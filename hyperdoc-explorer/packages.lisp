@@ -19,7 +19,7 @@
     (remove-duplicates
      (loop for tlf in tlfs
            when (eq (car tlf) 'in-package)
-             collect (find-package (cadr tlf)))
+           collect (find-package (cadr tlf)))
      :test #'eq)))
 
 (defun packages-used (hd)
@@ -48,9 +48,9 @@
 
 (views:defview 👀packages (hd hyperdoc)
   (-> hd
-    packages-used
-    views:👀items
-    (views:rename :title "Packages" :priority 13)))
+      packages-used
+      views:👀items
+      (views:rename :title "Packages" :priority 13)))
 
 (views:defview 👀packages (system asdf:system)
   (let ((packages (packages-defined-by-system system)))

@@ -50,7 +50,7 @@
 
 (defclass boundary-instance ()
   ((definition :reader boundary-instance-definition-of
-               :initarg :definition)
+     :initarg :definition)
    (subject :reader boundary-instance-subject-of
             :initarg :subject
             :initform nil)

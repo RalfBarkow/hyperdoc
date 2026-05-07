@@ -190,16 +190,16 @@ COMMIT;"
          (recent-change-hits-with-attachments nil)
          (recent-change-groups nil)
          (stored-report
-           (hyperdoc::resolve-zotero-title-to-local-pdf-report
-            "Mind and Mechanism"
-            :bridge bridge))
+          (hyperdoc::resolve-zotero-title-to-local-pdf-report
+           "Mind and Mechanism"
+           :bridge bridge))
          (linked-report
-           (hyperdoc::resolve-zotero-title-to-local-pdf-report
-            "Linked attachment sample"
-            :bridge bridge))
+          (hyperdoc::resolve-zotero-title-to-local-pdf-report
+           "Linked attachment sample"
+           :bridge bridge))
          (stored-clue-kinds
-           (zotero-note-clue-kinds
-            (hyperdoc::zotero-report-note-evidence-of stored-report))))
+          (zotero-note-clue-kinds
+           (hyperdoc::zotero-report-note-evidence-of stored-report))))
     (multiple-value-setq (exact-title-items title-query)
       (hyperdoc::lookup-zotero-items-by-title
        "Mind and Mechanism"
@@ -252,7 +252,7 @@ COMMIT;"
          :bridge bridge
          :match-mode :exact)
       (declare (ignore query attachments-query items all-attachments
-                        note-evidence note-search-status note-files-searched))
+                       note-evidence note-search-status note-files-searched))
       (setf candidate-reports reports
             candidate-evidence evidence))
     (assert-equal 1

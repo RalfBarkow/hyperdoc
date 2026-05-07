@@ -29,7 +29,7 @@
                    (hyperdoc::dmx-workspace-annotation-write-plan-payload
                     plan)))
          (view-props
-           (hyperdoc::dmx-workspace-annotation-write-plan-view-props plan)))
+          (hyperdoc::dmx-workspace-annotation-write-plan-view-props plan)))
     (setf (getf payload :id) 936040)
     (hyperdoc::dmx-import-create-topic client payload)
     (setf (gethash
@@ -52,28 +52,28 @@
                   :storage-mode
                   hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*))
            (state
-             (list :topic-id
-                   (hyperdoc::dmx-workspace-annotation-write-plan-existing-topic-id
-                    plan)
-                   :topic-action
-                   (hyperdoc::dmx-workspace-annotation-write-plan-topic-action
-                    plan)
-                   :topicmap-id
-                   (hyperdoc::dmx-workspace-annotation-write-plan-workspace-topicmap-id
-                    plan)
-                   :topicmap-present-p
-                   (hyperdoc::dmx-import-topic-in-topicmap-p
-                    client
-                    *dmx-annotations-smoke-workspace-topicmap-id*
-                    936040)
-                   :workspace-id
-                   (hyperdoc::dmx-workspace-annotation-write-plan-current-workspace-id
-                    plan)
-                   :remaining-action
-                   (and (eq (hyperdoc::dmx-workspace-annotation-write-plan-workspace-action
-                             plan)
-                            :assign)
-                        :assign-workspace))))
+            (list :topic-id
+                  (hyperdoc::dmx-workspace-annotation-write-plan-existing-topic-id
+                   plan)
+                  :topic-action
+                  (hyperdoc::dmx-workspace-annotation-write-plan-topic-action
+                   plan)
+                  :topicmap-id
+                  (hyperdoc::dmx-workspace-annotation-write-plan-workspace-topicmap-id
+                   plan)
+                  :topicmap-present-p
+                  (hyperdoc::dmx-import-topic-in-topicmap-p
+                   client
+                   *dmx-annotations-smoke-workspace-topicmap-id*
+                   936040)
+                  :workspace-id
+                  (hyperdoc::dmx-workspace-annotation-write-plan-current-workspace-id
+                   plan)
+                  :remaining-action
+                  (and (eq (hyperdoc::dmx-workspace-annotation-write-plan-workspace-action
+                            plan)
+                           :assign)
+                       :assign-workspace))))
       (annotation-936040-assert-equal
        936040
        (getf state :topic-id)

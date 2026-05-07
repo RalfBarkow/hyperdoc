@@ -43,7 +43,7 @@
   (loop with limit = (- (length text) *git-commit-hash-length*)
         for pos from start to limit
         when (commit-hash-start-p text pos)
-          do (return (values pos (+ pos *git-commit-hash-length*)))
+        do (return (values pos (+ pos *git-commit-hash-length*)))
         finally (return (values nil nil))))
 
 (defun software-heritage-revision-swhid (hash)
@@ -79,9 +79,9 @@
           for chunk = (str:substring start end text)
           for is-link? = nil then (not is-link?)
           if is-link?
-            collect (funcall link-fn chunk page)
+          collect (funcall link-fn chunk page)
           else
-            collect (funcall text-fn chunk page))))
+          collect (funcall text-fn chunk page))))
 
 ;;
 ;; Extract links from items
@@ -105,8 +105,8 @@
                                                     :test #'equal
                                                     :key #'hb:key-of))
                         (hb:page-link (pushnew link page-links
-                                              :test #'equal
-                                              :key #'hb:key-of))
+                                               :test #'equal
+                                               :key #'hb:key-of))
                         (hb:web-link (pushnew link web-links
                                               :test #'equal
                                               :key #'hb:key-of)))))
@@ -131,9 +131,9 @@
                                                       (software-heritage-revision-url hash)))))
                                             #'collect-link)
         if (listp item)
-          append item
+        append item
         else if item
-          collect item))
+        collect item))
 
 (defun collect-link (link-text page)
   (if (str:starts-with? "[[" link-text)
@@ -176,10 +176,10 @@
   (:method ((type t) item page)
     (declare (ignore page))
     (views:html
-      (:div (:i (:small (views:object-ref item
-                                          :display (-> type symbol-name str:downcase)))))
-      (:pre :style "background-color: #eee;"
-       (views:esc (text-of item))))))
+     (:div (:i (:small (views:object-ref item
+                                         :display (-> type symbol-name str:downcase)))))
+     (:pre :style "background-color: #eee;"
+           (views:esc (text-of item))))))
 
 
 (defmethod render-wiki-text (text page)
@@ -210,24 +210,24 @@
   (handler-case
       (let ((target (find-target-by-title link-text page)))
         (views:html
-          (:span :class "hyperbook-reference"
-                 :title (format nil "Page \"~A\"~%HyperBook \"~A\""
-                                (cl-who:escape-string (hb:title-of target))
-                                (cl-who:escape-string
-                                 (hb:title-of (hb:hyperbook-of target))))
-                 (views:object-ref target :display link-text))))
+         (:span :class "hyperbook-reference"
+                :title (format nil "Page \"~A\"~%HyperBook \"~A\""
+                               (cl-who:escape-string (hb:title-of target))
+                               (cl-who:escape-string
+                                (hb:title-of (hb:hyperbook-of target))))
+                (views:object-ref target :display link-text))))
     (hb:lookup-failure (c)
       (views:html
-        (:span :class "hyperbook-reference hyperbook-error"
-               (views:object-ref c :display link-text))))))
+       (:span :class "hyperbook-reference hyperbook-error"
+              (views:object-ref c :display link-text))))))
 
 (defun render-external-link (url link-text page)
   (declare (ignore page))
   (if-let (hb-link (hb:replace-by-hyperbook-link url))
-    (hb:render-hyperbook-or-page-link (first hb-link) (second hb-link) link-text)
+      (hb:render-hyperbook-or-page-link (first hb-link) (second hb-link) link-text)
     (views:html
-      (:a :href url :target "_blank"
-          (views:esc link-text)))))
+     (:a :href url :target "_blank"
+         (views:esc link-text)))))
 
 (defun graphviz-story-item-engine-of (item)
   (or (and (data-of item)
@@ -464,8 +464,8 @@
 
 (defun parse-video-snippet-header (header)
   (let* ((tokens (remove ""
-                        (cl-ppcre:split "\\s+" header)
-                        :test #'string=))
+                         (cl-ppcre:split "\\s+" header)
+                         :test #'string=))
          (provider-token (first tokens))
          (video-id (second tokens)))
     (cond
@@ -568,7 +568,7 @@
           (mapcar (lambda (line)
                     (string-trim '(#\Space #\Tab #\Newline) line))
                   (cl-ppcre:split "\\n"
-                                   (normalize-frame-snippet-source-text text)))
+                                  (normalize-frame-snippet-source-text text)))
           :test #'string=))
 
 (defun absolute-http-url-p (url)
@@ -577,8 +577,8 @@
 
 (defun parse-frame-snippet-height-line (line)
   (let ((tokens (remove ""
-                       (cl-ppcre:split "\\s+" line)
-                       :test #'string=)))
+                        (cl-ppcre:split "\\s+" line)
+                        :test #'string=)))
     (cond
       ((or (/= (length tokens) 2)
            (not (string= (string-upcase (first tokens)) "HEIGHT")))
@@ -764,36 +764,36 @@
 
 (defun render-video-snippet-preferred (snippet page)
   (views:html
-    (:div :class "fedwiki-video-snippet-preferred"
-          (:iframe :src (adapted-video-snippet-embed-url-of snippet)
-                   :title (adapted-video-snippet-summary-of snippet)
-                   :width "560"
-                   :height "315"
-                   :loading "lazy"
-                   :allow "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                   :allowfullscreen "allowfullscreen")
-          (when (plusp (length (adapted-video-snippet-caption-of snippet)))
-            (views:html
-              (:p :class "fedwiki-video-snippet-caption"
-                  (render-wiki-text
-                   (adapted-video-snippet-caption-of snippet)
-                   page)))))))
+   (:div :class "fedwiki-video-snippet-preferred"
+         (:iframe :src (adapted-video-snippet-embed-url-of snippet)
+                  :title (adapted-video-snippet-summary-of snippet)
+                  :width "560"
+                  :height "315"
+                  :loading "lazy"
+                  :allow "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  :allowfullscreen "allowfullscreen")
+         (when (plusp (length (adapted-video-snippet-caption-of snippet)))
+           (views:html
+            (:p :class "fedwiki-video-snippet-caption"
+                (render-wiki-text
+                 (adapted-video-snippet-caption-of snippet)
+                 page)))))))
 
 (defun render-video-snippet-fallback (snippet page &key (include-caption-p t))
   (views:html
-    (:div :class "fedwiki-video-snippet-fallback"
-          (:p
-           (:a :href (adapted-video-snippet-canonical-url-of snippet)
-               :target "_blank"
-               :rel "noopener noreferrer"
-               (views:esc "Watch on YouTube")))
-          (when (and include-caption-p
-                     (plusp (length (adapted-video-snippet-caption-of snippet))))
-            (views:html
-              (:p :class "fedwiki-video-snippet-caption"
-                  (render-wiki-text
-                   (adapted-video-snippet-caption-of snippet)
-                   page)))))))
+   (:div :class "fedwiki-video-snippet-fallback"
+         (:p
+          (:a :href (adapted-video-snippet-canonical-url-of snippet)
+              :target "_blank"
+              :rel "noopener noreferrer"
+              (views:esc "Watch on YouTube")))
+         (when (and include-caption-p
+                    (plusp (length (adapted-video-snippet-caption-of snippet))))
+           (views:html
+            (:p :class "fedwiki-video-snippet-caption"
+                (render-wiki-text
+                 (adapted-video-snippet-caption-of snippet)
+                 page)))))))
 
 (defun adaptation-failure-heading (failure)
   (format nil "~A adaptation failed."
@@ -804,95 +804,95 @@
 (defun render-story-item-adaptation-failure (failure)
   (let ((item (adaptation-failure-source-item-of failure)))
     (views:html
-      (:div :class "fedwiki-story-item-adaptation-failure"
-            (:p
-             (:b (views:esc (adaptation-failure-heading failure))))
-            (:p (views:esc (adaptation-failure-message-of failure)))
-            (:p
-             (views:esc "Failure object: ")
-             (views:object-ref failure))
-            (:p
-             (views:esc "Original story item: ")
-             (views:object-ref item))
-            (:pre :style "background-color: #eee;"
-                  (views:esc (text-of item)))))))
+     (:div :class "fedwiki-story-item-adaptation-failure"
+           (:p
+            (:b (views:esc (adaptation-failure-heading failure))))
+           (:p (views:esc (adaptation-failure-message-of failure)))
+           (:p
+            (views:esc "Failure object: ")
+            (views:object-ref failure))
+           (:p
+            (views:esc "Original story item: ")
+            (views:object-ref item))
+           (:pre :style "background-color: #eee;"
+                 (views:esc (text-of item)))))))
 
 (defun render-video-adaptation-failure (failure)
   (render-story-item-adaptation-failure failure))
 
 (defun render-adapted-video-snippet (snippet page)
   (views:html
-    (:div :class "fedwiki-video-snippet"
-          (render-video-snippet-preferred snippet page)
-          (render-video-snippet-fallback
-           snippet
-           page
-           :include-caption-p nil))))
+   (:div :class "fedwiki-video-snippet"
+         (render-video-snippet-preferred snippet page)
+         (render-video-snippet-fallback
+          snippet
+          page
+          :include-caption-p nil))))
 
 (defun render-frame-snippet-preferred (snippet)
   (views:html
-    (:div :class "fedwiki-frame-snippet-preferred"
-          (:iframe :src (adapted-frame-snippet-target-url-of snippet)
-                   :title (adapted-frame-snippet-summary-of snippet)
-                   :width "100%"
-                   :height (princ-to-string
-                            (adapted-frame-snippet-height-of snippet))
-                   :loading "lazy"))))
+   (:div :class "fedwiki-frame-snippet-preferred"
+         (:iframe :src (adapted-frame-snippet-target-url-of snippet)
+                  :title (adapted-frame-snippet-summary-of snippet)
+                  :width "100%"
+                  :height (princ-to-string
+                           (adapted-frame-snippet-height-of snippet))
+                  :loading "lazy"))))
 
 (defun render-frame-snippet-fallback (snippet)
   (views:html
-    (:div :class "fedwiki-frame-snippet-fallback"
-          (:p
-           (:a :href (adapted-frame-snippet-target-url-of snippet)
-               :target "_blank"
-               :rel "noopener noreferrer"
-               (views:esc "Open frame target")))
-          (:p
-           (:small
-            (views:esc
-             (format nil "Frame height: ~D px"
-                     (adapted-frame-snippet-height-of snippet))))))))
+   (:div :class "fedwiki-frame-snippet-fallback"
+         (:p
+          (:a :href (adapted-frame-snippet-target-url-of snippet)
+              :target "_blank"
+              :rel "noopener noreferrer"
+              (views:esc "Open frame target")))
+         (:p
+          (:small
+           (views:esc
+            (format nil "Frame height: ~D px"
+                    (adapted-frame-snippet-height-of snippet))))))))
 
 (defun render-frame-adaptation-failure (failure)
   (render-story-item-adaptation-failure failure))
 
 (defun render-adapted-frame-snippet (snippet)
   (views:html
-    (:div :class "fedwiki-frame-snippet"
-          (render-frame-snippet-preferred snippet)
-          (render-frame-snippet-fallback snippet))))
+   (:div :class "fedwiki-frame-snippet"
+         (render-frame-snippet-preferred snippet)
+         (render-frame-snippet-fallback snippet))))
 
 (defun render-audio-snippet-caption (snippet page)
   (when (plusp (length (adapted-audio-snippet-caption-of snippet)))
     (views:html
-      (:div :class "fedwiki-audio-snippet-caption"
-            :style "white-space: pre-wrap;"
-            (render-wiki-text (adapted-audio-snippet-caption-of snippet)
-                              page)))))
+     (:div :class "fedwiki-audio-snippet-caption"
+           :style "white-space: pre-wrap;"
+           (render-wiki-text (adapted-audio-snippet-caption-of snippet)
+                             page)))))
 
 (defun render-audio-snippet-open-link (snippet label)
   (views:html
-    (:p
-     (:a :href (adapted-audio-snippet-target-url-of snippet)
-         :target "_blank"
-         :rel "noopener noreferrer"
-         (views:esc label)))))
+   (:p
+    (:a :href (adapted-audio-snippet-target-url-of snippet)
+        :target "_blank"
+        :rel "noopener noreferrer"
+        (views:esc label)))))
 
 (defun render-audio-snippet-direct-media (snippet page)
   (views:html
-    (:div :class "fedwiki-audio-snippet-direct-media"
-          (:audio :controls "controls"
-                  :preload "none"
-                  :src (adapted-audio-snippet-target-url-of snippet))
-          (render-audio-snippet-caption snippet page)
-          (render-audio-snippet-open-link snippet "Open/download audio"))))
+   (:div :class "fedwiki-audio-snippet-direct-media"
+         (:audio :controls "controls"
+                 :preload "none"
+                 :src (adapted-audio-snippet-target-url-of snippet))
+         (render-audio-snippet-caption snippet page)
+         (render-audio-snippet-open-link snippet "Open/download audio"))))
 
 (defun render-audio-snippet-fallback-only (snippet page)
   (views:html
-    (:div :class "fedwiki-audio-snippet-fallback-only"
-          (:p (:b (views:esc "External audio reference")))
-          (render-audio-snippet-caption snippet page)
-          (render-audio-snippet-open-link snippet "Open audio reference"))))
+   (:div :class "fedwiki-audio-snippet-fallback-only"
+         (:p (:b (views:esc "External audio reference")))
+         (render-audio-snippet-caption snippet page)
+         (render-audio-snippet-open-link snippet "Open audio reference"))))
 
 (defun render-audio-adaptation-failure (failure)
   (render-story-item-adaptation-failure failure))
@@ -901,26 +901,26 @@
   (ecase (adapted-audio-snippet-url-kind-of snippet)
     (:direct-media
      (views:html
-       (:div :class "fedwiki-audio-snippet"
-             (render-audio-snippet-direct-media snippet page))))
+      (:div :class "fedwiki-audio-snippet"
+            (render-audio-snippet-direct-media snippet page))))
     (:fallback-only
      (views:html
-       (:div :class "fedwiki-audio-snippet"
-             (render-audio-snippet-fallback-only snippet page))))))
+      (:div :class "fedwiki-audio-snippet"
+            (render-audio-snippet-fallback-only snippet page))))))
 
 ;; Paragraphs
 
 (defmethod render-story-item ((type (eql :paragraph)) item page)
   (views:html
-    (:p (render-wiki-text (text-of item) page))))
+   (:p (render-wiki-text (text-of item) page))))
 
 ;; Markdown
 
 (defmethod render-story-item ((type (eql :markdown)) item page)
   (views:html
-    (:div (:i (:small (views:object-ref item :display "markdown"))))
-    (:pre :style "background-color: #eee;"
-          (render-wiki-text (text-of item) page))))
+   (:div (:i (:small (views:object-ref item :display "markdown"))))
+   (:pre :style "background-color: #eee;"
+         (render-wiki-text (text-of item) page))))
 
 ;; References
 
@@ -930,28 +930,28 @@
          (title (gethash "title" data))
          (slug (gethash "slug" data)))
     (views:html
-      (:p
-       (:span :class "hyperbook-reference"
-              :title (format nil "Page \"~A\"~%HyperBook \"~A\""
-                             (cl-who:escape-string title)
-                             (cl-who:escape-string (hb:title-of (hb:hyperbook-of page))))
-              (views:object-ref
-               (handler-case
-                   (get-remote-page (hb:hyperbook-of page)
-                                    (str:concat site "/" slug)
-                                    title)
-                 (error (c) c))))
-       (views:esc " — ")
-       (render-wiki-text (text-of item) page)))))
+     (:p
+      (:span :class "hyperbook-reference"
+             :title (format nil "Page \"~A\"~%HyperBook \"~A\""
+                            (cl-who:escape-string title)
+                            (cl-who:escape-string (hb:title-of (hb:hyperbook-of page))))
+             (views:object-ref
+              (handler-case
+                  (get-remote-page (hb:hyperbook-of page)
+                                   (str:concat site "/" slug)
+                                   title)
+                (error (c) c))))
+      (views:esc " — ")
+      (render-wiki-text (text-of item) page)))))
 
 ;; Page folds
 
 (defmethod render-story-item ((type (eql :pagefold)) item page)
   (views:html
-    (:div :style "top-margin: 5pt;"
-          (:hr :style "color: gray;")
-          (:span :style "color: gray;"
-                 (views:esc (text-of item))))))
+   (:div :style "top-margin: 5pt;"
+         (:hr :style "color: gray;")
+         (:span :style "color: gray;"
+                (views:esc (text-of item))))))
 
 ;; Video
 
@@ -1012,68 +1012,68 @@
                               (html-inspector-views/reactive:input-id
                                draft-cell :event :change))))
     (views:html
-      (:div :class "hyperbook-fedwiki-graphviz-edit-shell"
-            :data-fedwiki-graphviz-story-item-id (id-of item)
-            :data-fedwiki-graphviz-canonical-dot dot
-            :data-fedwiki-graphviz-engine engine
-            :data-fedwiki-graphviz-editable (if editable-p "true" "false")
-            :data-fedwiki-graphviz-input-id (or draft-input-id "")
-            (:div :class "hyperbook-fedwiki-graphviz-view-state"
-                  (views:graphviz-snippet
-                   dot
-                   :engine engine
-                   :fallback-title "Raw DOT source"))
-            (when editable-p
-              (views:html
-                (:div :class "hyperbook-fedwiki-graphviz-controls"
-                      (:button :type "button"
-                               :class "hyperbook-fedwiki-graphviz-edit-button"
-                               :onclick (graphviz-story-item-edit-button-script)
-                               "Edit DOT"))
-                (:div :class "hyperbook-fedwiki-graphviz-edit-state"
-                      :hidden "hidden"
-                      (:label :class "hyperbook-fedwiki-graphviz-editor-label"
-                              "DOT source")
-                      (:textarea :class "hyperbook-fedwiki-graphviz-editor"
-                                 :rows "10"
-                                 :spellcheck "false"
-                                 :data-fedwiki-graphviz-input-id draft-input-id
-                                 :oninput (graphviz-story-item-sync-draft-script)
-                                 (views:esc dot))
-                      (:input :type "hidden" :id draft-input-id :value dot)
-                      (:div :class "hyperbook-fedwiki-graphviz-editor-actions"
-                            (:button :type "button"
-                                     :class "hyperbook-fedwiki-graphviz-preview-button"
-                                     :onclick (graphviz-story-item-preview-script)
-                                     "Preview")
-                            " "
-                            (:span :class "hyperbook-fedwiki-graphviz-save-submit"
-                                   :style "display:none"
-                                   (views:action-button
-                                    "Save"
-                                    (views:thunk
-                                      (persist-localhost-fedwiki-story-item-text-edit
-                                       page
-                                       item
-                                       (lwcells:cell-ref draft-cell))
-                                     t)
-                                    "Persist the current DOT as a FedWiki story-item text edit"))
-                            " "
-                            (:button :type "button"
-                                     :class "hyperbook-fedwiki-graphviz-save-button"
-                                     :onclick (graphviz-story-item-save-script)
-                                     "Save")
-                            " "
-                            (:button :type "button"
-                                     :class "hyperbook-fedwiki-graphviz-cancel-button"
-                                     :onclick (graphviz-story-item-cancel-script)
-                                     "Cancel")))))))))
+     (:div :class "hyperbook-fedwiki-graphviz-edit-shell"
+           :data-fedwiki-graphviz-story-item-id (id-of item)
+           :data-fedwiki-graphviz-canonical-dot dot
+           :data-fedwiki-graphviz-engine engine
+           :data-fedwiki-graphviz-editable (if editable-p "true" "false")
+           :data-fedwiki-graphviz-input-id (or draft-input-id "")
+           (:div :class "hyperbook-fedwiki-graphviz-view-state"
+                 (views:graphviz-snippet
+                  dot
+                  :engine engine
+                  :fallback-title "Raw DOT source"))
+           (when editable-p
+             (views:html
+              (:div :class "hyperbook-fedwiki-graphviz-controls"
+                    (:button :type "button"
+                             :class "hyperbook-fedwiki-graphviz-edit-button"
+                             :onclick (graphviz-story-item-edit-button-script)
+                             "Edit DOT"))
+              (:div :class "hyperbook-fedwiki-graphviz-edit-state"
+                    :hidden "hidden"
+                    (:label :class "hyperbook-fedwiki-graphviz-editor-label"
+                            "DOT source")
+                    (:textarea :class "hyperbook-fedwiki-graphviz-editor"
+                               :rows "10"
+                               :spellcheck "false"
+                               :data-fedwiki-graphviz-input-id draft-input-id
+                               :oninput (graphviz-story-item-sync-draft-script)
+                               (views:esc dot))
+                    (:input :type "hidden" :id draft-input-id :value dot)
+                    (:div :class "hyperbook-fedwiki-graphviz-editor-actions"
+                          (:button :type "button"
+                                   :class "hyperbook-fedwiki-graphviz-preview-button"
+                                   :onclick (graphviz-story-item-preview-script)
+                                   "Preview")
+                          " "
+                          (:span :class "hyperbook-fedwiki-graphviz-save-submit"
+                                 :style "display:none"
+                                 (views:action-button
+                                  "Save"
+                                  (views:thunk
+                                   (persist-localhost-fedwiki-story-item-text-edit
+                                    page
+                                    item
+                                    (lwcells:cell-ref draft-cell))
+                                   t)
+                                  "Persist the current DOT as a FedWiki story-item text edit"))
+                          " "
+                          (:button :type "button"
+                                   :class "hyperbook-fedwiki-graphviz-save-button"
+                                   :onclick (graphviz-story-item-save-script)
+                                   "Save")
+                          " "
+                          (:button :type "button"
+                                   :class "hyperbook-fedwiki-graphviz-cancel-button"
+                                   :onclick (graphviz-story-item-cancel-script)
+                                   "Cancel")))))))))
 
 ;; Images
 
 (defmethod render-story-item ((type (eql :image)) item page)
   (views:html
-    (:div :style "text-align:center; background-color: #eee;"
-          (:div :style "width: 80%; margin: 0 auto;"
-                (:img :src (gethash "url" (data-of item)))
-                (:p (render-wiki-text (text-of item) page))))))
+   (:div :style "text-align:center; background-color: #eee;"
+         (:div :style "width: 80%; margin: 0 auto;"
+               (:img :src (gethash "url" (data-of item)))
+               (:p (render-wiki-text (text-of item) page))))))

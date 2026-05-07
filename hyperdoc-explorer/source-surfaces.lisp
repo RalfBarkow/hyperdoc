@@ -108,7 +108,7 @@
         for strategy = (gethash class
                                 *source-surface-strategy-class-policies*)
         when strategy
-          return (values strategy class)))
+        return (values strategy class)))
 
 (defun source-surface-strategy-policy-for (page)
   (nth-value 0 (source-surface-strategy-policy-match-for page)))
@@ -156,17 +156,17 @@
   (multiple-value-bind (class-policy-strategy class-policy-class)
       (source-surface-strategy-policy-match-for page)
     (let* ((override-strategy
-             (source-surface-strategy-from-designator
-              *source-surface-strategy-override*))
+            (source-surface-strategy-from-designator
+             *source-surface-strategy-override*))
            (default-strategy (source-surface-strategy-for page))
            (winner (cond (override-strategy :override)
                          (class-policy-strategy :class-policy)
                          (t :default)))
            (effective-strategy
-             (ecase winner
-               (:override override-strategy)
-               (:class-policy class-policy-strategy)
-               (:default default-strategy))))
+            (ecase winner
+              (:override override-strategy)
+              (:class-policy class-policy-strategy)
+              (:default default-strategy))))
       (list :target page
             :target-class (class-name (class-of page))
             :override-present-p (not (null override-strategy))
@@ -208,7 +208,7 @@
 (defmacro with-source-surface-strategy-class-policy
     ((class-designator strategy-designator) &body body)
   `(let ((*source-surface-strategy-class-policies*
-           (copy-source-surface-strategy-class-policies)))
+          (copy-source-surface-strategy-class-policies)))
      (register-source-surface-strategy-policy
       ,class-designator
       ,strategy-designator)
@@ -221,13 +221,13 @@
     ((strategy connect-source-surface-strategy) (page text-page)
      &key (title "Source") (priority 10))
   (views:html-view :title title :priority priority
-    (render-source-connect-surface page title (file-of page))))
+                   (render-source-connect-surface page title (file-of page))))
 
 (defmethod render-source-surface-with-strategy
     ((strategy plain-source-surface-strategy) (page text-page)
      &key (title "Source") (priority 10))
   (views:html-view :title title :priority priority
-    (hb:render-file-source-surface (file-of page))))
+                   (hb:render-file-source-surface (file-of page))))
 
 (defun source-surface-resolution-report-display-value (value)
   (typecase value
@@ -255,78 +255,78 @@
 (defun render-source-surface-resolution-report (page)
   (let* ((report (source-surface-resolution-report-for page))
          (rows
-           `(("Target class"
-              ,(source-surface-resolution-report-display-value
-                (getf report :target-class)))
-             ("Winner"
-              ,(source-surface-resolution-report-display-value
-                (getf report :winner)))
-             ("Effective strategy"
-              ,(source-surface-resolution-report-strategy-display
-                report
-                :effective-strategy-id
-                :effective-strategy-label))
-             ("Default strategy"
-              ,(source-surface-resolution-report-strategy-display
-                report
-                :default-strategy-id
-                :default-strategy-label))
-             ("Override present"
-              ,(source-surface-resolution-report-display-value
-                (getf report :override-present-p)))
-             ("Override strategy"
-              ,(source-surface-resolution-report-strategy-display
-                report
-                :override-strategy-id
-                :override-strategy-label))
-             ("Class policy matched"
-              ,(source-surface-resolution-report-display-value
-                (getf report :class-policy-matched-p)))
-             ("Matched class"
-              ,(source-surface-resolution-report-display-value
-                (getf report :class-policy-class)))
-             ("Class policy strategy"
-              ,(source-surface-resolution-report-strategy-display
-                report
-                :class-policy-strategy-id
-                :class-policy-strategy-label)))))
+          `(("Target class"
+             ,(source-surface-resolution-report-display-value
+               (getf report :target-class)))
+            ("Winner"
+             ,(source-surface-resolution-report-display-value
+               (getf report :winner)))
+            ("Effective strategy"
+             ,(source-surface-resolution-report-strategy-display
+               report
+               :effective-strategy-id
+               :effective-strategy-label))
+            ("Default strategy"
+             ,(source-surface-resolution-report-strategy-display
+               report
+               :default-strategy-id
+               :default-strategy-label))
+            ("Override present"
+             ,(source-surface-resolution-report-display-value
+               (getf report :override-present-p)))
+            ("Override strategy"
+             ,(source-surface-resolution-report-strategy-display
+               report
+               :override-strategy-id
+               :override-strategy-label))
+            ("Class policy matched"
+             ,(source-surface-resolution-report-display-value
+               (getf report :class-policy-matched-p)))
+            ("Matched class"
+             ,(source-surface-resolution-report-display-value
+               (getf report :class-policy-class)))
+            ("Class policy strategy"
+             ,(source-surface-resolution-report-strategy-display
+               report
+               :class-policy-strategy-id
+               :class-policy-strategy-label)))))
     (views:html
-      (:table :class "inspector-table"
-              (:tr (:th (views:esc "Field"))
-                   (:th (views:esc "Value")))
-              (dolist (row rows)
-                (destructuring-bind (label value) row
-                  (views:html
-                    (:tr (:td (:tt (views:esc label)))
-                         (:td (:tt (views:esc value)))))))))))
+     (:table :class "inspector-table"
+             (:tr (:th (views:esc "Field"))
+                  (:th (views:esc "Value")))
+             (dolist (row rows)
+               (destructuring-bind (label value) row
+                 (views:html
+                  (:tr (:td (:tt (views:esc label)))
+                       (:td (:tt (views:esc value)))))))))))
 
 (views:defview 👀source-surface (page text-page)
   (views:html-view :title "Source surface" :priority 11
-    (render-source-surface-resolution-report page)))
+                   (render-source-surface-resolution-report page)))
 
 (defun render-source-surface-strategy-catalog ()
   (views:html
-    (:table :class "inspector-table"
-            (:tr (:th (views:esc "Strategy id"))
-                 (:th (views:esc "Label"))
-                 (:th (views:esc "Connect-capable"))
-                 (:th (views:esc "Designator")))
-            (dolist (entry (source-surface-strategy-catalog))
-              (views:html
-                (:tr (:td (:tt (views:esc
-                                (source-surface-resolution-report-display-value
-                                 (getf entry :id)))))
-                     (:td (:tt (views:esc (getf entry :label))))
-                     (:td (:tt (views:esc
-                                (source-surface-resolution-report-display-value
-                                 (getf entry :connect-capable-p)))))
-                     (:td (:tt (views:esc
-                                (source-surface-resolution-report-display-value
-                                 (getf entry :designator)))))))))))
+   (:table :class "inspector-table"
+           (:tr (:th (views:esc "Strategy id"))
+                (:th (views:esc "Label"))
+                (:th (views:esc "Connect-capable"))
+                (:th (views:esc "Designator")))
+           (dolist (entry (source-surface-strategy-catalog))
+             (views:html
+              (:tr (:td (:tt (views:esc
+                              (source-surface-resolution-report-display-value
+                               (getf entry :id)))))
+                   (:td (:tt (views:esc (getf entry :label))))
+                   (:td (:tt (views:esc
+                              (source-surface-resolution-report-display-value
+                               (getf entry :connect-capable-p)))))
+                   (:td (:tt (views:esc
+                              (source-surface-resolution-report-display-value
+                               (getf entry :designator)))))))))))
 
 (views:defview 👀source-strategies (page text-page)
   (views:html-view :title "Source strategies" :priority 14
-    (render-source-surface-strategy-catalog)))
+                   (render-source-surface-strategy-catalog)))
 
 (defun render-source-surface-for-page-with-designator
     (page designator &key (title "Source") (priority 10))
@@ -338,7 +338,7 @@
 
 (views:defview 👀plain-source (page text-page)
   (views:html-view :title "Plain source" :priority 12
-    (hb:render-file-source-surface (file-of page))))
+                   (hb:render-file-source-surface (file-of page))))
 
 (defun render-source-surface-for-page (page &key (title "Source") (priority 10))
   (render-source-surface-for-page-with-designator
@@ -354,11 +354,11 @@
     (loop for entry in (source-surface-strategy-catalog)
           for designator = (getf entry :designator)
           unless (eq current-designator designator)
-            collect (list :designator designator
-                          :label (getf entry :label)
-                          :connect-capable-p (getf entry :connect-capable-p)
-                          :preview
-                          (make-source-surface-swap-preview page designator)))))
+          collect (list :designator designator
+                        :label (getf entry :label)
+                        :connect-capable-p (getf entry :connect-capable-p)
+                        :preview
+                        (make-source-surface-swap-preview page designator)))))
 
 (defclass source-surface-swap-preview ()
   ((page :reader source-surface-swap-preview-page-of
@@ -377,7 +377,7 @@
 (defun make-source-surface-swap-preview (page alternate-designator)
   (let* ((current-report (source-surface-resolution-report-for page))
          (normalized-alternate-designator
-           (normalize-source-surface-designator alternate-designator))
+          (normalize-source-surface-designator alternate-designator))
          (current-designator (getf current-report :effective-strategy-id)))
     (make-instance 'source-surface-swap-preview
                    :page page
@@ -438,82 +438,82 @@
 (views:defview 👀overview (preview source-surface-swap-preview)
   (let ((report (source-surface-swap-preview-current-report-of preview)))
     (views:html-view :title "Overview" :priority 1
-      (views:html
-        (:p
-         (views:esc
-          "This preview keeps the current Source path intact and renders the alternate path through the public designator-based Source rendering API."))
-        (:table :class "inspector-table"
-                (:tr (:td (views:esc "Page"))
-                     (:td (views:object-ref
-                           (source-surface-swap-preview-page-of preview))))
-                (:tr (:td (views:esc "Current winner"))
-                     (:td (:tt
-                           (views:esc
-                            (source-surface-resolution-report-display-value
-                             (getf report :winner))))))
-                (:tr (:td (views:esc "Current Source path"))
-                     (:td (:tt
-                           (views:esc
-                            (source-surface-swap-preview-current-display-value
-                             preview)))))
-                (:tr (:td (views:esc "Requested alternate"))
-                     (:td (:tt
-                           (views:esc
-                            (source-surface-swap-preview-alternate-display-value
-                             preview)))))
-                (:tr (:td (views:esc "Alternate supported"))
-                     (:td (:tt
-                           (views:esc
-                            (source-surface-resolution-report-display-value
-                             (source-surface-swap-preview-alternate-supported-p
-                              preview))))))
-                (:tr (:td (views:esc "Same path"))
-                     (:td (:tt
-                           (views:esc
-                            (source-surface-resolution-report-display-value
-                             (source-surface-swap-preview-same-designator-p
-                              preview)))))))))))
+                     (views:html
+                      (:p
+                       (views:esc
+                        "This preview keeps the current Source path intact and renders the alternate path through the public designator-based Source rendering API."))
+                      (:table :class "inspector-table"
+                              (:tr (:td (views:esc "Page"))
+                                   (:td (views:object-ref
+                                         (source-surface-swap-preview-page-of preview))))
+                              (:tr (:td (views:esc "Current winner"))
+                                   (:td (:tt
+                                         (views:esc
+                                          (source-surface-resolution-report-display-value
+                                           (getf report :winner))))))
+                              (:tr (:td (views:esc "Current Source path"))
+                                   (:td (:tt
+                                         (views:esc
+                                          (source-surface-swap-preview-current-display-value
+                                           preview)))))
+                              (:tr (:td (views:esc "Requested alternate"))
+                                   (:td (:tt
+                                         (views:esc
+                                          (source-surface-swap-preview-alternate-display-value
+                                           preview)))))
+                              (:tr (:td (views:esc "Alternate supported"))
+                                   (:td (:tt
+                                         (views:esc
+                                          (source-surface-resolution-report-display-value
+                                           (source-surface-swap-preview-alternate-supported-p
+                                            preview))))))
+                              (:tr (:td (views:esc "Same path"))
+                                   (:td (:tt
+                                         (views:esc
+                                          (source-surface-resolution-report-display-value
+                                           (source-surface-swap-preview-same-designator-p
+                                            preview)))))))))))
 
 (views:defview 👀compare (preview source-surface-swap-preview)
   (let ((report (source-surface-swap-preview-current-report-of preview))
         (alternate-entry (source-surface-swap-preview-alternate-entry preview)))
     (views:html-view :title "Compare" :priority 2
-      (views:html
-        (:table :class "inspector-table"
-                (:tr (:th (views:esc "Path"))
-                     (:th (views:esc "Designator"))
-                     (:th (views:esc "Label"))
-                     (:th (views:esc "Connect-capable")))
-                (:tr (:td (views:esc "Current"))
-                     (:td (:tt
-                           (views:esc
-                            (source-surface-swap-preview-designator-display-value
-                             (source-surface-swap-preview-current-designator-of
-                              preview)))))
-                     (:td (:tt
-                           (views:esc
-                            (getf report :effective-strategy-label))))
-                     (:td (:tt
-                           (views:esc
-                            (source-surface-resolution-report-display-value
-                             (source-surface-swap-preview-current-connect-capable-p
-                              preview))))))
-                (:tr (:td (views:esc "Alternate"))
-                     (:td (:tt
-                           (views:esc
-                            (source-surface-swap-preview-designator-display-value
-                             (source-surface-swap-preview-alternate-designator-of
-                              preview)))))
-                     (:td (:tt
-                           (views:esc
-                            (or (and alternate-entry
-                                     (getf alternate-entry :label))
-                                "unsupported"))))
-                     (:td (:tt
-                           (views:esc
-                            (source-surface-resolution-report-display-value
-                             (source-surface-swap-preview-alternate-connect-capable-p
-                              preview)))))))))))
+                     (views:html
+                      (:table :class "inspector-table"
+                              (:tr (:th (views:esc "Path"))
+                                   (:th (views:esc "Designator"))
+                                   (:th (views:esc "Label"))
+                                   (:th (views:esc "Connect-capable")))
+                              (:tr (:td (views:esc "Current"))
+                                   (:td (:tt
+                                         (views:esc
+                                          (source-surface-swap-preview-designator-display-value
+                                           (source-surface-swap-preview-current-designator-of
+                                            preview)))))
+                                   (:td (:tt
+                                         (views:esc
+                                          (getf report :effective-strategy-label))))
+                                   (:td (:tt
+                                         (views:esc
+                                          (source-surface-resolution-report-display-value
+                                           (source-surface-swap-preview-current-connect-capable-p
+                                            preview))))))
+                              (:tr (:td (views:esc "Alternate"))
+                                   (:td (:tt
+                                         (views:esc
+                                          (source-surface-swap-preview-designator-display-value
+                                           (source-surface-swap-preview-alternate-designator-of
+                                            preview)))))
+                                   (:td (:tt
+                                         (views:esc
+                                          (or (and alternate-entry
+                                                   (getf alternate-entry :label))
+                                              "unsupported"))))
+                                   (:td (:tt
+                                         (views:esc
+                                          (source-surface-resolution-report-display-value
+                                           (source-surface-swap-preview-alternate-connect-capable-p
+                                            preview)))))))))))
 
 (views:defview 👀current-source (preview source-surface-swap-preview)
   (render-source-surface-for-page-with-designator
@@ -525,8 +525,8 @@
 (views:defview 👀alternate-source (preview source-surface-swap-preview)
   (let* ((page (source-surface-swap-preview-page-of preview))
          (designator
-           (normalize-source-surface-designator
-            (source-surface-swap-preview-alternate-designator-of preview))))
+          (normalize-source-surface-designator
+           (source-surface-swap-preview-alternate-designator-of preview))))
     (if (and (typep page 'text-page)
              (eql designator :plain))
         (-> page
@@ -543,47 +543,47 @@
   (let* ((report (source-surface-resolution-report-for page))
          (candidates (source-surface-swap-preview-candidates-for-page page)))
     (views:html
-      (:p
-       (views:esc
-        "This page-level operation surface keeps the current Source path unchanged and exposes inspectable swap previews for supported alternate Source designators."))
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Current winner"))
-                   (:td (:tt
-                         (views:esc
-                          (source-surface-resolution-report-display-value
-                           (getf report :winner))))))
-              (:tr (:td (views:esc "Current Source path"))
-                   (:td (:tt
-                         (views:esc
-                          (source-surface-resolution-report-strategy-display
-                           report
-                           :effective-strategy-id
-                           :effective-strategy-label))))))
-      (if candidates
-          (views:html
-            (:table :class "inspector-table"
-                    (:tr (:th (views:esc "Alternate designator"))
-                         (:th (views:esc "Label"))
-                         (:th (views:esc "Connect-capable"))
-                         (:th (views:esc "Preview")))
-                    (dolist (candidate candidates)
-                      (views:html
-                        (:tr
-                         (:td (:tt
-                               (views:esc
-                                (source-surface-swap-preview-designator-display-value
-                                 (getf candidate :designator)))))
-                         (:td (:tt (views:esc (getf candidate :label))))
-                         (:td (:tt
-                               (views:esc
-                                (source-surface-resolution-report-display-value
-                                 (getf candidate :connect-capable-p)))))
-                         (:td (views:object-ref (getf candidate :preview))))))))
-          (views:html
-            (:p :style "opacity: 0.7;"
-                (views:esc
-                 "No alternate Source swap previews are available for this page.")))))))
+     (:p
+      (views:esc
+       "This page-level operation surface keeps the current Source path unchanged and exposes inspectable swap previews for supported alternate Source designators."))
+     (:table :class "inspector-table"
+             (:tr (:td (views:esc "Current winner"))
+                  (:td (:tt
+                        (views:esc
+                         (source-surface-resolution-report-display-value
+                          (getf report :winner))))))
+             (:tr (:td (views:esc "Current Source path"))
+                  (:td (:tt
+                        (views:esc
+                         (source-surface-resolution-report-strategy-display
+                          report
+                          :effective-strategy-id
+                          :effective-strategy-label))))))
+     (if candidates
+         (views:html
+          (:table :class "inspector-table"
+                  (:tr (:th (views:esc "Alternate designator"))
+                       (:th (views:esc "Label"))
+                       (:th (views:esc "Connect-capable"))
+                       (:th (views:esc "Preview")))
+                  (dolist (candidate candidates)
+                    (views:html
+                     (:tr
+                      (:td (:tt
+                            (views:esc
+                             (source-surface-swap-preview-designator-display-value
+                              (getf candidate :designator)))))
+                      (:td (:tt (views:esc (getf candidate :label))))
+                      (:td (:tt
+                            (views:esc
+                             (source-surface-resolution-report-display-value
+                              (getf candidate :connect-capable-p)))))
+                      (:td (views:object-ref (getf candidate :preview))))))))
+         (views:html
+          (:p :style "opacity: 0.7;"
+              (views:esc
+               "No alternate Source swap previews are available for this page.")))))))
 
 (views:defview 👀source-swap-operations (page text-page)
   (views:html-view :title "Source swap operations" :priority 15
-    (render-source-surface-swap-operations-for-page page)))
+                   (render-source-surface-swap-operations-for-page page)))

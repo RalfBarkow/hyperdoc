@@ -59,17 +59,17 @@
          (payload (hyperdoc::topic-factory-snippet-dmx-write-plan-payload plan))
          (children (getf payload :children))
          (provenance-json
-           (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
-                    children))
+          (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
+                   children))
          (provenance-object (shasht:read-json provenance-json))
          (fragment-ordinals
-           (sort (coerce (gethash "source_fragment_ordinals" provenance-object)
-                         'list)
-                 #'<))
+          (sort (coerce (gethash "source_fragment_ordinals" provenance-object)
+                        'list)
+                #'<))
          (view-props (hyperdoc::topic-factory-snippet-dmx-write-plan-view-props plan))
          (normalization
-           (hyperdoc::topic-factory-snippet-dmx-write-plan-view-props-normalization
-            plan)))
+          (hyperdoc::topic-factory-snippet-dmx-write-plan-view-props-normalization
+           plan)))
     (assert-equal :create
                   (hyperdoc::topic-factory-snippet-dmx-write-plan-topic-action plan)
                   "Fresh snippet plan must start with CREATE")
@@ -104,7 +104,7 @@
                   "Payload provenance JSON must preserve fragment-level provenance granularity")
     (assert-equal '(0 3 4 5 6)
                   fragment-ordinals
-     "Payload provenance JSON must preserve fragment ordinals with canonical provenance")
+                  "Payload provenance JSON must preserve fragment ordinals with canonical provenance")
     (assert-equal :canonical
                   (getf normalization :status)
                   "Snippet plan must keep canonical topicmap view props at the HyperDoc boundary")
@@ -129,14 +129,14 @@
                                 :next-topic-id 7000))
          (definition (make-test-topic-factory-snippet-definition))
          (output
-           (with-output-to-string (stream)
-             (hyperdoc::execute-topic-factory-snippet-dmx-write
-              definition
-              :workspace-topicmap-id
-              *topic-factory-snippet-dmx-workspace-topicmap-id*
-              :client client
-              :dry-run t
-              :stream stream))))
+          (with-output-to-string (stream)
+            (hyperdoc::execute-topic-factory-snippet-dmx-write
+             definition
+             :workspace-topicmap-id
+             *topic-factory-snippet-dmx-workspace-topicmap-id*
+             :client client
+             :dry-run t
+             :stream stream))))
     (assert-true (search "topic-action=CREATE" output)
                  "Dry-run create output must expose CREATE")
     (assert-true (search "topicmap-action=ADD" output)
@@ -175,14 +175,14 @@
      (hyperdoc::make-dmx-topicmap-view-props-json-object
       :x 10 :y 20 :visibility t :pinned nil))
     (let ((output
-            (with-output-to-string (stream)
-              (hyperdoc::execute-topic-factory-snippet-dmx-write
-               definition
-               :workspace-topicmap-id
-               *topic-factory-snippet-dmx-workspace-topicmap-id*
-               :client client
-               :dry-run t
-               :stream stream))))
+           (with-output-to-string (stream)
+             (hyperdoc::execute-topic-factory-snippet-dmx-write
+              definition
+              :workspace-topicmap-id
+              *topic-factory-snippet-dmx-workspace-topicmap-id*
+              :client client
+              :dry-run t
+              :stream stream))))
       (assert-true (search "topic-action=UPDATE" output)
                    "Dry-run update output must expose UPDATE")
       (assert-true (search "topicmap-action=ALREADY-PRESENT" output)
@@ -233,7 +233,7 @@
               *topic-factory-snippet-dmx-workspace-topicmap-id*
               7010
               (hyperdoc::make-dmx-topicmap-view-props-json-object
-              :x 160 :y 120 :visibility t :pinned nil))
+               :x 160 :y 120 :visibility t :pinned nil))
              (assert-equal :post captured-method
                            "HTTP topicmap add must stay a POST")
              (assert-true
@@ -268,15 +268,15 @@
                 :topic-value *topic-factory-snippet-dmx-custom-topic-value*))
          (payload (hyperdoc::topic-factory-snippet-dmx-write-plan-payload plan))
          (output
-           (with-output-to-string (stream)
-             (hyperdoc::execute-topic-factory-snippet-dmx-write
-              definition
-              :workspace-topicmap-id
-              *topic-factory-snippet-dmx-workspace-topicmap-id*
-              :client client
-              :topic-value *topic-factory-snippet-dmx-custom-topic-value*
-              :dry-run t
-              :stream stream))))
+          (with-output-to-string (stream)
+            (hyperdoc::execute-topic-factory-snippet-dmx-write
+             definition
+             :workspace-topicmap-id
+             *topic-factory-snippet-dmx-workspace-topicmap-id*
+             :client client
+             :topic-value *topic-factory-snippet-dmx-custom-topic-value*
+             :dry-run t
+             :stream stream))))
     (assert-equal *topic-factory-snippet-dmx-custom-topic-value*
                   (getf payload :value)
                   "Custom topic-value override must be preserved in the DMX payload")
@@ -305,11 +305,11 @@
          (json (hyperdoc::dmx-import-json-object payload))
          (json-children (gethash "children" json))
          (json-title
-           (gethash hyperdoc::*dmx-zettelkasten-zettel-title-type-uri*
-                    json-children))
+          (gethash hyperdoc::*dmx-zettelkasten-zettel-title-type-uri*
+                   json-children))
          (json-content
-           (gethash hyperdoc::*dmx-zettelkasten-zettel-content-type-uri*
-                    json-children)))
+          (gethash hyperdoc::*dmx-zettelkasten-zettel-content-type-uri*
+                   json-children)))
     (assert-equal hyperdoc::*dmx-zettelkasten-zettel-type-uri*
                   (getf payload :type-uri)
                   "Zettel payload must preserve the explicit zettel topic type")

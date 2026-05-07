@@ -18,7 +18,7 @@
   (coerce (loop for char across text
                 for normalized = (if (char= char #\Space) #\- char)
                 when (fedwiki-java-example-slug-char-p normalized)
-                  collect (char-downcase normalized))
+                collect (char-downcase normalized))
           'string))
 
 (defun fedwiki-java-example-context (journal)
@@ -38,7 +38,7 @@
     (cons origin (remove origin context :test #'equal))))
 
 (defexample fedwiki-java-slug-example
-  "Translate a collaborative link label into the slug used for lookup."
+    "Translate a collaborative link label into the slug used for lookup."
   (let* ((input "Collaborative Link")
          (slug (-> input
                    fedwiki-java-example-slug
@@ -47,7 +47,7 @@
           :slug slug)))
 
 (defexample fedwiki-java-context-example
-  "Translate page journal provenance into an ordered context site list."
+    "Translate page journal provenance into an ordered context site list."
   (let* ((journal (list (list :site "alpha.example")
                         (list :site nil)
                         (list :site "beta.example")
@@ -60,7 +60,7 @@
           :context context)))
 
 (defexample fedwiki-java-resolution-order-example
-  "Translate collaborative-link resolution into the ordered site search path."
+    "Translate collaborative-link resolution into the ordered site search path."
   (let* ((origin "origin.example")
          (journal (list (list :site "beta.example")
                         (list :site "gamma.example")
@@ -75,7 +75,7 @@
           :resolution-order order)))
 
 (defexample fedwiki-commit-link-example
-  "Translate a full Git commit hash in story text into a Software Heritage revision link."
+    "Translate a full Git commit hash in story text into a Software Heritage revision link."
   (let* ((hash "0123456789abcdef0123456789abcdef01234567")
          (text (format nil "See ~A and [https://example.org Example]" hash))
          (wiki (make-instance 'hyperbook/fedwiki::fedwiki
@@ -143,7 +143,7 @@
         page))))
 
 (defexample journalmatic-revision-example
-  "Replay a small journal into the current page state."
+    "Replay a small journal into the current page state."
   (let* ((page *journalmatic-example-page*)
          (revised (journalmatic-example-revision (getf page :journal)
                                                  :title (getf page :title))))
@@ -152,7 +152,7 @@
           :story (getf revised :story))))
 
 (defexample journalmatic-checker-example
-  "Report the checker findings for a page with a chronology issue."
+    "Report the checker findings for a page with a chronology issue."
   (let* ((page *journalmatic-example-page-with-chronology-error*)
          (results (journalmatic-example-check page)))
     (assert-equal '(:chronology) results)
@@ -160,7 +160,7 @@
           :results results)))
 
 (defexample journalmatic-rectify-chronology-example
-  "Sort a page journal by date to remove chronology errors."
+    "Sort a page journal by date to remove chronology errors."
   (let* ((page *journalmatic-example-page-with-chronology-error*)
          (fixed (journalmatic-example-fix-chronology page))
          (dates (mapcar #'(lambda (action) (getf action :date))
@@ -171,7 +171,7 @@
           :results (journalmatic-example-check fixed))))
 
 (defexample journalmatic-gentle-compactor-example
-  "Keep only the last edit in a short run of edits to the same item."
+    "Keep only the last edit in a short run of edits to the same item."
   (let* ((page *journalmatic-example-page*)
          (compacted (journalmatic-example-compact-journal page))
          (types-and-ids (mapcar #'(lambda (action)
@@ -226,7 +226,7 @@
     page))
 
 (defexample journalmatic-page-generation-workflow-example
-  "Generate a reproducible page JSON shape and verify chronology/fork ordering."
+    "Generate a reproducible page JSON shape and verify chronology/fork ordering."
   (let* ((story (list (list :type :paragraph :id "a1" :text "Alpha")
                       (list :type :markdown :id "b1" :text "### Beta")))
          (page (journalmatic-make-page-with-journal "Workflow Example"
@@ -243,7 +243,7 @@
           :results checked)))
 
 (defexample journalmatic-page-generation-wiki-client-style-example
-  "Append a story item using max(now, last-date+1) date semantics."
+    "Append a story item using max(now, last-date+1) date semantics."
   (let* ((seed (journalmatic-make-page-with-journal
                 "Workflow Example"
                 (list (list :type :paragraph :id "a1" :text "Alpha"))

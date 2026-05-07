@@ -84,13 +84,13 @@
   (let* ((relation (hyperdoc::example-association-topics-relation))
          (proposal (hyperdoc::promote-relation-to-topic-proposal relation))
          (page-fragment
-           (hyperdoc::relation-topic-proposal-page-fragment proposal))
+          (hyperdoc::relation-topic-proposal-page-fragment proposal))
          (bundle
-           (hyperdoc::relation-topic-proposal-authoring-bundle proposal))
+          (hyperdoc::relation-topic-proposal-authoring-bundle proposal))
          (fedwiki-delta
-           (hyperdoc::relation-topic-proposal-fedwiki-twin-delta proposal))
+          (hyperdoc::relation-topic-proposal-fedwiki-twin-delta proposal))
          (patch-plan
-           (hyperdoc::make-relation-topic-patch-plan proposal)))
+          (hyperdoc::make-relation-topic-patch-plan proposal)))
     (relation-proposal-assert-true
      (and (stringp page-fragment)
           (plusp (length page-fragment)))
@@ -130,29 +130,29 @@
 
 (defun run-relation-topic-proposal-review-wording-smoke-test ()
   (let* ((relation
-           (make-instance
-            'hyperdoc::dom-relation-annotation
-            :id "dom-relation/example-review-wording"
-            :title "Association: source -> target"
-            :summary "Minimal relation for review-wording fallback."
-            :context-view-title "Content"
-            :source-anchor
-            (make-instance 'hyperdoc::dom-annotation-anchor
-                           :provider-kind "dom-v1"
-                           :strategy "semantic-heading"
-                           :value "source"
-                           :label "Source seam"
-                           :page-title
-                           "Association Topics for Stable Identity and Mutable Titles")
-            :target-anchor
-            (make-instance 'hyperdoc::dom-annotation-anchor
-                           :provider-kind "dom-v1"
-                           :strategy "semantic-heading"
-                           :value "target"
-                           :label "Target seam"
-                           :page-title
-                           "Association Topics for Stable Identity and Mutable Titles")
-            :relation-kind "unclassified association"))
+          (make-instance
+           'hyperdoc::dom-relation-annotation
+           :id "dom-relation/example-review-wording"
+           :title "Association: source -> target"
+           :summary "Minimal relation for review-wording fallback."
+           :context-view-title "Content"
+           :source-anchor
+           (make-instance 'hyperdoc::dom-annotation-anchor
+                          :provider-kind "dom-v1"
+                          :strategy "semantic-heading"
+                          :value "source"
+                          :label "Source seam"
+                          :page-title
+                          "Association Topics for Stable Identity and Mutable Titles")
+           :target-anchor
+           (make-instance 'hyperdoc::dom-annotation-anchor
+                          :provider-kind "dom-v1"
+                          :strategy "semantic-heading"
+                          :value "target"
+                          :label "Target seam"
+                          :page-title
+                          "Association Topics for Stable Identity and Mutable Titles")
+           :relation-kind "unclassified association"))
          (proposal (hyperdoc::promote-relation-to-topic-proposal relation)))
     (relation-proposal-assert-equal
      :new-topic
@@ -168,12 +168,12 @@
   (let* ((root (relation-proposal-make-temp-root))
          (topics-path (merge-pathnames "hyperdoc/topics.lisp" root))
          (page-path
-           (merge-pathnames "hyperdoc/Association topics.html" root))
+          (merge-pathnames "hyperdoc/Association topics.html" root))
          (initial-content
-           (relation-proposal-existing-topics-file-content))
+          (relation-proposal-existing-topics-file-content))
          (proposal
-           (hyperdoc::promote-relation-to-topic-proposal
-            (hyperdoc::example-association-topics-relation)))
+          (hyperdoc::promote-relation-to-topic-proposal
+           (hyperdoc::example-association-topics-relation)))
          approval-error-signaled)
     (relation-proposal-write-string-file topics-path initial-content)
     (let ((hyperdoc::*relation-topic-patch-repo-root* root))
@@ -197,21 +197,21 @@
   (let* ((root (relation-proposal-make-temp-root))
          (topics-path (merge-pathnames "hyperdoc/topics.lisp" root))
          (page-path
-           (merge-pathnames "hyperdoc/Association topics.html" root))
+          (merge-pathnames "hyperdoc/Association topics.html" root))
          (initial-content
-           (relation-proposal-adjacent-topics-file-content))
+          (relation-proposal-adjacent-topics-file-content))
          (proposal
-           (hyperdoc::promote-relation-to-topic-proposal
-            (hyperdoc::example-association-topics-relation))))
+          (hyperdoc::promote-relation-to-topic-proposal
+           (hyperdoc::example-association-topics-relation))))
     (relation-proposal-write-string-file topics-path initial-content)
     (let ((hyperdoc::*relation-topic-patch-repo-root* root))
       (let* ((plan (hyperdoc::make-relation-topic-patch-plan proposal))
              (result
-               (hyperdoc::apply-relation-topic-patch-plan
-                plan
-                hyperdoc::*relation-topic-patch-approval-token*))
+              (hyperdoc::apply-relation-topic-patch-plan
+               plan
+               hyperdoc::*relation-topic-patch-approval-token*))
              (updated-content
-               (relation-proposal-read-string-file topics-path)))
+              (relation-proposal-read-string-file topics-path)))
         (relation-proposal-assert-equal
          :edit-existing-factory
          (hyperdoc::topics-action-of plan)
@@ -264,30 +264,30 @@
   (let* ((root (relation-proposal-make-temp-root))
          (topics-path (merge-pathnames "hyperdoc/topics.lisp" root))
          (proposal
-           (hyperdoc::promote-relation-to-topic-proposal
-            (make-instance
-             'hyperdoc::dom-relation-annotation
-             :id "dom-relation/example-patch-application"
-             :title "Association: source -> target"
-             :summary "Minimal relation for approved patch-plan application."
-             :context-view-title "Content"
-             :source-anchor
-             (make-instance 'hyperdoc::dom-annotation-anchor
-                            :provider-kind "dom-v1"
-                            :strategy "semantic-heading"
-                            :value "source"
-                            :label "Source seam"
-                            :page-title
-                            "Association Topics for Stable Identity and Mutable Titles")
-             :target-anchor
-             (make-instance 'hyperdoc::dom-annotation-anchor
-                            :provider-kind "dom-v1"
-                            :strategy "semantic-heading"
-                            :value "target"
-                            :label "Target seam"
-                            :page-title
-                            "Association Topics for Stable Identity and Mutable Titles")
-             :relation-kind "Patch application seam"))))
+          (hyperdoc::promote-relation-to-topic-proposal
+           (make-instance
+            'hyperdoc::dom-relation-annotation
+            :id "dom-relation/example-patch-application"
+            :title "Association: source -> target"
+            :summary "Minimal relation for approved patch-plan application."
+            :context-view-title "Content"
+            :source-anchor
+            (make-instance 'hyperdoc::dom-annotation-anchor
+                           :provider-kind "dom-v1"
+                           :strategy "semantic-heading"
+                           :value "source"
+                           :label "Source seam"
+                           :page-title
+                           "Association Topics for Stable Identity and Mutable Titles")
+            :target-anchor
+            (make-instance 'hyperdoc::dom-annotation-anchor
+                           :provider-kind "dom-v1"
+                           :strategy "semantic-heading"
+                           :value "target"
+                           :label "Target seam"
+                           :page-title
+                           "Association Topics for Stable Identity and Mutable Titles")
+            :relation-kind "Patch application seam"))))
     (relation-proposal-write-string-file
      topics-path
      (format nil "(in-package :hyperdoc)~%"))
@@ -297,9 +297,9 @@
                          (hyperdoc::page-target-path-of plan)
                          root))
              (result
-               (hyperdoc::apply-relation-topic-patch-plan
-                plan
-                hyperdoc::*relation-topic-patch-approval-token*)))
+              (hyperdoc::apply-relation-topic-patch-plan
+               plan
+               hyperdoc::*relation-topic-patch-approval-token*)))
         (relation-proposal-assert-true
          (typep result 'hyperdoc::approved-relation-topic-patch-application)
          "Valid approval token must return an application result object")
@@ -350,33 +350,33 @@
   (let* ((root (relation-proposal-make-temp-root))
          (topics-path (merge-pathnames "hyperdoc/topics.lisp" root))
          (proposal
-           (hyperdoc::promote-relation-to-topic-proposal
-            (make-instance
-             'hyperdoc::dom-relation-annotation
-             :id "dom-relation/example-append-conflict"
-             :title "Association: source -> target"
-             :summary "Minimal relation for append-conflict hardening."
-             :context-view-title "Content"
-             :source-anchor
-             (make-instance 'hyperdoc::dom-annotation-anchor
-                            :provider-kind "dom-v1"
-                            :strategy "semantic-heading"
-                            :value "source"
-                            :label "Source seam"
-                            :page-title
-                            "Association Topics for Stable Identity and Mutable Titles")
-             :target-anchor
-             (make-instance 'hyperdoc::dom-annotation-anchor
-                            :provider-kind "dom-v1"
-                            :strategy "semantic-heading"
-                            :value "target"
-                            :label "Target seam"
-                            :page-title
-                            "Association Topics for Stable Identity and Mutable Titles")
-             :relation-kind "Patch application seam")))
+          (hyperdoc::promote-relation-to-topic-proposal
+           (make-instance
+            'hyperdoc::dom-relation-annotation
+            :id "dom-relation/example-append-conflict"
+            :title "Association: source -> target"
+            :summary "Minimal relation for append-conflict hardening."
+            :context-view-title "Content"
+            :source-anchor
+            (make-instance 'hyperdoc::dom-annotation-anchor
+                           :provider-kind "dom-v1"
+                           :strategy "semantic-heading"
+                           :value "source"
+                           :label "Source seam"
+                           :page-title
+                           "Association Topics for Stable Identity and Mutable Titles")
+            :target-anchor
+            (make-instance 'hyperdoc::dom-annotation-anchor
+                           :provider-kind "dom-v1"
+                           :strategy "semantic-heading"
+                           :value "target"
+                           :label "Target seam"
+                           :page-title
+                           "Association Topics for Stable Identity and Mutable Titles")
+            :relation-kind "Patch application seam")))
          (initial-content
-           (format nil
-                   "(in-package :hyperdoc)~%~%(defun patch-application-seam-temp-topic ()~%  (make-topic~%   :id \"patch-application-seam-temp\"~%   :title \"Patch application seam\"~%   :summary \"Existing exact-title factory already present in the target file.\"~%   :references '(\"Existing target reference\")))~%"))
+          (format nil
+                  "(in-package :hyperdoc)~%~%(defun patch-application-seam-temp-topic ()~%  (make-topic~%   :id \"patch-application-seam-temp\"~%   :title \"Patch application seam\"~%   :summary \"Existing exact-title factory already present in the target file.\"~%   :references '(\"Existing target reference\")))~%"))
          conflict-signaled)
     (relation-proposal-write-string-file topics-path initial-content)
     (let ((hyperdoc::*relation-topic-patch-repo-root* root))

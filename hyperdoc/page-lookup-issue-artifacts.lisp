@@ -119,20 +119,20 @@
   (let* ((source (page-lookup-issue-authored-source-artifact))
          (relations (make-page-lookup-issue-authored-relations))
          (semantic-relations
-           (remove-if-not
-            (lambda (relation)
-              (eq (authored-relation-layer-of relation) :semantic))
-            relations))
+          (remove-if-not
+           (lambda (relation)
+             (eq (authored-relation-layer-of relation) :semantic))
+           relations))
          (behavior-relations
-           (remove-if-not
-            (lambda (relation)
-              (eq (authored-relation-layer-of relation) :behavior))
-            relations))
+          (remove-if-not
+           (lambda (relation)
+             (eq (authored-relation-layer-of relation) :behavior))
+           relations))
          (layout-relations
-           (remove-if-not
-            (lambda (relation)
-              (eq (authored-relation-layer-of relation) :layout))
-            relations)))
+          (remove-if-not
+           (lambda (relation)
+             (eq (authored-relation-layer-of relation) :layout))
+           relations)))
     (make-instance
      'page-lookup-issue-authored-artifact
      :id (authored-relation-artifact-source-artifact-id-of source)
@@ -279,9 +279,9 @@
       (let* ((state-id (id-of state))
              (outgoing (state-machine-transitions-from-state machine state-id))
              (terminal-p
-               (member state-id
-                       (state-machine-definition-terminal-states-of machine)
-                       :test #'equal)))
+              (member state-id
+                      (state-machine-definition-terminal-states-of machine)
+                      :test #'equal)))
         (if (and terminal-p (null outgoing))
             (format stream "  <final id=\"~A\"/>~%"
                     (page-lookup-issue-xml-escape state-id))
@@ -312,18 +312,18 @@
 
 (defun page-lookup-issue-layout-ordered-panes (relations)
   (let* ((contains
-           (remove-if-not
-            (lambda (relation)
-              (and (eq (authored-relation-subject-of relation)
-                       :lookup-issue-pane)
-                   (eq (authored-relation-predicate-of relation) :contains)))
-            relations))
+          (remove-if-not
+           (lambda (relation)
+             (and (eq (authored-relation-subject-of relation)
+                      :lookup-issue-pane)
+                  (eq (authored-relation-predicate-of relation) :contains)))
+           relations))
          (contained-panes (mapcar #'authored-relation-object-of contains))
          (after-relations
-           (remove-if-not
-            (lambda (relation)
-              (eq (authored-relation-predicate-of relation) :after))
-            relations)))
+          (remove-if-not
+           (lambda (relation)
+             (eq (authored-relation-predicate-of relation) :after))
+           relations)))
     (labels ((after-p (pane)
                (find pane
                      after-relations
@@ -348,8 +348,8 @@
   (or *page-lookup-issue-behavior-artifact*
       (let* ((authored-artifact (page-lookup-issue-authored-artifact))
              (relations
-               (authored-relation-artifact-behavior-relations-of
-                authored-artifact))
+              (authored-relation-artifact-behavior-relations-of
+               authored-artifact))
              (machine (compile-page-lookup-issue-machine authored-artifact)))
         (setf *page-lookup-issue-behavior-artifact*
               (make-instance
@@ -374,10 +374,10 @@
   (or *page-lookup-issue-layout-artifact*
       (let* ((authored-artifact (page-lookup-issue-authored-artifact))
              (relations
-               (authored-relation-artifact-layout-relations-of
-                authored-artifact))
+              (authored-relation-artifact-layout-relations-of
+               authored-artifact))
              (pane-relations
-               (page-lookup-issue-layout-pane-relations relations)))
+              (page-lookup-issue-layout-pane-relations relations)))
         (setf *page-lookup-issue-layout-artifact*
               (make-instance
                'page-lookup-issue-layout-artifact

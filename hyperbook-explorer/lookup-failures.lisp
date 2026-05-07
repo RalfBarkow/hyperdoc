@@ -47,8 +47,8 @@
                    :initarg :classification
                    :initform :unknown)
    (default-status :accessor lookup-issue-default-status-of
-                   :initarg :status
-                   :initform :open)
+     :initarg :status
+     :initform :open)
    (suggested-repair :accessor lookup-issue-suggested-repair-of
                      :initarg :suggested-repair
                      :initform nil)
@@ -171,15 +171,15 @@
          (source-page-title (lookup-issue-source-page-title-of issue))
          (source-page-id (lookup-issue-source-page-id-of issue))
          (page-fragment
-           (cond
-             ((and source-page-title source-page-id)
-              (format nil " from page ~A (~A)" source-page-title source-page-id))
-             (source-page-title
-              (format nil " from page ~A" source-page-title))
-             (source-page-id
-              (format nil " from page ~A" source-page-id))
-             (t
-              ""))))
+          (cond
+            ((and source-page-title source-page-id)
+             (format nil " from page ~A (~A)" source-page-title source-page-id))
+            (source-page-title
+             (format nil " from page ~A" source-page-title))
+            (source-page-id
+             (format nil " from page ~A" source-page-id))
+            (t
+             ""))))
     (case (function-lookup-issue-runtime-load-state issue)
       (:fbound
        (format nil
@@ -584,21 +584,21 @@
 
 (defun render-function-lookup-issue-runtime-summary-rows (issue)
   (views:html
-    (:tr (:td (views:esc "Current runtime load state"))
-         (:td (:tt (views:esc
-                    (issue-label
-                     (function-lookup-issue-runtime-load-state issue))))))
-    (:tr (:td (views:esc "Current-state reason"))
-         (:td (views:esc
-               (function-lookup-issue-status-reason issue))))
-    (:tr (:td (views:esc "Repair path on click"))
-         (:td (views:esc
-               (function-lookup-issue-repair-target-label issue))))
-    (:tr (:td (views:esc "Retry available now"))
-         (:td (:tt (views:esc
-                    (if (function-lookup-issue-retry-available-p issue)
-                        "yes"
-                        "no")))))))
+   (:tr (:td (views:esc "Current runtime load state"))
+        (:td (:tt (views:esc
+                   (issue-label
+                    (function-lookup-issue-runtime-load-state issue))))))
+   (:tr (:td (views:esc "Current-state reason"))
+        (:td (views:esc
+              (function-lookup-issue-status-reason issue))))
+   (:tr (:td (views:esc "Repair path on click"))
+        (:td (views:esc
+              (function-lookup-issue-repair-target-label issue))))
+   (:tr (:td (views:esc "Retry available now"))
+        (:td (:tt (views:esc
+                   (if (function-lookup-issue-retry-available-p issue)
+                       "yes"
+                       "no")))))))
 
 (defmethod bounded-lookup-issue-overview-extra-rows ((issue function-lookup-issue))
   (render-function-lookup-issue-runtime-summary-rows issue))
@@ -623,170 +623,170 @@
 
 (defmethod bounded-lookup-issue-repair-extra-content ((issue function-lookup-issue))
   (views:html
-    (:table :class "inspector-table"
-            (render-function-lookup-issue-runtime-summary-rows issue))
-    (:p (views:esc
-         "Overview preserves authored provenance for this failure, and Condition preserves the original undefined-function evidence."))))
+   (:table :class "inspector-table"
+           (render-function-lookup-issue-runtime-summary-rows issue))
+   (:p (views:esc
+        "Overview preserves authored provenance for this failure, and Condition preserves the original undefined-function evidence."))))
 
 (defmethod views:html-representation ((issue lookup-issue) &optional id)
   (views:html
-    (:span :id id :class "inspector-error"
-           (:tt (views:esc (issue-label
-                            (lookup-issue-classification-of issue))))
-           (views:esc ": ")
-           (views:esc (or (lookup-issue-link-text-of issue)
-                          (lookup-issue-expected-page-id-of issue)
-                          "lookup issue")))))
+   (:span :id id :class "inspector-error"
+          (:tt (views:esc (issue-label
+                           (lookup-issue-classification-of issue))))
+          (views:esc ": ")
+          (views:esc (or (lookup-issue-link-text-of issue)
+                         (lookup-issue-expected-page-id-of issue)
+                         "lookup issue")))))
 
 (defun render-lookup-issue-status-button (issue label status)
   (views:action-button
    label
    (views:thunk
-     (mark-lookup-issue! issue status)
-     issue)
+    (mark-lookup-issue! issue status)
+    issue)
    (format nil "Mark this lookup issue as ~A."
            (issue-label status))))
 
 (defmethod views:title-bar-action-buttons ((issue lookup-issue))
   (views:html
-    (render-lookup-issue-status-button issue "Open" :open)
-    " "
-    (render-lookup-issue-status-button issue "Publication" :publication-boundary)
-    " "
-    (render-lookup-issue-status-button issue "Needs materialization"
-                                       :needs-local-materialization)
-    " "
-    (render-lookup-issue-status-button issue "Needs topic"
-                                       :needs-topic-creation)
-    " "
-    (render-lookup-issue-status-button issue "Fixed" :fixed)))
+   (render-lookup-issue-status-button issue "Open" :open)
+   " "
+   (render-lookup-issue-status-button issue "Publication" :publication-boundary)
+   " "
+   (render-lookup-issue-status-button issue "Needs materialization"
+                                      :needs-local-materialization)
+   " "
+   (render-lookup-issue-status-button issue "Needs topic"
+                                      :needs-topic-creation)
+   " "
+   (render-lookup-issue-status-button issue "Fixed" :fixed)))
 
 (views:defview 👀overview (issue lookup-issue)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Source page"))
-                   (:td (views:esc (lookup-issue-source-page-title-of issue))))
-              (:tr (:td (views:esc "Source page id / slug"))
-                   (:td (:tt (views:esc
-                              (or (lookup-issue-source-page-id-of issue)
-                                  "")))))
-              (:tr (:td (views:esc "Source HyperBook"))
-                   (:td (views:esc (source-hyperbook-of issue))))
-              (:tr (:td (views:esc "Source section"))
-                   (:td (views:esc (or (lookup-issue-source-section-of issue)
-                                       ""))))
-              (:tr (:td (views:esc "Link text"))
-                   (:td (views:esc (or (lookup-issue-link-text-of issue) ""))))
-              (:tr (:td (views:esc "Expected page id / slug"))
-                   (:td (:tt (views:esc
-                              (or (lookup-issue-expected-page-id-of issue)
-                                  "")))))
-              (:tr (:td (views:esc "Target HyperBook"))
-                   (:td (:tt (views:esc
-                              (or (lookup-issue-target-hyperbook-id-of issue)
-                                  "")))))
-              (:tr (:td (views:esc "Target site"))
-                   (:td (views:esc (or (lookup-issue-target-site-of issue) ""))))
-              (:tr (:td (views:esc "Target kind"))
-                   (:td (:tt (views:esc
-                              (issue-label
-                               (lookup-issue-target-kind-of issue))))))
-              (:tr (:td (views:esc "Failure classification"))
-                   (:td (:tt (views:esc
-                              (issue-label
-                               (lookup-issue-classification-of issue))))))
-              (:tr (:td (views:esc "Current status"))
-                   (:td (:tt (views:esc
-                              (issue-label (lookup-issue-status-of issue))))))
-              (:tr (:td (views:esc "Current repair operation"))
-                   (:td (:tt (views:esc
-                              (or (and (lookup-issue-suggested-repair-of issue)
-                                       (issue-label
-                                        (lookup-issue-suggested-repair-of issue)))
-                                  "")))))
-              (:tr (:td (views:esc "Repair description"))
-                   (:td (views:esc (or (lookup-issue-repair-description-of issue)
-                                       ""))))
-              (render-lookup-issue-overview-extra-rows issue)))))
+                   (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "Source page"))
+                                 (:td (views:esc (lookup-issue-source-page-title-of issue))))
+                            (:tr (:td (views:esc "Source page id / slug"))
+                                 (:td (:tt (views:esc
+                                            (or (lookup-issue-source-page-id-of issue)
+                                                "")))))
+                            (:tr (:td (views:esc "Source HyperBook"))
+                                 (:td (views:esc (source-hyperbook-of issue))))
+                            (:tr (:td (views:esc "Source section"))
+                                 (:td (views:esc (or (lookup-issue-source-section-of issue)
+                                                     ""))))
+                            (:tr (:td (views:esc "Link text"))
+                                 (:td (views:esc (or (lookup-issue-link-text-of issue) ""))))
+                            (:tr (:td (views:esc "Expected page id / slug"))
+                                 (:td (:tt (views:esc
+                                            (or (lookup-issue-expected-page-id-of issue)
+                                                "")))))
+                            (:tr (:td (views:esc "Target HyperBook"))
+                                 (:td (:tt (views:esc
+                                            (or (lookup-issue-target-hyperbook-id-of issue)
+                                                "")))))
+                            (:tr (:td (views:esc "Target site"))
+                                 (:td (views:esc (or (lookup-issue-target-site-of issue) ""))))
+                            (:tr (:td (views:esc "Target kind"))
+                                 (:td (:tt (views:esc
+                                            (issue-label
+                                             (lookup-issue-target-kind-of issue))))))
+                            (:tr (:td (views:esc "Failure classification"))
+                                 (:td (:tt (views:esc
+                                            (issue-label
+                                             (lookup-issue-classification-of issue))))))
+                            (:tr (:td (views:esc "Current status"))
+                                 (:td (:tt (views:esc
+                                            (issue-label (lookup-issue-status-of issue))))))
+                            (:tr (:td (views:esc "Current repair operation"))
+                                 (:td (:tt (views:esc
+                                            (or (and (lookup-issue-suggested-repair-of issue)
+                                                     (issue-label
+                                                      (lookup-issue-suggested-repair-of issue)))
+                                                "")))))
+                            (:tr (:td (views:esc "Repair description"))
+                                 (:td (views:esc (or (lookup-issue-repair-description-of issue)
+                                                     ""))))
+                            (render-lookup-issue-overview-extra-rows issue)))))
 
 (views:defview 👀details (issue lookup-issue)
   (views:html-view :title "Details" :priority 2
-    (let ((details (lookup-issue-details-of issue)))
-      (if details
-          (views:html
-            (:table :class "inspector-table"
-                    (loop for (key value) on details by #'cddr
-                          do (views:html
-                               (:tr (:td (:tt (views:esc (format nil "~(~A~)" key))))
-                                    (:td (views:object-ref value)))))))
-          (views:html
-            (:p (views:esc "No extra details.")))))))
+                   (let ((details (lookup-issue-details-of issue)))
+                     (if details
+                         (views:html
+                          (:table :class "inspector-table"
+                                  (loop for (key value) on details by #'cddr
+                                        do (views:html
+                                            (:tr (:td (:tt (views:esc (format nil "~(~A~)" key))))
+                                                 (:td (views:object-ref value)))))))
+                         (views:html
+                          (:p (views:esc "No extra details.")))))))
 
 (views:defview 👀repair (issue lookup-issue)
   (views:html-view :title "Repair" :priority 3
-    (views:html
-      (:p (views:esc
-           (or (lookup-issue-repair-description-of issue)
-               "No repair operation has been attached to this lookup issue yet.")))
-      (render-lookup-issue-repair-extra-content issue)
-      (when (lookup-issue-repair-thunk-of issue)
-        (views:html
-          (:p (views:eval-button
-               (lookup-issue-repair-button-label-of issue)
-               (views:thunk
-                 (funcall (lookup-issue-repair-thunk-of issue))))))))))
+                   (views:html
+                    (:p (views:esc
+                         (or (lookup-issue-repair-description-of issue)
+                             "No repair operation has been attached to this lookup issue yet.")))
+                    (render-lookup-issue-repair-extra-content issue)
+                    (when (lookup-issue-repair-thunk-of issue)
+                      (views:html
+                       (:p (views:eval-button
+                            (lookup-issue-repair-button-label-of issue)
+                            (views:thunk
+                             (funcall (lookup-issue-repair-thunk-of issue))))))))))
 
 (views:defview 👀condition (issue lookup-issue)
   (when-let (condition (lookup-issue-underlying-condition-of issue))
     (views:html-view :title "Condition" :priority 4
-      (views:html
-        (:div :class "hyperbook-page"
-              (when-let (message (lookup-issue-underlying-message-of issue))
-                (views:html
-                  (:p (views:esc "Preserved condition text"))
-                  (:pre (views:esc message))))
-              (views:object-ref condition))))))
+                     (views:html
+                      (:div :class "hyperbook-page"
+                            (when-let (message (lookup-issue-underlying-message-of issue))
+                              (views:html
+                               (:p (views:esc "Preserved condition text"))
+                               (:pre (views:esc message))))
+                            (views:object-ref condition))))))
 
 (views:defview 👀overview (correction function-lookup-correction)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Mode"))
-                   (:td (:tt (views:esc
-                              (issue-label
-                               (function-lookup-correction-mode-of correction))))))
-              (:tr (:td (views:esc "Expected symbol"))
-                   (:td (views:object-ref
-                         (function-lookup-correction-expected-symbol-of correction))))
-              (:tr (:td (views:esc "Expected page id / slug"))
-                   (:td (:tt (views:esc
-                              (or (function-lookup-correction-expected-page-id-of correction)
-                                  "")))))
-              (:tr (:td (views:esc "Source HyperBook"))
-                   (:td (views:esc
-                         (or (function-lookup-correction-source-hyperbook-of correction)
-                             ""))))
-              (:tr (:td (views:esc "Source page"))
-                   (:td (views:esc
-                         (or (function-lookup-correction-source-page-title-of correction)
-                             ""))))
-              (:tr (:td (views:esc "Source page id / slug"))
-                   (:td (:tt (views:esc
-                              (or (function-lookup-correction-source-page-id-of correction)
-                                  "")))))
-              (:tr (:td (views:esc "Reference kind"))
-                   (:td (:tt (views:esc
-                              (or (and (function-lookup-correction-reference-kind-of correction)
-                                       (issue-label
-                                        (function-lookup-correction-reference-kind-of correction)))
-                                  "")))))
-              (:tr (:td (views:esc "Package"))
-                   (:td (:tt (views:esc
-                              (or (function-lookup-correction-package-name-of correction)
-                                  "")))))))))
+                   (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "Mode"))
+                                 (:td (:tt (views:esc
+                                            (issue-label
+                                             (function-lookup-correction-mode-of correction))))))
+                            (:tr (:td (views:esc "Expected symbol"))
+                                 (:td (views:object-ref
+                                       (function-lookup-correction-expected-symbol-of correction))))
+                            (:tr (:td (views:esc "Expected page id / slug"))
+                                 (:td (:tt (views:esc
+                                            (or (function-lookup-correction-expected-page-id-of correction)
+                                                "")))))
+                            (:tr (:td (views:esc "Source HyperBook"))
+                                 (:td (views:esc
+                                       (or (function-lookup-correction-source-hyperbook-of correction)
+                                           ""))))
+                            (:tr (:td (views:esc "Source page"))
+                                 (:td (views:esc
+                                       (or (function-lookup-correction-source-page-title-of correction)
+                                           ""))))
+                            (:tr (:td (views:esc "Source page id / slug"))
+                                 (:td (:tt (views:esc
+                                            (or (function-lookup-correction-source-page-id-of correction)
+                                                "")))))
+                            (:tr (:td (views:esc "Reference kind"))
+                                 (:td (:tt (views:esc
+                                            (or (and (function-lookup-correction-reference-kind-of correction)
+                                                     (issue-label
+                                                      (function-lookup-correction-reference-kind-of correction)))
+                                                "")))))
+                            (:tr (:td (views:esc "Package"))
+                                 (:td (:tt (views:esc
+                                            (or (function-lookup-correction-package-name-of correction)
+                                                "")))))))))
 
 (views:defview 👀guidance (correction function-lookup-correction)
   (views:html-view :title "Guidance" :priority 2
-    (views:html
-      (:p (views:esc (function-lookup-correction-guidance-of correction))))))
+                   (views:html
+                    (:p (views:esc (function-lookup-correction-guidance-of correction))))))

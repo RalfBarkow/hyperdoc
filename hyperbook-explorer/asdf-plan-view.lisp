@@ -63,78 +63,78 @@
 
 (defun render-object-cell (object &key (align "left"))
   (html
-    (:td :align align
-         (if object
-             (object-ref object)
-             (html
-               (:tt (esc "n/a")))))))
+   (:td :align align
+        (if object
+            (object-ref object)
+            (html
+             (:tt (esc "n/a")))))))
 
 (defun render-module-path-cell (module-components)
   (html
-    (:td
-     (if module-components
-         (loop for component in module-components
-               for first = t then nil
-               do (unless first
-                    (html (:span " / ")))
-                  (html (object-ref component)))
-         (html
-           (:small :class "inspector-index" (esc "root")))))))
+   (:td
+    (if module-components
+        (loop for component in module-components
+              for first = t then nil
+              do (unless first
+                   (html (:span " / ")))
+              (html (object-ref component)))
+        (html
+         (:small :class "inspector-index" (esc "root")))))))
 
 (defun render-raw-target-cell (raw-target)
   (html
-    (:td (:tt (esc raw-target)))))
+   (:td (:tt (esc raw-target)))))
 
 (defun render-plan-action-row (row)
   (html
-    (:tr
-     (:td :align "right"
-          (:small :class "inspector-index"
-                  (fmt "~D" (1+ (plan-action-row-index row)))))
-     (render-object-cell (plan-action-row-operation row))
-     (render-object-cell (plan-action-row-system row))
-     (render-module-path-cell (plan-action-row-module-components row))
-     (render-object-cell (plan-action-row-leaf-component row))
-     (:td (:tt (esc (plan-action-row-component-class row))))
-     (render-raw-target-cell (plan-action-row-raw-target row)))))
+   (:tr
+    (:td :align "right"
+         (:small :class "inspector-index"
+                 (fmt "~D" (1+ (plan-action-row-index row)))))
+    (render-object-cell (plan-action-row-operation row))
+    (render-object-cell (plan-action-row-system row))
+    (render-module-path-cell (plan-action-row-module-components row))
+    (render-object-cell (plan-action-row-leaf-component row))
+    (:td (:tt (esc (plan-action-row-component-class row))))
+    (render-raw-target-cell (plan-action-row-raw-target row)))))
 
 (defview 👀actions (plan asdf/plan:plan)
   (html-view :title "Actions" :priority 1
-    (let* ((rows (plan-action-rows plan))
-           (system-count (length
-                          (remove-duplicates
-                           (remove nil
-                                   (mapcar (lambda (row)
-                                             (and (plan-action-row-system row)
-                                                  (asdf:component-name
-                                                   (plan-action-row-system row))))
-                                           rows))
-                           :test #'string=)))
-           (module-count (length
-                          (distinct-non-empty-strings
-                           (mapcar (lambda (row)
-                                     (module-path-string
-                                      (plan-action-row-module-components row)))
-                                   rows))))
-           (leaf-count (length
-                        (remove-duplicates
-                         (mapcar #'plan-action-row-raw-target rows)
-                         :test #'string=))))
-      (html
-        (:small :class "inspector-index"
-                (fmt "~D action(s), ~D system(s), ~D module path(s), ~D leaf component(s)"
-                     (length rows)
-                     system-count
-                     module-count
-                     leaf-count))
-        (:table :class "inspector-table"
-                (:tr (:th (esc "Order"))
-                     (:th (esc "Operation"))
-                     (:th (esc "System"))
-                     (:th (esc "Module path"))
-                     (:th (esc "Component / file"))
-                     (:th (esc "Component class"))
-                     (:th (esc "Raw target")))
-                (loop for row in rows
-                      do (html
-                           (render-plan-action-row row))))))))
+             (let* ((rows (plan-action-rows plan))
+                    (system-count (length
+                                   (remove-duplicates
+                                    (remove nil
+                                            (mapcar (lambda (row)
+                                                      (and (plan-action-row-system row)
+                                                           (asdf:component-name
+                                                            (plan-action-row-system row))))
+                                                    rows))
+                                    :test #'string=)))
+                    (module-count (length
+                                   (distinct-non-empty-strings
+                                    (mapcar (lambda (row)
+                                              (module-path-string
+                                               (plan-action-row-module-components row)))
+                                            rows))))
+                    (leaf-count (length
+                                 (remove-duplicates
+                                  (mapcar #'plan-action-row-raw-target rows)
+                                  :test #'string=))))
+               (html
+                (:small :class "inspector-index"
+                        (fmt "~D action(s), ~D system(s), ~D module path(s), ~D leaf component(s)"
+                             (length rows)
+                             system-count
+                             module-count
+                             leaf-count))
+                (:table :class "inspector-table"
+                        (:tr (:th (esc "Order"))
+                             (:th (esc "Operation"))
+                             (:th (esc "System"))
+                             (:th (esc "Module path"))
+                             (:th (esc "Component / file"))
+                             (:th (esc "Component class"))
+                             (:th (esc "Raw target")))
+                        (loop for row in rows
+                              do (html
+                                  (render-plan-action-row row))))))))

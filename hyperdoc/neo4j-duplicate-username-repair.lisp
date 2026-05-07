@@ -274,7 +274,7 @@
           for firstp = t then nil
           do (unless firstp
                (write-string separator stream))
-             (write-string string stream))))
+          (write-string string stream))))
 
 (defun neo4j-command-display-string (command)
   (neo4j-string-join
@@ -324,17 +324,17 @@
 
 (defun neo4j-helper-classpath-string (store-target &key include-build-root-p)
   (let ((entries
-          (append
-           (when include-build-root-p
-             (list (neo4j-store-target-tool-build-root-of store-target)))
-           (neo4j-store-target-tool-classpath-entries-of store-target))))
+         (append
+          (when include-build-root-p
+            (list (neo4j-store-target-tool-build-root-of store-target)))
+          (neo4j-store-target-tool-classpath-entries-of store-target))))
     (neo4j-string-join (mapcar #'namestring entries) ":")))
 
 (defun neo4j-java-program (store-target program-name)
   (if-let (java-home (neo4j-store-target-java-home-of store-target))
-    (namestring
-     (merge-pathnames (format nil "bin/~A" program-name)
-                      java-home))
+      (namestring
+       (merge-pathnames (format nil "bin/~A" program-name)
+                        java-home))
     program-name))
 
 (defun neo4j-helper-compile-command (store-target)
@@ -406,18 +406,18 @@
 
 (defun neo4j-path-safe-component (string)
   (let* ((raw
-           (with-output-to-string (stream)
-             (loop with wrote-separator = nil
-                   for char across (string-downcase string)
-                   do (cond
-                        ((or (alphanumericp char)
-                             (char= char #\-)
-                             (char= char #\_))
-                         (write-char char stream)
-                         (setf wrote-separator nil))
-                        ((not wrote-separator)
-                         (write-char #\- stream)
-                         (setf wrote-separator t))))))
+          (with-output-to-string (stream)
+            (loop with wrote-separator = nil
+                  for char across (string-downcase string)
+                  do (cond
+                       ((or (alphanumericp char)
+                            (char= char #\-)
+                            (char= char #\_))
+                        (write-char char stream)
+                        (setf wrote-separator nil))
+                       ((not wrote-separator)
+                        (write-char #\- stream)
+                        (setf wrote-separator t))))))
          (candidate (string-trim "-" raw)))
     (if (> (length candidate) 0)
         candidate
@@ -439,7 +439,7 @@
          (store-path (merge-pathnames +local-dmx-neo4j-default-store-relative-path+
                                       app-root))
          (tool-source-path
-           (neo4j-store-tool-path +neo4j-duplicate-username-tool-source-relative-path+)))
+          (neo4j-store-tool-path +neo4j-duplicate-username-tool-source-relative-path+)))
     (make-instance 'neo4j-store-target
                    :id "local-neo4j-store-target"
                    :title "Local Neo4j store target"
@@ -498,9 +498,9 @@
 (defun classify-neo4j-username-ambiguity-topics (topics)
   (let* ((matching-topics (neo4j-seq->list topics))
          (account-backed
-           (remove-if-not #'neo4j-topic-account-backed-p matching-topics))
+          (remove-if-not #'neo4j-topic-account-backed-p matching-topics))
          (standalone
-           (remove-if #'neo4j-topic-account-backed-p matching-topics)))
+          (remove-if #'neo4j-topic-account-backed-p matching-topics)))
     (cond
       ((null matching-topics)
        (list :classification :no-match
@@ -525,16 +525,16 @@
 (defun make-neo4j-username-ambiguity-report
     (read-operation &key status raw-json raw-payload command-records)
   (let* ((matching-topics
-           (neo4j-seq->list
-            (neo4j-payload-field raw-payload "matchingTopics")))
+          (neo4j-seq->list
+           (neo4j-payload-field raw-payload "matchingTopics")))
          (matching-count
-           (or (neo4j-payload-field raw-payload "matchingCount")
-               (length matching-topics)))
+          (or (neo4j-payload-field raw-payload "matchingCount")
+              (length matching-topics)))
          (classification-data
-           (if (eq status :ok)
-               (classify-neo4j-username-ambiguity-topics matching-topics)
-               (list :classification :inspection-failed
-                     :note "The read-only duplicate-username inspection did not complete successfully."))))
+          (if (eq status :ok)
+              (classify-neo4j-username-ambiguity-topics matching-topics)
+              (list :classification :inspection-failed
+                    :note "The read-only duplicate-username inspection did not complete successfully."))))
     (make-instance 'neo4j-username-ambiguity-report
                    :id (format nil "neo4j-username-ambiguity-report:~A"
                                (neo4j-read-query-operation-username-of read-operation))
@@ -554,10 +554,10 @@
 
 (defun inspect-neo4j-duplicate-username-report (read-operation)
   (let* ((store-target
-           (neo4j-instance-target-store-target-of
-            (neo4j-read-query-operation-instance-target-of read-operation)))
+          (neo4j-instance-target-store-target-of
+           (neo4j-read-query-operation-instance-target-of read-operation)))
          (prepare-commands
-           (neo4j-duplicate-username-adapter-prepare-commands store-target))
+          (neo4j-duplicate-username-adapter-prepare-commands store-target))
          (records '())
          (build-record (neo4j-run-command-record
                         :prepare-build
@@ -579,11 +579,11 @@
         :command-records records))
       (t
        (let* ((report-record
-                (neo4j-run-command-record
-                 :read-report
-                 (neo4j-duplicate-username-adapter-report-command
-                  store-target
-                  (neo4j-read-query-operation-username-of read-operation))))
+               (neo4j-run-command-record
+                :read-report
+                (neo4j-duplicate-username-adapter-report-command
+                 store-target
+                 (neo4j-read-query-operation-username-of read-operation))))
               (records (append records (list report-record))))
          (if (neo4j-command-record-success-p report-record)
              (make-neo4j-username-ambiguity-report
@@ -635,26 +635,26 @@
 (defun plan-neo4j-duplicate-username-repair
     (report &key replacement-value backup-path)
   (let* ((read-operation
-           (neo4j-username-ambiguity-report-read-operation-of report))
+          (neo4j-username-ambiguity-report-read-operation-of report))
          (instance-target
-           (neo4j-read-query-operation-instance-target-of read-operation))
+          (neo4j-read-query-operation-instance-target-of read-operation))
          (stale-topic (neo4j-username-ambiguity-report-stale-topic-of report))
          (canonical-topic (neo4j-username-ambiguity-report-canonical-topic-of report))
          (stale-topic-id (neo4j-topic-node-id stale-topic))
          (canonical-topic-id (neo4j-topic-node-id canonical-topic))
          (username (neo4j-read-query-operation-username-of read-operation))
          (replacement-value
-           (or replacement-value
-               (if stale-topic-id
-                   (format nil "~A__stale_~D" username stale-topic-id)
-                   (format nil "~A__stale_duplicate" username))))
+          (or replacement-value
+              (if stale-topic-id
+                  (format nil "~A__stale_~D" username stale-topic-id)
+                  (format nil "~A__stale_duplicate" username))))
          (backup-path
-           (or backup-path
-               (and stale-topic-id
-                    (deterministic-neo4j-backup-path
-                     (neo4j-instance-target-store-target-of instance-target)
-                     username
-                     stale-topic-id))))
+          (or backup-path
+              (and stale-topic-id
+                   (deterministic-neo4j-backup-path
+                    (neo4j-instance-target-store-target-of instance-target)
+                    username
+                    stale-topic-id))))
          (supported-p (neo4j-supported-duplicate-repair-p report)))
     (make-instance 'neo4j-duplicate-username-repair-plan
                    :id (format nil "neo4j-duplicate-username-repair-plan:~A"
@@ -761,10 +761,10 @@
 
 (defun neo4j-port-listener-state (instance-target)
   (let ((record
-          (neo4j-run-command-record
-           :port-listener-check
-           (neo4j-port-listener-command
-            (neo4j-instance-target-http-port-of instance-target)))))
+         (neo4j-run-command-record
+          :port-listener-check
+          (neo4j-port-listener-command
+           (neo4j-instance-target-http-port-of instance-target)))))
     (cond
       ((and (integerp (getf record :exit-code))
             (zerop (getf record :exit-code))
@@ -819,14 +819,14 @@
       "Refusing mutation: the plan does not yet contain a deterministic stale node id, canonical node id, replacement value, and backup path."))
     (t
      (let* ((instance-target
-              (neo4j-duplicate-username-repair-plan-instance-target-of plan))
+             (neo4j-duplicate-username-repair-plan-instance-target-of plan))
             (preflight-report
-              (inspect-local-admin-username-ambiguity
-               :instance-target instance-target
-               :username
-               (neo4j-read-query-operation-username-of
-                (neo4j-username-ambiguity-report-read-operation-of
-                 (neo4j-duplicate-username-repair-plan-report-of plan))))))
+             (inspect-local-admin-username-ambiguity
+              :instance-target instance-target
+              :username
+              (neo4j-read-query-operation-username-of
+               (neo4j-username-ambiguity-report-read-operation-of
+                (neo4j-duplicate-username-repair-plan-report-of plan))))))
        (cond
          ((not (eq (neo4j-username-ambiguity-report-status-of preflight-report)
                    :ok))
@@ -857,24 +857,24 @@
                 :verification-record listener-record))
               (t
                (let* ((store-target
-                        (neo4j-instance-target-store-target-of instance-target))
+                       (neo4j-instance-target-store-target-of instance-target))
                       (records
-                        (list listener-record
-                              (neo4j-run-command-record
-                               :prepare-build
-                               (first
-                                (neo4j-duplicate-username-adapter-prepare-commands
-                                 store-target)))
-                              (neo4j-run-command-record
-                               :compile-helper
-                               (second
-                                (neo4j-duplicate-username-adapter-prepare-commands
-                                 store-target)))
-                              (neo4j-run-command-record
-                               :backup-store
-                               (neo4j-store-backup-command
-                                store-target
-                                (neo4j-duplicate-username-repair-plan-backup-path-of plan))))))
+                       (list listener-record
+                             (neo4j-run-command-record
+                              :prepare-build
+                              (first
+                               (neo4j-duplicate-username-adapter-prepare-commands
+                                store-target)))
+                             (neo4j-run-command-record
+                              :compile-helper
+                              (second
+                               (neo4j-duplicate-username-adapter-prepare-commands
+                                store-target)))
+                             (neo4j-run-command-record
+                              :backup-store
+                              (neo4j-store-backup-command
+                               store-target
+                               (neo4j-duplicate-username-repair-plan-backup-path-of plan))))))
                  (labels ((record-at (index) (nth index records))
                           (rename-record ()
                             (neo4j-run-command-record
@@ -900,7 +900,7 @@
                        :preflight-report preflight-report
                        :refusal-reason "The required store backup step failed; no rename was attempted."))
                      (t
-                          (let* ((rename-record (rename-record))
+                      (let* ((rename-record (rename-record))
                              (records (append records (list rename-record))))
                         (if (not (neo4j-command-record-success-p rename-record))
                             (make-failed-neo4j-repair-operation
@@ -908,12 +908,12 @@
                              :preflight-report preflight-report
                              :refusal-reason "The stale duplicate rename failed.")
                             (let ((post-repair-report
-                                    (inspect-local-admin-username-ambiguity
-                                     :instance-target instance-target
-                                     :username
-                                     (neo4j-read-query-operation-username-of
-                                      (neo4j-username-ambiguity-report-read-operation-of
-                                       preflight-report)))))
+                                   (inspect-local-admin-username-ambiguity
+                                    :instance-target instance-target
+                                    :username
+                                    (neo4j-read-query-operation-username-of
+                                     (neo4j-username-ambiguity-report-read-operation-of
+                                      preflight-report)))))
                               (if (member (neo4j-username-ambiguity-report-classification-of
                                            post-repair-report)
                                           '(:unique :no-match)
@@ -935,10 +935,10 @@
   (unless (typep operation 'neo4j-repair-operation)
     (error "Expected a neo4j-repair-operation, got ~S" operation))
   (let* ((verification-operation
-           (neo4j-repair-operation-verification-operation-of operation))
+          (neo4j-repair-operation-verification-operation-of operation))
          (instance-target
-           (and verification-operation
-                (neo4j-read-query-operation-instance-target-of verification-operation))))
+          (and verification-operation
+               (neo4j-read-query-operation-instance-target-of verification-operation))))
     (if (null verification-operation)
         operation
         (multiple-value-bind (listener-state listener-record)
@@ -996,22 +996,22 @@
 
 (defmethod materialization-shell-block ((operation neo4j-read-query-operation))
   (let* ((store-target
-           (neo4j-instance-target-store-target-of
-            (neo4j-read-query-operation-instance-target-of operation)))
+          (neo4j-instance-target-store-target-of
+           (neo4j-read-query-operation-instance-target-of operation)))
          (prepare-commands
-           (neo4j-duplicate-username-adapter-prepare-commands store-target))
+          (neo4j-duplicate-username-adapter-prepare-commands store-target))
          (commands
-           (case (neo4j-read-query-operation-kind-of operation)
-             (:duplicate-username-report
-              (list (first prepare-commands)
-                    (second prepare-commands)
-                    (neo4j-duplicate-username-adapter-report-command
-                     store-target
-                     (neo4j-read-query-operation-username-of operation))))
-             (:live-username-probe
-              (list (neo4j-live-username-probe-command
-                     (neo4j-read-query-operation-instance-target-of operation)
-                     (neo4j-read-query-operation-username-of operation)))))))
+          (case (neo4j-read-query-operation-kind-of operation)
+            (:duplicate-username-report
+             (list (first prepare-commands)
+                   (second prepare-commands)
+                   (neo4j-duplicate-username-adapter-report-command
+                    store-target
+                    (neo4j-read-query-operation-username-of operation))))
+            (:live-username-probe
+             (list (neo4j-live-username-probe-command
+                    (neo4j-read-query-operation-instance-target-of operation)
+                    (neo4j-read-query-operation-username-of operation)))))))
     (shell-block
      (mapcar #'neo4j-command-display-string commands))))
 
@@ -1024,31 +1024,31 @@
                      (or (neo4j-duplicate-username-repair-plan-refusal-reason-of plan)
                          "This ambiguity shape is not supported by the narrow rename repair."))))
       (let* ((instance-target
-               (neo4j-duplicate-username-repair-plan-instance-target-of plan))
+              (neo4j-duplicate-username-repair-plan-instance-target-of plan))
              (store-target
-               (neo4j-instance-target-store-target-of instance-target))
+              (neo4j-instance-target-store-target-of instance-target))
              (prepare-commands
-               (neo4j-duplicate-username-adapter-prepare-commands store-target))
+              (neo4j-duplicate-username-adapter-prepare-commands store-target))
              (commands
-               (list (neo4j-port-listener-command
-                      (neo4j-instance-target-http-port-of instance-target))
-                     (first prepare-commands)
-                     (second prepare-commands)
-                     (neo4j-store-backup-command
-                      store-target
-                      (neo4j-duplicate-username-repair-plan-backup-path-of plan))
-                     (neo4j-duplicate-username-adapter-rename-command
-                      store-target
-                      (neo4j-duplicate-username-repair-plan-expected-stale-topic-id-of plan)
-                      (neo4j-duplicate-username-repair-plan-replacement-value-of plan))
-                     (neo4j-duplicate-username-adapter-report-command
-                      store-target
-                      (neo4j-read-query-operation-username-of
-                       (neo4j-duplicate-username-repair-plan-verification-operation-of plan)))
-                     (neo4j-live-username-probe-command
-                      instance-target
-                      (neo4j-read-query-operation-username-of
-                       (neo4j-duplicate-username-repair-plan-verification-operation-of plan))))))
+              (list (neo4j-port-listener-command
+                     (neo4j-instance-target-http-port-of instance-target))
+                    (first prepare-commands)
+                    (second prepare-commands)
+                    (neo4j-store-backup-command
+                     store-target
+                     (neo4j-duplicate-username-repair-plan-backup-path-of plan))
+                    (neo4j-duplicate-username-adapter-rename-command
+                     store-target
+                     (neo4j-duplicate-username-repair-plan-expected-stale-topic-id-of plan)
+                     (neo4j-duplicate-username-repair-plan-replacement-value-of plan))
+                    (neo4j-duplicate-username-adapter-report-command
+                     store-target
+                     (neo4j-read-query-operation-username-of
+                      (neo4j-duplicate-username-repair-plan-verification-operation-of plan)))
+                    (neo4j-live-username-probe-command
+                     instance-target
+                     (neo4j-read-query-operation-username-of
+                      (neo4j-duplicate-username-repair-plan-verification-operation-of plan))))))
         (shell-block
          (append
           '("# Stop the DMX server before running the store mutation."

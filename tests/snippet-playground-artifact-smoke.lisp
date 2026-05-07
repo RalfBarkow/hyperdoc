@@ -141,16 +141,16 @@
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-bundled-slice-smoke-session))
          (recognized-code-snippets
-           (hyperdoc::snippet-playground-session-recognized-code-snippets-of
-            session))
+          (hyperdoc::snippet-playground-session-recognized-code-snippets-of
+           session))
          (selected-code
-           (hyperdoc::snippet-playground-session-selected-code-of session))
+          (hyperdoc::snippet-playground-session-selected-code-of session))
          (selected-source
-           (and selected-code
-                (hyperdoc::code-snippet-source-of selected-code)))
+          (and selected-code
+               (hyperdoc::code-snippet-source-of selected-code)))
          (selected-findings
-           (and selected-code
-                (hyperdoc::code-snippet-findings-of selected-code))))
+          (and selected-code
+               (hyperdoc::code-snippet-findings-of selected-code))))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
@@ -263,32 +263,32 @@
 (defun run-snippet-playground-elided-html-pre-pollution-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session
-           (make-snippet-playground-elided-html-pre-pollution-smoke-session))
+          (make-snippet-playground-elided-html-pre-pollution-smoke-session))
          (report
-           (hyperdoc::snippet-playground-session-source-expansion-report-of
-            session))
+          (hyperdoc::snippet-playground-session-source-expansion-report-of
+           session))
          (selected-code
-           (hyperdoc::snippet-playground-session-selected-code-of session))
+          (hyperdoc::snippet-playground-session-selected-code-of session))
          (selected-source
-           (and selected-code
-                (hyperdoc::code-snippet-source-of selected-code)))
+          (and selected-code
+               (hyperdoc::code-snippet-source-of selected-code)))
          (selected-findings
-           (and selected-code
-                (hyperdoc::code-snippet-findings-of selected-code)))
+          (and selected-code
+               (hyperdoc::code-snippet-findings-of selected-code)))
          (recognized-labels
-           (mapcar #'hyperdoc::snippet-location-label-of
-                   (hyperdoc::snippet-playground-session-recognized-code-snippets-of
-                    session)))
+          (mapcar #'hyperdoc::snippet-location-label-of
+                  (hyperdoc::snippet-playground-session-recognized-code-snippets-of
+                   session)))
          (candidates
-           (and report
-                (hyperdoc::snippet-source-expansion-report-candidates report)))
+          (and report
+               (hyperdoc::snippet-source-expansion-report-candidates report)))
          (preview-candidate
-           (find-if (lambda (entry)
-                      (string= (getf entry :synthetic_id) "html-pre/2/1"))
-                    candidates))
+          (find-if (lambda (entry)
+                     (string= (getf entry :synthetic_id) "html-pre/2/1"))
+                   candidates))
          (preview-source
-           (and preview-candidate
-                (getf preview-candidate :preview))))
+          (and preview-candidate
+               (getf preview-candidate :preview))))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
@@ -412,10 +412,10 @@
 (defun make-snippet-playground-popular-equivalence-smoke-session
     (&key code-operation)
   (let* ((blocks
-           (snippet-playground-smoke-make-popular-equivalence-blocks
-            :code-operation code-operation))
+          (snippet-playground-smoke-make-popular-equivalence-blocks
+           :code-operation code-operation))
          (source-text
-           (hyperdoc::snippet-playground-source-text-from-blocks blocks)))
+          (hyperdoc::snippet-playground-source-text-from-blocks blocks)))
     (hyperdoc::make-snippet-playground-result-from-blocks
      :context-object nil
      :context-view-title "Source"
@@ -446,9 +446,9 @@
 
 (defun make-snippet-playground-quick-brown-fox-equivalence-smoke-session ()
   (let* ((blocks
-           (snippet-playground-smoke-make-quick-brown-fox-equivalence-blocks))
+          (snippet-playground-smoke-make-quick-brown-fox-equivalence-blocks))
          (source-text
-           (hyperdoc::snippet-playground-source-text-from-blocks blocks)))
+          (hyperdoc::snippet-playground-source-text-from-blocks blocks)))
     (hyperdoc::make-snippet-playground-result-from-blocks
      :context-object nil
      :context-view-title "Source"
@@ -465,52 +465,52 @@
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-popular-equivalence-smoke-session))
          (execution-interface
-           (hyperdoc::snippet-playground-session-execution-interface-of
-            session))
+          (hyperdoc::snippet-playground-session-execution-interface-of
+           session))
          (execution-input
-           (hyperdoc::snippet-playground-session-mech-execution-input-of
-            session))
+          (hyperdoc::snippet-playground-session-mech-execution-input-of
+           session))
          (mech-execution-ir
-           (hyperdoc::snippet-playground-session-mech-execution-ir-of
-            session))
+          (hyperdoc::snippet-playground-session-mech-execution-ir-of
+           session))
          (mech-scxml-execution-chart
-           (hyperdoc::snippet-playground-session-mech-scxml-execution-chart-of
-            session))
+          (hyperdoc::snippet-playground-session-mech-scxml-execution-chart-of
+           session))
          (scxml-run-result
-           (hyperdoc::snippet-playground-session-scxml-run-result-of
-            session))
+          (hyperdoc::snippet-playground-session-scxml-run-result-of
+           session))
          (lefty
-           (hyperdoc::snippet-playground-session-lefty-run-result-of session))
+          (hyperdoc::snippet-playground-session-lefty-run-result-of session))
          (rita
-           (hyperdoc::snippet-playground-session-rita-run-result-of session))
+          (hyperdoc::snippet-playground-session-rita-run-result-of session))
          (equivalence-report
-           (hyperdoc::snippet-playground-session-equivalence-report-of
-            session))
+          (hyperdoc::snippet-playground-session-equivalence-report-of
+           session))
          (transformation-ir
-           (hyperdoc::snippet-playground-session-transformation-ir-of
-            session))
+          (hyperdoc::snippet-playground-session-transformation-ir-of
+           session))
          (session-views
-           (snippet-playground-smoke-load-inspector-views-for-object session))
+          (snippet-playground-smoke-load-inspector-views-for-object session))
          (comparison-view
-           (snippet-playground-smoke-find-view-by-title session-views
-                                                        "Comparison"))
+          (snippet-playground-smoke-find-view-by-title session-views
+                                                       "Comparison"))
          (comparison-html
-           (and comparison-view
-                (html-inspector-views:view-html comparison-view)))
+          (and comparison-view
+               (html-inspector-views:view-html comparison-view)))
          (execution-view
-           (snippet-playground-smoke-find-view-by-title session-views
-                                                        "Execution"))
+          (snippet-playground-smoke-find-view-by-title session-views
+                                                       "Execution"))
          (execution-html
-           (and execution-view
-                (html-inspector-views:view-html execution-view)))
+          (and execution-view
+               (html-inspector-views:view-html execution-view)))
          (lisp-scaffold-source
-           (hyperdoc::snippet-playground-session-lisp-scaffold-source-of
-            session))
+          (hyperdoc::snippet-playground-session-lisp-scaffold-source-of
+           session))
          (operation-tokens
-           (mapcar (lambda (operation)
-                     (getf operation :operation))
-                   (hyperdoc::mech-execution-ir-ordered-operations-of
-                    mech-execution-ir))))
+          (mapcar (lambda (operation)
+                    (getf operation :operation))
+                  (hyperdoc::mech-execution-ir-ordered-operations-of
+                   mech-execution-ir))))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
@@ -673,58 +673,58 @@
 (defun run-snippet-playground-quick-brown-fox-input-leakage-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session
-           (make-snippet-playground-quick-brown-fox-equivalence-smoke-session))
+          (make-snippet-playground-quick-brown-fox-equivalence-smoke-session))
          (execution-input
-           (hyperdoc::snippet-playground-session-mech-execution-input-of
-            session))
+          (hyperdoc::snippet-playground-session-mech-execution-input-of
+           session))
          (mech-execution-ir
-           (hyperdoc::snippet-playground-session-mech-execution-ir-of
-            session))
+          (hyperdoc::snippet-playground-session-mech-execution-ir-of
+           session))
          (mech-scxml-execution-chart
-           (hyperdoc::snippet-playground-session-mech-scxml-execution-chart-of
-            session))
+          (hyperdoc::snippet-playground-session-mech-scxml-execution-chart-of
+           session))
          (scxml-run-result
-           (hyperdoc::snippet-playground-session-scxml-run-result-of
-            session))
+          (hyperdoc::snippet-playground-session-scxml-run-result-of
+           session))
          (lefty
-           (hyperdoc::snippet-playground-session-lefty-run-result-of session))
+          (hyperdoc::snippet-playground-session-lefty-run-result-of session))
          (rita
-           (hyperdoc::snippet-playground-session-rita-run-result-of session))
+          (hyperdoc::snippet-playground-session-rita-run-result-of session))
          (operation-tokens
-           (mapcar (lambda (operation)
-                     (getf operation :operation))
-                   (hyperdoc::mech-execution-ir-ordered-operations-of
-                    mech-execution-ir)))
+          (mapcar (lambda (operation)
+                    (getf operation :operation))
+                  (hyperdoc::mech-execution-ir-ordered-operations-of
+                   mech-execution-ir)))
          (chart-source
-           (or (and mech-scxml-execution-chart
-                    (hyperdoc::mech-scxml-execution-chart-scxml-text-of
-                     mech-scxml-execution-chart))
-               ""))
+          (or (and mech-scxml-execution-chart
+                   (hyperdoc::mech-scxml-execution-chart-scxml-text-of
+                    mech-scxml-execution-chart))
+              ""))
          (session-views
-           (snippet-playground-smoke-load-inspector-views-for-object session))
+          (snippet-playground-smoke-load-inspector-views-for-object session))
          (execution-view
-           (snippet-playground-smoke-find-view-by-title session-views
-                                                        "Execution"))
+          (snippet-playground-smoke-find-view-by-title session-views
+                                                       "Execution"))
          (execution-html
-           (or (and execution-view
-                    (html-inspector-views:view-html execution-view))
-               ""))
+          (or (and execution-view
+                   (html-inspector-views:view-html execution-view))
+              ""))
          (scxml-trace
-           (format nil "~{~A~%~}"
-                   (or (hyperdoc::mech-run-result-trace-of scxml-run-result)
-                       '())))
+          (format nil "~{~A~%~}"
+                  (or (hyperdoc::mech-run-result-trace-of scxml-run-result)
+                      '())))
          (diagnostic-text
-           (format nil "~{~A~%~}"
-                   (append
-                    (or (hyperdoc::mech-run-result-diagnostics-of
-                         scxml-run-result)
-                        '())
-                    (or (hyperdoc::mech-run-result-unsupported-constructs-of
-                         lefty)
-                        '())
-                    (or (hyperdoc::mech-run-result-unsupported-constructs-of
-                         rita)
-                        '())))))
+          (format nil "~{~A~%~}"
+                  (append
+                   (or (hyperdoc::mech-run-result-diagnostics-of
+                        scxml-run-result)
+                       '())
+                   (or (hyperdoc::mech-run-result-unsupported-constructs-of
+                        lefty)
+                       '())
+                   (or (hyperdoc::mech-run-result-unsupported-constructs-of
+                        rita)
+                       '())))))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
@@ -774,18 +774,18 @@
 (defun run-snippet-playground-popular-unsupported-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session
-           (make-snippet-playground-popular-equivalence-smoke-session
-            :code-operation "CODE trending 15"))
+          (make-snippet-playground-popular-equivalence-smoke-session
+           :code-operation "CODE trending 15"))
          (scxml-run-result
-           (hyperdoc::snippet-playground-session-scxml-run-result-of
-            session))
+          (hyperdoc::snippet-playground-session-scxml-run-result-of
+           session))
          (lefty
-           (hyperdoc::snippet-playground-session-lefty-run-result-of session))
+          (hyperdoc::snippet-playground-session-lefty-run-result-of session))
          (rita
-           (hyperdoc::snippet-playground-session-rita-run-result-of session))
+          (hyperdoc::snippet-playground-session-rita-run-result-of session))
          (equivalence-report
-           (hyperdoc::snippet-playground-session-equivalence-report-of
-            session)))
+          (hyperdoc::snippet-playground-session-equivalence-report-of
+           session)))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
@@ -922,44 +922,44 @@
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-html-pre-expansion-smoke-session))
          (recognized-code-snippets
-           (hyperdoc::snippet-playground-session-recognized-code-snippets-of
-            session))
+          (hyperdoc::snippet-playground-session-recognized-code-snippets-of
+           session))
          (selected-code
-           (hyperdoc::snippet-playground-session-selected-code-of session))
+          (hyperdoc::snippet-playground-session-selected-code-of session))
          (selected-source
-           (and selected-code
-                (hyperdoc::code-snippet-source-of selected-code)))
+          (and selected-code
+               (hyperdoc::code-snippet-source-of selected-code)))
          (entry-position
-           (and selected-source
-                (search "export default function htmlEntry"
-                        selected-source
-                        :test #'char=)))
+          (and selected-source
+               (search "export default function htmlEntry"
+                       selected-source
+                       :test #'char=)))
          (helper-position
-           (and selected-source
-                (search "function htmlHelper"
-                        selected-source
-                        :test #'char=)))
+          (and selected-source
+               (search "function htmlHelper"
+                       selected-source
+                       :test #'char=)))
          (report
-           (hyperdoc::snippet-playground-session-source-expansion-report-of
-            session))
+          (hyperdoc::snippet-playground-session-source-expansion-report-of
+           session))
          (recognized-labels
-           (mapcar #'hyperdoc::snippet-location-label-of recognized-code-snippets))
+          (mapcar #'hyperdoc::snippet-location-label-of recognized-code-snippets))
          (candidates
-           (and report
-                (hyperdoc::snippet-source-expansion-report-candidates
-                 report)))
+          (and report
+               (hyperdoc::snippet-source-expansion-report-candidates
+                report)))
          (first-candidate
-           (find-if (lambda (entry)
-                      (string= (getf entry :synthetic_id) "html-pre/2/1"))
-                    candidates))
+          (find-if (lambda (entry)
+                     (string= (getf entry :synthetic_id) "html-pre/2/1"))
+                   candidates))
          (second-candidate
-           (find-if (lambda (entry)
-                      (string= (getf entry :synthetic_id) "html-pre/2/2"))
-                    candidates))
+          (find-if (lambda (entry)
+                     (string= (getf entry :synthetic_id) "html-pre/2/2"))
+                   candidates))
          (policy-summary
-           (and report
-                (hyperdoc::snippet-source-expansion-report-policy-summary
-                 report))))
+          (and report
+               (hyperdoc::snippet-source-expansion-report-policy-summary
+                report))))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
@@ -1077,22 +1077,22 @@
 (defun run-snippet-playground-html-pre-expansion-disabled-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((policy
-           (hyperdoc::make-snippet-source-expansion-policy
-            :extract-html-pre-p nil))
+          (hyperdoc::make-snippet-source-expansion-policy
+           :extract-html-pre-p nil))
          (session
-           (make-snippet-playground-html-pre-expansion-smoke-session
-            :source-expansion-policy policy))
+          (make-snippet-playground-html-pre-expansion-smoke-session
+           :source-expansion-policy policy))
          (report
-           (hyperdoc::snippet-playground-session-source-expansion-report-of
-            session))
+          (hyperdoc::snippet-playground-session-source-expansion-report-of
+           session))
          (selected-code
-           (hyperdoc::snippet-playground-session-selected-code-of session))
+          (hyperdoc::snippet-playground-session-selected-code-of session))
          (recognized-code-snippets
-           (hyperdoc::snippet-playground-session-recognized-code-snippets-of
-            session))
+          (hyperdoc::snippet-playground-session-recognized-code-snippets-of
+           session))
          (recognized-labels
-           (mapcar #'hyperdoc::snippet-location-label-of
-                   recognized-code-snippets)))
+          (mapcar #'hyperdoc::snippet-location-label-of
+                  recognized-code-snippets)))
     (snippet-playground-assert-equal
      0
      (hyperdoc::snippet-source-expansion-report-synthetic-block-count report)
@@ -1125,27 +1125,27 @@
 (defun run-snippet-playground-html-pre-expansion-scxml-engine-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((direct-policy
-           (hyperdoc::make-snippet-source-expansion-policy
-            :parser-engine-kind :direct))
+          (hyperdoc::make-snippet-source-expansion-policy
+           :parser-engine-kind :direct))
          (scxml-policy
-           (hyperdoc::make-snippet-source-expansion-policy
-            :parser-engine-kind :scxml))
+          (hyperdoc::make-snippet-source-expansion-policy
+           :parser-engine-kind :scxml))
          (direct-session
-           (make-snippet-playground-html-pre-expansion-smoke-session
-            :source-expansion-policy direct-policy))
+          (make-snippet-playground-html-pre-expansion-smoke-session
+           :source-expansion-policy direct-policy))
          (scxml-session
-           (make-snippet-playground-html-pre-expansion-smoke-session
-            :source-expansion-policy scxml-policy))
+          (make-snippet-playground-html-pre-expansion-smoke-session
+           :source-expansion-policy scxml-policy))
          (direct-report
-           (hyperdoc::snippet-playground-session-source-expansion-report-of
-            direct-session))
+          (hyperdoc::snippet-playground-session-source-expansion-report-of
+           direct-session))
          (scxml-report
-           (hyperdoc::snippet-playground-session-source-expansion-report-of
-            scxml-session))
+          (hyperdoc::snippet-playground-session-source-expansion-report-of
+           scxml-session))
          (direct-selected
-           (hyperdoc::snippet-playground-session-selected-code-of direct-session))
+          (hyperdoc::snippet-playground-session-selected-code-of direct-session))
          (scxml-selected
-           (hyperdoc::snippet-playground-session-selected-code-of scxml-session)))
+          (hyperdoc::snippet-playground-session-selected-code-of scxml-session)))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of scxml-session)
@@ -1191,26 +1191,26 @@
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-html-pre-discrepancy-smoke-session))
          (report
-           (hyperdoc::snippet-playground-session-source-expansion-report-of
-            session))
+          (hyperdoc::snippet-playground-session-source-expansion-report-of
+           session))
          (selected-code
-           (hyperdoc::snippet-playground-session-selected-code-of session))
+          (hyperdoc::snippet-playground-session-selected-code-of session))
          (selected-source
-           (and selected-code
-                (hyperdoc::code-snippet-source-of selected-code)))
+          (and selected-code
+               (hyperdoc::code-snippet-source-of selected-code)))
          (candidates (hyperdoc::snippet-source-expansion-report-candidates report))
          (rejected-candidate
-           (find-if (lambda (entry)
-                      (and (eql (getf entry :status) :rejected)
-                           (= (getf entry :pre_ordinal) 2)))
-                    candidates))
+          (find-if (lambda (entry)
+                     (and (eql (getf entry :status) :rejected)
+                          (= (getf entry :pre_ordinal) 2)))
+                   candidates))
          (empty-pre-discrepancy
-           (find-if (lambda (entry)
-                      (eql (hyperdoc::snippet-source-parse-discrepancy-kind
-                            entry)
-                           :empty-pre))
-                    (hyperdoc::snippet-source-expansion-report-discrepancies
-                     report))))
+          (find-if (lambda (entry)
+                     (eql (hyperdoc::snippet-source-parse-discrepancy-kind
+                           entry)
+                          :empty-pre))
+                   (hyperdoc::snippet-source-expansion-report-discrepancies
+                    report))))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
@@ -1250,7 +1250,7 @@
      "Structured discrepancy must include source line number")
     (snippet-playground-assert-true
      (integerp
-     (or (hyperdoc::snippet-source-parse-discrepancy-character-offset
+      (or (hyperdoc::snippet-source-parse-discrepancy-character-offset
            empty-pre-discrepancy)
           0))
      "Structured discrepancy must include character offset")))
@@ -1259,15 +1259,15 @@
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-html-pre-malformed-smoke-session))
          (report
-           (hyperdoc::snippet-playground-session-source-expansion-report-of
-            session))
+          (hyperdoc::snippet-playground-session-source-expansion-report-of
+           session))
          (unterminated-discrepancy
-           (find-if
-            (lambda (entry)
-              (eql (hyperdoc::snippet-source-parse-discrepancy-kind entry)
-                   :unterminated-html-region))
-            (hyperdoc::snippet-source-expansion-report-discrepancies
-             report))))
+          (find-if
+           (lambda (entry)
+             (eql (hyperdoc::snippet-source-parse-discrepancy-kind entry)
+                  :unterminated-html-region))
+           (hyperdoc::snippet-source-expansion-report-discrepancies
+            report))))
     (snippet-playground-assert-equal
      :ready
      (hyperdoc::snippet-playground-session-status-of session)
@@ -1290,22 +1290,22 @@
 (defun run-snippet-playground-html-pre-expansion-graphviz-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((policy
-           (hyperdoc::make-snippet-source-expansion-policy
-            :generate-graphviz-dot-p t
-            :collect-incremental-stats-p t
-            :stats-snapshot-period 1
-            :graphviz-dot-snapshot-period 1))
+          (hyperdoc::make-snippet-source-expansion-policy
+           :generate-graphviz-dot-p t
+           :collect-incremental-stats-p t
+           :stats-snapshot-period 1
+           :graphviz-dot-snapshot-period 1))
          (session
-           (make-snippet-playground-html-pre-expansion-smoke-session
-            :source-expansion-policy policy))
+          (make-snippet-playground-html-pre-expansion-smoke-session
+           :source-expansion-policy policy))
          (report
-           (hyperdoc::snippet-playground-session-source-expansion-report-of
-            session))
+          (hyperdoc::snippet-playground-session-source-expansion-report-of
+           session))
          (dot-text
-           (hyperdoc::snippet-source-expansion-report-graphviz-dot-text report))
+          (hyperdoc::snippet-source-expansion-report-graphviz-dot-text report))
          (snapshots
-           (hyperdoc::snippet-source-expansion-report-incremental-stats-snapshots
-            report)))
+          (hyperdoc::snippet-source-expansion-report-incremental-stats-snapshots
+           report)))
     (snippet-playground-assert-true
      (stringp dot-text)
      "Graphviz smoke test must emit DOT text when enabled")
@@ -1333,35 +1333,35 @@
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-artifact-smoke-session))
          (authored-source
-           (hyperdoc::snippet-playground-authored-source-artifact))
+          (hyperdoc::snippet-playground-authored-source-artifact))
          (authored-artifact
-           (hyperdoc::snippet-playground-session-authored-artifact-of session))
+          (hyperdoc::snippet-playground-session-authored-artifact-of session))
          (behavior-artifact
-           (hyperdoc::snippet-playground-session-behavior-artifact-of session))
+          (hyperdoc::snippet-playground-session-behavior-artifact-of session))
          (layout-artifact
-           (hyperdoc::snippet-playground-session-layout-artifact-of session))
+          (hyperdoc::snippet-playground-session-layout-artifact-of session))
          (layout-spec
-           (hyperdoc::snippet-playground-layout-artifact-comparison-layout-spec-of
-            layout-artifact))
+          (hyperdoc::snippet-playground-layout-artifact-comparison-layout-spec-of
+           layout-artifact))
          (center-region
-           (snippet-playground-smoke-region-spec layout-spec :center))
+          (snippet-playground-smoke-region-spec layout-spec :center))
          (left-region
-           (snippet-playground-smoke-region-spec layout-spec :left))
+          (snippet-playground-smoke-region-spec layout-spec :left))
          (right-region
-           (snippet-playground-smoke-region-spec layout-spec :right))
+          (snippet-playground-smoke-region-spec layout-spec :right))
          (run-machine
-           (hyperdoc::snippet-playground-behavior-artifact-run-machine-of
-            behavior-artifact))
+          (hyperdoc::snippet-playground-behavior-artifact-run-machine-of
+           behavior-artifact))
          (comparison-machine
-           (hyperdoc::snippet-playground-behavior-artifact-comparison-machine-of
-            behavior-artifact))
+          (hyperdoc::snippet-playground-behavior-artifact-comparison-machine-of
+           behavior-artifact))
          (run-state-ids
-           (mapcar #'hyperdoc::id-of
-                   (hyperdoc::state-machine-definition-states-of run-machine)))
+          (mapcar #'hyperdoc::id-of
+                  (hyperdoc::state-machine-definition-states-of run-machine)))
          (comparison-state-ids
-           (mapcar #'hyperdoc::id-of
-                   (hyperdoc::state-machine-definition-states-of
-                    comparison-machine)))
+          (mapcar #'hyperdoc::id-of
+                  (hyperdoc::state-machine-definition-states-of
+                   comparison-machine)))
          (run-events (hyperdoc::state-machine-definition-events-of run-machine)))
     (snippet-playground-assert-typep
      'hyperdoc::snippet-playground-session
@@ -1479,23 +1479,23 @@
   (asdf:load-system :hyperdoc/inspector)
   (let* ((session (make-snippet-playground-artifact-smoke-session))
          (authored-source
-           (hyperdoc::snippet-playground-authored-source-artifact))
+          (hyperdoc::snippet-playground-authored-source-artifact))
          (authored-artifact
-           (hyperdoc::snippet-playground-session-authored-artifact-of session))
+          (hyperdoc::snippet-playground-session-authored-artifact-of session))
          (session-views
-           (snippet-playground-smoke-load-inspector-views-for-object session))
+          (snippet-playground-smoke-load-inspector-views-for-object session))
          (artifact-views
-           (snippet-playground-smoke-load-inspector-views-for-object
-            authored-artifact))
+          (snippet-playground-smoke-load-inspector-views-for-object
+           authored-artifact))
          (source-views
-           (snippet-playground-smoke-load-inspector-views-for-object
-            authored-source))
+          (snippet-playground-smoke-load-inspector-views-for-object
+           authored-source))
          (summary-view
-           (snippet-playground-smoke-find-view-by-title session-views
-                                                        "Summary"))
+          (snippet-playground-smoke-find-view-by-title session-views
+                                                       "Summary"))
          (authored-view
-           (snippet-playground-smoke-find-view-by-title session-views
-                                                        "Authored")))
+          (snippet-playground-smoke-find-view-by-title session-views
+                                                       "Authored")))
     (dolist (title '("Summary"
                      "Comparison"
                      "Authored"
@@ -1539,27 +1539,27 @@
      (html-inspector-views:view-html authored-view)
      "Authored tab must surface layout relations directly")
     (let ((relation-graph-view
-            (snippet-playground-smoke-find-view-by-title
-             artifact-views
-             "Relation graph")))
+           (snippet-playground-smoke-find-view-by-title
+            artifact-views
+            "Relation graph")))
       (let ((relation-graph-html
-              (html-inspector-views:view-html relation-graph-view)))
-      (snippet-playground-assert-contains
-       "data-hyperdoc-authored-relation-graph"
-       relation-graph-html
-       "Authored artifact relation graph view must render with the graph marker")
-      (snippet-playground-assert-contains
-       "snippet-playground-behavior-artifact"
-       relation-graph-html
-       "Authored artifact relation graph must mention the compiled behavior artifact target")
-      (snippet-playground-assert-contains
-       "snippet-playground-layout-artifact"
-       relation-graph-html
-       "Authored artifact relation graph must mention the compiled layout artifact target")
-      (snippet-playground-assert-contains
-       "compiled-from"
-       relation-graph-html
-       "Authored artifact relation graph must expose compiled-from derivation edges")))
+             (html-inspector-views:view-html relation-graph-view)))
+        (snippet-playground-assert-contains
+         "data-hyperdoc-authored-relation-graph"
+         relation-graph-html
+         "Authored artifact relation graph view must render with the graph marker")
+        (snippet-playground-assert-contains
+         "snippet-playground-behavior-artifact"
+         relation-graph-html
+         "Authored artifact relation graph must mention the compiled behavior artifact target")
+        (snippet-playground-assert-contains
+         "snippet-playground-layout-artifact"
+         relation-graph-html
+         "Authored artifact relation graph must mention the compiled layout artifact target")
+        (snippet-playground-assert-contains
+         "compiled-from"
+         relation-graph-html
+         "Authored artifact relation graph must expose compiled-from derivation edges")))
     (snippet-playground-assert-contains
      "data-hyperdoc-snippet-authored-artifact"
      (html-inspector-views:view-html

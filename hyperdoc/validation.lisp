@@ -173,10 +173,10 @@
         for value-start = (+ start 6)
         for value-end = (position #\" html :start value-start)
         when value-end
-          collect (subseq html value-start value-end)
-          and do (setf pos (1+ value-end))
+        collect (subseq html value-start value-end)
+        and do (setf pos (1+ value-end))
         else
-          do (setf pos (1+ value-start))))
+        do (setf pos (1+ value-start))))
 
 (defun expr-function-token (expr)
   (let ((open (position #\( expr)))
@@ -227,9 +227,9 @@
           for symbol = (and token (expr-token-symbol token))
           when (and (hyperdoc-symbol-p symbol)
                     (not (gethash symbol seen)))
-            collect (progn
-                      (setf (gethash symbol seen) t)
-                      (cons symbol expr)))))
+          collect (progn
+                    (setf (gethash symbol seen) t)
+                    (cons symbol expr)))))
 
 (defun sorted-page-symbol-counts (table)
   (sort (loop for page being the hash-keys of table
@@ -241,11 +241,11 @@
 (defun documentation-topic-coverage-report (&key pages)
   "Return an inspectable report for topic coverage on the selected HyperDoc pages."
   (let* ((selected-pages
-           (mapcar #'(lambda (page)
-                       (documentation-validation-file-path
-                        page
-                        :missing-label "Topic coverage page"))
-                   (or pages *default-documentation-topic-coverage-pages*)))
+          (mapcar #'(lambda (page)
+                      (documentation-validation-file-path
+                       page
+                       :missing-label "Topic coverage page"))
+                  (or pages *default-documentation-topic-coverage-pages*)))
          (all-symbols '())
          (symbol-sources (make-hash-table :test #'eq))
          (symbol-reference-counts (make-hash-table :test #'eq))
@@ -269,20 +269,20 @@
                                     (string= (topic-coverage-reference-expr-of left)
                                              (topic-coverage-reference-expr-of right)))))))))
     (let* ((missing-symbols
-             (sort (loop for symbol in all-symbols
-                         unless (fboundp symbol)
-                           collect (make-instance 'topic-coverage-missing-symbol
-                                                  :symbol symbol
-                                                  :symbol-key (topic-symbol-key symbol)
-                                                  :references
-                                                  (sort (copy-list (gethash symbol symbol-sources))
-                                                        #'string<
-                                                        :key #'topic-coverage-reference-page-of)))
-                   #'string<
-                   :key #'topic-coverage-missing-symbol-key-of))
+            (sort (loop for symbol in all-symbols
+                        unless (fboundp symbol)
+                        collect (make-instance 'topic-coverage-missing-symbol
+                                               :symbol symbol
+                                               :symbol-key (topic-symbol-key symbol)
+                                               :references
+                                               (sort (copy-list (gethash symbol symbol-sources))
+                                                     #'string<
+                                                     :key #'topic-coverage-reference-page-of)))
+                  #'string<
+                  :key #'topic-coverage-missing-symbol-key-of))
            (duplicate-symbol-count
-             (loop for symbol in all-symbols
-                   count (> (gethash symbol symbol-reference-counts 0) 1))))
+            (loop for symbol in all-symbols
+                  count (> (gethash symbol symbol-reference-counts 0) 1))))
       (make-instance 'topic-coverage-report
                      :pages (mapcar #'namestring selected-pages)
                      :checked-symbol-count (length all-symbols)
@@ -374,7 +374,7 @@
   "Return a source-based audit report for semantic-vs-presentation anchor boundaries."
   (let* ((anchor-model-path "hyperdoc/dom-annotations.lisp")
          (anchor-model (validation-file-string anchor-model-path
-                                              :missing-label "Anchor model file"))
+                                               :missing-label "Anchor model file"))
          (explorer-path "hyperdoc-explorer/dom-annotations.lisp")
          (explorer (validation-file-string explorer-path
                                            :missing-label "Explorer annotation file"))
@@ -382,145 +382,145 @@
          (connect-js (validation-file-string connect-js-path
                                              :missing-label "Connect UI JS file"))
          (checks
-           (list
-            (pattern-present-validation-check
-             "semantic-anchor-identity-fields"
-             "anchor envelope exposes semantic identity fields separately"
-             anchor-model-path
-             anchor-model
-             "(defun semantic-anchor-identity-fields")
-            (pattern-present-validation-check
-             "presentation-anchor-fallback-fields"
-             "anchor envelope exposes presentation fallback fields separately"
-             anchor-model-path
-             anchor-model
-             "(defun presentation-anchor-fallback-fields")
-            (pattern-present-validation-check
-             "semantic-identity-label"
-             "semantic identity is labeled explicitly"
-             anchor-model-path
-             anchor-model
-             "(cons \"Semantic identity\"")
-            (pattern-present-validation-check
-             "fallback-strategy-label"
-             "fallback strategy is labeled as fallback metadata"
-             anchor-model-path
-             anchor-model
-             "(cons \"Fallback strategy\"")
-            (pattern-present-validation-check
-             "fallback-value-label"
-             "fallback value is labeled as fallback metadata"
-             anchor-model-path
-             anchor-model
-             "(cons \"Fallback value\"")
-            (pattern-present-validation-check
-             "durability-tier"
-             "anchor model keeps durability tier available"
-             anchor-model-path
-             anchor-model
-             "durability-tier")
-            (pattern-present-validation-check
-             "inspector-semantic-fields"
-             "inspector rendering reads semantic identity fields"
-             explorer-path
-             explorer
-             "(semantic-anchor-identity-fields anchor)")
-            (pattern-present-validation-check
-             "inspector-fallback-fields"
-             "inspector rendering reads presentation fallback fields"
-             explorer-path
-             explorer
-             "(presentation-anchor-fallback-fields anchor)")
-            (pattern-present-validation-check
-             "inspector-semantic-section"
-             "inspector renders a dedicated Semantic anchor section"
-             explorer-path
-             explorer
-             "(:h4 \"Semantic anchor\")")
-            (pattern-present-validation-check
-             "inspector-fallback-section"
-             "inspector renders a dedicated Presentation fallback section"
-             explorer-path
-             explorer
-             "(:h4 \"Presentation fallback\")")
-            (pattern-present-validation-check
-             "inspector-durability-section"
-             "inspector renders a dedicated Durability section"
-             explorer-path
-             explorer
-             "(:h4 \"Durability\")")
-            (pattern-present-validation-check
-             "content-provider-copy"
-             "content provider help uses human-facing click wording"
-             explorer-path
-             explorer
-             "\"Click the part of the page you want to connect.\"")
-            (pattern-present-validation-check
-             "source-provider-copy"
-             "source provider help uses human-facing click wording"
-             explorer-path
-             explorer
-             "\"Click the source lines you want to connect.\"")
-            (pattern-present-validation-check
-             "fedwiki-provider-copy"
-             "FedWiki provider help uses human-facing click wording"
-             explorer-path
-             explorer
-             "\"Click the story item you want to connect.\"")
-            (pattern-present-validation-check
-             "generic-connect-copy"
-             "generic Connect chrome copy uses step wording"
-             connect-js-path
-             connect-js
-             "\"Click a source anchor, then a target anchor.\"")
-            (pattern-absent-validation-check
-             "no-dock-inspect-affordance"
-             "Dock chrome keeps inspection out of the Dock layer"
-             connect-js-path
-             connect-js
-             "\"hyperdoc-dom-connect-inspect\"")
-            (pattern-present-validation-check
-             "connect-request-evidence-constructor"
-             "explorer keeps request-evidence inspection as the surviving Connect inspection seam"
-             explorer-path
-             explorer
-             "make-dom-connect-request-evidence-from-values")
-            (pattern-absent-validation-check
-             "no-visible-elements-provider-copy"
-             "provider help avoids stale visible-elements wording"
-             explorer-path
-             explorer
-             "Connect visible elements")
-            (pattern-absent-validation-check
-             "no-visible-elements-chrome-copy"
-             "pane chrome copy avoids stale visible-elements wording"
-             connect-js-path
-             connect-js
-             "Connect visible elements")
-            (pattern-absent-validation-check
-             "no-page-scoped-provider-copy"
-             "provider help avoids page-scoped wording"
-             explorer-path
-             explorer
-             "in this page to create an association")
-            (pattern-absent-validation-check
-             "no-page-scoped-chrome-copy"
-             "pane chrome copy avoids page-scoped wording"
-             connect-js-path
-             connect-js
-             "in this page to create an association")
-            (pattern-absent-validation-check
-             "no-target-element-provider-copy"
-             "provider help avoids target-element wording"
-             explorer-path
-             explorer
-             "target element")
-            (pattern-absent-validation-check
-             "no-target-element-chrome-copy"
-             "pane chrome copy avoids target-element wording"
-             connect-js-path
-             connect-js
-             "target element"))))
+          (list
+           (pattern-present-validation-check
+            "semantic-anchor-identity-fields"
+            "anchor envelope exposes semantic identity fields separately"
+            anchor-model-path
+            anchor-model
+            "(defun semantic-anchor-identity-fields")
+           (pattern-present-validation-check
+            "presentation-anchor-fallback-fields"
+            "anchor envelope exposes presentation fallback fields separately"
+            anchor-model-path
+            anchor-model
+            "(defun presentation-anchor-fallback-fields")
+           (pattern-present-validation-check
+            "semantic-identity-label"
+            "semantic identity is labeled explicitly"
+            anchor-model-path
+            anchor-model
+            "(cons \"Semantic identity\"")
+           (pattern-present-validation-check
+            "fallback-strategy-label"
+            "fallback strategy is labeled as fallback metadata"
+            anchor-model-path
+            anchor-model
+            "(cons \"Fallback strategy\"")
+           (pattern-present-validation-check
+            "fallback-value-label"
+            "fallback value is labeled as fallback metadata"
+            anchor-model-path
+            anchor-model
+            "(cons \"Fallback value\"")
+           (pattern-present-validation-check
+            "durability-tier"
+            "anchor model keeps durability tier available"
+            anchor-model-path
+            anchor-model
+            "durability-tier")
+           (pattern-present-validation-check
+            "inspector-semantic-fields"
+            "inspector rendering reads semantic identity fields"
+            explorer-path
+            explorer
+            "(semantic-anchor-identity-fields anchor)")
+           (pattern-present-validation-check
+            "inspector-fallback-fields"
+            "inspector rendering reads presentation fallback fields"
+            explorer-path
+            explorer
+            "(presentation-anchor-fallback-fields anchor)")
+           (pattern-present-validation-check
+            "inspector-semantic-section"
+            "inspector renders a dedicated Semantic anchor section"
+            explorer-path
+            explorer
+            "(:h4 \"Semantic anchor\")")
+           (pattern-present-validation-check
+            "inspector-fallback-section"
+            "inspector renders a dedicated Presentation fallback section"
+            explorer-path
+            explorer
+            "(:h4 \"Presentation fallback\")")
+           (pattern-present-validation-check
+            "inspector-durability-section"
+            "inspector renders a dedicated Durability section"
+            explorer-path
+            explorer
+            "(:h4 \"Durability\")")
+           (pattern-present-validation-check
+            "content-provider-copy"
+            "content provider help uses human-facing click wording"
+            explorer-path
+            explorer
+            "\"Click the part of the page you want to connect.\"")
+           (pattern-present-validation-check
+            "source-provider-copy"
+            "source provider help uses human-facing click wording"
+            explorer-path
+            explorer
+            "\"Click the source lines you want to connect.\"")
+           (pattern-present-validation-check
+            "fedwiki-provider-copy"
+            "FedWiki provider help uses human-facing click wording"
+            explorer-path
+            explorer
+            "\"Click the story item you want to connect.\"")
+           (pattern-present-validation-check
+            "generic-connect-copy"
+            "generic Connect chrome copy uses step wording"
+            connect-js-path
+            connect-js
+            "\"Click a source anchor, then a target anchor.\"")
+           (pattern-absent-validation-check
+            "no-dock-inspect-affordance"
+            "Dock chrome keeps inspection out of the Dock layer"
+            connect-js-path
+            connect-js
+            "\"hyperdoc-dom-connect-inspect\"")
+           (pattern-present-validation-check
+            "connect-request-evidence-constructor"
+            "explorer keeps request-evidence inspection as the surviving Connect inspection seam"
+            explorer-path
+            explorer
+            "make-dom-connect-request-evidence-from-values")
+           (pattern-absent-validation-check
+            "no-visible-elements-provider-copy"
+            "provider help avoids stale visible-elements wording"
+            explorer-path
+            explorer
+            "Connect visible elements")
+           (pattern-absent-validation-check
+            "no-visible-elements-chrome-copy"
+            "pane chrome copy avoids stale visible-elements wording"
+            connect-js-path
+            connect-js
+            "Connect visible elements")
+           (pattern-absent-validation-check
+            "no-page-scoped-provider-copy"
+            "provider help avoids page-scoped wording"
+            explorer-path
+            explorer
+            "in this page to create an association")
+           (pattern-absent-validation-check
+            "no-page-scoped-chrome-copy"
+            "pane chrome copy avoids page-scoped wording"
+            connect-js-path
+            connect-js
+            "in this page to create an association")
+           (pattern-absent-validation-check
+            "no-target-element-provider-copy"
+            "provider help avoids target-element wording"
+            explorer-path
+            explorer
+            "target element")
+           (pattern-absent-validation-check
+            "no-target-element-chrome-copy"
+            "pane chrome copy avoids target-element wording"
+            connect-js-path
+            connect-js
+            "target element"))))
     (multiple-value-bind (passed failed skipped)
         (count-documentation-validation-checks checks)
       (declare (ignore skipped))
@@ -653,7 +653,7 @@
         (dolist (fedwiki-page fedwiki-pages)
           (handler-case
               (let ((resolved-fedwiki-page
-                      (validate-fedwiki-json-syntax fedwiki-page)))
+                     (validate-fedwiki-json-syntax fedwiki-page)))
                 (push resolved-fedwiki-page resolved-fedwiki-pages)
                 (push (make-documentation-validation-check
                        "fedwiki"
@@ -692,7 +692,7 @@
     (let* ((ordered-checks (nreverse checks))
            (pass? (notany #'(lambda (check)
                               (eql (documentation-validation-check-status-of check)
-                                    :failed))
+                                   :failed))
                           ordered-checks)))
       (multiple-value-bind (passed failed skipped)
           (count-documentation-validation-checks ordered-checks)

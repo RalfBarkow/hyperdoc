@@ -18,9 +18,9 @@
                  :target-title target-title
                  :target-slug target-slug
                  :thunk (views:thunk
-                          (handler-case
-                              (find-target-by-title target-slug source-page)
-                            (error (c) c)))))
+                         (handler-case
+                             (find-target-by-title target-slug source-page)
+                           (error (c) c)))))
 
 (defclass fedwiki-links (hb:links)
   ((wiki-links :reader wiki-links-of :initarg :wiki-links :initform nil)))
@@ -43,7 +43,7 @@
         (loop for remote in (context-of page)
               for page = (hb:find-page remote slug)
               when page
-                return (make-remote wiki page)))))
+              return (make-remote wiki page)))))
 
 (defun make-remote (wiki page-on-remote-wiki)
   (let* ((remote-wiki (hb:hyperbook-of page-on-remote-wiki))
@@ -70,9 +70,9 @@
 
 (defun slug (title)
   (-<> title
-    (cl-ppcre:regex-replace-all "\\s" <> "-")
-    (cl-ppcre:regex-replace-all "[^A-Za-z0-9-]" <> "")
-    str:downcase))
+       (cl-ppcre:regex-replace-all "\\s" <> "-")
+       (cl-ppcre:regex-replace-all "[^A-Za-z0-9-]" <> "")
+       str:downcase))
 
 (define-condition wiki-lookup-failure (hb:lookup-failure)
   ((title :initarg :title :type string)
@@ -100,28 +100,28 @@
   (when (str:starts-with? "fedwiki:" hyperbook-id)
     (loop for link in (-> target hb:links-of wiki-links-of)
           when (equal page-id (target-slug-of link))
-            collect target)))
+          collect target)))
 ;;
 ;; Link view
 ;;
 
 (views:defview 👀links (links fedwiki-links)
   (views:html-view :title "Links" :priority 10
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperbook
-                           "assets/hyperbook/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:html
-      (:div :class "hyperbook-page"
-            (when-let (wlinks (wiki-links-of links))
-              (views:html
-                (:h2 (views:esc "Wiki links"))
-                (:table :class "inspector-table"
-                        (dolist (link wlinks)
-                          (let ((text (or (target-title-of link)
-                                          (target-slug-of link)))
-                                (target (-> link hb:thunk-of views:eval-thunk)))
+                   (views:add-asset-path "/hyperbook/"
+                                         (asdf:system-relative-pathname
+                                          :hyperbook
+                                          "assets/hyperbook/"))
+                   (views:include-css "/hyperbook/css/hyperbook.css")
+                   (views:html
+                    (:div :class "hyperbook-page"
+                          (when-let (wlinks (wiki-links-of links))
                             (views:html
-                              (:tr (:td (views:object-ref target :display text)))))))))
-            (views:transclusion (hb::👀links links))))))
+                             (:h2 (views:esc "Wiki links"))
+                             (:table :class "inspector-table"
+                                     (dolist (link wlinks)
+                                       (let ((text (or (target-title-of link)
+                                                       (target-slug-of link)))
+                                             (target (-> link hb:thunk-of views:eval-thunk)))
+                                         (views:html
+                                          (:tr (:td (views:object-ref target :display text)))))))))
+                          (views:transclusion (hb::👀links links))))))

@@ -4,7 +4,7 @@
 
 (in-package :hyperdoc)
 
-;(A narrow in-image check runner for examples and smoke tests.)
+                                        ;(A narrow in-image check runner for examples and smoke tests.)
 
 (defclass check-spec ()
   ((kind :initarg :kind :reader check-kind-of)
@@ -168,28 +168,28 @@
             for system = (ignore-errors (asdf:find-system name))
             when (and system
                       (component-defines-source-file-p system source-file))
-              return (asdf:component-name system)))))
+            return (asdf:component-name system)))))
 
 (defun register-example-check (function-symbol &key system
-                                              (package (symbol-package function-symbol))
-                                              (source-file (or *load-truename*
-                                                               *compile-file-truename*))
-                                              page
-                                              title
-                                              tags)
+                                                 (package (symbol-package function-symbol))
+                                                 (source-file (or *load-truename*
+                                                                  *compile-file-truename*))
+                                                 page
+                                                 title
+                                                 tags)
   (let* ((resolved-system (or system
                               (source-file-system-name source-file)
                               "hyperdoc"))
          (package-name (normalize-package-designator package))
          (page-title (or page (source-file-page-title source-file)))
          (registration
-           (list :function function-symbol
-                 :system (normalize-string-designator resolved-system)
-                 :package package-name
-                 :source-file source-file
-                 :page page-title
-                 :title (or title (make-check-title :example function-symbol))
-                 :tags tags)))
+          (list :function function-symbol
+                :system (normalize-string-designator resolved-system)
+                :package package-name
+                :source-file source-file
+                :page page-title
+                :title (or title (make-check-title :example function-symbol))
+                :tags tags)))
     (unless (gethash function-symbol *example-check-registrations*)
       (setf *example-check-order* (append *example-check-order*
                                           (list function-symbol))))
@@ -282,7 +282,7 @@
                                                   :system system
                                                   :package package
                                                   :page page))
-          collect (make-example-check-spec registration)))
+        collect (make-example-check-spec registration)))
 
 (defun ensure-test-checks-loaded ()
   (ignore-errors
@@ -316,11 +316,11 @@
                   (resolve-function-symbol
                    (list :function-package (getf registration :package)
                          :function-name (getf registration :name))))
-          collect (make-test-check-spec registration)))
+        collect (make-test-check-spec registration)))
 
 (defun discover-checks (&key system package page
-                             (include-examples t)
-                             (include-tests t))
+                          (include-examples t)
+                          (include-tests t))
   (append (when include-examples
             (discover-example-checks :system system :package package :page page))
           (when include-tests
@@ -410,10 +410,10 @@
          (replacement-map (result-map-by-id (check-run-results-of rerun-run)))
          (existing-map (result-map-by-id results))
          (merged-results
-           (loop for spec in (check-run-specs-of run)
-                 for id = (check-id-of spec)
-                 collect (or (gethash id replacement-map)
-                             (gethash id existing-map)))))
+          (loop for spec in (check-run-specs-of run)
+                for id = (check-id-of spec)
+                collect (or (gethash id replacement-map)
+                            (gethash id existing-map)))))
     (setf (check-run-results-of run) merged-results
           (check-run-started-at-of run) (check-run-started-at-of rerun-run)
           (check-run-finished-at-of run) (check-run-finished-at-of rerun-run))
@@ -423,8 +423,8 @@
     run))
 
 (defun make-discovered-check-run (&key system package page
-                                       (include-examples t)
-                                       (include-tests t))
+                                    (include-examples t)
+                                    (include-tests t))
   (make-instance 'check-run
                  :specs (discover-checks :system system
                                          :package package
@@ -433,9 +433,9 @@
                                          :include-tests include-tests)))
 
 (defun run-discovered-checks (&key system package page
-                                   (include-examples t)
-                                   (include-tests t)
-                                   fail-fast?)
+                                (include-examples t)
+                                (include-tests t)
+                                fail-fast?)
   (run-checks (discover-checks :system system
                                :package package
                                :page page
@@ -466,11 +466,11 @@
          (zerop (getf summary :error)))))
 
 (defun run-ci-checks (&key (system "hyperdoc") package page
-                           (include-examples t)
-                           (include-tests t)
-                           fail-fast?
-                           (stream *standard-output*)
-                           (quit? t))
+                        (include-examples t)
+                        (include-tests t)
+                        fail-fast?
+                        (stream *standard-output*)
+                        (quit? t))
   (let* ((run (run-discovered-checks :system system
                                      :package package
                                      :page page

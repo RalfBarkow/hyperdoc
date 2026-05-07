@@ -124,7 +124,7 @@
          append
          (let* ((state-id (hyperdoc::id-of state))
                 (outgoing
-                  (hyperdoc::state-machine-transitions-from-state machine state-id)))
+                 (hyperdoc::state-machine-transitions-from-state machine state-id)))
            (cons
             (format nil "- ~A [~A]"
                     (hyperdoc::title-of state)
@@ -178,14 +178,14 @@
 
 (defun state-machine-transition-cell-label (machine from-state to-state)
   (let ((transition
-          (find-if (lambda (candidate)
-                     (and (equal (hyperdoc::state-machine-transition-from-state-of
-                                  candidate)
-                                 from-state)
-                          (equal (hyperdoc::state-machine-transition-to-state-of
-                                  candidate)
-                                 to-state)))
-                   (hyperdoc::state-machine-definition-transitions-of machine))))
+         (find-if (lambda (candidate)
+                    (and (equal (hyperdoc::state-machine-transition-from-state-of
+                                 candidate)
+                                from-state)
+                         (equal (hyperdoc::state-machine-transition-to-state-of
+                                 candidate)
+                                to-state)))
+                  (hyperdoc::state-machine-definition-transitions-of machine))))
     (cond
       ((null transition) "forbidden")
       ((hyperdoc::state-machine-transition-guard-of transition)
@@ -320,7 +320,7 @@
 
 (defun state-machine-preformatted-view (lines)
   (views:html
-    (:pre (views:esc (state-machine-lines-to-string lines)))))
+   (:pre (views:esc (state-machine-lines-to-string lines)))))
 
 (defmethod views:text-representation
     ((machine hyperdoc::state-machine-definition))
@@ -335,115 +335,115 @@
 
 (views:defview 👀overview (machine hyperdoc::state-machine-definition)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:p (views:esc
-           (or (hyperdoc::summary-of machine)
-               "Reusable state-machine definition.")))
-      (state-machine-preformatted-view
-       (state-machine-definition-overview-lines machine)))))
+                   (views:html
+                    (:p (views:esc
+                         (or (hyperdoc::summary-of machine)
+                             "Reusable state-machine definition.")))
+                    (state-machine-preformatted-view
+                     (state-machine-definition-overview-lines machine)))))
 
 (views:defview 👀states (machine hyperdoc::state-machine-definition)
   (views:html-view :title "States" :priority 2
-    (state-machine-preformatted-view
-     (state-machine-definition-state-lines machine))))
+                   (state-machine-preformatted-view
+                    (state-machine-definition-state-lines machine))))
 
 (views:defview 👀transitions (machine hyperdoc::state-machine-definition)
   (views:html-view :title "Transitions" :priority 3
-    (state-machine-preformatted-view
-     (state-machine-definition-transition-lines machine))))
+                   (state-machine-preformatted-view
+                    (state-machine-definition-transition-lines machine))))
 
 (views:defview 👀state-machine (machine hyperdoc::state-machine-definition)
   (views:html-view :title "State machine" :priority 4
-    (views:html
-      (:p (views:esc
-           "Canonical teaching view of the ordered states, guarded arrows, and terminal/failure branches."))
-      (state-machine-preformatted-view
-       (state-machine-definition-graph-lines machine)))))
+                   (views:html
+                    (:p (views:esc
+                         "Canonical teaching view of the ordered states, guarded arrows, and terminal/failure branches."))
+                    (state-machine-preformatted-view
+                     (state-machine-definition-graph-lines machine)))))
 
 (views:defview 👀invariants-constraints (machine hyperdoc::state-machine-definition)
   (views:html-view :title "Invariants / constraints" :priority 5
-    (state-machine-preformatted-view
-     (state-machine-definition-findings-lines machine))))
+                   (state-machine-preformatted-view
+                    (state-machine-definition-findings-lines machine))))
 
 (views:defview 👀source-evidence-code-path
     (machine hyperdoc::state-machine-definition)
   (views:html-view :title "Source evidence / code path" :priority 6
-    (state-machine-preformatted-view
-     (state-machine-source-evidence-lines
-      (hyperdoc::state-machine-definition-source-evidence-of machine)))))
+                   (state-machine-preformatted-view
+                    (state-machine-source-evidence-lines
+                     (hyperdoc::state-machine-definition-source-evidence-of machine)))))
 
 (views:defview 👀directed-graph (machine hyperdoc::state-machine-definition)
   (views:html-view :title "Directed graph" :priority 7
-    (views:html
-      (:p (views:esc
-           "Derived graph view: nodes are states and edges are transitions labeled by event / guard."))
-      (state-machine-preformatted-view
-       (state-machine-definition-graph-lines machine)))))
+                   (views:html
+                    (:p (views:esc
+                         "Derived graph view: nodes are states and edges are transitions labeled by event / guard."))
+                    (state-machine-preformatted-view
+                     (state-machine-definition-graph-lines machine)))))
 
 (views:defview 👀graphviz (machine hyperdoc::state-machine-definition)
   (views:html-view :title "Graphviz" :priority 8
-    (views:html
-      (:p (views:esc
-           "Browser-rendered Graphviz view derived from the machine definition. The machine object remains the source of truth; DOT is a derived rendering format, while Directed graph remains the teaching-oriented text view."))
-      (views:graphviz-snippet
-       (hyperdoc::state-machine-definition-dot-text machine)))))
+                   (views:html
+                    (:p (views:esc
+                         "Browser-rendered Graphviz view derived from the machine definition. The machine object remains the source of truth; DOT is a derived rendering format, while Directed graph remains the teaching-oriented text view."))
+                    (views:graphviz-snippet
+                     (hyperdoc::state-machine-definition-dot-text machine)))))
 
 (views:defview 👀transition-matrix (machine hyperdoc::state-machine-definition)
   (views:html-view :title "Transition matrix" :priority 9
-    (state-machine-preformatted-view
-     (state-machine-transition-matrix-lines machine))))
+                   (state-machine-preformatted-view
+                    (state-machine-transition-matrix-lines machine))))
 
 (views:defview 👀overview (run hyperdoc::state-machine-run)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:p (views:esc
-           (or (hyperdoc::summary-of run)
-               "Concrete run of a reusable state machine.")))
-      (state-machine-preformatted-view
-       (state-machine-run-overview-lines run)))))
+                   (views:html
+                    (:p (views:esc
+                         (or (hyperdoc::summary-of run)
+                             "Concrete run of a reusable state machine.")))
+                    (state-machine-preformatted-view
+                     (state-machine-run-overview-lines run)))))
 
 (views:defview 👀trace (run hyperdoc::state-machine-run)
   (views:html-view :title "Trace" :priority 2
-    (state-machine-preformatted-view
-     (state-machine-run-trace-lines run))))
+                   (state-machine-preformatted-view
+                    (state-machine-run-trace-lines run))))
 
 (views:defview 👀timeline (run hyperdoc::state-machine-run)
   (views:html-view :title "Timeline" :priority 3
-    (views:html
-      (:p (views:esc
-           "Ordered state-entry and transition evidence events for this concrete run."))
-      (state-machine-preformatted-view
-       (state-machine-trace-entry-lines
-        (state-machine-run-timeline-entries run))))))
+                   (views:html
+                    (:p (views:esc
+                         "Ordered state-entry and transition evidence events for this concrete run."))
+                    (state-machine-preformatted-view
+                     (state-machine-trace-entry-lines
+                      (state-machine-run-timeline-entries run))))))
 
 (views:defview 👀evidence (run hyperdoc::state-machine-run)
   (views:html-view :title "Evidence" :priority 4
-    (views:html
-      (:p (views:esc
-           "Evidence attached at state-entry and transition points."))
-      (state-machine-preformatted-view
-       (state-machine-run-evidence-lines run)))))
+                   (views:html
+                    (:p (views:esc
+                         "Evidence attached at state-entry and transition points."))
+                    (state-machine-preformatted-view
+                     (state-machine-run-evidence-lines run)))))
 
 (views:defview 👀failure-analysis (run hyperdoc::state-machine-run)
   (views:html-view :title "Failure analysis" :priority 5
-    (state-machine-preformatted-view
-     (state-machine-run-failure-lines run))))
+                   (state-machine-preformatted-view
+                    (state-machine-run-failure-lines run))))
 
 (views:defview 👀source-evidence-code-path (run hyperdoc::state-machine-run)
   (views:html-view :title "Source evidence / code path" :priority 6
-    (state-machine-preformatted-view
-     (append
-      (list "Machine source evidence:")
-      (state-machine-source-evidence-lines
-       (hyperdoc::state-machine-definition-source-evidence-of
-        (hyperdoc::state-machine-run-machine-of run)))
-      (if (hyperdoc::state-machine-run-notes-of run)
-          (append
-           (list ""
-                 "Run notes:")
-           (mapcar (lambda (entry)
-                     (format nil "- ~A: ~A"
-                             (state-machine-item-value entry :label)
-                             (state-machine-item-value entry :detail)))
-                   (hyperdoc::state-machine-run-notes-of run)))
-          '())))))
+                   (state-machine-preformatted-view
+                    (append
+                     (list "Machine source evidence:")
+                     (state-machine-source-evidence-lines
+                      (hyperdoc::state-machine-definition-source-evidence-of
+                       (hyperdoc::state-machine-run-machine-of run)))
+                     (if (hyperdoc::state-machine-run-notes-of run)
+                         (append
+                          (list ""
+                                "Run notes:")
+                          (mapcar (lambda (entry)
+                                    (format nil "- ~A: ~A"
+                                            (state-machine-item-value entry :label)
+                                            (state-machine-item-value entry :detail)))
+                                  (hyperdoc::state-machine-run-notes-of run)))
+                         '())))))

@@ -97,7 +97,7 @@
     (loop for (key value) in pairs
           when (or (member key '(:id :title :summary) :test #'eq)
                    value)
-            append (list key value))))
+          append (list key value))))
 
 (defmethod print-object ((object sd-card-procedure-step) stream)
   (print-unreadable-object (object stream :type t)
@@ -336,123 +336,123 @@ Raw list structure is preserved as a secondary view."
 
 (defun make-official-rpi-tutorial-steps ()
   (let* ((download-step
-           (make-instance 'sd-card-procedure-step
-                          :id "official-download-prebuilt-image"
-                          :title "Download prebuilt aarch64 SD image"
-                          :summary "Download latest Hydra artifact and preserve filename by trusting the redirected server URL name."
-                          :commands (list "nix-shell -p wget zstd"
-                                          "LATEST_URL=\"https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1\""
-                                          "wget --trust-server-names \"$LATEST_URL\"")
-                          :verification "Result must be a newly downloaded nixos-image-sd-card-*.img.zst artifact (not a file named '1' and no manual rename)."))
+          (make-instance 'sd-card-procedure-step
+                         :id "official-download-prebuilt-image"
+                         :title "Download prebuilt aarch64 SD image"
+                         :summary "Download latest Hydra artifact and preserve filename by trusting the redirected server URL name."
+                         :commands (list "nix-shell -p wget zstd"
+                                         "LATEST_URL=\"https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1\""
+                                         "wget --trust-server-names \"$LATEST_URL\"")
+                         :verification "Result must be a newly downloaded nixos-image-sd-card-*.img.zst artifact (not a file named '1' and no manual rename)."))
          (decompress-step
-           (make-instance 'sd-card-procedure-step
-                          :id "official-decompress-zstd-to-img"
-                          :title "Decompress .zstd image to .img"
-                          :summary "Convert the downloaded compressed image artifact into the raw .img artifact required by the flashing step."
-                          :commands (list "unzstd -d nixos-image-sd-card-*.img.zst")
-                          :verification "Confirm a .img artifact exists and is the flash input; .img.zst and .img may both be present after decompression."))
+          (make-instance 'sd-card-procedure-step
+                         :id "official-decompress-zstd-to-img"
+                         :title "Decompress .zstd image to .img"
+                         :summary "Convert the downloaded compressed image artifact into the raw .img artifact required by the flashing step."
+                         :commands (list "unzstd -d nixos-image-sd-card-*.img.zst")
+                         :verification "Confirm a .img artifact exists and is the flash input; .img.zst and .img may both be present after decompression."))
          (flash-step
-           (make-instance 'sd-card-procedure-step
-                          :id "official-flash-sd-card"
-                          :title "Flash image to SD card"
-                          :summary "Write the prepared .img image to the selected SD card device."
-                          :commands (list "diskutil list"
-                                          "diskutil unmountDisk /dev/diskN"
-                                          "sudo dd if=IMAGE.img of=/dev/rdiskN bs=4m status=progress conv=sync"
-                                          "sync")))
+          (make-instance 'sd-card-procedure-step
+                         :id "official-flash-sd-card"
+                         :title "Flash image to SD card"
+                         :summary "Write the prepared .img image to the selected SD card device."
+                         :commands (list "diskutil list"
+                                         "diskutil unmountDisk /dev/diskN"
+                                         "sudo dd if=IMAGE.img of=/dev/rdiskN bs=4m status=progress conv=sync"
+                                         "sync")))
          (boot-step
-           (make-instance 'sd-card-procedure-step
-                          :id "official-boot-pi"
-                          :title "Boot Raspberry Pi from flashed card"
-                          :summary "Boot Pi 4/400 from the flashed SD image and reach a usable local shell/session."))
+          (make-instance 'sd-card-procedure-step
+                         :id "official-boot-pi"
+                         :title "Boot Raspberry Pi from flashed card"
+                         :summary "Boot Pi 4/400 from the flashed SD image and reach a usable local shell/session."))
          (connect-step
-           (make-instance 'sd-card-procedure-step
-                          :id "official-connect-pi-over-ssh"
-                          :title "Connect to the Pi over SSH"
-                          :summary "If the Pi joined the network and remote access is already configured, determine its hostname/IP and open an SSH session; otherwise continue from a local console."
-                          :commands (list "PI_HOST_OR_IP=\"${PI_HOST_OR_IP:?set the Pi hostname or IP after confirming it joined the network}\""
-                                          "ping -c 1 \"$PI_HOST_OR_IP\""
-                                          "SSH_TARGET=\"${SSH_TARGET:?set to user@$PI_HOST_OR_IP once SSH/login credentials are configured}\""
-                                          "ssh \"$SSH_TARGET\"")))
+          (make-instance 'sd-card-procedure-step
+                         :id "official-connect-pi-over-ssh"
+                         :title "Connect to the Pi over SSH"
+                         :summary "If the Pi joined the network and remote access is already configured, determine its hostname/IP and open an SSH session; otherwise continue from a local console."
+                         :commands (list "PI_HOST_OR_IP=\"${PI_HOST_OR_IP:?set the Pi hostname or IP after confirming it joined the network}\""
+                                         "ping -c 1 \"$PI_HOST_OR_IP\""
+                                         "SSH_TARGET=\"${SSH_TARGET:?set to user@$PI_HOST_OR_IP once SSH/login credentials are configured}\""
+                                         "ssh \"$SSH_TARGET\"")))
          (edit-step
-           (make-instance 'sd-card-procedure-step
-                          :id "official-edit-configuration"
-                          :title "Edit /etc/nixos/configuration.nix"
-                          :summary "Adjust host-specific configuration and secrets locally on the running machine."
-                          :commands (list "sudoedit /etc/nixos/configuration.nix")))
+          (make-instance 'sd-card-procedure-step
+                         :id "official-edit-configuration"
+                         :title "Edit /etc/nixos/configuration.nix"
+                         :summary "Adjust host-specific configuration and secrets locally on the running machine."
+                         :commands (list "sudoedit /etc/nixos/configuration.nix")))
          (first-rebuild-step
-           (make-instance 'sd-card-procedure-step
-                          :id "official-first-rebuild-boot"
-                          :title "Run first rebuild with nixos-rebuild boot"
-                          :summary "Use boot mode first to prepare a reboot-safe generation."
-                          :commands (list "sudo nixos-rebuild boot")))
+          (make-instance 'sd-card-procedure-step
+                         :id "official-first-rebuild-boot"
+                         :title "Run first rebuild with nixos-rebuild boot"
+                         :summary "Use boot mode first to prepare a reboot-safe generation."
+                         :commands (list "sudo nixos-rebuild boot")))
          (reboot-step
-           (make-instance 'sd-card-procedure-step
-                          :id "official-reboot-new-generation"
-                          :title "Reboot into the new generation"
-                          :summary "Reboot and confirm the system starts with the freshly built generation."
-                          :commands (list "sudo reboot")))
+          (make-instance 'sd-card-procedure-step
+                         :id "official-reboot-new-generation"
+                         :title "Reboot into the new generation"
+                         :summary "Reboot and confirm the system starts with the freshly built generation."
+                         :commands (list "sudo reboot")))
          (switch-step
-           (make-instance 'sd-card-procedure-step
-                          :id "official-switch-later"
-                          :title "Use nixos-rebuild switch only later"
-                          :summary "Use switch only after reboot reliability is established."
-                          :commands (list "sudo nixos-rebuild switch")
-                          :diagnosis "Applying switch too early can hide boot-path issues that only appear on reboot."))
+          (make-instance 'sd-card-procedure-step
+                         :id "official-switch-later"
+                         :title "Use nixos-rebuild switch only later"
+                         :summary "Use switch only after reboot reliability is established."
+                         :commands (list "sudo nixos-rebuild switch")
+                         :diagnosis "Applying switch too early can hide boot-path issues that only appear on reboot."))
          (filename-handoff-defect
-           (make-instance 'sd-card-step-handoff-defect
-                          :id "official-hydra-latest-filename-handoff-defect"
-                          :title "Missing filename-preservation handoff for Hydra latest/download/1"
-                          :summary "Plain wget can save latest/download/1 as file '1'; decompression expects a named .img.zst artifact."
-                          :from-step download-step
-                          :to-step decompress-step
-                          :produced-artifact "file named 1"
-                          :required-artifact "named .img.zst artifact filename"
-                          :missing-transition "preserve redirected artifact filename"))
+          (make-instance 'sd-card-step-handoff-defect
+                         :id "official-hydra-latest-filename-handoff-defect"
+                         :title "Missing filename-preservation handoff for Hydra latest/download/1"
+                         :summary "Plain wget can save latest/download/1 as file '1'; decompression expects a named .img.zst artifact."
+                         :from-step download-step
+                         :to-step decompress-step
+                         :produced-artifact "file named 1"
+                         :required-artifact "named .img.zst artifact filename"
+                         :missing-transition "preserve redirected artifact filename"))
          (filename-handoff-patch-target
-           (make-instance 'sd-card-step-handoff-patch-target
-                          :id "official-hydra-latest-filename-handoff-patch-target"
-                          :title "Preserve redirected Hydra artifact filename in download step"
-                          :summary "Patch target is the relation between latest/download/1 and decompression: use wget --trust-server-names so wget adopts the redirected URL filename and step output satisfies decompression precondition."
-                          :defect filename-handoff-defect
-                          :inserted-step download-step
-                          :verification-note "Download output is a named .img.zst artifact carried into decompression."))         
+          (make-instance 'sd-card-step-handoff-patch-target
+                         :id "official-hydra-latest-filename-handoff-patch-target"
+                         :title "Preserve redirected Hydra artifact filename in download step"
+                         :summary "Patch target is the relation between latest/download/1 and decompression: use wget --trust-server-names so wget adopts the redirected URL filename and step output satisfies decompression precondition."
+                         :defect filename-handoff-defect
+                         :inserted-step download-step
+                         :verification-note "Download output is a named .img.zst artifact carried into decompression."))
          (handoff-defect
-           (make-instance 'sd-card-step-handoff-defect
-                          :id "official-zstd-to-img-handoff-defect"
-                          :title "Missing decompression handoff between steps 1 and 2"
-                          :summary "Step 1 outputs .zstd while step 2 requires .img; the .zstd -> .img transition must be explicit."
-                          :from-step download-step
-                          :to-step flash-step
-                          :produced-artifact ".img.zst"
-                          :required-artifact ".img"
-                          :missing-transition ".zstd -> .img decompression step"))
+          (make-instance 'sd-card-step-handoff-defect
+                         :id "official-zstd-to-img-handoff-defect"
+                         :title "Missing decompression handoff between steps 1 and 2"
+                         :summary "Step 1 outputs .zstd while step 2 requires .img; the .zstd -> .img transition must be explicit."
+                         :from-step download-step
+                         :to-step flash-step
+                         :produced-artifact ".img.zst"
+                         :required-artifact ".img"
+                         :missing-transition ".zstd -> .img decompression step"))
          (handoff-patch-target
-           (make-instance 'sd-card-step-handoff-patch-target
-                          :id "official-zstd-to-img-handoff-patch-target"
-                          :title "Insert explicit .zstd -> .img handoff step"
-                          :summary "Patch target is the relation between download and flash: add a decompression step so the flashing input precondition is explicit."
-                          :defect handoff-defect
-                          :inserted-step decompress-step
-                          :verification-note "The inserted step must produce a .img artifact consumed by the flash step."))
+          (make-instance 'sd-card-step-handoff-patch-target
+                         :id "official-zstd-to-img-handoff-patch-target"
+                         :title "Insert explicit .zstd -> .img handoff step"
+                         :summary "Patch target is the relation between download and flash: add a decompression step so the flashing input precondition is explicit."
+                         :defect handoff-defect
+                         :inserted-step decompress-step
+                         :verification-note "The inserted step must produce a .img artifact consumed by the flash step."))
          (headless-handoff-defect
-           (make-instance 'sd-card-step-handoff-defect
-                          :id "official-headless-ssh-connect-handoff-defect"
-                          :title "Missing headless-connect handoff between boot and configuration edit"
-                          :summary "Booting the Pi does not by itself yield a remote shell; headless continuation needs network reachability, host discovery, and a configured SSH/login path."
-                          :from-step boot-step
-                          :to-step edit-step
-                          :produced-artifact "booted Pi with no remote shell yet"
-                          :required-artifact "reachable shell session on the Pi"
-                          :missing-transition "network discovery and SSH connection step"))
+          (make-instance 'sd-card-step-handoff-defect
+                         :id "official-headless-ssh-connect-handoff-defect"
+                         :title "Missing headless-connect handoff between boot and configuration edit"
+                         :summary "Booting the Pi does not by itself yield a remote shell; headless continuation needs network reachability, host discovery, and a configured SSH/login path."
+                         :from-step boot-step
+                         :to-step edit-step
+                         :produced-artifact "booted Pi with no remote shell yet"
+                         :required-artifact "reachable shell session on the Pi"
+                         :missing-transition "network discovery and SSH connection step"))
          (headless-handoff-patch-target
-           (make-instance 'sd-card-step-handoff-patch-target
-                          :id "official-headless-ssh-connect-handoff-patch-target"
-                          :title "Insert explicit headless SSH-connect handoff step"
-                          :summary "Patch target is the relation between boot and configuration edit: add an explicit step that confirms network reachability, identifies the Pi on the network, and opens an SSH session when remote access is configured."
-                          :defect headless-handoff-defect
-                          :inserted-step connect-step
-                          :verification-note "The inserted step must produce a reachable SSH shell on the Pi or stop and redirect the user to a local console when SSH/login prerequisites are absent.")))
+          (make-instance 'sd-card-step-handoff-patch-target
+                         :id "official-headless-ssh-connect-handoff-patch-target"
+                         :title "Insert explicit headless SSH-connect handoff step"
+                         :summary "Patch target is the relation between boot and configuration edit: add an explicit step that confirms network reachability, identifies the Pi on the network, and opens an SSH session when remote access is configured."
+                         :defect headless-handoff-defect
+                         :inserted-step connect-step
+                         :verification-note "The inserted step must produce a reachable SSH shell on the Pi or stop and redirect the user to a local console when SSH/login prerequisites are absent.")))
     (setf (slot-value download-step 'diagnosis)
           "Plain wget on latest/download/1 can save as file '1'; use --trust-server-names so wget keeps the redirected URL filename for decompression.")
     (setf (slot-value download-step 'source-target) filename-handoff-defect)
@@ -570,24 +570,24 @@ for the fully headless preconfigured-image path."
               (connect-step (official-rpi-tutorial-step "official-connect-pi-over-ssh"))
               (edit-step (official-rpi-tutorial-step "official-edit-configuration"))
               (bootstrap-step
-                (make-step "official-local-console-bootstrap"
-                           "Continue from local console to establish remote access"
-                           "Use a directly attached console once to set a password or authorized key, confirm sshd, and discover hostname/IP before returning to the SSH continuation step."
-                           :diagnosis
-                           "This is the semi-headless bootstrap path: stock official boot is not assumed to be SSH-ready."
-                           :commands
-                           (list "sudo systemctl status sshd"
-                                 "hostname"
-                                 "ip -brief address"
-                                 "# set password or install an authorized key through the local console path")))
+               (make-step "official-local-console-bootstrap"
+                          "Continue from local console to establish remote access"
+                          "Use a directly attached console once to set a password or authorized key, confirm sshd, and discover hostname/IP before returning to the SSH continuation step."
+                          :diagnosis
+                          "This is the semi-headless bootstrap path: stock official boot is not assumed to be SSH-ready."
+                          :commands
+                          (list "sudo systemctl status sshd"
+                                "hostname"
+                                "ip -brief address"
+                                "# set password or install an authorized key through the local console path")))
               (remote-ready-p (and network-reachable-p ssh-login-ready-p))
               (continuation-note
-                (cond (remote-ready-p
-                       "Remote continuation is valid: the booted official image is reachable and a usable SSH/login path already exists.")
-                      (network-reachable-p
-                       "Network is reachable, but SSH/login prerequisites are still missing. Use a local console once, then resume remote maintenance over SSH.")
-                      (t
-                       "No confirmed network path exists yet. Stop remote continuation and continue from a local console.")))
+               (cond (remote-ready-p
+                      "Remote continuation is valid: the booted official image is reachable and a usable SSH/login path already exists.")
+                     (network-reachable-p
+                      "Network is reachable, but SSH/login prerequisites are still missing. Use a local console once, then resume remote maintenance over SSH.")
+                     (t
+                      "No confirmed network path exists yet. Stop remote continuation and continue from a local console.")))
               (steps (if remote-ready-p
                          (list boot-step connect-step edit-step)
                          (list boot-step bootstrap-step connect-step edit-step)))
@@ -608,29 +608,29 @@ for the fully headless preconfigured-image path."
                        section)))
       (:custom-image
        (let* ((preseed-step
-                (make-step "custom-image-preseeded-access"
-                           "Build a custom image with preseeded access"
-                           "Fully headless first boot requires OpenSSH, a normal admin user, and an authorized key already present in the image."
-                           :diagnosis
-                           "This is a different access path from stock official SD-image boot, but it still converges on the same post-boot maintenance flow."))
+               (make-step "custom-image-preseeded-access"
+                          "Build a custom image with preseeded access"
+                          "Fully headless first boot requires OpenSSH, a normal admin user, and an authorized key already present in the image."
+                          :diagnosis
+                          "This is a different access path from stock official SD-image boot, but it still converges on the same post-boot maintenance flow."))
               (boot-step
-                (make-step "custom-image-boot-pi"
-                           "Boot the preconfigured custom image"
-                           "Boot the flashed custom image on the Pi and wait for it to join the network with its predeclared access path."))
+               (make-step "custom-image-boot-pi"
+                          "Boot the preconfigured custom image"
+                          "Boot the flashed custom image on the Pi and wait for it to join the network with its predeclared access path."))
               (discover-step
-                (make-step "custom-image-discover-host"
-                           "Discover hostname or IP on the network"
-                           "Determine the host or IP that the preconfigured image obtained after boot."
-                           :commands
-                           (list (format nil "PI_HOST_OR_IP=\"${PI_HOST_OR_IP:-~A}\"" host-or-ip)
-                                 "ping -c 1 \"$PI_HOST_OR_IP\"")))
+               (make-step "custom-image-discover-host"
+                          "Discover hostname or IP on the network"
+                          "Determine the host or IP that the preconfigured image obtained after boot."
+                          :commands
+                          (list (format nil "PI_HOST_OR_IP=\"${PI_HOST_OR_IP:-~A}\"" host-or-ip)
+                                "ping -c 1 \"$PI_HOST_OR_IP\"")))
               (connect-step
-                (make-step "custom-image-ssh-admin-login"
-                           "SSH in as the declared admin user"
-                           "Open an SSH session as the normal admin user declared in the custom image."
-                           :commands
-                           (list (format nil "SSH_TARGET=\"${SSH_TARGET:-~A@$PI_HOST_OR_IP}\"" admin-user)
-                                 "ssh \"$SSH_TARGET\"")))
+               (make-step "custom-image-ssh-admin-login"
+                          "SSH in as the declared admin user"
+                          "Open an SSH session as the normal admin user declared in the custom image."
+                          :commands
+                          (list (format nil "SSH_TARGET=\"${SSH_TARGET:-~A@$PI_HOST_OR_IP}\"" admin-user)
+                                "ssh \"$SSH_TARGET\"")))
               (edit-step (official-rpi-tutorial-step "official-edit-configuration"))
               (section (make-instance 'sd-card-runbook-section
                                       :id "custom-image-first-boot-access"
@@ -702,12 +702,12 @@ for the fully headless preconfigured-image path."
 
 (defun sd-card-creation-dry-run
     (&key (stream *standard-output*)
-          (download-url
-           "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1")
-          (compressed-image "nixos-aarch64.img.zst")
-          (raw-image "nixos-aarch64.img")
-          (disk "diskN")
-          (kioskberrli-root "~/workspace/hauptsache/kioskberrli"))
+       (download-url
+        "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1")
+       (compressed-image "nixos-aarch64.img.zst")
+       (raw-image "nixos-aarch64.img")
+       (disk "diskN")
+       (kioskberrli-root "~/workspace/hauptsache/kioskberrli"))
   "Print the SD-card runbook commands without executing shell actions."
   (let ((runbook (sd-card-creation-command-plan
                   :download-url download-url
@@ -729,11 +729,11 @@ for the fully headless preconfigured-image path."
     runbook))
 
 (defexample sd-card-creation-command-plan-example
-  "Return the default command plan used by the SD-card creation runbook page."
+    "Return the default command plan used by the SD-card creation runbook page."
   (sd-card-creation-command-plan))
 
 (defexample sd-card-creation-dry-run-example
-  "Return a semantic transcript object for the default SD-card command plan."
+    "Return a semantic transcript object for the default SD-card command plan."
   (let (runbook)
     (let ((text (with-output-to-string (stream)
                   (setf runbook (sd-card-creation-dry-run :stream stream)))))
@@ -743,7 +743,7 @@ for the fully headless preconfigured-image path."
                      :runbook runbook))))
 
 (defexample rpi-first-boot-access-dry-run-example
-  "Return inspectable dry-run transcripts for the first-boot access paths in this slice."
+    "Return inspectable dry-run transcripts for the first-boot access paths in this slice."
   (flet ((transcript (title &rest args)
            (let (runbook)
              (let ((text (with-output-to-string (stream)
@@ -774,7 +774,7 @@ for the fully headless preconfigured-image path."
                       :admin-user "rgb"))))
 
 (defexample sd-card-primary-semantic-entrypoints-example
-  "Regression check: primary page entrypoints resolve to semantic objects, not raw cons lists."
+    "Regression check: primary page entrypoints resolve to semantic objects, not raw cons lists."
   (let* ((runbook (sd-card-creation-command-plan))
          (correction (sd-card-creation-command-plan-step "sdimage-imagesize-correction"))
          (raw (sd-card-creation-command-plan-raw)))
@@ -786,7 +786,7 @@ for the fully headless preconfigured-image path."
           :raw-type (type-of raw))))
 
 (defexample sd-card-runbook-section-navigation-example
-  "Regression check: runbook summary section navigation targets semantic section objects."
+    "Regression check: runbook summary section navigation targets semantic section objects."
   (let* ((runbook (sd-card-creation-command-plan))
          (ids '("path-a-official-prebuilt-image"
                 "path-b-build-project-image"
@@ -801,7 +801,7 @@ for the fully headless preconfigured-image path."
           :section-titles (mapcar #'title-of sections))))
 
 (defexample official-rpi-tutorial-step-navigation-example
-  "Regression check: official tutorial steps resolve to semantic procedure-step objects."
+    "Regression check: official tutorial steps resolve to semantic procedure-step objects."
   (let* ((workflow (official-rpi-tutorial-workflow))
          (ids '("official-download-prebuilt-image"
                 "official-decompress-zstd-to-img"
@@ -821,7 +821,7 @@ for the fully headless preconfigured-image path."
           :step-titles (mapcar #'title-of steps))))
 
 (defexample official-rpi-zstd-to-img-handoff-regression-example
-  "Regression check: missing handoff is modeled as relation defect with explicit inserted step."
+    "Regression check: missing handoff is modeled as relation defect with explicit inserted step."
   (let* ((inserted-step (official-rpi-tutorial-step "official-decompress-zstd-to-img"))
          (defect (official-zstd-to-img-handoff-defect))
          (patch (official-zstd-to-img-handoff-patch-target)))
@@ -839,7 +839,7 @@ for the fully headless preconfigured-image path."
           :patch-target (id-of patch))))
 
 (defexample official-rpi-hydra-filename-preservation-regression-example
-  "Regression check: official download command preserves redirected Hydra artifact filename."
+    "Regression check: official download command preserves redirected Hydra artifact filename."
   (let* ((download-step (official-rpi-tutorial-step "official-download-prebuilt-image"))
          (commands (commands-of download-step))
          (defect (official-hydra-latest-filename-handoff-defect))
@@ -855,7 +855,7 @@ for the fully headless preconfigured-image path."
           :patch-target (id-of patch))))
 
 (defexample official-rpi-headless-ssh-connect-handoff-regression-example
-  "Regression check: headless continuation is modeled as an explicit boot -> SSH connect -> edit handoff."
+    "Regression check: headless continuation is modeled as an explicit boot -> SSH connect -> edit handoff."
   (let* ((inserted-step (official-rpi-tutorial-step "official-connect-pi-over-ssh"))
          (defect (official-headless-ssh-connect-handoff-defect))
          (patch (official-headless-ssh-connect-handoff-patch-target)))
@@ -875,34 +875,34 @@ for the fully headless preconfigured-image path."
           :patch-target (id-of patch))))
 
 (defexample rpi-first-boot-access-dry-run-regression-example
-  "Regression check: first-boot access dry-runs cover stock-remote, semi-headless bootstrap, and fully headless custom-image paths."
+    "Regression check: first-boot access dry-runs cover stock-remote, semi-headless bootstrap, and fully headless custom-image paths."
   (let (official-remote-runbook official-local-runbook custom-runbook)
     (let* ((official-remote-text
-             (with-output-to-string (stream)
-               (setf official-remote-runbook
-                     (rpi-first-boot-access-dry-run
-                      :stream stream
-                      :model :official
-                      :network-reachable-p t
-                      :ssh-login-ready-p t
-                      :host-or-ip "pi.local"))))
+            (with-output-to-string (stream)
+              (setf official-remote-runbook
+                    (rpi-first-boot-access-dry-run
+                     :stream stream
+                     :model :official
+                     :network-reachable-p t
+                     :ssh-login-ready-p t
+                     :host-or-ip "pi.local"))))
            (official-local-text
-             (with-output-to-string (stream)
-               (setf official-local-runbook
-                     (rpi-first-boot-access-dry-run
-                      :stream stream
-                      :model :official
-                      :network-reachable-p t
-                      :ssh-login-ready-p nil
-                      :host-or-ip "pi.local"))))
+            (with-output-to-string (stream)
+              (setf official-local-runbook
+                    (rpi-first-boot-access-dry-run
+                     :stream stream
+                     :model :official
+                     :network-reachable-p t
+                     :ssh-login-ready-p nil
+                     :host-or-ip "pi.local"))))
            (custom-text
-             (with-output-to-string (stream)
-               (setf custom-runbook
-                     (rpi-first-boot-access-dry-run
-                      :stream stream
-                      :model :custom-image
-                      :host-or-ip "kioskberrli.local"
-                      :admin-user "rgb")))))
+            (with-output-to-string (stream)
+              (setf custom-runbook
+                    (rpi-first-boot-access-dry-run
+                     :stream stream
+                     :model :custom-image
+                     :host-or-ip "kioskberrli.local"
+                     :admin-user "rgb")))))
       (assert-eql 'sd-card-runbook (type-of official-remote-runbook))
       (assert-eql 'sd-card-runbook (type-of official-local-runbook))
       (assert-eql 'sd-card-runbook (type-of custom-runbook))
@@ -922,7 +922,7 @@ for the fully headless preconfigured-image path."
             :custom-summary (summary-of custom-runbook)))))
 
 (defexample hydra-filename-outcome-states-example
-  "Contrast historical filename-loss with corrected download and post-decompression state progression."
+    "Contrast historical filename-loss with corrected download and post-decompression state progression."
   (let* ((bad-outcome (list :mode :historical-failure
                             :saved-as "1"
                             :provenance :lost-at-download-time))
@@ -966,7 +966,7 @@ for the fully headless preconfigured-image path."
           :post-decompression decompressed-outcome)))
 
 (defexample official-rpi-zstd-to-img-handoff-adjacency-regression-example
-  "Regression check: flash step must be immediately preceded by the decompression handoff step."
+    "Regression check: flash step must be immediately preceded by the decompression handoff step."
   (let* ((workflow (official-rpi-tutorial-workflow))
          (section (first (sections-of workflow)))
          (ids (mapcar #'id-of (steps-of section)))
@@ -983,7 +983,7 @@ for the fully headless preconfigured-image path."
           :forbidden forbidden)))
 
 (defexample official-rpi-zstd-to-img-handoff-successor-regression-example
-  "Regression check: handoff successor constraints hold from both transition endpoints."
+    "Regression check: handoff successor constraints hold from both transition endpoints."
   (let* ((workflow (official-rpi-tutorial-workflow))
          (section (first (sections-of workflow)))
          (ids (mapcar #'id-of (steps-of section)))
@@ -1005,7 +1005,7 @@ for the fully headless preconfigured-image path."
           :download-not-flash download-not-flash)))
 
 (defexample official-rpi-zstd-to-img-step-chain-regression-example
-  "Regression check: local SD-image handoff chain is enforced as one declarative invariant."
+    "Regression check: local SD-image handoff chain is enforced as one declarative invariant."
   (let* ((workflow (official-rpi-tutorial-workflow))
          (section (first (sections-of workflow)))
          (ids (mapcar #'id-of (steps-of section)))
@@ -1018,7 +1018,7 @@ for the fully headless preconfigured-image path."
           :chain-result chain-result)))
 
 (defexample official-rpi-tutorial-step-raw-structure-regression-example
-  "Regression check: procedure-step raw structure is computed and includes core keys."
+    "Regression check: procedure-step raw structure is computed and includes core keys."
   (let* ((step (official-rpi-tutorial-step "official-reboot-new-generation"))
          (structure (raw-structure step)))
     (assert structure)
@@ -1032,14 +1032,14 @@ for the fully headless preconfigured-image path."
           :raw-structure structure)))
 
 (defexample official-rpi-tutorial-expr-quoting-regression-example
-  "Regression check: HTML expr string arguments must use &quot; and evaluate to step objects."
+    "Regression check: HTML expr string arguments must use &quot; and evaluate to step objects."
   ;; expr-attr models the value seen by Lisp after HTML entity decoding.
   (let* ((expr-attr "(hyperdoc::official-rpi-tutorial-step \"official-download-prebuilt-image\")")
          (good (handler-case
                    (eval (read-from-string expr-attr))
                  (error (c) c)))
          (bad-expr "(hyperdoc::official-rpi-tutorial-step \\\"official-download-prebuilt-image\\\")")
-    (bad (handler-case
+         (bad (handler-case
                   (eval (read-from-string bad-expr))
                 (error (c) c))))
     (assert-eql 'sd-card-procedure-step (type-of good))
@@ -1049,7 +1049,7 @@ for the fully headless preconfigured-image path."
           :bad-condition-type (type-of bad))))
 
 (defexample rpi-first-boot-access-page-wiring-regression-example
-  "Regression check: the Pi first-boot access slice is linked from the edited HyperDoc pages."
+    "Regression check: the Pi first-boot access slice is linked from the edited HyperDoc pages."
   (flet ((page-string (path)
            (uiop:read-file-string (asdf:system-relative-pathname :hyperdoc path))))
     (let* ((specs '(("hyperdoc/official-tutorial-nixos-sd-image-on-raspberry-pi-4-400.html"
@@ -1068,14 +1068,14 @@ for the fully headless preconfigured-image path."
                      "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
                      "expr=\"(hyperdoc::rpi-first-boot-access-dry-run-example)\"")))
            (results
-             (loop for (path required-a required-b) in specs
-                   for html = (page-string path)
-                   do (progn
-                        (assert (search required-a html))
-                        (assert (search required-b html)))
-                   collect (list :page path
-                                 :required-a required-a
-                                 :required-b required-b))))
+            (loop for (path required-a required-b) in specs
+                  for html = (page-string path)
+                  do (progn
+                       (assert (search required-a html))
+                       (assert (search required-b html)))
+                  collect (list :page path
+                                :required-a required-a
+                                :required-b required-b))))
       (assert (search "openssh.authorizedKeys.keys"
                       (page-string "hyperdoc/Salon Pi 4 Kiosk Hardening Checklist.html")))
       (list :pages results
@@ -1227,7 +1227,7 @@ context."))
                  :removed-option "sdImage.imageSize"))
 
 (defexample wiki-client-blame-operation-example
-  "Show reproducible git-blame operations for wiki-client timestamp lines."
+    "Show reproducible git-blame operations for wiki-client timestamp lines."
   (let ((repo "/Users/rgb/workspace/wiki-client"))
     (list :repo repo
           :commands
@@ -1362,16 +1362,16 @@ context."))
     (unless (and display argv)
       (error "Malformed command descriptor: ~S" command))
     (format stream "~&$ ~A~%" display)
-  (finish-output stream)
-  (unless print-only
-    (let* ((process (uiop:launch-program
-                     argv
-                     :output *standard-output*
-                     :error-output *error-output*
-                     :ignore-error-status t))
-           (exit-code (uiop:wait-process process)))
-      (unless (zerop exit-code)
-        (error "Command failed with exit code ~D: ~A" exit-code display))))))
+    (finish-output stream)
+    (unless print-only
+      (let* ((process (uiop:launch-program
+                       argv
+                       :output *standard-output*
+                       :error-output *error-output*
+                       :ignore-error-status t))
+             (exit-code (uiop:wait-process process)))
+        (unless (zerop exit-code)
+          (error "Command failed with exit code ~D: ~A" exit-code display))))))
 
 (defun run-dreyeck-deploy-action
     (action &key build-host target-host (print-only t) (stream *standard-output*))

@@ -8,4 +8,4 @@
   (loop for fn in (link-redirections-of *catalog*)
         for hb-link = (funcall fn url)
         when hb-link
-          return hb-link))
+        return hb-link))

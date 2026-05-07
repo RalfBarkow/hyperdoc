@@ -46,9 +46,9 @@ that occurred when reading the site map.")))
 
 (defun domain-name-of (wiki)
   (->> wiki
-    hb:id-of
-    (str:split ":")
-    second))
+       hb:id-of
+       (str:split ":")
+       second))
 
 (defmethod hb:title-of ((wiki fedwiki))
   (domain-name-of wiki))
@@ -125,10 +125,10 @@ that occurred when reading the site map.")))
   wiki)
 
 (defun retry-site-data-over-http (wiki &key initial-condition
-                                             initial-context
-                                             initial-path
-                                             initial-protocol
-                                             (log-initial-failure? t))
+                                         initial-context
+                                         initial-path
+                                         initial-protocol
+                                         (log-initial-failure? t))
   (let* ((domain-name (domain-name-of wiki))
          (initial-protocol (or initial-protocol
                                (protocol-of wiki)))
@@ -208,9 +208,9 @@ that occurred when reading the site map.")))
                (unless https-supplied-p
                  (handler-case
                      (-> domain-name
-                       copy-seq ;; ensure simple-string
-                       (usocket:socket-connect 443)
-                       (usocket:socket-close))
+                         copy-seq ;; ensure simple-string
+                         (usocket:socket-connect 443)
+                         (usocket:socket-close))
                    (usocket:connection-refused-error (c)
                      (declare (ignore c))
                      (setf (slot-value wiki 'protocol) "http"))
@@ -235,17 +235,17 @@ that occurred when reading the site map.")))
           for slug = (gethash "slug" page-spec)
           for title = (gethash "title" page-spec)
           for links = (some->> page-spec
-                        (gethash "links")
-                        alexandria:hash-table-keys)
+                               (gethash "links")
+                               alexandria:hash-table-keys)
           for page = (make-fedwiki-page wiki slug title)
           do (setf (gethash slug (pages-of wiki))
                    page)
-             (setf (gethash slug (slugs-of wiki))
-                   title)
-             (setf (gethash title (slugs-of wiki))
-                   slug)
-             (setf (slot-value page 'links)
-                   (make-links page links)))))
+          (setf (gethash slug (slugs-of wiki))
+                title)
+          (setf (gethash title (slugs-of wiki))
+                slug)
+          (setf (slot-value page 'links)
+                (make-links page links)))))
 
 ;; see https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$4MOZVD4F5_BMRwWv6GjsfrCTPqJlmrFZ7qxIhtSapzU
 ;; and https://matrix.to/#/!BkPDqaI4Qv3Gjcxk1HoInFDyL14M41hU7aC9evyWGZQ/$hdhNbB8kOl5kOYghNwaudGVbk1JlnqCWlbB8lS2bgXo
@@ -289,13 +289,13 @@ that occurred when reading the site map.")))
 (defvar *neighborhood* (make-hash-table :test #'equal))
 
 (defun get-fedwiki (domain-name &optional signal-error? wait-for-sitemap?
-                                 &rest initargs)
+                    &rest initargs)
   (declare (ignore signal-error?))
   (let* ((https (getf initargs :https))
          (wiki (if-let (wiki (gethash domain-name *neighborhood*))
-                wiki
-                (setf (gethash domain-name *neighborhood*)
-                      (make-fedwiki domain-name :https https)))))
+                   wiki
+                 (setf (gethash domain-name *neighborhood*)
+                       (make-fedwiki domain-name :https https)))))
     (when wait-for-sitemap?
       (wait-for-sitemap wiki))
     wiki))
@@ -324,8 +324,8 @@ that occurred when reading the site map.")))
 (views:defview 👀main-page (wiki fedwiki)
   (when-let (main-page (hb:find-page wiki "welcome-visitors"))
     (-> main-page
-      👀story
-      (views:rename :title "Main page" :priority 1))))
+        👀story
+        (views:rename :title "Main page" :priority 1))))
 
 ;;
 ;; Register a HyperBook factory
@@ -348,5 +348,5 @@ that occurred when reading the site map.")))
   (loop for page being the hash-values of (pages-of wiki)
         when (loop for item across (or (story-of page) #())
                    when (equal (item-type-of item) item-type)
-                     return t)
-          collect page))
+                   return t)
+        collect page))

@@ -137,17 +137,17 @@
                      window))
          (json-object (shasht:read-json json-text))
          (roundtrip
-           (hyperdoc::shared-projection-context-window-from-json-string
-            json-text))
+          (hyperdoc::shared-projection-context-window-from-json-string
+           json-text))
          (first-entity
-           (first (hyperdoc::shared-projection-context-window-entities-of
-                   roundtrip)))
+          (first (hyperdoc::shared-projection-context-window-entities-of
+                  roundtrip)))
          (first-relation
-           (first (hyperdoc::shared-projection-context-window-relations-of
-                   roundtrip)))
+          (first (hyperdoc::shared-projection-context-window-relations-of
+                  roundtrip)))
          (first-event
-           (first (hyperdoc::shared-projection-context-window-journal-events-of
-                   roundtrip))))
+          (first (hyperdoc::shared-projection-context-window-journal-events-of
+                  roundtrip))))
     (shared-projection-assert-equal
      1
      (gethash "schemaVersion" json-object)
@@ -190,8 +190,8 @@
   (asdf:load-system :hyperdoc/inspector)
   (let* ((generic-machine (hyperdoc::make-example-state-machine-definition))
          (behavior-machine
-           (hyperdoc::state-machine-definition->behavior-machine-definition
-            generic-machine))
+          (hyperdoc::state-machine-definition->behavior-machine-definition
+           generic-machine))
          (machine (hyperdoc::make-workspace-annotation-behavior-machine-definition))
          (scxml (hyperdoc::behavior-machine-definition->scxml machine))
          (roundtrip (hyperdoc::scxml->behavior-machine-definition scxml)))
@@ -278,14 +278,14 @@
 (defun run-shared-projection-negative-distinction-smoke-test ()
   (asdf:load-system :hyperdoc)
   (let* ((window
-           (hyperdoc::dmx-topicmap-json->shared-projection-context-window
-            (shared-projection-make-visible-topicmap-json)
-            :topic-jsons (list (shared-projection-make-visible-topic-json))
-            :workspace-json nil
-            :active-behavior-machine-ids nil))
+          (hyperdoc::dmx-topicmap-json->shared-projection-context-window
+           (shared-projection-make-visible-topicmap-json)
+           :topic-jsons (list (shared-projection-make-visible-topic-json))
+           :workspace-json nil
+           :active-behavior-machine-ids nil))
          (entity
-           (first (hyperdoc::shared-projection-context-window-entities-of
-                   window))))
+          (first (hyperdoc::shared-projection-context-window-entities-of
+                  window))))
     (shared-projection-assert-true
      (hyperdoc::shared-projection-entity-topicmap-memberships-of entity)
      "Visible topicmap membership must be reconstructed")

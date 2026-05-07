@@ -196,7 +196,7 @@
           while to
           for edge = (code-path-graph-edge graph from to)
           when edge
-            collect edge)))
+          collect edge)))
 
 (defun code-path-graph-active-edges (graph)
   (remove-if-not (lambda (edge)

@@ -5,9 +5,9 @@
 (defpackage :hyperbook/server
   (:use :cl)
   (:import-from :alexandria
-   :if-let :when-let :compose)
+                :if-let :when-let :compose)
   (:import-from :arrow-macros
-   :-> :-<> :->> :-<>> :<> :some-> :some->>)
+                :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:export :serve-catalog
            :serve-hyperbooks
            :development-mode-p

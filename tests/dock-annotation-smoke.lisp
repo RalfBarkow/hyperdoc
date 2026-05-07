@@ -29,33 +29,33 @@
          (chunk-page (hyperdoc::find-page hyperdoc::*topics* "Chunk" :signal-error? t))
          (chunk-topic (hyperdoc::topic-of chunk-page))
          (shortcut-from-page
-           (hyperdoc::dock-annotation-for-context
-            chunk-page
-            :context-view-title "Content"))
+          (hyperdoc::dock-annotation-for-context
+           chunk-page
+           :context-view-title "Content"))
          (shortcut-from-page-again
-           (hyperdoc::dock-annotation-for-context
-            chunk-page
-            :context-view-title "Content"))
+          (hyperdoc::dock-annotation-for-context
+           chunk-page
+           :context-view-title "Content"))
          (shortcut-from-topic
-           (hyperdoc::dock-annotation-for-context
-            chunk-topic
-            :context-view-title "Topic"))
+          (hyperdoc::dock-annotation-for-context
+           chunk-topic
+           :context-view-title "Topic"))
          (annotation-from-connect
-           (hyperdoc::make-association-annotation-from-json
-            :context-object hyperdoc-page
-            :context-view-title "Main page"
-            :source-json (dock-annotation-source-json "HYPERDOC"
-                                                      "Text pages"
-                                                      "list-item:main-page/text-pages")
-            :target-json (dock-annotation-target-json "HYPERDOC")))
+          (hyperdoc::make-association-annotation-from-json
+           :context-object hyperdoc-page
+           :context-view-title "Main page"
+           :source-json (dock-annotation-source-json "HYPERDOC"
+                                                     "Text pages"
+                                                     "list-item:main-page/text-pages")
+           :target-json (dock-annotation-target-json "HYPERDOC")))
          (annotation-from-connect-again
-           (hyperdoc::make-association-annotation-from-json
-            :context-object hyperdoc-page
-            :context-view-title "Main page"
-            :source-json (dock-annotation-source-json "HYPERDOC"
-                                                      "Text pages"
-                                                      "list-item:main-page/text-pages")
-            :target-json (dock-annotation-target-json "HYPERDOC"))))
+          (hyperdoc::make-association-annotation-from-json
+           :context-object hyperdoc-page
+           :context-view-title "Main page"
+           :source-json (dock-annotation-source-json "HYPERDOC"
+                                                     "Text pages"
+                                                     "list-item:main-page/text-pages")
+           :target-json (dock-annotation-target-json "HYPERDOC"))))
     (assert-true (typep shortcut-from-page 'hyperdoc::dock-annotation)
                  "Dock Annotation should specialize dom-relation-annotation rather than introducing a parallel annotation substrate")
     (assert-true (typep annotation-from-connect 'hyperdoc::dock-annotation)

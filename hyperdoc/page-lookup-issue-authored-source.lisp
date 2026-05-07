@@ -228,9 +228,9 @@
     :title "Target chunk opens from repair"
     :summary "The target chunk is a bounded inspectable object opened from repair context."
     :layer :layout
-   :subject :target-chunk-pane
-   :predicate :opens-from
-   :object :repair-pane)))
+    :subject :target-chunk-pane
+    :predicate :opens-from
+    :object :repair-pane)))
 
 (defun page-lookup-issue-authored-layout-source-pathname
     (&optional (source-path *page-lookup-issue-authored-layout-source-path*))
@@ -249,9 +249,9 @@
 (defun page-lookup-issue-authored-layout-default-override-payload ()
   (let* ((base-relations (page-lookup-issue-authored-source-base-relation-definitions))
          (default-layout-relation
-           (page-lookup-issue-authored-source-relation-by-id
-            base-relations
-            "layout/page-lookup/repair-after-overview")))
+          (page-lookup-issue-authored-source-relation-by-id
+           base-relations
+           "layout/page-lookup/repair-after-overview")))
     (unless default-layout-relation
       (error "Missing default layout relation for page-lookup authored source."))
     (list :schema-version 1
@@ -292,13 +292,13 @@
   (let ((relation-id (getf replacement :id))
         (replaced nil))
     (let ((updated
-            (mapcar (lambda (definition)
-                      (if (equal relation-id (getf definition :id))
-                          (progn
-                            (setf replaced t)
-                            replacement)
-                          definition))
-                    definitions)))
+           (mapcar (lambda (definition)
+                     (if (equal relation-id (getf definition :id))
+                         (progn
+                           (setf replaced t)
+                           replacement)
+                         definition))
+                   definitions)))
       (if replaced
           updated
           (append updated (list replacement))))))
@@ -313,11 +313,11 @@
     (&key (source-path *page-lookup-issue-authored-layout-source-path*))
   (let* ((base-relations (page-lookup-issue-authored-source-base-relation-definitions))
          (override-payload
-           (page-lookup-issue-authored-layout-override-payload
-            :source-path source-path))
+          (page-lookup-issue-authored-layout-override-payload
+           :source-path source-path))
          (relation-overrides
-           (copy-tree (or (getf override-payload :relation-overrides)
-                          nil))))
+          (copy-tree (or (getf override-payload :relation-overrides)
+                         nil))))
     (page-lookup-issue-authored-source-apply-relation-overrides
      base-relations
      relation-overrides)))
@@ -325,8 +325,8 @@
 (defun make-page-lookup-issue-authored-source-artifact ()
   (let* ((override-payload (page-lookup-issue-authored-layout-override-payload))
          (override-findings
-           (copy-list (or (getf override-payload :findings)
-                          nil))))
+          (copy-list (or (getf override-payload :findings)
+                         nil))))
     (make-authored-relation-artifact-source
      :id "source/page-lookup-issue-authored-artifact"
      :title "Page lookup issue authored source artifact"

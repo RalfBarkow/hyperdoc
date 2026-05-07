@@ -9,12 +9,12 @@
 ;;
 
 (defhyperdoc *explorer-hyperdoc*
-  ;; The title of the HyperDoc
-  :id "hyperdoc/explorer"
-  :title "HyperDoc Explorer"
-  ;; The ASDF system in which it is located
-  :asdf-system-name "hyperdoc/explorer"
-  ;; The subdirectory and ASDF module name containing the  text and code pages
-  :subdirectory "hyperdoc-explorer"
-  ;; The id of the page to be displayed as the main entry point
-  :main-page-id "HyperDoc Explorer")
+    ;; The title of the HyperDoc
+    :id "hyperdoc/explorer"
+    :title "HyperDoc Explorer"
+    ;; The ASDF system in which it is located
+    :asdf-system-name "hyperdoc/explorer"
+    ;; The subdirectory and ASDF module name containing the  text and code pages
+    :subdirectory "hyperdoc-explorer"
+    ;; The id of the page to be displayed as the main entry point
+    :main-page-id "HyperDoc Explorer")

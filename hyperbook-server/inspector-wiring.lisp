@@ -203,8 +203,8 @@
          (started-at (maybe-current-time-millis))
          (source-summary (maybe-summarize-object-for-log (pane-object pane)))
          (originating-expression
-           (or (hover-label-for-element element)
-               (maybe-summarize-object-for-log target))))
+          (or (hover-label-for-element element)
+              (maybe-summarize-object-for-log target))))
     (make-instance
      'evaluation-pending-state
      :request-id (symbol-name (gensym "PENDING-EVAL-"))
@@ -247,11 +247,11 @@
 
 (defun pending-pane-dom-update-script (pane-id state)
   (let ((phase-text
-          (string-downcase
-           (symbol-name (evaluation-pending-current-phase-of state))))
+         (string-downcase
+          (symbol-name (evaluation-pending-current-phase-of state))))
         (status-text
-          (pending-evaluation-phase-label
-           (evaluation-pending-current-phase-of state)))
+         (pending-evaluation-phase-label
+          (evaluation-pending-current-phase-of state)))
         (log-text (evaluation-pending-stage-log-text state)))
     (format nil
             "(function(){ var pane = document.getElementById(~A); if (!pane) { return; } var pendingNodes = pane.querySelectorAll('.hyperdoc-evaluation-pending'); pendingNodes.forEach(function(node){ node.setAttribute('data-hyperdoc-pending-phase', ~A); var status = node.querySelector('.hyperdoc-evaluation-pending-status'); if (status) { status.textContent = ~A; } }); var logNodes = pane.querySelectorAll('.hyperdoc-evaluation-stage-log pre'); logNodes.forEach(function(node){ node.textContent = ~A; }); })();"
@@ -271,75 +271,75 @@
 
 (defun render-evaluation-pending-stage-log (state)
   (hv:html
-    (:div :class "hyperdoc-evaluation-stage-log"
-          :style "margin-top: 0.8em; border: 1px solid #ddd; background: #fafafa; padding: 0.6em;"
-          (:div :style "font-weight: 600; margin-bottom: 0.4em;" "Console")
-          (:pre :style "white-space: pre-wrap; margin: 0;"
-                (hv:esc (evaluation-pending-stage-log-text state))))))
+   (:div :class "hyperdoc-evaluation-stage-log"
+         :style "margin-top: 0.8em; border: 1px solid #ddd; background: #fafafa; padding: 0.6em;"
+         (:div :style "font-weight: 600; margin-bottom: 0.4em;" "Console")
+         (:pre :style "white-space: pre-wrap; margin: 0;"
+               (hv:esc (evaluation-pending-stage-log-text state))))))
 
 (hv:defview 👀summary (state evaluation-pending-state)
   (hv:html-view :title "Summary" :priority 1
-    (hv:html
-      (:div :class "hyperdoc-evaluation-pending"
-            :data-hyperdoc-pending-pane "true"
-            :data-hyperdoc-pending-request-id
-            (hv:esc (evaluation-pending-request-id-of state))
-            :data-hyperdoc-pending-phase
-            (string-downcase
-             (symbol-name (evaluation-pending-current-phase-of state)))
-            (:h3 (hv:esc (evaluation-pending-title-of state)))
-            (:p :class "hyperdoc-evaluation-pending-status"
-                (hv:esc
-                 (pending-evaluation-phase-label
-                  (evaluation-pending-current-phase-of state))))
-            (:table :class "inspector-table"
-                    (:tr (:td "Request id")
-                         (:td (:tt (hv:esc
-                                    (evaluation-pending-request-id-of state)))))
-                    (:tr (:td "Started at")
-                         (:td (:tt (hv:esc
-                                    (format nil "~A"
-                                            (evaluation-pending-started-at-of state))))))
-                    (:tr (:td "Source pane")
-                         (:td (:tt (hv:esc
-                                    (or (evaluation-pending-source-pane-object-summary-of state)
-                                        "n/a")))))
-                    (:tr (:td "Origin")
-                         (:td (:tt (hv:esc
-                                    (or (evaluation-pending-originating-expression-of state)
-                                        "n/a"))))))
-            (render-evaluation-pending-stage-log state)))))
+                (hv:html
+                 (:div :class "hyperdoc-evaluation-pending"
+                       :data-hyperdoc-pending-pane "true"
+                       :data-hyperdoc-pending-request-id
+                       (hv:esc (evaluation-pending-request-id-of state))
+                       :data-hyperdoc-pending-phase
+                       (string-downcase
+                        (symbol-name (evaluation-pending-current-phase-of state)))
+                       (:h3 (hv:esc (evaluation-pending-title-of state)))
+                       (:p :class "hyperdoc-evaluation-pending-status"
+                           (hv:esc
+                            (pending-evaluation-phase-label
+                             (evaluation-pending-current-phase-of state))))
+                       (:table :class "inspector-table"
+                               (:tr (:td "Request id")
+                                    (:td (:tt (hv:esc
+                                               (evaluation-pending-request-id-of state)))))
+                               (:tr (:td "Started at")
+                                    (:td (:tt (hv:esc
+                                               (format nil "~A"
+                                                       (evaluation-pending-started-at-of state))))))
+                               (:tr (:td "Source pane")
+                                    (:td (:tt (hv:esc
+                                               (or (evaluation-pending-source-pane-object-summary-of state)
+                                                   "n/a")))))
+                               (:tr (:td "Origin")
+                                    (:td (:tt (hv:esc
+                                               (or (evaluation-pending-originating-expression-of state)
+                                                   "n/a"))))))
+                       (render-evaluation-pending-stage-log state)))))
 
 (hv:defview 👀log (state evaluation-pending-state)
   (hv:html-view :title "Log" :priority 2
-    (render-evaluation-pending-stage-log state)))
+                (render-evaluation-pending-stage-log state)))
 
 (hv:defview 👀overview (issue deferred-evaluation-issue)
   (hv:html-view :title "Overview" :priority 1
-    (hv:html
-      (:h3 (hv:esc (deferred-evaluation-issue-title-of issue)))
-      (:p (hv:esc (deferred-evaluation-issue-summary-of issue)))
-      (:table :class "inspector-table"
-              (:tr (:td "Origin")
-                   (:td (:tt (hv:esc
-                              (or (deferred-evaluation-issue-originating-expression-of issue)
-                                  "n/a")))))
-              (:tr (:td "Source pane")
-                   (:td (:tt (hv:esc
-                              (or (deferred-evaluation-issue-source-pane-object-summary-of issue)
-                                  "n/a")))))
-              (:tr (:td "Started at")
-                   (:td (:tt (hv:esc
-                              (format nil "~A"
-                                      (deferred-evaluation-issue-started-at-of issue))))))
-              (:tr (:td "Condition")
-                   (:td (hv:object-ref
-                         (deferred-evaluation-issue-condition-of issue))))))))
+                (hv:html
+                 (:h3 (hv:esc (deferred-evaluation-issue-title-of issue)))
+                 (:p (hv:esc (deferred-evaluation-issue-summary-of issue)))
+                 (:table :class "inspector-table"
+                         (:tr (:td "Origin")
+                              (:td (:tt (hv:esc
+                                         (or (deferred-evaluation-issue-originating-expression-of issue)
+                                             "n/a")))))
+                         (:tr (:td "Source pane")
+                              (:td (:tt (hv:esc
+                                         (or (deferred-evaluation-issue-source-pane-object-summary-of issue)
+                                             "n/a")))))
+                         (:tr (:td "Started at")
+                              (:td (:tt (hv:esc
+                                         (format nil "~A"
+                                                 (deferred-evaluation-issue-started-at-of issue))))))
+                         (:tr (:td "Condition")
+                              (:td (hv:object-ref
+                                    (deferred-evaluation-issue-condition-of issue))))))))
 
 (hv:defview 👀condition (issue deferred-evaluation-issue)
   (hv:html-view :title "Condition" :priority 2
-    (hv:html
-      (:p (hv:object-ref (deferred-evaluation-issue-condition-of issue))))))
+                (hv:html
+                 (:p (hv:object-ref (deferred-evaluation-issue-condition-of issue))))))
 
 (defun set-active-eval-button-state (element activep)
   (ignore-errors
@@ -423,9 +423,9 @@
      (lambda ()
        (let ((result nil)
              (*pending-evaluation-progress-hook*
-               (lambda (phase message &key detail)
-                 (clog:with-sync-event ((clog-obj pending-pane))
-                   (refresh-pending-pane pending-pane phase message :detail detail))))
+              (lambda (phase message &key detail)
+                (clog:with-sync-event ((clog-obj pending-pane))
+                  (refresh-pending-pane pending-pane phase message :detail detail))))
              (*pending-evaluation-origin-pane-id* (pane-runtime-id pane))
              (*pending-evaluation-pane-id* (pane-runtime-id pending-pane)))
          (handler-case
@@ -559,11 +559,11 @@
                  (let ((view-ref nil))
                    (when (eql (length html-id-parts) 3)
                      (setf view-ref (hv:decode-base32 (third html-id-parts))))
-                 (clog:set-on-mouse-click
-                  ref-element
-                  #'(lambda (obj event)
-                      (handle-inspector-reference-eval-click pane obj target event view-ref))
-                  :cancel-event t)
-                 (setf (clog:attribute ref-element
-                                       "data-hyperdoc-eval-bound")
-                       "true"))))))))))
+                   (clog:set-on-mouse-click
+                    ref-element
+                    #'(lambda (obj event)
+                        (handle-inspector-reference-eval-click pane obj target event view-ref))
+                    :cancel-event t)
+                   (setf (clog:attribute ref-element
+                                         "data-hyperdoc-eval-bound")
+                         "true"))))))))))

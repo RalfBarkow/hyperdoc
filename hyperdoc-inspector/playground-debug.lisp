@@ -12,34 +12,34 @@
 
 (hv:defview 👀debug (r playground-debug-report)
   (hv:html-view :title "Debug" :priority 1
-    (hv:html
-      (:h3 "Recovery")
-      (:p
-       (if (playground-debug-retry r)
-           (hv:html
-             (hv:eval-button
-              "Retry"
-              (hv:thunk
-                (funcall (playground-debug-retry r)))
-              "Re-evaluate the captured source with the same object bound to *"))
-           (hv:html (:span "Retry unavailable for this error.")))
-       " "
-       (hv:action-button
-        "Abort"
-        (hv:thunk
-          (setf (playground-debug-status r) "Aborted. No retry was attempted.")
-          t)
-        "Keep the report, but stop this recovery attempt"))
-      (when (playground-debug-status r)
-        (hv:html
-          (:p (hv:esc (playground-debug-status r)))))
-      (:h3 "Condition")
-      (:pre (hv:esc (format nil "~A" (playground-debug-condition r))))
-      (:h3 "Source")
-      (:pre (hv:esc (or (playground-debug-source r) "")))
-      (:h3 "Backtrace")
-      (:pre :style "white-space: pre-wrap"
-            (hv:esc (or (playground-debug-backtrace r) ""))))))
+                (hv:html
+                 (:h3 "Recovery")
+                 (:p
+                  (if (playground-debug-retry r)
+                      (hv:html
+                       (hv:eval-button
+                        "Retry"
+                        (hv:thunk
+                         (funcall (playground-debug-retry r)))
+                        "Re-evaluate the captured source with the same object bound to *"))
+                      (hv:html (:span "Retry unavailable for this error.")))
+                  " "
+                  (hv:action-button
+                   "Abort"
+                   (hv:thunk
+                    (setf (playground-debug-status r) "Aborted. No retry was attempted.")
+                    t)
+                   "Keep the report, but stop this recovery attempt"))
+                 (when (playground-debug-status r)
+                   (hv:html
+                    (:p (hv:esc (playground-debug-status r)))))
+                 (:h3 "Condition")
+                 (:pre (hv:esc (format nil "~A" (playground-debug-condition r))))
+                 (:h3 "Source")
+                 (:pre (hv:esc (or (playground-debug-source r) "")))
+                 (:h3 "Backtrace")
+                 (:pre :style "white-space: pre-wrap"
+                       (hv:esc (or (playground-debug-backtrace r) ""))))))
 
 (defun make-playground-debug-report (condition source &key retry)
   (let ((bt (with-output-to-string (s)
@@ -100,8 +100,8 @@ public predicate/accessors. Keep HVS internals contained here."
                        result))
                (error (condition)
                  (make-playground-debug-report condition
-                                              source
-                                              :retry #'retry)))))
+                                               source
+                                               :retry #'retry)))))
     #'retry))
 
 (defun make-playground-debug-report-from-eval-error (error source &key retry)

@@ -512,8 +512,8 @@
           :directoryp t))))
 
 (defun make-zotero-library-bridge (&key db-path storage-root note-roots
-                                        (sqlite-program
-                                          *zotero-default-sqlite-program*))
+                                     (sqlite-program
+                                      *zotero-default-sqlite-program*))
   (make-instance 'zotero-library-bridge
                  :db-path (normalize-path-designator db-path)
                  :storage-root (normalize-path-designator storage-root
@@ -656,7 +656,7 @@
        (gethash key row)))
 
 (defun zotero-bibliographic-items-query-sql (&key where-clause
-                                                  (order-by "title, itemID"))
+                                               (order-by "title, itemID"))
   (format nil
           "SELECT * FROM (~%
              SELECT i.itemID AS itemID,~%
@@ -702,13 +702,13 @@
 
 (defun recent-zotero-changes-query-sql (limit since include-attachments-p)
   (let ((type-filter
-          (if include-attachments-p
-              "it.typeName NOT IN ('note', 'annotation')"
-              "it.typeName NOT IN ('attachment', 'note', 'annotation')"))
+         (if include-attachments-p
+             "it.typeName NOT IN ('note', 'annotation')"
+             "it.typeName NOT IN ('attachment', 'note', 'annotation')"))
         (since-clause
-          (and since
-               (format nil "AND i.dateModified >= ~A"
-                       (sql-string-literal since)))))
+         (and since
+              (format nil "AND i.dateModified >= ~A"
+                      (sql-string-literal since)))))
     (format nil
             "WITH item_fields AS (
                SELECT d.itemID,
@@ -953,10 +953,10 @@
 (defun lookup-zotero-items-by-title (title &key bridge (match-mode :exact))
   (let* ((bridge (or bridge (make-default-zotero-library-bridge)))
          (query-evidence
-           (run-zotero-sqlite-query bridge
-                                    (format nil "title lookup (~A)" match-mode)
-                                    (title-match-query-sql title
-                                                           :match-mode match-mode)))
+          (run-zotero-sqlite-query bridge
+                                   (format nil "title lookup (~A)" match-mode)
+                                   (title-match-query-sql title
+                                                          :match-mode match-mode)))
          (items (mapcar #'make-zotero-item-from-row
                         (zotero-query-rows query-evidence)))
          (title-query (make-zotero-title-query-from-evidence
@@ -976,10 +976,10 @@
                         (zotero-query-rows query)))
          (item (first items))
          (item-id-query
-           (make-zotero-item-id-query-from-evidence bridge
-                                                    item-id
-                                                    item
-                                                    query)))
+          (make-zotero-item-id-query-from-evidence bridge
+                                                   item-id
+                                                   item
+                                                   query)))
     (values item
             item-id-query)))
 
@@ -1014,14 +1014,14 @@
          (limit (zotero-positive-integer-or-default limit 20))
          (since (zotero-normalize-since-value since))
          (query-evidence
-           (run-zotero-sqlite-query
-            bridge
-            (if include-attachments?
-                "recent changes (including attachments)"
-                "recent changes")
-            (recent-zotero-changes-query-sql limit
-                                             since
-                                             include-attachments?)))
+          (run-zotero-sqlite-query
+           bridge
+           (if include-attachments?
+               "recent changes (including attachments)"
+               "recent changes")
+           (recent-zotero-changes-query-sql limit
+                                            since
+                                            include-attachments?)))
          (hits (loop for row in (zotero-query-rows query-evidence)
                      for row-index from 0
                      collect (make-zotero-recent-change-hit-from-row
@@ -1120,8 +1120,8 @@
           (values attachments query)))))
 
 (defun make-zotero-path-report (bridge attachment &key item-hit resolved-path
-                                                     exists-p failure-mode detail
-                                                     storage-relative-path)
+                                                    exists-p failure-mode detail
+                                                    storage-relative-path)
   (make-instance 'zotero-attachment-path-resolution
                  :bridge bridge
                  :item-hit item-hit
@@ -1369,19 +1369,19 @@
                             #'string<
                             :key #'pathname-namestring-or-nil))
                (evidence
-                 (remove nil
-                         (loop for file in files
-                               for root = (find-if
-                                           (lambda (candidate-root)
-                                             (uiop:string-prefix-p
-                                              (pathname-namestring-or-nil
-                                               candidate-root)
-                                              (pathname-namestring-or-nil file)))
-                                           roots)
-                               collect (search-note-file-for-clues
-                                        file
-                                        root
-                                        clue-specs)))))
+                (remove nil
+                        (loop for file in files
+                              for root = (find-if
+                                          (lambda (candidate-root)
+                                            (uiop:string-prefix-p
+                                             (pathname-namestring-or-nil
+                                              candidate-root)
+                                             (pathname-namestring-or-nil file)))
+                                          roots)
+                              collect (search-note-file-for-clues
+                                       file
+                                       root
+                                       clue-specs)))))
           (values evidence :searched (length files))))))
 
 (defun note-evidence-for-selection (note-evidence item attachment)
@@ -1425,18 +1425,18 @@
                    :detail (zotero-path-report-detail-of report))))
 
 (defun resolve-zotero-title-to-candidate-pdf-reports (title &key bridge
-                                                            (match-mode :exact))
+                                                              (match-mode :exact))
   (let ((bridge (or bridge (make-default-zotero-library-bridge))))
     (multiple-value-bind (items title-query)
         (lookup-zotero-items-by-title title
                                       :bridge bridge
                                       :match-mode match-mode)
       (let* ((attachment-query
-               (and items
-                    (run-zotero-sqlite-query bridge
-                                             "attachment lookup"
-                                             (attachment-query-sql
-                                              (mapcar #'zotero-item-id-of items)))))
+              (and items
+                   (run-zotero-sqlite-query bridge
+                                            "attachment lookup"
+                                            (attachment-query-sql
+                                             (mapcar #'zotero-item-id-of items)))))
              (attachments (mapcar #'make-zotero-attachment-from-row
                                   (zotero-query-rows attachment-query)))
              (note-evidence nil)
@@ -1446,21 +1446,21 @@
         (multiple-value-setq (note-evidence note-search-status note-files-searched)
           (collect-note-evidence bridge title items attachments))
         (let* ((candidate-reports
-                 (loop for attachment in attachments
-                       for item-hit =
-                         (find-zotero-item-hit-by-id items
-                                                     (zotero-attachment-parent-item-id-of
-                                                      attachment))
-                       when (pdf-attachment-p attachment)
-                       collect (resolve-zotero-attachment-path bridge
-                                                               attachment
-                                                               :item-hit item-hit)))
+                (loop for attachment in attachments
+                      for item-hit =
+                      (find-zotero-item-hit-by-id items
+                                                  (zotero-attachment-parent-item-id-of
+                                                   attachment))
+                      when (pdf-attachment-p attachment)
+                      collect (resolve-zotero-attachment-path bridge
+                                                              attachment
+                                                              :item-hit item-hit)))
                (candidate-evidence
-                 (mapcar (lambda (report)
-                           (make-zotero-resolution-evidence-from-report
-                            report
-                            note-evidence))
-                         candidate-reports)))
+                (mapcar (lambda (report)
+                          (make-zotero-resolution-evidence-from-report
+                           report
+                           note-evidence))
+                        candidate-reports)))
           (values candidate-reports
                   title-query
                   attachment-query
@@ -1483,25 +1483,25 @@
     (t
      (let* ((item (first items))
             (item-attachments
-              (remove-if-not (lambda (attachment)
-                               (= (zotero-attachment-parent-item-id-of attachment)
-                                  (zotero-item-id-of item)))
-                             attachments))
+             (remove-if-not (lambda (attachment)
+                              (= (zotero-attachment-parent-item-id-of attachment)
+                                 (zotero-item-id-of item)))
+                            attachments))
             (item-candidate-reports
-              (remove-if-not
-               (lambda (report)
-                 (let ((attachment-hit
-                         (zotero-path-report-attachment-hit-of report)))
-                   (and attachment-hit
-                        (= (zotero-attachment-parent-item-id-of attachment-hit)
-                           (zotero-item-id-of item)))))
-               candidate-reports))
+             (remove-if-not
+              (lambda (report)
+                (let ((attachment-hit
+                       (zotero-path-report-attachment-hit-of report)))
+                  (and attachment-hit
+                       (= (zotero-attachment-parent-item-id-of attachment-hit)
+                          (zotero-item-id-of item)))))
+              candidate-reports))
             (item-candidate-evidence
-              (remove-if-not
-               (lambda (evidence)
-                 (eq (zotero-resolution-evidence-item-hit-of evidence)
-                     item))
-               candidate-evidence)))
+             (remove-if-not
+              (lambda (evidence)
+                (eq (zotero-resolution-evidence-item-hit-of evidence)
+                    item))
+              candidate-evidence)))
        (cond
          ((null item-attachments)
           (values item nil nil nil :no-attachments
@@ -1517,13 +1517,13 @@
           (let* ((resolution (first item-candidate-reports))
                  (attachment (zotero-path-report-attachment-hit-of resolution))
                  (selected-evidence
-                   (or (find resolution
-                             item-candidate-evidence
-                             :key #'zotero-resolution-evidence-path-report-of
-                             :test #'eq)
-                       (make-zotero-resolution-evidence-from-report
-                        resolution
-                        nil))))
+                  (or (find resolution
+                            item-candidate-evidence
+                            :key #'zotero-resolution-evidence-path-report-of
+                            :test #'eq)
+                      (make-zotero-resolution-evidence-from-report
+                       resolution
+                       nil))))
             (cond
               ((null resolution)
                (values item attachment nil nil :unresolved-attachment-path
@@ -1551,7 +1551,7 @@
             (nreverse (copy-list (gethash (zotero-item-id-of item) table)))))))
 
 (defun resolve-zotero-title-to-local-pdf-report (title &key bridge
-                                                      (match-mode :exact))
+                                                         (match-mode :exact))
   (let* ((bridge (or bridge (make-default-zotero-library-bridge)))
          (candidate-reports nil)
          (item-query nil)
@@ -1577,26 +1577,26 @@
                                candidate-reports
                                candidate-evidence)
       (let* ((sqlite-failure
-               (and (null (zotero-query-selected-attempt-of item-query))
-                    :sqlite-query-failed))
+              (and (null (zotero-query-selected-attempt-of item-query))
+                   :sqlite-query-failed))
              (final-failure-mode
-               (or sqlite-failure
-                   failure-mode))
+              (or sqlite-failure
+                  failure-mode))
              (final-detail
-               (or (and sqlite-failure
-                        (let ((attempt (car (last (zotero-query-attempts-of item-query)))))
-                          (and attempt
-                               (zotero-query-attempt-detail-of attempt))))
-                   detail))
+              (or (and sqlite-failure
+                       (let ((attempt (car (last (zotero-query-attempts-of item-query)))))
+                         (and attempt
+                              (zotero-query-attempt-detail-of attempt))))
+                  detail))
              (evidence-chain
-               (remove nil
-                       (append (list selected-item
-                                     selected-attachment
-                                     selected-resolution
-                                     selected-evidence)
-                               (and selected-evidence
-                                    (zotero-resolution-evidence-note-evidence-of
-                                     selected-evidence)))))
+              (remove nil
+                      (append (list selected-item
+                                    selected-attachment
+                                    selected-resolution
+                                    selected-evidence)
+                              (and selected-evidence
+                                   (zotero-resolution-evidence-note-evidence-of
+                                    selected-evidence)))))
              (resolved-path (and selected-resolution
                                  (zotero-path-report-resolved-path-of
                                   selected-resolution)))
@@ -1683,11 +1683,11 @@
   (let* ((bridge (make-zotero-live-demo-library))
          (item (mind-and-mechanism-zotero-item-hit))
          (attachments
-           (when item
-             (multiple-value-bind (hits query)
-                 (list-zotero-attachments-for-item item :bridge bridge)
-               (declare (ignore query))
-               hits))))
+          (when item
+            (multiple-value-bind (hits query)
+                (list-zotero-attachments-for-item item :bridge bridge)
+              (declare (ignore query))
+              hits))))
     (find (mind-and-mechanism-zotero-demo-attachment-key)
           attachments
           :key #'zotero-attachment-key-of
@@ -1746,11 +1746,11 @@
   (let* ((bridge (make-zotero-live-demo-library))
          (item (martinez-zotero-item-hit))
          (attachments
-           (when item
-             (multiple-value-bind (hits query)
-                 (list-zotero-attachments-for-item item :bridge bridge)
-               (declare (ignore query))
-               hits))))
+          (when item
+            (multiple-value-bind (hits query)
+                (list-zotero-attachments-for-item item :bridge bridge)
+              (declare (ignore query))
+              hits))))
     (find attachment-key
           attachments
           :key #'zotero-attachment-key-of
@@ -1792,52 +1792,52 @@
       (multiple-value-setq (attachments attachment-query)
         (list-zotero-attachments-for-item item :bridge bridge)))
     (let* ((attachment
-             (find attachment-key
-                   attachments
-                   :key #'zotero-attachment-key-of
-                   :test #'string=))
+            (find attachment-key
+                  attachments
+                  :key #'zotero-attachment-key-of
+                  :test #'string=))
            (resolution
-             (and attachment
-                  (resolve-zotero-attachment-path bridge
-                                                  attachment
-                                                  :item-hit item)))
+            (and attachment
+                 (resolve-zotero-attachment-path bridge
+                                                 attachment
+                                                 :item-hit item)))
            (selected-evidence
-             (and resolution
-                  (make-zotero-resolution-evidence-from-report
-                   resolution
-                   nil)))
+            (and resolution
+                 (make-zotero-resolution-evidence-from-report
+                  resolution
+                  nil)))
            (failure-mode
-             (cond
-               ((null item)
-                :no-item-id-match)
-               ((null attachment)
-                :selected-attachment-missing)
-               (resolution
-                (or (zotero-path-report-failure-mode-of resolution)
-                    (unless (zotero-path-report-exists-p resolution)
-                      :resolved-pdf-missing)))
-               (t
-                :unresolved-attachment-path)))
+            (cond
+              ((null item)
+               :no-item-id-match)
+              ((null attachment)
+               :selected-attachment-missing)
+              (resolution
+               (or (zotero-path-report-failure-mode-of resolution)
+                   (unless (zotero-path-report-exists-p resolution)
+                     :resolved-pdf-missing)))
+              (t
+               :unresolved-attachment-path)))
            (detail
-             (cond
-               ((null item)
-                (format nil "No Zotero item matched the configured Martínez item id ~A."
-                        (martinez-zotero-demo-item-id)))
-               ((null attachment)
-                (format nil "No child attachment matched the configured key ~A."
-                        attachment-key))
-               (resolution
-                (or (zotero-path-report-detail-of resolution)
-                    (unless (zotero-path-report-exists-p resolution)
-                      "The resolved PDF path does not exist.")))
-               (t
-                "Attachment resolution did not yield a report.")))
+            (cond
+              ((null item)
+               (format nil "No Zotero item matched the configured Martínez item id ~A."
+                       (martinez-zotero-demo-item-id)))
+              ((null attachment)
+               (format nil "No child attachment matched the configured key ~A."
+                       attachment-key))
+              (resolution
+               (or (zotero-path-report-detail-of resolution)
+                   (unless (zotero-path-report-exists-p resolution)
+                     "The resolved PDF path does not exist.")))
+              (t
+               "Attachment resolution did not yield a report.")))
            (resolved-path
-             (and resolution
-                  (zotero-path-report-resolved-path-of resolution)))
+            (and resolution
+                 (zotero-path-report-resolved-path-of resolution)))
            (exists-p
-             (and resolution
-                  (zotero-path-report-exists-p resolution))))
+            (and resolution
+                 (zotero-path-report-exists-p resolution))))
       (make-instance 'zotero-title-resolution-report
                      :bridge bridge
                      :query-title query-title

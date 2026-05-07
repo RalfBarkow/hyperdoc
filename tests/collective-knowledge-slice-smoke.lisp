@@ -21,13 +21,13 @@
 
 (defun call-with-collective-knowledge-fedwiki-fixture (thunk)
   (let* ((fixture-pages-directory
-           (collective-knowledge-fixture-fedwiki-pages-directory))
+          (collective-knowledge-fixture-fedwiki-pages-directory))
          (fixture-page-path
-           (merge-pathnames "the-life-cycle-of-collective-knowledge"
-                            fixture-pages-directory))
+          (merge-pathnames "the-life-cycle-of-collective-knowledge"
+                           fixture-pages-directory))
          (original
-           (symbol-function
-            'hyperdoc::article-allegation-default-fedwiki-pages-directory)))
+          (symbol-function
+           'hyperdoc::article-allegation-default-fedwiki-pages-directory)))
     (assert-true
      (uiop:file-exists-p fixture-page-path)
      (format nil "Collective-knowledge fixture missing at ~A"
@@ -152,19 +152,19 @@
                                    (collective-knowledge-relative-path
                                     "assets/the-life-cycle-of-collective-knowledge-topic.lisp")))
          (source
-           (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
+          (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
          (rendered-page
-           (hyperdoc::render-the-life-cycle-of-collective-knowledge-page))
+          (hyperdoc::render-the-life-cycle-of-collective-knowledge-page))
          (rendered-topic-snippet
-           (hyperdoc::render-the-life-cycle-of-collective-knowledge-topic-factory-snippet))
+          (hyperdoc::render-the-life-cycle-of-collective-knowledge-topic-factory-snippet))
          (rendered-page-with-snapshot
-           (hyperdoc::render-localhost-fedwiki-page-artifact-with-source-snapshot
-            rendered-page
-            source))
+          (hyperdoc::render-localhost-fedwiki-page-artifact-with-source-snapshot
+           rendered-page
+           source))
          (rendered-topic-snippet-with-snapshot
-           (hyperdoc::render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
-            rendered-topic-snippet
-            source)))
+          (hyperdoc::render-localhost-fedwiki-topic-snippet-artifact-with-source-snapshot
+           rendered-topic-snippet
+           source)))
     (assert-true
      (search "preserve fragment-level provenance within that item instead of claiming"
              rendered-page)
@@ -212,10 +212,10 @@
            (first (read stream nil :eof))))
        "Committed topic snippet must remain reader-safe because the envelope comment is skipped before the snippet form")
       (let* ((temp-path
-               (merge-pathnames
-                (format nil "hyperdoc-snippet-envelope-load-smoke-~D.lisp"
-                        (get-universal-time))
-                (uiop:temporary-directory))))
+              (merge-pathnames
+               (format nil "hyperdoc-snippet-envelope-load-smoke-~D.lisp"
+                       (get-universal-time))
+               (uiop:temporary-directory))))
         (unwind-protect
              (progn
                (setf (symbol-value 'cl-user::*hyperdoc-snippet-envelope-load-smoke*)
@@ -236,11 +236,11 @@
           (when (uiop:file-exists-p temp-path)
             (delete-file temp-path)))))
     (let ((page-reflection
-            (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot-reflection
-             committed-page))
+           (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot-reflection
+            committed-page))
           (snippet-reflection
-            (hyperdoc::localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot-reflection
-             committed-topic-snippet)))
+           (hyperdoc::localhost-fedwiki-topic-snippet-artifact-reflected-source-snapshot-reflection
+            committed-topic-snippet)))
       (assert-equal
        :present
        (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-status
@@ -281,11 +281,11 @@
          (first (read stream nil :eof))))
      "Rendered snippet artifact must remain reader-safe with the snapshot envelope comment")
     (let* ((reflection
-             (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot-reflection
-              rendered-page-with-snapshot))
+            (hyperdoc::localhost-fedwiki-page-artifact-reflected-source-snapshot-reflection
+             rendered-page-with-snapshot))
            (snapshot
-             (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
-              reflection)))
+            (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+             reflection)))
       (assert-equal
        :present
        (hyperdoc::localhost-fedwiki-source-snapshot-envelope-reflection-status
@@ -301,23 +301,23 @@
 (defun run-collective-knowledge-generated-output-idempotence-smoke-test ()
   (let* ((run-id (get-universal-time))
          (root-relative
-           (format nil "tmp/collective-knowledge-smoke-~D/" run-id))
+          (format nil "tmp/collective-knowledge-smoke-~D/" run-id))
          (root-path (collective-knowledge-relative-path root-relative))
          (page-relative
-           (format nil "~Ahyperdoc/The Life Cycle of Collective Knowledge.html"
-                   root-relative))
+          (format nil "~Ahyperdoc/The Life Cycle of Collective Knowledge.html"
+                  root-relative))
          (snippet-relative
-           (format nil "~Aassets/the-life-cycle-of-collective-knowledge-topic.lisp"
-                   root-relative)))
+          (format nil "~Aassets/the-life-cycle-of-collective-knowledge-topic.lisp"
+                  root-relative)))
     (let ((hyperdoc::*the-life-cycle-of-collective-knowledge-page-path*
-            page-relative)
+           page-relative)
           (hyperdoc::*the-life-cycle-of-collective-knowledge-topic-asset*
-            snippet-relative))
+           snippet-relative))
       (unwind-protect
            (let ((page-path
-                   (hyperdoc::the-life-cycle-of-collective-knowledge-page-pathname))
+                  (hyperdoc::the-life-cycle-of-collective-knowledge-page-pathname))
                  (snippet-path
-                   (hyperdoc::the-life-cycle-of-collective-knowledge-topic-asset-path)))
+                  (hyperdoc::the-life-cycle-of-collective-knowledge-topic-asset-path)))
              (hyperdoc::write-the-life-cycle-of-collective-knowledge-artifacts)
              (let ((first-page (uiop:read-file-string page-path))
                    (first-snippet (uiop:read-file-string snippet-path)))

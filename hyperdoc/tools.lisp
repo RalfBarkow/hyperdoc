@@ -343,11 +343,11 @@ inside a live checkout.")
       (resolve-git-repository-root-override)
     (declare (ignore _requested-root _requested-string))
     (let* ((process-root-info
-             (handler-case
-                 (multiple-value-list
-                  (process-working-directory-repository-root-info))
-               (error ()
-                 nil)))
+            (handler-case
+                (multiple-value-list
+                 (process-working-directory-repository-root-info))
+              (error ()
+                nil)))
            (process-root (first process-root-info))
            (process-source (second process-root-info)))
       (cond
@@ -371,11 +371,11 @@ inside a live checkout.")
                                (string
                                 requested-program)))
            (resolved-program
-             (if (and requested-string
-                      (ignore-errors
-                        (uiop:absolute-pathname-p (pathname requested-string))))
-                 (probe-file requested-string)
-                 requested-string)))
+            (if (and requested-string
+                     (ignore-errors
+                       (uiop:absolute-pathname-p (pathname requested-string))))
+                (probe-file requested-string)
+                requested-string)))
       (values resolved-program
               requested-string
               configuration-source))))
@@ -487,49 +487,49 @@ inside a live checkout.")
   (let* ((classification (or classification :git-command-failed))
          (working-directory (or working-directory repository-root))
          (repository-root-source
-           (or repository-root-source
-               (infer-git-repository-root-source repository-root)))
+          (or repository-root-source
+              (infer-git-repository-root-source repository-root)))
          (summary (git-runtime-condition-summary classification))
          (title (git-runtime-condition-title classification))
          (reason (or reason
                      (git-runtime-default-reason classification))))
-  (error 'git-runtime-unavailable
-         :classification classification
-         :title title
-         :summary summary
-         :operation operation
-         :command command
-         :exit-code exit-code
-         :working-directory working-directory
-         :repository-root repository-root
-         :repository-root-source repository-root-source
-         :requested-program requested-program
-         :resolved-program resolved-program
-         :configuration-source configuration-source
-         :reason reason
-         :detail detail
-         :guidance (git-runtime-guidance
-                    :classification classification
-                    :working-directory working-directory
-                    :repository-root repository-root
-                    :repository-root-source repository-root-source))))
+    (error 'git-runtime-unavailable
+           :classification classification
+           :title title
+           :summary summary
+           :operation operation
+           :command command
+           :exit-code exit-code
+           :working-directory working-directory
+           :repository-root repository-root
+           :repository-root-source repository-root-source
+           :requested-program requested-program
+           :resolved-program resolved-program
+           :configuration-source configuration-source
+           :reason reason
+           :detail detail
+           :guidance (git-runtime-guidance
+                      :classification classification
+                      :working-directory working-directory
+                      :repository-root repository-root
+                      :repository-root-source repository-root-source))))
 
 (defun git-command-output* (directory args &key ignore-error-status operation
-                                      repository-root-source)
+                                             repository-root-source)
   (multiple-value-bind (resolved-program requested-program configuration-source)
       (resolve-git-program)
     (let* ((resolved-program-string
-             (and resolved-program
-                  (git-command-program-string resolved-program)))
+            (and resolved-program
+                 (git-command-program-string resolved-program)))
            (command
-             (and resolved-program
-                  (append (list resolved-program-string
-                                "-C"
-                                (pathname-namestring-or-nil directory))
-                          args)))
+            (and resolved-program
+                 (append (list resolved-program-string
+                               "-C"
+                               (pathname-namestring-or-nil directory))
+                         args)))
            (command-display
-             (and command
-                  (format nil "~{~A~^ ~}" command))))
+            (and command
+                 (format nil "~{~A~^ ~}" command))))
       (unless resolved-program
         (signal-git-runtime-unavailable
          :classification :git-executable-unavailable
@@ -566,10 +566,10 @@ inside a live checkout.")
                  output)
                 (t
                  (let ((classification
-                         (classify-git-runtime-failure
-                          :operation (or operation "git command")
-                          :detail output
-                          :exit-code exit-code)))
+                        (classify-git-runtime-failure
+                         :operation (or operation "git command")
+                         :detail output
+                         :exit-code exit-code)))
                    (signal-git-runtime-unavailable
                     :classification classification
                     :operation (or operation "git command")
@@ -587,9 +587,9 @@ inside a live checkout.")
         (error (condition)
           (let* ((detail (princ-to-string condition))
                  (classification
-                   (classify-git-runtime-failure
-                    :operation (or operation "git command")
-                    :detail detail)))
+                  (classify-git-runtime-failure
+                   :operation (or operation "git command")
+                   :detail detail)))
             (signal-git-runtime-unavailable
              :classification classification
              :operation (or operation "git command")

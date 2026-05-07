@@ -113,11 +113,11 @@
   kind)
 
 (defun define-agent (runtime kind arity
-                      &key principal-type
-                        principal-polarity
-                        auxiliary-types
-                        auxiliary-polarities
-                        auxiliary-partitions)
+                     &key principal-type
+                       principal-polarity
+                       auxiliary-types
+                       auxiliary-polarities
+                       auxiliary-partitions)
   "Register KIND with ARITY. Optional typed metadata can be attached incrementally."
   (check-type runtime runtime)
   (check-type kind symbol)
@@ -143,8 +143,8 @@
   kind)
 
 (defun define-symbol (runtime kind arity
-                       &key principal-type principal-polarity
-                         auxiliary-types auxiliary-polarities auxiliary-partitions)
+                      &key principal-type principal-polarity
+                        auxiliary-types auxiliary-polarities auxiliary-partitions)
   "Typed symbol declaration layer.
 
 Polarity convention:
@@ -172,7 +172,7 @@ Polarity convention:
            (runtime-rule-entries runtime)))
 
 (defun %register-rule-entry (runtime left-kind right-kind function
-                              &key name dsl)
+                             &key name dsl)
   (let ((key (%rule-key left-kind right-kind)))
     (setf (gethash key (runtime-rules runtime)) function)
     (setf (gethash key (runtime-rule-entries runtime))
@@ -182,7 +182,7 @@ Polarity convention:
                            :dsl dsl))))
 
 (defun define-rule (runtime left-kind right-kind function
-                     &key (allow-self-interaction nil) name dsl)
+                    &key (allow-self-interaction nil) name dsl)
   "Install a symmetric active-pair rewrite rule.
 
 Validation:
@@ -323,7 +323,7 @@ Signals TYPING-ERROR when incompatible and SIGNAL-ERROR? is true."
 
 Returns two values:
 1) boolean completeness
-2) list of missing typed rule pairs" 
+2) list of missing typed rule pairs"
   (let ((missing '())
         (symbols '()))
     (maphash (lambda (kind spec)
@@ -460,42 +460,42 @@ REDUCTION-TRACE in NET-TRACE-OBJECT."
                    (error 'reduction-limit-reached
                           :limit limit
                           :steps steps))
-                 (destructuring-bind (left . right)
-                     (pop (net-active-stack net))
-                   (when (active-pair-valid-p left right)
-                     (let* ((rule-entry (rule-entry-for (net-runtime net)
-                                                        left right))
-                            (rule (and rule-entry
-                                       (rule-entry-function rule-entry))))
-                       (unless rule
-                         (error "No rule for active pair (~S >< ~S)."
-                                (cell-kind left) (cell-kind right)))
-                       (let ((*collect-new-active-pairs* (and trace '())))
-                         (funcall rule net left right)
-                         (when trace
-                           (push (make-reduction-step
-                                  :step steps
-                                  :active-pair-kinds
-                                  (list (cell-kind left) (cell-kind right))
-                                  :active-pair-cell-ids
-                                  (list (cell-id left) (cell-id right))
-                                  :rule-name (rule-entry-name rule-entry)
-                                  :rule-key (rule-entry-key rule-entry)
-                                  :new-active-pairs
-                                  (nreverse *collect-new-active-pairs*))
-                                 step-records))
-                         (incf steps)))))
+              (destructuring-bind (left . right)
+                  (pop (net-active-stack net))
+                (when (active-pair-valid-p left right)
+                  (let* ((rule-entry (rule-entry-for (net-runtime net)
+                                                     left right))
+                         (rule (and rule-entry
+                                    (rule-entry-function rule-entry))))
+                    (unless rule
+                      (error "No rule for active pair (~S >< ~S)."
+                             (cell-kind left) (cell-kind right)))
+                    (let ((*collect-new-active-pairs* (and trace '())))
+                      (funcall rule net left right)
+                      (when trace
+                        (push (make-reduction-step
+                               :step steps
+                               :active-pair-kinds
+                               (list (cell-kind left) (cell-kind right))
+                               :active-pair-cell-ids
+                               (list (cell-id left) (cell-id right))
+                               :rule-name (rule-entry-name rule-entry)
+                               :rule-key (rule-entry-key rule-entry)
+                               :new-active-pairs
+                               (nreverse *collect-new-active-pairs*))
+                              step-records))
+                      (incf steps)))))
               finally
-                 (setf (net-trace net)
-                       (nreverse step-records)
-                       (net-trace-object net)
-                       (make-reduction-trace
-                        :status :normal-form
-                        :steps (nreverse step-records)
-                        :total-steps steps
-                        :final-normal-form (%net-normal-form-summary net)
-                        :failure-reason nil))
-                 (return (values net steps)))
+              (setf (net-trace net)
+                    (nreverse step-records)
+                    (net-trace-object net)
+                    (make-reduction-trace
+                     :status :normal-form
+                     :steps (nreverse step-records)
+                     :total-steps steps
+                     :final-normal-form (%net-normal-form-summary net)
+                     :failure-reason nil))
+              (return (values net steps)))
       (reduction-limit-reached (condition)
         (setf (net-trace net)
               (nreverse step-records)
@@ -522,7 +522,7 @@ REDUCTION-TRACE in NET-TRACE-OBJECT."
 (defun parse-net (runtime forms)
   "Parse first-order net forms.
 
-Each cell form: (:agent ID KIND PRINCIPAL-WIRE AUX-WIRE...)" 
+Each cell form: (:agent ID KIND PRINCIPAL-WIRE AUX-WIRE...)"
   (let ((net (make-net :runtime runtime))
         (occurrences (make-hash-table :test #'equal)))
     (labels ((record-occurrence (wire endpoint)
@@ -600,7 +600,7 @@ Each cell form: (:agent ID KIND PRINCIPAL-WIRE AUX-WIRE...)"
            (error "CONS tail port is disconnected in cell ~S." (cell-id cell)))
          (cons (funcall atom-reader head-link)
                (read-list-from-principal-endpoint tail-link
-                                                 :atom-reader atom-reader))))
+                                                  :atom-reader atom-reader))))
       ((or (eq (cell-kind cell) '|Nil|)
            (eq (cell-kind cell) nil))
        nil)
@@ -610,7 +610,7 @@ Each cell form: (:agent ID KIND PRINCIPAL-WIRE AUX-WIRE...)"
               (cell-id cell))))))
 
 (defun read-list (net free-name &key (atom-reader #'read-atom-from-principal-endpoint))
-  "Read a list value exposed at FREE-NAME." 
+  "Read a list value exposed at FREE-NAME."
   (let* ((free (net-free-endpoint net free-name))
          (other (endpoint-link free)))
     (unless other
@@ -676,30 +676,30 @@ Accepted forms:
 
 (define-rule
     *demo-runtime* 'zero 'plus
-  (lambda (net zero plus)
-    (let ((result (take-port-link plus 1))
-          (n (take-port-link plus 2)))
-      (kill-cell net zero)
-      (kill-cell net plus)
-      (connect-endpoints net result n))))
+    (lambda (net zero plus)
+      (let ((result (take-port-link plus 1))
+            (n (take-port-link plus 2)))
+        (kill-cell net zero)
+        (kill-cell net plus)
+        (connect-endpoints net result n))))
 
 (define-rule
     *demo-runtime* 'succ 'plus
-  (lambda (net succ plus)
-    (let ((x (take-port-link succ 1))
-          (result (take-port-link plus 1))
-          (n (take-port-link plus 2))
-          (new-plus (make-cell* (gensym "PLUS-") 'plus 2))
-          (new-succ (make-cell* (gensym "SUCC-") 'succ 1)))
-      (install-cell net new-plus)
-      (install-cell net new-succ)
-      (kill-cell net succ)
-      (kill-cell net plus)
-      (connect-endpoints net (port-endpoint new-plus 0) x)
-      (connect-endpoints net (port-endpoint new-plus 2) n)
-      (connect-endpoints net (port-endpoint new-succ 0) result)
-      (connect-endpoints net (port-endpoint new-succ 1)
-                         (port-endpoint new-plus 1)))))
+    (lambda (net succ plus)
+      (let ((x (take-port-link succ 1))
+            (result (take-port-link plus 1))
+            (n (take-port-link plus 2))
+            (new-plus (make-cell* (gensym "PLUS-") 'plus 2))
+            (new-succ (make-cell* (gensym "SUCC-") 'succ 1)))
+        (install-cell net new-plus)
+        (install-cell net new-succ)
+        (kill-cell net succ)
+        (kill-cell net plus)
+        (connect-endpoints net (port-endpoint new-plus 0) x)
+        (connect-endpoints net (port-endpoint new-plus 2) n)
+        (connect-endpoints net (port-endpoint new-succ 0) result)
+        (connect-endpoints net (port-endpoint new-succ 1)
+                           (port-endpoint new-plus 1)))))
 
 (defun demo-plus ()
   "Compute 2 + 1 in unary interaction-net form.
@@ -725,36 +725,36 @@ Returns three values:
 (defparameter *figure9-runtime* (make-runtime :typed-mode t))
 
 (define-symbol *figure9-runtime* 'p 0
-  :principal-type 'atom
-  :principal-polarity :output)
+               :principal-type 'atom
+               :principal-polarity :output)
 (define-symbol *figure9-runtime* 'l 0
-  :principal-type 'atom
-  :principal-polarity :output)
+               :principal-type 'atom
+               :principal-polarity :output)
 (define-symbol *figure9-runtime* '|0| 0
-  :principal-type 'atom
-  :principal-polarity :output)
+               :principal-type 'atom
+               :principal-polarity :output)
 (define-symbol *figure9-runtime* 'cons 2
-  :principal-type 'list
-  :principal-polarity :output
-  :auxiliary-types '(atom list)
-  :auxiliary-polarities '(:input :input)
-  :auxiliary-partitions '((1) (2)))
+               :principal-type 'list
+               :principal-polarity :output
+               :auxiliary-types '(atom list)
+               :auxiliary-polarities '(:input :input)
+               :auxiliary-partitions '((1) (2)))
 (define-symbol *figure9-runtime* '|Nil| 0
-  :principal-type 'list
-  :principal-polarity :output)
+               :principal-type 'list
+               :principal-polarity :output)
 (define-symbol *figure9-runtime* 'append 2
-  :principal-type 'list
-  :principal-polarity :input
-  :auxiliary-types '(list list)
-  :auxiliary-polarities '(:input :output)
-  :auxiliary-partitions '((1) (2)))
+               :principal-type 'list
+               :principal-polarity :input
+               :auxiliary-types '(list list)
+               :auxiliary-polarities '(:input :output)
+               :auxiliary-partitions '((1) (2)))
 
 (define-lafont-rule *figure9-runtime*
-  '((cons x (append u t))
-    (append v (cons x t))))
+    '((cons x (append u t))
+      (append v (cons x t))))
 
 (define-lafont-rule *figure9-runtime*
-  '(|Nil| (append v v)))
+    '(|Nil| (append v v)))
 
 (defun demo-append-figure9 ()
   "Reduce a Figure-9-style append example and return the resulting list.

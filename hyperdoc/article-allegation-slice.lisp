@@ -502,7 +502,7 @@
   (loop for title in titles
         for concept = (article-allegation-concept-by-title input title)
         when concept
-          collect (article-allegation-topic-link (getf concept :title))))
+        collect (article-allegation-topic-link (getf concept :title))))
 
 (defun article-allegation-concept-references (input concept)
   (remove-duplicates
@@ -864,7 +864,7 @@
     (cond
       ((hash-table-p value)
        (loop for json-key being each hash-key of value
-               using (hash-value json-value)
+             using (hash-value json-value)
              for normalized-key = (article-allegation-json-keyword json-key)
              append (list normalized-key
                           (article-allegation-normalize-json json-value normalized-key))))
@@ -970,33 +970,33 @@
 
 (defun article-allegation-validation-commands (input)
   (let* ((page-paths
-           (append
-            (list (format nil "hyperdoc/~A"
-                          (article-allegation-page-filename
-                           (getf input :incident-title))))
-            (loop for concept in (getf input :concepts)
-                  collect (format nil "hyperdoc/~A"
-                                  (article-allegation-page-filename
-                                   (getf concept :title))))))
-         (topic-symbols
+          (append
+           (list (format nil "hyperdoc/~A"
+                         (article-allegation-page-filename
+                          (getf input :incident-title))))
            (loop for concept in (getf input :concepts)
-                 collect (format nil "hyperdoc::~A"
-                                 (getf concept :topic-function-name))))
+                 collect (format nil "hyperdoc/~A"
+                                 (article-allegation-page-filename
+                                  (getf concept :title))))))
+         (topic-symbols
+          (loop for concept in (getf input :concepts)
+                collect (format nil "hyperdoc::~A"
+                                (getf concept :topic-function-name))))
          (fedwiki-paths
-           (when (getf input :generate-fedwiki-twins-p)
-             (append
-              (list (format nil "~Apages/~A"
-                            (namestring (getf input :fedwiki-repo-root))
-                            (getf input :incident-fedwiki-slug)))
-              (loop for concept in (getf input :concepts)
-                    collect (format nil "~Apages/~A"
-                                    (namestring (getf input :fedwiki-repo-root))
-                                    (getf concept :fedwiki-slug)))
-              (when (and (getf input :generate-daily-anchor-p)
-                         (getf input :daily-anchor-date))
-                (list (format nil "~Apages/~A"
-                              (namestring (getf input :fedwiki-repo-root))
-                              (getf input :daily-anchor-date)))))))
+          (when (getf input :generate-fedwiki-twins-p)
+            (append
+             (list (format nil "~Apages/~A"
+                           (namestring (getf input :fedwiki-repo-root))
+                           (getf input :incident-fedwiki-slug)))
+             (loop for concept in (getf input :concepts)
+                   collect (format nil "~Apages/~A"
+                                   (namestring (getf input :fedwiki-repo-root))
+                                   (getf concept :fedwiki-slug)))
+             (when (and (getf input :generate-daily-anchor-p)
+                        (getf input :daily-anchor-date))
+               (list (format nil "~Apages/~A"
+                             (namestring (getf input :fedwiki-repo-root))
+                             (getf input :daily-anchor-date)))))))
          (bootstrap (article-allegation-asdf-bootstrap-command)))
     (append
      (list
@@ -1025,48 +1025,48 @@
                             (uiop:ensure-directory-pathname dry-run-directory)))
          (incident-title (getf normalized :incident-title))
          (incident-content
-           (article-allegation-assert-incident-page-invariants
-            normalized
-            (article-allegation-render-incident-page normalized)))
+          (article-allegation-assert-incident-page-invariants
+           normalized
+           (article-allegation-render-incident-page normalized)))
          (hyperdoc-files
-           (append
-            (list (list :title incident-title
-                        :relative-path (format nil "hyperdoc/~A"
-                                               (article-allegation-page-filename incident-title))
-                        :target-path (merge-pathnames
-                                      (article-allegation-page-filename incident-title)
-                                      (getf normalized :hyperdoc-pages-directory))
-                        :content incident-content))
-            (loop for concept in (getf normalized :concepts)
-                  collect (list :title (getf concept :title)
-                                :relative-path (format nil "hyperdoc/~A"
-                                                       (article-allegation-page-filename
-                                                        (getf concept :title)))
-                                :target-path (merge-pathnames
-                                              (article-allegation-page-filename
-                                               (getf concept :title))
-                                              (getf normalized :hyperdoc-pages-directory))
-                                :content (article-allegation-render-concept-page
-                                          normalized concept)))))
+          (append
+           (list (list :title incident-title
+                       :relative-path (format nil "hyperdoc/~A"
+                                              (article-allegation-page-filename incident-title))
+                       :target-path (merge-pathnames
+                                     (article-allegation-page-filename incident-title)
+                                     (getf normalized :hyperdoc-pages-directory))
+                       :content incident-content))
+           (loop for concept in (getf normalized :concepts)
+                 collect (list :title (getf concept :title)
+                               :relative-path (format nil "hyperdoc/~A"
+                                                      (article-allegation-page-filename
+                                                       (getf concept :title)))
+                               :target-path (merge-pathnames
+                                             (article-allegation-page-filename
+                                              (getf concept :title))
+                                             (getf normalized :hyperdoc-pages-directory))
+                               :content (article-allegation-render-concept-page
+                                         normalized concept)))))
          (fedwiki-files
-           (if (getf normalized :generate-fedwiki-twins-p)
-               (append
-                (list (list :title incident-title
-                            :slug (getf normalized :incident-fedwiki-slug)
-                            :target-path (merge-pathnames
-                                          (getf normalized :incident-fedwiki-slug)
-                                          (getf normalized :fedwiki-pages-directory))
-                            :page (article-allegation-incident-fedwiki-page normalized)))
-                (loop for concept in (getf normalized :concepts)
-                      for page-index from 2
-                      collect (list :title (getf concept :title)
-                                    :slug (getf concept :fedwiki-slug)
-                                    :target-path (merge-pathnames
-                                                  (getf concept :fedwiki-slug)
-                                                  (getf normalized :fedwiki-pages-directory))
-                                    :page (article-allegation-concept-fedwiki-page
-                                           normalized concept page-index))))
-               '()))
+          (if (getf normalized :generate-fedwiki-twins-p)
+              (append
+               (list (list :title incident-title
+                           :slug (getf normalized :incident-fedwiki-slug)
+                           :target-path (merge-pathnames
+                                         (getf normalized :incident-fedwiki-slug)
+                                         (getf normalized :fedwiki-pages-directory))
+                           :page (article-allegation-incident-fedwiki-page normalized)))
+               (loop for concept in (getf normalized :concepts)
+                     for page-index from 2
+                     collect (list :title (getf concept :title)
+                                   :slug (getf concept :fedwiki-slug)
+                                   :target-path (merge-pathnames
+                                                 (getf concept :fedwiki-slug)
+                                                 (getf normalized :fedwiki-pages-directory))
+                                   :page (article-allegation-concept-fedwiki-page
+                                          normalized concept page-index))))
+              '()))
          (bundle (list :input normalized
                        :dry-run-root dry-run-root
                        :hyperdoc-files hyperdoc-files

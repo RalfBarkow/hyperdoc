@@ -263,7 +263,7 @@
 
 (defun boundary-preformatted-view (lines)
   (views:html
-    (:pre (views:esc (boundary-lines-to-string lines)))))
+   (:pre (views:esc (boundary-lines-to-string lines)))))
 
 (defmethod views:text-representation
     ((definition hyperdoc::boundary-definition))
@@ -279,100 +279,100 @@
 
 (views:defview 👀overview (definition hyperdoc::boundary-definition)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:p (views:esc
-           (or (hyperdoc::summary-of definition)
-               "Reusable boundary definition.")))
-      (boundary-preformatted-view
-       (boundary-definition-overview-lines definition)))))
+                   (views:html
+                    (:p (views:esc
+                         (or (hyperdoc::summary-of definition)
+                             "Reusable boundary definition.")))
+                    (boundary-preformatted-view
+                     (boundary-definition-overview-lines definition)))))
 
 (views:defview 👀sides-crossing-condition
     (definition hyperdoc::boundary-definition)
   (views:html-view :title "Sides and crossing condition" :priority 2
-    (boundary-preformatted-view
-     (boundary-definition-sides-lines definition))))
+                   (boundary-preformatted-view
+                    (boundary-definition-sides-lines definition))))
 
 (views:defview 👀permitted-blocked-operations
     (definition hyperdoc::boundary-definition)
   (views:html-view :title "Permitted and blocked operations" :priority 3
-    (boundary-preformatted-view
-     (boundary-definition-operations-lines definition))))
+                   (boundary-preformatted-view
+                    (boundary-definition-operations-lines definition))))
 
 (views:defview 👀failure-classifications
     (definition hyperdoc::boundary-definition)
   (views:html-view :title "Failure classifications" :priority 4
-    (boundary-preformatted-view
-     (boundary-definition-failure-lines definition))))
+                   (boundary-preformatted-view
+                    (boundary-definition-failure-lines definition))))
 
 (views:defview 👀adjacent-surfaces-stages
     (definition hyperdoc::boundary-definition)
   (views:html-view :title "Adjacent surfaces and stages" :priority 5
-    (views:html
-      (:p (views:esc
-           "Definitions declare adjacent surfaces; concrete stages appear on boundary instances.")))
-    (boundary-preformatted-view
-     (boundary-definition-adjacent-lines definition))))
+                   (views:html
+                    (:p (views:esc
+                         "Definitions declare adjacent surfaces; concrete stages appear on boundary instances.")))
+                   (boundary-preformatted-view
+                    (boundary-definition-adjacent-lines definition))))
 
 (views:defview 👀related-boundaries (definition hyperdoc::boundary-definition)
   (views:html-view :title "Related boundaries" :priority 6
-    (boundary-preformatted-view
-     (boundary-definition-related-lines definition))))
+                   (boundary-preformatted-view
+                    (boundary-definition-related-lines definition))))
 
 (views:defview 👀source-evidence-code-path
     (definition hyperdoc::boundary-definition)
   (views:html-view :title "Source evidence / code path" :priority 7
-    (boundary-preformatted-view
-     (boundary-source-evidence-lines
-      (hyperdoc::boundary-definition-source-evidence-of definition)))))
+                   (boundary-preformatted-view
+                    (boundary-source-evidence-lines
+                     (hyperdoc::boundary-definition-source-evidence-of definition)))))
 
 (views:defview 👀overview (instance hyperdoc::boundary-instance)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:p (views:esc
-           (or (hyperdoc::summary-of
-                (hyperdoc::boundary-instance-definition-of instance))
-               "Concrete realized boundary crossing or block.")))
-      (boundary-preformatted-view
-       (boundary-instance-overview-lines instance)))))
+                   (views:html
+                    (:p (views:esc
+                         (or (hyperdoc::summary-of
+                              (hyperdoc::boundary-instance-definition-of instance))
+                             "Concrete realized boundary crossing or block.")))
+                    (boundary-preformatted-view
+                     (boundary-instance-overview-lines instance)))))
 
 (views:defview 👀boundary-state (instance hyperdoc::boundary-instance)
   (views:html-view :title "Boundary state" :priority 2
-    (boundary-preformatted-view
-     (boundary-instance-state-lines instance))))
+                   (boundary-preformatted-view
+                    (boundary-instance-state-lines instance))))
 
 (views:defview 👀crossing-attempt (instance hyperdoc::boundary-instance)
   (views:html-view :title "Crossing attempt" :priority 3
-    (boundary-preformatted-view
-     (boundary-instance-crossing-lines instance))))
+                   (boundary-preformatted-view
+                    (boundary-instance-crossing-lines instance))))
 
 (views:defview 👀evidence (instance hyperdoc::boundary-instance)
   (views:html-view :title "Evidence" :priority 4
-    (boundary-preformatted-view
-     (boundary-instance-evidence-lines instance))))
+                   (boundary-preformatted-view
+                    (boundary-instance-evidence-lines instance))))
 
 (views:defview 👀failure-analysis (instance hyperdoc::boundary-instance)
   (views:html-view :title "Failure analysis" :priority 5
-    (boundary-preformatted-view
-     (boundary-instance-failure-lines instance))))
+                   (boundary-preformatted-view
+                    (boundary-instance-failure-lines instance))))
 
 (views:defview 👀adjacent-stages-surfaces (instance hyperdoc::boundary-instance)
   (views:html-view :title "Adjacent stages and surfaces" :priority 6
-    (boundary-preformatted-view
-     (boundary-instance-adjacent-lines instance))))
+                   (boundary-preformatted-view
+                    (boundary-instance-adjacent-lines instance))))
 
 (views:defview 👀source-evidence-code-path
     (instance hyperdoc::boundary-instance)
   (views:html-view :title "Source evidence / code path" :priority 7
-    (boundary-preformatted-view
-     (append
-      (list "Definition source evidence:")
-      (boundary-source-evidence-lines
-       (hyperdoc::boundary-definition-source-evidence-of
-        (hyperdoc::boundary-instance-definition-of instance)))
-      (if (hyperdoc::boundary-instance-source-evidence-of instance)
-          (append
-           (list ""
-                 "Instance-specific source evidence:")
-           (boundary-source-evidence-lines
-            (hyperdoc::boundary-instance-source-evidence-of instance)))
-          '())))))
+                   (boundary-preformatted-view
+                    (append
+                     (list "Definition source evidence:")
+                     (boundary-source-evidence-lines
+                      (hyperdoc::boundary-definition-source-evidence-of
+                       (hyperdoc::boundary-instance-definition-of instance)))
+                     (if (hyperdoc::boundary-instance-source-evidence-of instance)
+                         (append
+                          (list ""
+                                "Instance-specific source evidence:")
+                          (boundary-source-evidence-lines
+                           (hyperdoc::boundary-instance-source-evidence-of instance)))
+                         '())))))

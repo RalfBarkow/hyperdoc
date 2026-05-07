@@ -117,18 +117,18 @@
     (interaction-net:define-agent runtime 'ping 0)
     (interaction-net:define-agent runtime 'pong 0)
     (interaction-net:define-rule
-     runtime 'ping 'pong
-     (lambda (net ping pong)
-       (let ((new-ping (interaction-net::make-cell* (gensym "PING-") 'ping 0))
-             (new-pong (interaction-net::make-cell* (gensym "PONG-") 'pong 0)))
-         (interaction-net::kill-cell net ping)
-         (interaction-net::kill-cell net pong)
-         (interaction-net::install-cell net new-ping)
-         (interaction-net::install-cell net new-pong)
-         (interaction-net::connect-endpoints
-          net
-          (interaction-net::port-endpoint new-ping 0)
-          (interaction-net::port-endpoint new-pong 0)))))
+        runtime 'ping 'pong
+        (lambda (net ping pong)
+          (let ((new-ping (interaction-net::make-cell* (gensym "PING-") 'ping 0))
+                (new-pong (interaction-net::make-cell* (gensym "PONG-") 'pong 0)))
+            (interaction-net::kill-cell net ping)
+            (interaction-net::kill-cell net pong)
+            (interaction-net::install-cell net new-ping)
+            (interaction-net::install-cell net new-pong)
+            (interaction-net::connect-endpoints
+             net
+             (interaction-net::port-endpoint new-ping 0)
+             (interaction-net::port-endpoint new-pong 0)))))
     (let ((net (interaction-net:parse-net runtime '((:agent p ping w)
                                                     (:agent q pong w)))))
       (interaction-net-assert-signals
@@ -187,8 +187,8 @@
        (hyperbook:find-page hyperdoc::*topics* title :signal-error? t)
        (format nil "Topics HyperBook must resolve ~A" title))))
   (let ((page-source
-          (interaction-net-smoke-read-page
-           "hyperdoc/Lafont 1990 Interaction Nets.html")))
+         (interaction-net-smoke-read-page
+          "hyperdoc/Lafont 1990 Interaction Nets.html")))
     (interaction-net-assert-true
      (search "Implementation crosswalk" page-source :test #'char=)
      "Lafont page must include the implementation crosswalk section")

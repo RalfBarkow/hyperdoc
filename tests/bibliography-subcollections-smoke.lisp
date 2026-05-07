@@ -405,8 +405,8 @@ COMMIT;"
          (plan (hyperdoc::coachmark-bibliography-authoring-plan :source source
                                                                 :signal-error? t))
          (candidate-titles
-           (mapcar #'hyperdoc::candidate-topic-title-of
-                   (hyperdoc::hyperdoc-authoring-plan-candidate-topics-of plan)))
+          (mapcar #'hyperdoc::candidate-topic-title-of
+                  (hyperdoc::hyperdoc-authoring-plan-candidate-topics-of plan)))
          (coach-marks (find-candidate-by-title plan "Coach marks"))
          (mobile-onboarding (find-candidate-by-title plan "Mobile onboarding")))
     (dolist (title '("Coach marks"
@@ -551,13 +551,13 @@ COMMIT;"
                   (merge-pathnames "page-update-notes/onboarding.txt" root))
                  "Materialization should write an arrangement/update note for scoped candidates")
     (let ((topic-entry
-            (find :topic-factory-snippet
-                  (hyperdoc::hyperdoc-authoring-plan-materialization-entries-of plan)
-                  :key #'hyperdoc::bibliography-materialization-entry-kind-of))
+           (find :topic-factory-snippet
+                 (hyperdoc::hyperdoc-authoring-plan-materialization-entries-of plan)
+                 :key #'hyperdoc::bibliography-materialization-entry-kind-of))
           (page-entry
-            (find :page-fragment
-                  (hyperdoc::hyperdoc-authoring-plan-materialization-entries-of plan)
-                  :key #'hyperdoc::bibliography-materialization-entry-kind-of)))
+           (find :page-fragment
+                 (hyperdoc::hyperdoc-authoring-plan-materialization-entries-of plan)
+                 :key #'hyperdoc::bibliography-materialization-entry-kind-of)))
       (assert-true (search "hyperdoc/topics.lisp"
                            (format nil "~{~A~^~%~}"
                                    (hyperdoc::bibliography-materialization-entry-repo-touch-preview-of

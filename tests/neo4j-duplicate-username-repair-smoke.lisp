@@ -62,7 +62,7 @@
 
 (defun neo4j-repair-string-contains-all (string label needles)
   (let ((normalized
-          (neo4j-repair-normalize-whitespace string)))
+         (neo4j-repair-normalize-whitespace string)))
     (dolist (needle needles)
       (neo4j-repair-assert-true
        (search (neo4j-repair-normalize-whitespace needle)
@@ -124,7 +124,7 @@
          (refused (hyperdoc::make-example-refused-admin-duplicate-username-repair-operation))
          (unsupported-report (neo4j-repair-make-unresolved-report))
          (unsupported-plan
-           (hyperdoc::plan-neo4j-duplicate-username-repair unsupported-report)))
+          (hyperdoc::plan-neo4j-duplicate-username-repair unsupported-report)))
     (neo4j-repair-assert-typep 'hyperdoc::neo4j-store-target store-target
                                "Store target type")
     (neo4j-repair-assert-typep 'hyperdoc::dmx-neo4j-instance-target instance-target

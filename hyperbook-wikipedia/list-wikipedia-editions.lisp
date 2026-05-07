@@ -9,9 +9,9 @@
 (defpackage :wikipedia-tools
   (:use :cl)
   (:import-from :alexandria
-   :if-let :when-let :compose)
+                :if-let :when-let :compose)
   (:import-from :arrow-macros
-   :-> :-<> :->> :-<>> :<> :some-> :some->>))
+                :-> :-<> :->> :-<>> :<> :some-> :some->>))
 
 (in-package :wikipedia-tools)
 
@@ -40,20 +40,20 @@
          ;; wdt:P1448  Official name
          (result (wikidata-query query)))
     (->> result
-      (gethash "results")
-      (gethash "bindings")
-      (map 'vector
-           #'(lambda (d)
-               (let ((name (->> d
-                            (gethash "name")
-                            (gethash "value")))
-                     (url (->> d
-                            (gethash "url")
-                            (gethash "value"))))
-                 (multiple-value-bind
-                       (code main-page)
-                     (find-code-and-name-of-main-page url)
-                   (list code (decode-utf8 name) main-page))))))))
+         (gethash "results")
+         (gethash "bindings")
+         (map 'vector
+              #'(lambda (d)
+                  (let ((name (->> d
+                                   (gethash "name")
+                                   (gethash "value")))
+                        (url (->> d
+                                  (gethash "url")
+                                  (gethash "value"))))
+                    (multiple-value-bind
+                          (code main-page)
+                        (find-code-and-name-of-main-page url)
+                      (list code (decode-utf8 name) main-page))))))))
 
 (defun find-code-and-name-of-main-page (url)
   (multiple-value-bind
@@ -61,20 +61,20 @@
       (drakma:http-request url :method :get)
     (declare (ignorable body status headers source-uri stream must-close? reason ))
     (let ((code (->> source-uri
-                  puri:uri-host
-                  (str:split ".")
-                  first))
+                     puri:uri-host
+                     (str:split ".")
+                     first))
           (main-page (->> source-uri
-                       puri:uri-path
-                       decode-utf8
-                       (str:split "/")
-                       third)))
+                          puri:uri-path
+                          decode-utf8
+                          (str:split "/")
+                          third)))
       (values code main-page))))
 
 (defun decode-utf8 (s)
   (->> s
-    (map 'vector #'char-code)
-    trivial-utf-8:utf-8-bytes-to-string))
+       (map 'vector #'char-code)
+       trivial-utf-8:utf-8-bytes-to-string))
 
 (defvar *editions* (fetch-wikipedia-editions))
 

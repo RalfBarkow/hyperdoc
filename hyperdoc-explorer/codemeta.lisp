@@ -25,16 +25,16 @@
 (views:defview 👀authors (hd hyperdoc)
   (when-let (authors (codemeta-authors hd))
     (views:html-view :title "Authors" :priority 7
-      (loop for author across authors
-            do (views:html
-                 (:div
-                  (:a :href (str:concat "mailto:" (njson:jget "email" author))
-                      (views:esc (njson:jget "givenName" author))
-                      (views:esc " ")
-                      (views:esc (njson:jget "familyName" author)))
-                  (:br)
-                  (:a :href (njson:jget "id" author)
-                      :target "_blank"
-                      (views:esc (njson:jget "id" author)))
-                  (:br)
-                  (:br)))))))
+                     (loop for author across authors
+                           do (views:html
+                               (:div
+                                (:a :href (str:concat "mailto:" (njson:jget "email" author))
+                                    (views:esc (njson:jget "givenName" author))
+                                    (views:esc " ")
+                                    (views:esc (njson:jget "familyName" author)))
+                                (:br)
+                                (:a :href (njson:jget "id" author)
+                                    :target "_blank"
+                                    (views:esc (njson:jget "id" author)))
+                                (:br)
+                                (:br)))))))

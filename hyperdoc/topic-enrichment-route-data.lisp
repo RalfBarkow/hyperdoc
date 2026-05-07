@@ -57,10 +57,10 @@
             until (eq form eof)
             for end = (file-position stream)
             when (topic-enrichment-route-definition-form-p form)
-              return (list :start start :end end :form form)
+            return (list :start start :end end :form form)
             finally
-               (error "No *topic-enrichment-route-definitions* form found in ~A."
-                      pathname)))))
+            (error "No *topic-enrichment-route-definitions* form found in ~A."
+                   pathname)))))
 
 (defun topic-enrichment-route-definition-entries-from-form (form)
   (let ((value-form (third form)))

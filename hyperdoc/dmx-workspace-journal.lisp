@@ -115,23 +115,23 @@
     (&key subject-key subject-uri subject-kind subject previous-state
        after-state)
   (let ((resolved-kind
-          (or subject-kind
-              (dmx-workspace-journal-snapshot-field subject "subjectKind")
-              (dmx-workspace-journal-snapshot-field after-state "subjectKind")
-              (dmx-workspace-journal-snapshot-field previous-state
-                                                    "subjectKind")))
+         (or subject-kind
+             (dmx-workspace-journal-snapshot-field subject "subjectKind")
+             (dmx-workspace-journal-snapshot-field after-state "subjectKind")
+             (dmx-workspace-journal-snapshot-field previous-state
+                                                   "subjectKind")))
         (resolved-key
-          (or subject-key
-              (dmx-workspace-journal-snapshot-field subject "subjectKey")
-              (dmx-workspace-journal-snapshot-field after-state "subjectKey")
-              (dmx-workspace-journal-snapshot-field previous-state
-                                                    "subjectKey")))
+         (or subject-key
+             (dmx-workspace-journal-snapshot-field subject "subjectKey")
+             (dmx-workspace-journal-snapshot-field after-state "subjectKey")
+             (dmx-workspace-journal-snapshot-field previous-state
+                                                   "subjectKey")))
         (resolved-uri
-          (or subject-uri
-              (dmx-workspace-journal-snapshot-field subject "subjectUri")
-              (dmx-workspace-journal-snapshot-field after-state "subjectUri")
-              (dmx-workspace-journal-snapshot-field previous-state
-                                                    "subjectUri"))))
+         (or subject-uri
+             (dmx-workspace-journal-snapshot-field subject "subjectUri")
+             (dmx-workspace-journal-snapshot-field after-state "subjectUri")
+             (dmx-workspace-journal-snapshot-field previous-state
+                                                   "subjectUri"))))
     (or (and (stringp resolved-kind)
              (string= resolved-kind "workspace-journal"))
         (dmx-string-prefix-p *hyperdoc-workspace-journal-uri-prefix*
@@ -204,43 +204,43 @@
 (defun dmx-workspace-journal-ensure-hidden-topicmap-placement
     (client workspace-topicmap-id topic-id)
   (let* ((existing-view-props
-           (dmx-workspace-journal-view-props-for-topic
-            client
-            workspace-topicmap-id
-            topic-id))
+          (dmx-workspace-journal-view-props-for-topic
+           client
+           workspace-topicmap-id
+           topic-id))
          (in-topicmap-p
-           (and workspace-topicmap-id
-                topic-id
-                (dmx-import-topic-in-topicmap-p client
+          (and workspace-topicmap-id
+               topic-id
+               (dmx-import-topic-in-topicmap-p client
                                                workspace-topicmap-id
                                                topic-id)))
          (hidden-view-props
-           (dmx-workspace-journal-hidden-view-props))
+          (dmx-workspace-journal-hidden-view-props))
          (placement-action
-           (cond
-             ((not in-topicmap-p)
-              (dmx-import-add-topic-to-topicmap
-               client
-               workspace-topicmap-id
-               topic-id
-               hidden-view-props)
-              :add)
-             ((not (dmx-workspace-journal-hidden-view-props-p
-                    existing-view-props))
-              (dmx-import-set-topic-view-props
-               client
-               workspace-topicmap-id
-               topic-id
-               hidden-view-props)
-              :set-view-props)
-             (t
-              :already-hidden)))
+          (cond
+            ((not in-topicmap-p)
+             (dmx-import-add-topic-to-topicmap
+              client
+              workspace-topicmap-id
+              topic-id
+              hidden-view-props)
+             :add)
+            ((not (dmx-workspace-journal-hidden-view-props-p
+                   existing-view-props))
+             (dmx-import-set-topic-view-props
+              client
+              workspace-topicmap-id
+              topic-id
+              hidden-view-props)
+             :set-view-props)
+            (t
+             :already-hidden)))
          (resolved-view-props
-           (or (dmx-workspace-journal-view-props-for-topic
-                client
-                workspace-topicmap-id
-                topic-id)
-               hidden-view-props)))
+          (or (dmx-workspace-journal-view-props-for-topic
+               client
+               workspace-topicmap-id
+               topic-id)
+              hidden-view-props)))
     (list :topicmap-placement-action placement-action
           :topicmap-placement-action-label
           (case placement-action
@@ -260,29 +260,29 @@
                            (or (dmx-json-object-value existing-topic "uri")
                                (getf existing-topic :uri))))
          (existing-assignment
-           (dmx-workspace-journal-existing-topic-workspace-summary
-            client
-            existing-topic))
+          (dmx-workspace-journal-existing-topic-workspace-summary
+           client
+           existing-topic))
          (existing-in-topicmap-p
-           (and existing-topic-id
+          (and existing-topic-id
+               workspace-topicmap-id
+               (dmx-import-topic-in-topicmap-p
+                client
                 workspace-topicmap-id
-                (dmx-import-topic-in-topicmap-p
-                 client
-                 workspace-topicmap-id
-                 existing-topic-id)))
+                existing-topic-id)))
          (existing-view-props
-           (and existing-topic-id
+          (and existing-topic-id
+               workspace-topicmap-id
+               (dmx-workspace-journal-view-props-for-topic
+                client
                 workspace-topicmap-id
-                (dmx-workspace-journal-view-props-for-topic
-                 client
-                 workspace-topicmap-id
-                 existing-topic-id)))
+                existing-topic-id)))
          (existing-hidden-view-props-p
-           (dmx-workspace-journal-hidden-view-props-p existing-view-props))
+          (dmx-workspace-journal-hidden-view-props-p existing-view-props))
          (resolved-workspace-id
-           (effective-http-dmx-import-workspace-id
-            client
-            :workspace-id workspace-id)))
+          (effective-http-dmx-import-workspace-id
+           client
+           :workspace-id workspace-id)))
     (list :repair-required-p t
           :repair-status :pending
           :repair-status-label "pending"
@@ -339,23 +339,23 @@
 (defun dmx-workspace-journal-current-companion-candidate (candidates)
   (when candidates
     (let* ((superseded-topic-ids
-             (remove nil
-                     (mapcar (lambda (candidate)
-                               (getf candidate :supersedes-topic-id))
-                             candidates)))
+            (remove nil
+                    (mapcar (lambda (candidate)
+                              (getf candidate :supersedes-topic-id))
+                            candidates)))
            (unsuperseded
-             (remove-if (lambda (candidate)
-                          (member (getf candidate :topic-id)
-                                  superseded-topic-ids
-                                  :test #'eql))
-                        candidates))
+            (remove-if (lambda (candidate)
+                         (member (getf candidate :topic-id)
+                                 superseded-topic-ids
+                                 :test #'eql))
+                       candidates))
            (preferred
-             (or unsuperseded candidates))
+            (or unsuperseded candidates))
            (assigned
-             (remove-if-not
-              (lambda (candidate)
-                (getf candidate :assigned-workspace-id))
-              preferred))
+            (remove-if-not
+             (lambda (candidate)
+               (getf candidate :assigned-workspace-id))
+             preferred))
            (pool (or assigned preferred)))
       (car (sort (copy-list pool) #'> :key (lambda (candidate)
                                              (or (getf candidate :topic-id)
@@ -373,9 +373,9 @@
             (when (and stream
                        (string= subject-key (gethash "subjectKey" stream)))
               (let* ((assignment
-                       (dmx-workspace-journal-existing-topic-workspace-summary
-                        client
-                        topic))
+                      (dmx-workspace-journal-existing-topic-workspace-summary
+                       client
+                       topic))
                      (topic-id (dmx-import-object-id topic)))
                 (push (list :topic topic
                             :stream stream
@@ -415,9 +415,9 @@
 
 (defun dmx-workspace-journal-companion-repair-result
     (summary ownership &key dry-run repairable-p repair-completed-p repair-reason
-       subject-key subject-uri journal-topic-id)
+                         subject-key subject-uri journal-topic-id)
   (let ((current-topic-id
-          (dmx-workspace-journal-companion-repair-current-topic-id summary)))
+         (dmx-workspace-journal-companion-repair-current-topic-id summary)))
     (append
      summary
      (list :operation :repair-workspace-journal-companion
@@ -450,64 +450,64 @@
     (&key journal-topic-id subject-key subject-uri workspace-topicmap-id client)
   (let* ((boundary 'execute-dmx-workspace-journal-companion-repair)
          (resolved-topicmap-id
-           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run t :verbose nil)))
+          (or client
+              (make-default-dmx-import-client :dry-run t :verbose nil)))
          (resolved-journal-topic-id
-           (and journal-topic-id
-                (normalize-dmx-workspace-topic-id
-                 journal-topic-id
-                 :journal-topic-id
-                 boundary
-                 :required? t)))
+          (and journal-topic-id
+               (normalize-dmx-workspace-topic-id
+                journal-topic-id
+                :journal-topic-id
+                boundary
+                :required? t)))
          (resolved-subject-key
-           (or (and subject-key
-                    (normalize-dmx-workspace-topic-string
-                     subject-key
-                     :subject-key
-                     boundary
-                     :required? t))
-               (and subject-uri
-                    (normalize-dmx-workspace-topic-string
-                     subject-uri
-                     :subject-uri
-                     boundary
-                     :required? t))))
+          (or (and subject-key
+                   (normalize-dmx-workspace-topic-string
+                    subject-key
+                    :subject-key
+                    boundary
+                    :required? t))
+              (and subject-uri
+                   (normalize-dmx-workspace-topic-string
+                    subject-uri
+                    :subject-uri
+                    boundary
+                    :required? t))))
          (existing-topic
-           (cond
-             (resolved-journal-topic-id
-              (dmx-import-read-topic resolved-client resolved-journal-topic-id))
-             (resolved-subject-key
-              (or (getf (dmx-workspace-journal-current-companion-candidate
-                         (dmx-workspace-journal-companion-candidates-for-subject
-                          resolved-client
-                          resolved-topicmap-id
-                          resolved-subject-key))
-                        :topic)
-                  (dmx-import-find-existing-topic
-                   resolved-client
-                   (dmx-workspace-journal-note-uri resolved-subject-key))))
-             (t
-              (error 'dmx-workspace-topic-validation-error
-                     :message
-                     (dmx-workspace-topic-validation-message
-                      boundary
-                      '(:journal-topic-id :subject-key :subject-uri)
-                      nil)
-                     :boundary boundary
-                     :payload nil
-                     :missing-fields
-                     '(:journal-topic-id :subject-key :subject-uri)))))
+          (cond
+            (resolved-journal-topic-id
+             (dmx-import-read-topic resolved-client resolved-journal-topic-id))
+            (resolved-subject-key
+             (or (getf (dmx-workspace-journal-current-companion-candidate
+                        (dmx-workspace-journal-companion-candidates-for-subject
+                         resolved-client
+                         resolved-topicmap-id
+                         resolved-subject-key))
+                       :topic)
+                 (dmx-import-find-existing-topic
+                  resolved-client
+                  (dmx-workspace-journal-note-uri resolved-subject-key))))
+            (t
+             (error 'dmx-workspace-topic-validation-error
+                    :message
+                    (dmx-workspace-topic-validation-message
+                     boundary
+                     '(:journal-topic-id :subject-key :subject-uri)
+                     nil)
+                    :boundary boundary
+                    :payload nil
+                    :missing-fields
+                    '(:journal-topic-id :subject-key :subject-uri)))))
          (ownership
-           (and existing-topic
-                (classify-dmx-workspace-topic-ownership existing-topic)))
+          (and existing-topic
+               (classify-dmx-workspace-topic-ownership existing-topic)))
          (stream
-           (and existing-topic
-                (eq (dmx-workspace-topic-ownership-class ownership)
-                    :hyperdoc-workspace-journal)
-                (dmx-workspace-journal-companion-stream-from-topic
-                 existing-topic))))
+          (and existing-topic
+               (eq (dmx-workspace-topic-ownership-class ownership)
+                   :hyperdoc-workspace-journal)
+               (dmx-workspace-journal-companion-stream-from-topic
+                existing-topic))))
     (values existing-topic
             ownership
             stream
@@ -519,7 +519,7 @@
     (&key journal-topic-id subject-key subject-uri workspace-topicmap-id
        workspace-id client (dry-run t))
   (multiple-value-bind (existing-topic ownership stream resolved-topicmap-id
-                         resolved-client resolved-subject-key)
+                                       resolved-client resolved-subject-key)
       (resolve-dmx-workspace-journal-companion-repair
        :journal-topic-id journal-topic-id
        :subject-key subject-key
@@ -527,42 +527,42 @@
        :workspace-topicmap-id workspace-topicmap-id
        :client client)
     (let* ((resolved-subject-uri
-             (or subject-uri
-                 resolved-subject-key
-                 (and stream
-                      (gethash "subjectUri" stream))))
+            (or subject-uri
+                resolved-subject-key
+                (and stream
+                     (gethash "subjectUri" stream))))
            (resolved-journal-topic-id
-             (or journal-topic-id
-                 (and existing-topic
-                      (dmx-import-object-id existing-topic))))
+            (or journal-topic-id
+                (and existing-topic
+                     (dmx-import-object-id existing-topic))))
            (resolved-stream
-             (or stream
-                 (and existing-topic
-                      ownership
-                      (eq (dmx-workspace-topic-ownership-class ownership)
-                          :hyperdoc-workspace-journal)
-                      (dmx-workspace-journal-companion-stream-from-topic
-                       existing-topic))))
+            (or stream
+                (and existing-topic
+                     ownership
+                     (eq (dmx-workspace-topic-ownership-class ownership)
+                         :hyperdoc-workspace-journal)
+                     (dmx-workspace-journal-companion-stream-from-topic
+                      existing-topic))))
            (current-candidate
-             (and resolved-stream
-                  (dmx-workspace-journal-current-companion-candidate
-                   (dmx-workspace-journal-companion-candidates-for-subject
-                    resolved-client
-                    resolved-topicmap-id
-                    (gethash "subjectKey" resolved-stream)))))
-           (already-repaired-current-topic
-             (and current-candidate
-                  (not (eql (getf current-candidate :topic-id)
-                            (dmx-import-object-id existing-topic)))
-                  (eql (getf current-candidate :supersedes-topic-id)
-                       (dmx-import-object-id existing-topic))))
-           (base-summary
-             (and existing-topic
-                  (dmx-workspace-journal-companion-repair-base-summary
+            (and resolved-stream
+                 (dmx-workspace-journal-current-companion-candidate
+                  (dmx-workspace-journal-companion-candidates-for-subject
                    resolved-client
-                   existing-topic
                    resolved-topicmap-id
-                   :workspace-id workspace-id))))
+                   (gethash "subjectKey" resolved-stream)))))
+           (already-repaired-current-topic
+            (and current-candidate
+                 (not (eql (getf current-candidate :topic-id)
+                           (dmx-import-object-id existing-topic)))
+                 (eql (getf current-candidate :supersedes-topic-id)
+                      (dmx-import-object-id existing-topic))))
+           (base-summary
+            (and existing-topic
+                 (dmx-workspace-journal-companion-repair-base-summary
+                  resolved-client
+                  existing-topic
+                  resolved-topicmap-id
+                  :workspace-id workspace-id))))
       (cond
         ((null existing-topic)
          (values
@@ -641,18 +641,18 @@
           t))
         ((not (eq (getf base-summary :existing-assigned-workspace-status) :none))
          (let ((not-needed-summary
-                 (append
-                  base-summary
-                  (list :repair-status :not-needed
-                        :repair-status-label "not-needed"
-                        :repair-step :assignment-check
-                        :repair-step-label "assignment-check"
-                        :assigned-workspace-id-after
-                        (getf base-summary :existing-assigned-workspace-id)
-                        :assigned-workspace-label-after
-                        (getf base-summary :existing-assigned-workspace-label)
-                        :repair-action-taken
-                        "Rejected journal companion repair because the existing companion topic is already assigned and does not need the stale/unassigned repair path."))))
+                (append
+                 base-summary
+                 (list :repair-status :not-needed
+                       :repair-status-label "not-needed"
+                       :repair-step :assignment-check
+                       :repair-step-label "assignment-check"
+                       :assigned-workspace-id-after
+                       (getf base-summary :existing-assigned-workspace-id)
+                       :assigned-workspace-label-after
+                       (getf base-summary :existing-assigned-workspace-label)
+                       :repair-action-taken
+                       "Rejected journal companion repair because the existing companion topic is already assigned and does not need the stale/unassigned repair path."))))
            (values
             (dmx-workspace-journal-companion-repair-result
              not-needed-summary
@@ -669,25 +669,25 @@
         (already-repaired-current-topic
          (let* ((replacement-topic-id (getf current-candidate :topic-id))
                 (replacement-assigned-workspace-id
-                  (getf current-candidate :assigned-workspace-id))
+                 (getf current-candidate :assigned-workspace-id))
                 (not-needed-summary
-                  (append
-                   base-summary
-                   (list :repair-status :not-needed
-                         :repair-status-label "not-needed"
-                         :repair-step :already-replaced
-                         :repair-step-label "already-replaced"
-                         :stale-topic-retained-p t
-                         :stale-topic-superseded-p t
-                         :replacement-topic-id replacement-topic-id
-                         :assigned-workspace-id-after
-                         replacement-assigned-workspace-id
-                         :assigned-workspace-label-after
-                         (and replacement-assigned-workspace-id
-                              (format nil "workspace (~D)"
-                                      replacement-assigned-workspace-id))
-                         :repair-action-taken
-                         "Rejected a second stale-companion repair because a retained-stale replacement companion already exists for this journal stream."))))
+                 (append
+                  base-summary
+                  (list :repair-status :not-needed
+                        :repair-status-label "not-needed"
+                        :repair-step :already-replaced
+                        :repair-step-label "already-replaced"
+                        :stale-topic-retained-p t
+                        :stale-topic-superseded-p t
+                        :replacement-topic-id replacement-topic-id
+                        :assigned-workspace-id-after
+                        replacement-assigned-workspace-id
+                        :assigned-workspace-label-after
+                        (and replacement-assigned-workspace-id
+                             (format nil "workspace (~D)"
+                                     replacement-assigned-workspace-id))
+                        :repair-action-taken
+                        "Rejected a second stale-companion repair because a retained-stale replacement companion already exists for this journal stream."))))
            (values
             (dmx-workspace-journal-companion-repair-result
              not-needed-summary
@@ -724,15 +724,15 @@
           t))
         (dry-run
          (let ((planned-summary
-                 (append
-                  base-summary
-                  (list :repair-status :planned
-                        :repair-status-label "planned"
-                        :repair-step :planned-create-replacement-and-retain-stale
-                        :repair-step-label "planned-create-replacement-and-retain-stale"
-                        :repair-action-taken
-                        "Would create a replacement companion topic under the writable workspace context, retain the stale unassigned companion as history, and restore hidden/off-canvas placement on the replacement."
-                        :repair-completed-p nil))))
+                (append
+                 base-summary
+                 (list :repair-status :planned
+                       :repair-status-label "planned"
+                       :repair-step :planned-create-replacement-and-retain-stale
+                       :repair-step-label "planned-create-replacement-and-retain-stale"
+                       :repair-action-taken
+                       "Would create a replacement companion topic under the writable workspace context, retain the stale unassigned companion as history, and restore hidden/off-canvas placement on the replacement."
+                       :repair-completed-p nil))))
            (values
             (dmx-workspace-journal-companion-repair-result
              planned-summary
@@ -773,23 +773,23 @@
            (dmx-workspace-journal-companion-repair-failed-error
                (condition)
              (let ((repair-summary
-                     (dmx-workspace-journal-companion-repair-summary-of condition)))
-             (values
-              (dmx-workspace-journal-companion-repair-result
-               repair-summary
-               ownership
-               :dry-run nil
-               :repairable-p t
-               :repair-completed-p nil
-               :repair-reason
-               (or (getf repair-summary :repair-reason)
-                   :repair-failed)
-               :subject-key (or resolved-subject-key
-                                (and resolved-stream
-                                     (gethash "subjectKey" resolved-stream)))
-               :subject-uri resolved-subject-uri
-               :journal-topic-id resolved-journal-topic-id)
-              t)))))))))
+                    (dmx-workspace-journal-companion-repair-summary-of condition)))
+               (values
+                (dmx-workspace-journal-companion-repair-result
+                 repair-summary
+                 ownership
+                 :dry-run nil
+                 :repairable-p t
+                 :repair-completed-p nil
+                 :repair-reason
+                 (or (getf repair-summary :repair-reason)
+                     :repair-failed)
+                 :subject-key (or resolved-subject-key
+                                  (and resolved-stream
+                                       (gethash "subjectKey" resolved-stream)))
+                 :subject-uri resolved-subject-uri
+                 :journal-topic-id resolved-journal-topic-id)
+                t)))))))))
 
 (defun dmx-workspace-journal-repair-unassigned-companion-topic
     (client stream existing-topic workspace-topicmap-id &key workspace-id)
@@ -798,224 +798,224 @@
                            (or (dmx-json-object-value existing-topic "uri")
                                (getf existing-topic :uri))))
          (resolved-workspace-id
-           (effective-http-dmx-import-workspace-id
-            client
-            :workspace-id workspace-id))
+          (effective-http-dmx-import-workspace-id
+           client
+           :workspace-id workspace-id))
          (repair-summary
-           (dmx-workspace-journal-companion-repair-base-summary
-            client
-            existing-topic
-            workspace-topicmap-id
-            :workspace-id workspace-id))
+          (dmx-workspace-journal-companion-repair-base-summary
+           client
+           existing-topic
+           workspace-topicmap-id
+           :workspace-id workspace-id))
          (existing-assignment
-           (list :assigned-workspace-id
-                 (getf repair-summary :existing-assigned-workspace-id)
-                 :assigned-workspace-status
-                 (getf repair-summary :existing-assigned-workspace-status)))
+          (list :assigned-workspace-id
+                (getf repair-summary :existing-assigned-workspace-id)
+                :assigned-workspace-status
+                (getf repair-summary :existing-assigned-workspace-status)))
          (existing-in-topicmap-p
-           (getf repair-summary :existing-in-topicmap-p))
+          (getf repair-summary :existing-in-topicmap-p))
          (existing-hidden-view-props-p
-           (getf repair-summary :existing-hidden-view-props-p)))
+          (getf repair-summary :existing-hidden-view-props-p)))
     (flet ((remember (&rest key-values)
              (loop for (key value) on key-values by #'cddr
                    do (setf (getf repair-summary key) value))
              repair-summary))
-    (unless resolved-workspace-id
-      (remember :repair-status :failed
-                :repair-status-label "failed"
-                :repair-step :preflight
-                :repair-step-label "preflight"
-                :repair-action-taken
-                "Could not replace the stale companion because no writable workspace id was available for the create-and-retain-stale path."
-                :repair-failure-message
-                "No writable workspace id was available for journal companion replacement.")
-      (error 'dmx-workspace-journal-companion-repair-failed-error
-             :message
-             "Workspace journal companion repair requires a writable workspace id for replacement create"
-             :repair-summary repair-summary
-             :cause nil))
-    (handler-case
-        (with-http-dmx-import-request-workspace-id
-            (resolved-workspace-id)
-          (ensure-http-dmx-import-authenticated-operation
-           client
-           :repair-workspace-journal-companion)
-          (let* ((replacement-uri
-                   (dmx-workspace-journal-replacement-note-uri
-                    (gethash "subjectKey" stream)
-                    existing-topic-id))
-                 (replacement-stream
-                   (dmx-workspace-journal-stream-with-retained-stale-metadata
-                    stream
-                    existing-topic-id
-                    replacement-uri))
-                 (payload
-                   (dmx-workspace-note-payload
-                    (dmx-workspace-journal-visible-title replacement-stream)
-                    (encode-json-string replacement-stream)
-                    replacement-uri))
-                 (repair-step-recorded
-                   (remember :repair-step :create-replacement
-                             :repair-step-label "create-replacement"
-                             :stale-topic-retained-p t
-                             :replacement-create-attempted-p t
-                             :repair-action-taken
-                             "Creating a fresh replacement companion topic under the intended workspace request context while retaining the stale unassigned companion as history."))
-                 (replacement-topic
-                   (dmx-import-create-topic client payload))
-                 (replacement-topic-id
-                   (dmx-import-object-id replacement-topic))
-                 (assigned-workspace
-                   (and replacement-topic-id
+      (unless resolved-workspace-id
+        (remember :repair-status :failed
+                  :repair-status-label "failed"
+                  :repair-step :preflight
+                  :repair-step-label "preflight"
+                  :repair-action-taken
+                  "Could not replace the stale companion because no writable workspace id was available for the create-and-retain-stale path."
+                  :repair-failure-message
+                  "No writable workspace id was available for journal companion replacement.")
+        (error 'dmx-workspace-journal-companion-repair-failed-error
+               :message
+               "Workspace journal companion repair requires a writable workspace id for replacement create"
+               :repair-summary repair-summary
+               :cause nil))
+      (handler-case
+          (with-http-dmx-import-request-workspace-id
+              (resolved-workspace-id)
+            (ensure-http-dmx-import-authenticated-operation
+             client
+             :repair-workspace-journal-companion)
+            (let* ((replacement-uri
+                    (dmx-workspace-journal-replacement-note-uri
+                     (gethash "subjectKey" stream)
+                     existing-topic-id))
+                   (replacement-stream
+                    (dmx-workspace-journal-stream-with-retained-stale-metadata
+                     stream
+                     existing-topic-id
+                     replacement-uri))
+                   (payload
+                    (dmx-workspace-note-payload
+                     (dmx-workspace-journal-visible-title replacement-stream)
+                     (encode-json-string replacement-stream)
+                     replacement-uri))
+                   (repair-step-recorded
+                    (remember :repair-step :create-replacement
+                              :repair-step-label "create-replacement"
+                              :stale-topic-retained-p t
+                              :replacement-create-attempted-p t
+                              :repair-action-taken
+                              "Creating a fresh replacement companion topic under the intended workspace request context while retaining the stale unassigned companion as history."))
+                   (replacement-topic
+                    (dmx-import-create-topic client payload))
+                   (replacement-topic-id
+                    (dmx-import-object-id replacement-topic))
+                   (assigned-workspace
+                    (and replacement-topic-id
+                         (dmx-import-read-topic-workspace
+                          client
+                          replacement-topic-id)))
+                   (assigned-workspace-id
+                    (and assigned-workspace
+                         (dmx-import-object-id assigned-workspace)))
+                   (replacement-create-recorded
+                    (remember :replacement-topic-id replacement-topic-id
+                              :stale-topic-superseded-p t
+                              :replacement-create-succeeded-p t))
+                   (assignment-action
+                    (if assigned-workspace-id
+                        :inherited-from-create
+                        (progn
+                          (remember :repair-step
+                                    :assign-replacement-to-workspace
+                                    :repair-step-label
+                                    "assign-replacement-to-workspace"
+                                    :repair-action-taken
+                                    "Assigned the replacement companion topic to the intended workspace after create.")
+                          (dmx-import-assign-topic-to-workspace
+                           client
+                           resolved-workspace-id
+                           replacement-topic-id)
+                          :assign-after-create)))
+                   (resolved-assigned-workspace
+                    (or (and (eq assignment-action :inherited-from-create)
+                             assigned-workspace)
                         (dmx-import-read-topic-workspace
                          client
                          replacement-topic-id)))
-                 (assigned-workspace-id
-                   (and assigned-workspace
-                        (dmx-import-object-id assigned-workspace)))
-                 (replacement-create-recorded
-                   (remember :replacement-topic-id replacement-topic-id
-                             :stale-topic-superseded-p t
-                             :replacement-create-succeeded-p t))
-                 (assignment-action
-                   (if assigned-workspace-id
-                       :inherited-from-create
-                       (progn
-                         (remember :repair-step
-                                   :assign-replacement-to-workspace
-                                   :repair-step-label
-                                   "assign-replacement-to-workspace"
-                                   :repair-action-taken
-                                   "Assigned the replacement companion topic to the intended workspace after create.")
-                         (dmx-import-assign-topic-to-workspace
-                          client
-                          resolved-workspace-id
-                          replacement-topic-id)
-                         :assign-after-create)))
-                 (resolved-assigned-workspace
-                   (or (and (eq assignment-action :inherited-from-create)
-                            assigned-workspace)
-                       (dmx-import-read-topic-workspace
-                        client
-                        replacement-topic-id)))
-                 (resolved-assigned-workspace-id
-                   (and resolved-assigned-workspace
-                        (dmx-import-object-id resolved-assigned-workspace)))
-                 (assignment-recorded
-                   (remember :assigned-workspace-id-after
-                             resolved-assigned-workspace-id
-                             :assigned-workspace-label-after
-                             (and resolved-assigned-workspace-id
-                                  (or (dmx-workspace-title-from-topic
-                                       resolved-assigned-workspace)
-                                      (format nil
-                                              "workspace (~D)"
-                                              resolved-assigned-workspace-id)))
-                             :assignment-action assignment-action
-                             :assignment-action-label
-                             (case assignment-action
-                               (:inherited-from-create
-                                "workspace assignment inherited from replacement create")
-                               (:assign-after-create
-                                "assigned replacement topic to workspace after create")
-                               (otherwise
-                                "workspace assignment updated"))))
-                 (hidden-placement-summary
-                   (progn
-                     (remember :repair-step
-                               :enforce-hidden-placement
-                               :repair-step-label
-                               "enforce-hidden-placement"
-                               :hidden-placement-attempted-p t
-                               :repair-action-taken
-                               "Re-applied the hidden/off-canvas topicmap placement invariant to the replacement companion topic.")
-                     (dmx-workspace-journal-ensure-hidden-topicmap-placement
-                      client
-                      workspace-topicmap-id
-                      replacement-topic-id))))
-            (declare (ignore repair-step-recorded replacement-create-recorded
-                             assignment-recorded))
-            (unless resolved-assigned-workspace-id
-              (remember :repair-step :verify-workspace-assignment
-                        :repair-step-label "verify-workspace-assignment")
-              (error 'fedwiki-dmx-import-error
-                     :message
-                     (format nil
-                             "Replacement workspace journal companion topic ~D is still unassigned after the fresh-create repair path"
-                             replacement-topic-id)))
-            (loop for (key value) on hidden-placement-summary by #'cddr
-                  do (setf (getf repair-summary key) value))
-            (remember :hidden-placement-succeeded-p
-                      (and (getf hidden-placement-summary
-                                 :hidden-placement-enforced-p)
-                           t))
-            (remember :repair-status :completed
-                      :repair-status-label "completed"
-                      :repair-step :completed
-                      :repair-step-label "completed"
-                      :repair-action-taken
-                      "Created a fresh replacement companion topic under the intended workspace context and retained the stale unassigned companion as history."
-                      :replacement-in-topicmap-p
-                      (and workspace-topicmap-id
-                           (dmx-import-topic-in-topicmap-p
-                            client
-                            workspace-topicmap-id
-                            replacement-topic-id))
-                      :repaired-visible-leak-p
-                      (and existing-in-topicmap-p
-                           (not existing-hidden-view-props-p)
-                           (getf hidden-placement-summary
-                                 :hidden-view-props-restored-p)))
-            (values
-             replacement-topic
-             repair-summary)))
-      (dmx-import-config-error (condition)
-        (if (dmx-workspace-journal-missing-auth-config-error-p condition)
-            (remember :repair-status :blocked
-                      :repair-status-label "blocked"
-                      :repair-step :preflight
-                      :repair-step-label "preflight"
-                      :repair-reason :missing-server-side-dmx-auth-config
-                      :repair-action-taken
-                      "Blocked journal companion repair because the MCP server has no usable DMX write-auth configuration for the create-and-retain-stale path."
-                      :repair-failure-message
-                      (format nil "~A" condition))
-            (remember :repair-status :failed
-                      :repair-status-label "failed"
-                      :repair-reason :repair-failed
-                      :repair-failure-message
-                      (format nil "~A" condition)))
-        (error 'dmx-workspace-journal-companion-repair-failed-error
-               :message
-               (format nil
-                       "Workspace journal companion repair failed for stale unassigned topic ~D"
-                       existing-topic-id)
-               :repair-summary repair-summary
-               :cause condition))
-      (error (condition)
-        (remember :repair-status :failed
-                  :repair-status-label "failed"
-                  :repair-reason :repair-failed
-                  :repair-failure-message
-                  (format nil "~A" condition))
-        (error 'dmx-workspace-journal-companion-repair-failed-error
-               :message
-               (format nil
-                       "Workspace journal companion repair failed for stale unassigned topic ~D"
-                       existing-topic-id)
-               :repair-summary repair-summary
-               :cause condition))))))
+                   (resolved-assigned-workspace-id
+                    (and resolved-assigned-workspace
+                         (dmx-import-object-id resolved-assigned-workspace)))
+                   (assignment-recorded
+                    (remember :assigned-workspace-id-after
+                              resolved-assigned-workspace-id
+                              :assigned-workspace-label-after
+                              (and resolved-assigned-workspace-id
+                                   (or (dmx-workspace-title-from-topic
+                                        resolved-assigned-workspace)
+                                       (format nil
+                                               "workspace (~D)"
+                                               resolved-assigned-workspace-id)))
+                              :assignment-action assignment-action
+                              :assignment-action-label
+                              (case assignment-action
+                                (:inherited-from-create
+                                 "workspace assignment inherited from replacement create")
+                                (:assign-after-create
+                                 "assigned replacement topic to workspace after create")
+                                (otherwise
+                                 "workspace assignment updated"))))
+                   (hidden-placement-summary
+                    (progn
+                      (remember :repair-step
+                                :enforce-hidden-placement
+                                :repair-step-label
+                                "enforce-hidden-placement"
+                                :hidden-placement-attempted-p t
+                                :repair-action-taken
+                                "Re-applied the hidden/off-canvas topicmap placement invariant to the replacement companion topic.")
+                      (dmx-workspace-journal-ensure-hidden-topicmap-placement
+                       client
+                       workspace-topicmap-id
+                       replacement-topic-id))))
+              (declare (ignore repair-step-recorded replacement-create-recorded
+                               assignment-recorded))
+              (unless resolved-assigned-workspace-id
+                (remember :repair-step :verify-workspace-assignment
+                          :repair-step-label "verify-workspace-assignment")
+                (error 'fedwiki-dmx-import-error
+                       :message
+                       (format nil
+                               "Replacement workspace journal companion topic ~D is still unassigned after the fresh-create repair path"
+                               replacement-topic-id)))
+              (loop for (key value) on hidden-placement-summary by #'cddr
+                    do (setf (getf repair-summary key) value))
+              (remember :hidden-placement-succeeded-p
+                        (and (getf hidden-placement-summary
+                                   :hidden-placement-enforced-p)
+                             t))
+              (remember :repair-status :completed
+                        :repair-status-label "completed"
+                        :repair-step :completed
+                        :repair-step-label "completed"
+                        :repair-action-taken
+                        "Created a fresh replacement companion topic under the intended workspace context and retained the stale unassigned companion as history."
+                        :replacement-in-topicmap-p
+                        (and workspace-topicmap-id
+                             (dmx-import-topic-in-topicmap-p
+                              client
+                              workspace-topicmap-id
+                              replacement-topic-id))
+                        :repaired-visible-leak-p
+                        (and existing-in-topicmap-p
+                             (not existing-hidden-view-props-p)
+                             (getf hidden-placement-summary
+                                   :hidden-view-props-restored-p)))
+              (values
+               replacement-topic
+               repair-summary)))
+        (dmx-import-config-error (condition)
+          (if (dmx-workspace-journal-missing-auth-config-error-p condition)
+              (remember :repair-status :blocked
+                        :repair-status-label "blocked"
+                        :repair-step :preflight
+                        :repair-step-label "preflight"
+                        :repair-reason :missing-server-side-dmx-auth-config
+                        :repair-action-taken
+                        "Blocked journal companion repair because the MCP server has no usable DMX write-auth configuration for the create-and-retain-stale path."
+                        :repair-failure-message
+                        (format nil "~A" condition))
+              (remember :repair-status :failed
+                        :repair-status-label "failed"
+                        :repair-reason :repair-failed
+                        :repair-failure-message
+                        (format nil "~A" condition)))
+          (error 'dmx-workspace-journal-companion-repair-failed-error
+                 :message
+                 (format nil
+                         "Workspace journal companion repair failed for stale unassigned topic ~D"
+                         existing-topic-id)
+                 :repair-summary repair-summary
+                 :cause condition))
+        (error (condition)
+          (remember :repair-status :failed
+                    :repair-status-label "failed"
+                    :repair-reason :repair-failed
+                    :repair-failure-message
+                    (format nil "~A" condition))
+          (error 'dmx-workspace-journal-companion-repair-failed-error
+                 :message
+                 (format nil
+                         "Workspace journal companion repair failed for stale unassigned topic ~D"
+                         existing-topic-id)
+                 :repair-summary repair-summary
+                 :cause condition))))))
 
 (defun dmx-workspace-journal-assert-existing-topic-assigned
     (client existing-topic journal-uri workspace-topicmap-id)
   (let* ((topic-id (and existing-topic
                         (dmx-import-object-id existing-topic)))
          (assignment
-           (and topic-id
-                (typep client 'http-dmx-import-client)
-                (dmx-workspace-journal-existing-topic-workspace-summary
-                 client
-                 existing-topic))))
+          (and topic-id
+               (typep client 'http-dmx-import-client)
+               (dmx-workspace-journal-existing-topic-workspace-summary
+                client
+                existing-topic))))
     (when (and topic-id
                (typep client 'http-dmx-import-client)
                (null (getf assignment :assigned-workspace-id)))
@@ -1154,15 +1154,15 @@
 (defun dmx-workspace-journal-view-props-for-topic
     (client topicmap-id topic-id &optional topicmap-json)
   (let* ((resolved-topicmap-json
-           (or topicmap-json
-               (and topicmap-id
-                    (dmx-import-read-topicmap client topicmap-id))))
+          (or topicmap-json
+              (and topicmap-id
+                   (dmx-import-read-topicmap client topicmap-id))))
          (topic-entry
-           (and resolved-topicmap-json
-                topic-id
-                (dmx-workspace-journal-topic-in-topicmap-entry
-                 resolved-topicmap-json
-                 topic-id))))
+          (and resolved-topicmap-json
+               topic-id
+               (dmx-workspace-journal-topic-in-topicmap-entry
+                resolved-topicmap-json
+                topic-id))))
     (and topic-entry
          (gethash "viewProps" topic-entry))))
 
@@ -1176,26 +1176,26 @@
                          (dmx-import-read-topic-workspace client topic-id)))
          (workspace-id (dmx-import-object-id workspace))
          (resolved-in-topicmap-p
-           (if (null in-topicmap-p)
-               (and workspace-topicmap-id
-                    topic-id
-                    (dmx-import-topic-in-topicmap-p client
+          (if (null in-topicmap-p)
+              (and workspace-topicmap-id
+                   topic-id
+                   (dmx-import-topic-in-topicmap-p client
                                                    workspace-topicmap-id
                                                    topic-id))
-               in-topicmap-p))
+              in-topicmap-p))
          (resolved-view-props
-           (cond
-             (view-props
-              (dmx-workspace-journal-deep-copy view-props))
-             (resolved-in-topicmap-p
-              (dmx-workspace-journal-deep-copy
-               (dmx-workspace-journal-view-props-for-topic
-                client
-                workspace-topicmap-id
-                topic-id
-                topicmap-json)))
-             (t
-              nil))))
+          (cond
+            (view-props
+             (dmx-workspace-journal-deep-copy view-props))
+            (resolved-in-topicmap-p
+             (dmx-workspace-journal-deep-copy
+              (dmx-workspace-journal-view-props-for-topic
+               client
+               workspace-topicmap-id
+               topic-id
+               topicmap-json)))
+            (t
+             nil))))
     (dmx-workspace-journal-json-object
      "subjectKey" (gethash "subjectKey" metadata)
      "subjectUri" (gethash "subjectUri" metadata)
@@ -1297,9 +1297,9 @@
         for event-revision = (gethash "revision" event)
         when (or (null revision)
                  (<= event-revision revision))
-          do (setf current
-                   (dmx-workspace-journal-deep-copy
-                    (gethash "nextState" event)))
+        do (setf current
+                 (dmx-workspace-journal-deep-copy
+                  (gethash "nextState" event)))
         finally (return current)))
 
 (defun dmx-workspace-journal-read-stream
@@ -1313,16 +1313,16 @@
     (declare (ignore _topicmap-json))
     (let* ((journal-uri (dmx-workspace-journal-note-uri subject-key))
            (current-candidate
-             (dmx-workspace-journal-current-companion-candidate candidates))
+            (dmx-workspace-journal-current-companion-candidate candidates))
            (existing-topic
-             (or (getf current-candidate :topic)
-                 (dmx-import-find-existing-topic client journal-uri)))
+            (or (getf current-candidate :topic)
+                (dmx-import-find-existing-topic client journal-uri)))
            (existing-text
-           (and existing-topic
-                (dmx-json-child-value existing-topic *dmx-notes-text-type-uri*)))
+            (and existing-topic
+                 (dmx-json-child-value existing-topic *dmx-notes-text-type-uri*)))
            (existing-stream
-           (and (dmx-non-empty-string-p existing-text)
-                (shasht:read-json existing-text))))
+            (and (dmx-non-empty-string-p existing-text)
+                 (shasht:read-json existing-text))))
       (values (or existing-stream
                   (dmx-workspace-journal-make-base-stream
                    subject-key
@@ -1353,42 +1353,42 @@
          (repaired-existing-topic-p nil))
     (let* ((resolved-existing-topic existing-topic)
            (journal-topic
-             (progn
-               (when (and resolved-existing-topic
-                          (typep client 'http-dmx-import-client)
-                          (dmx-import-object-id resolved-existing-topic))
-                 (let ((assignment
-                         (dmx-workspace-journal-existing-topic-workspace-summary
-                          client
-                          resolved-existing-topic)))
-                   (when (null (getf assignment :assigned-workspace-id))
-                     (multiple-value-setq (resolved-existing-topic
-                                           repair-summary)
-                       (dmx-workspace-journal-repair-unassigned-companion-topic
+            (progn
+              (when (and resolved-existing-topic
+                         (typep client 'http-dmx-import-client)
+                         (dmx-import-object-id resolved-existing-topic))
+                (let ((assignment
+                       (dmx-workspace-journal-existing-topic-workspace-summary
                         client
-                        stream
-                        resolved-existing-topic
-                        workspace-topicmap-id
-                        :workspace-id workspace-id))
-                     (setf repaired-existing-topic-p t))))
-               (let* ((payload-uri
-                        (or (dmx-workspace-journal-topic-uri
-                             resolved-existing-topic)
-                            (dmx-workspace-journal-note-uri subject-key)))
-                      (payload
-                        (dmx-workspace-note-payload
-                         (dmx-workspace-journal-visible-title stream)
-                         (encode-json-string stream)
-                         payload-uri)))
-                 (cond
-                   (repaired-existing-topic-p
+                        resolved-existing-topic)))
+                  (when (null (getf assignment :assigned-workspace-id))
+                    (multiple-value-setq (resolved-existing-topic
+                                          repair-summary)
+                      (dmx-workspace-journal-repair-unassigned-companion-topic
+                       client
+                       stream
+                       resolved-existing-topic
+                       workspace-topicmap-id
+                       :workspace-id workspace-id))
+                    (setf repaired-existing-topic-p t))))
+              (let* ((payload-uri
+                      (or (dmx-workspace-journal-topic-uri
+                           resolved-existing-topic)
+                          (dmx-workspace-journal-note-uri subject-key)))
+                     (payload
+                      (dmx-workspace-note-payload
+                       (dmx-workspace-journal-visible-title stream)
+                       (encode-json-string stream)
+                       payload-uri)))
+                (cond
+                  (repaired-existing-topic-p
                    resolved-existing-topic)
-                   (resolved-existing-topic
-                    (dmx-import-update-topic client resolved-existing-topic payload))
-                   (t
-                    (dmx-import-create-topic client payload))))))
+                  (resolved-existing-topic
+                   (dmx-import-update-topic client resolved-existing-topic payload))
+                  (t
+                   (dmx-import-create-topic client payload))))))
            (resolved-journal-topic-id
-             (dmx-import-object-id journal-topic)))
+            (dmx-import-object-id journal-topic)))
       (unless repaired-existing-topic-p
         (dmx-workspace-journal-ensure-hidden-topicmap-placement
          client
@@ -1530,9 +1530,9 @@
         ((and previous-exists-p
               (not next-exists-p))
          (let ((archived
-                 (dmx-workspace-journal-snapshot-with-archive-state
-                  previous
-                  t)))
+                (dmx-workspace-journal-snapshot-with-archive-state
+                 previous
+                 t)))
            (emit (if (dmx-workspace-journal-note-subject-p previous)
                      "note-archive"
                      "archive-topic")
@@ -1549,7 +1549,7 @@
                     (gethash "payload" working)
                     (gethash "payload" next))
              (let ((payload-updated
-                     (dmx-workspace-journal-snapshot-with-payload working next)))
+                    (dmx-workspace-journal-snapshot-with-payload working next)))
                (emit (if (dmx-workspace-journal-note-subject-p next)
                          "note-update"
                          "update-topic")
@@ -1559,7 +1559,7 @@
            (unless (equal (gethash "workspaceId" working)
                           (gethash "workspaceId" next))
              (let ((workspace-updated
-                     (dmx-workspace-journal-snapshot-with-workspace working next)))
+                    (dmx-workspace-journal-snapshot-with-workspace working next)))
                (emit "repair-workspace-assignment"
                      working
                      workspace-updated)
@@ -1568,9 +1568,9 @@
              ((and (not (gethash "inTopicmap" working))
                    (gethash "inTopicmap" next))
               (let ((membership-added
-                      (dmx-workspace-journal-snapshot-with-membership
-                       working
-                       next)))
+                     (dmx-workspace-journal-snapshot-with-membership
+                      working
+                      next)))
                 (emit "restore-topicmap-membership"
                       working
                       membership-added)
@@ -1578,9 +1578,9 @@
              ((and (gethash "inTopicmap" working)
                    (not (gethash "inTopicmap" next)))
               (let ((membership-removed
-                      (dmx-workspace-journal-snapshot-with-membership
-                       working
-                       next)))
+                     (dmx-workspace-journal-snapshot-with-membership
+                      working
+                      next)))
                 (emit "remove-from-topicmap"
                       working
                       membership-removed)
@@ -1604,11 +1604,11 @@
   (let* ((current-events (dmx-workspace-journal-stream-events-list stream))
          (next-revision (1+ (or (gethash "currentRevision" stream) 0)))
          (augmented-events
-           (loop for event in events
-                 for revision from next-revision
-                 collect (let ((copy (dmx-workspace-journal-deep-copy event)))
-                           (setf (gethash "revision" copy) revision)
-                           copy))))
+          (loop for event in events
+                for revision from next-revision
+                collect (let ((copy (dmx-workspace-journal-deep-copy event)))
+                          (setf (gethash "revision" copy) revision)
+                          copy))))
     (setf (gethash "events" stream)
           (coerce (append current-events augmented-events) 'vector)
           (gethash "currentRevision" stream)
@@ -1620,7 +1620,7 @@
     (client stream existing-topic workspace-topicmap-id events
      &key workspace-id)
   (let ((updated-stream
-          (dmx-workspace-journal-apply-events-to-stream stream events)))
+         (dmx-workspace-journal-apply-events-to-stream stream events)))
     (multiple-value-bind (_ repair-summary)
         (dmx-workspace-journal-persist-stream client
                                               updated-stream
@@ -1651,19 +1651,19 @@
      (let* ((lookup-kind (dmx-workspace-journal-stream-subject-lookup-kind stream))
             (lookup-value (dmx-workspace-journal-stream-subject-lookup-value stream))
             (resolved-topicmap-id
-              (or workspace-topicmap-id
-                  (gethash "workspaceTopicmapId" stream)))
+             (or workspace-topicmap-id
+                 (gethash "workspaceTopicmapId" stream)))
             (subject-fallback
-              (dmx-workspace-journal-subject-snapshot-from-stream stream))
+             (dmx-workspace-journal-subject-snapshot-from-stream stream))
             (topic
-              (cond
-                ((string= lookup-kind "uri")
-                 (dmx-import-find-existing-topic client lookup-value))
-                ((and (string= lookup-kind "topic-id")
-                      (integerp lookup-value))
-                 (dmx-import-read-topic client lookup-value))
-                (t
-                 nil))))
+             (cond
+               ((string= lookup-kind "uri")
+                (dmx-import-find-existing-topic client lookup-value))
+               ((and (string= lookup-kind "topic-id")
+                     (integerp lookup-value))
+                (dmx-import-read-topic client lookup-value))
+               (t
+                nil))))
        (if topic
            (dmx-workspace-journal-live-snapshot
             client
@@ -1693,39 +1693,39 @@
        :note-key note-key
        :note-kind note-kind)
     (let* ((previous-state
-             (or (dmx-workspace-journal-current-snapshot stream)
-                 (dmx-workspace-journal-subject-snapshot-from-stream stream)))
+            (or (dmx-workspace-journal-current-snapshot stream)
+                (dmx-workspace-journal-subject-snapshot-from-stream stream)))
            (current-live-state
-             (dmx-workspace-journal-live-snapshot-from-stream
-              client
-              stream
-              :workspace-topicmap-id workspace-topicmap-id
-              :live-snapshot live-snapshot))
+            (dmx-workspace-journal-live-snapshot-from-stream
+             client
+             stream
+             :workspace-topicmap-id workspace-topicmap-id
+             :live-snapshot live-snapshot))
            (events
-             (dmx-workspace-journal-transition-events
-              previous-state
-              current-live-state
-              *dmx-workspace-journal-diff-observation-kind*
-              *dmx-workspace-journal-diff-actor*)))
+            (dmx-workspace-journal-transition-events
+             previous-state
+             current-live-state
+             *dmx-workspace-journal-diff-observation-kind*
+             *dmx-workspace-journal-diff-actor*)))
       (let ((repair-summary nil))
-      (when events
-        (if (or *dmx-workspace-journal-suppressed-p*
-                (not persist-events-p))
-            ;; Read reconciliation must stay side-effect free. Apply the
-            ;; synthesized diff to the in-memory stream only.
-            (dmx-workspace-journal-apply-events-to-stream stream events)
-            (multiple-value-setq (stream repair-summary)
-              (dmx-workspace-journal-append-events client
-                                                   stream
-                                                   existing-topic
-                                                   workspace-topicmap-id
-                                                   events
-                                                   :workspace-id
-                                                   workspace-id))))
-      (values current-live-state
-              events
-              stream
-              repair-summary)))))
+        (when events
+          (if (or *dmx-workspace-journal-suppressed-p*
+                  (not persist-events-p))
+              ;; Read reconciliation must stay side-effect free. Apply the
+              ;; synthesized diff to the in-memory stream only.
+              (dmx-workspace-journal-apply-events-to-stream stream events)
+              (multiple-value-setq (stream repair-summary)
+                (dmx-workspace-journal-append-events client
+                                                     stream
+                                                     existing-topic
+                                                     workspace-topicmap-id
+                                                     events
+                                                     :workspace-id
+                                                     workspace-id))))
+        (values current-live-state
+                events
+                stream
+                repair-summary)))))
 
 (defun dmx-workspace-journal-transition-preview
     (previous-state next-state)
@@ -1774,23 +1774,23 @@
     (client subject-key lookup-kind lookup-value workspace-topicmap-id
      &key subject-uri subject-kind ownership-class note-key note-kind)
   (let* ((fallback-stream
-           (dmx-workspace-journal-make-base-stream
-            subject-key
-            lookup-kind
-            lookup-value
-            workspace-topicmap-id
-            :subject-uri subject-uri
-            :subject-kind subject-kind
-            :ownership-class ownership-class
-            :note-key note-key
-            :note-kind note-kind))
+          (dmx-workspace-journal-make-base-stream
+           subject-key
+           lookup-kind
+           lookup-value
+           workspace-topicmap-id
+           :subject-uri subject-uri
+           :subject-kind subject-kind
+           :ownership-class ownership-class
+           :note-key note-key
+           :note-kind note-kind))
          (stream fallback-stream)
          (existing-topic nil)
          (lookup-condition nil)
          (assignment-summary
-           (list :assigned-workspace-id nil
-                 :assigned-workspace-title nil
-                 :assigned-workspace-status :not-applicable))
+          (list :assigned-workspace-id nil
+                :assigned-workspace-title nil
+                :assigned-workspace-status :not-applicable))
          (assignment-lookup-condition nil))
     (handler-case
         (multiple-value-setq (stream existing-topic)
@@ -1867,11 +1867,11 @@
          :note-key (gethash "noteKey" next-state)
          :note-kind (gethash "noteKind" next-state))
       (let ((events
-              (dmx-workspace-journal-transition-events
-               previous-state
-               next-state
-               *dmx-workspace-journal-in-band-observation-kind*
-               *dmx-workspace-journal-in-band-actor*)))
+             (dmx-workspace-journal-transition-events
+              previous-state
+              next-state
+              *dmx-workspace-journal-in-band-observation-kind*
+              *dmx-workspace-journal-in-band-actor*)))
         (when events
           (dmx-workspace-journal-append-events client
                                                stream
@@ -1901,73 +1901,73 @@
 (defun hyperdoc-local-workspace-journal-record-transition
     (previous-state next-state workspace-topicmap-id)
   (let* ((subject-key
-           (or (dmx-workspace-journal-snapshot-field next-state "subjectKey")
-               (dmx-workspace-journal-snapshot-field previous-state
-                                                     "subjectKey")
-               (error 'fedwiki-dmx-import-error
-                      :message
-                      "HyperDoc-local workspace journal transition requires a subject key")))
+          (or (dmx-workspace-journal-snapshot-field next-state "subjectKey")
+              (dmx-workspace-journal-snapshot-field previous-state
+                                                    "subjectKey")
+              (error 'fedwiki-dmx-import-error
+                     :message
+                     "HyperDoc-local workspace journal transition requires a subject key")))
          (lookup (or (dmx-workspace-journal-snapshot-field next-state
                                                            "subjectLookup")
                      (dmx-workspace-journal-snapshot-field previous-state
                                                            "subjectLookup")))
          (stream
-           (or (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
-               (setf (gethash subject-key
-                              *hyperdoc-local-workspace-journal-streams*)
-                     (dmx-workspace-journal-make-base-stream
-                      subject-key
-                      (or (and (hash-table-p lookup)
-                               (gethash "kind" lookup))
-                          "uri")
-                      (or (and (hash-table-p lookup)
-                               (gethash "value" lookup))
-                          subject-key)
-                      workspace-topicmap-id
-                      :subject-uri
-                      (or (dmx-workspace-journal-snapshot-field
-                           next-state
-                           "subjectUri")
-                          (dmx-workspace-journal-snapshot-field
-                           previous-state
-                           "subjectUri"))
-                      :subject-kind
-                      (or (dmx-workspace-journal-snapshot-field
-                           next-state
-                           "subjectKind")
-                          (dmx-workspace-journal-snapshot-field
-                           previous-state
-                           "subjectKind"))
-                      :ownership-class
-                      (or (dmx-workspace-journal-snapshot-field
-                           next-state
-                           "ownershipClass")
-                          (dmx-workspace-journal-snapshot-field
-                           previous-state
-                           "ownershipClass"))
-                      :note-key
-                      (or (dmx-workspace-journal-snapshot-field
-                           next-state
-                           "noteKey")
-                          (dmx-workspace-journal-snapshot-field
-                           previous-state
-                           "noteKey"))
-                      :note-kind
-                      (or (dmx-workspace-journal-snapshot-field
-                           next-state
-                           "noteKind")
-                          (dmx-workspace-journal-snapshot-field
-                           previous-state
-                           "noteKind"))))))
+          (or (gethash subject-key *hyperdoc-local-workspace-journal-streams*)
+              (setf (gethash subject-key
+                             *hyperdoc-local-workspace-journal-streams*)
+                    (dmx-workspace-journal-make-base-stream
+                     subject-key
+                     (or (and (hash-table-p lookup)
+                              (gethash "kind" lookup))
+                         "uri")
+                     (or (and (hash-table-p lookup)
+                              (gethash "value" lookup))
+                         subject-key)
+                     workspace-topicmap-id
+                     :subject-uri
+                     (or (dmx-workspace-journal-snapshot-field
+                          next-state
+                          "subjectUri")
+                         (dmx-workspace-journal-snapshot-field
+                          previous-state
+                          "subjectUri"))
+                     :subject-kind
+                     (or (dmx-workspace-journal-snapshot-field
+                          next-state
+                          "subjectKind")
+                         (dmx-workspace-journal-snapshot-field
+                          previous-state
+                          "subjectKind"))
+                     :ownership-class
+                     (or (dmx-workspace-journal-snapshot-field
+                          next-state
+                          "ownershipClass")
+                         (dmx-workspace-journal-snapshot-field
+                          previous-state
+                          "ownershipClass"))
+                     :note-key
+                     (or (dmx-workspace-journal-snapshot-field
+                          next-state
+                          "noteKey")
+                         (dmx-workspace-journal-snapshot-field
+                          previous-state
+                          "noteKey"))
+                     :note-kind
+                     (or (dmx-workspace-journal-snapshot-field
+                          next-state
+                          "noteKind")
+                         (dmx-workspace-journal-snapshot-field
+                          previous-state
+                          "noteKind"))))))
          (effective-previous-state
-           (or (dmx-workspace-journal-current-snapshot stream)
-               previous-state))
+          (or (dmx-workspace-journal-current-snapshot stream)
+              previous-state))
          (events
-           (dmx-workspace-journal-transition-events
-            effective-previous-state
-            next-state
-            *dmx-workspace-journal-in-band-observation-kind*
-            "hyperdoc-local-workspace-journal-sink"))
+          (dmx-workspace-journal-transition-events
+           effective-previous-state
+           next-state
+           *dmx-workspace-journal-in-band-observation-kind*
+           "hyperdoc-local-workspace-journal-sink"))
          (pathname nil))
     (when events
       (dmx-workspace-journal-apply-events-to-stream stream events))
@@ -1993,10 +1993,10 @@
      &key client subject-key subject-kind subject-uri)
   (let ((resolved-sink (or sink *workspace-journal-sink*))
         (resolved-subject-key
-          (or subject-key
-              (dmx-workspace-journal-snapshot-field after-state "subjectKey")
-              (dmx-workspace-journal-snapshot-field previous-state
-                                                    "subjectKey"))))
+         (or subject-key
+             (dmx-workspace-journal-snapshot-field after-state "subjectKey")
+             (dmx-workspace-journal-snapshot-field previous-state
+                                                   "subjectKey"))))
     (handler-case
         (progn
           (assert-not-journaling-workspace-journal
@@ -2023,11 +2023,11 @@
             (:dmx
              (if *allow-dmx-workspace-journal-writes*
                  (let ((events
-                         (dmx-workspace-journal-record-transition
-                          client
-                          previous-state
-                          after-state
-                          workspace-topicmap-id)))
+                        (dmx-workspace-journal-record-transition
+                         client
+                         previous-state
+                         after-state
+                         workspace-topicmap-id)))
                    (values events
                            (workspace-transition-diagnostic
                             :sink :dmx
@@ -2103,8 +2103,8 @@
     (maphash (lambda (_subject-key subject-candidates)
                (declare (ignore _subject-key))
                (when-let (current-candidate
-                           (dmx-workspace-journal-current-companion-candidate
-                            subject-candidates))
+                          (dmx-workspace-journal-current-companion-candidate
+                           subject-candidates))
                  (push (getf current-candidate :stream) streams)))
              candidates-by-subject)
     (values (nreverse streams) topicmap-json)))
@@ -2115,14 +2115,14 @@
       (unless (dmx-workspace-journal-topic-p topic)
         (let* ((metadata (dmx-workspace-journal-subject-metadata-from-topic topic))
                (snapshot
-                 (dmx-workspace-journal-live-snapshot
-                  client
-                  topic
-                  workspace-topicmap-id
-                  :subject-meta metadata
-                  :topicmap-json topicmap-json
-                  :in-topicmap-p t
-                  :view-props (gethash "viewProps" topic))))
+                (dmx-workspace-journal-live-snapshot
+                 client
+                 topic
+                 workspace-topicmap-id
+                 :subject-meta metadata
+                 :topicmap-json topicmap-json
+                 :in-topicmap-p t
+                 :view-props (gethash "viewProps" topic))))
           (setf (gethash (gethash "subjectKey" snapshot) snapshots)
                 snapshot))))
     snapshots))
@@ -2132,10 +2132,10 @@
   (multiple-value-bind (streams topicmap-json)
       (dmx-workspace-journal-collect-streams client workspace-topicmap-id)
     (let* ((live-snapshots
-             (dmx-workspace-journal-live-topic-snapshots
-              client
-              workspace-topicmap-id
-              topicmap-json))
+            (dmx-workspace-journal-live-topic-snapshots
+             client
+             workspace-topicmap-id
+             topicmap-json))
            (stream-table (make-hash-table :test #'equal))
            (reconciled-streams '())
            (synthesized-event-count 0))
@@ -2274,7 +2274,7 @@
 (defun read-hyperdoc-workspace-journal
     (&key workspace-topicmap-id)
   (let* ((resolved-topicmap-id
-           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (streams (hyperdoc-local-workspace-journal-streams)))
     (dmx-workspace-journal-json-object
      "workspaceTopicmapId" resolved-topicmap-id
@@ -2300,11 +2300,11 @@
 (defun read-hyperdoc-topic-journal
     (&key subject-key topic-id note-key note-kind)
   (let* ((resolved-subject-key
-           (hyperdoc-local-workspace-journal-subject-key
-            :subject-key subject-key
-            :topic-id topic-id
-            :note-key note-key
-            :note-kind note-kind))
+          (hyperdoc-local-workspace-journal-subject-key
+           :subject-key subject-key
+           :topic-id topic-id
+           :note-key note-key
+           :note-kind note-kind))
          (stream (gethash resolved-subject-key
                           *hyperdoc-local-workspace-journal-streams*)))
     (unless stream
@@ -2326,11 +2326,11 @@
 (defun list-hyperdoc-topic-revisions
     (&key subject-key topic-id note-key note-kind)
   (let* ((resolved-subject-key
-           (hyperdoc-local-workspace-journal-subject-key
-            :subject-key subject-key
-            :topic-id topic-id
-            :note-key note-key
-            :note-kind note-kind))
+          (hyperdoc-local-workspace-journal-subject-key
+           :subject-key subject-key
+           :topic-id topic-id
+           :note-key note-key
+           :note-kind note-kind))
          (stream (gethash resolved-subject-key
                           *hyperdoc-local-workspace-journal-streams*)))
     (unless stream
@@ -2373,12 +2373,12 @@
 (defun inventory-legacy-dmx-workspace-journal-artifacts
     (&key workspace-topicmap-id client candidate-topic-ids)
   (let* ((resolved-topicmap-id
-           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run t :verbose nil)))
+          (or client
+              (make-default-dmx-import-client :dry-run t :verbose nil)))
          (topicmap-json
-           (dmx-import-read-topicmap resolved-client resolved-topicmap-id))
+          (dmx-import-read-topicmap resolved-client resolved-topicmap-id))
          (candidate-table (make-hash-table :test #'eql)))
     (dolist (topic (json-array-elements (gethash "topics" topicmap-json)))
       (when (dmx-workspace-journal-legacy-candidate-p topic)
@@ -2395,11 +2395,11 @@
                  topic
                  "explicit-topic-id")))))
     (let ((candidates
-            (sort (loop for candidate being the hash-values in candidate-table
-                        collect candidate)
-                  #'<
-                  :key (lambda (candidate)
-                         (or (gethash "topicId" candidate) most-positive-fixnum)))))
+           (sort (loop for candidate being the hash-values in candidate-table
+                       collect candidate)
+                 #'<
+                 :key (lambda (candidate)
+                        (or (gethash "topicId" candidate) most-positive-fixnum)))))
       (dmx-workspace-journal-json-object
        "workspaceTopicmapId" resolved-topicmap-id
        "inventoryMode" "read-only"
@@ -2416,10 +2416,10 @@
     (error 'fedwiki-dmx-import-error
            :message "candidateTopicIds must be a non-empty array for plan_legacy_dmx_workspace_journal_cleanup"))
   (let* ((resolved-topicmap-id
-           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run t :verbose nil)))
+          (or client
+              (make-default-dmx-import-client :dry-run t :verbose nil)))
          (accepted '())
          (rejected '()))
     (dolist (candidate-topic-id candidate-topic-ids)
@@ -2439,9 +2439,9 @@
                  rejected))
           (t
            (let ((candidate
-                   (dmx-workspace-journal-legacy-candidate-summary
-                    topic
-                    "explicit-topic-id")))
+                  (dmx-workspace-journal-legacy-candidate-summary
+                   topic
+                   "explicit-topic-id")))
              (setf (gethash "status" candidate) "accepted")
              (push candidate accepted))))))
     (setf accepted
@@ -2449,23 +2449,23 @@
                 :key (lambda (candidate)
                        (or (gethash "assocCount" candidate) 0))))
     (let ((planned-actions
-            (loop for candidate in accepted
-                  for step from 1
-                  collect
-                    (dmx-workspace-journal-json-object
-                     "step" step
-                     "topicId" (gethash "topicId" candidate)
-                     "uri" (gethash "uri" candidate)
-                     "orderRationale"
-                     "Delete association IDs first, then delete the legacy topic by explicit ID."
-                     "plannedOperations"
-                     (dmx-workspace-journal-json-array
-                      (dmx-workspace-journal-json-object
-                       "kind" "delete-associations"
-                       "assocIds" (gethash "assocIds" candidate))
-                      (dmx-workspace-journal-json-object
-                       "kind" "delete-topic"
-                       "topicId" (gethash "topicId" candidate)))))))
+           (loop for candidate in accepted
+                 for step from 1
+                 collect
+                 (dmx-workspace-journal-json-object
+                  "step" step
+                  "topicId" (gethash "topicId" candidate)
+                  "uri" (gethash "uri" candidate)
+                  "orderRationale"
+                  "Delete association IDs first, then delete the legacy topic by explicit ID."
+                  "plannedOperations"
+                  (dmx-workspace-journal-json-array
+                   (dmx-workspace-journal-json-object
+                    "kind" "delete-associations"
+                    "assocIds" (gethash "assocIds" candidate))
+                   (dmx-workspace-journal-json-object
+                    "kind" "delete-topic"
+                    "topicId" (gethash "topicId" candidate)))))))
       (dmx-workspace-journal-json-object
        "workspaceTopicmapId" resolved-topicmap-id
        "dryRun" t
@@ -2484,10 +2484,10 @@
 (defun read-dmx-workspace-journal
     (&key workspace-topicmap-id client (reconcile t))
   (let* ((resolved-topicmap-id
-           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run t :verbose nil))))
+          (or client
+              (make-default-dmx-import-client :dry-run t :verbose nil))))
     (multiple-value-bind (streams reconciliation)
         (if reconcile
             (dmx-workspace-journal-reconcile-workspace
@@ -2621,25 +2621,25 @@
     (client workspace-topicmap-id
      &key subject-key topic-id note-key note-kind reconcile)
   (let* ((resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run t :verbose nil)))
+          (or client
+              (make-default-dmx-import-client :dry-run t :verbose nil)))
          (resolved-topicmap-id
-           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (resolved-note-kind
-           (and note-key
-                (normalize-dmx-workspace-note-kind-designator
-                 note-kind
-                 'dmx-workspace-journal-locate-stream)))
+          (and note-key
+               (normalize-dmx-workspace-note-kind-designator
+                note-kind
+                'dmx-workspace-journal-locate-stream)))
          (resolved-subject-key
-           (cond
-             (subject-key
-              subject-key)
-             (note-key
-              (dmx-workspace-note-uri
-               resolved-note-kind
-               note-key))
-             (t
-              nil))))
+          (cond
+            (subject-key
+             subject-key)
+            (note-key
+             (dmx-workspace-note-uri
+              resolved-note-kind
+              note-key))
+            (t
+             nil))))
     (or (and resolved-subject-key
              (dmx-workspace-journal-locate-subject-stream
               resolved-client
@@ -2650,7 +2650,7 @@
               :reconcile reconcile))
         (and topic-id
              (multiple-value-bind (live-subject-key _lookup-kind _lookup-value
-                                   subject-meta live-snapshot)
+                                                    subject-meta live-snapshot)
                  (dmx-workspace-journal-locate-live-subject
                   resolved-client
                   topic-id
@@ -2742,7 +2742,7 @@
   (loop for revision in (reverse (coerce (dmx-workspace-journal-revision-summaries stream)
                                          'list))
         when (gethash "topicExists" revision)
-          return (gethash "revision" revision)))
+        return (gethash "revision" revision)))
 
 (defun dmx-workspace-journal-restore-event-list
     (previous-state next-state)
@@ -2795,8 +2795,8 @@
 (defun restore-dmx-workspace-topic-revision
     (&key workspace-topicmap-id client subject-key topic-id revision dry-run)
   (let* ((resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run dry-run :verbose nil)))
+          (or client
+              (make-default-dmx-import-client :dry-run dry-run :verbose nil)))
          (stream (dmx-workspace-journal-locate-stream
                   resolved-client
                   workspace-topicmap-id
@@ -2807,23 +2807,23 @@
       (error 'fedwiki-dmx-import-error
              :message "No workspace journal stream matched the requested topic"))
     (let* ((resolved-revision
-             (or (and revision
-                      (parse-positive-integer revision))
-                 (dmx-workspace-journal-latest-restorable-revision stream)
-                 (error 'fedwiki-dmx-import-error
-                        :message "No restorable revision exists for the requested topic")))
+            (or (and revision
+                     (parse-positive-integer revision))
+                (dmx-workspace-journal-latest-restorable-revision stream)
+                (error 'fedwiki-dmx-import-error
+                       :message "No restorable revision exists for the requested topic")))
            (target-state
-             (dmx-workspace-journal-current-snapshot
-              stream
-              :revision resolved-revision))
+            (dmx-workspace-journal-current-snapshot
+             stream
+             :revision resolved-revision))
            (workspace-topicmap-id*
-             (or workspace-topicmap-id
-                 (gethash "workspaceTopicmapId" stream)))
+            (or workspace-topicmap-id
+                (gethash "workspaceTopicmapId" stream)))
            (current-state
-             (dmx-workspace-journal-live-snapshot-from-stream
-              resolved-client
-              stream
-              :workspace-topicmap-id workspace-topicmap-id*))
+            (dmx-workspace-journal-live-snapshot-from-stream
+             resolved-client
+             stream
+             :workspace-topicmap-id workspace-topicmap-id*))
            (actions '()))
       (unless (and target-state
                    (gethash "topicExists" target-state))
@@ -2874,10 +2874,10 @@
             (topic current-state))
         (when (not (dmx-workspace-journal-topic-exists-p current-state))
           (let ((created
-                  (dmx-import-create-topic
-                   resolved-client
-                   (dmx-workspace-journal-payload-json->payload
-                    (gethash "payload" target-state)))))
+                 (dmx-import-create-topic
+                  resolved-client
+                  (dmx-workspace-journal-payload-json->payload
+                   (gethash "payload" target-state)))))
             (setf topic
                   (dmx-workspace-journal-live-snapshot
                    resolved-client
@@ -2890,14 +2890,14 @@
                          (gethash "payload" topic)
                          (gethash "payload" target-state))))
           (let* ((existing-topic
-                   (dmx-import-read-topic resolved-client
-                                          (gethash "topicId" topic)))
+                  (dmx-import-read-topic resolved-client
+                                         (gethash "topicId" topic)))
                  (updated
-                   (dmx-import-update-topic
-                    resolved-client
-                    existing-topic
-                    (dmx-workspace-journal-payload-json->payload
-                     (gethash "payload" target-state)))))
+                  (dmx-import-update-topic
+                   resolved-client
+                   existing-topic
+                   (dmx-workspace-journal-payload-json->payload
+                    (gethash "payload" target-state)))))
             (setf topic
                   (dmx-workspace-journal-live-snapshot
                    resolved-client
@@ -2933,10 +2933,10 @@
                  :workspace-topicmap-id workspace-topicmap-id*))
           (push "restore-topicmap-membership" actions))
         (let ((after-state
-                (dmx-workspace-journal-live-snapshot-from-stream
-                 resolved-client
-                 stream
-                 :workspace-topicmap-id workspace-topicmap-id*)))
+               (dmx-workspace-journal-live-snapshot-from-stream
+                resolved-client
+                stream
+                :workspace-topicmap-id workspace-topicmap-id*)))
           (unless (dmx-workspace-journal-snapshot-equivalent-p
                    target-state
                    after-state)

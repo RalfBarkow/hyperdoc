@@ -299,7 +299,7 @@ recommended on public servers because it allows the execution of
                                  hb)
                             (hyperbook:lookup-path hb rel-path)
                             (make-instance 'notfound :hyperbook hb*
-                                                     :path rel-path))))
+                                           :path rel-path))))
            (declare (ignore _))
            (clog-moldable-inspector:on-new-inspector body
                                                      :object object
@@ -318,15 +318,15 @@ recommended on public servers because it allows the execution of
 
 (views:defview views:👀content (notfound notfound)
   (views:html-view :title "Not found" :priority 1
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperbook
-                           "assets/hyperbook/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:html
-      (:div :class "hyperbook-page"
-            (:h1 "Not found")
-            (:p (views:esc (str:join "/" (path-of notfound))))))))
+                   (views:add-asset-path "/hyperbook/"
+                                         (asdf:system-relative-pathname
+                                          :hyperbook
+                                          "assets/hyperbook/"))
+                   (views:include-css "/hyperbook/css/hyperbook.css")
+                   (views:html
+                    (:div :class "hyperbook-page"
+                          (:h1 "Not found")
+                          (:p (views:esc (str:join "/" (path-of notfound))))))))
 
 (defun serve-catalog (&key (port 8080) (pane-width "700px") (development :auto))
   "Start a Web server on PORT that serves the HyperBook catalog at path \"/\"
@@ -371,10 +371,10 @@ removal of characters that are not allowed in URLs."
 (defun canonical-route-origin ()
   (if-let (public-base-url (uiop:getenv "HYPERDOC_PUBLIC_BASE_URL"))
       (trim-trailing-slash public-base-url)
-      (format nil "http://~A:~A"
-              (local-route-host)
-              (or (uiop:getenv "HYPERDOC_PORT")
-                  "8080"))))
+    (format nil "http://~A:~A"
+            (local-route-host)
+            (or (uiop:getenv "HYPERDOC_PORT")
+                "8080"))))
 
 (defun canonical-inspector-path (object)
   (typecase object
@@ -420,15 +420,15 @@ removal of characters that are not allowed in URLs."
 
 (defun url-view-from-slug (slug)
   (views:html-view :title "URL" :priority 20
-    ;; Runtime mounting and cache-busting need different filesystem roots here:
-    ;; the server route is mounted at startup, while the file lives under
-    ;; assets/hyperbook-server/js/url.js for version lookup.
-    (views:include-js
-     (versioned-hyperbook-server-asset-url
-      "/hyperbook-server/js/url.js"
-      "assets/hyperbook-server/js/url.js"))
-    (views:include-script "makeUrl(window.currentInspectorView)")
-    (views:html (:hyperbook-slug (views:esc slug)))))
+                   ;; Runtime mounting and cache-busting need different filesystem roots here:
+                   ;; the server route is mounted at startup, while the file lives under
+                   ;; assets/hyperbook-server/js/url.js for version lookup.
+                   (views:include-js
+                    (versioned-hyperbook-server-asset-url
+                     "/hyperbook-server/js/url.js"
+                     "assets/hyperbook-server/js/url.js"))
+                   (views:include-script "makeUrl(window.currentInspectorView)")
+                   (views:html (:hyperbook-slug (views:esc slug)))))
 
 (defclass slug-wrapper () (slug))
 

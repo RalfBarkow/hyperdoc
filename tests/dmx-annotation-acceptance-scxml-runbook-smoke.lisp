@@ -151,9 +151,9 @@
                            run)
                           stream))))
          (session-cookie-shape
-           (hyperdoc::dmx-action-auth-session-run-session-cookie-shape-of run))
+          (hyperdoc::dmx-action-auth-session-run-session-cookie-shape-of run))
          (authorization-scheme
-           (hyperdoc::dmx-action-auth-session-run-authorization-scheme-of run)))
+          (hyperdoc::dmx-action-auth-session-run-authorization-scheme-of run)))
     (dmx-annotation-runbook-assert-true
      (hyperdoc::dmx-action-auth-session-run-done-p-of run)
      "Action auth/session run must reach final state")
@@ -242,18 +242,18 @@
    :expected-state "anonymous-blocked"
    :expected-failure-boundary :anonymous-blocked)
   (let ((header-run
-          (run-dmx-action-auth-session-scxml-mode-smoke-test
-           :authorization-header
-           :expected-state "direct-header-request-shaped")))
+         (run-dmx-action-auth-session-scxml-mode-smoke-test
+          :authorization-header
+          :expected-state "direct-header-request-shaped")))
     (dmx-annotation-runbook-assert-equal
      "direct-header"
      (hyperdoc::dmx-action-auth-session-run-authorization-scheme-of
       header-run)
      "Authorization-header auth/session path must expose only the normalized scheme label"))
   (let ((bearer-run
-          (run-dmx-action-auth-session-scxml-mode-smoke-test
-           :bearer-token
-           :expected-state "bearer-request-shaped")))
+         (run-dmx-action-auth-session-scxml-mode-smoke-test
+          :bearer-token
+          :expected-state "bearer-request-shaped")))
     (dmx-annotation-runbook-assert-equal
      "Bearer"
      (hyperdoc::dmx-action-auth-session-run-authorization-scheme-of bearer-run)
@@ -270,12 +270,12 @@
          (trace-text (dmx-annotation-runbook-trace-string run))
          (facts-text (dmx-annotation-runbook-facts-string run))
          (skipped-checks
-           (hyperdoc::dmx-annotation-acceptance-scxml-run-skipped-checks-of run))
+          (hyperdoc::dmx-annotation-acceptance-scxml-run-skipped-checks-of run))
          (create-topic-skip
-           (find "create-topic failure evidence smoke"
-                 skipped-checks
-                 :key (lambda (entry) (getf entry :check))
-                 :test #'string=))
+          (find "create-topic failure evidence smoke"
+                skipped-checks
+                :key (lambda (entry) (getf entry :check))
+                :test #'string=))
          (views (dmx-annotation-runbook-load-inspector-views-for-object run))
          (overview (dmx-annotation-runbook-find-view-by-title views
                                                               "DMX annotation acceptance SCXML runbook"))
@@ -285,8 +285,8 @@
          (replay-html (and replay
                            (html-inspector-views:view-html replay)))
          (scxml-text
-           (dmx-annotation-runbook-read-file-string
-            (dmx-annotation-runbook-scxml-pathname))))
+          (dmx-annotation-runbook-read-file-string
+           (dmx-annotation-runbook-scxml-pathname))))
     (dmx-annotation-runbook-assert-true
      (hyperdoc::dmx-annotation-acceptance-scxml-run-done-p-of run)
      "Local runbook replay must reach a final state")
@@ -302,28 +302,28 @@
      (hyperdoc::dmx-annotation-acceptance-scxml-run-accepted-commits-of run)
      "Runbook replay must record accepted commit set")
     (dolist (state-id
-             '("repo-loaded"
-               "patch-branch"
-               "journal-local-first"
-               "journal-recursion-guarded"
-               "auth-boundary-inspectable"
-               "safe-evidence"
-               "fresh-image"
-               "dmx-import-loaded"
-               "authenticated-client-ready"
-               "prewrite-readback-confirmed"
-               "patched-image-ready"
-               "enter-dev-shell"
-               "sbcl-started"
-               "asdf-ready"
-               "tests-loaded"
-               "focused-smokes"
-               "full-suite"
-               "patch-verifiable"
-               "patch-ready-for-single-live-assignment"
-               "single-live-assignment-armed"
-               "verified"
-               "accepted"))
+              '("repo-loaded"
+                "patch-branch"
+                "journal-local-first"
+                "journal-recursion-guarded"
+                "auth-boundary-inspectable"
+                "safe-evidence"
+                "fresh-image"
+                "dmx-import-loaded"
+                "authenticated-client-ready"
+                "prewrite-readback-confirmed"
+                "patched-image-ready"
+                "enter-dev-shell"
+                "sbcl-started"
+                "asdf-ready"
+                "tests-loaded"
+                "focused-smokes"
+                "full-suite"
+                "patch-verifiable"
+                "patch-ready-for-single-live-assignment"
+                "single-live-assignment-armed"
+                "verified"
+                "accepted"))
       (dmx-annotation-runbook-assert-substring
        (format nil "Entering: ~A" state-id)
        trace-text

@@ -184,13 +184,13 @@
 (defun topic-page-lookup-status-reason (chunk)
   (let* ((title (page-lookup-topic-title-of chunk))
          (authored-factory-defined-p
-           (authored-topic-factory-defined-in-source-p title))
+          (authored-topic-factory-defined-in-source-p title))
          (page-resolves-p (topic-page-resolves-p title))
          (signature-freshness-known-p
-           (topic-page-signature-freshness-known-p title))
+          (topic-page-signature-freshness-known-p title))
          (signatures-match-p
-           (and signature-freshness-known-p
-                (topic-page-signatures-match-p title))))
+          (and signature-freshness-known-p
+               (topic-page-signatures-match-p title))))
     (cond
       ((not authored-factory-defined-p)
        "No authored topic factory for this title exists in the bound topics source.")
@@ -322,7 +322,7 @@
 (defmethod derive-chunk ((chunk topic-page-availability-chunk))
   (unless (chunk-up-to-date-p chunk)
     (let ((*page-lookup-current-source-signature-table*
-            (page-lookup-topic-source-signature-table)))
+           (page-lookup-topic-source-signature-table)))
       (load-page-lookup-topic-source!)
       (rebuild-topic-indexes)))
   (derive-date chunk))

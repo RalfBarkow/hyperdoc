@@ -45,48 +45,48 @@
 
 (defun call-with-simulated-missing-reproducible-devenv-source (thunk)
   (let* ((symbol
-           'hyperdoc::reproducible-devenv-as-knowledge-artifact-page-pipeline-spec)
+          'hyperdoc::reproducible-devenv-as-knowledge-artifact-page-pipeline-spec)
          (original (symbol-function symbol))
          (missing-path
-           (merge-pathnames
-            (format nil "hyperdoc-missing-fedwiki-page-~A.json"
-                    (gensym "REPRO-"))
-            (uiop:temporary-directory))))
+          (merge-pathnames
+           (format nil "hyperdoc-missing-fedwiki-page-~A.json"
+                   (gensym "REPRO-"))
+           (uiop:temporary-directory))))
     (unwind-protect
-        (progn
-          (setf (symbol-function symbol)
-                (lambda ()
-                  (let ((spec (funcall original)))
-                    (setf (hyperdoc::localhost-fedwiki-page-pipeline-spec-page-reader
-                           spec)
-                          (lambda ()
-                            (hyperdoc::article-allegation-read-json-file
-                             missing-path)))
-                    spec)))
-          (funcall thunk))
+         (progn
+           (setf (symbol-function symbol)
+                 (lambda ()
+                   (let ((spec (funcall original)))
+                     (setf (hyperdoc::localhost-fedwiki-page-pipeline-spec-page-reader
+                            spec)
+                           (lambda ()
+                             (hyperdoc::article-allegation-read-json-file
+                              missing-path)))
+                     spec)))
+           (funcall thunk))
       (setf (symbol-function symbol) original))))
 
 (defun call-with-simulated-missing-collective-knowledge-source (thunk)
   (let* ((symbol
-           'hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline-spec)
+          'hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline-spec)
          (original (symbol-function symbol))
          (missing-path
-           (merge-pathnames
-            (format nil "hyperdoc-missing-fedwiki-page-~A.json"
-                    (gensym "COLLECTIVE-"))
-            (uiop:temporary-directory))))
+          (merge-pathnames
+           (format nil "hyperdoc-missing-fedwiki-page-~A.json"
+                   (gensym "COLLECTIVE-"))
+           (uiop:temporary-directory))))
     (unwind-protect
-        (progn
-          (setf (symbol-function symbol)
-                (lambda ()
-                  (let ((spec (funcall original)))
-                    (setf (hyperdoc::localhost-fedwiki-page-pipeline-spec-page-reader
-                           spec)
-                          (lambda ()
-                            (hyperdoc::article-allegation-read-json-file
-                             missing-path)))
-                    spec)))
-          (funcall thunk))
+         (progn
+           (setf (symbol-function symbol)
+                 (lambda ()
+                   (let ((spec (funcall original)))
+                     (setf (hyperdoc::localhost-fedwiki-page-pipeline-spec-page-reader
+                            spec)
+                           (lambda ()
+                             (hyperdoc::article-allegation-read-json-file
+                              missing-path)))
+                     spec)))
+           (funcall thunk))
       (setf (symbol-function symbol) original))))
 
 (defun collective-knowledge-fixture-page-path ()
@@ -96,38 +96,38 @@
 
 (defun call-with-collective-knowledge-source-fixture (thunk)
   (let* ((symbol
-           'hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline-spec)
+          'hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline-spec)
          (original (symbol-function symbol))
          (fixture-path (collective-knowledge-fixture-page-path)))
     (unwind-protect
-        (progn
-          (setf (symbol-function symbol)
-                (lambda ()
-                  (let ((spec (funcall original)))
-                    (setf (hyperdoc::localhost-fedwiki-page-pipeline-spec-page-reader
-                           spec)
-                          (lambda ()
-                            (hyperdoc::article-allegation-read-json-file
-                             fixture-path)))
-                    spec)))
-          (funcall thunk))
+         (progn
+           (setf (symbol-function symbol)
+                 (lambda ()
+                   (let ((spec (funcall original)))
+                     (setf (hyperdoc::localhost-fedwiki-page-pipeline-spec-page-reader
+                            spec)
+                           (lambda ()
+                             (hyperdoc::article-allegation-read-json-file
+                              fixture-path)))
+                     spec)))
+           (funcall thunk))
       (setf (symbol-function symbol) original))))
 
 (defun call-with-temporary-collective-knowledge-artifact-targets (thunk)
   (let* ((run-id (get-universal-time))
          (root-relative
-           (format nil "tmp/localhost-fedwiki-promotion-collective-~D/" run-id))
+          (format nil "tmp/localhost-fedwiki-promotion-collective-~D/" run-id))
          (root-path (asdf:system-relative-pathname :hyperdoc root-relative))
          (page-relative
-           (format nil "~Ahyperdoc/The Life Cycle of Collective Knowledge.html"
-                   root-relative))
+          (format nil "~Ahyperdoc/The Life Cycle of Collective Knowledge.html"
+                  root-relative))
          (snippet-relative
-           (format nil "~Aassets/the-life-cycle-of-collective-knowledge-topic.lisp"
-                   root-relative)))
+          (format nil "~Aassets/the-life-cycle-of-collective-knowledge-topic.lisp"
+                  root-relative)))
     (let ((hyperdoc::*the-life-cycle-of-collective-knowledge-page-path*
-            page-relative)
+           page-relative)
           (hyperdoc::*the-life-cycle-of-collective-knowledge-topic-asset*
-            snippet-relative))
+           snippet-relative))
       (unwind-protect
            (progn
              (hyperdoc::write-the-life-cycle-of-collective-knowledge-artifacts)
@@ -171,28 +171,28 @@
 (defun run-localhost-first-fedwiki-publication-plan-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((seed-plan
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan
-            :target-page-reader
-            (lambda (plan)
-              (declare (ignore plan))
-              (list :state :missing
-                    :protocol "https"
-                    :message "Seed reader for local-page discovery only."))))
+          (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan
+           :target-page-reader
+           (lambda (plan)
+             (declare (ignore plan))
+             (list :state :missing
+                   :protocol "https"
+                   :message "Seed reader for local-page discovery only."))))
          (local-state
-           (hyperdoc::localhost-fedwiki-page-publication-plan-local-page-state
-            seed-plan))
+          (hyperdoc::localhost-fedwiki-page-publication-plan-local-page-state
+           seed-plan))
          (local-page (getf local-state :page))
          (remote-state
-           (list :state :present
-                 :protocol "https"
-                 :page (publication-plan-test-stale-target-page local-page)))
+          (list :state :present
+                :protocol "https"
+                :page (publication-plan-test-stale-target-page local-page)))
          (plan
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan
-            :live-publication-writer nil
-            :target-page-reader
-            (lambda (ignored-plan)
-              (declare (ignore ignored-plan))
-              (copy-tree remote-state)))))
+          (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan
+           :live-publication-writer nil
+           :target-page-reader
+           (lambda (ignored-plan)
+             (declare (ignore ignored-plan))
+             (copy-tree remote-state)))))
     (assert-true (getf local-state :available)
                  "The chosen localhost-first publication target must have a readable local page")
     (assert-true (getf local-state :json-syntax-valid-p)
@@ -200,38 +200,38 @@
     (assert-true (getf local-state :journal-valid-p)
                  "The chosen localhost-first publication target must pass the local journal gate before publication is considered")
     (let* ((summary
-             (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
-              plan))
+            (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+             plan))
            (review
-             (hyperdoc::review-localhost-fedwiki-page-publication-plan-dry-run
-              plan))
+            (hyperdoc::review-localhost-fedwiki-page-publication-plan-dry-run
+             plan))
            (views (load-inspector-views-for-object plan))
            (overview-html
-             (html-inspector-views:view-html
-              (smoke-find-view-by-title views "Overview")))
+            (html-inspector-views:view-html
+             (smoke-find-view-by-title views "Overview")))
            (local-page-html
-             (html-inspector-views:view-html
-              (smoke-find-view-by-title views "Local page")))
+            (html-inspector-views:view-html
+             (smoke-find-view-by-title views "Local page")))
            (target-page-html
-             (html-inspector-views:view-html
-              (smoke-find-view-by-title views "Target page")))
+            (html-inspector-views:view-html
+             (smoke-find-view-by-title views "Target page")))
            (dry-run-html
-             (html-inspector-views:view-html
-              (smoke-find-view-by-title views "Dry-run")))
+            (html-inspector-views:view-html
+             (smoke-find-view-by-title views "Dry-run")))
            (promotion-plan-overview-html
-             (html-inspector-views:view-html
-              (smoke-find-view-by-title
-               (load-inspector-views-for-object
-                (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
-               "Overview")))
+            (html-inspector-views:view-html
+             (smoke-find-view-by-title
+              (load-inspector-views-for-object
+               (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+              "Overview")))
            (live-error
-             (handler-case
-                 (progn
-                   (hyperdoc::execute-localhost-fedwiki-page-publication-plan-live
-                    plan)
-                   nil)
-               (error (condition)
-                 condition))))
+            (handler-case
+                (progn
+                  (hyperdoc::execute-localhost-fedwiki-page-publication-plan-live
+                   plan)
+                  nil)
+              (error (condition)
+                condition))))
       (assert-view-titles-present views
                                   '("Overview"
                                     "Local page"
@@ -283,36 +283,36 @@
        (search "Review publication plan" promotion-plan-overview-html :test #'char=)
        "The existing promotion plan overview must expose the localhost-first publication-plan handoff")
       (dolist (needle
-               '("Publication status"
-                 "stale"
-                 "wiki.ralfbarkow.ch"
-                 "reproducible-devenv-as-knowledge-artifact"
-                 "Review publication dry-run"))
+                '("Publication status"
+                  "stale"
+                  "wiki.ralfbarkow.ch"
+                  "reproducible-devenv-as-knowledge-artifact"
+                  "Review publication dry-run"))
         (assert-true
          (search needle overview-html :test #'char-equal)
          (format nil "Publication-plan overview must expose ~A" needle)))
       (dolist (needle
-               '("Source page id"
-                 "reproducible-devenv-as-knowledge-artifact"
-                 "JSON syntax valid"
-                 "Journal gate valid"))
+                '("Source page id"
+                  "reproducible-devenv-as-knowledge-artifact"
+                  "JSON syntax valid"
+                  "Journal gate valid"))
         (assert-true
          (search needle local-page-html :test #'char-equal)
          (format nil "Publication-plan local-page view must expose ~A" needle)))
       (dolist (needle
-               '("Target site"
-                 "wiki.ralfbarkow.ch"
-                 "Publication status"
-                 "stale"))
+                '("Target site"
+                  "wiki.ralfbarkow.ch"
+                  "Publication status"
+                  "stale"))
         (assert-true
          (search needle target-page-html :test #'char-equal)
          (format nil "Publication-plan target-page view must expose ~A" needle)))
       (dolist (needle
-               '("Exact write action"
-                 "publish local title/story/journal"
-                 "execute-localhost-fedwiki-page-publication-plan-live"
-                 "LOCALHOST_FEDWIKI_PUBLICATION_DRY_RUN"
-                 "local-journal-gate=pass"))
+                '("Exact write action"
+                  "publish local title/story/journal"
+                  "execute-localhost-fedwiki-page-publication-plan-live"
+                  "LOCALHOST_FEDWIKI_PUBLICATION_DRY_RUN"
+                  "local-journal-gate=pass"))
         (assert-true
          (search needle dry-run-html :test #'char-equal)
          (format nil "Publication-plan dry-run view must expose ~A" needle)))
@@ -337,13 +337,13 @@
                 :protocol "https"
                 :page (publication-plan-test-copy-page local-page)))
     (let* ((summary
-             (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
-              plan))
+            (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+             plan))
            (overview-html
-             (html-inspector-views:view-html
-              (smoke-find-view-by-title
-               (load-inspector-views-for-object plan)
-               "Overview"))))
+            (html-inspector-views:view-html
+             (smoke-find-view-by-title
+              (load-inspector-views-for-object plan)
+              "Overview"))))
       (assert-equal
        :current
        (getf summary :publication-status)
@@ -364,8 +364,8 @@
                 :protocol "https"
                 :page (publication-plan-test-divergent-target-page local-page)))
     (let ((summary
-            (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
-             plan)))
+           (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+            plan)))
       (assert-equal
        :divergent
        (getf summary :publication-status)
@@ -378,8 +378,8 @@
                 :protocol "https"
                 :message "Target slug is currently missing on the served site."))
     (let ((summary
-            (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
-             plan)))
+           (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+            plan)))
       (assert-equal
        :missing
        (getf summary :publication-status)
@@ -394,46 +394,46 @@
   (let* ((root (localhost-fedwiki-live-publication-smoke-root))
          (pages-dir (merge-pathnames "pages/" root))
          (target-path
-           (merge-pathnames
-            "reproducible-devenv-as-knowledge-artifact"
-            pages-dir)))
+          (merge-pathnames
+           "reproducible-devenv-as-knowledge-artifact"
+           pages-dir)))
     (when (uiop:directory-exists-p root)
       (uiop:delete-directory-tree root
                                   :validate t
                                   :if-does-not-exist :ignore))
     (ensure-directories-exist pages-dir)
     (let ((hyperdoc::*localhost-fedwiki-page-publication-target-pages-directory-overrides*
-            (list (cons "wiki.ralfbarkow.ch" pages-dir))))
+           (list (cons "wiki.ralfbarkow.ch" pages-dir))))
       (let* ((plan
-               (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan))
+              (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-first-publication-plan))
              (summary-before
-               (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
-                plan))
+              (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+               plan))
              (views-before (load-inspector-views-for-object plan))
              (overview-before-html
-               (html-inspector-views:view-html
-                (smoke-find-view-by-title views-before "Overview")))
+              (html-inspector-views:view-html
+               (smoke-find-view-by-title views-before "Overview")))
              (dry-run-before-html
-               (html-inspector-views:view-html
-                (smoke-find-view-by-title views-before "Dry-run")))
+              (html-inspector-views:view-html
+               (smoke-find-view-by-title views-before "Dry-run")))
              (report
-               (hyperdoc::execute-localhost-fedwiki-page-publication-plan-live
-                plan))
+              (hyperdoc::execute-localhost-fedwiki-page-publication-plan-live
+               plan))
              (written-page
-               (hyperdoc::article-allegation-read-json-file target-path))
+              (hyperdoc::article-allegation-read-json-file target-path))
              (summary-after
-               (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
-                plan))
+              (hyperdoc::localhost-fedwiki-page-publication-plan-dry-run-summary
+               plan))
              (views-after (load-inspector-views-for-object plan))
              (overview-after-html
-               (html-inspector-views:view-html
-                (smoke-find-view-by-title views-after "Overview")))
+              (html-inspector-views:view-html
+               (smoke-find-view-by-title views-after "Overview")))
              (target-page-html
-               (html-inspector-views:view-html
-                (smoke-find-view-by-title views-after "Target page")))
+              (html-inspector-views:view-html
+               (smoke-find-view-by-title views-after "Target page")))
              (dry-run-after-html
-               (html-inspector-views:view-html
-                (smoke-find-view-by-title views-after "Dry-run"))))
+              (html-inspector-views:view-html
+               (smoke-find-view-by-title views-after "Dry-run"))))
         (assert-view-titles-present views-before
                                     '("Overview"
                                       "Local page"
@@ -464,16 +464,16 @@
          (getf (getf summary-before :planned-write) :target-path)
          "The planned write must preserve the exact target file path")
         (dolist (needle
-                 '("Execute live publication"
-                   "Target page path"
-                   "publish local title/story/journal"))
+                  '("Execute live publication"
+                    "Target page path"
+                    "publish local title/story/journal"))
           (assert-true
            (search needle overview-before-html :test #'char-equal)
            (format nil "Live publication overview must expose ~A" needle)))
         (dolist (needle
-                 '("Execute live publication"
-                   "LOCALHOST_FEDWIKI_PUBLICATION_DRY_RUN"
-                   "target-page-path="))
+                  '("Execute live publication"
+                    "LOCALHOST_FEDWIKI_PUBLICATION_DRY_RUN"
+                    "target-page-path="))
           (assert-true
            (search needle dry-run-before-html :test #'char-equal)
            (format nil "Live publication dry-run must expose ~A" needle)))
@@ -537,21 +537,21 @@
          (getf summary-after :target-page-fingerprint)
          "The refreshed target fingerprint must match the local page fingerprint")
         (dolist (needle
-                 '("current"
-                   "success (current)"
-                   "Target page path"))
+                  '("current"
+                    "success (current)"
+                    "Target page path"))
           (assert-true
            (search needle overview-after-html :test #'char-equal)
            (format nil "Post-write overview must expose ~A" needle)))
         (dolist (needle
-                 '("Target page path"
-                   "current"))
+                  '("Target page path"
+                    "current"))
           (assert-true
            (search needle target-page-html :test #'char-equal)
            (format nil "Post-write target-page view must expose ~A" needle)))
         (dolist (needle
-                 '("Execute live publication"
-                   "no write needed"))
+                  '("Execute live publication"
+                    "no write needed"))
           (assert-true
            (search needle dry-run-after-html :test #'char-equal)
            (format nil "Post-write dry-run must expose ~A" needle)))))
@@ -566,80 +566,80 @@
          (repro (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
          (surface-views (load-inspector-views-for-object surface))
          (surface-overview-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views "Overview")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views "Overview")))
          (surface-triage-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views "Triage")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views "Triage")))
          (surface-attention-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views "Attention needed")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views "Attention needed")))
          (surface-all-fresh-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views "All fresh")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views "All fresh")))
          (surface-source-unavailable-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views "Source unavailable")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views "Source unavailable")))
          (surface-stale-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views "Stale")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views "Stale")))
          (surface-missing-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views
-                                      "Unknown missing envelope")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views
+                                     "Unknown missing envelope")))
          (surface-malformed-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views
-                                      "Unknown malformed envelope")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views
+                                     "Unknown malformed envelope")))
          (surface-mixed-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views "Mixed states")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views "Mixed states")))
          (surface-handover-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title surface-views "DMX handover")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title surface-views "DMX handover")))
          (collective-views (load-inspector-views-for-object collective))
          (repro-views (load-inspector-views-for-object repro))
          (collective-promoted-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-views "Promoted topics")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-views "Promoted topics")))
          (collective-overview-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-views "Overview")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-views "Overview")))
          (collective-freshness-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-views "Source freshness")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-views "Source freshness")))
          (collective-source-page-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-views "Source page")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-views "Source page")))
          (repro-overview-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-views "Overview")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-views "Overview")))
          (repro-freshness-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-views "Source freshness")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-views "Source freshness")))
          (repro-source-page-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-views "Source page")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-views "Source page")))
          (collective-story-items-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-views "Story items")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-views "Story items")))
          (collective-dmx-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-views "DMX dry-run")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-views "DMX dry-run")))
          (repro-promoted-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-views "Promoted topics")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-views "Promoted topics")))
          (repro-dmx-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-views "DMX dry-run")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-views "DMX dry-run")))
          (collective-generated-page
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
-            collective
-            :signal-error? t))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
+           collective
+           :signal-error? t))
          (repro-generated-page
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
-            repro
-            :signal-error? t)))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
+           repro
+           :signal-error? t)))
     (assert-view-titles-present surface-views
                                 '("Overview"
                                   "Triage"
@@ -939,184 +939,184 @@
          (collective (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
          (repro (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
          (collective-id
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective))
          (repro-id
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro))
          (base-rows
-           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows surface))
+          (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows surface))
          (base-counts
-           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-counts
-            surface))
+          (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-counts
+           surface))
          (collective-row
-           (find collective-id
-                 base-rows
-                 :key (lambda (row) (getf row :plan-id))
-                 :test #'equal))
+          (find collective-id
+                base-rows
+                :key (lambda (row) (getf row :plan-id))
+                :test #'equal))
          (repro-row
-           (find repro-id
-                 base-rows
-                 :key (lambda (row) (getf row :plan-id))
-                 :test #'equal))
+          (find repro-id
+                base-rows
+                :key (lambda (row) (getf row :plan-id))
+                :test #'equal))
          (repro-status
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            repro))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           repro))
          (count-attention-spec
-           (hyperdoc::promotion-triage-count-drilldown-spec
-            surface
-            :attention-needed))
+          (hyperdoc::promotion-triage-count-drilldown-spec
+           surface
+           :attention-needed))
          (count-all-fresh-spec
-           (hyperdoc::promotion-triage-count-drilldown-spec
-            surface
-            :all-fresh))
+          (hyperdoc::promotion-triage-count-drilldown-spec
+           surface
+           :all-fresh))
          (count-stale-spec
-           (hyperdoc::promotion-triage-count-drilldown-spec
-            surface
-            :stale))
+          (hyperdoc::promotion-triage-count-drilldown-spec
+           surface
+           :stale))
          (count-missing-spec
-           (hyperdoc::promotion-triage-count-drilldown-spec
-            surface
-            :unknown-missing-envelope))
+          (hyperdoc::promotion-triage-count-drilldown-spec
+           surface
+           :unknown-missing-envelope))
          (count-malformed-spec
-           (hyperdoc::promotion-triage-count-drilldown-spec
-            surface
-            :unknown-malformed-envelope))
+          (hyperdoc::promotion-triage-count-drilldown-spec
+           surface
+           :unknown-malformed-envelope))
          (count-mixed-spec
-           (hyperdoc::promotion-triage-count-drilldown-spec
-            surface
-            :mixed-states))
+          (hyperdoc::promotion-triage-count-drilldown-spec
+           surface
+           :mixed-states))
          (repro-page-rest
-           (strip-artifact-envelope-line
-            (uiop:read-file-string
-             (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
-              repro))))
+          (strip-artifact-envelope-line
+           (uiop:read-file-string
+            (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
+             repro))))
          (repro-snippet-rest
-           (strip-artifact-envelope-line
-            (uiop:read-file-string
-             (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
-              repro))))
+          (strip-artifact-envelope-line
+           (uiop:read-file-string
+            (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
+             repro))))
          (simulated-missing
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            repro
-            :page-contents repro-page-rest
-            :snippet-contents repro-snippet-rest))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           repro
+           :page-contents repro-page-rest
+           :snippet-contents repro-snippet-rest))
          (simulated-stale
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            repro
-            :current-source-snapshot
-            (hyperdoc::plist-with-overrides
-             (getf repro-status :current-source-snapshot)
-             :fingerprint "fnv1a64:SIMULATEDSTALE"
-             :summary
-             "story-items=simulated; source snapshot intentionally stale for triage counts")) )
-         (simulated-malformed
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            repro
-            :page-contents
-            (malformed-html-envelope-contents repro-page-rest)
-            :snippet-contents
-            (malformed-snippet-envelope-contents repro-snippet-rest)))
-         (simulated-mixed
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           repro
+           :current-source-snapshot
            (hyperdoc::plist-with-overrides
-            repro-status
-            :page-source-freshness-state :stale
-            :page-source-freshness-reason
-            "Current normalized source fingerprint fnv1a64:SIMULATEDSTALE differs from reflected snapshot fingerprint fnv1a64:D3A4A5482E15414D."
-            :page-source-freshness-recommended-action :regenerate-artifact
-            :page-source-freshness-recommended-action-label
-            "Regenerate the page artifact to refresh its reflected source snapshot evidence."
-            :page-source-freshness-recommended-operation
-            'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
-            :page-source-freshness-known t
-            :page-source-freshness-unknown-reason nil
-            :page-source-fresh nil
-            :snippet-source-freshness-state :fresh
-            :snippet-source-freshness-reason
-            "Current normalized source fingerprint fnv1a64:D3A4A5482E15414D matches reflected snapshot fingerprint fnv1a64:D3A4A5482E15414D."
-            :snippet-source-freshness-recommended-action :no-regeneration-needed
-            :snippet-source-freshness-recommended-action-label
-            "No regeneration needed; the snippet artifact already reflects the current source snapshot."
-            :snippet-source-freshness-recommended-operation nil
-            :snippet-source-freshness-known t
-            :snippet-source-freshness-unknown-reason nil
-            :snippet-source-fresh t))
+            (getf repro-status :current-source-snapshot)
+            :fingerprint "fnv1a64:SIMULATEDSTALE"
+            :summary
+            "story-items=simulated; source snapshot intentionally stale for triage counts")) )
+         (simulated-malformed
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           repro
+           :page-contents
+           (malformed-html-envelope-contents repro-page-rest)
+           :snippet-contents
+           (malformed-snippet-envelope-contents repro-snippet-rest)))
+         (simulated-mixed
+          (hyperdoc::plist-with-overrides
+           repro-status
+           :page-source-freshness-state :stale
+           :page-source-freshness-reason
+           "Current normalized source fingerprint fnv1a64:SIMULATEDSTALE differs from reflected snapshot fingerprint fnv1a64:D3A4A5482E15414D."
+           :page-source-freshness-recommended-action :regenerate-artifact
+           :page-source-freshness-recommended-action-label
+           "Regenerate the page artifact to refresh its reflected source snapshot evidence."
+           :page-source-freshness-recommended-operation
+           'hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+           :page-source-freshness-known t
+           :page-source-freshness-unknown-reason nil
+           :page-source-fresh nil
+           :snippet-source-freshness-state :fresh
+           :snippet-source-freshness-reason
+           "Current normalized source fingerprint fnv1a64:D3A4A5482E15414D matches reflected snapshot fingerprint fnv1a64:D3A4A5482E15414D."
+           :snippet-source-freshness-recommended-action :no-regeneration-needed
+           :snippet-source-freshness-recommended-action-label
+           "No regeneration needed; the snippet artifact already reflects the current source snapshot."
+           :snippet-source-freshness-recommended-operation nil
+           :snippet-source-freshness-known t
+           :snippet-source-freshness-unknown-reason nil
+           :snippet-source-fresh t))
          (missing-row
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
-            collective
-            :status simulated-missing))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
+           collective
+           :status simulated-missing))
          (stale-row
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
-            repro
-            :status simulated-stale))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
+           repro
+           :status simulated-stale))
          (malformed-row
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
-            collective
-            :status simulated-malformed))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
+           collective
+           :status simulated-malformed))
          (mixed-row
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
-            repro
-            :status simulated-mixed))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-triage-row
+           repro
+           :status simulated-mixed))
          (collective-inspect-spec
-           (hyperdoc::promotion-triage-row-inspect-spec collective-row))
+          (hyperdoc::promotion-triage-row-inspect-spec collective-row))
          (collective-freshness-spec
-           (hyperdoc::promotion-triage-row-freshness-spec collective-row))
+          (hyperdoc::promotion-triage-row-freshness-spec collective-row))
          (fresh-action-spec
-           (hyperdoc::promotion-triage-row-action-review-spec repro-row))
+          (hyperdoc::promotion-triage-row-action-review-spec repro-row))
          (collective-action-spec
-           (hyperdoc::promotion-triage-row-action-review-spec collective-row))
+          (hyperdoc::promotion-triage-row-action-review-spec collective-row))
          (stale-action-spec
-           (hyperdoc::promotion-triage-row-action-review-spec stale-row))
+          (hyperdoc::promotion-triage-row-action-review-spec stale-row))
          (missing-action-spec
-           (hyperdoc::promotion-triage-row-action-review-spec missing-row))
+          (hyperdoc::promotion-triage-row-action-review-spec missing-row))
          (malformed-action-spec
-           (hyperdoc::promotion-triage-row-action-review-spec malformed-row))
+          (hyperdoc::promotion-triage-row-action-review-spec malformed-row))
          (mixed-action-spec
-           (hyperdoc::promotion-triage-row-action-review-spec mixed-row))
+          (hyperdoc::promotion-triage-row-action-review-spec mixed-row))
          (ordered-rows
-           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
-            surface
-            :status-overrides
-            (list (cons collective-id simulated-malformed)
-                  (cons repro-id simulated-mixed))))
+          (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+           surface
+           :status-overrides
+           (list (cons collective-id simulated-malformed)
+                 (cons repro-id simulated-mixed))))
          (missing-stale-counts
-           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-counts
-            surface
-            :status-overrides
-            (list (cons collective-id simulated-missing)
-                  (cons repro-id simulated-stale))))
+          (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-counts
+           surface
+           :status-overrides
+           (list (cons collective-id simulated-missing)
+                 (cons repro-id simulated-stale))))
          (malformed-mixed-counts
-           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-counts
-            surface
-            :status-overrides
-            (list (cons collective-id simulated-malformed)
-                  (cons repro-id simulated-mixed))))
+          (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-counts
+           surface
+           :status-overrides
+           (list (cons collective-id simulated-malformed)
+                 (cons repro-id simulated-mixed))))
          (attention-rows
-           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
-            surface
-            :filter :attention-needed
-            :status-overrides
-            (list (cons collective-id simulated-malformed)
-                  (cons repro-id simulated-mixed))))
+          (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+           surface
+           :filter :attention-needed
+           :status-overrides
+           (list (cons collective-id simulated-malformed)
+                 (cons repro-id simulated-mixed))))
          (missing-filter-rows
-           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
-            surface
-            :filter :unknown-missing-envelope
-            :status-overrides
-            (list (cons collective-id simulated-missing)
-                  (cons repro-id simulated-stale))))
+          (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+           surface
+           :filter :unknown-missing-envelope
+           :status-overrides
+           (list (cons collective-id simulated-missing)
+                 (cons repro-id simulated-stale))))
          (stale-filter-rows
-           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
-            surface
-            :filter :stale
-            :status-overrides
-            (list (cons collective-id simulated-missing)
-                  (cons repro-id simulated-stale))))
+          (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+           surface
+           :filter :stale
+           :status-overrides
+           (list (cons collective-id simulated-missing)
+                 (cons repro-id simulated-stale))))
          (mixed-filter-rows
-           (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
-            surface
-            :filter :mixed-states
-            :status-overrides
-            (list (cons collective-id simulated-malformed)
-                  (cons repro-id simulated-mixed)))))
+          (hyperdoc::localhost-fedwiki-page-promotion-surface-triage-rows
+           surface
+           :filter :mixed-states
+           :status-overrides
+           (list (cons collective-id simulated-malformed)
+                 (cons repro-id simulated-mixed)))))
     (assert-true collective-row
                  "Promotion surface triage rows must include the collective plan")
     (assert-true repro-row
@@ -1327,94 +1327,94 @@
 (defun run-localhost-fedwiki-page-promotion-entry-point-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((collective-plan
-           (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+          (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
          (repro-plan
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+          (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
          (collective-topic-page
-           (hyperbook:find-page hyperdoc::*topics*
-                                "The Life Cycle of Collective Knowledge"
-                                :signal-error? t))
+          (hyperbook:find-page hyperdoc::*topics*
+                               "The Life Cycle of Collective Knowledge"
+                               :signal-error? t))
          (repro-topic-page
-           (hyperbook:find-page hyperdoc::*topics*
-                                "Reproducible DevEnv as Knowledge Artifact"
-                                :signal-error? t))
+          (hyperbook:find-page hyperdoc::*topics*
+                               "Reproducible DevEnv as Knowledge Artifact"
+                               :signal-error? t))
          (workflow-topic-page
-           (hyperbook:find-page hyperdoc::*topics*
-                                "Localhost FedWiki page promotion workflow"
-                                :signal-error? t))
+          (hyperbook:find-page hyperdoc::*topics*
+                               "Localhost FedWiki page promotion workflow"
+                               :signal-error? t))
          (collective-topic (hyperdoc::the-life-cycle-of-collective-knowledge-topic))
          (repro-topic
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-topic))
+          (hyperdoc::reproducible-devenv-as-knowledge-artifact-topic))
          (workflow-topic
-           (hyperdoc::localhost-fedwiki-page-promotion-workflow-topic))
+          (hyperdoc::localhost-fedwiki-page-promotion-workflow-topic))
          (collective-source
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-source collective-plan))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-source collective-plan))
          (repro-source
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-source repro-plan))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-source repro-plan))
          (collective-topic-page-views
-           (load-inspector-views-for-object collective-topic-page))
+          (load-inspector-views-for-object collective-topic-page))
          (repro-topic-page-views
-           (load-inspector-views-for-object repro-topic-page))
+          (load-inspector-views-for-object repro-topic-page))
          (workflow-topic-page-views
-           (load-inspector-views-for-object workflow-topic-page))
+          (load-inspector-views-for-object workflow-topic-page))
          (collective-topic-views
-           (load-inspector-views-for-object collective-topic))
+          (load-inspector-views-for-object collective-topic))
          (repro-topic-views
-           (load-inspector-views-for-object repro-topic))
+          (load-inspector-views-for-object repro-topic))
          (workflow-topic-views
-           (load-inspector-views-for-object workflow-topic))
+          (load-inspector-views-for-object workflow-topic))
          (collective-source-views
-           (load-inspector-views-for-object collective-source))
+          (load-inspector-views-for-object collective-source))
          (repro-source-views
-           (load-inspector-views-for-object repro-source))
+          (load-inspector-views-for-object repro-source))
          (collective-topic-page-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-topic-page-views
-                                      "Promotion plan")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-topic-page-views
+                                     "Promotion plan")))
          (repro-topic-page-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-topic-page-views
-                                      "Promotion plan")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-topic-page-views
+                                     "Promotion plan")))
          (collective-topic-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-topic-views
-                                      "Promotion plan")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-topic-views
+                                     "Promotion plan")))
          (repro-topic-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-topic-views
-                                      "Promotion plan")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-topic-views
+                                     "Promotion plan")))
          (collective-source-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-source-views
-                                      "Promotion plan")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-source-views
+                                     "Promotion plan")))
          (repro-source-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-source-views
-                                      "Promotion plan")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-source-views
+                                     "Promotion plan")))
          (collective-source-summary-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-source-views
-                                      "Summary")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-source-views
+                                     "Summary")))
          (repro-source-summary-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-source-views
-                                      "Summary")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-source-views
+                                     "Summary")))
          (collective-generated-page
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
-            collective-plan
-            :signal-error? t))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
+           collective-plan
+           :signal-error? t))
          (repro-generated-page
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
-            repro-plan
-            :signal-error? t))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-generated-page
+           repro-plan
+           :signal-error? t))
          (collective-source-generated-page
-           (hyperdoc::localhost-fedwiki-source-generated-page
-            collective-source
-            :signal-error? t))
+          (hyperdoc::localhost-fedwiki-source-generated-page
+           collective-source
+           :signal-error? t))
          (repro-source-generated-page
-           (hyperdoc::localhost-fedwiki-source-generated-page
-            repro-source
-            :signal-error? t)))
+          (hyperdoc::localhost-fedwiki-source-generated-page
+           repro-source
+           :signal-error? t)))
     (assert-true
      (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic-page
       collective-topic-page)
@@ -1554,128 +1554,128 @@
          (collective-views (load-inspector-views-for-object collective))
          (repro-views (load-inspector-views-for-object repro))
          (collective-overview-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-views "Overview")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-views "Overview")))
          (repro-overview-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-views "Overview")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-views "Overview")))
          (collective-operations-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-views
-                                      "<span style=\"color: #666;\">Operations</span>")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-views
+                                     "<span style=\"color: #666;\">Operations</span>")))
          (repro-operations-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-views
-                                      "<span style=\"color: #666;\">Operations</span>")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-views
+                                     "<span style=\"color: #666;\">Operations</span>")))
          (collective-page-path
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
-            collective))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
+           collective))
          (collective-snippet-path
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
-            collective))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
+           collective))
          (repro-page-path
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
-            repro))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-composed-page-pathname
+           repro))
          (repro-snippet-path
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
-            repro))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-topic-snippet-pathname
+           repro))
          (collective-page-before (uiop:read-file-string collective-page-path))
          (collective-snippet-before (uiop:read-file-string collective-snippet-path))
          (repro-page-before (uiop:read-file-string repro-page-path))
          (repro-snippet-before (uiop:read-file-string repro-snippet-path))
          (collective-page-result
-           (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
-            collective))
+          (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+           collective))
          (repro-snippet-result
-           (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact
-            repro))
+          (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact
+           repro))
          (collective-both-result
-           (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-artifacts
-            collective))
+          (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-artifacts
+           collective))
          (repro-both-result
-           (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-artifacts
-            repro))
+          (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-artifacts
+           repro))
          (collective-dmx-review
-           (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
-            collective))
+          (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
+           collective))
          (repro-dmx-review
-           (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
-            repro))
+          (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
+           repro))
          (collective-freshness-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-views "Source freshness")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title collective-views "Source freshness")))
          (repro-freshness-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-views "Source freshness")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title repro-views "Source freshness")))
          (collective-status
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            collective))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           collective))
          (repro-status
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            repro))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           repro))
          (collective-page-rest
-           (strip-artifact-envelope-line collective-page-before))
+          (strip-artifact-envelope-line collective-page-before))
          (collective-snippet-rest
-           (strip-artifact-envelope-line collective-snippet-before))
+          (strip-artifact-envelope-line collective-snippet-before))
          (missing-envelope-status
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            collective
-            :page-contents collective-page-rest
-            :snippet-contents collective-snippet-rest))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           collective
+           :page-contents collective-page-rest
+           :snippet-contents collective-snippet-rest))
          (malformed-envelope-status
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            collective
-            :page-contents
-            (malformed-html-envelope-contents collective-page-rest)
-            :snippet-contents
-            (malformed-snippet-envelope-contents collective-snippet-rest)))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           collective
+           :page-contents
+           (malformed-html-envelope-contents collective-page-rest)
+           :snippet-contents
+           (malformed-snippet-envelope-contents collective-snippet-rest)))
          (collective-dmx-string (prin1-to-string collective-dmx-review))
          (repro-dmx-string (prin1-to-string repro-dmx-review))
          (simulated-out-of-sync
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            collective
-            :page-contents "out-of-sync page"
-            :snippet-contents "out-of-sync snippet"))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           collective
+           :page-contents "out-of-sync page"
+           :snippet-contents "out-of-sync snippet"))
          (simulated-stale-source
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
-            collective
-            :current-source-snapshot
-            (hyperdoc::plist-with-overrides
-             (getf collective-status :current-source-snapshot)
-             :fingerprint "fnv1a64:SIMULATEDSTALE"
-             :summary "story-items=simulated; source snapshot intentionally stale for smoke coverage")))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status-report
+           collective
+           :current-source-snapshot
+           (hyperdoc::plist-with-overrides
+            (getf collective-status :current-source-snapshot)
+            :fingerprint "fnv1a64:SIMULATEDSTALE"
+            :summary "story-items=simulated; source snapshot intentionally stale for smoke coverage")))
          (collective-page-fresh-affordance
-           (hyperdoc::promotion-source-freshness-affordance-spec
-            :page
-            collective-status))
+          (hyperdoc::promotion-source-freshness-affordance-spec
+           :page
+           collective-status))
          (collective-snippet-fresh-affordance
-           (hyperdoc::promotion-source-freshness-affordance-spec
-            :snippet
-            collective-status))
+          (hyperdoc::promotion-source-freshness-affordance-spec
+           :snippet
+           collective-status))
          (stale-page-affordance
-           (hyperdoc::promotion-source-freshness-affordance-spec
-            :page
-            simulated-stale-source))
+          (hyperdoc::promotion-source-freshness-affordance-spec
+           :page
+           simulated-stale-source))
          (stale-snippet-affordance
-           (hyperdoc::promotion-source-freshness-affordance-spec
-            :snippet
-            simulated-stale-source))
+          (hyperdoc::promotion-source-freshness-affordance-spec
+           :snippet
+           simulated-stale-source))
          (missing-page-affordance
-           (hyperdoc::promotion-source-freshness-affordance-spec
-            :page
-            missing-envelope-status))
+          (hyperdoc::promotion-source-freshness-affordance-spec
+           :page
+           missing-envelope-status))
          (missing-snippet-affordance
-           (hyperdoc::promotion-source-freshness-affordance-spec
-            :snippet
-            missing-envelope-status))
+          (hyperdoc::promotion-source-freshness-affordance-spec
+           :snippet
+           missing-envelope-status))
          (malformed-page-affordance
-           (hyperdoc::promotion-source-freshness-affordance-spec
-            :page
-            malformed-envelope-status))
+          (hyperdoc::promotion-source-freshness-affordance-spec
+           :page
+           malformed-envelope-status))
          (malformed-snippet-affordance
-           (hyperdoc::promotion-source-freshness-affordance-spec
-            :snippet
-            malformed-envelope-status)))
+          (hyperdoc::promotion-source-freshness-affordance-spec
+           :snippet
+           malformed-envelope-status)))
     (dolist (html (list collective-overview-html
                         repro-overview-html))
       (assert-true
@@ -2207,219 +2207,219 @@
 (defun run-localhost-fedwiki-page-promotion-page-and-topic-smoke-test ()
   (call-with-collective-knowledge-source-fixture
    (lambda ()
-    (let* ((workflow-page-source
-           (uiop:read-file-string
-            (localhost-fedwiki-page-promotion-workflow-relative-path)))
-         (collective-page-source
-           (uiop:read-file-string
-            (asdf:system-relative-pathname
-             :hyperdoc
-             "hyperdoc/The Life Cycle of Collective Knowledge.html")))
-         (repro-page-source
-           (uiop:read-file-string
-            (asdf:system-relative-pathname
-             :hyperdoc
-             "hyperdoc/Reproducible DevEnv as Knowledge Artifact.html")))
-         (collective-page
-           (hyperbook:find-page hyperdoc::*hyperdoc*
-                                "The Life Cycle of Collective Knowledge"
-                                :signal-error? t))
-         (repro-page
-           (hyperbook:find-page hyperdoc::*hyperdoc*
-                                "Reproducible DevEnv as Knowledge Artifact"
-                                :signal-error? t))
-         (collective-page-views
-           (load-inspector-views-for-object collective-page))
-         (repro-page-views
-           (load-inspector-views-for-object repro-page))
-         (collective-content-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-page-views "Content")))
-         (collective-status-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title collective-page-views "Workflow status")))
-         (repro-content-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-page-views "Content")))
-         (repro-status-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title repro-page-views "Workflow status")))
-         (collective-plan
-           (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
-         (repro-plan
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
-         (collective-status
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-            collective-plan))
-         (repro-status
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-            repro-plan))
-         (collective-source
-           (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
-         (repro-source
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
-         (collective-page-plan
-           (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-generated-page
-            collective-page
-            :signal-error? t))
-         (repro-page-plan
-           (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-generated-page
-            repro-page
-            :signal-error? t)))
-    (assert-true
-     (fboundp 'hyperdoc::localhost-fedwiki-page-promotion-workflow-topic)
-     "Workflow topic function must be present")
-    (assert-true
-     (hyperbook:find-page hyperdoc::*topics*
-                          "Localhost FedWiki page promotion workflow"
-                          :signal-error? t)
-     "Workflow topic page must be browseable in Topics")
-    (assert-true
-     (hyperbook:find-page hyperdoc::*hyperdoc*
-                          "Localhost FedWiki page promotion workflow"
-                          :signal-error? t)
-     "Workflow HyperDoc page must be browseable")
-    (assert-true
-     (search "the-life-cycle-of-collective-knowledge-promotion-plan"
-             workflow-page-source
-             :test #'char=)
-     "Workflow page must link to the collective knowledge promotion plan object")
-    (assert-true
-     (search "reproducible-devenv-as-knowledge-artifact-promotion-plan"
-             workflow-page-source
-             :test #'char=)
-     "Workflow page must link to the second real-page promotion plan object")
-    (assert-true
-     (search "write-localhost-fedwiki-page-promotion-plan-artifacts"
-             workflow-page-source
-             :test #'char=)
-     "Workflow page must document the explicit local artifact write boundary")
-    (assert-true
-     (search "execute-topic-factory-snippet-dmx-write ... :dry-run nil"
-             workflow-page-source
-             :test #'char=)
-     "Workflow page must keep the optional live DMX write boundary explicit and separate")
-    (dolist (page-view-html (list collective-content-html
-                                  repro-content-html))
-      (assert-true
-       (search "Promotion workflow" page-view-html :test #'char=)
-       "Generated page content view must expose the Promotion workflow section")
-      (assert-true
-       (search "Promotion plan overview" page-view-html :test #'char=)
-       "Generated page content view must expose the promotion-plan back-link")
-      (assert-true
-       (search "Review source freshness" page-view-html :test #'char=)
-       "Generated page content view must expose the source-freshness back-link")
-      (assert-true
-       (search "Normalized localhost source object" page-view-html :test #'char=)
-       "Generated page content view must expose the normalized-source back-link"))
-    (dolist (status-html (list collective-status-html
-                               repro-status-html))
-      (assert-true
-       (search "Promotion plan id" status-html :test #'char=)
-       "Generated page workflow-status view must expose the linked promotion plan id")
-      (assert-true
-       (search "Linked localhost source id" status-html :test #'char=)
-       "Generated page workflow-status view must expose the linked localhost source id")
-      (assert-true
-       (search "Linked localhost source slug" status-html :test #'char=)
-       "Generated page workflow-status view must expose the linked localhost source slug")
-      (assert-true
-       (search "Page source freshness" status-html :test #'char=)
-       "Generated page workflow-status view must expose page freshness")
-      (assert-true
-       (search "Snippet source freshness" status-html :test #'char=)
-       "Generated page workflow-status view must expose snippet freshness")
-      (assert-true
-       (search "Recommended next action summary" status-html :test #'char=)
-       "Generated page workflow-status view must expose recommended next-action summary")
-      (assert-true
-       (search "Promotion plan overview" status-html :test #'char=)
-       "Generated page workflow-status view must link to the promotion plan overview")
-      (assert-true
-       (search "Review source freshness" status-html :test #'char=)
-       "Generated page workflow-status view must link to source freshness")
-      (assert-true
-       (search "Review source page" status-html :test #'char=)
-       "Generated page workflow-status view must link to the source-page surface"))
-    (assert-true
-     (search
-      (hyperdoc::localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
-       collective-status)
-      collective-status-html
-      :test #'char=)
-     "Collective knowledge generated page workflow-status view must expose the model-derived recommended-action summary")
-    (assert-true
-     (search
-      (hyperdoc::localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
-       repro-status)
-      repro-status-html
-      :test #'char=)
-     "Second real generated page workflow-status view must expose the model-derived recommended-action summary")
-    (dolist (needle
-             '("expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Overview\""
-               "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Source freshness\""
-               "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Source page\""
-               "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk)\" view=\"Summary\""))
-      (assert-true
-       (search needle collective-page-source :test #'char=)
-       (format nil "Collective knowledge generated page must contain authored navigation ~A"
-               needle)))
-    (dolist (needle
-             '("expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)\" view=\"Overview\""
-               "expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)\" view=\"Source freshness\""
-               "expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)\" view=\"Source page\""
-               "expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)\" view=\"Summary\""))
-      (assert-true
-       (search needle repro-page-source :test #'char=)
-       (format nil "Second real generated page must contain authored navigation ~A"
-               needle)))
-    (assert-equal
-     "the-life-cycle-of-collective-knowledge-promotion-plan"
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
-     "Collective knowledge generated page must link back to the correct promotion plan object")
-    (assert-equal
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-page-plan)
-     "Collective knowledge generated page workflow-status surface must resolve to the correct promotion plan object")
-    (assert-equal
-     "reproducible-devenv-as-knowledge-artifact-promotion-plan"
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
-     "Second real generated page must link back to the correct promotion plan object")
-    (assert-equal
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
-     (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-page-plan)
-     "Second real generated page workflow-status surface must resolve to the correct promotion plan object")
-    (assert-equal
-     "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
-     (hyperdoc::fedwiki-page-id-of collective-source)
-     "Collective knowledge generated page must link back to the correct normalized source object")
-    (assert-equal
-     "fedwiki:wiki.ralfbarkow.ch/reproducible-devenv-as-knowledge-artifact"
-     (hyperdoc::fedwiki-page-id-of repro-source)
-     "Second real generated page must link back to the correct normalized source object")
-    (assert-true
-     (search (hyperdoc::fedwiki-page-id-of collective-source)
-             collective-status-html
-             :test #'char=)
-     "Collective knowledge generated page workflow-status surface must expose the canonical source id")
-    (assert-true
-     (search (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-slug
-              collective-plan)
-             collective-status-html
-             :test #'char=)
-     "Collective knowledge generated page workflow-status surface must expose the canonical source slug")
-    (assert-true
-     (search (hyperdoc::fedwiki-page-id-of repro-source)
-             repro-status-html
-             :test #'char=)
-     "Second real generated page workflow-status surface must expose the canonical source id")
-    (assert-true
-     (search (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-slug
-              repro-plan)
-             repro-status-html
-             :test #'char=)
-     "Second real generated page workflow-status surface must expose the canonical source slug")))))
+     (let* ((workflow-page-source
+             (uiop:read-file-string
+              (localhost-fedwiki-page-promotion-workflow-relative-path)))
+            (collective-page-source
+             (uiop:read-file-string
+              (asdf:system-relative-pathname
+               :hyperdoc
+               "hyperdoc/The Life Cycle of Collective Knowledge.html")))
+            (repro-page-source
+             (uiop:read-file-string
+              (asdf:system-relative-pathname
+               :hyperdoc
+               "hyperdoc/Reproducible DevEnv as Knowledge Artifact.html")))
+            (collective-page
+             (hyperbook:find-page hyperdoc::*hyperdoc*
+                                  "The Life Cycle of Collective Knowledge"
+                                  :signal-error? t))
+            (repro-page
+             (hyperbook:find-page hyperdoc::*hyperdoc*
+                                  "Reproducible DevEnv as Knowledge Artifact"
+                                  :signal-error? t))
+            (collective-page-views
+             (load-inspector-views-for-object collective-page))
+            (repro-page-views
+             (load-inspector-views-for-object repro-page))
+            (collective-content-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title collective-page-views "Content")))
+            (collective-status-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title collective-page-views "Workflow status")))
+            (repro-content-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title repro-page-views "Content")))
+            (repro-status-html
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title repro-page-views "Workflow status")))
+            (collective-plan
+             (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+            (repro-plan
+             (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+            (collective-status
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+              collective-plan))
+            (repro-status
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+              repro-plan))
+            (collective-source
+             (hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
+            (repro-source
+             (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
+            (collective-page-plan
+             (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-generated-page
+              collective-page
+              :signal-error? t))
+            (repro-page-plan
+             (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-generated-page
+              repro-page
+              :signal-error? t)))
+       (assert-true
+        (fboundp 'hyperdoc::localhost-fedwiki-page-promotion-workflow-topic)
+        "Workflow topic function must be present")
+       (assert-true
+        (hyperbook:find-page hyperdoc::*topics*
+                             "Localhost FedWiki page promotion workflow"
+                             :signal-error? t)
+        "Workflow topic page must be browseable in Topics")
+       (assert-true
+        (hyperbook:find-page hyperdoc::*hyperdoc*
+                             "Localhost FedWiki page promotion workflow"
+                             :signal-error? t)
+        "Workflow HyperDoc page must be browseable")
+       (assert-true
+        (search "the-life-cycle-of-collective-knowledge-promotion-plan"
+                workflow-page-source
+                :test #'char=)
+        "Workflow page must link to the collective knowledge promotion plan object")
+       (assert-true
+        (search "reproducible-devenv-as-knowledge-artifact-promotion-plan"
+                workflow-page-source
+                :test #'char=)
+        "Workflow page must link to the second real-page promotion plan object")
+       (assert-true
+        (search "write-localhost-fedwiki-page-promotion-plan-artifacts"
+                workflow-page-source
+                :test #'char=)
+        "Workflow page must document the explicit local artifact write boundary")
+       (assert-true
+        (search "execute-topic-factory-snippet-dmx-write ... :dry-run nil"
+                workflow-page-source
+                :test #'char=)
+        "Workflow page must keep the optional live DMX write boundary explicit and separate")
+       (dolist (page-view-html (list collective-content-html
+                                     repro-content-html))
+         (assert-true
+          (search "Promotion workflow" page-view-html :test #'char=)
+          "Generated page content view must expose the Promotion workflow section")
+         (assert-true
+          (search "Promotion plan overview" page-view-html :test #'char=)
+          "Generated page content view must expose the promotion-plan back-link")
+         (assert-true
+          (search "Review source freshness" page-view-html :test #'char=)
+          "Generated page content view must expose the source-freshness back-link")
+         (assert-true
+          (search "Normalized localhost source object" page-view-html :test #'char=)
+          "Generated page content view must expose the normalized-source back-link"))
+       (dolist (status-html (list collective-status-html
+                                  repro-status-html))
+         (assert-true
+          (search "Promotion plan id" status-html :test #'char=)
+          "Generated page workflow-status view must expose the linked promotion plan id")
+         (assert-true
+          (search "Linked localhost source id" status-html :test #'char=)
+          "Generated page workflow-status view must expose the linked localhost source id")
+         (assert-true
+          (search "Linked localhost source slug" status-html :test #'char=)
+          "Generated page workflow-status view must expose the linked localhost source slug")
+         (assert-true
+          (search "Page source freshness" status-html :test #'char=)
+          "Generated page workflow-status view must expose page freshness")
+         (assert-true
+          (search "Snippet source freshness" status-html :test #'char=)
+          "Generated page workflow-status view must expose snippet freshness")
+         (assert-true
+          (search "Recommended next action summary" status-html :test #'char=)
+          "Generated page workflow-status view must expose recommended next-action summary")
+         (assert-true
+          (search "Promotion plan overview" status-html :test #'char=)
+          "Generated page workflow-status view must link to the promotion plan overview")
+         (assert-true
+          (search "Review source freshness" status-html :test #'char=)
+          "Generated page workflow-status view must link to source freshness")
+         (assert-true
+          (search "Review source page" status-html :test #'char=)
+          "Generated page workflow-status view must link to the source-page surface"))
+       (assert-true
+        (search
+         (hyperdoc::localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
+          collective-status)
+         collective-status-html
+         :test #'char=)
+        "Collective knowledge generated page workflow-status view must expose the model-derived recommended-action summary")
+       (assert-true
+        (search
+         (hyperdoc::localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
+          repro-status)
+         repro-status-html
+         :test #'char=)
+        "Second real generated page workflow-status view must expose the model-derived recommended-action summary")
+       (dolist (needle
+                 '("expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Overview\""
+                   "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Source freshness\""
+                   "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan)\" view=\"Source page\""
+                   "expr=\"(hyperdoc::the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk)\" view=\"Summary\""))
+         (assert-true
+          (search needle collective-page-source :test #'char=)
+          (format nil "Collective knowledge generated page must contain authored navigation ~A"
+                  needle)))
+       (dolist (needle
+                 '("expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)\" view=\"Overview\""
+                   "expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)\" view=\"Source freshness\""
+                   "expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)\" view=\"Source page\""
+                   "expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)\" view=\"Summary\""))
+         (assert-true
+          (search needle repro-page-source :test #'char=)
+          (format nil "Second real generated page must contain authored navigation ~A"
+                  needle)))
+       (assert-equal
+        "the-life-cycle-of-collective-knowledge-promotion-plan"
+        (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
+        "Collective knowledge generated page must link back to the correct promotion plan object")
+       (assert-equal
+        (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-plan)
+        (hyperdoc::localhost-fedwiki-page-promotion-plan-id collective-page-plan)
+        "Collective knowledge generated page workflow-status surface must resolve to the correct promotion plan object")
+       (assert-equal
+        "reproducible-devenv-as-knowledge-artifact-promotion-plan"
+        (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
+        "Second real generated page must link back to the correct promotion plan object")
+       (assert-equal
+        (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-plan)
+        (hyperdoc::localhost-fedwiki-page-promotion-plan-id repro-page-plan)
+        "Second real generated page workflow-status surface must resolve to the correct promotion plan object")
+       (assert-equal
+        "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
+        (hyperdoc::fedwiki-page-id-of collective-source)
+        "Collective knowledge generated page must link back to the correct normalized source object")
+       (assert-equal
+        "fedwiki:wiki.ralfbarkow.ch/reproducible-devenv-as-knowledge-artifact"
+        (hyperdoc::fedwiki-page-id-of repro-source)
+        "Second real generated page must link back to the correct normalized source object")
+       (assert-true
+        (search (hyperdoc::fedwiki-page-id-of collective-source)
+                collective-status-html
+                :test #'char=)
+        "Collective knowledge generated page workflow-status surface must expose the canonical source id")
+       (assert-true
+        (search (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-slug
+                 collective-plan)
+                collective-status-html
+                :test #'char=)
+        "Collective knowledge generated page workflow-status surface must expose the canonical source slug")
+       (assert-true
+        (search (hyperdoc::fedwiki-page-id-of repro-source)
+                repro-status-html
+                :test #'char=)
+        "Second real generated page workflow-status surface must expose the canonical source id")
+       (assert-true
+        (search (hyperdoc::localhost-fedwiki-page-promotion-plan-source-page-slug
+                 repro-plan)
+                repro-status-html
+                :test #'char=)
+        "Second real generated page workflow-status surface must expose the canonical source slug")))))
 
 (defun page-promotion-sync-status-signature (status)
   (list
@@ -2434,42 +2434,42 @@
   (call-with-collective-knowledge-source-fixture
    (lambda ()
      (let* ((collective-baseline
-              (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+             (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
             (repro-baseline
-              (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+             (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
             (collective-baseline-status
-              (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-               collective-baseline))
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+              collective-baseline))
             (repro-baseline-status
-              (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-               repro-baseline))
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+              repro-baseline))
             (facts
-              (list :baseline-captured-p t
-                    :global-abort-p nil
-                    :global-abort-condition nil
-                    :collective-baseline-status collective-baseline-status
-                    :repro-baseline-status repro-baseline-status
-                    :collective-status-after-seam nil
-                    :repro-status-after-seam nil
-                    :collective-source-unavailable-p nil
-                    :collective-fallback-rendered-p nil
-                    :collective-output-unsynced-expected-p nil
-                    :repro-available-p nil
-                    :repro-not-source-unavailable-p nil
-                    :repro-state-unchanged-p nil)))
+             (list :baseline-captured-p t
+                   :global-abort-p nil
+                   :global-abort-condition nil
+                   :collective-baseline-status collective-baseline-status
+                   :repro-baseline-status repro-baseline-status
+                   :collective-status-after-seam nil
+                   :repro-status-after-seam nil
+                   :collective-source-unavailable-p nil
+                   :collective-fallback-rendered-p nil
+                   :collective-output-unsynced-expected-p nil
+                   :repro-available-p nil
+                   :repro-not-source-unavailable-p nil
+                   :repro-state-unchanged-p nil)))
        (handler-case
            (call-with-simulated-missing-collective-knowledge-source
             (lambda ()
               (let* ((collective-after
-                       (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+                      (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
                      (repro-after
-                       (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+                      (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
                      (collective-after-status
-                       (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-                        collective-after))
+                      (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+                       collective-after))
                      (repro-after-status
-                       (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-                        repro-after)))
+                      (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+                       repro-after)))
                 (setf (getf facts :collective-status-after-seam)
                       collective-after-status
                       (getf facts :repro-status-after-seam)
@@ -2511,17 +2511,17 @@
       (list "FAIL.GLOBAL_ABORT")
       (let ((events (list "BASELINE.CAPTURED"))
             (collective-source-unavailable-p
-              (getf semantic-facts :collective-source-unavailable-p))
+             (getf semantic-facts :collective-source-unavailable-p))
             (collective-fallback-rendered-p
-              (getf semantic-facts :collective-fallback-rendered-p))
+             (getf semantic-facts :collective-fallback-rendered-p))
             (collective-output-unsynced-expected-p
-              (getf semantic-facts :collective-output-unsynced-expected-p))
+             (getf semantic-facts :collective-output-unsynced-expected-p))
             (repro-available-p
-              (getf semantic-facts :repro-available-p))
+             (getf semantic-facts :repro-available-p))
             (repro-not-source-unavailable-p
-              (getf semantic-facts :repro-not-source-unavailable-p))
+             (getf semantic-facts :repro-not-source-unavailable-p))
             (repro-state-unchanged-p
-              (getf semantic-facts :repro-state-unchanged-p)))
+             (getf semantic-facts :repro-state-unchanged-p)))
         (setf events
               (append events
                       (list (if collective-source-unavailable-p
@@ -2554,7 +2554,7 @@
 (defun run-page-promotion-output-sync-expectation-scxml ()
   (let* ((semantic-facts (page-promotion-output-sync-semantic-facts))
          (input-events
-           (page-promotion-output-sync-expectation-events semantic-facts)))
+          (page-promotion-output-sync-expectation-events semantic-facts)))
     (hyperdoc::run-scxml-expectation-with-events
      hyperdoc::*page-promotion-output-sync-expectation-scxml*
      input-events
@@ -2568,23 +2568,23 @@
 
 (defun run-localhost-fedwiki-page-promotion-output-sync-smoke-test ()
   (let* ((expectation-run
-           (run-page-promotion-output-sync-expectation-scxml))
+          (run-page-promotion-output-sync-expectation-scxml))
          (trace
-           (hyperdoc::scxml-expectation-run-trace-of expectation-run))
+          (hyperdoc::scxml-expectation-run-trace-of expectation-run))
          (semantic-facts
-           (hyperdoc::scxml-expectation-run-semantic-facts-of expectation-run))
+          (hyperdoc::scxml-expectation-run-semantic-facts-of expectation-run))
          (error-findings
-           (remove-if-not
-            (lambda (finding)
-              (eq :error
-                  (hyperdoc/scxml:scxml-validation-finding-severity-of finding)))
-            (hyperdoc::scxml-expectation-run-validation-findings-of
-             expectation-run)))
+          (remove-if-not
+           (lambda (finding)
+             (eq :error
+                 (hyperdoc/scxml:scxml-validation-finding-severity-of finding)))
+           (hyperdoc::scxml-expectation-run-validation-findings-of
+            expectation-run)))
          (failure-final-states
-           '("failedCollectiveDidNotFailSoft"
-             "failedReproInheritedMissingSource"
-             "failedGlobalAbort"
-             "failedUnexpectedSyncContract")))
+          '("failedCollectiveDidNotFailSoft"
+            "failedReproInheritedMissingSource"
+            "failedGlobalAbort"
+            "failedUnexpectedSyncContract")))
     (assert-true
      (null error-findings)
      "Output-sync expectation SCXML must validate without :error findings")
@@ -2638,22 +2638,22 @@
   (let* ((surface (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
          (views (load-inspector-views-for-object surface))
          (handover-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title views "DMX handover")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title views "DMX handover")))
          (runbook-page (hyperdoc::promotion-dmx-repair-runbook-page))
          (runbook-object (hyperdoc::promotion-dmx-repair-runbook-object))
          (definition
-           (hyperdoc::localhost-fedwiki-page-promotion-handover-topic-definition-chunk
-            surface))
+          (hyperdoc::localhost-fedwiki-page-promotion-handover-topic-definition-chunk
+           surface))
          (summary
-           (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-summary
-            :surface surface))
+          (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-summary
+           :surface surface))
          (evidence
-           (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-evidence
-            :surface surface))
+          (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-evidence
+           :surface surface))
          (plan
-           (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-plan
-            :surface surface))
+          (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-plan
+           :surface surface))
          (payload (hyperdoc::topic-factory-snippet-dmx-write-plan-payload plan))
          (children (getf payload :children))
          (body (hyperdoc::snippet-text-of definition)))
@@ -2720,38 +2720,38 @@
                            children)
                   "DMX handover payload must place the accepted handover body into the note text child")
     (dolist (needle
-             (list "Current status"
-                   "Current boundaries"
-                   "Proven real instances"
-                   "Current workflow loop"
-                   "Next DMX-oriented work"
-                   "Identifiers and links"
-                   "The Life Cycle of Collective Knowledge"
-                   "Reproducible DevEnv as Knowledge Artifact"
-                   "localhost-fedwiki-page-promotion-workflow"
-                   "topicmap 919822"))
+              (list "Current status"
+                    "Current boundaries"
+                    "Proven real instances"
+                    "Current workflow loop"
+                    "Next DMX-oriented work"
+                    "Identifiers and links"
+                    "The Life Cycle of Collective Knowledge"
+                    "Reproducible DevEnv as Knowledge Artifact"
+                    "localhost-fedwiki-page-promotion-workflow"
+                    "topicmap 919822"))
       (assert-true
        (search needle body :test #'char=)
        (format nil "DMX handover body must expose ~A" needle)))
     (dolist (needle
-             (list "DMX handover"
-                   "HyperDoc localhost FedWiki promotion workflow"
-                   "topicmap/919822/topic/919822"
-                   "Current status"
-                   "Next DMX-oriented work"
-                   "TOPIC_FACTORY_SNIPPET_DMX_TOPIC value=\"HyperDoc localhost FedWiki promotion workflow\""
-                   "TOPIC_FACTORY_SNIPPET_DMX_TYPE uri=\"dmx.notes.note\""
-                   "topic-action=CREATE"
-                   "topicmap-action=ADD"
-                   "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=CANONICAL"
-                   "\"dmx.topicmaps.x\":160"
-                   "workspace-topicmap-id=919822"
-                   "source=hyperdoc/localhost-fedwiki-page-promotion-plans.lisp"
-                   "DMX repair and guarded-write boundary."
-                   "Topicmap 919822 was repaired live after the short-key-only topicmap-context defect on assocs 921404 and 921471."
-                   "valuable but untrusted persistence boundary"
-                   "Repair runbook page"
-                   "Inspect repair runbook object"))
+              (list "DMX handover"
+                    "HyperDoc localhost FedWiki promotion workflow"
+                    "topicmap/919822/topic/919822"
+                    "Current status"
+                    "Next DMX-oriented work"
+                    "TOPIC_FACTORY_SNIPPET_DMX_TOPIC value=\"HyperDoc localhost FedWiki promotion workflow\""
+                    "TOPIC_FACTORY_SNIPPET_DMX_TYPE uri=\"dmx.notes.note\""
+                    "topic-action=CREATE"
+                    "topicmap-action=ADD"
+                    "TOPIC_FACTORY_SNIPPET_DMX_VIEW_VALIDATION status=CANONICAL"
+                    "\"dmx.topicmaps.x\":160"
+                    "workspace-topicmap-id=919822"
+                    "source=hyperdoc/localhost-fedwiki-page-promotion-plans.lisp"
+                    "DMX repair and guarded-write boundary."
+                    "Topicmap 919822 was repaired live after the short-key-only topicmap-context defect on assocs 921404 and 921471."
+                    "valuable but untrusted persistence boundary"
+                    "Repair runbook page"
+                    "Inspect repair runbook object"))
       (assert-true
        (or (search needle handover-html :test #'char=)
            (search needle evidence :test #'char=))
@@ -2778,11 +2778,11 @@
 (defun run-localhost-fedwiki-page-promotion-guarded-dmx-dry-run-smoke-test ()
   (let* ((plan (first-healthy-real-localhost-fedwiki-page-promotion-plan))
          (summary
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
-            plan))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
+           plan))
          (evidence
-           (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence
-            plan)))
+          (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence
+           plan)))
     (assert-true plan
                  "A healthy real promotion plan must remain available for guarded DMX dry-run coverage")
     (assert-true
@@ -2809,39 +2809,39 @@
 (defun run-dmx-topicmap-919822-repair-runbook-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page-source
-           (uiop:read-file-string
-            (dmx-topicmap-919822-repair-runbook-relative-path)))
+          (uiop:read-file-string
+           (dmx-topicmap-919822-repair-runbook-relative-path)))
          (page
-           (hyperbook:find-page hyperdoc::*hyperdoc*
-                                "DMX topicmap 919822 repair runbook"
-                                :signal-error? t))
+          (hyperbook:find-page hyperdoc::*hyperdoc*
+                               "DMX topicmap 919822 repair runbook"
+                               :signal-error? t))
          (topic-page
-           (hyperbook:find-page hyperdoc::*topics*
-                                "DMX topicmap 919822 repair runbook"
-                                :signal-error? t))
+          (hyperbook:find-page hyperdoc::*topics*
+                               "DMX topicmap 919822 repair runbook"
+                               :signal-error? t))
          (runbook (hyperdoc::dmx-topicmap-919822-repair-runbook))
          (views (load-inspector-views-for-object runbook))
          (overview-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title views "Overview")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title views "Overview")))
          (healthy-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title views "Healthy specimen")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title views "Healthy specimen")))
          (broken-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title views "Broken assocs")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title views "Broken assocs")))
          (evidence-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title views "Evidence")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title views "Evidence")))
          (dry-run-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title views "Dry-run")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title views "Dry-run")))
          (unknowns-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title views "Unknowns")))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title views "Unknowns")))
          (operations-html
-           (html-inspector-views:view-html
-            (smoke-find-view-by-title views "Operations"))))
+          (html-inspector-views:view-html
+           (smoke-find-view-by-title views "Operations"))))
     (assert-true
      (fboundp 'hyperdoc::dmx-topicmap-919822-repair-runbook-topic)
      "Repair runbook topic function must be present")
@@ -2861,101 +2861,101 @@
        "Operations")
      "DMX topicmap 919822 repair runbook")
     (dolist (needle
-             '("dmx-topicmap-919822-repair-runbook"
-               "Healthy specimen"
-               "Broken assocs"
-               "Dry-run"
-               "Unknowns"
-               "Operations"
-               "921404"
-               "921471"
-               "921494"
-               "921503"
-               "topicmaps/object/921352"
-               "topicmaps/object/921464"
-               "topicmaps/919822"
-               "dmx.topicmaps.visibility"
-               "dmx.topicmaps.x"
-               "Why HyperDoc now narrows its own write boundary"
-               "generic DMX <tt>ViewProps</tt> endpoints can persist malformed short-key-only payloads unchanged"
-               "Unproven: <tt>DELETE /topicmaps/&lt;topicmap&gt;/topic/&lt;topic&gt;</tt>"))
+              '("dmx-topicmap-919822-repair-runbook"
+                "Healthy specimen"
+                "Broken assocs"
+                "Dry-run"
+                "Unknowns"
+                "Operations"
+                "921404"
+                "921471"
+                "921494"
+                "921503"
+                "topicmaps/object/921352"
+                "topicmaps/object/921464"
+                "topicmaps/919822"
+                "dmx.topicmaps.visibility"
+                "dmx.topicmaps.x"
+                "Why HyperDoc now narrows its own write boundary"
+                "generic DMX <tt>ViewProps</tt> endpoints can persist malformed short-key-only payloads unchanged"
+                "Unproven: <tt>DELETE /topicmaps/&lt;topicmap&gt;/topic/&lt;topic&gt;</tt>"))
       (assert-true
        (search needle page-source :test #'char=)
        (format nil "Repair runbook page must expose ~A" needle)))
     (dolist (needle
-             '("Topicmap id"
-               "919822"
-               "context-window"
-               "Healthy comparison topic"
-               "921494"
-               "Healthy comparison assoc"
-               "921503"
-               "Broken assoc ids"
-               "921404, 921471"
-               "DMX writes enabled by default"
-               "no"))
+              '("Topicmap id"
+                "919822"
+                "context-window"
+                "Healthy comparison topic"
+                "921494"
+                "Healthy comparison assoc"
+                "921503"
+                "Broken assoc ids"
+                "921404, 921471"
+                "DMX writes enabled by default"
+                "no"))
       (assert-true
        (search needle overview-html :test #'char=)
        (format nil "Repair runbook overview must expose ~A" needle)))
     (dolist (needle
-             '("Topic 921494 is the accepted healthy comparison specimen"
-               "921494"
-               "921503"
-               "dmx.topicmaps.topicmap_context"))
+              '("Topic 921494 is the accepted healthy comparison specimen"
+                "921494"
+                "921503"
+                "dmx.topicmaps.topicmap_context"))
       (assert-true
        (search needle healthy-html :test #'char=)
        (format nil "Repair runbook healthy-specimen view must expose ~A"
                needle)))
     (dolist (needle
-             '("921404"
-               "921352"
-               "921471"
-               "921464"
-               "dmx.topicmaps.topicmap_context"
-               "topicmaps/object/921352 fails on missing dmx.topicmaps.visibility for assoc 921404"
-               "topicmaps/object/921464 fails on missing dmx.topicmaps.visibility for assoc 921471"))
+              '("921404"
+                "921352"
+                "921471"
+                "921464"
+                "dmx.topicmaps.topicmap_context"
+                "topicmaps/object/921352 fails on missing dmx.topicmaps.visibility for assoc 921404"
+                "topicmaps/object/921464 fails on missing dmx.topicmaps.visibility for assoc 921471"))
       (assert-true
        (search needle broken-html :test #'char=)
        (format nil "Repair runbook broken-assocs view must expose ~A" needle)))
     (dolist (needle
-             '("/core/topic/921494?children=true&amp;assocChildren=true"
-               "/topicmaps/object/921494"
-               "/core/assoc/921404?children=true&amp;assocChildren=true"
-               "/core/assoc/921471?children=true&amp;assocChildren=true"
-               "/topicmaps/919822"))
+              '("/core/topic/921494?children=true&amp;assocChildren=true"
+                "/topicmaps/object/921494"
+                "/core/assoc/921404?children=true&amp;assocChildren=true"
+                "/core/assoc/921471?children=true&amp;assocChildren=true"
+                "/topicmaps/919822"))
       (assert-true
        (search needle evidence-html :test #'char=)
        (format nil "Repair runbook evidence view must expose ~A" needle)))
     (dolist (needle
-             '("This checklist is read-only by default."
-               "Default mode remains read-only"
-               "Dry-run inspection remains read-first until a backend/admin repair contract is explicitly proven."
-               "Returns 200 OK and exposes assoc 921503"
-               "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921404."
-               "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921471."
-               "Post-repair verification"
-               "Returns 200 OK with no missing-x failure before any DMX seeding work resumes."))
+              '("This checklist is read-only by default."
+                "Default mode remains read-only"
+                "Dry-run inspection remains read-first until a backend/admin repair contract is explicitly proven."
+                "Returns 200 OK and exposes assoc 921503"
+                "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921404."
+                "Returns 500 and names missing dmx.topicmaps.visibility for assoc 921471."
+                "Post-repair verification"
+                "Returns 200 OK with no missing-x failure before any DMX seeding work resumes."))
       (assert-true
        (search needle dry-run-html :test #'char=)
        (format nil "Repair runbook dry-run view must expose ~A" needle)))
     (dolist (needle
-             '("HyperDoc-side writer changes are not justified"
-               "public API proves the broken assoc ids"
-               "does not expose the exact write payload"))
+              '("HyperDoc-side writer changes are not justified"
+                "public API proves the broken assoc ids"
+                "does not expose the exact write payload"))
       (assert-true
        (search needle unknowns-html :test #'char-equal)
        (format nil "Repair runbook unknowns view must expose ~A" needle)))
     (dolist (needle
-             '("Operations stay passive in this runbook."
-               "Default mode"
-               "read-only"
-               "Writes enabled"
-               "no"
-               "/topicmaps/919822/assoc/921503"
-               "921404, 921471"
-               "does not reveal the original write payload"
-               "/topicmaps/919822/assoc/&lt;assoc-id&gt;"
-               "validates its own writes explicitly"))
+              '("Operations stay passive in this runbook."
+                "Default mode"
+                "read-only"
+                "Writes enabled"
+                "no"
+                "/topicmaps/919822/assoc/921503"
+                "921404, 921471"
+                "does not reveal the original write payload"
+                "/topicmaps/919822/assoc/&lt;assoc-id&gt;"
+                "validates its own writes explicitly"))
       (assert-true
        (search needle operations-html :test #'char=)
        (format nil "Repair runbook operations view must expose ~A" needle)))
@@ -2973,26 +2973,26 @@
 (defun run-localhost-fedwiki-page-promotion-lookup-boundary-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((topic-page
-           (hyperbook:find-page hyperdoc::*topics*
-                                "DMX topicmap 919822 repair runbook"
-                                :signal-error? t))
+          (hyperbook:find-page hyperdoc::*topics*
+                               "DMX topicmap 919822 repair runbook"
+                               :signal-error? t))
          (views
-           (let ((hyperdoc::*localhost-fedwiki-page-promotion-plan-specs*
-                   (list
-                    (list :id "explosive-promotion-plan"
-                          :related-topic-id "some-other-topic"
-                          :source-page-id
-                          "fedwiki:wiki.ralfbarkow.ch/some-other-topic"
-                          :related-hyperdoc-page-title
-                          "Some Other Topic"
-                          :constructor
-                          'explosive-localhost-fedwiki-page-promotion-plan))))
-             (assert-equal
-              nil
-              (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic-page
-               topic-page)
-              "Unrelated promotion-plan constructors must not run while looking up the repair runbook topic page")
-             (load-inspector-views-for-object topic-page))))
+          (let ((hyperdoc::*localhost-fedwiki-page-promotion-plan-specs*
+                 (list
+                  (list :id "explosive-promotion-plan"
+                        :related-topic-id "some-other-topic"
+                        :source-page-id
+                        "fedwiki:wiki.ralfbarkow.ch/some-other-topic"
+                        :related-hyperdoc-page-title
+                        "Some Other Topic"
+                        :constructor
+                        'explosive-localhost-fedwiki-page-promotion-plan))))
+            (assert-equal
+             nil
+             (hyperdoc::find-localhost-fedwiki-page-promotion-plan-for-topic-page
+              topic-page)
+             "Unrelated promotion-plan constructors must not run while looking up the repair runbook topic page")
+            (load-inspector-views-for-object topic-page))))
     (assert-true
      (smoke-find-view-by-title views "Content")
      "Repair runbook topic page must keep opening when unrelated promotion-plan constructors are present")
@@ -3005,27 +3005,27 @@
   (call-with-collective-knowledge-source-fixture
    (lambda ()
      (let* ((unaffected-plan
-              (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
+             (hyperdoc::the-life-cycle-of-collective-knowledge-promotion-plan))
             (unaffected-title
-              (hyperdoc::localhost-fedwiki-page-promotion-plan-title
-               unaffected-plan))
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-title
+              unaffected-plan))
             (unaffected-status
-              (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-               unaffected-plan))
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+              unaffected-plan))
             (unaffected-page-state
-              (getf unaffected-status :page-source-freshness-state))
+             (getf unaffected-status :page-source-freshness-state))
             (unaffected-snippet-state
-              (getf unaffected-status :snippet-source-freshness-state))
+             (getf unaffected-status :snippet-source-freshness-state))
             (unaffected-summary
-              (hyperdoc::localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
-               unaffected-status))
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-recommended-next-action-summary
+              unaffected-status))
             (unaffected-surface
-              (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
+             (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
             (unaffected-surface-views
-              (load-inspector-views-for-object unaffected-surface))
+             (load-inspector-views-for-object unaffected-surface))
             (unaffected-surface-triage-html
-              (html-inspector-views:view-html
-               (smoke-find-view-by-title unaffected-surface-views "Triage"))))
+             (html-inspector-views:view-html
+              (smoke-find-view-by-title unaffected-surface-views "Triage"))))
        (assert-true unaffected-plan
                     "A deterministic unaffected real promotion plan must be available under the collective-knowledge fixture")
        (assert-true
@@ -3052,38 +3052,38 @@
         (lambda ()
           (let* ((surface (hyperdoc::current-localhost-fedwiki-page-promotion-surface))
                  (repro
-                   (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+                  (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
                  (issue
-                   (hyperdoc::localhost-fedwiki-page-promotion-plan-source-issue
-                    repro))
+                  (hyperdoc::localhost-fedwiki-page-promotion-plan-source-issue
+                   repro))
                  (status
-                   (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-                    repro))
+                  (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+                   repro))
                  (views (load-inspector-views-for-object repro))
                  (issue-views (load-inspector-views-for-object issue))
                  (surface-views (load-inspector-views-for-object surface))
                  (surface-source-unavailable-html
-                   (html-inspector-views:view-html
-                    (smoke-find-view-by-title surface-views "Source unavailable")))
+                  (html-inspector-views:view-html
+                   (smoke-find-view-by-title surface-views "Source unavailable")))
                  (surface-triage-html
-                   (html-inspector-views:view-html
-                    (smoke-find-view-by-title surface-views "Triage")))
+                  (html-inspector-views:view-html
+                   (smoke-find-view-by-title surface-views "Triage")))
                  (unaffected-status-during
-                   (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
-                    unaffected-plan))
+                  (hyperdoc::localhost-fedwiki-page-promotion-plan-sync-status
+                   unaffected-plan))
                  (page-regeneration-result
-                   (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
-                    repro))
+                  (hyperdoc::regenerate-localhost-fedwiki-page-promotion-plan-page-artifact
+                   repro))
                  (dmx-review-result
-                   (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
-                    repro))
+                  (hyperdoc::review-localhost-fedwiki-page-promotion-plan-dmx-dry-run
+                   repro))
                  (canonical-page-id
-                   (format nil "fedwiki:~A/~A"
-                           hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-site*
-                           hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-slug*))
+                  (format nil "fedwiki:~A/~A"
+                          hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-site*
+                          hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-slug*))
                  (canonical-path
-                   (format nil "pages/~A"
-                           hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-slug*)))
+                  (format nil "pages/~A"
+                          hyperdoc::*reproducible-devenv-as-knowledge-artifact-fedwiki-slug*)))
             (assert-true issue
                          "Missing-source seam must still instantiate a bounded promotion-plan source issue")
             (assert-equal

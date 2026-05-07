@@ -34,4 +34,3 @@ Wiki site at WIKI-DOMAIN."
 a local-time:timestamp. Allow DATE to be NIL, returning NIL."
   (and date
        (local-time:unix-to-timestamp (round (/ date 1000)))))
-

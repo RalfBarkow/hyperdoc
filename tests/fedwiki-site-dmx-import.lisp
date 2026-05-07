@@ -229,17 +229,17 @@
          (fetch-calls '())
          (events '())
          (expected-https-sitemap
-           (hyperbook/fedwiki::wiki-url domain "https" "/system/sitemap.json"))
+          (hyperbook/fedwiki::wiki-url domain "https" "/system/sitemap.json"))
          (expected-http-sitemap
-           (hyperbook/fedwiki::wiki-url domain "http" "/system/sitemap.json"))
+          (hyperbook/fedwiki::wiki-url domain "http" "/system/sitemap.json"))
          (expected-http-plugins
-           (hyperbook/fedwiki::wiki-url domain "http" "/system/plugins.json"))
+          (hyperbook/fedwiki::wiki-url domain "http" "/system/plugins.json"))
          (original-fetch-json
-           (symbol-function 'hyperbook/fedwiki::fetch-json))
+          (symbol-function 'hyperbook/fedwiki::fetch-json))
          (original-note-network-init-failure
-           (symbol-function 'hyperbook/fedwiki::note-network-init-failure))
+          (symbol-function 'hyperbook/fedwiki::note-network-init-failure))
          (original-note-http-fallback-attempt
-           (symbol-function 'hyperbook/fedwiki::note-http-fallback-attempt)))
+          (symbol-function 'hyperbook/fedwiki::note-http-fallback-attempt)))
     (let ((hyperbook/fedwiki::*neighborhood* (make-hash-table :test #'equal)))
       (unwind-protect
            (progn

@@ -77,9 +77,9 @@
                  :target-hyperbook target-hyperbook-id
                  :target-page target-page-id
                  :thunk (views:thunk
-                          (result-or-condition
-                            (find-page target-hyperbook-id target-page-id
-                                       :signal-error? t)))
+                         (result-or-condition
+                          (find-page target-hyperbook-id target-page-id
+                                     :signal-error? t)))
                  :view view))
 
 ;;
@@ -108,8 +108,8 @@
                  :source-section source-section
                  :target-hyperbook target-hyperbook-id
                  :thunk (views:thunk
-                          (result-or-condition
-                            (find-hyperbook target-hyperbook-id :signal-error? t)))
+                         (result-or-condition
+                          (find-hyperbook target-hyperbook-id :signal-error? t)))
                  :view view))
 
 ;;
@@ -209,34 +209,34 @@
 (defun extract-links (page)
   (let ((dom (dom-of page)))
     (make-instance 'links
-     :page-links
-     (make-link-list page (lquery:$ dom "a[page]")
-                     #'(lambda (page element link-text source-section)
-                         (let ((hyperbook (or (plump:get-attribute element "hyperbook")
-                                              (-> page hyperbook-of id-of))))
-                           (make-page-link page hyperbook
-                                           (plump:get-attribute element "page")
-                                           :view (plump:get-attribute element "view")
-                                           :link-text link-text
-                                           :source-section source-section))))
-     :hyperbook-links
-     (make-link-list page (lquery:$ dom
-                            "a[hyperbook]"
-                            (filter #'(lambda (el)
-                                        (not (plump:has-attribute el "page")))))
-                     #'(lambda (page element link-text source-section)
-                         (make-hyperbook-link page
-                                              (plump:get-attribute element "hyperbook")
-                                              :view (plump:get-attribute element "view")
-                                              :link-text link-text
-                                              :source-section source-section)))
-     :web-links
-     (make-link-list page (lquery:$ dom "a[href]")
-                     #'(lambda (page element link-text source-section)
-                         (make-web-link page
-                                        (plump:get-attribute element "href")
-                                        :link-text link-text
-                                        :source-section source-section))))))
+                   :page-links
+                   (make-link-list page (lquery:$ dom "a[page]")
+                                   #'(lambda (page element link-text source-section)
+                                       (let ((hyperbook (or (plump:get-attribute element "hyperbook")
+                                                            (-> page hyperbook-of id-of))))
+                                         (make-page-link page hyperbook
+                                                         (plump:get-attribute element "page")
+                                                         :view (plump:get-attribute element "view")
+                                                         :link-text link-text
+                                                         :source-section source-section))))
+                   :hyperbook-links
+                   (make-link-list page (lquery:$ dom
+                                                  "a[hyperbook]"
+                                                  (filter #'(lambda (el)
+                                                              (not (plump:has-attribute el "page")))))
+                                   #'(lambda (page element link-text source-section)
+                                       (make-hyperbook-link page
+                                                            (plump:get-attribute element "hyperbook")
+                                                            :view (plump:get-attribute element "view")
+                                                            :link-text link-text
+                                                            :source-section source-section)))
+                   :web-links
+                   (make-link-list page (lquery:$ dom "a[href]")
+                                   #'(lambda (page element link-text source-section)
+                                       (make-web-link page
+                                                      (plump:get-attribute element "href")
+                                                      :link-text link-text
+                                                      :source-section source-section))))))
 
 ;;
 ;; Find links

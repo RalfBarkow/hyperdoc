@@ -5,7 +5,7 @@
   (let ((arguments (uiop:command-line-arguments)))
     (or (loop for (option value) on arguments by #'cddr
               when (string= option name)
-                do (return value))
+              do (return value))
         default)))
 
 (defun truth-string (value)
@@ -27,7 +27,7 @@
 (let* ((mode (argument-value "--mode" "live"))
        (collection (argument-value "--collection" "coachmark"))
        (entry-page-title
-         (argument-value "--entry-page" "Bibliography subcollections in HyperDoc"))
+        (argument-value "--entry-page" "Bibliography subcollections in HyperDoc"))
        (link-text (argument-value "--link-text" collection))
        (source (make-standin-source mode))
        (report (hyperdoc::bibliography-authoring-plan-standin-report

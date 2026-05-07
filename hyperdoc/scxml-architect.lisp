@@ -191,9 +191,9 @@
 
 (defun dmx-annotation-workspace-architect-state-group-of (state-id)
   (or (loop for (group-id . member-state-ids)
-              in *dmx-annotation-workspace-architect-state-groups*
+            in *dmx-annotation-workspace-architect-state-groups*
             when (member state-id member-state-ids :test #'string=)
-              do (return group-id))
+            do (return group-id))
       (if (string= state-id "classifyAnnotation")
           "workspaceView"
           nil)))
@@ -241,12 +241,12 @@
   (let ((ordered-groups '()))
     (dolist (group-label *dmx-annotation-workspace-architect-event-group-order*)
       (let ((plans
-              (remove-if-not
-               (lambda (plan)
-                 (string= group-label
-                          (dmx-annotation-workspace-architect-event-group-label
-                           plan)))
-               action-plans)))
+             (remove-if-not
+              (lambda (plan)
+                (string= group-label
+                         (dmx-annotation-workspace-architect-event-group-label
+                          plan)))
+              action-plans)))
         (when plans
           (push (list :group-label group-label
                       :plans plans)
@@ -360,29 +360,29 @@
          (middle-id (second active-state-path))
          (leaf-id (car (last active-state-path)))
          (entries
-           (list (list :state-id root-id
-                       :role :root
-                       :active-p t
-                       :inherited-events
-                       (copy-list (dmx-annotation-workspace-architect-state-events
-                                   root-id))
-                       :leaf-events nil
-                       :differences nil)
-                 (list :state-id middle-id
-                       :role :parent
-                       :active-p (and middle-id t)
-                       :inherited-events inherited-events
-                       :leaf-events nil
-                       :differences nil)
-                 (list :state-id leaf-id
-                       :role :leaf
-                       :active-p t
-                       :inherited-events inherited-events
-                       :leaf-events leaf-events
-                       :differences
-                       (set-difference leaf-events
-                                       inherited-events
-                                       :test #'string=)))))
+          (list (list :state-id root-id
+                      :role :root
+                      :active-p t
+                      :inherited-events
+                      (copy-list (dmx-annotation-workspace-architect-state-events
+                                  root-id))
+                      :leaf-events nil
+                      :differences nil)
+                (list :state-id middle-id
+                      :role :parent
+                      :active-p (and middle-id t)
+                      :inherited-events inherited-events
+                      :leaf-events nil
+                      :differences nil)
+                (list :state-id leaf-id
+                      :role :leaf
+                      :active-p t
+                      :inherited-events inherited-events
+                      :leaf-events leaf-events
+                      :differences
+                      (set-difference leaf-events
+                                      inherited-events
+                                      :test #'string=)))))
     (remove-if (lambda (entry)
                  (or (null (getf entry :state-id))
                      (and (eq :parent (getf entry :role))
@@ -459,19 +459,19 @@
                      (target (scxml-architect-transition-target transition))
                      (effect (gethash event event-effect-index))
                      (selected-p
-                       (and (string= source current-state)
-                            (scxml-architect-event-string= selected-event event)))
+                      (and (string= source current-state)
+                           (scxml-architect-event-string= selected-event event)))
                      (preview-p
-                       (and (member source preview-path :test #'string=)
-                            (member target preview-path :test #'string=)))
+                      (and (member source preview-path :test #'string=)
+                           (member target preview-path :test #'string=)))
                      (guarded-p
-                       (dmx-annotation-workspace-architect-event-guarded-p
-                        event effect))
+                      (dmx-annotation-workspace-architect-event-guarded-p
+                       event effect))
                      (side-effect-p
-                       (and effect
-                            (dmx-annotation-workspace-architect-event-side-effect-p
-                             event
-                             effect)))
+                      (and effect
+                           (dmx-annotation-workspace-architect-event-side-effect-p
+                            event
+                            effect)))
                      (color (cond
                               (selected-p "#d62728")
                               (preview-p "#ff7f0e")
@@ -512,10 +512,10 @@
 (defun make-dmx-annotation-workspace-architect-view-model
     (workspace-view-run event-groups active-state-path preview-path)
   (let ((primary-plan
-          (dmx-annotation-workspace-architect-primary-event-plan
-           event-groups
-           (dmx-annotation-workspace-view-run-selected-preview-event-of
-            workspace-view-run))))
+         (dmx-annotation-workspace-architect-primary-event-plan
+          event-groups
+          (dmx-annotation-workspace-view-run-selected-preview-event-of
+           workspace-view-run))))
     (make-instance
      'dmx-annotation-workspace-architect-view-model
      :source-run workspace-view-run
@@ -570,73 +570,73 @@
 
 (defun make-dmx-annotation-workspace-architect-session
     (annotation &key workspace-topicmap-id workspace-id client
-       (materialize-to-dmx-p nil))
+                  (materialize-to-dmx-p nil))
   (let* ((workspace-view-run
-           (make-dmx-annotation-workspace-view-run
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client client
-            :materialize-to-dmx-p materialize-to-dmx-p))
+          (make-dmx-annotation-workspace-view-run
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client client
+           :materialize-to-dmx-p materialize-to-dmx-p))
          (chart (read-dmx-annotation-workspace-view-scxml))
          (current-state
-           (dmx-annotation-workspace-view-run-current-state-of workspace-view-run))
+          (dmx-annotation-workspace-view-run-current-state-of workspace-view-run))
          (selected-event
-           (dmx-annotation-workspace-view-run-selected-preview-event-of
-            workspace-view-run))
+          (dmx-annotation-workspace-view-run-selected-preview-event-of
+           workspace-view-run))
          (preview-path
-           (remove-duplicates
-            (append (list current-state)
-                    (copy-list
-                     (or (dmx-annotation-workspace-view-run-next-states-of
-                          workspace-view-run)
-                         '())))
-            :test #'string=))
+          (remove-duplicates
+           (append (list current-state)
+                   (copy-list
+                    (or (dmx-annotation-workspace-view-run-next-states-of
+                         workspace-view-run)
+                        '())))
+           :test #'string=))
          (active-state-path
-           (dmx-annotation-workspace-architect-active-state-path current-state))
+          (dmx-annotation-workspace-architect-active-state-path current-state))
          (all-action-plans
-           (copy-list
-            (or (dmx-annotation-workspace-view-run-enabled-action-plans-of
-                 workspace-view-run)
-                '())))
+          (copy-list
+           (or (dmx-annotation-workspace-view-run-enabled-action-plans-of
+                workspace-view-run)
+               '())))
          (mapped-action-plans
-           (remove-if-not #'dmx-annotation-workspace-view-action-plan-mapped-from-scxml-p
-                          all-action-plans))
+          (remove-if-not #'dmx-annotation-workspace-view-action-plan-mapped-from-scxml-p
+                         all-action-plans))
          (diagnostic-plans
-           (remove-if #'dmx-annotation-workspace-view-action-plan-mapped-from-scxml-p
-                      all-action-plans))
+          (remove-if #'dmx-annotation-workspace-view-action-plan-mapped-from-scxml-p
+                     all-action-plans))
          (leaf-events
-           (dmx-annotation-workspace-architect-leaf-events mapped-action-plans))
+          (dmx-annotation-workspace-architect-leaf-events mapped-action-plans))
          (inherited-events
-           (dmx-annotation-workspace-architect-inherited-events
-            active-state-path))
+          (dmx-annotation-workspace-architect-inherited-events
+           active-state-path))
          (event-groups
-           (dmx-annotation-workspace-architect-event-groups all-action-plans))
+          (dmx-annotation-workspace-architect-event-groups all-action-plans))
          (transition-effects
-           (dmx-annotation-workspace-architect-transition-effects all-action-plans))
+          (dmx-annotation-workspace-architect-transition-effects all-action-plans))
          (state-metadata
-           (dmx-annotation-workspace-architect-state-metadata
-            active-state-path
-            inherited-events
-            leaf-events))
+          (dmx-annotation-workspace-architect-state-metadata
+           active-state-path
+           inherited-events
+           leaf-events))
          (transition-metadata
-           (dmx-annotation-workspace-architect-transition-metadata
-            chart
-            transition-effects))
+          (dmx-annotation-workspace-architect-transition-metadata
+           chart
+           transition-effects))
          (dot-text
-           (dmx-annotation-workspace-architect-dot
-            chart
-            current-state
-            selected-event
-            preview-path
-            active-state-path
-            transition-effects))
+          (dmx-annotation-workspace-architect-dot
+           chart
+           current-state
+           selected-event
+           preview-path
+           active-state-path
+           transition-effects))
          (view-model
-           (make-dmx-annotation-workspace-architect-view-model
-            workspace-view-run
-            event-groups
-            active-state-path
-            preview-path)))
+          (make-dmx-annotation-workspace-architect-view-model
+           workspace-view-run
+           event-groups
+           active-state-path
+           preview-path)))
     (make-instance 'scxml-architect-session
                    :scxml-path *dmx-annotation-workspace-view-scxml*
                    :chart chart

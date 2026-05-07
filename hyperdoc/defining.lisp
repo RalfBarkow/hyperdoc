@@ -10,7 +10,7 @@
 
 (defmacro defhyperdoc (var-symbol
                        &key id title asdf-system-name subdirectory
-                            main-page-id tools data)
+                         main-page-id tools data)
   "Define and register a HyperDoc from TITLE, the HyperDoc's title,
 ASDF-SYSTEM-NAME and SUBDIRECTORY to define the HyperDoc's directory.
 Optional data are MAIN-PAGE-ID, the id of the main page, TOOLS, a list

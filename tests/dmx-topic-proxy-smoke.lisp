@@ -104,10 +104,10 @@
 
 (defun make-smoke-diagnostics-proxy
     (topic-id title &key workspace-id
-       (ownership-class :hyperdoc-workspace-note)
-       (hyperdoc-owned-p t)
-       (status :ok)
-       (repair-needed-p nil))
+                      (ownership-class :hyperdoc-workspace-note)
+                      (hyperdoc-owned-p t)
+                      (status :ok)
+                      (repair-needed-p nil))
   (let ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy topic-id)))
     (setf (hyperdoc::dmx-diagnostics-of proxy)
           (hyperdoc::make-dmx-topic-diagnostics
@@ -157,28 +157,28 @@
                       (error "Unexpected DMX fetch call ~S ~S"
                              endpoint
                              parameters)))))
-        (hyperdoc::ensure-dmx-topic-data proxy :force? t)
-        (hyperdoc::ensure-dmx-topicmap-data proxy :force? t)
-        (assert-equal topic-json
-                      (hyperdoc::dmx-topic-data-of proxy)
-                      "Topic data should come from /core/topic/<topic-id>")
-        (assert-equal topicmap-json
-                      (hyperdoc::dmx-topicmap-data-of proxy)
-                      "Topicmap data should come from /core/topic/<topicmap-id>")
-        (assert-equal (expected-dmx-core-topic-url 912102)
-                      (hyperdoc::dmx-topicmap-core-topic-url proxy)
-                      "Topicmap helper must expose the exact core-topic URL")
-        (assert-true
-         (member (list "/core/topic/912102"
-                       (hyperdoc::dmx-children+assoc-parameters))
-                 calls
-                 :test #'equal)
-         "Topicmap data fetch must use the core topic endpoint")
-        (assert-true
-         (notany (lambda (call)
-                   (search "/topicmaps/" (first call)))
-                 calls)
-         "No /topicmaps/<id> fetch should remain in the exercised topicmap path"))
+           (hyperdoc::ensure-dmx-topic-data proxy :force? t)
+           (hyperdoc::ensure-dmx-topicmap-data proxy :force? t)
+           (assert-equal topic-json
+                         (hyperdoc::dmx-topic-data-of proxy)
+                         "Topic data should come from /core/topic/<topic-id>")
+           (assert-equal topicmap-json
+                         (hyperdoc::dmx-topicmap-data-of proxy)
+                         "Topicmap data should come from /core/topic/<topicmap-id>")
+           (assert-equal (expected-dmx-core-topic-url 912102)
+                         (hyperdoc::dmx-topicmap-core-topic-url proxy)
+                         "Topicmap helper must expose the exact core-topic URL")
+           (assert-true
+            (member (list "/core/topic/912102"
+                          (hyperdoc::dmx-children+assoc-parameters))
+                    calls
+                    :test #'equal)
+            "Topicmap data fetch must use the core topic endpoint")
+           (assert-true
+            (notany (lambda (call)
+                      (search "/topicmaps/" (first call)))
+                    calls)
+            "No /topicmaps/<id> fetch should remain in the exercised topicmap path"))
       (setf (symbol-function 'hyperdoc::dmx-fetch-json) original))))
 
 (defun run-workspace-diagnostics-regression-test ()
@@ -299,8 +299,8 @@
                          (expected-dmx-core-topic-url 919822)
                          "OK"))
                        ((member endpoint '("/workspaces/object/922464"
-                                          "/workspaces/object/928648"
-                                          "/workspaces/object/928674")
+                                           "/workspaces/object/928648"
+                                           "/workspaces/object/928674")
                                 :test #'string=)
                         (values
                          ""
@@ -322,10 +322,10 @@
                        ((string= endpoint "/access-control/workspace/919815/owner")
                         (values "rgb" 200 (expected-dmx-workspace-owner-url 919815) "OK"))
                        ((member endpoint '("/topicmaps/object/922464"
-                                          "/topicmaps/object/928648"
-                                          "/topicmaps/object/928674")
+                                           "/topicmaps/object/928648"
+                                           "/topicmaps/object/928674")
                                 :test #'string=)
-                       (values
+                        (values
                          (hyperdoc::encode-json-string
                           (vector (make-membership
                                    919822
@@ -431,7 +431,7 @@
               (member "/topicmaps/object/928674" calls :test #'equal)
               "Diagnostics must read the topicmap-memberships endpoint for workspace journals")
              (assert-true
-             (member "/access-control/workspace/919815/owner" calls :test #'equal)
+              (member "/access-control/workspace/919815/owner" calls :test #'equal)
               "Diagnostics must read the workspace-owner endpoint when a workspace exists"))
         (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http)))))
 
@@ -491,11 +491,11 @@
                      (push endpoint calls)
                      (cond
                        ((string= endpoint "/topicmaps/919822")
-                       (values
+                        (values
                          (hyperdoc::encode-json-string
                           (make-topicmap-projection
                            (list (make-topic-json
-                                 922451
+                                  922451
                                   "hyperdoc:mcp/auth-probe-20260330-1"
                                   "auth probe")
                                  (make-topic-json
@@ -519,9 +519,9 @@
                                   "hyperdoc:mcp/workspace-note/maintenance-note-probe-topic-922451-disposition"
                                   "Maintenance note for probe topic 922451")
                                  (make-topic-json
-                                 922565
-                                 "hyperdoc:mcp/handover/set-default-workspace-and-owner"
-                                 "Set default workspace and owner")
+                                  922565
+                                  "hyperdoc:mcp/handover/set-default-workspace-and-owner"
+                                  "Set default workspace and owner")
                                  (make-topic-json
                                   928648
                                   "hyperdoc:mcp/workspace-annotation/test-workspace-annotation"
@@ -544,14 +544,14 @@
                          (expected-dmx-core-topic-url 919822)
                          "OK"))
                        ((member endpoint '("/workspaces/object/922464"
-                                          "/workspaces/object/922479"
-                                          "/workspaces/object/922500"
-                                          "/workspaces/object/922515"
-                                          "/workspaces/object/922532"
-                                          "/workspaces/object/922565"
-                                          "/workspaces/object/928648"
-                                          "/workspaces/object/928674"
-                                          "/workspaces/object/922451")
+                                           "/workspaces/object/922479"
+                                           "/workspaces/object/922500"
+                                           "/workspaces/object/922515"
+                                           "/workspaces/object/922532"
+                                           "/workspaces/object/922565"
+                                           "/workspaces/object/928648"
+                                           "/workspaces/object/928674"
+                                           "/workspaces/object/922451")
                                 :test #'string=)
                         (values "" 204
                                 (expected-dmx-workspace-object-url
@@ -568,15 +568,15 @@
                        ((string= endpoint "/access-control/workspace/919815/owner")
                         (values "rgb" 200 (expected-dmx-workspace-owner-url 919815) "OK"))
                        ((member endpoint '("/topicmaps/object/922451"
-                                          "/topicmaps/object/922464"
-                                          "/topicmaps/object/922479"
-                                          "/topicmaps/object/922500"
-                                          "/topicmaps/object/922515"
-                                          "/topicmaps/object/922532"
-                                          "/topicmaps/object/922565"
-                                          "/topicmaps/object/928648"
-                                          "/topicmaps/object/928674"
-                                          "/topicmaps/object/922586")
+                                           "/topicmaps/object/922464"
+                                           "/topicmaps/object/922479"
+                                           "/topicmaps/object/922500"
+                                           "/topicmaps/object/922515"
+                                           "/topicmaps/object/922532"
+                                           "/topicmaps/object/922565"
+                                           "/topicmaps/object/928648"
+                                           "/topicmaps/object/928674"
+                                           "/topicmaps/object/922586")
                                 :test #'string=)
                         (let* ((id-string (subseq endpoint
                                                   (length "/topicmaps/object/")))
@@ -640,24 +640,24 @@
 
 (defun run-explicit-dmx-repair-client-builder-test ()
   (let ((basic-client
-          (hyperdoc::make-http-dmx-import-client-from-explicit-auth
-           :base-url "https://dmx.ralfbarkow.ch"
-           :workspace-id 919815
-           :auth-mode :basic
-           :username "rgb"
-           :password "secret"))
+         (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+          :base-url "https://dmx.ralfbarkow.ch"
+          :workspace-id 919815
+          :auth-mode :basic
+          :username "rgb"
+          :password "secret"))
         (header-client
-          (hyperdoc::make-http-dmx-import-client-from-explicit-auth
-           :base-url "https://dmx.ralfbarkow.ch"
-           :workspace-id 919815
-           :auth-mode :header
-           :authorization-header "Basic abc123"))
+         (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+          :base-url "https://dmx.ralfbarkow.ch"
+          :workspace-id 919815
+          :auth-mode :header
+          :authorization-header "Basic abc123"))
         (token-client
-          (hyperdoc::make-http-dmx-import-client-from-explicit-auth
-           :base-url "https://dmx.ralfbarkow.ch"
-           :workspace-id 919815
-           :auth-mode :token
-           :auth-token "tok-123")))
+         (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+          :base-url "https://dmx.ralfbarkow.ch"
+          :workspace-id 919815
+          :auth-mode :token
+          :auth-token "tok-123")))
     (assert-equal "https://dmx.ralfbarkow.ch"
                   (hyperdoc::dmx-import-base-url-of basic-client)
                   "Explicit auth builder must preserve the base URL")
@@ -811,11 +811,11 @@
                                    (hyperdoc::dmx-repair-topic-proxies-of triage-page))
                            "Repair console triage must begin with the two unassigned HyperDoc-owned topics")
              (let ((single-result
-                     (hyperdoc/inspector::repair-topic-proxy-with-client
-                      single-proxy
-                      client
-                      :dry-run nil
-                      :auth-mode :header)))
+                    (hyperdoc/inspector::repair-topic-proxy-with-client
+                     single-proxy
+                     client
+                     :dry-run nil
+                     :auth-mode :header)))
                (assert-true (getf single-result :success-p)
                             "Single-topic repair helper must succeed on a HyperDoc-owned unassigned topic")
                (assert-equal 919815
@@ -834,11 +834,11 @@
                                    (hyperdoc::dmx-repair-topic-proxies-of triage-page))
                            "The repaired canary must disappear from backlog triage")
              (let ((backlog-results
-                     (hyperdoc/inspector::repair-workspace-triage-backlog-with-client
-                      triage-page
-                      client
-                      :dry-run nil
-                      :auth-mode :header)))
+                    (hyperdoc/inspector::repair-workspace-triage-backlog-with-client
+                     triage-page
+                     client
+                     :dry-run nil
+                     :auth-mode :header)))
                (assert-equal '(922500)
                              (mapcar (lambda (result) (getf result :topic-id))
                                      backlog-results)
@@ -879,15 +879,15 @@
          (events nil)
          (original-http (symbol-function 'hyperdoc::dmx-http-request-body))
          (original-explicit-client
-           (symbol-function 'hyperdoc/inspector::make-explicit-dmx-repair-client))
+          (symbol-function 'hyperdoc/inspector::make-explicit-dmx-repair-client))
          (original-rehearsal-builder
-           (symbol-function
-            'hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot))
+          (symbol-function
+           'hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot))
          (original-execute
-           (symbol-function
-            'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair))
+          (symbol-function
+           'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair))
          (original-journal-suppressed-p
-           hyperdoc::*dmx-workspace-journal-suppressed-p*))
+          hyperdoc::*dmx-workspace-journal-suppressed-p*))
     (labels ((make-view-props (x y)
                (let ((json (make-hash-table :test #'equal)))
                  (setf (gethash "dmx.topicmaps.x" json) x
@@ -1024,9 +1024,9 @@
                             (captures (gethash "captures" snapshot))
                             (topic-id (gethash "topicId" repair-target))
                             (workspace-assignment
-                              (gethash "workspaceAssignment" captures))
+                             (gethash "workspaceAssignment" captures))
                             (topicmap-memberships
-                              (gethash "topicmapMemberships" captures)))
+                             (gethash "topicmapMemberships" captures)))
                        (push (list :snapshot
                                    topic-id
                                    (length (hyperdoc::json-array-elements
@@ -1051,11 +1051,11 @@
                                    (hyperdoc::dmx-repair-topic-proxies-of triage-page))
                            "Backlog rehearsal bridge must start from the filtered triage backlog")
              (let ((results
-                     (hyperdoc/inspector::repair-workspace-triage-backlog-with-explicit-auth
-                      triage-page
-                      :dry-run nil
-                      :auth-mode :header
-                      :authorization-header "Bearer smoke-token")))
+                    (hyperdoc/inspector::repair-workspace-triage-backlog-with-explicit-auth
+                     triage-page
+                     :dry-run nil
+                     :auth-mode :header
+                     :authorization-header "Bearer smoke-token")))
                (assert-equal 1
                              (length results)
                              "Backlog rehearsal bridge must return one repaired backlog item")
@@ -1167,61 +1167,61 @@
              (journal-companion-topic-json ()
                (let* ((topic (canary-topic-json))
                       (metadata
-                        (hyperdoc::dmx-workspace-journal-subject-metadata-from-topic
-                         topic))
+                       (hyperdoc::dmx-workspace-journal-subject-metadata-from-topic
+                        topic))
                       (subject-key (gethash "subjectKey" metadata))
                       (lookup (gethash "subjectLookup" metadata))
                       (lookup-kind (gethash "kind" lookup))
                       (lookup-value (gethash "value" lookup))
                       (payload
-                        (hyperdoc::dmx-workspace-journal-payload-json-from-topic
-                         topic))
+                       (hyperdoc::dmx-workspace-journal-payload-json-from-topic
+                        topic))
                       (view-props (make-view-props 24 44))
                       (current-state
-                        (hyperdoc::dmx-workspace-journal-snapshot-from-payload
-                         subject-key
-                         lookup-kind
-                         lookup-value
-                         919822
-                         payload
-                         :subject-uri (gethash "subjectUri" metadata)
-                         :subject-kind (gethash "subjectKind" metadata)
-                         :ownership-class (gethash "ownershipClass" metadata)
-                         :note-key (gethash "noteKey" metadata)
-                         :note-kind (gethash "noteKind" metadata)
-                         :topic-id 922464
-                         :in-topicmap t
-                         :view-props view-props
-                         :workspace-id nil
-                         :workspace-title nil))
+                       (hyperdoc::dmx-workspace-journal-snapshot-from-payload
+                        subject-key
+                        lookup-kind
+                        lookup-value
+                        919822
+                        payload
+                        :subject-uri (gethash "subjectUri" metadata)
+                        :subject-kind (gethash "subjectKind" metadata)
+                        :ownership-class (gethash "ownershipClass" metadata)
+                        :note-key (gethash "noteKey" metadata)
+                        :note-kind (gethash "noteKind" metadata)
+                        :topic-id 922464
+                        :in-topicmap t
+                        :view-props view-props
+                        :workspace-id nil
+                        :workspace-title nil))
                       (previous-state
-                        (hyperdoc::dmx-workspace-journal-absent-snapshot
-                         subject-key
-                         lookup-kind
-                         lookup-value
-                         919822
-                         :subject-uri (gethash "subjectUri" metadata)
-                         :subject-kind (gethash "subjectKind" metadata)
-                         :ownership-class (gethash "ownershipClass" metadata)
-                         :note-key (gethash "noteKey" metadata)
-                         :note-kind (gethash "noteKind" metadata)))
+                       (hyperdoc::dmx-workspace-journal-absent-snapshot
+                        subject-key
+                        lookup-kind
+                        lookup-value
+                        919822
+                        :subject-uri (gethash "subjectUri" metadata)
+                        :subject-kind (gethash "subjectKind" metadata)
+                        :ownership-class (gethash "ownershipClass" metadata)
+                        :note-key (gethash "noteKey" metadata)
+                        :note-kind (gethash "noteKind" metadata)))
                       (stream
-                        (hyperdoc::dmx-workspace-journal-make-base-stream
-                         subject-key
-                         lookup-kind
-                         lookup-value
-                         919822
-                         :subject-uri (gethash "subjectUri" metadata)
-                         :subject-kind (gethash "subjectKind" metadata)
-                         :ownership-class (gethash "ownershipClass" metadata)
-                         :note-key (gethash "noteKey" metadata)
-                         :note-kind (gethash "noteKind" metadata)))
+                       (hyperdoc::dmx-workspace-journal-make-base-stream
+                        subject-key
+                        lookup-kind
+                        lookup-value
+                        919822
+                        :subject-uri (gethash "subjectUri" metadata)
+                        :subject-kind (gethash "subjectKind" metadata)
+                        :ownership-class (gethash "ownershipClass" metadata)
+                        :note-key (gethash "noteKey" metadata)
+                        :note-kind (gethash "noteKind" metadata)))
                       (events
-                        (hyperdoc::dmx-workspace-journal-transition-events
-                         previous-state
-                         current-state
-                         hyperdoc::*dmx-workspace-journal-diff-observation-kind*
-                         hyperdoc::*dmx-workspace-journal-diff-actor*)))
+                       (hyperdoc::dmx-workspace-journal-transition-events
+                        previous-state
+                        current-state
+                        hyperdoc::*dmx-workspace-journal-diff-observation-kind*
+                        hyperdoc::*dmx-workspace-journal-diff-actor*)))
                  (hyperdoc::dmx-workspace-journal-apply-events-to-stream
                   stream
                   events)
@@ -1252,7 +1252,7 @@
                      (declare (ignore book parameters accept))
                      (cond
                        ((string= endpoint "/core/topic/922464")
-                       (values
+                        (values
                          (hyperdoc::encode-json-string
                           (canary-topic-json))
                          200
@@ -1274,10 +1274,10 @@
                          (expected-dmx-topicmap-memberships-url 922464)
                          "OK"))
                        (t
-                       (error "Unexpected DMX repair-console fetch ~S" endpoint)))))
+                        (error "Unexpected DMX repair-console fetch ~S" endpoint)))))
              (setf (symbol-function 'drakma:http-request)
                    (lambda (url &key method additional-headers content-type content
-                               content-length want-stream &allow-other-keys)
+                                  content-length want-stream &allow-other-keys)
                      (declare (ignore want-stream))
                      (cond
                        ((search (hyperdoc::dmx-topic-uri-lookup-path
@@ -1366,24 +1366,24 @@
                        (t
                         (error "Unexpected Drakma repair-console call ~S" url)))))
              (let* ((auth-context
-                      (hyperdoc/inspector::build-dmx-repair-auth-context
-                       :auth-mode :basic
-                       :username "rgb"
-                       :password "secret"))
+                     (hyperdoc/inspector::build-dmx-repair-auth-context
+                      :auth-mode :basic
+                      :username "rgb"
+                      :password "secret"))
                     (client
-                      (hyperdoc::make-http-dmx-import-client-from-explicit-auth
-                       :base-url "https://dmx.ralfbarkow.ch"
-                       :workspace-id 919815
-                       :auth-mode :basic
-                       :username "rgb"
-                       :password "secret"))
+                     (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+                      :base-url "https://dmx.ralfbarkow.ch"
+                      :workspace-id 919815
+                      :auth-mode :basic
+                      :username "rgb"
+                      :password "secret"))
                     (result
-                      (hyperdoc/inspector::repair-topic-proxy-with-client
-                       single-proxy
-                       client
-                       :dry-run nil
-                       :auth-mode :basic
-                       :auth-context auth-context))
+                     (hyperdoc/inspector::repair-topic-proxy-with-client
+                      single-proxy
+                      client
+                      :dry-run nil
+                      :auth-mode :basic
+                      :auth-context auth-context))
                     (debug-report (getf result :debug-report))
                     (states (getf debug-report :states)))
                (assert-true
@@ -1476,8 +1476,8 @@
                                  :test #'eq)
                            :reached-p))
                 "Repair-console debug trace must leave S12 unreached on error"))))
-        (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http
-              (symbol-function 'drakma:http-request) original-drakma))))
+      (setf (symbol-function 'hyperdoc::dmx-http-request-body) original-http
+            (symbol-function 'drakma:http-request) original-drakma))))
 
 (defun run-topicmap-designator-helper-test ()
   (let* ((id 913836)
@@ -1510,15 +1510,15 @@
                 :workspace-id 111111
                 :topicmap-id 222222))
          (matching-result
-           '(:success-p t
-             :dry-run nil
-             :result-workspace-id 111111
-             :result-in-topicmap-p t))
+          '(:success-p t
+            :dry-run nil
+            :result-workspace-id 111111
+            :result-in-topicmap-p t))
          (mismatched-result
-           '(:success-p t
-             :dry-run nil
-             :result-workspace-id 919815
-             :result-in-topicmap-p t)))
+          '(:success-p t
+            :dry-run nil
+            :result-workspace-id 919815
+            :result-in-topicmap-p t)))
     (assert-equal "repair-succeeded"
                   (hyperdoc/inspector::dmx-repair-result-operational-state-label
                    page
@@ -1532,20 +1532,20 @@
 
 (defun run-dmx-repair-auth-state-machine-run-status-smoke-test ()
   (let* ((running-run
-           (hyperdoc/inspector::make-dmx-repair-auth-state-machine-run
-            :result '(:trace-state :s6 :success-p nil)
-            :auth-context '(:auth-mode :basic)
-            :debug-events nil))
+          (hyperdoc/inspector::make-dmx-repair-auth-state-machine-run
+           :result '(:trace-state :s6 :success-p nil)
+           :auth-context '(:auth-mode :basic)
+           :debug-events nil))
          (success-run
-           (hyperdoc/inspector::make-dmx-repair-auth-state-machine-run
-            :result '(:trace-state :s12 :success-p t :outcome :ok)
-            :auth-context '(:auth-mode :basic)
-            :debug-events nil))
+          (hyperdoc/inspector::make-dmx-repair-auth-state-machine-run
+           :result '(:trace-state :s12 :success-p t :outcome :ok)
+           :auth-context '(:auth-mode :basic)
+           :debug-events nil))
          (failure-run
-           (hyperdoc/inspector::make-dmx-repair-auth-state-machine-run
-            :result '(:trace-state :s13 :success-p nil :outcome :repair-failed)
-            :auth-context '(:auth-mode :basic)
-            :debug-events nil)))
+          (hyperdoc/inspector::make-dmx-repair-auth-state-machine-run
+           :result '(:trace-state :s13 :success-p nil :outcome :repair-failed)
+           :auth-context '(:auth-mode :basic)
+           :debug-events nil)))
     (assert-equal :running
                   (hyperdoc::state-machine-run-status-of running-run)
                   "Intermediate auth states must remain running")
@@ -1559,17 +1559,17 @@
 (defun run-shared-workspace-nondefault-id-rendering-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((missing-proxy
-           (make-smoke-diagnostics-proxy
-            922464
-            "Operational definition: chunk, chunk note, manifest note, content topic"
-            :workspace-id nil
-            :status :in-topicmap-but-unassigned
-            :repair-needed-p t))
+          (make-smoke-diagnostics-proxy
+           922464
+           "Operational definition: chunk, chunk note, manifest note, content topic"
+           :workspace-id nil
+           :status :in-topicmap-but-unassigned
+           :repair-needed-p t))
          (projection
-           (make-smoke-topicmap-projection
-            (list (make-smoke-topicmap-projection-topic
-                   922464
-                   "Operational definition: chunk, chunk note, manifest note, content topic"))))
+          (make-smoke-topicmap-projection
+           (list (make-smoke-topicmap-projection-topic
+                  922464
+                  "Operational definition: chunk, chunk note, manifest note, content topic"))))
          (workspace (hyperdoc::make-dmx-shared-workspace-object
                      :workspace-id 111111
                      :topicmap-id 222222))
@@ -1577,7 +1577,7 @@
                     :workspace-id 111111
                     :topicmap-id 222222))
          (original-ensure
-           (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)))
+          (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)))
     (unwind-protect
          (progn
            (setf (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)
@@ -1592,17 +1592,17 @@
                    (hyperdoc::dmx-repair-summary-of page) nil
                    (hyperdoc::dmx-load-error-of page) nil))
            (let* ((workspace-views
-                    (dmx-topic-proxy-smoke-load-inspector-views-for-object workspace))
+                   (dmx-topic-proxy-smoke-load-inspector-views-for-object workspace))
                   (topicmap-views
-                    (dmx-topic-proxy-smoke-load-inspector-views-for-object topicmap))
+                   (dmx-topic-proxy-smoke-load-inspector-views-for-object topicmap))
                   (workspace-overview
-                    (dmx-topic-proxy-smoke-find-view-by-title workspace-views "Overview"))
+                   (dmx-topic-proxy-smoke-find-view-by-title workspace-views "Overview"))
                   (workspace-missing
-                    (dmx-topic-proxy-smoke-find-view-by-title
-                     workspace-views
-                     "Topics missing workspace assignment"))
+                   (dmx-topic-proxy-smoke-find-view-by-title
+                    workspace-views
+                    "Topics missing workspace assignment"))
                   (topicmap-overview
-                    (dmx-topic-proxy-smoke-find-view-by-title topicmap-views "Overview")))
+                   (dmx-topic-proxy-smoke-find-view-by-title topicmap-views "Overview")))
              (assert-true
               (search "topicmap 222222"
                       (html-inspector-views:view-html workspace-overview)
@@ -1632,18 +1632,18 @@
                 :workspace-id 111111
                 :topicmap-id 222222))
          (result
-           '(:topic-id 922464
-             :topic-title "Operational definition: chunk, chunk note, manifest note, content topic"
-             :auth-mode :header
-             :success-p t
-             :dry-run nil
-             :workspace-action :assigned
-             :result-workspace-id 111111
-             :result-workspace-title "alt-context"
-             :result-in-topicmap-p t
-             :debug-report (:current-state-label "S12 terminal success")))
+          '(:topic-id 922464
+            :topic-title "Operational definition: chunk, chunk note, manifest note, content topic"
+            :auth-mode :header
+            :success-p t
+            :dry-run nil
+            :workspace-action :assigned
+            :result-workspace-id 111111
+            :result-workspace-title "alt-context"
+            :result-in-topicmap-p t
+            :debug-report (:current-state-label "S12 terminal success")))
          (original-ensure
-           (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)))
+          (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)))
     (unwind-protect
          (progn
            (setf (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)
@@ -1658,7 +1658,7 @@
                  (hyperdoc::dmx-load-error-of page) nil)
            (let* ((views (dmx-topic-proxy-smoke-load-inspector-views-for-object page))
                   (repair-view
-                    (dmx-topic-proxy-smoke-find-view-by-title views "Repair console"))
+                   (dmx-topic-proxy-smoke-find-view-by-title views "Repair console"))
                   (html (html-inspector-views:view-html repair-view)))
              (assert-true
               (search "Operational state" html :test #'char=)
@@ -1675,43 +1675,43 @@
 (defun run-shared-workspace-inspectable-object-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((healthy-proxy
-           (make-smoke-diagnostics-proxy
-            922586
-            "Guarded workspace default verification note"
-            :workspace-id 919815
-            :status :ok))
+          (make-smoke-diagnostics-proxy
+           922586
+           "Guarded workspace default verification note"
+           :workspace-id 919815
+           :status :ok))
          (missing-proxy
-           (make-smoke-diagnostics-proxy
-            922464
-            "Operational definition: chunk, chunk note, manifest note, content topic"
-            :workspace-id nil
-            :status :in-topicmap-but-unassigned
-            :repair-needed-p t))
+          (make-smoke-diagnostics-proxy
+           922464
+           "Operational definition: chunk, chunk note, manifest note, content topic"
+           :workspace-id nil
+           :status :in-topicmap-but-unassigned
+           :repair-needed-p t))
          (foreign-proxy
-           (make-smoke-diagnostics-proxy
-            922451
-            "auth probe"
-            :workspace-id nil
-            :ownership-class :foreign
-            :hyperdoc-owned-p nil
-            :status :foreign-object))
+          (make-smoke-diagnostics-proxy
+           922451
+           "auth probe"
+           :workspace-id nil
+           :ownership-class :foreign
+           :hyperdoc-owned-p nil
+           :status :foreign-object))
          (projection
-           (make-smoke-topicmap-projection
-            (list (make-smoke-topicmap-projection-topic
-                   922451
-                   "auth probe")
-                  (make-smoke-topicmap-projection-topic
-                   922464
-                   "Operational definition: chunk, chunk note, manifest note, content topic")
-                  (make-smoke-topicmap-projection-topic
-                   922586
-                   "Guarded workspace default verification note"))))
+          (make-smoke-topicmap-projection
+           (list (make-smoke-topicmap-projection-topic
+                  922451
+                  "auth probe")
+                 (make-smoke-topicmap-projection-topic
+                  922464
+                  "Operational definition: chunk, chunk note, manifest note, content topic")
+                 (make-smoke-topicmap-projection-topic
+                  922586
+                  "Guarded workspace default verification note"))))
          (topic-proxies (list healthy-proxy missing-proxy foreign-proxy))
          (repair-proxies (list missing-proxy))
          (workspace (hyperdoc::make-dmx-shared-workspace-object))
          (topicmap (hyperdoc::make-dmx-shared-topicmap-object))
          (original-ensure
-           (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)))
+          (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)))
     (unwind-protect
          (progn
            (setf (symbol-function 'hyperdoc::ensure-dmx-workspace-repair-triage)
@@ -1744,37 +1744,37 @@
                          (hyperdoc/inspector::repair-workspace-triage-topic-ids topicmap)
                          "Topicmap object must reuse the existing narrow repair backlog helper")
            (let* ((workspace-views
-                    (dmx-topic-proxy-smoke-load-inspector-views-for-object workspace))
+                   (dmx-topic-proxy-smoke-load-inspector-views-for-object workspace))
                   (topicmap-views
-                    (dmx-topic-proxy-smoke-load-inspector-views-for-object topicmap))
+                   (dmx-topic-proxy-smoke-load-inspector-views-for-object topicmap))
                   (workspace-overview
-                    (dmx-topic-proxy-smoke-find-view-by-title workspace-views "Overview"))
+                   (dmx-topic-proxy-smoke-find-view-by-title workspace-views "Overview"))
                   (workspace-missing
-                    (dmx-topic-proxy-smoke-find-view-by-title
-                     workspace-views
-                     "Topics missing workspace assignment"))
+                   (dmx-topic-proxy-smoke-find-view-by-title
+                    workspace-views
+                    "Topics missing workspace assignment"))
                   (workspace-assigned
-                    (dmx-topic-proxy-smoke-find-view-by-title
-                     workspace-views
-                     "Assigned topics"))
+                   (dmx-topic-proxy-smoke-find-view-by-title
+                    workspace-views
+                    "Assigned topics"))
                   (workspace-repair
-                    (dmx-topic-proxy-smoke-find-view-by-title
-                     workspace-views
-                     "Repair console"))
+                   (dmx-topic-proxy-smoke-find-view-by-title
+                    workspace-views
+                    "Repair console"))
                   (topicmap-overview
-                    (dmx-topic-proxy-smoke-find-view-by-title topicmap-views "Overview"))
+                   (dmx-topic-proxy-smoke-find-view-by-title topicmap-views "Overview"))
                   (topicmap-visible
-                    (dmx-topic-proxy-smoke-find-view-by-title
-                     topicmap-views
-                     "Visible topics"))
+                   (dmx-topic-proxy-smoke-find-view-by-title
+                    topicmap-views
+                    "Visible topics"))
                   (topicmap-unassigned
-                    (dmx-topic-proxy-smoke-find-view-by-title
-                     topicmap-views
-                     "Visible but unassigned"))
+                   (dmx-topic-proxy-smoke-find-view-by-title
+                    topicmap-views
+                    "Visible but unassigned"))
                   (topicmap-repair
-                    (dmx-topic-proxy-smoke-find-view-by-title
-                     topicmap-views
-                     "Repair console")))
+                   (dmx-topic-proxy-smoke-find-view-by-title
+                    topicmap-views
+                    "Repair console")))
              (dolist (view (list workspace-overview
                                  workspace-missing
                                  workspace-assigned
@@ -1952,30 +1952,30 @@
 
 (defun make-dmx-topic-936040-dock-annotation-fixture ()
   (let ((source-anchor
-          (make-instance
-           'hyperdoc::dom-annotation-anchor
-           :provider-kind "dom-v1"
-           :view-kind "content"
-           :view-title "Main page"
-           :context-object-id "lafont-1990-interaction-nets"
-           :strategy "list-item-anchor"
-           :value "list-item:h1/lafont-1990-interaction-nets/h2/core-concepts-from-lafont-1990/ul[2]/item[3]"
-           :label "An active/alive pair is two agents connected by principal ports."
-           :section-path
-           '("Lafont 1990 Interaction Nets"
-             "Core concepts from Lafont 1990")
-           :object-id "lafont-active-alive-pair-item"))
+         (make-instance
+          'hyperdoc::dom-annotation-anchor
+          :provider-kind "dom-v1"
+          :view-kind "content"
+          :view-title "Main page"
+          :context-object-id "lafont-1990-interaction-nets"
+          :strategy "list-item-anchor"
+          :value "list-item:h1/lafont-1990-interaction-nets/h2/core-concepts-from-lafont-1990/ul[2]/item[3]"
+          :label "An active/alive pair is two agents connected by principal ports."
+          :section-path
+          '("Lafont 1990 Interaction Nets"
+            "Core concepts from Lafont 1990")
+          :object-id "lafont-active-alive-pair-item"))
         (target-anchor
-          (make-instance
-           'hyperdoc::dom-annotation-anchor
-           :provider-kind "dock-v1"
-           :view-kind "dock-target"
-           :view-title "Main page"
-           :context-object-id "lafont-1990-interaction-nets"
-           :strategy "annotation-topic"
-           :value "dock-annotation"
-           :label "Annotation"
-           :object-id "dock-annotation")))
+         (make-instance
+          'hyperdoc::dom-annotation-anchor
+          :provider-kind "dock-v1"
+          :view-kind "dock-target"
+          :view-title "Main page"
+          :context-object-id "lafont-1990-interaction-nets"
+          :strategy "annotation-topic"
+          :value "dock-annotation"
+          :label "Annotation"
+          :object-id "dock-annotation")))
     (make-instance
      'hyperdoc::workspace-dock-annotation
      :id *dmx-topic-936040-runtime-relation-id*
@@ -1999,9 +1999,9 @@
 (defun run-dmx-topic-proxy-meta-view-936040-smoke-test ()
   (let* ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 936040))
          (original-ensure-diagnostics
-           (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
+          (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
          (original-ensure-related
-           (symbol-function 'hyperdoc::ensure-dmx-related-topics))
+          (symbol-function 'hyperdoc::ensure-dmx-related-topics))
          (original-http (symbol-function 'hyperdoc::dmx-http-request-body)))
     (seed-dmx-topic-936040-proxy-fixture proxy)
     (unwind-protect
@@ -2027,9 +2027,9 @@
                         views
                         "Raw fetched data"))
                   (diagnostics
-                    (dmx-topic-proxy-smoke-find-view-by-title
-                     views
-                     "Workspace diagnostics"))
+                   (dmx-topic-proxy-smoke-find-view-by-title
+                    views
+                    "Workspace diagnostics"))
                   (html (and meta
                              (html-inspector-views:view-html meta))))
              (assert-true meta
@@ -2073,7 +2073,7 @@
 (defun run-dmx-topic-proxy-workspace-assignment-card-936040-smoke-test ()
   (let* ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 936040))
          (original-ensure-diagnostics
-           (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
+          (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
          (original-http (symbol-function 'hyperdoc::dmx-http-request-body)))
     (seed-dmx-topic-936040-proxy-fixture proxy)
     (unwind-protect
@@ -2089,9 +2089,9 @@
            (let* ((views (dmx-topic-proxy-smoke-load-inspector-views-for-object
                           proxy))
                   (diagnostics
-                    (dmx-topic-proxy-smoke-find-view-by-title
-                     views
-                     "Workspace diagnostics"))
+                   (dmx-topic-proxy-smoke-find-view-by-title
+                    views
+                    "Workspace diagnostics"))
                   (html (and diagnostics
                              (html-inspector-views:view-html diagnostics))))
              (assert-true diagnostics
@@ -2120,7 +2120,7 @@
                         "Workspace assignment card for topic 936040 must render ~S"
                         needle)))
              (dolist (forbidden '("super-secret" "raw-secret" "token-secret"
-                                   "Assign workspace"))
+                                  "Assign workspace"))
                (assert-true
                 (not (search forbidden html :test #'char=))
                 (format nil
@@ -2136,8 +2136,8 @@
          (events nil)
          (original-http (symbol-function 'hyperdoc::dmx-http-request-body))
          (original-execute
-           (symbol-function
-            'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair)))
+          (symbol-function
+           'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair)))
     (seed-dmx-topic-936040-proxy-fixture proxy)
     (unwind-protect
          (progn
@@ -2149,7 +2149,7 @@
                   'hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair)
                  (lambda (topic-id &rest args
                           &key client dry-run workspace-id workspace-topicmap-id
-                          &allow-other-keys)
+                            &allow-other-keys)
                    (push (list :topic-id topic-id
                                :client-type (type-of client)
                                :dry-run (and dry-run t)
@@ -2158,16 +2158,16 @@
                          events)
                    (apply original-execute topic-id args)))
            (let ((result
-                   (hyperdoc/inspector::run-dmx-topic-proxy-inline-workspace-assignment
-                    proxy
-                    :dry-run t
-                    :auth-mode :basic
-                    :username "ignored"
-                    :password "super-secret"
-                    :authorization-header "Basic raw-secret"
-                    :auth-token "token-secret"
-                    :workspace-id 919815
-                    :workspace-topicmap-id 919822)))
+                  (hyperdoc/inspector::run-dmx-topic-proxy-inline-workspace-assignment
+                   proxy
+                   :dry-run t
+                   :auth-mode :basic
+                   :username "ignored"
+                   :password "super-secret"
+                   :authorization-header "Basic raw-secret"
+                   :auth-token "token-secret"
+                   :workspace-id 919815
+                   :workspace-topicmap-id 919822)))
              (assert-true (getf result :success-p)
                           "Inline dry-run assignment must return a successful local plan")
              (assert-true (getf result :dry-run)
@@ -2184,8 +2184,8 @@
               (reverse events)
               "Inline dry-run assignment must call the existing executor with a memory client")
              (let ((table-input
-                     (write-to-string
-                      (hyperdoc::dmx-repair-results-of proxy))))
+                    (write-to-string
+                     (hyperdoc::dmx-repair-results-of proxy))))
                (dolist (forbidden '("super-secret" "raw-secret" "token-secret"
                                     "Authorization: " "Cookie: "))
                  (assert-true
@@ -2202,8 +2202,8 @@
   (let* ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 936040))
          (calls nil)
          (original-explicit
-           (symbol-function
-            'hyperdoc/inspector::repair-topic-proxy-with-explicit-auth))
+          (symbol-function
+           'hyperdoc/inspector::repair-topic-proxy-with-explicit-auth))
          (original-http (symbol-function 'hyperdoc::dmx-http-request-body)))
     (seed-dmx-topic-936040-proxy-fixture proxy)
     (unwind-protect
@@ -2216,8 +2216,8 @@
                   'hyperdoc/inspector::repair-topic-proxy-with-explicit-auth)
                  (lambda (page &rest args
                           &key dry-run auth-mode username password
-                          authorization-header auth-token workspace-id
-                          workspace-topicmap-id &allow-other-keys)
+                            authorization-header auth-token workspace-id
+                            workspace-topicmap-id &allow-other-keys)
                    (declare (ignore page username password authorization-header
                                     auth-token))
                    (push (list :dry-run (and dry-run t)
@@ -2256,9 +2256,9 @@
 (defun run-dmx-topic-proxy-url-view-936040-smoke-test ()
   (let* ((proxy (hyperdoc::make-dmx-shared-workspace-topic-proxy 936040))
          (original-ensure-diagnostics
-           (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
+          (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
          (original-ensure-related
-           (symbol-function 'hyperdoc::ensure-dmx-related-topics))
+          (symbol-function 'hyperdoc::ensure-dmx-related-topics))
          (original-http (symbol-function 'hyperdoc::dmx-http-request-body)))
     (seed-dmx-topic-936040-proxy-fixture proxy)
     (unwind-protect
@@ -2306,9 +2306,9 @@
 (defun run-dock-annotation-open-dmx-meta-action-smoke-test ()
   (let* ((annotation (make-dmx-topic-936040-dock-annotation-fixture))
          (original-ensure-diagnostics
-           (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
+          (symbol-function 'hyperdoc::ensure-dmx-topic-diagnostics))
          (original-ensure-related
-           (symbol-function 'hyperdoc::ensure-dmx-related-topics))
+          (symbol-function 'hyperdoc::ensure-dmx-related-topics))
          (original-http (symbol-function 'hyperdoc::dmx-http-request-body))
          (proxy nil)
          (buttons-html nil))

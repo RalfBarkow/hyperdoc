@@ -12,22 +12,22 @@
   (wait-for-sitemap wiki)
   (unless (zerop (hash-table-count (pages-of wiki)))
     (-<> wiki
-      pages-of
-      alexandria:hash-table-values
-      (remove-if #'(lambda (p) (typep p 'fedwiki-plugin-page)) <>)
-      (sort #'string< :key #'hb:title-of)
-      (views:list-view :title "Pages" :priority 5))))
+         pages-of
+         alexandria:hash-table-values
+         (remove-if #'(lambda (p) (typep p 'fedwiki-plugin-page)) <>)
+         (sort #'string< :key #'hb:title-of)
+         (views:list-view :title "Pages" :priority 5))))
 
 (views:defview 👀plugins (wiki fedwiki)
   (views:list-view
    (views:thunk
-     (wait-for-sitemap wiki)
-     (when (zerop (hash-table-count (plugins-of wiki)))
-       (fetch-plugin-data wiki))
-     (-> wiki
-       plugins-of
-       alexandria:hash-table-values
-       (sort #'string< :key #'name-of)))
+    (wait-for-sitemap wiki)
+    (when (zerop (hash-table-count (plugins-of wiki)))
+      (fetch-plugin-data wiki))
+    (-> wiki
+        plugins-of
+        alexandria:hash-table-values
+        (sort #'string< :key #'name-of)))
    :title "Plugins" :priority 7))
 
 ;;
@@ -36,9 +36,9 @@
 
 (defmethod views:title-bar-action-buttons ((wiki fedwiki))
   (views:action-button html-inspector-views/standard:*icon-open-external*
-    (views:thunk
-      (clog:open-browser :url (wiki-url (domain-name-of wiki) (protocol-of wiki) "/")))
-    nil))
+                       (views:thunk
+                        (clog:open-browser :url (wiki-url (domain-name-of wiki) (protocol-of wiki) "/")))
+                       nil))
 
 ;;
 ;; Views on pages
@@ -52,13 +52,13 @@
 (views:defview 👀journal (page fedwiki-page)
   (load-page page)
   (views:multi-column-list-view
-     (journal-of page)
-     :title "Journal" :priority 3
-     :display (list #'(lambda (entry)
-                        (-> entry entry-type-of symbol-name str:downcase))
-                    #'(lambda (entry)
-                        (or (-> entry date-of)
-                            "")))))
+   (journal-of page)
+   :title "Journal" :priority 3
+   :display (list #'(lambda (entry)
+                      (-> entry entry-type-of symbol-name str:downcase))
+                  #'(lambda (entry)
+                      (or (-> entry date-of)
+                          "")))))
 
 (views:defview 👀context (page fedwiki-page)
   (load-page page)
@@ -92,23 +92,23 @@
   (when-let (context (context-of page))
     (let ((slug (ignore-errors (origin-id-of page))))
       (views:html-view :title "Context" :priority 4
-        (views:html
-          (:table :class "inspector-table"
-                  (dolist (wiki context)
-                    (let* ((owner (or (get-site-owner wiki)
-                                      ""))
-                           (domain (ignore-errors (domain-name-of wiki)))
-                           (url (and domain slug
-                                     (remote-fedwiki-context-url wiki slug))))
-                      (views:html
-                        (:tr (:td (if url
-                                      (views:html
-                                        (:a :href url
-                                            :target "_blank"
-                                            :rel "noopener noreferrer"
-                                            (views:esc domain)))
-                                      (views:esc (or domain ""))))
-                             (:td (views:esc owner))))))))))))
+                       (views:html
+                        (:table :class "inspector-table"
+                                (dolist (wiki context)
+                                  (let* ((owner (or (get-site-owner wiki)
+                                                    ""))
+                                         (domain (ignore-errors (domain-name-of wiki)))
+                                         (url (and domain slug
+                                                   (remote-fedwiki-context-url wiki slug))))
+                                    (views:html
+                                     (:tr (:td (if url
+                                                   (views:html
+                                                    (:a :href url
+                                                        :target "_blank"
+                                                        :rel "noopener noreferrer"
+                                                        (views:esc domain)))
+                                                   (views:esc (or domain ""))))
+                                          (:td (views:esc owner))))))))))))
 
 ;;
 ;; Views on plugins
@@ -120,9 +120,9 @@
 (views:defview 👀pages (plugin fedwiki-plugin)
   (views:list-view
    (views:thunk
-     (load-plugin-pages plugin)
-     (-> plugin
-       pages-of
-       alexandria:hash-table-values
-       (sort #'string< :key #'hb:title-of)))
+    (load-plugin-pages plugin)
+    (-> plugin
+        pages-of
+        alexandria:hash-table-values
+        (sort #'string< :key #'hb:title-of)))
    :title "Pages" :priority 1))

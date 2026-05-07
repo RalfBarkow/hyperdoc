@@ -124,9 +124,9 @@
   (loop for bundle in (fedwiki-materialization-dry-run-bundles :root root)
         for source = (fedwiki-materialization-source-page-from-bundle bundle slug)
         when source
-          do (return (append source
-                             (list :bundle-root (getf bundle :root)
-                                   :slice-id (getf (getf bundle :metadata) :slice-id))))))
+        do (return (append source
+                           (list :bundle-root (getf bundle :root)
+                                 :slice-id (getf (getf bundle :metadata) :slice-id))))))
 
 (defun fedwiki-materialization-topic-fedwiki-page (topic &key (start-date 1773393295339))
   (article-allegation-make-page-with-journal
@@ -150,10 +150,10 @@
       (let* ((existing-page (article-allegation-read-json-file target-path))
              (item-text (getf (first (getf source-page :story)) :text))
              (existing-item
-               (find item-text
-                     (getf existing-page :story)
-                     :key (lambda (item) (getf item :text))
-                     :test #'equal)))
+              (find item-text
+                    (getf existing-page :story)
+                    :key (lambda (item) (getf item :text))
+                    :test #'equal)))
         (if existing-item :already-present :append))
       :create))
 
@@ -263,16 +263,16 @@
          (topic-source (unless bundle-source
                          (fedwiki-materialization-topic-source-for-slug slug)))
          (entry
-           (cond
-             (bundle-source
-              (fedwiki-materialization-plan-entry-from-bundle-source
-               bundle-source slug slug fedwiki-pages-directory))
-             (topic-source
-              (fedwiki-materialization-plan-entry-from-topic-source
-               topic-source slug slug fedwiki-pages-directory))
-             (t
-              (error "No generated slice artifact or topic-driven FedWiki twin for slug ~S"
-                     slug)))))
+          (cond
+            (bundle-source
+             (fedwiki-materialization-plan-entry-from-bundle-source
+              bundle-source slug slug fedwiki-pages-directory))
+            (topic-source
+             (fedwiki-materialization-plan-entry-from-topic-source
+              topic-source slug slug fedwiki-pages-directory))
+            (t
+             (error "No generated slice artifact or topic-driven FedWiki twin for slug ~S"
+                    slug)))))
     (fedwiki-materialization-plan
      :page
      slug
@@ -317,16 +317,16 @@
     (bundle selector fedwiki-pages-directory include-daily-anchor-p)
   (let* ((metadata (getf bundle :metadata))
          (page-slugs
-           (append (list (getf metadata :incident-fedwiki-slug))
-                   (copy-list (or (getf metadata :concept-fedwiki-slugs) '()))))
+          (append (list (getf metadata :incident-fedwiki-slug))
+                  (copy-list (or (getf metadata :concept-fedwiki-slugs) '()))))
          (daily-slug (and include-daily-anchor-p
                           (getf metadata :daily-anchor-target))))
     (append
      (loop for slug in page-slugs
            for source = (fedwiki-materialization-source-page-from-bundle bundle slug)
            when source
-             collect (fedwiki-materialization-plan-entry-from-bundle-source
-                      source slug selector fedwiki-pages-directory))
+           collect (fedwiki-materialization-plan-entry-from-bundle-source
+                    source slug selector fedwiki-pages-directory))
      (when daily-slug
        (when-let (source (fedwiki-materialization-source-page-from-bundle bundle daily-slug))
          (list (fedwiki-materialization-plan-entry-from-bundle-source
@@ -334,29 +334,29 @@
 
 (defun plan-fedwiki-slice-materialization
     (slice-id &key
-               (include-daily-anchor-p nil)
-               (fedwiki-pages-directory (article-allegation-default-fedwiki-pages-directory))
-               (fedwiki-repo-root (article-allegation-default-fedwiki-pages-directory))
-               (hyperdoc-repo-root (article-allegation-source-root))
-               (expected-hyperdoc-branch "hauptsache")
-               (expected-fedwiki-branch "localhost"))
+                (include-daily-anchor-p nil)
+                (fedwiki-pages-directory (article-allegation-default-fedwiki-pages-directory))
+                (fedwiki-repo-root (article-allegation-default-fedwiki-pages-directory))
+                (hyperdoc-repo-root (article-allegation-source-root))
+                (expected-hyperdoc-branch "hauptsache")
+                (expected-fedwiki-branch "localhost"))
   (let* ((slice-id (article-allegation-non-empty-string slice-id))
          (bundle (fedwiki-materialization-find-bundle-by-slice-id slice-id))
          (entries
-           (cond
-             (bundle
-              (fedwiki-materialization-entries-from-dry-run-bundle
-               bundle slice-id fedwiki-pages-directory include-daily-anchor-p))
-             ((fedwiki-materialization-find-spec-by-slice-id slice-id)
-              (fedwiki-materialization-entries-from-rendered-bundle
-               (render-article-allegation-slice-bundle
-                (fedwiki-materialization-find-spec-by-slice-id slice-id))
-               slice-id
-               fedwiki-pages-directory
-               include-daily-anchor-p))
-             (t
-              (error "No dry-run bundle or article allegation spec found for slice ~S"
-                     slice-id)))))
+          (cond
+            (bundle
+             (fedwiki-materialization-entries-from-dry-run-bundle
+              bundle slice-id fedwiki-pages-directory include-daily-anchor-p))
+            ((fedwiki-materialization-find-spec-by-slice-id slice-id)
+             (fedwiki-materialization-entries-from-rendered-bundle
+              (render-article-allegation-slice-bundle
+               (fedwiki-materialization-find-spec-by-slice-id slice-id))
+              slice-id
+              fedwiki-pages-directory
+              include-daily-anchor-p))
+            (t
+             (error "No dry-run bundle or article allegation spec found for slice ~S"
+                    slice-id)))))
     (fedwiki-materialization-plan
      :slice
      slice-id
@@ -394,21 +394,21 @@
 
 (defun fedwiki-materialization-assert-live-branches (plan)
   (let ((expected-hyperdoc-branch
-          (fedwiki-materialization-expected-hyperdoc-branch-of plan))
+         (fedwiki-materialization-expected-hyperdoc-branch-of plan))
         (expected-fedwiki-branch
-          (fedwiki-materialization-expected-fedwiki-branch-of plan)))
+         (fedwiki-materialization-expected-fedwiki-branch-of plan)))
     (when expected-hyperdoc-branch
       (let ((hyperdoc-branch
-              (article-allegation-git-branch
-               (fedwiki-materialization-hyperdoc-repo-root-of plan))))
+             (article-allegation-git-branch
+              (fedwiki-materialization-hyperdoc-repo-root-of plan))))
         (unless (string= hyperdoc-branch expected-hyperdoc-branch)
           (error "HyperDoc repo branch mismatch: expected ~S, got ~S"
                  expected-hyperdoc-branch
                  hyperdoc-branch))))
     (when expected-fedwiki-branch
       (let ((fedwiki-branch
-              (article-allegation-git-branch
-               (fedwiki-materialization-fedwiki-pages-directory-of plan))))
+             (article-allegation-git-branch
+              (fedwiki-materialization-fedwiki-pages-directory-of plan))))
         (unless (string= fedwiki-branch expected-fedwiki-branch)
           (error "FedWiki repo branch mismatch: expected ~S, got ~S"
                  expected-fedwiki-branch
@@ -451,11 +451,11 @@
                                (getf existing-page :journal)))))
          (setf (getf item :id) new-id)
          (let ((updated (article-allegation-append-item-to-page existing-page item)))
-         (article-allegation-write-json-file target-path updated)
-         (fedwiki-materialization-validate-target-path target-path)
-         (list :slug (fedwiki-materialization-entry-slug-of entry)
-               :action :append
-               :target-path target-path))))
+           (article-allegation-write-json-file target-path updated)
+           (fedwiki-materialization-validate-target-path target-path)
+           (list :slug (fedwiki-materialization-entry-slug-of entry)
+                 :action :append
+                 :target-path target-path))))
       (otherwise
        (error "Unsupported materialization action ~S"
               (fedwiki-materialization-entry-action-of entry))))))
@@ -463,19 +463,19 @@
 (defun materialize-fedwiki-materialization-plan (plan)
   (fedwiki-materialization-assert-live-branches plan)
   (let ((report
-          (loop for entry in (fedwiki-materialization-entries-of plan)
-                collect (fedwiki-materialization-write-entry! entry))))
+         (loop for entry in (fedwiki-materialization-entries-of plan)
+               collect (fedwiki-materialization-write-entry! entry))))
     (setf (fedwiki-materialization-execution-report-of plan) report)
     plan))
 
 (defexample fedwiki-materialization-page-preview-example
-  "Plan materialization of the missing civilian-casualty-mitigation FedWiki page."
+    "Plan materialization of the missing civilian-casualty-mitigation FedWiki page."
   (let ((plan (plan-fedwiki-page-materialization "civilian-casualty-mitigation")))
     (assert-equal 1 (length (fedwiki-materialization-entries-of plan)))
     plan))
 
 (defexample fedwiki-materialization-slice-preview-example
-  "Plan slice-level materialization for the Minab article-allegation dry-run bundle."
+    "Plan slice-level materialization for the Minab article-allegation dry-run bundle."
   (let ((plan (plan-fedwiki-slice-materialization
                "minab-school-strike"
                :include-daily-anchor-p t)))

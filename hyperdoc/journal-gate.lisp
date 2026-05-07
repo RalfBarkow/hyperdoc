@@ -56,7 +56,7 @@
               (after (and index (plusp index) (nth (1- index) order)))
               (story (getf page :story))
               (item (find id story :key #'(lambda (entry) (getf entry :id))
-                         :test #'equal)))
+                          :test #'equal)))
          (when item
            (setf story (journalmatic-example-remove story id))
            (setf (getf page :story)
@@ -98,7 +98,7 @@
           for date = (getf action :date)
           do (when (and previous-date date (> previous-date date))
                (pushnew :chronology results))
-             (setf previous-date date))
+          (setf previous-date date))
     (dolist (action journal)
       (case (getf action :type)
         (:create
@@ -211,7 +211,7 @@
         (push copy normalized)))))
 
 (defexample journalmatic-commit-gate-script-example
-  "Show exact commit-gate pass/fail results for one blocked and one passing page."
+    "Show exact commit-gate pass/fail results for one blocked and one passing page."
   (let* ((bad-page *journalmatic-example-page-with-chronology-error*)
          (good-page *journalmatic-example-page*)
          (bad-findings (journalmatic-commit-gate-findings bad-page))
@@ -227,7 +227,7 @@
                            :pass? (journalmatic-commit-gate-pass-p good-page)))))
 
 (defexample journalmatic-date-origin-example
-  "Show Date.now-style millis and monotonic next-date behavior."
+    "Show Date.now-style millis and monotonic next-date behavior."
   (let* ((journal '((:type :create :date 1000)
                     (:type :add :id "a1" :date 1001)))
          (now 950)
@@ -239,7 +239,7 @@
           :next-date next-date)))
 
 (defexample journalmatic-monotonic-normalization-example
-  "Normalize out-of-order dates while preserving action order."
+    "Normalize out-of-order dates while preserving action order."
   (let* ((journal '((:type :create :date 1000)
                     (:type :add :id "a1" :date 1100)
                     (:type :fork :site "localhost:3000" :date 1050)))

@@ -37,23 +37,23 @@
 (defparameter *code-path-graphs-smoke-workspace-topicmap-id* 919822)
 
 (defun make-code-path-graph-test-dock-annotation (&key note
-                                                       (context-view-title
-                                                         "Main page")
-                                                       (source-label
-                                                         "Text pages")
-                                                       (source-value
-                                                         "list-item:main-page/text-pages"))
+                                                    (context-view-title
+                                                     "Main page")
+                                                    (source-label
+                                                     "Text pages")
+                                                    (source-value
+                                                     "list-item:main-page/text-pages"))
   (let* ((hyperdoc-page (hyperdoc::find-page hyperdoc::*hyperdoc*
                                              "HyperDoc"
                                              :signal-error? t))
          (annotation-from-connect
-           (hyperdoc::make-association-annotation-from-json
-            :context-object hyperdoc-page
-            :context-view-title context-view-title
-            :source-json (dock-annotation-source-json "HYPERDOC"
-                                                      source-label
-                                                      source-value)
-            :target-json (dock-annotation-target-json "HYPERDOC"))))
+          (hyperdoc::make-association-annotation-from-json
+           :context-object hyperdoc-page
+           :context-view-title context-view-title
+           :source-json (dock-annotation-source-json "HYPERDOC"
+                                                     source-label
+                                                     source-value)
+           :target-json (dock-annotation-target-json "HYPERDOC"))))
     (hyperdoc::make-dock-annotation
      :context-object hyperdoc-page
      :context-view-title context-view-title
@@ -81,7 +81,7 @@
 
 (defun assert-code-path-graph-page-contains-all (page-source page-label needles)
   (let ((normalized-page-source
-          (normalize-code-path-graphs-smoke-whitespace page-source)))
+         (normalize-code-path-graphs-smoke-whitespace page-source)))
     (dolist (needle needles)
       (code-path-assert-true
        (search (normalize-code-path-graphs-smoke-whitespace needle)
@@ -218,9 +218,9 @@
   (let* ((graph (make-code-path-graph-smoke-graph))
          (views (code-path-graph-smoke-load-inspector-views-for-object graph))
          (graphviz-view
-           (code-path-graph-smoke-find-view-by-title views "Graphviz"))
+          (code-path-graph-smoke-find-view-by-title views "Graphviz"))
          (dot-view
-           (code-path-graph-smoke-find-view-by-title views "DOT export")))
+          (code-path-graph-smoke-find-view-by-title views "DOT export")))
     (code-path-assert-true graphviz-view
                            "Code-path graph must expose a Graphviz view")
     (code-path-assert-true dot-view
@@ -243,17 +243,17 @@
   (let* ((graph (make-source-linked-code-path-graph-smoke-graph))
          (node (first (hyperdoc::code-path-graph-node-seq graph)))
          (expected-source-label
-           "hyperdoc/dmx-workspace-journal.lisp :: read-dmx-workspace-journal")
+          "hyperdoc/dmx-workspace-journal.lisp :: read-dmx-workspace-journal")
          (page (hyperdoc/inspector::code-path-graph-source-page node))
          (target (hyperdoc/inspector::code-path-graph-source-target node))
          (views (code-path-graph-smoke-load-inspector-views-for-object graph))
          (source-view
-           (code-path-graph-smoke-find-view-by-title views "Source references"))
+          (code-path-graph-smoke-find-view-by-title views "Source references"))
          (source-html (html-inspector-views:view-html source-view))
          (target-views
-           (code-path-graph-smoke-load-inspector-views-for-object target))
+          (code-path-graph-smoke-load-inspector-views-for-object target))
          (target-source-view
-           (code-path-graph-smoke-find-view-by-title target-views "Source"))
+          (code-path-graph-smoke-find-view-by-title target-views "Source"))
          (target-source-html (html-inspector-views:view-html target-source-view)))
     (code-path-assert-true page
                            "Source-backed graph node must resolve to a source page")
@@ -311,13 +311,13 @@
          (expected-source-label "hyperdoc/dmx-workspace-journal.lisp")
          (target (hyperdoc/inspector::code-path-graph-source-target node))
          (source-target-views
-           (code-path-graph-smoke-load-inspector-views-for-object target))
+          (code-path-graph-smoke-load-inspector-views-for-object target))
          (target-source-view
-           (code-path-graph-smoke-find-view-by-title source-target-views "Source"))
+          (code-path-graph-smoke-find-view-by-title source-target-views "Source"))
          (target-source-html (html-inspector-views:view-html target-source-view))
          (graph-views (code-path-graph-smoke-load-inspector-views-for-object graph))
          (source-view
-           (code-path-graph-smoke-find-view-by-title graph-views "Source references"))
+          (code-path-graph-smoke-find-view-by-title graph-views "Source references"))
          (source-html (html-inspector-views:view-html source-view)))
     (code-path-assert-true target
                            "File-backed graph node must still resolve to an inspectable source target")
@@ -346,7 +346,7 @@
          (dot (hyperdoc::code-path-graph-dot-text graph))
          (views (code-path-graph-smoke-load-inspector-views-for-object graph))
          (graphviz-view
-           (code-path-graph-smoke-find-view-by-title views "Graphviz"))
+          (code-path-graph-smoke-find-view-by-title views "Graphviz"))
          (graphviz-html (html-inspector-views:view-html graphviz-view)))
     (code-path-assert-contains "\\\"quoted\\\" & routed" dot
                                "Regression DOT must include quote and ampersand text")
@@ -381,11 +381,11 @@
          (annotation (make-code-path-graph-test-dock-annotation
                       :note "Path diff graph smoke"))
          (comparison
-           (hyperdoc::compare-dock-annotation-with-guarded-workspace-path
-            annotation
-            :workspace-topicmap-id
-            *code-path-graphs-smoke-workspace-topicmap-id*
-            :client client))
+          (hyperdoc::compare-dock-annotation-with-guarded-workspace-path
+           annotation
+           :workspace-topicmap-id
+           *code-path-graphs-smoke-workspace-topicmap-id*
+           :client client))
          (graph (hyperdoc::workspace-annotation-path-diff-graph comparison))
          (dot (hyperdoc::code-path-graph-dot-text graph))
          (focus-paths (hyperdoc::code-path-graph-focus-path-seq graph))
@@ -410,9 +410,9 @@
 (defun run-playground-stepper-code-path-graph-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let* ((stepper
-           (clog-moldable-inspector::make-playground-stepper
-            '(alpha beta gamma)
-            "(car *)\n(length *)"))
+          (clog-moldable-inspector::make-playground-stepper
+           '(alpha beta gamma)
+           "(car *)\n(length *)"))
          (_ (clog-moldable-inspector::playground-stepper-step stepper))
          (graph (hyperdoc/inspector::playground-stepper-code-path-graph stepper))
          (dot (hyperdoc::code-path-graph-dot-text graph))

@@ -49,24 +49,24 @@ HOOK may return three values: new hyperbook id, new page id, and a handled flag.
 
 (defmethod views:html-representation ((nodes html-nodes) &optional id)
   (views:html
-    (:span :id id
-           (loop for node across (nodes-of nodes)
-                 do (plump:serialize-object node)))))
+   (:span :id id
+          (loop for node across (nodes-of nodes)
+                do (plump:serialize-object node)))))
 
 (defun render-node (node)
   (views:html
-    (views:str "<")
-    (views:str (plump:tag-name node))
-    (plump:serialize (plump:attributes node) views::*html-stream*)
-    (if (< 0 (length (plump:children node)))
-        (progn
-          (views:str ">")
-          (loop for child across (plump:children node)
-                do (plump:serialize-object child))
-          (views:str "</")
-          (views:str (plump:tag-name node))
-          (views:str ">"))
-        (views:str "/>"))))
+   (views:str "<")
+   (views:str (plump:tag-name node))
+   (plump:serialize (plump:attributes node) views::*html-stream*)
+   (if (< 0 (length (plump:children node)))
+       (progn
+         (views:str ">")
+         (loop for child across (plump:children node)
+               do (plump:serialize-object child))
+         (views:str "</")
+         (views:str (plump:tag-name node))
+         (views:str ">"))
+       (views:str "/>"))))
 
 ;; Plump extension for rendering links
 
@@ -98,16 +98,16 @@ HOOK may return three values: new hyperbook id, new page id, and a handled flag.
       (href-attr
        ;; Force target="_blank" for href links
        (views:html
-         (:a :href href-attr :target "_blank"
-             (loop for child across (plump:children element)
-                   do (plump:serialize child plump:*stream*)))))
+        (:a :href href-attr :target "_blank"
+            (loop for child across (plump:children element)
+                  do (plump:serialize child plump:*stream*)))))
       (t
        ;; Nonstandard links, i.e. neither hrefs nor HyperBook links.
        ;; Provide a generic function for extensions, with dispatch
        ;; on the elements attribute names.
        (let* ((attrs (sort (-> element plump:attributes alexandria:hash-table-keys)
                            #'string<))
-              (kw (alexandria:make-keyword 
+              (kw (alexandria:make-keyword
                    (str:upcase (str:join "." attrs)))))
          (serialize-a-element kw element)))))
   t)
@@ -118,9 +118,9 @@ HOOK may return three values: new hyperbook id, new page id, and a handled flag.
 
 (defun render-link-issue-reference (issue link-text)
   (views:html
-    (:span :class "hyperbook-reference hyperbook-error"
-           (views:object-ref issue
-                             :display (rendered-link-text link-text)))))
+   (:span :class "hyperbook-reference hyperbook-error"
+          (views:object-ref issue
+                            :display (rendered-link-text link-text)))))
 
 (defun render-hyperbook-link (hyperbook-id link-text &key element)
   (let ((source-section (and *current-page* element
@@ -130,11 +130,11 @@ HOOK may return three values: new hyperbook id, new page id, and a handled flag.
     (handler-case
         (let ((hyperbook (find-hyperbook hyperbook-id :signal-error? t)))
           (views:html
-            (:span :class "hyperbook-reference"
-                   :title (format nil "HyperBook \"~A\""
-                                  (cl-who:escape-string hyperbook-id))
-                   (views:object-ref hyperbook
-                                     :display (rendered-link-text link-text)))))
+           (:span :class "hyperbook-reference"
+                  :title (format nil "HyperBook \"~A\""
+                                 (cl-who:escape-string hyperbook-id))
+                  (views:object-ref hyperbook
+                                    :display (rendered-link-text link-text)))))
       (lookup-failure (c)
         (render-link-issue-reference
          (make-render-time-hyperbook-lookup-issue
@@ -165,43 +165,43 @@ HOOK may return three values: new hyperbook id, new page id, and a handled flag.
       (let* ((hyperbook (find-hyperbook hyperbook-id :signal-error? t))
              (page (find-page hyperbook page-id :signal-error? t)))
         (views:html
-          (:span :class "hyperbook-reference"
-                 :title (format nil "Page \"~A\"~%HyperBook \"~A\""
-                                (cl-who:escape-string page-id)
-                                (cl-who:escape-string (title-of hyperbook)))
-                 (views:object-ref page
-                                    :display (rendered-link-text link-text)))))
+         (:span :class "hyperbook-reference"
+                :title (format nil "Page \"~A\"~%HyperBook \"~A\""
+                               (cl-who:escape-string page-id)
+                               (cl-who:escape-string (title-of hyperbook)))
+                (views:object-ref page
+                                  :display (rendered-link-text link-text)))))
     (lookup-failure (c)
       (let ((issue
-              (make-render-time-lookup-issue
-               c
-               :source-page *current-page*
-               :target-hyperbook-id hyperbook-id
-               :expected-page-id page-id
-               :link-text (typecase link-text
-                            (string link-text)
-                            (t (or (and element (trimmed-node-text element))
-                                   page-id)))
-                :source-section (and *current-page* element
-                                     (source-section-for-link-element
-                                      (dom-of *current-page*)
-                                      element)))))
+             (make-render-time-lookup-issue
+              c
+              :source-page *current-page*
+              :target-hyperbook-id hyperbook-id
+              :expected-page-id page-id
+              :link-text (typecase link-text
+                           (string link-text)
+                           (t (or (and element (trimmed-node-text element))
+                                  page-id)))
+              :source-section (and *current-page* element
+                                   (source-section-for-link-element
+                                    (dom-of *current-page*)
+                                    element)))))
         (render-link-issue-reference issue link-text)))
     (error (c)
       (let ((issue
-              (make-render-time-lookup-issue
-               c
-               :source-page *current-page*
-               :target-hyperbook-id hyperbook-id
-               :expected-page-id page-id
-               :link-text (typecase link-text
-                            (string link-text)
-                            (t (or (and element (trimmed-node-text element))
-                                   page-id)))
-               :source-section (and *current-page* element
-                                    (source-section-for-link-element
-                                     (dom-of *current-page*)
-                                     element)))))
+             (make-render-time-lookup-issue
+              c
+              :source-page *current-page*
+              :target-hyperbook-id hyperbook-id
+              :expected-page-id page-id
+              :link-text (typecase link-text
+                           (string link-text)
+                           (t (or (and element (trimmed-node-text element))
+                                  page-id)))
+              :source-section (and *current-page* element
+                                   (source-section-for-link-element
+                                    (dom-of *current-page*)
+                                    element)))))
         (render-link-issue-reference issue link-text)))))
 
 (defun render-hyperbook-or-page-link (hyperbook-id page-id link-text &key element)
@@ -224,14 +224,14 @@ HOOK may return three values: new hyperbook id, new page id, and a handled flag.
 (views:defview views:👀content (page page)
   (when-let (dom (dom-of page))
     (views:html-view :title "Content" :priority 1
-      (views:add-asset-path "/hyperbook/"
-                            (asdf:system-relative-pathname
-                             :hyperbook
-                             "assets/hyperbook/"))
-      (views:include-css "/hyperbook/css/hyperbook.css")
-      (let ((*current-page* page))
-        (views:html
-          (:div :class "hyperbook-page"
-                (let ((plump:*tag-dispatchers* *hyperbook-tags*))
-                  (plump:serialize dom views::*html-stream*))
-                (:br)))))))
+                     (views:add-asset-path "/hyperbook/"
+                                           (asdf:system-relative-pathname
+                                            :hyperbook
+                                            "assets/hyperbook/"))
+                     (views:include-css "/hyperbook/css/hyperbook.css")
+                     (let ((*current-page* page))
+                       (views:html
+                        (:div :class "hyperbook-page"
+                              (let ((plump:*tag-dispatchers* *hyperbook-tags*))
+                                (plump:serialize dom views::*html-stream*))
+                              (:br)))))))

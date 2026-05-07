@@ -47,7 +47,7 @@
                                              start
                                              (or comma (length value))))
             when (plusp (length piece))
-              collect piece
+            collect piece
             while comma))))
 
 (defun make-default-dmx-mcp-server ()
@@ -108,7 +108,7 @@
      (let ((json (make-hash-table :test #'equal)))
        (maphash (lambda (key nested-value)
                   (setf (gethash (princ-to-string key) json)
-                       (dmx-mcp-normalize-json-value nested-value)))
+                        (dmx-mcp-normalize-json-value nested-value)))
                 value)
        json))
     ((dmx-mcp-dotted-pair-p value)
@@ -335,12 +335,12 @@
          (topic-summaries (and topicmap-json
                                (dmx-mcp-topicmap-topic-summaries topicmap-json)))
          (visible-topic-summaries
-           (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
+          (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
          (note-summaries (dmx-mcp-note-summaries visible-topic-summaries)))
     (dmx-mcp-json-object
      "workspace" (dmx-mcp-json-object
                   "slug" (if (eql resolved-topicmap-id
-                                   (dmx-mcp-server-workspace-topicmap-id server))
+                                  (dmx-mcp-server-workspace-topicmap-id server))
                              "context-window"
                              (format nil "topicmap-~D" resolved-topicmap-id))
                   "topicmapId" resolved-topicmap-id
@@ -504,19 +504,19 @@
 (defun dmx-mcp-workspace-annotation-report-object (report)
   (let* ((plan (workspace-annotation-persistence-report-plan-of report))
          (saved-annotation
-           (workspace-annotation-persistence-report-saved-annotation-of report))
+          (workspace-annotation-persistence-report-saved-annotation-of report))
          (saved-topic-id
-           (workspace-annotation-persistence-report-saved-topic-id-of report))
+          (workspace-annotation-persistence-report-saved-topic-id-of report))
          (saved-carrier-type-uri
-           (workspace-annotation-persistence-report-saved-carrier-type-uri-of
-            report))
+          (workspace-annotation-persistence-report-saved-carrier-type-uri-of
+           report))
          (journal-summary
-           (workspace-annotation-persistence-report-journal-preflight-summary-of
-            report))
+          (workspace-annotation-persistence-report-journal-preflight-summary-of
+           report))
          (journal-topic-id
-           (workspace-annotation-persistence-report-journal-topic-id-of report))
+          (workspace-annotation-persistence-report-journal-topic-id-of report))
          (condition
-           (workspace-annotation-persistence-report-condition-of report)))
+          (workspace-annotation-persistence-report-condition-of report)))
     (dmx-mcp-json-object
      "resultKind" "workspace_annotation_persistence_report"
      "reportStatus"
@@ -621,113 +621,113 @@
 
 (defun dmx-mcp-continue-workspace-annotation-tool (server arguments)
   (let* ((topic-id
-           (or (parse-positive-integer
-                (gethash "topicId" arguments))
-               (error 'fedwiki-dmx-import-error
-                      :message
-                      "topicId is required for continue_workspace_annotation")))
+          (or (parse-positive-integer
+               (gethash "topicId" arguments))
+              (error 'fedwiki-dmx-import-error
+                     :message
+                     "topicId is required for continue_workspace_annotation")))
          (workspace-topicmap-id
-           (or (dmx-mcp-argument arguments "workspaceTopicmapId")
-               (dmx-mcp-server-workspace-topicmap-id server)))
+          (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+              (dmx-mcp-server-workspace-topicmap-id server)))
          (workspace-id
-           (dmx-mcp-argument arguments "workspaceId"))
+          (dmx-mcp-argument arguments "workspaceId"))
          (auth-mode
-           (dmx-mcp-continue-workspace-annotation-explicit-auth-mode
-            arguments))
+          (dmx-mcp-continue-workspace-annotation-explicit-auth-mode
+           arguments))
          (username (dmx-mcp-argument arguments "username"))
          (password (dmx-mcp-argument arguments "password"))
          (authorization-header
-           (dmx-mcp-argument arguments "authorizationHeader"))
+          (dmx-mcp-argument arguments "authorizationHeader"))
          (auth-token (dmx-mcp-argument arguments "authToken"))
          (explicit-auth-requested-p
-           (or auth-mode
-               (dmx-non-empty-string-p username)
-               (dmx-non-empty-string-p password)
-               (dmx-non-empty-string-p authorization-header)
-               (dmx-non-empty-string-p auth-token)))
+          (or auth-mode
+              (dmx-non-empty-string-p username)
+              (dmx-non-empty-string-p password)
+              (dmx-non-empty-string-p authorization-header)
+              (dmx-non-empty-string-p auth-token)))
          (dry-run (dmx-mcp-argument arguments "dryRun" t))
          (read-client (dmx-mcp-server-read-client server))
          (write-client (dmx-mcp-server-write-client server))
          (annotation
-           (read-dmx-workspace-annotation
-            :topic-id topic-id
-            :workspace-topicmap-id workspace-topicmap-id
-            :client read-client))
+          (read-dmx-workspace-annotation
+           :topic-id topic-id
+           :workspace-topicmap-id workspace-topicmap-id
+           :client read-client))
          (plan
-           (plan-dmx-workspace-annotation-write-from-object
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client write-client))
+          (plan-dmx-workspace-annotation-write-from-object
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client write-client))
          (continuation-report
-           (make-workspace-annotation-continuation-report
-            annotation
-            plan
-            topic-id
-            workspace-topicmap-id
-            write-client)))
+          (make-workspace-annotation-continuation-report
+           annotation
+           plan
+           topic-id
+           workspace-topicmap-id
+           write-client)))
     (if dry-run
         (let* ((guarded-assignment
-                 (and (eql (dmx-workspace-annotation-write-plan-workspace-action
-                            plan)
-                           :assign)
-                      (continue-workspace-annotation-with-guarded-assignment
-                       plan
-                       write-client
-                       topic-id
-                       workspace-topicmap-id
-                       :dry-run t)))
+                (and (eql (dmx-workspace-annotation-write-plan-workspace-action
+                           plan)
+                          :assign)
+                     (continue-workspace-annotation-with-guarded-assignment
+                      plan
+                      write-client
+                      topic-id
+                      workspace-topicmap-id
+                      :dry-run t)))
                (guarded-topicmap
-                 (and (eql (dmx-workspace-annotation-write-plan-topicmap-action
-                            plan)
-                           :add)
-                      (continue-workspace-annotation-with-guarded-topicmap-placement
-                       plan
-                       write-client
-                       topic-id
-                       workspace-topicmap-id
-                       :dry-run t)))
+                (and (eql (dmx-workspace-annotation-write-plan-topicmap-action
+                           plan)
+                          :add)
+                     (continue-workspace-annotation-with-guarded-topicmap-placement
+                      plan
+                      write-client
+                      topic-id
+                      workspace-topicmap-id
+                      :dry-run t)))
                (dry-run-result
-                 (list :journal-event-preview
-                       (dmx-mcp-merge-journal-event-previews
-                        guarded-assignment
-                        guarded-topicmap)
-                       :guarded-workspace-assignment guarded-assignment
-                       :guarded-topicmap-placement guarded-topicmap)))
+                (list :journal-event-preview
+                      (dmx-mcp-merge-journal-event-previews
+                       guarded-assignment
+                       guarded-topicmap)
+                      :guarded-workspace-assignment guarded-assignment
+                      :guarded-topicmap-placement guarded-topicmap)))
           (dmx-mcp-workspace-annotation-dry-run-object
            plan
            dry-run-result
            annotation))
         (let* ((result
-                 (if explicit-auth-requested-p
-                     (continue-workspace-annotation-persistence-with-explicit-auth
-                      continuation-report
-                      :auth-mode auth-mode
-                      :username username
-                      :password password
-                      :authorization-header authorization-header
-                      :auth-token auth-token)
-                     (continue-workspace-annotation-persistence-with-client
-                      continuation-report
-                      write-client)))
+                (if explicit-auth-requested-p
+                    (continue-workspace-annotation-persistence-with-explicit-auth
+                     continuation-report
+                     :auth-mode auth-mode
+                     :username username
+                     :password password
+                     :authorization-header authorization-header
+                     :auth-token auth-token)
+                    (continue-workspace-annotation-persistence-with-client
+                     continuation-report
+                     write-client)))
                (status (workspace-annotation-persistence-report-status-of result))
                (saved-annotation
-                 (workspace-annotation-persistence-report-saved-annotation-of
-                  result))
+                (workspace-annotation-persistence-report-saved-annotation-of
+                 result))
                (journal-summary
-                 (or (workspace-annotation-persistence-report-journal-preflight-summary-of
-                      result)
-                     (and saved-annotation
-                          (dmx-workspace-journal-preflight-summary
-                           write-client
-                           (workspace-annotation-topic-uri-of saved-annotation)
-                           "uri"
-                           (workspace-annotation-topic-uri-of saved-annotation)
-                           (workspace-annotation-topicmap-id-of saved-annotation)
-                           :subject-uri
-                           (workspace-annotation-topic-uri-of saved-annotation)
-                           :subject-kind "workspace-annotation"
-                           :ownership-class "hyperdoc-workspace-annotation")))))
+                (or (workspace-annotation-persistence-report-journal-preflight-summary-of
+                     result)
+                    (and saved-annotation
+                         (dmx-workspace-journal-preflight-summary
+                          write-client
+                          (workspace-annotation-topic-uri-of saved-annotation)
+                          "uri"
+                          (workspace-annotation-topic-uri-of saved-annotation)
+                          (workspace-annotation-topicmap-id-of saved-annotation)
+                          :subject-uri
+                          (workspace-annotation-topic-uri-of saved-annotation)
+                          :subject-kind "workspace-annotation"
+                          :ownership-class "hyperdoc-workspace-annotation")))))
           (if (and (eq status :persisted)
                    saved-annotation)
               (dmx-mcp-json-object
@@ -756,7 +756,7 @@
                "journalPreflightSummary"
                (and journal-summary
                     (dmx-mcp-normalize-json-value journal-summary)))
-	              (dmx-mcp-workspace-annotation-report-object result))))))
+	      (dmx-mcp-workspace-annotation-report-object result))))))
 
 (defun dmx-mcp-repair-workspace-journal-companion-tool (server arguments)
   (execute-dmx-workspace-journal-companion-repair
@@ -774,7 +774,7 @@
   (let* ((topicmap-topic (gethash "topic" topicmap-json))
          (topic-summaries (dmx-mcp-topicmap-topic-summaries topicmap-json))
          (visible-topic-summaries
-           (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
+          (remove-if #'dmx-workspace-journal-note-summary-p topic-summaries))
          (note-summaries (dmx-mcp-note-summaries visible-topic-summaries)))
     (dmx-mcp-json-object
      "id" (dmx-json-object-value topicmap-topic "id")
@@ -794,12 +794,12 @@
                          (dmx-mcp-server-read-client server)
                          (dmx-mcp-server-workspace-topicmap-id server)))
          (workspace-topic-ids
-           (loop for topic in (or (and topicmap-json
-                                       (json-array-elements (gethash "topics" topicmap-json)))
-                                  '())
-                 unless (dmx-workspace-journal-topic-p topic)
-                   collect (dmx-json-object-value topic "id") into topic-ids
-                 finally (return (remove nil topic-ids)))))
+          (loop for topic in (or (and topicmap-json
+                                      (json-array-elements (gethash "topics" topicmap-json)))
+                                 '())
+                unless (dmx-workspace-journal-topic-p topic)
+                collect (dmx-json-object-value topic "id") into topic-ids
+                finally (return (remove nil topic-ids)))))
     (remove-duplicates
      (append (dmx-mcp-server-known-topic-ids server)
              workspace-topic-ids)
@@ -807,16 +807,16 @@
 
 (defun dmx-mcp-resource-list (server)
   (let ((resources
-          (list (dmx-mcp-resource-metadata
-                 (dmx-mcp-workspace-resource-uri)
-                 "workspace/context-window"
-                 "Summary projection of the shared DMX context-window workspace.")
-                (dmx-mcp-resource-metadata
-                 (dmx-mcp-topicmap-resource-uri
-                  (dmx-mcp-server-workspace-topicmap-id server))
-                 (format nil "topicmap/~D"
-                         (dmx-mcp-server-workspace-topicmap-id server))
-                 "Topicmap projection for the current shared workspace."))))
+         (list (dmx-mcp-resource-metadata
+                (dmx-mcp-workspace-resource-uri)
+                "workspace/context-window"
+                "Summary projection of the shared DMX context-window workspace.")
+               (dmx-mcp-resource-metadata
+                (dmx-mcp-topicmap-resource-uri
+                 (dmx-mcp-server-workspace-topicmap-id server))
+                (format nil "topicmap/~D"
+                        (dmx-mcp-server-workspace-topicmap-id server))
+                "Topicmap projection for the current shared workspace."))))
     (dolist (topic-id (dmx-mcp-known-topic-ids server))
       (let ((topic (dmx-import-read-topic (dmx-mcp-server-read-client server) topic-id)))
         (when topic
@@ -1024,16 +1024,16 @@
 
 (defun dmx-mcp-dry-run-workspace-note (server arguments)
   (let ((summary
-          (plan-dmx-workspace-note-write
-           (gethash "title" arguments)
-           (gethash "text" arguments)
-           :workspace-topicmap-id
-           (or (dmx-mcp-argument arguments "workspaceTopicmapId")
-               (dmx-mcp-server-workspace-topicmap-id server))
-           :client (dmx-mcp-server-read-client server)
-           :view-props (gethash "viewProps" arguments)
-           :note-key (dmx-mcp-argument arguments "noteKey")
-           :uri (dmx-mcp-argument arguments "uri"))))
+         (plan-dmx-workspace-note-write
+          (gethash "title" arguments)
+          (gethash "text" arguments)
+          :workspace-topicmap-id
+          (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+              (dmx-mcp-server-workspace-topicmap-id server))
+          :client (dmx-mcp-server-read-client server)
+          :view-props (gethash "viewProps" arguments)
+          :note-key (dmx-mcp-argument arguments "noteKey")
+          :uri (dmx-mcp-argument arguments "uri"))))
     (dmx-mcp-json-object
      "writeKind" "workspace_note_create"
      "summary" (dmx-workspace-note-plan-summary summary)
@@ -1054,23 +1054,23 @@
 
 (defun dmx-mcp-dry-run-handover (server arguments)
   (let ((result
-          (create-dmx-workspace-handover
-           (gethash "title" arguments)
-           (gethash "summary" arguments)
-           :from-agent (dmx-mcp-argument arguments "fromAgent")
-           :to-agent (dmx-mcp-argument arguments "toAgent")
-           :requested-action (dmx-mcp-argument arguments "requestedAction")
-           :artifacts (coerce (or (json-array-elements (gethash "artifacts" arguments))
-                                  #())
-                              'list)
-           :status (dmx-mcp-argument arguments "status")
-           :workspace-topicmap-id
-           (or (dmx-mcp-argument arguments "workspaceTopicmapId")
-               (dmx-mcp-server-workspace-topicmap-id server))
-           :client (dmx-mcp-server-read-client server)
-           :view-props (gethash "viewProps" arguments)
-           :note-key (dmx-mcp-argument arguments "noteKey")
-           :dry-run t)))
+         (create-dmx-workspace-handover
+          (gethash "title" arguments)
+          (gethash "summary" arguments)
+          :from-agent (dmx-mcp-argument arguments "fromAgent")
+          :to-agent (dmx-mcp-argument arguments "toAgent")
+          :requested-action (dmx-mcp-argument arguments "requestedAction")
+          :artifacts (coerce (or (json-array-elements (gethash "artifacts" arguments))
+                                 #())
+                             'list)
+          :status (dmx-mcp-argument arguments "status")
+          :workspace-topicmap-id
+          (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+              (dmx-mcp-server-workspace-topicmap-id server))
+          :client (dmx-mcp-server-read-client server)
+          :view-props (gethash "viewProps" arguments)
+          :note-key (dmx-mcp-argument arguments "noteKey")
+          :dry-run t)))
     (dmx-mcp-json-object
      "writeKind" "handover_create"
      "summary" result)))
@@ -1113,23 +1113,23 @@
 
 (defun dmx-mcp-resolve-workspace-note-tool (server arguments)
   (let* ((note-key
-           (or (dmx-mcp-argument arguments "noteKey")
-               (error 'fedwiki-dmx-import-error
-                      :message "noteKey is required for resolve_workspace_note")))
+          (or (dmx-mcp-argument arguments "noteKey")
+              (error 'fedwiki-dmx-import-error
+                     :message "noteKey is required for resolve_workspace_note")))
          (note-kind
-           (normalize-dmx-workspace-note-kind-designator
-            (dmx-mcp-argument arguments "noteKind")
-            'dmx-mcp-resolve-workspace-note-tool))
+          (normalize-dmx-workspace-note-kind-designator
+           (dmx-mcp-argument arguments "noteKind")
+           'dmx-mcp-resolve-workspace-note-tool))
          (resolution
-           (resolve-dmx-workspace-note
-            :workspace-topicmap-id
-            (or (dmx-mcp-argument arguments "workspaceTopicmapId")
-                (dmx-mcp-server-workspace-topicmap-id server))
-            :client (dmx-mcp-server-read-client server)
-            :note-key note-key
-            :note-kind note-kind))
+          (resolve-dmx-workspace-note
+           :workspace-topicmap-id
+           (or (dmx-mcp-argument arguments "workspaceTopicmapId")
+               (dmx-mcp-server-workspace-topicmap-id server))
+           :client (dmx-mcp-server-read-client server)
+           :note-key note-key
+           :note-kind note-kind))
          (existing-topic
-           (dmx-workspace-note-resolution-existing-topic resolution)))
+          (dmx-workspace-note-resolution-existing-topic resolution)))
     (dmx-mcp-json-object
      "noteKey" (dmx-workspace-note-resolution-note-key resolution)
      "noteKind" (format nil "~(~A~)"
@@ -1498,7 +1498,7 @@
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
       "viewProps" (dmx-mcp-json-object "type" "object")
       "artifacts" (dmx-mcp-json-object "type" "array"
-                                      "items" (dmx-mcp-json-object "type" "string")))
+                                       "items" (dmx-mcp-json-object "type" "string")))
      "required" (dmx-mcp-json-array "writeKind")
      "additionalProperties" t))
    (dmx-mcp-json-object
@@ -1515,11 +1515,11 @@
       "noteKey" (dmx-mcp-json-object "type" "string")
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
       "viewProps" (dmx-mcp-json-object "type" "object")
-     "dryRun" (dmx-mcp-json-object "type" "boolean"))
+      "dryRun" (dmx-mcp-json-object "type" "boolean"))
      "required" (dmx-mcp-json-array "title" "text")
      "additionalProperties" t))
-	   (dmx-mcp-json-object
-	    "name" "continue_workspace_annotation"
+   (dmx-mcp-json-object
+    "name" "continue_workspace_annotation"
     "description"
     "Continue a saved workspace annotation by topic id through journal preflight and the remaining guarded persistence steps through the authenticated shared-workspace adapter."
     "inputSchema"
@@ -1536,10 +1536,10 @@
       "authorizationHeader" (dmx-mcp-json-object "type" "string")
       "authToken" (dmx-mcp-json-object "type" "string")
       "dryRun" (dmx-mcp-json-object "type" "boolean"))
-	     "required" (dmx-mcp-json-array "topicId")
-	     "additionalProperties" t))
-	   (dmx-mcp-json-object
-	    "name" "dmx-mcp-continue-workspace-annotation"
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "dmx-mcp-continue-workspace-annotation"
     "description"
     "Alias for continue_workspace_annotation to keep dreyeck bridge compatibility while continuing a saved workspace annotation through the authenticated guarded stages."
     "inputSchema"
@@ -1556,10 +1556,10 @@
       "authorizationHeader" (dmx-mcp-json-object "type" "string")
       "authToken" (dmx-mcp-json-object "type" "string")
       "dryRun" (dmx-mcp-json-object "type" "boolean"))
-	     "required" (dmx-mcp-json-array "topicId")
-	     "additionalProperties" t))
-	   (dmx-mcp-json-object
-	    "name" "upsert_workspace_topicmap_context"
+     "required" (dmx-mcp-json-array "topicId")
+     "additionalProperties" t))
+   (dmx-mcp-json-object
+    "name" "upsert_workspace_topicmap_context"
     "description"
     "Ensure a typed topicmap-context placement for an existing topic by adding it to a workspace topicmap or updating its validated long-form view props."
     "inputSchema"
@@ -1637,9 +1637,9 @@
      (dmx-mcp-json-object
       "noteKey" (dmx-mcp-json-object "type" "string")
       "noteKind" (dmx-mcp-json-object "type" "string"
-                                       "enum" (dmx-mcp-json-array
-                                               "workspace-note"
-                                               "handover"))
+                                      "enum" (dmx-mcp-json-array
+                                              "workspace-note"
+                                              "handover"))
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer"))
      "required" (dmx-mcp-json-array "noteKey")
      "additionalProperties" t))
@@ -1839,7 +1839,7 @@
       "requestedAction" (dmx-mcp-json-object "type" "string")
       "status" (dmx-mcp-json-object "type" "string")
       "artifacts" (dmx-mcp-json-object "type" "array"
-                                      "items" (dmx-mcp-json-object "type" "string"))
+                                       "items" (dmx-mcp-json-object "type" "string"))
       "noteKey" (dmx-mcp-json-object "type" "string")
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
       "viewProps" (dmx-mcp-json-object "type" "object")

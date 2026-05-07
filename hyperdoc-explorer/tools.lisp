@@ -10,25 +10,25 @@
 
 (views:defview views:👀content (tool tool-page)
   (views:html-view :title "Live" :priority 1
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperdoc
-                           "assets/hyperbook/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:html
-      (:div :class "hyperbook-page"
-            (let ((hb::*current-page* tool)
-                  (*current-package* (package-of tool))
-                  (plump:*tag-dispatchers* *hyperdoc-tags*))
-              (dolist (part (reverse (parts-of tool)))
-                (render-tool-part tool (car part) (cdr part))))))))
+                   (views:add-asset-path "/hyperbook/"
+                                         (asdf:system-relative-pathname
+                                          :hyperdoc
+                                          "assets/hyperbook/"))
+                   (views:include-css "/hyperbook/css/hyperbook.css")
+                   (views:html
+                    (:div :class "hyperbook-page"
+                          (let ((hb::*current-page* tool)
+                                (*current-package* (package-of tool))
+                                (plump:*tag-dispatchers* *hyperdoc-tags*))
+                            (dolist (part (reverse (parts-of tool)))
+                              (render-tool-part tool (car part) (cdr part))))))))
 
 (defun render-tool-part (tool kind content)
   (ccase kind
     (:html
-      (let ((dom (let ((plump:*tag-dispatchers* plump:*html-tags*))
-                   (plump:parse content))))
-        (plump:serialize dom views::*html-stream*)))
+     (let ((dom (let ((plump:*tag-dispatchers* plump:*html-tags*))
+                  (plump:parse content))))
+       (plump:serialize dom views::*html-stream*)))
     (:markdown
      (render-tool-part tool :html
                        (with-output-to-string (str)
@@ -47,10 +47,10 @@
 (defun parse-tool-part (tool kind content)
   (case kind
     (:html
-      (let ((hb::*current-page* tool)
-            (*current-package* (package-of tool)))
-        (let ((plump:*tag-dispatchers* plump:*html-tags*))
-          (plump:parse content))))
+     (let ((hb::*current-page* tool)
+           (*current-package* (package-of tool)))
+       (let ((plump:*tag-dispatchers* plump:*html-tags*))
+         (plump:parse content))))
     (:markdown
      (parse-tool-part tool :html
                       (with-output-to-string (str)
@@ -63,10 +63,10 @@
 
 (views:defview views:👀source (tool tool-page)
   (-> tool
-    symbol-of
-    views/standard:var-definition
-    views:👀source
-    (views:rename :title "Source" :priority 7)))
+      symbol-of
+      views/standard:var-definition
+      views:👀source
+      (views:rename :title "Source" :priority 7)))
 
 ;;
 ;; Playground pages
@@ -88,7 +88,7 @@
   (views:action-button "Reset"
                        (views:thunk (views/standard:store-playground-content
                                      pg (initial-content-of pg))
-                         t)
+                                    t)
                        "Reset to initial content"))
 
 (defmethod load-page ((page playground-page))

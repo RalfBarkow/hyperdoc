@@ -123,7 +123,7 @@
           finally (when current-lines
                     (push (format nil "~{~A~^~%~}" (nreverse current-lines))
                           blocks))
-                  (return (nreverse blocks)))))
+          (return (nreverse blocks)))))
 
 (defun trim-whitespace-string (string)
   (string-trim '(#\Space #\Tab #\Newline #\Return)
@@ -178,7 +178,7 @@
     (append (copy-tree overrides)
             (loop for (key value) on plist by #'cddr
                   unless (member key override-keys)
-                    append (list key (copy-tree value))))))
+                  append (list key (copy-tree value))))))
 
 (defun default-localhost-fedwiki-page-relative-path (slug)
   (format nil "pages/~A" slug))
@@ -195,11 +195,11 @@
 (defun localhost-fedwiki-page-pipeline-page-relative-path (spec)
   (or (localhost-fedwiki-page-pipeline-spec-page-relative-path spec)
       (default-localhost-fedwiki-page-relative-path
-       (localhost-fedwiki-page-pipeline-spec-slug spec))))
+          (localhost-fedwiki-page-pipeline-spec-slug spec))))
 
 (defun read-localhost-fedwiki-page (spec)
   (if-let (reader (localhost-fedwiki-page-pipeline-spec-page-reader spec))
-    (funcall reader)
+      (funcall reader)
     (article-allegation-read-json-file
      (localhost-fedwiki-page-pipeline-page-pathname spec))))
 
@@ -218,10 +218,10 @@
 
 (defun localhost-fedwiki-heading-key (spec line)
   (if-let (function (localhost-fedwiki-page-pipeline-spec-heading-key-function spec))
-    (funcall function line)
+      (funcall function line)
     (default-localhost-fedwiki-heading-key
-     (localhost-fedwiki-page-pipeline-spec-heading-key-map spec)
-     line)))
+        (localhost-fedwiki-page-pipeline-spec-heading-key-map spec)
+        line)))
 
 (defun fedwiki-journal-entry-type-name (entry)
   (let ((type (getf entry :type)))
@@ -247,7 +247,7 @@
             for nested-item = (getf entry :item)
             when (or (equal (getf entry :id) item-id)
                      (equal (getf nested-item :id) item-id))
-              collect (copy-tree entry))))
+            collect (copy-tree entry))))
 
 (defun fedwiki-page-create-date (page)
   (getf (find :create
@@ -260,7 +260,7 @@
           (loop for entry in (or (getf page :journal) '())
                 for date = (getf entry :date)
                 when (numberp date)
-                  collect date)
+                collect date)
           :initial-value 0))
 
 (defun fedwiki-story-item-source-id* (page-id item-id item-index)
@@ -366,9 +366,9 @@
       (loop for char across string
             for code = (char-code char)
             do (mix-byte (ldb (byte 8 0) code))
-               (mix-byte (ldb (byte 8 8) code))
-               (mix-byte (ldb (byte 8 16) code))
-               (mix-byte (ldb (byte 8 24) code))))
+            (mix-byte (ldb (byte 8 8) code))
+            (mix-byte (ldb (byte 8 16) code))
+            (mix-byte (ldb (byte 8 24) code))))
     (format nil "fnv1a64:~16,'0x" hash)))
 
 (defun localhost-fedwiki-source-snapshot-summary (source-data)
@@ -384,9 +384,9 @@
 
 (defun localhost-fedwiki-source-snapshot-metadata (source-data)
   (let* ((fingerprint-input
-           (localhost-fedwiki-source-snapshot-fingerprint-input source-data))
+          (localhost-fedwiki-source-snapshot-fingerprint-input source-data))
          (fingerprint-string
-           (serialize-localhost-fedwiki-source-snapshot-object fingerprint-input))
+          (serialize-localhost-fedwiki-source-snapshot-object fingerprint-input))
          (raw-page (localhost-fedwiki-source-raw-page* source-data)))
     (list :snapshot-kind "localhost-fedwiki-page-source-snapshot"
           :snapshot-format-version 1
@@ -496,11 +496,11 @@
 (defun parse-localhost-fedwiki-source-snapshot-line
     (line prefix &optional suffix)
   (let ((reflection
-          (reflect-localhost-fedwiki-source-snapshot-envelope-line
-           :custom
-           line
-           prefix
-           suffix)))
+         (reflect-localhost-fedwiki-source-snapshot-envelope-line
+          :custom
+          line
+          prefix
+          suffix)))
     (when (eql (localhost-fedwiki-source-snapshot-envelope-reflection-status
                 reflection)
                :present)
@@ -622,7 +622,7 @@
 
 (defun localhost-fedwiki-primary-story-item-data (spec story-items)
   (if-let (selector (localhost-fedwiki-page-pipeline-spec-primary-item-selector spec))
-    (funcall selector story-items)
+      (funcall selector story-items)
     (default-localhost-fedwiki-primary-item-selector story-items)))
 
 (defun localhost-fedwiki-item-fragment-by-section-key (item-data section-key)
@@ -674,24 +674,24 @@
         (labels ((emit-fragment ()
                    (when current-lines
                      (let* ((fragment-text
-                              (format nil "~{~A~^~%~}" (nreverse current-lines)))
+                             (format nil "~{~A~^~%~}" (nreverse current-lines)))
                             (fragment-anchor (format nil "segment:~D" fragment-index))
                             (fragment-excerpt
-                              (shorten-source-excerpt fragment-text))
+                             (shorten-source-excerpt fragment-text))
                             (fragment-provenance
-                              (plist-with-overrides
-                               base-provenance
-                               :source-kind "localhost-fedwiki-story-item-fragment"
-                               :provenance-granularity "story-item-fragment"
-                               :source-story-item-source-id
-                               (fedwiki-story-item-source-id* page-id item-id item-index)
-                               :source-fragment-index fragment-index
-                               :source-fragment-anchor fragment-anchor
-                               :source-fragment-section-key current-section-key
-                               :source-fragment-heading current-heading
-                               :source-fragment-excerpt fragment-excerpt
-                               :derivation-note
-                               "Split paragraph story item by heading lines and blank-line-separated text segments.")))
+                             (plist-with-overrides
+                              base-provenance
+                              :source-kind "localhost-fedwiki-story-item-fragment"
+                              :provenance-granularity "story-item-fragment"
+                              :source-story-item-source-id
+                              (fedwiki-story-item-source-id* page-id item-id item-index)
+                              :source-fragment-index fragment-index
+                              :source-fragment-anchor fragment-anchor
+                              :source-fragment-section-key current-section-key
+                              :source-fragment-heading current-heading
+                              :source-fragment-excerpt fragment-excerpt
+                              :derivation-note
+                              "Split paragraph story item by heading lines and blank-line-separated text segments.")))
                        (push (make-localhost-fedwiki-fragment-data
                               :page-id page-id
                               :page-slug page-slug
@@ -730,38 +730,38 @@
 (defun normalize-localhost-fedwiki-story-item-data (spec page item item-index)
   (let* ((item-id (getf item :id))
          (item-type
-           (let ((type-value (getf item :type)))
-             (etypecase type-value
-               (keyword (string-downcase (symbol-name type-value)))
-               (string (string-downcase type-value)))))
+          (let ((type-value (getf item :type)))
+            (etypecase type-value
+              (keyword (string-downcase (symbol-name type-value)))
+              (string (string-downcase type-value)))))
          (item-text (or (getf item :text) ""))
          (item-blocks (and (string= item-type "paragraph")
                            (split-blank-line-blocks item-text)))
          (journal-entries (fedwiki-journal-entries-for-item page item-id))
          (classification
-           (fedwiki-story-item-provenance-classification
-            item-id journal-entries item-index))
+          (fedwiki-story-item-provenance-classification
+           item-id journal-entries item-index))
          (page-id (localhost-fedwiki-page-pipeline-page-id spec))
          (page-relative-path
-           (localhost-fedwiki-page-pipeline-page-relative-path spec))
+          (localhost-fedwiki-page-pipeline-page-relative-path spec))
          (base-provenance
-           (list :source-kind "localhost-fedwiki-story-item"
-                 :source-page-id page-id
-                 :source-page-slug
-                 (localhost-fedwiki-page-pipeline-spec-slug spec)
-                 :source-page-path page-relative-path
-                 :source-story-item-id item-id
-                 :source-story-item-index item-index
-                 :source-story-item-type item-type
-                 :journal-action-count (length journal-entries)
-                 :journal-action-types
-                 (mapcar #'fedwiki-journal-entry-type-name journal-entries)
-                 :journal-last-date
-                 (and journal-entries
-                      (getf (car (last journal-entries)) :date))
-                 :page-create-date (fedwiki-page-create-date page)
-                 :provenance-granularity "story-item"
-                 :provenance-classification classification)))
+          (list :source-kind "localhost-fedwiki-story-item"
+                :source-page-id page-id
+                :source-page-slug
+                (localhost-fedwiki-page-pipeline-spec-slug spec)
+                :source-page-path page-relative-path
+                :source-story-item-id item-id
+                :source-story-item-index item-index
+                :source-story-item-type item-type
+                :journal-action-count (length journal-entries)
+                :journal-action-types
+                (mapcar #'fedwiki-journal-entry-type-name journal-entries)
+                :journal-last-date
+                (and journal-entries
+                     (getf (car (last journal-entries)) :date))
+                :page-create-date (fedwiki-page-create-date page)
+                :provenance-granularity "story-item"
+                :provenance-classification classification)))
     (make-localhost-fedwiki-item-data
      :page-id page-id
      :page-slug (localhost-fedwiki-page-pipeline-spec-slug spec)
@@ -794,50 +794,50 @@
 (defun build-localhost-fedwiki-source-data (spec &key page story-items)
   (let* ((resolved-page (or page (read-localhost-fedwiki-page spec)))
          (resolved-story-items
-           (or story-items
-               (normalize-localhost-fedwiki-story-items spec resolved-page)))
+          (or story-items
+              (normalize-localhost-fedwiki-story-items spec resolved-page)))
          (primary-item
-           (localhost-fedwiki-primary-story-item-data spec resolved-story-items))
+          (localhost-fedwiki-primary-story-item-data spec resolved-story-items))
          (summary-function
-           (or (localhost-fedwiki-page-pipeline-spec-source-summary-function spec)
-               #'default-localhost-fedwiki-source-summary))
+          (or (localhost-fedwiki-page-pipeline-spec-source-summary-function spec)
+              #'default-localhost-fedwiki-source-summary))
          (source-data
-           (make-localhost-fedwiki-source-data
-            :id (or (localhost-fedwiki-page-pipeline-spec-source-chunk-id spec)
-                    (format nil "~A-localhost-fedwiki-source"
-                            (localhost-fedwiki-page-pipeline-spec-id spec)))
-            :title
-            (or (localhost-fedwiki-page-pipeline-spec-source-chunk-title spec)
-                (format nil "~A localhost FedWiki source"
-                        (or (localhost-fedwiki-page-pipeline-spec-page-title spec)
-                            (getf resolved-page :title))))
-            :summary
-            (funcall summary-function spec resolved-story-items primary-item)
-            :source-path (localhost-fedwiki-page-pipeline-page-relative-path spec)
-            :references
-            (list (localhost-fedwiki-page-pipeline-page-id spec)
-                  (localhost-fedwiki-page-pipeline-spec-html-url spec))
-            :fedwiki-site (localhost-fedwiki-page-pipeline-spec-site spec)
-            :fedwiki-page-id (localhost-fedwiki-page-pipeline-page-id spec)
-            :fedwiki-slug (localhost-fedwiki-page-pipeline-spec-slug spec)
-            :fedwiki-title (getf resolved-page :title)
-            :fedwiki-url (localhost-fedwiki-page-pipeline-spec-html-url spec)
-            :fedwiki-relative-path
-            (localhost-fedwiki-page-pipeline-page-relative-path spec)
-            :claim ""
-            :story-items resolved-story-items
-            :raw-page resolved-page
-            :provenance
-            (list :source-kind "localhost-fedwiki-page"
-                  :source-page-id (localhost-fedwiki-page-pipeline-page-id spec)
-                  :source-page-slug
-                  (localhost-fedwiki-page-pipeline-spec-slug spec)
-                  :source-page-path
-                  (localhost-fedwiki-page-pipeline-page-relative-path spec)
-                  :story-item-count (length resolved-story-items)
-                  :journal-entry-count (length (or (getf resolved-page :journal) '()))
-                  :provenance-granularity "page-level-fallback"
-                  :provenance-classification "page-story-and-journal"))))
+          (make-localhost-fedwiki-source-data
+           :id (or (localhost-fedwiki-page-pipeline-spec-source-chunk-id spec)
+                   (format nil "~A-localhost-fedwiki-source"
+                           (localhost-fedwiki-page-pipeline-spec-id spec)))
+           :title
+           (or (localhost-fedwiki-page-pipeline-spec-source-chunk-title spec)
+               (format nil "~A localhost FedWiki source"
+                       (or (localhost-fedwiki-page-pipeline-spec-page-title spec)
+                           (getf resolved-page :title))))
+           :summary
+           (funcall summary-function spec resolved-story-items primary-item)
+           :source-path (localhost-fedwiki-page-pipeline-page-relative-path spec)
+           :references
+           (list (localhost-fedwiki-page-pipeline-page-id spec)
+                 (localhost-fedwiki-page-pipeline-spec-html-url spec))
+           :fedwiki-site (localhost-fedwiki-page-pipeline-spec-site spec)
+           :fedwiki-page-id (localhost-fedwiki-page-pipeline-page-id spec)
+           :fedwiki-slug (localhost-fedwiki-page-pipeline-spec-slug spec)
+           :fedwiki-title (getf resolved-page :title)
+           :fedwiki-url (localhost-fedwiki-page-pipeline-spec-html-url spec)
+           :fedwiki-relative-path
+           (localhost-fedwiki-page-pipeline-page-relative-path spec)
+           :claim ""
+           :story-items resolved-story-items
+           :raw-page resolved-page
+           :provenance
+           (list :source-kind "localhost-fedwiki-page"
+                 :source-page-id (localhost-fedwiki-page-pipeline-page-id spec)
+                 :source-page-slug
+                 (localhost-fedwiki-page-pipeline-spec-slug spec)
+                 :source-page-path
+                 (localhost-fedwiki-page-pipeline-page-relative-path spec)
+                 :story-item-count (length resolved-story-items)
+                 :journal-entry-count (length (or (getf resolved-page :journal) '()))
+                 :provenance-granularity "page-level-fallback"
+                 :provenance-classification "page-story-and-journal"))))
     (setf (localhost-fedwiki-source-data-claim source-data)
           (funcall (or (localhost-fedwiki-page-pipeline-spec-source-claim-function spec)
                        #'default-localhost-fedwiki-source-claim)
@@ -885,30 +885,30 @@
                                                      selection
                                                      primary-item)
   (let* ((item-data
-           (or (find-localhost-fedwiki-item-data-by-selection
-                source-data
-                selection
-                primary-item)
-               (error "Could not resolve FedWiki item selection ~S." selection)))
+          (or (find-localhost-fedwiki-item-data-by-selection
+               source-data
+               selection
+               primary-item)
+              (error "Could not resolve FedWiki item selection ~S." selection)))
          (whole-item-p (getf selection :whole-item))
          (fragments
-           (cond
-             ((getf selection :fragment-ordinals)
-              (localhost-fedwiki-fragments-by-ordinals
-               item-data
-               (copy-list (getf selection :fragment-ordinals))))
-             ((getf selection :section-keys)
-              (loop for section-key in (copy-list (getf selection :section-keys))
-                    collect (or (localhost-fedwiki-item-fragment-by-section-key
-                                 item-data
-                                 section-key)
-                                (error "Missing section key ~S in story item ~S."
-                                       section-key
-                                       (localhost-fedwiki-item-data-item-id item-data)))))
-             (whole-item-p
-              (copy-list (localhost-fedwiki-item-data-fragments item-data)))
-             (t
-              '()))))
+          (cond
+            ((getf selection :fragment-ordinals)
+             (localhost-fedwiki-fragments-by-ordinals
+              item-data
+              (copy-list (getf selection :fragment-ordinals))))
+            ((getf selection :section-keys)
+             (loop for section-key in (copy-list (getf selection :section-keys))
+                   collect (or (localhost-fedwiki-item-fragment-by-section-key
+                                item-data
+                                section-key)
+                               (error "Missing section key ~S in story item ~S."
+                                      section-key
+                                      (localhost-fedwiki-item-data-item-id item-data)))))
+            (whole-item-p
+             (copy-list (localhost-fedwiki-item-data-fragments item-data)))
+            (t
+             '()))))
     (list :selection (copy-tree selection)
           :item-data item-data
           :whole-item-p whole-item-p
@@ -951,130 +951,130 @@
                                                         &key derived-topic-id
                                                           derivation-note)
   (let* ((item-datas
-           (remove-duplicates
-            (loop for resolved-selection in resolved-selections
-                  collect (getf resolved-selection :item-data))
-            :key #'localhost-fedwiki-item-data-source-id
-            :test #'equal))
-         (base-provenance
-           (copy-tree
-            (if item-datas
-                (localhost-fedwiki-item-data-provenance (first item-datas))
-                (localhost-fedwiki-source-data-provenance source-data))))
-         (fragments
+          (remove-duplicates
            (loop for resolved-selection in resolved-selections
-                 append (copy-list (getf resolved-selection :fragments))))
+                 collect (getf resolved-selection :item-data))
+           :key #'localhost-fedwiki-item-data-source-id
+           :test #'equal))
+         (base-provenance
+          (copy-tree
+           (if item-datas
+               (localhost-fedwiki-item-data-provenance (first item-datas))
+               (localhost-fedwiki-source-data-provenance source-data))))
+         (fragments
+          (loop for resolved-selection in resolved-selections
+                append (copy-list (getf resolved-selection :fragments))))
          (whole-item-p
-           (and (= (length item-datas) 1)
-                (every (lambda (resolved-selection)
-                         (and (getf resolved-selection :whole-item-p)
-                              (null (getf (getf resolved-selection :selection)
-                                          :fragment-ordinals))
-                              (null (getf (getf resolved-selection :selection)
-                                          :section-keys))))
-                       resolved-selections)))
+          (and (= (length item-datas) 1)
+               (every (lambda (resolved-selection)
+                        (and (getf resolved-selection :whole-item-p)
+                             (null (getf (getf resolved-selection :selection)
+                                         :fragment-ordinals))
+                             (null (getf (getf resolved-selection :selection)
+                                         :section-keys))))
+                      resolved-selections)))
          (granularity
-           (cond
-             ((null item-datas)
-              "page-level-fallback")
-             ((> (length item-datas) 1)
-              "multi-item-derived")
-             (whole-item-p
-              "story-item")
-             (t
-              "story-item-fragment")))
+          (cond
+            ((null item-datas)
+             "page-level-fallback")
+            ((> (length item-datas) 1)
+             "multi-item-derived")
+            (whole-item-p
+             "story-item")
+            (t
+             "story-item-fragment")))
          (classifications
-           (remove-duplicates
-            (loop for item-data in item-datas
-                  collect (getf (localhost-fedwiki-item-data-provenance item-data)
-                                :provenance-classification))
-            :test #'equal))
+          (remove-duplicates
+           (loop for item-data in item-datas
+                 collect (getf (localhost-fedwiki-item-data-provenance item-data)
+                               :provenance-classification))
+           :test #'equal))
          (story-item-source-ids
-           (mapcar #'localhost-fedwiki-item-data-source-id item-datas))
+          (mapcar #'localhost-fedwiki-item-data-source-id item-datas))
          (story-item-ids
-           (mapcar #'localhost-fedwiki-item-data-item-id item-datas))
+          (mapcar #'localhost-fedwiki-item-data-item-id item-datas))
          (story-item-indexes
-           (mapcar #'localhost-fedwiki-item-data-item-index item-datas))
+          (mapcar #'localhost-fedwiki-item-data-item-index item-datas))
          (fragment-ordinals
-           (mapcar #'localhost-fedwiki-fragment-data-fragment-index fragments))
+          (mapcar #'localhost-fedwiki-fragment-data-fragment-index fragments))
          (fragment-anchors
-           (mapcar #'localhost-fedwiki-fragment-data-fragment-anchor fragments))
+          (mapcar #'localhost-fedwiki-fragment-data-fragment-anchor fragments))
          (fragment-section-keys
-           (mapcar #'localhost-fedwiki-fragment-data-section-key fragments))
+          (mapcar #'localhost-fedwiki-fragment-data-section-key fragments))
          (fragment-excerpts
-           (mapcar #'localhost-fedwiki-fragment-data-excerpt fragments))
+          (mapcar #'localhost-fedwiki-fragment-data-excerpt fragments))
          (shared-overrides
-           (append
-            (when derived-topic-id
-              (list :derived-topic-id derived-topic-id))
-            (list :provenance-granularity granularity
-                  :provenance-classification
-                  (if (= (length classifications) 1)
-                      (first classifications)
-                      "mixed-story-item-provenance")
-                  :source-provenance-classifications classifications
-                  :journal-action-count
-                  (if item-datas
-                      (aggregate-resolved-selection-journal-count resolved-selections)
-                      (getf (localhost-fedwiki-source-data-provenance source-data)
-                            :journal-entry-count
-                            0))
-                  :derivation-note
-                  (or derivation-note
-                      (ecase (intern (string-upcase granularity) :keyword)
-                        (:STORY-ITEM
-                         "Derived from one whole localhost FedWiki story item.")
-                        (:STORY-ITEM-FRAGMENT
-                         "Derived from paragraph fragments within one localhost FedWiki story item, not from separate whole story items.")
-                        (:MULTI-ITEM-DERIVED
-                         "Derived by grouping fragments across multiple localhost FedWiki story items.")
-                        (:PAGE-LEVEL-FALLBACK
-                         "Derived from page-level FedWiki provenance without resolvable story-item selections.")))
-                  :source-fragment-selection-kind
-                  (ecase (intern (string-upcase granularity) :keyword)
-                    (:STORY-ITEM "whole-story-item")
-                    (:STORY-ITEM-FRAGMENT "paragraph-fragments")
-                    (:MULTI-ITEM-DERIVED "multi-item-fragments")
-                    (:PAGE-LEVEL-FALLBACK "page-level-fallback")))))
+          (append
+           (when derived-topic-id
+             (list :derived-topic-id derived-topic-id))
+           (list :provenance-granularity granularity
+                 :provenance-classification
+                 (if (= (length classifications) 1)
+                     (first classifications)
+                     "mixed-story-item-provenance")
+                 :source-provenance-classifications classifications
+                 :journal-action-count
+                 (if item-datas
+                     (aggregate-resolved-selection-journal-count resolved-selections)
+                     (getf (localhost-fedwiki-source-data-provenance source-data)
+                           :journal-entry-count
+                           0))
+                 :derivation-note
+                 (or derivation-note
+                     (ecase (intern (string-upcase granularity) :keyword)
+                       (:STORY-ITEM
+                        "Derived from one whole localhost FedWiki story item.")
+                       (:STORY-ITEM-FRAGMENT
+                        "Derived from paragraph fragments within one localhost FedWiki story item, not from separate whole story items.")
+                       (:MULTI-ITEM-DERIVED
+                        "Derived by grouping fragments across multiple localhost FedWiki story items.")
+                       (:PAGE-LEVEL-FALLBACK
+                        "Derived from page-level FedWiki provenance without resolvable story-item selections.")))
+                 :source-fragment-selection-kind
+                 (ecase (intern (string-upcase granularity) :keyword)
+                   (:STORY-ITEM "whole-story-item")
+                   (:STORY-ITEM-FRAGMENT "paragraph-fragments")
+                   (:MULTI-ITEM-DERIVED "multi-item-fragments")
+                   (:PAGE-LEVEL-FALLBACK "page-level-fallback")))))
          (location-overrides
-           (cond
-             ((null item-datas)
-              (list :source-page-id
-                    (localhost-fedwiki-source-data-fedwiki-page-id source-data)
-                    :source-page-path
-                    (localhost-fedwiki-source-data-fedwiki-relative-path
-                     source-data)))
-             ((= (length item-datas) 1)
-              (append
-               (list :source-story-item-source-id (first story-item-source-ids))
-               (when fragments
-                 (list :source-fragment-ordinals fragment-ordinals
-                       :source-fragment-anchors fragment-anchors
-                       :source-fragment-section-keys fragment-section-keys
-                       :source-fragment-excerpt (first fragment-excerpts)
-                       :source-fragment-excerpts fragment-excerpts))))
-             (t
-              (append
-               (list :source-story-item-source-ids story-item-source-ids
-                     :source-story-item-ids story-item-ids
-                     :source-story-item-indexes story-item-indexes)
-               (when fragments
-                 (list :source-fragment-ordinals fragment-ordinals
-                       :source-fragment-anchors fragment-anchors
-                       :source-fragment-section-keys fragment-section-keys
-                       :source-fragment-excerpt (first fragment-excerpts)
-                       :source-fragment-excerpts fragment-excerpts)))))))
+          (cond
+            ((null item-datas)
+             (list :source-page-id
+                   (localhost-fedwiki-source-data-fedwiki-page-id source-data)
+                   :source-page-path
+                   (localhost-fedwiki-source-data-fedwiki-relative-path
+                    source-data)))
+            ((= (length item-datas) 1)
+             (append
+              (list :source-story-item-source-id (first story-item-source-ids))
+              (when fragments
+                (list :source-fragment-ordinals fragment-ordinals
+                      :source-fragment-anchors fragment-anchors
+                      :source-fragment-section-keys fragment-section-keys
+                      :source-fragment-excerpt (first fragment-excerpts)
+                      :source-fragment-excerpts fragment-excerpts))))
+            (t
+             (append
+              (list :source-story-item-source-ids story-item-source-ids
+                    :source-story-item-ids story-item-ids
+                    :source-story-item-indexes story-item-indexes)
+              (when fragments
+                (list :source-fragment-ordinals fragment-ordinals
+                      :source-fragment-anchors fragment-anchors
+                      :source-fragment-section-keys fragment-section-keys
+                      :source-fragment-excerpt (first fragment-excerpts)
+                      :source-fragment-excerpts fragment-excerpts)))))))
     (apply #'plist-with-overrides
            base-provenance
            (append shared-overrides location-overrides))))
 
 (defun localhost-fedwiki-topic-source-path (source-data resolved-selections)
   (let ((item-datas
-          (remove-duplicates
-           (loop for resolved-selection in resolved-selections
-                 collect (getf resolved-selection :item-data))
-           :key #'localhost-fedwiki-item-data-source-id
-           :test #'equal)))
+         (remove-duplicates
+          (loop for resolved-selection in resolved-selections
+                collect (getf resolved-selection :item-data))
+          :key #'localhost-fedwiki-item-data-source-id
+          :test #'equal)))
     (cond
       ((null item-datas)
        (localhost-fedwiki-source-data-fedwiki-page-id source-data))
@@ -1089,20 +1089,20 @@
                                                     page-title
                                                     topic-spec)
   (let* ((resolved-selections
-           (resolve-localhost-fedwiki-fragment-selections
-            source-data
-            (copy-tree (getf topic-spec :fragment-selections))
-            primary-item))
+          (resolve-localhost-fedwiki-fragment-selections
+           source-data
+           (copy-tree (getf topic-spec :fragment-selections))
+           primary-item))
          (derivation-note
-           (or (getf topic-spec :derivation-note)
-               (if (> (length (remove-duplicates
-                               (loop for resolved-selection in resolved-selections
-                                     collect (localhost-fedwiki-item-data-source-id
-                                              (getf resolved-selection :item-data)))
-                               :test #'equal))
-                       1)
-                   "Derived by grouping fragments across multiple localhost FedWiki story items."
-                   "Derived from paragraph fragments within one localhost FedWiki story item, not from separate whole story items."))))
+          (or (getf topic-spec :derivation-note)
+              (if (> (length (remove-duplicates
+                              (loop for resolved-selection in resolved-selections
+                                    collect (localhost-fedwiki-item-data-source-id
+                                             (getf resolved-selection :item-data)))
+                              :test #'equal))
+                     1)
+                  "Derived by grouping fragments across multiple localhost FedWiki story items."
+                  "Derived from paragraph fragments within one localhost FedWiki story item, not from separate whole story items."))))
     (make-localhost-fedwiki-promoted-topic-data
      :id (getf topic-spec :id)
      :title (getf topic-spec :title)
@@ -1124,25 +1124,25 @@
   (let* ((page (read-localhost-fedwiki-page spec))
          (source (build-localhost-fedwiki-source-data spec :page page))
          (primary-item
-           (localhost-fedwiki-primary-story-item-data
-            spec
-            (localhost-fedwiki-source-data-story-items source)))
+          (localhost-fedwiki-primary-story-item-data
+           spec
+           (localhost-fedwiki-source-data-story-items source)))
          (topic-chunks
-           (loop for topic-spec in topic-specs
-                 collect (build-localhost-fedwiki-promoted-topic-data
-                          source
-                          primary-item
-                          (or (localhost-fedwiki-page-pipeline-spec-page-title spec)
-                              (localhost-fedwiki-source-data-fedwiki-title source))
-                          topic-spec)))
+          (loop for topic-spec in topic-specs
+                collect (build-localhost-fedwiki-promoted-topic-data
+                         source
+                         primary-item
+                         (or (localhost-fedwiki-page-pipeline-spec-page-title spec)
+                             (localhost-fedwiki-source-data-fedwiki-title source))
+                         topic-spec)))
          (umbrella-topic
-           (find :umbrella
-                 topic-chunks
-                 :key #'localhost-fedwiki-promoted-topic-data-topic-kind))
+          (find :umbrella
+                topic-chunks
+                :key #'localhost-fedwiki-promoted-topic-data-topic-kind))
          (subtopics
-           (remove :umbrella
-                   topic-chunks
-                   :key #'localhost-fedwiki-promoted-topic-data-topic-kind)))
+          (remove :umbrella
+                  topic-chunks
+                  :key #'localhost-fedwiki-promoted-topic-data-topic-kind)))
     (make-localhost-fedwiki-page-pipeline-result
      :spec spec
      :raw-page page
@@ -1164,12 +1164,12 @@
   (let* ((source (localhost-fedwiki-page-pipeline-result-source pipeline))
          (primary-item (localhost-fedwiki-page-pipeline-result-primary-item pipeline))
          (resolved-selections
-           (resolve-localhost-fedwiki-fragment-selections
-            source
-            (or (copy-tree fragment-selections)
-                (localhost-fedwiki-flatten-fragment-selections
-                 (localhost-fedwiki-page-pipeline-result-topic-specs pipeline)))
-            primary-item)))
+          (resolve-localhost-fedwiki-fragment-selections
+           source
+           (or (copy-tree fragment-selections)
+               (localhost-fedwiki-flatten-fragment-selections
+                (localhost-fedwiki-page-pipeline-result-topic-specs pipeline)))
+           primary-item)))
     (list :id id
           :source-file source-file
           :source-origin-id (localhost-fedwiki-source-data-fedwiki-page-id source)
@@ -1208,23 +1208,23 @@
 (defun render-hyperdoc-page-shell (page-title intro-blocks section-blocks)
   (with-output-to-string (stream)
     (let ((last-section-block (car (last section-blocks))))
-    (format stream "<h1>~A</h1>~%~%" page-title)
-    (format stream "<in-package>hyperdoc</in-package>~%~%")
-    (dolist (block intro-blocks)
-      (write-string block stream)
-      (format stream "~%~%"))
-    (loop for section-block in section-blocks
-          do (format stream "<h2>~A</h2>~%~%~A"
-                     (getf section-block :title)
-                     (getf section-block :body-html))
-             (unless (eq section-block last-section-block)
-               (format stream "~%~%"))))))
+      (format stream "<h1>~A</h1>~%~%" page-title)
+      (format stream "<in-package>hyperdoc</in-package>~%~%")
+      (dolist (block intro-blocks)
+        (write-string block stream)
+        (format stream "~%~%"))
+      (loop for section-block in section-blocks
+            do (format stream "<h2>~A</h2>~%~%~A"
+                       (getf section-block :title)
+                       (getf section-block :body-html))
+            (unless (eq section-block last-section-block)
+              (format stream "~%~%"))))))
 
 (defun render-localhost-fedwiki-promotion-workflow-section-html
     (&key promotion-plan-expression
-          source-expression
-          source-page-id
-          source-page-path)
+       source-expression
+       source-page-id
+       source-page-path)
   (with-output-to-string (stream)
     (format stream "<p>~%")
     (format stream "  This generated HyperDoc page can reopen its promotion workflow for source page~%")

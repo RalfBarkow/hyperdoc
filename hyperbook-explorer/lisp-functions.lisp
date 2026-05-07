@@ -82,7 +82,7 @@
   (let ((symbol (read-symbol page-id signal-error?)))
     (when symbol
       (if-let ((definition (lisp-function-definition symbol)))
-        (make-lisp-function-page hb page-id definition)
+          (make-lisp-function-page hb page-id definition)
         (and signal-error?
              (handler-case
                  (fdefinition symbol)
@@ -119,16 +119,16 @@
 (views:defview 👀overview (hb lisp-functions)
   (declare (ignore hb))
   (views:html-view :title "Overview" :priority 1
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperbook
-                           "assets/hyperbook/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:html
-      (:div :class "hyperbook-page"
-            (:h1 (views:esc "Lisp functions"))
-            (:p (views:esc "This hyperbook contains one page for each symbol
+                   (views:add-asset-path "/hyperbook/"
+                                         (asdf:system-relative-pathname
+                                          :hyperbook
+                                          "assets/hyperbook/"))
+                   (views:include-css "/hyperbook/css/hyperbook.css")
+                   (views:html
+                    (:div :class "hyperbook-page"
+                          (:h1 (views:esc "Lisp functions"))
+                          (:p (views:esc "This hyperbook contains one page for each symbol
 in the Lisp image that has a function definition attached to it.
 It is used for linking to Lisp code."))
-            (:p (views:esc "Use the Loaded functions view to browse the current Lisp image,
+                          (:p (views:esc "Use the Loaded functions view to browse the current Lisp image,
 or open a page directly by its package-qualified symbol name."))))))

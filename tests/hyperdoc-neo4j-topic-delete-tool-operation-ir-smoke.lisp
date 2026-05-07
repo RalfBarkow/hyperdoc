@@ -68,28 +68,28 @@
         (command-suffix "\".equals(command))")
         (arity-marker "args.length != "))
     (loop
-      for if-start = (search if-marker source :start2 position)
-      while if-start
-      do (let* ((command-start (+ if-start (length if-marker)))
-                (command-end (search command-suffix
-                                     source
-                                     :start2 command-start)))
-           (unless command-end
-             (setf position (+ command-start 1))
-             (return))
-           (let* ((command (subseq source command-start command-end))
-                  (return-pos (or (search "return;" source :start2 command-end)
-                                  (length source)))
-                  (block (subseq source command-end return-pos))
-                  (arity-pos (search arity-marker block)))
-             (when arity-pos
-               (let* ((args-length-start (+ arity-pos (length arity-marker)))
-                      (args-length
-                        (neo4j-topic-delete-tool-parse-integer-at
-                         block
-                         args-length-start)))
-                 (push (cons command (1- args-length)) result)))
-             (setf position return-pos))))
+          for if-start = (search if-marker source :start2 position)
+          while if-start
+          do (let* ((command-start (+ if-start (length if-marker)))
+                    (command-end (search command-suffix
+                                         source
+                                         :start2 command-start)))
+               (unless command-end
+                 (setf position (+ command-start 1))
+                 (return))
+               (let* ((command (subseq source command-start command-end))
+                      (return-pos (or (search "return;" source :start2 command-end)
+                                      (length source)))
+                      (block (subseq source command-end return-pos))
+                      (arity-pos (search arity-marker block)))
+                 (when arity-pos
+                   (let* ((args-length-start (+ arity-pos (length arity-marker)))
+                          (args-length
+                           (neo4j-topic-delete-tool-parse-integer-at
+                            block
+                            args-length-start)))
+                     (push (cons command (1- args-length)) result)))
+                 (setf position return-pos))))
     (nreverse result)))
 
 (defun neo4j-topic-delete-tool-sorted-command-arities (alist)
@@ -107,7 +107,7 @@
          (tool (hyperdoc::hyperdoc-neo4j-topic-delete-tool-operation-ir-tool
                 ir))
          (operations
-           (hyperdoc::hyperdoc-neo4j-topic-delete-tool-operations ir)))
+          (hyperdoc::hyperdoc-neo4j-topic-delete-tool-operations ir)))
     (neo4j-topic-delete-tool-assert-equal
      "HyperdocNeo4jTopicDeleteTool"
      (getf tool :id)
@@ -142,13 +142,13 @@
 
 (defun run-hyperdoc-neo4j-topic-delete-tool-operation-ir-java-parity-smoke-test ()
   (let* ((java-source
-           (neo4j-topic-delete-tool-read-repo-file
-            "tools/HyperdocNeo4jTopicDeleteTool.java"))
+          (neo4j-topic-delete-tool-read-repo-file
+           "tools/HyperdocNeo4jTopicDeleteTool.java"))
          (ir (hyperdoc::hyperdoc-neo4j-topic-delete-tool-operation-ir))
          (java-arities
-           (neo4j-topic-delete-tool-java-command-arities java-source))
+          (neo4j-topic-delete-tool-java-command-arities java-source))
          (ir-arities
-           (neo4j-topic-delete-tool-ir-command-arities ir)))
+          (neo4j-topic-delete-tool-ir-command-arities ir)))
     (neo4j-topic-delete-tool-assert-equal
      (neo4j-topic-delete-tool-sorted-command-arities java-arities)
      (neo4j-topic-delete-tool-sorted-command-arities ir-arities)
@@ -210,13 +210,13 @@
 
 (defun run-hyperdoc-neo4j-topic-delete-tool-operation-ir-scxml-smoke-test ()
   (let* ((path
-           (neo4j-topic-delete-tool-repo-path
-            "hyperdoc/hyperdoc-neo4j-topic-delete-tool-capability-model.scxml"))
+          (neo4j-topic-delete-tool-repo-path
+           "hyperdoc/hyperdoc-neo4j-topic-delete-tool-capability-model.scxml"))
          (chart (hyperdoc/scxml:parse-scxml-file path))
          (findings (hyperdoc/scxml:validate-scxml-chart chart))
          (states
-           (mapcar #'hyperdoc/scxml:scxml-state-id-of
-                   (hyperdoc/scxml:scxml-chart-states-of chart))))
+          (mapcar #'hyperdoc/scxml:scxml-state-id-of
+                  (hyperdoc/scxml:scxml-chart-states-of chart))))
     (neo4j-topic-delete-tool-assert-equal
      "hyperdoc-neo4j-topic-delete-tool-capability-model"
      (hyperdoc/scxml:scxml-chart-name-of chart)
@@ -254,28 +254,28 @@
 (defun run-hyperdoc-neo4j-topic-delete-tool-operation-ir-inspector-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((model
-           (hyperdoc::make-hyperdoc-neo4j-topic-delete-tool-operation-model))
+          (hyperdoc::make-hyperdoc-neo4j-topic-delete-tool-operation-model))
          (views (neo4j-topic-delete-tool-load-inspector-views model))
          (operations-view
-           (neo4j-topic-delete-tool-find-view-by-title views "Operations"))
+          (neo4j-topic-delete-tool-find-view-by-title views "Operations"))
          (safety-view
-           (neo4j-topic-delete-tool-find-view-by-title
-            views
-            "Safety classification"))
+          (neo4j-topic-delete-tool-find-view-by-title
+           views
+           "Safety classification"))
          (preview-view
-           (neo4j-topic-delete-tool-find-view-by-title
-            views
-            "Command previews")))
+          (neo4j-topic-delete-tool-find-view-by-title
+           views
+           "Command previews")))
     (dolist (view (list operations-view safety-view preview-view))
       (neo4j-topic-delete-tool-assert-true
        view
        "Operation model must expose read-only inspector views"))
     (let ((combined-html
-            (concatenate
-             'string
-             (html-inspector-views:view-html operations-view)
-             (html-inspector-views:view-html safety-view)
-             (html-inspector-views:view-html preview-view))))
+           (concatenate
+            'string
+            (html-inspector-views:view-html operations-view)
+            (html-inspector-views:view-html safety-view)
+            (html-inspector-views:view-html preview-view))))
       (dolist (command +neo4j-topic-delete-tool-commands+)
         (neo4j-topic-delete-tool-assert-true
          (search command combined-html :test #'char=)
@@ -295,11 +295,11 @@
 
 (defun run-hyperdoc-neo4j-topic-delete-tool-operation-ir-doc-smoke-test ()
   (let ((page
-          (neo4j-topic-delete-tool-read-repo-file
-           "hyperdoc/Hyperdoc Neo4j Topic Delete Tool Operation Model.html"))
+         (neo4j-topic-delete-tool-read-repo-file
+          "hyperdoc/Hyperdoc Neo4j Topic Delete Tool Operation Model.html"))
         (ir
-          (neo4j-topic-delete-tool-read-repo-file
-           "tools/hyperdoc-neo4j-topic-delete-tool.operations.sexp")))
+         (neo4j-topic-delete-tool-read-repo-file
+          "tools/hyperdoc-neo4j-topic-delete-tool.operations.sexp")))
     (dolist (needle '("source parity"
                       "not behavioral change"
                       "936040"

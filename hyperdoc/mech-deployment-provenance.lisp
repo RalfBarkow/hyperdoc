@@ -294,11 +294,11 @@
 
 (defun mech-provenance-sha256-hex (content)
   (let* ((temporary-name
-           (format nil "mech-provenance-~A.tmp"
-                   (symbol-name (gensym "RUN"))))
+          (format nil "mech-provenance-~A.tmp"
+                  (symbol-name (gensym "RUN"))))
          (temporary-path
-           (merge-pathnames temporary-name
-                            (uiop:temporary-directory))))
+          (merge-pathnames temporary-name
+                           (uiop:temporary-directory))))
     (unwind-protect
          (progn
            (with-open-file (stream temporary-path
@@ -318,7 +318,7 @@
   (loop for (asset-name . content) in asset-contents
         for digest = (and content (mech-provenance-sha256-hex content))
         when digest
-          collect (cons asset-name digest)))
+        collect (cons asset-name digest)))
 
 (defun mech-provenance-find-plugmatic-plugin-entry (payload plugin-name)
   (let ((entries (cond
@@ -420,14 +420,14 @@
     (loop for (asset-name . content) in asset-contents
           for source-path = (mech-provenance-source-path-for-asset asset-name)
           when source-path
-            collect
-            (cons asset-name
-                  (string= (or content "")
-                           (or (mech-provenance-git-show-file
-                                repository-path
-                                commit
-                                source-path)
-                               ""))))))
+          collect
+          (cons asset-name
+                (string= (or content "")
+                         (or (mech-provenance-git-show-file
+                              repository-path
+                              commit
+                              source-path)
+                             ""))))))
 
 (defun mech-provenance-comparison-all-match-p (comparison)
   (and comparison
@@ -457,11 +457,11 @@
 
 (defun collect-live-mech-host-runtime-provenance
     (host-spec &key
-       (reference-repo-path *default-wiki-plugin-mech-repository-path*)
-       (upstream-reference-commit *upstream-mech-reference-commit*)
-       (upstream-reference-version *upstream-mech-reference-version*)
-       (patched-lineage-version *patched-mech-discourse-graphs-version*)
-       (known-patched-reference-commit *known-patched-mech-reference-commit*))
+                 (reference-repo-path *default-wiki-plugin-mech-repository-path*)
+                 (upstream-reference-commit *upstream-mech-reference-commit*)
+                 (upstream-reference-version *upstream-mech-reference-version*)
+                 (patched-lineage-version *patched-mech-discourse-graphs-version*)
+                 (known-patched-reference-commit *known-patched-mech-reference-commit*))
   (let* ((host (host-spec-value host-spec :host))
          (base-url (host-spec-value host-spec :base-url))
          (page-slug (or (host-spec-value host-spec :page-slug)
@@ -472,14 +472,14 @@
          (page-url (format nil "~A/~A.json" base-url page-slug))
          (asset-names '("mech.js" "blocks.js" "interpreter.js" "library.js"))
          (asset-urls
-           (loop for asset-name in asset-names
-                 collect (cons asset-name
-                               (format nil "~A/plugins/mech/~A"
-                                       base-url
-                                       asset-name))))
+          (loop for asset-name in asset-names
+                collect (cons asset-name
+                              (format nil "~A/plugins/mech/~A"
+                                      base-url
+                                      asset-name))))
          (plugin-endpoints
-           (append (list system-plugins-url plugmatic-url)
-                   (mapcar #'cdr asset-urls)))
+          (append (list system-plugins-url plugmatic-url)
+                  (mapcar #'cdr asset-urls)))
          (evidence nil)
          (system-plugins-json nil)
          (plugmatic-json nil)
@@ -528,28 +528,28 @@
                                 (format nil "Failed to fetch ~A" (car asset)))))))
       (setf asset-contents (nreverse asset-contents))
       (let* ((mech-entry
-               (and plugmatic-json
-                    (mech-provenance-find-plugmatic-plugin-entry
-                     plugmatic-json
-                     "mech")))
+              (and plugmatic-json
+                   (mech-provenance-find-plugmatic-plugin-entry
+                    plugmatic-json
+                    "mech")))
              (mech-package (and mech-entry (mech-json-get mech-entry "package")))
              (mech-repository
-               (and mech-package
-                    (mech-json-get mech-package "repository")))
+              (and mech-package
+                   (mech-json-get mech-package "repository")))
              (system-plugins
-               (mech-json-sequence->list system-plugins-json))
+              (mech-json-sequence->list system-plugins-json))
              (mech-js (cdr (assoc "mech.js" asset-contents :test #'string=)))
              (blocks-js (cdr (assoc "blocks.js" asset-contents :test #'string=)))
              (upstream-comparison
-               (mech-provenance-compare-assets-to-git-commit
-                asset-contents
-                reference-repo-path
-                upstream-reference-commit))
+              (mech-provenance-compare-assets-to-git-commit
+               asset-contents
+               reference-repo-path
+               upstream-reference-commit))
              (known-patched-comparison
-               (mech-provenance-compare-assets-to-git-commit
-                asset-contents
-                reference-repo-path
-                known-patched-reference-commit)))
+              (mech-provenance-compare-assets-to-git-commit
+               asset-contents
+               reference-repo-path
+               known-patched-reference-commit)))
         (setf plugin-version
               (or (and mech-package (mech-json-get mech-package "version"))
                   (and mech-js
@@ -561,10 +561,10 @@
                    (mech-json-get mech-repository "url")))
         (setf build-commit
               (let ((value
-                      (and mech-js
-                           (mech-provenance-extract-js-field-value
-                            mech-js
-                            "MECH_GIT_COMMIT"))))
+                     (and mech-js
+                          (mech-provenance-extract-js-field-value
+                           mech-js
+                           "MECH_GIT_COMMIT"))))
                 (and (mech-provenance-hex-string-p value 40)
                      value)))
         (setf served-vocabulary
@@ -874,17 +874,17 @@
 (defun live-mech-plugin-provenance-check-conclusion-from-reports
     (reports &key known-patched-reference-commit)
   (let* ((classifications
-           (mapcar #'mech-host-runtime-provenance-classification-of reports))
+          (mapcar #'mech-host-runtime-provenance-classification-of reports))
          (discourse-report
-           (find "discourse.dreyeck.ch"
-                 reports
-                 :key #'mech-host-runtime-provenance-host-of
-                 :test #'string=))
+          (find "discourse.dreyeck.ch"
+                reports
+                :key #'mech-host-runtime-provenance-host-of
+                :test #'string=))
          (wiki-report
-           (find "wiki.ralfbarkow.ch"
-                 reports
-                 :key #'mech-host-runtime-provenance-host-of
-                 :test #'string=)))
+          (find "wiki.ralfbarkow.ch"
+                reports
+                :key #'mech-host-runtime-provenance-host-of
+                :test #'string=)))
     (cond
       ((every (lambda (classification)
                 (eq classification :upstream))
@@ -910,14 +910,14 @@
 (defun make-live-mech-plugin-provenance-check
     (&key
        (reports
-         (list (make-wiki-ralfbarkow-live-mech-host-report)
-               (make-discourse-dreyeck-live-mech-host-report)))
+        (list (make-wiki-ralfbarkow-live-mech-host-report)
+              (make-discourse-dreyeck-live-mech-host-report)))
        (hosts (default-live-mech-plugin-provenance-hosts))
        (reference-repo-path *default-wiki-plugin-mech-repository-path*)
        (execution-mode :baseline)
        executed-at
        (known-patched-reference-commit
-         *known-patched-mech-reference-commit*)
+        *known-patched-mech-reference-commit*)
        conclusion)
   (make-instance
    'live-mech-plugin-provenance-check
@@ -954,15 +954,15 @@
        (hosts (default-live-mech-plugin-provenance-hosts))
        (reference-repo-path *default-wiki-plugin-mech-repository-path*)
        (known-patched-reference-commit
-         *known-patched-mech-reference-commit*))
+        *known-patched-mech-reference-commit*))
   (let ((reports
-          (mapcar (lambda (host-spec)
-                    (collect-live-mech-host-runtime-provenance
-                     host-spec
-                     :reference-repo-path reference-repo-path
-                     :known-patched-reference-commit
-                     known-patched-reference-commit))
-                  hosts)))
+         (mapcar (lambda (host-spec)
+                   (collect-live-mech-host-runtime-provenance
+                    host-spec
+                    :reference-repo-path reference-repo-path
+                    :known-patched-reference-commit
+                    known-patched-reference-commit))
+                 hosts)))
     (make-live-mech-plugin-provenance-check
      :reports reports
      :hosts hosts

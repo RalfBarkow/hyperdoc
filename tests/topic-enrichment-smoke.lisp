@@ -98,9 +98,9 @@ COMMIT;")
 
 (defun write-topic-enrichment-smoke-route-data-file (directory &optional (entries '()))
   (let* ((source
-           (asdf:system-relative-pathname
-            :hyperdoc
-            "hyperdoc/topic-enrichment-route-data.lisp"))
+          (asdf:system-relative-pathname
+           :hyperdoc
+           "hyperdoc/topic-enrichment-route-data.lisp"))
          (target (merge-pathnames "topic-enrichment-route-data.lisp" directory))
          (content (uiop:read-file-string source)))
     (with-open-file (stream target
@@ -110,7 +110,7 @@ COMMIT;")
                             :external-format :utf-8)
       (write-string content stream))
     (let ((hyperdoc::*topic-enrichment-route-definitions-source-pathname*
-            target))
+           target))
       (hyperdoc::write-topic-enrichment-route-definitions! entries target))
     target))
 
@@ -119,21 +119,21 @@ COMMIT;")
   `(let* ((,fixture-var (make-topic-enrichment-smoke-fixture))
           (root (getf ,fixture-var :root))
           (,route-data-path-var
-            (write-topic-enrichment-smoke-route-data-file root))
+           (write-topic-enrichment-smoke-route-data-file root))
           (bridge (make-topic-enrichment-smoke-bridge ,fixture-var))
           (,source-var
-            (hyperdoc::make-zotero-library-source-designator
-             :id "zotero-library/default"
-             :title "Local Zotero library"
-             :summary
-             "Fixture-backed local Zotero library for runtime durable-route smoke tests."
-             :bridge-provider (lambda () bridge))))
+           (hyperdoc::make-zotero-library-source-designator
+            :id "zotero-library/default"
+            :title "Local Zotero library"
+            :summary
+            "Fixture-backed local Zotero library for runtime durable-route smoke tests."
+            :bridge-provider (lambda () bridge))))
      (let ((hyperdoc::*topic-enrichment-route-definitions-source-pathname*
-             ,route-data-path-var)
+            ,route-data-path-var)
            (hyperdoc::*topic-enrichment-route-definitions* '()))
        (let ((old-default-source-designators
-               (symbol-function
-                'hyperdoc::default-topic-enrichment-source-designators)))
+              (symbol-function
+               'hyperdoc::default-topic-enrichment-source-designators)))
          (unwind-protect
               (progn
                 (setf (symbol-function
@@ -143,7 +143,7 @@ COMMIT;")
                 (hyperdoc::reload-topic-enrichment-route-definitions!
                  ,route-data-path-var)
                 (locally
-                  ,@body))
+                    ,@body))
            (setf (symbol-function
                   'hyperdoc::default-topic-enrichment-source-designators)
                  old-default-source-designators))))))
@@ -156,16 +156,16 @@ COMMIT;")
          (plan (hyperdoc::topic-source-route-default-plan route))
          (report (hyperdoc::run-topic-enrichment-query-plan plan))
          (signal-titles
-           (mapcar #'hyperdoc::candidate-topic-signal-display-title-of
-                   (hyperdoc::topic-enrichment-report-candidate-signals-of
-                    report)))
+          (mapcar #'hyperdoc::candidate-topic-signal-display-title-of
+                  (hyperdoc::topic-enrichment-report-candidate-signals-of
+                   report)))
          (route-titles (inspector-view-titles-for-object route))
          (plan-titles (inspector-view-titles-for-object plan))
          (report-titles (inspector-view-titles-for-object report))
          (topic-titles (inspector-view-titles-for-object (hyperdoc::chunk-topic)))
          (topic-page-titles
-           (inspector-view-titles-for-object
-            (hyperbook:find-page hyperdoc::*topics* "Chunk" :signal-error? t))))
+          (inspector-view-titles-for-object
+           (hyperbook:find-page hyperdoc::*topics* "Chunk" :signal-error? t))))
     (assert-equal :ready-to-attempt
                   (hyperdoc::topic-enrichment-plan-execution-readiness-of plan)
                   "Fixture-backed plan should be executable")
@@ -230,7 +230,7 @@ COMMIT;")
     (let* ((topic (hyperdoc::chunk-topic))
            (fixture-database-path (getf fixture :database-path))
            (before-routes
-             (hyperdoc::topic-source-route-durable-routes-for-topic topic)))
+            (hyperdoc::topic-source-route-durable-routes-for-topic topic)))
       (assert-true fixture-database-path
                    "Runtime-authoring smoke fixture should provide a database path.")
       (assert-true (null before-routes)
@@ -266,11 +266,11 @@ COMMIT;")
         (setf hyperdoc::*topic-enrichment-route-definitions* '())
         (hyperdoc::reload-topic-enrichment-route-definitions! route-data-path)
         (let* ((reopened-routes
-                 (hyperdoc::topic-source-route-durable-routes-for-topic topic))
+                (hyperdoc::topic-source-route-durable-routes-for-topic topic))
                (reopened-route
-                 (hyperdoc::topic-source-route-durable-route-for-topic-source
-                  topic
-                  source)))
+                (hyperdoc::topic-source-route-durable-route-for-topic-source
+                 topic
+                 source)))
           (assert-equal 1
                         (length reopened-routes)
                         "Reloading definitions from the authored-data file should reopen the durable route.")

@@ -69,8 +69,8 @@
          (pathnamep snippet-source))
      (let ((namestring (namestring (pathname snippet-source)))
            (default-namestring
-             (namestring
-              (the-life-cycle-of-collective-knowledge-topic-asset-path))))
+            (namestring
+             (the-life-cycle-of-collective-knowledge-topic-asset-path))))
        (if (or (string= namestring default-namestring)
                (string= namestring
                         *the-life-cycle-of-collective-knowledge-topic-asset*))
@@ -166,17 +166,17 @@
     (definition workspace-topicmap-id &key topic-type-uri topic-value)
   (if-let (carrier-spec
            (topic-factory-snippet-dmx-title-content-carrier-spec topic-type-uri))
-    (topic-factory-snippet-dmx-title-content-children
-     definition
-     topic-value
-     (getf carrier-spec :title-type-uri)
-     (getf carrier-spec :content-type-uri))
+      (topic-factory-snippet-dmx-title-content-children
+       definition
+       topic-value
+       (getf carrier-spec :title-type-uri)
+       (getf carrier-spec :content-type-uri))
     (topic-factory-snippet-dmx-default-children
      definition
      workspace-topicmap-id)))
 
 (defun topic-factory-snippet-dmx-payload (definition workspace-topicmap-id
-                                           &key topic-type-uri topic-value)
+                                          &key topic-type-uri topic-value)
   (let ((uri (make-the-life-cycle-of-collective-knowledge-dmx-snippet-uri
               (snippet-id-of definition))))
     (list :uri uri
@@ -196,10 +196,10 @@
      &key workspace-topicmap-id client topic-type-uri view-props topic-value)
   (let* ((definition (normalize-topic-factory-snippet-source snippet-source))
          (resolved-topicmap-id
-           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run t :verbose nil)))
+          (or client
+              (make-default-dmx-import-client :dry-run t :verbose nil)))
          (payload (topic-factory-snippet-dmx-payload definition
                                                      resolved-topicmap-id
                                                      :topic-type-uri topic-type-uri
@@ -209,8 +209,8 @@
          (existing-topic-id (dmx-import-object-id existing-topic))
          (in-topicmap-p (and existing-topic-id
                              (dmx-import-topic-in-topicmap-p resolved-client
-                                                            resolved-topicmap-id
-                                                            existing-topic-id))))
+                                                             resolved-topicmap-id
+                                                             existing-topic-id))))
     (multiple-value-bind (resolved-view-props view-props-normalization)
         (normalize-topic-factory-snippet-view-props view-props)
       (make-topic-factory-snippet-dmx-write-plan
@@ -261,7 +261,7 @@
           (topic-factory-snippet-dmx-write-plan-source-path plan))
   (let ((view-props (topic-factory-snippet-dmx-write-plan-view-props plan))
         (normalization
-          (topic-factory-snippet-dmx-write-plan-view-props-normalization plan)))
+         (topic-factory-snippet-dmx-write-plan-view-props-normalization plan)))
     (format stream
             "TOPIC_FACTORY_SNIPPET_DMX_VIEW x=~D y=~D visibility=~:[NIL~;T~] pinned=~:[NIL~;T~]~%"
             (dmx-topicmap-view-props-value view-props :x)
@@ -284,8 +284,8 @@
        topic-value
        (stream *standard-output*))
   (let* ((resolved-client
-           (or client
-               (make-default-dmx-import-client :dry-run dry-run :verbose nil)))
+          (or client
+              (make-default-dmx-import-client :dry-run dry-run :verbose nil)))
          (plan (plan-topic-factory-snippet-dmx-write
                 snippet-source
                 :workspace-topicmap-id workspace-topicmap-id

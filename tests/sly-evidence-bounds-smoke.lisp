@@ -25,11 +25,11 @@
         (condition nil))
     (unwind-protect
          (let ((client
-                 (make-instance 'hyperdoc::http-dmx-import-client
-                                :base-url "https://dmx.example.test"
-                                :authorization-header "Bearer redacted"
-                                :workspace-id 919815
-                                :verbose nil)))
+                (make-instance 'hyperdoc::http-dmx-import-client
+                               :base-url "https://dmx.example.test"
+                               :authorization-header "Bearer redacted"
+                               :workspace-id 919815
+                               :verbose nil)))
            (setf (symbol-function 'drakma:http-request)
                  (lambda (url &key method &allow-other-keys)
                    (declare (ignore url method))
@@ -48,8 +48,8 @@
              (hyperdoc::dmx-import-http-error (caught)
                (setf condition caught)))
            (let ((evidence
-                   (hyperdoc::dmx-import-last-http-transaction-evidence-of
-                    client)))
+                  (hyperdoc::dmx-import-last-http-transaction-evidence-of
+                   client)))
              (evidence-bounds-assert-true
               condition
               "Huge response smoke must end in an HTTP condition")
@@ -74,11 +74,11 @@
 
 (defun run-sly-evidence-debug-event-cap-smoke-test ()
   (let ((client
-          (make-instance 'hyperdoc::http-dmx-import-client
-                         :base-url "https://dmx.example.test"
-                         :authorization-header "Bearer redacted"
-                         :workspace-id 919815
-                         :verbose nil)))
+         (make-instance 'hyperdoc::http-dmx-import-client
+                        :base-url "https://dmx.example.test"
+                        :authorization-header "Bearer redacted"
+                        :workspace-id 919815
+                        :verbose nil)))
     (dotimes (index 40)
       (hyperdoc::append-http-dmx-import-debug-event
        client

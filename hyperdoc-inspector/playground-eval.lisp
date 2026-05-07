@@ -71,35 +71,35 @@
                        (debug-log "~&[PLAYGROUND] ERROR: ~A~%" e)
                        (values nil nil e)))))))
       (let* ((eval-action-thunk
-               (hv:thunk
-                 (debug-log "~&[PLAYGROUND] Eval clicked~%")
-                 (let ((code (selected-source)))
-                   (debug-log "~&[PLAYGROUND] Evaluating:~%~A~%" code)
-                   (multiple-value-bind (ok? result)
-                       (run-selection-eval)
-                     (when ok?
-                       (debug-log "~&[PLAYGROUND] Result: ~S~%" result)
-                       (format t "~&Eval executed.~%"))))
-                 nil))
-             (ping-action-thunk
-               (hv:thunk
-                 (debug-log "~&[PLAYGROUND] Ping clicked~%")
-                 nil))
-             (eval-inspect-thunk
-               (hv:thunk
-                 (multiple-value-bind (ok? result err)
+              (hv:thunk
+               (debug-log "~&[PLAYGROUND] Eval clicked~%")
+               (let ((code (selected-source)))
+                 (debug-log "~&[PLAYGROUND] Evaluating:~%~A~%" code)
+                 (multiple-value-bind (ok? result)
                      (run-selection-eval)
-                   (if ok?
-                       result
-                       err))))
+                   (when ok?
+                     (debug-log "~&[PLAYGROUND] Result: ~S~%" result)
+                     (format t "~&Eval executed.~%"))))
+               nil))
+             (ping-action-thunk
+              (hv:thunk
+               (debug-log "~&[PLAYGROUND] Ping clicked~%")
+               nil))
+             (eval-inspect-thunk
+              (hv:thunk
+               (multiple-value-bind (ok? result err)
+                   (run-selection-eval)
+                 (if ok?
+                     result
+                     err))))
              (step-thunk
-               (hv:thunk
-                 (make-playground-stepper (pane-object pane)
-                                          (selected-source))))
+              (hv:thunk
+               (make-playground-stepper (pane-object pane)
+                                        (selected-source))))
              (debug-thunk
-               (hv:thunk
-                 (let ((code (selected-source)))
-                   (let ((retry (make-playground-retry (pane-object pane) code)))
+              (hv:thunk
+               (let ((code (selected-source)))
+                 (let ((retry (make-playground-retry (pane-object pane) code)))
                    (multiple-value-bind (ok? result err)
                        (run-selection-eval)
                      (if ok?
@@ -117,8 +117,8 @@
                                                             :retry retry))
                              (t nil)))))))))
              (sessions-thunk
-               (hv:thunk
-                 (web-debugger-registry)))
+              (hv:thunk
+               (web-debugger-registry)))
              (button-refs nil)
              (sanitized-refs nil)
              (ping-button-id nil)
@@ -135,12 +135,12 @@
              (sessions-button nil))
         (multiple-value-bind (buttons-html references assets)
             (hv:html-and-references
-              (hv:action-button "Ping" ping-action-thunk)
-              (hv:action-button "Evaluate" eval-action-thunk)
-              (hv:eval-button "Evaluate and Inspect" eval-inspect-thunk)
-              (hv:eval-button "Step" step-thunk)
-              (hv:eval-button "Debug" debug-thunk)
-              (hv:eval-button "Sessions" sessions-thunk))
+             (hv:action-button "Ping" ping-action-thunk)
+             (hv:action-button "Evaluate" eval-action-thunk)
+             (hv:eval-button "Evaluate and Inspect" eval-inspect-thunk)
+             (hv:eval-button "Step" step-thunk)
+             (hv:eval-button "Debug" debug-thunk)
+             (hv:eval-button "Sessions" sessions-thunk))
           (declare (ignore assets))
           (setf (clog:inner-html tool-bar) buttons-html
                 button-refs references))

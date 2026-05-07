@@ -67,9 +67,9 @@
   (or (and (second story-items)
            (localhost-fedwiki-item-data-text (second story-items)))
       (default-localhost-fedwiki-source-claim
-       source-data
-       story-items
-       primary-item)))
+          source-data
+          story-items
+        primary-item)))
 
 (defun reproducible-devenv-as-knowledge-artifact-page-pipeline-spec ()
   (make-localhost-fedwiki-page-pipeline-spec
@@ -148,7 +148,7 @@
 (defun normalize-reproducible-devenv-as-knowledge-artifact-topic-factory-metadata
     (metadata)
   (let ((defaults
-          (reproducible-devenv-as-knowledge-artifact-default-topic-factory-metadata)))
+         (reproducible-devenv-as-knowledge-artifact-default-topic-factory-metadata)))
     (list :id (or (getf metadata :id)
                   (getf defaults :id))
           :source-file (or (getf metadata :source-file)
@@ -195,12 +195,12 @@
 
 (defun reproducible-devenv-as-knowledge-artifact-topic-definition-chunk ()
   (let* ((metadata
-           (reproducible-devenv-as-knowledge-artifact-topic-factory-metadata))
+          (reproducible-devenv-as-knowledge-artifact-topic-factory-metadata))
          (snippet-path
-           (reproducible-devenv-as-knowledge-artifact-topic-asset-path))
+          (reproducible-devenv-as-knowledge-artifact-topic-asset-path))
          (source-file
-           (or (getf metadata :source-file)
-               *reproducible-devenv-as-knowledge-artifact-topic-asset*)))
+          (or (getf metadata :source-file)
+              *reproducible-devenv-as-knowledge-artifact-topic-asset*)))
     (make-instance 'topic-definition-chunk
                    :id (getf metadata :id)
                    :title
@@ -225,7 +225,7 @@
 
 (defun reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk ()
   (let ((definition
-          (reproducible-devenv-as-knowledge-artifact-topic-definition-chunk)))
+         (reproducible-devenv-as-knowledge-artifact-topic-definition-chunk)))
     (make-instance 'dmx-snippet-chunk
                    :id (format nil "~A-dmx" (snippet-id-of definition))
                    :title
@@ -250,22 +250,22 @@
 
 (defun render-reproducible-devenv-as-knowledge-artifact-topic-factory-snippet ()
   (let* ((definition
-           (reproducible-devenv-as-knowledge-artifact-topic-definition-chunk))
+          (reproducible-devenv-as-knowledge-artifact-topic-definition-chunk))
          (metadata
-           (list :topic-factory-snippet
-                 :id (snippet-id-of definition)
-                 :source-file
-                 *reproducible-devenv-as-knowledge-artifact-topic-asset*
-                 :source-origin-id (source-origin-id-of definition)
-                 :source-origin-path (source-origin-path-of definition)
-                 :related-hyperdoc-page-title
-                 (related-hyperdoc-page-title-of definition)
-                 :related-topic-id (related-topic-id-of definition)
-                 :related-topic-ids (related-topic-ids-of definition)
-                 :provenance (provenance-of definition)))
+          (list :topic-factory-snippet
+                :id (snippet-id-of definition)
+                :source-file
+                *reproducible-devenv-as-knowledge-artifact-topic-asset*
+                :source-origin-id (source-origin-id-of definition)
+                :source-origin-path (source-origin-path-of definition)
+                :related-hyperdoc-page-title
+                (related-hyperdoc-page-title-of definition)
+                :related-topic-id (related-topic-id-of definition)
+                :related-topic-ids (related-topic-ids-of definition)
+                :provenance (provenance-of definition)))
          (topic-forms
-           (mapcar #'render-topic-factory-form-from-chunk
-                   (reproducible-devenv-as-knowledge-artifact-topic-chunks))))
+          (mapcar #'render-topic-factory-form-from-chunk
+                  (reproducible-devenv-as-knowledge-artifact-topic-chunks))))
     (with-output-to-string (stream)
       (pprint metadata stream)
       (terpri stream)
@@ -277,126 +277,126 @@
             do (unless first?
                  (terpri stream)
                  (terpri stream))
-               (write-string form stream))
+            (write-string form stream))
       (terpri stream))))
 
 (defun render-reproducible-devenv-as-knowledge-artifact-page ()
   (let* ((source
-           (reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
+          (reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
          (umbrella
-           (reproducible-devenv-as-knowledge-artifact-umbrella-topic-chunk))
+          (reproducible-devenv-as-knowledge-artifact-umbrella-topic-chunk))
          (subtopics
-           (reproducible-devenv-as-knowledge-artifact-subtopic-chunks))
+          (reproducible-devenv-as-knowledge-artifact-subtopic-chunks))
          (definition
-           (reproducible-devenv-as-knowledge-artifact-topic-definition-chunk))
+          (reproducible-devenv-as-knowledge-artifact-topic-definition-chunk))
          (dmx-snippet
-           (reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk))
+          (reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk))
          (story-items (story-items-of source))
          (topic-list (cons umbrella subtopics))
          (whole-item-topics
-           (remove "multi-item-derived"
-                   topic-list
-                   :key (lambda (chunk)
-                          (getf (provenance-of chunk) :provenance-granularity))
-                   :test #'equal))
+          (remove "multi-item-derived"
+                  topic-list
+                  :key (lambda (chunk)
+                         (getf (provenance-of chunk) :provenance-granularity))
+                  :test #'equal))
          (intro-blocks
-           (list
-            (format nil
-                    "<p>~%  This authored HyperDoc page is composed from FedWiki-derived chunks read from the~%  localhost page <tt>~A</tt> at repo-relative source path <tt>~A</tt>.~%</p>"
-                    (fedwiki-page-id-of source)
-                    (fedwiki-relative-path-of source))
-            (format nil
-                    "<p>~%  The local composition path stays usable without DMX. The topic-factory snippet asset~%  <tt>~A</tt> remains a separate derived artifact, and the DMX writer stays a~%  separate, explicit, dry-run-first twin path rather than a live proxy for this~%  authored page.~%</p>"
-                    *reproducible-devenv-as-knowledge-artifact-topic-asset*)))
+          (list
+           (format nil
+                   "<p>~%  This authored HyperDoc page is composed from FedWiki-derived chunks read from the~%  localhost page <tt>~A</tt> at repo-relative source path <tt>~A</tt>.~%</p>"
+                   (fedwiki-page-id-of source)
+                   (fedwiki-relative-path-of source))
+           (format nil
+                   "<p>~%  The local composition path stays usable without DMX. The topic-factory snippet asset~%  <tt>~A</tt> remains a separate derived artifact, and the DMX writer stays a~%  separate, explicit, dry-run-first twin path rather than a live proxy for this~%  authored page.~%</p>"
+                   *reproducible-devenv-as-knowledge-artifact-topic-asset*)))
          (section-blocks
+          (list
+           (list :title "Source claim"
+                 :body-html
+                 (format nil "<p>~%  ~A~% </p>~%~%<p>~%  ~A~% </p>"
+                         (claim-of source)
+                         (body-of umbrella)))
+           (list :title "Reusable topic chunks"
+                 :body-html
+                 (render-topic-list-html
+                  (reproducible-devenv-topic-list-entries topic-list)))
            (list
-            (list :title "Source claim"
-                  :body-html
-                  (format nil "<p>~%  ~A~% </p>~%~%<p>~%  ~A~% </p>"
-                          (claim-of source)
-                          (body-of umbrella)))
-            (list :title "Reusable topic chunks"
-                  :body-html
-                  (render-topic-list-html
-                   (reproducible-devenv-topic-list-entries topic-list)))
-            (list
-             :title "Local composition path"
-             :body-html
-             (with-output-to-string (stream)
-               (format stream "<p>~%")
-               (format stream "  This page promotes one reusable topic from each whole paragraph story item.~%")
-               (format stream "  The two subtopics therefore keep <tt>story-item</tt> provenance, while the umbrella~%")
-               (format stream "  topic explicitly records <tt>multi-item-derived</tt> provenance across both items.~%")
-               (format stream "</p>~%~%")
-               (format stream "<ul>~%")
-               (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)\"><tt>Localhost FedWiki source chunk</tt></a></li>~%")
-               (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-topic-definition-chunk)\"><tt>Topic-definition chunk</tt></a></li>~%")
-               (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-subtopic-chunks)\"><tt>Subtopic chunks</tt></a></li>~%")
-               (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-topic-page-chunk)\"><tt>Topic-page chunk</tt></a></li>~%")
-               (format stream "</ul>")))
-            (list
-             :title "DMX snippet twin"
-             :body-html
-             (with-output-to-string (stream)
-               (format stream "<p>~%")
-               (format stream "  The DMX twin/snippet chunk writes the topic-factory bundle under the stable URI~%")
-               (format stream "  <tt>~A</tt>. It carries snippet text, canonical source-file provenance, the~%"
-                       (snippet-uri-of dmx-snippet))
-               (format stream "  related HyperDoc page title, and the related umbrella topic id <tt>~A</tt>.~%"
-                       (related-topic-id-of definition))
-               (format stream "</p>~%~%")
-               (format stream "<ul>~%")
-               (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk)\"><tt>DMX twin/snippet chunk</tt></a></li>~%")
-               (format stream "  <li><tt>plan-topic-factory-snippet-dmx-write</tt> for plan-only inspection.</li>~%")
-               (format stream "  <li><tt>execute-topic-factory-snippet-dmx-write</tt> for explicit dry-run or live execution.</li>~%")
-               (format stream "  <li><a page=\"DMX FedWiki Write Model\">DMX FedWiki Write Model</a></li>~%")
-               (format stream "  <li><a hyperbook=\"topics\" page=\"Runtime write live-proof gate\"><tt>Runtime write live-proof gate</tt></a></li>~%")
-               (format stream "</ul>")))
-            (list
-             :title "FedWiki source"
-             :body-html
-             (with-output-to-string (stream)
-               (format stream "<p>~%")
-               (format stream "  Source FedWiki page id: <tt>~A</tt>. Repo-relative page path: <tt>~A</tt>.~%"
-                       (fedwiki-page-id-of source)
-                       (fedwiki-relative-path-of source))
-               (format stream "</p>~%~%")
-               (format stream "<p>~%")
-               (format stream "  External source URL: <a href=\"~A\"><tt>~A</tt></a>. Parsed story items: <tt>~D</tt>.~%"
-                       (fedwiki-url-of source)
-                       (fedwiki-url-of source)
-                       (length story-items))
-               (format stream "</p>~%~%")
-               (format stream "<p>~%")
-               (format stream "  The individual reusable topics are derived from <tt>~D</tt> whole paragraph story items,~%"
-                       (length whole-item-topics))
-               (format stream "  and the umbrella topic records multi-item provenance across both source items.~%")
-               (format stream "</p>")))
-            (list
-             :title "Promotion workflow"
-             :body-html
-             (render-localhost-fedwiki-promotion-workflow-section-html
-              :promotion-plan-expression
-              "(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)"
-              :source-expression
-              "(hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)"
-              :source-page-id
-              (fedwiki-page-id-of source)
-              :source-page-path
-              (fedwiki-relative-path-of source)))
-            (list
-             :title "Inspectable objects"
-             :body-html
-             (with-output-to-string (stream)
-               (format stream "~A~%"
-                       (render-topic-list-html
-                        (reproducible-devenv-topic-list-entries topic-list)))
-               (format stream "<ul>~%")
-               (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-topic-definition-chunk)\"><tt>~A</tt></a></li>~%"
-                       (title-of definition))
-               (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk)\"><tt>~A</tt></a></li>~%"
-                       (title-of dmx-snippet))
-               (format stream "</ul>"))))))
+            :title "Local composition path"
+            :body-html
+            (with-output-to-string (stream)
+              (format stream "<p>~%")
+              (format stream "  This page promotes one reusable topic from each whole paragraph story item.~%")
+              (format stream "  The two subtopics therefore keep <tt>story-item</tt> provenance, while the umbrella~%")
+              (format stream "  topic explicitly records <tt>multi-item-derived</tt> provenance across both items.~%")
+              (format stream "</p>~%~%")
+              (format stream "<ul>~%")
+              (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)\"><tt>Localhost FedWiki source chunk</tt></a></li>~%")
+              (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-topic-definition-chunk)\"><tt>Topic-definition chunk</tt></a></li>~%")
+              (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-subtopic-chunks)\"><tt>Subtopic chunks</tt></a></li>~%")
+              (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-topic-page-chunk)\"><tt>Topic-page chunk</tt></a></li>~%")
+              (format stream "</ul>")))
+           (list
+            :title "DMX snippet twin"
+            :body-html
+            (with-output-to-string (stream)
+              (format stream "<p>~%")
+              (format stream "  The DMX twin/snippet chunk writes the topic-factory bundle under the stable URI~%")
+              (format stream "  <tt>~A</tt>. It carries snippet text, canonical source-file provenance, the~%"
+                      (snippet-uri-of dmx-snippet))
+              (format stream "  related HyperDoc page title, and the related umbrella topic id <tt>~A</tt>.~%"
+                      (related-topic-id-of definition))
+              (format stream "</p>~%~%")
+              (format stream "<ul>~%")
+              (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk)\"><tt>DMX twin/snippet chunk</tt></a></li>~%")
+              (format stream "  <li><tt>plan-topic-factory-snippet-dmx-write</tt> for plan-only inspection.</li>~%")
+              (format stream "  <li><tt>execute-topic-factory-snippet-dmx-write</tt> for explicit dry-run or live execution.</li>~%")
+              (format stream "  <li><a page=\"DMX FedWiki Write Model\">DMX FedWiki Write Model</a></li>~%")
+              (format stream "  <li><a hyperbook=\"topics\" page=\"Runtime write live-proof gate\"><tt>Runtime write live-proof gate</tt></a></li>~%")
+              (format stream "</ul>")))
+           (list
+            :title "FedWiki source"
+            :body-html
+            (with-output-to-string (stream)
+              (format stream "<p>~%")
+              (format stream "  Source FedWiki page id: <tt>~A</tt>. Repo-relative page path: <tt>~A</tt>.~%"
+                      (fedwiki-page-id-of source)
+                      (fedwiki-relative-path-of source))
+              (format stream "</p>~%~%")
+              (format stream "<p>~%")
+              (format stream "  External source URL: <a href=\"~A\"><tt>~A</tt></a>. Parsed story items: <tt>~D</tt>.~%"
+                      (fedwiki-url-of source)
+                      (fedwiki-url-of source)
+                      (length story-items))
+              (format stream "</p>~%~%")
+              (format stream "<p>~%")
+              (format stream "  The individual reusable topics are derived from <tt>~D</tt> whole paragraph story items,~%"
+                      (length whole-item-topics))
+              (format stream "  and the umbrella topic records multi-item provenance across both source items.~%")
+              (format stream "</p>")))
+           (list
+            :title "Promotion workflow"
+            :body-html
+            (render-localhost-fedwiki-promotion-workflow-section-html
+             :promotion-plan-expression
+             "(hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan)"
+             :source-expression
+             "(hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk)"
+             :source-page-id
+             (fedwiki-page-id-of source)
+             :source-page-path
+             (fedwiki-relative-path-of source)))
+           (list
+            :title "Inspectable objects"
+            :body-html
+            (with-output-to-string (stream)
+              (format stream "~A~%"
+                      (render-topic-list-html
+                       (reproducible-devenv-topic-list-entries topic-list)))
+              (format stream "<ul>~%")
+              (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-topic-definition-chunk)\"><tt>~A</tt></a></li>~%"
+                      (title-of definition))
+              (format stream "  <li><a expr=\"(hyperdoc::reproducible-devenv-as-knowledge-artifact-dmx-snippet-chunk)\"><tt>~A</tt></a></li>~%"
+                      (title-of dmx-snippet))
+              (format stream "</ul>"))))))
     (render-hyperdoc-page-shell
      "Reproducible DevEnv as Knowledge Artifact"
      intro-blocks
@@ -436,7 +436,7 @@
 
 (defun write-reproducible-devenv-as-knowledge-artifact-artifacts ()
   (let* ((source
-           (reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
+          (reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
          (snippet-path (reproducible-devenv-as-knowledge-artifact-topic-asset-path))
          (page-path (reproducible-devenv-as-knowledge-artifact-page-pathname)))
     (write-utf8-file-string

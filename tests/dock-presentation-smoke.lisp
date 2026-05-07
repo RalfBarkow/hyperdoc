@@ -24,31 +24,31 @@
          (state-titles (mapcar #'hyperdoc::title-of states))
          (claim-titles (mapcar #'hyperdoc::title-of claims))
          (provider-claim
-           (find "Provider-specific workflows stay in the pane body"
-                 claims
-                 :key #'hyperdoc::title-of
-                 :test #'string=))
+          (find "Provider-specific workflows stay in the pane body"
+                claims
+                :key #'hyperdoc::title-of
+                :test #'string=))
          (snapshot
-           (hyperdoc::make-dom-connect-pane-state-snapshot-from-json
-            '(:paneId "pane-1"
-              :activeTab "Main page"
-              :contextViewTitle "Main page"
-              :providerKind "dom-v1"
-              :available t
-              :enabled t
-              :phase "choose-target"
-              :helpOpen t
-              :presentationState "active"
-              :presentationReason "choose-target"
-              :introducedCapability "connect"
-              :presentationScope "browser-session"
-              :coachmarkVisible t
-              :selectedSourceLabel "Text pages"
-              :selectedSourcePane t
-              :pendingRequestId "assoc-123"
-              :compactCapabilities ("Connect" "Annotation" "Guide")
-              :coachmarkCapabilities ("Touch-Fahrplan")
-              :providerHandoffs ("Touch-Fahrplan")))))
+          (hyperdoc::make-dom-connect-pane-state-snapshot-from-json
+           '(:paneId "pane-1"
+             :activeTab "Main page"
+             :contextViewTitle "Main page"
+             :providerKind "dom-v1"
+             :available t
+             :enabled t
+             :phase "choose-target"
+             :helpOpen t
+             :presentationState "active"
+             :presentationReason "choose-target"
+             :introducedCapability "connect"
+             :presentationScope "browser-session"
+             :coachmarkVisible t
+             :selectedSourceLabel "Text pages"
+             :selectedSourcePane t
+             :pendingRequestId "assoc-123"
+             :compactCapabilities ("Connect" "Annotation" "Guide")
+             :coachmarkCapabilities ("Touch-Fahrplan")
+             :providerHandoffs ("Touch-Fahrplan")))))
     (assert-true (typep model 'hyperdoc::dock-presentation-model)
                  "Dock presentation model entrypoint must materialize an inspectable model object")
     (dolist (title '("latent" "introduction" "active" "degraded" "rediscovery"))

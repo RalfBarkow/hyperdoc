@@ -1,4 +1,4 @@
-;;;; Page and HyperDoc links embedded in Lisp code 
+;;;; Page and HyperDoc links embedded in Lisp code
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 

@@ -66,7 +66,7 @@
     (declare (ignore resolved-function-name))
     (let* ((package (find-package resolved-package-name))
            (machine-constructor (%generated-function package
-                                                    "MAKE-SCXML-MACHINE"))
+                                                     "MAKE-SCXML-MACHINE"))
            (enter-state (%generated-function package "%ENTER-STATE"))
            (raise-event (%generated-function package "%RAISE-EVENT"))
            (step-machine (%generated-function package "%STEP-MACHINE"))
@@ -99,9 +99,9 @@
          :package-name package-name
          :function-name function-name)
       (let ((run-function-symbol
-              (%resolve-generated-run-function
-               resolved-package-name
-               resolved-function-name)))
+             (%resolve-generated-run-function
+              resolved-package-name
+              resolved-function-name)))
         (funcall run-function-symbol)))))
 
 (defun compile-and-run-scxml-file-with-events

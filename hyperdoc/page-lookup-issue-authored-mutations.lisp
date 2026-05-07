@@ -17,81 +17,81 @@
             :initarg :summary
             :initform nil)
    (source-path
-     :reader page-lookup-issue-roundtrip-source-path-of
-     :initarg :source-path
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-source-path-of
+    :initarg :source-path
+    :initform nil)
    (before-source-artifact
-     :reader page-lookup-issue-roundtrip-before-source-artifact-of
-     :initarg :before-source-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-before-source-artifact-of
+    :initarg :before-source-artifact
+    :initform nil)
    (before-authored-artifact
-     :reader page-lookup-issue-roundtrip-before-authored-artifact-of
-     :initarg :before-authored-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-before-authored-artifact-of
+    :initarg :before-authored-artifact
+    :initform nil)
    (before-behavior-artifact
-     :reader page-lookup-issue-roundtrip-before-behavior-artifact-of
-     :initarg :before-behavior-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-before-behavior-artifact-of
+    :initarg :before-behavior-artifact
+    :initform nil)
    (before-layout-artifact
-     :reader page-lookup-issue-roundtrip-before-layout-artifact-of
-     :initarg :before-layout-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-before-layout-artifact-of
+    :initarg :before-layout-artifact
+    :initform nil)
    (before-consumer
-     :reader page-lookup-issue-roundtrip-before-consumer-of
-     :initarg :before-consumer
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-before-consumer-of
+    :initarg :before-consumer
+    :initform nil)
    (before-consumer-layout-artifact
-     :reader page-lookup-issue-roundtrip-before-consumer-layout-artifact-of
-     :initarg :before-consumer-layout-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-before-consumer-layout-artifact-of
+    :initarg :before-consumer-layout-artifact
+    :initform nil)
    (before-ordered-panes
-     :reader page-lookup-issue-roundtrip-before-ordered-panes-of
-     :initarg :before-ordered-panes
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-before-ordered-panes-of
+    :initarg :before-ordered-panes
+    :initform nil)
    (after-source-artifact
-     :reader page-lookup-issue-roundtrip-after-source-artifact-of
-     :initarg :after-source-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-after-source-artifact-of
+    :initarg :after-source-artifact
+    :initform nil)
    (after-authored-artifact
-     :reader page-lookup-issue-roundtrip-after-authored-artifact-of
-     :initarg :after-authored-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-after-authored-artifact-of
+    :initarg :after-authored-artifact
+    :initform nil)
    (after-behavior-artifact
-     :reader page-lookup-issue-roundtrip-after-behavior-artifact-of
-     :initarg :after-behavior-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-after-behavior-artifact-of
+    :initarg :after-behavior-artifact
+    :initform nil)
    (after-layout-artifact
-     :reader page-lookup-issue-roundtrip-after-layout-artifact-of
-     :initarg :after-layout-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-after-layout-artifact-of
+    :initarg :after-layout-artifact
+    :initform nil)
    (after-consumer
-     :reader page-lookup-issue-roundtrip-after-consumer-of
-     :initarg :after-consumer
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-after-consumer-of
+    :initarg :after-consumer
+    :initform nil)
    (after-consumer-layout-artifact
-     :reader page-lookup-issue-roundtrip-after-consumer-layout-artifact-of
-     :initarg :after-consumer-layout-artifact
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-after-consumer-layout-artifact-of
+    :initarg :after-consumer-layout-artifact
+    :initform nil)
    (after-ordered-panes
-     :reader page-lookup-issue-roundtrip-after-ordered-panes-of
-     :initarg :after-ordered-panes
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-after-ordered-panes-of
+    :initarg :after-ordered-panes
+    :initform nil)
    (planned-mutation
-     :reader page-lookup-issue-roundtrip-planned-mutation-of
-     :initarg :planned-mutation
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-planned-mutation-of
+    :initarg :planned-mutation
+    :initform nil)
    (applied-mutation
-     :reader page-lookup-issue-roundtrip-applied-mutation-of
-     :initarg :applied-mutation
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-applied-mutation-of
+    :initarg :applied-mutation
+    :initform nil)
    (restored-p
-     :reader page-lookup-issue-roundtrip-restored-p
-     :initarg :restored-p
-     :initform nil)
+    :reader page-lookup-issue-roundtrip-restored-p
+    :initarg :restored-p
+    :initform nil)
    (findings
-     :reader page-lookup-issue-roundtrip-findings-of
-     :initarg :findings
-     :initform nil)))
+    :reader page-lookup-issue-roundtrip-findings-of
+    :initarg :findings
+    :initform nil)))
 
 (defvar *last-page-lookup-issue-authored-mutation-roundtrip-report* nil)
 
@@ -100,9 +100,9 @@
        (target-hyperbook-id "topics")
        (expected-page-id "Synthetic mutation walkthrough target")
        (source-page-id
-         "Authored relation mutation round-trip for page-lookup issue")
+        "Authored relation mutation round-trip for page-lookup issue")
        (source-page-title
-         "Authored relation mutation round-trip for page-lookup issue"))
+        "Authored relation mutation round-trip for page-lookup issue"))
   (hyperbook::enrich-lookup-issue
    (hyperbook::make-page-lookup-issue
     (make-condition 'simple-error
@@ -127,31 +127,31 @@
 (defun run-page-lookup-issue-authored-mutation-roundtrip-example
     (&key source-path)
   (let* ((resolved-source-path
-           (namestring
-            (page-lookup-issue-authored-layout-source-pathname
-             (or source-path
-                 *page-lookup-issue-authored-layout-source-path*))))
+          (namestring
+           (page-lookup-issue-authored-layout-source-pathname
+            (or source-path
+                *page-lookup-issue-authored-layout-source-path*))))
          (original-payload
-           (copy-tree
-            (page-lookup-issue-authored-layout-override-payload
-             :source-path resolved-source-path))))
+          (copy-tree
+           (page-lookup-issue-authored-layout-override-payload
+            :source-path resolved-source-path))))
     (unwind-protect
          (let ((*page-lookup-issue-authored-layout-source-path*
-                 resolved-source-path))
+                resolved-source-path))
            (let* ((before-reconstruction
-                    (reconstruct-page-lookup-issue-artifacts-from-source
-                     :refresh-source t))
+                   (reconstruct-page-lookup-issue-artifacts-from-source
+                    :refresh-source t))
                   (before-source (getf before-reconstruction :source))
                   (before-authored (getf before-reconstruction :authored))
                   (before-behavior (getf before-reconstruction :behavior))
                   (before-layout (getf before-reconstruction :layout))
                   (before-consumer (make-page-lookup-issue-example-consumer))
                   (before-consumer-layout
-                    (page-lookup-issue-example-consumer-layout-artifact
-                     before-consumer))
+                   (page-lookup-issue-example-consumer-layout-artifact
+                    before-consumer))
                   (planned-mutation
-                    (make-page-lookup-issue-layout-order-toggle-mutation
-                     :source-path resolved-source-path)))
+                   (make-page-lookup-issue-layout-order-toggle-mutation
+                    :source-path resolved-source-path)))
              (multiple-value-bind (applied-mutation after-reconstruction)
                  (apply-authored-relation-mutation
                   planned-mutation
@@ -162,14 +162,14 @@
                       (after-layout (getf after-reconstruction :layout))
                       (after-consumer (make-page-lookup-issue-example-consumer))
                       (after-consumer-layout
-                        (page-lookup-issue-example-consumer-layout-artifact
-                         after-consumer))
+                       (page-lookup-issue-example-consumer-layout-artifact
+                        after-consumer))
                       (before-ordered-panes
-                        (page-lookup-issue-layout-artifact-ordered-panes
-                         before-consumer-layout))
+                       (page-lookup-issue-layout-artifact-ordered-panes
+                        before-consumer-layout))
                       (after-ordered-panes
-                        (page-lookup-issue-layout-artifact-ordered-panes
-                         after-consumer-layout)))
+                       (page-lookup-issue-layout-artifact-ordered-panes
+                        after-consumer-layout)))
                  (make-instance
                   'page-lookup-issue-authored-mutation-roundtrip-report
                   :id "example/page-lookup-issue-authored-mutation-roundtrip"
@@ -208,7 +208,7 @@
        original-payload
        :source-path resolved-source-path)
       (let ((*page-lookup-issue-authored-layout-source-path*
-              resolved-source-path))
+             resolved-source-path))
         (reconstruct-page-lookup-issue-artifacts-from-source
          :refresh-source t)))))
 
@@ -237,19 +237,19 @@
 (defun make-page-lookup-issue-layout-relation-mutation
     (&key relation-id new-subject new-object source-path summary)
   (let* ((effective-source-path
-           (or source-path
-               *page-lookup-issue-authored-layout-source-path*))
+          (or source-path
+              *page-lookup-issue-authored-layout-source-path*))
          (relations
-           (page-lookup-issue-authored-source-relation-definitions
-            :source-path effective-source-path))
+          (page-lookup-issue-authored-source-relation-definitions
+           :source-path effective-source-path))
          (before
-           (page-lookup-issue-relation-definition-by-id relations relation-id))
+          (page-lookup-issue-relation-definition-by-id relations relation-id))
          (after
-           (and before
-                (page-lookup-issue-relation-definition-replaced-subject-object
-                 before
-                 new-subject
-                 new-object))))
+          (and before
+               (page-lookup-issue-relation-definition-replaced-subject-object
+                before
+                new-subject
+                new-object))))
     (unless before
       (error "Unknown page-lookup authored relation id ~S." relation-id))
     (make-instance
@@ -276,13 +276,13 @@
 (defun make-page-lookup-issue-layout-order-toggle-mutation (&key source-path)
   (let* ((relation-id "layout/page-lookup/repair-after-overview")
          (effective-source-path
-           (or source-path
-               *page-lookup-issue-authored-layout-source-path*))
+          (or source-path
+              *page-lookup-issue-authored-layout-source-path*))
          (relations
-           (page-lookup-issue-authored-source-relation-definitions
-            :source-path effective-source-path))
+          (page-lookup-issue-authored-source-relation-definitions
+           :source-path effective-source-path))
          (before
-           (page-lookup-issue-relation-definition-by-id relations relation-id)))
+          (page-lookup-issue-relation-definition-by-id relations relation-id)))
     (unless before
       (error "Cannot toggle layout order: relation ~S not found." relation-id))
     (let ((new-subject (getf before :object))
@@ -317,50 +317,50 @@
 (defun page-lookup-issue-authored-relation-mutation-write-payload
     (mutation source-path)
   (let* ((payload
-           (copy-tree
-            (page-lookup-issue-authored-layout-override-payload
-             :source-path source-path)))
+          (copy-tree
+           (page-lookup-issue-authored-layout-override-payload
+            :source-path source-path)))
          (relation-overrides
-           (copy-tree (or (getf payload :relation-overrides)
-                          nil)))
+          (copy-tree (or (getf payload :relation-overrides)
+                         nil)))
          (updated-overrides
-           (page-lookup-issue-authored-source-upsert-relation-definition
-            relation-overrides
-            (copy-list
-             (authored-relation-mutation-after-relation-definition-of mutation)))))
+          (page-lookup-issue-authored-source-upsert-relation-definition
+           relation-overrides
+           (copy-list
+            (authored-relation-mutation-after-relation-definition-of mutation)))))
     (setf (getf payload :relation-overrides) updated-overrides)
     payload))
 
 (defmethod apply-authored-relation-mutation
     ((mutation page-lookup-issue-authored-relation-mutation) &key source-path)
   (let* ((selected-source-path
-           (or source-path
-               (authored-relation-mutation-source-path-of mutation)
-               *page-lookup-issue-authored-layout-source-path*))
+          (or source-path
+              (authored-relation-mutation-source-path-of mutation)
+              *page-lookup-issue-authored-layout-source-path*))
          (resolved-source-pathname
-           (page-lookup-issue-authored-layout-source-pathname
-            selected-source-path))
+          (page-lookup-issue-authored-layout-source-pathname
+           selected-source-path))
          (resolved-source-path
-           (namestring resolved-source-pathname))
+          (namestring resolved-source-pathname))
          (updated-payload
-           (page-lookup-issue-authored-relation-mutation-write-payload
-            mutation
-            resolved-source-path))
+          (page-lookup-issue-authored-relation-mutation-write-payload
+           mutation
+           resolved-source-path))
          (applied-findings
-           (append
-            (copy-list
-             (or (authored-relation-mutation-findings-of mutation)
-                 nil))
-            (list
-             (format nil
-                     "Wrote authored relation override to ~A."
-                     resolved-source-path)
-             "Reconstructed page-lookup authored, behavior, and layout artifacts from the updated source."))))
+          (append
+           (copy-list
+            (or (authored-relation-mutation-findings-of mutation)
+                nil))
+           (list
+            (format nil
+                    "Wrote authored relation override to ~A."
+                    resolved-source-path)
+            "Reconstructed page-lookup authored, behavior, and layout artifacts from the updated source."))))
     (write-page-lookup-issue-authored-layout-override-payload
      updated-payload
      :source-path resolved-source-path)
     (let ((*page-lookup-issue-authored-layout-source-path*
-            resolved-source-path))
+           resolved-source-path))
       (values
        (page-lookup-issue-authored-relation-mutation-applied
         mutation

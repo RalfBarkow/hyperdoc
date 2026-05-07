@@ -162,6 +162,6 @@ followed by the next. Returns an inspectable plist on success."
 ;;
 
 (defexample the-answer
-  "The answer to the question of life, the universe, and everything."
+    "The answer to the question of life, the universe, and everything."
   (-> 42
       (assert-equal 42)))

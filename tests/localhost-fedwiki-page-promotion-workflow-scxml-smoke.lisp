@@ -104,10 +104,10 @@
 (defun run-localhost-fedwiki-page-promotion-workflow-scxml-source-unavailable-smoke-test
     ()
   (let* ((facts
-           (make-workflow-semantic-facts
-            :source-resolved-p nil
-            :source-normalized-p nil
-            :source-availability-state :source-unavailable))
+          (make-workflow-semantic-facts
+           :source-resolved-p nil
+           :source-normalized-p nil
+           :source-availability-state :source-unavailable))
          (run (apply #'run-workflow-scenario facts)))
     (workflow-scxml-assert-equal
      :source-unavailable
@@ -127,9 +127,9 @@
 (defun run-localhost-fedwiki-page-promotion-workflow-scxml-malformed-source-smoke-test
     ()
   (let* ((facts
-           (make-workflow-semantic-facts
-            :source-envelope-malformed-p t
-            :source-normalized-p nil))
+          (make-workflow-semantic-facts
+           :source-envelope-malformed-p t
+           :source-normalized-p nil))
          (run (apply #'run-workflow-scenario facts)))
     (workflow-scxml-assert-true
      (getf facts :source-envelope-malformed-p)
@@ -217,14 +217,14 @@
 (defun run-localhost-fedwiki-page-promotion-workflow-scxml-unexpected-regression-smoke-test
     ()
   (let* ((facts
-           (make-workflow-semantic-facts
-            :unexpected-regression-p t
-            :unexpected-regression-condition
-            "simulated deterministic regression marker"))
+          (make-workflow-semantic-facts
+           :unexpected-regression-p t
+           :unexpected-regression-condition
+           "simulated deterministic regression marker"))
          (run (apply #'run-workflow-scenario facts))
          (next-action
-           (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-suggested-next-action-of
-            run)))
+          (hyperdoc::localhost-fedwiki-page-promotion-workflow-scxml-run-suggested-next-action-of
+           run)))
     (workflow-scxml-assert-true
      (getf facts :unexpected-regression-p)
      "Unexpected-regression scenario facts must encode an explicit regression")

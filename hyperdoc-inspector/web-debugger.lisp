@@ -132,26 +132,26 @@
       (let ((session (register-web-debugger-session
                       (make-web-debugger-session condition))))
         (loop
-          (let ((cmd (dequeue-web-debugger-command session)))
-            (when (null cmd)
+         (let ((cmd (dequeue-web-debugger-command session)))
+           (when (null cmd)
+             (return))
+           (ecase (first cmd)
+             (:noop
+              nil)
+             (:fallback
+              (remove-web-debugger-session session)
+              (setf (web-debugger-session-closed? session) t)
+              (when (and old-hook (functionp old-hook))
+                (funcall old-hook condition nil))
               (return))
-            (ecase (first cmd)
-              (:noop
-               nil)
-              (:fallback
-               (remove-web-debugger-session session)
-               (setf (web-debugger-session-closed? session) t)
-               (when (and old-hook (functionp old-hook))
-                 (funcall old-hook condition nil))
-               (return))
-              (:invoke
-               (let* ((idx (second cmd))
-                      (restart (nth idx (web-debugger-session-restarts session))))
-                 (when restart
-                   (remove-web-debugger-session session)
-                   (setf (web-debugger-session-closed? session) t)
-                   (invoke-restart restart)
-                   (return))))))))
+             (:invoke
+              (let* ((idx (second cmd))
+                     (restart (nth idx (web-debugger-session-restarts session))))
+                (when restart
+                  (remove-web-debugger-session session)
+                  (setf (web-debugger-session-closed? session) t)
+                  (invoke-restart restart)
+                  (return))))))))
     (error (e)
       (declare (ignore e))
       (when (and old-hook (functionp old-hook))
@@ -165,7 +165,7 @@
     (setf sb-ext:*invoke-debugger-hook*
           #'(lambda (condition old-hook)
               (web-debugger-invoke-debugger-hook condition
-                                                (or old-hook *web-debugger-prev-hook*))))
+                                                 (or old-hook *web-debugger-prev-hook*))))
     (setf *web-debugger-enabled* t))
   t)
 
@@ -185,25 +185,25 @@
 (hv:defview 👀debugger (r web-debugger-registry)
   (let ((sessions (list-web-debugger-sessions)))
     (hv:html-view :title "Debugger" :priority 1
-      (hv:html
-        (:h3 "Active debugger sessions")
-        (if (null sessions)
-            (hv:html (:p "No active sessions."))
-            (hv:html
-              (:ul
-               (loop for session in sessions
-                     do (hv:html
-                          (:li
-                           (hv:eval-button
-                            (format nil "Inspect ~A" (web-debugger-session-id session))
-                            (hv:thunk session)
-                            "Inspect this debugger session")
-                           " "
-                           (:span (hv:esc (format nil "~A"
-                                                  (type-of (web-debugger-session-condition session)))))
-                           " -- "
-                           (:span (hv:esc (format nil "~A"
-                                                  (web-debugger-session-condition session))))))))))))))
+                  (hv:html
+                   (:h3 "Active debugger sessions")
+                   (if (null sessions)
+                       (hv:html (:p "No active sessions."))
+                       (hv:html
+                        (:ul
+                         (loop for session in sessions
+                               do (hv:html
+                                   (:li
+                                    (hv:eval-button
+                                     (format nil "Inspect ~A" (web-debugger-session-id session))
+                                     (hv:thunk session)
+                                     "Inspect this debugger session")
+                                    " "
+                                    (:span (hv:esc (format nil "~A"
+                                                           (type-of (web-debugger-session-condition session)))))
+                                    " -- "
+                                    (:span (hv:esc (format nil "~A"
+                                                           (web-debugger-session-condition session))))))))))))))
 
 (defmethod hv:text-representation ((session web-debugger-session))
   (format nil "Debug Session ~A" (web-debugger-session-id session)))
@@ -211,36 +211,36 @@
 (hv:defview 👀debugger (session web-debugger-session)
   (let ((info (web-debugger-session-restart-info session)))
     (hv:html-view :title "Debug Session" :priority 1
-      (hv:html
-        (:h3 "Condition")
-        (:pre (hv:esc (format nil "~A" (web-debugger-session-condition session))))
-        (:h3 "Thread")
-        (:pre (hv:esc (format nil "~A" (web-debugger-session-thread session))))
-        (:h3 "Restarts")
-        (if (null info)
-            (hv:html (:p "No restarts reported."))
-            (hv:html
-              (:ol
-               (loop for entry in info
-                     for i from 0
-                     do (hv:html
-                          (:li
-                           (hv:action-button
-                            (format nil "[~D] ~A" i (getf entry :name))
-                            (hv:thunk (web-debugger-invoke-restart session i) t)
-                            (or (getf entry :report) "Invoke restart"))
-                           " "
-                           (:small (hv:esc (or (getf entry :report) "")))))))))
-        (:p
-         (hv:action-button
-          "Fallback to SBCL debugger"
-          (hv:thunk (web-debugger-fallback-to-sbcl-debugger session) t)
-          "Let SBCL enter its own debugger (TTY/Swank)")
-         " "
-         (hv:action-button
-          "Dismiss session"
-          (hv:thunk (web-debugger-dismiss session) t)
-          "Remove from the session list (does not resume paused thread)"))
-        (:h3 "Backtrace")
-        (:pre :style "white-space: pre-wrap"
-              (hv:esc (or (web-debugger-session-backtrace session) "")))))))
+                  (hv:html
+                   (:h3 "Condition")
+                   (:pre (hv:esc (format nil "~A" (web-debugger-session-condition session))))
+                   (:h3 "Thread")
+                   (:pre (hv:esc (format nil "~A" (web-debugger-session-thread session))))
+                   (:h3 "Restarts")
+                   (if (null info)
+                       (hv:html (:p "No restarts reported."))
+                       (hv:html
+                        (:ol
+                         (loop for entry in info
+                               for i from 0
+                               do (hv:html
+                                   (:li
+                                    (hv:action-button
+                                     (format nil "[~D] ~A" i (getf entry :name))
+                                     (hv:thunk (web-debugger-invoke-restart session i) t)
+                                     (or (getf entry :report) "Invoke restart"))
+                                    " "
+                                    (:small (hv:esc (or (getf entry :report) "")))))))))
+                   (:p
+                    (hv:action-button
+                     "Fallback to SBCL debugger"
+                     (hv:thunk (web-debugger-fallback-to-sbcl-debugger session) t)
+                     "Let SBCL enter its own debugger (TTY/Swank)")
+                    " "
+                    (hv:action-button
+                     "Dismiss session"
+                     (hv:thunk (web-debugger-dismiss session) t)
+                     "Remove from the session list (does not resume paused thread)"))
+                   (:h3 "Backtrace")
+                   (:pre :style "white-space: pre-wrap"
+                         (hv:esc (or (web-debugger-session-backtrace session) "")))))))

@@ -32,8 +32,8 @@
            (clog-dir (and clog-src
                           (uiop:ensure-directory-pathname clog-src)))
            (clog-element-source
-             (and clog-dir
-                  (merge-pathnames "source/clog-element.lisp" clog-dir))))
+            (and clog-dir
+                 (merge-pathnames "source/clog-element.lisp" clog-dir))))
       (unless (and clog-element-source (probe-file clog-element-source))
         (error "CLOG_SRC does not expose source/clog-element.lisp: ~S" clog-src))
       ;; Loading the patched CLOG element source avoids nested ASDF :force
@@ -47,7 +47,7 @@
 (defun run-dom-node-count-query-script-smoke-test ()
   (asdf:load-system :hyperdoc/server)
   (let ((string-script
-          (clog-moldable-inspector::dom-node-count-query-script "view817"))
+         (clog-moldable-inspector::dom-node-count-query-script "view817"))
         (symbol-id (make-symbol "view817")))
     (inspector-assert-equal
      "view817"
@@ -60,7 +60,7 @@
      (null (search "document.getElementById(view817)" string-script))
      "String ids must not be emitted as bare JS tokens")
     (let ((symbol-script
-            (clog-moldable-inspector::dom-node-count-query-script symbol-id)))
+           (clog-moldable-inspector::dom-node-count-query-script symbol-id)))
       (inspector-assert-equal
        "view817"
        (clog-moldable-inspector::normalize-dom-html-id symbol-id)

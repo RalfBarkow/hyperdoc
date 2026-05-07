@@ -97,7 +97,7 @@
      :detail detail)))
 
 (defun ensure-optional-zotero-system-loaded (&key (system-name *zotero-backend-system-name*)
-                                                  operation)
+                                               operation)
   (declare (ignore operation))
   (when (zotero-support-enabled-p)
     (handler-case
@@ -127,7 +127,7 @@
 (defmacro define-zotero-runtime-wrapper (name lambda-list operation)
   (let ((args (loop for item in lambda-list
                     unless (member item '(&optional &rest &key &allow-other-keys &aux))
-                      collect (if (consp item) (first item) item))))
+                    collect (if (consp item) (first item) item))))
     `(defun ,name ,lambda-list
        (call-zotero-runtime-symbol ,(string name)
                                    ,operation
@@ -275,9 +275,9 @@
                 :register? t))
              source)
            (let ((unavailable
-                   (make-zotero-backend-unavailable
-                    "runtime Zotero support"
-                    :detail detail)))
+                  (make-zotero-backend-unavailable
+                   "runtime Zotero support"
+                   :detail detail)))
              (format t "~&[HYPERDOC/ZOTERO] ~A~%"
                      (zotero-backend-unavailable-message-of unavailable))
              unavailable))))))

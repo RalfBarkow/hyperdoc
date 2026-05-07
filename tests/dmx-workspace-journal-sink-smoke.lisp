@@ -47,18 +47,18 @@
 
 (defun run-dmx-workspace-journal-dmx-opt-in-smoke-test ()
   (let* ((previous
-           (hyperdoc::dmx-workspace-journal-absent-snapshot
-            "hyperdoc:test/dmx-opt-in"
-            "uri"
-            "hyperdoc:test/dmx-opt-in"
-            919822
-            :subject-uri "hyperdoc:test/dmx-opt-in"
-            :subject-kind "workspace-topic"))
+          (hyperdoc::dmx-workspace-journal-absent-snapshot
+           "hyperdoc:test/dmx-opt-in"
+           "uri"
+           "hyperdoc:test/dmx-opt-in"
+           919822
+           :subject-uri "hyperdoc:test/dmx-opt-in"
+           :subject-kind "workspace-topic"))
          (after
-           (journal-sink-test-snapshot
-            "hyperdoc:test/dmx-opt-in"
-            919822
-            :topic-id 936040)))
+          (journal-sink-test-snapshot
+           "hyperdoc:test/dmx-opt-in"
+           919822
+           :topic-id 936040)))
     (let ((hyperdoc::*allow-dmx-workspace-journal-writes* nil))
       (multiple-value-bind (events diagnostic)
           (hyperdoc::record-workspace-transition
@@ -83,19 +83,19 @@
 (defun run-dmx-workspace-journal-recursion-guard-smoke-test ()
   (let* ((subject-key "hyperdoc:mcp/workspace-journal/workspace-journal-test")
          (previous
-           (hyperdoc::dmx-workspace-journal-absent-snapshot
-            subject-key
-            "uri"
-            subject-key
-            919822
-            :subject-uri subject-key
-            :subject-kind "workspace-journal"))
+          (hyperdoc::dmx-workspace-journal-absent-snapshot
+           subject-key
+           "uri"
+           subject-key
+           919822
+           :subject-uri subject-key
+           :subject-kind "workspace-journal"))
          (after
-           (journal-sink-test-snapshot
-            subject-key
-            919822
-            :topic-id 936041
-            :subject-kind "workspace-journal")))
+          (journal-sink-test-snapshot
+           subject-key
+           919822
+           :topic-id 936041
+           :subject-kind "workspace-journal")))
     (let ((hyperdoc::*allow-dmx-workspace-journal-writes* t))
       (multiple-value-bind (events diagnostic)
           (hyperdoc::record-workspace-transition
@@ -122,18 +122,18 @@
     (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
     (let* ((subject-key "hyperdoc:test/local-sink")
            (previous
-             (hyperdoc::dmx-workspace-journal-absent-snapshot
-              subject-key
-              "uri"
-              subject-key
-              919822
-              :subject-uri subject-key
-              :subject-kind "workspace-topic"))
+            (hyperdoc::dmx-workspace-journal-absent-snapshot
+             subject-key
+             "uri"
+             subject-key
+             919822
+             :subject-uri subject-key
+             :subject-kind "workspace-topic"))
            (after
-             (journal-sink-test-snapshot
-              subject-key
-              919822
-              :topic-id 936040)))
+            (journal-sink-test-snapshot
+             subject-key
+             919822
+             :topic-id 936040)))
       (multiple-value-bind (events diagnostic)
           (hyperdoc::record-workspace-transition
            :hyperdoc-local
@@ -163,15 +163,15 @@
            (annotation (make-test-dock-annotation
                         :note "Default sink avoids DMX journal companion"))
            (_result
-             (hyperdoc::execute-dmx-workspace-annotation-write-from-object
-              annotation
-              :workspace-id *dmx-annotations-smoke-workspace-id*
-              :workspace-topicmap-id
-              *dmx-annotations-smoke-workspace-topicmap-id*
-              :client client
-              :dry-run nil
-              :storage-mode
-              hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*))
+            (hyperdoc::execute-dmx-workspace-annotation-write-from-object
+             annotation
+             :workspace-id *dmx-annotations-smoke-workspace-id*
+             :workspace-topicmap-id
+             *dmx-annotations-smoke-workspace-topicmap-id*
+             :client client
+             :dry-run nil
+             :storage-mode
+             hyperdoc::*dmx-workspace-annotation-compatibility-storage-mode*))
            (journal-topic-keys '()))
       (declare (ignore _result))
       (maphash (lambda (external-key _topic)

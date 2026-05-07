@@ -18,7 +18,7 @@
 
 (defun run-dmx-platform-workspace-assignment-semantics-object-smoke-test ()
   (let* ((semantics
-           (hyperdoc::dmx-platform-workspace-assignment-semantics))
+          (hyperdoc::dmx-platform-workspace-assignment-semantics))
          (route (getf semantics :public-route))
          (checks (getf semantics :public-route-checks))
          (helper (getf semantics :initial-assignment-helper))
@@ -87,9 +87,9 @@
 
 (defun run-dmx-platform-workspace-assignment-semantics-scxml-smoke-test ()
   (let* ((path
-           (asdf:system-relative-pathname
-            :hyperdoc
-            "hyperdoc/dmx-platform-workspace-assignment-semantics.scxml"))
+          (asdf:system-relative-pathname
+           :hyperdoc
+           "hyperdoc/dmx-platform-workspace-assignment-semantics.scxml"))
          (chart (hyperdoc/scxml:parse-scxml-file path))
          (states (hyperdoc/scxml:scxml-chart-states-of chart)))
     (dmx-platform-semantics-assert-equal
@@ -115,22 +115,22 @@
 
 (defun run-dmx-platform-workspace-assignment-semantics-pages-smoke-test ()
   (let* ((semantics-page
-           (dmx-platform-semantics-repo-text
-            "hyperdoc/DMX platform workspace assignment semantics.html"))
+          (dmx-platform-semantics-repo-text
+           "hyperdoc/DMX platform workspace assignment semantics.html"))
          (runbook-page
-           (dmx-platform-semantics-repo-text
-            "hyperdoc/DMX workspace assignment permission repair runbook.html"))
+          (dmx-platform-semantics-repo-text
+           "hyperdoc/DMX workspace assignment permission repair runbook.html"))
          (scxml
-           (dmx-platform-semantics-repo-text
-            "hyperdoc/dmx-platform-workspace-assignment-semantics.scxml"))
+          (dmx-platform-semantics-repo-text
+           "hyperdoc/dmx-platform-workspace-assignment-semantics.scxml"))
          (combined
-           (concatenate 'string semantics-page #(#\Newline)
-                        runbook-page #(#\Newline)
-                        scxml))
+          (concatenate 'string semantics-page #(#\Newline)
+                       runbook-page #(#\Newline)
+                       scxml))
          (live-gate
-           (concatenate 'string
-                        "HYPERDOC_RUN_LIVE_DMX_"
-                        "WORKSPACE_ASSIGNMENT_936040")))
+          (concatenate 'string
+                       "HYPERDOC_RUN_LIVE_DMX_"
+                       "WORKSPACE_ASSIGNMENT_936040")))
     (dolist (phrase '("public REST route"
                       "object write access"
                       "initial assignment"

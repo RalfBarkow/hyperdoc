@@ -135,20 +135,20 @@
   (let* ((raw (string-trim '(#\Space #\Tab #\Newline #\Return)
                            (or value "")))
          (normalized
-           (with-output-to-string (stream)
-             (loop with previous-space = nil
-                   for char across raw
-                   for output = (case char
-                                  ((#\- #\_ #\/) #\Space)
-                                  (otherwise char))
-                   do (cond
-                        ((char= output #\Space)
-                         (unless previous-space
-                           (write-char output stream))
-                         (setf previous-space t))
-                        (t
-                         (write-char output stream)
-                         (setf previous-space nil)))))))
+          (with-output-to-string (stream)
+            (loop with previous-space = nil
+                  for char across raw
+                  for output = (case char
+                                 ((#\- #\_ #\/) #\Space)
+                                 (otherwise char))
+                  do (cond
+                       ((char= output #\Space)
+                        (unless previous-space
+                          (write-char output stream))
+                        (setf previous-space t))
+                       (t
+                        (write-char output stream)
+                        (setf previous-space nil)))))))
     (if (zerop (length normalized))
         normalized
         (concatenate 'string
@@ -170,11 +170,11 @@
                  (string value)
                  (t (princ-to-string value))))
          (chars
-           (loop for char across (string-downcase text)
-                 collect (if (or (alpha-char-p char)
-                                 (digit-char-p char))
-                             char
-                             #\-))))
+          (loop for char across (string-downcase text)
+                collect (if (or (alpha-char-p char)
+                                (digit-char-p char))
+                            char
+                            #\-))))
     (string-trim "-"
                  (with-output-to-string (stream)
                    (loop with previous-dash = nil
@@ -311,10 +311,10 @@
 (defun relation-topic-proposal-page-fragment (proposal)
   (let* ((relation (relation-of proposal))
          (relation-expression
-           (relation-topic-proposal-source-expression relation))
+          (relation-topic-proposal-source-expression relation))
          (proposal-expression
-           (format nil "(promote-relation-to-topic-proposal ~A)"
-                   relation-expression)))
+          (format nil "(promote-relation-to-topic-proposal ~A)"
+                  relation-expression)))
     (format nil
             "<h1>~A</h1>~%~%<in-package>hyperdoc</in-package>~%~%<p>~A</p>~%~%<h2>Inspectable objects</h2>~%~%<ul>~%  <li><a expr=~S><tt>~A</tt></a></li>~%  <li><a expr=~S><tt>~A</tt></a></li>~%</ul>~%"
             (proposed-title-of proposal)
@@ -427,8 +427,8 @@
             for end = (file-position stream)
             when (equal (relation-topic-title-of-top-level-form form)
                         title)
-              do (push (list :start start :end end :form form)
-                       matches)))
+            do (push (list :start start :end end :form form)
+                     matches)))
     (setf matches (nreverse matches))
     matches))
 
@@ -502,7 +502,7 @@
     (proposal &key (page-target-path (relation-topic-page-file-path-candidate
                                       proposal)))
   (not (null (probe-file (relation-topic-resolve-target-pathname
-                         page-target-path)))))
+                          page-target-path)))))
 
 (defun relation-topic-page-payload (proposal)
   (relation-topic-proposal-page-fragment proposal))
@@ -545,9 +545,9 @@
                             :edit-existing-factory
                             :append-new-factory))
          (page-exists-p
-           (relation-topic-page-file-exists-p
-            proposal
-            :page-target-path page-target-path))
+          (relation-topic-page-file-exists-p
+           proposal
+           :page-target-path page-target-path))
          (page-action (cond
                         (page-exists-p
                          :edit-existing-page)
@@ -579,31 +579,31 @@
          (payload (topics-payload-of plan))
          (exact-title (relation-topic-patch-plan-exact-title plan))
          (new-content
-           (case (topics-action-of plan)
-             (:edit-existing-factory
-              (destructuring-bind (&key start end &allow-other-keys)
-                  (relation-topic-factory-bounds-by-title
-                   target-path
-                   exact-title)
-                (relation-topic-replace-range
-                 content
-                 start
-                 end
-                 (format nil "~A~%" payload))))
-             (:append-new-factory
-              (when (relation-topic-factory-matches-by-title
-                     target-path
-                     exact-title)
-                (error 'relation-topic-patch-plan-title-conflict
-                       :patch-plan plan
-                       :target-path target-path
-                       :title exact-title))
-              (format nil "~A~2%~A~%"
-                      (string-right-trim '(#\Newline #\Return) content)
-                      payload))
-             (otherwise
-              (error "Unsupported topics.lisp action ~S."
-                     (topics-action-of plan))))))
+          (case (topics-action-of plan)
+            (:edit-existing-factory
+             (destructuring-bind (&key start end &allow-other-keys)
+                 (relation-topic-factory-bounds-by-title
+                  target-path
+                  exact-title)
+               (relation-topic-replace-range
+                content
+                start
+                end
+                (format nil "~A~%" payload))))
+            (:append-new-factory
+             (when (relation-topic-factory-matches-by-title
+                    target-path
+                    exact-title)
+               (error 'relation-topic-patch-plan-title-conflict
+                      :patch-plan plan
+                      :target-path target-path
+                      :title exact-title))
+             (format nil "~A~2%~A~%"
+                     (string-right-trim '(#\Newline #\Return) content)
+                     payload))
+            (otherwise
+             (error "Unsupported topics.lisp action ~S."
+                    (topics-action-of plan))))))
     (relation-topic-write-file-string target-path new-content)
     (list :path target-path
           :action (topics-action-of plan)
@@ -644,22 +644,22 @@
   (let* ((topics-result (apply-topics-lisp-patch-plan plan))
          (page-result (apply-page-patch-plan plan))
          (applied-results
-           (remove nil
-                   (list topics-result
-                         (unless (eq (getf page-result :action)
-                                     :no-page-needed)
-                           page-result))))
+          (remove nil
+                  (list topics-result
+                        (unless (eq (getf page-result :action)
+                                    :no-page-needed)
+                          page-result))))
          (applied-paths (mapcar (lambda (entry)
                                   (getf entry :path))
                                 applied-results))
          (actions-performed
-           (list (getf topics-result :action)
-                 (getf page-result :action)))
+          (list (getf topics-result :action)
+                (getf page-result :action)))
          (applied-payloads
-           (remove nil
-                   (list (cons :topics (getf topics-result :payload))
-                         (when (getf page-result :payload)
-                           (cons :page (getf page-result :payload)))))))
+          (remove nil
+                  (list (cons :topics (getf topics-result :payload))
+                        (when (getf page-result :payload)
+                          (cons :page (getf page-result :payload)))))))
     (make-instance 'approved-relation-topic-patch-application
                    :patch-plan plan
                    :patch-plan-identity

@@ -31,14 +31,14 @@
    (source-designator :reader topic-source-route-source-designator-of
                       :initarg :source-designator)
    (default-match-mode :reader topic-source-route-default-match-mode-of
-                       :initarg :default-match-mode
-                       :initform :exact)
+     :initarg :default-match-mode
+     :initform :exact)
    (annotation :reader topic-source-route-annotation-of
                :initarg :annotation
                :initform nil)
    (definition :reader topic-source-route-definition-of
-               :initarg :definition
-               :initform nil)))
+     :initarg :definition
+     :initform nil)))
 
 (defclass topic-enrichment-query-plan ()
   ((route :reader topic-enrichment-plan-route-of
@@ -239,7 +239,7 @@
     (&key (id "zotero-library/default")
        (title "Local Zotero library")
        (summary
-         "Read-only local Zotero library source designator that resolves through the existing default bridge wrapper.")
+        "Read-only local Zotero library source designator that resolves through the existing default bridge wrapper.")
        (source-kind :zotero-library)
        (bridge-provider 'make-default-zotero-library-bridge)
        notes)
@@ -289,15 +289,15 @@
            (topic-enrichment-route-definition-source-designator-of definition))))
 
 (defun make-topic-enrichment-route-definition (entry)
-   (let* ((topic (find-topic-by-id (getf entry :topic-id) :signal-error? t))
+  (let* ((topic (find-topic-by-id (getf entry :topic-id) :signal-error? t))
          (source (or (find-topic-enrichment-source-designator-by-id
                       (getf entry :source-id))
                      (find-topic-enrichment-source-designator-by-id
                       (id-of (first (default-topic-enrichment-source-designators))))
                      (error "Unknown source designator ~S" (getf entry :source-id))))
-        (notes (getf entry :notes))
-        (relation-kind (or (getf entry :relation-kind)
-                          "topic-enrichment-route")))
+         (notes (getf entry :notes))
+         (relation-kind (or (getf entry :relation-kind)
+                            "topic-enrichment-route")))
     (make-instance 'topic-enrichment-route-definition
                    :id (getf entry :id)
                    :topic topic
@@ -402,7 +402,7 @@
   (let* ((topic-id (id-of topic))
          (source-id (id-of source-designator))
          (existing-entry
-           (topic-enrichment-route-entry-for-topic-source topic-id source-id))
+          (topic-enrichment-route-entry-for-topic-source topic-id source-id))
          (entry (or existing-entry
                     (make-topic-enrichment-route-definition-entry
                      topic
@@ -455,7 +455,7 @@
 
 (defun make-topic-source-route
     (topic source-designator &key (default-match-mode :exact)
-           annotation definition)
+                               annotation definition)
   (make-instance 'topic-source-route
                  :topic topic
                  :source-designator source-designator

@@ -85,32 +85,32 @@
                   :initarg :workflow-role
                   :initform nil)
    (compiler-pipeline
-     :reader authored-relation-artifact-compiler-pipeline-of
-     :initarg :compiler-pipeline
-     :initform nil)
+    :reader authored-relation-artifact-compiler-pipeline-of
+    :initarg :compiler-pipeline
+    :initform nil)
    (semantic-roles
-     :reader authored-relation-artifact-semantic-roles-of
-     :initarg :semantic-roles
-     :initform nil)
+    :reader authored-relation-artifact-semantic-roles-of
+    :initarg :semantic-roles
+    :initform nil)
    (semantic-relations
-     :reader authored-relation-artifact-semantic-relations-of
-     :initarg :semantic-relations
-     :initform nil)
+    :reader authored-relation-artifact-semantic-relations-of
+    :initarg :semantic-relations
+    :initform nil)
    (behavior-relations
-     :reader authored-relation-artifact-behavior-relations-of
-     :initarg :behavior-relations
-     :initform nil)
+    :reader authored-relation-artifact-behavior-relations-of
+    :initarg :behavior-relations
+    :initform nil)
    (layout-relations
-     :reader authored-relation-artifact-layout-relations-of
-     :initarg :layout-relations
-     :initform nil)
+    :reader authored-relation-artifact-layout-relations-of
+    :initarg :layout-relations
+    :initform nil)
    (relations :reader authored-relation-artifact-relations-of
               :initarg :relations
               :initform nil)
    (compiled-targets
-     :reader authored-relation-artifact-compiled-targets-of
-     :initarg :compiled-targets
-     :initform nil)
+    :reader authored-relation-artifact-compiled-targets-of
+    :initarg :compiled-targets
+    :initform nil)
    (findings :reader authored-relation-artifact-findings-of
              :initarg :findings
              :initform nil)))
@@ -143,21 +143,21 @@
                   :initarg :workflow-role
                   :initform nil)
    (compiler-pipeline
-     :reader authored-relation-artifact-source-compiler-pipeline-of
-     :initarg :compiler-pipeline
-     :initform nil)
+    :reader authored-relation-artifact-source-compiler-pipeline-of
+    :initarg :compiler-pipeline
+    :initform nil)
    (semantic-role-definitions
-     :reader authored-relation-artifact-source-semantic-role-definitions-of
-     :initarg :semantic-role-definitions
-     :initform nil)
+    :reader authored-relation-artifact-source-semantic-role-definitions-of
+    :initarg :semantic-role-definitions
+    :initform nil)
    (relation-definitions
-     :reader authored-relation-artifact-source-relation-definitions-of
-     :initarg :relation-definitions
-     :initform nil)
+    :reader authored-relation-artifact-source-relation-definitions-of
+    :initarg :relation-definitions
+    :initform nil)
    (compiled-targets
-     :reader authored-relation-artifact-source-compiled-targets-of
-     :initarg :compiled-targets
-     :initform nil)
+    :reader authored-relation-artifact-source-compiled-targets-of
+    :initarg :compiled-targets
+    :initform nil)
    (findings :reader authored-relation-artifact-source-findings-of
              :initarg :findings
              :initform nil)))
@@ -194,25 +194,25 @@
                     :initarg :primary-machine
                     :initform nil)
    (primary-machine-scxml
-     :reader compiled-behavior-artifact-primary-machine-scxml-of
-     :initarg :primary-machine-scxml
-     :initform nil)
+    :reader compiled-behavior-artifact-primary-machine-scxml-of
+    :initarg :primary-machine-scxml
+    :initform nil)
    (related-machines :reader compiled-behavior-artifact-related-machines-of
                      :initarg :related-machines
                      :initform nil)
    (related-machine-scxml
-     :reader compiled-behavior-artifact-related-machine-scxml-of
-     :initarg :related-machine-scxml
-     :initform nil)))
+    :reader compiled-behavior-artifact-related-machine-scxml-of
+    :initarg :related-machine-scxml
+    :initform nil)))
 
 (defclass compiled-layout-artifact (compiled-artifact)
   ((pane-relations :reader compiled-layout-artifact-pane-relations-of
                    :initarg :pane-relations
                    :initform nil)
    (comparison-relations
-     :reader compiled-layout-artifact-comparison-relations-of
-     :initarg :comparison-relations
-     :initform nil)
+    :reader compiled-layout-artifact-comparison-relations-of
+    :initarg :comparison-relations
+    :initform nil)
    (layout-spec :reader compiled-layout-artifact-layout-spec-of
                 :initarg :layout-spec
                 :initform nil)))
@@ -238,13 +238,13 @@
                 :initarg :relation-id
                 :initform nil)
    (before-relation-definition
-     :reader authored-relation-mutation-before-relation-definition-of
-     :initarg :before-relation-definition
-     :initform nil)
+    :reader authored-relation-mutation-before-relation-definition-of
+    :initarg :before-relation-definition
+    :initform nil)
    (after-relation-definition
-     :reader authored-relation-mutation-after-relation-definition-of
-     :initarg :after-relation-definition
-     :initform nil)
+    :reader authored-relation-mutation-after-relation-definition-of
+    :initarg :after-relation-definition
+    :initform nil)
    (status :reader authored-relation-mutation-status-of
            :initarg :status
            :initform :planned)

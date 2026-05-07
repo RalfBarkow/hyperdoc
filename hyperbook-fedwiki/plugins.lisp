@@ -39,28 +39,28 @@
 
 (defun fetch-plugmatic-info (wiki)
   (let ((plugin-data (->> "/plugin/plugmatic/plugins"
-                       (wiki-url (domain-name-of wiki) (protocol-of wiki))
-                       fetch-json
-                       (gethash "install"))))
+                          (wiki-url (domain-name-of wiki) (protocol-of wiki))
+                          fetch-json
+                          (gethash "install"))))
     (loop for p across plugin-data
           for plugin-name = (gethash "plugin" p)
           for plugin = (gethash plugin-name (plugins-of wiki))
           for pages = (gethash "pages" p)
           when plugin
-            do (loop for page across pages
-                     do (let* ((slug (gethash "slug" page))
-                               (title (gethash "title" page))
-                               (page (make-instance 'fedwiki-plugin-page
-                                                    :hyperbook wiki
-                                                    :id slug
-                                                    :title title
-                                                    :plugin plugin)))
-                          (setf (gethash slug (pages-of wiki)) page)
-                          (setf (gethash slug (slugs-of wiki)) title)
-                          (setf (gethash title (slugs-of wiki)) slug)
-                          (setf (gethash slug (pages-of plugin)) page)))
-               (remhash "pages" p)
-               (setf (slot-value plugin 'plugmatic-data) p))))
+          do (loop for page across pages
+                   do (let* ((slug (gethash "slug" page))
+                             (title (gethash "title" page))
+                             (page (make-instance 'fedwiki-plugin-page
+                                                  :hyperbook wiki
+                                                  :id slug
+                                                  :title title
+                                                  :plugin plugin)))
+                        (setf (gethash slug (pages-of wiki)) page)
+                        (setf (gethash slug (slugs-of wiki)) title)
+                        (setf (gethash title (slugs-of wiki)) slug)
+                        (setf (gethash slug (pages-of plugin)) page)))
+          (remhash "pages" p)
+          (setf (slot-value plugin 'plugmatic-data) p))))
 
 ;;
 ;; Manage plugin pages

@@ -47,16 +47,16 @@
 
 (defun code-path-graph-source-page-path-strings (hyperdoc page)
   (let* ((source-path
-           (code-path-graph-normalized-pathname
-            (asdf:component-pathname (hyperdoc:file-of page))))
+          (code-path-graph-normalized-pathname
+           (asdf:component-pathname (hyperdoc:file-of page))))
          (system-root
-           (code-path-graph-normalized-pathname
-            (ignore-errors
-              (asdf:system-source-directory
-               (hyperdoc:asdf-system-of hyperdoc)))))
+          (code-path-graph-normalized-pathname
+           (ignore-errors
+             (asdf:system-source-directory
+              (hyperdoc:asdf-system-of hyperdoc)))))
          (hyperdoc-root
-           (code-path-graph-normalized-pathname
-            (hyperdoc:directory-of hyperdoc))))
+          (code-path-graph-normalized-pathname
+           (hyperdoc:directory-of hyperdoc))))
     (remove nil
             (remove-duplicates
              (list (code-path-graph-canonical-path-string source-path)
@@ -76,8 +76,8 @@
             (remove-duplicates
              (list (code-path-graph-canonical-path-string source-file)
                    (when-let (pathname
-                                (code-path-graph-normalized-pathname
-                                 source-file))
+                              (code-path-graph-normalized-pathname
+                               source-file))
                      (code-path-graph-canonical-path-string pathname)))
              :test #'string=))))
 
@@ -90,14 +90,14 @@
                                    hyperdoc
                                    page)
                                   :test #'string=))
-            do (return page))))
+          do (return page))))
 
 (defun code-path-graph-find-source-component-in-tree (component source-paths)
   (or (and (typep component 'asdf:source-file)
            (when-let (component-path
-                        (code-path-graph-canonical-path-string
-                         (ignore-errors
-                           (asdf:component-pathname component))))
+                      (code-path-graph-canonical-path-string
+                       (ignore-errors
+                         (asdf:component-pathname component))))
              (and (member component-path source-paths :test #'string=)
                   component)))
       (loop for child in (ignore-errors (asdf:component-children component))
@@ -105,7 +105,7 @@
                          child
                          source-paths)
             when match
-              do (return match))))
+            do (return match))))
 
 (defun code-path-graph-source-component (node)
   (when-let (source-paths (code-path-graph-node-source-path-strings node))
@@ -113,11 +113,11 @@
                                    #'string<)
           for system = (ignore-errors (asdf:find-system system-name))
           when system
-            do (when-let (component
-                           (code-path-graph-find-source-component-in-tree
-                            system
-                            source-paths))
-                 (return component)))))
+          do (when-let (component
+                        (code-path-graph-find-source-component-in-tree
+                         system
+                         source-paths))
+               (return component)))))
 
 (defun code-path-graph-default-source-page-hyperdoc ()
   (or (code-path-graph-current-hyperdoc)
@@ -126,7 +126,7 @@
            hyperdoc::*hyperdoc*)
       (loop for hyperbook in (hyperbook:hyperbooks-of hyperbook:*catalog*)
             when (typep hyperbook 'hyperdoc::hyperdoc)
-              do (return hyperbook))))
+            do (return hyperbook))))
 
 (defun code-path-graph-source-page (node)
   (let ((current-hyperdoc (code-path-graph-current-hyperdoc)))
@@ -135,11 +135,11 @@
         (loop for hyperbook in (hyperbook:hyperbooks-of hyperbook:*catalog*)
               unless (or (eq hyperbook current-hyperdoc)
                          (not (typep hyperbook 'hyperdoc::hyperdoc)))
-                do (when-let (page
-                               (code-path-graph-source-page-in-hyperdoc
-                                hyperbook
-                                node))
-                     (return page)))
+              do (when-let (page
+                            (code-path-graph-source-page-in-hyperdoc
+                             hyperbook
+                             node))
+                   (return page)))
         (when-let (component (code-path-graph-source-component node))
           (when-let (hyperdoc (code-path-graph-default-source-page-hyperdoc))
             (hyperdoc::make-code-page hyperdoc component))))))
@@ -147,20 +147,20 @@
 (defun code-path-graph-source-target (node)
   (when-let (page (code-path-graph-source-page node))
     (if-let (source-function (getf node :source-function))
-      (hyperdoc::make-code-page-source-navigation page source-function)
+        (hyperdoc::make-code-page-source-navigation page source-function)
       page)))
 
 (defun render-code-path-graph-source (node)
   (if-let (label (hyperdoc::code-path-graph-source-label node))
-    (if-let (target (code-path-graph-source-target node))
-      (views:html
-        (:code (views:object-ref target
-                                 :display label
-                                 :select "Source")))
-      (views:html
-        (:code (views:esc label))))
+      (if-let (target (code-path-graph-source-target node))
+          (views:html
+           (:code (views:object-ref target
+                                    :display label
+                                    :select "Source")))
+        (views:html
+         (:code (views:esc label))))
     (views:html
-      (:span :style "opacity: 0.55;" "runtime target"))))
+     (:span :style "opacity: 0.55;" "runtime target"))))
 
 (defun code-path-graph-node-anchor-object (node)
   (or (getf node :object)
@@ -170,64 +170,64 @@
 
 (defun render-code-path-graph-node-anchor (node)
   (if-let (object (code-path-graph-node-anchor-object node))
-    (views:object-ref object
-                      :display (or (getf node :anchor-label)
-                                   (getf node :label)))
+      (views:object-ref object
+                        :display (or (getf node :anchor-label)
+                                     (getf node :label)))
     (if-let (expr (getf node :expr))
-      (views:html (:code (views:esc expr)))
+        (views:html (:code (views:esc expr)))
       (views:html (:span :style "opacity: 0.55;" "n/a")))))
 
 (defun render-code-path-graph-entrypoints (graph)
   (let ((entrypoints (hyperdoc::code-path-graph-entrypoint-seq graph)))
     (when entrypoints
       (views:html
-        (:h4 "Entrypoints")
-        (:table :class "inspector-table"
-                (:thead
-                 (:tr (:th (views:esc "Entrypoint"))
-                      (:th (views:esc "Summary"))))
-                (:tbody
-                 (dolist (entrypoint entrypoints)
-                   (let ((label
-                           (hyperdoc::code-path-graph-entrypoint-label
-                            entrypoint))
-                         (summary
-                           (or (hyperdoc::code-path-graph-entrypoint-summary
-                                entrypoint)
-                               "")))
-                     (views:html
-                       (:tr
-                        (:td (:tt (views:esc label)))
-                        (:td (views:esc summary))))))))))))
+       (:h4 "Entrypoints")
+       (:table :class "inspector-table"
+               (:thead
+                (:tr (:th (views:esc "Entrypoint"))
+                     (:th (views:esc "Summary"))))
+               (:tbody
+                (dolist (entrypoint entrypoints)
+                  (let ((label
+                         (hyperdoc::code-path-graph-entrypoint-label
+                          entrypoint))
+                        (summary
+                         (or (hyperdoc::code-path-graph-entrypoint-summary
+                              entrypoint)
+                             "")))
+                    (views:html
+                     (:tr
+                      (:td (:tt (views:esc label)))
+                      (:td (views:esc summary))))))))))))
 
 (defun render-code-path-graph-focus-path-list (graph)
   (let ((paths (hyperdoc::code-path-graph-focus-path-seq graph)))
     (when paths
       (views:html
-        (:h4 "Focused paths")
-        (:table :class "inspector-table"
-                (:thead
-                 (:tr (:th (views:esc "Path"))
-                      (:th (views:esc "Summary"))
-                      (:th (views:esc "Nodes"))))
-                (:tbody
-                 (dolist (focus-path paths)
-                   (let ((label
-                           (hyperdoc::code-path-graph-focus-path-label
-                            focus-path))
-                         (summary
-                           (or (hyperdoc::code-path-graph-focus-path-summary
-                                focus-path)
-                               "")))
-                     (views:html
-                       (:tr
-                        (:td (:tt (views:esc label)))
-                        (:td (views:esc summary))
-                        (:td (render-code-path-graph-maybe-code
-                              (length
-                               (hyperdoc::code-path-graph-focus-path-nodes
-                                graph
-                                focus-path))))))))))))))
+       (:h4 "Focused paths")
+       (:table :class "inspector-table"
+               (:thead
+                (:tr (:th (views:esc "Path"))
+                     (:th (views:esc "Summary"))
+                     (:th (views:esc "Nodes"))))
+               (:tbody
+                (dolist (focus-path paths)
+                  (let ((label
+                         (hyperdoc::code-path-graph-focus-path-label
+                          focus-path))
+                        (summary
+                         (or (hyperdoc::code-path-graph-focus-path-summary
+                              focus-path)
+                             "")))
+                    (views:html
+                     (:tr
+                      (:td (:tt (views:esc label)))
+                      (:td (views:esc summary))
+                      (:td (render-code-path-graph-maybe-code
+                            (length
+                             (hyperdoc::code-path-graph-focus-path-nodes
+                              graph
+                              focus-path))))))))))))))
 
 (defmethod views:text-representation ((graph hyperdoc::code-path-graph))
   (or (hyperdoc::code-path-graph-title graph)
@@ -236,258 +236,258 @@
 
 (views:defview 👀overview (graph hyperdoc::code-path-graph)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:p (views:esc
-           (or (hyperdoc::code-path-graph-summary graph)
-               "Inspectable code-path graph.")))
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Graph id"))
-                   (:td (render-code-path-graph-maybe-code
-                         (hyperdoc::code-path-graph-id graph))))
-              (:tr (:td (views:esc "Nodes"))
-                   (:td (render-code-path-graph-maybe-code
-                         (length (hyperdoc::code-path-graph-node-seq graph)))))
-              (:tr (:td (views:esc "Edges"))
-                   (:td (render-code-path-graph-maybe-code
-                         (length (hyperdoc::code-path-graph-edge-seq graph)))))
-              (:tr (:td (views:esc "Focused paths"))
-                   (:td (render-code-path-graph-maybe-code
-                         (length
-                          (hyperdoc::code-path-graph-focus-path-seq graph)))))
-              (:tr (:td (views:esc "Trace events"))
-                   (:td (render-code-path-graph-maybe-code
-                         (length
-                          (hyperdoc::code-path-graph-trace-event-seq graph))))))
-      (render-code-path-graph-entrypoints graph)
-      (render-code-path-graph-focus-path-list graph)
-      (when-let (extra (code-path-graph-overview-extra-html graph))
-        extra))))
+                   (views:html
+                    (:p (views:esc
+                         (or (hyperdoc::code-path-graph-summary graph)
+                             "Inspectable code-path graph.")))
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "Graph id"))
+                                 (:td (render-code-path-graph-maybe-code
+                                       (hyperdoc::code-path-graph-id graph))))
+                            (:tr (:td (views:esc "Nodes"))
+                                 (:td (render-code-path-graph-maybe-code
+                                       (length (hyperdoc::code-path-graph-node-seq graph)))))
+                            (:tr (:td (views:esc "Edges"))
+                                 (:td (render-code-path-graph-maybe-code
+                                       (length (hyperdoc::code-path-graph-edge-seq graph)))))
+                            (:tr (:td (views:esc "Focused paths"))
+                                 (:td (render-code-path-graph-maybe-code
+                                       (length
+                                        (hyperdoc::code-path-graph-focus-path-seq graph)))))
+                            (:tr (:td (views:esc "Trace events"))
+                                 (:td (render-code-path-graph-maybe-code
+                                       (length
+                                        (hyperdoc::code-path-graph-trace-event-seq graph))))))
+                    (render-code-path-graph-entrypoints graph)
+                    (render-code-path-graph-focus-path-list graph)
+                    (when-let (extra (code-path-graph-overview-extra-html graph))
+                      extra))))
 
 (views:defview 👀nodes (graph hyperdoc::code-path-graph)
   (views:html-view :title "Nodes" :priority 4
-    (views:html
-      (:p (views:esc
-           "Meaningful code-path nodes. Each node can carry source anchors plus an optional runtime or topic object anchor."))
-      (:table :class "inspector-table"
-              (:thead
-               (:tr (:th (views:esc "Node"))
-                    (:th (views:esc "Role"))
-                    (:th (views:esc "Anchor"))
-                    (:th (views:esc "Source"))
-                    (:th (views:esc "Summary"))))
-              (:tbody
-               (dolist (node (hyperdoc::code-path-graph-node-seq graph))
-                 (let ((label (or (getf node :label)
-                                  (getf node :id)))
-                       (role-label
-                         (hyperdoc::code-path-graph-role-label
-                          (or (getf node :role)
-                              (getf node :kind)))))
                    (views:html
-                     (:tr
-                      (:td (:tt (views:esc label)))
-                      (:td (:tt (views:esc role-label)))
-                      (:td (render-code-path-graph-node-anchor node))
-                      (:td (render-code-path-graph-source node))
-                      (:td (views:esc (or (getf node :summary) ""))))))))))))
+                    (:p (views:esc
+                         "Meaningful code-path nodes. Each node can carry source anchors plus an optional runtime or topic object anchor."))
+                    (:table :class "inspector-table"
+                            (:thead
+                             (:tr (:th (views:esc "Node"))
+                                  (:th (views:esc "Role"))
+                                  (:th (views:esc "Anchor"))
+                                  (:th (views:esc "Source"))
+                                  (:th (views:esc "Summary"))))
+                            (:tbody
+                             (dolist (node (hyperdoc::code-path-graph-node-seq graph))
+                               (let ((label (or (getf node :label)
+                                                (getf node :id)))
+                                     (role-label
+                                      (hyperdoc::code-path-graph-role-label
+                                       (or (getf node :role)
+                                           (getf node :kind)))))
+                                 (views:html
+                                  (:tr
+                                   (:td (:tt (views:esc label)))
+                                   (:td (:tt (views:esc role-label)))
+                                   (:td (render-code-path-graph-node-anchor node))
+                                   (:td (render-code-path-graph-source node))
+                                   (:td (views:esc (or (getf node :summary) ""))))))))))))
 
 (views:defview 👀edges (graph hyperdoc::code-path-graph)
   (views:html-view :title "Edges" :priority 5
-    (views:html
-      (:p (views:esc
-           "Typed edges between graph nodes. These can describe reads, writes, runtime steps, or suppressed transitions."))
-      (:table :class "inspector-table"
-              (:thead
-               (:tr (:th (views:esc "From"))
-                    (:th (views:esc "To"))
-                    (:th (views:esc "Kind"))
-                    (:th (views:esc "Status"))
-                    (:th (views:esc "Write-capable"))
-                    (:th (views:esc "Summary"))))
-              (:tbody
-               (dolist (edge (hyperdoc::code-path-graph-edge-seq graph))
-                 (let ((from-label
-                         (hyperdoc::code-path-graph-node-label
-                          graph
-                          (getf edge :from)))
-                       (to-label
-                         (hyperdoc::code-path-graph-node-label
-                          graph
-                          (getf edge :to))))
                    (views:html
-                     (:tr
-                      (:td (:tt (views:esc from-label)))
-                      (:td (:tt (views:esc to-label)))
-                      (:td (:tt (views:esc
-                                 (hyperdoc::code-path-graph-edge-kind-label
-                                  (getf edge :kind)))))
-                      (:td (:tt (views:esc
-                                 (hyperdoc::code-path-graph-edge-status-label
-                                  (getf edge :status)))))
-                      (:td (:tt (views:esc
-                                 (if (getf edge :write-capable-p)
-                                     "yes"
-                                     "no"))))
-                      (:td (views:esc (or (getf edge :summary) ""))))))))))))
+                    (:p (views:esc
+                         "Typed edges between graph nodes. These can describe reads, writes, runtime steps, or suppressed transitions."))
+                    (:table :class "inspector-table"
+                            (:thead
+                             (:tr (:th (views:esc "From"))
+                                  (:th (views:esc "To"))
+                                  (:th (views:esc "Kind"))
+                                  (:th (views:esc "Status"))
+                                  (:th (views:esc "Write-capable"))
+                                  (:th (views:esc "Summary"))))
+                            (:tbody
+                             (dolist (edge (hyperdoc::code-path-graph-edge-seq graph))
+                               (let ((from-label
+                                      (hyperdoc::code-path-graph-node-label
+                                       graph
+                                       (getf edge :from)))
+                                     (to-label
+                                      (hyperdoc::code-path-graph-node-label
+                                       graph
+                                       (getf edge :to))))
+                                 (views:html
+                                  (:tr
+                                   (:td (:tt (views:esc from-label)))
+                                   (:td (:tt (views:esc to-label)))
+                                   (:td (:tt (views:esc
+                                              (hyperdoc::code-path-graph-edge-kind-label
+                                               (getf edge :kind)))))
+                                   (:td (:tt (views:esc
+                                              (hyperdoc::code-path-graph-edge-status-label
+                                               (getf edge :status)))))
+                                   (:td (:tt (views:esc
+                                              (if (getf edge :write-capable-p)
+                                                  "yes"
+                                                  "no"))))
+                                   (:td (views:esc (or (getf edge :summary) ""))))))))))))
 
 (views:defview 👀focused-paths (graph hyperdoc::code-path-graph)
   (views:html-view :title "Focused paths" :priority 6
-    (let ((paths (hyperdoc::code-path-graph-focus-path-seq graph)))
-      (if paths
-          (views:html
-            (:p (views:esc
-                 "Curated or traced paths through the graph. These make the abstraction useful before any exhaustive static call graph exists."))
-            (dolist (focus-path paths)
-              (views:html
-                (:h4 (views:esc
-                      (hyperdoc::code-path-graph-focus-path-label focus-path)))
-                (when-let (summary
-                             (hyperdoc::code-path-graph-focus-path-summary
-                              focus-path))
-                  (views:html
-                    (:p (views:esc summary))))
-                (:table :class "inspector-table"
-                        (:thead
-                         (:tr (:th (views:esc "Node"))
-                              (:th (views:esc "Role"))
-                              (:th (views:esc "Summary"))))
-                        (:tbody
-                         (dolist (node
-                                   (hyperdoc::code-path-graph-focus-path-nodes
-                                    graph
-                                    focus-path))
-                           (let ((label (or (getf node :label)
-                                            (getf node :id)))
-                                 (role-label
-                                   (hyperdoc::code-path-graph-role-label
-                                    (or (getf node :role)
-                                        (getf node :kind)))))
-                             (views:html
-                               (:tr
-                                (:td (:tt (views:esc label)))
-                                (:td (:tt (views:esc role-label)))
-                                (:td (views:esc (or (getf node :summary)
-                                                    ""))))))))
-                (when-let (edges
-                             (hyperdoc::code-path-graph-focus-path-edges
-                              graph
-                              focus-path))
-                  (views:html
-                    (:table :class "inspector-table"
-                            (:thead
-                             (:tr (:th (views:esc "Edge"))
-                                  (:th (views:esc "Status"))
-                                  (:th (views:esc "Summary"))))
-                            (:tbody
-                             (dolist (edge edges)
-                               (let ((edge-label
-                                       (format nil "~A -> ~A"
-                                               (hyperdoc::code-path-graph-node-label
-                                                graph
-                                                (getf edge :from))
-                                               (hyperdoc::code-path-graph-node-label
-                                                graph
-                                                (getf edge :to)))))
-                                 (views:html
-                                   (:tr
-                                    (:td (:tt (views:esc edge-label)))
-                                    (:td (:tt (views:esc
-                                               (hyperdoc::code-path-graph-edge-status-label
-                                                (getf edge :status)))))
-                                    (:td (views:esc
-                                          (or (getf edge :summary)
-                                              "")))))))))))))
-          (views:html
-            (:p (views:esc
-                 "No focused paths are currently attached to this graph.")))))))))
+                   (let ((paths (hyperdoc::code-path-graph-focus-path-seq graph)))
+                     (if paths
+                         (views:html
+                          (:p (views:esc
+                               "Curated or traced paths through the graph. These make the abstraction useful before any exhaustive static call graph exists."))
+                          (dolist (focus-path paths)
+                            (views:html
+                             (:h4 (views:esc
+                                   (hyperdoc::code-path-graph-focus-path-label focus-path)))
+                             (when-let (summary
+                                        (hyperdoc::code-path-graph-focus-path-summary
+                                         focus-path))
+                               (views:html
+                                (:p (views:esc summary))))
+                             (:table :class "inspector-table"
+                                     (:thead
+                                      (:tr (:th (views:esc "Node"))
+                                           (:th (views:esc "Role"))
+                                           (:th (views:esc "Summary"))))
+                                     (:tbody
+                                      (dolist (node
+                                                (hyperdoc::code-path-graph-focus-path-nodes
+                                                 graph
+                                                 focus-path))
+                                        (let ((label (or (getf node :label)
+                                                         (getf node :id)))
+                                              (role-label
+                                               (hyperdoc::code-path-graph-role-label
+                                                (or (getf node :role)
+                                                    (getf node :kind)))))
+                                          (views:html
+                                           (:tr
+                                            (:td (:tt (views:esc label)))
+                                            (:td (:tt (views:esc role-label)))
+                                            (:td (views:esc (or (getf node :summary)
+                                                                ""))))))))
+                                     (when-let (edges
+                                                (hyperdoc::code-path-graph-focus-path-edges
+                                                 graph
+                                                 focus-path))
+                                       (views:html
+                                        (:table :class "inspector-table"
+                                                (:thead
+                                                 (:tr (:th (views:esc "Edge"))
+                                                      (:th (views:esc "Status"))
+                                                      (:th (views:esc "Summary"))))
+                                                (:tbody
+                                                 (dolist (edge edges)
+                                                   (let ((edge-label
+                                                          (format nil "~A -> ~A"
+                                                                  (hyperdoc::code-path-graph-node-label
+                                                                   graph
+                                                                   (getf edge :from))
+                                                                  (hyperdoc::code-path-graph-node-label
+                                                                   graph
+                                                                   (getf edge :to)))))
+                                                     (views:html
+                                                      (:tr
+                                                       (:td (:tt (views:esc edge-label)))
+                                                       (:td (:tt (views:esc
+                                                                  (hyperdoc::code-path-graph-edge-status-label
+                                                                   (getf edge :status)))))
+                                                       (:td (views:esc
+                                                             (or (getf edge :summary)
+                                                                 "")))))))))))))
+                            (views:html
+                             (:p (views:esc
+                                  "No focused paths are currently attached to this graph.")))))))))
 
 (views:defview 👀source-references (graph hyperdoc::code-path-graph)
   (views:html-view :title "Source references" :priority 7
-    (views:html
-      (:p (views:esc
-           "Source-backed reference table for the current graph. This keeps curated architecture diagrams and traced runtime paths attached to concrete code anchors."))
-      (:table :class "inspector-table"
-              (:thead
-               (:tr (:th (views:esc "Function or target"))
-                    (:th (views:esc "Role"))
-                    (:th (views:esc "Anchor"))
-                    (:th (views:esc "Source"))
-                    (:th (views:esc "Why it matters"))))
-              (:tbody
-               (dolist (node (hyperdoc::code-path-graph-node-seq graph))
-                 (let ((label (or (getf node :label)
-                                  (getf node :id)))
-                       (role-label
-                         (hyperdoc::code-path-graph-role-label
-                          (or (getf node :role)
-                              (getf node :kind)))))
                    (views:html
-                     (:tr
-                      (:td (:tt (views:esc label)))
-                      (:td (:tt (views:esc role-label)))
-                      (:td (render-code-path-graph-node-anchor node))
-                      (:td (render-code-path-graph-source node))
-                      (:td (views:esc (or (getf node :summary)
-                                          "")))))))))
-      (when-let (extra (code-path-graph-source-references-extra-html graph))
-        extra))))
+                    (:p (views:esc
+                         "Source-backed reference table for the current graph. This keeps curated architecture diagrams and traced runtime paths attached to concrete code anchors."))
+                    (:table :class "inspector-table"
+                            (:thead
+                             (:tr (:th (views:esc "Function or target"))
+                                  (:th (views:esc "Role"))
+                                  (:th (views:esc "Anchor"))
+                                  (:th (views:esc "Source"))
+                                  (:th (views:esc "Why it matters"))))
+                            (:tbody
+                             (dolist (node (hyperdoc::code-path-graph-node-seq graph))
+                               (let ((label (or (getf node :label)
+                                                (getf node :id)))
+                                     (role-label
+                                      (hyperdoc::code-path-graph-role-label
+                                       (or (getf node :role)
+                                           (getf node :kind)))))
+                                 (views:html
+                                  (:tr
+                                   (:td (:tt (views:esc label)))
+                                   (:td (:tt (views:esc role-label)))
+                                   (:td (render-code-path-graph-node-anchor node))
+                                   (:td (render-code-path-graph-source node))
+                                   (:td (views:esc (or (getf node :summary)
+                                                       "")))))))))
+                    (when-let (extra (code-path-graph-source-references-extra-html graph))
+                      extra))))
 
 (views:defview 👀graphviz (graph hyperdoc::code-path-graph)
   (views:html-view :title "Graphviz" :priority 8
-    (views:html
-      (:p (views:esc
-           "Browser-rendered Graphviz view for the current graph object. The graph remains the source of truth; DOT is a derived rendering format for SVG rendering and inspection."))
-      (views:graphviz-snippet
-       (hyperdoc::code-path-graph-dot-text graph)))))
+                   (views:html
+                    (:p (views:esc
+                         "Browser-rendered Graphviz view for the current graph object. The graph remains the source of truth; DOT is a derived rendering format for SVG rendering and inspection."))
+                    (views:graphviz-snippet
+                     (hyperdoc::code-path-graph-dot-text graph)))))
 
 (views:defview 👀dot-export (graph hyperdoc::code-path-graph)
   (views:html-view :title "DOT export" :priority 9
-    (views:html
-      (:p (views:esc
-           "Graphviz DOT export for the current graph object. The graph remains the source of truth; DOT is a derived rendering format."))
-      (:pre :style "white-space: pre-wrap;"
-            (views:esc (hyperdoc::code-path-graph-dot-text graph))))))
+                   (views:html
+                    (:p (views:esc
+                         "Graphviz DOT export for the current graph object. The graph remains the source of truth; DOT is a derived rendering format."))
+                    (:pre :style "white-space: pre-wrap;"
+                          (views:esc (hyperdoc::code-path-graph-dot-text graph))))))
 
 (defmethod code-path-graph-overview-extra-html
     ((graph hyperdoc::playground-stepper-code-path-graph))
   (views:html
-    (:h4 "Runtime state")
-    (:table :class "inspector-table"
-            (:tr (:td (views:esc "Package"))
-                 (:td (render-code-path-graph-maybe-code
-                       (hyperdoc::playground-stepper-code-path-graph-package-name
-                        graph))))
-            (:tr (:td (views:esc "Progress"))
-                 (:td (views:esc
-                       (or (hyperdoc::playground-stepper-code-path-graph-progress-label
-                            graph)
-                           ""))))
-            (:tr (:td (views:esc "Done"))
-                 (:td (:tt (views:esc
-                            (if (hyperdoc::playground-stepper-code-path-graph-done-p
-                                 graph)
-                                "yes"
-                                "no")))))
-            (:tr (:td (views:esc "Parse error"))
-                 (:td (:tt (views:esc
-                            (if (hyperdoc::playground-stepper-code-path-graph-parse-error-p
-                                 graph)
-                                "yes"
-                                "no")))))
-    (:h4 "Source selection")
-    (:pre :style "white-space: pre-wrap;"
-          (views:esc
-           (or (hyperdoc::playground-stepper-code-path-graph-source-selection
-                graph)
-               ""))))))
+   (:h4 "Runtime state")
+   (:table :class "inspector-table"
+           (:tr (:td (views:esc "Package"))
+                (:td (render-code-path-graph-maybe-code
+                      (hyperdoc::playground-stepper-code-path-graph-package-name
+                       graph))))
+           (:tr (:td (views:esc "Progress"))
+                (:td (views:esc
+                      (or (hyperdoc::playground-stepper-code-path-graph-progress-label
+                           graph)
+                          ""))))
+           (:tr (:td (views:esc "Done"))
+                (:td (:tt (views:esc
+                           (if (hyperdoc::playground-stepper-code-path-graph-done-p
+                                graph)
+                               "yes"
+                               "no")))))
+           (:tr (:td (views:esc "Parse error"))
+                (:td (:tt (views:esc
+                           (if (hyperdoc::playground-stepper-code-path-graph-parse-error-p
+                                graph)
+                               "yes"
+                               "no")))))
+           (:h4 "Source selection")
+           (:pre :style "white-space: pre-wrap;"
+                 (views:esc
+                  (or (hyperdoc::playground-stepper-code-path-graph-source-selection
+                       graph)
+                      ""))))))
 
 (defun playground-stepper-form-status (stepper position)
   (let ((current-index
-          (clog-moldable-inspector::playground-stepper-index stepper))
+         (clog-moldable-inspector::playground-stepper-index stepper))
         (last-error
-          (clog-moldable-inspector::playground-stepper-last-error stepper))
+         (clog-moldable-inspector::playground-stepper-last-error stepper))
         (parse-report
-          (clog-moldable-inspector::playground-stepper-parse-report stepper)))
+         (clog-moldable-inspector::playground-stepper-parse-report stepper)))
     (cond
       (parse-report :parse-error)
       ((< position current-index) :completed)
@@ -498,14 +498,14 @@
 (defun playground-stepper-runtime-trace-events (stepper)
   (let ((forms (clog-moldable-inspector::playground-stepper-forms stepper)))
     (if-let (parse-report
-               (clog-moldable-inspector::playground-stepper-parse-report stepper))
-      (list
-       (list :id "parse-error"
-             :label "Parse error"
-             :status :parse-error
-             :summary
-             (truncate-code-path-graph-text
-              (format nil "~A" parse-report))))
+             (clog-moldable-inspector::playground-stepper-parse-report stepper))
+        (list
+         (list :id "parse-error"
+               :label "Parse error"
+               :status :parse-error
+               :summary
+               (truncate-code-path-graph-text
+                (format nil "~A" parse-report))))
       (loop for form in forms
             for index from 0
             collect
@@ -519,8 +519,8 @@
 (defun playground-stepper-terminal-node (stepper)
   (cond
     ((when-let (parse-report
-                 (clog-moldable-inspector::playground-stepper-parse-report
-                  stepper))
+                (clog-moldable-inspector::playground-stepper-parse-report
+                 stepper))
        (list :id "parse-error"
              :label "Parse error"
              :role :runtime-error
@@ -531,8 +531,8 @@
              :summary
              "Reader failure captured before evaluation begins.")))
     ((when-let (last-error
-                 (clog-moldable-inspector::playground-stepper-last-error
-                  stepper))
+                (clog-moldable-inspector::playground-stepper-last-error
+                 stepper))
        (list :id "runtime-error"
              :label "Runtime error"
              :role :runtime-error
@@ -558,18 +558,18 @@
   (let* ((forms (clog-moldable-inspector::playground-stepper-forms stepper))
          (terminal-node (playground-stepper-terminal-node stepper))
          (form-nodes
-           (loop for form in forms
-                 for index from 0
-                 collect
-                 (list :id (format nil "form-~D" (1+ index))
-                       :label (format nil "Form ~D" (1+ index))
-                       :role :runtime-step
-                       :source-file "hyperbook-server/playground-stepper.lisp"
-                       :source-function "playground-stepper-step"
-                       :status (playground-stepper-form-status stepper index)
-                       :summary
-                       (truncate-code-path-graph-text
-                        (prin1-to-string form))))))
+          (loop for form in forms
+                for index from 0
+                collect
+                (list :id (format nil "form-~D" (1+ index))
+                      :label (format nil "Form ~D" (1+ index))
+                      :role :runtime-step
+                      :source-file "hyperbook-server/playground-stepper.lisp"
+                      :source-function "playground-stepper-step"
+                      :status (playground-stepper-form-status stepper index)
+                      :summary
+                      (truncate-code-path-graph-text
+                       (prin1-to-string form))))))
     (append
      (list
       (list :id "source-selection"
@@ -599,13 +599,13 @@
          (last-error (clog-moldable-inspector::playground-stepper-last-error
                       stepper))
          (edges
-           (list
-            (list :from "source-selection"
-                  :to "parse-source"
-                  :kind :parse
-                  :status (if parse-report :parse-error :completed)
-                  :summary
-                  "Create the stepper and parse the selected source into top-level forms."))))
+          (list
+           (list :from "source-selection"
+                 :to "parse-source"
+                 :kind :parse
+                 :status (if parse-report :parse-error :completed)
+                 :summary
+                 "Create the stepper and parse the selected source into top-level forms."))))
     (when forms
       (push
        (list :from "parse-source"
@@ -715,20 +715,20 @@
 (views:defview 👀code-path-graph
     (stepper clog-moldable-inspector::playground-stepper)
   (views:html-view :title "Code path graph" :priority 2
-    (let ((graph (playground-stepper-code-path-graph stepper)))
-      (views:html
-        (:p (views:esc
-             "Derived runtime code-path graph for the current stepped selection. It reuses the same inspectable graph abstraction as curated architectural call graphs."))
-        (:ul
-         (:li
-          (views:object-ref graph
-                            :display "Open code-path overview"
-                            :select "Overview"))
-         (:li
-          (views:object-ref graph
-                            :display "Open focused paths"
-                            :select "Focused paths"))
-         (:li
-          (views:object-ref graph
-                            :display "Open DOT export"
-                            :select "DOT export")))))))
+                   (let ((graph (playground-stepper-code-path-graph stepper)))
+                     (views:html
+                      (:p (views:esc
+                           "Derived runtime code-path graph for the current stepped selection. It reuses the same inspectable graph abstraction as curated architectural call graphs."))
+                      (:ul
+                       (:li
+                        (views:object-ref graph
+                                          :display "Open code-path overview"
+                                          :select "Overview"))
+                       (:li
+                        (views:object-ref graph
+                                          :display "Open focused paths"
+                                          :select "Focused paths"))
+                       (:li
+                        (views:object-ref graph
+                                          :display "Open DOT export"
+                                          :select "DOT export")))))))

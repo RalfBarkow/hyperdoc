@@ -360,19 +360,19 @@
 (defun make-localhost-fedwiki-page-promotion-source-unavailable-source
     (spec issue)
   (let* ((page-title
-           (or (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-title
-                issue)
-               (localhost-fedwiki-page-pipeline-spec-page-title spec)
-               (localhost-fedwiki-page-pipeline-spec-slug spec)))
+          (or (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-title
+               issue)
+              (localhost-fedwiki-page-pipeline-spec-page-title spec)
+              (localhost-fedwiki-page-pipeline-spec-slug spec)))
          (summary-fallback
-           (or (localhost-fedwiki-page-pipeline-spec-source-summary-fallback spec)
-               (format nil "Localhost FedWiki source page for ~A." page-title)))
+          (or (localhost-fedwiki-page-pipeline-spec-source-summary-fallback spec)
+              (format nil "Localhost FedWiki source page for ~A." page-title)))
          (reason
-           (localhost-fedwiki-page-promotion-source-unavailable-reason issue))
+          (localhost-fedwiki-page-promotion-source-unavailable-reason issue))
          (raw-page
-           (list :title page-title
-                 :story '()
-                 :journal '())))
+          (list :title page-title
+                :story '()
+                :journal '())))
     (make-localhost-fedwiki-source-data
      :id (or (localhost-fedwiki-page-pipeline-spec-source-chunk-id spec)
              (format nil "~A-localhost-fedwiki-source"
@@ -440,12 +440,12 @@
 (defun make-localhost-fedwiki-page-promotion-source-unavailable-topic-definition
     (issue source-file related-hyperdoc-page-title related-topic-id snippet-id)
   (let ((metadata
-          (make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
-           issue
-           source-file
-           related-hyperdoc-page-title
-           related-topic-id
-           snippet-id)))
+         (make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
+          issue
+          source-file
+          related-hyperdoc-page-title
+          related-topic-id
+          snippet-id)))
     (make-instance
      'topic-definition-chunk
      :id snippet-id
@@ -471,12 +471,12 @@
 (defun make-localhost-fedwiki-page-promotion-source-unavailable-dmx-snippet
     (issue source-file related-hyperdoc-page-title related-topic-id snippet-id)
   (let ((metadata
-          (make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
-           issue
-           source-file
-           related-hyperdoc-page-title
-           related-topic-id
-           snippet-id)))
+         (make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
+          issue
+          source-file
+          related-hyperdoc-page-title
+          related-topic-id
+          snippet-id)))
     (make-instance
      'dmx-snippet-chunk
      :id (format nil "~A-dmx" snippet-id)
@@ -501,33 +501,33 @@
 
 (defun make-localhost-fedwiki-page-promotion-source-unavailable-plan
     (&key id
-          title
-          summary
-          spec
-          condition
-          composed-page-target
-          source-file
-          related-hyperdoc-page-title
-          related-topic-id
-          snippet-id
-          default-workspace-topicmap-id)
+       title
+       summary
+       spec
+       condition
+       composed-page-target
+       source-file
+       related-hyperdoc-page-title
+       related-topic-id
+       snippet-id
+       default-workspace-topicmap-id)
   (let* ((issue
-           (make-localhost-fedwiki-page-promotion-source-unavailable-issue
-            id
-            title
-            spec
-            condition))
+          (make-localhost-fedwiki-page-promotion-source-unavailable-issue
+           id
+           title
+           spec
+           condition))
          (source
-           (make-localhost-fedwiki-page-promotion-source-unavailable-source
-            spec
-            issue))
+          (make-localhost-fedwiki-page-promotion-source-unavailable-source
+           spec
+           issue))
          (topic-factory-metadata
-           (make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
-            issue
-            source-file
-            related-hyperdoc-page-title
-            related-topic-id
-            snippet-id)))
+          (make-localhost-fedwiki-page-promotion-source-unavailable-topic-factory-metadata
+           issue
+           source-file
+           related-hyperdoc-page-title
+           related-topic-id
+           snippet-id)))
     (make-localhost-fedwiki-page-promotion-plan
      :id id
      :title title
@@ -568,16 +568,16 @@
 
 (defun make-localhost-fedwiki-page-promotion-plan-with-source-fallback
     (&key id
-          title
-          summary
-          spec
-          build
-          composed-page-target
-          source-file
-          related-hyperdoc-page-title
-          related-topic-id
-          snippet-id
-          default-workspace-topicmap-id)
+       title
+       summary
+       spec
+       build
+       composed-page-target
+       source-file
+       related-hyperdoc-page-title
+       related-topic-id
+       snippet-id
+       default-workspace-topicmap-id)
   (handler-case
       (funcall build)
     (file-error (condition)
@@ -649,9 +649,9 @@
   (if-let (plan (find-localhost-fedwiki-page-promotion-plan-for-source
                  source
                  :signal-error? signal-error?))
-    (localhost-fedwiki-page-promotion-plan-generated-page
-     plan
-     :signal-error? signal-error?)
+      (localhost-fedwiki-page-promotion-plan-generated-page
+       plan
+       :signal-error? signal-error?)
     (when signal-error?
       (error "No generated HyperDoc page is available for source page ~A."
              (localhost-fedwiki-source-data-fedwiki-page-id source)))))
@@ -709,7 +709,7 @@
 
 (defun localhost-fedwiki-page-promotion-plan-rendered-page (plan)
   (if-let (renderer (localhost-fedwiki-page-promotion-plan-page-renderer plan))
-    (funcall renderer)
+      (funcall renderer)
     ""))
 
 (defun localhost-fedwiki-page-promotion-plan-rendered-page-artifact (plan)
@@ -753,7 +753,7 @@
 
 (defun localhost-fedwiki-page-promotion-plan-write-local-artifacts (plan)
   (if-let (writer (localhost-fedwiki-page-promotion-plan-local-artifact-writer plan))
-    (funcall writer)
+      (funcall writer)
     (error "No local artifact writer configured for ~S." plan)))
 
 (defun write-localhost-fedwiki-page-promotion-plan-artifacts (plan)
@@ -849,18 +849,18 @@
 (defun localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
     (reflection current-source-snapshot)
   (let* ((state
-           (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
-            reflection
-            current-source-snapshot))
+          (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+           reflection
+           current-source-snapshot))
          (reflected-snapshot
-           (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
-            reflection))
+          (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+           reflection))
          (current-fingerprint
-           (localhost-fedwiki-source-snapshot-fingerprint-field
-            current-source-snapshot))
+          (localhost-fedwiki-source-snapshot-fingerprint-field
+           current-source-snapshot))
          (reflected-fingerprint
-           (localhost-fedwiki-source-snapshot-fingerprint-field
-            reflected-snapshot)))
+          (localhost-fedwiki-source-snapshot-fingerprint-field
+           reflected-snapshot)))
     (case state
       (:fresh
        (format nil "Current normalized source fingerprint ~A matches reflected snapshot fingerprint ~A."
@@ -880,18 +880,18 @@
 (defun localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
     (artifact freshness-state)
   (let ((artifact-label
-          (case artifact
-            (:page "page artifact")
-            (:snippet "snippet artifact")
-            (otherwise "artifact")))
+         (case artifact
+           (:page "page artifact")
+           (:snippet "snippet artifact")
+           (otherwise "artifact")))
         (operation
-          (case artifact
-            (:page
-             'regenerate-localhost-fedwiki-page-promotion-plan-page-artifact)
-            (:snippet
-             'regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact)
-            (otherwise
-             'localhost-fedwiki-page-promotion-plan-sync-status))))
+         (case artifact
+           (:page
+            'regenerate-localhost-fedwiki-page-promotion-plan-page-artifact)
+           (:snippet
+            'regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact)
+           (otherwise
+            'localhost-fedwiki-page-promotion-plan-sync-status))))
     (case freshness-state
       (:fresh
        (list :action :no-regeneration-needed
@@ -966,25 +966,25 @@
     (plan
      &key page-contents snippet-contents current-source-snapshot)
   (let* ((page-reflection
-           (localhost-fedwiki-page-promotion-plan-page-source-snapshot-reflection
-            plan
-            :file-contents page-contents))
+          (localhost-fedwiki-page-promotion-plan-page-source-snapshot-reflection
+           plan
+           :file-contents page-contents))
          (snippet-reflection
-           (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot-reflection
-            plan
-            :file-contents snippet-contents))
+          (localhost-fedwiki-page-promotion-plan-snippet-source-snapshot-reflection
+           plan
+           :file-contents snippet-contents))
          (page-source-snapshot
-           (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
-            page-reflection))
+          (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+           page-reflection))
          (snippet-source-snapshot
-           (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
-            snippet-reflection))
+          (localhost-fedwiki-source-snapshot-envelope-reflection-snapshot
+           snippet-reflection))
          (source-issue
-           (localhost-fedwiki-page-promotion-plan-source-issue plan)))
+          (localhost-fedwiki-page-promotion-plan-source-issue plan)))
     (if source-issue
         (let ((reason
-                (localhost-fedwiki-page-promotion-source-unavailable-reason
-                 source-issue)))
+               (localhost-fedwiki-page-promotion-source-unavailable-reason
+                source-issue)))
           (list :plan-id
                 (localhost-fedwiki-page-promotion-plan-id plan)
                 :page-path
@@ -1068,33 +1068,33 @@
                 (localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
                  plan)))
         (let* ((resolved-current-source-snapshot
-                 (or current-source-snapshot
-                     (localhost-fedwiki-page-promotion-plan-current-source-snapshot
-                      plan)))
+                (or current-source-snapshot
+                    (localhost-fedwiki-page-promotion-plan-current-source-snapshot
+                     plan)))
                (page-freshness-state
-                 (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
-                  page-reflection
-                  resolved-current-source-snapshot))
+                (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+                 page-reflection
+                 resolved-current-source-snapshot))
                (snippet-freshness-state
-                 (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
-                  snippet-reflection
-                  resolved-current-source-snapshot))
+                (localhost-fedwiki-page-promotion-plan-source-freshness-state-from-reflection
+                 snippet-reflection
+                 resolved-current-source-snapshot))
                (page-freshness-reason
-                 (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
-                  page-reflection
-                  resolved-current-source-snapshot))
+                (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
+                 page-reflection
+                 resolved-current-source-snapshot))
                (snippet-freshness-reason
-                 (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
-                  snippet-reflection
-                  resolved-current-source-snapshot))
+                (localhost-fedwiki-page-promotion-plan-source-freshness-reason-from-reflection
+                 snippet-reflection
+                 resolved-current-source-snapshot))
                (page-freshness-recommendation
-                 (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
-                  :page
-                  page-freshness-state))
+                (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
+                 :page
+                 page-freshness-state))
                (snippet-freshness-recommendation
-                 (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
-                  :snippet
-                  snippet-freshness-state)))
+                (localhost-fedwiki-page-promotion-plan-source-freshness-recommendation
+                 :snippet
+                 snippet-freshness-state)))
           (list :plan-id
                 (localhost-fedwiki-page-promotion-plan-id plan)
                 :page-path
@@ -1267,13 +1267,13 @@
   (let* ((page-state (getf status :page-source-freshness-state))
          (snippet-state (getf status :snippet-source-freshness-state))
          (page-label
-           (localhost-fedwiki-page-promotion-plan-source-freshness-action-label
-            :page
-            page-state))
+          (localhost-fedwiki-page-promotion-plan-source-freshness-action-label
+           :page
+           page-state))
          (snippet-label
-           (localhost-fedwiki-page-promotion-plan-source-freshness-action-label
-            :snippet
-            snippet-state)))
+          (localhost-fedwiki-page-promotion-plan-source-freshness-action-label
+           :snippet
+           snippet-state)))
     (if (and (eql page-state :fresh)
              (eql snippet-state :fresh))
         "No action needed"
@@ -1284,16 +1284,16 @@
 (defun localhost-fedwiki-page-promotion-plan-triage-row
     (plan &key status)
   (let* ((resolved-status
-           (or status
-               (localhost-fedwiki-page-promotion-plan-sync-status-report plan)))
+          (or status
+              (localhost-fedwiki-page-promotion-plan-sync-status-report plan)))
          (page-state (getf resolved-status :page-source-freshness-state))
          (snippet-state (getf resolved-status :snippet-source-freshness-state))
          (attention-severity
-           (min
-            (localhost-fedwiki-page-promotion-plan-attention-severity-for-state
-             page-state)
-            (localhost-fedwiki-page-promotion-plan-attention-severity-for-state
-             snippet-state))))
+          (min
+           (localhost-fedwiki-page-promotion-plan-attention-severity-for-state
+            page-state)
+           (localhost-fedwiki-page-promotion-plan-attention-severity-for-state
+            snippet-state))))
     (list :plan plan
           :inspect-target plan
           :plan-id (localhost-fedwiki-page-promotion-plan-id plan)
@@ -1398,7 +1398,7 @@
 (defun localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
     (&optional
        (topicmap-id
-         *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+        *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
   (format nil
           "https://dmx.ralfbarkow.ch/systems.dmx.webclient/#/topicmap/~D/topic/~D"
           topicmap-id
@@ -1435,7 +1435,7 @@
   (let* ((plans (localhost-fedwiki-page-promotion-surface-plans surface))
          (counts (localhost-fedwiki-page-promotion-surface-triage-counts surface))
          (topicmap-id
-           *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+          *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
     (with-output-to-string (stream)
       (format stream
               "This one-topic handover seeds DMX topicmap ~D with the current HyperDoc-side localhost FedWiki promotion workflow checkpoint and the identifiers needed to continue there through the guarded DMX write boundary.~2%"
@@ -1474,7 +1474,7 @@
                 "- ~A (~A).~%"
                 (localhost-fedwiki-page-promotion-plan-related-hyperdoc-page-title
                  plan)
-               (localhost-fedwiki-page-promotion-plan-id plan)))
+                (localhost-fedwiki-page-promotion-plan-id plan)))
       (format stream "~%Current workflow loop~%")
       (format stream
               "- normalized localhost source object -> promotion plan -> generated HyperDoc page -> topic-factory snippet -> guarded DMX dry-run/write.~%")
@@ -1563,7 +1563,7 @@
 (defgeneric regenerate-localhost-fedwiki-page-promotion-plan-page-artifact (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))
     (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
-      issue
+        issue
       (progn
         (localhost-fedwiki-page-promotion-plan-write-page-artifact plan)
         (append
@@ -1573,7 +1573,7 @@
 (defgeneric regenerate-localhost-fedwiki-page-promotion-plan-snippet-artifact (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))
     (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
-      issue
+        issue
       (progn
         (localhost-fedwiki-page-promotion-plan-write-snippet-artifact plan)
         (append
@@ -1583,7 +1583,7 @@
 (defgeneric regenerate-localhost-fedwiki-page-promotion-plan-artifacts (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))
     (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
-      issue
+        issue
       (progn
         (localhost-fedwiki-page-promotion-plan-write-page-artifact plan)
         (localhost-fedwiki-page-promotion-plan-write-snippet-artifact plan)
@@ -1594,7 +1594,7 @@
 (defgeneric review-localhost-fedwiki-page-promotion-plan-dmx-dry-run (plan)
   (:method ((plan localhost-fedwiki-page-promotion-plan))
     (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
-      issue
+        issue
       (list :plan-id
             (localhost-fedwiki-page-promotion-plan-id plan)
             :summary
@@ -1605,12 +1605,12 @@
 (defun find-localhost-fedwiki-page-promotion-plan-for-topic-id
     (topic-id &key signal-error?)
   (when-let ((spec
-               (find-localhost-fedwiki-page-promotion-plan-spec-if
-                (lambda (entry)
-                  (equal topic-id
-                         (getf entry :related-topic-id)))
-                :signal-error? signal-error?
-                :error-context (format nil "topic id ~S" topic-id))))
+              (find-localhost-fedwiki-page-promotion-plan-spec-if
+               (lambda (entry)
+                 (equal topic-id
+                        (getf entry :related-topic-id)))
+               :signal-error? signal-error?
+               :error-context (format nil "topic id ~S" topic-id))))
     (instantiate-localhost-fedwiki-page-promotion-plan spec)))
 
 (defun find-localhost-fedwiki-page-promotion-plan-for-topic
@@ -1630,12 +1630,12 @@
 (defun find-localhost-fedwiki-page-promotion-plan-for-source-page-id
     (page-id &key signal-error?)
   (when-let ((spec
-               (find-localhost-fedwiki-page-promotion-plan-spec-if
-                (lambda (entry)
-                  (equal page-id
-                         (getf entry :source-page-id)))
-                :signal-error? signal-error?
-                :error-context (format nil "source page id ~S" page-id))))
+              (find-localhost-fedwiki-page-promotion-plan-spec-if
+               (lambda (entry)
+                 (equal page-id
+                        (getf entry :source-page-id)))
+               :signal-error? signal-error?
+               :error-context (format nil "source page id ~S" page-id))))
     (instantiate-localhost-fedwiki-page-promotion-plan spec)))
 
 (defun find-localhost-fedwiki-page-promotion-plan-for-source
@@ -1648,12 +1648,12 @@
 (defun find-localhost-fedwiki-page-promotion-plan-for-hyperdoc-page-title
     (title &key signal-error?)
   (when-let ((spec
-               (find-localhost-fedwiki-page-promotion-plan-spec-if
-                (lambda (entry)
-                  (equal title
-                         (getf entry :related-hyperdoc-page-title)))
-                :signal-error? signal-error?
-                :error-context (format nil "HyperDoc page title ~S" title))))
+              (find-localhost-fedwiki-page-promotion-plan-spec-if
+               (lambda (entry)
+                 (equal title
+                        (getf entry :related-hyperdoc-page-title)))
+               :signal-error? signal-error?
+               :error-context (format nil "HyperDoc page title ~S" title))))
     (instantiate-localhost-fedwiki-page-promotion-plan spec)))
 
 (defun find-localhost-fedwiki-page-promotion-plan-for-generated-page
@@ -1683,9 +1683,9 @@
 
 (defun localhost-fedwiki-page-promotion-live-dmx-client-configured-p ()
   (let ((client
-          (make-localhost-fedwiki-page-promotion-default-dmx-client
-           :dry-run nil
-           :verbose nil)))
+         (make-localhost-fedwiki-page-promotion-default-dmx-client
+          :dry-run nil
+          :verbose nil)))
     (and client
          (not (typep client 'null-dmx-import-client)))))
 
@@ -1714,8 +1714,8 @@
         :topic-body topic-body
         :normalized-view-props-json
         (when-let ((normalized-payload
-                     (dmx-topicmap-view-props-validation-normalized-payload-of
-                      condition)))
+                    (dmx-topicmap-view-props-validation-normalized-payload-of
+                     condition)))
           (dmx-topicmap-view-props-json-string normalized-payload))
         :forbidden-short-keys
         (copy-list
@@ -1751,11 +1751,11 @@
        workspace-topicmap-id
        client)
   (let* ((resolved-topicmap-id
-           (or workspace-topicmap-id
-               *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+          (or workspace-topicmap-id
+              *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
          (definition
-           (localhost-fedwiki-page-promotion-handover-topic-definition-chunk
-            surface)))
+          (localhost-fedwiki-page-promotion-handover-topic-definition-chunk
+           surface)))
     (call-with-localhost-fedwiki-page-promotion-dmx-validation-handling
      (lambda ()
        (if-let (dmx-plan
@@ -1763,47 +1763,47 @@
                  :surface surface
                  :workspace-topicmap-id resolved-topicmap-id
                  :client client))
-         (list :available t
-               :topic-title *localhost-fedwiki-page-promotion-handover-topic-title*
-               :topic-body (snippet-text-of definition)
-               :snippet-id
-               (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
-               :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
-               :topic-type-uri
-               (topic-factory-snippet-dmx-write-plan-topic-type-uri dmx-plan)
-               :workspace-topicmap-id
-               (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
-               :workspace-topicmap-route
-               (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
-                resolved-topicmap-id)
-               :topic-action
-               (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
-               :topicmap-action
-               (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
-               :view-props-validation-status
-               (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
-                      dmx-plan)
-                     :status)
-               :forbidden-short-keys
-               (copy-list
-                (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
-                       dmx-plan)
-                      :forbidden-short-keys))
-               :normalized-view-props-json
-               (dmx-topicmap-view-props-json-string
-                (topic-factory-snippet-dmx-write-plan-view-props dmx-plan))
-               :source-path
-               (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
-               :related-hyperdoc-page-title
-               (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
-                dmx-plan)
-               :related-topic-id
-               (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
-               :provenance
-               (copy-tree
-                (topic-factory-snippet-dmx-write-plan-provenance dmx-plan))
-               :live-write-configured
-               (localhost-fedwiki-page-promotion-live-dmx-client-configured-p))
+           (list :available t
+                 :topic-title *localhost-fedwiki-page-promotion-handover-topic-title*
+                 :topic-body (snippet-text-of definition)
+                 :snippet-id
+                 (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
+                 :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
+                 :topic-type-uri
+                 (topic-factory-snippet-dmx-write-plan-topic-type-uri dmx-plan)
+                 :workspace-topicmap-id
+                 (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
+                 :workspace-topicmap-route
+                 (localhost-fedwiki-page-promotion-handover-topicmap-webclient-route
+                  resolved-topicmap-id)
+                 :topic-action
+                 (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
+                 :topicmap-action
+                 (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
+                 :view-props-validation-status
+                 (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
+                        dmx-plan)
+                       :status)
+                 :forbidden-short-keys
+                 (copy-list
+                  (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
+                         dmx-plan)
+                        :forbidden-short-keys))
+                 :normalized-view-props-json
+                 (dmx-topicmap-view-props-json-string
+                  (topic-factory-snippet-dmx-write-plan-view-props dmx-plan))
+                 :source-path
+                 (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
+                 :related-hyperdoc-page-title
+                 (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
+                  dmx-plan)
+                 :related-topic-id
+                 (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
+                 :provenance
+                 (copy-tree
+                  (topic-factory-snippet-dmx-write-plan-provenance dmx-plan))
+                 :live-write-configured
+                 (localhost-fedwiki-page-promotion-live-dmx-client-configured-p))
          (list :available nil
                :workspace-topicmap-id resolved-topicmap-id
                :workspace-topicmap-route
@@ -1851,38 +1851,38 @@
   (unless (ensure-localhost-fedwiki-page-promotion-dmx-support)
     (error "DMX handover execution support is unavailable; load :hyperdoc/dmx-import first."))
   (let* ((resolved-topicmap-id
-           (or workspace-topicmap-id
-               *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
+          (or workspace-topicmap-id
+              *localhost-fedwiki-page-promotion-default-workspace-topicmap-id*))
          (resolved-client
-           (or client
-               (if dry-run
-                   (make-localhost-fedwiki-page-promotion-memory-dmx-client)
-                   (make-localhost-fedwiki-page-promotion-default-dmx-client
-                    :dry-run nil
-                    :verbose nil))))
+          (or client
+              (if dry-run
+                  (make-localhost-fedwiki-page-promotion-memory-dmx-client)
+                  (make-localhost-fedwiki-page-promotion-default-dmx-client
+                   :dry-run nil
+                   :verbose nil))))
          (result
-           (funcall
-            (symbol-function 'execute-topic-factory-snippet-dmx-write)
-            (localhost-fedwiki-page-promotion-handover-topic-definition-chunk
-             surface)
-            :workspace-topicmap-id resolved-topicmap-id
-            :client resolved-client
-            :dry-run dry-run
-            :topic-type-uri
-            *localhost-fedwiki-page-promotion-handover-dmx-topic-type-uri*
-            :topic-value *localhost-fedwiki-page-promotion-handover-topic-title*
-            :stream stream))
+          (funcall
+           (symbol-function 'execute-topic-factory-snippet-dmx-write)
+           (localhost-fedwiki-page-promotion-handover-topic-definition-chunk
+            surface)
+           :workspace-topicmap-id resolved-topicmap-id
+           :client resolved-client
+           :dry-run dry-run
+           :topic-type-uri
+           *localhost-fedwiki-page-promotion-handover-dmx-topic-type-uri*
+           :topic-value *localhost-fedwiki-page-promotion-handover-topic-title*
+           :stream stream))
          (plan (getf result :plan))
          (topic-id
-           (and (not dry-run)
-                resolved-client
-                plan
-                (let ((topic
-                        (dmx-import-find-existing-topic
-                         resolved-client
-                         (getf (topic-factory-snippet-dmx-write-plan-payload plan)
-                               :external-key))))
-                  (dmx-import-object-id topic)))))
+          (and (not dry-run)
+               resolved-client
+               plan
+               (let ((topic
+                      (dmx-import-find-existing-topic
+                       resolved-client
+                       (getf (topic-factory-snippet-dmx-write-plan-payload plan)
+                             :external-key))))
+                 (dmx-import-object-id topic)))))
     (append result
             (list :topic-title
                   *localhost-fedwiki-page-promotion-handover-topic-title*
@@ -1918,22 +1918,22 @@
     (plan
      &key workspace-topicmap-id client)
   (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
-    (list :available nil
-          :classification :source-unavailable
-          :source-issue issue
-          :source-page-id
-          (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
-           issue)
-          :source-page-path
-          (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
-           issue)
-          :message
-          (format nil
-                  "DMX dry-run is unavailable because the configured localhost FedWiki source page file is missing for ~A at ~A."
-                  (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
-                   issue)
-                  (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
-                   issue)))
+      (list :available nil
+            :classification :source-unavailable
+            :source-issue issue
+            :source-page-id
+            (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+             issue)
+            :source-page-path
+            (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
+             issue)
+            :message
+            (format nil
+                    "DMX dry-run is unavailable because the configured localhost FedWiki source page file is missing for ~A at ~A."
+                    (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-id
+                     issue)
+                    (localhost-fedwiki-page-promotion-source-unavailable-issue-source-page-path
+                     issue)))
     (call-with-localhost-fedwiki-page-promotion-dmx-validation-handling
      (lambda ()
        (if-let (dmx-plan
@@ -1941,38 +1941,38 @@
                  plan
                  :workspace-topicmap-id workspace-topicmap-id
                  :client client))
-         (list :available t
-               :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
-               :snippet-id
-               (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
-               :workspace-topicmap-id
-               (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
-               :topic-action
-               (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
-               :topicmap-action
-               (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
-               :view-props-validation-status
-               (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
-                      dmx-plan)
-                     :status)
-               :forbidden-short-keys
-               (copy-list
-                (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
-                       dmx-plan)
-                      :forbidden-short-keys))
-               :normalized-view-props-json
-               (dmx-topicmap-view-props-json-string
-                (topic-factory-snippet-dmx-write-plan-view-props dmx-plan))
-               :source-path
-               (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
-               :related-hyperdoc-page-title
-               (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
-                dmx-plan)
-               :related-topic-id
-               (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
-               :provenance
-               (copy-tree
-                (topic-factory-snippet-dmx-write-plan-provenance dmx-plan)))
+           (list :available t
+                 :uri (topic-factory-snippet-dmx-write-plan-uri dmx-plan)
+                 :snippet-id
+                 (topic-factory-snippet-dmx-write-plan-snippet-id dmx-plan)
+                 :workspace-topicmap-id
+                 (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id dmx-plan)
+                 :topic-action
+                 (topic-factory-snippet-dmx-write-plan-topic-action dmx-plan)
+                 :topicmap-action
+                 (topic-factory-snippet-dmx-write-plan-topicmap-action dmx-plan)
+                 :view-props-validation-status
+                 (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
+                        dmx-plan)
+                       :status)
+                 :forbidden-short-keys
+                 (copy-list
+                  (getf (topic-factory-snippet-dmx-write-plan-view-props-normalization
+                         dmx-plan)
+                        :forbidden-short-keys))
+                 :normalized-view-props-json
+                 (dmx-topicmap-view-props-json-string
+                  (topic-factory-snippet-dmx-write-plan-view-props dmx-plan))
+                 :source-path
+                 (topic-factory-snippet-dmx-write-plan-source-path dmx-plan)
+                 :related-hyperdoc-page-title
+                 (topic-factory-snippet-dmx-write-plan-related-hyperdoc-page-title
+                  dmx-plan)
+                 :related-topic-id
+                 (topic-factory-snippet-dmx-write-plan-related-topic-id dmx-plan)
+                 :provenance
+                 (copy-tree
+                  (topic-factory-snippet-dmx-write-plan-provenance dmx-plan)))
          (list :available nil
                :message
                "DMX dry-run planner is unavailable; load :hyperdoc/dmx-import to inspect the dry-run plan.")))
@@ -1999,7 +1999,7 @@
     (plan
      &key workspace-topicmap-id client)
   (if-let (issue (localhost-fedwiki-page-promotion-plan-source-issue plan))
-    (localhost-fedwiki-page-promotion-source-unavailable-reason issue)
+      (localhost-fedwiki-page-promotion-source-unavailable-reason issue)
     (if (ensure-localhost-fedwiki-page-promotion-dmx-support)
         (call-with-localhost-fedwiki-page-promotion-dmx-validation-handling
          (lambda ()
@@ -2146,9 +2146,9 @@
 (defun localhost-fedwiki-page-publication-target-pages-directory (plan)
   (let* ((site (localhost-fedwiki-page-publication-plan-target-site plan))
          (override
-           (cdr (assoc site
-                       *localhost-fedwiki-page-publication-target-pages-directory-overrides*
-                       :test #'string=))))
+          (cdr (assoc site
+                      *localhost-fedwiki-page-publication-target-pages-directory-overrides*
+                      :test #'string=))))
     (or override
         (and (string= site
                       *reproducible-devenv-as-knowledge-artifact-fedwiki-site*)
@@ -2197,12 +2197,12 @@
 
 (defun normalize-fedwiki-page-publication-page (page)
   (let ((page
-          (cond
-            ((or (hash-table-p page)
-                 (article-allegation-json-object-p page))
-             (article-allegation-normalize-json page))
-            (t
-             (copy-tree page)))))
+         (cond
+           ((or (hash-table-p page)
+                (article-allegation-json-object-p page))
+            (article-allegation-normalize-json page))
+           (t
+            (copy-tree page)))))
     (list :title (or (getf page :title) "")
           :story (copy-tree (or (getf page :story) '()))
           :journal (copy-tree (or (getf page :journal) '())))))
@@ -2270,7 +2270,7 @@
   (let* ((path (localhost-fedwiki-page-publication-plan-source-page-pathname plan))
          (source-plan (localhost-fedwiki-page-publication-plan-source-plan plan))
          (source-issue
-           (localhost-fedwiki-page-promotion-plan-source-issue source-plan)))
+          (localhost-fedwiki-page-promotion-plan-source-issue source-plan)))
     (cond
       (source-issue
        (list :available nil
@@ -2289,15 +2289,15 @@
       (t
        (handler-case
            (let* ((page
-                    (copy-tree
-                     (localhost-fedwiki-page-pipeline-result-raw-page
-                      (localhost-fedwiki-page-promotion-plan-pipeline
-                       source-plan))))
+                   (copy-tree
+                    (localhost-fedwiki-page-pipeline-result-raw-page
+                     (localhost-fedwiki-page-promotion-plan-pipeline
+                      source-plan))))
                   (normalized-page
-                    (normalize-fedwiki-page-publication-page page))
+                   (normalize-fedwiki-page-publication-page page))
                   (findings
-                    (copy-list
-                     (journalmatic-commit-gate-findings normalized-page))))
+                   (copy-list
+                    (journalmatic-commit-gate-findings normalized-page))))
              (list :available t
                    :classification :available
                    :path path
@@ -2323,16 +2323,16 @@
 (defun localhost-fedwiki-page-publication-plan-default-target-page-reader (plan)
   (let* ((path (localhost-fedwiki-page-publication-plan-target-page-pathname plan))
          (fallback-protocol
-           (or (localhost-fedwiki-page-publication-plan-target-protocol plan)
-               "https"))
+          (or (localhost-fedwiki-page-publication-plan-target-protocol plan)
+              "https"))
          (html-url
-           (localhost-fedwiki-page-publication-plan-target-html-url
-            plan
-            :protocol fallback-protocol))
+          (localhost-fedwiki-page-publication-plan-target-html-url
+           plan
+           :protocol fallback-protocol))
          (json-url
-           (localhost-fedwiki-page-publication-plan-target-json-url
-            plan
-            :protocol fallback-protocol))
+          (localhost-fedwiki-page-publication-plan-target-json-url
+           plan
+           :protocol fallback-protocol))
          (target-path (namestring path)))
     (cond
       ((not (uiop:file-exists-p path))
@@ -2346,8 +2346,8 @@
              (format nil "No published target page file at ~A." target-path)))
       (t
        (let ((validated
-               (localhost-fedwiki-page-publication-validated-page-state-from-path
-                path)))
+              (localhost-fedwiki-page-publication-validated-page-state-from-path
+               path)))
          (if (getf validated :available)
              (list :state :present
                    :protocol fallback-protocol
@@ -2367,13 +2367,13 @@
 
 (defun localhost-fedwiki-page-publication-plan-target-page-state (plan)
   (let* ((reader
-           (or (localhost-fedwiki-page-publication-plan-target-page-reader plan)
-               #'localhost-fedwiki-page-publication-plan-default-target-page-reader))
+          (or (localhost-fedwiki-page-publication-plan-target-page-reader plan)
+              #'localhost-fedwiki-page-publication-plan-default-target-page-reader))
          (state (copy-tree (funcall reader plan)))
          (protocol
-           (or (getf state :protocol)
-               (localhost-fedwiki-page-publication-plan-target-protocol plan)
-               "https")))
+          (or (getf state :protocol)
+              (localhost-fedwiki-page-publication-plan-target-protocol plan)
+              "https")))
     (setf (getf state :protocol) protocol)
     (unless (getf state :target-html-url)
       (setf (getf state :target-html-url)
@@ -2392,7 +2392,7 @@
               plan))))
     (when-let (page (getf state :page))
       (let* ((normalized-page
-               (normalize-fedwiki-page-publication-page page))
+              (normalize-fedwiki-page-publication-page page))
              (findings (copy-list (journalmatic-commit-gate-findings
                                    normalized-page))))
         (setf (getf state :page) normalized-page
@@ -2420,9 +2420,9 @@
      :unreachable)
     (t
      (let ((divergent-fields
-             (localhost-fedwiki-page-publication-plan-divergent-fields
-              (getf local-state :page)
-              (getf target-state :page))))
+            (localhost-fedwiki-page-publication-plan-divergent-fields
+             (getf local-state :page)
+             (getf target-state :page))))
        (cond
          ((null divergent-fields)
           :current)
@@ -2461,30 +2461,30 @@
 (defun localhost-fedwiki-page-publication-plan-dry-run-summary (plan)
   (let* ((source-plan (localhost-fedwiki-page-publication-plan-source-plan plan))
          (local-state
-           (localhost-fedwiki-page-publication-plan-local-page-state plan))
+          (localhost-fedwiki-page-publication-plan-local-page-state plan))
          (target-state
-           (when (getf local-state :available)
-             (localhost-fedwiki-page-publication-plan-target-page-state plan)))
+          (when (getf local-state :available)
+            (localhost-fedwiki-page-publication-plan-target-page-state plan)))
          (publication-status
-           (localhost-fedwiki-page-publication-plan-status
-            local-state
-            target-state))
+          (localhost-fedwiki-page-publication-plan-status
+           local-state
+           target-state))
          (divergent-fields
-           (when (and target-state
-                      (getf target-state :page)
-                      (getf local-state :page))
-             (localhost-fedwiki-page-publication-plan-divergent-fields
-              (getf local-state :page)
-              (getf target-state :page))))
+          (when (and target-state
+                     (getf target-state :page)
+                     (getf local-state :page))
+            (localhost-fedwiki-page-publication-plan-divergent-fields
+             (getf local-state :page)
+             (getf target-state :page))))
          (planned-write
-           (localhost-fedwiki-page-publication-plan-planned-write
-            plan
-            local-state
-            publication-status))
+          (localhost-fedwiki-page-publication-plan-planned-write
+           plan
+           local-state
+           publication-status))
          (protocol
-           (or (and target-state (getf target-state :protocol))
-               (localhost-fedwiki-page-publication-plan-target-protocol plan)
-               "https")))
+          (or (and target-state (getf target-state :protocol))
+              (localhost-fedwiki-page-publication-plan-target-protocol plan)
+              "https")))
     (list :plan-id (localhost-fedwiki-page-publication-plan-id plan)
           :source-plan-id
           (localhost-fedwiki-page-promotion-plan-id source-plan)
@@ -2572,7 +2572,7 @@
 
 (defun localhost-fedwiki-page-publication-plan-dry-run-evidence (plan)
   (let* ((summary
-           (localhost-fedwiki-page-publication-plan-dry-run-summary plan))
+          (localhost-fedwiki-page-publication-plan-dry-run-summary plan))
          (planned-write (getf summary :planned-write)))
     (with-output-to-string (stream)
       (format stream "LOCALHOST_FEDWIKI_PUBLICATION_DRY_RUN~%")
@@ -2631,13 +2631,13 @@
          (planned-write (getf summary :planned-write))
          (action (getf planned-write :action))
          (target-pathname
-           (or (and (getf planned-write :target-path)
-                    (pathname (getf planned-write :target-path)))
-               (localhost-fedwiki-page-publication-plan-target-page-pathname
-                plan)))
+          (or (and (getf planned-write :target-path)
+                   (pathname (getf planned-write :target-path)))
+              (localhost-fedwiki-page-publication-plan-target-page-pathname
+               plan)))
          (target-path (namestring target-pathname))
          (target-existed-before-p
-           (not (null (uiop:file-exists-p target-pathname)))))
+          (not (null (uiop:file-exists-p target-pathname)))))
     (labels ((remember-report (report)
                (setf (localhost-fedwiki-page-publication-plan-last-live-publication-report
                       plan)
@@ -2671,11 +2671,11 @@
           target-pathname
           (getf planned-write :page))
          (let* ((validated
-                  (localhost-fedwiki-page-publication-validated-page-state-from-path
-                   target-pathname))
+                 (localhost-fedwiki-page-publication-validated-page-state-from-path
+                  target-pathname))
                 (post-summary
-                  (localhost-fedwiki-page-publication-plan-dry-run-summary
-                   plan)))
+                 (localhost-fedwiki-page-publication-plan-dry-run-summary
+                  plan)))
            (unless (and (getf validated :available)
                         (getf validated :json-syntax-valid-p))
              (error "Published page ~A is not valid JSON: ~A"
@@ -2739,14 +2739,14 @@
               (stream *standard-output*))
     (declare (ignore stream))
     (let ((summary
-            (localhost-fedwiki-page-publication-plan-dry-run-summary plan)))
+           (localhost-fedwiki-page-publication-plan-dry-run-summary plan)))
       (unless (getf summary :local-preflight-pass-p)
         (error "Refusing live publication for ~A because the local page failed JSON/journal preflight."
                (localhost-fedwiki-page-publication-plan-id plan)))
       (if-let (writer
                (localhost-fedwiki-page-publication-plan-live-publication-writer
                 plan))
-        (funcall writer plan :summary summary)
+          (funcall writer plan :summary summary)
         (error "Live publication is not configured for ~A. Inspect the dry-run summary first and attach an explicit page-scoped writer."
                (localhost-fedwiki-page-publication-plan-id plan))))))
 

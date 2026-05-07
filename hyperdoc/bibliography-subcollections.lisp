@@ -25,8 +25,8 @@
                 :initarg :description
                 :initform nil)
    (default-collection :reader bibliography-source-default-collection-of
-                       :initarg :default-collection
-                       :initform *bibliography-default-main-page-id*)
+     :initarg :default-collection
+     :initform *bibliography-default-main-page-id*)
    (materialization-root :reader bibliography-source-materialization-root-of
                          :initarg :materialization-root
                          :initform *bibliography-default-materialization-root*)))
@@ -720,25 +720,25 @@
          (tracked-p (bibliography-git-tracked-p source-path))
          (link-present-p (bibliography-entry-page-link-present-p source-path link-text))
          (selection-classification
-           (bibliography-entry-page-selection-classification
-            page
-            source-path
-            tracked-p
-            link-present-p))
+          (bibliography-entry-page-selection-classification
+           page
+           source-path
+           tracked-p
+           link-present-p))
          (inventory-classification
-           (bibliography-runtime-surface-inventory-classification
-            page
-            source-path
-            link-present-p))
+          (bibliography-runtime-surface-inventory-classification
+           page
+           source-path
+           link-present-p))
          (mismatch-classification
-           (bibliography-workspace-vs-flake-mismatch-classification
-            source-path
-            tracked-p))
+          (bibliography-workspace-vs-flake-mismatch-classification
+           source-path
+           tracked-p))
          (resolved-output-root
-           (or output-root
-               (bibliography-standin-output-root
-                (substitute #\- #\Space
-                            (string-downcase collection-name)))))
+          (or output-root
+              (bibliography-standin-output-root
+               (substitute #\- #\Space
+                           (string-downcase collection-name)))))
          (plan-build-start (bibliography-standin-current-millis))
          (plan nil)
          (plan-error nil))
@@ -755,26 +755,26 @@
     (let* ((plan-build-ms (bibliography-standin-elapsed-millis plan-build-start))
            (plan-ready-p (typep plan 'hyperdoc-authoring-plan))
            (materialization-summary
-             (and plan-ready-p
-                  (bibliography-materialize-plan-and-summarize plan)))
+            (and plan-ready-p
+                 (bibliography-materialize-plan-and-summarize plan)))
            (artifact-ready-p (getf materialization-summary :artifact-ready-p))
            (failure-classification
-             (bibliography-failure-classification-before-browser
-              selection-classification
-              mismatch-classification
-              plan
-              plan-ready-p
-              artifact-ready-p))
+            (bibliography-failure-classification-before-browser
+             selection-classification
+             mismatch-classification
+             plan
+             plan-ready-p
+             artifact-ready-p))
            (last-protocol-boundary
-             (cond
-               (artifact-ready-p "artifact-bundle-written")
-               (plan-ready-p "authoring-plan-ready")
-               ((zotero-backend-unavailable-p plan)
-                "zotero-backend-unavailable")
-               ((string= selection-classification "tracked-entry-page-selected")
-                "tracked-entry-page-selected")
-               (t
-                "pre-entry-page-ready"))))
+            (cond
+              (artifact-ready-p "artifact-bundle-written")
+              (plan-ready-p "authoring-plan-ready")
+              ((zotero-backend-unavailable-p plan)
+               "zotero-backend-unavailable")
+              ((string= selection-classification "tracked-entry-page-selected")
+               "tracked-entry-page-selected")
+              (t
+               "pre-entry-page-ready"))))
       (make-instance 'bibliography-authoring-plan-standin-report
                      :mode mode
                      :collection-name collection-name
@@ -837,19 +837,19 @@
   (if (zotero-backend-unavailable-p source)
       source
       (let ((book
-              (or (and *bibliography-subcollections*
-                       (equal (hb:id-of *bibliography-subcollections*) id)
-                       (typep *bibliography-subcollections* 'bibliography-subcollections-hyperbook)
-                       (eq (bibliography-hyperbook-source-of *bibliography-subcollections*)
-                           source)
-                       *bibliography-subcollections*)
-                  (setf *bibliography-subcollections*
-                        (make-instance 'bibliography-subcollections-hyperbook
-                                       :id id
-                                       :source source
-                                       :title title
-                                       :main-page-id (or main-page-id
-                                                         *bibliography-default-main-page-id*))))))
+             (or (and *bibliography-subcollections*
+                      (equal (hb:id-of *bibliography-subcollections*) id)
+                      (typep *bibliography-subcollections* 'bibliography-subcollections-hyperbook)
+                      (eq (bibliography-hyperbook-source-of *bibliography-subcollections*)
+                          source)
+                      *bibliography-subcollections*)
+                 (setf *bibliography-subcollections*
+                       (make-instance 'bibliography-subcollections-hyperbook
+                                      :id id
+                                      :source source
+                                      :title title
+                                      :main-page-id (or main-page-id
+                                                        *bibliography-default-main-page-id*))))))
         (when register?
           (register book))
         book)))
@@ -971,18 +971,18 @@
     (remove-duplicates
      (loop for tail on words
            when (> (length tail) 0)
-             collect (phrase-display-title tail))
+           collect (phrase-display-title tail))
      :test #'string-equal)))
 
 (defun parse-year-from-date-string (value)
   (let ((string (maybe-string value)))
     (when string
       (let ((start (position-if #'digit-char-p string)))
-      (when start
-        (ignore-errors
-          (parse-integer string
-                         :start start
-                         :end (+ start 4))))))))
+        (when start
+          (ignore-errors
+            (parse-integer string
+                           :start start
+                           :end (+ start 4))))))))
 
 (defun hyperdoc-page-present-p (title)
   (let ((book (find-hyperbook "hyperdoc")))
@@ -1029,8 +1029,8 @@
 
 (defun candidate-topic-key (title aliases)
   (or (let ((keys
-              (remove-if #'string-blank-p
-                         (mapcar #'title-normalized-key-from-phrase aliases))))
+             (remove-if #'string-blank-p
+                        (mapcar #'title-normalized-key-from-phrase aliases))))
         (when keys
           (first (sort (copy-list keys) #'string<))))
       (title-normalized-key-from-phrase title)))
@@ -1102,8 +1102,8 @@
   (remove-duplicates
    (loop for signal in (candidate-topic-signals-of candidate)
          when (funcall predicate signal)
-           collect (bibliography-signal-evidence-line signal
-                                                     :show-field? show-field?))
+         collect (bibliography-signal-evidence-line signal
+                                                    :show-field? show-field?))
    :test #'string-equal))
 
 (defun topic-constructor-symbol-for-title (title)
@@ -1212,7 +1212,7 @@
                              :collection-name))
                     (not (member (candidate-topic-signal-field-of signal)
                                  '(:title :notes :tags))))
-            collect (bibliography-signal-evidence-line signal))
+          collect (bibliography-signal-evidence-line signal))
     (loop for title in (candidate-topic-broader-hints-of candidate)
           collect (format nil "Broader hint: ~A" title))
     (loop for note in (topic-comparison-report-review-notes-of comparison)
@@ -1222,9 +1222,9 @@
    :test #'string-equal))
 
 (defun decision-repo-touch-preview (topic-action page-action
-                                     &key target-topic-title
-                                       target-page-title
-                                       matched-existing-topic-title)
+                                    &key target-topic-title
+                                      target-page-title
+                                      matched-existing-topic-title)
   (let ((lines '()))
     (case topic-action
       (:add-new-topic-factory
@@ -1268,22 +1268,22 @@
   (let* ((status (topic-comparison-report-status-of comparison))
          (decision-kind (decision-kind-for-actions status topic-action))
          (matched-existing-topic-title
-           (and (not (eq status :new-topic))
-                (decision-target-topic comparison)))
+          (and (not (eq status :new-topic))
+               (decision-target-topic comparison)))
          (matched-existing-page-title
-           (decision-existing-page-title
-            (or matched-existing-topic-title target-page-title)))
+          (decision-existing-page-title
+           (or matched-existing-topic-title target-page-title)))
          (rationale (or (first decision-notes)
                         "Editorial review required."))
          (materialization-consequence
-           (decision-materialization-consequence topic-action page-action))
+          (decision-materialization-consequence topic-action page-action))
          (repo-touch-preview
-           (decision-repo-touch-preview
-            topic-action
-            page-action
-            :target-topic-title target-topic-title
-            :target-page-title target-page-title
-            :matched-existing-topic-title matched-existing-topic-title)))
+          (decision-repo-touch-preview
+           topic-action
+           page-action
+           :target-topic-title target-topic-title
+           :target-page-title target-page-title
+           :matched-existing-topic-title matched-existing-topic-title)))
     (make-instance 'authoring-decision
                    :candidate-topic candidate
                    :comparison-report comparison
@@ -1322,24 +1322,24 @@
                             (split-words text)))
          (signals '()))
     (loop for size from 1 to 3 do
-      (loop for start from 0 to (- (length tokens) size)
-            for phrase-words = (subseq tokens start (+ start size))
-            for last-word = (car (last phrase-words))
-            when (member last-word *bibliography-candidate-head-tokens* :test #'string=)
-              do (let* ((display-title (phrase-display-title phrase-words))
-                        (aliases (phrase-aliases display-title)))
-                   (push (make-instance 'candidate-topic-signal
-                                        :source-kind source-kind
-                                        :field field
-                                        :raw-value display-title
-                                        :display-title display-title
-                                        :normalized-key (candidate-topic-key
-                                                         display-title
-                                                         aliases)
-                                        :aliases aliases
-                                        :entry entry
-                                        :detail "Derived by simple n-gram extraction from bibliography metadata text.")
-                         signals))))
+          (loop for start from 0 to (- (length tokens) size)
+                for phrase-words = (subseq tokens start (+ start size))
+                for last-word = (car (last phrase-words))
+                when (member last-word *bibliography-candidate-head-tokens* :test #'string=)
+                do (let* ((display-title (phrase-display-title phrase-words))
+                          (aliases (phrase-aliases display-title)))
+                     (push (make-instance 'candidate-topic-signal
+                                          :source-kind source-kind
+                                          :field field
+                                          :raw-value display-title
+                                          :display-title display-title
+                                          :normalized-key (candidate-topic-key
+                                                           display-title
+                                                           aliases)
+                                          :aliases aliases
+                                          :entry entry
+                                          :detail "Derived by simple n-gram extraction from bibliography metadata text.")
+                           signals))))
     (nreverse signals)))
 
 (defun collection-name-signals (collection-hit)
@@ -1407,15 +1407,15 @@
                            (mapcar #'candidate-topic-signal-entry-of signals))
                    :test #'eq))
          (collection-signals
-           (remove-if-not (lambda (signal)
-                            (eq (candidate-topic-signal-source-kind-of signal)
-                                :collection-name))
-                          signals))
+          (remove-if-not (lambda (signal)
+                           (eq (candidate-topic-signal-source-kind-of signal)
+                               :collection-name))
+                         signals))
          (entry-signals
-           (remove-if (lambda (signal)
-                        (eq (candidate-topic-signal-source-kind-of signal)
-                            :collection-name))
-                      signals)))
+          (remove-if (lambda (signal)
+                       (eq (candidate-topic-signal-source-kind-of signal)
+                           :collection-name))
+                     signals)))
     (make-instance 'candidate-topic
                    :title title
                    :normalized-key (candidate-topic-key title aliases)
@@ -1450,27 +1450,27 @@
 (defun compare-candidate-topic (candidate)
   (let* ((exact (find-topic-by-title (candidate-topic-title-of candidate)))
          (alias-matches
-           (unless exact
-             (unique-topic-list
-              (loop for alias in (remove (candidate-topic-title-of candidate)
-                                         (candidate-topic-aliases-of candidate)
-                                         :test #'string-equal)
-                    collect (find-topic-by-title alias)))))
+          (unless exact
+            (unique-topic-list
+             (loop for alias in (remove (candidate-topic-title-of candidate)
+                                        (candidate-topic-aliases-of candidate)
+                                        :test #'string-equal)
+                   collect (find-topic-by-title alias)))))
          (near-duplicate-matches
-           (unless (or exact alias-matches)
-             (remove-if-not
-              (lambda (topic)
-                (and (not (string= (title-of topic)
-                                   (candidate-topic-title-of candidate)))
-                     (string= (title-normalized-key-from-phrase
-                               (title-of topic))
-                              (candidate-topic-normalized-key-of candidate))))
-              (all-current-topics))))
+          (unless (or exact alias-matches)
+            (remove-if-not
+             (lambda (topic)
+               (and (not (string= (title-of topic)
+                                  (candidate-topic-title-of candidate)))
+                    (string= (title-normalized-key-from-phrase
+                              (title-of topic))
+                             (candidate-topic-normalized-key-of candidate))))
+             (all-current-topics))))
          (broader-topic-matches
-           (unless (or exact alias-matches near-duplicate-matches)
-             (unique-topic-list
-              (loop for broader in (candidate-topic-broader-hints-of candidate)
-                    collect (find-topic-by-title broader)))))
+          (unless (or exact alias-matches near-duplicate-matches)
+            (unique-topic-list
+             (loop for broader in (candidate-topic-broader-hints-of candidate)
+                   collect (find-topic-by-title broader)))))
          (status (cond
                    (exact :exact-title-match)
                    (alias-matches :alias-match)
@@ -1500,11 +1500,11 @@
 (defun arrangement-only-candidate-p (candidate candidates)
   (and (zerop (length (candidate-topic-collection-signals-of candidate)))
        (let ((broader-candidates
-               (remove nil
-                       (loop for broader in (candidate-topic-broader-hints-of candidate)
-                             collect (find broader candidates
-                                           :key #'candidate-topic-title-of
-                                           :test #'string-equal)))))
+              (remove nil
+                      (loop for broader in (candidate-topic-broader-hints-of candidate)
+                            collect (find broader candidates
+                                          :key #'candidate-topic-title-of
+                                          :test #'string-equal)))))
          (and broader-candidates
               (every (lambda (broader)
                        (>= (candidate-topic-support-count-of broader)
@@ -1608,11 +1608,11 @@
 
 (defun bibliography-topic-id-from-title (title)
   (let ((chars
-          (loop for char across (string-downcase title)
-                collect (if (or (alpha-char-p char)
-                                (digit-char-p char))
-                            char
-                            #\-))))
+         (loop for char across (string-downcase title)
+               collect (if (or (alpha-char-p char)
+                               (digit-char-p char))
+                           char
+                           #\-))))
     (string-trim "-" (coerce chars 'string))))
 
 (defun bibliography-topic-function-name-from-title (title)
@@ -1623,8 +1623,8 @@
          (references '("Coachmark bibliography authoring plan"
                        "Bibliography subcollections in HyperDoc"))
          (summary
-           (format nil "Proposed topic scaffold derived from bibliography evidence for ~A; tighten after editorial review."
-                   title)))
+          (format nil "Proposed topic scaffold derived from bibliography evidence for ~A; tighten after editorial review."
+                  title)))
     (format nil "(defun ~A ()~%  (make-topic~%   :id ~S~%   :title ~S~%   :summary ~S~%   :references '~S))~%"
             (bibliography-topic-function-name-from-title title)
             (bibliography-topic-id-from-title title)
@@ -1636,8 +1636,8 @@
   (let* ((title (authoring-decision-target-page-title-of decision))
          (subcollection (hyperdoc-authoring-plan-source-subcollection-of plan))
          (collection-path
-           (bibliography-collection-path-of
-            (bibliography-subcollection-collection-hit-of subcollection))))
+          (bibliography-collection-path-of
+           (bibliography-subcollection-collection-hit-of subcollection))))
     (format nil "<h1>~A</h1>~%~%<in-package>hyperdoc</in-package>~%~%<p>~%  This page was scaffolded from the inspectable authoring plan for the bibliography subcollection <tt>~A</tt>. Replace this scaffold with durable HyperDoc prose after reviewing the supporting bibliography entries and candidate-topic comparison report.~%</p>~%~%<h2>Inspectable objects</h2>~%~%<ul>~%  <li><a hyperbook=\"topics\" page=\"~A\"><tt>~A</tt></a></li>~%  <li><a expr=\"(coachmark-bibliography-authoring-plan)\"><tt>(coachmark-bibliography-authoring-plan)</tt></a></li>~%</ul>~%"
             title
             collection-path
@@ -1744,10 +1744,10 @@
                 (hyperdoc-authoring-plan-output-root-of plan)))
          (page-update-groups '())
          (entries
-           (list (make-bibliography-materialization-entry
-                  :plan-summary
-                  (merge-pathnames (bibliography-summary-path) root)
-                  (bibliography-plan-summary-preview plan)))))
+          (list (make-bibliography-materialization-entry
+                 :plan-summary
+                 (merge-pathnames (bibliography-summary-path) root)
+                 (bibliography-plan-summary-preview plan)))))
     (dolist (decision (hyperdoc-authoring-plan-authoring-decisions-of plan))
       (case (authoring-decision-topic-action-of decision)
         (:add-new-topic-factory
@@ -1812,25 +1812,25 @@
 
 (defun plan-bibliography-authoring
     (subcollection-or-name &key (source (make-default-bibliography-source))
-       signal-error? output-root)
+                             signal-error? output-root)
   (let ((subcollection
-          (typecase subcollection-or-name
-            (zotero-backend-unavailable subcollection-or-name)
-            (bibliography-subcollection-load-failure subcollection-or-name)
-            (string
-             (cond
-               ((zotero-backend-unavailable-p source)
-                source)
-               (t
-                (load-bibliography-subcollection-using-source
-                 source
-                 subcollection-or-name
-                 :signal-error? signal-error?
-                 :output-root output-root))))
-            (bibliography-subcollection
-             subcollection-or-name)
-            (otherwise
-             (error "Unsupported bibliography authoring target ~S." subcollection-or-name)))))
+         (typecase subcollection-or-name
+           (zotero-backend-unavailable subcollection-or-name)
+           (bibliography-subcollection-load-failure subcollection-or-name)
+           (string
+            (cond
+              ((zotero-backend-unavailable-p source)
+               source)
+              (t
+               (load-bibliography-subcollection-using-source
+                source
+                subcollection-or-name
+                :signal-error? signal-error?
+                :output-root output-root))))
+           (bibliography-subcollection
+            subcollection-or-name)
+           (otherwise
+            (error "Unsupported bibliography authoring target ~S." subcollection-or-name)))))
     (if (or (zotero-backend-unavailable-p subcollection)
             (bibliography-subcollection-load-failure-p subcollection))
         subcollection
@@ -1870,10 +1870,10 @@
         (lookup (or page-id (hb:main-page-id-of book))))
     (or (gethash lookup cache)
         (let ((subcollection
-                (load-bibliography-subcollection-using-source
-                 source
-                 lookup
-                 :signal-error? signal-error?)))
+               (load-bibliography-subcollection-using-source
+                source
+                lookup
+                :signal-error? signal-error?)))
           (cond
             ((zotero-backend-unavailable-p subcollection)
              subcollection)
@@ -1881,16 +1881,16 @@
              (setf (gethash lookup cache) subcollection)
              subcollection)
             (subcollection
-            (setf (gethash lookup cache) subcollection)
-            (let ((path (bibliography-collection-path-of
-                         (bibliography-subcollection-collection-hit-of
-                          subcollection))))
-              (setf (gethash path cache) subcollection
-                    (gethash (bibliography-collection-name-of
-                              (bibliography-subcollection-collection-hit-of
-                               subcollection))
-                             cache)
-                    subcollection))
+             (setf (gethash lookup cache) subcollection)
+             (let ((path (bibliography-collection-path-of
+                          (bibliography-subcollection-collection-hit-of
+                           subcollection))))
+               (setf (gethash path cache) subcollection
+                     (gethash (bibliography-collection-name-of
+                               (bibliography-subcollection-collection-hit-of
+                                subcollection))
+                              cache)
+                     subcollection))
              subcollection)
             (t nil))))))
 

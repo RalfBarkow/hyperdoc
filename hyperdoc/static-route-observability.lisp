@@ -51,9 +51,9 @@
                                   "assets/hyperbook-server/")))
 
 (defun make-static-asset-path-resolution (&key id title summary request-path owner-kind
-                                               mount-prefix root-path relative-path
-                                               evidence-mode contract implemented-by
-                                               worked-example)
+                                            mount-prefix root-path relative-path
+                                            evidence-mode contract implemented-by
+                                            worked-example)
   (let* ((root (uiop:ensure-directory-pathname root-path))
          (resolved (merge-pathnames (pathname relative-path) root)))
     (make-instance 'static-asset-path-resolution
@@ -72,7 +72,7 @@
                    :worked-example worked-example)))
 
 (defun make-clog-static-root-resolution (&key id title summary request-path relative-path
-                                              contract implemented-by worked-example)
+                                           contract implemented-by worked-example)
   (make-static-asset-path-resolution
    :id id
    :title title
@@ -88,8 +88,8 @@
    :worked-example worked-example))
 
 (defun make-mounted-asset-resolution (&key id title summary request-path mount-prefix
-                                           root-path relative-path contract
-                                           implemented-by worked-example)
+                                        root-path relative-path contract
+                                        implemented-by worked-example)
   (make-static-asset-path-resolution
    :id id
    :title title

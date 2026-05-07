@@ -119,7 +119,7 @@
                      :condition-text
                      "Unclassified failing form in downstream full suite.")))
          (next-action
-           (hyperdoc::hyperdoc-test-system-scxml-run-suggested-next-action-of run)))
+          (hyperdoc::hyperdoc-test-system-scxml-run-suggested-next-action-of run)))
     (test-system-runbook-assert-true
      (hyperdoc::hyperdoc-test-system-scxml-run-done-p-of run)
      "Unknown-failure runbook scenario must reach a final state")

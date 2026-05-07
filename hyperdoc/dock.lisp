@@ -103,18 +103,18 @@ the primary pane-local object in this slice."))
           context-view-title))
 
 (defun dock-annotation-key (source-anchor context-object context-view-title
-                             &optional target-anchor)
+                            &optional target-anchor)
   (let* ((resolved-source-anchor
-           (or source-anchor
-               (make-dock-current-object-anchor
-                (dock-primary-object context-object)
-                context-object
-                context-view-title)))
+          (or source-anchor
+              (make-dock-current-object-anchor
+               (dock-primary-object context-object)
+               context-object
+               context-view-title)))
          (resolved-target-anchor
-           (or target-anchor
-               (make-dock-annotation-target-anchor
-                context-object
-                context-view-title))))
+          (or target-anchor
+              (make-dock-annotation-target-anchor
+               context-object
+               context-view-title))))
     (dom-relation-annotation-id resolved-source-anchor
                                 resolved-target-anchor)))
 
@@ -124,27 +124,27 @@ the primary pane-local object in this slice."))
       (maybe-official-step-for-anchor source-anchor)))
 
 (defun make-dock-annotation (&key context-object
-                                  context-view-title
-                                  source-anchor
-                                  source-object
-                                  target-anchor
-                                  relation-kind
-                                  note)
+                               context-view-title
+                               source-anchor
+                               source-object
+                               target-anchor
+                               relation-kind
+                               note)
   (let* ((resolved-source-anchor
-           (or source-anchor
-               (make-dock-current-object-anchor
-                (dock-primary-object context-object)
-                context-object
-                context-view-title)))
+          (or source-anchor
+              (make-dock-current-object-anchor
+               (dock-primary-object context-object)
+               context-object
+               context-view-title)))
          (annotation-topic (dock-annotation-topic))
          (resolved-target-anchor
-           (or target-anchor
-               (make-dock-annotation-target-anchor
-                context-object
-                context-view-title)))
+          (or target-anchor
+              (make-dock-annotation-target-anchor
+               context-object
+               context-view-title)))
          (registry-key
-           (dom-relation-annotation-id resolved-source-anchor
-                                       resolved-target-anchor)))
+          (dom-relation-annotation-id resolved-source-anchor
+                                      resolved-target-anchor)))
     (make-dom-relation-annotation
      :class 'dock-annotation
      :id registry-key
@@ -176,14 +176,14 @@ the primary pane-local object in this slice."))
                                             relation-kind
                                             note)
   (let* ((annotation
-           (make-dock-annotation
-            :context-object context-object
-            :context-view-title context-view-title
-            :source-anchor source-anchor
-            :source-object source-object
-            :target-anchor target-anchor
-            :relation-kind relation-kind
-            :note note))
+          (make-dock-annotation
+           :context-object context-object
+           :context-view-title context-view-title
+           :source-anchor source-anchor
+           :source-object source-object
+           :target-anchor target-anchor
+           :relation-kind relation-kind
+           :note note))
          (registry-key (id-of annotation)))
     (or (gethash registry-key *dock-annotations*)
         (setf (gethash registry-key *dock-annotations*) annotation))))
@@ -198,8 +198,8 @@ the primary pane-local object in this slice."))
            *dock-annotations*))
 
 (defun dock-annotation-for-context (context-object &key context-view-title
-                                                   relation-kind
-                                                   note)
+                                                     relation-kind
+                                                     note)
   (dock-annotation-for-source-anchor
    context-object
    (make-dock-current-object-anchor
@@ -221,22 +221,22 @@ the primary pane-local object in this slice."))
    :context-view-title context-view-title))
 
 (defun annotation-capability-semantic-target (&key context-object
-                                                   context-view-title
-                                                   source-json)
+                                                context-view-title
+                                                source-json)
   (let* ((source-anchor
-           (and source-json
-                (maybe-dom-connect-anchor-from-json-string source-json)))
+          (and source-json
+               (maybe-dom-connect-anchor-from-json-string source-json)))
          (existing-annotation
-           (cond
-             (source-anchor
-              (find-dock-annotation-for-source-anchor
-               context-object
-               source-anchor
-               :context-view-title context-view-title))
-             (t
-              (find-dock-annotation-for-context
-               context-object
-               :context-view-title context-view-title)))))
+          (cond
+            (source-anchor
+             (find-dock-annotation-for-source-anchor
+              context-object
+              source-anchor
+              :context-view-title context-view-title))
+            (t
+             (find-dock-annotation-for-context
+              context-object
+              :context-view-title context-view-title)))))
     (or existing-annotation
         (annotation-topic))))
 
@@ -548,9 +548,9 @@ the primary pane-local object in this slice."))
                  :compact-representation "Compact capability strip only."
                  :expanded-representation "None until rediscovery is requested."
                  :entry-triggers '("Coachmark dismissed."
-                                    "Capability acknowledged."
-                                    "Connect used once."
-                                    "Snippet handoff used once.")
+                                   "Capability acknowledged."
+                                   "Connect used once."
+                                   "Snippet handoff used once.")
                  :exit-conditions '("Guide requests rediscovery."
                                     "Connect becomes active again (stateful capability).")
                  :capabilities '("Connect" "Annotation" "Snippet")

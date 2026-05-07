@@ -231,9 +231,9 @@
 (defun iconic-retrieval--cue-texts (cues)
   (loop for cue in cues
         when cue
-          collect (if (typep cue 'linguistic-retrieval-cue)
-                      (linguistic-retrieval-cue-text-of cue)
-                      cue)))
+        collect (if (typep cue 'linguistic-retrieval-cue)
+                    (linguistic-retrieval-cue-text-of cue)
+                    cue)))
 
 (defun iconic-retrieval--titles (objects)
   (loop for object in objects
@@ -241,7 +241,7 @@
                           ((stringp object) object)
                           ((ignore-errors (title-of object))))
         when title
-          collect title))
+        collect title))
 
 (defun iconic-retrieval--grounded-mode-p (mode)
   (member mode
@@ -685,7 +685,7 @@
 
 (defun acquire-iconic-representation
     (world-state-proxy &key id title summary sensory-pattern-note cue-set
-       trajectory (grounded-p t) (reentrant-p nil) modalities grounding-note)
+                         trajectory (grounded-p t) (reentrant-p nil) modalities grounding-note)
   (make-iconic-state-definition
    :id id
    :title (or title
@@ -707,13 +707,13 @@
 
 (defun associate-language-cue-with-iconic-state
     (cue iconic-state &key id title source-state
-       (retrieval-mode :symbolic-to-grounded)
-       trajectory inspectable-path
-       (lay-label "Lay route")
-       (follow-label "Follow route"))
+                        (retrieval-mode :symbolic-to-grounded)
+                        trajectory inspectable-path
+                        (lay-label "Lay route")
+                        (follow-label "Follow route"))
   (let ((resolved-source-state
-          (or source-state
-              (iconic-state-world-state-proxy-of iconic-state))))
+         (or source-state
+             (iconic-state-world-state-proxy-of iconic-state))))
     (make-iconic-retrieval-route
      :id id
      :title (or title
@@ -769,9 +769,9 @@
   (typecase object
     (multimodal-association-example
      (let ((iconic-state
-             (multimodal-association-example-iconic-state-of object))
+            (multimodal-association-example-iconic-state-of object))
            (trajectory
-             (multimodal-association-example-trajectory-of object)))
+            (multimodal-association-example-trajectory-of object)))
        `((:cue-texts
           . ,(iconic-retrieval--cue-texts
               (multimodal-association-example-cues-of object)))
@@ -798,100 +798,100 @@
                   "Inspectable iconic retrieval objects"
                   "Symbols and semantics in Mind and Mechanism"))
          (world-state
-           (make-world-state-proxy
-            :id "world-state/cup-seen-and-named"
-            :title "Cup world state"
-            :summary
-            "Grounded world-state proxy for a cup encountered while its image, phonemic stream, and written word co-occur."
-            :evidence-pages pages
-            :source-kind :paper-example
-            :temporal-note
-            "The example is sequential: heard phonemes and written word co-occur with the cup image across a learned state sequence."))
+          (make-world-state-proxy
+           :id "world-state/cup-seen-and-named"
+           :title "Cup world state"
+           :summary
+           "Grounded world-state proxy for a cup encountered while its image, phonemic stream, and written word co-occur."
+           :evidence-pages pages
+           :source-kind :paper-example
+           :temporal-note
+           "The example is sequential: heard phonemes and written word co-occur with the cup image across a learned state sequence."))
          (phonemic-cue
-           (make-linguistic-retrieval-cue
-            :id "cue/phonemic-k-a-p"
-            :cue-text "k-a-p"
-            :symbolic-role :phonemic-trigger
-            :related-pages pages
-            :modality :phonemic))
+          (make-linguistic-retrieval-cue
+           :id "cue/phonemic-k-a-p"
+           :cue-text "k-a-p"
+           :symbolic-role :phonemic-trigger
+           :related-pages pages
+           :modality :phonemic))
          (written-cue
-           (make-linguistic-retrieval-cue
-            :id "cue/written-cup"
-            :cue-text "cup"
-            :symbolic-role :lexical-trigger
-            :related-pages pages
-            :modality :written))
+          (make-linguistic-retrieval-cue
+           :id "cue/written-cup"
+           :cue-text "cup"
+           :symbolic-role :lexical-trigger
+           :related-pages pages
+           :modality :written))
          (trajectory
-           (make-iconic-state-trajectory
-            :id "trajectory/cup-multimodal-association"
-            :title "Cup multimodal association trajectory"
-            :states '("<Ci,Cw,k>"
-                      "<Ci,Wi,a>"
-                      "<Ci,Wi,p>"
-                      "<Ci,Wi,/>")
-            :transitions
-            '((:from "<Ci,Cw,k>" :to "<Ci,Wi,a>" :label "heard a")
-              (:from "<Ci,Wi,a>" :to "<Ci,Wi,p>" :label "heard p")
-              (:from "<Ci,Wi,p>" :to "<Ci,Wi,/>" :label "phonetic input stops"))
-            :interpretation-note
-            "The learned sequence associates the cup image, written word, and phonemic sequence until the final state becomes reentrant."))
+          (make-iconic-state-trajectory
+           :id "trajectory/cup-multimodal-association"
+           :title "Cup multimodal association trajectory"
+           :states '("<Ci,Cw,k>"
+                     "<Ci,Wi,a>"
+                     "<Ci,Wi,p>"
+                     "<Ci,Wi,/>")
+           :transitions
+           '((:from "<Ci,Cw,k>" :to "<Ci,Wi,a>" :label "heard a")
+             (:from "<Ci,Wi,a>" :to "<Ci,Wi,p>" :label "heard p")
+             (:from "<Ci,Wi,p>" :to "<Ci,Wi,/>" :label "phonetic input stops"))
+           :interpretation-note
+           "The learned sequence associates the cup image, written word, and phonemic sequence until the final state becomes reentrant."))
          (iconic-state
-           (acquire-iconic-representation
-            world-state
-            :id "iconic-state/cup-multimodal"
-            :title "Cup multimodal iconic state"
-            :summary
-            "Reentrant iconic state that binds the cup image to its phonemic input and written lexical symbol."
-            :sensory-pattern-note
-            "The iconic state represents the sensory pattern generated by the cup world state while written and phonemic cues are simultaneously available."
-            :cue-set (list phonemic-cue written-cue)
-            :trajectory trajectory
-            :grounded-p t
-            :reentrant-p t
-            :modalities '(:visual :written :phonemic)
-            :grounding-note
-            "The multimodal sequence keeps symbolic cues distinct while the grounded cup representation remains the state that is retrieved." ))
+          (acquire-iconic-representation
+           world-state
+           :id "iconic-state/cup-multimodal"
+           :title "Cup multimodal iconic state"
+           :summary
+           "Reentrant iconic state that binds the cup image to its phonemic input and written lexical symbol."
+           :sensory-pattern-note
+           "The iconic state represents the sensory pattern generated by the cup world state while written and phonemic cues are simultaneously available."
+           :cue-set (list phonemic-cue written-cue)
+           :trajectory trajectory
+           :grounded-p t
+           :reentrant-p t
+           :modalities '(:visual :written :phonemic)
+           :grounding-note
+           "The multimodal sequence keeps symbolic cues distinct while the grounded cup representation remains the state that is retrieved." ))
          (phonemic-route
-           (associate-language-cue-with-iconic-state
-            phonemic-cue
-            iconic-state
-            :id "route/phonemic-k-a-p-to-cup"
-            :title "Phonemic cue retrieves cup iconic state"
-            :trajectory trajectory
-            :inspectable-path pages))
+          (associate-language-cue-with-iconic-state
+           phonemic-cue
+           iconic-state
+           :id "route/phonemic-k-a-p-to-cup"
+           :title "Phonemic cue retrieves cup iconic state"
+           :trajectory trajectory
+           :inspectable-path pages))
          (written-route
-           (associate-language-cue-with-iconic-state
-            written-cue
-            iconic-state
-            :id "route/written-cup-to-cup-state"
-            :title "Written cue retrieves cup iconic state"
-            :trajectory trajectory
-            :inspectable-path pages))
+          (associate-language-cue-with-iconic-state
+           written-cue
+           iconic-state
+           :id "route/written-cup-to-cup-state"
+           :title "Written cue retrieves cup iconic state"
+           :trajectory trajectory
+           :inspectable-path pages))
          (early-processing
-           (make-early-processing-stage
-            :id "early-processing/cup-multimodal"
-            :title "Early processing for cup association"
-            :summary
-            "Pre-fashioned early processing stage for visual feature extraction and auditory frequency encoding before the cup association becomes iconic."
-            :functions '("visual feature extraction"
-                         "auditory frequency encoding")
-            :modalities '(:visual :auditory)))
+          (make-early-processing-stage
+           :id "early-processing/cup-multimodal"
+           :title "Early processing for cup association"
+           :summary
+           "Pre-fashioned early processing stage for visual feature extraction and auditory frequency encoding before the cup association becomes iconic."
+           :functions '("visual feature extraction"
+                        "auditory frequency encoding")
+           :modalities '(:visual :auditory)))
          (nsmm
-           (make-neural-state-machine-model-definition
-            :id "nsmm/cup-multimodal-association"
-            :title "NSMM support for cup multimodal association"
-            :summary
-            "Paper-backed support object for the cup example: early processing feeds a reentrant iconic state that can be retrieved by phonemic and written cues."
-            :early-processing early-processing
-            :symbolic-cues (list phonemic-cue written-cue)
-            :iconic-states (list iconic-state)
-            :trajectories (list trajectory)
-            :motor-action-note
-            "Learning to say k-a-p associates heard sounds with sounds emitted through the motor-action neurons."
-            :dual-operation-note
-            "The same system keeps written and phonemic cues symbolic while the cup representation remains grounded and reentrant."
-            :grounding-claim
-            "The paper's lexical example depends on a grounded/iconic state rather than on arbitrary label attachment alone.")))
+          (make-neural-state-machine-model-definition
+           :id "nsmm/cup-multimodal-association"
+           :title "NSMM support for cup multimodal association"
+           :summary
+           "Paper-backed support object for the cup example: early processing feeds a reentrant iconic state that can be retrieved by phonemic and written cues."
+           :early-processing early-processing
+           :symbolic-cues (list phonemic-cue written-cue)
+           :iconic-states (list iconic-state)
+           :trajectories (list trajectory)
+           :motor-action-note
+           "Learning to say k-a-p associates heard sounds with sounds emitted through the motor-action neurons."
+           :dual-operation-note
+           "The same system keeps written and phonemic cues symbolic while the cup representation remains grounded and reentrant."
+           :grounding-claim
+           "The paper's lexical example depends on a grounded/iconic state rather than on arbitrary label attachment alone.")))
     (make-multimodal-association-example
      :id "example/lexical-iconic-association"
      :title "Lexical iconic association example"
@@ -915,146 +915,146 @@
          (rock-sentence "The boy broke the window with a rock")
          (curtain-sentence "The boy broke the window with a curtain")
          (rock-cue
-           (make-linguistic-retrieval-cue
-            :id "cue/case-role-rock"
-            :cue-text rock-sentence
-            :symbolic-role :sentence-trigger
-            :related-pages pages
-            :modality :sentence))
+          (make-linguistic-retrieval-cue
+           :id "cue/case-role-rock"
+           :cue-text rock-sentence
+           :symbolic-role :sentence-trigger
+           :related-pages pages
+           :modality :sentence))
          (curtain-cue
-           (make-linguistic-retrieval-cue
-            :id "cue/case-role-curtain"
-            :cue-text curtain-sentence
-            :symbolic-role :sentence-trigger
-            :related-pages pages
-            :modality :sentence))
+          (make-linguistic-retrieval-cue
+           :id "cue/case-role-curtain"
+           :cue-text curtain-sentence
+           :symbolic-role :sentence-trigger
+           :related-pages pages
+           :modality :sentence))
          (rock-world-state
-           (make-world-state-proxy
-            :id "world-state/boy-breaks-window-with-rock"
-            :title "Breaking event with rock instrument"
-            :summary
-            "Grounded world-state proxy in which the rock functions as instrument in the breaking event."
-            :evidence-pages pages
-            :source-kind :paper-example
-            :temporal-note
-            "The event unfolds as an action trajectory in which the rock remains attached to the breaking action."))
+          (make-world-state-proxy
+           :id "world-state/boy-breaks-window-with-rock"
+           :title "Breaking event with rock instrument"
+           :summary
+           "Grounded world-state proxy in which the rock functions as instrument in the breaking event."
+           :evidence-pages pages
+           :source-kind :paper-example
+           :temporal-note
+           "The event unfolds as an action trajectory in which the rock remains attached to the breaking action."))
          (curtain-world-state
-           (make-world-state-proxy
-            :id "world-state/window-with-curtain"
-            :title "Window scene with curtain modifier"
-            :summary
-            "Grounded world-state proxy in which the curtain modifies the window scene rather than filling the instrumental role."
-            :evidence-pages pages
-            :source-kind :paper-example
-            :temporal-note
-            "The scene remains distinct because the modifier path through the state structure differs from the instrumental path."))
+          (make-world-state-proxy
+           :id "world-state/window-with-curtain"
+           :title "Window scene with curtain modifier"
+           :summary
+           "Grounded world-state proxy in which the curtain modifies the window scene rather than filling the instrumental role."
+           :evidence-pages pages
+           :source-kind :paper-example
+           :temporal-note
+           "The scene remains distinct because the modifier path through the state structure differs from the instrumental path."))
          (rock-trajectory
-           (make-iconic-state-trajectory
-            :id "trajectory/case-role-rock"
-            :title "Rock instrument trajectory"
-            :states '("boy as agent"
-                      "breaking event"
-                      "window as patient"
-                      "rock as instrument")
-            :transitions
-            '((:from "boy as agent" :to "breaking event" :label "broke")
-              (:from "breaking event" :to "window as patient" :label "the window")
-              (:from "window as patient" :to "rock as instrument" :label "with a rock"))
-            :interpretation-note
-            "The sentence retrieves a trajectory in which the rock is bound to the action as instrument."
-            :case-role-note
-            "with a rock fills the instrument role for the breaking event."))
+          (make-iconic-state-trajectory
+           :id "trajectory/case-role-rock"
+           :title "Rock instrument trajectory"
+           :states '("boy as agent"
+                     "breaking event"
+                     "window as patient"
+                     "rock as instrument")
+           :transitions
+           '((:from "boy as agent" :to "breaking event" :label "broke")
+             (:from "breaking event" :to "window as patient" :label "the window")
+             (:from "window as patient" :to "rock as instrument" :label "with a rock"))
+           :interpretation-note
+           "The sentence retrieves a trajectory in which the rock is bound to the action as instrument."
+           :case-role-note
+           "with a rock fills the instrument role for the breaking event."))
          (curtain-trajectory
-           (make-iconic-state-trajectory
-            :id "trajectory/case-role-curtain"
-            :title "Curtain modifier trajectory"
-            :states '("boy as agent"
-                      "breaking event"
-                      "window as modified patient"
-                      "curtain as window modifier")
-            :transitions
-            '((:from "boy as agent" :to "breaking event" :label "broke")
-              (:from "breaking event" :to "window as modified patient" :label "the window")
-              (:from "window as modified patient"
-                :to "curtain as window modifier"
-                :label "with a curtain"))
-            :interpretation-note
-            "The sentence retrieves a different trajectory in which the curtain modifies the window phrase."
-            :case-role-note
-            "with a curtain modifies the window description rather than instrumenting the action."))
+          (make-iconic-state-trajectory
+           :id "trajectory/case-role-curtain"
+           :title "Curtain modifier trajectory"
+           :states '("boy as agent"
+                     "breaking event"
+                     "window as modified patient"
+                     "curtain as window modifier")
+           :transitions
+           '((:from "boy as agent" :to "breaking event" :label "broke")
+             (:from "breaking event" :to "window as modified patient" :label "the window")
+             (:from "window as modified patient"
+              :to "curtain as window modifier"
+              :label "with a curtain"))
+           :interpretation-note
+           "The sentence retrieves a different trajectory in which the curtain modifies the window phrase."
+           :case-role-note
+           "with a curtain modifies the window description rather than instrumenting the action."))
          (rock-iconic-state
-           (acquire-iconic-representation
-            rock-world-state
-            :id "iconic-state/rock-instrument-reading"
-            :title "Rock instrument iconic state"
-            :summary
-            "Grounded iconic state for the sentence reading in which the rock is the instrument."
-            :sensory-pattern-note
-            "The state represents the event structure suggested by the sentence when the prepositional phrase is attached instrumentally."
-            :cue-set (list rock-cue)
-            :trajectory rock-trajectory
-            :grounded-p t
-            :reentrant-p nil
-            :modalities '(:linguistic :event)
-            :grounding-note
-            "The cue remains symbolic, but the retrieved state is a grounded event reading with a distinct action trajectory."))
+          (acquire-iconic-representation
+           rock-world-state
+           :id "iconic-state/rock-instrument-reading"
+           :title "Rock instrument iconic state"
+           :summary
+           "Grounded iconic state for the sentence reading in which the rock is the instrument."
+           :sensory-pattern-note
+           "The state represents the event structure suggested by the sentence when the prepositional phrase is attached instrumentally."
+           :cue-set (list rock-cue)
+           :trajectory rock-trajectory
+           :grounded-p t
+           :reentrant-p nil
+           :modalities '(:linguistic :event)
+           :grounding-note
+           "The cue remains symbolic, but the retrieved state is a grounded event reading with a distinct action trajectory."))
          (curtain-iconic-state
-           (acquire-iconic-representation
-            curtain-world-state
-            :id "iconic-state/curtain-modifier-reading"
-            :title "Curtain modifier iconic state"
-            :summary
-            "Grounded iconic state for the sentence reading in which the curtain modifies the window."
-            :sensory-pattern-note
-            "The state represents the sentence as a window scene with a curtain modifier rather than an instrument."
-            :cue-set (list curtain-cue)
-            :trajectory curtain-trajectory
-            :grounded-p t
-            :reentrant-p nil
-            :modalities '(:linguistic :event)
-            :grounding-note
-            "The distinct iconic trajectory preserves a semantic distinction that flat labels would obscure." ))
+          (acquire-iconic-representation
+           curtain-world-state
+           :id "iconic-state/curtain-modifier-reading"
+           :title "Curtain modifier iconic state"
+           :summary
+           "Grounded iconic state for the sentence reading in which the curtain modifies the window."
+           :sensory-pattern-note
+           "The state represents the sentence as a window scene with a curtain modifier rather than an instrument."
+           :cue-set (list curtain-cue)
+           :trajectory curtain-trajectory
+           :grounded-p t
+           :reentrant-p nil
+           :modalities '(:linguistic :event)
+           :grounding-note
+           "The distinct iconic trajectory preserves a semantic distinction that flat labels would obscure." ))
          (rock-route
-           (associate-language-cue-with-iconic-state
-            rock-cue
-            rock-iconic-state
-            :id "route/rock-sentence-to-iconic-state"
-            :title "Rock sentence retrieves instrument trajectory"
-            :trajectory rock-trajectory
-            :inspectable-path pages))
+          (associate-language-cue-with-iconic-state
+           rock-cue
+           rock-iconic-state
+           :id "route/rock-sentence-to-iconic-state"
+           :title "Rock sentence retrieves instrument trajectory"
+           :trajectory rock-trajectory
+           :inspectable-path pages))
          (curtain-route
-           (associate-language-cue-with-iconic-state
-            curtain-cue
-            curtain-iconic-state
-            :id "route/curtain-sentence-to-iconic-state"
-            :title "Curtain sentence retrieves modifier trajectory"
-            :trajectory curtain-trajectory
-            :inspectable-path pages))
+          (associate-language-cue-with-iconic-state
+           curtain-cue
+           curtain-iconic-state
+           :id "route/curtain-sentence-to-iconic-state"
+           :title "Curtain sentence retrieves modifier trajectory"
+           :trajectory curtain-trajectory
+           :inspectable-path pages))
          (early-processing
-           (make-early-processing-stage
-            :id "early-processing/case-role"
-            :title "Early processing for case-role distinction"
-            :summary
-            "Pre-fashioned early processing stage that prepares sentence input before iconic trajectories differentiate the semantic reading."
-            :functions '("early lexical segmentation"
-                         "auditory frequency encoding")
-            :modalities '(:auditory :linguistic)))
+          (make-early-processing-stage
+           :id "early-processing/case-role"
+           :title "Early processing for case-role distinction"
+           :summary
+           "Pre-fashioned early processing stage that prepares sentence input before iconic trajectories differentiate the semantic reading."
+           :functions '("early lexical segmentation"
+                        "auditory frequency encoding")
+           :modalities '(:auditory :linguistic)))
          (nsmm
-           (make-neural-state-machine-model-definition
-            :id "nsmm/case-role-trajectories"
-            :title "NSMM support for case-role trajectories"
-            :summary
-            "Paper-backed support object in which sentence cues retrieve distinct iconic trajectories for the rock and curtain readings."
-            :early-processing early-processing
-            :symbolic-cues (list rock-cue curtain-cue)
-            :iconic-states (list rock-iconic-state curtain-iconic-state)
-            :trajectories (list rock-trajectory curtain-trajectory)
-            :motor-action-note
-            "The model still reserves motor/action output even when the example foregrounds internal semantic discrimination."
-            :dual-operation-note
-            "The sentence remains a symbolic trigger while the semantic distinction lives in grounded/iconic state trajectories."
-            :grounding-claim
-            "Distinct semantics are represented as distinct trajectories in iconic state structure, not merely as flat labels.")))
+          (make-neural-state-machine-model-definition
+           :id "nsmm/case-role-trajectories"
+           :title "NSMM support for case-role trajectories"
+           :summary
+           "Paper-backed support object in which sentence cues retrieve distinct iconic trajectories for the rock and curtain readings."
+           :early-processing early-processing
+           :symbolic-cues (list rock-cue curtain-cue)
+           :iconic-states (list rock-iconic-state curtain-iconic-state)
+           :trajectories (list rock-trajectory curtain-trajectory)
+           :motor-action-note
+           "The model still reserves motor/action output even when the example foregrounds internal semantic discrimination."
+           :dual-operation-note
+           "The sentence remains a symbolic trigger while the semantic distinction lives in grounded/iconic state trajectories."
+           :grounding-claim
+           "Distinct semantics are represented as distinct trajectories in iconic state structure, not merely as flat labels.")))
     (make-case-role-trajectory-example
      :id "example/case-role-iconic-trajectories"
      :title "Case-role iconic trajectory example"
@@ -1074,52 +1074,52 @@
                   "Symbols and semantics in Mind and Mechanism"
                   "Touch-Fahrplan view for Zotero topic enrichment"))
          (cue
-           (make-linguistic-retrieval-cue
-            :id "cue/follow-route"
-            :cue-text "Follow route"
-            :symbolic-role :route-starter
-            :related-pages pages
-            :modality :linguistic))
+          (make-linguistic-retrieval-cue
+           :id "cue/follow-route"
+           :cue-text "Follow route"
+           :symbolic-role :route-starter
+           :related-pages pages
+           :modality :linguistic))
          (world-state
-           (make-world-state-proxy
-            :id "world-state/focused-semantic-source-station"
-            :title "Focused semantic source station"
-            :summary
-            "Grounded world-state proxy for the evidence-bearing semantic station that a HyperDoc route re-enters."
-            :evidence-pages pages
-            :source-kind :hyperdoc-reading
-            :temporal-note
-            "The station remains revisitable as later route following re-enters the same grounded state."))
+          (make-world-state-proxy
+           :id "world-state/focused-semantic-source-station"
+           :title "Focused semantic source station"
+           :summary
+           "Grounded world-state proxy for the evidence-bearing semantic station that a HyperDoc route re-enters."
+           :evidence-pages pages
+           :source-kind :hyperdoc-reading
+           :temporal-note
+           "The station remains revisitable as later route following re-enters the same grounded state."))
          (trajectory
-           (make-iconic-state-trajectory
-            :id "trajectory/follow-route-understanding"
-            :title "Follow route understanding trajectory"
-            :states '("cue received"
-                      "grounded station focused"
-                      "iconic state re-entered")
-            :transitions
-            '((:from "cue received" :to "grounded station focused"
-               :label "focus grounded station")
-              (:from "grounded station focused" :to "iconic state re-entered"
-               :label "understanding as retrieval"))
-            :interpretation-note
-            "Touch-Fahrplan route following is read here as successful retrieval of a grounded/iconic state rather than as bare graph traversal."))
+          (make-iconic-state-trajectory
+           :id "trajectory/follow-route-understanding"
+           :title "Follow route understanding trajectory"
+           :states '("cue received"
+                     "grounded station focused"
+                     "iconic state re-entered")
+           :transitions
+           '((:from "cue received" :to "grounded station focused"
+              :label "focus grounded station")
+             (:from "grounded station focused" :to "iconic state re-entered"
+              :label "understanding as retrieval"))
+           :interpretation-note
+           "Touch-Fahrplan route following is read here as successful retrieval of a grounded/iconic state rather than as bare graph traversal."))
          (iconic-state
-           (acquire-iconic-representation
-            world-state
-            :id "iconic-state/route-language-reentry"
-            :title "Route-language reentry iconic state"
-            :summary
-            "Grounded iconic state recovered when a route cue successfully re-enters the relevant semantic station."
-            :sensory-pattern-note
-            "The state represents the source station as an inspectable grounded pattern rather than a flat label."
-            :cue-set (list cue)
-            :trajectory trajectory
-            :grounded-p t
-            :reentrant-p t
-            :modalities '(:linguistic :documentary)
-            :grounding-note
-            "The symbolic cue and grounded station remain distinct, but the route binds them into one retrieval relation." )))
+          (acquire-iconic-representation
+           world-state
+           :id "iconic-state/route-language-reentry"
+           :title "Route-language reentry iconic state"
+           :summary
+           "Grounded iconic state recovered when a route cue successfully re-enters the relevant semantic station."
+           :sensory-pattern-note
+           "The state represents the source station as an inspectable grounded pattern rather than a flat label."
+           :cue-set (list cue)
+           :trajectory trajectory
+           :grounded-p t
+           :reentrant-p t
+           :modalities '(:linguistic :documentary)
+           :grounding-note
+           "The symbolic cue and grounded station remain distinct, but the route binds them into one retrieval relation." )))
     (associate-language-cue-with-iconic-state
      cue
      iconic-state
@@ -1135,21 +1135,21 @@
          (case-role-example (make-case-role-iconic-trajectory-example))
          (route-example (make-iconic-route-language-example))
          (route-iconic-state
-           (iconic-retrieval-route-iconic-state-of route-example))
+          (iconic-retrieval-route-iconic-state-of route-example))
          (route-trajectory
-           (iconic-retrieval-route-trajectory-of route-example))
+          (iconic-retrieval-route-trajectory-of route-example))
          (route-cue
-           (iconic-retrieval-route-cue-of route-example))
+          (iconic-retrieval-route-cue-of route-example))
          (early-processing
-           (make-early-processing-stage
-            :id "early-processing/nsmm-paper-support"
-            :title "Early processing for paper-backed NSMM support"
-            :summary
-            "Support-stage object that keeps perceptual input, pre-fashioned preprocessing, iconic internal state, and motor/action output legible in HyperDoc."
-            :functions '("edge extraction"
-                         "auditory frequency encoding"
-                         "early lexical segmentation")
-            :modalities '(:visual :auditory :linguistic))))
+          (make-early-processing-stage
+           :id "early-processing/nsmm-paper-support"
+           :title "Early processing for paper-backed NSMM support"
+           :summary
+           "Support-stage object that keeps perceptual input, pre-fashioned preprocessing, iconic internal state, and motor/action output legible in HyperDoc."
+           :functions '("edge extraction"
+                        "auditory frequency encoding"
+                        "early lexical segmentation")
+           :modalities '(:visual :auditory :linguistic))))
     (make-neural-state-machine-model-definition
      :id "nsmm/iconic-language-paper-support"
      :title "NSMM support object for iconic language representation"

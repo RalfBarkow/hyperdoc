@@ -21,10 +21,10 @@
         for value-start = (+ start 6)
         for value-end = (position #\" html :start value-start)
         when value-end
-          collect (subseq html value-start value-end)
-          and do (setf pos (1+ value-end))
+        collect (subseq html value-start value-end)
+        and do (setf pos (1+ value-end))
         else
-          do (setf pos (1+ value-start))))
+        do (setf pos (1+ value-start))))
 
 (defun expr-function-token (expr)
   (let ((open (position #\( expr)))
@@ -58,7 +58,7 @@
      (loop for expr in forms
            for token = (expr-function-token expr)
            when token
-             collect (token->symbol token))
+           collect (token->symbol token))
      :test #'eq)))
 
 (defparameter *required-release-symbols*
@@ -88,7 +88,7 @@
         (pushnew (namestring page) (gethash symbol symbol-pages) :test #'equal)))
     (let ((missing (loop for symbol in all-symbols
                          unless (fboundp symbol)
-                           collect symbol)))
+                         collect symbol)))
       (if missing
           (progn
             (format t "RELEASE_DOC_RUNTIME_FAIL~%")

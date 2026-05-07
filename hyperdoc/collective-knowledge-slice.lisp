@@ -241,7 +241,7 @@
           finally (when current-lines
                     (push (format nil "~{~A~^~%~}" (nreverse current-lines))
                           blocks))
-                  (return (nreverse blocks)))))
+          (return (nreverse blocks)))))
 
 (defun trim-whitespace-string (string)
   (string-trim '(#\Space #\Tab #\Newline #\Return)
@@ -293,7 +293,7 @@
     (append (copy-tree overrides)
             (loop for (key value) on plist by #'cddr
                   unless (member key override-keys)
-                    append (list key (copy-tree value))))))
+                  append (list key (copy-tree value))))))
 
 (defun fedwiki-journal-entry-type-name (entry)
   (let ((type (getf entry :type)))
@@ -319,7 +319,7 @@
             for nested-item = (getf entry :item)
             when (or (equal (getf entry :id) item-id)
                      (equal (getf nested-item :id) item-id))
-              collect (copy-tree entry))))
+            collect (copy-tree entry))))
 
 (defun fedwiki-page-create-date (page)
   (getf (find :create
@@ -364,24 +364,24 @@
         (labels ((emit-fragment ()
                    (when current-lines
                      (let* ((fragment-text
-                              (format nil "~{~A~^~%~}" (nreverse current-lines)))
+                             (format nil "~{~A~^~%~}" (nreverse current-lines)))
                             (fragment-anchor (format nil "segment:~D" fragment-index))
                             (fragment-excerpt
-                              (shorten-source-excerpt fragment-text))
+                             (shorten-source-excerpt fragment-text))
                             (fragment-provenance
-                              (plist-with-overrides
-                               base-provenance
-                               :source-kind "localhost-fedwiki-story-item-fragment"
-                               :provenance-granularity "story-item-fragment"
-                               :source-story-item-source-id
-                               (fedwiki-story-item-source-id* page-id item-id item-index)
-                               :source-fragment-index fragment-index
-                               :source-fragment-anchor fragment-anchor
-                               :source-fragment-section-key current-section-key
-                               :source-fragment-heading current-heading
-                               :source-fragment-excerpt fragment-excerpt
-                               :derivation-note
-                               "Split paragraph story item by heading lines and blank-line-separated text segments.")))
+                             (plist-with-overrides
+                              base-provenance
+                              :source-kind "localhost-fedwiki-story-item-fragment"
+                              :provenance-granularity "story-item-fragment"
+                              :source-story-item-source-id
+                              (fedwiki-story-item-source-id* page-id item-id item-index)
+                              :source-fragment-index fragment-index
+                              :source-fragment-anchor fragment-anchor
+                              :source-fragment-section-key current-section-key
+                              :source-fragment-heading current-heading
+                              :source-fragment-excerpt fragment-excerpt
+                              :derivation-note
+                              "Split paragraph story item by heading lines and blank-line-separated text segments.")))
                        (push (make-instance 'localhost-fedwiki-fragment-record
                                             :page-id page-id
                                             :page-slug page-slug
@@ -426,28 +426,28 @@
                            (split-blank-line-blocks item-text)))
          (journal-entries (fedwiki-journal-entries-for-item page item-id))
          (classification
-           (fedwiki-story-item-provenance-classification
-            item-id journal-entries item-index))
+          (fedwiki-story-item-provenance-classification
+           item-id journal-entries item-index))
          (page-id (the-life-cycle-of-collective-knowledge-fedwiki-page-id))
          (page-relative-path
-           (the-life-cycle-of-collective-knowledge-localhost-fedwiki-page-relative-path))
+          (the-life-cycle-of-collective-knowledge-localhost-fedwiki-page-relative-path))
          (base-provenance
-           (list :source-kind "localhost-fedwiki-story-item"
-                 :source-page-id page-id
-                 :source-page-slug *the-life-cycle-of-collective-knowledge-fedwiki-slug*
-                 :source-page-path page-relative-path
-                 :source-story-item-id item-id
-                 :source-story-item-index item-index
-                 :source-story-item-type item-type
-                 :journal-action-count (length journal-entries)
-                 :journal-action-types
-                 (mapcar #'fedwiki-journal-entry-type-name journal-entries)
-                 :journal-last-date
-                 (and journal-entries
-                      (getf (car (last journal-entries)) :date))
-                 :page-create-date (fedwiki-page-create-date page)
-                 :provenance-granularity "story-item"
-                 :provenance-classification classification)))
+          (list :source-kind "localhost-fedwiki-story-item"
+                :source-page-id page-id
+                :source-page-slug *the-life-cycle-of-collective-knowledge-fedwiki-slug*
+                :source-page-path page-relative-path
+                :source-story-item-id item-id
+                :source-story-item-index item-index
+                :source-story-item-type item-type
+                :journal-action-count (length journal-entries)
+                :journal-action-types
+                (mapcar #'fedwiki-journal-entry-type-name journal-entries)
+                :journal-last-date
+                (and journal-entries
+                     (getf (car (last journal-entries)) :date))
+                :page-create-date (fedwiki-page-create-date page)
+                :provenance-granularity "story-item"
+                :provenance-classification classification)))
     (make-instance 'localhost-fedwiki-item-record
                    :page-id page-id
                    :page-slug *the-life-cycle-of-collective-knowledge-fedwiki-slug*
@@ -522,7 +522,7 @@
      :title "The Life Cycle of Collective Knowledge"
      :summary "Collective knowledge remains alive only when its representations stay usable long enough to be reviewed, recombined, and reused across time."
      :fragment-selections ((:use-primary-item t
-                            :fragment-ordinals (0 3 4 5 6)))
+                                              :fragment-ordinals (0 3 4 5 6)))
      :topic-kind :umbrella
      :references ("Source-oriented and image-oriented development in Common Lisp"
                   "Opening external FedWiki sites"
@@ -531,7 +531,7 @@
      :title "Collective knowledge"
      :summary "Collective knowledge is information that has been published, reviewed, cited, recombined, and carried forward beyond any single contributor or file format."
      :fragment-selections ((:use-primary-item t
-                            :fragment-ordinals (0 3 6)))
+                                              :fragment-ordinals (0 3 6)))
      :topic-kind :subtopic
      :references ("The Life Cycle of Collective Knowledge"
                   "Source-oriented and image-oriented development in Common Lisp"
@@ -540,7 +540,7 @@
      :title "Refinement of information into knowledge"
      :summary "Information becomes knowledge when communities can inspect, cite, compare, refine, and recombine it through durable representations."
      :fragment-selections ((:use-primary-item t
-                            :fragment-ordinals (0 6)))
+                                              :fragment-ordinals (0 6)))
      :topic-kind :subtopic
      :references ("The Life Cycle of Collective Knowledge"
                   "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"))
@@ -548,7 +548,7 @@
      :title "Digital fragility of software source code"
      :summary "Software source code is digitally fragile because its intelligibility and execution depend on machines, runtimes, toolchains, and surrounding environments."
      :fragment-selections ((:use-primary-item t
-                            :fragment-ordinals (3)))
+                                              :fragment-ordinals (3)))
      :topic-kind :subtopic
      :references ("The Life Cycle of Collective Knowledge"
                   "Source-oriented and image-oriented development in Common Lisp"
@@ -557,7 +557,7 @@
      :title "Computational reproducibility is not enough"
      :summary "Archiving old environments preserves rerun capability, but collective knowledge needs more than frozen reproducibility snapshots."
      :fragment-selections ((:use-primary-item t
-                            :fragment-ordinals (4)))
+                                              :fragment-ordinals (4)))
      :topic-kind :subtopic
      :references ("The Life Cycle of Collective Knowledge"
                   "Source-oriented and image-oriented development in Common Lisp"
@@ -567,7 +567,7 @@
      :title "Software interoperability across time"
      :summary "Long-lived software knowledge requires later systems to inspect, compare, and reuse earlier components across time instead of only preserving them as inert artifacts."
      :fragment-selections ((:use-primary-item t
-                            :fragment-ordinals (4)))
+                                              :fragment-ordinals (4)))
      :topic-kind :subtopic
      :references ("The Life Cycle of Collective Knowledge"
                   "Source-oriented and image-oriented development in Common Lisp"
@@ -576,7 +576,7 @@
      :title "Stable software environments"
      :summary "Stable software environments provide the language, standards, and implementation continuity that let software remain usable across long spans of time."
      :fragment-selections ((:use-primary-item t
-                            :fragment-ordinals (5)))
+                                              :fragment-ordinals (5)))
      :topic-kind :subtopic
      :references ("The Life Cycle of Collective Knowledge"
                   "Source-oriented and image-oriented development in Common Lisp"
@@ -594,16 +594,16 @@
 (defun the-life-cycle-of-collective-knowledge-source-claim-from-pipeline
     (source-data story-items primary-item)
   (let ((claim-fragment
-          (and primary-item
-               (localhost-fedwiki-item-fragment-by-section-key
-                primary-item
-                "claim-carried-by-this-page"))))
+         (and primary-item
+              (localhost-fedwiki-item-fragment-by-section-key
+               primary-item
+               "claim-carried-by-this-page"))))
     (or (and claim-fragment
              (localhost-fedwiki-fragment-data-text claim-fragment))
         (default-localhost-fedwiki-source-claim
-         source-data
-         story-items
-         primary-item))))
+            source-data
+            story-items
+          primary-item))))
 
 (defun the-life-cycle-of-collective-knowledge-page-pipeline-spec ()
   (make-localhost-fedwiki-page-pipeline-spec
@@ -741,15 +741,15 @@
          (source (localhost-fedwiki-page-pipeline-result-source pipeline))
          (item-data (localhost-fedwiki-page-pipeline-result-primary-item pipeline))
          (fragment-ordinals
-           (remove-duplicates
-            (loop for topic-spec in +the-life-cycle-of-collective-knowledge-topic-extraction-specs+
-                  append (loop for selection in (getf topic-spec :fragment-selections)
-                               append (copy-list
-                                       (or (getf selection :fragment-ordinals)
-                                           '()))))
-            :test #'eql))
+          (remove-duplicates
+           (loop for topic-spec in +the-life-cycle-of-collective-knowledge-topic-extraction-specs+
+                 append (loop for selection in (getf topic-spec :fragment-selections)
+                              append (copy-list
+                                      (or (getf selection :fragment-ordinals)
+                                          '()))))
+           :test #'eql))
          (fragments
-           (localhost-fedwiki-fragments-by-ordinals item-data fragment-ordinals)))
+          (localhost-fedwiki-fragments-by-ordinals item-data fragment-ordinals)))
     (list :id "the-life-cycle-of-collective-knowledge-topic-set"
           :source-file *the-life-cycle-of-collective-knowledge-topic-asset*
           :source-origin-id
@@ -881,19 +881,19 @@
 (defun render-the-life-cycle-of-collective-knowledge-topic-factory-snippet ()
   (let* ((definition (the-life-cycle-of-collective-knowledge-topic-definition-chunk))
          (metadata
-           (list :topic-factory-snippet
-                 :id (snippet-id-of definition)
-                 :source-file *the-life-cycle-of-collective-knowledge-topic-asset*
-                 :source-origin-id (source-origin-id-of definition)
-                 :source-origin-path (source-origin-path-of definition)
-                 :related-hyperdoc-page-title
-                 (related-hyperdoc-page-title-of definition)
-                 :related-topic-id (related-topic-id-of definition)
-                 :related-topic-ids (related-topic-ids-of definition)
-                 :provenance (provenance-of definition)))
+          (list :topic-factory-snippet
+                :id (snippet-id-of definition)
+                :source-file *the-life-cycle-of-collective-knowledge-topic-asset*
+                :source-origin-id (source-origin-id-of definition)
+                :source-origin-path (source-origin-path-of definition)
+                :related-hyperdoc-page-title
+                (related-hyperdoc-page-title-of definition)
+                :related-topic-id (related-topic-id-of definition)
+                :related-topic-ids (related-topic-ids-of definition)
+                :provenance (provenance-of definition)))
          (topic-forms
-           (mapcar #'render-the-life-cycle-topic-factory-form
-                   (the-life-cycle-of-collective-knowledge-topic-chunks))))
+          (mapcar #'render-the-life-cycle-topic-factory-form
+                  (the-life-cycle-of-collective-knowledge-topic-chunks))))
     (with-output-to-string (stream)
       (pprint metadata stream)
       (terpri stream)
@@ -904,7 +904,7 @@
             do (unless first?
                  (terpri stream)
                  (terpri stream))
-               (write-string form stream))
+            (write-string form stream))
       (terpri stream))))
 
 (defun render-the-life-cycle-topic-list-item (chunk)
@@ -917,7 +917,7 @@
 (defun render-the-life-cycle-of-collective-knowledge-page ()
   (let* ((source (the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
          (primary-item
-           (the-life-cycle-of-collective-knowledge-primary-story-item source))
+          (the-life-cycle-of-collective-knowledge-primary-story-item source))
          (primary-fragment-count (length (fragments-of primary-item)))
          (umbrella (the-life-cycle-of-collective-knowledge-umbrella-topic-chunk))
          (subtopics (the-life-cycle-of-collective-knowledge-subtopic-chunks))
@@ -1048,7 +1048,7 @@
 
 (defun write-the-life-cycle-of-collective-knowledge-artifacts ()
   (let* ((source
-           (the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
+          (the-life-cycle-of-collective-knowledge-localhost-fedwiki-source-chunk))
          (snippet-path (the-life-cycle-of-collective-knowledge-topic-asset-path))
          (page-path (the-life-cycle-of-collective-knowledge-page-pathname)))
     (write-utf8-file-string snippet-path

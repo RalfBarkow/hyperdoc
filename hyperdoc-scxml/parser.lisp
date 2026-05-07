@@ -16,21 +16,21 @@
 
 (defun xml-local-name (node-or-name)
   (let* ((raw
-           (cond
-             ((typep node-or-name 'plump-dom:element)
-              (plump:tag-name node-or-name))
-             ((symbolp node-or-name)
-              (symbol-name node-or-name))
-             (t
-              node-or-name)))
+          (cond
+            ((typep node-or-name 'plump-dom:element)
+             (plump:tag-name node-or-name))
+            ((symbolp node-or-name)
+             (symbol-name node-or-name))
+            (t
+             node-or-name)))
          (name (string raw))
          (colon (position #\: name :from-end t))
          (brace (position #\} name :from-end t))
          (start
-           (cond
-             (brace (1+ brace))
-             (colon (1+ colon))
-             (t 0))))
+          (cond
+            (brace (1+ brace))
+            (colon (1+ colon))
+            (t 0))))
     (string-downcase (subseq name start))))
 
 (defun xml-attribute (element attribute-name)
@@ -47,7 +47,7 @@
 (defun xml-element-children (element)
   (loop for child across (plump:children element)
         when (typep child 'plump-dom:element)
-          collect child))
+        collect child))
 
 (defun xml-first-child-element-named (element child-name)
   (let ((target-name (xml-local-name child-name)))

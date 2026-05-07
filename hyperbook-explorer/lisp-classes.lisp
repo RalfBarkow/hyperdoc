@@ -68,7 +68,7 @@
   (let ((symbol (read-symbol page-id signal-error?)))
     (when symbol
       (if-let ((class (lisp-class-definition symbol)))
-        (make-lisp-class-page hb page-id class)
+          (make-lisp-class-page hb page-id class)
         (and signal-error?
              (handler-case
                  (find-class symbol)
@@ -93,16 +93,16 @@
 (views:defview 👀overview (hb lisp-classes)
   (declare (ignore hb))
   (views:html-view :title "Overview" :priority 1
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperbook
-                           "assets/hyperbook/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:html
-      (:div :class "hyperbook-page"
-            (:h1 (views:esc "Lisp classes"))
-            (:p (views:esc "This hyperbook contains one page for each symbol
+                   (views:add-asset-path "/hyperbook/"
+                                         (asdf:system-relative-pathname
+                                          :hyperbook
+                                          "assets/hyperbook/"))
+                   (views:include-css "/hyperbook/css/hyperbook.css")
+                   (views:html
+                    (:div :class "hyperbook-page"
+                          (:h1 (views:esc "Lisp classes"))
+                          (:p (views:esc "This hyperbook contains one page for each symbol
 in the Lisp image that has a class definition attached to it.
 It is used for linking to Lisp code."))
-            (:p (views:esc "Use the Loaded classes view to browse the current Lisp image,
+                          (:p (views:esc "Use the Loaded classes view to browse the current Lisp image,
 or open a page directly by its package-qualified class name."))))))

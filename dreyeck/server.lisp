@@ -20,7 +20,7 @@
     (list "hyperdoc/explorer")))
 
 (defun dreyeck-link-target-rewriter (source-page hyperbook-id page-id
-                                      &key element link-text)
+                                     &key element link-text)
   (declare (ignore source-page element link-text))
   (if (member hyperbook-id +dreyeck-local-target-aliases+ :test #'string=)
       (values "hyperdoc/explorer" page-id t)

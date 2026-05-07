@@ -183,7 +183,7 @@
    (workspace-id
     :initarg :workspace-id
     :initform nil
-   :reader workspace-annotation-persistence-debug-workspace-id-of)
+    :reader workspace-annotation-persistence-debug-workspace-id-of)
    (destination
     :initarg :destination
     :initform nil
@@ -271,7 +271,7 @@
    (runtime-relation-id
     :initarg :runtime-relation-id
     :initform nil
-   :reader workspace-annotation-persistence-report-runtime-relation-id-of)
+    :reader workspace-annotation-persistence-report-runtime-relation-id-of)
    (plan
     :initarg :plan
     :initform nil
@@ -452,9 +452,9 @@
     :initarg :success-readback
     :initform nil)
    (do-not-do
-    :reader workspace-annotation-persistence-resolution-do-not-do-of
-    :initarg :do-not-do
-    :initform nil)))
+       :reader workspace-annotation-persistence-resolution-do-not-do-of
+       :initarg :do-not-do
+       :initform nil)))
 
 (defclass workspace-annotation-persistence-stage-operation ()
   ((id
@@ -795,7 +795,7 @@
    (endpoint-path
     :initarg :endpoint-path
     :initform nil
-   :reader workspace-annotation-backend-compatibility-report-endpoint-path-of)
+    :reader workspace-annotation-backend-compatibility-report-endpoint-path-of)
    (failing-type-uri
     :initarg :failing-type-uri
     :initform nil
@@ -855,9 +855,9 @@
     :initform nil
     :reader workspace-annotation-topicmap-id-of)
    (workspace-id
-   :initarg :workspace-id
-   :initform nil
-   :reader workspace-annotation-workspace-id-of)
+    :initarg :workspace-id
+    :initform nil
+    :reader workspace-annotation-workspace-id-of)
    (storage-mode
     :initarg :storage-mode
     :initform *dmx-workspace-annotation-native-storage-mode*
@@ -965,8 +965,8 @@
      (and (plusp value) value))
     ((stringp value)
      (let ((trimmed
-             (string-trim '(#\Space #\Tab #\Newline #\Return)
-                          value)))
+            (string-trim '(#\Space #\Tab #\Newline #\Return)
+                         value)))
        (and (plusp (length trimmed))
             (every #'digit-char-p trimmed)
             (parse-integer trimmed))))
@@ -979,10 +979,10 @@
          (target-id (and target
                          (ignore-errors (id-of target))))
          (target-anchor-object-id
-           (and annotation
-                (ignore-errors
-                  (anchor-object-id-of
-                   (target-anchor-of annotation))))))
+          (and annotation
+               (ignore-errors
+                 (anchor-object-id-of
+                  (target-anchor-of annotation))))))
     (or (workspace-annotation-strict-positive-topic-id-or-nil target)
         (workspace-annotation-strict-positive-topic-id-or-nil target-id)
         (workspace-annotation-strict-positive-topic-id-or-nil
@@ -996,13 +996,13 @@
     (annotation workspace-topicmap-id
      &key status supersedes-topic-id annotation-key provenance-json)
   (let* ((normalized
-           (dmx-workspace-annotation-from-object
-            annotation
-            workspace-topicmap-id
-            :status status
-            :supersedes-topic-id supersedes-topic-id
-            :annotation-key annotation-key
-            :provenance-json provenance-json)))
+          (dmx-workspace-annotation-from-object
+           annotation
+           workspace-topicmap-id
+           :status status
+           :supersedes-topic-id supersedes-topic-id
+           :annotation-key annotation-key
+           :provenance-json provenance-json)))
     (dmx-workspace-annotation-native-payload
      :uri (getf normalized :uri)
      :title (getf normalized :title)
@@ -1023,8 +1023,8 @@
 
 (defun workspace-annotation-local-payload-with-status (payload status)
   (let* ((payload-copy
-           (dmx-workspace-journal-payload-json->payload
-            (dmx-workspace-journal-payload-json-from-payload payload)))
+          (dmx-workspace-journal-payload-json->payload
+           (dmx-workspace-journal-payload-json-from-payload payload)))
          (children (or (getf payload-copy :children)
                        (let ((json (make-hash-table :test #'equal)))
                          (setf (getf payload-copy :children) json)
@@ -1087,20 +1087,20 @@
 (defun workspace-annotation-local-apply-transition
     (subject-key workspace-topicmap-id next-state)
   (let* ((stream
-           (ensure-hyperdoc-local-workspace-annotation-stream
-            subject-key
-            workspace-topicmap-id))
+          (ensure-hyperdoc-local-workspace-annotation-stream
+           subject-key
+           workspace-topicmap-id))
          (previous-state
-           (hyperdoc-local-workspace-annotation-current-state
-            stream
-            subject-key
-            workspace-topicmap-id))
+          (hyperdoc-local-workspace-annotation-current-state
+           stream
+           subject-key
+           workspace-topicmap-id))
          (events
-           (dmx-workspace-journal-transition-events
-            previous-state
-            next-state
-            *hyperdoc-local-workspace-annotation-observation-kind*
-            *hyperdoc-local-workspace-annotation-actor*)))
+          (dmx-workspace-journal-transition-events
+           previous-state
+           next-state
+           *hyperdoc-local-workspace-annotation-observation-kind*
+           *hyperdoc-local-workspace-annotation-actor*)))
     (when events
       (dmx-workspace-journal-apply-events-to-stream stream events))
     (set-hyperdoc-local-workspace-journal-stream subject-key stream)
@@ -1126,87 +1126,87 @@
     (snapshot)
   (let* ((payload-json (and snapshot (gethash "payload" snapshot)))
          (payload
-           (and (hash-table-p payload-json)
-                (dmx-workspace-journal-payload-json->payload payload-json)))
+          (and (hash-table-p payload-json)
+               (dmx-workspace-journal-payload-json->payload payload-json)))
          (source-anchor-json
-           (and payload
-                (dmx-json-child-value
-                 payload
-                 *dmx-workspace-annotation-source-anchor-json-type-uri*)))
+          (and payload
+               (dmx-json-child-value
+                payload
+                *dmx-workspace-annotation-source-anchor-json-type-uri*)))
          (target-anchor-json
-           (and payload
-                (dmx-json-child-value
-                 payload
-                 *dmx-workspace-annotation-target-anchor-json-type-uri*)))
+          (and payload
+               (dmx-json-child-value
+                payload
+                *dmx-workspace-annotation-target-anchor-json-type-uri*)))
          (source-anchor
-           (and (dmx-non-empty-string-p source-anchor-json)
-                (make-dom-annotation-anchor-from-json
-                 (parse-dom-annotation-json source-anchor-json))))
+          (and (dmx-non-empty-string-p source-anchor-json)
+               (make-dom-annotation-anchor-from-json
+                (parse-dom-annotation-json source-anchor-json))))
          (target-anchor
-           (and (dmx-non-empty-string-p target-anchor-json)
-                (make-dom-annotation-anchor-from-json
-                 (parse-dom-annotation-json target-anchor-json))))
+          (and (dmx-non-empty-string-p target-anchor-json)
+               (make-dom-annotation-anchor-from-json
+                (parse-dom-annotation-json target-anchor-json))))
          (topic-type-uri (and payload (getf payload :type-uri)))
          (workspace-topic-uri
-           (or (and payload (getf payload :uri))
-               (and snapshot (gethash "subjectUri" snapshot))
-               (and snapshot (gethash "subjectKey" snapshot))))
+          (or (and payload (getf payload :uri))
+              (and snapshot (gethash "subjectUri" snapshot))
+              (and snapshot (gethash "subjectKey" snapshot))))
          (topic-id (and snapshot (gethash "topicId" snapshot)))
          (storage-mode
-           (if (or (string= (or topic-type-uri "")
-                            *dmx-workspace-annotation-compatibility-carrier-type-uri*)
-                   (string= (or topic-type-uri "")
-                            *dmx-notes-note-type-uri*))
-               *dmx-workspace-annotation-compatibility-storage-mode*
-               *dmx-workspace-annotation-native-storage-mode*))
+          (if (or (string= (or topic-type-uri "")
+                           *dmx-workspace-annotation-compatibility-carrier-type-uri*)
+                  (string= (or topic-type-uri "")
+                           *dmx-notes-note-type-uri*))
+              *dmx-workspace-annotation-compatibility-storage-mode*
+              *dmx-workspace-annotation-native-storage-mode*))
          (carrier-type-uri
-           (and (dmx-workspace-annotation-compatibility-storage-mode-p
-                 storage-mode)
-                (or (and (dmx-non-empty-string-p topic-type-uri) topic-type-uri)
-                    *dmx-workspace-annotation-compatibility-carrier-type-uri*)))
+          (and (dmx-workspace-annotation-compatibility-storage-mode-p
+                storage-mode)
+               (or (and (dmx-non-empty-string-p topic-type-uri) topic-type-uri)
+                   *dmx-workspace-annotation-compatibility-carrier-type-uri*)))
          (annotation-key
-           (and (dmx-non-empty-string-p workspace-topic-uri)
-                (dmx-string-prefix-p *hyperdoc-workspace-annotation-uri-prefix*
-                                     workspace-topic-uri)
-                (subseq workspace-topic-uri
-                        (length *hyperdoc-workspace-annotation-uri-prefix*))))
+          (and (dmx-non-empty-string-p workspace-topic-uri)
+               (dmx-string-prefix-p *hyperdoc-workspace-annotation-uri-prefix*
+                                    workspace-topic-uri)
+               (subseq workspace-topic-uri
+                       (length *hyperdoc-workspace-annotation-uri-prefix*))))
          (source-object-ref
-           (and payload
-                (dmx-json-child-value
-                 payload
-                 *dmx-workspace-annotation-source-object-ref-type-uri*)))
+          (and payload
+               (dmx-json-child-value
+                payload
+                *dmx-workspace-annotation-source-object-ref-type-uri*)))
          (target-object-ref
-           (and payload
-                (dmx-json-child-value
-                 payload
-                 *dmx-workspace-annotation-target-object-ref-type-uri*)))
+          (and payload
+               (dmx-json-child-value
+                payload
+                *dmx-workspace-annotation-target-object-ref-type-uri*)))
          (runtime-relation-id
-           (and payload
-                (dmx-json-child-value
-                 payload
-                 *dmx-workspace-annotation-runtime-relation-id-type-uri*)))
+          (and payload
+               (dmx-json-child-value
+                payload
+                *dmx-workspace-annotation-runtime-relation-id-type-uri*)))
          (summary
-           (or (and payload
-                    (dmx-json-child-value
-                     payload
-                     *dmx-workspace-annotation-summary-type-uri*))
-               (and payload (getf payload :value))
-               "Workspace annotation"))
+          (or (and payload
+                   (dmx-json-child-value
+                    payload
+                    *dmx-workspace-annotation-summary-type-uri*))
+              (and payload (getf payload :value))
+              "Workspace annotation"))
          (title
-           (or (and payload (getf payload :value))
-               "Workspace annotation"))
+          (or (and payload (getf payload :value))
+              "Workspace annotation"))
          (stable-id
-           (if (integerp topic-id)
-               (format nil "workspace-annotation/~D" topic-id)
-               (format nil "workspace-annotation/local/~A"
-                       (or annotation-key
-                           (dmx-workspace-annotation-slug
-                            (or runtime-relation-id title "annotation"))))))
+          (if (integerp topic-id)
+              (format nil "workspace-annotation/~D" topic-id)
+              (format nil "workspace-annotation/local/~A"
+                      (or annotation-key
+                          (dmx-workspace-annotation-slug
+                           (or runtime-relation-id title "annotation"))))))
          (workspace-status
-           (and payload
-                (dmx-json-child-value
-                 payload
-                 *dmx-workspace-annotation-status-type-uri*))))
+          (and payload
+               (dmx-json-child-value
+                payload
+                *dmx-workspace-annotation-status-type-uri*))))
     (unless (and payload source-anchor target-anchor)
       (error 'fedwiki-dmx-import-error
              :message
@@ -1269,12 +1269,12 @@
 (defun read-hyperdoc-local-workspace-annotation
     (&key subject-key annotation-key)
   (let* ((resolved-subject-key
-           (or subject-key
-               (and (dmx-non-empty-string-p annotation-key)
-                    (dmx-workspace-annotation-uri annotation-key))
-               (error 'fedwiki-dmx-import-error
-                      :message
-                      "Provide subject-key or annotation-key for HyperDoc-local workspace annotation read")))
+          (or subject-key
+              (and (dmx-non-empty-string-p annotation-key)
+                   (dmx-workspace-annotation-uri annotation-key))
+              (error 'fedwiki-dmx-import-error
+                     :message
+                     "Provide subject-key or annotation-key for HyperDoc-local workspace annotation read")))
          (stream (gethash resolved-subject-key
                           *hyperdoc-local-workspace-journal-streams*)))
     (unless stream
@@ -1310,11 +1310,11 @@
 
 (defun make-default-workspace-annotation-live-client (&key verbose)
   (let* ((environment-client
-           (make-http-dmx-import-client-from-environment :verbose verbose))
+          (make-http-dmx-import-client-from-environment :verbose verbose))
          (fallback-base-url
-           (normalize-http-dmx-import-string
-            *dmx-base-url*
-            :base-url 'make-default-workspace-annotation-live-client)))
+          (normalize-http-dmx-import-string
+           *dmx-base-url*
+           :base-url 'make-default-workspace-annotation-live-client)))
     (when fallback-base-url
       (make-instance
        'http-dmx-import-client
@@ -1342,9 +1342,9 @@
 (defun resolve-dmx-workspace-annotation-client
     (&key client (dry-run t) verbose)
   (let ((resolved-client
-          (or client
-              (make-default-dmx-import-client :dry-run dry-run
-                                              :verbose verbose))))
+         (or client
+             (make-default-dmx-import-client :dry-run dry-run
+                                             :verbose verbose))))
     (if (or dry-run
             (not (typep resolved-client 'null-dmx-import-client)))
         resolved-client
@@ -1418,47 +1418,47 @@
 (defun resolve-dmx-workspace-annotation-destination
     (annotation &key workspace-topicmap-id workspace-id client)
   (let* ((persisted-workspace-id
-           (and (workspace-dock-annotation-p annotation)
-                (workspace-annotation-workspace-id-of annotation)))
+          (and (workspace-dock-annotation-p annotation)
+               (workspace-annotation-workspace-id-of annotation)))
          (persisted-topicmap-id
-           (and (workspace-dock-annotation-p annotation)
-                (workspace-annotation-topicmap-id-of annotation)))
+          (and (workspace-dock-annotation-p annotation)
+               (workspace-annotation-topicmap-id-of annotation)))
          (explicit-workspace-id
-           (and workspace-id
-                (dmx-workspace-annotation-topic-id
-                 workspace-id
-                 :workspace-id
-                 'resolve-dmx-workspace-annotation-destination
-                 :required? t)))
+          (and workspace-id
+               (dmx-workspace-annotation-topic-id
+                workspace-id
+                :workspace-id
+                'resolve-dmx-workspace-annotation-destination
+                :required? t)))
          (explicit-topicmap-id
-           (normalize-optional-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-optional-workspace-topicmap-id workspace-topicmap-id))
          (client-workspace-id
-           (and (typep client 'http-dmx-import-client)
-                (dmx-import-workspace-id-of client)))
+          (and (typep client 'http-dmx-import-client)
+               (dmx-import-workspace-id-of client)))
          (resolved-workspace-id
-           (or explicit-workspace-id
-               persisted-workspace-id
-               client-workspace-id
-               *dmx-context-window-workspace-id*))
+          (or explicit-workspace-id
+              persisted-workspace-id
+              client-workspace-id
+              *dmx-context-window-workspace-id*))
          (workspace-source
-           (cond
-             (explicit-workspace-id :explicit-user-choice)
-             (persisted-workspace-id :persisted-annotation-destination)
-             (client-workspace-id :http-client-workspace-context)
-             (t :context-window-default)))
+          (cond
+            (explicit-workspace-id :explicit-user-choice)
+            (persisted-workspace-id :persisted-annotation-destination)
+            (client-workspace-id :http-client-workspace-context)
+            (t :context-window-default)))
          (resolved-topicmap-id
-           (or explicit-topicmap-id
-               persisted-topicmap-id
-               *dmx-context-window-topicmap-id*))
+          (or explicit-topicmap-id
+              persisted-topicmap-id
+              *dmx-context-window-topicmap-id*))
          (topicmap-source
-           (cond
-             (explicit-topicmap-id :explicit-user-choice)
-             (persisted-topicmap-id :persisted-annotation-destination)
-             (t :context-window-default)))
+          (cond
+            (explicit-topicmap-id :explicit-user-choice)
+            (persisted-topicmap-id :persisted-annotation-destination)
+            (t :context-window-default)))
          (source
-           (if (eq workspace-source topicmap-source)
-               workspace-source
-               :mixed)))
+          (if (eq workspace-source topicmap-source)
+              workspace-source
+              :mixed)))
     (make-dmx-workspace-annotation-destination
      :workspace-id resolved-workspace-id
      :workspace-topicmap-id resolved-topicmap-id
@@ -1526,8 +1526,8 @@
 (defun resolve-dmx-workspace-annotation-storage-mode
     (requested-storage-mode client existing-topic)
   (let ((existing-storage-mode
-          (and existing-topic
-               (dmx-workspace-annotation-topic-storage-mode existing-topic))))
+         (and existing-topic
+              (dmx-workspace-annotation-topic-storage-mode existing-topic))))
     (cond
       (existing-storage-mode
        existing-storage-mode)
@@ -1578,9 +1578,9 @@
     (loop for char across string
           for index from 0
           unless (<= (char-code char) 255)
-            do (return (list :character (string char)
-                             :code-point (char-code char)
-                             :position index)))))
+          do (return (list :character (string char)
+                           :code-point (char-code char)
+                           :position index)))))
 
 (defun workspace-annotation-transport-field-candidates (plan)
   (when plan
@@ -1617,9 +1617,9 @@
                                     plan)
             for details = (first-non-latin-1-character-details value)
             when details
-              do (return (append (list :transport-stage failure-stage
-                                       :field field)
-                                 details))))))
+            do (return (append (list :transport-stage failure-stage
+                                     :field field)
+                               details))))))
 
 (defun workspace-annotation-write-plan-payload-json-string (plan)
   (when plan
@@ -1708,22 +1708,22 @@
     (labels ((probe-type-uri (type-uri kind)
                (let* ((topic (dmx-import-find-existing-topic client type-uri))
                       (evidence
-                        (and (typep client 'http-dmx-import-client)
-                             (dmx-import-last-http-transaction-evidence-of
-                              client)))
+                       (and (typep client 'http-dmx-import-client)
+                            (dmx-import-last-http-transaction-evidence-of
+                             client)))
                       (result
-                        (workspace-annotation-live-type-support-result
-                         type-uri
-                         kind
-                         topic
-                         evidence)))
+                       (workspace-annotation-live-type-support-result
+                        type-uri
+                        kind
+                        topic
+                        evidence)))
                  (push result results)
                  result)))
       (let* ((parent-result
-               (probe-type-uri (first type-uris)
-                               (ecase kind-prefix
-                                 (:native :native-parent)
-                                 (:carrier :carrier-parent))))
+              (probe-type-uri (first type-uris)
+                              (ecase kind-prefix
+                                (:native :native-parent)
+                                (:carrier :carrier-parent))))
              (parent-supported-p (getf parent-result :supported-p)))
         (when parent-supported-p
           (dolist (child-type-uri (rest type-uris))
@@ -1733,9 +1733,9 @@
                               (:carrier :carrier-child)))))
         (let* ((ordered-results (nreverse results))
                (first-missing
-                 (find-if-not (lambda (entry)
-                                (getf entry :supported-p))
-                              ordered-results)))
+                (find-if-not (lambda (entry)
+                               (getf entry :supported-p))
+                             ordered-results)))
           (values ordered-results first-missing))))))
 
 (defun workspace-annotation-create-topic-probe-form
@@ -1752,11 +1752,11 @@
 
 (defun dmx-import-http-evidence (condition)
   (and (typep condition 'dmx-import-http-error)
-         (let ((evidence
-               (or (dmx-import-http-evidence-of condition)
-                   (list :url (dmx-import-http-url-of condition)
-                         :response-status-code
-                         (dmx-import-http-status-code-of condition)))))
+       (let ((evidence
+              (or (dmx-import-http-evidence-of condition)
+                  (list :url (dmx-import-http-url-of condition)
+                        :response-status-code
+                        (dmx-import-http-status-code-of condition)))))
          (sanitize-dmx-import-http-evidence evidence))))
 
 (defun workspace-annotation-topic-upsert-evidence (plan condition)
@@ -1845,7 +1845,7 @@
           :update)
      (if-let (topic-id (dmx-workspace-annotation-write-plan-existing-topic-id
                         plan))
-       (dmx-topic-update-path topic-id)
+         (dmx-topic-update-path topic-id)
        "/core/topic"))
     (t
      (dmx-topic-create-path))))
@@ -1856,14 +1856,14 @@
          (path (workspace-annotation-topic-upsert-endpoint-path-for-plan plan))
          (workspace-id (dmx-workspace-annotation-write-plan-workspace-id plan))
          (cookie-values
-           (http-dmx-import-request-cookie-values
-            client
-            :workspace-id workspace-id))
+          (http-dmx-import-request-cookie-values
+           client
+           :workspace-id workspace-id))
          (cookie-header
-           (and cookie-values
-                (format nil "~{~A~^; ~}" cookie-values)))
+          (and cookie-values
+               (format nil "~{~A~^; ~}" cookie-values)))
          (payload-json
-           (workspace-annotation-write-plan-payload-json-string plan)))
+          (workspace-annotation-write-plan-payload-json-string plan)))
     (error 'dmx-import-http-error
            :message
            (format nil
@@ -1905,10 +1905,10 @@
 (defun workspace-annotation-assignment-auth-context
     (plan client topic-id condition)
   (let ((client-auth-context
-          (workspace-annotation-client-auth-context client))
+         (workspace-annotation-client-auth-context client))
         (destination
-          (and plan
-               (dmx-workspace-annotation-write-plan-destination plan))))
+         (and plan
+              (dmx-workspace-annotation-write-plan-destination plan))))
     (append
      (list :workspace-id
            (and plan
@@ -1968,10 +1968,10 @@
 (defun workspace-annotation-journal-preflight-auth-context
     (plan client summary condition)
   (let ((client-auth-context
-          (workspace-annotation-client-auth-context client))
+         (workspace-annotation-client-auth-context client))
         (destination
-          (and plan
-               (dmx-workspace-annotation-write-plan-destination plan)))
+         (and plan
+              (dmx-workspace-annotation-write-plan-destination plan)))
         (http-evidence (dmx-import-http-evidence condition)))
     (append
      (list :workspace-id
@@ -2059,14 +2059,14 @@
 (defun workspace-annotation-journal-preflight-assigned-workspace-label
     (summary)
   (let ((assigned-workspace-id
-          (and summary
-               (getf summary :assigned-workspace-id)))
+         (and summary
+              (getf summary :assigned-workspace-id)))
         (assigned-workspace-title
-          (and summary
-               (getf summary :assigned-workspace-title)))
+         (and summary
+              (getf summary :assigned-workspace-title)))
         (assigned-workspace-status
-          (and summary
-               (getf summary :assigned-workspace-status))))
+         (and summary
+              (getf summary :assigned-workspace-status))))
     (cond
       (assigned-workspace-id
        (or (dmx-workspace-annotation-workspace-label assigned-workspace-id)
@@ -2101,21 +2101,21 @@
        (not (eq (workspace-annotation-persistence-report-failure-stage-of report)
                 :prepare-transition))
        (let ((prepare-transition
-               (workspace-annotation-persistence-stage-result
-                report
-                :prepare-transition)))
+              (workspace-annotation-persistence-stage-result
+               report
+               :prepare-transition)))
          (or (null prepare-transition)
              (eq (getf prepare-transition :status) :completed)))))
 
 (defun workspace-annotation-journal-preflight-repair-summary (report)
   (let* ((stored-summary
-           (and (typep report 'workspace-annotation-persistence-report)
-                (workspace-annotation-persistence-report-journal-preflight-repair-summary-of
-                 report)))
+          (and (typep report 'workspace-annotation-persistence-report)
+               (workspace-annotation-persistence-report-journal-preflight-repair-summary-of
+                report)))
          (failure-summary
-           (and (workspace-annotation-journal-preflight-repair-failed-p report)
-                (dmx-workspace-journal-companion-repair-summary-of
-                 (workspace-annotation-persistence-report-condition-of report))))
+          (and (workspace-annotation-journal-preflight-repair-failed-p report)
+               (dmx-workspace-journal-companion-repair-summary-of
+                (workspace-annotation-persistence-report-condition-of report))))
          (summary (or stored-summary failure-summary)))
     (when summary
       (let ((copy (copy-list summary)))
@@ -2144,23 +2144,23 @@
   (when (workspace-annotation-journal-preflight-unassigned-companion-topic-p
          report)
     (let* ((summary
-             (workspace-annotation-persistence-report-journal-preflight-summary-of
-              report))
+            (workspace-annotation-persistence-report-journal-preflight-summary-of
+             report))
            (journal-topic-id
-             (workspace-annotation-persistence-report-journal-topic-id-of
-              report))
+            (workspace-annotation-persistence-report-journal-topic-id-of
+             report))
            (workspace-id
-             (or (workspace-annotation-persistence-report-workspace-id-of report)
-                 (and (workspace-annotation-persistence-report-plan-of report)
-                      (dmx-workspace-annotation-write-plan-workspace-id
-                       (workspace-annotation-persistence-report-plan-of
-                        report)))))
+            (or (workspace-annotation-persistence-report-workspace-id-of report)
+                (and (workspace-annotation-persistence-report-plan-of report)
+                     (dmx-workspace-annotation-write-plan-workspace-id
+                      (workspace-annotation-persistence-report-plan-of
+                       report)))))
            (workspace-label
-             (and workspace-id
-                  (dmx-workspace-annotation-workspace-label workspace-id)))
+            (and workspace-id
+                 (dmx-workspace-annotation-workspace-label workspace-id)))
            (direct-put-endpoint
-             (and journal-topic-id
-                  (dmx-topic-update-path journal-topic-id))))
+            (and journal-topic-id
+                 (dmx-topic-update-path journal-topic-id))))
       (list :retry-outcome-classification :unassigned-companion-topic
             :retry-outcome-classification-label "unassigned-companion-topic"
             :assigned-workspace-id
@@ -2210,10 +2210,10 @@
 
 (defun workspace-annotation-persistence-report-journal-topic-proxy-of (report)
   (let ((journal-topic-id
-          (workspace-annotation-persistence-report-journal-topic-id-of report))
+         (workspace-annotation-persistence-report-journal-topic-id-of report))
         (workspace-topicmap-id
-          (workspace-annotation-persistence-report-workspace-topicmap-id-of
-           report))
+         (workspace-annotation-persistence-report-workspace-topicmap-id-of
+          report))
         (client (workspace-annotation-persistence-report-client-of report)))
     (and journal-topic-id
          workspace-topicmap-id
@@ -2262,21 +2262,21 @@
                   "A Common/shared workspace is not sufficient unless the journal companion topic is actually assigned there."))
       (if (typep condition 'dmx-workspace-journal-companion-repair-failed-error)
           (let* ((repair-summary
-                   (dmx-workspace-journal-companion-repair-summary-of condition))
+                  (dmx-workspace-journal-companion-repair-summary-of condition))
                  (stale-topic-id (getf repair-summary :existing-topic-id))
                  (replacement-topic-id
-                   (getf repair-summary :replacement-topic-id))
+                  (getf repair-summary :replacement-topic-id))
                  (repair-strategy-label
-                   (or (getf repair-summary :repair-strategy-label)
-                       (workspace-annotation-render-value
-                        (getf repair-summary :repair-strategy))))
+                  (or (getf repair-summary :repair-strategy-label)
+                      (workspace-annotation-render-value
+                       (getf repair-summary :repair-strategy))))
                  (repair-step-label
-                   (or (getf repair-summary :repair-step-label)
-                       (workspace-annotation-render-value
-                        (getf repair-summary :repair-step))))
+                  (or (getf repair-summary :repair-step-label)
+                      (workspace-annotation-render-value
+                       (getf repair-summary :repair-step))))
                  (failure-message
-                   (or (getf repair-summary :repair-failure-message)
-                       (format nil "~A" condition))))
+                  (or (getf repair-summary :repair-failure-message)
+                      (format nil "~A" condition))))
             (format nil
                     "Before annotation topic upsert could start, HyperDoc detected that ~A for ~A in ~A is an existing unassigned journal companion topic and selected the ~A repair path. The repair failed~@[ after replacement topic ~D was created while the stale topic was retained as history~]~@[ at ~A~] for stale companion topic ~D because ~A. This remains the workspace journal preflight boundary, not annotation topic upsert, workspace assignment, or topicmap placement."
                     (workspace-annotation-journal-preflight-label summary)
@@ -2309,13 +2309,13 @@
 (defun workspace-annotation-http-evidence-response-cause (http-evidence)
   (when http-evidence
     (let* ((parsed
-             (parse-http-response-body-json
-              (or (getf http-evidence :response-body-prefix)
-                  (getf http-evidence :response-body))))
+            (parse-http-response-body-json
+             (or (getf http-evidence :response-body-prefix)
+                 (getf http-evidence :response-body))))
            (cause
-             (or (workspace-annotation-json-field-value parsed "cause")
-                 (workspace-annotation-json-field-value parsed "message")
-                 (and (stringp parsed) parsed))))
+            (or (workspace-annotation-json-field-value parsed "cause")
+                (workspace-annotation-json-field-value parsed "message")
+                (and (stringp parsed) parsed))))
       (and (dmx-non-empty-string-p cause)
            cause))))
 
@@ -2326,9 +2326,9 @@
     (when-let (start (search marker text :test #'char-equal))
       (let ((content-start (+ start (length marker))))
         (when-let (content-end
-                    (position quote-char
-                              text
-                              :start content-start))
+                   (position quote-char
+                             text
+                             :start content-start))
           (subseq text content-start content-end))))))
 
 (defun workspace-annotation-extract-token-after (text marker)
@@ -2337,15 +2337,15 @@
     (when-let (start (search marker text :test #'char-equal))
       (let* ((token-start (+ start (length marker)))
              (token-end
-               (or (position-if
-                    (lambda (char)
-                      (or (member char '(#\Space #\Tab #\Newline
-                                         #\Return #\: #\, #\. #\;)
-                                  :test #'char=)
-                          (char= char #\))))
-                    text
-                    :start token-start)
-                   (length text))))
+              (or (position-if
+                   (lambda (char)
+                     (or (member char '(#\Space #\Tab #\Newline
+                                        #\Return #\: #\, #\. #\;)
+                                 :test #'char=)
+                         (char= char #\))))
+                   text
+                   :start token-start)
+                  (length text))))
         (when (< token-start token-end)
           (subseq text token-start token-end))))))
 
@@ -2357,10 +2357,10 @@
     (when-let (start (search start-marker text :test #'char-equal))
       (let ((content-start (+ start (length start-marker))))
         (when-let (content-end
-                    (search end-marker
-                            text
-                            :start2 content-start
-                            :test #'char-equal))
+                   (search end-marker
+                           text
+                           :start2 content-start
+                           :test #'char-equal))
           (string-trim '(#\Space #\Tab #\Newline #\Return)
                        (subseq text content-start content-end)))))))
 
@@ -2370,10 +2370,10 @@
     (when-let (start (search marker text :test #'char-equal))
       (let* ((digits-start (+ start (length marker)))
              (digits-end
-               (or (position-if-not #'digit-char-p
-                                    text
-                                    :start digits-start)
-                   (length text))))
+              (or (position-if-not #'digit-char-p
+                                   text
+                                   :start digits-start)
+                  (length text))))
         (and (< digits-start digits-end)
              (parse-positive-integer
               (subseq text digits-start digits-end)))))))
@@ -2390,39 +2390,39 @@
     (cause &key blocked-endpoint-path fallback-object-topic-id)
   (when (dmx-non-empty-string-p cause)
     (let* ((principal
-             (or (workspace-annotation-extract-quoted-fragment-after
-                  cause
-                  "user \""
-                  #\")
-                 (workspace-annotation-extract-quoted-fragment-after
-                  cause
-                  "user '"
-                  #\')
-                 (workspace-annotation-extract-quoted-fragment-after
-                  cause
-                  "principal \""
-                  #\")
-                 (workspace-annotation-extract-quoted-fragment-after
-                  cause
-                  "principal '"
-                  #\')
-                 (workspace-annotation-extract-token-after cause "user ")
-                 (workspace-annotation-extract-token-after cause "principal ")))
+            (or (workspace-annotation-extract-quoted-fragment-after
+                 cause
+                 "user \""
+                 #\")
+                (workspace-annotation-extract-quoted-fragment-after
+                 cause
+                 "user '"
+                 #\')
+                (workspace-annotation-extract-quoted-fragment-after
+                 cause
+                 "principal \""
+                 #\")
+                (workspace-annotation-extract-quoted-fragment-after
+                 cause
+                 "principal '"
+                 #\')
+                (workspace-annotation-extract-token-after cause "user ")
+                (workspace-annotation-extract-token-after cause "principal ")))
            (required-permission
-             (workspace-annotation-extract-between-markers
-              cause
-              " has no "
-              " permission"))
+            (workspace-annotation-extract-between-markers
+             cause
+             " has no "
+             " permission"))
            (blocked-object-topic-id
-             (or (workspace-annotation-extract-integer-after-marker
-                  cause
-                  " object ")
-                 (workspace-annotation-extract-integer-after-marker
-                  cause
-                  " topic ")
-                 (workspace-annotation-topic-id-from-core-topic-path
-                  blocked-endpoint-path)
-                 fallback-object-topic-id)))
+            (or (workspace-annotation-extract-integer-after-marker
+                 cause
+                 " object ")
+                (workspace-annotation-extract-integer-after-marker
+                 cause
+                 " topic ")
+                (workspace-annotation-topic-id-from-core-topic-path
+                 blocked-endpoint-path)
+                fallback-object-topic-id)))
       (when (and (dmx-non-empty-string-p principal)
                  (not (string-equal principal "anonymous")))
         (list :authenticated-principal principal
@@ -2435,19 +2435,19 @@
   (when (and (typep report 'workspace-annotation-persistence-report)
              context)
     (let* ((blocked-endpoint-path
-             (or (getf context :guarded-request-endpoint-path)
-                 (getf context :final-failing-endpoint-path)))
+            (or (getf context :guarded-request-endpoint-path)
+                (getf context :final-failing-endpoint-path)))
            (response-cause
-             (or (getf context :response-cause)
-                 (workspace-annotation-http-evidence-response-cause
-                  (getf context :http-evidence))))
+            (or (getf context :response-cause)
+                (workspace-annotation-http-evidence-response-cause
+                 (getf context :http-evidence))))
            (denial-details
-             (workspace-annotation-authorization-denial-details
-              response-cause
-              :blocked-endpoint-path blocked-endpoint-path
-              :fallback-object-topic-id
-              (workspace-annotation-persistence-report-journal-topic-id-of
-               report))))
+            (workspace-annotation-authorization-denial-details
+             response-cause
+             :blocked-endpoint-path blocked-endpoint-path
+             :fallback-object-topic-id
+             (workspace-annotation-persistence-report-journal-topic-id-of
+              report))))
       (when (and (or (workspace-annotation-persistence-report-explicit-auth-retry-invoked-p
                       report)
                      (getf context :continuation-invoked-p))
@@ -2475,9 +2475,9 @@
 
 (defun workspace-annotation-journal-preflight-authorization-summary (report)
   (let ((context
-          (and (typep report 'workspace-annotation-persistence-report)
-               (workspace-annotation-persistence-report-explicit-auth-attempt-context-of
-                report))))
+         (and (typep report 'workspace-annotation-persistence-report)
+              (workspace-annotation-persistence-report-explicit-auth-attempt-context-of
+               report))))
     (or (and context
              (getf context :authorization-failed-p)
              (list :retry-outcome-classification
@@ -2521,14 +2521,14 @@
 
 (defun workspace-annotation-explicit-auth-client-mode (client)
   (let* ((built-event
-           (and (typep client 'http-dmx-import-client)
-                (http-dmx-import-debug-event client :s3-explicit-auth-client-built)))
+          (and (typep client 'http-dmx-import-client)
+               (http-dmx-import-debug-event client :s3-explicit-auth-client-built)))
          (authorization-header
-           (and (typep client 'http-dmx-import-client)
-                (dmx-import-authorization-header-of client)))
+          (and (typep client 'http-dmx-import-client)
+               (dmx-import-authorization-header-of client)))
          (authorization-scheme
-           (and authorization-header
-                (summarize-http-authorization-scheme authorization-header))))
+          (and authorization-header
+               (summarize-http-authorization-scheme authorization-header))))
     (or (and built-event
              (getf built-event :auth-mode))
         (and (typep client 'http-dmx-import-client)
@@ -2543,14 +2543,14 @@
 (defun workspace-annotation-explicit-auth-input-flags
     (client requested-auth-mode username password authorization-header auth-token)
   (let* ((built-event
-           (and (typep client 'http-dmx-import-client)
-                (http-dmx-import-debug-event client :s3-explicit-auth-client-built)))
+          (and (typep client 'http-dmx-import-client)
+               (http-dmx-import-debug-event client :s3-explicit-auth-client-built)))
          (client-header
-           (and (typep client 'http-dmx-import-client)
-                (dmx-import-authorization-header-of client)))
+          (and (typep client 'http-dmx-import-client)
+               (dmx-import-authorization-header-of client)))
          (client-scheme
-           (and client-header
-                (summarize-http-authorization-scheme client-header)))
+          (and client-header
+               (summarize-http-authorization-scheme client-header)))
          (basic-header-p (and client-scheme
                               (string= client-scheme "Basic")))
          (bearer-header-p (and client-scheme
@@ -2561,36 +2561,36 @@
                ((not (null event)) (and event t))
                (t (and inferred t)))))
       (let* ((username-present-p
-               (flag (and (dmx-non-empty-string-p username) t)
-                     (and built-event (getf built-event :username-present-p))
-                     (and (eq requested-auth-mode :basic)
-                          basic-header-p)))
+              (flag (and (dmx-non-empty-string-p username) t)
+                    (and built-event (getf built-event :username-present-p))
+                    (and (eq requested-auth-mode :basic)
+                         basic-header-p)))
              (password-present-p
-               (flag (and (dmx-non-empty-string-p password) t)
-                     (and built-event (getf built-event :password-present-p))
-                     (and (eq requested-auth-mode :basic)
-                          basic-header-p)))
+              (flag (and (dmx-non-empty-string-p password) t)
+                    (and built-event (getf built-event :password-present-p))
+                    (and (eq requested-auth-mode :basic)
+                         basic-header-p)))
              (authorization-header-present-p
-               (flag (and (dmx-non-empty-string-p authorization-header) t)
-                     (and built-event
-                          (getf built-event :authorization-header-present-p))
-                     (and (eq requested-auth-mode :header)
-                          client-header)))
+              (flag (and (dmx-non-empty-string-p authorization-header) t)
+                    (and built-event
+                         (getf built-event :authorization-header-present-p))
+                    (and (eq requested-auth-mode :header)
+                         client-header)))
              (auth-token-present-p
-               (flag (and (dmx-non-empty-string-p auth-token) t)
-                     (and built-event (getf built-event :auth-token-present-p))
-                     (and (eq requested-auth-mode :token)
-                          bearer-header-p)))
+              (flag (and (dmx-non-empty-string-p auth-token) t)
+                    (and built-event (getf built-event :auth-token-present-p))
+                    (and (eq requested-auth-mode :token)
+                         bearer-header-p)))
              (selected-mode-credentials-present-p
-               (case requested-auth-mode
-                 (:basic
-                  (and username-present-p password-present-p))
-                 (:header
-                  authorization-header-present-p)
-                 (:token
-                  auth-token-present-p)
-                 (otherwise
-                  nil))))
+              (case requested-auth-mode
+                (:basic
+                 (and username-present-p password-present-p))
+                (:header
+                 authorization-header-present-p)
+                (:token
+                 auth-token-present-p)
+                (otherwise
+                 nil))))
         (list :username-present-p username-present-p
               :password-present-p password-present-p
               :authorization-header-present-p authorization-header-present-p
@@ -2606,7 +2606,7 @@
   (let ((username-present-p (getf flags :username-present-p))
         (password-present-p (getf flags :password-present-p))
         (selected-mode-credentials-present-p
-          (getf flags :selected-mode-credentials-present-p)))
+         (getf flags :selected-mode-credentials-present-p)))
     (cond
       (local-failure-p
        (if (and (eq requested-auth-mode :basic)
@@ -2663,230 +2663,230 @@
 
 (defun workspace-annotation-explicit-auth-attempt-context
     (report client condition &key auth-mode username password
-       authorization-header auth-token local-failure-stage
-       continuation-request-id continuation-executed-at continuation-source)
+                               authorization-header auth-token local-failure-stage
+                               continuation-request-id continuation-executed-at continuation-source)
   (let* ((requested-auth-mode
-           (or (workspace-annotation-explicit-auth-mode-or-nil auth-mode)
-               (workspace-annotation-explicit-auth-client-mode client)))
+          (or (workspace-annotation-explicit-auth-mode-or-nil auth-mode)
+              (workspace-annotation-explicit-auth-client-mode client)))
          (flags
-           (workspace-annotation-explicit-auth-input-flags
-            client
-            requested-auth-mode
-            username
-            password
-            authorization-header
-            auth-token))
+          (workspace-annotation-explicit-auth-input-flags
+           client
+           requested-auth-mode
+           username
+           password
+           authorization-header
+           auth-token))
          (journal-auth-context
-           (workspace-annotation-persistence-report-journal-preflight-auth-context-of
-            report))
+          (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+           report))
          (final-http-evidence
-           (or (dmx-import-http-evidence condition)
-               (and (typep client 'http-dmx-import-client)
-                    (dmx-import-last-http-transaction-evidence-of client))))
+          (or (dmx-import-http-evidence condition)
+              (and (typep client 'http-dmx-import-client)
+                   (dmx-import-last-http-transaction-evidence-of client))))
          (bootstrap-request
-           (and (typep client 'http-dmx-import-client)
-                (http-dmx-import-debug-event client :s5-bootstrap-request-sent)))
+          (and (typep client 'http-dmx-import-client)
+               (http-dmx-import-debug-event client :s5-bootstrap-request-sent)))
          (bootstrap-response
-           (and (typep client 'http-dmx-import-client)
-                (http-dmx-import-debug-event client :s6-bootstrap-response-received)))
+          (and (typep client 'http-dmx-import-client)
+               (http-dmx-import-debug-event client :s6-bootstrap-response-received)))
          (session-event
-           (and (typep client 'http-dmx-import-client)
-                (http-dmx-import-debug-event client :s7-session-material-extracted)))
+          (and (typep client 'http-dmx-import-client)
+               (http-dmx-import-debug-event client :s7-session-material-extracted)))
          (bootstrap-required-p
-           (and (or (eq requested-auth-mode :basic)
-                    (and (typep client 'http-dmx-import-client)
-                         (dmx-import-session-login-required-p-of client)))
-                t))
+          (and (or (eq requested-auth-mode :basic)
+                   (and (typep client 'http-dmx-import-client)
+                        (dmx-import-session-login-required-p-of client)))
+               t))
          (bootstrap-endpoint-path
-           (or (and bootstrap-request (getf bootstrap-request :path))
-               (and bootstrap-response (getf bootstrap-response :path))
-               (and final-http-evidence
-                    (let ((path (or (getf final-http-evidence :path)
-                                    (getf final-http-evidence :url))))
-                      (and path
-                           (search "/access-control/login"
-                                   path
-                                   :test #'char-equal)
-                           path)))))
+          (or (and bootstrap-request (getf bootstrap-request :path))
+              (and bootstrap-response (getf bootstrap-response :path))
+              (and final-http-evidence
+                   (let ((path (or (getf final-http-evidence :path)
+                                   (getf final-http-evidence :url))))
+                     (and path
+                          (search "/access-control/login"
+                                  path
+                                  :test #'char-equal)
+                          path)))))
          (bootstrap-attempted-p
-           (and (or bootstrap-request
-                    bootstrap-response
-                    bootstrap-endpoint-path)
-                t))
+          (and (or bootstrap-request
+                   bootstrap-response
+                   bootstrap-endpoint-path)
+               t))
          (bootstrap-request-auth-mode-summary
-           (or (and bootstrap-request
-                    (getf bootstrap-request :auth-mode-summary))
-               (and bootstrap-attempted-p
-                    final-http-evidence
-                    (equal (or (getf final-http-evidence :path)
-                               (getf final-http-evidence :url))
-                           bootstrap-endpoint-path)
-                    (getf final-http-evidence :auth-mode-summary))))
+          (or (and bootstrap-request
+                   (getf bootstrap-request :auth-mode-summary))
+              (and bootstrap-attempted-p
+                   final-http-evidence
+                   (equal (or (getf final-http-evidence :path)
+                              (getf final-http-evidence :url))
+                          bootstrap-endpoint-path)
+                   (getf final-http-evidence :auth-mode-summary))))
          (bootstrap-request-authorization-scheme
-           (or (and bootstrap-request
-                    (getf bootstrap-request :authorization-scheme))
-               (and bootstrap-attempted-p
-                    final-http-evidence
-                    (equal (or (getf final-http-evidence :path)
-                               (getf final-http-evidence :url))
-                           bootstrap-endpoint-path)
-                    (getf final-http-evidence :authorization-scheme))))
+          (or (and bootstrap-request
+                   (getf bootstrap-request :authorization-scheme))
+              (and bootstrap-attempted-p
+                   final-http-evidence
+                   (equal (or (getf final-http-evidence :path)
+                              (getf final-http-evidence :url))
+                          bootstrap-endpoint-path)
+                   (getf final-http-evidence :authorization-scheme))))
          (bootstrap-response-status-code
-           (or (and bootstrap-response
-                    (getf bootstrap-response :status-code))
-               (and bootstrap-attempted-p
-                    final-http-evidence
-                    (equal (or (getf final-http-evidence :path)
-                               (getf final-http-evidence :url))
-                           bootstrap-endpoint-path)
-                    (getf final-http-evidence :response-status-code))))
+          (or (and bootstrap-response
+                   (getf bootstrap-response :status-code))
+              (and bootstrap-attempted-p
+                   final-http-evidence
+                   (equal (or (getf final-http-evidence :path)
+                              (getf final-http-evidence :url))
+                          bootstrap-endpoint-path)
+                   (getf final-http-evidence :response-status-code))))
          (bootstrap-response-reason-phrase
-           (or (and bootstrap-response
-                    (getf bootstrap-response :reason-phrase))
-               (and bootstrap-attempted-p
-                    final-http-evidence
-                    (equal (or (getf final-http-evidence :path)
-                               (getf final-http-evidence :url))
-                           bootstrap-endpoint-path)
-                    (getf final-http-evidence :response-reason-phrase))))
+          (or (and bootstrap-response
+                   (getf bootstrap-response :reason-phrase))
+              (and bootstrap-attempted-p
+                   final-http-evidence
+                   (equal (or (getf final-http-evidence :path)
+                              (getf final-http-evidence :url))
+                          bootstrap-endpoint-path)
+                   (getf final-http-evidence :response-reason-phrase))))
          (bootstrap-set-cookie-jsessionid-p
-           (or (and bootstrap-response
-                    (getf bootstrap-response :set-cookie-jsessionid-p))
-               (and final-http-evidence
-                    (getf final-http-evidence :bootstrap-set-cookie-jsessionid-p))))
+          (or (and bootstrap-response
+                   (getf bootstrap-response :set-cookie-jsessionid-p))
+              (and final-http-evidence
+                   (getf final-http-evidence :bootstrap-set-cookie-jsessionid-p))))
          (session-cookie-captured-p
-           (or (and session-event
-                    (getf session-event :session-cookie-captured-p))
-               (and (typep client 'http-dmx-import-client)
-                    (dmx-import-session-cookie-of client)
-                    t)
-               (and final-http-evidence
-                    (getf final-http-evidence :session-cookie-captured-p))))
+          (or (and session-event
+                   (getf session-event :session-cookie-captured-p))
+              (and (typep client 'http-dmx-import-client)
+                   (dmx-import-session-cookie-of client)
+                   t)
+              (and final-http-evidence
+                   (getf final-http-evidence :session-cookie-captured-p))))
          (bootstrap-succeeded-p
-           (and bootstrap-attempted-p
-                bootstrap-response-status-code
-                (http-success-status-p bootstrap-response-status-code)
-                session-cookie-captured-p))
+          (and bootstrap-attempted-p
+               bootstrap-response-status-code
+               (http-success-status-p bootstrap-response-status-code)
+               session-cookie-captured-p))
          (journal-endpoint-path
-           (or (and journal-auth-context
-                    (getf journal-auth-context :journal-endpoint-path))
-               (and (workspace-annotation-persistence-report-journal-topic-id-of
-                     report)
-                    (dmx-topic-update-path
-                     (workspace-annotation-persistence-report-journal-topic-id-of
-                      report)))))
+          (or (and journal-auth-context
+                   (getf journal-auth-context :journal-endpoint-path))
+              (and (workspace-annotation-persistence-report-journal-topic-id-of
+                    report)
+                   (dmx-topic-update-path
+                    (workspace-annotation-persistence-report-journal-topic-id-of
+                     report)))))
          (final-failing-endpoint-path
-           (or (and final-http-evidence
-                    (or (getf final-http-evidence :path)
-                        (getf final-http-evidence :url)))
-               (and (typep condition 'dmx-import-http-error)
-                    (dmx-import-http-url-of condition))))
+          (or (and final-http-evidence
+                   (or (getf final-http-evidence :path)
+                       (getf final-http-evidence :url)))
+              (and (typep condition 'dmx-import-http-error)
+                   (dmx-import-http-url-of condition))))
          (final-failing-status-code
-           (or (and final-http-evidence
-                    (getf final-http-evidence :response-status-code))
-               (and (typep condition 'dmx-import-http-error)
-                    (dmx-import-http-status-code-of condition))))
+          (or (and final-http-evidence
+                   (getf final-http-evidence :response-status-code))
+              (and (typep condition 'dmx-import-http-error)
+                   (dmx-import-http-status-code-of condition))))
          (final-failing-reason-phrase
-           (or (and final-http-evidence
-                    (getf final-http-evidence :response-reason-phrase))
-               nil))
+          (or (and final-http-evidence
+                   (getf final-http-evidence :response-reason-phrase))
+              nil))
          (guarded-request-retried-p
-           (and journal-endpoint-path
-                final-failing-endpoint-path
-                (string-equal journal-endpoint-path
-                              final-failing-endpoint-path)
-                t))
+          (and journal-endpoint-path
+               final-failing-endpoint-path
+               (string-equal journal-endpoint-path
+                             final-failing-endpoint-path)
+               t))
          (guarded-request-auth-mode-summary
-           (and guarded-request-retried-p
-                final-http-evidence
-                (getf final-http-evidence :auth-mode-summary)))
+          (and guarded-request-retried-p
+               final-http-evidence
+               (getf final-http-evidence :auth-mode-summary)))
          (guarded-request-authorization-scheme
-           (and guarded-request-retried-p
-                final-http-evidence
-                (getf final-http-evidence :authorization-scheme)))
+          (and guarded-request-retried-p
+               final-http-evidence
+               (getf final-http-evidence :authorization-scheme)))
          (guarded-request-cookie-shape
-           (and guarded-request-retried-p
-                final-http-evidence
-                (getf final-http-evidence :cookie-shape)))
+          (and guarded-request-retried-p
+               final-http-evidence
+               (getf final-http-evidence :cookie-shape)))
          (guarded-request-remained-anonymous-p
-           (and guarded-request-retried-p
-                (string-equal (or guarded-request-auth-mode-summary "")
-                              "anonymous")
-                t))
+          (and guarded-request-retried-p
+               (string-equal (or guarded-request-auth-mode-summary "")
+                             "anonymous")
+               t))
          (response-cause
-           (or (workspace-annotation-http-evidence-response-cause
-                final-http-evidence)
-               (and condition
-                    (format nil "~A" condition))))
+          (or (workspace-annotation-http-evidence-response-cause
+               final-http-evidence)
+              (and condition
+                   (format nil "~A" condition))))
          (local-failure-p
-           (and (null final-http-evidence)
-                (not bootstrap-attempted-p)
-                (not guarded-request-retried-p)
-                t))
+          (and (null final-http-evidence)
+               (not bootstrap-attempted-p)
+               (not guarded-request-retried-p)
+               t))
          (base-context
-           (append
-            (list :requested-auth-mode requested-auth-mode
-                  :requested-auth-mode-label
-                  (and requested-auth-mode
-                       (workspace-annotation-auth-mode-label requested-auth-mode))
-                  :continuation-invoked-p t
-                  :retry-request-id continuation-request-id
-                  :retry-executed-at continuation-executed-at
-                  :retry-executed-at-label
-                  (workspace-annotation-format-explicit-auth-retry-time
-                   continuation-executed-at)
-                  :retry-mode-used requested-auth-mode
-                  :retry-mode-used-label
-                  (and requested-auth-mode
-                       (workspace-annotation-auth-mode-label requested-auth-mode))
-                  :retry-source continuation-source
-                  :retry-source-label
-                  (workspace-annotation-explicit-auth-retry-source-label
-                   continuation-source)
-                  :retry-evidence-version
-                  *workspace-annotation-explicit-auth-retry-evidence-version*
-                  :bootstrap-required-p bootstrap-required-p
-                  :bootstrap-attempted-p bootstrap-attempted-p
-                  :bootstrap-endpoint-path bootstrap-endpoint-path
-                  :bootstrap-request-auth-mode-summary
-                  bootstrap-request-auth-mode-summary
-                  :bootstrap-request-authorization-scheme
-                  bootstrap-request-authorization-scheme
-                  :bootstrap-response-status-code bootstrap-response-status-code
-                  :bootstrap-response-reason-phrase
-                  bootstrap-response-reason-phrase
-                  :bootstrap-set-cookie-jsessionid-p
-                  (and bootstrap-set-cookie-jsessionid-p t)
-                  :session-cookie-captured-p
-                  (and session-cookie-captured-p t)
-                  :bootstrap-succeeded-p
-                  (and bootstrap-succeeded-p t)
-                  :guarded-request-retried-p
-                  guarded-request-retried-p
-                  :guarded-request-endpoint-path
-                  (and guarded-request-retried-p final-failing-endpoint-path)
-                  :guarded-request-auth-mode-summary
-                  guarded-request-auth-mode-summary
-                  :guarded-request-authorization-scheme
-                  guarded-request-authorization-scheme
-                  :guarded-request-cookie-shape guarded-request-cookie-shape
-                  :guarded-request-remained-anonymous-p
-                  guarded-request-remained-anonymous-p
-                  :final-failing-endpoint-path final-failing-endpoint-path
-                  :final-failing-status-code final-failing-status-code
-                  :final-failing-reason-phrase final-failing-reason-phrase
-                  :response-cause response-cause
-                  :local-failure-p local-failure-p
-                  :local-failure-stage local-failure-stage
-                  :condition-text
-                  (and condition
-                       (format nil "~A" condition))
-                  :http-evidence final-http-evidence)
-            flags))
+          (append
+           (list :requested-auth-mode requested-auth-mode
+                 :requested-auth-mode-label
+                 (and requested-auth-mode
+                      (workspace-annotation-auth-mode-label requested-auth-mode))
+                 :continuation-invoked-p t
+                 :retry-request-id continuation-request-id
+                 :retry-executed-at continuation-executed-at
+                 :retry-executed-at-label
+                 (workspace-annotation-format-explicit-auth-retry-time
+                  continuation-executed-at)
+                 :retry-mode-used requested-auth-mode
+                 :retry-mode-used-label
+                 (and requested-auth-mode
+                      (workspace-annotation-auth-mode-label requested-auth-mode))
+                 :retry-source continuation-source
+                 :retry-source-label
+                 (workspace-annotation-explicit-auth-retry-source-label
+                  continuation-source)
+                 :retry-evidence-version
+                 *workspace-annotation-explicit-auth-retry-evidence-version*
+                 :bootstrap-required-p bootstrap-required-p
+                 :bootstrap-attempted-p bootstrap-attempted-p
+                 :bootstrap-endpoint-path bootstrap-endpoint-path
+                 :bootstrap-request-auth-mode-summary
+                 bootstrap-request-auth-mode-summary
+                 :bootstrap-request-authorization-scheme
+                 bootstrap-request-authorization-scheme
+                 :bootstrap-response-status-code bootstrap-response-status-code
+                 :bootstrap-response-reason-phrase
+                 bootstrap-response-reason-phrase
+                 :bootstrap-set-cookie-jsessionid-p
+                 (and bootstrap-set-cookie-jsessionid-p t)
+                 :session-cookie-captured-p
+                 (and session-cookie-captured-p t)
+                 :bootstrap-succeeded-p
+                 (and bootstrap-succeeded-p t)
+                 :guarded-request-retried-p
+                 guarded-request-retried-p
+                 :guarded-request-endpoint-path
+                 (and guarded-request-retried-p final-failing-endpoint-path)
+                 :guarded-request-auth-mode-summary
+                 guarded-request-auth-mode-summary
+                 :guarded-request-authorization-scheme
+                 guarded-request-authorization-scheme
+                 :guarded-request-cookie-shape guarded-request-cookie-shape
+                 :guarded-request-remained-anonymous-p
+                 guarded-request-remained-anonymous-p
+                 :final-failing-endpoint-path final-failing-endpoint-path
+                 :final-failing-status-code final-failing-status-code
+                 :final-failing-reason-phrase final-failing-reason-phrase
+                 :response-cause response-cause
+                 :local-failure-p local-failure-p
+                 :local-failure-stage local-failure-stage
+                 :condition-text
+                 (and condition
+                      (format nil "~A" condition))
+                 :http-evidence final-http-evidence)
+           flags))
          (authorization-summary
-           (workspace-annotation-journal-preflight-authorization-summary-data
-            report
-            base-context)))
+          (workspace-annotation-journal-preflight-authorization-summary-data
+           report
+           base-context)))
     (append
      base-context
      authorization-summary
@@ -2912,9 +2912,9 @@
                  (if-let (topic
                           (dmx-workspace-annotation-write-plan-existing-topic
                            plan))
-                   (dmx-import-object-id topic)))))
+                     (dmx-import-object-id topic)))))
       (let ((annotation
-              (workspace-annotation-persistence-report-annotation-of report)))
+             (workspace-annotation-persistence-report-annotation-of report)))
         (and (typep annotation 'workspace-dock-annotation)
              (workspace-annotation-topic-id-of annotation)))))
 
@@ -2929,9 +2929,9 @@
   (or (if-let (persisted
                (workspace-annotation-persistence-report-persisted-annotation-of
                 report))
-        (workspace-annotation-storage-mode-of persisted))
+          (workspace-annotation-storage-mode-of persisted))
       (let ((annotation
-              (workspace-annotation-persistence-report-annotation-of report)))
+             (workspace-annotation-persistence-report-annotation-of report)))
         (and (typep annotation 'workspace-dock-annotation)
              (workspace-annotation-storage-mode-of annotation)))
       (let ((plan (workspace-annotation-persistence-report-plan-of report)))
@@ -2943,9 +2943,9 @@
   (or (if-let (persisted
                (workspace-annotation-persistence-report-persisted-annotation-of
                 report))
-        (workspace-annotation-carrier-type-uri-of persisted))
+          (workspace-annotation-carrier-type-uri-of persisted))
       (let ((annotation
-              (workspace-annotation-persistence-report-annotation-of report)))
+             (workspace-annotation-persistence-report-annotation-of report)))
         (and (typep annotation 'workspace-dock-annotation)
              (workspace-annotation-carrier-type-uri-of annotation)))
       (let ((plan (workspace-annotation-persistence-report-plan-of report)))
@@ -2955,20 +2955,20 @@
 (defun workspace-annotation-persistence-report-saved-annotation-of (report)
   (or (workspace-annotation-persistence-report-persisted-annotation-of report)
       (let* ((annotation
-               (workspace-annotation-persistence-report-annotation-of report))
+              (workspace-annotation-persistence-report-annotation-of report))
              (saved-topic-id
-               (workspace-annotation-persistence-report-saved-topic-id-of
-                report)))
+              (workspace-annotation-persistence-report-saved-topic-id-of
+               report)))
         (and (typep annotation 'workspace-dock-annotation)
              (eql (workspace-annotation-topic-id-of annotation)
                   saved-topic-id)
              annotation))
       (let ((saved-topic-id
-              (workspace-annotation-persistence-report-saved-topic-id-of
-               report))
+             (workspace-annotation-persistence-report-saved-topic-id-of
+              report))
             (workspace-topicmap-id
-              (workspace-annotation-persistence-report-workspace-topicmap-id-of
-               report))
+             (workspace-annotation-persistence-report-workspace-topicmap-id-of
+              report))
             (client (workspace-annotation-persistence-report-client-of report)))
         (and saved-topic-id
              workspace-topicmap-id
@@ -2982,10 +2982,10 @@
 (defun workspace-annotation-persistence-report-saved-carrier-topic-proxy-of
     (report)
   (let ((saved-topic-id
-          (workspace-annotation-persistence-report-saved-topic-id-of report))
+         (workspace-annotation-persistence-report-saved-topic-id-of report))
         (workspace-topicmap-id
-          (workspace-annotation-persistence-report-workspace-topicmap-id-of
-           report))
+         (workspace-annotation-persistence-report-workspace-topicmap-id-of
+          report))
         (client (workspace-annotation-persistence-report-client-of report)))
     (and saved-topic-id
          workspace-topicmap-id
@@ -3042,9 +3042,9 @@
 (defun workspace-annotation-persistence-report-topic-proxy
     (report topic-id &key topicmap-id)
   (let ((resolved-topicmap-id
-          (or topicmap-id
-              (workspace-annotation-persistence-report-workspace-topicmap-id-of
-               report))))
+         (or topicmap-id
+             (workspace-annotation-persistence-report-workspace-topicmap-id-of
+              report))))
     (and topic-id
          resolved-topicmap-id
          (ignore-errors
@@ -3056,7 +3056,7 @@
 
 (defun workspace-annotation-persistence-report-workspace-proxy-of (report)
   (let ((workspace-id
-          (workspace-annotation-persistence-report-workspace-id-of report)))
+         (workspace-annotation-persistence-report-workspace-id-of report)))
     (and workspace-id
          (workspace-annotation-persistence-report-topic-proxy
           report
@@ -3064,8 +3064,8 @@
 
 (defun workspace-annotation-persistence-report-topicmap-proxy-of (report)
   (let ((topicmap-id
-          (workspace-annotation-persistence-report-workspace-topicmap-id-of
-           report)))
+         (workspace-annotation-persistence-report-workspace-topicmap-id-of
+          report)))
     (and topicmap-id
          (ignore-errors
            (make-dmx-topicmap-proxy
@@ -3090,10 +3090,10 @@
 (defun workspace-annotation-persistence-report-topic-upsert-evidence-path
     (report)
   (let ((evidence
-          (workspace-annotation-persistence-report-topic-upsert-evidence-of
-           report))
+         (workspace-annotation-persistence-report-topic-upsert-evidence-of
+          report))
         (topic-id
-          (workspace-annotation-persistence-report-saved-topic-id-of report)))
+         (workspace-annotation-persistence-report-saved-topic-id-of report)))
     (or (getf evidence :path)
         (and topic-id
              (dmx-topic-update-path topic-id))
@@ -3102,8 +3102,8 @@
 (defun workspace-annotation-persistence-report-topic-upsert-endpoint-label
     (report)
   (let* ((evidence
-           (workspace-annotation-persistence-report-topic-upsert-evidence-of
-            report))
+          (workspace-annotation-persistence-report-topic-upsert-evidence-of
+           report))
          (method (or (getf evidence :method)
                      (if (eq (and (workspace-annotation-persistence-report-plan-of
                                    report)
@@ -3114,20 +3114,20 @@
                          :put
                          :post)))
          (path
-           (workspace-annotation-persistence-report-topic-upsert-evidence-path
-            report)))
+          (workspace-annotation-persistence-report-topic-upsert-evidence-path
+           report)))
     (and path
          (format nil "~:@(~A~) ~A" method path))))
 
 (defun workspace-annotation-persistence-stage-boundary-or-endpoint
     (report stage)
   (let* ((topic-id
-           (workspace-annotation-persistence-report-saved-topic-id-of report))
+          (workspace-annotation-persistence-report-saved-topic-id-of report))
          (workspace-id
-           (workspace-annotation-persistence-report-workspace-id-of report))
+          (workspace-annotation-persistence-report-workspace-id-of report))
          (topicmap-id
-           (workspace-annotation-persistence-report-workspace-topicmap-id-of
-            report)))
+          (workspace-annotation-persistence-report-workspace-topicmap-id-of
+           report)))
     (case stage
       (:topic-upsert
        (workspace-annotation-persistence-report-topic-upsert-endpoint-label
@@ -3150,9 +3150,9 @@
        (if-let (journal-topic-id
                 (workspace-annotation-persistence-report-journal-topic-id-of
                  report))
-         (format nil
-                 "dmx-workspace-journal-record-transition -> companion topic ~D"
-                 journal-topic-id)
+           (format nil
+                   "dmx-workspace-journal-record-transition -> companion topic ~D"
+                   journal-topic-id)
          "dmx-workspace-journal-record-transition"))
       (:reopen-persisted-annotation
        (and topicmap-id
@@ -3167,10 +3167,10 @@
 (defun workspace-annotation-persistence-topic-upsert-resolution-summary
     (report)
   (let* ((topic-id
-           (workspace-annotation-persistence-report-saved-topic-id-of report))
+          (workspace-annotation-persistence-report-saved-topic-id-of report))
          (evidence
-           (workspace-annotation-persistence-report-topic-upsert-evidence-of
-            report))
+          (workspace-annotation-persistence-report-topic-upsert-evidence-of
+           report))
          (status-code (or (getf evidence :response-status-code) 401)))
     (if (getf evidence :blocked-before-http-p)
         (format nil
@@ -3184,8 +3184,8 @@
 (defun workspace-annotation-persistence-topic-upsert-blocking-condition
     (report)
   (let* ((evidence
-           (workspace-annotation-persistence-report-topic-upsert-evidence-of
-            report))
+          (workspace-annotation-persistence-report-topic-upsert-evidence-of
+           report))
          (auth-mode (or (getf evidence :auth-mode-summary)
                         "anonymous"))
          (status-code (or (getf evidence :response-status-code) 401)))
@@ -3204,7 +3204,7 @@
 
 (defun workspace-annotation-persistence-report-continue-target (report)
   (let ((topic-id
-          (workspace-annotation-persistence-report-saved-topic-id-of report)))
+         (workspace-annotation-persistence-report-saved-topic-id-of report)))
     (make-workspace-annotation-path-next-step-target
      "continue-workspace-annotation"
      "continue_workspace_annotation"
@@ -3247,13 +3247,13 @@
 
 (defun workspace-annotation-persistence-report-success-readback-of (report)
   (let* ((topic-id
-           (workspace-annotation-persistence-report-saved-topic-id-of report))
+          (workspace-annotation-persistence-report-saved-topic-id-of report))
          (topic-proxy
-           (workspace-annotation-persistence-report-saved-topic-proxy-of report))
+          (workspace-annotation-persistence-report-saved-topic-proxy-of report))
          (workspace-proxy
-           (workspace-annotation-persistence-report-workspace-proxy-of report))
+          (workspace-annotation-persistence-report-workspace-proxy-of report))
          (topicmap-proxy
-           (workspace-annotation-persistence-report-topicmap-proxy-of report)))
+          (workspace-annotation-persistence-report-topicmap-proxy-of report)))
     (when topic-id
       (make-instance
        'workspace-annotation-persistence-success-readback
@@ -3365,23 +3365,23 @@
 (defun workspace-annotation-persistence-stage-absence-of (report stage)
   (let* ((entry (workspace-annotation-persistence-stage-result report stage))
          (failure-stage
-           (workspace-annotation-persistence-report-failure-stage-of report))
+          (workspace-annotation-persistence-report-failure-stage-of report))
          (resolution
-           (workspace-annotation-persistence-report-resolution-of report))
+          (workspace-annotation-persistence-report-resolution-of report))
          (next-step-targets
-           (or (and resolution
-                    (list
-                     (workspace-annotation-persistence-resolution-recommended-tool-path-of
-                      resolution)))
-               (workspace-annotation-persistence-report-recommended-next-step-targets
-                report
-                stage)))
+          (or (and resolution
+                   (list
+                    (workspace-annotation-persistence-resolution-recommended-tool-path-of
+                     resolution)))
+              (workspace-annotation-persistence-report-recommended-next-step-targets
+               report
+               stage)))
          (success-readback
-           (or (and resolution
-                    (workspace-annotation-persistence-resolution-success-readback-of
-                     resolution))
-               (workspace-annotation-persistence-report-success-readback-of
-                report))))
+          (or (and resolution
+                   (workspace-annotation-persistence-resolution-success-readback-of
+                    resolution))
+              (workspace-annotation-persistence-report-success-readback-of
+               report))))
     (cond
       ((and entry
             (eq (getf entry :status) :skipped))
@@ -3555,7 +3555,7 @@
 (defun workspace-annotation-persistence-stage-operation-of (report stage)
   (let* ((entry (workspace-annotation-persistence-stage-result report stage))
          (resolution
-           (workspace-annotation-persistence-report-resolution-of report)))
+          (workspace-annotation-persistence-report-resolution-of report)))
     (make-instance
      'workspace-annotation-persistence-stage-operation
      :id (format nil
@@ -3785,31 +3785,31 @@
 
 (defun probe-live-workspace-annotation-type-support
     (annotation &key workspace-topicmap-id workspace-id client view-props
-       status supersedes-topic-id annotation-key provenance-json storage-mode)
+                  status supersedes-topic-id annotation-key provenance-json storage-mode)
   (let* ((annotation (workspace-annotation-replay-subject annotation))
          (resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run nil
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run nil
+           :verbose nil))
          (resolved-destination
-           (resolve-dmx-workspace-annotation-destination
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client resolved-client))
+          (resolve-dmx-workspace-annotation-destination
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client resolved-client))
          (resolved-topicmap-id
-           (dmx-workspace-annotation-destination-workspace-topicmap-id
-            resolved-destination))
+          (dmx-workspace-annotation-destination-workspace-topicmap-id
+           resolved-destination))
          (preview nil)
          (plan nil)
          (payload-json nil)
          (exact-form
-           (workspace-annotation-backend-compatibility-probe-form
-            resolved-topicmap-id
-            :workspace-id
-            (dmx-workspace-annotation-destination-workspace-id
-             resolved-destination))))
+          (workspace-annotation-backend-compatibility-probe-form
+           resolved-topicmap-id
+           :workspace-id
+           (dmx-workspace-annotation-destination-workspace-id
+            resolved-destination))))
     (handler-case
         (setf preview
               (workspace-annotation-persistence-preview
@@ -3832,13 +3832,13 @@
     (let ((current-type-uri nil))
       (handler-case
           (let* ((normalized
-                   (dmx-workspace-annotation-from-object
-                    annotation
-                    resolved-topicmap-id
-                    :status status
-                    :supersedes-topic-id supersedes-topic-id
-                    :annotation-key annotation-key
-                    :provenance-json provenance-json))
+                  (dmx-workspace-annotation-from-object
+                   annotation
+                   resolved-topicmap-id
+                   :status status
+                   :supersedes-topic-id supersedes-topic-id
+                   :annotation-key annotation-key
+                   :provenance-json provenance-json))
                  (type-results '()))
             (setf plan
                   (apply #'plan-dmx-workspace-annotation-write
@@ -3898,11 +3898,11 @@
                             *dmx-workspace-annotation-required-live-child-type-uris*)
                       :native))
                  (let* ((selected-storage-mode
-                          (dmx-workspace-annotation-write-plan-storage-mode
-                           plan))
+                         (dmx-workspace-annotation-write-plan-storage-mode
+                          plan))
                         (carrier-type-uri
-                          (dmx-workspace-annotation-write-plan-carrier-type-uri
-                           plan))
+                         (dmx-workspace-annotation-write-plan-carrier-type-uri
+                          plan))
                         (carrier-results '())
                         (carrier-missing nil))
                    (when (dmx-workspace-annotation-compatibility-storage-mode-p
@@ -3917,43 +3917,43 @@
                           :carrier))))
                    (let* ((native-supported-p (null native-missing))
                           (carrier-supported-p
-                            (if (dmx-workspace-annotation-compatibility-storage-mode-p
-                                 selected-storage-mode)
-                                (null carrier-missing)
-                                nil))
-                          (failing-type-uri
-                            (cond
-                              ((and (dmx-workspace-annotation-compatibility-storage-mode-p
-                                     selected-storage-mode)
-                                    carrier-missing)
-                               (getf carrier-missing :type-uri))
-                              ((and (dmx-workspace-annotation-native-storage-mode-p
-                                     selected-storage-mode)
-                                    native-missing)
-                               (getf native-missing :type-uri))
-                              (t
-                               nil)))
-                          (http-evidence
-                            (cond
-                              ((and (dmx-workspace-annotation-compatibility-storage-mode-p
-                                     selected-storage-mode)
-                                    carrier-missing)
-                               (getf carrier-missing :http-evidence))
-                              (native-missing
-                               (getf native-missing :http-evidence))
-                              (t
-                               nil)))
-                          (report-status
-                            (cond
-                              ((dmx-workspace-annotation-compatibility-storage-mode-p
+                           (if (dmx-workspace-annotation-compatibility-storage-mode-p
                                 selected-storage-mode)
-                               (if carrier-supported-p
-                                   :compatible-via-carrier
-                                   :unsupported))
-                              (native-supported-p
-                               :supported)
-                              (t
-                               :unsupported))))
+                               (null carrier-missing)
+                               nil))
+                          (failing-type-uri
+                           (cond
+                             ((and (dmx-workspace-annotation-compatibility-storage-mode-p
+                                    selected-storage-mode)
+                                   carrier-missing)
+                              (getf carrier-missing :type-uri))
+                             ((and (dmx-workspace-annotation-native-storage-mode-p
+                                    selected-storage-mode)
+                                   native-missing)
+                              (getf native-missing :type-uri))
+                             (t
+                              nil)))
+                          (http-evidence
+                           (cond
+                             ((and (dmx-workspace-annotation-compatibility-storage-mode-p
+                                    selected-storage-mode)
+                                   carrier-missing)
+                              (getf carrier-missing :http-evidence))
+                             (native-missing
+                              (getf native-missing :http-evidence))
+                             (t
+                              nil)))
+                          (report-status
+                           (cond
+                             ((dmx-workspace-annotation-compatibility-storage-mode-p
+                               selected-storage-mode)
+                              (if carrier-supported-p
+                                  :compatible-via-carrier
+                                  :unsupported))
+                             (native-supported-p
+                              :supported)
+                             (t
+                              :unsupported))))
                      (make-instance
                       'workspace-annotation-backend-compatibility-report
                       :annotation annotation
@@ -3998,7 +3998,7 @@
            :report-status :error
            :condition condition
            :endpoint-path (dmx-topic-create-path)
-            :failing-type-uri current-type-uri
+           :failing-type-uri current-type-uri
            :selected-storage-mode
            (and plan
                 (dmx-workspace-annotation-write-plan-storage-mode plan))
@@ -4041,21 +4041,21 @@
 
 (defun debug-dock-annotation-workspace-persistence
     (annotation &key workspace-topicmap-id workspace-id client view-props
-       status supersedes-topic-id annotation-key provenance-json storage-mode)
+                  status supersedes-topic-id annotation-key provenance-json storage-mode)
   (let* ((resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run nil
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run nil
+           :verbose nil))
          (resolved-destination
-           (resolve-dmx-workspace-annotation-destination
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client resolved-client))
+          (resolve-dmx-workspace-annotation-destination
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client resolved-client))
          (resolved-topicmap-id
-           (dmx-workspace-annotation-destination-workspace-topicmap-id
-            resolved-destination))
+          (dmx-workspace-annotation-destination-workspace-topicmap-id
+           resolved-destination))
          (preview nil)
          (preview-error nil))
     (handler-case
@@ -4125,7 +4125,7 @@
 
 (defun workspace-annotation-persistence-code-path-graph
     (annotation workspace-topicmap-id &key annotation-key runtime-relation-id
-       report)
+                                        report)
   (let ((persisted (and report
                         (workspace-annotation-persistence-report-persisted-annotation-of
                          report))))
@@ -4145,7 +4145,7 @@
       (list :id "persist-action"
             :label "Persist to workspace"
             :summary
-            "The normal live annotation action. It preflights raw hyperdoc.annotation support and, on live HTTP backends, can switch to the compatibility carrier before create-topic."))    
+            "The normal live annotation action. It preflights raw hyperdoc.annotation support and, on live HTTP backends, can switch to the compatibility carrier before create-topic."))
      :nodes
      (list
       (list :id "annotation"
@@ -4371,28 +4371,28 @@
 
 (defun trace-dock-annotation-workspace-persistence-path
     (annotation &key workspace-topicmap-id workspace-id client annotation-key
-       runtime-relation-id)
+                  runtime-relation-id)
   (let* ((resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run nil
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run nil
+           :verbose nil))
          (destination
-           (resolve-dmx-workspace-annotation-destination
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client resolved-client))
+          (resolve-dmx-workspace-annotation-destination
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client resolved-client))
          (resolved-topicmap-id
-           (dmx-workspace-annotation-destination-workspace-topicmap-id
-            destination)))
+          (dmx-workspace-annotation-destination-workspace-topicmap-id
+           destination)))
     (workspace-annotation-persistence-code-path-graph
      annotation
      resolved-topicmap-id
      :annotation-key
      (or annotation-key
          (workspace-annotation-persistence-derived-key annotation
-                                                      resolved-topicmap-id))
+                                                       resolved-topicmap-id))
      :runtime-relation-id
      (or runtime-relation-id
          (workspace-annotation-persistence-runtime-relation-id annotation)))))
@@ -4552,13 +4552,13 @@
 (defun normalize-dmx-workspace-annotation-key
     (annotation-key title runtime-relation-id &key fresh-key-p)
   (let ((base
-          (cond
-            ((dmx-non-empty-string-p annotation-key)
-             (dmx-workspace-annotation-slug annotation-key))
-            ((dmx-non-empty-string-p runtime-relation-id)
-             (dmx-workspace-annotation-slug runtime-relation-id))
-            (t
-             (dmx-workspace-annotation-slug title)))))
+         (cond
+           ((dmx-non-empty-string-p annotation-key)
+            (dmx-workspace-annotation-slug annotation-key))
+           ((dmx-non-empty-string-p runtime-relation-id)
+            (dmx-workspace-annotation-slug runtime-relation-id))
+           (t
+            (dmx-workspace-annotation-slug title)))))
     (if fresh-key-p
         (format nil "~A-~D" (or base "annotation") (get-universal-time))
         (or base
@@ -4712,12 +4712,12 @@
   (let* ((uri (getf native-payload :uri))
          (title (getf native-payload :value))
          (text
-           (encode-json-string
-            (dmx-workspace-annotation-compatibility-envelope
-             annotation-key
-             workspace-topicmap-id
-             runtime-relation-id
-             native-payload))))
+          (encode-json-string
+           (dmx-workspace-annotation-compatibility-envelope
+            annotation-key
+            workspace-topicmap-id
+            runtime-relation-id
+            native-payload))))
     (list :uri uri
           :external-key uri
           :type-uri *dmx-workspace-annotation-compatibility-carrier-type-uri*
@@ -4739,38 +4739,38 @@
 
 (defun dmx-workspace-annotation-from-object
     (annotation workspace-topicmap-id &key status supersedes-topic-id
-       annotation-key provenance-json)
+                                        annotation-key provenance-json)
   (let* ((resolved-topicmap-id
-           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (persisted-p (workspace-dock-annotation-p annotation))
          (runtime-relation-id
-           (or (and persisted-p
-                    (workspace-annotation-runtime-relation-id-of annotation))
-               (id-of annotation)))
+          (or (and persisted-p
+                   (workspace-annotation-runtime-relation-id-of annotation))
+              (id-of annotation)))
          (resolved-status
-           (normalize-dmx-workspace-note-string
-            (or status
-                (and persisted-p
-                     (workspace-annotation-status-of annotation))
-                "persisted")
-            :status
-            'dmx-workspace-annotation-from-object
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           (or status
+               (and persisted-p
+                    (workspace-annotation-status-of annotation))
+               "persisted")
+           :status
+           'dmx-workspace-annotation-from-object
+           :required? t))
          (fresh-key-p
-           (and supersedes-topic-id
-                (not persisted-p)))
+          (and supersedes-topic-id
+               (not persisted-p)))
          (resolved-key
-           (normalize-dmx-workspace-annotation-key
-            (or annotation-key
-                (and persisted-p
-                     (workspace-annotation-key-of annotation)))
-            (title-of annotation)
-            runtime-relation-id
-            :fresh-key-p fresh-key-p))
+          (normalize-dmx-workspace-annotation-key
+           (or annotation-key
+               (and persisted-p
+                    (workspace-annotation-key-of annotation)))
+           (title-of annotation)
+           runtime-relation-id
+           :fresh-key-p fresh-key-p))
          (resolved-uri
-           (or (and persisted-p
-                    (workspace-annotation-topic-uri-of annotation))
-               (dmx-workspace-annotation-uri resolved-key))))
+          (or (and persisted-p
+                   (workspace-annotation-topic-uri-of annotation))
+              (dmx-workspace-annotation-uri resolved-key))))
     (list :topic-id (and persisted-p
                          (workspace-annotation-topic-id-of annotation))
           :annotation-key resolved-key
@@ -4858,59 +4858,59 @@
     (&key client workspace-topicmap-id workspace-id annotation-key uri topic-id
        title runtime-relation-id supersedes-topic-id storage-mode destination)
   (let* ((resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run t
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run t
+           :verbose nil))
          (resolved-destination
-           (or destination
-               (resolve-dmx-workspace-annotation-destination
-                nil
-                :workspace-topicmap-id workspace-topicmap-id
-                :workspace-id workspace-id
-                :client resolved-client)))
+          (or destination
+              (resolve-dmx-workspace-annotation-destination
+               nil
+               :workspace-topicmap-id workspace-topicmap-id
+               :workspace-id workspace-id
+               :client resolved-client)))
          (resolved-topicmap-id
-           (dmx-workspace-annotation-destination-workspace-topicmap-id
-            resolved-destination))
+          (dmx-workspace-annotation-destination-workspace-topicmap-id
+           resolved-destination))
          (resolved-workspace-id
-           (dmx-workspace-annotation-destination-workspace-id
-            resolved-destination))
+          (dmx-workspace-annotation-destination-workspace-id
+           resolved-destination))
          (resolved-key
-           (cond
-             (topic-id
-              nil)
-             (uri
-              (subseq uri (length *hyperdoc-workspace-annotation-uri-prefix*)))
-             (t
-              (normalize-dmx-workspace-annotation-key
-               annotation-key
-               title
-               runtime-relation-id
-               :fresh-key-p (and supersedes-topic-id (null topic-id))))))
+          (cond
+            (topic-id
+             nil)
+            (uri
+             (subseq uri (length *hyperdoc-workspace-annotation-uri-prefix*)))
+            (t
+             (normalize-dmx-workspace-annotation-key
+              annotation-key
+              title
+              runtime-relation-id
+              :fresh-key-p (and supersedes-topic-id (null topic-id))))))
          (resolved-uri
-           (or uri
-               (and resolved-key
-                    (dmx-workspace-annotation-uri resolved-key))))
+          (or uri
+              (and resolved-key
+                   (dmx-workspace-annotation-uri resolved-key))))
          (existing-topic
-           (cond
-             (topic-id
-              (dmx-import-read-topic
-               resolved-client
-               (dmx-workspace-annotation-topic-id
-                topic-id
-                :topic-id
-                'resolve-dmx-workspace-annotation
-                :required? t)))
-             (resolved-uri
-              (dmx-import-find-existing-topic resolved-client resolved-uri))
-             (t
-              nil)))
+          (cond
+            (topic-id
+             (dmx-import-read-topic
+              resolved-client
+              (dmx-workspace-annotation-topic-id
+               topic-id
+               :topic-id
+               'resolve-dmx-workspace-annotation
+               :required? t)))
+            (resolved-uri
+             (dmx-import-find-existing-topic resolved-client resolved-uri))
+            (t
+             nil)))
          (existing-topic-id (dmx-import-object-id existing-topic))
          (resolved-storage-mode
-           (resolve-dmx-workspace-annotation-storage-mode
-            storage-mode
-            resolved-client
-            existing-topic)))
+          (resolve-dmx-workspace-annotation-storage-mode
+           storage-mode
+           resolved-client
+           existing-topic)))
     (when (and existing-topic
                (null (dmx-workspace-annotation-topic-storage-mode existing-topic)))
       (error 'fedwiki-dmx-import-error
@@ -4921,18 +4921,18 @@
                               existing-topic-id
                               (dmx-json-object-value existing-topic "typeUri"))))
     (let* ((in-topicmap-p
-             (and existing-topic-id
-                  (dmx-import-topic-in-topicmap-p
-                   resolved-client
-                   resolved-topicmap-id
-                   existing-topic-id)))
+            (and existing-topic-id
+                 (dmx-import-topic-in-topicmap-p
+                  resolved-client
+                  resolved-topicmap-id
+                  existing-topic-id)))
            (current-workspace
-             (and existing-topic-id
-                  (dmx-import-read-topic-workspace
-                   resolved-client
-                   existing-topic-id)))
+            (and existing-topic-id
+                 (dmx-import-read-topic-workspace
+                  resolved-client
+                  existing-topic-id)))
            (current-workspace-id
-             (dmx-import-object-id current-workspace)))
+            (dmx-import-object-id current-workspace)))
       (make-dmx-workspace-annotation-resolution
        :annotation-key resolved-key
        :uri resolved-uri
@@ -5024,141 +5024,141 @@
        annotation-key uri topic-id supersedes-topic-id view-props storage-mode
        destination)
   (let* ((resolved-title
-           (normalize-dmx-workspace-note-string
-            title
-            :title
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           title
+           :title
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-summary
-           (normalize-dmx-workspace-note-string
-            summary
-            :summary
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           summary
+           :summary
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-text
-           (normalize-dmx-workspace-note-string
-            text
-            :text
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           text
+           :text
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-relation-kind
-           (normalize-dmx-workspace-note-string
-            relation-kind
-            :relation-kind
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           relation-kind
+           :relation-kind
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-status
-           (normalize-dmx-workspace-note-string
-            status
-            :status
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           status
+           :status
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-source-anchor-json
-           (normalize-dmx-workspace-note-string
-            source-anchor-json
-            :source-anchor-json
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           source-anchor-json
+           :source-anchor-json
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-target-anchor-json
-           (normalize-dmx-workspace-note-string
-            target-anchor-json
-            :target-anchor-json
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           target-anchor-json
+           :target-anchor-json
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-context-object-id
-           (normalize-dmx-workspace-note-string
-            context-object-id
-            :context-object-id
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           context-object-id
+           :context-object-id
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-context-view-title
-           (normalize-dmx-workspace-note-string
-            context-view-title
-            :context-view-title
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           context-view-title
+           :context-view-title
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-source-object-ref
-           (normalize-dmx-workspace-note-string
-            source-object-ref
-            :source-object-ref
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           source-object-ref
+           :source-object-ref
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-target-object-ref
-           (normalize-dmx-workspace-note-string
-            target-object-ref
-            :target-object-ref
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           target-object-ref
+           :target-object-ref
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-runtime-relation-id
-           (normalize-dmx-workspace-note-string
-            runtime-relation-id
-            :runtime-relation-id
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           runtime-relation-id
+           :runtime-relation-id
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-provenance-json
-           (normalize-dmx-workspace-note-string
-            provenance-json
-            :provenance-json
-            'plan-dmx-workspace-annotation-write
-            :required? t))
+          (normalize-dmx-workspace-note-string
+           provenance-json
+           :provenance-json
+           'plan-dmx-workspace-annotation-write
+           :required? t))
          (resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run t
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run t
+           :verbose nil))
          (resolved-destination
-           (or destination
-               (resolve-dmx-workspace-annotation-destination
-                nil
-                :workspace-topicmap-id workspace-topicmap-id
-                :workspace-id workspace-id
-                :client resolved-client)))
+          (or destination
+              (resolve-dmx-workspace-annotation-destination
+               nil
+               :workspace-topicmap-id workspace-topicmap-id
+               :workspace-id workspace-id
+               :client resolved-client)))
          (resolution
-           (resolve-dmx-workspace-annotation
-            :client resolved-client
-            :workspace-topicmap-id
-            (dmx-workspace-annotation-destination-workspace-topicmap-id
-             resolved-destination)
-            :workspace-id
-            (dmx-workspace-annotation-destination-workspace-id
-             resolved-destination)
-            :annotation-key annotation-key
-            :uri uri
-            :topic-id topic-id
-            :title resolved-title
-            :runtime-relation-id resolved-runtime-relation-id
-            :supersedes-topic-id supersedes-topic-id
-            :storage-mode storage-mode
-            :destination resolved-destination))
+          (resolve-dmx-workspace-annotation
+           :client resolved-client
+           :workspace-topicmap-id
+           (dmx-workspace-annotation-destination-workspace-topicmap-id
+            resolved-destination)
+           :workspace-id
+           (dmx-workspace-annotation-destination-workspace-id
+            resolved-destination)
+           :annotation-key annotation-key
+           :uri uri
+           :topic-id topic-id
+           :title resolved-title
+           :runtime-relation-id resolved-runtime-relation-id
+           :supersedes-topic-id supersedes-topic-id
+           :storage-mode storage-mode
+           :destination resolved-destination))
          (native-payload
-           (dmx-workspace-annotation-native-payload
-            :uri (dmx-workspace-annotation-resolution-uri resolution)
-            :title resolved-title
-            :summary resolved-summary
-            :text resolved-text
-            :relation-kind resolved-relation-kind
-            :status resolved-status
-            :source-anchor-json resolved-source-anchor-json
-            :target-anchor-json resolved-target-anchor-json
-            :context-object-id resolved-context-object-id
-            :context-view-title resolved-context-view-title
-            :source-object-ref resolved-source-object-ref
-            :target-object-ref resolved-target-object-ref
-            :runtime-relation-id resolved-runtime-relation-id
-            :provenance-json resolved-provenance-json
-            :workspace-topicmap-id
-            (dmx-workspace-annotation-resolution-workspace-topicmap-id resolution)
-            :supersedes-topic-id supersedes-topic-id))
+          (dmx-workspace-annotation-native-payload
+           :uri (dmx-workspace-annotation-resolution-uri resolution)
+           :title resolved-title
+           :summary resolved-summary
+           :text resolved-text
+           :relation-kind resolved-relation-kind
+           :status resolved-status
+           :source-anchor-json resolved-source-anchor-json
+           :target-anchor-json resolved-target-anchor-json
+           :context-object-id resolved-context-object-id
+           :context-view-title resolved-context-view-title
+           :source-object-ref resolved-source-object-ref
+           :target-object-ref resolved-target-object-ref
+           :runtime-relation-id resolved-runtime-relation-id
+           :provenance-json resolved-provenance-json
+           :workspace-topicmap-id
+           (dmx-workspace-annotation-resolution-workspace-topicmap-id resolution)
+           :supersedes-topic-id supersedes-topic-id))
          (payload
-           (if (dmx-workspace-annotation-compatibility-storage-mode-p
-                (dmx-workspace-annotation-resolution-storage-mode resolution))
-               (dmx-workspace-annotation-compatibility-note-payload
-                (dmx-workspace-annotation-resolution-annotation-key resolution)
-                (dmx-workspace-annotation-resolution-workspace-topicmap-id
-                 resolution)
-                resolved-runtime-relation-id
-                native-payload)
-               native-payload)))
+          (if (dmx-workspace-annotation-compatibility-storage-mode-p
+               (dmx-workspace-annotation-resolution-storage-mode resolution))
+              (dmx-workspace-annotation-compatibility-note-payload
+               (dmx-workspace-annotation-resolution-annotation-key resolution)
+               (dmx-workspace-annotation-resolution-workspace-topicmap-id
+                resolution)
+               resolved-runtime-relation-id
+               native-payload)
+              native-payload)))
     (multiple-value-bind (resolved-view-props view-props-normalization)
         (normalize-dmx-workspace-note-view-props
          view-props
@@ -5208,18 +5208,18 @@
 
 (defun plan-dmx-workspace-annotation-write-from-object
     (annotation &key workspace-topicmap-id workspace-id client view-props
-       status supersedes-topic-id annotation-key provenance-json storage-mode)
+                  status supersedes-topic-id annotation-key provenance-json storage-mode)
   (let* ((resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run t
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run t
+           :verbose nil))
          (destination
-           (resolve-dmx-workspace-annotation-destination
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client resolved-client)))
+          (resolve-dmx-workspace-annotation-destination
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client resolved-client)))
     (apply #'plan-dmx-workspace-annotation-write
            (append (dmx-workspace-annotation-from-object
                     annotation
@@ -5259,18 +5259,18 @@
        (dmx-workspace-annotation-write-plan-view-props plan))))
   (let* ((after-topic (dmx-import-read-topic client topic-id))
          (after-state
-           (dmx-workspace-journal-live-snapshot
-            client
-            after-topic
-            (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)))
+          (dmx-workspace-journal-live-snapshot
+           client
+           after-topic
+           (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)))
          (journal-events
-           (record-workspace-transition
-            *workspace-journal-sink*
-            previous-state
-            after-state
-            (dmx-workspace-annotation-write-plan-workspace-topicmap-id
-             plan)
-            :client client)))
+          (record-workspace-transition
+           *workspace-journal-sink*
+           previous-state
+           after-state
+           (dmx-workspace-annotation-write-plan-workspace-topicmap-id
+            plan)
+           :client client)))
     (values after-topic after-state journal-events)))
 
 (defun execute-dmx-workspace-annotation-write
@@ -5282,113 +5282,113 @@
        storage-mode destination
        (dry-run t))
   (let* ((resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run dry-run
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run dry-run
+           :verbose nil))
          (plan
-           (plan-dmx-workspace-annotation-write
-            :title title
-            :summary summary
-            :text text
-            :relation-kind relation-kind
-            :status status
-            :source-anchor-json source-anchor-json
-            :target-anchor-json target-anchor-json
-            :context-object-id context-object-id
-            :context-view-title context-view-title
-            :source-object-ref source-object-ref
-            :target-object-ref target-object-ref
-            :runtime-relation-id runtime-relation-id
-            :provenance-json provenance-json
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client resolved-client
-            :annotation-key annotation-key
-            :uri uri
-            :topic-id topic-id
-            :supersedes-topic-id supersedes-topic-id
-            :view-props view-props
-            :storage-mode storage-mode
-            :destination destination))
+          (plan-dmx-workspace-annotation-write
+           :title title
+           :summary summary
+           :text text
+           :relation-kind relation-kind
+           :status status
+           :source-anchor-json source-anchor-json
+           :target-anchor-json target-anchor-json
+           :context-object-id context-object-id
+           :context-view-title context-view-title
+           :source-object-ref source-object-ref
+           :target-object-ref target-object-ref
+           :runtime-relation-id runtime-relation-id
+           :provenance-json provenance-json
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client resolved-client
+           :annotation-key annotation-key
+           :uri uri
+           :topic-id topic-id
+           :supersedes-topic-id supersedes-topic-id
+           :view-props view-props
+           :storage-mode storage-mode
+           :destination destination))
          (subject-key (dmx-workspace-annotation-write-plan-uri plan))
          (previous-preview
-           (if-let (existing-topic
-                    (dmx-workspace-annotation-write-plan-existing-topic plan))
-             (dmx-workspace-journal-live-snapshot
-              resolved-client
-              existing-topic
-              (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan))
-             (dmx-workspace-journal-absent-snapshot
-              subject-key
-              "uri"
-              subject-key
-              (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)
-              :subject-uri subject-key
-              :subject-kind "workspace-annotation"
-              :ownership-class "hyperdoc-workspace-annotation")))
+          (if-let (existing-topic
+                   (dmx-workspace-annotation-write-plan-existing-topic plan))
+              (dmx-workspace-journal-live-snapshot
+               resolved-client
+               existing-topic
+               (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan))
+            (dmx-workspace-journal-absent-snapshot
+             subject-key
+             "uri"
+             subject-key
+             (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)
+             :subject-uri subject-key
+             :subject-kind "workspace-annotation"
+             :ownership-class "hyperdoc-workspace-annotation")))
          (next-preview
-           (dmx-workspace-journal-snapshot-from-payload
-            subject-key
-            "uri"
-            subject-key
-            (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)
-            (dmx-workspace-journal-payload-json-from-payload
-             (dmx-workspace-annotation-write-plan-payload plan))
-            :subject-uri subject-key
-            :subject-kind "workspace-annotation"
-            :ownership-class "hyperdoc-workspace-annotation"
-            :topic-id
-            (dmx-workspace-annotation-write-plan-existing-topic-id plan)
-            :in-topicmap t
-            :view-props
-            (if (eql (dmx-workspace-annotation-write-plan-topicmap-action plan)
-                     :add)
-                (dmx-workspace-annotation-write-plan-view-props plan)
-                (gethash "viewProps" previous-preview))
-            :workspace-id
-            (dmx-workspace-annotation-write-plan-workspace-id plan)
-            :workspace-title
-            (gethash "workspaceTitle" previous-preview)))
+          (dmx-workspace-journal-snapshot-from-payload
+           subject-key
+           "uri"
+           subject-key
+           (dmx-workspace-annotation-write-plan-workspace-topicmap-id plan)
+           (dmx-workspace-journal-payload-json-from-payload
+            (dmx-workspace-annotation-write-plan-payload plan))
+           :subject-uri subject-key
+           :subject-kind "workspace-annotation"
+           :ownership-class "hyperdoc-workspace-annotation"
+           :topic-id
+           (dmx-workspace-annotation-write-plan-existing-topic-id plan)
+           :in-topicmap t
+           :view-props
+           (if (eql (dmx-workspace-annotation-write-plan-topicmap-action plan)
+                    :add)
+               (dmx-workspace-annotation-write-plan-view-props plan)
+               (gethash "viewProps" previous-preview))
+           :workspace-id
+           (dmx-workspace-annotation-write-plan-workspace-id plan)
+           :workspace-title
+           (gethash "workspaceTitle" previous-preview)))
          (journal-preview
-           (dmx-workspace-journal-transition-preview
-            previous-preview
-            next-preview)))
+          (dmx-workspace-journal-transition-preview
+           previous-preview
+           next-preview)))
     (if dry-run
         (append (dmx-workspace-annotation-plan-summary plan)
                 (list :dry-run t
                       :journal-event-preview journal-preview))
         (let* ((previous-state
-                 (dmx-workspace-journal-prepare-transition
-                  resolved-client
-                  subject-key
-                  "uri"
-                  subject-key
-                  (dmx-workspace-annotation-write-plan-workspace-topicmap-id
-                   plan)
-                  :subject-uri subject-key
-                  :subject-kind "workspace-annotation"
-                  :ownership-class "hyperdoc-workspace-annotation"
-                  :workspace-id
-                  (dmx-workspace-annotation-write-plan-workspace-id plan)))
+                (dmx-workspace-journal-prepare-transition
+                 resolved-client
+                 subject-key
+                 "uri"
+                 subject-key
+                 (dmx-workspace-annotation-write-plan-workspace-topicmap-id
+                  plan)
+                 :subject-uri subject-key
+                 :subject-kind "workspace-annotation"
+                 :ownership-class "hyperdoc-workspace-annotation"
+                 :workspace-id
+                 (dmx-workspace-annotation-write-plan-workspace-id plan)))
                (topic
-                 (ecase (dmx-workspace-annotation-write-plan-topic-action plan)
-                   (:create
-                    (dmx-import-create-topic
-                     resolved-client
-                     (dmx-workspace-annotation-write-plan-payload plan)))
-                   (:update
-                    (progn
-                      (when (workspace-annotation-topic-upsert-existing-topic-anonymous-p
-                             resolved-client
-                             plan)
-                        (signal-workspace-annotation-topic-upsert-auth-boundary
-                         resolved-client
-                         plan))
-                      (dmx-import-update-topic
-                       resolved-client
-                       (dmx-workspace-annotation-write-plan-existing-topic plan)
-                       (dmx-workspace-annotation-write-plan-payload plan))))))
+                (ecase (dmx-workspace-annotation-write-plan-topic-action plan)
+                  (:create
+                   (dmx-import-create-topic
+                    resolved-client
+                    (dmx-workspace-annotation-write-plan-payload plan)))
+                  (:update
+                   (progn
+                     (when (workspace-annotation-topic-upsert-existing-topic-anonymous-p
+                            resolved-client
+                            plan)
+                       (signal-workspace-annotation-topic-upsert-auth-boundary
+                        resolved-client
+                        plan))
+                     (dmx-import-update-topic
+                      resolved-client
+                      (dmx-workspace-annotation-write-plan-existing-topic plan)
+                      (dmx-workspace-annotation-write-plan-payload plan))))))
                (topic-id* (dmx-import-object-id topic)))
           (multiple-value-bind (_after-topic _after-state journal-events)
               (continue-dmx-workspace-annotation-write-after-topic-upsert
@@ -5406,20 +5406,20 @@
 
 (defun execute-dmx-workspace-annotation-write-from-object
     (annotation &key workspace-topicmap-id workspace-id client view-props
-       status supersedes-topic-id annotation-key provenance-json
-       storage-mode
-       (dry-run t))
+                  status supersedes-topic-id annotation-key provenance-json
+                  storage-mode
+                  (dry-run t))
   (let* ((resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run dry-run
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run dry-run
+           :verbose nil))
          (destination
-           (resolve-dmx-workspace-annotation-destination
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client resolved-client)))
+          (resolve-dmx-workspace-annotation-destination
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client resolved-client)))
     (apply #'execute-dmx-workspace-annotation-write
            (append (dmx-workspace-annotation-from-object
                     annotation
@@ -5443,19 +5443,19 @@
 
 (defun run-dock-annotation-workspace-persistence-debug
     (annotation &key workspace-topicmap-id workspace-id client view-props
-       status supersedes-topic-id annotation-key provenance-json storage-mode)
+                  status supersedes-topic-id annotation-key provenance-json storage-mode)
   (let* ((debug
-           (debug-dock-annotation-workspace-persistence
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client client
-            :view-props view-props
-            :status status
-            :supersedes-topic-id supersedes-topic-id
-            :annotation-key annotation-key
-            :provenance-json provenance-json
-            :storage-mode storage-mode))
+          (debug-dock-annotation-workspace-persistence
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client client
+           :view-props view-props
+           :status status
+           :supersedes-topic-id supersedes-topic-id
+           :annotation-key annotation-key
+           :provenance-json provenance-json
+           :storage-mode storage-mode))
          (stage-results '())
          (failure-stage nil)
          (failure-condition nil)
@@ -5463,12 +5463,12 @@
          (persisted-annotation nil)
          (raw-result nil)
          (resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run nil
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run nil
+           :verbose nil))
          (resolved-topicmap-id
-           (workspace-annotation-persistence-debug-workspace-topicmap-id-of debug))
+          (workspace-annotation-persistence-debug-workspace-topicmap-id-of debug))
          (subject-key nil)
          (previous-state nil)
          (journal-preflight-summary nil)
@@ -5714,92 +5714,92 @@
                    (lambda ()
                      (read-dmx-workspace-annotation
                       :topic-id topic-id*
-                     :workspace-topicmap-id resolved-topicmap-id
-                     :client resolved-client)))))
+                      :workspace-topicmap-id resolved-topicmap-id
+                      :client resolved-client)))))
         (error (condition)
           (setf failure-condition (or failure-condition condition))))
       (let* ((journal-preflight-auth-blocked-p
-               (and (eq failure-stage :prepare-transition)
-                    (workspace-annotation-auth-blocked-condition-p
-                     failure-condition)))
+              (and (eq failure-stage :prepare-transition)
+                   (workspace-annotation-auth-blocked-condition-p
+                    failure-condition)))
              (pending-auth-p
-               (workspace-annotation-auth-awaiting-stage-p
-                failure-stage
-                failure-condition
-                :persisted-topic-id persisted-topic-id))
+              (workspace-annotation-auth-awaiting-stage-p
+               failure-stage
+               failure-condition
+               :persisted-topic-id persisted-topic-id))
              (auth-awaiting-p
-               (workspace-annotation-auth-awaiting-stage-p
-                failure-stage
-                failure-condition
-                :persisted-topic-id persisted-topic-id
-                :journal-preflight-auth-blocked-p
-                journal-preflight-auth-blocked-p))
+              (workspace-annotation-auth-awaiting-stage-p
+               failure-stage
+               failure-condition
+               :persisted-topic-id persisted-topic-id
+               :journal-preflight-auth-blocked-p
+               journal-preflight-auth-blocked-p))
              (report
-               (make-instance
-                'workspace-annotation-persistence-report
-                :annotation annotation
-                :workspace-topicmap-id resolved-topicmap-id
-                :workspace-id
-                (or (and plan
-                         (dmx-workspace-annotation-write-plan-workspace-id plan))
-                    (workspace-annotation-persistence-debug-workspace-id-of
-                     debug))
-                :client resolved-client
-                :exact-form
-                (workspace-annotation-persistence-debug-exact-form-of debug)
-                :stepper-source
-                (workspace-annotation-persistence-debug-stepper-source-of debug)
-                :dry-run-preview
-                (workspace-annotation-persistence-debug-dry-run-preview-of debug)
-                :annotation-key
-                (workspace-annotation-persistence-debug-annotation-key-of debug)
-                :runtime-relation-id
-                (workspace-annotation-persistence-debug-runtime-relation-id-of
-                 debug)
-                :plan plan
-                :stage-results (nreverse stage-results)
-                :report-status (cond
-                                 (auth-awaiting-p :pending-auth)
-                                 (failure-stage :failed)
-                                 (t :persisted))
-                :failure-stage failure-stage
-                :condition failure-condition
-                :transport-diagnostics
-                (workspace-annotation-transport-diagnostics
-                 plan
-                 failure-stage
-                 failure-condition)
-                :topic-upsert-evidence
-                (and (eq failure-stage :topic-upsert)
-                     (workspace-annotation-topic-upsert-evidence
-                      plan
-                      failure-condition))
-                :raw-result raw-result
-                :persisted-topic-id persisted-topic-id
-                :persisted-annotation persisted-annotation
-                :subject-key subject-key
-                :previous-state previous-state
-                :journal-preflight-summary journal-preflight-summary
-                :journal-preflight-repair-summary
-                (or journal-preflight-repair-summary
-                    (and (typep failure-condition
-                                'dmx-workspace-journal-companion-repair-failed-error)
-                         (dmx-workspace-journal-companion-repair-summary-of
-                          failure-condition)))
-                :journal-preflight-auth-context
-                (and journal-preflight-auth-blocked-p
-                     (workspace-annotation-journal-preflight-auth-context
-                      plan
-                      resolved-client
-                      journal-preflight-summary
-                      failure-condition))
-                :assignment-auth-context
-                (and pending-auth-p
-                     (workspace-annotation-assignment-auth-context
-                      plan
-                      resolved-client
-                      persisted-topic-id
-                      failure-condition)))))
+              (make-instance
+               'workspace-annotation-persistence-report
+               :annotation annotation
+               :workspace-topicmap-id resolved-topicmap-id
+               :workspace-id
+               (or (and plan
+                        (dmx-workspace-annotation-write-plan-workspace-id plan))
+                   (workspace-annotation-persistence-debug-workspace-id-of
+                    debug))
+               :client resolved-client
+               :exact-form
+               (workspace-annotation-persistence-debug-exact-form-of debug)
+               :stepper-source
+               (workspace-annotation-persistence-debug-stepper-source-of debug)
+               :dry-run-preview
+               (workspace-annotation-persistence-debug-dry-run-preview-of debug)
+               :annotation-key
+               (workspace-annotation-persistence-debug-annotation-key-of debug)
+               :runtime-relation-id
+               (workspace-annotation-persistence-debug-runtime-relation-id-of
+                debug)
+               :plan plan
+               :stage-results (nreverse stage-results)
+               :report-status (cond
+                                (auth-awaiting-p :pending-auth)
+                                (failure-stage :failed)
+                                (t :persisted))
+               :failure-stage failure-stage
+               :condition failure-condition
+               :transport-diagnostics
+               (workspace-annotation-transport-diagnostics
+                plan
+                failure-stage
+                failure-condition)
+               :topic-upsert-evidence
+               (and (eq failure-stage :topic-upsert)
+                    (workspace-annotation-topic-upsert-evidence
+                     plan
+                     failure-condition))
+               :raw-result raw-result
+               :persisted-topic-id persisted-topic-id
+               :persisted-annotation persisted-annotation
+               :subject-key subject-key
+               :previous-state previous-state
+               :journal-preflight-summary journal-preflight-summary
+               :journal-preflight-repair-summary
+               (or journal-preflight-repair-summary
+                   (and (typep failure-condition
+                               'dmx-workspace-journal-companion-repair-failed-error)
+                        (dmx-workspace-journal-companion-repair-summary-of
+                         failure-condition)))
+               :journal-preflight-auth-context
+               (and journal-preflight-auth-blocked-p
+                    (workspace-annotation-journal-preflight-auth-context
+                     plan
+                     resolved-client
+                     journal-preflight-summary
+                     failure-condition))
+               :assignment-auth-context
+               (and pending-auth-p
+                    (workspace-annotation-assignment-auth-context
+                     plan
+                     resolved-client
+                     persisted-topic-id
+                     failure-condition)))))
         (setf (workspace-annotation-persistence-debug-last-report-of debug)
               report)
         report))))
@@ -5873,16 +5873,16 @@
     (annotation plan topic-id workspace-topicmap-id client)
   (let* ((subject-key (dmx-workspace-annotation-write-plan-uri plan))
          (journal-preflight-summary
-           (ignore-errors
-             (dmx-workspace-journal-preflight-summary
-              client
-              subject-key
-              "uri"
-              subject-key
-              workspace-topicmap-id
-              :subject-uri subject-key
-              :subject-kind "workspace-annotation"
-              :ownership-class "hyperdoc-workspace-annotation"))))
+          (ignore-errors
+            (dmx-workspace-journal-preflight-summary
+             client
+             subject-key
+             "uri"
+             subject-key
+             workspace-topicmap-id
+             :subject-uri subject-key
+             :subject-kind "workspace-annotation"
+             :ownership-class "hyperdoc-workspace-annotation"))))
     (make-instance
      'workspace-annotation-persistence-report
      :annotation annotation
@@ -5991,9 +5991,9 @@
 (defun guarded-journal-transition-stage-summary
     (assignment-summary topicmap-summary)
   (let ((covered-stages
-          (remove nil
-                  (list (when assignment-summary "workspace-assignment")
-                        (when topicmap-summary "topicmap-placement")))))
+         (remove nil
+                 (list (when assignment-summary "workspace-assignment")
+                       (when topicmap-summary "topicmap-placement")))))
     (if covered-stages
         (format nil
                 "Guarded continuation recorded journal transitions inside the shared-workspace executors for ~{~A~^ and ~}."
@@ -6011,26 +6011,26 @@
          (topic-id (workspace-annotation-persistence-report-persisted-topic-id-of
                     report))
          (workspace-topicmap-id
-           (workspace-annotation-persistence-report-workspace-topicmap-id-of
-            report))
+          (workspace-annotation-persistence-report-workspace-topicmap-id-of
+           report))
          (subject-key
-           (workspace-annotation-persistence-report-subject-key-of report))
+          (workspace-annotation-persistence-report-subject-key-of report))
          (previous-state
-           (workspace-annotation-persistence-report-previous-state-of report))
+          (workspace-annotation-persistence-report-previous-state-of report))
          (stage-results
-           (copy-tree
-            (workspace-annotation-persistence-report-stage-results-of report)))
+          (copy-tree
+           (workspace-annotation-persistence-report-stage-results-of report)))
          (failure-stage nil)
          (failure-condition nil)
          (guarded-assignment-summary nil)
          (guarded-topicmap-summary nil)
          (persisted-annotation nil)
          (raw-result
-           (or (workspace-annotation-persistence-report-raw-result-of report)
-               (append (dmx-workspace-annotation-plan-summary plan)
-                       (list :dry-run nil
-                             :topic-id topic-id
-                             :journal-subject-key subject-key)))))
+          (or (workspace-annotation-persistence-report-raw-result-of report)
+              (append (dmx-workspace-annotation-plan-summary plan)
+                      (list :dry-run nil
+                            :topic-id topic-id
+                            :journal-subject-key subject-key)))))
     (labels ((record-stage (stage status summary &key detail)
                (setf stage-results
                      (workspace-annotation-stage-results-with-entry
@@ -6245,17 +6245,17 @@
 
 (defun workspace-annotation-path-diff-guarded-stage-status (comparison stage)
   (let ((assignment-summary
-          (workspace-annotation-path-diff-guarded-assignment-summary-of
-           comparison))
+         (workspace-annotation-path-diff-guarded-assignment-summary-of
+          comparison))
         (assignment-condition
-          (workspace-annotation-path-diff-guarded-assignment-condition-of
-           comparison))
+         (workspace-annotation-path-diff-guarded-assignment-condition-of
+          comparison))
         (topicmap-summary
-          (workspace-annotation-path-diff-guarded-topicmap-summary-of
-           comparison))
+         (workspace-annotation-path-diff-guarded-topicmap-summary-of
+          comparison))
         (topicmap-condition
-          (workspace-annotation-path-diff-guarded-topicmap-condition-of
-           comparison)))
+         (workspace-annotation-path-diff-guarded-topicmap-condition-of
+          comparison)))
     (case stage
       (:workspace-assignment
        (cond
@@ -6310,19 +6310,19 @@
 
 (defun workspace-annotation-path-diff-guarded-live-label (comparison stage)
   (let ((assignment-summary
-          (workspace-annotation-path-diff-guarded-assignment-summary-of
-           comparison))
+         (workspace-annotation-path-diff-guarded-assignment-summary-of
+          comparison))
         (assignment-condition
-          (workspace-annotation-path-diff-guarded-assignment-condition-of
-           comparison))
+         (workspace-annotation-path-diff-guarded-assignment-condition-of
+          comparison))
         (topicmap-summary
-          (workspace-annotation-path-diff-guarded-topicmap-summary-of
-           comparison))
+         (workspace-annotation-path-diff-guarded-topicmap-summary-of
+          comparison))
         (topicmap-condition
-          (workspace-annotation-path-diff-guarded-topicmap-condition-of
-           comparison))
+         (workspace-annotation-path-diff-guarded-topicmap-condition-of
+          comparison))
         (topic-id
-          (workspace-annotation-path-diff-continuation-topic-id-of comparison)))
+         (workspace-annotation-path-diff-continuation-topic-id-of comparison)))
     (case stage
       (:topic-upsert
        (and topic-id "preserved topic id"))
@@ -6526,12 +6526,12 @@
         when (or (eq stage :topic-upsert)
                  (and (or raw guarded)
                       (not (equal raw guarded))))
-          collect stage))
+        collect stage))
 
 (defun workspace-annotation-path-state-repair-needed-p (comparison)
   (let* ((state (workspace-annotation-path-diff-state-snapshot-of comparison))
          (target-workspace-id
-           (workspace-annotation-path-target-workspace-id comparison)))
+          (workspace-annotation-path-target-workspace-id comparison)))
     (and state
          (getf state :workspace-read-p)
          (getf state :topicmap-read-p)
@@ -6544,7 +6544,7 @@
   (let* ((state (workspace-annotation-path-diff-state-snapshot-of comparison))
          (plan (workspace-annotation-path-diff-plan-of comparison))
          (target-workspace-id
-           (workspace-annotation-path-target-workspace-id comparison)))
+          (workspace-annotation-path-target-workspace-id comparison)))
     (and state
          (getf state :workspace-read-p)
          (getf state :topicmap-read-p)
@@ -6562,7 +6562,7 @@
 (defun workspace-annotation-path-reopen-success-proved-p (comparison)
   (let ((annotation (workspace-annotation-path-diff-annotation-of comparison))
         (topic-id
-          (workspace-annotation-path-diff-continuation-topic-id-of comparison)))
+         (workspace-annotation-path-diff-continuation-topic-id-of comparison)))
     (and (typep annotation 'workspace-dock-annotation)
          topic-id
          (eql (workspace-annotation-topic-id-of annotation)
@@ -6582,7 +6582,7 @@
 (defun workspace-annotation-path-consequence-summary-for-stages
     (comparison stages)
   (let ((consequences
-          (workspace-annotation-path-consequences-for-stages comparison stages)))
+         (workspace-annotation-path-consequences-for-stages comparison stages)))
     (when consequences
       (format nil
               "Consequence: ~{~A~^; ~}"
@@ -6615,12 +6615,12 @@
   (let* ((report (workspace-annotation-path-diff-raw-report-of comparison))
          (state (workspace-annotation-path-diff-state-snapshot-of comparison))
          (topic-id
-           (workspace-annotation-path-diff-continuation-topic-id-of comparison))
+          (workspace-annotation-path-diff-continuation-topic-id-of comparison))
          (live-http-p (workspace-annotation-path-live-http-client-p comparison))
          (target-workspace-id
-           (workspace-annotation-path-target-workspace-id comparison))
+          (workspace-annotation-path-target-workspace-id comparison))
          (divergent-stages
-           (workspace-annotation-path-diff-divergent-stages comparison))
+          (workspace-annotation-path-diff-divergent-stages comparison))
          (rows '()))
     (flet ((add (row)
              (push row rows)))
@@ -6669,10 +6669,10 @@
             nil
             '(:workspace-assignment)
             :kind :surface
-             :summary
-             "Review the preserved raw report and its evidence before continuing."
-             :target-object report
-             :target-select "Overview")))))
+            :summary
+            "Review the preserved raw report and its evidence before continuing."
+            :target-object report
+            :target-select "Overview")))))
       (when (workspace-annotation-path-state-repair-needed-p comparison)
         (add
          (make-workspace-annotation-path-consequence
@@ -6708,10 +6708,10 @@
             "read_dmx_topic"
             "read_dmx_topic"
             :inspect
-             nil
-             '(:workspace-assignment :topicmap-placement)
-             :summary
-             "Inspect the persisted topic state before running the guarded repair.")))))
+            nil
+            '(:workspace-assignment :topicmap-placement)
+            :summary
+            "Inspect the persisted topic state before running the guarded repair.")))))
       (when (and state
                  (member (getf state :status) '(:blocked :partial) :test #'eq)
                  topic-id
@@ -6741,10 +6741,10 @@
             "read_dmx_topicmap"
             "read_dmx_topicmap"
             :inspect
-             nil
-             '(:topicmap-placement)
-             :summary
-             "Inspect the topicmap projection separately from workspace ownership.")))))
+            nil
+            '(:topicmap-placement)
+            :summary
+            "Inspect the topicmap projection separately from workspace ownership.")))))
       (when (and (typep report 'workspace-annotation-persistence-report)
                  (eq (workspace-annotation-persistence-report-status-of report)
                      :persisted))
@@ -6793,10 +6793,10 @@
             "current compare state"
             :none
             nil
-             '(:workspace-assignment :topicmap-placement)
-             :kind :surface
-             :summary
-             "The compare surface shows no additional guarded mutation requirement.")))))
+            '(:workspace-assignment :topicmap-placement)
+            :kind :surface
+            :summary
+            "The compare surface shows no additional guarded mutation requirement.")))))
       (when (and (null rows)
                  (or (and (typep report 'workspace-annotation-persistence-report)
                           (eq (workspace-annotation-persistence-report-status-of
@@ -6991,74 +6991,74 @@
 
 (defun make-workspace-annotation-path-diff
     (annotation workspace-topicmap-id &key workspace-id client report
-       view-props status supersedes-topic-id annotation-key provenance-json
-       storage-mode)
+                                        view-props status supersedes-topic-id annotation-key provenance-json
+                                        storage-mode)
   (let* ((report-plan
-           (and (typep report 'workspace-annotation-persistence-report)
-                (workspace-annotation-persistence-report-plan-of report)))
+          (and (typep report 'workspace-annotation-persistence-report)
+               (workspace-annotation-persistence-report-plan-of report)))
          (resolved-client
-           (or client
-               (and (typep report 'workspace-annotation-persistence-report)
-                    (workspace-annotation-persistence-report-client-of report))
-               (resolve-dmx-workspace-annotation-client
-                :client client
-                :dry-run t
-                :verbose nil)))
+          (or client
+              (and (typep report 'workspace-annotation-persistence-report)
+                   (workspace-annotation-persistence-report-client-of report))
+              (resolve-dmx-workspace-annotation-client
+               :client client
+               :dry-run t
+               :verbose nil)))
          (destination
-           (or (and report-plan
-                    (dmx-workspace-annotation-write-plan-destination
-                     report-plan))
-               (resolve-dmx-workspace-annotation-destination
-                annotation
-                :workspace-topicmap-id workspace-topicmap-id
-                :workspace-id workspace-id
-                :client resolved-client)))
+          (or (and report-plan
+                   (dmx-workspace-annotation-write-plan-destination
+                    report-plan))
+              (resolve-dmx-workspace-annotation-destination
+               annotation
+               :workspace-topicmap-id workspace-topicmap-id
+               :workspace-id workspace-id
+               :client resolved-client)))
          (resolved-topicmap-id
-           (or (and (typep report 'workspace-annotation-persistence-report)
-                    (workspace-annotation-persistence-report-workspace-topicmap-id-of
-                     report))
-               (and destination
-                    (dmx-workspace-annotation-destination-workspace-topicmap-id
-                     destination))
-               workspace-topicmap-id))
+          (or (and (typep report 'workspace-annotation-persistence-report)
+                   (workspace-annotation-persistence-report-workspace-topicmap-id-of
+                    report))
+              (and destination
+                   (dmx-workspace-annotation-destination-workspace-topicmap-id
+                    destination))
+              workspace-topicmap-id))
          (resolved-workspace-id
-           (or (and report-plan
-                    (dmx-workspace-annotation-write-plan-workspace-id
-                     report-plan))
-               (and (typep report 'workspace-annotation-persistence-report)
-                    (workspace-annotation-persistence-report-workspace-id-of
-                     report))
-               (and destination
-                    (dmx-workspace-annotation-destination-workspace-id
-                     destination))
-               workspace-id))
+          (or (and report-plan
+                   (dmx-workspace-annotation-write-plan-workspace-id
+                    report-plan))
+              (and (typep report 'workspace-annotation-persistence-report)
+                   (workspace-annotation-persistence-report-workspace-id-of
+                    report))
+              (and destination
+                   (dmx-workspace-annotation-destination-workspace-id
+                    destination))
+              workspace-id))
          (plan
-           (or report-plan
-               (plan-dmx-workspace-annotation-write-from-object
-                annotation
-                :workspace-topicmap-id resolved-topicmap-id
-                :workspace-id resolved-workspace-id
-                :client resolved-client
-                :view-props view-props
-                :status status
-                :supersedes-topic-id supersedes-topic-id
-                :annotation-key annotation-key
-                :provenance-json provenance-json
-                :storage-mode storage-mode)))
+          (or report-plan
+              (plan-dmx-workspace-annotation-write-from-object
+               annotation
+               :workspace-topicmap-id resolved-topicmap-id
+               :workspace-id resolved-workspace-id
+               :client resolved-client
+               :view-props view-props
+               :status status
+               :supersedes-topic-id supersedes-topic-id
+               :annotation-key annotation-key
+               :provenance-json provenance-json
+               :storage-mode storage-mode)))
          (continuation-topic-id
-           (or (and (typep report 'workspace-annotation-persistence-report)
-                    (workspace-annotation-persistence-report-saved-topic-id-of
-                     report))
-               (and (typep annotation 'workspace-dock-annotation)
-                    (workspace-annotation-topic-id-of annotation))
-               (and plan
-                    (dmx-workspace-annotation-write-plan-existing-topic-id
-                     plan))))
+          (or (and (typep report 'workspace-annotation-persistence-report)
+                   (workspace-annotation-persistence-report-saved-topic-id-of
+                    report))
+              (and (typep annotation 'workspace-dock-annotation)
+                   (workspace-annotation-topic-id-of annotation))
+              (and plan
+                   (dmx-workspace-annotation-write-plan-existing-topic-id
+                    plan))))
          (state-snapshot
-           (inspect-workspace-annotation-path-state
-            resolved-client
-            continuation-topic-id
-            resolved-topicmap-id))
+          (inspect-workspace-annotation-path-state
+           resolved-client
+           continuation-topic-id
+           resolved-topicmap-id))
          (guarded-assignment-summary nil)
          (guarded-assignment-condition nil)
          (guarded-topicmap-summary nil)
@@ -7100,8 +7100,8 @@
 
 (defun compare-dock-annotation-with-guarded-workspace-path
     (annotation &key workspace-topicmap-id workspace-id client report
-       view-props status supersedes-topic-id annotation-key provenance-json
-       storage-mode)
+                  view-props status supersedes-topic-id annotation-key provenance-json
+                  storage-mode)
   (make-workspace-annotation-path-diff
    annotation
    workspace-topicmap-id
@@ -7121,27 +7121,27 @@
          (topic-id (workspace-annotation-path-diff-continuation-topic-id-of
                     comparison))
          (workspace-topicmap-id
-           (workspace-annotation-path-diff-workspace-topicmap-id-of comparison))
+          (workspace-annotation-path-diff-workspace-topicmap-id-of comparison))
          (divergence-consequence
-           (workspace-annotation-path-consequence-summary-for-stages
-            comparison
-            '(:topic-upsert :workspace-assignment)))
+          (workspace-annotation-path-consequence-summary-for-stages
+           comparison
+           '(:topic-upsert :workspace-assignment)))
          (assignment-consequence
-           (workspace-annotation-path-consequence-summary-for-stages
-            comparison
-            :workspace-assignment))
+          (workspace-annotation-path-consequence-summary-for-stages
+           comparison
+           :workspace-assignment))
          (topicmap-consequence
-           (workspace-annotation-path-consequence-summary-for-stages
-            comparison
-            :topicmap-placement))
+          (workspace-annotation-path-consequence-summary-for-stages
+           comparison
+           :topicmap-placement))
          (journal-consequence
-           (workspace-annotation-path-consequence-summary-for-stages
-            comparison
-            :journal-transition))
+          (workspace-annotation-path-consequence-summary-for-stages
+           comparison
+           :journal-transition))
          (result-consequence
-           (workspace-annotation-path-consequence-summary-for-stages
-            comparison
-            :reopen-persisted-annotation)))
+          (workspace-annotation-path-consequence-summary-for-stages
+           comparison
+           :reopen-persisted-annotation)))
     (make-code-path-graph
      :id "workspace-annotation-path-diff"
      :title "Workspace annotation path diff"
@@ -7462,7 +7462,7 @@
 
 (defun continue-workspace-annotation-persistence-with-explicit-auth
     (report &key client auth-mode username password authorization-header
-       auth-token)
+              auth-token)
   (handler-case
       (continue-workspace-annotation-persistence-with-client
        report
@@ -7524,61 +7524,61 @@
 
 (defun continue-workspace-annotation-journal-preflight-with-explicit-auth
     (report &key client auth-mode username password authorization-header
-       auth-token)
+              auth-token)
   (let ((attempt-client nil)
         (retry-executed-at (get-universal-time))
         (retry-request-id
-          (workspace-annotation-explicit-auth-retry-request-id)))
+         (workspace-annotation-explicit-auth-retry-request-id)))
     (labels ((requested-auth-mode ()
-             (or (workspace-annotation-explicit-auth-mode-or-nil auth-mode)
-                 (workspace-annotation-explicit-auth-client-mode
-                  attempt-client)))
-           (retry-marker-overrides ()
-             (list :explicit-auth-retry-invoked-p t
-                   :explicit-auth-retry-request-id retry-request-id
-                   :explicit-auth-retry-executed-at retry-executed-at
-                   :explicit-auth-retry-executed-at-label
-                   (workspace-annotation-format-explicit-auth-retry-time
-                    retry-executed-at)
-                   :explicit-auth-retry-mode (requested-auth-mode)
-                   :explicit-auth-retry-mode-label
-                   (and (requested-auth-mode)
-                        (workspace-annotation-auth-mode-label
-                         (requested-auth-mode)))
-                   :explicit-auth-retry-source
-                   :journal-preflight-explicit-auth
-                   :explicit-auth-retry-source-label
-                   (workspace-annotation-explicit-auth-retry-source-label
-                    :journal-preflight-explicit-auth)
-                   :explicit-auth-retry-evidence-version
-                   *workspace-annotation-explicit-auth-retry-evidence-version*))
-           (attempt-context (failure &key local-failure-stage)
-             (workspace-annotation-explicit-auth-attempt-context
-              report
-              attempt-client
-              failure
-              :auth-mode auth-mode
-              :username username
-              :password password
-              :authorization-header authorization-header
-              :auth-token auth-token
-              :local-failure-stage local-failure-stage
-              :continuation-request-id retry-request-id
-              :continuation-executed-at retry-executed-at
-              :continuation-source :journal-preflight-explicit-auth))
-           (decorate-report (result &key failure include-attempt-context-p)
-             (if (typep result 'workspace-annotation-persistence-report)
-                 (apply #'make-workspace-annotation-persistence-report-like
-                        result
-                        (append
-                         (list :journal-preflight-auth-context
-                               (workspace-annotation-persistence-report-journal-preflight-auth-context-of
-                                report))
-                         (when include-attempt-context-p
-                           (list :explicit-auth-attempt-context
-                                 (attempt-context failure)))
-                         (retry-marker-overrides)))
-                 result)))
+               (or (workspace-annotation-explicit-auth-mode-or-nil auth-mode)
+                   (workspace-annotation-explicit-auth-client-mode
+                    attempt-client)))
+             (retry-marker-overrides ()
+               (list :explicit-auth-retry-invoked-p t
+                     :explicit-auth-retry-request-id retry-request-id
+                     :explicit-auth-retry-executed-at retry-executed-at
+                     :explicit-auth-retry-executed-at-label
+                     (workspace-annotation-format-explicit-auth-retry-time
+                      retry-executed-at)
+                     :explicit-auth-retry-mode (requested-auth-mode)
+                     :explicit-auth-retry-mode-label
+                     (and (requested-auth-mode)
+                          (workspace-annotation-auth-mode-label
+                           (requested-auth-mode)))
+                     :explicit-auth-retry-source
+                     :journal-preflight-explicit-auth
+                     :explicit-auth-retry-source-label
+                     (workspace-annotation-explicit-auth-retry-source-label
+                      :journal-preflight-explicit-auth)
+                     :explicit-auth-retry-evidence-version
+                     *workspace-annotation-explicit-auth-retry-evidence-version*))
+             (attempt-context (failure &key local-failure-stage)
+               (workspace-annotation-explicit-auth-attempt-context
+                report
+                attempt-client
+                failure
+                :auth-mode auth-mode
+                :username username
+                :password password
+                :authorization-header authorization-header
+                :auth-token auth-token
+                :local-failure-stage local-failure-stage
+                :continuation-request-id retry-request-id
+                :continuation-executed-at retry-executed-at
+                :continuation-source :journal-preflight-explicit-auth))
+             (decorate-report (result &key failure include-attempt-context-p)
+               (if (typep result 'workspace-annotation-persistence-report)
+                   (apply #'make-workspace-annotation-persistence-report-like
+                          result
+                          (append
+                           (list :journal-preflight-auth-context
+                                 (workspace-annotation-persistence-report-journal-preflight-auth-context-of
+                                  report))
+                           (when include-attempt-context-p
+                             (list :explicit-auth-attempt-context
+                                   (attempt-context failure)))
+                           (retry-marker-overrides)))
+                   result)))
       (handler-case
           (setf attempt-client
                 (or client
@@ -7608,13 +7608,13 @@
       (reset-http-dmx-import-debug-evidence attempt-client)
       (handler-case
           (let ((continued
-                  (progn
-                    (ensure-http-dmx-import-authenticated-operation
-                     attempt-client
-                     :journal-preflight-continuation)
-                    (continue-workspace-annotation-journal-preflight-with-client
-                     report
-                     attempt-client))))
+                 (progn
+                   (ensure-http-dmx-import-authenticated-operation
+                    attempt-client
+                    :journal-preflight-continuation)
+                   (continue-workspace-annotation-journal-preflight-with-client
+                    report
+                    attempt-client))))
             (decorate-report
              continued
              :failure
@@ -7632,75 +7632,75 @@
             report
             :client attempt-client
             :condition failure
-           :report-status
+            :report-status
             (workspace-annotation-persistence-report-status-of report)
-           :failure-stage
+            :failure-stage
             (workspace-annotation-persistence-report-failure-stage-of report))
            :failure failure
            :include-attempt-context-p t))))))
 
 (defun probe-live-create-topic-for-dock-annotation
     (annotation &key workspace-topicmap-id workspace-id client view-props
-       status supersedes-topic-id annotation-key provenance-json
-       (storage-mode *dmx-workspace-annotation-native-storage-mode*))
+                  status supersedes-topic-id annotation-key provenance-json
+                  (storage-mode *dmx-workspace-annotation-native-storage-mode*))
   (let* ((annotation (workspace-annotation-replay-subject annotation))
          (resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run nil
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run nil
+           :verbose nil))
          (resolved-destination
-           (resolve-dmx-workspace-annotation-destination
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client resolved-client))
+          (resolve-dmx-workspace-annotation-destination
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client resolved-client))
          (resolved-topicmap-id
-           (dmx-workspace-annotation-destination-workspace-topicmap-id
-            resolved-destination))
+          (dmx-workspace-annotation-destination-workspace-topicmap-id
+           resolved-destination))
          (preview
-           (workspace-annotation-persistence-preview
-            annotation
-            resolved-topicmap-id
-            :workspace-id
-            (dmx-workspace-annotation-destination-workspace-id
-             resolved-destination)
-            :client resolved-client
-            :view-props view-props
-            :status status
-            :supersedes-topic-id supersedes-topic-id
-            :annotation-key annotation-key
-            :provenance-json provenance-json
-            :storage-mode storage-mode))
+          (workspace-annotation-persistence-preview
+           annotation
+           resolved-topicmap-id
+           :workspace-id
+           (dmx-workspace-annotation-destination-workspace-id
+            resolved-destination)
+           :client resolved-client
+           :view-props view-props
+           :status status
+           :supersedes-topic-id supersedes-topic-id
+           :annotation-key annotation-key
+           :provenance-json provenance-json
+           :storage-mode storage-mode))
          (normalized
-           (dmx-workspace-annotation-from-object
-            annotation
-            resolved-topicmap-id
-            :status status
+          (dmx-workspace-annotation-from-object
+           annotation
+           resolved-topicmap-id
+           :status status
            :supersedes-topic-id supersedes-topic-id
            :annotation-key annotation-key
            :provenance-json provenance-json))
          (plan
-           (apply #'plan-dmx-workspace-annotation-write
-                  (append normalized
-                          (list :workspace-id
-                                (dmx-workspace-annotation-destination-workspace-id
-                                 resolved-destination)
-                                :workspace-topicmap-id
-                                resolved-topicmap-id
-                                :client resolved-client
-                                :view-props view-props
-                                :storage-mode storage-mode
-                                :destination resolved-destination))))
+          (apply #'plan-dmx-workspace-annotation-write
+                 (append normalized
+                         (list :workspace-id
+                               (dmx-workspace-annotation-destination-workspace-id
+                                resolved-destination)
+                               :workspace-topicmap-id
+                               resolved-topicmap-id
+                               :client resolved-client
+                               :view-props view-props
+                               :storage-mode storage-mode
+                               :destination resolved-destination))))
          (payload-json
-           (workspace-annotation-write-plan-payload-json-string plan))
+          (workspace-annotation-write-plan-payload-json-string plan))
          (exact-form
-           (workspace-annotation-create-topic-probe-form
-            resolved-topicmap-id
-            :workspace-id
-            (dmx-workspace-annotation-destination-workspace-id
-             resolved-destination)
-            :storage-mode storage-mode)))
+          (workspace-annotation-create-topic-probe-form
+           resolved-topicmap-id
+           :workspace-id
+           (dmx-workspace-annotation-destination-workspace-id
+            resolved-destination)
+           :storage-mode storage-mode)))
     (cond
       ((not (eq (dmx-workspace-annotation-write-plan-topic-action plan) :create))
        (make-instance
@@ -7716,9 +7716,9 @@
       (t
        (handler-case
            (let* ((topic
-                    (dmx-import-create-topic
-                     resolved-client
-                     (dmx-workspace-annotation-write-plan-payload plan)))
+                   (dmx-import-create-topic
+                    resolved-client
+                    (dmx-workspace-annotation-write-plan-payload plan)))
                   (topic-id (dmx-import-object-id topic)))
              (make-instance
               'workspace-annotation-create-topic-probe-report
@@ -7829,8 +7829,8 @@
                nil))
       (:compatibility-note-carrier
        (let ((envelope
-               (dmx-workspace-annotation-compatibility-envelope-from-topic
-                topic)))
+              (dmx-workspace-annotation-compatibility-envelope-from-topic
+               topic)))
          (values (dmx-workspace-annotation-native-topic-json-from-envelope
                   topic
                   envelope)
@@ -7848,18 +7848,18 @@
 (defun read-dmx-workspace-annotation
     (&key topic-id client workspace-topicmap-id)
   (let* ((resolved-topic-id
-           (dmx-workspace-annotation-topic-id
-            topic-id
-            :topic-id
-            'read-dmx-workspace-annotation
-            :required? t))
+          (dmx-workspace-annotation-topic-id
+           topic-id
+           :topic-id
+           'read-dmx-workspace-annotation
+           :required? t))
          (resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run t
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run t
+           :verbose nil))
          (resolved-topicmap-id
-           (normalize-required-workspace-topicmap-id workspace-topicmap-id))
+          (normalize-required-workspace-topicmap-id workspace-topicmap-id))
          (topic (dmx-import-read-topic resolved-client resolved-topic-id)))
     (unless topic
       (error 'fedwiki-dmx-import-error
@@ -7869,103 +7869,103 @@
         (dmx-workspace-annotation-reopen-source topic resolved-topic-id)
       (declare (ignore envelope))
       (let* ((source-anchor-json
-             (dmx-json-child-value annotation-topic
-                                   *dmx-workspace-annotation-source-anchor-json-type-uri*))
-           (target-anchor-json
-             (dmx-json-child-value annotation-topic
-                                   *dmx-workspace-annotation-target-anchor-json-type-uri*))
-           (source-anchor
-             (make-dom-annotation-anchor-from-json
-              (or (parse-dom-annotation-json source-anchor-json)
-                  (error "Missing source anchor JSON for annotation topic ~D"
-                         resolved-topic-id))))
-           (target-anchor
-             (make-dom-annotation-anchor-from-json
-              (or (parse-dom-annotation-json target-anchor-json)
-                  (error "Missing target anchor JSON for annotation topic ~D"
-                         resolved-topic-id))))
-           (workspace
-             (dmx-import-read-topic-workspace resolved-client resolved-topic-id))
-           (source-binding
-             (dmx-workspace-annotation-child-json
-              annotation-topic
-              *dmx-workspace-annotation-source-binding-type-uri*))
-           (target-binding
-             (dmx-workspace-annotation-child-json
-              annotation-topic
-              *dmx-workspace-annotation-target-binding-type-uri*))
-           (context-binding
-             (dmx-workspace-annotation-child-json
-              annotation-topic
-              *dmx-workspace-annotation-context-binding-type-uri*))
-           (supersedes-binding
-             (dmx-workspace-annotation-child-json
-              annotation-topic
-              *dmx-workspace-annotation-supersedes-type-uri*))
-           (source-object-ref
-             (dmx-json-child-value annotation-topic
-                                   *dmx-workspace-annotation-source-object-ref-type-uri*))
-           (target-object-ref
-             (dmx-json-child-value annotation-topic
-                                   *dmx-workspace-annotation-target-object-ref-type-uri*))
-           (runtime-relation-id
-             (dmx-json-child-value annotation-topic
-                                   *dmx-workspace-annotation-runtime-relation-id-type-uri*)))
-      (make-instance
-       'workspace-dock-annotation
-       :id (format nil "workspace-annotation/~D" resolved-topic-id)
-       :title (dmx-workspace-annotation-topic-title annotation-topic)
-       :summary (or (dmx-json-child-value annotation-topic
-                                          *dmx-workspace-annotation-summary-type-uri*)
-                    (dmx-json-object-value annotation-topic "value"))
-       :context-object
-       (dmx-json-child-value annotation-topic
-                             *dmx-workspace-annotation-context-object-id-type-uri*)
-       :context-view-title
-       (dmx-json-child-value annotation-topic
-                             *dmx-workspace-annotation-context-view-title-type-uri*)
-       :source-anchor source-anchor
-       :target-anchor target-anchor
-       :source-object source-object-ref
-       :target-object (dmx-workspace-annotation-target-object target-object-ref)
-       :relation-kind (dmx-json-child-value annotation-topic
-                                            *dmx-workspace-annotation-relation-kind-type-uri*)
-       :note (dmx-json-child-value annotation-topic
-                                   *dmx-workspace-annotation-text-type-uri*)
-       :matching-patch-target nil
-       :matching-defect nil
-       :matching-inserted-step nil
-       :registry-key runtime-relation-id
-       :dock-capability "Annotation"
-       :workspace-topic-id resolved-topic-id
-       :workspace-topic-uri (or (dmx-json-object-value topic "uri") "")
-       :workspace-topicmap-id resolved-topicmap-id
-       :workspace-id (dmx-import-object-id workspace)
-       :storage-mode storage-mode
-       :carrier-type-uri
-       (dmx-workspace-annotation-storage-mode-carrier-type-uri storage-mode)
-       :annotation-key
-       (let ((uri (or (dmx-json-object-value topic "uri") "")))
-         (if (dmx-string-prefix-p *hyperdoc-workspace-annotation-uri-prefix* uri)
-             (subseq uri (length *hyperdoc-workspace-annotation-uri-prefix*))
-             nil))
-       :workspace-status
-       (dmx-json-child-value annotation-topic
-                             *dmx-workspace-annotation-status-type-uri*)
-       :source-anchor-json source-anchor-json
-       :target-anchor-json target-anchor-json
-       :source-object-ref source-object-ref
-       :target-object-ref target-object-ref
-       :runtime-relation-id runtime-relation-id
-       :provenance-json
-       (dmx-json-child-value annotation-topic
-                             *dmx-workspace-annotation-provenance-type-uri*)
-       :source-binding source-binding
-       :target-binding target-binding
-       :context-binding context-binding
-       :supersedes-binding supersedes-binding
-       :supersedes-topic-id
-       (dmx-workspace-annotation-binding-topic-id supersedes-binding))))))
+              (dmx-json-child-value annotation-topic
+                                    *dmx-workspace-annotation-source-anchor-json-type-uri*))
+             (target-anchor-json
+              (dmx-json-child-value annotation-topic
+                                    *dmx-workspace-annotation-target-anchor-json-type-uri*))
+             (source-anchor
+              (make-dom-annotation-anchor-from-json
+               (or (parse-dom-annotation-json source-anchor-json)
+                   (error "Missing source anchor JSON for annotation topic ~D"
+                          resolved-topic-id))))
+             (target-anchor
+              (make-dom-annotation-anchor-from-json
+               (or (parse-dom-annotation-json target-anchor-json)
+                   (error "Missing target anchor JSON for annotation topic ~D"
+                          resolved-topic-id))))
+             (workspace
+              (dmx-import-read-topic-workspace resolved-client resolved-topic-id))
+             (source-binding
+              (dmx-workspace-annotation-child-json
+               annotation-topic
+               *dmx-workspace-annotation-source-binding-type-uri*))
+             (target-binding
+              (dmx-workspace-annotation-child-json
+               annotation-topic
+               *dmx-workspace-annotation-target-binding-type-uri*))
+             (context-binding
+              (dmx-workspace-annotation-child-json
+               annotation-topic
+               *dmx-workspace-annotation-context-binding-type-uri*))
+             (supersedes-binding
+              (dmx-workspace-annotation-child-json
+               annotation-topic
+               *dmx-workspace-annotation-supersedes-type-uri*))
+             (source-object-ref
+              (dmx-json-child-value annotation-topic
+                                    *dmx-workspace-annotation-source-object-ref-type-uri*))
+             (target-object-ref
+              (dmx-json-child-value annotation-topic
+                                    *dmx-workspace-annotation-target-object-ref-type-uri*))
+             (runtime-relation-id
+              (dmx-json-child-value annotation-topic
+                                    *dmx-workspace-annotation-runtime-relation-id-type-uri*)))
+        (make-instance
+         'workspace-dock-annotation
+         :id (format nil "workspace-annotation/~D" resolved-topic-id)
+         :title (dmx-workspace-annotation-topic-title annotation-topic)
+         :summary (or (dmx-json-child-value annotation-topic
+                                            *dmx-workspace-annotation-summary-type-uri*)
+                      (dmx-json-object-value annotation-topic "value"))
+         :context-object
+         (dmx-json-child-value annotation-topic
+                               *dmx-workspace-annotation-context-object-id-type-uri*)
+         :context-view-title
+         (dmx-json-child-value annotation-topic
+                               *dmx-workspace-annotation-context-view-title-type-uri*)
+         :source-anchor source-anchor
+         :target-anchor target-anchor
+         :source-object source-object-ref
+         :target-object (dmx-workspace-annotation-target-object target-object-ref)
+         :relation-kind (dmx-json-child-value annotation-topic
+                                              *dmx-workspace-annotation-relation-kind-type-uri*)
+         :note (dmx-json-child-value annotation-topic
+                                     *dmx-workspace-annotation-text-type-uri*)
+         :matching-patch-target nil
+         :matching-defect nil
+         :matching-inserted-step nil
+         :registry-key runtime-relation-id
+         :dock-capability "Annotation"
+         :workspace-topic-id resolved-topic-id
+         :workspace-topic-uri (or (dmx-json-object-value topic "uri") "")
+         :workspace-topicmap-id resolved-topicmap-id
+         :workspace-id (dmx-import-object-id workspace)
+         :storage-mode storage-mode
+         :carrier-type-uri
+         (dmx-workspace-annotation-storage-mode-carrier-type-uri storage-mode)
+         :annotation-key
+         (let ((uri (or (dmx-json-object-value topic "uri") "")))
+           (if (dmx-string-prefix-p *hyperdoc-workspace-annotation-uri-prefix* uri)
+               (subseq uri (length *hyperdoc-workspace-annotation-uri-prefix*))
+               nil))
+         :workspace-status
+         (dmx-json-child-value annotation-topic
+                               *dmx-workspace-annotation-status-type-uri*)
+         :source-anchor-json source-anchor-json
+         :target-anchor-json target-anchor-json
+         :source-object-ref source-object-ref
+         :target-object-ref target-object-ref
+         :runtime-relation-id runtime-relation-id
+         :provenance-json
+         (dmx-json-child-value annotation-topic
+                               *dmx-workspace-annotation-provenance-type-uri*)
+         :source-binding source-binding
+         :target-binding target-binding
+         :context-binding context-binding
+         :supersedes-binding supersedes-binding
+         :supersedes-topic-id
+         (dmx-workspace-annotation-binding-topic-id supersedes-binding))))))
 
 (defun workspace-annotation-local-projection-topic-id (result)
   (cond
@@ -7983,7 +7983,7 @@
      (workspace-annotation-workspace-id-of result))
     ((typep result 'workspace-annotation-persistence-report)
      (let ((failure-stage
-             (workspace-annotation-persistence-report-failure-stage-of result)))
+            (workspace-annotation-persistence-report-failure-stage-of result)))
        (if (eq failure-stage :topicmap-placement)
            fallback-workspace-id
            nil)))
@@ -8002,109 +8002,109 @@
 
 (defun persist-dock-annotation-local-first
     (annotation &key workspace-topicmap-id workspace-id client view-props
-       status supersedes-topic-id annotation-key provenance-json
-       storage-mode
-       (materialize-to-dmx-p nil))
+                  status supersedes-topic-id annotation-key provenance-json
+                  storage-mode
+                  (materialize-to-dmx-p nil))
   (let* ((annotation (workspace-annotation-replay-subject annotation))
          (planning-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run t
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run t
+           :verbose nil))
          (destination
-           (resolve-dmx-workspace-annotation-destination
-            annotation
-            :workspace-topicmap-id workspace-topicmap-id
-            :workspace-id workspace-id
-            :client planning-client))
+          (resolve-dmx-workspace-annotation-destination
+           annotation
+           :workspace-topicmap-id workspace-topicmap-id
+           :workspace-id workspace-id
+           :client planning-client))
          (resolved-topicmap-id
-           (dmx-workspace-annotation-destination-workspace-topicmap-id
-            destination))
+          (dmx-workspace-annotation-destination-workspace-topicmap-id
+           destination))
          (resolved-workspace-id
-           (dmx-workspace-annotation-destination-workspace-id destination))
+          (dmx-workspace-annotation-destination-workspace-id destination))
          (native-payload
-           (dmx-workspace-annotation-local-native-payload-from-object
-            annotation
-            resolved-topicmap-id
-            :status status
-            :supersedes-topic-id supersedes-topic-id
-            :annotation-key annotation-key
-            :provenance-json provenance-json))
+          (dmx-workspace-annotation-local-native-payload-from-object
+           annotation
+           resolved-topicmap-id
+           :status status
+           :supersedes-topic-id supersedes-topic-id
+           :annotation-key annotation-key
+           :provenance-json provenance-json))
          (subject-key
-           (or (getf native-payload :uri)
-               (error 'fedwiki-dmx-import-error
-                      :message
-                      "Workspace annotation local-first persistence requires a stable URI subject key")))
+          (or (getf native-payload :uri)
+              (error 'fedwiki-dmx-import-error
+                     :message
+                     "Workspace annotation local-first persistence requires a stable URI subject key")))
          (local-payload
-           (workspace-annotation-local-payload-with-status
-            native-payload
-            *hyperdoc-local-workspace-annotation-status-local-only*))
+          (workspace-annotation-local-payload-with-status
+           native-payload
+           *hyperdoc-local-workspace-annotation-status-local-only*))
          (local-state
-           (workspace-annotation-local-next-state-from-payload
-            subject-key
-            resolved-topicmap-id
-            local-payload)))
+          (workspace-annotation-local-next-state-from-payload
+           subject-key
+           resolved-topicmap-id
+           local-payload)))
     (workspace-annotation-local-apply-transition
      subject-key
      resolved-topicmap-id
      local-state)
     (let ((local-annotation
-            (read-hyperdoc-local-workspace-annotation
-             :subject-key subject-key)))
+           (read-hyperdoc-local-workspace-annotation
+            :subject-key subject-key)))
       (unless materialize-to-dmx-p
         (return-from persist-dock-annotation-local-first local-annotation))
       (let* ((live-client
-               (resolve-dmx-workspace-annotation-client
-                :client client
-                :dry-run nil
-                :verbose nil))
+              (resolve-dmx-workspace-annotation-client
+               :client client
+               :dry-run nil
+               :verbose nil))
              (projection-result
-               (persist-dock-annotation-to-workspace
-                local-annotation
-                :workspace-topicmap-id resolved-topicmap-id
-                :workspace-id resolved-workspace-id
-                :client live-client
-                :view-props view-props
-                :status status
-                :supersedes-topic-id supersedes-topic-id
-                :annotation-key annotation-key
-                :provenance-json provenance-json
-                :storage-mode storage-mode
-                :dry-run nil))
+              (persist-dock-annotation-to-workspace
+               local-annotation
+               :workspace-topicmap-id resolved-topicmap-id
+               :workspace-id resolved-workspace-id
+               :client live-client
+               :view-props view-props
+               :status status
+               :supersedes-topic-id supersedes-topic-id
+               :annotation-key annotation-key
+               :provenance-json provenance-json
+               :storage-mode storage-mode
+               :dry-run nil))
              (saved-topic-id
-               (workspace-annotation-local-projection-topic-id
-                projection-result))
+              (workspace-annotation-local-projection-topic-id
+               projection-result))
              (saved-workspace-id
-               (workspace-annotation-local-projection-workspace-id
-                projection-result
-                resolved-workspace-id))
+              (workspace-annotation-local-projection-workspace-id
+               projection-result
+               resolved-workspace-id))
              (projected-in-topicmap-p
-               (workspace-annotation-local-projection-in-topicmap-p
-                projection-result))
+              (workspace-annotation-local-projection-in-topicmap-p
+               projection-result))
              (projection-status
-               (cond
-                 ((typep projection-result 'workspace-dock-annotation)
-                  *hyperdoc-local-workspace-annotation-status-projected*)
-                 ((typep projection-result 'workspace-annotation-persistence-report)
-                  (workspace-annotation-local-projection-status-from-report
-                   projection-result
-                   saved-topic-id))
-                 (t
-                  *hyperdoc-local-workspace-annotation-status-projection-failed*)))
+              (cond
+                ((typep projection-result 'workspace-dock-annotation)
+                 *hyperdoc-local-workspace-annotation-status-projected*)
+                ((typep projection-result 'workspace-annotation-persistence-report)
+                 (workspace-annotation-local-projection-status-from-report
+                  projection-result
+                  saved-topic-id))
+                (t
+                 *hyperdoc-local-workspace-annotation-status-projection-failed*)))
              (projected-payload
-               (workspace-annotation-local-payload-with-status
-                native-payload
-                projection-status))
+              (workspace-annotation-local-payload-with-status
+               native-payload
+               projection-status))
              (projected-state
-               (workspace-annotation-local-next-state-from-payload
-                subject-key
-                resolved-topicmap-id
-                projected-payload
-                :topic-id saved-topic-id
-                :workspace-id saved-workspace-id
-                :in-topicmap projected-in-topicmap-p
-                :view-props
-                (and projected-in-topicmap-p view-props))))
+              (workspace-annotation-local-next-state-from-payload
+               subject-key
+               resolved-topicmap-id
+               projected-payload
+               :topic-id saved-topic-id
+               :workspace-id saved-workspace-id
+               :in-topicmap projected-in-topicmap-p
+               :view-props
+               (and projected-in-topicmap-p view-props))))
         (workspace-annotation-local-apply-transition
          subject-key
          resolved-topicmap-id
@@ -8113,30 +8113,30 @@
 
 (defun persist-dock-annotation-to-workspace
     (annotation &key workspace-topicmap-id workspace-id client view-props
-       status supersedes-topic-id annotation-key provenance-json
-       storage-mode
-       (dry-run t))
+                  status supersedes-topic-id annotation-key provenance-json
+                  storage-mode
+                  (dry-run t))
   (let* ((annotation (workspace-annotation-replay-subject annotation))
          (resolved-client
-           (resolve-dmx-workspace-annotation-client
-            :client client
-            :dry-run dry-run
-            :verbose nil))
+          (resolve-dmx-workspace-annotation-client
+           :client client
+           :dry-run dry-run
+           :verbose nil))
          (compatibility-report
-           (and (not dry-run)
-                (workspace-annotation-live-compatibility-preflight-required-p
-                 resolved-client)
-                (probe-live-workspace-annotation-type-support
-                 annotation
-                 :workspace-topicmap-id workspace-topicmap-id
-                 :workspace-id workspace-id
-                 :client resolved-client
-                 :view-props view-props
-                 :status status
-                 :supersedes-topic-id supersedes-topic-id
-                 :annotation-key annotation-key
-                 :provenance-json provenance-json
-                 :storage-mode storage-mode))))
+          (and (not dry-run)
+               (workspace-annotation-live-compatibility-preflight-required-p
+                resolved-client)
+               (probe-live-workspace-annotation-type-support
+                annotation
+                :workspace-topicmap-id workspace-topicmap-id
+                :workspace-id workspace-id
+                :client resolved-client
+                :view-props view-props
+                :status status
+                :supersedes-topic-id supersedes-topic-id
+                :annotation-key annotation-key
+                :provenance-json provenance-json
+                :storage-mode storage-mode))))
     (when (and compatibility-report
                (workspace-annotation-backend-compatibility-blocked-p
                 compatibility-report))
@@ -8156,17 +8156,17 @@
          :storage-mode storage-mode
          :dry-run t)
         (let ((report
-                (run-dock-annotation-workspace-persistence-debug
-                 annotation
-                 :workspace-topicmap-id workspace-topicmap-id
-                 :workspace-id workspace-id
-                 :client resolved-client
-                 :view-props view-props
-                 :status status
-                 :supersedes-topic-id supersedes-topic-id
-                 :annotation-key annotation-key
-                 :provenance-json provenance-json
-                 :storage-mode storage-mode)))
+               (run-dock-annotation-workspace-persistence-debug
+                annotation
+                :workspace-topicmap-id workspace-topicmap-id
+                :workspace-id workspace-id
+                :client resolved-client
+                :view-props view-props
+                :status status
+                :supersedes-topic-id supersedes-topic-id
+                :annotation-key annotation-key
+                :provenance-json provenance-json
+                :storage-mode storage-mode)))
           (if (eq (workspace-annotation-persistence-report-status-of report)
                   :persisted)
               (or (workspace-annotation-persistence-report-persisted-annotation-of

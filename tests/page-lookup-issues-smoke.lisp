@@ -24,7 +24,7 @@
   (loop for anchor in (plump:get-elements-by-tag-name (hyperbook:dom-of page) "a")
         for hb = (plump:get-attribute anchor "hyperbook")
         when (and hb (uiop:string-prefix-p "fedwiki:" hb))
-          collect (plump:text anchor)))
+        collect (plump:text anchor)))
 
 (defun smoke-find-issue-by-target (issues target-id)
   (find target-id
@@ -166,19 +166,19 @@
          (slug "civilian-casualty-mitigation"))
     (unwind-protect
          (let* ((issue
-                  (smoke-make-missing-local-fedwiki-twin-issue
-                   slug
-                   pages-directory
-                   root))
+                 (smoke-make-missing-local-fedwiki-twin-issue
+                  slug
+                  pages-directory
+                  root))
                 (views (page-lookup-load-inspector-views-for-object issue))
                 (overview-html
-                  (html-inspector-views:view-html
-                   (page-lookup-smoke-find-view-by-title views "Overview")))
+                 (html-inspector-views:view-html
+                  (page-lookup-smoke-find-view-by-title views "Overview")))
                 (repair-html
-                  (html-inspector-views:view-html
-                   (page-lookup-smoke-find-view-by-title views "Repair")))
+                 (html-inspector-views:view-html
+                  (page-lookup-smoke-find-view-by-title views "Repair")))
                 (repair-thunk
-                  (hyperbook::lookup-issue-repair-thunk-of issue))
+                 (hyperbook::lookup-issue-repair-thunk-of issue))
                 (details (hyperbook:lookup-issue-details-of issue)))
            (assert-equal :local-fedwiki-twin
                          (hyperbook:lookup-issue-target-kind-of issue)
@@ -237,17 +237,17 @@
               (getf (hyperdoc::article-allegation-read-json-file target) :title)
               "FedWiki twin repair should materialize the expected topic-derived page")
              (let* ((refreshed-views
-                      (page-lookup-load-inspector-views-for-object issue))
+                     (page-lookup-load-inspector-views-for-object issue))
                     (refreshed-overview-html
-                      (html-inspector-views:view-html
-                       (page-lookup-smoke-find-view-by-title refreshed-views
-                                                             "Overview")))
+                     (html-inspector-views:view-html
+                      (page-lookup-smoke-find-view-by-title refreshed-views
+                                                            "Overview")))
                     (refreshed-repair-html
-                      (html-inspector-views:view-html
-                       (page-lookup-smoke-find-view-by-title refreshed-views
-                                                             "Repair")))
+                     (html-inspector-views:view-html
+                      (page-lookup-smoke-find-view-by-title refreshed-views
+                                                            "Repair")))
                     (refreshed-details
-                      (hyperbook:lookup-issue-details-of issue)))
+                     (hyperbook:lookup-issue-details-of issue)))
                (assert-equal :fixed
                              (hyperbook:lookup-issue-status-of issue)
                              "The same FedWiki twin lookup issue should refresh to fixed once the local page exists")
@@ -306,17 +306,17 @@
          (layout (hyperdoc::page-lookup-issue-layout-artifact))
          (machine (hyperdoc::compiled-behavior-artifact-machine behavior))
          (layout-spec
-           (hyperdoc::compiled-layout-artifact-layout-spec-of layout))
+          (hyperdoc::compiled-layout-artifact-layout-spec-of layout))
          (issue (smoke-make-page-lookup-issue "topics"
-                                             "Synthetic artifact target"))
+                                              "Synthetic artifact target"))
          (source-views (page-lookup-load-inspector-views-for-object source))
          (authored-views (page-lookup-load-inspector-views-for-object authored))
          (relation-graph-view
-           (page-lookup-smoke-find-view-by-title
-            authored-views
-            "Relation graph"))
+          (page-lookup-smoke-find-view-by-title
+           authored-views
+           "Relation graph"))
          (behavior-views
-           (page-lookup-load-inspector-views-for-object behavior))
+          (page-lookup-load-inspector-views-for-object behavior))
          (layout-views (page-lookup-load-inspector-views-for-object layout)))
     (assert-true
      (typep source 'hyperdoc::authored-relation-artifact-source)
@@ -436,26 +436,26 @@
 (defun run-page-lookup-authored-mutation-roundtrip-smoke-test ()
   (let* ((root (page-lookup-smoke-tempdir))
          (source-pathname
-           (merge-pathnames "page-lookup-issue-authored-layout-relation.sexp"
-                            root))
+          (merge-pathnames "page-lookup-issue-authored-layout-relation.sexp"
+                           root))
          (source-path (namestring source-pathname))
          (relation-id "layout/page-lookup/repair-after-overview"))
     (unwind-protect
          (let ((hyperdoc::*page-lookup-issue-authored-layout-source-path*
-                 source-path))
+                source-path))
            (hyperdoc::write-page-lookup-issue-authored-layout-override-payload
             (hyperdoc::page-lookup-issue-authored-layout-default-override-payload)
             :source-path source-path)
            (let* ((initial-reconstruction
-                    (hyperdoc::reconstruct-page-lookup-issue-artifacts-from-source
-                     :refresh-source t))
+                   (hyperdoc::reconstruct-page-lookup-issue-artifacts-from-source
+                    :refresh-source t))
                   (initial-layout (getf initial-reconstruction :layout))
                   (initial-layout-spec
-                    (hyperdoc::compiled-layout-artifact-layout-spec-of
-                     initial-layout))
+                   (hyperdoc::compiled-layout-artifact-layout-spec-of
+                    initial-layout))
                   (mutation
-                    (hyperdoc::make-page-lookup-issue-layout-order-toggle-mutation
-                     :source-path source-path)))
+                   (hyperdoc::make-page-lookup-issue-layout-order-toggle-mutation
+                    :source-path source-path)))
              (assert-true
               (typep mutation
                      'hyperdoc::page-lookup-issue-authored-relation-mutation)
@@ -472,24 +472,24 @@
                   mutation
                   :source-path source-path)
                (let* ((updated-source-payload
-                        (hyperdoc::page-lookup-issue-authored-layout-override-payload
-                         :source-path source-path))
+                       (hyperdoc::page-lookup-issue-authored-layout-override-payload
+                        :source-path source-path))
                       (updated-relation-definition
-                        (page-lookup-authored-source-relation-definition-by-id
-                         (getf updated-source-payload :relation-overrides)
-                         relation-id))
+                       (page-lookup-authored-source-relation-definition-by-id
+                        (getf updated-source-payload :relation-overrides)
+                        relation-id))
                       (updated-source (getf reconstruction :source))
                       (updated-authored (getf reconstruction :authored))
                       (updated-behavior (getf reconstruction :behavior))
                       (updated-layout (getf reconstruction :layout))
                       (updated-layout-spec
-                        (hyperdoc::compiled-layout-artifact-layout-spec-of
-                         updated-layout))
+                       (hyperdoc::compiled-layout-artifact-layout-spec-of
+                        updated-layout))
                       (issue (smoke-make-page-lookup-issue
                               "topics"
                               "Synthetic mutation target"))
                       (issue-layout
-                        (hyperdoc::page-lookup-issue-layout-artifact-for issue)))
+                       (hyperdoc::page-lookup-issue-layout-artifact-for issue)))
                  (assert-equal :applied
                                (hyperdoc::authored-relation-mutation-status-of
                                 applied)
@@ -546,7 +546,7 @@
                                issue-layout
                                "Page-lookup issue consumer should expose the recompiled layout artifact after mutation")))))
       (let ((hyperdoc::*page-lookup-issue-authored-layout-source-path*
-              "hyperdoc/page-lookup-issue-authored-layout-relation.sexp"))
+             "hyperdoc/page-lookup-issue-authored-layout-relation.sexp"))
         (hyperdoc::reconstruct-page-lookup-issue-artifacts-from-source
          :refresh-source t))
       (ignore-errors
@@ -560,7 +560,7 @@
   (let* ((denk-page (smoke-find-hyperdoc-page "Denkpanzer paper 2013"))
          (denk-headings (smoke-heading-texts denk-page))
          (denk-counterpart-issues
-           (slot-value denk-page 'hyperdoc::counterpart-section-issues))
+          (slot-value denk-page 'hyperdoc::counterpart-section-issues))
          (denk-link-texts (smoke-fedwiki-link-texts denk-page)))
     (assert-true (member "FedWiki counterparts" denk-headings :test #'string=)
                  "Counterpart heading should be normalized away from Localhost")
@@ -580,7 +580,7 @@
     (let* ((writing-page (smoke-find-hyperdoc-page "Writing text pages"))
            (issues (hyperbook:lookup-issues-of writing-page))
            (missing-issue (smoke-find-issue-by-target issues
-                                                     "Defining custom views")))
+                                                      "Defining custom views")))
       (assert-true missing-issue
                    "Writing text pages should expose the missing Defining custom views target as a structured issue")
       (assert-equal :hyperdoc-page
@@ -606,29 +606,29 @@
                     (hyperbook:lookup-issue-status-of missing-issue)
                     "Lookup-issue status should be markable from the operation flow")))
   (let* ((topic-issue
-           (hyperbook:enrich-lookup-issue
-            (smoke-make-page-lookup-issue "topics"
-                                          "Synthetic missing topic")))
+          (hyperbook:enrich-lookup-issue
+           (smoke-make-page-lookup-issue "topics"
+                                         "Synthetic missing topic")))
          (topic-issue-views
-           (page-lookup-load-inspector-views-for-object topic-issue))
+          (page-lookup-load-inspector-views-for-object topic-issue))
          (topic-issue-overview-html
-           (html-inspector-views:view-html
-            (page-lookup-smoke-find-view-by-title topic-issue-views "Overview")))
+          (html-inspector-views:view-html
+           (page-lookup-smoke-find-view-by-title topic-issue-views "Overview")))
          (topic-issue-repair-html
-           (html-inspector-views:view-html
-            (page-lookup-smoke-find-view-by-title topic-issue-views "Repair")))
+          (html-inspector-views:view-html
+           (page-lookup-smoke-find-view-by-title topic-issue-views "Repair")))
          (topic-repair (funcall (hyperbook::lookup-issue-repair-thunk-of topic-issue)))
          (topic-repair-views
-           (page-lookup-load-inspector-views-for-object topic-repair))
+          (page-lookup-load-inspector-views-for-object topic-repair))
          (overview-html
-           (html-inspector-views:view-html
-            (page-lookup-smoke-find-view-by-title topic-repair-views "Overview")))
+          (html-inspector-views:view-html
+           (page-lookup-smoke-find-view-by-title topic-repair-views "Overview")))
          (freshness-html
-           (html-inspector-views:view-html
-            (page-lookup-smoke-find-view-by-title topic-repair-views "Freshness")))
+          (html-inspector-views:view-html
+           (page-lookup-smoke-find-view-by-title topic-repair-views "Freshness")))
          (repair-html
-           (html-inspector-views:view-html
-            (page-lookup-smoke-find-view-by-title topic-repair-views "Repair"))))
+          (html-inspector-views:view-html
+           (page-lookup-smoke-find-view-by-title topic-repair-views "Repair"))))
     (assert-equal :hyperdoc-topic-page
                   (hyperbook:lookup-issue-target-kind-of topic-issue)
                   "Topics targets should route to HyperDoc topic-page repair planning")
@@ -695,14 +695,14 @@
    "Synthetic missing topic via chunk repair"
    (lambda (symbol temp-topics original-topics)
      (let* ((issue
-              (hyperbook:enrich-lookup-issue
-               (smoke-make-page-lookup-issue "topics"
-                                             "Synthetic missing topic via chunk repair")))
+             (hyperbook:enrich-lookup-issue
+              (smoke-make-page-lookup-issue "topics"
+                                            "Synthetic missing topic via chunk repair")))
             (chunk (hyperdoc::issue-target-chunk issue))
             (factory-marker
-              (string-upcase
-               (format nil "(defun ~A"
-                       (symbol-name symbol))))
+             (string-upcase
+              (format nil "(defun ~A"
+                      (symbol-name symbol))))
             (before (uiop:read-file-string temp-topics))
             (original-before (uiop:read-file-string original-topics)))
        (assert-equal :needs-topic-creation
@@ -740,15 +740,15 @@
      (let* ((title "Synthetic topic freshness")
             (fresh-form (hyperdoc::page-lookup-placeholder-topic-form title))
             (updated-form
-              (hyperdoc::page-lookup-placeholder-topic-form
-               title
-               :summary "Updated summary for freshness smoke.")))
+             (hyperdoc::page-lookup-placeholder-topic-form
+              title
+              :summary "Updated summary for freshness smoke.")))
        (append-placeholder-topic-factory-to-file title temp-topics)
        (hyperdoc::load-page-lookup-topic-source!)
        (hyperdoc::rebuild-topic-indexes)
        (let ((fresh-issue
-               (hyperbook:enrich-lookup-issue
-                (smoke-make-page-lookup-issue "topics" title))))
+              (hyperbook:enrich-lookup-issue
+               (smoke-make-page-lookup-issue "topics" title))))
          (assert-true (hyperdoc::topic-page-resolves-p title)
                       "Freshness smoke should start from a resolving topics page")
          (assert-equal :fixed
@@ -762,8 +762,8 @@
           "Unrelated topic freshness noise"
           temp-topics)
          (let* ((unchanged-issue
-                  (hyperbook:enrich-lookup-issue
-                   (smoke-make-page-lookup-issue "topics" title)))
+                 (hyperbook:enrich-lookup-issue
+                  (smoke-make-page-lookup-issue "topics" title)))
                 (unchanged-chunk (hyperdoc::issue-target-chunk unchanged-issue)))
            (assert-equal :fixed
                          (hyperbook:lookup-issue-status-of unchanged-issue)
@@ -773,20 +773,20 @@
                          "Chunk state should remain fixed when the topic-specific authored signature is unchanged"))
          (rewrite-file-substring! temp-topics fresh-form updated-form)
          (let* ((stale-issue
-                  (hyperbook:enrich-lookup-issue
-                   (smoke-make-page-lookup-issue "topics" title)))
+                 (hyperbook:enrich-lookup-issue
+                  (smoke-make-page-lookup-issue "topics" title)))
                 (stale-chunk (hyperdoc::issue-target-chunk stale-issue))
                 (stale-views
-                  (page-lookup-load-inspector-views-for-object stale-chunk))
+                 (page-lookup-load-inspector-views-for-object stale-chunk))
                 (stale-overview-html
-                  (html-inspector-views:view-html
-                   (page-lookup-smoke-find-view-by-title stale-views "Overview")))
+                 (html-inspector-views:view-html
+                  (page-lookup-smoke-find-view-by-title stale-views "Overview")))
                 (stale-freshness-html
-                  (html-inspector-views:view-html
-                   (page-lookup-smoke-find-view-by-title stale-views "Freshness")))
+                 (html-inspector-views:view-html
+                  (page-lookup-smoke-find-view-by-title stale-views "Freshness")))
                 (stale-repair-html
-                  (html-inspector-views:view-html
-                   (page-lookup-smoke-find-view-by-title stale-views "Repair"))))
+                 (html-inspector-views:view-html
+                  (page-lookup-smoke-find-view-by-title stale-views "Repair"))))
            (assert-true (hyperdoc::topic-page-resolves-p title)
                         "Freshness smoke should keep the topic page resolving while the authored signature changes")
            (assert-equal :needs-local-materialization
@@ -828,9 +828,9 @@
             (hyperdoc::topic-page-materialization-signature title)
             "Repair should refresh the per-topic materialization signature to the updated authored definition"))))))
   (let ((generic-issue
-          (hyperbook:enrich-lookup-issue
-           (smoke-make-page-lookup-issue "lisp-functions"
-                                         "hyperbook:make-page-lookup-issue"))))
+         (hyperbook:enrich-lookup-issue
+          (smoke-make-page-lookup-issue "lisp-functions"
+                                        "hyperbook:make-page-lookup-issue"))))
     (assert-equal :hyperbook-page
                   (hyperbook:lookup-issue-target-kind-of generic-issue)
                   "Non-HyperDoc targets should remain generic HyperBook page issues")

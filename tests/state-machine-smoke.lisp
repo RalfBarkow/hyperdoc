@@ -54,7 +54,7 @@
 
 (defun assert-state-machine-page-contains-all (page-source page-label needles)
   (let ((normalized
-          (normalize-state-machine-smoke-whitespace page-source)))
+         (normalize-state-machine-smoke-whitespace page-source)))
     (dolist (needle needles)
       (state-machine-assert-true
        (search (normalize-state-machine-smoke-whitespace needle)
@@ -81,11 +81,11 @@
          (run (hyperdoc::make-example-state-machine-run))
          (auth (hyperdoc::dmx-auth-crosswalk-username-password-example))
          (machine-views
-           (state-machine-smoke-load-inspector-views-for-object machine))
+          (state-machine-smoke-load-inspector-views-for-object machine))
          (run-views
-           (state-machine-smoke-load-inspector-views-for-object run))
+          (state-machine-smoke-load-inspector-views-for-object run))
          (auth-views
-           (state-machine-smoke-load-inspector-views-for-object auth)))
+          (state-machine-smoke-load-inspector-views-for-object auth)))
     (state-machine-assert-typep
      'hyperdoc::state-machine-definition
      machine
@@ -163,9 +163,9 @@
          (dot (hyperdoc::state-machine-definition-dot-text machine))
          (views (state-machine-smoke-load-inspector-views-for-object machine))
          (graphviz-view
-           (state-machine-smoke-find-view-by-title views "Graphviz"))
+          (state-machine-smoke-find-view-by-title views "Graphviz"))
          (directed-graph-view
-           (state-machine-smoke-find-view-by-title views "Directed graph")))
+          (state-machine-smoke-find-view-by-title views "Directed graph")))
     (state-machine-assert-contains "digraph \"state-machine-definition/example\""
                                    dot
                                    "State-machine DOT export must use the machine id")
@@ -199,53 +199,53 @@
                          probe-args)
                   nil)))
     (let* ((packaged-run
-             (make-run
-              :git-executable-available-p t
-              :runtime-origin :packaged-source
-              :git-metadata-present-p nil
-              :requested-program "git"
-              :resolved-program "git"))
+            (make-run
+             :git-executable-available-p t
+             :runtime-origin :packaged-source
+             :git-metadata-present-p nil
+             :requested-program "git"
+             :resolved-program "git"))
            (missing-remote-run
-             (make-run
-              :git-executable-available-p t
-              :runtime-origin :live-checkout
-              :effective-repository-root #p"/tmp/hyperdoc/"
-              :repository-root-source :process-working-directory
-              :git-metadata-present-p t
-              :upstream-remote-present-p nil
-              :requested-program "git"
-              :resolved-program "git"))
+            (make-run
+             :git-executable-available-p t
+             :runtime-origin :live-checkout
+             :effective-repository-root #p"/tmp/hyperdoc/"
+             :repository-root-source :process-working-directory
+             :git-metadata-present-p t
+             :upstream-remote-present-p nil
+             :requested-program "git"
+             :resolved-program "git"))
            (not-fetched-run
-             (make-run
-              :git-executable-available-p t
-              :runtime-origin :live-checkout
-              :effective-repository-root #p"/tmp/hyperdoc/"
-              :repository-root-source :process-working-directory
-              :git-metadata-present-p t
-              :upstream-remote-present-p t
-              :upstream-remote-url "https://codeberg.org/khinsen/hyperdoc.git"
-              :upstream-main-fetched-p nil
-              :requested-program "git"
-              :resolved-program "git"))
+            (make-run
+             :git-executable-available-p t
+             :runtime-origin :live-checkout
+             :effective-repository-root #p"/tmp/hyperdoc/"
+             :repository-root-source :process-working-directory
+             :git-metadata-present-p t
+             :upstream-remote-present-p t
+             :upstream-remote-url "https://codeberg.org/khinsen/hyperdoc.git"
+             :upstream-main-fetched-p nil
+             :requested-program "git"
+             :resolved-program "git"))
            (ready-run
-             (make-run
-              :git-executable-available-p t
-              :runtime-origin :live-checkout
-              :effective-repository-root #p"/tmp/hyperdoc/"
-              :repository-root-source :process-working-directory
-              :git-metadata-present-p t
-              :upstream-remote-present-p t
-              :upstream-remote-url "https://codeberg.org/khinsen/hyperdoc.git"
-              :upstream-main-fetched-p t
-              :requested-program "git"
-              :resolved-program "git"))
+            (make-run
+             :git-executable-available-p t
+             :runtime-origin :live-checkout
+             :effective-repository-root #p"/tmp/hyperdoc/"
+             :repository-root-source :process-working-directory
+             :git-metadata-present-p t
+             :upstream-remote-present-p t
+             :upstream-remote-url "https://codeberg.org/khinsen/hyperdoc.git"
+             :upstream-main-fetched-p t
+             :requested-program "git"
+             :resolved-program "git"))
            (ready-views
-             (state-machine-smoke-load-inspector-views-for-object ready-run))
+            (state-machine-smoke-load-inspector-views-for-object ready-run))
            (ready-summary-view
-             (state-machine-smoke-find-view-by-title ready-views "Summary"))
+            (state-machine-smoke-find-view-by-title ready-views "Summary"))
            (ready-operational-path-view
-             (state-machine-smoke-find-view-by-title ready-views
-                                                     "Operational path"))
+            (state-machine-smoke-find-view-by-title ready-views
+                                                    "Operational path"))
            (machine (hyperdoc::state-machine-run-machine-of ready-run)))
       (state-machine-assert-typep
        'hyperdoc::dreyeck-git-readiness-state-machine-run

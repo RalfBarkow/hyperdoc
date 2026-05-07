@@ -44,11 +44,11 @@
 (defun set-title (page)
   (with-slots (parse-tree id) page
     (setf id (or (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
-                          do (let ((elements (-> (dom-of page)
-                                               (plump:get-elements-by-tag-name tag))))
-                               (when elements
-                                 (return (-> elements first plump:text str:trim)))))
-                    "Untitled"))))
+                       do (let ((elements (-> (dom-of page)
+                                              (plump:get-elements-by-tag-name tag))))
+                            (when elements
+                              (return (-> elements first plump:text str:trim)))))
+                 "Untitled"))))
 
 (defun copy-plump-attributes! (from to)
   (maphash #'(lambda (key value)
@@ -69,10 +69,10 @@
                            (plump:get-attribute anchor "page")
                            domain))
          (labelled-text
-           (if (and current-text
-                    (uiop:string-prefix-p "[" current-text))
-               current-text
-               (format nil "[~A] ~A" domain current-text))))
+          (if (and current-text
+                   (uiop:string-prefix-p "[" current-text))
+              current-text
+              (format nil "[~A] ~A" domain current-text))))
     (replace-element-text! anchor labelled-text)))
 
 (defun fedwiki-counterpart-heading-p (text)
@@ -95,11 +95,11 @@
 (defun fedwiki-links-in-section (nodes)
   (loop for node in nodes
         when (typep node 'plump:element)
-          append (loop for element across (lquery:$ node "a[hyperbook]")
-                       for hyperbook = (plump:get-attribute element "hyperbook")
-                       when (and hyperbook
-                                 (uiop:string-prefix-p "fedwiki:" hyperbook))
-                         collect element)))
+        append (loop for element across (lquery:$ node "a[hyperbook]")
+                     for hyperbook = (plump:get-attribute element "hyperbook")
+                     when (and hyperbook
+                               (uiop:string-prefix-p "fedwiki:" hyperbook))
+                     collect element)))
 
 (defun node-vector-to-list (vector)
   (loop for node across vector
@@ -117,56 +117,56 @@
                     (member (plump:tag-name node)
                             '("h2" "h3" "h4" "h5" "h6")
                             :test #'string-equal))
-            do (let ((heading-text (hb::trimmed-node-text node)))
-                 (when (fedwiki-counterpart-heading-p heading-text)
-                   (let* ((section-nodes
-                            (loop for section-index from (1+ index) below (length children)
-                                  for section-node = (nth section-index children)
-                                  while (not (and (typep section-node 'plump:element)
-                                                  (member (plump:tag-name section-node)
-                                                          '("h1" "h2" "h3" "h4" "h5" "h6")
-                                                          :test #'string-equal)))
-                                  collect section-node))
-                          (anchors (fedwiki-links-in-section section-nodes))
-                          (domains
-                            (remove-duplicates
-                             (loop for anchor in anchors
-                                   for hyperbook = (plump:get-attribute anchor "hyperbook")
-                                   collect (subseq hyperbook (length "fedwiki:")))
-                             :test #'string-equal))
-                          (replacement-title
-                            (fedwiki-counterpart-section-title domains)))
-                     (when (or (not (string= heading-text replacement-title))
-                               (some #'(lambda (domain)
-                                         (not (localhost-like-fedwiki-domain-p domain)))
-                                     domains))
-                       (push
-                        (hb:make-target-grouping-issue
-                         :source-object page
-                         :source-hyperbook page-hyperbook-id
-                         :source-page-id page-id
-                         :source-page-title page-title
-                         :source-section heading-text
-                         :target-hyperbook-id (and (= 1 (length domains))
-                                                   (format nil "fedwiki:~A"
-                                                           (first domains)))
-                         :target-kind (if (> (length domains) 1)
-                                          :unknown
-                                          :remote-fedwiki-page)
-                         :classification :mislabelled-target-grouping
-                         :status :mislabelled-target
-                         :suggested-repair :normalize-fedwiki-counterpart-labels
-                         :repair-description
-                         "Render FedWiki counterpart sections with truthful scope labels rather than a flat Localhost heading."
-                         :details (list :original-heading heading-text
-                                        :replacement-heading replacement-title
-                                        :domains domains))
-                        issues))
-                     (replace-element-text! node replacement-title)
-                     (loop for anchor in anchors
-                           for hyperbook = (plump:get-attribute anchor "hyperbook")
-                           for domain = (subseq hyperbook (length "fedwiki:"))
-                           do (normalize-fedwiki-counterpart-link! anchor domain))))))
+          do (let ((heading-text (hb::trimmed-node-text node)))
+               (when (fedwiki-counterpart-heading-p heading-text)
+                 (let* ((section-nodes
+                         (loop for section-index from (1+ index) below (length children)
+                               for section-node = (nth section-index children)
+                               while (not (and (typep section-node 'plump:element)
+                                               (member (plump:tag-name section-node)
+                                                       '("h1" "h2" "h3" "h4" "h5" "h6")
+                                                       :test #'string-equal)))
+                               collect section-node))
+                        (anchors (fedwiki-links-in-section section-nodes))
+                        (domains
+                         (remove-duplicates
+                          (loop for anchor in anchors
+                                for hyperbook = (plump:get-attribute anchor "hyperbook")
+                                collect (subseq hyperbook (length "fedwiki:")))
+                          :test #'string-equal))
+                        (replacement-title
+                         (fedwiki-counterpart-section-title domains)))
+                   (when (or (not (string= heading-text replacement-title))
+                             (some #'(lambda (domain)
+                                       (not (localhost-like-fedwiki-domain-p domain)))
+                                   domains))
+                     (push
+                      (hb:make-target-grouping-issue
+                       :source-object page
+                       :source-hyperbook page-hyperbook-id
+                       :source-page-id page-id
+                       :source-page-title page-title
+                       :source-section heading-text
+                       :target-hyperbook-id (and (= 1 (length domains))
+                                                 (format nil "fedwiki:~A"
+                                                         (first domains)))
+                       :target-kind (if (> (length domains) 1)
+                                        :unknown
+                                        :remote-fedwiki-page)
+                       :classification :mislabelled-target-grouping
+                       :status :mislabelled-target
+                       :suggested-repair :normalize-fedwiki-counterpart-labels
+                       :repair-description
+                       "Render FedWiki counterpart sections with truthful scope labels rather than a flat Localhost heading."
+                       :details (list :original-heading heading-text
+                                      :replacement-heading replacement-title
+                                      :domains domains))
+                      issues))
+                   (replace-element-text! node replacement-title)
+                   (loop for anchor in anchors
+                         for hyperbook = (plump:get-attribute anchor "hyperbook")
+                         for domain = (subseq hyperbook (length "fedwiki:"))
+                         do (normalize-fedwiki-counterpart-link! anchor domain))))))
     (nreverse issues)))
 
 (defmethod hb:enrich-lookup-issue ((issue hb:page-lookup-issue))
@@ -386,9 +386,9 @@
 (defun authored-source-of-function-page-id (reference)
   (or (when-let (symbol (authored-source-of-function-expected-symbol reference))
         (if-let (package (symbol-package symbol))
-          (format nil "~A::~A"
-                  (package-name package)
-                  (symbol-name symbol))
+            (format nil "~A::~A"
+                    (package-name package)
+                    (symbol-name symbol))
           (symbol-name symbol)))
       (authored-expression-raw-source-of reference)
       (authored-expression-expression-of reference)))
@@ -475,7 +475,7 @@
          (merge-inline-html-view-into-current-render target))
         ((or function class)
          (if-let (view (resolve-inline-source-view target))
-           (merge-inline-html-view-into-current-render view)
+             (merge-inline-html-view-into-current-render view)
            (views:object-ref target
                              :display (or (authored-expression-label-of reference)
                                           (authored-expression-raw-source-of reference))
@@ -556,8 +556,8 @@
               "Computed HTML"
               #'(lambda ()
                   (views:html-and-references
-                    (views:html
-                      (views:str value))))))))
+                   (views:html
+                    (views:str value))))))))
       (:html-generator
        (let ((form (parse (authored-expression-expression-of reference))))
          (if (typep form 'condition)
@@ -567,7 +567,7 @@
               "Generated HTML"
               #'(lambda ()
                   (views:html-and-references
-                    (eval form)))))))
+                   (eval form)))))))
       (:view-transclusion
        (force-view-or-issue
         reference
@@ -602,10 +602,10 @@
                                 reference
                                 :select (authored-expression-view-title-of reference))))
     (views:html
-      (:button :id html-id
-               :class "inspector-action"
-               :title "Evaluate this authored expression reference."
-               "Evaluate"))))
+     (:button :id html-id
+              :class "inspector-action"
+              :title "Evaluate this authored expression reference."
+              "Evaluate"))))
 
 (defmethod views:text-representation ((issue authored-expression-evaluation-issue))
   (format nil "Authored expression failure: ~A"
@@ -619,49 +619,49 @@
   (typecase value
     (null
      (views:html
-       (:span :class "inspector-index" "none")))
+      (:span :class "inspector-index" "none")))
     (string
      (views:html
-       (views:esc value)))
+      (views:esc value)))
     (symbol
      (views:html
-       (views:esc (string-downcase (symbol-name value)))))
+      (views:esc (string-downcase (symbol-name value)))))
     (t
      (views:html
-       (views:object-ref value)))))
+      (views:object-ref value)))))
 
 (defun render-authored-expression-metadata-row (label value)
   (views:html
-    (:tr
-     (:th (views:esc label))
-     (:td
-      (render-authored-expression-metadata-value value)))))
+   (:tr
+    (:th (views:esc label))
+    (:td
+     (render-authored-expression-metadata-value value)))))
 
 (views:defview 👀overview (reference authored-expression-reference)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:p
-       "Deferred authored expression. Normal page rendering stores this reference without executing it. Click the rendered reference or the Evaluate action to run it in the current image; Alt-click opens the reference without evaluation.")
-      (:table :class "inspector-table"
-              (render-authored-expression-metadata-row
-               "Kind"
-               (authored-expression-kind-label
-                (authored-expression-kind-of reference)))
-              (render-authored-expression-metadata-row
-               "Expression"
-               (authored-expression-expression-of reference))
-              (render-authored-expression-metadata-row
-               "Package"
-               (authored-expression-package-name-of reference))
-              (render-authored-expression-metadata-row
-               "Selected view"
-               (authored-expression-view-title-of reference))
-              (render-authored-expression-metadata-row
-               "Source page"
-               (authored-expression-source-page-title-of reference))
-              (render-authored-expression-metadata-row
-               "Source tag"
-               (authored-expression-source-tag-of reference))))))
+                   (views:html
+                    (:p
+                     "Deferred authored expression. Normal page rendering stores this reference without executing it. Click the rendered reference or the Evaluate action to run it in the current image; Alt-click opens the reference without evaluation.")
+                    (:table :class "inspector-table"
+                            (render-authored-expression-metadata-row
+                             "Kind"
+                             (authored-expression-kind-label
+                              (authored-expression-kind-of reference)))
+                            (render-authored-expression-metadata-row
+                             "Expression"
+                             (authored-expression-expression-of reference))
+                            (render-authored-expression-metadata-row
+                             "Package"
+                             (authored-expression-package-name-of reference))
+                            (render-authored-expression-metadata-row
+                             "Selected view"
+                             (authored-expression-view-title-of reference))
+                            (render-authored-expression-metadata-row
+                             "Source page"
+                             (authored-expression-source-page-title-of reference))
+                            (render-authored-expression-metadata-row
+                             "Source tag"
+                             (authored-expression-source-tag-of reference))))))
 
 (views:defview 👀source (reference authored-expression-reference)
   (views:lisp-code-view
@@ -673,32 +673,32 @@
   (let* ((reference (authored-expression-issue-reference-of issue))
          (condition (authored-expression-issue-condition-of issue)))
     (views:html-view :title "Overview" :priority 1
-      (views:html
-        (:p :class "hyperdoc-error"
-            "Deferred authored-expression evaluation failed. The render path stayed intact and returned this issue object instead of crashing the pane.")
-        (:table :class "inspector-table"
-                (render-authored-expression-metadata-row
-                 "Reference"
-                 reference)
-                (render-authored-expression-metadata-row
-                 "Phase"
-                 (authored-expression-issue-phase-of issue))
-                (render-authored-expression-metadata-row
-                 "Condition type"
-                 (type-of condition))
-                (render-authored-expression-metadata-row
-                 "Condition"
-                 condition))))))
+                     (views:html
+                      (:p :class "hyperdoc-error"
+                          "Deferred authored-expression evaluation failed. The render path stayed intact and returned this issue object instead of crashing the pane.")
+                      (:table :class "inspector-table"
+                              (render-authored-expression-metadata-row
+                               "Reference"
+                               reference)
+                              (render-authored-expression-metadata-row
+                               "Phase"
+                               (authored-expression-issue-phase-of issue))
+                              (render-authored-expression-metadata-row
+                               "Condition type"
+                               (type-of condition))
+                              (render-authored-expression-metadata-row
+                               "Condition"
+                               condition))))))
 
 (views:defview 👀condition (issue authored-expression-evaluation-issue)
   (views:html-view :title "Condition" :priority 2
-    (views:html
-      (views:object-ref (authored-expression-issue-condition-of issue)))))
+                   (views:html
+                    (views:object-ref (authored-expression-issue-condition-of issue)))))
 
 (views:defview 👀reference (issue authored-expression-evaluation-issue)
   (views:html-view :title "Reference" :priority 3
-    (views:html
-      (views:object-ref (authored-expression-issue-reference-of issue)))))
+                   (views:html
+                    (views:object-ref (authored-expression-issue-reference-of issue)))))
 
 (defun render-authored-expression-reference
     (reference renderer
@@ -707,23 +707,23 @@
                                 reference
                                 :select (authored-expression-view-title-of reference))))
     (views:html
-      (:span :id html-id
-             :class classes
-             :tabindex 0
-             :title (authored-expression-title reference)
-             :data-hyperdoc-deferred-expression "true"
-             :data-hyperdoc-expression-kind
-             (string-downcase
-              (symbol-name (authored-expression-kind-of reference)))
-             :data-hyperdoc-expression-source
-             (authored-expression-expression-of reference)
-             :data-hyperdoc-expression-package
-             (authored-expression-package-name-of reference)
-             :data-hyperdoc-expression-view
-             (or (authored-expression-view-title-of reference) "")
-             :data-hyperdoc-expression-source-page
-             (or (authored-expression-source-page-title-of reference) "")
-             (funcall renderer)))))
+     (:span :id html-id
+            :class classes
+            :tabindex 0
+            :title (authored-expression-title reference)
+            :data-hyperdoc-deferred-expression "true"
+            :data-hyperdoc-expression-kind
+            (string-downcase
+             (symbol-name (authored-expression-kind-of reference)))
+            :data-hyperdoc-expression-source
+            (authored-expression-expression-of reference)
+            :data-hyperdoc-expression-package
+            (authored-expression-package-name-of reference)
+            :data-hyperdoc-expression-view
+            (or (authored-expression-view-title-of reference) "")
+            :data-hyperdoc-expression-source-page
+            (or (authored-expression-source-page-title-of reference) "")
+            (funcall renderer)))))
 
 (defun render-authored-expression-text (reference text
                                         &key (classes "hyperbook-reference hyperdoc-deferred-reference"))
@@ -731,7 +731,7 @@
    reference
    #'(lambda ()
        (views:html
-         (views:esc text)))
+        (views:esc text)))
    :classes classes))
 
 (defun render-authored-expression-children (reference children
@@ -765,12 +765,12 @@
 (plump:define-tag-printer value-of (element)
   (let* ((text (-> element plump:text))
          (reference
-           (make-authored-expression-reference
-            :kind :value-of
-            :expression text
-            :raw-source text
-            :label (normalize-authored-reference-label text "computed value")
-            :source-tag "value-of")))
+          (make-authored-expression-reference
+           :kind :value-of
+           :expression text
+           :raw-source text
+           :label (normalize-authored-reference-label text "computed value")
+           :source-tag "value-of")))
     (render-authored-expression-text
      reference
      text
@@ -785,20 +785,20 @@
 (plump:define-tag-printer html-expr (element)
   (let* ((text (-> element plump:text))
          (reference
-           (make-authored-expression-reference
-            :kind :html-expr
-            :expression text
-            :raw-source text
-            :label (normalize-authored-reference-label text "computed HTML")
-            :source-tag "html-expr")))
+          (make-authored-expression-reference
+           :kind :html-expr
+           :expression text
+           :raw-source text
+           :label (normalize-authored-reference-label text "computed HTML")
+           :source-tag "html-expr")))
     (render-authored-expression-reference
      reference
      #'(lambda ()
          (views:html
-           (:span :class "hyperdoc-executable-tag"
-                  (views:esc (authored-expression-tag-label "html-expr")))
-           " "
-           (:tt (views:esc text))))
+          (:span :class "hyperdoc-executable-tag"
+                 (views:esc (authored-expression-tag-label "html-expr")))
+          " "
+          (:tt (views:esc text))))
      :classes "hyperbook-reference hyperdoc-deferred-reference"))
   t)
 
@@ -810,20 +810,20 @@
 (plump:define-tag-printer html-generator (element)
   (let* ((expr (plump:text element))
          (reference
-           (make-authored-expression-reference
-            :kind :html-generator
-            :expression expr
-            :raw-source expr
-            :label (normalize-authored-reference-label expr "HTML generator")
-            :source-tag "html-generator")))
+          (make-authored-expression-reference
+           :kind :html-generator
+           :expression expr
+           :raw-source expr
+           :label (normalize-authored-reference-label expr "HTML generator")
+           :source-tag "html-generator")))
     (render-authored-expression-reference
      reference
      #'(lambda ()
          (views:html
-           (:span :class "hyperdoc-executable-tag"
-                  (views:esc (authored-expression-tag-label "html-generator")))
-           " "
-           (:tt (views:esc expr))))
+          (:span :class "hyperdoc-executable-tag"
+                 (views:esc (authored-expression-tag-label "html-generator")))
+          " "
+          (:tt (views:esc expr))))
      :classes "hyperbook-reference hyperdoc-deferred-reference"))
   t)
 
@@ -835,20 +835,20 @@
 (plump:define-tag-printer view-transclusion (element)
   (let* ((expr (plump:text element))
          (reference
-           (make-authored-expression-reference
-            :kind :view-transclusion
-            :expression expr
-            :raw-source expr
-            :label (normalize-authored-reference-label expr "view transclusion")
-            :source-tag "view-transclusion")))
+          (make-authored-expression-reference
+           :kind :view-transclusion
+           :expression expr
+           :raw-source expr
+           :label (normalize-authored-reference-label expr "view transclusion")
+           :source-tag "view-transclusion")))
     (render-authored-expression-reference
      reference
      #'(lambda ()
          (views:html
-           (:span :class "hyperdoc-executable-tag"
-                  (views:esc (authored-expression-tag-label "view-transclusion")))
-           " "
-           (:tt (views:esc expr))))
+          (:span :class "hyperdoc-executable-tag"
+                 (views:esc (authored-expression-tag-label "view-transclusion")))
+          " "
+          (:tt (views:esc expr))))
      :classes "hyperbook-reference hyperdoc-deferred-reference"))
   t)
 
@@ -861,12 +861,12 @@
   (let* ((name (plump:text element))
          (expression (format nil "(find-class '~a)" name))
          (reference
-           (make-authored-expression-reference
-            :kind :source-of-class
-            :expression expression
-            :raw-source name
-            :label (normalize-authored-reference-label name "source of class")
-            :source-tag "source-of-class")))
+          (make-authored-expression-reference
+           :kind :source-of-class
+           :expression expression
+           :raw-source name
+           :label (normalize-authored-reference-label name "source of class")
+           :source-tag "source-of-class")))
     (render-authored-inline-source-target
      reference
      (evaluate-authored-expression-reference reference)))
@@ -881,12 +881,12 @@
   (let* ((name (plump:text element))
          (expression (format nil "(function ~a)" name))
          (reference
-           (make-authored-expression-reference
-            :kind :source-of-function
-            :expression expression
-            :raw-source name
-            :label (normalize-authored-reference-label name "source of function")
-            :source-tag "source-of-function")))
+          (make-authored-expression-reference
+           :kind :source-of-function
+           :expression expression
+           :raw-source name
+           :label (normalize-authored-reference-label name "source of function")
+           :source-tag "source-of-function")))
     (render-authored-inline-source-target
      reference
      (evaluate-authored-expression-reference reference)))
@@ -923,28 +923,28 @@
     (unless (or (and uri (puri:uri-scheme uri))
                 (and src (str:starts-with? "/" src)))
       (let* ((page-base-directory
-               (ignore-errors
-                 (let ((file-of-symbol (find-symbol "FILE-OF" :hyperbook)))
-                   (when (and (boundp 'hb::*current-page*)
-                              hb::*current-page*
-                              file-of-symbol
-                              (fboundp file-of-symbol))
-                     (uiop:pathname-directory-pathname
-                      (funcall file-of-symbol hb::*current-page*))))))
+              (ignore-errors
+                (let ((file-of-symbol (find-symbol "FILE-OF" :hyperbook)))
+                  (when (and (boundp 'hb::*current-page*)
+                             hb::*current-page*
+                             file-of-symbol
+                             (fboundp file-of-symbol))
+                    (uiop:pathname-directory-pathname
+                     (funcall file-of-symbol hb::*current-page*))))))
              (hyperdoc-base-directory
-               (ignore-errors
-                 (when (and (boundp 'hb::*current-page*)
-                            hb::*current-page*)
-                   (-> hb::*current-page*
-                       (slot-value 'hyperbook)
-                       directory-of))))
+              (ignore-errors
+                (when (and (boundp 'hb::*current-page*)
+                           hb::*current-page*)
+                  (-> hb::*current-page*
+                      (slot-value 'hyperbook)
+                      directory-of))))
              (candidate
-               (cond ((and src page-base-directory)
-                      (merge-pathnames src page-base-directory))
-                     ((and src hyperdoc-base-directory)
-                      (merge-pathnames src hyperdoc-base-directory))
-                     (src
-                      (ignore-errors (pathname src)))))
+              (cond ((and src page-base-directory)
+                     (merge-pathnames src page-base-directory))
+                    ((and src hyperdoc-base-directory)
+                     (merge-pathnames src hyperdoc-base-directory))
+                    (src
+                     (ignore-errors (pathname src)))))
              (existing (and candidate (probe-file candidate))))
         (when existing
           (let* ((bytes (alexandria:read-file-into-byte-vector existing))
@@ -973,13 +973,13 @@
                       (hb::trimmed-node-text element))
                  expr-attr))
          (reference
-           (make-authored-expression-reference
-            :kind :expr-link
-            :expression expr-attr
-            :raw-source expr-attr
-            :view-title view-attr
-            :label label
-            :source-tag "a")))
+          (make-authored-expression-reference
+           :kind :expr-link
+           :expression expr-attr
+           :raw-source expr-attr
+           :view-title view-attr
+           :label label
+           :source-tag "a")))
     (if render-children
         (render-authored-expression-children reference render-children)
         (render-authored-expression-reference
@@ -994,28 +994,28 @@
 
 (views:defview views:👀content (page html-page)
   (views:html-view :title "Content" :priority 1
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperbook
-                           "assets/hyperbook/"))
-    (views:add-asset-path "/hyperdoc/"
-                          (asdf:system-relative-pathname
-                           :hyperdoc
-                           "assets/hyperdoc/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:include-css "/hyperdoc/css/hyperdoc.css")
-    (let ((hb::*current-page* page)
-          (*current-package* (find-package "CL-USER")))
-      (when-let (dom (dom-of page))
-        (render-dom-connect-surface
-         page
-         "Content"
-         #'(lambda ()
-             (views:html
-               (:div :class "hyperbook-page"
-                     (let ((plump:*tag-dispatchers* *hyperdoc-tags*))
-                       (plump:serialize dom views::*html-stream*))
-                     (:br)))))))))
+                   (views:add-asset-path "/hyperbook/"
+                                         (asdf:system-relative-pathname
+                                          :hyperbook
+                                          "assets/hyperbook/"))
+                   (views:add-asset-path "/hyperdoc/"
+                                         (asdf:system-relative-pathname
+                                          :hyperdoc
+                                          "assets/hyperdoc/"))
+                   (views:include-css "/hyperbook/css/hyperbook.css")
+                   (views:include-css "/hyperdoc/css/hyperdoc.css")
+                   (let ((hb::*current-page* page)
+                         (*current-package* (find-package "CL-USER")))
+                     (when-let (dom (dom-of page))
+                       (render-dom-connect-surface
+                        page
+                        "Content"
+                        #'(lambda ()
+                            (views:html
+                             (:div :class "hyperbook-page"
+                                   (let ((plump:*tag-dispatchers* *hyperdoc-tags*))
+                                     (plump:serialize dom views::*html-stream*))
+                                   (:br)))))))))
 
 ;;
 ;; Parse tree view

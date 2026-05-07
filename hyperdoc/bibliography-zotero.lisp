@@ -182,32 +182,32 @@
                    :raw-row row)))
 
 (defun lookup-zotero-collection (query-text &key (source (make-default-bibliography-source))
-                                            signal-error?)
+                                              signal-error?)
   (let* ((bridge (bibliography-source-bridge-of source))
          (query (run-zotero-sqlite-query
                  bridge
                  "zotero-collection-lookup"
                  (zotero-collection-query-sql query-text)))
          (selected-attempt
-           (normalize-zotero-query-attempt
-            query
-            :attempted-operation 'zotero-query-attempt-rows-of
-            :receiver (zotero-query-selected-attempt-of query)
-            :higher-level-intent `(lookup-zotero-collection ,query-text)
-            :repair-hint
-            "Check the configured Zotero DB path or disable the live Zotero source."))
+          (normalize-zotero-query-attempt
+           query
+           :attempted-operation 'zotero-query-attempt-rows-of
+           :receiver (zotero-query-selected-attempt-of query)
+           :higher-level-intent `(lookup-zotero-collection ,query-text)
+           :repair-hint
+           "Check the configured Zotero DB path or disable the live Zotero source."))
          (collections
-           (mapcar #'make-zotero-collection-hit
-                   (zotero-query-protocol-rows-of selected-attempt)))
+          (mapcar #'make-zotero-collection-hit
+                  (zotero-query-protocol-rows-of selected-attempt)))
          (wrapped-query
-           (make-instance 'zotero-collection-query
-                          :bridge bridge
-                          :name "zotero-collection-lookup"
-                          :query-text query-text
-                          :sql (zotero-query-sql-of query)
-                          :attempts (zotero-query-attempts-of query)
-                          :selected-attempt (zotero-query-selected-attempt-of query)
-                          :matched-collections collections)))
+          (make-instance 'zotero-collection-query
+                         :bridge bridge
+                         :name "zotero-collection-lookup"
+                         :query-text query-text
+                         :sql (zotero-query-sql-of query)
+                         :attempts (zotero-query-attempts-of query)
+                         :selected-attempt (zotero-query-selected-attempt-of query)
+                         :matched-collections collections)))
     (cond
       ((typep selected-attempt 'zotero-query-missing-attempt)
        (when signal-error?
@@ -335,144 +335,144 @@
   (multiple-value-bind (collection-hit collection-query)
       (lookup-zotero-collection query-text :source source :signal-error? signal-error?)
     (let ((collection-attempt
-            (normalize-zotero-query-attempt
-             collection-query
-             :attempted-operation 'zotero-query-attempt-rows-of
-             :receiver (and collection-query
-                            (zotero-query-selected-attempt-of collection-query))
-             :higher-level-intent `(lookup-zotero-collection ,query-text)
-             :repair-hint
-             "Check the configured Zotero DB path or disable the live Zotero source.")))
+           (normalize-zotero-query-attempt
+            collection-query
+            :attempted-operation 'zotero-query-attempt-rows-of
+            :receiver (and collection-query
+                           (zotero-query-selected-attempt-of collection-query))
+            :higher-level-intent `(lookup-zotero-collection ,query-text)
+            :repair-hint
+            "Check the configured Zotero DB path or disable the live Zotero source.")))
       (cond
-      ((typep collection-attempt 'zotero-query-missing-attempt)
-       (if signal-error?
-           (error "~A ~A"
-                  "Bibliography collection lookup failed."
-                  (or (zotero-query-protocol-detail-of collection-attempt) ""))
-           (make-zotero-bibliography-load-failure
-            query-text
-            source
-            :collection-query
-            :collection-query collection-query
-            :failed-attempt collection-attempt)))
-      ((null collection-hit)
-       nil)
-      (t
-       (let* ((bridge (bibliography-source-bridge-of source))
-              (item-query
-                (run-zotero-sqlite-query
-                 bridge
-                 "zotero-bibliography-items"
-                 (zotero-collection-items-query-sql
-                  (zotero-collection-id-of collection-hit))))
-              (author-query
-                (run-zotero-sqlite-query
-                 bridge
-                 "zotero-bibliography-authors"
-                 (zotero-collection-authors-query-sql
-                  (zotero-collection-id-of collection-hit))))
-              (tag-query
-                (run-zotero-sqlite-query
-                 bridge
-                 "zotero-bibliography-tags"
-                 (zotero-collection-tags-query-sql
-                  (zotero-collection-id-of collection-hit))))
-              (item-attempt
-                (normalize-zotero-query-attempt
-                 item-query
-                 :attempted-operation 'zotero-query-attempt-rows-of
-                 :receiver (zotero-query-selected-attempt-of item-query)
-                 :higher-level-intent `(load-zotero-bibliography-subcollection ,query-text :entries)
-                 :repair-hint
-                 "Inspect the Zotero query evidence for item import."))
-              (author-attempt
-                (normalize-zotero-query-attempt
-                 author-query
-                 :attempted-operation 'zotero-query-attempt-rows-of
-                 :receiver (zotero-query-selected-attempt-of author-query)
-                 :higher-level-intent `(load-zotero-bibliography-subcollection ,query-text :authors)
-                 :repair-hint
-                 "Inspect the Zotero query evidence for author import."))
-              (tag-attempt
-                (normalize-zotero-query-attempt
-                 tag-query
-                 :attempted-operation 'zotero-query-attempt-rows-of
-                 :receiver (zotero-query-selected-attempt-of tag-query)
-                 :higher-level-intent `(load-zotero-bibliography-subcollection ,query-text :tags)
-                 :repair-hint
-                 "Inspect the Zotero query evidence for tag import.")))
-         (cond
-           ((typep item-attempt 'zotero-query-missing-attempt)
-            (if signal-error?
-                (error "~A ~A"
-                       "Bibliography entry import failed."
-                       (or (zotero-query-protocol-detail-of item-attempt) ""))
-                (make-zotero-bibliography-load-failure
-                 query-text
-                 source
-                 :entry-query
-                 :collection-query collection-query
-                 :entry-query item-query
-                 :author-query author-query
-                 :tag-query tag-query
-                 :failed-attempt item-attempt)))
-           ((typep author-attempt 'zotero-query-missing-attempt)
-            (if signal-error?
-                (error "~A ~A"
-                       "Bibliography author import failed."
-                       (or (zotero-query-protocol-detail-of author-attempt) ""))
-                (make-zotero-bibliography-load-failure
-                 query-text
-                 source
-                 :author-query
-                 :collection-query collection-query
-                 :entry-query item-query
-                 :author-query author-query
-                 :tag-query tag-query
-                 :failed-attempt author-attempt)))
-           ((typep tag-attempt 'zotero-query-missing-attempt)
-            (if signal-error?
-                (error "~A ~A"
-                       "Bibliography tag import failed."
-                       (or (zotero-query-protocol-detail-of tag-attempt) ""))
-                (make-zotero-bibliography-load-failure
-                 query-text
-                 source
-                 :tag-query
-                 :collection-query collection-query
-                 :entry-query item-query
-                 :author-query author-query
-                 :tag-query tag-query
-                 :failed-attempt tag-attempt)))
-           (t
-            (let* ((author-rows (zotero-query-protocol-rows-of author-attempt))
-                   (tag-rows (zotero-query-protocol-rows-of tag-attempt))
-                   (authors-by-item (group-rows-by-key author-rows "itemID"))
-                   (tags-by-item (group-rows-by-key tag-rows "itemID"))
-                   (entries
-                     (loop for row in (zotero-query-protocol-rows-of item-attempt)
-                           collect (make-bibliography-entry
-                                    row
-                                    (gethash (gethash "itemID" row) authors-by-item)
-                                    (gethash (gethash "itemID" row) tags-by-item)
-                                    collection-hit)))
-                   (subcollection
-                     (make-instance 'bibliography-subcollection
-                                    :hyperbook (ensure-bibliography-subcollections-hyperbook
-                                                :source source)
-                                    :id query-text
-                                    :source source
-                                    :source-system :zotero
-                                    :query-text query-text
-                                    :collection-hit collection-hit
-                                    :collection-query collection-query
-                                    :entry-query item-query
-                                    :author-query author-query
-                                    :tag-query tag-query
-                                    :entries entries)))
-              (setf (bibliography-subcollection-candidate-topics-of subcollection)
-                    (ensure-bibliography-subcollection-candidate-topics subcollection))
-              subcollection)))))))))
+        ((typep collection-attempt 'zotero-query-missing-attempt)
+         (if signal-error?
+             (error "~A ~A"
+                    "Bibliography collection lookup failed."
+                    (or (zotero-query-protocol-detail-of collection-attempt) ""))
+             (make-zotero-bibliography-load-failure
+              query-text
+              source
+              :collection-query
+              :collection-query collection-query
+              :failed-attempt collection-attempt)))
+        ((null collection-hit)
+         nil)
+        (t
+         (let* ((bridge (bibliography-source-bridge-of source))
+                (item-query
+                 (run-zotero-sqlite-query
+                  bridge
+                  "zotero-bibliography-items"
+                  (zotero-collection-items-query-sql
+                   (zotero-collection-id-of collection-hit))))
+                (author-query
+                 (run-zotero-sqlite-query
+                  bridge
+                  "zotero-bibliography-authors"
+                  (zotero-collection-authors-query-sql
+                   (zotero-collection-id-of collection-hit))))
+                (tag-query
+                 (run-zotero-sqlite-query
+                  bridge
+                  "zotero-bibliography-tags"
+                  (zotero-collection-tags-query-sql
+                   (zotero-collection-id-of collection-hit))))
+                (item-attempt
+                 (normalize-zotero-query-attempt
+                  item-query
+                  :attempted-operation 'zotero-query-attempt-rows-of
+                  :receiver (zotero-query-selected-attempt-of item-query)
+                  :higher-level-intent `(load-zotero-bibliography-subcollection ,query-text :entries)
+                  :repair-hint
+                  "Inspect the Zotero query evidence for item import."))
+                (author-attempt
+                 (normalize-zotero-query-attempt
+                  author-query
+                  :attempted-operation 'zotero-query-attempt-rows-of
+                  :receiver (zotero-query-selected-attempt-of author-query)
+                  :higher-level-intent `(load-zotero-bibliography-subcollection ,query-text :authors)
+                  :repair-hint
+                  "Inspect the Zotero query evidence for author import."))
+                (tag-attempt
+                 (normalize-zotero-query-attempt
+                  tag-query
+                  :attempted-operation 'zotero-query-attempt-rows-of
+                  :receiver (zotero-query-selected-attempt-of tag-query)
+                  :higher-level-intent `(load-zotero-bibliography-subcollection ,query-text :tags)
+                  :repair-hint
+                  "Inspect the Zotero query evidence for tag import.")))
+           (cond
+             ((typep item-attempt 'zotero-query-missing-attempt)
+              (if signal-error?
+                  (error "~A ~A"
+                         "Bibliography entry import failed."
+                         (or (zotero-query-protocol-detail-of item-attempt) ""))
+                  (make-zotero-bibliography-load-failure
+                   query-text
+                   source
+                   :entry-query
+                   :collection-query collection-query
+                   :entry-query item-query
+                   :author-query author-query
+                   :tag-query tag-query
+                   :failed-attempt item-attempt)))
+             ((typep author-attempt 'zotero-query-missing-attempt)
+              (if signal-error?
+                  (error "~A ~A"
+                         "Bibliography author import failed."
+                         (or (zotero-query-protocol-detail-of author-attempt) ""))
+                  (make-zotero-bibliography-load-failure
+                   query-text
+                   source
+                   :author-query
+                   :collection-query collection-query
+                   :entry-query item-query
+                   :author-query author-query
+                   :tag-query tag-query
+                   :failed-attempt author-attempt)))
+             ((typep tag-attempt 'zotero-query-missing-attempt)
+              (if signal-error?
+                  (error "~A ~A"
+                         "Bibliography tag import failed."
+                         (or (zotero-query-protocol-detail-of tag-attempt) ""))
+                  (make-zotero-bibliography-load-failure
+                   query-text
+                   source
+                   :tag-query
+                   :collection-query collection-query
+                   :entry-query item-query
+                   :author-query author-query
+                   :tag-query tag-query
+                   :failed-attempt tag-attempt)))
+             (t
+              (let* ((author-rows (zotero-query-protocol-rows-of author-attempt))
+                     (tag-rows (zotero-query-protocol-rows-of tag-attempt))
+                     (authors-by-item (group-rows-by-key author-rows "itemID"))
+                     (tags-by-item (group-rows-by-key tag-rows "itemID"))
+                     (entries
+                      (loop for row in (zotero-query-protocol-rows-of item-attempt)
+                            collect (make-bibliography-entry
+                                     row
+                                     (gethash (gethash "itemID" row) authors-by-item)
+                                     (gethash (gethash "itemID" row) tags-by-item)
+                                     collection-hit)))
+                     (subcollection
+                      (make-instance 'bibliography-subcollection
+                                     :hyperbook (ensure-bibliography-subcollections-hyperbook
+                                                 :source source)
+                                     :id query-text
+                                     :source source
+                                     :source-system :zotero
+                                     :query-text query-text
+                                     :collection-hit collection-hit
+                                     :collection-query collection-query
+                                     :entry-query item-query
+                                     :author-query author-query
+                                     :tag-query tag-query
+                                     :entries entries)))
+                (setf (bibliography-subcollection-candidate-topics-of subcollection)
+                      (ensure-bibliography-subcollection-candidate-topics subcollection))
+                subcollection)))))))))
 
 (defmethod load-bibliography-subcollection-using-source
     ((source zotero-bibliography-source) query-text &key signal-error? output-root)

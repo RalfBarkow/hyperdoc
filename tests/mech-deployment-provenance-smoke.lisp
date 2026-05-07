@@ -74,7 +74,7 @@
 
 (defun run-mech-provenance-page-smoke-test ()
   (let* ((page-namestring
-           "hyperdoc/FedWiki Graphviz story item render trace.html")
+          "hyperdoc/FedWiki Graphviz story item render trace.html")
          (page-pathname (mech-provenance-page-pathname page-namestring))
          (page-source (read-mech-provenance-page page-namestring)))
     (mech-provenance-assert-true
@@ -114,18 +114,18 @@
          (reports (hyperdoc::live-mech-plugin-provenance-check-reports-of
                    operation))
          (classifications
-           (hyperdoc::mech-plugin-provenance-check-host-classifications
-            operation))
+          (hyperdoc::mech-plugin-provenance-check-host-classifications
+           operation))
          (discourse-report
-           (find "discourse.dreyeck.ch"
-                 reports
-                 :key #'hyperdoc::mech-host-runtime-provenance-host-of
-                 :test #'string=))
+          (find "discourse.dreyeck.ch"
+                reports
+                :key #'hyperdoc::mech-host-runtime-provenance-host-of
+                :test #'string=))
          (wiki-report
-           (find "wiki.ralfbarkow.ch"
-                 reports
-                 :key #'hyperdoc::mech-host-runtime-provenance-host-of
-                 :test #'string=)))
+          (find "wiki.ralfbarkow.ch"
+                reports
+                :key #'hyperdoc::mech-host-runtime-provenance-host-of
+                :test #'string=)))
     (mech-provenance-assert-typep
      'hyperdoc::live-mech-plugin-provenance-check
      operation

@@ -128,13 +128,13 @@ images, etc.")
 
 (defun make-story-item (item)
   (let ((type (->> item
-                (gethash "type")
-                (str:upcase)
-                alexandria:make-keyword))
+                   (gethash "type")
+                   (str:upcase)
+                   alexandria:make-keyword))
         (id (->> item
-                (gethash "id")))
+                 (gethash "id")))
         (text (->> item
-                (gethash "text"))))
+                   (gethash "text"))))
     (remhash "type" item)
     (remhash "id" item)
     (remhash "text" item)
@@ -159,20 +159,20 @@ images, etc.")
 
 (views:defview 👀data (item story-item)
   (views:html-view :title "Data" :priority 1
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "type"))
-                   (:td (views:object-ref (-> item item-type-of symbol-name str:downcase))))
-              (:tr (:td (views:esc "id"))
-                   (:td (views:object-ref (id-of item))))
-              (:tr (:td (views:esc "text"))
-                   (:td (views:object-ref (text-of item))))
-              (when-let (data (data-of item))
-                (loop for key being the hash-keys in data
-                        using (hash-value value)
-                      do (views:html
-                           (:tr (:td (views:esc key))
-                                (:td (views:object-ref value))))))))))
+                   (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "type"))
+                                 (:td (views:object-ref (-> item item-type-of symbol-name str:downcase))))
+                            (:tr (:td (views:esc "id"))
+                                 (:td (views:object-ref (id-of item))))
+                            (:tr (:td (views:esc "text"))
+                                 (:td (views:object-ref (text-of item))))
+                            (when-let (data (data-of item))
+                              (loop for key being the hash-keys in data
+                                    using (hash-value value)
+                                    do (views:html
+                                        (:tr (:td (views:esc key))
+                                             (:td (views:object-ref value))))))))))
 
 ;;
 ;; Page journal
@@ -188,12 +188,12 @@ images, etc.")
 
 (defun make-journal-entry (entry)
   (let ((type (->> entry
-                (gethash "type")
-                (str:upcase)
-                alexandria:make-keyword))
+                   (gethash "type")
+                   (str:upcase)
+                   alexandria:make-keyword))
         (date (->> entry
-                (gethash "date")
-                wiki-date-to-timestamp)))
+                   (gethash "date")
+                   wiki-date-to-timestamp)))
     (remhash "type" entry)
     (remhash "date" entry)
     (make-instance 'journal-entry
@@ -274,7 +274,7 @@ images, etc.")
     ((hash-table-p value)
      (let ((copy (make-hash-table :test #'equal)))
        (loop for key being the hash-keys in value
-               using (hash-value hash-value)
+             using (hash-value hash-value)
              do (setf (gethash key copy)
                       (copy-json-like-value hash-value)))
        copy))
@@ -374,24 +374,24 @@ images, etc.")
 
 (defun site-of (entry)
   (or (->> entry
-        data-of
-        (gethash "site"))
+           data-of
+           (gethash "site"))
       (some->> entry
-        data-of
-        (gethash "attribution")
-        (gethash "site"))))
+               data-of
+               (gethash "attribution")
+               (gethash "site"))))
 
 (defun extract-context (journal)
   (let (remote-sites)
     (loop for entry across journal
           for site = (site-of entry)
           when site
-            ;; This looks like pushnew, but it ensures that the order
-            ;; of each site in the list corresponds to its most recent
-            ;; occurence in the journal.
-            do (setf remote-sites
-                     (cons site
-                           (remove site remote-sites :test #'equal))))
+          ;; This looks like pushnew, but it ensures that the order
+          ;; of each site in the list corresponds to its most recent
+          ;; occurence in the journal.
+          do (setf remote-sites
+                   (cons site
+                         (remove site remote-sites :test #'equal))))
     (mapcar #'get-fedwiki remote-sites)))
 
 ;;
@@ -401,22 +401,22 @@ images, etc.")
 (views:defview 👀story (page fedwiki-page)
   (load-page page)
   (views:html-view :title "Story" :priority 2
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperbook
-                           "assets/hyperbook/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:html
-      (:div :class "hyperbook-page"
-            (:h1 (:img :src (wiki-url (-> page origin-of domain-name-of)
-                                      (-> page origin-of protocol-of)
-                                      "/favicon.png"))
-                 (views:esc " ")
-                 (views:esc (hb:title-of page)))
-            (loop for item across (story-of page)
-                  do (views:html
-                       (:div :title (-> item item-type-of symbol-name str:downcase)
-                             (render-story-item (item-type-of item) item page))))))))
+                   (views:add-asset-path "/hyperbook/"
+                                         (asdf:system-relative-pathname
+                                          :hyperbook
+                                          "assets/hyperbook/"))
+                   (views:include-css "/hyperbook/css/hyperbook.css")
+                   (views:html
+                    (:div :class "hyperbook-page"
+                          (:h1 (:img :src (wiki-url (-> page origin-of domain-name-of)
+                                                    (-> page origin-of protocol-of)
+                                                    "/favicon.png"))
+                               (views:esc " ")
+                               (views:esc (hb:title-of page)))
+                          (loop for item across (story-of page)
+                                do (views:html
+                                    (:div :title (-> item item-type-of symbol-name str:downcase)
+                                          (render-story-item (item-type-of item) item page))))))))
 
 (defmethod hb:👀links ((page fedwiki-page))
   (load-page page)
@@ -434,22 +434,22 @@ images, etc.")
                         (protocol-of wiki)
                         (str:concat "/" slug ".html"))))
     (views:html
-      (views:action-button "Reload"
-                           (views:thunk
-                             (reload-page page)
-                             t))
-      " "
-      (views:action-button html-inspector-views/standard:*icon-open-external*
-                           (views:thunk
-                             (when url
-                               (clog:open-browser :url url)))
-                           nil))))
+     (views:action-button "Reload"
+                          (views:thunk
+                           (reload-page page)
+                           t))
+     " "
+     (views:action-button html-inspector-views/standard:*icon-open-external*
+                          (views:thunk
+                           (when url
+                             (clog:open-browser :url url)))
+                          nil))))
 
 (defmethod views:title-bar-action-buttons ((page remote-fedwiki-page))
   (views:action-button html-inspector-views/standard:*icon-open-external*
-    (views:thunk
-      (clog:open-browser :url (make-wiki-view-url page)))
-    nil))
+                       (views:thunk
+                        (clog:open-browser :url (make-wiki-view-url page)))
+                       nil))
 
 (defgeneric make-wiki-view-url (page))
 

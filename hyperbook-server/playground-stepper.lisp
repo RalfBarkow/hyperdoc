@@ -116,44 +116,44 @@ If that extension is unavailable, fall back to the raw condition."
 
 (hv:defview 👀stepper (s playground-stepper)
   (hv:html-view :title "Step" :priority 1
-    (hv:html
-      (:h3 "Controls")
-      (:p
-       (hv:action-button "Reset"
-                         (hv:thunk (playground-stepper-reset s) t)
-                         "Reset to first parsed form")
-       " "
-       (hv:action-button "Next"
-                         (hv:thunk (playground-stepper-step s) t)
-                         "Evaluate the next form")
-       " "
-       (hv:action-button "Run"
-                         (hv:thunk (playground-stepper-run s) t)
-                         "Run until completion or first error"))
-      (:h3 "Progress")
-      (:pre (hv:esc (format nil "~D / ~D~%Package: ~A~%"
-                            (playground-stepper-index s)
-                            (length (playground-stepper-forms s))
-                            (package-name (playground-stepper-package s)))))
-      (let ((pr (playground-stepper-parse-report s)))
-        (when pr
-          (hv:html
-            (:h3 "Parse / reader error")
-            (:p "The current source selection could not be read as Lisp.")
-            (:p "Evaluation did not start. The selected text is not a complete readable form in its current boundaries.")
-            (hv:eval-button "Inspect parse error report"
-                            (hv:thunk pr)
-                            "Open the captured reader error and backtrace"))))
-      (:h3 "Source selection")
-      (:pre :style "white-space: pre-wrap"
-            (hv:esc (or (playground-stepper-source s) "")))
-      (:h3 "Last value")
-      (:pre :style "white-space: pre-wrap"
-            (hv:esc (format nil "~S" (playground-stepper-last-value s))))
-      (let ((err (playground-stepper-last-error s)))
-        (when err
-          (hv:html
-            (:h3 "Last error")
-            (hv:eval-button "Inspect error report"
-                            (hv:thunk err)
-                            "Open the captured error and backtrace")))))))
+                (hv:html
+                 (:h3 "Controls")
+                 (:p
+                  (hv:action-button "Reset"
+                                    (hv:thunk (playground-stepper-reset s) t)
+                                    "Reset to first parsed form")
+                  " "
+                  (hv:action-button "Next"
+                                    (hv:thunk (playground-stepper-step s) t)
+                                    "Evaluate the next form")
+                  " "
+                  (hv:action-button "Run"
+                                    (hv:thunk (playground-stepper-run s) t)
+                                    "Run until completion or first error"))
+                 (:h3 "Progress")
+                 (:pre (hv:esc (format nil "~D / ~D~%Package: ~A~%"
+                                       (playground-stepper-index s)
+                                       (length (playground-stepper-forms s))
+                                       (package-name (playground-stepper-package s)))))
+                 (let ((pr (playground-stepper-parse-report s)))
+                   (when pr
+                     (hv:html
+                      (:h3 "Parse / reader error")
+                      (:p "The current source selection could not be read as Lisp.")
+                      (:p "Evaluation did not start. The selected text is not a complete readable form in its current boundaries.")
+                      (hv:eval-button "Inspect parse error report"
+                                      (hv:thunk pr)
+                                      "Open the captured reader error and backtrace"))))
+                 (:h3 "Source selection")
+                 (:pre :style "white-space: pre-wrap"
+                       (hv:esc (or (playground-stepper-source s) "")))
+                 (:h3 "Last value")
+                 (:pre :style "white-space: pre-wrap"
+                       (hv:esc (format nil "~S" (playground-stepper-last-value s))))
+                 (let ((err (playground-stepper-last-error s)))
+                   (when err
+                     (hv:html
+                      (:h3 "Last error")
+                      (hv:eval-button "Inspect error report"
+                                      (hv:thunk err)
+                                      "Open the captured error and backtrace")))))))

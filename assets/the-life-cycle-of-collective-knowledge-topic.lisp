@@ -1,44 +1,44 @@
 ;; HYPERDOC_LOCALHOST_FEDWIKI_SOURCE_SNAPSHOT (:SNAPSHOT-KIND "localhost-fedwiki-page-source-snapshot" :SNAPSHOT-FORMAT-VERSION 1 :FINGERPRINT-ALGORITHM "fnv1a-64-over-normalized-raw-page-story-and-journal" :FINGERPRINT "fnv1a64:168557695B6C63A3" :SUMMARY "story-items=2; fragments=7; journal=6; last-journal=1774540104897" :SOURCE-PAGE-ID "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge" :SOURCE-PAGE-SLUG "the-life-cycle-of-collective-knowledge" :SOURCE-PAGE-PATH "pages/the-life-cycle-of-collective-knowledge" :SOURCE-PAGE-TITLE "The Life Cycle of Collective Knowledge" :STORY-ITEM-COUNT 2 :FRAGMENT-COUNT 7 :JOURNAL-ENTRY-COUNT 6 :JOURNAL-LAST-DATE 1774540104897 :PAGE-CREATE-DATE 1774540076497)
 
 (:TOPIC-FACTORY-SNIPPET :ID "the-life-cycle-of-collective-knowledge-topic-set"
- :SOURCE-FILE "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
- :SOURCE-ORIGIN-ID
- "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
- :SOURCE-ORIGIN-PATH "pages/the-life-cycle-of-collective-knowledge"
- :RELATED-HYPERDOC-PAGE-TITLE "The Life Cycle of Collective Knowledge"
- :RELATED-TOPIC-ID "the-life-cycle-of-collective-knowledge" :RELATED-TOPIC-IDS
- ("the-life-cycle-of-collective-knowledge" "collective-knowledge"
-  "refinement-of-information-into-knowledge"
-  "digital-fragility-of-software-source-code"
-  "computational-reproducibility-is-not-enough"
-  "software-interoperability-across-time" "stable-software-environments")
- :PROVENANCE
- (:SOURCE-KIND "localhost-fedwiki-topic-factory-snippet" :SOURCE-PAGE-ID
-  "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
-  :SOURCE-PAGE-PATH "pages/the-life-cycle-of-collective-knowledge"
-  :PROVENANCE-GRANULARITY "story-item-fragment" :SOURCE-STORY-ITEM-SOURCE-ID
-  "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge#story-item/3cf5038a96d6b6ee"
-  :SOURCE-FRAGMENT-ORDINALS (0 6 3 4 5) :SOURCE-FRAGMENT-ANCHORS
-  ("segment:0" "segment:6" "segment:3" "segment:4" "segment:5")
-  :SOURCE-FRAGMENT-SECTION-KEYS
-  ("intro" "claim-carried-by-this-page" "why-this-matters-for-hyperdoc"
-   "why-this-matters-for-hyperdoc" "why-this-matters-for-hyperdoc")
-  :SOURCE-FRAGMENT-EXCERPT
-  "This page anchors Konrad Hinsen's FedWiki note on how collective knowledge is published, reviewed, cited, combined, a..."
-  :SOURCE-FRAGMENT-EXCERPTS
-  ("This page anchors Konrad Hinsen's FedWiki note on how collective knowledge is published, reviewed, cited, combined, a..."
-   "The life cycle of collective knowledge does not stop at preservation. It also requires forms of software publication ..."
-   "The central claim is that collective knowledge depends on representations that stay usable long enough to be reviewed..."
-   "Archiving old environments improves reproducibility, but the stronger demand for collective knowledge is interoperabi..."
-   "This is the point at which the FedWiki note connects directly to HyperDoc's long-term interest in Common Lisp. The no...")
-  :DERIVATION-NOTE
-  "Dry-run-first DMX snippet twin for authored HyperDoc topic factories derived from paragraph fragments in one localhost FedWiki story item."
-  :SOURCE-PAGE-SLUG "the-life-cycle-of-collective-knowledge"
-  :SOURCE-STORY-ITEM-ID "3cf5038a96d6b6ee" :SOURCE-STORY-ITEM-INDEX 0
-  :SOURCE-STORY-ITEM-TYPE "paragraph" :JOURNAL-ACTION-COUNT 2
-  :JOURNAL-ACTION-TYPES ("add" "edit") :JOURNAL-LAST-DATE 1774540081043
-  :PAGE-CREATE-DATE 1774540076497 :PROVENANCE-CLASSIFICATION
-  "story-item-id-and-journal"))
+                        :SOURCE-FILE "assets/the-life-cycle-of-collective-knowledge-topic.lisp"
+                        :SOURCE-ORIGIN-ID
+                        "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
+                        :SOURCE-ORIGIN-PATH "pages/the-life-cycle-of-collective-knowledge"
+                        :RELATED-HYPERDOC-PAGE-TITLE "The Life Cycle of Collective Knowledge"
+                        :RELATED-TOPIC-ID "the-life-cycle-of-collective-knowledge" :RELATED-TOPIC-IDS
+                        ("the-life-cycle-of-collective-knowledge" "collective-knowledge"
+                                                                  "refinement-of-information-into-knowledge"
+                                                                  "digital-fragility-of-software-source-code"
+                                                                  "computational-reproducibility-is-not-enough"
+                                                                  "software-interoperability-across-time" "stable-software-environments")
+                        :PROVENANCE
+                        (:SOURCE-KIND "localhost-fedwiki-topic-factory-snippet" :SOURCE-PAGE-ID
+                                      "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge"
+                                      :SOURCE-PAGE-PATH "pages/the-life-cycle-of-collective-knowledge"
+                                      :PROVENANCE-GRANULARITY "story-item-fragment" :SOURCE-STORY-ITEM-SOURCE-ID
+                                      "fedwiki:wiki.ralfbarkow.ch/the-life-cycle-of-collective-knowledge#story-item/3cf5038a96d6b6ee"
+                                      :SOURCE-FRAGMENT-ORDINALS (0 6 3 4 5) :SOURCE-FRAGMENT-ANCHORS
+                                      ("segment:0" "segment:6" "segment:3" "segment:4" "segment:5")
+                                      :SOURCE-FRAGMENT-SECTION-KEYS
+                                      ("intro" "claim-carried-by-this-page" "why-this-matters-for-hyperdoc"
+                                               "why-this-matters-for-hyperdoc" "why-this-matters-for-hyperdoc")
+                                      :SOURCE-FRAGMENT-EXCERPT
+                                      "This page anchors Konrad Hinsen's FedWiki note on how collective knowledge is published, reviewed, cited, combined, a..."
+                                      :SOURCE-FRAGMENT-EXCERPTS
+                                      ("This page anchors Konrad Hinsen's FedWiki note on how collective knowledge is published, reviewed, cited, combined, a..."
+                                       "The life cycle of collective knowledge does not stop at preservation. It also requires forms of software publication ..."
+                                       "The central claim is that collective knowledge depends on representations that stay usable long enough to be reviewed..."
+                                       "Archiving old environments improves reproducibility, but the stronger demand for collective knowledge is interoperabi..."
+                                       "This is the point at which the FedWiki note connects directly to HyperDoc's long-term interest in Common Lisp. The no...")
+                                      :DERIVATION-NOTE
+                                      "Dry-run-first DMX snippet twin for authored HyperDoc topic factories derived from paragraph fragments in one localhost FedWiki story item."
+                                      :SOURCE-PAGE-SLUG "the-life-cycle-of-collective-knowledge"
+                                      :SOURCE-STORY-ITEM-ID "3cf5038a96d6b6ee" :SOURCE-STORY-ITEM-INDEX 0
+                                      :SOURCE-STORY-ITEM-TYPE "paragraph" :JOURNAL-ACTION-COUNT 2
+                                      :JOURNAL-ACTION-TYPES ("add" "edit") :JOURNAL-LAST-DATE 1774540081043
+                                      :PAGE-CREATE-DATE 1774540076497 :PROVENANCE-CLASSIFICATION
+                                      "story-item-id-and-journal"))
 
 ;; Topic-factory snippet bundle for The Life Cycle of Collective Knowledge.
 

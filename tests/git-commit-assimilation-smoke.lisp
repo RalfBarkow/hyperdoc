@@ -79,23 +79,23 @@
     :patch-equivalent-p t
     :semantic-effect-status :unknown
     :semantic-compatibility-status :unknown
-   :validation-status :unknown)
+    :validation-status :unknown)
    "Missing semantic and validation evidence must remain inconclusive"))
 
 (defun run-upstream-commit-assimilation-page-evidence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((resolved
-           (hyperdoc::safe-assimilation-page-evidence
-            hyperdoc::*hyperdoc*
-            "Static route observability"))
+          (hyperdoc::safe-assimilation-page-evidence
+           hyperdoc::*hyperdoc*
+           "Static route observability"))
          (missing
-           (hyperdoc::safe-assimilation-page-evidence
-            hyperdoc::*topics*
-            "Assimilation lookup issue smoke missing page"))
+          (hyperdoc::safe-assimilation-page-evidence
+           hyperdoc::*topics*
+           "Assimilation lookup issue smoke missing page"))
          (unavailable
-           (hyperdoc::safe-assimilation-page-evidence
-            nil
-            "Assimilation unavailable corpus page")))
+          (hyperdoc::safe-assimilation-page-evidence
+           nil
+           "Assimilation unavailable corpus page")))
     (assimilation-assert-equal
      :resolved
      (getf resolved :status)
@@ -120,35 +120,35 @@
   (asdf:load-system :hyperdoc/explorer)
   (let* ((hyperdoc::*git-program* "/definitely/missing/hyperdoc-git")
          (result
-           (hyperdoc::graphviz-story-item-upstream-assimilation-example))
+          (hyperdoc::graphviz-story-item-upstream-assimilation-example))
          (result-views
-           (assimilation-load-inspector-views-for-object result))
+          (assimilation-load-inspector-views-for-object result))
          (result-summary-view
-           (assimilation-find-view-by-title result-views "Summary"))
+          (assimilation-find-view-by-title result-views "Summary"))
          (surface
-           (make-instance 'hyperdoc::git-upstream-commit-assimilation-surface
-                          :id "git-unavailable-assimilation-surface-smoke"
-                          :title "Git-unavailable assimilation surface smoke"
-                          :summary "Regression surface for bounded git-runtime-unavailable rows."
-                          :checks (list result)))
+          (make-instance 'hyperdoc::git-upstream-commit-assimilation-surface
+                         :id "git-unavailable-assimilation-surface-smoke"
+                         :title "Git-unavailable assimilation surface smoke"
+                         :summary "Regression surface for bounded git-runtime-unavailable rows."
+                         :checks (list result)))
          (surface-views
-           (assimilation-load-inspector-views-for-object surface))
+          (assimilation-load-inspector-views-for-object surface))
          (comparison-view
-           (assimilation-find-view-by-title surface-views "Comparison"))
+          (assimilation-find-view-by-title surface-views "Comparison"))
          (worked-example-view
-           (assimilation-find-view-by-title surface-views "Worked example"))
+          (assimilation-find-view-by-title surface-views "Worked example"))
          (comparison-html
-           (and comparison-view
-                (html-inspector-views:view-html comparison-view)))
+          (and comparison-view
+               (html-inspector-views:view-html comparison-view)))
          (result-summary-html
-           (and result-summary-view
-                (html-inspector-views:view-html result-summary-view)))
+          (and result-summary-view
+               (html-inspector-views:view-html result-summary-view)))
          (worked-example-html
-           (and worked-example-view
-                (html-inspector-views:view-html worked-example-view))))
+          (and worked-example-view
+               (html-inspector-views:view-html worked-example-view))))
     (assimilation-assert-typep
      'hyperdoc::git-runtime-unavailable
-    result
+     result
      "Graphviz defexample must degrade to a bounded git-runtime-unavailable object when Git cannot be resolved")
     (assimilation-assert-true
      result-summary-view
@@ -181,25 +181,25 @@
 (defun run-upstream-commit-assimilation-worked-example-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((check
-           (hyperdoc::hyperdoc-static-route-observability-commit-assimilation-check))
+          (hyperdoc::hyperdoc-static-route-observability-commit-assimilation-check))
          (graphviz-check
-           (hyperdoc::hyperdoc-graphviz-story-item-commit-assimilation-check))
+          (hyperdoc::hyperdoc-graphviz-story-item-commit-assimilation-check))
          (graphviz-example
-           (hyperdoc::graphviz-story-item-upstream-assimilation-example))
+          (hyperdoc::graphviz-story-item-upstream-assimilation-example))
          (surface
-           (hyperdoc::hyperdoc-upstream-commit-assimilation-surface))
+          (hyperdoc::hyperdoc-upstream-commit-assimilation-surface))
          (check-views
-           (assimilation-load-inspector-views-for-object check))
+          (assimilation-load-inspector-views-for-object check))
          (graphviz-check-views
-           (assimilation-load-inspector-views-for-object graphviz-check))
+          (assimilation-load-inspector-views-for-object graphviz-check))
          (surface-views
-           (assimilation-load-inspector-views-for-object surface))
+          (assimilation-load-inspector-views-for-object surface))
          (payload-paths
-           (sorted-copy-of-strings
-            (hyperdoc::payload-paths-of check)))
+          (sorted-copy-of-strings
+           (hyperdoc::payload-paths-of check)))
          (graphviz-payload-paths
-           (sorted-copy-of-strings
-            (hyperdoc::payload-paths-of graphviz-check))))
+          (sorted-copy-of-strings
+           (hyperdoc::payload-paths-of graphviz-check))))
     (assimilation-assert-typep
      'hyperdoc::git-upstream-commit-assimilation-check
      check
@@ -355,16 +355,16 @@
 (defun run-upstream-commit-assimilation-page-render-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page
-           (hyperbook:find-page hyperdoc::*hyperdoc*
-                                "Graphviz story item upstream assimilation example"
-                                :signal-error? t))
+          (hyperbook:find-page hyperdoc::*hyperdoc*
+                               "Graphviz story item upstream assimilation example"
+                               :signal-error? t))
          (views
-           (assimilation-load-inspector-views-for-object page))
+          (assimilation-load-inspector-views-for-object page))
          (content-view
-           (assimilation-find-view-by-title views "Content"))
+          (assimilation-find-view-by-title views "Content"))
          (content-html
-           (and content-view
-                (html-inspector-views:view-html content-view))))
+          (and content-view
+               (html-inspector-views:view-html content-view))))
     (assimilation-assert-true
      content-view
      "Graphviz assimilation example page must expose a Content view")
@@ -392,7 +392,7 @@
   (asdf:load-system :hyperdoc/explorer)
   (let ((topic (hyperdoc::check-upstream-commit-assimilation-equivalence-topic))
         (example-topic
-          (hyperdoc::graphviz-story-item-upstream-assimilation-example-topic)))
+         (hyperdoc::graphviz-story-item-upstream-assimilation-example-topic)))
     (assimilation-assert-true
      (fboundp 'hyperdoc::check-upstream-commit-assimilation-equivalence-topic)
      "Assimilation topic function must be present")

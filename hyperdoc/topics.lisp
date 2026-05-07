@@ -211,7 +211,7 @@
           for first? = t then nil
           do (unless first?
                (write-char #\& stream))
-             (format stream "~A=~A" key value))))
+          (format stream "~A=~A" key value))))
 
 (defun dmx-endpoint-url (book endpoint &key parameters)
   (format nil "~A~A~@[?~A~]"
@@ -383,14 +383,14 @@
                                (main-topic-id *dmx-default-topic-id*))
   (let ((key (list base-url topicmap-id)))
     (or (gethash key *dmx-hyperbooks*)
-          (let ((book (make-instance 'dmx-hyperbook
-                                     :id (make-dmx-hyperbook-id topicmap-id)
-                                     :base-url base-url
-                                     :topicmap-id topicmap-id
-                                     :title (format nil "DMX Topicmap ~D" topicmap-id)
-                                     :main-page-id (format nil "~D" main-topic-id))))
-            (setf (gethash key *dmx-hyperbooks*) book)
-            book))))
+        (let ((book (make-instance 'dmx-hyperbook
+                                   :id (make-dmx-hyperbook-id topicmap-id)
+                                   :base-url base-url
+                                   :topicmap-id topicmap-id
+                                   :title (format nil "DMX Topicmap ~D" topicmap-id)
+                                   :main-page-id (format nil "~D" main-topic-id))))
+          (setf (gethash key *dmx-hyperbooks*) book)
+          book))))
 
 (defun get-dmx-hyperbook (path &optional signal-error?)
   (declare (ignore signal-error?))
@@ -722,7 +722,7 @@
   (loop for topic in (dmx-topicmap-projection-topics projection)
         for topic-id = (dmx-json-object-id topic)
         when topic-id
-          collect topic-id))
+        collect topic-id))
 
 (defun dmx-topic-diagnostic-status-summary
     (ownership-class hyperdoc-owned-p selected-topicmap-membership-p workspace-id)
@@ -758,24 +758,24 @@
          (memberships (dmx-vector-elements (dmx-topicmap-memberships-of page)))
          (selected-topicmap-id (dmx-topicmap-id-of page))
          (selected-topicmap-membership-p
-           (loop for membership in memberships
-                 thereis (eql selected-topicmap-id
-                              (dmx-membership-topicmap-id membership))))
+          (loop for membership in memberships
+                thereis (eql selected-topicmap-id
+                             (dmx-membership-topicmap-id membership))))
          (ownership (dmx-topic-diagnostic-ownership-summary topic-data))
          (topic-uri (dmx-json-object-field topic-data "uri"))
          (topic-type-uri (dmx-json-object-field topic-data "typeUri"))
          (topic-title (dmx-topic-title-from-topic-data topic-data))
          (source-endpoints
-           (list (cons "topic"
-                       (dmx-core-topic-url (hyperbook:hyperbook-of page)
-                                           (dmx-topic-id-of page)
-                                           :parameters (dmx-children+assoc-parameters)))
-                 (cons "workspace-assignment"
-                       (dmx-workspace-object-url page))
-                 (cons "topicmap-memberships"
-                       (dmx-topicmap-memberships-url page))
-                 (cons "workspace-owner"
-                       (dmx-workspace-owner-url page workspace-id)))))
+          (list (cons "topic"
+                      (dmx-core-topic-url (hyperbook:hyperbook-of page)
+                                          (dmx-topic-id-of page)
+                                          :parameters (dmx-children+assoc-parameters)))
+                (cons "workspace-assignment"
+                      (dmx-workspace-object-url page))
+                (cons "topicmap-memberships"
+                      (dmx-topicmap-memberships-url page))
+                (cons "workspace-owner"
+                      (dmx-workspace-owner-url page workspace-id)))))
     (multiple-value-bind (status repair-needed-p status-reason)
         (dmx-topic-diagnostic-status-summary
          (getf ownership :class)
@@ -837,25 +837,25 @@
     (loop for topic in topic-objects
           for topic-id = (dmx-json-object-id topic)
           when topic-id
-            collect
-            (let ((proxy (make-dmx-topic-proxy :topic-id topic-id
-                                               :topicmap-id topicmap-id
-                                               :base-url base-url)))
-              (setf (dmx-topic-data-of proxy) topic)
-              (ensure-dmx-topicmap-data proxy :force? force?)
-              (ensure-dmx-workspace-data proxy :force? force?)
-              (ensure-dmx-topicmap-memberships proxy :force? force?)
-              (when (and (dmx-workspace-data-of proxy)
-                         (or force?
-                             (null (dmx-workspace-owner-of proxy))))
-                (setf (dmx-workspace-owner-of proxy)
-                      (fetch-dmx-workspace-owner
-                       proxy
-                       (dmx-json-object-id (dmx-workspace-data-of proxy)))))
-              (setf (dmx-diagnostics-of proxy)
-                    (compute-dmx-topic-diagnostics proxy))
-              (setf (dmx-load-error-of proxy) nil)
-              proxy))))
+          collect
+          (let ((proxy (make-dmx-topic-proxy :topic-id topic-id
+                                             :topicmap-id topicmap-id
+                                             :base-url base-url)))
+            (setf (dmx-topic-data-of proxy) topic)
+            (ensure-dmx-topicmap-data proxy :force? force?)
+            (ensure-dmx-workspace-data proxy :force? force?)
+            (ensure-dmx-topicmap-memberships proxy :force? force?)
+            (when (and (dmx-workspace-data-of proxy)
+                       (or force?
+                           (null (dmx-workspace-owner-of proxy))))
+              (setf (dmx-workspace-owner-of proxy)
+                    (fetch-dmx-workspace-owner
+                     proxy
+                     (dmx-json-object-id (dmx-workspace-data-of proxy)))))
+            (setf (dmx-diagnostics-of proxy)
+                  (compute-dmx-topic-diagnostics proxy))
+            (setf (dmx-load-error-of proxy) nil)
+            proxy))))
 
 (defun ensure-dmx-workspace-repair-triage (page &key force?)
   (ensure-dmx-topicmap-projection page :force? force?)
@@ -863,14 +863,14 @@
             (null (dmx-triage-topic-proxies-of page)))
     (handler-case
         (let* ((topic-proxies
-                 (compute-dmx-workspace-repair-triage-topic-proxies
-                  page
-                  :force? force?))
+                (compute-dmx-workspace-repair-triage-topic-proxies
+                 page
+                 :force? force?))
                (repair-topic-proxies
-                 (loop for proxy in topic-proxies
-                       for diagnostics = (dmx-diagnostics-of proxy)
-                       when (dmx-topic-diagnostics-repair-triage-p diagnostics)
-                         collect proxy)))
+                (loop for proxy in topic-proxies
+                      for diagnostics = (dmx-diagnostics-of proxy)
+                      when (dmx-topic-diagnostics-repair-triage-p diagnostics)
+                      collect proxy)))
           (setf (dmx-triage-topic-proxies-of page) topic-proxies)
           (setf (dmx-repair-topic-proxies-of page) repair-topic-proxies)
           (setf (dmx-load-error-of page) nil))
@@ -891,7 +891,7 @@
           when (and diagnostics
                     (eql (dmx-topic-diagnostics-workspace-id diagnostics)
                          workspace-id))
-            collect proxy)))
+          collect proxy)))
 
 (defun dmx-visible-but-unassigned-topic-proxies (page &key force?)
   (loop for proxy in (dmx-visible-topic-proxies page :force? force?)
@@ -900,10 +900,10 @@
                   (dmx-topic-diagnostics-selected-topicmap-membership-p
                    diagnostics)
                   (null (dmx-topic-diagnostics-workspace-id diagnostics)))
-          collect proxy))
+        collect proxy))
 
 (defun make-dmx-topic-proxy (&key topic-id topicmap-id
-                                   (base-url *dmx-base-url*))
+                               (base-url *dmx-base-url*))
   (let ((resolved-topic-id (or (parse-positive-integer topic-id)
                                (error 'unknown-dmx-topic-identifier
                                       :identifier topic-id)))
@@ -1223,10 +1223,10 @@
               (%register-topic topic)
               (when *topic-index-materialization-signature-provider*
                 (let ((signature
-                        (ignore-errors
-                          (funcall *topic-index-materialization-signature-provider*
-                                   symbol
-                                   topic))))
+                       (ignore-errors
+                         (funcall *topic-index-materialization-signature-provider*
+                                  symbol
+                                  topic))))
                   (when signature
                     (setf (gethash symbol *topic-index-materialization-signatures*)
                           signature))))))
@@ -3438,15 +3438,15 @@
               when (and topic-plist
                         (string= (or (getf topic-plist :id) "")
                                  topic-id))
-                do (return
-                     (make-topic
-                      :id (getf topic-plist :id)
-                      :title (getf topic-plist :title)
-                      :summary (getf topic-plist :summary)
-                      :references
-                      (copy-list
-                       (unquote-generated-topic-value
-                        (getf topic-plist :references))))))))))
+              do (return
+                   (make-topic
+                    :id (getf topic-plist :id)
+                    :title (getf topic-plist :title)
+                    :summary (getf topic-plist :summary)
+                    :references
+                    (copy-list
+                     (unquote-generated-topic-value
+                      (getf topic-plist :references))))))))))
 
 (defun make-generated-page-topic-with-fallback
     (topic-id chunk-finder asset-relative-path)

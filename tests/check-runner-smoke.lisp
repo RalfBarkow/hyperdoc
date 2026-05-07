@@ -77,9 +77,9 @@
 (defun run-check-discovery-smoke-test ()
   (let* ((examples (hyperdoc::discover-example-checks :system "hyperdoc" :page "Examples"))
          (example-symbols
-           (mapcar (lambda (spec)
-                     (getf (hyperdoc::check-locator-of spec) :function))
-                   examples))
+          (mapcar (lambda (spec)
+                    (getf (hyperdoc::check-locator-of spec) :function))
+                  examples))
          (test-ids (known-test-check-ids)))
     (cr-assert-true (member 'hyperdoc::the-answer example-symbols)
                     "Example discovery must include the-answer on the Examples page")
@@ -161,18 +161,18 @@
 
 (defun run-documentation-slice-validation-report-smoke-test ()
   (let* ((report
-           (hyperdoc:validate-documentation-slice
-            :page "hyperdoc/Semantic-first anchor resolution.html"
-            :topics '("semantic-first-anchor-resolution-topic")
-            :fedwiki-pages '("tools/testdata/journal-gate/good-page.json")))
+          (hyperdoc:validate-documentation-slice
+           :page "hyperdoc/Semantic-first anchor resolution.html"
+           :topics '("semantic-first-anchor-resolution-topic")
+           :fedwiki-pages '("tools/testdata/journal-gate/good-page.json")))
          (audit-check (documentation-validation-check-by-id
                        report
                        "semantic-first-anchor-audit"))
          (audit-payload (and audit-check
                              (hyperdoc::documentation-validation-check-payload-of audit-check)))
          (rendered
-           (with-output-to-string (stream)
-             (hyperdoc:print-documentation-slice-validation-report report stream))))
+          (with-output-to-string (stream)
+            (hyperdoc:print-documentation-slice-validation-report report stream))))
     (cr-assert-true (hyperdoc:documentation-slice-validation-pass-p report)
                     "Representative documentation slice must validate successfully")
     (cr-assert-true audit-check

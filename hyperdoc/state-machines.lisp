@@ -302,9 +302,9 @@
   (let* ((trigger (state-machine-transition-trigger-of transition))
          (guard (state-machine-transition-guard-of transition))
          (parts
-           (remove nil
-                   (list (and trigger (format nil "~A" trigger))
-                         (and guard (format nil "~A" guard))))))
+          (remove nil
+                  (list (and trigger (format nil "~A" trigger))
+                        (and guard (format nil "~A" guard))))))
     (cond
       (parts
        (format nil "~{~A~^ / ~}" parts))
@@ -355,16 +355,16 @@
     (dolist (state (state-machine-definition-states-of machine))
       (let* ((state-id (id-of state))
              (attributes
-               (list
-                (format nil "label=~A"
-                        (state-machine-dot-quoted
-                         (state-machine-definition-dot-state-label
-                          machine
-                          state)))
-                (format nil "shape=~A"
-                        (state-machine-definition-dot-state-shape
+              (list
+               (format nil "label=~A"
+                       (state-machine-dot-quoted
+                        (state-machine-definition-dot-state-label
                          machine
-                         state-id)))))
+                         state)))
+               (format nil "shape=~A"
+                       (state-machine-definition-dot-state-shape
+                        machine
+                        state-id)))))
         (when (equal state-id
                      (state-machine-definition-initial-state-of machine))
           (push "style=bold" attributes))

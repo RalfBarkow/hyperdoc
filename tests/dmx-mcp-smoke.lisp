@@ -61,11 +61,11 @@
                        (error ()
                          nil))
         when socket
-          do (progn
-               (ignore-errors (usocket:socket-close socket))
-               (return port))
+        do (progn
+             (ignore-errors (usocket:socket-close socket))
+             (return port))
         finally
-           (error "Could not allocate a free localhost port for DMX MCP smoke tests")))
+        (error "Could not allocate a free localhost port for DMX MCP smoke tests")))
 
 (defun mcp-test-view-props (&key (x 160) (y 120) (visibility t) (pinned nil))
   (hyperdoc::make-dmx-topicmap-view-props-json-object
@@ -88,9 +88,9 @@
   (when content-type
     (let* ((separator (position #\; content-type))
            (parameter-section
-             (and separator
-                  (< separator (1- (length content-type)))
-                  (subseq content-type (1+ separator))))
+            (and separator
+                 (< separator (1- (length content-type)))
+                 (subseq content-type (1+ separator))))
            (parameter-name-downcase (string-downcase parameter-name)))
       (when parameter-section
         (loop for raw-part in (uiop:split-string parameter-section :separator '(#\;))
@@ -105,7 +105,7 @@
                                 (string-trim '(#\Space #\Tab #\Newline #\Return #\")
                                              (subseq part (1+ equals)))))
               when (and key (string= key parameter-name-downcase))
-                return value)))))
+              return value)))))
 
 (defun mcp-test-json-stream (object)
   (make-string-input-stream (hyperdoc::encode-json-string object)))
@@ -168,7 +168,7 @@
          (progn
            (setf (symbol-function 'drakma:http-request)
                  (lambda (url &key method additional-headers content content-type
-                               &allow-other-keys)
+                                &allow-other-keys)
                    (cond
                      ((and (eq method :get)
                            (search "/core/topic/uri/" url))
@@ -366,9 +366,9 @@
 (defun mcp-test-seed-note
     (client id title text
      &key (topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*)
-          (x 160)
-          (y 120)
-          uri)
+       (x 160)
+       (y 120)
+       uri)
   (let ((topic (hyperdoc::dmx-import-create-topic
                 client
                 (list* :id id
@@ -400,9 +400,9 @@
     :initarg :journal-delete-topic-ids
     :initform '())
    (journal-placement-observations
-   :accessor mcp-journal-placement-observations-of
-   :initarg :journal-placement-observations
-   :initform '())
+    :accessor mcp-journal-placement-observations-of
+    :initarg :journal-placement-observations
+    :initform '())
    (fail-journal-hidden-placement-p
     :accessor mcp-fail-journal-hidden-placement-p-of
     :initarg :fail-journal-hidden-placement-p
@@ -420,9 +420,9 @@
 
 (defun mcp-topic-external-key-by-id (client topic-id)
   (loop for external-key being the hash-keys of (hyperdoc::topics-by-external-key-of client)
-          using (hash-value topic)
+        using (hash-value topic)
         when (eql topic-id (hyperdoc::dmx-import-object-id topic))
-          do (return external-key)))
+        do (return external-key)))
 
 (defun mcp-journal-topic-id-p (client topic-id)
   (mcp-journal-uri-p
@@ -444,11 +444,11 @@
                            (getf payload :uri)))
          (journal-p (mcp-journal-uri-p external-key))
          (workspace-id
-           (hyperdoc::effective-http-dmx-import-workspace-id client))
+          (hyperdoc::effective-http-dmx-import-workspace-id client))
          (_failure
-           (when (and journal-p
-                      (mcp-fail-journal-replacement-create-p-of client))
-             (error "Simulated MCP journal replacement create failure")))
+          (when (and journal-p
+                     (mcp-fail-journal-replacement-create-p-of client))
+            (error "Simulated MCP journal replacement create failure")))
          (topic (call-next-method)))
     (declare (ignore _failure))
     (when journal-p
@@ -521,8 +521,8 @@
 (defun mcp-test-seed-journal-companion
     (client id subject-key
      &key workspace-id
-          (topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*)
-          (view-props (mcp-test-view-props :x 40 :y 60 :visibility t :pinned nil)))
+       (topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*)
+       (view-props (mcp-test-view-props :x 40 :y 60 :visibility t :pinned nil)))
   (let* ((stream (mcp-test-make-journal-stream subject-key))
          (topic (hyperdoc::dmx-import-create-topic
                  client
@@ -564,8 +564,8 @@
      :bearer-token nil
      :allowed-origins nil
      :live-writes-enabled-p t
-	     :sessions (make-hash-table :test #'equal)
-	     :log-stream nil)))
+     :sessions (make-hash-table :test #'equal)
+     :log-stream nil)))
 
 (defun dmx-workspace-assignment-rehearsal-fixture-pathname ()
   (asdf:system-relative-pathname
@@ -574,15 +574,15 @@
 
 (defun make-dmx-mcp-workspace-assignment-rehearsal-server ()
   (let* ((snapshot
-           (hyperdoc::read-dmx-workspace-assignment-rehearsal-snapshot
-            (dmx-workspace-assignment-rehearsal-fixture-pathname)))
+          (hyperdoc::read-dmx-workspace-assignment-rehearsal-snapshot
+           (dmx-workspace-assignment-rehearsal-fixture-pathname)))
          (repair-target (gethash "repairTarget" snapshot))
          (topic-id (gethash "topicId" repair-target))
          (workspace-topicmap-id (gethash "workspaceTopicmapId" repair-target))
          (client
-           (hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot
-            snapshot
-            :next-topic-id 934000)))
+          (hyperdoc::make-memory-dmx-import-client-from-workspace-assignment-rehearsal-snapshot
+           snapshot
+           :next-topic-id 934000)))
     (values
      (hyperdoc::make-dmx-mcp-server
       :read-client client
@@ -599,19 +599,19 @@
 
 (defun make-dmx-mcp-journal-companion-repair-server
     (&key (fail-hidden-placement-p nil)
-          (fail-replacement-create-p nil)
-          (authorization-header "Bearer smoke-token"))
+       (fail-replacement-create-p nil)
+       (authorization-header "Bearer smoke-token"))
   (ensure-dmx-mcp-smoke-runtime-loaded)
   (let ((client
-          (make-instance 'mcp-journal-repair-observing-http-dmx-import-client
-                         :base-url "https://dmx.ralfbarkow.ch"
-                         :authorization-header authorization-header
-                         :workspace-id *dmx-mcp-smoke-workspace-id*
-                         :next-topic-id 933000
-                         :fail-journal-replacement-create-p
-                         fail-replacement-create-p
-                         :fail-journal-hidden-placement-p
-                         fail-hidden-placement-p)))
+         (make-instance 'mcp-journal-repair-observing-http-dmx-import-client
+                        :base-url "https://dmx.ralfbarkow.ch"
+                        :authorization-header authorization-header
+                        :workspace-id *dmx-mcp-smoke-workspace-id*
+                        :next-topic-id 933000
+                        :fail-journal-replacement-create-p
+                        fail-replacement-create-p
+                        :fail-journal-hidden-placement-p
+                        fail-hidden-placement-p)))
     (values
      (hyperdoc::make-dmx-mcp-server
       :read-client client
@@ -633,12 +633,12 @@
          (annotation (make-test-dock-annotation
                       :note "Saved annotation for MCP continuation smoke"))
          (persisted
-           (hyperdoc::persist-dock-annotation-to-workspace
-            annotation
-            :workspace-topicmap-id *dmx-annotations-smoke-workspace-topicmap-id*
-            :workspace-id *dmx-annotations-smoke-workspace-id*
-            :client client
-            :dry-run nil))
+          (hyperdoc::persist-dock-annotation-to-workspace
+           annotation
+           :workspace-topicmap-id *dmx-annotations-smoke-workspace-topicmap-id*
+           :workspace-id *dmx-annotations-smoke-workspace-id*
+           :client client
+           :dry-run nil))
          (topic-id (hyperdoc::workspace-annotation-topic-id-of persisted)))
     (values
      (hyperdoc::make-dmx-mcp-server
@@ -649,8 +649,8 @@
       :bearer-token nil
       :allowed-origins nil
       :live-writes-enabled-p t
-     :sessions (make-hash-table :test #'equal)
-     :log-stream nil)
+      :sessions (make-hash-table :test #'equal)
+      :log-stream nil)
      topic-id)))
 
 (defun make-dmx-mcp-annotation-auth-blocked-server ()
@@ -658,32 +658,32 @@
          (topicmap-memberships (make-hash-table :test #'equal))
          (workspace-assignments (make-hash-table :test #'eql))
          (create-client
-           (make-instance 'compatibility-storage-http-dmx-import-client
-                          :base-url "https://dmx.ralfbarkow.ch"
-                          :authorization-header "Bearer test-token"
-                          :workspace-id *dmx-annotations-smoke-workspace-id*
-                          :topics-by-external-key topics
-                          :topicmap-memberships topicmap-memberships
-                          :workspace-assignments workspace-assignments
-                          :next-topic-id 931100))
+          (make-instance 'compatibility-storage-http-dmx-import-client
+                         :base-url "https://dmx.ralfbarkow.ch"
+                         :authorization-header "Bearer test-token"
+                         :workspace-id *dmx-annotations-smoke-workspace-id*
+                         :topics-by-external-key topics
+                         :topicmap-memberships topicmap-memberships
+                         :workspace-assignments workspace-assignments
+                         :next-topic-id 931100))
          (persisted
-           (hyperdoc::persist-dock-annotation-to-workspace
-            (make-test-dock-annotation
-             :note "Saved annotation for MCP auth-blocked continuation smoke")
-            :workspace-topicmap-id *dmx-annotations-smoke-workspace-topicmap-id*
-            :workspace-id *dmx-annotations-smoke-workspace-id*
-            :client create-client
-            :dry-run nil))
+          (hyperdoc::persist-dock-annotation-to-workspace
+           (make-test-dock-annotation
+            :note "Saved annotation for MCP auth-blocked continuation smoke")
+           :workspace-topicmap-id *dmx-annotations-smoke-workspace-topicmap-id*
+           :workspace-id *dmx-annotations-smoke-workspace-id*
+           :client create-client
+           :dry-run nil))
          (topic-id (hyperdoc::workspace-annotation-topic-id-of persisted))
          (blocked-client
-           (make-instance
-            'pending-auth-compatibility-storage-http-dmx-import-client
-            :base-url "https://dmx.ralfbarkow.ch"
-            :workspace-id *dmx-annotations-smoke-workspace-id*
-            :topics-by-external-key topics
-            :topicmap-memberships topicmap-memberships
-            :workspace-assignments workspace-assignments
-            :next-topic-id 931101)))
+          (make-instance
+           'pending-auth-compatibility-storage-http-dmx-import-client
+           :base-url "https://dmx.ralfbarkow.ch"
+           :workspace-id *dmx-annotations-smoke-workspace-id*
+           :topics-by-external-key topics
+           :topicmap-memberships topicmap-memberships
+           :workspace-assignments workspace-assignments
+           :next-topic-id 931101)))
     (remhash topic-id workspace-assignments)
     (values
      (hyperdoc::make-dmx-mcp-server
@@ -937,26 +937,26 @@
                  (declare (ignore _))
                  (mcp-assert-equal 200 tools-status "tools/list status")
                  (let ((tool-names
-                         (mapcar (lambda (tool) (gethash "name" tool))
-                                 (hyperdoc::json-array-elements
-                                  (gethash "tools"
-                                           (gethash "result" tools-body))))))
-	                   (dolist (tool-name '("validated_dmx_write_dry_run"
-	                                        "read_dmx_topicmap"
-	                                        "read_dmx_topic"
-	                                        "resolve_workspace_note"
-	                                        "read_hyperdoc_workspace_journal"
-	                                        "read_hyperdoc_topic_journal"
-	                                        "list_hyperdoc_topic_revisions"
-	                                        "inventory_legacy_dmx_workspace_journal_artifacts"
-	                                        "plan_legacy_dmx_workspace_journal_cleanup"
-	                                        "append_workspace_note"
-	                                        "update_workspace_note"
-	                                        "continue_workspace_annotation"
-	                                        "upsert_workspace_topicmap_context"
-	                                        "remove_workspace_topic_from_topicmap"
-	                                        "repair_workspace_topic_assignment"
-	                                        "delete_workspace_note"
+                        (mapcar (lambda (tool) (gethash "name" tool))
+                                (hyperdoc::json-array-elements
+                                 (gethash "tools"
+                                          (gethash "result" tools-body))))))
+	           (dolist (tool-name '("validated_dmx_write_dry_run"
+	                                "read_dmx_topicmap"
+	                                "read_dmx_topic"
+	                                "resolve_workspace_note"
+	                                "read_hyperdoc_workspace_journal"
+	                                "read_hyperdoc_topic_journal"
+	                                "list_hyperdoc_topic_revisions"
+	                                "inventory_legacy_dmx_workspace_journal_artifacts"
+	                                "plan_legacy_dmx_workspace_journal_cleanup"
+	                                "append_workspace_note"
+	                                "update_workspace_note"
+	                                "continue_workspace_annotation"
+	                                "upsert_workspace_topicmap_context"
+	                                "remove_workspace_topic_from_topicmap"
+	                                "repair_workspace_topic_assignment"
+	                                "delete_workspace_note"
                                         "delete_workspace_topic"
                                         "restore_workspace_topic_revision"
                                         "restore_workspace_note_revision"
@@ -1236,7 +1236,7 @@
                                        "resolve_workspace_note handover status")
                      (let* ((resolve-result (gethash "result" handover-resolve-body))
                             (resolve-structured
-                              (gethash "structuredContent" resolve-result)))
+                             (gethash "structuredContent" resolve-result)))
                        (mcp-assert-true
                         (null (gethash "isError" resolve-result))
                         "resolve_workspace_note handover must not be flagged as error")
@@ -1263,7 +1263,7 @@
          (subject-key "hyperdoc:mcp/workspace-annotation/hyperdoc-local-journal-smoke")
          (legacy-topic-id 924694)
          (legacy-uri
-           "hyperdoc:mcp/workspace-journal/workspace-journal-646d783a746f7069632f323232353731"))
+          "hyperdoc:mcp/workspace-journal/workspace-journal-646d783a746f7069632f323232353731"))
     (hyperdoc::clear-hyperdoc-local-workspace-journal-store)
     (hyperdoc::set-hyperdoc-local-workspace-journal-stream
      subject-key
@@ -1279,9 +1279,9 @@
            (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
            (sleep 0.2)
            (let ((session-id
-                   (mcp-test-open-session url
-                                          :id 401
-                                          :client-name "hyperdoc-workspace-journal-smoke")))
+                  (mcp-test-open-session url
+                                         :id 401
+                                         :client-name "hyperdoc-workspace-journal-smoke")))
              (multiple-value-bind (workspace-body workspace-status _)
                  (mcp-test-call-tool
                   url
@@ -1446,16 +1446,16 @@
          (topic-uri "dmx://foreign/workspace-topic/940100")
          (topic-id nil))
     (let ((topic
-            (hyperdoc::dmx-import-create-topic
-             client
-             (list :uri topic-uri
-                   :external-key topic-uri
-                   :type-uri "dmx.notes.note"
-                   :value "Foreign workspace topic"
-                   :children
-                   (mcp-test-json-object
-                    "dmx.notes.title" "Foreign workspace topic"
-                    "dmx.notes.text" "Out-of-band foreign state")))))
+           (hyperdoc::dmx-import-create-topic
+            client
+            (list :uri topic-uri
+                  :external-key topic-uri
+                  :type-uri "dmx.notes.note"
+                  :value "Foreign workspace topic"
+                  :children
+                  (mcp-test-json-object
+                   "dmx.notes.title" "Foreign workspace topic"
+                   "dmx.notes.text" "Out-of-band foreign state")))))
       (setf topic-id (hyperdoc::dmx-import-object-id topic))
       (hyperdoc::dmx-import-add-topic-to-topicmap
        client
@@ -1463,7 +1463,7 @@
        topic-id
        (mcp-test-view-props :x 610 :y 620))
       (let* ((initial-journal
-               (hyperdoc::read-dmx-topic-journal
+              (hyperdoc::read-dmx-topic-journal
                :workspace-topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*
                :client client
                :topic-id topic-id
@@ -1478,8 +1478,8 @@
       ;; exercising delete/restore guardrails.
       (let* ((live-topic (hyperdoc::dmx-import-read-topic client topic-id))
              (metadata
-               (hyperdoc::dmx-workspace-journal-subject-metadata-from-topic
-                live-topic))
+              (hyperdoc::dmx-workspace-journal-subject-metadata-from-topic
+               live-topic))
              (lookup (gethash "subjectLookup" metadata)))
         (hyperdoc::dmx-workspace-journal-prepare-transition
          client
@@ -1494,20 +1494,20 @@
          :note-kind (gethash "noteKind" metadata))))
     (hyperdoc::dmx-import-delete-topic client topic-id)
     (let* ((deleted-journal
-             (hyperdoc::read-dmx-topic-journal
-              :workspace-topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*
-              :client client
-              :subject-key topic-uri
-              :reconcile t))
+            (hyperdoc::read-dmx-topic-journal
+             :workspace-topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*
+             :client client
+             :subject-key topic-uri
+             :reconcile t))
            (all-events (hyperdoc::json-array-elements
                         (gethash "events" deleted-journal)))
            (delete-events (subseq all-events (- (length all-events) 2)))
            (restore-result
-             (hyperdoc::restore-dmx-workspace-topic-revision
-              :workspace-topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*
-              :client client
-              :subject-key topic-uri
-              :dry-run nil)))
+            (hyperdoc::restore-dmx-workspace-topic-revision
+             :workspace-topicmap-id *dmx-mcp-smoke-workspace-topicmap-id*
+             :client client
+             :subject-key topic-uri
+             :dry-run nil)))
       (mcp-assert-equal '("archive-topic" "delete-topic")
                         (mapcar (lambda (event) (gethash "eventType" event))
                                 delete-events)
@@ -1563,7 +1563,7 @@
                  (mcp-assert-true
                   (search "DELETE"
                           (hyperdoc::fedwiki-dmx-import-message-of condition))
-                 "Unsupported topicmap unlink must explain the missing DELETE proof")))))
+                  "Unsupported topicmap unlink must explain the missing DELETE proof")))))
       (setf (symbol-function 'drakma:http-request) original))))
 
 (defun run-dmx-import-workspace-assignment-contract-smoke-test ()
@@ -1573,7 +1573,7 @@
          (progn
            (setf (symbol-function 'drakma:http-request)
                  (lambda (url &key method additional-headers content-type content content-length
-                               &allow-other-keys)
+                                &allow-other-keys)
                    (setf captured-assign-call
                          (list :url url
                                :method method
@@ -1638,7 +1638,7 @@
          (progn
            (setf (symbol-function 'drakma:http-request)
                  (lambda (url &key method additional-headers content-type content content-length
-                               &allow-other-keys)
+                                &allow-other-keys)
                    (push (list :url url
                                :method method
                                :headers additional-headers
@@ -1662,12 +1662,12 @@
                          "value" "context-window"))
                        200 nil nil nil "OK")))))
            (let ((client
-                   (hyperdoc::make-http-dmx-import-client-from-explicit-auth
-                    :base-url "https://dmx.ralfbarkow.ch"
-                    :workspace-id 919815
-                    :auth-mode :basic
-                    :username "rgb"
-                    :password "secret")))
+                  (hyperdoc::make-http-dmx-import-client-from-explicit-auth
+                   :base-url "https://dmx.ralfbarkow.ch"
+                   :workspace-id 919815
+                   :auth-mode :basic
+                   :username "rgb"
+                   :password "secret")))
              (hyperdoc::dmx-import-assign-topic-to-workspace client 919815 922464)
              (let ((calls (nreverse captured-calls)))
                (mcp-assert-equal 2
@@ -1702,8 +1702,8 @@
                                    (getf assign-call :method)
                                    "Workspace assignment must remain a PUT after login bootstrap")
                  (mcp-assert-true
-                 (search "/workspaces/919815/object/922464"
-                         (getf assign-call :url))
+                  (search "/workspaces/919815/object/922464"
+                          (getf assign-call :url))
                   "Workspace assignment must still target /workspaces/<workspace>/object/<topic>")
                  (mcp-assert-equal nil
                                    (mcp-test-header-value (getf assign-call :headers)
@@ -1734,16 +1734,16 @@
            (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
            (sleep 0.2)
            (let* ((session-id
-                    (mcp-test-open-session url
-                                           :id 201
-                                           :client-name "hyperdoc-lifecycle-smoke"))
+                   (mcp-test-open-session url
+                                          :id 201
+                                          :client-name "hyperdoc-lifecycle-smoke"))
                   (definition (make-test-topic-factory-snippet-definition))
                   (snippet-id (hyperdoc::snippet-id-of definition))
                   (snippet-source-path (hyperdoc::source-path-of definition))
                   (snippet-related-page
-                    (hyperdoc::related-hyperdoc-page-title-of definition))
+                   (hyperdoc::related-hyperdoc-page-title-of definition))
                   (snippet-related-topic-id
-                    (hyperdoc::related-topic-id-of definition))
+                   (hyperdoc::related-topic-id-of definition))
                   (snippet-uri nil)
                   (snippet-topic-id nil))
              (multiple-value-bind (snippet-body snippet-status _)
@@ -1836,10 +1836,10 @@
                (let* ((tool-result (gethash "result" placement-body))
                       (structured (gethash "structuredContent" tool-result))
                       (view-props
-                        (gethash (hyperdoc::memory-topicmap-membership-key
-                                  *dmx-mcp-smoke-workspace-topicmap-id*
-                                  *dmx-mcp-smoke-secondary-topic-id*)
-                                 (hyperdoc::topicmap-memberships-of client))))
+                       (gethash (hyperdoc::memory-topicmap-membership-key
+                                 *dmx-mcp-smoke-workspace-topicmap-id*
+                                 *dmx-mcp-smoke-secondary-topic-id*)
+                                (hyperdoc::topicmap-memberships-of client))))
                  (mcp-assert-true
                   (null (gethash "isError" tool-result))
                   "upsert_workspace_topicmap_context must succeed")
@@ -1998,16 +1998,16 @@
            (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
            (sleep 0.2)
            (let* ((session-id
-                    (mcp-test-open-session url
-                                           :id 301
-                                           :client-name "hyperdoc-owned-lifecycle-smoke"))
+                   (mcp-test-open-session url
+                                          :id 301
+                                          :client-name "hyperdoc-owned-lifecycle-smoke"))
                   (definition (make-test-topic-factory-snippet-definition))
                   (snippet-id (hyperdoc::snippet-id-of definition))
                   (snippet-source-path (hyperdoc::source-path-of definition))
                   (snippet-related-page
-                    (hyperdoc::related-hyperdoc-page-title-of definition))
+                   (hyperdoc::related-hyperdoc-page-title-of definition))
                   (snippet-related-topic-id
-                    (hyperdoc::related-topic-id-of definition)))
+                   (hyperdoc::related-topic-id-of definition)))
              (multiple-value-bind (create-body create-status _)
                  (mcp-test-call-tool
                   url
@@ -2037,90 +2037,90 @@
                  (mcp-assert-equal "add"
                                    (gethash "topicmap-action" structured)
                                    "Owned topic lifecycle proof must add the topic to the workspace")
-                  (setf owned-topic-id (gethash "topic-id" structured)))
-             (mcp-assert-true (integerp owned-topic-id)
-                              "Owned topic lifecycle proof must return a topic id")
-             (mcp-assert-true
-              (hyperdoc::dmx-import-topic-in-topicmap-p
-               client
-               *dmx-mcp-smoke-workspace-topicmap-id*
-               owned-topic-id)
-              "Owned topic lifecycle proof must place the topic in the workspace topicmap")
-             (multiple-value-bind (remove-body remove-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  303
-                  "remove_workspace_topic_from_topicmap"
-                  (mcp-test-json-object
-                   "topicId" owned-topic-id
-                   "dryRun" nil))
-               (declare (ignore _))
-               (mcp-assert-equal 200 remove-status
-                                 "Owned topic lifecycle proof remove status")
-               (let* ((tool-result (gethash "result" remove-body))
-                      (structured (gethash "structuredContent" tool-result)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "Owned topic lifecycle proof remove must succeed on the memory client")
-                 (mcp-assert-equal "remove"
-                                   (gethash "topicmap-action" structured)
-                                   "Owned topic lifecycle proof remove must expose REMOVE")))
-             (mcp-assert-true
-              (null (gethash (hyperdoc::memory-topicmap-membership-key
-                              *dmx-mcp-smoke-workspace-topicmap-id*
-                              owned-topic-id)
-                             (hyperdoc::topicmap-memberships-of client)))
-              "Owned topic lifecycle proof remove must leave the topic alive but absent from the topicmap")
-             (mcp-assert-true
-              (hyperdoc::dmx-import-read-topic client owned-topic-id)
-              "Owned topic lifecycle proof remove must not hard-delete the topic")
-             (multiple-value-bind (delete-body delete-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  304
-                  "delete_workspace_topic"
-                  (mcp-test-json-object
-                   "topicId" owned-topic-id
-                   "dryRun" nil))
-               (declare (ignore _))
-               (mcp-assert-equal 200 delete-status
-                                 "Owned topic lifecycle proof delete status")
-               (let* ((tool-result (gethash "result" delete-body))
-                      (structured (gethash "structuredContent" tool-result)))
-                 (mcp-assert-true
-                  (null (gethash "isError" tool-result))
-                  "Owned topic lifecycle proof delete must succeed")
-                 (mcp-assert-equal "hard-delete"
-                                   (gethash "delete-action" structured)
-                                   "Owned topic lifecycle proof delete must expose HARD-DELETE")))
-             (mcp-assert-true
-              (null (hyperdoc::dmx-import-read-topic client owned-topic-id))
-              "Owned topic lifecycle proof delete must remove the HyperDoc-owned topic")
-             (multiple-value-bind (foreign-delete-body foreign-delete-status _)
-                 (mcp-test-call-tool
-                  url
-                  session-id
-                  305
-                  "delete_workspace_topic"
-                  (mcp-test-json-object
-                   "topicId" foreign-topic-id
-                   "dryRun" nil))
-               (declare (ignore _))
-               (mcp-assert-equal 200 foreign-delete-status
-                                 "Owned topic lifecycle proof foreign delete status")
-               (let* ((tool-result (gethash "result" foreign-delete-body))
-                      (structured (gethash "structuredContent" tool-result)))
-                 (mcp-assert-true
-                  (gethash "isError" tool-result)
-                  "Owned topic lifecycle proof must reject foreign hard delete")
-                 (mcp-assert-equal "ownership_error"
-                                   (gethash "status" structured)
-                                   "Owned topic lifecycle proof foreign delete must surface ownership_error")))
-             (mcp-assert-true
-              (hyperdoc::dmx-import-read-topic client foreign-topic-id)
-              "Owned topic lifecycle proof foreign delete must leave the foreign topic intact"))))
+                 (setf owned-topic-id (gethash "topic-id" structured)))
+               (mcp-assert-true (integerp owned-topic-id)
+                                "Owned topic lifecycle proof must return a topic id")
+               (mcp-assert-true
+                (hyperdoc::dmx-import-topic-in-topicmap-p
+                 client
+                 *dmx-mcp-smoke-workspace-topicmap-id*
+                 owned-topic-id)
+                "Owned topic lifecycle proof must place the topic in the workspace topicmap")
+               (multiple-value-bind (remove-body remove-status _)
+                   (mcp-test-call-tool
+                    url
+                    session-id
+                    303
+                    "remove_workspace_topic_from_topicmap"
+                    (mcp-test-json-object
+                     "topicId" owned-topic-id
+                     "dryRun" nil))
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 remove-status
+                                   "Owned topic lifecycle proof remove status")
+                 (let* ((tool-result (gethash "result" remove-body))
+                        (structured (gethash "structuredContent" tool-result)))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "Owned topic lifecycle proof remove must succeed on the memory client")
+                   (mcp-assert-equal "remove"
+                                     (gethash "topicmap-action" structured)
+                                     "Owned topic lifecycle proof remove must expose REMOVE")))
+               (mcp-assert-true
+                (null (gethash (hyperdoc::memory-topicmap-membership-key
+                                *dmx-mcp-smoke-workspace-topicmap-id*
+                                owned-topic-id)
+                               (hyperdoc::topicmap-memberships-of client)))
+                "Owned topic lifecycle proof remove must leave the topic alive but absent from the topicmap")
+               (mcp-assert-true
+                (hyperdoc::dmx-import-read-topic client owned-topic-id)
+                "Owned topic lifecycle proof remove must not hard-delete the topic")
+               (multiple-value-bind (delete-body delete-status _)
+                   (mcp-test-call-tool
+                    url
+                    session-id
+                    304
+                    "delete_workspace_topic"
+                    (mcp-test-json-object
+                     "topicId" owned-topic-id
+                     "dryRun" nil))
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 delete-status
+                                   "Owned topic lifecycle proof delete status")
+                 (let* ((tool-result (gethash "result" delete-body))
+                        (structured (gethash "structuredContent" tool-result)))
+                   (mcp-assert-true
+                    (null (gethash "isError" tool-result))
+                    "Owned topic lifecycle proof delete must succeed")
+                   (mcp-assert-equal "hard-delete"
+                                     (gethash "delete-action" structured)
+                                     "Owned topic lifecycle proof delete must expose HARD-DELETE")))
+               (mcp-assert-true
+                (null (hyperdoc::dmx-import-read-topic client owned-topic-id))
+                "Owned topic lifecycle proof delete must remove the HyperDoc-owned topic")
+               (multiple-value-bind (foreign-delete-body foreign-delete-status _)
+                   (mcp-test-call-tool
+                    url
+                    session-id
+                    305
+                    "delete_workspace_topic"
+                    (mcp-test-json-object
+                     "topicId" foreign-topic-id
+                     "dryRun" nil))
+                 (declare (ignore _))
+                 (mcp-assert-equal 200 foreign-delete-status
+                                   "Owned topic lifecycle proof foreign delete status")
+                 (let* ((tool-result (gethash "result" foreign-delete-body))
+                        (structured (gethash "structuredContent" tool-result)))
+                   (mcp-assert-true
+                    (gethash "isError" tool-result)
+                    "Owned topic lifecycle proof must reject foreign hard delete")
+                   (mcp-assert-equal "ownership_error"
+                                     (gethash "status" structured)
+                                     "Owned topic lifecycle proof foreign delete must surface ownership_error")))
+               (mcp-assert-true
+                (hyperdoc::dmx-import-read-topic client foreign-topic-id)
+                "Owned topic lifecycle proof foreign delete must leave the foreign topic intact"))))
       (hyperdoc::stop-dmx-mcp-server)))
   t)
 
@@ -2148,9 +2148,9 @@
            (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
            (sleep 0.2)
            (let ((session-id
-                   (mcp-test-open-session url
-                                          :id 401
-                                          :client-name "hyperdoc-assignment-repair-smoke")))
+                  (mcp-test-open-session url
+                                         :id 401
+                                         :client-name "hyperdoc-assignment-repair-smoke")))
              (multiple-value-bind (dry-run-body dry-run-status _)
                  (mcp-test-call-tool
                   url
@@ -2234,10 +2234,10 @@
                                    (gethash "status" structured)
                                    "Foreign workspace assignment repair must surface ownership_error")))
              (mcp-assert-true
-             (null (hyperdoc::dmx-import-read-topic-workspace client foreign-topic-id))
+              (null (hyperdoc::dmx-import-read-topic-workspace client foreign-topic-id))
               "Foreign topic must remain without a workspace assignment after rejection")))
       (hyperdoc::stop-dmx-mcp-server))
-  t))
+    t))
 
 (defun run-dmx-mcp-workspace-assignment-localhost-rehearsal-smoke-test ()
   (let* ((port (mcp-test-port))
@@ -2250,10 +2250,10 @@
              (workspace-id (gethash "workspaceId" repair-target))
              (workspace-topicmap-id (gethash "workspaceTopicmapId" repair-target))
              (before-topicmap
-               (hyperdoc::dmx-import-read-topicmap client workspace-topicmap-id))
+              (hyperdoc::dmx-import-read-topicmap client workspace-topicmap-id))
              (before-topic-count
-               (length (hyperdoc::json-array-elements
-                        (gethash "topics" before-topicmap)))))
+              (length (hyperdoc::json-array-elements
+                       (gethash "topics" before-topicmap)))))
         (mcp-assert-true
          (hyperdoc::dmx-import-read-topic client topic-id)
          "Localhost rehearsal fixture must load the captured topic")
@@ -2282,10 +2282,10 @@
                 :server server)
                (sleep 0.2)
                (let ((session-id
-                       (mcp-test-open-session
-                        url
-                        :id 451
-                        :client-name "hyperdoc-assignment-localhost-rehearsal")))
+                      (mcp-test-open-session
+                       url
+                       :id 451
+                       :client-name "hyperdoc-assignment-localhost-rehearsal")))
                  (multiple-value-bind (dry-run-body dry-run-status _)
                      (mcp-test-call-tool
                       url
@@ -2335,12 +2335,12 @@
                                       client
                                       topic-id))
                           (after-topicmap
-                            (hyperdoc::dmx-import-read-topicmap
-                             client
-                             workspace-topicmap-id))
+                           (hyperdoc::dmx-import-read-topicmap
+                            client
+                            workspace-topicmap-id))
                           (after-topic-count
-                            (length (hyperdoc::json-array-elements
-                                     (gethash "topics" after-topicmap)))))
+                           (length (hyperdoc::json-array-elements
+                                    (gethash "topics" after-topicmap)))))
                      (mcp-assert-true
                       (null (gethash "isError" tool-result))
                       "Localhost rehearsal repair must succeed")
@@ -2369,24 +2369,24 @@
          (journal-uri (hyperdoc::dmx-workspace-journal-note-uri subject-key))
          (nested-uri (hyperdoc::dmx-workspace-journal-note-uri journal-uri))
          (journal-topic
-           (hyperdoc::dmx-import-create-topic
-            client
-            (hyperdoc::dmx-workspace-note-payload
-             "Workspace journal repair smoke"
-             "{\"journalOwner\":\"hyperdoc\",\"schemaVersion\":1}"
-             journal-uri)))
+          (hyperdoc::dmx-import-create-topic
+           client
+           (hyperdoc::dmx-workspace-note-payload
+            "Workspace journal repair smoke"
+            "{\"journalOwner\":\"hyperdoc\",\"schemaVersion\":1}"
+            journal-uri)))
          (journal-topic-id (hyperdoc::dmx-import-object-id journal-topic))
          (topic-count-before
-           (hash-table-count (hyperdoc::topics-by-external-key-of client)))
+          (hash-table-count (hyperdoc::topics-by-external-key-of client)))
          (result
-           (hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair
-            journal-topic-id
-            :workspace-id 919815
-            :workspace-topicmap-id workspace-topicmap-id
-            :client client
-            :dry-run nil))
+          (hyperdoc::execute-dmx-workspace-topic-workspace-assignment-repair
+           journal-topic-id
+           :workspace-id 919815
+           :workspace-topicmap-id workspace-topicmap-id
+           :client client
+           :dry-run nil))
          (topic-count-after
-           (hash-table-count (hyperdoc::topics-by-external-key-of client))))
+          (hash-table-count (hyperdoc::topics-by-external-key-of client))))
     (mcp-assert-equal 919815
                       (getf result :result-workspace-id)
                       "Workspace-journal assignment repair must assign the target workspace")
@@ -2410,9 +2410,9 @@
            (assigned-topic-id 921681)
            (stale-topic-id 921682)
            (assigned-subject-key
-             "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-assigned")
+            "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-assigned")
            (stale-subject-key
-             "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-stale"))
+            "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-stale"))
       (mcp-test-seed-note client
                           nonjournal-topic-id
                           "Non-journal note"
@@ -2437,10 +2437,10 @@
              (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
              (sleep 0.2)
              (let ((session-id
-                     (mcp-test-open-session
-                      url
-                      :id 501
-                      :client-name "hyperdoc-journal-companion-repair-smoke")))
+                    (mcp-test-open-session
+                     url
+                     :id 501
+                     :client-name "hyperdoc-journal-companion-repair-smoke")))
                (multiple-value-bind (reject-body reject-status _)
                    (mcp-test-call-tool
                     url
@@ -2563,21 +2563,21 @@
                         (structured (gethash "structuredContent" tool-result))
                         (replacement-topic-id (gethash "replacement-topic-id" structured))
                         (replacement-topic
-                          (and replacement-topic-id
-                               (hyperdoc::dmx-import-read-topic
-                                client
-                                replacement-topic-id)))
+                         (and replacement-topic-id
+                              (hyperdoc::dmx-import-read-topic
+                               client
+                               replacement-topic-id)))
                         (replacement-workspace
-                          (and replacement-topic-id
-                               (hyperdoc::dmx-import-read-topic-workspace
-                                client
-                                replacement-topic-id)))
+                         (and replacement-topic-id
+                              (hyperdoc::dmx-import-read-topic-workspace
+                               client
+                               replacement-topic-id)))
                         (replacement-membership
-                          (and replacement-topic-id
-                               (gethash (hyperdoc::memory-topicmap-membership-key
-                                         *dmx-mcp-smoke-workspace-topicmap-id*
-                                         replacement-topic-id)
-                                        (hyperdoc::topicmap-memberships-of client)))))
+                         (and replacement-topic-id
+                              (gethash (hyperdoc::memory-topicmap-membership-key
+                                        *dmx-mcp-smoke-workspace-topicmap-id*
+                                        replacement-topic-id)
+                                       (hyperdoc::topicmap-memberships-of client)))))
                    (mcp-assert-true
                     (null (gethash "isError" tool-result))
                     "Stale journal companion repair must succeed on the typed repair path")
@@ -2640,107 +2640,107 @@
                (mcp-assert-true
                 (hyperdoc::dmx-import-read-topic client stale-topic-id)
                 "Live repair must retain the stale companion topic as history after replacement create"))))
-        (hyperdoc::stop-dmx-mcp-server))
+      (hyperdoc::stop-dmx-mcp-server))
     t)
 
-(defun run-dmx-mcp-workspace-journal-companion-repair-failure-smoke-test ()
-  (multiple-value-bind (server client)
-      (make-dmx-mcp-journal-companion-repair-server)
-    (let* ((port (mcp-test-port))
-           (url (format nil "http://127.0.0.1:~D/mcp" port))
-           (stale-topic-id 921683)
-           (stale-subject-key
-             "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-failure"))
-      (mcp-test-seed-journal-companion
-       client
-       stale-topic-id
-       stale-subject-key
-       :view-props (mcp-test-view-props :x 80 :y 90 :visibility t :pinned nil))
-      (mcp-clear-journal-repair-observations client)
-      (setf (mcp-fail-journal-hidden-placement-p-of client) t)
-      (unwind-protect
-           (progn
-             (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
-             (sleep 0.2)
-             (let ((session-id
-                     (mcp-test-open-session
+  (defun run-dmx-mcp-workspace-journal-companion-repair-failure-smoke-test ()
+    (multiple-value-bind (server client)
+        (make-dmx-mcp-journal-companion-repair-server)
+      (let* ((port (mcp-test-port))
+             (url (format nil "http://127.0.0.1:~D/mcp" port))
+             (stale-topic-id 921683)
+             (stale-subject-key
+              "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-failure"))
+        (mcp-test-seed-journal-companion
+         client
+         stale-topic-id
+         stale-subject-key
+         :view-props (mcp-test-view-props :x 80 :y 90 :visibility t :pinned nil))
+        (mcp-clear-journal-repair-observations client)
+        (setf (mcp-fail-journal-hidden-placement-p-of client) t)
+        (unwind-protect
+             (progn
+               (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
+               (sleep 0.2)
+               (let ((session-id
+                      (mcp-test-open-session
+                       url
+                       :id 551
+                       :client-name "hyperdoc-journal-companion-repair-failure")))
+                 (multiple-value-bind (failure-body failure-status _)
+                     (mcp-test-call-tool
                       url
-                      :id 551
-                      :client-name "hyperdoc-journal-companion-repair-failure")))
-               (multiple-value-bind (failure-body failure-status _)
-                   (mcp-test-call-tool
-                    url
-                    session-id
-                    552
-                    "repair_workspace_journal_companion"
-                    (mcp-test-json-object
-                     "journalTopicId" stale-topic-id
-                     "workspaceTopicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
-                     "workspaceId" *dmx-mcp-smoke-workspace-id*
-                     "dryRun" nil))
-                 (declare (ignore _))
-                 (mcp-assert-equal 200 failure-status
-                                   "Journal companion repair failure status")
-                 (let* ((tool-result (gethash "result" failure-body))
-                        (structured (gethash "structuredContent" tool-result))
-                        (replacement-topic-id (gethash "replacement-topic-id" structured))
-                        (replacement-workspace
-                          (and replacement-topic-id
-                               (hyperdoc::dmx-import-read-topic-workspace
-                                client
-                                replacement-topic-id))))
-                   (mcp-assert-true
-                    (gethash "isError" tool-result)
-                    "Repair failure after retained-stale replacement create must stay a typed repair error")
-                   (mcp-assert-equal "failed"
-                                     (gethash "repair-status" structured)
-                                     "Repair failure must preserve FAILED status")
-                   (mcp-assert-equal "create-replacement-and-retain-stale"
-                                     (gethash "repair-strategy" structured)
-                                     "Repair failure must preserve the create-and-retain-stale strategy")
-                   (mcp-assert-equal stale-topic-id
-                                     (gethash "stale-topic-id" structured)
-                                     "Repair failure must preserve the stale companion id")
-                   (mcp-assert-true
-                    (integerp replacement-topic-id)
-                    "Repair failure after recreate must preserve the replacement id")
-                   (mcp-assert-equal replacement-topic-id
-                                     (gethash "current-topic-id" structured)
-                                     "Repair failure must preserve the last valid post-repair identity")
-                   (mcp-assert-equal t
-                                     (gethash "stale-topic-retained-p" structured)
-                                     "Repair failure must preserve that the stale topic was retained")
-                   (mcp-assert-equal t
-                                     (gethash "stale-topic-superseded-p" structured)
-                                     "Repair failure after replacement create must preserve stale-superseded truth")
-                   (mcp-assert-true
-                    (mcp-json-null-p
-                     (gethash "stale-delete-attempted-p" structured))
-                    "Repair failure must preserve that stale delete was not attempted")
-                   (mcp-assert-true
-                    (mcp-json-null-p
-                     (gethash "stale-delete-succeeded-p" structured))
-                    "Repair failure must preserve that stale delete did not run")
-                   (mcp-assert-equal t
-                                     (gethash "replacement-create-attempted-p" structured)
-                                     "Repair failure must preserve replacement create attempt evidence")
-                   (mcp-assert-equal t
-                                     (gethash "replacement-create-succeeded-p" structured)
-                                     "Repair failure must preserve replacement create success evidence")
-                   (mcp-assert-equal t
-                                     (gethash "hidden-placement-attempted-p" structured)
-                                     "Repair failure must preserve hidden placement attempt evidence")
-                   (mcp-assert-true
-                    (mcp-json-null-p
-                     (gethash "hidden-placement-succeeded-p" structured))
-                    "Repair failure must keep hidden placement failure visible")
-                   (mcp-assert-true
-                    (mcp-json-null-p
-                     (gethash "repair-completed-p" structured))
-                                     "Repair failure must not claim repair completion")
-                   (mcp-assert-equal *dmx-mcp-smoke-workspace-id*
-                                     (hyperdoc::dmx-import-object-id replacement-workspace)
-                                     "Repair failure must still preserve the recreated topic's workspace assignment"))))
+                      session-id
+                      552
+                      "repair_workspace_journal_companion"
+                      (mcp-test-json-object
+                       "journalTopicId" stale-topic-id
+                       "workspaceTopicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                       "workspaceId" *dmx-mcp-smoke-workspace-id*
+                       "dryRun" nil))
+                   (declare (ignore _))
+                   (mcp-assert-equal 200 failure-status
+                                     "Journal companion repair failure status")
+                   (let* ((tool-result (gethash "result" failure-body))
+                          (structured (gethash "structuredContent" tool-result))
+                          (replacement-topic-id (gethash "replacement-topic-id" structured))
+                          (replacement-workspace
+                           (and replacement-topic-id
+                                (hyperdoc::dmx-import-read-topic-workspace
+                                 client
+                                 replacement-topic-id))))
+                     (mcp-assert-true
+                      (gethash "isError" tool-result)
+                      "Repair failure after retained-stale replacement create must stay a typed repair error")
+                     (mcp-assert-equal "failed"
+                                       (gethash "repair-status" structured)
+                                       "Repair failure must preserve FAILED status")
+                     (mcp-assert-equal "create-replacement-and-retain-stale"
+                                       (gethash "repair-strategy" structured)
+                                       "Repair failure must preserve the create-and-retain-stale strategy")
+                     (mcp-assert-equal stale-topic-id
+                                       (gethash "stale-topic-id" structured)
+                                       "Repair failure must preserve the stale companion id")
+                     (mcp-assert-true
+                      (integerp replacement-topic-id)
+                      "Repair failure after recreate must preserve the replacement id")
+                     (mcp-assert-equal replacement-topic-id
+                                       (gethash "current-topic-id" structured)
+                                       "Repair failure must preserve the last valid post-repair identity")
+                     (mcp-assert-equal t
+                                       (gethash "stale-topic-retained-p" structured)
+                                       "Repair failure must preserve that the stale topic was retained")
+                     (mcp-assert-equal t
+                                       (gethash "stale-topic-superseded-p" structured)
+                                       "Repair failure after replacement create must preserve stale-superseded truth")
+                     (mcp-assert-true
+                      (mcp-json-null-p
+                       (gethash "stale-delete-attempted-p" structured))
+                      "Repair failure must preserve that stale delete was not attempted")
+                     (mcp-assert-true
+                      (mcp-json-null-p
+                       (gethash "stale-delete-succeeded-p" structured))
+                      "Repair failure must preserve that stale delete did not run")
+                     (mcp-assert-equal t
+                                       (gethash "replacement-create-attempted-p" structured)
+                                       "Repair failure must preserve replacement create attempt evidence")
+                     (mcp-assert-equal t
+                                       (gethash "replacement-create-succeeded-p" structured)
+                                       "Repair failure must preserve replacement create success evidence")
+                     (mcp-assert-equal t
+                                       (gethash "hidden-placement-attempted-p" structured)
+                                       "Repair failure must preserve hidden placement attempt evidence")
+                     (mcp-assert-true
+                      (mcp-json-null-p
+                       (gethash "hidden-placement-succeeded-p" structured))
+                      "Repair failure must keep hidden placement failure visible")
+                     (mcp-assert-true
+                      (mcp-json-null-p
+                       (gethash "repair-completed-p" structured))
+                      "Repair failure must not claim repair completion")
+                     (mcp-assert-equal *dmx-mcp-smoke-workspace-id*
+                                       (hyperdoc::dmx-import-object-id replacement-workspace)
+                                       "Repair failure must still preserve the recreated topic's workspace assignment"))))
                (mcp-assert-true
                 (null (mcp-journal-delete-topic-ids-of client))
                 "Repair failure must retain the stale companion when placement fails")
@@ -2751,92 +2751,92 @@
                 (null (mcp-journal-update-topic-ids-of client))
                 "Repair failure must not fall back to a broader journal direct-update path")))
         (hyperdoc::stop-dmx-mcp-server))
-    t))
+      t))
 
-(defun run-dmx-mcp-workspace-journal-companion-replacement-create-failure-smoke-test ()
-  (multiple-value-bind (server client)
-      (make-dmx-mcp-journal-companion-repair-server)
-    (let* ((port (mcp-test-port))
-           (url (format nil "http://127.0.0.1:~D/mcp" port))
-           (stale-topic-id 921685)
-           (stale-subject-key
-             "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-create-failure"))
-      (mcp-test-seed-journal-companion
-       client
-       stale-topic-id
-       stale-subject-key
-       :view-props (mcp-test-view-props :x 88 :y 92 :visibility t :pinned nil))
-      (mcp-clear-journal-repair-observations client)
-      (setf (mcp-fail-journal-replacement-create-p-of client) t)
-      (unwind-protect
-           (progn
-             (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
-             (sleep 0.2)
-             (let ((session-id
-                     (mcp-test-open-session
+  (defun run-dmx-mcp-workspace-journal-companion-replacement-create-failure-smoke-test ()
+    (multiple-value-bind (server client)
+        (make-dmx-mcp-journal-companion-repair-server)
+      (let* ((port (mcp-test-port))
+             (url (format nil "http://127.0.0.1:~D/mcp" port))
+             (stale-topic-id 921685)
+             (stale-subject-key
+              "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-create-failure"))
+        (mcp-test-seed-journal-companion
+         client
+         stale-topic-id
+         stale-subject-key
+         :view-props (mcp-test-view-props :x 88 :y 92 :visibility t :pinned nil))
+        (mcp-clear-journal-repair-observations client)
+        (setf (mcp-fail-journal-replacement-create-p-of client) t)
+        (unwind-protect
+             (progn
+               (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
+               (sleep 0.2)
+               (let ((session-id
+                      (mcp-test-open-session
+                       url
+                       :id 553
+                       :client-name "hyperdoc-journal-companion-repair-create-failure")))
+                 (multiple-value-bind (failure-body failure-status _)
+                     (mcp-test-call-tool
                       url
-                      :id 553
-                      :client-name "hyperdoc-journal-companion-repair-create-failure")))
-               (multiple-value-bind (failure-body failure-status _)
-                   (mcp-test-call-tool
-                    url
-                    session-id
-                    554
-                    "repair_workspace_journal_companion"
-                    (mcp-test-json-object
-                     "journalTopicId" stale-topic-id
-                     "workspaceTopicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
-                     "workspaceId" *dmx-mcp-smoke-workspace-id*
-                     "dryRun" nil))
-                 (declare (ignore _))
-                 (mcp-assert-equal 200 failure-status
-                                   "Journal companion replacement-create failure status")
-                 (let* ((tool-result (gethash "result" failure-body))
-                        (structured (gethash "structuredContent" tool-result)))
-                   (mcp-assert-true
-                    (gethash "isError" tool-result)
-                    "Replacement-create failure must stay a typed repair error")
-                   (mcp-assert-equal "failed"
-                                     (gethash "repair-status" structured)
-                                     "Replacement-create failure must preserve FAILED status")
-                   (mcp-assert-equal "create-replacement-and-retain-stale"
-                                     (gethash "repair-strategy" structured)
-                                     "Replacement-create failure must preserve the create-and-retain-stale strategy")
-                   (mcp-assert-equal "create-replacement"
-                                     (gethash "repair-step" structured)
-                                     "Replacement-create failure must stop at create-replacement")
-                   (mcp-assert-equal stale-topic-id
-                                     (gethash "stale-topic-id" structured)
-                                     "Replacement-create failure must preserve the stale companion id")
-                   (mcp-assert-equal stale-topic-id
-                                     (gethash "current-topic-id" structured)
-                                     "Replacement-create failure must keep current identity on the stale companion")
-                   (mcp-assert-equal t
-                                     (gethash "stale-topic-retained-p" structured)
-                                     "Replacement-create failure must preserve stale-retained truth")
-                   (mcp-assert-true
-                    (mcp-json-null-p
-                     (gethash "stale-topic-superseded-p" structured))
-                    "Replacement-create failure must not claim the stale topic was already superseded")
-                   (mcp-assert-true
-                    (mcp-json-null-p
-                     (gethash "replacement-topic-id" structured))
-                    "Replacement-create failure must not fabricate a replacement id")
-                   (mcp-assert-true
-                    (mcp-json-null-p
-                     (gethash "stale-delete-attempted-p" structured))
-                    "Replacement-create failure must not attempt stale delete")
-                   (mcp-assert-equal t
-                                     (gethash "replacement-create-attempted-p" structured)
-                                     "Replacement-create failure must record the create attempt")
-                   (mcp-assert-true
-                    (mcp-json-null-p
-                     (gethash "replacement-create-succeeded-p" structured))
-                    "Replacement-create failure must preserve create failure truth")
-                   (mcp-assert-true
-                    (mcp-json-null-p
-                     (gethash "hidden-placement-attempted-p" structured))
-                    "Replacement-create failure must not attempt hidden placement"))))
+                      session-id
+                      554
+                      "repair_workspace_journal_companion"
+                      (mcp-test-json-object
+                       "journalTopicId" stale-topic-id
+                       "workspaceTopicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                       "workspaceId" *dmx-mcp-smoke-workspace-id*
+                       "dryRun" nil))
+                   (declare (ignore _))
+                   (mcp-assert-equal 200 failure-status
+                                     "Journal companion replacement-create failure status")
+                   (let* ((tool-result (gethash "result" failure-body))
+                          (structured (gethash "structuredContent" tool-result)))
+                     (mcp-assert-true
+                      (gethash "isError" tool-result)
+                      "Replacement-create failure must stay a typed repair error")
+                     (mcp-assert-equal "failed"
+                                       (gethash "repair-status" structured)
+                                       "Replacement-create failure must preserve FAILED status")
+                     (mcp-assert-equal "create-replacement-and-retain-stale"
+                                       (gethash "repair-strategy" structured)
+                                       "Replacement-create failure must preserve the create-and-retain-stale strategy")
+                     (mcp-assert-equal "create-replacement"
+                                       (gethash "repair-step" structured)
+                                       "Replacement-create failure must stop at create-replacement")
+                     (mcp-assert-equal stale-topic-id
+                                       (gethash "stale-topic-id" structured)
+                                       "Replacement-create failure must preserve the stale companion id")
+                     (mcp-assert-equal stale-topic-id
+                                       (gethash "current-topic-id" structured)
+                                       "Replacement-create failure must keep current identity on the stale companion")
+                     (mcp-assert-equal t
+                                       (gethash "stale-topic-retained-p" structured)
+                                       "Replacement-create failure must preserve stale-retained truth")
+                     (mcp-assert-true
+                      (mcp-json-null-p
+                       (gethash "stale-topic-superseded-p" structured))
+                      "Replacement-create failure must not claim the stale topic was already superseded")
+                     (mcp-assert-true
+                      (mcp-json-null-p
+                       (gethash "replacement-topic-id" structured))
+                      "Replacement-create failure must not fabricate a replacement id")
+                     (mcp-assert-true
+                      (mcp-json-null-p
+                       (gethash "stale-delete-attempted-p" structured))
+                      "Replacement-create failure must not attempt stale delete")
+                     (mcp-assert-equal t
+                                       (gethash "replacement-create-attempted-p" structured)
+                                       "Replacement-create failure must record the create attempt")
+                     (mcp-assert-true
+                      (mcp-json-null-p
+                       (gethash "replacement-create-succeeded-p" structured))
+                      "Replacement-create failure must preserve create failure truth")
+                     (mcp-assert-true
+                      (mcp-json-null-p
+                       (gethash "hidden-placement-attempted-p" structured))
+                      "Replacement-create failure must not attempt hidden placement"))))
                (mcp-assert-true
                 (null (mcp-journal-delete-topic-ids-of client))
                 "Replacement-create failure must not delete the stale companion")
@@ -2846,7 +2846,7 @@
                (mcp-assert-true
                 (hyperdoc::dmx-import-read-topic client stale-topic-id)
                 "Replacement-create failure must leave the stale companion readable"))))
-        (hyperdoc::stop-dmx-mcp-server))
+      (hyperdoc::stop-dmx-mcp-server))
     t))
 
 (defun run-dmx-mcp-workspace-journal-companion-repair-missing-auth-config-smoke-test ()
@@ -2857,7 +2857,7 @@
            (url (format nil "http://127.0.0.1:~D/mcp" port))
            (stale-topic-id 921684)
            (stale-subject-key
-             "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-missing-auth"))
+            "hyperdoc:mcp/workspace-annotation/mcp-journal-companion-missing-auth"))
       (mcp-test-seed-journal-companion
        client
        stale-topic-id
@@ -2869,10 +2869,10 @@
              (hyperdoc::serve-dmx-mcp-server :port port :address "127.0.0.1" :server server)
              (sleep 0.2)
              (let ((session-id
-                     (mcp-test-open-session
-                      url
-                      :id 561
-                      :client-name "hyperdoc-journal-companion-repair-missing-auth")))
+                    (mcp-test-open-session
+                     url
+                     :id 561
+                     :client-name "hyperdoc-journal-companion-repair-missing-auth")))
                (multiple-value-bind (blocked-body blocked-status _)
                    (mcp-test-call-tool
                     url
@@ -2935,16 +2935,16 @@
                     (search "HYPERDOC_DMX_IMPORT_AUTH_HEADER"
                             (or (gethash "repair-failure-message" structured) ""))
                     "Blocked repair must keep the missing server-side auth evidence visible"))))
-               (mcp-assert-true
-                (null (mcp-journal-delete-topic-ids-of client))
-                "Blocked repair must not delete the stale companion")
-               (mcp-assert-true
-                (null (mcp-journal-create-observations-of client))
-                "Blocked repair must not create a replacement companion")
-               (mcp-assert-true
-                (null (mcp-journal-placement-observations-of client))
-                "Blocked repair must not attempt hidden placement")))
-        (hyperdoc::stop-dmx-mcp-server))
+             (mcp-assert-true
+              (null (mcp-journal-delete-topic-ids-of client))
+              "Blocked repair must not delete the stale companion")
+             (mcp-assert-true
+              (null (mcp-journal-create-observations-of client))
+              "Blocked repair must not create a replacement companion")
+             (mcp-assert-true
+              (null (mcp-journal-placement-observations-of client))
+              "Blocked repair must not attempt hidden placement")))
+      (hyperdoc::stop-dmx-mcp-server))
     t))
 
 (defun run-dmx-mcp-workspace-annotation-continuation-smoke-test ()
@@ -2977,7 +2977,7 @@
                         (structured (gethash "structuredContent" tool-result))
                         (plan (gethash "plan" structured))
                         (saved-annotation
-                          (gethash "savedAnnotationObject" structured)))
+                         (gethash "savedAnnotationObject" structured)))
                    (mcp-assert-true
                     (null (gethash "isError" tool-result))
                     "continue_workspace_annotation dry-run must not be flagged as error")
@@ -3010,9 +3010,9 @@
                         (structured (gethash "structuredContent" tool-result))
                         (annotation (gethash "annotation" structured))
                         (saved-carrier-topic
-                          (gethash "savedCarrierTopic" structured))
+                         (gethash "savedCarrierTopic" structured))
                         (journal-topic
-                          (gethash "journalCompanionTopic" structured)))
+                         (gethash "journalCompanionTopic" structured)))
                    (mcp-assert-true
                     (null (gethash "isError" tool-result))
                     "continue_workspace_annotation live must not be flagged as error")
@@ -3066,13 +3066,13 @@
                  (let* ((tool-result (gethash "result" blocked-body))
                         (structured (gethash "structuredContent" tool-result))
                         (saved-annotation
-                          (gethash "savedAnnotationObject" structured))
+                         (gethash "savedAnnotationObject" structured))
                         (saved-carrier-topic
-                          (gethash "savedCarrierTopic" structured))
+                         (gethash "savedCarrierTopic" structured))
                         (journal-topic
-                          (gethash "journalCompanionTopic" structured))
+                         (gethash "journalCompanionTopic" structured))
                         (assignment-auth-context
-                          (gethash "assignmentAuthContext" structured)))
+                         (gethash "assignmentAuthContext" structured)))
                    (mcp-assert-true
                     (null (gethash "isError" tool-result))
                     "continue_workspace_annotation auth-blocked reports must stay in structured content")
@@ -3241,88 +3241,88 @@
                         (setf primary-title (gethash "title" topic-json)))
                        ((string= resource-uri "dmx://topic/921464")
                         (setf secondary-title (gethash "title" topic-json))))))
-               (multiple-value-bind (dry-run-body dry-run-http-status _)
-                   (mcp-test-call url
-                                  (mcp-test-json-object
-                                   "jsonrpc" "2.0"
-                                   "id" 105
-                                   "method" "tools/call"
-                                   "params"
-                                   (mcp-test-json-object
-                                    "name" "validated_dmx_write_dry_run"
-                                    "arguments"
+                 (multiple-value-bind (dry-run-body dry-run-http-status _)
+                     (mcp-test-call url
                                     (mcp-test-json-object
-                                     "writeKind" "topicmap_context_add"
-                                     "topicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
-                                     "topicId" *dmx-mcp-smoke-primary-topic-id*
-                                     "viewProps"
-                                     (mcp-test-view-props :x 333 :y 444))))
-                                  :session-id session-id)
-                 (declare (ignore _))
-                 (mcp-assert-equal 200 dry-run-http-status "live validated_dmx_write_dry_run status")
-                 (let* ((tool-result (gethash "result" dry-run-body))
-                        (structured (gethash "structuredContent" tool-result)))
-                   (mcp-assert-true
-                    (null (gethash "isError" tool-result))
-                    "live canonical dry-run must not be flagged as error")
-                   (mcp-assert-equal 333
-                                     (gethash "dmx.topicmaps.x"
-                                              (gethash "normalizedPayload" structured))
-                                     "live dry-run normalized x")
-                   (mcp-assert-equal "canonical"
-                                     (gethash "validationStatus" structured)
-                                     "live dry-run validation status")
-                   (setf dry-run-status
-                         (gethash "validationStatus" structured))))
-               (multiple-value-bind (invalid-body invalid-http-status _)
-                   (mcp-test-call url
-                                  (mcp-test-json-object
-                                   "jsonrpc" "2.0"
-                                   "id" 106
-                                   "method" "tools/call"
-                                   "params"
-                                   (mcp-test-json-object
-                                    "name" "validated_dmx_write_dry_run"
-                                    "arguments"
-                                    (mcp-test-json-object
-                                     "writeKind" "topicmap_context_add"
-                                     "topicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
-                                     "topicId" *dmx-mcp-smoke-primary-topic-id*
-                                     "viewProps"
+                                     "jsonrpc" "2.0"
+                                     "id" 105
+                                     "method" "tools/call"
+                                     "params"
                                      (mcp-test-json-object
-                                      "x" 1
-                                      "y" 2
-                                      "visibility" t
-                                      "pinned" nil))))
-                                  :session-id session-id)
-                 (declare (ignore _))
-                 (mcp-assert-equal 200 invalid-http-status "live invalid dry-run status")
-                 (let* ((tool-result (gethash "result" invalid-body))
-                        (structured (gethash "structuredContent" tool-result)))
-                   (mcp-assert-true (gethash "isError" tool-result)
-                                    "live short-key dry-run must be flagged as error")
-                   (mcp-assert-equal "validation_error"
-                                     (gethash "status" structured)
-                                     "live short-key rejection status")
-                   (mcp-assert-true
-                    (member "x"
-                            (hyperdoc::json-array-elements
-                             (gethash "forbiddenShortKeys" structured))
-                            :test #'string=)
-                    "live short-key rejection must name x")
-                   (setf invalid-status-label
-                         (gethash "status" structured)
-                         invalid-forbidden-keys
-                         (hyperdoc::json-array-elements
-                          (gethash "forbiddenShortKeys" structured)))))))
-      (hyperdoc::stop-dmx-mcp-server)))
-  (format t
-          "~&DMX MCP live read smoke passed. workspace-topicmap=~D note-count=~D topic907120=~S topic921464=~S dry-run-status=~A invalid-status=~A forbidden-short-keys=~S~%"
-          *dmx-mcp-smoke-workspace-topicmap-id*
-          workspace-note-count
-          primary-title
-          secondary-title
-          dry-run-status
-          invalid-status-label
-          invalid-forbidden-keys)
-  t)))
+                                      "name" "validated_dmx_write_dry_run"
+                                      "arguments"
+                                      (mcp-test-json-object
+                                       "writeKind" "topicmap_context_add"
+                                       "topicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                                       "topicId" *dmx-mcp-smoke-primary-topic-id*
+                                       "viewProps"
+                                       (mcp-test-view-props :x 333 :y 444))))
+                                    :session-id session-id)
+                   (declare (ignore _))
+                   (mcp-assert-equal 200 dry-run-http-status "live validated_dmx_write_dry_run status")
+                   (let* ((tool-result (gethash "result" dry-run-body))
+                          (structured (gethash "structuredContent" tool-result)))
+                     (mcp-assert-true
+                      (null (gethash "isError" tool-result))
+                      "live canonical dry-run must not be flagged as error")
+                     (mcp-assert-equal 333
+                                       (gethash "dmx.topicmaps.x"
+                                                (gethash "normalizedPayload" structured))
+                                       "live dry-run normalized x")
+                     (mcp-assert-equal "canonical"
+                                       (gethash "validationStatus" structured)
+                                       "live dry-run validation status")
+                     (setf dry-run-status
+                           (gethash "validationStatus" structured))))
+                 (multiple-value-bind (invalid-body invalid-http-status _)
+                     (mcp-test-call url
+                                    (mcp-test-json-object
+                                     "jsonrpc" "2.0"
+                                     "id" 106
+                                     "method" "tools/call"
+                                     "params"
+                                     (mcp-test-json-object
+                                      "name" "validated_dmx_write_dry_run"
+                                      "arguments"
+                                      (mcp-test-json-object
+                                       "writeKind" "topicmap_context_add"
+                                       "topicmapId" *dmx-mcp-smoke-workspace-topicmap-id*
+                                       "topicId" *dmx-mcp-smoke-primary-topic-id*
+                                       "viewProps"
+                                       (mcp-test-json-object
+                                        "x" 1
+                                        "y" 2
+                                        "visibility" t
+                                        "pinned" nil))))
+                                    :session-id session-id)
+                   (declare (ignore _))
+                   (mcp-assert-equal 200 invalid-http-status "live invalid dry-run status")
+                   (let* ((tool-result (gethash "result" invalid-body))
+                          (structured (gethash "structuredContent" tool-result)))
+                     (mcp-assert-true (gethash "isError" tool-result)
+                                      "live short-key dry-run must be flagged as error")
+                     (mcp-assert-equal "validation_error"
+                                       (gethash "status" structured)
+                                       "live short-key rejection status")
+                     (mcp-assert-true
+                      (member "x"
+                              (hyperdoc::json-array-elements
+                               (gethash "forbiddenShortKeys" structured))
+                              :test #'string=)
+                      "live short-key rejection must name x")
+                     (setf invalid-status-label
+                           (gethash "status" structured)
+                           invalid-forbidden-keys
+                           (hyperdoc::json-array-elements
+                            (gethash "forbiddenShortKeys" structured)))))))
+             (hyperdoc::stop-dmx-mcp-server)))
+      (format t
+              "~&DMX MCP live read smoke passed. workspace-topicmap=~D note-count=~D topic907120=~S topic921464=~S dry-run-status=~A invalid-status=~A forbidden-short-keys=~S~%"
+              *dmx-mcp-smoke-workspace-topicmap-id*
+              workspace-note-count
+              primary-title
+              secondary-title
+              dry-run-status
+              invalid-status-label
+              invalid-forbidden-keys)
+      t)))

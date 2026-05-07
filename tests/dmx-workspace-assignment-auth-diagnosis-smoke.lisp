@@ -20,9 +20,9 @@
 
 (defun run-dmx-workspace-assignment-auth-py4dmx-comparison-smoke-test ()
   (let* ((hyperdoc-shape
-           (hyperdoc::hyperdoc-workspace-assignment-request-shape))
+          (hyperdoc::hyperdoc-workspace-assignment-request-shape))
          (py4dmx-shape
-           (hyperdoc::py4dmx-workspace-assignment-request-shape))
+          (hyperdoc::py4dmx-workspace-assignment-request-shape))
          (py4dmx-write (getf py4dmx-shape :write)))
     (dmx-assignment-auth-diagnosis-assert-true
      (hyperdoc::dmx-workspace-assignment-auth-shape-match-p
@@ -53,7 +53,7 @@
 
 (defun run-dmx-platform-workspace-assignment-route-inventory-smoke-test ()
   (let* ((inventory
-           (hyperdoc::dmx-platform-workspace-assignment-route-inventory))
+          (hyperdoc::dmx-platform-workspace-assignment-route-inventory))
          (route (getf inventory :workspace-assignment-route))
          (checks (getf inventory :assignment-checks)))
     (dmx-assignment-auth-diagnosis-assert-equal
@@ -80,7 +80,7 @@
 
 (defun run-dmx-platform-workspace-assignment-permission-semantics-smoke-test ()
   (let* ((inventory
-           (hyperdoc::dmx-platform-workspace-assignment-route-inventory))
+          (hyperdoc::dmx-platform-workspace-assignment-route-inventory))
          (unassigned-policy (getf inventory :unassigned-object-policy))
          (mapping (getf inventory :permission-status-mapping))
          (probe-routes (getf inventory :read-only-probe-routes)))
@@ -106,10 +106,10 @@
 
 (defun run-dmx-workspace-assignment-936040-auth-diagnosis-smoke-test ()
   (let* ((terminal-card
-           (hyperdoc::read-dmx-workspace-assignment-936040-terminal-card))
+          (hyperdoc::read-dmx-workspace-assignment-936040-terminal-card))
          (diagnosis
-           (hyperdoc::make-dmx-workspace-assignment-auth-diagnosis
-            :terminal-card terminal-card))
+          (hyperdoc::make-dmx-workspace-assignment-auth-diagnosis
+           :terminal-card terminal-card))
          (classification (getf diagnosis :classification)))
     (dmx-assignment-auth-diagnosis-assert-equal
      :workspace-assignment-auth-diagnosis
@@ -155,7 +155,7 @@
 
 (defun run-dmx-workspace-assignment-936040-no-delete-regression-smoke-test ()
   (let ((diagnosis
-          (hyperdoc::make-dmx-workspace-assignment-auth-diagnosis)))
+         (hyperdoc::make-dmx-workspace-assignment-auth-diagnosis)))
     (dmx-assignment-auth-diagnosis-assert-equal
      :keep-topic-936040
      (getf diagnosis :recommendation)
@@ -177,9 +177,9 @@
 
 (defun run-dmx-workspace-assignment-auth-diagnosis-bounds-smoke-test ()
   (let* ((diagnosis
-           (hyperdoc::make-dmx-workspace-assignment-auth-diagnosis))
+          (hyperdoc::make-dmx-workspace-assignment-auth-diagnosis))
          (printed
-           (dmx-assignment-auth-diagnosis-text diagnosis)))
+          (dmx-assignment-auth-diagnosis-text diagnosis)))
     (dolist (forbidden '("abc123"
                          "not-real"
                          "JSESSIONID=abc123"
@@ -206,15 +206,15 @@
 
 (defun run-dmx-workspace-assignment-auth-diagnosis-docs-smoke-test ()
   (let ((doc
-          (dmx-assignment-auth-diagnosis-repo-text
-           "hyperdoc/DMX workspace assignment 401 diagnosis.html"))
+         (dmx-assignment-auth-diagnosis-repo-text
+          "hyperdoc/DMX workspace assignment 401 diagnosis.html"))
         (scxml-path
-          (asdf:system-relative-pathname
-           :hyperdoc
-           "hyperdoc/dmx-workspace-assignment-401-diagnosis.scxml"))
+         (asdf:system-relative-pathname
+          :hyperdoc
+          "hyperdoc/dmx-workspace-assignment-401-diagnosis.scxml"))
         (scxml
-          (dmx-assignment-auth-diagnosis-repo-text
-           "hyperdoc/dmx-workspace-assignment-401-diagnosis.scxml")))
+         (dmx-assignment-auth-diagnosis-repo-text
+          "hyperdoc/dmx-workspace-assignment-401-diagnosis.scxml")))
     (dolist (needle '("REQUEST-SHAPE-MATCHES-PY4DMX-BUT-PERMISSION-DENIED"
                       "run-live-dmx-workspace-assignment-936040-once"
                       "Delete/recreate is not the default repair path"

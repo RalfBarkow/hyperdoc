@@ -19,9 +19,9 @@
 
 (defun run-reproducible-devenv-as-knowledge-artifact-chunk-parse-smoke-test ()
   (let* ((parsed
-           (hyperdoc::parse-reproducible-devenv-as-knowledge-artifact-chunks))
+          (hyperdoc::parse-reproducible-devenv-as-knowledge-artifact-chunks))
          (pipeline
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-page-pipeline))
+          (hyperdoc::reproducible-devenv-as-knowledge-artifact-page-pipeline))
          (source (getf parsed :source-fedwiki-page))
          (definition (getf parsed :topic-definition))
          (umbrella (getf parsed :umbrella-topic))
@@ -105,19 +105,19 @@
 
 (defun run-reproducible-devenv-as-knowledge-artifact-render-smoke-test ()
   (let ((expected-page
-          (uiop:read-file-string
-           (reproducible-devenv-relative-path
-            "hyperdoc/Reproducible DevEnv as Knowledge Artifact.html")))
+         (uiop:read-file-string
+          (reproducible-devenv-relative-path
+           "hyperdoc/Reproducible DevEnv as Knowledge Artifact.html")))
         (expected-topic-snippet
-          (uiop:read-file-string
-           (reproducible-devenv-relative-path
-            "assets/reproducible-devenv-as-knowledge-artifact-topic.lisp")))
+         (uiop:read-file-string
+          (reproducible-devenv-relative-path
+           "assets/reproducible-devenv-as-knowledge-artifact-topic.lisp")))
         (source
-          (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
+         (hyperdoc::reproducible-devenv-as-knowledge-artifact-localhost-fedwiki-source-chunk))
         (rendered-page
-          (hyperdoc::render-reproducible-devenv-as-knowledge-artifact-page))
+         (hyperdoc::render-reproducible-devenv-as-knowledge-artifact-page))
         (rendered-topic-snippet
-          (hyperdoc::render-reproducible-devenv-as-knowledge-artifact-topic-factory-snippet)))
+         (hyperdoc::render-reproducible-devenv-as-knowledge-artifact-topic-factory-snippet)))
     (assert-true
      (search "<tt>story-item</tt> provenance" rendered-page)
      "Rendered page wording must state whole-item provenance for the individual subtopics")
@@ -147,11 +147,11 @@
 
 (defun run-reproducible-devenv-as-knowledge-artifact-generated-output-idempotence-smoke-test ()
   (let ((page-path
-          (reproducible-devenv-relative-path
-           "hyperdoc/Reproducible DevEnv as Knowledge Artifact.html"))
+         (reproducible-devenv-relative-path
+          "hyperdoc/Reproducible DevEnv as Knowledge Artifact.html"))
         (snippet-path
-          (reproducible-devenv-relative-path
-           "assets/reproducible-devenv-as-knowledge-artifact-topic.lisp")))
+         (reproducible-devenv-relative-path
+          "assets/reproducible-devenv-as-knowledge-artifact-topic.lisp")))
     (hyperdoc::write-reproducible-devenv-as-knowledge-artifact-artifacts)
     (let ((first-page (uiop:read-file-string page-path))
           (first-snippet (uiop:read-file-string snippet-path)))
@@ -184,34 +184,34 @@
 
 (defun run-reproducible-devenv-as-knowledge-artifact-dmx-smoke-test ()
   (let* ((definition
-           (hyperdoc::reproducible-devenv-as-knowledge-artifact-topic-definition-chunk))
+          (hyperdoc::reproducible-devenv-as-knowledge-artifact-topic-definition-chunk))
          (client (make-instance 'hyperdoc::memory-dmx-import-client
                                 :next-topic-id 7100))
          (plan
-           (hyperdoc::plan-topic-factory-snippet-dmx-write
-            definition
-            :workspace-topicmap-id
-            *reproducible-devenv-topic-factory-snippet-dmx-workspace-topicmap-id*
-            :client client))
+          (hyperdoc::plan-topic-factory-snippet-dmx-write
+           definition
+           :workspace-topicmap-id
+           *reproducible-devenv-topic-factory-snippet-dmx-workspace-topicmap-id*
+           :client client))
          (payload (hyperdoc::topic-factory-snippet-dmx-write-plan-payload plan))
          (children (getf payload :children))
          (provenance-json
-           (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
-                    children))
+          (gethash hyperdoc::*dmx-topic-factory-snippet-provenance-type-uri*
+                   children))
          (provenance-object (shasht:read-json provenance-json))
          (story-item-indexes
-           (sort (coerce (gethash "source_story_item_indexes" provenance-object)
-                         'list)
-                 #'<))
+          (sort (coerce (gethash "source_story_item_indexes" provenance-object)
+                        'list)
+                #'<))
          (output
-           (with-output-to-string (stream)
-             (hyperdoc::execute-topic-factory-snippet-dmx-write
-              definition
-              :workspace-topicmap-id
-              *reproducible-devenv-topic-factory-snippet-dmx-workspace-topicmap-id*
-              :client client
-              :dry-run t
-              :stream stream))))
+          (with-output-to-string (stream)
+            (hyperdoc::execute-topic-factory-snippet-dmx-write
+             definition
+             :workspace-topicmap-id
+             *reproducible-devenv-topic-factory-snippet-dmx-workspace-topicmap-id*
+             :client client
+             :dry-run t
+             :stream stream))))
     (assert-equal :create
                   (hyperdoc::topic-factory-snippet-dmx-write-plan-topic-action plan)
                   "Fresh second-page snippet plan must start with CREATE")

@@ -24,7 +24,7 @@
                                  (find-symbol "*SERVER-PARAMETERS*" pkg))))
     (if server-parameters
         (progv (list server-parameters)
-               (list (list "700px" development))
+            (list (list "700px" development))
           (funcall thunk))
         (funcall thunk))))
 
@@ -42,23 +42,23 @@
                 slug))
          (directory (uiop:pathname-directory-pathname path))
          (page-json
-           (make-story-items-smoke-json-table
-            "title" "Graphviz edit fixture"
-            "story" (list (make-story-items-smoke-json-table
-                           "id" "fixture-graphviz"
-                           "type" "graphviz"
-                           "text" "digraph { a -> b }"))
-            "journal" (list (make-story-items-smoke-json-table
-                             "type" "create"
-                             "date" 1000)
-                            (make-story-items-smoke-json-table
-                             "type" "add"
-                             "date" 1001
-                             "id" "fixture-graphviz"
-                             "item" (make-story-items-smoke-json-table
-                                     "id" "fixture-graphviz"
-                                     "type" "graphviz"
-                                     "text" "digraph { a -> b }")))))
+          (make-story-items-smoke-json-table
+           "title" "Graphviz edit fixture"
+           "story" (list (make-story-items-smoke-json-table
+                          "id" "fixture-graphviz"
+                          "type" "graphviz"
+                          "text" "digraph { a -> b }"))
+           "journal" (list (make-story-items-smoke-json-table
+                            "type" "create"
+                            "date" 1000)
+                           (make-story-items-smoke-json-table
+                            "type" "add"
+                            "date" 1001
+                            "id" "fixture-graphviz"
+                            "item" (make-story-items-smoke-json-table
+                                    "id" "fixture-graphviz"
+                                    "type" "graphviz"
+                                    "text" "digraph { a -> b }")))))
          (wiki (make-instance 'hyperbook/fedwiki::fedwiki
                               :id (format nil "fedwiki:~A" domain-name)))
          (page (hyperbook/fedwiki::make-fedwiki-page wiki slug "Graphviz edit fixture")))
@@ -99,7 +99,7 @@
     (with-output-to-string (stream)
       (let ((html-inspector-views::*html-stream* stream)
             (html-inspector-views::*view-accumulator*
-              (make-instance 'html-inspector-views::view-accumulator)))
+             (make-instance 'html-inspector-views::view-accumulator)))
         (hyperbook/fedwiki::render-story-item type item page)))))
 
 (defun render-story-item-to-string-and-assets (type text)
@@ -118,7 +118,7 @@
     (with-output-to-string (stream)
       (let ((html-inspector-views::*html-stream* stream)
             (html-inspector-views::*view-accumulator*
-              (make-instance 'html-inspector-views::view-accumulator)))
+             (make-instance 'html-inspector-views::view-accumulator)))
         (hyperbook/fedwiki::render-story-item type item page)))))
 
 (defun render-html-fragment-to-string-and-assets (thunk)
@@ -139,7 +139,7 @@
 (defun asset-urls-of-type (assets type)
   (loop for asset in assets
         when (eq (car asset) type)
-          collect (cdr asset)))
+        collect (cdr asset)))
 
 (defun asset-script-present-p (assets fragment)
   (loop for asset in assets
@@ -237,31 +237,31 @@
             (original-dot "digraph { a -> b }")
             (updated-dot "digraph { alpha -> beta; beta -> gamma }")
             (page-json
-              (make-story-items-smoke-json-table
-               "title" "Graphviz edit persistence fixture"
-               "story" (list (make-story-items-smoke-json-table
-                              "id" "fixture-graphviz"
-                              "type" "graphviz"
-                              "text" original-dot))
-               "journal" (list (make-story-items-smoke-json-table
-                                "type" "create"
-                                "date" 1000)
-                               (make-story-items-smoke-json-table
-                                "type" "add"
-                                "date" 1001
-                                "id" "fixture-graphviz"
-                                "item" (make-story-items-smoke-json-table
-                                        "id" "fixture-graphviz"
-                                        "type" "graphviz"
-                                        "text" original-dot))))))
+             (make-story-items-smoke-json-table
+              "title" "Graphviz edit persistence fixture"
+              "story" (list (make-story-items-smoke-json-table
+                             "id" "fixture-graphviz"
+                             "type" "graphviz"
+                             "text" original-dot))
+              "journal" (list (make-story-items-smoke-json-table
+                               "type" "create"
+                               "date" 1000)
+                              (make-story-items-smoke-json-table
+                               "type" "add"
+                               "date" 1001
+                               "id" "fixture-graphviz"
+                               "item" (make-story-items-smoke-json-table
+                                       "id" "fixture-graphviz"
+                                       "type" "graphviz"
+                                       "text" original-dot))))))
        (ensure-directories-exist path)
        (hyperbook/fedwiki::write-localhost-fedwiki-page-json-file path page-json)
        (let* ((updated
-                (hyperbook/fedwiki::persist-localhost-fedwiki-story-item-text-edit-at-path
-                 path
-                 "fixture-graphviz"
-                 updated-dot
-                 :item-type :graphviz))
+               (hyperbook/fedwiki::persist-localhost-fedwiki-story-item-text-edit-at-path
+                path
+                "fixture-graphviz"
+                updated-dot
+                :item-type :graphviz))
               (story-item (elt (gethash "story" updated) 0))
               (journal (hyperbook/fedwiki::json-array-elements
                         (gethash "journal" updated)))
@@ -297,13 +297,13 @@
    (lambda (page path)
      (declare (ignore path))
      (let ((html
-             (call-with-story-items-smoke-development-mode
-              t
-              (lambda ()
-                (render-story-item-to-string-with-page
-                 page
-                 :graphviz
-                 "digraph { a -> b }")))))
+            (call-with-story-items-smoke-development-mode
+             t
+             (lambda ()
+               (render-story-item-to-string-with-page
+                page
+                :graphviz
+                "digraph { a -> b }")))))
        (assert-true (search "hyperbook-fedwiki-graphviz-edit-button" html)
                     "Graphviz edit controls must render in development mode.")
        (assert-true (search "hyperbook-fedwiki-graphviz-editor" html)
@@ -315,13 +315,13 @@
   (call-with-localhost-story-items-page-fixture
    (lambda (page path)
      (let ((html
-             (call-with-story-items-smoke-development-mode
-              nil
-              (lambda ()
-                (render-story-item-to-string-with-page
-                 page
-                 :graphviz
-                 "digraph { a -> b }")))))
+            (call-with-story-items-smoke-development-mode
+             nil
+             (lambda ()
+               (render-story-item-to-string-with-page
+                page
+                :graphviz
+                "digraph { a -> b }")))))
        (assert-true (search "data-inspector-graphviz=" html)
                     "Graphviz story items must still render in non-development mode.")
        (assert-true (not (search "hyperbook-fedwiki-graphviz-edit-button" html))
@@ -332,18 +332,18 @@
                     "Graphviz save controls must be absent outside development mode."))
      (let* ((before (hyperbook/fedwiki::read-localhost-fedwiki-page-json-file path))
             (error-signaled-p
-              (call-with-story-items-smoke-development-mode
-               nil
-               (lambda ()
-                 (handler-case
-                     (progn
-                       (hyperbook/fedwiki::persist-localhost-fedwiki-story-item-text-edit-at-path
-                        path
-                        "fixture-graphviz"
-                        "digraph { alpha -> beta }"
-                        :item-type :graphviz)
-                       nil)
-                   (error () t)))))
+             (call-with-story-items-smoke-development-mode
+              nil
+              (lambda ()
+                (handler-case
+                    (progn
+                      (hyperbook/fedwiki::persist-localhost-fedwiki-story-item-text-edit-at-path
+                       path
+                       "fixture-graphviz"
+                       "digraph { alpha -> beta }"
+                       :item-type :graphviz)
+                      nil)
+                  (error () t)))))
             (after (hyperbook/fedwiki::read-localhost-fedwiki-page-json-file path)))
        (assert-true error-signaled-p
                     "Graphviz text edit persistence must fail closed outside development mode.")
@@ -444,9 +444,9 @@ Published Dec 1, 2007.")
 
 (defun run-fedwiki-story-item-video-preferred-render-smoke-test ()
   (let ((html
-          (render-story-item-to-string
-           :video
-           "YOUTUBE UjPxDOEdsX8
+         (render-story-item-to-string
+          :video
+          "YOUTUBE UjPxDOEdsX8
 Published Dec 1, 2007.")))
     (assert-true (search "<iframe" html :test #'char-equal)
                  "Successful video rendering must use the preferred embedded player path.")
@@ -480,9 +480,9 @@ Published Dec 1, 2007.")
 
 (defun run-fedwiki-story-item-video-failure-render-smoke-test ()
   (let ((html
-          (render-story-item-to-string
-           :video
-           "VIMEO UjPxDOEdsX8
+         (render-story-item-to-string
+          :video
+          "VIMEO UjPxDOEdsX8
 Published Dec 1, 2007.")))
     (assert-true (search "Video adaptation failed." html :test #'char=)
                  "Malformed or unsupported video input must render an explicit failure block.")
@@ -591,9 +591,9 @@ HEIGHT giant")
 
 (defun run-fedwiki-story-item-frame-preferred-render-smoke-test ()
   (let ((html
-          (render-story-item-to-string
-           :frame
-           "https://example.org/embed/widget
+         (render-story-item-to-string
+          :frame
+          "https://example.org/embed/widget
 HEIGHT 420")))
     (assert-true (search "<iframe" html :test #'char-equal)
                  "Successful frame rendering must use the preferred iframe path.")
@@ -629,9 +629,9 @@ HEIGHT 420")
 
 (defun run-fedwiki-story-item-frame-failure-render-smoke-test ()
   (let ((html
-          (render-story-item-to-string
-           :frame
-           "<iframe src=\"https://example.org/embed/widget\" height=\"420\"></iframe>")))
+         (render-story-item-to-string
+          :frame
+          "<iframe src=\"https://example.org/embed/widget\" height=\"420\"></iframe>")))
     (assert-true (search "Frame adaptation failed." html :test #'char=)
                  "Unsupported raw <iframe ...> input must render an explicit frame failure block.")
     (assert-true (search "Raw &lt;iframe ...&gt; HTML is unsupported in this slice." html :test #'char=)
@@ -759,9 +759,9 @@ Fallback body")
 
 (defun run-fedwiki-story-item-audio-preferred-render-smoke-test ()
   (let ((html
-          (render-story-item-to-string
-           :audio
-           "https://example.org/audio.mp3
+         (render-story-item-to-string
+          :audio
+          "https://example.org/audio.mp3
 Episode notes for the direct media case.")))
     (assert-true (search "<audio" html :test #'char-equal)
                  "Direct-media audio rendering must use the preferred HTML5 audio path.")
@@ -778,9 +778,9 @@ Episode notes for the direct media case.")))
 
 (defun run-fedwiki-story-item-audio-fallback-only-render-smoke-test ()
   (let ((html
-          (render-story-item-to-string
-           :audio
-           "https://www.listennotes.com/e/p/4308ac34a98a4027b735398ea21d3582/
+         (render-story-item-to-string
+          :audio
+          "https://www.listennotes.com/e/p/4308ac34a98a4027b735398ea21d3582/
 Line one of the audio notes.
 Line two with [https://example.org link].")))
     (assert-true (not (search "<audio" html :test #'char-equal))
@@ -798,9 +798,9 @@ Line two with [https://example.org link].")))
 
 (defun run-fedwiki-story-item-audio-failure-render-smoke-test ()
   (let ((html
-          (render-story-item-to-string
-           :audio
-           "<audio src=\"https://example.org/audio.mp3\"></audio>")))
+         (render-story-item-to-string
+          :audio
+          "<audio src=\"https://example.org/audio.mp3\"></audio>")))
     (assert-true (search "Audio adaptation failed." html :test #'char=)
                  "Unsupported raw <audio ...> input must render an explicit audio failure block.")
     (assert-true (search "Raw &lt;audio ...&gt; HTML or HTML-contaminated audio lines are unsupported in this slice." html :test #'char=)

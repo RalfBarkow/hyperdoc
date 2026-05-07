@@ -37,13 +37,13 @@
 
 (defun assert-page-contains-all (page-source page-label needles)
   (let ((normalized-page-source
-          (normalize-whitespace-for-smoke page-source)))
+         (normalize-whitespace-for-smoke page-source)))
     (dolist (needle needles)
-    (assert-true
-     (search (normalize-whitespace-for-smoke needle)
-             normalized-page-source
-             :test #'char=)
-     (format nil "~A must contain ~S" page-label needle)))))
+      (assert-true
+       (search (normalize-whitespace-for-smoke needle)
+               normalized-page-source
+               :test #'char=)
+       (format nil "~A must contain ~S" page-label needle)))))
 
 (defun run-dmx-incident-documentation-pages-smoke-test ()
   (assert-page-contains-all
@@ -145,7 +145,7 @@
 
 (defun call-with-dmx-incident-collective-knowledge-source-fixture (thunk)
   (let* ((symbol
-           'hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline-spec)
+          'hyperdoc::the-life-cycle-of-collective-knowledge-page-pipeline-spec)
          (original (symbol-function symbol))
          (fixture-path (dmx-incident-collective-knowledge-fixture-page-path)))
     (assert-true
@@ -170,17 +170,17 @@
   (call-with-dmx-incident-collective-knowledge-source-fixture
    (lambda ()
      (let* ((healthy-plan
-              (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
+             (hyperdoc::reproducible-devenv-as-knowledge-artifact-promotion-plan))
             (summary
-              (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
-               healthy-plan))
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-summary
+              healthy-plan))
             (evidence
-              (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence
-               healthy-plan))
+             (hyperdoc::localhost-fedwiki-page-promotion-plan-dmx-dry-run-evidence
+              healthy-plan))
             (handover-summary
-              (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-summary))
+             (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-summary))
             (handover-evidence
-              (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-evidence)))
+             (hyperdoc::localhost-fedwiki-page-promotion-handover-dmx-write-evidence)))
        (assert-true (getf summary :available)
                     "Healthy promotion plan must keep DMX dry-run available")
        (assert-equal :canonical

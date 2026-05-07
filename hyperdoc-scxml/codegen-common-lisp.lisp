@@ -16,13 +16,13 @@
                     (string value)))
          (upcase (string-upcase input))
          (sanitized
-           (with-output-to-string (stream)
-             (loop for char across upcase
-                   do (if (or (alphanumericp char)
-                              (char= char #\-)
-                              (char= char #\_))
-                          (write-char char stream)
-                          (write-char #\- stream))))))
+          (with-output-to-string (stream)
+            (loop for char across upcase
+                  do (if (or (alphanumericp char)
+                             (char= char #\-)
+                             (char= char #\_))
+                         (write-char char stream)
+                         (write-char #\- stream))))))
     (if (or (%blank-or-empty-string-p sanitized)
             (digit-char-p (char sanitized 0)))
         (format nil "SCXML-~A" sanitized)
@@ -34,14 +34,14 @@
                     (string value)))
          (upcase (string-upcase input))
          (sanitized
-           (with-output-to-string (stream)
-             (loop for char across upcase
-                   do (if (or (alphanumericp char)
-                              (char= char #\-)
-                              (char= char #\_)
-                              (char= char #\/))
-                          (write-char char stream)
-                          (write-char #\- stream))))))
+          (with-output-to-string (stream)
+            (loop for char across upcase
+                  do (if (or (alphanumericp char)
+                             (char= char #\-)
+                             (char= char #\_)
+                             (char= char #\/))
+                         (write-char char stream)
+                         (write-char #\- stream))))))
     (if (or (%blank-or-empty-string-p sanitized)
             (digit-char-p (char sanitized 0)))
         (format nil "SCXML-~A" sanitized)
@@ -94,7 +94,7 @@
 (defun %final-state-id-list (chart)
   (loop for state in (scxml-chart-states-of chart)
         when (scxml-state-final-p-of state)
-          collect (scxml-state-id-of state)))
+        collect (scxml-state-id-of state)))
 
 (defun %log-action-message (action)
   (let ((label (getf (scxml-action-attributes-of action) :label))

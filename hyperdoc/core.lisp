@@ -38,8 +38,8 @@
 (defgeneric asdf-system-of (hd)
   (:method ((hd hyperdoc))
     (-> hd
-      asdf-system-name-of
-      asdf:find-system)))
+        asdf-system-name-of
+        asdf:find-system)))
 
 ;;
 ;; Page classes. text-class is still quite abstract, concrete
@@ -61,7 +61,7 @@
 ;;
 
 (defun make-hyperdoc (&key id title asdf-system-name subdirectory
-                           main-page-id tools data)
+                        main-page-id tools data)
   "Create a HyperDoc instance with unique identifier ID (a string) and TITLE
 for the text and code pages located in SUBDIRECTORY relative to the base
 directory for ASDF-SYSTEM-NAME. The main page for the HyperDoc is the
@@ -161,11 +161,11 @@ the macro DEFHYPERDOC."
 
 (defun code-file-title (cl-source-file)
   (->> cl-source-file
-    asdf:component-pathname
-    uiop:read-file-lines
-    first
-    (string-left-trim " ;")
-    (string-right-trim " ")))
+       asdf:component-pathname
+       uiop:read-file-lines
+       first
+       (string-left-trim " ;")
+       (string-right-trim " ")))
 
 
 ;;
@@ -186,4 +186,4 @@ the macro DEFHYPERDOC."
        (or (find-page hd (first path))
            (loop for (variable . title) in (data-of hd)
                  when (equal title (first path))
-                   return (symbol-value variable)))))
+                 return (symbol-value variable)))))

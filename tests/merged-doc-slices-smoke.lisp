@@ -189,9 +189,9 @@
          (rehearsal (hyperdoc::hyperdoc-upstream-main-into-hauptsache-merge-rehearsal))
          (raw-surface (hyperdoc::hyperdoc-upstream-main-into-hauptsache-extra-raw-conflict-surface))
          (proposal-surface
-           (hyperdoc::hyperdoc-upstream-main-into-hauptsache-conflict-resolution-proposal-surface))
+          (hyperdoc::hyperdoc-upstream-main-into-hauptsache-conflict-resolution-proposal-surface))
          (recipe-surface
-           (hyperdoc::hyperdoc-upstream-main-into-hauptsache-manual-merge-execution-recipe-surface))
+          (hyperdoc::hyperdoc-upstream-main-into-hauptsache-manual-merge-execution-recipe-surface))
          (frontier (hyperdoc::hyperdoc-upstream-main-into-hauptsache-current-manual-merge-frontier))
          (remaining-paths (mapcar #'hyperdoc::path-of
                                   (hyperdoc::remaining-historical-results-of frontier)))
@@ -202,27 +202,27 @@
          (proposal-gap-paths (hyperdoc::proposal-gap-paths-of frontier))
          (recipe-gap-paths (hyperdoc::recipe-gap-paths-of frontier))
          (rendering-proposal
-           (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-rendering-resolution-proposal))
+          (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-rendering-resolution-proposal))
          (fedwiki-proposal
-           (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-fedwiki-fedwiki-resolution-proposal))
+          (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-fedwiki-fedwiki-resolution-proposal))
          (list-editions-proposal
-           (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-wikipedia-list-editions-resolution-proposal))
+          (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-wikipedia-list-editions-resolution-proposal))
          (package-recipe
-           (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-execution-recipe))
+          (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-package-execution-recipe))
          (rendering-recipe
-           (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-rendering-execution-recipe))
+          (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-explorer-rendering-execution-recipe))
          (list-editions-recipe
-           (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-wikipedia-list-editions-execution-recipe))
+          (hyperdoc::hyperdoc-upstream-main-into-hauptsache-hyperbook-wikipedia-list-editions-execution-recipe))
          (rendering-extra
-           (find "hyperbook-explorer/rendering.lisp"
-                 (hyperdoc::promoted-extra-conflicts-of frontier)
-                 :key #'hyperdoc::path-of
-                 :test #'string=))
+          (find "hyperbook-explorer/rendering.lisp"
+                (hyperdoc::promoted-extra-conflicts-of frontier)
+                :key #'hyperdoc::path-of
+                :test #'string=))
          (fedwiki-extra
-           (find "hyperbook-fedwiki/fedwiki.lisp"
-                 (hyperdoc::promoted-extra-conflicts-of frontier)
-                 :key #'hyperdoc::path-of
-                 :test #'string=)))
+          (find "hyperbook-fedwiki/fedwiki.lisp"
+                (hyperdoc::promoted-extra-conflicts-of frontier)
+                :key #'hyperdoc::path-of
+                :test #'string=)))
     (assert-true (typep frontier 'hyperdoc::git-manual-merge-frontier-surface)
                  "Current frontier entrypoint should return a git-manual-merge-frontier-surface")
     (assert-true (typep recipe-surface 'hyperdoc::git-manual-merge-execution-recipe-surface)

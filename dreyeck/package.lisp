@@ -11,5 +11,5 @@
 (defpackage :dreyeck
   (:use :cl)
   (:import-from :dreyeck/server
-   #:install-dreyeck-server-scaffold)
+                #:install-dreyeck-server-scaffold)
   (:export #:install-dreyeck-server-scaffold))

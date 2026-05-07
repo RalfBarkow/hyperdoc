@@ -68,7 +68,7 @@
          (lexical-retrieved (hyperdoc::retrieve-iconic-state "cup" lexical-example))
          (case-description (hyperdoc::describe-case-role-trajectory case-example))
          (lexical-description
-           (hyperdoc::describe-lexical-association-trajectory lexical-example)))
+          (hyperdoc::describe-lexical-association-trajectory lexical-example)))
     (iconic-retrieval-assert-typep
      'hyperdoc::iconic-retrieval-route
      route
@@ -201,17 +201,17 @@
      (hyperbook:find-page hyperdoc::*hyperdoc* title :signal-error? t)
      (format nil "Missing HyperDoc page ~A" title)))
   (let ((iconic-source
-          (uiop:read-file-string
-           (iconic-retrieval-relative-path
-            "hyperdoc/Iconic route language in HyperDoc.html")))
+         (uiop:read-file-string
+          (iconic-retrieval-relative-path
+           "hyperdoc/Iconic route language in HyperDoc.html")))
         (operational-source
-          (uiop:read-file-string
-           (iconic-retrieval-relative-path
-            "hyperdoc/Inspectable iconic retrieval objects.html")))
+         (uiop:read-file-string
+          (iconic-retrieval-relative-path
+           "hyperdoc/Inspectable iconic retrieval objects.html")))
         (symbols-source
-          (uiop:read-file-string
-           (iconic-retrieval-relative-path
-            "hyperdoc/Symbols and semantics in Mind and Mechanism.html"))))
+         (uiop:read-file-string
+          (iconic-retrieval-relative-path
+           "hyperdoc/Symbols and semantics in Mind and Mechanism.html"))))
     (dolist (substring '("(make-iconic-route-language-example)"
                          "(make-lexical-iconic-association-example)"
                          "(make-case-role-iconic-trajectory-example)"

@@ -4,13 +4,13 @@
 
 (in-package :hyperbook)
 
-(defvar *hyperbook* 
+(defvar *hyperbook*
   (let* ((directory (asdf:system-relative-pathname
                      :hyperbook
                      "hyperbook-the-book/"))
          (page-files (-> directory
-                       uiop:directory-files
-                       (sort #'string< :key #'pathname-name))))
+                         uiop:directory-files
+                         (sort #'string< :key #'pathname-name))))
     (make-instance 'html-hyperbook
                    :id "hyperbook"
                    :title "HyperBook"

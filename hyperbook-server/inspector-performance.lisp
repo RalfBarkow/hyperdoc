@@ -174,7 +174,7 @@
       (let* ((resolved-select (default-pane-selection pane select))
              (view-title (typecase resolved-select
                            (integer (hv:view-title (nth resolved-select
-                                                       (pane-views pane))))
+                                                        (pane-views pane))))
                            (hv:view (hv:view-title resolved-select))
                            (t resolved-select))))
         (log-inspector-performance :create-pane/select
@@ -390,7 +390,7 @@
                   end
                   (>= offset start)
                   (< offset end))
-          do (return idx)))
+        do (return idx)))
 
 (defun exact-or-nearby-class-definition (forms class-name offset)
   (let ((containing (containing-form-index forms offset)))
@@ -406,7 +406,7 @@
                for idx = (and containing (+ containing delta))
                for cst = (class-form-cst idx)
                when cst
-                 do (return (values idx cst :heuristic-nearby))))
+               do (return (values idx cst :heuristic-nearby))))
         (containing
          (values containing nil :nearest-containing-form))
         (t
@@ -433,11 +433,11 @@
   (let ((result (copy-list indices)))
     (loop while (and (> (length result) 1)
                      (or (> (reduce #'+ result :key (lambda (index)
-                                                     (form-line-count code index))
+                                                      (form-line-count code index))
                                     :initial-value 0)
                             *class-source-context-max-lines*)
                          (> (reduce #'+ result :key (lambda (index)
-                                                     (form-character-count code index))
+                                                      (form-character-count code index))
                                     :initial-value 0)
                             *class-source-context-max-characters*)
                          (> (length result) *class-source-context-max-forms*)))
@@ -455,26 +455,26 @@
           when (or (and sexp (contains-symbol-p sexp class-name))
                    (and sexp (contains-symbol-p sexp 'change-class))
                    (eq (top-level-form-head (nth idx forms)) 'defclass))
-            do (setf indices (append indices (list idx))))
+          do (setf indices (append indices (list idx))))
     (capped-context-indices code (sort indices #'<))))
 
 (defun render-form-indices-as-html (code indices)
   (with-slots (source top-level-forms) code
     (html
-      (:pre :class "code-snippet"
-            (:code
-             (loop for idx in indices
-                   for form = (nth idx top-level-forms)
-                   for cst = (cst-of form)
-                   for range = (cst:source cst)
-                   for start = (and range (car range))
-                   for last-index = (car (last indices))
-                   do (when start
-                        (html
-                          (:lisp-toplevel
-                           (render-toplevel-cst nil cst source start)))
-                        (unless (eql idx last-index)
-                          (str (format nil "~%~%"))))))))))
+     (:pre :class "code-snippet"
+           (:code
+            (loop for idx in indices
+                  for form = (nth idx top-level-forms)
+                  for cst = (cst-of form)
+                  for range = (cst:source cst)
+                  for start = (and range (car range))
+                  for last-index = (car (last indices))
+                  do (when start
+                       (html
+                        (:lisp-toplevel
+                         (render-toplevel-cst nil cst source start)))
+                       (unless (eql idx last-index)
+                         (str (format nil "~%~%"))))))))))
 
 (defun render-cst-as-html (code cst)
   (with-slots (source) code
@@ -482,44 +482,44 @@
         (cst-range cst)
       (declare (ignore _end))
       (html
-        (:pre :class "code-snippet"
-              (:code
-               (when start
-                 (render-cst cst source start))))))))
+       (:pre :class "code-snippet"
+             (:code
+              (when start
+                (render-cst cst source start))))))))
 
 (defun source-metadata-bar (pathname locator-kind indices truncated?)
   (html
-    (:div :class "inspector-index" :style "text-align:right;padding-right:10px"
-          (:small
-           (esc (format nil "~A | locator: ~A | forms: ~D~:[~; | truncated~]"
-                        (file-namestring pathname)
-                        locator-kind
-                        (length indices)
-                        truncated?))))))
+   (:div :class "inspector-index" :style "text-align:right;padding-right:10px"
+         (:small
+          (esc (format nil "~A | locator: ~A | forms: ~D~:[~; | truncated~]"
+                       (file-namestring pathname)
+                       locator-kind
+                       (length indices)
+                       truncated?))))))
 
 (defun compact-source-fallback (class pathname locator-kind)
   (html
-    (:div :class "inspector-index"
-          (:small
-           (esc (format nil "Precise definition source unavailable for ~A."
-                        (or (class-name class) "<anonymous-class>")))))
-    (:table :class "inspector-table"
-            (:tr (:th "Pathname")
-                 (:td (esc (or (and pathname (namestring pathname))
-                               "Unavailable"))))
-            (:tr (:th "Locator")
-                 (:td (esc (princ-to-string locator-kind)))))
-    (:p (:i "Use a source-aware editor or a richer source locator to recover a tighter definition excerpt."))))
+   (:div :class "inspector-index"
+         (:small
+          (esc (format nil "Precise definition source unavailable for ~A."
+                       (or (class-name class) "<anonymous-class>")))))
+   (:table :class "inspector-table"
+           (:tr (:th "Pathname")
+                (:td (esc (or (and pathname (namestring pathname))
+                              "Unavailable"))))
+           (:tr (:th "Locator")
+                (:td (esc (princ-to-string locator-kind)))))
+   (:p (:i "Use a source-aware editor or a richer source locator to recover a tighter definition excerpt."))))
 
 (defun single-cst-metadata-bar (pathname locator-kind code cst)
   (html
-    (:div :class "inspector-index" :style "text-align:right;padding-right:10px"
-          (:small
-           (esc (format nil "~A | locator: ~A | lines: ~D | chars: ~D"
-                        (file-namestring pathname)
-                        locator-kind
-                        (cst-line-count code cst)
-                        (cst-character-count code cst)))))))
+   (:div :class "inspector-index" :style "text-align:right;padding-right:10px"
+         (:small
+          (esc (format nil "~A | locator: ~A | lines: ~D | chars: ~D"
+                       (file-namestring pathname)
+                       locator-kind
+                       (cst-line-count code cst)
+                       (cst-character-count code cst)))))))
 
 (defun cached-class-source-render (class mode)
   (multiple-value-bind (pathname offset location-cache-hit?)
@@ -546,9 +546,9 @@
                   (cond
                     ((null pathname)
                      (html-and-references
-                       (compact-source-fallback class pathname :no-pathname)))
+                      (compact-source-fallback class pathname :no-pathname)))
                     (t
-                    (let* ((code (cached-parse-lisp-code pathname))
+                     (let* ((code (cached-parse-lisp-code pathname))
                             (forms (slot-value code 'top-level-forms))
                             (target-index nil)
                             (definition-cst nil)
@@ -557,7 +557,7 @@
                          (exact-or-nearby-class-definition forms class-name offset))
                        (if (null target-index)
                            (html-and-references
-                             (compact-source-fallback class pathname locator-kind))
+                            (compact-source-fallback class pathname locator-kind))
                            (ecase mode
                              (:definition
                               (if definition-cst
@@ -574,8 +574,8 @@
                                                 :character-count (cst-character-count code definition-cst)
                                                 :truncated? nil)
                                     (html-and-references
-                                      (single-cst-metadata-bar pathname locator-kind code definition-cst)
-                                      (render-cst-as-html code definition-cst)))
+                                     (single-cst-metadata-bar pathname locator-kind code definition-cst)
+                                     (render-cst-as-html code definition-cst)))
                                   (progn
                                     (source-log :class-source/excerpt
                                                 :class class-name
@@ -589,8 +589,8 @@
                                                 :character-count (form-character-count code target-index)
                                                 :truncated? nil)
                                     (html-and-references
-                                      (source-metadata-bar pathname locator-kind (list target-index) nil)
-                                      (render-form-indices-as-html code (list target-index))))))
+                                     (source-metadata-bar pathname locator-kind (list target-index) nil)
+                                     (render-form-indices-as-html code (list target-index))))))
                              (:context
                               (let* ((raw-indices (context-form-indices code forms
                                                                         target-index
@@ -615,8 +615,8 @@
                                                                      :initial-value 0)
                                             :truncated? truncated?)
                                 (html-and-references
-                                  (source-metadata-bar pathname locator-kind indices truncated?)
-                                  (render-form-indices-as-html code indices)))))))))
+                                 (source-metadata-bar pathname locator-kind indices truncated?)
+                                 (render-form-indices-as-html code indices)))))))))
                 (source-log :class-source/render
                             :class class-name
                             :mode mode
@@ -659,12 +659,12 @@
 
 (defview 👀overview (class class)
   (html-view :title "Overview" :priority 1
-    (html
-      (:table :class "inspector-table"
-              (loop for (label . value) in (class-overview-rows class)
-                    do (html
-                         (:tr (:th (esc label))
-                              (:td (esc (princ-to-string value))))))))))
+             (html
+              (:table :class "inspector-table"
+                      (loop for (label . value) in (class-overview-rows class)
+                            do (html
+                                (:tr (:th (esc label))
+                                     (:td (esc (princ-to-string value))))))))))
 
 (defview 👀source (class class)
   (class-source-html-view class :mode :definition :title "Source code" :priority 9))
@@ -694,15 +694,15 @@
 
 (defview 👀specializing-methods (class class)
   (html-view :title "Methods" :priority 8
-    (let ((specializers (let ((methods (find-specializers class)))
-                          (and methods
-                               (sort methods #'string<
-                                     :key #'text-representation)))))
-      (if specializers
-          (html
-            (:small :class "inspector-index"
-                    (fmt "~a item(s)" (length specializers)))
-            (html-table specializers :display (list #'text-representation)))
-          (html
-            (:small :class "inspector-index"
-                    (esc "No specializing methods found.")))))))
+             (let ((specializers (let ((methods (find-specializers class)))
+                                   (and methods
+                                        (sort methods #'string<
+                                              :key #'text-representation)))))
+               (if specializers
+                   (html
+                    (:small :class "inspector-index"
+                            (fmt "~a item(s)" (length specializers)))
+                    (html-table specializers :display (list #'text-representation)))
+                   (html
+                    (:small :class "inspector-index"
+                            (esc "No specializing methods found.")))))))

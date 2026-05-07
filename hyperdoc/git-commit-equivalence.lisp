@@ -226,21 +226,21 @@
            (uiop:string-prefix-p fragment full-commit-hash))))
 
 (defun git-command-result* (directory args &key operation repository-root-source
-                                      (acceptable-exit-codes '(0)))
+                                             (acceptable-exit-codes '(0)))
   (multiple-value-bind (resolved-program requested-program configuration-source)
       (resolve-git-program)
     (let* ((resolved-program-string
-             (and resolved-program
-                  (git-command-program-string resolved-program)))
+            (and resolved-program
+                 (git-command-program-string resolved-program)))
            (command
-             (and resolved-program
-                  (append (list resolved-program-string
-                                "-C"
-                                (pathname-namestring-or-nil directory))
-                          args)))
+            (and resolved-program
+                 (append (list resolved-program-string
+                               "-C"
+                               (pathname-namestring-or-nil directory))
+                         args)))
            (command-display
-             (and command
-                  (format nil "~{~A~^ ~}" command))))
+            (and command
+                 (format nil "~{~A~^ ~}" command))))
       (unless resolved-program
         (signal-git-runtime-unavailable
          :classification :git-executable-unavailable
@@ -267,10 +267,10 @@
               (if (member exit-code acceptable-exit-codes)
                   (values output exit-code command-display)
                   (let ((classification
-                          (classify-git-runtime-failure
-                           :operation (or operation "git command")
-                           :detail output
-                           :exit-code exit-code)))
+                         (classify-git-runtime-failure
+                          :operation (or operation "git command")
+                          :detail output
+                          :exit-code exit-code)))
                     (signal-git-runtime-unavailable
                      :classification classification
                      :operation (or operation "git command")
@@ -349,13 +349,13 @@
              (left-colon (position #\: left))
              (right-colon (position #\: right))
              (source-short
-               (and left-colon
-                    (first-whitespace-token
-                     (subseq left (1+ left-colon)))))
+              (and left-colon
+                   (first-whitespace-token
+                    (subseq left (1+ left-colon)))))
              (target-short
-               (and right-colon
-                    (first-whitespace-token
-                     (subseq right (1+ right-colon))))))
+              (and right-colon
+                   (first-whitespace-token
+                    (subseq right (1+ right-colon))))))
         (when (and (git-hash-fragment-p source-short)
                    (git-hash-fragment-p target-short))
           (list :source-short source-short
@@ -369,7 +369,7 @@
                   (hash-fragment-matches-commit-p
                    (getf parsed :source-short)
                    source-commit-hash))
-          do (return parsed)))
+        do (return parsed)))
 
 (defun commit-equivalence-status-summary (ancestry-present-p patch-equivalent-p)
   (cond
@@ -381,7 +381,7 @@
      "The source commit is neither directly reachable from the target ancestry nor proven replay-equivalent by the current graph/history checks.")))
 
 (defun commit-equivalence-interpretation (source-commit-hash source-branch target-branch
-                                           ancestry-present-p replayed-equivalent-commit)
+                                          ancestry-present-p replayed-equivalent-commit)
   (cond
     (ancestry-present-p
      (format nil "The original ~A is directly reachable from ~A ancestry."
@@ -447,15 +447,15 @@
     (:inconclusive ":inconclusive")))
 
 (defun classify-upstream-commit-assimilation-decision (&key ancestry-present-p
-                                                            patch-equivalent-p
-                                                            superseding-local-commit
-                                                            semantic-effect-status
-                                                            semantic-compatibility-status
-                                                            validation-status)
+                                                         patch-equivalent-p
+                                                         superseding-local-commit
+                                                         semantic-effect-status
+                                                         semantic-compatibility-status
+                                                         validation-status)
   (let ((graph-or-local-evidence-p
-          (or ancestry-present-p
-              patch-equivalent-p
-              superseding-local-commit)))
+         (or ancestry-present-p
+             patch-equivalent-p
+             superseding-local-commit)))
     (cond
       ((and graph-or-local-evidence-p
             (eq semantic-effect-status :present)
@@ -472,10 +472,10 @@
        :inconclusive))))
 
 (defun upstream-commit-assimilation-interpretation (source-commit-hash source-branch
-                                                     target-branch final-decision
-                                                     &key ancestry-present-p
-                                                       replayed-equivalent-commit
-                                                       superseding-local-commit)
+                                                    target-branch final-decision
+                                                    &key ancestry-present-p
+                                                      replayed-equivalent-commit
+                                                      superseding-local-commit)
   (ecase final-decision
     (:already-assimilated
      (cond
@@ -538,31 +538,31 @@
       (apply (symbol-function symbol) args))))
 
 (defun make-assimilation-page-lookup-issue (condition book page-id
-                                           &key
-                                             (source-page-id
-                                              +upstream-commit-assimilation-source-page-id+)
-                                             (source-page-title
-                                            (assimilation-source-page-title))
-                                             (source-section "Corpus evidence"))
+                                            &key
+                                              (source-page-id
+                                               +upstream-commit-assimilation-source-page-id+)
+                                              (source-page-title
+                                               (assimilation-source-page-title))
+                                              (source-section "Corpus evidence"))
   (let* ((target-hyperbook-id
-           (ignore-errors
-             (id-of book)))
+          (ignore-errors
+            (id-of book)))
          (issue
-           (call-optional-hyperbook-function
-            "MAKE-PAGE-LOOKUP-ISSUE"
-            condition
-            :source-hyperbook "hyperdoc"
-            :source-page-id source-page-id
-            :source-page-title source-page-title
-            :source-section source-section
-            :link-text page-id
-            :target-hyperbook-id target-hyperbook-id
-            :expected-page-id page-id
-            :classification :lookup-failure
-            :details (list :lookup-stage :assimilation-corpus
-                           :target-hyperbook-id target-hyperbook-id
-                           :expected-page-id page-id
-                           :condition-type (type-of condition)))))
+          (call-optional-hyperbook-function
+           "MAKE-PAGE-LOOKUP-ISSUE"
+           condition
+           :source-hyperbook "hyperdoc"
+           :source-page-id source-page-id
+           :source-page-title source-page-title
+           :source-section source-section
+           :link-text page-id
+           :target-hyperbook-id target-hyperbook-id
+           :expected-page-id page-id
+           :classification :lookup-failure
+           :details (list :lookup-stage :assimilation-corpus
+                          :target-hyperbook-id target-hyperbook-id
+                          :expected-page-id page-id
+                          :condition-type (type-of condition)))))
     (when issue
       (or (ignore-errors
             (call-optional-hyperbook-function
@@ -596,9 +596,9 @@
                    :source-page-id source-page-id
                    :source-page-title source-page-title
                    :source-section source-section))
-           (list :status :lookup-issue
-                 :page-id page-id
-                 :issue issue)
+             (list :status :lookup-issue
+                   :page-id page-id
+                   :issue issue)
            (list :status :unavailable
                  :page-id page-id
                  :condition condition
@@ -613,9 +613,9 @@
                    :source-page-id source-page-id
                    :source-page-title source-page-title
                    :source-section source-section))
-           (list :status :lookup-issue
-                 :page-id page-id
-                 :issue issue)
+             (list :status :lookup-issue
+                   :page-id page-id
+                   :issue issue)
            (list :status :unavailable
                  :page-id page-id
                  :condition condition
@@ -709,10 +709,10 @@
 (defun inspect-graphviz-story-item-renderer-source-shape ()
   (let* ((pathname (graphviz-story-item-renderer-source-pathname))
          (snippet
-           (source-snippet-between-markers
-            pathname
-            "(defmethod render-story-item ((type (eql :graphviz)) item page)"
-            ";; Images")))
+          (source-snippet-between-markers
+           pathname
+           "(defmethod render-story-item ((type (eql :graphviz)) item page)"
+           ";; Images")))
     (cond
       ((null (probe-file pathname))
        (list :status :unavailable
@@ -724,19 +724,19 @@
              :reason "The current image could not locate the :graphviz render-story-item method in hyperbook-fedwiki/story-items.lisp."))
       (t
        (let* ((dot-from-text-p
-                (not (null (search "(text-of item)" snippet))))
+               (not (null (search "(text-of item)" snippet))))
               (dot-from-data-p
-                (not (null (search "(gethash \"dot\"" snippet))))
+               (not (null (search "(gethash \"dot\"" snippet))))
               (engine-from-data-p
-                (not (null (search "(gethash \"engine\"" snippet))))
+               (not (null (search "(gethash \"engine\"" snippet))))
               (fallback-title-present-p
-                (not (null (search ":fallback-title \"Raw DOT source\""
-                                   snippet))))
+               (not (null (search ":fallback-title \"Raw DOT source\""
+                                  snippet))))
               (recognized-text-backed-shape-p
-                (and dot-from-text-p
-                     (not dot-from-data-p)
-                     engine-from-data-p
-                     fallback-title-present-p)))
+               (and dot-from-text-p
+                    (not dot-from-data-p)
+                    engine-from-data-p
+                    fallback-title-present-p)))
          (list :status (if recognized-text-backed-shape-p
                            :resolved
                            :partial)
@@ -769,19 +769,19 @@
       (t
        (let* ((source (uiop:read-file-string resolved))
               (type-present-p
-                (not (null (search "\"type\": \"graphviz\"" source))))
+               (not (null (search "\"type\": \"graphviz\"" source))))
               (text-present-p
-                (or (search "\"text\": \"digraph { a -&gt; b }\"" source)
-                    (search "\"text\": \"digraph { a -> b }\"" source)))
+               (or (search "\"text\": \"digraph { a -&gt; b }\"" source)
+                   (search "\"text\": \"digraph { a -> b }\"" source)))
               (shared-helper-present-p
-                (not (null (search "views:graphviz-snippet" source))))
+               (not (null (search "views:graphviz-snippet" source))))
               (text-backed-explanation-present-p
-                (not (null (search "story item's DOT text" source))))
+               (not (null (search "story item's DOT text" source))))
               (recognized-text-backed-corpus-p
-                (and type-present-p
-                     text-present-p
-                     shared-helper-present-p
-                     text-backed-explanation-present-p)))
+               (and type-present-p
+                    text-present-p
+                    shared-helper-present-p
+                    text-backed-explanation-present-p)))
          (list :status (if recognized-text-backed-corpus-p
                            :resolved
                            :partial)
@@ -798,9 +798,9 @@
                                                            corpus-evidence-status
                                                            corpus-shape-info)
   (let ((renderer-resolved-p
-          (getf renderer-shape-info :recognized-text-backed-shape-p))
+         (getf renderer-shape-info :recognized-text-backed-shape-p))
         (corpus-shape-resolved-p
-          (getf corpus-shape-info :recognized-text-backed-corpus-p)))
+         (getf corpus-shape-info :recognized-text-backed-corpus-p)))
     (cond
       ((and renderer-resolved-p
             corpus-shape-resolved-p
@@ -819,30 +819,30 @@
       (progn
         (asdf:load-system :hyperbook/fedwiki)
         (let* ((wiki-class
-                 (package-class-if-present :hyperbook/fedwiki "FEDWIKI"))
+                (package-class-if-present :hyperbook/fedwiki "FEDWIKI"))
                (page-maker
-                 (package-function-if-present :hyperbook/fedwiki
-                                              "MAKE-FEDWIKI-PAGE"))
+                (package-function-if-present :hyperbook/fedwiki
+                                             "MAKE-FEDWIKI-PAGE"))
                (story-item-class
-                 (package-class-if-present :hyperbook/fedwiki "STORY-ITEM"))
+                (package-class-if-present :hyperbook/fedwiki "STORY-ITEM"))
                (render-story-item
-                 (package-function-if-present :hyperbook/fedwiki
-                                              "RENDER-STORY-ITEM"))
+                (package-function-if-present :hyperbook/fedwiki
+                                             "RENDER-STORY-ITEM"))
                (accumulator-class
-                 (package-class-if-present :html-inspector-views
-                                           "VIEW-ACCUMULATOR"))
+                (package-class-if-present :html-inspector-views
+                                          "VIEW-ACCUMULATOR"))
                (accumulator-assets
-                 (package-function-if-present :html-inspector-views
-                                              "ACCUMULATOR-ASSETS"))
+                (package-function-if-present :html-inspector-views
+                                             "ACCUMULATOR-ASSETS"))
                (html-stream-symbol
-                 (or (package-variable-symbol-if-present :html-inspector-views
-                                                         "*HTML-STREAM*")
-                     (find-package-symbol-if-present :html-inspector-views
+                (or (package-variable-symbol-if-present :html-inspector-views
+                                                        "*HTML-STREAM*")
+                    (find-package-symbol-if-present :html-inspector-views
                                                     "*HTML-STREAM*")))
                (view-accumulator-symbol
-                 (or (package-variable-symbol-if-present :html-inspector-views
-                                                         "*VIEW-ACCUMULATOR*")
-                     (find-package-symbol-if-present :html-inspector-views
+                (or (package-variable-symbol-if-present :html-inspector-views
+                                                        "*VIEW-ACCUMULATOR*")
+                    (find-package-symbol-if-present :html-inspector-views
                                                     "*VIEW-ACCUMULATOR*"))))
           (unless (and wiki-class
                        page-maker
@@ -866,28 +866,28 @@
                                       :data nil))
                  (accumulator (make-instance accumulator-class))
                  (html
-                   (with-output-to-string (stream)
-                     (progv (list html-stream-symbol
-                                  view-accumulator-symbol)
-                            (list stream accumulator)
-                       (funcall render-story-item :graphviz item page))))
+                  (with-output-to-string (stream)
+                    (progv (list html-stream-symbol
+                                 view-accumulator-symbol)
+                        (list stream accumulator)
+                      (funcall render-story-item :graphviz item page))))
                  (assets (funcall accumulator-assets accumulator))
                  (placeholder-present-p
-                   (not (null (search "data-inspector-graphviz=" html))))
+                  (not (null (search "data-inspector-graphviz=" html))))
                  (dot-transport-present-p
-                   (not (null (search "data-inspector-graphviz-dot=" html))))
+                  (not (null (search "data-inspector-graphviz-dot=" html))))
                  (raw-dot-fallback-present-p
-                   (not (null (search "Raw DOT source" html))))
+                  (not (null (search "Raw DOT source" html))))
                  (dot-text-present-p
-                   (not (null (search "digraph { a -&gt; b }" html))))
+                  (not (null (search "digraph { a -&gt; b }" html))))
                  (generic-raw-text-fallback-present-p
-                   (not (null (search "background-color: #eee;" html))))
+                  (not (null (search "background-color: #eee;" html))))
                  (passed-p
-                   (and placeholder-present-p
-                        dot-transport-present-p
-                        raw-dot-fallback-present-p
-                        dot-text-present-p
-                        (not generic-raw-text-fallback-present-p))))
+                  (and placeholder-present-p
+                       dot-transport-present-p
+                       raw-dot-fallback-present-p
+                       dot-text-present-p
+                       (not generic-raw-text-fallback-present-p))))
             (list :status (if passed-p :passed :failed)
                   :html html
                   :assets assets
@@ -1010,7 +1010,7 @@
     (let* ((contracts (and entries
                            (static-route-observability-runtime-contracts entries)))
            (expected-contracts
-             (expected-static-route-observability-runtime-contracts)))
+            (expected-static-route-observability-runtime-contracts)))
       (list :status :constructed
             :surface surface
             :shape shape
@@ -1030,73 +1030,73 @@
                                                                   payload-paths)
   (declare (ignore equivalence-check))
   (let* ((hyperdoc-book
-           (and (boundp '*hyperdoc*)
-                (symbol-value '*hyperdoc*)))
+          (and (boundp '*hyperdoc*)
+               (symbol-value '*hyperdoc*)))
          (topics-book
-           (and (boundp '*topics*)
-                (symbol-value '*topics*)))
+          (and (boundp '*topics*)
+               (symbol-value '*topics*)))
          (page-evidence
-           (list
-            (safe-assimilation-page-evidence
-             hyperdoc-book
-             "Static route observability")
-            (safe-assimilation-page-evidence
-             hyperdoc-book
-             "Diagnose static asset route ownership")
-            (safe-assimilation-page-evidence
-             hyperdoc-book
-             "Static Asset Path Resolution")
-            (safe-assimilation-page-evidence
-             topics-book
-             "Static route observability")
-            (safe-assimilation-page-evidence
-             topics-book
-             "Static asset path resolution")))
+          (list
+           (safe-assimilation-page-evidence
+            hyperdoc-book
+            "Static route observability")
+           (safe-assimilation-page-evidence
+            hyperdoc-book
+            "Diagnose static asset route ownership")
+           (safe-assimilation-page-evidence
+            hyperdoc-book
+            "Static Asset Path Resolution")
+           (safe-assimilation-page-evidence
+            topics-book
+            "Static route observability")
+           (safe-assimilation-page-evidence
+            topics-book
+            "Static asset path resolution")))
          (corpus-evidence-status
-           (corpus-evidence-status page-evidence))
+          (corpus-evidence-status page-evidence))
          (runtime-shape-info
-           (inspect-static-route-observability-runtime-shape))
+          (inspect-static-route-observability-runtime-shape))
          (runtime-shape
-           (getf runtime-shape-info :shape :unknown))
+          (getf runtime-shape-info :shape :unknown))
          (runtime-status
-           (getf runtime-shape-info :status :unavailable))
+          (getf runtime-shape-info :status :unavailable))
          (runtime-contracts
-           (getf runtime-shape-info :contracts))
+          (getf runtime-shape-info :contracts))
          (runtime-matches-expected-p
-           (getf runtime-shape-info :matches-expected-p))
+          (getf runtime-shape-info :matches-expected-p))
          (semantic-evidence-availability
-           (semantic-evidence-availability
-            runtime-shape
-            corpus-evidence-status))
+          (semantic-evidence-availability
+           runtime-shape
+           corpus-evidence-status))
          (constructor-symbols
-           (and (recognized-static-route-observability-runtime-shape-p
-                 runtime-shape)
-                (static-route-observability-runtime-boundary-constructor-symbols
-                 runtime-shape)))
+          (and (recognized-static-route-observability-runtime-shape-p
+                runtime-shape)
+               (static-route-observability-runtime-boundary-constructor-symbols
+                runtime-shape)))
          (constructors-present-p
-           (and constructor-symbols
-                (every #'fboundp constructor-symbols)))
+          (and constructor-symbols
+               (every #'fboundp constructor-symbols)))
          (payload-paths-present-p
-           (payload-paths-present-in-system-source-p :hyperdoc payload-paths))
+          (payload-paths-present-in-system-source-p :hyperdoc payload-paths))
          (semantic-effect-status
-           (if (and (recognized-static-route-observability-runtime-shape-p
-                     runtime-shape)
-                    constructors-present-p
-                    payload-paths-present-p)
-               :present
-               :absent))
+          (if (and (recognized-static-route-observability-runtime-shape-p
+                    runtime-shape)
+                   constructors-present-p
+                   payload-paths-present-p)
+              :present
+              :absent))
          (semantic-compatibility-status
-           (cond
-             (runtime-matches-expected-p
-              :compatible)
-             ((eq runtime-status :constructed)
-              :diverged)
-             (t
-              :unknown)))
+          (cond
+            (runtime-matches-expected-p
+             :compatible)
+            ((eq runtime-status :constructed)
+             :diverged)
+            (t
+             :unknown)))
          (superseding-local-commit-hash
-           (and (eq runtime-shape :operational-targets)
-                runtime-matches-expected-p
-                +static-route-observability-superseding-local-commit-hash+)))
+          (and (eq runtime-shape :operational-targets)
+               runtime-matches-expected-p
+               +static-route-observability-superseding-local-commit-hash+)))
     (list :semantic-effect-status semantic-effect-status
           :semantic-compatibility-status semantic-compatibility-status
           :corpus-evidence-status corpus-evidence-status
@@ -1147,19 +1147,19 @@
                                                            semantic-evidence)
   (declare (ignore equivalence-check payload-paths semantic-evidence))
   (let* ((runtime-shape-info
-           (inspect-static-route-observability-runtime-shape))
+          (inspect-static-route-observability-runtime-shape))
          (runtime-status
-           (getf runtime-shape-info :status :unavailable))
+          (getf runtime-shape-info :status :unavailable))
          (runtime-shape
-           (getf runtime-shape-info :shape :unknown))
+          (getf runtime-shape-info :shape :unknown))
          (observed-contracts
-           (getf runtime-shape-info :contracts))
+          (getf runtime-shape-info :contracts))
          (expected-contracts
-           (getf runtime-shape-info
-                 :expected-contracts
-                 (expected-static-route-observability-runtime-contracts)))
+          (getf runtime-shape-info
+                :expected-contracts
+                (expected-static-route-observability-runtime-contracts)))
          (shape-passed-p
-           (getf runtime-shape-info :matches-expected-p)))
+          (getf runtime-shape-info :matches-expected-p)))
     (cond
       ((eq runtime-status :constructed)
        (list :validation-status (if shape-passed-p :passed :failed)
@@ -1192,50 +1192,50 @@
                                                            payload-paths)
   (declare (ignore equivalence-check))
   (let* ((page-evidence
-           (list
-            (safe-assimilation-page-evidence
-             (hyperdoc-book-if-available)
-             +graphviz-story-item-corpus-page-id+
-             :source-page-id +graphviz-story-item-assimilation-source-page-id+
-             :source-page-title +graphviz-story-item-assimilation-source-page-id+
-             :source-section "Corpus evidence")))
+          (list
+           (safe-assimilation-page-evidence
+            (hyperdoc-book-if-available)
+            +graphviz-story-item-corpus-page-id+
+            :source-page-id +graphviz-story-item-assimilation-source-page-id+
+            :source-page-title +graphviz-story-item-assimilation-source-page-id+
+            :source-section "Corpus evidence")))
          (corpus-evidence-status
-           (corpus-evidence-status page-evidence))
+          (corpus-evidence-status page-evidence))
          (renderer-shape-info
-           (inspect-graphviz-story-item-renderer-source-shape))
+          (inspect-graphviz-story-item-renderer-source-shape))
          (corpus-shape-info
-           (inspect-graphviz-story-item-corpus-shape))
+          (inspect-graphviz-story-item-corpus-shape))
          (payload-paths-present-p
-           (payload-paths-present-in-system-source-p :hyperdoc payload-paths))
+          (payload-paths-present-in-system-source-p :hyperdoc payload-paths))
          (renderer-recognized-p
-           (getf renderer-shape-info :recognized-text-backed-shape-p))
+          (getf renderer-shape-info :recognized-text-backed-shape-p))
          (corpus-recognized-p
-           (getf corpus-shape-info :recognized-text-backed-corpus-p))
+          (getf corpus-shape-info :recognized-text-backed-corpus-p))
          (semantic-effect-status
-           (if (and payload-paths-present-p
-                    renderer-recognized-p
-                    corpus-recognized-p)
-               :present
-               :unknown))
-         (semantic-compatibility-status
-           (cond
-             ((and renderer-recognized-p
+          (if (and payload-paths-present-p
+                   renderer-recognized-p
                    corpus-recognized-p)
-              :compatible)
-             ((or (eq (getf renderer-shape-info :status) :partial)
-                  (eq (getf corpus-shape-info :status) :partial))
-              :diverged)
-             (t
-              :unknown)))
+              :present
+              :unknown))
+         (semantic-compatibility-status
+          (cond
+            ((and renderer-recognized-p
+                  corpus-recognized-p)
+             :compatible)
+            ((or (eq (getf renderer-shape-info :status) :partial)
+                 (eq (getf corpus-shape-info :status) :partial))
+             :diverged)
+            (t
+             :unknown)))
          (semantic-evidence-availability
-           (graphviz-story-item-semantic-evidence-availability
-            renderer-shape-info
-            corpus-evidence-status
-            corpus-shape-info))
+          (graphviz-story-item-semantic-evidence-availability
+           renderer-shape-info
+           corpus-evidence-status
+           corpus-shape-info))
          (superseding-local-commit-hash
-           (and (eq semantic-effect-status :present)
-                (eq semantic-compatibility-status :compatible)
-                +graphviz-story-item-superseding-local-commit-hash+)))
+          (and (eq semantic-effect-status :present)
+               (eq semantic-compatibility-status :compatible)
+               +graphviz-story-item-superseding-local-commit-hash+)))
     (list
      :semantic-effect-status semantic-effect-status
      :semantic-compatibility-status semantic-compatibility-status
@@ -1247,7 +1247,7 @@
      (cond
        ((and (eq semantic-effect-status :present)
              superseding-local-commit-hash)
-       "The graphviz story-item payload is already present in effect: upstream touched only the FedWiki renderer slice, but hauptsache already carries earlier local commit b1e8d404 through the shared graphviz seam, and the current constructor plus corpus still use text-backed graphviz items so no data[\"dot\"] compatibility patch is needed.")
+        "The graphviz story-item payload is already present in effect: upstream touched only the FedWiki renderer slice, but hauptsache already carries earlier local commit b1e8d404 through the shared graphviz seam, and the current constructor plus corpus still use text-backed graphviz items so no data[\"dot\"] compatibility patch is needed.")
        ((eq semantic-compatibility-status :diverged)
         "The current graphviz story-item slice still looks related, but the constructor or corpus no longer match the text-backed canonical shape used in this repo snapshot.")
        (t
@@ -1280,7 +1280,7 @@
                                                     semantic-evidence)
   (declare (ignore equivalence-check payload-paths semantic-evidence))
   (let ((validation-info
-          (inspect-graphviz-story-item-render-validation)))
+         (inspect-graphviz-story-item-render-validation)))
     (case (getf validation-info :status :unknown)
       (:passed
        (list :validation-status :passed
@@ -1317,8 +1317,8 @@
                                "graphviz validation helpers unavailable"))))))))
 
 (defun %system-git-commit-equivalence-check (system-designator source-commit-hash
-                                              &key source-branch target-branch
-                                                shared-base-hash id title summary)
+                                             &key source-branch target-branch
+                                               shared-base-hash id title summary)
   (let* ((system (etypecase system-designator
                    (asdf:system
                     system-designator)
@@ -1367,30 +1367,30 @@
                      (history-lines (non-empty-output-lines history-output))
                      (range-diff-lines (non-empty-output-lines range-diff-output))
                      (cherry-marker (cherry-marker-for-commit cherry-lines
-                                                             source-commit-hash))
+                                                              source-commit-hash))
                      (range-diff-info (range-diff-equivalence-info range-diff-lines
                                                                    source-commit-hash))
                      (patch-equivalent-p
-                       (or ancestry-present-p
-                           (char= #\- (or cherry-marker #\+))
-                           (not (null range-diff-info))))
+                      (or ancestry-present-p
+                          (char= #\- (or cherry-marker #\+))
+                          (not (null range-diff-info))))
                      (source-commit (%system-git-commit-target system
-                                                              source-commit-hash))
+                                                               source-commit-hash))
                      (shared-base (%system-git-commit-target system
-                                                            shared-base-hash))
+                                                             shared-base-hash))
                      (replayed-equivalent-commit
-                       (cond
-                         (ancestry-present-p
-                          source-commit)
-                         (range-diff-info
-                          (%system-git-commit-target
-                           system
-                           (git-resolve-commitish
-                            repo-root
-                            repository-root-source
-                            (getf range-diff-info :target-short))))
-                         (t
-                          nil))))
+                      (cond
+                        (ancestry-present-p
+                         source-commit)
+                        (range-diff-info
+                         (%system-git-commit-target
+                          system
+                          (git-resolve-commitish
+                           repo-root
+                           repository-root-source
+                           (getf range-diff-info :target-short))))
+                        (t
+                         nil))))
                 (make-instance
                  'git-commit-equivalence-check
                  :id (or id "git-commit-equivalence-check")
@@ -1429,8 +1429,8 @@
                   replayed-equivalent-commit))))))))))
 
 (defun system-git-commit-equivalence-check (system-designator source-commit-hash
-                                             &key source-branch target-branch
-                                               shared-base-hash id title summary)
+                                            &key source-branch target-branch
+                                              shared-base-hash id title summary)
   (call-with-git-runtime-boundary
    (lambda ()
      (%system-git-commit-equivalence-check
@@ -1450,78 +1450,78 @@
        semantic-evidence-function
        focused-validation-function)
   (let* ((equivalence-check
-           (%system-git-commit-equivalence-check
-            system-designator
-            source-commit-hash
-            :source-branch source-branch
-            :target-branch target-branch
-            :shared-base-hash shared-base-hash
-            :id (or id "git-commit-equivalence-check")
-            :title (or title
-                       (format nil "Commit equivalence proof for ~A"
-                               (short-git-commit-hash source-commit-hash)))
-            :summary
-            "Read-only graph/history proof that distinguishes original commit ancestry from replay-equivalent content on a target branch."))
+          (%system-git-commit-equivalence-check
+           system-designator
+           source-commit-hash
+           :source-branch source-branch
+           :target-branch target-branch
+           :shared-base-hash shared-base-hash
+           :id (or id "git-commit-equivalence-check")
+           :title (or title
+                      (format nil "Commit equivalence proof for ~A"
+                              (short-git-commit-hash source-commit-hash)))
+           :summary
+           "Read-only graph/history proof that distinguishes original commit ancestry from replay-equivalent content on a target branch."))
          (repo-root (repo-root-of equivalence-check))
          (repository-root-source
-           (repository-root-source-of equivalence-check))
+          (repository-root-source-of equivalence-check))
          (payload-paths nil)
          (payload-command nil))
     (multiple-value-setq (payload-paths payload-command)
       (git-commit-payload-paths repo-root repository-root-source
                                 source-commit-hash))
     (let* ((semantic-evidence
-             (if semantic-evidence-function
-                 (funcall semantic-evidence-function
-                          equivalence-check
-                          payload-paths)
-                 nil))
+            (if semantic-evidence-function
+                (funcall semantic-evidence-function
+                         equivalence-check
+                         payload-paths)
+                nil))
            (superseding-local-commit-hash
-             (getf semantic-evidence :superseding-local-commit-hash))
+            (getf semantic-evidence :superseding-local-commit-hash))
            (superseding-local-commit
-             (and superseding-local-commit-hash
-                  (%system-git-commit-target
-                   (system-of equivalence-check)
-                   superseding-local-commit-hash)))
+            (and superseding-local-commit-hash
+                 (%system-git-commit-target
+                  (system-of equivalence-check)
+                  superseding-local-commit-hash)))
            (validation-evidence
-             (if focused-validation-function
-                 (funcall focused-validation-function
-                          equivalence-check
-                          payload-paths
-                          semantic-evidence)
-                 nil))
+            (if focused-validation-function
+                (funcall focused-validation-function
+                         equivalence-check
+                         payload-paths
+                         semantic-evidence)
+                nil))
            (semantic-effect-status
-             (getf semantic-evidence :semantic-effect-status :unknown))
+            (getf semantic-evidence :semantic-effect-status :unknown))
            (semantic-compatibility-status
-             (getf semantic-evidence :semantic-compatibility-status :unknown))
+            (getf semantic-evidence :semantic-compatibility-status :unknown))
            (corpus-evidence-status
-             (getf semantic-evidence :corpus-evidence-status :unavailable))
+            (getf semantic-evidence :corpus-evidence-status :unavailable))
            (corpus-page-evidence
-             (getf semantic-evidence :corpus-page-evidence))
+            (getf semantic-evidence :corpus-page-evidence))
            (semantic-evidence-availability
-             (getf semantic-evidence
-                   :semantic-evidence-availability
-                   :unavailable))
+            (getf semantic-evidence
+                  :semantic-evidence-availability
+                  :unavailable))
            (semantic-compatibility-summary
-             (or (getf semantic-evidence :summary)
-                 "No semantic compatibility summary recorded."))
+            (or (getf semantic-evidence :summary)
+                "No semantic compatibility summary recorded."))
            (semantic-compatibility-notes
-             (getf semantic-evidence :notes))
+            (getf semantic-evidence :notes))
            (validation-status
-             (getf validation-evidence :validation-status :unknown))
+            (getf validation-evidence :validation-status :unknown))
            (validation-summary
-             (or (getf validation-evidence :summary)
-                 "No focused validation summary recorded."))
+            (or (getf validation-evidence :summary)
+                "No focused validation summary recorded."))
            (validation-notes
-             (getf validation-evidence :notes))
+            (getf validation-evidence :notes))
            (final-decision
-             (classify-upstream-commit-assimilation-decision
-              :ancestry-present-p (ancestry-present-p equivalence-check)
-              :patch-equivalent-p (patch-equivalent-p equivalence-check)
-              :superseding-local-commit superseding-local-commit
-              :semantic-effect-status semantic-effect-status
-              :semantic-compatibility-status semantic-compatibility-status
-              :validation-status validation-status)))
+            (classify-upstream-commit-assimilation-decision
+             :ancestry-present-p (ancestry-present-p equivalence-check)
+             :patch-equivalent-p (patch-equivalent-p equivalence-check)
+             :superseding-local-commit superseding-local-commit
+             :semantic-effect-status semantic-effect-status
+             :semantic-compatibility-status semantic-compatibility-status
+             :validation-status validation-status)))
       (make-instance
        'git-upstream-commit-assimilation-check
        :id (or id "git-upstream-commit-assimilation-check")
@@ -1633,7 +1633,7 @@
      (%hyperdoc-graphviz-story-item-commit-assimilation-check))))
 
 (defexample graphviz-story-item-upstream-assimilation-example
-  (:register nil)
+    (:register nil)
   "Run the ceae9d graphviz upstream assimilation check and return the inspectable result."
   (let ((check (hyperdoc-graphviz-story-item-commit-assimilation-check)))
     (typecase check

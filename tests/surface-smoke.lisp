@@ -50,7 +50,7 @@
 
 (defun assert-surface-page-contains-all (page-source page-label needles)
   (let ((normalized
-          (normalize-surface-smoke-whitespace page-source)))
+         (normalize-surface-smoke-whitespace page-source)))
     (dolist (needle needles)
       (surface-assert-true
        (search (normalize-surface-smoke-whitespace needle)
@@ -76,29 +76,29 @@
   (let* ((definition (hyperdoc::make-example-surface-definition))
          (instance (hyperdoc::make-example-surface-instance))
          (diagnostic-definition
-           (hyperdoc::make-dmx-workspace-repair-diagnostic-surface-definition))
+          (hyperdoc::make-dmx-workspace-repair-diagnostic-surface-definition))
          (diagnostic-instance
-           (hyperdoc::make-dmx-workspace-repair-diagnostic-surface-instance))
+          (hyperdoc::make-dmx-workspace-repair-diagnostic-surface-instance))
          (mutation-definition
-           (hyperdoc::make-dmx-repair-console-mutation-surface-definition))
+          (hyperdoc::make-dmx-repair-console-mutation-surface-definition))
          (mutation-instance
-           (hyperdoc::make-dmx-repair-console-mutation-surface-instance))
+          (hyperdoc::make-dmx-repair-console-mutation-surface-instance))
          (failure-definition
-           (hyperdoc::make-dmx-workspace-journal-observed-failure-surface-definition))
+          (hyperdoc::make-dmx-workspace-journal-observed-failure-surface-definition))
          (failure-instance
-           (hyperdoc::make-dmx-workspace-journal-observed-failure-surface-instance))
+          (hyperdoc::make-dmx-workspace-journal-observed-failure-surface-instance))
          (definition-views
-           (surface-smoke-load-inspector-views-for-object definition))
+          (surface-smoke-load-inspector-views-for-object definition))
          (instance-views
-           (surface-smoke-load-inspector-views-for-object instance))
+          (surface-smoke-load-inspector-views-for-object instance))
          (diagnostic-definition-views
-           (surface-smoke-load-inspector-views-for-object diagnostic-definition))
+          (surface-smoke-load-inspector-views-for-object diagnostic-definition))
          (diagnostic-instance-views
-           (surface-smoke-load-inspector-views-for-object diagnostic-instance))
+          (surface-smoke-load-inspector-views-for-object diagnostic-instance))
          (mutation-instance-views
-           (surface-smoke-load-inspector-views-for-object mutation-instance))
+          (surface-smoke-load-inspector-views-for-object mutation-instance))
          (failure-instance-views
-           (surface-smoke-load-inspector-views-for-object failure-instance)))
+          (surface-smoke-load-inspector-views-for-object failure-instance)))
     (surface-assert-typep
      'hyperdoc::surface-definition
      definition

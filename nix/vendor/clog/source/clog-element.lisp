@@ -29,7 +29,7 @@ element objects."))
 (defun make-clog-element (connection-id html-id &key (clog-type 'clog-element))
   "Construct a new clog-element or sub-element of CLOG-TYPE. (Private)"
   (let ((obj (make-instance clog-type :connection-id connection-id
-                                      :html-id       html-id)))
+                            :html-id       html-id)))
     (when *store-new-objects*
       (setf (connection-data-item obj html-id) obj))
     obj))
@@ -64,9 +64,9 @@ clog array but is not in the DOM. If HTML-ID is nil, one is generated.
                     html-id
                     (format nil "CLOG~A" (generate-id)))))
     (cached-execute connection-id
-     (format nil
-             "clog['~A']=$(\"~A\").get(0); $(clog['~A']).first().prop('id','~A')"
-             web-id html web-id web-id))
+                    (format nil
+                            "clog['~A']=$(\"~A\").get(0); $(clog['~A']).first().prop('id','~A')"
+                            web-id html web-id web-id))
     (make-clog-element connection-id web-id :clog-type clog-type)))
 
 ;;;;;;;;;;;;
@@ -94,7 +94,7 @@ CONNECTION-ID to it and then return it. The HTML-ID must be unique. (private)"
 
 (defgeneric create-element (clog-obj html-tag &rest all-args
 			    &key content clog-type html-id auto-place
-			    &allow-other-keys)
+			      &allow-other-keys)
   (:documentation "Create a new CLOG-ELEMENT as child of CLOG-OBJ with any
 possible tag and keywords."))
 
@@ -103,27 +103,27 @@ possible tag and keywords."))
 			     clog-type
                              html-id
                              (auto-place t)
-                           &allow-other-keys)
+                             &allow-other-keys)
   (let* ((extra-args (alexandria:remove-from-plist all-args
 						   :content :clog-type
 						   :html-id :auto-place))
-           (html (with-output-to-string (*standard-output*)
-                   (format t "<~(~a~) " html-tag)
-                   (loop for (key value) on extra-args by #'cddr
-                         do (format t "~(~a~)=~s" key value))
-                   (format t " id=~s>~A</~(~a~)>" html-id content html-tag)))
-           (clog-type (or clog-type
-                          (let* ((class-name (intern (string-upcase
-						      (format nil "CLOG-~a"
-							      html-tag))
-						     :clog)))
-                            (when (find-class class-name nil)
-                              class-name))
-                          'clog-element)))
-      (create-child clog-obj html
-                    :clog-type  clog-type
-                    :html-id    html-id
-                    :auto-place auto-place)))
+         (html (with-output-to-string (*standard-output*)
+                 (format t "<~(~a~) " html-tag)
+                 (loop for (key value) on extra-args by #'cddr
+                       do (format t "~(~a~)=~s" key value))
+                 (format t " id=~s>~A</~(~a~)>" html-id content html-tag)))
+         (clog-type (or clog-type
+                        (let* ((class-name (intern (string-upcase
+						    (format nil "CLOG-~a"
+							    html-tag))
+						   :clog)))
+                          (when (find-class class-name nil)
+                            class-name))
+                        'clog-element)))
+    (create-child clog-obj html
+                  :clog-type  clog-type
+                  :html-id    html-id
+                  :auto-place auto-place)))
 
 ;;;;;;;;;;;;;;;;;;
 ;; create-child ;;
@@ -203,7 +203,7 @@ often."))
   (:documentation "Get/Setf css style."))
 
 (defmethod style ((obj clog-element) style-name
-                      &key (default-answer nil))
+                  &key (default-answer nil))
   (jquery-query obj (format nil "css('~A')" style-name)
                 :default-answer default-answer))
 
@@ -599,8 +599,8 @@ exists."))
 
 (defmethod (setf text-value) (value (obj clog-element))
   (jquery-execute obj
-    (format nil "contents().not(~A.children()).get(0).nodeValue='~A'"
-            (jquery obj) (escape-string value))))
+                  (format nil "contents().not(~A.children()).get(0).nodeValue='~A'"
+                          (jquery obj) (escape-string value))))
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; text-direction ;;
@@ -863,7 +863,7 @@ if the right or left side of block should be clear of any 'floated' Element."))
 ;;;;;;;;;;;;;;;;
 
 (deftype float-wrap-type ()
-    '(member :none :left :right :inline-start :inline-end))
+  '(member :none :left :right :inline-start :inline-end))
 
 (defgeneric float-wrap (clog-element)
   (:documentation "Get/Setf for element float left or right and other
@@ -1609,17 +1609,17 @@ UNITS (default :px) is used."))
                                               width height (units :px))
   (jquery-execute obj (format nil "css({~@[~a~]~@[~a~]~@[~a~]~@[~a~]~@[~a~]~@[~a~]})"
                               (when left
-                                  (format nil "'left':'~A'," (unit* units left)))
+                                (format nil "'left':'~A'," (unit* units left)))
                               (when top
-                                  (format nil "'top':'~A'," (unit* units top)))
+                                (format nil "'top':'~A'," (unit* units top)))
                               (when right
-                                  (format nil "'right':'~A'," (unit* units right)))
+                                (format nil "'right':'~A'," (unit* units right)))
                               (when bottom
-                                  (format nil "'bottom':'~A'," (unit* units bottom)))
+                                (format nil "'bottom':'~A'," (unit* units bottom)))
                               (when width
-                                  (format nil "'width':'~A'," (unit* units width)))
+                                (format nil "'width':'~A'," (unit* units width)))
                               (when height
-                                  (format nil "'height':'~A'," (unit* units height))))))
+                                (format nil "'height':'~A'," (unit* units height))))))
 
 ;;;;;;;;;;
 ;; left ;;
@@ -1800,7 +1800,7 @@ UNITS (default :px) is used."))
 ;;  For reference:
 ;;  | Margin | Border | Padding | Scroll | [Element] | Scroll | Padding ...
 ;;
-;;  Height and Width of Element are in clog-base 
+;;  Height and Width of Element are in clog-base
 ;;  All the following have the advantage in that the results are always
 ;;  pixels and numeric.
 
@@ -2266,7 +2266,7 @@ A list of standard cursor types can be found at:
 
 (defgeneric set-font
     (clog-element font-style font-variant font-weight font-height font-family)
-(:documentation "Set font."))
+  (:documentation "Set font."))
 
 (defmethod set-font
     ((obj clog-element)
@@ -2427,7 +2427,7 @@ on the browser or Lisp side until DESTROY."))
 
 (defmethod browser-gc ((obj clog-element))
   (js-execute obj
-            "Object.entries(clog).forEach(function(c,i,a)
+              "Object.entries(clog).forEach(function(c,i,a)
                {if ((c[1] !== null) && (typeof c[1] === 'object') && (c[1].nodeType===1))
                   {if (c[1].isConnected===false) {$(clog['window']).trigger('gc', c[0])}}})"))
 
@@ -2515,7 +2515,7 @@ like pointers."))
 
 (defmethod list-of-children ((obj clog-element) &key no-attach)
   (let ((result (read-from-string (js-query obj (format nil
-"const tmpf=function(obj) {
+                                                        "const tmpf=function(obj) {
               var tmp='(' + obj.prop('id');
               obj.children().each(function() {
                                     if ( $(this).children().first() ) {
@@ -2533,11 +2533,11 @@ like pointers."))
                    (attach-as-child obj
                                     (normalize-html-id-for-attach item))))
              (ll (lst)
-                 (mapcar (lambda (l)
-                           (if (listp l)
-                               (ll l)
-                               (tr l)))
-                         lst)))
+               (mapcar (lambda (l)
+                         (if (listp l)
+                             (ll l)
+                             (tr l)))
+                       lst)))
       (rest (ll result)))))
 
 ;;;;;;;;;;;;;;;;;

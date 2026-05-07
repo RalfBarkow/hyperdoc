@@ -26,7 +26,7 @@
     (cond
       ((hash-table-p value)
        (loop for json-key being each hash-key of value
-               using (hash-value json-value)
+             using (hash-value json-value)
              for normalized-key = (keywordize-json-key json-key)
              append (list normalized-key
                           (normalize-journal-json json-value normalized-key))))

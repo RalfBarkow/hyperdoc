@@ -43,7 +43,7 @@
 
 (defun assert-py4dmx-page-contains-all (page-source page-label needles)
   (let ((normalized-page-source
-          (normalize-py4dmx-smoke-whitespace page-source)))
+         (normalize-py4dmx-smoke-whitespace page-source)))
     (dolist (needle needles)
       (py4dmx-assert-true
        (search (normalize-py4dmx-smoke-whitespace needle)

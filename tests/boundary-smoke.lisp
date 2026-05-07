@@ -50,7 +50,7 @@
 
 (defun assert-boundary-page-contains-all (page-source page-label needles)
   (let ((normalized
-          (normalize-boundary-smoke-whitespace page-source)))
+         (normalize-boundary-smoke-whitespace page-source)))
     (dolist (needle needles)
       (boundary-assert-true
        (search (normalize-boundary-smoke-whitespace needle)
@@ -77,23 +77,23 @@
          (instance (hyperdoc::make-example-boundary-instance))
          (dmx-note (hyperdoc::make-dmx-note-read-write-boundary-definition))
          (dmx-transition
-           (hyperdoc::make-dmx-workspace-journal-preflight-boundary-definition))
+          (hyperdoc::make-dmx-workspace-journal-preflight-boundary-definition))
          (dmx-auth
-           (hyperdoc::make-dmx-repair-console-authentication-boundary-definition))
+          (hyperdoc::make-dmx-repair-console-authentication-boundary-definition))
          (dmx-blocked
-           (hyperdoc::make-dmx-workspace-journal-preflight-blocked-boundary-instance))
+          (hyperdoc::make-dmx-workspace-journal-preflight-blocked-boundary-instance))
          (definition-views
-           (boundary-smoke-load-inspector-views-for-object definition))
+          (boundary-smoke-load-inspector-views-for-object definition))
          (instance-views
-           (boundary-smoke-load-inspector-views-for-object instance))
+          (boundary-smoke-load-inspector-views-for-object instance))
          (dmx-note-views
-           (boundary-smoke-load-inspector-views-for-object dmx-note))
+          (boundary-smoke-load-inspector-views-for-object dmx-note))
          (dmx-transition-views
-           (boundary-smoke-load-inspector-views-for-object dmx-transition))
+          (boundary-smoke-load-inspector-views-for-object dmx-transition))
          (dmx-auth-views
-           (boundary-smoke-load-inspector-views-for-object dmx-auth))
+          (boundary-smoke-load-inspector-views-for-object dmx-auth))
          (dmx-blocked-views
-           (boundary-smoke-load-inspector-views-for-object dmx-blocked)))
+          (boundary-smoke-load-inspector-views-for-object dmx-blocked)))
     (boundary-assert-typep
      'hyperdoc::boundary-definition
      definition

@@ -66,9 +66,9 @@
 
 (defun local-fedwiki-domain-name ()
   (let ((directory-components
-          (pathname-directory
-           (uiop:pathname-parent-directory-pathname
-            (local-fedwiki-pages-directory)))))
+         (pathname-directory
+          (uiop:pathname-parent-directory-pathname
+           (local-fedwiki-pages-directory)))))
     (string-downcase
      (princ-to-string (car (last directory-components))))))
 
@@ -134,52 +134,52 @@
 
 (views:defview 👀overview (probe fedwiki-publication-probe)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Domain"))
-                   (:td (views:esc (fedwiki-publication-probe-domain-of probe))))
-              (:tr (:td (views:esc "Slug"))
-                   (:td (:tt (views:esc (fedwiki-publication-probe-slug-of probe)))))
-              (:tr (:td (views:esc "Protocol"))
-                   (:td (:tt (views:esc (fedwiki-publication-probe-protocol-of probe)))))
-              (:tr (:td (views:esc "Local page path"))
-                   (:td (:code (views:esc
-                                (or (and (fedwiki-publication-probe-local-path-of probe)
-                                         (namestring
-                                          (fedwiki-publication-probe-local-path-of probe)))
-                                    "")))))
-              (:tr (:td (views:esc "Local page exists"))
-                   (:td (:tt (views:esc
-                              (if (fedwiki-publication-probe-local-page-exists-p probe)
-                                  "yes"
-                                  "no")))))
-              (:tr (:td (views:esc "Sitemap has slug"))
-                   (:td (:tt (views:esc
-                              (if (fedwiki-publication-probe-sitemap-has-slug-p probe)
-                                  "yes"
-                                  "no")))))
-              (:tr (:td (views:esc "Direct JSON fetch"))
-                   (:td (:tt (views:esc
-                              (string-downcase
-                               (symbol-name
-                                (fedwiki-publication-probe-fetch-status-of probe)))))))
-              (:tr (:td (views:esc "Classification"))
-                   (:td (:tt (views:esc
-                              (string-downcase
-                               (substitute #\Space #\- (symbol-name
-                                                        (fedwiki-publication-probe-classification-of probe))))))))))))
+                   (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "Domain"))
+                                 (:td (views:esc (fedwiki-publication-probe-domain-of probe))))
+                            (:tr (:td (views:esc "Slug"))
+                                 (:td (:tt (views:esc (fedwiki-publication-probe-slug-of probe)))))
+                            (:tr (:td (views:esc "Protocol"))
+                                 (:td (:tt (views:esc (fedwiki-publication-probe-protocol-of probe)))))
+                            (:tr (:td (views:esc "Local page path"))
+                                 (:td (:code (views:esc
+                                              (or (and (fedwiki-publication-probe-local-path-of probe)
+                                                       (namestring
+                                                        (fedwiki-publication-probe-local-path-of probe)))
+                                                  "")))))
+                            (:tr (:td (views:esc "Local page exists"))
+                                 (:td (:tt (views:esc
+                                            (if (fedwiki-publication-probe-local-page-exists-p probe)
+                                                "yes"
+                                                "no")))))
+                            (:tr (:td (views:esc "Sitemap has slug"))
+                                 (:td (:tt (views:esc
+                                            (if (fedwiki-publication-probe-sitemap-has-slug-p probe)
+                                                "yes"
+                                                "no")))))
+                            (:tr (:td (views:esc "Direct JSON fetch"))
+                                 (:td (:tt (views:esc
+                                            (string-downcase
+                                             (symbol-name
+                                              (fedwiki-publication-probe-fetch-status-of probe)))))))
+                            (:tr (:td (views:esc "Classification"))
+                                 (:td (:tt (views:esc
+                                            (string-downcase
+                                             (substitute #\Space #\- (symbol-name
+                                                                      (fedwiki-publication-probe-classification-of probe))))))))))))
 
 (views:defview 👀details (probe fedwiki-publication-probe)
   (views:html-view :title "Details" :priority 2
-    (views:html
-      (:p
-       (views:esc
-        "Use this probe to distinguish a missing twin from a publication/resolution boundary on the served FedWiki site."))
-      (when-let (error (fedwiki-publication-probe-fetch-error-of probe))
-        (views:html
-          (:table :class "inspector-table"
-                  (:tr (:td (views:esc "Fetch error"))
-                       (:td (views:object-ref error)))))))))
+                   (views:html
+                    (:p
+                     (views:esc
+                      "Use this probe to distinguish a missing twin from a publication/resolution boundary on the served FedWiki site."))
+                    (when-let (error (fedwiki-publication-probe-fetch-error-of probe))
+                      (views:html
+                       (:table :class "inspector-table"
+                               (:tr (:td (views:esc "Fetch error"))
+                                    (:td (views:object-ref error)))))))))
 
 (defun hyperdoc-page-template (title)
   (format nil "<h1>~A</h1>~%~%<in-package>hyperdoc</in-package>~%~%<p>~%  Placeholder page scaffolded from a lookup-repair plan. Replace this text with durable documentation content.~%</p>~%~%<h2>Inspectable objects</h2>~%~%<ul>~%  <li><a hyperbook=\"topics\" page=\"~A\"><tt>~A</tt></a></li>~%</ul>~%"
@@ -202,17 +202,17 @@
          (topic-id (topic-id-from-title page-id))
          (topic-function-name (topic-function-name-from-title page-id))
          (summary
-           (if (eq mode :topic)
-               "Scaffold the missing topic constructor and matching durable page without inventing content strength."
-               "Scaffold the missing HyperDoc page file and keep the authored content boundary explicit."))
+          (if (eq mode :topic)
+              "Scaffold the missing topic constructor and matching durable page without inventing content strength."
+              "Scaffold the missing HyperDoc page file and keep the authored content boundary explicit."))
          (template
-           (if (eq mode :topic)
-               (format nil "(defun ~A ()~%  (make-topic~%   :id ~S~%   :title ~S~%   :summary \"TODO\"~%   :references '(~S)))~%"
-                       topic-function-name
-                       topic-id
-                       page-id
-                       page-id)
-               (hyperdoc-page-template page-id))))
+          (if (eq mode :topic)
+              (format nil "(defun ~A ()~%  (make-topic~%   :id ~S~%   :title ~S~%   :summary \"TODO\"~%   :references '(~S)))~%"
+                      topic-function-name
+                      topic-id
+                      page-id
+                      page-id)
+              (hyperdoc-page-template page-id))))
     (make-instance 'hyperdoc-authoring-scaffold-plan
                    :mode mode
                    :target-hyperbook-id target-hyperbook-id
@@ -274,13 +274,13 @@
          (local-page-exists-p (and local-path
                                    (not (null (uiop:file-exists-p local-path)))))
          (materialization-plan
-           (and local-domain-p
-                (ignore-errors
-                  (plan-fedwiki-page-materialization
-                   slug
-                   :fedwiki-pages-directory pages-directory
-                   :fedwiki-repo-root repo-root
-                   :expected-fedwiki-branch nil))))
+          (and local-domain-p
+               (ignore-errors
+                 (plan-fedwiki-page-materialization
+                  slug
+                  :fedwiki-pages-directory pages-directory
+                  :fedwiki-repo-root repo-root
+                  :expected-fedwiki-branch nil))))
          (probe (make-fedwiki-publication-probe domain slug)))
     (hb::append-lookup-issue-details!
      issue
@@ -380,50 +380,50 @@
 (defmethod views:title-bar-action-buttons ((plan hyperdoc-authoring-scaffold-plan))
   (when (eq (hyperdoc-authoring-scaffold-mode-of plan) :page)
     (views:html
-      (views:action-button
-       "Write page stub"
-       (views:thunk
-         (write-hyperdoc-authoring-scaffold-plan! plan)
-         plan)
-       "Create the missing HyperDoc page file from this scaffold plan without touching topics.lisp."))))
+     (views:action-button
+      "Write page stub"
+      (views:thunk
+       (write-hyperdoc-authoring-scaffold-plan! plan)
+       plan)
+      "Create the missing HyperDoc page file from this scaffold plan without touching topics.lisp."))))
 
 (views:defview 👀overview (plan hyperdoc-authoring-scaffold-plan)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Mode"))
-                   (:td (:tt (views:esc
-                              (string-downcase
-                               (symbol-name
-                                (hyperdoc-authoring-scaffold-mode-of plan)))))))
-              (:tr (:td (views:esc "Target HyperBook"))
-                   (:td (:tt (views:esc
-                              (hyperdoc-authoring-scaffold-target-hyperbook-id-of plan)))))
-              (:tr (:td (views:esc "Page id"))
-                   (:td (:tt (views:esc
-                              (hyperdoc-authoring-scaffold-page-id-of plan)))))
-              (:tr (:td (views:esc "File path"))
-                   (:td (:code (views:esc
-                                (or (and (hyperdoc-authoring-scaffold-file-path-of plan)
-                                         (namestring
-                                          (hyperdoc-authoring-scaffold-file-path-of plan)))
-                                    "")))))
-              (:tr (:td (views:esc "Topic id"))
-                   (:td (:tt (views:esc
-                              (or (hyperdoc-authoring-scaffold-topic-id-of plan)
-                                  "")))))
-              (:tr (:td (views:esc "Topic function"))
-                   (:td (:tt (views:esc
-                              (or (hyperdoc-authoring-scaffold-topic-function-name-of plan)
-                                  "")))))
-              (:tr (:td (views:esc "Summary"))
-                   (:td (views:esc
-                         (hyperdoc-authoring-scaffold-summary-of plan))))))))
+                   (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "Mode"))
+                                 (:td (:tt (views:esc
+                                            (string-downcase
+                                             (symbol-name
+                                              (hyperdoc-authoring-scaffold-mode-of plan)))))))
+                            (:tr (:td (views:esc "Target HyperBook"))
+                                 (:td (:tt (views:esc
+                                            (hyperdoc-authoring-scaffold-target-hyperbook-id-of plan)))))
+                            (:tr (:td (views:esc "Page id"))
+                                 (:td (:tt (views:esc
+                                            (hyperdoc-authoring-scaffold-page-id-of plan)))))
+                            (:tr (:td (views:esc "File path"))
+                                 (:td (:code (views:esc
+                                              (or (and (hyperdoc-authoring-scaffold-file-path-of plan)
+                                                       (namestring
+                                                        (hyperdoc-authoring-scaffold-file-path-of plan)))
+                                                  "")))))
+                            (:tr (:td (views:esc "Topic id"))
+                                 (:td (:tt (views:esc
+                                            (or (hyperdoc-authoring-scaffold-topic-id-of plan)
+                                                "")))))
+                            (:tr (:td (views:esc "Topic function"))
+                                 (:td (:tt (views:esc
+                                            (or (hyperdoc-authoring-scaffold-topic-function-name-of plan)
+                                                "")))))
+                            (:tr (:td (views:esc "Summary"))
+                                 (:td (views:esc
+                                       (hyperdoc-authoring-scaffold-summary-of plan))))))))
 
 (views:defview 👀template (plan hyperdoc-authoring-scaffold-plan)
   (views:html-view :title "Template" :priority 2
-    (views:html
-      (:pre (views:esc (hyperdoc-authoring-scaffold-template-of plan))))))
+                   (views:html
+                    (:pre (views:esc (hyperdoc-authoring-scaffold-template-of plan))))))
 
 (defmethod issue-target-chunk ((issue hb:lookup-issue))
   (when (string= (or (hb:lookup-issue-target-hyperbook-id-of issue) "")
@@ -458,22 +458,22 @@
   (when (missing-local-fedwiki-twin-lookup-issue-p issue)
     (let* ((slug (hb:lookup-issue-expected-page-id-of issue))
            (pages-directory
-             (missing-local-fedwiki-twin-lookup-issue-pages-directory issue))
+            (missing-local-fedwiki-twin-lookup-issue-pages-directory issue))
            (repo-root
-             (missing-local-fedwiki-twin-lookup-issue-repo-root issue))
+            (missing-local-fedwiki-twin-lookup-issue-repo-root issue))
            (local-path (and slug
                             (merge-pathnames slug pages-directory)))
            (local-page-exists-p (and local-path
                                      (not (null (uiop:file-exists-p local-path)))))
            (materialization-plan
-             (and slug
-                  (not local-page-exists-p)
-                  (ignore-errors
-                    (plan-fedwiki-page-materialization
-                     slug
-                     :fedwiki-pages-directory pages-directory
-                     :fedwiki-repo-root repo-root
-                     :expected-fedwiki-branch nil))))
+            (and slug
+                 (not local-page-exists-p)
+                 (ignore-errors
+                   (plan-fedwiki-page-materialization
+                    slug
+                    :fedwiki-pages-directory pages-directory
+                    :fedwiki-repo-root repo-root
+                    :expected-fedwiki-branch nil))))
            (entry (and materialization-plan
                        (first
                         (fedwiki-materialization-entries-of
@@ -530,21 +530,21 @@
                             (hb:lookup-issue-repair-description-of issue)))
          (freshness-mode (getf details :freshness-mode)))
     (views:html
-      (when include-target-chunk
-        (views:html
-          (:tr (:td (views:esc "Target chunk"))
-               (:td (if chunk
-                        (views:object-ref chunk)
-                        (views:esc ""))))))
-      (:tr (:td (views:esc "Current-state reason"))
-           (:td (views:esc (or status-reason ""))))
-      (:tr (:td (views:esc "Repair path on click"))
-           (:td (views:esc (page-lookup-issue-repair-path-label issue))))
-      (when freshness-mode
-        (views:html
-          (:tr (:td (views:esc "Freshness mode"))
-               (:td (:tt (views:esc
-                          (hb::issue-label freshness-mode))))))))))
+     (when include-target-chunk
+       (views:html
+        (:tr (:td (views:esc "Target chunk"))
+             (:td (if chunk
+                      (views:object-ref chunk)
+                      (views:esc ""))))))
+     (:tr (:td (views:esc "Current-state reason"))
+          (:td (views:esc (or status-reason ""))))
+     (:tr (:td (views:esc "Repair path on click"))
+          (:td (views:esc (page-lookup-issue-repair-path-label issue))))
+     (when freshness-mode
+       (views:html
+        (:tr (:td (views:esc "Freshness mode"))
+             (:td (:tt (views:esc
+                        (hb::issue-label freshness-mode))))))))))
 
 (defmethod hb:bounded-lookup-issue-current-status-of ((issue hb:page-lookup-issue))
   (or (when-let (chunk (topic-page-lookup-issue-target-chunk issue))
@@ -604,26 +604,26 @@
 (defmethod hb::bounded-lookup-issue-repair-extra-content
     ((issue hb:page-lookup-issue))
   (views:html
-    (:table :class "inspector-table"
-            (render-page-lookup-issue-runtime-summary-rows
-             issue
-             :include-target-chunk t))
-    (when (topic-page-lookup-issue-target-chunk issue)
-      (views:html
-        (:p (views:esc
-             "This repair path is chunk-first: clicking repair ensures the target chunk and its basis chain."))
-        (:p
-         (views:eval-button
-          "Inspect SCXML dry-run"
-          (views:thunk
-            (run-page-lookup-topic-repair-stub-scxml issue))
-          "Run the SCXML repair protocol stub without mutating HyperDoc source.")
-         (views:esc " ")
-         (views:eval-button
-          "Inspect native SCXML run"
-          (views:thunk
-            (run-page-lookup-topic-repair-native-scxml issue))
-          "Compile and run the SCXML repair protocol with HyperDoc's Lisp-native SCXML compiler."))))))
+   (:table :class "inspector-table"
+           (render-page-lookup-issue-runtime-summary-rows
+            issue
+            :include-target-chunk t))
+   (when (topic-page-lookup-issue-target-chunk issue)
+     (views:html
+      (:p (views:esc
+           "This repair path is chunk-first: clicking repair ensures the target chunk and its basis chain."))
+      (:p
+       (views:eval-button
+        "Inspect SCXML dry-run"
+        (views:thunk
+         (run-page-lookup-topic-repair-stub-scxml issue))
+        "Run the SCXML repair protocol stub without mutating HyperDoc source.")
+       (views:esc " ")
+       (views:eval-button
+        "Inspect native SCXML run"
+        (views:thunk
+         (run-page-lookup-topic-repair-native-scxml issue))
+        "Compile and run the SCXML repair protocol with HyperDoc's Lisp-native SCXML compiler."))))))
 
 (defmethod views:text-representation ((chunk page-lookup-target-chunk))
   (title-of chunk))
@@ -640,173 +640,173 @@
 
 (views:defview 👀overview (chunk authored-topic-factory-chunk)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Chunk"))
-                   (:td (:tt (views:esc "authored-topic-factory"))))
-              (:tr (:td (views:esc "Topic title"))
-                   (:td (:tt (views:esc
-                              (page-lookup-topic-title-of chunk)))))
-              (:tr (:td (views:esc "Satisfied"))
-                   (:td (:tt (views:esc
-                              (if (chunk-satisfied-p chunk) "yes" "no")))))
-              (:tr (:td (views:esc "Source signature token"))
-                   (:td (:tt (views:esc
-                              (format nil "~A"
-                                      (topic-page-authored-signature-token
-                                       (page-lookup-topic-title-of chunk)))))))
-              (:tr (:td (views:esc "Summary"))
-                   (:td (views:esc (summary-of chunk))))))))
+                   (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "Chunk"))
+                                 (:td (:tt (views:esc "authored-topic-factory"))))
+                            (:tr (:td (views:esc "Topic title"))
+                                 (:td (:tt (views:esc
+                                            (page-lookup-topic-title-of chunk)))))
+                            (:tr (:td (views:esc "Satisfied"))
+                                 (:td (:tt (views:esc
+                                            (if (chunk-satisfied-p chunk) "yes" "no")))))
+                            (:tr (:td (views:esc "Source signature token"))
+                                 (:td (:tt (views:esc
+                                            (format nil "~A"
+                                                    (topic-page-authored-signature-token
+                                                     (page-lookup-topic-title-of chunk)))))))
+                            (:tr (:td (views:esc "Summary"))
+                                 (:td (views:esc (summary-of chunk))))))))
 
 (views:defview 👀freshness (chunk authored-topic-factory-chunk)
   (views:html-view :title "Freshness" :priority 2
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Authored factory in source"))
-                   (:td (:tt (views:esc
-                              (if (authored-topic-factory-defined-in-source-p
-                                   (page-lookup-topic-title-of chunk))
-                                  "yes"
-                                  "no")))))
-              (:tr (:td (views:esc "Source signature token"))
-                   (:td (:tt (views:esc
-                              (format nil "~A"
-                                      (topic-page-authored-signature-token
-                                       (page-lookup-topic-title-of chunk))))))))
-      (if-let (signature
-               (authored-topic-factory-source-signature
-                (page-lookup-topic-title-of chunk)))
-        (views:html
-          (:p (views:esc "Authored topic factory signature"))
-          (:pre (views:esc signature)))
-        (views:html
-          (:p (views:esc
-               "No authored topic factory signature is available yet for this title.")))))))
+                   (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "Authored factory in source"))
+                                 (:td (:tt (views:esc
+                                            (if (authored-topic-factory-defined-in-source-p
+                                                 (page-lookup-topic-title-of chunk))
+                                                "yes"
+                                                "no")))))
+                            (:tr (:td (views:esc "Source signature token"))
+                                 (:td (:tt (views:esc
+                                            (format nil "~A"
+                                                    (topic-page-authored-signature-token
+                                                     (page-lookup-topic-title-of chunk))))))))
+                    (if-let (signature
+                             (authored-topic-factory-source-signature
+                              (page-lookup-topic-title-of chunk)))
+                        (views:html
+                         (:p (views:esc "Authored topic factory signature"))
+                         (:pre (views:esc signature)))
+                      (views:html
+                       (:p (views:esc
+                            "No authored topic factory signature is available yet for this title.")))))))
 
 (views:defview 👀materialization (chunk authored-topic-factory-chunk)
   (views:html-view :title "Materialization" :priority 3
-    (views:html
-      (:p (views:esc
-           "Ensuring this chunk appends a placeholder topic factory to topics.lisp when no authored factory exists, then loads the updated source into the running image."))
-      (:pre (views:esc
-             (page-lookup-placeholder-topic-form
-              (page-lookup-topic-title-of chunk)))))))
+                   (views:html
+                    (:p (views:esc
+                         "Ensuring this chunk appends a placeholder topic factory to topics.lisp when no authored factory exists, then loads the updated source into the running image."))
+                    (:pre (views:esc
+                           (page-lookup-placeholder-topic-form
+                            (page-lookup-topic-title-of chunk)))))))
 
 (views:defview 👀overview (chunk topic-page-availability-chunk)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:table :class "inspector-table"
-              (:tr (:td (views:esc "Chunk"))
-                   (:td (:tt (views:esc "topic-page-availability"))))
-              (:tr (:td (views:esc "Topic title"))
-                   (:td (:tt (views:esc
-                              (page-lookup-topic-title-of chunk)))))
-              (:tr (:td (views:esc "Derived issue state"))
-                   (:td (:tt (views:esc
-                              (hb::issue-label
-                               (topic-page-lookup-chunk-state chunk))))))
-              (:tr (:td (views:esc "Status reason"))
-                   (:td (views:esc
-                         (topic-page-lookup-status-reason chunk))))
-              (:tr (:td (views:esc "Repair hint"))
-                   (:td (views:esc
-                         (topic-page-lookup-repair-hint chunk))))
-              (:tr (:td (views:esc "Freshness mode"))
-                   (:td (:tt (views:esc
-                              (hb::issue-label
-                               (topic-page-lookup-freshness-mode chunk))))))
-              (:tr (:td (views:esc "Topic index state"))
-                   (:td (:tt (views:esc
-                              (hb::issue-label *topic-index-state*)))))
-              (:tr (:td (views:esc "Page resolves"))
-                   (:td (:tt (views:esc
-                              (if (topic-page-resolves-p
-                                   (page-lookup-topic-title-of chunk))
-                                  "yes"
-                                  "no")))))
-              (:tr (:td (views:esc "Summary"))
-                   (:td (views:esc (summary-of chunk))))))))
+                   (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:td (views:esc "Chunk"))
+                                 (:td (:tt (views:esc "topic-page-availability"))))
+                            (:tr (:td (views:esc "Topic title"))
+                                 (:td (:tt (views:esc
+                                            (page-lookup-topic-title-of chunk)))))
+                            (:tr (:td (views:esc "Derived issue state"))
+                                 (:td (:tt (views:esc
+                                            (hb::issue-label
+                                             (topic-page-lookup-chunk-state chunk))))))
+                            (:tr (:td (views:esc "Status reason"))
+                                 (:td (views:esc
+                                       (topic-page-lookup-status-reason chunk))))
+                            (:tr (:td (views:esc "Repair hint"))
+                                 (:td (views:esc
+                                       (topic-page-lookup-repair-hint chunk))))
+                            (:tr (:td (views:esc "Freshness mode"))
+                                 (:td (:tt (views:esc
+                                            (hb::issue-label
+                                             (topic-page-lookup-freshness-mode chunk))))))
+                            (:tr (:td (views:esc "Topic index state"))
+                                 (:td (:tt (views:esc
+                                            (hb::issue-label *topic-index-state*)))))
+                            (:tr (:td (views:esc "Page resolves"))
+                                 (:td (:tt (views:esc
+                                            (if (topic-page-resolves-p
+                                                 (page-lookup-topic-title-of chunk))
+                                                "yes"
+                                                "no")))))
+                            (:tr (:td (views:esc "Summary"))
+                                 (:td (views:esc (summary-of chunk))))))))
 
 (views:defview 👀basis (chunk topic-page-availability-chunk)
   (views:html-view :title "Basis" :priority 2
-    (let ((basis (chunk-basis chunk)))
-      (views:html
-        (:table :class "inspector-table"
-                (dolist (basis-chunk basis)
-                  (views:html
-                    (:tr (:td (views:esc "Required chunk"))
-                         (:td (views:object-ref basis-chunk))))))))))
+                   (let ((basis (chunk-basis chunk)))
+                     (views:html
+                      (:table :class "inspector-table"
+                              (dolist (basis-chunk basis)
+                                (views:html
+                                 (:tr (:td (views:esc "Required chunk"))
+                                      (:td (views:object-ref basis-chunk))))))))))
 
 (views:defview 👀freshness (chunk topic-page-availability-chunk)
   (views:html-view :title "Freshness" :priority 3
-    (let* ((title (page-lookup-topic-title-of chunk))
-           (source-signature (authored-topic-factory-source-signature title))
-           (materialized-signature (topic-page-materialization-signature title)))
-      (views:html
-        (:table :class "inspector-table"
-                (:tr (:td (views:esc "Authored factory in source"))
-                     (:td (:tt (views:esc
-                                (if (authored-topic-factory-defined-in-source-p
-                                     title)
-                                    "yes"
-                                    "no")))))
-                (:tr (:td (views:esc "Freshness mode"))
-                     (:td (:tt (views:esc
-                                (hb::issue-label
-                                 (topic-page-lookup-freshness-mode chunk))))))
-                (:tr (:td (views:esc "Authored signature token"))
-                     (:td (:tt (views:esc
-                                (format nil "~A"
-                                        (topic-page-authored-signature-token
-                                         title))))))
-                (:tr (:td (views:esc "Materialization signature token"))
-                     (:td (:tt (views:esc
-                                (format nil "~A"
-                                        (topic-page-materialization-signature-token
-                                         title))))))
-                (:tr (:td (views:esc "Per-topic signatures match"))
-                     (:td (:tt (views:esc
-                                (if (topic-page-signatures-match-p title)
-                                    "yes"
-                                    "no")))))
-                (:tr (:td (views:esc "Topics source write date"))
-                     (:td (:tt (views:esc
-                                (format nil "~A"
-                                        (page-lookup-topic-source-write-date))))))
-                (:tr (:td (views:esc "Topic index derived at"))
-                     (:td (:tt (views:esc
-                                (format nil "~A"
-                                        (or *topic-index-derived-at*
-                                            +no-info-date+)))))))
-        (if source-signature
-            (views:html
-              (:p (views:esc "Authored topic factory signature"))
-              (:pre (views:esc source-signature)))
-            (views:html
-              (:p (views:esc
-                   "No authored topic factory signature is available for this title."))))
-        (if materialized-signature
-            (views:html
-              (:p (views:esc "Materialized topic signature"))
-              (:pre (views:esc materialized-signature)))
-            (views:html
-              (:p (views:esc
-                   "No materialized topic signature is available yet for this title."))))))))
+                   (let* ((title (page-lookup-topic-title-of chunk))
+                          (source-signature (authored-topic-factory-source-signature title))
+                          (materialized-signature (topic-page-materialization-signature title)))
+                     (views:html
+                      (:table :class "inspector-table"
+                              (:tr (:td (views:esc "Authored factory in source"))
+                                   (:td (:tt (views:esc
+                                              (if (authored-topic-factory-defined-in-source-p
+                                                   title)
+                                                  "yes"
+                                                  "no")))))
+                              (:tr (:td (views:esc "Freshness mode"))
+                                   (:td (:tt (views:esc
+                                              (hb::issue-label
+                                               (topic-page-lookup-freshness-mode chunk))))))
+                              (:tr (:td (views:esc "Authored signature token"))
+                                   (:td (:tt (views:esc
+                                              (format nil "~A"
+                                                      (topic-page-authored-signature-token
+                                                       title))))))
+                              (:tr (:td (views:esc "Materialization signature token"))
+                                   (:td (:tt (views:esc
+                                              (format nil "~A"
+                                                      (topic-page-materialization-signature-token
+                                                       title))))))
+                              (:tr (:td (views:esc "Per-topic signatures match"))
+                                   (:td (:tt (views:esc
+                                              (if (topic-page-signatures-match-p title)
+                                                  "yes"
+                                                  "no")))))
+                              (:tr (:td (views:esc "Topics source write date"))
+                                   (:td (:tt (views:esc
+                                              (format nil "~A"
+                                                      (page-lookup-topic-source-write-date))))))
+                              (:tr (:td (views:esc "Topic index derived at"))
+                                   (:td (:tt (views:esc
+                                              (format nil "~A"
+                                                      (or *topic-index-derived-at*
+                                                          +no-info-date+)))))))
+                      (if source-signature
+                          (views:html
+                           (:p (views:esc "Authored topic factory signature"))
+                           (:pre (views:esc source-signature)))
+                          (views:html
+                           (:p (views:esc
+                                "No authored topic factory signature is available for this title."))))
+                      (if materialized-signature
+                          (views:html
+                           (:p (views:esc "Materialized topic signature"))
+                           (:pre (views:esc materialized-signature)))
+                          (views:html
+                           (:p (views:esc
+                                "No materialized topic signature is available yet for this title."))))))))
 
 (views:defview 👀repair (chunk topic-page-availability-chunk)
   (views:html-view :title "Repair" :priority 4
-    (views:html
-      (:p (views:esc
-           (topic-page-lookup-repair-description chunk)))
-      (:p (views:esc
-           "Repair for this issue class delegates to ensure-chunk on the target chunk."))
-      (when (eq (topic-page-lookup-chunk-state chunk)
-                :needs-topic-creation)
-        (views:html
-          (:p (views:esc
-               "This repair path first ensures the authored-topic-factory basis chunk so the missing topic definition is added before the Topics page is rebuilt."))))
-      (when (eq (topic-page-lookup-chunk-state chunk)
-                :needs-local-materialization)
-        (views:html
-          (:p (views:esc
-               "This repair path keeps the authored topic factory and refreshes only the running Topics materialization.")))))))
+                   (views:html
+                    (:p (views:esc
+                         (topic-page-lookup-repair-description chunk)))
+                    (:p (views:esc
+                         "Repair for this issue class delegates to ensure-chunk on the target chunk."))
+                    (when (eq (topic-page-lookup-chunk-state chunk)
+                              :needs-topic-creation)
+                      (views:html
+                       (:p (views:esc
+                            "This repair path first ensures the authored-topic-factory basis chunk so the missing topic definition is added before the Topics page is rebuilt."))))
+                    (when (eq (topic-page-lookup-chunk-state chunk)
+                              :needs-local-materialization)
+                      (views:html
+                       (:p (views:esc
+                            "This repair path keeps the authored topic factory and refreshes only the running Topics materialization.")))))))

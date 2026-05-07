@@ -23,7 +23,7 @@
              (dom (plump:parse file))
              (title (loop for tag in '("title" "h1" "h2" "h3" "h4" "h5" "h6")
                           do (let ((elements (-> dom
-                                               (plump:get-elements-by-tag-name tag))))
+                                                 (plump:get-elements-by-tag-name tag))))
                                (when elements
                                  (return (-> elements first plump:text))))))
              (page (make-instance 'html-page
@@ -65,30 +65,30 @@
 
 (defun render-source-surface-line (line-number line-text)
   (views:html
-    (:div :class "hyperdoc-source-pane-line"
-          (:span :class "hyperdoc-source-pane-line-number"
-                 (views:esc (format nil "~D" line-number)))
-          (:span :class "hyperdoc-source-pane-line-text"
-                 (views:esc line-text)))))
+   (:div :class "hyperdoc-source-pane-line"
+         (:span :class "hyperdoc-source-pane-line-number"
+                (views:esc (format nil "~D" line-number)))
+         (:span :class "hyperdoc-source-pane-line-text"
+                (views:esc line-text)))))
 
 (defun render-source-surface-lines (pathname render-line
                                     &key
                                       (wrapper-class "hyperdoc-source-pane-view"))
   (views:html
-    (:div :class wrapper-class
-          (loop for line-text in (uiop:read-file-lines pathname)
-                for line-number from 1
-                do (funcall render-line line-number line-text)))))
+   (:div :class wrapper-class
+         (loop for line-text in (uiop:read-file-lines pathname)
+               for line-number from 1
+               do (funcall render-line line-number line-text)))))
 
 (defun render-file-source-surface (pathname)
   (include-source-surface-assets)
   (views:html
-    (:div :class "hyperdoc-source-pane"
-          (render-source-surface-lines pathname #'render-source-surface-line))))
+   (:div :class "hyperdoc-source-pane"
+         (render-source-surface-lines pathname #'render-source-surface-line))))
 
 (views:defview views:👀source (page html-page)
   (views:html-view :title "Source" :priority 10
-    (render-file-source-surface (file-of page))))
+                   (render-file-source-surface (file-of page))))
 
 (defmethod find-link-sources ((hb html-hyperbook) hyperbook-id page-id)
   (load-pages hb)

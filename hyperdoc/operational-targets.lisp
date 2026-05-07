@@ -387,8 +387,8 @@
                   (probe-file (git-metadata-pathname repository-root))))))
 
 (defun dreyeck-git-readiness-runtime-origin (&key repository-root
-                                                repository-root-source
-                                                system)
+                                               repository-root-source
+                                               system)
   (let ((source-file (ignore-errors (asdf:system-source-file system))))
     (cond
       ((git-explicit-repository-root-source-p repository-root-source)
@@ -814,7 +814,7 @@
 
 (defun make-dreyeck-git-readiness-run-from-probe (probe)
   (multiple-value-bind (current-state status failure-classification
-                        visited-states transition-trace evidence-trace)
+                                      visited-states transition-trace evidence-trace)
       (classify-dreyeck-git-readiness-probe probe)
     (let* ((host-target (dreyeck-ch-nixos-host-target))
            (add-operation (dreyeck-ch-add-konrad-upstream-remote-operation))
@@ -865,12 +865,12 @@
                    ((or string symbol)
                     (asdf:find-system system-designator))))
          (git-version-result
-           (call-with-git-runtime-boundary
-            (lambda ()
-              (git-command-output*
-               (runtime-probe-directory)
-               '("--version")
-               :operation "git --version")))))
+          (call-with-git-runtime-boundary
+           (lambda ()
+             (git-command-output*
+              (runtime-probe-directory)
+              '("--version")
+              :operation "git --version")))))
     (multiple-value-bind (resolved-program requested-program _configuration-source)
         (resolve-git-program)
       (declare (ignore _configuration-source))
@@ -885,20 +885,20 @@
           :blocking-condition git-version-result))
         (t
          (let ((root-result
-                 (call-with-git-runtime-boundary
-                  (lambda ()
-                    (multiple-value-list
-                     (system-repository-root-info system))))))
+                (call-with-git-runtime-boundary
+                 (lambda ()
+                   (multiple-value-list
+                    (system-repository-root-info system))))))
            (cond
              ((typep root-result 'git-runtime-unavailable)
               (let* ((repository-root (repository-root-of root-result))
                      (repository-root-source
-                       (repository-root-source-of root-result))
+                      (repository-root-source-of root-result))
                      (runtime-origin
-                       (dreyeck-git-readiness-runtime-origin
-                        :repository-root repository-root
-                        :repository-root-source repository-root-source
-                        :system system)))
+                      (dreyeck-git-readiness-runtime-origin
+                       :repository-root repository-root
+                       :repository-root-source repository-root-source
+                       :system system)))
                 (make-dreyeck-git-readiness-probe
                  :git-executable-available-p t
                  :requested-program requested-program
@@ -914,21 +914,21 @@
               (destructuring-bind (repository-root repository-root-source)
                   root-result
                 (let* ((runtime-origin
-                         (dreyeck-git-readiness-runtime-origin
-                          :repository-root repository-root
-                          :repository-root-source repository-root-source
-                          :system system))
+                        (dreyeck-git-readiness-runtime-origin
+                         :repository-root repository-root
+                         :repository-root-source repository-root-source
+                         :system system))
                        (metadata-present-p
-                         (git-metadata-present-p repository-root))
+                        (git-metadata-present-p repository-root))
                        (remote-output
-                         (call-with-git-runtime-boundary
-                          (lambda ()
-                            (git-command-output*
-                             repository-root
-                             '("remote" "get-url" "upstream")
-                             :ignore-error-status t
-                             :operation "git remote get-url upstream"
-                             :repository-root-source repository-root-source)))))
+                        (call-with-git-runtime-boundary
+                         (lambda ()
+                           (git-command-output*
+                            repository-root
+                            '("remote" "get-url" "upstream")
+                            :ignore-error-status t
+                            :operation "git remote get-url upstream"
+                            :repository-root-source repository-root-source)))))
                   (cond
                     ((typep remote-output 'git-runtime-unavailable)
                      (make-dreyeck-git-readiness-probe
@@ -952,15 +952,15 @@
                       :upstream-remote-present-p nil))
                     (t
                      (let ((upstream-main-output
-                             (call-with-git-runtime-boundary
-                              (lambda ()
-                                (git-command-output*
-                                 repository-root
-                                 '("show-ref" "--verify" "refs/remotes/upstream/main")
-                                 :ignore-error-status t
-                                 :operation
-                                 "git show-ref --verify refs/remotes/upstream/main"
-                                 :repository-root-source repository-root-source)))))
+                            (call-with-git-runtime-boundary
+                             (lambda ()
+                               (git-command-output*
+                                repository-root
+                                '("show-ref" "--verify" "refs/remotes/upstream/main")
+                                :ignore-error-status t
+                                :operation
+                                "git show-ref --verify refs/remotes/upstream/main"
+                                :repository-root-source repository-root-source)))))
                        (if (typep upstream-main-output 'git-runtime-unavailable)
                            (make-dreyeck-git-readiness-probe
                             :git-executable-available-p t

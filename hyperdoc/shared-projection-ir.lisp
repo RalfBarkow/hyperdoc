@@ -19,7 +19,7 @@
           for value = (gethash key object)
           when (or value
                    (nth-value 1 (gethash key object)))
-            do (return value))))
+          do (return value))))
 
 (defun shared-projection-list (value)
   (cond
@@ -558,7 +558,7 @@
                  :failure-states
                  (loop for state in states
                        when (eq (state-machine-state-role-of state) :failure)
-                         collect (id-of state))
+                       collect (id-of state))
                  :regions regions
                  :history-mode history-mode
                  :scxml-text scxml-text
@@ -604,12 +604,12 @@
 (defun behavior-trace->state-machine-evidence-trace (trace)
   (loop for entry in (behavior-trace-entries-of trace)
         when (behavior-trace-entry-evidence-of entry)
-          collect (list :timestamp (behavior-trace-entry-timestamp-of entry)
-                        :kind :evidence
-                        :transition-id (behavior-trace-entry-transition-id-of entry)
-                        :from-state (behavior-trace-entry-from-state-of entry)
-                        :to-state (behavior-trace-entry-to-state-of entry)
-                        :evidence (behavior-trace-entry-evidence-of entry))))
+        collect (list :timestamp (behavior-trace-entry-timestamp-of entry)
+                      :kind :evidence
+                      :transition-id (behavior-trace-entry-transition-id-of entry)
+                      :from-state (behavior-trace-entry-from-state-of entry)
+                      :to-state (behavior-trace-entry-to-state-of entry)
+                      :evidence (behavior-trace-entry-evidence-of entry))))
 
 (defun make-behavior-run
     (&key id title summary machine input current-state visited-states
@@ -698,20 +698,20 @@
 
 (defun state-machine-definition->behavior-machine-definition (machine)
   (let* ((guard-objects
-           (mapcar (lambda (guard-id)
-                     (make-behavior-guard
-                      :id (shared-projection-string guard-id)
-                      :title (shared-projection-string guard-id)
-                      :summary "Imported from the generic HyperDoc state-machine guard list."
-                      :expression (shared-projection-string guard-id)))
-                   (state-machine-definition-guards-of machine)))
+          (mapcar (lambda (guard-id)
+                    (make-behavior-guard
+                     :id (shared-projection-string guard-id)
+                     :title (shared-projection-string guard-id)
+                     :summary "Imported from the generic HyperDoc state-machine guard list."
+                     :expression (shared-projection-string guard-id)))
+                  (state-machine-definition-guards-of machine)))
          (event-objects
-           (mapcar (lambda (event-id)
-                     (make-behavior-event
-                      :id (shared-projection-string event-id)
-                      :title (shared-projection-string event-id)
-                      :summary "Imported from the generic HyperDoc state-machine event list."))
-                   (state-machine-definition-events-of machine))))
+          (mapcar (lambda (event-id)
+                    (make-behavior-event
+                     :id (shared-projection-string event-id)
+                     :title (shared-projection-string event-id)
+                     :summary "Imported from the generic HyperDoc state-machine event list."))
+                  (state-machine-definition-events-of machine))))
     (make-behavior-machine-definition
      :id (id-of machine)
      :title (title-of machine)
@@ -809,9 +809,9 @@
                 (let* ((state-id (id-of state))
                        (outgoing (state-machine-transitions-from-state machine state-id))
                        (terminal-p
-                         (member state-id
-                                 (state-machine-definition-terminal-states-of machine)
-                                 :test #'equal)))
+                        (member state-id
+                                (state-machine-definition-terminal-states-of machine)
+                                :test #'equal)))
                   (if (and terminal-p (null outgoing))
                       (format stream "  <final id=\"~A\"/>~%"
                               (shared-projection-xml-escape state-id))
@@ -864,7 +864,7 @@
                    (shared-projection-extract-xml-attribute trimmed "initial")))
             ((search "<final" trimmed :test #'char=)
              (let ((state-id
-                     (shared-projection-extract-xml-attribute trimmed "id")))
+                    (shared-projection-extract-xml-attribute trimmed "id")))
                (push (make-behavior-state
                       :id state-id
                       :title state-id
@@ -884,13 +884,13 @@
                    states))
             ((search "<transition" trimmed :test #'char=)
              (let ((transition-id
-                     (shared-projection-extract-xml-attribute trimmed "id"))
+                    (shared-projection-extract-xml-attribute trimmed "id"))
                    (event-id
-                     (shared-projection-extract-xml-attribute trimmed "event"))
+                    (shared-projection-extract-xml-attribute trimmed "event"))
                    (guard-id
-                     (shared-projection-extract-xml-attribute trimmed "cond"))
+                    (shared-projection-extract-xml-attribute trimmed "cond"))
                    (target-id
-                     (shared-projection-extract-xml-attribute trimmed "target")))
+                    (shared-projection-extract-xml-attribute trimmed "target")))
                (push (make-behavior-transition
                       :id (or transition-id
                               (format nil "~A->~A" current-state-id target-id))
@@ -1013,76 +1013,76 @@
                              (shared-projection-json-field topicmap-topic "value")
                              "context-window"))
          (memberships-by-topic
-           (or topicmap-memberships
-               (let ((table (make-hash-table :test #'equal)))
-                 (dolist (topic-entry
+          (or topicmap-memberships
+              (let ((table (make-hash-table :test #'equal)))
+                (dolist (topic-entry
                           (shared-projection-list
                            (shared-projection-json-field topicmap-json "topics")))
-                   (let* ((topic-id (shared-projection-json-field topic-entry "id"))
-                          (membership
-                            (make-shared-projection-topicmap-membership
-                             :id (format nil "topicmap-membership/~A/~A"
-                                         topicmap-id
-                                         topic-id)
-                             :topicmap-id topicmap-id
-                             :assoc-id nil
-                             :view-props
-                             (shared-projection-copy-json-value
-                              (shared-projection-json-field topic-entry "viewProps")))))
-                     (setf (gethash topic-id table) (list membership))))
-                 table)))
+                  (let* ((topic-id (shared-projection-json-field topic-entry "id"))
+                         (membership
+                          (make-shared-projection-topicmap-membership
+                           :id (format nil "topicmap-membership/~A/~A"
+                                       topicmap-id
+                                       topic-id)
+                           :topicmap-id topicmap-id
+                           :assoc-id nil
+                           :view-props
+                           (shared-projection-copy-json-value
+                            (shared-projection-json-field topic-entry "viewProps")))))
+                    (setf (gethash topic-id table) (list membership))))
+                table)))
          (entities
-           (mapcar
-            (lambda (topic-json)
-              (let* ((topic-id (shared-projection-json-field topic-json "id"))
-                     (memberships
-                       (shared-projection-list
-                        (gethash topic-id memberships-by-topic)))
-                     (assignment
-                       (and workspace-id
-                            (make-shared-projection-workspace-assignment
-                             :id (format nil "workspace-assignment/~A/~A"
-                                         workspace-id topic-id)
-                             :workspace-id workspace-id
-                             :workspace-name workspace-name
-                             :assignment-status "read-from-authoritative-workspace"))))
-                (dmx-topic-json->shared-projection-entity
-                 topic-json
-                 :workspace-assignment assignment
-                 :topicmap-memberships memberships
-                 :owner-class nil
-                 :provenance
-                 (make-shared-projection-provenance
-                  :id (format nil "provenance/topic/~A" topic-id)
-                  :source-kind "dmx-read"
-                  :source-id (format nil "topic/~A" topic-id)
-                  :derivation-kind "normalized-topic-json"
-                  :confidence 1.0
-                  :replay-hash (format nil "topic/~A" topic-id)))))
-            topic-jsons))
+          (mapcar
+           (lambda (topic-json)
+             (let* ((topic-id (shared-projection-json-field topic-json "id"))
+                    (memberships
+                     (shared-projection-list
+                      (gethash topic-id memberships-by-topic)))
+                    (assignment
+                     (and workspace-id
+                          (make-shared-projection-workspace-assignment
+                           :id (format nil "workspace-assignment/~A/~A"
+                                       workspace-id topic-id)
+                           :workspace-id workspace-id
+                           :workspace-name workspace-name
+                           :assignment-status "read-from-authoritative-workspace"))))
+               (dmx-topic-json->shared-projection-entity
+                topic-json
+                :workspace-assignment assignment
+                :topicmap-memberships memberships
+                :owner-class nil
+                :provenance
+                (make-shared-projection-provenance
+                 :id (format nil "provenance/topic/~A" topic-id)
+                 :source-kind "dmx-read"
+                 :source-id (format nil "topic/~A" topic-id)
+                 :derivation-kind "normalized-topic-json"
+                 :confidence 1.0
+                 :replay-hash (format nil "topic/~A" topic-id)))))
+           topic-jsons))
          (relations
-           (loop for entity in entities
-                 append
-                 (mapcar
+          (loop for entity in entities
+                append
+                (mapcar
                  (lambda (membership)
-                    (dmx-topicmap-membership->shared-projection-relation
-                     (id-of entity)
-                     membership
-                     :provenance
-                     (make-shared-projection-provenance
-                      :source-kind "dmx-read"
-                      :source-id (format nil "topicmap/~A"
-                                         (shared-projection-topicmap-membership-topicmap-id-of
-                                          membership))
-                      :derivation-kind "normalized-topicmap-membership"
-                      :confidence 1.0
-                      :replay-hash
-                      (format nil "topicmap-membership/~A/~A"
-                              (shared-projection-topicmap-membership-topicmap-id-of
-                               membership)
-                              (shared-projection-topicmap-membership-assoc-id-of
-                               membership)))))
-                  (shared-projection-entity-topicmap-memberships-of entity)))))
+                   (dmx-topicmap-membership->shared-projection-relation
+                    (id-of entity)
+                    membership
+                    :provenance
+                    (make-shared-projection-provenance
+                     :source-kind "dmx-read"
+                     :source-id (format nil "topicmap/~A"
+                                        (shared-projection-topicmap-membership-topicmap-id-of
+                                         membership))
+                     :derivation-kind "normalized-topicmap-membership"
+                     :confidence 1.0
+                     :replay-hash
+                     (format nil "topicmap-membership/~A/~A"
+                             (shared-projection-topicmap-membership-topicmap-id-of
+                              membership)
+                             (shared-projection-topicmap-membership-assoc-id-of
+                              membership)))))
+                 (shared-projection-entity-topicmap-memberships-of entity)))))
     (make-shared-projection-context-window
      :id (format nil "context-window/~A" topicmap-id)
      :title (format nil "~A shared projection" workspace-name)
@@ -1647,13 +1647,13 @@
 
 (defun shared-projection-context-window-from-json (json)
   (let* ((machines
-           (mapcar #'behavior-machine-definition-from-json
-                   (shared-projection-list
-                    (shared-projection-json-field json "behaviorMachines"))))
+          (mapcar #'behavior-machine-definition-from-json
+                  (shared-projection-list
+                   (shared-projection-json-field json "behaviorMachines"))))
          (traces
-           (mapcar #'behavior-trace-from-json
-                   (shared-projection-list
-                    (shared-projection-json-field json "behaviorTraces"))))
+          (mapcar #'behavior-trace-from-json
+                  (shared-projection-list
+                   (shared-projection-json-field json "behaviorTraces"))))
          (trace-by-run-id (make-hash-table :test #'equal)))
     (dolist (trace traces)
       (setf (gethash (behavior-trace-run-id-of trace) trace-by-run-id) trace))
@@ -1903,130 +1903,130 @@
          (run (make-workspace-annotation-behavior-run machine))
          (trace (behavior-run-trace-of run))
          (annotation-provenance
-           (make-shared-projection-provenance
-            :id "provenance/annotation/123"
-            :source-kind "hyperdoc-journal"
-            :source-id "annotation/123"
-            :derivation-kind "authoritative-annotation-state"
-            :confidence 1.0
-            :replay-hash "sha256:annotation-123"))
+          (make-shared-projection-provenance
+           :id "provenance/annotation/123"
+           :source-kind "hyperdoc-journal"
+           :source-id "annotation/123"
+           :derivation-kind "authoritative-annotation-state"
+           :confidence 1.0
+           :replay-hash "sha256:annotation-123"))
          (machine-provenance
-           (make-shared-projection-provenance
-            :id "provenance/machine/workspace_annotation_lifecycle"
-            :source-kind "hyperdoc-machine-definition"
-            :source-id "workspace_annotation_lifecycle"
-            :derivation-kind "behavior-definition"
-            :confidence 1.0
-            :replay-hash "sha256:workspace-annotation-lifecycle"))
+          (make-shared-projection-provenance
+           :id "provenance/machine/workspace_annotation_lifecycle"
+           :source-kind "hyperdoc-machine-definition"
+           :source-id "workspace_annotation_lifecycle"
+           :derivation-kind "behavior-definition"
+           :confidence 1.0
+           :replay-hash "sha256:workspace-annotation-lifecycle"))
          (annotation-membership
-           (make-shared-projection-topicmap-membership
-            :id "topicmap-membership/919822/annotation-123"
-            :topicmap-id 919822
-            :assoc-id 913483
-            :view-props
-            (let ((json (shared-projection-json-object)))
-              (shared-projection-json-set json "dmx.topicmaps.x" 160)
-              (shared-projection-json-set json "dmx.topicmaps.y" 120)
-              (shared-projection-json-set json "dmx.topicmaps.visibility" t)
-              (shared-projection-json-set json "dmx.topicmaps.pinned" nil)
-              json)))
+          (make-shared-projection-topicmap-membership
+           :id "topicmap-membership/919822/annotation-123"
+           :topicmap-id 919822
+           :assoc-id 913483
+           :view-props
+           (let ((json (shared-projection-json-object)))
+             (shared-projection-json-set json "dmx.topicmaps.x" 160)
+             (shared-projection-json-set json "dmx.topicmaps.y" 120)
+             (shared-projection-json-set json "dmx.topicmaps.visibility" t)
+             (shared-projection-json-set json "dmx.topicmaps.pinned" nil)
+             json)))
          (machine-membership
-           (make-shared-projection-topicmap-membership
-            :id "topicmap-membership/919822/machine-workspace-annotation-lifecycle"
-            :topicmap-id 919822
-            :assoc-id 913484
-            :view-props
-            (let ((json (shared-projection-json-object)))
-              (shared-projection-json-set json "dmx.topicmaps.x" 420)
-              (shared-projection-json-set json "dmx.topicmaps.y" 120)
-              (shared-projection-json-set json "dmx.topicmaps.visibility" t)
-              (shared-projection-json-set json "dmx.topicmaps.pinned" nil)
-              json)))
+          (make-shared-projection-topicmap-membership
+           :id "topicmap-membership/919822/machine-workspace-annotation-lifecycle"
+           :topicmap-id 919822
+           :assoc-id 913484
+           :view-props
+           (let ((json (shared-projection-json-object)))
+             (shared-projection-json-set json "dmx.topicmaps.x" 420)
+             (shared-projection-json-set json "dmx.topicmaps.y" 120)
+             (shared-projection-json-set json "dmx.topicmaps.visibility" t)
+             (shared-projection-json-set json "dmx.topicmaps.pinned" nil)
+             json)))
          (workspace-assignment
-           (make-shared-projection-workspace-assignment
-            :id "workspace-assignment/919815/annotation-123"
-            :workspace-id 919815
-            :workspace-name "context-window"
-            :assignment-status "authoritative-workspace-assignment"))
+          (make-shared-projection-workspace-assignment
+           :id "workspace-assignment/919815/annotation-123"
+           :workspace-id 919815
+           :workspace-name "context-window"
+           :assignment-status "authoritative-workspace-assignment"))
          (machine-assignment
-           (make-shared-projection-workspace-assignment
-            :id "workspace-assignment/919815/machine-workspace-annotation-lifecycle"
-            :workspace-id 919815
-            :workspace-name "context-window"
-            :assignment-status "authoritative-workspace-assignment"))
+          (make-shared-projection-workspace-assignment
+           :id "workspace-assignment/919815/machine-workspace-annotation-lifecycle"
+           :workspace-id 919815
+           :workspace-name "context-window"
+           :assignment-status "authoritative-workspace-assignment"))
          (annotation-entity
-           (make-shared-projection-entity
-            :id "annotation/123"
-            :title "Annotation 123"
-            :summary "Authoritative annotation entity projected into the shared context window."
-            :type "hyperdoc.annotation"
-            :attrs
-            (let ((json (shared-projection-json-object)))
-              (shared-projection-json-set json "text" "Workspace annotation example")
-              (shared-projection-json-set json "authorityLayer" "hyperdoc-journal")
-              json)
-            :owner-class "hyperdoc-managed"
-            :workspace-assignment workspace-assignment
-            :topicmap-memberships (list annotation-membership)
-            :provenance annotation-provenance
-            :journal-subject-key "annotation/123"))
+          (make-shared-projection-entity
+           :id "annotation/123"
+           :title "Annotation 123"
+           :summary "Authoritative annotation entity projected into the shared context window."
+           :type "hyperdoc.annotation"
+           :attrs
+           (let ((json (shared-projection-json-object)))
+             (shared-projection-json-set json "text" "Workspace annotation example")
+             (shared-projection-json-set json "authorityLayer" "hyperdoc-journal")
+             json)
+           :owner-class "hyperdoc-managed"
+           :workspace-assignment workspace-assignment
+           :topicmap-memberships (list annotation-membership)
+           :provenance annotation-provenance
+           :journal-subject-key "annotation/123"))
          (machine-entity
-           (make-shared-projection-entity
-            :id "machine/workspace_annotation_lifecycle"
-            :title "workspace_annotation_lifecycle"
-            :summary "Behavior machine entity linked into the shared projection."
-            :type "hyperdoc.behavior.machine"
-            :attrs
-            (let ((json (shared-projection-json-object)))
-              (shared-projection-json-set json "machineId" "workspace_annotation_lifecycle")
-              (shared-projection-json-set json "layer" "behavior-ir")
-              json)
-            :owner-class "hyperdoc-managed"
-            :workspace-assignment machine-assignment
-            :topicmap-memberships (list machine-membership)
-            :provenance machine-provenance
-            :journal-subject-key "machine/workspace_annotation_lifecycle"))
+          (make-shared-projection-entity
+           :id "machine/workspace_annotation_lifecycle"
+           :title "workspace_annotation_lifecycle"
+           :summary "Behavior machine entity linked into the shared projection."
+           :type "hyperdoc.behavior.machine"
+           :attrs
+           (let ((json (shared-projection-json-object)))
+             (shared-projection-json-set json "machineId" "workspace_annotation_lifecycle")
+             (shared-projection-json-set json "layer" "behavior-ir")
+             json)
+           :owner-class "hyperdoc-managed"
+           :workspace-assignment machine-assignment
+           :topicmap-memberships (list machine-membership)
+           :provenance machine-provenance
+           :journal-subject-key "machine/workspace_annotation_lifecycle"))
          (relation
-           (make-shared-projection-relation
-            :id "rel/annotation-has-machine"
-            :title "Annotation uses behavior machine"
-            :summary "Projection-level relation linking the annotation to its behavior machine."
-            :type "annotation-has-machine"
-            :roles
-            (list
-             (make-shared-projection-role-binding
-              :role "annotation"
-              :entity-id "annotation/123")
-             (make-shared-projection-role-binding
-              :role "behavior-machine"
-              :entity-id "machine/workspace_annotation_lifecycle"))
-            :attrs
-            (let ((json (shared-projection-json-object)))
-              (shared-projection-json-set json "linkKind" "behavior-machine-binding")
-              json)
-            :provenance
-            (make-shared-projection-provenance
-             :id "provenance/rel/annotation-has-machine"
-             :source-kind "hyperdoc-derived-link"
-             :source-id "rel/annotation-has-machine"
-             :derivation-kind "projection-link"
-             :confidence 1.0
-             :replay-hash "sha256:rel-annotation-has-machine")))
+          (make-shared-projection-relation
+           :id "rel/annotation-has-machine"
+           :title "Annotation uses behavior machine"
+           :summary "Projection-level relation linking the annotation to its behavior machine."
+           :type "annotation-has-machine"
+           :roles
+           (list
+            (make-shared-projection-role-binding
+             :role "annotation"
+             :entity-id "annotation/123")
+            (make-shared-projection-role-binding
+             :role "behavior-machine"
+             :entity-id "machine/workspace_annotation_lifecycle"))
+           :attrs
+           (let ((json (shared-projection-json-object)))
+             (shared-projection-json-set json "linkKind" "behavior-machine-binding")
+             json)
+           :provenance
+           (make-shared-projection-provenance
+            :id "provenance/rel/annotation-has-machine"
+            :source-kind "hyperdoc-derived-link"
+            :source-id "rel/annotation-has-machine"
+            :derivation-kind "projection-link"
+            :confidence 1.0
+            :replay-hash "sha256:rel-annotation-has-machine")))
          (journal-event
-           (make-shared-projection-journal-event
-            :id "journal-event/annotation-123/project"
-            :subject-key "annotation/123"
-            :timestamp 2
-            :operation "project-annotation"
-            :target-id "annotation/123"
-            :payload
-            (let ((json (shared-projection-json-object)))
-              (shared-projection-json-set json "projectionStatus"
-                                          "rebuildable-shared-projection")
-              (shared-projection-json-set json "topicmapId" 919822)
-              json)
-            :derivation-kind "projected-from-authoritative-state"
-            :replay-status "replayable")))
+          (make-shared-projection-journal-event
+           :id "journal-event/annotation-123/project"
+           :subject-key "annotation/123"
+           :timestamp 2
+           :operation "project-annotation"
+           :target-id "annotation/123"
+           :payload
+           (let ((json (shared-projection-json-object)))
+             (shared-projection-json-set json "projectionStatus"
+                                         "rebuildable-shared-projection")
+             (shared-projection-json-set json "topicmapId" 919822)
+             json)
+           :derivation-kind "projected-from-authoritative-state"
+           :replay-status "replayable")))
     (make-shared-projection-context-window
      :id "context-window/919822"
      :title "Workspace annotation shared projection"

@@ -35,7 +35,7 @@
 
 (defun assert-shared-workspace-page-contains-all (page-source page-label needles)
   (let ((normalized-page-source
-          (normalize-dmx-shared-workspace-smoke-whitespace page-source)))
+         (normalize-dmx-shared-workspace-smoke-whitespace page-source)))
     (dolist (needle needles)
       (assert-true
        (search (normalize-dmx-shared-workspace-smoke-whitespace needle)
@@ -286,7 +286,7 @@
      "922464"
      "922586"
      "922451"
-      "repair_workspace_topic_assignment"
+     "repair_workspace_topic_assignment"
      "Diagnosis remains read-only and needs no login"
      "Repair console"))
   (assert-shared-workspace-page-contains-all
@@ -314,7 +314,7 @@
      "922565"
      "922586"
      "922451"
-      "read-only"
+     "read-only"
      "make-dmx-shared-workspace-repair-triage"
      "Repair console"))
   (assert-shared-workspace-page-contains-all
@@ -454,7 +454,7 @@
 
 (defun run-dmx-shared-workspace-topic-availability-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
-   (dolist (entry '((hyperdoc::dmx-mcp-server-for-shared-workspace-topic
+  (dolist (entry '((hyperdoc::dmx-mcp-server-for-shared-workspace-topic
                     "DMX MCP server for shared workspace")
                    (hyperdoc::context-window-workspace-as-shared-blackboard-topic
                     "Context window workspace as shared blackboard")
@@ -463,11 +463,11 @@
                    (hyperdoc::dmx-workspace-journal-model-topic
                     "DMX workspace journal model")
                    (hyperdoc::dmx-note-read-write-boundary-topic
-                   "DMX note read/write boundary")
+                    "DMX note read/write boundary")
                    (hyperdoc::dmx-machine-readable-read-paths-topic
-                   "DMX machine-readable read paths")
+                    "DMX machine-readable read paths")
                    (hyperdoc::shared-workspace-collaboration-model-topic
-                   "Shared-workspace collaboration model")
+                    "Shared-workspace collaboration model")
                    (hyperdoc::using-guarded-workspace-topic-lifecycle-tools-topic
                     "Using guarded workspace topic lifecycle tools")
                    (hyperdoc::diagnosing-dmx-workspace-assignment-and-topicmap-placement-topic
@@ -532,47 +532,47 @@
          (header (hyperdoc::dmx-auth-crosswalk-authorization-header-example))
          (token (hyperdoc::dmx-auth-crosswalk-bearer-token-example))
          (crosswalk-views
-           (dmx-shared-workspace-docs-load-inspector-views-for-object crosswalk))
+          (dmx-shared-workspace-docs-load-inspector-views-for-object crosswalk))
          (basic-views
-           (dmx-shared-workspace-docs-load-inspector-views-for-object basic))
+          (dmx-shared-workspace-docs-load-inspector-views-for-object basic))
          (header-views
-           (dmx-shared-workspace-docs-load-inspector-views-for-object header))
+          (dmx-shared-workspace-docs-load-inspector-views-for-object header))
          (token-views
-           (dmx-shared-workspace-docs-load-inspector-views-for-object token))
+          (dmx-shared-workspace-docs-load-inspector-views-for-object token))
          (crosswalk-overview
-           (dmx-shared-workspace-docs-find-view-by-title crosswalk-views "Overview"))
+          (dmx-shared-workspace-docs-find-view-by-title crosswalk-views "Overview"))
          (crosswalk-credentials
-           (dmx-shared-workspace-docs-find-view-by-title
-            crosswalk-views
-            "Credentials crosswalk"))
+          (dmx-shared-workspace-docs-find-view-by-title
+           crosswalk-views
+           "Credentials crosswalk"))
          (basic-overview
-           (dmx-shared-workspace-docs-find-view-by-title basic-views "Overview"))
+          (dmx-shared-workspace-docs-find-view-by-title basic-views "Overview"))
          (basic-state-machine
-           (dmx-shared-workspace-docs-find-view-by-title
-            basic-views
-            "State machine"))
+          (dmx-shared-workspace-docs-find-view-by-title
+           basic-views
+           "State machine"))
          (basic-derived
-           (dmx-shared-workspace-docs-find-view-by-title
-            basic-views
-            "Derived request shapes"))
+          (dmx-shared-workspace-docs-find-view-by-title
+           basic-views
+           "Derived request shapes"))
          (basic-credentials
-           (dmx-shared-workspace-docs-find-view-by-title
-            basic-views
-            "Credentials crosswalk"))
+          (dmx-shared-workspace-docs-find-view-by-title
+           basic-views
+           "Credentials crosswalk"))
          (basic-contract-notes
-           (dmx-shared-workspace-docs-find-view-by-title
-            basic-views
-            "DMX backend contract"))
+          (dmx-shared-workspace-docs-find-view-by-title
+           basic-views
+           "DMX backend contract"))
          (basic-source
-           (dmx-shared-workspace-docs-find-view-by-title
-            basic-views
-            "Source evidence / code path"))
+          (dmx-shared-workspace-docs-find-view-by-title
+           basic-views
+           "Source evidence / code path"))
          (header-overview
-           (dmx-shared-workspace-docs-find-view-by-title header-views "Overview"))
+          (dmx-shared-workspace-docs-find-view-by-title header-views "Overview"))
          (token-contract-notes
-           (dmx-shared-workspace-docs-find-view-by-title
-            token-views
-            "DMX backend contract")))
+          (dmx-shared-workspace-docs-find-view-by-title
+           token-views
+           "DMX backend contract")))
     (assert-type 'hyperdoc::dmx-auth-path-example
                  basic
                  "Username/password example must now be a first-class dmx-auth-path-example")
@@ -633,7 +633,7 @@
                                     :signal-error? t))
          (strategy (hyperdoc::source-surface-strategy-for page))
          (effective-strategy
-           (hyperdoc::effective-source-surface-strategy-for page))
+          (hyperdoc::effective-source-surface-strategy-for page))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (source-view (dmx-shared-workspace-docs-find-view-by-title views "Source"))
          (source-html (and source-view
@@ -703,12 +703,12 @@
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page-title "Workspace-native annotations in a DMX workspace")
          (expected-source-snippet
-           "&lt;h1&gt;Workspace-native annotations in a DMX workspace&lt;/h1&gt;")
+          "&lt;h1&gt;Workspace-native annotations in a DMX workspace&lt;/h1&gt;")
          (page (hyperbook:find-page hyperdoc::*hyperdoc*
                                     page-title
                                     :signal-error? t))
          (default-strategy
-           (hyperdoc::effective-source-surface-strategy-for page)))
+          (hyperdoc::effective-source-surface-strategy-for page)))
     (assert-type 'hyperdoc::connect-source-surface-strategy
                  default-strategy
                  (format nil "~A default effective strategy must stay connect"
@@ -718,7 +718,7 @@
                          page-title))
     (hyperdoc::with-source-surface-strategy-override (:plain)
       (let* ((override-strategy
-               (hyperdoc::effective-source-surface-strategy-for page))
+              (hyperdoc::effective-source-surface-strategy-for page))
              (source-view (hyperdoc::render-source-surface-for-page page))
              (source-html (html-inspector-views:view-html source-view)))
         (assert-type 'hyperdoc::plain-source-surface-strategy
@@ -759,7 +759,7 @@
                                     page-title
                                     :signal-error? t))
          (default-strategy
-           (hyperdoc::effective-source-surface-strategy-for page)))
+          (hyperdoc::effective-source-surface-strategy-for page)))
     (assert-type 'hyperdoc::connect-source-surface-strategy
                  default-strategy
                  (format nil "~A default effective strategy must stay connect"
@@ -767,14 +767,14 @@
     (hyperdoc::with-source-surface-strategy-class-policy
         ('hyperdoc::text-page :plain)
       (let ((policy-strategy
-              (hyperdoc::effective-source-surface-strategy-for page)))
+             (hyperdoc::effective-source-surface-strategy-for page)))
         (assert-type 'hyperdoc::plain-source-surface-strategy
                      policy-strategy
                      (format nil "~A class policy must select the plain strategy"
                              page-title))
         (hyperdoc::with-source-surface-strategy-override (:connect)
           (let ((override-strategy
-                  (hyperdoc::effective-source-surface-strategy-for page)))
+                 (hyperdoc::effective-source-surface-strategy-for page)))
             (assert-type 'hyperdoc::connect-source-surface-strategy
                          override-strategy
                          (format nil "~A dynamic override must win over class policy"
@@ -791,7 +791,7 @@
                                     page-title
                                     :signal-error? t))
          (default-report
-           (hyperdoc::source-surface-resolution-report-for page)))
+          (hyperdoc::source-surface-resolution-report-for page)))
     (assert-true (eq (getf default-report :target-class)
                      (class-name (class-of page)))
                  (format nil "~A report must expose the target class"
@@ -816,7 +816,7 @@
     (hyperdoc::with-source-surface-strategy-class-policy
         ('hyperdoc::text-page :plain)
       (let ((policy-report
-              (hyperdoc::source-surface-resolution-report-for page)))
+             (hyperdoc::source-surface-resolution-report-for page)))
         (assert-true (eq (getf policy-report :winner) :class-policy)
                      (format nil "~A class policy report must resolve through :class-policy"
                              page-title))
@@ -837,7 +837,7 @@
                              page-title))
         (hyperdoc::with-source-surface-strategy-override (:connect)
           (let ((override-report
-                  (hyperdoc::source-surface-resolution-report-for page)))
+                 (hyperdoc::source-surface-resolution-report-for page)))
             (assert-true (eq (getf override-report :winner) :override)
                          (format nil "~A override report must resolve through :override"
                                  page-title))
@@ -863,7 +863,7 @@
                                     page-title
                                     :signal-error? t))
          (default-report
-           (hyperdoc::source-surface-resolution-report-for page)))
+          (hyperdoc::source-surface-resolution-report-for page)))
     (assert-equal :connect
                   (getf default-report :default-strategy-id)
                   (format nil "~A default report must expose the connect default id"
@@ -883,7 +883,7 @@
     (hyperdoc::with-source-surface-strategy-class-policy
         ('hyperdoc::text-page :plain)
       (let ((policy-report
-              (hyperdoc::source-surface-resolution-report-for page)))
+             (hyperdoc::source-surface-resolution-report-for page)))
         (assert-equal :plain
                       (getf policy-report :class-policy-strategy-id)
                       (format nil "~A class policy report must expose the plain strategy id"
@@ -902,7 +902,7 @@
                               page-title))
         (hyperdoc::with-source-surface-strategy-override (:connect)
           (let ((override-report
-                  (hyperdoc::source-surface-resolution-report-for page)))
+                 (hyperdoc::source-surface-resolution-report-for page)))
             (assert-equal :connect
                           (getf override-report :override-strategy-id)
                           (format nil "~A override report must expose the connect override id"
@@ -932,16 +932,16 @@
   (asdf:load-system :hyperdoc/explorer)
   (let* ((catalog (hyperdoc::source-surface-strategy-catalog))
          (connect-entry
-           (find :connect catalog :key (lambda (entry) (getf entry :id))))
+          (find :connect catalog :key (lambda (entry) (getf entry :id))))
          (plain-entry
-           (find :plain catalog :key (lambda (entry) (getf entry :id))))
+          (find :plain catalog :key (lambda (entry) (getf entry :id))))
          (page-title "Workspace-native annotations in a DMX workspace")
          (page (hyperbook:find-page hyperdoc::*hyperdoc*
                                     page-title
                                     :signal-error? t))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (catalog-view
-           (dmx-shared-workspace-docs-find-view-by-title views "Source strategies"))
+          (dmx-shared-workspace-docs-find-view-by-title views "Source strategies"))
          (catalog-html (and catalog-view
                             (html-inspector-views:view-html catalog-view))))
     (assert-true connect-entry
@@ -989,19 +989,19 @@
                                     page-title
                                     :signal-error? t))
          (connect-strategy
-           (hyperdoc::source-surface-strategy-for-stable-designator :connect))
+          (hyperdoc::source-surface-strategy-for-stable-designator :connect))
          (plain-symbol-strategy
-           (hyperdoc::source-surface-strategy-for-stable-designator 'plain))
+          (hyperdoc::source-surface-strategy-for-stable-designator 'plain))
          (plain-strategy
-           (hyperdoc::source-surface-strategy-for-stable-designator :plain))
+          (hyperdoc::source-surface-strategy-for-stable-designator :plain))
          (connect-view
-           (hyperdoc::render-source-surface-for-page-with-designator
-            page
-            :connect))
+          (hyperdoc::render-source-surface-for-page-with-designator
+           page
+           :connect))
          (plain-view
-           (hyperdoc::render-source-surface-for-page-with-designator
-            page
-            :plain))
+          (hyperdoc::render-source-surface-for-page-with-designator
+           page
+           :plain))
          (connect-html (html-inspector-views:view-html connect-view))
          (plain-html (html-inspector-views:view-html plain-view)))
     (assert-true
@@ -1053,28 +1053,28 @@
                                     :signal-error? t))
          (preview (hyperdoc::make-source-surface-swap-preview page :plain))
          (plain-symbol-preview
-           (hyperdoc::make-source-surface-swap-preview page 'plain))
+          (hyperdoc::make-source-surface-swap-preview page 'plain))
          (unsupported-preview
-           (hyperdoc::make-source-surface-swap-preview page :bogus))
+          (hyperdoc::make-source-surface-swap-preview page :bogus))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object preview))
          (overview-view
-           (dmx-shared-workspace-docs-find-view-by-title views "Overview"))
+          (dmx-shared-workspace-docs-find-view-by-title views "Overview"))
          (compare-view
-           (dmx-shared-workspace-docs-find-view-by-title views "Compare"))
+          (dmx-shared-workspace-docs-find-view-by-title views "Compare"))
          (current-view
-           (dmx-shared-workspace-docs-find-view-by-title views "Current Source"))
+          (dmx-shared-workspace-docs-find-view-by-title views "Current Source"))
          (alternate-view
-           (dmx-shared-workspace-docs-find-view-by-title views "Alternate Source"))
+          (dmx-shared-workspace-docs-find-view-by-title views "Alternate Source"))
          (alternate-source-code-view
-           (html-inspector-views/standard:source-code-view
-            #'hyperdoc::👀alternate-source
-            :in-file? nil))
+          (html-inspector-views/standard:source-code-view
+           #'hyperdoc::👀alternate-source
+           :in-file? nil))
          (expected-alternate-view
-           (hyperdoc::->
-            page
-            hyperdoc::file-of
-            html-inspector-views:👀content
-            (html-inspector-views:rename :title "Alternate Source" :priority 4)))
+          (hyperdoc::->
+           page
+           hyperdoc::file-of
+           html-inspector-views:👀content
+           (html-inspector-views:rename :title "Alternate Source" :priority 4)))
          (overview-html (and overview-view
                              (html-inspector-views:view-html overview-view)))
          (compare-html (and compare-view
@@ -1082,8 +1082,8 @@
          (current-html (and current-view
                             (html-inspector-views:view-html current-view)))
          (alternate-source-code-html
-           (and alternate-source-code-view
-                (html-inspector-views:view-html alternate-source-code-view))))
+          (and alternate-source-code-view
+               (html-inspector-views:view-html alternate-source-code-view))))
     (assert-type 'hyperdoc::source-surface-swap-preview
                  preview
                  "Swap preview must materialize as an inspectable object.")
@@ -1235,39 +1235,39 @@
          (candidates (hyperdoc::source-surface-swap-preview-candidates-for-page
                       page))
          (plain-candidate
-           (find :plain candidates
-                 :key (lambda (candidate) (getf candidate :designator))))
+          (find :plain candidates
+                :key (lambda (candidate) (getf candidate :designator))))
          (plain-preview (and plain-candidate
                              (getf plain-candidate :preview)))
          (page-views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (operations-view
-           (dmx-shared-workspace-docs-find-view-by-title
-            page-views
-            "Source swap operations"))
+          (dmx-shared-workspace-docs-find-view-by-title
+           page-views
+           "Source swap operations"))
          (operations-html (and operations-view
                                (html-inspector-views:view-html operations-view)))
          (preview-views (and plain-preview
                              (dmx-shared-workspace-docs-load-inspector-views-for-object
                               plain-preview)))
          (preview-overview
-           (and preview-views
-                (dmx-shared-workspace-docs-find-view-by-title
-                 preview-views
-                 "Overview")))
+          (and preview-views
+               (dmx-shared-workspace-docs-find-view-by-title
+                preview-views
+                "Overview")))
          (preview-alternate
-           (and preview-views
-                (dmx-shared-workspace-docs-find-view-by-title
-                 preview-views
-                 "Alternate Source")))
+          (and preview-views
+               (dmx-shared-workspace-docs-find-view-by-title
+                preview-views
+                "Alternate Source")))
          (expected-alternate-view
-           (hyperdoc::->
-            page
-            hyperdoc::file-of
-            html-inspector-views:👀content
-            (html-inspector-views:rename :title "Alternate Source" :priority 4)))
+          (hyperdoc::->
+           page
+           hyperdoc::file-of
+           html-inspector-views:👀content
+           (html-inspector-views:rename :title "Alternate Source" :priority 4)))
          (preview-overview-html
-           (and preview-overview
-                (html-inspector-views:view-html preview-overview))))
+          (and preview-overview
+               (html-inspector-views:view-html preview-overview))))
     (assert-equal :connect
                   (getf report :effective-strategy-id)
                   (format nil "~A current effective Source path must stay connect by default"
@@ -1337,7 +1337,7 @@
                                     :signal-error? t))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (resolution-view
-           (dmx-shared-workspace-docs-find-view-by-title views "Source surface"))
+          (dmx-shared-workspace-docs-find-view-by-title views "Source surface"))
          (resolution-html (and resolution-view
                                (html-inspector-views:view-html resolution-view))))
     (assert-true resolution-view
@@ -1360,25 +1360,25 @@
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page-title "Workspace-native annotations in a DMX workspace")
          (expected-source-snippet
-           "&lt;h1&gt;Workspace-native annotations in a DMX workspace&lt;/h1&gt;")
+          "&lt;h1&gt;Workspace-native annotations in a DMX workspace&lt;/h1&gt;")
          (page (hyperbook:find-page hyperdoc::*hyperdoc*
                                     page-title
                                     :signal-error? t))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (source-view (dmx-shared-workspace-docs-find-view-by-title views "Source"))
          (plain-view
-           (dmx-shared-workspace-docs-find-view-by-title views "Plain source"))
+          (dmx-shared-workspace-docs-find-view-by-title views "Plain source"))
          (plain-source-code-view
-           (html-inspector-views/standard:source-code-view
-            #'hyperdoc::👀plain-source
-            :in-file? nil))
+          (html-inspector-views/standard:source-code-view
+           #'hyperdoc::👀plain-source
+           :in-file? nil))
          (source-html (and source-view
                            (html-inspector-views:view-html source-view)))
          (plain-html (and plain-view
                           (html-inspector-views:view-html plain-view)))
          (plain-source-code-html
-           (and plain-source-code-view
-                (html-inspector-views:view-html plain-source-code-view))))
+          (and plain-source-code-view
+               (html-inspector-views:view-html plain-source-code-view))))
     (assert-true plain-view
                  (format nil "~A must expose a Plain source view" page-title))
     (assert-true source-view
@@ -1494,9 +1494,9 @@
                              "assets/hyperdoc/js/dom-annotation-connect.js"))
       (let* ((target (hyperdoc::source-pane-layout-source-target relative-path))
              (target-views
-               (dmx-shared-workspace-docs-load-inspector-views-for-object target))
+              (dmx-shared-workspace-docs-load-inspector-views-for-object target))
              (source-view
-               (dmx-shared-workspace-docs-find-view-by-title target-views "Source")))
+              (dmx-shared-workspace-docs-find-view-by-title target-views "Source")))
         (assert-true target
                      (format nil "Evidence path ~A must resolve to an inspectable target"
                              relative-path))

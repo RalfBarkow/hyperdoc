@@ -599,7 +599,7 @@
      nil)
     ((hash-table-p value)
      (loop for json-key being each hash-key of value
-             using (hash-value json-value)
+           using (hash-value json-value)
            append (list (dom-annotation-json-keyword json-key)
                         (normalize-dom-annotation-json json-value))))
     ((vectorp value)
@@ -778,10 +778,10 @@
   (if value "yes" "no"))
 
 (defun dom-connect-transition-stage-summary (stage details source-anchor
-                                              target-anchor anchor)
+                                             target-anchor anchor)
   (let ((stage (or stage "")))
     (labels ((anchor-label (anchor-object)
-             (or (dom-connect-anchor-label anchor-object) "anchor")))
+               (or (dom-connect-anchor-label anchor-object) "anchor")))
       (cond
         ((string= stage "session-started")
          (format nil "Session started in ~A."
@@ -931,7 +931,7 @@
                    :details details)))
 
 (defun dom-connect-pending-request-state (phase pending-request-id
-                                           last-transition)
+                                          last-transition)
   (cond
     (pending-request-id
      (or (and last-transition (stage-of last-transition))
@@ -943,20 +943,20 @@
      nil)))
 
 (defun make-dom-connect-session-snapshot (&key context-object
-                                               context-view-title
-                                               captured-at
-                                               captured-at-label
-                                               session-id
-                                               phase
-                                               origin-pane-id
-                                               source-pane-id
-                                               source-provider-kind
-                                               source-anchor
-                                               target-pane-id
-                                               target-provider-kind
-                                               target-anchor
-                                               panes
-                                               transitions)
+                                            context-view-title
+                                            captured-at
+                                            captured-at-label
+                                            session-id
+                                            phase
+                                            origin-pane-id
+                                            source-pane-id
+                                            source-provider-kind
+                                            source-anchor
+                                            target-pane-id
+                                            target-provider-kind
+                                            target-anchor
+                                            panes
+                                            transitions)
   (let* ((last-transition (car (last transitions)))
          (pending-pane (find-if (lambda (pane)
                                   (dom-connect-present-p
@@ -968,9 +968,9 @@
                     (format nil "Connect session: ~A" session-id)
                     "Connect session"))
          (summary
-           (format nil "Snapshot of Connect phase ~A with ~D live pane~:P."
-                   (or phase "idle")
-                   (length panes))))
+          (format nil "Snapshot of Connect phase ~A with ~D live pane~:P."
+                  (or phase "idle")
+                  (length panes))))
     (make-instance 'dom-connect-session-snapshot
                    :id (format nil "connect-session/~A/~A"
                                (or session-id "idle")
@@ -999,8 +999,8 @@
                    :last-transition last-transition)))
 
 (defun make-dom-connect-session-snapshot-from-json (&key context-object
-                                                         context-view-title
-                                                         snapshot-json)
+                                                      context-view-title
+                                                      snapshot-json)
   (let* ((data (or (parse-dom-annotation-json snapshot-json)
                    (error "Missing Connect snapshot JSON.")))
          (session (or (getf data :session) '()))
@@ -1026,8 +1026,8 @@
      :transitions transitions)))
 
 (defun connect-capability-runtime-target (&key context-object
-                                               context-view-title
-                                               snapshot-json)
+                                            context-view-title
+                                            snapshot-json)
   (make-dom-connect-session-snapshot-from-json
    :context-object context-object
    :context-view-title context-view-title
@@ -1048,7 +1048,7 @@
                                              browser-failure-kind)
   (cond
     ((string= (or browser-failure-kind "")
-                 "websocket-disconnect-before-acknowledgement")
+              "websocket-disconnect-before-acknowledgement")
      (format nil "Request ~A reached the Connect boundary, but the browser lost the websocket before it saw any acknowledgement."
              (or request-id "unknown")))
     ((string= (or browser-failure-kind "") "pane-open-timeout")
@@ -1156,22 +1156,22 @@
   evidence)
 
 (defun ensure-dom-connect-request-evidence (&key context-object
-                                                 context-view-title
-                                                 request-id
-                                                 transport
-                                                 inspection-pane-id
-                                                 snapshot-json
-                                                 source-json
-                                                 target-json
-                                                 source-pane-id
-                                                 target-pane-id
-                                                 source-provider-kind
-                                                 target-provider-kind)
+                                              context-view-title
+                                              request-id
+                                              transport
+                                              inspection-pane-id
+                                              snapshot-json
+                                              source-json
+                                              target-json
+                                              source-pane-id
+                                              target-pane-id
+                                              source-provider-kind
+                                              target-provider-kind)
   (let* ((existing (find-dom-connect-request-evidence request-id))
          (session-snapshot
-           (or (and existing (session-snapshot-of existing))
-               (maybe-dom-connect-session-snapshot-from-json-string
-                context-object context-view-title snapshot-json)))
+          (or (and existing (session-snapshot-of existing))
+              (maybe-dom-connect-session-snapshot-from-json-string
+               context-object context-view-title snapshot-json)))
          (source-anchor (or (and existing (source-anchor-of existing))
                             (maybe-dom-connect-anchor-from-json-string
                              source-json)
@@ -1260,20 +1260,20 @@
     (register-dom-connect-request-evidence evidence)))
 
 (defun make-dom-connect-request-evidence-from-values (&key context-object
-                                                           context-view-title
-                                                           request-id
-                                                           snapshot-json
-                                                           browser-failure-kind
-                                                           browser-message
-                                                           browser-detail)
+                                                        context-view-title
+                                                        request-id
+                                                        snapshot-json
+                                                        browser-failure-kind
+                                                        browser-message
+                                                        browser-detail)
   (let ((evidence
-          (ensure-dom-connect-request-evidence
-           :context-object context-object
-           :context-view-title context-view-title
-           :request-id (or request-id
-                           (error "Missing Connect request id."))
-           :transport "connect-request-evidence-v1"
-           :snapshot-json snapshot-json)))
+         (ensure-dom-connect-request-evidence
+          :context-object context-object
+          :context-view-title context-view-title
+          :request-id (or request-id
+                          (error "Missing Connect request id."))
+          :transport "connect-request-evidence-v1"
+          :snapshot-json snapshot-json)))
     (when (or browser-failure-kind browser-message browser-detail)
       (record-dom-connect-request-evidence-browser-failure
        request-id
@@ -1375,7 +1375,7 @@
               (anchor-value-of target-anchor))))
 
 (defun dom-relation-annotation-summary (source-anchor target-anchor patch-target
-                                         &optional context-view-title)
+                                        &optional context-view-title)
   (let* ((source-surface (anchor-surface-label source-anchor))
          (target-surface (anchor-surface-label target-anchor))
          (same-surface-p (string= source-surface target-surface)))
@@ -1421,31 +1421,31 @@
                 target-note))))
 
 (defun make-dom-relation-annotation (&key context-object
-                                          context-view-title
-                                          source-anchor
-                                          target-anchor
-                                          class
-                                          id
-                                          title
-                                          summary
-                                          source-object
-                                          target-object
-                                          relation-kind
-                                          note
-                                          registry-key
-                                          dock-capability)
+                                       context-view-title
+                                       source-anchor
+                                       target-anchor
+                                       class
+                                       id
+                                       title
+                                       summary
+                                       source-object
+                                       target-object
+                                       relation-kind
+                                       note
+                                       registry-key
+                                       dock-capability)
   (let* ((match (matched-workflow-patch-target-info source-anchor target-anchor))
          (patch-target (getf match :patch-target))
          (defect (getf match :defect))
          (inserted-step (getf match :inserted-step))
          (computed-source-object
-           (or (maybe-official-step-for-anchor source-anchor)
-               (and patch-target
-                    (call-hyperdoc-runtime "FROM-STEP-OF" defect))))
+          (or (maybe-official-step-for-anchor source-anchor)
+              (and patch-target
+                   (call-hyperdoc-runtime "FROM-STEP-OF" defect))))
          (computed-target-object
-           (or (maybe-official-step-for-anchor target-anchor)
-               (and patch-target
-                    (call-hyperdoc-runtime "TO-STEP-OF" defect)))))
+          (or (maybe-official-step-for-anchor target-anchor)
+              (and patch-target
+                   (call-hyperdoc-runtime "TO-STEP-OF" defect)))))
     (apply #'make-instance
            (or class 'dom-relation-annotation)
            :id (or id
@@ -1483,9 +1483,9 @@
               (list :dock-capability dock-capability))))))
 
 (defun make-association-annotation-from-json (&key context-object
-                                                   context-view-title
-                                                   source-json
-                                                   target-json)
+                                                context-view-title
+                                                source-json
+                                                target-json)
   (let* ((source-data (or (parse-dom-annotation-json source-json)
                           (error "Missing source anchor JSON.")))
          (target-data (or (parse-dom-annotation-json target-json)
@@ -1505,9 +1505,9 @@
          :target-anchor target-anchor))))
 
 (defun make-dom-relation-annotation-from-json (&key context-object
-                                                    context-view-title
-                                                    source-json
-                                                    target-json)
+                                                 context-view-title
+                                                 source-json
+                                                 target-json)
   (make-association-annotation-from-json
    :context-object context-object
    :context-view-title context-view-title

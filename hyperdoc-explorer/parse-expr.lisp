@@ -20,8 +20,8 @@
 (defun eval-parsed (form)
   (if (typep form 'condition)
       form
-    (handler-case (eval form)
-      (error (c) c))))
+      (handler-case (eval form)
+        (error (c) c))))
 
 (defun parse-and-eval (string)
   "Parse STRING as Lisp code, evaluate it, and return the result.

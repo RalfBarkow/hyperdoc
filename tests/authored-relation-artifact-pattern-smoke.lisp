@@ -45,110 +45,110 @@
 
 (defun make-authored-relation-pattern-fixture ()
   (let* ((role
-           (hyperdoc::make-authored-relation-role
-            :id "role/input"
-            :title "Input evidence"
-            :summary "Selected evidence entering the compiler pipeline."
-            :kind :evidence
-            :binding :input-evidence
-            :participants '(:selected-mech-snippet :selected-javascript-snippet)))
+          (hyperdoc::make-authored-relation-role
+           :id "role/input"
+           :title "Input evidence"
+           :summary "Selected evidence entering the compiler pipeline."
+           :kind :evidence
+           :binding :input-evidence
+           :participants '(:selected-mech-snippet :selected-javascript-snippet)))
          (semantic-relation
-           (hyperdoc::make-authored-relation
-            :id "rel/input-supports-unit"
-            :title "Input supports transformation unit"
-            :layer :semantic
-            :subject :input-evidence
-            :predicate :supports
-            :object :transformation-unit))
+          (hyperdoc::make-authored-relation
+           :id "rel/input-supports-unit"
+           :title "Input supports transformation unit"
+           :layer :semantic
+           :subject :input-evidence
+           :predicate :supports
+           :object :transformation-unit))
          (behavior-relation
-           (hyperdoc::make-authored-relation
-            :id "rel/available-ready"
-            :title "Available transitions to ready"
-            :layer :behavior
-            :subject :available
-            :predicate :transition-to
-            :object :ready
-            :attributes '(:trigger :complete)))
+          (hyperdoc::make-authored-relation
+           :id "rel/available-ready"
+           :title "Available transitions to ready"
+           :layer :behavior
+           :subject :available
+           :predicate :transition-to
+           :object :ready
+           :attributes '(:trigger :complete)))
          (layout-relation
-           (hyperdoc::make-authored-relation
-            :id "rel/comparison-center"
-            :title "Comparison keeps shared evidence centered"
-            :layer :layout
-            :subject :comparison-pane
-            :predicate :contains-center
-            :object :shared-evidence))
+          (hyperdoc::make-authored-relation
+           :id "rel/comparison-center"
+           :title "Comparison keeps shared evidence centered"
+           :layer :layout
+           :subject :comparison-pane
+           :predicate :contains-center
+           :object :shared-evidence))
          (artifact
-           (hyperdoc::make-authored-relation-artifact
-            :id "artifact/example-authored-relation"
-            :title "Example authored relation artifact"
-            :summary
-            "Reusable authored artifact describing semantic, behavior, and layout relations."
-            :workflow-role "Reusable graph-authored reconstruction point."
-            :compiler-pipeline
-            "authored relation artifact -> compiled behavior artifact + compiled layout artifact"
-            :semantic-roles (list role)
-            :semantic-relations (list semantic-relation)
-            :behavior-relations (list behavior-relation)
-            :layout-relations (list layout-relation)
-            :relations (list semantic-relation behavior-relation layout-relation)
-            :compiled-targets
-            '("compiled-behavior-artifact" "compiled-layout-artifact")
-            :findings
-            '("The authored artifact remains distinct from compiled outputs.")))
+          (hyperdoc::make-authored-relation-artifact
+           :id "artifact/example-authored-relation"
+           :title "Example authored relation artifact"
+           :summary
+           "Reusable authored artifact describing semantic, behavior, and layout relations."
+           :workflow-role "Reusable graph-authored reconstruction point."
+           :compiler-pipeline
+           "authored relation artifact -> compiled behavior artifact + compiled layout artifact"
+           :semantic-roles (list role)
+           :semantic-relations (list semantic-relation)
+           :behavior-relations (list behavior-relation)
+           :layout-relations (list layout-relation)
+           :relations (list semantic-relation behavior-relation layout-relation)
+           :compiled-targets
+           '("compiled-behavior-artifact" "compiled-layout-artifact")
+           :findings
+           '("The authored artifact remains distinct from compiled outputs.")))
          (available-state
-           (make-instance 'hyperdoc::state-machine-state
-                          :id :available
-                          :title "Available"))
+          (make-instance 'hyperdoc::state-machine-state
+                         :id :available
+                         :title "Available"))
          (ready-state
-           (make-instance 'hyperdoc::state-machine-state
-                          :id :ready
-                          :title "Ready"))
+          (make-instance 'hyperdoc::state-machine-state
+                         :id :ready
+                         :title "Ready"))
          (transition
-           (make-instance 'hyperdoc::state-machine-transition
-                          :id :complete
-                          :title "Complete"
-                          :from-state :available
-                          :to-state :ready
-                          :trigger :complete))
+          (make-instance 'hyperdoc::state-machine-transition
+                         :id :complete
+                         :title "Complete"
+                         :from-state :available
+                         :to-state :ready
+                         :trigger :complete))
          (machine
-           (hyperdoc::make-state-machine-definition
-            :id "example_behavior_machine"
-            :title "Example behavior machine"
-            :summary "Minimal machine compiled from the example authored artifact."
-            :states (list available-state ready-state)
-            :transitions (list transition)
-            :initial-state :available
-            :events '(:complete)))
+          (hyperdoc::make-state-machine-definition
+           :id "example_behavior_machine"
+           :title "Example behavior machine"
+           :summary "Minimal machine compiled from the example authored artifact."
+           :states (list available-state ready-state)
+           :transitions (list transition)
+           :initial-state :available
+           :events '(:complete)))
          (behavior-artifact
-           (hyperdoc::make-compiled-behavior-artifact
-            :id "artifact/example-compiled-behavior"
-            :title "Example compiled behavior artifact"
-            :summary "Compiled behavior artifact derived from the authored relation artifact."
-            :artifact-kind :compiled-behavior-artifact
-            :authored-artifact artifact
-            :compiler-stage :behavior-compilation
-            :compiler-inputs (list artifact)
-            :relations (list behavior-relation)
-            :primary-machine machine
-            :primary-machine-scxml
-            (hyperdoc::state-machine-definition-scxml-text machine)
-            :findings '("Behavior remains a compiled artifact, not the authored source.")))
+          (hyperdoc::make-compiled-behavior-artifact
+           :id "artifact/example-compiled-behavior"
+           :title "Example compiled behavior artifact"
+           :summary "Compiled behavior artifact derived from the authored relation artifact."
+           :artifact-kind :compiled-behavior-artifact
+           :authored-artifact artifact
+           :compiler-stage :behavior-compilation
+           :compiler-inputs (list artifact)
+           :relations (list behavior-relation)
+           :primary-machine machine
+           :primary-machine-scxml
+           (hyperdoc::state-machine-definition-scxml-text machine)
+           :findings '("Behavior remains a compiled artifact, not the authored source.")))
          (layout-artifact
-           (hyperdoc::make-compiled-layout-artifact
-            :id "artifact/example-compiled-layout"
-            :title "Example compiled layout artifact"
-            :summary "Compiled layout artifact derived from the authored relation artifact."
-            :artifact-kind :compiled-layout-artifact
-            :authored-artifact artifact
-            :compiler-stage :layout-compilation
-            :compiler-inputs (list artifact)
-            :relations (list layout-relation)
-            :pane-relations nil
-            :comparison-relations (list layout-relation)
-            :layout-spec
-            '(:surface example-comparison
-              :regions ((:center :region :shared :content :shared-evidence)))
-            :findings '("Layout remains separate from behavior compilation."))))
+          (hyperdoc::make-compiled-layout-artifact
+           :id "artifact/example-compiled-layout"
+           :title "Example compiled layout artifact"
+           :summary "Compiled layout artifact derived from the authored relation artifact."
+           :artifact-kind :compiled-layout-artifact
+           :authored-artifact artifact
+           :compiler-stage :layout-compilation
+           :compiler-inputs (list artifact)
+           :relations (list layout-relation)
+           :pane-relations nil
+           :comparison-relations (list layout-relation)
+           :layout-spec
+           '(:surface example-comparison
+             :regions ((:center :region :shared :content :shared-evidence)))
+           :findings '("Layout remains separate from behavior compilation."))))
     (list :artifact artifact
           :behavior-artifact behavior-artifact
           :layout-artifact layout-artifact)))
@@ -189,13 +189,13 @@
   (destructuring-bind (&key artifact behavior-artifact layout-artifact)
       (make-authored-relation-pattern-fixture)
     (let ((artifact-views
-            (authored-relation-pattern-load-inspector-views-for-object artifact))
+           (authored-relation-pattern-load-inspector-views-for-object artifact))
           (behavior-views
-            (authored-relation-pattern-load-inspector-views-for-object
-             behavior-artifact))
+           (authored-relation-pattern-load-inspector-views-for-object
+            behavior-artifact))
           (layout-views
-            (authored-relation-pattern-load-inspector-views-for-object
-             layout-artifact)))
+           (authored-relation-pattern-load-inspector-views-for-object
+            layout-artifact)))
       (dolist (title '("Summary"
                        "Semantic roles"
                        "Behavior relations"
@@ -205,9 +205,9 @@
          (authored-relation-pattern-find-view-by-title artifact-views title)
          (format nil "Generic authored artifact must expose view ~A" title)))
       (let ((graph-view
-              (authored-relation-pattern-find-view-by-title
-               artifact-views
-               "Relation graph")))
+             (authored-relation-pattern-find-view-by-title
+              artifact-views
+              "Relation graph")))
         (authored-relation-pattern-assert-contains
          "data-hyperdoc-authored-relation-graph"
          (html-inspector-views:view-html graph-view)

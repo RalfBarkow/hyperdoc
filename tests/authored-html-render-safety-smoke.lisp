@@ -111,43 +111,43 @@
 (defun run-authored-html-passive-render-smoke-test ()
   (clear-authored-html-render-smoke-log)
   (with-authored-html-render-safety-surface
-   (lambda (book explosive-id page)
-     (declare (ignore book explosive-id))
-     (let* ((views (load-inspector-views-for-object page))
-            (content-view (smoke-find-view-by-title views "Content"))
-            (html (and content-view
-                       (html-inspector-views:view-html content-view)))
-            (lookup-issues nil)
-            (lookup-issues-condition nil))
-       (assert-true content-view
-                    "Authored HTML smoke page must expose a Content view")
-       (assert-equal nil
-                     (authored-html-render-smoke-log)
-                     "Opening the page and materializing its views must not execute authored expressions")
-       (assert-true (search "data-hyperdoc-deferred-expression" html :test #'char=)
-                    "Content render must expose deferred expression metadata instead of eager execution")
-       (assert-true (search "hyperdoc-computed-value" html :test #'char=)
-                    "Immediate computed-value tags must render as deferred references")
-       (assert-true (search "hyperbook-error" html :test #'char=)
-                    "Unexpected page-link failures must become bounded issue refs instead of crashing content")
-       (setf lookup-issues
-             (handler-case
-                 (hyperbook:lookup-issues-of page)
-               (error (condition)
-                 (setf lookup-issues-condition condition)
-                 nil)))
-       (assert-equal nil
-                     lookup-issues-condition
-                     "Lookup issue discovery must stay bounded under the non-executing render contract")
-       (assert-true (listp lookup-issues)
-                    "Lookup issue discovery must still return a list or NIL")))))
+      (lambda (book explosive-id page)
+        (declare (ignore book explosive-id))
+        (let* ((views (load-inspector-views-for-object page))
+               (content-view (smoke-find-view-by-title views "Content"))
+               (html (and content-view
+                          (html-inspector-views:view-html content-view)))
+               (lookup-issues nil)
+               (lookup-issues-condition nil))
+          (assert-true content-view
+                       "Authored HTML smoke page must expose a Content view")
+          (assert-equal nil
+                        (authored-html-render-smoke-log)
+                        "Opening the page and materializing its views must not execute authored expressions")
+          (assert-true (search "data-hyperdoc-deferred-expression" html :test #'char=)
+                       "Content render must expose deferred expression metadata instead of eager execution")
+          (assert-true (search "hyperdoc-computed-value" html :test #'char=)
+                       "Immediate computed-value tags must render as deferred references")
+          (assert-true (search "hyperbook-error" html :test #'char=)
+                       "Unexpected page-link failures must become bounded issue refs instead of crashing content")
+          (setf lookup-issues
+                (handler-case
+                    (hyperbook:lookup-issues-of page)
+                  (error (condition)
+                    (setf lookup-issues-condition condition)
+                    nil)))
+          (assert-equal nil
+                        lookup-issues-condition
+                        "Lookup issue discovery must stay bounded under the non-executing render contract")
+          (assert-true (listp lookup-issues)
+                       "Lookup issue discovery must still return a list or NIL")))))
 
 (defun run-authored-html-explicit-evaluation-smoke-test ()
   (clear-authored-html-render-smoke-log)
   (let* ((reference
-           (authored-expression-smoke-reference
-            "(record-authored-html-render-smoke \"explicit-eval\")"
-            :label "explicit-eval"))
+          (authored-expression-smoke-reference
+           "(record-authored-html-render-smoke \"explicit-eval\")"
+           :label "explicit-eval"))
          (result (html-inspector-views:eval-thunk reference)))
     (assert-equal "explicit-eval"
                   result
@@ -158,9 +158,9 @@
 
 (defun run-authored-html-explicit-failure-smoke-test ()
   (let* ((reference
-           (authored-expression-smoke-reference
-            "(error \"authored-eval-smoke-failure\")"
-            :label "failing-reference"))
+          (authored-expression-smoke-reference
+           "(error \"authored-eval-smoke-failure\")"
+           :label "failing-reference"))
          (result (html-inspector-views:eval-thunk reference)))
     (assert-true (typep result 'hyperdoc::authored-expression-evaluation-issue)
                  "Deferred authored-expression failure must return a bounded issue object")

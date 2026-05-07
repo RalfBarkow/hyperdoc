@@ -35,7 +35,7 @@
          (let ((client nil))
            (setf (symbol-function 'drakma:http-request)
                  (lambda (url &key method additional-headers content
-                               content-type content-length &allow-other-keys)
+                                content-type content-length &allow-other-keys)
                    (cond
                      ((and (eq method :post)
                            (search "/access-control/login" url
@@ -154,12 +154,12 @@
               (auth-session-debug-event client state)
               (format nil "Auth debug trace must include ~A" state)))
            (let* ((evidence
-                    (hyperdoc::dmx-import-last-http-transaction-evidence-of
-                     client))
+                   (hyperdoc::dmx-import-last-http-transaction-evidence-of
+                    client))
                   (safe-text
-                    (auth-session-string-for-leak-check
-                     (list evidence
-                           (hyperdoc::dmx-import-debug-events-of client)))))
+                   (auth-session-string-for-leak-check
+                    (list evidence
+                          (hyperdoc::dmx-import-debug-events-of client)))))
              (auth-session-assert-equal
               401
               (getf evidence :response-status-code)

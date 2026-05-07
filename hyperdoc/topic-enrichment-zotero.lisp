@@ -158,19 +158,19 @@
          :bridge bridge
          :match-mode (topic-enrichment-plan-match-mode-of plan))
       (let ((query-attempt
-              (normalize-zotero-query-attempt
-               query-evidence
-               :attempted-operation 'zotero-query-attempt-rows-of
-               :receiver (and query-evidence
-                              (zotero-query-selected-attempt-of query-evidence))
-               :arguments
-               (list (topic-enrichment-plan-query-text-of plan)
-                     :match-mode (topic-enrichment-plan-match-mode-of plan))
-               :higher-level-intent
-               (list 'lookup-zotero-items-by-title
-                     (topic-enrichment-plan-query-text-of plan))
-               :repair-hint
-               "Inspect the title-query evidence before assuming a selected Zotero attempt exists.")))
+             (normalize-zotero-query-attempt
+              query-evidence
+              :attempted-operation 'zotero-query-attempt-rows-of
+              :receiver (and query-evidence
+                             (zotero-query-selected-attempt-of query-evidence))
+              :arguments
+              (list (topic-enrichment-plan-query-text-of plan)
+                    :match-mode (topic-enrichment-plan-match-mode-of plan))
+              :higher-level-intent
+              (list 'lookup-zotero-items-by-title
+                    (topic-enrichment-plan-query-text-of plan))
+              :repair-hint
+              "Inspect the title-query evidence before assuming a selected Zotero attempt exists.")))
         (cond
           ((typep query-attempt 'zotero-query-missing-attempt)
            (make-topic-enrichment-report-object

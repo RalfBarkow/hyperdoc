@@ -84,8 +84,8 @@
          (daily-path (merge-pathnames "fedwiki-pages/2026-03-13" dry-run-root))
          (metadata-path (merge-pathnames "slice-metadata.lisp" dry-run-root))
          (incident-fedwiki-path
-           (merge-pathnames "fedwiki-pages/minab-school-strike-allegations"
-                            dry-run-root)))
+          (merge-pathnames "fedwiki-pages/minab-school-strike-allegations"
+                           dry-run-root)))
     (assert-equal 7
                   (length (getf bundle :hyperdoc-files))
                   "Dry-run bundle should emit one incident page plus six concept pages")

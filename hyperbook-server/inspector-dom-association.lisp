@@ -38,7 +38,7 @@
   (loop for current = element then (ignore-errors (clog:parent current))
         while current
         when (ignore-errors (funcall predicate current))
-          return current))
+        return current))
 
 (defun dom-association-control-container (element)
   (dom-association-ancestor-matching
@@ -144,44 +144,44 @@
          (wrapper (dom-association-submit-wrapper payload-element))
          (container (dom-association-control-container payload-element))
          (source-field-id
-           (dom-association-control-field-id
-            payload-element
-            "data-dom-association-source-field-id"
-            "data-source-input-id"))
+          (dom-association-control-field-id
+           payload-element
+           "data-dom-association-source-field-id"
+           "data-source-input-id"))
          (target-field-id
-           (dom-association-control-field-id
-            payload-element
-            "data-dom-association-target-field-id"
-            "data-target-input-id"))
+          (dom-association-control-field-id
+           payload-element
+           "data-dom-association-target-field-id"
+           "data-target-input-id"))
          (snapshot-field-id
-           (dom-association-control-field-id
-            payload-element
-            "data-dom-connect-snapshot-field-id"
-            "data-snapshot-input-id"))
+          (dom-association-control-field-id
+           payload-element
+           "data-dom-connect-snapshot-field-id"
+           "data-snapshot-input-id"))
          (request-id-field-id
-           (dom-association-control-field-id
-            payload-element
-            "data-dom-association-request-id-field-id"
-            "data-request-id-input-id"))
+          (dom-association-control-field-id
+           payload-element
+           "data-dom-association-request-id-field-id"
+           "data-request-id-input-id"))
          (browser-failure-kind-field-id
-           (dom-association-control-field-id
-            payload-element
-            "data-dom-connect-browser-failure-kind-field-id"
-            "data-browser-failure-kind-input-id"))
+          (dom-association-control-field-id
+           payload-element
+           "data-dom-connect-browser-failure-kind-field-id"
+           "data-browser-failure-kind-input-id"))
          (browser-message-field-id
-           (dom-association-control-field-id
-            payload-element
-            "data-dom-connect-browser-message-field-id"
-            "data-browser-message-input-id"))
+          (dom-association-control-field-id
+           payload-element
+           "data-dom-connect-browser-message-field-id"
+           "data-browser-message-input-id"))
          (browser-detail-field-id
-           (dom-association-control-field-id
-            payload-element
-            "data-dom-connect-browser-detail-field-id"
-            "data-browser-detail-input-id"))
+          (dom-association-control-field-id
+           payload-element
+           "data-dom-connect-browser-detail-field-id"
+           "data-browser-detail-input-id"))
          (request-id
-           (or (dom-association-attribute-value
-                payload-element "data-dom-association-request-id")
-               (dom-association-control-value pane request-id-field-id))))
+          (or (dom-association-attribute-value
+               payload-element "data-dom-association-request-id")
+              (dom-association-control-value pane request-id-field-id))))
     (when (or wrapper
               container
               (dom-association-attribute-value
@@ -190,67 +190,67 @@
             request-id
             :transport
             (inferred-dom-association-transport payload-element request-id)
-          :context-object-id
-          (dom-association-context-value
-           pane payload-element "data-context-object-id")
-          :context-view-title
-          (or (dom-association-context-value
-               pane payload-element "data-context-view-title")
-              (dom-association-context-value
-               pane payload-element "data-dom-association-context-view-title"))
-          :source-field-id
-          source-field-id
-          :target-field-id
-          target-field-id
-          :snapshot-field-id
-          snapshot-field-id
-          :source-pane-id
-          (dom-association-attribute-value
-           payload-element "data-dom-association-source-pane-id")
-          :target-pane-id
-          (dom-association-attribute-value
-           payload-element "data-dom-association-target-pane-id")
-          :source-provider-kind
-          (dom-association-attribute-value
-           payload-element "data-dom-association-source-provider-kind")
-          :target-provider-kind
-          (dom-association-attribute-value
-           payload-element "data-dom-association-target-provider-kind")
-          :inspection-pane-id
-          (or (dom-association-attribute-value
-               payload-element "data-dom-connect-inspection-pane-id")
-              (dom-association-attribute-value
-               (clog-obj pane)
-               "data-hyperdoc-connect-pane-id"))
-          :evidence-request-id
-          (or (dom-association-attribute-value
-               payload-element "data-dom-connect-request-evidence-request-id")
-              request-id)
-          :browser-failure-kind
-          (or (dom-association-attribute-value
-               payload-element "data-dom-connect-browser-failure-kind")
-              (dom-association-control-value
-               pane browser-failure-kind-field-id))
-          :browser-message
-          (or (dom-association-attribute-value
-               payload-element "data-dom-connect-browser-message")
-              (dom-association-control-value pane browser-message-field-id))
-          :browser-detail
-          (or (dom-association-attribute-value
-               payload-element "data-dom-connect-browser-detail")
-              (dom-association-control-value pane browser-detail-field-id))
-          :snapshot-json
-          (or (dom-association-attribute-value
-               payload-element "data-dom-connect-snapshot-json")
-              (dom-association-control-value pane snapshot-field-id))
-          :source-json
-          (or (dom-association-attribute-value
-               payload-element "data-dom-association-source-json")
-              (dom-association-control-value pane source-field-id))
-          :target-json
-          (or (dom-association-attribute-value
-               payload-element "data-dom-association-target-json")
-              (dom-association-control-value pane target-field-id))))))
+            :context-object-id
+            (dom-association-context-value
+             pane payload-element "data-context-object-id")
+            :context-view-title
+            (or (dom-association-context-value
+                 pane payload-element "data-context-view-title")
+                (dom-association-context-value
+                 pane payload-element "data-dom-association-context-view-title"))
+            :source-field-id
+            source-field-id
+            :target-field-id
+            target-field-id
+            :snapshot-field-id
+            snapshot-field-id
+            :source-pane-id
+            (dom-association-attribute-value
+             payload-element "data-dom-association-source-pane-id")
+            :target-pane-id
+            (dom-association-attribute-value
+             payload-element "data-dom-association-target-pane-id")
+            :source-provider-kind
+            (dom-association-attribute-value
+             payload-element "data-dom-association-source-provider-kind")
+            :target-provider-kind
+            (dom-association-attribute-value
+             payload-element "data-dom-association-target-provider-kind")
+            :inspection-pane-id
+            (or (dom-association-attribute-value
+                 payload-element "data-dom-connect-inspection-pane-id")
+                (dom-association-attribute-value
+                 (clog-obj pane)
+                 "data-hyperdoc-connect-pane-id"))
+            :evidence-request-id
+            (or (dom-association-attribute-value
+                 payload-element "data-dom-connect-request-evidence-request-id")
+                request-id)
+            :browser-failure-kind
+            (or (dom-association-attribute-value
+                 payload-element "data-dom-connect-browser-failure-kind")
+                (dom-association-control-value
+                 pane browser-failure-kind-field-id))
+            :browser-message
+            (or (dom-association-attribute-value
+                 payload-element "data-dom-connect-browser-message")
+                (dom-association-control-value pane browser-message-field-id))
+            :browser-detail
+            (or (dom-association-attribute-value
+                 payload-element "data-dom-connect-browser-detail")
+                (dom-association-control-value pane browser-detail-field-id))
+            :snapshot-json
+            (or (dom-association-attribute-value
+                 payload-element "data-dom-connect-snapshot-json")
+                (dom-association-control-value pane snapshot-field-id))
+            :source-json
+            (or (dom-association-attribute-value
+                 payload-element "data-dom-association-source-json")
+                (dom-association-control-value pane source-field-id))
+            :target-json
+            (or (dom-association-attribute-value
+                 payload-element "data-dom-association-target-json")
+                (dom-association-control-value pane target-field-id))))))
 
 (defun log-dom-association-submit-boundary (pane payload)
   (with-slots (object) pane
@@ -406,9 +406,9 @@
 
 (defun dock-annotation-object-p (object)
   (let ((dock-capability
-          (call-hyperdoc-optional-accessor "DOCK-CAPABILITY-OF" object))
+         (call-hyperdoc-optional-accessor "DOCK-CAPABILITY-OF" object))
         (relation-kind
-          (call-hyperdoc-optional-accessor "RELATION-KIND-OF" object)))
+         (call-hyperdoc-optional-accessor "RELATION-KIND-OF" object)))
     (and (stringp dock-capability)
          (string= dock-capability "Annotation")
          (stringp relation-kind)
@@ -458,7 +458,7 @@
   (set-connect-snapshot-pane-attribute
    pane "data-hyperdoc-connect-captured-at"
    (let ((captured-at
-           (call-hyperdoc-connect-snapshot-accessor "CAPTURED-AT-OF" snapshot)))
+          (call-hyperdoc-connect-snapshot-accessor "CAPTURED-AT-OF" snapshot)))
      (and captured-at (format nil "~A" captured-at)))))
 
 (defun mark-dom-connect-request-evidence-pane (pane request-id evidence)
@@ -490,7 +490,7 @@
     (when reuse-key
       (loop for candidate in (fset:convert 'list (inspector-panes inspector))
             when (dom-connect-snapshot-pane-match-p candidate reuse-key)
-              return candidate))))
+            return candidate))))
 
 (defun dom-connect-request-evidence-pane-match-p (pane request-id)
   (let ((marked (dom-association-attribute-value
@@ -508,11 +508,11 @@
 (defun find-reusable-dom-connect-request-evidence-pane (inspector request-id)
   (loop for candidate in (fset:convert 'list (inspector-panes inspector))
         when (dom-connect-request-evidence-pane-match-p candidate request-id)
-          return candidate))
+        return candidate))
 
 (defun open-dom-connect-snapshot-pane (inspector payload snapshot)
   (let ((existing-pane
-          (find-reusable-dom-connect-snapshot-pane inspector payload snapshot)))
+         (find-reusable-dom-connect-snapshot-pane inspector payload snapshot)))
     (if existing-pane
         (progn
           (setf (pane-object existing-pane) snapshot)
@@ -527,7 +527,7 @@
 
 (defun open-dom-connect-request-evidence-pane (inspector request-id evidence)
   (let ((existing-pane
-          (find-reusable-dom-connect-request-evidence-pane inspector request-id)))
+         (find-reusable-dom-connect-request-evidence-pane inspector request-id)))
     (if existing-pane
         (progn
           (setf (pane-object existing-pane) evidence)
@@ -548,7 +548,7 @@
             for pane-object = (pane-object candidate)
             when (string= (or (stable-hyperdoc-object-id pane-object) "")
                           object-id)
-              return candidate))))
+            return candidate))))
 
 (defun open-hyperdoc-object-pane (inspector object &key (select nil))
   (let ((existing-pane (find-reusable-hyperdoc-object-pane inspector object)))
@@ -571,7 +571,7 @@
             when (and (dock-annotation-object-p pane-object)
                       (string= (or (stable-hyperdoc-object-id pane-object) "")
                                annotation-id))
-              return candidate))))
+            return candidate))))
 
 (defun open-dock-annotation-pane (inspector annotation)
   (let ((existing-pane (find-reusable-dock-annotation-pane inspector annotation)))
@@ -653,10 +653,10 @@
                                 (dom-association-request-id-for-element
                                  pane obj))))
            (association-request-p
-             (and submit-payload
-                  request-id
-                  (not (dom-connect-request-evidence-submit-payload-p
-                        submit-payload))))
+            (and submit-payload
+                 request-id
+                 (not (dom-connect-request-evidence-submit-payload-p
+                       submit-payload))))
            (*inspector-operation-id* request-id)
            (click-start (maybe-current-time-millis)))
       (when submit-payload
@@ -711,7 +711,7 @@
                 :message (dom-association-success-message submit-payload)))
               ((dom-connect-request-evidence-submit-payload-p submit-payload)
                (let* ((evidence-request-id
-                        (getf submit-payload :evidence-request-id))
+                       (getf submit-payload :evidence-request-id))
                       (evidence (or (find-dom-connect-request-evidence
                                      evidence-request-id)
                                     (ensure-dom-connect-request-evidence-from-submit-payload
@@ -738,8 +738,8 @@
                             submit-payload))))
               (request-id
                (let ((association
-                       (make-dom-association-from-submit-payload
-                        pane submit-payload)))
+                      (make-dom-association-from-submit-payload
+                       pane submit-payload)))
                  (maybe-log-inspector-performance
                   :dom-association/object-created
                   :object (maybe-summarize-object-for-log association))
@@ -782,7 +782,7 @@
                 :dom-association/pane-open-requested
                 :mode :pending-evaluated-object)
                (let ((pending-pane
-                       (start-pending-evaluation pane obj target)))
+                      (start-pending-evaluation pane obj target)))
                  (maybe-log-inspector-performance
                   :dom-association/pane-open-succeeded
                   :mode :pending-evaluated-object

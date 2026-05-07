@@ -564,12 +564,12 @@ The resulting system must continue to load and serve HyperDoc.")
 (defun string-list-difference (left right)
   (loop for item in left
         unless (member item right :test #'string=)
-          collect item))
+        collect item))
 
 (defun string-list-intersection (left right)
   (loop for item in left
         when (member item right :test #'string=)
-          collect item))
+        collect item))
 
 (defun git-merge-base-hash (repo-root source-hash target-hash)
   (let ((hash (git-command-output repo-root "merge-base" source-hash target-hash)))
@@ -630,7 +630,7 @@ The resulting system must continue to load and serve HyperDoc.")
         for parsed = (parse-merge-tree-conflict-line line)
         when (and parsed
                   (string= path (car parsed)))
-          do (return (cdr parsed))))
+        do (return (cdr parsed))))
 
 (defun git-merge-tree-rehearsal-report (repo-root source-hash target-hash)
   (let* ((output (git-command-output-ignore-status repo-root
@@ -846,10 +846,10 @@ The resulting system must continue to load and serve HyperDoc.")
         ,@body))))
 
 (defun %system-git-branch-ref (system-designator branch-name
-                                &key
-                                  full-commit-hash
-                                  role
-                                  aliases)
+                               &key
+                                 full-commit-hash
+                                 role
+                                 aliases)
   (let ((system (etypecase system-designator
                   (asdf:system
                    system-designator)
@@ -920,7 +920,7 @@ The resulting system must continue to load and serve HyperDoc.")
                  :separator '(#\Newline))))
     (loop for line in lines
           when (full-git-commit-hash-p line)
-            collect (%system-git-commit-target (system-of branch-ref) line))))
+          collect (%system-git-commit-target (system-of branch-ref) line))))
 
 (defun git-history-local-commits (surface)
   (git-branch-history-targets (local-branch-of surface)
@@ -936,7 +936,7 @@ The resulting system must continue to load and serve HyperDoc.")
   (loop for relation in (relations-of surface)
         when (string= (branch-name-of (target-branch-of relation))
                       (branch-name-of target-branch))
-          collect relation))
+        collect relation))
 
 (defun make-git-path-decision (relation path-set path classification rationale
                                &key linked-note)
@@ -1194,7 +1194,7 @@ Use this object to capture ownership, rationale, and merge policy before merge e
 (defun git-path-decisions-with-classification (decisions classification)
   (loop for decision in decisions
         when (string= (classification-of decision) classification)
-          collect decision))
+        collect decision))
 
 (defun git-manual-overlapping-path-decisions (forecast)
   (git-path-decisions-with-classification
@@ -1373,7 +1373,7 @@ Use this object to capture ownership, rationale, and merge policy before merge e
    :bucket-type (getf spec :bucket-type)
    :paths (loop for path in candidate-paths
                 when (member path (getf spec :paths) :test #'string=)
-                  collect path)
+                collect path)
    :why-not-upstream-core (getf spec :why-not-upstream-core)
    :expected-asdf-placement (getf spec :expected-asdf-placement)
    :expected-dependency-direction (getf spec :expected-dependency-direction)
@@ -1839,7 +1839,7 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun git-historical-conflict-resolution-proposal-surface-from-forecast (forecast)
   (let* ((manual-dossier (git-manual-conflict-dossier-from-forecast forecast))
          (historical-proposals
-           (git-historical-conflict-resolution-proposals forecast)))
+          (git-historical-conflict-resolution-proposals forecast)))
     (make-instance
      'git-conflict-resolution-proposal-surface
      :id (format nil "~A-resolution-proposals" (id-of forecast))
@@ -1854,36 +1854,36 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun git-promoted-frontier-conflict-resolution-proposals (forecast raw-conflict-surface)
   (loop for extra-conflict in (extra-conflicts-of raw-conflict-surface)
         when (promote-to-current-frontier-p-of extra-conflict)
-          collect (make-git-conflict-resolution-proposal-from-extra-conflict
-                   forecast
-                   extra-conflict)))
+        collect (make-git-conflict-resolution-proposal-from-extra-conflict
+                 forecast
+                 extra-conflict)))
 
 (defun git-conflict-resolution-proposal-surface-from-raw-conflict-surface
     (forecast raw-conflict-surface)
   (let* ((historical-surface
-           (git-historical-conflict-resolution-proposal-surface-from-forecast
-            forecast))
+          (git-historical-conflict-resolution-proposal-surface-from-forecast
+           forecast))
          (historical-proposals (historical-proposals-of historical-surface))
          (frontier-historical-paths
-           (mapcar #'path-of (typed-manual-results-of raw-conflict-surface)))
+          (mapcar #'path-of (typed-manual-results-of raw-conflict-surface)))
          (frontier-historical-proposals
-           (loop for proposal in historical-proposals
-                 when (member (path-of proposal)
-                              frontier-historical-paths
-                              :test #'string=)
-                   collect proposal))
+          (loop for proposal in historical-proposals
+                when (member (path-of proposal)
+                             frontier-historical-paths
+                             :test #'string=)
+                collect proposal))
          (promoted-frontier-proposals
-           (git-promoted-frontier-conflict-resolution-proposals
-            forecast
-            raw-conflict-surface))
+          (git-promoted-frontier-conflict-resolution-proposals
+           forecast
+           raw-conflict-surface))
          (current-frontier-proposals
-           (append frontier-historical-proposals
-                   promoted-frontier-proposals))
+          (append frontier-historical-proposals
+                  promoted-frontier-proposals))
          (all-proposals
-           (append historical-proposals promoted-frontier-proposals))
+          (append historical-proposals promoted-frontier-proposals))
          (current-frontier-paths
-           (append frontier-historical-paths
-                   (mapcar #'path-of promoted-frontier-proposals))))
+          (append frontier-historical-paths
+                  (mapcar #'path-of promoted-frontier-proposals))))
     (make-instance
      'git-conflict-resolution-proposal-surface
      :id (format nil "~A-resolution-proposals" (id-of forecast))
@@ -2064,9 +2064,9 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
     (forecast raw-conflict-surface proposal-surface)
   (let* ((typed-manual-results (typed-manual-results-of raw-conflict-surface))
          (promoted-extra-conflicts
-           (loop for extra-conflict in (extra-conflicts-of raw-conflict-surface)
-                 when (promote-to-current-frontier-p-of extra-conflict)
-                   collect extra-conflict)))
+          (loop for extra-conflict in (extra-conflicts-of raw-conflict-surface)
+                when (promote-to-current-frontier-p-of extra-conflict)
+                collect extra-conflict)))
     (loop for proposal in (current-frontier-proposals-of proposal-surface)
           for path = (path-of proposal)
           for rehearsal-result = (find path
@@ -2090,22 +2090,22 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun git-manual-merge-execution-recipe-surface-from-raw-conflict-surface
     (forecast raw-conflict-surface proposal-surface)
   (let* ((recipes
-           (git-current-frontier-manual-merge-execution-recipes
-            forecast
-            raw-conflict-surface
-            proposal-surface))
+          (git-current-frontier-manual-merge-execution-recipes
+           forecast
+           raw-conflict-surface
+           proposal-surface))
          (historical-current-recipes
-           (loop for recipe in recipes
-                 when (string= (frontier-status-of recipe)
-                               "remaining-historical-dossier-raw-conflict")
-                   collect recipe))
+          (loop for recipe in recipes
+                when (string= (frontier-status-of recipe)
+                              "remaining-historical-dossier-raw-conflict")
+                collect recipe))
          (promoted-current-recipes
-           (loop for recipe in recipes
-                 when (string= (frontier-status-of recipe)
-                               "promoted-extra-raw-conflict")
-                   collect recipe))
+          (loop for recipe in recipes
+                when (string= (frontier-status-of recipe)
+                              "promoted-extra-raw-conflict")
+                collect recipe))
          (current-frontier-paths
-           (mapcar #'path-of (current-frontier-proposals-of proposal-surface))))
+          (mapcar #'path-of (current-frontier-proposals-of proposal-surface))))
     (make-instance
      'git-manual-merge-execution-recipe-surface
      :id (format nil "~A-execution-recipes" (id-of forecast))
@@ -2126,9 +2126,9 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun git-manual-merge-execution-recipe-surface-from-forecast (forecast)
   (let* ((raw-conflict-surface (git-raw-conflict-surface-from-forecast forecast))
          (proposal-surface
-           (git-conflict-resolution-proposal-surface-from-raw-conflict-surface
-            forecast
-            raw-conflict-surface)))
+          (git-conflict-resolution-proposal-surface-from-raw-conflict-surface
+           forecast
+           raw-conflict-surface)))
     (git-manual-merge-execution-recipe-surface-from-raw-conflict-surface
      forecast
      raw-conflict-surface
@@ -2156,8 +2156,8 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun git-dreyeck-executable-scaffold-from-forecast (forecast)
   (let ((transition-plan (git-dreyeck-transition-plan-from-forecast forecast))
         (proposal-surface
-          (git-historical-conflict-resolution-proposal-surface-from-forecast
-           forecast)))
+         (git-historical-conflict-resolution-proposal-surface-from-forecast
+          forecast)))
     (make-instance
      'git-dreyeck-executable-scaffold
      :id (format nil "~A-dreyeck-scaffold" (id-of forecast))
@@ -2250,7 +2250,7 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
                          forecast
                          path)
          when proposal
-           collect proposal)
+         collect proposal)
    :validation-proof (copy-list (getf spec :validation-proof))))
 
 (defun git-protocol-seams-from-forecast (forecast &key scaffold)
@@ -2284,9 +2284,9 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
          (conflict-kind (merge-tree-conflict-kind-for-path path message-lines))
          (direction-ready (dreyeck-server-dependency-direction-ready-p))
          (core-link-redirection-export-p
-           (external-symbol-named-p "hyperbook:register-link-redirection"))
+          (external-symbol-named-p "hyperbook:register-link-redirection"))
          (core-target-rewriter-export-p
-           (external-symbol-named-p "hyperbook:register-link-target-rewriter"))
+          (external-symbol-named-p "hyperbook:register-link-target-rewriter"))
          (base-evidence (copy-list (getf scaffold-assessment :evidence))))
     (cond
       ((string= path "hyperbook.asd")
@@ -2380,12 +2380,12 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun make-git-rehearsal-result (forecast rehearsal conflict proposal report
                                   scaffold-assessment)
   (let* ((assessment
-           (manual-proposal-rehearsal-assessment
-            conflict
-            proposal
-            (getf report :raw-conflict-paths)
-            (getf report :message-lines)
-            scaffold-assessment))
+          (manual-proposal-rehearsal-assessment
+           conflict
+           proposal
+           (getf report :raw-conflict-paths)
+           (getf report :message-lines)
+           scaffold-assessment))
          (path (path-of conflict)))
     (make-instance
      'git-rehearsal-result
@@ -2423,7 +2423,7 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun git-typed-manual-raw-conflict-results (rehearsal)
   (loop for result in (rehearsal-results-of rehearsal)
         when (rehearsal-result-on-raw-conflict-frontier-p result)
-          collect result))
+        collect result))
 
 (defun extra-raw-conflict-spec (path)
   (cond
@@ -2489,9 +2489,9 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
   (let* ((spec (extra-raw-conflict-spec path))
          (forecast (forecast-of rehearsal))
          (original-decision
-           (git-overlapping-path-decision-for-path forecast path))
+          (git-overlapping-path-decision-for-path forecast path))
          (conflict-kind
-           (merge-tree-conflict-kind-for-path path (message-lines-of rehearsal))))
+          (merge-tree-conflict-kind-for-path path (message-lines-of rehearsal))))
     (make-instance
      'git-extra-raw-conflict
      :id (format nil "~A/extra-raw-conflict/~A"
@@ -2501,14 +2501,14 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
      :summary (getf spec :summary)
      :rehearsal rehearsal
      :path path
-      :original-decision original-decision
-      :conflict-kind conflict-kind
-      :looks-like (getf spec :looks-like)
-      :frontier-classification (getf spec :frontier-classification)
-      :promote-to-current-frontier-p (getf spec :promote-to-current-frontier-p)
-      :promotion-rationale (getf spec :promotion-rationale)
-      :preliminary-preferred-handling
-      (getf spec :preliminary-preferred-handling))))
+     :original-decision original-decision
+     :conflict-kind conflict-kind
+     :looks-like (getf spec :looks-like)
+     :frontier-classification (getf spec :frontier-classification)
+     :promote-to-current-frontier-p (getf spec :promote-to-current-frontier-p)
+     :promotion-rationale (getf spec :promotion-rationale)
+     :preliminary-preferred-handling
+     (getf spec :preliminary-preferred-handling))))
 
 (defun git-extra-raw-conflicts (rehearsal)
   (loop for path in (additional-conflict-paths-of rehearsal)
@@ -2517,7 +2517,7 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun git-promoted-extra-raw-conflicts (rehearsal)
   (loop for conflict in (git-extra-raw-conflicts rehearsal)
         when (promote-to-current-frontier-p-of conflict)
-          collect conflict))
+        collect conflict))
 
 (defun git-extra-raw-conflict-for-path (forecast path)
   (find path
@@ -2545,7 +2545,7 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun git-raw-conflict-surface-from-forecast (forecast)
   (let* ((rehearsal (git-merge-rehearsal-from-forecast forecast))
          (typed-manual-results
-           (git-typed-manual-raw-conflict-results rehearsal))
+          (git-typed-manual-raw-conflict-results rehearsal))
          (extra-conflicts (git-extra-raw-conflicts rehearsal)))
     (make-instance
      'git-raw-conflict-surface
@@ -2562,22 +2562,22 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
          (raw-conflict-surface (git-raw-conflict-surface-from-forecast forecast))
          (historical-dossier (git-manual-conflict-dossier-from-forecast forecast))
          (proposal-surface
-           (git-conflict-resolution-proposal-surface-from-raw-conflict-surface
-            forecast
-            raw-conflict-surface))
+          (git-conflict-resolution-proposal-surface-from-raw-conflict-surface
+           forecast
+           raw-conflict-surface))
          (recipe-surface
-           (git-manual-merge-execution-recipe-surface-from-raw-conflict-surface
-            forecast
-            raw-conflict-surface
-            proposal-surface))
+          (git-manual-merge-execution-recipe-surface-from-raw-conflict-surface
+           forecast
+           raw-conflict-surface
+           proposal-surface))
          (remaining-historical-results
-           (typed-manual-results-of raw-conflict-surface))
+          (typed-manual-results-of raw-conflict-surface))
          (promoted-extra-conflicts
-           (git-promoted-extra-raw-conflicts rehearsal))
+          (git-promoted-extra-raw-conflicts rehearsal))
          (current-frontier-proposals
-           (current-frontier-proposals-of proposal-surface))
+          (current-frontier-proposals-of proposal-surface))
          (current-frontier-recipes
-           (current-frontier-recipes-of recipe-surface)))
+          (current-frontier-recipes-of recipe-surface)))
     (make-instance
      'git-manual-merge-frontier-surface
      :id (format nil "~A-current-manual-frontier" (id-of forecast))
@@ -2612,34 +2612,34 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
          (report (git-merge-tree-rehearsal-report repo-root source-hash target-hash))
          (scaffold (git-dreyeck-executable-scaffold-from-forecast forecast))
          (proposal-surface
-           (git-historical-conflict-resolution-proposal-surface-from-forecast
-            forecast))
+          (git-historical-conflict-resolution-proposal-surface-from-forecast
+           forecast))
          (scaffold-assessment (dreyeck-scaffold-rehearsal-assessment))
          (manual-paths (mapcar #'path-of (git-manual-conflicts forecast)))
          (rehearsal
-           (make-instance
-            'git-merge-rehearsal
-            :id (format nil "~A-merge-rehearsal" (id-of forecast))
-            :title "Dry-run merge rehearsal"
-            :summary "Non-destructive merge rehearsal object that records the current virtual merge-tree result, preserves the historical three-path dossier as typed boundary checks, and exposes the active raw conflict frontier without executing the merge."
-            :relation relation
-            :forecast forecast
-            :scaffold scaffold
-            :proposal-surface proposal-surface
-            :merge-base-commit (merge-base-commit-of forecast)
-            :mechanism
-            "git merge-tree --write-tree --name-only against the explicit source and target anchors"
-            :virtual-merge-tree-hash
-            (getf report :virtual-merge-tree-hash)
-            :raw-conflict-paths (copy-list (getf report :raw-conflict-paths))
-            :additional-conflict-paths
-            (string-list-difference (getf report :raw-conflict-paths)
-                                    manual-paths)
-            :message-lines (copy-list (getf report :message-lines))
-            :scaffold-sufficient-p (getf scaffold-assessment :ok)
-            :scaffold-direction-status (getf scaffold-assessment :status)
-            :scaffold-evidence (copy-list (getf scaffold-assessment :evidence))
-            :rehearsal-results nil)))
+          (make-instance
+           'git-merge-rehearsal
+           :id (format nil "~A-merge-rehearsal" (id-of forecast))
+           :title "Dry-run merge rehearsal"
+           :summary "Non-destructive merge rehearsal object that records the current virtual merge-tree result, preserves the historical three-path dossier as typed boundary checks, and exposes the active raw conflict frontier without executing the merge."
+           :relation relation
+           :forecast forecast
+           :scaffold scaffold
+           :proposal-surface proposal-surface
+           :merge-base-commit (merge-base-commit-of forecast)
+           :mechanism
+           "git merge-tree --write-tree --name-only against the explicit source and target anchors"
+           :virtual-merge-tree-hash
+           (getf report :virtual-merge-tree-hash)
+           :raw-conflict-paths (copy-list (getf report :raw-conflict-paths))
+           :additional-conflict-paths
+           (string-list-difference (getf report :raw-conflict-paths)
+                                   manual-paths)
+           :message-lines (copy-list (getf report :message-lines))
+           :scaffold-sufficient-p (getf scaffold-assessment :ok)
+           :scaffold-direction-status (getf scaffold-assessment :status)
+           :scaffold-evidence (copy-list (getf scaffold-assessment :evidence))
+           :rehearsal-results nil)))
     (setf (rehearsal-results-of rehearsal)
           (git-manual-conflict-rehearsal-results forecast
                                                  rehearsal
@@ -2743,19 +2743,19 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
          (source-commit (git-branch-target source-branch))
          (target-commit (git-branch-target target-branch))
          (relation
-           (make-instance 'git-merge-intent
-                          :id "merge-upstream-main-into-hauptsache-via-dreyeck-fallback"
-                          :title "Merge upstream/main into hauptsache via dreyeck fallback"
-                          :summary "Typed merge-intent relation between explicit upstream/main and hauptsache commit anchors for the HyperDoc repo."
-                          :relation-type "merge-intent"
-                          :status "planned"
-                          :source-commit source-commit
-                          :target-commit target-commit
-                          :source-branch source-branch
-                          :target-branch target-branch
-                          :prompt +hyperdoc-upstream-main-merge-intent-prompt+
-                          :conflict-policy +hyperdoc-upstream-main-conflict-policy+
-                          :success-criteria +hyperdoc-upstream-main-success-criteria+)))
+          (make-instance 'git-merge-intent
+                         :id "merge-upstream-main-into-hauptsache-via-dreyeck-fallback"
+                         :title "Merge upstream/main into hauptsache via dreyeck fallback"
+                         :summary "Typed merge-intent relation between explicit upstream/main and hauptsache commit anchors for the HyperDoc repo."
+                         :relation-type "merge-intent"
+                         :status "planned"
+                         :source-commit source-commit
+                         :target-commit target-commit
+                         :source-branch source-branch
+                         :target-branch target-branch
+                         :prompt +hyperdoc-upstream-main-merge-intent-prompt+
+                         :conflict-policy +hyperdoc-upstream-main-conflict-policy+
+                         :success-criteria +hyperdoc-upstream-main-success-criteria+)))
     (setf (notes-of relation)
           (make-hyperdoc-upstream-main-dreyeck-notes relation))
     relation))
@@ -3011,21 +3011,21 @@ Keep the future dependency direction one-way: :dreyeck/server -> :hyperdoc/serve
 (defun hyperdoc-git-history-route-discovery ()
   (let* ((history-surface (hyperdoc-git-history-surface))
          (inspectable-object
-           (hyperdoc-upstream-main-into-hauptsache-merge-intent))
+          (hyperdoc-upstream-main-into-hauptsache-merge-intent))
          (repository-root
-           (typecase history-surface
-             (git-history-surface
-              (repo-root-of history-surface))
-             (git-runtime-unavailable
-              (repository-root-of history-surface))
-             (t
-              nil)))
+          (typecase history-surface
+            (git-history-surface
+             (repo-root-of history-surface))
+            (git-runtime-unavailable
+             (repository-root-of history-surface))
+            (t
+             nil)))
          (repository-root-source
-           (typecase history-surface
-             ((or git-history-surface git-runtime-unavailable)
-              (repository-root-source-of history-surface))
-             (t
-              nil))))
+          (typecase history-surface
+            ((or git-history-surface git-runtime-unavailable)
+             (repository-root-source-of history-surface))
+            (t
+             nil))))
     (make-instance 'canonical-route-discovery
                    :id "canonical-route-discovery-for-git-history-surface"
                    :title "Canonical route discovery for Git history surface"

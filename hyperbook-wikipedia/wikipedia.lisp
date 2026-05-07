@@ -51,8 +51,8 @@
 (defun purge-page-cache ()
   (let ((now (get-universal-time)))
     (loop for id being the hash-keys
-            using (hash-value ts)
-              of (timestamps-of *page-cache*)
+          using (hash-value ts)
+          of (timestamps-of *page-cache*)
           do (when (> (- now ts) *page-cache-retention-delay*)
                (remhash id (timestamps-of *page-cache*))
                (remhash id (pages-of *page-cache*))))))
@@ -82,8 +82,8 @@
       (setf (slot-value page 'dom) dom)
       (setf (slot-value page 'wikipedia-pageid)
             (some->> page-data
-              (gethash "parse")
-              (gethash "pageid")))
+                     (gethash "parse")
+                     (gethash "pageid")))
       (setf (slot-value page 'links) (hb:extract-links page))
       (setf (slot-value page 'page-data) page-data))))
 
@@ -102,92 +102,92 @@
 (defun adapt-dom (dom wikipedia page-title)
   ;; Remove the links for editing each section
   (lquery:$ dom ".mw-editsection"
-    (remove))
+            (remove))
   ;; Remove style nodes
   (lquery:$ dom "style"
-    (remove))
+            (remove))
   ;; Replace internal Wikipedia links by HyperBook links
   (lquery:$ dom "a[href^=/wiki/]"
-    (map #'(lambda (el)
-             (let* ((href (plump:get-attribute el "href"))
-                    (page-id (str:replace-all
-                              "_" " "
-                              (str:substring 6 nil href))))
-               (unless (or (str:starts-with? "Special:" page-id)
-                           (str:starts-with? "File:" page-id))
-                 (plump:set-attribute el "page" page-id) 
-                 (plump:remove-attribute el "href")
-                 (plump:remove-attribute el "title"))))))
+            (map #'(lambda (el)
+                     (let* ((href (plump:get-attribute el "href"))
+                            (page-id (str:replace-all
+                                      "_" " "
+                                      (str:substring 6 nil href))))
+                       (unless (or (str:starts-with? "Special:" page-id)
+                                   (str:starts-with? "File:" page-id))
+                         (plump:set-attribute el "page" page-id)
+                         (plump:remove-attribute el "href")
+                         (plump:remove-attribute el "title"))))))
   ;; Add Wikipedia base URL to the remaining internal links
   (lquery:$ dom "a[href^=/wiki/]"
-    (map #'(lambda (el)
-             (let ((href (plump:get-attribute el "href")))
-               (plump:set-attribute el "href"
-                                    (str:concat (base-url wikipedia)
-                                                href))
-               (plump:set-attribute el "target" "_blank")))))
+            (map #'(lambda (el)
+                     (let ((href (plump:get-attribute el "href")))
+                       (plump:set-attribute el "href"
+                                            (str:concat (base-url wikipedia)
+                                                        href))
+                       (plump:set-attribute el "target" "_blank")))))
   ;; Remove links to anchors inside the page, replace by hover text
   (let ((root (plump:make-root)))
     (lquery:$ dom "a[href^=#]"
-      (map #'(lambda (el)
-               (let* ((html-id (str:substring 1 nil (plump:get-attribute el "href")))
-                      (target (plump:get-element-by-id dom html-id))
-                      (target-text (or (and target (plump:text target)) ""))
-                      (text (plump:text el))
-                      (span (plump:make-element root "span")))
-                 (plump:set-attribute span "title" target-text)
-                 (plump:make-text-node span text)
-                 (plump:replace-child el span))))))
+              (map #'(lambda (el)
+                       (let* ((html-id (str:substring 1 nil (plump:get-attribute el "href")))
+                              (target (plump:get-element-by-id dom html-id))
+                              (target-text (or (and target (plump:text target)) ""))
+                              (text (plump:text el))
+                              (span (plump:make-element root "span")))
+                         (plump:set-attribute span "title" target-text)
+                         (plump:make-text-node span text)
+                         (plump:replace-child el span))))))
   ;; Add the page title
   (lquery:$ dom ".mw-parser-output"
-    (before (format nil "<h1>~A</h1>" page-title))))
+            (before (format nil "<h1>~A</h1>" page-title))))
 
 (defun make-dom (page-data)
   (if-let (error (gethash "error" page-data))
-    (plump:parse (format nil "<span class=\"hyperbook-error\">~A</span>"
-                         (gethash "info" error)))
+      (plump:parse (format nil "<span class=\"hyperbook-error\">~A</span>"
+                           (gethash "info" error)))
     (some->> page-data
-      (gethash "parse")
-      (gethash "text")
-      (gethash "*")
-      (plump:parse))))
+             (gethash "parse")
+             (gethash "text")
+             (gethash "*")
+             (plump:parse))))
 
 (defun get-page-data (wp page-title)
   (let* ((response
-           (multiple-value-list
-            (drakma:http-request (api-url wp)
-                                 :method :get
-                                 :parameters `(("action" . "parse")
-                                               ("page" . ,page-title)
-                                               ("format" . "json"))
-                                 :external-format-in :utf8
-                                 :external-format-out :utf8
-                                 :want-stream t)))
+          (multiple-value-list
+           (drakma:http-request (api-url wp)
+                                :method :get
+                                :parameters `(("action" . "parse")
+                                              ("page" . ,page-title)
+                                              ("format" . "json"))
+                                :external-format-in :utf8
+                                :external-format-out :utf8
+                                :want-stream t)))
          (stream (first response)))
     (shasht:read-json stream)))
 
 (views:defview 👀languages (page wikipedia-page)
   (load-page page)
   (views:html-view :title "Languages" :priority 12
-    (views:html
-      (:table :class "inspector-table"
-               (loop for item across (->> page page-data-of
-                                          (gethash "parse")
-                                          (gethash "langlinks"))
-                     for langname = (gethash "langname" item)
-                     for autonym = (gethash "autonym" item)
-                     for hb-link = (hb:replace-by-hyperbook-link
-                                    (tbnl:url-decode (gethash "url" item)))
-                     do (let* ((hyperbook-id (first hb-link))
-                               (page-id (second hb-link))
-                               (thunk (views:thunk
-                                        (hb:find-page hyperbook-id page-id))))
-                           (views:html
-                             (:tr :id (views:eval-id thunk)
-                                  :class "inspector-inspect"
-                                  (:td (views:esc langname))
-                                  (:td (views:esc autonym))
-                                   (:td (views:esc page-id))))))))))
+                   (views:html
+                    (:table :class "inspector-table"
+                            (loop for item across (->> page page-data-of
+                                                       (gethash "parse")
+                                                       (gethash "langlinks"))
+                                  for langname = (gethash "langname" item)
+                                  for autonym = (gethash "autonym" item)
+                                  for hb-link = (hb:replace-by-hyperbook-link
+                                                 (tbnl:url-decode (gethash "url" item)))
+                                  do (let* ((hyperbook-id (first hb-link))
+                                            (page-id (second hb-link))
+                                            (thunk (views:thunk
+                                                    (hb:find-page hyperbook-id page-id))))
+                                       (views:html
+                                        (:tr :id (views:eval-id thunk)
+                                             :class "inspector-inspect"
+                                             (:td (views:esc langname))
+                                             (:td (views:esc autonym))
+                                             (:td (views:esc page-id))))))))))
 
 ;;
 ;; Make and manage wikipedia objects
@@ -276,29 +276,29 @@
 (defmethod views:title-bar-action-buttons ((page wikipedia-page))
   (views:action-button "Open in browser"
                        (views:thunk (clog:open-browser :url (page-url page))
-                         nil)))
+                                    nil)))
 
 (views:defview views:👀source (page wikipedia-page)
   (views:html-view :title "Source" :priority 10
-    (let* ((stream (drakma:http-request
-                    (-> page hb:hyperbook-of api-url)
-                    :method :get
-                    :parameters `(("action" . "parse")
-                                  ("page" . ,(-> page hb:id-of
-                                                 encode-page-title-for-url))
-                                  ("prop" . "wikitext")
-                                  ("format" . "json"))
-                    :external-format-in :utf8
-                    :external-format-out :utf8
-                    :want-stream t))
-           (data (shasht:read-json stream))
-           (wikitext (some->> data
-                       (gethash "parse")
-                       (gethash "wikitext")
-                       (gethash "*"))))
-      (when wikitext
-        (views:html
-          (:pre (views:esc wikitext)))))))
+                   (let* ((stream (drakma:http-request
+                                   (-> page hb:hyperbook-of api-url)
+                                   :method :get
+                                   :parameters `(("action" . "parse")
+                                                 ("page" . ,(-> page hb:id-of
+                                                                encode-page-title-for-url))
+                                                 ("prop" . "wikitext")
+                                                 ("format" . "json"))
+                                   :external-format-in :utf8
+                                   :external-format-out :utf8
+                                   :want-stream t))
+                          (data (shasht:read-json stream))
+                          (wikitext (some->> data
+                                             (gethash "parse")
+                                             (gethash "wikitext")
+                                             (gethash "*"))))
+                     (when wikitext
+                       (views:html
+                        (:pre (views:esc wikitext)))))))
 
 (views:defview 👀parse-tree (page wikipedia-page)
   (let* ((stream (drakma:http-request
@@ -314,16 +314,16 @@
                   :want-stream t))
          (data (shasht:read-json stream))
          (dom (some->> data
-                (gethash "parse")
-                (gethash "parsetree")
-                (gethash "*")
-                (plump:parse))))
+                       (gethash "parse")
+                       (gethash "parsetree")
+                       (gethash "*")
+                       (plump:parse))))
     (when dom
       (some-> dom
-        (plump:get-elements-by-tag-name  "root")
-        (first)
-        (plump-inspector-views::👀children)
-        (views:rename :title "Parse tree" :priority 11)))))
+              (plump:get-elements-by-tag-name  "root")
+              (first)
+              (plump-inspector-views::👀children)
+              (views:rename :title "Parse tree" :priority 11)))))
 
 
 (defmethod hb:find-link-sources ((wp wikipedia) hyperbook-id page-id)
@@ -346,8 +346,8 @@
                     :want-stream t))
            (data (shasht:read-json stream))
            (links (some->> data
-                    (gethash "query")
-                    (gethash "backlinks"))))
+                           (gethash "query")
+                           (gethash "backlinks"))))
       (loop for link across links
             when (zerop (gethash "ns" link))
-              collect (hb:find-page wp (gethash "title" link))))))
+            collect (hb:find-page wp (gethash "title" link))))))

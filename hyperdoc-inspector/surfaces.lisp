@@ -233,7 +233,7 @@
 
 (defun surface-preformatted-view (lines)
   (views:html
-    (:pre (views:esc (surface-lines-to-string lines)))))
+   (:pre (views:esc (surface-lines-to-string lines)))))
 
 (defmethod views:text-representation ((definition hyperdoc::surface-definition))
   (or (hyperdoc::title-of definition)
@@ -247,83 +247,83 @@
 
 (views:defview 👀overview (definition hyperdoc::surface-definition)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:p (views:esc
-           (or (hyperdoc::summary-of definition)
-               "Reusable surface definition.")))
-      (surface-preformatted-view
-       (surface-definition-overview-lines definition)))))
+                   (views:html
+                    (:p (views:esc
+                         (or (hyperdoc::summary-of definition)
+                             "Reusable surface definition.")))
+                    (surface-preformatted-view
+                     (surface-definition-overview-lines definition)))))
 
 (views:defview 👀classification (definition hyperdoc::surface-definition)
   (views:html-view :title "Classification" :priority 2
-    (surface-preformatted-view
-     (surface-definition-classification-lines definition))))
+                   (surface-preformatted-view
+                    (surface-definition-classification-lines definition))))
 
 (views:defview 👀capabilities (definition hyperdoc::surface-definition)
   (views:html-view :title "Capabilities" :priority 3
-    (surface-preformatted-view
-     (surface-definition-capability-lines definition))))
+                   (surface-preformatted-view
+                    (surface-definition-capability-lines definition))))
 
 (views:defview 👀inputs-outputs (definition hyperdoc::surface-definition)
   (views:html-view :title "Inputs and outputs" :priority 4
-    (surface-preformatted-view
-     (surface-definition-io-lines definition))))
+                   (surface-preformatted-view
+                    (surface-definition-io-lines definition))))
 
 (views:defview 👀boundary-rules (definition hyperdoc::surface-definition)
   (views:html-view :title "Boundary rules" :priority 5
-    (surface-preformatted-view
-     (surface-definition-boundary-lines definition))))
+                   (surface-preformatted-view
+                    (surface-definition-boundary-lines definition))))
 
 (views:defview 👀related-surfaces (definition hyperdoc::surface-definition)
   (views:html-view :title "Related surfaces" :priority 6
-    (surface-preformatted-view
-     (surface-definition-related-lines definition))))
+                   (surface-preformatted-view
+                    (surface-definition-related-lines definition))))
 
 (views:defview 👀source-evidence-code-path
     (definition hyperdoc::surface-definition)
   (views:html-view :title "Source evidence / code path" :priority 7
-    (surface-preformatted-view
-     (surface-source-evidence-lines
-      (hyperdoc::surface-definition-source-evidence-of definition)))))
+                   (surface-preformatted-view
+                    (surface-source-evidence-lines
+                     (hyperdoc::surface-definition-source-evidence-of definition)))))
 
 (views:defview 👀overview (instance hyperdoc::surface-instance)
   (views:html-view :title "Overview" :priority 1
-    (views:html
-      (:p (views:esc
-           (or (hyperdoc::summary-of
-                (hyperdoc::surface-instance-definition-of instance))
-               "Concrete realized surface instance.")))
-      (surface-preformatted-view
-       (surface-instance-overview-lines instance)))))
+                   (views:html
+                    (:p (views:esc
+                         (or (hyperdoc::summary-of
+                              (hyperdoc::surface-instance-definition-of instance))
+                             "Concrete realized surface instance.")))
+                    (surface-preformatted-view
+                     (surface-instance-overview-lines instance)))))
 
 (views:defview 👀boundary-state (instance hyperdoc::surface-instance)
   (views:html-view :title "Boundary state" :priority 2
-    (surface-preformatted-view
-     (surface-instance-boundary-lines instance))))
+                   (surface-preformatted-view
+                    (surface-instance-boundary-lines instance))))
 
 (views:defview 👀active-capabilities (instance hyperdoc::surface-instance)
   (views:html-view :title "Active capabilities" :priority 3
-    (surface-preformatted-view
-     (surface-instance-capability-lines instance))))
+                   (surface-preformatted-view
+                    (surface-instance-capability-lines instance))))
 
 (views:defview 👀evidence (instance hyperdoc::surface-instance)
   (views:html-view :title "Evidence" :priority 4
-    (surface-preformatted-view
-     (surface-instance-evidence-lines instance))))
+                   (surface-preformatted-view
+                    (surface-instance-evidence-lines instance))))
 
 (views:defview 👀failure-surfaces (instance hyperdoc::surface-instance)
   (views:html-view :title "Failure surfaces" :priority 5
-    (surface-preformatted-view
-     (surface-instance-failure-lines instance))))
+                   (surface-preformatted-view
+                    (surface-instance-failure-lines instance))))
 
 (views:defview 👀adjacent-surfaces (instance hyperdoc::surface-instance)
   (views:html-view :title "Adjacent surfaces" :priority 6
-    (surface-preformatted-view
-     (surface-instance-adjacent-lines instance))))
+                   (surface-preformatted-view
+                    (surface-instance-adjacent-lines instance))))
 
 (views:defview 👀source-evidence-code-path
     (instance hyperdoc::surface-instance)
   (views:html-view :title "Source evidence / code path" :priority 7
-    (surface-preformatted-view
-     (surface-source-evidence-lines
-      (hyperdoc::surface-instance-source-evidence-of instance)))))
+                   (surface-preformatted-view
+                    (surface-source-evidence-lines
+                     (hyperdoc::surface-instance-source-evidence-of instance)))))

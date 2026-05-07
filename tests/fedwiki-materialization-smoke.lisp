@@ -20,21 +20,21 @@
   (let* ((root (fedwiki-materialization-smoke-tempdir))
          (pages-dir (merge-pathnames "pages/" root))
          (page-plan
-           (hyperdoc:plan-fedwiki-page-materialization
-            "civilian-casualty-mitigation"
-            :fedwiki-pages-directory pages-dir
-            :fedwiki-repo-root root
-            :hyperdoc-repo-root (asdf:system-source-directory :hyperdoc)
-            :expected-fedwiki-branch nil))
+          (hyperdoc:plan-fedwiki-page-materialization
+           "civilian-casualty-mitigation"
+           :fedwiki-pages-directory pages-dir
+           :fedwiki-repo-root root
+           :hyperdoc-repo-root (asdf:system-source-directory :hyperdoc)
+           :expected-fedwiki-branch nil))
          (page-entry (first (hyperdoc::fedwiki-materialization-entries-of page-plan)))
          (slice-plan
-           (hyperdoc:plan-fedwiki-slice-materialization
-            "minab-school-strike"
-            :include-daily-anchor-p t
-            :fedwiki-pages-directory pages-dir
-            :fedwiki-repo-root root
-            :hyperdoc-repo-root (asdf:system-source-directory :hyperdoc)
-            :expected-fedwiki-branch nil)))
+          (hyperdoc:plan-fedwiki-slice-materialization
+           "minab-school-strike"
+           :include-daily-anchor-p t
+           :fedwiki-pages-directory pages-dir
+           :fedwiki-repo-root root
+           :hyperdoc-repo-root (asdf:system-source-directory :hyperdoc)
+           :expected-fedwiki-branch nil)))
     (assert-equal 1
                   (length (hyperdoc::fedwiki-materialization-entries-of page-plan))
                   "Page materialization must plan exactly one entry")

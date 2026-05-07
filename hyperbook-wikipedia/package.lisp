@@ -5,9 +5,9 @@
 (defpackage :hyperbook/wikipedia
   (:use :cl)
   (:import-from :alexandria
-   :if-let :when-let :compose)
+                :if-let :when-let :compose)
   (:import-from :arrow-macros
-   :-> :-<> :->> :-<>> :<> :some-> :some->>)
+                :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:export :get-wikipedia))
 
 (trivial-package-local-nicknames:add-package-local-nickname

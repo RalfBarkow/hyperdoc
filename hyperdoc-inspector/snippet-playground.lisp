@@ -23,7 +23,7 @@
   (parser-engine-kind :direct)
   (max-html-pre-blocks-per-source-block nil)
   (html-pre-language-attributes
-    '("lang" "language" "data-lang" "data-language" "class"))
+   '("lang" "language" "data-lang" "data-language" "class"))
   (minimum-pre-character-count 1))
 
 (defparameter *snippet-source-expansion-policy*
@@ -202,13 +202,13 @@
                 :initarg :source-text
                 :initform "")
    (source-original-length
-     :reader snippet-comparison-region-source-original-length-of
-     :initarg :source-original-length
-     :initform 0)
+    :reader snippet-comparison-region-source-original-length-of
+    :initarg :source-original-length
+    :initform 0)
    (source-truncated-p
-     :reader snippet-comparison-region-source-truncated-p
-     :initarg :source-truncated-p
-     :initform nil)
+    :reader snippet-comparison-region-source-truncated-p
+    :initarg :source-truncated-p
+    :initform nil)
    (findings :reader snippet-comparison-region-findings-of
              :initarg :findings
              :initform nil)))
@@ -263,17 +263,17 @@
                       :initarg :transformation-ir
                       :initform nil)
    (mech-scxml-execution-chart
-     :reader snippet-comparison-surface-mech-scxml-execution-chart-of
-     :initarg :mech-scxml-execution-chart
-     :initform nil)
+    :reader snippet-comparison-surface-mech-scxml-execution-chart-of
+    :initarg :mech-scxml-execution-chart
+    :initform nil)
    (scxml-run-result
-     :reader snippet-comparison-surface-scxml-run-result-of
-     :initarg :scxml-run-result
-     :initform nil)
+    :reader snippet-comparison-surface-scxml-run-result-of
+    :initarg :scxml-run-result
+    :initform nil)
    (mech-lisp-scaffold-source
-     :reader snippet-comparison-surface-mech-lisp-scaffold-source-of
-     :initarg :mech-lisp-scaffold-source
-     :initform nil)
+    :reader snippet-comparison-surface-mech-lisp-scaffold-source-of
+    :initarg :mech-lisp-scaffold-source
+    :initform nil)
    (lifecycle-run :reader snippet-comparison-surface-lifecycle-run-of
                   :initarg :lifecycle-run
                   :initform nil)
@@ -431,9 +431,9 @@
                         :initarg :code-operation-name
                         :initform nil)
    (code-operation-arguments
-     :reader mech-execution-input-code-operation-arguments-of
-     :initarg :code-operation-arguments
-     :initform nil)
+    :reader mech-execution-input-code-operation-arguments-of
+    :initarg :code-operation-arguments
+    :initform nil)
    (handoff-path :reader mech-execution-input-handoff-path-of
                  :initarg :handoff-path
                  :initform nil)
@@ -492,9 +492,9 @@
                     :initarg :rita-run-result
                     :initform nil)
    (normalized-comparison-value
-     :reader mech-equivalence-report-normalized-comparison-value-of
-     :initarg :normalized-comparison-value
-     :initform nil)
+    :reader mech-equivalence-report-normalized-comparison-value-of
+    :initarg :normalized-comparison-value
+    :initform nil)
    (equal-p :reader mech-equivalence-report-equal-p
             :initarg :equal-p
             :initform nil)
@@ -502,9 +502,9 @@
                 :initarg :differences
                 :initform nil)
    (unsupported-constructs
-     :reader mech-equivalence-report-unsupported-constructs-of
-     :initarg :unsupported-constructs
-     :initform nil)
+    :reader mech-equivalence-report-unsupported-constructs-of
+    :initarg :unsupported-constructs
+    :initform nil)
    (source-provenance :reader mech-equivalence-report-source-provenance-of
                       :initarg :source-provenance
                       :initform nil)
@@ -793,9 +793,9 @@
                        :initarg :context-view-title
                        :initform nil)
    (origin-surface-kind
-     :reader snippet-playground-session-origin-surface-kind-of
-     :initarg :origin-surface-kind
-     :initform "html-source")
+    :reader snippet-playground-session-origin-surface-kind-of
+    :initarg :origin-surface-kind
+    :initform "html-source")
    (provider-kind :reader snippet-playground-session-provider-kind-of
                   :initarg :provider-kind
                   :initform "source-v1")
@@ -809,21 +809,21 @@
                 :initarg :source-text
                 :initform "")
    (source-block-count
-     :reader snippet-playground-session-source-block-count-of
-     :initarg :source-block-count
-     :initform 0)
+    :reader snippet-playground-session-source-block-count-of
+    :initarg :source-block-count
+    :initform 0)
    (source-expansion-report
-     :reader snippet-playground-session-source-expansion-report-of
-     :initarg :source-expansion-report
-     :initform nil)
+    :reader snippet-playground-session-source-expansion-report-of
+    :initarg :source-expansion-report
+    :initform nil)
    (recognized-mech-snippets
-     :reader snippet-playground-session-recognized-mech-snippets-of
-     :initarg :recognized-mech-snippets
-     :initform nil)
+    :reader snippet-playground-session-recognized-mech-snippets-of
+    :initarg :recognized-mech-snippets
+    :initform nil)
    (recognized-code-snippets
-     :reader snippet-playground-session-recognized-code-snippets-of
-     :initarg :recognized-code-snippets
-     :initform nil)
+    :reader snippet-playground-session-recognized-code-snippets-of
+    :initarg :recognized-code-snippets
+    :initform nil)
    (selected-mech :reader snippet-playground-session-selected-mech-of
                   :initarg :selected-mech
                   :initform nil)
@@ -831,53 +831,53 @@
                   :initarg :selected-code
                   :initform nil)
    (execution-interface
-     :reader snippet-playground-session-execution-interface-of
-     :initarg :execution-interface
-     :initform nil)
+    :reader snippet-playground-session-execution-interface-of
+    :initarg :execution-interface
+    :initform nil)
    (transformation-unit
-     :reader snippet-playground-session-transformation-unit-of
-     :initarg :transformation-unit
-     :initform nil)
+    :reader snippet-playground-session-transformation-unit-of
+    :initarg :transformation-unit
+    :initform nil)
    (mech-execution-ir
-     :reader snippet-playground-session-mech-execution-ir-of
-     :initarg :mech-execution-ir
-     :initform nil)
+    :reader snippet-playground-session-mech-execution-ir-of
+    :initarg :mech-execution-ir
+    :initform nil)
    (mech-execution-input
-     :reader snippet-playground-session-mech-execution-input-of
-     :initarg :mech-execution-input
-     :initform nil)
+    :reader snippet-playground-session-mech-execution-input-of
+    :initarg :mech-execution-input
+    :initform nil)
    (lefty-run-result
-     :reader snippet-playground-session-lefty-run-result-of
-     :initarg :lefty-run-result
-     :initform nil)
+    :reader snippet-playground-session-lefty-run-result-of
+    :initarg :lefty-run-result
+    :initform nil)
    (rita-run-result
-     :reader snippet-playground-session-rita-run-result-of
-     :initarg :rita-run-result
-     :initform nil)
+    :reader snippet-playground-session-rita-run-result-of
+    :initarg :rita-run-result
+    :initform nil)
    (equivalence-report
-     :reader snippet-playground-session-equivalence-report-of
-     :initarg :equivalence-report
-     :initform nil)
+    :reader snippet-playground-session-equivalence-report-of
+    :initarg :equivalence-report
+    :initform nil)
    (transformation-ir
-     :reader snippet-playground-session-transformation-ir-of
-     :initarg :transformation-ir
-     :initform nil)
+    :reader snippet-playground-session-transformation-ir-of
+    :initarg :transformation-ir
+    :initform nil)
    (mech-scxml-execution-chart
-     :reader snippet-playground-session-mech-scxml-execution-chart-of
-     :initarg :mech-scxml-execution-chart
-     :initform nil)
+    :reader snippet-playground-session-mech-scxml-execution-chart-of
+    :initarg :mech-scxml-execution-chart
+    :initform nil)
    (scxml-run-result
-     :reader snippet-playground-session-scxml-run-result-of
-     :initarg :scxml-run-result
-     :initform nil)
+    :reader snippet-playground-session-scxml-run-result-of
+    :initarg :scxml-run-result
+    :initform nil)
    (mech-lisp-scaffold-source
-     :reader snippet-playground-session-mech-lisp-scaffold-source-of
-     :initarg :mech-lisp-scaffold-source
-     :initform nil)
+    :reader snippet-playground-session-mech-lisp-scaffold-source-of
+    :initarg :mech-lisp-scaffold-source
+    :initform nil)
    (comparison-surface
-     :reader snippet-playground-session-comparison-surface-of
-     :initarg :comparison-surface
-     :initform nil)
+    :reader snippet-playground-session-comparison-surface-of
+    :initarg :comparison-surface
+    :initform nil)
    (crosswalk :reader snippet-playground-session-crosswalk-of
               :initarg :crosswalk
               :initform nil)
@@ -885,21 +885,21 @@
                   :initarg :pairing-notes
                   :initform nil)
    (authored-artifact
-     :reader snippet-playground-session-authored-artifact-of
-     :initarg :authored-artifact
-     :initform nil)
+    :reader snippet-playground-session-authored-artifact-of
+    :initarg :authored-artifact
+    :initform nil)
    (behavior-artifact
-     :reader snippet-playground-session-behavior-artifact-of
-     :initarg :behavior-artifact
-     :initform nil)
+    :reader snippet-playground-session-behavior-artifact-of
+    :initarg :behavior-artifact
+    :initform nil)
    (layout-artifact
-     :reader snippet-playground-session-layout-artifact-of
-     :initarg :layout-artifact
-     :initform nil)
+    :reader snippet-playground-session-layout-artifact-of
+    :initarg :layout-artifact
+    :initform nil)
    (lisp-scaffold-source
-     :reader snippet-playground-session-lisp-scaffold-source-of
-     :initarg :lisp-scaffold-source
-     :initform nil)
+    :reader snippet-playground-session-lisp-scaffold-source-of
+    :initarg :lisp-scaffold-source
+    :initform nil)
    (derived-items :accessor snippet-playground-session-derived-items-of
                   :initarg :derived-items
                   :initform nil)
@@ -907,18 +907,18 @@
                     :initarg :last-run-object
                     :initform nil)
    (state-machine-run
-     :accessor snippet-playground-session-state-machine-run-of
-     :initarg :state-machine-run
-     :initform nil)
+    :accessor snippet-playground-session-state-machine-run-of
+    :initarg :state-machine-run
+    :initform nil)
    (findings :reader snippet-playground-session-findings-of
              :initarg :findings
              :initform nil)))
 
 (defclass snippet-playground-failure (snippet-playground-session)
   ((failure-classification
-     :reader snippet-playground-failure-classification-of
-     :initarg :failure-classification
-     :initform :failed)))
+    :reader snippet-playground-failure-classification-of
+    :initarg :failure-classification
+    :initform :failed)))
 
 (defmethod print-object ((object mech-snippet-step) stream)
   (print-unreadable-object (object stream :type t)
@@ -1189,23 +1189,23 @@
   (let* ((source (snippet-playground-authored-source-artifact))
          (relations (make-snippet-playground-authored-graph))
          (semantic-relations
-           (remove-if-not
-            (lambda (relation)
-              (eq (snippet-playground-authored-relation-layer-of relation)
-                  :semantic))
-            relations))
+          (remove-if-not
+           (lambda (relation)
+             (eq (snippet-playground-authored-relation-layer-of relation)
+                 :semantic))
+           relations))
          (behavior-relations
-           (remove-if-not
-            (lambda (relation)
-              (eq (snippet-playground-authored-relation-layer-of relation)
-                  :behavior))
-            relations))
+          (remove-if-not
+           (lambda (relation)
+             (eq (snippet-playground-authored-relation-layer-of relation)
+                 :behavior))
+           relations))
          (layout-relations
-           (remove-if-not
-            (lambda (relation)
-              (eq (snippet-playground-authored-relation-layer-of relation)
-                  :layout))
-            relations)))
+          (remove-if-not
+           (lambda (relation)
+             (eq (snippet-playground-authored-relation-layer-of relation)
+                 :layout))
+           relations)))
     (make-instance
      'snippet-playground-authored-artifact
      :id (authored-relation-artifact-source-artifact-id-of source)
@@ -1373,9 +1373,9 @@
       (let* ((state-id (id-of state))
              (outgoing (state-machine-transitions-from-state machine state-id))
              (terminal-p
-               (member state-id
-                       (state-machine-definition-terminal-states-of machine)
-                       :test #'equal)))
+              (member state-id
+                      (state-machine-definition-terminal-states-of machine)
+                      :test #'equal)))
         (if (and terminal-p (null outgoing))
             (format stream "  <final id=\"~A\"/>~%"
                     (snippet-playground-xml-escape state-id))
@@ -1412,85 +1412,85 @@
 
 (defun compile-snippet-playground-layout-spec (relations)
   (let* ((comparison-relations
-           (remove-if-not
-            (lambda (relation)
-              (member (snippet-playground-authored-relation-predicate-of relation)
-                      '(:contains-left :contains-center :contains-right :show-once
-                        :above :renders)
-                      :test #'eq))
-            relations))
+          (remove-if-not
+           (lambda (relation)
+             (member (snippet-playground-authored-relation-predicate-of relation)
+                     '(:contains-left :contains-center :contains-right :show-once
+                       :above :renders)
+                     :test #'eq))
+           relations))
          (render-relations
-           (remove-if-not
-            (lambda (relation)
-              (eq (snippet-playground-authored-relation-predicate-of relation)
-                  :renders))
-            comparison-relations))
+          (remove-if-not
+           (lambda (relation)
+             (eq (snippet-playground-authored-relation-predicate-of relation)
+                 :renders))
+           comparison-relations))
          (region-relations
-           (remove-if-not
-            (lambda (relation)
-              (member (snippet-playground-authored-relation-predicate-of relation)
-                      '(:contains-left :contains-center :contains-right)
-                      :test #'eq))
-            comparison-relations))
+          (remove-if-not
+           (lambda (relation)
+             (member (snippet-playground-authored-relation-predicate-of relation)
+                     '(:contains-left :contains-center :contains-right)
+                     :test #'eq))
+           comparison-relations))
          (above-relations
-           (remove-if-not
-            (lambda (relation)
-              (eq (snippet-playground-authored-relation-predicate-of relation)
-                  :above))
-            comparison-relations))
+          (remove-if-not
+           (lambda (relation)
+             (eq (snippet-playground-authored-relation-predicate-of relation)
+                 :above))
+           comparison-relations))
          (placement-order '(:contains-center :contains-left :contains-right))
          (regions
-           (loop for predicate in placement-order
-                 for relation = (find predicate
-                                      region-relations
-                                      :key
-                                      #'snippet-playground-authored-relation-predicate-of
-                                      :test #'eq)
-                 for component = (and relation
-                                      (snippet-playground-authored-relation-object-of
-                                       relation))
-                 for render = (and component
-                                   (find component
-                                         render-relations
-                                         :key
-                                         #'snippet-playground-authored-relation-subject-of
-                                         :test #'eq))
-                 for top-band-p = (and component
-                                       (find component
-                                             above-relations
-                                             :key
-                                             #'snippet-playground-authored-relation-subject-of
-                                             :test #'eq))
-                 when render
-                   collect
-                   (list (ecase predicate
-                           (:contains-left :left)
-                           (:contains-center :center)
-                           (:contains-right :right))
-                         :region
-                         (snippet-playground-authored-relation-attribute
-                          render
-                          :region)
-                         :content
-                         (snippet-playground-authored-relation-object-of render)
-                         :title
-                         (snippet-playground-authored-relation-attribute
-                          render
-                          :title)
-                         :row (if top-band-p 1 2)
-                         :column (ecase predicate
-                                   (:contains-left 1)
-                                   (:contains-center 1)
-                                   (:contains-right 2))
-                         :column-span (if top-band-p 2 1))))
+          (loop for predicate in placement-order
+                for relation = (find predicate
+                                     region-relations
+                                     :key
+                                     #'snippet-playground-authored-relation-predicate-of
+                                     :test #'eq)
+                for component = (and relation
+                                     (snippet-playground-authored-relation-object-of
+                                      relation))
+                for render = (and component
+                                  (find component
+                                        render-relations
+                                        :key
+                                        #'snippet-playground-authored-relation-subject-of
+                                        :test #'eq))
+                for top-band-p = (and component
+                                      (find component
+                                            above-relations
+                                            :key
+                                            #'snippet-playground-authored-relation-subject-of
+                                            :test #'eq))
+                when render
+                collect
+                (list (ecase predicate
+                        (:contains-left :left)
+                        (:contains-center :center)
+                        (:contains-right :right))
+                      :region
+                      (snippet-playground-authored-relation-attribute
+                       render
+                       :region)
+                      :content
+                      (snippet-playground-authored-relation-object-of render)
+                      :title
+                      (snippet-playground-authored-relation-attribute
+                       render
+                       :title)
+                      :row (if top-band-p 1 2)
+                      :column (ecase predicate
+                                (:contains-left 1)
+                                (:contains-center 1)
+                                (:contains-right 2))
+                      :column-span (if top-band-p 2 1))))
          (rules
-           (loop for relation in comparison-relations
-                 when (eq (snippet-playground-authored-relation-predicate-of relation)
-                          :show-once)
-                   collect
-                   (list :show-once
-                         (snippet-playground-authored-relation-object-of
-                          relation)))))
+          (loop for relation in comparison-relations
+                when (eq (snippet-playground-authored-relation-predicate-of relation)
+                         :show-once)
+                collect
+                (list :show-once
+                      (snippet-playground-authored-relation-object-of
+                       relation)))))
     (list :surface 'snippet-comparison
           :regions regions
           :relations
@@ -1506,23 +1506,23 @@
   (or *snippet-playground-layout-artifact*
       (let* ((authored-artifact (snippet-playground-authored-artifact))
              (relations
-               (snippet-playground-authored-artifact-layout-relations-of
-                authored-artifact))
+              (snippet-playground-authored-artifact-layout-relations-of
+               authored-artifact))
              (pane-relations
-               (remove-if-not
-                (lambda (relation)
-                  (member (snippet-playground-authored-relation-predicate-of relation)
-                          '(:right-of :below :replaces)
-                          :test #'eq))
-                relations))
+              (remove-if-not
+               (lambda (relation)
+                 (member (snippet-playground-authored-relation-predicate-of relation)
+                         '(:right-of :below :replaces)
+                         :test #'eq))
+               relations))
              (comparison-relations
-               (remove-if-not
-                (lambda (relation)
-                  (member (snippet-playground-authored-relation-predicate-of relation)
-                          '(:contains-left :contains-center :contains-right
-                            :show-once :above :renders)
-                          :test #'eq))
-                relations)))
+              (remove-if-not
+               (lambda (relation)
+                 (member (snippet-playground-authored-relation-predicate-of relation)
+                         '(:contains-left :contains-center :contains-right
+                           :show-once :above :renders)
+                         :test #'eq))
+               relations)))
         (setf *snippet-playground-layout-artifact*
               (make-instance
                'snippet-playground-layout-artifact
@@ -1550,22 +1550,22 @@
   (or *snippet-playground-behavior-artifact*
       (let* ((authored-artifact (snippet-playground-authored-artifact))
              (relations
-               (snippet-playground-authored-artifact-behavior-relations-of
-                authored-artifact))
+              (snippet-playground-authored-artifact-behavior-relations-of
+               authored-artifact))
              (run-machine
-               (compile-snippet-playground-machine
-                authored-artifact
-                :snippet-playground-run
-                "snippet_playground_run"
-                "snippet_playground_run"
-                "Origin-aware snippet-playground lifecycle shared by html-source and fedwiki-page providers."))
+              (compile-snippet-playground-machine
+               authored-artifact
+               :snippet-playground-run
+               "snippet_playground_run"
+               "snippet_playground_run"
+               "Origin-aware snippet-playground lifecycle shared by html-source and fedwiki-page providers."))
              (comparison-machine
-               (compile-snippet-playground-machine
-                authored-artifact
-                :snippet-comparison-surface
-                "snippet_comparison_surface"
-                "snippet_comparison_surface"
-                "Small lifecycle for the declarative snippet comparison surface.")))
+              (compile-snippet-playground-machine
+               authored-artifact
+               :snippet-comparison-surface
+               "snippet_comparison_surface"
+               "snippet_comparison_surface"
+               "Small lifecycle for the declarative snippet comparison surface.")))
         (setf *snippet-playground-behavior-artifact*
               (make-instance
                'snippet-playground-behavior-artifact
@@ -1861,9 +1861,9 @@
                               discrepancies)
                         (setf scan-start (1+ pre-end)))
                       (let* ((code-start-candidate
-                               (search "<code" source
-                                       :test #'char-equal
-                                       :start2 (1+ pre-end)))
+                              (search "<code" source
+                                      :test #'char-equal
+                                      :start2 (1+ pre-end)))
                              (code-start (and code-start-candidate
                                               (< code-start-candidate
                                                  close-pre-start)
@@ -1872,15 +1872,15 @@
                                             (position #\> source
                                                       :start code-start)))
                              (close-code-start-candidate
-                               (and code-end
-                                    (search "</code>" source
-                                            :test #'char-equal
-                                            :start2 (1+ code-end))))
+                              (and code-end
+                                   (search "</code>" source
+                                           :test #'char-equal
+                                           :start2 (1+ code-end))))
                              (close-code-start
-                               (and close-code-start-candidate
-                                    (< close-code-start-candidate
-                                       close-pre-start)
-                                    close-code-start-candidate))
+                              (and close-code-start-candidate
+                                   (< close-code-start-candidate
+                                      close-pre-start)
+                                   close-code-start-candidate))
                              (content-start (if code-end
                                                 (1+ code-end)
                                                 (1+ pre-end)))
@@ -1892,9 +1892,9 @@
                                                    (1+ pre-end))))
                              (raw-source (subseq source content-start content-end))
                              (decoded-source
-                               (if decode-html-entities-p
-                                   (decode-html-code-block-text raw-source)
-                                   raw-source)))
+                              (if decode-html-entities-p
+                                  (decode-html-code-block-text raw-source)
+                                  raw-source)))
                         (incf index)
                         (push (list :index index
                                     :line-number line-number
@@ -1937,18 +1937,18 @@
                       (hyperbook/fedwiki::text-of item))
         when (and (snippet-playground-candidate-fedwiki-story-item-p item)
                   (not (snippet-playground-empty-string-p source)))
-          do (push (list :index index
-                         :line-number index
-                         :location-label
-                         (format nil "story item ~D (~A)"
-                                 index
-                                 (string-downcase (string item-type)))
-                         :open-tag (format nil "fedwiki-~(~A~)" item-type)
-                         :source source
-                         :origin-surface-kind "fedwiki-page"
-                         :provider-kind "fedwiki-v1"
-                         :story-item-id story-item-id)
-                   blocks)
+        do (push (list :index index
+                       :line-number index
+                       :location-label
+                       (format nil "story item ~D (~A)"
+                               index
+                               (string-downcase (string item-type)))
+                       :open-tag (format nil "fedwiki-~(~A~)" item-type)
+                       :source source
+                       :origin-surface-kind "fedwiki-page"
+                       :provider-kind "fedwiki-v1"
+                       :story-item-id story-item-id)
+                 blocks)
         finally (return (nreverse blocks))))
 
 (defun snippet-source-expansion-policy-summary (policy)
@@ -2027,16 +2027,16 @@
 
 (defun snippet-playground-html-pre-language-hints (open-tag policy)
   (let ((attributes
-          (snippet-source-expansion-policy-html-pre-language-attributes
-           policy)))
+         (snippet-source-expansion-policy-html-pre-language-attributes
+          policy)))
     (loop for attribute-name in attributes
           for value = (snippet-playground-open-tag-attribute-value
                        open-tag
                        attribute-name)
           when (and value
                     (not (snippet-playground-empty-string-p value)))
-            collect (list :attribute (string-downcase attribute-name)
-                          :value (string-downcase value)))))
+          collect (list :attribute (string-downcase attribute-name)
+                        :value (string-downcase value)))))
 
 (defun snippet-playground-html-pre-open-tag-from-hints (hints)
   (if hints
@@ -2048,16 +2048,16 @@
 
 (defun snippet-playground-synthetic-html-pre-labels-from-report (report)
   (loop for synthetic-block in
-          (snippet-source-expansion-report-synthetic-blocks report)
+        (snippet-source-expansion-report-synthetic-blocks report)
         collect (getf synthetic-block :synthetic_id)))
 
 (defun snippet-playground-recognized-synthetic-html-pre-labels (session)
   (loop for snippet in
-          (snippet-playground-session-recognized-code-snippets-of session)
+        (snippet-playground-session-recognized-code-snippets-of session)
         for label = (snippet-location-label-of snippet)
         when (and label
                   (search "html-pre/" label :test #'char=))
-          collect label))
+        collect label))
 
 (defun snippet-source-parse-discrepancy->plist (discrepancy)
   (list :severity
@@ -2109,21 +2109,21 @@
       (let* ((parent-index (or (getf candidate :parent_block_index) 0))
              (pre-ordinal (or (getf candidate :pre_ordinal) 0))
              (candidate-node
-               (format nil "candidate-html-pre-~D-~D"
-                       parent-index
-                       pre-ordinal))
+              (format nil "candidate-html-pre-~D-~D"
+                      parent-index
+                      pre-ordinal))
              (candidate-label
-               (snippet-source-parser-dot-escape-label
-                (format nil "~A~%status=~A~%hint=~A~%lines=~A"
-                        (or (getf candidate :synthetic_id)
-                            candidate-node)
-                        (or (getf candidate :status) :unknown)
-                        (or (getf candidate :language_hint) "n/a")
-                        (or (getf candidate :line_count) 0))))
+              (snippet-source-parser-dot-escape-label
+               (format nil "~A~%status=~A~%hint=~A~%lines=~A"
+                       (or (getf candidate :synthetic_id)
+                           candidate-node)
+                       (or (getf candidate :status) :unknown)
+                       (or (getf candidate :language_hint) "n/a")
+                       (or (getf candidate :line_count) 0))))
              (parent-node (format nil "source-block-~D" parent-index))
              (edge-label
-               (snippet-source-parser-dot-escape-label
-                (or (getf candidate :reason) "candidate"))))
+              (snippet-source-parser-dot-escape-label
+               (or (getf candidate :reason) "candidate"))))
         (format stream "  \"~A\" [label=\"~A\", shape=note];~%"
                 candidate-node
                 candidate-label)
@@ -2135,8 +2135,8 @@
 
 (defun snippet-playground-source-expansion-evidence (report)
   (let ((effective-report
-          (or report
-              (make-snippet-source-expansion-report))))
+         (or report
+             (make-snippet-source-expansion-report))))
     (list
      :source_block_count
      (snippet-source-expansion-report-original-block-count effective-report)
@@ -2239,7 +2239,7 @@
              table))
          (record-discrepancy
              (severity kind fact-summary
-              &key block source-line-number character-offset evidence-value)
+                       &key block source-line-number character-offset evidence-value)
            (when (snippet-source-expansion-policy-record-discrepancies-p
                   effective-policy)
              (push
@@ -2255,7 +2255,7 @@
               discrepancies)))
          (record-rejection
              (reason discrepancy-kind message
-              &key block source-line-number character-offset evidence-value)
+                     &key block source-line-number character-offset evidence-value)
            (setf rejection-reasons
                  (incf-table-count reason rejection-reasons))
            (incf pre-regions-rejected)
@@ -2278,10 +2278,10 @@
                       (snippet-source-expansion-policy-collect-incremental-stats-p
                        effective-policy))
              (let ((period
-                     (max 1
-                          (or (snippet-source-expansion-policy-stats-snapshot-period
-                               effective-policy)
-                              1))))
+                    (max 1
+                         (or (snippet-source-expansion-policy-stats-snapshot-period
+                              effective-policy)
+                             1))))
                (when (or (= processed-node-count 1)
                          (zerop (mod processed-node-count period)))
                  (push (list :node_count processed-node-count
@@ -2298,10 +2298,10 @@
            (when (snippet-source-expansion-policy-generate-graphviz-dot-p
                   effective-policy)
              (let ((period
-                     (max 1
-                          (or (snippet-source-expansion-policy-graphviz-dot-snapshot-period
-                               effective-policy)
-                              1))))
+                    (max 1
+                         (or (snippet-source-expansion-policy-graphviz-dot-snapshot-period
+                              effective-policy)
+                             1))))
                (when (or (= processed-node-count 1)
                          (zerop (mod processed-node-count period)))
                  (push (list :node_count processed-node-count
@@ -2323,41 +2323,41 @@
                preview)))
          (record-candidate-entry
              (parent-block parent-index parent-location-label pre-index
-              pre-source pre-char-count hinted-language hints reason accepted-p
-              pre-line-number pre-character-offset)
+                           pre-source pre-char-count hinted-language hints reason accepted-p
+                           pre-line-number pre-character-offset)
            (let* ((synthetic-id
-                    (format nil "html-pre/~D/~D" parent-index pre-index))
+                   (format nil "html-pre/~D/~D" parent-index pre-index))
                   (synthetic-location-label
-                    (format nil "~A from ~A"
-                            synthetic-id
-                            parent-location-label))
+                   (format nil "~A from ~A"
+                           synthetic-id
+                           parent-location-label))
                   (line-count
-                    (max 1
-                         (1+ (count #\Newline pre-source))))
+                   (max 1
+                        (1+ (count #\Newline pre-source))))
                   (decoded-p
-                    (snippet-source-expansion-policy-decode-html-entities-p
-                     effective-policy))
+                   (snippet-source-expansion-policy-decode-html-entities-p
+                    effective-policy))
                   (entry
-                    (list
-                     :synthetic_id synthetic-id
-                     :location_label synthetic-location-label
-                     :parent_block_id (getf parent-block :id)
-                     :parent_story_item_id (getf parent-block :story-item-id)
-                     :parent_block_index parent-index
-                     :source_line_number pre-line-number
-                     :character_offset pre-character-offset
-                     :pre_ordinal pre-index
-                     :source_kind :html-pre
-                     :language_hint hinted-language
-                     :language_hint_attributes hints
-                     :accepted_p accepted-p
-                     :status (if accepted-p :accepted :rejected)
-                     :reason reason
-                     :decoded_entities_p decoded-p
-                     :character_count pre-char-count
-                     :line_count line-count
-                     :preview (candidate-preview pre-source)
-                     :parent_location_label parent-location-label)))
+                   (list
+                    :synthetic_id synthetic-id
+                    :location_label synthetic-location-label
+                    :parent_block_id (getf parent-block :id)
+                    :parent_story_item_id (getf parent-block :story-item-id)
+                    :parent_block_index parent-index
+                    :source_line_number pre-line-number
+                    :character_offset pre-character-offset
+                    :pre_ordinal pre-index
+                    :source_kind :html-pre
+                    :language_hint hinted-language
+                    :language_hint_attributes hints
+                    :accepted_p accepted-p
+                    :status (if accepted-p :accepted :rejected)
+                    :reason reason
+                    :decoded_entities_p decoded-p
+                    :character_count pre-char-count
+                    :line_count line-count
+                    :preview (candidate-preview pre-source)
+                    :parent_location_label parent-location-label)))
              (push entry candidate-entries)
              (when accepted-p
                (push entry accepted-synthetic-entries)
@@ -2366,11 +2366,11 @@
       (dolist (block blocks)
         (touch-node :source-block)
         (let* ((html-pre-source-block-p
-                 (snippet-playground-html-pre-source-block-p block))
+                (snippet-playground-html-pre-source-block-p block))
                (include-original-p
-                 (or (not html-pre-source-block-p)
-                     (snippet-source-expansion-policy-include-original-blocks-p
-                      effective-policy))))
+                (or (not html-pre-source-block-p)
+                    (snippet-source-expansion-policy-include-original-blocks-p
+                     effective-policy))))
           (when html-pre-source-block-p
             (incf html-like-block-count))
           (when include-original-p
@@ -2395,13 +2395,13 @@
                     (parent-line-number (or (getf block :line-number) 1))
                     (parent-location-label (snippet-block-location-label block))
                     (max-per-parent
-                      (snippet-source-expansion-policy-max-html-pre-blocks-per-source-block
-                       effective-policy))
+                     (snippet-source-expansion-policy-max-html-pre-blocks-per-source-block
+                      effective-policy))
                     (min-char-count
-                      (max 0
-                           (or (snippet-source-expansion-policy-minimum-pre-character-count
-                                effective-policy)
-                               0)))
+                     (max 0
+                          (or (snippet-source-expansion-policy-minimum-pre-character-count
+                               effective-policy)
+                              0)))
                     (emitted-count 0)
                     (source (or (getf block :source) ""))
                     (pre-blocks '())
@@ -2421,7 +2421,7 @@
                        (line-number (+ parent-line-number
                                        (max 0
                                             (1- (or (getf discrepancy
-                                                         :line-number)
+                                                          :line-number)
                                                     1)))))
                        (character-offset (getf discrepancy :character-offset))
                        (summary (or (getf discrepancy :summary)
@@ -2456,238 +2456,238 @@
                                   (getf pre-block :open-tag)
                                   effective-policy)
                      for hinted-language = (and hints
-                                              (getf (first hints) :value))
+                                                (getf (first hints) :value))
                      for allow-without-language-p =
-                       (snippet-source-expansion-policy-recognize-pre-without-language-p
-                        effective-policy)
+                     (snippet-source-expansion-policy-recognize-pre-without-language-p
+                      effective-policy)
                      do (touch-node :pre-region)
-                        (record-language-hints hints)
-                        (cond
-                          ((and max-per-parent
-                                (>= emitted-count max-per-parent))
-                           (record-candidate-entry
-                            block
-                            parent-index
-                            parent-location-label
-                            pre-index
-                            pre-source
-                            pre-char-count
-                            hinted-language
-                            hints
-                            (format nil
-                                    "Rejected by max_html_pre_blocks_per_source_block (~D)."
-                                    max-per-parent)
-                            nil
-                            pre-line-number
-                            pre-character-offset)
-                           (record-rejection
-                            :max-per-parent
-                            :rejected-by-policy
-                            (format nil
-                                    "Rejected candidate ~D in block #~D by max_html_pre_blocks_per_source_block (~D)."
-                                    pre-index
-                                    parent-index
-                                    max-per-parent)
-                            :block block
-                            :source-line-number pre-line-number
-                            :character-offset pre-character-offset
-                            :evidence-value max-per-parent))
-                          ((< pre-char-count min-char-count)
-                           (record-candidate-entry
-                            block
-                            parent-index
-                            parent-location-label
-                            pre-index
-                            pre-source
-                            pre-char-count
-                            hinted-language
-                            hints
-                            (format nil
-                                    "Rejected by minimum_pre_character_count (~D)."
-                                    min-char-count)
-                            nil
-                            pre-line-number
-                            pre-character-offset)
-                           (record-rejection
-                            :minimum-pre-character-count
-                            (if (zerop pre-char-count)
-                                :empty-pre
-                                :rejected-by-policy)
-                            (format nil
-                                    "Rejected candidate ~D in block #~D by minimum_pre_character_count (~D): ~D chars."
-                                    pre-index
-                                    parent-index
-                                    min-char-count
-                                    pre-char-count)
-                            :block block
-                            :source-line-number pre-line-number
-                            :character-offset pre-character-offset
-                            :evidence-value pre-char-count))
-                          ((and (null hints)
-                                (not allow-without-language-p))
-                           (record-candidate-entry
-                            block
-                            parent-index
-                            parent-location-label
-                            pre-index
-                            pre-source
-                            pre-char-count
-                            hinted-language
-                            hints
-                            "Rejected because recognize_pre_without_language_p is nil and no policy-approved language hint was found."
-                            nil
-                            pre-line-number
-                            pre-character-offset)
-                           (record-rejection
-                            :missing-language-hint
-                            :ambiguous-language
-                            (format nil
-                                    "Rejected candidate ~D in block #~D because no policy-approved language hint was found."
-                                    pre-index
-                                    parent-index)
-                            :block block
-                            :source-line-number pre-line-number
-                            :character-offset pre-character-offset))
-                          (t
-                           (incf emitted-count)
-                           (let* ((reason
-                                    (if hints
-                                        (format nil
-                                                "Accepted with policy-approved language hint (~{~A~^, ~})."
-                                                (mapcar (lambda (hint)
-                                                          (getf hint :attribute))
-                                                        hints))
-                                        "Accepted as exploratory HTML <pre> candidate without language hint."))
-                                  (entry
-                                    (record-candidate-entry
-                                     block
-                                     parent-index
-                                     parent-location-label
-                                     pre-index
-                                     pre-source
-                                     pre-char-count
-                                     hinted-language
-                                     hints
-                                     reason
-                                     t
-                                     pre-line-number
-                                     pre-character-offset))
-                                  (synthetic-block
-                                    (list
-                                     :line-number
-                                     pre-line-number
-                                     :character-offset pre-character-offset
-                                     :location-label (getf entry :location_label)
-                                     :open-tag
-                                     (snippet-playground-html-pre-open-tag-from-hints
-                                      hints)
-                                     :source pre-source
-                                     :origin-surface-kind
-                                     (or (getf block :origin-surface-kind)
-                                         "html-source")
-                                     :provider-kind
-                                     (or (getf block :provider-kind)
-                                         "source-v1")
-                                     :synthetic-kind :html-pre
-                                     :synthetic-id (getf entry :synthetic_id)
-                                     :synthetic-parent-index parent-index
-                                     :synthetic-parent-id (getf block :id)
-                                     :synthetic-parent-story-item-id
-                                     (getf block :story-item-id)
-                                     :synthetic-parent-location-label
-                                     parent-location-label
-                                     :synthetic-source-line-number
-                                     pre-line-number
-                                     :synthetic-character-offset
-                                     pre-character-offset
-                                     :synthetic-language-hint hinted-language
-                                     :synthetic-language-hint-attributes hints
-                                     :synthetic-reason (getf entry :reason)
-                                     :synthetic-decoded-entities-p
-                                     (getf entry :decoded_entities_p)
-                                     :synthetic-character-count pre-char-count
-                                     :synthetic-line-count
-                                     (getf entry :line_count)
-                                     :synthetic-source-kind :html-pre
-                                     :synthetic-preview (getf entry :preview))))
-                             (append-expanded-block synthetic-block)))))))))))
-      (let* ((final-expanded-blocks (nreverse expanded-blocks))
-             (synthetic-blocks (nreverse accepted-synthetic-entries))
-             (all-candidates (nreverse candidate-entries))
-             (all-discrepancies (nreverse discrepancies))
-             (report-notes (nreverse notes))
-             (report-warnings (nreverse warnings))
-             (collect-stats-p
-               (snippet-source-expansion-policy-collect-parser-stats-p
-                effective-policy))
-             (elapsed
-               (and collect-stats-p
-                    (- (snippet-playground-current-millis) parse-start)))
-             (dot-text
-               (and (snippet-source-expansion-policy-generate-graphviz-dot-p
-                     effective-policy)
-                    (snippet-source-parser-report-graphviz-dot-text
-                     blocks
-                     all-candidates))))
-        (values
-         final-expanded-blocks
-         (make-snippet-source-expansion-report
-          :original-block-count (length blocks)
-          :expanded-block-count (length final-expanded-blocks)
-          :synthetic-block-count (length synthetic-blocks)
-          :synthetic-blocks synthetic-blocks
-          :html-like-block-count
-          (if collect-stats-p html-like-block-count 0)
-          :scanned-block-count
-          (if collect-stats-p scanned-block-count 0)
-          :accepted-candidate-count
-          (if collect-stats-p pre-regions-accepted 0)
-          :rejected-candidate-count
-          (if collect-stats-p pre-regions-rejected 0)
-          :html-like-blocks-scanned
-          (if collect-stats-p scanned-block-count 0)
-          :pre-regions-found
-          (if collect-stats-p pre-regions-found 0)
-          :pre-regions-accepted
-          (if collect-stats-p pre-regions-accepted 0)
-          :pre-regions-rejected
-          (if collect-stats-p pre-regions-rejected 0)
-          :rejection-reasons
-          (if collect-stats-p
-              (loop for (reason . count) in (nreverse rejection-reasons)
-                    collect (list :reason reason :count count))
-              nil)
-          :language-hints-observed
-          (if collect-stats-p
-              (loop for (hint . count) in (nreverse language-hints-observed)
-                    collect (list :attribute (getf hint :attribute)
-                                  :value (getf hint :value)
-                                  :count count))
-              nil)
-          :decode-count
-          (if collect-stats-p decode-count 0)
-          :warnings
-          (if collect-stats-p report-warnings nil)
-          :discrepancies
-          (if collect-stats-p all-discrepancies nil)
-          :parse-elapsed-millis elapsed
-          :incremental-stats-snapshots
-          (if collect-stats-p
-              (nreverse incremental-stats-snapshots)
-              nil)
-          :candidates
-          (if collect-stats-p all-candidates nil)
-          :graphviz-dot-text dot-text
-          :graphviz-dot-path nil
-          :graphviz-dot-snapshots
-          (if (and collect-stats-p
-                   (snippet-source-expansion-policy-generate-graphviz-dot-p
-                    effective-policy))
-              (nreverse graphviz-dot-snapshots)
-              nil)
-          :policy-summary
-          (snippet-source-expansion-policy-summary effective-policy)
-          :notes report-notes)))))
+                     (record-language-hints hints)
+                     (cond
+                       ((and max-per-parent
+                             (>= emitted-count max-per-parent))
+                        (record-candidate-entry
+                         block
+                         parent-index
+                         parent-location-label
+                         pre-index
+                         pre-source
+                         pre-char-count
+                         hinted-language
+                         hints
+                         (format nil
+                                 "Rejected by max_html_pre_blocks_per_source_block (~D)."
+                                 max-per-parent)
+                         nil
+                         pre-line-number
+                         pre-character-offset)
+                        (record-rejection
+                         :max-per-parent
+                         :rejected-by-policy
+                         (format nil
+                                 "Rejected candidate ~D in block #~D by max_html_pre_blocks_per_source_block (~D)."
+                                 pre-index
+                                 parent-index
+                                 max-per-parent)
+                         :block block
+                         :source-line-number pre-line-number
+                         :character-offset pre-character-offset
+                         :evidence-value max-per-parent))
+                       ((< pre-char-count min-char-count)
+                        (record-candidate-entry
+                         block
+                         parent-index
+                         parent-location-label
+                         pre-index
+                         pre-source
+                         pre-char-count
+                         hinted-language
+                         hints
+                         (format nil
+                                 "Rejected by minimum_pre_character_count (~D)."
+                                 min-char-count)
+                         nil
+                         pre-line-number
+                         pre-character-offset)
+                        (record-rejection
+                         :minimum-pre-character-count
+                         (if (zerop pre-char-count)
+                             :empty-pre
+                             :rejected-by-policy)
+                         (format nil
+                                 "Rejected candidate ~D in block #~D by minimum_pre_character_count (~D): ~D chars."
+                                 pre-index
+                                 parent-index
+                                 min-char-count
+                                 pre-char-count)
+                         :block block
+                         :source-line-number pre-line-number
+                         :character-offset pre-character-offset
+                         :evidence-value pre-char-count))
+                       ((and (null hints)
+                             (not allow-without-language-p))
+                        (record-candidate-entry
+                         block
+                         parent-index
+                         parent-location-label
+                         pre-index
+                         pre-source
+                         pre-char-count
+                         hinted-language
+                         hints
+                         "Rejected because recognize_pre_without_language_p is nil and no policy-approved language hint was found."
+                         nil
+                         pre-line-number
+                         pre-character-offset)
+                        (record-rejection
+                         :missing-language-hint
+                         :ambiguous-language
+                         (format nil
+                                 "Rejected candidate ~D in block #~D because no policy-approved language hint was found."
+                                 pre-index
+                                 parent-index)
+                         :block block
+                         :source-line-number pre-line-number
+                         :character-offset pre-character-offset))
+                       (t
+                        (incf emitted-count)
+                        (let* ((reason
+                                (if hints
+                                    (format nil
+                                            "Accepted with policy-approved language hint (~{~A~^, ~})."
+                                            (mapcar (lambda (hint)
+                                                      (getf hint :attribute))
+                                                    hints))
+                                    "Accepted as exploratory HTML <pre> candidate without language hint."))
+                               (entry
+                                (record-candidate-entry
+                                 block
+                                 parent-index
+                                 parent-location-label
+                                 pre-index
+                                 pre-source
+                                 pre-char-count
+                                 hinted-language
+                                 hints
+                                 reason
+                                 t
+                                 pre-line-number
+                                 pre-character-offset))
+                               (synthetic-block
+                                (list
+                                 :line-number
+                                 pre-line-number
+                                 :character-offset pre-character-offset
+                                 :location-label (getf entry :location_label)
+                                 :open-tag
+                                 (snippet-playground-html-pre-open-tag-from-hints
+                                  hints)
+                                 :source pre-source
+                                 :origin-surface-kind
+                                 (or (getf block :origin-surface-kind)
+                                     "html-source")
+                                 :provider-kind
+                                 (or (getf block :provider-kind)
+                                     "source-v1")
+                                 :synthetic-kind :html-pre
+                                 :synthetic-id (getf entry :synthetic_id)
+                                 :synthetic-parent-index parent-index
+                                 :synthetic-parent-id (getf block :id)
+                                 :synthetic-parent-story-item-id
+                                 (getf block :story-item-id)
+                                 :synthetic-parent-location-label
+                                 parent-location-label
+                                 :synthetic-source-line-number
+                                 pre-line-number
+                                 :synthetic-character-offset
+                                 pre-character-offset
+                                 :synthetic-language-hint hinted-language
+                                 :synthetic-language-hint-attributes hints
+                                 :synthetic-reason (getf entry :reason)
+                                 :synthetic-decoded-entities-p
+                                 (getf entry :decoded_entities_p)
+                                 :synthetic-character-count pre-char-count
+                                 :synthetic-line-count
+                                 (getf entry :line_count)
+                                 :synthetic-source-kind :html-pre
+                                 :synthetic-preview (getf entry :preview))))
+                          (append-expanded-block synthetic-block)))))))))))
+    (let* ((final-expanded-blocks (nreverse expanded-blocks))
+           (synthetic-blocks (nreverse accepted-synthetic-entries))
+           (all-candidates (nreverse candidate-entries))
+           (all-discrepancies (nreverse discrepancies))
+           (report-notes (nreverse notes))
+           (report-warnings (nreverse warnings))
+           (collect-stats-p
+            (snippet-source-expansion-policy-collect-parser-stats-p
+             effective-policy))
+           (elapsed
+            (and collect-stats-p
+                 (- (snippet-playground-current-millis) parse-start)))
+           (dot-text
+            (and (snippet-source-expansion-policy-generate-graphviz-dot-p
+                  effective-policy)
+                 (snippet-source-parser-report-graphviz-dot-text
+                  blocks
+                  all-candidates))))
+      (values
+       final-expanded-blocks
+       (make-snippet-source-expansion-report
+        :original-block-count (length blocks)
+        :expanded-block-count (length final-expanded-blocks)
+        :synthetic-block-count (length synthetic-blocks)
+        :synthetic-blocks synthetic-blocks
+        :html-like-block-count
+        (if collect-stats-p html-like-block-count 0)
+        :scanned-block-count
+        (if collect-stats-p scanned-block-count 0)
+        :accepted-candidate-count
+        (if collect-stats-p pre-regions-accepted 0)
+        :rejected-candidate-count
+        (if collect-stats-p pre-regions-rejected 0)
+        :html-like-blocks-scanned
+        (if collect-stats-p scanned-block-count 0)
+        :pre-regions-found
+        (if collect-stats-p pre-regions-found 0)
+        :pre-regions-accepted
+        (if collect-stats-p pre-regions-accepted 0)
+        :pre-regions-rejected
+        (if collect-stats-p pre-regions-rejected 0)
+        :rejection-reasons
+        (if collect-stats-p
+            (loop for (reason . count) in (nreverse rejection-reasons)
+                  collect (list :reason reason :count count))
+            nil)
+        :language-hints-observed
+        (if collect-stats-p
+            (loop for (hint . count) in (nreverse language-hints-observed)
+                  collect (list :attribute (getf hint :attribute)
+                                :value (getf hint :value)
+                                :count count))
+            nil)
+        :decode-count
+        (if collect-stats-p decode-count 0)
+        :warnings
+        (if collect-stats-p report-warnings nil)
+        :discrepancies
+        (if collect-stats-p all-discrepancies nil)
+        :parse-elapsed-millis elapsed
+        :incremental-stats-snapshots
+        (if collect-stats-p
+            (nreverse incremental-stats-snapshots)
+            nil)
+        :candidates
+        (if collect-stats-p all-candidates nil)
+        :graphviz-dot-text dot-text
+        :graphviz-dot-path nil
+        :graphviz-dot-snapshots
+        (if (and collect-stats-p
+                 (snippet-source-expansion-policy-generate-graphviz-dot-p
+                  effective-policy))
+            (nreverse graphviz-dot-snapshots)
+            nil)
+        :policy-summary
+        (snippet-source-expansion-policy-summary effective-policy)
+        :notes report-notes)))))
 
 (defparameter *snippet-source-parser-scxml-chart-string*
   (format nil
@@ -2747,7 +2747,7 @@
   (loop for line in (or trace '())
         for marker = (search "Entering: " line :test #'char=)
         when marker
-          collect (subseq line (+ marker (length "Entering: ")))))
+        collect (subseq line (+ marker (length "Entering: ")))))
 
 (defun snippet-source-parser-scxml-events-from-trace (trace)
   (loop for line in (or trace '())
@@ -2756,7 +2756,7 @@
                          (search "--> " line :test #'char=
                                  :start2 (+ left 3)))
         when (and left right)
-          collect (subseq line (+ left 3) right)))
+        collect (subseq line (+ left 3) right)))
 
 (defun snippet-source-parser-engine-from-policy (policy)
   (case (snippet-source-expansion-policy-parser-engine-kind policy)
@@ -2783,16 +2783,16 @@
           (snippet-source-expansion-report-parser-engine-events report)
           nil)
     (let ((context
-            (make-snippet-source-parse-context
-             :policy policy
-             :input-blocks blocks
-             :expanded-blocks expanded-blocks
-             :synthetic-blocks
-             (snippet-source-expansion-report-synthetic-blocks report)
-             :stats (snippet-playground-source-expansion-evidence report)
-             :warnings (snippet-source-expansion-report-warnings report)
-             :trace nil
-             :report report)))
+           (make-snippet-source-parse-context
+            :policy policy
+            :input-blocks blocks
+            :expanded-blocks expanded-blocks
+            :synthetic-blocks
+            (snippet-source-expansion-report-synthetic-blocks report)
+            :stats (snippet-playground-source-expansion-evidence report)
+            :warnings (snippet-source-expansion-report-warnings report)
+            :trace nil
+            :report report)))
       (declare (ignore context)))
     (values expanded-blocks report)))
 
@@ -2839,16 +2839,16 @@
           (push scxml-warning
                 (snippet-source-expansion-report-notes report)))
         (let ((context
-                (make-snippet-source-parse-context
-                 :policy policy
-                 :input-blocks blocks
-                 :expanded-blocks expanded-blocks
-                 :synthetic-blocks
-                 (snippet-source-expansion-report-synthetic-blocks report)
-                 :stats (snippet-playground-source-expansion-evidence report)
-                 :warnings (snippet-source-expansion-report-warnings report)
-                 :trace trace
-                 :report report)))
+               (make-snippet-source-parse-context
+                :policy policy
+                :input-blocks blocks
+                :expanded-blocks expanded-blocks
+                :synthetic-blocks
+                (snippet-source-expansion-report-synthetic-blocks report)
+                :stats (snippet-playground-source-expansion-evidence report)
+                :warnings (snippet-source-expansion-report-warnings report)
+                :trace trace
+                :report report)))
           (declare (ignore context)))
         (values expanded-blocks report)))))
 
@@ -2872,9 +2872,9 @@
           do (unless first
                (terpri stream)
                (terpri stream))
-             (format stream ";; ~A~%~A"
-                     (snippet-block-location-label block)
-                     (getf block :source)))))
+          (format stream ";; ~A~%~A"
+                  (snippet-block-location-label block)
+                  (getf block :source)))))
 
 (defun snippet-playground-language-hint (open-tag)
   (cond
@@ -2932,10 +2932,10 @@
 
 (defun mech-snippet-preview-mode (steps)
   (let ((preview-step
-          (find "PREVIEW"
-                steps
-                :key #'mech-snippet-step-operation-of
-                :test #'string=)))
+         (find "PREVIEW"
+               steps
+               :key #'mech-snippet-step-operation-of
+               :test #'string=)))
     (when preview-step
       (format nil "~{~A~^ ~}" (mech-snippet-step-arguments-of preview-step)))))
 
@@ -3075,9 +3075,9 @@
   (let* ((source (getf block :source))
          (output-path (code-output-path source))
          (translation-mode
-           (if (eq language :javascript)
-               (javascript-translation-mode source output-path)
-               :unsupported)))
+          (if (eq language :javascript)
+              (javascript-translation-mode source output-path)
+              :unsupported)))
     (make-instance (if (eq language :javascript)
                        'javascript-code-snippet
                        'unsupported-code-snippet)
@@ -3102,18 +3102,18 @@
 (defun recognized-code-snippets-from-blocks (blocks)
   (loop for block in blocks
         unless (maybe-make-mech-snippet block)
-          append
-            (multiple-value-bind (language score)
-                (detect-code-language (getf block :source)
-                                      (getf block :open-tag))
-              (cond
-                ((eq language :javascript)
-                 (list (make-code-snippet-object block language score)))
-                ((and (not (eq language :unknown))
-                      (> score 0))
-                 (list (make-code-snippet-object block language score)))
-                (t
-                 nil)))))
+        append
+        (multiple-value-bind (language score)
+            (detect-code-language (getf block :source)
+                                  (getf block :open-tag))
+          (cond
+            ((eq language :javascript)
+             (list (make-code-snippet-object block language score)))
+            ((and (not (eq language :unknown))
+                  (> score 0))
+             (list (make-code-snippet-object block language score)))
+            (t
+             nil)))))
 
 (defun select-best-snippet (snippets score-reader)
   (car (sort (copy-list snippets) #'>
@@ -3123,7 +3123,7 @@
     (selected-mech recognized-mech-snippets)
   (when selected-mech
     (let ((selected-mech-block-index
-            (mech-snippet-block-index-of selected-mech))
+           (mech-snippet-block-index-of selected-mech))
           (next-mech-block-index nil))
       (dolist (mech-snippet recognized-mech-snippets next-mech-block-index)
         (let ((block-index (mech-snippet-block-index-of mech-snippet)))
@@ -3137,17 +3137,17 @@
   (if (null selected-mech)
       nil
       (let* ((selected-mech-block-index
-               (mech-snippet-block-index-of selected-mech))
+              (mech-snippet-block-index-of selected-mech))
              (next-mech-block-index
-               (snippet-playground-next-mech-block-index
-                selected-mech
-                recognized-mech-snippets)))
+              (snippet-playground-next-mech-block-index
+               selected-mech
+               recognized-mech-snippets)))
         (loop for code-snippet in recognized-code-snippets
               for block-index = (code-snippet-block-index-of code-snippet)
               when (and (> block-index selected-mech-block-index)
                         (or (null next-mech-block-index)
                             (< block-index next-mech-block-index)))
-                collect code-snippet))))
+              collect code-snippet))))
 
 (defun snippet-playground-code-snippet-class (snippet)
   (if (typep snippet 'javascript-code-snippet)
@@ -3161,8 +3161,8 @@
           (close (position #\) location-label :from-end t)))
       (when (and open close (< open close))
         (let ((kind-token
-                (string-downcase
-                 (subseq location-label (1+ open) close))))
+               (string-downcase
+                (subseq location-label (1+ open) close))))
           (cond
             ((string= kind-token "code") :code)
             ((string= kind-token "mech") :mech)
@@ -3190,11 +3190,11 @@
 (defun snippet-playground-source-expansion-candidate-for-snippet (snippet report)
   (let* ((location-label (snippet-location-label-of snippet))
          (synthetic-id
-           (snippet-playground-synthetic-html-pre-id-from-location-label
-            location-label))
+          (snippet-playground-synthetic-html-pre-id-from-location-label
+           location-label))
          (candidates
-           (and report
-                (snippet-source-expansion-report-candidates report))))
+          (and report
+               (snippet-source-expansion-report-candidates report))))
     (when candidates
       (or (and location-label
                (find location-label
@@ -3212,8 +3212,8 @@
 (defun snippet-playground-source-expansion-candidate-discrepancy-p
     (candidate report)
   (let ((discrepancies
-          (and report
-               (snippet-source-expansion-report-discrepancies report))))
+         (and report
+              (snippet-source-expansion-report-discrepancies report))))
     (when (and candidate discrepancies)
       (let ((parent-index (getf candidate :parent_block_index))
             (line-number (getf candidate :source_line_number))
@@ -3267,31 +3267,31 @@
     (snippet &key policy report slice-code-snippets)
   (let* ((source (or (code-snippet-source-of snippet) ""))
          (story-item-kind
-           (snippet-playground-story-item-kind-from-location-label
-            (snippet-location-label-of snippet)))
+          (snippet-playground-story-item-kind-from-location-label
+           (snippet-location-label-of snippet)))
          (synthetic-html-pre-p
-           (snippet-playground-synthetic-html-pre-snippet-p snippet))
+          (snippet-playground-synthetic-html-pre-snippet-p snippet))
          (candidate
-           (and synthetic-html-pre-p
-                (snippet-playground-source-expansion-candidate-for-snippet
-                 snippet
-                 report)))
+          (and synthetic-html-pre-p
+               (snippet-playground-source-expansion-candidate-for-snippet
+                snippet
+                report)))
          (candidate-accepted-p
-           (or (null candidate)
-               (eql (getf candidate :status) :accepted)
-               (eq (getf candidate :accepted_p) t)))
+          (or (null candidate)
+              (eql (getf candidate :status) :accepted)
+              (eq (getf candidate :accepted_p) t)))
          (candidate-discrepancy-p
-           (and candidate
-                (snippet-playground-source-expansion-candidate-discrepancy-p
-                 candidate
-                 report)))
+          (and candidate
+               (snippet-playground-source-expansion-candidate-discrepancy-p
+                candidate
+                report)))
          (superseded-p
-           (snippet-playground-synthetic-html-pre-superseded-p
-            snippet
-            slice-code-snippets))
+          (snippet-playground-synthetic-html-pre-superseded-p
+           snippet
+           slice-code-snippets))
          (html-pre-policy-allowed-p
-           (or (null policy)
-               (snippet-source-expansion-policy-extract-html-pre-p policy))))
+          (or (null policy)
+              (snippet-source-expansion-policy-extract-html-pre-p policy))))
     (and (typep snippet 'javascript-code-snippet)
          (not (snippet-playground-empty-string-p source))
          (not (member story-item-kind
@@ -3312,7 +3312,7 @@
           do (unless first
                (terpri stream)
                (terpri stream))
-             (write-string (code-snippet-source-of snippet) stream))))
+          (write-string (code-snippet-source-of snippet) stream))))
 
 (defun make-snippet-playground-bundled-code-snippet
     (selected-mech entry-snippet ordered-slice-code-snippets)
@@ -3320,22 +3320,22 @@
          (first-slice-snippet (first ordered-slice-code-snippets))
          (last-slice-snippet (car (last ordered-slice-code-snippets)))
          (selected-mech-block-index
-           (mech-snippet-block-index-of selected-mech))
+          (mech-snippet-block-index-of selected-mech))
          (entry-block-index
-           (code-snippet-block-index-of entry-snippet))
+          (code-snippet-block-index-of entry-snippet))
          (first-block-index
-           (code-snippet-block-index-of first-slice-snippet))
+          (code-snippet-block-index-of first-slice-snippet))
          (last-block-index
-           (code-snippet-block-index-of last-slice-snippet))
+          (code-snippet-block-index-of last-slice-snippet))
          (language-label
-           (code-language-display-name
-            (code-snippet-language-of entry-snippet)))
+          (code-language-display-name
+           (code-snippet-language-of entry-snippet)))
          (bundle-findings
-           (append (copy-list (code-snippet-findings-of entry-snippet))
-                   (list (format nil
-                                 "Bundled ~D code snippets from the Mech slice after block #~D."
-                                 bundle-count
-                                 selected-mech-block-index)))))
+          (append (copy-list (code-snippet-findings-of entry-snippet))
+                  (list (format nil
+                                "Bundled ~D code snippets from the Mech slice after block #~D."
+                                bundle-count
+                                selected-mech-block-index)))))
     (make-instance
      (snippet-playground-code-snippet-class entry-snippet)
      :id (format nil "code-snippet-bundle/mech-~D/code-~D-~D"
@@ -3370,22 +3370,22 @@
     (selected-mech recognized-mech-snippets recognized-code-snippets
      &key policy report)
   (let* ((slice-code-snippets
-           (snippet-playground-code-snippets-for-mech-slice
-            selected-mech
-            recognized-mech-snippets
-            recognized-code-snippets))
+          (snippet-playground-code-snippets-for-mech-slice
+           selected-mech
+           recognized-mech-snippets
+           recognized-code-snippets))
          (executable-snippets
-           (remove-if-not
-            (lambda (snippet)
-              (executable-code-snippet-for-bundle-p
-               snippet
-               :policy policy
-               :report report
-               :slice-code-snippets slice-code-snippets))
-            slice-code-snippets))
+          (remove-if-not
+           (lambda (snippet)
+             (executable-code-snippet-for-bundle-p
+              snippet
+              :policy policy
+              :report report
+              :slice-code-snippets slice-code-snippets))
+           slice-code-snippets))
          (entry-snippet
-           (select-best-snippet executable-snippets
-                                #'code-snippet-score-of)))
+          (select-best-snippet executable-snippets
+                               #'code-snippet-score-of)))
     (if (and entry-snippet
              (> (length executable-snippets) 1))
         (make-snippet-playground-bundled-code-snippet
@@ -3533,7 +3533,7 @@
 
 (defun make-snippet-lefty-projection
     (mech code &key origin-surface-kind provider-kind source-label
-       context-view-title)
+                 context-view-title)
   (make-instance
    'snippet-lefty-projection
    :id (format nil "snippet-lefty/~A/~A"
@@ -3570,9 +3570,9 @@
 (defun make-snippet-rita-projection
     (mech code execution-interface &key scaffold-source)
   (let ((effective-scaffold-source
-          (or scaffold-source
-              (and code
-                   (snippet-playground-lisp-scaffold nil code)))))
+         (or scaffold-source
+             (and code
+                  (snippet-playground-lisp-scaffold nil code)))))
     (make-instance
      'snippet-rita-projection
      :id (format nil "snippet-rita/~A/~A"
@@ -3657,9 +3657,9 @@
                        code
                        execution-interface))
          (preview-mode
-           (and execution-interface
-                (snippet-execution-interface-preview-mode-of
-                 execution-interface)))
+          (and execution-interface
+               (snippet-execution-interface-preview-mode-of
+                execution-interface)))
          (input-kind (getf normal-form :input-kind))
          (input-shape (getf normal-form :input-shape))
          (operation-kind (getf normal-form :operation-kind))
@@ -3690,8 +3690,8 @@
      :rita-projection rita-projection
      :findings
      (snippet-transformation-unit-findings
-     execution-interface
-     normal-form))))
+      execution-interface
+      normal-form))))
 
 (defun snippet-playground-mech-operation-entries (mech)
   (if mech
@@ -3721,7 +3721,7 @@
 (defun snippet-playground-parse-code-argument-value (argument)
   (if-let (number (and argument
                        (ignore-errors (parse-integer argument))))
-    number
+      number
     argument))
 
 (defun snippet-playground-mech-code-function-name (mech)
@@ -3873,7 +3873,7 @@
                   ("addAll" . "Bag.addAll helper method"))))
     (loop for (token . label) in checks
           unless (snippet-playground-string-contains-p code-source token)
-            collect label)))
+          collect label)))
 
 (defun snippet-playground-copy-execution-state (state)
   (copy-tree (or state '())))
@@ -3987,31 +3987,31 @@
   (let* ((code (mech-execution-input-selected-code-of execution-input))
          (code-source (and code (code-snippet-source-of code)))
          (operation-name
-           (mech-execution-input-code-operation-name-of execution-input))
+          (mech-execution-input-code-operation-name-of execution-input))
          (args (mech-execution-input-code-operation-arguments-of execution-input))
          (count-arg (first args))
          (handoff-path (mech-execution-input-handoff-path-of execution-input))
          (missing-constructs
-           (snippet-playground-popular-bundle-missing-constructs
-            (or code-source "")))
+          (snippet-playground-popular-bundle-missing-constructs
+           (or code-source "")))
          (unsupported-constructs
-           (append
-            (unless (and operation-name
-                         (string-equal operation-name "popular"))
-              (list (format nil
-                            "Unsupported CODE operation ~A; only popular is currently executable."
-                            (or operation-name "n/a"))))
-            (unless (string= (or handoff-path "") "state.items")
-              (list (format nil
-                            "Unsupported handoff path ~A; only state.items is currently executable."
-                            (or handoff-path "n/a"))))
-            (unless (integerp count-arg)
-              (list (format nil
-                            "Unsupported CODE argument ~S; popular currently requires an integer count."
-                            count-arg)))
-            (mapcar (lambda (item)
-                      (format nil "Missing popular bundle construct: ~A" item))
-                    missing-constructs))))
+          (append
+           (unless (and operation-name
+                        (string-equal operation-name "popular"))
+             (list (format nil
+                           "Unsupported CODE operation ~A; only popular is currently executable."
+                           (or operation-name "n/a"))))
+           (unless (string= (or handoff-path "") "state.items")
+             (list (format nil
+                           "Unsupported handoff path ~A; only state.items is currently executable."
+                           (or handoff-path "n/a"))))
+           (unless (integerp count-arg)
+             (list (format nil
+                           "Unsupported CODE argument ~S; popular currently requires an integer count."
+                           count-arg)))
+           (mapcar (lambda (item)
+                     (format nil "Missing popular bundle construct: ~A" item))
+                   missing-constructs))))
     (if unsupported-constructs
         (make-mech-run-result
          :engine :lefty
@@ -4024,14 +4024,14 @@
                :code_location (and code (snippet-location-label-of code))))
         (handler-case
             (let ((state
-                    (snippet-playground-copy-execution-state
-                     (mech-execution-input-normalized-state-of execution-input))))
+                   (snippet-playground-copy-execution-state
+                    (mech-execution-input-normalized-state-of execution-input))))
               (multiple-value-bind (return-value final-state trace)
                   (lefty-popular state count-arg)
                 (let ((output
-                        (snippet-playground-mech-state-value-at-handoff-path
-                         final-state
-                         handoff-path)))
+                       (snippet-playground-mech-state-value-at-handoff-path
+                        final-state
+                        handoff-path)))
                   (make-mech-run-result
                    :engine :lefty
                    :status :ok
@@ -4062,25 +4062,25 @@
 
 (defun run-rita-mech-execution (execution-input)
   (let* ((operation-name
-           (mech-execution-input-code-operation-name-of execution-input))
+          (mech-execution-input-code-operation-name-of execution-input))
          (args (mech-execution-input-code-operation-arguments-of execution-input))
          (count-arg (first args))
          (handoff-path (mech-execution-input-handoff-path-of execution-input))
          (unsupported-constructs
-           (append
-            (unless (and operation-name
-                         (string-equal operation-name "popular"))
-              (list (format nil
-                            "Rita currently implements only popular; got ~A."
-                            (or operation-name "n/a"))))
-            (unless (string= (or handoff-path "") "state.items")
-              (list (format nil
-                            "Rita currently supports only state.items handoff; got ~A."
-                            (or handoff-path "n/a"))))
-            (unless (integerp count-arg)
-              (list (format nil
-                            "Rita popular currently requires an integer count; got ~S."
-                            count-arg))))))
+          (append
+           (unless (and operation-name
+                        (string-equal operation-name "popular"))
+             (list (format nil
+                           "Rita currently implements only popular; got ~A."
+                           (or operation-name "n/a"))))
+           (unless (string= (or handoff-path "") "state.items")
+             (list (format nil
+                           "Rita currently supports only state.items handoff; got ~A."
+                           (or handoff-path "n/a"))))
+           (unless (integerp count-arg)
+             (list (format nil
+                           "Rita popular currently requires an integer count; got ~S."
+                           count-arg))))))
     (if unsupported-constructs
         (make-mech-run-result
          :engine :rita
@@ -4091,14 +4091,14 @@
          :source-provenance (list :operation operation-name :arguments args))
         (handler-case
             (let ((state
-                    (snippet-playground-copy-execution-state
-                     (mech-execution-input-normalized-state-of execution-input))))
+                   (snippet-playground-copy-execution-state
+                    (mech-execution-input-normalized-state-of execution-input))))
               (multiple-value-bind (return-value final-state trace)
                   (rita-popular state count-arg)
                 (let ((output
-                        (snippet-playground-mech-state-value-at-handoff-path
-                         final-state
-                         handoff-path)))
+                       (snippet-playground-mech-state-value-at-handoff-path
+                        final-state
+                        handoff-path)))
                   (make-mech-run-result
                    :engine :rita
                    :status :ok
@@ -4148,32 +4148,32 @@
 
 (defun make-mech-equivalence-report (lefty-run-result rita-run-result)
   (let* ((unsupported-constructs
-           (append (when lefty-run-result
-                     (copy-list
-                      (mech-run-result-unsupported-constructs-of
-                       lefty-run-result)))
-                   (when rita-run-result
-                     (copy-list
-                      (mech-run-result-unsupported-constructs-of
-                       rita-run-result)))))
+          (append (when lefty-run-result
+                    (copy-list
+                     (mech-run-result-unsupported-constructs-of
+                      lefty-run-result)))
+                  (when rita-run-result
+                    (copy-list
+                     (mech-run-result-unsupported-constructs-of
+                      rita-run-result)))))
          (differences
-           (if (and lefty-run-result rita-run-result)
-               (make-mech-equivalence-differences
-                lefty-run-result
-                rita-run-result)
-               (list (list :kind :missing-run-results))))
+          (if (and lefty-run-result rita-run-result)
+              (make-mech-equivalence-differences
+               lefty-run-result
+               rita-run-result)
+              (list (list :kind :missing-run-results))))
          (equal-p
-           (and (null unsupported-constructs)
-                (null differences)
-                (eq (mech-run-result-status-of lefty-run-result) :ok)
-                (eq (mech-run-result-status-of rita-run-result) :ok)))
+          (and (null unsupported-constructs)
+               (null differences)
+               (eq (mech-run-result-status-of lefty-run-result) :ok)
+               (eq (mech-run-result-status-of rita-run-result) :ok)))
          (comparison-value
-           (list :lefty (and lefty-run-result
-                             (mech-run-result-normalized-output-of
-                              lefty-run-result))
-                 :rita (and rita-run-result
+          (list :lefty (and lefty-run-result
                             (mech-run-result-normalized-output-of
-                             rita-run-result)))))
+                             lefty-run-result))
+                :rita (and rita-run-result
+                           (mech-run-result-normalized-output-of
+                            rita-run-result)))))
     (make-instance
      'mech-equivalence-report
      :id "mech-equivalence-report/state.items"
@@ -4223,34 +4223,34 @@
   (let* ((code (mech-execution-input-selected-code-of execution-input))
          (code-source (or (and code (code-snippet-source-of code)) ""))
          (function-name
-           (mech-execution-input-code-operation-name-of execution-input))
+          (mech-execution-input-code-operation-name-of execution-input))
          (function-arguments
-           (copy-list (mech-execution-input-code-operation-arguments-of
-                       execution-input)))
+          (copy-list (mech-execution-input-code-operation-arguments-of
+                      execution-input)))
          (output-path (mech-execution-input-handoff-path-of execution-input))
          (requires-neighborhood
-           (mech-operations-require-neighborhood-p
-            (mech-execution-input-parsed-mech-operations-of execution-input)))
+          (mech-operations-require-neighborhood-p
+           (mech-execution-input-parsed-mech-operations-of execution-input)))
          (input-slots
-           (if requires-neighborhood
-               '("neighborhood")
-               '("page/context story")))
+          (if requires-neighborhood
+              '("neighborhood")
+              '("page/context story")))
          (operation-summary
-           (if (and function-name
-                    (string-equal function-name "popular"))
-               "Tally neighborhood links, sort by descending count, report top N items, and publish to state.items."
-               "Bounded execution/equivalence layer currently specializes popular(count); non-popular CODE operations remain explicit unsupported paths."))
+          (if (and function-name
+                   (string-equal function-name "popular"))
+              "Tally neighborhood links, sort by descending count, report top N items, and publish to state.items."
+              "Bounded execution/equivalence layer currently specializes popular(count); non-popular CODE operations remain explicit unsupported paths."))
          (equivalence-status
-           (cond
-             ((null equivalence-report)
-              :unavailable)
-             ((mech-equivalence-report-equal-p equivalence-report)
-              :equal)
-             ((mech-equivalence-report-unsupported-constructs-of
-               equivalence-report)
-              :unsupported)
-             (t
-              :different))))
+          (cond
+            ((null equivalence-report)
+             :unavailable)
+            ((mech-equivalence-report-equal-p equivalence-report)
+             :equal)
+            ((mech-equivalence-report-unsupported-constructs-of
+              equivalence-report)
+             :unsupported)
+            (t
+             :different))))
     (make-instance
      'mech-state-items-ir
      :id (format nil "mech-state-items-ir/~A/~A"
@@ -4291,25 +4291,25 @@
     (selected-mech selected-code execution-interface
      &key neighborhood-input)
   (let* ((parsed-mech-operations
-           (snippet-playground-mech-operation-entries selected-mech))
+          (snippet-playground-mech-operation-entries selected-mech))
          (requires-neighborhood
-           (mech-operations-require-neighborhood-p parsed-mech-operations))
+          (mech-operations-require-neighborhood-p parsed-mech-operations))
          (effective-neighborhood
-           (when (and requires-neighborhood neighborhood-input)
-             (snippet-playground-normalize-neighborhood-input
-              neighborhood-input)))
+          (when (and requires-neighborhood neighborhood-input)
+            (snippet-playground-normalize-neighborhood-input
+             neighborhood-input)))
          (normalized-state
-           (if effective-neighborhood
-               (list :neighborhood effective-neighborhood
-                     :items nil)
-               (list :items nil)))
+          (if effective-neighborhood
+              (list :neighborhood effective-neighborhood
+                    :items nil)
+              (list :items nil)))
          (code-operation-name
-           (snippet-playground-mech-code-function-name selected-mech))
+          (snippet-playground-mech-code-function-name selected-mech))
          (code-operation-arguments
-           (snippet-playground-mech-code-arguments selected-mech))
+          (snippet-playground-mech-code-arguments selected-mech))
          (handoff-path
-           (and execution-interface
-                (snippet-execution-interface-handoff-path-of execution-interface))))
+          (and execution-interface
+               (snippet-execution-interface-handoff-path-of execution-interface))))
     (make-instance
      'mech-execution-input
      :id (format nil "mech-execution-input/~A/~A"
@@ -4350,20 +4350,20 @@
 (defun mech-ir-token-slug (token)
   (let ((text (string-downcase (format nil "~A" token))))
     (let ((slug
-            (with-output-to-string (stream)
-              (loop with emitted-p = nil
-                    with pending-dash-p = nil
-                    for char across text
-                    do (cond
-                         ((or (alphanumericp char)
-                              (char= char #\_))
-                          (when (and pending-dash-p emitted-p)
-                            (write-char #\- stream))
-                          (setf pending-dash-p nil)
-                          (write-char char stream)
-                          (setf emitted-p t))
-                         (emitted-p
-                          (setf pending-dash-p t)))))))
+           (with-output-to-string (stream)
+             (loop with emitted-p = nil
+                   with pending-dash-p = nil
+                   for char across text
+                   do (cond
+                        ((or (alphanumericp char)
+                             (char= char #\_))
+                         (when (and pending-dash-p emitted-p)
+                           (write-char #\- stream))
+                         (setf pending-dash-p nil)
+                         (write-char char stream)
+                         (setf emitted-p t))
+                        (emitted-p
+                         (setf pending-dash-p t)))))))
       (if (zerop (length slug))
           "token"
           slug))))
@@ -4372,30 +4372,30 @@
   (let* ((operation (string-upcase (or (getf operation-entry :operation) "")))
          (arguments (or (getf operation-entry :arguments) '()))
          (state-id
-           (cond
-             ((string= operation "CLICK")
-              (format nil "click-~D" (max 1 click-index)))
-             ((string= operation "NEIGHBORS")
-              (if arguments
-                  (format nil "load-neighborhood-~A"
-                          (mech-ir-token-slug (format nil "~{~A~^-~}" arguments)))
-                  "load-neighborhood"))
-             ((string= operation "CODE")
-              (format nil "run-code-~A"
-                      (if arguments
-                          (mech-ir-token-slug
-                           (format nil "~{~A~^-~}" arguments))
-                          "unknown")))
-             ((string= operation "PREVIEW")
-              (format nil "preview-~A"
-                      (if arguments
-                          (mech-ir-token-slug
-                           (format nil "~{~A~^-~}" arguments))
-                          "output")))
-             (t
-              (format nil "operation-~A-~D"
-                      (mech-ir-token-slug operation)
-                      (or (getf operation-entry :index) 0))))))
+          (cond
+            ((string= operation "CLICK")
+             (format nil "click-~D" (max 1 click-index)))
+            ((string= operation "NEIGHBORS")
+             (if arguments
+                 (format nil "load-neighborhood-~A"
+                         (mech-ir-token-slug (format nil "~{~A~^-~}" arguments)))
+                 "load-neighborhood"))
+            ((string= operation "CODE")
+             (format nil "run-code-~A"
+                     (if arguments
+                         (mech-ir-token-slug
+                          (format nil "~{~A~^-~}" arguments))
+                         "unknown")))
+            ((string= operation "PREVIEW")
+             (format nil "preview-~A"
+                     (if arguments
+                         (mech-ir-token-slug
+                          (format nil "~{~A~^-~}" arguments))
+                         "output")))
+            (t
+             (format nil "operation-~A-~D"
+                     (mech-ir-token-slug operation)
+                     (or (getf operation-entry :index) 0))))))
     state-id))
 
 (defun mech-ir-click-groups-from-operations (operations)
@@ -4404,7 +4404,7 @@
       (let ((group-index (getf operation :click-group)))
         (when group-index
           (let ((existing
-                  (assoc group-index groups :test #'=)))
+                 (assoc group-index groups :test #'=)))
             (if existing
                 (setf (cdr existing)
                       (append (cdr existing) (list operation)))
@@ -4418,31 +4418,31 @@
   (loop for operation in operations
         when (string= (string-upcase (or (getf operation :operation) ""))
                       "NEIGHBORS")
-          collect (list :kind :neighbors
-                        :source (format nil "~{~A~^ ~}"
-                                        (or (getf operation :arguments) '()))
-                        :state-id (getf operation :state-id)
-                        :line-number (getf operation :line-number))))
+        collect (list :kind :neighbors
+                      :source (format nil "~{~A~^ ~}"
+                                      (or (getf operation :arguments) '()))
+                      :state-id (getf operation :state-id)
+                      :line-number (getf operation :line-number))))
 
 (defun mech-ir-code-invocations-from-operations (operations)
   (loop for operation in operations
         when (string= (string-upcase (or (getf operation :operation) ""))
                       "CODE")
-          collect (list :function-name (first (getf operation :arguments))
-                        :arguments
-                        (mapcar #'snippet-playground-parse-code-argument-value
-                                (rest (or (getf operation :arguments) '())))
-                        :state-id (getf operation :state-id)
-                        :line-number (getf operation :line-number))))
+        collect (list :function-name (first (getf operation :arguments))
+                      :arguments
+                      (mapcar #'snippet-playground-parse-code-argument-value
+                              (rest (or (getf operation :arguments) '())))
+                      :state-id (getf operation :state-id)
+                      :line-number (getf operation :line-number))))
 
 (defun mech-ir-preview-output-paths-from-operations (operations)
   (loop for operation in operations
         when (string= (string-upcase (or (getf operation :operation) ""))
                       "PREVIEW")
-          collect (list :path (format nil "~{~A~^ ~}"
-                                      (or (getf operation :arguments) '()))
-                        :state-id (getf operation :state-id)
-                        :line-number (getf operation :line-number))))
+        collect (list :path (format nil "~{~A~^ ~}"
+                                    (or (getf operation :arguments) '()))
+                      :state-id (getf operation :state-id)
+                      :line-number (getf operation :line-number))))
 
 (defun mech-ir-unsupported-operations-from-operations (operations)
   (remove nil
@@ -4461,45 +4461,45 @@
 (defun make-mech-execution-ir (execution-input)
   (let* ((source-mech (mech-execution-input-selected-mech-of execution-input))
          (raw-operations
-           (copy-tree (or (mech-execution-input-parsed-mech-operations-of
-                           execution-input)
-                          '())))
+          (copy-tree (or (mech-execution-input-parsed-mech-operations-of
+                          execution-input)
+                         '())))
          (click-index 0)
          (operations
-           (loop for raw-operation in raw-operations
-                 for operation-index from 1
-                 for operation-token =
-                   (string-upcase (or (getf raw-operation :operation) ""))
-                 do (when (string= operation-token "CLICK")
-                      (incf click-index))
-                 collect
-                 (let* ((state-click-index
-                          (if (plusp click-index) click-index 1))
-                        (entry
-                          (list :index operation-index
-                                :operation operation-token
-                                :arguments
-                                (copy-list (or (getf raw-operation :arguments)
-                                               '()))
-                                :line-number (getf raw-operation :line-number)
-                                :click-group state-click-index)))
-                   (setf (getf entry :state-id)
-                         (mech-ir-operation-state-id
-                          entry
-                          state-click-index)
-                         (getf entry :provenance)
-                         (list :line-number (getf entry :line-number)
-                               :operation (getf entry :operation)
-                               :arguments (copy-list
-                                           (getf entry :arguments))))
-                   entry)))
+          (loop for raw-operation in raw-operations
+                for operation-index from 1
+                for operation-token =
+                (string-upcase (or (getf raw-operation :operation) ""))
+                do (when (string= operation-token "CLICK")
+                     (incf click-index))
+                collect
+                (let* ((state-click-index
+                        (if (plusp click-index) click-index 1))
+                       (entry
+                        (list :index operation-index
+                              :operation operation-token
+                              :arguments
+                              (copy-list (or (getf raw-operation :arguments)
+                                             '()))
+                              :line-number (getf raw-operation :line-number)
+                              :click-group state-click-index)))
+                  (setf (getf entry :state-id)
+                        (mech-ir-operation-state-id
+                         entry
+                         state-click-index)
+                        (getf entry :provenance)
+                        (list :line-number (getf entry :line-number)
+                              :operation (getf entry :operation)
+                              :arguments (copy-list
+                                          (getf entry :arguments))))
+                  entry)))
          (click-groups (mech-ir-click-groups-from-operations operations))
          (required-inputs (mech-ir-required-inputs-from-operations operations))
          (code-invocations (mech-ir-code-invocations-from-operations operations))
          (preview-output-paths
-           (mech-ir-preview-output-paths-from-operations operations))
+          (mech-ir-preview-output-paths-from-operations operations))
          (unsupported-operations
-           (mech-ir-unsupported-operations-from-operations operations)))
+          (mech-ir-unsupported-operations-from-operations operations)))
     (make-instance
      'mech-execution-ir
      :id (format nil "mech-execution-ir/~A"
@@ -4558,74 +4558,74 @@
                               (getf operation :state-id))
                             operations))
          (operation-transitions
-           (loop with chain = (append state-ids
-                                      (list "compare-equivalence"))
-                 for source in (cons "initial" chain)
-                 for target in chain
-                 for transition-index from 1
-                 when target
-                   collect
-                   (make-state-machine-transition
-                    :id (format nil "mech-ir/step-~D" transition-index)
-                    :title (format nil "Step ~D" transition-index)
-                    :from-state source
-                    :to-state target
-                    :trigger (format nil "step/~A" target)
-                    :notes (format nil "Advance to ~A." target))))
+          (loop with chain = (append state-ids
+                                     (list "compare-equivalence"))
+                for source in (cons "initial" chain)
+                for target in chain
+                for transition-index from 1
+                when target
+                collect
+                (make-state-machine-transition
+                 :id (format nil "mech-ir/step-~D" transition-index)
+                 :title (format nil "Step ~D" transition-index)
+                 :from-state source
+                 :to-state target
+                 :trigger (format nil "step/~A" target)
+                 :notes (format nil "Advance to ~A." target))))
          (result-transitions
-           (list
-            (make-state-machine-transition
-             :id "mech-ir/result-ok"
-             :title "Result ok"
-             :from-state "compare-equivalence"
-             :to-state "done"
-             :trigger "result/ok")
-            (make-state-machine-transition
-             :id "mech-ir/result-different"
-             :title "Result different"
-             :from-state "compare-equivalence"
-             :to-state "different"
-             :trigger "result/different")
-            (make-state-machine-transition
-             :id "mech-ir/result-unsupported"
-             :title "Result unsupported"
-             :from-state "compare-equivalence"
-             :to-state "unsupported"
-             :trigger "result/unsupported")))
+          (list
+           (make-state-machine-transition
+            :id "mech-ir/result-ok"
+            :title "Result ok"
+            :from-state "compare-equivalence"
+            :to-state "done"
+            :trigger "result/ok")
+           (make-state-machine-transition
+            :id "mech-ir/result-different"
+            :title "Result different"
+            :from-state "compare-equivalence"
+            :to-state "different"
+            :trigger "result/different")
+           (make-state-machine-transition
+            :id "mech-ir/result-unsupported"
+            :title "Result unsupported"
+            :from-state "compare-equivalence"
+            :to-state "unsupported"
+            :trigger "result/unsupported")))
          (states
-           (append
-            (list
-             (make-state-machine-state
-              :id "initial"
-              :title "Initial"
-              :summary "Initial Mech execution state before operation sequencing."))
-            (mapcar (lambda (operation)
-                      (make-state-machine-state
-                       :id (getf operation :state-id)
-                       :title (format nil "~A ~{~A~^ ~}"
-                                      (or (getf operation :operation) "OP")
-                                      (or (getf operation :arguments) '()))
-                       :summary
-                       (format nil "Mech line ~A."
-                               (or (getf operation :line-number) "n/a"))))
-                    operations)
-            (list
-             (make-state-machine-state
-              :id "compare-equivalence"
-              :title "Compare equivalence"
-              :summary "Compare normalized state.items output between Lefty and Rita.")
-             (make-state-machine-state
-              :id "done"
-              :title "Done"
-              :summary "SCXML Mech execution completed with equivalence.")
-             (make-state-machine-state
-              :id "different"
-              :title "Different"
-              :summary "SCXML Mech execution completed with differences.")
-             (make-state-machine-state
-              :id "unsupported"
-              :title "Unsupported"
-              :summary "SCXML Mech execution completed with unsupported constructs.")))))
+          (append
+           (list
+            (make-state-machine-state
+             :id "initial"
+             :title "Initial"
+             :summary "Initial Mech execution state before operation sequencing."))
+           (mapcar (lambda (operation)
+                     (make-state-machine-state
+                      :id (getf operation :state-id)
+                      :title (format nil "~A ~{~A~^ ~}"
+                                     (or (getf operation :operation) "OP")
+                                     (or (getf operation :arguments) '()))
+                      :summary
+                      (format nil "Mech line ~A."
+                              (or (getf operation :line-number) "n/a"))))
+                   operations)
+           (list
+            (make-state-machine-state
+             :id "compare-equivalence"
+             :title "Compare equivalence"
+             :summary "Compare normalized state.items output between Lefty and Rita.")
+            (make-state-machine-state
+             :id "done"
+             :title "Done"
+             :summary "SCXML Mech execution completed with equivalence.")
+            (make-state-machine-state
+             :id "different"
+             :title "Different"
+             :summary "SCXML Mech execution completed with differences.")
+            (make-state-machine-state
+             :id "unsupported"
+             :title "Unsupported"
+             :summary "SCXML Mech execution completed with unsupported constructs.")))))
     (make-state-machine-definition
      :id (format nil "state-machine-definition/mech-ir/~A"
                  (or (id-of ir) "unknown"))
@@ -4715,7 +4715,7 @@
   (loop for line in (or trace '())
         for marker = (search "Entering: " line :test #'char=)
         when marker
-          collect (subseq line (+ marker (length "Entering: ")))))
+        collect (subseq line (+ marker (length "Entering: ")))))
 
 (defun mech-scxml-result-event
     (lefty-run-result rita-run-result equivalence-report ir)
@@ -4733,7 +4733,7 @@
 
 (defun run-mech-ir-semantic-actions (ir execution-input)
   (let ((operations-by-state
-          (make-hash-table :test #'equal))
+         (make-hash-table :test #'equal))
         (semantic-trace '())
         (lefty-run-result nil)
         (rita-run-result nil))
@@ -4752,9 +4752,9 @@
                  (cond
                    ((string= token "NEIGHBORS")
                     (let ((neighborhood
-                            (getf (mech-execution-input-normalized-state-of
-                                   execution-input)
-                                  :neighborhood)))
+                           (getf (mech-execution-input-normalized-state-of
+                                  execution-input)
+                                 :neighborhood)))
                       (if neighborhood
                           (push "loaded normalized neighborhood input"
                                 semantic-trace)
@@ -4787,16 +4787,16 @@
      equivalence-report)
   (let* ((chart (and scxml-chart (mech-scxml-execution-chart-chart-of scxml-chart)))
          (chart-name
-           (or (and scxml-chart
-                    (mech-scxml-execution-chart-name-of scxml-chart))
-               "mech-ir-chart"))
+          (or (and scxml-chart
+                   (mech-scxml-execution-chart-name-of scxml-chart))
+              "mech-ir-chart"))
          (state-sequence-events (mech-scxml-state-sequence-events ir))
          (result-event
-           (mech-scxml-result-event
-            lefty-run-result
-            rita-run-result
-            equivalence-report
-            ir))
+          (mech-scxml-result-event
+           lefty-run-result
+           rita-run-result
+           equivalence-report
+           ir))
          (events (append state-sequence-events (list result-event)))
          (generated-run nil)
          (warning nil))
@@ -4829,21 +4829,21 @@
                (list :chart_name chart-name
                      :events events))
               (let* ((final-state
-                       (hyperdoc/scxml:generated-scxml-run-final-state-of
-                        generated-run))
+                      (hyperdoc/scxml:generated-scxml-run-final-state-of
+                       generated-run))
                      (done-p
-                       (hyperdoc/scxml:generated-scxml-run-done-p
-                        generated-run))
+                      (hyperdoc/scxml:generated-scxml-run-done-p
+                       generated-run))
                      (status
-                       (cond
-                         ((string= (or final-state "") "done")
-                          :ok)
-                         ((string= (or final-state "") "different")
-                          :different)
-                         ((string= (or final-state "") "unsupported")
-                          :unsupported)
-                         (t
-                          :error))))
+                      (cond
+                        ((string= (or final-state "") "done")
+                         :ok)
+                        ((string= (or final-state "") "different")
+                         :different)
+                        ((string= (or final-state "") "unsupported")
+                         :unsupported)
+                        (t
+                         :error))))
                 (make-mech-run-result
                  :engine :scxml
                  :status status
@@ -4908,12 +4908,12 @@
           (setf prefix-warning
                 (format nil "SCXML prefix orchestration failed: ~A" condition)))))
     (dolist (state-id
-             (if prefix-run
-                 (mech-scxml-run-trace-states
-                  (hyperdoc/scxml:generated-scxml-run-trace-of prefix-run))
-                 (mapcar (lambda (operation)
-                           (getf operation :state-id))
-                         (or (mech-execution-ir-ordered-operations-of ir) '()))))
+              (if prefix-run
+                  (mech-scxml-run-trace-states
+                   (hyperdoc/scxml:generated-scxml-run-trace-of prefix-run))
+                  (mapcar (lambda (operation)
+                            (getf operation :state-id))
+                          (or (mech-execution-ir-ordered-operations-of ir) '()))))
       (when dispatcher
         (funcall dispatcher state-id)))
     (multiple-value-setq (lefty-run-result rita-run-result)
@@ -4937,17 +4937,17 @@
              (list "No CODE operation was dispatched from Mech execution IR.")
              :unsupported-constructs (list "Missing CODE operation in Mech execution IR."))))
     (let* ((equivalence-report
-             (make-mech-equivalence-report
-              lefty-run-result
-              rita-run-result))
+            (make-mech-equivalence-report
+             lefty-run-result
+             rita-run-result))
            (scxml-run-result
-             (run-mech-scxml-execution
-              scxml-chart
-              execution-input
-              ir
-              lefty-run-result
-              rita-run-result
-              equivalence-report)))
+            (run-mech-scxml-execution
+             scxml-chart
+             execution-input
+             ir
+             lefty-run-result
+             rita-run-result
+             equivalence-report)))
       (when prefix-warning
         (setf scxml-run-result
               (make-mech-run-result
@@ -4997,19 +4997,19 @@
     (ir execution-input scxml-chart scxml-run-result)
   (declare (ignore scxml-run-result))
   (let* ((operation-name
-           (or (mech-execution-input-code-operation-name-of execution-input)
-               "popular"))
+          (or (mech-execution-input-code-operation-name-of execution-input)
+              "popular"))
          (count-value
-           (or (first (mech-execution-input-code-operation-arguments-of
-                       execution-input))
-               0))
+          (or (first (mech-execution-input-code-operation-arguments-of
+                      execution-input))
+              0))
          (normalized-neighborhood
-           (getf (mech-execution-input-normalized-state-of execution-input)
-                 :neighborhood))
+          (getf (mech-execution-input-normalized-state-of execution-input)
+                :neighborhood))
          (chart-name
-           (or (and scxml-chart
-                    (mech-scxml-execution-chart-name-of scxml-chart))
-               "n/a"))
+          (or (and scxml-chart
+                   (mech-scxml-execution-chart-name-of scxml-chart))
+              "n/a"))
          (operations (or (mech-execution-ir-ordered-operations-of ir) '())))
     (with-output-to-string (stream)
       (format stream
@@ -5094,19 +5094,19 @@
     (ir execution-input transformation-ir scxml-chart scxml-run-result
      equivalence-report code)
   (let* ((source
-           (if (and execution-input
-                    (string-equal
-                     (or (mech-execution-input-code-operation-name-of
-                          execution-input)
-                         "")
-                     "popular"))
-               (mech-lisp-scaffold-source-from-ir
-                ir
-                execution-input
-                scxml-chart
-                scxml-run-result)
-               (and code
-                    (snippet-playground-lisp-scaffold nil code)))))
+          (if (and execution-input
+                   (string-equal
+                    (or (mech-execution-input-code-operation-name-of
+                         execution-input)
+                        "")
+                    "popular"))
+              (mech-lisp-scaffold-source-from-ir
+               ir
+               execution-input
+               scxml-chart
+               scxml-run-result)
+              (and code
+                   (snippet-playground-lisp-scaffold nil code)))))
     (make-instance
      'mech-lisp-scaffold-source
      :id (format nil "mech-lisp-scaffold-source/~A"
@@ -5235,16 +5235,16 @@
 (defun normalize-snippet-comparison-layout-spec (layout-spec)
   (let* ((region-specs (snippet-comparison-layout-region-specs layout-spec))
          (normalized-regions
-           (loop for placement in *snippet-comparison-supported-placements*
-                 for match = (find placement
-                                   region-specs
-                                   :key #'car
-                                   :test #'eq)
-                 when match
-                   collect (normalize-snippet-comparison-region-spec match)))
+          (loop for placement in *snippet-comparison-supported-placements*
+                for match = (find placement
+                                  region-specs
+                                  :key #'car
+                                  :test #'eq)
+                when match
+                collect (normalize-snippet-comparison-region-spec match)))
          (ignored-region-count
-           (max 0 (- (length region-specs)
-                     (length normalized-regions))))
+          (max 0 (- (length region-specs)
+                    (length normalized-regions))))
          (findings '()))
     (when (> ignored-region-count 0)
       (push (format nil
@@ -5267,33 +5267,33 @@
        failure-classification)
   (let* ((layout-artifact (snippet-comparison-layout-artifact))
          (raw-layout-spec
-           (snippet-playground-layout-artifact-comparison-layout-spec-of
-            layout-artifact))
+          (snippet-playground-layout-artifact-comparison-layout-spec-of
+           layout-artifact))
          (normalized-layout-spec nil)
          (layout-findings nil)
          (left-region
-           (make-snippet-comparison-region
-            "left-code-region"
-            :left
-            'javascript-code
-            "JavaScript"
-            mech
-            code
-            lisp-source))
+          (make-snippet-comparison-region
+           "left-code-region"
+           :left
+           'javascript-code
+           "JavaScript"
+           mech
+           code
+           lisp-source))
          (center-region
-           (make-snippet-comparison-region
-            "shared-mech-region"
-            :center
-            'shared-mech
-            "Mech"
-            mech
-            code
-            lisp-source))
+          (make-snippet-comparison-region
+           "shared-mech-region"
+           :center
+           'shared-mech
+           "Mech"
+           mech
+           code
+           lisp-source))
          (right-region
-           (make-snippet-comparison-region
-            "right-code-region"
-            :right
-            'lisp-code
+          (make-snippet-comparison-region
+           "right-code-region"
+           :right
+           'lisp-code
            "Lisp"
            mech
            code
@@ -5341,18 +5341,18 @@
          (output-path (or (code-snippet-output-path-of code)
                           "state.items (expected)"))
          (precondition
-           (cond
-             ((or (find "CLICK"
-                        (mech-snippet-steps-of mech)
-                        :key #'mech-snippet-step-operation-of
-                        :test #'string=)
-                  (find "NEIGHBORS"
-                        (mech-snippet-steps-of mech)
-                        :key #'mech-snippet-step-operation-of
-                        :test #'string=))
-              "CLICK / NEIGHBORS from the selected Mech snippet")
-             (t
-              "CLICK / NEIGHBORS next remains the upstream precondition before CODE."))))
+          (cond
+            ((or (find "CLICK"
+                       (mech-snippet-steps-of mech)
+                       :key #'mech-snippet-step-operation-of
+                       :test #'string=)
+                 (find "NEIGHBORS"
+                       (mech-snippet-steps-of mech)
+                       :key #'mech-snippet-step-operation-of
+                       :test #'string=))
+             "CLICK / NEIGHBORS from the selected Mech snippet")
+            (t
+             "CLICK / NEIGHBORS next remains the upstream precondition before CODE."))))
     (list
      (list :stage "Precondition"
            :mech precondition
@@ -5523,15 +5523,15 @@
        source-expansion-policy source-parser-policy
        execution-neighborhood-input)
   (let* ((resolved-source-label
-           (or source-label
-               (ignore-errors (title-of context-object))
-               (and source-pathname
-                    (file-namestring source-pathname))
-               "Source"))
+          (or source-label
+              (ignore-errors (title-of context-object))
+              (and source-pathname
+                   (file-namestring source-pathname))
+              "Source"))
          (effective-source-expansion-policy
-           (or source-parser-policy
-               source-expansion-policy
-               *snippet-source-expansion-policy*))
+          (or source-parser-policy
+              source-expansion-policy
+              *snippet-source-expansion-policy*))
          (authored-artifact (snippet-playground-authored-artifact))
          (behavior-artifact (snippet-playground-behavior-artifact))
          (layout-artifact (snippet-comparison-layout-artifact))
@@ -5600,131 +5600,131 @@
                             execution-interface
                             transformation-unit))
                   (comparison
-                    (or comparison-surface
-                        (when (or selected-mech
-                                  selected-code
-                                  transformation-unit)
-                          (setf comparison-surface
-                                (make-snippet-comparison-surface
-                                 :status status
-                                 :source-label resolved-source-label
-                                 :mech selected-mech
-                                 :code selected-code
-                                 :lisp-source
-                                 (and rita-projection
-                                      (snippet-rita-projection-lisp-scaffold-source-of
-                                       rita-projection))
-                                 :execution-interface execution-interface
-                                 :transformation-unit transformation-unit
-                                 :mech-execution-ir mech-execution-ir
-                                 :execution-input mech-execution-input
-                                 :lefty-run-result lefty-run-result
-                                 :rita-run-result rita-run-result
-                                 :equivalence-report equivalence-report
-                                 :transformation-ir transformation-ir
-                                 :mech-scxml-execution-chart
-                                 mech-scxml-execution-chart
-                                 :scxml-run-result scxml-run-result
-                                 :mech-lisp-scaffold-source
-                                 mech-lisp-scaffold-source
-                                 :origin-pane-id origin-pane-id
-                                 :pending-pane-id pending-pane-id
-                                 :failure-classification failure-classification)))))
+                   (or comparison-surface
+                       (when (or selected-mech
+                                 selected-code
+                                 transformation-unit)
+                         (setf comparison-surface
+                               (make-snippet-comparison-surface
+                                :status status
+                                :source-label resolved-source-label
+                                :mech selected-mech
+                                :code selected-code
+                                :lisp-source
+                                (and rita-projection
+                                     (snippet-rita-projection-lisp-scaffold-source-of
+                                      rita-projection))
+                                :execution-interface execution-interface
+                                :transformation-unit transformation-unit
+                                :mech-execution-ir mech-execution-ir
+                                :execution-input mech-execution-input
+                                :lefty-run-result lefty-run-result
+                                :rita-run-result rita-run-result
+                                :equivalence-report equivalence-report
+                                :transformation-ir transformation-ir
+                                :mech-scxml-execution-chart
+                                mech-scxml-execution-chart
+                                :scxml-run-result scxml-run-result
+                                :mech-lisp-scaffold-source
+                                mech-lisp-scaffold-source
+                                :origin-pane-id origin-pane-id
+                                :pending-pane-id pending-pane-id
+                                :failure-classification failure-classification)))))
                   (class (if (eq status :ready)
                              'snippet-playground-session
                              'snippet-playground-failure))
                   (initargs
-                    (list
-                     :id (snippet-playground-session-id
-                          origin-surface-kind
-                          resolved-source-label
-                          source-pathname)
-                     :title title
-                     :summary summary
-                     :status status
-                     :context-object context-object
-                     :context-view-title context-view-title
+                   (list
+                    :id (snippet-playground-session-id
+                         origin-surface-kind
+                         resolved-source-label
+                         source-pathname)
+                    :title title
+                    :summary summary
+                    :status status
+                    :context-object context-object
+                    :context-view-title context-view-title
+                    :origin-surface-kind origin-surface-kind
+                    :provider-kind provider-kind
+                    :source-label resolved-source-label
+                    :source-pathname source-pathname
+                    :source-text (or source-text "")
+                    :source-block-count
+                    (or (and source-expansion-report
+                             (snippet-source-expansion-report-expanded-block-count
+                              source-expansion-report))
+                        (length (or expanded-blocks blocks)))
+                    :source-expansion-report source-expansion-report
+                    :recognized-mech-snippets recognized-mech-snippets
+                    :recognized-code-snippets recognized-code-snippets
+                    :selected-mech selected-mech
+                    :selected-code selected-code
+                    :execution-interface execution-interface
+                    :mech-execution-ir mech-execution-ir
+                    :transformation-unit transformation-unit
+                    :mech-execution-input mech-execution-input
+                    :lefty-run-result lefty-run-result
+                    :rita-run-result rita-run-result
+                    :equivalence-report equivalence-report
+                    :transformation-ir transformation-ir
+                    :mech-scxml-execution-chart
+                    mech-scxml-execution-chart
+                    :scxml-run-result scxml-run-result
+                    :mech-lisp-scaffold-source mech-lisp-scaffold-source
+                    :authored-artifact authored-artifact
+                    :behavior-artifact behavior-artifact
+                    :layout-artifact layout-artifact
+                    :comparison-surface comparison
+                    :crosswalk (and selected-mech
+                                    selected-code
+                                    (snippet-playground-crosswalk
+                                     selected-mech
+                                     selected-code))
+                    :pairing-notes (snippet-playground-evidence-notes
+                                    selected-mech
+                                    selected-code
+                                    execution-interface)
+                    :lisp-scaffold-source
+                    (and rita-projection
+                         (snippet-rita-projection-lisp-scaffold-source-of
+                          rita-projection))
+                    :findings (snippet-playground-findings
+                               selected-mech
+                               selected-code
+                               execution-interface
+                               transformation-unit
+                               equivalence-report
+                               mech-execution-ir
+                               mech-scxml-execution-chart
+                               scxml-run-result
+                               mech-lisp-scaffold-source)))
+                  (object
+                   (apply #'make-instance
+                          class
+                          (if (eq class 'snippet-playground-failure)
+                              (append initargs
+                                      (list :failure-classification
+                                            failure-classification))
+                              initargs))))
+             (let ((run
+                    (make-snippet-playground-state-machine-run
+                     :current-state current-state
+                     :visited-states (nreverse visited-states)
+                     :transition-trace (nreverse transition-trace)
+                     :evidence-trace (nreverse evidence-trace)
+                     :start-time start-time
+                     :end-time (snippet-playground-current-millis)
+                     :status (if (eq status :ready) :finished :failed)
+                     :failure-classification failure-classification
+                     :source-label resolved-source-label
+                     :origin-pane-id origin-pane-id
                      :origin-surface-kind origin-surface-kind
                      :provider-kind provider-kind
-                     :source-label resolved-source-label
-                     :source-pathname source-pathname
-                     :source-text (or source-text "")
-                     :source-block-count
-                     (or (and source-expansion-report
-                              (snippet-source-expansion-report-expanded-block-count
-                               source-expansion-report))
-                         (length (or expanded-blocks blocks)))
-                     :source-expansion-report source-expansion-report
+                     :pending-pane-id pending-pane-id
                      :recognized-mech-snippets recognized-mech-snippets
                      :recognized-code-snippets recognized-code-snippets
                      :selected-mech selected-mech
                      :selected-code selected-code
-                     :execution-interface execution-interface
-                     :mech-execution-ir mech-execution-ir
-                     :transformation-unit transformation-unit
-                     :mech-execution-input mech-execution-input
-                     :lefty-run-result lefty-run-result
-                     :rita-run-result rita-run-result
-                     :equivalence-report equivalence-report
-                     :transformation-ir transformation-ir
-                     :mech-scxml-execution-chart
-                     mech-scxml-execution-chart
-                     :scxml-run-result scxml-run-result
-                     :mech-lisp-scaffold-source mech-lisp-scaffold-source
-                     :authored-artifact authored-artifact
-                     :behavior-artifact behavior-artifact
-                     :layout-artifact layout-artifact
-                     :comparison-surface comparison
-                     :crosswalk (and selected-mech
-                                     selected-code
-                                     (snippet-playground-crosswalk
-                                      selected-mech
-                                      selected-code))
-                     :pairing-notes (snippet-playground-evidence-notes
-                                     selected-mech
-                                     selected-code
-                                     execution-interface)
-                     :lisp-scaffold-source
-                     (and rita-projection
-                          (snippet-rita-projection-lisp-scaffold-source-of
-                           rita-projection))
-                     :findings (snippet-playground-findings
-                                selected-mech
-                                selected-code
-                                execution-interface
-                                transformation-unit
-                                equivalence-report
-                                mech-execution-ir
-                                mech-scxml-execution-chart
-                                scxml-run-result
-                                mech-lisp-scaffold-source)))
-                  (object
-                    (apply #'make-instance
-                           class
-                           (if (eq class 'snippet-playground-failure)
-                               (append initargs
-                                       (list :failure-classification
-                                             failure-classification))
-                               initargs))))
-             (let ((run
-                     (make-snippet-playground-state-machine-run
-                      :current-state current-state
-                      :visited-states (nreverse visited-states)
-                      :transition-trace (nreverse transition-trace)
-                      :evidence-trace (nreverse evidence-trace)
-                      :start-time start-time
-                      :end-time (snippet-playground-current-millis)
-                      :status (if (eq status :ready) :finished :failed)
-                      :failure-classification failure-classification
-                      :source-label resolved-source-label
-                      :origin-pane-id origin-pane-id
-                      :origin-surface-kind origin-surface-kind
-                      :provider-kind provider-kind
-                      :pending-pane-id pending-pane-id
-                      :recognized-mech-snippets recognized-mech-snippets
-                      :recognized-code-snippets recognized-code-snippets
-                      :selected-mech selected-mech
-                      :selected-code selected-code
                      :execution-interface execution-interface
                      :mech-execution-ir mech-execution-ir
                      :transformation-unit transformation-unit
@@ -6186,16 +6186,16 @@
 
 (defun snippet-playground-status-table-row (label value)
   (html-inspector-views:html
-    (:tr (:td (html-inspector-views:esc label))
-         (:td (html-inspector-views:esc
-               (snippet-playground-display-value value))))))
+   (:tr (:td (html-inspector-views:esc label))
+        (:td (html-inspector-views:esc
+              (snippet-playground-display-value value))))))
 
 (defun maybe-object-ref-row (label object)
   (html-inspector-views:html
-    (:tr (:td (html-inspector-views:esc label))
-         (:td (if object
-                  (html-inspector-views:object-ref object)
-                  (html-inspector-views:esc "n/a"))))))
+   (:tr (:td (html-inspector-views:esc label))
+        (:td (if object
+                 (html-inspector-views:object-ref object)
+                 (html-inspector-views:esc "n/a"))))))
 
 (defun snippet-source-pre
     (source
@@ -6210,16 +6210,16 @@
                   truncated-p)
           (snippet-playground-bounded-source-text source :limit limit))
     (html-inspector-views:html
-      (:div :class "hyperdoc-snippet-source-view"
-            (when effective-truncated-p
-              (html-inspector-views:html
-                (:p :class "hyperdoc-snippet-source-boundary"
-                    (html-inspector-views:esc
-                     (snippet-playground-inline-truncation-note
-                      (length excerpt)
-                      effective-original-length)))))
-            (:pre :style "white-space: pre-wrap"
-                  (html-inspector-views:esc excerpt))))))
+     (:div :class "hyperdoc-snippet-source-view"
+           (when effective-truncated-p
+             (html-inspector-views:html
+              (:p :class "hyperdoc-snippet-source-boundary"
+                  (html-inspector-views:esc
+                   (snippet-playground-inline-truncation-note
+                    (length excerpt)
+                    effective-original-length)))))
+           (:pre :style "white-space: pre-wrap"
+                 (html-inspector-views:esc excerpt))))))
 
 (defun snippet-playground-view-interface-text (session)
   (or (and (snippet-playground-session-execution-interface-of session)
@@ -6237,7 +6237,7 @@
 (defun snippet-comparison-layout-show-once-content-keys (layout-spec)
   (loop for rule in (getf layout-spec :rules)
         when (eq (first rule) :show-once)
-          collect (second rule)))
+        collect (second rule)))
 
 (defun snippet-comparison-surface-region-for-placement (surface placement)
   (find placement
@@ -6263,313 +6263,313 @@
 
 (defun snippet-comparison-render-mech-run-result (label run-result)
   (html-inspector-views:html
-    (:h4 (html-inspector-views:esc label))
-    (if run-result
-        (html-inspector-views:html
-          (:table :class "inspector-table"
-                  (snippet-playground-status-table-row
-                   "Engine"
-                   (mech-run-result-engine-of run-result))
-                  (snippet-playground-status-table-row
-                   "Status"
-                   (mech-run-result-status-of run-result))
-                  (snippet-playground-status-table-row
-                   "Return value"
-                   (snippet-playground-value-or-na
-                    (mech-run-result-return-value-of run-result))))
-          (:h5 "Normalized output")
-          (snippet-source-pre
-           (snippet-playground-value-or-na
-            (mech-run-result-normalized-output-of run-result)))
-          (:h5 "Diagnostics")
-          (snippet-source-pre
-           (snippet-playground-value-or-na
-            (mech-run-result-diagnostics-of run-result)))
-          (:h5 "Trace")
-          (snippet-source-pre
-           (snippet-playground-value-or-na
-            (mech-run-result-trace-of run-result))))
-        (html-inspector-views:html
-          (:p (html-inspector-views:esc
-               "Run result is unavailable."))))))
+   (:h4 (html-inspector-views:esc label))
+   (if run-result
+       (html-inspector-views:html
+        (:table :class "inspector-table"
+                (snippet-playground-status-table-row
+                 "Engine"
+                 (mech-run-result-engine-of run-result))
+                (snippet-playground-status-table-row
+                 "Status"
+                 (mech-run-result-status-of run-result))
+                (snippet-playground-status-table-row
+                 "Return value"
+                 (snippet-playground-value-or-na
+                  (mech-run-result-return-value-of run-result))))
+        (:h5 "Normalized output")
+        (snippet-source-pre
+         (snippet-playground-value-or-na
+          (mech-run-result-normalized-output-of run-result)))
+        (:h5 "Diagnostics")
+        (snippet-source-pre
+         (snippet-playground-value-or-na
+          (mech-run-result-diagnostics-of run-result)))
+        (:h5 "Trace")
+        (snippet-source-pre
+         (snippet-playground-value-or-na
+          (mech-run-result-trace-of run-result))))
+       (html-inspector-views:html
+        (:p (html-inspector-views:esc
+             "Run result is unavailable."))))))
 
 (defun snippet-comparison-render-execution-equivalence (surface)
   (let ((execution-input
-          (snippet-comparison-surface-execution-input-of surface))
+         (snippet-comparison-surface-execution-input-of surface))
         (mech-execution-ir
-          (snippet-comparison-surface-mech-execution-ir-of surface))
+         (snippet-comparison-surface-mech-execution-ir-of surface))
         (mech-scxml-execution-chart
-          (snippet-comparison-surface-mech-scxml-execution-chart-of surface))
+         (snippet-comparison-surface-mech-scxml-execution-chart-of surface))
         (scxml-run-result
-          (snippet-comparison-surface-scxml-run-result-of surface))
+         (snippet-comparison-surface-scxml-run-result-of surface))
         (lefty-run-result
-          (snippet-comparison-surface-lefty-run-result-of surface))
+         (snippet-comparison-surface-lefty-run-result-of surface))
         (rita-run-result
-          (snippet-comparison-surface-rita-run-result-of surface))
+         (snippet-comparison-surface-rita-run-result-of surface))
         (equivalence-report
-          (snippet-comparison-surface-equivalence-report-of surface))
+         (snippet-comparison-surface-equivalence-report-of surface))
         (transformation-ir
-          (snippet-comparison-surface-transformation-ir-of surface))
+         (snippet-comparison-surface-transformation-ir-of surface))
         (mech-lisp-scaffold-source
-          (snippet-comparison-surface-mech-lisp-scaffold-source-of surface)))
+         (snippet-comparison-surface-mech-lisp-scaffold-source-of surface)))
     (html-inspector-views:html
-      (:div :class "hyperdoc-snippet-execution-equivalence"
-            (:h3 "Execution equivalence")
-            (:table :class "inspector-table"
-                    (maybe-object-ref-row "Execution input" execution-input)
-                    (maybe-object-ref-row "Mech execution IR" mech-execution-ir)
-                    (maybe-object-ref-row "Generated SCXML chart"
-                                          mech-scxml-execution-chart)
-                    (maybe-object-ref-row "SCXML run result" scxml-run-result)
-                    (maybe-object-ref-row "Lefty run result" lefty-run-result)
-                    (maybe-object-ref-row "Rita run result" rita-run-result)
-                    (maybe-object-ref-row "Equivalence report" equivalence-report)
-                    (maybe-object-ref-row "Shared IR" transformation-ir)
-                    (maybe-object-ref-row "Mech-derived Lisp scaffold source"
-                                          mech-lisp-scaffold-source))
-            (if mech-execution-ir
-                (html-inspector-views:html
-                  (:h4 "Parsed Mech operations")
-                  (:table :class "inspector-table"
-                          (snippet-playground-status-table-row
-                           "Click groups"
-                           (length
-                            (or (mech-execution-ir-click-groups-of
-                                 mech-execution-ir)
-                                '())))
-                          (snippet-playground-status-table-row
-                           "Required inputs"
-                           (length
-                            (or (mech-execution-ir-required-inputs-of
-                                 mech-execution-ir)
-                                '())))
-                          (snippet-playground-status-table-row
-                           "Code invocations"
-                           (length
-                            (or (mech-execution-ir-code-invocations-of
-                                 mech-execution-ir)
-                                '())))
-                          (snippet-playground-status-table-row
-                           "Preview output paths"
-                           (length
-                            (or (mech-execution-ir-preview-output-paths-of
-                                 mech-execution-ir)
-                                '())))
-                          (snippet-playground-status-table-row
-                           "Unsupported operations"
-                           (length
-                            (or (mech-execution-ir-unsupported-operations-of
-                                 mech-execution-ir)
-                                '()))))
-                  (:table :class "inspector-table"
-                          (:tr (:th "Line")
-                               (:th "Operation")
-                               (:th "Arguments")
-                               (:th "Click group")
-                               (:th "State id"))
-                          (dolist (operation
-                                   (or (mech-execution-ir-ordered-operations-of
-                                        mech-execution-ir)
-                                       '()))
-                            (html-inspector-views:html
-                              (:tr
-                               (:td (html-inspector-views:esc
-                                     (format nil "~A"
-                                             (or (getf operation :line-number)
-                                                 "n/a"))))
-                               (:td (html-inspector-views:esc
-                                     (or (getf operation :operation) "")))
-                               (:td (html-inspector-views:esc
-                                     (format nil "~{~A~^ ~}"
-                                             (or (getf operation :arguments)
-                                                 '()))))
-                               (:td (html-inspector-views:esc
-                                     (format nil "~A"
-                                             (or (getf operation :click-group)
-                                                 "n/a"))))
-                               (:td (html-inspector-views:esc
-                                     (or (getf operation :state-id) ""))))))))
-                (html-inspector-views:html
-                  (:p (html-inspector-views:esc
-                       "Mech execution IR is unavailable."))))
-            (if mech-scxml-execution-chart
-                (html-inspector-views:html
-                  (:h4 "Generated SCXML chart")
-                  (:table :class "inspector-table"
-                          (snippet-playground-status-table-row
-                           "Chart name"
-                           (mech-scxml-execution-chart-name-of
-                            mech-scxml-execution-chart))
-                          (snippet-playground-status-table-row
-                           "Initial state"
-                           (mech-scxml-execution-chart-initial-state-of
-                            mech-scxml-execution-chart))
-                          (snippet-playground-status-table-row
-                           "Terminal states"
-                           (mech-scxml-execution-chart-terminal-states-of
-                            mech-scxml-execution-chart))
-                          (snippet-playground-status-table-row
-                           "Failure states"
-                           (mech-scxml-execution-chart-failure-states-of
-                            mech-scxml-execution-chart))
-                          (snippet-playground-status-table-row
-                           "Events"
-                           (mech-scxml-execution-chart-events-of
-                            mech-scxml-execution-chart)))
-                  (:h5 "SCXML source")
-                  (snippet-source-pre
-                   (snippet-playground-value-or-na
-                    (mech-scxml-execution-chart-scxml-text-of
-                     mech-scxml-execution-chart))))
-                (html-inspector-views:html
-                  (:p (html-inspector-views:esc
-                       "Generated SCXML chart is unavailable."))))
-            (if execution-input
-                (let* ((normalized-state
-                         (mech-execution-input-normalized-state-of execution-input))
-                       (neighborhood-required-p
-                         (or (and mech-execution-ir
-                                  (mech-ir-requires-neighborhood-p
-                                   mech-execution-ir))
-                             (mech-operations-require-neighborhood-p
-                              (mech-execution-input-parsed-mech-operations-of
-                               execution-input))))
-                       (neighborhood-state
-                         (and normalized-state
-                              (getf normalized-state :neighborhood))))
-                  (html-inspector-views:html
-                    (:h4 "Execution input")
-                    (:table :class "inspector-table"
-                            (snippet-playground-status-table-row
-                             "Function"
-                             (mech-execution-input-code-operation-name-of
-                              execution-input))
-                            (snippet-playground-status-table-row
-                             "Arguments"
-                             (mech-execution-input-code-operation-arguments-of
-                              execution-input))
-                            (snippet-playground-status-table-row
-                             "Output path"
-                             (mech-execution-input-handoff-path-of
-                              execution-input))
-                            (snippet-playground-status-table-row
-                             "Required input"
-                             (if neighborhood-required-p
-                                 "NEIGHBORS input"
-                                 "Page/context story")))
-                    (if neighborhood-required-p
-                        (if neighborhood-state
-                            (html-inspector-views:html
-                              (:h5 "Normalized neighborhood state")
-                              (snippet-source-pre
-                               (snippet-playground-value-or-na
-                                neighborhood-state)))
-                            (html-inspector-views:html
-                              (:h5 "Neighborhood input")
-                              (:p (html-inspector-views:esc
-                                   "NEIGHBORS is requested by Mech IR, but no neighborhood input is resolved."))))
-                        (html-inspector-views:html
-                          (:h5 "Required input")
-                          (snippet-source-pre
-                           "Page/context story")))))
-                (html-inspector-views:html
-                  (:p (html-inspector-views:esc
-                       "Execution input is unavailable."))))
-            (snippet-comparison-render-mech-run-result
-             "SCXML run"
-             scxml-run-result)
-            (snippet-comparison-render-mech-run-result
-             "Lefty run"
-             lefty-run-result)
-            (snippet-comparison-render-mech-run-result
-             "Rita run"
-             rita-run-result)
-            (if equivalence-report
-                (html-inspector-views:html
-                  (:h4 "Equivalence report")
-                  (:table :class "inspector-table"
-                          (snippet-playground-status-table-row
-                           "equal-p"
-                           (if (mech-equivalence-report-equal-p
-                                equivalence-report)
-                               "true"
-                               "false"))
-                          (snippet-playground-status-table-row
-                           "Unsupported constructs"
-                           (length
-                            (or (mech-equivalence-report-unsupported-constructs-of
-                                 equivalence-report)
-                                '())))
-                          (snippet-playground-status-table-row
-                           "Differences"
-                           (length
-                            (or (mech-equivalence-report-differences-of
-                                 equivalence-report)
-                                '()))))
-                  (:h5 "Normalized comparison value")
-                  (snippet-source-pre
-                   (snippet-playground-value-or-na
-                    (mech-equivalence-report-normalized-comparison-value-of
-                     equivalence-report)))
-                  (:h5 "Differences")
-                  (snippet-source-pre
-                   (snippet-playground-value-or-na
-                    (mech-equivalence-report-differences-of
-                     equivalence-report)))
-                  (:h5 "Unsupported constructs")
-                  (snippet-source-pre
-                   (snippet-playground-value-or-na
-                    (mech-equivalence-report-unsupported-constructs-of
-                     equivalence-report))))
-                (html-inspector-views:html
-                  (:p (html-inspector-views:esc
-                       "Equivalence report is unavailable."))))
-            (if transformation-ir
-                (html-inspector-views:html
-                  (:h4 "Shared IR")
+     (:div :class "hyperdoc-snippet-execution-equivalence"
+           (:h3 "Execution equivalence")
+           (:table :class "inspector-table"
+                   (maybe-object-ref-row "Execution input" execution-input)
+                   (maybe-object-ref-row "Mech execution IR" mech-execution-ir)
+                   (maybe-object-ref-row "Generated SCXML chart"
+                                         mech-scxml-execution-chart)
+                   (maybe-object-ref-row "SCXML run result" scxml-run-result)
+                   (maybe-object-ref-row "Lefty run result" lefty-run-result)
+                   (maybe-object-ref-row "Rita run result" rita-run-result)
+                   (maybe-object-ref-row "Equivalence report" equivalence-report)
+                   (maybe-object-ref-row "Shared IR" transformation-ir)
+                   (maybe-object-ref-row "Mech-derived Lisp scaffold source"
+                                         mech-lisp-scaffold-source))
+           (if mech-execution-ir
+               (html-inspector-views:html
+                (:h4 "Parsed Mech operations")
+                (:table :class "inspector-table"
+                        (snippet-playground-status-table-row
+                         "Click groups"
+                         (length
+                          (or (mech-execution-ir-click-groups-of
+                               mech-execution-ir)
+                              '())))
+                        (snippet-playground-status-table-row
+                         "Required inputs"
+                         (length
+                          (or (mech-execution-ir-required-inputs-of
+                               mech-execution-ir)
+                              '())))
+                        (snippet-playground-status-table-row
+                         "Code invocations"
+                         (length
+                          (or (mech-execution-ir-code-invocations-of
+                               mech-execution-ir)
+                              '())))
+                        (snippet-playground-status-table-row
+                         "Preview output paths"
+                         (length
+                          (or (mech-execution-ir-preview-output-paths-of
+                               mech-execution-ir)
+                              '())))
+                        (snippet-playground-status-table-row
+                         "Unsupported operations"
+                         (length
+                          (or (mech-execution-ir-unsupported-operations-of
+                               mech-execution-ir)
+                              '()))))
+                (:table :class "inspector-table"
+                        (:tr (:th "Line")
+                             (:th "Operation")
+                             (:th "Arguments")
+                             (:th "Click group")
+                             (:th "State id"))
+                        (dolist (operation
+                                  (or (mech-execution-ir-ordered-operations-of
+                                       mech-execution-ir)
+                                      '()))
+                          (html-inspector-views:html
+                           (:tr
+                            (:td (html-inspector-views:esc
+                                  (format nil "~A"
+                                          (or (getf operation :line-number)
+                                              "n/a"))))
+                            (:td (html-inspector-views:esc
+                                  (or (getf operation :operation) "")))
+                            (:td (html-inspector-views:esc
+                                  (format nil "~{~A~^ ~}"
+                                          (or (getf operation :arguments)
+                                              '()))))
+                            (:td (html-inspector-views:esc
+                                  (format nil "~A"
+                                          (or (getf operation :click-group)
+                                              "n/a"))))
+                            (:td (html-inspector-views:esc
+                                  (or (getf operation :state-id) ""))))))))
+               (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "Mech execution IR is unavailable."))))
+           (if mech-scxml-execution-chart
+               (html-inspector-views:html
+                (:h4 "Generated SCXML chart")
+                (:table :class "inspector-table"
+                        (snippet-playground-status-table-row
+                         "Chart name"
+                         (mech-scxml-execution-chart-name-of
+                          mech-scxml-execution-chart))
+                        (snippet-playground-status-table-row
+                         "Initial state"
+                         (mech-scxml-execution-chart-initial-state-of
+                          mech-scxml-execution-chart))
+                        (snippet-playground-status-table-row
+                         "Terminal states"
+                         (mech-scxml-execution-chart-terminal-states-of
+                          mech-scxml-execution-chart))
+                        (snippet-playground-status-table-row
+                         "Failure states"
+                         (mech-scxml-execution-chart-failure-states-of
+                          mech-scxml-execution-chart))
+                        (snippet-playground-status-table-row
+                         "Events"
+                         (mech-scxml-execution-chart-events-of
+                          mech-scxml-execution-chart)))
+                (:h5 "SCXML source")
+                (snippet-source-pre
+                 (snippet-playground-value-or-na
+                  (mech-scxml-execution-chart-scxml-text-of
+                   mech-scxml-execution-chart))))
+               (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "Generated SCXML chart is unavailable."))))
+           (if execution-input
+               (let* ((normalized-state
+                       (mech-execution-input-normalized-state-of execution-input))
+                      (neighborhood-required-p
+                       (or (and mech-execution-ir
+                                (mech-ir-requires-neighborhood-p
+                                 mech-execution-ir))
+                           (mech-operations-require-neighborhood-p
+                            (mech-execution-input-parsed-mech-operations-of
+                             execution-input))))
+                      (neighborhood-state
+                       (and normalized-state
+                            (getf normalized-state :neighborhood))))
+                 (html-inspector-views:html
+                  (:h4 "Execution input")
                   (:table :class "inspector-table"
                           (snippet-playground-status-table-row
                            "Function"
-                           (mech-state-items-ir-function-name-of
-                            transformation-ir))
+                           (mech-execution-input-code-operation-name-of
+                            execution-input))
                           (snippet-playground-status-table-row
                            "Arguments"
-                           (mech-state-items-ir-function-arguments-of
-                            transformation-ir))
-                          (snippet-playground-status-table-row
-                           "Input slots"
-                           (mech-state-items-ir-input-slots-of
-                            transformation-ir))
+                           (mech-execution-input-code-operation-arguments-of
+                            execution-input))
                           (snippet-playground-status-table-row
                            "Output path"
-                           (mech-state-items-ir-output-path-of
-                            transformation-ir))
+                           (mech-execution-input-handoff-path-of
+                            execution-input))
                           (snippet-playground-status-table-row
-                           "Helpers"
-                           (mech-state-items-ir-helper-functions-of
-                            transformation-ir))
-                          (snippet-playground-status-table-row
-                           "Equivalence status"
-                           (mech-state-items-ir-equivalence-status-of
-                            transformation-ir)))
-                  (:h5 "Operation summary")
-                  (snippet-source-pre
-                   (snippet-playground-value-or-na
-                    (mech-state-items-ir-operation-summary-of
-                     transformation-ir))))
-                (html-inspector-views:html
-                  (:p (html-inspector-views:esc
-                       "Shared IR is unavailable."))))
-            (if mech-lisp-scaffold-source
-                (html-inspector-views:html
-                  (:h4 "Mech-derived Lisp scaffold")
-                  (snippet-source-pre
-                   (or (mech-lisp-scaffold-source-source-of
-                        mech-lisp-scaffold-source)
-                       "")))
-                (html-inspector-views:html
-                  (:p (html-inspector-views:esc
-                       "Mech-derived Lisp scaffold source is unavailable."))))))))
+                           "Required input"
+                           (if neighborhood-required-p
+                               "NEIGHBORS input"
+                               "Page/context story")))
+                  (if neighborhood-required-p
+                      (if neighborhood-state
+                          (html-inspector-views:html
+                           (:h5 "Normalized neighborhood state")
+                           (snippet-source-pre
+                            (snippet-playground-value-or-na
+                             neighborhood-state)))
+                          (html-inspector-views:html
+                           (:h5 "Neighborhood input")
+                           (:p (html-inspector-views:esc
+                                "NEIGHBORS is requested by Mech IR, but no neighborhood input is resolved."))))
+                      (html-inspector-views:html
+                       (:h5 "Required input")
+                       (snippet-source-pre
+                        "Page/context story")))))
+               (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "Execution input is unavailable."))))
+           (snippet-comparison-render-mech-run-result
+            "SCXML run"
+            scxml-run-result)
+           (snippet-comparison-render-mech-run-result
+            "Lefty run"
+            lefty-run-result)
+           (snippet-comparison-render-mech-run-result
+            "Rita run"
+            rita-run-result)
+           (if equivalence-report
+               (html-inspector-views:html
+                (:h4 "Equivalence report")
+                (:table :class "inspector-table"
+                        (snippet-playground-status-table-row
+                         "equal-p"
+                         (if (mech-equivalence-report-equal-p
+                              equivalence-report)
+                             "true"
+                             "false"))
+                        (snippet-playground-status-table-row
+                         "Unsupported constructs"
+                         (length
+                          (or (mech-equivalence-report-unsupported-constructs-of
+                               equivalence-report)
+                              '())))
+                        (snippet-playground-status-table-row
+                         "Differences"
+                         (length
+                          (or (mech-equivalence-report-differences-of
+                               equivalence-report)
+                              '()))))
+                (:h5 "Normalized comparison value")
+                (snippet-source-pre
+                 (snippet-playground-value-or-na
+                  (mech-equivalence-report-normalized-comparison-value-of
+                   equivalence-report)))
+                (:h5 "Differences")
+                (snippet-source-pre
+                 (snippet-playground-value-or-na
+                  (mech-equivalence-report-differences-of
+                   equivalence-report)))
+                (:h5 "Unsupported constructs")
+                (snippet-source-pre
+                 (snippet-playground-value-or-na
+                  (mech-equivalence-report-unsupported-constructs-of
+                   equivalence-report))))
+               (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "Equivalence report is unavailable."))))
+           (if transformation-ir
+               (html-inspector-views:html
+                (:h4 "Shared IR")
+                (:table :class "inspector-table"
+                        (snippet-playground-status-table-row
+                         "Function"
+                         (mech-state-items-ir-function-name-of
+                          transformation-ir))
+                        (snippet-playground-status-table-row
+                         "Arguments"
+                         (mech-state-items-ir-function-arguments-of
+                          transformation-ir))
+                        (snippet-playground-status-table-row
+                         "Input slots"
+                         (mech-state-items-ir-input-slots-of
+                          transformation-ir))
+                        (snippet-playground-status-table-row
+                         "Output path"
+                         (mech-state-items-ir-output-path-of
+                          transformation-ir))
+                        (snippet-playground-status-table-row
+                         "Helpers"
+                         (mech-state-items-ir-helper-functions-of
+                          transformation-ir))
+                        (snippet-playground-status-table-row
+                         "Equivalence status"
+                         (mech-state-items-ir-equivalence-status-of
+                          transformation-ir)))
+                (:h5 "Operation summary")
+                (snippet-source-pre
+                 (snippet-playground-value-or-na
+                  (mech-state-items-ir-operation-summary-of
+                   transformation-ir))))
+               (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "Shared IR is unavailable."))))
+           (if mech-lisp-scaffold-source
+               (html-inspector-views:html
+                (:h4 "Mech-derived Lisp scaffold")
+                (snippet-source-pre
+                 (or (mech-lisp-scaffold-source-source-of
+                      mech-lisp-scaffold-source)
+                     "")))
+               (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "Mech-derived Lisp scaffold source is unavailable."))))))))
 
 (defun snippet-comparison-render-region-style (region-spec)
   (format nil
@@ -6581,16 +6581,16 @@
 
 (defun snippet-comparison-render-region (region region-spec)
   (html-inspector-views:html
-    (:div :class (snippet-comparison-region-css-class
-                  (snippet-comparison-region-placement-of region))
-          :style (snippet-comparison-render-region-style region-spec)
-          (:h3 (html-inspector-views:esc (title-of region)))
-          (snippet-source-pre
-           (snippet-comparison-region-source-text-of region)
-           :original-length
-           (snippet-comparison-region-source-original-length-of region)
-           :truncated-p
-           (snippet-comparison-region-source-truncated-p region)))))
+   (:div :class (snippet-comparison-region-css-class
+                 (snippet-comparison-region-placement-of region))
+         :style (snippet-comparison-render-region-style region-spec)
+         (:h3 (html-inspector-views:esc (title-of region)))
+         (snippet-source-pre
+          (snippet-comparison-region-source-text-of region)
+          :original-length
+          (snippet-comparison-region-source-original-length-of region)
+          :truncated-p
+          (snippet-comparison-region-source-truncated-p region)))))
 
 (defun snippet-comparison-layout-column-count (layout-spec)
   (loop for region-spec in (snippet-comparison-layout-region-specs layout-spec)
@@ -6605,19 +6605,19 @@
   (let ((shown-content-keys '())
         (layout-spec (snippet-comparison-surface-layout-spec-of surface))
         (show-once-keys
-          (snippet-comparison-layout-show-once-content-keys
-           (snippet-comparison-surface-layout-spec-of surface)))
+         (snippet-comparison-layout-show-once-content-keys
+          (snippet-comparison-surface-layout-spec-of surface)))
         (visible '()))
     (dolist (region-spec (snippet-comparison-layout-region-specs layout-spec)
-                         (nreverse visible))
+             (nreverse visible))
       (let* ((placement (first region-spec))
              (region
-               (snippet-comparison-surface-region-for-placement
-                surface
-                placement))
+              (snippet-comparison-surface-region-for-placement
+               surface
+               placement))
              (content-key
-               (and region
-                    (snippet-comparison-region-content-key-of region))))
+              (and region
+                   (snippet-comparison-region-content-key-of region))))
         (when (and region
                    (not (and (member content-key
                                      show-once-keys
@@ -6672,12 +6672,12 @@
 
 (defun snippet-comparison-render-transformation-unit (surface)
   (html-inspector-views:html
-    (:div :class "hyperdoc-snippet-transformation-unit"
-          (:h3 "Transformation unit")
-          (if-let (unit
-                   (snippet-comparison-surface-transformation-unit-of
-                    surface))
-            (html-inspector-views:html
+   (:div :class "hyperdoc-snippet-transformation-unit"
+         (:h3 "Transformation unit")
+         (if-let (unit
+                  (snippet-comparison-surface-transformation-unit-of
+                   surface))
+             (html-inspector-views:html
               (:table :class "inspector-table"
                       (snippet-playground-view-transformation-row
                        "Interface"
@@ -6698,15 +6698,15 @@
                       (snippet-playground-view-transformation-row
                        "Preview"
                        (snippet-transformation-unit-preview-mode-of unit))))
-            (html-inspector-views:html
-              (:p (html-inspector-views:esc
-                   "No transformation unit is available for this session.")))))))
+           (html-inspector-views:html
+            (:p (html-inspector-views:esc
+                 "No transformation unit is available for this session.")))))))
 
 (defun snippet-comparison-render-surface (surface)
   (let* ((layout-spec (snippet-comparison-surface-layout-spec-of surface))
          (visible-regions (snippet-comparison-visible-regions surface))
          (column-count
-           (snippet-comparison-layout-grid-column-count layout-spec)))
+          (snippet-comparison-layout-grid-column-count layout-spec)))
     (write-string
      "<div class=\"hyperdoc-snippet-comparison\">"
      html-inspector-views::*html-stream*)
@@ -6744,14 +6744,14 @@
   (let* ((layout-spec (snippet-comparison-surface-layout-spec-of surface))
          (visible-regions (snippet-comparison-visible-regions surface))
          (normalized-placements
-           (mapcar #'first
-                   (snippet-comparison-layout-region-specs layout-spec)))
+          (mapcar #'first
+                  (snippet-comparison-layout-region-specs layout-spec)))
          (visible-placements
-           (mapcar (lambda (entry)
-                     (snippet-comparison-region-placement-of (car entry)))
-                   visible-regions))
+          (mapcar (lambda (entry)
+                    (snippet-comparison-region-placement-of (car entry)))
+                  visible-regions))
          (column-count
-           (snippet-comparison-layout-grid-column-count layout-spec)))
+          (snippet-comparison-layout-grid-column-count layout-spec)))
     (snippet-playground-log-comparison-render
      "MATERIALIZE-START"
      :visible-region-count (length visible-regions)
@@ -6809,1378 +6809,1378 @@
 (html-inspector-views:defview snippet-playground-authored-role-summary
     (role snippet-playground-authored-role)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of role)))
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Kind"
-               (snippet-playground-authored-role-kind-of role))
-              (snippet-playground-status-table-row
-               "Binding"
-               (snippet-playground-authored-role-binding-of role))
-              (snippet-playground-status-table-row
-               "Participants"
-               (or (snippet-playground-authored-role-participants-of role)
-                   "n/a")))
-      (when (snippet-playground-authored-role-findings-of role)
-        (html-inspector-views:html
-          (:h3 "Findings")
-          (:ul
-           (dolist (finding (snippet-playground-authored-role-findings-of role))
-             (html-inspector-views:html
-               (:li (html-inspector-views:esc finding))))))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of role)))
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Kind"
+                                            (snippet-playground-authored-role-kind-of role))
+                                           (snippet-playground-status-table-row
+                                            "Binding"
+                                            (snippet-playground-authored-role-binding-of role))
+                                           (snippet-playground-status-table-row
+                                            "Participants"
+                                            (or (snippet-playground-authored-role-participants-of role)
+                                                "n/a")))
+                                   (when (snippet-playground-authored-role-findings-of role)
+                                     (html-inspector-views:html
+                                      (:h3 "Findings")
+                                      (:ul
+                                       (dolist (finding (snippet-playground-authored-role-findings-of role))
+                                         (html-inspector-views:html
+                                          (:li (html-inspector-views:esc finding))))))))))
 
 (html-inspector-views:defview snippet-playground-authored-relation-summary
     (relation snippet-playground-authored-relation)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Layer"
-               (snippet-playground-authored-relation-layer-of relation))
-              (snippet-playground-status-table-row
-               "Subject"
-               (snippet-playground-authored-relation-subject-of relation))
-              (snippet-playground-status-table-row
-               "Predicate"
-               (snippet-playground-authored-relation-predicate-of relation))
-              (snippet-playground-status-table-row
-               "Object"
-               (snippet-playground-authored-relation-object-of relation)))
-      (when (snippet-playground-authored-relation-attributes-of relation)
-        (html-inspector-views:html
-          (:h3 "Attributes")
-          (:pre :style "white-space: pre-wrap"
-                (html-inspector-views:esc
-                 (format nil "~S"
-                         (snippet-playground-authored-relation-attributes-of
-                          relation)))))))))
+                                  (html-inspector-views:html
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Layer"
+                                            (snippet-playground-authored-relation-layer-of relation))
+                                           (snippet-playground-status-table-row
+                                            "Subject"
+                                            (snippet-playground-authored-relation-subject-of relation))
+                                           (snippet-playground-status-table-row
+                                            "Predicate"
+                                            (snippet-playground-authored-relation-predicate-of relation))
+                                           (snippet-playground-status-table-row
+                                            "Object"
+                                            (snippet-playground-authored-relation-object-of relation)))
+                                   (when (snippet-playground-authored-relation-attributes-of relation)
+                                     (html-inspector-views:html
+                                      (:h3 "Attributes")
+                                      (:pre :style "white-space: pre-wrap"
+                                            (html-inspector-views:esc
+                                             (format nil "~S"
+                                                     (snippet-playground-authored-relation-attributes-of
+                                                      relation)))))))))
 
 (html-inspector-views:defview snippet-playground-authored-artifact-summary
     (artifact snippet-playground-authored-artifact)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:div :class "hyperdoc-snippet-authored-artifact"
-            :data-hyperdoc-snippet-authored-artifact "true"
-            (:p (html-inspector-views:esc (summary-of artifact)))
-            (:table :class "inspector-table"
-                    (snippet-playground-status-table-row
-                     "Kind"
-                     (snippet-playground-authored-artifact-kind-of artifact))
-                    (snippet-playground-status-table-row
-                     "Workflow role"
-                     (snippet-playground-authored-artifact-workflow-role-of
-                      artifact))
-                    (snippet-playground-status-table-row
-                     "Compiler pipeline"
-                     (snippet-playground-authored-artifact-compiler-pipeline-of
-                      artifact))
-                    (snippet-playground-status-table-row
-                     "Semantic roles"
-                     (length
-                      (snippet-playground-authored-artifact-semantic-roles-of
-                       artifact)))
-                    (snippet-playground-status-table-row
-                     "Behavior relations"
-                     (length
-                      (snippet-playground-authored-artifact-behavior-relations-of
-                       artifact)))
-                    (snippet-playground-status-table-row
-                     "Layout relations"
-                     (length
-                      (snippet-playground-authored-artifact-layout-relations-of
-                       artifact))))
-            (:h3 "Compiled targets")
-            (:ul
-             (dolist (target
-                      (snippet-playground-authored-artifact-compiled-targets-of
-                       artifact))
-               (html-inspector-views:html
-                 (:li (html-inspector-views:esc target)))))
-            (:h3 "Findings")
-            (:ul
-             (dolist (finding
-                      (snippet-playground-authored-artifact-findings-of artifact))
-               (html-inspector-views:html
-                 (:li (html-inspector-views:esc finding)))))))))
+                                  (html-inspector-views:html
+                                   (:div :class "hyperdoc-snippet-authored-artifact"
+                                         :data-hyperdoc-snippet-authored-artifact "true"
+                                         (:p (html-inspector-views:esc (summary-of artifact)))
+                                         (:table :class "inspector-table"
+                                                 (snippet-playground-status-table-row
+                                                  "Kind"
+                                                  (snippet-playground-authored-artifact-kind-of artifact))
+                                                 (snippet-playground-status-table-row
+                                                  "Workflow role"
+                                                  (snippet-playground-authored-artifact-workflow-role-of
+                                                   artifact))
+                                                 (snippet-playground-status-table-row
+                                                  "Compiler pipeline"
+                                                  (snippet-playground-authored-artifact-compiler-pipeline-of
+                                                   artifact))
+                                                 (snippet-playground-status-table-row
+                                                  "Semantic roles"
+                                                  (length
+                                                   (snippet-playground-authored-artifact-semantic-roles-of
+                                                    artifact)))
+                                                 (snippet-playground-status-table-row
+                                                  "Behavior relations"
+                                                  (length
+                                                   (snippet-playground-authored-artifact-behavior-relations-of
+                                                    artifact)))
+                                                 (snippet-playground-status-table-row
+                                                  "Layout relations"
+                                                  (length
+                                                   (snippet-playground-authored-artifact-layout-relations-of
+                                                    artifact))))
+                                         (:h3 "Compiled targets")
+                                         (:ul
+                                          (dolist (target
+                                                    (snippet-playground-authored-artifact-compiled-targets-of
+                                                     artifact))
+                                            (html-inspector-views:html
+                                             (:li (html-inspector-views:esc target)))))
+                                         (:h3 "Findings")
+                                         (:ul
+                                          (dolist (finding
+                                                    (snippet-playground-authored-artifact-findings-of artifact))
+                                            (html-inspector-views:html
+                                             (:li (html-inspector-views:esc finding)))))))))
 
 (html-inspector-views:defview snippet-playground-authored-artifact-semantic-roles
     (artifact snippet-playground-authored-artifact)
   (html-inspector-views:html-view :title "Semantic roles" :priority 2
-    (html-inspector-views:html
-      (:ul
-       (dolist (role
-                (snippet-playground-authored-artifact-semantic-roles-of artifact))
-         (html-inspector-views:html
-           (:li (html-inspector-views:object-ref role))))))))
+                                  (html-inspector-views:html
+                                   (:ul
+                                    (dolist (role
+                                              (snippet-playground-authored-artifact-semantic-roles-of artifact))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:object-ref role))))))))
 
 (html-inspector-views:defview snippet-playground-authored-artifact-behavior-relations
     (artifact snippet-playground-authored-artifact)
   (html-inspector-views:html-view :title "Behavior relations" :priority 3
-    (html-inspector-views:html
-      (:ul
-       (dolist (relation
-                (snippet-playground-authored-artifact-behavior-relations-of
-                 artifact))
-         (html-inspector-views:html
-           (:li (html-inspector-views:object-ref relation))))))))
+                                  (html-inspector-views:html
+                                   (:ul
+                                    (dolist (relation
+                                              (snippet-playground-authored-artifact-behavior-relations-of
+                                               artifact))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:object-ref relation))))))))
 
 (html-inspector-views:defview snippet-playground-authored-artifact-layout-relations
     (artifact snippet-playground-authored-artifact)
   (html-inspector-views:html-view :title "Layout relations" :priority 4
-    (html-inspector-views:html
-      (:ul
-       (dolist (relation
-                (snippet-playground-authored-artifact-layout-relations-of
-                 artifact))
-         (html-inspector-views:html
-           (:li (html-inspector-views:object-ref relation))))))))
+                                  (html-inspector-views:html
+                                   (:ul
+                                    (dolist (relation
+                                              (snippet-playground-authored-artifact-layout-relations-of
+                                               artifact))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:object-ref relation))))))))
 
 (html-inspector-views:defview snippet-playground-behavior-artifact-summary
     (artifact snippet-playground-behavior-artifact)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:div :class "hyperdoc-snippet-behavior-artifact"
-            :data-hyperdoc-snippet-behavior-artifact "true"
-            (:p (html-inspector-views:esc (summary-of artifact)))
-            (:table :class "inspector-table"
-                    (maybe-object-ref-row
-                     "Authored artifact"
-                     (snippet-playground-behavior-artifact-authored-artifact-of
-                      artifact))
-                    (maybe-object-ref-row
-                     "Run machine"
-                     (snippet-playground-behavior-artifact-run-machine-of
-                      artifact))
-                    (maybe-object-ref-row
-                     "Comparison machine"
-                     (snippet-playground-behavior-artifact-comparison-machine-of
-                      artifact))
-                    (snippet-playground-status-table-row
-                     "Behavior relations"
-                     (length
-                      (snippet-playground-behavior-artifact-relations-of
-                       artifact))))
-            (:h3 "Findings")
-            (:ul
-             (dolist (finding
-                      (snippet-playground-behavior-artifact-findings-of artifact))
-               (html-inspector-views:html
-                 (:li (html-inspector-views:esc finding)))))))))
+                                  (html-inspector-views:html
+                                   (:div :class "hyperdoc-snippet-behavior-artifact"
+                                         :data-hyperdoc-snippet-behavior-artifact "true"
+                                         (:p (html-inspector-views:esc (summary-of artifact)))
+                                         (:table :class "inspector-table"
+                                                 (maybe-object-ref-row
+                                                  "Authored artifact"
+                                                  (snippet-playground-behavior-artifact-authored-artifact-of
+                                                   artifact))
+                                                 (maybe-object-ref-row
+                                                  "Run machine"
+                                                  (snippet-playground-behavior-artifact-run-machine-of
+                                                   artifact))
+                                                 (maybe-object-ref-row
+                                                  "Comparison machine"
+                                                  (snippet-playground-behavior-artifact-comparison-machine-of
+                                                   artifact))
+                                                 (snippet-playground-status-table-row
+                                                  "Behavior relations"
+                                                  (length
+                                                   (snippet-playground-behavior-artifact-relations-of
+                                                    artifact))))
+                                         (:h3 "Findings")
+                                         (:ul
+                                          (dolist (finding
+                                                    (snippet-playground-behavior-artifact-findings-of artifact))
+                                            (html-inspector-views:html
+                                             (:li (html-inspector-views:esc finding)))))))))
 
 (html-inspector-views:defview snippet-playground-behavior-artifact-relations
     (artifact snippet-playground-behavior-artifact)
   (html-inspector-views:html-view :title "Relations" :priority 2
-    (html-inspector-views:html
-      (:ul
-       (dolist (relation (snippet-playground-behavior-artifact-relations-of
-                          artifact))
-         (html-inspector-views:html
-           (:li (html-inspector-views:object-ref relation))))))))
+                                  (html-inspector-views:html
+                                   (:ul
+                                    (dolist (relation (snippet-playground-behavior-artifact-relations-of
+                                                       artifact))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:object-ref relation))))))))
 
 (html-inspector-views:defview snippet-playground-behavior-artifact-scxml
     (artifact snippet-playground-behavior-artifact)
   (html-inspector-views:html-view :title "SCXML" :priority 3
-    (html-inspector-views:html
-      (:h3 "Run machine")
-      (:pre :style "white-space: pre-wrap"
-            :data-hyperdoc-snippet-machine-scxml "true"
-            (html-inspector-views:esc
-             (snippet-playground-behavior-artifact-run-machine-scxml-of
-              artifact)))
-      (:h3 "Comparison machine")
-      (:pre :style "white-space: pre-wrap"
-            :data-hyperdoc-snippet-comparison-machine-scxml "true"
-            (html-inspector-views:esc
-             (snippet-playground-behavior-artifact-comparison-machine-scxml-of
-              artifact))))))
+                                  (html-inspector-views:html
+                                   (:h3 "Run machine")
+                                   (:pre :style "white-space: pre-wrap"
+                                         :data-hyperdoc-snippet-machine-scxml "true"
+                                         (html-inspector-views:esc
+                                          (snippet-playground-behavior-artifact-run-machine-scxml-of
+                                           artifact)))
+                                   (:h3 "Comparison machine")
+                                   (:pre :style "white-space: pre-wrap"
+                                         :data-hyperdoc-snippet-comparison-machine-scxml "true"
+                                         (html-inspector-views:esc
+                                          (snippet-playground-behavior-artifact-comparison-machine-scxml-of
+                                           artifact))))))
 
 (html-inspector-views:defview snippet-playground-layout-artifact-summary
     (artifact snippet-playground-layout-artifact)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:div :class "hyperdoc-snippet-layout-artifact"
-            :data-hyperdoc-snippet-layout-artifact "true"
-            (:p (html-inspector-views:esc (summary-of artifact)))
-            (:table :class "inspector-table"
-                    (maybe-object-ref-row
-                     "Authored artifact"
-                     (snippet-playground-layout-artifact-authored-artifact-of
-                      artifact))
-                    (snippet-playground-status-table-row
-                     "Pane relations"
-                     (length
-                      (snippet-playground-layout-artifact-pane-relations-of
-                       artifact)))
-                    (snippet-playground-status-table-row
-                     "Comparison relations"
-                     (length
-                      (snippet-playground-layout-artifact-comparison-relations-of
-                       artifact))))
-            (:h3 "Relations")
-            (:pre :style "white-space: pre-wrap"
-                  (html-inspector-views:esc
-                   (format nil
-                           "~{~A~%~}"
-                           (snippet-playground-layout-relation-lines
-                            (snippet-playground-layout-artifact-relations-of
-                             artifact)))))
-            (:h3 "Compiled spec")
-            (:pre :style "white-space: pre-wrap"
-                  (html-inspector-views:esc
-                   (format nil "~S"
-                           (snippet-playground-layout-artifact-comparison-layout-spec-of
-                            artifact))))))))
+                                  (html-inspector-views:html
+                                   (:div :class "hyperdoc-snippet-layout-artifact"
+                                         :data-hyperdoc-snippet-layout-artifact "true"
+                                         (:p (html-inspector-views:esc (summary-of artifact)))
+                                         (:table :class "inspector-table"
+                                                 (maybe-object-ref-row
+                                                  "Authored artifact"
+                                                  (snippet-playground-layout-artifact-authored-artifact-of
+                                                   artifact))
+                                                 (snippet-playground-status-table-row
+                                                  "Pane relations"
+                                                  (length
+                                                   (snippet-playground-layout-artifact-pane-relations-of
+                                                    artifact)))
+                                                 (snippet-playground-status-table-row
+                                                  "Comparison relations"
+                                                  (length
+                                                   (snippet-playground-layout-artifact-comparison-relations-of
+                                                    artifact))))
+                                         (:h3 "Relations")
+                                         (:pre :style "white-space: pre-wrap"
+                                               (html-inspector-views:esc
+                                                (format nil
+                                                        "~{~A~%~}"
+                                                        (snippet-playground-layout-relation-lines
+                                                         (snippet-playground-layout-artifact-relations-of
+                                                          artifact)))))
+                                         (:h3 "Compiled spec")
+                                         (:pre :style "white-space: pre-wrap"
+                                               (html-inspector-views:esc
+                                                (format nil "~S"
+                                                        (snippet-playground-layout-artifact-comparison-layout-spec-of
+                                                         artifact))))))))
 
 (html-inspector-views:defview snippet-playground-layout-artifact-details
     (artifact snippet-playground-layout-artifact)
-    (html-inspector-views:html-view :title "Details" :priority 2
-    (html-inspector-views:html
-      (:table :class "inspector-table"
-              (maybe-object-ref-row
-               "Authored artifact"
-               (snippet-playground-layout-artifact-authored-artifact-of
-                artifact)))
-      (:h3 "Pane placement")
-      (:ul
-       (dolist (relation
-                (snippet-playground-layout-artifact-pane-relations-of artifact))
-         (html-inspector-views:html
-           (:li (html-inspector-views:object-ref relation)))))
-      (:h3 "Comparison layout")
-      (:ul
-       (dolist (relation
-                (snippet-playground-layout-artifact-comparison-relations-of
-                 artifact))
-         (html-inspector-views:html
-           (:li (html-inspector-views:object-ref relation)))))
-      (:h3 "Findings")
-      (:ul
-       (dolist (finding (snippet-playground-layout-artifact-findings-of artifact))
-         (html-inspector-views:html
-           (:li (html-inspector-views:esc finding))))))))
+  (html-inspector-views:html-view :title "Details" :priority 2
+                                  (html-inspector-views:html
+                                   (:table :class "inspector-table"
+                                           (maybe-object-ref-row
+                                            "Authored artifact"
+                                            (snippet-playground-layout-artifact-authored-artifact-of
+                                             artifact)))
+                                   (:h3 "Pane placement")
+                                   (:ul
+                                    (dolist (relation
+                                              (snippet-playground-layout-artifact-pane-relations-of artifact))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:object-ref relation)))))
+                                   (:h3 "Comparison layout")
+                                   (:ul
+                                    (dolist (relation
+                                              (snippet-playground-layout-artifact-comparison-relations-of
+                                               artifact))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:object-ref relation)))))
+                                   (:h3 "Findings")
+                                   (:ul
+                                    (dolist (finding (snippet-playground-layout-artifact-findings-of artifact))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:esc finding))))))))
 
 (html-inspector-views:defview snippet-playground-step-summary
     (step mech-snippet-step)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Line"
-               (format nil "~D" (mech-snippet-step-line-number-of step)))
-              (snippet-playground-status-table-row
-               "Operation"
-               (mech-snippet-step-operation-of step))
-              (snippet-playground-status-table-row
-               "Arguments"
-               (format nil "~{~A~^ ~}"
-                       (mech-snippet-step-arguments-of step))))
-      (:h3 "Raw line")
-      (snippet-source-pre (mech-snippet-step-raw-line-of step)))))
+                                  (html-inspector-views:html
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Line"
+                                            (format nil "~D" (mech-snippet-step-line-number-of step)))
+                                           (snippet-playground-status-table-row
+                                            "Operation"
+                                            (mech-snippet-step-operation-of step))
+                                           (snippet-playground-status-table-row
+                                            "Arguments"
+                                            (format nil "~{~A~^ ~}"
+                                                    (mech-snippet-step-arguments-of step))))
+                                   (:h3 "Raw line")
+                                   (snippet-source-pre (mech-snippet-step-raw-line-of step)))))
 
 (html-inspector-views:defview snippet-playground-mech-summary
     (snippet mech-snippet)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Block"
-               (format nil "#~D" (mech-snippet-block-index-of snippet)))
-              (snippet-playground-status-table-row
-               "Source line"
-               (format nil "~D" (mech-snippet-line-number-of snippet)))
-              (snippet-playground-status-table-row
-               "Preview mode"
-               (mech-snippet-preview-mode-of snippet))
-              (snippet-playground-status-table-row
-               "Recognized steps"
-               (format nil "~D" (length (mech-snippet-steps-of snippet)))))
-      (:h3 "Findings")
-      (:ul
-       (dolist (finding (mech-snippet-findings-of snippet))
-         (html-inspector-views:html
-           (:li (html-inspector-views:esc finding)))))
-      (:h3 "Source")
-      (snippet-source-pre (mech-snippet-source-of snippet)))))
+                                  (html-inspector-views:html
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Block"
+                                            (format nil "#~D" (mech-snippet-block-index-of snippet)))
+                                           (snippet-playground-status-table-row
+                                            "Source line"
+                                            (format nil "~D" (mech-snippet-line-number-of snippet)))
+                                           (snippet-playground-status-table-row
+                                            "Preview mode"
+                                            (mech-snippet-preview-mode-of snippet))
+                                           (snippet-playground-status-table-row
+                                            "Recognized steps"
+                                            (format nil "~D" (length (mech-snippet-steps-of snippet)))))
+                                   (:h3 "Findings")
+                                   (:ul
+                                    (dolist (finding (mech-snippet-findings-of snippet))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:esc finding)))))
+                                   (:h3 "Source")
+                                   (snippet-source-pre (mech-snippet-source-of snippet)))))
 
 (html-inspector-views:defview snippet-playground-mech-steps
     (snippet mech-snippet)
   (html-inspector-views:html-view :title "Steps" :priority 2
-    (html-inspector-views:html
-      (:table :class "inspector-table"
-              (:tr (:th "Line")
-                   (:th "Op")
-                   (:th "Arguments")
-                   (:th "Inspectable step"))
-              (dolist (step (mech-snippet-steps-of snippet))
-                (html-inspector-views:html
-                  (:tr (:td (html-inspector-views:esc
-                             (format nil "~D"
-                                     (mech-snippet-step-line-number-of step))))
-                       (:td (html-inspector-views:esc
-                             (mech-snippet-step-operation-of step)))
-                       (:td (html-inspector-views:esc
-                             (format nil "~{~A~^ ~}"
-                                     (mech-snippet-step-arguments-of step))))
-                       (:td (html-inspector-views:object-ref step)))))))))
+                                  (html-inspector-views:html
+                                   (:table :class "inspector-table"
+                                           (:tr (:th "Line")
+                                                (:th "Op")
+                                                (:th "Arguments")
+                                                (:th "Inspectable step"))
+                                           (dolist (step (mech-snippet-steps-of snippet))
+                                             (html-inspector-views:html
+                                              (:tr (:td (html-inspector-views:esc
+                                                         (format nil "~D"
+                                                                 (mech-snippet-step-line-number-of step))))
+                                                   (:td (html-inspector-views:esc
+                                                         (mech-snippet-step-operation-of step)))
+                                                   (:td (html-inspector-views:esc
+                                                         (format nil "~{~A~^ ~}"
+                                                                 (mech-snippet-step-arguments-of step))))
+                                                   (:td (html-inspector-views:object-ref step)))))))))
 
 (html-inspector-views:defview snippet-playground-code-summary
     (snippet code-snippet)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Block"
-               (format nil "#~D" (code-snippet-block-index-of snippet)))
-              (snippet-playground-status-table-row
-               "Source line"
-               (format nil "~D" (code-snippet-line-number-of snippet)))
-              (snippet-playground-status-table-row
-               "Language"
-               (string-downcase (string (code-snippet-language-of snippet))))
-              (snippet-playground-status-table-row
-               "Output path"
-               (code-snippet-output-path-of snippet))
-              (snippet-playground-status-table-row
-               "Translation mode"
-               (string-downcase (string (code-snippet-translation-mode-of snippet)))))
-      (:h3 "Findings")
-      (:ul
-       (dolist (finding (code-snippet-findings-of snippet))
-         (html-inspector-views:html
-           (:li (html-inspector-views:esc finding)))))
-      (:h3 "Source")
-      (snippet-source-pre (code-snippet-source-of snippet)))))
+                                  (html-inspector-views:html
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Block"
+                                            (format nil "#~D" (code-snippet-block-index-of snippet)))
+                                           (snippet-playground-status-table-row
+                                            "Source line"
+                                            (format nil "~D" (code-snippet-line-number-of snippet)))
+                                           (snippet-playground-status-table-row
+                                            "Language"
+                                            (string-downcase (string (code-snippet-language-of snippet))))
+                                           (snippet-playground-status-table-row
+                                            "Output path"
+                                            (code-snippet-output-path-of snippet))
+                                           (snippet-playground-status-table-row
+                                            "Translation mode"
+                                            (string-downcase (string (code-snippet-translation-mode-of snippet)))))
+                                   (:h3 "Findings")
+                                   (:ul
+                                    (dolist (finding (code-snippet-findings-of snippet))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:esc finding)))))
+                                   (:h3 "Source")
+                                   (snippet-source-pre (code-snippet-source-of snippet)))))
 
 (html-inspector-views:defview snippet-execution-interface-summary
     (interface snippet-execution-interface)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of interface)))
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Handoff path"
-               (snippet-execution-interface-handoff-path-of interface))
-              (snippet-playground-status-table-row
-               "Preview mode"
-               (snippet-execution-interface-preview-mode-of interface))
-              (snippet-playground-status-table-row
-               "Output channel"
-               (snippet-execution-interface-output-channel-of interface))
-              (snippet-playground-status-table-row
-               "Input role"
-               (snippet-execution-interface-input-role-name-of interface))
-              (snippet-playground-status-table-row
-               "Output role"
-               (snippet-execution-interface-output-role-name-of interface)))
-      (:h3 "Findings")
-      (:ul
-       (dolist (finding (snippet-execution-interface-findings-of interface))
-         (html-inspector-views:html
-           (:li (html-inspector-views:esc finding))))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of interface)))
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Handoff path"
+                                            (snippet-execution-interface-handoff-path-of interface))
+                                           (snippet-playground-status-table-row
+                                            "Preview mode"
+                                            (snippet-execution-interface-preview-mode-of interface))
+                                           (snippet-playground-status-table-row
+                                            "Output channel"
+                                            (snippet-execution-interface-output-channel-of interface))
+                                           (snippet-playground-status-table-row
+                                            "Input role"
+                                            (snippet-execution-interface-input-role-name-of interface))
+                                           (snippet-playground-status-table-row
+                                            "Output role"
+                                            (snippet-execution-interface-output-role-name-of interface)))
+                                   (:h3 "Findings")
+                                   (:ul
+                                    (dolist (finding (snippet-execution-interface-findings-of interface))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:esc finding))))))))
 
 (html-inspector-views:defview snippet-lefty-projection-summary
     (projection snippet-lefty-projection)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of projection)))
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Origin surface"
-               (snippet-lefty-projection-origin-surface-kind-of projection))
-              (snippet-playground-status-table-row
-               "Provider kind"
-               (snippet-lefty-projection-provider-kind-of projection))
-              (snippet-playground-status-table-row
-               "Origin label"
-               (snippet-lefty-projection-origin-label-of projection))
-              (snippet-playground-status-table-row
-               "Context view"
-               (snippet-lefty-projection-context-view-title-of projection))
-              (maybe-object-ref-row
-               "Mech evidence"
-               (snippet-lefty-projection-mech-snippet-of projection))
-              (maybe-object-ref-row
-               "JavaScript evidence"
-               (snippet-lefty-projection-code-snippet-of projection)))
-      (:h3 "Findings")
-      (:ul
-       (dolist (finding (snippet-lefty-projection-findings-of projection))
-         (html-inspector-views:html
-           (:li (html-inspector-views:esc finding))))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of projection)))
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Origin surface"
+                                            (snippet-lefty-projection-origin-surface-kind-of projection))
+                                           (snippet-playground-status-table-row
+                                            "Provider kind"
+                                            (snippet-lefty-projection-provider-kind-of projection))
+                                           (snippet-playground-status-table-row
+                                            "Origin label"
+                                            (snippet-lefty-projection-origin-label-of projection))
+                                           (snippet-playground-status-table-row
+                                            "Context view"
+                                            (snippet-lefty-projection-context-view-title-of projection))
+                                           (maybe-object-ref-row
+                                            "Mech evidence"
+                                            (snippet-lefty-projection-mech-snippet-of projection))
+                                           (maybe-object-ref-row
+                                            "JavaScript evidence"
+                                            (snippet-lefty-projection-code-snippet-of projection)))
+                                   (:h3 "Findings")
+                                   (:ul
+                                    (dolist (finding (snippet-lefty-projection-findings-of projection))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:esc finding))))))))
 
 (html-inspector-views:defview snippet-rita-projection-summary
     (projection snippet-rita-projection)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of projection)))
-      (:table :class "inspector-table"
-              (maybe-object-ref-row
-               "Mech evidence"
-               (snippet-rita-projection-mech-snippet-of projection))
-              (maybe-object-ref-row
-               "Execution interface"
-               (snippet-rita-projection-execution-interface-of projection))
-              (snippet-playground-status-table-row
-               "Scaffold available"
-               (if (snippet-playground-empty-string-p
-                    (snippet-rita-projection-lisp-scaffold-source-of projection))
-                   "no"
-                   "yes")))
-      (:h3 "Findings")
-      (:ul
-       (dolist (finding (snippet-rita-projection-findings-of projection))
-         (html-inspector-views:html
-           (:li (html-inspector-views:esc finding)))))
-      (:h3 "Lisp scaffold")
-      (snippet-source-pre
-       (snippet-rita-projection-lisp-scaffold-source-of projection)))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of projection)))
+                                   (:table :class "inspector-table"
+                                           (maybe-object-ref-row
+                                            "Mech evidence"
+                                            (snippet-rita-projection-mech-snippet-of projection))
+                                           (maybe-object-ref-row
+                                            "Execution interface"
+                                            (snippet-rita-projection-execution-interface-of projection))
+                                           (snippet-playground-status-table-row
+                                            "Scaffold available"
+                                            (if (snippet-playground-empty-string-p
+                                                 (snippet-rita-projection-lisp-scaffold-source-of projection))
+                                                "no"
+                                                "yes")))
+                                   (:h3 "Findings")
+                                   (:ul
+                                    (dolist (finding (snippet-rita-projection-findings-of projection))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:esc finding)))))
+                                   (:h3 "Lisp scaffold")
+                                   (snippet-source-pre
+                                    (snippet-rita-projection-lisp-scaffold-source-of projection)))))
 
 (html-inspector-views:defview snippet-transformation-unit-summary
     (unit snippet-transformation-unit)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of unit)))
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Input kind"
-               (snippet-transformation-unit-input-kind-of unit))
-              (snippet-playground-status-table-row
-               "Input shape"
-               (snippet-transformation-unit-input-shape-of unit))
-              (snippet-playground-status-table-row
-               "Operation kind"
-               (snippet-transformation-unit-operation-kind-of unit))
-              (snippet-playground-status-table-row
-               "Operation summary"
-               (snippet-transformation-unit-operation-summary-of unit))
-              (snippet-playground-status-table-row
-               "Preview mode"
-               (snippet-transformation-unit-preview-mode-of unit))
-              (snippet-playground-status-table-row
-               "Output kind"
-               (snippet-transformation-unit-output-kind-of unit))
-              (snippet-playground-status-table-row
-               "Output shape"
-               (snippet-transformation-unit-output-shape-of unit))
-              (maybe-object-ref-row
-               "Execution interface"
-               (snippet-transformation-unit-execution-interface-of unit))
-              (maybe-object-ref-row
-               "Lefty projection"
-               (snippet-transformation-unit-lefty-projection-of unit))
-              (maybe-object-ref-row
-               "Rita projection"
-               (snippet-transformation-unit-rita-projection-of unit)))
-      (:h3 "Findings")
-      (:ul
-       (dolist (finding (snippet-transformation-unit-findings-of unit))
-         (html-inspector-views:html
-           (:li (html-inspector-views:esc finding))))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of unit)))
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Input kind"
+                                            (snippet-transformation-unit-input-kind-of unit))
+                                           (snippet-playground-status-table-row
+                                            "Input shape"
+                                            (snippet-transformation-unit-input-shape-of unit))
+                                           (snippet-playground-status-table-row
+                                            "Operation kind"
+                                            (snippet-transformation-unit-operation-kind-of unit))
+                                           (snippet-playground-status-table-row
+                                            "Operation summary"
+                                            (snippet-transformation-unit-operation-summary-of unit))
+                                           (snippet-playground-status-table-row
+                                            "Preview mode"
+                                            (snippet-transformation-unit-preview-mode-of unit))
+                                           (snippet-playground-status-table-row
+                                            "Output kind"
+                                            (snippet-transformation-unit-output-kind-of unit))
+                                           (snippet-playground-status-table-row
+                                            "Output shape"
+                                            (snippet-transformation-unit-output-shape-of unit))
+                                           (maybe-object-ref-row
+                                            "Execution interface"
+                                            (snippet-transformation-unit-execution-interface-of unit))
+                                           (maybe-object-ref-row
+                                            "Lefty projection"
+                                            (snippet-transformation-unit-lefty-projection-of unit))
+                                           (maybe-object-ref-row
+                                            "Rita projection"
+                                            (snippet-transformation-unit-rita-projection-of unit)))
+                                   (:h3 "Findings")
+                                   (:ul
+                                    (dolist (finding (snippet-transformation-unit-findings-of unit))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:esc finding))))))))
 
 (html-inspector-views:defview mech-execution-input-summary
     (input mech-execution-input)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of input)))
-      (:table :class "inspector-table"
-              (maybe-object-ref-row
-               "Selected Mech"
-               (mech-execution-input-selected-mech-of input))
-              (maybe-object-ref-row
-               "Selected code"
-               (mech-execution-input-selected-code-of input))
-              (snippet-playground-status-table-row
-               "Function"
-               (mech-execution-input-code-operation-name-of input))
-              (snippet-playground-status-table-row
-               "Arguments"
-               (mech-execution-input-code-operation-arguments-of input))
-              (snippet-playground-status-table-row
-               "Output path"
-               (mech-execution-input-handoff-path-of input)))
-      (:h3 "Normalized state")
-      (snippet-source-pre
-       (snippet-playground-value-or-na
-        (mech-execution-input-normalized-state-of input))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of input)))
+                                   (:table :class "inspector-table"
+                                           (maybe-object-ref-row
+                                            "Selected Mech"
+                                            (mech-execution-input-selected-mech-of input))
+                                           (maybe-object-ref-row
+                                            "Selected code"
+                                            (mech-execution-input-selected-code-of input))
+                                           (snippet-playground-status-table-row
+                                            "Function"
+                                            (mech-execution-input-code-operation-name-of input))
+                                           (snippet-playground-status-table-row
+                                            "Arguments"
+                                            (mech-execution-input-code-operation-arguments-of input))
+                                           (snippet-playground-status-table-row
+                                            "Output path"
+                                            (mech-execution-input-handoff-path-of input)))
+                                   (:h3 "Normalized state")
+                                   (snippet-source-pre
+                                    (snippet-playground-value-or-na
+                                     (mech-execution-input-normalized-state-of input))))))
 
 (html-inspector-views:defview mech-run-result-summary
     (result mech-run-result)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of result)))
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Engine"
-               (mech-run-result-engine-of result))
-              (snippet-playground-status-table-row
-               "Status"
-               (mech-run-result-status-of result))
-              (snippet-playground-status-table-row
-               "Unsupported constructs"
-               (length (or (mech-run-result-unsupported-constructs-of result)
-                           '()))))
-      (:h3 "Return value")
-      (snippet-source-pre
-       (snippet-playground-value-or-na
-        (mech-run-result-return-value-of result)))
-      (:h3 "Normalized output")
-      (snippet-source-pre
-       (snippet-playground-value-or-na
-        (mech-run-result-normalized-output-of result)))
-      (:h3 "Diagnostics")
-      (snippet-source-pre
-       (snippet-playground-value-or-na
-        (mech-run-result-diagnostics-of result))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of result)))
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Engine"
+                                            (mech-run-result-engine-of result))
+                                           (snippet-playground-status-table-row
+                                            "Status"
+                                            (mech-run-result-status-of result))
+                                           (snippet-playground-status-table-row
+                                            "Unsupported constructs"
+                                            (length (or (mech-run-result-unsupported-constructs-of result)
+                                                        '()))))
+                                   (:h3 "Return value")
+                                   (snippet-source-pre
+                                    (snippet-playground-value-or-na
+                                     (mech-run-result-return-value-of result)))
+                                   (:h3 "Normalized output")
+                                   (snippet-source-pre
+                                    (snippet-playground-value-or-na
+                                     (mech-run-result-normalized-output-of result)))
+                                   (:h3 "Diagnostics")
+                                   (snippet-source-pre
+                                    (snippet-playground-value-or-na
+                                     (mech-run-result-diagnostics-of result))))))
 
 (html-inspector-views:defview mech-equivalence-report-summary
     (report mech-equivalence-report)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of report)))
-      (:table :class "inspector-table"
-              (maybe-object-ref-row
-               "Lefty run"
-               (mech-equivalence-report-lefty-run-result-of report))
-              (maybe-object-ref-row
-               "Rita run"
-               (mech-equivalence-report-rita-run-result-of report))
-              (snippet-playground-status-table-row
-               "equal-p"
-               (if (mech-equivalence-report-equal-p report)
-                   "true"
-                   "false"))
-              (snippet-playground-status-table-row
-               "Differences"
-               (length (or (mech-equivalence-report-differences-of report)
-                           '()))))
-      (:h3 "Comparison value")
-      (snippet-source-pre
-       (snippet-playground-value-or-na
-        (mech-equivalence-report-normalized-comparison-value-of report)))
-      (:h3 "Unsupported constructs")
-      (snippet-source-pre
-       (snippet-playground-value-or-na
-        (mech-equivalence-report-unsupported-constructs-of report))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of report)))
+                                   (:table :class "inspector-table"
+                                           (maybe-object-ref-row
+                                            "Lefty run"
+                                            (mech-equivalence-report-lefty-run-result-of report))
+                                           (maybe-object-ref-row
+                                            "Rita run"
+                                            (mech-equivalence-report-rita-run-result-of report))
+                                           (snippet-playground-status-table-row
+                                            "equal-p"
+                                            (if (mech-equivalence-report-equal-p report)
+                                                "true"
+                                                "false"))
+                                           (snippet-playground-status-table-row
+                                            "Differences"
+                                            (length (or (mech-equivalence-report-differences-of report)
+                                                        '()))))
+                                   (:h3 "Comparison value")
+                                   (snippet-source-pre
+                                    (snippet-playground-value-or-na
+                                     (mech-equivalence-report-normalized-comparison-value-of report)))
+                                   (:h3 "Unsupported constructs")
+                                   (snippet-source-pre
+                                    (snippet-playground-value-or-na
+                                     (mech-equivalence-report-unsupported-constructs-of report))))))
 
 (html-inspector-views:defview mech-state-items-ir-summary
     (ir mech-state-items-ir)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of ir)))
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Function"
-               (mech-state-items-ir-function-name-of ir))
-              (snippet-playground-status-table-row
-               "Arguments"
-               (mech-state-items-ir-function-arguments-of ir))
-              (snippet-playground-status-table-row
-               "Input slots"
-               (mech-state-items-ir-input-slots-of ir))
-              (snippet-playground-status-table-row
-               "Output path"
-               (mech-state-items-ir-output-path-of ir))
-              (snippet-playground-status-table-row
-               "Helpers"
-               (mech-state-items-ir-helper-functions-of ir))
-              (snippet-playground-status-table-row
-               "Equivalence status"
-               (mech-state-items-ir-equivalence-status-of ir)))
-      (:h3 "Operation summary")
-      (snippet-source-pre
-       (snippet-playground-value-or-na
-        (mech-state-items-ir-operation-summary-of ir))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of ir)))
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Function"
+                                            (mech-state-items-ir-function-name-of ir))
+                                           (snippet-playground-status-table-row
+                                            "Arguments"
+                                            (mech-state-items-ir-function-arguments-of ir))
+                                           (snippet-playground-status-table-row
+                                            "Input slots"
+                                            (mech-state-items-ir-input-slots-of ir))
+                                           (snippet-playground-status-table-row
+                                            "Output path"
+                                            (mech-state-items-ir-output-path-of ir))
+                                           (snippet-playground-status-table-row
+                                            "Helpers"
+                                            (mech-state-items-ir-helper-functions-of ir))
+                                           (snippet-playground-status-table-row
+                                            "Equivalence status"
+                                            (mech-state-items-ir-equivalence-status-of ir)))
+                                   (:h3 "Operation summary")
+                                   (snippet-source-pre
+                                    (snippet-playground-value-or-na
+                                     (mech-state-items-ir-operation-summary-of ir))))))
 
 (html-inspector-views:defview mech-execution-ir-summary
     (ir mech-execution-ir)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of ir)))
-      (:table :class "inspector-table"
-              (maybe-object-ref-row
-               "Source Mech snippet"
-               (mech-execution-ir-source-mech-of ir))
-              (snippet-playground-status-table-row
-               "Operation count"
-               (length (or (mech-execution-ir-ordered-operations-of ir) '())))
-              (snippet-playground-status-table-row
-               "Click groups"
-               (length (or (mech-execution-ir-click-groups-of ir) '())))
-              (snippet-playground-status-table-row
-               "Required inputs"
-               (mech-execution-ir-required-inputs-of ir))
-              (snippet-playground-status-table-row
-               "Code invocations"
-               (mech-execution-ir-code-invocations-of ir))
-              (snippet-playground-status-table-row
-               "Preview output paths"
-               (mech-execution-ir-preview-output-paths-of ir))
-              (snippet-playground-status-table-row
-               "Unsupported operations"
-               (mech-execution-ir-unsupported-operations-of ir)))
-      (:h3 "Ordered operations")
-      (snippet-source-pre
-       (snippet-playground-value-or-na
-        (mech-execution-ir-ordered-operations-of ir))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of ir)))
+                                   (:table :class "inspector-table"
+                                           (maybe-object-ref-row
+                                            "Source Mech snippet"
+                                            (mech-execution-ir-source-mech-of ir))
+                                           (snippet-playground-status-table-row
+                                            "Operation count"
+                                            (length (or (mech-execution-ir-ordered-operations-of ir) '())))
+                                           (snippet-playground-status-table-row
+                                            "Click groups"
+                                            (length (or (mech-execution-ir-click-groups-of ir) '())))
+                                           (snippet-playground-status-table-row
+                                            "Required inputs"
+                                            (mech-execution-ir-required-inputs-of ir))
+                                           (snippet-playground-status-table-row
+                                            "Code invocations"
+                                            (mech-execution-ir-code-invocations-of ir))
+                                           (snippet-playground-status-table-row
+                                            "Preview output paths"
+                                            (mech-execution-ir-preview-output-paths-of ir))
+                                           (snippet-playground-status-table-row
+                                            "Unsupported operations"
+                                            (mech-execution-ir-unsupported-operations-of ir)))
+                                   (:h3 "Ordered operations")
+                                   (snippet-source-pre
+                                    (snippet-playground-value-or-na
+                                     (mech-execution-ir-ordered-operations-of ir))))))
 
 (html-inspector-views:defview mech-scxml-execution-chart-summary
     (chart mech-scxml-execution-chart)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of chart)))
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Chart name"
-               (mech-scxml-execution-chart-name-of chart))
-              (snippet-playground-status-table-row
-               "Initial state"
-               (mech-scxml-execution-chart-initial-state-of chart))
-              (snippet-playground-status-table-row
-               "Terminal states"
-               (mech-scxml-execution-chart-terminal-states-of chart))
-              (snippet-playground-status-table-row
-               "Failure states"
-               (mech-scxml-execution-chart-failure-states-of chart))
-              (snippet-playground-status-table-row
-               "Events"
-               (mech-scxml-execution-chart-events-of chart))
-              (maybe-object-ref-row
-               "Execution IR"
-               (mech-scxml-execution-chart-execution-ir-of chart))
-              (maybe-object-ref-row
-               "Machine definition"
-               (mech-scxml-execution-chart-machine-definition-of chart))
-              (maybe-object-ref-row
-               "Parsed SCXML chart"
-               (mech-scxml-execution-chart-chart-of chart)))
-      (:h3 "SCXML source")
-      (snippet-source-pre
-       (snippet-playground-value-or-na
-        (mech-scxml-execution-chart-scxml-text-of chart))))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of chart)))
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Chart name"
+                                            (mech-scxml-execution-chart-name-of chart))
+                                           (snippet-playground-status-table-row
+                                            "Initial state"
+                                            (mech-scxml-execution-chart-initial-state-of chart))
+                                           (snippet-playground-status-table-row
+                                            "Terminal states"
+                                            (mech-scxml-execution-chart-terminal-states-of chart))
+                                           (snippet-playground-status-table-row
+                                            "Failure states"
+                                            (mech-scxml-execution-chart-failure-states-of chart))
+                                           (snippet-playground-status-table-row
+                                            "Events"
+                                            (mech-scxml-execution-chart-events-of chart))
+                                           (maybe-object-ref-row
+                                            "Execution IR"
+                                            (mech-scxml-execution-chart-execution-ir-of chart))
+                                           (maybe-object-ref-row
+                                            "Machine definition"
+                                            (mech-scxml-execution-chart-machine-definition-of chart))
+                                           (maybe-object-ref-row
+                                            "Parsed SCXML chart"
+                                            (mech-scxml-execution-chart-chart-of chart)))
+                                   (:h3 "SCXML source")
+                                   (snippet-source-pre
+                                    (snippet-playground-value-or-na
+                                     (mech-scxml-execution-chart-scxml-text-of chart))))))
 
 (html-inspector-views:defview mech-lisp-scaffold-source-summary
     (source mech-lisp-scaffold-source)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:p (html-inspector-views:esc (summary-of source)))
-      (:table :class "inspector-table"
-              (maybe-object-ref-row
-               "Execution input"
-               (mech-lisp-scaffold-source-execution-input-of source))
-              (maybe-object-ref-row
-               "Transformation IR"
-               (mech-lisp-scaffold-source-transformation-ir-of source))
-              (maybe-object-ref-row
-               "SCXML chart"
-               (mech-lisp-scaffold-source-scxml-execution-chart-of source))
-              (maybe-object-ref-row
-               "SCXML run result"
-               (mech-lisp-scaffold-source-scxml-run-result-of source))
-              (maybe-object-ref-row
-               "Equivalence report"
-               (mech-lisp-scaffold-source-equivalence-report-of source)))
-      (:h3 "Scaffold source")
-      (snippet-source-pre
-       (or (mech-lisp-scaffold-source-source-of source) "")))))
+                                  (html-inspector-views:html
+                                   (:p (html-inspector-views:esc (summary-of source)))
+                                   (:table :class "inspector-table"
+                                           (maybe-object-ref-row
+                                            "Execution input"
+                                            (mech-lisp-scaffold-source-execution-input-of source))
+                                           (maybe-object-ref-row
+                                            "Transformation IR"
+                                            (mech-lisp-scaffold-source-transformation-ir-of source))
+                                           (maybe-object-ref-row
+                                            "SCXML chart"
+                                            (mech-lisp-scaffold-source-scxml-execution-chart-of source))
+                                           (maybe-object-ref-row
+                                            "SCXML run result"
+                                            (mech-lisp-scaffold-source-scxml-run-result-of source))
+                                           (maybe-object-ref-row
+                                            "Equivalence report"
+                                            (mech-lisp-scaffold-source-equivalence-report-of source)))
+                                   (:h3 "Scaffold source")
+                                   (snippet-source-pre
+                                    (or (mech-lisp-scaffold-source-source-of source) "")))))
 
 (html-inspector-views:defview snippet-comparison-region-summary
     (region snippet-comparison-region)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Placement"
-               (snippet-comparison-region-placement-of region))
-              (snippet-playground-status-table-row
-               "Content"
-               (snippet-comparison-region-content-key-of region))
-              (snippet-playground-status-table-row
-               "Displayed characters"
-               (length (snippet-comparison-region-source-text-of region)))
-              (snippet-playground-status-table-row
-               "Original characters"
-               (snippet-comparison-region-source-original-length-of region))
-              (snippet-playground-status-table-row
-               "Truncated"
-               (if (snippet-comparison-region-source-truncated-p region)
-                   "yes"
-                   "no")))
-      (snippet-source-pre
-       (snippet-comparison-region-source-text-of region)
-       :original-length
-       (snippet-comparison-region-source-original-length-of region)
-       :truncated-p
-       (snippet-comparison-region-source-truncated-p region)))))
+                                  (html-inspector-views:html
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Placement"
+                                            (snippet-comparison-region-placement-of region))
+                                           (snippet-playground-status-table-row
+                                            "Content"
+                                            (snippet-comparison-region-content-key-of region))
+                                           (snippet-playground-status-table-row
+                                            "Displayed characters"
+                                            (length (snippet-comparison-region-source-text-of region)))
+                                           (snippet-playground-status-table-row
+                                            "Original characters"
+                                            (snippet-comparison-region-source-original-length-of region))
+                                           (snippet-playground-status-table-row
+                                            "Truncated"
+                                            (if (snippet-comparison-region-source-truncated-p region)
+                                                "yes"
+                                                "no")))
+                                   (snippet-source-pre
+                                    (snippet-comparison-region-source-text-of region)
+                                    :original-length
+                                    (snippet-comparison-region-source-original-length-of region)
+                                    :truncated-p
+                                    (snippet-comparison-region-source-truncated-p region)))))
 
 (html-inspector-views:defview snippet-comparison-surface-summary
     (surface snippet-comparison-surface)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (snippet-comparison-render-surface surface)))
+                                  (snippet-comparison-render-surface surface)))
 
 (html-inspector-views:defview snippet-comparison-surface-details
     (surface snippet-comparison-surface)
   (html-inspector-views:html-view :title "Details" :priority 2
-    (html-inspector-views:html
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Layout"
-               (getf (snippet-comparison-surface-layout-spec-of surface)
-                     :surface))
-              (snippet-playground-status-table-row
-               "Rules"
-               (getf (snippet-comparison-surface-layout-spec-of surface)
-                     :rules))
-              (maybe-object-ref-row
-               "Layout artifact"
-               (snippet-comparison-surface-layout-artifact-of surface))
-              (maybe-object-ref-row
-               "Lifecycle run"
-               (snippet-comparison-surface-lifecycle-run-of surface))
-              (maybe-object-ref-row
-               "Shared Mech region"
-               (snippet-comparison-surface-shared-mech-region-of surface))
-              (maybe-object-ref-row
-               "Left code region"
-               (snippet-comparison-surface-left-code-region-of surface))
-              (maybe-object-ref-row
-               "Right code region"
-               (snippet-comparison-surface-right-code-region-of surface))
-              (maybe-object-ref-row
-               "Mech execution IR"
-               (snippet-comparison-surface-mech-execution-ir-of surface))
-              (maybe-object-ref-row
-               "Mech SCXML chart"
-               (snippet-comparison-surface-mech-scxml-execution-chart-of
-                surface))
-              (maybe-object-ref-row
-               "SCXML run result"
-               (snippet-comparison-surface-scxml-run-result-of surface))
-              (maybe-object-ref-row
-               "Mech-derived Lisp scaffold source"
-               (snippet-comparison-surface-mech-lisp-scaffold-source-of
-                surface)))
-      (:h3 "Findings")
-      (:ul
-       (dolist (finding (snippet-comparison-surface-findings-of surface))
-         (html-inspector-views:html
-           (:li (html-inspector-views:esc finding))))))))
+                                  (html-inspector-views:html
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Layout"
+                                            (getf (snippet-comparison-surface-layout-spec-of surface)
+                                                  :surface))
+                                           (snippet-playground-status-table-row
+                                            "Rules"
+                                            (getf (snippet-comparison-surface-layout-spec-of surface)
+                                                  :rules))
+                                           (maybe-object-ref-row
+                                            "Layout artifact"
+                                            (snippet-comparison-surface-layout-artifact-of surface))
+                                           (maybe-object-ref-row
+                                            "Lifecycle run"
+                                            (snippet-comparison-surface-lifecycle-run-of surface))
+                                           (maybe-object-ref-row
+                                            "Shared Mech region"
+                                            (snippet-comparison-surface-shared-mech-region-of surface))
+                                           (maybe-object-ref-row
+                                            "Left code region"
+                                            (snippet-comparison-surface-left-code-region-of surface))
+                                           (maybe-object-ref-row
+                                            "Right code region"
+                                            (snippet-comparison-surface-right-code-region-of surface))
+                                           (maybe-object-ref-row
+                                            "Mech execution IR"
+                                            (snippet-comparison-surface-mech-execution-ir-of surface))
+                                           (maybe-object-ref-row
+                                            "Mech SCXML chart"
+                                            (snippet-comparison-surface-mech-scxml-execution-chart-of
+                                             surface))
+                                           (maybe-object-ref-row
+                                            "SCXML run result"
+                                            (snippet-comparison-surface-scxml-run-result-of surface))
+                                           (maybe-object-ref-row
+                                            "Mech-derived Lisp scaffold source"
+                                            (snippet-comparison-surface-mech-lisp-scaffold-source-of
+                                             surface)))
+                                   (:h3 "Findings")
+                                   (:ul
+                                    (dolist (finding (snippet-comparison-surface-findings-of surface))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:esc finding))))))))
 
 (html-inspector-views:defview snippet-playground-session-summary-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Summary" :priority 1
-    (html-inspector-views:html
-      (:div :class "hyperdoc-snippet-summary-minimal"
-            (:p :class "hyperdoc-snippet-summary-sentence"
-                (html-inspector-views:esc (summary-of session)))
-            (:p :class "hyperdoc-snippet-summary-interface"
-                (:strong "Interface:")
-                " "
-                (html-inspector-views:esc
-                 (snippet-playground-view-interface-text session)))))))
+                                  (html-inspector-views:html
+                                   (:div :class "hyperdoc-snippet-summary-minimal"
+                                         (:p :class "hyperdoc-snippet-summary-sentence"
+                                             (html-inspector-views:esc (summary-of session)))
+                                         (:p :class "hyperdoc-snippet-summary-interface"
+                                             (:strong "Interface:")
+                                             " "
+                                             (html-inspector-views:esc
+                                              (snippet-playground-view-interface-text session)))))))
 
 (html-inspector-views:defview snippet-playground-session-authored-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Authored" :priority 3
-    (if-let (artifact (snippet-playground-session-authored-artifact-of session))
-      (html-inspector-views:html
-        (:div :class "hyperdoc-snippet-authored-artifact"
-              :data-hyperdoc-snippet-authored-tab "true"
-              (:table :class "inspector-table"
-                      (maybe-object-ref-row "Authored artifact" artifact)
-                      (maybe-object-ref-row
-                       "Behavior artifact"
-                       (snippet-playground-session-behavior-artifact-of
-                        session))
-                      (maybe-object-ref-row
-                       "Layout artifact"
-                       (snippet-playground-session-layout-artifact-of session))
-                      (snippet-playground-status-table-row
-                       "Semantic roles"
-                       (length
-                        (snippet-playground-authored-artifact-semantic-roles-of
-                         artifact)))
-                      (snippet-playground-status-table-row
-                       "Behavior relations"
-                       (length
-                        (snippet-playground-authored-artifact-behavior-relations-of
-                         artifact)))
-                      (snippet-playground-status-table-row
-                       "Layout relations"
-                       (length
-                        (snippet-playground-authored-artifact-layout-relations-of
-                         artifact))))
-              (:h3 "Semantic roles")
-              (:ul
-               (dolist (role
-                        (snippet-playground-authored-artifact-semantic-roles-of
-                         artifact))
-                 (html-inspector-views:html
-                   (:li (html-inspector-views:object-ref role)))))
-              (:h3 "Behavior relations")
-              (:pre :style "white-space: pre-wrap"
-                    :data-hyperdoc-snippet-behavior-relations "true"
-                    (html-inspector-views:esc
-                     (format nil
-                             "~{~A~%~}"
-                             (snippet-playground-layout-relation-lines
-                              (snippet-playground-authored-artifact-behavior-relations-of
-                               artifact)))))
-              (:h3 "Layout relations")
-              (:pre :style "white-space: pre-wrap"
-                    :data-hyperdoc-snippet-layout-relations "true"
-                    (html-inspector-views:esc
-                     (format nil
-                             "~{~A~%~}"
-                             (snippet-playground-layout-relation-lines
-                              (snippet-playground-authored-artifact-layout-relations-of
-                               artifact)))))))
-      (html-inspector-views:html
-        (:p (html-inspector-views:esc
-             "No authored artifact is available for this session."))))))
+                                  (if-let (artifact (snippet-playground-session-authored-artifact-of session))
+                                      (html-inspector-views:html
+                                       (:div :class "hyperdoc-snippet-authored-artifact"
+                                             :data-hyperdoc-snippet-authored-tab "true"
+                                             (:table :class "inspector-table"
+                                                     (maybe-object-ref-row "Authored artifact" artifact)
+                                                     (maybe-object-ref-row
+                                                      "Behavior artifact"
+                                                      (snippet-playground-session-behavior-artifact-of
+                                                       session))
+                                                     (maybe-object-ref-row
+                                                      "Layout artifact"
+                                                      (snippet-playground-session-layout-artifact-of session))
+                                                     (snippet-playground-status-table-row
+                                                      "Semantic roles"
+                                                      (length
+                                                       (snippet-playground-authored-artifact-semantic-roles-of
+                                                        artifact)))
+                                                     (snippet-playground-status-table-row
+                                                      "Behavior relations"
+                                                      (length
+                                                       (snippet-playground-authored-artifact-behavior-relations-of
+                                                        artifact)))
+                                                     (snippet-playground-status-table-row
+                                                      "Layout relations"
+                                                      (length
+                                                       (snippet-playground-authored-artifact-layout-relations-of
+                                                        artifact))))
+                                             (:h3 "Semantic roles")
+                                             (:ul
+                                              (dolist (role
+                                                        (snippet-playground-authored-artifact-semantic-roles-of
+                                                         artifact))
+                                                (html-inspector-views:html
+                                                 (:li (html-inspector-views:object-ref role)))))
+                                             (:h3 "Behavior relations")
+                                             (:pre :style "white-space: pre-wrap"
+                                                   :data-hyperdoc-snippet-behavior-relations "true"
+                                                   (html-inspector-views:esc
+                                                    (format nil
+                                                            "~{~A~%~}"
+                                                            (snippet-playground-layout-relation-lines
+                                                             (snippet-playground-authored-artifact-behavior-relations-of
+                                                              artifact)))))
+                                             (:h3 "Layout relations")
+                                             (:pre :style "white-space: pre-wrap"
+                                                   :data-hyperdoc-snippet-layout-relations "true"
+                                                   (html-inspector-views:esc
+                                                    (format nil
+                                                            "~{~A~%~}"
+                                                            (snippet-playground-layout-relation-lines
+                                                             (snippet-playground-authored-artifact-layout-relations-of
+                                                              artifact)))))))
+                                    (html-inspector-views:html
+                                     (:p (html-inspector-views:esc
+                                          "No authored artifact is available for this session."))))))
 
 (html-inspector-views:defview snippet-playground-session-behavior-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Behavior" :priority 4
-    (let ((artifact (snippet-playground-session-behavior-artifact-of session))
-          (run (snippet-playground-session-state-machine-run-of session)))
-      (html-inspector-views:html
-        (:div :class "hyperdoc-snippet-behavior-artifact"
-              :data-hyperdoc-snippet-behavior-artifact "true"
-              (:table :class "inspector-table"
-                      (maybe-object-ref-row
-                       "Behavior artifact"
-                       artifact)
-                      (maybe-object-ref-row
-                       "Authored artifact"
-                       (and artifact
-                            (snippet-playground-behavior-artifact-authored-artifact-of
-                             artifact)))
-                      (maybe-object-ref-row
-                       "Lifecycle machine"
-                       (or (and run (state-machine-run-machine-of run))
-                           (and artifact
-                                (snippet-playground-behavior-artifact-run-machine-of
-                                 artifact))))
-                      (maybe-object-ref-row
-                       "Lifecycle run"
-                       run)
-                      (maybe-object-ref-row
-                       "Comparison surface machine"
-                       (and artifact
-                            (snippet-playground-behavior-artifact-comparison-machine-of
-                             artifact))))
-              (:p (html-inspector-views:esc
-                   "Compiled lifecycle artifact shared by html-source and fedwiki-page providers."))
-              (when artifact
-                (html-inspector-views:html
-                  (:pre :style "white-space: pre-wrap"
-                        :data-hyperdoc-snippet-machine-scxml "true"
-                        (html-inspector-views:esc
-                         (snippet-playground-behavior-artifact-run-machine-scxml-of
-                          artifact))))))))))
+                                  (let ((artifact (snippet-playground-session-behavior-artifact-of session))
+                                        (run (snippet-playground-session-state-machine-run-of session)))
+                                    (html-inspector-views:html
+                                     (:div :class "hyperdoc-snippet-behavior-artifact"
+                                           :data-hyperdoc-snippet-behavior-artifact "true"
+                                           (:table :class "inspector-table"
+                                                   (maybe-object-ref-row
+                                                    "Behavior artifact"
+                                                    artifact)
+                                                   (maybe-object-ref-row
+                                                    "Authored artifact"
+                                                    (and artifact
+                                                         (snippet-playground-behavior-artifact-authored-artifact-of
+                                                          artifact)))
+                                                   (maybe-object-ref-row
+                                                    "Lifecycle machine"
+                                                    (or (and run (state-machine-run-machine-of run))
+                                                        (and artifact
+                                                             (snippet-playground-behavior-artifact-run-machine-of
+                                                              artifact))))
+                                                   (maybe-object-ref-row
+                                                    "Lifecycle run"
+                                                    run)
+                                                   (maybe-object-ref-row
+                                                    "Comparison surface machine"
+                                                    (and artifact
+                                                         (snippet-playground-behavior-artifact-comparison-machine-of
+                                                          artifact))))
+                                           (:p (html-inspector-views:esc
+                                                "Compiled lifecycle artifact shared by html-source and fedwiki-page providers."))
+                                           (when artifact
+                                             (html-inspector-views:html
+                                              (:pre :style "white-space: pre-wrap"
+                                                    :data-hyperdoc-snippet-machine-scxml "true"
+                                                    (html-inspector-views:esc
+                                                     (snippet-playground-behavior-artifact-run-machine-scxml-of
+                                                      artifact))))))))))
 
 (html-inspector-views:defview snippet-playground-session-layout-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Layout" :priority 5
-    (let ((artifact (snippet-playground-session-layout-artifact-of session)))
-      (html-inspector-views:html
-        (:div :class "hyperdoc-snippet-layout-artifact"
-              :data-hyperdoc-snippet-layout-artifact "true"
-              (:table :class "inspector-table"
-                      (maybe-object-ref-row
-                       "Layout artifact"
-                       artifact)
-                      (maybe-object-ref-row
-                       "Comparison surface"
-                       (snippet-playground-session-comparison-surface-of session)))
-              (:p (html-inspector-views:esc
-                   "Compiled layout artifact keeps result placement right-of the origin pane and comparison placement declarative."))
-              (:pre :style "white-space: pre-wrap"
-                    :data-hyperdoc-snippet-layout-relations "true"
-                    (html-inspector-views:esc
-                     (format nil "~{~A~%~}"
-                             (snippet-playground-layout-relation-lines
-                              (snippet-playground-layout-artifact-relations-of
-                               artifact)))))
-              (:pre :style "white-space: pre-wrap"
-                    :data-hyperdoc-snippet-layout-spec "true"
-                    (html-inspector-views:esc
-                     (format nil "~S"
-                             (snippet-playground-layout-artifact-comparison-layout-spec-of
-                              artifact)))))))))
+                                  (let ((artifact (snippet-playground-session-layout-artifact-of session)))
+                                    (html-inspector-views:html
+                                     (:div :class "hyperdoc-snippet-layout-artifact"
+                                           :data-hyperdoc-snippet-layout-artifact "true"
+                                           (:table :class "inspector-table"
+                                                   (maybe-object-ref-row
+                                                    "Layout artifact"
+                                                    artifact)
+                                                   (maybe-object-ref-row
+                                                    "Comparison surface"
+                                                    (snippet-playground-session-comparison-surface-of session)))
+                                           (:p (html-inspector-views:esc
+                                                "Compiled layout artifact keeps result placement right-of the origin pane and comparison placement declarative."))
+                                           (:pre :style "white-space: pre-wrap"
+                                                 :data-hyperdoc-snippet-layout-relations "true"
+                                                 (html-inspector-views:esc
+                                                  (format nil "~{~A~%~}"
+                                                          (snippet-playground-layout-relation-lines
+                                                           (snippet-playground-layout-artifact-relations-of
+                                                            artifact)))))
+                                           (:pre :style "white-space: pre-wrap"
+                                                 :data-hyperdoc-snippet-layout-spec "true"
+                                                 (html-inspector-views:esc
+                                                  (format nil "~S"
+                                                          (snippet-playground-layout-artifact-comparison-layout-spec-of
+                                                           artifact)))))))))
 
 (html-inspector-views:defview snippet-playground-session-details-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Details" :priority 7
-    (html-inspector-views:html
-      (:table :class "inspector-table"
-              (snippet-playground-status-table-row
-               "Status"
-               (snippet-playground-status-label
-                (snippet-playground-session-status-of session)))
-              (snippet-playground-status-table-row
-               "Context view"
-               (snippet-playground-session-context-view-title-of session))
-              (snippet-playground-status-table-row
-               "Origin surface"
-               (snippet-playground-session-origin-surface-kind-of session))
-              (snippet-playground-status-table-row
-               "Provider kind"
-               (snippet-playground-session-provider-kind-of session))
-              (snippet-playground-status-table-row
-               "Source label"
-               (snippet-playground-session-source-label-of session))
-              (snippet-playground-status-table-row
-               "Source file"
-               (and (snippet-playground-session-source-pathname-of session)
-                    (namestring
-                     (snippet-playground-session-source-pathname-of session))))
-              (maybe-object-ref-row
-               "Execution interface"
-               (snippet-playground-session-execution-interface-of session))
-              (maybe-object-ref-row
-               "Mech execution IR"
-               (snippet-playground-session-mech-execution-ir-of session))
-              (maybe-object-ref-row
-               "Transformation unit"
-               (snippet-playground-session-transformation-unit-of session))
-              (maybe-object-ref-row
-               "Execution input"
-               (snippet-playground-session-mech-execution-input-of session))
-              (maybe-object-ref-row
-               "Lefty run result"
-               (snippet-playground-session-lefty-run-result-of session))
-              (maybe-object-ref-row
-               "Rita run result"
-               (snippet-playground-session-rita-run-result-of session))
-              (maybe-object-ref-row
-               "Equivalence report"
-               (snippet-playground-session-equivalence-report-of session))
-              (maybe-object-ref-row
-               "Shared IR"
-               (snippet-playground-session-transformation-ir-of session))
-              (maybe-object-ref-row
-               "Mech SCXML chart"
-               (snippet-playground-session-mech-scxml-execution-chart-of session))
-              (maybe-object-ref-row
-               "SCXML run result"
-               (snippet-playground-session-scxml-run-result-of session))
-              (maybe-object-ref-row
-               "Mech-derived Lisp scaffold source"
-               (snippet-playground-session-mech-lisp-scaffold-source-of session))
-              (maybe-object-ref-row
-               "Authored artifact"
-               (snippet-playground-session-authored-artifact-of session))
-              (maybe-object-ref-row
-               "Behavior artifact"
-               (snippet-playground-session-behavior-artifact-of session))
-              (maybe-object-ref-row
-               "Layout artifact"
-               (snippet-playground-session-layout-artifact-of session))
-              (maybe-object-ref-row
-               "Comparison surface"
-               (snippet-playground-session-comparison-surface-of session))
-              (maybe-object-ref-row
-               "Lefty projection"
-               (and (snippet-playground-session-transformation-unit-of session)
-                    (snippet-transformation-unit-lefty-projection-of
-                     (snippet-playground-session-transformation-unit-of session))))
-              (maybe-object-ref-row
-               "Rita projection"
-               (and (snippet-playground-session-transformation-unit-of session)
-                    (snippet-transformation-unit-rita-projection-of
-                     (snippet-playground-session-transformation-unit-of session))))
-              (snippet-playground-status-table-row
-               "Transformation input kind"
-               (and (snippet-playground-session-transformation-unit-of session)
-                    (snippet-transformation-unit-input-kind-of
-                     (snippet-playground-session-transformation-unit-of
-                      session))))
-              (snippet-playground-status-table-row
-               "Transformation operation"
-               (and (snippet-playground-session-transformation-unit-of session)
-                    (snippet-transformation-unit-operation-kind-of
-                     (snippet-playground-session-transformation-unit-of
-                      session))))
-              (snippet-playground-status-table-row
-               "Transformation output kind"
-               (and (snippet-playground-session-transformation-unit-of session)
-                    (snippet-transformation-unit-output-kind-of
-                     (snippet-playground-session-transformation-unit-of
-                      session))))
-              (snippet-playground-status-table-row
-               "Collected inputs"
-               (format nil "~D"
-                       (snippet-playground-session-source-block-count-of
-                        session)))
-              (snippet-playground-status-table-row
-               "Recognized Mech snippets"
-               (format nil "~D"
-                       (length
-                        (snippet-playground-session-recognized-mech-snippets-of
-                         session))))
-              (snippet-playground-status-table-row
-               "Recognized code snippets"
-               (format nil "~D"
-                       (length
-                        (snippet-playground-session-recognized-code-snippets-of
-                         session))))
-              (maybe-object-ref-row
-               "Selected Mech evidence"
-               (snippet-playground-session-selected-mech-of session))
-              (maybe-object-ref-row
-               "Selected code evidence"
-               (snippet-playground-session-selected-code-of session))
-              (snippet-playground-status-table-row
-               "Detected code language"
-               (and (snippet-playground-session-selected-code-of session)
-                    (code-language-display-name
-                     (code-snippet-language-of
-                      (snippet-playground-session-selected-code-of session)))))
-              (maybe-object-ref-row
-               "Run"
-               (snippet-playground-session-state-machine-run-of session))
-              (when (typep session 'snippet-playground-failure)
-                (snippet-playground-status-table-row
-                 "Failure classification"
-                 (string-downcase
-                  (string
-                   (snippet-playground-failure-classification-of session))))))
-      (:h3 "Findings")
-      (if (snippet-playground-session-findings-of session)
-          (html-inspector-views:html
-            (:ul
-             (dolist (finding (snippet-playground-session-findings-of session))
-               (html-inspector-views:html
-                 (:li (html-inspector-views:esc finding))))))
-          (html-inspector-views:html
-            (:p (html-inspector-views:esc
-                 "Constructed execution interface and transformation unit for the current slice."))))
-      (:h3 "Evidence inputs")
-      (:ul
-       (dolist (note (snippet-playground-session-pairing-notes-of session))
-         (html-inspector-views:html
-           (:li (html-inspector-views:esc note)))))
-      (:h3 "Exploratory source parser")
-      (if-let (report (snippet-playground-session-source-expansion-report-of
-                       session))
-        (html-inspector-views:html
-          (:table :class "inspector-table"
-                  (snippet-playground-status-table-row
-                   "Parser engine kind"
-                   (snippet-source-expansion-report-parser-engine-kind report))
-                  (snippet-playground-status-table-row
-                   "Parser engine identity"
-                   (snippet-source-expansion-report-parser-engine-identity
-                    report))
-                  (snippet-playground-status-table-row
-                   "Parser chart"
-                   (snippet-source-expansion-report-parser-engine-chart-name
-                    report))
-                  (snippet-playground-status-table-row
-                   "Original block count"
-                   (snippet-source-expansion-report-original-block-count report))
-                  (snippet-playground-status-table-row
-                   "Expanded block count"
-                   (snippet-source-expansion-report-expanded-block-count report))
-                  (snippet-playground-status-table-row
-                   "Synthetic block count"
-                   (snippet-source-expansion-report-synthetic-block-count report))
-                  (snippet-playground-status-table-row
-                   "HTML-like block count"
-                   (snippet-source-expansion-report-html-like-block-count report))
-                  (snippet-playground-status-table-row
-                   "Scanned block count"
-                   (snippet-source-expansion-report-scanned-block-count report))
-                  (snippet-playground-status-table-row
-                   "Accepted candidate count"
-                   (snippet-source-expansion-report-accepted-candidate-count
-                    report))
-                  (snippet-playground-status-table-row
-                   "Rejected candidate count"
-                   (snippet-source-expansion-report-rejected-candidate-count
-                    report))
-                  (snippet-playground-status-table-row
-                   "HTML-like blocks scanned"
-                   (snippet-source-expansion-report-html-like-blocks-scanned
-                    report))
-                  (snippet-playground-status-table-row
-                   "<pre> regions found"
-                   (snippet-source-expansion-report-pre-regions-found report))
-                  (snippet-playground-status-table-row
-                   "<pre> accepted"
-                   (snippet-source-expansion-report-pre-regions-accepted report))
-                  (snippet-playground-status-table-row
-                   "<pre> rejected"
-                   (snippet-source-expansion-report-pre-regions-rejected report))
-                  (snippet-playground-status-table-row
-                   "Entity decode count"
-                   (snippet-source-expansion-report-decode-count report))
-                  (snippet-playground-status-table-row
-                   "Discrepancy count"
-                   (length (snippet-source-expansion-report-discrepancies
-                            report)))
-                  (snippet-playground-status-table-row
-                   "Incremental snapshots"
-                   (length
-                    (snippet-source-expansion-report-incremental-stats-snapshots
-                     report)))
-                  (snippet-playground-status-table-row
-                   "Elapsed ms"
-                   (snippet-source-expansion-report-parse-elapsed-millis report)))
-          (:h4 "Policy")
-          (:ul
-           (loop for (key value) on
-                   (snippet-source-expansion-report-policy-summary report)
-                 by #'cddr
-                 do (html-inspector-views:html
-                      (:li (html-inspector-views:esc
-                            (format nil "~A = ~S" key value))))))
-          (:h4 "Candidates")
-          (if (snippet-source-expansion-report-candidates report)
-              (html-inspector-views:html
-                (:ul
-                 (dolist (entry (snippet-source-expansion-report-candidates
-                                 report))
-                   (html-inspector-views:html
-                     (:li (html-inspector-views:esc
-                           (format nil
-                                   "~A (~A) parent #~A pre #~A hint=~A reason=~A"
-                                   (or (getf entry :location_label)
-                                       (getf entry :synthetic_id))
-                                   (or (getf entry :status) :unknown)
-                                   (or (getf entry :parent_block_index) "n/a")
-                                   (or (getf entry :pre_ordinal) "n/a")
-                                   (or (getf entry :language_hint) "n/a")
-                                   (or (getf entry :reason) "n/a"))))))))
-              (html-inspector-views:html
-                (:p (html-inspector-views:esc
-                     "No exploratory candidates were recorded for this run."))))
-          (:h4 "Synthetic blocks entering code recognition")
-          (let ((recognized-labels
-                  (snippet-playground-recognized-synthetic-html-pre-labels
-                   session)))
-            (if recognized-labels
-                (html-inspector-views:html
-                  (:ul
-                   (dolist (label recognized-labels)
-                     (html-inspector-views:html
-                       (:li (html-inspector-views:esc label))))))
-                (html-inspector-views:html
-                  (:p (html-inspector-views:esc
-                       "No synthetic html-pre labels entered code recognition.")))))
-          (:h4 "Discrepancies")
-          (if (snippet-source-expansion-report-discrepancies report)
-              (html-inspector-views:html
-                (:ul
-                 (dolist (discrepancy
-                          (snippet-source-expansion-report-discrepancies report))
-                   (html-inspector-views:html
-                     (:li (html-inspector-views:esc
-                           (format nil
-                                   "~A/~A block=#~A id=~A line=~A offset=~A fact=~A evidence=~S"
-                                   (or (snippet-source-parse-discrepancy-severity
-                                        discrepancy)
-                                       :unknown)
-                                   (or (snippet-source-parse-discrepancy-kind
-                                        discrepancy)
-                                       :unknown)
-                                   (or (snippet-source-parse-discrepancy-source-block-index
-                                        discrepancy)
-                                       "n/a")
-                                   (or (snippet-source-parse-discrepancy-source-block-id
-                                        discrepancy)
-                                       "n/a")
-                                   (or (snippet-source-parse-discrepancy-source-line-number
-                                        discrepancy)
-                                       "n/a")
-                                   (or (snippet-source-parse-discrepancy-character-offset
-                                        discrepancy)
-                                       "n/a")
-                                   (or (snippet-source-parse-discrepancy-fact-summary
-                                        discrepancy)
-                                       "n/a")
-                                   (snippet-source-parse-discrepancy-evidence-value
-                                    discrepancy))))))))
-              (html-inspector-views:html
-                (:p (html-inspector-views:esc
-                     "No parser discrepancies were recorded."))))
-          (:h4 "Graphviz DOT")
-          (if (snippet-source-expansion-report-graphviz-dot-text report)
-              (snippet-source-pre
-               (snippet-source-expansion-report-graphviz-dot-text report))
-              (html-inspector-views:html
-                (:p (html-inspector-views:esc
-                     "No Graphviz DOT artifact was recorded."))))
-          (:h4 "SCXML parser trace")
-          (if (snippet-source-expansion-report-parser-engine-trace report)
-              (snippet-source-pre
-               (format nil "~{~A~%~}"
-                       (snippet-source-expansion-report-parser-engine-trace
-                        report)))
-              (html-inspector-views:html
-                (:p (html-inspector-views:esc
-                     "No SCXML parser trace was recorded."))))
-          (:h4 "Warnings")
-          (if (snippet-source-expansion-report-warnings report)
-              (html-inspector-views:html
-                (:ul
-                 (dolist (warning
-                          (snippet-source-expansion-report-warnings report))
-                   (html-inspector-views:html
-                     (:li (html-inspector-views:esc warning))))))
-              (html-inspector-views:html
-                (:p (html-inspector-views:esc
-                     "No parser warnings recorded.")))))
-        (html-inspector-views:html
-          (:p (html-inspector-views:esc
-               "No exploratory source parser report is available for this session.")))))))
+                                  (html-inspector-views:html
+                                   (:table :class "inspector-table"
+                                           (snippet-playground-status-table-row
+                                            "Status"
+                                            (snippet-playground-status-label
+                                             (snippet-playground-session-status-of session)))
+                                           (snippet-playground-status-table-row
+                                            "Context view"
+                                            (snippet-playground-session-context-view-title-of session))
+                                           (snippet-playground-status-table-row
+                                            "Origin surface"
+                                            (snippet-playground-session-origin-surface-kind-of session))
+                                           (snippet-playground-status-table-row
+                                            "Provider kind"
+                                            (snippet-playground-session-provider-kind-of session))
+                                           (snippet-playground-status-table-row
+                                            "Source label"
+                                            (snippet-playground-session-source-label-of session))
+                                           (snippet-playground-status-table-row
+                                            "Source file"
+                                            (and (snippet-playground-session-source-pathname-of session)
+                                                 (namestring
+                                                  (snippet-playground-session-source-pathname-of session))))
+                                           (maybe-object-ref-row
+                                            "Execution interface"
+                                            (snippet-playground-session-execution-interface-of session))
+                                           (maybe-object-ref-row
+                                            "Mech execution IR"
+                                            (snippet-playground-session-mech-execution-ir-of session))
+                                           (maybe-object-ref-row
+                                            "Transformation unit"
+                                            (snippet-playground-session-transformation-unit-of session))
+                                           (maybe-object-ref-row
+                                            "Execution input"
+                                            (snippet-playground-session-mech-execution-input-of session))
+                                           (maybe-object-ref-row
+                                            "Lefty run result"
+                                            (snippet-playground-session-lefty-run-result-of session))
+                                           (maybe-object-ref-row
+                                            "Rita run result"
+                                            (snippet-playground-session-rita-run-result-of session))
+                                           (maybe-object-ref-row
+                                            "Equivalence report"
+                                            (snippet-playground-session-equivalence-report-of session))
+                                           (maybe-object-ref-row
+                                            "Shared IR"
+                                            (snippet-playground-session-transformation-ir-of session))
+                                           (maybe-object-ref-row
+                                            "Mech SCXML chart"
+                                            (snippet-playground-session-mech-scxml-execution-chart-of session))
+                                           (maybe-object-ref-row
+                                            "SCXML run result"
+                                            (snippet-playground-session-scxml-run-result-of session))
+                                           (maybe-object-ref-row
+                                            "Mech-derived Lisp scaffold source"
+                                            (snippet-playground-session-mech-lisp-scaffold-source-of session))
+                                           (maybe-object-ref-row
+                                            "Authored artifact"
+                                            (snippet-playground-session-authored-artifact-of session))
+                                           (maybe-object-ref-row
+                                            "Behavior artifact"
+                                            (snippet-playground-session-behavior-artifact-of session))
+                                           (maybe-object-ref-row
+                                            "Layout artifact"
+                                            (snippet-playground-session-layout-artifact-of session))
+                                           (maybe-object-ref-row
+                                            "Comparison surface"
+                                            (snippet-playground-session-comparison-surface-of session))
+                                           (maybe-object-ref-row
+                                            "Lefty projection"
+                                            (and (snippet-playground-session-transformation-unit-of session)
+                                                 (snippet-transformation-unit-lefty-projection-of
+                                                  (snippet-playground-session-transformation-unit-of session))))
+                                           (maybe-object-ref-row
+                                            "Rita projection"
+                                            (and (snippet-playground-session-transformation-unit-of session)
+                                                 (snippet-transformation-unit-rita-projection-of
+                                                  (snippet-playground-session-transformation-unit-of session))))
+                                           (snippet-playground-status-table-row
+                                            "Transformation input kind"
+                                            (and (snippet-playground-session-transformation-unit-of session)
+                                                 (snippet-transformation-unit-input-kind-of
+                                                  (snippet-playground-session-transformation-unit-of
+                                                   session))))
+                                           (snippet-playground-status-table-row
+                                            "Transformation operation"
+                                            (and (snippet-playground-session-transformation-unit-of session)
+                                                 (snippet-transformation-unit-operation-kind-of
+                                                  (snippet-playground-session-transformation-unit-of
+                                                   session))))
+                                           (snippet-playground-status-table-row
+                                            "Transformation output kind"
+                                            (and (snippet-playground-session-transformation-unit-of session)
+                                                 (snippet-transformation-unit-output-kind-of
+                                                  (snippet-playground-session-transformation-unit-of
+                                                   session))))
+                                           (snippet-playground-status-table-row
+                                            "Collected inputs"
+                                            (format nil "~D"
+                                                    (snippet-playground-session-source-block-count-of
+                                                     session)))
+                                           (snippet-playground-status-table-row
+                                            "Recognized Mech snippets"
+                                            (format nil "~D"
+                                                    (length
+                                                     (snippet-playground-session-recognized-mech-snippets-of
+                                                      session))))
+                                           (snippet-playground-status-table-row
+                                            "Recognized code snippets"
+                                            (format nil "~D"
+                                                    (length
+                                                     (snippet-playground-session-recognized-code-snippets-of
+                                                      session))))
+                                           (maybe-object-ref-row
+                                            "Selected Mech evidence"
+                                            (snippet-playground-session-selected-mech-of session))
+                                           (maybe-object-ref-row
+                                            "Selected code evidence"
+                                            (snippet-playground-session-selected-code-of session))
+                                           (snippet-playground-status-table-row
+                                            "Detected code language"
+                                            (and (snippet-playground-session-selected-code-of session)
+                                                 (code-language-display-name
+                                                  (code-snippet-language-of
+                                                   (snippet-playground-session-selected-code-of session)))))
+                                           (maybe-object-ref-row
+                                            "Run"
+                                            (snippet-playground-session-state-machine-run-of session))
+                                           (when (typep session 'snippet-playground-failure)
+                                             (snippet-playground-status-table-row
+                                              "Failure classification"
+                                              (string-downcase
+                                               (string
+                                                (snippet-playground-failure-classification-of session))))))
+                                   (:h3 "Findings")
+                                   (if (snippet-playground-session-findings-of session)
+                                       (html-inspector-views:html
+                                        (:ul
+                                         (dolist (finding (snippet-playground-session-findings-of session))
+                                           (html-inspector-views:html
+                                            (:li (html-inspector-views:esc finding))))))
+                                       (html-inspector-views:html
+                                        (:p (html-inspector-views:esc
+                                             "Constructed execution interface and transformation unit for the current slice."))))
+                                   (:h3 "Evidence inputs")
+                                   (:ul
+                                    (dolist (note (snippet-playground-session-pairing-notes-of session))
+                                      (html-inspector-views:html
+                                       (:li (html-inspector-views:esc note)))))
+                                   (:h3 "Exploratory source parser")
+                                   (if-let (report (snippet-playground-session-source-expansion-report-of
+                                                    session))
+                                       (html-inspector-views:html
+                                        (:table :class "inspector-table"
+                                                (snippet-playground-status-table-row
+                                                 "Parser engine kind"
+                                                 (snippet-source-expansion-report-parser-engine-kind report))
+                                                (snippet-playground-status-table-row
+                                                 "Parser engine identity"
+                                                 (snippet-source-expansion-report-parser-engine-identity
+                                                  report))
+                                                (snippet-playground-status-table-row
+                                                 "Parser chart"
+                                                 (snippet-source-expansion-report-parser-engine-chart-name
+                                                  report))
+                                                (snippet-playground-status-table-row
+                                                 "Original block count"
+                                                 (snippet-source-expansion-report-original-block-count report))
+                                                (snippet-playground-status-table-row
+                                                 "Expanded block count"
+                                                 (snippet-source-expansion-report-expanded-block-count report))
+                                                (snippet-playground-status-table-row
+                                                 "Synthetic block count"
+                                                 (snippet-source-expansion-report-synthetic-block-count report))
+                                                (snippet-playground-status-table-row
+                                                 "HTML-like block count"
+                                                 (snippet-source-expansion-report-html-like-block-count report))
+                                                (snippet-playground-status-table-row
+                                                 "Scanned block count"
+                                                 (snippet-source-expansion-report-scanned-block-count report))
+                                                (snippet-playground-status-table-row
+                                                 "Accepted candidate count"
+                                                 (snippet-source-expansion-report-accepted-candidate-count
+                                                  report))
+                                                (snippet-playground-status-table-row
+                                                 "Rejected candidate count"
+                                                 (snippet-source-expansion-report-rejected-candidate-count
+                                                  report))
+                                                (snippet-playground-status-table-row
+                                                 "HTML-like blocks scanned"
+                                                 (snippet-source-expansion-report-html-like-blocks-scanned
+                                                  report))
+                                                (snippet-playground-status-table-row
+                                                 "<pre> regions found"
+                                                 (snippet-source-expansion-report-pre-regions-found report))
+                                                (snippet-playground-status-table-row
+                                                 "<pre> accepted"
+                                                 (snippet-source-expansion-report-pre-regions-accepted report))
+                                                (snippet-playground-status-table-row
+                                                 "<pre> rejected"
+                                                 (snippet-source-expansion-report-pre-regions-rejected report))
+                                                (snippet-playground-status-table-row
+                                                 "Entity decode count"
+                                                 (snippet-source-expansion-report-decode-count report))
+                                                (snippet-playground-status-table-row
+                                                 "Discrepancy count"
+                                                 (length (snippet-source-expansion-report-discrepancies
+                                                          report)))
+                                                (snippet-playground-status-table-row
+                                                 "Incremental snapshots"
+                                                 (length
+                                                  (snippet-source-expansion-report-incremental-stats-snapshots
+                                                   report)))
+                                                (snippet-playground-status-table-row
+                                                 "Elapsed ms"
+                                                 (snippet-source-expansion-report-parse-elapsed-millis report)))
+                                        (:h4 "Policy")
+                                        (:ul
+                                         (loop for (key value) on
+                                               (snippet-source-expansion-report-policy-summary report)
+                                               by #'cddr
+                                               do (html-inspector-views:html
+                                                   (:li (html-inspector-views:esc
+                                                         (format nil "~A = ~S" key value))))))
+                                        (:h4 "Candidates")
+                                        (if (snippet-source-expansion-report-candidates report)
+                                            (html-inspector-views:html
+                                             (:ul
+                                              (dolist (entry (snippet-source-expansion-report-candidates
+                                                              report))
+                                                (html-inspector-views:html
+                                                 (:li (html-inspector-views:esc
+                                                       (format nil
+                                                               "~A (~A) parent #~A pre #~A hint=~A reason=~A"
+                                                               (or (getf entry :location_label)
+                                                                   (getf entry :synthetic_id))
+                                                               (or (getf entry :status) :unknown)
+                                                               (or (getf entry :parent_block_index) "n/a")
+                                                               (or (getf entry :pre_ordinal) "n/a")
+                                                               (or (getf entry :language_hint) "n/a")
+                                                               (or (getf entry :reason) "n/a"))))))))
+                                            (html-inspector-views:html
+                                             (:p (html-inspector-views:esc
+                                                  "No exploratory candidates were recorded for this run."))))
+                                        (:h4 "Synthetic blocks entering code recognition")
+                                        (let ((recognized-labels
+                                               (snippet-playground-recognized-synthetic-html-pre-labels
+                                                session)))
+                                          (if recognized-labels
+                                              (html-inspector-views:html
+                                               (:ul
+                                                (dolist (label recognized-labels)
+                                                  (html-inspector-views:html
+                                                   (:li (html-inspector-views:esc label))))))
+                                              (html-inspector-views:html
+                                               (:p (html-inspector-views:esc
+                                                    "No synthetic html-pre labels entered code recognition.")))))
+                                        (:h4 "Discrepancies")
+                                        (if (snippet-source-expansion-report-discrepancies report)
+                                            (html-inspector-views:html
+                                             (:ul
+                                              (dolist (discrepancy
+                                                        (snippet-source-expansion-report-discrepancies report))
+                                                (html-inspector-views:html
+                                                 (:li (html-inspector-views:esc
+                                                       (format nil
+                                                               "~A/~A block=#~A id=~A line=~A offset=~A fact=~A evidence=~S"
+                                                               (or (snippet-source-parse-discrepancy-severity
+                                                                    discrepancy)
+                                                                   :unknown)
+                                                               (or (snippet-source-parse-discrepancy-kind
+                                                                    discrepancy)
+                                                                   :unknown)
+                                                               (or (snippet-source-parse-discrepancy-source-block-index
+                                                                    discrepancy)
+                                                                   "n/a")
+                                                               (or (snippet-source-parse-discrepancy-source-block-id
+                                                                    discrepancy)
+                                                                   "n/a")
+                                                               (or (snippet-source-parse-discrepancy-source-line-number
+                                                                    discrepancy)
+                                                                   "n/a")
+                                                               (or (snippet-source-parse-discrepancy-character-offset
+                                                                    discrepancy)
+                                                                   "n/a")
+                                                               (or (snippet-source-parse-discrepancy-fact-summary
+                                                                    discrepancy)
+                                                                   "n/a")
+                                                               (snippet-source-parse-discrepancy-evidence-value
+                                                                discrepancy))))))))
+                                            (html-inspector-views:html
+                                             (:p (html-inspector-views:esc
+                                                  "No parser discrepancies were recorded."))))
+                                        (:h4 "Graphviz DOT")
+                                        (if (snippet-source-expansion-report-graphviz-dot-text report)
+                                            (snippet-source-pre
+                                             (snippet-source-expansion-report-graphviz-dot-text report))
+                                            (html-inspector-views:html
+                                             (:p (html-inspector-views:esc
+                                                  "No Graphviz DOT artifact was recorded."))))
+                                        (:h4 "SCXML parser trace")
+                                        (if (snippet-source-expansion-report-parser-engine-trace report)
+                                            (snippet-source-pre
+                                             (format nil "~{~A~%~}"
+                                                     (snippet-source-expansion-report-parser-engine-trace
+                                                      report)))
+                                            (html-inspector-views:html
+                                             (:p (html-inspector-views:esc
+                                                  "No SCXML parser trace was recorded."))))
+                                        (:h4 "Warnings")
+                                        (if (snippet-source-expansion-report-warnings report)
+                                            (html-inspector-views:html
+                                             (:ul
+                                              (dolist (warning
+                                                        (snippet-source-expansion-report-warnings report))
+                                                (html-inspector-views:html
+                                                 (:li (html-inspector-views:esc warning))))))
+                                            (html-inspector-views:html
+                                             (:p (html-inspector-views:esc
+                                                  "No parser warnings recorded.")))))
+                                     (html-inspector-views:html
+                                      (:p (html-inspector-views:esc
+                                           "No exploratory source parser report is available for this session.")))))))
 
 (html-inspector-views:defview snippet-playground-session-source-pair
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Evidence" :priority 6
-    (html-inspector-views:html
-      (:h3 "Mech evidence")
-      (if-let (mech (snippet-playground-session-selected-mech-of session))
-        (snippet-source-pre (mech-snippet-source-of mech))
-        (html-inspector-views:html
-          (:p (html-inspector-views:esc
-               "No Mech snippet was selected from the current origin surface."))))
-      (:h3 "Code evidence")
-      (if-let (code (snippet-playground-session-selected-code-of session))
-        (snippet-source-pre (code-snippet-source-of code))
-        (html-inspector-views:html
-          (:p (html-inspector-views:esc
-               "No supported code snippet was selected from the current origin surface.")))))))
+                                  (html-inspector-views:html
+                                   (:h3 "Mech evidence")
+                                   (if-let (mech (snippet-playground-session-selected-mech-of session))
+                                       (snippet-source-pre (mech-snippet-source-of mech))
+                                     (html-inspector-views:html
+                                      (:p (html-inspector-views:esc
+                                           "No Mech snippet was selected from the current origin surface."))))
+                                   (:h3 "Code evidence")
+                                   (if-let (code (snippet-playground-session-selected-code-of session))
+                                       (snippet-source-pre (code-snippet-source-of code))
+                                     (html-inspector-views:html
+                                      (:p (html-inspector-views:esc
+                                           "No supported code snippet was selected from the current origin surface.")))))))
 
 (html-inspector-views:defview snippet-playground-session-mech
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Mech" :priority 8
-    (html-inspector-views:html
-      (if-let (mech (snippet-playground-session-selected-mech-of session))
-        (html-inspector-views:html
-          (:table :class "inspector-table"
-                  (snippet-playground-status-table-row
-                   "Preview mode"
-                   (mech-snippet-preview-mode-of mech))
-                  (snippet-playground-status-table-row
-                   "Recognized steps"
-                   (format nil "~D"
-                           (length (mech-snippet-steps-of mech)))))
-          (:ul
-           (dolist (step (mech-snippet-steps-of mech))
-             (html-inspector-views:html
-               (:li (html-inspector-views:object-ref step
-                                                     :display
-                                                     (title-of step)))))))
-        (html-inspector-views:html
-          (:p (html-inspector-views:esc
-               "No Mech snippet is available for this session.")))))))
+                                  (html-inspector-views:html
+                                   (if-let (mech (snippet-playground-session-selected-mech-of session))
+                                       (html-inspector-views:html
+                                        (:table :class "inspector-table"
+                                                (snippet-playground-status-table-row
+                                                 "Preview mode"
+                                                 (mech-snippet-preview-mode-of mech))
+                                                (snippet-playground-status-table-row
+                                                 "Recognized steps"
+                                                 (format nil "~D"
+                                                         (length (mech-snippet-steps-of mech)))))
+                                        (:ul
+                                         (dolist (step (mech-snippet-steps-of mech))
+                                           (html-inspector-views:html
+                                            (:li (html-inspector-views:object-ref step
+                                                                                  :display
+                                                                                  (title-of step)))))))
+                                     (html-inspector-views:html
+                                      (:p (html-inspector-views:esc
+                                           "No Mech snippet is available for this session.")))))))
 
 (html-inspector-views:defview snippet-playground-session-code
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Code" :priority 9
-    (html-inspector-views:html
-      (if-let (code (snippet-playground-session-selected-code-of session))
-        (html-inspector-views:html
-          (:table :class "inspector-table"
-                  (snippet-playground-status-table-row
-                   "Language"
-                   (string-downcase (string (code-snippet-language-of code))))
-                  (snippet-playground-status-table-row
-                   "Output path"
-                   (code-snippet-output-path-of code))
-                  (snippet-playground-status-table-row
-                   "Translation mode"
-                   (string-downcase
-                    (string (code-snippet-translation-mode-of code)))))
-          (:h3 "Source")
-          (snippet-source-pre (code-snippet-source-of code)))
-        (html-inspector-views:html
-          (:p (html-inspector-views:esc
-               "No supported code snippet is available for this session.")))))))
+                                  (html-inspector-views:html
+                                   (if-let (code (snippet-playground-session-selected-code-of session))
+                                       (html-inspector-views:html
+                                        (:table :class "inspector-table"
+                                                (snippet-playground-status-table-row
+                                                 "Language"
+                                                 (string-downcase (string (code-snippet-language-of code))))
+                                                (snippet-playground-status-table-row
+                                                 "Output path"
+                                                 (code-snippet-output-path-of code))
+                                                (snippet-playground-status-table-row
+                                                 "Translation mode"
+                                                 (string-downcase
+                                                  (string (code-snippet-translation-mode-of code)))))
+                                        (:h3 "Source")
+                                        (snippet-source-pre (code-snippet-source-of code)))
+                                     (html-inspector-views:html
+                                      (:p (html-inspector-views:esc
+                                           "No supported code snippet is available for this session.")))))))
 
 (html-inspector-views:defview snippet-playground-session-comparison-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Comparison" :priority 2
-    (if-let (surface (snippet-playground-session-comparison-surface-of session))
-      (snippet-playground-render-comparison-surface-into-current-view surface)
-      (html-inspector-views:html
-        (:p (html-inspector-views:esc
-             "No comparison surface is available for this session."))))))
+                                  (if-let (surface (snippet-playground-session-comparison-surface-of session))
+                                      (snippet-playground-render-comparison-surface-into-current-view surface)
+                                    (html-inspector-views:html
+                                     (:p (html-inspector-views:esc
+                                          "No comparison surface is available for this session."))))))
 
 (html-inspector-views:defview snippet-playground-session-crosswalk-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Crosswalk" :priority 10
-    (html-inspector-views:html
-      (if (snippet-playground-session-crosswalk-of session)
-          (html-inspector-views:html
-            (:table :class "inspector-table"
-                    (:tr (:th "Stage")
-                         (:th "Mech")
-                         (:th "JavaScript")
-                         (:th "Lisp")
-                         (:th "Detail"))
-                    (dolist (entry (snippet-playground-session-crosswalk-of
-                                    session))
-                      (html-inspector-views:html
-                        (:tr
-                         (:td (html-inspector-views:esc (getf entry :stage)))
-                         (:td (html-inspector-views:esc (getf entry :mech)))
-                         (:td (html-inspector-views:esc (getf entry :javascript)))
-                         (:td (html-inspector-views:esc (getf entry :lisp)))
-                         (:td (html-inspector-views:esc (getf entry :detail)))))))
-          (html-inspector-views:html
-            (:p (html-inspector-views:esc
-                 "Crosswalk is unavailable until both a Mech snippet and a code snippet are recognized.")))))))
+                                  (html-inspector-views:html
+                                   (if (snippet-playground-session-crosswalk-of session)
+                                       (html-inspector-views:html
+                                        (:table :class "inspector-table"
+                                                (:tr (:th "Stage")
+                                                     (:th "Mech")
+                                                     (:th "JavaScript")
+                                                     (:th "Lisp")
+                                                     (:th "Detail"))
+                                                (dolist (entry (snippet-playground-session-crosswalk-of
+                                                                session))
+                                                  (html-inspector-views:html
+                                                   (:tr
+                                                    (:td (html-inspector-views:esc (getf entry :stage)))
+                                                    (:td (html-inspector-views:esc (getf entry :mech)))
+                                                    (:td (html-inspector-views:esc (getf entry :javascript)))
+                                                    (:td (html-inspector-views:esc (getf entry :lisp)))
+                                                    (:td (html-inspector-views:esc (getf entry :detail)))))))
+                                        (html-inspector-views:html
+                                         (:p (html-inspector-views:esc
+                                              "Crosswalk is unavailable until both a Mech snippet and a code snippet are recognized.")))))))
   )
 
 (html-inspector-views:defview snippet-playground-session-lisp-scaffold-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Lisp scaffold" :priority 11
-    (html-inspector-views:html
-      (if (snippet-playground-session-ready-p session)
-          (html-inspector-views:html
-            (:p
-             (html-inspector-views:action-button
-              "Run scaffold"
-              (html-inspector-views:thunk
-                (setf (snippet-playground-session-last-run-object-of session)
-                      (snippet-playground-run-scaffold session))
-                t)
-              "Evaluate the scaffold in-place and keep the result inspectable on the session.")
-             " "
-             (html-inspector-views:eval-button
-              "Step scaffold"
-              (html-inspector-views:thunk
-                (clog-moldable-inspector::make-playground-stepper
-                 session
-                 (snippet-playground-session-lisp-scaffold-source-of session)))
-              "Open the generated Lisp scaffold in the existing stepper surface."))
-            (:h3 "Scaffold source")
-            (snippet-source-pre
-             (snippet-playground-session-lisp-scaffold-source-of session))
-            (when (snippet-playground-session-last-run-object-of session)
-              (html-inspector-views:html
-                (:h3 "Last run object")
-                (:p (html-inspector-views:object-ref
-                     (snippet-playground-session-last-run-object-of session)))
-                (:h3 "Derived items")
-                (snippet-source-pre
-                 (format nil "~S"
-                         (snippet-playground-session-derived-items-of
-                          session))))))
-          (html-inspector-views:html
-            (:p (html-inspector-views:esc
-                 "No runnable Lisp scaffold is available for this session.")))))))
+                                  (html-inspector-views:html
+                                   (if (snippet-playground-session-ready-p session)
+                                       (html-inspector-views:html
+                                        (:p
+                                         (html-inspector-views:action-button
+                                          "Run scaffold"
+                                          (html-inspector-views:thunk
+                                           (setf (snippet-playground-session-last-run-object-of session)
+                                                 (snippet-playground-run-scaffold session))
+                                           t)
+                                          "Evaluate the scaffold in-place and keep the result inspectable on the session.")
+                                         " "
+                                         (html-inspector-views:eval-button
+                                          "Step scaffold"
+                                          (html-inspector-views:thunk
+                                           (clog-moldable-inspector::make-playground-stepper
+                                            session
+                                            (snippet-playground-session-lisp-scaffold-source-of session)))
+                                          "Open the generated Lisp scaffold in the existing stepper surface."))
+                                        (:h3 "Scaffold source")
+                                        (snippet-source-pre
+                                         (snippet-playground-session-lisp-scaffold-source-of session))
+                                        (when (snippet-playground-session-last-run-object-of session)
+                                          (html-inspector-views:html
+                                           (:h3 "Last run object")
+                                           (:p (html-inspector-views:object-ref
+                                                (snippet-playground-session-last-run-object-of session)))
+                                           (:h3 "Derived items")
+                                           (snippet-source-pre
+                                            (format nil "~S"
+                                                    (snippet-playground-session-derived-items-of
+                                                     session))))))
+                                       (html-inspector-views:html
+                                        (:p (html-inspector-views:esc
+                                             "No runnable Lisp scaffold is available for this session.")))))))
 
 (html-inspector-views:defview snippet-playground-session-execution-view
     (session snippet-playground-session)
   (html-inspector-views:html-view :title "Execution" :priority 12
-    (html-inspector-views:html
-      (if-let (surface (snippet-playground-session-comparison-surface-of session))
-        (snippet-comparison-render-execution-equivalence surface)
-        (html-inspector-views:html
-          (:p (html-inspector-views:esc
-               "No execution/equivalence surface is available for this session.")))))))
+                                  (html-inspector-views:html
+                                   (if-let (surface (snippet-playground-session-comparison-surface-of session))
+                                       (snippet-comparison-render-execution-equivalence surface)
+                                     (html-inspector-views:html
+                                      (:p (html-inspector-views:esc
+                                           "No execution/equivalence surface is available for this session.")))))))

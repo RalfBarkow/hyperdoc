@@ -84,17 +84,17 @@ This claim block is a later fragment in the same paragraph story item.")
          (topic-chunks (hyperdoc::localhost-fedwiki-page-pipeline-result-topic-chunks
                         pipeline))
          (fragment-topic
-           (find "fixture-fragment-topic"
-                 topic-chunks
-                 :key #'hyperdoc::localhost-fedwiki-promoted-topic-data-id
-                 :test #'equal))
+          (find "fixture-fragment-topic"
+                topic-chunks
+                :key #'hyperdoc::localhost-fedwiki-promoted-topic-data-id
+                :test #'equal))
          (whole-item-topic
-           (find "fixture-whole-item-topic"
-                 topic-chunks
-                 :key #'hyperdoc::localhost-fedwiki-promoted-topic-data-id
-                 :test #'equal))
+          (find "fixture-whole-item-topic"
+                topic-chunks
+                :key #'hyperdoc::localhost-fedwiki-promoted-topic-data-id
+                :test #'equal))
          (overview
-           (hyperdoc::localhost-fedwiki-page-pipeline-result-umbrella-topic pipeline)))
+          (hyperdoc::localhost-fedwiki-page-pipeline-result-umbrella-topic pipeline)))
     (assert-true (typep pipeline 'hyperdoc::localhost-fedwiki-page-pipeline-result)
                  "Synthetic fixture must run through the generic localhost FedWiki page pipeline")
     (assert-equal 2
@@ -140,32 +140,32 @@ This claim block is a later fragment in the same paragraph story item.")
 (defun run-localhost-fedwiki-page-pipeline-render-smoke-test ()
   (let* ((pipeline (synthetic-localhost-fedwiki-page-pipeline))
          (topic-entries
-           (loop for topic in (hyperdoc::localhost-fedwiki-page-pipeline-result-topic-chunks
-                               pipeline)
-                 collect (list :title (hyperdoc::localhost-fedwiki-promoted-topic-data-title
-                                       topic)
-                               :summary
-                               (hyperdoc::localhost-fedwiki-promoted-topic-data-summary
-                                topic))))
+          (loop for topic in (hyperdoc::localhost-fedwiki-page-pipeline-result-topic-chunks
+                              pipeline)
+                collect (list :title (hyperdoc::localhost-fedwiki-promoted-topic-data-title
+                                      topic)
+                              :summary
+                              (hyperdoc::localhost-fedwiki-promoted-topic-data-summary
+                               topic))))
          (rendered
-           (hyperdoc::render-hyperdoc-page-shell
-            "Generic localhost FedWiki pipeline fixture"
-            (list "<p>This synthetic page proves the generic localhost FedWiki page pipeline without promoting a second durable HyperDoc page.</p>")
-            (list
-             (list :title "Reusable topic chunks"
-                   :body-html (hyperdoc::render-topic-list-html topic-entries)))))
+          (hyperdoc::render-hyperdoc-page-shell
+           "Generic localhost FedWiki pipeline fixture"
+           (list "<p>This synthetic page proves the generic localhost FedWiki page pipeline without promoting a second durable HyperDoc page.</p>")
+           (list
+            (list :title "Reusable topic chunks"
+                  :body-html (hyperdoc::render-topic-list-html topic-entries)))))
          (metadata
-           (hyperdoc::make-localhost-fedwiki-topic-factory-metadata-from-pipeline
-            pipeline
-            :id "fixture-fragment-topic-set"
-            :source-file "assets/fixture-fragment-topic-set.lisp"
-            :related-hyperdoc-page-title
-            "Generic localhost FedWiki pipeline fixture"
-            :related-topic-id "fixture-fragment-topic"
-            :fragment-selections
-            '((:use-primary-item t :fragment-ordinals (0 2)))
-            :note
-            "Synthetic fragment-scoped metadata for the generic localhost FedWiki page pipeline smoke test."))
+          (hyperdoc::make-localhost-fedwiki-topic-factory-metadata-from-pipeline
+           pipeline
+           :id "fixture-fragment-topic-set"
+           :source-file "assets/fixture-fragment-topic-set.lisp"
+           :related-hyperdoc-page-title
+           "Generic localhost FedWiki pipeline fixture"
+           :related-topic-id "fixture-fragment-topic"
+           :fragment-selections
+           '((:use-primary-item t :fragment-ordinals (0 2)))
+           :note
+           "Synthetic fragment-scoped metadata for the generic localhost FedWiki page pipeline smoke test."))
          (provenance (getf metadata :provenance)))
     (assert-true (search "<h1>Generic localhost FedWiki pipeline fixture</h1>"
                          rendered)

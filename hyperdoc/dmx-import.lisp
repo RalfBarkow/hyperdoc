@@ -355,27 +355,27 @@
                  (setf (gethash field values) value
                        (gethash field seen-fields) t)))))))
     (let* ((missing-long-keys
-             (loop for spec in *dmx-topicmap-view-prop-specs*
-                   for field = (getf spec :field)
-                   unless (gethash field seen-fields)
-                     collect (getf spec :long-key)))
+            (loop for spec in *dmx-topicmap-view-prop-specs*
+                  for field = (getf spec :field)
+                  unless (gethash field seen-fields)
+                  collect (getf spec :long-key)))
            (invalid-field-types
-             (loop for spec in *dmx-topicmap-view-prop-specs*
-                   for field = (getf spec :field)
-                   for value = (gethash field values)
-                   when (and (gethash field seen-fields)
-                             (not (dmx-topicmap-view-prop-valid-type-p field value)))
-                     collect (format nil
-                                     "~A expected ~A but got ~S"
-                                     (getf spec :long-key)
-                                     (getf spec :type-label)
-                                     value)))
+            (loop for spec in *dmx-topicmap-view-prop-specs*
+                  for field = (getf spec :field)
+                  for value = (gethash field values)
+                  when (and (gethash field seen-fields)
+                            (not (dmx-topicmap-view-prop-valid-type-p field value)))
+                  collect (format nil
+                                  "~A expected ~A but got ~S"
+                                  (getf spec :long-key)
+                                  (getf spec :type-label)
+                                  value)))
            (normalized-payload
-             (make-dmx-topicmap-view-props-json-object
-              :x (gethash :x values)
-              :y (gethash :y values)
-              :visibility (gethash :visibility values)
-              :pinned (gethash :pinned values))))
+            (make-dmx-topicmap-view-props-json-object
+             :x (gethash :x values)
+             :y (gethash :y values)
+             :visibility (gethash :visibility values)
+             :pinned (gethash :pinned values))))
       (when (or missing-long-keys
                 forbidden-short-keys
                 unknown-keys
@@ -572,19 +572,19 @@
 (defmethod dmx-import-assign-topic-to-workspace ((client memory-dmx-import-client)
                                                  workspace-id topic-id)
   (let ((resolved-workspace-id
-          (or (parse-positive-integer workspace-id)
-              (and (integerp workspace-id) (plusp workspace-id) workspace-id)
-              (error 'fedwiki-dmx-import-error
-                     :message (format nil
-                                      "Workspace assignment requires a positive workspace id, got ~S"
-                                      workspace-id))))
+         (or (parse-positive-integer workspace-id)
+             (and (integerp workspace-id) (plusp workspace-id) workspace-id)
+             (error 'fedwiki-dmx-import-error
+                    :message (format nil
+                                     "Workspace assignment requires a positive workspace id, got ~S"
+                                     workspace-id))))
         (resolved-topic-id
-          (or (parse-positive-integer topic-id)
-              (and (integerp topic-id) (plusp topic-id) topic-id)
-              (error 'fedwiki-dmx-import-error
-                     :message (format nil
-                                      "Workspace assignment requires a positive topic id, got ~S"
-                                      topic-id)))))
+         (or (parse-positive-integer topic-id)
+             (and (integerp topic-id) (plusp topic-id) topic-id)
+             (error 'fedwiki-dmx-import-error
+                    :message (format nil
+                                     "Workspace assignment requires a positive topic id, got ~S"
+                                     topic-id)))))
     (unless (dmx-import-read-topic client resolved-topic-id)
       (error 'fedwiki-dmx-import-error
              :message (format nil
@@ -605,9 +605,9 @@
       (normalize-dmx-topicmap-view-props
        view-props
        :boundary 'dmx-import-add-topic-to-topicmap)
-  (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
-                 (topicmap-memberships-of client))
-        normalized-view-props)
+    (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
+                   (topicmap-memberships-of client))
+          normalized-view-props)
     normalized-view-props))
 
 (defmethod dmx-import-set-topic-view-props ((client memory-dmx-import-client)
@@ -616,9 +616,9 @@
       (normalize-dmx-topicmap-view-props
        view-props
        :boundary 'dmx-import-set-topic-view-props)
-  (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
-                 (topicmap-memberships-of client))
-        normalized-view-props)
+    (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
+                   (topicmap-memberships-of client))
+          normalized-view-props)
     normalized-view-props))
 
 (defmethod dmx-import-remove-topic-from-topicmap ((client memory-dmx-import-client)
@@ -716,24 +716,24 @@
     (&key topic workspace-id workspace-topicmap-id workspace-assignment
        topicmap-memberships workspace-topicmap workspace-owner)
   (let* ((resolved-topic-id
-           (or (dmx-import-object-id topic)
-               (error 'fedwiki-dmx-import-error
-                      :message
-                      "DMX workspace-assignment rehearsal snapshot requires a captured topic with id")))
+          (or (dmx-import-object-id topic)
+              (error 'fedwiki-dmx-import-error
+                     :message
+                     "DMX workspace-assignment rehearsal snapshot requires a captured topic with id")))
          (resolved-workspace-id
-           (or (parse-positive-integer workspace-id)
-               (and (integerp workspace-id) (plusp workspace-id) workspace-id)
-               (error 'fedwiki-dmx-import-error
-                      :message
-                      "DMX workspace-assignment rehearsal snapshot requires a positive target workspace id")))
+          (or (parse-positive-integer workspace-id)
+              (and (integerp workspace-id) (plusp workspace-id) workspace-id)
+              (error 'fedwiki-dmx-import-error
+                     :message
+                     "DMX workspace-assignment rehearsal snapshot requires a positive target workspace id")))
          (resolved-topicmap-id
-           (or (parse-positive-integer workspace-topicmap-id)
-               (and (integerp workspace-topicmap-id)
-                    (plusp workspace-topicmap-id)
-                    workspace-topicmap-id)
-               (error 'fedwiki-dmx-import-error
-                      :message
-                      "DMX workspace-assignment rehearsal snapshot requires a positive target workspace topicmap id")))
+          (or (parse-positive-integer workspace-topicmap-id)
+              (and (integerp workspace-topicmap-id)
+                   (plusp workspace-topicmap-id)
+                   workspace-topicmap-id)
+              (error 'fedwiki-dmx-import-error
+                     :message
+                     "DMX workspace-assignment rehearsal snapshot requires a positive target workspace topicmap id")))
          (snapshot (make-hash-table :test #'equal))
          (repair-target (make-hash-table :test #'equal))
          (captures (make-hash-table :test #'equal)))
@@ -777,8 +777,8 @@
 
 (defun read-dmx-workspace-assignment-rehearsal-snapshot (path)
   (let ((snapshot
-          (with-open-file (stream path :direction :input)
-            (shasht:read-json stream))))
+         (with-open-file (stream path :direction :input)
+           (shasht:read-json stream))))
     (unless (hash-table-p snapshot)
       (error 'fedwiki-dmx-import-error
              :message (format nil
@@ -802,10 +802,10 @@
      "repairTarget"
      'read-dmx-workspace-assignment-rehearsal-snapshot)
     (let ((captures
-            (dmx-workspace-assignment-rehearsal-required-hash
-             snapshot
-             "captures"
-             'read-dmx-workspace-assignment-rehearsal-snapshot)))
+           (dmx-workspace-assignment-rehearsal-required-hash
+            snapshot
+            "captures"
+            'read-dmx-workspace-assignment-rehearsal-snapshot)))
       (dmx-workspace-assignment-rehearsal-required-hash
        captures
        "topic"
@@ -824,33 +824,33 @@
                             "DMX workspace-assignment rehearsal snapshot loader requires a memory-dmx-import-client, got ~S"
                             (type-of client))))
   (let* ((repair-target
-           (dmx-workspace-assignment-rehearsal-required-hash
-            snapshot
-            "repairTarget"
-            'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
+          (dmx-workspace-assignment-rehearsal-required-hash
+           snapshot
+           "repairTarget"
+           'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
          (captures
-           (dmx-workspace-assignment-rehearsal-required-hash
-            snapshot
-            "captures"
-            'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
+          (dmx-workspace-assignment-rehearsal-required-hash
+           snapshot
+           "captures"
+           'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
          (topic-json
-           (dmx-workspace-assignment-rehearsal-required-hash
-            captures
-            "topic"
-            'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
+          (dmx-workspace-assignment-rehearsal-required-hash
+           captures
+           "topic"
+           'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
          (workspace-assignment (gethash "workspaceAssignment" captures))
          (topicmap-memberships (gethash "topicmapMemberships" captures))
          (workspace-topicmap
-           (dmx-workspace-assignment-rehearsal-required-hash
-            captures
-            "workspaceTopicmap"
-            'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
+          (dmx-workspace-assignment-rehearsal-required-hash
+           captures
+           "workspaceTopicmap"
+           'load-dmx-workspace-assignment-rehearsal-snapshot-into-memory-client))
          (topic-id
-           (or (dmx-import-object-id topic-json)
-               (parse-positive-integer (gethash "topicId" repair-target))
-               (error 'fedwiki-dmx-import-error
-                      :message
-                      "DMX workspace-assignment rehearsal snapshot is missing repairTarget.topicId"))))
+          (or (dmx-import-object-id topic-json)
+              (parse-positive-integer (gethash "topicId" repair-target))
+              (error 'fedwiki-dmx-import-error
+                     :message
+                     "DMX workspace-assignment rehearsal snapshot is missing repairTarget.topicId"))))
     (when clear-state-p
       (clear-memory-dmx-import-client-state client))
     (dmx-import-create-topic
@@ -863,11 +863,11 @@
     (dolist (membership (json-array-elements topicmap-memberships))
       (let* ((topicmap-id (dmx-import-object-id membership))
              (topic-entry
-               (and topicmap-id
-                    (eql topicmap-id (dmx-import-object-id workspace-topicmap))
-                    (dmx-workspace-assignment-rehearsal-topic-entry-in-topicmap
-                     workspace-topicmap
-                     topic-id))))
+              (and topicmap-id
+                   (eql topicmap-id (dmx-import-object-id workspace-topicmap))
+                   (dmx-workspace-assignment-rehearsal-topic-entry-in-topicmap
+                    workspace-topicmap
+                    topic-id))))
         (when topicmap-id
           (setf (gethash (memory-topicmap-membership-key topicmap-id topic-id)
                          (topicmap-memberships-of client))
@@ -876,13 +876,13 @@
                       (gethash "viewProps" topic-entry)))))))
     (let* ((workspace-topicmap-id (dmx-import-object-id workspace-topicmap))
            (membership-key
-             (and workspace-topicmap-id
-                  (memory-topicmap-membership-key workspace-topicmap-id topic-id)))
+            (and workspace-topicmap-id
+                 (memory-topicmap-membership-key workspace-topicmap-id topic-id)))
            (topic-entry
-             (and workspace-topicmap-id
-                  (dmx-workspace-assignment-rehearsal-topic-entry-in-topicmap
-                   workspace-topicmap
-                   topic-id))))
+            (and workspace-topicmap-id
+                 (dmx-workspace-assignment-rehearsal-topic-entry-in-topicmap
+                  workspace-topicmap
+                  topic-id))))
       (when (and membership-key
                  topic-entry
                  (null (gethash membership-key (topicmap-memberships-of client))))
@@ -914,16 +914,16 @@
                                byte3)
           do (write-char (char *base64-alphabet* (ldb (byte 6 18) triple))
                          stream)
-             (write-char (char *base64-alphabet* (ldb (byte 6 12) triple))
-                         stream)
-             (write-char (if (< index2 length)
-                             (char *base64-alphabet* (ldb (byte 6 6) triple))
-                             #\=)
-                         stream)
-             (write-char (if (< index3 length)
-                             (char *base64-alphabet* (ldb (byte 6 0) triple))
-                             #\=)
-                         stream))))
+          (write-char (char *base64-alphabet* (ldb (byte 6 12) triple))
+                      stream)
+          (write-char (if (< index2 length)
+                          (char *base64-alphabet* (ldb (byte 6 6) triple))
+                          #\=)
+                      stream)
+          (write-char (if (< index3 length)
+                          (char *base64-alphabet* (ldb (byte 6 0) triple))
+                          #\=)
+                      stream))))
 
 (defun basic-authorization-header (username password)
   (let* ((credentials (format nil "~A:~A" username password))
@@ -962,7 +962,7 @@
                    for text = (item-text item)
                    when (and (funcall predicate item)
                              (meaningful-fedwiki-import-text-p text))
-                     return text)))
+                   return text)))
     (or (first-matching-text story #'fedwiki-summary-paragraph-item-p)
         (first-matching-text story (lambda (item)
                                      (declare (ignore item))
@@ -978,7 +978,7 @@
   (loop for entry across (or journal #())
         for date = (and entry (gethash "date" entry))
         when (numberp date)
-          maximize date))
+        maximize date))
 
 (defun local-fedwiki-page-p (page)
   (and (typep page 'hyperbook/fedwiki::fedwiki-page)
@@ -999,7 +999,7 @@
                                       (hb:id-of page)))
 
 (defun build-fedwiki-import-candidate (wiki page page-json
-                                        &key (now (get-universal-time)))
+                                       &key (now (get-universal-time)))
   (let* ((domain (hyperbook/fedwiki::domain-name-of wiki))
          (slug (hb:id-of page))
          (title (or (gethash "title" page-json)
@@ -1014,11 +1014,11 @@
      :slug slug
      :title title
      :canonical-html-url (hyperbook/fedwiki::wiki-url domain
-                                                     protocol
-                                                     (format nil "/~A.html" slug))
+                                                      protocol
+                                                      (format nil "/~A.html" slug))
      :canonical-json-url (hyperbook/fedwiki::wiki-url domain
-                                                     protocol
-                                                     (format nil "/~A.json" slug))
+                                                      protocol
+                                                      (format nil "/~A.json" slug))
      :summary (derive-fedwiki-summary-from-story story title)
      :source-kind *fedwiki-import-source-kind*
      :page-json page-json
@@ -1036,7 +1036,7 @@
     (loop for page in pages
           for index from 0
           when (and limit (>= index limit))
-            do (loop-finish)
+          do (loop-finish)
           do (push (build-fedwiki-import-candidate wiki
                                                    page
                                                    (funcall page-json-loader wiki page)
@@ -1073,8 +1073,8 @@
          (let ((original-protocol (hyperbook/fedwiki::protocol-of resolved-wiki))
                (original-pages (page-count resolved-wiki))
                (initial-condition
-                 (and (typep (hyperbook/fedwiki::status-of resolved-wiki) 'condition)
-                      (hyperbook/fedwiki::status-of resolved-wiki))))
+                (and (typep (hyperbook/fedwiki::status-of resolved-wiki) 'condition)
+                     (hyperbook/fedwiki::status-of resolved-wiki))))
            (multiple-value-bind (retry-wiki recovered-p)
                (hyperbook/fedwiki::retry-site-data-over-http
                 resolved-wiki
@@ -1377,7 +1377,7 @@
          (prefix-name (intern (format nil "~A-BODY-PREFIX" prefix) :keyword))
          (length-name (intern (format nil "~A-BODY-LENGTH" prefix) :keyword))
          (truncated-name
-           (intern (format nil "~A-BODY-TRUNCATED-P" prefix) :keyword)))
+          (intern (format nil "~A-BODY-TRUNCATED-P" prefix) :keyword)))
     (list length-name length
           prefix-name (bounded-http-evidence-string string)
           truncated-name
@@ -1386,7 +1386,7 @@
 (defun plist-without-http-body-fields (plist)
   (loop for (key value) on plist by #'cddr
         unless (member key '(:request-body :response-body) :test #'eq)
-          append (list key value)))
+        append (list key value)))
 
 (defun sanitize-dmx-import-http-evidence (evidence)
   (when evidence
@@ -1521,7 +1521,7 @@
 (defun reset-http-dmx-import-debug-evidence (client)
   (when (typep client 'http-dmx-import-client)
     (let ((build-event
-            (http-dmx-import-debug-event client :s3-explicit-auth-client-built)))
+           (http-dmx-import-debug-event client :s3-explicit-auth-client-built)))
       (setf (dmx-import-debug-events-of client)
             (and build-event
                  (list build-event))
@@ -1538,13 +1538,13 @@
 
 (defun summarize-http-request-auth-mode (authorization-header cookie-header)
   (let ((authorization-scheme
-          (summarize-http-authorization-scheme authorization-header))
+         (summarize-http-authorization-scheme authorization-header))
         (cookie-shape
-          (summarize-http-cookie-shape cookie-header))
+         (summarize-http-cookie-shape cookie-header))
         (jsessionid-cookie-p
-          (and (cookie-contains-token-p cookie-header "JSESSIONID=") t))
+         (and (cookie-contains-token-p cookie-header "JSESSIONID=") t))
         (workspace-cookie-p
-          (and (cookie-contains-token-p cookie-header "dmx_workspace_id=") t)))
+         (and (cookie-contains-token-p cookie-header "dmx_workspace_id=") t)))
     (cond
       ((and jsessionid-cookie-p (null authorization-scheme))
        "session-only")
@@ -1603,9 +1603,9 @@
   (let* ((authorization-header (http-response-header-value headers "Authorization"))
          (cookie-header (http-response-header-value headers "Cookie"))
          (authorization-scheme
-           (summarize-http-authorization-scheme authorization-header))
+          (summarize-http-authorization-scheme authorization-header))
          (cookie-shape
-           (summarize-http-cookie-shape cookie-header)))
+          (summarize-http-cookie-shape cookie-header)))
     (append
      (list :method method
            :url normalized-url
@@ -1614,17 +1614,17 @@
            :request-content-length actual-content-length
            :accept-header (http-response-header-value headers "Accept")
            :authorization-scheme authorization-scheme
-          :auth-mode-summary
-          (summarize-http-request-auth-mode authorization-header cookie-header)
-          :session-login-required-p
-          (and (typep client 'http-dmx-import-client)
-               (dmx-import-session-login-required-p-of client))
-          :bootstrap-session-p
-          (and (typep client 'http-dmx-import-client)
-               (dmx-import-bootstrap-session-p-of client))
-          :derived-auth-scheme
-          (and (typep client 'http-dmx-import-client)
-               (dmx-import-derived-auth-scheme-of client))
+           :auth-mode-summary
+           (summarize-http-request-auth-mode authorization-header cookie-header)
+           :session-login-required-p
+           (and (typep client 'http-dmx-import-client)
+                (dmx-import-session-login-required-p-of client))
+           :bootstrap-session-p
+           (and (typep client 'http-dmx-import-client)
+                (dmx-import-bootstrap-session-p-of client))
+           :derived-auth-scheme
+           (and (typep client 'http-dmx-import-client)
+                (dmx-import-derived-auth-scheme-of client))
            :cookie-shape cookie-shape
            :jsessionid-cookie-p
            (and (cookie-contains-token-p cookie-header "JSESSIONID=") t)
@@ -1668,12 +1668,12 @@
 
 (defun bootstrap-http-dmx-import-session (client)
   (let* ((authorization-header
-           (effective-http-dmx-import-authorization-header
-            client
-            :bootstrap-request-p t))
+          (effective-http-dmx-import-authorization-header
+           client
+           :bootstrap-request-p t))
          (normalized-url
-           (normalize-http-client-url client
-                                      (dmx-access-control-login-path))))
+          (normalize-http-client-url client
+                                     (dmx-access-control-login-path))))
     (append-http-dmx-import-debug-event
      client
      :s5-bootstrap-request-sent
@@ -1719,23 +1719,23 @@
                       response-headers
                       body)))
              (append-http-dmx-import-debug-event
-             client
-             :s6-bootstrap-response-received
-             :method :post
-             :path (http-request-relative-path client normalized-url)
-             :status-code status-code
-             :reason-phrase reason-phrase
-             :set-cookie-jsessionid-p
-             (and (http-response-header-value response-headers "Set-Cookie")
+              client
+              :s6-bootstrap-response-received
+              :method :post
+              :path (http-request-relative-path client normalized-url)
+              :status-code status-code
+              :reason-phrase reason-phrase
+              :set-cookie-jsessionid-p
+              (and (http-response-header-value response-headers "Set-Cookie")
                    (parse-set-cookie-cookie-pair
                     (http-response-header-value response-headers "Set-Cookie")
                     :cookie-name "JSESSIONID")
                    t))
              (if (http-success-status-p status-code)
                  (let ((session-cookie
-                         (parse-set-cookie-cookie-pair
-                          (http-response-header-value response-headers "Set-Cookie")
-                          :cookie-name "JSESSIONID")))
+                        (parse-set-cookie-cookie-pair
+                         (http-response-header-value response-headers "Set-Cookie")
+                         :cookie-name "JSESSIONID")))
                    (unless session-cookie
                      (error 'dmx-import-http-error
                             :message "DMX login succeeded without a JSESSIONID cookie"
@@ -1785,16 +1785,16 @@
   (let* ((normalized-url (normalize-http-client-url client url))
          (relative-path (http-request-relative-path client normalized-url))
          (json-content
-           (and (or payload body-object)
-                (encode-http-json-request-body
-                 (or body-object
-                     (dmx-import-json-object payload)))))
+          (and (or payload body-object)
+               (encode-http-json-request-body
+                (or body-object
+                    (dmx-import-json-object payload)))))
          (authorization-header
-           (effective-http-dmx-import-authorization-header client))
+          (effective-http-dmx-import-authorization-header client))
          (cookie-values
-           (http-dmx-import-request-cookie-values
-            client
-            :workspace-id workspace-id))
+          (http-dmx-import-request-cookie-values
+           client
+           :workspace-id workspace-id))
          (headers (append (when authorization-header
                             (list (cons "Authorization"
                                         authorization-header)))
@@ -1803,38 +1803,38 @@
                                         (format nil "~{~A~^; ~}" cookie-values))))
                           extra-headers))
          (actual-request-content
-           (cond
-             (json-content json-content)
-             (raw-content-provided-p raw-content)
-             (t nil)))
+          (cond
+            (json-content json-content)
+            (raw-content-provided-p raw-content)
+            (t nil)))
          (actual-request-content-type
-           (cond
-             (json-content "application/json; charset=utf-8")
-             (content-type-provided-p content-type)
-             (t nil)))
+          (cond
+            (json-content "application/json; charset=utf-8")
+            (content-type-provided-p content-type)
+            (t nil)))
          (actual-request-content-length
-           (cond
-             (json-content (length json-content))
-             (content-length-provided-p content-length)
-             (t nil)))
+          (cond
+            (json-content (length json-content))
+            (content-length-provided-p content-length)
+            (t nil)))
          (request-kind
-           (classify-http-dmx-debug-request method relative-path))
+          (classify-http-dmx-debug-request method relative-path))
          (request-args
-           (append (list normalized-url
-                         :method method
-                         :want-stream t
-                         :additional-headers headers)
-                   (cond
-                     (json-content
-                      (list :content actual-request-content
-                            :content-type actual-request-content-type
-                            :content-length actual-request-content-length))
-                     (raw-content-provided-p
-                      (append (list :content actual-request-content)
-                              (when content-type-provided-p
-                                (list :content-type actual-request-content-type))
-                              (when content-length-provided-p
-                                (list :content-length actual-request-content-length))))))))
+          (append (list normalized-url
+                        :method method
+                        :want-stream t
+                        :additional-headers headers)
+                  (cond
+                    (json-content
+                     (list :content actual-request-content
+                           :content-type actual-request-content-type
+                           :content-length actual-request-content-length))
+                    (raw-content-provided-p
+                     (append (list :content actual-request-content)
+                             (when content-type-provided-p
+                               (list :content-type actual-request-content-type))
+                             (when content-length-provided-p
+                               (list :content-length actual-request-content-length))))))))
     (when (eql request-kind :workspace-assignment)
       (append-http-dmx-import-debug-event
        client
@@ -1911,7 +1911,7 @@
                     (= status-code 205))
                 nil)
                ((http-success-status-p status-code)
-               (parse-http-response-body-json body))
+                (parse-http-response-body-json body))
                (t
                 (error 'dmx-import-http-error
                        :message (or reason-phrase
@@ -2032,12 +2032,12 @@
   ;; assignment route accepts PUT, but rejects that implicit form media
   ;; type with HTTP 415. Force an explicit zero-length body instead.
   (let* ((cookie-values
-           (http-dmx-import-request-cookie-values
-            client
-            :workspace-id workspace-id))
+          (http-dmx-import-request-cookie-values
+           client
+           :workspace-id workspace-id))
          (cookie-header
-           (and cookie-values
-                (format nil "~{~A~^; ~}" cookie-values))))
+          (and cookie-values
+               (format nil "~{~A~^; ~}" cookie-values))))
     (append-http-dmx-import-debug-event
      client
      :s8-guarded-repair-request-prepared
@@ -2326,9 +2326,9 @@
 (defun classify-dmx-workspace-assignment-auth-401
     (hyperdoc-shape py4dmx-shape platform-shape terminal-card)
   (let ((shape-match-p
-          (dmx-workspace-assignment-auth-shape-match-p
-           hyperdoc-shape
-           py4dmx-shape)))
+         (dmx-workspace-assignment-auth-shape-match-p
+          hyperdoc-shape
+          py4dmx-shape)))
     (cond
       ((not (getf (getf platform-shape :workspace-assignment-route)
                   :endpoint-present-p))
@@ -2358,29 +2358,29 @@
         (read-dmx-workspace-assignment-936040-terminal-card)))
   (let* ((endpoint (dmx-workspace-assign-object-path workspace-id topic-id))
          (hyperdoc-shape
-           (hyperdoc-workspace-assignment-request-shape
-            :workspace-id workspace-id
-            :topic-id topic-id))
+          (hyperdoc-workspace-assignment-request-shape
+           :workspace-id workspace-id
+           :topic-id topic-id))
          (py4dmx-shape
-           (py4dmx-workspace-assignment-request-shape
-            :workspace-id workspace-id
-            :topic-id topic-id))
+          (py4dmx-workspace-assignment-request-shape
+           :workspace-id workspace-id
+           :topic-id topic-id))
          (platform-shape
-           (dmx-platform-workspace-assignment-route-inventory))
+          (dmx-platform-workspace-assignment-route-inventory))
          (shape-match-p
-           (dmx-workspace-assignment-auth-shape-match-p
-            hyperdoc-shape
-            py4dmx-shape))
+          (dmx-workspace-assignment-auth-shape-match-p
+           hyperdoc-shape
+           py4dmx-shape))
          (shape-differences
-           (dmx-workspace-assignment-request-shape-differences
-            hyperdoc-shape
-            py4dmx-shape))
+          (dmx-workspace-assignment-request-shape-differences
+           hyperdoc-shape
+           py4dmx-shape))
          (classification
-           (classify-dmx-workspace-assignment-auth-401
-            hyperdoc-shape
-            py4dmx-shape
-            platform-shape
-            terminal-card)))
+          (classify-dmx-workspace-assignment-auth-401
+           hyperdoc-shape
+           py4dmx-shape
+           platform-shape
+           terminal-card)))
     (list :state :workspace-assignment-auth-diagnosis
           :topic-id topic-id
           :workspace-id workspace-id
@@ -2502,12 +2502,12 @@
 
 (defun dmx-workspace-assignment-live-preflight-state
     (client &key
-       (topic-id *dmx-workspace-assignment-936040-topic-id*)
-       (workspace-id *dmx-workspace-assignment-936040-workspace-id*)
-       (topicmap-id *dmx-workspace-assignment-936040-topicmap-id*))
+              (topic-id *dmx-workspace-assignment-936040-topic-id*)
+              (workspace-id *dmx-workspace-assignment-936040-workspace-id*)
+              (topicmap-id *dmx-workspace-assignment-936040-topicmap-id*))
   (let* ((topicmap-present-p
-           (and client
-                (dmx-import-topic-in-topicmap-p client topicmap-id topic-id)))
+          (and client
+               (dmx-import-topic-in-topicmap-p client topicmap-id topic-id)))
          (workspace (and client
                          (dmx-import-read-topic-workspace client topic-id)))
          (current-workspace-id (dmx-import-object-id workspace))
@@ -2515,10 +2515,10 @@
          (journal-disabled-p (not *allow-dmx-workspace-journal-writes*))
          (workspace-still-missing-p (null current-workspace-id))
          (ready-p
-           (and topicmap-present-p
-                workspace-still-missing-p
-                journal-local-p
-                journal-disabled-p)))
+          (and topicmap-present-p
+               workspace-still-missing-p
+               journal-local-p
+               journal-disabled-p)))
     (list :state :single-live-assignment/preflight-recheck
           :gate *dmx-workspace-assignment-936040-live-gate*
           :ready-p ready-p
@@ -2535,8 +2535,8 @@
 
 (defun bounded-dmx-workspace-assignment-http-error-summary
     (condition &key
-       (topic-id *dmx-workspace-assignment-936040-topic-id*)
-       (workspace-id *dmx-workspace-assignment-936040-workspace-id*))
+                 (topic-id *dmx-workspace-assignment-936040-topic-id*)
+                 (workspace-id *dmx-workspace-assignment-936040-workspace-id*))
   (list :state
         (if (eql 401 (dmx-import-http-status-code-of condition))
             :single-live-assignment/auth-blocked
@@ -2570,11 +2570,11 @@
                "HYPERDOC_DMX_IMPORT_AUTH_HEADER or username/password"
                "HYPERDOC_DMX_IMPORT_WORKSPACE_ID")))
     (let ((preflight
-            (dmx-workspace-assignment-live-preflight-state
-             resolved-client
-             :topic-id topic-id
-             :workspace-id workspace-id
-             :topicmap-id topicmap-id)))
+           (dmx-workspace-assignment-live-preflight-state
+            resolved-client
+            :topic-id topic-id
+            :workspace-id workspace-id
+            :topicmap-id topicmap-id)))
       (unless (getf preflight :ready-p)
         (return-from run-live-dmx-workspace-assignment-936040-once
           (list :state :single-live-assignment/preflight-blocked
@@ -2582,40 +2582,40 @@
                 :safe-invariants
                 (dmx-workspace-assignment-auth-safe-invariants))))
       (let ((attempt
-              (handler-case
-                  (progn
-                    (dmx-import-assign-topic-to-workspace
-                     resolved-client
-                     workspace-id
-                     topic-id)
-                    (list :state :single-live-assignment/put-accepted
-                          :method :put
-                          :path (dmx-workspace-assign-object-path
-                                 workspace-id
-                                 topic-id)
-                          :status
-                          (getf (dmx-import-last-http-transaction-evidence-of
-                                 resolved-client)
-                                :response-status-code)
-                          :http-evidence
-                          (dmx-import-last-http-transaction-evidence-of
-                           resolved-client)))
-                (dmx-import-http-error (condition)
-                  (bounded-dmx-workspace-assignment-http-error-summary
-                   condition
-                   :topic-id topic-id
-                   :workspace-id workspace-id)))))
-        (let* ((workspace-readback
-                 (ignore-errors
-                   (dmx-import-read-topic-workspace resolved-client topic-id)))
-               (readback-workspace-id
-                 (dmx-import-object-id workspace-readback))
-               (topicmap-present-p
-                 (ignore-errors
-                   (dmx-import-topic-in-topicmap-p
+             (handler-case
+                 (progn
+                   (dmx-import-assign-topic-to-workspace
                     resolved-client
-                    topicmap-id
-                    topic-id))))
+                    workspace-id
+                    topic-id)
+                   (list :state :single-live-assignment/put-accepted
+                         :method :put
+                         :path (dmx-workspace-assign-object-path
+                                workspace-id
+                                topic-id)
+                         :status
+                         (getf (dmx-import-last-http-transaction-evidence-of
+                                resolved-client)
+                               :response-status-code)
+                         :http-evidence
+                         (dmx-import-last-http-transaction-evidence-of
+                          resolved-client)))
+               (dmx-import-http-error (condition)
+                 (bounded-dmx-workspace-assignment-http-error-summary
+                  condition
+                  :topic-id topic-id
+                  :workspace-id workspace-id)))))
+        (let* ((workspace-readback
+                (ignore-errors
+                  (dmx-import-read-topic-workspace resolved-client topic-id)))
+               (readback-workspace-id
+                (dmx-import-object-id workspace-readback))
+               (topicmap-present-p
+                (ignore-errors
+                  (dmx-import-topic-in-topicmap-p
+                   resolved-client
+                   topicmap-id
+                   topic-id))))
           (list :state
                 (cond
                   ((eql readback-workspace-id workspace-id)
@@ -2730,59 +2730,59 @@
        derived-auth-scheme)
   (let* ((boundary 'make-http-dmx-import-client-from-explicit-auth)
          (resolved-auth-mode
-           (normalize-http-dmx-import-auth-mode auth-mode boundary))
+          (normalize-http-dmx-import-auth-mode auth-mode boundary))
          (resolved-bootstrap-session-p
-           (if bootstrap-session-supplied-p
-               (and bootstrap-session-p t)
-               (eq resolved-auth-mode :basic)))
+          (if bootstrap-session-supplied-p
+              (and bootstrap-session-p t)
+              (eq resolved-auth-mode :basic)))
          (resolved-derived-auth-scheme
-           (normalize-http-dmx-import-derived-auth-scheme
-            derived-auth-scheme
-            resolved-auth-mode
-            boundary))
+          (normalize-http-dmx-import-derived-auth-scheme
+           derived-auth-scheme
+           resolved-auth-mode
+           boundary))
          (resolved-base-url
-           (or (normalize-http-dmx-import-string base-url :base-url boundary)
-               (getenv-non-empty "HYPERDOC_DMX_IMPORT_BASE_URL")))
+          (or (normalize-http-dmx-import-string base-url :base-url boundary)
+              (getenv-non-empty "HYPERDOC_DMX_IMPORT_BASE_URL")))
          (resolved-workspace-id
-           (cond
-             ((null workspace-id) nil)
-             (t
-              (or (parse-positive-integer workspace-id)
-                  (and (integerp workspace-id) (plusp workspace-id) workspace-id)
-                  (error 'dmx-import-config-error
-                         :message (format nil
-                                          "Invalid explicit DMX import workspace id ~S at ~A"
-                                          workspace-id
-                                          boundary)
-                         :missing-keys '("workspace-id"))))))
+          (cond
+            ((null workspace-id) nil)
+            (t
+             (or (parse-positive-integer workspace-id)
+                 (and (integerp workspace-id) (plusp workspace-id) workspace-id)
+                 (error 'dmx-import-config-error
+                        :message (format nil
+                                         "Invalid explicit DMX import workspace id ~S at ~A"
+                                         workspace-id
+                                         boundary)
+                        :missing-keys '("workspace-id"))))))
          (resolved-topic-type-uri
-           (or (normalize-http-dmx-import-string topic-type-uri :topic-type-uri boundary)
-               (getenv-non-empty "HYPERDOC_DMX_IMPORT_TOPIC_TYPE_URI")
-               *dmx-fedwiki-page-type-uri*))
+          (or (normalize-http-dmx-import-string topic-type-uri :topic-type-uri boundary)
+              (getenv-non-empty "HYPERDOC_DMX_IMPORT_TOPIC_TYPE_URI")
+              *dmx-fedwiki-page-type-uri*))
          (resolved-auth-header
-           (explicit-http-dmx-import-authorization-header
-            :auth-mode resolved-auth-mode
-            :authorization-header authorization-header
-            :auth-token auth-token
-            :username username
-            :password password
-            :boundary boundary)))
+          (explicit-http-dmx-import-authorization-header
+           :auth-mode resolved-auth-mode
+           :authorization-header authorization-header
+           :auth-token auth-token
+           :username username
+           :password password
+           :boundary boundary)))
     (unless resolved-base-url
       (error 'dmx-import-config-error
              :message "Incomplete explicit DMX import configuration"
              :missing-keys '("HYPERDOC_DMX_IMPORT_BASE_URL" "base-url")))
     (let ((client
-            (make-instance 'http-dmx-import-client
-                           :base-url resolved-base-url
-                           :authorization-header resolved-auth-header
-                           :session-login-required-p
-                           resolved-bootstrap-session-p
-                           :bootstrap-session-p resolved-bootstrap-session-p
-                           :derived-auth-scheme
-                           resolved-derived-auth-scheme
-                           :workspace-id resolved-workspace-id
-                           :topic-type-uri resolved-topic-type-uri
-                           :verbose verbose)))
+           (make-instance 'http-dmx-import-client
+                          :base-url resolved-base-url
+                          :authorization-header resolved-auth-header
+                          :session-login-required-p
+                          resolved-bootstrap-session-p
+                          :bootstrap-session-p resolved-bootstrap-session-p
+                          :derived-auth-scheme
+                          resolved-derived-auth-scheme
+                          :workspace-id resolved-workspace-id
+                          :topic-type-uri resolved-topic-type-uri
+                          :verbose verbose)))
       (append-http-dmx-import-debug-event
        client
        :s3-explicit-auth-client-built
@@ -2807,46 +2807,46 @@
 (defun make-http-dmx-import-client-from-environment (&key verbose)
   (let* ((base-url (getenv-non-empty "HYPERDOC_DMX_IMPORT_BASE_URL"))
          (topic-type-uri
-           (getenv-non-empty "HYPERDOC_DMX_IMPORT_TOPIC_TYPE_URI"))
+          (getenv-non-empty "HYPERDOC_DMX_IMPORT_TOPIC_TYPE_URI"))
          (workspace-id
-           (let ((value (getenv-non-empty "HYPERDOC_DMX_IMPORT_WORKSPACE_ID")))
-             (when value
-               (or (parse-positive-integer value)
-                   (error 'dmx-import-config-error
-                          :message
-                          (format nil
-                                  "Invalid DMX import workspace id ~S in HYPERDOC_DMX_IMPORT_WORKSPACE_ID"
-                                  value))))))
+          (let ((value (getenv-non-empty "HYPERDOC_DMX_IMPORT_WORKSPACE_ID")))
+            (when value
+              (or (parse-positive-integer value)
+                  (error 'dmx-import-config-error
+                         :message
+                         (format nil
+                                 "Invalid DMX import workspace id ~S in HYPERDOC_DMX_IMPORT_WORKSPACE_ID"
+                                 value))))))
          (configured-auth-header
-           (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_HEADER"))
+          (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_HEADER"))
          (configured-username
-           (getenv-non-empty "HYPERDOC_DMX_IMPORT_USERNAME"))
+          (getenv-non-empty "HYPERDOC_DMX_IMPORT_USERNAME"))
          (configured-password
-           (getenv-non-empty "HYPERDOC_DMX_IMPORT_PASSWORD"))
+          (getenv-non-empty "HYPERDOC_DMX_IMPORT_PASSWORD"))
          (auth-header
-           (or configured-auth-header
-               (when (and configured-username configured-password)
-                 (basic-authorization-header configured-username
-                                             configured-password))))
+          (or configured-auth-header
+              (when (and configured-username configured-password)
+                (basic-authorization-header configured-username
+                                            configured-password))))
          (session-login-required-p
-           (and auth-header
-                (string= (summarize-http-authorization-scheme auth-header)
-                         "Basic")))
+          (and auth-header
+               (string= (summarize-http-authorization-scheme auth-header)
+                        "Basic")))
          (bootstrap-session-p
-           (or session-login-required-p
-               (dmx-import-env-true-p
-                "HYPERDOC_DMX_IMPORT_BOOTSTRAP_SESSION")))
+          (or session-login-required-p
+              (dmx-import-env-true-p
+               "HYPERDOC_DMX_IMPORT_BOOTSTRAP_SESSION")))
          (derived-auth-scheme
-           (if session-login-required-p :basic :dmx))
+          (if session-login-required-p :basic :dmx))
          (legacy-auth-token
-           (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_TOKEN")))
+          (getenv-non-empty "HYPERDOC_DMX_IMPORT_AUTH_TOKEN")))
     (when (or base-url topic-type-uri auth-header legacy-auth-token)
       (make-instance 'http-dmx-import-client
                      :base-url base-url
                      :authorization-header (or auth-header
                                                (and legacy-auth-token
-                                                   (format nil "Bearer ~A"
-                                                           legacy-auth-token)))
+                                                    (format nil "Bearer ~A"
+                                                            legacy-auth-token)))
                      :session-login-required-p bootstrap-session-p
                      :bootstrap-session-p bootstrap-session-p
                      :derived-auth-scheme derived-auth-scheme
@@ -3032,15 +3032,15 @@
             do (unless (and (integerp v1) (integerp v2))
                  (error 'dmx-import-config-error
                         :message "Invalid Base64 quartet while decoding Authorization header example"))
-               (let ((triple (logior (ash v1 18)
-                                     (ash v2 12)
-                                     (ash (or v3 0) 6)
-                                     (or v4 0))))
-                 (vector-push-extend (ldb (byte 8 16) triple) octets)
-                 (unless (null v3)
-                   (vector-push-extend (ldb (byte 8 8) triple) octets))
-                 (unless (null v4)
-                   (vector-push-extend (ldb (byte 8 0) triple) octets))))
+            (let ((triple (logior (ash v1 18)
+                                  (ash v2 12)
+                                  (ash (or v3 0) 6)
+                                  (or v4 0))))
+              (vector-push-extend (ldb (byte 8 16) triple) octets)
+              (unless (null v3)
+                (vector-push-extend (ldb (byte 8 8) triple) octets))
+              (unless (null v4)
+                (vector-push-extend (ldb (byte 8 0) triple) octets))))
       octets)))
 
 (defun latin1-octets-to-string (octets)
@@ -3052,9 +3052,9 @@
   (let* ((trimmed (string-trim '(#\Space #\Tab #\Newline #\Return)
                                (or authorization-header "")))
          (separator
-           (position-if (lambda (char)
-                          (find char '(#\Space #\Tab)))
-                        trimmed)))
+          (position-if (lambda (char)
+                         (find char '(#\Space #\Tab)))
+                       trimmed)))
     (if separator
         (list (subseq trimmed 0 separator)
               (string-trim '(#\Space #\Tab)
@@ -3067,8 +3067,8 @@
     (when (and (plusp (length token))
                (string-equal method "Basic"))
       (let* ((decoded
-               (latin1-octets-to-string
-                (decode-base64-string-to-octets token)))
+              (latin1-octets-to-string
+               (decode-base64-string-to-octets token)))
              (separator (position #\: decoded))
              (username (if separator
                            (subseq decoded 0 separator)
@@ -3082,9 +3082,9 @@
 
 (defun dmx-auth-path-example-state-trace (mode)
   (let ((resolved-mode
-          (normalize-http-dmx-import-auth-mode
-           mode
-           'dmx-auth-path-example-state-trace)))
+         (normalize-http-dmx-import-auth-mode
+          mode
+          'dmx-auth-path-example-state-trace)))
     (append
      (list
       (list :label "S1 credentials captured in UI"
@@ -3128,9 +3128,9 @@
 
 (defun dmx-auth-path-example-source-evidence (mode)
   (let ((resolved-mode
-          (normalize-http-dmx-import-auth-mode
-           mode
-           'dmx-auth-path-example-source-evidence)))
+         (normalize-http-dmx-import-auth-mode
+          mode
+          'dmx-auth-path-example-source-evidence)))
     (append
      (list
       (list :layer "HyperDoc"
@@ -3169,9 +3169,9 @@
 
 (defun dmx-auth-path-example-notes (mode)
   (let ((resolved-mode
-          (normalize-http-dmx-import-auth-mode
-           mode
-           'dmx-auth-path-example-notes)))
+         (normalize-http-dmx-import-auth-mode
+          mode
+          'dmx-auth-path-example-notes)))
     (case resolved-mode
       (:basic
        (list
@@ -3212,9 +3212,9 @@
 
 (defun dmx-auth-path-example-installation-dependencies (mode &key detected-scheme)
   (let ((resolved-mode
-          (normalize-http-dmx-import-auth-mode
-           mode
-           'dmx-auth-path-example-installation-dependencies)))
+         (normalize-http-dmx-import-auth-mode
+          mode
+          'dmx-auth-path-example-installation-dependencies)))
     (case resolved-mode
       (:basic
        (list
@@ -3233,8 +3233,8 @@
                   :classification "Installation-dependent"
                   :detail "A non-Basic Authorization header needs a matching AuthorizationMethod inside DMX or a compatible proxy/gateway that translates it before DMX checks credentials."))))
       (:token
-        (list
-         (list :label "Bearer support"
+       (list
+        (list :label "Bearer support"
               :classification "Installation-dependent"
               :detail "Bearer token examples depend on a registered non-Basic AuthorizationMethod or a compatible proxy/gateway. HyperDoc does not claim bearer is universally native to DMX core."))))))
 
@@ -3446,9 +3446,9 @@
 
 (defun dmx-auth-path-example-visited-states (mode &key detected-scheme)
   (let ((resolved-mode
-          (normalize-http-dmx-import-auth-mode
-           mode
-           'dmx-auth-path-example-visited-states)))
+         (normalize-http-dmx-import-auth-mode
+          mode
+          'dmx-auth-path-example-visited-states)))
     (case resolved-mode
       (:basic
        '("input-captured"
@@ -3531,9 +3531,9 @@
      post-bootstrap-request-shape
      &key detected-authorization-method)
   (let ((resolved-mode
-          (normalize-http-dmx-import-auth-mode
-           mode
-           'dmx-auth-path-example-evidence-trace)))
+         (normalize-http-dmx-import-auth-mode
+          mode
+          'dmx-auth-path-example-evidence-trace)))
     (append
      (list
       (list :timestamp 0
@@ -3594,134 +3594,134 @@
        (workspace-id *dmx-auth-crosswalk-default-workspace-id*)
        (topic-id *dmx-auth-crosswalk-default-topic-id*))
   (let* ((resolved-mode
-           (normalize-http-dmx-import-auth-mode
-            auth-mode
-            'make-dmx-auth-path-example))
+          (normalize-http-dmx-import-auth-mode
+           auth-mode
+           'make-dmx-auth-path-example))
          (raw-fields
-           (case resolved-mode
-             (:basic
-              (list (cons "Username" (or username ""))
-                    (cons "Password" (or password ""))))
-             (:header
-              (list (cons "Authorization header" (or authorization-header ""))))
-             (:token
-              (list (cons "Bearer token" (or auth-token ""))))))
+          (case resolved-mode
+            (:basic
+             (list (cons "Username" (or username ""))
+                   (cons "Password" (or password ""))))
+            (:header
+             (list (cons "Authorization header" (or authorization-header ""))))
+            (:token
+             (list (cons "Bearer token" (or auth-token ""))))))
          (derived-authorization-header
-           (explicit-http-dmx-import-authorization-header
-            :auth-mode resolved-mode
-            :authorization-header authorization-header
-            :auth-token auth-token
-            :username username
-            :password password
-            :boundary 'make-dmx-auth-path-example))
+          (explicit-http-dmx-import-authorization-header
+           :auth-mode resolved-mode
+           :authorization-header authorization-header
+           :auth-token auth-token
+           :username username
+           :password password
+           :boundary 'make-dmx-auth-path-example))
          (detected-scheme
-           (summarize-http-authorization-scheme
-            derived-authorization-header))
+          (summarize-http-authorization-scheme
+           derived-authorization-header))
          (authorization-method-name
-           (case resolved-mode
-             (:basic "Basic")
-             (:header detected-scheme)
-             (:token "Bearer")))
+          (case resolved-mode
+            (:basic "Basic")
+            (:header detected-scheme)
+            (:token "Bearer")))
          (derived-credentials
-           (case resolved-mode
-             (:basic
-              (list (cons "username" (or username ""))
-                    (cons "password" (or password ""))
-                    (cons "methodName" "Basic")))
-             (:header
-              (or (ignore-errors
-                    (decode-basic-authorization-header-for-display
-                     derived-authorization-header))
-                  (list (cons "note"
-                              "No DMX-core-native Credentials summary available for this header."))))
-             (:token
-              (list (cons "note"
-                          "No DMX-core-native Credentials summary is assumed for an arbitrary bearer token example.")))))
+          (case resolved-mode
+            (:basic
+             (list (cons "username" (or username ""))
+                   (cons "password" (or password ""))
+                   (cons "methodName" "Basic")))
+            (:header
+             (or (ignore-errors
+                   (decode-basic-authorization-header-for-display
+                    derived-authorization-header))
+                 (list (cons "note"
+                             "No DMX-core-native Credentials summary available for this header."))))
+            (:token
+             (list (cons "note"
+                         "No DMX-core-native Credentials summary is assumed for an arbitrary bearer token example.")))))
          (bootstrap-request-shape
-           (if (eq resolved-mode :basic)
-               (list (cons "Method" "POST")
-                     (cons "Path" (dmx-access-control-login-path))
-                     (cons "Authorization header" derived-authorization-header)
-                     (cons "Cookie" "-")
-                     (cons "Cookie shape" "none")
-                     (cons "Accept" "-")
-                     (cons "Content-Length" "0")
-                     (cons "Content-Type" "-")
-                     (cons "Summarized request auth mode"
-                           (summarize-http-request-auth-mode
-                            derived-authorization-header
-                            nil)))
-               (list (cons "Status" "not used")
-                     (cons "Reason"
-                           "This mode is direct-header only in HyperDoc and does not synthesize a separate login bootstrap request."))))
+          (if (eq resolved-mode :basic)
+              (list (cons "Method" "POST")
+                    (cons "Path" (dmx-access-control-login-path))
+                    (cons "Authorization header" derived-authorization-header)
+                    (cons "Cookie" "-")
+                    (cons "Cookie shape" "none")
+                    (cons "Accept" "-")
+                    (cons "Content-Length" "0")
+                    (cons "Content-Type" "-")
+                    (cons "Summarized request auth mode"
+                          (summarize-http-request-auth-mode
+                           derived-authorization-header
+                           nil)))
+              (list (cons "Status" "not used")
+                    (cons "Reason"
+                          "This mode is direct-header only in HyperDoc and does not synthesize a separate login bootstrap request."))))
          (post-cookie-header
-           (case resolved-mode
-             (:basic
-              (format nil "JSESSIONID=<session-id>; dmx_workspace_id=~D"
-                      workspace-id))
-             (otherwise
-              (format nil "dmx_workspace_id=~D" workspace-id))))
+          (case resolved-mode
+            (:basic
+             (format nil "JSESSIONID=<session-id>; dmx_workspace_id=~D"
+                     workspace-id))
+            (otherwise
+             (format nil "dmx_workspace_id=~D" workspace-id))))
          (post-authorization-header
-           (if (eq resolved-mode :basic)
-               nil
-               derived-authorization-header))
+          (if (eq resolved-mode :basic)
+              nil
+              derived-authorization-header))
          (post-bootstrap-request-shape
-           (list (cons "Method" "PUT")
-                 (cons "Path"
-                       (dmx-workspace-assign-object-path workspace-id topic-id))
-                 (cons "Authorization header"
-                       (or post-authorization-header "-"))
-                 (cons "Cookie" post-cookie-header)
-                 (cons "Cookie shape"
-                       (summarize-http-cookie-shape post-cookie-header))
-                 (cons "Accept" "application/json")
-                 (cons "Content-Length" "0")
-                 (cons "Content-Type" "-")
-                 (cons "Summarized request auth mode"
-                       (summarize-http-request-auth-mode
-                        post-authorization-header
-                        post-cookie-header))))
+          (list (cons "Method" "PUT")
+                (cons "Path"
+                      (dmx-workspace-assign-object-path workspace-id topic-id))
+                (cons "Authorization header"
+                      (or post-authorization-header "-"))
+                (cons "Cookie" post-cookie-header)
+                (cons "Cookie shape"
+                      (summarize-http-cookie-shape post-cookie-header))
+                (cons "Accept" "application/json")
+                (cons "Content-Length" "0")
+                (cons "Content-Type" "-")
+                (cons "Summarized request auth mode"
+                      (summarize-http-request-auth-mode
+                       post-authorization-header
+                       post-cookie-header))))
          (derived-request-shape
-           (list (cons "Detected Authorization scheme"
-                       (or detected-scheme "-"))
-                 (cons "AuthorizationMethod name"
-                       (or authorization-method-name "-"))
-                 (cons "Bootstrap request path"
-                       (if (eq resolved-mode :basic)
-                           (dmx-access-control-login-path)
-                           "not used"))
-                 (cons "Guarded request path"
-                       (dmx-workspace-assign-object-path workspace-id topic-id))
-                 (cons "Guarded request auth mode"
-                       (summarize-http-request-auth-mode
-                        post-authorization-header
-                        post-cookie-header))
-                 (cons "Expected cookie shape"
-                       (summarize-http-cookie-shape post-cookie-header))))
+          (list (cons "Detected Authorization scheme"
+                      (or detected-scheme "-"))
+                (cons "AuthorizationMethod name"
+                      (or authorization-method-name "-"))
+                (cons "Bootstrap request path"
+                      (if (eq resolved-mode :basic)
+                          (dmx-access-control-login-path)
+                          "not used"))
+                (cons "Guarded request path"
+                      (dmx-workspace-assign-object-path workspace-id topic-id))
+                (cons "Guarded request auth mode"
+                      (summarize-http-request-auth-mode
+                       post-authorization-header
+                       post-cookie-header))
+                (cons "Expected cookie shape"
+                      (summarize-http-cookie-shape post-cookie-header))))
          (session-transition
-           (case resolved-mode
-             (:basic
-              (list (cons "Bootstrap request"
-                          (format nil
-                                  "POST ~A with Authorization: ~A"
-                                  (dmx-access-control-login-path)
-                                  derived-authorization-header))
-                    (cons "Expected bootstrap outcome"
-                          "204 No Content + Set-Cookie: JSESSIONID=...")
-                    (cons "Session aftermath"
-                          (format nil
-                                  "JSESSIONID is captured ephemerally, then later guarded requests use Cookie: JSESSIONID=<session-id>; dmx_workspace_id=~D"
-                                  workspace-id))
-                    (cons "Bootstrap-capable"
-                          "yes")))
-             (otherwise
-              (list (cons "Bootstrap request" "not used")
-                    (cons "Expected bootstrap outcome"
-                          "Direct-header mode stays on the original Authorization header unless the installation produces a session separately.")
-                    (cons "Session aftermath"
-                          "JSESSIONID is not treated as a primary input mode here.")
-                    (cons "Bootstrap-capable"
-                          "no")))))
+          (case resolved-mode
+            (:basic
+             (list (cons "Bootstrap request"
+                         (format nil
+                                 "POST ~A with Authorization: ~A"
+                                 (dmx-access-control-login-path)
+                                 derived-authorization-header))
+                   (cons "Expected bootstrap outcome"
+                         "204 No Content + Set-Cookie: JSESSIONID=...")
+                   (cons "Session aftermath"
+                         (format nil
+                                 "JSESSIONID is captured ephemerally, then later guarded requests use Cookie: JSESSIONID=<session-id>; dmx_workspace_id=~D"
+                                 workspace-id))
+                   (cons "Bootstrap-capable"
+                         "yes")))
+            (otherwise
+             (list (cons "Bootstrap request" "not used")
+                   (cons "Expected bootstrap outcome"
+                         "Direct-header mode stays on the original Authorization header unless the installation produces a session separately.")
+                   (cons "Session aftermath"
+                         "JSESSIONID is not treated as a primary input mode here.")
+                   (cons "Bootstrap-capable"
+                         "no")))))
          (mode-label (dmx-auth-mode-label resolved-mode)))
     (make-instance 'dmx-auth-path-example
                    :id (format nil "dmx-auth-path-example/~A"

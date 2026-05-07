@@ -573,10 +573,10 @@
 
 (defun scxml-final-state= (expected final-state)
   (let ((state
-          (cond
-            ((stringp final-state) final-state)
-            ((symbolp final-state) (string-downcase (symbol-name final-state)))
-            (t (princ-to-string final-state)))))
+         (cond
+           ((stringp final-state) final-state)
+           ((symbolp final-state) (string-downcase (symbol-name final-state)))
+           (t (princ-to-string final-state)))))
     (string= (string-downcase expected)
              (string-downcase state))))
 
@@ -700,36 +700,36 @@
     (let* ((status (localhost-fedwiki-page-promotion-plan-sync-status plan))
            (dmx-summary (getf status :dmx-dry-run-summary))
            (source-availability-state
-             (getf status :source-availability-state :unknown))
+            (getf status :source-availability-state :unknown))
            (page-freshness-state
-             (getf status :page-source-freshness-state :unknown))
+            (getf status :page-source-freshness-state :unknown))
            (snippet-freshness-state
-             (getf status :snippet-source-freshness-state :unknown))
+            (getf status :snippet-source-freshness-state :unknown))
            (source-envelope-malformed-p
-             (or (eq :unknown-malformed-envelope page-freshness-state)
-                 (eq :unknown-malformed-envelope snippet-freshness-state)))
+            (or (eq :unknown-malformed-envelope page-freshness-state)
+                (eq :unknown-malformed-envelope snippet-freshness-state)))
            (page-artifact-state
-             (localhost-fedwiki-page-promotion-workflow-artifact-state
-              (getf status :page-synced)
-              page-freshness-state
-              source-availability-state))
+            (localhost-fedwiki-page-promotion-workflow-artifact-state
+             (getf status :page-synced)
+             page-freshness-state
+             source-availability-state))
            (snippet-artifact-state
-             (localhost-fedwiki-page-promotion-workflow-artifact-state
-              (getf status :snippet-synced)
-              snippet-freshness-state
-              source-availability-state))
+            (localhost-fedwiki-page-promotion-workflow-artifact-state
+             (getf status :snippet-synced)
+             snippet-freshness-state
+             source-availability-state))
            (dmx-dry-run-payload-built-p
-             (and dmx-summary
-                  (getf dmx-summary :available)))
+            (and dmx-summary
+                 (getf dmx-summary :available)))
            (dmx-payload-valid-p
-             (and dmx-dry-run-payload-built-p
-                  (eq :canonical
-                      (getf dmx-summary :view-props-validation-status))
-                  (null (getf dmx-summary :forbidden-short-keys))))
+            (and dmx-dry-run-payload-built-p
+                 (eq :canonical
+                     (getf dmx-summary :view-props-validation-status))
+                 (null (getf dmx-summary :forbidden-short-keys))))
            (guarded-write-boundary
-             (if dmx-payload-valid-p
-                 :accepted
-                 :rejected)))
+            (if dmx-payload-valid-p
+                :accepted
+                :rejected)))
       (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
        (list :promotion-surface surface
              :plan-id (localhost-fedwiki-page-promotion-plan-id plan)
@@ -748,15 +748,15 @@
              :promotion-plan-built-p t
              :page-composed-p
              (let ((rendered-page
-                     (localhost-fedwiki-page-promotion-plan-rendered-page
-                      plan)))
+                    (localhost-fedwiki-page-promotion-plan-rendered-page
+                     plan)))
                (and (stringp rendered-page)
                     (plusp (length rendered-page))))
              :snippet-generated-p
              (let ((snippet
-                     (snippet-text-of
-                      (localhost-fedwiki-page-promotion-plan-topic-definition
-                       plan))))
+                    (snippet-text-of
+                     (localhost-fedwiki-page-promotion-plan-topic-definition
+                      plan))))
                (and (stringp snippet)
                     (plusp (length snippet))))
              :page-artifact-state page-artifact-state
@@ -772,8 +772,8 @@
 
 (defun localhost-fedwiki-page-promotion-workflow-events (semantic-facts)
   (let* ((facts
-           (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
-            semantic-facts))
+          (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
+           semantic-facts))
          (events '()))
     (labels ((emit (event)
                (push event events)))
@@ -876,8 +876,8 @@
 (defun localhost-fedwiki-page-promotion-workflow-phase-results
     (semantic-facts)
   (let ((facts
-          (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
-           semantic-facts)))
+         (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
+          semantic-facts)))
     (list :resolve-source
           (case (getf facts :source-availability-state)
             (:source-unavailable :source-unavailable)
@@ -990,78 +990,78 @@
     (&key promotion-surface plan-id semantic-facts input-events
        package-name function-name)
   (let* ((resolved-surface
-           (or promotion-surface
-               (ignore-errors
-                 (current-localhost-fedwiki-page-promotion-surface))))
+          (or promotion-surface
+              (ignore-errors
+                (current-localhost-fedwiki-page-promotion-surface))))
          (resolved-plan
-           (and resolved-surface
-                (localhost-fedwiki-page-promotion-workflow-find-plan
-                 resolved-surface
-                 plan-id)))
+          (and resolved-surface
+               (localhost-fedwiki-page-promotion-workflow-find-plan
+                resolved-surface
+                plan-id)))
          (computed-facts
-           (or semantic-facts
-               (handler-case
-                   (localhost-fedwiki-page-promotion-workflow-semantic-facts
-                    :promotion-surface resolved-surface
-                    :plan-id plan-id)
-                 (error (condition)
-                   (list :plan-id
-                         (or plan-id
-                             (and resolved-plan
-                                  (localhost-fedwiki-page-promotion-plan-id
-                                   resolved-plan)))
-                         :plan-title
-                         (and resolved-plan
-                              (localhost-fedwiki-page-promotion-plan-title
-                               resolved-plan))
-                         :source-resolved-p nil
-                         :source-normalized-p nil
-                         :source-availability-state :unknown
-                         :unexpected-regression-p t
-                         :unexpected-regression-condition
-                         (princ-to-string condition))))))
-         (resolved-facts
-           (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
-            computed-facts))
-         (resolved-input-events
-           (or input-events
-               (localhost-fedwiki-page-promotion-workflow-events
-                resolved-facts)))
-         (phase-results
-           (localhost-fedwiki-page-promotion-workflow-phase-results
-            resolved-facts))
-         (resolved-package
-           (or package-name
-               "HYPERDOC/SCXML/GENERATED/LOCALHOST-FEDWIKI-PAGE-PROMOTION-WORKFLOW"))
-         (resolved-function
-           (or function-name
-               "RUN-LOCALHOST-FEDWIKI-PAGE-PROMOTION-WORKFLOW"))
-         (expectation-run
-           (run-scxml-expectation-with-events
-            *localhost-fedwiki-page-promotion-workflow-scxml*
-            resolved-input-events
-            resolved-facts
-            :expected-subject
-            (format nil
-                    "localhost-fedwiki-page-promotion-workflow ~A"
-                    (or (getf resolved-facts :plan-id)
+          (or semantic-facts
+              (handler-case
+                  (localhost-fedwiki-page-promotion-workflow-semantic-facts
+                   :promotion-surface resolved-surface
+                   :plan-id plan-id)
+                (error (condition)
+                  (list :plan-id
+                        (or plan-id
+                            (and resolved-plan
+                                 (localhost-fedwiki-page-promotion-plan-id
+                                  resolved-plan)))
+                        :plan-title
                         (and resolved-plan
-                             (localhost-fedwiki-page-promotion-plan-id
+                             (localhost-fedwiki-page-promotion-plan-title
                               resolved-plan))
-                        "default-plan"))
-            :package-name resolved-package
-            :function-name resolved-function))
+                        :source-resolved-p nil
+                        :source-normalized-p nil
+                        :source-availability-state :unknown
+                        :unexpected-regression-p t
+                        :unexpected-regression-condition
+                        (princ-to-string condition))))))
+         (resolved-facts
+          (localhost-fedwiki-page-promotion-workflow-normalize-semantic-facts
+           computed-facts))
+         (resolved-input-events
+          (or input-events
+              (localhost-fedwiki-page-promotion-workflow-events
+               resolved-facts)))
+         (phase-results
+          (localhost-fedwiki-page-promotion-workflow-phase-results
+           resolved-facts))
+         (resolved-package
+          (or package-name
+              "HYPERDOC/SCXML/GENERATED/LOCALHOST-FEDWIKI-PAGE-PROMOTION-WORKFLOW"))
+         (resolved-function
+          (or function-name
+              "RUN-LOCALHOST-FEDWIKI-PAGE-PROMOTION-WORKFLOW"))
+         (expectation-run
+          (run-scxml-expectation-with-events
+           *localhost-fedwiki-page-promotion-workflow-scxml*
+           resolved-input-events
+           resolved-facts
+           :expected-subject
+           (format nil
+                   "localhost-fedwiki-page-promotion-workflow ~A"
+                   (or (getf resolved-facts :plan-id)
+                       (and resolved-plan
+                            (localhost-fedwiki-page-promotion-plan-id
+                             resolved-plan))
+                       "default-plan"))
+           :package-name resolved-package
+           :function-name resolved-function))
          (final-state
-           (scxml-expectation-run-final-state-of expectation-run))
+          (scxml-expectation-run-final-state-of expectation-run))
          (classification
-           (localhost-fedwiki-page-promotion-workflow-failure-classification
-            final-state))
+          (localhost-fedwiki-page-promotion-workflow-failure-classification
+           final-state))
          (blocker
-           (localhost-fedwiki-page-promotion-workflow-blocker-summary
-            classification))
+          (localhost-fedwiki-page-promotion-workflow-blocker-summary
+           classification))
          (suggested-next-action
-           (localhost-fedwiki-page-promotion-workflow-suggested-next-action
-            classification)))
+          (localhost-fedwiki-page-promotion-workflow-suggested-next-action
+           classification)))
     (make-instance 'localhost-fedwiki-page-promotion-workflow-scxml-run
                    :scxml-path *localhost-fedwiki-page-promotion-workflow-scxml*
                    :promotion-surface resolved-surface
@@ -1194,9 +1194,9 @@
        'workspace-annotation-topic-uri-of
        annotation)
       (let ((annotation-key
-              (dmx-annotation-workspace-view-safe-call
-               'workspace-annotation-key-of
-               annotation)))
+             (dmx-annotation-workspace-view-safe-call
+              'workspace-annotation-key-of
+              annotation)))
         (and annotation-key
              (dmx-annotation-workspace-view-safe-call
               'dmx-workspace-annotation-uri
@@ -1204,8 +1204,8 @@
 
 (defun dmx-annotation-workspace-view-local-stream (subject-key)
   (let ((streams
-          (and (boundp '*hyperdoc-local-workspace-journal-streams*)
-               (symbol-value '*hyperdoc-local-workspace-journal-streams*))))
+         (and (boundp '*hyperdoc-local-workspace-journal-streams*)
+              (symbol-value '*hyperdoc-local-workspace-journal-streams*))))
     (and subject-key
          (hash-table-p streams)
          (gethash subject-key streams))))
@@ -1267,18 +1267,18 @@
     (if state
         (remove nil
                 (loop for transition in
-                         (call-hyperdoc-scxml
-                          :scxml-state-transitions-of
-                          state)
+                      (call-hyperdoc-scxml
+                       :scxml-state-transitions-of
+                       state)
                       when (string= (or (call-hyperdoc-scxml
                                          :scxml-transition-event-of
                                          transition)
                                         "")
                                     (or event ""))
-                        collect
-                        (call-hyperdoc-scxml
-                         :scxml-transition-target-of
-                         transition)))
+                      collect
+                      (call-hyperdoc-scxml
+                       :scxml-transition-target-of
+                       transition)))
         '())))
 
 (defun dmx-annotation-workspace-view-dot-quoted (value)
@@ -1306,17 +1306,17 @@
       (dolist (state (call-hyperdoc-scxml :scxml-chart-states-of chart))
         (let* ((state-id (call-hyperdoc-scxml :scxml-state-id-of state))
                (attributes
-                 (list (format nil "label=~A"
-                               (dmx-annotation-workspace-view-dot-quoted
-                                state-id))
-                       (if (string= state-id current-state)
-                           "fillcolor=\"lightgoldenrod1\""
-                           (if (member state-id path-states :test #'string=)
-                               "fillcolor=\"lightcyan\""
-                               "fillcolor=\"white\""))
-                       (if (string= state-id current-state)
-                           "penwidth=2.5"
-                           "penwidth=1.0"))))
+                (list (format nil "label=~A"
+                              (dmx-annotation-workspace-view-dot-quoted
+                               state-id))
+                      (if (string= state-id current-state)
+                          "fillcolor=\"lightgoldenrod1\""
+                          (if (member state-id path-states :test #'string=)
+                              "fillcolor=\"lightcyan\""
+                              "fillcolor=\"white\""))
+                      (if (string= state-id current-state)
+                          "penwidth=2.5"
+                          "penwidth=1.0"))))
           (format stream "  ~A [~{~A~^, ~}];~%"
                   (dmx-annotation-workspace-view-dot-quoted state-id)
                   attributes)))
@@ -1325,7 +1325,7 @@
                (call-hyperdoc-scxml :scxml-chart-initial-state-of chart)))
       (dolist (state (call-hyperdoc-scxml :scxml-chart-states-of chart))
         (dolist (transition
-                 (call-hyperdoc-scxml :scxml-state-transitions-of state))
+                  (call-hyperdoc-scxml :scxml-state-transitions-of state))
           (let* ((source-id (call-hyperdoc-scxml :scxml-state-id-of state))
                  (event (or (call-hyperdoc-scxml
                              :scxml-transition-event-of
@@ -1336,8 +1336,8 @@
                               transition)
                              ""))
                  (highlight-p
-                   (and (string= source-id current-state)
-                        (string= event selected-event))))
+                  (and (string= source-id current-state)
+                       (string= event selected-event))))
             (format stream
                     "  ~A -> ~A [label=~A, color=~A, penwidth=~A];~%"
                     (dmx-annotation-workspace-view-dot-quoted source-id)
@@ -1360,9 +1360,9 @@
 (defun dmx-annotation-workspace-view-assignment-status-label
     (current-state annotation workspace-id)
   (let ((annotation-workspace-id
-          (dmx-annotation-workspace-view-safe-call
-           'workspace-annotation-workspace-id-of
-           annotation)))
+         (dmx-annotation-workspace-view-safe-call
+          'workspace-annotation-workspace-id-of
+          annotation)))
     (cond
       ((and annotation-workspace-id
             workspace-id
@@ -1382,9 +1382,9 @@
 (defun dmx-annotation-workspace-view-topicmap-placement-status-label
     (current-state annotation workspace-topicmap-id)
   (let ((annotation-topicmap-id
-          (dmx-annotation-workspace-view-safe-call
-           'workspace-annotation-topicmap-id-of
-           annotation)))
+         (dmx-annotation-workspace-view-safe-call
+          'workspace-annotation-topicmap-id-of
+          annotation)))
     (cond
       ((and annotation-topicmap-id
             workspace-topicmap-id
@@ -1404,20 +1404,20 @@
 (defun dmx-annotation-workspace-view-classify-state
     (annotation continuation-topic-id)
   (let* ((workspace-annotation-p
-           (dmx-annotation-workspace-view-instance-p annotation))
+          (dmx-annotation-workspace-view-instance-p annotation))
          (status
-           (dmx-annotation-workspace-view-annotation-status annotation))
+          (dmx-annotation-workspace-view-annotation-status annotation))
          (projected-p
-           (or (dmx-annotation-workspace-view-status= status "persisted")
-               (dmx-annotation-workspace-view-status= status "projected")))
+          (or (dmx-annotation-workspace-view-status= status "persisted")
+              (dmx-annotation-workspace-view-status= status "projected")))
          (pending-p
-           (dmx-annotation-workspace-view-status=
-            status
-            "projection-pending-auth"))
+          (dmx-annotation-workspace-view-status=
+           status
+           "projection-pending-auth"))
          (failed-p
-           (dmx-annotation-workspace-view-status=
-            status
-            "projection-failed")))
+          (dmx-annotation-workspace-view-status=
+           status
+           "projection-failed")))
     (cond
       ((and workspace-annotation-p projected-p)
        "projectedComplete")
@@ -1688,7 +1688,7 @@
 (defun dmx-annotation-workspace-view-build-enabled-action-plans
     (chart current-state selected-event)
   (let ((enabled-events
-          (dmx-annotation-workspace-view-enabled-events chart current-state))
+         (dmx-annotation-workspace-view-enabled-events chart current-state))
         (plans '()))
     (dolist (event enabled-events)
       (let* ((spec (dmx-annotation-workspace-view-action-spec
@@ -1699,9 +1699,9 @@
                        current-state
                        event))
              (expected-path
-               (or (copy-list (getf spec :next-states))
-                   (copy-list targets)
-                   (list current-state))))
+              (or (copy-list (getf spec :next-states))
+                  (copy-list targets)
+                  (list current-state))))
         (when spec
           (push (make-dmx-annotation-workspace-view-action-plan
                  :event event
@@ -1759,75 +1759,75 @@
 
 (defun make-dmx-annotation-workspace-view-run
     (annotation &key workspace-topicmap-id workspace-id client
-       (materialize-to-dmx-p nil))
+                  (materialize-to-dmx-p nil))
   (let* ((resolved-workspace-id (or workspace-id 919815))
          (resolved-workspace-topicmap-id (or workspace-topicmap-id 919822))
          (continuation-topic-id
-           (dmx-annotation-workspace-view-continuation-topic-id annotation))
+          (dmx-annotation-workspace-view-continuation-topic-id annotation))
          (current-state
-           (dmx-annotation-workspace-view-classify-state
-            annotation
-            continuation-topic-id))
+          (dmx-annotation-workspace-view-classify-state
+           annotation
+           continuation-topic-id))
          (selected-event
-           (dmx-annotation-workspace-view-selected-event
-            current-state
-            materialize-to-dmx-p))
+          (dmx-annotation-workspace-view-selected-event
+           current-state
+           materialize-to-dmx-p))
          (action-spec
-           (or (dmx-annotation-workspace-view-action-spec
-                current-state
-                selected-event)
-               (list :next-states (list current-state)
-                     :primary-action-label "Inspect workspace write plan"
-                     :mutation-boundary "SCXML plan inspection boundary"
-                     :auth-requirement "not required"
-                     :dmx-http-will-run-p nil
-                     :topic-upsert-will-run-p nil
-                     :workspace-assignment-will-run-p nil
-                     :topicmap-placement-will-run-p nil
-                     :local-journal-mutation-p nil
-                     :dmx-mutation-p nil
-                     :local-save-authoritative-p t
-                     :executor-function
-                     'make-dmx-annotation-workspace-view-run)))
+          (or (dmx-annotation-workspace-view-action-spec
+               current-state
+               selected-event)
+              (list :next-states (list current-state)
+                    :primary-action-label "Inspect workspace write plan"
+                    :mutation-boundary "SCXML plan inspection boundary"
+                    :auth-requirement "not required"
+                    :dmx-http-will-run-p nil
+                    :topic-upsert-will-run-p nil
+                    :workspace-assignment-will-run-p nil
+                    :topicmap-placement-will-run-p nil
+                    :local-journal-mutation-p nil
+                    :dmx-mutation-p nil
+                    :local-save-authoritative-p t
+                    :executor-function
+                    'make-dmx-annotation-workspace-view-run)))
          (chart (read-dmx-annotation-workspace-view-scxml))
          (validation-findings (call-hyperdoc-scxml
                                :validate-scxml-chart
                                chart))
          (local-subject-key
-           (dmx-annotation-workspace-view-local-subject-key annotation))
+          (dmx-annotation-workspace-view-local-subject-key annotation))
          (local-stream
-           (dmx-annotation-workspace-view-local-stream local-subject-key))
+          (dmx-annotation-workspace-view-local-stream local-subject-key))
          (local-events
-           (dmx-annotation-workspace-view-local-stream-events local-stream))
+          (dmx-annotation-workspace-view-local-stream-events local-stream))
          (enabled-action-plans
-           (dmx-annotation-workspace-view-build-enabled-action-plans
-            chart
-            current-state
-            selected-event))
+          (dmx-annotation-workspace-view-build-enabled-action-plans
+           chart
+           current-state
+           selected-event))
          (expected-path
-           (or (copy-list (getf action-spec :next-states))
-               (copy-list
-                (dmx-annotation-workspace-view-transition-targets
-                 chart
-                 current-state
-                 selected-event))
-               (list current-state)))
+          (or (copy-list (getf action-spec :next-states))
+              (copy-list
+               (dmx-annotation-workspace-view-transition-targets
+                chart
+                current-state
+                selected-event))
+              (list current-state)))
          (chart-dot
-           (dmx-annotation-workspace-view-chart-dot-text
-            chart
-            current-state
-            selected-event
-            expected-path))
+          (dmx-annotation-workspace-view-chart-dot-text
+           chart
+           current-state
+           selected-event
+           expected-path))
          (chart-path-summary
-           (list :current-state current-state
-                 :selected-event selected-event
-                 :expected-next-states (copy-list expected-path)
-                 :mutates-local-journal
-                 (and (getf action-spec :local-journal-mutation-p) t)
-                 :mutates-dmx
-                 (and (getf action-spec :dmx-mutation-p) t)))
+          (list :current-state current-state
+                :selected-event selected-event
+                :expected-next-states (copy-list expected-path)
+                :mutates-local-journal
+                (and (getf action-spec :local-journal-mutation-p) t)
+                :mutates-dmx
+                (and (getf action-spec :dmx-mutation-p) t)))
          (planning-client
-           (make-instance 'null-dmx-import-client))
+          (make-instance 'null-dmx-import-client))
          (workspace-write-plan nil)
          (workspace-write-plan-error nil))
     (multiple-value-setq (workspace-write-plan workspace-write-plan-error)
@@ -1837,17 +1837,17 @@
        resolved-workspace-id
        planning-client))
     (let ((auth-submachine-needed-p
-            (dmx-annotation-workspace-view-auth-submachine-needed-p
-             current-state))
+           (dmx-annotation-workspace-view-auth-submachine-needed-p
+            current-state))
           (auth-session-submachine-run
-            (and (dmx-annotation-workspace-view-auth-submachine-needed-p
-                  current-state)
-                 (fboundp 'make-dmx-action-auth-session-run)
-                 (ignore-errors
-                   (make-dmx-action-auth-session-run
-                    :selected-auth-mode :anonymous
-                    :workspace-id resolved-workspace-id
-                    :topic-id continuation-topic-id)))))
+           (and (dmx-annotation-workspace-view-auth-submachine-needed-p
+                 current-state)
+                (fboundp 'make-dmx-action-auth-session-run)
+                (ignore-errors
+                  (make-dmx-action-auth-session-run
+                   :selected-auth-mode :anonymous
+                   :workspace-id resolved-workspace-id
+                   :topic-id continuation-topic-id)))))
       (make-instance 'dmx-annotation-workspace-view-run
                      :scxml-path *dmx-annotation-workspace-view-scxml*
                      :annotation annotation
@@ -2063,8 +2063,8 @@
        bootstrap-status)
   (let* ((mode (dmx-action-auth-session-normalize-mode selected-auth-mode))
          (resolved-bootstrap-status
-           (or bootstrap-status
-               (dmx-action-auth-session-default-bootstrap-status mode))))
+          (or bootstrap-status
+              (dmx-action-auth-session-default-bootstrap-status mode))))
     (list :selected-auth-mode mode
           :workspace-id workspace-id
           :topic-id topic-id
@@ -2097,67 +2097,67 @@
        bootstrap-status package-name function-name)
   (let* ((mode (dmx-action-auth-session-normalize-mode selected-auth-mode))
          (resolved-bootstrap-status
-           (or bootstrap-status
-               (dmx-action-auth-session-default-bootstrap-status mode)))
+          (or bootstrap-status
+              (dmx-action-auth-session-default-bootstrap-status mode)))
          (session-cookie-present-p
-           (dmx-action-auth-session-session-cookie-present-p
-            mode
-            resolved-bootstrap-status))
+          (dmx-action-auth-session-session-cookie-present-p
+           mode
+           resolved-bootstrap-status))
          (session-cookie-shape
-           (dmx-action-auth-session-session-cookie-shape
-            session-cookie-present-p))
+          (dmx-action-auth-session-session-cookie-shape
+           session-cookie-present-p))
          (authorization-scheme
-           (dmx-action-auth-session-authorization-scheme mode))
+          (dmx-action-auth-session-authorization-scheme mode))
          (bootstrap-required-p (eq mode :username-password))
          (bootstrap-attempted-p (eq mode :username-password))
          (continuation-readiness
-           (dmx-action-auth-session-continuation-readiness
-            mode
-            resolved-bootstrap-status))
+          (dmx-action-auth-session-continuation-readiness
+           mode
+           resolved-bootstrap-status))
          (failure-boundary
-           (dmx-action-auth-session-failure-boundary
-            mode
-            resolved-bootstrap-status))
+          (dmx-action-auth-session-failure-boundary
+           mode
+           resolved-bootstrap-status))
          (events
-           (dmx-action-auth-session-events mode resolved-bootstrap-status))
+          (dmx-action-auth-session-events mode resolved-bootstrap-status))
          (semantic-facts
-           (list :selected-auth-mode mode
-                 :selected-auth-mode-label
-                 (dmx-action-auth-session-mode-label mode)
-                 :workspace-id workspace-id
-                 :topic-id topic-id
-                 :bootstrap-required-p bootstrap-required-p
-                 :bootstrap-attempted-p bootstrap-attempted-p
-                 :bootstrap-status resolved-bootstrap-status
-                 :session-cookie-present-p session-cookie-present-p
-                 :session-cookie-shape session-cookie-shape
-                 :authorization-scheme authorization-scheme
-                 :continuation-readiness continuation-readiness
-                 :redaction-status :redacted
-                 :failure-boundary failure-boundary))
+          (list :selected-auth-mode mode
+                :selected-auth-mode-label
+                (dmx-action-auth-session-mode-label mode)
+                :workspace-id workspace-id
+                :topic-id topic-id
+                :bootstrap-required-p bootstrap-required-p
+                :bootstrap-attempted-p bootstrap-attempted-p
+                :bootstrap-status resolved-bootstrap-status
+                :session-cookie-present-p session-cookie-present-p
+                :session-cookie-shape session-cookie-shape
+                :authorization-scheme authorization-scheme
+                :continuation-readiness continuation-readiness
+                :redaction-status :redacted
+                :failure-boundary failure-boundary))
          (generated-package
-           (or package-name
-               "HYPERDOC/SCXML/GENERATED/DMX-ACTION-AUTH-SESSION"))
+          (or package-name
+              "HYPERDOC/SCXML/GENERATED/DMX-ACTION-AUTH-SESSION"))
          (generated-function
-           (or function-name
-               "RUN-DMX-ACTION-AUTH-SESSION"))
+          (or function-name
+              "RUN-DMX-ACTION-AUTH-SESSION"))
          (expectation-run
-           (run-scxml-expectation-with-events
-            *dmx-action-auth-session-scxml*
-            events
-            semantic-facts
-            :expected-subject
-            (format nil
-                    "dmx-action-auth-session ~A"
-                    (dmx-action-auth-session-mode-label mode))
-            :package-name generated-package
-            :function-name generated-function))
+          (run-scxml-expectation-with-events
+           *dmx-action-auth-session-scxml*
+           events
+           semantic-facts
+           :expected-subject
+           (format nil
+                   "dmx-action-auth-session ~A"
+                   (dmx-action-auth-session-mode-label mode))
+           :package-name generated-package
+           :function-name generated-function))
          (trace (or (scxml-expectation-run-trace-of expectation-run) '()))
          (trace-string (format nil "~{~A~%~}" trace))
          (redaction-status
-           (if (dmx-action-auth-session-secret-leak-p trace-string)
-               :unexpected-secret
-               :redacted)))
+          (if (dmx-action-auth-session-secret-leak-p trace-string)
+              :unexpected-secret
+              :redacted)))
     (make-instance 'dmx-action-auth-session-run
                    :scxml-path *dmx-action-auth-session-scxml*
                    :selected-auth-mode mode
@@ -2372,20 +2372,20 @@
               live-stderr (dmx-annotation-acceptance-sanitize-output stderr)
               live-exit-code exit-code)))
     (let* ((input-events
-             (dmx-annotation-acceptance-runbook-events run-live-p))
+            (dmx-annotation-acceptance-runbook-events run-live-p))
            (semantic-facts
-             (dmx-annotation-acceptance-runbook-semantic-facts
-              :live-run-enabled-p run-live-p
-              :live-exit-code live-exit-code
-              :live-pass-lines-observed-p
-              (and run-live-p
-                   (zerop live-exit-code)
-                   (dmx-annotation-acceptance-live-pass-lines-observed-p
-                    live-stdout))))
+            (dmx-annotation-acceptance-runbook-semantic-facts
+             :live-run-enabled-p run-live-p
+             :live-exit-code live-exit-code
+             :live-pass-lines-observed-p
+             (and run-live-p
+                  (zerop live-exit-code)
+                  (dmx-annotation-acceptance-live-pass-lines-observed-p
+                   live-stdout))))
            (generated-package
-             "HYPERDOC/SCXML/GENERATED/DMX-ANNOTATION-ACCEPTANCE-RUNBOOK")
+            "HYPERDOC/SCXML/GENERATED/DMX-ANNOTATION-ACCEPTANCE-RUNBOOK")
            (generated-function
-             "RUN-DMX-ANNOTATION-ACCEPTANCE-RUNBOOK")
+            "RUN-DMX-ANNOTATION-ACCEPTANCE-RUNBOOK")
            (chart (call-hyperdoc-scxml
                    :parse-scxml-file
                    *dmx-annotation-local-first-continuation-runbook-scxml*))
@@ -2393,7 +2393,7 @@
                                  :validate-scxml-chart
                                  chart))
            (error-findings
-             (scxml-validation-error-findings validation-findings)))
+            (scxml-validation-error-findings validation-findings)))
       (if error-findings
           (make-instance 'dmx-annotation-acceptance-scxml-run
                          :scxml-path
@@ -2420,12 +2420,12 @@
                          :live-stdout live-stdout
                          :live-stderr live-stderr)
           (let* ((generated-run
-                   (call-hyperdoc-scxml
-                    :compile-and-run-scxml-file-with-events
-                    *dmx-annotation-local-first-continuation-runbook-scxml*
-                    input-events
-                    :package-name generated-package
-                    :function-name generated-function))
+                  (call-hyperdoc-scxml
+                   :compile-and-run-scxml-file-with-events
+                   *dmx-annotation-local-first-continuation-runbook-scxml*
+                   input-events
+                   :package-name generated-package
+                   :function-name generated-function))
                  (trace (call-hyperdoc-scxml
                          :generated-scxml-run-trace-of
                          generated-run))
@@ -2436,44 +2436,44 @@
                           :generated-scxml-run-done-p
                           generated-run))
                  (scxml-passed-p
-                   (and done-p
-                        (scxml-final-state=
-                         "accepted"
-                         final-state)))
+                  (and done-p
+                       (scxml-final-state=
+                        "accepted"
+                        final-state)))
                  (critical-state-ids
-                   '("repo-loaded"
-                     "patch-branch"
-                     "journal-local-first"
-                     "journal-recursion-guarded"
-                     "auth-boundary-inspectable"
-                     "safe-evidence"
-                     "fresh-image"
-                     "dmx-import-loaded"
-                     "authenticated-client-ready"
-                     "prewrite-readback-confirmed"
-                     "patched-image-ready"
-                     "enter-dev-shell"
-                     "sbcl-started"
-                     "asdf-ready"
-                     "tests-loaded"
-                     "focused-smokes"
-                     "full-suite"
-                     "patch-verifiable"
-                     "patch-ready-for-single-live-assignment"
-                     "single-live-assignment-armed"
-                     "verified"
-                     "accepted"))
+                  '("repo-loaded"
+                    "patch-branch"
+                    "journal-local-first"
+                    "journal-recursion-guarded"
+                    "auth-boundary-inspectable"
+                    "safe-evidence"
+                    "fresh-image"
+                    "dmx-import-loaded"
+                    "authenticated-client-ready"
+                    "prewrite-readback-confirmed"
+                    "patched-image-ready"
+                    "enter-dev-shell"
+                    "sbcl-started"
+                    "asdf-ready"
+                    "tests-loaded"
+                    "focused-smokes"
+                    "full-suite"
+                    "patch-verifiable"
+                    "patch-ready-for-single-live-assignment"
+                    "single-live-assignment-armed"
+                    "verified"
+                    "accepted"))
                  (critical-trace-present-p
-                   (every (lambda (state-id)
-                            (dmx-annotation-acceptance-trace-contains-state-p
-                             trace
-                             state-id))
-                          critical-state-ids))
+                  (every (lambda (state-id)
+                           (dmx-annotation-acceptance-trace-contains-state-p
+                            trace
+                            state-id))
+                         critical-state-ids))
                  (live-passed-p
-                   (or (not run-live-p)
-                       (and (zerop live-exit-code)
-                            (dmx-annotation-acceptance-live-pass-lines-observed-p
-                             live-stdout))))
+                  (or (not run-live-p)
+                      (and (zerop live-exit-code)
+                           (dmx-annotation-acceptance-live-pass-lines-observed-p
+                            live-stdout))))
                  (passed-p (and scxml-passed-p
                                 critical-trace-present-p
                                 live-passed-p)))
@@ -2548,7 +2548,7 @@
          (test-system-runbook-string-contains-ci-p condition-text "nested ASDF :force"))
      :compile-order)
     ((test-system-runbook-string-contains-ci-p condition-text
-                                                "No workspace journal stream matched the requested subject")
+                                               "No workspace journal stream matched the requested subject")
      :live-precondition)
     ((or (test-system-runbook-string-contains-ci-p condition-text "collective-knowledge")
          (test-system-runbook-string-contains-ci-p condition-text "collective knowledge"))
@@ -2651,11 +2651,11 @@
 
 (defun hyperdoc-test-system-runbook-events (phase-results full-suite-result)
   (let* ((resolved-phase-results
-           (or phase-results
-               (default-hyperdoc-test-system-phase-results)))
+          (or phase-results
+              (default-hyperdoc-test-system-phase-results)))
          (resolved-full-suite-result
-           (or full-suite-result
-               (default-hyperdoc-test-system-full-suite-result)))
+          (or full-suite-result
+              (default-hyperdoc-test-system-full-suite-result)))
          (events (list "ENV.CAPTURED")))
     (labels ((emit (phase-key)
                (let ((event (hyperdoc-test-system-phase-event
@@ -2694,9 +2694,9 @@
     (input-events full-suite-result)
   (or (loop for event in input-events
             for classification
-              = (hyperdoc-test-system-failure-classification-from-event event)
+            = (hyperdoc-test-system-failure-classification-from-event event)
             when classification
-              return classification)
+            return classification)
       (if (eq :pass (getf full-suite-result :status :pass))
           :none
           (or (getf full-suite-result :classification)
@@ -2753,53 +2753,53 @@
     (&key phase-results focused-check-results
        full-suite-result input-events environment-summary)
   (let* ((resolved-phase-results
-           (or phase-results
-               (default-hyperdoc-test-system-phase-results)))
+          (or phase-results
+              (default-hyperdoc-test-system-phase-results)))
          (resolved-focused-check-results
-           (or focused-check-results
-               (default-hyperdoc-test-system-focused-check-results
-                 resolved-phase-results)))
+          (or focused-check-results
+              (default-hyperdoc-test-system-focused-check-results
+                  resolved-phase-results)))
          (resolved-full-suite-result
-           (or full-suite-result
-               (default-hyperdoc-test-system-full-suite-result)))
+          (or full-suite-result
+              (default-hyperdoc-test-system-full-suite-result)))
          (resolved-environment-summary
-           (or environment-summary
-               (default-hyperdoc-test-system-environment-summary)))
+          (or environment-summary
+              (default-hyperdoc-test-system-environment-summary)))
          (resolved-input-events
-           (or input-events
-               (hyperdoc-test-system-runbook-events
-                resolved-phase-results
-                resolved-full-suite-result)))
+          (or input-events
+              (hyperdoc-test-system-runbook-events
+               resolved-phase-results
+               resolved-full-suite-result)))
          (classification
-           (hyperdoc-test-system-runbook-classification
-            resolved-input-events
-            resolved-full-suite-result))
+          (hyperdoc-test-system-runbook-classification
+           resolved-input-events
+           resolved-full-suite-result))
          (blocker
-           (or (getf resolved-full-suite-result :blocker)
-               (hyperdoc-test-system-runbook-blocker-summary classification)))
+          (or (getf resolved-full-suite-result :blocker)
+              (hyperdoc-test-system-runbook-blocker-summary classification)))
          (suggested-next-action
-           (hyperdoc-test-system-runbook-suggested-next-action
-            classification))
+          (hyperdoc-test-system-runbook-suggested-next-action
+           classification))
          (semantic-facts
-           (hyperdoc-test-system-runbook-semantic-facts
-            resolved-environment-summary
-            resolved-phase-results
-            resolved-focused-check-results
-            resolved-full-suite-result
-            resolved-input-events
-            classification
-            blocker
-            suggested-next-action))
+          (hyperdoc-test-system-runbook-semantic-facts
+           resolved-environment-summary
+           resolved-phase-results
+           resolved-focused-check-results
+           resolved-full-suite-result
+           resolved-input-events
+           classification
+           blocker
+           suggested-next-action))
          (expectation-run
-           (run-scxml-expectation-with-events
-            *hyperdoc-test-system-runbook-scxml*
-            resolved-input-events
-            semantic-facts
-            :expected-subject "asdf:test-system :hyperdoc runbook"
-            :package-name
-            "HYPERDOC/SCXML/GENERATED/HYPERDOC-TEST-SYSTEM-RUNBOOK"
-            :function-name
-            "RUN-HYPERDOC-TEST-SYSTEM-RUNBOOK")))
+          (run-scxml-expectation-with-events
+           *hyperdoc-test-system-runbook-scxml*
+           resolved-input-events
+           semantic-facts
+           :expected-subject "asdf:test-system :hyperdoc runbook"
+           :package-name
+           "HYPERDOC/SCXML/GENERATED/HYPERDOC-TEST-SYSTEM-RUNBOOK"
+           :function-name
+           "RUN-HYPERDOC-TEST-SYSTEM-RUNBOOK")))
     (make-instance 'hyperdoc-test-system-scxml-run
                    :scxml-path *hyperdoc-test-system-runbook-scxml*
                    :environment-summary resolved-environment-summary
@@ -2860,24 +2860,24 @@
                     :fail-unexpected-regression))
                (otherwise :fail-unexpected-regression))))
     (let ((phase-results
-            (default-hyperdoc-test-system-phase-results))
+           (default-hyperdoc-test-system-phase-results))
           (full-suite-result
-            (default-hyperdoc-test-system-full-suite-result))
+           (default-hyperdoc-test-system-full-suite-result))
           (focused-check-results nil)
           (stop-after-focused-failure nil))
       (dolist (phase-spec
-               '((:scxml-compiler
-                  :run-scxml-compiler-smoke-tests)
-                 (:uscxml-repair
-                  :run-page-lookup-topic-repair-scxml-smoke-tests)
-                 (:dmx-annotations
-                  :run-dmx-annotations-smoke-tests)
-                 (:collective-knowledge
-                  :run-collective-knowledge-slice-smoke-tests)
-                 (:fedwiki-promotion-output-sync
-                  :run-localhost-fedwiki-page-promotion-output-sync-smoke-test)
-                 (:topic-factory-dmx
-                  :run-topic-factory-snippet-dmx-smoke-tests)))
+                '((:scxml-compiler
+                   :run-scxml-compiler-smoke-tests)
+                  (:uscxml-repair
+                   :run-page-lookup-topic-repair-scxml-smoke-tests)
+                  (:dmx-annotations
+                   :run-dmx-annotations-smoke-tests)
+                  (:collective-knowledge
+                   :run-collective-knowledge-slice-smoke-tests)
+                  (:fedwiki-promotion-output-sync
+                   :run-localhost-fedwiki-page-promotion-output-sync-smoke-test)
+                  (:topic-factory-dmx
+                   :run-topic-factory-snippet-dmx-smoke-tests)))
         (unless stop-after-focused-failure
           (destructuring-bind (phase function-name) phase-spec
             (multiple-value-bind (status condition-text)
@@ -2885,10 +2885,10 @@
               (if (eq status :pass)
                   (setf (getf phase-results phase) :pass)
                   (let* ((classification
-                           (hyperdoc-test-system-condition-classification
-                            condition-text))
+                          (hyperdoc-test-system-condition-classification
+                           condition-text))
                          (phase-status
-                           (classification->phase-status phase classification)))
+                          (classification->phase-status phase classification)))
                     (setf (getf phase-results phase) phase-status
                           (getf full-suite-result :status) :fail
                           (getf full-suite-result :classification) classification
@@ -2913,8 +2913,8 @@
               (error (condition)
                 (let* ((condition-text (princ-to-string condition))
                        (classification
-                         (hyperdoc-test-system-condition-classification
-                          condition-text)))
+                        (hyperdoc-test-system-condition-classification
+                         condition-text)))
                   (setf (getf full-suite-result :status) :fail
                         (getf full-suite-result :classification) classification
                         (getf full-suite-result :event)

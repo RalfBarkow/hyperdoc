@@ -32,10 +32,10 @@
                  (scxml-compiler-stub-pathname)))
          (state-ids (scxml-compiler-state-ids chart))
          (fixed-state
-           (find "fixed"
-                 (hyperdoc/scxml:scxml-chart-states-of chart)
-                 :key #'hyperdoc/scxml:scxml-state-id-of
-                 :test #'string=)))
+          (find "fixed"
+                (hyperdoc/scxml:scxml-chart-states-of chart)
+                :key #'hyperdoc/scxml:scxml-state-id-of
+                :test #'string=)))
     (scxml-compiler-assert-true
      (or (hyperdoc/scxml:scxml-chart-name-of chart)
          (hyperdoc/scxml:scxml-chart-initial-state-of chart))
@@ -45,18 +45,18 @@
      (hyperdoc/scxml:scxml-chart-initial-state-of chart)
      "Parsed chart initial state must be openIssue")
     (dolist (expected-state
-             '("openIssue"
-               "deriveTargetChunk"
-               "classify"
-               "missingTopic"
-               "planTopicFactoryAddition"
-               "previewTopicFactoryAddition"
-               "checkExistingTopicFactory"
-               "applyTopicFactoryAddition"
-               "loadTopicsSource"
-               "rebuildTopicIndex"
-               "verifyTopicPage"
-               "fixed"))
+              '("openIssue"
+                "deriveTargetChunk"
+                "classify"
+                "missingTopic"
+                "planTopicFactoryAddition"
+                "previewTopicFactoryAddition"
+                "checkExistingTopicFactory"
+                "applyTopicFactoryAddition"
+                "loadTopicsSource"
+                "rebuildTopicIndex"
+                "verifyTopicPage"
+                "fixed"))
       (scxml-compiler-assert-true
        (member expected-state state-ids :test #'string=)
        (format nil "Parsed chart must include state ~A" expected-state)))
@@ -70,11 +70,11 @@
                  (scxml-compiler-stub-pathname)))
          (findings (hyperdoc/scxml:validate-scxml-chart chart))
          (error-findings
-           (remove-if-not
-            (lambda (finding)
-              (eq :error
-                  (hyperdoc/scxml:scxml-validation-finding-severity-of finding)))
-            findings)))
+          (remove-if-not
+           (lambda (finding)
+             (eq :error
+                 (hyperdoc/scxml:scxml-validation-finding-severity-of finding)))
+           findings)))
     (scxml-compiler-assert-true
      (null error-findings)
      (format nil "Stub SCXML must validate without :error findings: ~S"
@@ -85,10 +85,10 @@
   (let* ((chart (hyperdoc/scxml:parse-scxml-file
                  (scxml-compiler-stub-pathname)))
          (generated-source
-           (hyperdoc/scxml:compile-scxml-chart-to-string
-            chart
-            :package-name "HYPERDOC/SCXML/GENERATED/SMOKE-CODE"
-            :function-name "RUN-PAGE-LOOKUP-ISSUE-TOPIC-REPAIR")))
+          (hyperdoc/scxml:compile-scxml-chart-to-string
+           chart
+           :package-name "HYPERDOC/SCXML/GENERATED/SMOKE-CODE"
+           :function-name "RUN-PAGE-LOOKUP-ISSUE-TOPIC-REPAIR")))
     (scxml-compiler-assert-substring
      "defpackage"
      generated-source
@@ -104,10 +104,10 @@
 
 (defun run-scxml-compiler-runtime-smoke-test ()
   (let* ((result
-           (hyperdoc/scxml:compile-and-run-scxml-file
-            (scxml-compiler-stub-pathname)
-            :package-name "HYPERDOC/SCXML/GENERATED/SMOKE-RUNTIME"
-            :function-name "RUN-PAGE-LOOKUP-ISSUE-TOPIC-REPAIR"))
+          (hyperdoc/scxml:compile-and-run-scxml-file
+           (scxml-compiler-stub-pathname)
+           :package-name "HYPERDOC/SCXML/GENERATED/SMOKE-RUNTIME"
+           :function-name "RUN-PAGE-LOOKUP-ISSUE-TOPIC-REPAIR"))
          (trace (hyperdoc/scxml:generated-scxml-run-trace-of result))
          (final-state (hyperdoc/scxml:generated-scxml-run-final-state-of result)))
     (scxml-compiler-assert-true
