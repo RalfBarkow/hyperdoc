@@ -1,0 +1,111 @@
+<h1>NOR Matcher Teaching Story</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+This page is a teaching narration for the NOR-only matcher variant of
+the closure-compiled query matcher. It is meant to be used together with
+the SLY REPL: first predict the result, then run the example, then inspect
+the trace.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+<li><a page="NOR matcher teaching code"><tt>NOR matcher teaching code</tt></a></li>
+<li><a page="Running HyperDoc Examples"><tt>Running HyperDoc Examples</tt></a></li>
+<li><a page="Writing source code pages"><tt>Writing source code pages</tt></a></li>
+</ul>
+
+<h2>1. The one connective</h2>
+
+<p>
+In this teaching slice, the object language has only strings and
+<tt>nor</tt> forms. A string succeeds when it is found in the target text.
+A <tt>nor</tt> form succeeds only when all of its subforms fail.
+</p>
+
+<pre>
+(nor "shuttle" "joke")
+</pre>
+
+<p>
+This means: accept only strings that contain neither “shuttle” nor “joke”.
+</p>
+
+<h2>2. Empty NOR</h2>
+
+<p>
+The empty NOR succeeds. This is the base case that lets a NOR form succeed
+after all of its subforms have failed.
+</p>
+
+<source-of-function>nor-demo-empty-success</source-of-function>
+
+<h2>3. First positive example</h2>
+
+<p>
+Ask the learner to predict the result before pressing the play button.
+The target contains neither forbidden word, so the NOR should succeed.
+</p>
+
+<source-of-function>nor-demo-simple-success</source-of-function>
+
+<h2>4. First negative example</h2>
+
+<p>
+Now the target contains forbidden words. The NOR should fail as soon as
+one subform succeeds.
+</p>
+
+<source-of-function>nor-demo-simple-failure</source-of-function>
+
+<h2>5. Why this is still compilation</h2>
+
+<p>
+The matcher is built before it is run. The builder walks the expression
+and returns a tree of closures. The resulting closure is then called with
+a target string.
+</p>
+
+<source-of-function>nor-demo-make-matcher</source-of-function>
+
+<h2>6. The NOR-only version of the original query</h2>
+
+<p>
+The ordinary query was:
+</p>
+
+<pre>
+(or (and "space" "mission")
+    (and (or "moon" "lunar") "landing"))
+</pre>
+
+<p>
+The teaching version rewrites this into a NOR-only expression and stores it
+in <tt>*nor-demo-expression*</tt>. The learner does not have to like this
+notation at first. The point is that one connective is sufficient.
+</p>
+
+<source-of-function>nor-demo-original-query-positive</source-of-function>
+
+<h2>7. Negative case for the full query</h2>
+
+<p>
+This target is unrelated to the original query, so the NOR-only spelling
+should reject it.
+</p>
+
+<source-of-function>nor-demo-original-query-negative</source-of-function>
+
+<h2>Teaching choreography</h2>
+
+<ol>
+<li>Show <tt>(nor "shuttle" "joke")</tt> in the SLY REPL.</li>
+<li>Ask: “What must be absent for this to succeed?”</li>
+<li>Run <tt>nor-demo-simple-success</tt> from HyperDoc.</li>
+<li>Inspect the returned <tt>:trace</tt>.</li>
+<li>Run <tt>nor-demo-simple-failure</tt>.</li>
+<li>Point to the <tt>:nor-short-circuit</tt> event.</li>
+<li>Only then show the full NOR-only expression.</li>
+</ol>

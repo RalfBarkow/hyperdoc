@@ -127,6 +127,17 @@
                           :serial t
                           :components ((:file "examples")))))
 
+(defsystem #:hyperdoc/nor-demo
+    :description "Teaching slice for the NOR-only matcher demonstration"
+    :author "Ralf Barkow"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc)
+    :components ((:module "hyperdoc"
+                          :serial t
+                          :components ((:file "nor-matcher-demo")))))
+
 (defsystem #:hyperdoc/dmx-import
     :description "FedWiki to DMX import support for HyperDoc"
     :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -294,6 +305,7 @@
     :depends-on (#:hyperbook/server
                  #:hyperbook/explorer
                  #:hyperdoc/examples
+                 #:hyperdoc/nor-demo
                  #:hyperdoc/explorer
                  #:hyperdoc/explorer/examples/ops
                  #:html-inspector-views/standard)
