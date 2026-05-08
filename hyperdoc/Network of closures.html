@@ -1,0 +1,66 @@
+<h1>Network of closures</h1>
+
+<p>
+  Feeley and Lapalme's phrase “network of closures” gives the precise compiler
+  model for the NOR matcher. The matcher compiler does not generate Lisp source,
+  bytecode, or machine code. It walks the source expression once and generates
+  closures. Each closure implements one primitive part of the object language.
+</p>
+
+<p>
+  In the NOR matcher, leaf forms become predicate closures and <tt>nor</tt>
+  forms become control closures. The resulting matcher is the root closure of
+  this generated network.
+</p>
+
+<pre>
+source form:
+  (nor "moon" "lunar" "landing")
+
+compiled control shape:
+  test "moon"
+    success -> final failure
+    failure -> test "lunar"
+                 success -> final failure
+                 failure -> test "landing"
+                              success -> final failure
+                              failure -> final success
+</pre>
+
+<p>
+  The important distinction from interpretation is that the source expression
+  is classified once during compilation. During execution, the matcher follows
+  the already-built closure network.
+</p>
+
+<p>
+  This makes the matcher a small embedded-language compiler. The source language
+  contains strings, structured leaf predicates, and <tt>nor</tt>. The target
+  language is an executable graph of closures connected by success and failure
+  continuations.
+</p>
+
+<h3>Why this should be visible in HyperDoc</h3>
+
+<p>
+  A closure prints opaquely, so the teaching object should preserve both the
+  executable root closure and a serializable network description. The learner
+  should be able to inspect:
+</p>
+
+<ul>
+  <li>the original expression,</li>
+  <li>the generated closure-network description,</li>
+  <li>the runtime trace for a target object,</li>
+  <li>the final result.</li>
+</ul>
+
+<p>
+  This separates three questions that beginners often confuse:
+</p>
+
+<ol>
+  <li>What did we write?</li>
+  <li>What did compilation build?</li>
+  <li>What happened when the matcher ran?</li>
+</ol>

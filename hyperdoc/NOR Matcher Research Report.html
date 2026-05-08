@@ -1,0 +1,276 @@
+<h1>NOR Matcher Research Report</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This report situates the NOR matcher teaching demo in a narrow research
+  neighborhood: switching logic, closure-compiled interpreters, continuation
+  passing, regular-expression compilation, live Lisp development, and
+  programming-education tracing.
+</p>
+
+<p>
+  The purpose is not to turn the NOR matcher into a production search engine.
+  The purpose is to make a small object language inspectable enough that a
+  beginner can see how logical forms become executable closure networks.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a page="NOR Matcher Teaching Story"><tt>NOR Matcher Teaching Story</tt></a></li>
+  <li><a page="NOR matcher teaching code"><tt>NOR matcher teaching code</tt></a></li>
+  <li><a page="Running HyperDoc Examples"><tt>Running HyperDoc Examples</tt></a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model"><tt>HyperDoc Evaluation and Inspection Model</tt></a></li>
+  <li><a page="HyperDoc Test Runner"><tt>HyperDoc Test Runner</tt></a></li>
+  <li><a page="Literate Tracing"><tt>Literate Tracing</tt></a></li>
+  <li><a page="Stepper Debugger Surface"><tt>Stepper Debugger Surface</tt></a></li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp"><tt>A framework for maintaining the coherence of a running Lisp</tt></a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp"><tt>Source-oriented and image-oriented development in Common Lisp</tt></a></li>
+  <li><a page="Definitive Common Lisp Books"><tt>Definitive Common Lisp Books</tt></a></li>
+</ul>
+
+<h2>Thesis</h2>
+
+<p>
+  The NOR matcher is best understood as a small compiler. Its source language
+  contains strings and <tt>nor</tt> forms. Its target representation is not
+  generated Lisp source and not machine code. Its target representation is a
+  network of closures connected by explicit success and failure continuations.
+</p>
+
+<p>
+  This makes the demo a useful hinge between three teaching concerns:
+</p>
+
+<ol>
+  <li>Boolean logic: one connective is enough.</li>
+  <li>Lisp execution: functions are values and closures remember context.</li>
+  <li>Compilation: an expression can be transformed once and executed many times.</li>
+</ol>
+
+<h2>1. Logical substrate: NOR as the only connective</h2>
+
+<p>
+  A NOR form succeeds only when every subform fails. The demo therefore treats
+  <tt>(nor A B C)</tt> as the primitive connective and derives the usual
+  logical operations from it:
+</p>
+
+<pre>
+(not A)    = (nor A)
+(or A B)   = (nor (nor A B))
+(and A B)  = (nor (nor A) (nor B))
+</pre>
+
+<p>
+  This is the teaching bridge to George Spencer-Brown's <i>Design with the NOR</i>:
+  the point is not merely that NOR is a hardware gate, but that a single operation
+  can generate a complete logical vocabulary.
+</p>
+
+<h2>2. The matcher as a closure compiler</h2>
+
+<p>
+  The central implementation function is <tt>nor-demo-make-nor-matcher</tt>.
+  It receives a list of subforms and two continuations: one for success and one
+  for failure. Empty NOR returns the success continuation. A non-empty NOR builds
+  a matcher for the first subform and a matcher for the rest.
+</p>
+
+<source-of-function>nor-demo-make-nor-matcher</source-of-function>
+
+<p>
+  The important instructional move is that success of any subform causes the
+  enclosing NOR to fail immediately. Failure of a subform permits evaluation to
+  continue with the rest of the NOR.
+</p>
+
+<h2>3. Continuation-passing shape</h2>
+
+<p>
+  Although the code is ordinary Common Lisp, its control structure is
+  continuation-passing in miniature. Each compiled matcher receives a target
+  string and decides which next function to call. This makes short-circuiting
+  explicit.
+</p>
+
+<pre>
+subform succeeds  -> call failure continuation of enclosing NOR
+subform fails     -> continue with the rest of the NOR
+all subforms fail -> call success continuation
+</pre>
+
+<p>
+  For teaching, this is preferable to beginning with a general account of CPS.
+  The learner can first observe a concrete trace and then name the pattern.
+</p>
+
+<h2>4. Relation to regular-expression compilation</h2>
+
+<p>
+  The matcher is not a regular-expression engine, but it belongs to the same
+  family of ideas: translate a compact pattern language into an executable
+  recognition structure. Classical regular-expression work translates regular
+  expressions to automata. This demo translates symbolic query expressions to
+  closures.
+</p>
+
+<p>
+  The boundary matters. An automaton-oriented implementation would make states
+  and transitions primary. The NOR matcher makes continuations primary. That is
+  exactly why it is a good Common Lisp teaching object.
+</p>
+
+<h2>5. Relation to definitional interpreters and partial evaluation</h2>
+
+<p>
+  A direct interpreter would walk the query expression every time it checks a
+  target string. The NOR demo instead walks the query once and returns a
+  specialized matcher. That makes it a small, concrete example of the same
+  general move studied in definitional interpreters and partial evaluation:
+  separate the stable program from the changing input.
+</p>
+
+<pre>
+interpreter style:
+  run expression + target together every time
+
+closure-compiler style:
+  compile expression once
+  run resulting matcher on many targets
+</pre>
+
+<h2>6. Relation to live Lisp development</h2>
+
+<p>
+  The demo should be taught from the REPL and the HyperDoc page together.
+  The REPL shows live construction, redefinition, tracing, and inspection.
+  HyperDoc supplies a durable story page with runnable examples.
+</p>
+
+<p>
+  This pairing is especially Lisp-like: the running image is useful because it
+  can be interrogated and changed, but the durable source page remains the
+  authority for rebuilding and reviewing the teaching object.
+</p>
+
+<h2>7. Relation to program-tracing pedagogy</h2>
+
+<p>
+  The report returned by <tt>nor-demo-run</tt> is deliberately inspectable:
+  it contains the expression, target, result, and trace. That trace is the
+  learner-facing object. It turns invisible control flow into a sequence of
+  visible decisions.
+</p>
+
+<source-of-function>nor-demo-run</source-of-function>
+
+<p>
+  This makes the demo adjacent to educational tracing systems: the trace is not
+  only debugging output, but also an explanatory artifact. The learner can compare
+  the general rule for NOR with a concrete execution trace.
+</p>
+
+<h2>8. Demonstration arc</h2>
+
+<ol>
+  <li>Start with <tt>(nor)</tt> and show that empty NOR succeeds.</li>
+  <li>Move to <tt>(nor "shuttle" "joke")</tt> on a sentence with neither word.</li>
+  <li>Run the same form on a sentence containing a forbidden word.</li>
+  <li>Point to the <tt>:nor-short-circuit</tt> trace event.</li>
+  <li>Only then show the full NOR-only version of the original query.</li>
+</ol>
+
+<h2>Runnable examples</h2>
+
+<h3>Empty NOR</h3>
+
+<source-of-function>nor-demo-empty-success</source-of-function>
+
+<h3>Simple success</h3>
+
+<source-of-function>nor-demo-simple-success</source-of-function>
+
+<h3>Simple failure</h3>
+
+<source-of-function>nor-demo-simple-failure</source-of-function>
+
+<h3>Original query, positive case</h3>
+
+<source-of-function>nor-demo-original-query-positive</source-of-function>
+
+<h3>Original query, negative case</h3>
+
+<source-of-function>nor-demo-original-query-negative</source-of-function>
+
+<h2>Research map</h2>
+
+<table>
+  <tr>
+    <th>Research line</th>
+    <th>Relevance to the NOR matcher</th>
+  </tr>
+  <tr>
+    <td>NOR and switching algebra</td>
+    <td>Provides the one-connective logical framing.</td>
+  </tr>
+  <tr>
+    <td>Definitional interpreters</td>
+    <td>Explains how a small language can be given executable meaning.</td>
+  </tr>
+  <tr>
+    <td>Continuation-passing style</td>
+    <td>Explains the success/failure continuation structure.</td>
+  </tr>
+  <tr>
+    <td>Partial evaluation</td>
+    <td>Explains why walking the expression once can produce a specialized runner.</td>
+  </tr>
+  <tr>
+    <td>Regular-expression compilation</td>
+    <td>Provides the closest pattern-language compilation analogy.</td>
+  </tr>
+  <tr>
+    <td>Live Lisp development</td>
+    <td>Explains the REPL + durable source workflow.</td>
+  </tr>
+  <tr>
+    <td>Educational tracing</td>
+    <td>Explains why inspectable traces are central to the teaching value.</td>
+  </tr>
+</table>
+
+<h2>Boundary</h2>
+
+<p>
+  Do not overclaim this demo. It is not a complete Boolean algebra library, not a
+  high-performance regular-expression system, and not a general-purpose compiler.
+  It is a compact teaching specimen: a single-connective object language compiled
+  into inspectable closures.
+</p>
+
+<h2>Implementation follow-up</h2>
+
+<ul>
+  <li>Add this page to the HyperDoc source tree.</li>
+  <li>Add a link from <a page="NOR Matcher Teaching Story"><tt>NOR Matcher Teaching Story</tt></a> to this report.</li>
+  <li>Extend the Playwright test to verify this page resolves all five runnable examples.</li>
+  <li>Add a small Lisp smoke test if Playwright is not guaranteed in the local dev shell.</li>
+</ul>
+
+<h2>Bibliography anchors</h2>
+
+<ul>
+  <li>George Spencer-Brown, <i>Design with the NOR</i>.</li>
+  <li>John C. Reynolds, <i>Definitional Interpreters for Higher-Order Programming Languages</i>.</li>
+  <li>Yoshihiko Futamura, work on partial evaluation and compiler generation.</li>
+  <li>Ken Thompson, <i>Regular Expression Search Algorithm</i>.</li>
+  <li>Stephen C. Kleene, work on regular events and finite automata.</li>
+  <li>Olivier Danvy and Lasse R. Nielsen, <i>Defunctionalization at Work</i>.</li>
+  <li>Lydia Mann, Marcia Linn, and Michael Clancy, <i>The LISP Evaluation Modeler</i>.</li>
+  <li>Peter Brusilovsky, work on explanatory visualization in educational programming environments.</li>
+  <li>Drew McDermott, <i>A Framework for Maintaining the Coherence of a Running Lisp</i>.</li>
+  <li>Peter Seibel, <i>Practical Common Lisp</i>.</li>
+  <li>Patrick Winston and Berthold Horn, <i>Lisp</i>.</li>
+</ul>
