@@ -1337,6 +1337,8 @@ Use this object to capture ownership, rationale, and merge policy before merge e
     :title "Glue code"
     :summary "Local wrappers, dependency shims, and source-rewrite glue should stay as dreyeck-owned glue around the core systems until cleaner extension seams replace them."
     :paths '("dev.sh"
+             "nix/patches/clog-boot-ignore-empty-ids.patch"
+             "nix/patches/clog-moldable-inspector-playground-eval.patch"
              "nix/sbcl-named-closure.nix"
              "nix/vendor/named-closure/named-closure.asd"
              "nix/vendor/named-closure/named-closure.lisp")
