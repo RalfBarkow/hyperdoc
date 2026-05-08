@@ -63,4 +63,5 @@
    :run-py4dmx-cluster-smoke-tests
    :run-scxml-compiler-smoke-tests
    :run-interaction-net-smoke-tests
+   :run-nor-graph-matcher-smoke-tests
    :run-page-lookup-topic-repair-scxml-smoke-tests))

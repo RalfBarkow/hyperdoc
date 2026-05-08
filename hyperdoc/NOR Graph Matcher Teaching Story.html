@@ -1,0 +1,112 @@
+<h1>NOR Graph Matcher Teaching Story</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+This page extends the NOR matcher from string search to graph predicates.
+The logical connective is still <tt>nor</tt>, but the leaves now inspect an
+interaction-net style graph made of agents, ports, and edges.
+</p>
+
+<p>
+This slice is read-only. It does not fire interaction-net rules, mutate a
+graph, update <tt>net-active-stack</tt>, write DMX topics, repair workspace
+assignments, or materialize topic factories.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+<li><a page="NOR Matcher Teaching Story"><tt>NOR Matcher Teaching Story</tt></a></li>
+<li><a page="NOR matcher teaching code"><tt>NOR matcher teaching code</tt></a></li>
+<li><a page="NOR graph matcher teaching code"><tt>NOR graph matcher teaching code</tt></a></li>
+<li><a page="NOR Matcher Research Report"><tt>NOR Matcher Research Report</tt></a></li>
+<li><a page="Lafont 1990 Interaction Nets"><tt>Lafont 1990 Interaction Nets</tt></a></li>
+</ul>
+
+<h2>Graph leaf test</h2>
+
+<p>
+A graph leaf test succeeds when it finds a witness in the target graph. It
+returns both a Boolean result and evidence. A failed leaf still appears in the
+trace with <tt>:matched-p NIL</tt> and <tt>:evidence NIL</tt>.
+</p>
+
+<pre>
+(:agent-alive lefty)
+(:agent-symbol lefty L)
+</pre>
+
+<p>
+Missing agents do not silently count as dead. The <tt>:agent-dead</tt> leaf
+succeeds only when the agent exists and its alive slot is false.
+</p>
+
+<h2>Active/alive pair</h2>
+
+<p>
+For this teaching graph, Lefty and Rita are graph agents, not Mech execution
+engines. An active/alive pair exists when two alive agents are connected by
+their principal ports.
+</p>
+
+<pre>
+(:active-alive-pair lefty rita)
+</pre>
+
+<p>
+The successful evidence names the leaf, the two agents, the edge, both
+oriented ports, and the alive reason. The matcher only observes that witness;
+it does not reduce the graph.
+</p>
+
+<source-of-function>nor-graph-active-pair-leaf-success</source-of-function>
+
+<h2>NOR over graph predicates</h2>
+
+<p>
+NOR keeps its truth rule over graph predicates: a <tt>nor</tt> form succeeds
+only when every child form fails. It short-circuits to failure when any child
+succeeds.
+</p>
+
+<pre>
+(nor (:active-alive-pair lefty rita))
+</pre>
+
+<p>
+This means: it is not the case that Lefty and Rita form an active/alive pair.
+On the active fixture, the child succeeds and the NOR fails immediately.
+</p>
+
+<source-of-function>nor-graph-active-pair-nor-failure</source-of-function>
+
+<h2>Normal-form query</h2>
+
+<pre>
+(nor (:any-active-alive-pair))
+</pre>
+
+<p>
+This is the normal-form query for the teaching demo. It succeeds when the
+graph has no active/alive pair anywhere. It fails as soon as the graph exposes
+one reducible active/alive pair witness.
+</p>
+
+<source-of-function>nor-graph-normal-form-success</source-of-function>
+
+<source-of-function>nor-graph-normal-form-failure</source-of-function>
+
+<h2>Dispatcher</h2>
+
+<p>
+The graph matcher dispatches <tt>(nor ...)</tt> as logical syntax and
+keyword-headed forms as graph leaves. Unsupported forms signal an error rather
+than becoming false by accident.
+</p>
+
+<source-of-function>nor-graph-run</source-of-function>
+
+<source-of-function>nor-graph-make-nor-matcher</source-of-function>
+
+<source-of-function>nor-graph-evaluate-leaf</source-of-function>

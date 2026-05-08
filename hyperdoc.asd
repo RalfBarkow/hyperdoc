@@ -138,6 +138,17 @@
                           :serial t
                           :components ((:file "nor-matcher-demo")))))
 
+(defsystem #:hyperdoc/nor-graph-demo
+    :description "Graph leaf tests for the NOR matcher teaching demo"
+    :author "Ralf Barkow"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/nor-demo)
+    :components ((:module "hyperdoc"
+                          :serial t
+                          :components ((:file "nor-graph-matcher-demo")))))
+
 (defsystem #:hyperdoc/dmx-import
     :description "FedWiki to DMX import support for HyperDoc"
     :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -306,6 +317,7 @@
                  #:hyperbook/explorer
                  #:hyperdoc/examples
                  #:hyperdoc/nor-demo
+                 #:hyperdoc/nor-graph-demo
                  #:hyperdoc/explorer
                  #:hyperdoc/explorer/examples/ops
                  #:html-inspector-views/standard)
@@ -322,6 +334,7 @@
     :depends-on (#:hyperdoc/mcp
                  #:hyperdoc/scxml
                  #:hyperdoc/explorer
+                 #:hyperdoc/nor-graph-demo
                  #:interaction-net)
     :components ((:module "tests"
                           :serial t
@@ -379,6 +392,7 @@
                                        (:file "scxml-compiler-smoke")
                                        (:file "page-lookup-topic-repair-scxml-smoke")
                                        (:file "interaction-net-smoke")
+                                       (:file "nor-graph-matcher-smoke")
                                        (:file "test-runner"))))
     :perform (test-op (op c)
                       (declare (ignore op c))

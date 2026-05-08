@@ -53,6 +53,7 @@
   (run-skillization-smoke-tests)
   (run-mech-deployment-provenance-smoke-tests)
   (run-interaction-net-smoke-tests)
+  (run-nor-graph-matcher-smoke-tests)
   t)
 
 (export '(run-hyperdoc-tests))
