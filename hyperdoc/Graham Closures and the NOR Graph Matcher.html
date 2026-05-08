@@ -1,0 +1,141 @@
+<h1>Graham Closures and the NOR Graph Matcher</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+This page relates Paul Graham's Section 6.5 explanation of closures to the
+NOR graph matcher teaching story.  Graham's beginner move is: a function can
+be returned as a value, and the returned function can keep using a lexical
+variable from the place where it was created.  The NOR matcher uses the same
+mechanism, but the remembered values are not just numbers; they are the next
+success and failure exits of a compiled matcher graph.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a page="NOR Matcher Teaching Story"><tt>NOR Matcher Teaching Story</tt></a></li>
+  <li><a page="NOR Graph Matcher Teaching Story"><tt>NOR Graph Matcher Teaching Story</tt></a></li>
+  <li><a page="Running HyperDoc Examples"><tt>Running HyperDoc Examples</tt></a></li>
+  <li><a page="Writing source code pages"><tt>Writing source code pages</tt></a></li>
+  <li><a page="Graham closures and NOR graph matcher teaching code"><tt>Graham closures and NOR graph matcher teaching code</tt></a></li>
+</ul>
+
+<h2>Boundary</h2>
+
+<p>
+This is a teaching page, not the production graph matcher.  The graph is a
+small property-list model with agents, ports, and edges.  The goal is to make
+the closure boundary visible: what value is remembered by each returned
+function, and why swapping success and failure implements NOR.
+</p>
+
+<h2>1. Graham's smallest closure: remembered <tt>n</tt></h2>
+
+<p>
+<b>Click:</b> run the example below.
+<b>Observe:</b> <tt>add3</tt> and <tt>add27</tt> are produced by the same function,
+but each returned function remembers a different value of <tt>n</tt>.
+<b>Why this matters:</b> the matcher builder will use the same idea to remember
+a form, a graph predicate, and two exits.
+</p>
+
+<source-of-function>closure-nor-demo-make-adder-example</source-of-function>
+
+<h2>2. Graham's <tt>complement</tt>: negation as a returned function</h2>
+
+<p>
+<b>Click:</b> run the complement example.
+<b>Observe:</b> <tt>our-complement</tt> returns a new predicate that calls the old
+predicate and reverses the result.
+<b>Why this matters:</b> this prepares the learner for the matcher version of
+negation, where the two continuations are reversed instead of calling
+<tt>not</tt> on a Boolean value.
+</p>
+
+<source-of-function>closure-nor-demo-complement-example</source-of-function>
+
+<h2>3. A graph leaf closure: remembered predicate and remembered exits</h2>
+
+<p>
+<b>Click:</b> run the graph leaf example.
+<b>Observe:</b> the leaf matcher remembers the form <tt>(:agent :moon)</tt> and the
+two exits it should call.
+<b>Why this matters:</b> a matcher leaf is Graham's closure pattern with a richer
+environment: the function remembers both what to test and where to continue.
+</p>
+
+<source-of-function>closure-nor-demo-graph-leaf-example</source-of-function>
+
+<h2>4. NOR over graph predicates</h2>
+
+<p>
+<b>Click:</b> run the NOR absence example.
+<b>Observe:</b> <tt>(nor (:agent :shuttle) (:agent :joke))</tt> succeeds on a graph
+that contains neither forbidden agent.
+<b>Why this matters:</b> the logical connective is no longer attached to string
+search.  It now works over graph-inspection leaves.
+</p>
+
+<source-of-function>closure-nor-demo-graph-nor-success-example</source-of-function>
+
+<h2>5. NOR short-circuiting as continuation choice</h2>
+
+<p>
+<b>Click:</b> run the short-circuit example.
+<b>Observe:</b> when <tt>(:agent :shuttle)</tt> succeeds, the enclosing NOR fails
+immediately and records a <tt>:nor-short-circuit</tt> event.
+<b>Why this matters:</b> Xach's compiler target is a tree of closures whose control
+flow is already wired.  It does not need <tt>eval</tt>, and it does not need a
+fresh call to <tt>compile</tt> for this query.
+</p>
+
+<source-of-function>closure-nor-demo-graph-nor-short-circuit-example</source-of-function>
+
+<h2>6. The original query, graph-shaped</h2>
+
+<p>
+The original string query was:
+</p>
+
+<pre><code>(or (and "space" "mission")
+    (and (or "moon" "lunar") "landing"))</code></pre>
+
+<p>
+For the graph matcher, the leaves become graph predicates such as
+<tt>(:agent :moon)</tt> and <tt>(:agent :landing)</tt>.  The closure compiler does
+not care whether the leaf is a string search or a graph inspection; it only
+needs the leaf to choose success or failure.
+</p>
+
+<p>
+<b>Click:</b> run the positive graph query.
+<b>Observe:</b> the Apollo graph matches because it has <tt>:moon</tt> and
+<tt>:landing</tt> agents.
+<b>Why this matters:</b> the teaching story can move from strings to graph objects
+without changing the continuation idea.
+</p>
+
+<source-of-function>closure-nor-demo-original-query-graph-positive-example</source-of-function>
+
+<h2>7. A negative graph for the same query</h2>
+
+<p>
+<b>Click:</b> run the negative graph query.
+<b>Observe:</b> the shuttle graph has neither the <tt>:space</tt>/<tt>:mission</tt>
+pair nor the <tt>:moon</tt>/<tt>:landing</tt> pair.
+<b>Why this matters:</b> the same compiled closure tree can explain both the match
+and the non-match by returning an inspectable trace.
+</p>
+
+<source-of-function>closure-nor-demo-original-query-graph-negative-example</source-of-function>
+
+<h2>Teaching choreography</h2>
+
+<ol>
+  <li>Start with <tt>make-adder</tt>: one function remembers one number.</li>
+  <li>Move to <tt>our-complement</tt>: one returned function reverses a predicate.</li>
+  <li>Move to a matcher leaf: one returned function remembers a graph predicate and two exits.</li>
+  <li>Show NOR: the connective is implemented by choosing which exit to call.</li>
+  <li>End with the graph-shaped original query and inspect the trace.</li>
+</ol>

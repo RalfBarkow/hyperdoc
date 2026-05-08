@@ -149,6 +149,17 @@
                           :serial t
                           :components ((:file "nor-graph-matcher-demo")))))
 
+(defsystem #:hyperdoc/closures-nor-demo
+    :description "Graham closure teaching slice for the NOR graph matcher"
+    :author "Ralf Barkow"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/nor-graph-demo)
+    :components ((:module "hyperdoc"
+                          :serial t
+                          :components ((:file "graham-closures-nor-demo")))))
+
 (defsystem #:hyperdoc/dmx-import
     :description "FedWiki to DMX import support for HyperDoc"
     :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -318,6 +329,7 @@
                  #:hyperdoc/examples
                  #:hyperdoc/nor-demo
                  #:hyperdoc/nor-graph-demo
+                 #:hyperdoc/closures-nor-demo
                  #:hyperdoc/explorer
                  #:hyperdoc/explorer/examples/ops
                  #:html-inspector-views/standard)
@@ -335,6 +347,7 @@
                  #:hyperdoc/scxml
                  #:hyperdoc/explorer
                  #:hyperdoc/nor-graph-demo
+                 #:hyperdoc/closures-nor-demo
                  #:interaction-net)
     :components ((:module "tests"
                           :serial t
@@ -392,6 +405,7 @@
                                        (:file "scxml-compiler-smoke")
                                        (:file "page-lookup-topic-repair-scxml-smoke")
                                        (:file "interaction-net-smoke")
+                                       (:file "closure-nor-demo-smoke")
                                        (:file "nor-graph-matcher-smoke")
                                        (:file "test-runner"))))
     :perform (test-op (op c)
