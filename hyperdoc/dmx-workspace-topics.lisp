@@ -453,6 +453,65 @@
                    :related-topic-ids (list resolved-related-topic-id)
                    :provenance resolved-provenance)))
 
+(defun normalize-mcp-topic-factory-snippet-topic-type-uri
+    (topic-type-uri)
+  (or (and topic-type-uri
+           (normalize-dmx-workspace-topic-string
+            topic-type-uri
+            :topic-type-uri
+            'execute-dmx-workspace-topic-factory-snippet-upsert))
+      *dmx-notes-note-type-uri*))
+
+(defun normalize-mcp-topic-factory-snippet-topic-value
+    (topic-value related-hyperdoc-page-title snippet-id)
+  (or (and topic-value
+           (normalize-dmx-workspace-topic-string
+            topic-value
+            :topic-value
+            'execute-dmx-workspace-topic-factory-snippet-upsert))
+      (and related-hyperdoc-page-title
+           (normalize-dmx-workspace-topic-string
+            related-hyperdoc-page-title
+            :related-hyperdoc-page-title
+            'execute-dmx-workspace-topic-factory-snippet-upsert))
+      snippet-id))
+
+(defun normalize-mcp-topic-factory-snippet-workspace-id
+    (workspace-id workspace-topicmap-id client)
+  (or (and workspace-id
+           (normalize-dmx-workspace-topic-id
+            workspace-id
+            :workspace-id
+            'execute-dmx-workspace-topic-factory-snippet-upsert
+            :required? t))
+      (and (typep client 'http-dmx-import-client)
+           (dmx-import-workspace-id-of client))
+      (and (eql workspace-topicmap-id *dmx-context-window-topicmap-id*)
+           *dmx-context-window-workspace-id*)))
+
+(defun mcp-topic-factory-snippet-current-workspace-id (client topic-id)
+  (and topic-id
+       (dmx-import-object-id
+        (dmx-import-read-topic-workspace client topic-id))))
+
+(defun mcp-topic-factory-snippet-workspace-action
+    (current-workspace-id workspace-id)
+  (cond
+    ((null workspace-id)
+     :not-requested)
+    ((eql current-workspace-id workspace-id)
+     :already-assigned)
+    ((and current-workspace-id
+          (not (eql current-workspace-id workspace-id)))
+     (error 'fedwiki-dmx-import-error
+            :message
+            (format nil
+                    "Topic-factory snippet upsert refuses to move topic from workspace ~D to workspace ~D"
+                    current-workspace-id
+                    workspace-id)))
+    (t
+     :assign)))
+
 (defun plan-dmx-workspace-topicmap-context-upsert
     (topic-id &key workspace-topicmap-id client view-props)
   (let* ((resolved-topic-id
@@ -1182,10 +1241,17 @@
     (&key snippet-id snippet-text source-path source-origin-id source-origin-path
        related-hyperdoc-page-title related-topic-id references provenance
        workspace-topicmap-id client (dry-run t) topic-type-uri view-props
-       topic-value)
+       topic-value workspace-id)
   (let* ((resolved-client
           (or client
               (make-default-dmx-import-client :dry-run dry-run :verbose nil)))
+         (resolved-topic-type-uri
+          (normalize-mcp-topic-factory-snippet-topic-type-uri topic-type-uri))
+         (resolved-topic-value
+          (normalize-mcp-topic-factory-snippet-topic-value
+           topic-value
+           related-hyperdoc-page-title
+           snippet-id))
          (definition
           (make-mcp-topic-factory-snippet-definition
            :snippet-id snippet-id
@@ -1203,9 +1269,22 @@
            definition
            :workspace-topicmap-id workspace-topicmap-id
            :client resolved-client
-           :topic-type-uri topic-type-uri
+           :topic-type-uri resolved-topic-type-uri
            :view-props view-props
-           :topic-value topic-value))
+           :topic-value resolved-topic-value))
+         (resolved-workspace-id
+          (normalize-mcp-topic-factory-snippet-workspace-id
+           workspace-id
+           (topic-factory-snippet-dmx-write-plan-workspace-topicmap-id planned)
+           resolved-client))
+         (current-workspace-id
+          (mcp-topic-factory-snippet-current-workspace-id
+           resolved-client
+           (topic-factory-snippet-dmx-write-plan-existing-topic-id planned)))
+         (workspace-action
+          (mcp-topic-factory-snippet-workspace-action
+           current-workspace-id
+           resolved-workspace-id))
          (subject-key (topic-factory-snippet-dmx-write-plan-uri planned))
          (previous-preview
           (if-let (existing-topic
@@ -1239,7 +1318,8 @@
            (if (eql (topic-factory-snippet-dmx-write-plan-topicmap-action planned) :add)
                (topic-factory-snippet-dmx-write-plan-view-props planned)
                (gethash "viewProps" previous-preview))
-           :workspace-id (gethash "workspaceId" previous-preview)
+           :workspace-id (or resolved-workspace-id
+                             (gethash "workspaceId" previous-preview))
            :workspace-title (gethash "workspaceTitle" previous-preview)))
          (journal-preview
           (dmx-workspace-journal-transition-preview
@@ -1263,9 +1343,10 @@
            :workspace-topicmap-id workspace-topicmap-id
            :client resolved-client
            :dry-run dry-run
-           :topic-type-uri topic-type-uri
+           :topic-type-uri resolved-topic-type-uri
            :view-props view-props
-           :topic-value topic-value
+           :topic-value resolved-topic-value
+           :workspace-id resolved-workspace-id
            :stream stream))
          (execution-log (get-output-stream-string stream))
          (plan (getf result :plan))
@@ -1292,6 +1373,9 @@
                  (topic-factory-snippet-dmx-write-plan-topic-type-uri plan)
                  :topic-value
                  (topic-factory-snippet-dmx-write-plan-topic-value plan)
+                 :workspace-id resolved-workspace-id
+                 :current-workspace-id current-workspace-id
+                 :workspace-action workspace-action
                  :source-path
                  (topic-factory-snippet-dmx-write-plan-source-path plan)
                  :related-hyperdoc-page-title

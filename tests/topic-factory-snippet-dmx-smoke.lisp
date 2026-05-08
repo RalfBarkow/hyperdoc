@@ -365,6 +365,162 @@
                            "HTTP 204 lookup must still classify missing topicmap membership as ADD")))
       (setf (symbol-function 'drakma:http-request) original))))
 
+(defun run-topic-factory-snippet-dmx-guarded-default-carrier-smoke-test ()
+  (let* ((client (make-instance 'hyperdoc::memory-dmx-import-client
+                                :next-topic-id 7200))
+         (snippet-id "guarded-topic-factory-snippet-default-carrier")
+         (source-path "hyperdoc/dmx-workspace-topics.lisp")
+         (related-title "Guarded topic-factory snippet default carrier")
+         (related-topic-id "guarded-topic-factory-snippet-default-carrier-topic")
+         (initial-text "(defun guarded-topic-factory-snippet-default-carrier-topic () :ok)")
+         (dry-run-summary
+          (hyperdoc::execute-dmx-workspace-topic-factory-snippet-upsert
+           :snippet-id snippet-id
+           :snippet-text initial-text
+           :source-path source-path
+           :related-hyperdoc-page-title related-title
+           :related-topic-id related-topic-id
+           :references (vector "Using guarded workspace topic lifecycle tools")
+           :workspace-topicmap-id
+           *topic-factory-snippet-dmx-workspace-topicmap-id*
+           :client client
+           :dry-run t)))
+    (assert-equal :canonical
+                  (getf dry-run-summary :view-props-validation-status)
+                  "Guarded snippet dry-run must preserve canonical view-props validation")
+    (assert-equal hyperdoc::*dmx-notes-note-type-uri*
+                  (getf dry-run-summary :topic-type-uri)
+                  "Guarded snippet upsert must default to the installed DMX note carrier")
+    (assert-equal related-title
+                  (getf dry-run-summary :topic-value)
+                  "Guarded snippet upsert must default the topic value to the related HyperDoc page title")
+    (assert-equal 919815
+                  (getf dry-run-summary :workspace-id)
+                  "Guarded snippet upsert must infer the context-window workspace for topicmap 919822")
+    (assert-equal :assign
+                  (getf dry-run-summary :workspace-action)
+                  "Guarded snippet dry-run must show the workspace assignment needed before durable idempotent updates")
+    (assert-true
+     (search "\"dmx.topicmaps.x\":160"
+             (getf dry-run-summary :normalized-view-props-json))
+     "Guarded snippet dry-run must expose long-form topicmap view-props")
+    (let* ((create-summary
+            (hyperdoc::execute-dmx-workspace-topic-factory-snippet-upsert
+             :snippet-id snippet-id
+             :snippet-text initial-text
+             :source-path source-path
+             :related-hyperdoc-page-title related-title
+             :related-topic-id related-topic-id
+             :references (vector "Using guarded workspace topic lifecycle tools")
+             :workspace-topicmap-id
+             *topic-factory-snippet-dmx-workspace-topicmap-id*
+             :client client
+             :dry-run nil))
+           (topic-id (getf create-summary :topic-id))
+           (topic (hyperdoc::dmx-import-read-topic client topic-id))
+           (membership-key
+            (hyperdoc::memory-topicmap-membership-key
+             *topic-factory-snippet-dmx-workspace-topicmap-id*
+             topic-id))
+           (membership-view-props
+            (gethash membership-key
+                     (hyperdoc::topicmap-memberships-of client))))
+      (assert-equal :create
+                    (getf create-summary :topic-action)
+                    "Guarded snippet live create must create the missing topic")
+      (assert-equal :add
+                    (getf create-summary :topicmap-action)
+                    "Guarded snippet live create must add the topicmap membership")
+      (assert-equal :assign
+                    (getf create-summary :workspace-action)
+                    "Guarded snippet live create must assign the topic to the context-window workspace")
+      (assert-true (integerp topic-id)
+                   "Guarded snippet live create must return a concrete topic id")
+      (assert-equal hyperdoc::*dmx-notes-note-type-uri*
+                    (hyperdoc::dmx-json-object-value topic "typeUri")
+                    "Guarded snippet live create must store an installed note topic")
+      (assert-equal related-title
+                    (hyperdoc::dmx-json-object-value topic "value")
+                    "Guarded snippet live create must store the human-facing topic value")
+      (assert-equal initial-text
+                    (hyperdoc::dmx-json-child-value
+                     topic
+                     hyperdoc::*dmx-notes-text-type-uri*)
+                    "Guarded snippet live create must store snippet text in the note text child")
+      (assert-true membership-view-props
+                   "Guarded snippet live create must place the topic in the topicmap")
+      (assert-equal 919815
+                    (hyperdoc::dmx-import-object-id
+                     (hyperdoc::dmx-import-read-topic-workspace client topic-id))
+                    "Guarded snippet live create must persist workspace assignment")
+      (assert-equal 160
+                    (hyperdoc::dmx-topicmap-view-props-value
+                     membership-view-props
+                     :x)
+                    "Guarded snippet topicmap membership must use canonical long-form view props")
+      (let* ((updated-text
+              "Updated snippet text through guarded workspace upsert.")
+             (update-summary
+              (hyperdoc::execute-dmx-workspace-topic-factory-snippet-upsert
+               :snippet-id snippet-id
+               :snippet-text updated-text
+               :source-path source-path
+               :related-hyperdoc-page-title related-title
+               :related-topic-id related-topic-id
+               :references (vector "Using guarded workspace topic lifecycle tools")
+               :workspace-topicmap-id
+               *topic-factory-snippet-dmx-workspace-topicmap-id*
+               :client client
+               :dry-run nil))
+             (updated-topic (hyperdoc::dmx-import-read-topic client topic-id)))
+        (assert-equal topic-id
+                      (getf update-summary :topic-id)
+                      "Guarded snippet repeated upsert must be idempotent over topic id")
+        (assert-equal :update
+                      (getf update-summary :topic-action)
+                      "Guarded snippet repeated upsert must switch to UPDATE")
+        (assert-equal :already-present
+                      (getf update-summary :topicmap-action)
+                      "Guarded snippet repeated upsert must not duplicate topicmap membership")
+        (assert-equal :already-assigned
+                      (getf update-summary :workspace-action)
+                      "Guarded snippet repeated upsert must preserve workspace assignment")
+        (assert-equal 1
+                      (hash-table-count
+                       (hyperdoc::topics-by-external-key-of client))
+                      "Guarded snippet repeated upsert must not create duplicate topics")
+        (assert-equal 1
+                      (hash-table-count
+                       (hyperdoc::topicmap-memberships-of client))
+                      "Guarded snippet repeated upsert must not create duplicate topicmap placements")
+        (assert-equal updated-text
+                      (hyperdoc::dmx-json-child-value
+                       updated-topic
+                       hyperdoc::*dmx-notes-text-type-uri*)
+                      "Guarded snippet repeated upsert must update the note text child")))))
+
+(defun run-dmx-handover-proxied-artifact-validation-smoke-test ()
+  (handler-case
+      (progn
+        (hyperdoc::create-dmx-workspace-handover
+         "Handover with proxied artifact"
+         "This handover deliberately carries a proxied artifact path."
+         :artifacts
+         '("/mnt/data/Graham%20Closures%20and%20the%20NOR%20Graph%20Matcher.html")
+         :workspace-topicmap-id
+         *topic-factory-snippet-dmx-workspace-topicmap-id*
+         :client (make-instance 'hyperdoc::memory-dmx-import-client)
+         :dry-run t)
+        (error "Expected proxied artifact paths to be rejected before write"))
+    (hyperdoc::dmx-workspace-note-validation-error (condition)
+      (let ((message (hyperdoc::fedwiki-dmx-import-message-of condition)))
+        (assert-true
+         (search "/mnt/data/" message)
+         "Proxied artifact validation must name the rejected mount")
+        (assert-true
+         (search "repo-relative paths" message)
+         "Proxied artifact validation must explain the accepted artifact shape")))))
+
 (defun run-topic-factory-snippet-dmx-smoke-tests ()
   (run-topic-factory-snippet-dmx-plan-smoke-test)
   (run-topic-factory-snippet-dmx-dry-run-create-smoke-test)
@@ -374,5 +530,7 @@
   (run-topic-factory-snippet-dmx-custom-topic-value-smoke-test)
   (run-topic-factory-snippet-dmx-zettel-payload-smoke-test)
   (run-topic-factory-snippet-dmx-http-no-content-plan-smoke-test)
+  (run-topic-factory-snippet-dmx-guarded-default-carrier-smoke-test)
+  (run-dmx-handover-proxied-artifact-validation-smoke-test)
   (format t "~&Topic-factory snippet DMX smoke tests passed.~%")
   t)

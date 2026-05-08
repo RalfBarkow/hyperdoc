@@ -889,6 +889,25 @@
    "message"
    "Live DMX writes are disabled. Set HYPERDOC_MCP_ENABLE_LIVE_WRITES=1 and configure a usable DMX import base URL before calling live tools."))
 
+(defun dmx-mcp-http-error-boundary (evidence)
+  (let ((method (getf evidence :method))
+        (path (getf evidence :path)))
+    (cond
+      ((and (eq method :post)
+            path
+            (string= path "/core/topic"))
+       "dmx-import-create-topic")
+      ((and (eq method :put)
+            path
+            (search "/core/topic/" path :test #'char=))
+       "dmx-import-update-topic")
+      ((and (member method '(:post :put) :test #'eq)
+            path
+            (search "/topicmaps/" path :test #'char=))
+       "dmx-import-topicmap-context")
+      (t
+       "dmx-import-http-request"))))
+
 (defun dmx-mcp-validation-error-object (condition)
   (typecase condition
     (dmx-topicmap-view-props-validation-error
@@ -940,6 +959,24 @@
       (coerce (mapcar (lambda (action) (format nil "~(~A~)" action))
                       (dmx-workspace-topic-ownership-allowed-actions-of condition))
               'vector)))
+    (dmx-import-http-error
+     (let ((evidence (dmx-import-http-evidence-of condition)))
+       (dmx-mcp-json-object
+        "status" "http_error"
+        "message" (princ-to-string condition)
+        "reason" (fedwiki-dmx-import-message-of condition)
+        "boundary" (dmx-mcp-http-error-boundary evidence)
+        "endpoint" (or (getf evidence :path)
+                       (dmx-import-http-url-of condition))
+        "url" (dmx-import-http-url-of condition)
+        "statusCode" (dmx-import-http-status-code-of condition)
+        "responseBody" (dmx-import-http-response-body-of condition)
+        "requestBodyPrefix" (getf evidence :request-body-prefix)
+        "requestBodyLength" (getf evidence :request-body-length)
+        "responseBodyPrefix" (or (getf evidence :response-body-prefix)
+                                  (dmx-import-http-response-body-of condition))
+        "responseBodyLength" (getf evidence :response-body-length)
+        "httpEvidence" evidence)))
     (dmx-import-unsupported-operation-error
      (dmx-mcp-json-object
       "status" "unsupported_operation"
@@ -1437,6 +1474,7 @@
                :workspace-topicmap-id
                (or (dmx-mcp-argument arguments "workspaceTopicmapId")
                    (dmx-mcp-server-workspace-topicmap-id server))
+               :workspace-id (dmx-mcp-argument arguments "workspaceId")
                :client (dmx-mcp-server-write-client server)
                :topic-type-uri (dmx-mcp-argument arguments "topicTypeUri")
                :view-props (gethash "viewProps" arguments)
@@ -1817,6 +1855,7 @@
                                         "items" (dmx-mcp-json-object "type" "string"))
       "provenance" (dmx-mcp-json-object "type" "object")
       "workspaceTopicmapId" (dmx-mcp-json-object "type" "integer")
+      "workspaceId" (dmx-mcp-json-object "type" "integer")
       "topicTypeUri" (dmx-mcp-json-object "type" "string")
       "topicValue" (dmx-mcp-json-object "type" "string")
       "viewProps" (dmx-mcp-json-object "type" "object")

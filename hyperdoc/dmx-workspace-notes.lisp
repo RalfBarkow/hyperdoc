@@ -163,6 +163,11 @@
 (defun dmx-workspace-note-uri (note-kind note-key)
   (format nil "hyperdoc:mcp/~(~A~)/~A" note-kind note-key))
 
+(defun dmx-workspace-note-string-prefix-p (prefix string)
+  (and (stringp string)
+       (<= (length prefix) (length string))
+       (string= prefix string :end2 (length prefix))))
+
 (defun make-dmx-workspace-note-children (&key title text)
   (let ((children (make-hash-table :test #'equal)))
     (setf (gethash *dmx-notes-title-type-uri* children) title
@@ -578,6 +583,26 @@
       (dolist (artifact artifacts)
         (format stream "- ~A~%" artifact)))))
 
+(defun normalize-dmx-workspace-handover-artifacts (artifacts)
+  (loop for artifact in (or artifacts '())
+        collect
+        (let ((resolved-artifact
+               (normalize-dmx-workspace-note-string
+                artifact
+                :artifacts
+                'create-dmx-workspace-handover)))
+          (when (dmx-workspace-note-string-prefix-p "/mnt/data/"
+                                                    resolved-artifact)
+            (error 'dmx-workspace-note-validation-error
+                   :message
+                   (format nil
+                           "DMX handover artifact path ~S is under the proxied mount /mnt/data/. This guarded MCP boundary cannot rewrite proxied local artifact paths without an explicit artifact rewrite contract. Pass repo-relative paths, dmx:// URIs, http(s) URLs, or omit artifacts."
+                           resolved-artifact)
+                   :boundary 'create-dmx-workspace-handover/artifacts
+                   :payload (list :artifact resolved-artifact)
+                   :invalid-fields '(:artifacts)))
+          resolved-artifact)))
+
 (defun create-dmx-workspace-handover
     (title
      summary
@@ -595,7 +620,9 @@
           summary
           :summary
           'create-dmx-workspace-handover
-          :required? t)))
+          :required? t))
+        (resolved-artifacts
+         (normalize-dmx-workspace-handover-artifacts artifacts)))
     (execute-dmx-workspace-note-write
      resolved-title
      (dmx-workspace-handover-body
@@ -603,7 +630,7 @@
       :to-agent to-agent
       :summary resolved-summary
       :requested-action requested-action
-      :artifacts artifacts
+      :artifacts resolved-artifacts
       :status status)
      :workspace-topicmap-id workspace-topicmap-id
      :client client

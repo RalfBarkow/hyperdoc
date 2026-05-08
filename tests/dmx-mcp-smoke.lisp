@@ -1818,8 +1818,8 @@
                   "Updated snippet text through MCP."
                   (hyperdoc::dmx-json-child-value
                    updated-topic
-                   hyperdoc::*dmx-topic-factory-snippet-text-type-uri*)
-                  "topic-factory snippet update must replace the snippet text child")))
+                   hyperdoc::*dmx-notes-text-type-uri*)
+                  "topic-factory snippet update must replace the note text child")))
              (multiple-value-bind (placement-body placement-status _)
                  (mcp-test-call-tool
                   url
@@ -3106,6 +3106,48 @@
         (hyperdoc::stop-dmx-mcp-server)))
     t))
 
+(defun run-dmx-mcp-http-error-surface-smoke-test ()
+  (let* ((request-prefix
+          "{\"typeUri\":\"hyperdoc.topic_factory_snippet\"}")
+         (response-prefix
+          "{\"message\":\"Type hyperdoc.topic_factory_snippet not found\"}")
+         (condition
+          (make-condition
+           'hyperdoc::dmx-import-http-error
+           :message "Internal Server Error"
+           :url "https://dmx.ralfbarkow.ch/core/topic"
+           :status-code 500
+           :response-body response-prefix
+           :evidence
+           (list :method :post
+                 :path "/core/topic"
+                 :request-body-prefix request-prefix
+                 :request-body-length (length request-prefix)
+                 :response-body-prefix response-prefix
+                 :response-body-length (length response-prefix))))
+         (object
+          (hyperdoc::dmx-mcp-validation-error-object condition)))
+    (mcp-assert-equal "http_error"
+                      (gethash "status" object)
+                      "MCP HTTP error surface must classify DMX HTTP failures")
+    (mcp-assert-equal "dmx-import-create-topic"
+                      (gethash "boundary" object)
+                      "MCP HTTP error surface must name the create-topic boundary")
+    (mcp-assert-equal "/core/topic"
+                      (gethash "endpoint" object)
+                      "MCP HTTP error surface must expose the failing endpoint")
+    (mcp-assert-equal 500
+                      (gethash "statusCode" object)
+                      "MCP HTTP error surface must expose the HTTP status")
+    (mcp-assert-true
+     (search "hyperdoc.topic_factory_snippet"
+             (gethash "requestBodyPrefix" object))
+     "MCP HTTP error surface must expose a bounded normalized request payload prefix")
+    (mcp-assert-true
+     (search "not found"
+             (gethash "responseBody" object))
+     "MCP HTTP error surface must expose the DMX response body")))
+
 (defun run-dmx-mcp-smoke-tests ()
   (run-dmx-workspace-note-http-single-content-type-smoke-test)
   (run-dmx-import-delete-and-remove-contract-smoke-test)
@@ -3120,6 +3162,7 @@
   (run-dmx-mcp-workspace-assignment-localhost-rehearsal-smoke-test)
   (run-dmx-mcp-workspace-assignment-repair-smoke-test)
   (run-dmx-workspace-journal-assignment-repair-nonrecursive-smoke-test)
+  (run-dmx-mcp-http-error-surface-smoke-test)
   (format t "~&DMX MCP smoke tests passed.~%")
   t)
 

@@ -135,6 +135,32 @@
      (list :title-type-uri *dmx-notes-title-type-uri*
            :content-type-uri *dmx-notes-text-type-uri*))))
 
+(defun topic-factory-snippet-dmx-topic-workspace-id (client topic-id)
+  (and topic-id
+       (dmx-import-object-id
+        (dmx-import-read-topic-workspace client topic-id))))
+
+(defun ensure-topic-factory-snippet-dmx-workspace-assignment
+    (client workspace-id topic-id)
+  (when workspace-id
+    (let ((current-workspace-id
+           (topic-factory-snippet-dmx-topic-workspace-id client topic-id)))
+      (cond
+        ((eql current-workspace-id workspace-id)
+         :already-assigned)
+        ((and current-workspace-id
+              (not (eql current-workspace-id workspace-id)))
+         (error 'fedwiki-dmx-import-error
+                :message
+                (format nil
+                        "Topic-factory snippet upsert refuses to move topic ~D from workspace ~D to workspace ~D"
+                        topic-id
+                        current-workspace-id
+                        workspace-id)))
+        (t
+         (dmx-import-assign-topic-to-workspace client workspace-id topic-id)
+         :assign)))))
+
 (defun topic-factory-snippet-dmx-default-children
     (definition workspace-topicmap-id)
   (let ((children (make-hash-table :test #'equal)))
@@ -282,6 +308,7 @@
     (snippet-source
      &key workspace-topicmap-id client (dry-run t) topic-type-uri view-props
        topic-value
+       workspace-id
        (stream *standard-output*))
   (let* ((resolved-client
           (or client
@@ -302,8 +329,31 @@
       (error 'dmx-import-config-error
              :message "Live topic-factory snippet DMX write requested without a configured HTTP client"
              :missing-keys '("HYPERDOC_DMX_IMPORT_BASE_URL")))
+    (when (and (not dry-run)
+               workspace-id
+               (typep resolved-client 'http-dmx-import-client)
+               (or (eql (topic-factory-snippet-dmx-write-plan-topic-action plan)
+                        :create)
+                   (null
+                    (topic-factory-snippet-dmx-topic-workspace-id
+                     resolved-client
+                     (topic-factory-snippet-dmx-write-plan-existing-topic-id
+                      plan)))))
+      ;; Preflight before a live create so an auth-blocked assignment cannot
+      ;; leave behind an unassigned topic that later idempotent updates cannot
+      ;; modify.
+      (ensure-http-dmx-import-authenticated-operation
+       resolved-client
+       :topic-factory-snippet-workspace-assignment))
     (render-topic-factory-snippet-dmx-plan plan :stream stream :dry-run dry-run)
     (unless dry-run
+      (when (and workspace-id
+                 (eql (topic-factory-snippet-dmx-write-plan-topic-action plan)
+                      :update))
+        (ensure-topic-factory-snippet-dmx-workspace-assignment
+         resolved-client
+         workspace-id
+         (topic-factory-snippet-dmx-write-plan-existing-topic-id plan)))
       (ecase (topic-factory-snippet-dmx-write-plan-topic-action plan)
         (:create
          (dmx-import-create-topic resolved-client
@@ -322,6 +372,13 @@
                  :message (format nil
                                   "Topic-factory snippet DMX write could not resolve a topic id for ~A after topic upsert"
                                   (topic-factory-snippet-dmx-write-plan-uri plan))))
+        (when (and workspace-id
+                   (eql (topic-factory-snippet-dmx-write-plan-topic-action plan)
+                        :create))
+          (ensure-topic-factory-snippet-dmx-workspace-assignment
+           resolved-client
+           workspace-id
+           topic-id))
         (ecase (topic-factory-snippet-dmx-write-plan-topicmap-action plan)
           (:add
            (dmx-import-add-topic-to-topicmap
