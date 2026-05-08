@@ -491,7 +491,6 @@
    :summary \"Human responsibility in AI-assisted targeting is scaffolded here as a reusable human/AI decision-boundary concept for allegation-qualified incident documentation.\"
    :references '(\"Human responsibility in AI-assisted targeting\"
                  \"Minab school strike allegations\")))
-
 "
  :TOPIC-DEFINITIONS
  ((:FUNCTION-NAME "stale-target-coordinates-topic" :TITLE "Stale target coordinates" :TOPIC-ID

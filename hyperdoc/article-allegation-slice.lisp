@@ -748,14 +748,17 @@
   (with-output-to-string (stream)
     (format stream ";; Article allegation slice topics for ~A.~%~%"
             (getf input :incident-title))
-    (dolist (concept (getf input :concepts))
+    (loop for concept in (getf input :concepts)
+          for first-p = t then nil
+          do (unless first-p
+               (terpri stream))
       (format stream "(defun ~A ()~%"
               (getf concept :topic-function-name))
       (format stream "  (make-topic~%")
       (format stream "   :id ~S~%" (getf concept :topic-id))
       (format stream "   :title ~S~%" (getf concept :title))
       (format stream "   :summary ~S~%" (getf concept :summary))
-      (format stream "   :references '~S))~%~%"
+      (format stream "   :references '~S))~%"
               (article-allegation-concept-references input concept)))))
 
 (defun article-allegation-story-item-id (page-index item-index)
