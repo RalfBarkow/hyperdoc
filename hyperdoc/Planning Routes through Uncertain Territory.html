@@ -1,0 +1,216 @@
+<h1>Planning Routes through Uncertain Territory</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page imports the core representational claim from Drew McDermott and
+  Ernest Davis's 1984 <i>Artificial Intelligence</i> paper: route planning in
+  partly known environments requires both topological structure and metric
+  structure, and the metric structure must tolerate uncertainty rather than
+  pretending that all locations are sharp points.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Planning routes through uncertain territory"><tt>Planning routes through uncertain territory</tt></a></li>
+  <li><a hyperbook="topics" page="Topological and metric spatial reasoning"><tt>Topological and metric spatial reasoning</tt></a></li>
+  <li><a hyperbook="topics" page="Fuzzy map"><tt>Fuzzy map</tt></a></li>
+  <li><a hyperbook="topics" page="Frob tree"><tt>Frob tree</tt></a></li>
+  <li><a hyperbook="topics" page="Spatial fact assimilation"><tt>Spatial fact assimilation</tt></a></li>
+  <li><a hyperbook="topics" page="Spatial discrimination tree"><tt>Spatial discrimination tree</tt></a></li>
+  <li><a hyperbook="topics" page="Route planning under uncertainty"><tt>Route planning under uncertainty</tt></a></li>
+  <li><a hyperbook="topics" page="Barrier/conduit route planning"><tt>Barrier/conduit route planning</tt></a></li>
+  <li><a hyperbook="topics" page="SPAM spatial module"><tt>SPAM spatial module</tt></a></li>
+</ul>
+
+<h2>Source identity</h2>
+
+<p>
+  Source: Drew McDermott and Ernest Davis, “Planning Routes through Uncertain
+  Territory,” <i>Artificial Intelligence</i>, volume 22, number 2, 1984,
+  pages 107–156.
+</p>
+
+<h2>Source-backed claims</h2>
+
+<ul>
+  <li>
+    A cognitive-map implementation should not collapse topology and metric
+    geometry. The paper's design keeps topological assertions in an assertional
+    database and metric information in a fuzzy map.
+  </li>
+  <li>
+    A fuzzy map records relative position, orientation, and scale in convenient
+    frames of reference, with fuzzy coordinates represented as interval
+    fuzzboxes rather than as fixed values.
+  </li>
+  <li>
+    The same spatial information also needs an inverted retrieval structure:
+    a discrimination tree that can retrieve objects by location and other
+    attributes instead of only answering questions about named objects.
+  </li>
+  <li>
+    Assimilation is not just append-only fact storage. A new spatial fact may
+    tighten existing fuzzy coordinate ranges, or it may force remapping by
+    rearranging or adding frames of reference.
+  </li>
+  <li>
+    Route planning is modeled as a staged process: first find the approximate
+    direction and topological path, then refine the route around barriers and
+    through conduits using the retrieval modules.
+  </li>
+</ul>
+
+<h2>Local vocabulary imported into HyperDoc</h2>
+
+<h3>Topological and metric split</h3>
+
+<p>
+  HyperDoc should preserve the paper's split between qualitative graph-like
+  relations and quantitative/metric constraints. A link, association, route,
+  station, or containment claim is not the same thing as an exact coordinate.
+  This is a useful boundary for documentation interfaces that make routes
+  visible without pretending that every anchor is equally stable or equally
+  precise.
+</p>
+
+<h3>Fuzzy map</h3>
+
+<p>
+  A fuzzy map is not imported here as a finished implementation. It is imported
+  as a design pattern: when an interface knows “roughly where” an object,
+  station, pane, source span, or DOM anchor belongs, the uncertainty should be
+  represented explicitly. For HyperDoc, this is relevant to source stations,
+  DOM anchors, route annotations, topic placement, and any future route view
+  that compares local and remote frames.
+</p>
+
+<h3>Frob tree and mquants</h3>
+
+<p>
+  McDermott and Davis collapse frame and object into a hybrid called a
+  <tt>frob</tt>. Adjacent frobs store memorized fuzzy quantities, or
+  <tt>mquants</tt>, and other quantities are computed along frame paths. The
+  HyperDoc lesson is that an inspectable object can also be a local reference
+  frame: the same thing may be content, anchor, coordinate frame, and retrieval
+  station, depending on the view.
+</p>
+
+<h3>Assimilation</h3>
+
+<p>
+  The paper's assimilation vocabulary is especially important for HyperDoc. A
+  newly imported source may merely sharpen an existing topic, but it may also
+  require a local reorganization of neighboring topics, pages, anchors, and
+  references. The two imported operations are:
+</p>
+
+<ul>
+  <li><b>fuzz constriction</b>: tightening an existing range of possibilities, and</li>
+  <li><b>remapping</b>: changing the frame structure so that a new fact becomes expressible.</li>
+</ul>
+
+<h3>Discrimination-tree retrieval</h3>
+
+<p>
+  The discrimination tree is an inverted map for retrieval. It turns “given
+  these spatial properties, what object is relevant?” into a first-class query.
+  HyperDoc's corresponding use is not geometric search alone; it is source and
+  topic retrieval by anchor context, relation kind, route role, traversability,
+  and page neighborhood.
+</p>
+
+<h3>Barrier/conduit route planning</h3>
+
+<p>
+  The route planner treats barriers and conduits as semantic spatial objects:
+  walls block; doors, paths, and openings permit traversal for particular
+  navigators; semiconduits may be traversable but still require planning.
+  The paper distinguishes traversal barriers from penetration barriers, so the
+  relevant question is not only whether an object blocks motion inside itself,
+  but also whether the navigator can get through its boundary. In HyperDoc
+  language, the useful import is that a route is not a line. A route is an
+  inspectable plan through constraints, with semantic roles for blockers,
+  openings, policies, and intermediate stations.
+</p>
+
+<h2>SPAM module crosswalk</h2>
+
+<table>
+  <tr>
+    <th>Paper component</th>
+    <th>Role in the paper</th>
+    <th>HyperDoc import</th>
+  </tr>
+  <tr>
+    <td><tt>TOPO</tt></td>
+    <td>Topological inferences over inclusion, overlap, parts, and barriers.</td>
+    <td>Graph/relation reasoning over topics, pages, anchors, and route constraints.</td>
+  </tr>
+  <tr>
+    <td><tt>MEASURE</tt></td>
+    <td>Metric queries over fuzzy maps, including term values and consistency tests.</td>
+    <td>Explicit uncertainty around anchor stability, relative placement, and route evidence.</td>
+  </tr>
+  <tr>
+    <td><tt>FIND</tt></td>
+    <td>Retrieval of objects from spatial properties using an inverted discrimination tree.</td>
+    <td>Discovery of relevant pages, topics, anchors, and route objects from contextual properties.</td>
+  </tr>
+  <tr>
+    <td>Assimilator</td>
+    <td>Constrains fuzz or remaps frames when new facts arrive.</td>
+    <td>Source-station assimilation that can sharpen or reorganize the local topic/page model.</td>
+  </tr>
+  <tr>
+    <td>Navigator / route planner</td>
+    <td>Finds direction and topology, then works around barriers and through conduits.</td>
+    <td>Route-as-object planning and inspection rather than disposable gesture trails.</td>
+  </tr>
+</table>
+
+<h2>Boundary notes</h2>
+
+<ul>
+  <li>
+    This page does not claim that HyperDoc now implements the SPAM algorithms.
+    It imports the paper's representational vocabulary and route-planning
+    decomposition.
+  </li>
+  <li>
+    The paper itself excludes or defers execution, multiple-destination route
+    planning, moving objects other than the navigator, vision integration,
+    robust replanning, contradiction handling, familiar-route retrieval, and
+    errand-running.
+  </li>
+  <li>
+    The paper's “fuzzy” intervals should not be read as a probabilistic model;
+    the authors explicitly choose simple ranges to keep computation tractable
+    under limited information.
+  </li>
+</ul>
+
+<h2>HyperDoc editorial synthesis</h2>
+
+<p>
+  This source belongs beside the existing Drew McDermott planning cluster, but
+  it also speaks directly to HyperDoc's route vocabulary. It is an early example
+  of route planning as an interaction between graph topology, uncertain metric
+  evidence, retrieval indexes, and staged plan refinement. That is the useful
+  bridge: HyperDoc routes should remain inspectable semantic objects whose
+  evidence and uncertainty can be reviewed, not only visual connectors drawn
+  between two rendered things.
+</p>
+
+<h2>Related local pages</h2>
+
+<ul>
+  <li><a page="Drew McDermott Lisp, Planning, and Software">Drew McDermott Lisp, Planning, and Software</a></li>
+  <li><a page="Drew McDermott topic arrangement">Drew McDermott topic arrangement</a></li>
+  <li><a page="PDDL and Opt in Drew McDermott's work">PDDL and Opt in Drew McDermott's work</a></li>
+  <li><a page="A DOM-annotation connect gesture">A DOM-annotation connect gesture</a></li>
+  <li><a page="Focused semantic source stations">Focused semantic source stations</a></li>
+  <li><a page="Source-station assimilation routine">Source-station assimilation routine</a></li>
+  <li><a page="Canonical Route Discovery for Runtime Smoke Tests">Canonical Route Discovery for Runtime Smoke Tests</a></li>
+</ul>

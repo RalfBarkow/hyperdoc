@@ -2831,6 +2831,88 @@
                  "Mind and Mechanism compatibility with HyperDoc"
                  "PDDL and Opt in Drew McDermott's work")))
 
+;; Topic objects for the McDermott-Davis route-planning source slice.
+(defun planning-routes-through-uncertain-territory-topic ()
+  (make-topic
+   :id "planning-routes-through-uncertain-territory"
+   :title "Planning routes through uncertain territory"
+   :summary "McDermott and Davis's route-planning source model for navigating partly known space with topological facts, metric fuzzy maps, spatial retrieval, and staged obstacle handling."
+   :references '("Planning Routes through Uncertain Territory"
+                 "Drew McDermott Lisp, Planning, and Software"
+                 "Drew McDermott topic arrangement")))
+
+(defun topological-and-metric-spatial-reasoning-topic ()
+  (make-topic
+   :id "topological-and-metric-spatial-reasoning"
+   :title "Topological and metric spatial reasoning"
+   :summary "Spatial representation split in which qualitative inclusion, overlap, and barrier facts remain distinct from metric position, orientation, scale, and distance constraints."
+   :references '("Planning Routes through Uncertain Territory"
+                 "Focused semantic source stations"
+                 "Canonical Route Discovery for Runtime Smoke Tests")))
+
+(defun fuzzy-map-topic ()
+  (make-topic
+   :id "fuzzy-map"
+   :title "Fuzzy map"
+   :summary "Metric spatial representation that stores relative positions, orientations, and scales in multiple frames of reference using interval-valued fuzzy coordinates and fuzzboxes."
+   :references '("Planning Routes through Uncertain Territory"
+                 "Topological and metric spatial reasoning")))
+
+(defun frob-tree-topic ()
+  (make-topic
+   :id "frob-tree"
+   :title "Frob tree"
+   :summary "Tree of hybrid frame/object nodes used by McDermott and Davis to organize fuzzy map frames and the memorized fuzzy quantities between adjacent frobs."
+   :references '("Planning Routes through Uncertain Territory"
+                 "Fuzzy map")))
+
+(defun spatial-fact-assimilation-topic ()
+  (make-topic
+   :id "spatial-fact-assimilation"
+   :title "Spatial fact assimilation"
+   :summary "Process of incorporating new spatial facts by constraining fuzzy coordinate ranges when possible and remapping or growing the frob tree when needed."
+   :references '("Planning Routes through Uncertain Territory"
+                 "Fuzzy map"
+                 "Frob tree"
+                 "Source-station assimilation routine")))
+
+(defun spatial-discrimination-tree-topic ()
+  (make-topic
+   :id "spatial-discrimination-tree"
+   :title "Spatial discrimination tree"
+   :summary "Inverted spatial retrieval index used by FIND to retrieve objects from location and other attributes instead of only computing properties of named objects."
+   :references '("Planning Routes through Uncertain Territory"
+                 "Fuzzy map"
+                 "Topological and metric spatial reasoning")))
+
+(defun route-planning-under-uncertainty-topic ()
+  (make-topic
+   :id "route-planning-under-uncertainty"
+   :title "Route planning under uncertainty"
+   :summary "Route generation strategy that first estimates direction and topological path, then refines the plan by handling obstacles, conduits, and local details."
+   :references '("Planning Routes through Uncertain Territory"
+                 "Barrier/conduit route planning"
+                 "SPAM spatial module"
+                 "Canonical Route Discovery for Runtime Smoke Tests")))
+
+(defun barrier-conduit-route-planning-topic ()
+  (make-topic
+   :id "barrier-conduit-route-planning"
+   :title "Barrier/conduit route planning"
+   :summary "Obstacle-handling vocabulary for route planning that distinguishes barriers, conduits, semiconduits, traversal barriers, and penetration barriers for a given traveler."
+   :references '("Planning Routes through Uncertain Territory"
+                 "Route planning under uncertainty")))
+
+(defun spam-spatial-module-topic ()
+  (make-topic
+   :id "spam-spatial-module"
+   :title "SPAM spatial module"
+   :summary "McDermott and Davis's implemented spatial module integrating TOPO, MEASURE, FIND, fuzzy map assimilation, and route planning over uncertain territory."
+   :references '("Planning Routes through Uncertain Territory"
+                 "Spatial discrimination tree"
+                 "Spatial fact assimilation"
+                 "Route planning under uncertainty")))
+
 ;; Topic objects for iconic retrieval and route-language assimilation.
 (defun iconic-state-topic ()
   (make-topic
