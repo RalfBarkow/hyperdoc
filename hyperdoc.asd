@@ -27,6 +27,7 @@
                                        (:file "reproducible-devenv-as-knowledge-artifact-slice")
                                        (:file "localhost-fedwiki-page-promotion-plans")
                                        (:file "code-path-graphs")
+                                       (:file "whyline-output-questions")
                                        (:file "topics")
                                        (:file "skillization")
                                        (:file "mech-deployment-provenance")
@@ -230,6 +231,7 @@
                           :serial t
                           :components ((:file "package")
                                        (:file "code-path-graphs")
+                                       (:file "whyline-output-questions")
                                        (:file "state-machines")
                                        (:file "authored-relation-artifacts")
                                        (:file "shared-projection-ir")
@@ -368,6 +370,7 @@
                                        (:file "compile-order-smoke")
                                        (:file "dmx-topic-proxy-smoke")
                                        (:file "code-path-graphs-smoke")
+                                       (:file "whyline-output-questions-smoke")
                                        (:file "state-machine-smoke")
                                        (:file "shared-projection-ir-smoke")
                                        (:file "snippet-playground-artifact-smoke")
