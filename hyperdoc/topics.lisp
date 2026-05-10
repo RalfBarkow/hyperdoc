@@ -7488,3 +7488,31 @@
    :references '("Evolving ASDF: More Cooperation, Less Coordination"
                  "ASDF Components Workflow"
                  "ASDF Systems, Examples, and Tests in HyperDoc")))
+
+
+(defun asdf-community-infrastructure-topic ()
+  (make-topic
+   :id "asdf-community-infrastructure"
+   :title "ASDF community infrastructure"
+   :summary "ASDF as shared Common Lisp infrastructure whose success turned build/load behavior into a community coordination surface."
+   :references '("Evolving ASDF: More Cooperation, Less Coordination"
+                 "Understanding ASDF Systems in HyperDoc"
+                 "Source-oriented and image-oriented development in Common Lisp")))
+
+(defun asdf-vendor-synchronization-topic ()
+  (make-topic
+   :id "asdf-vendor-synchronization"
+   :title "ASDF vendor synchronization"
+   :summary "The coordination burden created when implementation-shipped ASDF versions must be updated by vendors before users and library authors can rely on fixes."
+   :references '("Evolving ASDF: More Cooperation, Less Coordination"
+                 "ASDF social coordination cost"
+                 "ASDF hot upgrade boundary")))
+
+(defun asdf-convergence-through-divergence-topic ()
+  (make-topic
+   :id "asdf-convergence-through-divergence"
+   :title "ASDF convergence through divergence"
+   :summary "The ASDF 2 strategy in which allowing local upgrade and temporary version divergence reduces release-cycle coupling and encourages later ecosystem convergence."
+   :references '("Evolving ASDF: More Cooperation, Less Coordination"
+                 "ASDF vendor synchronization"
+                 "ASDF social coordination cost")))

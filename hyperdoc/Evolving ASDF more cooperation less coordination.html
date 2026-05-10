@@ -4,8 +4,8 @@
 
 <p>
   This source-station page assimilates Rideau and Goldman's 2010 paper
-  <i>Evolving ASDF: More Cooperation, Less Coordination</i> into the local
-  HyperDoc ASDF/runtime-coherence neighborhood.
+  <i>Evolving ASDF: More Cooperation, Less Coordination</i> as a study of
+  social coordination pressure in Common Lisp infrastructure.
 </p>
 
 <h2>Source artifact</h2>
@@ -17,25 +17,94 @@
   <li><b>Source boundary:</b> PDF is intentionally not vendored into the HyperDoc repository; keep the attachment in Zotero or another source library.</li>
 </ul>
 
-<h2>Assimilation verdict</h2>
+<h2>Social thesis</h2>
 
 <p>
-  Import the paper as a design lesson about social coordination encoded as
-  build-system protocol. ASDF 2 is not only a build-system revision; it is a
-  case study in reducing community-wide synchronization pressure by making the
-  running image, source discovery, output placement, and extension seams more
-  cooperative.
+  The paper should be read first as a social-infrastructure paper and only
+  second as a build-system paper. ASDF had become shared coordination
+  infrastructure for the Common Lisp community: libraries, implementations,
+  dependency managers, and interactive development workflows all depended on it.
+  That centrality meant that defects in ASDF were not merely local bugs. They
+  became community-wide coordination costs.
+</p>
+
+<p>
+  The core social problem was version coupling. If users could not upgrade the
+  ASDF shipped by an implementation, then every new feature or bugfix required
+  practical synchronization across vendors before library authors could rely on
+  it. In that world, progress depended on prior agreement among many actors.
+  ASDF 2 reverses the pressure: make upgrade possible inside the running image,
+  and the ecosystem can converge after the fact instead of waiting for everyone
+  to move first.
+</p>
+
+<h2>Social issues to extract</h2>
+
+<ul>
+  <li><b>Central infrastructure risk:</b> ASDF's success made it a single shared
+      dependency for much of the CL ecosystem.</li>
+  <li><b>Vendor synchronization cost:</b> implementation-bundled ASDF versions
+      made new fixes socially unavailable until vendors coordinated releases.</li>
+  <li><b>Backward-compatibility pressure:</b> the maintainers could not repair
+      interfaces freely because breaking ASDF meant breaking community trust.</li>
+  <li><b>Configuration as social friction:</b> unclear source discovery and output
+      placement forced users to coordinate conventions manually.</li>
+  <li><b>Formality cost:</b> the authors explicitly prefer solving a hard technical
+      issue once over imposing repeated formal social negotiations on the
+      community.</li>
+  <li><b>Convergence through tolerated divergence:</b> if local upgrade works,
+      vendors and users can move at different times while still converging on
+      the latest stable ASDF.</li>
+</ul>
+
+<h2>Technical features as social responses</h2>
+
+<table>
+  <tr>
+    <th>Social pressure</th>
+    <th>ASDF 2 response</th>
+  </tr>
+  <tr>
+    <td>Users cannot rely on fixes until vendors coordinate.</td>
+    <td>In-place ASDF upgrade from an old implementation-provided version.</td>
+  </tr>
+  <tr>
+    <td>Library authors fear breaking users on old implementations.</td>
+    <td>Backward compatibility and conservative interface change.</td>
+  </tr>
+  <tr>
+    <td>Source discovery depends on local conventions.</td>
+    <td>More explicit and portable configuration mechanisms.</td>
+  </tr>
+  <tr>
+    <td>Compiled outputs collide across users, implementations, or filesystems.</td>
+    <td>Output translation and clearer placement of build products.</td>
+  </tr>
+  <tr>
+    <td>Trust in central infrastructure is fragile.</td>
+    <td>Testing, portability work, and best-practice discipline.</td>
+  </tr>
+</table>
+
+<h2>HyperDoc reading</h2>
+
+<p>
+  For HyperDoc, the lesson is that an infrastructure artifact should expose the
+  social interaction it replaces. A good protocol is not merely technically
+  correct; it reduces the need for repeated interpersonal synchronization. ASDF 2
+  is valuable here because it shows how compatibility, upgradeability,
+  configuration, and portability can be understood as social features.
 </p>
 
 <h2>Core concepts</h2>
 
 <ul>
-  <li><a hyperbook="topics" page="Evolving ASDF paper"><tt>Evolving ASDF paper</tt></a></li>
   <li><a hyperbook="topics" page="ASDF social coordination cost"><tt>ASDF social coordination cost</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF community infrastructure"><tt>ASDF community infrastructure</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF vendor synchronization"><tt>ASDF vendor synchronization</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF convergence through divergence"><tt>ASDF convergence through divergence</tt></a></li>
   <li><a hyperbook="topics" page="ASDF hot upgrade boundary"><tt>ASDF hot upgrade boundary</tt></a></li>
   <li><a hyperbook="topics" page="ASDF configuration surface"><tt>ASDF configuration surface</tt></a></li>
-  <li><a hyperbook="topics" page="ASDF output translations"><tt>ASDF output translations</tt></a></li>
-  <li><a hyperbook="topics" page="ASDF traverse plan semantics"><tt>ASDF traverse plan semantics</tt></a></li>
 </ul>
 
 <h2>Crosswalk into this HyperDoc</h2>
@@ -43,27 +112,16 @@
 <ul>
   <li><a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a></li>
   <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
-  <li><a page="ASDF Systems, Examples, and Tests in HyperDoc">ASDF Systems, Examples, and Tests in HyperDoc</a></li>
   <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
   <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
   <li><a page="Source-station assimilation routine">Source-station assimilation routine</a></li>
 </ul>
 
-<h2>Reading notes</h2>
+<h2>Boundary</h2>
 
 <p>
-  The paper is useful here because it treats ASDF as more than a build tool.
-  It describes a Lisp-specific boundary where loading, compiling, source
-  discovery, output placement, and running-image state all interact. The
-  HyperDoc lesson is that coordination pressure should become an inspectable
-  protocol surface instead of an invisible social obligation.
+  This page does not summarize the whole ASDF 2 technical design. It keeps the
+  social issue in focus: how a central build facility reduces coordination costs
+  for a language community whose development style depends on long-lived,
+  mutable Lisp images.
 </p>
-
-<h2>Boundaries</h2>
-
-<ul>
-  <li>This page does not replace the ASDF manual.</li>
-  <li>This page does not claim ASDF 2 is current ASDF practice in every detail.</li>
-  <li>This page preserves the paper as a historical source and extracts reusable
-      HyperDoc design lessons.</li>
-</ul>
