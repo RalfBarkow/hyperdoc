@@ -1,0 +1,40 @@
+;;;; Source-backed Git repository checkout objects.
+;;;; Created from SLY MREPL; reload this file rather than redefining classes ad hoc.
+
+
+(IN-PACKAGE :HYPERDOC)
+
+
+(DEFCLASS GIT-REPOSITORY-CHECKOUT NIL
+          ((ROOT :READER GIT-REPOSITORY-ROOT-OF :INITARG :ROOT :TYPE PATHNAME)
+           (ROOT-SOURCE :READER GIT-REPOSITORY-ROOT-SOURCE-OF :INITARG
+            :ROOT-SOURCE)
+           (GIT-PROGRAM :READER GIT-PROGRAM-OF :INITARG :GIT-PROGRAM :INITFORM
+            "git" :TYPE STRING))
+          (:DOCUMENTATION
+           "Source-backed object representing the live Git checkout used by HyperDoc."))
+
+
+(DEFMETHOD PRINT-OBJECT ((CHECKOUT GIT-REPOSITORY-CHECKOUT) STREAM)
+  (PRINT-UNREADABLE-OBJECT (CHECKOUT STREAM :TYPE T :IDENTITY NIL)
+    (FORMAT STREAM "~A via ~A" (GIT-REPOSITORY-ROOT-OF CHECKOUT)
+            (GIT-REPOSITORY-ROOT-SOURCE-OF CHECKOUT))))
+
+
+(DEFVAR *GIT-REPOSITORY-CHECKOUT* NIL)
+
+
+(DEFUN MAKE-CURRENT-GIT-REPOSITORY-CHECKOUT ()
+  "Return a source-backed object for the live HyperDoc Git checkout."
+  (MULTIPLE-VALUE-BIND (ROOT SOURCE)
+      (SYSTEM-REPOSITORY-ROOT-INFO :HYPERDOC)
+    (UNLESS (AND ROOT (PROBE-FILE ROOT))
+      (ERROR "No usable HyperDoc Git repository root: ~S from ~S" ROOT SOURCE))
+    (MAKE-INSTANCE 'GIT-REPOSITORY-CHECKOUT :ROOT ROOT :ROOT-SOURCE SOURCE)))
+
+
+(DEFUN CURRENT-GIT-REPOSITORY-CHECKOUT ()
+  "Return the memoized live checkout object, constructing it if needed."
+  (OR *GIT-REPOSITORY-CHECKOUT*
+      (SETF *GIT-REPOSITORY-CHECKOUT* (MAKE-CURRENT-GIT-REPOSITORY-CHECKOUT))))
+
