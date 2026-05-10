@@ -7431,3 +7431,60 @@
 
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))
+
+
+;; Evolving ASDF source-station topics.
+(defun evolving-asdf-paper-topic ()
+  (make-topic
+   :id "evolving-asdf-paper"
+   :title "Evolving ASDF paper"
+   :summary "Rideau and Goldman's 2010 ASDF 2 paper, assimilated as a source-station for build-system protocol, hot upgrade, configuration, and social coordination in Common Lisp."
+   :references '("Evolving ASDF: More Cooperation, Less Coordination"
+                 "Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
+                 "Source-oriented and image-oriented development in Common Lisp")))
+
+(defun asdf-social-coordination-cost-topic ()
+  (make-topic
+   :id "asdf-social-coordination-cost"
+   :title "ASDF social coordination cost"
+   :summary "The community-wide synchronization burden created when build-system changes require vendors, users, libraries, and running images to coordinate manually."
+   :references '("Evolving ASDF: More Cooperation, Less Coordination"
+                 "Understanding ASDF Systems in HyperDoc"
+                 "Source-oriented and image-oriented development in Common Lisp")))
+
+(defun asdf-hot-upgrade-boundary-topic ()
+  (make-topic
+   :id "asdf-hot-upgrade-boundary"
+   :title "ASDF hot upgrade boundary"
+   :summary "The boundary where ASDF must upgrade itself inside a running Common Lisp image without assuming restart, vendor synchronization, or perfect monotonicity."
+   :references '("Evolving ASDF: More Cooperation, Less Coordination"
+                 "A framework for maintaining the coherence of a running Lisp"
+                 "Source-oriented and image-oriented development in Common Lisp")))
+
+(defun asdf-configuration-surface-topic ()
+  (make-topic
+   :id "asdf-configuration-surface"
+   :title "ASDF configuration surface"
+   :summary "The ASDF 2 shift toward explicit, portable configuration for source discovery and related build behavior instead of ad hoc post-load setup."
+   :references '("Evolving ASDF: More Cooperation, Less Coordination"
+                 "ASDF Components Workflow"
+                 "Understanding ASDF Systems in HyperDoc")))
+
+(defun asdf-output-translations-topic ()
+  (make-topic
+   :id "asdf-output-translations"
+   :title "ASDF output translations"
+   :summary "The ASDF mechanism for redirecting compiler outputs into implementation- and user-specific locations, avoiding shared FASL collisions and unsafe writes."
+   :references '("Evolving ASDF: More Cooperation, Less Coordination"
+                 "ASDF Components Workflow"
+                 "Understanding ASDF Systems in HyperDoc")))
+
+(defun asdf-traverse-plan-semantics-topic ()
+  (make-topic
+   :id "asdf-traverse-plan-semantics"
+   :title "ASDF traverse plan semantics"
+   :summary "The ASDF planning seam where operation/component dependency traversal determines what must be recompiled, loaded, or synchronized across composite components."
+   :references '("Evolving ASDF: More Cooperation, Less Coordination"
+                 "ASDF Components Workflow"
+                 "ASDF Systems, Examples, and Tests in HyperDoc")))

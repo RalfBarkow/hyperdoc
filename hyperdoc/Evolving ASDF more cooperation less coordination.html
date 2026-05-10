@@ -1,0 +1,69 @@
+<h1>Evolving ASDF: More Cooperation, Less Coordination</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This source-station page assimilates Rideau and Goldman's 2010 paper
+  <i>Evolving ASDF: More Cooperation, Less Coordination</i> into the local
+  HyperDoc ASDF/runtime-coherence neighborhood.
+</p>
+
+<h2>Source artifact</h2>
+
+<ul>
+  <li><b>Authors:</b> François-René Rideau and Robert P. Goldman</li>
+  <li><b>Published:</b> ILC 2010</li>
+  <li><b>DOI:</b> 10.1145/1869643.1869648</li>
+  <li><a href="/hyperdoc/sources/evolving-asdf-more-cooperation-less-coordination.pdf">Local PDF copy</a></li>
+</ul>
+
+<h2>Assimilation verdict</h2>
+
+<p>
+  Import the paper as a design lesson about social coordination encoded as
+  build-system protocol. ASDF 2 is not only a build-system revision; it is a
+  case study in reducing community-wide synchronization pressure by making the
+  running image, source discovery, output placement, and extension seams more
+  cooperative.
+</p>
+
+<h2>Core concepts</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Evolving ASDF paper"><tt>Evolving ASDF paper</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF social coordination cost"><tt>ASDF social coordination cost</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF hot upgrade boundary"><tt>ASDF hot upgrade boundary</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF configuration surface"><tt>ASDF configuration surface</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF output translations"><tt>ASDF output translations</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF traverse plan semantics"><tt>ASDF traverse plan semantics</tt></a></li>
+</ul>
+
+<h2>Crosswalk into this HyperDoc</h2>
+
+<ul>
+  <li><a page="Understanding ASDF Systems in HyperDoc">Understanding ASDF Systems in HyperDoc</a></li>
+  <li><a page="ASDF Components Workflow">ASDF Components Workflow</a></li>
+  <li><a page="ASDF Systems, Examples, and Tests in HyperDoc">ASDF Systems, Examples, and Tests in HyperDoc</a></li>
+  <li><a page="Source-oriented and image-oriented development in Common Lisp">Source-oriented and image-oriented development in Common Lisp</a></li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+  <li><a page="Source-station assimilation routine">Source-station assimilation routine</a></li>
+</ul>
+
+<h2>Reading notes</h2>
+
+<p>
+  The paper is useful here because it treats ASDF as more than a build tool.
+  It describes a Lisp-specific boundary where loading, compiling, source
+  discovery, output placement, and running-image state all interact. The
+  HyperDoc lesson is that coordination pressure should become an inspectable
+  protocol surface instead of an invisible social obligation.
+</p>
+
+<h2>Boundaries</h2>
+
+<ul>
+  <li>This page does not replace the ASDF manual.</li>
+  <li>This page does not claim ASDF 2 is current ASDF practice in every detail.</li>
+  <li>This page preserves the paper as a historical source and extracts reusable
+      HyperDoc design lessons.</li>
+</ul>
