@@ -209,3 +209,181 @@
       (:pre :style "white-space: pre-wrap;"
             (html-inspector-views:esc
              (git-evolution-native-graph history-map))))))
+
+
+;;;; Clickable topology overlay.
+
+(defun git-evolution-upstream-tip-commit (history-map)
+  "Return Konrad's current upstream/main tip commit object in HISTORY-MAP."
+  (first (hyperdoc::git-history-map-left-commits-of history-map)))
+
+(defun git-evolution-first-path-overlap (history-map)
+  "Return the first exact path-overlap object in HISTORY-MAP, if any."
+  (first (hyperdoc::git-history-map-path-overlaps history-map)))
+
+(defun git-evolution-dot-node-url (anchor-id)
+  (format nil "#~A" anchor-id))
+
+(defun git-evolution-clickable-dot-text (history-map)
+  "Return DOT with graph nodes linked to HTML anchors in the same Topology view.
+
+The SVG node clicks jump to the corresponding target rows below the graph.
+Those rows contain inspector OBJECT-REF links that open the actual objects."
+  (let* ((upstream-commits
+           (reverse
+            (copy-list
+             (hyperdoc::git-history-map-left-commits-of history-map))))
+         (latest-konrad
+           (git-evolution-upstream-tip-commit history-map))
+         (latest-konrad-hash
+           (and latest-konrad
+                (hyperdoc::git-history-commit-hash-of latest-konrad)))
+         (overlaps
+           (hyperdoc::git-history-map-path-overlaps history-map))
+         (base-short
+           (hyperdoc::git-history-short-hash
+            (hyperdoc::git-history-map-merge-base-of history-map)))
+         (right-count
+           (hyperdoc::git-history-map-right-count-of history-map)))
+    (with-output-to-string (stream)
+      (format stream "digraph git_evolution {~%")
+      (format stream "  rankdir=LR;~%")
+      (format stream "  node [fontname=~S];~%" "Helvetica")
+      (format stream "  edge [fontname=~S];~%" "Helvetica")
+
+      (format stream
+              "  base [label=~S shape=ellipse URL=~S tooltip=~S];~%"
+              (format nil "merge base~%~A" base-short)
+              (git-evolution-dot-node-url "git-evolution-topology-base")
+              "Merge base")
+
+      (let ((previous "base")
+            (upstream-tip-node "base"))
+        (loop for commit in upstream-commits
+              for index from 0
+              for node = (format nil "u~D" index)
+              for hash = (hyperdoc::git-history-commit-hash-of commit)
+              for latest? = (and latest-konrad-hash
+                                 (string= hash latest-konrad-hash))
+              do (progn
+                   (format stream
+                           "  ~A [label=~S shape=box URL=~S tooltip=~S~A];~%"
+                           node
+                           (git-evolution-commit-label commit)
+                           (if latest?
+                               (git-evolution-dot-node-url
+                                "git-evolution-topology-upstream-tip")
+                               (format nil "#git-evolution-topology-upstream-~D"
+                                       index))
+                           (if latest?
+                               "Open upstream tip target"
+                               "Upstream commit")
+                           (if latest?
+                               " penwidth=3"
+                               ""))
+                   (format stream "  ~A -> ~A [label=~S];~%"
+                           previous node "Konrad")
+                   (setf previous node
+                         upstream-tip-node node)))
+
+        (format stream
+                "  ours [label=~S shape=box style=rounded URL=~S tooltip=~S];~%"
+                (format nil "hauptsache / HEAD~%~D local commits" right-count)
+                (git-evolution-dot-node-url "git-evolution-topology-ours")
+                "Hauptsache branch summary")
+        (format stream "  base -> ours [label=~S];~%" "hauptsache")
+
+        (loop for overlap in overlaps
+              for index from 0
+              for node = (format nil "o~D" index)
+              for anchor = (format nil "git-evolution-topology-overlap-~D" index)
+              do (progn
+                   (format stream
+                           "  ~A [label=~S shape=note URL=~S tooltip=~S penwidth=3];~%"
+                           node
+                           (git-evolution-overlap-label overlap)
+                           (git-evolution-dot-node-url anchor)
+                           "Open overlap target")
+                   (format stream "  ~A -> ~A [style=dashed label=~S];~%"
+                           upstream-tip-node node "touches")
+                   (format stream "  ours -> ~A [style=dashed label=~S];~%"
+                           node "also touched"))))
+
+      (format stream "}~%"))))
+
+(defun render-git-evolution-click-target-row
+    (anchor-id label object description &key select)
+  (html-inspector-views:html
+    (:tr :id anchor-id
+     (:td (:b (html-inspector-views:esc label)))
+     (:td
+      (if object
+          (html-inspector-views:object-ref
+           object
+           :display label
+           :select select)
+          (html-inspector-views:esc "none")))
+     (:td (html-inspector-views:esc description)))))
+
+(defun render-git-evolution-click-targets (history-map)
+  (let* ((upstream-tip
+           (git-evolution-upstream-tip-commit history-map))
+         (overlaps
+           (hyperdoc::git-history-map-path-overlaps history-map)))
+    (html-inspector-views:html
+      (:h3 (html-inspector-views:esc "Clickable topology targets"))
+      (:p
+       (html-inspector-views:esc
+        "Click a graph node to jump here, then click the target object to open it in the inspector."))
+
+      (:table :class "inspector-table"
+              (:tr
+               (:th (html-inspector-views:esc "Node"))
+               (:th (html-inspector-views:esc "Open object"))
+               (:th (html-inspector-views:esc "Meaning")))
+
+              (render-git-evolution-click-target-row
+               "git-evolution-topology-base"
+               "Merge base"
+               history-map
+               "The common ancestor for upstream/main...HEAD."
+               :select "Situation")
+
+              (render-git-evolution-click-target-row
+               "git-evolution-topology-upstream-tip"
+               "Konrad upstream tip"
+               upstream-tip
+               "Current upstream/main commit; currently the latest Konrad change."
+               :select "Commit")
+
+              (render-git-evolution-click-target-row
+               "git-evolution-topology-ours"
+               "hauptsache / HEAD"
+               history-map
+               "Your current branch summarized as the right-hand history."
+               :select "Our work")
+
+              (loop for overlap in overlaps
+                    for index from 0
+                    do (render-git-evolution-click-target-row
+                        (format nil "git-evolution-topology-overlap-~D" index)
+                        (format nil "Overlap: ~A"
+                                (hyperdoc::git-history-path-overlap-path-of
+                                 overlap))
+                        overlap
+                        "Exact file path touched by both histories."
+                        :select "Overview"))))))
+
+(html-inspector-views:defview 👀topology
+    (history-map hyperdoc::git-history-map)
+  (html-inspector-views:html-view :title "Topology" :priority 1
+    (html-inspector-views:html
+      (:h3 (html-inspector-views:esc "Branch topology"))
+
+      (html-inspector-views:graphviz-snippet
+       (html-inspector-views:thunk
+         (git-evolution-clickable-dot-text history-map))
+       :engine "dot"
+       :fallback-title "Clickable Git evolution DOT")
+
+      (render-git-evolution-click-targets history-map))))
