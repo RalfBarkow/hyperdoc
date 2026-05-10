@@ -448,3 +448,34 @@
                       (declare (ignore op c))
                       (uiop:symbol-call :hyperdoc/tests
                                         :run-hyperdoc-zotero-tests)))
+
+
+(defsystem #:hyperdoc/git
+  :description "Git-backed inspection objects for HyperDoc"
+  :author "Ralf Barkow <ralf.barkow@me.com>"
+  :license "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc
+               #:uiop)
+  :components ((:module "hyperdoc"
+                :serial t
+                :components ((:file "git-repository-checkout")
+                             (:file "git-commit-inspection")))))
+
+(defsystem #:hyperdoc/inspector/git
+  :description "Inspector views for Git-backed HyperDoc objects"
+  :author "Ralf Barkow <ralf.barkow@me.com>"
+  :license "BSD"
+  :version "0.0.1"
+  :homepage "https://codeberg.org/khinsen/hyperdoc"
+  :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
+  :serial t
+  :depends-on (#:hyperdoc/git
+               #:hyperdoc/inspector
+               #:html-inspector-views)
+  :components ((:module "hyperdoc-inspector"
+                :serial t
+                :components ((:file "git-commit-inspection-views")))))
