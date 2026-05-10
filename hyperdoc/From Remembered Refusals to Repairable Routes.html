@@ -1,0 +1,108 @@
+<h1>From Remembered Refusals to Repairable Routes</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This bridge page treats the Graham closure/NOR matcher as the executable
+  case and the route-planning page as the abstraction target.  The narrow
+  question is: can the matcher's continuation trace be represented as a first
+  inspectable HyperDoc route object?
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a page="Graham Closures and the NOR Graph Matcher"><tt>Graham Closures and the NOR Graph Matcher</tt></a></li>
+  <li><a page="NOR Graph Matcher Teaching Story"><tt>NOR Graph Matcher Teaching Story</tt></a></li>
+  <li><a page="Planning Routes through Uncertain Territory"><tt>Planning Routes through Uncertain Territory</tt></a></li>
+  <li><tt>CAIR finite route language and route automata</tt></li>
+</ul>
+
+<h2>Bridge argument</h2>
+
+<ol>
+  <li>
+    <b>Graham closure:</b> a returned function remembers a lexical binding.
+    The teaching artifact starts with <tt>make-adder</tt>: the function remembers
+    <tt>n</tt> and later uses it.
+  </li>
+  <li>
+    <b>NOR matcher closure:</b> a matcher leaf remembers its predicate and its
+    success/failure exits.  When the leaf fails, the failure continuation is the
+    remembered alternate route through the compiled matcher.
+  </li>
+  <li>
+    <b>HyperDoc route object:</b> a route remembers failed premises,
+    alternatives, repairs, evidence, and the original trace events, so the path
+    can be inspected or replayed without re-running the matcher.
+  </li>
+</ol>
+
+<h2>Executable bridge</h2>
+
+<p>
+  The bridge does not replace the matcher.  It runs the existing closure/NOR
+  demo and converts the emitted trace into a small route IR.  The default case
+  uses <tt>(nor (:agent :shuttle) (:agent :joke))</tt> on the Apollo graph:
+  both leaves are absent, so the failure continuation advances to the next
+  remembered alternative and yields visible route repairs.
+</p>
+
+<source-of-function>continuation-route-trace-demo-example</source-of-function>
+
+<h2>Route IR</h2>
+
+<ul>
+  <li><tt>continuation-route</tt>: id, intention, origin, target, steps, alternatives, repairs, evidence, trace events.</li>
+  <li><tt>continuation-route-step</tt>: from, to, operation, premise, constraint, result, success continuation, failure continuation, evidence.</li>
+  <li><tt>continuation-route-repair</tt>: failed step, remembered refusal, alternate step, continuation, evidence.</li>
+</ul>
+
+<h2>Replay surface</h2>
+
+<p>
+  The route object keeps enough data to replay the path as rows without calling
+  the matcher again.  A later UI can render the same route as a table or tree:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>step</th>
+      <th>choice</th>
+      <th>remembered refusal</th>
+      <th>success continuation</th>
+      <th>failure continuation</th>
+      <th>repair</th>
+      <th>evidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><tt>step-01</tt></td>
+      <td><tt>(:agent :shuttle)</tt></td>
+      <td>absent leaf</td>
+      <td>not used</td>
+      <td>advance to next leaf</td>
+      <td>try remembered alternative</td>
+      <td>original NOR trace event</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Scope boundary</h2>
+
+<p>
+  This is not McDermott-style planning, not a general graph planner, and not a
+  navigation redesign.  It is the smallest executable bridge from closures as
+  remembered refusals to routes as inspectable, repairable continuations
+  through uncertainty.
+</p>
+
+<h2>Focused validation</h2>
+
+<lisp-code>
+(asdf:load-system :hyperdoc/continuation-route-trace)
+(asdf:load-system :hyperdoc/tests)
+(hyperdoc/tests:run-continuation-route-trace-smoke-tests)
+</lisp-code>

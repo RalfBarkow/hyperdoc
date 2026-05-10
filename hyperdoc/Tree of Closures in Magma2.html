@@ -1,0 +1,109 @@
+<h1>Tree of Closures in Magma2</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Turini's Magma2 backtracking environment makes control state explicit.  A
+  suspended computation is represented by a closure; a context is represented by
+  a node that points to such a closure; and the active control state is a tree of
+  those nodes plus a stack of re-entry nodes.
+</p>
+
+<blockquote>
+  <p>
+    “a tree of closure is actually implemented as a tree, whose nodes are
+    pointers to closures.”
+  </p>
+</blockquote>
+
+<p>
+  The point is not merely that the implementation happens to use pointers.  The
+  pointer structure is the control abstraction.  Returning, choosing, retrying,
+  and failing can be expressed by moving among nodes and by selecting the
+  closure stored at a node.
+</p>
+
+<h2>Source context</h2>
+
+<p>
+  In the backtracking control environment, closures that have performed a
+  recursive call are not simply popped when executed.  They can still belong to
+  an older saved context.  That is why the control structure grows from a stack
+  into a tree.  The backtracking stack then contains nodes in that tree, not
+  copied computations.
+</p>
+
+<h2>Vocabulary for the examples</h2>
+
+<ul>
+  <li><tt>closure</tt>: an executable suspended computation that remembers an agent, local store, and continuation point.</li>
+  <li><tt>node</tt>: a heap object whose payload is a pointer to a closure.</li>
+  <li><tt>FTREE</tt>: the tree of closure nodes.</li>
+  <li><tt>CURNODE</tt>: the current node in the active recursive stack.</li>
+  <li><tt>BSTACK</tt>: a stack of nodes that can be re-entered after failure.</li>
+</ul>
+
+<h2>1. A node points to a closure object</h2>
+
+<p>
+  <b>Click:</b> run the pointer example.
+  <b>Observe:</b> two distinct nodes can refer to the same closure object.
+  <b>Why this matters:</b> a tree node is not the computation itself; it is an
+  addressable control object whose payload is an executable closure.
+</p>
+
+<source-of-function>magma2-closure-tree-pointer-example</source-of-function>
+
+<h2>2. A recursive stack is a path in the tree</h2>
+
+<p>
+  <b>Click:</b> run the recursive-path example.
+  <b>Observe:</b> the active recursive stack is represented as a path from the
+  current node back through its fathers.
+  <b>Why this matters:</b> a stack is a special case of the closure tree.  Once
+  choices introduce saved contexts, several stack paths can share earlier nodes.
+</p>
+
+<source-of-function>magma2-closure-tree-recursive-path-example</source-of-function>
+
+<h2>3. A failure resumes a node from the backtracking stack</h2>
+
+<p>
+  <b>Click:</b> run the backtracking example.
+  <b>Observe:</b> <tt>FAIL</tt> chooses a node from <tt>BSTACK</tt>, restores its
+  father as <tt>CURNODE</tt>, and returns the closure stored in the chosen node.
+  <b>Why this matters:</b> the control environment resumes by following object
+  identity in the tree, not by reinterpreting the source program from scratch.
+</p>
+
+<source-of-function>magma2-closure-tree-backtracking-example</source-of-function>
+
+<h2>4. Context sharing</h2>
+
+<p>
+  <b>Click:</b> run the sharing example.
+  <b>Observe:</b> two saved contexts share their prefix node.
+  <b>Why this matters:</b> the tree lets the control environment preserve several
+  possible futures without duplicating the whole recursive stack for every
+  future.
+</p>
+
+<source-of-function>magma2-closure-tree-sharing-example</source-of-function>
+
+<h2>Teaching choreography</h2>
+
+<ol>
+  <li>Start with the pointer example: a node contains a reference to executable state.</li>
+  <li>Show the recursive path: a stack is a path through parent links.</li>
+  <li>Add a second branch: saved contexts share prefix nodes.</li>
+  <li>Finish with failure: backtracking selects a node and re-enters its closure.</li>
+</ol>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Network of closures">Network of closures</a></li>
+  <li><a page="NOR Graph Matcher Teaching Story">NOR Graph Matcher Teaching Story</a></li>
+  <li><a page="Graham Closures and the NOR Graph Matcher">Graham Closures and the NOR Graph Matcher</a></li>
+  <li>Franco Turini, “Magma2: A Language Oriented toward Experiments in Control,” ACM TOPLAS 6(4), 1984.</li>
+</ul>

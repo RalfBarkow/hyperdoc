@@ -67,4 +67,8 @@
    :run-closure-nor-demo-smoke-tests
    :run-nor-graph-matcher-smoke-tests
    :run-continuation-route-trace-smoke-tests
+   :run-shared-projection-ir-smoke-tests
+   :run-localhost-first-fedwiki-live-publication-smoke-test
+   :run-localhost-first-fedwiki-publication-plan-smoke-test
+   :run-missing-local-fedwiki-twin-lookup-issue-smoke-test
    :run-page-lookup-topic-repair-scxml-smoke-tests))
