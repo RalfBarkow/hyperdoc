@@ -9,6 +9,7 @@
 
    :run-dmx-topic-proxy-smoke-tests
    :run-code-path-graphs-smoke-tests
+   :run-whyline-output-questions-smoke-tests
    :run-state-machine-smoke-tests
    :run-snippet-playground-artifact-smoke-tests
    :run-authored-relation-artifact-pattern-smoke-tests
@@ -65,4 +66,5 @@
    :run-interaction-net-smoke-tests
    :run-closure-nor-demo-smoke-tests
    :run-nor-graph-matcher-smoke-tests
+   :run-continuation-route-trace-smoke-tests
    :run-page-lookup-topic-repair-scxml-smoke-tests))

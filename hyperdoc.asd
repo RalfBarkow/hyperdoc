@@ -160,6 +160,17 @@
                           :serial t
                           :components ((:file "graham-closures-nor-demo")))))
 
+(defsystem #:hyperdoc/continuation-route-trace
+    :description "Inspectable route bridge for closure-backed NOR matcher traces"
+    :author "Ralf Barkow"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/closures-nor-demo)
+    :components ((:module "hyperdoc"
+                          :serial t
+                          :components ((:file "continuation-route-trace")))))
+
 (defsystem #:hyperdoc/dmx-import
     :description "FedWiki to DMX import support for HyperDoc"
     :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -330,6 +341,7 @@
                  #:hyperdoc/nor-demo
                  #:hyperdoc/nor-graph-demo
                  #:hyperdoc/closures-nor-demo
+                 #:hyperdoc/continuation-route-trace
                  #:hyperdoc/explorer
                  #:hyperdoc/explorer/examples/ops
                  #:html-inspector-views/standard)
@@ -348,6 +360,7 @@
                  #:hyperdoc/explorer
                  #:hyperdoc/nor-graph-demo
                  #:hyperdoc/closures-nor-demo
+                 #:hyperdoc/continuation-route-trace
                  #:interaction-net)
     :components ((:module "tests"
                           :serial t
@@ -407,6 +420,7 @@
                                        (:file "interaction-net-smoke")
                                        (:file "closure-nor-demo-smoke")
                                        (:file "nor-graph-matcher-smoke")
+                                       (:file "continuation-route-trace-smoke")
                                        (:file "test-runner"))))
     :perform (test-op (op c)
                       (declare (ignore op c))

@@ -55,6 +55,7 @@
   (run-interaction-net-smoke-tests)
   (run-closure-nor-demo-smoke-tests)
   (run-nor-graph-matcher-smoke-tests)
+  (run-continuation-route-trace-smoke-tests)
   t)
 
 (export '(run-hyperdoc-tests))

@@ -1,0 +1,35 @@
+<h1>Debugging Reinvented in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<h2>Assimilation verdict</h2>
+<p>
+  Import the Whyline interaction pattern, not the Java implementation.
+  HyperDoc should let a reader start from an observed runtime artifact:
+  a value, error, rendered view, page artifact, snippet result, or missing
+  expected output, then ask why-did / why-not questions that open inspectable
+  evidence objects.
+</p>
+
+<h2>Inspectable examples</h2>
+<ul>
+  <li><a expr="(whyline-color-demo-run)" view="Questions"><tt>(whyline-color-demo-run)</tt> Questions</a></li>
+  <li><a expr="(whyline-color-demo-why-did-answer)" view="Answer graph"><tt>(whyline-color-demo-why-did-answer)</tt> Answer graph</a></li>
+  <li><a expr="(whyline-color-demo-why-not-answer)" view="Answer graph"><tt>(whyline-color-demo-why-not-answer)</tt> Why-not answer graph</a></li>
+  <li><a expr="(whyline-color-demo-answer-code-path-graph)" view="DOT export"><tt>(whyline-color-demo-answer-code-path-graph)</tt> DOT export</a></li>
+</ul>
+
+<h2>Why this belongs in HyperDoc</h2>
+<p>
+  The paper makes debugging less speculative by deriving questions from
+  observable output. HyperDoc can do the same for inspectable runtime objects:
+  an output observation becomes a first-class question target, and the answer
+  becomes a code-path graph plus source anchors.
+</p>
+
+<h2>Boundary</h2>
+<p>
+  This slice does not claim full dynamic slicing, full static call graph recovery,
+  or JVM-style instrumentation. It starts with authored, short, inspectable traces
+  from the Playground / SLY / inspector path.
+</p>
