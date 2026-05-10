@@ -167,31 +167,65 @@ trap terminate_dev INT TERM
 
 nix develop --command sbcl --no-userinit --disable-debugger \
   --eval '(require :asdf)' \
-  --eval '(let* ((root (uiop:ensure-directory-pathname (uiop:getcwd)))
-                 (flake-deps (uiop:ensure-directory-pathname
-                              (merge-pathnames ".flake-deps/" root)))
-                 (extra-env (remove nil
-                                    (list (uiop:getenv "CL_SOURCE_REGISTRY")
-                                          (uiop:getenv "HYPERDOC_ASDF_TREES"))))
-                 (extra-paths
-                  (remove-duplicates
-                   (loop for entry in extra-env append
-                     (loop for s in (uiop:split-string entry :separator ":")
-                           for p = (and (> (length s) 0)
-                                        (ignore-errors
-                                          (uiop:ensure-directory-pathname s)))
-                           when p collect p))
-                   :test (function equal))))
-            ;; Keep the flake-injected source trees authoritative so patched CLOG Lisp
-            ;; and static assets come from the same source, while still inheriting the
-            ;; packaged dependency trees through CL_SOURCE_REGISTRY/HYPERDOC_ASDF_TREES.
-            ;; The project ASDs are loaded explicitly below so we do not recurse through
-            ;; the whole repo tree here.
-            (asdf:initialize-source-registry
-             (append (list :source-registry
-                           (list :tree flake-deps))
-                     (mapcar (lambda (p) (list :tree p)) extra-paths)
-                     (list :ignore-inherited-configuration))))' \
+  --eval '(labels ((entry-pathname (entry)
+                     ;; CL_SOURCE_REGISTRY/HYPERDOC_ASDF_TREES entries may use
+                     ;; ASDF recursive-directory syntax such as /path/to/tree//.
+                     ;; Normalize enough for safety filtering before handing the
+                     ;; path back to ASDF.
+                     (let* ((trimmed (string-right-trim
+                                      (list #\Space #\Tab #\Newline #\Return)
+                                      entry))
+                            (recursive? (and (>= (length trimmed) 2)
+                                             (string= trimmed "//"
+                                                      :start1 (- (length trimmed) 2))))
+                            (base (if recursive?
+                                      (subseq trimmed 0 (- (length trimmed) 1))
+                                      trimmed)))
+                       (and (> (length base) 0)
+                            (ignore-errors
+                              (uiop:ensure-directory-pathname base)))))
+                   (unsafe-source-root-p (path root direnv cache)
+                     ;; Never let ASDF recurse through the project root or local
+                     ;; runtime/build state. The project ASDs are loaded explicitly
+                     ;; below, and .direnv can contain huge non-Lisp source trees.
+                     (or (equal path root)
+                         (uiop:subpathp path direnv)
+                         (uiop:subpathp path cache))))
+            (let* ((root (uiop:ensure-directory-pathname (uiop:getcwd)))
+                   (flake-deps (uiop:ensure-directory-pathname
+                                (merge-pathnames ".flake-deps/" root)))
+                   (direnv (uiop:ensure-directory-pathname
+                            (merge-pathnames ".direnv/" root)))
+                   (cache (uiop:ensure-directory-pathname
+                           (merge-pathnames ".cache/" root)))
+                   (extra-env (remove nil
+                                      (list (uiop:getenv "CL_SOURCE_REGISTRY")
+                                            (uiop:getenv "HYPERDOC_ASDF_TREES"))))
+                   (raw-extra-paths
+                    (remove-duplicates
+                     (loop for entry in extra-env append
+                       (loop for s in (uiop:split-string entry :separator ":")
+                             for p = (entry-pathname s)
+                             when p collect p))
+                     :test (function equal)))
+                   (extra-paths
+                    (remove-if
+                     (lambda (p)
+                       (unsafe-source-root-p p root direnv cache))
+                     raw-extra-paths)))
+              ;; Keep the flake-injected source trees authoritative so patched CLOG Lisp
+              ;; and static assets come from the same source, while still inheriting the
+              ;; packaged dependency trees through CL_SOURCE_REGISTRY/HYPERDOC_ASDF_TREES.
+              ;; The project ASDs are loaded explicitly below so we do not recurse through
+              ;; the whole repo tree here.
+              (dolist (p extra-paths)
+                (when (unsafe-source-root-p p root direnv cache)
+                  (error "Unsafe ASDF source-registry root: ~A" p)))
+              (asdf:initialize-source-registry
+               (append (list :source-registry
+                             (list :tree flake-deps))
+                       (mapcar (lambda (p) (list :tree p)) extra-paths)
+                       (list :ignore-inherited-configuration)))))' \
   --eval '(sb-sys:enable-interrupt
             sb-unix:sigint
             (lambda (signal code scp)
@@ -207,8 +241,13 @@ nix develop --command sbcl --no-userinit --disable-debugger \
                               :implementation))))' \
   --eval '(setf *print-circle* t)' \
   --eval '(format t "~&ASDF ready.~%")' \
-  --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
-  --eval '(asdf:load-asd (truename "hyperdoc.asd"))' \
+  --eval '(dolist (asd-file (list "njson.asd"
+                                  "hyperbook.asd"
+                                  "hyperdoc.asd"
+                                  "interaction-net.asd"
+                                  "dreyeck.asd"))
+            (when (probe-file asd-file)
+              (asdf:load-asd (truename asd-file))))' \
   --eval '(let ((system (uiop:getenv "HYPERDOC_LISP_SERVER_SYSTEM")))
             (unless (asdf:find-system system nil)
               (format *error-output*
