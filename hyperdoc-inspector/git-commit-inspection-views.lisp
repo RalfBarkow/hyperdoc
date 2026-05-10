@@ -136,10 +136,54 @@
                  (html-inspector-views:esc
                   (hyperdoc::git-file-blob-spec file)))))))))
 
+;;;; Git file content view helpers.
+
+(defun git-file-path-type-string (file)
+  (let ((type (pathname-type
+               (pathname
+                (hyperdoc::git-file-path-of file)))))
+    (and type
+         (string-downcase type))))
+
+(defun git-file-lisp-source-p (file)
+  (member (git-file-path-type-string file)
+          '("lisp" "asd" "cl" "lsp")
+          :test #'string=))
+
+(defun git-file-html-source-p (file)
+  (member (git-file-path-type-string file)
+          '("html" "htm")
+          :test #'string=))
+
+(defun git-file-content-code-view (file)
+  (let ((contents
+          (html-inspector-views:thunk
+            (hyperdoc::git-file-contents file))))
+    (cond
+      ((git-file-lisp-source-p file)
+       (html-inspector-views:lisp-code-view
+        contents
+        :title "Blob contents"
+        :priority 2))
+      ((git-file-html-source-p file)
+       (html-inspector-views:html-code-view
+        contents
+        :title "Blob contents"
+        :priority 2))
+      (t
+       (html-inspector-views:html-view
+        :title "Blob contents"
+        :priority 2
+        (html-inspector-views:html
+          (:pre :style "white-space: pre-wrap;"
+                (html-inspector-views:esc
+                 (html-inspector-views:eval-thunk contents)))))))))
+
 (html-inspector-views:defview 👀contents (file hyperdoc::git-file-at-commit)
-  (html-inspector-views:html-view :title "Contents" :priority 2
-    (handler-case
-        (render-git-pre
-         (hyperdoc::git-file-contents file))
-      (condition (condition)
-        (render-git-error condition)))))
+  (handler-case
+      (html-inspector-views:rename
+       (git-file-content-code-view file)
+       :title "Contents"
+       :priority 2)
+    (condition (condition)
+      (render-git-error condition))))
