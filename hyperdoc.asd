@@ -322,7 +322,8 @@
                                        (:file "codemeta")
                                        (:file "example-core")
                                        (:file "check-runner")
-                                       (:file "hyperdoc")))))
+                                       (:file "hyperdoc")
+                                       (:file "page-lookup-rebuild-gate")))))
 
 (defsystem #:hyperdoc/explorer/examples/ops
     :description "Explorer views for HyperDoc ops/local examples"

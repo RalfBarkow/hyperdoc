@@ -1,0 +1,56 @@
+<h1>Page Lookup Rebuild Gate</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The page-lookup rebuild gate is the inspectable runtime check for the
+  <tt>verify-no-page-lookup-issues</tt> state in the running-image coherence
+  rebuild workflow.
+</p>
+
+<p>
+  It reloads HyperDoc text pages, scans authored local page links through
+  HyperBook's exact lookup path, and returns an inspectable report object.
+</p>
+
+<h2>Inspectable report</h2>
+
+<ul>
+  <li><a expr="(make-page-lookup-rebuild-report)" view="Overview"><tt>Run page-lookup rebuild gate</tt></a></li>
+  <li><a expr="(make-page-lookup-rebuild-report)" view="Issues"><tt>Inspect page-lookup issues after rebuild</tt></a></li>
+</ul>
+
+<h2>Boundary</h2>
+
+<p>
+  This gate does not repair links automatically. Exact lookup is authoritative.
+  Near-miss matching, including NOR-style candidate ranking, belongs to the
+  diagnostic layer after a lookup issue exists.
+</p>
+
+<pre>reload text pages
+  -> scan authored local page links
+  -> collect page-lookup issues
+  -> inspect report
+  -> repair authored page or link
+  -> rebuild again</pre>
+
+<h2>REPL use</h2>
+
+<lisp-code>
+(defparameter *page-lookup-rebuild-report*
+  (make-page-lookup-rebuild-report))
+
+(clog-moldable-inspector:clog-inspect
+ :object *page-lookup-rebuild-report*)
+</lisp-code>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Running Image Coherence Rebuild Workflow">Running Image Coherence Rebuild Workflow</a></li>
+  <li><a page="SCXML Architect">SCXML Architect</a></li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+  <li><a page="McDermott Running Image Coherence Crosswalk">McDermott Running Image Coherence Crosswalk</a></li>
+  <li><a page="Make the issue repair function disappear as the primary abstraction">Make the issue repair function disappear as the primary abstraction</a></li>
+</ul>
