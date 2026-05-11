@@ -3,10 +3,10 @@ dm6 upstream narrative
 
 repo:      /Users/rgb/workspace/dm6-elm/
 local:     main  73c51b7b
-upstream:  upstream/master  f1aa6faa
+upstream:  upstream/master  7ca974b0
 base:      c5fad791
-ahead/behind: 345	138
-upstream commits: 138
+ahead/behind: 345	141
+upstream commits: 141
 changed files:    57
 
 dirty status:
@@ -862,6 +862,24 @@ Jörg upstream story, oldest first
    areas:  CONTAINMENT, EXTENSION-SEAM, NAVIGATION, SEARCH-SELECTION, TOOLING, APP-DISPATCH, CONTROLLER, GEOMETRY, DRAG-INPUT, UNCLASSIFIED, RENDERER
    files:  16
 
+139. 2e43834b  Refactor: list box traversal
+   author: Jörg Richter
+   date:   2026-05-11T11:50:16+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, ALTERNATE-RENDERER
+   files:  3
+
+140. f1f96d88  Box count includes children (recursively)
+   author: Jörg Richter
+   date:   2026-05-11T13:34:22+02:00
+   areas:  CONTAINMENT, ALTERNATE-RENDERER, RENDERER
+   files:  3
+
+141. 7ca974b0  Refactor: make Box.traverse generic
+   author: Jörg Richter
+   date:   2026-05-11T16:05:48+02:00
+   areas:  CONTAINMENT, ALTERNATE-RENDERER
+   files:  2
+
 
 
 File deltas
@@ -872,7 +890,7 @@ UNCLASSIFIED  +1 -0  index.html
 UNCLASSIFIED  +4 -4  index.js
 UNCLASSIFIED  +3 -3  package.json
 UNCLASSIFIED  +74 -0  src/Assoc.elm
-CONTAINMENT  +363 -403  src/Box.elm
+CONTAINMENT  +408 -393  src/Box.elm
 CONTAINMENT  +0 -192  src/Box/Size.elm
 CONTAINMENT  +0 -174  src/Box/Transfer.elm
 UNCLASSIFIED  +23 -12  src/Config.elm
@@ -913,12 +931,12 @@ PERSISTENCE  +15 -6  src/Storage.elm
 UNCLASSIFIED  +92 -0  src/Topic.elm
 ALTERNATE-RENDERER  +124 -0  src/TopicList/Geometry.elm
 ALTERNATE-RENDERER  +79 -0  src/TopicList/TopicListDef.elm
-ALTERNATE-RENDERER  +266 -0  src/TopicList/ViewProps.elm
+ALTERNATE-RENDERER  +249 -0  src/TopicList/ViewProps.elm
 CONTROLLER  +21 -0  src/TopicMap/Controller.elm
 GEOMETRY  +355 -0  src/TopicMap/Geometry.elm
 DRAG-INPUT  +213 -0  src/TopicMap/Mouse.elm
 UNCLASSIFIED  +148 -0  src/TopicMap/TopicMapDef.elm
-RENDERER  +737 -0  src/TopicMap/View.elm
+RENDERER  +732 -0  src/TopicMap/View.elm
 RENDERER  +74 -0  src/TopicMap/ViewModel.elm
 RENDERER  +305 -0  src/TopicMap/ViewProps.elm
 UNCLASSIFIED  +7 -19  src/Undo.elm
