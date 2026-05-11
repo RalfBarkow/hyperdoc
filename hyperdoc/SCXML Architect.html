@@ -1,0 +1,125 @@
+<h1>SCXML Architect</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  SCXML Architect is the inspectable surface for viewing, validating, replaying,
+  and explaining SCXML-backed workflows in HyperDoc.
+</p>
+
+<p>
+  It is not the workflow itself. It is the architectural viewing surface around
+  a workflow: current state, legal events, guards, preview path, mutation
+  boundary, trace evidence, and the source SCXML that produced the run.
+</p>
+
+<h2>Purpose</h2>
+
+<p>
+  HyperDoc uses SCXML to make procedural knowledge explicit. A workflow should
+  not be hidden inside an ad hoc sequence of REPL commands, shell commands, or
+  server-side callbacks. SCXML Architect gives that workflow an inspectable
+  shape.
+</p>
+
+<ul>
+  <li>Show the active state path of an SCXML-backed run.</li>
+  <li>Show the next legal semantic events.</li>
+  <li>Show preview paths before mutation.</li>
+  <li>Separate deterministic state-machine structure from transport and mutation effects.</li>
+  <li>Expose source, trace, and boundary evidence next to the object being inspected.</li>
+</ul>
+
+<h2>Current implementation surfaces</h2>
+
+<ul>
+  <li><tt>hyperdoc/scxml-architect.lisp</tt>: runtime session and view-model objects.</li>
+  <li><tt>hyperdoc-inspector/scxml-architect.lisp</tt>: inspector views for SCXML Architect sessions.</li>
+  <li><tt>assets/hyperdoc/css/scxml-architect.css</tt>: Architect surface styling.</li>
+  <li><tt>assets/hyperdoc/js/scxml-architect.js</tt>: client-side statechart interaction.</li>
+</ul>
+
+<h2>Relation to the SCXML C embedding decision map</h2>
+
+<p>
+  The SCXML C decision map keeps HyperDoc as a long-running Lisp service and
+  embeds only a generated SCXML protocol machine into C. SCXML Architect is the
+  inspection surface for that protocol machine and for the corresponding
+  HyperDoc-side replay.
+</p>
+
+<ul>
+  <li><a page="SCXML C Embedding Decision Map">SCXML C Embedding Decision Map</a></li>
+  <li><a expr="*scxml-c-embedding-decision-map*" view="Decision matrix"><tt>Inspect the SCXML C decision matrix</tt></a></li>
+  <li><a expr="*scxml-c-embedding-decision-map*" view="Roadmap"><tt>Inspect the SCXML C roadmap</tt></a></li>
+</ul>
+
+<h2>Relation to running-image coherence</h2>
+
+<p>
+  Drew McDermott's running-image coherence problem is a natural workflow target
+  for SCXML Architect. In a long-running Lisp image, source files, loaded
+  definitions, registered pages, generated views, topic materializations, and
+  lookup results can drift out of coherence.
+</p>
+
+<p>
+  The corresponding HyperDoc workflow should make those dependencies explicit:
+  source changed, reload systems, reload text pages, refresh derived objects,
+  scan links, classify lookup issues, propose repairs, and verify that no open
+  page-lookup issues remain.
+</p>
+
+<ul>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+  <li><a page="McDermott Running Image Coherence Crosswalk">McDermott Running Image Coherence Crosswalk</a></li>
+  <li><a page="Core Chunk Classes">Core Chunk Classes</a></li>
+</ul>
+
+<h2>Boundary model</h2>
+
+<table class="inspector-table">
+  <tr>
+    <th>Layer</th>
+    <th>Responsibility</th>
+  </tr>
+  <tr>
+    <td>SCXML source</td>
+    <td>Declares states, transitions, legal events, guards, and terminal states.</td>
+  </tr>
+  <tr>
+    <td>SCXML Architect session</td>
+    <td>Presents active state, preview path, selected event, diagnostics, and source evidence.</td>
+  </tr>
+  <tr>
+    <td>Mutation adapter</td>
+    <td>Performs concrete effects only through explicit guarded actions.</td>
+  </tr>
+  <tr>
+    <td>HyperDoc page</td>
+    <td>Explains the workflow and links to inspectable objects.</td>
+  </tr>
+</table>
+
+<h2>Near-miss and page-lookup repair role</h2>
+
+<p>
+  Exact HyperBook lookup remains authoritative. A matcher such as the NOR
+  matcher should only assist diagnosis by ranking possible repairs when an
+  exact page target is missing. It should not silently rewrite authored links.
+</p>
+
+<pre>exact lookup -> page-lookup issue -> ranked repair candidates -> human review -> authored page or link correction</pre>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="SCXML C Embedding Decision Map">SCXML C Embedding Decision Map</a></li>
+  <li><a page="State machine">State machine</a></li>
+  <li><a page="State-machine run">State-machine run</a></li>
+  <li><a page="State-machine trace">State-machine trace</a></li>
+  <li><a page="State-machine visualization">State-machine visualization</a></li>
+  <li><a page="Shared Projection IR">Shared Projection IR</a></li>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+</ul>
