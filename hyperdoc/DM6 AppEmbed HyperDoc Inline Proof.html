@@ -1,13 +1,52 @@
 <h1>DM6 AppEmbed HyperDoc Inline Proof</h1>
 <in-package>hyperdoc</in-package>
 
-<p>Inline proof for embedding dm6 through Elm.AppEmbed.</p>
-<p>This version passes a current native dm6 model matching <tt>Model.decoder</tt>: top-level <tt>items</tt>, <tt>boxes</tt>, <tt>boxId</tt>, and <tt>nextId</tt>.</p>
-<div class='dm6-hyperdoc-map' data-dm6-slug='dm6-hyperdoc-inline-proof' data-dm6-bundle='/assets/dm6-elm/app.js' style='height:820px;border:1px solid #c7d2dc;padding:0.5rem;'>
-  <div class='dm6-stage' style='height:420px;width:100%;border:1px dashed #d8e1e8;'>dm6 AppEmbed mount pending...</div>
-  <p><b>Status:</b> <span class='dm6-status'>not mounted</span></p>
-  <details open><summary>Evidence summary</summary><pre class='dm6-evidence-summary' style='white-space:pre-wrap;max-height:8rem;overflow:auto;'></pre></details>
-  <details open><summary>Captured optional ports and mount evidence</summary><pre class='dm6-evidence' style='white-space:pre-wrap;max-height:20rem;overflow:auto;'></pre></details>
+<link rel='stylesheet' href='/assets/dm6-elm/hyperdoc-dm6-inline.css'>
+
+<p>This page verifies the stable dm6 embedding seam: <code>Elm.AppEmbed.init({ node, flags: { slug, stored } })</code>.</p>
+<p>The dm6 topic map below is treated as an embedded application island. When the pointer is inside the island, HyperDoc overlays should become passive and evidence remains collapsed by default.</p>
+
+<section class='dm6-hyperdoc-map dm6-island' data-dm6-slug='dm6-hyperdoc-inline-proof' data-dm6-bundle='/assets/dm6-elm/app.js'>
+  <header class='dm6-island-header'>
+    <div class='dm6-island-title'>
+      <h2>DM6 Topic Map</h2>
+      <span class='dm6-island-subtitle'>Live AppEmbed canvas with structured evidence capture</span>
+    </div>
+    <nav class='dm6-toolbar' aria-label='dm6 controls'>
+      <button type='button' data-dm6-action='select'>Select</button>
+      <button type='button' data-dm6-action='move'>Move</button>
+      <button type='button' data-dm6-action='cross'>Cross</button>
+      <button type='button' data-dm6-action='fit'>Fit</button>
+      <button type='button' data-dm6-action='reset'>Reset</button>
+      <button type='button' data-dm6-action='evidence'>Evidence</button>
+    </nav>
+  </header>
+  <div class='dm6-mode-banner'>
+    <span><b>Input owner:</b> <span class='dm6-input-owner'>page</span></span>
+    <span><b>Mode:</b> <span class='dm6-mode'>select</span></span>
+    <span><b>HyperDoc:</b> <span class='dm6-hyperdoc-state'>overlays active outside embedded app</span></span>
+  </div>
+  <div class='dm6-canvas'>
+    <div class='dm6-stage'>dm6 AppEmbed mount pending...</div>
+  </div>
+  <div class='dm6-success-card'>
+    <div><strong class='dm6-mount-summary'>dm6 mounting…</strong><br>Try: click a topic, drag a topic, then inspect emitted events.</div>
+    <div><b>Status:</b> <span class='dm6-status'>not mounted</span></div>
+  </div>
+  <details class='dm6-evidence-drawer'>
+    <summary>Evidence: <span class='dm6-evidence-count'>0</span> events · last: <span class='dm6-evidence-last'>none</span></summary>
+    <div class='dm6-evidence-panel'>
+      <div class='dm6-evidence-actions'>
+        <button type='button' data-dm6-evidence-copy>Copy JSON</button>
+        <button type='button' data-dm6-evidence-clear>Clear</button>
+        <button type='button' data-dm6-evidence-download>Download</button>
+      </div>
+      <h3>Evidence summary</h3>
+      <pre class='dm6-evidence-summary'>{}</pre>
+      <h3>Raw events</h3>
+      <pre class='dm6-evidence'></pre>
+    </div>
+  </details>
   <script type='application/json' class='dm6-stored'>{
     "items": [
       {
@@ -155,6 +194,7 @@
     "boxId": 0,
     "nextId": 9
   }</script>
-</div>
+</section>
+
 <script src='/assets/dm6-elm/hyperdoc-dm6-inline.js'></script>
 <script>window.hyperdocDm6Inline && window.hyperdocDm6Inline.mountAll(document);</script>
