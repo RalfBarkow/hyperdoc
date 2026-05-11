@@ -107,17 +107,24 @@ Enable web debugger only when that extension is loaded."
       (funcall app env))))
 
 (defun register-runtime-asset-paths ()
+  ;; Keep the proven HyperBook server asset mount.
+  ;; /hyperbook-server/js/url.js resolves under:
+  ;;   hyperbook-server/assets/hyperbook-server/js/url.js
   (clog-connection:add-plugin-path
    "^/hyperbook-server/"
    (uiop:ensure-directory-pathname
     (asdf:system-relative-pathname :hyperbook/server
-                                   "assets/"))))
+                                   "assets/")))
+
+  ;; Mount HyperDoc's public /assets/ URL family at the HyperDoc source root.
+  ;; CLOG's plugin-path lookup preserves the URL prefix in the filesystem path,
+  ;; so /assets/dm6-elm/app.js must resolve against the source root, not against
+  ;; assets/dm6-elm/ itself.
   (clog-connection:add-plugin-path
-   "^/assets/dm6-elm/"
+   "^/assets/"
    (uiop:ensure-directory-pathname
     (asdf:system-relative-pathname :hyperdoc
-                                   "assets/dm6-elm/")))
-
+                                   ""))))
 
 (defun register-known-hyperbooks ()
   (multiple-value-bind (entries exists? path candidates load-error)
