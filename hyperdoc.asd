@@ -422,6 +422,7 @@
                                        (:file "mech-deployment-provenance-smoke")
                                        (:file "py4dmx-cluster-smoke")
                                        (:file "scxml-compiler-smoke")
+                             (:file "running-image-coherence-rebuild-smoke")
                                        (:file "page-lookup-topic-repair-scxml-smoke")
                                        (:file "interaction-net-smoke")
                                        (:file "closure-nor-demo-smoke")
