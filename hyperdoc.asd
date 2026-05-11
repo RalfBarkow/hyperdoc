@@ -244,6 +244,7 @@
                                        (:file "bibliography-subcollections")
                                        (:file "topic-enrichment")
                                        (:file "fedwiki-materialization")
+                             (:file "fedwiki-story-item-rendering-demo")
                                        (:file "playground-debug")
                                        (:file "web-debugger")
                                        (:file "playground-eval")

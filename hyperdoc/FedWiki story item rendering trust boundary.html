@@ -1,0 +1,117 @@
+<h1>FedWiki story item rendering trust boundary</h1>
+
+<in-package>hyperdoc/inspector</in-package>
+
+<p>
+  This page demonstrates the two recent FedWiki story-item rendering
+  hardenings: <tt>:html</tt> story items now fail closed by default, and the
+  <tt>:graphviz</tt> story-item path remains text-backed and routed through the
+  shared Graphviz rendering seam.
+</p>
+
+<h2>Inspectable examples</h2>
+
+<ul>
+  <li>
+    <a expr="(make-fedwiki-html-story-item-blocked-demo)">
+      <tt>(make-fedwiki-html-story-item-blocked-demo)</tt>
+    </a>
+    — renders an unsafe-looking HTML item in the default blocked mode.
+  </li>
+  <li>
+    <a expr="(make-fedwiki-html-story-item-trusted-demo)">
+      <tt>(make-fedwiki-html-story-item-trusted-demo)</tt>
+    </a>
+    — renders a small trusted HTML item with the explicit trust binding.
+  </li>
+  <li>
+    <a expr="(make-fedwiki-graphviz-story-item-shape-demo)">
+      <tt>(make-fedwiki-graphviz-story-item-shape-demo)</tt>
+    </a>
+    — proves that Graphviz uses story item <tt>text</tt>, not
+    <tt>data[&quot;dot&quot;]</tt>, as the canonical DOT source.
+  </li>
+  <li>
+    <a expr="(make-fedwiki-story-item-rendering-demo-set)">
+      <tt>(make-fedwiki-story-item-rendering-demo-set)</tt>
+    </a>
+    — opens all three examples as one inspectable list.
+  </li>
+</ul>
+
+<h2>What to look for in the inspector</h2>
+
+<p>
+  Each example object has views for <b>Overview</b>, <b>Rendered HTML</b>,
+  <b>Source shape</b>, <b>Contract</b>, and <b>Related examples</b>.
+</p>
+
+<table>
+  <tr>
+    <th>Example</th>
+    <th>Expected observation</th>
+  </tr>
+  <tr>
+    <td><tt>:html</tt> blocked</td>
+    <td>The rendered output contains the blocked-message text and escaped
+        source; it must not emit a raw <tt>&lt;script&gt;</tt> tag.</td>
+  </tr>
+  <tr>
+    <td><tt>:html</tt> trusted</td>
+    <td>The rendered output is raw only because the demo dynamically binds
+        <tt>*render-unsafe-html-story-items*</tt> to true.</td>
+  </tr>
+  <tr>
+    <td><tt>:graphviz</tt></td>
+    <td>The rendered output contains the shared Graphviz placeholder and the
+        text-backed DOT, while the deliberately wrong <tt>data[&quot;dot&quot;]</tt>
+        value is absent.</td>
+  </tr>
+</table>
+
+<h2>REPL entry points</h2>
+
+<lisp-code>
+(clog-moldable-inspector:clog-inspect
+ :object (hyperdoc/inspector::make-fedwiki-html-story-item-blocked-demo))
+
+(clog-moldable-inspector:clog-inspect
+ :object (hyperdoc/inspector::make-fedwiki-html-story-item-trusted-demo))
+
+(clog-moldable-inspector:clog-inspect
+ :object (hyperdoc/inspector::make-fedwiki-graphviz-story-item-shape-demo))
+</lisp-code>
+
+<h2>Smoke-test confirmation</h2>
+
+<p>
+  The implementation-level confirmation remains:
+</p>
+
+<lisp-code>
+(hyperdoc/tests:run-fedwiki-story-items-smoke-tests)
+</lisp-code>
+
+<p>
+  The page is deliberately not a replacement for the smoke test. It is the
+  inspectable explanation surface for the same contract.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="FedWiki Graphviz story item render trace">FedWiki Graphviz story item render trace</a></li>
+  <li><a page="FedWiki Story Item IDs">FedWiki Story Item IDs</a></li>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="Runtime Dispatch Seams in HyperDoc">Runtime Dispatch Seams in HyperDoc</a></li>
+</ul>
+
+<h2>Boundary</h2>
+
+<p>
+  This page demonstrates behavior. It does not make remote FedWiki HTML trusted,
+  and it does not move Graphviz rendering policy into the FedWiki adapter. The
+  adapter remains a dispatch seam; the shared Graphviz runtime remains the
+  rendering seam.
+</p>
