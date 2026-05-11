@@ -2,11 +2,159 @@
 <in-package>hyperdoc</in-package>
 
 <p>Inline proof for embedding dm6 through Elm.AppEmbed.</p>
-<div class='dm6-hyperdoc-map' data-dm6-slug='dm6-hyperdoc-inline-proof' data-dm6-bundle='/assets/dm6-elm/app.js' style='height:520px;border:1px solid #c7d2dc;padding:0.5rem;'>
-  <div class='dm6-stage' style='height:calc(100% - 4.2rem);width:100%;'>dm6 AppEmbed mount pending...</div>
+<p>This version passes a current native dm6 model matching <tt>Model.decoder</tt>: top-level <tt>items</tt>, <tt>boxes</tt>, <tt>boxId</tt>, and <tt>nextId</tt>.</p>
+<div class='dm6-hyperdoc-map' data-dm6-slug='dm6-hyperdoc-inline-proof' data-dm6-bundle='/assets/dm6-elm/app.js' style='height:820px;border:1px solid #c7d2dc;padding:0.5rem;'>
+  <div class='dm6-stage' style='height:420px;width:100%;border:1px dashed #d8e1e8;'>dm6 AppEmbed mount pending...</div>
   <p><b>Status:</b> <span class='dm6-status'>not mounted</span></p>
-  <details><summary>Captured optional ports</summary><pre class='dm6-evidence' style='white-space:pre-wrap;max-height:8rem;overflow:auto;'></pre></details>
-  <script type='application/json' class='dm6-stored'>{"title":"DM6 AppEmbed HyperDoc Inline Proof","story":[{"type":"paragraph","text":"This is a HyperDoc-authored page converted to FedWiki-like JSON and passed as AppEmbed flags."},{"type":"markdown","text":"Stable seam: Elm.AppEmbed.init({ node, flags: { slug, stored } })."},{"type":"paragraph","text":"Next phase: subscribe to dm6 ports for store, log, and future evidence events."}]}</script>
+  <details open><summary>Evidence summary</summary><pre class='dm6-evidence-summary' style='white-space:pre-wrap;max-height:8rem;overflow:auto;'></pre></details>
+  <details open><summary>Captured optional ports and mount evidence</summary><pre class='dm6-evidence' style='white-space:pre-wrap;max-height:20rem;overflow:auto;'></pre></details>
+  <script type='application/json' class='dm6-stored'>{
+    "items": [
+      {
+        "topic": {
+          "id": 0,
+          "icon": "",
+          "text": "Home",
+          "size": {
+            "view": { "w": 0, "h": 0 },
+            "editor": { "w": 0, "h": 0 }
+          },
+          "assocIds": [2,4,6,8]
+        }
+      },
+      {
+        "topic": {
+          "id": 1,
+          "icon": "",
+          "text": "A",
+          "size": {
+            "view": { "w": 128, "h": 37 },
+            "editor": { "w": 128, "h": 37 }
+          },
+          "assocIds": [2]
+        }
+      },
+      {
+        "assoc": {
+          "id": 2,
+          "type": "Hierarchy",
+          "player1": 0,
+          "player2": 1,
+          "assocIds": []
+        }
+      },
+      {
+        "topic": {
+          "id": 3,
+          "icon": "",
+          "text": "B",
+          "size": {
+            "view": { "w": 128, "h": 37 },
+            "editor": { "w": 128, "h": 37 }
+          },
+          "assocIds": [4]
+        }
+      },
+      {
+        "assoc": {
+          "id": 4,
+          "type": "Hierarchy",
+          "player1": 0,
+          "player2": 3,
+          "assocIds": []
+        }
+      },
+      {
+        "topic": {
+          "id": 5,
+          "icon": "",
+          "text": "C",
+          "size": {
+            "view": { "w": 128, "h": 37 },
+            "editor": { "w": 128, "h": 37 }
+          },
+          "assocIds": [6]
+        }
+      },
+      {
+        "assoc": {
+          "id": 6,
+          "type": "Hierarchy",
+          "player1": 0,
+          "player2": 5,
+          "assocIds": []
+        }
+      },
+      {
+        "topic": {
+          "id": 7,
+          "icon": "",
+          "text": "D",
+          "size": {
+            "view": { "w": 128, "h": 37 },
+            "editor": { "w": 128, "h": 37 }
+          },
+          "assocIds": [8]
+        }
+      },
+      {
+        "assoc": {
+          "id": 8,
+          "type": "Hierarchy",
+          "player1": 0,
+          "player2": 7,
+          "assocIds": []
+        }
+      }
+    ],
+    "boxes": [
+      {
+        "id": 0,
+        "rect": { "x1": 0, "y1": 0, "x2": 900, "y2": 520 },
+        "scroll": { "x": 0, "y": 0 },
+        "items": [
+          {
+            "id": 1,
+            "boxAssocId": 2,
+            "visibility": "Visible",
+            "topicProps": {
+              "pos": { "x": 120, "y": 80 },
+              "display": "Detail"
+            }
+          },
+          {
+            "id": 3,
+            "boxAssocId": 4,
+            "visibility": "Visible",
+            "topicProps": {
+              "pos": { "x": 320, "y": 80 },
+              "display": "Detail"
+            }
+          },
+          {
+            "id": 5,
+            "boxAssocId": 6,
+            "visibility": "Visible",
+            "topicProps": {
+              "pos": { "x": 120, "y": 220 },
+              "display": "Detail"
+            }
+          },
+          {
+            "id": 7,
+            "boxAssocId": 8,
+            "visibility": "Visible",
+            "topicProps": {
+              "pos": { "x": 320, "y": 220 },
+              "display": "Detail"
+            }
+          }
+        ]
+      }
+    ],
+    "boxId": 0,
+    "nextId": 9
+  }</script>
 </div>
 <script src='/assets/dm6-elm/hyperdoc-dm6-inline.js'></script>
 <script>window.hyperdocDm6Inline && window.hyperdocDm6Inline.mountAll(document);</script>
