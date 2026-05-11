@@ -22,6 +22,7 @@
                           :serial t
                           :components ((:file "package")
                                        (:file "core")
+                             (:file "decision-maps")
                                        (:file "localhost-fedwiki-page-pipeline")
                                        (:file "collective-knowledge-slice")
                                        (:file "reproducible-devenv-as-knowledge-artifact-slice")
@@ -230,6 +231,7 @@
     :components ((:module "hyperdoc-inspector"
                           :serial t
                           :components ((:file "package")
+                             (:file "decision-maps")
                                        (:file "code-path-graphs")
                                        (:file "whyline-output-questions")
                                        (:file "state-machines")
