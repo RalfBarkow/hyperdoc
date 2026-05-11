@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="running-image-coherence-rebuild"
+    initial="source-changed">
+
+  <state id="source-changed">
+    <transition event="begin" target="reload-systems"/>
+  </state>
+
+  <state id="reload-systems">
+    <transition event="reload.ok" target="reload-text-pages"/>
+    <transition event="reload.failed" target="failed"/>
+  </state>
+
+  <state id="reload-text-pages">
+    <transition event="pages.reload.ok" target="refresh-derived-runtime-state"/>
+    <transition event="pages.reload.failed" target="failed"/>
+  </state>
+
+  <state id="refresh-derived-runtime-state">
+    <transition event="derived-state.refreshed" target="scan-authored-links"/>
+    <transition event="derived-state.failed" target="failed"/>
+  </state>
+
+  <state id="scan-authored-links">
+    <transition event="links.scanned" target="classify-page-lookup-issues"/>
+    <transition event="links.scan.failed" target="failed"/>
+  </state>
+
+  <state id="classify-page-lookup-issues">
+    <transition event="lookup.clean" target="verify-no-page-lookup-issues"/>
+    <transition event="lookup.issues-found" target="rank-repair-candidates"/>
+  </state>
+
+  <state id="rank-repair-candidates">
+    <transition event="candidates.ranked" target="review-repairs"/>
+    <transition event="candidates.unavailable" target="failed"/>
+  </state>
+
+  <state id="review-repairs">
+    <transition event="repair.accepted" target="apply-authored-repair"/>
+    <transition event="repair.rejected" target="failed"/>
+  </state>
+
+  <state id="apply-authored-repair">
+    <transition event="repair.applied" target="reload-text-pages"/>
+    <transition event="repair.failed" target="failed"/>
+  </state>
+
+  <state id="verify-no-page-lookup-issues">
+    <transition event="verification.clean" target="coherent"/>
+    <transition event="verification.issues" target="classify-page-lookup-issues"/>
+    <transition event="verification.failed" target="failed"/>
+  </state>
+
+  <final id="coherent"/>
+  <final id="failed"/>
+
+</scxml>

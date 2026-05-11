@@ -1,0 +1,128 @@
+<h1>Running Image Coherence Rebuild Workflow</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page specifies the first SCXML runbook for rebuilding HyperDoc's
+  long-running Lisp image back into a coherent state after source, page, or
+  derived runtime state changes.
+</p>
+
+<p>
+  The workflow is based on Drew V. McDermott's running-image coherence problem:
+  a Lisp image can keep executing while source files, loaded definitions,
+  registries, indexes, page links, and derived tables drift out of freshness
+  order. The workflow treats rebuild as a state-machine problem rather than as
+  an ad hoc sequence of REPL commands.
+</p>
+
+<h2>Workflow artifact</h2>
+
+<ul>
+  <li><tt>hyperdoc/running-image-coherence-rebuild.scxml</tt></li>
+</ul>
+
+<h2>SCXML intent</h2>
+
+<p>
+  The SCXML machine expresses the rebuild path as a sequence of observable
+  states and semantic events:
+</p>
+
+<pre>source-changed
+  -> reload-systems
+  -> reload-text-pages
+  -> refresh-derived-runtime-state
+  -> scan-authored-links
+  -> classify-page-lookup-issues
+  -> verify-no-page-lookup-issues
+  -> coherent</pre>
+
+<p>
+  If page-lookup issues are found, the workflow moves through ranked repair
+  candidates and explicit human review before applying an authored repair.
+</p>
+
+<pre>classify-page-lookup-issues
+  -> rank-repair-candidates
+  -> review-repairs
+  -> apply-authored-repair
+  -> reload-text-pages</pre>
+
+<h2>McDermott mapping</h2>
+
+<table class="inspector-table">
+  <tr>
+    <th>McDermott term</th>
+    <th>HyperDoc rebuild interpretation</th>
+  </tr>
+  <tr>
+    <td>Chunk</td>
+    <td>A page, source file, loaded definition, registry entry, topic materialization, lookup result, or derived inspector surface.</td>
+  </tr>
+  <tr>
+    <td>Basis</td>
+    <td>The supporting source or runtime artifact whose freshness constrains a derived chunk.</td>
+  </tr>
+  <tr>
+    <td>Derived chunk</td>
+    <td>Loaded pages, link indexes, lookup-issue objects, topic registries, and generated inspector surfaces.</td>
+  </tr>
+  <tr>
+    <td>Deriver</td>
+    <td>The reload, rescan, repair, or materialization operation that brings a derived chunk up to date.</td>
+  </tr>
+  <tr>
+    <td>Coherent image</td>
+    <td>A Lisp image whose loaded systems, text pages, derived state, and authored links agree after rebuild.</td>
+  </tr>
+</table>
+
+<h2>Page-lookup gate</h2>
+
+<p>
+  Exact HyperBook page lookup is the authority. The workflow should not treat
+  near matches as success. A matcher such as the NOR matcher can rank repair
+  candidates, but it must not silently rewrite authored links.
+</p>
+
+<pre>exact lookup fails
+  -> page-lookup issue
+  -> rank near-miss repair candidates
+  -> human review
+  -> authored page or link correction
+  -> rebuild and verify</pre>
+
+<h2>Acceptance condition</h2>
+
+<p>
+  The workflow reaches <tt>coherent</tt> only when the rebuild has completed and
+  the page-lookup verification pass reports no remaining authored page targets
+  that fail exact lookup.
+</p>
+
+<h2>REPL sketch</h2>
+
+<lisp-code>
+(asdf:load-system :hyperdoc/explorer)
+(asdf:load-system :hyperdoc/inspector)
+
+(hyperdoc::reload-text-pages hyperdoc::*hyperdoc*)
+
+(loop for page being the hash-values of (hyperdoc::pages-of hyperdoc::*hyperdoc*)
+      append (hyperbook:lookup-issues-of page))
+</lisp-code>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="SCXML Architect">SCXML Architect</a></li>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+  <li><a page="McDermott Running Image Coherence Crosswalk">McDermott Running Image Coherence Crosswalk</a></li>
+  <li><a page="Core Chunk Classes">Core Chunk Classes</a></li>
+  <li><a page="Make the issue repair function disappear as the primary abstraction">Make the issue repair function disappear as the primary abstraction</a></li>
+  <li><a page="State machine">State machine</a></li>
+  <li><a page="State-machine run">State-machine run</a></li>
+  <li><a page="State-machine trace">State-machine trace</a></li>
+  <li><a page="Shared Projection IR">Shared Projection IR</a></li>
+</ul>
