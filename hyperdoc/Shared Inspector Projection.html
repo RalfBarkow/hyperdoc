@@ -1,0 +1,195 @@
+<h1>Shared Inspector Projection</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A shared inspector projection is the collaboration artifact for sharing an
+  inspector view between HyperDoc instances without sharing the live CLOG
+  inspector session itself.
+</p>
+
+<p>
+  The rule is:
+</p>
+
+<pre>Do not share the live inspector session as the collaboration artifact.
+Share an inspector projection that another HyperDoc instance can inspect locally.</pre>
+
+<h2>Problem</h2>
+
+<p>
+  A local inspector URL such as <tt>http://127.0.0.1:8080/inspector</tt>
+  is a live browser surface over one Lisp image. It can contain transient
+  object identities, evaluation affordances, restarts, mutable image state,
+  and browser-session state.
+</p>
+
+<p>
+  That makes the live inspector useful locally, but unsuitable as the object
+  to synchronize between two HyperDoc instances or to expose directly through
+  a public URL such as <tt>https://dreyeck.ch/inspector</tt>.
+</p>
+
+<h2>Design</h2>
+
+<p>
+  The collaboration boundary is a projection:
+</p>
+
+<pre>local inspector object
+  -> inspectable projection object
+  -> DMX topic
+  -> DMX topicmap placement
+  -> remote HyperDoc reads projection
+  -> remote HyperDoc opens its own local inspector view</pre>
+
+<p>
+  Live object identity remains local. The projection is the shared artifact.
+  Each HyperDoc instance renders its own inspector pane from the shared
+  projection data.
+</p>
+
+<h2>Example: page-lookup rebuild report</h2>
+
+<p>
+  The current motivating object is the page-lookup rebuild report:
+</p>
+
+<lisp-code>
+(defparameter *page-lookup-rebuild-report*
+  (make-page-lookup-rebuild-report))
+
+(clog-moldable-inspector:clog-inspect
+ :object *page-lookup-rebuild-report*)
+</lisp-code>
+
+<p>
+  Instead of sharing the live pane, HyperDoc should derive a projection such
+  as:
+</p>
+
+<pre>{
+  "kind": "hyperdoc.inspector.projection",
+  "shareId": "page-lookup-rebuild-report/latest",
+  "producer": "rgb-local-hyperdoc",
+  "producerUrl": "http://127.0.0.1:8080/inspector",
+  "publicUrl": "https://dreyeck.ch/inspector",
+  "objectClass": "page-lookup-rebuild-report",
+  "textRepresentation": "Page lookup rebuild gate: issues, 262 issues",
+  "selectedView": "Summary",
+  "views": [
+    {"title": "Overview", "summary": "Status, pages scanned, issue count, reload status"},
+    {"title": "Summary", "summary": "Counts grouped by issue classification"},
+    {"title": "Issues", "summary": "Structured page/link/classification/status rows"},
+    {"title": "Scanned pages", "summary": "Pages included in the rebuild gate scan"}
+  ],
+  "data": {
+    "status": "issues",
+    "issueCount": 262
+  }
+}</pre>
+
+<h2>Active/alive pair of HyperDoc instances</h2>
+
+<p>
+  An active/alive pair does not mean that two browser DOMs are synchronized.
+  It means that two HyperDoc instances share the same durable projection topic
+  and topicmap placement, while each instance keeps its own local Lisp image
+  and inspector runtime.
+</p>
+
+<table class="inspector-table">
+  <tr>
+    <th>Level</th>
+    <th>Meaning</th>
+    <th>Implementation</th>
+  </tr>
+  <tr>
+    <td>Snapshot</td>
+    <td>Share one inspector projection once.</td>
+    <td>DMX topic containing projection JSON.</td>
+  </tr>
+  <tr>
+    <td>Refreshable</td>
+    <td>Re-run the local report and update the same projection topic.</td>
+    <td>Journaled update of the projection payload.</td>
+  </tr>
+  <tr>
+    <td>Live-ish pair</td>
+    <td>Both HyperDoc instances reread the same projection topicmap and re-render locally.</td>
+    <td>DMX topicmap plus revision or journal polling.</td>
+  </tr>
+</table>
+
+<h2>DMX topicmap workflow</h2>
+
+<ol>
+  <li>Build the local inspector object.</li>
+  <li>Build an inspector projection from that object.</li>
+  <li>Preview the DMX write as a dry run.</li>
+  <li>Create or update a DMX topic containing the projection JSON.</li>
+  <li>Place the topic into the shared topicmap with view props.</li>
+  <li>Remote HyperDoc reads the topicmap.</li>
+  <li>Remote HyperDoc materializes a local projection object.</li>
+  <li>Remote HyperDoc opens its own inspector view of that projection.</li>
+</ol>
+
+<h2>Proposed object model</h2>
+
+<pre>(defclass inspector-share-projection ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (producer-instance :initarg :producer-instance :reader producer-instance-of)
+   (producer-url :initarg :producer-url :reader producer-url-of)
+   (object-class :initarg :object-class :reader object-class-of)
+   (object-text :initarg :object-text :reader object-text-of)
+   (selected-view :initarg :selected-view :reader selected-view-of)
+   (view-summaries :initarg :view-summaries :initform nil :reader view-summaries-of)
+   (projection-json :initarg :projection-json :reader projection-json-of)
+   (created-at :initarg :created-at :reader created-at-of)
+   (dmx-topic-id :initarg :dmx-topic-id :initform nil :reader dmx-topic-id-of)
+   (dmx-topicmap-id :initarg :dmx-topicmap-id :initform nil :reader dmx-topicmap-id-of)
+   (status :initarg :status :reader status-of)))</pre>
+
+<h2>Recommended inspector views</h2>
+
+<ul>
+  <li><b>Overview:</b> object text, producer, selected view, status, DMX placement.</li>
+  <li><b>Projection JSON:</b> exact machine-readable payload to publish.</li>
+  <li><b>DMX placement:</b> topic id, topicmap id, view props, last update.</li>
+  <li><b>Consumer instructions:</b> how another HyperDoc instance reads and inspects it.</li>
+</ul>
+
+<h2>Boundary rule</h2>
+
+<p>
+  The projection must not include arbitrary live Lisp object references,
+  restart handles, evaluation closures, browser DOM state, or unaudited
+  mutation affordances. It may include stable identifiers, textual
+  representation, selected view name, summarized view data, and structured
+  report data.
+</p>
+
+<h2>First implementation slice</h2>
+
+<ol>
+  <li>Add <tt>inspector-share-projection</tt> objects.</li>
+  <li>Add inspector views for projections.</li>
+  <li>Add a projection function for <tt>page-lookup-rebuild-report</tt>.</li>
+  <li>Publish the projection as a DMX topic.</li>
+  <li>Place the projection topic on a shared DMX topicmap.</li>
+  <li>Read the topicmap from a second HyperDoc instance and inspect the projection locally.</li>
+</ol>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Page Lookup Rebuild Gate">Page Lookup Rebuild Gate</a></li>
+  <li><a page="Running Image Coherence Rebuild Workflow">Running Image Coherence Rebuild Workflow</a></li>
+  <li><a page="SCXML Architect">SCXML Architect</a></li>
+  <li><a page="Shared Projection IR">Shared Projection IR</a></li>
+  <li><a page="DMX MCP server for shared workspace">DMX MCP server for shared workspace</a></li>
+  <li><a page="DMX workspace journal model">DMX workspace journal model</a></li>
+  <li><a page="Concepts DMX Topics and Topic Maps">Concepts DMX Topics and Topic Maps</a></li>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+</ul>
