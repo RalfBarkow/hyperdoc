@@ -112,6 +112,12 @@ Enable web debugger only when that extension is loaded."
    (uiop:ensure-directory-pathname
     (asdf:system-relative-pathname :hyperbook/server
                                    "assets/"))))
+  (clog-connection:add-plugin-path
+   "^/assets/dm6-elm/"
+   (uiop:ensure-directory-pathname
+    (asdf:system-relative-pathname :hyperdoc
+                                   "assets/dm6-elm/")))
+
 
 (defun register-known-hyperbooks ()
   (multiple-value-bind (entries exists? path candidates load-error)
