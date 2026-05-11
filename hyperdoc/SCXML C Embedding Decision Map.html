@@ -1,0 +1,103 @@
+<h1>SCXML C Embedding Decision Map</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the inspectable decision-space object for the
+  SCXML-to-C HyperDoc integration path.
+</p>
+
+<p>
+  The architectural rule is:
+</p>
+
+<pre>Do not embed HyperDoc into C.
+Embed a generated SCXML protocol machine into C.
+Let that machine call the HyperDoc service.
+Let HyperDoc inspect, validate, replay, and document the same machine.</pre>
+
+<h2>Why this page exists</h2>
+
+<p>
+  The decision map is a live Lisp object with inspector views. This page is the
+  durable explanation surface. Keep them separate: the page explains the design,
+  while the object exposes the current decision matrix, roadmap, and option
+  objects.
+</p>
+
+<h2>Inspectable decision map</h2>
+
+<p>
+  Open the decision map next to this page and inspect its views:
+</p>
+
+<ul>
+  <li><a expr="*scxml-c-embedding-decision-map*" view="Overview"><tt>SCXML C decision map — Overview</tt></a></li>
+  <li><a expr="*scxml-c-embedding-decision-map*" view="Decision matrix"><tt>SCXML C decision map — Decision matrix</tt></a></li>
+  <li><a expr="*scxml-c-embedding-decision-map*" view="Roadmap"><tt>SCXML C decision map — Roadmap</tt></a></li>
+</ul>
+
+<p>
+  To keep this page visible while opening the object, use the browser inspector
+  pane behavior: click the object link to open it as an adjacent inspectable
+  object, or shift-click if the current lineup would otherwise be replaced.
+</p>
+
+<h2>Boundary model</h2>
+
+<table class="inspector-table">
+  <tr>
+    <th>Layer</th>
+    <th>Responsibility</th>
+  </tr>
+  <tr>
+    <td>Generated C state machine</td>
+    <td>Owns deterministic protocol state, events, guards, and trace emission.</td>
+  </tr>
+  <tr>
+    <td>Transport adapter</td>
+    <td>Owns HTTP, JSON-RPC, MCP, socket, or embedded-system transport calls.</td>
+  </tr>
+  <tr>
+    <td>HyperDoc service</td>
+    <td>Owns pages, topics, inspector views, replay, validation, and documentation.</td>
+  </tr>
+  <tr>
+    <td>HyperDoc page</td>
+    <td>Explains the architecture and links to the inspectable runtime object.</td>
+  </tr>
+</table>
+
+<h2>Current recommended sequence</h2>
+
+<ol>
+  <li><b>HyperDoc-first MVP:</b> SCXML as contract, HyperDoc validates and replays, C client initially handwritten.</li>
+  <li><b>Embedded-safe SCXML profile:</b> restrict SCXML to deterministic, codegen-friendly constructs.</li>
+  <li><b>Generated C machine plus handwritten transport:</b> generate only the state/event/transition logic and keep I/O in callbacks.</li>
+</ol>
+
+<h2>Source artifacts</h2>
+
+<ul>
+  <li><tt>hyperdoc/decision-maps.lisp</tt>: decision-map object model and seed instance.</li>
+  <li><tt>hyperdoc-inspector/decision-maps.lisp</tt>: inspector views for the map and options.</li>
+  <li><tt>hyperdoc/SCXML C Embedding Decision Map.html</tt>: this durable explanation page.</li>
+</ul>
+
+<h2>Usage from the REPL</h2>
+
+<lisp-code>
+(clog-moldable-inspector:clog-inspect
+ :object hyperdoc::*scxml-c-embedding-decision-map*)
+</lisp-code>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="HyperDoc Evaluation and Inspection Model">HyperDoc Evaluation and Inspection Model</a></li>
+  <li><a page="HyperDoc Runtime Model">HyperDoc Runtime Model</a></li>
+  <li><a page="Documentation Surfaces in HyperDoc">Documentation Surfaces in HyperDoc</a></li>
+  <li><a page="State machine">State machine</a></li>
+  <li><a page="State-machine run">State-machine run</a></li>
+  <li><a page="SCXML Architect">SCXML Architect</a></li>
+</ul>
