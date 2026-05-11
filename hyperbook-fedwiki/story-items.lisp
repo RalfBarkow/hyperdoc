@@ -1077,3 +1077,37 @@
          (:div :style "width: 80%; margin: 0 auto;"
                (:img :src (gethash "url" (data-of item)))
                (:p (render-wiki-text (text-of item) page))))))
+
+
+;;;; html-story-item-trust-boundary-override
+;;;; Fail closed for FedWiki :html story items unless explicitly trusted.
+
+(in-package :hyperbook/fedwiki)
+
+(defparameter *render-unsafe-html-story-items* nil
+  "When true, render FedWiki :HTML story items with VIEWS:UNSAFE-HTML.
+The default is NIL so imported or remote FedWiki HTML snippets fail closed.")
+
+(defun trusted-html-story-item-p (item page)
+  "Return true only when this story item's HTML may be rendered as raw HTML.
+
+The default policy is deliberately explicit: callers must dynamically bind
+*RENDER-UNSAFE-HTML-STORY-ITEMS* around rendering trusted corpora. Do not infer
+trust from FedWiki locality alone."
+  (declare (ignore item page))
+  *render-unsafe-html-story-items*)
+
+(defun render-blocked-html-story-item (item)
+  (views:html
+    (:div :class "hyperbook-fedwiki-html-story-item-blocked"
+          (:p (:b (views:esc "HTML story item withheld by default.")))
+          (:p (:small
+               (views:esc
+                "Bind HYPERBOOK/FEDWIKI::*RENDER-UNSAFE-HTML-STORY-ITEMS* to T only for trusted FedWiki HTML snippets.")))
+          (:pre :style "white-space: pre-wrap; background-color: #eee;"
+                (views:esc (text-of item))))))
+
+(defmethod render-story-item ((type (eql :html)) item page)
+  (if (trusted-html-story-item-p item page)
+      (write-string (text-of item) html-inspector-views::*html-stream*)
+      (render-blocked-html-story-item item)))

@@ -8,7 +8,18 @@
   (export (list (intern "RUN-FEDWIKI-STORY-ITEMS-SMOKE-TESTS" :hyperdoc/tests))
           :hyperdoc/tests))
 
+
 (in-package :hyperdoc/tests)
+
+(defun assert-true (condition message)
+  (unless condition
+    (error "~A" message)))
+
+(defun assert-equal (expected actual message)
+  (unless (equal expected actual)
+    (error "~A~%Expected: ~S~%Actual:   ~S"
+           message expected actual)))
+
 
 (defparameter *story-items-smoke-commit-hash*
   "0123456789abcdef0123456789abcdef01234567")
@@ -886,4 +897,105 @@ Line two with [https://example.org link].")))
   (run-fedwiki-story-item-non-hex-negative-test)
   (run-fedwiki-story-item-explicit-link-boundary-test)
   (format t "~&FedWiki story-item smoke tests passed.~%")
+  t)
+
+
+;;;; Graphviz-shape regression and HTML trust-boundary tests.
+
+(defun story-items-smoke-source-contains-p (pathname needle)
+  (search needle (uiop:read-file-string pathname) :test #'char=))
+
+(defun make-story-items-smoke-data-table (&rest pairs)
+  (let ((table (make-hash-table :test #'equal)))
+    (loop for (key value) on pairs by #'cddr
+          do (setf (gethash key table) value))
+    table))
+
+(defun render-story-item-with-data-to-string-and-assets (type text data)
+  (let* ((page (make-story-items-smoke-page))
+         (item (make-instance 'hyperbook/fedwiki::story-item
+                              :item-type type
+                              :id "item-with-data"
+                              :text text
+                              :data data))
+         (accumulator
+           (make-instance 'html-inspector-views::view-accumulator)))
+    (values
+     (with-output-to-string (stream)
+       (let ((html-inspector-views::*html-stream* stream)
+             (html-inspector-views::*view-accumulator* accumulator))
+         (hyperbook/fedwiki::render-story-item type item page)))
+     (html-inspector-views::accumulator-assets accumulator))))
+
+(defun run-fedwiki-story-item-graphviz-shape-regression-test ()
+  (let ((path
+          (asdf:system-relative-pathname
+           :hyperdoc
+           "hyperbook-fedwiki/story-items.lisp")))
+    (assert-true
+     (story-items-smoke-source-contains-p
+      path
+      "(defmethod render-story-item ((type (eql :graphviz)) item page)")
+     "Graphviz story-item renderer must remain a typed story-item method.")
+    (assert-true
+     (story-items-smoke-source-contains-p path "(text-of item)")
+     "Graphviz story items must read canonical DOT from story item text.")
+    (assert-true
+     (story-items-smoke-source-contains-p path "views:graphviz-snippet")
+     "Graphviz story items must delegate to the shared Graphviz snippet.")
+    (assert-true
+     (not (story-items-smoke-source-contains-p path "(gethash \"dot\""))
+     "Graphviz story items must not treat data[\"dot\"] as canonical DOT."))
+
+  (multiple-value-bind (html assets)
+      (render-story-item-with-data-to-string-and-assets
+       :graphviz
+       "digraph { text -> canonical }"
+       (make-story-items-smoke-data-table
+        "dot" "digraph { data -> wrong }"
+        "engine" "dot"))
+    (declare (ignore assets))
+    (assert-true
+     (search "data-inspector-graphviz=" html)
+     "Graphviz rendering must still use the shared Graphviz placeholder.")
+    (assert-true
+     (search "text -&gt; canonical" html)
+     "Graphviz rendering must preserve DOT from story item text.")
+    (assert-true
+     (not (search "data -&gt; wrong" html))
+     "Graphviz rendering must not leak data[\"dot\"] as DOT source.")))
+
+(defun run-fedwiki-story-item-html-trust-boundary-smoke-test ()
+  (let ((html
+          (render-story-item-to-string
+           :html
+           "<script>alert(1)</script><p>trusted-looking markup</p>")))
+    (assert-true
+     (search "HTML story item withheld by default" html)
+     "HTML story items must be visibly blocked by default.")
+    (assert-true
+     (not (search "<script>" html))
+     "Blocked HTML story items must not emit raw script tags.")
+    (assert-true
+     (search "&lt;script&gt;alert(1)&lt;/script&gt;" html)
+     "Blocked HTML story items must render escaped source for inspection."))
+
+  (let ((hyperbook/fedwiki::*render-unsafe-html-story-items* t))
+    (let ((html
+            (render-story-item-to-string
+             :html
+             "<p>trusted html snippet</p>")))
+      (assert-true
+       (search "<p>trusted html snippet</p>" html)
+       "Explicit trusted binding must still allow raw HTML rendering."))))
+
+(unless (fboundp 'run-fedwiki-story-items-smoke-tests-before-html-boundary)
+  (setf (symbol-function 'run-fedwiki-story-items-smoke-tests-before-html-boundary)
+        (symbol-function 'run-fedwiki-story-items-smoke-tests)))
+
+(defun run-fedwiki-story-items-smoke-tests ()
+  (run-fedwiki-story-items-smoke-tests-before-html-boundary)
+  (run-fedwiki-story-item-graphviz-shape-regression-test)
+  (run-fedwiki-story-item-html-trust-boundary-smoke-test)
+  (format t "~&FedWiki story-item Graphviz shape and HTML trust-boundary smoke tests passed.~%")
   t)
