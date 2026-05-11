@@ -1,0 +1,927 @@
+dm6 upstream narrative
+======================
+
+repo:      /Users/rgb/workspace/dm6-elm/
+local:     main  73c51b7b
+upstream:  upstream/master  f1aa6faa
+base:      c5fad791
+ahead/behind: 345	138
+upstream commits: 138
+changed files:    57
+
+dirty status:
+?? dm6-elm-repomix-output-f1aa6faa45a3fa99cab158cc957e65c8f1e92bfd.md
+
+
+
+HyperDoc impact
+===============
+
+AppEmbed ABI touched upstream: no
+Storage chokepoint touched:    yes
+Mouse/drag touched:            yes
+Selection touched:             yes
+Controller touched:            yes
+Renderer touched:              yes
+
+Recommendation:
+  Keep AppEmbed as the public ABI.
+  Re-anchor store evidence at Storage.* only after merge.
+  Re-anchor drag/select evidence at the new mouse/selection seams.
+  Define cross-boundary evidence from before/after containment, not message names.
+
+
+Jörg upstream story, oldest first
+===============================
+
+1. ba082ec1  Attach click handlers to associations
+   author: Jörg Richter
+   date:   2025-12-31T16:03:24+01:00
+   areas:  DRAG-INPUT, APP-DISPATCH, UNCLASSIFIED, MODEL
+   files:  5
+
+2. 46d687d7  Visualize selected association
+   author: Jörg Richter
+   date:   2026-01-01T15:02:50+01:00
+   areas:  APP-DISPATCH, UNCLASSIFIED
+   files:  3
+
+3. 275cb49b  Add association toolbar
+   author: Jörg Richter
+   date:   2026-01-01T22:23:28+01:00
+   areas:  CONTAINMENT, TOOLING, UNCLASSIFIED
+   files:  3
+
+4. d67d3a95  Refactor topic toolbar
+   author: Jörg Richter
+   date:   2026-01-02T13:19:36+01:00
+   areas:  UNCLASSIFIED, TOOLING
+   files:  2
+
+5. f5b8ffc1  Revise toolbar button events
+   author: Jörg Richter
+   date:   2026-01-02T17:30:55+01:00
+   areas:  TOOLING, UNCLASSIFIED
+   files:  2
+
+6. ef165f80  Add 20px hit area to associations
+   author: Jörg Richter
+   date:   2026-01-02T22:59:50+01:00
+   areas:  DRAG-INPUT, SEARCH-SELECTION, TOOLING, APP-DISPATCH, UNCLASSIFIED, MODEL
+   files:  9
+
+7. 4a9a9fa6  Fix: perpendicular association selection visualization
+   author: Jörg Richter
+   date:   2026-01-03T13:48:04+01:00
+   areas:  TOOLING, UNCLASSIFIED
+   files:  3
+
+8. 158b6e8b  Merge branch 'assoc-tools'
+   author: Jörg Richter
+   date:   2026-01-03T16:06:58+01:00
+   areas:  TOOLING
+   files:  1
+
+9. 1a895bee  Fix: dropping box into box can't create cycle
+   author: Jörg Richter
+   date:   2026-01-03T23:17:07+01:00
+   areas:  CONTAINMENT, DRAG-INPUT, UNCLASSIFIED
+   files:  3
+
+10. 53efeb69  Dragging topic stays in edit mode
+   author: Jörg Richter
+   date:   2026-01-04T12:53:49+01:00
+   areas:  UNCLASSIFIED, TOOLING, APP-DISPATCH
+   files:  3
+
+11. c4b7045f  In edit mode don't show expand/collapse button
+   author: Jörg Richter
+   date:   2026-01-04T14:14:36+01:00
+   areas:  UNCLASSIFIED, TOOLING
+   files:  2
+
+12. d13fa568  Add settings menu
+   author: Jörg Richter
+   date:   2026-01-04T15:29:46+01:00
+   areas:  SEARCH-SELECTION, TOOLING, APP-DISPATCH, MODEL
+   files:  5
+
+13. 52e5ee68  Move Import/Export buttons to Settings menu
+   author: Jörg Richter
+   date:   2026-01-04T20:47:41+01:00
+   areas:  UNCLASSIFIED, TOOLING
+   files:  2
+
+14. 9222d4db  Add line style switch to Settings menu
+   author: Jörg Richter
+   date:   2026-01-05T13:45:01+01:00
+   areas:  TOOLING, UNCLASSIFIED
+   files:  4
+
+15. 025a699b  Persist line style setting
+   author: Jörg Richter
+   date:   2026-01-05T21:23:26+01:00
+   areas:  TOOLING, MODEL
+   files:  4
+
+16. 28908dd1  Revise Undo/transient state
+   author: Jörg Richter
+   date:   2026-01-06T12:27:55+01:00
+   areas:  TOOLING, MODEL, PERSISTENCE, UNCLASSIFIED
+   files:  6
+
+17. 33acb898  Merge branch 'settings-menu'
+   author: Jörg Richter
+   date:   2026-01-06T13:22:10+01:00
+   areas:  
+   files:  0
+
+18. a0e30f26  Revise toolbar style
+   author: Jörg Richter
+   date:   2026-01-06T14:12:47+01:00
+   areas:  SEARCH-SELECTION, TOOLING, APP-DISPATCH
+   files:  3
+
+19. 4c67472d  Revise mouse state (drop 'Class')
+   author: Jörg Richter
+   date:   2026-01-06T15:30:53+01:00
+   areas:  UNCLASSIFIED, DRAG-INPUT, TOOLING, MODEL
+   files:  6
+
+20. 510e5716  Use topic/box placeholder text
+   author: Jörg Richter
+   date:   2026-01-06T16:58:06+01:00
+   areas:  UNCLASSIFIED, TOOLING
+   files:  2
+
+21. 61b56881  Reveal search/traversal result only in whiteboxed boxes
+   author: Jörg Richter
+   date:   2026-01-07T12:41:58+01:00
+   areas:  UNCLASSIFIED, SELECTION
+   files:  2
+
+22. c3dabc2f  Revert: empty boxes CAN be whiteboxed
+   author: Jörg Richter
+   date:   2026-01-07T13:54:18+01:00
+   areas:  CONTAINMENT, UNCLASSIFIED, TOOLING, MODEL
+   files:  4
+
+23. 0b1327dc  Put created things in selected whitebox, if any
+   author: Jörg Richter
+   date:   2026-01-07T22:29:43+01:00
+   areas:  SELECTION, TOOLING
+   files:  2
+
+24. 8473ca25  Refactor Add Topic/Box
+   author: Jörg Richter
+   date:   2026-01-08T12:54:30+01:00
+   areas:  CONTAINMENT, UNCLASSIFIED, TOOLING, APP-DISPATCH
+   files:  4
+
+25. 1c83921b  Revise search result menu
+   author: Jörg Richter
+   date:   2026-01-08T23:55:54+01:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, TOOLING
+   files:  3
+
+26. 257035bb  Fix "landing box"
+   author: Jörg Richter
+   date:   2026-01-09T01:48:27+01:00
+   areas:  CONTAINMENT, UNCLASSIFIED, SEARCH-SELECTION, SELECTION, TOOLING, MODEL
+   files:  6
+
+27. 8ac76dfe  Add viewport meta tag
+   author: Jörg Richter
+   date:   2026-01-11T12:27:57+01:00
+   areas:  UNCLASSIFIED, CONTAINMENT
+   files:  2
+
+28. e2ef8efa  Refactor mouse handling (drop subscriptions)
+   author: Jörg Richter
+   date:   2026-01-11T18:17:58+01:00
+   areas:  DRAG-INPUT, APP-DISPATCH, UNCLASSIFIED
+   files:  6
+
+29. 193fef2e  Refactor: use pointer events
+   author: Jörg Richter
+   date:   2026-01-13T11:31:39+01:00
+   areas:  DRAG-INPUT, SEARCH-SELECTION, APP-DISPATCH, UNCLASSIFIED
+   files:  5
+
+30. a0c4a219  Prevent viewport zoom
+   author: Jörg Richter
+   date:   2026-01-13T13:08:30+01:00
+   areas:  UNCLASSIFIED
+   files:  2
+
+31. 58d232fd  Touch: drag topics
+   author: Jörg Richter
+   date:   2026-01-13T23:11:43+01:00
+   areas:  UNCLASSIFIED
+   files:  1
+
+32. 91dcc62e  Refactor: update topic pos by delta
+   author: Jörg Richter
+   date:   2026-01-15T12:22:36+01:00
+   areas:  CONTAINMENT, UNCLASSIFIED, DRAG-INPUT, MODEL
+   files:  5
+
+33. a65e514d  Replace enter/leave events by geometry
+   author: Jörg Richter
+   date:   2026-01-15T23:23:51+01:00
+   areas:  CONTAINMENT, DRAG-INPUT, NAVIGATION, UNCLASSIFIED, MODEL
+   files:  7
+
+34. e2116225  Revise caret button
+   author: Jörg Richter
+   date:   2026-01-16T17:43:13+01:00
+   areas:  CONTAINMENT, DRAG-INPUT, TOOLING, APP-DISPATCH, MODEL, UNCLASSIFIED
+   files:  8
+
+35. c3dea57f  Box hover
+   author: Jörg Richter
+   date:   2026-01-17T10:55:40+01:00
+   areas:  CONTAINMENT, DRAG-INPUT, APP-DISPATCH
+   files:  3
+
+36. 1ffc5cf9  Nested box hover
+   author: Jörg Richter
+   date:   2026-01-17T13:19:19+01:00
+   areas:  CONTAINMENT, UNCLASSIFIED
+   files:  2
+
+37. ab826288  Whitebox hover
+   author: Jörg Richter
+   date:   2026-01-17T19:24:00+01:00
+   areas:  CONTAINMENT
+   files:  1
+
+38. 8f0240fb  Respect display modes for hover
+   author: Jörg Richter
+   date:   2026-01-18T14:08:18+01:00
+   areas:  CONTAINMENT, UNCLASSIFIED
+   files:  4
+
+39. 4237adc8  Minor changes for code readability
+   author: Jörg Richter
+   date:   2026-03-25T19:12:46+01:00
+   areas:  CONTAINMENT, UNCLASSIFIED
+   files:  2
+
+40. 76981e92  Merge branch 'touch'
+   author: Jörg Richter
+   date:   2026-03-25T19:35:14+01:00
+   areas:  
+   files:  0
+
+41. 83e33e8f  0.4 Release
+   author: Jörg Richter
+   date:   2026-03-25T20:47:52+01:00
+   areas:  UNCLASSIFIED, APP-DISPATCH
+   files:  3
+
+42. 05e4b478  Refactor: TopicMap renderer module structure
+   author: Jörg Richter
+   date:   2026-03-26T14:36:13+01:00
+   areas:  CONTAINMENT, DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, TOOLING, APP-DISPATCH, GEOMETRY, MODEL, UNCLASSIFIED, RENDERER
+   files:  17
+
+43. c485afe1  Revert: empty boxes do not switch back to Blackbox
+   author: Jörg Richter
+   date:   2026-03-27T12:30:35+01:00
+   areas:  CONTAINMENT
+   files:  1
+
+44. 085a54b3  Refactor: separate box data from render props
+   author: Jörg Richter
+   date:   2026-03-27T21:44:40+01:00
+   areas:  DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, TOOLING, APP-DISPATCH, CONTAINMENT, GEOMETRY, MODEL, UNCLASSIFIED, RENDERER
+   files:  17
+
+45. b113aba4  Refactor: topicmap renderer module/type naming
+   author: Jörg Richter
+   date:   2026-03-28T13:09:19+01:00
+   areas:  DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, TOOLING, APP-DISPATCH, CONTAINMENT, GEOMETRY, MODEL, UNCLASSIFIED, RENDERER
+   files:  18
+
+46. 1738705d  Adapt (de)serialization
+   author: Jörg Richter
+   date:   2026-03-28T15:33:06+01:00
+   areas:  CONTAINMENT, MODEL, UNCLASSIFIED
+   files:  4
+
+47. 549ca1a6  Upgrade Vite 7->8
+   author: Jörg Richter
+   date:   2026-03-29T00:26:41+01:00
+   areas:  CONTAINMENT, UNCLASSIFIED
+   files:  4
+
+48. fff1c291  Refactor: TopicMap renderer module names
+   author: Jörg Richter
+   date:   2026-03-29T11:36:53+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, TOOLING, APP-DISPATCH, MODEL, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  22
+
+49. 72b72759  Add  to model
+   author: Jörg Richter
+   date:   2026-03-30T10:41:22+02:00
+   areas:  MODEL, UNCLASSIFIED
+   files:  4
+
+50. 38bd8638  Refactor: move 4 functions from TopicMap to Box
+   author: Jörg Richter
+   date:   2026-03-30T12:06:47+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, TOOLING, APP-DISPATCH, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  9
+
+51. fd1d0a33  Refactor: TopicMap API wording
+   author: Jörg Richter
+   date:   2026-03-30T14:27:15+02:00
+   areas:  CONTAINMENT, NAVIGATION, TOOLING, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  6
+
+52. eb81e1d2  Fix: store topic position when dragged inside nested box
+   author: Jörg Richter
+   date:   2026-03-30T17:22:38+02:00
+   areas:  UNCLASSIFIED, DRAG-INPUT
+   files:  2
+
+53. 2960a7f3  0.4.1 Release
+   author: Jörg Richter
+   date:   2026-03-30T19:11:16+02:00
+   areas:  UNCLASSIFIED
+   files:  2
+
+54. 877c9b19  Merge branch 'master' into box-renderer
+   author: Jörg Richter
+   date:   2026-03-30T19:48:56+02:00
+   areas:  DRAG-INPUT
+   files:  1
+
+55. f5f86fb1  Data model: Create ItemSet alng with Box
+   author: Jörg Richter
+   date:   2026-03-31T14:05:45+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, MODEL
+   files:  5
+
+56. 076ab925  Refactor: move "boxAssocId" MapItem -> SetItem
+   author: Jörg Richter
+   date:   2026-03-31T22:46:42+02:00
+   areas:  CONTAINMENT, TOOLING, MODEL, RENDERER, UNCLASSIFIED
+   files:  8
+
+57. 460483e7  Refactor: move DisplayMode type to ModelParts
+   author: Jörg Richter
+   date:   2026-04-01T12:32:10+02:00
+   areas:  SELECTION, TOOLING, MODEL, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  12
+
+58. 2c084d50  Refactor: move DisplayMode state/API out of TopicMap
+   author: Jörg Richter
+   date:   2026-04-01T20:34:32+02:00
+   areas:  CONTAINMENT, SELECTION, TOOLING, MODEL, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  10
+
+59. 55600b37  Refactor: "box" vs. "map" wording
+   author: Jörg Richter
+   date:   2026-04-02T12:26:46+02:00
+   areas:  CONTAINMENT, MODEL, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  9
+
+60. 9517c095  Refactor: "add" vs. "create" wording
+   author: Jörg Richter
+   date:   2026-04-02T13:35:59+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, TOOLING, APP-DISPATCH, MODEL, UNCLASSIFIED
+   files:  8
+
+61. 7e2ad170  Update Box state on create topic/box
+   author: Jörg Richter
+   date:   2026-04-02T16:57:58+02:00
+   areas:  CONTAINMENT, TOOLING, APP-DISPATCH, MODEL, UNCLASSIFIED
+   files:  6
+
+62. c55659d7  Update Box state on search/navigate
+   author: Jörg Richter
+   date:   2026-04-02T23:57:16+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, SEARCH-SELECTION, TOOLING, UNCLASSIFIED, RENDERER
+   files:  7
+
+63. d01a54c3  Update Box state on move-topic-to-box
+   author: Jörg Richter
+   date:   2026-04-03T14:34:04+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, SEARCH-SELECTION, TOOLING, APP-DISPATCH, MODEL, RENDERER
+   files:  7
+
+64. b487d217  Adapt limbo rendering to Box model
+   author: Jörg Richter
+   date:   2026-04-03T17:38:23+02:00
+   areas:  UNCLASSIFIED, RENDERER
+   files:  2
+
+65. 6d659669  Add "renderer" field to Box
+   author: Jörg Richter
+   date:   2026-04-04T14:20:19+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, TOOLING, MODEL, UNCLASSIFIED
+   files:  7
+
+66. c3c42b18  Add renderer selector to box toolbar
+   author: Jörg Richter
+   date:   2026-04-05T09:36:06+02:00
+   areas:  CONTAINMENT, TOOLING, MODEL, UNCLASSIFIED
+   files:  9
+
+67. 40b247b7  Refactor: add central RendererInfo table
+   author: Jörg Richter
+   date:   2026-04-05T11:03:48+02:00
+   areas:  UNCLASSIFIED
+   files:  3
+
+68. 1e8f716e  Refactor: add central renderer dispatch
+   author: Jörg Richter
+   date:   2026-04-05T19:45:53+02:00
+   areas:  TOOLING, APP-DISPATCH, UNCLASSIFIED
+   files:  4
+
+69. 4ccd8913  Inject dispatcher for recursive box rendering
+   author: Jörg Richter
+   date:   2026-04-06T14:03:55+02:00
+   areas:  CONTAINMENT, TOOLING, APP-DISPATCH, MODEL, UNCLASSIFIED, RENDERER
+   files:  13
+
+70. 33a734b3  Merge branch 'box-renderer'
+   author: Jörg Richter
+   date:   2026-04-06T14:28:16+02:00
+   areas:  CONTAINMENT
+   files:  1
+
+71. 08d55328  Add basic list renderer
+   author: Jörg Richter
+   date:   2026-04-06T22:05:19+02:00
+   areas:  CONTAINMENT, TOOLING, UNCLASSIFIED, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, RENDERER
+   files:  10
+
+72. b1b01bf2  Wording: ModelParts -> ModelBase
+   author: Jörg Richter
+   date:   2026-04-07T10:51:07+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, SELECTION, TOOLING, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, GEOMETRY, RENDERER, UNCLASSIFIED
+   files:  31
+
+73. cd4f13cd  Minor API renaming
+   author: Jörg Richter
+   date:   2026-04-07T11:14:45+02:00
+   areas:  CONTAINMENT, TOOLING, MODEL, UNCLASSIFIED
+   files:  9
+
+74. 29fe3484  Update Box state on create association
+   author: Jörg Richter
+   date:   2026-04-07T13:31:50+02:00
+   areas:  CONTAINMENT, SELECTION, TOOLING, APP-DISPATCH, MODEL
+   files:  5
+
+75. fecacfc9  Update Box state on delete-item
+   author: Jörg Richter
+   date:   2026-04-07T14:30:49+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, ALTERNATE-RENDERER
+   files:  3
+
+76. 083f6dbe  Wording: feature modules Def/API
+   author: Jörg Richter
+   date:   2026-04-07T16:16:21+02:00
+   areas:  DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, SELECTION, TOOLING, APP-DISPATCH, MODEL, UNCLASSIFIED, RENDERER
+   files:  27
+
+77. 60455550  Remove "unbox" command
+   author: Jörg Richter
+   date:   2026-04-07T17:48:37+02:00
+   areas:  SELECTION, TOOLING, MODEL, ALTERNATE-RENDERER, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  11
+
+78. d859fb09  Minor refactor: Geometry code
+   author: Jörg Richter
+   date:   2026-04-08T10:56:52+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, TOOLING, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  8
+
+79. 6cfa8e42  Add extension point "findTopicAt"
+   author: Jörg Richter
+   date:   2026-04-08T22:33:13+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, APP-DISPATCH, ALTERNATE-RENDERER, GEOMETRY, RENDERER
+   files:  8
+
+80. 8d1d4c68  Minor refactor: extension manager
+   author: Jörg Richter
+   date:   2026-04-09T12:42:03+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, DRAG-INPUT, ALTERNATE-RENDERER, GEOMETRY, RENDERER
+   files:  8
+
+81. 5c4480f8  Dispatch "findTopicAt" for nested boxes
+   author: Jörg Richter
+   date:   2026-04-09T17:38:51+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, MODEL, ALTERNATE-RENDERER, GEOMETRY, UNCLASSIFIED
+   files:  7
+
+82. 90566fc2  Add TopicList model
+   author: Jörg Richter
+   date:   2026-04-09T19:59:32+02:00
+   areas:  APP-DISPATCH, MODEL, ALTERNATE-RENDERER, UNCLASSIFIED
+   files:  4
+
+83. 9935560e  Revise nested box geometry
+   author: Jörg Richter
+   date:   2026-04-10T16:41:20+02:00
+   areas:  DRAG-INPUT, UNCLASSIFIED, GEOMETRY
+   files:  4
+
+84. 29aaf646  Fix: hit test when document is scrolled
+   author: Jörg Richter
+   date:   2026-04-10T20:17:41+02:00
+   areas:  GEOMETRY
+   files:  1
+
+85. 8b10769d  Refactor: Extension module
+   author: Jörg Richter
+   date:   2026-04-11T12:04:39+02:00
+   areas:  CONTAINMENT, EXTENSION-SEAM, DRAG-INPUT, SELECTION, TOOLING, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  19
+
+86. d73aefb8  Add extension point "autoSize"
+   author: Jörg Richter
+   date:   2026-04-11T17:05:41+02:00
+   areas:  EXTENSION-SEAM, DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, TOOLING, APP-DISPATCH, ALTERNATE-RENDERER, UNCLASSIFIED
+   files:  12
+
+87. 0e545641  Extension module is single source of truth
+   author: Jörg Richter
+   date:   2026-04-12T11:48:40+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, EXTENSION-SEAM, TOOLING, MODEL, ALTERNATE-RENDERER, RENDERER
+   files:  11
+
+88. 7d7903c2  Refactor: add "Env" for passing Extension Manager
+   author: Jörg Richter
+   date:   2026-04-12T21:13:58+02:00
+   areas:  EXTENSION-SEAM, DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, TOOLING, APP-DISPATCH, UNCLASSIFIED
+   files:  9
+
+89. d4fb598e  Refactor: Extension Manager injects itself on dispatch
+   author: Jörg Richter
+   date:   2026-04-13T12:44:07+02:00
+   areas:  EXTENSION-SEAM, TOOLING, APP-DISPATCH, ALTERNATE-RENDERER, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  11
+
+90. 5d6bcbf7  Introduce "Env" module
+   author: Jörg Richter
+   date:   2026-04-14T04:54:36+02:00
+   areas:  EXTENSION-SEAM, DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, TOOLING, APP-DISPATCH, ALTERNATE-RENDERER, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  16
+
+91. adf27e8f  Refactor: DisplayMode -> Expansion, unified for topics/boxes
+   author: Jörg Richter
+   date:   2026-04-15T13:50:22+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, SELECTION, TOOLING, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  17
+
+92. 7fd63126  Refactor: ItemProps -> BoxItem
+   author: Jörg Richter
+   date:   2026-04-15T22:51:21+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, TOOLING, APP-DISPATCH, MODEL, UNCLASSIFIED
+   files:  7
+
+93. bcce7afa  Refactor: remove "Visibility" state, it's implicit
+   author: Jörg Richter
+   date:   2026-04-16T23:04:29+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, TOOLING, APP-DISPATCH, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  11
+
+94. 9618cb38  Model: drop "boxAssocId" from SetItem
+   author: Jörg Richter
+   date:   2026-04-17T11:42:59+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, MODEL, RENDERER
+   files:  4
+
+95. 65246c89  Fix: don't create new HIERARCHY if topic in box already
+   author: Jörg Richter
+   date:   2026-04-17T12:41:07+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, RENDERER
+   files:  4
+
+96. d6ccd3b8  Fix: delete HIERARCHY association when removing item
+   author: Jörg Richter
+   date:   2026-04-17T20:19:37+02:00
+   areas:  CONTAINMENT, MODEL, ALTERNATE-RENDERER, UNCLASSIFIED, RENDERER
+   files:  8
+
+97. 71ff297c  Restore position and expansion on reveal
+   author: Jörg Richter
+   date:   2026-04-18T14:08:48+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, TOOLING, APP-DISPATCH, UNCLASSIFIED
+   files:  8
+
+98. 73fef72a  Topic moved to box gets random position
+   author: Jörg Richter
+   date:   2026-04-19T15:58:00+02:00
+   areas:  DRAG-INPUT, SEARCH-SELECTION, TOOLING, APP-DISPATCH, MODEL, UNCLASSIFIED
+   files:  9
+
+99. 3284a043  Fix: limbo association
+   author: Jörg Richter
+   date:   2026-04-19T17:04:18+02:00
+   areas:  UNCLASSIFIED, RENDERER
+   files:  2
+
+100. b57865f5  Render nested lists
+   author: Jörg Richter
+   date:   2026-04-19T21:20:10+02:00
+   areas:  CONTAINMENT, ALTERNATE-RENDERER, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  7
+
+101. 1537aa8f  Calculate list size (in pixel)
+   author: Jörg Richter
+   date:   2026-04-20T11:26:27+02:00
+   areas:  APP-DISPATCH, ALTERNATE-RENDERER, UNCLASSIFIED
+   files:  6
+
+102. d8a21157  Apply target/selection style to list
+   author: Jörg Richter
+   date:   2026-04-20T13:04:18+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, TOOLING, APP-DISPATCH, ALTERNATE-RENDERER, RENDERER, UNCLASSIFIED
+   files:  10
+
+103. 5129b31a  Remove topic/box duality
+   author: Jörg Richter
+   date:   2026-04-20T16:05:08+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, DRAG-INPUT, SELECTION, TOOLING, APP-DISPATCH, GEOMETRY, RENDERER
+   files:  9
+
+104. e240fe0b  Edit new topic in list
+   author: Jörg Richter
+   date:   2026-04-21T11:00:30+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, ALTERNATE-RENDERER, RENDERER
+   files:  6
+
+105. c40b3b6d  Select topic in list
+   author: Jörg Richter
+   date:   2026-04-21T15:57:18+02:00
+   areas:  DRAG-INPUT, SEARCH-SELECTION, TOOLING, ALTERNATE-RENDERER, RENDERER, UNCLASSIFIED
+   files:  9
+
+106. 6a11806d  Add extension point "toolbar" (w/o Debug.todo)
+   author: Jörg Richter
+   date:   2026-04-23T11:37:10+02:00
+   areas:  UNCLASSIFIED, EXTENSION-SEAM, TOOLING, MODEL, ALTERNATE-RENDERER, GEOMETRY
+   files:  8
+
+107. ca2260a6  Refactor: Box model
+   author: Jörg Richter
+   date:   2026-04-23T15:01:47+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, TOOLING, APP-DISPATCH, MODEL, UNCLASSIFIED
+   files:  6
+
+108. 4bcafc16  Refactor: introduce tagged wrapper types for IDs
+   author: Jörg Richter
+   date:   2026-04-23T22:02:19+02:00
+   areas:  CONTAINMENT, MODEL, RENDERER
+   files:  4
+
+109. 93c97441  Refactor: Box API
+   author: Jörg Richter
+   date:   2026-04-24T12:04:04+02:00
+   areas:  CONTAINMENT, ALTERNATE-RENDERER, UNCLASSIFIED, RENDERER
+   files:  6
+
+110. dd81de8e  Refactor: TopicMap model
+   author: Jörg Richter
+   date:   2026-04-24T17:01:31+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, SEARCH-SELECTION, TOOLING, APP-DISPATCH, MODEL, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  13
+
+111. eb1d8ea0  Fix: create Hierarchy only for topics
+   author: Jörg Richter
+   date:   2026-04-24T22:06:52+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, SELECTION, APP-DISPATCH, MODEL, GEOMETRY, RENDERER
+   files:  7
+
+112. 9015af49  Topics can be set fullscreen
+   author: Jörg Richter
+   date:   2026-04-24T23:13:00+02:00
+   areas:  TOOLING, APP-DISPATCH
+   files:  2
+
+113. 8a52205d  Refactor: make Box's "renderer" field type-safe
+   author: Jörg Richter
+   date:   2026-04-25T13:09:44+02:00
+   areas:  CONTAINMENT, UNCLASSIFIED, EXTENSION-SEAM, TOOLING, MODEL
+   files:  8
+
+114. 83aad6bd  Refactor: dispatcher passes "small" environment to extensions
+   author: Jörg Richter
+   date:   2026-04-25T16:33:09+02:00
+   areas:  CONTAINMENT, EXTENSION-SEAM, TOOLING, ALTERNATE-RENDERER, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  9
+
+115. 7e6c20b7  Refactor model: split "items" into topics/assocs
+   author: Jörg Richter
+   date:   2026-04-26T15:05:40+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, SELECTION, TOOLING, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, RENDERER, UNCLASSIFIED
+   files:  14
+
+116. 2f76fb60  Refactor: split Items.elm module into Topic/Assoc.elm
+   author: Jörg Richter
+   date:   2026-04-26T17:19:12+02:00
+   areas:  CONTAINMENT, SEARCH-SELECTION, SELECTION, TOOLING, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, GEOMETRY, UNCLASSIFIED, RENDERER
+   files:  17
+
+117. f6ddb75e  Fix: dynamic z-index respects full box-context
+   author: Jörg Richter
+   date:   2026-04-26T20:48:09+02:00
+   areas:  SELECTION, APP-DISPATCH, ALTERNATE-RENDERER, GEOMETRY, RENDERER, UNCLASSIFIED
+   files:  8
+
+118. dd69664f  Refactor types: Target holds wrapped ItemId
+   author: Jörg Richter
+   date:   2026-04-27T08:38:22+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, SEARCH-SELECTION, SELECTION, TOOLING, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, GEOMETRY, RENDERER, UNCLASSIFIED
+   files:  19
+
+119. 96403c4a  Refactor types: wrap Topic/Assoc IDs
+   author: Jörg Richter
+   date:   2026-04-28T10:26:28+02:00
+   areas:  CONTAINMENT, EXTENSION-SEAM, DRAG-INPUT, SEARCH-SELECTION, TOOLING, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, GEOMETRY, RENDERER, UNCLASSIFIED
+   files:  28
+
+120. d5dab029  Refactor types: wrap Box IDs
+   author: Jörg Richter
+   date:   2026-04-29T13:34:24+02:00
+   areas:  CONTAINMENT, DRAG-INPUT, NAVIGATION, SEARCH-SELECTION, SELECTION, TOOLING, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, GEOMETRY, RENDERER, UNCLASSIFIED
+   files:  23
+
+121. 47503932  Refactor: use TopicID wrapper in file picker ports
+   author: Jörg Richter
+   date:   2026-04-30T00:10:42+02:00
+   areas:  UNCLASSIFIED, MODEL
+   files:  5
+
+122. 4ffbc92f  Refactor: move imageCache state from Main -> Text module
+   author: Jörg Richter
+   date:   2026-04-30T10:55:55+02:00
+   areas:  APP-DISPATCH, MODEL, UNCLASSIFIED
+   files:  9
+
+123. a79fa9f5  Fix: "Hierarchy" associations can't be deleted
+   author: Jörg Richter
+   date:   2026-04-30T15:33:57+02:00
+   areas:  DRAG-INPUT, TOOLING, APP-DISPATCH
+   files:  4
+
+124. a4d650e5  List renderer: toolbar for nested list topics
+   author: Jörg Richter
+   date:   2026-05-01T11:21:27+02:00
+   areas:  UNCLASSIFIED, ALTERNATE-RENDERER
+   files:  2
+
+125. 4457e551  Refactor: move Mouse module into TopicMap module
+   author: Jörg Richter
+   date:   2026-05-02T12:03:17+02:00
+   areas:  TOOLING, APP-DISPATCH, MODEL, ALTERNATE-RENDERER, DRAG-INPUT, RENDERER, UNCLASSIFIED
+   files:  11
+
+126. 1fc721e7  Refactor: merge Mouse state into TopicMap state
+   author: Jörg Richter
+   date:   2026-05-02T19:00:17+02:00
+   areas:  CONTAINMENT, MODEL, DRAG-INPUT, RENDERER, UNCLASSIFIED
+   files:  10
+
+127. d158bdd2  Refactor: merge Mouse messages into TopicMap messages
+   author: Jörg Richter
+   date:   2026-05-02T23:43:18+02:00
+   areas:  APP-DISPATCH, MODEL, CONTROLLER, DRAG-INPUT, RENDERER, UNCLASSIFIED
+   files:  10
+
+128. ac17efa7  Refactor: introduce module directory "Shared"
+   author: Jörg Richter
+   date:   2026-05-03T10:11:58+02:00
+   areas:  SEARCH-SELECTION, TOOLING, APP-DISPATCH, EVENT-PLUMBING, ALTERNATE-RENDERER, DRAG-INPUT, RENDERER, UNCLASSIFIED
+   files:  13
+
+129. 5f38dbea  Add 2 extension points: "mouseMove", "mouseUp"
+   author: Jörg Richter
+   date:   2026-05-04T15:11:39+02:00
+   areas:  EXTENSION-SEAM, APP-DISPATCH, MODEL, EVENT-PLUMBING, ALTERNATE-RENDERER, CONTROLLER, DRAG-INPUT, UNCLASSIFIED, RENDERER
+   files:  12
+
+130. 099e95a0  Add extension point: "dragStart"
+   author: Jörg Richter
+   date:   2026-05-05T12:16:38+02:00
+   areas:  EXTENSION-SEAM, APP-DISPATCH, EVENT-PLUMBING, ALTERNATE-RENDERER, CONTROLLER, DRAG-INPUT, UNCLASSIFIED, RENDERER
+   files:  12
+
+131. 7d8f5019  Merge branch 'refactor-events'
+   author: Jörg Richter
+   date:   2026-05-05T13:26:30+02:00
+   areas:  
+   files:  0
+
+132. 2e579a34  Fix: topic hover
+   author: Jörg Richter
+   date:   2026-05-06T14:34:11+02:00
+   areas:  APP-DISPATCH, EVENT-PLUMBING, DRAG-INPUT, UNCLASSIFIED
+   files:  7
+
+133. 802619a3  List renderer: add basic geometry
+   author: Jörg Richter
+   date:   2026-05-07T11:43:12+02:00
+   areas:  UNCLASSIFIED, TOOLING, ALTERNATE-RENDERER, DRAG-INPUT
+   files:  7
+
+134. 1edad93a  Add extension point: "init"
+   author: Jörg Richter
+   date:   2026-05-08T14:49:02+02:00
+   areas:  EXTENSION-SEAM, DRAG-INPUT, TOOLING, MODEL, ALTERNATE-RENDERER, UNCLASSIFIED
+   files:  11
+
+135. b6e51109  Introduce TopicList ViewModel
+   author: Jörg Richter
+   date:   2026-05-09T15:18:28+02:00
+   areas:  UNCLASSIFIED, EXTENSION-SEAM, ALTERNATE-RENDERER
+   files:  6
+
+136. 68ed53e2  Add extension point: "addTopic"
+   author: Jörg Richter
+   date:   2026-05-09T20:34:12+02:00
+   areas:  EXTENSION-SEAM, SEARCH-SELECTION, TOOLING, APP-DISPATCH, ALTERNATE-RENDERER, UNCLASSIFIED
+   files:  7
+
+137. cb9cb62c  List renderer respects topic order
+   author: Jörg Richter
+   date:   2026-05-09T23:28:54+02:00
+   areas:  UNCLASSIFIED, ALTERNATE-RENDERER
+   files:  2
+
+138. f1aa6faa  Refactor: TopicMap modularization
+   author: Jörg Richter
+   date:   2026-05-10T12:47:19+02:00
+   areas:  CONTAINMENT, EXTENSION-SEAM, NAVIGATION, SEARCH-SELECTION, TOOLING, APP-DISPATCH, CONTROLLER, GEOMETRY, DRAG-INPUT, UNCLASSIFIED, RENDERER
+   files:  16
+
+
+
+File deltas
+===========
+
+UNCLASSIFIED  +22 -1  README.md
+UNCLASSIFIED  +1 -0  index.html
+UNCLASSIFIED  +4 -4  index.js
+UNCLASSIFIED  +3 -3  package.json
+UNCLASSIFIED  +74 -0  src/Assoc.elm
+CONTAINMENT  +363 -403  src/Box.elm
+CONTAINMENT  +0 -192  src/Box/Size.elm
+CONTAINMENT  +0 -174  src/Box/Transfer.elm
+UNCLASSIFIED  +23 -12  src/Config.elm
+UNCLASSIFIED  +108 -0  src/Env.elm
+EXTENSION-SEAM  +217 -0  src/ExtManager.elm
+EXTENSION-SEAM  +49 -0  src/Extension.elm
+UNCLASSIFIED  +107 -13  src/Feature/Icon.elm
+UNCLASSIFIED  +0 -120  src/Feature/IconAPI.elm
+UNCLASSIFIED  +25 -0  src/Feature/IconDef.elm
+DRAG-INPUT  +61 -26  src/Feature/Mouse.elm
+DRAG-INPUT  +0 -296  src/Feature/MouseAPI.elm
+DRAG-INPUT  +31 -0  src/Feature/MouseDef.elm
+NAVIGATION  +100 -3  src/Feature/Nav.elm
+NAVIGATION  +0 -102  src/Feature/NavAPI.elm
+NAVIGATION  +6 -0  src/Feature/NavDef.elm
+SEARCH-SELECTION  +420 -28  src/Feature/Search.elm
+SEARCH-SELECTION  +0 -405  src/Feature/SearchAPI.elm
+SEARCH-SELECTION  +38 -0  src/Feature/SearchDef.elm
+SELECTION  +54 -8  src/Feature/Sel.elm
+SELECTION  +0 -86  src/Feature/SelAPI.elm
+SELECTION  +16 -0  src/Feature/SelDef.elm
+UNCLASSIFIED  +326 -20  src/Feature/Text.elm
+UNCLASSIFIED  +0 -291  src/Feature/TextAPI.elm
+UNCLASSIFIED  +41 -0  src/Feature/TextDef.elm
+TOOLING  +584 -28  src/Feature/Tool.elm
+TOOLING  +0 -400  src/Feature/ToolAPI.elm
+TOOLING  +84 -0  src/Feature/ToolDef.elm
+UNCLASSIFIED  +0 -210  src/Item.elm
+APP-DISPATCH  +143 -128  src/Main.elm
+UNCLASSIFIED  +0 -714  src/Map.elm
+MODEL  +0 -115  src/Map/Model.elm
+MODEL  +90 -68  src/Model.elm
+MODEL  +427 -0  src/ModelBase.elm
+MODEL  +0 -418  src/ModelParts.elm
+EVENT-PLUMBING  +106 -0  src/Shared/Events.elm
+UNCLASSIFIED  +68 -0  src/Shared/ViewBase.elm
+PERSISTENCE  +15 -6  src/Storage.elm
+UNCLASSIFIED  +92 -0  src/Topic.elm
+ALTERNATE-RENDERER  +124 -0  src/TopicList/Geometry.elm
+ALTERNATE-RENDERER  +79 -0  src/TopicList/TopicListDef.elm
+ALTERNATE-RENDERER  +266 -0  src/TopicList/ViewProps.elm
+CONTROLLER  +21 -0  src/TopicMap/Controller.elm
+GEOMETRY  +355 -0  src/TopicMap/Geometry.elm
+DRAG-INPUT  +213 -0  src/TopicMap/Mouse.elm
+UNCLASSIFIED  +148 -0  src/TopicMap/TopicMapDef.elm
+RENDERER  +737 -0  src/TopicMap/View.elm
+RENDERER  +74 -0  src/TopicMap/ViewModel.elm
+RENDERER  +305 -0  src/TopicMap/ViewProps.elm
+UNCLASSIFIED  +7 -19  src/Undo.elm
+UNCLASSIFIED  +17 -97  src/Utils.elm
+UNCLASSIFIED  +1 -3  vite.config.js
+

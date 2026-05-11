@@ -1,0 +1,159 @@
+<h1>DM6 Upstream Narrative Inspector</h1>
+<in-package>hyperdoc</in-package>
+
+<p>This page documents the read-only inspector for comparing our local dm6 <code>main</code> branch with Jörg’s evolving <code>upstream/master</code>. The purpose is to understand the architectural story before merging or re-anchoring HyperDoc evidence behavior.</p>
+<p><b>Current generated report:</b> <a href='/assets/dm6-elm/dm6-upstream-narrative-report.txt'>dm6-upstream-narrative report</a></p>
+<h2>Current branch relation</h2>
+<pre><code>dm6 upstream narrative
+======================
+
+repo:      /Users/rgb/workspace/dm6-elm/
+local:     main  73c51b7b
+upstream:  upstream/master  f1aa6faa
+base:      c5fad791
+ahead/behind: 345	138
+upstream commits: 138
+changed files:    57
+
+dirty status:
+?? dm6-elm-repomix-output-f1aa6faa45a3fa99cab158cc957e65c8f1e92bfd.md
+
+</code></pre>
+<p>Upstream commits in story: <b>138</b>. Changed files: <b>57</b>.</p>
+<h2>Why this inspector exists</h2>
+<p>Topic <code>968908</code>, “What Jörg’s codebase is doing,” reframes the work as an architectural integration problem rather than a normal branch merge.</p>
+<ul>
+  <li>Jörg’s branch modularizes dm6 around renderer/feature layers such as <code>TopicMap.*</code>, <code>TopicList.*</code>, <code>Feature.*</code>, <code>Storage</code>, and event plumbing.</li>
+  <li>Our branch preserves the HyperDoc embedding contract through <code>src/AppEmbed.elm</code> and the <code>Elm.AppEmbed.init</code> ABI.</li>
+  <li>The integration target is <code>Jörg modular internals + AppEmbed public seam + HyperDoc evidence vocabulary</code>.</li>
+  <li>We should inspect first, then merge on an integration branch, then move evidence hooks inward to the new mutation seams.</li>
+</ul>
+<h2>Non-negotiable AppEmbed contract</h2>
+<pre><code>Elm.AppEmbed.init({
+  node: stage,
+  flags: {
+    slug: String(slug),
+    stored: String(stored || &#39;{}&#39;)
+  }
+});</code></pre>
+<p>For HyperDoc, <code>Main.elm</code> is not sufficient. The stable public ABI is the compiled <code>Elm.AppEmbed</code> module accepting string flags <code>{ slug, stored }</code>.</p>
+<h2>Inspector implementation entry point</h2>
+<pre><code>(in-package #:hyperdoc)
+
+(load (asdf:system-relative-pathname
+       :hyperdoc
+       &quot;hyperdoc/dm6-upstream-narrative.lisp&quot;))
+
+(defparameter *dm6-narrative*
+  (make-dm6-upstream-narrative
+   :repo #P&quot;/Users/rgb/workspace/dm6-elm/&quot;
+   :local &quot;main&quot;
+   :upstream &quot;upstream/master&quot;))
+
+*dm6-narrative*</code></pre>
+<p>The object is intentionally read-only. It runs Git inspection commands but does not merge, rebase, checkout, stage, or commit dm6.</p>
+<h2>Open the inspector</h2>
+<pre><code>(inspect-dm6-upstream-narrative!
+ :repo #P&quot;/Users/rgb/workspace/dm6-elm/&quot;
+ :local &quot;main&quot;
+ :upstream &quot;upstream/master&quot;)</code></pre>
+<p>This creates a <code>dm6-upstream-narrative</code> object and opens it in the CLOG moldable inspector when available.</p>
+<h2>Generate the narrative report</h2>
+<pre><code>(format t &quot;~A~%&quot;
+        (dm6-narrative-report *dm6-narrative*))</code></pre>
+<pre><code>(dm6-write-upstream-narrative-report-asset!
+ *dm6-narrative*)</code></pre>
+<p>The report combines branch summary, HyperDoc impact, upstream commit story, and file-delta classification.</p>
+<h2>Drill into file diffs</h2>
+<pre><code>(dm6-narrative-diff-for-file
+ *dm6-narrative*
+ &quot;src/TopicMap/Mouse.elm&quot;)</code></pre>
+<pre><code>(dm6-narrative-diff-for-file
+ *dm6-narrative*
+ &quot;src/Storage.elm&quot;)</code></pre>
+<pre><code>(dm6-narrative-diff-for-file
+ *dm6-narrative*
+ &quot;src/Main.elm&quot;)</code></pre>
+<p>These are the first files to inspect for the new behavior seams: mouse/drag, storage snapshots, and app dispatch.</p>
+<h2>Search upstream for integration seams</h2>
+<pre><code>(dm6-narrative-grep-upstream
+ *dm6-narrative*
+ &quot;AppEmbed&quot;)</code></pre>
+<pre><code>(dm6-narrative-grep-upstream
+ *dm6-narrative*
+ &quot;storeCmd&quot;)</code></pre>
+<pre><code>(dm6-narrative-grep-upstream
+ *dm6-narrative*
+ &quot;TopicMap.Mouse&quot;)</code></pre>
+<pre><code>(dm6-narrative-grep-upstream
+ *dm6-narrative*
+ &quot;Selection&quot;)</code></pre>
+<p>Expected interpretation: if <code>AppEmbed</code> has no upstream matches, Jörg’s branch lacks the public HyperDoc ABI and we must restore it deliberately.</p>
+<h2>Evidence hook target map</h2>
+<pre><code>Evidence kind        Best hook after Jörg integration
+-----------------------------------------------------
+init                 AppEmbed.init
+import               AppEmbed flag decode / FedWiki import path
+store snapshot       Storage.storeCmd or Storage.storeWith
+selection            Feature.Sel or ItemClicked dispatch path
+drag                 Shared.Events + Feature.Mouse / TopicMap.Mouse
+cross-boundary       before/after containment transition</code></pre>
+<p>The main architectural change is that semantic evidence should move inward. AppEmbed remains the public seam, but storage, selection, drag, and cross-boundary evidence should come from the real mutation sites after the modular branch is integrated.</p>
+<h2>Safe integration branch sketch</h2>
+<pre><code>cd ~/workspace/dm6-elm
+
+git fetch upstream
+git switch main
+git switch -c integrate-jorg-hyperdoc
+
+# inspect first; merge only after the narrative says where the risks are
+git merge --no-commit upstream/master</code></pre>
+<p>Use a named integration branch. Do not mutate <code>main</code> directly while preserving the cross-repository milestone story.</p>
+<h2>Comparable worktrees</h2>
+<pre><code>cd ~/workspace/dm6-elm
+
+git worktree add ../dm6-jorg f1aa6faa45a3fa99cab158cc957e65c8f1e92bfd
+git worktree add ../dm6-hyperdoc 73c51b7bce6d768bb5550cf180a2cb9cd983a03b</code></pre>
+<p>Use worktrees when you want to compile and inspect both historical states without disturbing the active checkout.</p>
+<h2>Compile smoke checks</h2>
+<pre><code>cd ~/workspace/dm6-elm
+
+npx elm make src/Main.elm --output=/tmp/dm6-main.js
+npx elm make src/AppEmbed.elm --output=/tmp/dm6-appembed.js
+
+grep -q &quot;AppEmbed&quot; /tmp/dm6-appembed.js &amp;&amp; echo &quot;AppEmbed present&quot;</code></pre>
+<p>The integration branch is not acceptable until <code>src/AppEmbed.elm</code> exists, compiles, and exports <code>Elm.AppEmbed</code>.</p>
+<h2>Acceptance criteria before merging</h2>
+<ul>
+  <li><code>src/AppEmbed.elm</code> exists and compiles.</li>
+  <li>The compiled bundle exports <code>Elm.AppEmbed</code>.</li>
+  <li>Flags remain <code>{ slug : String, stored : String }</code>.</li>
+  <li>HyperDoc receives evidence for init/import/store/selection/drag/cross.</li>
+  <li>Store evidence is emitted once per semantic store, not twice from both wrapper and storage layer.</li>
+  <li>Cross-boundary evidence is based on before/after containment, not a particular internal message constructor.</li>
+</ul>
+<h2>Current HyperDoc impact</h2>
+<pre><code>HyperDoc impact
+===============
+
+AppEmbed ABI touched upstream: no
+Storage chokepoint touched:    yes
+Mouse/drag touched:            yes
+Selection touched:             yes
+Controller touched:            yes
+Renderer touched:              yes
+
+Recommendation:
+  Keep AppEmbed as the public ABI.
+  Re-anchor store evidence at Storage.* only after merge.
+  Re-anchor drag/select evidence at the new mouse/selection seams.
+  Define cross-boundary evidence from before/after containment, not message names.
+</code></pre>
+<h2>Related durable topics</h2>
+<ul>
+  <li>Topic 968908 @dreyeck: <em>What Jörg’s codebase is doing</em>.</li>
+  <li><code>73c51b7 Add HyperDoc evidence events to AppEmbed</code>.</li>
+  <li><code>54d1237 Add dm6 AppEmbed HyperDoc inline proof</code>.</li>
+  <li><code>DM6 AppEmbed HyperDoc inline proof milestone</code>.</li>
+</ul>
+<p><small>Generated report asset path: <code>/Users/rgb/workspace/hyperdoc/assets/dm6-elm/dm6-upstream-narrative-report.txt</code></small></p>
