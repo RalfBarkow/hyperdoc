@@ -152,3 +152,135 @@
                    (:td
                     (:code
                      (html-inspector-views:esc path))))))))))
+
+
+
+
+;;;; Inspectable touched paths for Git history commits.
+;;;; Appended from SLY MREPL.
+
+(in-package :hyperdoc/inspector)
+
+(defclass git-history-path-at-commit ()
+  ((commit
+    :reader git-history-path-at-commit-commit-of
+    :initarg :commit)
+   (path
+    :reader git-history-path-at-commit-path-of
+    :initarg :path
+    :type string)))
+
+(defmethod print-object ((file git-history-path-at-commit) stream)
+  (print-unreadable-object (file stream :type t :identity nil)
+    (format stream "~A @ ~A"
+            (git-history-path-at-commit-path-of file)
+            (hyperdoc::git-history-commit-short-hash
+             (git-history-path-at-commit-commit-of file)))))
+
+(defmethod html-inspector-views:text-representation
+    ((file git-history-path-at-commit))
+  (format nil "~A @ ~A"
+          (git-history-path-at-commit-path-of file)
+          (hyperdoc::git-history-commit-short-hash
+           (git-history-path-at-commit-commit-of file))))
+
+(defun git-history-path-at-commit-objects (commit)
+  (mapcar
+   (lambda (path)
+     (make-instance 'git-history-path-at-commit
+                    :commit commit
+                    :path path))
+   (sort (copy-list (hyperdoc::git-history-commit-paths commit))
+         #'string<)))
+
+(defun git-history-path-at-commit-blob-spec (file)
+  (format nil "~A:~A"
+          (hyperdoc::git-history-commit-hash-of
+           (git-history-path-at-commit-commit-of file))
+          (git-history-path-at-commit-path-of file)))
+
+(defun git-history-path-at-commit-run-string (file &rest args)
+  (let ((commit (git-history-path-at-commit-commit-of file)))
+    (multiple-value-bind (out err code)
+        (uiop:run-program
+         (cons "git" args)
+         :directory (hyperdoc::git-history-commit-repository-root-of commit)
+         :output :string
+         :error-output :string
+         :ignore-error-status t)
+      (if (zerop code)
+          out
+          (format nil "git ~{~A~^ ~} failed with code ~D~%~%STDOUT:~%~A~%STDERR:~%~A"
+                  args code out err)))))
+
+(defun git-history-path-at-commit-contents (file)
+  (git-history-path-at-commit-run-string
+   file
+   "show"
+   "--no-color"
+   (git-history-path-at-commit-blob-spec file)))
+
+(defun git-history-path-at-commit-patch (file)
+  (let ((commit (git-history-path-at-commit-commit-of file)))
+    (git-history-path-at-commit-run-string
+     file
+     "show"
+     "--stat"
+     "--patch"
+     "--no-color"
+     (hyperdoc::git-history-commit-hash-of commit)
+     "--"
+     (git-history-path-at-commit-path-of file))))
+
+(html-inspector-views:defview 👀summary
+    (file git-history-path-at-commit)
+  (html-inspector-views:html-view :title "Summary" :priority 1
+    (html-inspector-views:html
+      (:table :class "inspector-table"
+              (:tr
+               (:td (:b (html-inspector-views:esc "Path")))
+               (:td (:code
+                     (html-inspector-views:esc
+                      (git-history-path-at-commit-path-of file)))))
+              (:tr
+               (:td (:b (html-inspector-views:esc "Commit")))
+               (:td
+                (html-inspector-views:object-ref
+                 (git-history-path-at-commit-commit-of file))))
+              (:tr
+               (:td (:b (html-inspector-views:esc "Blob spec")))
+               (:td (:code
+                     (html-inspector-views:esc
+                      (git-history-path-at-commit-blob-spec file)))))))))
+
+(html-inspector-views:defview 👀contents
+    (file git-history-path-at-commit)
+  (html-inspector-views:html-view :title "Contents" :priority 2
+    (html-inspector-views:html
+      (:pre :style "white-space: pre-wrap;"
+            (html-inspector-views:esc
+             (git-history-path-at-commit-contents file))))))
+
+(html-inspector-views:defview 👀patch
+    (file git-history-path-at-commit)
+  (html-inspector-views:html-view :title "Patch" :priority 3
+    (html-inspector-views:html
+      (:pre :style "white-space: pre-wrap;"
+            (html-inspector-views:esc
+             (git-history-path-at-commit-patch file))))))
+
+(html-inspector-views:defview 👀paths
+    (commit hyperdoc::git-history-commit)
+  (html-inspector-views:html-view :title "Touched paths" :priority 2
+    (html-inspector-views:html
+      (:p
+       (html-inspector-views:esc
+        "Paths are loaded lazily for this one commit only. Click a path to inspect its contents or patch at this commit."))
+      (:table :class "inspector-table"
+              (:tr
+               (:th (html-inspector-views:esc "Path at commit")))
+              (dolist (file (git-history-path-at-commit-objects commit))
+                (html-inspector-views:html
+                  (:tr
+                   (:td
+                    (html-inspector-views:object-ref file)))))))))
