@@ -19,63 +19,17 @@
 <h2>Coordinates</h2>
 
 <table>
-  <tr>
-    <th>Coordinate</th>
-    <th>Topic</th>
-    <th>Purpose</th>
-    <th>Expected artifact</th>
-  </tr>
-  <tr>
-    <td><tt>P0</tt></td>
-    <td>Bootstrap operator page</td>
-    <td>Create this page first so all later work has a shared surface.</td>
-    <td><tt>hyperdoc/Projection Pipeline Operator Plan.html</tt></td>
-  </tr>
-  <tr>
-    <td><tt>P1</tt></td>
-    <td>SCXML trace</td>
-    <td>Track the state-machine route for dry-run and live guarded paths.</td>
-    <td><tt>hyperdoc/projection-pipeline-operator-plan.scxml</tt></td>
-  </tr>
-  <tr>
-    <td><tt>P2</tt></td>
-    <td>Clickable examples</td>
-    <td>Expose demo annotation, dry-run report, trace, and plan objects.</td>
-    <td><tt>projection-pipeline-operator</tt> functions</td>
-  </tr>
-  <tr>
-    <td><tt>P3</tt></td>
-    <td>SHOP3 plan</td>
-    <td>Use SHOP3 as a plan-only organizer, not an executor.</td>
-    <td><tt>hyperdoc-shop3/projection-pipeline-dmx-annotation-plan.sexp</tt></td>
-  </tr>
-  <tr>
-    <td><tt>P4</tt></td>
-    <td>Focused smoke test</td>
-    <td>Verify the page, SCXML trace, examples, and plan objects.</td>
-    <td><tt>tests/projection-pipeline-dmx-annotation-smoke.lisp</tt></td>
-  </tr>
-  <tr>
-    <td><tt>P5</tt></td>
-    <td>Memory-client readback</td>
-    <td>Demonstrate annotation write/readback without live HTTP mutation.</td>
-    <td>Focused smoke-test extension</td>
-  </tr>
-  <tr>
-    <td><tt>P6</tt></td>
-    <td>Guarded live DMX readback</td>
-    <td>Optional, explicit, authenticated, mutation-allowed live run.</td>
-    <td>Manual SLY run report</td>
-  </tr>
+  <tr><th>Coordinate</th><th>Topic</th><th>Purpose</th><th>Expected artifact</th></tr>
+  <tr><td><tt>P0</tt></td><td>Bootstrap operator page</td><td>Create this page first so all later work has a shared surface.</td><td><tt>hyperdoc/Projection Pipeline Operator Plan.html</tt></td></tr>
+  <tr><td><tt>P1</tt></td><td>SCXML trace</td><td>Track the state-machine route for dry-run and live guarded paths.</td><td><tt>hyperdoc/projection-pipeline-operator-plan.scxml</tt></td></tr>
+  <tr><td><tt>P2</tt></td><td>Clickable examples</td><td>Expose demo annotation, dry-run report, trace, and plan objects.</td><td><tt>projection-pipeline-operator</tt> functions</td></tr>
+  <tr><td><tt>P3</tt></td><td>SHOP3 plan</td><td>Use SHOP3 as a plan-only organizer, not an executor.</td><td><tt>hyperdoc-shop3/projection-pipeline-dmx-annotation-plan.sexp</tt></td></tr>
+  <tr><td><tt>P4</tt></td><td>Focused smoke test</td><td>Verify the page, SCXML trace, examples, and plan objects.</td><td><tt>tests/projection-pipeline-dmx-annotation-smoke.lisp</tt></td></tr>
+  <tr><td><tt>P5</tt></td><td>Memory-client readback</td><td>Demonstrate annotation write/readback without live HTTP mutation.</td><td>Focused smoke-test extension</td></tr>
+  <tr><td><tt>P6</tt></td><td>Guarded live DMX readback</td><td>Optional, explicit, authenticated, mutation-allowed live run.</td><td>Manual SLY run report</td></tr>
 </table>
 
 <h2>SCXML trace</h2>
-
-<p>
-  The SCXML trace keeps the operator route explicit. The normal path for this
-  page is dry-run first: it must end at <tt>dryRunBlocked</tt> until live
-  mutation is explicitly allowed.
-</p>
 
 <ul>
   <li><a expr="(scxml-dry-run-trace)"><tt>Dry-run SCXML trace object</tt></a></li>
@@ -83,11 +37,6 @@
 </ul>
 
 <h2>SHOP3 plan-only organizer</h2>
-
-<p>
-  SHOP3 is used here to organize the task sequence. It does not execute DMX
-  writes. Execution remains behind explicit HyperDoc/operator guards.
-</p>
 
 <ul>
   <li><a expr="(shop3-plan-fixture)"><tt>SHOP3-shaped plan fixture</tt></a></li>
@@ -105,12 +54,6 @@
 
 <h2>Readback discipline</h2>
 
-<p>
-  Readback and verification must use DMX machine-readable topic/topicmap
-  boundaries. Browser routes, webclient hash routes, and cached UI state are
-  not verification sources.
-</p>
-
 <ul>
   <li><a page="DMX machine-readable read paths">DMX machine-readable read paths</a></li>
   <li><a page="DMX note read-write boundary">DMX note read-write boundary</a></li>
@@ -121,11 +64,6 @@
 </ul>
 
 <h2>Working rule</h2>
-
-<p>
-  We always advance by one coordinate: update the page or support object, reload
-  the HyperDoc page, inspect the clickable object, then add the next check.
-</p>
 
 <ul>
   <li>No live DMX mutation by default.</li>
