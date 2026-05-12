@@ -1,0 +1,79 @@
+<h1>SHOP3 Planning API Reference</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page lists the small HyperDoc-facing API exposed by the optional
+  <tt>hyperdoc/shop3</tt> system.
+</p>
+
+<h2>System and source</h2>
+
+<ul>
+  <li><a expr='(ignore-errors (asdf:find-system :hyperdoc/shop3 nil))'><tt>:hyperdoc/shop3</tt> ASDF system</a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/package.lisp&quot;)'><tt>package.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/plan-objects.lisp&quot;)'><tt>plan-objects.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/views.lisp&quot;)'><tt>views.lisp</tt></a></li>
+</ul>
+
+<h2>Result object</h2>
+
+<pre>hyperdoc-htn-plan-result</pre>
+
+<p>
+  The result object stores the SHOP3 result without turning it into an
+  executor. Its default execution mode is <tt>:plan-only</tt>.
+</p>
+
+<ul>
+  <li><tt>problem-name-of</tt></li>
+  <li><tt>plans-of</tt></li>
+  <li><tt>raw-plans-of</tt></li>
+  <li><tt>plan-trees-of</tt></li>
+  <li><tt>final-states-of</tt></li>
+  <li><tt>time-of</tt></li>
+  <li><tt>execution-mode-of</tt></li>
+</ul>
+
+<h2>Planner entry point</h2>
+
+<pre>(hyperdoc/shop3:run-hyperdoc-asdf-refactor-plan-object)</pre>
+
+<p>
+  Runs the built-in <tt>hyperdoc-asdf-refactor-001</tt> SHOP3 problem
+  and returns a <tt>hyperdoc-htn-plan-result</tt>.
+</p>
+
+<h2>Projection helpers</h2>
+
+<ul>
+  <li><tt>plan-tree-&gt;safe-sexp</tt></li>
+  <li><tt>classify-hyperdoc-plan-step</tt></li>
+  <li><tt>normalize-hyperdoc-plan-step</tt></li>
+  <li><tt>normalize-hyperdoc-plan</tt></li>
+  <li><tt>hyperdoc-plan-checklist</tt></li>
+  <li><tt>hyperdoc-plan-summary</tt></li>
+</ul>
+
+<h2>Minimal REPL session</h2>
+
+<pre>(asdf:load-system :hyperdoc/shop3)
+
+(defparameter *plan*
+  (hyperdoc/shop3:run-hyperdoc-asdf-refactor-plan-object))
+
+(describe *plan*)
+
+(hyperdoc/shop3:hyperdoc-plan-checklist *plan*)
+
+(hyperdoc/shop3:hyperdoc-plan-summary *plan*)</pre>
+
+<h2>Design rule</h2>
+
+<blockquote>
+  <p>
+    SHOP3 proposes ordered maintenance plans. HyperDoc makes those
+    plans inspectable. Execution remains manual until a later guarded
+    execution boundary is explicitly designed.
+  </p>
+</blockquote>

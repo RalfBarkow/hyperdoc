@@ -1,0 +1,111 @@
+<h1>SHOP3 ASDF Refactor Plan Example</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page documents the first concrete SHOP3 plan currently shipped
+  with HyperDoc: a symbolic ASDF refactor plan. The plan demonstrates
+  how commit discipline can be represented as an HTN planning
+  constraint rather than as an external reminder.
+</p>
+
+<h2>Source links</h2>
+
+<ul>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/hyperdoc-maintenance-domain.lisp&quot;)'>Domain and problem source</a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/examples.lisp&quot;)'>Example runner source</a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3-asdf-refactor-plan.sexp&quot;)'>Expected checklist fixture</a></li>
+</ul>
+
+<h2>The planner call</h2>
+
+<pre>(find-plans 'hyperdoc-asdf-refactor-001
+            :which :first
+            :verbose 0
+            :plan-tree t)</pre>
+
+<p>
+  The exported wrapper is:
+</p>
+
+<pre>(hyperdoc/shop3:run-hyperdoc-asdf-refactor-plan-object)</pre>
+
+<h2>Expected primitive plan</h2>
+
+<ol>
+  <li><tt>!add-recursive-component-collector</tt></li>
+  <li><tt>!commit-stage recursive-component-collector-added add-recursive-hyperdoc-source-component-discovery</tt></li>
+  <li><tt>!create-asdf-system hyperdoc/kernel</tt></li>
+  <li><tt>!create-asdf-system hyperdoc/topics</tt></li>
+  <li><tt>!commit-stage hyperdoc/topics introduce-hyperdoc-kernel-and-topics-systems</tt></li>
+  <li><tt>!split-topic-family asdf</tt></li>
+  <li><tt>!load-system hyperdoc</tt></li>
+  <li><tt>!run-smoke-test compile-order-smoke</tt></li>
+  <li><tt>!commit-stage compile-order-smoke split-asdf-topic-family-and-verify-load-order</tt></li>
+</ol>
+
+<h2>Checklist projection</h2>
+
+<p>
+  The checklist projection is intentionally simple. It classifies each
+  SHOP3 primitive action into one of three HyperDoc-facing step kinds:
+</p>
+
+<ul>
+  <li><tt>:source-edit</tt></li>
+  <li><tt>:commit</tt></li>
+  <li><tt>:verification</tt></li>
+</ul>
+
+<pre>(defparameter *plan*
+  (hyperdoc/shop3:run-hyperdoc-asdf-refactor-plan-object))
+
+(defparameter *checklist*
+  (hyperdoc/shop3:hyperdoc-plan-checklist *plan*))
+
+(length *checklist*)
+;; =&gt; 9</pre>
+
+<h2>Fixture comparison</h2>
+
+<p>
+  To compare the live projection to the committed fixture, read the
+  fixture in the <tt>HYPERDOC/SHOP3</tt> package so symbols are interned
+  consistently.
+</p>
+
+<pre>(let* ((*package* (find-package &quot;HYPERDOC/SHOP3&quot;))
+       (fixture
+        (uiop:read-file-form
+         (asdf:system-relative-pathname
+          :hyperdoc
+          &quot;hyperdoc-shop3-asdf-refactor-plan.sexp&quot;)))
+       (checklist
+        (hyperdoc/shop3:hyperdoc-plan-checklist
+         (hyperdoc/shop3:run-hyperdoc-asdf-refactor-plan-object))))
+  (list :fixture-length (length fixture)
+        :checklist-length (length checklist)
+        :matches? (equal fixture checklist)))
+
+;; =&gt; (:fixture-length 9 :checklist-length 9 :matches? t)</pre>
+
+<h2>Operator list order</h2>
+
+<p>
+  The domain source must preserve SHOP3's operator order:
+</p>
+
+<pre>(:operator task preconditions delete-list add-list)</pre>
+
+<p>
+  Reversing delete and add lists makes the planner remove progress
+  facts instead of adding them.
+</p>
+
+<h2>Execution boundary</h2>
+
+<p>
+  A checklist item is a proposal. It is not an executor. In this first
+  slice, SHOP3 never performs the source edit, load, smoke test, or git
+  commit represented by an operator.
+</p>

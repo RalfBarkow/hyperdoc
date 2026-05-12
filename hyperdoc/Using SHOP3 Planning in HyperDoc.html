@@ -1,0 +1,87 @@
+<h1>Using SHOP3 Planning in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page explains how to use the optional SHOP3 planning slice in
+  HyperDoc. The slice is intentionally plan-only: it asks SHOP3 to
+  propose ordered maintenance plans and then projects those plans into
+  inspectable HyperDoc objects. It does not edit files, run shell
+  commands, mutate DMX, run tests, or commit changes.
+</p>
+
+<h2>Source files</h2>
+
+<p>
+  The implementation lives in the optional <tt>hyperdoc/shop3</tt>
+  ASDF system. These links point to the source files as local HyperDoc
+  objects:
+</p>
+
+<ul>
+  <li><a expr='(ignore-errors (asdf:system-source-file :hyperdoc/shop3))'><tt>hyperdoc.asd</tt> system definition</a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/package.lisp&quot;)'><tt>hyperdoc-shop3/package.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/plan-objects.lisp&quot;)'><tt>hyperdoc-shop3/plan-objects.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/hyperdoc-maintenance-domain.lisp&quot;)'><tt>hyperdoc-shop3/hyperdoc-maintenance-domain.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/examples.lisp&quot;)'><tt>hyperdoc-shop3/examples.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/views.lisp&quot;)'><tt>hyperdoc-shop3/views.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3-asdf-refactor-plan.sexp&quot;)'><tt>hyperdoc-shop3-asdf-refactor-plan.sexp</tt></a></li>
+</ul>
+
+<h2>Loading boundary</h2>
+
+<p>
+  The root <tt>:hyperdoc</tt> system must remain independent of SHOP3:
+</p>
+
+<pre>(asdf:load-system :hyperdoc)</pre>
+
+<p>
+  The optional planning layer is loaded explicitly:
+</p>
+
+<pre>(asdf:load-system :hyperdoc/shop3)</pre>
+
+<p>
+  In this local development image, SHOP3 is registered narrowly. The
+  important rule is to expose only the planner source and PDDL tools,
+  not the whole checkout as an ASDF tree.
+</p>
+
+<pre>(asdf:initialize-source-registry
+ `(:source-registry
+   (:tree &quot;/Users/rgb/workspace/hyperdoc/&quot;)
+   (:directory &quot;/Users/rgb/workspace/shop3/shop3/&quot;)
+   (:directory &quot;/Users/rgb/workspace/shop3/jenkins/ext/pddl-tools/&quot;)
+   (:directory &quot;/Users/rgb/workspace/shop3/jenkins/ext/fiveam-asdf/&quot;)
+   :inherit-configuration))</pre>
+
+<h2>Basic use</h2>
+
+<p>
+  The central entry point is
+  <tt>run-hyperdoc-asdf-refactor-plan-object</tt>. It returns a
+  <tt>hyperdoc-htn-plan-result</tt> object. The checklist projection
+  turns the SHOP3 plan into a HyperDoc-friendly manual runbook.
+</p>
+
+<pre>(defparameter *plan*
+  (hyperdoc/shop3:run-hyperdoc-asdf-refactor-plan-object))
+
+(hyperdoc/shop3:hyperdoc-plan-checklist *plan*)</pre>
+
+<p>
+  The result is a nine-item checklist. Every item includes
+  <tt>:manual? t</tt>, making the non-execution boundary explicit.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page='SHOP3 Planning Layer for HyperDoc'>SHOP3 Planning Layer for HyperDoc</a></li>
+  <li><a page='SHOP3 ASDF Refactor Plan Example'>SHOP3 ASDF Refactor Plan Example</a></li>
+  <li><a page='SHOP3 Planning API Reference'>SHOP3 Planning API Reference</a></li>
+  <li><a page='Understanding ASDF Systems in HyperDoc'>Understanding ASDF Systems in HyperDoc</a></li>
+  <li><a page='HyperDoc Test Runner'>HyperDoc Test Runner</a></li>
+  <li><a page='Codex commit hygiene and staging boundaries'>Codex commit hygiene and staging boundaries</a></li>
+</ul>
