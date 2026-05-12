@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" initial="step-1-abort-debugger-to-cl-user">
+  <datamodel>
+    <data id="executionMode" expr="'plan-only'"/>
+    <data id="sourceUrl" expr="'https://shop-planner.github.io/#Introduction'"/>
+    <data id="hyperdocSystem" expr="':hyperdoc/shop3'"/>
+  </datamodel>
+
+  <!--
+    This SCXML workflow mirrors the SHOP3-style primitive plan in
+    hyperdoc-shop3/shop3-parser-documentation-plan.sexp.
+
+    It is plan-only. States describe manual steps; transitions mark
+    operator completion. The workflow does not perform edits, reloads,
+    inspections, git status, or commits.
+  -->
+
+  <state id="step-1-abort-debugger-to-cl-user">
+    <onentry>
+      <log label="step" expr="'1'"/>
+      <log label="operator" expr="'!ABORT-DEBUGGER-TO-CL-USER'"/>
+      <log label="kind" expr="'PREFLIGHT'"/>
+      <log label="manual" expr="'T'"/>
+      <log label="summary" expr="'Abort any active debugger and return to a normal CL-USER SLY MREPL prompt.'"/>
+    </onentry>
+    <transition event="done.step.1" target="step-2-install-clickable-parser-examples"/>
+  </state>
+  <state id="step-2-install-clickable-parser-examples">
+    <onentry>
+      <log label="step" expr="'2'"/>
+      <log label="operator" expr="'!INSTALL-CLICKABLE-PARSER-EXAMPLES'"/>
+      <log label="kind" expr="'SOURCE-EDIT'"/>
+      <log label="manual" expr="'T'"/>
+      <log label="summary" expr="'Install runnable defexample forms for the SHOP3 Introduction parser into hyperdoc-shop3/examples.lisp.'"/>
+    </onentry>
+    <transition event="done.step.2" target="step-3-reload-hyperdoc-shop3"/>
+  </state>
+  <state id="step-3-reload-hyperdoc-shop3">
+    <onentry>
+      <log label="step" expr="'3'"/>
+      <log label="operator" expr="'!RELOAD-HYPERDOC-SHOP3'"/>
+      <log label="kind" expr="'VERIFICATION'"/>
+      <log label="manual" expr="'T'"/>
+      <log label="summary" expr="'Compile and reload the optional hyperdoc/shop3 ASDF system.'"/>
+    </onentry>
+    <transition event="done.step.3" target="step-4-run-parser-examples"/>
+  </state>
+  <state id="step-4-run-parser-examples">
+    <onentry>
+      <log label="step" expr="'4'"/>
+      <log label="operator" expr="'!RUN-PARSER-EXAMPLES'"/>
+      <log label="kind" expr="'VERIFICATION'"/>
+      <log label="manual" expr="'T'"/>
+      <log label="summary" expr="'Run the parser examples from SLY and confirm the explicit :SOURCE-URL is propagated.'"/>
+    </onentry>
+    <transition event="done.step.4" target="step-5-write-parser-demo-page"/>
+  </state>
+  <state id="step-5-write-parser-demo-page">
+    <onentry>
+      <log label="step" expr="'5'"/>
+      <log label="operator" expr="'!WRITE-PARSER-DEMO-PAGE'"/>
+      <log label="kind" expr="'SOURCE-EDIT'"/>
+      <log label="manual" expr="'T'"/>
+      <log label="summary" expr="'Write the HyperDoc page that transcludes clickable defexample source snippets.'"/>
+    </onentry>
+    <transition event="done.step.5" target="step-6-reload-and-inspect-parser-demo-page"/>
+  </state>
+  <state id="step-6-reload-and-inspect-parser-demo-page">
+    <onentry>
+      <log label="step" expr="'6'"/>
+      <log label="operator" expr="'!RELOAD-AND-INSPECT-PARSER-DEMO-PAGE'"/>
+      <log label="kind" expr="'VERIFICATION'"/>
+      <log label="manual" expr="'T'"/>
+      <log label="summary" expr="'Reload text pages, find the new page, load it, inspect it, and verify source-of-function rendering.'"/>
+    </onentry>
+    <transition event="done.step.6" target="step-7-check-git-status"/>
+  </state>
+  <state id="step-7-check-git-status">
+    <onentry>
+      <log label="step" expr="'7'"/>
+      <log label="operator" expr="'!CHECK-GIT-STATUS'"/>
+      <log label="kind" expr="'VERIFICATION'"/>
+      <log label="manual" expr="'T'"/>
+      <log label="summary" expr="'Check repository status from SLY before staging.'"/>
+    </onentry>
+    <transition event="done.step.7" target="step-8-commit-parser-documentation"/>
+  </state>
+  <state id="step-8-commit-parser-documentation">
+    <onentry>
+      <log label="step" expr="'8'"/>
+      <log label="operator" expr="'!COMMIT-PARSER-DOCUMENTATION'"/>
+      <log label="kind" expr="'COMMIT'"/>
+      <log label="manual" expr="'T'"/>
+      <log label="summary" expr="'Commit the examples and documentation page after inspection.'"/>
+    </onentry>
+    <transition event="done.step.8" target="done"/>
+  </state>
+
+  <final id="done"/>
+</scxml>
