@@ -1,0 +1,126 @@
+<h1>FedWiki-to-DMX importer workspace assignment bug</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the shared bug-fix surface for the FedWiki-to-DMX importer
+  refactor. It exists before the code change so the failure, invariant,
+  planned repair, and verification route are inspectable in one place.
+</p>
+
+<h2>Bug summary</h2>
+
+<p>
+  The FedWiki-to-DMX importer can create a DMX topic and receive a successful
+  topic id without assigning the new topic to a workspace. The observed result
+  is a live DMX topic whose Meta panel shows <tt>Workspace n/a</tt>.
+</p>
+
+<p>
+  The immediate observed example is topic <tt>971853</tt>,
+  <tt>Minimal viable DMX note writer</tt>, with URI
+  <tt>hyperdoc:mcp/workspace-note/minimal-viable-dmx-note-writer</tt>.
+  It was created during an MREPL demonstration and appeared in the topicmap
+  view, but it was not assigned to a workspace.
+</p>
+
+<h2>Expected invariant</h2>
+
+<p>
+  Importer-level topic creation must not be able to return an unassigned DMX
+  topic. For HyperDoc importer workflows, the default workspace is the
+  context-window workspace <tt>919815</tt>, and the default visible topicmap
+  placement is the context-window topicmap <tt>919822</tt>.
+</p>
+
+<pre>importer create topic
+  - create DMX topic
+  - assign topic to workspace 919815
+  - place topic in topicmap 919822
+  - report success only after assignment and placement</pre>
+
+<h2>Related topic</h2>
+
+<p>
+  DMX topic <tt>961552</tt> documents <tt>_assignToWorkspace</tt> as a private
+  initial-assignment helper. This bug fix should respect that boundary:
+  the importer needs an explicit initial-assignment workflow, not a broad
+  public mutation surface.
+</p>
+
+<h2>Root cause hypothesis</h2>
+
+<p>
+  <tt>dmx-import-create-topic</tt> is currently usable as an importer workflow
+  primitive, but it behaves like a raw transport primitive. Raw topic creation
+  can succeed before workspace assignment and topicmap placement happen.
+  That makes an orphan topic representable as a successful import result.
+</p>
+
+<h2>Refactor target</h2>
+
+<ul>
+  <li>Demote or rename <tt>dmx-import-create-topic</tt> to an explicitly raw primitive.</li>
+  <li>Add a guarded importer primitive such as <tt>dmx-import-create-workspace-topic</tt>.</li>
+  <li>Make FedWiki import execution call only the workspace-aware primitive.</li>
+  <li>Make raw creation signal or warn when called from importer workflows.</li>
+  <li>Add a regression test that no importer-visible create action returns an unassigned topic.</li>
+</ul>
+
+<h2>Current coordinate</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::fedwiki-dmx-importer-bug-status)"><tt>Current bug-fix status</tt></a></li>
+  <li><a expr="(hyperdoc::fedwiki-dmx-importer-bug-plan)"><tt>Full bug-fix plan</tt></a></li>
+  <li><a expr="(hyperdoc::fedwiki-dmx-importer-bug-page-object :signal-error? t)"><tt>Inspect this HTML page object</tt></a></li>
+</ul>
+
+<h2>Coordinates</h2>
+
+<table>
+  <tr><th>Coordinate</th><th>Topic</th><th>Purpose</th><th>Expected artifact</th></tr>
+  <tr><td><tt>P0</tt></td><td>Bootstrap shared bug surface</td><td>Create this page before changing importer code.</td><td><tt>hyperdoc/FedWiki-to-DMX importer workspace assignment bug.html</tt></td></tr>
+  <tr><td><tt>P1</tt></td><td>Confirm failure path</td><td>Show that raw creation can produce <tt>Workspace n/a</tt>.</td><td>topic <tt>971853</tt></td></tr>
+  <tr><td><tt>P2</tt></td><td>Define invariant</td><td>Importer creation must assign workspace and topicmap placement.</td><td>write contract</td></tr>
+  <tr><td><tt>P3</tt></td><td>Refactor raw topic creation</td><td>Guard or rename the low-level primitive.</td><td><tt>dmx-import.lisp</tt></td></tr>
+  <tr><td><tt>P4</tt></td><td>Add workspace-aware create primitive</td><td>Create, assign, place, then return success.</td><td><tt>dmx-import-create-workspace-topic</tt></td></tr>
+  <tr><td><tt>P5</tt></td><td>Refactor FedWiki importer execution</td><td>Route <tt>:create</tt> actions through the guarded primitive.</td><td><tt>execute-dmx-import-plan</tt></td></tr>
+  <tr><td><tt>P6</tt></td><td>Regression test</td><td>Prove importer creation cannot produce an orphan topic.</td><td><tt>tests/fedwiki-site-dmx-import.lisp</tt></td></tr>
+</table>
+
+<h2>Proposed boundary names</h2>
+
+<table>
+  <tr><th>Name</th><th>Role</th><th>Importer-visible?</th></tr>
+  <tr><td><tt>dmx-import-create-raw-topic</tt></td><td>Only POST a topic to DMX.</td><td>No</td></tr>
+  <tr><td><tt>dmx-import-create-workspace-topic</tt></td><td>Create, assign workspace, and place in topicmap.</td><td>Yes</td></tr>
+  <tr><td><tt>execute-dmx-import-plan</tt></td><td>Run the FedWiki import plan through guarded operations.</td><td>Yes</td></tr>
+</table>
+
+<h2>CLOG inspector entry points</h2>
+
+<pre>(fedwiki-dmx-importer-bug-page-object :signal-error? t)
+
+(inspect-fedwiki-dmx-importer-bug-page!)
+
+(fedwiki-dmx-importer-bug-page-url)</pre>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="DMX note read/write boundary">DMX note read/write boundary</a></li>
+  <li><a page="DMX FedWiki Write Model">DMX FedWiki Write Model</a></li>
+  <li><a page="DMX platform workspace assignment semantics">DMX platform workspace assignment semantics</a></li>
+  <li><a page="DMX workspace assignment permission repair runbook">DMX workspace assignment permission repair runbook</a></li>
+  <li><a page="Projection Pipeline Operator Plan">Projection Pipeline Operator Plan</a></li>
+  <li><a page="Read-write boundary">Read-write boundary</a></li>
+</ul>
+
+<h2>Working rule</h2>
+
+<p>
+  The importer must treat topic creation and workspace assignment as one
+  importer-level transaction. If workspace assignment or topicmap placement
+  cannot be completed, the import operation must not report a successful
+  topic creation.
+</p>
