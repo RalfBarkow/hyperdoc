@@ -114,11 +114,11 @@
                 :key (lambda (step) (getf step :id)))
     (error "Unknown projection pipeline coordinate: ~S" coordinate))
   (setf *current-coordinate* coordinate)
-  (operator-status))
+  (ppipe:operator-status))
 
 (defun artifact-paths ()
   (list :operator-page (root-path *operator-page-relative-path*)
-        :operator-scxml (root-path *operator-scxml-relative-path*)
+        :operator-scxml (ppipe:root-path ppipe::*operator-scxml-relative-path*)
         :smoke-test (root-path "tests/projection-pipeline-dmx-annotation-smoke.lisp")
         :shop3-plan (root-path "hyperdoc-shop3/projection-pipeline-dmx-annotation-plan.sexp")))
 
@@ -237,19 +237,19 @@ views instead of a simple-character-string view."
 
 (defun inspect-operator-plan ()
   "Open the current operator plan object in the CLOG inspector."
-  (clog-inspect-object (operator-plan)))
+  (clog-inspect-object (ppipe:operator-plan)))
 
 (defun inspect-operator-status ()
   "Open the current coordinate/status object in the CLOG inspector."
-  (clog-inspect-object (operator-status)))
+  (clog-inspect-object (ppipe:operator-status)))
 
 (defun inspect-scxml-dry-run-trace ()
   "Open the dry-run trace object in the CLOG inspector."
-  (clog-inspect-object (scxml-dry-run-trace)))
+  (clog-inspect-object (ppipe:scxml-dry-run-trace)))
 
 (defun inspect-shop3-plan-fixture ()
   "Open the current SHOP3-shaped plan fixture in the CLOG inspector."
-  (clog-inspect-object (shop3-plan-fixture)))
+  (clog-inspect-object (ppipe:shop3-plan-fixture)))
 
 (defun write-operator-scxml ()
   (write-text-file
@@ -352,9 +352,9 @@ views instead of a simple-character-string view."
 <h2>Current coordinate</h2>
 
 <ul>
-  <li><a expr=\"(operator-status)\"><tt>Current operator status</tt></a></li>
-  <li><a expr=\"(operator-plan)\"><tt>Full operator plan</tt></a></li>
-  <li><a expr=\"(artifact-paths)\"><tt>Artifact paths</tt></a></li>
+  <li><a expr=\"(ppipe:operator-status)\"><tt>Current operator status</tt></a></li>
+  <li><a expr=\"(ppipe:operator-plan)\"><tt>Full operator plan</tt></a></li>
+  <li><a expr=\"(ppipe:artifact-paths)\"><tt>Artifact paths</tt></a></li>
 </ul>
 
 <h2>Coordinates</h2>
@@ -373,14 +373,14 @@ views instead of a simple-character-string view."
 <h2>SCXML trace</h2>
 
 <ul>
-  <li><a expr=\"(scxml-dry-run-trace)\"><tt>Dry-run SCXML trace object</tt></a></li>
-  <li><a expr=\"(root-path *operator-scxml-relative-path*)\"><tt>SCXML file pathname</tt></a></li>
+  <li><a expr=\"(ppipe:scxml-dry-run-trace)\"><tt>Dry-run SCXML trace object</tt></a></li>
+  <li><a expr=\"(ppipe:root-path ppipe::*operator-scxml-relative-path*)\"><tt>SCXML file pathname</tt></a></li>
 </ul>
 
 <h2>SHOP3 plan-only organizer</h2>
 
 <ul>
-  <li><a expr=\"(shop3-plan-fixture)\"><tt>SHOP3-shaped plan fixture</tt></a></li>
+  <li><a expr=\"(ppipe:shop3-plan-fixture)\"><tt>SHOP3-shaped plan fixture</tt></a></li>
 </ul>
 
 <h2>DMX target coordinates</h2>
