@@ -1,0 +1,66 @@
+<h1>SHOP3 Introduction Topics</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is a local HyperDoc parsing of the SHOP3 manual Introduction.
+  It turns the introductory prose into topic candidates that can later be
+  promoted into durable HyperDoc topic factories, DMX topics, or source-linked
+  documentation pages.
+</p>
+
+<h2>Source</h2>
+
+<p><a href='https://shop-planner.github.io/#Introduction'>https://shop-planner.github.io/#Introduction</a></p>
+
+<h2>Generated topic data</h2>
+
+<ul>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc/topics/shop3-introduction.lisp&quot;)'><tt>hyperdoc/topics/shop3-introduction.lisp</tt></a></li>
+</ul>
+
+<h2>Root topic</h2>
+
+<dl>
+  <dt>Title</dt><dd>1 Introduction</dd>
+  <dt>ID</dt><dd><code>shop3-introduction/root</code></dd>
+</dl>
+
+<h2>Parsed topics</h2>
+
+<ol>
+<li><strong>Next: Execution Environment , Previous: SHOP3 Manual , Up: SHOP3 Manual [ Contents ][ Index ]</strong> <code>CONCEPT</code><br/><span>Next: Execution Environment , Previous: SHOP3 Manual , Up: SHOP3 Manual [ Contents ][ Index ]</span><br/><small>SHOP3, PLANNING, CONCEPT</small></li>
+<li><strong>AI planning as means-ends reasoning</strong> <code>CONCEPT</code><br/><span>AI planning is the subfield of artificial intelligence (AI) that aims at automating processes of means-ends reasoning . In general, AI planning is the problem of finding a sequence of actions that, executed in a specified initial state, will reach a goal state. This is a problem with applications to diverse areas including manufacturing, autonomous space and deep sea exploration, medical treatment, and military operations, to name just a few. This is the manual for SHOP3 , the third major version of the Simple Hierarchical Ordered Planner. </span><br/><small>SHOP3, PLANNING, CONCEPT</small></li>
+<li><strong>Domain, problem, objective, and plan</strong> <code>CONCEPT</code><br/><span>An AI planning system takes as input a domain – a description of available actions, relations, etc.; a problem – a description of the initial state of the system, and an objective , a task to be performed or goal to be achieved. From these, it generates a plan : a sequence of actions that, if performed with the expected results, will attain the objective. This is the key function performed by SHOP3 , although, as will be seen in this manual, many additional functions are offered. </span><br/><small>SHOP3, PLANNING, CONCEPT</small></li>
+<li><strong>SHOP3 as ordered task decomposition</strong> <code>CONCEPT</code><br/><span>SHOP3 is a domain-independent planning system based on ordered task decomposition , a modified version of Hierarchical Task Network (HTN) planning that involves planning for tasks in the same order that they will later be executed. An HTN, or decomposition, planner “proceeds by decomposing nonprimitive tasks recursively into smaller and smaller subtasks, until primitive tasks are reached that can be performed directly using the planning operators” (see Ghallab et al. , 2004 ). This manual does not give an introduction to HTN planning or AI planning in general, for that we recommend the textbook by Ghallab et al. and the research papers describing SHOP . </span><br/><small>SHOP3, PLANNING, CONCEPT, HTN</small></li>
+<li><strong>SHOP lineage and stewardship</strong> <code>CONCEPT</code><br/><span>SHOP and SHOP 2 were originally developed at the Computer Science Department of the University of Maryland, College Park, by Prof. Dana Nau’s research group. This manual draws heavily on material from the manual for SHOP2 , which was, in turn based, in part, on the JSHOP documentation written by Füsun Yaman, with additional material from Yue Cao’s December 2000 draft of the SHOP2 documentation and pseudocode from Nau et al. (see Nau et al. , 2001 ). Some updates to the SHOP2 manual were made by Robert P. Goldman and John Maraist, of SIFT. </span><br/><small>SHOP3, PLANNING, CONCEPT</small></li>
+<li><strong>Unifier and theorem-prover subsystems</strong> <code>CONCEPT</code><br/><span>SHOP3 contains two important subsystems that perform useful functions as part of it, but can also be used on their own. The first is the unifier , which computes the most general unifier of two logical formulas, encoded as Lisp s-expressions. The second subsystem is the theorem-prover , which performs Prolog-style rule-based Horn clause deduction over state sequences. </span><br/><small>SHOP3, PLANNING, CONCEPT, THEOREM-PROVER, UNIFIER</small></li>
+<li><strong>Goldman and Kuter 2019 citation</strong> <code>CONCEPT</code><br/><span>Robert P. Goldman and Ugur Kuter have a paper in the European Lisp Symposium describing SHOP3 (see Goldman &amp; Kuter, 2019 ). </span><br/><small>SHOP3, PLANNING, CONCEPT</small></li>
+<li><strong>The planners in the SHOP family have the following distinctive characteristics: </strong> <code>CONCEPT</code><br/><span>The planners in the SHOP family have the following distinctive characteristics: </span><br/><small>SHOP3, PLANNING, CONCEPT</small></li>
+<li><strong>State-aware planning process</strong> <code>DISTINCTIVE-CHARACTERISTIC</code><br/><span>SHOP knows the current state-of-the-world at each step of the planning process. </span><br/><small>SHOP3, PLANNING, DISTINCTIVE-CHARACTERISTIC</small></li>
+<li><strong>Expressive mixed symbolic and numeric preconditions</strong> <code>DISTINCTIVE-CHARACTERISTIC</code><br/><span>It has great expressive power, far beyond that of conventional PDDL planners. For example, in the preconditions of operators and methods it can do mixed symbolic/numeric computations and execute calls to external programs. </span><br/><small>SHOP3, PLANNING, DISTINCTIVE-CHARACTERISTIC, PDDL</small></li>
+<li><strong>Domain-specific planning algorithms</strong> <code>DISTINCTIVE-CHARACTERISTIC</code><br/><span>It can be used to create very efficient domain-specific planning algorithms. The software distribution includes several examples of such domain-specific algorithms. </span><br/><small>SHOP3, PLANNING, DISTINCTIVE-CHARACTERISTIC</small></li>
+<li><strong>PDDL feature incorporation</strong> <code>DISTINCTIVE-CHARACTERISTIC</code><br/><span>SHOP3 incorporates many features from PDDL , e.g., support for quantifiers and conditional effects in methods and operators. </span><br/><small>SHOP3, PLANNING, DISTINCTIVE-CHARACTERISTIC, PDDL</small></li>
+<li><strong>Ordered and unordered task networks</strong> <code>DISTINCTIVE-CHARACTERISTIC</code><br/><span>SHOP2 and SHOP3 (unlike SHOP ) allow a combination of partially ordered and fully ordered task networks through the use of the :unordered and :ordered keywords. </span><br/><small>SHOP3, PLANNING, DISTINCTIVE-CHARACTERISTIC</small></li>
+<li><strong>Expressiveness boundary versus full HTN planners</strong> <code>DISTINCTIVE-CHARACTERISTIC</code><br/><span>SHOP3 task networks are less expressive than full HTN planners such as UMCP, which have labeled tasks in their task networks and allow arbitrary ordering constraints. </span><br/><small>SHOP3, PLANNING, DISTINCTIVE-CHARACTERISTIC, HTN</small></li>
+<li><strong>Plan-cost optimization</strong> <code>DISTINCTIVE-CHARACTERISTIC</code><br/><span>SHOP3 allows branch-and-bound optimization of plan costs. For small problems, this capability can be used to find the absolute minimum cost plans. For larger problems, this capability can be used with time limits to get the lowest cost plan that is found within the given time limit. </span><br/><small>SHOP3, PLANNING, DISTINCTIVE-CHARACTERISTIC</small></li>
+<li><strong>PDDL support and domain engineering</strong> <code>DISTINCTIVE-CHARACTERISTIC</code><br/><span>SHOP3 adds support for the Planner Domain Description Language (PDDL), and updates the SHOP language for easier domain engineering. </span><br/><small>SHOP3, PLANNING, DISTINCTIVE-CHARACTERISTIC, PDDL</small></li>
+</ol>
+
+<h2>Interpretation for HyperDoc</h2>
+
+<p>
+  The most important mapping is that SHOP3 domains, problems, objectives,
+  and plans correspond naturally to HyperDoc maintenance domains,
+  repository states, requested documentation or refactoring objectives,
+  and manual runbooks.
+</p>
+
+<h2>Related HyperDoc pages</h2>
+
+<ul>
+  <li><a page='Using SHOP3 Planning in HyperDoc'>Using SHOP3 Planning in HyperDoc</a></li>
+  <li><a page='SHOP3 ASDF Refactor Plan Example'>SHOP3 ASDF Refactor Plan Example</a></li>
+  <li><a page='SHOP3 Planning API Reference'>SHOP3 Planning API Reference</a></li>
+  <li><a page='SHOP3 Planning Layer for HyperDoc'>SHOP3 Planning Layer for HyperDoc</a></li>
+</ul>
