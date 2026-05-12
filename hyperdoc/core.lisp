@@ -41,6 +41,18 @@
         asdf-system-name-of
         asdf:find-system)))
 
+(defun cl-source-file-components-under (component)
+  (labels ((walk (c)
+             (cond
+               ((typep c 'asdf:cl-source-file)
+                (list c))
+               ((typep c 'asdf:module)
+                (mapcan #'walk (asdf:component-children c)))
+               (t
+                nil))))
+    (when component
+      (walk component))))
+
 ;;
 ;; Page classes. text-class is still quite abstract, concrete
 ;; subclasses for HTML and Markdown pages follow later.
@@ -80,9 +92,7 @@ the macro DEFHYPERDOC."
          (writable (is-writable? directory))
          (component (asdf:find-component system subdirectory))
          (code-files (when component
-                       (remove-if-not #'(lambda (c)
-                                          (typep c 'asdf:cl-source-file))
-                                      (asdf:component-children component))))
+                       (cl-source-file-components-under component)))
          (pages (make-hash-table :test #'equal))
          (code-pages (make-array (length code-files)
                                  :element-type '(or null code-page)
