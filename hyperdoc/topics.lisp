@@ -7429,6 +7429,92 @@
    :references '("Source-station assimilation routine"
                  "Lafont 1990 Interaction Nets")))
 
+
+;; SIFT careers source-station topics.
+
+(defun smart-information-flow-technologies-topic ()
+  (make-topic
+   :id "smart-information-flow-technologies"
+   :title "Smart Information Flow Technologies"
+   :summary "SIFT as presented in the pasted careers source: a Minneapolis-based research and development company with distributed staff and work across cyber, AI, NLP, planning, healthcare, supervisory control, and human-automation interaction."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT careers topic arrangement")))
+
+(defun sift-careers-page-topic ()
+  (make-topic
+   :id "sift-careers-page"
+   :title "SIFT careers page"
+   :summary "Pasted SIFT careers source station that records role, skills, work-environment, eligibility, and equal-opportunity claims without treating them as a live job-board scrape."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT careers topic arrangement"
+                 "Source-station assimilation routine")))
+
+(defun sift-cyber-ai-nlp-roles-topic ()
+  (make-topic
+   :id "sift-cyber-ai-nlp-roles"
+   :title "SIFT cyber AI and NLP roles"
+   :summary "Role family in the pasted SIFT source covering Researcher, Associate Researcher, and Research Intern positions focused on Cyber, AI, and NLP."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT careers topic arrangement"
+                 "Smart Information Flow Technologies")))
+
+(defun sift-researcher-role-topic ()
+  (make-topic
+   :id "sift-researcher-role"
+   :title "SIFT researcher role"
+   :summary "Full-time Researcher role in the pasted SIFT source, requiring a Master's degree, Ph.D., or equivalent experience, advanced proficiency, and current high-need emphasis on binary analysis and NLP using BERT-like tools."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT cyber AI and NLP roles" "SIFT skills matrix")))
+
+(defun sift-associate-researcher-role-topic ()
+  (make-topic
+   :id "sift-associate-researcher-role"
+   :title "SIFT associate researcher role"
+   :summary "Full-time Associate Researcher role in the pasted SIFT source, framed around a Bachelor's degree, advanced related-field proficiency, rapid learning, new language acquisition, and prototype production."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT cyber AI and NLP roles" "SIFT skills matrix")))
+
+(defun sift-research-intern-role-topic ()
+  (make-topic
+   :id "sift-research-intern-role"
+   :title "SIFT research intern role"
+   :summary "Salaried internship role in the pasted SIFT source for graduate and advanced undergraduate students, typically 6-12 months, with design, implementation, evaluation, proposal, program-management, publication, and dissertation-relevant opportunities."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT cyber AI and NLP roles")))
+
+(defun sift-interdisciplinary-rd-areas-topic ()
+  (make-topic
+   :id "sift-interdisciplinary-rd-areas"
+   :title "SIFT interdisciplinary R&D areas"
+   :summary "Research-and-development areas named in the pasted SIFT source: NLP, automated planning, cybersecurity, supervisory control, healthcare, and human-automation interaction."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT careers topic arrangement"
+                 "Smart Information Flow Technologies")))
+
+(defun sift-skills-matrix-topic ()
+  (make-topic
+   :id "sift-skills-matrix"
+   :title "SIFT skills matrix"
+   :summary "Skill matrix extracted from the pasted SIFT source, spanning engineering languages and web tooling, constraint and functional programming, AI planning, plan recognition, NLP, computational linguistics, machine learning, optimization, formal methods, control theory, HCI, UI, and simulation."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT careers topic arrangement")))
+
+(defun sift-flexible-research-work-environment-topic ()
+  (make-topic
+   :id "sift-flexible-research-work-environment"
+   :title "SIFT flexible research work environment"
+   :summary "Work-environment claim in the pasted SIFT source: flexible hours, substantial home-office work, non-bureaucratic collaboration, and principal hiring locations in Minneapolis and Boston."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT careers topic arrangement"
+                 "Smart Information Flow Technologies")))
+
+(defun sift-employment-eligibility-restriction-topic ()
+  (make-topic
+   :id "sift-employment-eligibility-restriction"
+   :title "SIFT employment eligibility restriction"
+   :summary "Employment boundary in the pasted SIFT source stating that, due to contract work, SIFT positions are limited to United States citizens or permanent residents."
+   :references '("Smart Information Flow Technologies Careers"
+                 "SIFT careers topic arrangement")))
 (eval-when (:load-toplevel :execute)
   (install-topic-proxy-wrappers))
 
