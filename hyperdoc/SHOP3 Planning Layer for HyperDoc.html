@@ -1,0 +1,247 @@
+<h1>SHOP3 Planning Layer for HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page records the first successful live experiment in mapping
+  HyperDoc maintenance work to a SHOP3 Hierarchical Task Network
+  planning problem. The result is not an executor. It is a plan-only
+  bridge: SHOP3 proposes an ordered maintenance plan, and HyperDoc
+  preserves the plan as an inspectable documentation and runtime
+  artifact.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook='topics' page='SHOP3 Planning Layer for HyperDoc'><tt>SHOP3 Planning Layer for HyperDoc</tt></a></li>
+  <li><a hyperbook='hyperdoc' page='ASDF Systems, Examples, and Tests in HyperDoc'><tt>ASDF Systems, Examples, and Tests in HyperDoc</tt></a></li>
+  <li><a hyperbook='hyperdoc' page='Understanding ASDF Systems in HyperDoc'><tt>Understanding ASDF Systems in HyperDoc</tt></a></li>
+  <li><a hyperbook='hyperdoc' page='HyperDoc Test Runner'><tt>HyperDoc Test Runner</tt></a></li>
+  <li><a hyperbook='hyperdoc' page='Codex commit hygiene and staging boundaries'><tt>Codex commit hygiene and staging boundaries</tt></a></li>
+  <li><a hyperbook='hyperdoc' page='Planning Routes through Uncertain Territory'><tt>Planning Routes through Uncertain Territory</tt></a></li>
+  <li><a href='https://github.com/shop-planner/shop3'><tt>shop-planner/shop3</tt></a></li>
+</ul>
+
+<h2>What was established</h2>
+
+<p>
+  SHOP3 was loaded into the live SLY MREPL connected to the HyperDoc
+  Lisp image. The useful boundary was narrow ASDF registration:
+  expose the planner system and the PDDL tools, but not the whole
+  SHOP3 checkout.
+</p>
+
+<pre>(asdf:initialize-source-registry
+ `(:source-registry
+   (:directory &quot;/Users/rgb/workspace/shop3/shop3/&quot;)
+   (:directory &quot;/Users/rgb/workspace/shop3/jenkins/ext/pddl-tools/&quot;)
+   :inherit-configuration))</pre>
+
+<p>
+  Registering the whole checkout as an ASDF tree exposed vendored
+  dependencies under <tt>jenkins/ext</tt>, in particular Alexandria,
+  and caused package conflicts in the already-running HyperDoc image.
+  The working rule is therefore: do not register
+  <tt>/Users/rgb/workspace/shop3/</tt> as a broad ASDF tree inside
+  this image.
+</p>
+
+<h2>Dependency loading notes</h2>
+
+<p>
+  The live load needed <tt>fiveam-asdf</tt> from Quicklisp and
+  <tt>pddl-utils</tt> from the SHOP3 checkout. Once those were visible,
+  <tt>(ql:quickload &quot;shop3&quot;)</tt> loaded SHOP3 successfully.
+</p>
+
+<pre>(ql:quickload &quot;fiveam-asdf&quot;)
+(ql:quickload &quot;shop3&quot;)</pre>
+
+<p>
+  The loaded image reported SHOP3 version 4.3.1 and created the
+  packages needed for the planner, theorem-prover, PDDL utilities,
+  plan tree support, and user-facing SHOP3 work.
+</p>
+
+<h2>Scratch package</h2>
+
+<p>
+  The first mapping was done in a scratch package, not in production
+  HyperDoc code. This kept the experiment reversible while allowing
+  SHOP3 domain syntax to be evaluated directly.
+</p>
+
+<pre>(defpackage #:hyperdoc-shop3.scratch
+  (:use #:cl #:shop3))
+
+(in-package #:hyperdoc-shop3.scratch)</pre>
+
+<h2>The first planning domain</h2>
+
+<p>
+  The first SHOP3 domain was named <tt>hyperdoc-maintenance</tt>.
+  It models a narrow ASDF refactor workflow as a maintenance plan.
+  The primitive operators are symbolic. They do not edit files, run
+  tests, or commit automatically.
+</p>
+
+<ul>
+  <li><tt>!add-recursive-component-collector</tt></li>
+  <li><tt>!create-asdf-system</tt></li>
+  <li><tt>!split-topic-family</tt></li>
+  <li><tt>!load-system</tt></li>
+  <li><tt>!run-smoke-test</tt></li>
+  <li><tt>!commit-stage</tt></li>
+</ul>
+
+<p>
+  The important correction from the first failed attempt was the
+  SHOP3 operator shape. The correct form is:
+</p>
+
+<pre>(:operator task preconditions delete-list add-list)</pre>
+
+<p>
+  The initial attempt accidentally reversed add and delete lists,
+  which made the planner remove progress facts instead of adding them.
+</p>
+
+<h2>The first planning problem</h2>
+
+<p>
+  The first problem was named
+  <tt>hyperdoc-asdf-refactor-001</tt>. Its high-level task was:
+</p>
+
+<pre>(refactor-hyperdoc-asdf-systems)</pre>
+
+<p>
+  The initial state said that HyperDoc has a root system, needs a
+  recursive source component collector, plans two new systems
+  <tt>hyperdoc/kernel</tt> and <tt>hyperdoc/topics</tt>, has an
+  ASDF topic family that still needs splitting, has the
+  <tt>compile-order-smoke</tt> test, and starts from a clean git state.
+</p>
+
+<h2>Successful plan result</h2>
+
+<p>
+  SHOP3 found one plan with nine primitive steps. The key result is
+  that commit discipline became part of the HTN plan rather than an
+  external prose reminder.
+</p>
+
+<ol>
+  <li><tt>!add-recursive-component-collector</tt></li>
+  <li><tt>!commit-stage recursive-component-collector-added add-recursive-hyperdoc-source-component-discovery</tt></li>
+  <li><tt>!create-asdf-system hyperdoc/kernel</tt></li>
+  <li><tt>!create-asdf-system hyperdoc/topics</tt></li>
+  <li><tt>!commit-stage hyperdoc/topics introduce-hyperdoc-kernel-and-topics-systems</tt></li>
+  <li><tt>!split-topic-family asdf</tt></li>
+  <li><tt>!load-system hyperdoc</tt></li>
+  <li><tt>!run-smoke-test compile-order-smoke</tt></li>
+  <li><tt>!commit-stage compile-order-smoke split-asdf-topic-family-and-verify-load-order</tt></li>
+</ol>
+
+<h2>Checklist projection</h2>
+
+<p>
+  The first HyperDoc-facing projection is a checklist. It classifies
+  SHOP3 primitive steps into three kinds:
+</p>
+
+<ul>
+  <li><tt>:source-edit</tt></li>
+  <li><tt>:commit</tt></li>
+  <li><tt>:verification</tt></li>
+</ul>
+
+<p>
+  Every step is currently marked <tt>:manual? t</tt>. This is the
+  execution boundary for the first slice: SHOP3 proposes the plan;
+  HyperDoc records and renders it; a human or later guarded tool
+  decides whether any step is executed.
+</p>
+
+<pre>((:index 1 :kind :source-edit :operator !add-recursive-component-collector
+  :arguments nil :manual? t)
+ (:index 2 :kind :commit :stage recursive-component-collector-added
+  :message add-recursive-hyperdoc-source-component-discovery :manual? t)
+ (:index 3 :kind :source-edit :operator !create-asdf-system
+  :arguments (hyperdoc/kernel) :manual? t)
+ (:index 4 :kind :source-edit :operator !create-asdf-system
+  :arguments (hyperdoc/topics) :manual? t)
+ (:index 5 :kind :commit :stage hyperdoc/topics
+  :message introduce-hyperdoc-kernel-and-topics-systems :manual? t)
+ (:index 6 :kind :source-edit :operator !split-topic-family
+  :arguments (asdf) :manual? t)
+ (:index 7 :kind :verification :action :load-system
+  :system hyperdoc :manual? t)
+ (:index 8 :kind :verification :action :run-smoke-test
+  :test compile-order-smoke :manual? t)
+ (:index 9 :kind :commit :stage compile-order-smoke
+  :message split-asdf-topic-family-and-verify-load-order :manual? t))</pre>
+
+<h2>Plan tree and final state</h2>
+
+<p>
+  SHOP3 also returned a plan tree and a final state. The useful bridge
+  for HyperDoc is not to expose all SHOP3 internals directly, but to
+  normalize them into inspectable objects:
+</p>
+
+<ul>
+  <li><tt>shorter-plan</tt> removes internal operator costs from the raw plan sequence.</li>
+  <li><tt>plan-tree:plan-tree-&gt;sexp</tt> provides a HyperDoc-friendly S-expression view of the plan tree.</li>
+  <li><tt>state-atoms</tt> exposes the final state's facts for summary and postcondition views.</li>
+</ul>
+
+<h2>Object model to promote next</h2>
+
+<p>
+  The next implementation slice should promote the scratch result into
+  an optional <tt>hyperdoc/shop3</tt> ASDF system, not into the root
+  <tt>hyperdoc</tt> system.
+</p>
+
+<pre>(defclass hyperdoc-htn-plan-result ()
+  ((problem-name :initarg :problem-name :reader problem-name-of)
+   (plans :initarg :plans :reader plans-of)
+   (raw-plans :initarg :raw-plans :reader raw-plans-of)
+   (plan-trees :initarg :plan-trees :reader plan-trees-of)
+   (final-states :initarg :final-states :reader final-states-of)
+   (time :initarg :time :reader time-of)
+   (execution-mode :initarg :execution-mode
+                   :initform :plan-only
+                   :reader execution-mode-of)))</pre>
+
+<h2>Boundary</h2>
+
+<p>
+  This page documents a successful planning experiment and the intended
+  first integration boundary. It does not claim that HyperDoc should
+  become autonomous, and it does not authorize automatic source edits,
+  shell commands, DMX mutations, or git commits.
+</p>
+
+<p>
+  The first durable design rule is:
+</p>
+
+<blockquote>
+  <p>
+    SHOP3 proposes ordered maintenance plans. HyperDoc makes those
+    plans inspectable. Execution remains manual until a later guarded
+    execution boundary is explicitly designed.
+  </p>
+</blockquote>
+
+<h2>Next Codex handoff</h2>
+
+<p>
+  Codex should integrate this as an optional, plan-only slice:
+  documentation first, then <tt>hyperdoc/shop3</tt>, then the symbolic
+  ASDF refactor domain and checklist example. The root
+  <tt>hyperdoc</tt> system must continue loading without SHOP3.
+</p>

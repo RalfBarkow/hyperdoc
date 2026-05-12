@@ -7575,6 +7575,16 @@
                  "ASDF Components Workflow"
                  "ASDF Systems, Examples, and Tests in HyperDoc")))
 
+(defun shop3-planning-layer-for-hyperdoc-topic ()
+  (make-topic
+   :id "shop3-planning-layer-for-hyperdoc"
+   :title "SHOP3 Planning Layer for HyperDoc"
+   :summary "Optional plan-only SHOP3 HTN planning layer that proposes ordered HyperDoc maintenance plans while leaving all source edits, checks, DMX writes, and commits manual."
+   :references '("SHOP3 Planning Layer for HyperDoc"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "Understanding ASDF Systems in HyperDoc"
+                 "Planning Routes through Uncertain Territory")))
+
 
 (defun asdf-community-infrastructure-topic ()
   (make-topic
@@ -7636,4 +7646,3 @@
                  "DM6 AppEmbed HyperDoc Inline Proof"
                  "Git History Surface for HyperDoc"
                  "Association Topics for Stable Identity and Mutable Titles")))
-
