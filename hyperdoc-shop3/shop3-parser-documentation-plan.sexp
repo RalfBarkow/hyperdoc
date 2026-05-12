@@ -5,7 +5,10 @@
  (!RUN-PARSER-EXAMPLES)
  (!WRITE-PARSER-DEMO-PAGE
   "hyperdoc/Parsing SHOP3 Introduction into Topics.html")
- (!RELOAD-AND-INSPECT-PARSER-DEMO-PAGE)
+ (!WRITE-PLAN-SCXML-LINK-PAGE
+  "hyperdoc/SHOP3 Parser Documentation Plan and SCXML.html")
+ (!OPEN-PLAN-SCXML-LINK-PAGE-IN-HYPERDOC-INSPECTOR
+  "SHOP3 Parser Documentation Plan and SCXML")
  (!CHECK-GIT-STATUS "git status --short --branch")
  (!COMMIT-PARSER-DOCUMENTATION
-  "docs: add runnable SHOP3 introduction parser examples"))
+  "shop3: add parser documentation plan and SCXML workflow"))

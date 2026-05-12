@@ -63,37 +63,47 @@
       <log label="manual" expr="'T'"/>
       <log label="summary" expr="'Write the HyperDoc page that transcludes clickable defexample source snippets.'"/>
     </onentry>
-    <transition event="done.step.5" target="step-6-reload-and-inspect-parser-demo-page"/>
+    <transition event="done.step.5" target="step-6-write-plan-scxml-link-page"/>
   </state>
-  <state id="step-6-reload-and-inspect-parser-demo-page">
+  <state id="step-6-write-plan-scxml-link-page">
     <onentry>
       <log label="step" expr="'6'"/>
-      <log label="operator" expr="'!RELOAD-AND-INSPECT-PARSER-DEMO-PAGE'"/>
-      <log label="kind" expr="'VERIFICATION'"/>
+      <log label="operator" expr="'!WRITE-PLAN-SCXML-LINK-PAGE'"/>
+      <log label="kind" expr="'SOURCE-EDIT'"/>
       <log label="manual" expr="'T'"/>
-      <log label="summary" expr="'Reload text pages, find the new page, load it, inspect it, and verify source-of-function rendering.'"/>
+      <log label="summary" expr="'Write the HyperDoc page linking the SHOP3-style plan and matching SCXML workflow.'"/>
     </onentry>
-    <transition event="done.step.6" target="step-7-check-git-status"/>
+    <transition event="done.step.6" target="step-7-open-plan-scxml-link-page-in-hyperdoc-inspector"/>
   </state>
-  <state id="step-7-check-git-status">
+  <state id="step-7-open-plan-scxml-link-page-in-hyperdoc-inspector">
     <onentry>
       <log label="step" expr="'7'"/>
+      <log label="operator" expr="'!OPEN-PLAN-SCXML-LINK-PAGE-IN-HYPERDOC-INSPECTOR'"/>
+      <log label="kind" expr="'VERIFICATION'"/>
+      <log label="manual" expr="'T'"/>
+      <log label="summary" expr="'Reload HyperDoc text pages, find the plan/SCXML page, load it, and open it in the HyperDoc inspector view before committing.'"/>
+    </onentry>
+    <transition event="done.step.7" target="step-8-check-git-status"/>
+  </state>
+  <state id="step-8-check-git-status">
+    <onentry>
+      <log label="step" expr="'8'"/>
       <log label="operator" expr="'!CHECK-GIT-STATUS'"/>
       <log label="kind" expr="'VERIFICATION'"/>
       <log label="manual" expr="'T'"/>
       <log label="summary" expr="'Check repository status from SLY before staging.'"/>
     </onentry>
-    <transition event="done.step.7" target="step-8-commit-parser-documentation"/>
+    <transition event="done.step.8" target="step-9-commit-parser-documentation"/>
   </state>
-  <state id="step-8-commit-parser-documentation">
+  <state id="step-9-commit-parser-documentation">
     <onentry>
-      <log label="step" expr="'8'"/>
+      <log label="step" expr="'9'"/>
       <log label="operator" expr="'!COMMIT-PARSER-DOCUMENTATION'"/>
       <log label="kind" expr="'COMMIT'"/>
       <log label="manual" expr="'T'"/>
-      <log label="summary" expr="'Commit the examples and documentation page after inspection.'"/>
+      <log label="summary" expr="'Commit the plan, SCXML workflow, and linking HyperDoc page after inspection.'"/>
     </onentry>
-    <transition event="done.step.8" target="done"/>
+    <transition event="done.step.9" target="done"/>
   </state>
 
   <final id="done"/>
