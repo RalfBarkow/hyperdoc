@@ -137,6 +137,24 @@
                                        (:file "git-commit-equivalence")
                                        (:file "hyperdoc")))))
 
+(defsystem #:hyperdoc/shop3
+    :description "SHOP3-backed HTN planning layer for HyperDoc operations"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc
+                 #:shop3)
+    :components
+    ((:module "hyperdoc-shop3"
+      :serial t
+      :components
+      ((:file "package")
+       (:file "plan-objects")
+       (:file "hyperdoc-maintenance-domain")
+       (:file "examples")
+       (:file "views")))))
+
 (defsystem #:hyperdoc/scxml
     :description "SCXML parser and ANSI Common Lisp code generator for HyperDoc"
     :author "Ralf Barkow <ralf.barkow@me.com>"
