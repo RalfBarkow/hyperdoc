@@ -19,7 +19,8 @@
                   :serial t
                   :components ((:file "package")
                                (:file "core")
-                               (:file "defining")))))
+                               (:file "defining")
+                               (:file "links-in-code")))))
 
 (defsystem #:hyperdoc/topics
     :description "Inspectable authored topic registry for HyperDoc"
@@ -65,6 +66,36 @@
                   :serial t
                   :components ((:file "dmx-topics")))))
 
+(defsystem #:hyperdoc/checks
+    :description "In-image example and documentation validation checks for HyperDoc"
+    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :license  "BSD"
+    :version "0.0.1"
+    :homepage "https://codeberg.org/khinsen/hyperdoc"
+    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :serial t
+    :depends-on (#:hyperdoc/topics
+                 #:shasht)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "check-runner")
+                               (:file "example-core")
+                               (:file "journal-gate")
+                               (:file "validation")))))
+
+(defsystem #:hyperdoc/state-machines
+    :description "Reusable state-machine objects for HyperDoc workflows"
+    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :license  "BSD"
+    :version "0.0.1"
+    :homepage "https://codeberg.org/khinsen/hyperdoc"
+    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :serial t
+    :depends-on (#:hyperdoc/topics)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "state-machines")))))
+
 (defsystem #:hyperdoc
     :description "Hypertext documentation system"
     :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -73,23 +104,18 @@
     :homepage "https://codeberg.org/khinsen/hyperdoc"
     :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
     :serial t
-    :depends-on (#:hyperdoc/dmx-topics)
+    :depends-on (#:hyperdoc/topics
+                 #:hyperdoc/checks
+                 #:hyperdoc/state-machines)
     :in-order-to ((test-op (test-op "hyperdoc/tests")))
     :components ((:module "hyperdoc"
                           :serial t
                           :components ((:file "decision-maps")
-                                       (:file "localhost-fedwiki-page-pipeline")
-                                       (:file "collective-knowledge-slice")
-                                       (:file "reproducible-devenv-as-knowledge-artifact-slice")
-                                       (:file "localhost-fedwiki-page-promotion-plans")
                                        (:file "code-path-graphs")
                                        (:file "whyline-output-questions")
                                        (:file "skillization")
                                        (:file "mech-deployment-provenance")
                                        (:file "page-lookup-chunks")
-                                       (:file "state-machines")
-                                       (:file "scxml-runs")
-                                       (:file "scxml-architect")
                                        (:file "authored-relation-artifacts")
                                        (:file "page-lookup-issue-authored-source")
                                        (:file "page-lookup-issue-artifacts")
@@ -98,18 +124,7 @@
                                        (:file "iconic-retrieval")
                                        (:file "surfaces")
                                        (:file "boundaries")
-                                       (:file "links-in-code")
-                                       (:file "check-runner")
-                                       (:file "example-core")
-                                       (:file "journal-gate")
-                                       (:file "validation")
-                                       (:file "article-allegation-slice")
-                                       (:file "fedwiki-materialization")
                                        (:file "tools")
-                                       (:file "zotero-support")
-                                       (:file "bibliography-subcollections")
-                                       (:file "topic-enrichment-route-data")
-                                       (:file "topic-enrichment")
                                        (:file "static-route-observability")
                                        (:file "operational-targets")
                                        (:file "neo4j-duplicate-username-repair")
@@ -128,8 +143,7 @@
     :license "BSD"
     :version "0.0.1"
     :serial t
-    :depends-on (#:hyperdoc
-                 #:plump)
+    :depends-on (#:plump)
     :components ((:module "hyperdoc-scxml"
                           :serial t
                           :components ((:file "package")
@@ -140,6 +154,48 @@
                                        (:file "codegen-common-lisp")
                                        (:file "compiler")))))
 
+(defsystem #:hyperdoc/scxml-workflows
+    :description "SCXML-backed HyperDoc workflow run objects"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc
+                 #:hyperdoc/scxml
+                 #:hyperdoc/dmx-import
+                 #:hyperdoc/fedwiki)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "scxml-runs")
+                               (:file "scxml-architect")))))
+
+(defsystem #:hyperdoc/zotero-support
+    :description "Optional Zotero loading boundary and unavailable-backend objects"
+    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :license  "BSD"
+    :version "0.0.1"
+    :homepage "https://codeberg.org/khinsen/hyperdoc"
+    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :serial t
+    :depends-on (#:hyperdoc/topics)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "zotero-support")))))
+
+(defsystem #:hyperdoc/bibliography
+    :description "Bibliography subcollections and authoring plans for HyperDoc"
+    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :license  "BSD"
+    :version "0.0.1"
+    :homepage "https://codeberg.org/khinsen/hyperdoc"
+    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :serial t
+    :depends-on (#:hyperdoc/topics
+                 #:hyperdoc/zotero-support)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "bibliography-subcollections")))))
+
 (defsystem #:hyperdoc/zotero
     :description "Optional Zotero backend for HyperDoc"
     :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -148,11 +204,14 @@
     :homepage "https://codeberg.org/khinsen/hyperdoc"
     :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
     :serial t
-    :depends-on (#:hyperdoc)
+    :depends-on (#:hyperdoc/bibliography
+                 #:shasht)
     :components ((:module "hyperdoc"
                           :serial t
                           :components ((:file "zotero-bridge")
                                        (:file "bibliography-zotero")
+                                       (:file "topic-enrichment-route-data")
+                                       (:file "topic-enrichment")
                                        (:file "topic-enrichment-zotero")))))
 
 (defsystem #:hyperdoc/examples
@@ -235,6 +294,8 @@
     :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc
+                 #:hyperdoc/dmx-topics
+                 #:hyperdoc/state-machines
                  #:hyperbook/fedwiki
                  #:babel
                  #:cl-ppcre
@@ -245,10 +306,30 @@
                           :serial t
                           :components ((:file "dmx-import")
                                        (:file "topic-factory-snippet-dmx")
-                                       (:file "dmx-workspace-notes")
-                                       (:file "dmx-annotations")
                                        (:file "dmx-workspace-topics")
-                                       (:file "dmx-workspace-journal")))))
+                                       (:file "dmx-workspace-journal")
+                                       (:file "dmx-workspace-notes")
+                                       (:file "dmx-annotations")))))
+
+(defsystem #:hyperdoc/fedwiki
+    :description "FedWiki materialization, promotion, and slice tooling for HyperDoc"
+    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :license  "BSD"
+    :version "0.0.1"
+    :homepage "https://codeberg.org/khinsen/hyperdoc"
+    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :serial t
+    :depends-on (#:hyperdoc
+                 #:hyperbook/fedwiki
+                 #:shasht)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "localhost-fedwiki-page-pipeline")
+                               (:file "collective-knowledge-slice")
+                               (:file "reproducible-devenv-as-knowledge-artifact-slice")
+                               (:file "localhost-fedwiki-page-promotion-plans")
+                               (:file "article-allegation-slice")
+                               (:file "fedwiki-materialization")))))
 
 (defsystem #:hyperdoc/mcp
     :description "Streamable HTTP MCP server for the DMX shared workspace"
@@ -274,7 +355,11 @@
     :serial t
     :depends-on (#:hyperdoc
                  #:hyperdoc/scxml
+                 #:hyperdoc/scxml-workflows
                  #:hyperdoc/dmx-import
+                 #:hyperdoc/fedwiki
+                 #:hyperdoc/bibliography
+                 #:hyperdoc/zotero
                  #:hyperbook/server
                  #:hyperbook/wikipedia
                  #:html-inspector-views
@@ -332,6 +417,8 @@
     :serial t
     :depends-on (#:hyperdoc
                  #:hyperdoc/inspector
+                 #:hyperdoc/fedwiki
+                 #:hyperdoc/zotero
                  #:hyperbook/explorer
                  #:hyperbook/fedwiki
                  #:html-inspector-views

@@ -4,6 +4,11 @@
 
 (in-package :hyperdoc)
 
+;; Root HyperDoc keeps the inspectable DMX boundary vocabulary available without
+;; loading the DMX proxy/import systems.
+(defvar *dmx-context-window-workspace-id* 919815)
+(defvar *dmx-context-window-topicmap-id* 919822)
+
 (defclass boundary-definition ()
   ((id :reader id-of
        :initarg :id)
