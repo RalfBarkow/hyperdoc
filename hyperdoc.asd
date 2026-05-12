@@ -150,6 +150,7 @@
       :serial t
       :components
       ((:file "package")
+       (:file "manual-topics")
        (:file "plan-objects")
        (:file "hyperdoc-maintenance-domain")
        (:file "examples")

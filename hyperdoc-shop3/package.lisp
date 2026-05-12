@@ -20,6 +20,8 @@
    #:normalize-hyperdoc-plan
    #:hyperdoc-plan-checklist
    #:hyperdoc-plan-summary
+   #:*shop3-introduction-source-url*
+   #:parse-shop3-introduction-topics
    #:run-hyperdoc-asdf-refactor-plan-object
    #:*hyperdoc-asdf-refactor-plan-steps*
    #:*hyperdoc-asdf-refactor-checklist-fixture-pathname*
