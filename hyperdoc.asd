@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(defsystem #:hyperdoc
+(defsystem #:hyperdoc/kernel
     :description "Hypertext documentation system"
     :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
     :license  "BSD"
@@ -13,23 +13,77 @@
     :depends-on (#:hyperbook
                  #:alexandria
                  #:arrow-macros
-                 #:drakma
-                 #:shasht
                  #:asdf #:uiop
                  #:trivial-package-local-nicknames)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "package")
+                               (:file "core")
+                               (:file "defining")))))
+
+(defsystem #:hyperdoc/topics
+    :description "Inspectable authored topic registry for HyperDoc"
+    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :license  "BSD"
+    :version "0.0.1"
+    :homepage "https://codeberg.org/khinsen/hyperdoc"
+    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :serial t
+    :depends-on (#:hyperdoc/kernel)
+    :components ((:module "hyperdoc/topics"
+                  :serial t
+                  :components ((:file "registry")
+                               (:file "core-concepts")
+                               (:file "winston-horn")
+                               (:file "drew-mcdermott")
+                               (:file "asdf")
+                               (:file "generated-slices")
+                               (:file "runtime")
+                               (:file "surfaces")
+                               (:file "smalltalk-browser")
+                               (:file "capability-reference")
+                               (:file "hypercard-documentation")
+                               (:file "idiomatic-survey")
+                               (:file "identity-risk")
+                               (:file "civilian-harm")
+                               (:file "interaction-nets")
+                               (:file "source-stations")
+                               (:file "dm6-inline-proof")))))
+
+(defsystem #:hyperdoc/dmx-topics
+    :description "DMX-backed topic proxy objects for HyperDoc"
+    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :license  "BSD"
+    :version "0.0.1"
+    :homepage "https://codeberg.org/khinsen/hyperdoc"
+    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :serial t
+    :depends-on (#:hyperdoc/topics
+                 #:drakma
+                 #:shasht)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "dmx-topics")))))
+
+(defsystem #:hyperdoc
+    :description "Hypertext documentation system"
+    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :license  "BSD"
+    :version "0.0.1"
+    :homepage "https://codeberg.org/khinsen/hyperdoc"
+    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :serial t
+    :depends-on (#:hyperdoc/dmx-topics)
     :in-order-to ((test-op (test-op "hyperdoc/tests")))
     :components ((:module "hyperdoc"
                           :serial t
-                          :components ((:file "package")
-                                       (:file "core")
-                             (:file "decision-maps")
+                          :components ((:file "decision-maps")
                                        (:file "localhost-fedwiki-page-pipeline")
                                        (:file "collective-knowledge-slice")
                                        (:file "reproducible-devenv-as-knowledge-artifact-slice")
                                        (:file "localhost-fedwiki-page-promotion-plans")
                                        (:file "code-path-graphs")
                                        (:file "whyline-output-questions")
-                                       (:file "topics")
                                        (:file "skillization")
                                        (:file "mech-deployment-provenance")
                                        (:file "page-lookup-chunks")
@@ -45,7 +99,6 @@
                                        (:file "surfaces")
                                        (:file "boundaries")
                                        (:file "links-in-code")
-                                       (:file "defining")
                                        (:file "check-runner")
                                        (:file "example-core")
                                        (:file "journal-gate")
