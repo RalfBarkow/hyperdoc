@@ -1,0 +1,81 @@
+<h1>Parsing SHOP3 Introduction into Topics</h1>
+
+<in-package>hyperdoc/shop3</in-package>
+
+<p>
+  This page demonstrates the repo-local parser for turning the SHOP3 manual
+  Introduction into HyperDoc topic candidates. The parser is part of the
+  optional <tt>hyperdoc/shop3</tt> system and accepts the source URL as an
+  explicit keyword argument:
+</p>
+
+<pre>(parse-shop3-introduction-topics html
+                                 :source-url "https://shop-planner.github.io/#Introduction")</pre>
+
+<p>
+  The examples below are real HyperDoc examples. Each rendered
+  <tt>defexample</tt> form gets a <tt>►</tt> play button. Clicking the button
+  runs that example and opens the result in a new pane.
+</p>
+
+<h2>Implementation links</h2>
+
+<ul>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/manual-topics.lisp&quot;)'><tt>hyperdoc-shop3/manual-topics.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/examples.lisp&quot;)'><tt>hyperdoc-shop3/examples.lisp</tt></a></li>
+  <li><a expr='(ignore-errors (asdf:find-system :hyperdoc/shop3 nil))'><tt>:hyperdoc/shop3</tt> ASDF system</a></li>
+</ul>
+
+<h2>1. Show the explicit source URL</h2>
+
+<p>
+  This example returns the URL that will be passed as <tt>:source-url</tt>.
+</p>
+
+<source-of-function>shop3-introduction-source-url-example</source-of-function>
+
+<h2>2. Parse the Introduction fragment</h2>
+
+<p>
+  This example parses a compact local HTML fragment shaped like the SHOP3
+  manual Introduction. It does not perform network access. The URL is
+  provenance metadata supplied by the caller.
+</p>
+
+<source-of-function>shop3-introduction-parse-source-url-example</source-of-function>
+
+<h2>3. Verify source URL propagation</h2>
+
+<p>
+  This example checks that every generated topic carries the exact
+  <tt>:source-url</tt> supplied to the parser.
+</p>
+
+<source-of-function>shop3-introduction-topic-source-url-example</source-of-function>
+
+<h2>4. Summarize generated topic kinds</h2>
+
+<p>
+  This example summarizes the parser output as root chapter, concept topics,
+  and distinctive-characteristic topics.
+</p>
+
+<source-of-function>shop3-introduction-topic-kinds-example</source-of-function>
+
+<h2>Expected interpretation</h2>
+
+<p>
+  The parser produces plain Lisp topic plists. The first item is a
+  <tt>:source-chapter</tt> root topic. Paragraphs become <tt>:concept</tt>
+  topics. List items become <tt>:distinctive-characteristic</tt> topics.
+</p>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page='SHOP3 Introduction Topics'>SHOP3 Introduction Topics</a></li>
+  <li><a page='Using SHOP3 Planning in HyperDoc'>Using SHOP3 Planning in HyperDoc</a></li>
+  <li><a page='SHOP3 ASDF Refactor Plan Example'>SHOP3 ASDF Refactor Plan Example</a></li>
+  <li><a page='SHOP3 Planning API Reference'>SHOP3 Planning API Reference</a></li>
+  <li><a page='Writing source code pages'>Writing source code pages</a></li>
+</ul>
