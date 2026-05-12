@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="projection-pipeline-operator-plan"
+    initial="bootstrapOperatorPage">
+
+  <state id="bootstrapOperatorPage">
+    <onentry>
+      <log label="P0 bootstrap the shared operator HyperDoc page"/>
+    </onentry>
+    <transition event="PAGE.WRITTEN" target="operatorPageReady"/>
+  </state>
+
+  <state id="operatorPageReady">
+    <onentry>
+      <log label="Operator page exists and can be inspected"/>
+    </onentry>
+    <transition event="SCXML.REQUESTED" target="writeScxmlTrace"/>
+    <transition event="SHOP3.REQUESTED" target="writeShop3Plan"/>
+    <transition event="TEST.REQUESTED" target="writeSmokeTest"/>
+  </state>
+
+  <state id="writeScxmlTrace">
+    <onentry>
+      <log label="P1 write trace chart for annotation projection pipeline"/>
+    </onentry>
+    <transition event="SCXML.WRITTEN" target="scxmlTraceReady"/>
+  </state>
+
+  <state id="scxmlTraceReady">
+    <transition event="DRY_RUN" target="dryRunBlocked"/>
+    <transition event="ALLOW_MUTATION" target="mutationAllowed"/>
+  </state>
+
+  <state id="writeShop3Plan">
+    <onentry>
+      <log label="P3 write SHOP3 plan-only organizer"/>
+    </onentry>
+    <transition event="SHOP3.PLAN_READY" target="operatorPageReady"/>
+  </state>
+
+  <state id="writeSmokeTest">
+    <onentry>
+      <log label="P4 write focused non-mutating smoke test"/>
+    </onentry>
+    <transition event="TEST.WRITTEN" target="operatorPageReady"/>
+  </state>
+
+  <state id="dryRunBlocked" final="true">
+    <onentry>
+      <log label="Dry run reached non-mutating terminal state"/>
+    </onentry>
+  </state>
+
+  <state id="mutationAllowed">
+    <onentry>
+      <log label="Explicit live mutation guard accepted"/>
+    </onentry>
+    <transition event="LIVE.WRITE.OK" target="liveReadbackStarted"/>
+    <transition event="LIVE.WRITE.FAILED" target="verificationFailed"/>
+  </state>
+
+  <state id="liveReadbackStarted">
+    <transition event="READBACK.OK" target="verified"/>
+    <transition event="READBACK.FAILED" target="verificationFailed"/>
+  </state>
+
+  <state id="verified" final="true">
+    <onentry>
+      <log label="Projection pipeline verified by readback"/>
+    </onentry>
+  </state>
+
+  <state id="verificationFailed" final="true">
+    <onentry>
+      <log label="Projection pipeline verification failed"/>
+    </onentry>
+  </state>
+</scxml>
