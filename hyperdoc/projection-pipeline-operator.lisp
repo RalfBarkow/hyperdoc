@@ -1,50 +1,20 @@
-(defpackage :projection-pipeline-operator
-  (:use :cl)
-  (:nicknames :ppipe)
-  (:export
-   #:*topic-id*
-   #:*workspace-id*
-   #:*topicmap-id*
-   #:*current-coordinate*
-   #:operator-plan
-   #:current-coordinate
-   #:goto-coordinate
-   #:operator-status
-   #:shop3-plan-fixture
-   #:scxml-dry-run-trace
-   #:artifact-paths
-   #:root-path
-   #:write-text-file
-   #:write-operator-scxml
-   #:write-operator-page
-   #:bootstrap-operator-page
-   #:reload-operator-page
-   #:find-operator-page
-   #:resolve-artifact
-   #:inspect-operator-page
-   #:inspect-operator-plan
-   #:inspect-operator-status
-   #:inspect-current-artifact
-   #:inspect-scxml-dry-run-trace
-   #:inspect-shop3-plan-fixture))
+(in-package :hyperdoc)
 
-(in-package :ppipe)
+(defparameter *projection-pipeline-operator-topic-id* 968855)
+(defparameter *projection-pipeline-operator-workspace-id* 919815)
+(defparameter *projection-pipeline-operator-topicmap-id* 919822)
+(defparameter *projection-pipeline-operator-current-coordinate* :p0)
 
-(defparameter *topic-id* 968855)
-(defparameter *workspace-id* 919815)
-(defparameter *topicmap-id* 919822)
-(defparameter *current-coordinate* :p0)
-
-(defparameter *operator-page-title*
+(defparameter *projection-pipeline-operator-page-title*
   "Projection Pipeline Operator Plan")
 
-(defparameter *operator-page-relative-path*
+(defparameter *projection-pipeline-operator-page-relative-path*
   "hyperdoc/Projection Pipeline Operator Plan.html")
 
-(defparameter *operator-scxml-relative-path*
+(defparameter *projection-pipeline-operator-scxml-relative-path*
   "hyperdoc/projection-pipeline-operator-plan.scxml")
 
-(defparameter *steps*
+(defparameter *projection-pipeline-operator-steps*
   '((:id :p0
      :title "Bootstrap operator page"
      :status :active
@@ -58,8 +28,8 @@
     (:id :p2
      :title "Add clickable examples"
      :status :pending
-     :purpose "Expose demo annotation, dry-run plan, SCXML trace, and SHOP3 plan objects."
-     :artifact "projection-pipeline-operator package")
+     :purpose "Expose demo annotation, dry-run report, trace, and plan objects."
+     :artifact "projection-pipeline-operator runtime functions")
     (:id :p3
      :title "Add SHOP3 plan"
      :status :pending
@@ -81,11 +51,11 @@
      :purpose "Run only with explicit live-test environment and mutation guard."
      :artifact "manual SLY mREPL run")))
 
-(defun root-path (relative)
+(defun projection-pipeline-root-path (relative)
   (asdf:system-relative-pathname :hyperdoc relative))
 
-(defun write-text-file (relative text)
-  (let ((path (root-path relative)))
+(defun projection-pipeline-write-text-file (relative text)
+  (let ((path (projection-pipeline-root-path relative)))
     (ensure-directories-exist path)
     (with-open-file (stream path
                             :direction :output
@@ -93,84 +63,69 @@
                             :if-does-not-exist :create
                             :external-format :utf-8)
       (write-string text stream))
-    (format t "~&Wrote ~A~%" path)
     path))
 
-(defun current-coordinate ()
-  (find *current-coordinate* *steps*
+(defun projection-pipeline-operator-current-coordinate ()
+  (find *projection-pipeline-operator-current-coordinate*
+        *projection-pipeline-operator-steps*
         :key (lambda (step) (getf step :id))))
 
-(defun operator-plan ()
-  (list :topic-id *topic-id*
-        :workspace-id *workspace-id*
-        :topicmap-id *topicmap-id*
-        :current-coordinate *current-coordinate*
-        :default-mode :dry-run
-        :mutation-allowed nil
-        :steps *steps*))
+(defun projection-pipeline-operator-artifact-paths ()
+  (list :operator-page
+        (projection-pipeline-root-path
+         *projection-pipeline-operator-page-relative-path*)
+        :operator-scxml
+        (projection-pipeline-root-path
+         *projection-pipeline-operator-scxml-relative-path*)
+        :smoke-test
+        (projection-pipeline-root-path
+         "tests/projection-pipeline-dmx-annotation-smoke.lisp")
+        :shop3-plan
+        (projection-pipeline-root-path
+         "hyperdoc-shop3/projection-pipeline-dmx-annotation-plan.sexp")))
 
-(defun goto-coordinate (coordinate)
-  (unless (find coordinate *steps*
-                :key (lambda (step) (getf step :id)))
-    (error "Unknown projection pipeline coordinate: ~S" coordinate))
-  (setf *current-coordinate* coordinate)
-  (ppipe:operator-status))
+(defun projection-pipeline-operator-scxml-path ()
+  (projection-pipeline-root-path
+   *projection-pipeline-operator-scxml-relative-path*))
 
-(defun artifact-paths ()
-  (list :operator-page (root-path *operator-page-relative-path*)
-        :operator-scxml (ppipe:root-path ppipe::*operator-scxml-relative-path*)
-        :smoke-test (root-path "tests/projection-pipeline-dmx-annotation-smoke.lisp")
-        :shop3-plan (root-path "hyperdoc-shop3/projection-pipeline-dmx-annotation-plan.sexp")))
+(defun projection-pipeline-operator-page-object (&key (signal-error? nil))
+  (when (and (boundp '*hyperdoc*) *hyperdoc*)
+    (hyperbook:find-page *hyperdoc*
+                         *projection-pipeline-operator-page-title*
+                         :signal-error? signal-error?)))
 
-(defun find-operator-page (&key (reload t) (signal-error? t))
-  "Return the HyperDoc HTML page object for the operator plan page."
-  (when reload
-    (hyperdoc::reload-text-pages hyperdoc::*hyperdoc*))
-  (hyperbook:find-page hyperdoc::*hyperdoc*
-                       *operator-page-title*
-                       :signal-error? signal-error?))
-
-(defun resolve-artifact (artifact)
-  "Resolve an operator artifact designator to an inspectable object.
-
-For the operator HTML page, return the HyperDoc page object, not the
-artifact path string. That gives the CLOG inspector the page Content/Source
-views instead of a simple-character-string view."
+(defun projection-pipeline-operator-resolve-artifact (artifact)
   (cond
     ((null artifact)
      nil)
-
     ((and (stringp artifact)
-          (string= artifact *operator-page-relative-path*))
-     (find-operator-page :reload t :signal-error? t))
-
+          (string= artifact *projection-pipeline-operator-page-relative-path*))
+     (or (projection-pipeline-operator-page-object :signal-error? nil)
+         (projection-pipeline-root-path artifact)))
     ((and (stringp artifact)
-          (string= artifact *operator-scxml-relative-path*))
-     (root-path artifact))
-
+          (string= artifact *projection-pipeline-operator-scxml-relative-path*))
+     (projection-pipeline-root-path artifact))
     ((stringp artifact)
-     (let ((path (root-path artifact)))
-       (or (probe-file path)
-           artifact)))
+     (let ((path (projection-pipeline-root-path artifact)))
+       (or (probe-file path) artifact)))
+    (t
+     artifact)))
 
-    (t artifact)))
-
-(defun operator-status ()
-  "Return current coordinate with :ARTIFACT as an inspectable object."
-  (let* ((coordinate (current-coordinate))
-         (artifact-label (getf coordinate :artifact))
-         (artifact-object (resolve-artifact artifact-label)))
-    (list :coordinate *current-coordinate*
+(defun projection-pipeline-operator-status ()
+  (let* ((coordinate (projection-pipeline-operator-current-coordinate))
+         (artifact-label (getf coordinate :artifact)))
+    (list :coordinate *projection-pipeline-operator-current-coordinate*
           :title (getf coordinate :title)
           :purpose (getf coordinate :purpose)
-          :artifact artifact-object
+          :artifact
+          (projection-pipeline-operator-resolve-artifact artifact-label)
           :artifact-label artifact-label
-          :topic-id *topic-id*
-          :workspace-id *workspace-id*
-          :topicmap-id *topicmap-id*
+          :topic-id *projection-pipeline-operator-topic-id*
+          :workspace-id *projection-pipeline-operator-workspace-id*
+          :topicmap-id *projection-pipeline-operator-topicmap-id*
           :next-action
-          (case *current-coordinate*
-            (:p0 "Inspect :ARTIFACT; it should open the HyperDoc HTML page object.")
+          (case *projection-pipeline-operator-current-coordinate*
+            (:p0 "Inspect :ARTIFACT; it should open the HyperDoc HTML page object when available.")
             (:p1 "Add or inspect the SCXML trace.")
             (:p2 "Add concrete clickable demo examples.")
             (:p3 "Replace the static SHOP3 fixture with a real plan object.")
@@ -179,8 +134,27 @@ views instead of a simple-character-string view."
             (:p6 "Run live write/readback only with explicit guards.")
             (otherwise "Inspect operator plan.")))))
 
-(defun shop3-plan-fixture ()
-  "Plan-only SHOP3-shaped fixture. This is intentionally not an executor."
+(defun projection-pipeline-operator-plan ()
+  (list :topic-id *projection-pipeline-operator-topic-id*
+        :workspace-id *projection-pipeline-operator-workspace-id*
+        :topicmap-id *projection-pipeline-operator-topicmap-id*
+        :current-coordinate *projection-pipeline-operator-current-coordinate*
+        :default-mode :dry-run
+        :mutation-allowed nil
+        :steps *projection-pipeline-operator-steps*))
+
+(defun projection-pipeline-scxml-dry-run-trace ()
+  (list :kind :scxml-dry-run-trace
+        :chart *projection-pipeline-operator-scxml-relative-path*
+        :events
+        '((:state "bootstrapOperatorPage" :event "PAGE.WRITTEN")
+          (:state "operatorPageReady" :event "SCXML.REQUESTED")
+          (:state "writeScxmlTrace" :event "SCXML.WRITTEN")
+          (:state "scxmlTraceReady" :event "DRY_RUN")
+          (:state "dryRunBlocked" :final t))
+        :mutation-performed nil))
+
+(defun projection-pipeline-shop3-plan-fixture ()
   (list :kind :shop3-plan-fixture
         :execution-mode :plan-only
         :task '(:ensure-projection-pipeline-demonstration 968855)
@@ -195,65 +169,9 @@ views instead of a simple-character-string view."
           (!optionally-run-guarded-live-dmx-write)
           (!publish-verification-report))))
 
-(defun scxml-dry-run-trace ()
-  (list :kind :scxml-dry-run-trace
-        :chart *operator-scxml-relative-path*
-        :events
-        '((:state "bootstrapOperatorPage" :event "PAGE.WRITTEN")
-          (:state "operatorPageReady" :event "SCXML.REQUESTED")
-          (:state "writeScxmlTrace" :event "SCXML.WRITTEN")
-          (:state "scxmlTraceReady" :event "DRY_RUN")
-          (:state "dryRunBlocked" :final t))
-        :mutation-performed nil))
-
-(defun ensure-clog-inspector-loaded ()
-  (handler-case
-      (progn
-        (asdf:load-system :hyperdoc/inspector)
-        t)
-    (error (condition)
-      (format t "~&Could not load :hyperdoc/inspector: ~A~%" condition)
-      nil)))
-
-(defun clog-inspect-object (object)
-  "Open OBJECT in the CLOG moldable inspector."
-  (ensure-clog-inspector-loaded)
-  (clog-moldable-inspector:clog-inspect :object object))
-
-(defun reload-operator-page ()
-  "Reload HyperDoc text pages and return the operator page object."
-  (find-operator-page :reload t :signal-error? t))
-
-(defun inspect-current-artifact ()
-  "Inspect the resolved artifact for the current coordinate."
-  (let* ((coordinate (current-coordinate))
-         (artifact (resolve-artifact (getf coordinate :artifact))))
-    (clog-inspect-object artifact)
-    artifact))
-
-(defun inspect-operator-page ()
-  "Open the operator HyperDoc page object in the CLOG inspector."
-  (clog-inspect-object (find-operator-page :reload t :signal-error? t)))
-
-(defun inspect-operator-plan ()
-  "Open the current operator plan object in the CLOG inspector."
-  (clog-inspect-object (ppipe:operator-plan)))
-
-(defun inspect-operator-status ()
-  "Open the current coordinate/status object in the CLOG inspector."
-  (clog-inspect-object (ppipe:operator-status)))
-
-(defun inspect-scxml-dry-run-trace ()
-  "Open the dry-run trace object in the CLOG inspector."
-  (clog-inspect-object (ppipe:scxml-dry-run-trace)))
-
-(defun inspect-shop3-plan-fixture ()
-  "Open the current SHOP3-shaped plan fixture in the CLOG inspector."
-  (clog-inspect-object (ppipe:shop3-plan-fixture)))
-
-(defun write-operator-scxml ()
-  (write-text-file
-   *operator-scxml-relative-path*
+(defun write-projection-pipeline-operator-scxml ()
+  (projection-pipeline-write-text-file
+   *projection-pipeline-operator-scxml-relative-path*
    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <scxml
     xmlns=\"http://www.w3.org/2005/07/scxml\"
@@ -336,12 +254,12 @@ views instead of a simple-character-string view."
 </scxml>
 "))
 
-(defun write-operator-page ()
-  (write-text-file
-   *operator-page-relative-path*
+(defun write-projection-pipeline-operator-page ()
+  (projection-pipeline-write-text-file
+   *projection-pipeline-operator-page-relative-path*
    "<h1>Projection Pipeline Operator Plan</h1>
 
-<in-package>projection-pipeline-operator</in-package>
+<in-package>hyperdoc</in-package>
 
 <p>
   This page is the shared operator surface for topic <tt>968855</tt>. It is
@@ -352,9 +270,9 @@ views instead of a simple-character-string view."
 <h2>Current coordinate</h2>
 
 <ul>
-  <li><a expr=\"(ppipe:operator-status)\"><tt>Current operator status</tt></a></li>
-  <li><a expr=\"(ppipe:operator-plan)\"><tt>Full operator plan</tt></a></li>
-  <li><a expr=\"(ppipe:artifact-paths)\"><tt>Artifact paths</tt></a></li>
+  <li><a expr=\"(hyperdoc::projection-pipeline-operator-status)\"><tt>Current operator status</tt></a></li>
+  <li><a expr=\"(hyperdoc::projection-pipeline-operator-plan)\"><tt>Full operator plan</tt></a></li>
+  <li><a expr=\"(hyperdoc::projection-pipeline-operator-artifact-paths)\"><tt>Artifact paths</tt></a></li>
 </ul>
 
 <h2>Coordinates</h2>
@@ -363,7 +281,7 @@ views instead of a simple-character-string view."
   <tr><th>Coordinate</th><th>Topic</th><th>Purpose</th><th>Expected artifact</th></tr>
   <tr><td><tt>P0</tt></td><td>Bootstrap operator page</td><td>Create this page first so all later work has a shared surface.</td><td><tt>hyperdoc/Projection Pipeline Operator Plan.html</tt></td></tr>
   <tr><td><tt>P1</tt></td><td>SCXML trace</td><td>Track the state-machine route for dry-run and live guarded paths.</td><td><tt>hyperdoc/projection-pipeline-operator-plan.scxml</tt></td></tr>
-  <tr><td><tt>P2</tt></td><td>Clickable examples</td><td>Expose demo annotation, dry-run report, trace, and plan objects.</td><td><tt>projection-pipeline-operator</tt> functions</td></tr>
+  <tr><td><tt>P2</tt></td><td>Clickable examples</td><td>Expose demo annotation, dry-run report, trace, and plan objects.</td><td><tt>hyperdoc</tt> runtime functions</td></tr>
   <tr><td><tt>P3</tt></td><td>SHOP3 plan</td><td>Use SHOP3 as a plan-only organizer, not an executor.</td><td><tt>hyperdoc-shop3/projection-pipeline-dmx-annotation-plan.sexp</tt></td></tr>
   <tr><td><tt>P4</tt></td><td>Focused smoke test</td><td>Verify the page, SCXML trace, examples, and plan objects.</td><td><tt>tests/projection-pipeline-dmx-annotation-smoke.lisp</tt></td></tr>
   <tr><td><tt>P5</tt></td><td>Memory-client readback</td><td>Demonstrate annotation write/readback without live HTTP mutation.</td><td>Focused smoke-test extension</td></tr>
@@ -373,14 +291,14 @@ views instead of a simple-character-string view."
 <h2>SCXML trace</h2>
 
 <ul>
-  <li><a expr=\"(ppipe:scxml-dry-run-trace)\"><tt>Dry-run SCXML trace object</tt></a></li>
-  <li><a expr=\"(ppipe:root-path ppipe::*operator-scxml-relative-path*)\"><tt>SCXML file pathname</tt></a></li>
+  <li><a expr=\"(hyperdoc::projection-pipeline-scxml-dry-run-trace)\"><tt>Dry-run SCXML trace object</tt></a></li>
+  <li><a expr=\"(hyperdoc::projection-pipeline-operator-scxml-path)\"><tt>SCXML file pathname</tt></a></li>
 </ul>
 
 <h2>SHOP3 plan-only organizer</h2>
 
 <ul>
-  <li><a expr=\"(ppipe:shop3-plan-fixture)\"><tt>SHOP3-shaped plan fixture</tt></a></li>
+  <li><a expr=\"(hyperdoc::projection-pipeline-shop3-plan-fixture)\"><tt>SHOP3-shaped plan fixture</tt></a></li>
 </ul>
 
 <h2>DMX target coordinates</h2>
@@ -414,12 +332,7 @@ views instead of a simple-character-string view."
 </ul>
 "))
 
-(defun bootstrap-operator-page ()
-  "Create the operator artifacts, reload the page, and open it in CLOG inspector."
-  (write-operator-scxml)
-  (write-operator-page)
-  (setf *current-coordinate* :p0)
-  (let ((page (reload-operator-page)))
-    (format t "~&Bootstrapped operator page: ~A~%" page)
-    (clog-inspect-object page)
-    page))
+(defun bootstrap-projection-pipeline-operator-page ()
+  (write-projection-pipeline-operator-scxml)
+  (write-projection-pipeline-operator-page)
+  (projection-pipeline-operator-status))

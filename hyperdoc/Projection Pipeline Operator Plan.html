@@ -1,6 +1,6 @@
 <h1>Projection Pipeline Operator Plan</h1>
 
-<in-package>projection-pipeline-operator</in-package>
+<in-package>hyperdoc</in-package>
 
 <p>
   This page is the shared operator surface for topic <tt>968855</tt>. It is
@@ -11,9 +11,9 @@
 <h2>Current coordinate</h2>
 
 <ul>
-  <li><a expr="(ppipe:operator-status)"><tt>Current operator status</tt></a></li>
-  <li><a expr="(ppipe:operator-plan)"><tt>Full operator plan</tt></a></li>
-  <li><a expr="(ppipe:artifact-paths)"><tt>Artifact paths</tt></a></li>
+  <li><a expr="(hyperdoc::projection-pipeline-operator-status)"><tt>Current operator status</tt></a></li>
+  <li><a expr="(hyperdoc::projection-pipeline-operator-plan)"><tt>Full operator plan</tt></a></li>
+  <li><a expr="(hyperdoc::projection-pipeline-operator-artifact-paths)"><tt>Artifact paths</tt></a></li>
 </ul>
 
 <h2>Coordinates</h2>
@@ -22,7 +22,7 @@
   <tr><th>Coordinate</th><th>Topic</th><th>Purpose</th><th>Expected artifact</th></tr>
   <tr><td><tt>P0</tt></td><td>Bootstrap operator page</td><td>Create this page first so all later work has a shared surface.</td><td><tt>hyperdoc/Projection Pipeline Operator Plan.html</tt></td></tr>
   <tr><td><tt>P1</tt></td><td>SCXML trace</td><td>Track the state-machine route for dry-run and live guarded paths.</td><td><tt>hyperdoc/projection-pipeline-operator-plan.scxml</tt></td></tr>
-  <tr><td><tt>P2</tt></td><td>Clickable examples</td><td>Expose demo annotation, dry-run report, trace, and plan objects.</td><td><tt>projection-pipeline-operator</tt> functions</td></tr>
+  <tr><td><tt>P2</tt></td><td>Clickable examples</td><td>Expose demo annotation, dry-run report, trace, and plan objects.</td><td><tt>hyperdoc</tt> runtime functions</td></tr>
   <tr><td><tt>P3</tt></td><td>SHOP3 plan</td><td>Use SHOP3 as a plan-only organizer, not an executor.</td><td><tt>hyperdoc-shop3/projection-pipeline-dmx-annotation-plan.sexp</tt></td></tr>
   <tr><td><tt>P4</tt></td><td>Focused smoke test</td><td>Verify the page, SCXML trace, examples, and plan objects.</td><td><tt>tests/projection-pipeline-dmx-annotation-smoke.lisp</tt></td></tr>
   <tr><td><tt>P5</tt></td><td>Memory-client readback</td><td>Demonstrate annotation write/readback without live HTTP mutation.</td><td>Focused smoke-test extension</td></tr>
@@ -32,14 +32,14 @@
 <h2>SCXML trace</h2>
 
 <ul>
-  <li><a expr="(ppipe:scxml-dry-run-trace)"><tt>Dry-run SCXML trace object</tt></a></li>
-  <li><a expr="(ppipe:root-path ppipe::*operator-scxml-relative-path*)"><tt>SCXML file pathname</tt></a></li>
+  <li><a expr="(hyperdoc::projection-pipeline-scxml-dry-run-trace)"><tt>Dry-run SCXML trace object</tt></a></li>
+  <li><a expr="(hyperdoc::projection-pipeline-operator-scxml-path)"><tt>SCXML file pathname</tt></a></li>
 </ul>
 
 <h2>SHOP3 plan-only organizer</h2>
 
 <ul>
-  <li><a expr="(ppipe:shop3-plan-fixture)"><tt>SHOP3-shaped plan fixture</tt></a></li>
+  <li><a expr="(hyperdoc::projection-pipeline-shop3-plan-fixture)"><tt>SHOP3-shaped plan fixture</tt></a></li>
 </ul>
 
 <h2>DMX target coordinates</h2>

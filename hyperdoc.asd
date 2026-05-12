@@ -135,7 +135,8 @@
                                        (:file "git-relations")
                                        (:file "relation-topic-proposals")
                                        (:file "git-commit-equivalence")
-                                       (:file "hyperdoc")))))
+                                       (:file "hyperdoc")
+                             (:file "projection-pipeline-operator")))))
 
 (defsystem #:hyperdoc/shop3
     :description "SHOP3-backed HTN planning layer for HyperDoc operations"
