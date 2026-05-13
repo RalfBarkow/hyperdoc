@@ -3,8 +3,28 @@
 
 <link rel='stylesheet' href='/assets/dm6-elm/hyperdoc-dm6-inline.css'>
 
-<p>This page verifies the stable dm6 embedding seam: <code>Elm.AppEmbed.init({ node, flags: { slug, stored } })</code>.</p>
-<p>The dm6 topic map below is treated as an embedded application island. When the pointer is inside the island, HyperDoc overlays should become passive and evidence remains collapsed by default.</p>
+<p>
+  This page verifies the stable dm6 embedding contract:
+  <code>Elm.AppEmbed.init({ node, flags: { slug, stored } })</code>.
+  It treats dm6-elm as an embedded application island and records evidence
+  from boot, ports, stage snapshots, and semantic AppEmbed events.
+</p>
+
+<h2>Goal</h2>
+
+<p>
+  Show that HyperDoc can host dm6-elm through <code>AppEmbed</code> without
+  depending on internal dm6 modules, while making the embedded app's effects
+  visible as an ordered evidence timeline.
+</p>
+
+<h2>Starting situation</h2>
+
+<p>
+  The embedded bundle is loaded from <code>/assets/dm6-elm/app.js</code>. The
+  page supplies a stable slug and a clear <code>{}</code> stored-model fallback
+  so a stale native model cannot masquerade as valid dm6 state.
+</p>
 
 <section class='dm6-hyperdoc-map dm6-island' data-dm6-slug='dm6-hyperdoc-inline-proof' data-dm6-bundle='/assets/dm6-elm/app.js'>
   <header class='dm6-island-header'>
@@ -30,11 +50,11 @@
     <div class='dm6-stage'>dm6 AppEmbed mount pending...</div>
   </div>
   <div class='dm6-success-card'>
-    <div><strong class='dm6-mount-summary'>dm6 mounting…</strong><br>Try: click a topic, drag a topic, then inspect emitted events.</div>
+    <div><strong class='dm6-mount-summary'>dm6 mounting...</strong><br>Try: click a topic, drag a topic, then inspect emitted events.</div>
     <div><b>Status:</b> <span class='dm6-status'>not mounted</span></div>
   </div>
   <details class='dm6-evidence-drawer'>
-    <summary>Evidence: <span class='dm6-evidence-count'>0</span> events · last: <span class='dm6-evidence-last'>none</span></summary>
+    <summary>Evidence: <span class='dm6-evidence-count'>0</span> events - last: <span class='dm6-evidence-last'>none</span></summary>
     <div class='dm6-evidence-panel'>
       <div class='dm6-evidence-actions'>
         <button type='button' data-dm6-evidence-copy>Copy JSON</button>
@@ -45,156 +65,74 @@
       <pre class='dm6-evidence-summary'>{}</pre>
       <h3>Raw events</h3>
       <pre class='dm6-evidence'></pre>
+      <h3>Stored model supplied to AppEmbed</h3>
+      <pre class='dm6-stored-visible'>{}</pre>
     </div>
   </details>
-  <script type='application/json' class='dm6-stored'>{
-    "items": [
-      {
-        "topic": {
-          "id": 0,
-          "icon": "",
-          "text": "Home",
-          "size": {
-            "view": { "w": 0, "h": 0 },
-            "editor": { "w": 0, "h": 0 }
-          },
-          "assocIds": [2,4,6,8]
-        }
-      },
-      {
-        "topic": {
-          "id": 1,
-          "icon": "",
-          "text": "A",
-          "size": {
-            "view": { "w": 128, "h": 37 },
-            "editor": { "w": 128, "h": 37 }
-          },
-          "assocIds": [2]
-        }
-      },
-      {
-        "assoc": {
-          "id": 2,
-          "type": "Hierarchy",
-          "player1": 0,
-          "player2": 1,
-          "assocIds": []
-        }
-      },
-      {
-        "topic": {
-          "id": 3,
-          "icon": "",
-          "text": "B",
-          "size": {
-            "view": { "w": 128, "h": 37 },
-            "editor": { "w": 128, "h": 37 }
-          },
-          "assocIds": [4]
-        }
-      },
-      {
-        "assoc": {
-          "id": 4,
-          "type": "Hierarchy",
-          "player1": 0,
-          "player2": 3,
-          "assocIds": []
-        }
-      },
-      {
-        "topic": {
-          "id": 5,
-          "icon": "",
-          "text": "C",
-          "size": {
-            "view": { "w": 128, "h": 37 },
-            "editor": { "w": 128, "h": 37 }
-          },
-          "assocIds": [6]
-        }
-      },
-      {
-        "assoc": {
-          "id": 6,
-          "type": "Hierarchy",
-          "player1": 0,
-          "player2": 5,
-          "assocIds": []
-        }
-      },
-      {
-        "topic": {
-          "id": 7,
-          "icon": "",
-          "text": "D",
-          "size": {
-            "view": { "w": 128, "h": 37 },
-            "editor": { "w": 128, "h": 37 }
-          },
-          "assocIds": [8]
-        }
-      },
-      {
-        "assoc": {
-          "id": 8,
-          "type": "Hierarchy",
-          "player1": 0,
-          "player2": 7,
-          "assocIds": []
-        }
-      }
-    ],
-    "boxes": [
-      {
-        "id": 0,
-        "rect": { "x1": 0, "y1": 0, "x2": 900, "y2": 520 },
-        "scroll": { "x": 0, "y": 0 },
-        "items": [
-          {
-            "id": 1,
-            "boxAssocId": 2,
-            "visibility": "Visible",
-            "topicProps": {
-              "pos": { "x": 120, "y": 80 },
-              "display": "Detail"
-            }
-          },
-          {
-            "id": 3,
-            "boxAssocId": 4,
-            "visibility": "Visible",
-            "topicProps": {
-              "pos": { "x": 320, "y": 80 },
-              "display": "Detail"
-            }
-          },
-          {
-            "id": 5,
-            "boxAssocId": 6,
-            "visibility": "Visible",
-            "topicProps": {
-              "pos": { "x": 120, "y": 220 },
-              "display": "Detail"
-            }
-          },
-          {
-            "id": 7,
-            "boxAssocId": 8,
-            "visibility": "Visible",
-            "topicProps": {
-              "pos": { "x": 320, "y": 220 },
-              "display": "Detail"
-            }
-          }
-        ]
-      }
-    ],
-    "boxId": 0,
-    "nextId": 9
-  }</script>
+  <script type='application/json' class='dm6-stored'>{}</script>
 </section>
+
+<h2>Step 1: Boot the embedded app</h2>
+
+<p><b>Click:</b> open this page and let the dm6 island mount.</p>
+<p><b>Observe:</b> the status changes from <code>not mounted</code> to a mounted slug, and the evidence count increases.</p>
+<p><b>Why this matters:</b> HyperDoc is booting <code>window.Elm.AppEmbed</code> as a <code>Browser.element</code> with string flags only.</p>
+
+<h2>Step 2: Inspect the evidence drawer</h2>
+
+<p><b>Click:</b> press the <code>Evidence</code> control.</p>
+<p><b>Observe:</b> the summary lists mount, bundle, init, ports, stage snapshots, and any semantic AppEmbed port events.</p>
+<p><b>Why this matters:</b> the page turns embedding effects into inspectable values instead of relying on console output.</p>
+
+<h2>Step 3: Mutate or navigate inside dm6</h2>
+
+<p><b>Click:</b> interact with the dm6 canvas by selecting or dragging when topics are present.</p>
+<p><b>Observe:</b> AppEmbed evidence events such as selection, drag, cross, box change, and store snapshots appear when emitted by the bundle.</p>
+<p><b>Why this matters:</b> the timeline records dm6 model transitions at the embedding boundary without forking the dm6 architecture.</p>
+
+<h2>Evaluation: elm-pages Effects as Data</h2>
+
+<p>
+  elm-pages' insight transfers well because dm6-elm's embedding boundary also
+  turns effects into values. The dm6 equivalents of elm-pages framework state
+  are AppEmbed flags, FedWiki stored JSON, decoded model state, ports, input
+  events, semantic evidence records, and store snapshots.
+</p>
+
+<p>
+  The immediate target is not a full elm-pages-style test runner. The immediate
+  target is an inspectable evidence timeline in HyperDoc. A future replay,
+  fork, or time-travel debugger becomes plausible after the event grammar and
+  deterministic snapshot rules stabilize.
+</p>
+
+<h2>Expected result</h2>
+
+<p>
+  The proof succeeds when the page loads <code>/assets/dm6-elm/app.js</code>,
+  exports <code>Elm.AppEmbed</code>, mounts with <code>slug</code> and
+  <code>stored</code> as strings, and appends visible evidence records while
+  dispatching <code>hyperdoc:dm6-evidence</code> custom events.
+</p>
+
+<h2>Boundary</h2>
+
+<p>
+  HyperDoc owns the host page, evidence adapter, and visible proof timeline.
+  dm6-elm owns the product model, update function, view, and ports. The stable
+  integration boundary is <code>AppEmbed</code>; this page must not depend on
+  retired internal modules or create a second Elm app.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="elm-pages Effects as Data"><tt>elm-pages Effects as Data</tt></a></li>
+  <li><a hyperbook="topics" page="DM6 embedded evidence timeline"><tt>DM6 embedded evidence timeline</tt></a></li>
+  <li><a hyperbook="topics" page="DM6 AppEmbed contract boundary"><tt>DM6 AppEmbed contract boundary</tt></a></li>
+  <li><a hyperbook="topics" page="dm6-elm and elm-pages debugger comparison"><tt>dm6-elm and elm-pages debugger comparison</tt></a></li>
+  <li><a hyperbook="topics" page="DM6 AppEmbed HyperDoc inline proof milestone"><tt>DM6 AppEmbed HyperDoc inline proof milestone</tt></a></li>
+</ul>
 
 <script src='/assets/dm6-elm/hyperdoc-dm6-inline.js'></script>
 <script>window.hyperdocDm6Inline && window.hyperdocDm6Inline.mountAll(document);</script>

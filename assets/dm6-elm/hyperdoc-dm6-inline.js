@@ -32,6 +32,7 @@
         lastSemanticKind: null
       };
     }
+    root.dm6Evidence = root._dm6EvidenceState.events;
     return root._dm6EvidenceState;
   }
 
@@ -98,6 +99,10 @@
 
     state.events.push(record);
     renderEvidence(root);
+    root.dispatchEvent(new CustomEvent('hyperdoc:dm6-evidence', {
+      bubbles: true,
+      detail: record
+    }));
     return record;
   }
 
