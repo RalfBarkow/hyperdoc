@@ -1,0 +1,46 @@
+<h1>Debug SHOP3 find-plans</h1>
+
+<in-package>shop3-find-plans-debug</in-package>
+
+<p>This page is intentionally loaded without <tt>:hyperdoc/shop3</tt>. The failing boundary is ASDF resolving <tt>#:shop3</tt>, so every SHOP3 probe here is late-bound.</p>
+
+<h2>Environment</h2>
+<ul>
+  <li><a expr='(environment-report)'><tt>environment-report</tt></a></li>
+  <li><a expr='(try-load-shop3)'><tt>try-load-shop3</tt></a></li>
+  <li><a expr='(shop3-available-p)'><tt>shop3-available-p</tt></a></li>
+</ul>
+
+<h2>Tracing</h2>
+<ul>
+  <li><a expr='(trace-find-plans)'><tt>TRACE SHOP3:FIND-PLANS</tt></a></li>
+  <li><a expr='(untrace-find-plans)'><tt>UNTRACE SHOP3:FIND-PLANS</tt></a></li>
+</ul>
+
+<h2>Planner call once SHOP3 is available</h2>
+<pre>(shop3-find-plans-debug:call-find-plans
+ 'hyperdoc-asdf-refactor-001
+ :which :first
+ :verbose 0
+ :plan-tree t)</pre>
+
+<ul>
+  <li><a expr='(find-plans-call-form)'><tt>show call form</tt></a></li>
+  <li><a expr='(apply #'call-find-plans (rest (find-plans-call-form)))'><tt>run late-bound find-plans call</tt></a></li>
+</ul>
+
+<h2>Source anchors</h2>
+<ul>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/package.lisp&quot;)'><tt>hyperdoc-shop3/package.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/plan-objects.lisp&quot;)'><tt>hyperdoc-shop3/plan-objects.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/hyperdoc-maintenance-domain.lisp&quot;)'><tt>hyperdoc-shop3/hyperdoc-maintenance-domain.lisp</tt></a></li>
+  <li><a expr='(asdf:system-relative-pathname :hyperdoc &quot;hyperdoc-shop3/examples.lisp&quot;)'><tt>hyperdoc-shop3/examples.lisp</tt></a></li>
+</ul>
+
+<h2>Load boundary</h2>
+<pre>;; This currently fails in your image:
+(asdf:load-system :hyperdoc/shop3)
+
+;; Because :hyperdoc/shop3 depends on #:shop3.
+;; First make this succeed:
+(asdf:load-system :shop3)</pre>
