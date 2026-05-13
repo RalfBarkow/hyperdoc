@@ -1,0 +1,45 @@
+<!doctype html>
+<meta charset='utf-8'>
+<title>DM6 AppEmbed Side-by-Side Comparison</title>
+<link rel='stylesheet' href='/dm6-elm/hyperdoc-dm6-inline.css'>
+<style>
+body{margin:0;font:14px system-ui,sans-serif;background:#eef4f8}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px}
+.panel{background:white;border:1px solid #c9d6e2;border-radius:10px;overflow:hidden}
+.panel h2{margin:0;padding:10px 12px;background:#f8fbfd;border-bottom:1px solid #dbe5ee;font-size:16px}
+.body{height:680px;overflow:auto}
+iframe{width:100%;height:680px;border:0;display:block}
+</style>
+<div class='grid'>
+<section class='panel'>
+<h2>Embedded AppEmbed inside HyperDoc</h2>
+<div class='body'>
+<section class='dm6-hyperdoc-map dm6-island' data-dm6-slug='dm6-side-by-side-embedded' data-dm6-bundle='/dm6-elm/app.js'>
+<script type='application/json' class='dm6-stored'>
+{n  "topics":[{"id":0,"icon":"","text":"DM6 Elm","size":{"view":{"w":0,"h":0},"editor":{"w":0,"h":0}},"assocIds":[4,5,6]},{"id":1,"icon":"circle","text":"Click a topic","size":{"view":{"w":128,"h":38},"editor":{"w":128,"h":38}},"assocIds":[4]},{"id":2,"icon":"circle","text":"Drag a topic","size":{"view":{"w":128,"h":38},"editor":{"w":128,"h":38}},"assocIds":[5]},{"id":3,"icon":"circle","text":"Inspect emitted events","size":{"view":{"w":160,"h":38},"editor":{"w":160,"h":38}},"assocIds":[6]}],n  "assocs":[{"id":4,"type":"Hierarchy","topicId1":0,"topicId2":1},{"id":5,"type":"Hierarchy","topicId1":0,"topicId2":2},{"id":6,"type":"Hierarchy","topicId1":0,"topicId2":3}],n  "itemSets":[{"id":1,"items":[{"topicId":1},{"topicId":2},{"topicId":3}]}],n  "boxes":[{"id":0,"itemSetId":1,"topics":[{"id":1,"expansion":"Collapsed"},{"id":2,"expansion":"Collapsed"},{"id":3,"expansion":"Collapsed"}],"renderer":"TopicMap"}],n  "boxId":0,n  "nextId":7,n  "topicMap":{"viewProps":[{"id":0,"rect":{"x1":0,"y1":0,"x2":900,"y2":520},"scroll":{"x":0,"y":0},"topics":[{"id":1,"pos":{"x":120,"y":120}},{"id":2,"pos":{"x":360,"y":250}},{"id":3,"pos":{"x":560,"y":130}}]}]},n  "topicList":{"viewProps":[{"id":0,"order":[1,2,3],"size":{"w":900,"h":520}}]},n  "tool":{"lineStyle":"Cornered"}n}
+</script>
+<header class='dm6-island-header'>
+<div class='dm6-island-title'><h2>DM6 Topic Map</h2><span class='dm6-island-subtitle'>Embedded AppEmbed island with evidence capture</span></div>
+<nav class='dm6-toolbar' aria-label='dm6 controls'>
+<button type='button' data-dm6-action='select'>Select</button>
+<button type='button' data-dm6-action='move'>Move</button>
+<button type='button' data-dm6-action='cross'>Cross</button>
+<button type='button' data-dm6-action='fit'>Fit</button>
+<button type='button' data-dm6-action='reset'>Reset</button>
+<button type='button' data-dm6-action='evidence'>Evidence</button>
+</nav>
+</header>
+<div class='dm6-mode-banner'><span><b>Input owner:</b> <span class='dm6-input-owner'>page</span></span><span><b>Mode:</b> <span class='dm6-mode'>select</span></span><span><b>HyperDoc:</b> <span class='dm6-hyperdoc-state'>overlays active outside embedded app</span></span></div>
+<div class='dm6-canvas'><div class='dm6-stage'>dm6 AppEmbed mount pending...</div></div>
+<div class='dm6-success-card'><div><strong class='dm6-mount-summary'>dm6 mounting...</strong><br>Try: click a topic, drag a topic, inspect emitted events.</div><div><b>Status:</b> <span class='dm6-status'>not mounted</span></div></div>
+<details class='dm6-evidence-drawer'><summary>Evidence: <span class='dm6-evidence-count'>0</span> events - last: <span class='dm6-evidence-last'>none</span></summary><pre class='dm6-evidence-summary'></pre><pre class='dm6-evidence'></pre></details>
+</section>
+</div>
+</section>
+<section class='panel'>
+<h2>Standalone Elm boot shell</h2>
+<iframe src='/dm6-elm/dm6-standalone-shell.html'></iframe>
+</section>
+</div>
+<script src='/dm6-elm/hyperdoc-dm6-inline.js'></script>
+<script>window.hyperdocDm6Inline&&window.hyperdocDm6Inline.mountAll(document);</script>

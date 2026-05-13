@@ -483,6 +483,7 @@
                                        (:file "localhost-fedwiki-page-promotion-plans")
                                        (:file "tools")
                                        (:file "codemeta")
+                             (:file "dm6-elm-artifact-inspector")
                                        (:file "example-core")
                                        (:file "check-runner")
                                        (:file "hyperdoc")

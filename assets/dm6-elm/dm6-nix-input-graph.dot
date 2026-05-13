@@ -1,0 +1,7 @@
+digraph dm6_nix_inputs {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  root [label="dm6-elm flake"];
+  missing [label="No flake input metadata available"];
+  root -> missing;
+}

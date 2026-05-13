@@ -1,0 +1,51 @@
+<h1>DM6 Elm Artifact Inspector Runbook</h1>
+<in-package>hyperdoc</in-package>
+
+<p>
+This page documents the durable operator workflow for treating <tt>dm6-elm</tt>
+as an inspectable HyperDoc object. The source implementation lives in
+<tt>hyperdoc-explorer/dm6-elm-artifact-inspector.lisp</tt>.
+</p>
+
+<h2>Normal entry point</h2>
+
+<p>
+Open the artifact inspector, regenerate the Nix graph SVG, regenerate the
+side-by-side comparison files, and open the comparison surface:
+</p>
+
+<pre class='code-snippet'><code>(dm6-open!)</code></pre>
+
+<ul>
+  <li><a expr='(dm6-open!)'><tt>(dm6-open!)</tt></a></li>
+  <li><a expr='(dm6-inspect-artifact! *dm6-artifact*)'><tt>(dm6-inspect-artifact! *dm6-artifact*)</tt></a></li>
+  <li><a expr='(dm6-inspect-side-by-side-page! *dm6-artifact*)'><tt>(dm6-inspect-side-by-side-page! *dm6-artifact*)</tt></a></li>
+</ul>
+
+<h2>Build and repair commands</h2>
+
+<ul>
+  <li><a expr='(dm6-check-side-by-side-assets!)'><tt>(dm6-check-side-by-side-assets!)</tt></a></li>
+  <li><a expr='(dm6-build-appembed-bundle! *dm6-artifact*)'><tt>(dm6-build-appembed-bundle! *dm6-artifact*)</tt></a></li>
+  <li><a expr='(dm6-build-main-bundle! *dm6-artifact*)'><tt>(dm6-build-main-bundle! *dm6-artifact*)</tt></a></li>
+  <li><a expr='(dm6-write-nix-graph-svg! *dm6-artifact*)'><tt>(dm6-write-nix-graph-svg! *dm6-artifact*)</tt></a></li>
+  <li><a expr='(dm6-write-side-by-side! *dm6-artifact*)'><tt>(dm6-write-side-by-side! *dm6-artifact*)</tt></a></li>
+</ul>
+
+<h2>Expected inspector tabs</h2>
+
+<ul>
+  <li><b>Version metadata:</b> Git, Elm, bundle sizes, bundle SHA values.</li>
+  <li><b>Nix metadata:</b> <tt>nix flake metadata</tt> output.</li>
+  <li><b>Nix graph SVG:</b> server-side <tt>dot -Tsvg</tt> output.</li>
+  <li><b>Build commands:</b> exact Elm bundle build commands.</li>
+  <li><b>Browser:</b> embedded AppEmbed and standalone Elm shell side by side.</li>
+</ul>
+
+<h2>Failure policy</h2>
+
+<p>
+Do not call <tt>views:add-asset-path</tt> from top-level SLY functions. Asset route
+registration belongs inside the rendering body of <tt>views:html-view</tt>; otherwise
+<tt>VIEWS:*VIEW-ACCUMULATOR*</tt> is unbound.
+</p>
