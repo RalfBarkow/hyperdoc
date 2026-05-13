@@ -119,3 +119,13 @@
         (agent-memory-topic)
         (first-class-relationship-topic)
         (fluree-metagraph-topic)))
+
+
+(defun metagraph-source-article-topic ()
+  (make-topic
+   :id "source-article-metagraph-bipartite-jsonld-fluree"
+   :title "Source article: Metagraph as Bipartite Graph"
+   :summary "The source article transformed by the HyperDoc page: Volodymyr Pavlyshyn's article on implementing higher-order knowledge with JSON-LD and Fluree."
+   :references '("Metagraph as Bipartite Graph: JSON-LD + Fluree"
+                 "Metagraph as Bipartite Graph: Implementing Higher-Order Knowledge with JSON-LD and Fluree"
+                 "https://ai.plainenglish.io/metagraph-as-bipartite-graph-implementing-higher-order-knowledge-with-json-ld-and-fluree-658b6fe19eeb")))

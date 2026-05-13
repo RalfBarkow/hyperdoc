@@ -187,3 +187,19 @@
 (defexample metagraph-fluree-curl-sequence-example
     "Inspect the Fluree setup and transaction command sequence as a safe dry run."
   (metagraph-fluree-curl-commands))
+
+
+(defun metagraph-fluree-source-article ()
+  "Answer the question: which article does the phrase 'attached article' refer to?"
+  '(:kind :source-article
+    :title "Metagraph as Bipartite Graph: Implementing Higher-Order Knowledge with JSON-LD and Fluree"
+    :short-title "Metagraph as Bipartite Graph"
+    :author "Volodymyr Pavlyshyn"
+    :publication "Artificial Intelligence in Plain English"
+    :date "May 2026"
+    :hyperdoc-page "Metagraph as Bipartite Graph: JSON-LD + Fluree"
+    :url "https://ai.plainenglish.io/metagraph-as-bipartite-graph-implementing-higher-order-knowledge-with-json-ld-and-fluree-658b6fe19eeb"))
+
+(defexample metagraph-fluree-which-article-example
+    "Resolve the deictic phrase 'attached article' to a first-class source article object."
+  (metagraph-fluree-source-article))
