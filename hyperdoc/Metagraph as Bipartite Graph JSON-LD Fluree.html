@@ -1,0 +1,360 @@
+<h1>Metagraph as Bipartite Graph: JSON-LD + Fluree</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This HyperDoc page turns the attached article into a topic-oriented,
+  inspectable implementation note. The central move is to model a metagraph as
+  a layered graph in which relationships are first-class nodes, then persist the
+  result as JSON-LD in Fluree's temporal ledger.
+</p>
+
+<p>
+  The page is deliberately not a linear reproduction of the article. It is a
+  HyperDoc working surface: concepts become topics, implementation fragments
+  become code snippets, and operational checks become clickable examples.
+</p>
+
+<h2>Core claim</h2>
+
+<p>
+  Ordinary triples are adequate for simple facts, but they become awkward when
+  the system must ask questions <em>about</em> relationships: who verified an
+  attendance, when it became true, whether it caused another event, or how a
+  decision changed over time. The metagraph solution is to promote
+  relationships to addressable entities.
+</p>
+
+<p>
+  In this page's terminology, a relationship that matters operationally should
+  be a <a hyperbook="topics" page="Relationship node"><tt>Relationship node</tt></a>,
+  not only an edge property. That lets the relationship participate in further
+  causality, context, provenance, and temporal queries.
+</p>
+
+<h2>Inspectable topics</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Bipartite metagraph"><tt>Bipartite metagraph</tt></a></li>
+  <li><a hyperbook="topics" page="Entity node"><tt>Entity node</tt></a></li>
+  <li><a hyperbook="topics" page="Relationship node"><tt>Relationship node</tt></a></li>
+  <li><a hyperbook="topics" page="Subgraph node"><tt>Subgraph node</tt></a></li>
+  <li><a hyperbook="topics" page="Reified participation"><tt>Reified participation</tt></a></li>
+  <li><a hyperbook="topics" page="Causal E-node"><tt>Causal E-node</tt></a></li>
+  <li><a hyperbook="topics" page="JSON-LD vocabulary"><tt>JSON-LD vocabulary</tt></a></li>
+  <li><a hyperbook="topics" page="SHACL write constraint"><tt>SHACL write constraint</tt></a></li>
+  <li><a hyperbook="topics" page="Temporal ledger"><tt>Temporal ledger</tt></a></li>
+  <li><a hyperbook="topics" page="As-of query"><tt>As-of query</tt></a></li>
+  <li><a hyperbook="topics" page="Valid time"><tt>Valid time</tt></a></li>
+  <li><a hyperbook="topics" page="Named-graph provenance"><tt>Named-graph provenance</tt></a></li>
+  <li><a hyperbook="topics" page="Agent memory"><tt>Agent memory</tt></a></li>
+  <li><a hyperbook="topics" page="First-class relationship"><tt>First-class relationship</tt></a></li>
+  <li><a hyperbook="topics" page="Fluree metagraph"><tt>Fluree metagraph</tt></a></li>
+</ul>
+
+<p>
+  Runtime topic suite:
+  <a expr="(metagraph-fluree-topic-suite)"><tt>(metagraph-fluree-topic-suite)</tt></a>.
+</p>
+
+<h2>Layer model</h2>
+
+<p>
+  The article's implementation pattern uses three semantic layers:
+</p>
+
+<table>
+  <thead>
+    <tr><th>Layer</th><th>Node role</th><th>Examples</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><tt>N</tt></td><td>Entity nodes</td><td>people, projects, features, milestones, concepts</td></tr>
+    <tr><td><tt>E</tt></td><td>Relationship nodes</td><td>meetings, decisions, consequences, causal links</td></tr>
+    <tr><td><tt>S</tt></td><td>Subgraph nodes</td><td>episodes, contexts, narratives, named graphs, schemas</td></tr>
+  </tbody>
+</table>
+
+<p>
+  The useful invariant is not merely “there are three labels”. It is that every
+  edge crosses a declared boundary: <tt>N→E</tt>, <tt>E→N</tt>, <tt>E→S</tt>,
+  <tt>S→E</tt>, or <tt>S→S</tt>. Direct <tt>N→N</tt> and <tt>E→E</tt>
+  shortcuts are modeling errors.
+</p>
+
+<h3>Clickable layer contract</h3>
+
+<p>
+  Inspect the layer contract directly:
+  <a expr="(metagraph-fluree-layer-boundaries)"><tt>(metagraph-fluree-layer-boundaries)</tt></a>.
+</p>
+
+<source-of-function>metagraph-fluree-layer-summary-example</source-of-function>
+
+<h2>Vocabulary starter</h2>
+
+<p>
+  The vocabulary gives each layer and predicate a portable URI. This is the
+  smallest useful shape of the model, condensed for documentation.
+</p>
+
+<pre><code class="language-json">{
+  "@context": {
+    "@vocab": "https://metagraph.ai/vocab#",
+    "mg": "https://metagraph.ai/vocab#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "prov": "http://www.w3.org/ns/prov#"
+  },
+  "@graph": [
+    { "@id": "mg:EntityNode", "@type": "owl:Class" },
+    { "@id": "mg:RelationshipNode", "@type": "owl:Class" },
+    { "@id": "mg:SubgraphNode", "@type": "owl:Class" },
+    { "@id": "mg:MEMBER_OF", "@type": "owl:ObjectProperty" },
+    { "@id": "mg:PART_OF", "@type": "owl:ObjectProperty" },
+    { "@id": "mg:REFERENCES", "@type": "owl:ObjectProperty" },
+    { "@id": "mg:CONTAINS", "@type": "owl:ObjectProperty" },
+    { "@id": "mg:RELATES_TO", "@type": "owl:ObjectProperty" }
+  ]
+}</code></pre>
+
+<h2>SHACL guard for the model</h2>
+
+<p>
+  The write-time guard belongs in SHACL: it turns the layer contract into a
+  database constraint rather than a style convention.
+</p>
+
+<pre><code class="language-json">{
+  "@context": {
+    "mg": "https://metagraph.ai/vocab#",
+    "sh": "http://www.w3.org/ns/shacl#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "mg:EntityNodeShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": { "@id": "mg:EntityNode" },
+      "sh:property": [
+        { "sh:path": { "@id": "rdfs:label" }, "sh:minCount": 1 },
+        { "sh:path": { "@id": "mg:kind" }, "sh:minCount": 1 }
+      ]
+    },
+    {
+      "@id": "mg:RelationshipNodeShape",
+      "@type": "sh:NodeShape",
+      "sh:targetClass": { "@id": "mg:RelationshipNode" },
+      "sh:property": [
+        { "sh:path": { "@id": "mg:relationKind" }, "sh:minCount": 1 },
+        { "sh:path": { "@id": "mg:arity" }, "sh:minCount": 1 }
+      ]
+    }
+  ]
+}</code></pre>
+
+<h2>Scenario: Q2 planning chain</h2>
+
+<p>
+  The worked scenario contains a planning meeting, a decision to accelerate a
+  launch, a scope-cut consequence, and two causal links. The important point is
+  that the causal links are themselves relationship nodes, not edge annotations.
+</p>
+
+<p>
+  Inspect the compact scenario object:
+  <a expr="(metagraph-fluree-planning-scenario)"><tt>(metagraph-fluree-planning-scenario)</tt></a>.
+</p>
+
+<source-of-function>metagraph-fluree-planning-scenario-example</source-of-function>
+
+<h3>Minimal JSON-LD slice</h3>
+
+<pre><code class="language-json">{
+  "@context": {
+    "mg": "https://metagraph.ai/vocab#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "prov": "http://www.w3.org/ns/prov#"
+  },
+  "@graph": [
+    {
+      "@id": "mg:event/planning-meeting-2026-03-24",
+      "@type": "mg:RelationshipNode",
+      "rdfs:label": "Q2 Planning Meeting",
+      "mg:relationKind": "Event",
+      "mg:arity": 3,
+      "mg:outcome": "Agreed to accelerate Q2 deadline by 3 weeks"
+    },
+    {
+      "@id": "mg:decision/accelerate-q2",
+      "@type": "mg:RelationshipNode",
+      "rdfs:label": "Decision: Accelerate Q2 Deadline",
+      "mg:relationKind": "Decision",
+      "mg:arity": 2,
+      "mg:authority": "Carol"
+    },
+    {
+      "@id": "mg:causal/meeting-causes-decision",
+      "@type": "mg:RelationshipNode",
+      "rdfs:label": "Causal Link: Meeting → Decision",
+      "mg:relationKind": "Causality",
+      "mg:strength": 0.92
+    }
+  ]
+}</code></pre>
+
+<h2>Participation as role-bearing data</h2>
+
+<p>
+  Participation nodes keep role and position metadata without collapsing the
+  metagraph back into flat edge annotations.
+</p>
+
+<pre><code class="language-json">{
+  "@id": "mg:participation/carol-decision",
+  "@type": "mg:Participation",
+  "mg:participant": { "@id": "mg:person/carol" },
+  "mg:inRelationship": { "@id": "mg:decision/accelerate-q2" },
+  "mg:role": "authority",
+  "mg:position": 1
+}</code></pre>
+
+<source-of-function>metagraph-fluree-participants-query-example</source-of-function>
+
+<h2>Queries: participants and causal chain</h2>
+
+<h3>SPARQL: participants in the planning meeting</h3>
+
+<pre><code class="language-sparql">PREFIX mg: &lt;https://metagraph.ai/vocab#&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+SELECT ?personLabel ?role ?position
+WHERE {
+  ?p mg:inRelationship mg:event/planning-meeting-2026-03-24 .
+  ?p mg:participant ?person .
+  ?p mg:role ?role .
+  ?p mg:position ?position .
+  ?person rdfs:label ?personLabel .
+}
+ORDER BY ?position</code></pre>
+
+<h3>SPARQL: causal links as first-class relationship nodes</h3>
+
+<pre><code class="language-sparql">PREFIX mg: &lt;https://metagraph.ai/vocab#&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+SELECT ?causeName ?effectName ?strength
+WHERE {
+  ?causal a mg:RelationshipNode ;
+          mg:relationKind "Causality" ;
+          mg:strength ?strength .
+  ?cause_p mg:inRelationship ?causal ;
+           mg:role "cause" ;
+           mg:participant ?causeNode .
+  ?effect_p mg:inRelationship ?causal ;
+            mg:role "effect" ;
+            mg:participant ?effectNode .
+  ?causeNode rdfs:label ?causeName .
+  ?effectNode rdfs:label ?effectName .
+}
+ORDER BY DESC(?strength)</code></pre>
+
+<source-of-function>metagraph-fluree-causal-chain-example</source-of-function>
+
+<h2>Temporal layer</h2>
+
+<p>
+  Fluree's ledger model adds transaction time: the graph can be queried as it
+  existed at a prior block or timestamp. The vocabulary also carries valid-time
+  predicates, which describe when a statement was true in the modeled domain.
+</p>
+
+<pre><code class="language-json">{
+  "ledger": "metagraph/planning",
+  "query": {
+    "select": { "?event": ["*"] },
+    "where": [
+      ["?event", "@type", "mg:RelationshipNode"],
+      ["?event", "mg:relationKind", "?kind"]
+    ]
+  },
+  "opts": {
+    "as-of": "2026-03-24T17:00:00Z"
+  }
+}</code></pre>
+
+<p>
+  That query should return the meeting and decision but exclude the scope-cut
+  consequence, because the consequence enters the ledger later.
+</p>
+
+<source-of-function>metagraph-fluree-time-travel-example</source-of-function>
+
+<h2>Named-graph provenance</h2>
+
+<p>
+  Named graphs let the model preserve multiple perspectives on the same event.
+  An observer's notes, confidence score, timestamp, and claims can be attached
+  to the graph that contains the claims.
+</p>
+
+<pre><code class="language-json">{
+  "@id": "mg:named-graph/bob-meeting-notes",
+  "@type": "mg:SubgraphNode",
+  "mg:subgraphKind": "provenance-graph",
+  "prov:wasAttributedTo": { "@id": "mg:person/bob" },
+  "mg:confidence": 0.85,
+  "@graph": [
+    {
+      "@id": "mg:event/planning-meeting-2026-03-24",
+      "mg:mood": "tense"
+    }
+  ]
+}</code></pre>
+
+<source-of-function>metagraph-fluree-named-graph-provenance-example</source-of-function>
+
+<h2>Fluree transaction path</h2>
+
+<p>
+  The shell sequence is kept as a dry-run object so the page can be inspected
+  without mutating a local Fluree server.
+</p>
+
+<source-of-function>metagraph-fluree-curl-sequence-example</source-of-function>
+
+<h2>When this stack fits</h2>
+
+<ul>
+  <li>Use it when relationships are events you must query, annotate, and relate.</li>
+  <li>Use it when history is part of the knowledge rather than an audit afterthought.</li>
+  <li>Use it when provenance and multi-agent perspectives must be preserved.</li>
+  <li>Use it when causal reasoning should be a graph query instead of an application procedure.</li>
+  <li>Avoid it for high-throughput write paths or simple transitive graphs that do not need meta-level reasoning.</li>
+</ul>
+
+<h2>Drop-in files</h2>
+
+<p>
+  This page expects the companion source files to be loaded:
+</p>
+
+<ul>
+  <li><tt>metagraph-fluree-topics.lisp</tt>: proposed topic factories.</li>
+  <li><tt>metagraph-fluree-examples.lisp</tt>: clickable examples and inspectable data functions.</li>
+</ul>
+
+<lisp-code>
+(progn
+  (load "hyperdoc/topics/metagraph-fluree.lisp")
+  (load "hyperdoc/metagraph-fluree-examples.lisp")
+  nil)
+</lisp-code>
+
+<h2>Related HyperDoc pages</h2>
+
+<ul>
+  <li><a page="Running HyperDoc Examples">Running HyperDoc Examples</a></li>
+  <li><a page="Topics HyperBook in HyperDoc">Topics HyperBook in HyperDoc</a></li>
+  <li><a page="Documentation Page Template">Documentation Page Template</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Writing source code pages">Writing source code pages</a></li>
+</ul>

@@ -49,7 +49,8 @@
                                (:file "civilian-harm")
                                (:file "interaction-nets")
                                (:file "source-stations")
-                               (:file "dm6-inline-proof")))))
+                               (:file "dm6-inline-proof")
+                               (:file "metagraph-fluree")))))
 
 (defsystem #:hyperdoc/dmx-topics
     :description "DMX-backed topic proxy objects for HyperDoc"
@@ -137,7 +138,8 @@
                                        (:file "git-commit-equivalence")
                                        (:file "hyperdoc")
                              (:file "fedwiki-dmx-importer-bug")
-                                       (:file "projection-pipeline-operator")))))
+                                       (:file "projection-pipeline-operator")
+                                       (:file "metagraph-fluree-examples")))))
 
 (defsystem #:hyperdoc/shop3
     :description "SHOP3-backed HTN planning layer for HyperDoc operations"
