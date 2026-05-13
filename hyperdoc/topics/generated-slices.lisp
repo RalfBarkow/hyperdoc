@@ -151,7 +151,7 @@
   (make-topic
    :id "dmx-fedwiki-write-model"
    :title "DMX FedWiki Write Model"
-   :summary "HyperDoc-side DMX write contract that treats DMX as a valuable but untrusted persistence boundary and routes topicmap-context writes through canonical long-form payload validation."
+   :summary "HyperDoc-side DMX write contract that treats DMX as a persistence boundary and routes topicmap-context writes through canonical long-form payload validation."
    :references '("DMX FedWiki Write Model"
                  "DMX workspace journal model"
                  "DMX MCP server for shared workspace"
