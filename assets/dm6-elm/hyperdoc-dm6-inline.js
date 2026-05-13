@@ -98,6 +98,10 @@
 
     state.events.push(record);
     renderEvidence(root);
+    root.dispatchEvent(new CustomEvent('hyperdoc:dm6-evidence', {
+      bubbles: true,
+      detail: record
+    }));
     return record;
   }
 

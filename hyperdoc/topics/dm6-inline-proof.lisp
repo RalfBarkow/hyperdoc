@@ -35,3 +35,39 @@
                  "DM6 AppEmbed HyperDoc Inline Proof"
                  "Git History Surface for HyperDoc"
                  "Association Topics for Stable Identity and Mutable Titles")))
+
+(defun elm-pages-effects-as-data-topic ()
+  (make-topic
+   :id "elm-pages-effects-as-data"
+   :title "elm-pages Effects as Data"
+   :summary "The elm-pages testing/debugging pattern where framework effects are represented as values that tests and visual debuggers can inspect, replace, and replay."
+   :references '("DM6 AppEmbed HyperDoc Inline Proof"
+                 "DM6 AppEmbed HyperDoc inline proof milestone"
+                 "Debugging Reinvented in HyperDoc")))
+
+(defun dm6-embedded-evidence-timeline-topic ()
+  (make-topic
+   :id "dm6-embedded-evidence-timeline"
+   :title "DM6 embedded evidence timeline"
+   :summary "The ordered HyperDoc-visible record of AppEmbed boot, imported data, store snapshots, selections, drags, crosses, and other dm6-elm model transitions."
+   :references '("73c51b7 Add HyperDoc evidence events to AppEmbed"
+                 "DM6 AppEmbed HyperDoc Inline Proof"
+                 "Git History Surface for HyperDoc")))
+
+(defun dm6-appembed-contract-boundary-topic ()
+  (make-topic
+   :id "dm6-appembed-contract-boundary"
+   :title "DM6 AppEmbed contract boundary"
+   :summary "The stable embedding boundary where external hosts boot dm6-elm through Elm.AppEmbed with string flags slug and stored, without depending on internal app modules."
+   :references '("DM6 AppEmbed HyperDoc Inline Proof"
+                 "Contract boundary"
+                 "Documentation Surfaces in HyperDoc")))
+
+(defun dm6-elm-and-elm-pages-debugger-comparison-topic ()
+  (make-topic
+   :id "dm6-elm-and-elm-pages-debugger-comparison"
+   :title "dm6-elm and elm-pages debugger comparison"
+   :summary "A comparison that maps elm-pages BackendTasks, fetchers, cookies, redirects, and ErrorPages to dm6-elm's embedded values: FedWiki page JSON, AppEmbed flags, decoded model state, ports, input events, selections, drags, crosses, and store snapshots."
+   :references '("elm-pages Effects as Data"
+                 "DM6 embedded evidence timeline"
+                 "DM6 AppEmbed contract boundary")))

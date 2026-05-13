@@ -77,7 +77,7 @@ function A9(fun, a, b, c, d, e, f, g, h, i) {
   return fun.a === 9 ? fun.f(a, b, c, d, e, f, g, h, i) : fun(a)(b)(c)(d)(e)(f)(g)(h)(i);
 }
 
-
+console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
 
 
 // EQUALITY
@@ -113,7 +113,7 @@ function _Utils_eqHelp(x, y, depth, stack)
 		return true;
 	}
 
-	/**_UNUSED/
+	/**/
 	if (x.$ === 'Set_elm_builtin')
 	{
 		x = $elm$core$Set$toList(x);
@@ -126,7 +126,7 @@ function _Utils_eqHelp(x, y, depth, stack)
 	}
 	//*/
 
-	/**/
+	/**_UNUSED/
 	if (x.$ < 0)
 	{
 		x = $elm$core$Dict$toList(x);
@@ -161,7 +161,7 @@ function _Utils_cmp(x, y, ord)
 		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
 	}
 
-	/**_UNUSED/
+	/**/
 	if (x instanceof String)
 	{
 		var a = x.valueOf();
@@ -170,10 +170,10 @@ function _Utils_cmp(x, y, ord)
 	}
 	//*/
 
-	/**/
+	/**_UNUSED/
 	if (typeof x.$ === 'undefined')
 	//*/
-	/**_UNUSED/
+	/**/
 	if (x.$[0] === '#')
 	//*/
 	{
@@ -203,17 +203,17 @@ var _Utils_compare = F2(function(x, y)
 
 // COMMON VALUES
 
-var _Utils_Tuple0 = 0;
-var _Utils_Tuple0_UNUSED = { $: '#0' };
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
 
-function _Utils_Tuple2(a, b) { return { a: a, b: b }; }
-function _Utils_Tuple2_UNUSED(a, b) { return { $: '#2', a: a, b: b }; }
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
 
-function _Utils_Tuple3(a, b, c) { return { a: a, b: b, c: c }; }
-function _Utils_Tuple3_UNUSED(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
 
-function _Utils_chr(c) { return c; }
-function _Utils_chr_UNUSED(c) { return new String(c); }
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
 
 
 // RECORDS
@@ -264,11 +264,11 @@ function _Utils_ap(xs, ys)
 
 
 
-var _List_Nil = { $: 0 };
-var _List_Nil_UNUSED = { $: '[]' };
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
 
-function _List_Cons(hd, tl) { return { $: 1, a: hd, b: tl }; }
-function _List_Cons_UNUSED(hd, tl) { return { $: '::', a: hd, b: tl }; }
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
 
 
 var _List_cons = F2(_List_Cons);
@@ -499,12 +499,12 @@ var _JsArray_appendN = F3(function(n, dest, source)
 
 // LOG
 
-var _Debug_log = F2(function(tag, value)
+var _Debug_log_UNUSED = F2(function(tag, value)
 {
 	return value;
 });
 
-var _Debug_log_UNUSED = F2(function(tag, value)
+var _Debug_log = F2(function(tag, value)
 {
 	console.log(tag + ': ' + _Debug_toString(value));
 	return value;
@@ -530,12 +530,12 @@ function _Debug_todoCase(moduleName, region, value)
 
 // TO STRING
 
-function _Debug_toString(value)
+function _Debug_toString_UNUSED(value)
 {
 	return '<internals>';
 }
 
-function _Debug_toString_UNUSED(value)
+function _Debug_toString(value)
 {
 	return _Debug_toAnsiString(false, value);
 }
@@ -720,13 +720,13 @@ function _Debug_toHexDigit(n)
 // CRASH
 
 
-function _Debug_crash(identifier)
+function _Debug_crash_UNUSED(identifier)
 {
 	throw new Error('https://github.com/elm/core/blob/1.0.0/hints/' + identifier + '.md');
 }
 
 
-function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
+function _Debug_crash(identifier, fact1, fact2, fact3, fact4)
 {
 	switch(identifier)
 	{
@@ -784,11 +784,11 @@ function _Debug_crash_UNUSED(identifier, fact1, fact2, fact3, fact4)
 
 function _Debug_regionToString(region)
 {
-	if (region.k.ar === region.i.ar)
+	if (region.start.line === region.end.line)
 	{
-		return 'on line ' + region.k.ar;
+		return 'on line ' + region.start.line;
 	}
-	return 'on lines ' + region.k.ar + ' through ' + region.i.ar;
+	return 'on lines ' + region.start.line + ' through ' + region.end.line;
 }
 
 
@@ -1212,7 +1212,7 @@ function _Char_toLocaleLower(char)
 
 
 
-/**_UNUSED/
+/**/
 function _Json_errorToString(error)
 {
 	return $elm$json$Json$Decode$errorToString(error);
@@ -1616,11 +1616,11 @@ var _Json_encode = F2(function(indentLevel, value)
 	return JSON.stringify(_Json_unwrap(value), null, indentLevel) + '';
 });
 
-function _Json_wrap_UNUSED(value) { return { $: 0, a: value }; }
-function _Json_unwrap_UNUSED(value) { return value.a; }
+function _Json_wrap(value) { return { $: 0, a: value }; }
+function _Json_unwrap(value) { return value.a; }
 
-function _Json_wrap(value) { return value; }
-function _Json_unwrap(value) { return value; }
+function _Json_wrap_UNUSED(value) { return value; }
+function _Json_unwrap_UNUSED(value) { return value; }
 
 function _Json_emptyArray() { return []; }
 function _Json_emptyObject() { return {}; }
@@ -1857,9 +1857,9 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.dj,
-		impl.dZ,
-		impl.dU,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function() { return function() {} }
 	);
 });
@@ -1872,7 +1872,7 @@ var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
 function _Platform_initialize(flagDecoder, args, init, update, subscriptions, stepperBuilder)
 {
 	var result = A2(_Json_run, flagDecoder, _Json_wrap(args ? args['flags'] : undefined));
-	$elm$core$Result$isOk(result) || _Debug_crash(2 /**_UNUSED/, _Json_errorToString(result.a) /**/);
+	$elm$core$Result$isOk(result) || _Debug_crash(2 /**/, _Json_errorToString(result.a) /**/);
 	var managers = {};
 	var initPair = init(result.a);
 	var model = initPair.a;
@@ -2316,7 +2316,7 @@ function _Platform_setupIncomingPort(name, sendToApp)
 //
 
 
-function _Platform_export(exports)
+function _Platform_export_UNUSED(exports)
 {
 	scope['Elm']
 		? _Platform_mergeExportsProd(scope['Elm'], exports)
@@ -2337,7 +2337,7 @@ function _Platform_mergeExportsProd(obj, exports)
 }
 
 
-function _Platform_export_UNUSED(exports)
+function _Platform_export(exports)
 {
 	scope['Elm']
 		? _Platform_mergeExportsDebug('Elm', scope['Elm'], exports)
@@ -2377,10 +2377,10 @@ var _VirtualDom_init = F4(function(virtualNode, flagDecoder, debugMetadata, args
 {
 	// NOTE: this function needs _Platform_export available to work
 
-	/**/
+	/**_UNUSED/
 	var node = args['node'];
 	//*/
-	/**_UNUSED/
+	/**/
 	var node = args && args['node'] ? args['node'] : _Debug_crash(0);
 	//*/
 
@@ -2655,14 +2655,14 @@ function _VirtualDom_noInnerHtmlOrFormAction(key)
 function _VirtualDom_noJavaScriptUri(value)
 {
 	return _VirtualDom_RE_js.test(value)
-		? /**/''//*//**_UNUSED/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
+		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		: value;
 }
 
 function _VirtualDom_noJavaScriptOrHtmlUri(value)
 {
 	return _VirtualDom_RE_js_html.test(value)
-		? /**/''//*//**_UNUSED/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
+		? /**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		: value;
 }
 
@@ -2670,7 +2670,7 @@ function _VirtualDom_noJavaScriptOrHtmlJson(value)
 {
 	return (typeof _Json_unwrap(value) === 'string' && _VirtualDom_RE_js_html.test(_Json_unwrap(value)))
 		? _Json_wrap(
-			/**/''//*//**_UNUSED/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
+			/**_UNUSED/''//*//**/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		) : value;
 }
 
@@ -2719,9 +2719,9 @@ var _VirtualDom_mapEventTuple = F2(function(func, tuple)
 var _VirtualDom_mapEventRecord = F2(function(func, record)
 {
 	return {
-		V: func(record.V),
-		br: record.br,
-		bm: record.bm
+		message: func(record.message),
+		stopPropagation: record.stopPropagation,
+		preventDefault: record.preventDefault
 	}
 });
 
@@ -2989,11 +2989,11 @@ function _VirtualDom_makeCallback(eventNode, initialHandler)
 		// 3 = Custom
 
 		var value = result.a;
-		var message = !tag ? value : tag < 3 ? value.a : value.V;
-		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.br;
+		var message = !tag ? value : tag < 3 ? value.a : value.message;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.stopPropagation;
 		var currentEventNode = (
 			stopPropagation && event.stopPropagation(),
-			(tag == 2 ? value.b : tag == 3 && value.bm) && event.preventDefault(),
+			(tag == 2 ? value.b : tag == 3 && value.preventDefault) && event.preventDefault(),
 			eventNode
 		);
 		var tagger;
@@ -3943,15 +3943,15 @@ var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debug
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.dj,
-		impl.dZ,
-		impl.dU,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function(sendToApp, initialModel) {
-			var view = impl.d_;
-			/**/
+			var view = impl.view;
+			/**_UNUSED/
 			var domNode = args['node'];
 			//*/
-			/**_UNUSED/
+			/**/
 			var domNode = args && args['node'] ? args['node'] : _Debug_crash(0);
 			//*/
 			var currNode = _VirtualDom_virtualize(domNode);
@@ -3979,12 +3979,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 	return _Platform_initialize(
 		flagDecoder,
 		args,
-		impl.dj,
-		impl.dZ,
-		impl.dU,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
 		function(sendToApp, initialModel) {
-			var divertHrefToApp = impl.bn && impl.bn(sendToApp)
-			var view = impl.d_;
+			var divertHrefToApp = impl.setup && impl.setup(sendToApp)
+			var view = impl.view;
 			var title = _VirtualDom_doc.title;
 			var bodyNode = _VirtualDom_doc.body;
 			var currNode = _VirtualDom_virtualize(bodyNode);
@@ -3992,12 +3992,12 @@ var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, deb
 			{
 				_VirtualDom_divertHrefToApp = divertHrefToApp;
 				var doc = view(model);
-				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.cW);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.body);
 				var patches = _VirtualDom_diff(currNode, nextNode);
 				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
 				currNode = nextNode;
 				_VirtualDom_divertHrefToApp = 0;
-				(title !== doc.dY) && (_VirtualDom_doc.title = title = doc.dY);
+				(title !== doc.title) && (_VirtualDom_doc.title = title = doc.title);
 			});
 		}
 	);
@@ -4053,12 +4053,12 @@ function _Browser_makeAnimator(model, draw)
 
 function _Browser_application(impl)
 {
-	var onUrlChange = impl.dF;
-	var onUrlRequest = impl.dG;
+	var onUrlChange = impl.onUrlChange;
+	var onUrlRequest = impl.onUrlRequest;
 	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
 
 	return _Browser_document({
-		bn: function(sendToApp)
+		setup: function(sendToApp)
 		{
 			key.a = sendToApp;
 			_Browser_window.addEventListener('popstate', key);
@@ -4074,9 +4074,9 @@ function _Browser_application(impl)
 					var next = $elm$url$Url$fromString(href).a;
 					sendToApp(onUrlRequest(
 						(next
-							&& curr.cq === next.cq
-							&& curr.b0 === next.b0
-							&& curr.cn.a === next.cn.a
+							&& curr.protocol === next.protocol
+							&& curr.host === next.host
+							&& curr.port_.a === next.port_.a
 						)
 							? $elm$browser$Browser$Internal(next)
 							: $elm$browser$Browser$External(href)
@@ -4084,13 +4084,13 @@ function _Browser_application(impl)
 				}
 			});
 		},
-		dj: function(flags)
+		init: function(flags)
 		{
-			return A3(impl.dj, flags, _Browser_getUrl(), key);
+			return A3(impl.init, flags, _Browser_getUrl(), key);
 		},
-		d_: impl.d_,
-		dZ: impl.dZ,
-		dU: impl.dU
+		view: impl.view,
+		update: impl.update,
+		subscriptions: impl.subscriptions
 	});
 }
 
@@ -4156,17 +4156,17 @@ var _Browser_decodeEvent = F2(function(decoder, event)
 function _Browser_visibilityInfo()
 {
 	return (typeof _VirtualDom_doc.hidden !== 'undefined')
-		? { dg: 'hidden', c0: 'visibilitychange' }
+		? { hidden: 'hidden', change: 'visibilitychange' }
 		:
 	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
-		? { dg: 'mozHidden', c0: 'mozvisibilitychange' }
+		? { hidden: 'mozHidden', change: 'mozvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.msHidden !== 'undefined')
-		? { dg: 'msHidden', c0: 'msvisibilitychange' }
+		? { hidden: 'msHidden', change: 'msvisibilitychange' }
 		:
 	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
-		? { dg: 'webkitHidden', c0: 'webkitvisibilitychange' }
-		: { dg: 'hidden', c0: 'visibilitychange' };
+		? { hidden: 'webkitHidden', change: 'webkitvisibilitychange' }
+		: { hidden: 'hidden', change: 'visibilitychange' };
 }
 
 
@@ -4247,12 +4247,12 @@ var _Browser_call = F2(function(functionName, id)
 function _Browser_getViewport()
 {
 	return {
-		cy: _Browser_getScene(),
-		cM: {
-			d1: _Browser_window.pageXOffset,
-			d3: _Browser_window.pageYOffset,
-			d$: _Browser_doc.documentElement.clientWidth,
-			df: _Browser_doc.documentElement.clientHeight
+		scene: _Browser_getScene(),
+		viewport: {
+			x: _Browser_window.pageXOffset,
+			y: _Browser_window.pageYOffset,
+			width: _Browser_doc.documentElement.clientWidth,
+			height: _Browser_doc.documentElement.clientHeight
 		}
 	};
 }
@@ -4262,8 +4262,8 @@ function _Browser_getScene()
 	var body = _Browser_doc.body;
 	var elem = _Browser_doc.documentElement;
 	return {
-		d$: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
-		df: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+		width: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		height: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
 	};
 }
 
@@ -4286,15 +4286,15 @@ function _Browser_getViewportOf(id)
 	return _Browser_withNode(id, function(node)
 	{
 		return {
-			cy: {
-				d$: node.scrollWidth,
-				df: node.scrollHeight
+			scene: {
+				width: node.scrollWidth,
+				height: node.scrollHeight
 			},
-			cM: {
-				d1: node.scrollLeft,
-				d3: node.scrollTop,
-				d$: node.clientWidth,
-				df: node.clientHeight
+			viewport: {
+				x: node.scrollLeft,
+				y: node.scrollTop,
+				width: node.clientWidth,
+				height: node.clientHeight
 			}
 		};
 	});
@@ -4324,18 +4324,18 @@ function _Browser_getElement(id)
 		var x = _Browser_window.pageXOffset;
 		var y = _Browser_window.pageYOffset;
 		return {
-			cy: _Browser_getScene(),
-			cM: {
-				d1: x,
-				d3: y,
-				d$: _Browser_doc.documentElement.clientWidth,
-				df: _Browser_doc.documentElement.clientHeight
+			scene: _Browser_getScene(),
+			viewport: {
+				x: x,
+				y: y,
+				width: _Browser_doc.documentElement.clientWidth,
+				height: _Browser_doc.documentElement.clientHeight
 			},
-			c9: {
-				d1: x + rect.left,
-				d3: y + rect.top,
-				d$: rect.width,
-				df: rect.height
+			element: {
+				x: x + rect.left,
+				y: y + rect.top,
+				width: rect.width,
+				height: rect.height
 			}
 		};
 	});
@@ -4370,6 +4370,43 @@ function _Browser_load(url)
 		}
 	}));
 }
+
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
 
 
 
@@ -4416,43 +4453,6 @@ function _Time_getZoneName()
 		callback(_Scheduler_succeed(name));
 	});
 }
-
-
-
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
-};
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
 
 
 
@@ -4592,8 +4592,8 @@ var _Regex_never = /.^/;
 var _Regex_fromStringWith = F2(function(options, string)
 {
 	var flags = 'g';
-	if (options.du) { flags += 'm'; }
-	if (options.c$) { flags += 'i'; }
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
 
 	try
 	{
@@ -4701,15 +4701,15 @@ function _Url_percentDecode(string)
 	{
 		return $elm$core$Maybe$Nothing;
 	}
-}var $elm$core$Basics$EQ = 1;
-var $elm$core$Basics$GT = 2;
-var $elm$core$Basics$LT = 0;
+}var $elm$core$Basics$EQ = {$: 'EQ'};
+var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$LT = {$: 'LT'};
 var $elm$core$List$cons = _List_cons;
 var $elm$core$Dict$foldr = F3(
 	function (func, acc, t) {
 		foldr:
 		while (true) {
-			if (t.$ === -2) {
+			if (t.$ === 'RBEmpty_elm_builtin') {
 				return acc;
 			} else {
 				var key = t.b;
@@ -4754,7 +4754,7 @@ var $elm$core$Dict$keys = function (dict) {
 		dict);
 };
 var $elm$core$Set$toList = function (_v0) {
-	var dict = _v0;
+	var dict = _v0.a;
 	return $elm$core$Dict$keys(dict);
 };
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
@@ -4764,7 +4764,7 @@ var $elm$core$Array$foldr = F3(
 		var tail = _v0.d;
 		var helper = F2(
 			function (node, acc) {
-				if (!node.$) {
+				if (node.$ === 'SubTree') {
 					var subTree = node.a;
 					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
 				} else {
@@ -4782,32 +4782,32 @@ var $elm$core$Array$toList = function (array) {
 	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
 };
 var $elm$core$Result$Err = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Err', a: a};
 };
 var $elm$json$Json$Decode$Failure = F2(
 	function (a, b) {
-		return {$: 3, a: a, b: b};
+		return {$: 'Failure', a: a, b: b};
 	});
 var $elm$json$Json$Decode$Field = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Field', a: a, b: b};
 	});
 var $elm$json$Json$Decode$Index = F2(
 	function (a, b) {
-		return {$: 1, a: a, b: b};
+		return {$: 'Index', a: a, b: b};
 	});
 var $elm$core$Result$Ok = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Ok', a: a};
 };
 var $elm$json$Json$Decode$OneOf = function (a) {
-	return {$: 2, a: a};
+	return {$: 'OneOf', a: a};
 };
-var $elm$core$Basics$False = 1;
+var $elm$core$Basics$False = {$: 'False'};
 var $elm$core$Basics$add = _Basics_add;
 var $elm$core$Maybe$Just = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Just', a: a};
 };
-var $elm$core$Maybe$Nothing = {$: 1};
+var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$String$all = _String_all;
 var $elm$core$Basics$and = _Basics_and;
 var $elm$core$Basics$append = _Utils_append;
@@ -4932,12 +4932,12 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 		errorToStringHelp:
 		while (true) {
 			switch (error.$) {
-				case 0:
+				case 'Field':
 					var f = error.a;
 					var err = error.b;
 					var isSimple = function () {
 						var _v1 = $elm$core$String$uncons(f);
-						if (_v1.$ === 1) {
+						if (_v1.$ === 'Nothing') {
 							return false;
 						} else {
 							var _v2 = _v1.a;
@@ -4952,7 +4952,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 					error = $temp$error;
 					context = $temp$context;
 					continue errorToStringHelp;
-				case 1:
+				case 'Index':
 					var i = error.a;
 					var err = error.b;
 					var indexName = '[' + ($elm$core$String$fromInt(i) + ']');
@@ -4961,7 +4961,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 					error = $temp$error;
 					context = $temp$context;
 					continue errorToStringHelp;
-				case 2:
+				case 'OneOf':
 					var errors = error.a;
 					if (!errors.b) {
 						return 'Ran into a Json.Decode.oneOf with no possibilities' + function () {
@@ -5025,7 +5025,7 @@ var $elm$json$Json$Decode$errorToStringHelp = F2(
 var $elm$core$Array$branchFactor = 32;
 var $elm$core$Array$Array_elm_builtin = F4(
 	function (a, b, c, d) {
-		return {$: 0, a: a, b: b, c: c, d: d};
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
 	});
 var $elm$core$Elm$JsArray$empty = _JsArray_empty;
 var $elm$core$Basics$ceiling = _Basics_ceiling;
@@ -5040,7 +5040,7 @@ var $elm$core$Array$shiftStep = $elm$core$Basics$ceiling(
 var $elm$core$Array$empty = A4($elm$core$Array$Array_elm_builtin, 0, $elm$core$Array$shiftStep, $elm$core$Elm$JsArray$empty, $elm$core$Elm$JsArray$empty);
 var $elm$core$Elm$JsArray$initialize = _JsArray_initialize;
 var $elm$core$Array$Leaf = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Leaf', a: a};
 };
 var $elm$core$Basics$apL = F2(
 	function (f, x) {
@@ -5060,7 +5060,7 @@ var $elm$core$Basics$max = F2(
 	});
 var $elm$core$Basics$mul = _Basics_mul;
 var $elm$core$Array$SubTree = function (a) {
-	return {$: 0, a: a};
+	return {$: 'SubTree', a: a};
 };
 var $elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
 var $elm$core$Array$compressNodes = F2(
@@ -5107,25 +5107,25 @@ var $elm$core$Array$treeFromBuilder = F2(
 	});
 var $elm$core$Array$builderToArray = F2(
 	function (reverseNodeList, builder) {
-		if (!builder.q) {
+		if (!builder.nodeListSize) {
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.t),
+				$elm$core$Elm$JsArray$length(builder.tail),
 				$elm$core$Array$shiftStep,
 				$elm$core$Elm$JsArray$empty,
-				builder.t);
+				builder.tail);
 		} else {
-			var treeLen = builder.q * $elm$core$Array$branchFactor;
+			var treeLen = builder.nodeListSize * $elm$core$Array$branchFactor;
 			var depth = $elm$core$Basics$floor(
 				A2($elm$core$Basics$logBase, $elm$core$Array$branchFactor, treeLen - 1));
-			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.w) : builder.w;
-			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.q);
+			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.nodeList) : builder.nodeList;
+			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
 			return A4(
 				$elm$core$Array$Array_elm_builtin,
-				$elm$core$Elm$JsArray$length(builder.t) + treeLen,
+				$elm$core$Elm$JsArray$length(builder.tail) + treeLen,
 				A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep),
 				tree,
-				builder.t);
+				builder.tail);
 		}
 	});
 var $elm$core$Basics$idiv = _Basics_idiv;
@@ -5138,7 +5138,7 @@ var $elm$core$Array$initializeHelp = F5(
 				return A2(
 					$elm$core$Array$builderToArray,
 					false,
-					{w: nodeList, q: (len / $elm$core$Array$branchFactor) | 0, t: tail});
+					{nodeList: nodeList, nodeListSize: (len / $elm$core$Array$branchFactor) | 0, tail: tail});
 			} else {
 				var leaf = $elm$core$Array$Leaf(
 					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
@@ -5168,9 +5168,9 @@ var $elm$core$Array$initialize = F2(
 			return A5($elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
-var $elm$core$Basics$True = 0;
+var $elm$core$Basics$True = {$: 'True'};
 var $elm$core$Result$isOk = function (result) {
-	if (!result.$) {
+	if (result.$ === 'Ok') {
 		return true;
 	} else {
 		return false;
@@ -5181,31 +5181,33 @@ var $elm$json$Json$Decode$map2 = _Json_map2;
 var $elm$json$Json$Decode$succeed = _Json_succeed;
 var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
-		case 0:
+		case 'Normal':
 			return 0;
-		case 1:
+		case 'MayStopPropagation':
 			return 1;
-		case 2:
+		case 'MayPreventDefault':
 			return 2;
 		default:
 			return 3;
 	}
 };
 var $elm$browser$Browser$External = function (a) {
-	return {$: 1, a: a};
+	return {$: 'External', a: a};
 };
 var $elm$browser$Browser$Internal = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Internal', a: a};
 };
 var $elm$core$Basics$identity = function (x) {
 	return x;
 };
-var $elm$browser$Browser$Dom$NotFound = $elm$core$Basics$identity;
-var $elm$url$Url$Http = 0;
-var $elm$url$Url$Https = 1;
+var $elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
+var $elm$url$Url$Http = {$: 'Http'};
+var $elm$url$Url$Https = {$: 'Https'};
 var $elm$url$Url$Url = F6(
 	function (protocol, host, port_, path, query, fragment) {
-		return {bW: fragment, b0: host, ck: path, cn: port_, cq: protocol, cr: query};
+		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
 	});
 var $elm$core$String$contains = _String_contains;
 var $elm$core$String$length = _String_length;
@@ -5241,7 +5243,7 @@ var $elm$url$Url$chompBeforePath = F5(
 					var i = _v0.a;
 					var _v1 = $elm$core$String$toInt(
 						A2($elm$core$String$dropLeft, i + 1, str));
-					if (_v1.$ === 1) {
+					if (_v1.$ === 'Nothing') {
 						return $elm$core$Maybe$Nothing;
 					} else {
 						var port_ = _v1;
@@ -5324,24 +5326,26 @@ var $elm$core$String$startsWith = _String_startsWith;
 var $elm$url$Url$fromString = function (str) {
 	return A2($elm$core$String$startsWith, 'http://', str) ? A2(
 		$elm$url$Url$chompAfterProtocol,
-		0,
+		$elm$url$Url$Http,
 		A2($elm$core$String$dropLeft, 7, str)) : (A2($elm$core$String$startsWith, 'https://', str) ? A2(
 		$elm$url$Url$chompAfterProtocol,
-		1,
+		$elm$url$Url$Https,
 		A2($elm$core$String$dropLeft, 8, str)) : $elm$core$Maybe$Nothing);
 };
 var $elm$core$Basics$never = function (_v0) {
 	never:
 	while (true) {
-		var nvr = _v0;
+		var nvr = _v0.a;
 		var $temp$_v0 = nvr;
 		_v0 = $temp$_v0;
 		continue never;
 	}
 };
-var $elm$core$Task$Perform = $elm$core$Basics$identity;
+var $elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
 var $elm$core$Task$succeed = _Scheduler_succeed;
-var $elm$core$Task$init = $elm$core$Task$succeed(0);
+var $elm$core$Task$init = $elm$core$Task$succeed(_Utils_Tuple0);
 var $elm$core$List$foldrHelper = F4(
 	function (fn, acc, ctr, ls) {
 		if (!ls.b) {
@@ -5447,7 +5451,7 @@ var $elm$core$Task$sequence = function (tasks) {
 var $elm$core$Platform$sendToApp = _Platform_sendToApp;
 var $elm$core$Task$spawnCmd = F2(
 	function (router, _v0) {
-		var task = _v0;
+		var task = _v0.a;
 		return _Scheduler_spawn(
 			A2(
 				$elm$core$Task$andThen,
@@ -5459,7 +5463,7 @@ var $elm$core$Task$onEffects = F3(
 		return A2(
 			$elm$core$Task$map,
 			function (_v0) {
-				return 0;
+				return _Utils_Tuple0;
 			},
 			$elm$core$Task$sequence(
 				A2(
@@ -5469,563 +5473,31 @@ var $elm$core$Task$onEffects = F3(
 	});
 var $elm$core$Task$onSelfMsg = F3(
 	function (_v0, _v1, _v2) {
-		return $elm$core$Task$succeed(0);
+		return $elm$core$Task$succeed(_Utils_Tuple0);
 	});
 var $elm$core$Task$cmdMap = F2(
 	function (tagger, _v0) {
-		var task = _v0;
-		return A2($elm$core$Task$map, tagger, task);
+		var task = _v0.a;
+		return $elm$core$Task$Perform(
+			A2($elm$core$Task$map, tagger, task));
 	});
 _Platform_effectManagers['Task'] = _Platform_createManager($elm$core$Task$init, $elm$core$Task$onEffects, $elm$core$Task$onSelfMsg, $elm$core$Task$cmdMap);
 var $elm$core$Task$command = _Platform_leaf('Task');
 var $elm$core$Task$perform = F2(
 	function (toMessage, task) {
 		return $elm$core$Task$command(
-			A2($elm$core$Task$map, toMessage, task));
+			$elm$core$Task$Perform(
+				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$json$Json$Decode$decodeValue = _Json_run;
-var $author$project$Model$Model = function (items) {
-	return function (boxes) {
-		return function (boxId) {
-			return function (nextId) {
-				return function (imageCache) {
-					return function (text) {
-						return function (mouse) {
-							return function (search) {
-								return function (icon) {
-									return function (selection) {
-										return {a4: boxId, bL: boxes, aa: icon, dh: imageCache, b7: items, dt: mouse, dw: nextId, C: search, ax: selection, dX: text};
-									};
-								};
-							};
-						};
-					};
-				};
-			};
-		};
-	};
-};
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $author$project$ModelParts$Box = F4(
-	function (id, rect, scroll, items) {
-		return {aK: id, b7: items, aO: rect, aU: scroll};
-	});
-var $author$project$ModelParts$Point = F2(
-	function (x, y) {
-		return {d1: x, d3: y};
-	});
-var $author$project$ModelParts$Rectangle = F4(
-	function (x1, y1, x2, y2) {
-		return {d2: x1, a0: x2, d4: y1, a1: y2};
-	});
-var $author$project$ModelParts$AssocP = function (a) {
-	return {$: 1, a: a};
-};
-var $author$project$ModelParts$AssocProps = {};
-var $author$project$ModelParts$BoxItem = F4(
-	function (id, boxAssocId, visibility, props) {
-		return {cX: boxAssocId, aK: id, ac: props, al: visibility};
-	});
-var $author$project$ModelParts$TopicP = function (a) {
-	return {$: 0, a: a};
-};
-var $author$project$ModelParts$TopicProps = F2(
-	function (pos, displayMode) {
-		return {aI: displayMode, av: pos};
-	});
-var $author$project$ModelParts$BlackBox = 0;
-var $author$project$ModelParts$BoxD = function (a) {
-	return {$: 1, a: a};
-};
-var $author$project$ModelParts$Detail = 1;
-var $author$project$ModelParts$LabelOnly = 0;
-var $author$project$ModelParts$TopicD = function (a) {
-	return {$: 0, a: a};
-};
-var $author$project$ModelParts$Unboxed = 2;
-var $author$project$ModelParts$WhiteBox = 1;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $author$project$ModelParts$displayModeDecoder = function (str) {
-	switch (str) {
-		case 'LabelOnly':
-			return $elm$json$Json$Decode$succeed(
-				$author$project$ModelParts$TopicD(0));
-		case 'Detail':
-			return $elm$json$Json$Decode$succeed(
-				$author$project$ModelParts$TopicD(1));
-		case 'BlackBox':
-			return $elm$json$Json$Decode$succeed(
-				$author$project$ModelParts$BoxD(0));
-		case 'WhiteBox':
-			return $elm$json$Json$Decode$succeed(
-				$author$project$ModelParts$BoxD(1));
-		case 'Unboxed':
-			return $elm$json$Json$Decode$succeed(
-				$author$project$ModelParts$BoxD(2));
-		default:
-			return $elm$json$Json$Decode$fail('\"' + (str + '\" is an invalid DisplayMode'));
-	}
-};
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Decode$map4 = _Json_map4;
-var $elm$json$Json$Decode$oneOf = _Json_oneOf;
-var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$ModelParts$Pinned = 0;
-var $author$project$ModelParts$Removed = {$: 1};
-var $author$project$ModelParts$Unpinned = 1;
-var $author$project$ModelParts$Visible = function (a) {
-	return {$: 0, a: a};
-};
-var $author$project$ModelParts$visibilityDecoder = function (str) {
-	switch (str) {
-		case 'Pinned':
-			return $elm$json$Json$Decode$succeed(
-				$author$project$ModelParts$Visible(0));
-		case 'Visible':
-			return $elm$json$Json$Decode$succeed(
-				$author$project$ModelParts$Visible(1));
-		case 'Removed':
-			return $elm$json$Json$Decode$succeed($author$project$ModelParts$Removed);
-		default:
-			return $elm$json$Json$Decode$fail('\"' + (str + '\" is an invalid Visibility'));
-	}
-};
-var $author$project$ModelParts$boxItemDecoder = A5(
-	$elm$json$Json$Decode$map4,
-	$author$project$ModelParts$BoxItem,
-	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
-	A2($elm$json$Json$Decode$field, 'boxAssocId', $elm$json$Json$Decode$int),
-	A2(
-		$elm$json$Json$Decode$andThen,
-		$author$project$ModelParts$visibilityDecoder,
-		A2($elm$json$Json$Decode$field, 'visibility', $elm$json$Json$Decode$string)),
-	$elm$json$Json$Decode$oneOf(
-		_List_fromArray(
-			[
-				A2(
-				$elm$json$Json$Decode$field,
-				'topicProps',
-				A2(
-					$elm$json$Json$Decode$map,
-					$author$project$ModelParts$TopicP,
-					A3(
-						$elm$json$Json$Decode$map2,
-						$author$project$ModelParts$TopicProps,
-						A2(
-							$elm$json$Json$Decode$field,
-							'pos',
-							A3(
-								$elm$json$Json$Decode$map2,
-								$author$project$ModelParts$Point,
-								A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$int),
-								A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$int))),
-						A2(
-							$elm$json$Json$Decode$andThen,
-							$author$project$ModelParts$displayModeDecoder,
-							A2($elm$json$Json$Decode$field, 'display', $elm$json$Json$Decode$string))))),
-				A2(
-				$elm$json$Json$Decode$field,
-				'assocProps',
-				$elm$json$Json$Decode$succeed(
-					$author$project$ModelParts$AssocP($author$project$ModelParts$AssocProps)))
-			])));
-var $elm$json$Json$Decode$list = _Json_decodeList;
-var $elm$core$Dict$RBEmpty_elm_builtin = {$: -2};
-var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$core$Dict$Black = 1;
-var $elm$core$Dict$RBNode_elm_builtin = F5(
-	function (a, b, c, d, e) {
-		return {$: -1, a: a, b: b, c: c, d: d, e: e};
-	});
-var $elm$core$Dict$Red = 0;
-var $elm$core$Dict$balance = F5(
-	function (color, key, value, left, right) {
-		if ((right.$ === -1) && (!right.a)) {
-			var _v1 = right.a;
-			var rK = right.b;
-			var rV = right.c;
-			var rLeft = right.d;
-			var rRight = right.e;
-			if ((left.$ === -1) && (!left.a)) {
-				var _v3 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var lLeft = left.d;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					0,
-					key,
-					value,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, rK, rV, rLeft, rRight));
-			} else {
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					color,
-					rK,
-					rV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, left, rLeft),
-					rRight);
-			}
-		} else {
-			if ((((left.$ === -1) && (!left.a)) && (left.d.$ === -1)) && (!left.d.a)) {
-				var _v5 = left.a;
-				var lK = left.b;
-				var lV = left.c;
-				var _v6 = left.d;
-				var _v7 = _v6.a;
-				var llK = _v6.b;
-				var llV = _v6.c;
-				var llLeft = _v6.d;
-				var llRight = _v6.e;
-				var lRight = left.e;
-				return A5(
-					$elm$core$Dict$RBNode_elm_builtin,
-					0,
-					lK,
-					lV,
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, llK, llV, llLeft, llRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 1, key, value, lRight, right));
-			} else {
-				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
-			}
-		}
-	});
-var $elm$core$Basics$compare = _Utils_compare;
-var $elm$core$Dict$insertHelp = F3(
-	function (key, value, dict) {
-		if (dict.$ === -2) {
-			return A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
-		} else {
-			var nColor = dict.a;
-			var nKey = dict.b;
-			var nValue = dict.c;
-			var nLeft = dict.d;
-			var nRight = dict.e;
-			var _v1 = A2($elm$core$Basics$compare, key, nKey);
-			switch (_v1) {
-				case 0:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						A3($elm$core$Dict$insertHelp, key, value, nLeft),
-						nRight);
-				case 1:
-					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
-				default:
-					return A5(
-						$elm$core$Dict$balance,
-						nColor,
-						nKey,
-						nValue,
-						nLeft,
-						A3($elm$core$Dict$insertHelp, key, value, nRight));
-			}
-		}
-	});
-var $elm$core$Dict$insert = F3(
-	function (key, value, dict) {
-		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
-		if ((_v0.$ === -1) && (!_v0.a)) {
-			var _v1 = _v0.a;
-			var k = _v0.b;
-			var v = _v0.c;
-			var l = _v0.d;
-			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, 1, k, v, l, r);
-		} else {
-			var x = _v0;
-			return x;
-		}
-	});
-var $elm$core$Dict$fromList = function (assocs) {
-	return A3(
-		$elm$core$List$foldl,
-		F2(
-			function (_v0, dict) {
-				var key = _v0.a;
-				var value = _v0.b;
-				return A3($elm$core$Dict$insert, key, value, dict);
-			}),
-		$elm$core$Dict$empty,
-		assocs);
-};
-var $author$project$ModelParts$toDictDecoder = function (items) {
-	return $elm$json$Json$Decode$succeed(
-		$elm$core$Dict$fromList(
-			A2(
-				$elm$core$List$map,
-				function (item) {
-					return _Utils_Tuple2(item.aK, item);
-				},
-				items)));
-};
-var $author$project$ModelParts$boxDecoder = A5(
-	$elm$json$Json$Decode$map4,
-	$author$project$ModelParts$Box,
-	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
-	A2(
-		$elm$json$Json$Decode$field,
-		'rect',
-		A5(
-			$elm$json$Json$Decode$map4,
-			$author$project$ModelParts$Rectangle,
-			A2($elm$json$Json$Decode$field, 'x1', $elm$json$Json$Decode$int),
-			A2($elm$json$Json$Decode$field, 'y1', $elm$json$Json$Decode$int),
-			A2($elm$json$Json$Decode$field, 'x2', $elm$json$Json$Decode$int),
-			A2($elm$json$Json$Decode$field, 'y2', $elm$json$Json$Decode$int))),
-	A2(
-		$elm$json$Json$Decode$field,
-		'scroll',
-		A3(
-			$elm$json$Json$Decode$map2,
-			$author$project$ModelParts$Point,
-			A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$int),
-			A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$int))),
-	A2(
-		$elm$json$Json$Decode$field,
-		'items',
-		A2(
-			$elm$json$Json$Decode$andThen,
-			$author$project$ModelParts$toDictDecoder,
-			$elm$json$Json$Decode$list($author$project$ModelParts$boxItemDecoder))));
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
-var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
-var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded = A2($elm$core$Basics$composeR, $elm$json$Json$Decode$succeed, $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom);
-var $author$project$Feature$Icon$Closed = 1;
-var $author$project$Feature$Icon$init = {cl: 1};
-var $author$project$Feature$Mouse$NoDrag = function (a) {
-	return {$: 4, a: a};
-};
-var $author$project$Feature$Mouse$init = {
-	c6: $author$project$Feature$Mouse$NoDrag($elm$core$Maybe$Nothing)
-};
-var $author$project$Feature$Search$NoSearch = {$: 2};
-var $author$project$Feature$Search$init = {cw: $author$project$Feature$Search$NoSearch, cH: ''};
-var $author$project$Feature$Sel$init = {b7: _List_Nil};
-var $author$project$Feature$Text$NoEdit = {$: 1};
-var $author$project$Feature$Text$init = {c7: $author$project$Feature$Text$NoEdit, cc: ''};
-var $author$project$ModelParts$Assoc = function (a) {
-	return {$: 1, a: a};
-};
-var $author$project$ModelParts$AssocInfo = F4(
-	function (id, assocType, player1, player2) {
-		return {cT: assocType, aK: id, dK: player1, dL: player2};
-	});
-var $author$project$ModelParts$Item = F3(
-	function (id, info, assocIds) {
-		return {bH: assocIds, aK: id, b2: info};
-	});
-var $author$project$ModelParts$Topic = function (a) {
-	return {$: 0, a: a};
-};
-var $author$project$ModelParts$TopicInfo = F4(
-	function (id, icon, text, size) {
-		return {aa: icon, aK: id, bo: size, dX: text};
-	});
-var $elm$core$Set$Set_elm_builtin = $elm$core$Basics$identity;
-var $elm$core$Set$empty = $elm$core$Dict$empty;
-var $elm$core$Set$insert = F2(
-	function (key, _v0) {
-		var dict = _v0;
-		return A3($elm$core$Dict$insert, key, 0, dict);
-	});
-var $elm$core$Set$fromList = function (list) {
-	return A3($elm$core$List$foldl, $elm$core$Set$insert, $elm$core$Set$empty, list);
-};
-var $author$project$ModelParts$assocIdsDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	A2($elm$core$Basics$composeR, $elm$core$Set$fromList, $elm$json$Json$Decode$succeed),
-	A2(
-		$elm$json$Json$Decode$field,
-		'assocIds',
-		$elm$json$Json$Decode$list($elm$json$Json$Decode$int)));
-var $author$project$ModelParts$Crosslink = 1;
-var $author$project$ModelParts$Hierarchy = 0;
-var $author$project$ModelParts$assocTypeDecoder = function (str) {
-	switch (str) {
-		case 'Hierarchy':
-			return $elm$json$Json$Decode$succeed(0);
-		case 'Crosslink':
-			return $elm$json$Json$Decode$succeed(1);
-		default:
-			return $elm$json$Json$Decode$fail('\"' + (str + '\" is an invalid AssocType'));
-	}
-};
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$ModelParts$maybeString = function (str) {
-	return $elm$json$Json$Decode$succeed(
-		function () {
-			if (str === '') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				return $elm$core$Maybe$Just(str);
-			}
-		}());
-};
-var $author$project$ModelParts$Size = F2(
-	function (w, h) {
-		return {b_: h, cN: w};
-	});
-var $author$project$ModelParts$TextSize = F2(
-	function (view, editor) {
-		return {c8: editor, d_: view};
-	});
-var $author$project$ModelParts$textSizeDecoder = A2(
-	$elm$json$Json$Decode$field,
-	'size',
-	A3(
-		$elm$json$Json$Decode$map2,
-		$author$project$ModelParts$TextSize,
-		A2(
-			$elm$json$Json$Decode$field,
-			'view',
-			A3(
-				$elm$json$Json$Decode$map2,
-				$author$project$ModelParts$Size,
-				A2($elm$json$Json$Decode$field, 'w', $elm$json$Json$Decode$int),
-				A2($elm$json$Json$Decode$field, 'h', $elm$json$Json$Decode$int))),
-		A2(
-			$elm$json$Json$Decode$field,
-			'editor',
-			A3(
-				$elm$json$Json$Decode$map2,
-				$author$project$ModelParts$Size,
-				A2($elm$json$Json$Decode$field, 'w', $elm$json$Json$Decode$int),
-				A2($elm$json$Json$Decode$field, 'h', $elm$json$Json$Decode$int)))));
-var $author$project$ModelParts$itemDecoder = $elm$json$Json$Decode$oneOf(
-	_List_fromArray(
-		[
-			A2(
-			$elm$json$Json$Decode$field,
-			'topic',
-			A4(
-				$elm$json$Json$Decode$map3,
-				$author$project$ModelParts$Item,
-				A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
-				A2(
-					$elm$json$Json$Decode$map,
-					$author$project$ModelParts$Topic,
-					A5(
-						$elm$json$Json$Decode$map4,
-						$author$project$ModelParts$TopicInfo,
-						A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
-						A2(
-							$elm$json$Json$Decode$andThen,
-							$author$project$ModelParts$maybeString,
-							A2($elm$json$Json$Decode$field, 'icon', $elm$json$Json$Decode$string)),
-						A2($elm$json$Json$Decode$field, 'text', $elm$json$Json$Decode$string),
-						$author$project$ModelParts$textSizeDecoder)),
-				$author$project$ModelParts$assocIdsDecoder)),
-			A2(
-			$elm$json$Json$Decode$field,
-			'assoc',
-			A4(
-				$elm$json$Json$Decode$map3,
-				$author$project$ModelParts$Item,
-				A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
-				A2(
-					$elm$json$Json$Decode$map,
-					$author$project$ModelParts$Assoc,
-					A5(
-						$elm$json$Json$Decode$map4,
-						$author$project$ModelParts$AssocInfo,
-						A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
-						A2(
-							$elm$json$Json$Decode$andThen,
-							$author$project$ModelParts$assocTypeDecoder,
-							A2($elm$json$Json$Decode$field, 'type', $elm$json$Json$Decode$string)),
-						A2($elm$json$Json$Decode$field, 'player1', $elm$json$Json$Decode$int),
-						A2($elm$json$Json$Decode$field, 'player2', $elm$json$Json$Decode$int))),
-				$author$project$ModelParts$assocIdsDecoder))
-		]));
-var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
-	function (key, valDecoder, decoder) {
-		return A2(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-			A2($elm$json$Json$Decode$field, key, valDecoder),
-			decoder);
-	});
-var $author$project$Model$decoder = A2(
-	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
-	$author$project$Feature$Sel$init,
-	A2(
-		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
-		$author$project$Feature$Icon$init,
-		A2(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
-			$author$project$Feature$Search$init,
-			A2(
-				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
-				$author$project$Feature$Mouse$init,
-				A2(
-					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
-					$author$project$Feature$Text$init,
-					A2(
-						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
-						$elm$core$Dict$empty,
-						A3(
-							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'nextId',
-							$elm$json$Json$Decode$int,
-							A3(
-								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'boxId',
-								$elm$json$Json$Decode$int,
-								A3(
-									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-									'boxes',
-									A2(
-										$elm$json$Json$Decode$andThen,
-										$author$project$ModelParts$toDictDecoder,
-										$elm$json$Json$Decode$list($author$project$ModelParts$boxDecoder)),
-									A3(
-										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-										'items',
-										A2(
-											$elm$json$Json$Decode$andThen,
-											$author$project$ModelParts$toDictDecoder,
-											$elm$json$Json$Decode$list($author$project$ModelParts$itemDecoder)),
-										$elm$json$Json$Decode$succeed($author$project$Model$Model)))))))))));
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $author$project$AppEmbed$evidence = _Platform_outgoingPort('evidence', $elm$json$Json$Encode$string);
-var $elm$core$List$isEmpty = function (xs) {
-	if (!xs.b) {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $author$project$AppEmbed$jsonPair = F2(
-	function (key, value) {
-		return '\"' + (key + ('\":' + value));
-	});
-var $author$project$AppEmbed$jsonString = function (value) {
-	return '\"' + (value + '\"');
-};
-var $author$project$AppEmbed$emitEvidence = F2(
-	function (kind, fields) {
-		return $author$project$AppEmbed$evidence(
-			'{' + (A2(
-				$author$project$AppEmbed$jsonPair,
-				'kind',
-				$author$project$AppEmbed$jsonString(kind)) + ($elm$core$List$isEmpty(fields) ? '}' : (',' + (A2($elm$core$String$join, ',', fields) + '}')))));
-	});
 var $author$project$AppEmbed$Flags = F2(
 	function (slug, stored) {
-		return {bp: slug, bs: stored};
+		return {slug: slug, stored: stored};
 	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$maybe = function (decoder) {
 	return $elm$json$Json$Decode$oneOf(
 		_List_fromArray(
@@ -6034,9 +5506,10 @@ var $elm$json$Json$Decode$maybe = function (decoder) {
 				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
 			]));
 };
+var $elm$json$Json$Decode$string = _Json_decodeString;
 var $elm$core$Maybe$withDefault = F2(
 	function (_default, maybe) {
-		if (!maybe.$) {
+		if (maybe.$ === 'Just') {
 			var value = maybe.a;
 			return value;
 		} else {
@@ -6056,72 +5529,706 @@ var $author$project$AppEmbed$flagsDecoder = A3(
 		$elm$core$Maybe$withDefault('{}'),
 		$elm$json$Json$Decode$maybe(
 			A2($elm$json$Json$Decode$field, 'stored', $elm$json$Json$Decode$string))));
-var $author$project$ModelParts$rootBoxId = 0;
-var $author$project$Config$rootBoxName = 'DM6 Elm';
+var $author$project$AppEmbed$decodeFlags = function (rawFlags) {
+	var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$AppEmbed$flagsDecoder, rawFlags);
+	if (_v0.$ === 'Ok') {
+		var decoded = _v0.a;
+		return decoded;
+	} else {
+		return {slug: 'empty', stored: '{}'};
+	}
+};
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $author$project$Model$Model = function (topics) {
+	return function (assocs) {
+		return function (itemSets) {
+			return function (boxes) {
+				return function (boxId) {
+					return function (nextId) {
+						return function (topicMap) {
+							return function (topicList) {
+								return function (tool) {
+									return function (text) {
+										return function (mouse) {
+											return function (search) {
+												return function (icon) {
+													return function (selection) {
+														return {assocs: assocs, boxId: boxId, boxes: boxes, icon: icon, itemSets: itemSets, mouse: mouse, nextId: nextId, search: search, selection: selection, text: text, tool: tool, topicList: topicList, topicMap: topicMap, topics: topics};
+													};
+												};
+											};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var $author$project$ModelBase$Assoc = F4(
+	function (id, assocType, topicId1, topicId2) {
+		return {assocType: assocType, id: id, topicId1: topicId1, topicId2: topicId2};
+	});
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $author$project$ModelBase$AssocId = function (a) {
+	return {$: 'AssocId', a: a};
+};
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $author$project$ModelBase$assocIdDecoder = A2($elm$json$Json$Decode$map, $author$project$ModelBase$AssocId, $elm$json$Json$Decode$int);
+var $author$project$ModelBase$Association = {$: 'Association'};
+var $author$project$ModelBase$Hierarchy = {$: 'Hierarchy'};
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $author$project$ModelBase$assocTypeDecoder = function (str) {
+	switch (str) {
+		case 'Association':
+			return $elm$json$Json$Decode$succeed($author$project$ModelBase$Association);
+		case 'Hierarchy':
+			return $elm$json$Json$Decode$succeed($author$project$ModelBase$Hierarchy);
+		default:
+			return $elm$json$Json$Decode$fail('\"' + (str + '\" is an invalid AssocType'));
+	}
+};
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$ModelBase$TopicId = function (a) {
+	return {$: 'TopicId', a: a};
+};
+var $author$project$ModelBase$topicIdDecoder = A2($elm$json$Json$Decode$map, $author$project$ModelBase$TopicId, $elm$json$Json$Decode$int);
+var $author$project$ModelBase$assocDecoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$ModelBase$Assoc,
+	A2($elm$json$Json$Decode$field, 'id', $author$project$ModelBase$assocIdDecoder),
+	A2(
+		$elm$json$Json$Decode$andThen,
+		$author$project$ModelBase$assocTypeDecoder,
+		A2($elm$json$Json$Decode$field, 'type', $elm$json$Json$Decode$string)),
+	A2($elm$json$Json$Decode$field, 'topicId1', $author$project$ModelBase$topicIdDecoder),
+	A2($elm$json$Json$Decode$field, 'topicId2', $author$project$ModelBase$topicIdDecoder));
+var $author$project$ModelBase$Box = F4(
+	function (id, itemSetId, topics, renderer) {
+		return {id: id, itemSetId: itemSetId, renderer: renderer, topics: topics};
+	});
+var $author$project$ModelBase$BoxId = function (a) {
+	return {$: 'BoxId', a: a};
+};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $author$project$ModelBase$boxIdDecoder = A2(
+	$elm$json$Json$Decode$map,
+	A2($elm$core$Basics$composeL, $author$project$ModelBase$BoxId, $author$project$ModelBase$TopicId),
+	$elm$json$Json$Decode$int);
+var $author$project$ModelBase$BoxTopic = F2(
+	function (id, expansion) {
+		return {expansion: expansion, id: id};
+	});
+var $author$project$ModelBase$Collapsed = {$: 'Collapsed'};
+var $author$project$ModelBase$Expanded = {$: 'Expanded'};
+var $author$project$ModelBase$expansionDecoder = function (str) {
+	switch (str) {
+		case 'Collapsed':
+			return $elm$json$Json$Decode$succeed($author$project$ModelBase$Collapsed);
+		case 'Expanded':
+			return $elm$json$Json$Decode$succeed($author$project$ModelBase$Expanded);
+		default:
+			return $elm$json$Json$Decode$fail('\"' + (str + '\" is an invalid Expansion'));
+	}
+};
+var $author$project$ModelBase$boxTopicDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$ModelBase$BoxTopic,
+	A2($elm$json$Json$Decode$field, 'id', $author$project$ModelBase$topicIdDecoder),
+	A2(
+		$elm$json$Json$Decode$andThen,
+		$author$project$ModelBase$expansionDecoder,
+		A2($elm$json$Json$Decode$field, 'expansion', $elm$json$Json$Decode$string)));
+var $author$project$Extension$TopicList = {$: 'TopicList'};
+var $author$project$Extension$TopicMap = {$: 'TopicMap'};
+var $author$project$Extension$fromString = function (str) {
+	switch (str) {
+		case 'TopicMap':
+			return $elm$core$Maybe$Just($author$project$Extension$TopicMap);
+		case 'TopicList':
+			return $elm$core$Maybe$Just($author$project$Extension$TopicList);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Extension$rendererDecoder = function (strDecoder) {
+	return A2(
+		$elm$json$Json$Decode$andThen,
+		function (str) {
+			var _v0 = $author$project$Extension$fromString(str);
+			if (_v0.$ === 'Just') {
+				var renderer = _v0.a;
+				return $elm$json$Json$Decode$succeed(renderer);
+			} else {
+				return $elm$json$Json$Decode$fail('Unknown renderer: \"' + (str + '\"'));
+			}
+		},
+		strDecoder);
+};
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $elm$core$Dict$Black = {$: 'Black'};
+var $elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$core$Dict$Red = {$: 'Red'};
+var $elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _v1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _v3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					key,
+					value,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _v5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _v6 = left.d;
+				var _v7 = _v6.a;
+				var llK = _v6.b;
+				var llV = _v6.c;
+				var llLeft = _v6.d;
+				var llRight = _v6.e;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					lK,
+					lV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1.$) {
+				case 'LT':
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$ModelBase$toDictDecoderWith = F2(
+	function (unwrapId, entityDecoder) {
+		return A2(
+			$elm$json$Json$Decode$map,
+			function (items) {
+				return $elm$core$Dict$fromList(
+					A2(
+						$elm$core$List$map,
+						function (item) {
+							return _Utils_Tuple2(
+								unwrapId(item.id),
+								item);
+						},
+						items));
+			},
+			$elm$json$Json$Decode$list(entityDecoder));
+	});
+var $author$project$ModelBase$toTopicId = function (_v0) {
+	var id = _v0.a;
+	return id;
+};
+var $author$project$ModelBase$boxDecoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$ModelBase$Box,
+	A2($elm$json$Json$Decode$field, 'id', $author$project$ModelBase$boxIdDecoder),
+	A2($elm$json$Json$Decode$field, 'itemSetId', $elm$json$Json$Decode$int),
+	A2(
+		$elm$json$Json$Decode$field,
+		'topics',
+		A2($author$project$ModelBase$toDictDecoderWith, $author$project$ModelBase$toTopicId, $author$project$ModelBase$boxTopicDecoder)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'renderer',
+		$author$project$Extension$rendererDecoder($elm$json$Json$Decode$string)));
+var $author$project$Feature$ToolDef$Cornered = {$: 'Cornered'};
+var $author$project$Feature$ToolDef$init = {lineStyle: $author$project$Feature$ToolDef$Cornered, menu: false};
+var $author$project$Feature$ToolDef$Straight = {$: 'Straight'};
+var $author$project$Feature$ToolDef$lineStyleDecoder = function (lineStyle) {
+	switch (lineStyle) {
+		case 'Cornered':
+			return $elm$json$Json$Decode$succeed($author$project$Feature$ToolDef$Cornered);
+		case 'Straight':
+			return $elm$json$Json$Decode$succeed($author$project$Feature$ToolDef$Straight);
+		default:
+			return $elm$json$Json$Decode$fail('\"' + (lineStyle + '\" is an invalid LineStyle'));
+	}
+};
+var $author$project$Feature$ToolDef$decoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (lineStyle) {
+		return $elm$json$Json$Decode$succeed(
+			_Utils_update(
+				$author$project$Feature$ToolDef$init,
+				{lineStyle: lineStyle}));
+	},
+	A2(
+		$elm$json$Json$Decode$andThen,
+		$author$project$Feature$ToolDef$lineStyleDecoder,
+		A2($elm$json$Json$Decode$field, 'lineStyle', $elm$json$Json$Decode$string)));
+var $author$project$TopicList$TopicListDef$Model = F2(
+	function (viewProps, dragState) {
+		return {dragState: dragState, viewProps: viewProps};
+	});
+var $author$project$TopicList$TopicListDef$NoDrag = {$: 'NoDrag'};
+var $author$project$ModelBase$toBoxId = function (_v0) {
+	var id = _v0.a.a;
+	return id;
+};
+var $author$project$ModelBase$Size = F2(
+	function (w, h) {
+		return {h: h, w: w};
+	});
+var $author$project$TopicList$TopicListDef$ViewProps = F3(
+	function (id, order, size) {
+		return {id: id, order: order, size: size};
+	});
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$TopicList$TopicListDef$topicListDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$TopicList$TopicListDef$ViewProps,
+	A2($elm$json$Json$Decode$field, 'id', $author$project$ModelBase$boxIdDecoder),
+	A2(
+		$elm$json$Json$Decode$field,
+		'order',
+		$elm$json$Json$Decode$list($author$project$ModelBase$topicIdDecoder)),
+	A2(
+		$elm$json$Json$Decode$field,
+		'size',
+		A3(
+			$elm$json$Json$Decode$map2,
+			$author$project$ModelBase$Size,
+			A2($elm$json$Json$Decode$field, 'w', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'h', $elm$json$Json$Decode$int))));
+var $author$project$TopicList$TopicListDef$decoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$TopicList$TopicListDef$Model,
+	A2(
+		$elm$json$Json$Decode$field,
+		'viewProps',
+		A2($author$project$ModelBase$toDictDecoderWith, $author$project$ModelBase$toBoxId, $author$project$TopicList$TopicListDef$topicListDecoder)),
+	$elm$json$Json$Decode$succeed($author$project$TopicList$TopicListDef$NoDrag));
+var $author$project$TopicMap$TopicMapDef$Model = F2(
+	function (viewProps, dragState) {
+		return {dragState: dragState, viewProps: viewProps};
+	});
+var $author$project$TopicMap$TopicMapDef$NoDrag = {$: 'NoDrag'};
+var $author$project$ModelBase$Point = F2(
+	function (x, y) {
+		return {x: x, y: y};
+	});
+var $author$project$ModelBase$Rectangle = F4(
+	function (x1, y1, x2, y2) {
+		return {x1: x1, x2: x2, y1: y1, y2: y2};
+	});
+var $author$project$TopicMap$TopicMapDef$ViewProps = F4(
+	function (id, rect, scroll, topics) {
+		return {id: id, rect: rect, scroll: scroll, topics: topics};
+	});
+var $author$project$TopicMap$TopicMapDef$TopicProps = F3(
+	function (id, pos, expansion) {
+		return {expansion: expansion, id: id, pos: pos};
+	});
+var $author$project$TopicMap$TopicMapDef$mapTopicDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$TopicMap$TopicMapDef$TopicProps,
+	A2($elm$json$Json$Decode$field, 'id', $author$project$ModelBase$topicIdDecoder),
+	A2(
+		$elm$json$Json$Decode$field,
+		'pos',
+		A3(
+			$elm$json$Json$Decode$map2,
+			$author$project$ModelBase$Point,
+			A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$int))),
+	$elm$json$Json$Decode$succeed($author$project$ModelBase$Collapsed));
+var $author$project$TopicMap$TopicMapDef$topicMapDecoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$TopicMap$TopicMapDef$ViewProps,
+	A2($elm$json$Json$Decode$field, 'id', $author$project$ModelBase$boxIdDecoder),
+	A2(
+		$elm$json$Json$Decode$field,
+		'rect',
+		A5(
+			$elm$json$Json$Decode$map4,
+			$author$project$ModelBase$Rectangle,
+			A2($elm$json$Json$Decode$field, 'x1', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'y1', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'x2', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'y2', $elm$json$Json$Decode$int))),
+	A2(
+		$elm$json$Json$Decode$field,
+		'scroll',
+		A3(
+			$elm$json$Json$Decode$map2,
+			$author$project$ModelBase$Point,
+			A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$int))),
+	A2(
+		$elm$json$Json$Decode$field,
+		'topics',
+		A2($author$project$ModelBase$toDictDecoderWith, $author$project$ModelBase$toTopicId, $author$project$TopicMap$TopicMapDef$mapTopicDecoder)));
+var $author$project$TopicMap$TopicMapDef$decoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$TopicMap$TopicMapDef$Model,
+	A2(
+		$elm$json$Json$Decode$field,
+		'viewProps',
+		A2($author$project$ModelBase$toDictDecoderWith, $author$project$ModelBase$toBoxId, $author$project$TopicMap$TopicMapDef$topicMapDecoder)),
+	$elm$json$Json$Decode$succeed($author$project$TopicMap$TopicMapDef$NoDrag));
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded = A2($elm$core$Basics$composeR, $elm$json$Json$Decode$succeed, $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom);
+var $author$project$Feature$IconDef$Closed = {$: 'Closed'};
+var $author$project$Feature$IconDef$init = {picker: $author$project$Feature$IconDef$Closed};
+var $author$project$Feature$MouseDef$NoDrag = {$: 'NoDrag'};
+var $author$project$Feature$MouseDef$init = {dragState: $author$project$Feature$MouseDef$NoDrag, hover: $elm$core$Maybe$Nothing};
+var $author$project$Feature$SearchDef$NoSearch = {$: 'NoSearch'};
+var $author$project$Feature$SearchDef$init = {result: $author$project$Feature$SearchDef$NoSearch, term: ''};
+var $author$project$Feature$SelDef$init = {items: _List_Nil};
+var $author$project$Feature$TextDef$NoEdit = {$: 'NoEdit'};
+var $author$project$Feature$TextDef$init = {edit: $author$project$Feature$TextDef$NoEdit, imageCache: $elm$core$Dict$empty, measure: ''};
+var $author$project$ModelBase$A = function (a) {
+	return {$: 'A', a: a};
+};
+var $author$project$ModelBase$ItemSet = F2(
+	function (id, items) {
+		return {id: id, items: items};
+	});
+var $author$project$ModelBase$SetItem = function (id) {
+	return {id: id};
+};
+var $author$project$ModelBase$T = function (a) {
+	return {$: 'T', a: a};
+};
+var $author$project$ModelBase$itemSetDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$ModelBase$ItemSet,
+	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
+	A2(
+		$elm$json$Json$Decode$field,
+		'items',
+		$elm$json$Json$Decode$list(
+			$elm$json$Json$Decode$oneOf(
+				_List_fromArray(
+					[
+						A2(
+						$elm$json$Json$Decode$map,
+						A2(
+							$elm$core$Basics$composeL,
+							A2($elm$core$Basics$composeL, $author$project$ModelBase$SetItem, $author$project$ModelBase$T),
+							$author$project$ModelBase$TopicId),
+						A2($elm$json$Json$Decode$field, 'topicId', $elm$json$Json$Decode$int)),
+						A2(
+						$elm$json$Json$Decode$map,
+						A2(
+							$elm$core$Basics$composeL,
+							A2($elm$core$Basics$composeL, $author$project$ModelBase$SetItem, $author$project$ModelBase$A),
+							$author$project$ModelBase$AssocId),
+						A2($elm$json$Json$Decode$field, 'assocId', $elm$json$Json$Decode$int))
+					])))));
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
+	function (key, valDecoder, decoder) {
+		return A2(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+			A2($elm$json$Json$Decode$field, key, valDecoder),
+			decoder);
+	});
+var $author$project$ModelBase$toAssocId = function (_v0) {
+	var id = _v0.a;
+	return id;
+};
+var $author$project$ModelBase$toDictDecoder = function (entityDecoder) {
+	return A2($author$project$ModelBase$toDictDecoderWith, $elm$core$Basics$identity, entityDecoder);
+};
+var $author$project$ModelBase$Topic = F5(
+	function (id, icon, text, size, assocIds) {
+		return {assocIds: assocIds, icon: icon, id: id, size: size, text: text};
+	});
+var $author$project$ModelBase$assocIdsDecoder = A2(
+	$elm$json$Json$Decode$field,
+	'assocIds',
+	$elm$json$Json$Decode$list($author$project$ModelBase$assocIdDecoder));
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$ModelBase$maybeString = function (str) {
+	if (str === '') {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		return $elm$core$Maybe$Just(str);
+	}
+};
+var $author$project$ModelBase$TextSize = F2(
+	function (view, editor) {
+		return {editor: editor, view: view};
+	});
+var $author$project$ModelBase$textSizeDecoder = A2(
+	$elm$json$Json$Decode$field,
+	'size',
+	A3(
+		$elm$json$Json$Decode$map2,
+		$author$project$ModelBase$TextSize,
+		A2(
+			$elm$json$Json$Decode$field,
+			'view',
+			A3(
+				$elm$json$Json$Decode$map2,
+				$author$project$ModelBase$Size,
+				A2($elm$json$Json$Decode$field, 'w', $elm$json$Json$Decode$int),
+				A2($elm$json$Json$Decode$field, 'h', $elm$json$Json$Decode$int))),
+		A2(
+			$elm$json$Json$Decode$field,
+			'editor',
+			A3(
+				$elm$json$Json$Decode$map2,
+				$author$project$ModelBase$Size,
+				A2($elm$json$Json$Decode$field, 'w', $elm$json$Json$Decode$int),
+				A2($elm$json$Json$Decode$field, 'h', $elm$json$Json$Decode$int)))));
+var $author$project$ModelBase$topicDecoder = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$ModelBase$Topic,
+	A2($elm$json$Json$Decode$field, 'id', $author$project$ModelBase$topicIdDecoder),
+	A2(
+		$elm$json$Json$Decode$map,
+		$author$project$ModelBase$maybeString,
+		A2($elm$json$Json$Decode$field, 'icon', $elm$json$Json$Decode$string)),
+	A2($elm$json$Json$Decode$field, 'text', $elm$json$Json$Decode$string),
+	$author$project$ModelBase$textSizeDecoder,
+	$author$project$ModelBase$assocIdsDecoder);
+var $author$project$Model$decoder = A2(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
+	$author$project$Feature$SelDef$init,
+	A2(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
+		$author$project$Feature$IconDef$init,
+		A2(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
+			$author$project$Feature$SearchDef$init,
+			A2(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
+				$author$project$Feature$MouseDef$init,
+				A2(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
+					$author$project$Feature$TextDef$init,
+					A3(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'tool',
+						$author$project$Feature$ToolDef$decoder,
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'topicList',
+							$author$project$TopicList$TopicListDef$decoder,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'topicMap',
+								$author$project$TopicMap$TopicMapDef$decoder,
+								A3(
+									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+									'nextId',
+									$elm$json$Json$Decode$int,
+									A3(
+										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+										'boxId',
+										$author$project$ModelBase$boxIdDecoder,
+										A3(
+											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+											'boxes',
+											A2($author$project$ModelBase$toDictDecoderWith, $author$project$ModelBase$toBoxId, $author$project$ModelBase$boxDecoder),
+											A3(
+												$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+												'itemSets',
+												$author$project$ModelBase$toDictDecoder($author$project$ModelBase$itemSetDecoder),
+												A3(
+													$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+													'assocs',
+													A2($author$project$ModelBase$toDictDecoderWith, $author$project$ModelBase$toAssocId, $author$project$ModelBase$assocDecoder),
+													A3(
+														$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+														'topics',
+														A2($author$project$ModelBase$toDictDecoderWith, $author$project$ModelBase$toTopicId, $author$project$ModelBase$topicDecoder),
+														$elm$json$Json$Decode$succeed($author$project$Model$Model)))))))))))))));
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$AppEmbed$evidence = _Platform_outgoingPort('evidence', $elm$json$Json$Encode$string);
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $author$project$AppEmbed$emitEvidence = F2(
+	function (kind, fields) {
+		return $author$project$AppEmbed$evidence(
+			A2(
+				$elm$json$Json$Encode$encode,
+				0,
+				$elm$json$Json$Encode$object(
+					A2(
+						$elm$core$List$cons,
+						_Utils_Tuple2(
+							'kind',
+							$elm$json$Json$Encode$string(kind)),
+						fields))));
+	});
+var $author$project$Extension$defaultRenderer = $author$project$Extension$TopicMap;
+var $author$project$TopicList$TopicListDef$init = {dragState: $author$project$TopicList$TopicListDef$NoDrag, viewProps: $elm$core$Dict$empty};
+var $author$project$ModelBase$rootBoxId = $author$project$ModelBase$BoxId(
+	$author$project$ModelBase$TopicId(0));
 var $elm$core$Dict$singleton = F2(
 	function (key, value) {
-		return A5($elm$core$Dict$RBNode_elm_builtin, 1, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
 	});
+var $author$project$TopicMap$TopicMapDef$init = {
+	dragState: $author$project$TopicMap$TopicMapDef$NoDrag,
+	viewProps: A2(
+		$elm$core$Dict$singleton,
+		$author$project$ModelBase$toBoxId($author$project$ModelBase$rootBoxId),
+		A4(
+			$author$project$TopicMap$TopicMapDef$ViewProps,
+			$author$project$ModelBase$rootBoxId,
+			A4($author$project$ModelBase$Rectangle, 0, 0, 0, 0),
+			A2($author$project$ModelBase$Point, 0, 0),
+			$elm$core$Dict$empty))
+};
+var $author$project$Config$rootBoxName = 'DM6 Elm';
 var $author$project$Model$init = function () {
-	var rootTopic = A4(
-		$author$project$ModelParts$TopicInfo,
-		0,
+	var rootTopic = A5(
+		$author$project$ModelBase$Topic,
+		$author$project$ModelBase$TopicId(0),
 		$elm$core$Maybe$Nothing,
 		$author$project$Config$rootBoxName,
 		A2(
-			$author$project$ModelParts$TextSize,
-			A2($author$project$ModelParts$Size, 0, 0),
-			A2($author$project$ModelParts$Size, 0, 0)));
+			$author$project$ModelBase$TextSize,
+			A2($author$project$ModelBase$Size, 0, 0),
+			A2($author$project$ModelBase$Size, 0, 0)),
+		_List_Nil);
 	return {
-		a4: $author$project$ModelParts$rootBoxId,
-		bL: A2(
+		assocs: $elm$core$Dict$empty,
+		boxId: $author$project$ModelBase$rootBoxId,
+		boxes: A2(
 			$elm$core$Dict$singleton,
-			$author$project$ModelParts$rootBoxId,
-			A4(
-				$author$project$ModelParts$Box,
-				$author$project$ModelParts$rootBoxId,
-				A4($author$project$ModelParts$Rectangle, 0, 0, 0, 0),
-				A2($author$project$ModelParts$Point, 0, 0),
-				$elm$core$Dict$empty)),
-		aa: $author$project$Feature$Icon$init,
-		dh: $elm$core$Dict$empty,
-		b7: A2(
+			$author$project$ModelBase$toBoxId($author$project$ModelBase$rootBoxId),
+			A4($author$project$ModelBase$Box, $author$project$ModelBase$rootBoxId, 1, $elm$core$Dict$empty, $author$project$Extension$defaultRenderer)),
+		icon: $author$project$Feature$IconDef$init,
+		itemSets: A2(
 			$elm$core$Dict$singleton,
-			0,
-			A3(
-				$author$project$ModelParts$Item,
-				0,
-				$author$project$ModelParts$Topic(rootTopic),
-				$elm$core$Set$empty)),
-		dt: $author$project$Feature$Mouse$init,
-		dw: 1,
-		C: $author$project$Feature$Search$init,
-		ax: $author$project$Feature$Sel$init,
-		dX: $author$project$Feature$Text$init
+			1,
+			A2($author$project$ModelBase$ItemSet, 1, _List_Nil)),
+		mouse: $author$project$Feature$MouseDef$init,
+		nextId: 2,
+		search: $author$project$Feature$SearchDef$init,
+		selection: $author$project$Feature$SelDef$init,
+		text: $author$project$Feature$TextDef$init,
+		tool: $author$project$Feature$ToolDef$init,
+		topicList: $author$project$TopicList$TopicListDef$init,
+		topicMap: $author$project$TopicMap$TopicMapDef$init,
+		topics: A2($elm$core$Dict$singleton, 0, rootTopic)
 	};
 }();
-var $author$project$AppEmbed$jsonInt = function (value) {
-	return $elm$core$String$fromInt(value);
-};
-var $elm_community$undo_redo$UndoList$UndoList = F3(
-	function (past, present, future) {
-		return {u: future, s: past, aw: present};
-	});
-var $elm_community$undo_redo$UndoList$fresh = function (state) {
-	return A3($elm_community$undo_redo$UndoList$UndoList, _List_Nil, state, _List_Nil);
-};
-var $author$project$Undo$reset = function (_v0) {
-	var model = _v0.a;
-	var cmd = _v0.b;
-	return _Utils_Tuple2(
-		$elm_community$undo_redo$UndoList$fresh(model),
-		cmd);
-};
+var $elm$json$Json$Encode$int = _Json_wrap;
 var $elm$core$Dict$sizeHelp = F2(
 	function (n, dict) {
 		sizeHelp:
 		while (true) {
-			if (dict.$ === -2) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
 				return n;
 			} else {
 				var left = dict.d;
@@ -6137,50 +6244,62 @@ var $elm$core$Dict$sizeHelp = F2(
 var $elm$core$Dict$size = function (dict) {
 	return A2($elm$core$Dict$sizeHelp, 0, dict);
 };
+var $author$project$AppEmbed$modelStatFields = function (model) {
+	return _List_fromArray(
+		[
+			_Utils_Tuple2(
+			'boxId',
+			$elm$json$Json$Encode$int(
+				$author$project$ModelBase$toBoxId(model.boxId))),
+			_Utils_Tuple2(
+			'topicCount',
+			$elm$json$Json$Encode$int(
+				$elm$core$Dict$size(model.topics))),
+			_Utils_Tuple2(
+			'assocCount',
+			$elm$json$Json$Encode$int(
+				$elm$core$Dict$size(model.assocs))),
+			_Utils_Tuple2(
+			'boxCount',
+			$elm$json$Json$Encode$int(
+				$elm$core$Dict$size(model.boxes)))
+		]);
+};
+var $elm_community$undo_redo$UndoList$UndoList = F3(
+	function (past, present, future) {
+		return {future: future, past: past, present: present};
+	});
+var $elm_community$undo_redo$UndoList$fresh = function (state) {
+	return A3($elm_community$undo_redo$UndoList$UndoList, _List_Nil, state, _List_Nil);
+};
+var $author$project$Undo$reset = function (_v0) {
+	var model = _v0.a;
+	var cmd = _v0.b;
+	return _Utils_Tuple2(
+		$elm_community$undo_redo$UndoList$fresh(model),
+		cmd);
+};
 var $author$project$AppEmbed$storeSnapshotEvidence = F2(
 	function (reason, model) {
 		return A2(
 			$author$project$AppEmbed$emitEvidence,
 			'dm6.store.snapshot',
-			_List_fromArray(
-				[
-					A2(
-					$author$project$AppEmbed$jsonPair,
+			A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2(
 					'reason',
-					$author$project$AppEmbed$jsonString(reason)),
-					A2(
-					$author$project$AppEmbed$jsonPair,
-					'boxId',
-					$author$project$AppEmbed$jsonInt(model.a4)),
-					A2(
-					$author$project$AppEmbed$jsonPair,
-					'itemCount',
-					$author$project$AppEmbed$jsonInt(
-						$elm$core$Dict$size(model.b7))),
-					A2(
-					$author$project$AppEmbed$jsonPair,
-					'boxCount',
-					$author$project$AppEmbed$jsonInt(
-						$elm$core$Dict$size(model.bL)))
-				]));
+					$elm$json$Json$Encode$string(reason)),
+				$author$project$AppEmbed$modelStatFields(model)));
 	});
 var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $author$project$AppEmbed$init = function (rawFlags) {
-	var flags = function () {
-		var _v3 = A2($elm$json$Json$Decode$decodeValue, $author$project$AppEmbed$flagsDecoder, rawFlags);
-		if (!_v3.$) {
-			var decoded = _v3.a;
-			return decoded;
-		} else {
-			return {bp: 'empty', bs: '{}'};
-		}
-	}();
+	var flags = $author$project$AppEmbed$decodeFlags(rawFlags);
 	var _v0 = function () {
-		var _v1 = A2($elm$json$Json$Decode$decodeString, $elm$json$Json$Decode$value, flags.bs);
-		if (!_v1.$) {
+		var _v1 = A2($elm$json$Json$Decode$decodeString, $elm$json$Json$Decode$value, flags.stored);
+		if (_v1.$ === 'Ok') {
 			var value = _v1.a;
 			var _v2 = A2($elm$json$Json$Decode$decodeValue, $author$project$Model$decoder, value);
-			if (!_v2.$) {
+			if (_v2.$ === 'Ok') {
 				var decodedModel = _v2.a;
 				return _Utils_Tuple2(decodedModel, 'native-model');
 			} else {
@@ -6197,393 +6316,106 @@ var $author$project$AppEmbed$init = function (rawFlags) {
 			[
 				A2(
 				$author$project$AppEmbed$emitEvidence,
-				'dm6.import.completed',
+				'dm6.appembed.init',
 				_List_fromArray(
 					[
-						A2(
-						$author$project$AppEmbed$jsonPair,
-						'source',
-						$author$project$AppEmbed$jsonString(initSource)),
-						A2(
-						$author$project$AppEmbed$jsonPair,
+						_Utils_Tuple2(
 						'slug',
-						$author$project$AppEmbed$jsonString(flags.bp)),
-						A2(
-						$author$project$AppEmbed$jsonPair,
-						'boxId',
-						$author$project$AppEmbed$jsonInt(model.a4)),
-						A2(
-						$author$project$AppEmbed$jsonPair,
-						'itemCount',
-						$author$project$AppEmbed$jsonInt(
-							$elm$core$Dict$size(model.b7))),
-						A2(
-						$author$project$AppEmbed$jsonPair,
-						'boxCount',
-						$author$project$AppEmbed$jsonInt(
-							$elm$core$Dict$size(model.bL)))
+						$elm$json$Json$Encode$string(flags.slug)),
+						_Utils_Tuple2(
+						'storedBytes',
+						$elm$json$Json$Encode$int(
+							$elm$core$String$length(flags.stored)))
 					])),
+				A2(
+				$author$project$AppEmbed$emitEvidence,
+				'dm6.import.loaded',
+				_Utils_ap(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'source',
+							$elm$json$Json$Encode$string(initSource)),
+							_Utils_Tuple2(
+							'slug',
+							$elm$json$Json$Encode$string(flags.slug))
+						]),
+					$author$project$AppEmbed$modelStatFields(model))),
 				A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-import', model)
 			]));
 	return $author$project$Undo$reset(
 		_Utils_Tuple2(model, initCmd));
 };
-var $author$project$Model$NoOp = {$: 13};
+var $author$project$Model$NoOp = {$: 'NoOp'};
+var $author$project$Model$Scrolled = function (a) {
+	return {$: 'Scrolled', a: a};
+};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $author$project$AppEmbed$pageJson = _Platform_incomingPort('pageJson', $elm$json$Json$Decode$string);
-var $author$project$Model$Mouse = function (a) {
-	return {$: 7, a: a};
-};
-var $author$project$Feature$Mouse$Move = function (a) {
-	return {$: 2, a: a};
-};
-var $author$project$Feature$Mouse$Up = {$: 3};
-var $elm$browser$Browser$Events$Document = 0;
-var $elm$browser$Browser$Events$MySub = F3(
-	function (a, b, c) {
-		return {$: 0, a: a, b: b, c: c};
-	});
-var $elm$browser$Browser$Events$State = F2(
-	function (subs, pids) {
-		return {cm: pids, cF: subs};
-	});
-var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
-	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
-var $elm$browser$Browser$Events$nodeToKey = function (node) {
-	if (!node) {
-		return 'd_';
-	} else {
-		return 'w_';
-	}
-};
-var $elm$browser$Browser$Events$addKey = function (sub) {
-	var node = sub.a;
-	var name = sub.b;
-	return _Utils_Tuple2(
-		_Utils_ap(
-			$elm$browser$Browser$Events$nodeToKey(node),
-			name),
-		sub);
-};
-var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Dict$foldl = F3(
-	function (func, acc, dict) {
-		foldl:
-		while (true) {
-			if (dict.$ === -2) {
-				return acc;
-			} else {
-				var key = dict.b;
-				var value = dict.c;
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$func = func,
-					$temp$acc = A3(
-					func,
-					key,
-					value,
-					A3($elm$core$Dict$foldl, func, acc, left)),
-					$temp$dict = right;
-				func = $temp$func;
-				acc = $temp$acc;
-				dict = $temp$dict;
-				continue foldl;
-			}
-		}
-	});
-var $elm$core$Dict$merge = F6(
-	function (leftStep, bothStep, rightStep, leftDict, rightDict, initialResult) {
-		var stepState = F3(
-			function (rKey, rValue, _v0) {
-				stepState:
-				while (true) {
-					var list = _v0.a;
-					var result = _v0.b;
-					if (!list.b) {
-						return _Utils_Tuple2(
-							list,
-							A3(rightStep, rKey, rValue, result));
-					} else {
-						var _v2 = list.a;
-						var lKey = _v2.a;
-						var lValue = _v2.b;
-						var rest = list.b;
-						if (_Utils_cmp(lKey, rKey) < 0) {
-							var $temp$rKey = rKey,
-								$temp$rValue = rValue,
-								$temp$_v0 = _Utils_Tuple2(
-								rest,
-								A3(leftStep, lKey, lValue, result));
-							rKey = $temp$rKey;
-							rValue = $temp$rValue;
-							_v0 = $temp$_v0;
-							continue stepState;
-						} else {
-							if (_Utils_cmp(lKey, rKey) > 0) {
-								return _Utils_Tuple2(
-									list,
-									A3(rightStep, rKey, rValue, result));
-							} else {
-								return _Utils_Tuple2(
-									rest,
-									A4(bothStep, lKey, lValue, rValue, result));
-							}
-						}
-					}
-				}
-			});
-		var _v3 = A3(
-			$elm$core$Dict$foldl,
-			stepState,
-			_Utils_Tuple2(
-				$elm$core$Dict$toList(leftDict),
-				initialResult),
-			rightDict);
-		var leftovers = _v3.a;
-		var intermediateResult = _v3.b;
-		return A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v4, result) {
-					var k = _v4.a;
-					var v = _v4.b;
-					return A3(leftStep, k, v, result);
-				}),
-			intermediateResult,
-			leftovers);
-	});
-var $elm$browser$Browser$Events$Event = F2(
-	function (key, event) {
-		return {bT: event, b8: key};
-	});
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$browser$Browser$Events$spawn = F3(
-	function (router, key, _v0) {
-		var node = _v0.a;
-		var name = _v0.b;
-		var actualNode = function () {
-			if (!node) {
-				return _Browser_doc;
-			} else {
-				return _Browser_window;
-			}
-		}();
-		return A2(
-			$elm$core$Task$map,
-			function (value) {
-				return _Utils_Tuple2(key, value);
-			},
-			A3(
-				_Browser_on,
-				actualNode,
-				name,
-				function (event) {
-					return A2(
-						$elm$core$Platform$sendToSelf,
-						router,
-						A2($elm$browser$Browser$Events$Event, key, event));
-				}));
-	});
-var $elm$core$Dict$union = F2(
-	function (t1, t2) {
-		return A3($elm$core$Dict$foldl, $elm$core$Dict$insert, t2, t1);
-	});
-var $elm$browser$Browser$Events$onEffects = F3(
-	function (router, subs, state) {
-		var stepRight = F3(
-			function (key, sub, _v6) {
-				var deads = _v6.a;
-				var lives = _v6.b;
-				var news = _v6.c;
-				return _Utils_Tuple3(
-					deads,
-					lives,
-					A2(
-						$elm$core$List$cons,
-						A3($elm$browser$Browser$Events$spawn, router, key, sub),
-						news));
-			});
-		var stepLeft = F3(
-			function (_v4, pid, _v5) {
-				var deads = _v5.a;
-				var lives = _v5.b;
-				var news = _v5.c;
-				return _Utils_Tuple3(
-					A2($elm$core$List$cons, pid, deads),
-					lives,
-					news);
-			});
-		var stepBoth = F4(
-			function (key, pid, _v2, _v3) {
-				var deads = _v3.a;
-				var lives = _v3.b;
-				var news = _v3.c;
-				return _Utils_Tuple3(
-					deads,
-					A3($elm$core$Dict$insert, key, pid, lives),
-					news);
-			});
-		var newSubs = A2($elm$core$List$map, $elm$browser$Browser$Events$addKey, subs);
-		var _v0 = A6(
-			$elm$core$Dict$merge,
-			stepLeft,
-			stepBoth,
-			stepRight,
-			state.cm,
-			$elm$core$Dict$fromList(newSubs),
-			_Utils_Tuple3(_List_Nil, $elm$core$Dict$empty, _List_Nil));
-		var deadPids = _v0.a;
-		var livePids = _v0.b;
-		var makeNewPids = _v0.c;
-		return A2(
-			$elm$core$Task$andThen,
-			function (pids) {
-				return $elm$core$Task$succeed(
-					A2(
-						$elm$browser$Browser$Events$State,
-						newSubs,
-						A2(
-							$elm$core$Dict$union,
-							livePids,
-							$elm$core$Dict$fromList(pids))));
-			},
-			A2(
-				$elm$core$Task$andThen,
-				function (_v1) {
-					return $elm$core$Task$sequence(makeNewPids);
+var $author$project$Main$onScroll = _Platform_incomingPort(
+	'onScroll',
+	A2(
+		$elm$json$Json$Decode$andThen,
+		function (y) {
+			return A2(
+				$elm$json$Json$Decode$andThen,
+				function (x) {
+					return $elm$json$Json$Decode$succeed(
+						{x: x, y: y});
 				},
-				$elm$core$Task$sequence(
-					A2($elm$core$List$map, $elm$core$Process$kill, deadPids))));
-	});
-var $elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _v0 = f(mx);
-		if (!_v0.$) {
-			var x = _v0.a;
-			return A2($elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
-	});
-var $elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			$elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
-	});
-var $elm$browser$Browser$Events$onSelfMsg = F3(
-	function (router, _v0, state) {
-		var key = _v0.b8;
-		var event = _v0.bT;
-		var toMessage = function (_v2) {
-			var subKey = _v2.a;
-			var _v3 = _v2.b;
-			var node = _v3.a;
-			var name = _v3.b;
-			var decoder = _v3.c;
-			return _Utils_eq(subKey, key) ? A2(_Browser_decodeEvent, decoder, event) : $elm$core$Maybe$Nothing;
-		};
-		var messages = A2($elm$core$List$filterMap, toMessage, state.cF);
-		return A2(
-			$elm$core$Task$andThen,
-			function (_v1) {
-				return $elm$core$Task$succeed(state);
-			},
-			$elm$core$Task$sequence(
-				A2(
-					$elm$core$List$map,
-					$elm$core$Platform$sendToApp(router),
-					messages)));
-	});
-var $elm$browser$Browser$Events$subMap = F2(
-	function (func, _v0) {
-		var node = _v0.a;
-		var name = _v0.b;
-		var decoder = _v0.c;
-		return A3(
-			$elm$browser$Browser$Events$MySub,
-			node,
-			name,
-			A2($elm$json$Json$Decode$map, func, decoder));
-	});
-_Platform_effectManagers['Browser.Events'] = _Platform_createManager($elm$browser$Browser$Events$init, $elm$browser$Browser$Events$onEffects, $elm$browser$Browser$Events$onSelfMsg, 0, $elm$browser$Browser$Events$subMap);
-var $elm$browser$Browser$Events$subscription = _Platform_leaf('Browser.Events');
-var $elm$browser$Browser$Events$on = F3(
-	function (node, name, decoder) {
-		return $elm$browser$Browser$Events$subscription(
-			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
-	});
-var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, 0, 'mousemove');
-var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, 0, 'mouseup');
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
-var $elm$core$Basics$round = _Basics_round;
-var $author$project$Utils$toIntDecoder = function (_float) {
-	return $elm$json$Json$Decode$succeed(
-		$elm$core$Basics$round(_float));
+				A2($elm$json$Json$Decode$field, 'x', $elm$json$Json$Decode$int));
+		},
+		A2($elm$json$Json$Decode$field, 'y', $elm$json$Json$Decode$int)));
+var $author$project$AppEmbed$pageJson = _Platform_incomingPort('pageJson', $elm$json$Json$Decode$string);
+var $author$project$Feature$NavDef$HashChanged = function (a) {
+	return {$: 'HashChanged', a: a};
 };
-var $author$project$Utils$pointDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$ModelParts$Point,
-	A2(
-		$elm$json$Json$Decode$andThen,
-		$author$project$Utils$toIntDecoder,
-		A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float)),
-	A2(
-		$elm$json$Json$Decode$andThen,
-		$author$project$Utils$toIntDecoder,
-		A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float)));
-var $author$project$Feature$MouseAPI$dragSub = $elm$core$Platform$Sub$batch(
-	_List_fromArray(
-		[
-			$elm$browser$Browser$Events$onMouseMove(
-			A2(
-				$elm$json$Json$Decode$map,
-				$author$project$Model$Mouse,
-				A2($elm$json$Json$Decode$map, $author$project$Feature$Mouse$Move, $author$project$Utils$pointDecoder))),
-			$elm$browser$Browser$Events$onMouseUp(
-			A2(
-				$elm$json$Json$Decode$map,
-				$author$project$Model$Mouse,
-				$elm$json$Json$Decode$succeed($author$project$Feature$Mouse$Up)))
-		]));
-var $author$project$Feature$Mouse$Down = {$: 0};
-var $elm$browser$Browser$Events$onMouseDown = A2($elm$browser$Browser$Events$on, 0, 'mousedown');
-var $author$project$Feature$MouseAPI$mouseDownSub = $elm$browser$Browser$Events$onMouseDown(
-	$elm$json$Json$Decode$succeed(
-		$author$project$Model$Mouse($author$project$Feature$Mouse$Down)));
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Feature$MouseAPI$sub = function (_v0) {
-	var present = _v0.aw;
-	var _v1 = present.dt.c6;
-	switch (_v1.$) {
-		case 0:
-			return $elm$core$Platform$Sub$none;
-		case 2:
-			return $elm$core$Platform$Sub$none;
-		case 1:
-			return $author$project$Feature$MouseAPI$dragSub;
-		case 3:
-			return $author$project$Feature$MouseAPI$dragSub;
-		default:
-			return $author$project$Feature$MouseAPI$mouseDownSub;
-	}
+var $author$project$Model$Nav = function (a) {
+	return {$: 'Nav', a: a};
 };
-var $author$project$Feature$Text$ImageFilePicked = function (a) {
-	return {$: 4, a: a};
+var $author$project$Feature$Nav$onHashChange = _Platform_incomingPort('onHashChange', $elm$json$Json$Decode$string);
+var $author$project$Feature$Nav$sub = $author$project$Feature$Nav$onHashChange(
+	A2($elm$core$Basics$composeL, $author$project$Model$Nav, $author$project$Feature$NavDef$HashChanged));
+var $author$project$Feature$TextDef$ImageUrlResolved = function (a) {
+	return {$: 'ImageUrlResolved', a: a};
 };
 var $author$project$Model$Text = function (a) {
-	return {$: 6, a: a};
+	return {$: 'Text', a: a};
 };
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
+var $author$project$Feature$TextDef$ImageFilePicked = function (a) {
+	return {$: 'ImageFilePicked', a: a};
+};
+var $author$project$Logger$log = F2(
+	function (_v0, val) {
+		return val;
 	});
+var $author$project$Utils$logError = F3(
+	function (funcName, text, val) {
+		return A2($author$project$Logger$log, '💥 @' + (funcName + (': ' + text)), val);
+	});
+var $author$project$Feature$TextDef$TopicImage = F2(
+	function (topicId, imageId) {
+		return {imageId: imageId, topicId: topicId};
+	});
+var $author$project$Feature$Text$topicImageDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Feature$TextDef$TopicImage,
+	A2($elm$json$Json$Decode$field, 'topicId', $author$project$ModelBase$topicIdDecoder),
+	A2($elm$json$Json$Decode$field, 'imageId', $elm$json$Json$Decode$int));
+var $author$project$Feature$Text$decodeTopicImage = function (value) {
+	var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$Feature$Text$topicImageDecoder, value);
+	if (_v0.$ === 'Ok') {
+		var topicImage = _v0.a;
+		return A2($elm$core$Basics$composeL, $author$project$Model$Text, $author$project$Feature$TextDef$ImageFilePicked)(topicImage);
+	} else {
+		var e = _v0.a;
+		var _v1 = A3($author$project$Utils$logError, 'Feature.Text.decodeTopicImage', 'decoding onImageFilePicked', e);
+		return $author$project$Model$NoOp;
+	}
+};
+var $author$project$Feature$Text$onImageFilePicked = _Platform_incomingPort('onImageFilePicked', $elm$json$Json$Decode$value);
 var $elm$json$Json$Decode$index = _Json_decodeIndex;
-var $author$project$Feature$TextAPI$onPickImageFile = _Platform_incomingPort(
-	'onPickImageFile',
+var $author$project$Feature$Text$onImageUrlResolved = _Platform_incomingPort(
+	'onImageUrlResolved',
 	A2(
 		$elm$json$Json$Decode$andThen,
 		function (_v0) {
@@ -6593,44 +6425,190 @@ var $author$project$Feature$TextAPI$onPickImageFile = _Platform_incomingPort(
 					return $elm$json$Json$Decode$succeed(
 						_Utils_Tuple2(_v0, _v1));
 				},
-				A2($elm$json$Json$Decode$index, 1, $elm$json$Json$Decode$int));
+				A2($elm$json$Json$Decode$index, 1, $elm$json$Json$Decode$string));
 		},
 		A2($elm$json$Json$Decode$index, 0, $elm$json$Json$Decode$int)));
-var $author$project$Feature$TextAPI$sub = $author$project$Feature$TextAPI$onPickImageFile(
-	A2($elm$core$Basics$composeL, $author$project$Model$Text, $author$project$Feature$Text$ImageFilePicked));
-var $author$project$AppEmbed$subscriptions = function (undo) {
+var $author$project$Feature$Text$sub = $elm$core$Platform$Sub$batch(
+	_List_fromArray(
+		[
+			$author$project$Feature$Text$onImageFilePicked($author$project$Feature$Text$decodeTopicImage),
+			$author$project$Feature$Text$onImageUrlResolved(
+			A2($elm$core$Basics$composeL, $author$project$Model$Text, $author$project$Feature$TextDef$ImageUrlResolved))
+		]));
+var $author$project$AppEmbed$subscriptions = function (_v0) {
 	return $elm$core$Platform$Sub$batch(
 		_List_fromArray(
 			[
-				$author$project$Feature$MouseAPI$sub(undo),
-				$author$project$Feature$TextAPI$sub,
+				$author$project$Feature$Text$sub,
+				$author$project$Feature$Nav$sub,
+				$author$project$Main$onScroll($author$project$Model$Scrolled),
 				$author$project$AppEmbed$pageJson(
-				function (_v0) {
+				function (_v1) {
 					return $author$project$Model$NoOp;
 				})
 			]));
 };
-var $author$project$AppEmbed$jsonBoxPath = function (boxPath) {
-	return '[' + (A2(
-		$elm$core$String$join,
-		',',
-		A2($elm$core$List$map, $elm$core$String$fromInt, boxPath)) + ']');
+var $author$project$AppEmbed$itemIdFields = function (itemId) {
+	if (itemId.$ === 'T') {
+		var topicId = itemId.a;
+		return _List_fromArray(
+			[
+				_Utils_Tuple2(
+				'itemKind',
+				$elm$json$Json$Encode$string('topic')),
+				_Utils_Tuple2(
+				'topicId',
+				$elm$json$Json$Encode$int(
+					$author$project$ModelBase$toTopicId(topicId)))
+			]);
+	} else {
+		var assocId = itemId.a;
+		return _List_fromArray(
+			[
+				_Utils_Tuple2(
+				'itemKind',
+				$elm$json$Json$Encode$string('assoc')),
+				_Utils_Tuple2(
+				'assocId',
+				$elm$json$Json$Encode$int(
+					$author$project$ModelBase$toAssocId(assocId)))
+			]);
+	}
 };
-var $author$project$AppEmbed$jsonPoint = F2(
-	function (prefix, point) {
-		return A2(
-			$author$project$AppEmbed$jsonPair,
-			prefix + 'X',
-			$author$project$AppEmbed$jsonInt(point.d1)) + (',' + A2(
-			$author$project$AppEmbed$jsonPair,
-			prefix + 'Y',
-			$author$project$AppEmbed$jsonInt(point.d3)));
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
 	});
+var $author$project$AppEmbed$jsonBoxPath = function (boxPath) {
+	return A2(
+		$elm$json$Json$Encode$list,
+		A2($elm$core$Basics$composeR, $author$project$ModelBase$toBoxId, $elm$json$Json$Encode$int),
+		boxPath);
+};
+var $author$project$AppEmbed$jsonPoint = function (point) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'x',
+				$elm$json$Json$Encode$int(point.x)),
+				_Utils_Tuple2(
+				'y',
+				$elm$json$Json$Encode$int(point.y))
+			]));
+};
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$AppEmbed$toolEvidence = F2(
+	function (toolMsg, model) {
+		switch (toolMsg.$) {
+			case 'CreateTopic':
+				return $elm$core$Platform$Cmd$batch(
+					_List_fromArray(
+						[
+							A2(
+							$author$project$AppEmbed$emitEvidence,
+							'dm6.box.changed',
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'operation',
+									$elm$json$Json$Encode$string('create-topic'))
+								])),
+							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-create-topic', model)
+						]));
+			case 'Delete':
+				return $elm$core$Platform$Cmd$batch(
+					_List_fromArray(
+						[
+							A2(
+							$author$project$AppEmbed$emitEvidence,
+							'dm6.box.changed',
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'operation',
+									$elm$json$Json$Encode$string('delete'))
+								])),
+							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-delete', model)
+						]));
+			case 'Remove':
+				return $elm$core$Platform$Cmd$batch(
+					_List_fromArray(
+						[
+							A2(
+							$author$project$AppEmbed$emitEvidence,
+							'dm6.box.changed',
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'operation',
+									$elm$json$Json$Encode$string('remove'))
+								])),
+							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-remove', model)
+						]));
+			case 'Fullscreen':
+				var topicId = toolMsg.a;
+				return A2(
+					$author$project$AppEmbed$emitEvidence,
+					'dm6.box.changed',
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'operation',
+							$elm$json$Json$Encode$string('fullscreen')),
+							_Utils_Tuple2(
+							'topicId',
+							$elm$json$Json$Encode$int(
+								$author$project$ModelBase$toTopicId(topicId)))
+						]));
+			case 'ToggleExpansion':
+				var topicId = toolMsg.a;
+				var boxId = toolMsg.b;
+				return A2(
+					$author$project$AppEmbed$emitEvidence,
+					'dm6.box.changed',
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'operation',
+							$elm$json$Json$Encode$string('toggle-expansion')),
+							_Utils_Tuple2(
+							'topicId',
+							$elm$json$Json$Encode$int(
+								$author$project$ModelBase$toTopicId(topicId))),
+							_Utils_Tuple2(
+							'boxId',
+							$elm$json$Json$Encode$int(
+								$author$project$ModelBase$toBoxId(boxId)))
+						]));
+			case 'RendererSelected':
+				return $elm$core$Platform$Cmd$batch(
+					_List_fromArray(
+						[
+							A2(
+							$author$project$AppEmbed$emitEvidence,
+							'dm6.box.changed',
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'operation',
+									$elm$json$Json$Encode$string('renderer-selected'))
+								])),
+							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-renderer-selected', model)
+						]));
+			default:
+				return $elm$core$Platform$Cmd$none;
+		}
+	});
 var $author$project$AppEmbed$semanticEvidence = F3(
-	function (msg, oldUndo, newUndo) {
+	function (msg, _v0, newUndo) {
 		switch (msg.$) {
-			case 3:
+			case 'ItemClicked':
 				var itemId = msg.a;
 				var boxPath = msg.b;
 				return $elm$core$Platform$Cmd$batch(
@@ -6639,20 +6617,17 @@ var $author$project$AppEmbed$semanticEvidence = F3(
 							A2(
 							$author$project$AppEmbed$emitEvidence,
 							'dm6.selection.changed',
-							_List_fromArray(
-								[
-									A2(
-									$author$project$AppEmbed$jsonPair,
-									'itemId',
-									$author$project$AppEmbed$jsonInt(itemId)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
-									'boxPath',
-									$author$project$AppEmbed$jsonBoxPath(boxPath))
-								])),
-							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-selection', newUndo.aw)
+							_Utils_ap(
+								$author$project$AppEmbed$itemIdFields(itemId),
+								_List_fromArray(
+									[
+										_Utils_Tuple2(
+										'boxPath',
+										$author$project$AppEmbed$jsonBoxPath(boxPath))
+									]))),
+							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-selection', newUndo.present)
 						]));
-			case 0:
+			case 'CreateAssoc':
 				var player1 = msg.a;
 				var player2 = msg.b;
 				var boxId = msg.c;
@@ -6661,91 +6636,108 @@ var $author$project$AppEmbed$semanticEvidence = F3(
 						[
 							A2(
 							$author$project$AppEmbed$emitEvidence,
-							'dm6.cross-map.boundary',
+							'dm6.cross.performed',
 							_List_fromArray(
 								[
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									_Utils_Tuple2(
 									'operation',
-									$author$project$AppEmbed$jsonString('add-assoc')),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$string('create-assoc')),
+									_Utils_Tuple2(
 									'player1',
-									$author$project$AppEmbed$jsonInt(player1)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toTopicId(player1))),
+									_Utils_Tuple2(
 									'player2',
-									$author$project$AppEmbed$jsonInt(player2)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toTopicId(player2))),
+									_Utils_Tuple2(
 									'boxId',
-									$author$project$AppEmbed$jsonInt(boxId))
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toBoxId(boxId)))
 								])),
-							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-add-assoc', newUndo.aw)
+							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-create-assoc', newUndo.present)
 						]));
-			case 1:
+			case 'TopicDropped':
 				var topicId = msg.a;
 				var sourceBoxId = msg.b;
 				var origPos = msg.c;
-				var targetBoxId = msg.d;
+				var targetTopicId = msg.d;
 				var targetPath = msg.e;
-				var dropPos = msg.f;
 				return $elm$core$Platform$Cmd$batch(
 					_List_fromArray(
 						[
 							A2(
 							$author$project$AppEmbed$emitEvidence,
-							'dm6.cross-map.boundary',
+							'dm6.cross.performed',
 							_List_fromArray(
 								[
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									_Utils_Tuple2(
 									'operation',
-									$author$project$AppEmbed$jsonString('move-topic-to-box')),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$string('move-topic-to-box')),
+									_Utils_Tuple2(
 									'topicId',
-									$author$project$AppEmbed$jsonInt(topicId)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toTopicId(topicId))),
+									_Utils_Tuple2(
 									'sourceBoxId',
-									$author$project$AppEmbed$jsonInt(sourceBoxId)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toBoxId(sourceBoxId))),
+									_Utils_Tuple2(
+									'targetTopicId',
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toTopicId(targetTopicId))),
+									_Utils_Tuple2(
 									'targetBoxId',
-									$author$project$AppEmbed$jsonInt(targetBoxId)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toTopicId(targetTopicId))),
+									_Utils_Tuple2(
 									'targetPath',
 									$author$project$AppEmbed$jsonBoxPath(targetPath)),
-									A2($author$project$AppEmbed$jsonPoint, 'orig', origPos),
-									A2($author$project$AppEmbed$jsonPoint, 'drop', dropPos)
+									_Utils_Tuple2(
+									'orig',
+									$author$project$AppEmbed$jsonPoint(origPos))
 								])),
 							A2(
 							$author$project$AppEmbed$emitEvidence,
 							'dm6.drag.ended',
 							_List_fromArray(
 								[
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									_Utils_Tuple2(
 									'mode',
-									$author$project$AppEmbed$jsonString('move-topic-to-box')),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$string('move-topic-to-box')),
+									_Utils_Tuple2(
 									'topicId',
-									$author$project$AppEmbed$jsonInt(topicId)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toTopicId(topicId))),
+									_Utils_Tuple2(
 									'sourceBoxId',
-									$author$project$AppEmbed$jsonInt(sourceBoxId)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toBoxId(sourceBoxId))),
+									_Utils_Tuple2(
 									'targetBoxId',
-									$author$project$AppEmbed$jsonInt(targetBoxId))
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toTopicId(targetTopicId)))
 								])),
-							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-move-topic-to-box', newUndo.aw)
+							A2(
+							$author$project$AppEmbed$emitEvidence,
+							'dm6.box.changed',
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'operation',
+									$elm$json$Json$Encode$string('move-topic-to-box')),
+									_Utils_Tuple2(
+									'sourceBoxId',
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toBoxId(sourceBoxId))),
+									_Utils_Tuple2(
+									'targetBoxId',
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toTopicId(targetTopicId)))
+								])),
+							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-move-topic-to-box', newUndo.present)
 						]));
-			case 2:
+			case 'TopicDragged':
 				return $elm$core$Platform$Cmd$batch(
 					_List_fromArray(
 						[
@@ -6754,92 +6746,375 @@ var $author$project$AppEmbed$semanticEvidence = F3(
 							'dm6.drag.ended',
 							_List_fromArray(
 								[
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									_Utils_Tuple2(
 									'mode',
-									$author$project$AppEmbed$jsonString('topic-drag-no-target'))
+									$elm$json$Json$Encode$string('topic-drag-no-target'))
 								])),
-							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-topic-dragged', newUndo.aw)
+							A2($author$project$AppEmbed$storeSnapshotEvidence, 'after-topic-dragged', newUndo.present)
 						]));
-			case 7:
+			case 'Mouse':
 				var mouseMsg = msg.a;
 				switch (mouseMsg.$) {
-					case 1:
-						var className = mouseMsg.a;
-						var itemId = mouseMsg.b;
-						var boxPath = mouseMsg.c;
-						var pos = mouseMsg.d;
+					case 'DragStart':
+						var topicId = mouseMsg.a;
+						var boxPath = mouseMsg.b;
+						var _v3 = mouseMsg.c;
+						var pos = _v3.a;
+						var pointerType = _v3.b;
 						return A2(
 							$author$project$AppEmbed$emitEvidence,
 							'dm6.drag.started',
 							_List_fromArray(
 								[
-									A2(
-									$author$project$AppEmbed$jsonPair,
-									'class',
-									$author$project$AppEmbed$jsonString(className)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
-									'itemId',
-									$author$project$AppEmbed$jsonInt(itemId)),
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									_Utils_Tuple2(
+									'topicId',
+									$elm$json$Json$Encode$int(
+										$author$project$ModelBase$toTopicId(topicId))),
+									_Utils_Tuple2(
 									'boxPath',
 									$author$project$AppEmbed$jsonBoxPath(boxPath)),
-									A2($author$project$AppEmbed$jsonPoint, 'mouse', pos)
+									_Utils_Tuple2(
+									'pointerType',
+									$elm$json$Json$Encode$string(pointerType)),
+									_Utils_Tuple2(
+									'mouse',
+									$author$project$AppEmbed$jsonPoint(pos))
 								]));
-					case 2:
-						var pos = mouseMsg.a;
+					case 'Move':
+						var _v4 = mouseMsg.a;
+						var pos = _v4.a;
+						var pointerType = _v4.b;
 						return A2(
 							$author$project$AppEmbed$emitEvidence,
 							'dm6.drag.moved',
 							_List_fromArray(
 								[
-									A2($author$project$AppEmbed$jsonPoint, 'mouse', pos)
+									_Utils_Tuple2(
+									'pointerType',
+									$elm$json$Json$Encode$string(pointerType)),
+									_Utils_Tuple2(
+									'mouse',
+									$author$project$AppEmbed$jsonPoint(pos))
 								]));
-					case 3:
+					case 'Up':
 						return A2(
 							$author$project$AppEmbed$emitEvidence,
 							'dm6.drag.ended',
 							_List_fromArray(
 								[
-									A2(
-									$author$project$AppEmbed$jsonPair,
+									_Utils_Tuple2(
 									'mode',
-									$author$project$AppEmbed$jsonString('mouse-up'))
+									$elm$json$Json$Encode$string('mouse-up'))
 								]));
 					default:
-						return $elm$core$Platform$Cmd$none;
+						return A2(
+							$author$project$AppEmbed$emitEvidence,
+							'dm6.drag.ended',
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'mode',
+									$elm$json$Json$Encode$string('cancel'))
+								]));
 				}
+			case 'Tool':
+				var toolMsg = msg.a;
+				return A2($author$project$AppEmbed$toolEvidence, toolMsg, newUndo.present);
 			default:
 				return $elm$core$Platform$Cmd$none;
 		}
 	});
-var $author$project$Logger$log = F2(
-	function (_v0, val) {
-		return val;
+var $author$project$Feature$Sel$setItems = F2(
+	function (items, model) {
+		var selection = model.selection;
+		return _Utils_update(
+			model,
+			{
+				selection: _Utils_update(
+					selection,
+					{items: items})
+			});
 	});
-var $author$project$Utils$logError = F3(
-	function (funcName, text, val) {
-		return A2($author$project$Logger$log, '### ERROR @' + (funcName + (': ' + text)), val);
+var $author$project$Feature$Sel$clear = function (model) {
+	return A2($author$project$Feature$Sel$setItems, _List_Nil, model);
+};
+var $author$project$Feature$Mouse$setHover = F2(
+	function (hover, model) {
+		var mouse = model.mouse;
+		return _Utils_update(
+			model,
+			{
+				mouse: _Utils_update(
+					mouse,
+					{hover: hover})
+			});
 	});
-var $author$project$Utils$illegalId = F4(
+var $author$project$TopicMap$Mouse$clearHover = function (model) {
+	return A2($author$project$Feature$Mouse$setHover, $elm$core$Maybe$Nothing, model);
+};
+var $author$project$Feature$Mouse$isHovered = F3(
+	function (topicId, boxPath, model) {
+		var _v0 = model.mouse.hover;
+		if ((_v0.$ === 'Just') && (_v0.a.a.$ === 'T')) {
+			var _v1 = _v0.a;
+			var topicId_ = _v1.a.a;
+			var boxPath_ = _v1.b;
+			return _Utils_eq(topicId, topicId_) && _Utils_eq(boxPath, boxPath_);
+		} else {
+			return false;
+		}
+	});
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $author$project$Feature$Sel$isSelected = F3(
+	function (itemId, boxPath, model) {
+		return A2(
+			$elm$core$List$member,
+			_Utils_Tuple2(itemId, boxPath),
+			model.selection.items);
+	});
+var $author$project$ModelBase$View = {$: 'View'};
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $author$project$Env$autoSize = F2(
+	function (_v0, model) {
+		var ext = _v0.ext;
+		return A2(
+			ext.autoSize,
+			_List_fromArray(
+				[model.boxId]),
+			model).b;
+	});
+var $author$project$Box$fromPath = function (boxPath) {
+	return A2(
+		$elm$core$String$join,
+		',',
+		A2(
+			$elm$core$List$map,
+			A2($elm$core$Basics$composeL, $elm$core$String$fromInt, $author$project$ModelBase$toBoxId),
+			boxPath));
+};
+var $author$project$Box$elemId = F3(
+	function (name, _v0, boxPath) {
+		var id = _v0.a;
+		return name + ('-' + ($elm$core$String$fromInt(id) + (',' + $author$project$Box$fromPath(boxPath))));
+	});
+var $author$project$Feature$TextDef$GotTextSize = F3(
+	function (a, b, c) {
+		return {$: 'GotTextSize', a: a, b: b, c: c};
+	});
+var $elm$core$Task$onError = _Scheduler_onError;
+var $elm$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return $elm$core$Task$command(
+			$elm$core$Task$Perform(
+				A2(
+					$elm$core$Task$onError,
+					A2(
+						$elm$core$Basics$composeL,
+						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+						$elm$core$Result$Err),
+					A2(
+						$elm$core$Task$andThen,
+						A2(
+							$elm$core$Basics$composeL,
+							A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+							$elm$core$Result$Ok),
+						task))));
+	});
+var $elm$browser$Browser$Dom$getElement = _Browser_getElement;
+var $elm$core$Basics$round = _Basics_round;
+var $author$project$Logger$toString = function (_v0) {
+	return '';
+};
+var $author$project$Utils$toString = $author$project$Logger$toString;
+var $author$project$Feature$Text$measureElement = F3(
+	function (elemId, topicId, sizeField) {
+		return A2(
+			$elm$core$Task$attempt,
+			function (result) {
+				if (result.$ === 'Ok') {
+					var element = result.a.element;
+					return $author$project$Model$Text(
+						A3(
+							$author$project$Feature$TextDef$GotTextSize,
+							$author$project$ModelBase$toTopicId(topicId),
+							sizeField,
+							A2(
+								$author$project$ModelBase$Size,
+								$elm$core$Basics$round(element.width),
+								$elm$core$Basics$round(element.height))));
+				} else {
+					var err = result.a;
+					return A3(
+						$author$project$Utils$logError,
+						'Feature.Text.measureElement',
+						$author$project$Utils$toString(err),
+						$author$project$Model$NoOp);
+				}
+			},
+			$elm$browser$Browser$Dom$getElement(elemId));
+	});
+var $author$project$Feature$Text$setEditState = F2(
+	function (state, model) {
+		var text = model.text;
+		return _Utils_update(
+			model,
+			{
+				text: _Utils_update(
+					text,
+					{edit: state})
+			});
+	});
+var $author$project$Feature$Text$leaveEdit = function (env) {
+	var model = env.model;
+	var _v0 = model.text.edit;
+	if (_v0.$ === 'Edit') {
+		var topicId = _v0.a;
+		var boxPath = _v0.b;
+		var elemId = A3($author$project$Box$elemId, 'topic', topicId, boxPath);
+		return _Utils_Tuple2(
+			A2(
+				$author$project$Env$autoSize,
+				env,
+				A2($author$project$Feature$Text$setEditState, $author$project$Feature$TextDef$NoEdit, model)),
+			A3($author$project$Feature$Text$measureElement, elemId, topicId, $author$project$ModelBase$View));
+	} else {
+		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+	}
+};
+var $author$project$Env$withModel = F2(
+	function (env, model) {
+		return _Utils_update(
+			env,
+			{model: model});
+	});
+var $author$project$Main$cancelUIWith = F2(
+	function (maybeTarget, env) {
+		var model = env.model;
+		var isTargeted = function () {
+			if (maybeTarget.$ === 'Just') {
+				if (maybeTarget.a.a.$ === 'T') {
+					var _v1 = maybeTarget.a;
+					var itemId = _v1.a;
+					var topicId = itemId.a;
+					var boxPath = _v1.b;
+					return A3($author$project$Feature$Sel$isSelected, itemId, boxPath, model) || A3($author$project$Feature$Mouse$isHovered, topicId, boxPath, model);
+				} else {
+					var _v2 = maybeTarget.a;
+					var itemId = _v2.a;
+					var boxPath = _v2.b;
+					return A3($author$project$Feature$Sel$isSelected, itemId, boxPath, model);
+				}
+			} else {
+				return false;
+			}
+		}();
+		return isTargeted ? _Utils_Tuple2(model, $elm$core$Platform$Cmd$none) : $author$project$Feature$Text$leaveEdit(
+			A2(
+				$author$project$Env$withModel,
+				env,
+				$author$project$TopicMap$Mouse$clearHover(
+					$author$project$Feature$Sel$clear(model))));
+	});
+var $author$project$Feature$Search$setResult = F2(
+	function (result, model) {
+		var search = model.search;
+		return _Utils_update(
+			model,
+			{
+				search: _Utils_update(
+					search,
+					{result: result})
+			});
+	});
+var $author$project$Feature$Search$closeMenu = function (model) {
+	return A2($author$project$Feature$Search$setResult, $author$project$Feature$SearchDef$NoSearch, model);
+};
+var $author$project$Feature$Tool$setMenu = F2(
+	function (isOpen, model) {
+		var tool = model.tool;
+		return _Utils_update(
+			model,
+			{
+				tool: _Utils_update(
+					tool,
+					{menu: isOpen})
+			});
+	});
+var $author$project$Feature$Tool$closeMenu = function (model) {
+	return A2($author$project$Feature$Tool$setMenu, false, model);
+};
+var $author$project$Feature$Icon$closePicker = function (model) {
+	var icon = model.icon;
+	return _Utils_update(
+		model,
+		{
+			icon: _Utils_update(
+				icon,
+				{picker: $author$project$Feature$IconDef$Closed})
+		});
+};
+var $author$project$Main$cancelUI = F2(
+	function (maybeTarget, env) {
+		var model = env.model;
+		return A2(
+			$author$project$Main$cancelUIWith,
+			maybeTarget,
+			A2(
+				$author$project$Env$withModel,
+				env,
+				$author$project$Feature$Tool$closeMenu(
+					$author$project$Feature$Search$closeMenu(
+						$author$project$Feature$Icon$closePicker(model)))));
+	});
+var $author$project$Utils$notFound = F4(
 	function (funcName, item, id, val) {
 		return A3(
 			$author$project$Utils$logError,
 			funcName,
-			$elm$core$String$fromInt(id) + (' is an illegal ' + (item + ' ID')),
+			item + (' ' + ($elm$core$String$fromInt(id) + ' not found')),
 			val);
 	});
-var $author$project$Utils$illegalItemId = F3(
+var $author$project$Utils$itemSetNotFound = F3(
 	function (funcName, id, val) {
-		return A4($author$project$Utils$illegalId, funcName, 'Item', id, val);
+		return A4($author$project$Utils$notFound, funcName, 'ItemSet', id, val);
 	});
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
 		while (true) {
-			if (dict.$ === -2) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
 				return $elm$core$Maybe$Nothing;
 			} else {
 				var key = dict.b;
@@ -6847,14 +7122,14 @@ var $elm$core$Dict$get = F2(
 				var left = dict.d;
 				var right = dict.e;
 				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
-				switch (_v1) {
-					case 0:
+				switch (_v1.$) {
+					case 'LT':
 						var $temp$targetKey = targetKey,
 							$temp$dict = left;
 						targetKey = $temp$targetKey;
 						dict = $temp$dict;
 						continue get;
-					case 1:
+					case 'EQ':
 						return $elm$core$Maybe$Just(value);
 					default:
 						var $temp$targetKey = targetKey,
@@ -6869,7 +7144,7 @@ var $elm$core$Dict$get = F2(
 var $elm$core$Dict$getMin = function (dict) {
 	getMin:
 	while (true) {
-		if ((dict.$ === -1) && (dict.d.$ === -1)) {
+		if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
 			var left = dict.d;
 			var $temp$dict = left;
 			dict = $temp$dict;
@@ -6880,8 +7155,8 @@ var $elm$core$Dict$getMin = function (dict) {
 	}
 };
 var $elm$core$Dict$moveRedLeft = function (dict) {
-	if (((dict.$ === -1) && (dict.d.$ === -1)) && (dict.e.$ === -1)) {
-		if ((dict.e.d.$ === -1) && (!dict.e.d.a)) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.e.d.$ === 'RBNode_elm_builtin') && (dict.e.d.a.$ === 'Red')) {
 			var clr = dict.a;
 			var k = dict.b;
 			var v = dict.c;
@@ -6904,17 +7179,17 @@ var $elm$core$Dict$moveRedLeft = function (dict) {
 			var rRight = _v2.e;
 			return A5(
 				$elm$core$Dict$RBNode_elm_builtin,
-				0,
+				$elm$core$Dict$Red,
 				rlK,
 				rlV,
 				A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
 					rlL),
-				A5($elm$core$Dict$RBNode_elm_builtin, 1, rK, rV, rlR, rRight));
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rlR, rRight));
 		} else {
 			var clr = dict.a;
 			var k = dict.b;
@@ -6931,22 +7206,22 @@ var $elm$core$Dict$moveRedLeft = function (dict) {
 			var rV = _v5.c;
 			var rLeft = _v5.d;
 			var rRight = _v5.e;
-			if (clr === 1) {
+			if (clr.$ === 'Black') {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
 			} else {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
 			}
 		}
 	} else {
@@ -6954,8 +7229,8 @@ var $elm$core$Dict$moveRedLeft = function (dict) {
 	}
 };
 var $elm$core$Dict$moveRedRight = function (dict) {
-	if (((dict.$ === -1) && (dict.d.$ === -1)) && (dict.e.$ === -1)) {
-		if ((dict.d.d.$ === -1) && (!dict.d.d.a)) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.d.d.$ === 'RBNode_elm_builtin') && (dict.d.d.a.$ === 'Red')) {
 			var clr = dict.a;
 			var k = dict.b;
 			var v = dict.c;
@@ -6978,17 +7253,17 @@ var $elm$core$Dict$moveRedRight = function (dict) {
 			var rRight = _v4.e;
 			return A5(
 				$elm$core$Dict$RBNode_elm_builtin,
-				0,
+				$elm$core$Dict$Red,
 				lK,
 				lV,
-				A5($elm$core$Dict$RBNode_elm_builtin, 1, llK, llV, llLeft, llRight),
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
 				A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
 					lRight,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight)));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight)));
 		} else {
 			var clr = dict.a;
 			var k = dict.b;
@@ -7005,22 +7280,22 @@ var $elm$core$Dict$moveRedRight = function (dict) {
 			var rV = _v6.c;
 			var rLeft = _v6.d;
 			var rRight = _v6.e;
-			if (clr === 1) {
+			if (clr.$ === 'Black') {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
 			} else {
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
-					1,
+					$elm$core$Dict$Black,
 					k,
 					v,
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, lK, lV, lLeft, lRight),
-					A5($elm$core$Dict$RBNode_elm_builtin, 0, rK, rV, rLeft, rRight));
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
 			}
 		}
 	} else {
@@ -7029,7 +7304,7 @@ var $elm$core$Dict$moveRedRight = function (dict) {
 };
 var $elm$core$Dict$removeHelpPrepEQGT = F7(
 	function (targetKey, dict, color, key, value, left, right) {
-		if ((left.$ === -1) && (!left.a)) {
+		if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
 			var _v1 = left.a;
 			var lK = left.b;
 			var lV = left.c;
@@ -7041,13 +7316,13 @@ var $elm$core$Dict$removeHelpPrepEQGT = F7(
 				lK,
 				lV,
 				lLeft,
-				A5($elm$core$Dict$RBNode_elm_builtin, 0, key, value, lRight, right));
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, lRight, right));
 		} else {
 			_v2$2:
 			while (true) {
-				if ((right.$ === -1) && (right.a === 1)) {
-					if (right.d.$ === -1) {
-						if (right.d.a === 1) {
+				if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Black')) {
+					if (right.d.$ === 'RBNode_elm_builtin') {
+						if (right.d.a.$ === 'Black') {
 							var _v3 = right.a;
 							var _v4 = right.d;
 							var _v5 = _v4.a;
@@ -7068,7 +7343,7 @@ var $elm$core$Dict$removeHelpPrepEQGT = F7(
 		}
 	});
 var $elm$core$Dict$removeMin = function (dict) {
-	if ((dict.$ === -1) && (dict.d.$ === -1)) {
+	if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
 		var color = dict.a;
 		var key = dict.b;
 		var value = dict.c;
@@ -7076,8 +7351,8 @@ var $elm$core$Dict$removeMin = function (dict) {
 		var lColor = left.a;
 		var lLeft = left.d;
 		var right = dict.e;
-		if (lColor === 1) {
-			if ((lLeft.$ === -1) && (!lLeft.a)) {
+		if (lColor.$ === 'Black') {
+			if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
 				var _v3 = lLeft.a;
 				return A5(
 					$elm$core$Dict$RBNode_elm_builtin,
@@ -7088,7 +7363,7 @@ var $elm$core$Dict$removeMin = function (dict) {
 					right);
 			} else {
 				var _v4 = $elm$core$Dict$moveRedLeft(dict);
-				if (_v4.$ === -1) {
+				if (_v4.$ === 'RBNode_elm_builtin') {
 					var nColor = _v4.a;
 					var nKey = _v4.b;
 					var nValue = _v4.c;
@@ -7120,7 +7395,7 @@ var $elm$core$Dict$removeMin = function (dict) {
 };
 var $elm$core$Dict$removeHelp = F2(
 	function (targetKey, dict) {
-		if (dict.$ === -2) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
 			return $elm$core$Dict$RBEmpty_elm_builtin;
 		} else {
 			var color = dict.a;
@@ -7129,10 +7404,10 @@ var $elm$core$Dict$removeHelp = F2(
 			var left = dict.d;
 			var right = dict.e;
 			if (_Utils_cmp(targetKey, key) < 0) {
-				if ((left.$ === -1) && (left.a === 1)) {
+				if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Black')) {
 					var _v4 = left.a;
 					var lLeft = left.d;
-					if ((lLeft.$ === -1) && (!lLeft.a)) {
+					if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
 						var _v6 = lLeft.a;
 						return A5(
 							$elm$core$Dict$RBNode_elm_builtin,
@@ -7143,7 +7418,7 @@ var $elm$core$Dict$removeHelp = F2(
 							right);
 					} else {
 						var _v7 = $elm$core$Dict$moveRedLeft(dict);
-						if (_v7.$ === -1) {
+						if (_v7.$ === 'RBNode_elm_builtin') {
 							var nColor = _v7.a;
 							var nKey = _v7.b;
 							var nValue = _v7.c;
@@ -7179,7 +7454,7 @@ var $elm$core$Dict$removeHelp = F2(
 	});
 var $elm$core$Dict$removeHelpEQGT = F2(
 	function (targetKey, dict) {
-		if (dict.$ === -1) {
+		if (dict.$ === 'RBNode_elm_builtin') {
 			var color = dict.a;
 			var key = dict.b;
 			var value = dict.c;
@@ -7187,7 +7462,7 @@ var $elm$core$Dict$removeHelpEQGT = F2(
 			var right = dict.e;
 			if (_Utils_eq(targetKey, key)) {
 				var _v1 = $elm$core$Dict$getMin(right);
-				if (_v1.$ === -1) {
+				if (_v1.$ === 'RBNode_elm_builtin') {
 					var minKey = _v1.b;
 					var minValue = _v1.c;
 					return A5(
@@ -7216,13 +7491,13 @@ var $elm$core$Dict$removeHelpEQGT = F2(
 var $elm$core$Dict$remove = F2(
 	function (key, dict) {
 		var _v0 = A2($elm$core$Dict$removeHelp, key, dict);
-		if ((_v0.$ === -1) && (!_v0.a)) {
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
 			var _v1 = _v0.a;
 			var k = _v0.b;
 			var v = _v0.c;
 			var l = _v0.d;
 			var r = _v0.e;
-			return A5($elm$core$Dict$RBNode_elm_builtin, 1, k, v, l, r);
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
 		} else {
 			var x = _v0;
 			return x;
@@ -7232,427 +7507,924 @@ var $elm$core$Dict$update = F3(
 	function (targetKey, alter, dictionary) {
 		var _v0 = alter(
 			A2($elm$core$Dict$get, targetKey, dictionary));
-		if (!_v0.$) {
+		if (_v0.$ === 'Just') {
 			var value = _v0.a;
 			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
 		} else {
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
-var $author$project$Item$update = F3(
-	function (itemId, transform, model) {
+var $author$project$Box$addToItemSet_ = F3(
+	function (setItem, itemSetId, model) {
+		var itemSets = model.itemSets;
 		return _Utils_update(
 			model,
 			{
-				b7: A3(
+				itemSets: A3(
 					$elm$core$Dict$update,
-					itemId,
-					function (maybeItem) {
-						if (!maybeItem.$) {
-							var item = maybeItem.a;
+					itemSetId,
+					function (maybeItemSet) {
+						if (maybeItemSet.$ === 'Just') {
+							var itemSet = maybeItemSet.a;
 							return $elm$core$Maybe$Just(
-								transform(item));
+								_Utils_update(
+									itemSet,
+									{
+										items: A2($elm$core$List$cons, setItem, itemSet.items)
+									}));
 						} else {
-							return A3($author$project$Utils$illegalItemId, 'update', itemId, $elm$core$Maybe$Nothing);
+							return A3($author$project$Utils$itemSetNotFound, 'Box.addToItemSet_', itemSetId, $elm$core$Maybe$Nothing);
 						}
 					},
-					model.b7)
+					itemSets)
 			});
 	});
-var $author$project$Item$insertAssocId_ = F3(
-	function (assocId, itemId, model) {
+var $author$project$Utils$boxNotFound = F3(
+	function (funcName, id, val) {
+		return A4(
+			$author$project$Utils$notFound,
+			funcName,
+			'Box',
+			$author$project$ModelBase$toBoxId(id),
+			val);
+	});
+var $author$project$Box$byId = F2(
+	function (boxId, model) {
+		var _v0 = A2(
+			$elm$core$Dict$get,
+			$author$project$ModelBase$toBoxId(boxId),
+			model.boxes);
+		if (_v0.$ === 'Just') {
+			var box = _v0.a;
+			return $elm$core$Maybe$Just(box);
+		} else {
+			return A3($author$project$Utils$boxNotFound, 'Box.byId', boxId, $elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$Utils$topicNotFound = F3(
+	function (funcName, id, val) {
+		return A4(
+			$author$project$Utils$notFound,
+			funcName,
+			'Topic',
+			$author$project$ModelBase$toTopicId(id),
+			val);
+	});
+var $author$project$Topic$update = F3(
+	function (topicId, transform, model) {
+		var topics = model.topics;
+		return _Utils_update(
+			model,
+			{
+				topics: A3(
+					$elm$core$Dict$update,
+					$author$project$ModelBase$toTopicId(topicId),
+					function (maybeTopic) {
+						if (maybeTopic.$ === 'Just') {
+							var topic = maybeTopic.a;
+							return $elm$core$Maybe$Just(
+								transform(topic));
+						} else {
+							return A3($author$project$Utils$topicNotFound, 'Topic.update', topicId, $elm$core$Maybe$Nothing);
+						}
+					},
+					topics)
+			});
+	});
+var $author$project$Assoc$insertAssocId = F3(
+	function (assocId, topicId, model) {
 		return A3(
-			$author$project$Item$update,
-			itemId,
-			function (item) {
+			$author$project$Topic$update,
+			topicId,
+			function (topic) {
+				var assocIds = topic.assocIds;
 				return _Utils_update(
-					item,
+					topic,
 					{
-						bH: A2($elm$core$Set$insert, assocId, item.bH)
+						assocIds: A2($elm$core$List$cons, assocId, assocIds)
 					});
 			},
 			model);
 	});
-var $author$project$Item$nextId = function (model) {
+var $author$project$Model$nextId = function (model) {
 	return _Utils_update(
 		model,
-		{dw: model.dw + 1});
+		{nextId: model.nextId + 1});
 };
-var $author$project$Item$addAssoc = F4(
-	function (assocType, player1, player2, model) {
-		var id = model.dw;
-		var assoc = A4($author$project$ModelParts$AssocInfo, id, assocType, player1, player2);
-		var item = A3(
-			$author$project$ModelParts$Item,
-			id,
-			$author$project$ModelParts$Assoc(assoc),
-			$elm$core$Set$empty);
+var $author$project$Assoc$create = F4(
+	function (assocType, topicId1, topicId2, model) {
+		var assocs = model.assocs;
+		var id = $author$project$ModelBase$AssocId(model.nextId);
+		var assoc = A4($author$project$ModelBase$Assoc, id, assocType, topicId1, topicId2);
 		return _Utils_Tuple2(
-			$author$project$Item$nextId(
+			$author$project$Model$nextId(
 				A3(
-					$author$project$Item$insertAssocId_,
+					$author$project$Assoc$insertAssocId,
 					id,
-					player2,
+					topicId2,
 					A3(
-						$author$project$Item$insertAssocId_,
+						$author$project$Assoc$insertAssocId,
 						id,
-						player1,
+						topicId1,
 						_Utils_update(
 							model,
 							{
-								b7: A3($elm$core$Dict$insert, id, item, model.b7)
+								assocs: A3(
+									$elm$core$Dict$insert,
+									$author$project$ModelBase$toAssocId(id),
+									assoc,
+									assocs)
 							})))),
 			id);
 	});
-var $author$project$Utils$info = F2(
-	function (funcName, val) {
-		return A2($author$project$Logger$log, '@' + funcName, val);
-	});
-var $author$project$Utils$illegalBoxId = F3(
-	function (funcName, id, val) {
-		return A4($author$project$Utils$illegalId, funcName, 'Box', id, val);
-	});
-var $author$project$Box$update = F3(
-	function (boxId, transform, model) {
-		return _Utils_update(
-			model,
-			{
-				bL: A3(
-					$elm$core$Dict$update,
-					boxId,
-					function (maybeBox) {
-						if (!maybeBox.$) {
-							var box = maybeBox.a;
-							return $elm$core$Maybe$Just(
-								transform(box));
-						} else {
-							return A3($author$project$Utils$illegalBoxId, 'update', boxId, $elm$core$Maybe$Nothing);
-						}
-					},
-					model.bL)
-			});
-	});
-var $author$project$Box$addItem = F4(
-	function (itemId, props, boxId, model) {
-		var _v0 = A4($author$project$Item$addAssoc, 0, boxId, itemId, model);
-		var newModel = _v0.a;
-		var boxAssocId = _v0.b;
-		var boxItem = A4(
-			$author$project$ModelParts$BoxItem,
-			itemId,
-			boxAssocId,
-			$author$project$ModelParts$Visible(1),
-			props);
-		var _v1 = A2(
-			$author$project$Utils$info,
-			'addItem',
-			{cX: boxAssocId, a4: boxId, dm: itemId, ac: props});
-		return A3(
-			$author$project$Box$update,
-			boxId,
-			function (box) {
-				return _Utils_update(
-					box,
-					{
-						b7: A3($elm$core$Dict$insert, itemId, boxItem, box.b7)
-					});
-			},
-			newModel);
-	});
-var $author$project$Main$addAssocAndAddToBox = F5(
-	function (assocType, player1, player2, boxId, model) {
-		var props = $author$project$ModelParts$AssocP($author$project$ModelParts$AssocProps);
-		var _v0 = A4($author$project$Item$addAssoc, assocType, player1, player2, model);
-		var newModel = _v0.a;
-		var assocId = _v0.b;
-		return A4($author$project$Box$addItem, assocId, props, boxId, newModel);
-	});
-var $author$project$Main$addAssoc = F4(
-	function (player1, player2, boxId, model) {
-		return A5($author$project$Main$addAssocAndAddToBox, 1, player1, player2, boxId, model);
-	});
-var $author$project$Main$cacheImageUrl = F3(
-	function (imageId, url, model) {
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					dh: A3($elm$core$Dict$insert, imageId, url, model.dh)
-				}),
-			$elm$core$Platform$Cmd$none);
-	});
-var $author$project$Feature$SelAPI$setItems = F2(
-	function (items, model) {
-		var selection = model.ax;
-		return _Utils_update(
-			model,
-			{
-				ax: _Utils_update(
-					selection,
-					{b7: items})
-			});
-	});
-var $author$project$Feature$SelAPI$clear = function (model) {
-	return A2($author$project$Feature$SelAPI$setItems, _List_Nil, model);
+var $author$project$ModelBase$fromBoxId = function (_v0) {
+	var id = _v0.a;
+	return id;
 };
-var $author$project$Feature$SearchAPI$setResult = F2(
-	function (result, model) {
-		var search = model.C;
-		return _Utils_update(
-			model,
-			{
-				C: _Utils_update(
-					search,
-					{cw: result})
-			});
-	});
-var $author$project$Feature$SearchAPI$closeMenu = function (model) {
-	return A2($author$project$Feature$SearchAPI$setResult, $author$project$Feature$Search$NoSearch, model);
-};
-var $author$project$Feature$IconAPI$closePicker = function (model) {
-	var icon = model.aa;
-	return _Utils_update(
-		model,
-		{
-			aa: _Utils_update(
-				icon,
-				{cl: 1})
-		});
-};
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $author$project$Box$firstId = function (boxPath) {
-	if (boxPath.b) {
-		var boxId = boxPath.a;
-		return boxId;
-	} else {
-		return A3($author$project$Utils$logError, 'firstId', 'boxPath is empty!', -1);
-	}
-};
-var $elm$core$List$any = F2(
-	function (isOkay, list) {
-		any:
-		while (true) {
-			if (!list.b) {
-				return false;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (isOkay(x)) {
-					return true;
-				} else {
-					var $temp$isOkay = isOkay,
-						$temp$list = xs;
-					isOkay = $temp$isOkay;
-					list = $temp$list;
-					continue any;
-				}
-			}
-		}
-	});
-var $author$project$Feature$SelAPI$isSelected = F3(
+var $author$project$Box$createHierarchy = F3(
 	function (itemId, boxId, model) {
-		return A2(
-			$elm$core$List$any,
-			function (_v0) {
-				var id = _v0.a;
-				var boxPath = _v0.b;
-				if (boxPath.b) {
-					var boxId_ = boxPath.a;
-					return _Utils_eq(itemId, id) && _Utils_eq(boxId, boxId_);
-				} else {
-					return false;
-				}
-			},
-			model.ax.b7);
-	});
-var $author$project$ModelParts$View = 0;
-var $elm$core$Basics$min = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) < 0) ? x : y;
-	});
-var $author$project$Box$Size$accumulateRect = F2(
-	function (rectAcc, rect) {
-		return A4(
-			$author$project$ModelParts$Rectangle,
-			A2($elm$core$Basics$min, rectAcc.d2, rect.d2),
-			A2($elm$core$Basics$min, rectAcc.d4, rect.d4),
-			A2($elm$core$Basics$max, rectAcc.a0, rect.a0),
-			A2($elm$core$Basics$max, rectAcc.a1, rect.a1));
-	});
-var $author$project$Config$whiteBoxPadding = 12;
-var $author$project$Box$Size$addBoxPadding = function (rect) {
-	return A4($author$project$ModelParts$Rectangle, rect.d2 - $author$project$Config$whiteBoxPadding, rect.d4 - $author$project$Config$whiteBoxPadding, rect.a0 + $author$project$Config$whiteBoxPadding, rect.a1 + $author$project$Config$whiteBoxPadding);
-};
-var $author$project$Config$topicHeight = 28;
-var $author$project$Config$topicH2 = ($author$project$Config$topicHeight / 2) | 0;
-var $author$project$Config$topicWidth = 156;
-var $author$project$Config$topicW2 = ($author$project$Config$topicWidth / 2) | 0;
-var $author$project$Box$Size$boxExtent = F2(
-	function (pos, rect) {
-		var boxWidth = rect.a0 - rect.d2;
-		var boxHeight = rect.a1 - rect.d4;
-		return A4($author$project$ModelParts$Rectangle, pos.d1 - $author$project$Config$topicW2, pos.d3 - $author$project$Config$topicH2, (pos.d1 - $author$project$Config$topicW2) + boxWidth, (pos.d3 + $author$project$Config$topicH2) + boxHeight);
-	});
-var $author$project$Box$byId = F2(
-	function (boxId, model) {
-		return A2($elm$core$Dict$get, boxId, model.bL);
-	});
-var $author$project$Box$byIdOrLog = F2(
-	function (boxId, model) {
-		var _v0 = A2($author$project$Box$byId, boxId, model);
-		if (!_v0.$) {
-			var box = _v0.a;
-			return $elm$core$Maybe$Just(box);
+		if (itemId.$ === 'T') {
+			var topicId = itemId.a;
+			return A4(
+				$author$project$Assoc$create,
+				$author$project$ModelBase$Hierarchy,
+				$author$project$ModelBase$fromBoxId(boxId),
+				topicId,
+				model).a;
 		} else {
-			return A3($author$project$Utils$illegalBoxId, 'byIdOrLog', boxId, $elm$core$Maybe$Nothing);
+			return model;
 		}
 	});
-var $author$project$Feature$Text$Edit = F2(
-	function (a, b) {
-		return {$: 0, a: a, b: b};
-	});
-var $author$project$Config$topicBorderWidth = 1;
-var $author$project$Config$topicDetailMaxWidth = 300;
-var $author$project$Config$topicSize = A2($author$project$ModelParts$Size, $author$project$Config$topicWidth, $author$project$Config$topicHeight);
-var $author$project$Logger$toString = function (_v0) {
-	return '';
-};
 var $author$project$Utils$fail = F3(
 	function (funcName, args, val) {
 		return A2(
 			$author$project$Logger$log,
-			'--> @' + (funcName + (' ' + ($author$project$Logger$toString(args) + ' failed'))),
+			'--> @' + (funcName + (': ' + ($author$project$Logger$toString(args) + ' failed'))),
 			val);
 	});
-var $author$project$Item$byId = F2(
-	function (itemId, model) {
-		var _v0 = A2($elm$core$Dict$get, itemId, model.b7);
-		if (!_v0.$) {
-			var item = _v0.a;
-			return $elm$core$Maybe$Just(item);
-		} else {
-			return A3($author$project$Utils$illegalItemId, 'byId', itemId, $elm$core$Maybe$Nothing);
-		}
-	});
-var $author$project$Utils$topicMismatch = F3(
-	function (funcName, id, val) {
-		return A3(
-			$author$project$Utils$logError,
-			funcName,
-			$elm$core$String$fromInt(id) + ' is not a Topic but an Assoc',
-			val);
-	});
-var $author$project$Item$topicById = F2(
-	function (topicId, model) {
-		var _v0 = A2($author$project$Item$byId, topicId, model);
-		if (!_v0.$) {
-			var info = _v0.a.b2;
-			if (!info.$) {
-				var topic = info.a;
-				return $elm$core$Maybe$Just(topic);
+var $author$project$Box$itemSetOf = F2(
+	function (boxId, model) {
+		var _v0 = A2($author$project$Box$byId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var box = _v0.a;
+			var _v1 = A2($elm$core$Dict$get, box.itemSetId, model.itemSets);
+			if (_v1.$ === 'Just') {
+				var itemSet = _v1.a;
+				return $elm$core$Maybe$Just(itemSet);
 			} else {
-				return A3($author$project$Utils$topicMismatch, 'topicById', topicId, $elm$core$Maybe$Nothing);
+				return A3(
+					$author$project$Utils$logError,
+					'Box.itemSetOf',
+					'Missing underlying ItemSet (' + ($elm$core$String$fromInt(box.itemSetId) + (') of Box ' + $elm$core$String$fromInt(
+						$author$project$ModelBase$toBoxId(boxId)))),
+					$elm$core$Maybe$Nothing);
 			}
-		} else {
-			return A3($author$project$Utils$fail, 'topicById', topicId, $elm$core$Maybe$Nothing);
-		}
-	});
-var $author$project$Item$topicSize = F3(
-	function (topicId, get, model) {
-		var _v0 = A2($author$project$Item$topicById, topicId, model);
-		if (!_v0.$) {
-			var size = _v0.a.bo;
-			return $elm$core$Maybe$Just(
-				get(size));
 		} else {
 			return A3(
 				$author$project$Utils$fail,
-				'topicSize',
-				{bD: topicId},
+				'Box.itemSetOf',
+				{boxId: boxId},
 				$elm$core$Maybe$Nothing);
 		}
 	});
-var $author$project$Box$Size$detailTopicExtent = F4(
-	function (topicId, boxPath, pos, model) {
-		var isEdit = _Utils_eq(
-			model.dX.c7,
-			A2($author$project$Feature$Text$Edit, topicId, boxPath));
-		var get = isEdit ? function ($) {
-			return $.c8;
-		} : function ($) {
-			return $.d_;
-		};
-		var maybeSize = function () {
-			var _v1 = A3($author$project$Item$topicSize, topicId, get, model);
-			if (!_v1.$) {
-				var size = _v1.a;
-				return isEdit ? $elm$core$Maybe$Just(
-					_Utils_update(
-						size,
-						{cN: $author$project$Config$topicDetailMaxWidth})) : $elm$core$Maybe$Just(size);
-			} else {
-				return $elm$core$Maybe$Nothing;
-			}
-		}();
-		if (!maybeSize.$) {
-			var size = maybeSize.a;
-			return A4($author$project$ModelParts$Rectangle, pos.d1 - $author$project$Config$topicW2, pos.d3 - $author$project$Config$topicH2, (((pos.d1 - $author$project$Config$topicW2) + size.cN) + $author$project$Config$topicSize.b_) + (2 * $author$project$Config$topicBorderWidth), ((pos.d3 - $author$project$Config$topicH2) + size.b_) + (2 * $author$project$Config$topicBorderWidth));
-		} else {
-			return A4($author$project$ModelParts$Rectangle, 0, 0, 0, 0);
-		}
-	});
-var $author$project$Box$Size$topicExtent = function (pos) {
-	return A4($author$project$ModelParts$Rectangle, pos.d1 - $author$project$Config$topicW2, pos.d3 - $author$project$Config$topicH2, (pos.d1 + $author$project$Config$topicW2) + (2 * $author$project$Config$topicBorderWidth), (pos.d3 + $author$project$Config$topicH2) + (2 * $author$project$Config$topicBorderWidth));
-};
-var $author$project$Box$isVisible = function (item) {
-	var _v0 = item.al;
-	if (!_v0.$) {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$core$Basics$not = _Basics_not;
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
-var $author$project$Box$isEmpty = F2(
-	function (boxId, model) {
-		var _v0 = A2($author$project$Box$byIdOrLog, boxId, model);
-		if (!_v0.$) {
-			var box = _v0.a;
-			return !A2(
+var $author$project$Box$hasItem = F3(
+	function (itemId, boxId, model) {
+		var _v0 = A2($author$project$Box$itemSetOf, boxId, model);
+		if (_v0.$ === 'Just') {
+			var itemSet = _v0.a;
+			return A2(
 				$elm$core$List$any,
-				$author$project$Box$isVisible,
-				$elm$core$Dict$values(box.b7));
+				function (setItem) {
+					return _Utils_eq(setItem.id, itemId);
+				},
+				itemSet.items);
 		} else {
 			return false;
+		}
+	});
+var $author$project$Box$addToItemSet = F3(
+	function (itemId, boxId, model) {
+		if (A3($author$project$Box$hasItem, itemId, boxId, model)) {
+			return model;
+		} else {
+			var _v0 = A2($author$project$Box$byId, boxId, model);
+			if (_v0.$ === 'Just') {
+				var box = _v0.a;
+				return A3(
+					$author$project$Box$createHierarchy,
+					itemId,
+					boxId,
+					A3(
+						$author$project$Box$addToItemSet_,
+						$author$project$ModelBase$SetItem(itemId),
+						box.itemSetId,
+						model));
+			} else {
+				return model;
+			}
+		}
+	});
+var $author$project$Box$addAssoc = F3(
+	function (assocId, boxId, model) {
+		return A3(
+			$author$project$Box$addToItemSet,
+			$author$project$ModelBase$A(assocId),
+			boxId,
+			model);
+	});
+var $author$project$Main$createAssocAndAddToBox = F5(
+	function (assocType, topicId1, topicId2, boxId, model) {
+		var _v0 = A4($author$project$Assoc$create, assocType, topicId1, topicId2, model);
+		var newModel = _v0.a;
+		var assocId = _v0.b;
+		return A3($author$project$Box$addAssoc, assocId, boxId, newModel);
+	});
+var $author$project$Main$createAssoc = F4(
+	function (topicId1, topicId2, boxId, model) {
+		return A5($author$project$Main$createAssocAndAddToBox, $author$project$ModelBase$Association, topicId1, topicId2, boxId, model);
+	});
+var $author$project$Env$Env2 = F2(
+	function (model, ext) {
+		return {ext: ext, model: model};
+	});
+var $author$project$ModelBase$ToolbarPos = F2(
+	function (topic, assoc) {
+		return {assoc: assoc, topic: topic};
+	});
+var $author$project$TopicList$ViewProps$updateOrder = F3(
+	function (boxId, transform, model) {
+		var topicList = model.topicList;
+		return _Utils_update(
+			model,
+			{
+				topicList: _Utils_update(
+					topicList,
+					{
+						viewProps: A3(
+							$elm$core$Dict$update,
+							$author$project$ModelBase$toBoxId(boxId),
+							function (maybeViewProps) {
+								if (maybeViewProps.$ === 'Just') {
+									var viewProps = maybeViewProps.a;
+									return $elm$core$Maybe$Just(
+										_Utils_update(
+											viewProps,
+											{
+												order: transform(viewProps.order)
+											}));
+								} else {
+									return A3(
+										$author$project$Utils$logError,
+										'TopicList.ViewProps.updateOrder',
+										$author$project$Utils$toString(
+											{boxId: boxId}),
+										$elm$core$Maybe$Nothing);
+								}
+							},
+							topicList.viewProps)
+					})
+			});
+	});
+var $author$project$TopicList$ViewProps$addTopic = F4(
+	function (topicId, boxId, posHint, _v0) {
+		var model = _v0.model;
+		return _Utils_Tuple2(
+			A3(
+				$author$project$TopicList$ViewProps$updateOrder,
+				boxId,
+				function (orderList) {
+					return A2($elm$core$List$cons, topicId, orderList);
+				},
+				model),
+			$elm$core$Platform$Cmd$none);
+	});
+var $author$project$TopicMap$TopicMapDef$GotRandomPos = F3(
+	function (a, b, c) {
+		return {$: 'GotRandomPos', a: a, b: b, c: c};
+	});
+var $author$project$ModelBase$Random = {$: 'Random'};
+var $author$project$Model$TopicMap = function (a) {
+	return {$: 'TopicMap', a: a};
+};
+var $elm$random$Random$Generate = function (a) {
+	return {$: 'Generate', a: a};
+};
+var $elm$random$Random$Seed = F2(
+	function (a, b) {
+		return {$: 'Seed', a: a, b: b};
+	});
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $elm$random$Random$next = function (_v0) {
+	var state0 = _v0.a;
+	var incr = _v0.b;
+	return A2($elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
+};
+var $elm$random$Random$initialSeed = function (x) {
+	var _v0 = $elm$random$Random$next(
+		A2($elm$random$Random$Seed, 0, 1013904223));
+	var state1 = _v0.a;
+	var incr = _v0.b;
+	var state2 = (state1 + x) >>> 0;
+	return $elm$random$Random$next(
+		A2($elm$random$Random$Seed, state2, incr));
+};
+var $elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var $elm$time$Time$customZone = $elm$time$Time$Zone;
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
+var $elm$random$Random$init = A2(
+	$elm$core$Task$andThen,
+	function (time) {
+		return $elm$core$Task$succeed(
+			$elm$random$Random$initialSeed(
+				$elm$time$Time$posixToMillis(time)));
+	},
+	$elm$time$Time$now);
+var $elm$random$Random$step = F2(
+	function (_v0, seed) {
+		var generator = _v0.a;
+		return generator(seed);
+	});
+var $elm$random$Random$onEffects = F3(
+	function (router, commands, seed) {
+		if (!commands.b) {
+			return $elm$core$Task$succeed(seed);
+		} else {
+			var generator = commands.a.a;
+			var rest = commands.b;
+			var _v1 = A2($elm$random$Random$step, generator, seed);
+			var value = _v1.a;
+			var newSeed = _v1.b;
+			return A2(
+				$elm$core$Task$andThen,
+				function (_v2) {
+					return A3($elm$random$Random$onEffects, router, rest, newSeed);
+				},
+				A2($elm$core$Platform$sendToApp, router, value));
+		}
+	});
+var $elm$random$Random$onSelfMsg = F3(
+	function (_v0, _v1, seed) {
+		return $elm$core$Task$succeed(seed);
+	});
+var $elm$random$Random$Generator = function (a) {
+	return {$: 'Generator', a: a};
+};
+var $elm$random$Random$map = F2(
+	function (func, _v0) {
+		var genA = _v0.a;
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var _v1 = genA(seed0);
+				var a = _v1.a;
+				var seed1 = _v1.b;
+				return _Utils_Tuple2(
+					func(a),
+					seed1);
+			});
+	});
+var $elm$random$Random$cmdMap = F2(
+	function (func, _v0) {
+		var generator = _v0.a;
+		return $elm$random$Random$Generate(
+			A2($elm$random$Random$map, func, generator));
+	});
+_Platform_effectManagers['Random'] = _Platform_createManager($elm$random$Random$init, $elm$random$Random$onEffects, $elm$random$Random$onSelfMsg, $elm$random$Random$cmdMap);
+var $elm$random$Random$command = _Platform_leaf('Random');
+var $elm$random$Random$generate = F2(
+	function (tagger, generator) {
+		return $elm$random$Random$command(
+			$elm$random$Random$Generate(
+				A2($elm$random$Random$map, tagger, generator)));
+	});
+var $author$project$TopicMap$ViewProps$byId = F2(
+	function (mapId, model) {
+		var _v0 = A2(
+			$elm$core$Dict$get,
+			$author$project$ModelBase$toBoxId(mapId),
+			model.topicMap.viewProps);
+		if (_v0.$ === 'Just') {
+			var viewProps = _v0.a;
+			return $elm$core$Maybe$Just(viewProps);
+		} else {
+			return A3(
+				$author$project$Utils$logError,
+				'TopicMap.ViewProps.byId',
+				'Missing ViewProps for ' + $author$project$Utils$toString(mapId),
+				$elm$core$Maybe$Nothing);
 		}
 	});
 var $elm$core$Dict$member = F2(
 	function (key, dict) {
 		var _v0 = A2($elm$core$Dict$get, key, dict);
-		if (!_v0.$) {
+		if (_v0.$ === 'Just') {
 			return true;
 		} else {
 			return false;
 		}
 	});
-var $author$project$Item$isBox = F2(
-	function (id, model) {
-		return A2($elm$core$Dict$member, id, model.bL);
+var $author$project$TopicMap$ViewProps$hasMapTopic = F3(
+	function (topicId, mapId, model) {
+		var _v0 = A2($author$project$TopicMap$ViewProps$byId, mapId, model);
+		if (_v0.$ === 'Just') {
+			var map = _v0.a;
+			return A2(
+				$elm$core$Dict$member,
+				$author$project$ModelBase$toTopicId(topicId),
+				map.topics);
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'TopicMap.ViewProps.hasMapTopic',
+				{mapId: mapId, topicId: topicId},
+				false);
+		}
 	});
-var $author$project$Feature$SelAPI$single = function (model) {
-	var _v0 = model.ax.b7;
+var $author$project$Utils$info = F2(
+	function (funcName, val) {
+		return A2($author$project$Logger$log, '@' + funcName, val);
+	});
+var $author$project$Config$initTopicPos = A2($author$project$ModelBase$Point, 104, 72);
+var $author$project$TopicMap$ViewProps$initTopicPos = F2(
+	function (mapId, model) {
+		var _v0 = A2($author$project$TopicMap$ViewProps$byId, mapId, model);
+		if (_v0.$ === 'Just') {
+			var map = _v0.a;
+			return A2($author$project$ModelBase$Point, ($author$project$Config$initTopicPos.x + map.rect.x1) + map.scroll.x, ($author$project$Config$initTopicPos.y + map.rect.y1) + map.scroll.y);
+		} else {
+			return A2($author$project$ModelBase$Point, 0, 0);
+		}
+	});
+var $author$project$TopicMap$ViewProps$initMapTopic = F3(
+	function (topicId, mapId, model) {
+		return A3(
+			$author$project$TopicMap$TopicMapDef$TopicProps,
+			topicId,
+			A2($author$project$TopicMap$ViewProps$initTopicPos, mapId, model),
+			$author$project$ModelBase$Collapsed);
+	});
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$core$Bitwise$xor = _Bitwise_xor;
+var $elm$random$Random$peel = function (_v0) {
+	var state = _v0.a;
+	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
+	return ((word >>> 22) ^ word) >>> 0;
+};
+var $elm$random$Random$int = F2(
+	function (a, b) {
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var _v0 = (_Utils_cmp(a, b) < 0) ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
+				var lo = _v0.a;
+				var hi = _v0.b;
+				var range = (hi - lo) + 1;
+				if (!((range - 1) & range)) {
+					return _Utils_Tuple2(
+						(((range - 1) & $elm$random$Random$peel(seed0)) >>> 0) + lo,
+						$elm$random$Random$next(seed0));
+				} else {
+					var threshhold = (((-range) >>> 0) % range) >>> 0;
+					var accountForBias = function (seed) {
+						accountForBias:
+						while (true) {
+							var x = $elm$random$Random$peel(seed);
+							var seedN = $elm$random$Random$next(seed);
+							if (_Utils_cmp(x, threshhold) < 0) {
+								var $temp$seed = seedN;
+								seed = $temp$seed;
+								continue accountForBias;
+							} else {
+								return _Utils_Tuple2((x % range) + lo, seedN);
+							}
+						}
+					};
+					return accountForBias(seed0);
+				}
+			});
+	});
+var $elm$random$Random$map2 = F3(
+	function (func, _v0, _v1) {
+		var genA = _v0.a;
+		var genB = _v1.a;
+		return $elm$random$Random$Generator(
+			function (seed0) {
+				var _v2 = genA(seed0);
+				var a = _v2.a;
+				var seed1 = _v2.b;
+				var _v3 = genB(seed1);
+				var b = _v3.a;
+				var seed2 = _v3.b;
+				return _Utils_Tuple2(
+					A2(func, a, b),
+					seed2);
+			});
+	});
+var $author$project$Config$topicHeight = 28;
+var $author$project$Config$topicH2 = ($author$project$Config$topicHeight / 2) | 0;
+var $author$project$Config$topicWidth = 156;
+var $author$project$Config$topicW2 = ($author$project$Config$topicWidth / 2) | 0;
+var $author$project$Config$whiteBoxPadding = 12;
+var $author$project$Config$whiteBoxRange = A2($author$project$ModelBase$Size, 250, 150);
+var $author$project$TopicMap$ViewProps$pointGen = function () {
+	var rw = $author$project$Config$whiteBoxRange.w;
+	var rh = $author$project$Config$whiteBoxRange.h;
+	var cy = $author$project$Config$topicH2 + $author$project$Config$whiteBoxPadding;
+	var cx = $author$project$Config$topicW2 + $author$project$Config$whiteBoxPadding;
+	return A3(
+		$elm$random$Random$map2,
+		F2(
+			function (x, y) {
+				return A2($author$project$ModelBase$Point, cx + x, cy + y);
+			}),
+		A2($elm$random$Random$int, 0, rw),
+		A2($elm$random$Random$int, 0, rh));
+}();
+var $author$project$TopicMap$ViewProps$updateTopicMap = F3(
+	function (mapId, transform, model) {
+		var topicMap = model.topicMap;
+		return _Utils_update(
+			model,
+			{
+				topicMap: _Utils_update(
+					topicMap,
+					{
+						viewProps: A3(
+							$elm$core$Dict$update,
+							$author$project$ModelBase$toBoxId(mapId),
+							function (maybeMap) {
+								if (maybeMap.$ === 'Just') {
+									var map = maybeMap.a;
+									return $elm$core$Maybe$Just(
+										transform(map));
+								} else {
+									return A3($author$project$Utils$boxNotFound, 'TopicMap.ViewProps.updateTopicMap', mapId, $elm$core$Maybe$Nothing);
+								}
+							},
+							topicMap.viewProps)
+					})
+			});
+	});
+var $author$project$TopicMap$ViewProps$addTopic = F4(
+	function (topicId, mapId, posHint, _v0) {
+		var model = _v0.model;
+		if (A3($author$project$TopicMap$ViewProps$hasMapTopic, topicId, mapId, model)) {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		} else {
+			if (_Utils_eq(posHint, $author$project$ModelBase$Random)) {
+				var toMsg = A2(
+					$elm$core$Basics$composeL,
+					$author$project$Model$TopicMap,
+					A2($author$project$TopicMap$TopicMapDef$GotRandomPos, topicId, mapId));
+				return _Utils_Tuple2(
+					model,
+					A2($elm$random$Random$generate, toMsg, $author$project$TopicMap$ViewProps$pointGen));
+			} else {
+				var topic = A3($author$project$TopicMap$ViewProps$initMapTopic, topicId, mapId, model);
+				var _v1 = A2(
+					$author$project$Utils$info,
+					'TopicMap.ViewProps.addTopic',
+					{mapId: mapId, topicId: topicId});
+				return _Utils_Tuple2(
+					A3(
+						$author$project$TopicMap$ViewProps$updateTopicMap,
+						mapId,
+						function (map) {
+							return _Utils_update(
+								map,
+								{
+									topics: A3(
+										$elm$core$Dict$insert,
+										$author$project$ModelBase$toTopicId(topicId),
+										topic,
+										map.topics)
+								});
+						},
+						model),
+					$elm$core$Platform$Cmd$none);
+			}
+		}
+	});
+var $author$project$Config$contentFontSize = 13;
+var $author$project$Box$firstId = function (boxPath) {
+	if (boxPath.b) {
+		var boxId = boxPath.a;
+		return boxId;
+	} else {
+		return A3(
+			$author$project$Utils$logError,
+			'firstId',
+			'boxPath is empty!',
+			$author$project$ModelBase$BoxId(
+				$author$project$ModelBase$TopicId(-1)));
+	}
+};
+var $author$project$TopicList$Geometry$updateTopicList = F3(
+	function (boxId, transform, model) {
+		var topicList = model.topicList;
+		return _Utils_update(
+			model,
+			{
+				topicList: _Utils_update(
+					topicList,
+					{
+						viewProps: A3(
+							$elm$core$Dict$update,
+							$author$project$ModelBase$toBoxId(boxId),
+							function (maybeList) {
+								if (maybeList.$ === 'Just') {
+									var list = maybeList.a;
+									return $elm$core$Maybe$Just(
+										transform(list));
+								} else {
+									return A3($author$project$Utils$boxNotFound, 'TopicList.Geometry.updateTopicList', boxId, $elm$core$Maybe$Nothing);
+								}
+							},
+							topicList.viewProps)
+					})
+			});
+	});
+var $author$project$TopicList$Geometry$setSize = F3(
+	function (boxId, size, model) {
+		var topicList = model.topicList;
+		return A3(
+			$author$project$TopicList$Geometry$updateTopicList,
+			boxId,
+			function (list) {
+				return _Utils_update(
+					list,
+					{size: size});
+			},
+			model);
+	});
+var $author$project$Topic$isBox = F2(
+	function (_v0, model) {
+		var id = _v0.a;
+		return A2($elm$core$Dict$member, id, model.boxes);
+	});
+var $author$project$Box$topicIds = F2(
+	function (boxId, model) {
+		var _v0 = A2($author$project$Box$itemSetOf, boxId, model);
+		if (_v0.$ === 'Just') {
+			var itemSet = _v0.a;
+			return A3(
+				$elm$core$List$foldr,
+				F2(
+					function (setItem, acc) {
+						var _v1 = setItem.id;
+						if (_v1.$ === 'T') {
+							var id = _v1.a;
+							return A2($elm$core$List$cons, id, acc);
+						} else {
+							return acc;
+						}
+					}),
+				_List_Nil,
+				itemSet.items);
+		} else {
+			return _List_Nil;
+		}
+	});
+var $author$project$TopicList$Geometry$topicCount = F2(
+	function (boxId, model) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (topicId, acc) {
+					return A2($author$project$Topic$isBox, topicId, model) ? ((acc + 1) + A2(
+						$author$project$TopicList$Geometry$topicCount,
+						$author$project$ModelBase$BoxId(topicId),
+						model)) : (acc + 1);
+				}),
+			0,
+			A2($author$project$Box$topicIds, boxId, model));
+	});
+var $author$project$Config$topicLineHeight = 1.5;
+var $author$project$TopicList$Geometry$autoSize = F2(
+	function (boxPath, _v0) {
+		var model = _v0.model;
+		var width = 260;
+		var boxId = $author$project$Box$firstId(boxPath);
+		var count = A2($author$project$TopicList$Geometry$topicCount, boxId, model);
+		var height = $elm$core$Basics$round((count * $author$project$Config$topicLineHeight) * $author$project$Config$contentFontSize) + 34;
+		var rect = A4($author$project$ModelBase$Rectangle, 0, 0, width, height);
+		var newModel = A3(
+			$author$project$TopicList$Geometry$setSize,
+			boxId,
+			A2($author$project$ModelBase$Size, width, height),
+			model);
+		return _Utils_Tuple2(rect, newModel);
+	});
+var $elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var $author$project$TopicMap$Geometry$accumulateRect = F2(
+	function (rectAcc, rect) {
+		return A4(
+			$author$project$ModelBase$Rectangle,
+			A2($elm$core$Basics$min, rectAcc.x1, rect.x1),
+			A2($elm$core$Basics$min, rectAcc.y1, rect.y1),
+			A2($elm$core$Basics$max, rectAcc.x2, rect.x2),
+			A2($elm$core$Basics$max, rectAcc.y2, rect.y2));
+	});
+var $author$project$TopicMap$Geometry$boxExtent = F2(
+	function (pos, rect) {
+		var boxWidth = rect.x2 - rect.x1;
+		var boxHeight = rect.y2 - rect.y1;
+		return A4($author$project$ModelBase$Rectangle, pos.x - $author$project$Config$topicW2, pos.y - $author$project$Config$topicH2, (pos.x - $author$project$Config$topicW2) + boxWidth, (pos.y + $author$project$Config$topicH2) + boxHeight);
+	});
+var $author$project$Feature$TextDef$Edit = F2(
+	function (a, b) {
+		return {$: 'Edit', a: a, b: b};
+	});
+var $author$project$Topic$fromId = F2(
+	function (topicId, model) {
+		var _v0 = A2(
+			$elm$core$Dict$get,
+			$author$project$ModelBase$toTopicId(topicId),
+			model.topics);
+		if (_v0.$ === 'Just') {
+			var topic = _v0.a;
+			return $elm$core$Maybe$Just(topic);
+		} else {
+			return A3($author$project$Utils$topicNotFound, 'Topic.fromId', topicId, $elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$Topic$size = F3(
+	function (topicId, get, model) {
+		var _v0 = A2($author$project$Topic$fromId, topicId, model);
+		if (_v0.$ === 'Just') {
+			var topic = _v0.a;
+			return $elm$core$Maybe$Just(
+				get(topic.size));
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'Topic.size',
+				{topicId: topicId},
+				$elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$Config$topicBorderWidth = 1;
+var $author$project$Config$topicDetailMaxWidth = 300;
+var $author$project$TopicMap$Geometry$detailTopicExtent = F4(
+	function (topicId, boxPath, pos, model) {
+		var isEdit = _Utils_eq(
+			model.text.edit,
+			A2($author$project$Feature$TextDef$Edit, topicId, boxPath));
+		var get = isEdit ? function ($) {
+			return $.editor;
+		} : function ($) {
+			return $.view;
+		};
+		var maybeSize = function () {
+			var _v1 = A3($author$project$Topic$size, topicId, get, model);
+			if (_v1.$ === 'Just') {
+				var size = _v1.a;
+				return isEdit ? $elm$core$Maybe$Just(
+					_Utils_update(
+						size,
+						{w: $author$project$Config$topicDetailMaxWidth})) : $elm$core$Maybe$Just(size);
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		}();
+		if (maybeSize.$ === 'Just') {
+			var size = maybeSize.a;
+			return A4($author$project$ModelBase$Rectangle, pos.x - $author$project$Config$topicW2, pos.y - $author$project$Config$topicH2, (((pos.x - $author$project$Config$topicW2) + size.w) + $author$project$Config$topicHeight) + (2 * $author$project$Config$topicBorderWidth), ((pos.y - $author$project$Config$topicH2) + size.h) + (2 * $author$project$Config$topicBorderWidth));
+		} else {
+			return A4($author$project$ModelBase$Rectangle, 0, 0, 0, 0);
+		}
+	});
+var $author$project$TopicMap$Geometry$topicExtent = function (pos) {
+	return A4($author$project$ModelBase$Rectangle, pos.x - $author$project$Config$topicW2, pos.y - $author$project$Config$topicH2, (pos.x + $author$project$Config$topicW2) + (2 * $author$project$Config$topicBorderWidth), (pos.y + $author$project$Config$topicH2) + (2 * $author$project$Config$topicBorderWidth));
+};
+var $author$project$TopicMap$Geometry$calcItemRect = F4(
+	function (topic, boxPath, ext, model) {
+		var pos = topic.pos;
+		var expansion = topic.expansion;
+		var _v0 = _Utils_Tuple2(
+			A2($author$project$Topic$isBox, topic.id, model),
+			expansion);
+		if (!_v0.a) {
+			if (_v0.b.$ === 'Collapsed') {
+				var _v1 = _v0.b;
+				return _Utils_Tuple2(
+					$author$project$TopicMap$Geometry$topicExtent(pos),
+					model);
+			} else {
+				var _v2 = _v0.b;
+				return _Utils_Tuple2(
+					A4($author$project$TopicMap$Geometry$detailTopicExtent, topic.id, boxPath, pos, model),
+					model);
+			}
+		} else {
+			if (_v0.b.$ === 'Collapsed') {
+				var _v3 = _v0.b;
+				return _Utils_Tuple2(
+					$author$project$TopicMap$Geometry$topicExtent(pos),
+					model);
+			} else {
+				var _v4 = _v0.b;
+				var _v5 = A2(
+					ext.autoSize,
+					A2(
+						$elm$core$List$cons,
+						$author$project$ModelBase$BoxId(topic.id),
+						boxPath),
+					model);
+				var rect_ = _v5.a;
+				var model_ = _v5.b;
+				return _Utils_Tuple2(
+					A2($author$project$TopicMap$Geometry$boxExtent, pos, rect_),
+					model_);
+			}
+		}
+	});
+var $author$project$TopicMap$Geometry$accumulateItem = F5(
+	function (mapItem, boxPath, rectAcc, ext, model) {
+		var _v0 = A4($author$project$TopicMap$Geometry$calcItemRect, mapItem, boxPath, ext, model);
+		var rect = _v0.a;
+		var model_ = _v0.b;
+		return _Utils_Tuple2(
+			A2($author$project$TopicMap$Geometry$accumulateRect, rectAcc, rect),
+			model_);
+	});
+var $author$project$TopicMap$Geometry$addBoxPadding = function (rect) {
+	return A4($author$project$ModelBase$Rectangle, rect.x1 - $author$project$Config$whiteBoxPadding, rect.y1 - $author$project$Config$whiteBoxPadding, rect.x2 + $author$project$Config$whiteBoxPadding, rect.y2 + $author$project$Config$whiteBoxPadding);
+};
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$Box$topicFrom = F3(
+	function (_v0, box, model) {
+		var id = _v0.a;
+		var _v1 = A2($elm$core$Dict$get, id, box.topics);
+		if (_v1.$ === 'Just') {
+			var topic = _v1.a;
+			return $elm$core$Maybe$Just(topic);
+		} else {
+			return A3(
+				$author$project$Utils$logError,
+				'Box.topicFrom',
+				'Missing BoxTopic ' + ($elm$core$String$fromInt(id) + (' in Box ' + $elm$core$String$fromInt(
+					$author$project$ModelBase$toBoxId(box.id)))),
+				$elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$Box$expansionOf = F3(
+	function (topicId, boxId, model) {
+		var _v0 = A2(
+			$elm$core$Maybe$andThen,
+			function (box) {
+				return A3($author$project$Box$topicFrom, topicId, box, model);
+			},
+			A2($author$project$Box$byId, boxId, model));
+		if (_v0.$ === 'Just') {
+			var expansion = _v0.a.expansion;
+			return expansion;
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'Box.expansionOf',
+				{boxId: boxId, topicId: topicId},
+				$author$project$ModelBase$Collapsed);
+		}
+	});
+var $author$project$Feature$Sel$single = function (model) {
+	var _v0 = model.selection.items;
 	if (_v0.b && (!_v0.b.b)) {
 		var selItem = _v0.a;
 		return $elm$core$Maybe$Just(selItem);
@@ -7660,34 +8432,37 @@ var $author$project$Feature$SelAPI$single = function (model) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Feature$SelAPI$revelationBoxPath = function (model) {
-	var _v0 = model.C.cw;
+var $author$project$Feature$Sel$landingBoxPath = function (model) {
+	var _v0 = $author$project$Feature$Sel$single(model);
+	if ((_v0.$ === 'Just') && (_v0.a.a.$ === 'T')) {
+		var _v1 = _v0.a;
+		var topicId = _v1.a.a;
+		var boxPath = _v1.b;
+		var boxId = $author$project$Box$firstId(boxPath);
+		var isExpanded = _Utils_eq(
+			A3($author$project$Box$expansionOf, topicId, boxId, model),
+			$author$project$ModelBase$Expanded);
+		return (A2($author$project$Topic$isBox, topicId, model) && isExpanded) ? A2(
+			$elm$core$List$cons,
+			$author$project$ModelBase$BoxId(topicId),
+			boxPath) : _List_fromArray(
+			[model.boxId]);
+	} else {
+		return _List_fromArray(
+			[model.boxId]);
+	}
+};
+var $author$project$TopicMap$ViewProps$revelationBoxPath = function (model) {
+	var _v0 = model.search.result;
 	switch (_v0.$) {
-		case 0:
-			var _v1 = $author$project$Feature$SelAPI$single(model);
-			if (!_v1.$) {
+		case 'Topics':
+			return $elm$core$Maybe$Just(
+				$author$project$Feature$Sel$landingBoxPath(model));
+		case 'RelTopics':
+			var _v1 = $author$project$Feature$Sel$single(model);
+			if (_v1.$ === 'Just') {
 				var _v2 = _v1.a;
-				var id = _v2.a;
 				var boxPath = _v2.b;
-				var _v3 = A2($author$project$Item$isBox, id, model);
-				if (_v3) {
-					return $elm$core$Maybe$Just(
-						A2($elm$core$List$cons, id, boxPath));
-				} else {
-					return $elm$core$Maybe$Just(
-						_List_fromArray(
-							[model.a4]));
-				}
-			} else {
-				return $elm$core$Maybe$Just(
-					_List_fromArray(
-						[model.a4]));
-			}
-		case 1:
-			var _v4 = $author$project$Feature$SelAPI$single(model);
-			if (!_v4.$) {
-				var _v5 = _v4.a;
-				var boxPath = _v5.b;
 				return $elm$core$Maybe$Just(boxPath);
 			} else {
 				return $elm$core$Maybe$Nothing;
@@ -7696,9 +8471,9 @@ var $author$project$Feature$SelAPI$revelationBoxPath = function (model) {
 			return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Feature$SelAPI$revelationBoxId = function (model) {
-	var _v0 = $author$project$Feature$SelAPI$revelationBoxPath(model);
-	if ((!_v0.$) && _v0.a.b) {
+var $author$project$TopicMap$ViewProps$revelationBoxId = function (model) {
+	var _v0 = $author$project$TopicMap$ViewProps$revelationBoxPath(model);
+	if ((_v0.$ === 'Just') && _v0.a.b) {
 		var _v1 = _v0.a;
 		var boxId = _v1.a;
 		return $elm$core$Maybe$Just(boxId);
@@ -7706,24 +8481,24 @@ var $author$project$Feature$SelAPI$revelationBoxId = function (model) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Map$Model$limboState = function (model) {
-	var _v0 = $author$project$Feature$SelAPI$revelationBoxId(model);
-	if (!_v0.$) {
+var $author$project$TopicMap$ViewModel$limboState = function (model) {
+	var _v0 = $author$project$TopicMap$ViewProps$revelationBoxId(model);
+	if (_v0.$ === 'Just') {
 		var boxId = _v0.a;
-		var _v1 = model.C.cw;
+		var _v1 = model.search.result;
 		_v1$2:
 		while (true) {
 			switch (_v1.$) {
-				case 0:
-					if (!_v1.b.$) {
+				case 'Topics':
+					if (_v1.b.$ === 'Just') {
 						var topicId = _v1.b.a;
 						return $elm$core$Maybe$Just(
 							_Utils_Tuple3(topicId, $elm$core$Maybe$Nothing, boxId));
 					} else {
 						break _v1$2;
 					}
-				case 1:
-					if (!_v1.b.$) {
+				case 'RelTopics':
+					if (_v1.b.$ === 'Just') {
 						var _v2 = _v1.b.a;
 						var topicId = _v2.a;
 						var assocId = _v2.b;
@@ -7744,10 +8519,10 @@ var $author$project$Map$Model$limboState = function (model) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$Map$Model$isLimboTopic = F3(
+var $author$project$TopicMap$ViewModel$isLimboTopic = F3(
 	function (topicId, boxId, model) {
-		var _v0 = $author$project$Map$Model$limboState(model);
-		if (!_v0.$) {
+		var _v0 = $author$project$TopicMap$ViewModel$limboState(model);
+		if (_v0.$ === 'Just') {
 			var _v1 = _v0.a;
 			var topicId_ = _v1.a;
 			var boxId_ = _v1.c;
@@ -7756,233 +8531,164 @@ var $author$project$Map$Model$isLimboTopic = F3(
 			return false;
 		}
 	});
-var $author$project$Map$Model$effectiveDisplayMode = F4(
-	function (topicId, boxId, model, props) {
+var $author$project$TopicMap$ViewModel$effectiveExpansion = F3(
+	function (topic, boxId, model) {
 		return _Utils_update(
-			props,
+			topic,
 			{
-				aI: function () {
-					if (A3($author$project$Map$Model$isLimboTopic, topicId, boxId, model)) {
-						var _v0 = props.aI;
-						if (!_v0.$) {
-							return $author$project$ModelParts$TopicD(1);
-						} else {
-							var _v1 = A2($author$project$Box$isEmpty, topicId, model);
-							if (_v1) {
-								return props.aI;
-							} else {
-								return $author$project$ModelParts$BoxD(1);
-							}
-						}
-					} else {
-						return props.aI;
-					}
-				}()
+				expansion: A3($author$project$TopicMap$ViewModel$isLimboTopic, topic.id, boxId, model) ? $author$project$ModelBase$Expanded : A3($author$project$Box$expansionOf, topic.id, boxId, model)
 			});
 	});
-var $author$project$Box$hasItem = F3(
-	function (boxId, itemId, model) {
-		var _v0 = A2($author$project$Box$byIdOrLog, boxId, model);
-		if (!_v0.$) {
-			var box = _v0.a;
-			return A2($elm$core$Dict$member, itemId, box.b7);
-		} else {
-			return false;
-		}
-	});
-var $author$project$Config$initTopicPos = A2($author$project$ModelParts$Point, 104, 72);
-var $author$project$Box$initTopicPos = F2(
-	function (boxId, model) {
-		var _v0 = A2($author$project$Box$byIdOrLog, boxId, model);
-		if (!_v0.$) {
-			var box = _v0.a;
-			return A2($author$project$ModelParts$Point, ($author$project$Config$initTopicPos.d1 + box.aO.d2) + box.aU.d1, ($author$project$Config$initTopicPos.d3 + box.aO.d4) + box.aU.d3);
-		} else {
-			return A2($author$project$ModelParts$Point, 0, 0);
-		}
-	});
-var $author$project$Box$initTopicProps = F3(
-	function (topicId, boxId, model) {
-		return A2(
-			$author$project$ModelParts$TopicProps,
-			A2($author$project$Box$initTopicPos, boxId, model),
-			function () {
-				var _v0 = A2($author$project$Item$isBox, topicId, model);
-				if (_v0) {
-					return $author$project$ModelParts$BoxD(0);
-				} else {
-					return $author$project$ModelParts$TopicD(0);
-				}
-			}());
-	});
-var $author$project$Box$isTopic = function (item) {
-	var _v0 = item.ac;
-	if (!_v0.$) {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
+var $author$project$TopicMap$ViewProps$initLimboMapTopic = F3(
+	function (topicId, mapId, model) {
 		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
+			$author$project$TopicMap$TopicMapDef$TopicProps,
+			topicId,
+			A2($author$project$TopicMap$ViewProps$initTopicPos, mapId, model),
+			$author$project$ModelBase$Expanded);
 	});
-var $author$project$Map$Model$isLimboAssoc = F3(
-	function (assocId, boxId, model) {
-		var _v0 = $author$project$Map$Model$limboState(model);
-		if ((!_v0.$) && (!_v0.a.b.$)) {
-			var _v1 = _v0.a;
-			var assocId_ = _v1.b.a;
-			var boxId_ = _v1.c;
-			return _Utils_eq(assocId, assocId_) && _Utils_eq(boxId, boxId_);
+var $author$project$TopicMap$ViewProps$mapTopicOrNothing = F2(
+	function (topicId, map) {
+		var _v0 = A2(
+			$elm$core$Dict$get,
+			$author$project$ModelBase$toTopicId(topicId),
+			map.topics);
+		if (_v0.$ === 'Just') {
+			var topic = _v0.a;
+			return $elm$core$Maybe$Just(topic);
 		} else {
-			return false;
+			return $elm$core$Maybe$Nothing;
 		}
 	});
-var $author$project$Map$Model$isLimboItem = F3(
-	function (item, boxId, model) {
-		var isLimbo = function () {
-			var _v0 = item.ac;
-			if (!_v0.$) {
-				return $author$project$Map$Model$isLimboTopic;
-			} else {
-				return $author$project$Map$Model$isLimboAssoc;
-			}
-		}();
-		return A3(isLimbo, item.aK, boxId, model);
-	});
-var $author$project$Map$Model$shouldItemRender = F3(
-	function (boxId, model, item) {
-		return $author$project$Box$isVisible(item) || A3($author$project$Map$Model$isLimboItem, item, boxId, model);
-	});
-var $author$project$Map$Model$itemsToRender = F3(
-	function (box, filter, model) {
-		return A2(
-			$elm$core$List$filter,
-			A2($author$project$Map$Model$shouldItemRender, box.aK, model),
-			A2(
-				$elm$core$List$filter,
-				filter,
-				$elm$core$Dict$values(box.b7)));
-	});
-var $author$project$Map$Model$topicsToRender = F2(
-	function (box, model) {
-		var topics = A2(
-			$elm$core$List$map,
-			function (boxItem) {
-				return _Utils_update(
-					boxItem,
-					{
-						ac: function () {
-							var _v3 = boxItem.ac;
-							if (!_v3.$) {
-								var props = _v3.a;
-								return $author$project$ModelParts$TopicP(
-									A4($author$project$Map$Model$effectiveDisplayMode, boxItem.aK, box.aK, model, props));
-							} else {
-								return A3($author$project$Utils$logError, 'topicsToRender', 'Found assoc in a topic list', boxItem.ac);
-							}
-						}()
-					});
-			},
-			A3($author$project$Map$Model$itemsToRender, box, $author$project$Box$isTopic, model));
-		var limboTopic = function () {
-			var _v0 = $author$project$Map$Model$limboState(model);
-			if (!_v0.$) {
-				var _v1 = _v0.a;
-				var topicId = _v1.a;
-				var limboBoxId = _v1.c;
-				if (_Utils_eq(limboBoxId, box.aK) && (!A3($author$project$Box$hasItem, box.aK, topicId, model))) {
-					var props = $author$project$ModelParts$TopicP(
-						A4(
-							$author$project$Map$Model$effectiveDisplayMode,
-							topicId,
-							box.aK,
-							model,
-							A3($author$project$Box$initTopicProps, topicId, box.aK, model)));
-					var _v2 = A2(
-						$author$project$Utils$info,
-						'viewLimboTopic',
-						_Utils_Tuple3(topicId, 'not in box', box.aK));
-					return _List_fromArray(
-						[
-							A4($author$project$ModelParts$BoxItem, topicId, -1, $author$project$ModelParts$Removed, props)
-						]);
-				} else {
-					return _List_Nil;
-				}
+var $elm$core$Basics$not = _Basics_not;
+var $author$project$TopicMap$ViewModel$limboMapTopic = F2(
+	function (map, model) {
+		var _v0 = $author$project$TopicMap$ViewModel$limboState(model);
+		if (_v0.$ === 'Just') {
+			var _v1 = _v0.a;
+			var topicId = _v1.a;
+			var limboBoxId = _v1.c;
+			if (_Utils_eq(limboBoxId, map.id) && (!A3(
+				$author$project$Box$hasItem,
+				$author$project$ModelBase$T(topicId),
+				map.id,
+				model))) {
+				var mapTopic = function () {
+					var _v3 = A2($author$project$TopicMap$ViewProps$mapTopicOrNothing, topicId, map);
+					if (_v3.$ === 'Just') {
+						var pos = _v3.a.pos;
+						return A3($author$project$TopicMap$TopicMapDef$TopicProps, topicId, pos, $author$project$ModelBase$Expanded);
+					} else {
+						return A3($author$project$TopicMap$ViewProps$initLimboMapTopic, topicId, map.id, model);
+					}
+				}();
+				var _v2 = A2(
+					$author$project$Utils$info,
+					'TopicMap.ViewModel.limboMapTopic',
+					_Utils_Tuple3(topicId, 'not in map', map.id));
+				return _List_fromArray(
+					[mapTopic]);
 			} else {
 				return _List_Nil;
 			}
-		}();
+		} else {
+			return _List_Nil;
+		}
+	});
+var $author$project$TopicMap$ViewProps$mapTopic_ = F2(
+	function (topicId, map) {
+		var _v0 = A2($author$project$TopicMap$ViewProps$mapTopicOrNothing, topicId, map);
+		if (_v0.$ === 'Just') {
+			var topic = _v0.a;
+			return $elm$core$Maybe$Just(topic);
+		} else {
+			return A3(
+				$author$project$Utils$logError,
+				'TopicMap.ViewProps.mapTopic_',
+				'Missing TopicProps ' + ($author$project$Utils$toString(topicId) + (' in ' + $elm$core$String$fromInt(
+					$author$project$ModelBase$toBoxId(map.id)))),
+				$elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$TopicMap$ViewProps$topics = F2(
+	function (map, model) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (topicId, itemsAcc) {
+					var _v0 = A2($author$project$TopicMap$ViewProps$mapTopic_, topicId, map);
+					if (_v0.$ === 'Just') {
+						var item = _v0.a;
+						return A2($elm$core$List$cons, item, itemsAcc);
+					} else {
+						return itemsAcc;
+					}
+				}),
+			_List_Nil,
+			A2($author$project$Box$topicIds, map.id, model));
+	});
+var $author$project$TopicMap$ViewModel$topicsToRender = F2(
+	function (map, model) {
+		var topics = A2(
+			$elm$core$List$map,
+			function (topic) {
+				return A3($author$project$TopicMap$ViewModel$effectiveExpansion, topic, map.id, model);
+			},
+			A2($author$project$TopicMap$ViewProps$topics, map, model));
+		var limboTopic = A2($author$project$TopicMap$ViewModel$limboMapTopic, map, model);
 		return _Utils_ap(topics, limboTopic);
 	});
-var $author$project$Box$updateTopicProps_ = F4(
-	function (topicId, boxId, transform, model) {
+var $author$project$TopicMap$ViewProps$updateMapTopic = F4(
+	function (topicId, mapId, transform, model) {
 		return A3(
-			$author$project$Box$update,
-			boxId,
-			function (box) {
+			$author$project$TopicMap$ViewProps$updateTopicMap,
+			mapId,
+			function (map) {
 				return _Utils_update(
-					box,
+					map,
 					{
-						b7: A3(
+						topics: A3(
 							$elm$core$Dict$update,
-							topicId,
-							function (item_) {
-								if (!item_.$) {
-									var item = item_.a;
-									var _v1 = item.ac;
-									if (!_v1.$) {
-										var props = _v1.a;
-										return $elm$core$Maybe$Just(
-											_Utils_update(
-												item,
-												{
-													ac: $author$project$ModelParts$TopicP(
-														transform(props))
-												}));
-									} else {
-										return A3($author$project$Utils$topicMismatch, 'updateTopicProps_', topicId, $elm$core$Maybe$Nothing);
-									}
+							$author$project$ModelBase$toTopicId(topicId),
+							function (maybeTopic) {
+								if (maybeTopic.$ === 'Just') {
+									var topic = maybeTopic.a;
+									return $elm$core$Maybe$Just(
+										transform(topic));
 								} else {
-									return A3($author$project$Utils$illegalItemId, 'updateTopicProps_', topicId, $elm$core$Maybe$Nothing);
+									return A3($author$project$Utils$topicNotFound, 'TopicMap.ViewProps.updateMapTopic', topicId, $elm$core$Maybe$Nothing);
 								}
 							},
-							box.b7)
+							map.topics)
 					});
 			},
 			model);
 	});
-var $author$project$Box$setTopicPosByDelta = F4(
-	function (topicId, boxId, delta, model) {
+var $author$project$TopicMap$ViewProps$updateTopicPos = F4(
+	function (topicId, mapId, transform, model) {
 		return A4(
-			$author$project$Box$updateTopicProps_,
+			$author$project$TopicMap$ViewProps$updateMapTopic,
 			topicId,
-			boxId,
-			function (props) {
+			mapId,
+			function (topic) {
 				return _Utils_update(
-					props,
+					topic,
 					{
-						av: A2($author$project$ModelParts$Point, props.av.d1 + delta.d1, props.av.d3 + delta.d3)
+						pos: transform(topic.pos)
 					});
 			},
 			model);
 	});
-var $author$project$Box$Size$adjustBoxPos = F5(
-	function (boxId, parentBoxId, newRect, oldRect, model) {
+var $author$project$TopicMap$Geometry$adjustBoxPos = F5(
+	function (_v0, parentBoxId, newRect, oldRect, model) {
+		var topicId = _v0.a;
 		return A4(
-			$author$project$Box$setTopicPosByDelta,
-			boxId,
+			$author$project$TopicMap$ViewProps$updateTopicPos,
+			topicId,
 			parentBoxId,
-			A2($author$project$ModelParts$Point, newRect.d2 - oldRect.d2, newRect.d4 - oldRect.d4),
+			function (oldPos) {
+				return A2($author$project$ModelBase$Point, (oldPos.x + newRect.x1) - oldRect.x1, (oldPos.y + newRect.y1) - oldRect.y1);
+			},
 			model);
 	});
 var $elm$core$List$drop = F2(
@@ -8006,40 +8712,31 @@ var $elm$core$List$drop = F2(
 			}
 		}
 	});
-var $elm$core$List$member = F2(
-	function (x, xs) {
-		return A2(
-			$elm$core$List$any,
-			function (a) {
-				return _Utils_eq(a, x);
-			},
-			xs);
-	});
-var $author$project$Box$updateRect = F3(
-	function (boxId, transform, model) {
+var $author$project$TopicMap$ViewProps$updateRect = F3(
+	function (mapId, transform, model) {
 		return A3(
-			$author$project$Box$update,
-			boxId,
-			function (box) {
+			$author$project$TopicMap$ViewProps$updateTopicMap,
+			mapId,
+			function (map) {
 				return _Utils_update(
-					box,
+					map,
 					{
-						aO: transform(box.aO)
+						rect: transform(map.rect)
 					});
 			},
 			model);
 	});
-var $author$project$Box$Size$setBoxRect = F3(
+var $author$project$TopicMap$Geometry$setBoxRect = F3(
 	function (boxId, rect, model) {
 		return A3(
-			$author$project$Box$updateRect,
+			$author$project$TopicMap$ViewProps$updateRect,
 			boxId,
 			function (_v0) {
 				return rect;
 			},
 			model);
 	});
-var $author$project$Box$Size$updateBoxGeometry = F4(
+var $author$project$TopicMap$Geometry$updateBoxGeometry = F4(
 	function (boxPath, newRect, oldRect, model) {
 		if (boxPath.b) {
 			if (boxPath.b.b) {
@@ -8047,8 +8744,8 @@ var $author$project$Box$Size$updateBoxGeometry = F4(
 				var _v1 = boxPath.b;
 				var parentBoxId = _v1.a;
 				var _v2 = function () {
-					var _v3 = model.dt.c6;
-					if ((_v3.$ === 3) && (!_v3.a)) {
+					var _v3 = model.topicMap.dragState;
+					if ((_v3.$ === 'Drag') && (_v3.a.$ === 'DragTopic')) {
 						var _v4 = _v3.a;
 						var dragPath = _v3.c;
 						return _Utils_Tuple3(
@@ -8068,3087 +8765,1136 @@ var $author$project$Box$Size$updateBoxGeometry = F4(
 				var isOnDragPath = _v2.b;
 				var isBoxInDragPath = _v2.c;
 				return isDragInProgress ? (isOnDragPath ? A5(
-					$author$project$Box$Size$adjustBoxPos,
+					$author$project$TopicMap$Geometry$adjustBoxPos,
 					boxId,
 					parentBoxId,
 					newRect,
 					oldRect,
-					A3($author$project$Box$Size$setBoxRect, boxId, newRect, model)) : (isBoxInDragPath ? model : A3($author$project$Box$Size$setBoxRect, boxId, newRect, model))) : A3($author$project$Box$Size$setBoxRect, boxId, newRect, model);
+					A3($author$project$TopicMap$Geometry$setBoxRect, boxId, newRect, model)) : (isBoxInDragPath ? model : A3($author$project$TopicMap$Geometry$setBoxRect, boxId, newRect, model))) : A3($author$project$TopicMap$Geometry$setBoxRect, boxId, newRect, model);
 			} else {
 				var boxId = boxPath.a;
-				return A3($author$project$Box$Size$setBoxRect, boxId, newRect, model);
+				return A3($author$project$TopicMap$Geometry$setBoxRect, boxId, newRect, model);
 			}
 		} else {
 			return A3($author$project$Utils$logError, 'updateBoxGeometry', 'boxPath is empty!', model);
 		}
 	});
-var $author$project$Box$Size$accumulateItem = F4(
-	function (boxItem, boxPath, rectAcc, model) {
-		var _v11 = A3($author$project$Box$Size$calcItemRect, boxItem, boxPath, model);
-		var rect = _v11.a;
-		var model_ = _v11.b;
-		return _Utils_Tuple2(
-			A2($author$project$Box$Size$accumulateRect, rectAcc, rect),
-			model_);
-	});
-var $author$project$Box$Size$calcBoxRect = F2(
-	function (boxPath, model) {
+var $author$project$Config$whiteBoxEmpty = A4($author$project$ModelBase$Rectangle, 0, 0, $author$project$Config$topicWidth + (2 * $author$project$Config$topicBorderWidth), $author$project$Config$topicHeight + (2 * $author$project$Config$topicBorderWidth));
+var $author$project$TopicMap$Geometry$autoSize = F2(
+	function (boxPath, _v0) {
+		var model = _v0.model;
+		var ext = _v0.ext;
 		var boxId = $author$project$Box$firstId(boxPath);
-		var _v8 = A2($author$project$Box$byIdOrLog, boxId, model);
-		if (!_v8.$) {
-			var box = _v8.a;
-			var _v9 = A3(
+		var _v1 = A2($author$project$TopicMap$ViewProps$byId, boxId, model);
+		if (_v1.$ === 'Just') {
+			var map = _v1.a;
+			var topics = A2($author$project$TopicMap$ViewModel$topicsToRender, map, model);
+			var _v2 = $elm$core$List$isEmpty(topics) ? _Utils_Tuple2($author$project$Config$whiteBoxEmpty, model) : A3(
 				$elm$core$List$foldr,
 				F2(
-					function (boxItem, _v10) {
-						var rectAcc = _v10.a;
-						var modelAcc = _v10.b;
-						return A4($author$project$Box$Size$accumulateItem, boxItem, boxPath, rectAcc, modelAcc);
+					function (mapItem, _v3) {
+						var rectAcc = _v3.a;
+						var modelAcc = _v3.b;
+						return A5($author$project$TopicMap$Geometry$accumulateItem, mapItem, boxPath, rectAcc, ext, modelAcc);
 					}),
 				_Utils_Tuple2(
-					A4($author$project$ModelParts$Rectangle, 0, 0, 0, 0),
+					A4($author$project$ModelBase$Rectangle, 0, 0, 0, 0),
 					model),
-				A2($author$project$Map$Model$topicsToRender, box, model));
-			var rect = _v9.a;
-			var model_ = _v9.b;
-			var newRect = $author$project$Box$Size$addBoxPadding(rect);
+				topics);
+			var rect = _v2.a;
+			var model_ = _v2.b;
+			var newRect = $author$project$TopicMap$Geometry$addBoxPadding(rect);
 			return _Utils_Tuple2(
 				newRect,
-				A4($author$project$Box$Size$updateBoxGeometry, boxPath, newRect, box.aO, model_));
+				A4($author$project$TopicMap$Geometry$updateBoxGeometry, boxPath, newRect, map.rect, model_));
 		} else {
 			return _Utils_Tuple2(
-				A4($author$project$ModelParts$Rectangle, 0, 0, 0, 0),
+				A4($author$project$ModelBase$Rectangle, 0, 0, 0, 0),
 				model);
 		}
 	});
-var $author$project$Box$Size$calcItemRect = F3(
-	function (boxItem, boxPath, model) {
-		var _v0 = boxItem.ac;
-		if (!_v0.$) {
-			var pos = _v0.a.av;
-			var displayMode = _v0.a.aI;
-			if (!displayMode.$) {
-				if (!displayMode.a) {
-					var _v2 = displayMode.a;
-					return _Utils_Tuple2(
-						$author$project$Box$Size$topicExtent(pos),
-						model);
-				} else {
-					var _v3 = displayMode.a;
-					return _Utils_Tuple2(
-						A4($author$project$Box$Size$detailTopicExtent, boxItem.aK, boxPath, pos, model),
-						model);
-				}
-			} else {
-				switch (displayMode.a) {
-					case 0:
-						var _v4 = displayMode.a;
-						return _Utils_Tuple2(
-							$author$project$Box$Size$topicExtent(pos),
-							model);
-					case 1:
-						var _v5 = displayMode.a;
-						var _v6 = A2(
-							$author$project$Box$Size$calcBoxRect,
-							A2($elm$core$List$cons, boxItem.aK, boxPath),
-							model);
-						var rect_ = _v6.a;
-						var model_ = _v6.b;
-						return _Utils_Tuple2(
-							A2($author$project$Box$Size$boxExtent, pos, rect_),
-							model_);
-					default:
-						var _v7 = displayMode.a;
-						return _Utils_Tuple2(
-							$author$project$Box$Size$topicExtent(pos),
-							model);
-				}
-			}
-		} else {
-			return _Utils_Tuple2(
-				A4($author$project$ModelParts$Rectangle, 0, 0, 0, 0),
-				model);
-		}
-	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
-var $author$project$Box$Size$auto = function (model) {
-	return A2(
-		$author$project$Box$Size$calcBoxRect,
-		_List_fromArray(
-			[model.a4]),
-		model).b;
-};
-var $author$project$Box$fromPath = function (boxPath) {
-	return A2(
-		$elm$core$String$join,
-		',',
-		A2($elm$core$List$map, $elm$core$String$fromInt, boxPath));
-};
-var $author$project$Box$elemId = F3(
-	function (name, id, boxPath) {
-		return name + ('-' + ($elm$core$String$fromInt(id) + (',' + $author$project$Box$fromPath(boxPath))));
-	});
-var $author$project$Feature$Text$GotTextSize = F3(
-	function (a, b, c) {
-		return {$: 2, a: a, b: b, c: c};
-	});
-var $elm$core$Task$onError = _Scheduler_onError;
-var $elm$core$Task$attempt = F2(
-	function (resultToMessage, task) {
-		return $elm$core$Task$command(
-			A2(
-				$elm$core$Task$onError,
-				A2(
-					$elm$core$Basics$composeL,
-					A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
-					$elm$core$Result$Err),
-				A2(
-					$elm$core$Task$andThen,
-					A2(
-						$elm$core$Basics$composeL,
-						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
-						$elm$core$Result$Ok),
-					task)));
-	});
-var $elm$browser$Browser$Dom$getElement = _Browser_getElement;
-var $author$project$Utils$toString = $author$project$Logger$toString;
-var $author$project$Feature$TextAPI$measureElement = F3(
-	function (elemId, topicId, sizeField) {
-		return A2(
-			$elm$core$Task$attempt,
-			function (result) {
-				if (!result.$) {
-					var element = result.a.c9;
-					return $author$project$Model$Text(
-						A3(
-							$author$project$Feature$Text$GotTextSize,
-							topicId,
-							sizeField,
-							A2(
-								$author$project$ModelParts$Size,
-								$elm$core$Basics$round(element.d$),
-								$elm$core$Basics$round(element.df))));
-				} else {
-					var err = result.a;
-					return A3(
-						$author$project$Utils$logError,
-						'measureElement',
-						$author$project$Utils$toString(err),
-						$author$project$Model$NoOp);
-				}
-			},
-			$elm$browser$Browser$Dom$getElement(elemId));
-	});
-var $author$project$Feature$TextAPI$setEditState = F2(
-	function (state, model) {
-		var text = model.dX;
-		return _Utils_update(
-			model,
-			{
-				dX: _Utils_update(
-					text,
-					{c7: state})
-			});
-	});
-var $author$project$Feature$TextAPI$leaveEdit = function (model) {
-	var _v0 = model.dX.c7;
-	if (!_v0.$) {
-		var topicId = _v0.a;
-		var boxPath = _v0.b;
-		var elemId = A3($author$project$Box$elemId, 'topic', topicId, boxPath);
-		return _Utils_Tuple2(
-			$author$project$Box$Size$auto(
-				A2($author$project$Feature$TextAPI$setEditState, $author$project$Feature$Text$NoEdit, model)),
-			A3($author$project$Feature$TextAPI$measureElement, elemId, topicId, 0));
-	} else {
+var $author$project$TopicList$ViewProps$drag = F2(
+	function (pos, _v0) {
+		var model = _v0.model;
 		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-	}
+	});
+var $author$project$TopicMap$TopicMapDef$Time = function (a) {
+	return {$: 'Time', a: a};
 };
-var $author$project$Main$cancelUI = F2(
-	function (maybeTarget, model) {
-		var shouldClear = function () {
-			if (!maybeTarget.$) {
-				var _v1 = maybeTarget.a;
-				var itemId = _v1.a;
-				var boxPath = _v1.b;
-				return !A3(
-					$author$project$Feature$SelAPI$isSelected,
-					itemId,
-					$author$project$Box$firstId(boxPath),
-					model);
-			} else {
-				return true;
-			}
-		}();
-		return $author$project$Feature$TextAPI$leaveEdit(
-			$author$project$Feature$SearchAPI$closeMenu(
-				$author$project$Feature$IconAPI$closePicker(
-					(shouldClear ? $author$project$Feature$SelAPI$clear : $elm$core$Basics$identity)(model))));
-	});
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (!maybeValue.$) {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $author$project$Utils$assocMismatch = F3(
-	function (funcName, id, val) {
-		return A3(
-			$author$project$Utils$logError,
-			funcName,
-			$elm$core$String$fromInt(id) + ' is not an Assoc but a Topic',
-			val);
-	});
-var $author$project$Item$assocById = F2(
-	function (assocId, model) {
-		var _v0 = A2($author$project$Item$byId, assocId, model);
-		if (!_v0.$) {
-			var info = _v0.a.b2;
-			if (!info.$) {
-				return A3($author$project$Utils$assocMismatch, 'assocById', assocId, $elm$core$Maybe$Nothing);
-			} else {
-				var assoc = info.a;
-				return $elm$core$Maybe$Just(assoc);
-			}
-		} else {
-			return A3($author$project$Utils$fail, 'assocById', assocId, $elm$core$Maybe$Nothing);
-		}
-	});
-var $author$project$Item$hasPlayer = F3(
-	function (playerId, model, assocId) {
-		var _v0 = A2($author$project$Item$assocById, assocId, model);
-		if (!_v0.$) {
-			var assoc = _v0.a;
-			return _Utils_eq(assoc.dK, playerId) || _Utils_eq(assoc.dL, playerId);
-		} else {
-			return false;
-		}
-	});
-var $author$project$Box$isAssoc = function (item) {
-	return !$author$project$Box$isTopic(item);
-};
-var $author$project$Box$assocsOfPlayer_ = F3(
-	function (playerId, items, model) {
-		return A2(
-			$elm$core$List$filter,
-			A2($author$project$Item$hasPlayer, playerId, model),
-			A2(
-				$elm$core$List$map,
-				function ($) {
-					return $.aK;
-				},
-				A2(
-					$elm$core$List$filter,
-					$author$project$Box$isAssoc,
-					$elm$core$Dict$values(items))));
-	});
-var $author$project$Box$removeItem__ = F2(
-	function (itemId, items) {
-		return A3(
-			$elm$core$Dict$update,
-			itemId,
-			function (maybeItem) {
-				if (!maybeItem.$) {
-					var item = maybeItem.a;
-					return $elm$core$Maybe$Just(
-						_Utils_update(
-							item,
-							{al: $author$project$ModelParts$Removed}));
-				} else {
-					return $elm$core$Maybe$Nothing;
-				}
-			},
-			items);
-	});
-var $author$project$Box$removeItem_ = F3(
-	function (itemId, items, model) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (assocId, itemsAcc) {
-					return A3($author$project$Box$removeItem_, assocId, itemsAcc, model);
-				}),
-			A2($author$project$Box$removeItem__, itemId, items),
-			A3($author$project$Box$assocsOfPlayer_, itemId, items, model));
-	});
-var $elm$core$Dict$map = F2(
-	function (func, dict) {
-		if (dict.$ === -2) {
-			return $elm$core$Dict$RBEmpty_elm_builtin;
-		} else {
-			var color = dict.a;
-			var key = dict.b;
-			var value = dict.c;
-			var left = dict.d;
-			var right = dict.e;
-			return A5(
-				$elm$core$Dict$RBNode_elm_builtin,
-				color,
-				key,
-				A2(func, key, value),
-				A2($elm$core$Dict$map, func, left),
-				A2($elm$core$Dict$map, func, right));
-		}
-	});
-var $author$project$Box$updateTopicPropsInAllBoxes_ = F3(
-	function (topicId, transform, model) {
-		return _Utils_update(
-			model,
-			{
-				bL: A2(
-					$elm$core$Dict$map,
-					F2(
-						function (_v0, box) {
-							return _Utils_update(
-								box,
-								{
-									b7: A3(
-										$elm$core$Dict$update,
-										topicId,
-										function (item_) {
-											if (!item_.$) {
-												var item = item_.a;
-												var _v2 = item.ac;
-												if (!_v2.$) {
-													var props = _v2.a;
-													return $elm$core$Maybe$Just(
-														_Utils_update(
-															item,
-															{
-																ac: $author$project$ModelParts$TopicP(
-																	transform(props))
-															}));
-												} else {
-													return A3($author$project$Utils$topicMismatch, 'updateTopicPropsInAllBoxes_', topicId, item_);
-												}
-											} else {
-												return $elm$core$Maybe$Nothing;
-											}
-										},
-										box.b7)
-								});
-						}),
-					model.bL)
-			});
-	});
-var $author$project$Box$resetEmptyBox_ = F2(
-	function (boxId, model) {
-		var _v0 = A2($author$project$Box$isEmpty, boxId, model);
-		if (_v0) {
-			return A3(
-				$author$project$Box$updateTopicPropsInAllBoxes_,
-				boxId,
-				function (props) {
-					return _Utils_update(
-						props,
-						{
-							aI: $author$project$ModelParts$BoxD(0)
-						});
-				},
-				model);
-		} else {
-			return model;
-		}
-	});
-var $author$project$Box$removeItem = F3(
-	function (itemId, boxId, model) {
-		return A2(
-			$author$project$Box$resetEmptyBox_,
-			boxId,
-			A3(
-				$author$project$Box$update,
-				boxId,
-				function (box) {
-					return _Utils_update(
-						box,
-						{
-							b7: A3($author$project$Box$removeItem_, itemId, box.b7, model)
-						});
-				},
-				model));
-	});
-var $author$project$Feature$SelAPI$select = F3(
-	function (itemId, boxPath, model) {
-		var _v0 = A2(
-			$author$project$Utils$info,
-			'select',
-			_Utils_Tuple2(itemId, boxPath));
-		return A2(
-			$author$project$Feature$SelAPI$setItems,
-			_List_fromArray(
-				[
-					_Utils_Tuple2(itemId, boxPath)
-				]),
-			model);
-	});
-var $author$project$Box$setTopicPos = F4(
-	function (topicId, boxId, pos, model) {
-		return A4(
-			$author$project$Box$updateTopicProps_,
-			topicId,
-			boxId,
-			function (props) {
-				return _Utils_update(
-					props,
-					{av: pos});
-			},
-			model);
-	});
-var $author$project$Utils$itemNotInBox = F4(
-	function (funcName, itemId, boxId, val) {
-		return A3(
-			$author$project$Utils$logError,
-			funcName,
-			'item ' + ($elm$core$String$fromInt(itemId) + (' not in box ' + $elm$core$String$fromInt(boxId))),
-			val);
-	});
-var $author$project$Box$itemByIdOrLog_ = F3(
-	function (itemId, boxId, model) {
-		return A2(
-			$elm$core$Maybe$andThen,
-			function (box) {
-				var _v0 = A2($elm$core$Dict$get, itemId, box.b7);
-				if (!_v0.$) {
-					var boxItem = _v0.a;
-					return $elm$core$Maybe$Just(boxItem);
-				} else {
-					return A4($author$project$Utils$itemNotInBox, 'itemByIdOrLog_', itemId, box.aK, $elm$core$Maybe$Nothing);
-				}
-			},
-			A2($author$project$Box$byIdOrLog, boxId, model));
-	});
-var $author$project$Box$topicProps = F3(
-	function (topicId, boxId, model) {
-		var _v0 = A3($author$project$Box$itemByIdOrLog_, topicId, boxId, model);
-		if (!_v0.$) {
-			var boxItem = _v0.a;
-			var _v1 = boxItem.ac;
-			if (!_v1.$) {
-				var props = _v1.a;
-				return $elm$core$Maybe$Just(props);
-			} else {
-				return A3($author$project$Utils$topicMismatch, 'topicProps', topicId, $elm$core$Maybe$Nothing);
-			}
-		} else {
-			return A3(
-				$author$project$Utils$fail,
-				'topicProps',
-				{a4: boxId, bD: topicId},
-				$elm$core$Maybe$Nothing);
-		}
-	});
-var $author$project$Main$moveTopicToBox = F7(
-	function (topicId, boxId, origPos, targetBoxId, targetPath, pos, model) {
-		var props_ = A2(
-			$elm$core$Maybe$andThen,
-			function (props) {
-				return $elm$core$Maybe$Just(
-					$author$project$ModelParts$TopicP(
-						_Utils_update(
-							props,
-							{av: pos})));
-			},
-			A3($author$project$Box$topicProps, topicId, boxId, model));
-		if (!props_.$) {
-			var props = props_.a;
-			return $author$project$Box$Size$auto(
-				A3(
-					$author$project$Feature$SelAPI$select,
-					targetBoxId,
-					targetPath,
-					A4(
-						$author$project$Box$addItem,
-						topicId,
-						props,
-						targetBoxId,
-						A4(
-							$author$project$Box$setTopicPos,
-							topicId,
-							boxId,
-							origPos,
-							A3($author$project$Box$removeItem, topicId, boxId, model)))));
-		} else {
-			return model;
-		}
-	});
-var $elm_community$undo_redo$UndoList$new = F2(
-	function (event, _v0) {
-		var past = _v0.s;
-		var present = _v0.aw;
-		return A3(
-			$elm_community$undo_redo$UndoList$UndoList,
-			A2($elm$core$List$cons, present, past),
-			event,
-			_List_Nil);
-	});
-var $author$project$Undo$push = F2(
-	function (undoModel, _v0) {
-		var model = _v0.a;
-		var cmd = _v0.b;
-		return _Utils_Tuple2(
-			A2($elm_community$undo_redo$UndoList$new, model, undoModel),
-			cmd);
-	});
-var $author$project$Main$select = F3(
-	function (itemId, boxPath, model) {
-		return _Utils_Tuple2(
-			A3($author$project$Feature$SelAPI$select, itemId, boxPath, model),
-			$elm$core$Platform$Cmd$none);
-	});
-var $author$project$ModelParts$encodeDisplayName = function (displayMode) {
-	return $elm$json$Json$Encode$string(
-		function () {
-			if (!displayMode.$) {
-				if (!displayMode.a) {
-					var _v1 = displayMode.a;
-					return 'LabelOnly';
-				} else {
-					var _v2 = displayMode.a;
-					return 'Detail';
-				}
-			} else {
-				switch (displayMode.a) {
-					case 0:
-						var _v3 = displayMode.a;
-						return 'BlackBox';
-					case 1:
-						var _v4 = displayMode.a;
-						return 'WhiteBox';
-					default:
-						var _v5 = displayMode.a;
-						return 'Unboxed';
-				}
-			}
-		}());
-};
-var $author$project$ModelParts$encodeVisibility = function (visibility) {
-	return $elm$json$Json$Encode$string(
-		function () {
-			if (!visibility.$) {
-				if (!visibility.a) {
-					var _v1 = visibility.a;
-					return 'Pinned';
-				} else {
-					var _v2 = visibility.a;
-					return 'Visible';
-				}
-			} else {
-				return 'Removed';
-			}
-		}());
-};
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(0),
-			pairs));
-};
-var $author$project$ModelParts$encodeBoxItem = function (item) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'id',
-				$elm$json$Json$Encode$int(item.aK)),
-				_Utils_Tuple2(
-				'boxAssocId',
-				$elm$json$Json$Encode$int(item.cX)),
-				_Utils_Tuple2(
-				'visibility',
-				$author$project$ModelParts$encodeVisibility(item.al)),
-				function () {
-				var _v0 = item.ac;
-				if (!_v0.$) {
-					var topicProps = _v0.a;
-					return _Utils_Tuple2(
-						'topicProps',
-						$elm$json$Json$Encode$object(
-							_List_fromArray(
-								[
-									_Utils_Tuple2(
-									'pos',
-									$elm$json$Json$Encode$object(
-										_List_fromArray(
-											[
-												_Utils_Tuple2(
-												'x',
-												$elm$json$Json$Encode$int(topicProps.av.d1)),
-												_Utils_Tuple2(
-												'y',
-												$elm$json$Json$Encode$int(topicProps.av.d3))
-											]))),
-									_Utils_Tuple2(
-									'display',
-									$author$project$ModelParts$encodeDisplayName(topicProps.aI))
-								])));
-				} else {
-					var assosProps = _v0.a;
-					return _Utils_Tuple2(
-						'assocProps',
-						$elm$json$Json$Encode$object(_List_Nil));
-				}
-			}()
-			]));
-};
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(0),
-				entries));
-	});
-var $author$project$ModelParts$encodeBox = function (box) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'id',
-				$elm$json$Json$Encode$int(box.aK)),
-				_Utils_Tuple2(
-				'rect',
-				$elm$json$Json$Encode$object(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(
-							'x1',
-							$elm$json$Json$Encode$int(box.aO.d2)),
-							_Utils_Tuple2(
-							'y1',
-							$elm$json$Json$Encode$int(box.aO.d4)),
-							_Utils_Tuple2(
-							'x2',
-							$elm$json$Json$Encode$int(box.aO.a0)),
-							_Utils_Tuple2(
-							'y2',
-							$elm$json$Json$Encode$int(box.aO.a1))
-						]))),
-				_Utils_Tuple2(
-				'scroll',
-				$elm$json$Json$Encode$object(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(
-							'x',
-							$elm$json$Json$Encode$int(box.aU.d1)),
-							_Utils_Tuple2(
-							'y',
-							$elm$json$Json$Encode$int(box.aU.d3))
-						]))),
-				_Utils_Tuple2(
-				'items',
-				A2(
-					$elm$json$Json$Encode$list,
-					$author$project$ModelParts$encodeBoxItem,
-					$elm$core$Dict$values(box.b7)))
-			]));
-};
-var $author$project$ModelParts$encodeAssocType = function (assocType) {
-	return $elm$json$Json$Encode$string(
-		function () {
-			if (!assocType) {
-				return 'Hierarchy';
-			} else {
-				return 'Crosslink';
-			}
-		}());
-};
-var $author$project$ModelParts$encodeTextSize = function (size) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'view',
-				$elm$json$Json$Encode$object(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(
-							'w',
-							$elm$json$Json$Encode$int(size.d_.cN)),
-							_Utils_Tuple2(
-							'h',
-							$elm$json$Json$Encode$int(size.d_.b_))
-						]))),
-				_Utils_Tuple2(
-				'editor',
-				$elm$json$Json$Encode$object(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(
-							'w',
-							$elm$json$Json$Encode$int(size.c8.cN)),
-							_Utils_Tuple2(
-							'h',
-							$elm$json$Json$Encode$int(size.c8.b_))
-						])))
-			]));
-};
-var $elm$core$Set$foldl = F3(
-	function (func, initialState, _v0) {
-		var dict = _v0;
-		return A3(
-			$elm$core$Dict$foldl,
-			F3(
-				function (key, _v1, state) {
-					return A2(func, key, state);
-				}),
-			initialState,
-			dict);
-	});
-var $elm$json$Json$Encode$set = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$Set$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(0),
-				entries));
-	});
-var $author$project$ModelParts$encodeItem = function (item) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				function () {
-				var _v0 = item.b2;
-				if (!_v0.$) {
-					var topic = _v0.a;
-					return _Utils_Tuple2(
-						'topic',
-						$elm$json$Json$Encode$object(
-							_List_fromArray(
-								[
-									_Utils_Tuple2(
-									'id',
-									$elm$json$Json$Encode$int(topic.aK)),
-									_Utils_Tuple2(
-									'icon',
-									$elm$json$Json$Encode$string(
-										A2($elm$core$Maybe$withDefault, '', topic.aa))),
-									_Utils_Tuple2(
-									'text',
-									$elm$json$Json$Encode$string(topic.dX)),
-									_Utils_Tuple2(
-									'size',
-									$author$project$ModelParts$encodeTextSize(topic.bo)),
-									_Utils_Tuple2(
-									'assocIds',
-									A2($elm$json$Json$Encode$set, $elm$json$Json$Encode$int, item.bH))
-								])));
-				} else {
-					var assoc = _v0.a;
-					return _Utils_Tuple2(
-						'assoc',
-						$elm$json$Json$Encode$object(
-							_List_fromArray(
-								[
-									_Utils_Tuple2(
-									'id',
-									$elm$json$Json$Encode$int(assoc.aK)),
-									_Utils_Tuple2(
-									'type',
-									$author$project$ModelParts$encodeAssocType(assoc.cT)),
-									_Utils_Tuple2(
-									'player1',
-									$elm$json$Json$Encode$int(assoc.dK)),
-									_Utils_Tuple2(
-									'player2',
-									$elm$json$Json$Encode$int(assoc.dL)),
-									_Utils_Tuple2(
-									'assocIds',
-									A2($elm$json$Json$Encode$set, $elm$json$Json$Encode$int, item.bH))
-								])));
-				}
-			}()
-			]));
-};
-var $author$project$Model$encode = function (model) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'items',
-				A2(
-					$elm$json$Json$Encode$list,
-					$author$project$ModelParts$encodeItem,
-					$elm$core$Dict$values(model.b7))),
-				_Utils_Tuple2(
-				'boxes',
-				A2(
-					$elm$json$Json$Encode$list,
-					$author$project$ModelParts$encodeBox,
-					$elm$core$Dict$values(model.bL))),
-				_Utils_Tuple2(
-				'boxId',
-				$elm$json$Json$Encode$int(model.a4)),
-				_Utils_Tuple2(
-				'nextId',
-				$elm$json$Json$Encode$int(model.dw))
-			]));
-};
-var $author$project$Storage$storeModel = _Platform_outgoingPort('storeModel', $elm$core$Basics$identity);
-var $author$project$Storage$store = function (model) {
-	return _Utils_Tuple2(
-		model,
-		$author$project$Storage$storeModel(
-			$author$project$Model$encode(model)));
-};
-var $elm_community$undo_redo$UndoList$mapPresent = F2(
-	function (f, _v0) {
-		var past = _v0.s;
-		var present = _v0.aw;
-		var future = _v0.u;
-		return A3(
-			$elm_community$undo_redo$UndoList$UndoList,
-			past,
-			f(present),
-			future);
-	});
-var $author$project$Undo$swap = F2(
-	function (undoModel, _v0) {
-		var model = _v0.a;
-		var cmd = _v0.b;
-		return _Utils_Tuple2(
-			A2(
-				$elm_community$undo_redo$UndoList$mapPresent,
-				function (_v1) {
-					return model;
-				},
-				undoModel),
-			cmd);
-	});
-var $author$project$Item$updateTopic = F3(
-	function (topicId, transform, model) {
-		return A3(
-			$author$project$Item$update,
-			topicId,
-			function (item) {
-				var _v0 = item.b2;
-				if (!_v0.$) {
-					var topic = _v0.a;
-					return _Utils_update(
-						item,
-						{
-							b2: $author$project$ModelParts$Topic(
-								transform(topic))
-						});
-				} else {
-					return A3($author$project$Utils$topicMismatch, 'updateTopic', topicId, item);
-				}
-			},
-			model);
-	});
-var $author$project$Feature$IconAPI$setIcon = F2(
-	function (iconName, model) {
-		var _v0 = $author$project$Feature$SelAPI$single(model);
-		if (!_v0.$) {
-			var _v1 = _v0.a;
-			var id = _v1.a;
-			return A3(
-				$author$project$Item$updateTopic,
-				id,
-				function (topic) {
-					return _Utils_update(
-						topic,
-						{aa: iconName});
-				},
-				model);
-		} else {
-			return model;
-		}
-	});
-var $author$project$Feature$IconAPI$update = F2(
-	function (msg, undoModel) {
-		var present = undoModel.aw;
-		var maybeIcon = msg;
-		return A2(
-			$author$project$Undo$push,
-			undoModel,
-			$author$project$Storage$store(
-				$author$project$Feature$IconAPI$closePicker(
-					A2($author$project$Feature$IconAPI$setIcon, maybeIcon, present))));
-	});
-var $author$project$Feature$Mouse$DraftAssoc = 1;
-var $author$project$Feature$Mouse$Drag = F6(
-	function (a, b, c, d, e, f) {
-		return {$: 3, a: a, b: b, c: c, d: d, e: e, f: f};
-	});
-var $author$project$Feature$MouseAPI$setDragState = F2(
-	function (dragState, model) {
-		var mouse = model.dt;
-		return _Utils_update(
-			model,
-			{
-				dt: _Utils_update(
-					mouse,
-					{c6: dragState})
-			});
-	});
-var $author$project$Feature$MouseAPI$hover = F4(
-	function (_class, targetId, targetPath, model) {
-		var _v0 = model.dt.c6;
-		switch (_v0.$) {
-			case 3:
-				var dragMode = _v0.a;
-				var id = _v0.b;
-				var boxPath = _v0.c;
-				var origPos = _v0.d;
-				var lastPos = _v0.e;
-				var isSelf = _Utils_eq(
-					_Utils_Tuple2(
-						id,
-						$author$project$Box$firstId(boxPath)),
-					_Utils_Tuple2(
-						targetId,
-						$author$project$Box$firstId(targetPath)));
-				var isBox = A2($author$project$Item$isBox, targetId, model);
-				var target = ((!isSelf) && (isBox || (dragMode === 1))) ? $elm$core$Maybe$Just(
-					_Utils_Tuple2(targetId, targetPath)) : $elm$core$Maybe$Nothing;
-				return A2(
-					$author$project$Feature$MouseAPI$setDragState,
-					A6($author$project$Feature$Mouse$Drag, dragMode, id, boxPath, origPos, lastPos, target),
-					model);
-			case 4:
-				return A2(
-					$author$project$Feature$MouseAPI$setDragState,
-					$author$project$Feature$Mouse$NoDrag(
-						$elm$core$Maybe$Just(
-							_Utils_Tuple2(targetId, targetPath))),
-					model);
-			default:
-				return model;
-		}
-	});
-var $author$project$Model$Cancel = function (a) {
-	return {$: 4, a: a};
-};
-var $author$project$Utils$command = function (msg) {
-	return A2(
-		$elm$core$Task$perform,
-		function (_v0) {
-			return msg;
-		},
-		$elm$core$Task$succeed(0));
-};
-var $author$project$Feature$MouseAPI$mouseDown = $author$project$Utils$command(
-	$author$project$Model$Cancel($elm$core$Maybe$Nothing));
-var $author$project$Feature$Mouse$Time = function (a) {
-	return {$: 6, a: a};
-};
-var $author$project$Feature$Mouse$WaitForStartTime = F4(
+var $author$project$TopicMap$TopicMapDef$WaitForEndTime = F4(
 	function (a, b, c, d) {
-		return {$: 0, a: a, b: b, c: c, d: d};
+		return {$: 'WaitForEndTime', a: a, b: b, c: c, d: d};
 	});
-var $elm$time$Time$Name = function (a) {
-	return {$: 0, a: a};
-};
-var $elm$time$Time$Offset = function (a) {
-	return {$: 1, a: a};
-};
-var $elm$time$Time$Zone = F2(
-	function (a, b) {
-		return {$: 0, a: a, b: b};
+var $author$project$TopicMap$TopicMapDef$Drag = F6(
+	function (a, b, c, d, e, f) {
+		return {$: 'Drag', a: a, b: b, c: c, d: d, e: e, f: f};
 	});
-var $elm$time$Time$customZone = $elm$time$Time$Zone;
-var $elm$time$Time$Posix = $elm$core$Basics$identity;
-var $elm$time$Time$millisToPosix = $elm$core$Basics$identity;
-var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
-var $author$project$Feature$MouseAPI$mouseDownOnItem = F5(
-	function (_class, id, boxPath, pos, model) {
-		return _Utils_Tuple2(
-			A2(
-				$author$project$Feature$MouseAPI$setDragState,
-				A4($author$project$Feature$Mouse$WaitForStartTime, _class, id, boxPath, pos),
-				model),
-			$elm$core$Platform$Cmd$batch(
-				_List_fromArray(
-					[
-						$author$project$Utils$command(
-						$author$project$Model$Cancel(
-							$elm$core$Maybe$Just(
-								_Utils_Tuple2(id, boxPath)))),
-						A2(
-						$elm$core$Task$perform,
-						A2($elm$core$Basics$composeL, $author$project$Model$Mouse, $author$project$Feature$Mouse$Time),
-						$elm$time$Time$now)
-					])));
+var $author$project$Env$autoSize2 = F2(
+	function (_v0, model) {
+		var ext = _v0.ext;
+		return A2(
+			ext.autoSize,
+			_List_fromArray(
+				[model.boxId]),
+			model).b;
 	});
-var $author$project$Feature$Mouse$WaitForEndTime = F5(
-	function (a, b, c, d, e) {
-		return {$: 2, a: a, b: b, c: c, d: d, e: e};
+var $author$project$TopicMap$Mouse$setDragState = F2(
+	function (dragState, model) {
+		var topicMap = model.topicMap;
+		return _Utils_update(
+			model,
+			{
+				topicMap: _Utils_update(
+					topicMap,
+					{dragState: dragState})
+			});
 	});
-var $author$project$Feature$MouseAPI$performDrag = F2(
-	function (pos, model) {
-		var _v0 = model.dt.c6;
-		if (_v0.$ === 3) {
+var $author$project$TopicMap$Mouse$performDrag = F2(
+	function (pos, env) {
+		var model = env.model;
+		var _v0 = model.topicMap.dragState;
+		if (_v0.$ === 'Drag') {
 			var dragMode = _v0.a;
 			var id = _v0.b;
 			var boxPath = _v0.c;
 			var origPos = _v0.d;
 			var lastPos = _v0.e;
 			var target = _v0.f;
-			var delta = A2($author$project$ModelParts$Point, pos.d1 - lastPos.d1, pos.d3 - lastPos.d3);
 			var boxId = $author$project$Box$firstId(boxPath);
 			var newModel = function () {
-				if (!dragMode) {
-					return A4($author$project$Box$setTopicPosByDelta, id, boxId, delta, model);
+				if (dragMode.$ === 'DragTopic') {
+					return A4(
+						$author$project$TopicMap$ViewProps$updateTopicPos,
+						id,
+						boxId,
+						function (oldPos) {
+							return A2($author$project$ModelBase$Point, (oldPos.x + pos.x) - lastPos.x, (oldPos.y + pos.y) - lastPos.y);
+						},
+						model);
 				} else {
 					return model;
 				}
 			}();
-			return $author$project$Box$Size$auto(
+			return A2(
+				$author$project$Env$autoSize2,
+				env,
 				A2(
-					$author$project$Feature$MouseAPI$setDragState,
-					A6($author$project$Feature$Mouse$Drag, dragMode, id, boxPath, origPos, pos, target),
+					$author$project$TopicMap$Mouse$setDragState,
+					A6($author$project$TopicMap$TopicMapDef$Drag, dragMode, id, boxPath, origPos, pos, target),
 					newModel));
 		} else {
 			return A3(
 				$author$project$Utils$logError,
-				'performDrag',
-				'Received \"Move\" message when dragState is ' + $author$project$Utils$toString(model.dt.c6),
+				'TopicMap.Mouse.performDrag',
+				'Received \"Drag\" when dragState is ' + $author$project$Utils$toString(model.topicMap.dragState),
 				model);
 		}
 	});
-var $author$project$Feature$MouseAPI$mouseMove = F2(
-	function (pos, model) {
-		var _v0 = model.dt.c6;
+var $author$project$TopicMap$TopicMapDef$DraftAssoc = {$: 'DraftAssoc'};
+var $author$project$Box$hadDeepTopic = F3(
+	function (topicId, boxId, model) {
+		if (_Utils_eq(topicId, boxId)) {
+			return true;
+		} else {
+			if (A2($author$project$Topic$isBox, boxId, model)) {
+				var _v0 = A2(
+					$author$project$Box$itemSetOf,
+					$author$project$ModelBase$BoxId(boxId),
+					model);
+				if (_v0.$ === 'Just') {
+					var itemSet = _v0.a;
+					return A2(
+						$elm$core$List$any,
+						function (setItem) {
+							var _v1 = setItem.id;
+							if (_v1.$ === 'T') {
+								var id = _v1.a;
+								return A3($author$project$Box$hadDeepTopic, topicId, id, model);
+							} else {
+								return false;
+							}
+						},
+						itemSet.items);
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+	});
+var $author$project$TopicMap$Mouse$updateTarget = F2(
+	function (pos, _v0) {
+		var model = _v0.model;
+		var ext = _v0.ext;
+		var _v1 = model.topicMap.dragState;
+		if (_v1.$ === 'Drag') {
+			var dragMode = _v1.a;
+			var id = _v1.b;
+			var boxPath = _v1.c;
+			var origPos = _v1.d;
+			var lastPos = _v1.e;
+			var dragState = A5($author$project$TopicMap$TopicMapDef$Drag, dragMode, id, boxPath, origPos, lastPos);
+			var _v2 = model.mouse.hover;
+			if (_v2.$ === 'Just') {
+				if (_v2.a.a.$ === 'T') {
+					var target = _v2.a;
+					var topicId = target.a.a;
+					var isCyclic = A3($author$project$Box$hadDeepTopic, topicId, id, model);
+					var newTarget = ((!isCyclic) || _Utils_eq(dragMode, $author$project$TopicMap$TopicMapDef$DraftAssoc)) ? $elm$core$Maybe$Just(target) : $elm$core$Maybe$Nothing;
+					return A2(
+						$author$project$TopicMap$Mouse$setDragState,
+						dragState(newTarget),
+						model);
+				} else {
+					return model;
+				}
+			} else {
+				return A2(
+					$author$project$TopicMap$Mouse$setDragState,
+					dragState($elm$core$Maybe$Nothing),
+					model);
+			}
+		} else {
+			return model;
+		}
+	});
+var $author$project$Env$withModel2 = F2(
+	function (env, model) {
+		return _Utils_update(
+			env,
+			{model: model});
+	});
+var $author$project$TopicMap$Mouse$drag = F2(
+	function (pos, env) {
+		var model = A2($author$project$TopicMap$Mouse$updateTarget, pos, env);
+		var newEnv = A2($author$project$Env$withModel2, env, model);
+		var _v0 = model.topicMap.dragState;
 		switch (_v0.$) {
-			case 1:
+			case 'DragEngaged':
 				var time = _v0.a;
-				var _class = _v0.b;
-				var id = _v0.c;
-				var boxPath = _v0.d;
-				var pos_ = _v0.e;
+				var id = _v0.b;
+				var boxPath = _v0.c;
+				var pos_ = _v0.d;
 				return _Utils_Tuple2(
 					A2(
-						$author$project$Feature$MouseAPI$setDragState,
-						A5($author$project$Feature$Mouse$WaitForEndTime, time, _class, id, boxPath, pos_),
+						$author$project$TopicMap$Mouse$setDragState,
+						A4($author$project$TopicMap$TopicMapDef$WaitForEndTime, time, id, boxPath, pos_),
 						model),
 					A2(
 						$elm$core$Task$perform,
-						A2($elm$core$Basics$composeL, $author$project$Model$Mouse, $author$project$Feature$Mouse$Time),
+						A2($elm$core$Basics$composeL, $author$project$Model$TopicMap, $author$project$TopicMap$TopicMapDef$Time),
 						$elm$time$Time$now));
-			case 3:
+			case 'Drag':
 				return _Utils_Tuple2(
-					A2($author$project$Feature$MouseAPI$performDrag, pos, model),
+					A2($author$project$TopicMap$Mouse$performDrag, pos, newEnv),
 					$elm$core$Platform$Cmd$none);
 			default:
-				return A3(
-					$author$project$Utils$logError,
-					'mouseMove',
-					'Received \"Move\" message when dragState is ' + $author$project$Utils$toString(model.dt.c6),
-					_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Model$AddAssoc = F3(
+var $author$project$TopicList$ViewProps$dragStart = F5(
+	function (topicId, boxPath, pos, pointerType, _v0) {
+		var model = _v0.model;
+		return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+	});
+var $author$project$Model$Cancel = function (a) {
+	return {$: 'Cancel', a: a};
+};
+var $author$project$TopicMap$TopicMapDef$WaitForStartTime = F3(
 	function (a, b, c) {
-		return {$: 0, a: a, b: b, c: c};
+		return {$: 'WaitForStartTime', a: a, b: b, c: c};
+	});
+var $author$project$Utils$command = function (msg) {
+	return A2(
+		$elm$core$Task$perform,
+		function (_v0) {
+			return msg;
+		},
+		$elm$core$Task$succeed(_Utils_Tuple0));
+};
+var $author$project$TopicMap$Mouse$emulateHover = F4(
+	function (topicId, boxPath, pointerType, model) {
+		return (pointerType === 'touch') ? A2(
+			$author$project$Feature$Mouse$setHover,
+			$elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					$author$project$ModelBase$T(topicId),
+					boxPath)),
+			model) : model;
+	});
+var $author$project$TopicMap$Mouse$dragStart = F5(
+	function (topicId, boxPath, pos, pointerType, _v0) {
+		var model = _v0.model;
+		return _Utils_Tuple2(
+			A2(
+				$author$project$TopicMap$Mouse$setDragState,
+				A3($author$project$TopicMap$TopicMapDef$WaitForStartTime, topicId, boxPath, pos),
+				A4($author$project$TopicMap$Mouse$emulateHover, topicId, boxPath, pointerType, model)),
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						$author$project$Utils$command(
+						$author$project$Model$Cancel(
+							$elm$core$Maybe$Just(
+								_Utils_Tuple2(
+									$author$project$ModelBase$T(topicId),
+									boxPath)))),
+						A2(
+						$elm$core$Task$perform,
+						A2($elm$core$Basics$composeL, $author$project$Model$TopicMap, $author$project$TopicMap$TopicMapDef$Time),
+						$elm$time$Time$now)
+					])));
+	});
+var $author$project$TopicList$ViewProps$dragStop = function (_v0) {
+	var model = _v0.model;
+	return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+};
+var $author$project$Model$CreateAssoc = F3(
+	function (a, b, c) {
+		return {$: 'CreateAssoc', a: a, b: b, c: c};
 	});
 var $author$project$Model$ItemClicked = F2(
 	function (a, b) {
-		return {$: 3, a: a, b: b};
+		return {$: 'ItemClicked', a: a, b: b};
 	});
-var $author$project$Model$MoveTopicToBox = F6(
-	function (a, b, c, d, e, f) {
-		return {$: 1, a: a, b: b, c: c, d: d, e: e, f: f};
+var $author$project$Model$TopicDragged = {$: 'TopicDragged'};
+var $author$project$Model$TopicDropped = F5(
+	function (a, b, c, d, e) {
+		return {$: 'TopicDropped', a: a, b: b, c: c, d: d, e: e};
 	});
-var $author$project$Model$TopicDragged = {$: 2};
-var $elm$random$Random$Generate = $elm$core$Basics$identity;
-var $elm$random$Random$Seed = F2(
-	function (a, b) {
-		return {$: 0, a: a, b: b};
-	});
-var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
-var $elm$random$Random$next = function (_v0) {
-	var state0 = _v0.a;
-	var incr = _v0.b;
-	return A2($elm$random$Random$Seed, ((state0 * 1664525) + incr) >>> 0, incr);
-};
-var $elm$random$Random$initialSeed = function (x) {
-	var _v0 = $elm$random$Random$next(
-		A2($elm$random$Random$Seed, 0, 1013904223));
-	var state1 = _v0.a;
-	var incr = _v0.b;
-	var state2 = (state1 + x) >>> 0;
-	return $elm$random$Random$next(
-		A2($elm$random$Random$Seed, state2, incr));
-};
-var $elm$time$Time$posixToMillis = function (_v0) {
-	var millis = _v0;
-	return millis;
-};
-var $elm$random$Random$init = A2(
-	$elm$core$Task$andThen,
-	function (time) {
-		return $elm$core$Task$succeed(
-			$elm$random$Random$initialSeed(
-				$elm$time$Time$posixToMillis(time)));
-	},
-	$elm$time$Time$now);
-var $elm$random$Random$step = F2(
-	function (_v0, seed) {
-		var generator = _v0;
-		return generator(seed);
-	});
-var $elm$random$Random$onEffects = F3(
-	function (router, commands, seed) {
-		if (!commands.b) {
-			return $elm$core$Task$succeed(seed);
-		} else {
-			var generator = commands.a;
-			var rest = commands.b;
-			var _v1 = A2($elm$random$Random$step, generator, seed);
-			var value = _v1.a;
-			var newSeed = _v1.b;
-			return A2(
-				$elm$core$Task$andThen,
-				function (_v2) {
-					return A3($elm$random$Random$onEffects, router, rest, newSeed);
-				},
-				A2($elm$core$Platform$sendToApp, router, value));
-		}
-	});
-var $elm$random$Random$onSelfMsg = F3(
-	function (_v0, _v1, seed) {
-		return $elm$core$Task$succeed(seed);
-	});
-var $elm$random$Random$Generator = $elm$core$Basics$identity;
-var $elm$random$Random$map = F2(
-	function (func, _v0) {
-		var genA = _v0;
-		return function (seed0) {
-			var _v1 = genA(seed0);
-			var a = _v1.a;
-			var seed1 = _v1.b;
-			return _Utils_Tuple2(
-				func(a),
-				seed1);
-		};
-	});
-var $elm$random$Random$cmdMap = F2(
-	function (func, _v0) {
-		var generator = _v0;
-		return A2($elm$random$Random$map, func, generator);
-	});
-_Platform_effectManagers['Random'] = _Platform_createManager($elm$random$Random$init, $elm$random$Random$onEffects, $elm$random$Random$onSelfMsg, $elm$random$Random$cmdMap);
-var $elm$random$Random$command = _Platform_leaf('Random');
-var $elm$random$Random$generate = F2(
-	function (tagger, generator) {
-		return $elm$random$Random$command(
-			A2($elm$random$Random$map, tagger, generator));
-	});
-var $elm$core$Bitwise$and = _Bitwise_and;
-var $elm$core$Bitwise$xor = _Bitwise_xor;
-var $elm$random$Random$peel = function (_v0) {
-	var state = _v0.a;
-	var word = (state ^ (state >>> ((state >>> 28) + 4))) * 277803737;
-	return ((word >>> 22) ^ word) >>> 0;
-};
-var $elm$random$Random$int = F2(
-	function (a, b) {
-		return function (seed0) {
-			var _v0 = (_Utils_cmp(a, b) < 0) ? _Utils_Tuple2(a, b) : _Utils_Tuple2(b, a);
-			var lo = _v0.a;
-			var hi = _v0.b;
-			var range = (hi - lo) + 1;
-			if (!((range - 1) & range)) {
-				return _Utils_Tuple2(
-					(((range - 1) & $elm$random$Random$peel(seed0)) >>> 0) + lo,
-					$elm$random$Random$next(seed0));
-			} else {
-				var threshhold = (((-range) >>> 0) % range) >>> 0;
-				var accountForBias = function (seed) {
-					accountForBias:
-					while (true) {
-						var x = $elm$random$Random$peel(seed);
-						var seedN = $elm$random$Random$next(seed);
-						if (_Utils_cmp(x, threshhold) < 0) {
-							var $temp$seed = seedN;
-							seed = $temp$seed;
-							continue accountForBias;
-						} else {
-							return _Utils_Tuple2((x % range) + lo, seedN);
-						}
-					}
-				};
-				return accountForBias(seed0);
-			}
-		};
-	});
-var $elm$random$Random$map2 = F3(
-	function (func, _v0, _v1) {
-		var genA = _v0;
-		var genB = _v1;
-		return function (seed0) {
-			var _v2 = genA(seed0);
-			var a = _v2.a;
-			var seed1 = _v2.b;
-			var _v3 = genB(seed1);
-			var b = _v3.a;
-			var seed2 = _v3.b;
-			return _Utils_Tuple2(
-				A2(func, a, b),
-				seed2);
-		};
-	});
-var $author$project$Config$whiteBoxRange = A2($author$project$ModelParts$Size, 250, 150);
-var $author$project$Feature$MouseAPI$point = function () {
-	var rw = $author$project$Config$whiteBoxRange.cN;
-	var rh = $author$project$Config$whiteBoxRange.b_;
-	var cy = $author$project$Config$topicH2 + $author$project$Config$whiteBoxPadding;
-	var cx = $author$project$Config$topicW2 + $author$project$Config$whiteBoxPadding;
-	return A3(
-		$elm$random$Random$map2,
-		F2(
-			function (x, y) {
-				return A2($author$project$ModelParts$Point, cx + x, cy + y);
-			}),
-		A2($elm$random$Random$int, 0, rw),
-		A2($elm$random$Random$int, 0, rh));
-}();
-var $author$project$Feature$MouseAPI$mouseUp = function (model) {
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$TopicMap$Mouse$dragStop = function (_v0) {
+	var model = _v0.model;
 	var cmd = function () {
-		var _v0 = model.dt.c6;
-		switch (_v0.$) {
-			case 3:
-				if (!_v0.a) {
-					if (!_v0.f.$) {
-						var _v1 = _v0.a;
-						var id = _v0.b;
-						var boxPath = _v0.c;
-						var origPos = _v0.d;
-						var _v2 = _v0.f.a;
-						var targetId = _v2.a;
-						var targetPath = _v2.b;
+		var _v1 = model.topicMap.dragState;
+		switch (_v1.$) {
+			case 'Drag':
+				if (_v1.a.$ === 'DragTopic') {
+					if ((_v1.f.$ === 'Just') && (_v1.f.a.a.$ === 'T')) {
+						var _v2 = _v1.a;
+						var id = _v1.b;
+						var boxPath = _v1.c;
+						var origPos = _v1.d;
+						var _v3 = _v1.f.a;
+						var targetId = _v3.a.a;
+						var targetPath = _v3.b;
 						var boxId = $author$project$Box$firstId(boxPath);
-						var droppedOnSourceBox = _Utils_eq(boxId, targetId);
-						var msg = A5($author$project$Model$MoveTopicToBox, id, boxId, origPos, targetId, targetPath);
-						var _v3 = A2(
+						var topicId = boxId.a;
+						var shouldMoveToBox = !_Utils_eq(topicId, targetId);
+						var _v4 = A2(
 							$author$project$Utils$info,
-							'mouseUp',
-							'dropped ' + ($elm$core$String$fromInt(id) + (' (box ' + ($author$project$Box$fromPath(boxPath) + (') on ' + ($elm$core$String$fromInt(targetId) + (' (box ' + ($author$project$Box$fromPath(targetPath) + (') --> ' + ((!droppedOnSourceBox) ? 'move topic' : 'abort'))))))))));
-						var _v4 = !droppedOnSourceBox;
-						if (_v4) {
-							return A2($elm$random$Random$generate, msg, $author$project$Feature$MouseAPI$point);
+							'TopicMap.Mouse.dragStop',
+							'dropped ' + ($elm$core$String$fromInt(
+								$author$project$ModelBase$toTopicId(id)) + (' (box ' + ($author$project$Box$fromPath(boxPath) + (') on ' + ($elm$core$String$fromInt(
+								$author$project$ModelBase$toTopicId(targetId)) + (' (box ' + ($author$project$Box$fromPath(targetPath) + (') --> ' + (shouldMoveToBox ? 'move topic to box' : 'abort'))))))))));
+						if (shouldMoveToBox) {
+							return $author$project$Utils$command(
+								A5($author$project$Model$TopicDropped, id, boxId, origPos, targetId, targetPath));
 						} else {
-							return $elm$core$Platform$Cmd$none;
+							return $author$project$Utils$command($author$project$Model$TopicDragged);
 						}
 					} else {
-						var _v5 = _v0.a;
-						var _v6 = A2($author$project$Utils$info, 'mouseUp', 'topic drag ended w/o target');
+						var _v6 = _v1.a;
+						var _v7 = A2($author$project$Utils$info, 'TopicMap.Mouse.dragStop', 'topic drag ended w/o target');
 						return $author$project$Utils$command($author$project$Model$TopicDragged);
 					}
 				} else {
-					if (!_v0.f.$) {
-						var _v7 = _v0.a;
-						var id = _v0.b;
-						var boxPath = _v0.c;
-						var _v8 = _v0.f.a;
-						var targetId = _v8.a;
-						var targetPath = _v8.b;
+					if ((_v1.f.$ === 'Just') && (_v1.f.a.a.$ === 'T')) {
+						var _v8 = _v1.a;
+						var id = _v1.b;
+						var boxPath = _v1.c;
+						var _v9 = _v1.f.a;
+						var targetId = _v9.a.a;
+						var targetPath = _v9.b;
 						var boxId = $author$project$Box$firstId(boxPath);
 						var isSameBox = _Utils_eq(
 							boxId,
 							$author$project$Box$firstId(targetPath));
-						var _v9 = A2(
+						var _v10 = A2(
 							$author$project$Utils$info,
-							'mouseUp',
-							'assoc drawn from ' + ($elm$core$String$fromInt(id) + (' (box ' + ($author$project$Box$fromPath(boxPath) + (') to ' + ($elm$core$String$fromInt(targetId) + (' (box ' + ($author$project$Box$fromPath(targetPath) + (') --> ' + (isSameBox ? 'create assoc' : 'abort'))))))))));
+							'TopicMap.Mouse.dragStop',
+							'assoc drawn from ' + ($elm$core$String$fromInt(
+								$author$project$ModelBase$toTopicId(id)) + (' (box ' + ($author$project$Box$fromPath(boxPath) + (') to ' + ($elm$core$String$fromInt(
+								$author$project$ModelBase$toTopicId(targetId)) + (' (box ' + ($author$project$Box$fromPath(targetPath) + (') --> ' + (isSameBox ? 'create assoc' : 'abort'))))))))));
 						if (isSameBox) {
 							return $author$project$Utils$command(
-								A3($author$project$Model$AddAssoc, id, targetId, boxId));
+								A3($author$project$Model$CreateAssoc, id, targetId, boxId));
 						} else {
 							return $elm$core$Platform$Cmd$none;
 						}
 					} else {
-						var _v11 = _v0.a;
-						var _v12 = A2($author$project$Utils$info, 'mouseUp', 'assoc ended w/o target');
+						var _v12 = _v1.a;
+						var _v13 = A2($author$project$Utils$info, 'TopicMap.Mouse.dragStop', 'assoc ended w/o target');
 						return $elm$core$Platform$Cmd$none;
 					}
 				}
-			case 1:
-				var id = _v0.c;
-				var boxPath = _v0.d;
-				var _v13 = A2($author$project$Utils$info, 'mouseUp', 'item not moved -> ItemClicked');
+			case 'DragEngaged':
+				var id = _v1.b;
+				var boxPath = _v1.c;
+				var _v14 = A2($author$project$Utils$info, 'TopicMap.Mouse.dragStop', 'item not moved -> ItemClicked');
 				return $author$project$Utils$command(
-					A2($author$project$Model$ItemClicked, id, boxPath));
+					A2(
+						$author$project$Model$ItemClicked,
+						$author$project$ModelBase$T(id),
+						boxPath));
 			default:
-				return A3(
-					$author$project$Utils$logError,
-					'mouseUp',
-					'Received \"Up\" message when dragState is ' + $author$project$Utils$toString(model.dt.c6),
-					$elm$core$Platform$Cmd$none);
+				return $elm$core$Platform$Cmd$none;
 		}
 	}();
 	return _Utils_Tuple2(
-		A2(
-			$author$project$Feature$MouseAPI$setDragState,
-			$author$project$Feature$Mouse$NoDrag($elm$core$Maybe$Nothing),
-			model),
+		A2($author$project$TopicMap$Mouse$setDragState, $author$project$TopicMap$TopicMapDef$NoDrag, model),
 		cmd);
 };
-var $author$project$Feature$Mouse$DragEngaged = F5(
-	function (a, b, c, d, e) {
-		return {$: 1, a: a, b: b, c: c, d: d, e: e};
+var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
+var $elm$core$Basics$ge = _Utils_ge;
+var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var $elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = $elm$core$Array$bitMask & (index >>> shift);
+			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_v0.$ === 'SubTree') {
+				var subTree = _v0.a;
+				var $temp$shift = shift - $elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _v0.a;
+				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
+			}
+		}
 	});
-var $author$project$Feature$Mouse$DragTopic = 0;
-var $author$project$Config$assocDelayMillis = 200;
-var $author$project$Box$topicPos = F3(
-	function (topicId, boxId, model) {
-		var _v0 = A3($author$project$Box$topicProps, topicId, boxId, model);
-		if (!_v0.$) {
-			var pos = _v0.a.av;
+var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var $elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var $elm$core$Array$get = F2(
+	function (index, _v0) {
+		var len = _v0.a;
+		var startShift = _v0.b;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
+			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
+			A3($elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var $author$project$TopicList$ViewProps$byId = F2(
+	function (boxId, model) {
+		var _v0 = A2(
+			$elm$core$Dict$get,
+			$author$project$ModelBase$toBoxId(boxId),
+			model.topicList.viewProps);
+		if (_v0.$ === 'Just') {
+			var viewProps = _v0.a;
+			return $elm$core$Maybe$Just(viewProps);
+		} else {
+			return A3(
+				$author$project$Utils$logError,
+				'TopicList.ViewProps.byId',
+				'Missing ViewProps for ' + $author$project$Utils$toString(boxId),
+				$elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$TopicList$ViewProps$listSize = F2(
+	function (boxId, model) {
+		var _v0 = A2($author$project$TopicList$ViewProps$byId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var size = _v0.a.size;
+			return size;
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'TopicList.ViewProps.listSize',
+				boxId,
+				A2($author$project$ModelBase$Size, 0, 0));
+		}
+	});
+var $author$project$TopicList$Geometry$isListHovered = F3(
+	function (boxId, pos, model) {
+		var size = A2($author$project$TopicList$ViewProps$listSize, boxId, model);
+		return (pos.x > 0) && ((_Utils_cmp(pos.x, size.w) < 0) && ((pos.y > 0) && (_Utils_cmp(pos.y, size.h) < 0)));
+	});
+var $elm$core$Elm$JsArray$appendN = _JsArray_appendN;
+var $elm$core$Elm$JsArray$slice = _JsArray_slice;
+var $elm$core$Array$appendHelpBuilder = F2(
+	function (tail, builder) {
+		var tailLen = $elm$core$Elm$JsArray$length(tail);
+		var notAppended = ($elm$core$Array$branchFactor - $elm$core$Elm$JsArray$length(builder.tail)) - tailLen;
+		var appended = A3($elm$core$Elm$JsArray$appendN, $elm$core$Array$branchFactor, builder.tail, tail);
+		return (notAppended < 0) ? {
+			nodeList: A2(
+				$elm$core$List$cons,
+				$elm$core$Array$Leaf(appended),
+				builder.nodeList),
+			nodeListSize: builder.nodeListSize + 1,
+			tail: A3($elm$core$Elm$JsArray$slice, notAppended, tailLen, tail)
+		} : ((!notAppended) ? {
+			nodeList: A2(
+				$elm$core$List$cons,
+				$elm$core$Array$Leaf(appended),
+				builder.nodeList),
+			nodeListSize: builder.nodeListSize + 1,
+			tail: $elm$core$Elm$JsArray$empty
+		} : {nodeList: builder.nodeList, nodeListSize: builder.nodeListSize, tail: appended});
+	});
+var $elm$core$Elm$JsArray$push = _JsArray_push;
+var $elm$core$Elm$JsArray$singleton = _JsArray_singleton;
+var $elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
+var $elm$core$Array$insertTailInTree = F4(
+	function (shift, index, tail, tree) {
+		var pos = $elm$core$Array$bitMask & (index >>> shift);
+		if (_Utils_cmp(
+			pos,
+			$elm$core$Elm$JsArray$length(tree)) > -1) {
+			if (shift === 5) {
+				return A2(
+					$elm$core$Elm$JsArray$push,
+					$elm$core$Array$Leaf(tail),
+					tree);
+			} else {
+				var newSub = $elm$core$Array$SubTree(
+					A4($elm$core$Array$insertTailInTree, shift - $elm$core$Array$shiftStep, index, tail, $elm$core$Elm$JsArray$empty));
+				return A2($elm$core$Elm$JsArray$push, newSub, tree);
+			}
+		} else {
+			var value = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (value.$ === 'SubTree') {
+				var subTree = value.a;
+				var newSub = $elm$core$Array$SubTree(
+					A4($elm$core$Array$insertTailInTree, shift - $elm$core$Array$shiftStep, index, tail, subTree));
+				return A3($elm$core$Elm$JsArray$unsafeSet, pos, newSub, tree);
+			} else {
+				var newSub = $elm$core$Array$SubTree(
+					A4(
+						$elm$core$Array$insertTailInTree,
+						shift - $elm$core$Array$shiftStep,
+						index,
+						tail,
+						$elm$core$Elm$JsArray$singleton(value)));
+				return A3($elm$core$Elm$JsArray$unsafeSet, pos, newSub, tree);
+			}
+		}
+	});
+var $elm$core$Array$unsafeReplaceTail = F2(
+	function (newTail, _v0) {
+		var len = _v0.a;
+		var startShift = _v0.b;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var originalTailLen = $elm$core$Elm$JsArray$length(tail);
+		var newTailLen = $elm$core$Elm$JsArray$length(newTail);
+		var newArrayLen = len + (newTailLen - originalTailLen);
+		if (_Utils_eq(newTailLen, $elm$core$Array$branchFactor)) {
+			var overflow = _Utils_cmp(newArrayLen >>> $elm$core$Array$shiftStep, 1 << startShift) > 0;
+			if (overflow) {
+				var newShift = startShift + $elm$core$Array$shiftStep;
+				var newTree = A4(
+					$elm$core$Array$insertTailInTree,
+					newShift,
+					len,
+					newTail,
+					$elm$core$Elm$JsArray$singleton(
+						$elm$core$Array$SubTree(tree)));
+				return A4($elm$core$Array$Array_elm_builtin, newArrayLen, newShift, newTree, $elm$core$Elm$JsArray$empty);
+			} else {
+				return A4(
+					$elm$core$Array$Array_elm_builtin,
+					newArrayLen,
+					startShift,
+					A4($elm$core$Array$insertTailInTree, startShift, len, newTail, tree),
+					$elm$core$Elm$JsArray$empty);
+			}
+		} else {
+			return A4($elm$core$Array$Array_elm_builtin, newArrayLen, startShift, tree, newTail);
+		}
+	});
+var $elm$core$Array$appendHelpTree = F2(
+	function (toAppend, array) {
+		var len = array.a;
+		var tree = array.c;
+		var tail = array.d;
+		var itemsToAppend = $elm$core$Elm$JsArray$length(toAppend);
+		var notAppended = ($elm$core$Array$branchFactor - $elm$core$Elm$JsArray$length(tail)) - itemsToAppend;
+		var appended = A3($elm$core$Elm$JsArray$appendN, $elm$core$Array$branchFactor, tail, toAppend);
+		var newArray = A2($elm$core$Array$unsafeReplaceTail, appended, array);
+		if (notAppended < 0) {
+			var nextTail = A3($elm$core$Elm$JsArray$slice, notAppended, itemsToAppend, toAppend);
+			return A2($elm$core$Array$unsafeReplaceTail, nextTail, newArray);
+		} else {
+			return newArray;
+		}
+	});
+var $elm$core$Elm$JsArray$foldl = _JsArray_foldl;
+var $elm$core$Array$builderFromArray = function (_v0) {
+	var len = _v0.a;
+	var tree = _v0.c;
+	var tail = _v0.d;
+	var helper = F2(
+		function (node, acc) {
+			if (node.$ === 'SubTree') {
+				var subTree = node.a;
+				return A3($elm$core$Elm$JsArray$foldl, helper, acc, subTree);
+			} else {
+				return A2($elm$core$List$cons, node, acc);
+			}
+		});
+	return {
+		nodeList: A3($elm$core$Elm$JsArray$foldl, helper, _List_Nil, tree),
+		nodeListSize: (len / $elm$core$Array$branchFactor) | 0,
+		tail: tail
+	};
+};
+var $elm$core$Array$append = F2(
+	function (a, _v0) {
+		var aTail = a.d;
+		var bLen = _v0.a;
+		var bTree = _v0.c;
+		var bTail = _v0.d;
+		if (_Utils_cmp(bLen, $elm$core$Array$branchFactor * 4) < 1) {
+			var foldHelper = F2(
+				function (node, array) {
+					if (node.$ === 'SubTree') {
+						var tree = node.a;
+						return A3($elm$core$Elm$JsArray$foldl, foldHelper, array, tree);
+					} else {
+						var leaf = node.a;
+						return A2($elm$core$Array$appendHelpTree, leaf, array);
+					}
+				});
+			return A2(
+				$elm$core$Array$appendHelpTree,
+				bTail,
+				A3($elm$core$Elm$JsArray$foldl, foldHelper, a, bTree));
+		} else {
+			var foldHelper = F2(
+				function (node, builder) {
+					if (node.$ === 'SubTree') {
+						var tree = node.a;
+						return A3($elm$core$Elm$JsArray$foldl, foldHelper, builder, tree);
+					} else {
+						var leaf = node.a;
+						return A2($elm$core$Array$appendHelpBuilder, leaf, builder);
+					}
+				});
+			return A2(
+				$elm$core$Array$builderToArray,
+				true,
+				A2(
+					$elm$core$Array$appendHelpBuilder,
+					bTail,
+					A3(
+						$elm$core$Elm$JsArray$foldl,
+						foldHelper,
+						$elm$core$Array$builderFromArray(a),
+						bTree)));
+		}
+	});
+var $elm$core$Array$push = F2(
+	function (a, array) {
+		var tail = array.d;
+		return A2(
+			$elm$core$Array$unsafeReplaceTail,
+			A2($elm$core$Elm$JsArray$push, a, tail),
+			array);
+	});
+var $author$project$TopicList$Geometry$targets = F3(
+	function (boxId, boxPath, model) {
+		var path = A2($elm$core$List$cons, boxId, boxPath);
+		return A3(
+			$elm$core$List$foldl,
+			F2(
+				function (topicId, acc) {
+					var t = A2(
+						$elm$core$Array$push,
+						_Utils_Tuple2(
+							$author$project$ModelBase$T(topicId),
+							path),
+						acc);
+					return A2($author$project$Topic$isBox, topicId, model) ? A2(
+						$elm$core$Array$append,
+						t,
+						A3(
+							$author$project$TopicList$Geometry$targets,
+							$author$project$ModelBase$BoxId(topicId),
+							path,
+							model)) : t;
+				}),
+			$elm$core$Array$empty,
+			A2($author$project$Box$topicIds, boxId, model));
+	});
+var $author$project$TopicList$Geometry$hitTest = F5(
+	function (boxId, boxPath, pos, excludeTopicId, _v0) {
+		var topicId = boxId.a;
+		var model = _v0.model;
+		if (A3($author$project$TopicList$Geometry$isListHovered, boxId, pos, model)) {
+			var t = A3($author$project$TopicList$Geometry$targets, boxId, boxPath, model);
+			var i = $elm$core$Basics$round((pos.y - 30) / ($author$project$Config$topicLineHeight * $author$project$Config$contentFontSize));
+			var target = A2($elm$core$Array$get, i, t);
+			var _v1 = A2($author$project$Utils$info, 'TopicList.Geometry.hitTest', target);
+			if (target.$ === 'Just') {
+				return target;
+			} else {
+				return $elm$core$Maybe$Just(
+					_Utils_Tuple2(
+						$author$project$ModelBase$T(topicId),
+						boxPath));
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$TopicMap$ViewProps$mapTopic = F3(
+	function (topicId, mapId, model) {
+		return A2(
+			$elm$core$Maybe$andThen,
+			$author$project$TopicMap$ViewProps$mapTopic_(topicId),
+			A2($author$project$TopicMap$ViewProps$byId, mapId, model));
+	});
+var $author$project$TopicMap$ViewProps$topicPos = F3(
+	function (topicId, mapId, model) {
+		var _v0 = A3($author$project$TopicMap$ViewProps$mapTopic, topicId, mapId, model);
+		if (_v0.$ === 'Just') {
+			var pos = _v0.a.pos;
 			return $elm$core$Maybe$Just(pos);
 		} else {
 			return A3(
 				$author$project$Utils$fail,
-				'topicPos',
-				{a4: boxId, bD: topicId},
+				'TopicMap.ViewProps.topicPos',
+				{mapId: mapId, topicId: topicId},
 				$elm$core$Maybe$Nothing);
 		}
 	});
-var $author$project$Feature$MouseAPI$timeArrived = F2(
-	function (time, undoModel) {
-		var present = undoModel.aw;
-		var _v0 = present.dt.c6;
-		switch (_v0.$) {
-			case 0:
-				var _class = _v0.a;
-				var id = _v0.b;
-				var boxPath = _v0.c;
-				var pos = _v0.d;
-				var dragState = A5($author$project$Feature$Mouse$DragEngaged, time, _class, id, boxPath, pos);
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						A2($author$project$Feature$MouseAPI$setDragState, dragState, present),
-						$elm$core$Platform$Cmd$none));
-			case 2:
-				var startTime = _v0.a;
-				var _class = _v0.b;
-				var id = _v0.c;
-				var boxPath = _v0.d;
-				var pos = _v0.e;
-				var maybeOrigPos = A3(
-					$author$project$Box$topicPos,
-					id,
-					$author$project$Box$firstId(boxPath),
-					present);
-				var delay = $elm$time$Time$posixToMillis(time) - $elm$time$Time$posixToMillis(startTime);
-				var _v1 = function () {
-					var _v2 = _Utils_cmp(delay, $author$project$Config$assocDelayMillis) > 0;
-					if (_v2) {
-						return _Utils_Tuple2(1, $author$project$Undo$swap);
-					} else {
-						return _Utils_Tuple2(0, $author$project$Undo$push);
-					}
-				}();
-				var dragMode = _v1.a;
-				var undo = _v1.b;
-				var dragState = function () {
-					if (_class === 'dmx-topic') {
-						if (!maybeOrigPos.$) {
-							var origPos = maybeOrigPos.a;
-							return A6($author$project$Feature$Mouse$Drag, dragMode, id, boxPath, origPos, pos, $elm$core$Maybe$Nothing);
-						} else {
-							return $author$project$Feature$Mouse$NoDrag($elm$core$Maybe$Nothing);
-						}
-					} else {
-						return $author$project$Feature$Mouse$NoDrag($elm$core$Maybe$Nothing);
-					}
-				}();
-				return A2(
-					undo,
-					undoModel,
-					_Utils_Tuple2(
-						A2($author$project$Feature$MouseAPI$setDragState, dragState, present),
-						$elm$core$Platform$Cmd$none));
-			default:
-				return A3(
-					$author$project$Utils$logError,
-					'timeArrived',
-					'Received Time when dragState is not WaitFor..Time',
-					_Utils_Tuple2(undoModel, $elm$core$Platform$Cmd$none));
-		}
-	});
-var $author$project$Feature$MouseAPI$unhover = F4(
-	function (_class, targetId, targetPath, model) {
-		var _v0 = model.dt.c6;
-		switch (_v0.$) {
-			case 3:
-				var dragMode = _v0.a;
-				var id = _v0.b;
-				var boxPath = _v0.c;
-				var origPos = _v0.d;
-				var lastPos = _v0.e;
-				return A2(
-					$author$project$Feature$MouseAPI$setDragState,
-					A6($author$project$Feature$Mouse$Drag, dragMode, id, boxPath, origPos, lastPos, $elm$core$Maybe$Nothing),
-					model);
-			case 4:
-				return A2(
-					$author$project$Feature$MouseAPI$setDragState,
-					$author$project$Feature$Mouse$NoDrag($elm$core$Maybe$Nothing),
-					model);
-			default:
-				return model;
-		}
-	});
-var $author$project$Feature$MouseAPI$update = F2(
-	function (msg, undoModel) {
-		var present = undoModel.aw;
-		switch (msg.$) {
-			case 0:
-				return _Utils_Tuple2(undoModel, $author$project$Feature$MouseAPI$mouseDown);
-			case 1:
-				var _class = msg.a;
-				var id = msg.b;
-				var boxPath = msg.c;
-				var pos = msg.d;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					A5($author$project$Feature$MouseAPI$mouseDownOnItem, _class, id, boxPath, pos, present));
-			case 2:
-				var pos = msg.a;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					A2($author$project$Feature$MouseAPI$mouseMove, pos, present));
-			case 3:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Feature$MouseAPI$mouseUp(present));
-			case 4:
-				var _class = msg.a;
-				var id = msg.b;
-				var boxPath = msg.c;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						A4($author$project$Feature$MouseAPI$hover, _class, id, boxPath, present),
-						$elm$core$Platform$Cmd$none));
-			case 5:
-				var _class = msg.a;
-				var id = msg.b;
-				var boxPath = msg.c;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						A4($author$project$Feature$MouseAPI$unhover, _class, id, boxPath, present),
-						$elm$core$Platform$Cmd$none));
-			default:
-				var time = msg.a;
-				return A2($author$project$Feature$MouseAPI$timeArrived, time, undoModel);
-		}
-	});
-var $author$project$Feature$NavAPI$boxIdFromHash = function (hash) {
-	var _v0 = $elm$core$String$isEmpty(hash);
-	if (_v0) {
-		return $elm$core$Maybe$Nothing;
-	} else {
-		var _v1 = A2($elm$core$String$startsWith, '#', hash);
-		if (_v1) {
-			var _v2 = $elm$core$String$toInt(
-				A2($elm$core$String$dropLeft, 1, hash));
-			if (!_v2.$) {
-				var boxId = _v2.a;
-				return $elm$core$Maybe$Just(boxId);
-			} else {
-				return A3($author$project$Utils$logError, 'boxIdFromHash', 'not a number after hash in \"' + (hash + '\"'), $elm$core$Maybe$Nothing);
-			}
-		} else {
-			return A3($author$project$Utils$logError, 'boxIdFromHash', '\"' + (hash + '\" is not a hash'), $elm$core$Maybe$Nothing);
-		}
-	}
-};
-var $author$project$Feature$NavAPI$setHash = _Platform_outgoingPort('setHash', $elm$json$Json$Encode$string);
-var $author$project$Feature$NavAPI$pushUrl = function (boxId) {
-	return $author$project$Feature$NavAPI$setHash(
-		'#' + $elm$core$String$fromInt(boxId));
-};
-var $elm$browser$Browser$Dom$setViewportOf = _Browser_setViewportOf;
-var $author$project$Feature$NavAPI$setViewport = function (model) {
-	var _v0 = A2($author$project$Box$byIdOrLog, model.a4, model);
-	if (!_v0.$) {
-		var box = _v0.a;
-		return A2(
-			$elm$core$Task$attempt,
-			function (result) {
-				if (!result.$) {
-					return $author$project$Model$NoOp;
-				} else {
-					var e = result.a;
-					return A3(
-						$author$project$Utils$logError,
-						'setViewport',
-						$author$project$Utils$toString(e),
-						$author$project$Model$NoOp);
-				}
-			},
-			A3($elm$browser$Browser$Dom$setViewportOf, 'main', box.aU.d1, box.aU.d3));
-	} else {
-		return A3($author$project$Utils$fail, 'setViewport', model.a4, $elm$core$Platform$Cmd$none);
-	}
-};
-var $author$project$Feature$NavAPI$setFullscreenBox = F2(
-	function (boxId, model) {
-		var newModel = _Utils_update(
-			model,
-			{a4: boxId});
-		return _Utils_Tuple2(
-			$author$project$Box$Size$auto(newModel),
-			$elm$core$Platform$Cmd$batch(
-				_List_fromArray(
-					[
-						$author$project$Feature$NavAPI$setViewport(newModel),
-						$author$project$Utils$command(
-						$author$project$Model$Cancel($elm$core$Maybe$Nothing))
-					])));
-	});
-var $author$project$Storage$storeWith = function (_v0) {
-	var model = _v0.a;
-	var cmd = _v0.b;
-	return _Utils_Tuple2(
-		model,
-		$elm$core$Platform$Cmd$batch(
-			_List_fromArray(
-				[
-					cmd,
-					$author$project$Storage$storeModel(
-					$author$project$Model$encode(model))
-				])));
-};
-var $author$project$Feature$NavAPI$hashChanged = F2(
-	function (hash, undoModel) {
-		var present = undoModel.aw;
-		var _v0 = $author$project$Feature$NavAPI$boxIdFromHash(hash);
-		if (!_v0.$) {
-			var boxId = _v0.a;
-			return $author$project$Undo$reset(
-				$author$project$Storage$storeWith(
-					A2($author$project$Feature$NavAPI$setFullscreenBox, boxId, present)));
-		} else {
-			var _v1 = A2(
-				$author$project$Utils$info,
-				'hashChanged',
-				'No hash -> redirect to ' + $elm$core$String$fromInt(present.a4));
-			return _Utils_Tuple2(
-				undoModel,
-				$author$project$Feature$NavAPI$pushUrl(present.a4));
-		}
-	});
-var $author$project$Feature$NavAPI$update = F2(
-	function (msg, undoModel) {
-		var present = undoModel.aw;
-		var hash = msg;
-		return A2($author$project$Feature$NavAPI$hashChanged, hash, undoModel);
-	});
-var $author$project$Feature$Search$Topics = F2(
-	function (a, b) {
-		return {$: 0, a: a, b: b};
-	});
-var $elm$core$String$toLower = _String_toLower;
-var $author$project$Feature$SearchAPI$isMatch = F2(
-	function (text, searchTerm) {
-		return (!$elm$core$String$isEmpty(searchTerm)) && A2(
-			$elm$core$String$contains,
-			$elm$core$String$toLower(searchTerm),
-			$elm$core$String$toLower(text));
-	});
-var $author$project$Feature$SearchAPI$searchTopics = function (model) {
-	var topicIds = A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (id, item, topicIdsAcc) {
-				var _v0 = item.b2;
-				if (!_v0.$) {
-					var text = _v0.a.dX;
-					var _v1 = A2($author$project$Feature$SearchAPI$isMatch, text, model.C.cH);
-					if (_v1) {
-						return A2($elm$core$List$cons, id, topicIdsAcc);
-					} else {
-						return topicIdsAcc;
-					}
-				} else {
-					return topicIdsAcc;
-				}
-			}),
-		_List_Nil,
-		model.b7);
-	return A2(
-		$author$project$Feature$SearchAPI$setResult,
-		A2($author$project$Feature$Search$Topics, topicIds, $elm$core$Maybe$Nothing),
-		model);
-};
-var $author$project$Feature$SearchAPI$onInputFocused = $author$project$Feature$SearchAPI$searchTopics;
-var $author$project$Feature$Search$RelTopics = F2(
-	function (a, b) {
-		return {$: 1, a: a, b: b};
-	});
-var $author$project$Feature$SearchAPI$onRelTopicHovered = F2(
-	function (relTopicId, model) {
-		var _v0 = model.C.cw;
-		if (_v0.$ === 1) {
-			var relTopicIds = _v0.a;
-			return $author$project$Box$Size$auto(
-				A2(
-					$author$project$Feature$SearchAPI$setResult,
-					A2(
-						$author$project$Feature$Search$RelTopics,
-						relTopicIds,
-						$elm$core$Maybe$Just(relTopicId)),
-					model));
-		} else {
-			return A3($author$project$Utils$logError, 'onRelTopicHovered', 'search.result is not RelTopics', model);
-		}
-	});
-var $author$project$Feature$SearchAPI$onRelTopicUnhovered = function (model) {
-	var _v0 = model.C.cw;
-	if (_v0.$ === 1) {
-		var relTopicIds = _v0.a;
-		return $author$project$Box$Size$auto(
-			A2(
-				$author$project$Feature$SearchAPI$setResult,
-				A2($author$project$Feature$Search$RelTopics, relTopicIds, $elm$core$Maybe$Nothing),
-				model));
-	} else {
-		return A3($author$project$Utils$logError, 'onRelTopicUnhovered', 'search.result is not RelTopics', model);
-	}
-};
-var $author$project$Feature$SearchAPI$onTopicHovered = F2(
-	function (topicId, model) {
-		var _v0 = model.C.cw;
-		if (!_v0.$) {
-			var topicIds = _v0.a;
-			return $author$project$Box$Size$auto(
-				A2(
-					$author$project$Feature$SearchAPI$setResult,
-					A2(
-						$author$project$Feature$Search$Topics,
-						topicIds,
-						$elm$core$Maybe$Just(topicId)),
-					model));
-		} else {
-			return A3($author$project$Utils$logError, 'onTopicHovered', 'search.result is not Topics', model);
-		}
-	});
-var $author$project$Feature$SearchAPI$onTopicUnhovered = function (model) {
-	var _v0 = model.C.cw;
-	if (!_v0.$) {
-		var topicIds = _v0.a;
-		return $author$project$Box$Size$auto(
-			A2(
-				$author$project$Feature$SearchAPI$setResult,
-				A2($author$project$Feature$Search$Topics, topicIds, $elm$core$Maybe$Nothing),
-				model));
-	} else {
-		return A3($author$project$Utils$logError, 'onTopicUnhovered', 'search.result is not Topics', model);
-	}
-};
-var $author$project$Box$initItemProps_ = F3(
-	function (itemId, boxId, model) {
-		var _v0 = A2($author$project$Item$byId, itemId, model);
-		if (!_v0.$) {
-			var item = _v0.a;
-			var _v1 = item.b2;
-			if (!_v1.$) {
-				return $author$project$ModelParts$TopicP(
-					A3($author$project$Box$initTopicProps, itemId, boxId, model));
-			} else {
-				return $author$project$ModelParts$AssocP(
-					{});
-			}
-		} else {
-			return $author$project$ModelParts$AssocP(
-				{});
-		}
-	});
-var $author$project$Box$showItem_ = F3(
-	function (itemId, boxId, model) {
-		return A3(
-			$author$project$Box$update,
-			boxId,
-			function (box) {
-				return _Utils_update(
-					box,
-					{
-						b7: A3(
-							$elm$core$Dict$update,
-							itemId,
-							function (maybeItem) {
-								if (!maybeItem.$) {
-									var boxItem = maybeItem.a;
-									return $elm$core$Maybe$Just(
-										_Utils_update(
-											boxItem,
-											{
-												al: function () {
-													var _v1 = boxItem.al;
-													if (!_v1.$) {
-														return boxItem.al;
-													} else {
-														return $author$project$ModelParts$Visible(1);
-													}
-												}()
-											}));
-								} else {
-									return $elm$core$Maybe$Nothing;
-								}
-							},
-							box.b7)
-					});
-			},
+var $author$project$TopicMap$Geometry$isBoxRectHit = F4(
+	function (pos, map, parentBoxId, model) {
+		var _v0 = A3(
+			$author$project$TopicMap$ViewProps$topicPos,
+			$author$project$ModelBase$fromBoxId(map.id),
+			parentBoxId,
 			model);
-	});
-var $author$project$Box$revealItem = F3(
-	function (itemId, boxId, model) {
-		if (A3($author$project$Box$hasItem, boxId, itemId, model)) {
-			var _v0 = A2(
-				$author$project$Utils$info,
-				'revealItem',
-				$elm$core$String$fromInt(itemId) + (' is in ' + $elm$core$String$fromInt(boxId)));
-			return A3($author$project$Box$showItem_, itemId, boxId, model);
-		} else {
-			var props = A3($author$project$Box$initItemProps_, itemId, boxId, model);
-			var _v1 = A2(
-				$author$project$Utils$info,
-				'revealItem',
-				$elm$core$String$fromInt(itemId) + (' not in ' + $elm$core$String$fromInt(boxId)));
-			return A4($author$project$Box$addItem, itemId, props, boxId, model);
-		}
-	});
-var $author$project$Feature$SearchAPI$revealRelTopic = F2(
-	function (_v0, model) {
-		var topicId = _v0.a;
-		var assocId = _v0.b;
-		var _v1 = $author$project$Feature$SelAPI$revelationBoxPath(model);
-		if ((!_v1.$) && _v1.a.b) {
-			var boxPath = _v1.a;
-			var boxId = boxPath.a;
-			return $author$project$Box$Size$auto(
-				A3(
-					$author$project$Feature$SelAPI$select,
-					topicId,
-					boxPath,
-					$author$project$Feature$SearchAPI$closeMenu(
-						A3(
-							$author$project$Box$revealItem,
-							assocId,
-							boxId,
-							A3($author$project$Box$revealItem, topicId, boxId, model)))));
-		} else {
-			return model;
-		}
-	});
-var $author$project$Feature$SearchAPI$revealTopic = F2(
-	function (topicId, model) {
-		var _v0 = $author$project$Feature$SelAPI$revelationBoxPath(model);
-		if ((!_v0.$) && _v0.a.b) {
-			var boxPath = _v0.a;
-			var boxId = boxPath.a;
-			return $author$project$Box$Size$auto(
-				A3(
-					$author$project$Feature$SelAPI$select,
-					topicId,
-					boxPath,
-					$author$project$Feature$SearchAPI$closeMenu(
-						A3($author$project$Box$revealItem, topicId, boxId, model))));
-		} else {
-			return model;
-		}
-	});
-var $author$project$Feature$SearchAPI$setTerm = F2(
-	function (term, model) {
-		var search = model.C;
-		return _Utils_update(
-			model,
-			{
-				C: _Utils_update(
-					search,
-					{cH: term})
-			});
-	});
-var $author$project$Feature$SearchAPI$setSearchTerm = F2(
-	function (term, model) {
-		return $author$project$Feature$SearchAPI$searchTopics(
-			A2($author$project$Feature$SearchAPI$setTerm, term, model));
-	});
-var $author$project$Feature$SearchAPI$update = F2(
-	function (msg, undoModel) {
-		var present = undoModel.aw;
-		switch (msg.$) {
-			case 0:
-				var term = msg.a;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						A2($author$project$Feature$SearchAPI$setSearchTerm, term, present),
-						$elm$core$Platform$Cmd$none));
-			case 1:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						$author$project$Feature$SearchAPI$onInputFocused(present),
-						$elm$core$Platform$Cmd$none));
-			case 2:
-				var topicId = msg.a;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						A2($author$project$Feature$SearchAPI$onTopicHovered, topicId, present),
-						$elm$core$Platform$Cmd$none));
-			case 3:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						$author$project$Feature$SearchAPI$onTopicUnhovered(present),
-						$elm$core$Platform$Cmd$none));
-			case 4:
-				var topicId = msg.a;
-				return A2(
-					$author$project$Undo$push,
-					undoModel,
-					$author$project$Storage$store(
-						A2($author$project$Feature$SearchAPI$revealTopic, topicId, present)));
-			case 5:
-				var relTopicId = msg.a;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						A2($author$project$Feature$SearchAPI$onRelTopicHovered, relTopicId, present),
-						$elm$core$Platform$Cmd$none));
-			case 6:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						$author$project$Feature$SearchAPI$onRelTopicUnhovered(present),
-						$elm$core$Platform$Cmd$none));
-			case 7:
-				var relTopicId = msg.a;
-				return A2(
-					$author$project$Undo$push,
-					undoModel,
-					$author$project$Storage$store(
-						A2($author$project$Feature$SearchAPI$revealRelTopic, relTopicId, present)));
-			default:
-				var boxId = msg.a;
-				return _Utils_Tuple2(
-					undoModel,
-					$author$project$Feature$NavAPI$pushUrl(boxId));
-		}
-	});
-var $author$project$ModelParts$Editor = 1;
-var $author$project$Feature$TextAPI$setMeasureText = F2(
-	function (text_, model) {
-		var text = model.dX;
-		return _Utils_update(
-			model,
-			{
-				dX: _Utils_update(
-					text,
-					{cc: text_})
-			});
-	});
-var $author$project$Feature$TextAPI$measureText = F3(
-	function (topicId, text, model) {
-		return _Utils_Tuple2(
-			A2($author$project$Feature$TextAPI$setMeasureText, text, model),
-			A3($author$project$Feature$TextAPI$measureElement, 'measure', topicId, 1));
-	});
-var $author$project$Feature$TextAPI$setTopicText = F3(
-	function (topicId, text, model) {
-		return A3(
-			$author$project$Item$updateTopic,
-			topicId,
-			function (topic) {
-				return _Utils_update(
-					topic,
-					{dX: text});
-			},
-			model);
-	});
-var $author$project$Feature$TextAPI$insertImage = F3(
-	function (topicId, imageId, model) {
-		var _v0 = A2($author$project$Item$topicById, topicId, model);
-		if (!_v0.$) {
-			var text = _v0.a.dX;
-			var image = '![image](app://image/' + ($elm$core$String$fromInt(imageId) + ')');
-			var newText = _Utils_ap(text, image);
-			return A3(
-				$author$project$Feature$TextAPI$measureText,
-				topicId,
-				newText,
-				A3($author$project$Feature$TextAPI$setTopicText, topicId, newText, model));
-		} else {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-		}
-	});
-var $author$project$Feature$TextAPI$onTextInput = F2(
-	function (text, model) {
-		var _v0 = model.dX.c7;
-		if (!_v0.$) {
-			var topicId = _v0.a;
-			return A3($author$project$Feature$TextAPI$setTopicText, topicId, text, model);
-		} else {
-			return A3($author$project$Utils$logError, 'onTextInput', 'called when text.edit is NoEdit', model);
-		}
-	});
-var $author$project$Feature$TextAPI$onTextareaInput = F2(
-	function (text, model) {
-		var _v0 = model.dX.c7;
-		if (!_v0.$) {
-			var topicId = _v0.a;
-			return A3(
-				$author$project$Feature$TextAPI$measureText,
-				topicId,
-				text,
-				A3($author$project$Feature$TextAPI$setTopicText, topicId, text, model));
-		} else {
-			return A3(
-				$author$project$Utils$logError,
-				'onTextareaInput',
-				'called when text.edit is NoEdit',
-				_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
-		}
-	});
-var $author$project$Item$setTopicSize = F4(
-	function (topicId, sizeField, size, model) {
-		return A3(
-			$author$project$Item$updateTopic,
-			topicId,
-			function (topic) {
-				var size_ = topic.bo;
-				return _Utils_update(
-					topic,
-					{
-						bo: function () {
-							if (!sizeField) {
-								return _Utils_update(
-									size_,
-									{
-										d_: _Utils_update(
-											size,
-											{cN: size.cN - $author$project$Config$topicHeight})
-									});
-							} else {
-								return _Utils_update(
-									size_,
-									{c8: size});
-							}
-						}()
-					});
-			},
-			model);
-	});
-var $author$project$Feature$TextAPI$update = F2(
-	function (msg, undoModel) {
-		var present = undoModel.aw;
-		switch (msg.$) {
-			case 0:
-				var text = msg.a;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Storage$store(
-						A2($author$project$Feature$TextAPI$onTextInput, text, present)));
-			case 1:
-				var text = msg.a;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Storage$storeWith(
-						A2($author$project$Feature$TextAPI$onTextareaInput, text, present)));
-			case 2:
-				var topicId = msg.a;
-				var sizeField = msg.b;
-				var size = msg.c;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Storage$store(
-						$author$project$Box$Size$auto(
-							A4($author$project$Item$setTopicSize, topicId, sizeField, size, present))));
-			case 3:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Feature$TextAPI$leaveEdit(present));
-			default:
-				var _v1 = msg.a;
-				var topicId = _v1.a;
-				var imageId = _v1.b;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					A3($author$project$Feature$TextAPI$insertImage, topicId, imageId, present));
-		}
-	});
-var $author$project$Box$addBox = F2(
-	function (boxId, model) {
-		return _Utils_update(
-			model,
-			{
-				bL: A3(
-					$elm$core$Dict$insert,
-					boxId,
-					A4(
-						$author$project$ModelParts$Box,
-						boxId,
-						A4($author$project$ModelParts$Rectangle, 0, 0, 0, 0),
-						A2($author$project$ModelParts$Point, 0, 0),
-						$elm$core$Dict$empty),
-					model.bL)
-			});
-	});
-var $author$project$Config$contentFontSize = 13;
-var $author$project$Config$topicDetailPadding = 8;
-var $author$project$Config$topicLineHeight = 1.5;
-var $author$project$Config$topicDetailSize = A2(
-	$author$project$ModelParts$Size,
-	$author$project$Config$topicWidth - $author$project$Config$topicHeight,
-	$elm$core$Basics$round(($author$project$Config$topicLineHeight * $author$project$Config$contentFontSize) + (2 * ($author$project$Config$topicDetailPadding + $author$project$Config$topicBorderWidth))));
-var $author$project$Item$addTopic = F3(
-	function (text, icon, model) {
-		var id = model.dw;
-		var topic = A4(
-			$author$project$ModelParts$TopicInfo,
-			id,
-			icon,
-			text,
-			A2($author$project$ModelParts$TextSize, $author$project$Config$topicDetailSize, $author$project$Config$topicDetailSize));
-		var item = A3(
-			$author$project$ModelParts$Item,
-			id,
-			$author$project$ModelParts$Topic(topic),
-			$elm$core$Set$empty);
-		return _Utils_Tuple2(
-			$author$project$Item$nextId(
-				_Utils_update(
-					model,
-					{
-						b7: A3($elm$core$Dict$insert, id, item, model.b7)
-					})),
-			id);
-	});
-var $elm$browser$Browser$Dom$focus = _Browser_call('focus');
-var $author$project$Feature$TextAPI$focus = function (model) {
-	var elemId = function () {
-		var _v1 = model.dX.c7;
-		if (!_v1.$) {
-			var id = _v1.a;
-			var boxPath = _v1.b;
-			return A3($author$project$Box$elemId, 'input', id, boxPath);
-		} else {
-			return A3($author$project$Utils$logError, 'focus', 'called when text.edit is NoEdit', '');
-		}
-	}();
-	return A2(
-		$elm$core$Task$attempt,
-		function (result) {
-			if (!result.$) {
-				return $author$project$Model$NoOp;
-			} else {
-				var e = result.a;
-				return A3(
-					$author$project$Utils$logError,
-					'focus',
-					$author$project$Utils$toString(e),
-					$author$project$Model$NoOp);
-			}
-		},
-		$elm$browser$Browser$Dom$focus(elemId));
-};
-var $author$project$Box$updateDisplayMode = F4(
-	function (topicId, boxId, transform, model) {
-		return A4(
-			$author$project$Box$updateTopicProps_,
-			topicId,
-			boxId,
-			function (props) {
-				return _Utils_update(
-					props,
-					{
-						aI: transform(props.aI)
-					});
-			},
-			model);
-	});
-var $author$project$Feature$TextAPI$switchTopicDisplay = F3(
-	function (topicId, boxId, model) {
-		return A4(
-			$author$project$Box$updateDisplayMode,
-			topicId,
-			boxId,
-			function (displayMode) {
-				if (!displayMode.$) {
-					return $author$project$ModelParts$TopicD(1);
-				} else {
-					return displayMode;
-				}
-			},
-			model);
-	});
-var $author$project$Feature$TextAPI$enterEdit = F3(
-	function (topicId, boxPath, model) {
-		var newModel = $author$project$Box$Size$auto(
-			A3(
-				$author$project$Feature$TextAPI$switchTopicDisplay,
-				topicId,
-				$author$project$Box$firstId(boxPath),
-				A2(
-					$author$project$Feature$TextAPI$setEditState,
-					A2($author$project$Feature$Text$Edit, topicId, boxPath),
-					model)));
-		return _Utils_Tuple2(
-			newModel,
-			$author$project$Feature$TextAPI$focus(newModel));
-	});
-var $author$project$Config$initBoxIcon = $elm$core$Maybe$Just('archive');
-var $author$project$Config$initBoxText = 'New Box';
-var $author$project$Feature$ToolAPI$addBox = function (model) {
-	var boxId = model.a4;
-	var props = $author$project$ModelParts$TopicP(
-		A2(
-			$author$project$ModelParts$TopicProps,
-			A2($author$project$Box$initTopicPos, boxId, model),
-			$author$project$ModelParts$BoxD(0)));
-	var _v0 = A3($author$project$Item$addTopic, $author$project$Config$initBoxText, $author$project$Config$initBoxIcon, model);
-	var newModel = _v0.a;
-	var topicId = _v0.b;
-	return A3(
-		$author$project$Feature$TextAPI$enterEdit,
-		topicId,
-		_List_fromArray(
-			[boxId]),
-		A3(
-			$author$project$Feature$SelAPI$select,
-			topicId,
-			_List_fromArray(
-				[boxId]),
-			A4(
-				$author$project$Box$addItem,
-				topicId,
-				props,
-				boxId,
-				A2($author$project$Box$addBox, topicId, newModel))));
-};
-var $author$project$Config$initTopicIcon = $elm$core$Maybe$Just('disc');
-var $author$project$Config$initTopicText = 'New Topic';
-var $author$project$Feature$ToolAPI$addTopic = function (model) {
-	var boxId = model.a4;
-	var props = $author$project$ModelParts$TopicP(
-		A2(
-			$author$project$ModelParts$TopicProps,
-			A2($author$project$Box$initTopicPos, boxId, model),
-			$author$project$ModelParts$TopicD(0)));
-	var _v0 = A3($author$project$Item$addTopic, $author$project$Config$initTopicText, $author$project$Config$initTopicIcon, model);
-	var newModel = _v0.a;
-	var topicId = _v0.b;
-	return A3(
-		$author$project$Feature$TextAPI$enterEdit,
-		topicId,
-		_List_fromArray(
-			[boxId]),
-		A3(
-			$author$project$Feature$SelAPI$select,
-			topicId,
-			_List_fromArray(
-				[boxId]),
-			A4($author$project$Box$addItem, topicId, props, boxId, newModel)));
-};
-var $author$project$Item$assocIds = F2(
-	function (itemId, model) {
-		var _v0 = A2($author$project$Item$byId, itemId, model);
-		if (!_v0.$) {
-			var item = _v0.a;
-			return item.bH;
-		} else {
-			return $elm$core$Set$empty;
-		}
-	});
-var $elm$core$Set$remove = F2(
-	function (key, _v0) {
-		var dict = _v0;
-		return A2($elm$core$Dict$remove, key, dict);
-	});
-var $author$project$Box$deleteAssocId_ = F3(
-	function (assocId, itemId, model) {
-		return A3(
-			$author$project$Item$update,
-			itemId,
-			function (item) {
-				return _Utils_update(
-					item,
-					{
-						bH: A2($elm$core$Set$remove, assocId, item.bH)
-					});
-			},
-			model);
-	});
-var $author$project$Box$deleteAssocRefs_ = F2(
-	function (assocId, model) {
-		var _v0 = A2($author$project$Item$byId, assocId, model);
-		if (!_v0.$) {
-			var info = _v0.a.b2;
-			if (info.$ === 1) {
-				var assoc = info.a;
-				return A3(
-					$author$project$Box$deleteAssocId_,
-					assoc.aK,
-					assoc.dL,
-					A3($author$project$Box$deleteAssocId_, assoc.aK, assoc.dK, model));
-			} else {
-				return model;
-			}
-		} else {
-			return model;
-		}
-	});
-var $author$project$Box$deleteItem__ = F2(
-	function (itemId, model) {
-		return _Utils_update(
-			model,
-			{
-				bL: A2(
-					$elm$core$Dict$map,
-					F2(
-						function (_v0, box) {
-							return _Utils_update(
-								box,
-								{
-									b7: A2($elm$core$Dict$remove, itemId, box.b7)
-								});
-						}),
-					model.bL),
-				b7: A2($elm$core$Dict$remove, itemId, model.b7)
-			});
-	});
-var $elm$core$Set$foldr = F3(
-	function (func, initialState, _v0) {
-		var dict = _v0;
-		return A3(
-			$elm$core$Dict$foldr,
-			F3(
-				function (key, _v1, state) {
-					return A2(func, key, state);
-				}),
-			initialState,
-			dict);
-	});
-var $author$project$Box$deleteItem_ = F2(
-	function (itemId, model) {
-		return A2(
-			$author$project$Box$deleteItem__,
-			itemId,
-			A2(
-				$author$project$Box$deleteAssocRefs_,
-				itemId,
-				A3(
-					$elm$core$Set$foldr,
-					$author$project$Box$deleteItem_,
-					model,
-					A2($author$project$Item$assocIds, itemId, model))));
-	});
-var $author$project$Box$resetAllEmptyBoxes = function (model) {
-	return A3(
-		$elm$core$List$foldr,
-		$author$project$Box$resetEmptyBox_,
-		model,
-		$elm$core$Dict$keys(model.bL));
-};
-var $author$project$Box$deleteItem = F2(
-	function (itemId, model) {
-		return $author$project$Box$resetAllEmptyBoxes(
-			A2($author$project$Box$deleteItem_, itemId, model));
-	});
-var $author$project$Feature$ToolAPI$delete = function (model) {
-	var newModel = A3(
-		$elm$core$List$foldr,
-		F2(
-			function (itemId, modelAcc) {
-				return A2($author$project$Box$deleteItem, itemId, modelAcc);
-			}),
-		model,
-		A2($elm$core$List$map, $elm$core$Tuple$first, model.ax.b7));
-	return $author$project$Box$Size$auto(
-		$author$project$Feature$SelAPI$clear(newModel));
-};
-var $author$project$Feature$ToolAPI$edit = function (model) {
-	var _v0 = $author$project$Feature$SelAPI$single(model);
-	if (!_v0.$) {
-		var _v1 = _v0.a;
-		var topicId = _v1.a;
-		var boxPath = _v1.b;
-		return A3($author$project$Feature$TextAPI$enterEdit, topicId, boxPath, model);
-	} else {
-		return A3(
-			$author$project$Utils$logError,
-			'edit',
-			'called when there is no single selection',
-			_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
-	}
-};
-var $elm$json$Json$Encode$null = _Json_encodeNull;
-var $author$project$Storage$exportJSON = _Platform_outgoingPort(
-	'exportJSON',
-	function ($) {
-		return $elm$json$Json$Encode$null;
-	});
-var $author$project$Storage$importJSON = _Platform_outgoingPort(
-	'importJSON',
-	function ($) {
-		return $elm$json$Json$Encode$null;
-	});
-var $author$project$Feature$TextAPI$imageFilePicker = _Platform_outgoingPort(
-	'imageFilePicker',
-	function ($) {
-		var a = $.a;
-		var b = $.b;
-		return A2(
-			$elm$json$Json$Encode$list,
-			$elm$core$Basics$identity,
-			_List_fromArray(
-				[
-					$elm$json$Json$Encode$int(a),
-					$elm$json$Json$Encode$int(b)
-				]));
-	});
-var $author$project$Feature$TextAPI$openImageFilePicker = F2(
-	function (topicId, model) {
-		var imageId = model.dw;
-		return _Utils_Tuple2(
-			$author$project$Item$nextId(model),
-			$author$project$Feature$TextAPI$imageFilePicker(
-				_Utils_Tuple2(topicId, imageId)));
-	});
-var $author$project$Feature$Icon$Open = 0;
-var $author$project$Feature$IconAPI$openPicker = function (model) {
-	var icon = model.aa;
-	return _Utils_update(
-		model,
-		{
-			aa: _Utils_update(
-				icon,
-				{cl: 0})
-		});
-};
-var $author$project$Model$initTransient = function (model) {
-	return _Utils_update(
-		model,
-		{aa: $author$project$Feature$Icon$init, dt: $author$project$Feature$Mouse$init, C: $author$project$Feature$Search$init, ax: $author$project$Feature$Sel$init, dX: $author$project$Feature$Text$init});
-};
-var $elm_community$undo_redo$UndoList$redo = function (_v0) {
-	var past = _v0.s;
-	var present = _v0.aw;
-	var future = _v0.u;
-	if (!future.b) {
-		return A3($elm_community$undo_redo$UndoList$UndoList, past, present, future);
-	} else {
-		var x = future.a;
-		var xs = future.b;
-		return A3(
-			$elm_community$undo_redo$UndoList$UndoList,
-			A2($elm$core$List$cons, present, past),
-			x,
-			xs);
-	}
-};
-var $author$project$Undo$redo = function (undoModel) {
-	var newUndoModel = $elm_community$undo_redo$UndoList$redo(undoModel);
-	var newModel = $author$project$Model$initTransient(newUndoModel.aw);
-	return A2(
-		$author$project$Undo$swap,
-		newUndoModel,
-		$author$project$Storage$store(newModel));
-};
-var $author$project$Feature$ToolAPI$remove = function (model) {
-	var newModel = A3(
-		$elm$core$List$foldr,
-		F2(
-			function (_v0, modelAcc) {
-				var itemId = _v0.a;
-				var boxPath = _v0.b;
-				return A3(
-					$author$project$Box$removeItem,
-					itemId,
-					$author$project$Box$firstId(boxPath),
-					modelAcc);
-			}),
-		model,
-		model.ax.b7);
-	return $author$project$Box$Size$auto(
-		$author$project$Feature$SelAPI$clear(newModel));
-};
-var $author$project$Box$isPinned = function (item) {
-	return _Utils_eq(
-		item.al,
-		$author$project$ModelParts$Visible(0));
-};
-var $author$project$Box$Transfer$boxItems_ = F3(
-	function (contentItems, targetItems, model) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (boxItem, targetItemsAcc) {
-					var _v0 = A2($elm$core$Dict$get, boxItem.aK, targetItemsAcc);
-					if (!_v0.$) {
-						var item = _v0.a;
-						if ($author$project$Box$isPinned(item)) {
-							return A3($author$project$Box$removeItem_, boxItem.cX, targetItemsAcc, model);
-						} else {
-							var items = A3($author$project$Box$removeItem_, boxItem.aK, targetItemsAcc, model);
-							var _v1 = A2($author$project$Box$byId, boxItem.aK, model);
-							if (!_v1.$) {
-								var box_ = _v1.a;
-								return A3($author$project$Box$Transfer$boxItems_, box_.b7, items, model);
-							} else {
-								return items;
-							}
-						}
-					} else {
-						return targetItemsAcc;
-					}
-				}),
-			targetItems,
-			A2(
-				$elm$core$List$filter,
-				$author$project$Box$isVisible,
-				$elm$core$Dict$values(contentItems)));
-	});
-var $author$project$Box$Transfer$transferContent = F4(
-	function (boxId, targetBoxId, transfer, model) {
-		var _v0 = A2($author$project$Box$byIdOrLog, boxId, model);
-		if (!_v0.$) {
-			var box_ = _v0.a;
-			return A3(
-				$author$project$Box$update,
-				targetBoxId,
-				function (targetBox) {
-					return _Utils_update(
-						targetBox,
-						{
-							b7: A3(transfer, box_.b7, targetBox.b7, model)
-						});
-				},
-				model);
-		} else {
-			return model;
-		}
-	});
-var $author$project$Box$Transfer$boxContent = F3(
-	function (boxId, targetBoxId, model) {
-		return A4($author$project$Box$Transfer$transferContent, boxId, targetBoxId, $author$project$Box$Transfer$boxItems_, model);
-	});
-var $author$project$Box$displayMode = F3(
-	function (topicId, boxId, model) {
-		var _v0 = A3($author$project$Box$topicProps, topicId, boxId, model);
-		if (!_v0.$) {
-			var props = _v0.a;
-			return $elm$core$Maybe$Just(props.aI);
-		} else {
-			return A3(
-				$author$project$Utils$fail,
-				'displayMode',
-				{a4: boxId, bD: topicId},
-				$elm$core$Maybe$Nothing);
-		}
-	});
-var $author$project$Box$setDisplayMode = F4(
-	function (topicId, boxId, display, model) {
-		return A4(
-			$author$project$Box$updateDisplayMode,
-			topicId,
-			boxId,
-			function (_v0) {
-				return display;
-			},
-			model);
-	});
-var $author$project$Feature$ToolAPI$toggleDisplay = F3(
-	function (topicId, boxId, model) {
-		var _v0 = function () {
-			var _v1 = A3($author$project$Box$displayMode, topicId, boxId, model);
-			if (!_v1.$) {
-				if (!_v1.a.$) {
-					if (!_v1.a.a) {
-						var _v2 = _v1.a.a;
-						return _Utils_Tuple2(
-							model,
-							$elm$core$Maybe$Just(
-								$author$project$ModelParts$TopicD(1)));
-					} else {
-						var _v3 = _v1.a.a;
-						return _Utils_Tuple2(
-							model,
-							$elm$core$Maybe$Just(
-								$author$project$ModelParts$TopicD(0)));
-					}
-				} else {
-					switch (_v1.a.a) {
-						case 0:
-							var _v4 = _v1.a.a;
-							return _Utils_Tuple2(
-								model,
-								$elm$core$Maybe$Just(
-									$author$project$ModelParts$BoxD(1)));
-						case 1:
-							var _v5 = _v1.a.a;
-							return _Utils_Tuple2(
-								model,
-								$elm$core$Maybe$Just(
-									$author$project$ModelParts$BoxD(0)));
-						default:
-							var _v6 = _v1.a.a;
-							return _Utils_Tuple2(
-								A3($author$project$Box$Transfer$boxContent, topicId, boxId, model),
-								$elm$core$Maybe$Just(
-									$author$project$ModelParts$BoxD(0)));
-					}
-				}
-			} else {
-				return _Utils_Tuple2(model, $elm$core$Maybe$Nothing);
-			}
-		}();
-		var newModel = _v0.a;
-		var newDisplayMode = _v0.b;
-		var _v7 = _Utils_Tuple2(newModel, newDisplayMode);
-		if (!_v7.b.$) {
-			var newModel_ = _v7.a;
-			var displayMode = _v7.b.a;
-			return $author$project$Box$Size$auto(
-				A4($author$project$Box$setDisplayMode, topicId, boxId, displayMode, newModel_));
-		} else {
-			return model;
-		}
-	});
-var $author$project$Item$otherPlayerId = F3(
-	function (assocId, playerId, model) {
-		var _v0 = A2($author$project$Item$assocById, assocId, model);
-		if (!_v0.$) {
-			var player1 = _v0.a.dK;
-			var player2 = _v0.a.dL;
-			return _Utils_eq(playerId, player1) ? player2 : (_Utils_eq(playerId, player2) ? player1 : A3(
-				$author$project$Utils$logError,
-				'otherPlayerId',
-				$elm$core$String$fromInt(playerId) + (' is not a player in assoc ' + $elm$core$String$fromInt(assocId)),
-				-1));
-		} else {
-			return -1;
-		}
-	});
-var $author$project$Item$relatedItems = F2(
-	function (itemId, model) {
-		return A3(
-			$elm$core$Set$foldr,
-			F2(
-				function (assocId, relItemsAcc) {
-					return A2(
-						$elm$core$List$cons,
-						_Utils_Tuple2(
-							A3($author$project$Item$otherPlayerId, assocId, itemId, model),
-							assocId),
-						relItemsAcc);
-				}),
-			_List_Nil,
-			A2($author$project$Item$assocIds, itemId, model));
-	});
-var $author$project$Feature$SearchAPI$traverse = function (model) {
-	var relTopicIds = function () {
-		var _v0 = $author$project$Feature$SelAPI$single(model);
-		if (!_v0.$) {
-			var _v1 = _v0.a;
-			var itemId = _v1.a;
-			return A2($author$project$Item$relatedItems, itemId, model);
-		} else {
-			return _List_Nil;
-		}
-	}();
-	return A2(
-		$author$project$Feature$SearchAPI$setResult,
-		A2($author$project$Feature$Search$RelTopics, relTopicIds, $elm$core$Maybe$Nothing),
-		model);
-};
-var $author$project$Box$Transfer$targetAssocItem = F2(
-	function (assocId, targetItems) {
-		var _v0 = A2($elm$core$Dict$get, assocId, targetItems);
-		if (!_v0.$) {
-			var item = _v0.a;
-			return _Utils_update(
-				item,
-				{
-					al: $author$project$ModelParts$Visible(1)
-				});
-		} else {
-			return A4(
-				$author$project$ModelParts$BoxItem,
-				assocId,
-				-1,
-				$author$project$ModelParts$Visible(1),
-				$author$project$ModelParts$AssocP($author$project$ModelParts$AssocProps));
-		}
-	});
-var $author$project$Box$Transfer$unboxAssoc = F2(
-	function (boxItem, targetItems) {
-		var assocToInsert = A2($author$project$Box$Transfer$targetAssocItem, boxItem.aK, targetItems);
-		return A3($elm$core$Dict$insert, assocToInsert.aK, assocToInsert, targetItems);
-	});
-var $author$project$Box$Transfer$isAbort = function (item) {
-	var _v0 = item.ac;
-	if (!_v0.$) {
-		var props = _v0.a;
-		var _v1 = props.aI;
-		if (_v1.$ === 1) {
-			switch (_v1.a) {
-				case 0:
-					var _v2 = _v1.a;
-					return true;
-				case 1:
-					var _v3 = _v1.a;
-					return true;
-				default:
-					var _v4 = _v1.a;
-					return false;
-			}
+		if (_v0.$ === 'Just') {
+			var boxPos = _v0.a;
+			return (pos.x > 0) && ((_Utils_cmp(pos.x, map.rect.x2 - map.rect.x1) < 0) && ((pos.y > 0) && (_Utils_cmp(pos.y, map.rect.y2 - map.rect.y1) < 0)));
 		} else {
 			return false;
 		}
-	} else {
-		return false;
-	}
-};
-var $author$project$Box$Transfer$setUnboxed = function (item) {
-	return _Utils_update(
-		item,
-		{
-			ac: function () {
-				var _v0 = item.ac;
-				if (!_v0.$) {
-					var props = _v0.a;
-					return $author$project$ModelParts$TopicP(
-						_Utils_update(
-							props,
-							{
-								aI: $author$project$ModelParts$BoxD(2)
-							}));
-				} else {
-					var props = _v0.a;
-					return $author$project$ModelParts$AssocP(props);
-				}
-			}()
-		});
-};
-var $author$project$Box$Transfer$unboxTopic = F3(
-	function (boxItem, targetItems, model) {
-		var assocToInsert = A2($author$project$Box$Transfer$targetAssocItem, boxItem.cX, targetItems);
-		var _v0 = function () {
-			var _v1 = A2($elm$core$Dict$get, boxItem.aK, targetItems);
-			if (!_v1.$) {
-				var item = _v1.a;
-				var isPinned = $author$project$Box$isVisible(item) ? 0 : 1;
-				var newItem = _Utils_update(
-					item,
-					{
-						al: $author$project$ModelParts$Visible(isPinned)
-					});
-				var _v2 = A2($author$project$Utils$info, 'unboxTopic', newItem);
-				return _Utils_Tuple2(
-					newItem,
-					$author$project$Box$Transfer$isAbort(item));
-			} else {
-				return A2($author$project$Item$isBox, boxItem.aK, model) ? _Utils_Tuple2(
-					$author$project$Box$Transfer$setUnboxed(boxItem),
-					false) : _Utils_Tuple2(boxItem, false);
-			}
-		}();
-		var topicToInsert = _v0.a;
-		var abort = _v0.b;
-		return _Utils_Tuple2(
-			A3(
-				$elm$core$Dict$insert,
-				assocToInsert.aK,
-				assocToInsert,
-				A3($elm$core$Dict$insert, topicToInsert.aK, topicToInsert, targetItems)),
-			abort);
 	});
-var $author$project$Box$Transfer$unboxItems_ = F3(
-	function (contentItems, targetItems, model) {
+var $author$project$Box$isFullscreen = F2(
+	function (boxId, model) {
+		return _Utils_eq(boxId, model.boxId);
+	});
+var $author$project$TopicMap$Geometry$mapOffset = F2(
+	function (pos, map) {
+		return A2($author$project$ModelBase$Point, (pos.x + map.rect.x1) + map.scroll.x, (pos.y + map.rect.y1) + map.scroll.y);
+	});
+var $author$project$TopicMap$Geometry$isTopicHeaderHit = F4(
+	function (pos, topicId, boxId, model) {
+		var _v0 = A3($author$project$TopicMap$ViewProps$topicPos, topicId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var topicPos = _v0.a;
+			return (_Utils_cmp(pos.x, (topicPos.x - $author$project$Config$topicW2) - $author$project$Config$topicHeight) > 0) && ((_Utils_cmp(pos.x, topicPos.x + $author$project$Config$topicW2) < 0) && ((_Utils_cmp(pos.y, topicPos.y - $author$project$Config$topicH2) > 0) && (_Utils_cmp(pos.y, topicPos.y + $author$project$Config$topicH2) < 0)));
+		} else {
+			return false;
+		}
+	});
+var $author$project$TopicMap$Geometry$isTopicDetailHit = F4(
+	function (pos, topicId, boxId, model) {
+		var _v0 = _Utils_Tuple2(
+			A3($author$project$TopicMap$ViewProps$topicPos, topicId, boxId, model),
+			A3(
+				$author$project$Topic$size,
+				topicId,
+				function ($) {
+					return $.view;
+				},
+				model));
+		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+			var topicPos = _v0.a.a;
+			var size = _v0.b.a;
+			return (_Utils_cmp(pos.x, (topicPos.x - $author$project$Config$topicW2) + $author$project$Config$topicHeight) > 0) && ((_Utils_cmp(pos.x, ((topicPos.x - $author$project$Config$topicW2) + $author$project$Config$topicHeight) + size.w) < 0) && ((_Utils_cmp(pos.y, topicPos.y - $author$project$Config$topicH2) > 0) && (_Utils_cmp(pos.y, (topicPos.y - $author$project$Config$topicH2) + size.h) < 0)));
+		} else {
+			return false;
+		}
+	});
+var $author$project$TopicMap$Geometry$isTopicHit = F4(
+	function (itemId, boxPath, pos, model) {
+		var boxId = $author$project$Box$firstId(boxPath);
+		var isDetailHit = A3($author$project$TopicMap$Geometry$isTopicDetailHit, pos, itemId, boxId);
+		var isHeaderHit = A3($author$project$TopicMap$Geometry$isTopicHeaderHit, pos, itemId, boxId);
+		var _v0 = A3($author$project$Box$expansionOf, itemId, boxId, model);
+		if (_v0.$ === 'Collapsed') {
+			return isHeaderHit(model);
+		} else {
+			return isHeaderHit(model) || isDetailHit(model);
+		}
+	});
+var $author$project$TopicMap$Geometry$relPos_ = F4(
+	function (pos, topicId, boxPath, model) {
+		var _v0 = A3(
+			$author$project$TopicMap$ViewProps$topicPos,
+			topicId,
+			$author$project$Box$firstId(boxPath),
+			model);
+		if (_v0.$ === 'Just') {
+			var boxPos = _v0.a;
+			return A2($author$project$ModelBase$Point, (pos.x - boxPos.x) + $author$project$Config$topicW2, (pos.y - boxPos.y) - $author$project$Config$topicH2);
+		} else {
+			return pos;
+		}
+	});
+var $author$project$TopicMap$Geometry$testChildren = F5(
+	function (pos, topics, boxPath, excludeTopicId, env) {
+		var model = env.model;
+		var ext = env.ext;
+		if (!topics.b) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var topic = topics.a;
+			var tailTopics = topics.b;
+			var testTailItems = A4($author$project$TopicMap$Geometry$testChildren, pos, tailTopics, boxPath, excludeTopicId);
+			var relPos = A3($author$project$TopicMap$Geometry$relPos_, pos, topic.id, boxPath);
+			var maybeItem = function (found) {
+				return found ? $elm$core$Maybe$Just(
+					_Utils_Tuple2(
+						$author$project$ModelBase$T(topic.id),
+						boxPath)) : $elm$core$Maybe$Nothing;
+			};
+			var boxId = $author$project$Box$firstId(boxPath);
+			var isHeaderHit = A2(
+				$elm$core$Basics$composeR,
+				A3($author$project$TopicMap$Geometry$isTopicHeaderHit, pos, topic.id, boxId),
+				maybeItem);
+			var maybeTarget = function () {
+				var _v5 = _Utils_Tuple2(
+					A2($author$project$Topic$isBox, topic.id, model),
+					A3($author$project$Box$expansionOf, topic.id, boxId, model));
+				if (_v5.a) {
+					if (_v5.b.$ === 'Collapsed') {
+						var _v6 = _v5.b;
+						return isHeaderHit(model);
+					} else {
+						var _v7 = _v5.b;
+						var _v8 = A5(
+							ext.hitTest,
+							$author$project$ModelBase$BoxId(topic.id),
+							boxPath,
+							relPos(model),
+							excludeTopicId,
+							model);
+						if (_v8.$ === 'Just') {
+							var target = _v8.a;
+							return $elm$core$Maybe$Just(target);
+						} else {
+							return isHeaderHit(model);
+						}
+					}
+				} else {
+					return maybeItem(
+						A4($author$project$TopicMap$Geometry$isTopicHit, topic.id, boxPath, pos, model));
+				}
+			}();
+			var _v1 = _Utils_Tuple2(maybeTarget, excludeTopicId);
+			if (_v1.a.$ === 'Just') {
+				if (_v1.b.$ === 'Just') {
+					var target = _v1.a.a;
+					var targetId = target.a;
+					var topicId = _v1.b.a;
+					var _v2 = !_Utils_eq(
+						targetId,
+						$author$project$ModelBase$T(topicId));
+					if (_v2) {
+						return $elm$core$Maybe$Just(target);
+					} else {
+						return testTailItems(env);
+					}
+				} else {
+					var target = _v1.a.a;
+					var _v3 = _v1.b;
+					return $elm$core$Maybe$Just(target);
+				}
+			} else {
+				var _v4 = _v1.a;
+				return testTailItems(env);
+			}
+		}
+	});
+var $author$project$TopicMap$Geometry$hitTest = F5(
+	function (boxId, boxPath, pos, excludeTopicId, env) {
+		var topicId = boxId.a;
+		var model = env.model;
+		var _v0 = A2($author$project$TopicMap$ViewProps$byId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var map = _v0.a;
+			var topics = A2($author$project$TopicMap$ViewProps$topics, map, model);
+			var relPos = A2($author$project$TopicMap$Geometry$mapOffset, pos, map);
+			var _v1 = A5(
+				$author$project$TopicMap$Geometry$testChildren,
+				relPos,
+				topics,
+				A2($elm$core$List$cons, boxId, boxPath),
+				excludeTopicId,
+				env);
+			if (_v1.$ === 'Just') {
+				var target = _v1.a;
+				return $elm$core$Maybe$Just(target);
+			} else {
+				if (A2($author$project$Box$isFullscreen, boxId, model)) {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var parentBoxId = $author$project$Box$firstId(boxPath);
+					return A4($author$project$TopicMap$Geometry$isBoxRectHit, pos, map, parentBoxId, model) ? $elm$core$Maybe$Just(
+						_Utils_Tuple2(
+							$author$project$ModelBase$T(topicId),
+							boxPath)) : $elm$core$Maybe$Nothing;
+				}
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$TopicList$ViewProps$createViewProps = F2(
+	function (boxId, model) {
+		var topicList = model.topicList;
+		var id = $author$project$ModelBase$toBoxId(boxId);
+		if (A2($elm$core$Dict$member, id, model.topicList.viewProps)) {
+			var _v0 = A2(
+				$author$project$Utils$info,
+				'TopicList.ViewProps.createViewProps',
+				'box ' + ($elm$core$String$fromInt(id) + ' has ViewProps already'));
+			return model;
+		} else {
+			var _v1 = A2(
+				$author$project$Utils$info,
+				'TopicList.ViewProps.createViewProps',
+				'creating ViewProps for box ' + $elm$core$String$fromInt(id));
+			return _Utils_update(
+				model,
+				{
+					topicList: _Utils_update(
+						topicList,
+						{
+							viewProps: A3(
+								$elm$core$Dict$insert,
+								id,
+								A3(
+									$author$project$TopicList$TopicListDef$ViewProps,
+									boxId,
+									_List_Nil,
+									A2($author$project$ModelBase$Size, 0, 0)),
+								topicList.viewProps)
+						})
+				});
+		}
+	});
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
 		return A3(
 			$elm$core$List$foldr,
-			F2(
-				function (boxItem, targetItemsAcc) {
-					var _v0 = boxItem.ac;
-					if (!_v0.$) {
-						var _v1 = A3($author$project$Box$Transfer$unboxTopic, boxItem, targetItemsAcc, model);
-						var items = _v1.a;
-						var abort = _v1.b;
-						if (abort) {
-							return items;
-						} else {
-							var _v2 = A2($author$project$Box$byId, boxItem.aK, model);
-							if (!_v2.$) {
-								var box_ = _v2.a;
-								return A3($author$project$Box$Transfer$unboxItems_, box_.b7, items, model);
-							} else {
-								return items;
-							}
-						}
-					} else {
-						return A2($author$project$Box$Transfer$unboxAssoc, boxItem, targetItemsAcc);
-					}
-				}),
-			targetItems,
-			A2(
-				$elm$core$List$filter,
-				$author$project$Box$isVisible,
-				$elm$core$Dict$values(contentItems)));
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
 	});
-var $author$project$Box$Transfer$unboxContent = F3(
-	function (boxId, targetBoxId, model) {
-		return A4($author$project$Box$Transfer$transferContent, boxId, targetBoxId, $author$project$Box$Transfer$unboxItems_, model);
+var $author$project$TopicList$ViewProps$missingTopicIds = F2(
+	function (orderList, topicId) {
+		return A2($elm$core$List$member, topicId, orderList) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(topicId);
 	});
-var $author$project$Feature$ToolAPI$unbox = F3(
-	function (boxId, targetBoxId, model) {
-		return $author$project$Box$Size$auto(
-			A4(
-				$author$project$Box$setDisplayMode,
-				boxId,
-				targetBoxId,
-				$author$project$ModelParts$BoxD(2),
-				A3($author$project$Box$Transfer$unboxContent, boxId, targetBoxId, model)));
-	});
-var $elm_community$undo_redo$UndoList$undo = function (_v0) {
-	var past = _v0.s;
-	var present = _v0.aw;
-	var future = _v0.u;
-	if (!past.b) {
-		return A3($elm_community$undo_redo$UndoList$UndoList, past, present, future);
-	} else {
-		var x = past.a;
-		var xs = past.b;
+var $author$project$TopicList$ViewProps$initViewProps = F2(
+	function (boxId, model) {
+		var topicList = model.topicList;
 		return A3(
-			$elm_community$undo_redo$UndoList$UndoList,
-			xs,
-			x,
-			A2($elm$core$List$cons, present, future));
-	}
-};
-var $author$project$Undo$undo = function (undoModel) {
-	var newUndoModel = $elm_community$undo_redo$UndoList$undo(undoModel);
-	var newModel = $author$project$Model$initTransient(newUndoModel.aw);
-	return A2(
-		$author$project$Undo$swap,
-		newUndoModel,
-		$author$project$Storage$store(newModel));
-};
-var $author$project$Feature$ToolAPI$update = F2(
-	function (msg, undoModel) {
-		var present = undoModel.aw;
-		switch (msg.$) {
-			case 0:
-				return _Utils_Tuple2(
-					undoModel,
-					$author$project$Feature$NavAPI$pushUrl($author$project$ModelParts$rootBoxId));
-			case 1:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						present,
-						$author$project$Storage$importJSON(0)));
-			case 2:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						present,
-						$author$project$Storage$exportJSON(0)));
-			case 3:
-				return A2(
-					$author$project$Undo$push,
-					undoModel,
-					$author$project$Storage$storeWith(
-						$author$project$Feature$ToolAPI$addTopic(present)));
-			case 4:
-				return A2(
-					$author$project$Undo$push,
-					undoModel,
-					$author$project$Storage$storeWith(
-						$author$project$Feature$ToolAPI$addBox(present)));
-			case 5:
-				return $author$project$Undo$undo(undoModel);
-			case 6:
-				return $author$project$Undo$redo(undoModel);
-			case 7:
-				return A2(
-					$author$project$Undo$push,
-					undoModel,
-					$author$project$Storage$storeWith(
-						$author$project$Feature$ToolAPI$edit(present)));
-			case 8:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						$author$project$Feature$IconAPI$openPicker(present),
-						$elm$core$Platform$Cmd$none));
-			case 9:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					_Utils_Tuple2(
-						$author$project$Feature$SearchAPI$traverse(present),
-						$elm$core$Platform$Cmd$none));
-			case 10:
-				return A2(
-					$author$project$Undo$push,
-					undoModel,
-					$author$project$Storage$store(
-						$author$project$Feature$ToolAPI$delete(present)));
-			case 11:
-				return A2(
-					$author$project$Undo$push,
-					undoModel,
-					$author$project$Storage$store(
-						$author$project$Feature$ToolAPI$remove(present)));
-			case 12:
-				var boxId = msg.a;
-				return _Utils_Tuple2(
-					undoModel,
-					$author$project$Feature$NavAPI$pushUrl(boxId));
-			case 13:
-				var boxId = msg.a;
-				var targetBoxId = msg.b;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Storage$store(
-						A3($author$project$Feature$ToolAPI$unbox, boxId, targetBoxId, present)));
-			case 14:
-				var topicId = msg.a;
-				var boxId = msg.b;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Storage$store(
-						A3($author$project$Feature$ToolAPI$toggleDisplay, topicId, boxId, present)));
-			case 15:
-				var topicId = msg.a;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Storage$storeWith(
-						A2($author$project$Feature$TextAPI$openImageFilePicker, topicId, present)));
-			default:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Feature$TextAPI$leaveEdit(present));
-		}
-	});
-var $author$project$Box$updateScrollPos = F3(
-	function (boxId, transform, model) {
-		return A3(
-			$author$project$Box$update,
+			$author$project$TopicList$ViewProps$updateOrder,
 			boxId,
-			function (box) {
-				return _Utils_update(
-					box,
-					{
-						aU: transform(box.aU)
-					});
+			function (orderList) {
+				var missing = A2(
+					$elm$core$List$filterMap,
+					$author$project$TopicList$ViewProps$missingTopicIds(orderList),
+					A2($author$project$Box$topicIds, boxId, model));
+				var _v0 = A2(
+					$author$project$Utils$info,
+					'TopicList.ViewProps.initViewProps',
+					'add missing ViewProps ' + ($author$project$Utils$toString(missing) + (' to ' + $author$project$Utils$toString(orderList))));
+				return _Utils_ap(missing, orderList);
 			},
 			model);
 	});
-var $author$project$Main$updateScrollPos = F2(
-	function (pos, model) {
-		return A3(
-			$author$project$Box$updateScrollPos,
-			model.a4,
+var $author$project$TopicList$ViewProps$init = F2(
+	function (boxId, model) {
+		return A2(
+			$author$project$TopicList$ViewProps$initViewProps,
+			boxId,
+			A2(
+				$author$project$TopicList$ViewProps$createViewProps,
+				boxId,
+				A3(
+					$elm$core$List$foldl,
+					F2(
+						function (topicId, acc) {
+							return A2($author$project$Topic$isBox, topicId, acc) ? A2(
+								$author$project$TopicList$ViewProps$init,
+								$author$project$ModelBase$BoxId(topicId),
+								acc) : acc;
+						}),
+					model,
+					A2($author$project$Box$topicIds, boxId, model))));
+	});
+var $author$project$TopicMap$ViewProps$init = F2(
+	function (mapId, model) {
+		return model;
+	});
+var $author$project$TopicList$Geometry$toolbarPos = F2(
+	function (mapId, model) {
+		return A2(
+			$author$project$ModelBase$ToolbarPos,
 			function (_v0) {
-				return pos;
+				return A2($author$project$ModelBase$Point, 0, 0);
 			},
-			model);
+			function (_v1) {
+				return A2($author$project$ModelBase$Point, 0, 0);
+			});
 	});
-var $author$project$Main$update = F2(
-	function (msg, undoModel) {
-		var present = undoModel.aw;
-		var _v0 = function () {
-			if (msg.$ === 7) {
-				return msg;
+var $elm$core$Maybe$map2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
 			} else {
-				return A2($author$project$Utils$info, 'update', msg);
+				var b = mb.a;
+				return $elm$core$Maybe$Just(
+					A2(func, a, b));
 			}
-		}();
-		switch (msg.$) {
-			case 0:
-				var player1 = msg.a;
-				var player2 = msg.b;
-				var boxId = msg.c;
-				return A2(
-					$author$project$Undo$push,
-					undoModel,
-					$author$project$Storage$store(
-						A4($author$project$Main$addAssoc, player1, player2, boxId, present)));
-			case 1:
-				var topicId = msg.a;
-				var boxId = msg.b;
-				var origPos = msg.c;
-				var targetId = msg.d;
-				var targetPath = msg.e;
-				var pos = msg.f;
-				return A2(
-					$author$project$Undo$push,
-					undoModel,
-					$author$project$Storage$store(
-						A7($author$project$Main$moveTopicToBox, topicId, boxId, origPos, targetId, targetPath, pos, present)));
-			case 2:
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Storage$store(present));
-			case 3:
-				var itemId = msg.a;
-				var boxPath = msg.b;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					A3($author$project$Main$select, itemId, boxPath, present));
-			case 4:
-				var maybeTarget = msg.a;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					A2($author$project$Main$cancelUI, maybeTarget, present));
-			case 5:
-				var toolMsg = msg.a;
-				return A2($author$project$Feature$ToolAPI$update, toolMsg, undoModel);
-			case 6:
-				var textMsg = msg.a;
-				return A2($author$project$Feature$TextAPI$update, textMsg, undoModel);
-			case 7:
-				var mouseMsg = msg.a;
-				return A2($author$project$Feature$MouseAPI$update, mouseMsg, undoModel);
-			case 8:
-				var searchMsg = msg.a;
-				return A2($author$project$Feature$SearchAPI$update, searchMsg, undoModel);
-			case 9:
-				var iconMenuMsg = msg.a;
-				return A2($author$project$Feature$IconAPI$update, iconMenuMsg, undoModel);
-			case 10:
-				var navMsg = msg.a;
-				return A2($author$project$Feature$NavAPI$update, navMsg, undoModel);
-			case 11:
-				var pos = msg.a;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					$author$project$Storage$store(
-						A2($author$project$Main$updateScrollPos, pos, present)));
-			case 12:
-				var _v3 = msg.a;
-				var imageId = _v3.a;
-				var url = _v3.b;
-				return A2(
-					$author$project$Undo$swap,
-					undoModel,
-					A3($author$project$Main$cacheImageUrl, imageId, url, present));
-			default:
-				return _Utils_Tuple2(undoModel, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$AppEmbed$updateWithEvidence = F2(
-	function (msg, undoModel) {
-		var _v0 = A2($author$project$Main$update, msg, undoModel);
-		var newUndo = _v0.a;
-		var cmd = _v0.b;
-		return _Utils_Tuple2(
-			newUndo,
-			$elm$core$Platform$Cmd$batch(
-				_List_fromArray(
-					[
-						cmd,
-						A3($author$project$AppEmbed$semanticEvidence, msg, undoModel, newUndo)
-					])));
+var $author$project$TopicMap$ViewProps$assocGeometry = F3(
+	function (assoc, mapId, model) {
+		var pos2 = A3($author$project$TopicMap$ViewProps$topicPos, assoc.topicId2, mapId, model);
+		var pos1 = A3($author$project$TopicMap$ViewProps$topicPos, assoc.topicId1, mapId, model);
+		var _v0 = A3(
+			$elm$core$Maybe$map2,
+			F2(
+				function (p1, p2) {
+					return _Utils_Tuple2(p1, p2);
+				}),
+			pos1,
+			pos2);
+		if (_v0.$ === 'Just') {
+			var geometry = _v0.a;
+			return $elm$core$Maybe$Just(geometry);
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'TopicMap.ViewProps.assocGeometry',
+				{assoc: assoc, mapId: mapId},
+				$elm$core$Maybe$Nothing);
+		}
 	});
-var $author$project$Map$Model$assocsToRender = F2(
-	function (box, model) {
-		return A3($author$project$Map$Model$itemsToRender, box, $author$project$Box$isAssoc, model);
+var $author$project$TopicMap$Geometry$toolbarPos = F2(
+	function (mapId, model) {
+		var _v0 = A2($author$project$TopicMap$ViewProps$byId, mapId, model);
+		if (_v0.$ === 'Just') {
+			var rect = _v0.a.rect;
+			return A2(
+				$author$project$ModelBase$ToolbarPos,
+				function (topic) {
+					var _v1 = A3($author$project$TopicMap$ViewProps$topicPos, topic.id, mapId, model);
+					if (_v1.$ === 'Just') {
+						var topicPos = _v1.a;
+						return A2($author$project$ModelBase$Point, (topicPos.x - rect.x1) - $author$project$Config$topicW2, ((topicPos.y - rect.y1) - $author$project$Config$topicH2) - 29);
+					} else {
+						return A2($author$project$ModelBase$Point, 0, 0);
+					}
+				},
+				function (assoc) {
+					var _v2 = A3($author$project$TopicMap$ViewProps$assocGeometry, assoc, mapId, model);
+					if (_v2.$ === 'Just') {
+						var _v3 = _v2.a;
+						var p1 = _v3.a;
+						var p2 = _v3.b;
+						return A2($author$project$ModelBase$Point, ((((p1.x + p2.x) / 2) | 0) - rect.x1) - 32, ((((p1.y + p2.y) / 2) | 0) - rect.y1) - 13);
+					} else {
+						return A2($author$project$ModelBase$Point, 0, 0);
+					}
+				});
+		} else {
+			return A2(
+				$author$project$ModelBase$ToolbarPos,
+				function (_v4) {
+					return A2($author$project$ModelBase$Point, 0, 0);
+				},
+				function (_v5) {
+					return A2($author$project$ModelBase$Point, 0, 0);
+				});
+		}
 	});
 var $elm$html$Html$div = _VirtualDom_node('div');
-var $author$project$Config$blackBoxOffset = 5;
-var $author$project$Feature$SelAPI$isSelectedPath = F3(
-	function (itemId, boxPath, model) {
-		return A2(
-			$elm$core$List$member,
-			_Utils_Tuple2(itemId, boxPath),
-			model.ax.b7);
-	});
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
-var $author$project$Map$selectionStyle = F3(
+var $author$project$Config$topicBoxShadow = 'gray 5px 5px 5px';
+var $author$project$Shared$ViewBase$selectionStyle = F3(
 	function (topicId, boxPath, model) {
-		var _v0 = A3($author$project$Feature$SelAPI$isSelectedPath, topicId, boxPath, model);
+		var _v0 = A3(
+			$author$project$Feature$Sel$isSelected,
+			$author$project$ModelBase$T(topicId),
+			boxPath,
+			model);
 		if (_v0) {
 			return _List_fromArray(
 				[
-					A2($elm$html$Html$Attributes$style, 'box-shadow', 'gray 5px 5px 5px')
+					A2($elm$html$Html$Attributes$style, 'box-shadow', $author$project$Config$topicBoxShadow)
 				]);
 		} else {
 			return _List_Nil;
 		}
 	});
-var $author$project$Map$isTarget = F3(
-	function (topicId, boxPath, target_) {
-		if (!target_.$) {
-			var target = target_.a;
+var $author$project$Shared$ViewBase$isTarget = F3(
+	function (topicId, boxPath, maybeTarget) {
+		if (maybeTarget.$ === 'Just') {
+			var target = maybeTarget.a;
 			return _Utils_eq(
 				target,
-				_Utils_Tuple2(topicId, boxPath));
+				_Utils_Tuple2(
+					$author$project$ModelBase$T(topicId),
+					boxPath));
 		} else {
 			return false;
 		}
 	});
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Map$topicBorderStyle = F3(
+var $author$project$Shared$ViewBase$topicBorderStyle = F3(
 	function (id, boxPath, model) {
-		var isTarget_ = A2($author$project$Map$isTarget, id, boxPath);
+		var isTarget_ = A2($author$project$Shared$ViewBase$isTarget, id, boxPath);
 		var targeted = function () {
-			var _v0 = model.dt.c6;
+			var _v0 = model.topicMap.dragState;
 			_v0$2:
 			while (true) {
-				if (_v0.$ === 3) {
-					if (!_v0.a) {
+				if (_v0.$ === 'Drag') {
+					if (_v0.a.$ === 'DragTopic') {
 						if (_v0.c.b) {
 							var _v1 = _v0.a;
 							var _v2 = _v0.c;
 							var boxId_ = _v2.a;
 							var target = _v0.f;
-							return isTarget_(target) && (!_Utils_eq(boxId_, id));
+							return isTarget_(target) && (!_Utils_eq(
+								$author$project$ModelBase$fromBoxId(boxId_),
+								id));
 						} else {
 							break _v0$2;
 						}
@@ -11178,9 +9924,11 @@ var $author$project$Map$topicBorderStyle = F3(
 				A2($elm$html$Html$Attributes$style, 'background-color', 'white')
 			]);
 	});
-var $author$project$Config$topicRadius = 7;
-var $author$project$Map$ghostTopicStyle = F3(
-	function (topic, boxPath, model) {
+var $author$project$Config$topicSize = A2($author$project$ModelBase$Size, $author$project$Config$topicWidth, $author$project$Config$topicHeight);
+var $author$project$Config$whiteBoxRadius = 14;
+var $author$project$Shared$ViewBase$nestedBoxStyle = F4(
+	function (boxId, size, boxPath, model) {
+		var r = $elm$core$String$fromInt($author$project$Config$whiteBoxRadius) + 'px';
 		return _Utils_ap(
 			_List_fromArray(
 				[
@@ -11188,211 +9936,173 @@ var $author$project$Map$ghostTopicStyle = F3(
 					A2(
 					$elm$html$Html$Attributes$style,
 					'left',
-					$elm$core$String$fromInt($author$project$Config$blackBoxOffset) + 'px'),
+					$elm$core$String$fromInt(-$author$project$Config$topicBorderWidth) + 'px'),
 					A2(
 					$elm$html$Html$Attributes$style,
 					'top',
-					$elm$core$String$fromInt($author$project$Config$blackBoxOffset) + 'px'),
+					$elm$core$String$fromInt($author$project$Config$topicSize.h - (2 * $author$project$Config$topicBorderWidth)) + 'px'),
 					A2(
 					$elm$html$Html$Attributes$style,
 					'width',
-					$elm$core$String$fromInt($author$project$Config$topicSize.cN) + 'px'),
+					$elm$core$String$fromInt(size.w) + 'px'),
 					A2(
 					$elm$html$Html$Attributes$style,
 					'height',
-					$elm$core$String$fromInt($author$project$Config$topicSize.b_) + 'px'),
-					A2(
-					$elm$html$Html$Attributes$style,
-					'border-radius',
-					$elm$core$String$fromInt($author$project$Config$topicRadius) + 'px'),
-					A2($elm$html$Html$Attributes$style, 'z-index', '-1')
+					$elm$core$String$fromInt(size.h) + 'px'),
+					A2($elm$html$Html$Attributes$style, 'border-radius', '0 ' + (r + (' ' + (r + (' ' + r)))))
 				]),
 			_Utils_ap(
-				A3($author$project$Map$topicBorderStyle, topic.aK, boxPath, model),
-				A3($author$project$Map$selectionStyle, topic.aK, boxPath, model)));
+				A3(
+					$author$project$Shared$ViewBase$topicBorderStyle,
+					$author$project$ModelBase$fromBoxId(boxId),
+					boxPath,
+					model),
+				A3(
+					$author$project$Shared$ViewBase$selectionStyle,
+					$author$project$ModelBase$fromBoxId(boxId),
+					boxPath,
+					model)));
 	});
-var $author$project$Map$topicFlexboxStyle = F4(
-	function (topic, props, boxPath, model) {
-		var r12 = $elm$core$String$fromInt($author$project$Config$topicRadius) + 'px';
-		var r34 = function () {
-			var _v0 = props.aI;
-			if ((_v0.$ === 1) && (_v0.a === 1)) {
-				var _v1 = _v0.a;
-				return '0';
-			} else {
-				return r12;
-			}
-		}();
-		return _Utils_ap(
-			_List_fromArray(
-				[
-					A2($elm$html$Html$Attributes$style, 'display', 'flex'),
-					A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
-					A2($elm$html$Html$Attributes$style, 'gap', '8px'),
-					A2(
-					$elm$html$Html$Attributes$style,
-					'width',
-					$elm$core$String$fromInt($author$project$Config$topicSize.cN) + 'px'),
-					A2(
-					$elm$html$Html$Attributes$style,
-					'height',
-					$elm$core$String$fromInt($author$project$Config$topicSize.b_) + 'px'),
-					A2($elm$html$Html$Attributes$style, 'border-radius', r12 + (' ' + (r12 + (' ' + (r34 + (' ' + r34))))))
-				]),
-			A3($author$project$Map$topicBorderStyle, topic.aK, boxPath, model));
+var $author$project$Shared$ViewBase$boxStyle = F4(
+	function (boxId, size, boxPath, model) {
+		return A2($author$project$Box$isFullscreen, boxId, model) ? _List_Nil : A4($author$project$Shared$ViewBase$nestedBoxStyle, boxId, size, boxPath, model);
 	});
-var $author$project$Map$topicPosStyle = function (_v0) {
-	var pos = _v0.av;
-	return _List_fromArray(
-		[
-			A2(
-			$elm$html$Html$Attributes$style,
-			'left',
-			$elm$core$String$fromInt(pos.d1 - $author$project$Config$topicW2) + 'px'),
-			A2(
-			$elm$html$Html$Attributes$style,
-			'top',
-			$elm$core$String$fromInt(pos.d3 - $author$project$Config$topicH2) + 'px')
-		]);
-};
-var $author$project$Map$itemCountStyle = _List_fromArray(
-	[
-		A2(
-		$elm$html$Html$Attributes$style,
-		'font-size',
-		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
-		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-		A2($elm$html$Html$Attributes$style, 'left', 'calc(100% + 12px)')
-	]);
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
-var $author$project$Map$viewItemCount = F3(
-	function (topicId, props, model) {
-		var itemCount = function () {
-			var _v0 = props.aI;
-			if (!_v0.$) {
-				return 0;
-			} else {
-				var _v1 = A2($author$project$Box$byIdOrLog, topicId, model);
-				if (!_v1.$) {
-					var box = _v1.a;
-					return $elm$core$List$length(
-						A2(
-							$elm$core$List$filter,
-							$author$project$Box$isVisible,
-							$elm$core$Dict$values(box.b7)));
-				} else {
-					return 0;
-				}
-			}
-		}();
-		return _List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				$author$project$Map$itemCountStyle,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(itemCount))
-					]))
-			]);
-	});
-var $author$project$Map$iconBoxStyle = function (props) {
-	var r1 = $elm$core$String$fromInt($author$project$Config$topicRadius) + 'px';
-	var r4 = function () {
-		var _v0 = props.aI;
-		if ((_v0.$ === 1) && (_v0.a === 1)) {
-			var _v1 = _v0.a;
-			return '0';
-		} else {
-			return r1;
-		}
-	}();
-	return _List_fromArray(
-		[
-			A2($elm$html$Html$Attributes$style, 'flex', 'none'),
-			A2(
-			$elm$html$Html$Attributes$style,
-			'width',
-			$elm$core$String$fromInt($author$project$Config$topicSize.b_) + 'px'),
-			A2(
-			$elm$html$Html$Attributes$style,
-			'height',
-			$elm$core$String$fromInt($author$project$Config$topicSize.b_) + 'px'),
-			A2($elm$html$Html$Attributes$style, 'border-radius', r1 + (' 0 0 ' + r4)),
-			A2($elm$html$Html$Attributes$style, 'background-color', 'black')
-		]);
-};
+var $elm$core$String$fromFloat = _String_fromNumber;
 var $author$project$Config$mainFont = 'sans-serif';
-var $author$project$Config$topicLabelWeight = 'bold';
-var $author$project$Map$inputStyle = _List_fromArray(
+var $author$project$TopicList$ViewProps$listFontStyle = _List_fromArray(
 	[
 		A2($elm$html$Html$Attributes$style, 'font-family', $author$project$Config$mainFont),
 		A2(
 		$elm$html$Html$Attributes$style,
 		'font-size',
 		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
-		A2($elm$html$Html$Attributes$style, 'font-weight', $author$project$Config$topicLabelWeight),
-		A2($elm$html$Html$Attributes$style, 'width', '100%'),
-		A2($elm$html$Html$Attributes$style, 'position', 'relative'),
-		A2($elm$html$Html$Attributes$style, 'left', '-4px')
+		A2(
+		$elm$html$Html$Attributes$style,
+		'line-height',
+		$elm$core$String$fromFloat($author$project$Config$topicLineHeight))
 	]);
-var $author$project$Feature$TextAPI$isEdit = F3(
+var $author$project$TopicList$ViewProps$listStyle = F3(
+	function (boxId, boxPath, model) {
+		var size = A2($author$project$TopicList$ViewProps$listSize, boxId, model);
+		return _Utils_ap(
+			A4($author$project$Shared$ViewBase$boxStyle, boxId, size, boxPath, model),
+			$author$project$TopicList$ViewProps$listFontStyle);
+	});
+var $author$project$TopicList$ViewProps$topicOrder = F3(
+	function (boxId, model, topicIds) {
+		var _v0 = A2($author$project$TopicList$ViewProps$byId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var order = _v0.a.order;
+			return A2(
+				$elm$core$List$filterMap,
+				function (orderTopicId) {
+					return A2($elm$core$List$member, orderTopicId, topicIds) ? $elm$core$Maybe$Just(orderTopicId) : $elm$core$Maybe$Nothing;
+				},
+				order);
+		} else {
+			return A3($author$project$Utils$fail, 'TopicList.ViewProps.topicOrder', boxId, topicIds);
+		}
+	});
+var $author$project$Box$topicLookup = F2(
+	function (model, topicId) {
+		var _v0 = A2($author$project$Topic$fromId, topicId, model);
+		if (_v0.$ === 'Just') {
+			var topic = _v0.a;
+			return $elm$core$Maybe$Just(topic);
+		} else {
+			return A3($author$project$Utils$fail, 'Box.topicLookup', topicId, $elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$Box$traverseWith = F6(
+	function (boxPath, transform, initAcc, accumulate, levelComplete, model) {
+		var topicAccumulator = F2(
+			function (topic, acc) {
+				var childPath = A2(
+					$elm$core$List$cons,
+					$author$project$ModelBase$BoxId(topic.id),
+					boxPath);
+				var children = A2($author$project$Topic$isBox, topic.id, model) ? $elm$core$Maybe$Just(
+					A6($author$project$Box$traverseWith, childPath, transform, initAcc, accumulate, levelComplete, model)) : $elm$core$Maybe$Nothing;
+				return A5(accumulate, topic, boxPath, acc, children, model);
+			});
+		var boxId = $author$project$Box$firstId(boxPath);
+		return A2(
+			levelComplete,
+			boxPath,
+			A3(
+				$elm$core$List$foldl,
+				topicAccumulator,
+				initAcc,
+				A2(
+					$elm$core$List$filterMap,
+					$author$project$Box$topicLookup(model),
+					A3(
+						transform,
+						boxId,
+						model,
+						A2($author$project$Box$topicIds, boxId, model)))));
+	});
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Utils$assocNotFound = F3(
+	function (funcName, id, val) {
+		return A4(
+			$author$project$Utils$notFound,
+			funcName,
+			'Assoc',
+			$author$project$ModelBase$toAssocId(id),
+			val);
+	});
+var $author$project$Assoc$fromId = F2(
+	function (assocId, model) {
+		var _v0 = A2(
+			$elm$core$Dict$get,
+			$author$project$ModelBase$toAssocId(assocId),
+			model.assocs);
+		if (_v0.$ === 'Just') {
+			var assoc = _v0.a;
+			return $elm$core$Maybe$Just(assoc);
+		} else {
+			return A3($author$project$Utils$assocNotFound, 'Assoc.fromId', assocId, $elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$Feature$Text$isEdit = F3(
 	function (topicId, boxPath, model) {
 		return _Utils_eq(
-			model.dX.c7,
-			A2($author$project$Feature$Text$Edit, topicId, boxPath));
+			model.text.edit,
+			A2($author$project$Feature$TextDef$Edit, topicId, boxPath));
 	});
-var $author$project$Config$topicIconSize = 16;
-var $author$project$Map$topicIconStyle = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'position', 'relative'),
-		A2(
-		$elm$html$Html$Attributes$style,
-		'top',
-		$elm$core$String$fromInt((($author$project$Config$topicSize.b_ - $author$project$Config$topicIconSize) / 2) | 0) + 'px'),
-		A2(
-		$elm$html$Html$Attributes$style,
-		'left',
-		$elm$core$String$fromInt((($author$project$Config$topicSize.b_ - $author$project$Config$topicIconSize) / 2) | 0) + 'px'),
-		A2($elm$html$Html$Attributes$style, 'color', 'white')
-	]);
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
+var $author$project$Feature$ToolDef$Delete = {$: 'Delete'};
+var $author$project$Feature$ToolDef$Remove = {$: 'Remove'};
+var $author$project$Config$toolbarColor = '#e9e9ed';
+var $author$project$Config$topicRadius = 7;
+var $author$project$Feature$Tool$toolbarStyle = function (pos) {
+	return _List_fromArray(
+		[
+			A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'top',
+			$elm$core$String$fromInt(pos.y) + 'px'),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'left',
+			$elm$core$String$fromInt(pos.x) + 'px'),
+			A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+			A2($elm$html$Html$Attributes$style, 'gap', '4px'),
+			A2($elm$html$Html$Attributes$style, 'background-color', $author$project$Config$toolbarColor),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'border-radius',
+			$elm$core$String$fromInt($author$project$Config$topicRadius) + 'px'),
+			A2($elm$html$Html$Attributes$style, 'padding', '4px 5px 0'),
+			A2($elm$html$Html$Attributes$style, 'z-index', '4')
+		]);
 };
-var $elm$core$String$lines = _String_lines;
-var $author$project$Item$topicLabel = function (topic) {
-	var _v0 = $elm$core$List$head(
-		$elm$core$String$lines(topic.dX));
-	if (!_v0.$) {
-		var line = _v0.a;
-		return line;
-	} else {
-		return '';
-	}
+var $author$project$Config$toolbarIconSize = 18;
+var $author$project$Model$Tool = function (a) {
+	return {$: 'Tool', a: a};
 };
-var $author$project$Map$topicLabelStyle = _List_fromArray(
-	[
-		A2(
-		$elm$html$Html$Attributes$style,
-		'font-size',
-		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
-		A2($elm$html$Html$Attributes$style, 'font-weight', $author$project$Config$topicLabelWeight),
-		A2($elm$html$Html$Attributes$style, 'overflow', 'hidden'),
-		A2($elm$html$Html$Attributes$style, 'text-overflow', 'ellipsis'),
-		A2($elm$html$Html$Attributes$style, 'white-space', 'nowrap')
-	]);
-var $author$project$Feature$Text$LeaveEdit = {$: 3};
-var $author$project$Feature$Text$OnTextInput = function (a) {
-	return {$: 0, a: a};
-};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(
@@ -11400,18 +10110,23 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			$elm$json$Json$Encode$string(string));
 	});
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $elm$html$Html$input = _VirtualDom_node('input');
-var $elm$html$Html$Events$keyCode = A2($elm$json$Json$Decode$field, 'keyCode', $elm$json$Json$Decode$int);
-var $author$project$Utils$keyDecoder = F2(
-	function (key, msg) {
-		var isKey = function (code) {
-			return _Utils_eq(code, key) ? $elm$json$Json$Decode$succeed(msg) : $elm$json$Json$Decode$fail('not that key');
-		};
-		return A2($elm$json$Json$Decode$andThen, isKey, $elm$html$Html$Events$keyCode);
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
 	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $author$project$Feature$Tool$iconButtonStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'border', 'none'),
+		A2($elm$html$Html$Attributes$style, 'background-color', 'transparent')
+	]);
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Normal', a: a};
 };
 var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
 var $elm$html$Html$Events$on = F2(
@@ -11421,22 +10136,14 @@ var $elm$html$Html$Events$on = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
-var $author$project$Utils$onEnterOrEsc = function (msg) {
+var $elm$html$Html$Events$onClick = function (msg) {
 	return A2(
 		$elm$html$Html$Events$on,
-		'keydown',
-		$elm$json$Json$Decode$oneOf(
-			_List_fromArray(
-				[
-					A2($author$project$Utils$keyDecoder, 13, msg),
-					A2($author$project$Utils$keyDecoder, 27, msg)
-				])));
-};
-var $elm$html$Html$Events$alwaysStop = function (x) {
-	return _Utils_Tuple2(x, true);
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
 };
 var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
-	return {$: 1, a: a};
+	return {$: 'MayStopPropagation', a: a};
 };
 var $elm$html$Html$Events$stopPropagationOn = F2(
 	function (event, decoder) {
@@ -11445,25 +10152,7 @@ var $elm$html$Html$Events$stopPropagationOn = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
 	});
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$html$Html$Events$targetValue = A2(
-	$elm$json$Json$Decode$at,
-	_List_fromArray(
-		['target', 'value']),
-	$elm$json$Json$Decode$string);
-var $elm$html$Html$Events$onInput = function (tagger) {
-	return A2(
-		$elm$html$Html$Events$stopPropagationOn,
-		'input',
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$html$Html$Events$alwaysStop,
-			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
-};
-var $author$project$Utils$stopPropagation = F2(
+var $author$project$Shared$Events$stopPropagation = F2(
 	function (eventName, msg) {
 		return A2(
 			$elm$html$Html$Events$stopPropagationOn,
@@ -11471,45 +10160,29 @@ var $author$project$Utils$stopPropagation = F2(
 			$elm$json$Json$Decode$succeed(
 				_Utils_Tuple2(msg, true)));
 	});
-var $author$project$Utils$onMouseDownStop = function (msg) {
-	return A2($author$project$Utils$stopPropagation, 'mousedown', msg);
+var $author$project$Shared$Events$onPointerDownStop = function (msg) {
+	return A2($author$project$Shared$Events$stopPropagation, 'pointerdown', msg);
 };
-var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $author$project$Feature$TextAPI$viewInput = F3(
-	function (topic, boxPath, style) {
-		return A2(
-			$elm$html$Html$input,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$id(
-						A3($author$project$Box$elemId, 'input', topic.aK, boxPath)),
-						$elm$html$Html$Attributes$value(topic.dX),
-						$elm$html$Html$Events$onInput(
-						A2($elm$core$Basics$composeL, $author$project$Model$Text, $author$project$Feature$Text$OnTextInput)),
-						$author$project$Utils$onEnterOrEsc(
-						$author$project$Model$Text($author$project$Feature$Text$LeaveEdit)),
-						$author$project$Utils$onMouseDownStop($author$project$Model$NoOp)
-					]),
-				style),
-			_List_Nil);
-	});
-var $feathericons$elm_feather$FeatherIcons$Icon = $elm$core$Basics$identity;
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
+var $feathericons$elm_feather$FeatherIcons$Icon = function (a) {
+	return {$: 'Icon', a: a};
+};
 var $feathericons$elm_feather$FeatherIcons$defaultAttributes = function (name) {
 	return {
-		aG: $elm$core$Maybe$Just('feather feather-' + name),
-		bo: 24,
-		ay: '',
-		aV: 2,
-		a$: '0 0 24 24'
+		_class: $elm$core$Maybe$Just('feather feather-' + name),
+		size: 24,
+		sizeUnit: '',
+		strokeWidth: 2,
+		viewBox: '0 0 24 24'
 	};
 };
 var $feathericons$elm_feather$FeatherIcons$makeBuilder = F2(
 	function (name, src) {
-		return {
-			E: $feathericons$elm_feather$FeatherIcons$defaultAttributes(name),
-			bq: src
-		};
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: $feathericons$elm_feather$FeatherIcons$defaultAttributes(name),
+				src: src
+			});
 	});
 var $elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
@@ -20322,9 +18995,10 @@ var $feathericons$elm_feather$FeatherIcons$icons = $elm$core$Dict$fromList(
 			_Utils_Tuple2('zoom-in', $feathericons$elm_feather$FeatherIcons$zoomIn),
 			_Utils_Tuple2('zoom-out', $feathericons$elm_feather$FeatherIcons$zoomOut)
 		]));
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var $elm$core$String$fromFloat = _String_fromNumber;
 var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$svg$Svg$map = $elm$virtual_dom$VirtualDom$map;
 var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
@@ -20335,27 +19009,27 @@ var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
 var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
 var $feathericons$elm_feather$FeatherIcons$toHtml = F2(
 	function (attributes, _v0) {
-		var src = _v0.bq;
-		var attrs = _v0.E;
-		var strSize = $elm$core$String$fromFloat(attrs.bo);
+		var src = _v0.a.src;
+		var attrs = _v0.a.attrs;
+		var strSize = $elm$core$String$fromFloat(attrs.size);
 		var baseAttributes = _List_fromArray(
 			[
 				$elm$svg$Svg$Attributes$fill('none'),
 				$elm$svg$Svg$Attributes$height(
-				_Utils_ap(strSize, attrs.ay)),
+				_Utils_ap(strSize, attrs.sizeUnit)),
 				$elm$svg$Svg$Attributes$width(
-				_Utils_ap(strSize, attrs.ay)),
+				_Utils_ap(strSize, attrs.sizeUnit)),
 				$elm$svg$Svg$Attributes$stroke('currentColor'),
 				$elm$svg$Svg$Attributes$strokeLinecap('round'),
 				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
 				$elm$svg$Svg$Attributes$strokeWidth(
-				$elm$core$String$fromFloat(attrs.aV)),
-				$elm$svg$Svg$Attributes$viewBox(attrs.a$)
+				$elm$core$String$fromFloat(attrs.strokeWidth)),
+				$elm$svg$Svg$Attributes$viewBox(attrs.viewBox)
 			]);
 		var combinedAttributes = _Utils_ap(
 			function () {
-				var _v1 = attrs.aG;
-				if (!_v1.$) {
+				var _v1 = attrs._class;
+				if (_v1.$ === 'Just') {
 					var c = _v1.a;
 					return A2(
 						$elm$core$List$cons,
@@ -20376,19 +19050,20 @@ var $feathericons$elm_feather$FeatherIcons$toHtml = F2(
 	});
 var $feathericons$elm_feather$FeatherIcons$withSize = F2(
 	function (size, _v0) {
-		var attrs = _v0.E;
-		var src = _v0.bq;
-		return {
-			E: _Utils_update(
-				attrs,
-				{bo: size}),
-			bq: src
-		};
+		var attrs = _v0.a.attrs;
+		var src = _v0.a.src;
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: _Utils_update(
+					attrs,
+					{size: size}),
+				src: src
+			});
 	});
-var $author$project$Feature$IconAPI$view = F3(
+var $author$project$Feature$Icon$view = F3(
 	function (iconName, size, style_) {
 		var _v0 = A2($elm$core$Dict$get, iconName, $feathericons$elm_feather$FeatherIcons$icons);
-		if (!_v0.$) {
+		if (_v0.$ === 'Just') {
 			var icon = _v0.a;
 			return A2(
 				$feathericons$elm_feather$FeatherIcons$toHtml,
@@ -20398,15 +19073,397 @@ var $author$project$Feature$IconAPI$view = F3(
 			return $elm$html$Html$text('??');
 		}
 	});
-var $author$project$Feature$IconAPI$viewTopicIcon = F4(
+var $author$project$Feature$Tool$viewIconButton = F7(
+	function (label, icon, iconSize, msg, isDisabled, maybeTarget, extraStyle) {
+		return A2(
+			$elm$html$Html$button,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('tool'),
+						$elm$html$Html$Attributes$title(label),
+						$elm$html$Html$Events$onClick(
+						$author$project$Model$Tool(msg)),
+						$elm$html$Html$Attributes$disabled(isDisabled),
+						$author$project$Shared$Events$onPointerDownStop(
+						$author$project$Model$Cancel(maybeTarget))
+					]),
+				_Utils_ap($author$project$Feature$Tool$iconButtonStyle, extraStyle)),
+			_List_fromArray(
+				[
+					A3($author$project$Feature$Icon$view, icon, iconSize, _List_Nil)
+				]));
+	});
+var $author$project$Feature$Tool$viewButton = F5(
+	function (label, icon, msg, isDisabled, target) {
+		return A7(
+			$author$project$Feature$Tool$viewIconButton,
+			label,
+			icon,
+			$author$project$Config$toolbarIconSize,
+			msg,
+			isDisabled,
+			$elm$core$Maybe$Just(target),
+			_List_Nil);
+	});
+var $author$project$Feature$Tool$viewAssocToolbar = F3(
+	function (pos, assoc, boxPath) {
+		var target = _Utils_Tuple2(
+			$author$project$ModelBase$A(assoc.id),
+			boxPath);
+		return A2(
+			$elm$html$Html$div,
+			$author$project$Feature$Tool$toolbarStyle(pos),
+			_List_fromArray(
+				[
+					A5(
+					$author$project$Feature$Tool$viewButton,
+					'Delete',
+					'trash',
+					$author$project$Feature$ToolDef$Delete,
+					_Utils_eq(assoc.assocType, $author$project$ModelBase$Hierarchy),
+					target),
+					A5($author$project$Feature$Tool$viewButton, 'Remove', 'x', $author$project$Feature$ToolDef$Remove, false, target)
+				]));
+	});
+var $author$project$Feature$ToolDef$Image = function (a) {
+	return {$: 'Image', a: a};
+};
+var $author$project$Feature$ToolDef$LeaveEdit = {$: 'LeaveEdit'};
+var $author$project$Feature$Tool$viewTextToolbar = F3(
+	function (pos, topicId, boxPath) {
+		var target = _Utils_Tuple2(
+			$author$project$ModelBase$T(topicId),
+			boxPath);
+		return A2(
+			$elm$html$Html$div,
+			$author$project$Feature$Tool$toolbarStyle(pos),
+			_List_fromArray(
+				[
+					A5(
+					$author$project$Feature$Tool$viewButton,
+					'Insert Image',
+					'image',
+					$author$project$Feature$ToolDef$Image(topicId),
+					false,
+					target),
+					A5($author$project$Feature$Tool$viewButton, 'Done', 'check', $author$project$Feature$ToolDef$LeaveEdit, false, target)
+				]));
+	});
+var $author$project$Feature$ToolDef$Edit = {$: 'Edit'};
+var $author$project$Feature$ToolDef$Fullscreen = function (a) {
+	return {$: 'Fullscreen', a: a};
+};
+var $author$project$Feature$ToolDef$Icon = {$: 'Icon'};
+var $author$project$Feature$ToolDef$RendererSelected = function (a) {
+	return {$: 'RendererSelected', a: a};
+};
+var $author$project$Feature$ToolDef$Traverse = {$: 'Traverse'};
+var $author$project$Box$rendererOf = F2(
+	function (boxId, model) {
+		var _v0 = A2($author$project$Box$byId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var box = _v0.a;
+			return $elm$core$Maybe$Just(box.renderer);
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'Box.rendererOf',
+				{boxId: boxId},
+				$elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$Feature$Icon$pickerStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+		A2($elm$html$Html$Attributes$style, 'left', '35px'),
+		A2($elm$html$Html$Attributes$style, 'width', '288px'),
+		A2($elm$html$Html$Attributes$style, 'white-space', 'initial'),
+		A2($elm$html$Html$Attributes$style, 'background-color', 'white'),
+		A2($elm$html$Html$Attributes$style, 'border', '1px solid lightgray')
+	]);
+var $author$project$Model$Icon = function (a) {
+	return {$: 'Icon', a: a};
+};
+var $author$project$Feature$IconDef$IconSelected = function (a) {
+	return {$: 'IconSelected', a: a};
+};
+var $author$project$Feature$Icon$iconButtonStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'border', 'none'),
+		A2($elm$html$Html$Attributes$style, 'margin', '8px'),
+		A2($elm$html$Html$Attributes$style, 'background-color', 'transparent')
+	]);
+var $author$project$Feature$Icon$viewIconList = A2(
+	$elm$core$List$map,
+	function (_v0) {
+		var iconName = _v0.a;
+		var icon = _v0.b;
+		return A2(
+			$elm$html$Html$button,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('tool'),
+						$elm$html$Html$Attributes$title(iconName),
+						$elm$html$Html$Events$onClick(
+						$author$project$Model$Icon(
+							$author$project$Feature$IconDef$IconSelected(
+								$elm$core$Maybe$Just(iconName)))),
+						$author$project$Shared$Events$onPointerDownStop($author$project$Model$NoOp)
+					]),
+				$author$project$Feature$Icon$iconButtonStyle),
+			_List_fromArray(
+				[
+					A2($feathericons$elm_feather$FeatherIcons$toHtml, _List_Nil, icon)
+				]));
+	},
+	$elm$core$Dict$toList($feathericons$elm_feather$FeatherIcons$icons));
+var $author$project$Feature$Icon$viewPicker = function (model) {
+	var _v0 = model.icon.picker;
+	if (_v0.$ === 'Open') {
+		return _List_fromArray(
+			[
+				A2($elm$html$Html$div, $author$project$Feature$Icon$pickerStyle, $author$project$Feature$Icon$viewIconList)
+			]);
+	} else {
+		return _List_Nil;
+	}
+};
+var $elm$html$Html$select = _VirtualDom_node('select');
+var $author$project$Feature$Tool$selectStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'position', 'relative'),
+		A2($elm$html$Html$Attributes$style, 'top', '-2px'),
+		A2($elm$html$Html$Attributes$style, 'left', '3px'),
+		A2($elm$html$Html$Attributes$style, 'font-family', $author$project$Config$mainFont),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'font-size',
+		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px')
+	]);
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $author$project$Extension$toString = function (renderer) {
+	if (renderer.$ === 'TopicMap') {
+		return 'TopicMap';
+	} else {
+		return 'TopicList';
+	}
+};
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $elm$html$Html$option = _VirtualDom_node('option');
+var $author$project$Feature$Tool$viewRendererOptions = function (ext) {
+	return A2(
+		$elm$core$List$map,
+		function (_v0) {
+			var name = _v0.a;
+			var label = _v0.b;
+			return A2(
+				$elm$html$Html$option,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$value(name)
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(label)
+					]));
+		},
+		ext.all);
+};
+var $author$project$Feature$Tool$viewRendererSelect = F3(
+	function (renderer, toMsg, ext) {
+		return A2(
+			$elm$html$Html$select,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$value(
+						$author$project$Extension$toString(renderer)),
+						A2(
+						$elm$html$Html$Events$on,
+						'input',
+						A2(
+							$elm$json$Json$Decode$map,
+							toMsg,
+							$author$project$Extension$rendererDecoder($elm$html$Html$Events$targetValue))),
+						$author$project$Shared$Events$onPointerDownStop($author$project$Model$NoOp)
+					]),
+				$author$project$Feature$Tool$selectStyle),
+			$author$project$Feature$Tool$viewRendererOptions(ext));
+	});
+var $author$project$Feature$SearchDef$RelTopicClicked = function (a) {
+	return {$: 'RelTopicClicked', a: a};
+};
+var $author$project$Feature$SearchDef$RelTopicHovered = function (a) {
+	return {$: 'RelTopicHovered', a: a};
+};
+var $author$project$Feature$SearchDef$RelTopicUnhovered = function (a) {
+	return {$: 'RelTopicUnhovered', a: a};
+};
+var $author$project$Model$Search = function (a) {
+	return {$: 'Search', a: a};
+};
+var $author$project$Feature$Search$isItemDisabled = F2(
+	function (topicId, model) {
+		var _v0 = $author$project$TopicMap$ViewProps$revelationBoxId(model);
+		if (_v0.$ === 'Just') {
+			var topicId_ = _v0.a.a;
+			return A3($author$project$Box$hadDeepTopic, topicId_, topicId, model);
+		} else {
+			return false;
+		}
+	});
+var $author$project$Feature$Search$isRelTopicHover = F2(
+	function (relTopic, model) {
+		var _v0 = model.search.result;
+		if ((_v0.$ === 'RelTopics') && (_v0.b.$ === 'Just')) {
+			var relTopic_ = _v0.b.a;
+			return _Utils_eq(relTopic_, relTopic);
+		} else {
+			return false;
+		}
+	});
+var $author$project$Config$disabledColor = '#b0b0b0';
+var $author$project$Config$hoverColor = '#d0d0d7';
+var $author$project$Feature$Search$menuItemStyle = F2(
+	function (isDisabled, isHover) {
+		var _v0 = function () {
+			if (isDisabled) {
+				return _Utils_Tuple3($author$project$Config$disabledColor, 'unset', 'none');
+			} else {
+				return _Utils_Tuple3(
+					'unset',
+					isHover ? $author$project$Config$hoverColor : 'unset',
+					'unset');
+			}
+		}();
+		var color = _v0.a;
+		var bgColor = _v0.b;
+		var pointerEvents = _v0.c;
+		return _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+				A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
+				A2($elm$html$Html$Attributes$style, 'gap', '8px'),
+				A2($elm$html$Html$Attributes$style, 'color', color),
+				A2($elm$html$Html$Attributes$style, 'background-color', bgColor),
+				A2($elm$html$Html$Attributes$style, 'padding', '0 8px'),
+				A2($elm$html$Html$Attributes$style, 'pointer-events', pointerEvents)
+			]);
+	});
+var $author$project$Feature$Search$menuStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+		A2($elm$html$Html$Attributes$style, 'width', '210px'),
+		A2($elm$html$Html$Attributes$style, 'padding', '3px 0'),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'font-size',
+		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
+		A2($elm$html$Html$Attributes$style, 'line-height', '2'),
+		A2($elm$html$Html$Attributes$style, 'background-color', 'white'),
+		A2($elm$html$Html$Attributes$style, 'border', '1px solid lightgray')
+	]);
+var $author$project$Feature$Search$traversalResultStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'left', '65px')
+	]);
+var $author$project$Feature$SearchDef$Fullscreen = function (a) {
+	return {$: 'Fullscreen', a: a};
+};
+var $author$project$Feature$Search$fullscreenButtonStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'border', 'none'),
+		A2($elm$html$Html$Attributes$style, 'background-color', 'transparent'),
+		A2($elm$html$Html$Attributes$style, 'pointer-events', 'initial')
+	]);
+var $author$project$Shared$Events$onClickStop = function (msg) {
+	return A2($author$project$Shared$Events$stopPropagation, 'click', msg);
+};
+var $author$project$Shared$Events$onPointerOutStop = function (msg) {
+	return A2($author$project$Shared$Events$stopPropagation, 'pointerout', msg);
+};
+var $author$project$Shared$Events$onPointerOverStop = function (msg) {
+	return A2($author$project$Shared$Events$stopPropagation, 'pointerover', msg);
+};
+var $author$project$Feature$Search$viewFullscreenButton = F2(
+	function (topicId, model) {
+		var isDisabled = _Utils_eq(
+			$author$project$ModelBase$fromBoxId(model.boxId),
+			topicId);
+		return A2($author$project$Topic$isBox, topicId, model) ? A2(
+			$elm$html$Html$button,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('tool'),
+						$elm$html$Html$Attributes$title('Fullscreen'),
+						$elm$html$Html$Attributes$disabled(isDisabled),
+						$author$project$Shared$Events$onClickStop(
+						$author$project$Model$Search(
+							$author$project$Feature$SearchDef$Fullscreen(
+								$author$project$ModelBase$BoxId(topicId)))),
+						$author$project$Shared$Events$onPointerOverStop($author$project$Model$NoOp),
+						$author$project$Shared$Events$onPointerOutStop($author$project$Model$NoOp)
+					]),
+				$author$project$Feature$Search$fullscreenButtonStyle),
+			_List_fromArray(
+				[
+					A3($author$project$Feature$Icon$view, 'maximize-2', 16, _List_Nil)
+				])) : $elm$html$Html$text('');
+	});
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$String$lines = _String_lines;
+var $author$project$Topic$label = function (topic) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		'',
+		$elm$core$List$head(
+			$elm$core$String$lines(topic.text)));
+};
+var $author$project$Feature$Search$viewItemText = function (topic) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'flex', 'auto'),
+				A2($elm$html$Html$Attributes$style, 'overflow', 'hidden'),
+				A2($elm$html$Html$Attributes$style, 'text-overflow', 'ellipsis'),
+				A2($elm$html$Html$Attributes$style, 'white-space', 'nowrap')
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				$author$project$Topic$label(topic))
+			]));
+};
+var $author$project$Config$topicIconSize = 16;
+var $author$project$Feature$Icon$viewTopicIcon = F4(
 	function (topicId, size, style_, model) {
-		var _v0 = A2($author$project$Item$topicById, topicId, model);
-		if (!_v0.$) {
+		var _v0 = A2($author$project$Topic$fromId, topicId, model);
+		if (_v0.$ === 'Just') {
 			var topic = _v0.a;
-			var _v1 = topic.aa;
-			if (!_v1.$) {
+			var _v1 = topic.icon;
+			if (_v1.$ === 'Just') {
 				var iconName = _v1.a;
-				return A3($author$project$Feature$IconAPI$view, iconName, size, style_);
+				return A3($author$project$Feature$Icon$view, iconName, size, style_);
 			} else {
 				return $elm$html$Html$text('');
 			}
@@ -20414,54 +19471,834 @@ var $author$project$Feature$IconAPI$viewTopicIcon = F4(
 			return $elm$html$Html$text('?');
 		}
 	});
-var $author$project$Map$viewLabelTopic = F4(
-	function (topic, props, boxPath, model) {
-		var textElem = function () {
-			var _v0 = A3($author$project$Feature$TextAPI$isEdit, topic.aK, boxPath, model);
-			if (_v0) {
-				return A3($author$project$Feature$TextAPI$viewInput, topic, boxPath, $author$project$Map$inputStyle);
-			} else {
-				return A2(
-					$elm$html$Html$div,
-					$author$project$Map$topicLabelStyle,
-					_List_fromArray(
+var $author$project$Feature$Search$viewTopicIcon = F2(
+	function (topic, model) {
+		return A4(
+			$author$project$Feature$Icon$viewTopicIcon,
+			topic.id,
+			$author$project$Config$topicIconSize,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'flex', 'none')
+				]),
+			model);
+	});
+var $author$project$Feature$Search$viewTraversalMenu = F2(
+	function (relTopicIds, model) {
+		return A2(
+			$elm$html$Html$div,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$author$project$Shared$Events$onPointerDownStop($author$project$Model$NoOp)
+					]),
+				_Utils_ap($author$project$Feature$Search$traversalResultStyle, $author$project$Feature$Search$menuStyle)),
+			A2(
+				$elm$core$List$map,
+				function (relTopic) {
+					var topicId = relTopic.a;
+					var assocId = relTopic.b;
+					var isHover = A2($author$project$Feature$Search$isRelTopicHover, relTopic, model);
+					var isDisabled = A2($author$project$Feature$Search$isItemDisabled, topicId, model);
+					var _v0 = A2($author$project$Topic$fromId, topicId, model);
+					if (_v0.$ === 'Just') {
+						var topic = _v0.a;
+						return A2(
+							$elm$html$Html$div,
+							_Utils_ap(
+								_List_fromArray(
+									[
+										$elm$html$Html$Events$onClick(
+										$author$project$Model$Search(
+											$author$project$Feature$SearchDef$RelTopicClicked(relTopic))),
+										A2(
+										$elm$html$Html$Events$on,
+										'pointerover',
+										$elm$json$Json$Decode$succeed(
+											$author$project$Model$Search(
+												$author$project$Feature$SearchDef$RelTopicHovered(relTopic)))),
+										A2(
+										$elm$html$Html$Events$on,
+										'pointerout',
+										$elm$json$Json$Decode$succeed(
+											$author$project$Model$Search(
+												$author$project$Feature$SearchDef$RelTopicUnhovered(relTopic))))
+									]),
+								A2($author$project$Feature$Search$menuItemStyle, isDisabled, isHover)),
+							_List_fromArray(
+								[
+									A2($author$project$Feature$Search$viewTopicIcon, topic, model),
+									$author$project$Feature$Search$viewItemText(topic),
+									A2($author$project$Feature$Search$viewFullscreenButton, topicId, model)
+								]));
+					} else {
+						return $elm$html$Html$text('??');
+					}
+				},
+				relTopicIds));
+	});
+var $author$project$Feature$Search$viewTraversalResult = function (model) {
+	var _v0 = model.search.result;
+	if (_v0.$ === 'RelTopics') {
+		var relTopicIds = _v0.a;
+		return (!$elm$core$List$isEmpty(relTopicIds)) ? _List_fromArray(
+			[
+				A2($author$project$Feature$Search$viewTraversalMenu, relTopicIds, model)
+			]) : _List_Nil;
+	} else {
+		return _List_Nil;
+	}
+};
+var $author$project$Feature$Tool$viewTopicToolbar = F4(
+	function (pos, topicId, boxPath, _v0) {
+		var model = _v0.model;
+		var ext = _v0.ext;
+		var target = _Utils_Tuple2(
+			$author$project$ModelBase$T(topicId),
+			boxPath);
+		var topicTools = _List_fromArray(
+			[
+				A5($author$project$Feature$Tool$viewButton, 'Edit', 'edit-3', $author$project$Feature$ToolDef$Edit, false, target),
+				A5($author$project$Feature$Tool$viewButton, 'Select Icon', 'smile', $author$project$Feature$ToolDef$Icon, false, target),
+				A5($author$project$Feature$Tool$viewButton, 'Traverse', 'share-2', $author$project$Feature$ToolDef$Traverse, false, target),
+				A5($author$project$Feature$Tool$viewButton, 'Delete', 'trash', $author$project$Feature$ToolDef$Delete, false, target),
+				A5($author$project$Feature$Tool$viewButton, 'Remove', 'x', $author$project$Feature$ToolDef$Remove, false, target),
+				A5(
+				$author$project$Feature$Tool$viewButton,
+				'Fullscreen',
+				'maximize-2',
+				$author$project$Feature$ToolDef$Fullscreen(topicId),
+				false,
+				target)
+			]);
+		var boxTools = function () {
+			if (A2($author$project$Topic$isBox, topicId, model)) {
+				var _v1 = A2(
+					$author$project$Box$rendererOf,
+					$author$project$ModelBase$BoxId(topicId),
+					model);
+				if (_v1.$ === 'Just') {
+					var renderer = _v1.a;
+					return _List_fromArray(
 						[
-							$elm$html$Html$text(
-							$author$project$Item$topicLabel(topic))
-						]));
+							A3(
+							$author$project$Feature$Tool$viewRendererSelect,
+							renderer,
+							A2($elm$core$Basics$composeL, $author$project$Model$Tool, $author$project$Feature$ToolDef$RendererSelected),
+							ext)
+						]);
+				} else {
+					return _List_Nil;
+				}
+			} else {
+				return _List_Nil;
+			}
+		}();
+		return A2(
+			$elm$html$Html$div,
+			$author$project$Feature$Tool$toolbarStyle(pos),
+			_Utils_ap(
+				topicTools,
+				_Utils_ap(
+					boxTools,
+					_Utils_ap(
+						$author$project$Feature$Icon$viewPicker(model),
+						$author$project$Feature$Search$viewTraversalResult(model)))));
+	});
+var $author$project$Feature$Tool$viewToolbar = F2(
+	function (boxPath, env) {
+		var model = env.model;
+		var ext = env.ext;
+		var boxId = $author$project$Box$firstId(boxPath);
+		var toolbar = A2(ext.toolbar, boxId, model);
+		var _v0 = $author$project$Feature$Sel$single(model);
+		if (_v0.$ === 'Just') {
+			var _v1 = _v0.a;
+			var itemId = _v1.a;
+			var selBoxPath = _v1.b;
+			if (_Utils_eq(selBoxPath, boxPath)) {
+				if (itemId.$ === 'T') {
+					var id = itemId.a;
+					var _v3 = A2($author$project$Topic$fromId, id, model);
+					if (_v3.$ === 'Just') {
+						var topic = _v3.a;
+						var pos = toolbar.topic(topic);
+						var _v4 = _Utils_Tuple2(
+							A3($author$project$Feature$Text$isEdit, id, boxPath, model),
+							A2($author$project$Topic$isBox, id, model));
+						if (!_v4.a) {
+							return _List_fromArray(
+								[
+									A4($author$project$Feature$Tool$viewTopicToolbar, pos, id, boxPath, env)
+								]);
+						} else {
+							if (!_v4.b) {
+								return _List_fromArray(
+									[
+										A3($author$project$Feature$Tool$viewTextToolbar, pos, id, boxPath)
+									]);
+							} else {
+								return _List_Nil;
+							}
+						}
+					} else {
+						return _List_Nil;
+					}
+				} else {
+					var id = itemId.a;
+					var _v5 = A2($author$project$Assoc$fromId, id, model);
+					if (_v5.$ === 'Just') {
+						var assoc = _v5.a;
+						var pos = toolbar.assoc(assoc);
+						return _List_fromArray(
+							[
+								A3($author$project$Feature$Tool$viewAssocToolbar, pos, assoc, boxPath)
+							]);
+					} else {
+						return _List_Nil;
+					}
+				}
+			} else {
+				return _List_Nil;
+			}
+		} else {
+			return _List_Nil;
+		}
+	});
+var $author$project$TopicList$ViewProps$viewList = F3(
+	function (env, boxPath, topics) {
+		return _Utils_ap(
+			_List_fromArray(
+				[
+					A2($elm$html$Html$ul, _List_Nil, topics)
+				]),
+			A2($author$project$Feature$Tool$viewToolbar, boxPath, env));
+	});
+var $author$project$TopicList$ViewProps$hoverStyle = F3(
+	function (topicId, boxPath, model) {
+		return A3($author$project$Feature$Mouse$isHovered, topicId, boxPath, model) ? _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'background-color', 'beige')
+			]) : _List_Nil;
+	});
+var $author$project$Shared$Events$itemClickHandler = F2(
+	function (itemId, boxPath) {
+		return _List_fromArray(
+			[
+				$author$project$Shared$Events$onClickStop(
+				A2($author$project$Model$ItemClicked, itemId, boxPath))
+			]);
+	});
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $author$project$TopicList$ViewProps$inputStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'font-family', $author$project$Config$mainFont),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'font-size',
+		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
+		A2($elm$html$Html$Attributes$style, 'width', '100%'),
+		A2($elm$html$Html$Attributes$style, 'position', 'relative'),
+		A2($elm$html$Html$Attributes$style, 'left', '-4px')
+	]);
+var $author$project$Feature$TextDef$LeaveEdit = {$: 'LeaveEdit'};
+var $author$project$Feature$TextDef$OnTextInput = function (a) {
+	return {$: 'OnTextInput', a: a};
+};
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $author$project$Config$initTopicText = 'New Topic';
+var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$Events$keyCode = A2($elm$json$Json$Decode$field, 'keyCode', $elm$json$Json$Decode$int);
+var $author$project$Shared$Events$keyDecoder = F2(
+	function (key, msg) {
+		var isKey = function (code) {
+			return _Utils_eq(code, key) ? $elm$json$Json$Decode$succeed(msg) : $elm$json$Json$Decode$fail('not that key');
+		};
+		return A2($elm$json$Json$Decode$andThen, isKey, $elm$html$Html$Events$keyCode);
+	});
+var $author$project$Shared$Events$onEnterOrEsc = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'keydown',
+		$elm$json$Json$Decode$oneOf(
+			_List_fromArray(
+				[
+					A2($author$project$Shared$Events$keyDecoder, 13, msg),
+					A2($author$project$Shared$Events$keyDecoder, 27, msg)
+				])));
+};
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
+var $author$project$Feature$Text$viewInput = F3(
+	function (topic, boxPath, style) {
+		return A2(
+			$elm$html$Html$input,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$id(
+						A3($author$project$Box$elemId, 'input', topic.id, boxPath)),
+						$elm$html$Html$Attributes$value(topic.text),
+						$elm$html$Html$Attributes$placeholder($author$project$Config$initTopicText),
+						$elm$html$Html$Events$onInput(
+						A2($elm$core$Basics$composeL, $author$project$Model$Text, $author$project$Feature$TextDef$OnTextInput)),
+						$author$project$Shared$Events$onEnterOrEsc(
+						$author$project$Model$Text($author$project$Feature$TextDef$LeaveEdit)),
+						$author$project$Shared$Events$onPointerDownStop($author$project$Model$NoOp)
+					]),
+				style),
+			_List_Nil);
+	});
+var $author$project$TopicList$ViewProps$viewTopic = F3(
+	function (topic, boxPath, model) {
+		return A3($author$project$Feature$Text$isEdit, topic.id, boxPath, model) ? A3($author$project$Feature$Text$viewInput, topic, boxPath, $author$project$TopicList$ViewProps$inputStyle) : $elm$html$Html$text(
+			$author$project$Topic$label(topic));
+	});
+var $author$project$TopicList$ViewProps$viewListItem = F5(
+	function (topic, boxPath, acc, childrenAcc, model) {
+		return _Utils_ap(
+			acc,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$li,
+					_Utils_ap(
+						A2(
+							$author$project$Shared$Events$itemClickHandler,
+							$author$project$ModelBase$T(topic.id),
+							boxPath),
+						_Utils_ap(
+							A3($author$project$Shared$ViewBase$selectionStyle, topic.id, boxPath, model),
+							A3($author$project$TopicList$ViewProps$hoverStyle, topic.id, boxPath, model))),
+					_Utils_ap(
+						_List_fromArray(
+							[
+								A3($author$project$TopicList$ViewProps$viewTopic, topic, boxPath, model)
+							]),
+						function () {
+							if (childrenAcc.$ === 'Just') {
+								var children = childrenAcc.a;
+								return children;
+							} else {
+								return _List_Nil;
+							}
+						}()))
+				]));
+	});
+var $author$project$TopicList$ViewProps$view = F3(
+	function (boxId, boxPath, env) {
+		var model = env.model;
+		return A2(
+			$elm$html$Html$div,
+			A3($author$project$TopicList$ViewProps$listStyle, boxId, boxPath, model),
+			A6(
+				$author$project$Box$traverseWith,
+				A2($elm$core$List$cons, boxId, boxPath),
+				$author$project$TopicList$ViewProps$topicOrder,
+				_List_Nil,
+				$author$project$TopicList$ViewProps$viewListItem,
+				$author$project$TopicList$ViewProps$viewList(env),
+				model));
+	});
+var $author$project$Box$assocIds = F2(
+	function (boxId, model) {
+		var _v0 = A2($author$project$Box$itemSetOf, boxId, model);
+		if (_v0.$ === 'Just') {
+			var itemSet = _v0.a;
+			return A3(
+				$elm$core$List$foldr,
+				F2(
+					function (setItem, acc) {
+						var _v1 = setItem.id;
+						if (_v1.$ === 'A') {
+							var id = _v1.a;
+							return A2($elm$core$List$cons, id, acc);
+						} else {
+							return acc;
+						}
+					}),
+				_List_Nil,
+				itemSet.items);
+		} else {
+			return _List_Nil;
+		}
+	});
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var $author$project$Config$assocRadius = 14;
+var $author$project$Config$assocHitArea = 20;
+var $author$project$TopicMap$View$lineHitAreaStyle = _List_fromArray(
+	[
+		$elm$svg$Svg$Attributes$stroke('transparent'),
+		$elm$svg$Svg$Attributes$strokeWidth(
+		$elm$core$String$fromInt($author$project$Config$assocHitArea) + 'px'),
+		$elm$svg$Svg$Attributes$fill('none')
+	]);
+var $elm$svg$Svg$Attributes$filter = _VirtualDom_attribute('filter');
+var $author$project$TopicMap$View$lineSelectionStyle = F3(
+	function (maybeAssoc, boxPath, model) {
+		if (maybeAssoc.$ === 'Just') {
+			var id = maybeAssoc.a.id;
+			var _v1 = A3(
+				$author$project$Feature$Sel$isSelected,
+				$author$project$ModelBase$A(id),
+				boxPath,
+				model);
+			if (_v1) {
+				return _List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$filter('url(#shadow)')
+					]);
+			} else {
+				return _List_Nil;
+			}
+		} else {
+			return _List_Nil;
+		}
+	});
+var $author$project$Config$assocColor = 'black';
+var $author$project$Config$assocLimboColor = '#858585';
+var $author$project$Config$assocWidth = 2;
+var $author$project$TopicMap$ViewModel$isLimboAssoc = F3(
+	function (assocId, boxId, model) {
+		var _v0 = $author$project$TopicMap$ViewModel$limboState(model);
+		if ((_v0.$ === 'Just') && (_v0.a.b.$ === 'Just')) {
+			var _v1 = _v0.a;
+			var assocId_ = _v1.b.a;
+			var boxId_ = _v1.c;
+			return _Utils_eq(assocId, assocId_) && _Utils_eq(boxId, boxId_);
+		} else {
+			return false;
+		}
+	});
+var $author$project$TopicMap$View$lineDasharray = function (assoc) {
+	if (assoc.$ === 'Just') {
+		var assocType = assoc.a.assocType;
+		if (assocType.$ === 'Association') {
+			return '5 0';
+		} else {
+			return '5';
+		}
+	} else {
+		return '5 0';
+	}
+};
+var $elm$svg$Svg$Attributes$strokeDasharray = _VirtualDom_attribute('stroke-dasharray');
+var $author$project$TopicMap$View$lineStyle = F3(
+	function (assoc, boxId, model) {
+		var color = function () {
+			if (assoc.$ === 'Just') {
+				var id = assoc.a.id;
+				var _v1 = A3($author$project$TopicMap$ViewModel$isLimboAssoc, id, boxId, model);
+				if (_v1) {
+					return $author$project$Config$assocLimboColor;
+				} else {
+					return $author$project$Config$assocColor;
+				}
+			} else {
+				return $author$project$Config$assocLimboColor;
 			}
 		}();
 		return _List_fromArray(
 			[
+				$elm$svg$Svg$Attributes$stroke(color),
+				$elm$svg$Svg$Attributes$strokeWidth(
+				$elm$core$String$fromFloat($author$project$Config$assocWidth) + 'px'),
+				$elm$svg$Svg$Attributes$strokeDasharray(
+				$author$project$TopicMap$View$lineDasharray(assoc)),
+				$elm$svg$Svg$Attributes$fill('none')
+			]);
+	});
+var $author$project$TopicMap$View$viewLineWithHitArea = F6(
+	function (svgElement, geometry, clickHandler, maybeAssoc, boxPath, model) {
+		var boxId = $author$project$Box$firstId(boxPath);
+		return _List_fromArray(
+			[
 				A2(
-				$elm$html$Html$div,
-				$author$project$Map$iconBoxStyle(props),
+				svgElement,
+				_Utils_ap(
+					geometry,
+					_Utils_ap(
+						A3($author$project$TopicMap$View$lineStyle, maybeAssoc, boxId, model),
+						A3($author$project$TopicMap$View$lineSelectionStyle, maybeAssoc, boxPath, model))),
+				_List_Nil),
+				A2(
+				svgElement,
+				_Utils_ap(
+					geometry,
+					_Utils_ap(clickHandler, $author$project$TopicMap$View$lineHitAreaStyle)),
+				_List_Nil)
+			]);
+	});
+var $author$project$TopicMap$View$corneredLine = F6(
+	function (pos1, pos2, maybeAssoc, boxPath, clickHandler, model) {
+		if (_Utils_cmp(
+			$elm$core$Basics$abs(pos2.x - pos1.x),
+			2 * $author$project$Config$assocRadius) < 0) {
+			var xm = ((pos1.x + pos2.x) / 2) | 0;
+			return A6(
+				$author$project$TopicMap$View$viewLineWithHitArea,
+				$elm$svg$Svg$path,
 				_List_fromArray(
 					[
-						A4($author$project$Feature$IconAPI$viewTopicIcon, topic.aK, $author$project$Config$topicIconSize, $author$project$Map$topicIconStyle, model)
+						$elm$svg$Svg$Attributes$d(
+						'M ' + ($elm$core$String$fromInt(xm) + (' ' + ($elm$core$String$fromInt(pos1.y) + (' V ' + $elm$core$String$fromInt(pos2.y))))))
+					]),
+				clickHandler,
+				maybeAssoc,
+				boxPath,
+				model);
+		} else {
+			if (_Utils_cmp(
+				$elm$core$Basics$abs(pos2.y - pos1.y),
+				2 * $author$project$Config$assocRadius) < 0) {
+				var ym = ((pos1.y + pos2.y) / 2) | 0;
+				return A6(
+					$author$project$TopicMap$View$viewLineWithHitArea,
+					$elm$svg$Svg$path,
+					_List_fromArray(
+						[
+							$elm$svg$Svg$Attributes$d(
+							'M ' + ($elm$core$String$fromInt(pos1.x) + (' ' + ($elm$core$String$fromInt(ym) + (' H ' + $elm$core$String$fromInt(pos2.x))))))
+						]),
+					clickHandler,
+					maybeAssoc,
+					boxPath,
+					model);
+			} else {
+				var ym = ((pos1.y + pos2.y) / 2) | 0;
+				var sy = (_Utils_cmp(pos2.y, pos1.y) > 0) ? (-1) : 1;
+				var y1 = $elm$core$String$fromInt(ym + (sy * $author$project$Config$assocRadius));
+				var y2 = $elm$core$String$fromInt(ym - (sy * $author$project$Config$assocRadius));
+				var sx = (_Utils_cmp(pos2.x, pos1.x) > 0) ? 1 : (-1);
+				var x1 = $elm$core$String$fromInt(pos1.x + (sx * $author$project$Config$assocRadius));
+				var x2 = $elm$core$String$fromInt(pos2.x - (sx * $author$project$Config$assocRadius));
+				var sweep1 = (sy === 1) ? ((sx === 1) ? 1 : 0) : ((sx === 1) ? 0 : 1);
+				var sweep2 = 1 - sweep1;
+				var sw2 = $elm$core$String$fromInt(sweep2);
+				var sw1 = $elm$core$String$fromInt(sweep1);
+				var r = $elm$core$String$fromInt($author$project$Config$assocRadius);
+				return A6(
+					$author$project$TopicMap$View$viewLineWithHitArea,
+					$elm$svg$Svg$path,
+					_List_fromArray(
+						[
+							$elm$svg$Svg$Attributes$d(
+							'M ' + ($elm$core$String$fromInt(pos1.x) + (' ' + ($elm$core$String$fromInt(pos1.y) + (' V ' + (y1 + (' A ' + (r + (' ' + (r + (' 0 0 ' + (sw1 + (' ' + (x1 + (' ' + ($elm$core$String$fromInt(ym) + (' H ' + (x2 + (' A ' + (r + (' ' + (r + (' 0 0 ' + (sw2 + (' ' + ($elm$core$String$fromInt(pos2.x) + (' ' + (y2 + (' V ' + $elm$core$String$fromInt(pos2.y))))))))))))))))))))))))))))))
+						]),
+					clickHandler,
+					maybeAssoc,
+					boxPath,
+					model);
+			}
+		}
+	});
+var $author$project$TopicMap$View$straightLine = F6(
+	function (pos1, pos2, maybeAssoc, boxPath, clickHandler, model) {
+		return A6(
+			$author$project$TopicMap$View$viewLineWithHitArea,
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1(
+					$elm$core$String$fromInt(pos1.x)),
+					$elm$svg$Svg$Attributes$y1(
+					$elm$core$String$fromInt(pos1.y)),
+					$elm$svg$Svg$Attributes$x2(
+					$elm$core$String$fromInt(pos2.x)),
+					$elm$svg$Svg$Attributes$y2(
+					$elm$core$String$fromInt(pos2.y))
+				]),
+			clickHandler,
+			maybeAssoc,
+			boxPath,
+			model);
+	});
+var $author$project$TopicMap$View$lineRenderer = function (model) {
+	var _v0 = model.tool.lineStyle;
+	if (_v0.$ === 'Cornered') {
+		return $author$project$TopicMap$View$corneredLine;
+	} else {
+		return $author$project$TopicMap$View$straightLine;
+	}
+};
+var $author$project$TopicMap$View$viewAssoc = F4(
+	function (assoc, boxPath, clickHandler, model) {
+		var boxId = $author$project$Box$firstId(boxPath);
+		var geom = A3($author$project$TopicMap$ViewProps$assocGeometry, assoc, boxId, model);
+		if (geom.$ === 'Just') {
+			var _v1 = geom.a;
+			var pos1 = _v1.a;
+			var pos2 = _v1.b;
+			return A7(
+				$author$project$TopicMap$View$lineRenderer,
+				model,
+				pos1,
+				pos2,
+				$elm$core$Maybe$Just(assoc),
+				boxPath,
+				clickHandler,
+				model);
+		} else {
+			return _List_Nil;
+		}
+	});
+var $author$project$Config$blackBoxOffset = 5;
+var $author$project$TopicMap$View$ghostTopicStyle = F3(
+	function (topic, boxPath, model) {
+		return _Utils_ap(
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'left',
+					$elm$core$String$fromInt($author$project$Config$blackBoxOffset) + 'px'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'top',
+					$elm$core$String$fromInt($author$project$Config$blackBoxOffset) + 'px'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'width',
+					$elm$core$String$fromInt($author$project$Config$topicSize.w) + 'px'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'height',
+					$elm$core$String$fromInt($author$project$Config$topicSize.h) + 'px'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'border-radius',
+					$elm$core$String$fromInt($author$project$Config$topicRadius) + 'px'),
+					A2($elm$html$Html$Attributes$style, 'z-index', '-1')
+				]),
+			_Utils_ap(
+				A3($author$project$Shared$ViewBase$topicBorderStyle, topic.id, boxPath, model),
+				A3($author$project$Shared$ViewBase$selectionStyle, topic.id, boxPath, model)));
+	});
+var $author$project$TopicMap$View$topicFlexboxStyle = F3(
+	function (mapTopic, boxPath, model) {
+		var r12 = $elm$core$String$fromInt($author$project$Config$topicRadius) + 'px';
+		var r34 = function () {
+			var _v0 = _Utils_Tuple2(
+				A2($author$project$Topic$isBox, mapTopic.id, model),
+				mapTopic.expansion);
+			if (_v0.a && (_v0.b.$ === 'Expanded')) {
+				var _v1 = _v0.b;
+				return '0';
+			} else {
+				return r12;
+			}
+		}();
+		return _Utils_ap(
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+					A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
+					A2($elm$html$Html$Attributes$style, 'gap', '8px'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'width',
+					$elm$core$String$fromInt($author$project$Config$topicSize.w) + 'px'),
+					A2(
+					$elm$html$Html$Attributes$style,
+					'height',
+					$elm$core$String$fromInt($author$project$Config$topicSize.h) + 'px'),
+					A2($elm$html$Html$Attributes$style, 'border-radius', r12 + (' ' + (r12 + (' ' + (r34 + (' ' + r34))))))
+				]),
+			A3($author$project$Shared$ViewBase$topicBorderStyle, mapTopic.id, boxPath, model));
+	});
+var $author$project$TopicMap$View$topicPosStyle = function (_v0) {
+	var pos = _v0.pos;
+	return _List_fromArray(
+		[
+			A2(
+			$elm$html$Html$Attributes$style,
+			'left',
+			$elm$core$String$fromInt(pos.x - $author$project$Config$topicW2) + 'px'),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'top',
+			$elm$core$String$fromInt(pos.y - $author$project$Config$topicH2) + 'px')
+		]);
+};
+var $author$project$TopicMap$View$itemCountStyle = _List_fromArray(
+	[
+		A2(
+		$elm$html$Html$Attributes$style,
+		'font-size',
+		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
+		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+		A2($elm$html$Html$Attributes$style, 'left', 'calc(100% + 12px)')
+	]);
+var $author$project$Box$traverse = F4(
+	function (boxPath, initAcc, accumulate, model) {
+		return A6(
+			$author$project$Box$traverseWith,
+			boxPath,
+			F3(
+				function (_v0, _v1, topicIds_) {
+					return topicIds_;
+				}),
+			initAcc,
+			accumulate,
+			F2(
+				function (_v2, count) {
+					return count;
+				}),
+			model);
+	});
+var $author$project$Box$topicCount = F2(
+	function (boxId, model) {
+		return A4(
+			$author$project$Box$traverse,
+			_List_fromArray(
+				[boxId]),
+			0,
+			F5(
+				function (_v0, _v1, count, childrenCount, _v2) {
+					return (count + 1) + A2($elm$core$Maybe$withDefault, 0, childrenCount);
+				}),
+			model);
+	});
+var $author$project$TopicMap$View$viewItemCount = F2(
+	function (boxId, model) {
+		return _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				$author$project$TopicMap$View$itemCountStyle,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(
+							A2($author$project$Box$topicCount, boxId, model)))
+					]))
+			]);
+	});
+var $author$project$TopicMap$View$iconBoxStyle = F2(
+	function (mapTopic, model) {
+		var r1 = $elm$core$String$fromInt($author$project$Config$topicRadius) + 'px';
+		var r4 = function () {
+			var _v0 = _Utils_Tuple2(
+				A2($author$project$Topic$isBox, mapTopic.id, model),
+				mapTopic.expansion);
+			if (_v0.a && (_v0.b.$ === 'Expanded')) {
+				var _v1 = _v0.b;
+				return '0';
+			} else {
+				return r1;
+			}
+		}();
+		return _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'flex', 'none'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'width',
+				$elm$core$String$fromInt($author$project$Config$topicSize.h) + 'px'),
+				A2(
+				$elm$html$Html$Attributes$style,
+				'height',
+				$elm$core$String$fromInt($author$project$Config$topicSize.h) + 'px'),
+				A2($elm$html$Html$Attributes$style, 'border-radius', r1 + (' 0 0 ' + r4)),
+				A2($elm$html$Html$Attributes$style, 'background-color', 'black')
+			]);
+	});
+var $author$project$Config$topicLabelWeight = 'bold';
+var $author$project$TopicMap$View$inputStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'font-family', $author$project$Config$mainFont),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'font-size',
+		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
+		A2($elm$html$Html$Attributes$style, 'font-weight', $author$project$Config$topicLabelWeight),
+		A2($elm$html$Html$Attributes$style, 'width', '100%'),
+		A2($elm$html$Html$Attributes$style, 'position', 'relative'),
+		A2($elm$html$Html$Attributes$style, 'left', '-4px')
+	]);
+var $author$project$TopicMap$View$labelTopicStyle = _List_fromArray(
+	[
+		A2(
+		$elm$html$Html$Attributes$style,
+		'font-size',
+		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
+		A2($elm$html$Html$Attributes$style, 'font-weight', $author$project$Config$topicLabelWeight),
+		A2($elm$html$Html$Attributes$style, 'overflow', 'hidden'),
+		A2($elm$html$Html$Attributes$style, 'text-overflow', 'ellipsis'),
+		A2($elm$html$Html$Attributes$style, 'white-space', 'nowrap')
+	]);
+var $author$project$TopicMap$View$topicIconStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'position', 'relative'),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'top',
+		$elm$core$String$fromInt((($author$project$Config$topicSize.h - $author$project$Config$topicIconSize) / 2) | 0) + 'px'),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'left',
+		$elm$core$String$fromInt((($author$project$Config$topicSize.h - $author$project$Config$topicIconSize) / 2) | 0) + 'px'),
+		A2($elm$html$Html$Attributes$style, 'color', 'white')
+	]);
+var $author$project$TopicMap$View$viewLabelTopic = F4(
+	function (topic, mapTopic, boxPath, model) {
+		var textElem = A3($author$project$Feature$Text$isEdit, topic.id, boxPath, model) ? A3($author$project$Feature$Text$viewInput, topic, boxPath, $author$project$TopicMap$View$inputStyle) : A2(
+			$elm$html$Html$div,
+			$author$project$TopicMap$View$labelTopicStyle,
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					$author$project$Topic$label(topic))
+				]));
+		return _List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				A2($author$project$TopicMap$View$iconBoxStyle, mapTopic, model),
+				_List_fromArray(
+					[
+						A4($author$project$Feature$Icon$viewTopicIcon, topic.id, $author$project$Config$topicIconSize, $author$project$TopicMap$View$topicIconStyle, model)
 					])),
 				textElem
 			]);
 	});
-var $author$project$Map$blackBoxTopic = F4(
-	function (topic, props, boxPath, model) {
+var $author$project$TopicMap$View$blackBoxTopic = F4(
+	function (topic, mapTopic, boxPath, model) {
 		return _Utils_Tuple2(
-			$author$project$Map$topicPosStyle(props),
+			$author$project$TopicMap$View$topicPosStyle(mapTopic),
 			_List_fromArray(
 				[
 					A2(
 					$elm$html$Html$div,
-					A4($author$project$Map$topicFlexboxStyle, topic, props, boxPath, model),
+					A3($author$project$TopicMap$View$topicFlexboxStyle, mapTopic, boxPath, model),
 					_Utils_ap(
-						A4($author$project$Map$viewLabelTopic, topic, props, boxPath, model),
-						A3($author$project$Map$viewItemCount, topic.aK, props, model))),
+						A4($author$project$TopicMap$View$viewLabelTopic, topic, mapTopic, boxPath, model),
+						A2(
+							$author$project$TopicMap$View$viewItemCount,
+							$author$project$ModelBase$BoxId(topic.id),
+							model))),
 					A2(
 					$elm$html$Html$div,
-					A3($author$project$Map$ghostTopicStyle, topic, boxPath, model),
+					A3($author$project$TopicMap$View$ghostTopicStyle, topic, boxPath, model),
 					_List_Nil)
 				]));
 	});
-var $author$project$Map$detailTextStyle = F3(
+var $author$project$Config$topicDetailPadding = 8;
+var $author$project$TopicMap$View$detailTextStyle = F3(
 	function (topicId, boxPath, model) {
 		var r = $elm$core$String$fromInt($author$project$Config$topicRadius) + 'px';
 		return _Utils_ap(
@@ -20486,10 +20323,10 @@ var $author$project$Map$detailTextStyle = F3(
 					A2($elm$html$Html$Attributes$style, 'border-radius', '0 ' + (r + (' ' + (r + (' ' + r)))))
 				]),
 			_Utils_ap(
-				A3($author$project$Map$topicBorderStyle, topicId, boxPath, model),
-				A3($author$project$Map$selectionStyle, topicId, boxPath, model)));
+				A3($author$project$Shared$ViewBase$topicBorderStyle, topicId, boxPath, model),
+				A3($author$project$Shared$ViewBase$selectionStyle, topicId, boxPath, model)));
 	});
-var $author$project$Map$detailTopicIconBoxStyle = _List_fromArray(
+var $author$project$TopicMap$View$detailTopicIconBoxStyle = _List_fromArray(
 	[
 		A2(
 		$elm$html$Html$Attributes$style,
@@ -20498,21 +20335,21 @@ var $author$project$Map$detailTopicIconBoxStyle = _List_fromArray(
 		A2(
 		$elm$html$Html$Attributes$style,
 		'width',
-		$elm$core$String$fromInt($author$project$Config$topicSize.b_ - $author$project$Config$topicBorderWidth) + 'px')
+		$elm$core$String$fromInt($author$project$Config$topicSize.h - $author$project$Config$topicBorderWidth) + 'px')
 	]);
-var $author$project$Map$detailTopicStyle = function (_v0) {
-	var pos = _v0.av;
+var $author$project$TopicMap$View$detailTopicStyle = function (_v0) {
+	var pos = _v0.pos;
 	return _List_fromArray(
 		[
 			A2($elm$html$Html$Attributes$style, 'display', 'flex'),
 			A2(
 			$elm$html$Html$Attributes$style,
 			'left',
-			$elm$core$String$fromInt(pos.d1 - $author$project$Config$topicW2) + 'px'),
+			$elm$core$String$fromInt(pos.x - $author$project$Config$topicW2) + 'px'),
 			A2(
 			$elm$html$Html$Attributes$style,
 			'top',
-			$elm$core$String$fromInt(pos.d3 - $author$project$Config$topicH2) + 'px')
+			$elm$core$String$fromInt(pos.y - $author$project$Config$topicH2) + 'px')
 		]);
 };
 var $elm$html$Html$a = _VirtualDom_node('a');
@@ -20520,19 +20357,9 @@ var $elm$html$Html$Attributes$align = $elm$html$Html$Attributes$stringProperty('
 var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
 var $elm$html$Html$blockquote = _VirtualDom_node('blockquote');
 var $elm$html$Html$br = _VirtualDom_node('br');
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
 var $elm$html$Html$Attributes$checked = $elm$html$Html$Attributes$boolProperty('checked');
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$html$Html$code = _VirtualDom_node('code');
 var $elm$html$Html$del = _VirtualDom_node('del');
-var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$em = _VirtualDom_node('em');
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$html$Html$h2 = _VirtualDom_node('h2');
@@ -20548,10 +20375,9 @@ var $elm$html$Html$Attributes$href = function (url) {
 		_VirtualDom_noJavaScriptUri(url));
 };
 var $elm$html$Html$img = _VirtualDom_node('img');
-var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$core$Maybe$map = F2(
 	function (f, maybe) {
-		if (!maybe.$) {
+		if (maybe.$ === 'Just') {
 			var value = maybe.a;
 			return $elm$core$Maybe$Just(
 				f(value));
@@ -20560,10 +20386,12 @@ var $elm$core$Maybe$map = F2(
 		}
 	});
 var $elm$html$Html$ol = _VirtualDom_node('ol');
-var $dillonkearns$elm_markdown$Markdown$HtmlRenderer$HtmlRenderer = $elm$core$Basics$identity;
+var $dillonkearns$elm_markdown$Markdown$HtmlRenderer$HtmlRenderer = function (a) {
+	return {$: 'HtmlRenderer', a: a};
+};
 var $elm$core$Result$mapError = F2(
 	function (f, result) {
-		if (!result.$) {
+		if (result.$ === 'Ok') {
 			var v = result.a;
 			return $elm$core$Result$Ok(v);
 		} else {
@@ -20574,9 +20402,9 @@ var $elm$core$Result$mapError = F2(
 	});
 var $dillonkearns$elm_markdown$Markdown$Html$resultOr = F2(
 	function (ra, rb) {
-		if (ra.$ === 1) {
+		if (ra.$ === 'Err') {
 			var singleError = ra.a;
-			if (!rb.$) {
+			if (rb.$ === 'Ok') {
 				var okValue = rb.a;
 				return $elm$core$Result$Ok(okValue);
 			} else {
@@ -20596,8 +20424,8 @@ var $dillonkearns$elm_markdown$Markdown$Html$attributesToString = function (attr
 		A2(
 			$elm$core$List$map,
 			function (_v0) {
-				var name = _v0.ce;
-				var value = _v0.cL;
+				var name = _v0.name;
+				var value = _v0.value;
 				return name + ('=\"' + (value + '\"'));
 			},
 			attributes));
@@ -20610,38 +20438,39 @@ var $dillonkearns$elm_markdown$Markdown$Html$oneOf = function (decoders) {
 	var unwrappedDecoders = A2(
 		$elm$core$List$map,
 		function (_v4) {
-			var rawDecoder = _v4;
+			var rawDecoder = _v4.a;
 			return rawDecoder;
 		},
 		decoders);
 	return function (rawDecoder) {
-		return F3(
-			function (tagName, attributes, innerBlocks) {
-				return A2(
-					$elm$core$Result$mapError,
-					function (errors) {
-						if (!errors.b) {
-							return 'Ran into a oneOf with no possibilities!';
-						} else {
-							if (!errors.b.b) {
-								var singleError = errors.a;
-								return 'Problem with the given value:\n\n' + (A2($dillonkearns$elm_markdown$Markdown$Html$tagToString, tagName, attributes) + ('\n\n' + (singleError + '\n')));
+		return $dillonkearns$elm_markdown$Markdown$HtmlRenderer$HtmlRenderer(
+			F3(
+				function (tagName, attributes, innerBlocks) {
+					return A2(
+						$elm$core$Result$mapError,
+						function (errors) {
+							if (!errors.b) {
+								return 'Ran into a oneOf with no possibilities!';
 							} else {
-								return 'oneOf failed parsing this value:\n    ' + (A2($dillonkearns$elm_markdown$Markdown$Html$tagToString, tagName, attributes) + ('\n\nParsing failed in the following 2 ways:\n\n\n' + (A2(
-									$elm$core$String$join,
-									'\n\n',
-									A2(
-										$elm$core$List$indexedMap,
-										F2(
-											function (index, error) {
-												return '(' + ($elm$core$String$fromInt(index + 1) + (') ' + error));
-											}),
-										errors)) + '\n')));
+								if (!errors.b.b) {
+									var singleError = errors.a;
+									return 'Problem with the given value:\n\n' + (A2($dillonkearns$elm_markdown$Markdown$Html$tagToString, tagName, attributes) + ('\n\n' + (singleError + '\n')));
+								} else {
+									return 'oneOf failed parsing this value:\n    ' + (A2($dillonkearns$elm_markdown$Markdown$Html$tagToString, tagName, attributes) + ('\n\nParsing failed in the following 2 ways:\n\n\n' + (A2(
+										$elm$core$String$join,
+										'\n\n',
+										A2(
+											$elm$core$List$indexedMap,
+											F2(
+												function (index, error) {
+													return '(' + ($elm$core$String$fromInt(index + 1) + (') ' + error));
+												}),
+											errors)) + '\n')));
+								}
 							}
-						}
-					},
-					A3(rawDecoder, tagName, attributes, innerBlocks));
-			});
+						},
+						A3(rawDecoder, tagName, attributes, innerBlocks));
+				}));
 	}(
 		A3(
 			$elm$core$List$foldl,
@@ -20685,19 +20514,17 @@ var $elm$html$Html$tbody = _VirtualDom_node('tbody');
 var $elm$html$Html$td = _VirtualDom_node('td');
 var $elm$html$Html$th = _VirtualDom_node('th');
 var $elm$html$Html$thead = _VirtualDom_node('thead');
-var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $elm$html$Html$tr = _VirtualDom_node('tr');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
-var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $elm$core$String$words = _String_words;
 var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
-	a3: $elm$html$Html$blockquote(_List_Nil),
-	a5: function (_v0) {
-		var body = _v0.cW;
-		var language = _v0.dn;
+	blockQuote: $elm$html$Html$blockquote(_List_Nil),
+	codeBlock: function (_v0) {
+		var body = _v0.body;
+		var language = _v0.language;
 		var classes = function () {
 			var _v1 = A2($elm$core$Maybe$map, $elm$core$String$words, language);
-			if ((!_v1.$) && _v1.a.b) {
+			if ((_v1.$ === 'Just') && _v1.a.b) {
 				var _v2 = _v1.a;
 				var actualLanguage = _v2.a;
 				return _List_fromArray(
@@ -20722,7 +20549,7 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 						]))
 				]));
 	},
-	a6: function (content) {
+	codeSpan: function (content) {
 		return A2(
 			$elm$html$Html$code,
 			_List_Nil,
@@ -20731,39 +20558,39 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 					$elm$html$Html$text(content)
 				]));
 	},
-	a8: function (children) {
+	emphasis: function (children) {
 		return A2($elm$html$Html$em, _List_Nil, children);
 	},
-	ba: A2($elm$html$Html$br, _List_Nil, _List_Nil),
-	bb: function (_v3) {
-		var level = _v3.cb;
-		var children = _v3.bN;
-		switch (level) {
-			case 0:
+	hardLineBreak: A2($elm$html$Html$br, _List_Nil, _List_Nil),
+	heading: function (_v3) {
+		var level = _v3.level;
+		var children = _v3.children;
+		switch (level.$) {
+			case 'H1':
 				return A2($elm$html$Html$h1, _List_Nil, children);
-			case 1:
+			case 'H2':
 				return A2($elm$html$Html$h2, _List_Nil, children);
-			case 2:
+			case 'H3':
 				return A2($elm$html$Html$h3, _List_Nil, children);
-			case 3:
+			case 'H4':
 				return A2($elm$html$Html$h4, _List_Nil, children);
-			case 4:
+			case 'H5':
 				return A2($elm$html$Html$h5, _List_Nil, children);
 			default:
 				return A2($elm$html$Html$h6, _List_Nil, children);
 		}
 	},
-	bc: $dillonkearns$elm_markdown$Markdown$Html$oneOf(_List_Nil),
-	bd: function (imageInfo) {
-		var _v5 = imageInfo.dY;
-		if (!_v5.$) {
+	html: $dillonkearns$elm_markdown$Markdown$Html$oneOf(_List_Nil),
+	image: function (imageInfo) {
+		var _v5 = imageInfo.title;
+		if (_v5.$ === 'Just') {
 			var title = _v5.a;
 			return A2(
 				$elm$html$Html$img,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$src(imageInfo.bq),
-						$elm$html$Html$Attributes$alt(imageInfo.a2),
+						$elm$html$Html$Attributes$src(imageInfo.src),
+						$elm$html$Html$Attributes$alt(imageInfo.alt),
 						$elm$html$Html$Attributes$title(title)
 					]),
 				_List_Nil);
@@ -20772,22 +20599,22 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 				$elm$html$Html$img,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$src(imageInfo.bq),
-						$elm$html$Html$Attributes$alt(imageInfo.a2)
+						$elm$html$Html$Attributes$src(imageInfo.src),
+						$elm$html$Html$Attributes$alt(imageInfo.alt)
 					]),
 				_List_Nil);
 		}
 	},
-	bg: F2(
+	link: F2(
 		function (link, content) {
-			var _v6 = link.dY;
-			if (!_v6.$) {
+			var _v6 = link.title;
+			if (_v6.$ === 'Just') {
 				var title = _v6.a;
 				return A2(
 					$elm$html$Html$a,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$href(link.c3),
+							$elm$html$Html$Attributes$href(link.destination),
 							$elm$html$Html$Attributes$title(title)
 						]),
 					content);
@@ -20796,12 +20623,12 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 					$elm$html$Html$a,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$href(link.c3)
+							$elm$html$Html$Attributes$href(link.destination)
 						]),
 					content);
 			}
 		}),
-	bk: F2(
+	orderedList: F2(
 		function (startingIndex, items) {
 			return A2(
 				$elm$html$Html$ol,
@@ -20822,16 +20649,16 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 					},
 					items));
 		}),
-	bl: $elm$html$Html$p(_List_Nil),
-	bt: function (children) {
+	paragraph: $elm$html$Html$p(_List_Nil),
+	strikethrough: function (children) {
 		return A2($elm$html$Html$del, _List_Nil, children);
 	},
-	bu: function (children) {
+	strong: function (children) {
 		return A2($elm$html$Html$strong, _List_Nil, children);
 	},
-	bw: $elm$html$Html$table(_List_Nil),
-	bx: $elm$html$Html$tbody(_List_Nil),
-	by: function (maybeAlignment) {
+	table: $elm$html$Html$table(_List_Nil),
+	tableBody: $elm$html$Html$tbody(_List_Nil),
+	tableCell: function (maybeAlignment) {
 		var attrs = A2(
 			$elm$core$Maybe$withDefault,
 			_List_Nil,
@@ -20844,10 +20671,10 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 					A2(
 						$elm$core$Maybe$map,
 						function (alignment) {
-							switch (alignment) {
-								case 0:
+							switch (alignment.$) {
+								case 'AlignLeft':
 									return 'left';
-								case 2:
+								case 'AlignCenter':
 									return 'center';
 								default:
 									return 'right';
@@ -20856,8 +20683,8 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 						maybeAlignment))));
 		return $elm$html$Html$td(attrs);
 	},
-	bz: $elm$html$Html$thead(_List_Nil),
-	bA: function (maybeAlignment) {
+	tableHeader: $elm$html$Html$thead(_List_Nil),
+	tableHeaderCell: function (maybeAlignment) {
 		var attrs = A2(
 			$elm$core$Maybe$withDefault,
 			_List_Nil,
@@ -20870,10 +20697,10 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 					A2(
 						$elm$core$Maybe$map,
 						function (alignment) {
-							switch (alignment) {
-								case 0:
+							switch (alignment.$) {
+								case 'AlignLeft':
 									return 'left';
-								case 2:
+								case 'AlignCenter':
 									return 'center';
 								default:
 									return 'right';
@@ -20882,10 +20709,10 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 						maybeAlignment))));
 		return $elm$html$Html$th(attrs);
 	},
-	aW: $elm$html$Html$tr(_List_Nil),
-	dX: $elm$html$Html$text,
-	bC: A2($elm$html$Html$hr, _List_Nil, _List_Nil),
-	bE: function (items) {
+	tableRow: $elm$html$Html$tr(_List_Nil),
+	text: $elm$html$Html$text,
+	thematicBreak: A2($elm$html$Html$hr, _List_Nil, _List_Nil),
+	unorderedList: function (items) {
 		return A2(
 			$elm$html$Html$ul,
 			_List_Nil,
@@ -20895,10 +20722,10 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 					var task = item.a;
 					var children = item.b;
 					var checkbox = function () {
-						switch (task) {
-							case 0:
+						switch (task.$) {
+							case 'NoTask':
 								return $elm$html$Html$text('');
-							case 1:
+							case 'IncompleteTask':
 								return A2(
 									$elm$html$Html$input,
 									_List_fromArray(
@@ -20928,231 +20755,237 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer = {
 				items));
 	}
 };
-var $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine = {$: 10};
+var $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine = {$: 'BlankLine'};
 var $dillonkearns$elm_markdown$Markdown$Block$BlockQuote = function (a) {
-	return {$: 3, a: a};
+	return {$: 'BlockQuote', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$RawBlock$BlockQuote = function (a) {
-	return {$: 11, a: a};
+	return {$: 'BlockQuote', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$Cdata = function (a) {
-	return {$: 4, a: a};
+	return {$: 'Cdata', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$CodeBlock = function (a) {
-	return {$: 7, a: a};
+	return {$: 'CodeBlock', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$RawBlock$CodeBlock = function (a) {
-	return {$: 5, a: a};
+	return {$: 'CodeBlock', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$CodeSpan = function (a) {
-	return {$: 6, a: a};
+	return {$: 'CodeSpan', a: a};
 };
-var $dillonkearns$elm_markdown$Markdown$Block$CompletedTask = 2;
+var $dillonkearns$elm_markdown$Markdown$Block$CompletedTask = {$: 'CompletedTask'};
 var $elm$parser$Parser$Advanced$Done = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Done', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$Emphasis = function (a) {
-	return {$: 3, a: a};
+	return {$: 'Emphasis', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Inline$Emphasis = F2(
 	function (a, b) {
-		return {$: 6, a: a, b: b};
+		return {$: 'Emphasis', a: a, b: b};
 	});
-var $dillonkearns$elm_markdown$Markdown$Parser$EmptyBlock = {$: 0};
+var $dillonkearns$elm_markdown$Markdown$Parser$EmptyBlock = {$: 'EmptyBlock'};
 var $elm$parser$Parser$Expecting = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Expecting', a: a};
 };
 var $elm$parser$Parser$ExpectingSymbol = function (a) {
-	return {$: 8, a: a};
+	return {$: 'ExpectingSymbol', a: a};
 };
-var $dillonkearns$elm_markdown$Markdown$Block$HardLineBreak = {$: 8};
+var $dillonkearns$elm_markdown$Markdown$Block$HardLineBreak = {$: 'HardLineBreak'};
 var $dillonkearns$elm_markdown$Markdown$Block$Heading = F2(
 	function (a, b) {
-		return {$: 4, a: a, b: b};
+		return {$: 'Heading', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$RawBlock$Heading = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Heading', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$RawBlock$Html = function (a) {
-	return {$: 2, a: a};
+	return {$: 'Html', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$HtmlBlock = function (a) {
-	return {$: 0, a: a};
+	return {$: 'HtmlBlock', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$HtmlComment = function (a) {
-	return {$: 1, a: a};
+	return {$: 'HtmlComment', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$HtmlDeclaration = F2(
 	function (a, b) {
-		return {$: 3, a: a, b: b};
+		return {$: 'HtmlDeclaration', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$Block$HtmlElement = F3(
 	function (a, b, c) {
-		return {$: 0, a: a, b: b, c: c};
+		return {$: 'HtmlElement', a: a, b: b, c: c};
 	});
 var $dillonkearns$elm_markdown$Markdown$Block$HtmlInline = function (a) {
-	return {$: 0, a: a};
+	return {$: 'HtmlInline', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$Image = F3(
 	function (a, b, c) {
-		return {$: 2, a: a, b: b, c: c};
+		return {$: 'Image', a: a, b: b, c: c};
 	});
-var $dillonkearns$elm_markdown$Markdown$Block$IncompleteTask = 1;
+var $dillonkearns$elm_markdown$Markdown$Block$IncompleteTask = {$: 'IncompleteTask'};
 var $dillonkearns$elm_markdown$Markdown$RawBlock$IndentedCodeBlock = function (a) {
-	return {$: 6, a: a};
+	return {$: 'IndentedCodeBlock', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$InlineProblem = function (a) {
-	return {$: 2, a: a};
+	return {$: 'InlineProblem', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$Link = F3(
 	function (a, b, c) {
-		return {$: 1, a: a, b: b, c: c};
+		return {$: 'Link', a: a, b: b, c: c};
 	});
 var $dillonkearns$elm_markdown$Markdown$Block$ListItem = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'ListItem', a: a, b: b};
 	});
 var $elm$parser$Parser$Advanced$Loop = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Loop', a: a};
 };
-var $dillonkearns$elm_markdown$Markdown$Block$NoTask = 0;
+var $dillonkearns$elm_markdown$Markdown$Block$NoTask = {$: 'NoTask'};
 var $dillonkearns$elm_markdown$Markdown$RawBlock$OpenBlockOrParagraph = function (a) {
-	return {$: 1, a: a};
+	return {$: 'OpenBlockOrParagraph', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$OrderedList = F3(
 	function (a, b, c) {
-		return {$: 2, a: a, b: b, c: c};
+		return {$: 'OrderedList', a: a, b: b, c: c};
 	});
 var $dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock = F6(
 	function (a, b, c, d, e, f) {
-		return {$: 4, a: a, b: b, c: c, d: d, e: e, f: f};
+		return {$: 'OrderedListBlock', a: a, b: b, c: c, d: d, e: e, f: f};
 	});
 var $dillonkearns$elm_markdown$Markdown$Block$Paragraph = function (a) {
-	return {$: 5, a: a};
+	return {$: 'Paragraph', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock = function (a) {
-	return {$: 1, a: a};
+	return {$: 'ParsedBlock', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote = function (a) {
-	return {$: 12, a: a};
+	return {$: 'ParsedBlockQuote', a: a};
 };
 var $elm$parser$Parser$Problem = function (a) {
-	return {$: 12, a: a};
+	return {$: 'Problem', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$ProcessingInstruction = function (a) {
-	return {$: 2, a: a};
+	return {$: 'ProcessingInstruction', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$Strikethrough = function (a) {
-	return {$: 5, a: a};
+	return {$: 'Strikethrough', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$Strong = function (a) {
-	return {$: 4, a: a};
+	return {$: 'Strong', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Block$Table = F2(
 	function (a, b) {
-		return {$: 6, a: a, b: b};
+		return {$: 'Table', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$RawBlock$Table = function (a) {
-	return {$: 8, a: a};
+	return {$: 'Table', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Table$Table = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Table', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$Table$TableDelimiterRow = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'TableDelimiterRow', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$Block$Text = function (a) {
-	return {$: 7, a: a};
+	return {$: 'Text', a: a};
 };
-var $dillonkearns$elm_markdown$Markdown$Block$ThematicBreak = {$: 8};
-var $dillonkearns$elm_markdown$Markdown$RawBlock$ThematicBreak = {$: 7};
+var $dillonkearns$elm_markdown$Markdown$Block$ThematicBreak = {$: 'ThematicBreak'};
+var $dillonkearns$elm_markdown$Markdown$RawBlock$ThematicBreak = {$: 'ThematicBreak'};
 var $elm$parser$Parser$Advanced$Token = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'Token', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$Block$UnorderedList = F2(
 	function (a, b) {
-		return {$: 1, a: a, b: b};
+		return {$: 'UnorderedList', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$RawBlock$UnorderedListBlock = F4(
 	function (a, b, c, d) {
-		return {$: 3, a: a, b: b, c: c, d: d};
+		return {$: 'UnorderedListBlock', a: a, b: b, c: c, d: d};
 	});
-var $dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines = $elm$core$Basics$identity;
+var $dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines = function (a) {
+	return {$: 'UnparsedInlines', a: a};
+};
 var $dillonkearns$elm_markdown$Markdown$Parser$addReference = F2(
 	function (state, linkRef) {
 		return {
-			a: A2($elm$core$List$cons, linkRef, state.a),
-			b: state.b
+			linkReferenceDefinitions: A2($elm$core$List$cons, linkRef, state.linkReferenceDefinitions),
+			rawBlocks: state.rawBlocks
 		};
 	});
 var $elm$parser$Parser$Advanced$Bad = F2(
 	function (a, b) {
-		return {$: 1, a: a, b: b};
+		return {$: 'Bad', a: a, b: b};
 	});
 var $elm$parser$Parser$Advanced$Good = F3(
 	function (a, b, c) {
-		return {$: 0, a: a, b: b, c: c};
+		return {$: 'Good', a: a, b: b, c: c};
 	});
-var $elm$parser$Parser$Advanced$Parser = $elm$core$Basics$identity;
+var $elm$parser$Parser$Advanced$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
 var $elm$parser$Parser$Advanced$andThen = F2(
 	function (callback, _v0) {
-		var parseA = _v0;
-		return function (s0) {
-			var _v1 = parseA(s0);
-			if (_v1.$ === 1) {
-				var p = _v1.a;
-				var x = _v1.b;
-				return A2($elm$parser$Parser$Advanced$Bad, p, x);
-			} else {
-				var p1 = _v1.a;
-				var a = _v1.b;
-				var s1 = _v1.c;
-				var _v2 = callback(a);
-				var parseB = _v2;
-				var _v3 = parseB(s1);
-				if (_v3.$ === 1) {
-					var p2 = _v3.a;
-					var x = _v3.b;
-					return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+		var parseA = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parseA(s0);
+				if (_v1.$ === 'Bad') {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
 				} else {
-					var p2 = _v3.a;
-					var b = _v3.b;
-					var s2 = _v3.c;
-					return A3($elm$parser$Parser$Advanced$Good, p1 || p2, b, s2);
+					var p1 = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					var _v2 = callback(a);
+					var parseB = _v2.a;
+					var _v3 = parseB(s1);
+					if (_v3.$ === 'Bad') {
+						var p2 = _v3.a;
+						var x = _v3.b;
+						return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _v3.a;
+						var b = _v3.b;
+						var s2 = _v3.c;
+						return A3($elm$parser$Parser$Advanced$Good, p1 || p2, b, s2);
+					}
 				}
-			}
-		};
+			});
 	});
 var $elm$parser$Parser$Advanced$backtrackable = function (_v0) {
-	var parse = _v0;
-	return function (s0) {
-		var _v1 = parse(s0);
-		if (_v1.$ === 1) {
-			var x = _v1.b;
-			return A2($elm$parser$Parser$Advanced$Bad, false, x);
-		} else {
-			var a = _v1.b;
-			var s1 = _v1.c;
-			return A3($elm$parser$Parser$Advanced$Good, false, a, s1);
-		}
-	};
+	var parse = _v0.a;
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s0) {
+			var _v1 = parse(s0);
+			if (_v1.$ === 'Bad') {
+				var x = _v1.b;
+				return A2($elm$parser$Parser$Advanced$Bad, false, x);
+			} else {
+				var a = _v1.b;
+				var s1 = _v1.c;
+				return A3($elm$parser$Parser$Advanced$Good, false, a, s1);
+			}
+		});
 };
 var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
 var $elm$parser$Parser$Advanced$chompWhileHelp = F5(
 	function (isGood, offset, row, col, s0) {
 		chompWhileHelp:
 		while (true) {
-			var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, offset, s0.bq);
+			var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, offset, s0.src);
 			if (_Utils_eq(newOffset, -1)) {
 				return A3(
 					$elm$parser$Parser$Advanced$Good,
-					_Utils_cmp(s0.e, offset) < 0,
-					0,
-					{bO: col, h: s0.h, j: s0.j, e: offset, dT: row, bq: s0.bq});
+					_Utils_cmp(s0.offset, offset) < 0,
+					_Utils_Tuple0,
+					{col: col, context: s0.context, indent: s0.indent, offset: offset, row: row, src: s0.src});
 			} else {
 				if (_Utils_eq(newOffset, -2)) {
 					var $temp$isGood = isGood,
@@ -21183,9 +21016,10 @@ var $elm$parser$Parser$Advanced$chompWhileHelp = F5(
 		}
 	});
 var $elm$parser$Parser$Advanced$chompWhile = function (isGood) {
-	return function (s) {
-		return A5($elm$parser$Parser$Advanced$chompWhileHelp, isGood, s.e, s.dT, s.bO, s);
-	};
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A5($elm$parser$Parser$Advanced$chompWhileHelp, isGood, s.offset, s.row, s.col, s);
+		});
 };
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
@@ -21193,42 +21027,43 @@ var $elm$core$Basics$always = F2(
 	});
 var $elm$parser$Parser$Advanced$map2 = F3(
 	function (func, _v0, _v1) {
-		var parseA = _v0;
-		var parseB = _v1;
-		return function (s0) {
-			var _v2 = parseA(s0);
-			if (_v2.$ === 1) {
-				var p = _v2.a;
-				var x = _v2.b;
-				return A2($elm$parser$Parser$Advanced$Bad, p, x);
-			} else {
-				var p1 = _v2.a;
-				var a = _v2.b;
-				var s1 = _v2.c;
-				var _v3 = parseB(s1);
-				if (_v3.$ === 1) {
-					var p2 = _v3.a;
-					var x = _v3.b;
-					return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+		var parseA = _v0.a;
+		var parseB = _v1.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v2 = parseA(s0);
+				if (_v2.$ === 'Bad') {
+					var p = _v2.a;
+					var x = _v2.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
 				} else {
-					var p2 = _v3.a;
-					var b = _v3.b;
-					var s2 = _v3.c;
-					return A3(
-						$elm$parser$Parser$Advanced$Good,
-						p1 || p2,
-						A2(func, a, b),
-						s2);
+					var p1 = _v2.a;
+					var a = _v2.b;
+					var s1 = _v2.c;
+					var _v3 = parseB(s1);
+					if (_v3.$ === 'Bad') {
+						var p2 = _v3.a;
+						var x = _v3.b;
+						return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _v3.a;
+						var b = _v3.b;
+						var s2 = _v3.c;
+						return A3(
+							$elm$parser$Parser$Advanced$Good,
+							p1 || p2,
+							A2(func, a, b),
+							s2);
+					}
 				}
-			}
-		};
+			});
 	});
 var $elm$parser$Parser$Advanced$ignorer = F2(
 	function (keepParser, ignoreParser) {
 		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$always, keepParser, ignoreParser);
 	});
 var $dillonkearns$elm_markdown$Whitespace$isSpaceOrTab = function (_char) {
-	switch (_char) {
+	switch (_char.valueOf()) {
 		case ' ':
 			return true;
 		case '\t':
@@ -21245,10 +21080,10 @@ var $dillonkearns$elm_markdown$Parser$Token$newline = A2(
 	$elm$parser$Parser$Advanced$Token,
 	'\n',
 	$elm$parser$Parser$Expecting('a newline'));
-var $elm$parser$Parser$Advanced$Empty = {$: 0};
+var $elm$parser$Parser$Advanced$Empty = {$: 'Empty'};
 var $elm$parser$Parser$Advanced$Append = F2(
 	function (a, b) {
-		return {$: 2, a: a, b: b};
+		return {$: 'Append', a: a, b: b};
 	});
 var $elm$parser$Parser$Advanced$oneOfHelp = F3(
 	function (s0, bag, parsers) {
@@ -21257,10 +21092,10 @@ var $elm$parser$Parser$Advanced$oneOfHelp = F3(
 			if (!parsers.b) {
 				return A2($elm$parser$Parser$Advanced$Bad, false, bag);
 			} else {
-				var parse = parsers.a;
+				var parse = parsers.a.a;
 				var remainingParsers = parsers.b;
 				var _v1 = parse(s0);
-				if (!_v1.$) {
+				if (_v1.$ === 'Good') {
 					var step = _v1;
 					return step;
 				} else {
@@ -21283,49 +21118,52 @@ var $elm$parser$Parser$Advanced$oneOfHelp = F3(
 		}
 	});
 var $elm$parser$Parser$Advanced$oneOf = function (parsers) {
-	return function (s) {
-		return A3($elm$parser$Parser$Advanced$oneOfHelp, s, $elm$parser$Parser$Advanced$Empty, parsers);
-	};
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3($elm$parser$Parser$Advanced$oneOfHelp, s, $elm$parser$Parser$Advanced$Empty, parsers);
+		});
 };
 var $elm$parser$Parser$Advanced$succeed = function (a) {
-	return function (s) {
-		return A3($elm$parser$Parser$Advanced$Good, false, a, s);
-	};
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3($elm$parser$Parser$Advanced$Good, false, a, s);
+		});
 };
 var $elm$parser$Parser$Advanced$AddRight = F2(
 	function (a, b) {
-		return {$: 1, a: a, b: b};
+		return {$: 'AddRight', a: a, b: b};
 	});
 var $elm$parser$Parser$Advanced$DeadEnd = F4(
 	function (row, col, problem, contextStack) {
-		return {bO: col, c1: contextStack, dM: problem, dT: row};
+		return {col: col, contextStack: contextStack, problem: problem, row: row};
 	});
 var $elm$parser$Parser$Advanced$fromState = F2(
 	function (s, x) {
 		return A2(
 			$elm$parser$Parser$Advanced$AddRight,
 			$elm$parser$Parser$Advanced$Empty,
-			A4($elm$parser$Parser$Advanced$DeadEnd, s.dT, s.bO, x, s.h));
+			A4($elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
 	});
 var $elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
 var $elm$parser$Parser$Advanced$token = function (_v0) {
 	var str = _v0.a;
 	var expecting = _v0.b;
 	var progress = !$elm$core$String$isEmpty(str);
-	return function (s) {
-		var _v1 = A5($elm$parser$Parser$Advanced$isSubString, str, s.e, s.dT, s.bO, s.bq);
-		var newOffset = _v1.a;
-		var newRow = _v1.b;
-		var newCol = _v1.c;
-		return _Utils_eq(newOffset, -1) ? A2(
-			$elm$parser$Parser$Advanced$Bad,
-			false,
-			A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
-			$elm$parser$Parser$Advanced$Good,
-			progress,
-			0,
-			{bO: newCol, h: s.h, j: s.j, e: newOffset, dT: newRow, bq: s.bq});
-	};
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _v1.a;
+			var newRow = _v1.b;
+			var newCol = _v1.c;
+			return _Utils_eq(newOffset, -1) ? A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				$elm$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
 };
 var $dillonkearns$elm_markdown$Whitespace$lineEnd = $elm$parser$Parser$Advanced$oneOf(
 	_List_fromArray(
@@ -21338,29 +21176,30 @@ var $dillonkearns$elm_markdown$Whitespace$lineEnd = $elm$parser$Parser$Advanced$
 				_List_fromArray(
 					[
 						$elm$parser$Parser$Advanced$token($dillonkearns$elm_markdown$Parser$Token$newline),
-						$elm$parser$Parser$Advanced$succeed(0)
+						$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 					])))
 		]));
 var $elm$parser$Parser$Advanced$map = F2(
 	function (func, _v0) {
-		var parse = _v0;
-		return function (s0) {
-			var _v1 = parse(s0);
-			if (!_v1.$) {
-				var p = _v1.a;
-				var a = _v1.b;
-				var s1 = _v1.c;
-				return A3(
-					$elm$parser$Parser$Advanced$Good,
-					p,
-					func(a),
-					s1);
-			} else {
-				var p = _v1.a;
-				var x = _v1.b;
-				return A2($elm$parser$Parser$Advanced$Bad, p, x);
-			}
-		};
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Good') {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						func(a),
+						s1);
+				} else {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				}
+			});
 	});
 var $dillonkearns$elm_markdown$Markdown$Parser$blankLine = A2(
 	$elm$parser$Parser$Advanced$map,
@@ -21409,7 +21248,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$blockQuoteStarts = _List_fromArra
 				])))
 	]);
 var $dillonkearns$elm_markdown$Whitespace$isLineEnd = function (_char) {
-	switch (_char) {
+	switch (_char.valueOf()) {
 		case '\n':
 			return true;
 		case '\u000D':
@@ -21422,27 +21261,28 @@ var $dillonkearns$elm_markdown$Helpers$chompUntilLineEndOrEnd = $elm$parser$Pars
 	A2($elm$core$Basics$composeL, $elm$core$Basics$not, $dillonkearns$elm_markdown$Whitespace$isLineEnd));
 var $elm$parser$Parser$Advanced$mapChompedString = F2(
 	function (func, _v0) {
-		var parse = _v0;
-		return function (s0) {
-			var _v1 = parse(s0);
-			if (_v1.$ === 1) {
-				var p = _v1.a;
-				var x = _v1.b;
-				return A2($elm$parser$Parser$Advanced$Bad, p, x);
-			} else {
-				var p = _v1.a;
-				var a = _v1.b;
-				var s1 = _v1.c;
-				return A3(
-					$elm$parser$Parser$Advanced$Good,
-					p,
-					A2(
-						func,
-						A3($elm$core$String$slice, s0.e, s1.e, s0.bq),
-						a),
-					s1);
-			}
-		};
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Bad') {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						A2(
+							func,
+							A3($elm$core$String$slice, s0.offset, s1.offset, s0.src),
+							a),
+						s1);
+				}
+			});
 	});
 var $elm$parser$Parser$Advanced$getChompedString = function (parser) {
 	return A2($elm$parser$Parser$Advanced$mapChompedString, $elm$core$Basics$always, parser);
@@ -21452,14 +21292,15 @@ var $elm$parser$Parser$Advanced$keeper = F2(
 		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$apL, parseFunc, parseArg);
 	});
 var $elm$parser$Parser$Advanced$end = function (x) {
-	return function (s) {
-		return _Utils_eq(
-			$elm$core$String$length(s.bq),
-			s.e) ? A3($elm$parser$Parser$Advanced$Good, false, 0, s) : A2(
-			$elm$parser$Parser$Advanced$Bad,
-			false,
-			A2($elm$parser$Parser$Advanced$fromState, s, x));
-	};
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return _Utils_eq(
+				$elm$core$String$length(s.src),
+				s.offset) ? A3($elm$parser$Parser$Advanced$Good, false, _Utils_Tuple0, s) : A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, x));
+		});
 };
 var $dillonkearns$elm_markdown$Helpers$endOfFile = $elm$parser$Parser$Advanced$end(
 	$elm$parser$Parser$Expecting('the end of the input'));
@@ -21478,7 +21319,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$blockQuote = A2(
 			_List_fromArray(
 				[
 					$elm$parser$Parser$Advanced$symbol($dillonkearns$elm_markdown$Parser$Token$space),
-					$elm$parser$Parser$Advanced$succeed(0)
+					$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 				]))),
 	A2(
 		$elm$parser$Parser$Advanced$ignorer,
@@ -21502,34 +21343,34 @@ var $elm$core$List$concatMap = F2(
 	});
 var $dillonkearns$elm_markdown$Markdown$Parser$problemToString = function (problem) {
 	switch (problem.$) {
-		case 0:
+		case 'Expecting':
 			var string = problem.a;
 			return 'Expecting ' + string;
-		case 1:
+		case 'ExpectingInt':
 			return 'Expecting int';
-		case 2:
+		case 'ExpectingHex':
 			return 'Expecting hex';
-		case 3:
+		case 'ExpectingOctal':
 			return 'Expecting octal';
-		case 4:
+		case 'ExpectingBinary':
 			return 'Expecting binary';
-		case 5:
+		case 'ExpectingFloat':
 			return 'Expecting float';
-		case 6:
+		case 'ExpectingNumber':
 			return 'Expecting number';
-		case 7:
+		case 'ExpectingVariable':
 			return 'Expecting variable';
-		case 8:
+		case 'ExpectingSymbol':
 			var string = problem.a;
 			return 'Expecting symbol ' + string;
-		case 9:
+		case 'ExpectingKeyword':
 			var string = problem.a;
 			return 'Expecting keyword ' + string;
-		case 10:
+		case 'ExpectingEnd':
 			return 'Expecting keyword end';
-		case 11:
+		case 'UnexpectedChar':
 			return 'Unexpected char';
-		case 12:
+		case 'Problem':
 			var problemDescription = problem.a;
 			return problemDescription;
 		default:
@@ -21537,7 +21378,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$problemToString = function (probl
 	}
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$deadEndToString = function (deadEnd) {
-	return 'Problem at row ' + ($elm$core$String$fromInt(deadEnd.dT) + ('\n' + $dillonkearns$elm_markdown$Markdown$Parser$problemToString(deadEnd.dM)));
+	return 'Problem at row ' + ($elm$core$String$fromInt(deadEnd.row) + ('\n' + $dillonkearns$elm_markdown$Markdown$Parser$problemToString(deadEnd.problem)));
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString = function (deadEnds) {
 	return A2(
@@ -21550,10 +21391,10 @@ var $dillonkearns$elm_markdown$Markdown$Parser$endWithOpenBlockOrParagraph = fun
 	endWithOpenBlockOrParagraph:
 	while (true) {
 		switch (block.$) {
-			case 1:
-				var str = block.a;
+			case 'OpenBlockOrParagraph':
+				var str = block.a.a;
 				return !A2($elm$core$String$endsWith, str, '\n');
-			case 12:
+			case 'ParsedBlockQuote':
 				var blocks = block.a;
 				if (blocks.b) {
 					var last = blocks.a;
@@ -21563,7 +21404,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$endWithOpenBlockOrParagraph = fun
 				} else {
 					return false;
 				}
-			case 4:
+			case 'OrderedListBlock':
 				var blockslist = block.e;
 				if (blockslist.b) {
 					var blocks = blockslist.a;
@@ -21578,44 +21419,56 @@ var $dillonkearns$elm_markdown$Markdown$Parser$endWithOpenBlockOrParagraph = fun
 				} else {
 					return false;
 				}
-			case 0:
+			case 'Heading':
 				return true;
 			default:
 				return false;
 		}
 	}
 };
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
 var $dillonkearns$elm_markdown$HtmlParser$Cdata = function (a) {
-	return {$: 3, a: a};
+	return {$: 'Cdata', a: a};
 };
 var $dillonkearns$elm_markdown$HtmlParser$Element = F3(
 	function (a, b, c) {
-		return {$: 0, a: a, b: b, c: c};
+		return {$: 'Element', a: a, b: b, c: c};
 	});
 var $dillonkearns$elm_markdown$HtmlParser$Text = function (a) {
-	return {$: 1, a: a};
+	return {$: 'Text', a: a};
 };
 var $elm$parser$Parser$Advanced$chompIf = F2(
 	function (isGood, expecting) {
-		return function (s) {
-			var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, s.e, s.bq);
-			return _Utils_eq(newOffset, -1) ? A2(
-				$elm$parser$Parser$Advanced$Bad,
-				false,
-				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : (_Utils_eq(newOffset, -2) ? A3(
-				$elm$parser$Parser$Advanced$Good,
-				true,
-				0,
-				{bO: 1, h: s.h, j: s.j, e: s.e + 1, dT: s.dT + 1, bq: s.bq}) : A3(
-				$elm$parser$Parser$Advanced$Good,
-				true,
-				0,
-				{bO: s.bO + 1, h: s.h, j: s.j, e: newOffset, dT: s.dT, bq: s.bq}));
-		};
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s) {
+				var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, s.offset, s.src);
+				return _Utils_eq(newOffset, -1) ? A2(
+					$elm$parser$Parser$Advanced$Bad,
+					false,
+					A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : (_Utils_eq(newOffset, -2) ? A3(
+					$elm$parser$Parser$Advanced$Good,
+					true,
+					_Utils_Tuple0,
+					{col: 1, context: s.context, indent: s.indent, offset: s.offset + 1, row: s.row + 1, src: s.src}) : A3(
+					$elm$parser$Parser$Advanced$Good,
+					true,
+					_Utils_Tuple0,
+					{col: s.col + 1, context: s.context, indent: s.indent, offset: newOffset, row: s.row, src: s.src}));
+			});
 	});
 var $dillonkearns$elm_markdown$HtmlParser$expectTagNameCharacter = $elm$parser$Parser$Expecting('at least 1 tag name character');
 var $dillonkearns$elm_markdown$HtmlParser$tagNameCharacter = function (c) {
-	switch (c) {
+	switch (c.valueOf()) {
 		case ' ':
 			return false;
 		case '\u000D':
@@ -21640,6 +21493,7 @@ var $dillonkearns$elm_markdown$HtmlParser$tagNameCharacter = function (c) {
 			return true;
 	}
 };
+var $elm$core$String$toLower = _String_toLower;
 var $dillonkearns$elm_markdown$HtmlParser$tagName = A2(
 	$elm$parser$Parser$Advanced$mapChompedString,
 	F2(
@@ -21663,13 +21517,13 @@ var $elm$parser$Parser$Advanced$loopHelp = F4(
 		loopHelp:
 		while (true) {
 			var _v0 = callback(state);
-			var parse = _v0;
+			var parse = _v0.a;
 			var _v1 = parse(s0);
-			if (!_v1.$) {
+			if (_v1.$ === 'Good') {
 				var p1 = _v1.a;
 				var step = _v1.b;
 				var s1 = _v1.c;
-				if (!step.$) {
+				if (step.$ === 'Loop') {
 					var newState = step.a;
 					var $temp$p = p || p1,
 						$temp$state = newState,
@@ -21693,23 +21547,34 @@ var $elm$parser$Parser$Advanced$loopHelp = F4(
 	});
 var $elm$parser$Parser$Advanced$loop = F2(
 	function (state, callback) {
-		return function (s) {
-			return A4($elm$parser$Parser$Advanced$loopHelp, false, state, callback, s);
-		};
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s) {
+				return A4($elm$parser$Parser$Advanced$loopHelp, false, state, callback, s);
+			});
 	});
 var $dillonkearns$elm_markdown$HtmlParser$entities = $elm$core$Dict$fromList(
 	_List_fromArray(
 		[
-			_Utils_Tuple2('amp', '&'),
-			_Utils_Tuple2('lt', '<'),
-			_Utils_Tuple2('gt', '>'),
-			_Utils_Tuple2('apos', '\''),
-			_Utils_Tuple2('quot', '\"')
+			_Utils_Tuple2(
+			'amp',
+			_Utils_chr('&')),
+			_Utils_Tuple2(
+			'lt',
+			_Utils_chr('<')),
+			_Utils_Tuple2(
+			'gt',
+			_Utils_chr('>')),
+			_Utils_Tuple2(
+			'apos',
+			_Utils_chr('\'')),
+			_Utils_Tuple2(
+			'quot',
+			_Utils_chr('\"'))
 		]));
 var $elm$core$Char$fromCode = _Char_fromCode;
 var $elm$core$Result$fromMaybe = F2(
 	function (err, maybe) {
-		if (!maybe.$) {
+		if (maybe.$ === 'Just') {
 			var v = maybe.a;
 			return $elm$core$Result$Ok(v);
 		} else {
@@ -21730,7 +21595,7 @@ var $rtfeldman$elm_hex$Hex$fromStringHelp = F3(
 			} else {
 				var _char = chars.a;
 				var rest = chars.b;
-				switch (_char) {
+				switch (_char.valueOf()) {
 					case '0':
 						var $temp$position = position - 1,
 							$temp$chars = rest,
@@ -21869,7 +21734,7 @@ var $rtfeldman$elm_hex$Hex$fromStringHelp = F3(
 	});
 var $elm$core$Result$map = F2(
 	function (func, ra) {
-		if (!ra.$) {
+		if (ra.$ === 'Ok') {
 			var a = ra.a;
 			return $elm$core$Result$Ok(
 				func(a));
@@ -21949,17 +21814,18 @@ var $dillonkearns$elm_markdown$HtmlParser$decodeEscape = function (s) {
 		A2($elm$core$Dict$get, s, $dillonkearns$elm_markdown$HtmlParser$entities)));
 };
 var $elm$parser$Parser$Advanced$problem = function (x) {
-	return function (s) {
-		return A2(
-			$elm$parser$Parser$Advanced$Bad,
-			false,
-			A2($elm$parser$Parser$Advanced$fromState, s, x));
-	};
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, x));
+		});
 };
 var $dillonkearns$elm_markdown$HtmlParser$escapedChar = function (end_) {
 	var process = function (entityStr) {
 		var _v0 = $dillonkearns$elm_markdown$HtmlParser$decodeEscape(entityStr);
-		if (!_v0.$) {
+		if (_v0.$ === 'Ok') {
 			var c = _v0.a;
 			return $elm$parser$Parser$Advanced$succeed(c);
 		} else {
@@ -21968,7 +21834,9 @@ var $dillonkearns$elm_markdown$HtmlParser$escapedChar = function (end_) {
 		}
 	};
 	var isEntityChar = function (c) {
-		return (!_Utils_eq(c, end_)) && (c !== ';');
+		return (!_Utils_eq(c, end_)) && (!_Utils_eq(
+			c,
+			_Utils_chr(';')));
 	};
 	return A2(
 		$elm$parser$Parser$Advanced$keeper,
@@ -22020,7 +21888,9 @@ var $dillonkearns$elm_markdown$HtmlParser$textStringStep = F3(
 	});
 var $dillonkearns$elm_markdown$HtmlParser$textString = function (closingChar) {
 	var predicate = function (c) {
-		return (!_Utils_eq(c, closingChar)) && (c !== '&');
+		return (!_Utils_eq(c, closingChar)) && (!_Utils_eq(
+			c,
+			_Utils_chr('&')));
 	};
 	return A2(
 		$elm$parser$Parser$Advanced$loop,
@@ -22038,7 +21908,8 @@ var $dillonkearns$elm_markdown$HtmlParser$attributeValue = $elm$parser$Parser$Ad
 				$dillonkearns$elm_markdown$HtmlParser$symbol('\"')),
 			A2(
 				$elm$parser$Parser$Advanced$ignorer,
-				$dillonkearns$elm_markdown$HtmlParser$textString('\"'),
+				$dillonkearns$elm_markdown$HtmlParser$textString(
+					_Utils_chr('\"')),
 				$dillonkearns$elm_markdown$HtmlParser$symbol('\"'))),
 			A2(
 			$elm$parser$Parser$Advanced$keeper,
@@ -22048,12 +21919,13 @@ var $dillonkearns$elm_markdown$HtmlParser$attributeValue = $elm$parser$Parser$Ad
 				$dillonkearns$elm_markdown$HtmlParser$symbol('\'')),
 			A2(
 				$elm$parser$Parser$Advanced$ignorer,
-				$dillonkearns$elm_markdown$HtmlParser$textString('\''),
+				$dillonkearns$elm_markdown$HtmlParser$textString(
+					_Utils_chr('\'')),
 				$dillonkearns$elm_markdown$HtmlParser$symbol('\'')))
 		]));
 var $dillonkearns$elm_markdown$HtmlParser$keepOldest = F2(
 	function (_new, mValue) {
-		if (!mValue.$) {
+		if (mValue.$ === 'Just') {
 			var v = mValue.a;
 			return $elm$core$Maybe$Just(v);
 		} else {
@@ -22061,7 +21933,7 @@ var $dillonkearns$elm_markdown$HtmlParser$keepOldest = F2(
 		}
 	});
 var $dillonkearns$elm_markdown$HtmlParser$isWhitespace = function (c) {
-	switch (c) {
+	switch (c.valueOf()) {
 		case ' ':
 			return true;
 		case '\u000D':
@@ -22105,6 +21977,31 @@ var $dillonkearns$elm_markdown$HtmlParser$attributesStep = function (attrs) {
 				$elm$parser$Parser$Advanced$Done(attrs))
 			]));
 };
+var $elm$core$Dict$foldl = F3(
+	function (func, acc, dict) {
+		foldl:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldl, func, acc, left)),
+					$temp$dict = right;
+				func = $temp$func;
+				acc = $temp$acc;
+				dict = $temp$dict;
+				continue foldl;
+			}
+		}
+	});
 var $dillonkearns$elm_markdown$HtmlParser$attributes = A2(
 	$elm$parser$Parser$Advanced$map,
 	A2(
@@ -22113,24 +22010,25 @@ var $dillonkearns$elm_markdown$HtmlParser$attributes = A2(
 			function (key, value, accum) {
 				return A2(
 					$elm$core$List$cons,
-					{ce: key, cL: value},
+					{name: key, value: value},
 					accum);
 			}),
 		_List_Nil),
 	A2($elm$parser$Parser$Advanced$loop, $elm$core$Dict$empty, $dillonkearns$elm_markdown$HtmlParser$attributesStep));
 var $elm$parser$Parser$Advanced$chompUntilEndOr = function (str) {
-	return function (s) {
-		var _v0 = A5(_Parser_findSubString, str, s.e, s.dT, s.bO, s.bq);
-		var newOffset = _v0.a;
-		var newRow = _v0.b;
-		var newCol = _v0.c;
-		var adjustedOffset = (newOffset < 0) ? $elm$core$String$length(s.bq) : newOffset;
-		return A3(
-			$elm$parser$Parser$Advanced$Good,
-			_Utils_cmp(s.e, adjustedOffset) < 0,
-			0,
-			{bO: newCol, h: s.h, j: s.j, e: adjustedOffset, dT: newRow, bq: s.bq});
-	};
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v0 = A5(_Parser_findSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _v0.a;
+			var newRow = _v0.b;
+			var newCol = _v0.c;
+			var adjustedOffset = (newOffset < 0) ? $elm$core$String$length(s.src) : newOffset;
+			return A3(
+				$elm$parser$Parser$Advanced$Good,
+				_Utils_cmp(s.offset, adjustedOffset) < 0,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: adjustedOffset, row: newRow, src: s.src});
+		});
 };
 var $dillonkearns$elm_markdown$HtmlParser$cdata = A2(
 	$elm$parser$Parser$Advanced$keeper,
@@ -22160,7 +22058,7 @@ var $dillonkearns$elm_markdown$HtmlParser$closingTag = function (startTagName) {
 	var closingTagName = A2(
 		$elm$parser$Parser$Advanced$andThen,
 		function (endTagName) {
-			return _Utils_eq(startTagName, endTagName) ? $elm$parser$Parser$Advanced$succeed(0) : $dillonkearns$elm_markdown$HtmlParser$fail('tag name mismatch: ' + (startTagName + (' and ' + endTagName)));
+			return _Utils_eq(startTagName, endTagName) ? $elm$parser$Parser$Advanced$succeed(_Utils_Tuple0) : $dillonkearns$elm_markdown$HtmlParser$fail('tag name mismatch: ' + (startTagName + (' and ' + endTagName)));
 		},
 		$dillonkearns$elm_markdown$HtmlParser$tagName);
 	return A2(
@@ -22178,7 +22076,7 @@ var $dillonkearns$elm_markdown$HtmlParser$closingTag = function (startTagName) {
 		$dillonkearns$elm_markdown$HtmlParser$symbol('>'));
 };
 var $dillonkearns$elm_markdown$HtmlParser$Comment = function (a) {
-	return {$: 2, a: a};
+	return {$: 'Comment', a: a};
 };
 var $dillonkearns$elm_markdown$HtmlParser$toToken = function (str) {
 	return A2(
@@ -22201,7 +22099,7 @@ var $dillonkearns$elm_markdown$HtmlParser$comment = A2(
 			$dillonkearns$elm_markdown$HtmlParser$toToken('-->'))));
 var $dillonkearns$elm_markdown$HtmlParser$Declaration = F2(
 	function (a, b) {
-		return {$: 5, a: a, b: b};
+		return {$: 'Declaration', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$HtmlParser$expectUppercaseCharacter = $elm$parser$Parser$Expecting('at least 1 uppercase character');
 var $dillonkearns$elm_markdown$HtmlParser$allUppercase = $elm$parser$Parser$Advanced$getChompedString(
@@ -22231,7 +22129,7 @@ var $dillonkearns$elm_markdown$HtmlParser$docType = A2(
 			$elm$parser$Parser$Advanced$chompUntilEndOr('>')),
 		$dillonkearns$elm_markdown$HtmlParser$symbol('>')));
 var $dillonkearns$elm_markdown$HtmlParser$ProcessingInstruction = function (a) {
-	return {$: 4, a: a};
+	return {$: 'ProcessingInstruction', a: a};
 };
 var $dillonkearns$elm_markdown$HtmlParser$processingInstruction = A2(
 	$elm$parser$Parser$Advanced$keeper,
@@ -22245,7 +22143,7 @@ var $dillonkearns$elm_markdown$HtmlParser$processingInstruction = A2(
 			$elm$parser$Parser$Advanced$chompUntilEndOr('?>')),
 		$dillonkearns$elm_markdown$HtmlParser$symbol('?>')));
 var $dillonkearns$elm_markdown$HtmlParser$isNotTextNodeIgnoreChar = function (c) {
-	switch (c) {
+	switch (c.valueOf()) {
 		case '<':
 			return false;
 		case '&':
@@ -22259,7 +22157,7 @@ var $dillonkearns$elm_markdown$HtmlParser$textNodeStringStepOptions = _List_from
 		A2(
 		$elm$parser$Parser$Advanced$map,
 		function (_v0) {
-			return $elm$parser$Parser$Advanced$Loop(0);
+			return $elm$parser$Parser$Advanced$Loop(_Utils_Tuple0);
 		},
 		A2(
 			$elm$parser$Parser$Advanced$ignorer,
@@ -22271,17 +22169,18 @@ var $dillonkearns$elm_markdown$HtmlParser$textNodeStringStepOptions = _List_from
 		A2(
 		$elm$parser$Parser$Advanced$map,
 		function (_v1) {
-			return $elm$parser$Parser$Advanced$Loop(0);
+			return $elm$parser$Parser$Advanced$Loop(_Utils_Tuple0);
 		},
-		$dillonkearns$elm_markdown$HtmlParser$escapedChar('<')),
+		$dillonkearns$elm_markdown$HtmlParser$escapedChar(
+			_Utils_chr('<'))),
 		$elm$parser$Parser$Advanced$succeed(
-		$elm$parser$Parser$Advanced$Done(0))
+		$elm$parser$Parser$Advanced$Done(_Utils_Tuple0))
 	]);
 var $dillonkearns$elm_markdown$HtmlParser$textNodeStringStep = function (_v0) {
 	return $elm$parser$Parser$Advanced$oneOf($dillonkearns$elm_markdown$HtmlParser$textNodeStringStepOptions);
 };
 var $dillonkearns$elm_markdown$HtmlParser$textNodeString = $elm$parser$Parser$Advanced$getChompedString(
-	A2($elm$parser$Parser$Advanced$loop, 0, $dillonkearns$elm_markdown$HtmlParser$textNodeStringStep));
+	A2($elm$parser$Parser$Advanced$loop, _Utils_Tuple0, $dillonkearns$elm_markdown$HtmlParser$textNodeStringStep));
 var $dillonkearns$elm_markdown$HtmlParser$children = function (startTagName) {
 	return A2(
 		$elm$parser$Parser$Advanced$loop,
@@ -22379,14 +22278,17 @@ function $dillonkearns$elm_markdown$HtmlParser$cyclic$element() {
 			$dillonkearns$elm_markdown$HtmlParser$symbol('<')),
 		A2($elm$parser$Parser$Advanced$andThen, $dillonkearns$elm_markdown$HtmlParser$elementContinuation, $dillonkearns$elm_markdown$HtmlParser$tagName));
 }
-var $dillonkearns$elm_markdown$HtmlParser$html = $dillonkearns$elm_markdown$HtmlParser$cyclic$html();
-$dillonkearns$elm_markdown$HtmlParser$cyclic$html = function () {
-	return $dillonkearns$elm_markdown$HtmlParser$html;
-};
-var $dillonkearns$elm_markdown$HtmlParser$element = $dillonkearns$elm_markdown$HtmlParser$cyclic$element();
-$dillonkearns$elm_markdown$HtmlParser$cyclic$element = function () {
-	return $dillonkearns$elm_markdown$HtmlParser$element;
-};
+try {
+	var $dillonkearns$elm_markdown$HtmlParser$html = $dillonkearns$elm_markdown$HtmlParser$cyclic$html();
+	$dillonkearns$elm_markdown$HtmlParser$cyclic$html = function () {
+		return $dillonkearns$elm_markdown$HtmlParser$html;
+	};
+	var $dillonkearns$elm_markdown$HtmlParser$element = $dillonkearns$elm_markdown$HtmlParser$cyclic$element();
+	$dillonkearns$elm_markdown$HtmlParser$cyclic$element = function () {
+		return $dillonkearns$elm_markdown$HtmlParser$element;
+	};
+} catch ($) {
+	throw 'Some top-level definitions from `HtmlParser` are causing infinite recursion:\n\n  ┌─────┐\n  │    children\n  │     ↓\n  │    childrenStepOptions\n  │     ↓\n  │    html\n  │     ↓\n  │    element\n  │     ↓\n  │    elementContinuation\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
 var $dillonkearns$elm_markdown$Parser$Token$tab = A2(
 	$elm$parser$Parser$Advanced$Token,
 	'\t',
@@ -22433,10 +22335,10 @@ var $elm$core$Basics$modBy = _Basics_modBy;
 var $dillonkearns$elm_markdown$Markdown$Helpers$isEven = function (_int) {
 	return !A2($elm$core$Basics$modBy, 2, _int);
 };
-var $dillonkearns$elm_markdown$Markdown$Block$Loose = 0;
-var $dillonkearns$elm_markdown$Markdown$Block$Tight = 1;
+var $dillonkearns$elm_markdown$Markdown$Block$Loose = {$: 'Loose'};
+var $dillonkearns$elm_markdown$Markdown$Block$Tight = {$: 'Tight'};
 var $dillonkearns$elm_markdown$Markdown$Parser$isTightBoolToListDisplay = function (isTight) {
-	return isTight ? 1 : 0;
+	return isTight ? $dillonkearns$elm_markdown$Markdown$Block$Tight : $dillonkearns$elm_markdown$Markdown$Block$Loose;
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith = F3(
 	function (joinWith, string1, string2) {
@@ -22469,17 +22371,19 @@ var $dillonkearns$elm_markdown$Markdown$Parser$innerParagraphParser = A2(
 	$elm$parser$Parser$Advanced$mapChompedString,
 	F2(
 		function (rawLine, _v0) {
-			return $dillonkearns$elm_markdown$Markdown$RawBlock$OpenBlockOrParagraph(rawLine);
+			return $dillonkearns$elm_markdown$Markdown$RawBlock$OpenBlockOrParagraph(
+				$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(rawLine));
 		}),
 	$dillonkearns$elm_markdown$Helpers$chompUntilLineEndOrEnd);
 var $dillonkearns$elm_markdown$Markdown$Parser$openBlockOrParagraphParser = A2($elm$parser$Parser$Advanced$ignorer, $dillonkearns$elm_markdown$Markdown$Parser$innerParagraphParser, $dillonkearns$elm_markdown$Helpers$lineEndOrEnd);
 var $dillonkearns$elm_markdown$Markdown$OrderedList$ListItem = F4(
 	function (order, intended, marker, body) {
-		return {cW: body, dk: intended, dq: marker, dJ: order};
+		return {body: body, intended: intended, marker: marker, order: order};
 	});
-var $elm$parser$Parser$Advanced$getCol = function (s) {
-	return A3($elm$parser$Parser$Advanced$Good, false, s.bO, s);
-};
+var $elm$parser$Parser$Advanced$getCol = $elm$parser$Parser$Advanced$Parser(
+	function (s) {
+		return A3($elm$parser$Parser$Advanced$Good, false, s.col, s);
+	});
 var $dillonkearns$elm_markdown$Markdown$OrderedList$orderedListEmptyItemParser = A2(
 	$elm$parser$Parser$Advanced$keeper,
 	$elm$parser$Parser$Advanced$succeed(
@@ -22513,8 +22417,8 @@ var $dillonkearns$elm_markdown$Markdown$OrderedList$orderedListItemBodyParser = 
 		$elm$parser$Parser$Advanced$ignorer,
 		$elm$parser$Parser$Advanced$getChompedString($dillonkearns$elm_markdown$Helpers$chompUntilLineEndOrEnd),
 		$dillonkearns$elm_markdown$Helpers$lineEndOrEnd));
-var $dillonkearns$elm_markdown$Markdown$OrderedList$Dot = 0;
-var $dillonkearns$elm_markdown$Markdown$OrderedList$Paren = 1;
+var $dillonkearns$elm_markdown$Markdown$OrderedList$Dot = {$: 'Dot'};
+var $dillonkearns$elm_markdown$Markdown$OrderedList$Paren = {$: 'Paren'};
 var $dillonkearns$elm_markdown$Parser$Token$closingParen = A2(
 	$elm$parser$Parser$Advanced$Token,
 	')',
@@ -22528,11 +22432,11 @@ var $dillonkearns$elm_markdown$Markdown$OrderedList$orderedListMarkerParser = $e
 		[
 			A2(
 			$elm$parser$Parser$Advanced$ignorer,
-			$elm$parser$Parser$Advanced$succeed(0),
+			$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$Markdown$OrderedList$Dot),
 			$elm$parser$Parser$Advanced$symbol($dillonkearns$elm_markdown$Parser$Token$dot)),
 			A2(
 			$elm$parser$Parser$Advanced$ignorer,
-			$elm$parser$Parser$Advanced$succeed(1),
+			$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$Markdown$OrderedList$Paren),
 			$elm$parser$Parser$Advanced$symbol($dillonkearns$elm_markdown$Parser$Token$closingParen))
 		]));
 var $dillonkearns$elm_markdown$Parser$Extra$positiveInteger = A2(
@@ -22578,7 +22482,7 @@ var $dillonkearns$elm_markdown$Parser$Extra$upTo = F2(
 	function (n, parser) {
 		var _v0 = A2($elm$core$List$repeat, n, parser);
 		if (!_v0.b) {
-			return $elm$parser$Parser$Advanced$succeed(0);
+			return $elm$parser$Parser$Advanced$succeed(_Utils_Tuple0);
 		} else {
 			var firstParser = _v0.a;
 			var remainingParsers = _v0.b;
@@ -22590,14 +22494,14 @@ var $dillonkearns$elm_markdown$Parser$Extra$upTo = F2(
 							_List_fromArray(
 								[
 									A2($elm$parser$Parser$Advanced$ignorer, p, parsers),
-									$elm$parser$Parser$Advanced$succeed(0)
+									$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 								]));
 					}),
 				$elm$parser$Parser$Advanced$oneOf(
 					_List_fromArray(
 						[
 							firstParser,
-							$elm$parser$Parser$Advanced$succeed(0)
+							$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 						])),
 				remainingParsers);
 		}
@@ -22679,42 +22583,42 @@ var $dillonkearns$elm_markdown$Markdown$Parser$orderedListBlock = function (prev
 	return A2(
 		$elm$parser$Parser$Advanced$map,
 		function (item) {
-			return A6($dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock, true, item.dk, item.dq, item.dJ, _List_Nil, item.cW);
+			return A6($dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock, true, item.intended, item.marker, item.order, _List_Nil, item.body);
 		},
 		$dillonkearns$elm_markdown$Markdown$OrderedList$parser(previousWasBody));
 };
 var $dillonkearns$elm_markdown$Markdown$Inline$CodeInline = function (a) {
-	return {$: 2, a: a};
+	return {$: 'CodeInline', a: a};
 };
-var $dillonkearns$elm_markdown$Markdown$Inline$HardLineBreak = {$: 1};
+var $dillonkearns$elm_markdown$Markdown$Inline$HardLineBreak = {$: 'HardLineBreak'};
 var $dillonkearns$elm_markdown$Markdown$Inline$HtmlInline = function (a) {
-	return {$: 5, a: a};
+	return {$: 'HtmlInline', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Inline$Image = F3(
 	function (a, b, c) {
-		return {$: 4, a: a, b: b, c: c};
+		return {$: 'Image', a: a, b: b, c: c};
 	});
 var $dillonkearns$elm_markdown$Markdown$Inline$Link = F3(
 	function (a, b, c) {
-		return {$: 3, a: a, b: b, c: c};
+		return {$: 'Link', a: a, b: b, c: c};
 	});
 var $dillonkearns$elm_markdown$Markdown$Inline$Strikethrough = function (a) {
-	return {$: 7, a: a};
+	return {$: 'Strikethrough', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$Inline$Text = function (a) {
-	return {$: 0, a: a};
+	return {$: 'Text', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$matchToInline = function (_v0) {
-	var match = _v0;
-	var _v1 = match.n;
+	var match = _v0.a;
+	var _v1 = match.type_;
 	switch (_v1.$) {
-		case 0:
-			return $dillonkearns$elm_markdown$Markdown$Inline$Text(match.dX);
-		case 1:
+		case 'NormalType':
+			return $dillonkearns$elm_markdown$Markdown$Inline$Text(match.text);
+		case 'HardLineBreakType':
 			return $dillonkearns$elm_markdown$Markdown$Inline$HardLineBreak;
-		case 2:
-			return $dillonkearns$elm_markdown$Markdown$Inline$CodeInline(match.dX);
-		case 3:
+		case 'CodeType':
+			return $dillonkearns$elm_markdown$Markdown$Inline$CodeInline(match.text);
+		case 'AutolinkType':
 			var _v2 = _v1.a;
 			var text = _v2.a;
 			var url = _v2.b;
@@ -22726,7 +22630,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$matchToInline = function (_
 					[
 						$dillonkearns$elm_markdown$Markdown$Inline$Text(text)
 					]));
-		case 4:
+		case 'LinkType':
 			var _v3 = _v1.a;
 			var url = _v3.a;
 			var maybeTitle = _v3.b;
@@ -22734,8 +22638,8 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$matchToInline = function (_
 				$dillonkearns$elm_markdown$Markdown$Inline$Link,
 				url,
 				maybeTitle,
-				$dillonkearns$elm_markdown$Markdown$InlineParser$matchesToInlines(match.v));
-		case 5:
+				$dillonkearns$elm_markdown$Markdown$InlineParser$matchesToInlines(match.matches));
+		case 'ImageType':
 			var _v4 = _v1.a;
 			var url = _v4.a;
 			var maybeTitle = _v4.b;
@@ -22743,63 +22647,68 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$matchToInline = function (_
 				$dillonkearns$elm_markdown$Markdown$Inline$Image,
 				url,
 				maybeTitle,
-				$dillonkearns$elm_markdown$Markdown$InlineParser$matchesToInlines(match.v));
-		case 6:
+				$dillonkearns$elm_markdown$Markdown$InlineParser$matchesToInlines(match.matches));
+		case 'HtmlType':
 			var model = _v1.a;
 			return $dillonkearns$elm_markdown$Markdown$Inline$HtmlInline(model);
-		case 7:
+		case 'EmphasisType':
 			var length = _v1.a;
 			return A2(
 				$dillonkearns$elm_markdown$Markdown$Inline$Emphasis,
 				length,
-				$dillonkearns$elm_markdown$Markdown$InlineParser$matchesToInlines(match.v));
+				$dillonkearns$elm_markdown$Markdown$InlineParser$matchesToInlines(match.matches));
 		default:
 			return $dillonkearns$elm_markdown$Markdown$Inline$Strikethrough(
-				$dillonkearns$elm_markdown$Markdown$InlineParser$matchesToInlines(match.v));
+				$dillonkearns$elm_markdown$Markdown$InlineParser$matchesToInlines(match.matches));
 	}
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$matchesToInlines = function (matches) {
 	return A2($elm$core$List$map, $dillonkearns$elm_markdown$Markdown$InlineParser$matchToInline, matches);
 };
-var $dillonkearns$elm_markdown$Markdown$InlineParser$Match = $elm$core$Basics$identity;
+var $dillonkearns$elm_markdown$Markdown$InlineParser$Match = function (a) {
+	return {$: 'Match', a: a};
+};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$prepareChildMatch = F2(
 	function (parentMatch, childMatch) {
-		return {i: childMatch.i - parentMatch.x, v: childMatch.v, k: childMatch.k - parentMatch.x, dX: childMatch.dX, I: childMatch.I - parentMatch.x, x: childMatch.x - parentMatch.x, n: childMatch.n};
+		return $dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+			{end: childMatch.end - parentMatch.textStart, matches: childMatch.matches, start: childMatch.start - parentMatch.textStart, text: childMatch.text, textEnd: childMatch.textEnd - parentMatch.textStart, textStart: childMatch.textStart - parentMatch.textStart, type_: childMatch.type_});
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$addChild = F2(
 	function (parentMatch, childMatch) {
-		return {
-			i: parentMatch.i,
-			v: A2(
-				$elm$core$List$cons,
-				A2($dillonkearns$elm_markdown$Markdown$InlineParser$prepareChildMatch, parentMatch, childMatch),
-				parentMatch.v),
-			k: parentMatch.k,
-			dX: parentMatch.dX,
-			I: parentMatch.I,
-			x: parentMatch.x,
-			n: parentMatch.n
-		};
+		return $dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+			{
+				end: parentMatch.end,
+				matches: A2(
+					$elm$core$List$cons,
+					A2($dillonkearns$elm_markdown$Markdown$InlineParser$prepareChildMatch, parentMatch, childMatch),
+					parentMatch.matches),
+				start: parentMatch.start,
+				text: parentMatch.text,
+				textEnd: parentMatch.textEnd,
+				textStart: parentMatch.textStart,
+				type_: parentMatch.type_
+			});
 	});
 var $elm$core$List$sortBy = _List_sortBy;
 var $dillonkearns$elm_markdown$Markdown$InlineParser$organizeChildren = function (_v4) {
-	var match = _v4;
-	return {
-		i: match.i,
-		v: $dillonkearns$elm_markdown$Markdown$InlineParser$organizeMatches(match.v),
-		k: match.k,
-		dX: match.dX,
-		I: match.I,
-		x: match.x,
-		n: match.n
-	};
+	var match = _v4.a;
+	return $dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+		{
+			end: match.end,
+			matches: $dillonkearns$elm_markdown$Markdown$InlineParser$organizeMatches(match.matches),
+			start: match.start,
+			text: match.text,
+			textEnd: match.textEnd,
+			textStart: match.textStart,
+			type_: match.type_
+		});
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$organizeMatches = function (matches) {
 	var _v2 = A2(
 		$elm$core$List$sortBy,
 		function (_v3) {
-			var match = _v3;
-			return match.k;
+			var match = _v3.a;
+			return match.start;
 		},
 		matches);
 	if (!_v2.b) {
@@ -22814,28 +22723,30 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$organizeMatchesHelp = F3(
 	function (remaining, _v0, matchesTail) {
 		organizeMatchesHelp:
 		while (true) {
-			var prevMatch = _v0;
+			var prevMatch = _v0.a;
 			if (!remaining.b) {
 				return A2(
 					$elm$core$List$cons,
-					$dillonkearns$elm_markdown$Markdown$InlineParser$organizeChildren(prevMatch),
+					$dillonkearns$elm_markdown$Markdown$InlineParser$organizeChildren(
+						$dillonkearns$elm_markdown$Markdown$InlineParser$Match(prevMatch)),
 					matchesTail);
 			} else {
-				var match = remaining.a;
+				var match = remaining.a.a;
 				var rest = remaining.b;
-				if (_Utils_cmp(prevMatch.i, match.k) < 1) {
+				if (_Utils_cmp(prevMatch.end, match.start) < 1) {
 					var $temp$remaining = rest,
-						$temp$_v0 = match,
+						$temp$_v0 = $dillonkearns$elm_markdown$Markdown$InlineParser$Match(match),
 						$temp$matchesTail = A2(
 						$elm$core$List$cons,
-						$dillonkearns$elm_markdown$Markdown$InlineParser$organizeChildren(prevMatch),
+						$dillonkearns$elm_markdown$Markdown$InlineParser$organizeChildren(
+							$dillonkearns$elm_markdown$Markdown$InlineParser$Match(prevMatch)),
 						matchesTail);
 					remaining = $temp$remaining;
 					_v0 = $temp$_v0;
 					matchesTail = $temp$matchesTail;
 					continue organizeMatchesHelp;
 				} else {
-					if ((_Utils_cmp(prevMatch.k, match.k) < 0) && (_Utils_cmp(prevMatch.i, match.i) > 0)) {
+					if ((_Utils_cmp(prevMatch.start, match.start) < 0) && (_Utils_cmp(prevMatch.end, match.end) > 0)) {
 						var $temp$remaining = rest,
 							$temp$_v0 = A2($dillonkearns$elm_markdown$Markdown$InlineParser$addChild, prevMatch, match),
 							$temp$matchesTail = matchesTail;
@@ -22845,7 +22756,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$organizeMatchesHelp = F3(
 						continue organizeMatchesHelp;
 					} else {
 						var $temp$remaining = rest,
-							$temp$_v0 = prevMatch,
+							$temp$_v0 = $dillonkearns$elm_markdown$Markdown$InlineParser$Match(prevMatch),
 							$temp$matchesTail = matchesTail;
 						remaining = $temp$remaining;
 						_v0 = $temp$_v0;
@@ -22856,19 +22767,19 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$organizeMatchesHelp = F3(
 			}
 		}
 	});
-var $dillonkearns$elm_markdown$Markdown$InlineParser$NormalType = {$: 0};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$NormalType = {$: 'NormalType'};
 var $dillonkearns$elm_markdown$Markdown$Helpers$containsAmpersand = function (string) {
 	return A2($elm$core$String$contains, '&', string);
 };
 var $elm$regex$Regex$Match = F4(
 	function (match, index, number, submatches) {
-		return {d: index, as: match, dE: number, bv: submatches};
+		return {index: index, match: match, number: number, submatches: submatches};
 	});
 var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
 var $elm$regex$Regex$fromString = function (string) {
 	return A2(
 		$elm$regex$Regex$fromStringWith,
-		{c$: false, du: false},
+		{caseInsensitive: false, multiline: false},
 		string);
 };
 var $elm$regex$Regex$never = _Regex_never;
@@ -22877,7 +22788,6 @@ var $dillonkearns$elm_markdown$Markdown$Entity$decimalRegex = A2(
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('&#([0-9]{1,8});'));
 var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
-var $elm$core$Basics$ge = _Utils_ge;
 var $dillonkearns$elm_markdown$Markdown$Entity$isBadEndUnicode = function (_int) {
 	var remain_ = A2($elm$core$Basics$modBy, 16, _int);
 	var remain = A2($elm$core$Basics$modBy, 131070, _int);
@@ -22892,18 +22802,18 @@ var $dillonkearns$elm_markdown$Markdown$Entity$validUnicode = function (_int) {
 		$elm$core$Char$fromCode(65533));
 };
 var $dillonkearns$elm_markdown$Markdown$Entity$replaceDecimal = function (match) {
-	var _v0 = match.bv;
-	if (_v0.b && (!_v0.a.$)) {
+	var _v0 = match.submatches;
+	if (_v0.b && (_v0.a.$ === 'Just')) {
 		var first = _v0.a.a;
 		var _v1 = $elm$core$String$toInt(first);
-		if (!_v1.$) {
+		if (_v1.$ === 'Just') {
 			var v = _v1.a;
 			return $dillonkearns$elm_markdown$Markdown$Entity$validUnicode(v);
 		} else {
-			return match.as;
+			return match.match;
 		}
 	} else {
-		return match.as;
+		return match.match;
 	}
 };
 var $dillonkearns$elm_markdown$Markdown$Entity$replaceDecimals = A2($elm$regex$Regex$replace, $dillonkearns$elm_markdown$Markdown$Entity$decimalRegex, $dillonkearns$elm_markdown$Markdown$Entity$replaceDecimal);
@@ -23169,19 +23079,19 @@ var $dillonkearns$elm_markdown$Markdown$Entity$entities = $elm$core$Dict$fromLis
 			_Utils_Tuple2('diams', 9830)
 		]));
 var $dillonkearns$elm_markdown$Markdown$Entity$replaceEntity = function (match) {
-	var _v0 = match.bv;
-	if (_v0.b && (!_v0.a.$)) {
+	var _v0 = match.submatches;
+	if (_v0.b && (_v0.a.$ === 'Just')) {
 		var first = _v0.a.a;
 		var _v1 = A2($elm$core$Dict$get, first, $dillonkearns$elm_markdown$Markdown$Entity$entities);
-		if (!_v1.$) {
+		if (_v1.$ === 'Just') {
 			var code = _v1.a;
 			return $elm$core$String$fromChar(
 				$elm$core$Char$fromCode(code));
 		} else {
-			return match.as;
+			return match.match;
 		}
 	} else {
-		return match.as;
+		return match.match;
 	}
 };
 var $dillonkearns$elm_markdown$Markdown$Entity$replaceEntities = A2($elm$regex$Regex$replace, $dillonkearns$elm_markdown$Markdown$Entity$entitiesRegex, $dillonkearns$elm_markdown$Markdown$Entity$replaceEntity);
@@ -23193,8 +23103,8 @@ var $dillonkearns$elm_markdown$Markdown$Helpers$replaceEscapable = A2(
 	$elm$regex$Regex$replace,
 	$dillonkearns$elm_markdown$Markdown$Helpers$escapableRegex,
 	function (regexMatch) {
-		var _v0 = regexMatch.bv;
-		if (((_v0.b && (!_v0.a.$)) && _v0.b.b) && (!_v0.b.a.$)) {
+		var _v0 = regexMatch.submatches;
+		if (((_v0.b && (_v0.a.$ === 'Just')) && _v0.b.b) && (_v0.b.a.$ === 'Just')) {
 			var backslashes = _v0.a.a;
 			var _v1 = _v0.b;
 			var escapedStr = _v1.a.a;
@@ -23205,7 +23115,7 @@ var $dillonkearns$elm_markdown$Markdown$Helpers$replaceEscapable = A2(
 					'\\'),
 				escapedStr);
 		} else {
-			return regexMatch.as;
+			return regexMatch.match;
 		}
 	});
 var $dillonkearns$elm_markdown$Markdown$Entity$hexadecimalRegex = A2(
@@ -23228,13 +23138,13 @@ var $dillonkearns$elm_markdown$Markdown$Entity$hexToInt = function (string) {
 		$elm$core$String$toLower(string));
 };
 var $dillonkearns$elm_markdown$Markdown$Entity$replaceHexadecimal = function (match) {
-	var _v0 = match.bv;
-	if (_v0.b && (!_v0.a.$)) {
+	var _v0 = match.submatches;
+	if (_v0.b && (_v0.a.$ === 'Just')) {
 		var first = _v0.a.a;
 		return $dillonkearns$elm_markdown$Markdown$Entity$validUnicode(
 			$dillonkearns$elm_markdown$Markdown$Entity$hexToInt(first));
 	} else {
-		return match.as;
+		return match.match;
 	}
 };
 var $dillonkearns$elm_markdown$Markdown$Entity$replaceHexadecimals = A2($elm$regex$Regex$replace, $dillonkearns$elm_markdown$Markdown$Entity$hexadecimalRegex, $dillonkearns$elm_markdown$Markdown$Entity$replaceHexadecimal);
@@ -23245,30 +23155,32 @@ var $dillonkearns$elm_markdown$Markdown$Helpers$formatStr = function (str) {
 			$dillonkearns$elm_markdown$Markdown$Entity$replaceEntities(withEscapes))) : withEscapes;
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$normalMatch = function (text) {
-	return {
-		i: 0,
-		v: _List_Nil,
-		k: 0,
-		dX: $dillonkearns$elm_markdown$Markdown$Helpers$formatStr(text),
-		I: 0,
-		x: 0,
-		n: $dillonkearns$elm_markdown$Markdown$InlineParser$NormalType
-	};
+	return $dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+		{
+			end: 0,
+			matches: _List_Nil,
+			start: 0,
+			text: $dillonkearns$elm_markdown$Markdown$Helpers$formatStr(text),
+			textEnd: 0,
+			textStart: 0,
+			type_: $dillonkearns$elm_markdown$Markdown$InlineParser$NormalType
+		});
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$parseTextMatch = F3(
 	function (rawText, _v2, parsedMatches) {
-		var matchModel = _v2;
-		var updtMatch = {
-			i: matchModel.i,
-			v: A3($dillonkearns$elm_markdown$Markdown$InlineParser$parseTextMatches, matchModel.dX, _List_Nil, matchModel.v),
-			k: matchModel.k,
-			dX: matchModel.dX,
-			I: matchModel.I,
-			x: matchModel.x,
-			n: matchModel.n
-		};
+		var matchModel = _v2.a;
+		var updtMatch = $dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+			{
+				end: matchModel.end,
+				matches: A3($dillonkearns$elm_markdown$Markdown$InlineParser$parseTextMatches, matchModel.text, _List_Nil, matchModel.matches),
+				start: matchModel.start,
+				text: matchModel.text,
+				textEnd: matchModel.textEnd,
+				textStart: matchModel.textStart,
+				type_: matchModel.type_
+			});
 		if (!parsedMatches.b) {
-			var finalStr = A2($elm$core$String$dropLeft, matchModel.i, rawText);
+			var finalStr = A2($elm$core$String$dropLeft, matchModel.end, rawText);
 			return $elm$core$String$isEmpty(finalStr) ? _List_fromArray(
 				[updtMatch]) : _List_fromArray(
 				[
@@ -23276,18 +23188,18 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$parseTextMatch = F3(
 					$dillonkearns$elm_markdown$Markdown$InlineParser$normalMatch(finalStr)
 				]);
 		} else {
-			var matchHead = parsedMatches.a;
-			var _v4 = matchHead.n;
-			if (!_v4.$) {
+			var matchHead = parsedMatches.a.a;
+			var _v4 = matchHead.type_;
+			if (_v4.$ === 'NormalType') {
 				return A2($elm$core$List$cons, updtMatch, parsedMatches);
 			} else {
-				return _Utils_eq(matchModel.i, matchHead.k) ? A2($elm$core$List$cons, updtMatch, parsedMatches) : ((_Utils_cmp(matchModel.i, matchHead.k) < 0) ? A2(
+				return _Utils_eq(matchModel.end, matchHead.start) ? A2($elm$core$List$cons, updtMatch, parsedMatches) : ((_Utils_cmp(matchModel.end, matchHead.start) < 0) ? A2(
 					$elm$core$List$cons,
 					updtMatch,
 					A2(
 						$elm$core$List$cons,
 						$dillonkearns$elm_markdown$Markdown$InlineParser$normalMatch(
-							A3($elm$core$String$slice, matchModel.i, matchHead.k, rawText)),
+							A3($elm$core$String$slice, matchModel.end, matchHead.start, rawText)),
 						parsedMatches)) : parsedMatches);
 			}
 		}
@@ -23303,11 +23215,11 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$parseTextMatches = F3(
 							$dillonkearns$elm_markdown$Markdown$InlineParser$normalMatch(rawText)
 						]);
 				} else {
-					var matchModel = parsedMatches.a;
-					return (matchModel.k > 0) ? A2(
+					var matchModel = parsedMatches.a.a;
+					return (matchModel.start > 0) ? A2(
 						$elm$core$List$cons,
 						$dillonkearns$elm_markdown$Markdown$InlineParser$normalMatch(
-							A2($elm$core$String$left, matchModel.k, rawText)),
+							A2($elm$core$String$left, matchModel.start, rawText)),
 						parsedMatches) : parsedMatches;
 				}
 			} else {
@@ -23360,7 +23272,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$cleanAngleBracketTokens = F
 				} else {
 					var hd = tokensL.a;
 					var rest = tokensL.b;
-					if (_Utils_cmp(hd.d, hd1.d) < 0) {
+					if (_Utils_cmp(hd.index, hd1.index) < 0) {
 						if (!countL) {
 							return A2(
 								$elm$core$List$cons,
@@ -23410,10 +23322,10 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$angleBracketLTokenRegex = A
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('(\\\\*)(\\<)'));
 var $elm$regex$Regex$find = _Regex_findAtMost(_Regex_infinity);
-var $dillonkearns$elm_markdown$Markdown$InlineParser$AngleBracketOpen = {$: 4};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$AngleBracketOpen = {$: 'AngleBracketOpen'};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToAngleBracketLToken = function (regMatch) {
-	var _v0 = regMatch.bv;
-	if ((_v0.b && _v0.b.b) && (!_v0.b.a.$)) {
+	var _v0 = regMatch.submatches;
+	if ((_v0.b && _v0.b.b) && (_v0.b.a.$ === 'Just')) {
 		var maybeBackslashes = _v0.a;
 		var _v1 = _v0.b;
 		var backslashesLength = A2(
@@ -23421,7 +23333,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToAngleBracketLToke
 			0,
 			A2($elm$core$Maybe$map, $elm$core$String$length, maybeBackslashes));
 		return $dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength) ? $elm$core$Maybe$Just(
-			{d: regMatch.d + backslashesLength, bf: 1, f: $dillonkearns$elm_markdown$Markdown$InlineParser$AngleBracketOpen}) : $elm$core$Maybe$Nothing;
+			{index: regMatch.index + backslashesLength, length: 1, meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$AngleBracketOpen}) : $elm$core$Maybe$Nothing;
 	} else {
 		return $elm$core$Maybe$Nothing;
 	}
@@ -23437,13 +23349,13 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$angleBracketRTokenRegex = A
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('(\\\\*)(\\>)'));
 var $dillonkearns$elm_markdown$Markdown$InlineParser$AngleBracketClose = function (a) {
-	return {$: 5, a: a};
+	return {$: 'AngleBracketClose', a: a};
 };
-var $dillonkearns$elm_markdown$Markdown$InlineParser$Escaped = 0;
-var $dillonkearns$elm_markdown$Markdown$InlineParser$NotEscaped = 1;
+var $dillonkearns$elm_markdown$Markdown$InlineParser$Escaped = {$: 'Escaped'};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$NotEscaped = {$: 'NotEscaped'};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToAngleBracketRToken = function (regMatch) {
-	var _v0 = regMatch.bv;
-	if ((_v0.b && _v0.b.b) && (!_v0.b.a.$)) {
+	var _v0 = regMatch.submatches;
+	if ((_v0.b && _v0.b.b) && (_v0.b.a.$ === 'Just')) {
 		var maybeBackslashes = _v0.a;
 		var _v1 = _v0.b;
 		var backslashesLength = A2(
@@ -23452,9 +23364,9 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToAngleBracketRToke
 			A2($elm$core$Maybe$map, $elm$core$String$length, maybeBackslashes));
 		return $elm$core$Maybe$Just(
 			{
-				d: regMatch.d + backslashesLength,
-				bf: 1,
-				f: $dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength) ? $dillonkearns$elm_markdown$Markdown$InlineParser$AngleBracketClose(1) : $dillonkearns$elm_markdown$Markdown$InlineParser$AngleBracketClose(0)
+				index: regMatch.index + backslashesLength,
+				length: 1,
+				meaning: $dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength) ? $dillonkearns$elm_markdown$Markdown$InlineParser$AngleBracketClose($dillonkearns$elm_markdown$Markdown$InlineParser$NotEscaped) : $dillonkearns$elm_markdown$Markdown$InlineParser$AngleBracketClose($dillonkearns$elm_markdown$Markdown$InlineParser$Escaped)
 			});
 	} else {
 		return $elm$core$Maybe$Nothing;
@@ -23472,10 +23384,10 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$asteriskEmphasisTokenRegex 
 	$elm$regex$Regex$fromString('(\\\\*)([^*])?(\\*+)([^*])?'));
 var $dillonkearns$elm_markdown$Markdown$InlineParser$EmphasisToken = F2(
 	function (a, b) {
-		return {$: 7, a: a, b: b};
+		return {$: 'EmphasisToken', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$isPunctuation = function (c) {
-	switch (c) {
+	switch (c.valueOf()) {
 		case '!':
 			return true;
 		case '\"':
@@ -23534,7 +23446,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$containPunctuation = A2(
 		}),
 	false);
 var $dillonkearns$elm_markdown$Markdown$InlineParser$isWhitespace = function (c) {
-	switch (c) {
+	switch (c.valueOf()) {
 		case ' ':
 			return true;
 		case '\u000C':
@@ -23565,7 +23477,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$containSpace = A2(
 		}),
 	false);
 var $dillonkearns$elm_markdown$Markdown$InlineParser$getFringeRank = function (mstring) {
-	if (!mstring.$) {
+	if (mstring.$ === 'Just') {
 		var string = mstring.a;
 		return ($elm$core$String$isEmpty(string) || $dillonkearns$elm_markdown$Markdown$InlineParser$containSpace(string)) ? 0 : ($dillonkearns$elm_markdown$Markdown$InlineParser$containPunctuation(string) ? 1 : 2);
 	} else {
@@ -23574,8 +23486,8 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$getFringeRank = function (m
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToEmphasisToken = F3(
 	function (_char, rawText, regMatch) {
-		var _v0 = regMatch.bv;
-		if ((((_v0.b && _v0.b.b) && _v0.b.b.b) && (!_v0.b.b.a.$)) && _v0.b.b.b.b) {
+		var _v0 = regMatch.submatches;
+		if ((((_v0.b && _v0.b.b) && _v0.b.b.b) && (_v0.b.b.a.$ === 'Just')) && _v0.b.b.b.b) {
 			var maybeBackslashes = _v0.a;
 			var _v1 = _v0.b;
 			var maybeLeftFringe = _v1.a;
@@ -23585,17 +23497,17 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToEmphasisToken = F
 			var maybeRightFringe = _v3.a;
 			var rFringeRank = $dillonkearns$elm_markdown$Markdown$InlineParser$getFringeRank(maybeRightFringe);
 			var leftFringeLength = function () {
-				if (!maybeLeftFringe.$) {
+				if (maybeLeftFringe.$ === 'Just') {
 					var left = maybeLeftFringe.a;
 					return $elm$core$String$length(left);
 				} else {
 					return 0;
 				}
 			}();
-			var mLeftFringe = ((!(!regMatch.d)) && (!leftFringeLength)) ? $elm$core$Maybe$Just(
-				A3($elm$core$String$slice, regMatch.d - 1, regMatch.d, rawText)) : maybeLeftFringe;
+			var mLeftFringe = ((!(!regMatch.index)) && (!leftFringeLength)) ? $elm$core$Maybe$Just(
+				A3($elm$core$String$slice, regMatch.index - 1, regMatch.index, rawText)) : maybeLeftFringe;
 			var backslashesLength = function () {
-				if (!maybeBackslashes.$) {
+				if (maybeBackslashes.$ === 'Just') {
 					var backslashes = maybeBackslashes.a;
 					return $elm$core$String$length(backslashes);
 				} else {
@@ -23603,7 +23515,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToEmphasisToken = F
 				}
 			}();
 			var isEscaped = ((!$dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength)) && (!leftFringeLength)) || function () {
-				if ((!mLeftFringe.$) && (mLeftFringe.a === '\\')) {
+				if ((mLeftFringe.$ === 'Just') && (mLeftFringe.a === '\\')) {
 					return true;
 				} else {
 					return false;
@@ -23611,18 +23523,20 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToEmphasisToken = F
 			}();
 			var delimiterLength = isEscaped ? ($elm$core$String$length(delimiter) - 1) : $elm$core$String$length(delimiter);
 			var lFringeRank = isEscaped ? 1 : $dillonkearns$elm_markdown$Markdown$InlineParser$getFringeRank(mLeftFringe);
-			if ((delimiterLength <= 0) || ((_char === '_') && ((lFringeRank === 2) && (rFringeRank === 2)))) {
+			if ((delimiterLength <= 0) || (_Utils_eq(
+				_char,
+				_Utils_chr('_')) && ((lFringeRank === 2) && (rFringeRank === 2)))) {
 				return $elm$core$Maybe$Nothing;
 			} else {
-				var index = ((regMatch.d + backslashesLength) + leftFringeLength) + (isEscaped ? 1 : 0);
+				var index = ((regMatch.index + backslashesLength) + leftFringeLength) + (isEscaped ? 1 : 0);
 				return $elm$core$Maybe$Just(
 					{
-						d: index,
-						bf: delimiterLength,
-						f: A2(
+						index: index,
+						length: delimiterLength,
+						meaning: A2(
 							$dillonkearns$elm_markdown$Markdown$InlineParser$EmphasisToken,
 							_char,
-							{aM: lFringeRank, aQ: rFringeRank})
+							{leftFringeRank: lFringeRank, rightFringeRank: rFringeRank})
 					});
 			}
 		} else {
@@ -23632,7 +23546,10 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToEmphasisToken = F
 var $dillonkearns$elm_markdown$Markdown$InlineParser$findAsteriskEmphasisTokens = function (str) {
 	return A2(
 		$elm$core$List$filterMap,
-		A2($dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToEmphasisToken, '*', str),
+		A2(
+			$dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToEmphasisToken,
+			_Utils_chr('*'),
+			str),
 		A2($elm$regex$Regex$find, $dillonkearns$elm_markdown$Markdown$InlineParser$asteriskEmphasisTokenRegex, str));
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$codeTokenRegex = A2(
@@ -23640,11 +23557,11 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$codeTokenRegex = A2(
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('(\\\\*)(\\`+)'));
 var $dillonkearns$elm_markdown$Markdown$InlineParser$CodeToken = function (a) {
-	return {$: 0, a: a};
+	return {$: 'CodeToken', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToCodeToken = function (regMatch) {
-	var _v0 = regMatch.bv;
-	if ((_v0.b && _v0.b.b) && (!_v0.b.a.$)) {
+	var _v0 = regMatch.submatches;
+	if ((_v0.b && _v0.b.b) && (_v0.b.a.$ === 'Just')) {
 		var maybeBackslashes = _v0.a;
 		var _v1 = _v0.b;
 		var backtick = _v1.a.a;
@@ -23654,9 +23571,9 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToCodeToken = funct
 			A2($elm$core$Maybe$map, $elm$core$String$length, maybeBackslashes));
 		return $elm$core$Maybe$Just(
 			{
-				d: regMatch.d + backslashesLength,
-				bf: $elm$core$String$length(backtick),
-				f: $dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength) ? $dillonkearns$elm_markdown$Markdown$InlineParser$CodeToken(1) : $dillonkearns$elm_markdown$Markdown$InlineParser$CodeToken(0)
+				index: regMatch.index + backslashesLength,
+				length: $elm$core$String$length(backtick),
+				meaning: $dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength) ? $dillonkearns$elm_markdown$Markdown$InlineParser$CodeToken($dillonkearns$elm_markdown$Markdown$InlineParser$NotEscaped) : $dillonkearns$elm_markdown$Markdown$InlineParser$CodeToken($dillonkearns$elm_markdown$Markdown$InlineParser$Escaped)
 			});
 	} else {
 		return $elm$core$Maybe$Nothing;
@@ -23672,25 +23589,25 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$hardBreakTokenRegex = A2(
 	$elm$core$Maybe$withDefault,
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('(?:(\\\\+)|( {2,}))\\n'));
-var $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken = {$: 8};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken = {$: 'HardLineBreakToken'};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToHardBreakToken = function (regMatch) {
-	var _v0 = regMatch.bv;
+	var _v0 = regMatch.submatches;
 	_v0$2:
 	while (true) {
 		if (_v0.b) {
-			if (!_v0.a.$) {
+			if (_v0.a.$ === 'Just') {
 				var backslashes = _v0.a.a;
 				var backslashesLength = $elm$core$String$length(backslashes);
 				return (!$dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength)) ? $elm$core$Maybe$Just(
-					{d: (regMatch.d + backslashesLength) - 1, bf: 2, f: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken}) : $elm$core$Maybe$Nothing;
+					{index: (regMatch.index + backslashesLength) - 1, length: 2, meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken}) : $elm$core$Maybe$Nothing;
 			} else {
-				if (_v0.b.b && (!_v0.b.a.$)) {
+				if (_v0.b.b && (_v0.b.a.$ === 'Just')) {
 					var _v1 = _v0.b;
 					return $elm$core$Maybe$Just(
 						{
-							d: regMatch.d,
-							bf: $elm$core$String$length(regMatch.as),
-							f: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken
+							index: regMatch.index,
+							length: $elm$core$String$length(regMatch.match),
+							meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken
 						});
 				} else {
 					break _v0$2;
@@ -23703,24 +23620,24 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToHardBreakToken = 
 	return $elm$core$Maybe$Nothing;
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToSoftHardBreakToken = function (regMatch) {
-	var _v0 = regMatch.bv;
+	var _v0 = regMatch.submatches;
 	_v0$2:
 	while (true) {
 		if (_v0.b) {
-			if (!_v0.a.$) {
+			if (_v0.a.$ === 'Just') {
 				var backslashes = _v0.a.a;
 				var backslashesLength = $elm$core$String$length(backslashes);
 				return $dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength) ? $elm$core$Maybe$Just(
-					{d: regMatch.d + backslashesLength, bf: 1, f: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken}) : $elm$core$Maybe$Just(
-					{d: (regMatch.d + backslashesLength) - 1, bf: 2, f: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken});
+					{index: regMatch.index + backslashesLength, length: 1, meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken}) : $elm$core$Maybe$Just(
+					{index: (regMatch.index + backslashesLength) - 1, length: 2, meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken});
 			} else {
 				if (_v0.b.b) {
 					var _v1 = _v0.b;
 					return $elm$core$Maybe$Just(
 						{
-							d: regMatch.d,
-							bf: $elm$core$String$length(regMatch.as),
-							f: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken
+							index: regMatch.index,
+							length: $elm$core$String$length(regMatch.match),
+							meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakToken
 						});
 				} else {
 					break _v0$2;
@@ -23750,10 +23667,10 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$linkImageCloseTokenRegex = 
 	$elm$core$Maybe$withDefault,
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('(\\\\*)(\\])'));
-var $dillonkearns$elm_markdown$Markdown$InlineParser$SquareBracketClose = {$: 3};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$SquareBracketClose = {$: 'SquareBracketClose'};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToLinkImageCloseToken = function (regMatch) {
-	var _v0 = regMatch.bv;
-	if ((_v0.b && _v0.b.b) && (!_v0.b.a.$)) {
+	var _v0 = regMatch.submatches;
+	if ((_v0.b && _v0.b.b) && (_v0.b.a.$ === 'Just')) {
 		var maybeBackslashes = _v0.a;
 		var _v1 = _v0.b;
 		var backslashesLength = A2(
@@ -23761,7 +23678,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToLinkImageCloseTok
 			0,
 			A2($elm$core$Maybe$map, $elm$core$String$length, maybeBackslashes));
 		return $dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength) ? $elm$core$Maybe$Just(
-			{d: regMatch.d + backslashesLength, bf: 1, f: $dillonkearns$elm_markdown$Markdown$InlineParser$SquareBracketClose}) : $elm$core$Maybe$Nothing;
+			{index: regMatch.index + backslashesLength, length: 1, meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$SquareBracketClose}) : $elm$core$Maybe$Nothing;
 	} else {
 		return $elm$core$Maybe$Nothing;
 	}
@@ -23776,14 +23693,14 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$linkImageOpenTokenRegex = A
 	$elm$core$Maybe$withDefault,
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('(\\\\*)(\\!)?(\\[)'));
-var $dillonkearns$elm_markdown$Markdown$InlineParser$Active = 0;
-var $dillonkearns$elm_markdown$Markdown$InlineParser$ImageOpenToken = {$: 2};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$Active = {$: 'Active'};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$ImageOpenToken = {$: 'ImageOpenToken'};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$LinkOpenToken = function (a) {
-	return {$: 1, a: a};
+	return {$: 'LinkOpenToken', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToLinkImageOpenToken = function (regMatch) {
-	var _v0 = regMatch.bv;
-	if (((_v0.b && _v0.b.b) && _v0.b.b.b) && (!_v0.b.b.a.$)) {
+	var _v0 = regMatch.submatches;
+	if (((_v0.b && _v0.b.b) && _v0.b.b.b) && (_v0.b.b.a.$ === 'Just')) {
 		var maybeBackslashes = _v0.a;
 		var _v1 = _v0.b;
 		var maybeImageOpen = _v1.a;
@@ -23793,28 +23710,28 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToLinkImageOpenToke
 			0,
 			A2($elm$core$Maybe$map, $elm$core$String$length, maybeBackslashes));
 		var isEscaped = !$dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength);
-		var index = isEscaped ? ((regMatch.d + backslashesLength) + 1) : (regMatch.d + backslashesLength);
+		var index = isEscaped ? ((regMatch.index + backslashesLength) + 1) : (regMatch.index + backslashesLength);
 		if (isEscaped) {
-			if (!maybeImageOpen.$) {
+			if (maybeImageOpen.$ === 'Just') {
 				return $elm$core$Maybe$Just(
 					{
-						d: index,
-						bf: 1,
-						f: $dillonkearns$elm_markdown$Markdown$InlineParser$LinkOpenToken(0)
+						index: index,
+						length: 1,
+						meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$LinkOpenToken($dillonkearns$elm_markdown$Markdown$InlineParser$Active)
 					});
 			} else {
 				return $elm$core$Maybe$Nothing;
 			}
 		} else {
-			if (!maybeImageOpen.$) {
+			if (maybeImageOpen.$ === 'Just') {
 				return $elm$core$Maybe$Just(
-					{d: index, bf: 2, f: $dillonkearns$elm_markdown$Markdown$InlineParser$ImageOpenToken});
+					{index: index, length: 2, meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$ImageOpenToken});
 			} else {
 				return $elm$core$Maybe$Just(
 					{
-						d: index,
-						bf: 1,
-						f: $dillonkearns$elm_markdown$Markdown$InlineParser$LinkOpenToken(0)
+						index: index,
+						length: 1,
+						meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$LinkOpenToken($dillonkearns$elm_markdown$Markdown$InlineParser$Active)
 					});
 			}
 		}
@@ -23829,11 +23746,11 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$findLinkImageOpenTokens = f
 		A2($elm$regex$Regex$find, $dillonkearns$elm_markdown$Markdown$InlineParser$linkImageOpenTokenRegex, str));
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$StrikethroughToken = function (a) {
-	return {$: 9, a: a};
+	return {$: 'StrikethroughToken', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToStrikethroughToken = function (regMatch) {
-	var _v0 = regMatch.bv;
-	if ((_v0.b && _v0.b.b) && (!_v0.b.a.$)) {
+	var _v0 = regMatch.submatches;
+	if ((_v0.b && _v0.b.b) && (_v0.b.a.$ === 'Just')) {
 		var maybeBackslashes = _v0.a;
 		var _v1 = _v0.b;
 		var tilde = _v1.a.a;
@@ -23843,13 +23760,13 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToStrikethroughToke
 			A2($elm$core$Maybe$map, $elm$core$String$length, maybeBackslashes));
 		var _v2 = $dillonkearns$elm_markdown$Markdown$Helpers$isEven(backslashesLength) ? _Utils_Tuple2(
 			$elm$core$String$length(tilde),
-			$dillonkearns$elm_markdown$Markdown$InlineParser$StrikethroughToken(1)) : _Utils_Tuple2(
+			$dillonkearns$elm_markdown$Markdown$InlineParser$StrikethroughToken($dillonkearns$elm_markdown$Markdown$InlineParser$NotEscaped)) : _Utils_Tuple2(
 			$elm$core$String$length(tilde),
-			$dillonkearns$elm_markdown$Markdown$InlineParser$StrikethroughToken(0));
+			$dillonkearns$elm_markdown$Markdown$InlineParser$StrikethroughToken($dillonkearns$elm_markdown$Markdown$InlineParser$Escaped));
 		var length = _v2.a;
 		var meaning = _v2.b;
 		return $elm$core$Maybe$Just(
-			{d: regMatch.d + backslashesLength, bf: length, f: meaning});
+			{index: regMatch.index + backslashesLength, length: length, meaning: meaning});
 	} else {
 		return $elm$core$Maybe$Nothing;
 	}
@@ -23871,7 +23788,10 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$underlineEmphasisTokenRegex
 var $dillonkearns$elm_markdown$Markdown$InlineParser$findUnderlineEmphasisTokens = function (str) {
 	return A2(
 		$elm$core$List$filterMap,
-		A2($dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToEmphasisToken, '_', str),
+		A2(
+			$dillonkearns$elm_markdown$Markdown$InlineParser$regMatchToEmphasisToken,
+			_Utils_chr('_'),
+			str),
 		A2($elm$regex$Regex$find, $dillonkearns$elm_markdown$Markdown$InlineParser$underlineEmphasisTokenRegex, str));
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$mergeByIndex = F2(
@@ -23882,7 +23802,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$mergeByIndex = F2(
 			if (right.b) {
 				var rfirst = right.a;
 				var rrest = right.b;
-				return (_Utils_cmp(lfirst.d, rfirst.d) < 0) ? A2(
+				return (_Utils_cmp(lfirst.index, rfirst.index) < 0) ? A2(
 					$elm$core$List$cons,
 					lfirst,
 					A2($dillonkearns$elm_markdown$Markdown$InlineParser$mergeByIndex, lrest, right)) : A2(
@@ -23904,13 +23824,13 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$tokenize = function (rawTex
 			A2(
 				$elm$core$List$sortBy,
 				function ($) {
-					return $.d;
+					return $.index;
 				},
 				$dillonkearns$elm_markdown$Markdown$InlineParser$findAngleBracketLTokens(rawText)),
 			A2(
 				$elm$core$List$sortBy,
 				function ($) {
-					return $.d;
+					return $.index;
 				},
 				$dillonkearns$elm_markdown$Markdown$InlineParser$findAngleBracketRTokens(rawText)),
 			0),
@@ -23934,23 +23854,23 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$tokenize = function (rawTex
 								$dillonkearns$elm_markdown$Markdown$InlineParser$findAsteriskEmphasisTokens(rawText),
 								$dillonkearns$elm_markdown$Markdown$InlineParser$findCodeTokens(rawText))))))));
 };
-var $dillonkearns$elm_markdown$Markdown$InlineParser$CodeType = {$: 2};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$CodeType = {$: 'CodeType'};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$EmphasisType = function (a) {
-	return {$: 7, a: a};
+	return {$: 'EmphasisType', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$HtmlType = function (a) {
-	return {$: 6, a: a};
+	return {$: 'HtmlType', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$ImageType = function (a) {
-	return {$: 5, a: a};
+	return {$: 'ImageType', a: a};
 };
-var $dillonkearns$elm_markdown$Markdown$InlineParser$Inactive = 1;
+var $dillonkearns$elm_markdown$Markdown$InlineParser$Inactive = {$: 'Inactive'};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$LinkType = function (a) {
-	return {$: 4, a: a};
+	return {$: 'LinkType', a: a};
 };
-var $dillonkearns$elm_markdown$Markdown$InlineParser$StrikethroughType = {$: 8};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$StrikethroughType = {$: 'StrikethroughType'};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$AutolinkType = function (a) {
-	return {$: 3, a: a};
+	return {$: 'AutolinkType', a: a};
 };
 var $elm$regex$Regex$contains = _Regex_contains;
 var $dillonkearns$elm_markdown$Markdown$InlineParser$decodeUrlRegex = A2(
@@ -23968,24 +23888,26 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$encodeUrl = A2(
 		function (match) {
 			return A2(
 				$elm$core$Maybe$withDefault,
-				match.as,
-				$elm$url$Url$percentDecode(match.as));
+				match.match,
+				$elm$url$Url$percentDecode(match.match));
 		}));
 var $dillonkearns$elm_markdown$Markdown$InlineParser$urlRegex = A2(
 	$elm$core$Maybe$withDefault,
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('^([A-Za-z][A-Za-z0-9.+\\-]{1,31}:[^<>\\x00-\\x20]*)$'));
 var $dillonkearns$elm_markdown$Markdown$InlineParser$autolinkToMatch = function (_v0) {
-	var match = _v0;
-	return A2($elm$regex$Regex$contains, $dillonkearns$elm_markdown$Markdown$InlineParser$urlRegex, match.dX) ? $elm$core$Result$Ok(
-		_Utils_update(
-			match,
-			{
-				n: $dillonkearns$elm_markdown$Markdown$InlineParser$AutolinkType(
-					_Utils_Tuple2(
-						match.dX,
-						$dillonkearns$elm_markdown$Markdown$InlineParser$encodeUrl(match.dX)))
-			})) : $elm$core$Result$Err(match);
+	var match = _v0.a;
+	return A2($elm$regex$Regex$contains, $dillonkearns$elm_markdown$Markdown$InlineParser$urlRegex, match.text) ? $elm$core$Result$Ok(
+		$dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+			_Utils_update(
+				match,
+				{
+					type_: $dillonkearns$elm_markdown$Markdown$InlineParser$AutolinkType(
+						_Utils_Tuple2(
+							match.text,
+							$dillonkearns$elm_markdown$Markdown$InlineParser$encodeUrl(match.text)))
+				}))) : $elm$core$Result$Err(
+		$dillonkearns$elm_markdown$Markdown$InlineParser$Match(match));
 };
 var $elm$regex$Regex$findAtMost = _Regex_findAtMost;
 var $dillonkearns$elm_markdown$Markdown$Helpers$insideSquareBracketRegex = '[^\\[\\]\\\\]*(?:\\\\.[^\\[\\]\\\\]*)*';
@@ -24007,11 +23929,11 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$prepareUrlAndTitle = F2(
 var $dillonkearns$elm_markdown$Markdown$InlineParser$refRegexToMatch = F3(
 	function (matchModel, references, maybeRegexMatch) {
 		var refLabel = function (str) {
-			return $elm$core$String$isEmpty(str) ? matchModel.dX : str;
+			return $elm$core$String$isEmpty(str) ? matchModel.text : str;
 		}(
 			A2(
 				$elm$core$Maybe$withDefault,
-				matchModel.dX,
+				matchModel.text,
 				A2(
 					$elm$core$Maybe$withDefault,
 					$elm$core$Maybe$Nothing,
@@ -24020,7 +23942,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$refRegexToMatch = F3(
 						A2(
 							$elm$core$Basics$composeR,
 							function ($) {
-								return $.bv;
+								return $.submatches;
 							},
 							$elm$core$List$head),
 						maybeRegexMatch))));
@@ -24028,15 +23950,15 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$refRegexToMatch = F3(
 			$elm$core$Dict$get,
 			$dillonkearns$elm_markdown$Markdown$Helpers$prepareRefLabel(refLabel),
 			references);
-		if (_v0.$ === 1) {
+		if (_v0.$ === 'Nothing') {
 			return $elm$core$Maybe$Nothing;
 		} else {
 			var _v1 = _v0.a;
 			var rawUrl = _v1.a;
 			var maybeTitle = _v1.b;
 			var type_ = function () {
-				var _v3 = matchModel.n;
-				if (_v3.$ === 5) {
+				var _v3 = matchModel.type_;
+				if (_v3.$ === 'ImageType') {
 					return $dillonkearns$elm_markdown$Markdown$InlineParser$ImageType(
 						A2($dillonkearns$elm_markdown$Markdown$InlineParser$prepareUrlAndTitle, rawUrl, maybeTitle));
 				} else {
@@ -24045,22 +23967,23 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$refRegexToMatch = F3(
 				}
 			}();
 			var regexMatchLength = function () {
-				if (!maybeRegexMatch.$) {
-					var match = maybeRegexMatch.a.as;
+				if (maybeRegexMatch.$ === 'Just') {
+					var match = maybeRegexMatch.a.match;
 					return $elm$core$String$length(match);
 				} else {
 					return 0;
 				}
 			}();
 			return $elm$core$Maybe$Just(
-				_Utils_update(
-					matchModel,
-					{i: matchModel.i + regexMatchLength, n: type_}));
+				$dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+					_Utils_update(
+						matchModel,
+						{end: matchModel.end + regexMatchLength, type_: type_})));
 		}
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$checkForInlineReferences = F3(
 	function (remainText, _v0, references) {
-		var tempMatch = _v0;
+		var tempMatch = _v0.a;
 		var matches = A3($elm$regex$Regex$findAtMost, 1, $dillonkearns$elm_markdown$Markdown$InlineParser$refLabelRegex, remainText);
 		return A3(
 			$dillonkearns$elm_markdown$Markdown$InlineParser$refRegexToMatch,
@@ -24079,7 +24002,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$inlineLinkTypeOrImageTypeRe
 var $dillonkearns$elm_markdown$Markdown$Helpers$returnFirstJust = function (maybes) {
 	var process = F2(
 		function (a, maybeFound) {
-			if (!maybeFound.$) {
+			if (maybeFound.$ === 'Just') {
 				var found = maybeFound.a;
 				return $elm$core$Maybe$Just(found);
 			} else {
@@ -24090,7 +24013,7 @@ var $dillonkearns$elm_markdown$Markdown$Helpers$returnFirstJust = function (mayb
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$inlineLinkTypeOrImageTypeRegexToMatch = F2(
 	function (matchModel, regexMatch) {
-		var _v0 = regexMatch.bv;
+		var _v0 = regexMatch.submatches;
 		if ((((_v0.b && _v0.b.b) && _v0.b.b.b) && _v0.b.b.b.b) && _v0.b.b.b.b.b) {
 			var maybeRawUrlAngleBrackets = _v0.a;
 			var _v1 = _v0.b;
@@ -24105,20 +24028,21 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$inlineLinkTypeOrImageTypeRe
 				_List_fromArray(
 					[maybeTitleSingleQuotes, maybeTitleDoubleQuotes, maybeTitleParenthesis]));
 			var toMatch = function (rawUrl) {
-				return _Utils_update(
-					matchModel,
-					{
-						i: matchModel.i + $elm$core$String$length(regexMatch.as),
-						n: function () {
-							var _v5 = matchModel.n;
-							if (_v5.$ === 5) {
-								return $dillonkearns$elm_markdown$Markdown$InlineParser$ImageType;
-							} else {
-								return $dillonkearns$elm_markdown$Markdown$InlineParser$LinkType;
-							}
-						}()(
-							A2($dillonkearns$elm_markdown$Markdown$InlineParser$prepareUrlAndTitle, rawUrl, maybeTitle))
-					});
+				return $dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+					_Utils_update(
+						matchModel,
+						{
+							end: matchModel.end + $elm$core$String$length(regexMatch.match),
+							type_: function () {
+								var _v5 = matchModel.type_;
+								if (_v5.$ === 'ImageType') {
+									return $dillonkearns$elm_markdown$Markdown$InlineParser$ImageType;
+								} else {
+									return $dillonkearns$elm_markdown$Markdown$InlineParser$LinkType;
+								}
+							}()(
+								A2($dillonkearns$elm_markdown$Markdown$InlineParser$prepareUrlAndTitle, rawUrl, maybeTitle))
+						}));
 			};
 			var maybeRawUrl = $dillonkearns$elm_markdown$Markdown$Helpers$returnFirstJust(
 				_List_fromArray(
@@ -24132,48 +24056,61 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$inlineLinkTypeOrImageTypeRe
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$checkForInlineLinkTypeOrImageType = F3(
 	function (remainText, _v0, refs) {
-		var tempMatch = _v0;
+		var tempMatch = _v0.a;
 		var _v1 = A3($elm$regex$Regex$findAtMost, 1, $dillonkearns$elm_markdown$Markdown$InlineParser$inlineLinkTypeOrImageTypeRegex, remainText);
 		if (_v1.b) {
 			var first = _v1.a;
 			var _v2 = A2($dillonkearns$elm_markdown$Markdown$InlineParser$inlineLinkTypeOrImageTypeRegexToMatch, tempMatch, first);
-			if (!_v2.$) {
+			if (_v2.$ === 'Just') {
 				var match = _v2.a;
 				return $elm$core$Maybe$Just(match);
 			} else {
-				return A3($dillonkearns$elm_markdown$Markdown$InlineParser$checkForInlineReferences, remainText, tempMatch, refs);
+				return A3(
+					$dillonkearns$elm_markdown$Markdown$InlineParser$checkForInlineReferences,
+					remainText,
+					$dillonkearns$elm_markdown$Markdown$InlineParser$Match(tempMatch),
+					refs);
 			}
 		} else {
-			return A3($dillonkearns$elm_markdown$Markdown$InlineParser$checkForInlineReferences, remainText, tempMatch, refs);
+			return A3(
+				$dillonkearns$elm_markdown$Markdown$InlineParser$checkForInlineReferences,
+				remainText,
+				$dillonkearns$elm_markdown$Markdown$InlineParser$Match(tempMatch),
+				refs);
 		}
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$checkParsedAheadOverlapping = F2(
 	function (_v0, remainMatches) {
-		var match = _v0;
+		var match = _v0.a;
 		var overlappingMatches = $elm$core$List$filter(
 			function (_v1) {
-				var testMatch = _v1;
-				return (_Utils_cmp(match.i, testMatch.k) > 0) && (_Utils_cmp(match.i, testMatch.i) < 0);
+				var testMatch = _v1.a;
+				return (_Utils_cmp(match.end, testMatch.start) > 0) && (_Utils_cmp(match.end, testMatch.end) < 0);
 			});
 		return ($elm$core$List$isEmpty(remainMatches) || $elm$core$List$isEmpty(
 			overlappingMatches(remainMatches))) ? $elm$core$Maybe$Just(
-			A2($elm$core$List$cons, match, remainMatches)) : $elm$core$Maybe$Nothing;
+			A2(
+				$elm$core$List$cons,
+				$dillonkearns$elm_markdown$Markdown$InlineParser$Match(match),
+				remainMatches)) : $elm$core$Maybe$Nothing;
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$emailRegex = A2(
 	$elm$core$Maybe$withDefault,
 	$elm$regex$Regex$never,
 	$elm$regex$Regex$fromString('^([a-zA-Z0-9.!#$%&\'*+\\/=?^_`{|}~\\-]+@[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?)*)$'));
 var $dillonkearns$elm_markdown$Markdown$InlineParser$emailAutolinkTypeToMatch = function (_v0) {
-	var match = _v0;
-	return A2($elm$regex$Regex$contains, $dillonkearns$elm_markdown$Markdown$InlineParser$emailRegex, match.dX) ? $elm$core$Result$Ok(
-		_Utils_update(
-			match,
-			{
-				n: $dillonkearns$elm_markdown$Markdown$InlineParser$AutolinkType(
-					_Utils_Tuple2(
-						match.dX,
-						'mailto:' + $dillonkearns$elm_markdown$Markdown$InlineParser$encodeUrl(match.dX)))
-			})) : $elm$core$Result$Err(match);
+	var match = _v0.a;
+	return A2($elm$regex$Regex$contains, $dillonkearns$elm_markdown$Markdown$InlineParser$emailRegex, match.text) ? $elm$core$Result$Ok(
+		$dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+			_Utils_update(
+				match,
+				{
+					type_: $dillonkearns$elm_markdown$Markdown$InlineParser$AutolinkType(
+						_Utils_Tuple2(
+							match.text,
+							'mailto:' + $dillonkearns$elm_markdown$Markdown$InlineParser$encodeUrl(match.text)))
+				}))) : $elm$core$Result$Err(
+		$dillonkearns$elm_markdown$Markdown$InlineParser$Match(match));
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$findTokenHelp = F3(
 	function (innerTokens, isToken, tokens) {
@@ -24208,20 +24145,21 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$findToken = F2(
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$HtmlToken = F2(
 	function (a, b) {
-		return {$: 6, a: a, b: b};
+		return {$: 'HtmlToken', a: a, b: b};
 	});
-var $dillonkearns$elm_markdown$Markdown$InlineParser$NotOpening = 0;
-var $elm$parser$Parser$Advanced$getOffset = function (s) {
-	return A3($elm$parser$Parser$Advanced$Good, false, s.e, s);
-};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$NotOpening = {$: 'NotOpening'};
+var $elm$parser$Parser$Advanced$getOffset = $elm$parser$Parser$Advanced$Parser(
+	function (s) {
+		return A3($elm$parser$Parser$Advanced$Good, false, s.offset, s);
+	});
 var $elm$parser$Parser$Advanced$bagToList = F2(
 	function (bag, list) {
 		bagToList:
 		while (true) {
 			switch (bag.$) {
-				case 0:
+				case 'Empty':
 					return list;
-				case 1:
+				case 'AddRight':
 					var bag1 = bag.a;
 					var x = bag.b;
 					var $temp$bag = bag1,
@@ -24242,10 +24180,10 @@ var $elm$parser$Parser$Advanced$bagToList = F2(
 	});
 var $elm$parser$Parser$Advanced$run = F2(
 	function (_v0, src) {
-		var parse = _v0;
+		var parse = _v0.a;
 		var _v1 = parse(
-			{bO: 1, h: _List_Nil, j: 1, e: 0, dT: 1, bq: src});
-		if (!_v1.$) {
+			{col: 1, context: _List_Nil, indent: 1, offset: 0, row: 1, src: src});
+		if (_v1.$ === 'Good') {
 			var value = _v1.b;
 			return $elm$core$Result$Ok(value);
 		} else {
@@ -24256,7 +24194,7 @@ var $elm$parser$Parser$Advanced$run = F2(
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$htmlToToken = F2(
 	function (rawText, _v0) {
-		var match = _v0;
+		var match = _v0.a;
 		var consumedCharacters = A2(
 			$elm$parser$Parser$Advanced$keeper,
 			A2(
@@ -24266,7 +24204,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$htmlToToken = F2(
 					$elm$parser$Parser$Advanced$succeed(
 						F3(
 							function (startOffset, htmlTag, endOffset) {
-								return {b1: htmlTag, bf: endOffset - startOffset};
+								return {htmlTag: htmlTag, length: endOffset - startOffset};
 							})),
 					$elm$parser$Parser$Advanced$getOffset),
 				$dillonkearns$elm_markdown$HtmlParser$html),
@@ -24274,20 +24212,20 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$htmlToToken = F2(
 		var parsed = A2(
 			$elm$parser$Parser$Advanced$run,
 			consumedCharacters,
-			A2($elm$core$String$dropLeft, match.k, rawText));
-		if (!parsed.$) {
-			var htmlTag = parsed.a.b1;
-			var length = parsed.a.bf;
-			var htmlToken = A2($dillonkearns$elm_markdown$Markdown$InlineParser$HtmlToken, 0, htmlTag);
+			A2($elm$core$String$dropLeft, match.start, rawText));
+		if (parsed.$ === 'Ok') {
+			var htmlTag = parsed.a.htmlTag;
+			var length = parsed.a.length;
+			var htmlToken = A2($dillonkearns$elm_markdown$Markdown$InlineParser$HtmlToken, $dillonkearns$elm_markdown$Markdown$InlineParser$NotOpening, htmlTag);
 			return $elm$core$Maybe$Just(
-				{d: match.k, bf: length, f: htmlToken});
+				{index: match.start, length: length, meaning: htmlToken});
 		} else {
 			return $elm$core$Maybe$Nothing;
 		}
 	});
 var $dillonkearns$elm_markdown$Markdown$Helpers$ifError = F2(
 	function (_function, result) {
-		if (!result.$) {
+		if (result.$ === 'Ok') {
 			return result;
 		} else {
 			var err = result.a;
@@ -24296,25 +24234,25 @@ var $dillonkearns$elm_markdown$Markdown$Helpers$ifError = F2(
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$isCodeTokenPair = F2(
 	function (closeToken, openToken) {
-		var _v0 = openToken.f;
-		if (!_v0.$) {
-			if (!_v0.a) {
+		var _v0 = openToken.meaning;
+		if (_v0.$ === 'CodeToken') {
+			if (_v0.a.$ === 'Escaped') {
 				var _v1 = _v0.a;
-				return _Utils_eq(openToken.bf - 1, closeToken.bf);
+				return _Utils_eq(openToken.length - 1, closeToken.length);
 			} else {
 				var _v2 = _v0.a;
-				return _Utils_eq(openToken.bf, closeToken.bf);
+				return _Utils_eq(openToken.length, closeToken.length);
 			}
 		} else {
 			return false;
 		}
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$isLinkTypeOrImageOpenToken = function (token) {
-	var _v0 = token.f;
+	var _v0 = token.meaning;
 	switch (_v0.$) {
-		case 1:
+		case 'LinkOpenToken':
 			return true;
-		case 2:
+		case 'ImageOpenToken':
 			return true;
 		default:
 			return false;
@@ -24322,15 +24260,15 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$isLinkTypeOrImageOpenToken 
 };
 var $dillonkearns$elm_markdown$Markdown$InlineParser$isOpenEmphasisToken = F2(
 	function (closeToken, openToken) {
-		var _v0 = openToken.f;
-		if (_v0.$ === 7) {
+		var _v0 = openToken.meaning;
+		if (_v0.$ === 'EmphasisToken') {
 			var openChar = _v0.a;
 			var open = _v0.b;
-			var _v1 = closeToken.f;
-			if (_v1.$ === 7) {
+			var _v1 = closeToken.meaning;
+			if (_v1.$ === 'EmphasisToken') {
 				var closeChar = _v1.a;
 				var close = _v1.b;
-				return _Utils_eq(openChar, closeChar) ? ((_Utils_eq(open.aM, open.aQ) || _Utils_eq(close.aM, close.aQ)) ? ((!(!A2($elm$core$Basics$modBy, 3, closeToken.bf + openToken.bf))) || ((!A2($elm$core$Basics$modBy, 3, closeToken.bf)) && (!A2($elm$core$Basics$modBy, 3, openToken.bf)))) : true) : false;
+				return _Utils_eq(openChar, closeChar) ? ((_Utils_eq(open.leftFringeRank, open.rightFringeRank) || _Utils_eq(close.leftFringeRank, close.rightFringeRank)) ? ((!(!A2($elm$core$Basics$modBy, 3, closeToken.length + openToken.length))) || ((!A2($elm$core$Basics$modBy, 3, closeToken.length)) && (!A2($elm$core$Basics$modBy, 3, openToken.length)))) : true) : false;
 			} else {
 				return false;
 			}
@@ -24341,14 +24279,14 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$isOpenEmphasisToken = F2(
 var $dillonkearns$elm_markdown$Markdown$InlineParser$isStrikethroughTokenPair = F2(
 	function (closeToken, openToken) {
 		var _v0 = function () {
-			var _v1 = openToken.f;
-			if (_v1.$ === 9) {
-				if (!_v1.a) {
+			var _v1 = openToken.meaning;
+			if (_v1.$ === 'StrikethroughToken') {
+				if (_v1.a.$ === 'Escaped') {
 					var _v2 = _v1.a;
-					return _Utils_Tuple2(true, openToken.bf - 1);
+					return _Utils_Tuple2(true, openToken.length - 1);
 				} else {
 					var _v3 = _v1.a;
-					return _Utils_Tuple2(true, openToken.bf);
+					return _Utils_Tuple2(true, openToken.length);
 				}
 			} else {
 				return _Utils_Tuple2(false, 0);
@@ -24357,14 +24295,14 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$isStrikethroughTokenPair = 
 		var openTokenIsStrikethrough = _v0.a;
 		var openTokenLength = _v0.b;
 		var _v4 = function () {
-			var _v5 = closeToken.f;
-			if (_v5.$ === 9) {
-				if (!_v5.a) {
+			var _v5 = closeToken.meaning;
+			if (_v5.$ === 'StrikethroughToken') {
+				if (_v5.a.$ === 'Escaped') {
 					var _v6 = _v5.a;
-					return _Utils_Tuple2(true, closeToken.bf - 1);
+					return _Utils_Tuple2(true, closeToken.length - 1);
 				} else {
 					var _v7 = _v5.a;
-					return _Utils_Tuple2(true, closeToken.bf);
+					return _Utils_Tuple2(true, closeToken.length);
 				}
 			} else {
 				return _Utils_Tuple2(false, 0);
@@ -24374,10 +24312,11 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$isStrikethroughTokenPair = 
 		var closeTokenLength = _v4.b;
 		return closeTokenIsStrikethrough && (openTokenIsStrikethrough && _Utils_eq(closeTokenLength, openTokenLength));
 	});
-var $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakType = {$: 1};
+var $dillonkearns$elm_markdown$Markdown$InlineParser$HardLineBreakType = {$: 'HardLineBreakType'};
 var $dillonkearns$elm_markdown$Markdown$InlineParser$tokenToMatch = F2(
 	function (token, type_) {
-		return {i: token.d + token.bf, v: _List_Nil, k: token.d, dX: '', I: 0, x: 0, n: type_};
+		return $dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+			{end: token.index + token.length, matches: _List_Nil, start: token.index, text: '', textEnd: 0, textStart: 0, type_: type_});
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$lineBreakTTM = F2(
 	function (remaining, matches) {
@@ -24388,8 +24327,8 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$lineBreakTTM = F2(
 			} else {
 				var token = remaining.a;
 				var tokensTail = remaining.b;
-				var _v1 = token.f;
-				if (_v1.$ === 8) {
+				var _v1 = token.meaning;
+				if (_v1.$ === 'HardLineBreakToken') {
 					var $temp$remaining = tokensTail,
 						$temp$matches = A2(
 						$elm$core$List$cons,
@@ -24410,11 +24349,11 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$lineBreakTTM = F2(
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$removeParsedAheadTokens = F2(
 	function (_v0, tokensTail) {
-		var match = _v0;
+		var match = _v0.a;
 		return A2(
 			$elm$core$List$filter,
 			function (token) {
-				return _Utils_cmp(token.d, match.i) > -1;
+				return _Utils_cmp(token.index, match.end) > -1;
 			},
 			tokensTail);
 	});
@@ -24437,11 +24376,11 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$angleBracketsToMatch = F6(
 					openToken,
 					closeToken,
 					_List_Nil)));
-		if (result.$ === 1) {
+		if (result.$ === 'Err') {
 			var tempMatch = result.a;
-			if (escaped === 1) {
+			if (escaped.$ === 'NotEscaped') {
 				var _v47 = A2($dillonkearns$elm_markdown$Markdown$InlineParser$htmlToToken, rawText, tempMatch);
-				if (!_v47.$) {
+				if (_v47.$ === 'Just') {
 					var newToken = _v47.a;
 					return $elm$core$Maybe$Just(
 						_Utils_Tuple2(
@@ -24476,14 +24415,14 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$codeAutolinkTypeHtmlTagTTM 
 			} else {
 				var token = remaining.a;
 				var tokensTail = remaining.b;
-				var _v36 = token.f;
+				var _v36 = token.meaning;
 				switch (_v36.$) {
-					case 0:
+					case 'CodeToken':
 						var _v37 = A2(
 							$dillonkearns$elm_markdown$Markdown$InlineParser$findToken,
 							$dillonkearns$elm_markdown$Markdown$InlineParser$isCodeTokenPair(token),
 							tokens);
-						if (!_v37.$) {
+						if (_v37.$ === 'Just') {
 							var code = _v37.a;
 							var _v38 = A5($dillonkearns$elm_markdown$Markdown$InlineParser$codeToMatch, token, matches, references, rawText, code);
 							var newTokens = _v38.a;
@@ -24512,21 +24451,21 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$codeAutolinkTypeHtmlTagTTM 
 							rawText = $temp$rawText;
 							continue codeAutolinkTypeHtmlTagTTM;
 						}
-					case 5:
+					case 'AngleBracketClose':
 						var isEscaped = _v36.a;
 						var isAngleBracketOpen = function (_v43) {
-							var meaning = _v43.f;
-							if (meaning.$ === 4) {
+							var meaning = _v43.meaning;
+							if (meaning.$ === 'AngleBracketOpen') {
 								return true;
 							} else {
 								return false;
 							}
 						};
 						var _v39 = A2($dillonkearns$elm_markdown$Markdown$InlineParser$findToken, isAngleBracketOpen, tokens);
-						if (!_v39.$) {
+						if (_v39.$ === 'Just') {
 							var found = _v39.a;
 							var _v40 = A6($dillonkearns$elm_markdown$Markdown$InlineParser$angleBracketsToMatch, token, isEscaped, matches, references, rawText, found);
-							if (!_v40.$) {
+							if (_v40.$ === 'Just') {
 								var _v41 = _v40.a;
 								var newTokens = _v41.a;
 								var newMatches = _v41.b;
@@ -24597,12 +24536,12 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$codeToMatch = F5(
 		var openToken = _v32.a;
 		var remainTokens = _v32.c;
 		var updatedOpenToken = function () {
-			var _v33 = openToken.f;
-			if ((!_v33.$) && (!_v33.a)) {
+			var _v33 = openToken.meaning;
+			if ((_v33.$ === 'CodeToken') && (_v33.a.$ === 'Escaped')) {
 				var _v34 = _v33.a;
 				return _Utils_update(
 					openToken,
-					{d: openToken.d + 1, bf: openToken.bf - 1});
+					{index: openToken.index + 1, length: openToken.length - 1});
 			} else {
 				return openToken;
 			}
@@ -24627,18 +24566,20 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$emphasisTTM = F5(
 			} else {
 				var token = remaining.a;
 				var tokensTail = remaining.b;
-				var _v27 = token.f;
-				if (_v27.$ === 7) {
+				var _v27 = token.meaning;
+				if (_v27.$ === 'EmphasisToken') {
 					var _char = _v27.a;
-					var leftFringeRank = _v27.b.aM;
-					var rightFringeRank = _v27.b.aQ;
+					var leftFringeRank = _v27.b.leftFringeRank;
+					var rightFringeRank = _v27.b.rightFringeRank;
 					if (_Utils_eq(leftFringeRank, rightFringeRank)) {
-						if ((!(!rightFringeRank)) && ((_char !== '_') || (rightFringeRank === 1))) {
+						if ((!(!rightFringeRank)) && ((!_Utils_eq(
+							_char,
+							_Utils_chr('_'))) || (rightFringeRank === 1))) {
 							var _v28 = A2(
 								$dillonkearns$elm_markdown$Markdown$InlineParser$findToken,
 								$dillonkearns$elm_markdown$Markdown$InlineParser$isOpenEmphasisToken(token),
 								tokens);
-							if (!_v28.$) {
+							if (_v28.$ === 'Just') {
 								var found = _v28.a;
 								var _v29 = A5($dillonkearns$elm_markdown$Markdown$InlineParser$emphasisToMatch, references, rawText, token, tokensTail, found);
 								var newRemaining = _v29.a;
@@ -24699,7 +24640,7 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$emphasisTTM = F5(
 								$dillonkearns$elm_markdown$Markdown$InlineParser$findToken,
 								$dillonkearns$elm_markdown$Markdown$InlineParser$isOpenEmphasisToken(token),
 								tokens);
-							if (!_v30.$) {
+							if (_v30.$ === 'Just') {
 								var found = _v30.a;
 								var _v31 = A5($dillonkearns$elm_markdown$Markdown$InlineParser$emphasisToMatch, references, rawText, token, tokensTail, found);
 								var newRemaining = _v31.a;
@@ -24752,30 +24693,30 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$emphasisToMatch = F5(
 		var openToken = _v25.a;
 		var innerTokens = _v25.b;
 		var remainTokens = _v25.c;
-		var remainLength = openToken.bf - closeToken.bf;
-		var updt = (!remainLength) ? {aH: closeToken, au: openToken, aP: remainTokens, aZ: tokensTail} : ((remainLength > 0) ? {
-			aH: closeToken,
-			au: _Utils_update(
+		var remainLength = openToken.length - closeToken.length;
+		var updt = (!remainLength) ? {closeToken: closeToken, openToken: openToken, remainTokens: remainTokens, tokensTail: tokensTail} : ((remainLength > 0) ? {
+			closeToken: closeToken,
+			openToken: _Utils_update(
 				openToken,
-				{d: openToken.d + remainLength, bf: closeToken.bf}),
-			aP: A2(
+				{index: openToken.index + remainLength, length: closeToken.length}),
+			remainTokens: A2(
 				$elm$core$List$cons,
 				_Utils_update(
 					openToken,
-					{bf: remainLength}),
+					{length: remainLength}),
 				remainTokens),
-			aZ: tokensTail
+			tokensTail: tokensTail
 		} : {
-			aH: _Utils_update(
+			closeToken: _Utils_update(
 				closeToken,
-				{bf: openToken.bf}),
-			au: openToken,
-			aP: remainTokens,
-			aZ: A2(
+				{length: openToken.length}),
+			openToken: openToken,
+			remainTokens: remainTokens,
+			tokensTail: A2(
 				$elm$core$List$cons,
 				_Utils_update(
 					closeToken,
-					{d: closeToken.d + openToken.bf, bf: -remainLength}),
+					{index: closeToken.index + openToken.length, length: -remainLength}),
 				tokensTail)
 		});
 		var match = A7(
@@ -24785,11 +24726,11 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$emphasisToMatch = F5(
 			function (s) {
 				return s;
 			},
-			$dillonkearns$elm_markdown$Markdown$InlineParser$EmphasisType(updt.au.bf),
-			updt.au,
-			updt.aH,
+			$dillonkearns$elm_markdown$Markdown$InlineParser$EmphasisType(updt.openToken.length),
+			updt.openToken,
+			updt.closeToken,
 			$elm$core$List$reverse(innerTokens));
-		return _Utils_Tuple3(updt.aZ, match, updt.aP);
+		return _Utils_Tuple3(updt.tokensTail, match, updt.remainTokens);
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$htmlElementTTM = F5(
 	function (remaining, tokens, matches, references, rawText) {
@@ -24806,8 +24747,8 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$htmlElementTTM = F5(
 			} else {
 				var token = remaining.a;
 				var tokensTail = remaining.b;
-				var _v23 = token.f;
-				if (_v23.$ === 6) {
+				var _v23 = token.meaning;
+				if (_v23.$ === 'HtmlToken') {
 					var isOpen = _v23.a;
 					var htmlModel = _v23.b;
 					var $temp$remaining = tokensTail,
@@ -24858,13 +24799,13 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$linkImageTypeTTM = F5(
 			} else {
 				var token = remaining.a;
 				var tokensTail = remaining.b;
-				var _v18 = token.f;
-				if (_v18.$ === 3) {
+				var _v18 = token.meaning;
+				if (_v18.$ === 'SquareBracketClose') {
 					var _v19 = A2($dillonkearns$elm_markdown$Markdown$InlineParser$findToken, $dillonkearns$elm_markdown$Markdown$InlineParser$isLinkTypeOrImageOpenToken, tokens);
-					if (!_v19.$) {
+					if (_v19.$ === 'Just') {
 						var found = _v19.a;
 						var _v20 = A6($dillonkearns$elm_markdown$Markdown$InlineParser$linkOrImageTypeToMatch, token, tokensTail, matches, references, rawText, found);
-						if (!_v20.$) {
+						if (_v20.$ === 'Just') {
 							var _v21 = _v20.a;
 							var x = _v21.a;
 							var newMatches = _v21.b;
@@ -24931,14 +24872,14 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$linkOrImageTypeToMatch = F6
 			tokensTail,
 			oldMatches,
 			_Utils_ap(innerTokens, remainTokens));
-		var remainText = A2($elm$core$String$dropLeft, closeToken.d + 1, rawText);
+		var remainText = A2($elm$core$String$dropLeft, closeToken.index + 1, rawText);
 		var inactivateLinkOpenToken = function (token) {
-			var _v16 = token.f;
-			if (_v16.$ === 1) {
+			var _v16 = token.meaning;
+			if (_v16.$ === 'LinkOpenToken') {
 				return _Utils_update(
 					token,
 					{
-						f: $dillonkearns$elm_markdown$Markdown$InlineParser$LinkOpenToken(1)
+						meaning: $dillonkearns$elm_markdown$Markdown$InlineParser$LinkOpenToken($dillonkearns$elm_markdown$Markdown$InlineParser$Inactive)
 					});
 			} else {
 				return token;
@@ -24959,17 +24900,17 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$linkOrImageTypeToMatch = F6
 				closeToken,
 				$elm$core$List$reverse(innerTokens));
 		};
-		var _v9 = openToken.f;
+		var _v9 = openToken.meaning;
 		switch (_v9.$) {
-			case 2:
+			case 'ImageOpenToken':
 				var tempMatch = findTempMatch(false);
 				var _v10 = A3($dillonkearns$elm_markdown$Markdown$InlineParser$checkForInlineLinkTypeOrImageType, remainText, tempMatch, references);
-				if (_v10.$ === 1) {
+				if (_v10.$ === 'Nothing') {
 					return $elm$core$Maybe$Just(removeOpenToken);
 				} else {
 					var match = _v10.a;
 					var _v11 = A2($dillonkearns$elm_markdown$Markdown$InlineParser$checkParsedAheadOverlapping, match, oldMatches);
-					if (!_v11.$) {
+					if (_v11.$ === 'Just') {
 						var matches = _v11.a;
 						return $elm$core$Maybe$Just(
 							_Utils_Tuple3(
@@ -24980,17 +24921,17 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$linkOrImageTypeToMatch = F6
 						return $elm$core$Maybe$Just(removeOpenToken);
 					}
 				}
-			case 1:
-				if (!_v9.a) {
+			case 'LinkOpenToken':
+				if (_v9.a.$ === 'Active') {
 					var _v12 = _v9.a;
 					var tempMatch = findTempMatch(true);
 					var _v13 = A3($dillonkearns$elm_markdown$Markdown$InlineParser$checkForInlineLinkTypeOrImageType, remainText, tempMatch, references);
-					if (_v13.$ === 1) {
+					if (_v13.$ === 'Nothing') {
 						return $elm$core$Maybe$Just(removeOpenToken);
 					} else {
 						var match = _v13.a;
 						var _v14 = A2($dillonkearns$elm_markdown$Markdown$InlineParser$checkParsedAheadOverlapping, match, oldMatches);
-						if (!_v14.$) {
+						if (_v14.$ === 'Just') {
 							var matches = _v14.a;
 							return $elm$core$Maybe$Just(
 								_Utils_Tuple3(
@@ -25021,13 +24962,13 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$strikethroughTTM = F5(
 			} else {
 				var token = remaining.a;
 				var tokensTail = remaining.b;
-				var _v5 = token.f;
-				if (_v5.$ === 9) {
+				var _v5 = token.meaning;
+				if (_v5.$ === 'StrikethroughToken') {
 					var _v6 = A2(
 						$dillonkearns$elm_markdown$Markdown$InlineParser$findToken,
 						$dillonkearns$elm_markdown$Markdown$InlineParser$isStrikethroughTokenPair(token),
 						tokens);
-					if (!_v6.$) {
+					if (_v6.$ === 'Just') {
 						var content = _v6.a;
 						var _v7 = A5($dillonkearns$elm_markdown$Markdown$InlineParser$strikethroughToMatch, token, matches, references, rawText, content);
 						var newTokens = _v7.a;
@@ -25077,12 +25018,12 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$strikethroughToMatch = F5(
 		var openToken = _v1.a;
 		var remainTokens = _v1.c;
 		var updatedOpenToken = function () {
-			var _v2 = openToken.f;
-			if ((_v2.$ === 9) && (!_v2.a)) {
+			var _v2 = openToken.meaning;
+			if ((_v2.$ === 'StrikethroughToken') && (_v2.a.$ === 'Escaped')) {
 				var _v3 = _v2.a;
 				return _Utils_update(
 					openToken,
-					{d: openToken.d + 1, bf: openToken.bf - 1});
+					{index: openToken.index + 1, length: openToken.length - 1});
 			} else {
 				return openToken;
 			}
@@ -25094,21 +25035,22 @@ var $dillonkearns$elm_markdown$Markdown$InlineParser$strikethroughToMatch = F5(
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$tokenPairToMatch = F7(
 	function (references, rawText, processText, type_, openToken, closeToken, innerTokens) {
-		var textStart = openToken.d + openToken.bf;
-		var textEnd = closeToken.d;
+		var textStart = openToken.index + openToken.length;
+		var textEnd = closeToken.index;
 		var text = processText(
 			A3($elm$core$String$slice, textStart, textEnd, rawText));
-		var start = openToken.d;
-		var end = closeToken.d + closeToken.bf;
-		var match = {i: end, v: _List_Nil, k: start, dX: text, I: textEnd, x: textStart, n: type_};
+		var start = openToken.index;
+		var end = closeToken.index + closeToken.length;
+		var match = {end: end, matches: _List_Nil, start: start, text: text, textEnd: textEnd, textStart: textStart, type_: type_};
 		var matches = A2(
 			$elm$core$List$map,
 			function (_v0) {
-				var matchModel = _v0;
+				var matchModel = _v0.a;
 				return A2($dillonkearns$elm_markdown$Markdown$InlineParser$prepareChildMatch, match, matchModel);
 			},
 			A4($dillonkearns$elm_markdown$Markdown$InlineParser$tokensToMatches, innerTokens, _List_Nil, references, rawText));
-		return {i: end, v: matches, k: start, dX: text, I: textEnd, x: textStart, n: type_};
+		return $dillonkearns$elm_markdown$Markdown$InlineParser$Match(
+			{end: end, matches: matches, start: start, text: text, textEnd: textEnd, textStart: textStart, type_: type_});
 	});
 var $dillonkearns$elm_markdown$Markdown$InlineParser$tokensToMatches = F4(
 	function (tokens, matches, references, rawText) {
@@ -25150,7 +25092,9 @@ var $dillonkearns$elm_markdown$Markdown$Parser$thisIsDefinitelyNotAnHtmlTag = $e
 					$elm$parser$Parser$Expecting('Alpha')),
 				$elm$parser$Parser$Advanced$chompWhile(
 					function (c) {
-						return $elm$core$Char$isAlphaNum(c) || (c === '-');
+						return $elm$core$Char$isAlphaNum(c) || _Utils_eq(
+							c,
+							_Utils_chr('-'));
 					})),
 			$elm$parser$Parser$Advanced$oneOf(
 				_List_fromArray(
@@ -25187,7 +25131,8 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseAsParagraphInsteadOfHtmlBloc
 		$elm$parser$Parser$Advanced$mapChompedString,
 		F2(
 			function (rawLine, _v0) {
-				return $dillonkearns$elm_markdown$Markdown$RawBlock$OpenBlockOrParagraph(rawLine);
+				return $dillonkearns$elm_markdown$Markdown$RawBlock$OpenBlockOrParagraph(
+					$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(rawLine));
 			}),
 		A2(
 			$elm$parser$Parser$Advanced$ignorer,
@@ -25203,7 +25148,9 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseAsParagraphInsteadOfHtmlBloc
 					$dillonkearns$elm_markdown$Markdown$Parser$thisIsDefinitelyNotAnHtmlTag),
 				$dillonkearns$elm_markdown$Helpers$chompUntilLineEndOrEnd),
 			$dillonkearns$elm_markdown$Helpers$lineEndOrEnd)));
-var $dillonkearns$elm_markdown$Markdown$Table$TableHeader = $elm$core$Basics$identity;
+var $dillonkearns$elm_markdown$Markdown$Table$TableHeader = function (a) {
+	return {$: 'TableHeader', a: a};
+};
 var $dillonkearns$elm_markdown$Parser$Token$parseString = function (str) {
 	return $elm$parser$Parser$Advanced$token(
 		A2(
@@ -25331,7 +25278,7 @@ var $dillonkearns$elm_markdown$Markdown$TableParser$rowParser = A2(
 			_List_fromArray(
 				[
 					$dillonkearns$elm_markdown$Parser$Token$parseString('|'),
-					$elm$parser$Parser$Advanced$succeed(0)
+					$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 				]))),
 	$dillonkearns$elm_markdown$Markdown$TableParser$parseCells);
 var $dillonkearns$elm_markdown$Markdown$TableParser$parseHeader = F2(
@@ -25342,7 +25289,7 @@ var $dillonkearns$elm_markdown$Markdown$TableParser$parseHeader = F2(
 				$elm$core$List$map2,
 				F2(
 					function (headerCell, alignment) {
-						return {aD: alignment, ai: headerCell};
+						return {alignment: alignment, label: headerCell};
 					}),
 				headers,
 				columnAlignments);
@@ -25351,13 +25298,14 @@ var $dillonkearns$elm_markdown$Markdown$TableParser$parseHeader = F2(
 			return _Utils_eq(
 				$elm$core$List$length(headers),
 				$elm$core$List$length(columnAlignments)) ? $elm$core$Result$Ok(
-				headersWithAlignment(headers)) : $elm$core$Result$Err(
+				$dillonkearns$elm_markdown$Markdown$Table$TableHeader(
+					headersWithAlignment(headers))) : $elm$core$Result$Err(
 				'Tables must have the same number of header columns (' + ($elm$core$String$fromInt(
 					$elm$core$List$length(headers)) + (') as delimiter columns (' + ($elm$core$String$fromInt(
 					$elm$core$List$length(columnAlignments)) + ')'))));
 		};
 		var _v1 = A2($elm$parser$Parser$Advanced$run, $dillonkearns$elm_markdown$Markdown$TableParser$rowParser, headersRow);
-		if (!_v1.$) {
+		if (_v1.$ === 'Ok') {
 			var headers = _v1.a;
 			return combineHeaderAndDelimiter(headers);
 		} else {
@@ -25366,7 +25314,7 @@ var $dillonkearns$elm_markdown$Markdown$TableParser$parseHeader = F2(
 	});
 var $dillonkearns$elm_markdown$Markdown$CodeBlock$CodeBlock = F2(
 	function (language, body) {
-		return {cW: body, dn: language};
+		return {body: body, language: language};
 	});
 var $dillonkearns$elm_markdown$Markdown$CodeBlock$infoString = function (fenceCharacter) {
 	var toInfoString = F2(
@@ -25379,14 +25327,16 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$infoString = function (fenceCh
 				return $elm$core$Maybe$Just(trimmed);
 			}
 		});
-	var _v0 = fenceCharacter.aL;
-	if (!_v0) {
+	var _v0 = fenceCharacter.kind;
+	if (_v0.$ === 'Backtick') {
 		return A2(
 			$elm$parser$Parser$Advanced$mapChompedString,
 			toInfoString,
 			$elm$parser$Parser$Advanced$chompWhile(
 				function (c) {
-					return (c !== '`') && (!$dillonkearns$elm_markdown$Whitespace$isLineEnd(c));
+					return (!_Utils_eq(
+						c,
+						_Utils_chr('`'))) && (!$dillonkearns$elm_markdown$Whitespace$isLineEnd(c));
 				}));
 	} else {
 		return A2(
@@ -25396,12 +25346,16 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$infoString = function (fenceCh
 				A2($elm$core$Basics$composeL, $elm$core$Basics$not, $dillonkearns$elm_markdown$Whitespace$isLineEnd)));
 	}
 };
-var $dillonkearns$elm_markdown$Markdown$CodeBlock$Backtick = 0;
+var $dillonkearns$elm_markdown$Markdown$CodeBlock$Backtick = {$: 'Backtick'};
 var $dillonkearns$elm_markdown$Parser$Token$backtick = A2(
 	$elm$parser$Parser$Advanced$Token,
 	'`',
 	$elm$parser$Parser$Expecting('a \'`\''));
-var $dillonkearns$elm_markdown$Markdown$CodeBlock$backtick = {aE: '`', aL: 0, aY: $dillonkearns$elm_markdown$Parser$Token$backtick};
+var $dillonkearns$elm_markdown$Markdown$CodeBlock$backtick = {
+	_char: _Utils_chr('`'),
+	kind: $dillonkearns$elm_markdown$Markdown$CodeBlock$Backtick,
+	token: $dillonkearns$elm_markdown$Parser$Token$backtick
+};
 var $dillonkearns$elm_markdown$Markdown$CodeBlock$colToIndentation = function (_int) {
 	switch (_int) {
 		case 1:
@@ -25425,11 +25379,11 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$fenceOfAtLeast = F2(
 				function (t, p) {
 					return A2($elm$parser$Parser$Advanced$ignorer, p, t);
 				}),
-			$elm$parser$Parser$Advanced$succeed(0),
+			$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0),
 			A2(
 				$elm$core$List$repeat,
 				minLength,
-				$elm$parser$Parser$Advanced$token(fenceCharacter.aY)));
+				$elm$parser$Parser$Advanced$token(fenceCharacter.token)));
 		return A2(
 			$elm$parser$Parser$Advanced$mapChompedString,
 			F2(
@@ -25442,14 +25396,18 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$fenceOfAtLeast = F2(
 				$elm$parser$Parser$Advanced$ignorer,
 				builtTokens,
 				$elm$parser$Parser$Advanced$chompWhile(
-					$elm$core$Basics$eq(fenceCharacter.aE))));
+					$elm$core$Basics$eq(fenceCharacter._char))));
 	});
-var $dillonkearns$elm_markdown$Markdown$CodeBlock$Tilde = 1;
+var $dillonkearns$elm_markdown$Markdown$CodeBlock$Tilde = {$: 'Tilde'};
 var $dillonkearns$elm_markdown$Parser$Token$tilde = A2(
 	$elm$parser$Parser$Advanced$Token,
 	'~',
 	$elm$parser$Parser$Expecting('a `~`'));
-var $dillonkearns$elm_markdown$Markdown$CodeBlock$tilde = {aE: '~', aL: 1, aY: $dillonkearns$elm_markdown$Parser$Token$tilde};
+var $dillonkearns$elm_markdown$Markdown$CodeBlock$tilde = {
+	_char: _Utils_chr('~'),
+	kind: $dillonkearns$elm_markdown$Markdown$CodeBlock$Tilde,
+	token: $dillonkearns$elm_markdown$Parser$Token$tilde
+};
 var $dillonkearns$elm_markdown$Whitespace$upToThreeSpaces = $elm$parser$Parser$Advanced$oneOf(
 	_List_fromArray(
 		[
@@ -25462,15 +25420,15 @@ var $dillonkearns$elm_markdown$Whitespace$upToThreeSpaces = $elm$parser$Parser$A
 					_List_fromArray(
 						[
 							$dillonkearns$elm_markdown$Whitespace$space,
-							$elm$parser$Parser$Advanced$succeed(0)
+							$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 						]))),
 			$elm$parser$Parser$Advanced$oneOf(
 				_List_fromArray(
 					[
 						$dillonkearns$elm_markdown$Whitespace$space,
-						$elm$parser$Parser$Advanced$succeed(0)
+						$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 					]))),
-			$elm$parser$Parser$Advanced$succeed(0)
+			$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 		]));
 var $dillonkearns$elm_markdown$Markdown$CodeBlock$openingFence = A2(
 	$elm$parser$Parser$Advanced$keeper,
@@ -25483,7 +25441,7 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$openingFence = A2(
 					function (indent, _v0) {
 						var character = _v0.a;
 						var length = _v0.b;
-						return {aF: character, be: indent, bf: length};
+						return {character: character, indented: indent, length: length};
 					})),
 			$dillonkearns$elm_markdown$Whitespace$upToThreeSpaces),
 		A2($elm$parser$Parser$Advanced$andThen, $dillonkearns$elm_markdown$Markdown$CodeBlock$colToIndentation, $elm$parser$Parser$Advanced$getCol)),
@@ -25493,8 +25451,9 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$openingFence = A2(
 				A2($dillonkearns$elm_markdown$Markdown$CodeBlock$fenceOfAtLeast, 3, $dillonkearns$elm_markdown$Markdown$CodeBlock$backtick),
 				A2($dillonkearns$elm_markdown$Markdown$CodeBlock$fenceOfAtLeast, 3, $dillonkearns$elm_markdown$Markdown$CodeBlock$tilde)
 			])));
-var $elm$parser$Parser$ExpectingEnd = {$: 10};
-var $dillonkearns$elm_markdown$Whitespace$isSpace = $elm$core$Basics$eq(' ');
+var $elm$parser$Parser$ExpectingEnd = {$: 'ExpectingEnd'};
+var $dillonkearns$elm_markdown$Whitespace$isSpace = $elm$core$Basics$eq(
+	_Utils_chr(' '));
 var $dillonkearns$elm_markdown$Markdown$CodeBlock$closingFence = F2(
 	function (minLength, fenceCharacter) {
 		return A2(
@@ -25505,7 +25464,7 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$closingFence = F2(
 					$elm$parser$Parser$Advanced$ignorer,
 					A2(
 						$elm$parser$Parser$Advanced$ignorer,
-						$elm$parser$Parser$Advanced$succeed(0),
+						$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0),
 						$dillonkearns$elm_markdown$Whitespace$upToThreeSpaces),
 					A2($dillonkearns$elm_markdown$Markdown$CodeBlock$fenceOfAtLeast, minLength, fenceCharacter)),
 				$elm$parser$Parser$Advanced$chompWhile($dillonkearns$elm_markdown$Whitespace$isSpace)),
@@ -25523,9 +25482,10 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$codeBlockLine = function (inde
 			A2($elm$parser$Parser$Advanced$ignorer, $elm$parser$Parser$Advanced$getOffset, $dillonkearns$elm_markdown$Helpers$chompUntilLineEndOrEnd),
 			$dillonkearns$elm_markdown$Helpers$lineEndOrEnd));
 };
-var $elm$parser$Parser$Advanced$getSource = function (s) {
-	return A3($elm$parser$Parser$Advanced$Good, false, s.bq, s);
-};
+var $elm$parser$Parser$Advanced$getSource = $elm$parser$Parser$Advanced$Parser(
+	function (s) {
+		return A3($elm$parser$Parser$Advanced$Good, false, s.src, s);
+	});
 var $dillonkearns$elm_markdown$Markdown$CodeBlock$remainingBlockHelp = function (_v0) {
 	var fence = _v0.a;
 	var body = _v0.b;
@@ -25552,7 +25512,7 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$remainingBlockHelp = function 
 					$elm$parser$Parser$Advanced$ignorer,
 					$elm$parser$Parser$Advanced$succeed(
 						$elm$parser$Parser$Advanced$Done(body)),
-					A2($dillonkearns$elm_markdown$Markdown$CodeBlock$closingFence, fence.bf, fence.aF))),
+					A2($dillonkearns$elm_markdown$Markdown$CodeBlock$closingFence, fence.length, fence.character))),
 				A2(
 				$elm$parser$Parser$Advanced$keeper,
 				A2(
@@ -25569,7 +25529,7 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$remainingBlockHelp = function 
 												body,
 												A3($elm$core$String$slice, start, end, source))));
 								})),
-						$dillonkearns$elm_markdown$Markdown$CodeBlock$codeBlockLine(fence.be)),
+						$dillonkearns$elm_markdown$Markdown$CodeBlock$codeBlockLine(fence.indented)),
 					$elm$parser$Parser$Advanced$getOffset),
 				$elm$parser$Parser$Advanced$getSource)
 			]));
@@ -25590,7 +25550,7 @@ var $dillonkearns$elm_markdown$Markdown$CodeBlock$parser = A2(
 				$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$Markdown$CodeBlock$CodeBlock),
 				A2(
 					$elm$parser$Parser$Advanced$ignorer,
-					$dillonkearns$elm_markdown$Markdown$CodeBlock$infoString(fence.aF),
+					$dillonkearns$elm_markdown$Markdown$CodeBlock$infoString(fence.character),
 					$dillonkearns$elm_markdown$Helpers$lineEndOrEnd)),
 			$dillonkearns$elm_markdown$Markdown$CodeBlock$remainingBlock(fence));
 	},
@@ -25621,7 +25581,7 @@ var $dillonkearns$elm_markdown$Parser$Token$hash = A2(
 	'#',
 	$elm$parser$Parser$Expecting('a `#`'));
 var $dillonkearns$elm_markdown$Markdown$Heading$isHash = function (c) {
-	if ('#' === c) {
+	if ('#' === c.valueOf()) {
 		return true;
 	} else {
 		return false;
@@ -25629,7 +25589,13 @@ var $dillonkearns$elm_markdown$Markdown$Heading$isHash = function (c) {
 };
 var $elm$parser$Parser$Advanced$spaces = $elm$parser$Parser$Advanced$chompWhile(
 	function (c) {
-		return (c === ' ') || ((c === '\n') || (c === '\r'));
+		return _Utils_eq(
+			c,
+			_Utils_chr(' ')) || (_Utils_eq(
+			c,
+			_Utils_chr('\n')) || _Utils_eq(
+			c,
+			_Utils_chr('\r')));
 	});
 var $dillonkearns$elm_markdown$Markdown$Heading$parser = A2(
 	$elm$parser$Parser$Advanced$keeper,
@@ -25663,7 +25629,8 @@ var $dillonkearns$elm_markdown$Markdown$Heading$parser = A2(
 			[
 				A2(
 				$elm$parser$Parser$Advanced$ignorer,
-				$elm$parser$Parser$Advanced$succeed(''),
+				$elm$parser$Parser$Advanced$succeed(
+					$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines('')),
 				$elm$parser$Parser$Advanced$symbol($dillonkearns$elm_markdown$Parser$Token$newline)),
 				A2(
 				$elm$parser$Parser$Advanced$keeper,
@@ -25680,8 +25647,9 @@ var $dillonkearns$elm_markdown$Markdown$Heading$parser = A2(
 					$elm$parser$Parser$Advanced$mapChompedString,
 					F2(
 						function (headingText, _v0) {
-							return $dillonkearns$elm_markdown$Markdown$Heading$dropClosingSequence(
-								$elm$core$String$trim(headingText));
+							return $dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(
+								$dillonkearns$elm_markdown$Markdown$Heading$dropClosingSequence(
+									$elm$core$String$trim(headingText)));
 						}),
 					$dillonkearns$elm_markdown$Helpers$chompUntilLineEndOrEnd))
 			])));
@@ -25696,20 +25664,21 @@ var $elm$parser$Parser$Advanced$fromInfo = F4(
 var $elm$parser$Parser$Advanced$chompUntil = function (_v0) {
 	var str = _v0.a;
 	var expecting = _v0.b;
-	return function (s) {
-		var _v1 = A5($elm$parser$Parser$Advanced$findSubString, str, s.e, s.dT, s.bO, s.bq);
-		var newOffset = _v1.a;
-		var newRow = _v1.b;
-		var newCol = _v1.c;
-		return _Utils_eq(newOffset, -1) ? A2(
-			$elm$parser$Parser$Advanced$Bad,
-			false,
-			A4($elm$parser$Parser$Advanced$fromInfo, newRow, newCol, expecting, s.h)) : A3(
-			$elm$parser$Parser$Advanced$Good,
-			_Utils_cmp(s.e, newOffset) < 0,
-			0,
-			{bO: newCol, h: s.h, j: s.j, e: newOffset, dT: newRow, bq: s.bq});
-	};
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v1 = A5($elm$parser$Parser$Advanced$findSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _v1.a;
+			var newRow = _v1.b;
+			var newCol = _v1.c;
+			return _Utils_eq(newOffset, -1) ? A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A4($elm$parser$Parser$Advanced$fromInfo, newRow, newCol, expecting, s.context)) : A3(
+				$elm$parser$Parser$Advanced$Good,
+				_Utils_cmp(s.offset, newOffset) < 0,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
 };
 var $dillonkearns$elm_markdown$Parser$Token$greaterThan = A2(
 	$elm$parser$Parser$Advanced$Token,
@@ -25717,41 +25686,42 @@ var $dillonkearns$elm_markdown$Parser$Token$greaterThan = A2(
 	$elm$parser$Parser$Expecting('a `>`'));
 var $elm$parser$Parser$Advanced$Located = F3(
 	function (row, col, context) {
-		return {bO: col, h: context, dT: row};
+		return {col: col, context: context, row: row};
 	});
 var $elm$parser$Parser$Advanced$changeContext = F2(
 	function (newContext, s) {
-		return {bO: s.bO, h: newContext, j: s.j, e: s.e, dT: s.dT, bq: s.bq};
+		return {col: s.col, context: newContext, indent: s.indent, offset: s.offset, row: s.row, src: s.src};
 	});
 var $elm$parser$Parser$Advanced$inContext = F2(
 	function (context, _v0) {
-		var parse = _v0;
-		return function (s0) {
-			var _v1 = parse(
-				A2(
-					$elm$parser$Parser$Advanced$changeContext,
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(
 					A2(
-						$elm$core$List$cons,
-						A3($elm$parser$Parser$Advanced$Located, s0.dT, s0.bO, context),
-						s0.h),
-					s0));
-			if (!_v1.$) {
-				var p = _v1.a;
-				var a = _v1.b;
-				var s1 = _v1.c;
-				return A3(
-					$elm$parser$Parser$Advanced$Good,
-					p,
-					a,
-					A2($elm$parser$Parser$Advanced$changeContext, s0.h, s1));
-			} else {
-				var step = _v1;
-				return step;
-			}
-		};
+						$elm$parser$Parser$Advanced$changeContext,
+						A2(
+							$elm$core$List$cons,
+							A3($elm$parser$Parser$Advanced$Located, s0.row, s0.col, context),
+							s0.context),
+						s0));
+				if (_v1.$ === 'Good') {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						a,
+						A2($elm$parser$Parser$Advanced$changeContext, s0.context, s1));
+				} else {
+					var step = _v1;
+					return step;
+				}
+			});
 	});
 var $dillonkearns$elm_markdown$Whitespace$isWhitespace = function (_char) {
-	switch (_char) {
+	switch (_char.valueOf()) {
 		case ' ':
 			return true;
 		case '\n':
@@ -25919,7 +25889,7 @@ var $dillonkearns$elm_markdown$Markdown$LinkReferenceDefinition$parser = A2(
 							function (label, destination, title) {
 								return _Utils_Tuple2(
 									label,
-									{c3: destination, dY: title});
+									{destination: destination, title: title});
 							})),
 					$dillonkearns$elm_markdown$Whitespace$upToThreeSpaces),
 				A2(
@@ -25934,12 +25904,12 @@ var $dillonkearns$elm_markdown$Markdown$LinkReferenceDefinition$parser = A2(
 							_List_fromArray(
 								[
 									$dillonkearns$elm_markdown$Whitespace$lineEnd,
-									$elm$parser$Parser$Advanced$succeed(0)
+									$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 								]))),
 					$elm$parser$Parser$Advanced$chompWhile($dillonkearns$elm_markdown$Whitespace$isSpaceOrTab))),
 			$dillonkearns$elm_markdown$Markdown$LinkReferenceDefinition$destinationParser),
 		$dillonkearns$elm_markdown$Markdown$LinkReferenceDefinition$titleParser));
-var $dillonkearns$elm_markdown$ThematicBreak$ThematicBreak = 0;
+var $dillonkearns$elm_markdown$ThematicBreak$ThematicBreak = {$: 'ThematicBreak'};
 var $dillonkearns$elm_markdown$ThematicBreak$whitespace = $elm$parser$Parser$Advanced$chompWhile($dillonkearns$elm_markdown$Whitespace$isSpaceOrTab);
 var $dillonkearns$elm_markdown$ThematicBreak$withChar = function (tchar) {
 	var token = $dillonkearns$elm_markdown$Parser$Token$parseString(
@@ -25958,7 +25928,7 @@ var $dillonkearns$elm_markdown$ThematicBreak$withChar = function (tchar) {
 							$elm$parser$Parser$Advanced$ignorer,
 							A2(
 								$elm$parser$Parser$Advanced$ignorer,
-								$elm$parser$Parser$Advanced$succeed(0),
+								$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$ThematicBreak$ThematicBreak),
 								token),
 							$dillonkearns$elm_markdown$ThematicBreak$whitespace),
 						token),
@@ -25973,9 +25943,12 @@ var $dillonkearns$elm_markdown$ThematicBreak$withChar = function (tchar) {
 var $dillonkearns$elm_markdown$ThematicBreak$parseThematicBreak = $elm$parser$Parser$Advanced$oneOf(
 	_List_fromArray(
 		[
-			$dillonkearns$elm_markdown$ThematicBreak$withChar('-'),
-			$dillonkearns$elm_markdown$ThematicBreak$withChar('*'),
-			$dillonkearns$elm_markdown$ThematicBreak$withChar('_')
+			$dillonkearns$elm_markdown$ThematicBreak$withChar(
+			_Utils_chr('-')),
+			$dillonkearns$elm_markdown$ThematicBreak$withChar(
+			_Utils_chr('*')),
+			$dillonkearns$elm_markdown$ThematicBreak$withChar(
+			_Utils_chr('_'))
 		]));
 var $dillonkearns$elm_markdown$ThematicBreak$parser = $elm$parser$Parser$Advanced$oneOf(
 	_List_fromArray(
@@ -25994,22 +25967,22 @@ var $dillonkearns$elm_markdown$ThematicBreak$parser = $elm$parser$Parser$Advance
 						_List_fromArray(
 							[
 								$dillonkearns$elm_markdown$Whitespace$space,
-								$elm$parser$Parser$Advanced$succeed(0)
+								$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 							]))),
 				$elm$parser$Parser$Advanced$oneOf(
 					_List_fromArray(
 						[
 							$dillonkearns$elm_markdown$Whitespace$space,
-							$elm$parser$Parser$Advanced$succeed(0)
+							$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 						]))),
 			$dillonkearns$elm_markdown$ThematicBreak$parseThematicBreak),
 			$dillonkearns$elm_markdown$ThematicBreak$parseThematicBreak
 		]));
-var $dillonkearns$elm_markdown$Markdown$RawBlock$LevelOne = 0;
-var $dillonkearns$elm_markdown$Markdown$RawBlock$LevelTwo = 1;
+var $dillonkearns$elm_markdown$Markdown$RawBlock$LevelOne = {$: 'LevelOne'};
+var $dillonkearns$elm_markdown$Markdown$RawBlock$LevelTwo = {$: 'LevelTwo'};
 var $dillonkearns$elm_markdown$Markdown$RawBlock$SetextLine = F2(
 	function (a, b) {
-		return {$: 13, a: a, b: b};
+		return {$: 'SetextLine', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Parser$Token$equals = A2(
 	$elm$parser$Parser$Advanced$Token,
@@ -26050,14 +26023,22 @@ var $dillonkearns$elm_markdown$Markdown$Parser$setextLineParser = function () {
 					$elm$parser$Parser$Advanced$oneOf(
 						_List_fromArray(
 							[
-								A3(setextLevel, 0, $dillonkearns$elm_markdown$Parser$Token$equals, '='),
-								A3(setextLevel, 1, $dillonkearns$elm_markdown$Parser$Token$minus, '-')
+								A3(
+								setextLevel,
+								$dillonkearns$elm_markdown$Markdown$RawBlock$LevelOne,
+								$dillonkearns$elm_markdown$Parser$Token$equals,
+								_Utils_chr('=')),
+								A3(
+								setextLevel,
+								$dillonkearns$elm_markdown$Markdown$RawBlock$LevelTwo,
+								$dillonkearns$elm_markdown$Parser$Token$minus,
+								_Utils_chr('-'))
 							])),
 					$elm$parser$Parser$Advanced$chompWhile($dillonkearns$elm_markdown$Whitespace$isSpaceOrTab)),
 				$dillonkearns$elm_markdown$Helpers$lineEndOrEnd)));
 }();
 var $dillonkearns$elm_markdown$Markdown$RawBlock$TableDelimiter = function (a) {
-	return {$: 9, a: a};
+	return {$: 'TableDelimiter', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$TableParser$chompSinglelineWhitespace = $elm$parser$Parser$Advanced$chompWhile($dillonkearns$elm_markdown$Whitespace$isSpaceOrTab);
 var $dillonkearns$elm_markdown$Parser$Extra$maybeChomp = function (condition) {
@@ -26068,7 +26049,7 @@ var $dillonkearns$elm_markdown$Parser$Extra$maybeChomp = function (condition) {
 				$elm$parser$Parser$Advanced$chompIf,
 				condition,
 				$elm$parser$Parser$Problem('Character not found')),
-				$elm$parser$Parser$Advanced$succeed(0)
+				$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 			]));
 };
 var $dillonkearns$elm_markdown$Markdown$TableParser$requirePipeIfNotFirst = function (columns) {
@@ -26076,7 +26057,7 @@ var $dillonkearns$elm_markdown$Markdown$TableParser$requirePipeIfNotFirst = func
 		_List_fromArray(
 			[
 				$dillonkearns$elm_markdown$Parser$Token$parseString('|'),
-				$elm$parser$Parser$Advanced$succeed(0)
+				$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0)
 			])) : $dillonkearns$elm_markdown$Parser$Token$parseString('|');
 };
 var $dillonkearns$elm_markdown$Markdown$TableParser$delimiterRowHelp = function (revDelimiterColumns) {
@@ -26135,38 +26116,44 @@ var $dillonkearns$elm_markdown$Markdown$TableParser$delimiterRowHelp = function 
 								$elm$parser$Parser$Advanced$ignorer,
 								A2(
 									$elm$parser$Parser$Advanced$ignorer,
-									$elm$parser$Parser$Advanced$succeed(0),
+									$elm$parser$Parser$Advanced$succeed(_Utils_Tuple0),
 									$dillonkearns$elm_markdown$Parser$Extra$maybeChomp(
 										function (c) {
-											return c === ':';
+											return _Utils_eq(
+												c,
+												_Utils_chr(':'));
 										})),
 								$dillonkearns$elm_markdown$Parser$Extra$chompOneOrMore(
 									function (c) {
-										return c === '-';
+										return _Utils_eq(
+											c,
+											_Utils_chr('-'));
 									})),
 							$dillonkearns$elm_markdown$Parser$Extra$maybeChomp(
 								function (c) {
-									return c === ':';
+									return _Utils_eq(
+										c,
+										_Utils_chr(':'));
 								}))),
 					$dillonkearns$elm_markdown$Markdown$TableParser$chompSinglelineWhitespace))
 			]));
 };
-var $dillonkearns$elm_markdown$Markdown$Block$AlignCenter = 2;
-var $dillonkearns$elm_markdown$Markdown$Block$AlignLeft = 0;
-var $dillonkearns$elm_markdown$Markdown$Block$AlignRight = 1;
+var $dillonkearns$elm_markdown$Markdown$Block$AlignCenter = {$: 'AlignCenter'};
+var $dillonkearns$elm_markdown$Markdown$Block$AlignLeft = {$: 'AlignLeft'};
+var $dillonkearns$elm_markdown$Markdown$Block$AlignRight = {$: 'AlignRight'};
 var $dillonkearns$elm_markdown$Markdown$TableParser$delimiterToAlignment = function (cell) {
 	var _v0 = _Utils_Tuple2(
 		A2($elm$core$String$startsWith, ':', cell),
 		A2($elm$core$String$endsWith, ':', cell));
 	if (_v0.a) {
 		if (_v0.b) {
-			return $elm$core$Maybe$Just(2);
+			return $elm$core$Maybe$Just($dillonkearns$elm_markdown$Markdown$Block$AlignCenter);
 		} else {
-			return $elm$core$Maybe$Just(0);
+			return $elm$core$Maybe$Just($dillonkearns$elm_markdown$Markdown$Block$AlignLeft);
 		}
 	} else {
 		if (_v0.b) {
-			return $elm$core$Maybe$Just(1);
+			return $elm$core$Maybe$Just($dillonkearns$elm_markdown$Markdown$Block$AlignRight);
 		} else {
 			return $elm$core$Maybe$Nothing;
 		}
@@ -26175,7 +26162,7 @@ var $dillonkearns$elm_markdown$Markdown$TableParser$delimiterToAlignment = funct
 var $dillonkearns$elm_markdown$Markdown$TableParser$delimiterRowParser = A2(
 	$elm$parser$Parser$Advanced$andThen,
 	function (delimiterRow) {
-		var trimmed = delimiterRow.a.cK;
+		var trimmed = delimiterRow.a.trimmed;
 		var headers = delimiterRow.b;
 		return $elm$core$List$isEmpty(headers) ? $elm$parser$Parser$Advanced$problem(
 			$elm$parser$Parser$Expecting('Must have at least one column in delimiter row.')) : ((($elm$core$List$length(headers) === 1) && (!(A2($elm$core$String$startsWith, '|', trimmed) && A2($elm$core$String$endsWith, '|', trimmed)))) ? $elm$parser$Parser$Advanced$problem(
@@ -26188,8 +26175,8 @@ var $dillonkearns$elm_markdown$Markdown$TableParser$delimiterRowParser = A2(
 				return A2(
 					$dillonkearns$elm_markdown$Markdown$Table$TableDelimiterRow,
 					{
-						cs: delimiterText,
-						cK: $elm$core$String$trim(delimiterText)
+						raw: delimiterText,
+						trimmed: $elm$core$String$trim(delimiterText)
 					},
 					A2(
 						$elm$core$List$map,
@@ -26335,10 +26322,10 @@ var $dillonkearns$elm_markdown$Markdown$TableParser$standardizeRowLength = F2(
 	function (expectedLength, row) {
 		var rowLength = $elm$core$List$length(row);
 		var _v0 = A2($elm$core$Basics$compare, expectedLength, rowLength);
-		switch (_v0) {
-			case 0:
+		switch (_v0.$) {
+			case 'LT':
 				return A2($elm$core$List$take, expectedLength, row);
-			case 1:
+			case 'EQ':
 				return row;
 			default:
 				return _Utils_ap(
@@ -26374,39 +26361,39 @@ var $dillonkearns$elm_markdown$Markdown$Parser$tableRowIfTableStarted = function
 		$dillonkearns$elm_markdown$Markdown$TableParser$bodyRowParser(
 			$elm$core$List$length(headers)));
 };
-var $dillonkearns$elm_markdown$Markdown$Block$H1 = 0;
-var $dillonkearns$elm_markdown$Markdown$Block$H2 = 1;
-var $dillonkearns$elm_markdown$Markdown$Block$H3 = 2;
-var $dillonkearns$elm_markdown$Markdown$Block$H4 = 3;
-var $dillonkearns$elm_markdown$Markdown$Block$H5 = 4;
-var $dillonkearns$elm_markdown$Markdown$Block$H6 = 5;
+var $dillonkearns$elm_markdown$Markdown$Block$H1 = {$: 'H1'};
+var $dillonkearns$elm_markdown$Markdown$Block$H2 = {$: 'H2'};
+var $dillonkearns$elm_markdown$Markdown$Block$H3 = {$: 'H3'};
+var $dillonkearns$elm_markdown$Markdown$Block$H4 = {$: 'H4'};
+var $dillonkearns$elm_markdown$Markdown$Block$H5 = {$: 'H5'};
+var $dillonkearns$elm_markdown$Markdown$Block$H6 = {$: 'H6'};
 var $dillonkearns$elm_markdown$Markdown$Parser$toHeading = function (level) {
 	switch (level) {
 		case 1:
-			return $elm$core$Result$Ok(0);
+			return $elm$core$Result$Ok($dillonkearns$elm_markdown$Markdown$Block$H1);
 		case 2:
-			return $elm$core$Result$Ok(1);
+			return $elm$core$Result$Ok($dillonkearns$elm_markdown$Markdown$Block$H2);
 		case 3:
-			return $elm$core$Result$Ok(2);
+			return $elm$core$Result$Ok($dillonkearns$elm_markdown$Markdown$Block$H3);
 		case 4:
-			return $elm$core$Result$Ok(3);
+			return $elm$core$Result$Ok($dillonkearns$elm_markdown$Markdown$Block$H4);
 		case 5:
-			return $elm$core$Result$Ok(4);
+			return $elm$core$Result$Ok($dillonkearns$elm_markdown$Markdown$Block$H5);
 		case 6:
-			return $elm$core$Result$Ok(5);
+			return $elm$core$Result$Ok($dillonkearns$elm_markdown$Markdown$Block$H6);
 		default:
 			return $elm$core$Result$Err(
 				$elm$parser$Parser$Expecting(
 					'A heading with 1 to 6 #\'s, but found ' + $elm$core$String$fromInt(level)));
 	}
 };
-var $dillonkearns$elm_markdown$Markdown$ListItem$EmptyItem = {$: 2};
+var $dillonkearns$elm_markdown$Markdown$ListItem$EmptyItem = {$: 'EmptyItem'};
 var $dillonkearns$elm_markdown$Markdown$ListItem$PlainItem = function (a) {
-	return {$: 1, a: a};
+	return {$: 'PlainItem', a: a};
 };
 var $dillonkearns$elm_markdown$Markdown$ListItem$TaskItem = F2(
 	function (a, b) {
-		return {$: 0, a: a, b: b};
+		return {$: 'TaskItem', a: a, b: b};
 	});
 var $dillonkearns$elm_markdown$Markdown$UnorderedList$getIntendedCodeItem = F4(
 	function (markerStartPos, listMarker, markerEndPos, _v0) {
@@ -26418,7 +26405,7 @@ var $dillonkearns$elm_markdown$Markdown$UnorderedList$getIntendedCodeItem = F4(
 		} else {
 			var intendedCodeItem = function () {
 				switch (item.$) {
-					case 0:
+					case 'TaskItem':
 						var completion = item.a;
 						var string = item.b;
 						return A2(
@@ -26427,7 +26414,7 @@ var $dillonkearns$elm_markdown$Markdown$UnorderedList$getIntendedCodeItem = F4(
 							_Utils_ap(
 								A2($elm$core$String$repeat, spaceNum - 1, ' '),
 								string));
-					case 1:
+					case 'PlainItem':
 						var string = item.a;
 						return $dillonkearns$elm_markdown$Markdown$ListItem$PlainItem(
 							_Utils_ap(
@@ -26447,14 +26434,14 @@ var $dillonkearns$elm_markdown$Markdown$UnorderedList$unorderedListEmptyItemPars
 			return _Utils_Tuple2(bodyStartPos, $dillonkearns$elm_markdown$Markdown$ListItem$EmptyItem);
 		}),
 	A2($elm$parser$Parser$Advanced$ignorer, $elm$parser$Parser$Advanced$getCol, $dillonkearns$elm_markdown$Helpers$lineEndOrEnd));
-var $dillonkearns$elm_markdown$Markdown$ListItem$Complete = 1;
-var $dillonkearns$elm_markdown$Markdown$ListItem$Incomplete = 0;
+var $dillonkearns$elm_markdown$Markdown$ListItem$Complete = {$: 'Complete'};
+var $dillonkearns$elm_markdown$Markdown$ListItem$Incomplete = {$: 'Incomplete'};
 var $dillonkearns$elm_markdown$Markdown$ListItem$taskItemParser = $elm$parser$Parser$Advanced$oneOf(
 	_List_fromArray(
 		[
 			A2(
 			$elm$parser$Parser$Advanced$ignorer,
-			$elm$parser$Parser$Advanced$succeed(1),
+			$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$Markdown$ListItem$Complete),
 			$elm$parser$Parser$Advanced$symbol(
 				A2(
 					$elm$parser$Parser$Advanced$Token,
@@ -26462,7 +26449,7 @@ var $dillonkearns$elm_markdown$Markdown$ListItem$taskItemParser = $elm$parser$Pa
 					$elm$parser$Parser$ExpectingSymbol('[x] ')))),
 			A2(
 			$elm$parser$Parser$Advanced$ignorer,
-			$elm$parser$Parser$Advanced$succeed(1),
+			$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$Markdown$ListItem$Complete),
 			$elm$parser$Parser$Advanced$symbol(
 				A2(
 					$elm$parser$Parser$Advanced$Token,
@@ -26470,7 +26457,7 @@ var $dillonkearns$elm_markdown$Markdown$ListItem$taskItemParser = $elm$parser$Pa
 					$elm$parser$Parser$ExpectingSymbol('[X] ')))),
 			A2(
 			$elm$parser$Parser$Advanced$ignorer,
-			$elm$parser$Parser$Advanced$succeed(0),
+			$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$Markdown$ListItem$Incomplete),
 			$elm$parser$Parser$Advanced$symbol(
 				A2(
 					$elm$parser$Parser$Advanced$Token,
@@ -26509,9 +26496,9 @@ var $dillonkearns$elm_markdown$Markdown$UnorderedList$unorderedListItemBodyParse
 			$dillonkearns$elm_markdown$Parser$Extra$chompOneOrMore($dillonkearns$elm_markdown$Whitespace$isSpaceOrTab)),
 		$elm$parser$Parser$Advanced$getCol),
 	$dillonkearns$elm_markdown$Markdown$ListItem$parser);
-var $dillonkearns$elm_markdown$Markdown$UnorderedList$Asterisk = 2;
-var $dillonkearns$elm_markdown$Markdown$UnorderedList$Minus = 0;
-var $dillonkearns$elm_markdown$Markdown$UnorderedList$Plus = 1;
+var $dillonkearns$elm_markdown$Markdown$UnorderedList$Asterisk = {$: 'Asterisk'};
+var $dillonkearns$elm_markdown$Markdown$UnorderedList$Minus = {$: 'Minus'};
+var $dillonkearns$elm_markdown$Markdown$UnorderedList$Plus = {$: 'Plus'};
 var $dillonkearns$elm_markdown$Markdown$UnorderedList$unorderedListMarkerParser = $elm$parser$Parser$Advanced$oneOf(
 	_List_fromArray(
 		[
@@ -26519,7 +26506,7 @@ var $dillonkearns$elm_markdown$Markdown$UnorderedList$unorderedListMarkerParser 
 			$elm$parser$Parser$Advanced$ignorer,
 			A2(
 				$elm$parser$Parser$Advanced$ignorer,
-				$elm$parser$Parser$Advanced$succeed(0),
+				$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$Markdown$UnorderedList$Minus),
 				A2($dillonkearns$elm_markdown$Parser$Extra$upTo, 3, $dillonkearns$elm_markdown$Whitespace$space)),
 			$elm$parser$Parser$Advanced$symbol(
 				A2(
@@ -26528,7 +26515,7 @@ var $dillonkearns$elm_markdown$Markdown$UnorderedList$unorderedListMarkerParser 
 					$elm$parser$Parser$ExpectingSymbol('-')))),
 			A2(
 			$elm$parser$Parser$Advanced$ignorer,
-			$elm$parser$Parser$Advanced$succeed(1),
+			$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$Markdown$UnorderedList$Plus),
 			$elm$parser$Parser$Advanced$symbol(
 				A2(
 					$elm$parser$Parser$Advanced$Token,
@@ -26536,7 +26523,7 @@ var $dillonkearns$elm_markdown$Markdown$UnorderedList$unorderedListMarkerParser 
 					$elm$parser$Parser$ExpectingSymbol('+')))),
 			A2(
 			$elm$parser$Parser$Advanced$ignorer,
-			$elm$parser$Parser$Advanced$succeed(2),
+			$elm$parser$Parser$Advanced$succeed($dillonkearns$elm_markdown$Markdown$UnorderedList$Asterisk),
 			$elm$parser$Parser$Advanced$symbol(
 				A2(
 					$elm$parser$Parser$Advanced$Token,
@@ -26564,26 +26551,26 @@ var $dillonkearns$elm_markdown$Markdown$Parser$unorderedListBlock = function (pr
 	var parseListItem = F2(
 		function (listmarker, unparsedListItem) {
 			switch (unparsedListItem.$) {
-				case 0:
+				case 'TaskItem':
 					var completion = unparsedListItem.a;
 					var body = unparsedListItem.b;
 					return {
-						cW: body,
-						dq: listmarker,
-						o: $elm$core$Maybe$Just(
+						body: body,
+						marker: listmarker,
+						task: $elm$core$Maybe$Just(
 							function () {
-								if (completion === 1) {
+								if (completion.$ === 'Complete') {
 									return true;
 								} else {
 									return false;
 								}
 							}())
 					};
-				case 1:
+				case 'PlainItem':
 					var body = unparsedListItem.a;
-					return {cW: body, dq: listmarker, o: $elm$core$Maybe$Nothing};
+					return {body: body, marker: listmarker, task: $elm$core$Maybe$Nothing};
 				default:
-					return {cW: '', dq: listmarker, o: $elm$core$Maybe$Nothing};
+					return {body: '', marker: listmarker, task: $elm$core$Maybe$Nothing};
 			}
 		});
 	return A2(
@@ -26603,7 +26590,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$unorderedListBlock = function (pr
 };
 var $elm$core$Result$withDefault = F2(
 	function (def, result) {
-		if (!result.$) {
+		if (result.$ === 'Ok') {
 			var a = result.a;
 			return a;
 		} else {
@@ -26613,12 +26600,12 @@ var $elm$core$Result$withDefault = F2(
 var $dillonkearns$elm_markdown$Markdown$Parser$childToBlocks = F2(
 	function (node, blocks) {
 		switch (node.$) {
-			case 0:
+			case 'Element':
 				var tag = node.a;
 				var attributes = node.b;
 				var children = node.c;
 				var _v106 = $dillonkearns$elm_markdown$Markdown$Parser$nodesToBlocks(children);
-				if (!_v106.$) {
+				if (_v106.$ === 'Ok') {
 					var childrenAsBlocks = _v106.a;
 					var block = $dillonkearns$elm_markdown$Markdown$Block$HtmlBlock(
 						A3($dillonkearns$elm_markdown$Markdown$Block$HtmlElement, tag, attributes, childrenAsBlocks));
@@ -26628,10 +26615,10 @@ var $dillonkearns$elm_markdown$Markdown$Parser$childToBlocks = F2(
 					var err = _v106.a;
 					return $elm$core$Result$Err(err);
 				}
-			case 1:
+			case 'Text':
 				var innerText = node.a;
 				var _v107 = $dillonkearns$elm_markdown$Markdown$Parser$parse(innerText);
-				if (!_v107.$) {
+				if (_v107.$ === 'Ok') {
 					var value = _v107.a;
 					return $elm$core$Result$Ok(
 						_Utils_ap(
@@ -26646,7 +26633,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$childToBlocks = F2(
 								'\n',
 								A2($elm$core$List$map, $dillonkearns$elm_markdown$Markdown$Parser$deadEndToString, error))));
 				}
-			case 2:
+			case 'Comment':
 				var string = node.a;
 				return $elm$core$Result$Ok(
 					A2(
@@ -26654,7 +26641,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$childToBlocks = F2(
 						$dillonkearns$elm_markdown$Markdown$Block$HtmlBlock(
 							$dillonkearns$elm_markdown$Markdown$Block$HtmlComment(string)),
 						blocks));
-			case 3:
+			case 'Cdata':
 				var string = node.a;
 				return $elm$core$Result$Ok(
 					A2(
@@ -26662,7 +26649,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$childToBlocks = F2(
 						$dillonkearns$elm_markdown$Markdown$Block$HtmlBlock(
 							$dillonkearns$elm_markdown$Markdown$Block$Cdata(string)),
 						blocks));
-			case 4:
+			case 'ProcessingInstruction':
 				var string = node.a;
 				return $elm$core$Result$Ok(
 					A2(
@@ -26682,26 +26669,26 @@ var $dillonkearns$elm_markdown$Markdown$Parser$childToBlocks = F2(
 		}
 	});
 var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state) {
-	var _v91 = state.b;
+	var _v91 = state.rawBlocks;
 	_v91$5:
 	while (true) {
 		if (_v91.b) {
 			switch (_v91.a.$) {
-				case 11:
+				case 'BlockQuote':
 					var body2 = _v91.a.a;
 					var rest = _v91.b;
 					var _v92 = A2(
 						$elm$parser$Parser$Advanced$run,
 						$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 						body2);
-					if (!_v92.$) {
+					if (_v92.$ === 'Ok') {
 						var value = _v92.a;
 						return $elm$parser$Parser$Advanced$succeed(
 							{
-								a: _Utils_ap(state.a, value.a),
-								b: A2(
+								linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+								rawBlocks: A2(
 									$elm$core$List$cons,
-									$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value.b),
+									$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value.rawBlocks),
 									rest)
 							});
 					} else {
@@ -26710,7 +26697,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 							$elm$parser$Parser$Problem(
 								$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(error)));
 					}
-				case 3:
+				case 'UnorderedListBlock':
 					var _v93 = _v91.a;
 					var tight = _v93.a;
 					var intended = _v93.b;
@@ -26720,14 +26707,14 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 					var _v94 = A2(
 						$elm$parser$Parser$Advanced$run,
 						$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
-						openListItem.cW);
-					if (!_v94.$) {
+						openListItem.body);
+					if (_v94.$ === 'Ok') {
 						var value = _v94.a;
-						var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? false : tight;
+						var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? false : tight;
 						return $elm$parser$Parser$Advanced$succeed(
 							{
-								a: _Utils_ap(state.a, value.a),
-								b: A2(
+								linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+								rawBlocks: A2(
 									$elm$core$List$cons,
 									A4(
 										$dillonkearns$elm_markdown$Markdown$RawBlock$UnorderedListBlock,
@@ -26735,7 +26722,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 										intended,
 										A2(
 											$elm$core$List$cons,
-											{cW: value.b, o: openListItem.o},
+											{body: value.rawBlocks, task: openListItem.task},
 											closeListItems),
 										openListItem),
 									rest)
@@ -26746,7 +26733,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 							$elm$parser$Parser$Problem(
 								$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 					}
-				case 4:
+				case 'OrderedListBlock':
 					var _v99 = _v91.a;
 					var tight = _v99.a;
 					var intended = _v99.b;
@@ -26759,13 +26746,13 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 						$elm$parser$Parser$Advanced$run,
 						$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 						openListItem);
-					if (!_v100.$) {
+					if (_v100.$ === 'Ok') {
 						var value = _v100.a;
-						var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? false : tight;
+						var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? false : tight;
 						return $elm$parser$Parser$Advanced$succeed(
 							{
-								a: _Utils_ap(state.a, value.a),
-								b: A2(
+								linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+								rawBlocks: A2(
 									$elm$core$List$cons,
 									A6(
 										$dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock,
@@ -26773,7 +26760,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 										intended,
 										marker,
 										order,
-										A2($elm$core$List$cons, value.b, closeListItems),
+										A2($elm$core$List$cons, value.rawBlocks, closeListItems),
 										openListItem),
 									rest)
 							});
@@ -26783,10 +26770,10 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 							$elm$parser$Parser$Problem(
 								$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 					}
-				case 10:
+				case 'BlankLine':
 					if (_v91.b.b) {
 						switch (_v91.b.a.$) {
-							case 3:
+							case 'UnorderedListBlock':
 								var _v95 = _v91.a;
 								var _v96 = _v91.b;
 								var _v97 = _v96.a;
@@ -26798,14 +26785,14 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 								var _v98 = A2(
 									$elm$parser$Parser$Advanced$run,
 									$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
-									openListItem.cW);
-								if (!_v98.$) {
+									openListItem.body);
+								if (_v98.$ === 'Ok') {
 									var value = _v98.a;
-									var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? false : tight;
+									var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? false : tight;
 									return $elm$parser$Parser$Advanced$succeed(
 										{
-											a: _Utils_ap(state.a, value.a),
-											b: A2(
+											linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+											rawBlocks: A2(
 												$elm$core$List$cons,
 												A4(
 													$dillonkearns$elm_markdown$Markdown$RawBlock$UnorderedListBlock,
@@ -26813,7 +26800,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 													intended,
 													A2(
 														$elm$core$List$cons,
-														{cW: value.b, o: openListItem.o},
+														{body: value.rawBlocks, task: openListItem.task},
 														closeListItems),
 													openListItem),
 												rest)
@@ -26824,7 +26811,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 										$elm$parser$Parser$Problem(
 											$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 								}
-							case 4:
+							case 'OrderedListBlock':
 								var _v101 = _v91.a;
 								var _v102 = _v91.b;
 								var _v103 = _v102.a;
@@ -26839,13 +26826,13 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 									$elm$parser$Parser$Advanced$run,
 									$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 									openListItem);
-								if (!_v104.$) {
+								if (_v104.$ === 'Ok') {
 									var value = _v104.a;
-									var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? false : tight;
+									var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? false : tight;
 									return $elm$parser$Parser$Advanced$succeed(
 										{
-											a: _Utils_ap(state.a, value.a),
-											b: A2(
+											linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+											rawBlocks: A2(
 												$elm$core$List$cons,
 												A6(
 													$dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock,
@@ -26853,7 +26840,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 													intended,
 													marker,
 													order,
-													A2($elm$core$List$cons, value.b, closeListItems),
+													A2($elm$core$List$cons, value.rawBlocks, closeListItems),
 													openListItem),
 												rest)
 										});
@@ -26880,57 +26867,57 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeBlocks = function (state)
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 	function (state, newRawBlock) {
-		var _v41 = _Utils_Tuple2(newRawBlock, state.b);
+		var _v41 = _Utils_Tuple2(newRawBlock, state.rawBlocks);
 		_v41$13:
 		while (true) {
 			if (_v41.b.b) {
 				switch (_v41.b.a.$) {
-					case 5:
-						if (_v41.a.$ === 5) {
+					case 'CodeBlock':
+						if (_v41.a.$ === 'CodeBlock') {
 							var block1 = _v41.a.a;
 							var _v42 = _v41.b;
 							var block2 = _v42.a.a;
 							var rest = _v42.b;
 							return $elm$parser$Parser$Advanced$succeed(
 								{
-									a: state.a,
-									b: A2(
+									linkReferenceDefinitions: state.linkReferenceDefinitions,
+									rawBlocks: A2(
 										$elm$core$List$cons,
 										$dillonkearns$elm_markdown$Markdown$RawBlock$CodeBlock(
 											{
-												cW: A2($dillonkearns$elm_markdown$Markdown$Parser$joinStringsPreserveAll, block2.cW, block1.cW),
-												dn: $elm$core$Maybe$Nothing
+												body: A2($dillonkearns$elm_markdown$Markdown$Parser$joinStringsPreserveAll, block2.body, block1.body),
+												language: $elm$core$Maybe$Nothing
 											}),
 										rest)
 								});
 						} else {
 							break _v41$13;
 						}
-					case 6:
+					case 'IndentedCodeBlock':
 						switch (_v41.a.$) {
-							case 6:
+							case 'IndentedCodeBlock':
 								var block1 = _v41.a.a;
 								var _v43 = _v41.b;
 								var block2 = _v43.a.a;
 								var rest = _v43.b;
 								return $elm$parser$Parser$Advanced$succeed(
 									{
-										a: state.a,
-										b: A2(
+										linkReferenceDefinitions: state.linkReferenceDefinitions,
+										rawBlocks: A2(
 											$elm$core$List$cons,
 											$dillonkearns$elm_markdown$Markdown$RawBlock$IndentedCodeBlock(
 												A2($dillonkearns$elm_markdown$Markdown$Parser$joinStringsPreserveAll, block2, block1)),
 											rest)
 									});
-							case 10:
+							case 'BlankLine':
 								var _v44 = _v41.a;
 								var _v45 = _v41.b;
 								var block = _v45.a.a;
 								var rest = _v45.b;
 								return $elm$parser$Parser$Advanced$succeed(
 									{
-										a: state.a,
-										b: A2(
+										linkReferenceDefinitions: state.linkReferenceDefinitions,
+										rawBlocks: A2(
 											$elm$core$List$cons,
 											$dillonkearns$elm_markdown$Markdown$RawBlock$IndentedCodeBlock(
 												A2($dillonkearns$elm_markdown$Markdown$Parser$joinStringsPreserveAll, block, '\n')),
@@ -26939,38 +26926,38 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 							default:
 								break _v41$13;
 						}
-					case 11:
+					case 'BlockQuote':
 						var _v46 = _v41.b;
 						var body2 = _v46.a.a;
 						var rest = _v46.b;
 						switch (newRawBlock.$) {
-							case 11:
+							case 'BlockQuote':
 								var body1 = newRawBlock.a;
 								return $elm$parser$Parser$Advanced$succeed(
 									{
-										a: state.a,
-										b: A2(
+										linkReferenceDefinitions: state.linkReferenceDefinitions,
+										rawBlocks: A2(
 											$elm$core$List$cons,
 											$dillonkearns$elm_markdown$Markdown$RawBlock$BlockQuote(
 												A2($dillonkearns$elm_markdown$Markdown$Parser$joinStringsPreserveAll, body2, body1)),
 											rest)
 									});
-							case 1:
-								var body1 = newRawBlock.a;
+							case 'OpenBlockOrParagraph':
+								var body1 = newRawBlock.a.a;
 								var _v48 = A2(
 									$elm$parser$Parser$Advanced$run,
 									$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 									body2);
-								if (!_v48.$) {
+								if (_v48.$ === 'Ok') {
 									var value = _v48.a;
-									var _v49 = value.b;
+									var _v49 = value.rawBlocks;
 									if (_v49.b) {
 										var last = _v49.a;
 										if ($dillonkearns$elm_markdown$Markdown$Parser$endWithOpenBlockOrParagraph(last) && (!A2($elm$core$String$endsWith, '\n', body2))) {
 											return $elm$parser$Parser$Advanced$succeed(
 												{
-													a: state.a,
-													b: A2(
+													linkReferenceDefinitions: state.linkReferenceDefinitions,
+													rawBlocks: A2(
 														$elm$core$List$cons,
 														$dillonkearns$elm_markdown$Markdown$RawBlock$BlockQuote(
 															A2($dillonkearns$elm_markdown$Markdown$Parser$joinStringsPreserveAll, body2, body1)),
@@ -26981,17 +26968,17 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 												$elm$parser$Parser$Advanced$run,
 												$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 												body2);
-											if (!_v50.$) {
+											if (_v50.$ === 'Ok') {
 												var value1 = _v50.a;
 												return $elm$parser$Parser$Advanced$succeed(
 													{
-														a: _Utils_ap(state.a, value.a),
-														b: A2(
+														linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+														rawBlocks: A2(
 															$elm$core$List$cons,
 															newRawBlock,
 															A2(
 																$elm$core$List$cons,
-																$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value1.b),
+																$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value1.rawBlocks),
 																rest))
 													});
 											} else {
@@ -27006,17 +26993,17 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 											$elm$parser$Parser$Advanced$run,
 											$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 											body2);
-										if (!_v51.$) {
+										if (_v51.$ === 'Ok') {
 											var value1 = _v51.a;
 											return $elm$parser$Parser$Advanced$succeed(
 												{
-													a: _Utils_ap(state.a, value.a),
-													b: A2(
+													linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+													rawBlocks: A2(
 														$elm$core$List$cons,
 														newRawBlock,
 														A2(
 															$elm$core$List$cons,
-															$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value1.b),
+															$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value1.rawBlocks),
 															rest))
 												});
 										} else {
@@ -27032,20 +27019,20 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 										$elm$parser$Parser$Problem(
 											$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 								}
-							case 6:
+							case 'IndentedCodeBlock':
 								var body1 = newRawBlock.a;
 								var _v52 = A2(
 									$elm$parser$Parser$Advanced$run,
 									$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 									body2);
-								if (!_v52.$) {
+								if (_v52.$ === 'Ok') {
 									var value = _v52.a;
-									var _v53 = value.b;
-									if (_v53.b && (_v53.a.$ === 1)) {
+									var _v53 = value.rawBlocks;
+									if (_v53.b && (_v53.a.$ === 'OpenBlockOrParagraph')) {
 										return $elm$parser$Parser$Advanced$succeed(
 											{
-												a: state.a,
-												b: A2(
+												linkReferenceDefinitions: state.linkReferenceDefinitions,
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													$dillonkearns$elm_markdown$Markdown$RawBlock$BlockQuote(
 														A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, ' ', body2, body1)),
@@ -27056,17 +27043,17 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 											$elm$parser$Parser$Advanced$run,
 											$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 											body2);
-										if (!_v54.$) {
+										if (_v54.$ === 'Ok') {
 											var value1 = _v54.a;
 											return $elm$parser$Parser$Advanced$succeed(
 												{
-													a: _Utils_ap(state.a, value.a),
-													b: A2(
+													linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+													rawBlocks: A2(
 														$elm$core$List$cons,
 														newRawBlock,
 														A2(
 															$elm$core$List$cons,
-															$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value1.b),
+															$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value1.rawBlocks),
 															rest))
 												});
 										} else {
@@ -27087,17 +27074,17 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 									$elm$parser$Parser$Advanced$run,
 									$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 									body2);
-								if (!_v55.$) {
+								if (_v55.$ === 'Ok') {
 									var value = _v55.a;
 									return $elm$parser$Parser$Advanced$succeed(
 										{
-											a: _Utils_ap(state.a, value.a),
-											b: A2(
+											linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+											rawBlocks: A2(
 												$elm$core$List$cons,
 												newRawBlock,
 												A2(
 													$elm$core$List$cons,
-													$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value.b),
+													$dillonkearns$elm_markdown$Markdown$RawBlock$ParsedBlockQuote(value.rawBlocks),
 													rest))
 										});
 								} else {
@@ -27107,7 +27094,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 											$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 								}
 						}
-					case 3:
+					case 'UnorderedListBlock':
 						var _v56 = _v41.b;
 						var _v57 = _v56.a;
 						var tight = _v57.a;
@@ -27116,20 +27103,20 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 						var openListItem2 = _v57.d;
 						var rest = _v56.b;
 						switch (newRawBlock.$) {
-							case 3:
+							case 'UnorderedListBlock':
 								var intended2 = newRawBlock.b;
 								var openListItem1 = newRawBlock.d;
-								if (_Utils_eq(openListItem2.dq, openListItem1.dq)) {
+								if (_Utils_eq(openListItem2.marker, openListItem1.marker)) {
 									var _v59 = A2(
 										$elm$parser$Parser$Advanced$run,
 										$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
-										openListItem2.cW);
-									if (!_v59.$) {
+										openListItem2.body);
+									if (_v59.$ === 'Ok') {
 										var value = _v59.a;
-										return A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? $elm$parser$Parser$Advanced$succeed(
+										return A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? $elm$parser$Parser$Advanced$succeed(
 											{
-												a: _Utils_ap(state.a, value.a),
-												b: A2(
+												linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													A4(
 														$dillonkearns$elm_markdown$Markdown$RawBlock$UnorderedListBlock,
@@ -27137,14 +27124,14 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 														intended2,
 														A2(
 															$elm$core$List$cons,
-															{cW: value.b, o: openListItem2.o},
+															{body: value.rawBlocks, task: openListItem2.task},
 															closeListItems2),
 														openListItem1),
 													rest)
 											}) : $elm$parser$Parser$Advanced$succeed(
 											{
-												a: _Utils_ap(state.a, value.a),
-												b: A2(
+												linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													A4(
 														$dillonkearns$elm_markdown$Markdown$RawBlock$UnorderedListBlock,
@@ -27152,7 +27139,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 														intended2,
 														A2(
 															$elm$core$List$cons,
-															{cW: value.b, o: openListItem2.o},
+															{body: value.rawBlocks, task: openListItem2.task},
 															closeListItems2),
 														openListItem1),
 													rest)
@@ -27167,14 +27154,14 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 									var _v60 = A2(
 										$elm$parser$Parser$Advanced$run,
 										$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
-										openListItem2.cW);
-									if (!_v60.$) {
+										openListItem2.body);
+									if (_v60.$ === 'Ok') {
 										var value = _v60.a;
-										var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? false : tight;
+										var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? false : tight;
 										return $elm$parser$Parser$Advanced$succeed(
 											{
-												a: _Utils_ap(state.a, value.a),
-												b: A2(
+												linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													newRawBlock,
 													A2(
@@ -27185,7 +27172,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 															intended1,
 															A2(
 																$elm$core$List$cons,
-																{cW: value.b, o: openListItem2.o},
+																{body: value.rawBlocks, task: openListItem2.task},
 																closeListItems2),
 															openListItem1),
 														rest))
@@ -27197,12 +27184,12 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 												$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 									}
 								}
-							case 1:
-								var body1 = newRawBlock.a;
+							case 'OpenBlockOrParagraph':
+								var body1 = newRawBlock.a.a;
 								return $elm$parser$Parser$Advanced$succeed(
 									{
-										a: state.a,
-										b: A2(
+										linkReferenceDefinitions: state.linkReferenceDefinitions,
+										rawBlocks: A2(
 											$elm$core$List$cons,
 											A4(
 												$dillonkearns$elm_markdown$Markdown$RawBlock$UnorderedListBlock,
@@ -27212,7 +27199,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 												_Utils_update(
 													openListItem2,
 													{
-														cW: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', openListItem2.cW, body1)
+														body: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', openListItem2.body, body1)
 													})),
 											rest)
 									});
@@ -27220,14 +27207,14 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 								var _v61 = A2(
 									$elm$parser$Parser$Advanced$run,
 									$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
-									openListItem2.cW);
-								if (!_v61.$) {
+									openListItem2.body);
+								if (_v61.$ === 'Ok') {
 									var value = _v61.a;
-									var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? false : tight;
+									var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? false : tight;
 									return $elm$parser$Parser$Advanced$succeed(
 										{
-											a: _Utils_ap(state.a, value.a),
-											b: A2(
+											linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+											rawBlocks: A2(
 												$elm$core$List$cons,
 												newRawBlock,
 												A2(
@@ -27238,7 +27225,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 														intended1,
 														A2(
 															$elm$core$List$cons,
-															{cW: value.b, o: openListItem2.o},
+															{body: value.rawBlocks, task: openListItem2.task},
 															closeListItems2),
 														openListItem2),
 													rest))
@@ -27250,7 +27237,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 											$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 								}
 						}
-					case 4:
+					case 'OrderedListBlock':
 						var _v62 = _v41.b;
 						var _v63 = _v62.a;
 						var tight = _v63.a;
@@ -27261,7 +27248,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 						var openListItem2 = _v63.f;
 						var rest = _v62.b;
 						switch (newRawBlock.$) {
-							case 4:
+							case 'OrderedListBlock':
 								var intended2 = newRawBlock.b;
 								var marker2 = newRawBlock.c;
 								var openListItem1 = newRawBlock.f;
@@ -27270,13 +27257,13 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 										$elm$parser$Parser$Advanced$run,
 										$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 										openListItem2);
-									if (!_v65.$) {
+									if (_v65.$ === 'Ok') {
 										var value = _v65.a;
-										var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? false : tight;
+										var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? false : tight;
 										return $elm$parser$Parser$Advanced$succeed(
 											{
-												a: _Utils_ap(state.a, value.a),
-												b: A2(
+												linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													A6(
 														$dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock,
@@ -27284,7 +27271,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 														intended2,
 														marker,
 														order,
-														A2($elm$core$List$cons, value.b, closeListItems2),
+														A2($elm$core$List$cons, value.rawBlocks, closeListItems2),
 														openListItem1),
 													rest)
 											});
@@ -27299,13 +27286,13 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 										$elm$parser$Parser$Advanced$run,
 										$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 										openListItem2);
-									if (!_v66.$) {
+									if (_v66.$ === 'Ok') {
 										var value = _v66.a;
-										var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? false : tight;
+										var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? false : tight;
 										return $elm$parser$Parser$Advanced$succeed(
 											{
-												a: _Utils_ap(state.a, value.a),
-												b: A2(
+												linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													newRawBlock,
 													A2(
@@ -27316,7 +27303,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 															intended1,
 															marker,
 															order,
-															A2($elm$core$List$cons, value.b, closeListItems2),
+															A2($elm$core$List$cons, value.rawBlocks, closeListItems2),
 															openListItem2),
 														rest))
 											});
@@ -27327,12 +27314,12 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 												$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 									}
 								}
-							case 1:
-								var body1 = newRawBlock.a;
+							case 'OpenBlockOrParagraph':
+								var body1 = newRawBlock.a.a;
 								return $elm$parser$Parser$Advanced$succeed(
 									{
-										a: state.a,
-										b: A2(
+										linkReferenceDefinitions: state.linkReferenceDefinitions,
+										rawBlocks: A2(
 											$elm$core$List$cons,
 											A6($dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock, tight, intended1, marker, order, closeListItems2, openListItem2 + ('\n' + body1)),
 											rest)
@@ -27342,13 +27329,13 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 									$elm$parser$Parser$Advanced$run,
 									$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 									openListItem2);
-								if (!_v67.$) {
+								if (_v67.$ === 'Ok') {
 									var value = _v67.a;
-									var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.b) ? false : tight;
+									var tight2 = A2($elm$core$List$member, $dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine, value.rawBlocks) ? false : tight;
 									return $elm$parser$Parser$Advanced$succeed(
 										{
-											a: _Utils_ap(state.a, value.a),
-											b: A2(
+											linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+											rawBlocks: A2(
 												$elm$core$List$cons,
 												newRawBlock,
 												A2(
@@ -27359,7 +27346,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 														intended1,
 														marker,
 														order,
-														A2($elm$core$List$cons, value.b, closeListItems2),
+														A2($elm$core$List$cons, value.rawBlocks, closeListItems2),
 														openListItem2),
 													rest))
 										});
@@ -27370,24 +27357,25 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 											$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 								}
 						}
-					case 1:
+					case 'OpenBlockOrParagraph':
 						switch (_v41.a.$) {
-							case 1:
-								var body1 = _v41.a.a;
+							case 'OpenBlockOrParagraph':
+								var body1 = _v41.a.a.a;
 								var _v68 = _v41.b;
-								var body2 = _v68.a.a;
+								var body2 = _v68.a.a.a;
 								var rest = _v68.b;
 								return $elm$parser$Parser$Advanced$succeed(
 									{
-										a: state.a,
-										b: A2(
+										linkReferenceDefinitions: state.linkReferenceDefinitions,
+										rawBlocks: A2(
 											$elm$core$List$cons,
 											$dillonkearns$elm_markdown$Markdown$RawBlock$OpenBlockOrParagraph(
-												A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', body2, body1)),
+												$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(
+													A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', body2, body1))),
 											rest)
 									});
-							case 13:
-								if (!_v41.a.a) {
+							case 'SetextLine':
+								if (_v41.a.a.$ === 'LevelOne') {
 									var _v69 = _v41.a;
 									var _v70 = _v69.a;
 									var _v71 = _v41.b;
@@ -27395,8 +27383,8 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 									var rest = _v71.b;
 									return $elm$parser$Parser$Advanced$succeed(
 										{
-											a: state.a,
-											b: A2(
+											linkReferenceDefinitions: state.linkReferenceDefinitions,
+											rawBlocks: A2(
 												$elm$core$List$cons,
 												A2($dillonkearns$elm_markdown$Markdown$RawBlock$Heading, 1, unparsedInlines),
 												rest)
@@ -27409,30 +27397,30 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 									var rest = _v74.b;
 									return $elm$parser$Parser$Advanced$succeed(
 										{
-											a: state.a,
-											b: A2(
+											linkReferenceDefinitions: state.linkReferenceDefinitions,
+											rawBlocks: A2(
 												$elm$core$List$cons,
 												A2($dillonkearns$elm_markdown$Markdown$RawBlock$Heading, 2, unparsedInlines),
 												rest)
 										});
 								}
-							case 9:
+							case 'TableDelimiter':
 								var _v75 = _v41.a.a;
 								var text = _v75.a;
 								var alignments = _v75.b;
 								var _v76 = _v41.b;
-								var rawHeaders = _v76.a.a;
+								var rawHeaders = _v76.a.a.a;
 								var rest = _v76.b;
 								var _v77 = A2(
 									$dillonkearns$elm_markdown$Markdown$TableParser$parseHeader,
 									A2($dillonkearns$elm_markdown$Markdown$Table$TableDelimiterRow, text, alignments),
 									rawHeaders);
-								if (!_v77.$) {
-									var headers = _v77.a;
+								if (_v77.$ === 'Ok') {
+									var headers = _v77.a.a;
 									return $elm$parser$Parser$Advanced$succeed(
 										{
-											a: state.a,
-											b: A2(
+											linkReferenceDefinitions: state.linkReferenceDefinitions,
+											rawBlocks: A2(
 												$elm$core$List$cons,
 												$dillonkearns$elm_markdown$Markdown$RawBlock$Table(
 													A2($dillonkearns$elm_markdown$Markdown$Table$Table, headers, _List_Nil)),
@@ -27441,26 +27429,27 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 								} else {
 									return $elm$parser$Parser$Advanced$succeed(
 										{
-											a: state.a,
-											b: A2(
+											linkReferenceDefinitions: state.linkReferenceDefinitions,
+											rawBlocks: A2(
 												$elm$core$List$cons,
 												$dillonkearns$elm_markdown$Markdown$RawBlock$OpenBlockOrParagraph(
-													A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', rawHeaders, text.cs)),
+													$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(
+														A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', rawHeaders, text.raw))),
 												rest)
 										});
 								}
 							default:
 								break _v41$13;
 						}
-					case 8:
-						if (_v41.a.$ === 8) {
+					case 'Table':
+						if (_v41.a.$ === 'Table') {
 							var updatedTable = _v41.a.a;
 							var _v78 = _v41.b;
 							var rest = _v78.b;
 							return $elm$parser$Parser$Advanced$succeed(
 								{
-									a: state.a,
-									b: A2(
+									linkReferenceDefinitions: state.linkReferenceDefinitions,
+									rawBlocks: A2(
 										$elm$core$List$cons,
 										$dillonkearns$elm_markdown$Markdown$RawBlock$Table(updatedTable),
 										rest)
@@ -27468,10 +27457,10 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 						} else {
 							break _v41$13;
 						}
-					case 10:
+					case 'BlankLine':
 						if (_v41.b.b.b) {
 							switch (_v41.b.b.a.$) {
-								case 4:
+								case 'OrderedListBlock':
 									var _v79 = _v41.b;
 									var _v80 = _v79.a;
 									var _v81 = _v79.b;
@@ -27487,15 +27476,15 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 										$elm$parser$Parser$Advanced$run,
 										$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 										openListItem2);
-									if (!_v83.$) {
+									if (_v83.$ === 'Ok') {
 										var value = _v83.a;
-										if (newRawBlock.$ === 4) {
+										if (newRawBlock.$ === 'OrderedListBlock') {
 											var intended2 = newRawBlock.b;
 											var openListItem = newRawBlock.f;
 											return $elm$parser$Parser$Advanced$succeed(
 												{
-													a: _Utils_ap(state.a, value.a),
-													b: A2(
+													linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+													rawBlocks: A2(
 														$elm$core$List$cons,
 														A6(
 															$dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock,
@@ -27503,15 +27492,15 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 															intended2,
 															marker,
 															order,
-															A2($elm$core$List$cons, value.b, closeListItems2),
+															A2($elm$core$List$cons, value.rawBlocks, closeListItems2),
 															openListItem),
 														rest)
 												});
 										} else {
 											return $elm$parser$Parser$Advanced$succeed(
 												{
-													a: _Utils_ap(state.a, value.a),
-													b: A2(
+													linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+													rawBlocks: A2(
 														$elm$core$List$cons,
 														newRawBlock,
 														A2(
@@ -27525,7 +27514,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 																	intended1,
 																	marker,
 																	order,
-																	A2($elm$core$List$cons, value.b, closeListItems2),
+																	A2($elm$core$List$cons, value.rawBlocks, closeListItems2),
 																	openListItem2),
 																rest)))
 												});
@@ -27536,7 +27525,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 											$elm$parser$Parser$Problem(
 												$dillonkearns$elm_markdown$Markdown$Parser$deadEndsToString(e)));
 									}
-								case 3:
+								case 'UnorderedListBlock':
 									var _v85 = _v41.b;
 									var _v86 = _v85.a;
 									var _v87 = _v85.b;
@@ -27549,15 +27538,15 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 									var _v89 = A2(
 										$elm$parser$Parser$Advanced$run,
 										$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
-										openListItem2.cW);
-									if (!_v89.$) {
+										openListItem2.body);
+									if (_v89.$ === 'Ok') {
 										var value = _v89.a;
-										if (newRawBlock.$ === 3) {
+										if (newRawBlock.$ === 'UnorderedListBlock') {
 											var openListItem = newRawBlock.d;
 											return $elm$parser$Parser$Advanced$succeed(
 												{
-													a: _Utils_ap(state.a, value.a),
-													b: A2(
+													linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+													rawBlocks: A2(
 														$elm$core$List$cons,
 														A4(
 															$dillonkearns$elm_markdown$Markdown$RawBlock$UnorderedListBlock,
@@ -27565,7 +27554,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 															intended1,
 															A2(
 																$elm$core$List$cons,
-																{cW: value.b, o: openListItem2.o},
+																{body: value.rawBlocks, task: openListItem2.task},
 																closeListItems2),
 															openListItem),
 														rest)
@@ -27573,8 +27562,8 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 										} else {
 											return $elm$parser$Parser$Advanced$succeed(
 												{
-													a: _Utils_ap(state.a, value.a),
-													b: A2(
+													linkReferenceDefinitions: _Utils_ap(state.linkReferenceDefinitions, value.linkReferenceDefinitions),
+													rawBlocks: A2(
 														$elm$core$List$cons,
 														newRawBlock,
 														A2(
@@ -27588,7 +27577,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 																	intended1,
 																	A2(
 																		$elm$core$List$cons,
-																		{cW: value.b, o: openListItem2.o},
+																		{body: value.rawBlocks, task: openListItem2.task},
 																		closeListItems2),
 																	openListItem2),
 																rest)))
@@ -27615,20 +27604,20 @@ var $dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks = F2(
 		}
 		return $elm$parser$Parser$Advanced$succeed(
 			{
-				a: state.a,
-				b: A2($elm$core$List$cons, newRawBlock, state.b)
+				linkReferenceDefinitions: state.linkReferenceDefinitions,
+				rawBlocks: A2($elm$core$List$cons, newRawBlock, state.rawBlocks)
 			});
 	});
 var $dillonkearns$elm_markdown$Markdown$Parser$inlineParseHelper = F2(
 	function (referencesDict, _v36) {
-		var unparsedInlines = _v36;
+		var unparsedInlines = _v36.a;
 		var mappedReferencesDict = $elm$core$Dict$fromList(
 			A2(
 				$elm$core$List$map,
 				$elm$core$Tuple$mapSecond(
 					function (_v37) {
-						var destination = _v37.c3;
-						var title = _v37.dY;
+						var destination = _v37.destination;
+						var title = _v37.title;
 						return _Utils_Tuple2(destination, title);
 					}),
 				referencesDict));
@@ -27639,15 +27628,15 @@ var $dillonkearns$elm_markdown$Markdown$Parser$inlineParseHelper = F2(
 	});
 var $dillonkearns$elm_markdown$Markdown$Parser$mapInline = function (inline) {
 	switch (inline.$) {
-		case 0:
+		case 'Text':
 			var string = inline.a;
 			return $dillonkearns$elm_markdown$Markdown$Block$Text(string);
-		case 1:
+		case 'HardLineBreak':
 			return $dillonkearns$elm_markdown$Markdown$Block$HardLineBreak;
-		case 2:
+		case 'CodeInline':
 			var string = inline.a;
 			return $dillonkearns$elm_markdown$Markdown$Block$CodeSpan(string);
-		case 3:
+		case 'Link':
 			var string = inline.a;
 			var maybeString = inline.b;
 			var inlines = inline.c;
@@ -27656,7 +27645,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$mapInline = function (inline) {
 				string,
 				maybeString,
 				A2($elm$core$List$map, $dillonkearns$elm_markdown$Markdown$Parser$mapInline, inlines));
-		case 4:
+		case 'Image':
 			var string = inline.a;
 			var maybeString = inline.b;
 			var inlines = inline.c;
@@ -27665,11 +27654,11 @@ var $dillonkearns$elm_markdown$Markdown$Parser$mapInline = function (inline) {
 				string,
 				maybeString,
 				A2($elm$core$List$map, $dillonkearns$elm_markdown$Markdown$Parser$mapInline, inlines));
-		case 5:
+		case 'HtmlInline':
 			var node = inline.a;
 			return $dillonkearns$elm_markdown$Markdown$Block$HtmlInline(
 				$dillonkearns$elm_markdown$Markdown$Parser$nodeToRawBlock(node));
-		case 6:
+		case 'Emphasis':
 			var level = inline.a;
 			var inlines = inline.b;
 			switch (level) {
@@ -27700,14 +27689,14 @@ var $dillonkearns$elm_markdown$Markdown$Parser$mapInline = function (inline) {
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$nodeToRawBlock = function (node) {
 	switch (node.$) {
-		case 1:
+		case 'Text':
 			return $dillonkearns$elm_markdown$Markdown$Block$HtmlComment('TODO this never happens, but use types to drop this case.');
-		case 0:
+		case 'Element':
 			var tag = node.a;
 			var attributes = node.b;
 			var children = node.c;
 			var parseChild = function (child) {
-				if (child.$ === 1) {
+				if (child.$ === 'Text') {
 					var text = child.a;
 					return $dillonkearns$elm_markdown$Markdown$Parser$textNodeToBlocks(text);
 				} else {
@@ -27723,13 +27712,13 @@ var $dillonkearns$elm_markdown$Markdown$Parser$nodeToRawBlock = function (node) 
 				tag,
 				attributes,
 				A2($elm$core$List$concatMap, parseChild, children));
-		case 2:
+		case 'Comment':
 			var string = node.a;
 			return $dillonkearns$elm_markdown$Markdown$Block$HtmlComment(string);
-		case 3:
+		case 'Cdata':
 			var string = node.a;
 			return $dillonkearns$elm_markdown$Markdown$Block$Cdata(string);
-		case 4:
+		case 'ProcessingInstruction':
 			var string = node.a;
 			return $dillonkearns$elm_markdown$Markdown$Block$ProcessingInstruction(string);
 		default:
@@ -27749,7 +27738,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$nodesToBlocksHelp = F2(
 				var node = remaining.a;
 				var rest = remaining.b;
 				var _v31 = A2($dillonkearns$elm_markdown$Markdown$Parser$childToBlocks, node, soFar);
-				if (!_v31.$) {
+				if (_v31.$ === 'Ok') {
 					var newSoFar = _v31.a;
 					var $temp$remaining = rest,
 						$temp$soFar = newSoFar;
@@ -27774,13 +27763,13 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parse = function (input) {
 			$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser(),
 			$dillonkearns$elm_markdown$Helpers$endOfFile),
 		input);
-	if (_v27.$ === 1) {
+	if (_v27.$ === 'Err') {
 		var e = _v27.a;
 		return $elm$core$Result$Err(e);
 	} else {
 		var v = _v27.a;
 		var _v28 = $dillonkearns$elm_markdown$Markdown$Parser$parseAllInlines(v);
-		if (_v28.$ === 1) {
+		if (_v28.$ === 'Err') {
 			var e = _v28.a;
 			return A2(
 				$elm$parser$Parser$Advanced$run,
@@ -27789,7 +27778,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parse = function (input) {
 		} else {
 			var blocks = _v28.a;
 			var isNotEmptyParagraph = function (block) {
-				if ((block.$ === 5) && (!block.a.b)) {
+				if ((block.$ === 'Paragraph') && (!block.a.b)) {
 					return false;
 				} else {
 					return true;
@@ -27801,7 +27790,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parse = function (input) {
 	}
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$parseAllInlines = function (state) {
-	return A3($dillonkearns$elm_markdown$Markdown$Parser$parseAllInlinesHelp, state, state.b, _List_Nil);
+	return A3($dillonkearns$elm_markdown$Markdown$Parser$parseAllInlinesHelp, state, state.rawBlocks, _List_Nil);
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$parseAllInlinesHelp = F3(
 	function (state, rawBlocks, parsedBlocks) {
@@ -27810,9 +27799,9 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseAllInlinesHelp = F3(
 			if (rawBlocks.b) {
 				var rawBlock = rawBlocks.a;
 				var rest = rawBlocks.b;
-				var _v26 = A2($dillonkearns$elm_markdown$Markdown$Parser$parseInlines, state.a, rawBlock);
+				var _v26 = A2($dillonkearns$elm_markdown$Markdown$Parser$parseInlines, state.linkReferenceDefinitions, rawBlock);
 				switch (_v26.$) {
-					case 1:
+					case 'ParsedBlock':
 						var newParsedBlock = _v26.a;
 						var $temp$state = state,
 							$temp$rawBlocks = rest,
@@ -27821,7 +27810,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseAllInlinesHelp = F3(
 						rawBlocks = $temp$rawBlocks;
 						parsedBlocks = $temp$parsedBlocks;
 						continue parseAllInlinesHelp;
-					case 0:
+					case 'EmptyBlock':
 						var $temp$state = state,
 							$temp$rawBlocks = rest,
 							$temp$parsedBlocks = parsedBlocks;
@@ -27843,26 +27832,26 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseHeaderInlines = F2(
 		return A2(
 			$elm$core$List$map,
 			function (_v24) {
-				var label = _v24.ai;
-				var alignment = _v24.aD;
+				var label = _v24.label;
+				var alignment = _v24.alignment;
 				return A3(
 					$dillonkearns$elm_markdown$Markdown$Parser$parseRawInline,
 					linkReferences,
 					function (parsedHeaderLabel) {
-						return {aD: alignment, ai: parsedHeaderLabel};
+						return {alignment: alignment, label: parsedHeaderLabel};
 					},
-					label);
+					$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(label));
 			},
 			header);
 	});
 var $dillonkearns$elm_markdown$Markdown$Parser$parseInlines = F2(
 	function (linkReferences, rawBlock) {
 		switch (rawBlock.$) {
-			case 0:
+			case 'Heading':
 				var level = rawBlock.a;
 				var unparsedInlines = rawBlock.b;
 				var _v17 = $dillonkearns$elm_markdown$Markdown$Parser$toHeading(level);
-				if (!_v17.$) {
+				if (_v17.$ === 'Ok') {
 					var parsedLevel = _v17.a;
 					return $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock(
 						A2(
@@ -27873,35 +27862,35 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseInlines = F2(
 					var e = _v17.a;
 					return $dillonkearns$elm_markdown$Markdown$Parser$InlineProblem(e);
 				}
-			case 1:
+			case 'OpenBlockOrParagraph':
 				var unparsedInlines = rawBlock.a;
 				return $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock(
 					$dillonkearns$elm_markdown$Markdown$Block$Paragraph(
 						A2($dillonkearns$elm_markdown$Markdown$Parser$inlineParseHelper, linkReferences, unparsedInlines)));
-			case 2:
+			case 'Html':
 				var html = rawBlock.a;
 				return $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock(
 					$dillonkearns$elm_markdown$Markdown$Block$HtmlBlock(html));
-			case 3:
+			case 'UnorderedListBlock':
 				var tight = rawBlock.a;
 				var unparsedItems = rawBlock.c;
 				var parseItem = F2(
 					function (rawBlockTask, rawBlocks) {
 						var blocksTask = function () {
-							if (!rawBlockTask.$) {
+							if (rawBlockTask.$ === 'Just') {
 								if (!rawBlockTask.a) {
-									return 1;
+									return $dillonkearns$elm_markdown$Markdown$Block$IncompleteTask;
 								} else {
-									return 2;
+									return $dillonkearns$elm_markdown$Markdown$Block$CompletedTask;
 								}
 							} else {
-								return 0;
+								return $dillonkearns$elm_markdown$Markdown$Block$NoTask;
 							}
 						}();
 						var blocks = function () {
 							var _v18 = $dillonkearns$elm_markdown$Markdown$Parser$parseAllInlines(
-								{a: linkReferences, b: rawBlocks});
-							if (!_v18.$) {
+								{linkReferenceDefinitions: linkReferences, rawBlocks: rawBlocks});
+							if (_v18.$ === 'Ok') {
 								var parsedBlocks = _v18.a;
 								return parsedBlocks;
 							} else {
@@ -27918,17 +27907,17 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseInlines = F2(
 							A2(
 								$elm$core$List$map,
 								function (item) {
-									return A2(parseItem, item.o, item.cW);
+									return A2(parseItem, item.task, item.body);
 								},
 								unparsedItems))));
-			case 4:
+			case 'OrderedListBlock':
 				var tight = rawBlock.a;
 				var startingIndex = rawBlock.d;
 				var unparsedItems = rawBlock.e;
 				var parseItem = function (rawBlocks) {
 					var _v20 = $dillonkearns$elm_markdown$Markdown$Parser$parseAllInlines(
-						{a: linkReferences, b: rawBlocks});
-					if (!_v20.$) {
+						{linkReferenceDefinitions: linkReferences, rawBlocks: rawBlocks});
+					if (_v20.$ === 'Ok') {
 						var parsedBlocks = _v20.a;
 						return parsedBlocks;
 					} else {
@@ -27942,21 +27931,21 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseInlines = F2(
 						startingIndex,
 						$elm$core$List$reverse(
 							A2($elm$core$List$map, parseItem, unparsedItems))));
-			case 5:
+			case 'CodeBlock':
 				var codeBlock = rawBlock.a;
 				return $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock(
 					$dillonkearns$elm_markdown$Markdown$Block$CodeBlock(codeBlock));
-			case 7:
+			case 'ThematicBreak':
 				return $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock($dillonkearns$elm_markdown$Markdown$Block$ThematicBreak);
-			case 10:
+			case 'BlankLine':
 				return $dillonkearns$elm_markdown$Markdown$Parser$EmptyBlock;
-			case 11:
+			case 'BlockQuote':
 				return $dillonkearns$elm_markdown$Markdown$Parser$EmptyBlock;
-			case 12:
+			case 'ParsedBlockQuote':
 				var rawBlocks = rawBlock.a;
 				var _v21 = $dillonkearns$elm_markdown$Markdown$Parser$parseAllInlines(
-					{a: linkReferences, b: rawBlocks});
-				if (!_v21.$) {
+					{linkReferenceDefinitions: linkReferences, rawBlocks: rawBlocks});
+				if (_v21.$ === 'Ok') {
 					var parsedBlocks = _v21.a;
 					return $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock(
 						$dillonkearns$elm_markdown$Markdown$Block$BlockQuote(parsedBlocks));
@@ -27964,12 +27953,12 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseInlines = F2(
 					var e = _v21.a;
 					return $dillonkearns$elm_markdown$Markdown$Parser$InlineProblem(e);
 				}
-			case 6:
+			case 'IndentedCodeBlock':
 				var codeBlockBody = rawBlock.a;
 				return $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock(
 					$dillonkearns$elm_markdown$Markdown$Block$CodeBlock(
-						{cW: codeBlockBody, dn: $elm$core$Maybe$Nothing}));
-			case 8:
+						{body: codeBlockBody, language: $elm$core$Maybe$Nothing}));
+			case 'Table':
 				var _v22 = rawBlock.a;
 				var header = _v22.a;
 				var rows = _v22.b;
@@ -27978,17 +27967,23 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseInlines = F2(
 						$dillonkearns$elm_markdown$Markdown$Block$Table,
 						A2($dillonkearns$elm_markdown$Markdown$Parser$parseHeaderInlines, linkReferences, header),
 						A2($dillonkearns$elm_markdown$Markdown$Parser$parseRowInlines, linkReferences, rows)));
-			case 9:
+			case 'TableDelimiter':
 				var _v23 = rawBlock.a;
 				var text = _v23.a;
 				return $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock(
 					$dillonkearns$elm_markdown$Markdown$Block$Paragraph(
-						A2($dillonkearns$elm_markdown$Markdown$Parser$inlineParseHelper, linkReferences, text.cs)));
+						A2(
+							$dillonkearns$elm_markdown$Markdown$Parser$inlineParseHelper,
+							linkReferences,
+							$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(text.raw))));
 			default:
 				var raw = rawBlock.b;
 				return $dillonkearns$elm_markdown$Markdown$Parser$ParsedBlock(
 					$dillonkearns$elm_markdown$Markdown$Block$Paragraph(
-						A2($dillonkearns$elm_markdown$Markdown$Parser$inlineParseHelper, linkReferences, raw)));
+						A2(
+							$dillonkearns$elm_markdown$Markdown$Parser$inlineParseHelper,
+							linkReferences,
+							$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(raw))));
 		}
 	});
 var $dillonkearns$elm_markdown$Markdown$Parser$parseRawInline = F3(
@@ -28004,7 +27999,11 @@ var $dillonkearns$elm_markdown$Markdown$Parser$parseRowInlines = F2(
 				return A2(
 					$elm$core$List$map,
 					function (column) {
-						return A3($dillonkearns$elm_markdown$Markdown$Parser$parseRawInline, linkReferences, $elm$core$Basics$identity, column);
+						return A3(
+							$dillonkearns$elm_markdown$Markdown$Parser$parseRawInline,
+							linkReferences,
+							$elm$core$Basics$identity,
+							$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(column));
 					},
 					row);
 			},
@@ -28028,12 +28027,12 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 				},
 				$elm$parser$Parser$Advanced$backtrackable($dillonkearns$elm_markdown$Markdown$LinkReferenceDefinition$parser)),
 				function () {
-				var _v3 = revStmts.b;
+				var _v3 = revStmts.rawBlocks;
 				_v3$6:
 				while (true) {
 					if (_v3.b) {
 						switch (_v3.a.$) {
-							case 1:
+							case 'OpenBlockOrParagraph':
 								return A2(
 									$elm$parser$Parser$Advanced$map,
 									function (block) {
@@ -28043,7 +28042,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 										$elm$parser$Parser$Advanced$andThen,
 										$dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks(revStmts),
 										$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterOpenBlockOrParagraphParser()));
-							case 8:
+							case 'Table':
 								var table = _v3.a.a;
 								return A2(
 									$elm$parser$Parser$Advanced$map,
@@ -28059,7 +28058,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 													$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockNotAfterOpenBlockOrParagraphParser(),
 													$dillonkearns$elm_markdown$Markdown$Parser$tableRowIfTableStarted(table)
 												]))));
-							case 3:
+							case 'UnorderedListBlock':
 								var _v4 = _v3.a;
 								var tight = _v4.a;
 								var intended = _v4.b;
@@ -28071,7 +28070,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 										return _Utils_update(
 											state,
 											{
-												b: A2(
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													$dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine,
 													A2(
@@ -28084,7 +28083,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 															_Utils_update(
 																openListItem,
 																{
-																	cW: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '', openListItem.cW, newString)
+																	body: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '', openListItem.body, newString)
 																})),
 														rest))
 											});
@@ -28094,7 +28093,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 										return _Utils_update(
 											state,
 											{
-												b: A2(
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													A4(
 														$dillonkearns$elm_markdown$Markdown$RawBlock$UnorderedListBlock,
@@ -28104,7 +28103,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 														_Utils_update(
 															openListItem,
 															{
-																cW: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', openListItem.cW, newString)
+																body: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', openListItem.body, newString)
 															})),
 													rest)
 											});
@@ -28155,7 +28154,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 												$dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks(revStmts),
 												$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterList()))
 										]));
-							case 4:
+							case 'OrderedListBlock':
 								var _v10 = _v3.a;
 								var tight = _v10.a;
 								var intended = _v10.b;
@@ -28169,7 +28168,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 										return _Utils_update(
 											state,
 											{
-												b: A2(
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													$dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine,
 													A2(
@@ -28183,7 +28182,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 										return _Utils_update(
 											state,
 											{
-												b: A2(
+												rawBlocks: A2(
 													$elm$core$List$cons,
 													A6($dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock, tight, intended, marker, order, closeListItems, openListItem + ('\n' + newString)),
 													rest)
@@ -28235,10 +28234,10 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 												$dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks(revStmts),
 												$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterList()))
 										]));
-							case 10:
+							case 'BlankLine':
 								if (_v3.b.b) {
 									switch (_v3.b.a.$) {
-										case 3:
+										case 'UnorderedListBlock':
 											var _v6 = _v3.a;
 											var _v7 = _v3.b;
 											var _v8 = _v7.a;
@@ -28252,7 +28251,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 													return _Utils_update(
 														state,
 														{
-															b: A2(
+															rawBlocks: A2(
 																$elm$core$List$cons,
 																$dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine,
 																A2(
@@ -28265,7 +28264,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 																		_Utils_update(
 																			openListItem,
 																			{
-																				cW: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '', openListItem.cW, newString)
+																				body: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '', openListItem.body, newString)
 																			})),
 																	rest))
 														});
@@ -28275,7 +28274,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 													return _Utils_update(
 														state,
 														{
-															b: A2(
+															rawBlocks: A2(
 																$elm$core$List$cons,
 																A4(
 																	$dillonkearns$elm_markdown$Markdown$RawBlock$UnorderedListBlock,
@@ -28285,12 +28284,12 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 																	_Utils_update(
 																		openListItem,
 																		{
-																			cW: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', openListItem.cW, newString)
+																			body: A3($dillonkearns$elm_markdown$Markdown$Parser$joinRawStringsWith, '\n', openListItem.body, newString)
 																		})),
 																rest)
 														});
 												});
-											return ($elm$core$String$trim(openListItem.cW) === '') ? A2(
+											return ($elm$core$String$trim(openListItem.body) === '') ? A2(
 												$elm$parser$Parser$Advanced$map,
 												function (block) {
 													return $elm$parser$Parser$Advanced$Loop(block);
@@ -28344,7 +28343,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 															$dillonkearns$elm_markdown$Markdown$Parser$completeOrMergeBlocks(revStmts),
 															$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockNotAfterOpenBlockOrParagraphParser()))
 													]));
-										case 4:
+										case 'OrderedListBlock':
 											var _v12 = _v3.a;
 											var _v13 = _v3.b;
 											var _v14 = _v13.a;
@@ -28360,7 +28359,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 													return _Utils_update(
 														state,
 														{
-															b: A2(
+															rawBlocks: A2(
 																$elm$core$List$cons,
 																$dillonkearns$elm_markdown$Markdown$RawBlock$BlankLine,
 																A2(
@@ -28374,7 +28373,7 @@ var $dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock = function (revStmts
 													return _Utils_update(
 														state,
 														{
-															b: A2(
+															rawBlocks: A2(
 																$elm$core$List$cons,
 																A6($dillonkearns$elm_markdown$Markdown$RawBlock$OrderedListBlock, tight, intended, marker, order, closeListItems, openListItem + ('\n' + newString)),
 																rest)
@@ -28476,16 +28475,17 @@ var $dillonkearns$elm_markdown$Markdown$Parser$textNodeToBlocks = function (text
 };
 var $dillonkearns$elm_markdown$Markdown$Parser$xmlNodeToHtmlNode = function (xmlNode) {
 	switch (xmlNode.$) {
-		case 1:
+		case 'Text':
 			var innerText = xmlNode.a;
 			return $elm$parser$Parser$Advanced$succeed(
-				$dillonkearns$elm_markdown$Markdown$RawBlock$OpenBlockOrParagraph(innerText));
-		case 0:
+				$dillonkearns$elm_markdown$Markdown$RawBlock$OpenBlockOrParagraph(
+					$dillonkearns$elm_markdown$Markdown$RawBlock$UnparsedInlines(innerText)));
+		case 'Element':
 			var tag = xmlNode.a;
 			var attributes = xmlNode.b;
 			var children = xmlNode.c;
 			var _v1 = $dillonkearns$elm_markdown$Markdown$Parser$nodesToBlocks(children);
-			if (!_v1.$) {
+			if (_v1.$ === 'Ok') {
 				var parsedChildren = _v1.a;
 				return $elm$parser$Parser$Advanced$succeed(
 					$dillonkearns$elm_markdown$Markdown$RawBlock$Html(
@@ -28494,17 +28494,17 @@ var $dillonkearns$elm_markdown$Markdown$Parser$xmlNodeToHtmlNode = function (xml
 				var err = _v1.a;
 				return $elm$parser$Parser$Advanced$problem(err);
 			}
-		case 2:
+		case 'Comment':
 			var string = xmlNode.a;
 			return $elm$parser$Parser$Advanced$succeed(
 				$dillonkearns$elm_markdown$Markdown$RawBlock$Html(
 					$dillonkearns$elm_markdown$Markdown$Block$HtmlComment(string)));
-		case 3:
+		case 'Cdata':
 			var string = xmlNode.a;
 			return $elm$parser$Parser$Advanced$succeed(
 				$dillonkearns$elm_markdown$Markdown$RawBlock$Html(
 					$dillonkearns$elm_markdown$Markdown$Block$Cdata(string)));
-		case 4:
+		case 'ProcessingInstruction':
 			var string = xmlNode.a;
 			return $elm$parser$Parser$Advanced$succeed(
 				$dillonkearns$elm_markdown$Markdown$RawBlock$Html(
@@ -28523,7 +28523,7 @@ function $dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser() {
 		$dillonkearns$elm_markdown$Markdown$Parser$completeBlocks,
 		A2(
 			$elm$parser$Parser$Advanced$loop,
-			{a: _List_Nil, b: _List_Nil},
+			{linkReferenceDefinitions: _List_Nil, rawBlocks: _List_Nil},
 			$dillonkearns$elm_markdown$Markdown$Parser$stepRawBlock));
 }
 function $dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockNotAfterOpenBlockOrParagraphParser() {
@@ -28601,34 +28601,37 @@ function $dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterLi
 function $dillonkearns$elm_markdown$Markdown$Parser$cyclic$htmlParser() {
 	return A2($elm$parser$Parser$Advanced$andThen, $dillonkearns$elm_markdown$Markdown$Parser$xmlNodeToHtmlNode, $dillonkearns$elm_markdown$HtmlParser$html);
 }
-var $dillonkearns$elm_markdown$Markdown$Parser$rawBlockParser = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser();
-$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser = function () {
-	return $dillonkearns$elm_markdown$Markdown$Parser$rawBlockParser;
-};
-var $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockNotAfterOpenBlockOrParagraphParser = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockNotAfterOpenBlockOrParagraphParser();
-$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockNotAfterOpenBlockOrParagraphParser = function () {
-	return $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockNotAfterOpenBlockOrParagraphParser;
-};
-var $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockAfterOpenBlockOrParagraphParser = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterOpenBlockOrParagraphParser();
-$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterOpenBlockOrParagraphParser = function () {
-	return $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockAfterOpenBlockOrParagraphParser;
-};
-var $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockAfterList = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterList();
-$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterList = function () {
-	return $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockAfterList;
-};
-var $dillonkearns$elm_markdown$Markdown$Parser$htmlParser = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$htmlParser();
-$dillonkearns$elm_markdown$Markdown$Parser$cyclic$htmlParser = function () {
-	return $dillonkearns$elm_markdown$Markdown$Parser$htmlParser;
-};
+try {
+	var $dillonkearns$elm_markdown$Markdown$Parser$rawBlockParser = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser();
+	$dillonkearns$elm_markdown$Markdown$Parser$cyclic$rawBlockParser = function () {
+		return $dillonkearns$elm_markdown$Markdown$Parser$rawBlockParser;
+	};
+	var $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockNotAfterOpenBlockOrParagraphParser = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockNotAfterOpenBlockOrParagraphParser();
+	$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockNotAfterOpenBlockOrParagraphParser = function () {
+		return $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockNotAfterOpenBlockOrParagraphParser;
+	};
+	var $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockAfterOpenBlockOrParagraphParser = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterOpenBlockOrParagraphParser();
+	$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterOpenBlockOrParagraphParser = function () {
+		return $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockAfterOpenBlockOrParagraphParser;
+	};
+	var $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockAfterList = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterList();
+	$dillonkearns$elm_markdown$Markdown$Parser$cyclic$mergeableBlockAfterList = function () {
+		return $dillonkearns$elm_markdown$Markdown$Parser$mergeableBlockAfterList;
+	};
+	var $dillonkearns$elm_markdown$Markdown$Parser$htmlParser = $dillonkearns$elm_markdown$Markdown$Parser$cyclic$htmlParser();
+	$dillonkearns$elm_markdown$Markdown$Parser$cyclic$htmlParser = function () {
+		return $dillonkearns$elm_markdown$Markdown$Parser$htmlParser;
+	};
+} catch ($) {
+	throw 'Some top-level definitions from `Markdown.Parser` are causing infinite recursion:\n\n  ┌─────┐\n  │    childToBlocks\n  │     ↓\n  │    rawBlockParser\n  │     ↓\n  │    completeBlocks\n  │     ↓\n  │    completeOrMergeBlocks\n  │     ↓\n  │    mergeableBlockNotAfterOpenBlockOrParagraphParser\n  │     ↓\n  │    mergeableBlockAfterOpenBlockOrParagraphParser\n  │     ↓\n  │    mergeableBlockAfterList\n  │     ↓\n  │    htmlParser\n  │     ↓\n  │    inlineParseHelper\n  │     ↓\n  │    mapInline\n  │     ↓\n  │    nodeToRawBlock\n  │     ↓\n  │    nodesToBlocks\n  │     ↓\n  │    nodesToBlocksHelp\n  │     ↓\n  │    parse\n  │     ↓\n  │    parseAllInlines\n  │     ↓\n  │    parseAllInlinesHelp\n  │     ↓\n  │    parseHeaderInlines\n  │     ↓\n  │    parseInlines\n  │     ↓\n  │    parseRawInline\n  │     ↓\n  │    parseRowInlines\n  │     ↓\n  │    stepRawBlock\n  │     ↓\n  │    textNodeToBlocks\n  │     ↓\n  │    xmlNodeToHtmlNode\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
 var $elm$core$Result$map2 = F3(
 	function (func, ra, rb) {
-		if (ra.$ === 1) {
+		if (ra.$ === 'Err') {
 			var x = ra.a;
 			return $elm$core$Result$Err(x);
 		} else {
 			var a = ra.a;
-			if (rb.$ === 1) {
+			if (rb.$ === 'Err') {
 				var x = rb.a;
 				return $elm$core$Result$Err(x);
 			} else {
@@ -28644,7 +28647,7 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$combineResults = A2(
 	$elm$core$Result$Ok(_List_Nil));
 var $elm$core$Result$andThen = F2(
 	function (callback, result) {
-		if (!result.$) {
+		if (result.$ === 'Ok') {
 			var value = result.a;
 			return callback(value);
 		} else {
@@ -28662,9 +28665,9 @@ var $dillonkearns$elm_markdown$Markdown$Block$foldl = F3(
 				var block = list.a;
 				var remainingBlocks = list.b;
 				switch (block.$) {
-					case 0:
+					case 'HtmlBlock':
 						var html = block.a;
-						if (!html.$) {
+						if (html.$ === 'HtmlElement') {
 							var children = html.c;
 							var $temp$function = _function,
 								$temp$acc = A2(_function, block, acc),
@@ -28682,7 +28685,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$foldl = F3(
 							list = $temp$list;
 							continue foldl;
 						}
-					case 1:
+					case 'UnorderedList':
 						var blocks = block.b;
 						var childBlocks = A2(
 							$elm$core$List$concatMap,
@@ -28698,7 +28701,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$foldl = F3(
 						acc = $temp$acc;
 						list = $temp$list;
 						continue foldl;
-					case 2:
+					case 'OrderedList':
 						var blocks = block.c;
 						var $temp$function = _function,
 							$temp$acc = A2(_function, block, acc),
@@ -28709,7 +28712,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$foldl = F3(
 						acc = $temp$acc;
 						list = $temp$list;
 						continue foldl;
-					case 3:
+					case 'BlockQuote':
 						var blocks = block.a;
 						var $temp$function = _function,
 							$temp$acc = A2(_function, block, acc),
@@ -28718,7 +28721,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$foldl = F3(
 						acc = $temp$acc;
 						list = $temp$list;
 						continue foldl;
-					case 4:
+					case 'Heading':
 						var $temp$function = _function,
 							$temp$acc = A2(_function, block, acc),
 							$temp$list = remainingBlocks;
@@ -28726,7 +28729,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$foldl = F3(
 						acc = $temp$acc;
 						list = $temp$list;
 						continue foldl;
-					case 5:
+					case 'Paragraph':
 						var $temp$function = _function,
 							$temp$acc = A2(_function, block, acc),
 							$temp$list = remainingBlocks;
@@ -28734,7 +28737,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$foldl = F3(
 						acc = $temp$acc;
 						list = $temp$list;
 						continue foldl;
-					case 6:
+					case 'Table':
 						var $temp$function = _function,
 							$temp$acc = A2(_function, block, acc),
 							$temp$list = remainingBlocks;
@@ -28742,7 +28745,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$foldl = F3(
 						acc = $temp$acc;
 						list = $temp$list;
 						continue foldl;
-					case 7:
+					case 'CodeBlock':
 						var $temp$function = _function,
 							$temp$acc = A2(_function, block, acc),
 							$temp$list = remainingBlocks;
@@ -28764,12 +28767,12 @@ var $dillonkearns$elm_markdown$Markdown$Block$foldl = F3(
 	});
 var $dillonkearns$elm_markdown$Markdown$Block$extractInlineBlockText = function (block) {
 	switch (block.$) {
-		case 5:
+		case 'Paragraph':
 			var inlines = block.a;
 			return $dillonkearns$elm_markdown$Markdown$Block$extractInlineText(inlines);
-		case 0:
+		case 'HtmlBlock':
 			var html = block.a;
-			if (!html.$) {
+			if (html.$ === 'HtmlElement') {
 				var blocks = html.c;
 				return A3(
 					$dillonkearns$elm_markdown$Markdown$Block$foldl,
@@ -28784,7 +28787,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$extractInlineBlockText = function 
 			} else {
 				return '';
 			}
-		case 1:
+		case 'UnorderedList':
 			var items = block.b;
 			return A2(
 				$elm$core$String$join,
@@ -28799,7 +28802,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$extractInlineBlockText = function 
 							A2($elm$core$List$map, $dillonkearns$elm_markdown$Markdown$Block$extractInlineBlockText, blocks));
 					},
 					items));
-		case 2:
+		case 'OrderedList':
 			var items = block.c;
 			return A2(
 				$elm$core$String$join,
@@ -28813,16 +28816,16 @@ var $dillonkearns$elm_markdown$Markdown$Block$extractInlineBlockText = function 
 							A2($elm$core$List$map, $dillonkearns$elm_markdown$Markdown$Block$extractInlineBlockText, blocks));
 					},
 					items));
-		case 3:
+		case 'BlockQuote':
 			var blocks = block.a;
 			return A2(
 				$elm$core$String$join,
 				'\n',
 				A2($elm$core$List$map, $dillonkearns$elm_markdown$Markdown$Block$extractInlineBlockText, blocks));
-		case 4:
+		case 'Heading':
 			var inlines = block.b;
 			return $dillonkearns$elm_markdown$Markdown$Block$extractInlineText(inlines);
-		case 6:
+		case 'Table':
 			var header = block.a;
 			var rows = block.b;
 			return A2(
@@ -28837,7 +28840,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$extractInlineBlockText = function 
 							A2(
 								$elm$core$List$map,
 								function ($) {
-									return $.ai;
+									return $.label;
 								},
 								header)),
 							$elm$core$List$concat(
@@ -28846,8 +28849,8 @@ var $dillonkearns$elm_markdown$Markdown$Block$extractInlineBlockText = function 
 								$elm$core$List$map($dillonkearns$elm_markdown$Markdown$Block$extractInlineText),
 								rows))
 						])));
-		case 7:
-			var body = block.a.cW;
+		case 'CodeBlock':
+			var body = block.a.body;
 			return body;
 		default:
 			return '';
@@ -28859,27 +28862,27 @@ var $dillonkearns$elm_markdown$Markdown$Block$extractInlineText = function (inli
 var $dillonkearns$elm_markdown$Markdown$Block$extractTextHelp = F2(
 	function (inline, text) {
 		switch (inline.$) {
-			case 7:
+			case 'Text':
 				var str = inline.a;
 				return _Utils_ap(text, str);
-			case 8:
+			case 'HardLineBreak':
 				return text + ' ';
-			case 6:
+			case 'CodeSpan':
 				var str = inline.a;
 				return _Utils_ap(text, str);
-			case 1:
+			case 'Link':
 				var inlines = inline.c;
 				return _Utils_ap(
 					text,
 					$dillonkearns$elm_markdown$Markdown$Block$extractInlineText(inlines));
-			case 2:
+			case 'Image':
 				var inlines = inline.c;
 				return _Utils_ap(
 					text,
 					$dillonkearns$elm_markdown$Markdown$Block$extractInlineText(inlines));
-			case 0:
+			case 'HtmlInline':
 				var html = inline.a;
-				if (!html.$) {
+				if (html.$ === 'HtmlElement') {
 					var blocks = html.c;
 					return A3(
 						$dillonkearns$elm_markdown$Markdown$Block$foldl,
@@ -28894,12 +28897,12 @@ var $dillonkearns$elm_markdown$Markdown$Block$extractTextHelp = F2(
 				} else {
 					return text;
 				}
-			case 4:
+			case 'Strong':
 				var inlines = inline.a;
 				return _Utils_ap(
 					text,
 					$dillonkearns$elm_markdown$Markdown$Block$extractInlineText(inlines));
-			case 3:
+			case 'Emphasis':
 				var inlines = inline.a;
 				return _Utils_ap(
 					text,
@@ -28917,7 +28920,7 @@ var $elm$core$Tuple$pair = F2(
 	});
 var $dillonkearns$elm_markdown$Markdown$Renderer$renderHtml = F5(
 	function (tagName, attributes, children, _v0, renderedChildren) {
-		var htmlRenderer = _v0;
+		var htmlRenderer = _v0.a;
 		return A2(
 			$elm$core$Result$andThen,
 			function (okChildren) {
@@ -28933,7 +28936,7 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHtml = F5(
 var $dillonkearns$elm_markdown$Markdown$Renderer$foldThing = F3(
 	function (renderer, topLevelInline, soFar) {
 		var _v12 = A2($dillonkearns$elm_markdown$Markdown$Renderer$renderSingleInline, renderer, topLevelInline);
-		if (!_v12.$) {
+		if (_v12.$ === 'Just') {
 			var inline = _v12.a;
 			return A2($elm$core$List$cons, inline, soFar);
 		} else {
@@ -28950,31 +28953,31 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelper = F2(
 var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (renderer) {
 	return function (block) {
 		switch (block.$) {
-			case 4:
+			case 'Heading':
 				var level = block.a;
 				var content = block.b;
 				return $elm$core$Maybe$Just(
 					A2(
 						$elm$core$Result$map,
 						function (children) {
-							return renderer.bb(
+							return renderer.heading(
 								{
-									bN: children,
-									cb: level,
-									dN: $dillonkearns$elm_markdown$Markdown$Block$extractInlineText(content)
+									children: children,
+									level: level,
+									rawText: $dillonkearns$elm_markdown$Markdown$Block$extractInlineText(content)
 								});
 						},
 						A2($dillonkearns$elm_markdown$Markdown$Renderer$renderStyled, renderer, content)));
-			case 5:
+			case 'Paragraph':
 				var content = block.a;
 				return $elm$core$Maybe$Just(
 					A2(
 						$elm$core$Result$map,
-						renderer.bl,
+						renderer.paragraph,
 						A2($dillonkearns$elm_markdown$Markdown$Renderer$renderStyled, renderer, content)));
-			case 0:
+			case 'HtmlBlock':
 				var html = block.a;
-				if (!html.$) {
+				if (html.$ === 'HtmlElement') {
 					var tag = html.a;
 					var attributes = html.b;
 					var children = html.c;
@@ -28983,14 +28986,14 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 				} else {
 					return $elm$core$Maybe$Nothing;
 				}
-			case 1:
+			case 'UnorderedList':
 				var tight = block.a;
 				var items = block.b;
 				return $elm$core$Maybe$Just(
 					A2(
 						$elm$core$Result$map,
 						function (listItems) {
-							return renderer.bE(
+							return renderer.unorderedList(
 								A2(
 									$elm$core$List$map,
 									function (_v7) {
@@ -29018,7 +29021,7 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 													$elm$core$List$filterMap,
 													function (listItemBlock) {
 														var _v5 = _Utils_Tuple2(tight, listItemBlock);
-														if ((_v5.a === 1) && (_v5.b.$ === 5)) {
+														if ((_v5.a.$ === 'Tight') && (_v5.b.$ === 'Paragraph')) {
 															var _v6 = _v5.a;
 															var content = _v5.b.a;
 															return $elm$core$Maybe$Just(
@@ -29034,7 +29037,7 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 											}(children)));
 								},
 								items))));
-			case 2:
+			case 'OrderedList':
 				var tight = block.a;
 				var startingIndex = block.b;
 				var items = block.c;
@@ -29043,7 +29046,7 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 						$elm$core$Result$map,
 						function (listItems) {
 							return A2(
-								renderer.bk,
+								renderer.orderedList,
 								startingIndex,
 								A2(
 									$elm$core$List$map,
@@ -29062,7 +29065,7 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 												$elm$core$List$filterMap,
 												function (listItemBlock) {
 													var _v8 = _Utils_Tuple2(tight, listItemBlock);
-													if ((_v8.a === 1) && (_v8.b.$ === 5)) {
+													if ((_v8.a.$ === 'Tight') && (_v8.b.$ === 'Paragraph')) {
 														var _v9 = _v8.a;
 														var content = _v8.b.a;
 														return $elm$core$Maybe$Just(
@@ -29078,20 +29081,20 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 										}(itemsblocks));
 								},
 								items))));
-			case 7:
+			case 'CodeBlock':
 				var codeBlock = block.a;
 				return $elm$core$Maybe$Just(
 					$elm$core$Result$Ok(
-						renderer.a5(codeBlock)));
-			case 8:
+						renderer.codeBlock(codeBlock)));
+			case 'ThematicBreak':
 				return $elm$core$Maybe$Just(
-					$elm$core$Result$Ok(renderer.bC));
-			case 3:
+					$elm$core$Result$Ok(renderer.thematicBreak));
+			case 'BlockQuote':
 				var nestedBlocks = block.a;
 				return $elm$core$Maybe$Just(
 					A2(
 						$elm$core$Result$map,
-						renderer.a3,
+						renderer.blockQuote,
 						$dillonkearns$elm_markdown$Markdown$Renderer$combineResults(
 							A2($dillonkearns$elm_markdown$Markdown$Renderer$renderHelper, renderer, nestedBlocks))));
 			default:
@@ -29101,8 +29104,8 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 					A2(
 						$elm$core$List$map,
 						function (_v11) {
-							var label = _v11.ai;
-							var alignment = _v11.aD;
+							var label = _v11.label;
+							var alignment = _v11.alignment;
 							return A2(
 								$elm$core$Result$map,
 								$elm$core$Tuple$pair(alignment),
@@ -29112,15 +29115,15 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 				var renderedHeader = A2(
 					$elm$core$Result$map,
 					function (listListView) {
-						return renderer.bz(
+						return renderer.tableHeader(
 							$elm$core$List$singleton(
-								renderer.aW(
+								renderer.tableRow(
 									A2(
 										$elm$core$List$map,
 										function (_v10) {
 											var maybeAlignment = _v10.a;
 											var item = _v10.b;
-											return A2(renderer.bA, maybeAlignment, item);
+											return A2(renderer.tableHeaderCell, maybeAlignment, item);
 										},
 										listListView))));
 					},
@@ -29128,14 +29131,14 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 				var renderedBody = function (r) {
 					return $elm$core$List$isEmpty(r) ? _List_Nil : _List_fromArray(
 						[
-							renderer.bx(r)
+							renderer.tableBody(r)
 						]);
 				};
 				var alignmentForColumn = function (columnIndex) {
 					return A2(
 						$elm$core$Maybe$andThen,
 						function ($) {
-							return $.aD;
+							return $.alignment;
 						},
 						$elm$core$List$head(
 							A2($elm$core$List$drop, columnIndex, header)));
@@ -29143,14 +29146,14 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 				var renderRow = function (cells) {
 					return A2(
 						$elm$core$Result$map,
-						renderer.aW,
+						renderer.tableRow,
 						A2(
 							$elm$core$Result$map,
 							$elm$core$List$indexedMap(
 								F2(
 									function (index, cell) {
 										return A2(
-											renderer.by,
+											renderer.tableCell,
 											alignmentForColumn(index),
 											cell);
 									})),
@@ -29167,7 +29170,7 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHelperSingle = function (
 						$elm$core$Result$map2,
 						F2(
 							function (h, r) {
-								return renderer.bw(
+								return renderer.table(
 									A2(
 										$elm$core$List$cons,
 										h,
@@ -29185,56 +29188,56 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderHtmlNode = F4(
 			tag,
 			attributes,
 			children,
-			renderer.bc,
+			renderer.html,
 			A2($dillonkearns$elm_markdown$Markdown$Renderer$renderHelper, renderer, children));
 	});
 var $dillonkearns$elm_markdown$Markdown$Renderer$renderSingleInline = F2(
 	function (renderer, inline) {
 		switch (inline.$) {
-			case 4:
+			case 'Strong':
 				var innerInlines = inline.a;
 				return $elm$core$Maybe$Just(
 					A2(
 						$elm$core$Result$map,
-						renderer.bu,
+						renderer.strong,
 						A2($dillonkearns$elm_markdown$Markdown$Renderer$renderStyled, renderer, innerInlines)));
-			case 3:
+			case 'Emphasis':
 				var innerInlines = inline.a;
 				return $elm$core$Maybe$Just(
 					A2(
 						$elm$core$Result$map,
-						renderer.a8,
+						renderer.emphasis,
 						A2($dillonkearns$elm_markdown$Markdown$Renderer$renderStyled, renderer, innerInlines)));
-			case 5:
+			case 'Strikethrough':
 				var innerInlines = inline.a;
 				return $elm$core$Maybe$Just(
 					A2(
 						$elm$core$Result$map,
-						renderer.bt,
+						renderer.strikethrough,
 						A2($dillonkearns$elm_markdown$Markdown$Renderer$renderStyled, renderer, innerInlines)));
-			case 2:
+			case 'Image':
 				var src = inline.a;
 				var title = inline.b;
 				var children = inline.c;
 				return $elm$core$Maybe$Just(
 					$elm$core$Result$Ok(
-						renderer.bd(
+						renderer.image(
 							{
-								a2: $dillonkearns$elm_markdown$Markdown$Block$extractInlineText(children),
-								bq: src,
-								dY: title
+								alt: $dillonkearns$elm_markdown$Markdown$Block$extractInlineText(children),
+								src: src,
+								title: title
 							})));
-			case 7:
+			case 'Text':
 				var string = inline.a;
 				return $elm$core$Maybe$Just(
 					$elm$core$Result$Ok(
-						renderer.dX(string)));
-			case 6:
+						renderer.text(string)));
+			case 'CodeSpan':
 				var string = inline.a;
 				return $elm$core$Maybe$Just(
 					$elm$core$Result$Ok(
-						renderer.a6(string)));
-			case 1:
+						renderer.codeSpan(string)));
+			case 'Link':
 				var destination = inline.a;
 				var title = inline.b;
 				var inlines = inline.c;
@@ -29244,17 +29247,17 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$renderSingleInline = F2(
 						function (children) {
 							return $elm$core$Result$Ok(
 								A2(
-									renderer.bg,
-									{c3: destination, dY: title},
+									renderer.link,
+									{destination: destination, title: title},
 									children));
 						},
 						A2($dillonkearns$elm_markdown$Markdown$Renderer$renderStyled, renderer, inlines)));
-			case 8:
+			case 'HardLineBreak':
 				return $elm$core$Maybe$Just(
-					$elm$core$Result$Ok(renderer.ba));
+					$elm$core$Result$Ok(renderer.hardLineBreak));
 			default:
 				var html = inline.a;
-				if (!html.$) {
+				if (html.$ === 'HtmlElement') {
 					var tag = html.a;
 					var attributes = html.b;
 					var children = html.c;
@@ -29279,7 +29282,7 @@ var $dillonkearns$elm_markdown$Markdown$Renderer$render = F2(
 		return $dillonkearns$elm_markdown$Markdown$Renderer$combineResults(
 			A2($dillonkearns$elm_markdown$Markdown$Renderer$renderHelper, renderer, ast));
 	});
-var $author$project$Feature$TextAPI$imageIdFromUrl = function (url) {
+var $author$project$Feature$Text$imageIdFromUrl = function (url) {
 	return A2(
 		$elm$core$Maybe$andThen,
 		$elm$core$String$toInt,
@@ -29287,27 +29290,27 @@ var $author$project$Feature$TextAPI$imageIdFromUrl = function (url) {
 			$elm$core$List$reverse(
 				A2($elm$core$String$split, '/', url))));
 };
-var $author$project$Feature$TextAPI$resolveImageUrl = F4(
+var $author$project$Feature$Text$resolveImageUrl = F4(
 	function (url, title, altInlines, model) {
 		var newUrl = function () {
-			var _v0 = $author$project$Feature$TextAPI$imageIdFromUrl(url);
-			if (!_v0.$) {
+			var _v0 = $author$project$Feature$Text$imageIdFromUrl(url);
+			if (_v0.$ === 'Just') {
 				var imageId = _v0.a;
-				var _v1 = A2($elm$core$Dict$get, imageId, model.dh);
-				if (!_v1.$) {
+				var _v1 = A2($elm$core$Dict$get, imageId, model.text.imageCache);
+				if (_v1.$ === 'Just') {
 					var blobUrl = _v1.a;
 					return blobUrl;
 				} else {
 					var _v2 = A2(
 						$author$project$Utils$info,
-						'resolveImageUrl',
+						'Feature.Text.resolveImageUrl',
 						_Utils_Tuple2('MISSING', imageId));
 					return url;
 				}
 			} else {
 				var _v3 = A2(
 					$author$project$Utils$info,
-					'resolveImageUrl',
+					'Feature.Text.resolveImageUrl',
 					_Utils_Tuple2('INVALID', url));
 				return url;
 			}
@@ -29317,7 +29320,7 @@ var $author$project$Feature$TextAPI$resolveImageUrl = F4(
 var $dillonkearns$elm_markdown$Markdown$Block$walk = F2(
 	function (_function, block) {
 		switch (block.$) {
-			case 3:
+			case 'BlockQuote':
 				var blocks = block.a;
 				return _function(
 					$dillonkearns$elm_markdown$Markdown$Block$BlockQuote(
@@ -29325,9 +29328,9 @@ var $dillonkearns$elm_markdown$Markdown$Block$walk = F2(
 							$elm$core$List$map,
 							$dillonkearns$elm_markdown$Markdown$Block$walk(_function),
 							blocks)));
-			case 0:
+			case 'HtmlBlock':
 				var html = block.a;
-				if (!html.$) {
+				if (html.$ === 'HtmlElement') {
 					var string = html.a;
 					var htmlAttributes = html.b;
 					var blocks = html.c;
@@ -29344,17 +29347,17 @@ var $dillonkearns$elm_markdown$Markdown$Block$walk = F2(
 				} else {
 					return _function(block);
 				}
-			case 1:
+			case 'UnorderedList':
 				return _function(block);
-			case 2:
+			case 'OrderedList':
 				return _function(block);
-			case 4:
+			case 'Heading':
 				return _function(block);
-			case 5:
+			case 'Paragraph':
 				return _function(block);
-			case 6:
+			case 'Table':
 				return _function(block);
-			case 7:
+			case 'CodeBlock':
 				return _function(block);
 			default:
 				return _function(block);
@@ -29363,7 +29366,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$walk = F2(
 var $dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk = F2(
 	function (_function, inline) {
 		switch (inline.$) {
-			case 1:
+			case 'Link':
 				var url = inline.a;
 				var maybeTitle = inline.b;
 				var inlines = inline.c;
@@ -29376,7 +29379,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk = F2(
 							$elm$core$List$map,
 							$dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk(_function),
 							inlines)));
-			case 2:
+			case 'Image':
 				var url = inline.a;
 				var maybeTitle = inline.b;
 				var inlines = inline.c;
@@ -29389,7 +29392,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk = F2(
 							$elm$core$List$map,
 							$dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk(_function),
 							inlines)));
-			case 3:
+			case 'Emphasis':
 				var inlines = inline.a;
 				return _function(
 					$dillonkearns$elm_markdown$Markdown$Block$Emphasis(
@@ -29397,7 +29400,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk = F2(
 							$elm$core$List$map,
 							$dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk(_function),
 							inlines)));
-			case 5:
+			case 'Strikethrough':
 				var inlines = inline.a;
 				return _function(
 					$dillonkearns$elm_markdown$Markdown$Block$Strikethrough(
@@ -29405,9 +29408,9 @@ var $dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk = F2(
 							$elm$core$List$map,
 							$dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk(_function),
 							inlines)));
-			case 0:
+			case 'HtmlInline':
 				var html = inline.a;
-				if (!html.$) {
+				if (html.$ === 'HtmlElement') {
 					var string = html.a;
 					var htmlAttributes = html.b;
 					var children = html.c;
@@ -29423,16 +29426,16 @@ var $dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk = F2(
 				} else {
 					return _function(inline);
 				}
-			case 4:
+			case 'Strong':
 				var inlines = inline.a;
 				return $dillonkearns$elm_markdown$Markdown$Block$Strong(
 					A2(
 						$elm$core$List$map,
 						$dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk(_function),
 						inlines));
-			case 6:
+			case 'CodeSpan':
 				return _function(inline);
-			case 7:
+			case 'Text':
 				return _function(inline);
 			default:
 				return _function(inline);
@@ -29448,14 +29451,14 @@ var $dillonkearns$elm_markdown$Markdown$Block$walkInlines = F2(
 var $dillonkearns$elm_markdown$Markdown$Block$walkInlinesHelp = F2(
 	function (_function, block) {
 		switch (block.$) {
-			case 5:
+			case 'Paragraph':
 				var inlines = block.a;
 				return $dillonkearns$elm_markdown$Markdown$Block$Paragraph(
 					A2(
 						$elm$core$List$map,
 						$dillonkearns$elm_markdown$Markdown$Block$inlineParserWalk(_function),
 						inlines));
-			case 1:
+			case 'UnorderedList':
 				var tight = block.a;
 				var listItems = block.b;
 				return A2(
@@ -29477,7 +29480,7 @@ var $dillonkearns$elm_markdown$Markdown$Block$walkInlinesHelp = F2(
 									children));
 						},
 						listItems));
-			case 2:
+			case 'OrderedList':
 				var tight = block.a;
 				var startIndex = block.b;
 				var listItems = block.c;
@@ -29496,21 +29499,21 @@ var $dillonkearns$elm_markdown$Markdown$Block$walkInlinesHelp = F2(
 								blocks);
 						},
 						listItems));
-			case 3:
+			case 'BlockQuote':
 				var children = block.a;
 				return $dillonkearns$elm_markdown$Markdown$Block$BlockQuote(
 					A2(
 						$elm$core$List$map,
 						$dillonkearns$elm_markdown$Markdown$Block$walkInlinesHelp(_function),
 						children));
-			case 4:
+			case 'Heading':
 				var level = block.a;
 				var children = block.b;
 				return A2(
 					$dillonkearns$elm_markdown$Markdown$Block$Heading,
 					level,
 					A2($elm$core$List$map, _function, children));
-			case 6:
+			case 'Table':
 				var header = block.a;
 				var rows = block.b;
 				return A2(
@@ -29518,11 +29521,11 @@ var $dillonkearns$elm_markdown$Markdown$Block$walkInlinesHelp = F2(
 					A2(
 						$elm$core$List$map,
 						function (_v2) {
-							var alignment = _v2.aD;
-							var label = _v2.ai;
+							var alignment = _v2.alignment;
+							var label = _v2.label;
 							return {
-								aD: alignment,
-								ai: A2($elm$core$List$map, _function, label)
+								alignment: alignment,
+								label: A2($elm$core$List$map, _function, label)
 							};
 						},
 						header),
@@ -29531,9 +29534,9 @@ var $dillonkearns$elm_markdown$Markdown$Block$walkInlinesHelp = F2(
 						$elm$core$List$map(
 							$elm$core$List$map(_function)),
 						rows));
-			case 0:
+			case 'HtmlBlock':
 				var html = block.a;
-				if (!html.$) {
+				if (html.$ === 'HtmlElement') {
 					var string = html.a;
 					var htmlAttributes = html.b;
 					var blocks = html.c;
@@ -29549,30 +29552,30 @@ var $dillonkearns$elm_markdown$Markdown$Block$walkInlinesHelp = F2(
 				} else {
 					return block;
 				}
-			case 7:
+			case 'CodeBlock':
 				return block;
 			default:
 				return block;
 		}
 	});
-var $author$project$Feature$TextAPI$resolveImageUrls = F2(
+var $author$project$Feature$Text$resolveImageUrls = F2(
 	function (model, blocks) {
 		return A2(
 			$elm$core$List$map,
 			$dillonkearns$elm_markdown$Markdown$Block$walkInlines(
 				function (inline) {
-					if (inline.$ === 2) {
+					if (inline.$ === 'Image') {
 						var url = inline.a;
 						var title = inline.b;
 						var altInlines = inline.c;
-						return A4($author$project$Feature$TextAPI$resolveImageUrl, url, title, altInlines, model);
+						return A4($author$project$Feature$Text$resolveImageUrl, url, title, altInlines, model);
 					} else {
 						return inline;
 					}
 				}),
 			blocks);
 	});
-var $author$project$Feature$TextAPI$markdown = F2(
+var $author$project$Feature$Text$markdown = F2(
 	function (source, model) {
 		return A2(
 			$elm$core$Result$withDefault,
@@ -29584,7 +29587,7 @@ var $author$project$Feature$TextAPI$markdown = F2(
 				$dillonkearns$elm_markdown$Markdown$Renderer$render,
 				$dillonkearns$elm_markdown$Markdown$Renderer$defaultHtmlRenderer,
 				A2(
-					$author$project$Feature$TextAPI$resolveImageUrls,
+					$author$project$Feature$Text$resolveImageUrls,
 					model,
 					A2(
 						$elm$core$Result$withDefault,
@@ -29592,19 +29595,19 @@ var $author$project$Feature$TextAPI$markdown = F2(
 						$dillonkearns$elm_markdown$Markdown$Parser$parse(source)))));
 	});
 var $author$project$Config$editorFont = 'monospace';
-var $author$project$Map$textEditorStyle = F2(
+var $author$project$TopicMap$View$textEditorStyle = F2(
 	function (topicId, model) {
 		var height = function () {
 			var _v0 = A3(
-				$author$project$Item$topicSize,
+				$author$project$Topic$size,
 				topicId,
 				function ($) {
-					return $.c8;
+					return $.editor;
 				},
 				model);
-			if (!_v0.$) {
+			if (_v0.$ === 'Just') {
 				var size = _v0.a;
-				return size.b_;
+				return size.h;
 			} else {
 				return 0;
 			}
@@ -29625,25 +29628,25 @@ var $author$project$Map$textEditorStyle = F2(
 				A2($elm$html$Html$Attributes$style, 'resize', 'none')
 			]);
 	});
-var $author$project$Map$textViewStyle = _List_fromArray(
+var $author$project$TopicMap$View$textViewStyle = _List_fromArray(
 	[
 		A2(
 		$elm$html$Html$Attributes$style,
 		'min-width',
-		$elm$core$String$fromInt($author$project$Config$topicSize.cN - $author$project$Config$topicSize.b_) + 'px'),
+		$elm$core$String$fromInt($author$project$Config$topicSize.w - $author$project$Config$topicSize.h) + 'px'),
 		A2($elm$html$Html$Attributes$style, 'max-width', 'max-content')
 	]);
-var $author$project$Feature$Text$OnTextareaInput = function (a) {
-	return {$: 1, a: a};
+var $author$project$Feature$TextDef$OnTextareaInput = function (a) {
+	return {$: 'OnTextareaInput', a: a};
 };
-var $author$project$Utils$onEsc = function (msg) {
+var $author$project$Shared$Events$onEsc = function (msg) {
 	return A2(
 		$elm$html$Html$Events$on,
 		'keydown',
-		A2($author$project$Utils$keyDecoder, 27, msg));
+		A2($author$project$Shared$Events$keyDecoder, 27, msg));
 };
 var $elm$html$Html$textarea = _VirtualDom_node('textarea');
-var $author$project$Feature$TextAPI$viewTextarea = F3(
+var $author$project$Feature$Text$viewTextarea = F3(
 	function (topic, boxPath, style) {
 		return A2(
 			$elm$html$Html$textarea,
@@ -29651,170 +29654,119 @@ var $author$project$Feature$TextAPI$viewTextarea = F3(
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$id(
-						A3($author$project$Box$elemId, 'input', topic.aK, boxPath)),
-						$elm$html$Html$Attributes$value(topic.dX),
+						A3($author$project$Box$elemId, 'input', topic.id, boxPath)),
+						$elm$html$Html$Attributes$value(topic.text),
+						$elm$html$Html$Attributes$placeholder($author$project$Config$initTopicText),
 						$elm$html$Html$Events$onInput(
-						A2($elm$core$Basics$composeL, $author$project$Model$Text, $author$project$Feature$Text$OnTextareaInput)),
-						$author$project$Utils$onEsc(
-						$author$project$Model$Text($author$project$Feature$Text$LeaveEdit)),
-						$author$project$Utils$onMouseDownStop($author$project$Model$NoOp)
+						A2($elm$core$Basics$composeL, $author$project$Model$Text, $author$project$Feature$TextDef$OnTextareaInput)),
+						$author$project$Shared$Events$onEsc(
+						$author$project$Model$Text($author$project$Feature$TextDef$LeaveEdit)),
+						$author$project$Shared$Events$onPointerDownStop($author$project$Model$NoOp)
 					]),
 				style),
 			_List_Nil);
 	});
-var $author$project$Map$detailTopic = F4(
-	function (topic, props, boxPath, model) {
+var $author$project$TopicMap$View$detailTopic = F4(
+	function (topic, mapTopic, boxPath, model) {
 		var textElem = function () {
-			var _v0 = A3($author$project$Feature$TextAPI$isEdit, topic.aK, boxPath, model);
+			var _v0 = A3($author$project$Feature$Text$isEdit, topic.id, boxPath, model);
 			if (_v0) {
 				return A3(
-					$author$project$Feature$TextAPI$viewTextarea,
+					$author$project$Feature$Text$viewTextarea,
 					topic,
 					boxPath,
 					_Utils_ap(
-						A3($author$project$Map$detailTextStyle, topic.aK, boxPath, model),
-						A2($author$project$Map$textEditorStyle, topic.aK, model)));
+						A3($author$project$TopicMap$View$detailTextStyle, topic.id, boxPath, model),
+						A2($author$project$TopicMap$View$textEditorStyle, topic.id, model)));
 			} else {
 				return A2(
 					$elm$html$Html$div,
 					_Utils_ap(
-						A3($author$project$Map$detailTextStyle, topic.aK, boxPath, model),
-						$author$project$Map$textViewStyle),
-					A2($author$project$Feature$TextAPI$markdown, topic.dX, model));
+						A3($author$project$TopicMap$View$detailTextStyle, topic.id, boxPath, model),
+						$author$project$TopicMap$View$textViewStyle),
+					A2($author$project$Feature$Text$markdown, topic.text, model));
 			}
 		}();
 		return _Utils_Tuple2(
-			$author$project$Map$detailTopicStyle(props),
+			$author$project$TopicMap$View$detailTopicStyle(mapTopic),
 			_List_fromArray(
 				[
 					A2(
 					$elm$html$Html$div,
 					_Utils_ap(
-						$author$project$Map$iconBoxStyle(props),
+						A2($author$project$TopicMap$View$iconBoxStyle, mapTopic, model),
 						_Utils_ap(
-							$author$project$Map$detailTopicIconBoxStyle,
-							A3($author$project$Map$selectionStyle, topic.aK, boxPath, model))),
+							$author$project$TopicMap$View$detailTopicIconBoxStyle,
+							A3($author$project$Shared$ViewBase$selectionStyle, topic.id, boxPath, model))),
 					_List_fromArray(
 						[
-							A4($author$project$Feature$IconAPI$viewTopicIcon, topic.aK, $author$project$Config$topicIconSize, $author$project$Map$topicIconStyle, model)
+							A4($author$project$Feature$Icon$viewTopicIcon, topic.id, $author$project$Config$topicIconSize, $author$project$TopicMap$View$topicIconStyle, model)
 						])),
 					textElem
 				]));
 	});
-var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
-var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
-var $author$project$Map$gAttr = F3(
-	function (boxId, boxRect, model) {
-		return _List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$transform(
-				'translate(' + ($elm$core$String$fromInt(-boxRect.d2) + (' ' + ($elm$core$String$fromInt(-boxRect.d4) + ')'))))
-			]);
-	});
-var $author$project$Feature$Mouse$Hover = F3(
+var $author$project$Feature$MouseDef$DragStart = F3(
 	function (a, b, c) {
-		return {$: 4, a: a, b: b, c: c};
+		return {$: 'DragStart', a: a, b: b, c: c};
 	});
-var $author$project$Feature$Mouse$Unhover = F3(
-	function (a, b, c) {
-		return {$: 5, a: a, b: b, c: c};
+var $author$project$Model$Mouse = function (a) {
+	return {$: 'Mouse', a: a};
+};
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $author$project$Shared$Events$pointDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$elm$core$Tuple$pair,
+	A3(
+		$elm$json$Json$Decode$map2,
+		$author$project$ModelBase$Point,
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Basics$round,
+			A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float)),
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Basics$round,
+			A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float))),
+	A2($elm$json$Json$Decode$field, 'pointerType', $elm$json$Json$Decode$string));
+var $author$project$Shared$Events$stopPropagationWith = F2(
+	function (eventName, decoder) {
+		return A2(
+			$elm$html$Html$Events$stopPropagationOn,
+			eventName,
+			A2(
+				$elm$json$Json$Decode$map,
+				function (msg) {
+					return _Utils_Tuple2(msg, true);
+				},
+				decoder));
 	});
-var $elm$html$Html$Events$onMouseEnter = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mouseenter',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $elm$html$Html$Events$onMouseLeave = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mouseleave',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $author$project$Feature$MouseAPI$hoverHandler = F2(
+var $author$project$Shared$Events$draggable = F2(
 	function (topicId, boxPath) {
 		return _List_fromArray(
 			[
-				$elm$html$Html$Events$onMouseEnter(
-				$author$project$Model$Mouse(
-					A3($author$project$Feature$Mouse$Hover, 'dmx-topic', topicId, boxPath))),
-				$elm$html$Html$Events$onMouseLeave(
-				$author$project$Model$Mouse(
-					A3($author$project$Feature$Mouse$Unhover, 'dmx-topic', topicId, boxPath)))
+				A2(
+				$author$project$Shared$Events$stopPropagationWith,
+				'pointerdown',
+				A2(
+					$elm$json$Json$Decode$map,
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Model$Mouse,
+						A2($author$project$Feature$MouseDef$DragStart, topicId, boxPath)),
+					$author$project$Shared$Events$pointDecoder))
 			]);
 	});
-var $author$project$Map$labelTopic = F4(
-	function (topic, props, boxPath, model) {
+var $author$project$TopicMap$View$labelTopic = F4(
+	function (topic, mapTopic, boxPath, model) {
 		return _Utils_Tuple2(
 			_Utils_ap(
-				$author$project$Map$topicPosStyle(props),
+				$author$project$TopicMap$View$topicPosStyle(mapTopic),
 				_Utils_ap(
-					A4($author$project$Map$topicFlexboxStyle, topic, props, boxPath, model),
-					A3($author$project$Map$selectionStyle, topic.aK, boxPath, model))),
-			A4($author$project$Map$viewLabelTopic, topic, props, boxPath, model));
+					A3($author$project$TopicMap$View$topicFlexboxStyle, mapTopic, boxPath, model),
+					A3($author$project$Shared$ViewBase$selectionStyle, topic.id, boxPath, model))),
+			A4($author$project$TopicMap$View$viewLabelTopic, topic, mapTopic, boxPath, model));
 	});
-var $author$project$Feature$Mouse$DownOnItem = F4(
-	function (a, b, c, d) {
-		return {$: 1, a: a, b: b, c: c, d: d};
-	});
-var $author$project$Feature$MouseAPI$mouseDownHandler = F2(
-	function (topicId, boxPath) {
-		return _List_fromArray(
-			[
-				A2(
-				$elm$html$Html$Events$stopPropagationOn,
-				'mousedown',
-				A2(
-					$elm$json$Json$Decode$andThen,
-					function (pos) {
-						return $elm$json$Json$Decode$succeed(
-							_Utils_Tuple2(
-								$author$project$Model$Mouse(
-									A4($author$project$Feature$Mouse$DownOnItem, 'dmx-topic', topicId, boxPath, pos)),
-								true));
-					},
-					$author$project$Utils$pointDecoder))
-			]);
-	});
-var $author$project$Config$whiteBoxRadius = 14;
-var $author$project$Map$nestedBoxStyle = F4(
-	function (topicId, rect, boxPath, model) {
-		var width = rect.a0 - rect.d2;
-		var r = $elm$core$String$fromInt($author$project$Config$whiteBoxRadius) + 'px';
-		var height = rect.a1 - rect.d4;
-		return _Utils_ap(
-			_List_fromArray(
-				[
-					A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-					A2(
-					$elm$html$Html$Attributes$style,
-					'left',
-					$elm$core$String$fromInt(-$author$project$Config$topicBorderWidth) + 'px'),
-					A2(
-					$elm$html$Html$Attributes$style,
-					'top',
-					$elm$core$String$fromInt($author$project$Config$topicSize.b_ - (2 * $author$project$Config$topicBorderWidth)) + 'px'),
-					A2(
-					$elm$html$Html$Attributes$style,
-					'width',
-					$elm$core$String$fromInt(width) + 'px'),
-					A2(
-					$elm$html$Html$Attributes$style,
-					'height',
-					$elm$core$String$fromInt(height) + 'px'),
-					A2($elm$html$Html$Attributes$style, 'border-radius', '0 ' + (r + (' ' + (r + (' ' + r)))))
-				]),
-			_Utils_ap(
-				A3($author$project$Map$topicBorderStyle, topicId, boxPath, model),
-				A3($author$project$Map$selectionStyle, topicId, boxPath, model)));
-	});
-var $author$project$Map$svgStyle = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-		A2($elm$html$Html$Attributes$style, 'top', '0'),
-		A2($elm$html$Html$Attributes$style, 'left', '0')
-	]);
-var $author$project$Map$topicAttr = F2(
+var $author$project$TopicMap$View$topicAttr = F2(
 	function (topicId, boxPath) {
 		return _List_fromArray(
 			[
@@ -29822,35 +29774,27 @@ var $author$project$Map$topicAttr = F2(
 				A3($author$project$Box$elemId, 'topic', topicId, boxPath))
 			]);
 	});
-var $author$project$Map$topicLayerStyle = function (boxRect) {
-	return _List_fromArray(
-		[
-			A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-			A2(
-			$elm$html$Html$Attributes$style,
-			'left',
-			$elm$core$String$fromInt(-boxRect.d2) + 'px'),
-			A2(
-			$elm$html$Html$Attributes$style,
-			'top',
-			$elm$core$String$fromInt(-boxRect.d4) + 'px')
-		]);
-};
 var $author$project$Config$topicLimboFilter = 'contrast(0.3) brightness(1.5)';
-var $author$project$Map$topicStyle = F3(
-	function (id, boxId, model) {
-		var isSelected = A3($author$project$Feature$SelAPI$isSelected, id, boxId, model);
-		var isLimbo = A3($author$project$Map$Model$isLimboTopic, id, boxId, model);
+var $author$project$TopicMap$View$topicStyle = F3(
+	function (id, boxPath, model) {
+		var isSelected = A3(
+			$author$project$Feature$Sel$isSelected,
+			$author$project$ModelBase$T(id),
+			boxPath,
+			model);
 		var isDragging = function () {
-			var _v0 = model.dt.c6;
-			if ((_v0.$ === 3) && (!_v0.a)) {
+			var _v0 = model.topicMap.dragState;
+			if ((_v0.$ === 'Drag') && (_v0.a.$ === 'DragTopic')) {
 				var _v1 = _v0.a;
 				var id_ = _v0.b;
-				return _Utils_eq(id_, id);
+				var boxPath_ = _v0.c;
+				return _Utils_eq(id_, id) && _Utils_eq(boxPath_, boxPath);
 			} else {
 				return false;
 			}
 		}();
+		var boxId = $author$project$Box$firstId(boxPath);
+		var isLimbo = A3($author$project$TopicMap$ViewModel$isLimboTopic, id, boxId, model);
 		return _List_fromArray(
 			[
 				A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
@@ -29861,241 +29805,366 @@ var $author$project$Map$topicStyle = F3(
 				A2(
 				$elm$html$Html$Attributes$style,
 				'z-index',
-				isDragging ? '1' : (isSelected ? '3' : '2'))
+				isDragging ? '1' : (isSelected ? '3' : '2')),
+				A2($elm$html$Html$Attributes$style, 'touch-action', 'none')
 			]);
 	});
-var $author$project$Map$unboxedTopic = F4(
-	function (topic, props, boxPath, model) {
-		var _v0 = A4($author$project$Map$labelTopic, topic, props, boxPath, model);
+var $author$project$TopicMap$Mouse$isDragInProgress = function (model) {
+	var _v0 = model.topicMap.dragState;
+	if (_v0.$ === 'Drag') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $author$project$Feature$ToolDef$ToggleExpansion = F2(
+	function (a, b) {
+		return {$: 'ToggleExpansion', a: a, b: b};
+	});
+var $author$project$Config$caretIconSize = 20;
+var $author$project$Feature$Tool$caretStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+		A2($elm$html$Html$Attributes$style, 'top', '2px'),
+		A2($elm$html$Html$Attributes$style, 'left', '-26px'),
+		A2($elm$html$Html$Attributes$style, 'background-color', 'transparent'),
+		A2($elm$html$Html$Attributes$style, 'border', 'none')
+	]);
+var $author$project$Feature$Tool$viewCaret = F3(
+	function (topicId, boxId, model) {
+		var icon = function () {
+			var _v0 = A3($author$project$Box$expansionOf, topicId, boxId, model);
+			if (_v0.$ === 'Collapsed') {
+				return 'chevron-right';
+			} else {
+				return 'chevron-down';
+			}
+		}();
+		return A2(
+			$elm$html$Html$button,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$Model$Tool(
+							A2($author$project$Feature$ToolDef$ToggleExpansion, topicId, boxId))),
+						$author$project$Shared$Events$onPointerDownStop($author$project$Model$NoOp)
+					]),
+				$author$project$Feature$Tool$caretStyle),
+			_List_fromArray(
+				[
+					A3($author$project$Feature$Icon$view, icon, $author$project$Config$caretIconSize, _List_Nil)
+				]));
+	});
+var $author$project$Feature$Tool$viewTopicTools = F3(
+	function (topicId, boxPath, model) {
+		var isHovered = A3($author$project$Feature$Mouse$isHovered, topicId, boxPath, model);
+		var isEdit = A3($author$project$Feature$Text$isEdit, topicId, boxPath, model);
+		var isDrag = $author$project$TopicMap$Mouse$isDragInProgress(model);
+		var boxId = $author$project$Box$firstId(boxPath);
+		return (isHovered && ((!isDrag) && (!isEdit))) ? _List_fromArray(
+			[
+				A3($author$project$Feature$Tool$viewCaret, topicId, boxId, model)
+			]) : _List_Nil;
+	});
+var $author$project$TopicMap$View$whiteBoxTopic = F5(
+	function (topic, mapTopic, boxPath, ext, model) {
+		var _v0 = A4($author$project$TopicMap$View$labelTopic, topic, mapTopic, boxPath, model);
 		var style = _v0.a;
 		var children = _v0.b;
 		return _Utils_Tuple2(
 			style,
 			_Utils_ap(
 				children,
-				A3($author$project$Map$viewItemCount, topic.aK, props, model)));
+				_Utils_ap(
+					A2(
+						$author$project$TopicMap$View$viewItemCount,
+						$author$project$ModelBase$BoxId(topic.id),
+						model),
+					_List_fromArray(
+						[
+							A3(
+							ext.view,
+							$author$project$ModelBase$BoxId(topic.id),
+							boxPath,
+							model)
+						]))));
 	});
-var $elm$core$Maybe$map2 = F3(
-	function (func, ma, mb) {
-		if (ma.$ === 1) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 1) {
-				return $elm$core$Maybe$Nothing;
+var $author$project$TopicMap$View$viewTopic = F4(
+	function (topic, mapTopic, boxPath, _v0) {
+		var model = _v0.model;
+		var ext = _v0.ext;
+		var render = function () {
+			var _v2 = _Utils_Tuple2(
+				A2($author$project$Topic$isBox, topic.id, model),
+				mapTopic.expansion);
+			if (!_v2.a) {
+				if (_v2.b.$ === 'Collapsed') {
+					var _v3 = _v2.b;
+					return A3($author$project$TopicMap$View$labelTopic, topic, mapTopic, boxPath);
+				} else {
+					var _v4 = _v2.b;
+					return A3($author$project$TopicMap$View$detailTopic, topic, mapTopic, boxPath);
+				}
 			} else {
-				var b = mb.a;
-				return $elm$core$Maybe$Just(
-					A2(func, a, b));
+				if (_v2.b.$ === 'Collapsed') {
+					var _v5 = _v2.b;
+					return A3($author$project$TopicMap$View$blackBoxTopic, topic, mapTopic, boxPath);
+				} else {
+					var _v6 = _v2.b;
+					return A4($author$project$TopicMap$View$whiteBoxTopic, topic, mapTopic, boxPath, ext);
+				}
 			}
-		}
+		}();
+		var _v1 = render(model);
+		var style = _v1.a;
+		var children = _v1.b;
+		return A2(
+			$elm$html$Html$div,
+			_Utils_ap(
+				A2($author$project$TopicMap$View$topicAttr, topic.id, boxPath),
+				_Utils_ap(
+					A2($author$project$Shared$Events$draggable, topic.id, boxPath),
+					_Utils_ap(
+						A3($author$project$TopicMap$View$topicStyle, topic.id, boxPath, model),
+						style))),
+			_Utils_ap(
+				children,
+				A3($author$project$Feature$Tool$viewTopicTools, topic.id, boxPath, model)));
 	});
-var $author$project$Map$assocGeometry = F3(
-	function (assoc, boxId, model) {
-		var pos2 = A3($author$project$Box$topicPos, assoc.dL, boxId, model);
-		var pos1 = A3($author$project$Box$topicPos, assoc.dK, boxId, model);
-		var _v0 = A3(
-			$elm$core$Maybe$map2,
+var $author$project$TopicMap$View$viewItems = F3(
+	function (map, boxPath, env) {
+		var model = env.model;
+		var newPath = A2($elm$core$List$cons, map.id, boxPath);
+		var topics = A2(
+			$elm$core$List$map,
+			function (mapTopic) {
+				var id = mapTopic.id;
+				var _v1 = A2($author$project$Topic$fromId, id, model);
+				if (_v1.$ === 'Just') {
+					var topic = _v1.a;
+					return A4($author$project$TopicMap$View$viewTopic, topic, mapTopic, newPath, env);
+				} else {
+					return A3(
+						$author$project$Utils$logError,
+						'TopicMap.View.viewItems',
+						'problem with topic ' + $elm$core$String$fromInt(
+							$author$project$ModelBase$toTopicId(id)),
+						$elm$html$Html$text(''));
+				}
+			},
+			A2($author$project$TopicMap$ViewModel$topicsToRender, map, model));
+		var assocs = A3(
+			$elm$core$List$foldr,
 			F2(
-				function (p1, p2) {
-					return _Utils_Tuple2(p1, p2);
+				function (id, svgAcc) {
+					var _v0 = A2($author$project$Assoc$fromId, id, model);
+					if (_v0.$ === 'Just') {
+						var assoc = _v0.a;
+						var clickHandler = A2(
+							$author$project$Shared$Events$itemClickHandler,
+							$author$project$ModelBase$A(id),
+							newPath);
+						return _Utils_ap(
+							svgAcc,
+							A4($author$project$TopicMap$View$viewAssoc, assoc, newPath, clickHandler, model));
+					} else {
+						return A3(
+							$author$project$Utils$logError,
+							'TopicMap.View.viewItems',
+							'problem with assoc ' + $elm$core$String$fromInt(
+								$author$project$ModelBase$toAssocId(id)),
+							svgAcc);
+					}
 				}),
-			pos1,
-			pos2);
-		if (!_v0.$) {
-			var geometry = _v0.a;
-			return $elm$core$Maybe$Just(geometry);
+			_List_Nil,
+			A2($author$project$Box$assocIds, map.id, model));
+		return _Utils_Tuple2(topics, assocs);
+	});
+var $author$project$TopicMap$View$boxInfo = F3(
+	function (boxId, boxPath, env) {
+		var model = env.model;
+		var _v0 = A2($author$project$TopicMap$ViewProps$byId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var map = _v0.a;
+			var width = map.rect.x2 - map.rect.x1;
+			var height = map.rect.y2 - map.rect.y1;
+			return _Utils_Tuple3(
+				A3($author$project$TopicMap$View$viewItems, map, boxPath, env),
+				map.rect,
+				_Utils_Tuple2(
+					{
+						h: $elm$core$String$fromInt(height),
+						w: $elm$core$String$fromInt(width)
+					},
+					A4(
+						$author$project$Shared$ViewBase$boxStyle,
+						boxId,
+						A2($author$project$ModelBase$Size, width, height),
+						boxPath,
+						model)));
 		} else {
 			return A3(
 				$author$project$Utils$fail,
-				'assocGeometry',
-				{cS: assoc, a4: boxId},
-				$elm$core$Maybe$Nothing);
+				'TopicMap.View.boxInfo',
+				{boxId: boxId, boxPath: boxPath},
+				_Utils_Tuple3(
+					_Utils_Tuple2(_List_Nil, _List_Nil),
+					A4($author$project$ModelBase$Rectangle, 0, 0, 0, 0),
+					_Utils_Tuple2(
+						{h: '0', w: '0'},
+						_List_Nil)));
 		}
 	});
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $author$project$Config$assocRadius = 14;
-var $author$project$Config$assocColor = 'black';
-var $author$project$Config$assocLimboColor = '#858585';
-var $author$project$Config$assocWidth = 1.5;
-var $author$project$Map$lineDasharray = function (assoc) {
-	if (!assoc.$) {
-		var assocType = assoc.a.cT;
-		if (assocType === 1) {
-			return '5 0';
-		} else {
-			return '5';
-		}
-	} else {
-		return '5 0';
-	}
-};
-var $elm$svg$Svg$Attributes$strokeDasharray = _VirtualDom_attribute('stroke-dasharray');
-var $author$project$Map$lineStyle = F3(
-	function (assoc, boxId, model) {
-		var color = function () {
-			if (!assoc.$) {
-				var id = assoc.a.aK;
-				var _v1 = A3($author$project$Map$Model$isLimboAssoc, id, boxId, model);
-				if (_v1) {
-					return $author$project$Config$assocLimboColor;
-				} else {
-					return $author$project$Config$assocColor;
-				}
-			} else {
-				return $author$project$Config$assocLimboColor;
-			}
-		}();
+var $elm$svg$Svg$g = $elm$svg$Svg$trustedNode('g');
+var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
+var $author$project$TopicMap$View$gAttr = F3(
+	function (boxId, boxRect, model) {
 		return _List_fromArray(
 			[
-				$elm$svg$Svg$Attributes$stroke(color),
-				$elm$svg$Svg$Attributes$strokeWidth(
-				$elm$core$String$fromFloat($author$project$Config$assocWidth) + 'px'),
-				$elm$svg$Svg$Attributes$strokeDasharray(
-				$author$project$Map$lineDasharray(assoc)),
-				$elm$svg$Svg$Attributes$fill('none')
+				$elm$svg$Svg$Attributes$transform(
+				'translate(' + ($elm$core$String$fromInt(-boxRect.x1) + (' ' + ($elm$core$String$fromInt(-boxRect.y1) + ')'))))
 			]);
 	});
-var $author$project$Map$taxiLine = F5(
-	function (pos1, pos2, assoc, boxId, model) {
-		if (_Utils_cmp(
-			$elm$core$Basics$abs(pos2.d1 - pos1.d1),
-			2 * $author$project$Config$assocRadius) < 0) {
-			var xm = ((pos1.d1 + pos2.d1) / 2) | 0;
-			return A2(
-				$elm$svg$Svg$path,
-				_Utils_ap(
+var $author$project$Config$assocDropShadow = {dx: 2, dy: 2, floodColor: 'black', stdDeviation: 2};
+var $elm$svg$Svg$defs = $elm$svg$Svg$trustedNode('defs');
+var $elm$svg$Svg$Attributes$dx = _VirtualDom_attribute('dx');
+var $elm$svg$Svg$Attributes$dy = _VirtualDom_attribute('dy');
+var $elm$svg$Svg$filter = $elm$svg$Svg$trustedNode('filter');
+var $elm$svg$Svg$Attributes$filterUnits = _VirtualDom_attribute('filterUnits');
+var $elm$svg$Svg$Attributes$floodColor = _VirtualDom_attribute('flood-color');
+var $elm$virtual_dom$VirtualDom$nodeNS = F2(
+	function (namespace, tag) {
+		return A2(
+			_VirtualDom_nodeNS,
+			namespace,
+			_VirtualDom_noScript(tag));
+	});
+var $elm$svg$Svg$node = $elm$virtual_dom$VirtualDom$nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$Attributes$stdDeviation = _VirtualDom_attribute('stdDeviation');
+var $author$project$TopicMap$View$svgDefs = A2(
+	$elm$svg$Svg$defs,
+	_List_Nil,
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$filter,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$id('shadow'),
+					$elm$svg$Svg$Attributes$x('-100%'),
+					$elm$svg$Svg$Attributes$y('-100%'),
+					$elm$svg$Svg$Attributes$width('200%'),
+					$elm$svg$Svg$Attributes$height('200%'),
+					$elm$svg$Svg$Attributes$filterUnits('userSpaceOnUse')
+				]),
+			_List_fromArray(
+				[
+					A3(
+					$elm$svg$Svg$node,
+					'feDropShadow',
 					_List_fromArray(
 						[
-							$elm$svg$Svg$Attributes$d(
-							'M ' + ($elm$core$String$fromInt(xm) + (' ' + ($elm$core$String$fromInt(pos1.d3) + (' V ' + $elm$core$String$fromInt(pos2.d3))))))
+							$elm$svg$Svg$Attributes$dx(
+							$elm$core$String$fromInt($author$project$Config$assocDropShadow.dx)),
+							$elm$svg$Svg$Attributes$dy(
+							$elm$core$String$fromInt($author$project$Config$assocDropShadow.dy)),
+							$elm$svg$Svg$Attributes$stdDeviation(
+							$elm$core$String$fromInt($author$project$Config$assocDropShadow.stdDeviation)),
+							$elm$svg$Svg$Attributes$floodColor($author$project$Config$assocDropShadow.floodColor)
 						]),
-					A3($author$project$Map$lineStyle, assoc, boxId, model)),
-				_List_Nil);
-		} else {
-			if (_Utils_cmp(
-				$elm$core$Basics$abs(pos2.d3 - pos1.d3),
-				2 * $author$project$Config$assocRadius) < 0) {
-				var ym = ((pos1.d3 + pos2.d3) / 2) | 0;
-				return A2(
-					$elm$svg$Svg$path,
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$elm$svg$Svg$Attributes$d(
-								'M ' + ($elm$core$String$fromInt(pos1.d1) + (' ' + ($elm$core$String$fromInt(ym) + (' H ' + $elm$core$String$fromInt(pos2.d1))))))
-							]),
-						A3($author$project$Map$lineStyle, assoc, boxId, model)),
-					_List_Nil);
-			} else {
-				var ym = ((pos1.d3 + pos2.d3) / 2) | 0;
-				var sy = (_Utils_cmp(pos2.d3, pos1.d3) > 0) ? (-1) : 1;
-				var y1 = $elm$core$String$fromInt(ym + (sy * $author$project$Config$assocRadius));
-				var y2 = $elm$core$String$fromInt(ym - (sy * $author$project$Config$assocRadius));
-				var sx = (_Utils_cmp(pos2.d1, pos1.d1) > 0) ? 1 : (-1);
-				var x1 = $elm$core$String$fromInt(pos1.d1 + (sx * $author$project$Config$assocRadius));
-				var x2 = $elm$core$String$fromInt(pos2.d1 - (sx * $author$project$Config$assocRadius));
-				var sweep1 = (sy === 1) ? ((sx === 1) ? 1 : 0) : ((sx === 1) ? 0 : 1);
-				var sweep2 = 1 - sweep1;
-				var sw2 = $elm$core$String$fromInt(sweep2);
-				var sw1 = $elm$core$String$fromInt(sweep1);
-				var r = $elm$core$String$fromInt($author$project$Config$assocRadius);
-				return A2(
-					$elm$svg$Svg$path,
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$elm$svg$Svg$Attributes$d(
-								'M ' + ($elm$core$String$fromInt(pos1.d1) + (' ' + ($elm$core$String$fromInt(pos1.d3) + (' V ' + (y1 + (' A ' + (r + (' ' + (r + (' 0 0 ' + (sw1 + (' ' + (x1 + (' ' + ($elm$core$String$fromInt(ym) + (' H ' + (x2 + (' A ' + (r + (' ' + (r + (' 0 0 ' + (sw2 + (' ' + ($elm$core$String$fromInt(pos2.d1) + (' ' + (y2 + (' V ' + $elm$core$String$fromInt(pos2.d3))))))))))))))))))))))))))))))
-							]),
-						A3($author$project$Map$lineStyle, assoc, boxId, model)),
-					_List_Nil);
-			}
-		}
-	});
-var $author$project$Map$lineFunc = $author$project$Map$taxiLine;
-var $author$project$Map$viewAssoc = F3(
-	function (assoc, boxId, model) {
-		var geom = A3($author$project$Map$assocGeometry, assoc, boxId, model);
-		if (!geom.$) {
-			var _v1 = geom.a;
-			var pos1 = _v1.a;
-			var pos2 = _v1.b;
-			return A5(
-				$author$project$Map$lineFunc,
-				pos1,
-				pos2,
-				$elm$core$Maybe$Just(assoc),
-				boxId,
-				model);
-		} else {
-			return $elm$html$Html$text('');
-		}
-	});
+					_List_Nil)
+				]))
+		]));
+var $author$project$TopicMap$View$svgStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+		A2($elm$html$Html$Attributes$style, 'top', '0'),
+		A2($elm$html$Html$Attributes$style, 'left', '0')
+	]);
+var $author$project$TopicMap$View$topicLayerStyle = function (boxRect) {
+	return _List_fromArray(
+		[
+			A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'left',
+			$elm$core$String$fromInt(-boxRect.x1) + 'px'),
+			A2(
+			$elm$html$Html$Attributes$style,
+			'top',
+			$elm$core$String$fromInt(-boxRect.y1) + 'px')
+		]);
+};
 var $author$project$Config$appHeaderHeight = 36;
-var $author$project$Map$accumulateRect = F3(
+var $author$project$TopicMap$ViewProps$fullscreen = function (model) {
+	return A2($author$project$TopicMap$ViewProps$byId, model.boxId, model);
+};
+var $author$project$TopicMap$View$accumulateRect = F3(
 	function (posAcc, boxId, model) {
-		var _v0 = A2($author$project$Box$byIdOrLog, boxId, model);
-		if (!_v0.$) {
-			var box = _v0.a;
-			return A2($author$project$ModelParts$Point, posAcc.d1 - box.aO.d2, posAcc.d3 - box.aO.d4);
+		var _v0 = A2($author$project$TopicMap$ViewProps$byId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var map = _v0.a;
+			return A2($author$project$ModelBase$Point, posAcc.x - map.rect.x1, posAcc.y - map.rect.y1);
 		} else {
-			return A2($author$project$ModelParts$Point, 0, 0);
+			return A2($author$project$ModelBase$Point, 0, 0);
 		}
 	});
-var $author$project$Map$absPos = F3(
+var $author$project$TopicMap$View$absPos = F3(
 	function (boxPath, posAcc, model) {
 		if (boxPath.b) {
 			if (!boxPath.b.b) {
 				var boxId = boxPath.a;
-				return A3($author$project$Map$accumulateRect, posAcc, boxId, model);
+				return A3($author$project$TopicMap$View$accumulateRect, posAcc, boxId, model);
 			} else {
 				var boxId = boxPath.a;
 				var _v3 = boxPath.b;
 				var parentBoxId = _v3.a;
 				var boxIds = _v3.b;
-				return A5($author$project$Map$accumulatePos, posAcc, boxId, parentBoxId, boxIds, model);
+				return A5($author$project$TopicMap$View$accumulatePos, posAcc, boxId, parentBoxId, boxIds, model);
 			}
 		} else {
 			return A3(
 				$author$project$Utils$logError,
-				'absPos',
+				'TopicMap.View.absPos',
 				'boxPath is empty!',
-				A2($author$project$ModelParts$Point, 0, 0));
+				A2($author$project$ModelBase$Point, 0, 0));
 		}
 	});
-var $author$project$Map$accumulatePos = F5(
+var $author$project$TopicMap$View$accumulatePos = F5(
 	function (posAcc, boxId, parentBoxId, boxIds, model) {
-		var _v0 = A3($author$project$Map$accumulateRect, posAcc, boxId, model);
-		var x = _v0.d1;
-		var y = _v0.d3;
-		var _v1 = A3($author$project$Box$topicPos, boxId, parentBoxId, model);
-		if (!_v1.$) {
+		var _v0 = A3($author$project$TopicMap$View$accumulateRect, posAcc, boxId, model);
+		var x = _v0.x;
+		var y = _v0.y;
+		var _v1 = A3(
+			$author$project$TopicMap$ViewProps$topicPos,
+			$author$project$ModelBase$fromBoxId(boxId),
+			parentBoxId,
+			model);
+		if (_v1.$ === 'Just') {
 			var boxPos = _v1.a;
 			return A3(
-				$author$project$Map$absPos,
+				$author$project$TopicMap$View$absPos,
 				A2($elm$core$List$cons, parentBoxId, boxIds),
-				A2($author$project$ModelParts$Point, (x + boxPos.d1) - $author$project$Config$topicW2, (y + boxPos.d3) + $author$project$Config$topicH2),
+				A2($author$project$ModelBase$Point, (x + boxPos.x) - $author$project$Config$topicW2, (y + boxPos.y) + $author$project$Config$topicH2),
 				model);
 		} else {
-			return A2($author$project$ModelParts$Point, 0, 0);
+			return A2($author$project$ModelBase$Point, 0, 0);
 		}
 	});
-var $author$project$Map$relPos = F3(
+var $author$project$TopicMap$View$relPos = F3(
 	function (pos, boxPath, model) {
 		var posAbs = A3(
-			$author$project$Map$absPos,
+			$author$project$TopicMap$View$absPos,
 			boxPath,
-			A2($author$project$ModelParts$Point, 0, 0),
+			A2($author$project$ModelBase$Point, 0, 0),
 			model);
-		return A2($author$project$ModelParts$Point, pos.d1 - posAbs.d1, pos.d3 - posAbs.d3);
+		return A2($author$project$ModelBase$Point, pos.x - posAbs.x, pos.y - posAbs.y);
 	});
-var $author$project$Map$viewAssocDraft = F2(
-	function (boxId, model) {
-		var _v0 = model.dt.c6;
-		if ((_v0.$ === 3) && (_v0.a === 1)) {
+var $author$project$TopicMap$View$viewAssocDraft = F2(
+	function (mapId, model) {
+		var _v0 = model.topicMap.dragState;
+		if ((_v0.$ === 'Drag') && (_v0.a.$ === 'DraftAssoc')) {
 			var _v1 = _v0.a;
 			var boxPath = _v0.c;
 			var origPos = _v0.d;
@@ -30103,21 +30172,21 @@ var $author$project$Map$viewAssocDraft = F2(
 			var _v2 = _Utils_Tuple2(
 				_Utils_eq(
 					$author$project$Box$firstId(boxPath),
-					boxId),
-				A2($author$project$Box$byIdOrLog, model.a4, model));
-			if (_v2.a && (!_v2.b.$)) {
-				var box = _v2.b.a;
-				var pagePos = A2($author$project$ModelParts$Point, pos.d1 + box.aU.d1, (pos.d3 + box.aU.d3) - $author$project$Config$appHeaderHeight);
-				return _List_fromArray(
-					[
-						A5(
-						$author$project$Map$lineFunc,
-						origPos,
-						A3($author$project$Map$relPos, pagePos, boxPath, model),
-						$elm$core$Maybe$Nothing,
-						boxId,
-						model)
-					]);
+					mapId),
+				$author$project$TopicMap$ViewProps$fullscreen(model));
+			if (_v2.a && (_v2.b.$ === 'Just')) {
+				var map = _v2.b.a;
+				var pagePos = A2($author$project$ModelBase$Point, pos.x + map.scroll.x, (pos.y + map.scroll.y) - $author$project$Config$appHeaderHeight);
+				return A7(
+					$author$project$TopicMap$View$lineRenderer,
+					model,
+					origPos,
+					A3($author$project$TopicMap$View$relPos, pagePos, boxPath, model),
+					$elm$core$Maybe$Nothing,
+					_List_fromArray(
+						[mapId]),
+					_List_Nil,
+					model);
 			} else {
 				return _List_Nil;
 			}
@@ -30125,685 +30194,82 @@ var $author$project$Map$viewAssocDraft = F2(
 			return _List_Nil;
 		}
 	});
-var $author$project$Feature$MouseAPI$isHovered = F3(
-	function (itemId, boxId, model) {
-		var _v0 = model.dt.c6;
-		if (((_v0.$ === 4) && (!_v0.a.$)) && _v0.a.a.b.b) {
-			var _v1 = _v0.a.a;
-			var itemId_ = _v1.a;
-			var _v2 = _v1.b;
-			var boxId_ = _v2.a;
-			return _Utils_eq(itemId, itemId_) && _Utils_eq(boxId, boxId_);
+var $author$project$Assoc$otherTopicId = F3(
+	function (assocId, topicId, model) {
+		var _v0 = A2($author$project$Assoc$fromId, assocId, model);
+		if (_v0.$ === 'Just') {
+			var topicId1 = _v0.a.topicId1;
+			var topicId2 = _v0.a.topicId2;
+			return _Utils_eq(topicId, topicId1) ? $elm$core$Maybe$Just(topicId2) : (_Utils_eq(topicId, topicId2) ? $elm$core$Maybe$Just(topicId1) : A3(
+				$author$project$Utils$logError,
+				'Assoc.otherTopicId',
+				$author$project$Utils$toString(topicId) + (' is not connected by ' + $author$project$Utils$toString(assocId)),
+				$elm$core$Maybe$Nothing));
 		} else {
-			return false;
+			return A3(
+				$author$project$Utils$fail,
+				'Assoc.otherTopicId',
+				{assocId: assocId, topicId: topicId},
+				$elm$core$Maybe$Nothing);
 		}
 	});
-var $author$project$Feature$Tool$ToggleDisplay = F2(
-	function (a, b) {
-		return {$: 14, a: a, b: b};
-	});
-var $author$project$Model$Tool = function (a) {
-	return {$: 5, a: a};
-};
-var $elm$html$Html$button = _VirtualDom_node('button');
-var $author$project$Feature$ToolAPI$caretStyle = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-		A2($elm$html$Html$Attributes$style, 'top', '1px'),
-		A2($elm$html$Html$Attributes$style, 'left', '-27px'),
-		A2($elm$html$Html$Attributes$style, 'background-color', 'transparent'),
-		A2($elm$html$Html$Attributes$style, 'border', 'none')
-	]);
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $author$project$Feature$ToolAPI$viewCaret = F3(
-	function (itemId, boxId, model) {
-		if (A2($author$project$Item$isBox, itemId, model) && A2($author$project$Box$isEmpty, itemId, model)) {
-			return _List_Nil;
-		} else {
-			var icon = function () {
-				var _v0 = A3($author$project$Box$displayMode, itemId, boxId, model);
-				if (!_v0.$) {
-					if (!_v0.a.$) {
-						if (!_v0.a.a) {
-							var _v1 = _v0.a.a;
-							return 'chevron-right';
-						} else {
-							var _v2 = _v0.a.a;
-							return 'chevron-down';
-						}
-					} else {
-						switch (_v0.a.a) {
-							case 0:
-								var _v3 = _v0.a.a;
-								return 'chevron-right';
-							case 1:
-								var _v4 = _v0.a.a;
-								return 'chevron-down';
-							default:
-								var _v5 = _v0.a.a;
-								return 'chevron-down';
-						}
-					}
-				} else {
-					return '??';
-				}
-			}();
-			return _List_fromArray(
-				[
-					A2(
-					$elm$html$Html$button,
-					_Utils_ap(
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick(
-								$author$project$Model$Tool(
-									A2($author$project$Feature$Tool$ToggleDisplay, itemId, boxId))),
-								$author$project$Utils$onMouseDownStop($author$project$Model$NoOp)
-							]),
-						$author$project$Feature$ToolAPI$caretStyle),
-					_List_fromArray(
-						[
-							A3($author$project$Feature$IconAPI$view, icon, 20, _List_Nil)
-						]))
-				]);
-		}
-	});
-var $author$project$Feature$Tool$Image = function (a) {
-	return {$: 15, a: a};
-};
-var $author$project$Feature$Tool$LeaveEdit = {$: 16};
-var $author$project$Config$toolbarColor = '#e9e9ed';
-var $author$project$Feature$ToolAPI$toolbarStyle = F3(
-	function (itemId, boxId, model) {
-		var offset = function () {
-			var _v0 = A3($author$project$Box$displayMode, itemId, boxId, model);
-			_v0$2:
-			while (true) {
-				if (!_v0.$) {
-					if (!_v0.a.$) {
-						if (_v0.a.a === 1) {
-							var _v1 = _v0.a.a;
-							return 1;
-						} else {
-							break _v0$2;
-						}
-					} else {
-						if (!_v0.a.a) {
-							var _v2 = _v0.a.a;
-							return 1;
-						} else {
-							break _v0$2;
-						}
-					}
-				} else {
-					break _v0$2;
-				}
-			}
-			return 0;
-		}();
-		return _List_fromArray(
-			[
-				A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-				A2(
-				$elm$html$Html$Attributes$style,
-				'top',
-				$elm$core$String$fromInt(offset - 30) + 'px'),
-				A2(
-				$elm$html$Html$Attributes$style,
-				'left',
-				$elm$core$String$fromInt(offset - 1) + 'px'),
-				A2($elm$html$Html$Attributes$style, 'white-space', 'nowrap'),
-				A2($elm$html$Html$Attributes$style, 'background-color', $author$project$Config$toolbarColor),
-				A2(
-				$elm$html$Html$Attributes$style,
-				'border-radius',
-				$elm$core$String$fromInt($author$project$Config$topicRadius) + 'px'),
-				A2($elm$html$Html$Attributes$style, 'padding', '4px 3px 0'),
-				A2($elm$html$Html$Attributes$style, 'z-index', '2')
-			]);
-	});
-var $author$project$Config$itemToolbarIconSize = 18;
-var $author$project$Feature$ToolAPI$iconButtonStyle = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'border', 'none'),
-		A2($elm$html$Html$Attributes$style, 'background-color', 'transparent'),
-		A2($elm$html$Html$Attributes$style, 'margin', '0 2px')
-	]);
-var $author$project$Feature$ToolAPI$viewIconButton = F7(
-	function (label, icon, iconSize, msg, isDisabled, shouldCancel, extraStyle) {
-		var stop = function () {
-			if (shouldCancel) {
-				return _List_Nil;
-			} else {
-				return _List_fromArray(
-					[
-						$author$project$Utils$onMouseDownStop($author$project$Model$NoOp)
-					]);
-			}
-		}();
-		return A2(
-			$elm$html$Html$button,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('tool'),
-						$elm$html$Html$Attributes$title(label),
-						$elm$html$Html$Events$onClick(msg),
-						$elm$html$Html$Attributes$disabled(isDisabled)
-					]),
-				_Utils_ap(
-					stop,
-					_Utils_ap($author$project$Feature$ToolAPI$iconButtonStyle, extraStyle))),
-			_List_fromArray(
-				[
-					A3($author$project$Feature$IconAPI$view, icon, iconSize, _List_Nil)
-				]));
-	});
-var $author$project$Feature$ToolAPI$viewItemButton = F5(
-	function (label, icon, msg, isDisabled, shouldCancel) {
-		return A7($author$project$Feature$ToolAPI$viewIconButton, label, icon, $author$project$Config$itemToolbarIconSize, msg, isDisabled, shouldCancel, _List_Nil);
-	});
-var $author$project$Feature$ToolAPI$viewTextToolbar = F3(
-	function (itemId, boxId, model) {
-		return A2(
-			$elm$html$Html$div,
-			A3($author$project$Feature$ToolAPI$toolbarStyle, itemId, boxId, model),
-			_List_fromArray(
-				[
-					A5(
-					$author$project$Feature$ToolAPI$viewItemButton,
-					'Insert Image',
-					'image',
-					$author$project$Model$Tool(
-						$author$project$Feature$Tool$Image(itemId)),
-					false,
-					false),
-					A5(
-					$author$project$Feature$ToolAPI$viewItemButton,
-					'Done',
-					'check',
-					$author$project$Model$Tool($author$project$Feature$Tool$LeaveEdit),
-					false,
-					false)
-				]));
-	});
-var $author$project$Feature$Tool$Delete = {$: 10};
-var $author$project$Feature$Tool$Edit = {$: 7};
-var $author$project$Feature$Tool$Fullscreen = function (a) {
-	return {$: 12, a: a};
-};
-var $author$project$Feature$Tool$Icon = {$: 8};
-var $author$project$Feature$Tool$Remove = {$: 11};
-var $author$project$Feature$Tool$Traverse = {$: 9};
-var $author$project$Feature$Tool$Unbox = F2(
-	function (a, b) {
-		return {$: 13, a: a, b: b};
-	});
-var $author$project$Box$isUnboxed = F3(
-	function (topicId, boxId, model) {
-		return _Utils_eq(
-			A3($author$project$Box$displayMode, topicId, boxId, model),
-			$elm$core$Maybe$Just(
-				$author$project$ModelParts$BoxD(2)));
-	});
-var $author$project$Feature$IconAPI$pickerStyle = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-		A2($elm$html$Html$Attributes$style, 'left', '35px'),
-		A2($elm$html$Html$Attributes$style, 'width', '288px'),
-		A2($elm$html$Html$Attributes$style, 'white-space', 'initial'),
-		A2($elm$html$Html$Attributes$style, 'background-color', 'white'),
-		A2($elm$html$Html$Attributes$style, 'border', '1px solid lightgray')
-	]);
-var $author$project$Model$Icon = function (a) {
-	return {$: 9, a: a};
-};
-var $author$project$Feature$Icon$IconSelected = $elm$core$Basics$identity;
-var $author$project$Feature$IconAPI$iconButtonStyle = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'border', 'none'),
-		A2($elm$html$Html$Attributes$style, 'margin', '8px'),
-		A2($elm$html$Html$Attributes$style, 'background-color', 'transparent')
-	]);
-var $author$project$Feature$IconAPI$viewIconList = A2(
-	$elm$core$List$map,
-	function (_v0) {
-		var iconName = _v0.a;
-		var icon = _v0.b;
-		return A2(
-			$elm$html$Html$button,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('tool'),
-						$elm$html$Html$Attributes$title(iconName),
-						$elm$html$Html$Events$onClick(
-						$author$project$Model$Icon(
-							$elm$core$Maybe$Just(iconName))),
-						$author$project$Utils$onMouseDownStop($author$project$Model$NoOp)
-					]),
-				$author$project$Feature$IconAPI$iconButtonStyle),
-			_List_fromArray(
-				[
-					A2($feathericons$elm_feather$FeatherIcons$toHtml, _List_Nil, icon)
-				]));
-	},
-	$elm$core$Dict$toList($feathericons$elm_feather$FeatherIcons$icons));
-var $author$project$Feature$IconAPI$viewPicker = function (model) {
-	var _v0 = model.aa.cl;
-	if (!_v0) {
-		return _List_fromArray(
-			[
-				A2($elm$html$Html$div, $author$project$Feature$IconAPI$pickerStyle, $author$project$Feature$IconAPI$viewIconList)
-			]);
-	} else {
-		return _List_Nil;
-	}
-};
-var $elm$html$Html$span = _VirtualDom_node('span');
-var $author$project$Feature$ToolAPI$viewSpacer = A2(
-	$elm$html$Html$span,
-	_List_fromArray(
-		[
-			A2($elm$html$Html$Attributes$style, 'display', 'inline-block'),
-			A2($elm$html$Html$Attributes$style, 'width', '14px')
-		]),
-	_List_Nil);
-var $author$project$Feature$Search$RelTopicClicked = function (a) {
-	return {$: 7, a: a};
-};
-var $author$project$Feature$Search$RelTopicHovered = function (a) {
-	return {$: 5, a: a};
-};
-var $author$project$Feature$Search$RelTopicUnhovered = function (a) {
-	return {$: 6, a: a};
-};
-var $author$project$Model$Search = function (a) {
-	return {$: 8, a: a};
-};
-var $author$project$Box$hasDeepItem = F3(
-	function (boxId, itemId, model) {
-		if (_Utils_eq(itemId, boxId)) {
-			return true;
-		} else {
-			var _v0 = A2($author$project$Box$byId, boxId, model);
-			if (!_v0.$) {
-				var box = _v0.a;
-				return A2(
-					$elm$core$List$any,
-					function (id) {
-						return A3($author$project$Box$hasDeepItem, id, itemId, model);
-					},
-					$elm$core$Dict$keys(box.b7));
-			} else {
-				return false;
-			}
-		}
-	});
-var $author$project$Feature$SearchAPI$isItemDisabled = F2(
-	function (topicId, model) {
-		var _v0 = $author$project$Feature$SelAPI$revelationBoxId(model);
-		if (!_v0.$) {
-			var boxId = _v0.a;
-			return A3($author$project$Box$hasDeepItem, topicId, boxId, model);
-		} else {
-			return false;
-		}
-	});
-var $author$project$Feature$SearchAPI$isRelTopicHover = F2(
-	function (relTopic, model) {
-		var _v0 = model.C.cw;
-		if ((_v0.$ === 1) && (!_v0.b.$)) {
-			var relTopic_ = _v0.b.a;
-			return _Utils_eq(relTopic_, relTopic);
-		} else {
-			return false;
-		}
-	});
-var $author$project$Config$disabledColor = '#b0b0b0';
-var $author$project$Config$hoverColor = '#d0d0d7';
-var $author$project$Feature$SearchAPI$menuItemStyle = F2(
-	function (isDisabled, isHover) {
-		var _v0 = function () {
-			if (isDisabled) {
-				return _Utils_Tuple3($author$project$Config$disabledColor, 'unset', 'none');
-			} else {
-				return _Utils_Tuple3(
-					'unset',
-					isHover ? $author$project$Config$hoverColor : 'unset',
-					'unset');
-			}
-		}();
-		var color = _v0.a;
-		var bgColor = _v0.b;
-		var pointerEvents = _v0.c;
-		return _List_fromArray(
-			[
-				A2($elm$html$Html$Attributes$style, 'display', 'flex'),
-				A2($elm$html$Html$Attributes$style, 'align-items', 'center'),
-				A2($elm$html$Html$Attributes$style, 'gap', '8px'),
-				A2($elm$html$Html$Attributes$style, 'color', color),
-				A2($elm$html$Html$Attributes$style, 'background-color', bgColor),
-				A2($elm$html$Html$Attributes$style, 'padding', '0 8px'),
-				A2($elm$html$Html$Attributes$style, 'pointer-events', pointerEvents)
-			]);
-	});
-var $author$project$Feature$SearchAPI$menuStyle = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'position', 'absolute'),
-		A2($elm$html$Html$Attributes$style, 'width', '210px'),
-		A2($elm$html$Html$Attributes$style, 'padding', '3px 0'),
-		A2(
-		$elm$html$Html$Attributes$style,
-		'font-size',
-		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
-		A2($elm$html$Html$Attributes$style, 'line-height', '2'),
-		A2($elm$html$Html$Attributes$style, 'background-color', 'white'),
-		A2($elm$html$Html$Attributes$style, 'border', '1px solid lightgray')
-	]);
-var $elm$html$Html$Events$onMouseOut = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mouseout',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $elm$html$Html$Events$onMouseOver = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mouseover',
-		$elm$json$Json$Decode$succeed(msg));
-};
-var $author$project$Feature$SearchAPI$traversalResultStyle = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'left', '65px')
-	]);
-var $author$project$Feature$Search$Fullscreen = function (a) {
-	return {$: 8, a: a};
-};
-var $author$project$Feature$SearchAPI$fullscreenButtonStyle = _List_fromArray(
-	[
-		A2($elm$html$Html$Attributes$style, 'border', 'none'),
-		A2($elm$html$Html$Attributes$style, 'background-color', 'transparent'),
-		A2($elm$html$Html$Attributes$style, 'pointer-events', 'initial')
-	]);
-var $author$project$Utils$onClickStop = function (msg) {
-	return A2($author$project$Utils$stopPropagation, 'click', msg);
-};
-var $author$project$Utils$onMouseOutStop = function (msg) {
-	return A2($author$project$Utils$stopPropagation, 'mouseout', msg);
-};
-var $author$project$Utils$onMouseOverStop = function (msg) {
-	return A2($author$project$Utils$stopPropagation, 'mouseover', msg);
-};
-var $author$project$Feature$SearchAPI$viewFullscreenButton = F2(
-	function (id, model) {
-		var isDisabled = _Utils_eq(model.a4, id);
-		var _v0 = A2($author$project$Item$isBox, id, model);
-		if (_v0) {
-			return A2(
-				$elm$html$Html$button,
-				_Utils_ap(
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('tool'),
-							$elm$html$Html$Attributes$title('Fullscreen'),
-							$elm$html$Html$Attributes$disabled(isDisabled),
-							$author$project$Utils$onClickStop(
-							$author$project$Model$Search(
-								$author$project$Feature$Search$Fullscreen(id))),
-							$author$project$Utils$onMouseOverStop($author$project$Model$NoOp),
-							$author$project$Utils$onMouseOutStop($author$project$Model$NoOp)
-						]),
-					$author$project$Feature$SearchAPI$fullscreenButtonStyle),
-				_List_fromArray(
-					[
-						A3($author$project$Feature$IconAPI$view, 'maximize-2', 16, _List_Nil)
-					]));
-		} else {
-			return $elm$html$Html$text('');
-		}
-	});
-var $author$project$Feature$SearchAPI$viewItemText = function (topic) {
-	return A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				A2($elm$html$Html$Attributes$style, 'flex', 'auto'),
-				A2($elm$html$Html$Attributes$style, 'overflow', 'hidden'),
-				A2($elm$html$Html$Attributes$style, 'text-overflow', 'ellipsis'),
-				A2($elm$html$Html$Attributes$style, 'white-space', 'nowrap')
-			]),
-		_List_fromArray(
-			[
-				$elm$html$Html$text(
-				$author$project$Item$topicLabel(topic))
-			]));
-};
-var $author$project$Feature$SearchAPI$viewTopicIcon = F2(
-	function (topic, model) {
-		return A4(
-			$author$project$Feature$IconAPI$viewTopicIcon,
-			topic.aK,
-			$author$project$Config$topicIconSize,
-			_List_fromArray(
-				[
-					A2($elm$html$Html$Attributes$style, 'flex', 'none')
-				]),
-			model);
-	});
-var $author$project$Feature$SearchAPI$viewTraversalMenu = F2(
-	function (relTopicIds, model) {
-		return A2(
-			$elm$html$Html$div,
-			_Utils_ap(
-				_List_fromArray(
-					[
-						$author$project$Utils$onMouseDownStop($author$project$Model$NoOp)
-					]),
-				_Utils_ap($author$project$Feature$SearchAPI$traversalResultStyle, $author$project$Feature$SearchAPI$menuStyle)),
-			A2(
-				$elm$core$List$map,
-				function (relTopic) {
-					var id = relTopic.a;
-					var assocId = relTopic.b;
-					var isHover = A2($author$project$Feature$SearchAPI$isRelTopicHover, relTopic, model);
-					var isDisabled = A2($author$project$Feature$SearchAPI$isItemDisabled, id, model);
-					var _v0 = A2($author$project$Item$topicById, id, model);
-					if (!_v0.$) {
-						var topic = _v0.a;
-						return A2(
-							$elm$html$Html$div,
-							_Utils_ap(
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick(
-										$author$project$Model$Search(
-											$author$project$Feature$Search$RelTopicClicked(
-												_Utils_Tuple2(id, assocId)))),
-										$elm$html$Html$Events$onMouseOver(
-										$author$project$Model$Search(
-											$author$project$Feature$Search$RelTopicHovered(
-												_Utils_Tuple2(id, assocId)))),
-										$elm$html$Html$Events$onMouseOut(
-										$author$project$Model$Search(
-											$author$project$Feature$Search$RelTopicUnhovered(
-												_Utils_Tuple2(id, assocId))))
-									]),
-								A2($author$project$Feature$SearchAPI$menuItemStyle, isDisabled, isHover)),
-							_List_fromArray(
-								[
-									A2($author$project$Feature$SearchAPI$viewTopicIcon, topic, model),
-									$author$project$Feature$SearchAPI$viewItemText(topic),
-									A2($author$project$Feature$SearchAPI$viewFullscreenButton, id, model)
-								]));
-					} else {
-						return $elm$html$Html$text('??');
-					}
-				},
-				relTopicIds));
-	});
-var $author$project$Feature$SearchAPI$viewTraversalResult = function (model) {
-	var _v0 = model.C.cw;
-	if (_v0.$ === 1) {
-		var relTopicIds = _v0.a;
-		return (!$elm$core$List$isEmpty(relTopicIds)) ? _List_fromArray(
-			[
-				A2($author$project$Feature$SearchAPI$viewTraversalMenu, relTopicIds, model)
-			]) : _List_Nil;
-	} else {
-		return _List_Nil;
-	}
-};
-var $author$project$Feature$ToolAPI$viewToolbar = F3(
-	function (itemId, boxId, model) {
-		var topicTools = _List_fromArray(
-			[
-				A5(
-				$author$project$Feature$ToolAPI$viewItemButton,
-				'Edit',
-				'edit-3',
-				$author$project$Model$Tool($author$project$Feature$Tool$Edit),
-				false,
-				true),
-				A5(
-				$author$project$Feature$ToolAPI$viewItemButton,
-				'Select Icon',
-				'smile',
-				$author$project$Model$Tool($author$project$Feature$Tool$Icon),
-				false,
-				true),
-				A5(
-				$author$project$Feature$ToolAPI$viewItemButton,
-				'Traverse',
-				'share-2',
-				$author$project$Model$Tool($author$project$Feature$Tool$Traverse),
-				false,
-				true),
-				A5(
-				$author$project$Feature$ToolAPI$viewItemButton,
-				'Delete',
-				'trash',
-				$author$project$Model$Tool($author$project$Feature$Tool$Delete),
-				false,
-				true),
-				A5(
-				$author$project$Feature$ToolAPI$viewItemButton,
-				'Remove',
-				'x',
-				$author$project$Model$Tool($author$project$Feature$Tool$Remove),
-				false,
-				true)
-			]);
-		var boxTools = function () {
-			if (A2($author$project$Item$isBox, itemId, model)) {
-				var disabled = A2($author$project$Box$isEmpty, itemId, model) || A3($author$project$Box$isUnboxed, itemId, boxId, model);
-				return _List_fromArray(
-					[
-						$author$project$Feature$ToolAPI$viewSpacer,
-						A5(
-						$author$project$Feature$ToolAPI$viewItemButton,
-						'Fullscreen',
-						'maximize-2',
-						$author$project$Model$Tool(
-							$author$project$Feature$Tool$Fullscreen(itemId)),
-						false,
-						true),
-						A5(
-						$author$project$Feature$ToolAPI$viewItemButton,
-						'Unbox',
-						'external-link',
-						$author$project$Model$Tool(
-							A2($author$project$Feature$Tool$Unbox, itemId, boxId)),
-						disabled,
-						true)
-					]);
-			} else {
-				return _List_Nil;
-			}
-		}();
-		return A2(
-			$elm$html$Html$div,
-			A3($author$project$Feature$ToolAPI$toolbarStyle, itemId, boxId, model),
-			_Utils_ap(
-				topicTools,
-				_Utils_ap(
-					boxTools,
-					_Utils_ap(
-						$author$project$Feature$IconAPI$viewPicker(model),
-						$author$project$Feature$SearchAPI$viewTraversalResult(model)))));
-	});
-var $author$project$Feature$ToolAPI$viewItemTools = F3(
-	function (itemId, boxPath, model) {
-		var boxId = $author$project$Box$firstId(boxPath);
-		var caret = function () {
-			var _v0 = A3($author$project$Feature$MouseAPI$isHovered, itemId, boxId, model);
-			if (_v0) {
-				return A3($author$project$Feature$ToolAPI$viewCaret, itemId, boxId, model);
-			} else {
-				return _List_Nil;
-			}
-		}();
-		var toolbar = A3($author$project$Feature$SelAPI$isSelectedPath, itemId, boxPath, model) ? (A3($author$project$Feature$TextAPI$isEdit, itemId, boxPath, model) ? (A2($author$project$Item$isBox, itemId, model) ? _List_Nil : _List_fromArray(
-			[
-				A3($author$project$Feature$ToolAPI$viewTextToolbar, itemId, boxId, model)
-			])) : _List_fromArray(
-			[
-				A3($author$project$Feature$ToolAPI$viewToolbar, itemId, boxId, model)
-			])) : _List_Nil;
-		return _Utils_ap(toolbar, caret);
-	});
-var $author$project$Map$viewLimboAssoc = F2(
+var $author$project$TopicMap$View$viewLimboAssoc = F2(
 	function (boxId, model) {
-		var _v0 = $author$project$Map$Model$limboState(model);
-		if ((!_v0.$) && (!_v0.a.b.$)) {
+		var _v0 = $author$project$TopicMap$ViewModel$limboState(model);
+		if ((_v0.$ === 'Just') && (_v0.a.b.$ === 'Just')) {
 			var _v1 = _v0.a;
 			var topicId = _v1.a;
 			var assocId = _v1.b.a;
 			var limboBoxId = _v1.c;
 			if (_Utils_eq(boxId, limboBoxId)) {
-				if (A3($author$project$Box$hasItem, boxId, assocId, model)) {
+				if (A3(
+					$author$project$Box$hasItem,
+					$author$project$ModelBase$A(assocId),
+					boxId,
+					model)) {
 					var _v2 = A2(
 						$author$project$Utils$info,
-						'viewLimboAssoc',
-						_Utils_Tuple3(assocId, 'is in box', boxId));
+						'TopicMap.View.viewLimboAssoc',
+						_Utils_Tuple3(assocId, 'is in map', boxId));
 					return _List_Nil;
 				} else {
 					var _v3 = A2(
 						$author$project$Utils$info,
-						'viewLimboAssoc',
-						_Utils_Tuple3(assocId, 'not in box', boxId));
-					var _v4 = A2($author$project$Item$assocById, assocId, model);
-					if (!_v4.$) {
+						'TopicMap.View.viewLimboAssoc',
+						_Utils_Tuple3(assocId, 'not in map', boxId));
+					var _v4 = A2($author$project$Assoc$fromId, assocId, model);
+					if (_v4.$ === 'Just') {
 						var assoc = _v4.a;
-						if (A3($author$project$Box$hasItem, boxId, topicId, model)) {
-							return _List_fromArray(
-								[
-									A3($author$project$Map$viewAssoc, assoc, boxId, model)
-								]);
-						} else {
-							var sourceTopicId = A3($author$project$Item$otherPlayerId, assocId, topicId, model);
-							var _v5 = A3($author$project$Box$topicPos, sourceTopicId, boxId, model);
-							if (!_v5.$) {
-								var pos = _v5.a;
-								return _List_fromArray(
-									[
-										A5(
-										$author$project$Map$lineFunc,
-										pos,
-										A2($author$project$Box$initTopicPos, boxId, model),
-										$elm$core$Maybe$Just(assoc),
-										boxId,
-										model)
-									]);
-							} else {
-								return _List_Nil;
-							}
-						}
+						return A3($author$project$TopicMap$ViewProps$hasMapTopic, topicId, boxId, model) ? A4(
+							$author$project$TopicMap$View$viewAssoc,
+							assoc,
+							_List_fromArray(
+								[boxId]),
+							_List_Nil,
+							model) : A2(
+							$elm$core$Maybe$withDefault,
+							_List_Nil,
+							A2(
+								$elm$core$Maybe$andThen,
+								function (pos) {
+									return $elm$core$Maybe$Just(
+										A7(
+											$author$project$TopicMap$View$lineRenderer,
+											model,
+											pos,
+											A2($author$project$TopicMap$ViewProps$initTopicPos, boxId, model),
+											$elm$core$Maybe$Just(assoc),
+											_List_fromArray(
+												[boxId]),
+											_List_Nil,
+											model));
+								},
+								A2(
+									$elm$core$Maybe$andThen,
+									function (sourceTopicId) {
+										return A3($author$project$TopicMap$ViewProps$topicPos, sourceTopicId, boxId, model);
+									},
+									A3($author$project$Assoc$otherTopicId, assocId, topicId, model))));
 					} else {
 						return _List_Nil;
 					}
@@ -30815,183 +30281,2710 @@ var $author$project$Map$viewLimboAssoc = F2(
 			return _List_Nil;
 		}
 	});
-var $author$project$Map$boxInfo = F3(
-	function (boxId, boxPath, model) {
-		var _v15 = A2($author$project$Box$byIdOrLog, boxId, model);
-		if (!_v15.$) {
-			var box = _v15.a;
-			return _Utils_Tuple3(
-				A3($author$project$Map$viewItems, box, boxPath, model),
-				box.aO,
-				_Utils_Tuple2(
-					{
-						b_: $elm$core$String$fromInt(box.aO.a1 - box.aO.d4),
-						cN: $elm$core$String$fromInt(box.aO.a0 - box.aO.d2)
-					},
-					_Utils_eq(model.a4, boxId) ? _List_Nil : A4($author$project$Map$nestedBoxStyle, boxId, box.aO, boxPath, model)));
-		} else {
-			return A3(
-				$author$project$Utils$fail,
-				'boxInfo',
-				{a4: boxId, cY: boxPath},
-				_Utils_Tuple3(
-					_Utils_Tuple2(_List_Nil, _List_Nil),
-					A4($author$project$ModelParts$Rectangle, 0, 0, 0, 0),
-					_Utils_Tuple2(
-						{b_: '0', cN: '0'},
-						_List_Nil)));
-		}
-	});
-var $author$project$Map$view = F3(
-	function (boxId, boxPath, model) {
-		var _v12 = A3($author$project$Map$boxInfo, boxId, boxPath, model);
-		var _v13 = _v12.a;
-		var topics = _v13.a;
-		var assocs = _v13.b;
-		var boxRect = _v12.b;
-		var _v14 = _v12.c;
-		var svgSize = _v14.a;
-		var boxStyle = _v14.b;
+var $author$project$TopicMap$View$view = F3(
+	function (boxId, boxPath, env) {
+		var model = env.model;
+		var _v0 = A3($author$project$TopicMap$View$boxInfo, boxId, boxPath, env);
+		var _v1 = _v0.a;
+		var topics = _v1.a;
+		var assocs = _v1.b;
+		var boxRect = _v0.b;
+		var _v2 = _v0.c;
+		var svgSize = _v2.a;
+		var boxStyle = _v2.b;
 		return A2(
 			$elm$html$Html$div,
 			boxStyle,
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$div,
-					$author$project$Map$topicLayerStyle(boxRect),
-					topics),
-					A2(
-					$elm$svg$Svg$svg,
-					_Utils_ap(
+			_Utils_ap(
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						$author$project$TopicMap$View$topicLayerStyle(boxRect),
+						topics),
+						A2(
+						$elm$svg$Svg$svg,
+						_Utils_ap(
+							_List_fromArray(
+								[
+									$elm$svg$Svg$Attributes$width(svgSize.w),
+									$elm$svg$Svg$Attributes$height(svgSize.h)
+								]),
+							$author$project$TopicMap$View$svgStyle),
 						_List_fromArray(
 							[
-								$elm$svg$Svg$Attributes$width(svgSize.cN),
-								$elm$svg$Svg$Attributes$height(svgSize.b_)
-							]),
-						$author$project$Map$svgStyle),
-					_List_fromArray(
-						[
-							A2(
-							$elm$svg$Svg$g,
-							A3($author$project$Map$gAttr, boxId, boxRect, model),
-							_Utils_ap(
-								assocs,
+								$author$project$TopicMap$View$svgDefs,
+								A2(
+								$elm$svg$Svg$g,
+								A3($author$project$TopicMap$View$gAttr, boxId, boxRect, model),
 								_Utils_ap(
-									A2($author$project$Map$viewLimboAssoc, boxId, model),
-									A2($author$project$Map$viewAssocDraft, boxId, model))))
-						]))
-				]));
+									assocs,
+									_Utils_ap(
+										A2($author$project$TopicMap$View$viewLimboAssoc, boxId, model),
+										A2($author$project$TopicMap$View$viewAssocDraft, boxId, model))))
+							]))
+					]),
+				A2(
+					$author$project$Feature$Tool$viewToolbar,
+					A2($elm$core$List$cons, boxId, boxPath),
+					env)));
 	});
-var $author$project$Map$viewItems = F3(
-	function (box, boxPath, model) {
-		var newPath = A2($elm$core$List$cons, box.aK, boxPath);
-		var topics = A2(
-			$elm$core$List$map,
-			function (_v10) {
-				var id = _v10.aK;
-				var props = _v10.ac;
-				var _v11 = _Utils_Tuple2(
-					A2($author$project$Item$topicById, id, model),
-					props);
-				if ((!_v11.a.$) && (!_v11.b.$)) {
-					var topic = _v11.a.a;
-					var tProps = _v11.b.a;
-					return A4($author$project$Map$viewTopic, topic, tProps, newPath, model);
-				} else {
-					return A3(
-						$author$project$Utils$logError,
-						'viewItems',
-						'problem with topic ' + $elm$core$String$fromInt(id),
-						$elm$html$Html$text(''));
-				}
-			},
-			A2($author$project$Map$Model$topicsToRender, box, model));
-		var assocs = A2(
-			$elm$core$List$map,
-			function (_v8) {
-				var id = _v8.aK;
-				var _v9 = A2($author$project$Item$assocById, id, model);
-				if (!_v9.$) {
-					var assoc = _v9.a;
-					return A3($author$project$Map$viewAssoc, assoc, box.aK, model);
-				} else {
-					return A3(
-						$author$project$Utils$logError,
-						'viewItems',
-						'problem with assoc ' + $elm$core$String$fromInt(id),
-						$elm$html$Html$text(''));
-				}
-			},
-			A2($author$project$Map$Model$assocsToRender, box, model));
-		return _Utils_Tuple2(topics, assocs);
+var $author$project$ExtManager$registry = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2(
+			'TopicMap',
+			{addTopic: $author$project$TopicMap$ViewProps$addTopic, autoSize: $author$project$TopicMap$Geometry$autoSize, drag: $author$project$TopicMap$Mouse$drag, dragStart: $author$project$TopicMap$Mouse$dragStart, dragStop: $author$project$TopicMap$Mouse$dragStop, hitTest: $author$project$TopicMap$Geometry$hitTest, init: $author$project$TopicMap$ViewProps$init, label: 'Topic Map', toolbar: $author$project$TopicMap$Geometry$toolbarPos, view: $author$project$TopicMap$View$view}),
+			_Utils_Tuple2(
+			'TopicList',
+			{addTopic: $author$project$TopicList$ViewProps$addTopic, autoSize: $author$project$TopicList$Geometry$autoSize, drag: $author$project$TopicList$ViewProps$drag, dragStart: $author$project$TopicList$ViewProps$dragStart, dragStop: $author$project$TopicList$ViewProps$dragStop, hitTest: $author$project$TopicList$Geometry$hitTest, init: $author$project$TopicList$ViewProps$init, label: 'List', toolbar: $author$project$TopicList$Geometry$toolbarPos, view: $author$project$TopicList$ViewProps$view})
+		]));
+var $author$project$ExtManager$all = A2(
+	$elm$core$List$map,
+	function (_v0) {
+		var name = _v0.a;
+		var label = _v0.b.label;
+		return _Utils_Tuple2(name, label);
+	},
+	$elm$core$Dict$toList($author$project$ExtManager$registry));
+var $author$project$ExtManager$addTopic = F4(
+	function (topicId, boxId, posHint, model) {
+		return A4(
+			$author$project$ExtManager$dispatch,
+			boxId,
+			model,
+			_Utils_Tuple2(model, $elm$core$Platform$Cmd$none),
+			F2(
+				function (env, renderer) {
+					return A4(renderer.addTopic, topicId, boxId, posHint, env);
+				}));
 	});
-var $author$project$Map$viewTopic = F4(
-	function (topic, props, boxPath, model) {
-		var render = function () {
-			var _v2 = props.aI;
-			if (!_v2.$) {
-				if (!_v2.a) {
-					var _v3 = _v2.a;
-					return $author$project$Map$labelTopic;
-				} else {
-					var _v4 = _v2.a;
-					return $author$project$Map$detailTopic;
-				}
+var $author$project$ExtManager$autoSize = F2(
+	function (boxPath, model) {
+		return A4(
+			$author$project$ExtManager$dispatch,
+			$author$project$Box$firstId(boxPath),
+			model,
+			_Utils_Tuple2(
+				A4($author$project$ModelBase$Rectangle, 0, 0, 0, 0),
+				model),
+			F2(
+				function (env, renderer) {
+					return A2(renderer.autoSize, boxPath, env);
+				}));
+	});
+var $author$project$ExtManager$dispatch = F4(
+	function (boxId, model, errVal, callExtWith) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			errVal,
+			A2(
+				$elm$core$Maybe$map,
+				callExtWith(
+					A2(
+						$author$project$Env$Env2,
+						model,
+						$author$project$ExtManager$cyclic$ext())),
+				A2(
+					$elm$core$Maybe$andThen,
+					function (renderer) {
+						return A2(
+							$elm$core$Dict$get,
+							$author$project$Extension$toString(renderer),
+							$author$project$ExtManager$registry);
+					},
+					A2($author$project$Box$rendererOf, boxId, model))));
+	});
+var $author$project$ExtManager$drag = F3(
+	function (boxId, pos, model) {
+		return A4(
+			$author$project$ExtManager$dispatch,
+			boxId,
+			model,
+			_Utils_Tuple2(model, $elm$core$Platform$Cmd$none),
+			F2(
+				function (env, renderer) {
+					return A2(renderer.drag, pos, env);
+				}));
+	});
+var $author$project$ExtManager$dragStart = F5(
+	function (topicId, boxPath, pos, pointerType, model) {
+		return A4(
+			$author$project$ExtManager$dispatch,
+			$author$project$Box$firstId(boxPath),
+			model,
+			_Utils_Tuple2(model, $elm$core$Platform$Cmd$none),
+			F2(
+				function (env, renderer) {
+					return A5(renderer.dragStart, topicId, boxPath, pos, pointerType, env);
+				}));
+	});
+var $author$project$ExtManager$dragStop = F2(
+	function (boxId, model) {
+		return A4(
+			$author$project$ExtManager$dispatch,
+			boxId,
+			model,
+			_Utils_Tuple2(model, $elm$core$Platform$Cmd$none),
+			F2(
+				function (env, renderer) {
+					return renderer.dragStop(env);
+				}));
+	});
+var $author$project$ExtManager$hitTest = F5(
+	function (boxId, boxPath, pos, excludeTopicId, model) {
+		return A4(
+			$author$project$ExtManager$dispatch,
+			boxId,
+			model,
+			$elm$core$Maybe$Nothing,
+			F2(
+				function (env, renderer) {
+					return A5(renderer.hitTest, boxId, boxPath, pos, excludeTopicId, env);
+				}));
+	});
+var $author$project$ExtManager$init = F2(
+	function (boxId, model) {
+		return A4(
+			$author$project$ExtManager$dispatch,
+			boxId,
+			model,
+			model,
+			F2(
+				function (env, renderer) {
+					return A2(renderer.init, boxId, model);
+				}));
+	});
+var $author$project$ExtManager$toolbar = F2(
+	function (boxId, model) {
+		return A4(
+			$author$project$ExtManager$dispatch,
+			boxId,
+			model,
+			A2(
+				$author$project$ModelBase$ToolbarPos,
+				function (_v0) {
+					return A2($author$project$ModelBase$Point, 0, 0);
+				},
+				function (_v1) {
+					return A2($author$project$ModelBase$Point, 0, 0);
+				}),
+			F2(
+				function (env, renderer) {
+					return A2(renderer.toolbar, boxId, model);
+				}));
+	});
+var $author$project$ExtManager$view = F3(
+	function (boxId, boxPath, model) {
+		return A4(
+			$author$project$ExtManager$dispatch,
+			boxId,
+			model,
+			$elm$html$Html$text('Renderer ?'),
+			F2(
+				function (env, renderer) {
+					return A3(renderer.view, boxId, boxPath, env);
+				}));
+	});
+function $author$project$ExtManager$cyclic$ext() {
+	return {addTopic: $author$project$ExtManager$addTopic, all: $author$project$ExtManager$all, autoSize: $author$project$ExtManager$autoSize, drag: $author$project$ExtManager$drag, dragStart: $author$project$ExtManager$dragStart, dragStop: $author$project$ExtManager$dragStop, hitTest: $author$project$ExtManager$hitTest, init: $author$project$ExtManager$init, toolbar: $author$project$ExtManager$toolbar, view: $author$project$ExtManager$view};
+}
+try {
+	var $author$project$ExtManager$ext = $author$project$ExtManager$cyclic$ext();
+	$author$project$ExtManager$cyclic$ext = function () {
+		return $author$project$ExtManager$ext;
+	};
+} catch ($) {
+	throw 'Some top-level definitions from `ExtManager` are causing infinite recursion:\n\n  ┌─────┐\n  │    ext\n  │     ↓\n  │    addTopic\n  │     ↓\n  │    autoSize\n  │     ↓\n  │    dispatch\n  │     ↓\n  │    drag\n  │     ↓\n  │    dragStart\n  │     ↓\n  │    dragStop\n  │     ↓\n  │    hitTest\n  │     ↓\n  │    init\n  │     ↓\n  │    toolbar\n  │     ↓\n  │    view\n  └─────┘\n\nThese errors are very tricky, so read https://elm-lang.org/0.19.1/bad-recursion to learn how to fix it!';}
+var $author$project$Box$hasBoxTopic = F3(
+	function (topicId, boxId, model) {
+		var _v0 = A2($author$project$Box$byId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var box = _v0.a;
+			return A2(
+				$elm$core$Dict$member,
+				$author$project$ModelBase$toTopicId(topicId),
+				box.topics);
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'Box.hasBoxTopic',
+				{boxId: boxId, topicId: topicId},
+				false);
+		}
+	});
+var $author$project$Box$addToBoxTopics = F3(
+	function (topic, boxId, model) {
+		var boxes = model.boxes;
+		return A3($author$project$Box$hasBoxTopic, topic.id, boxId, model) ? model : _Utils_update(
+			model,
+			{
+				boxes: A3(
+					$elm$core$Dict$update,
+					$author$project$ModelBase$toBoxId(boxId),
+					function (maybeBox) {
+						if (maybeBox.$ === 'Just') {
+							var box = maybeBox.a;
+							return $elm$core$Maybe$Just(
+								_Utils_update(
+									box,
+									{
+										topics: A3(
+											$elm$core$Dict$insert,
+											$author$project$ModelBase$toTopicId(topic.id),
+											topic,
+											box.topics)
+									}));
+						} else {
+							return $elm$core$Maybe$Nothing;
+						}
+					},
+					boxes)
+			});
+	});
+var $author$project$Box$addTopic = F3(
+	function (topic, boxId, model) {
+		return A3(
+			$author$project$Box$addToBoxTopics,
+			topic,
+			boxId,
+			A3(
+				$author$project$Box$addToItemSet,
+				$author$project$ModelBase$T(topic.id),
+				boxId,
+				model));
+	});
+var $author$project$TopicMap$ViewProps$create_ = F2(
+	function (map, model) {
+		var topicMap = model.topicMap;
+		return _Utils_update(
+			model,
+			{
+				topicMap: _Utils_update(
+					topicMap,
+					{
+						viewProps: A3(
+							$elm$core$Dict$insert,
+							$author$project$ModelBase$toBoxId(map.id),
+							map,
+							topicMap.viewProps)
+					})
+			});
+	});
+var $author$project$TopicMap$ViewProps$create = F2(
+	function (mapId, model) {
+		var map = A4(
+			$author$project$TopicMap$TopicMapDef$ViewProps,
+			mapId,
+			A4($author$project$ModelBase$Rectangle, 0, 0, 0, 0),
+			A2($author$project$ModelBase$Point, 0, 0),
+			$elm$core$Dict$empty);
+		return A2($author$project$TopicMap$ViewProps$create_, map, model);
+	});
+var $author$project$Box$create = F2(
+	function (box, model) {
+		var boxes = model.boxes;
+		return _Utils_update(
+			model,
+			{
+				boxes: A3(
+					$elm$core$Dict$insert,
+					$author$project$ModelBase$toBoxId(box.id),
+					box,
+					boxes)
+			});
+	});
+var $author$project$Box$createItemSet = F2(
+	function (set, model) {
+		var itemSets = model.itemSets;
+		return _Utils_update(
+			model,
+			{
+				itemSets: A3($elm$core$Dict$insert, set.id, set, itemSets)
+			});
+	});
+var $author$project$Box$turnTopicIntoBox = F2(
+	function (topicId, model) {
+		var setId = model.nextId;
+		var set = A2($author$project$ModelBase$ItemSet, setId, _List_Nil);
+		var box = A4(
+			$author$project$ModelBase$Box,
+			$author$project$ModelBase$BoxId(topicId),
+			setId,
+			$elm$core$Dict$empty,
+			$author$project$Extension$defaultRenderer);
+		return $author$project$Model$nextId(
+			A2(
+				$author$project$Box$createItemSet,
+				set,
+				A2($author$project$Box$create, box, model)));
+	});
+var $author$project$Feature$Tool$createBoxOnDemand = F2(
+	function (topicId, model) {
+		return A2($author$project$Topic$isBox, topicId, model) ? model : A2(
+			$author$project$TopicMap$ViewProps$create,
+			$author$project$ModelBase$BoxId(topicId),
+			A2($author$project$Box$turnTopicIntoBox, topicId, model));
+	});
+var $elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2($elm$core$Dict$map, func, left),
+				A2($elm$core$Dict$map, func, right));
+		}
+	});
+var $author$project$Box$deleteAssoc_ = F2(
+	function (assocId, model) {
+		var assocs = model.assocs;
+		var itemSets = model.itemSets;
+		return _Utils_update(
+			model,
+			{
+				assocs: A2(
+					$elm$core$Dict$remove,
+					$author$project$ModelBase$toAssocId(assocId),
+					assocs),
+				itemSets: A2(
+					$elm$core$Dict$map,
+					F2(
+						function (_v0, itemSet) {
+							var items = itemSet.items;
+							return _Utils_update(
+								itemSet,
+								{
+									items: A2(
+										$elm$core$List$filter,
+										function (setItem) {
+											return !_Utils_eq(
+												setItem.id,
+												$author$project$ModelBase$A(assocId));
+										},
+										items)
+								});
+						}),
+					itemSets)
+			});
+	});
+var $author$project$Box$removeAssocFromTopic = F3(
+	function (assocId, topicId, model) {
+		return A3(
+			$author$project$Topic$update,
+			topicId,
+			function (topic) {
+				return _Utils_update(
+					topic,
+					{
+						assocIds: A2(
+							$elm$core$List$filter,
+							$elm$core$Basics$neq(assocId),
+							topic.assocIds)
+					});
+			},
+			model);
+	});
+var $author$project$Box$removeAssocFromTopics = F2(
+	function (assocId, model) {
+		var _v0 = A2($author$project$Assoc$fromId, assocId, model);
+		if (_v0.$ === 'Just') {
+			var assoc = _v0.a;
+			return A3(
+				$author$project$Box$removeAssocFromTopic,
+				assoc.id,
+				assoc.topicId2,
+				A3($author$project$Box$removeAssocFromTopic, assoc.id, assoc.topicId1, model));
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'Box.removeAssocFromTopics',
+				{assocId: assocId},
+				model);
+		}
+	});
+var $author$project$Box$deleteAssoc = F2(
+	function (assocId, model) {
+		return A2(
+			$author$project$Box$deleteAssoc_,
+			assocId,
+			A2($author$project$Box$removeAssocFromTopics, assocId, model));
+	});
+var $author$project$Box$findHierarchy = F4(
+	function (topicId, boxId, assocIds_, model) {
+		findHierarchy:
+		while (true) {
+			if (!assocIds_.b) {
+				return A3(
+					$author$project$Utils$logError,
+					'Box.findHierarchy',
+					'Missing Hierarchy association between Topic ' + ($elm$core$String$fromInt(
+						$author$project$ModelBase$toTopicId(topicId)) + (' and Box ' + $elm$core$String$fromInt(
+						$author$project$ModelBase$toBoxId(boxId)))),
+					$elm$core$Maybe$Nothing);
 			} else {
-				switch (_v2.a) {
-					case 0:
-						var _v5 = _v2.a;
-						return $author$project$Map$blackBoxTopic;
-					case 1:
-						var _v6 = _v2.a;
-						return $author$project$Map$whiteBoxTopic;
-					default:
-						var _v7 = _v2.a;
-						return $author$project$Map$unboxedTopic;
+				var assocId = assocIds_.a;
+				var ids = assocIds_.b;
+				var _v1 = A2($author$project$Assoc$fromId, assocId, model);
+				if (_v1.$ === 'Just') {
+					var id = _v1.a.id;
+					var assocType = _v1.a.assocType;
+					var topicId1 = _v1.a.topicId1;
+					var topicId2 = _v1.a.topicId2;
+					if (_Utils_eq(assocType, $author$project$ModelBase$Hierarchy) && (_Utils_eq(
+						topicId1,
+						$author$project$ModelBase$fromBoxId(boxId)) && _Utils_eq(topicId2, topicId))) {
+						return $elm$core$Maybe$Just(id);
+					} else {
+						var $temp$topicId = topicId,
+							$temp$boxId = boxId,
+							$temp$assocIds_ = ids,
+							$temp$model = model;
+						topicId = $temp$topicId;
+						boxId = $temp$boxId;
+						assocIds_ = $temp$assocIds_;
+						model = $temp$model;
+						continue findHierarchy;
+					}
+				} else {
+					return $elm$core$Maybe$Nothing;
 				}
 			}
-		}();
-		var boxId = $author$project$Box$firstId(boxPath);
-		var _v1 = A4(render, topic, props, boxPath, model);
-		var style = _v1.a;
-		var children = _v1.b;
-		return A2(
-			$elm$html$Html$div,
-			_Utils_ap(
-				A2($author$project$Map$topicAttr, topic.aK, boxPath),
-				_Utils_ap(
-					A2($author$project$Feature$MouseAPI$hoverHandler, topic.aK, boxPath),
-					_Utils_ap(
-						A2($author$project$Feature$MouseAPI$mouseDownHandler, topic.aK, boxPath),
-						_Utils_ap(
-							A3($author$project$Map$topicStyle, topic.aK, boxId, model),
-							style)))),
-			_Utils_ap(
-				children,
-				A3($author$project$Feature$ToolAPI$viewItemTools, topic.aK, boxPath, model)));
+		}
 	});
-var $author$project$Map$whiteBoxTopic = F4(
-	function (topic, props, boxPath, model) {
-		var _v0 = A4($author$project$Map$labelTopic, topic, props, boxPath, model);
-		var style = _v0.a;
-		var children = _v0.b;
+var $author$project$Box$hierarchyAssoc = F3(
+	function (topicId, boxId, model) {
+		var _v0 = A2($author$project$Topic$fromId, topicId, model);
+		if (_v0.$ === 'Just') {
+			var topic = _v0.a;
+			return A4($author$project$Box$findHierarchy, topicId, boxId, topic.assocIds, model);
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'Box.hierarchyAssoc',
+				{boxId: boxId, topicId: topicId},
+				$elm$core$Maybe$Nothing);
+		}
+	});
+var $author$project$Box$removeItem = F3(
+	function (itemId, boxId, model) {
+		var _v0 = A2($author$project$Box$byId, boxId, model);
+		if (_v0.$ === 'Just') {
+			var box = _v0.a;
+			return _Utils_update(
+				model,
+				{
+					itemSets: A3(
+						$elm$core$Dict$update,
+						box.itemSetId,
+						function (maybeItemSet) {
+							if (maybeItemSet.$ === 'Just') {
+								var itemSet = maybeItemSet.a;
+								return $elm$core$Maybe$Just(
+									_Utils_update(
+										itemSet,
+										{
+											items: A2(
+												$elm$core$List$filter,
+												function (setItem) {
+													return !_Utils_eq(setItem.id, itemId);
+												},
+												itemSet.items)
+										}));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						},
+						model.itemSets)
+				});
+		} else {
+			return model;
+		}
+	});
+var $author$project$Box$removeAssoc = F3(
+	function (assocId, boxId, model) {
+		return A3(
+			$author$project$Box$removeItem,
+			$author$project$ModelBase$A(assocId),
+			boxId,
+			model);
+	});
+var $author$project$Box$removeAssocs = F3(
+	function (topic, boxId, model) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (assocId, modelAcc) {
+					return A3($author$project$Box$removeAssoc, assocId, boxId, modelAcc);
+				}),
+			model,
+			topic.assocIds);
+	});
+var $author$project$Box$removeTopic = F3(
+	function (topicId, boxId, model) {
+		var _v0 = _Utils_Tuple2(
+			A2($author$project$Topic$fromId, topicId, model),
+			A3($author$project$Box$hierarchyAssoc, topicId, boxId, model));
+		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+			var topic = _v0.a.a;
+			var assocId = _v0.b.a;
+			return A2(
+				$author$project$Box$deleteAssoc,
+				assocId,
+				A3(
+					$author$project$Box$removeAssocs,
+					topic,
+					boxId,
+					A3(
+						$author$project$Box$removeItem,
+						$author$project$ModelBase$T(topicId),
+						boxId,
+						model)));
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'Box.removeTopic',
+				{boxId: boxId, topicId: topicId},
+				model);
+		}
+	});
+var $author$project$Feature$Sel$select = F3(
+	function (itemId, boxPath, model) {
+		var _v0 = A2(
+			$author$project$Utils$info,
+			'Feature.Sel.select',
+			_Utils_Tuple2(itemId, boxPath));
+		return A2(
+			$author$project$Feature$Sel$setItems,
+			_List_fromArray(
+				[
+					_Utils_Tuple2(itemId, boxPath)
+				]),
+			model);
+	});
+var $author$project$TopicMap$ViewProps$setTopicPos = F4(
+	function (topicId, mapId, pos, model) {
+		return A4(
+			$author$project$TopicMap$ViewProps$updateTopicPos,
+			topicId,
+			mapId,
+			function (_v0) {
+				return pos;
+			},
+			model);
+	});
+var $author$project$Main$moveTopicToBox = F6(
+	function (topicId, boxId, origPos, targetTopicId, targetPath, _v0) {
+		var model = _v0.model;
+		var ext = _v0.ext;
+		var targetBoxId = $author$project$ModelBase$BoxId(targetTopicId);
+		var expansion = A3($author$project$Box$expansionOf, topicId, boxId, model);
+		return A4(
+			ext.addTopic,
+			topicId,
+			targetBoxId,
+			$author$project$ModelBase$Random,
+			A4(
+				$author$project$TopicMap$ViewProps$setTopicPos,
+				topicId,
+				boxId,
+				origPos,
+				A3(
+					$author$project$Feature$Sel$select,
+					$author$project$ModelBase$T(targetTopicId),
+					targetPath,
+					A3(
+						$author$project$Box$removeTopic,
+						topicId,
+						boxId,
+						A3(
+							$author$project$Box$addTopic,
+							A2($author$project$ModelBase$BoxTopic, topicId, expansion),
+							targetBoxId,
+							A2($author$project$Feature$Tool$createBoxOnDemand, targetTopicId, model))))));
+	});
+var $elm_community$undo_redo$UndoList$new = F2(
+	function (event, _v0) {
+		var past = _v0.past;
+		var present = _v0.present;
+		return A3(
+			$elm_community$undo_redo$UndoList$UndoList,
+			A2($elm$core$List$cons, present, past),
+			event,
+			_List_Nil);
+	});
+var $author$project$Undo$push = F2(
+	function (undoModel, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
 		return _Utils_Tuple2(
-			style,
-			_Utils_ap(
-				children,
-				_Utils_ap(
-					A3($author$project$Map$viewItemCount, topic.aK, props, model),
+			A2($elm_community$undo_redo$UndoList$new, model, undoModel),
+			cmd);
+	});
+var $author$project$Main$select = F3(
+	function (itemId, boxPath, model) {
+		return _Utils_Tuple2(
+			A3($author$project$Feature$Sel$select, itemId, boxPath, model),
+			$elm$core$Platform$Cmd$none);
+	});
+var $author$project$Feature$ToolDef$encodeLineStyle = function (lineStyle) {
+	return $elm$json$Json$Encode$string(
+		function () {
+			if (lineStyle.$ === 'Cornered') {
+				return 'Cornered';
+			} else {
+				return 'Straight';
+			}
+		}());
+};
+var $author$project$Feature$ToolDef$encode = function (model) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'lineStyle',
+				$author$project$Feature$ToolDef$encodeLineStyle(model.lineStyle))
+			]));
+};
+var $author$project$ModelBase$encodeBoxId = function (id) {
+	return $elm$json$Json$Encode$int(
+		$author$project$ModelBase$toBoxId(id));
+};
+var $author$project$ModelBase$encodeTopicId = function (id) {
+	return $elm$json$Json$Encode$int(
+		$author$project$ModelBase$toTopicId(id));
+};
+var $author$project$TopicList$TopicListDef$encodeTopicList = function (list) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'id',
+				$author$project$ModelBase$encodeBoxId(list.id)),
+				_Utils_Tuple2(
+				'order',
+				A2($elm$json$Json$Encode$list, $author$project$ModelBase$encodeTopicId, list.order)),
+				_Utils_Tuple2(
+				'size',
+				$elm$json$Json$Encode$object(
 					_List_fromArray(
 						[
-							A3($author$project$Map$view, topic.aK, boxPath, model)
+							_Utils_Tuple2(
+							'w',
+							$elm$json$Json$Encode$int(list.size.w)),
+							_Utils_Tuple2(
+							'h',
+							$elm$json$Json$Encode$int(list.size.h))
+						])))
+			]));
+};
+var $elm$core$Dict$values = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $author$project$TopicList$TopicListDef$encode = function (model) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'viewProps',
+				A2(
+					$elm$json$Json$Encode$list,
+					$author$project$TopicList$TopicListDef$encodeTopicList,
+					$elm$core$Dict$values(model.viewProps)))
+			]));
+};
+var $author$project$TopicMap$TopicMapDef$encodeMapTopic = function (topic) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'id',
+				$elm$json$Json$Encode$int(
+					$author$project$ModelBase$toTopicId(topic.id))),
+				_Utils_Tuple2(
+				'pos',
+				$elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'x',
+							$elm$json$Json$Encode$int(topic.pos.x)),
+							_Utils_Tuple2(
+							'y',
+							$elm$json$Json$Encode$int(topic.pos.y))
+						])))
+			]));
+};
+var $author$project$TopicMap$TopicMapDef$encodeTopicMap = function (map) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'id',
+				$author$project$ModelBase$encodeBoxId(map.id)),
+				_Utils_Tuple2(
+				'rect',
+				$elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'x1',
+							$elm$json$Json$Encode$int(map.rect.x1)),
+							_Utils_Tuple2(
+							'y1',
+							$elm$json$Json$Encode$int(map.rect.y1)),
+							_Utils_Tuple2(
+							'x2',
+							$elm$json$Json$Encode$int(map.rect.x2)),
+							_Utils_Tuple2(
+							'y2',
+							$elm$json$Json$Encode$int(map.rect.y2))
+						]))),
+				_Utils_Tuple2(
+				'scroll',
+				$elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'x',
+							$elm$json$Json$Encode$int(map.scroll.x)),
+							_Utils_Tuple2(
+							'y',
+							$elm$json$Json$Encode$int(map.scroll.y))
+						]))),
+				_Utils_Tuple2(
+				'topics',
+				A2(
+					$elm$json$Json$Encode$list,
+					$author$project$TopicMap$TopicMapDef$encodeMapTopic,
+					$elm$core$Dict$values(map.topics)))
+			]));
+};
+var $author$project$TopicMap$TopicMapDef$encode = function (model) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'viewProps',
+				A2(
+					$elm$json$Json$Encode$list,
+					$author$project$TopicMap$TopicMapDef$encodeTopicMap,
+					$elm$core$Dict$values(model.viewProps)))
+			]));
+};
+var $author$project$ModelBase$encodeAssocId = function (id) {
+	return $elm$json$Json$Encode$int(
+		$author$project$ModelBase$toAssocId(id));
+};
+var $author$project$ModelBase$encodeAssocType = function (assocType) {
+	return $elm$json$Json$Encode$string(
+		function () {
+			if (assocType.$ === 'Association') {
+				return 'Association';
+			} else {
+				return 'Hierarchy';
+			}
+		}());
+};
+var $author$project$ModelBase$encodeAssoc = function (_v0) {
+	var id = _v0.id;
+	var assocType = _v0.assocType;
+	var topicId1 = _v0.topicId1;
+	var topicId2 = _v0.topicId2;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'id',
+				$author$project$ModelBase$encodeAssocId(id)),
+				_Utils_Tuple2(
+				'type',
+				$author$project$ModelBase$encodeAssocType(assocType)),
+				_Utils_Tuple2(
+				'topicId1',
+				$author$project$ModelBase$encodeTopicId(topicId1)),
+				_Utils_Tuple2(
+				'topicId2',
+				$author$project$ModelBase$encodeTopicId(topicId2))
+			]));
+};
+var $author$project$ModelBase$encodeExpansion = function (expansion) {
+	return $elm$json$Json$Encode$string(
+		function () {
+			if (expansion.$ === 'Collapsed') {
+				return 'Collapsed';
+			} else {
+				return 'Expanded';
+			}
+		}());
+};
+var $author$project$ModelBase$encodeBoxTopic = function (topic) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'id',
+				$author$project$ModelBase$encodeTopicId(topic.id)),
+				_Utils_Tuple2(
+				'expansion',
+				$author$project$ModelBase$encodeExpansion(topic.expansion))
+			]));
+};
+var $author$project$Extension$encodeRenderer = A2($elm$core$Basics$composeR, $author$project$Extension$toString, $elm$json$Json$Encode$string);
+var $author$project$ModelBase$encodeBox = function (box) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'id',
+				$author$project$ModelBase$encodeBoxId(box.id)),
+				_Utils_Tuple2(
+				'itemSetId',
+				$elm$json$Json$Encode$int(box.itemSetId)),
+				_Utils_Tuple2(
+				'topics',
+				A2(
+					$elm$json$Json$Encode$list,
+					$author$project$ModelBase$encodeBoxTopic,
+					$elm$core$Dict$values(box.topics))),
+				_Utils_Tuple2(
+				'renderer',
+				$author$project$Extension$encodeRenderer(box.renderer))
+			]));
+};
+var $author$project$ModelBase$encodeSetItem = function (setItem) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				function () {
+				var _v0 = setItem.id;
+				if (_v0.$ === 'T') {
+					var id = _v0.a.a;
+					return _Utils_Tuple2(
+						'topicId',
+						$elm$json$Json$Encode$int(id));
+				} else {
+					var id = _v0.a.a;
+					return _Utils_Tuple2(
+						'assocId',
+						$elm$json$Json$Encode$int(id));
+				}
+			}()
+			]));
+};
+var $author$project$ModelBase$encodeItemSet = function (itemSet) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'id',
+				$elm$json$Json$Encode$int(itemSet.id)),
+				_Utils_Tuple2(
+				'items',
+				A2($elm$json$Json$Encode$list, $author$project$ModelBase$encodeSetItem, itemSet.items))
+			]));
+};
+var $author$project$ModelBase$encodeTextSize = function (size) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'view',
+				$elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'w',
+							$elm$json$Json$Encode$int(size.view.w)),
+							_Utils_Tuple2(
+							'h',
+							$elm$json$Json$Encode$int(size.view.h))
+						]))),
+				_Utils_Tuple2(
+				'editor',
+				$elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'w',
+							$elm$json$Json$Encode$int(size.editor.w)),
+							_Utils_Tuple2(
+							'h',
+							$elm$json$Json$Encode$int(size.editor.h))
+						])))
+			]));
+};
+var $author$project$ModelBase$encodeTopic = function (_v0) {
+	var id = _v0.id;
+	var icon = _v0.icon;
+	var text = _v0.text;
+	var size = _v0.size;
+	var assocIds = _v0.assocIds;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'id',
+				$author$project$ModelBase$encodeTopicId(id)),
+				_Utils_Tuple2(
+				'icon',
+				$elm$json$Json$Encode$string(
+					A2($elm$core$Maybe$withDefault, '', icon))),
+				_Utils_Tuple2(
+				'text',
+				$elm$json$Json$Encode$string(text)),
+				_Utils_Tuple2(
+				'size',
+				$author$project$ModelBase$encodeTextSize(size)),
+				_Utils_Tuple2(
+				'assocIds',
+				A2(
+					$elm$json$Json$Encode$list,
+					A2($elm$core$Basics$composeR, $author$project$ModelBase$toAssocId, $elm$json$Json$Encode$int),
+					assocIds))
+			]));
+};
+var $author$project$Model$encode = function (model) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'topics',
+				A2(
+					$elm$json$Json$Encode$list,
+					$author$project$ModelBase$encodeTopic,
+					$elm$core$Dict$values(model.topics))),
+				_Utils_Tuple2(
+				'assocs',
+				A2(
+					$elm$json$Json$Encode$list,
+					$author$project$ModelBase$encodeAssoc,
+					$elm$core$Dict$values(model.assocs))),
+				_Utils_Tuple2(
+				'itemSets',
+				A2(
+					$elm$json$Json$Encode$list,
+					$author$project$ModelBase$encodeItemSet,
+					$elm$core$Dict$values(model.itemSets))),
+				_Utils_Tuple2(
+				'boxes',
+				A2(
+					$elm$json$Json$Encode$list,
+					$author$project$ModelBase$encodeBox,
+					$elm$core$Dict$values(model.boxes))),
+				_Utils_Tuple2(
+				'boxId',
+				$author$project$ModelBase$encodeBoxId(model.boxId)),
+				_Utils_Tuple2(
+				'nextId',
+				$elm$json$Json$Encode$int(model.nextId)),
+				_Utils_Tuple2(
+				'topicMap',
+				$author$project$TopicMap$TopicMapDef$encode(model.topicMap)),
+				_Utils_Tuple2(
+				'topicList',
+				$author$project$TopicList$TopicListDef$encode(model.topicList)),
+				_Utils_Tuple2(
+				'tool',
+				$author$project$Feature$ToolDef$encode(model.tool))
+			]));
+};
+var $author$project$Storage$storeModel = _Platform_outgoingPort('storeModel', $elm$core$Basics$identity);
+var $author$project$Storage$storeCmd = function (model) {
+	return $author$project$Storage$storeModel(
+		$author$project$Model$encode(model));
+};
+var $author$project$Storage$store = function (model) {
+	return _Utils_Tuple2(
+		model,
+		$author$project$Storage$storeCmd(model));
+};
+var $author$project$Storage$storeWith = function (_v0) {
+	var model = _v0.a;
+	var cmd = _v0.b;
+	return _Utils_Tuple2(
+		model,
+		$elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[
+					cmd,
+					$author$project$Storage$storeCmd(model)
+				])));
+};
+var $elm_community$undo_redo$UndoList$mapPresent = F2(
+	function (f, _v0) {
+		var past = _v0.past;
+		var present = _v0.present;
+		var future = _v0.future;
+		return A3(
+			$elm_community$undo_redo$UndoList$UndoList,
+			past,
+			f(present),
+			future);
+	});
+var $author$project$Undo$swap = F2(
+	function (undoModel, _v0) {
+		var model = _v0.a;
+		var cmd = _v0.b;
+		return _Utils_Tuple2(
+			A2(
+				$elm_community$undo_redo$UndoList$mapPresent,
+				function (_v1) {
+					return model;
+				},
+				undoModel),
+			cmd);
+	});
+var $author$project$Feature$Icon$setIcon = F2(
+	function (iconName, model) {
+		var _v0 = $author$project$Feature$Sel$single(model);
+		if ((_v0.$ === 'Just') && (_v0.a.a.$ === 'T')) {
+			var _v1 = _v0.a;
+			var topicId = _v1.a.a;
+			return A3(
+				$author$project$Topic$update,
+				topicId,
+				function (topic) {
+					return _Utils_update(
+						topic,
+						{icon: iconName});
+				},
+				model);
+		} else {
+			return model;
+		}
+	});
+var $author$project$Feature$Icon$update = F2(
+	function (msg, undoModel) {
+		var present = undoModel.present;
+		var maybeIcon = msg.a;
+		return A2(
+			$author$project$Undo$push,
+			undoModel,
+			$author$project$Storage$store(
+				$author$project$Feature$Icon$closePicker(
+					A2($author$project$Feature$Icon$setIcon, maybeIcon, present))));
+	});
+var $author$project$Feature$MouseDef$DragInProgress = F2(
+	function (a, b) {
+		return {$: 'DragInProgress', a: a, b: b};
+	});
+var $author$project$Feature$Mouse$setDragState = F2(
+	function (dragState, model) {
+		var mouse = model.mouse;
+		return _Utils_update(
+			model,
+			{
+				mouse: _Utils_update(
+					mouse,
+					{dragState: dragState})
+			});
+	});
+var $author$project$Feature$Mouse$updateHover = F3(
+	function (_v0, ext, model) {
+		var x = _v0.x;
+		var y = _v0.y;
+		var pos = A2($author$project$ModelBase$Point, x, y - $author$project$Config$appHeaderHeight);
+		var excludeTopicId = function () {
+			var _v1 = model.mouse.dragState;
+			if (_v1.$ === 'DragInProgress') {
+				var topicId = _v1.a;
+				return $elm$core$Maybe$Just(topicId);
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		}();
+		var maybeTarget = A5(ext.hitTest, model.boxId, _List_Nil, pos, excludeTopicId, model);
+		return A2($author$project$Feature$Mouse$setHover, maybeTarget, model);
+	});
+var $author$project$Feature$Mouse$update = F2(
+	function (msg, env) {
+		var model = env.model;
+		var undoModel = env.undoModel;
+		var ext = env.ext;
+		var _v0 = _Utils_Tuple2(msg, model.mouse.dragState);
+		switch (_v0.a.$) {
+			case 'DragStart':
+				var _v1 = _v0.a;
+				var topicId = _v1.a;
+				var boxPath = _v1.b;
+				var _v2 = _v1.c;
+				var pos = _v2.a;
+				var pointerType = _v2.b;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					A5(
+						ext.dragStart,
+						topicId,
+						boxPath,
+						pos,
+						pointerType,
+						A2(
+							$author$project$Feature$Mouse$setDragState,
+							A2(
+								$author$project$Feature$MouseDef$DragInProgress,
+								topicId,
+								$author$project$Box$firstId(boxPath)),
+							model)));
+			case 'Move':
+				if (_v0.b.$ === 'NoDrag') {
+					var _v3 = _v0.a.a;
+					var pos = _v3.a;
+					var pointerType = _v3.b;
+					var _v4 = _v0.b;
+					return A2(
+						$author$project$Undo$swap,
+						undoModel,
+						function (model_) {
+							return A2($elm$core$Tuple$pair, model_, $elm$core$Platform$Cmd$none);
+						}(
+							A3($author$project$Feature$Mouse$updateHover, pos, ext, model)));
+				} else {
+					var _v5 = _v0.a.a;
+					var pos = _v5.a;
+					var pointerType = _v5.b;
+					var _v6 = _v0.b;
+					var topicId = _v6.a;
+					var boxId = _v6.b;
+					return A2(
+						$author$project$Undo$swap,
+						undoModel,
+						A3(
+							ext.drag,
+							boxId,
+							pos,
+							A3($author$project$Feature$Mouse$updateHover, pos, ext, model)));
+				}
+			case 'Up':
+				if (_v0.b.$ === 'DragInProgress') {
+					var _v7 = _v0.a;
+					var _v8 = _v0.b;
+					var topicId = _v8.a;
+					var boxId = _v8.b;
+					return A2(
+						$author$project$Undo$swap,
+						undoModel,
+						A2(
+							ext.dragStop,
+							boxId,
+							A2($author$project$Feature$Mouse$setDragState, $author$project$Feature$MouseDef$NoDrag, model)));
+				} else {
+					return _Utils_Tuple2(undoModel, $elm$core$Platform$Cmd$none);
+				}
+			default:
+				var _v9 = _v0.a;
+				return _Utils_Tuple2(
+					undoModel,
+					$author$project$Utils$command(
+						$author$project$Model$Cancel($elm$core$Maybe$Nothing)));
+		}
+	});
+var $author$project$Feature$Nav$boxIdFromHash = function (hash) {
+	var _v0 = $elm$core$String$isEmpty(hash);
+	if (_v0) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var _v1 = A2($elm$core$String$startsWith, '#', hash);
+		if (_v1) {
+			var _v2 = $elm$core$String$toInt(
+				A2($elm$core$String$dropLeft, 1, hash));
+			if (_v2.$ === 'Just') {
+				var boxId = _v2.a;
+				return $elm$core$Maybe$Just(
+					$author$project$ModelBase$BoxId(
+						$author$project$ModelBase$TopicId(boxId)));
+			} else {
+				return A3($author$project$Utils$logError, 'boxIdFromHash', 'not a number after hash in \"' + (hash + '\"'), $elm$core$Maybe$Nothing);
+			}
+		} else {
+			return A3($author$project$Utils$logError, 'boxIdFromHash', '\"' + (hash + '\" is not a hash'), $elm$core$Maybe$Nothing);
+		}
+	}
+};
+var $author$project$Feature$Nav$setHash = _Platform_outgoingPort('setHash', $elm$json$Json$Encode$string);
+var $author$project$Feature$Nav$pushUrl = function (boxId) {
+	return $author$project$Feature$Nav$setHash(
+		'#' + $elm$core$String$fromInt(
+			$author$project$ModelBase$toBoxId(boxId)));
+};
+var $elm$browser$Browser$Dom$setViewportOf = _Browser_setViewportOf;
+var $author$project$Feature$Nav$setViewport = function (model) {
+	var _v0 = $author$project$TopicMap$ViewProps$fullscreen(model);
+	if (_v0.$ === 'Just') {
+		var map = _v0.a;
+		return A2(
+			$elm$core$Task$attempt,
+			function (result) {
+				if (result.$ === 'Ok') {
+					return $author$project$Model$NoOp;
+				} else {
+					var e = result.a;
+					return A3(
+						$author$project$Utils$logError,
+						'setViewport',
+						$author$project$Utils$toString(e),
+						$author$project$Model$NoOp);
+				}
+			},
+			A3($elm$browser$Browser$Dom$setViewportOf, 'main', map.scroll.x, map.scroll.y));
+	} else {
+		return A3($author$project$Utils$fail, 'setViewport', model.boxId, $elm$core$Platform$Cmd$none);
+	}
+};
+var $author$project$Feature$Nav$setFullscreenBox = F2(
+	function (boxId, env) {
+		var model = env.model;
+		var newModel = _Utils_update(
+			model,
+			{boxId: boxId});
+		return _Utils_Tuple2(
+			A2($author$project$Env$autoSize, env, newModel),
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						$author$project$Feature$Nav$setViewport(newModel),
+						$author$project$Utils$command(
+						$author$project$Model$Cancel($elm$core$Maybe$Nothing))
+					])));
+	});
+var $author$project$Feature$Nav$hashChanged = F2(
+	function (hash, env) {
+		var model = env.model;
+		var undoModel = env.undoModel;
+		var _v0 = $author$project$Feature$Nav$boxIdFromHash(hash);
+		if (_v0.$ === 'Just') {
+			var boxId = _v0.a;
+			return $author$project$Undo$reset(
+				$author$project$Storage$storeWith(
+					A2($author$project$Feature$Nav$setFullscreenBox, boxId, env)));
+		} else {
+			var _v1 = A2(
+				$author$project$Utils$info,
+				'hashChanged',
+				'No hash -> redirect to ' + $elm$core$String$fromInt(
+					$author$project$ModelBase$toBoxId(model.boxId)));
+			return _Utils_Tuple2(
+				undoModel,
+				$author$project$Feature$Nav$pushUrl(model.boxId));
+		}
+	});
+var $author$project$Feature$Nav$update = F2(
+	function (msg, env) {
+		var hash = msg.a;
+		return A2($author$project$Feature$Nav$hashChanged, hash, env);
+	});
+var $author$project$Feature$SearchDef$Topics = F2(
+	function (a, b) {
+		return {$: 'Topics', a: a, b: b};
+	});
+var $author$project$Feature$Search$isMatch = F2(
+	function (text, searchTerm) {
+		return (!$elm$core$String$isEmpty(searchTerm)) && A2(
+			$elm$core$String$contains,
+			$elm$core$String$toLower(searchTerm),
+			$elm$core$String$toLower(text));
+	});
+var $author$project$Feature$Search$searchTopics = function (model) {
+	var topicIds = A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (id, _v0, idAcc) {
+				var text = _v0.text;
+				return A2($author$project$Feature$Search$isMatch, text, model.search.term) ? A2(
+					$elm$core$List$cons,
+					$author$project$ModelBase$TopicId(id),
+					idAcc) : idAcc;
+			}),
+		_List_Nil,
+		model.topics);
+	return A2(
+		$author$project$Feature$Search$setResult,
+		A2($author$project$Feature$SearchDef$Topics, topicIds, $elm$core$Maybe$Nothing),
+		model);
+};
+var $author$project$Feature$Search$onInputFocused = $author$project$Feature$Search$searchTopics;
+var $author$project$Feature$SearchDef$RelTopics = F2(
+	function (a, b) {
+		return {$: 'RelTopics', a: a, b: b};
+	});
+var $author$project$Feature$Search$onRelTopicHovered = F2(
+	function (relTopicId, env) {
+		var model = env.model;
+		var _v0 = model.search.result;
+		if (_v0.$ === 'RelTopics') {
+			var relTopicIds = _v0.a;
+			return A2(
+				$author$project$Env$autoSize,
+				env,
+				A2(
+					$author$project$Feature$Search$setResult,
+					A2(
+						$author$project$Feature$SearchDef$RelTopics,
+						relTopicIds,
+						$elm$core$Maybe$Just(relTopicId)),
+					model));
+		} else {
+			return A3($author$project$Utils$logError, 'Search.onRelTopicHovered', 'search.result is not RelTopics', model);
+		}
+	});
+var $author$project$Feature$Search$onRelTopicUnhovered = function (env) {
+	var model = env.model;
+	var _v0 = model.search.result;
+	if (_v0.$ === 'RelTopics') {
+		var relTopicIds = _v0.a;
+		return A2(
+			$author$project$Env$autoSize,
+			env,
+			A2(
+				$author$project$Feature$Search$setResult,
+				A2($author$project$Feature$SearchDef$RelTopics, relTopicIds, $elm$core$Maybe$Nothing),
+				model));
+	} else {
+		return A3($author$project$Utils$logError, 'Search.onRelTopicUnhovered', 'search.result is not RelTopics', model);
+	}
+};
+var $author$project$Feature$Search$onTopicHovered = F2(
+	function (topicId, env) {
+		var model = env.model;
+		var _v0 = model.search.result;
+		if (_v0.$ === 'Topics') {
+			var topicIds = _v0.a;
+			return A2(
+				$author$project$Env$autoSize,
+				env,
+				A2(
+					$author$project$Feature$Search$setResult,
+					A2(
+						$author$project$Feature$SearchDef$Topics,
+						topicIds,
+						$elm$core$Maybe$Just(topicId)),
+					model));
+		} else {
+			return A3($author$project$Utils$logError, 'Search.onTopicHovered', 'search.result is not Topics', model);
+		}
+	});
+var $author$project$Feature$Search$onTopicUnhovered = function (env) {
+	var model = env.model;
+	var _v0 = model.search.result;
+	if (_v0.$ === 'Topics') {
+		var topicIds = _v0.a;
+		return A2(
+			$author$project$Env$autoSize,
+			env,
+			A2(
+				$author$project$Feature$Search$setResult,
+				A2($author$project$Feature$SearchDef$Topics, topicIds, $elm$core$Maybe$Nothing),
+				model));
+	} else {
+		return A3($author$project$Utils$logError, 'Search.onTopicUnhovered', 'search.result is not Topics', model);
+	}
+};
+var $author$project$Feature$Search$revealAssoc_ = F3(
+	function (assocId, boxId, model) {
+		return A3($author$project$Box$addAssoc, assocId, boxId, model);
+	});
+var $author$project$ModelBase$Default = {$: 'Default'};
+var $author$project$Feature$Search$revealTopic_ = F4(
+	function (topicId, boxId, _v0, model) {
+		var ext = _v0.ext;
+		return A4(
+			ext.addTopic,
+			topicId,
+			boxId,
+			$author$project$ModelBase$Default,
+			A3(
+				$author$project$Box$addTopic,
+				A2($author$project$ModelBase$BoxTopic, topicId, $author$project$ModelBase$Collapsed),
+				boxId,
+				model)).a;
+	});
+var $author$project$Feature$Search$revealRelTopic = F2(
+	function (_v0, env) {
+		var topicId = _v0.a;
+		var assocId = _v0.b;
+		var model = env.model;
+		var _v1 = $author$project$TopicMap$ViewProps$revelationBoxPath(model);
+		if ((_v1.$ === 'Just') && _v1.a.b) {
+			var boxPath = _v1.a;
+			var boxId = boxPath.a;
+			return A2(
+				$author$project$Env$autoSize,
+				env,
+				A3(
+					$author$project$Feature$Sel$select,
+					$author$project$ModelBase$T(topicId),
+					boxPath,
+					$author$project$Feature$Search$closeMenu(
+						A3(
+							$author$project$Feature$Search$revealAssoc_,
+							assocId,
+							boxId,
+							A4($author$project$Feature$Search$revealTopic_, topicId, boxId, env, model)))));
+		} else {
+			return model;
+		}
+	});
+var $author$project$Feature$Search$revealTopic = F2(
+	function (topicId, env) {
+		var model = env.model;
+		var _v0 = $author$project$TopicMap$ViewProps$revelationBoxPath(model);
+		if ((_v0.$ === 'Just') && _v0.a.b) {
+			var boxPath = _v0.a;
+			var boxId = boxPath.a;
+			return A2(
+				$author$project$Env$autoSize,
+				env,
+				A3(
+					$author$project$Feature$Sel$select,
+					$author$project$ModelBase$T(topicId),
+					boxPath,
+					$author$project$Feature$Search$closeMenu(
+						A4($author$project$Feature$Search$revealTopic_, topicId, boxId, env, model))));
+		} else {
+			return model;
+		}
+	});
+var $author$project$Feature$Search$setTerm = F2(
+	function (term, model) {
+		var search = model.search;
+		return _Utils_update(
+			model,
+			{
+				search: _Utils_update(
+					search,
+					{term: term})
+			});
+	});
+var $author$project$Feature$Search$setSearchTerm = F2(
+	function (term, model) {
+		return $author$project$Feature$Search$searchTopics(
+			A2($author$project$Feature$Search$setTerm, term, model));
+	});
+var $author$project$Feature$Search$update = F2(
+	function (msg, env) {
+		var model = env.model;
+		var undoModel = env.undoModel;
+		switch (msg.$) {
+			case 'Input':
+				var term = msg.a;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						A2($author$project$Feature$Search$setSearchTerm, term, model),
+						$elm$core$Platform$Cmd$none));
+			case 'InputFocused':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						$author$project$Feature$Search$onInputFocused(model),
+						$elm$core$Platform$Cmd$none));
+			case 'TopicHovered':
+				var topicId = msg.a;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						A2($author$project$Feature$Search$onTopicHovered, topicId, env),
+						$elm$core$Platform$Cmd$none));
+			case 'TopicUnhovered':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						$author$project$Feature$Search$onTopicUnhovered(env),
+						$elm$core$Platform$Cmd$none));
+			case 'TopicClicked':
+				var topicId = msg.a;
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$store(
+						A2($author$project$Feature$Search$revealTopic, topicId, env)));
+			case 'RelTopicHovered':
+				var relTopicId = msg.a;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						A2($author$project$Feature$Search$onRelTopicHovered, relTopicId, env),
+						$elm$core$Platform$Cmd$none));
+			case 'RelTopicUnhovered':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						$author$project$Feature$Search$onRelTopicUnhovered(env),
+						$elm$core$Platform$Cmd$none));
+			case 'RelTopicClicked':
+				var relTopicId = msg.a;
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$store(
+						A2($author$project$Feature$Search$revealRelTopic, relTopicId, env)));
+			default:
+				var boxId = msg.a;
+				return _Utils_Tuple2(
+					undoModel,
+					$author$project$Feature$Nav$pushUrl(boxId));
+		}
+	});
+var $author$project$Feature$Text$addToImageCache = F3(
+	function (imageId, url, model) {
+		var text = model.text;
+		return _Utils_update(
+			model,
+			{
+				text: _Utils_update(
+					text,
+					{
+						imageCache: A3($elm$core$Dict$insert, imageId, url, text.imageCache)
+					})
+			});
+	});
+var $author$project$ModelBase$Editor = {$: 'Editor'};
+var $author$project$Feature$Text$setMeasureText = F2(
+	function (text_, model) {
+		var text = model.text;
+		return _Utils_update(
+			model,
+			{
+				text: _Utils_update(
+					text,
+					{measure: text_})
+			});
+	});
+var $author$project$Feature$Text$measureText = F3(
+	function (topicId, text, model) {
+		return _Utils_Tuple2(
+			A2($author$project$Feature$Text$setMeasureText, text, model),
+			A3($author$project$Feature$Text$measureElement, 'measure', topicId, $author$project$ModelBase$Editor));
+	});
+var $author$project$Feature$Text$setTopicText = F3(
+	function (topicId, text, model) {
+		return A3(
+			$author$project$Topic$update,
+			topicId,
+			function (topic) {
+				return _Utils_update(
+					topic,
+					{text: text});
+			},
+			model);
+	});
+var $author$project$Feature$Text$insertImage = F3(
+	function (topicId, imageId, model) {
+		var _v0 = A2($author$project$Topic$fromId, topicId, model);
+		if (_v0.$ === 'Just') {
+			var text = _v0.a.text;
+			var image = '![image](app://image/' + ($elm$core$String$fromInt(imageId) + ')');
+			var newText = _Utils_ap(text, image);
+			return A3(
+				$author$project$Feature$Text$measureText,
+				topicId,
+				newText,
+				A3($author$project$Feature$Text$setTopicText, topicId, newText, model));
+		} else {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Feature$Text$onTextInput = F2(
+	function (text, model) {
+		var _v0 = model.text.edit;
+		if (_v0.$ === 'Edit') {
+			var topicId = _v0.a;
+			return A3($author$project$Feature$Text$setTopicText, topicId, text, model);
+		} else {
+			return A3($author$project$Utils$logError, 'Feature.Text.onTextInput', 'called when text.edit is NoEdit', model);
+		}
+	});
+var $author$project$Feature$Text$onTextareaInput = F2(
+	function (text, model) {
+		var _v0 = model.text.edit;
+		if (_v0.$ === 'Edit') {
+			var topicId = _v0.a;
+			return A3(
+				$author$project$Feature$Text$measureText,
+				topicId,
+				text,
+				A3($author$project$Feature$Text$setTopicText, topicId, text, model));
+		} else {
+			return A3(
+				$author$project$Utils$logError,
+				'Feature.Text.onTextareaInput',
+				'called when text.edit is NoEdit',
+				_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
+		}
+	});
+var $author$project$Topic$setSize = F4(
+	function (topicId, sizeField, size_, model) {
+		return A3(
+			$author$project$Topic$update,
+			topicId,
+			function (topic) {
+				var size__ = topic.size;
+				return _Utils_update(
+					topic,
+					{
+						size: function () {
+							if (sizeField.$ === 'View') {
+								return _Utils_update(
+									size__,
+									{
+										view: _Utils_update(
+											size_,
+											{w: size_.w - $author$project$Config$topicHeight})
+									});
+							} else {
+								return _Utils_update(
+									size__,
+									{editor: size_});
+							}
+						}()
+					});
+			},
+			model);
+	});
+var $author$project$Feature$Text$update = F2(
+	function (msg, env) {
+		var model = env.model;
+		var undoModel = env.undoModel;
+		var ext = env.ext;
+		switch (msg.$) {
+			case 'OnTextInput':
+				var text = msg.a;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Storage$store(
+						A2($author$project$Feature$Text$onTextInput, text, model)));
+			case 'OnTextareaInput':
+				var text = msg.a;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Storage$storeWith(
+						A2($author$project$Feature$Text$onTextareaInput, text, model)));
+			case 'GotTextSize':
+				var topicId = msg.a;
+				var sizeField = msg.b;
+				var size = msg.c;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Storage$store(
+						A2(
+							$author$project$Env$autoSize,
+							env,
+							A4(
+								$author$project$Topic$setSize,
+								$author$project$ModelBase$TopicId(topicId),
+								sizeField,
+								size,
+								model))));
+			case 'LeaveEdit':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Feature$Text$leaveEdit(env));
+			case 'ImageFilePicked':
+				var topicId = msg.a.topicId;
+				var imageId = msg.a.imageId;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					A3($author$project$Feature$Text$insertImage, topicId, imageId, model));
+			default:
+				var _v1 = msg.a;
+				var imageId = _v1.a;
+				var url = _v1.b;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						A3($author$project$Feature$Text$addToImageCache, imageId, url, model),
+						$elm$core$Platform$Cmd$none));
+		}
+	});
+var $author$project$Topic$create_ = F2(
+	function (topic, model) {
+		var topics = model.topics;
+		return _Utils_update(
+			model,
+			{
+				topics: A3(
+					$elm$core$Dict$insert,
+					$author$project$ModelBase$toTopicId(topic.id),
+					topic,
+					topics)
+			});
+	});
+var $author$project$Config$topicDetailSize = A2(
+	$author$project$ModelBase$Size,
+	$author$project$Config$topicWidth - $author$project$Config$topicHeight,
+	$elm$core$Basics$round(($author$project$Config$topicLineHeight * $author$project$Config$contentFontSize) + (2 * ($author$project$Config$topicDetailPadding + $author$project$Config$topicBorderWidth))));
+var $author$project$Topic$create = F3(
+	function (text, icon, model) {
+		var id = $author$project$ModelBase$TopicId(model.nextId);
+		var topic = A5(
+			$author$project$ModelBase$Topic,
+			id,
+			icon,
+			text,
+			A2($author$project$ModelBase$TextSize, $author$project$Config$topicDetailSize, $author$project$Config$topicDetailSize),
+			_List_Nil);
+		return _Utils_Tuple2(
+			$author$project$Model$nextId(
+				A2($author$project$Topic$create_, topic, model)),
+			id);
+	});
+var $author$project$Config$initTopicIcon = $elm$core$Maybe$Just('circle');
+var $elm$browser$Browser$Dom$focus = _Browser_call('focus');
+var $author$project$Feature$Text$focus = function (model) {
+	var elemId = function () {
+		var _v1 = model.text.edit;
+		if (_v1.$ === 'Edit') {
+			var id = _v1.a;
+			var boxPath = _v1.b;
+			return A3($author$project$Box$elemId, 'input', id, boxPath);
+		} else {
+			return A3($author$project$Utils$logError, 'Feature.Text.focus', 'called when text.edit is NoEdit', '');
+		}
+	}();
+	return A2(
+		$elm$core$Task$attempt,
+		function (result) {
+			if (result.$ === 'Ok') {
+				return $author$project$Model$NoOp;
+			} else {
+				var e = result.a;
+				return A3(
+					$author$project$Utils$logError,
+					'Feature.Text.focus',
+					$author$project$Utils$toString(e),
+					$author$project$Model$NoOp);
+			}
+		},
+		$elm$browser$Browser$Dom$focus(elemId));
+};
+var $author$project$Box$updateExpansion = F4(
+	function (topicId, boxId, transform, model) {
+		return _Utils_update(
+			model,
+			{
+				boxes: A3(
+					$elm$core$Dict$update,
+					$author$project$ModelBase$toBoxId(boxId),
+					function (maybeBox) {
+						if (maybeBox.$ === 'Just') {
+							var box = maybeBox.a;
+							return $elm$core$Maybe$Just(
+								_Utils_update(
+									box,
+									{
+										topics: A3(
+											$elm$core$Dict$update,
+											$author$project$ModelBase$toTopicId(topicId),
+											function (maybeTopic) {
+												if (maybeTopic.$ === 'Just') {
+													var topic = maybeTopic.a;
+													return $elm$core$Maybe$Just(
+														_Utils_update(
+															topic,
+															{
+																expansion: transform(topic.expansion)
+															}));
+												} else {
+													return $elm$core$Maybe$Nothing;
+												}
+											},
+											box.topics)
+									}));
+						} else {
+							return $elm$core$Maybe$Nothing;
+						}
+					},
+					model.boxes)
+			});
+	});
+var $author$project$Feature$Text$switchTopicDisplay = F3(
+	function (topicId, boxId, model) {
+		return A4(
+			$author$project$Box$updateExpansion,
+			topicId,
+			boxId,
+			function (expansion) {
+				return A2($author$project$Topic$isBox, topicId, model) ? expansion : $author$project$ModelBase$Expanded;
+			},
+			model);
+	});
+var $author$project$Feature$Text$enterEdit = F3(
+	function (topicId, boxPath, env) {
+		var model = env.model;
+		var newModel = A2(
+			$author$project$Env$autoSize,
+			env,
+			A3(
+				$author$project$Feature$Text$switchTopicDisplay,
+				topicId,
+				$author$project$Box$firstId(boxPath),
+				A2(
+					$author$project$Feature$Text$setEditState,
+					A2($author$project$Feature$TextDef$Edit, topicId, boxPath),
+					model)));
+		return _Utils_Tuple2(
+			newModel,
+			$author$project$Feature$Text$focus(newModel));
+	});
+var $author$project$Feature$Tool$landTopic = F2(
+	function (topicId, env) {
+		var model = env.model;
+		var ext = env.ext;
+		var boxPath = $author$project$Feature$Sel$landingBoxPath(model);
+		var boxId = $author$project$Box$firstId(boxPath);
+		return A3(
+			$author$project$Feature$Text$enterEdit,
+			topicId,
+			boxPath,
+			A2(
+				$author$project$Env$withModel,
+				env,
+				A3(
+					$author$project$Feature$Sel$select,
+					$author$project$ModelBase$T(topicId),
+					boxPath,
+					A4(
+						ext.addTopic,
+						topicId,
+						boxId,
+						$author$project$ModelBase$Default,
+						A3(
+							$author$project$Box$addTopic,
+							A2($author$project$ModelBase$BoxTopic, topicId, $author$project$ModelBase$Collapsed),
+							boxId,
+							model)).a)));
+	});
+var $author$project$Feature$Tool$createTopic = function (env) {
+	var model = env.model;
+	var _v0 = A3($author$project$Topic$create, '', $author$project$Config$initTopicIcon, model);
+	var newModel = _v0.a;
+	var topicId = _v0.b;
+	var newEnv = A2($author$project$Env$withModel, env, newModel);
+	return A2($author$project$Feature$Tool$landTopic, topicId, newEnv);
+};
+var $author$project$Box$deleteTopic_ = F2(
+	function (topicId, model) {
+		var itemSets = model.itemSets;
+		var topicMap = model.topicMap;
+		return _Utils_update(
+			model,
+			{
+				itemSets: A2(
+					$elm$core$Dict$map,
+					F2(
+						function (_v0, itemSet) {
+							var items = itemSet.items;
+							return _Utils_update(
+								itemSet,
+								{
+									items: A2(
+										$elm$core$List$filter,
+										function (setItem) {
+											return !_Utils_eq(
+												setItem.id,
+												$author$project$ModelBase$T(topicId));
+										},
+										items)
+								});
+						}),
+					itemSets),
+				topicMap: _Utils_update(
+					topicMap,
+					{
+						viewProps: A2(
+							$elm$core$Dict$map,
+							F2(
+								function (_v1, map) {
+									return _Utils_update(
+										map,
+										{
+											topics: A2(
+												$elm$core$Dict$remove,
+												$author$project$ModelBase$toTopicId(topicId),
+												map.topics)
+										});
+								}),
+							topicMap.viewProps)
+					}),
+				topics: A2(
+					$elm$core$Dict$remove,
+					$author$project$ModelBase$toTopicId(topicId),
+					model.topics)
+			});
+	});
+var $author$project$Box$deleteTopic = F2(
+	function (topicId, model) {
+		var _v0 = A2($author$project$Topic$fromId, topicId, model);
+		if (_v0.$ === 'Just') {
+			var topic = _v0.a;
+			return A2(
+				$author$project$Box$deleteTopic_,
+				topicId,
+				A3($elm$core$List$foldr, $author$project$Box$deleteAssoc, model, topic.assocIds));
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'Box.deleteTopic',
+				{topicId: topicId},
+				model);
+		}
+	});
+var $author$project$Feature$Tool$delete_ = F2(
+	function (itemId, model) {
+		if (itemId.$ === 'T') {
+			var id = itemId.a;
+			return A2($author$project$Box$deleteTopic, id, model);
+		} else {
+			var id = itemId.a;
+			return A2($author$project$Box$deleteAssoc, id, model);
+		}
+	});
+var $author$project$Feature$Tool$delete = function (env) {
+	var model = env.model;
+	return A2(
+		$author$project$Env$autoSize,
+		env,
+		$author$project$Feature$Sel$clear(
+			A3(
+				$elm$core$List$foldr,
+				$author$project$Feature$Tool$delete_,
+				model,
+				A2($elm$core$List$map, $elm$core$Tuple$first, model.selection.items))));
+};
+var $author$project$Feature$Tool$edit = function (env) {
+	var model = env.model;
+	var _v0 = $author$project$Feature$Sel$single(model);
+	if ((_v0.$ === 'Just') && (_v0.a.a.$ === 'T')) {
+		var _v1 = _v0.a;
+		var id = _v1.a.a;
+		var boxPath = _v1.b;
+		return A3($author$project$Feature$Text$enterEdit, id, boxPath, env);
+	} else {
+		return A3(
+			$author$project$Utils$logError,
+			'Feature.Tool.edit',
+			'called when there is no single topic selection',
+			_Utils_Tuple2(model, $elm$core$Platform$Cmd$none));
+	}
+};
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $author$project$Storage$exportJSON = _Platform_outgoingPort(
+	'exportJSON',
+	function ($) {
+		return $elm$json$Json$Encode$null;
+	});
+var $author$project$Feature$Tool$fullscreen = F2(
+	function (topicId, model) {
+		return _Utils_Tuple2(
+			A2($author$project$Feature$Tool$createBoxOnDemand, topicId, model),
+			$author$project$Feature$Nav$pushUrl(
+				$author$project$ModelBase$BoxId(topicId)));
+	});
+var $author$project$Storage$importJSON = _Platform_outgoingPort(
+	'importJSON',
+	function ($) {
+		return $elm$json$Json$Encode$null;
+	});
+var $author$project$Feature$Text$imageFilePicker = _Platform_outgoingPort('imageFilePicker', $elm$core$Basics$identity);
+var $author$project$Feature$Text$openImageFilePicker = F2(
+	function (_v0, model) {
+		var topicId = _v0.a;
+		var imageId = model.nextId;
+		return _Utils_Tuple2(
+			$author$project$Model$nextId(model),
+			$author$project$Feature$Text$imageFilePicker(
+				$elm$json$Json$Encode$object(
+					_List_fromArray(
+						[
+							_Utils_Tuple2(
+							'topicId',
+							$elm$json$Json$Encode$int(topicId)),
+							_Utils_Tuple2(
+							'imageId',
+							$elm$json$Json$Encode$int(imageId))
 						]))));
 	});
+var $author$project$Feature$Tool$openMenu = function (model) {
+	return A2($author$project$Feature$Tool$setMenu, true, model);
+};
+var $author$project$Feature$IconDef$Open = {$: 'Open'};
+var $author$project$Feature$Icon$openPicker = function (model) {
+	var icon = model.icon;
+	return _Utils_update(
+		model,
+		{
+			icon: _Utils_update(
+				icon,
+				{picker: $author$project$Feature$IconDef$Open})
+		});
+};
+var $elm_community$undo_redo$UndoList$redo = function (_v0) {
+	var past = _v0.past;
+	var present = _v0.present;
+	var future = _v0.future;
+	if (!future.b) {
+		return A3($elm_community$undo_redo$UndoList$UndoList, past, present, future);
+	} else {
+		var x = future.a;
+		var xs = future.b;
+		return A3(
+			$elm_community$undo_redo$UndoList$UndoList,
+			A2($elm$core$List$cons, present, past),
+			x,
+			xs);
+	}
+};
+var $author$project$Undo$redo = function (undoModel) {
+	return $elm_community$undo_redo$UndoList$redo(undoModel);
+};
+var $author$project$Feature$Tool$remove_ = F2(
+	function (_v0, model) {
+		var itemId = _v0.a;
+		var boxPath = _v0.b;
+		var boxId = $author$project$Box$firstId(boxPath);
+		if (itemId.$ === 'T') {
+			var id = itemId.a;
+			return A3($author$project$Box$removeTopic, id, boxId, model);
+		} else {
+			var id = itemId.a;
+			return A3($author$project$Box$removeAssoc, id, boxId, model);
+		}
+	});
+var $author$project$Feature$Tool$remove = function (env) {
+	var model = env.model;
+	return A2(
+		$author$project$Env$autoSize,
+		env,
+		$author$project$Feature$Sel$clear(
+			A3($elm$core$List$foldr, $author$project$Feature$Tool$remove_, model, model.selection.items)));
+};
+var $author$project$Feature$Tool$setLineStyle = F2(
+	function (lineStyle, model) {
+		var tool = model.tool;
+		return _Utils_update(
+			model,
+			{
+				tool: _Utils_update(
+					tool,
+					{lineStyle: lineStyle})
+			});
+	});
+var $author$project$Box$setRenderer = F3(
+	function (boxId, renderer, model) {
+		var boxes = model.boxes;
+		return _Utils_update(
+			model,
+			{
+				boxes: A3(
+					$elm$core$Dict$update,
+					$author$project$ModelBase$toBoxId(boxId),
+					function (maybeBox) {
+						if (maybeBox.$ === 'Just') {
+							var box = maybeBox.a;
+							return $elm$core$Maybe$Just(
+								_Utils_update(
+									box,
+									{renderer: renderer}));
+						} else {
+							return $elm$core$Maybe$Nothing;
+						}
+					},
+					boxes)
+			});
+	});
+var $author$project$Feature$Tool$setRenderer = F2(
+	function (renderer, env) {
+		var model = env.model;
+		var ext = env.ext;
+		var _v0 = $author$project$Feature$Sel$single(model);
+		if ((_v0.$ === 'Just') && (_v0.a.a.$ === 'T')) {
+			var _v1 = _v0.a;
+			var topicId = _v1.a.a;
+			var boxId = $author$project$ModelBase$BoxId(topicId);
+			return A2(
+				$author$project$Env$autoSize,
+				env,
+				A2(
+					ext.init,
+					boxId,
+					A3($author$project$Box$setRenderer, boxId, renderer, model)));
+		} else {
+			return A3($author$project$Utils$logError, 'Feature.Tool.setRenderer', 'called when there is no single topic selection', model);
+		}
+	});
+var $author$project$Feature$Tool$store = function (undoModel) {
+	return _Utils_Tuple2(
+		undoModel,
+		$author$project$Storage$storeCmd(undoModel.present));
+};
+var $author$project$Feature$Tool$toggleExpansion = F3(
+	function (topicId, boxId, env) {
+		var model = env.model;
+		return A2(
+			$author$project$Env$autoSize,
+			env,
+			A4(
+				$author$project$Box$updateExpansion,
+				topicId,
+				boxId,
+				function (expansion) {
+					if (expansion.$ === 'Collapsed') {
+						return $author$project$ModelBase$Expanded;
+					} else {
+						return $author$project$ModelBase$Collapsed;
+					}
+				},
+				model));
+	});
+var $author$project$Assoc$relatedTopics = F2(
+	function (topicId, model) {
+		var _v0 = A2($author$project$Topic$fromId, topicId, model);
+		if (_v0.$ === 'Just') {
+			var topic = _v0.a;
+			return A3(
+				$elm$core$List$foldr,
+				F2(
+					function (assocId, acc) {
+						var _v1 = A3($author$project$Assoc$otherTopicId, assocId, topicId, model);
+						if (_v1.$ === 'Just') {
+							var id = _v1.a;
+							return A2(
+								$elm$core$List$cons,
+								_Utils_Tuple2(id, assocId),
+								acc);
+						} else {
+							return acc;
+						}
+					}),
+				_List_Nil,
+				topic.assocIds);
+		} else {
+			return A3(
+				$author$project$Utils$fail,
+				'Assoc.relatedTopics',
+				{topicId: topicId},
+				_List_Nil);
+		}
+	});
+var $author$project$Feature$Search$traverse = function (model) {
+	var relTopicIds = function () {
+		var _v0 = $author$project$Feature$Sel$single(model);
+		if ((_v0.$ === 'Just') && (_v0.a.a.$ === 'T')) {
+			var _v1 = _v0.a;
+			var id = _v1.a.a;
+			return A2($author$project$Assoc$relatedTopics, id, model);
+		} else {
+			return _List_Nil;
+		}
+	}();
+	return A2(
+		$author$project$Feature$Search$setResult,
+		A2($author$project$Feature$SearchDef$RelTopics, relTopicIds, $elm$core$Maybe$Nothing),
+		model);
+};
+var $elm_community$undo_redo$UndoList$undo = function (_v0) {
+	var past = _v0.past;
+	var present = _v0.present;
+	var future = _v0.future;
+	if (!past.b) {
+		return A3($elm_community$undo_redo$UndoList$UndoList, past, present, future);
+	} else {
+		var x = past.a;
+		var xs = past.b;
+		return A3(
+			$elm_community$undo_redo$UndoList$UndoList,
+			xs,
+			x,
+			A2($elm$core$List$cons, present, future));
+	}
+};
+var $author$project$Undo$undo = function (undoModel) {
+	return $elm_community$undo_redo$UndoList$undo(undoModel);
+};
+var $author$project$Feature$Tool$update = F2(
+	function (msg, env) {
+		var model = env.model;
+		var undoModel = env.undoModel;
+		switch (msg.$) {
+			case 'Home':
+				return _Utils_Tuple2(
+					undoModel,
+					$author$project$Feature$Nav$pushUrl($author$project$ModelBase$rootBoxId));
+			case 'Menu':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						$author$project$Feature$Tool$openMenu(model),
+						$elm$core$Platform$Cmd$none));
+			case 'Set':
+				var lineStyle = msg.a;
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$store(
+						A2($author$project$Feature$Tool$setLineStyle, lineStyle, model)));
+			case 'Import':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						model,
+						$author$project$Storage$importJSON(_Utils_Tuple0)));
+			case 'Export':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						model,
+						$author$project$Storage$exportJSON(_Utils_Tuple0)));
+			case 'CreateTopic':
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$storeWith(
+						$author$project$Feature$Tool$createTopic(env)));
+			case 'Undo':
+				return $author$project$Feature$Tool$store(
+					$author$project$Undo$undo(undoModel));
+			case 'Redo':
+				return $author$project$Feature$Tool$store(
+					$author$project$Undo$redo(undoModel));
+			case 'Edit':
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$storeWith(
+						$author$project$Feature$Tool$edit(env)));
+			case 'Icon':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						$author$project$Feature$Icon$openPicker(model),
+						$elm$core$Platform$Cmd$none));
+			case 'Traverse':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						$author$project$Feature$Search$traverse(model),
+						$elm$core$Platform$Cmd$none));
+			case 'Delete':
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$store(
+						$author$project$Feature$Tool$delete(env)));
+			case 'Remove':
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$store(
+						$author$project$Feature$Tool$remove(env)));
+			case 'Fullscreen':
+				var topicId = msg.a;
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$storeWith(
+						A2($author$project$Feature$Tool$fullscreen, topicId, model)));
+			case 'RendererSelected':
+				var renderer = msg.a;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Storage$store(
+						A2($author$project$Feature$Tool$setRenderer, renderer, env)));
+			case 'ToggleExpansion':
+				var topicId = msg.a;
+				var boxId = msg.b;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Storage$store(
+						A3($author$project$Feature$Tool$toggleExpansion, topicId, boxId, env)));
+			case 'Image':
+				var topicId = msg.a;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Storage$storeWith(
+						A2($author$project$Feature$Text$openImageFilePicker, topicId, model)));
+			default:
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Feature$Text$leaveEdit(env));
+		}
+	});
+var $author$project$TopicMap$ViewProps$addTopic__ = F3(
+	function (topicId, pos, map) {
+		return _Utils_update(
+			map,
+			{
+				topics: A3(
+					$elm$core$Dict$insert,
+					$author$project$ModelBase$toTopicId(topicId),
+					A3($author$project$TopicMap$TopicMapDef$TopicProps, topicId, pos, $author$project$ModelBase$Collapsed),
+					map.topics)
+			});
+	});
+var $author$project$TopicMap$ViewProps$addTopic_ = F4(
+	function (topicId, mapId, pos, env) {
+		var model = env.model;
+		return A2(
+			$author$project$Env$autoSize,
+			env,
+			A3(
+				$author$project$TopicMap$ViewProps$updateTopicMap,
+				mapId,
+				A2($author$project$TopicMap$ViewProps$addTopic__, topicId, pos),
+				model));
+	});
+var $author$project$TopicMap$TopicMapDef$DragEngaged = F4(
+	function (a, b, c, d) {
+		return {$: 'DragEngaged', a: a, b: b, c: c, d: d};
+	});
+var $author$project$TopicMap$TopicMapDef$DragTopic = {$: 'DragTopic'};
+var $author$project$Config$assocDelayMillis = 200;
+var $author$project$TopicMap$Mouse$timeArrived = F2(
+	function (time, undoModel) {
+		var present = undoModel.present;
+		var _v0 = present.topicMap.dragState;
+		switch (_v0.$) {
+			case 'WaitForStartTime':
+				var id = _v0.a;
+				var boxPath = _v0.b;
+				var pos = _v0.c;
+				var dragState = A4($author$project$TopicMap$TopicMapDef$DragEngaged, time, id, boxPath, pos);
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					_Utils_Tuple2(
+						A2($author$project$TopicMap$Mouse$setDragState, dragState, present),
+						$elm$core$Platform$Cmd$none));
+			case 'WaitForEndTime':
+				var startTime = _v0.a;
+				var id = _v0.b;
+				var boxPath = _v0.c;
+				var pos = _v0.d;
+				var maybeOrigPos = A3(
+					$author$project$TopicMap$ViewProps$topicPos,
+					id,
+					$author$project$Box$firstId(boxPath),
+					present);
+				var delay = $elm$time$Time$posixToMillis(time) - $elm$time$Time$posixToMillis(startTime);
+				var _v1 = function () {
+					var _v2 = _Utils_cmp(delay, $author$project$Config$assocDelayMillis) > 0;
+					if (_v2) {
+						return _Utils_Tuple2($author$project$TopicMap$TopicMapDef$DraftAssoc, $author$project$Undo$swap);
+					} else {
+						return _Utils_Tuple2($author$project$TopicMap$TopicMapDef$DragTopic, $author$project$Undo$push);
+					}
+				}();
+				var dragMode = _v1.a;
+				var undo = _v1.b;
+				var dragState = function () {
+					if (maybeOrigPos.$ === 'Just') {
+						var origPos = maybeOrigPos.a;
+						return A6($author$project$TopicMap$TopicMapDef$Drag, dragMode, id, boxPath, origPos, pos, $elm$core$Maybe$Nothing);
+					} else {
+						return $author$project$TopicMap$TopicMapDef$NoDrag;
+					}
+				}();
+				return A2(
+					undo,
+					undoModel,
+					_Utils_Tuple2(
+						A2($author$project$TopicMap$Mouse$setDragState, dragState, present),
+						$elm$core$Platform$Cmd$none));
+			default:
+				return A3(
+					$author$project$Utils$logError,
+					'TopicMap.Mouse.timeArrived',
+					'Received Time when dragState is not WaitFor..Time',
+					_Utils_Tuple2(undoModel, $elm$core$Platform$Cmd$none));
+		}
+	});
+var $author$project$TopicMap$Controller$update = F2(
+	function (msg, env) {
+		var model = env.model;
+		var undoModel = env.undoModel;
+		if (msg.$ === 'Time') {
+			var time = msg.a;
+			return A2($author$project$TopicMap$Mouse$timeArrived, time, undoModel);
+		} else {
+			var topicId = msg.a;
+			var mapId = msg.b;
+			var pos = msg.c;
+			return A2(
+				$author$project$Undo$push,
+				undoModel,
+				$author$project$Storage$store(
+					A4($author$project$TopicMap$ViewProps$addTopic_, topicId, mapId, pos, env)));
+		}
+	});
+var $author$project$TopicMap$ViewProps$updateScrollPos = F3(
+	function (mapId, transform, model) {
+		return A3(
+			$author$project$TopicMap$ViewProps$updateTopicMap,
+			mapId,
+			function (map) {
+				return _Utils_update(
+					map,
+					{
+						scroll: transform(map.scroll)
+					});
+			},
+			model);
+	});
+var $author$project$Main$updateScrollPos = F2(
+	function (pos, model) {
+		return A3(
+			$author$project$TopicMap$ViewProps$updateScrollPos,
+			model.boxId,
+			function (_v0) {
+				return pos;
+			},
+			model);
+	});
+var $author$project$Main$update = F2(
+	function (msg, undoModel) {
+		var present = undoModel.present;
+		var env = {ext: $author$project$ExtManager$ext, model: present, undoModel: undoModel};
+		var _v0 = function () {
+			if ((msg.$ === 'Mouse') && (msg.a.$ === 'Move')) {
+				return msg;
+			} else {
+				return A2($author$project$Utils$info, 'Main.update', msg);
+			}
+		}();
+		switch (msg.$) {
+			case 'CreateAssoc':
+				var topicId1 = msg.a;
+				var topicId2 = msg.b;
+				var boxId = msg.c;
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$store(
+						A4($author$project$Main$createAssoc, topicId1, topicId2, boxId, present)));
+			case 'TopicDropped':
+				var topicId = msg.a;
+				var boxId = msg.b;
+				var origPos = msg.c;
+				var targetId = msg.d;
+				var targetPath = msg.e;
+				return A2(
+					$author$project$Undo$push,
+					undoModel,
+					$author$project$Storage$storeWith(
+						A6($author$project$Main$moveTopicToBox, topicId, boxId, origPos, targetId, targetPath, env)));
+			case 'TopicDragged':
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Storage$store(present));
+			case 'ItemClicked':
+				var itemId = msg.a;
+				var boxPath = msg.b;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					A3($author$project$Main$select, itemId, boxPath, present));
+			case 'Cancel':
+				var maybeTarget = msg.a;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					A2($author$project$Main$cancelUI, maybeTarget, env));
+			case 'TopicMap':
+				var topicMapMsg = msg.a;
+				return A2($author$project$TopicMap$Controller$update, topicMapMsg, env);
+			case 'Tool':
+				var toolMsg = msg.a;
+				return A2($author$project$Feature$Tool$update, toolMsg, env);
+			case 'Text':
+				var textMsg = msg.a;
+				return A2($author$project$Feature$Text$update, textMsg, env);
+			case 'Mouse':
+				var mouseMsg = msg.a;
+				return A2($author$project$Feature$Mouse$update, mouseMsg, env);
+			case 'Search':
+				var searchMsg = msg.a;
+				return A2($author$project$Feature$Search$update, searchMsg, env);
+			case 'Icon':
+				var iconMenuMsg = msg.a;
+				return A2($author$project$Feature$Icon$update, iconMenuMsg, undoModel);
+			case 'Nav':
+				var navMsg = msg.a;
+				return A2($author$project$Feature$Nav$update, navMsg, env);
+			case 'Scrolled':
+				var pos = msg.a;
+				return A2(
+					$author$project$Undo$swap,
+					undoModel,
+					$author$project$Storage$store(
+						A2($author$project$Main$updateScrollPos, pos, present)));
+			default:
+				return _Utils_Tuple2(undoModel, $elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$AppEmbed$updateWithEvidence = F2(
+	function (msg, undoModel) {
+		var _v0 = A2($author$project$Main$update, msg, undoModel);
+		var newUndo = _v0.a;
+		var cmd = _v0.b;
+		return _Utils_Tuple2(
+			newUndo,
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						cmd,
+						A3($author$project$AppEmbed$semanticEvidence, msg, undoModel, newUndo)
+					])));
+	});
+var $author$project$Main$appStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'display', 'flex'),
+		A2($elm$html$Html$Attributes$style, 'flex-direction', 'column'),
+		A2($elm$html$Html$Attributes$style, 'height', '100%'),
+		A2($elm$html$Html$Attributes$style, 'font-family', $author$project$Config$mainFont),
+		A2($elm$html$Html$Attributes$style, 'user-select', 'none'),
+		A2($elm$html$Html$Attributes$style, '-webkit-user-select', 'none')
+	]);
+var $author$project$Feature$MouseDef$Cancel = {$: 'Cancel'};
+var $author$project$Feature$MouseDef$Move = function (a) {
+	return {$: 'Move', a: a};
+};
+var $author$project$Feature$MouseDef$Up = {$: 'Up'};
+var $author$project$Shared$Events$globalMouseHandler = _List_fromArray(
+	[
+		A2(
+		$elm$html$Html$Events$on,
+		'pointermove',
+		A2(
+			$elm$json$Json$Decode$map,
+			A2($elm$core$Basics$composeL, $author$project$Model$Mouse, $author$project$Feature$MouseDef$Move),
+			$author$project$Shared$Events$pointDecoder)),
+		A2(
+		$elm$html$Html$Events$on,
+		'pointerup',
+		$elm$json$Json$Decode$succeed(
+			$author$project$Model$Mouse($author$project$Feature$MouseDef$Up))),
+		A2(
+		$elm$html$Html$Events$on,
+		'pointerdown',
+		$elm$json$Json$Decode$succeed(
+			$author$project$Model$Mouse($author$project$Feature$MouseDef$Cancel)))
+	]);
+var $author$project$Main$mainStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'position', 'relative'),
+		A2($elm$html$Html$Attributes$style, 'flex-grow', '1'),
+		A2($elm$html$Html$Attributes$style, 'overflow', 'auto')
+	]);
+var $author$project$Main$measureStyle = _List_fromArray(
+	[
+		A2($elm$html$Html$Attributes$style, 'position', 'fixed'),
+		A2($elm$html$Html$Attributes$style, 'visibility', 'hidden'),
+		A2($elm$html$Html$Attributes$style, 'white-space', 'pre-wrap'),
+		A2($elm$html$Html$Attributes$style, 'font-family', $author$project$Config$editorFont),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'font-size',
+		$elm$core$String$fromInt($author$project$Config$contentFontSize) + 'px'),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'line-height',
+		$elm$core$String$fromFloat($author$project$Config$topicLineHeight)),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'padding',
+		$elm$core$String$fromInt($author$project$Config$topicDetailPadding) + 'px'),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'width',
+		$elm$core$String$fromInt($author$project$Config$topicDetailMaxWidth) + 'px'),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'min-width',
+		$elm$core$String$fromInt($author$project$Config$topicSize.w - $author$project$Config$topicSize.h) + 'px'),
+		A2($elm$html$Html$Attributes$style, 'max-width', 'max-content'),
+		A2(
+		$elm$html$Html$Attributes$style,
+		'border-width',
+		$elm$core$String$fromInt($author$project$Config$topicBorderWidth) + 'px'),
+		A2($elm$html$Html$Attributes$style, 'border-style', 'solid'),
+		A2($elm$html$Html$Attributes$style, 'box-sizing', 'border-box')
+	]);
+var $author$project$Main$viewMeasure = function (model) {
+	return A2(
+		$elm$html$Html$div,
+		_Utils_ap(
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$id('measure')
+				]),
+			$author$project$Main$measureStyle),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(model.text.measure),
+				A2($elm$html$Html$br, _List_Nil, _List_Nil)
+			]));
+};
 var $author$project$AppEmbed$view = function (undo) {
-	var model = undo.aw;
-	var currentBoxId = model.a4;
-	return A3($author$project$Map$view, currentBoxId, _List_Nil, model);
+	var model = undo.present;
+	return A2(
+		$elm$html$Html$div,
+		_Utils_ap($author$project$Shared$Events$globalMouseHandler, $author$project$Main$appStyle),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_Utils_ap(
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$id('main')
+						]),
+					$author$project$Main$mainStyle),
+				_List_fromArray(
+					[
+						A3($author$project$ExtManager$ext.view, model.boxId, _List_Nil, model)
+					])),
+				$author$project$Main$viewMeasure(model)
+			]));
 };
 var $author$project$AppEmbed$main = $elm$browser$Browser$element(
-	{dj: $author$project$AppEmbed$init, dU: $author$project$AppEmbed$subscriptions, dZ: $author$project$AppEmbed$updateWithEvidence, d_: $author$project$AppEmbed$view});
+	{init: $author$project$AppEmbed$init, subscriptions: $author$project$AppEmbed$subscriptions, update: $author$project$AppEmbed$updateWithEvidence, view: $author$project$AppEmbed$view});
 _Platform_export({'AppEmbed':{'init':$author$project$AppEmbed$main($elm$json$Json$Decode$value)(0)}});}(this));
