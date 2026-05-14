@@ -141,6 +141,17 @@
                                        (:file "projection-pipeline-operator")
                                        (:file "metagraph-fluree-examples")))))
 
+(defsystem #:hyperdoc/codex
+    :description "Codex collaboration home topic for HyperDoc"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "codex")))))
+
 (defsystem #:hyperdoc/shop3
     :description "SHOP3-backed HTN planning layer for HyperDoc operations"
     :author "Ralf Barkow <ralf.barkow@me.com>"
@@ -488,6 +499,18 @@
                                        (:file "check-runner")
                                        (:file "hyperdoc")
                                        (:file "page-lookup-rebuild-gate")))))
+
+(defsystem #:hyperdoc/codex/explorer
+    :description "Explorer views for the Codex collaboration home topic"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/codex
+                 #:hyperdoc/explorer)
+    :components ((:module "hyperdoc-explorer"
+                  :serial t
+                  :components ((:file "codex")))))
 
 (defsystem #:hyperdoc/explorer/examples/ops
     :description "Explorer views for HyperDoc ops/local examples"
