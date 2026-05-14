@@ -4,7 +4,7 @@
     "maxFileSize": 2000000
   },
   "output": {
-    "filePath": "repomix-output-hyperdoc.core.md",
+    "filePath": "repomix-output-hyperdoc.dmx.md",
     "style": "markdown",
     "parsableStyle": false,
     "compress": false,
@@ -22,25 +22,19 @@
     }
   },
   "include": [
-    "README.md",
     "AGENTS.md",
-    "AUTHORS",
-    "LICENSE",
-    "*.asd",
-    "package.json",
-    "flake.nix",
-    "flake.lock",
-    "dev.sh",
-    "start.sh",
-    "hyperbook/**/*.lisp",
-    "hyperbook-explorer/**/*.lisp",
-    "hyperbook-server/**/*.lisp",
-    "hyperdoc/*.lisp",
-    "hyperdoc-explorer/*.lisp",
-    "hyperdoc-inspector/*.lisp",
-    "hyperdoc-scxml/**/*.lisp",
-    "tests/package.lisp",
-    "tests/test-runner.lisp"
+    "README.md",
+    "hyperdoc/dmx-*.lisp",
+    "hyperdoc/dmx-*.scxml",
+    "hyperdoc/dmx-*.html",
+    "hyperdoc/DMX*.html",
+    "hyperdoc/Workspace-native annotations in a DMX workspace.html",
+    "hyperdoc-explorer/dmx-*.lisp",
+    "hyperdoc-inspector/dmx-*.lisp",
+    "tools/dmx-curl/**",
+    "tools/dmx-initial-workspace-assignment-repair-936040/**",
+    "tests/dmx-*.lisp",
+    "tests/projection-pipeline-dmx-annotation-smoke.lisp"
   ],
   "ignore": {
     "useGitignore": true,
@@ -71,10 +65,7 @@
       "**/*.webp",
       "**/*.ico",
       "deps/**/assets/**",
-      "assets/dm6-elm/app.js",
-      "hyperdoc/dmx-annotations.lisp",
-      "tests/dmx-annotations-smoke.lisp",
-      "hyperdoc-inspector/snippet-playground.lisp"
+      "assets/dm6-elm/app.js"
     ]
   },
   "security": {

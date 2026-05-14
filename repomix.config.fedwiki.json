@@ -4,7 +4,7 @@
     "maxFileSize": 2000000
   },
   "output": {
-    "filePath": "repomix-output-hyperdoc.core.md",
+    "filePath": "repomix-output-hyperdoc.fedwiki.md",
     "style": "markdown",
     "parsableStyle": false,
     "compress": false,
@@ -22,25 +22,27 @@
     }
   },
   "include": [
-    "README.md",
     "AGENTS.md",
-    "AUTHORS",
-    "LICENSE",
-    "*.asd",
-    "package.json",
-    "flake.nix",
-    "flake.lock",
-    "dev.sh",
-    "start.sh",
-    "hyperbook/**/*.lisp",
-    "hyperbook-explorer/**/*.lisp",
-    "hyperbook-server/**/*.lisp",
-    "hyperdoc/*.lisp",
-    "hyperdoc-explorer/*.lisp",
-    "hyperdoc-inspector/*.lisp",
-    "hyperdoc-scxml/**/*.lisp",
-    "tests/package.lisp",
-    "tests/test-runner.lisp"
+    "README.md",
+    "hyperbook-fedwiki/**/*.lisp",
+    "hyperdoc/fedwiki-materialization.lisp",
+    "hyperdoc/localhost-fedwiki-page-pipeline.lisp",
+    "hyperdoc/localhost-fedwiki-page-promotion-plans.lisp",
+    "hyperdoc-explorer/localhost-fedwiki-page-promotion-plans.lisp",
+    "hyperdoc-inspector/fedwiki-materialization.lisp",
+    "hyperdoc-inspector/fedwiki-story-item-rendering-demo.lisp",
+    "tools/fedwiki-materialization.lisp",
+    "tools/journal-gate.lisp",
+    "tools/testdata/journal-gate/**",
+    "tests/fedwiki-*.lisp",
+    "tests/localhost-fedwiki-*.lisp",
+    "tests/playwright/fedwiki-*.spec.js",
+    "hyperdoc/FedWiki*.html",
+    "hyperdoc/Localhost FedWiki*.html",
+    "hyperdoc/Story Neighborhood*.html",
+    "hyperdoc/Journal*.html",
+    "hyperdoc/Clickable commit IDs in FedWiki stories.html",
+    "hyperdoc/Graphviz story item upstream assimilation example.html"
   ],
   "ignore": {
     "useGitignore": true,
@@ -71,10 +73,7 @@
       "**/*.webp",
       "**/*.ico",
       "deps/**/assets/**",
-      "assets/dm6-elm/app.js",
-      "hyperdoc/dmx-annotations.lisp",
-      "tests/dmx-annotations-smoke.lisp",
-      "hyperdoc-inspector/snippet-playground.lisp"
+      "assets/dm6-elm/app.js"
     ]
   },
   "security": {

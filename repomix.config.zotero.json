@@ -4,7 +4,7 @@
     "maxFileSize": 2000000
   },
   "output": {
-    "filePath": "repomix-output-hyperdoc.core.md",
+    "filePath": "repomix-output-hyperdoc.zotero.md",
     "style": "markdown",
     "parsableStyle": false,
     "compress": false,
@@ -22,25 +22,19 @@
     }
   },
   "include": [
-    "README.md",
     "AGENTS.md",
-    "AUTHORS",
-    "LICENSE",
-    "*.asd",
-    "package.json",
-    "flake.nix",
-    "flake.lock",
-    "dev.sh",
-    "start.sh",
-    "hyperbook/**/*.lisp",
-    "hyperbook-explorer/**/*.lisp",
-    "hyperbook-server/**/*.lisp",
-    "hyperdoc/*.lisp",
-    "hyperdoc-explorer/*.lisp",
-    "hyperdoc-inspector/*.lisp",
-    "hyperdoc-scxml/**/*.lisp",
-    "tests/package.lisp",
-    "tests/test-runner.lisp"
+    "README.md",
+    "hyperdoc/zotero-*.lisp",
+    "hyperdoc/topic-enrichment*.lisp",
+    "hyperdoc/Zotero*.html",
+    "hyperdoc/*Zotero*.html",
+    "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html",
+    "hyperdoc-inspector/zotero-bridge.lisp",
+    "hyperdoc-inspector/topic-enrichment.lisp",
+    "hyperdoc-explorer/topic-enrichment.lisp",
+    "tests/zotero-*.lisp",
+    "tests/topic-enrichment-smoke.lisp",
+    "tests/playwright/topic-enrichment-runtime-authoring.*"
   ],
   "ignore": {
     "useGitignore": true,
@@ -71,10 +65,7 @@
       "**/*.webp",
       "**/*.ico",
       "deps/**/assets/**",
-      "assets/dm6-elm/app.js",
-      "hyperdoc/dmx-annotations.lisp",
-      "tests/dmx-annotations-smoke.lisp",
-      "hyperdoc-inspector/snippet-playground.lisp"
+      "assets/dm6-elm/app.js"
     ]
   },
   "security": {

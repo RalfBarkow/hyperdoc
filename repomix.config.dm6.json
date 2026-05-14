@@ -4,7 +4,7 @@
     "maxFileSize": 2000000
   },
   "output": {
-    "filePath": "repomix-output-hyperdoc.core.md",
+    "filePath": "repomix-output-hyperdoc.dm6.md",
     "style": "markdown",
     "parsableStyle": false,
     "compress": false,
@@ -22,25 +22,13 @@
     }
   },
   "include": [
-    "README.md",
     "AGENTS.md",
-    "AUTHORS",
-    "LICENSE",
-    "*.asd",
-    "package.json",
-    "flake.nix",
-    "flake.lock",
-    "dev.sh",
-    "start.sh",
-    "hyperbook/**/*.lisp",
-    "hyperbook-explorer/**/*.lisp",
-    "hyperbook-server/**/*.lisp",
-    "hyperdoc/*.lisp",
-    "hyperdoc-explorer/*.lisp",
-    "hyperdoc-inspector/*.lisp",
-    "hyperdoc-scxml/**/*.lisp",
-    "tests/package.lisp",
-    "tests/test-runner.lisp"
+    "README.md",
+    "assets/dm6-elm/**",
+    "hyperdoc/dm6-*.lisp",
+    "hyperdoc/DM6*.html",
+    "hyperdoc/topics/dm6-inline-proof.lisp",
+    "hyperdoc-explorer/dm6-elm-artifact-inspector.lisp"
   ],
   "ignore": {
     "useGitignore": true,
@@ -70,11 +58,7 @@
       "**/*.gif",
       "**/*.webp",
       "**/*.ico",
-      "deps/**/assets/**",
-      "assets/dm6-elm/app.js",
-      "hyperdoc/dmx-annotations.lisp",
-      "tests/dmx-annotations-smoke.lisp",
-      "hyperdoc-inspector/snippet-playground.lisp"
+      "deps/**/assets/**"
     ]
   },
   "security": {

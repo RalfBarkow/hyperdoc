@@ -4,7 +4,7 @@
     "maxFileSize": 2000000
   },
   "output": {
-    "filePath": "repomix-output-hyperdoc.core.md",
+    "filePath": "repomix-output-hyperdoc.dock.md",
     "style": "markdown",
     "parsableStyle": false,
     "compress": false,
@@ -22,25 +22,26 @@
     }
   },
   "include": [
-    "README.md",
     "AGENTS.md",
-    "AUTHORS",
-    "LICENSE",
-    "*.asd",
+    "README.md",
     "package.json",
-    "flake.nix",
-    "flake.lock",
-    "dev.sh",
-    "start.sh",
-    "hyperbook/**/*.lisp",
-    "hyperbook-explorer/**/*.lisp",
-    "hyperbook-server/**/*.lisp",
-    "hyperdoc/*.lisp",
-    "hyperdoc-explorer/*.lisp",
-    "hyperdoc-inspector/*.lisp",
-    "hyperdoc-scxml/**/*.lisp",
-    "tests/package.lisp",
-    "tests/test-runner.lisp"
+    "hyperdoc/dock.lisp",
+    "hyperdoc-explorer/dock.lisp",
+    "hyperdoc/dom-annotations.lisp",
+    "hyperdoc-explorer/dom-annotations.lisp",
+    "assets/hyperdoc/js/dom-annotation-connect.js",
+    "assets/hyperdoc/css/dom-annotation-connect.css",
+    "hyperdoc/Dock capabilities in HyperDoc.html",
+    "hyperdoc/Dock presentation state model.html",
+    "hyperdoc/Dock:coachmark:inspector-tabs UX model.md",
+    "hyperdoc/A DOM-annotation connect gesture.md",
+    "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html",
+    "tests/dock-presentation-smoke.lisp",
+    "tests/dock-annotation-smoke.lisp",
+    "tests/playwright/dock-presentation.spec.js",
+    "tests/playwright/dock-capability-modifier-inspection.spec.js",
+    "tests/playwright/hyperdoc-inspector.js",
+    "tests/playwright/pane-chrome-harness.js"
   ],
   "ignore": {
     "useGitignore": true,
@@ -71,10 +72,7 @@
       "**/*.webp",
       "**/*.ico",
       "deps/**/assets/**",
-      "assets/dm6-elm/app.js",
-      "hyperdoc/dmx-annotations.lisp",
-      "tests/dmx-annotations-smoke.lisp",
-      "hyperdoc-inspector/snippet-playground.lisp"
+      "assets/dm6-elm/app.js"
     ]
   },
   "security": {

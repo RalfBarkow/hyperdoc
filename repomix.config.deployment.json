@@ -4,7 +4,7 @@
     "maxFileSize": 2000000
   },
   "output": {
-    "filePath": "repomix-output-hyperdoc.core.md",
+    "filePath": "repomix-output-hyperdoc.deployment.md",
     "style": "markdown",
     "parsableStyle": false,
     "compress": false,
@@ -22,25 +22,31 @@
     }
   },
   "include": [
-    "README.md",
     "AGENTS.md",
-    "AUTHORS",
-    "LICENSE",
-    "*.asd",
-    "package.json",
+    "README.md",
     "flake.nix",
     "flake.lock",
+    ".envrc",
     "dev.sh",
     "start.sh",
-    "hyperbook/**/*.lisp",
-    "hyperbook-explorer/**/*.lisp",
-    "hyperbook-server/**/*.lisp",
-    "hyperdoc/*.lisp",
-    "hyperdoc-explorer/*.lisp",
-    "hyperdoc-inspector/*.lisp",
-    "hyperdoc-scxml/**/*.lisp",
-    "tests/package.lisp",
-    "tests/test-runner.lisp"
+    "dreyeck/**/*.lisp",
+    "dreyeck.asd",
+    "nix/**",
+    "tools/check-release-doc-runtime.lisp",
+    "tools/install-dreyeck-hyperdoc-mcp-sidecar.sh",
+    "hyperdoc/*dreyeck*.html",
+    "hyperdoc/*Dreyeck*.html",
+    "hyperdoc/*Nix*.html",
+    "hyperdoc/*deployment*.html",
+    "hyperdoc/*Deployment*.html",
+    "hyperdoc/Deploy dreyeck.ch from the local flake.html",
+    "hyperdoc/Deploy or restart dreyeck and confirm live parity.html",
+    "hyperdoc/Detect legacy workspace-checkout hyperdoc.service on dreyeck.ch.html",
+    "hyperdoc/Verify HyperDoc locally before deployment.html",
+    "hyperdoc/Verify HyperDoc on dreyeck.ch.html",
+    "hyperdoc/Live parity evidence.html",
+    "hyperdoc/Restart dreyeck release service.html",
+    "hyperdoc/Roll back HyperDoc on dreyeck.ch.html"
   ],
   "ignore": {
     "useGitignore": true,
@@ -71,10 +77,7 @@
       "**/*.webp",
       "**/*.ico",
       "deps/**/assets/**",
-      "assets/dm6-elm/app.js",
-      "hyperdoc/dmx-annotations.lisp",
-      "tests/dmx-annotations-smoke.lisp",
-      "hyperdoc-inspector/snippet-playground.lisp"
+      "assets/dm6-elm/app.js"
     ]
   },
   "security": {

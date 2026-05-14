@@ -55,6 +55,50 @@ validation flow for that entrypoint. The broader repo-level
 validation check, and that check now reports the semantic-first anchor audit
 explicitly through the same HyperDoc-owned validation report.
 
+## Repomix Context Packs
+
+Repomix snapshots are subsystem-scoped by default. Use the smallest pack that
+matches the task; reserve `full` for intentional whole-project reviews.
+
+| Task | Pack |
+| --- | --- |
+| Project orientation | `core` |
+| Dock, Connect, mobile route-first UI | `dock` |
+| ASDF, test runner, smoke load blockers | `validation` |
+| FedWiki story/materialization/promotion | `fedwiki` |
+| DMX annotation/import/workspace work | `dmx` |
+| dreyeck, Nix, release, deployment | `deployment` |
+| DM6 Elm/app embedding | `dm6` |
+| Zotero and topic enrichment | `zotero` |
+| Whole-repo review | `full` |
+
+Generate a pack with:
+
+```sh
+tools/repomix-pack.sh dock
+```
+
+or explicitly:
+
+```sh
+repomix -c repomix.config.dock.json
+```
+
+Inside the project development shell, the same runner can be invoked as:
+
+```sh
+nix develop --command tools/repomix-pack.sh dock
+```
+
+The runner uses `repomix` from `PATH` first. If it is missing and `nix` is
+available, it falls back to `nix run nixpkgs#repomix`; set
+`HYPERDOC_REPOMIX_DISABLE_NIX_FALLBACK=1` to disable that fallback.
+
+Do not attach the `full` pack for Dock, validation, FedWiki, deployment, DM6,
+DMX, or Zotero slices unless cross-subsystem context is actually needed. Generated
+`repomix-output*.md` and `repomix-output*.xml` files are ignored and should not be
+committed as handoff artifacts.
+
 ## Article Allegation Slice Helper
 
 Use `tools/article-allegation-slice.lisp` to scaffold an article-driven,

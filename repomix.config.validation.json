@@ -4,7 +4,7 @@
     "maxFileSize": 2000000
   },
   "output": {
-    "filePath": "repomix-output-hyperdoc.core.md",
+    "filePath": "repomix-output-hyperdoc.validation.md",
     "style": "markdown",
     "parsableStyle": false,
     "compress": false,
@@ -22,25 +22,18 @@
     }
   },
   "include": [
-    "README.md",
     "AGENTS.md",
-    "AUTHORS",
-    "LICENSE",
+    "README.md",
     "*.asd",
-    "package.json",
-    "flake.nix",
-    "flake.lock",
-    "dev.sh",
-    "start.sh",
-    "hyperbook/**/*.lisp",
-    "hyperbook-explorer/**/*.lisp",
-    "hyperbook-server/**/*.lisp",
-    "hyperdoc/*.lisp",
-    "hyperdoc-explorer/*.lisp",
-    "hyperdoc-inspector/*.lisp",
-    "hyperdoc-scxml/**/*.lisp",
+    "package.lisp",
     "tests/package.lisp",
-    "tests/test-runner.lisp"
+    "tests/test-runner.lisp",
+    "tests/*smoke.lisp",
+    "hyperdoc/check-runner.lisp",
+    "hyperdoc-explorer/check-runner.lisp",
+    "hyperdoc/HyperDoc Test Runner.html",
+    "hyperdoc/ASDF Systems, Examples, and Tests in HyperDoc.html",
+    "hyperdoc/Understanding ASDF Systems in HyperDoc.html"
   ],
   "ignore": {
     "useGitignore": true,
@@ -72,9 +65,9 @@
       "**/*.ico",
       "deps/**/assets/**",
       "assets/dm6-elm/app.js",
-      "hyperdoc/dmx-annotations.lisp",
       "tests/dmx-annotations-smoke.lisp",
-      "hyperdoc-inspector/snippet-playground.lisp"
+      "tests/dmx-mcp-smoke.lisp",
+      "tests/dmx-topic-proxy-smoke.lisp"
     ]
   },
   "security": {

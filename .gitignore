@@ -24,7 +24,8 @@
 .flake-deps/
 node_modules/
 test-results/
-repomix-output-hyperdoc.md
+repomix-output*.md
+repomix-output*.xml
 var/hyperdoc-local-journal/*.json
 target/
 *.class
