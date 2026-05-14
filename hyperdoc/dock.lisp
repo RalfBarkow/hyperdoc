@@ -35,6 +35,164 @@ the primary pane-local object in this slice."))
       (ignore-errors (title-of object))
       (format nil "~A" object)))
 
+(defun station-p (object)
+  (or (typep object 'dom-annotation-anchor)
+      (typep object 'topic)
+      (typep object 'topic-page)
+      (and object
+           (or (ignore-errors (title-of object))
+               (ignore-errors (id-of object))))))
+
+(defun operation-station-p (object)
+  (cond
+    ((typep object 'dom-annotation-anchor)
+     (annotation-target-anchor-p object))
+    ((and object
+          (ignore-errors (eq object (dock-annotation-topic))))
+     t)
+    ((stringp object)
+     (string= object "Annotation"))
+    (t
+     (string= (dock-object-label object) "Annotation"))))
+
+(defun station-title (station)
+  (cond
+    ((typep station 'dom-annotation-anchor)
+     (or (label-of station)
+         (anchor-value-of station)
+         (anchor-object-id-of station)
+         "station"))
+    (t
+     (dock-object-label station))))
+
+(defun station-summary (station)
+  (cond
+    ((typep station 'dom-annotation-anchor)
+     (or (text-snippet-of station)
+         (durability-note-of station)
+         (format nil "Route station anchored by ~A."
+                 (station-title station))))
+    ((ignore-errors (summary-of station)))
+    (t
+     (format nil "Route station ~A." (station-title station)))))
+
+(defun available-destinations (source &key context-object)
+  (declare (ignore context-object))
+  (when (station-p source)
+    nil))
+
+(defun available-operations (source &key context-object context-view-title)
+  (declare (ignore context-object context-view-title))
+  (when (station-p source)
+    (list (dock-annotation-topic))))
+
+(defun route-allowed-p (source destination &key context-object)
+  (declare (ignore context-object))
+  (and (station-p source)
+       (or (station-p destination)
+           (operation-station-p destination))
+       (not (and (typep source 'dom-annotation-anchor)
+                 (typep destination 'dom-annotation-anchor)
+                 (string= (or (anchor-value-of source) "")
+                          (or (anchor-value-of destination) ""))))))
+
+(defun route-safety-level (source destination &key context-object)
+  (declare (ignore context-object))
+  (cond
+    ((not (route-allowed-p source destination))
+     :blocked)
+    ((operation-station-p destination)
+     :safe)
+    (t
+     :safe)))
+
+(defun create-or-open-operation-route (source operation &key context-object
+                                                        context-view-title
+                                                        target-anchor
+                                                        relation-kind
+                                                        note)
+  (unless (route-allowed-p source operation :context-object context-object)
+    (error "Route from ~A to ~A is not allowed."
+           (station-title source)
+           (station-title operation)))
+  (let* ((resolved-context (or context-object source))
+         (source-anchor
+          (if (typep source 'dom-annotation-anchor)
+              source
+              (make-dock-current-object-anchor
+               (dock-primary-object source)
+               resolved-context
+               context-view-title))))
+    (cond
+      ((or (operation-station-p operation)
+           (and target-anchor (annotation-target-anchor-p target-anchor)))
+       (dock-annotation-for-source-anchor
+        resolved-context
+        source-anchor
+        :context-view-title context-view-title
+        :source-object (dock-annotation-source-object
+                        resolved-context
+                        source-anchor)
+        :target-anchor target-anchor
+        :relation-kind relation-kind
+        :note note))
+      (t
+       (error "Unsupported operation route target ~S." operation)))))
+
+(defun create-or-open-route (source destination &key context-object
+                                                  context-view-title)
+  (unless (route-allowed-p source destination :context-object context-object)
+    (error "Route from ~A to ~A is not allowed."
+           (station-title source)
+           (station-title destination)))
+  (if (operation-station-p destination)
+      (create-or-open-operation-route
+       source
+       destination
+       :context-object context-object
+       :context-view-title context-view-title)
+      (let* ((resolved-context (or context-object source))
+             (source-anchor
+              (if (typep source 'dom-annotation-anchor)
+                  source
+                  (make-dock-current-object-anchor
+                   (dock-primary-object source)
+                   resolved-context
+                   context-view-title)))
+             (target-anchor
+              (if (typep destination 'dom-annotation-anchor)
+                  destination
+                  (make-instance 'dom-annotation-anchor
+                                 :provider-kind "dock-v1"
+                                 :view-kind "dock-target"
+                                 :view-title context-view-title
+                                 :context-object-id
+                                 (dock-object-stable-id resolved-context)
+                                 :strategy "station-object"
+                                 :value (dock-object-stable-id destination)
+                                 :label (station-title destination)
+                                 :durability-tier "medium"
+                                 :durability-note
+                                 "Dock station-object anchors identify an inspectable station by its current object id or title."
+                                 :object-id
+                                 (dock-object-stable-id destination)))))
+        (make-dom-relation-annotation
+         :context-object resolved-context
+         :context-view-title context-view-title
+         :source-anchor source-anchor
+         :target-anchor target-anchor))))
+
+(defun route-evidence (route)
+  (cond
+    ((typep route 'dock-annotation)
+     (list (dock-annotation-model-evidence)
+           (dock-annotation-smoke-evidence)))
+    ((typep route 'dom-relation-annotation)
+     (list (dock-js-coachmark-evidence)
+           (dock-css-coachmark-evidence)))
+    (t
+     nil)))
+
 (defun dock-annotation-topic ()
   (annotation-topic))
 
@@ -242,6 +400,7 @@ the primary pane-local object in this slice."))
 
 (defun dock-zotero-capability-available-p (context-object)
   (and (typep (dock-primary-object context-object) 'topic)
+       (zotero-support-enabled-p)
        (let ((bridge (ignore-errors (make-default-zotero-library-bridge))))
          (and bridge
               (not (zotero-backend-unavailable-p bridge))))))
@@ -495,6 +654,18 @@ the primary pane-local object in this slice."))
                                  (dock-pane-view-evidence)
                                  (dock-smoke-evidence))))
 
+(defun dock-mobile-route-strip-claim ()
+  (make-instance 'dock-claim-code-relation
+                 :id "dock-claim/mobile-route-strip"
+                 :title "Mobile Dock uses route-first two-tap flow"
+                 :summary "On narrow viewports the Dock collapses to a route strip: tap a source station, then tap a target station or operation."
+                 :claim-text
+                 "Mobile Dock presentation exposes the Touch-Fahrplan route language first. Connect remains the internal capability, but the visible flow is a compact route strip that latches a source station, accepts a destination station or operation such as Annotation, and opens the first-class route object."
+                 :evidence (list (dock-js-coachmark-evidence)
+                                 (dock-css-coachmark-evidence)
+                                 (dock-playwright-evidence)
+                                 (dock-annotation-smoke-evidence))))
+
 (defun dock-latent-state ()
   (make-instance 'dock-presentation-state
                  :id "dock-state/latent"
@@ -571,6 +742,74 @@ the primary pane-local object in this slice."))
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-provider-handoff-claim))))
 
+(defun dock-mobile-route-idle-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-mobile-route-state/idle"
+                 :title "idle"
+                 :summary "The narrow Dock route strip is waiting for the first tap on a source station."
+                 :compact-representation "Tap a station"
+                 :expanded-representation "No coachmark overlay by default on mobile."
+                 :entry-triggers '("Narrow viewport with no latched source or pending route.")
+                 :exit-conditions '("Tap a station.")
+                 :capabilities '("Lay route")
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-mobile-route-source-latched-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-mobile-route-state/source-latched"
+                 :title "source-latched"
+                 :summary "A source station is latched and the route strip asks for a destination station or operation."
+                 :compact-representation "From: <source> -- tap target or operation."
+                 :expanded-representation "Only the route operation choices required now, plus Cancel."
+                 :entry-triggers '("Tap a source station while the mobile route strip is idle.")
+                 :exit-conditions '("Tap destination station."
+                                    "Tap destination operation."
+                                    "Cancel.")
+                 :capabilities '("Lay route" "Annotation" "Cancel")
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-mobile-route-destination-candidate-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-mobile-route-state/destination-candidate"
+                 :title "destination-candidate"
+                 :summary "A destination station or operation has been selected and the route can either complete directly or move to confirmation."
+                 :compact-representation "<source> -> <destination>."
+                 :expanded-representation "Snap highlight or operation candidate feedback only."
+                 :entry-triggers '("Tap destination station or operation from source-latched.")
+                 :exit-conditions '("Safe non-mutating route completes."
+                                    "Operation that requires confirmation enters confirming.")
+                 :capabilities '("Lay route")
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-mobile-route-confirming-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-mobile-route-state/confirming"
+                 :title "confirming"
+                 :summary "A destination operation route is waiting for explicit dry-run or confirmation when the operation is not a safe direct-open route."
+                 :compact-representation "<source> -> <operation> with Dry run, Confirm, and Cancel when required."
+                 :expanded-representation "No large coachmark overlay by default on mobile."
+                 :entry-triggers '("Tap an operation whose safety level requires confirmation.")
+                 :exit-conditions '("Dry run keeps confirming with evidence."
+                                    "Confirm opens or saves the route."
+                                    "Cancel returns to idle.")
+                 :capabilities '("Dry run" "Confirm" "Cancel" "Evidence")
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-mobile-route-completed-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-mobile-route-state/completed"
+                 :title "completed"
+                 :summary "The route has been saved or reopened as a first-class inspectable object."
+                 :compact-representation "Route saved, with Open route and Evidence when available."
+                 :expanded-representation "Normal inspection resumes in inspector tabs or the opened route pane."
+                 :entry-triggers '("Safe route completes."
+                                   "Confirmed operation route completes.")
+                 :exit-conditions '("Open route."
+                                    "Open evidence."
+                                    "Tap another station.")
+                 :capabilities '("Open route" "Evidence" "Lay route")
+                 :claims (list (dock-mobile-route-strip-claim))))
+
 (defun dock-introduction-to-active-transition ()
   (make-instance 'dock-presentation-transition
                  :id "dock-transition/introduction-active"
@@ -638,26 +877,116 @@ the primary pane-local object in this slice."))
                  :exit-condition "Compact capability strip remains."
                  :claims (list (dock-degrade-chrome-claim))))
 
+(defun dock-route-idle-to-source-latched-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-mobile-route-transition/idle-source-latched"
+                 :title "Idle -> Source latched"
+                 :summary "The first mobile tap latches a source station without exposing a separate Connect toolbar step."
+                 :from-state (dock-mobile-route-idle-state)
+                 :to-state (dock-mobile-route-source-latched-state)
+                 :trigger "Tap source station."
+                 :exit-condition "Route strip shows From: <source> and asks for target or operation."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-route-source-latched-to-destination-candidate-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-mobile-route-transition/source-latched-destination-candidate"
+                 :title "Source latched -> Destination candidate"
+                 :summary "The second mobile tap chooses either a destination station or a destination operation."
+                 :from-state (dock-mobile-route-source-latched-state)
+                 :to-state (dock-mobile-route-destination-candidate-state)
+                 :trigger "Tap destination station or operation."
+                 :exit-condition "Route target is known and safety can be evaluated."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-route-destination-candidate-to-completed-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-mobile-route-transition/destination-candidate-completed"
+                 :title "Destination candidate -> Completed"
+                 :summary "Safe non-mutating routes complete directly and open or reuse the first-class route object."
+                 :from-state (dock-mobile-route-destination-candidate-state)
+                 :to-state (dock-mobile-route-completed-state)
+                 :trigger "route-safety-level returns :safe."
+                 :exit-condition "Route saved and normal inspection resumes."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-route-destination-candidate-to-confirming-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-mobile-route-transition/destination-candidate-confirming"
+                 :title "Destination candidate -> Confirming"
+                 :summary "Operation routes that are mutating or dangerous require explicit confirmation."
+                 :from-state (dock-mobile-route-destination-candidate-state)
+                 :to-state (dock-mobile-route-confirming-state)
+                 :trigger "route-safety-level requires confirmation."
+                 :exit-condition "Dry run, Confirm, and Cancel are the only required controls."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-route-confirming-dry-run-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-mobile-route-transition/confirming-dry-run"
+                 :title "Confirming -> Confirming"
+                 :summary "Dry run keeps the operation route in confirming state while adding evidence."
+                 :from-state (dock-mobile-route-confirming-state)
+                 :to-state (dock-mobile-route-confirming-state)
+                 :trigger "Dry run."
+                 :exit-condition "Evidence is available without committing the operation route."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-route-confirming-to-completed-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-mobile-route-transition/confirming-completed"
+                 :title "Confirming -> Completed"
+                 :summary "Confirm commits or opens the operation route and returns inspection to the normal pane surface."
+                 :from-state (dock-mobile-route-confirming-state)
+                 :to-state (dock-mobile-route-completed-state)
+                 :trigger "Confirm."
+                 :exit-condition "Route saved or reopened."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-route-completed-to-idle-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-mobile-route-transition/completed-idle"
+                 :title "Completed -> Idle"
+                 :summary "Opening the route or evidence clears the compact completed state and normal inspection continues."
+                 :from-state (dock-mobile-route-completed-state)
+                 :to-state (dock-mobile-route-idle-state)
+                 :trigger "Open route, open evidence, or start another route."
+                 :exit-condition "Route strip returns to Tap a station."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
 (defun dock-presentation-model ()
   (make-instance 'dock-presentation-model
                  :id "dock-presentation-model"
                  :title "Dock presentation model"
-                 :summary "Inspectable SCXML-style state model for Dock presentation: capability-scoped introduction, Connect-only active session ownership, and shared degraded/rediscovery coachmark behavior."
+                 :summary "Inspectable SCXML-style state model for Dock presentation: desktop coachmark behavior plus the mobile route-first strip."
                  :states (list (dock-latent-state)
                                (dock-introduction-state)
                                (dock-active-state)
                                (dock-degraded-state)
-                               (dock-rediscovery-state))
+                               (dock-rediscovery-state)
+                               (dock-mobile-route-idle-state)
+                               (dock-mobile-route-source-latched-state)
+                               (dock-mobile-route-destination-candidate-state)
+                               (dock-mobile-route-confirming-state)
+                               (dock-mobile-route-completed-state))
                  :transitions (list (dock-introduction-to-active-transition)
                                     (dock-introduction-to-degraded-transition)
                                     (dock-degraded-to-active-transition)
                                     (dock-active-to-degraded-transition)
                                     (dock-degraded-to-rediscovery-transition)
-                                    (dock-rediscovery-to-degraded-transition))
+                                    (dock-rediscovery-to-degraded-transition)
+                                    (dock-route-idle-to-source-latched-transition)
+                                    (dock-route-source-latched-to-destination-candidate-transition)
+                                    (dock-route-destination-candidate-to-completed-transition)
+                                    (dock-route-destination-candidate-to-confirming-transition)
+                                    (dock-route-confirming-dry-run-transition)
+                                    (dock-route-confirming-to-completed-transition)
+                                    (dock-route-completed-to-idle-transition))
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-connect-active-claim)
                                (dock-provider-handoff-claim)
-                               (dock-runtime-inspection-claim))))
+                               (dock-runtime-inspection-claim)
+                               (dock-mobile-route-strip-claim))))
 
 (defun chunk-dock-presentation-model ()
   (dock-presentation-model))

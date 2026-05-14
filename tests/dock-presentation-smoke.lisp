@@ -28,6 +28,11 @@
                 claims
                 :key #'hyperdoc::title-of
                 :test #'string=))
+         (mobile-route-claim
+          (find "Mobile Dock uses route-first two-tap flow"
+                claims
+                :key #'hyperdoc::title-of
+                :test #'string=))
          (snapshot
           (hyperdoc::make-dom-connect-pane-state-snapshot-from-json
            '(:paneId "pane-1"
@@ -51,7 +56,9 @@
              :providerHandoffs ("Touch-Fahrplan")))))
     (assert-true (typep model 'hyperdoc::dock-presentation-model)
                  "Dock presentation model entrypoint must materialize an inspectable model object")
-    (dolist (title '("latent" "introduction" "active" "degraded" "rediscovery"))
+    (dolist (title '("latent" "introduction" "active" "degraded" "rediscovery"
+                     "idle" "source-latched" "destination-candidate"
+                     "confirming" "completed"))
       (assert-true (member title state-titles :test #'string=)
                    (format nil "Dock model must include the ~A state" title)))
     (dolist (state states)
@@ -60,9 +67,9 @@
                                 :test #'string=))
                    (format nil "Dock state ~A should not enumerate Inspect as a Dock capability"
                            (hyperdoc::title-of state))))
-    (assert-equal 6
+    (assert-equal 13
                   (length transitions)
-                  "Dock presentation model should expose the six explicit coachmark transitions in this slice")
+                  "Dock presentation model should expose desktop coachmark transitions plus mobile route-strip transitions")
     (assert-true (member "Degrade chrome, not capability"
                          claim-titles
                          :test #'string=)
@@ -79,6 +86,13 @@
                        :key #'hyperdoc::title-of
                        :test #'string=)
                  "Provider claim should include DMX evidence")
+    (assert-true mobile-route-claim
+                 "Dock model should keep the mobile route-strip claim inspectable")
+    (assert-true (find "Dock coachmark runtime state"
+                       (hyperdoc::evidence-of mobile-route-claim)
+                       :key #'hyperdoc::title-of
+                       :test #'string=)
+                 "Mobile route-strip claim should include JS runtime evidence")
     (dolist (claim claims)
       (assert-true (plusp (length (hyperdoc::evidence-of claim)))
                    (format nil "Dock claim ~A should point to implementation evidence"

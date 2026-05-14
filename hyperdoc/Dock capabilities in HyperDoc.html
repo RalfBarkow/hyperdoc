@@ -6,7 +6,9 @@
   Inspector tabs are the durable base chrome. The <b>Dock</b> is now a
   pane-local coachmark layer that progressively enhances those tabs when a
   capability such as <b>Lay route</b>, <b>Annotation</b>, or <b>Guide</b> has
-  become newly relevant, is currently active, or needs rediscovery.
+  become newly relevant, is currently active, or needs rediscovery. On narrow
+  mobile viewports, the same Dock collapses to a route strip instead of
+  showing a persistent capability block.
 </p>
 
 <p>
@@ -50,11 +52,14 @@
 <p>
   The pane still keeps a compact capability row below the inspector tabs, but
   that row is no longer the whole conceptual model. It is the lighter access
-  layer that remains when the coachmark is gone.
+  layer that remains when the coachmark is gone. On smartphone-sized
+  viewports, that lighter layer is the route strip:
+  <b>Tap a station</b>, then <b>From: &lt;source&gt;</b> with only the
+  destination operation controls needed now.
 </p>
 
 <ul>
-  <li><b>Lay route</b> (<b>Connect</b> capability): the compact action stays available, while the coachmark expands only for teaching, active task state, or rediscovery. The first implementation mechanic may still be <tt>drag-to-connect</tt>, with <tt>two-tap route-laying</tt> as the non-drag fallback.</li>
+  <li><b>Lay route</b> (<b>Connect</b> capability): the compact action stays available on desktop, while the coachmark expands only for teaching, active task state, or rediscovery. On mobile, tapping the first station starts the same internal Connect route without exposing a separate Connect button. The first implementation mechanic may still be <tt>drag-to-connect</tt> on desktop, with <tt>two-tap route-laying</tt> as the mobile route-first fallback.</li>
   <li><b>Annotation</b>: when <b>Lay route</b> is waiting for a target station, tapping Annotation completes the relation against the generic Annotation topic; the canonical example in this slice is source Text pages -&gt; target Annotation; when Connect is idle, the same control reopens the current-object annotation shortcut through that same relation model.</li></ul>
 
 <p>
@@ -100,6 +105,17 @@
 </ul>
 
 <p>
+  Mobile adds a route-first substate model inside the same Dock boundary:
+  <b>idle</b> shows <b>Tap a station</b>;
+  <b>source-latched</b> shows <b>From: &lt;source&gt;</b> and asks for a
+  target or operation; <b>destination-candidate</b> evaluates the selected
+  endpoint; <b>confirming</b> is reserved for operation routes that need
+  explicit dry-run or confirmation; and <b>completed</b> reports
+  <b>Route saved</b> with <b>Open route</b> and <b>Evidence</b> where the
+  runtime can provide them.
+</p>
+
+<p>
   The runtime and the docs both point to the same inspectable object:
   <a expr="(chunk-dock-presentation-model)"><tt>(chunk-dock-presentation-model)</tt></a>.
   Its claims link to implementation evidence in JS, CSS, pane snapshots,
@@ -132,8 +148,10 @@
 
 <p>
   This slice keeps the compact capability row visible in steady state and uses
-  <b>Guide</b> for rediscovery. It does not yet move those lighter affordances
-  directly into the tab strip itself.
+  <b>Guide</b> for desktop rediscovery. On mobile, ordinary teaching belongs
+  in the route strip, so the large coachmark does not occupy the primary
+  viewport by default. This slice does not move lighter affordances directly
+  into the tab strip itself.
 </p>
 
 <p>

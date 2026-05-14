@@ -7,11 +7,16 @@ const {
   exactTextPattern,
   openHyperDoc,
   openTextPageFromHyperDoc,
+  readPaneTitles,
   resetDockPresentation,
   selectSourceTab,
   settleInspectorBindings,
 } = require("./hyperdoc-inspector");
-const { paneChrome, readPaneChromeState } = require("./pane-chrome-harness");
+const {
+  openPaneChromeHelp,
+  paneChrome,
+  readPaneChromeState,
+} = require("./pane-chrome-harness");
 
 test("Dock coachmark states degrade chrome without removing capability", async ({
   page,
@@ -100,10 +105,7 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   );
   expect(degradedAfterCancel.compactActions).not.toContain("Inspect");
 
-  await expect(chrome.helpToggle).toBeVisible();
-  await chrome.helpToggle.click();
-
-  const rediscovery = await readPaneChromeState(page, 1);
+  const rediscovery = await openPaneChromeHelp(page, 1);
   await attachJson(testInfo, "dock-rediscovery.json", rediscovery);
 
   expect(rediscovery.presentationState).toBe("rediscovery");
@@ -119,6 +121,58 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(rediscovery.compactActions).not.toContain("Inspect");
   expect(rediscovery.dockInspectPresent).toBe(false);
   expect(rediscovery.connectStateInspectPresent).toBe(false);
+});
+
+test("Mobile Dock route strip latches a source and opens Annotation as an operation", async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 780 });
+  const hyperdocPane = await openHyperDoc(page, { expectDesktopDock: false });
+  await resetDockPresentation(page);
+
+  const idle = await readPaneChromeState(page, 1);
+  await attachJson(testInfo, "dock-mobile-route-idle.json", idle);
+
+  expect(idle.mobileRouteMode).toBe("true");
+  expect(idle.mobileRouteState).toBe("idle");
+  expect(idle.routeTitleText).toBe("Tap a station");
+  expect(idle.coachmarkVisible).toBe(false);
+  expect(idle.compactActions).not.toContain("Connect");
+
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+
+  await expect
+    .poll(async () => (await readPaneChromeState(page, 1)).mobileRouteState, {
+      timeout: 10_000,
+    })
+    .toBe("source-latched");
+
+  const sourceLatched = await readPaneChromeState(page, 1);
+  await attachJson(testInfo, "dock-mobile-route-source-latched.json", sourceLatched);
+
+  expect(sourceLatched.routeTitleText).toBe("From: Text pages");
+  expect(sourceLatched.routeDetailText).toBe("Tap target or operation");
+  expect(sourceLatched.compactActions).toEqual(expect.arrayContaining(["Annotation"]));
+  expect(sourceLatched.compactActions).not.toContain("Connect");
+  expect(sourceLatched.cancelHidden).toBe(false);
+
+  await paneChrome(page, 1).annotationButton.click();
+
+  await expect
+    .poll(
+      async () =>
+        (await readPaneTitles(page)).some((entry) =>
+          /^Annotation: Text pages$/.test(entry.title || "")
+        ),
+      { timeout: 20_000 }
+    )
+    .toBe(true);
+
+  const completed = await readPaneChromeState(page, 1);
+  await attachJson(testInfo, "dock-mobile-route-annotation-opened.json", completed);
 });
 
 test("Dock introduces Snippet independently on first eligible Source pane", async ({
@@ -168,14 +222,7 @@ test("Dock introduces Snippet independently on first eligible Source pane", asyn
   expect(sourceDegraded.coachmarkVisible).toBe(false);
   expect(sourceDegraded.compactActions).toContain("Snippet");
 
-  await sourceChrome.helpToggle.click();
-  await expect
-    .poll(
-      async () => (await readPaneChromeState(page, 2)).presentationState,
-      { timeout: 10_000 }
-    )
-    .toBe("rediscovery");
-  const sourceRediscovery = await readPaneChromeState(page, 2);
+  const sourceRediscovery = await openPaneChromeHelp(page, 2);
   await attachJson(testInfo, "dock-snippet-source-rediscovery.json", sourceRediscovery);
 
   expect(sourceRediscovery.presentationState).toBe("rediscovery");
@@ -203,9 +250,9 @@ test("Dock introduces Snippet independently on first eligible FedWiki pane", asy
 
   await openTextPageFromHyperDoc(
     page,
-    "Linking HyperDoc pages to FedWiki pages"
+    "Linking to Home Away From Home"
   );
-  await openFedWikiPageFromTextPageLink(page, 2, "FIND");
+  await openFedWikiPageFromTextPageLink(page, 2, "Home Away From Home");
   await settleInspectorBindings(page, 1500);
 
   const fedwikiIntroduction = await readPaneChromeState(page, 3);
@@ -234,14 +281,7 @@ test("Dock introduces Snippet independently on first eligible FedWiki pane", asy
   expect(fedwikiDegraded.coachmarkVisible).toBe(false);
   expect(fedwikiDegraded.compactActions).toContain("Snippet");
 
-  await fedwikiChrome.helpToggle.click();
-  await expect
-    .poll(
-      async () => (await readPaneChromeState(page, 3)).presentationState,
-      { timeout: 10_000 }
-    )
-    .toBe("rediscovery");
-  const fedwikiRediscovery = await readPaneChromeState(page, 3);
+  const fedwikiRediscovery = await openPaneChromeHelp(page, 3);
   await attachJson(testInfo, "dock-snippet-fedwiki-rediscovery.json", fedwikiRediscovery);
 
   expect(fedwikiRediscovery.presentationState).toBe("rediscovery");

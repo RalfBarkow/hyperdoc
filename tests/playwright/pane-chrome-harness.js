@@ -21,6 +21,10 @@ function paneChrome(page, paneIndex) {
     connectToggle: currentPane.locator(".hyperdoc-dom-connect-toggle"),
     annotationButton: currentPane.locator(".hyperdoc-dock-annotation"),
     snippetButton: currentPane.locator(".hyperdoc-dock-snippet-playground"),
+    routeTitle: currentPane.locator(".hyperdoc-mobile-route-title"),
+    routeDetail: currentPane.locator(".hyperdoc-mobile-route-detail"),
+    routeOpenButton: currentPane.locator(".hyperdoc-mobile-route-open"),
+    routeEvidenceButton: currentPane.locator(".hyperdoc-mobile-route-evidence"),
     status: currentPane.locator(".hyperdoc-dom-connect-status"),
     cue: currentPane.locator(".hyperdoc-dom-connect-cue"),
     sourceChip: currentPane.locator(".hyperdoc-dom-connect-source-chip"),
@@ -42,6 +46,10 @@ async function readPaneChromeState(page, paneIndex) {
     const slot = paneNode?.querySelector(".hyperdoc-dom-connect-pane-slot");
     const control = slot?.querySelector(".hyperdoc-dom-connect-control");
     const toggle = slot?.querySelector(".hyperdoc-dom-connect-toggle");
+    const routeTitle = slot?.querySelector(".hyperdoc-mobile-route-title");
+    const routeDetail = slot?.querySelector(".hyperdoc-mobile-route-detail");
+    const routeOpen = slot?.querySelector(".hyperdoc-mobile-route-open");
+    const routeEvidence = slot?.querySelector(".hyperdoc-mobile-route-evidence");
     const status = slot?.querySelector(".hyperdoc-dom-connect-status");
     const cue = slot?.querySelector(".hyperdoc-dom-connect-cue");
     const sourceSummary = slot?.querySelector(".hyperdoc-dom-connect-source-summary");
@@ -65,6 +73,7 @@ async function readPaneChromeState(page, paneIndex) {
     const providerSurface = activeView?.querySelector(
       ".hyperdoc-connect-provider-surface, .hyperdoc-dom-connect-surface"
     );
+    const helpToggle = slot?.querySelector(".hyperdoc-dom-connect-help-toggle");
     const tabRowRect = tabRow?.getBoundingClientRect();
     const connectRowRect = slot?.getBoundingClientRect();
     const helpPanelRect = helpPanel?.getBoundingClientRect();
@@ -77,6 +86,11 @@ async function readPaneChromeState(page, paneIndex) {
       slotHidden: !!slot?.hidden,
       slotHelpOpen: slot?.dataset.helpOpen || null,
       presentationState: slot?.dataset.dockPresentation || null,
+      mobileRouteMode: slot?.dataset.mobileRoute || null,
+      mobileRouteState: slot?.dataset.mobileRouteState || null,
+      routeTitleText: routeTitle?.textContent?.replace(/\s+/g, " ").trim() || null,
+      routeDetailHidden: !!routeDetail?.hidden,
+      routeDetailText: routeDetail?.textContent?.replace(/\s+/g, " ").trim() || null,
       introducedCapability: slot?.dataset.dockIntroducedCapability || null,
       presentationReason: slot?.dataset.dockPresentationReason || null,
       connectState: slot?.dataset.connectState || null,
@@ -90,6 +104,8 @@ async function readPaneChromeState(page, paneIndex) {
           )
             .map((node) => node.textContent?.trim() || "")
         : [],
+      routeOpenHidden: !!routeOpen?.hidden,
+      routeEvidenceHidden: !!routeEvidence?.hidden,
       snippetHidden: !!snippetButton?.hidden,
       statusHidden: !!status?.hidden,
       statusText: status?.textContent?.trim() || null,
@@ -122,10 +138,7 @@ async function readPaneChromeState(page, paneIndex) {
       dismissHidden: !!dismiss?.hidden,
       providerKind: providerSurface?.dataset.hyperdocConnectProviderKind || null,
       providerViewKind: providerSurface?.dataset.hyperdocConnectViewKind || null,
-      helpExpanded:
-        slot?.querySelector(".hyperdoc-dom-connect-help-toggle")?.getAttribute(
-          "aria-expanded"
-        ) || null,
+      helpExpanded: helpToggle?.getAttribute("aria-expanded") || null,
       helpAriaHidden: helpPanel?.getAttribute("aria-hidden") || null,
       panelDisplay: helpPanel ? window.getComputedStyle(helpPanel).display : null,
       tabRowTop: tabRowRect?.top || null,

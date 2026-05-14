@@ -40,21 +40,30 @@
           (hyperdoc::dock-annotation-for-context
            chunk-topic
            :context-view-title "Topic"))
+         (text-pages-source-json
+          (dock-annotation-source-json "HYPERDOC"
+                                       "Text pages"
+                                       "list-item:main-page/text-pages"))
+         (text-pages-source-anchor
+          (hyperdoc::maybe-dom-connect-anchor-from-json-string
+           text-pages-source-json))
+         (operation-route-from-helper
+          (hyperdoc::create-or-open-operation-route
+           text-pages-source-anchor
+           (hyperdoc::annotation-topic)
+           :context-object hyperdoc-page
+           :context-view-title "Main page"))
          (annotation-from-connect
           (hyperdoc::make-association-annotation-from-json
            :context-object hyperdoc-page
            :context-view-title "Main page"
-           :source-json (dock-annotation-source-json "HYPERDOC"
-                                                     "Text pages"
-                                                     "list-item:main-page/text-pages")
+           :source-json text-pages-source-json
            :target-json (dock-annotation-target-json "HYPERDOC")))
          (annotation-from-connect-again
           (hyperdoc::make-association-annotation-from-json
            :context-object hyperdoc-page
            :context-view-title "Main page"
-           :source-json (dock-annotation-source-json "HYPERDOC"
-                                                     "Text pages"
-                                                     "list-item:main-page/text-pages")
+           :source-json text-pages-source-json
            :target-json (dock-annotation-target-json "HYPERDOC"))))
     (assert-true (typep shortcut-from-page 'hyperdoc::dock-annotation)
                  "Dock Annotation should specialize dom-relation-annotation rather than introducing a parallel annotation substrate")
@@ -66,6 +75,18 @@
                  "Topic pages and their underlying topic objects should reopen the same current-object annotation relation")
     (assert-true (eq annotation-from-connect annotation-from-connect-again)
                  "Connecting the same source anchor to Annotation twice should reopen the existing relation instead of duplicating it")
+    (assert-true (hyperdoc::station-p text-pages-source-anchor)
+                 "A selected DOM anchor should be accepted as a mobile route station")
+    (assert-true (hyperdoc::operation-station-p (hyperdoc::annotation-topic))
+                 "Annotation should be accepted as a destination operation station")
+    (assert-equal :safe
+                  (hyperdoc::route-safety-level
+                   text-pages-source-anchor
+                   (hyperdoc::annotation-topic)
+                   :context-object hyperdoc-page)
+                  "Annotation operation routes should be safe direct-open routes")
+    (assert-true (eq operation-route-from-helper annotation-from-connect)
+                 "The route vocabulary helper should reopen the same source -> Annotation route object")
     (assert-equal "annotation"
                   (hyperdoc::relation-kind-of annotation-from-connect)
                   "Dock annotations should use the generic relation-kind classification slot")

@@ -44,7 +44,8 @@ async function settleInspectorBindings(page, timeout = 1500) {
   await page.waitForTimeout(timeout);
 }
 
-async function openHyperDoc(page) {
+async function openHyperDoc(page, options = {}) {
+  const expectDesktopDock = options.expectDesktopDock !== false;
   await gotoCatalog(page);
   const catalogPane = pane(page, 0);
   await tableCellByExactText(catalogPane, "HyperDoc").click();
@@ -91,14 +92,20 @@ async function openHyperDoc(page) {
         { timeout: 20_000 }
       )
       .toBeGreaterThan(0);
-    await expect(hyperdocPane.locator(".hyperdoc-dom-connect-toggle")).toBeVisible({
-      timeout: 20_000,
-    });
-    await expect(
-      hyperdocPane.locator(".hyperdoc-dom-connect-help-toggle")
-    ).toBeVisible({
-      timeout: 20_000,
-    });
+    if (expectDesktopDock) {
+      await expect(hyperdocPane.locator(".hyperdoc-dom-connect-toggle")).toBeVisible({
+        timeout: 20_000,
+      });
+      await expect(
+        hyperdocPane.locator(".hyperdoc-dom-connect-help-toggle")
+      ).toBeVisible({
+        timeout: 20_000,
+      });
+    } else {
+      await expect(hyperdocPane.locator(".hyperdoc-mobile-route-title")).toBeVisible({
+        timeout: 20_000,
+      });
+    }
   } else {
     expect(tabTexts).toContain("Text pages");
   }
@@ -152,6 +159,10 @@ async function openTopicPageFromHyperDoc(page, title) {
 async function openFedWikiPageFromTextPageLink(page, paneIndex, linkText) {
   const paneCountBefore = await page.locator(".inspector-pane").count();
   const sourcePane = pane(page, paneIndex);
+  await waitForPaneLoadingBoundary(page, paneIndex, 45_000);
+  await expect(
+    sourcePane.locator(".hyperdoc-connect-provider-root").first()
+  ).toBeVisible({ timeout: 20_000 });
   const reference = sourcePane
     .locator(".hyperdoc-connect-provider-root .hyperbook-reference")
     .filter({ hasText: exactTextPattern(linkText) })

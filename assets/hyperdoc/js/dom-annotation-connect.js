@@ -733,10 +733,16 @@
   var DOCK_PRESENTATION_SCOPE = "browser-session";
   var DOCK_CAPABILITY_CONNECT = "connect";
   var DOCK_CAPABILITY_SNIPPET = "snippet";
+  var MOBILE_ROUTE_MEDIA_QUERY = "(max-width: 720px)";
   var DOCK_INTRODUCTION_PRIORITY = [
     DOCK_CAPABILITY_SNIPPET,
     DOCK_CAPABILITY_CONNECT
   ];
+
+  function mobileRouteViewport() {
+    return !!(window.matchMedia &&
+      window.matchMedia(MOBILE_ROUTE_MEDIA_QUERY).matches);
+  }
 
   function createDockPresentationMemory() {
     return {
@@ -811,6 +817,9 @@
       introducedCapability: state.introducedCapability || null,
       presentationScope: state.presentationScope || DOCK_PRESENTATION_SCOPE,
       coachmarkVisible: !!state.helpOpen,
+      mobileRouteState: state.mobileRouteState || null,
+      mobileRouteTitle: state.mobileRouteTitleNode &&
+        state.mobileRouteTitleNode.textContent || null,
       selectedSourceLabel: anchorLabel(session && session.sourceAnchor, null),
       selectedSourcePane: !!(session && session.sourcePaneId &&
         session.sourcePaneId === state.paneId),
@@ -860,13 +869,68 @@
     return "";
   }
 
+  function mobileRouteStateForSession(state, session) {
+    if (state && state.feedback &&
+        !state.feedback.hidden &&
+        state.feedback.dataset.kind === "success") {
+      return "completed";
+    }
+    if (!session || !session.id || session.phase === "idle") {
+      return "idle";
+    }
+    if (session.phase === "choose-source") {
+      return "idle";
+    }
+    if (session.phase === "choose-target" && session.sourceAnchor) {
+      return "source-latched";
+    }
+    if (session.phase === "submitting") {
+      return "confirming";
+    }
+    return "idle";
+  }
+
+  function mobileRouteTitle(state, routeState, session) {
+    var sourceLabel = anchorLabel(session && session.sourceAnchor, "source");
+    var targetLabel = anchorLabel(session && session.targetAnchor, null);
+    if (routeState === "source-latched") {
+      return "From: " + (sourceLabel || "source");
+    }
+    if (routeState === "destination-candidate" && sourceLabel && targetLabel) {
+      return sourceLabel + " \u2192 " + targetLabel;
+    }
+    if (routeState === "confirming") {
+      if (sourceLabel && targetLabel) {
+        return sourceLabel + " \u2192 " + targetLabel;
+      }
+      return "Opening route";
+    }
+    if (routeState === "completed") {
+      return "Route saved";
+    }
+    return "Tap a station";
+  }
+
+  function mobileRouteDetail(routeState) {
+    if (routeState === "source-latched") {
+      return "Tap target or operation";
+    }
+    if (routeState === "confirming") {
+      return "Opening route";
+    }
+    if (routeState === "completed") {
+      return "Open route or evidence when available";
+    }
+    return "";
+  }
+
   function connectionSuccessText(session) {
     var sourceLabel = anchorLabel(session && session.sourceAnchor, "source");
     var targetLabel = anchorLabel(session && session.targetAnchor, "target");
     if (sourceLabel && targetLabel) {
-      return 'Connected "' + sourceLabel + '" to "' + targetLabel + '".';
+      return 'Route saved: "' + sourceLabel + '" to "' + targetLabel + '".';
     }
-    return "Connected.";
+    return "Route saved.";
   }
 
   function uniqueStates(states) {
@@ -1279,6 +1343,7 @@
     var manager = state.manager || connectManager();
     var session = manager.session;
     var feedbackText = connectionSuccessText(session);
+    var completedRoute = sessionDiagnostic(session);
     var feedbackStates = uniqueStates([
       session && session.sourceState,
       session && session.targetState,
@@ -1289,7 +1354,9 @@
       clearPendingRequest(state);
       resetConnectSession(manager);
       feedbackStates.forEach(function (feedbackState) {
+        recordCompletedRoute(feedbackState, completedRoute);
         setFeedback(feedbackState, "success", feedbackText);
+        refreshPaneStateFromSession(feedbackState);
       });
       return;
     }
@@ -1580,6 +1647,10 @@
     slot.innerHTML =
       '<div class="hyperdoc-dom-connect-control hyperdoc-dock-control" data-hyperdoc-connect-ignore="true">' +
         '<div class="hyperdoc-dock-compact">' +
+          '<div class="hyperdoc-mobile-route-copy" aria-live="polite">' +
+            '<span class="hyperdoc-mobile-route-title">Tap a station</span>' +
+            '<span class="hyperdoc-mobile-route-detail" hidden></span>' +
+          '</div>' +
           '<span class="hyperdoc-dock-label">Capabilities</span>' +
           '<div class="hyperdoc-dock-actions">' +
             '<button type="button" class="hyperdoc-dom-connect-toggle hyperdoc-dock-action" ' +
@@ -1589,6 +1660,10 @@
             '<button type="button" class="hyperdoc-dock-snippet-playground hyperdoc-dock-action" ' +
                     'title="Open a snippet playground crosswalk for the current source surface." ' +
                     'data-hyperdoc-snippet-playground-submit="true" hidden>Snippet</button>' +
+            '<button type="button" class="hyperdoc-mobile-route-open hyperdoc-dock-action" ' +
+                    'title="Open the saved route again." hidden>Open route</button>' +
+            '<button type="button" class="hyperdoc-mobile-route-evidence hyperdoc-dock-action" ' +
+                    'title="Open evidence for the current route request when available." hidden>Evidence</button>' +
           '</div>' +
           '<button type="button" class="hyperdoc-dom-connect-help-toggle hyperdoc-dock-guide" ' +
                   'title="Rediscover Dock guidance" aria-label="Rediscover Dock guidance" aria-expanded="false">Guide</button>' +
@@ -1991,6 +2066,9 @@
     var coachmark = presentation.state === "introduction" ||
       presentation.state === "active" ||
       presentation.state === "rediscovery";
+    if (mobileRouteViewport()) {
+      coachmark = false;
+    }
     var introducedCapability = presentation.introducedCapability || null;
     var copy = dockCoachmarkCopy(
       state,
@@ -2034,6 +2112,91 @@
       : [];
     if (state.surface) {
       state.surface.dataset.hyperdocDockPresentation = presentation.state;
+    }
+  }
+
+  function recordCompletedRoute(state, route) {
+    if (!state || !route) {
+      return;
+    }
+    state.completedRoute = cloneData(route);
+  }
+
+  function openCompletedRoute(state) {
+    var route = state && state.completedRoute;
+    if (!route || !route.source || !route.target) {
+      return;
+    }
+    var manager = state.manager || connectManager();
+    clearFeedback(state);
+    manager.session = {
+      id: makeRequestId(),
+      phase: "choose-target",
+      originPaneId: route.originPaneId || state.paneId,
+      sourcePaneId: route.sourcePaneId || state.paneId,
+      sourceProviderKind: route.sourceProviderKind || route.source.providerKind || null,
+      sourceAnchor: route.source,
+      sourceState: state,
+      targetPaneId: null,
+      targetProviderKind: null,
+      targetAnchor: null,
+      targetState: null
+    };
+    completeConnection(state, route.target);
+  }
+
+  function applyMobileRouteStrip(state) {
+    if (!state || !state.slot || !state.mobileRouteTitleNode) {
+      return;
+    }
+    var manager = state.manager || connectManager();
+    var session = manager.session;
+    var mobile = mobileRouteViewport();
+    var routeState = mobile
+      ? mobileRouteStateForSession(state, session)
+      : "";
+    var routeTitle = mobile ? mobileRouteTitle(state, routeState, session) : "";
+    var routeDetail = mobile ? mobileRouteDetail(routeState) : "";
+    state.mobileRouteState = routeState || null;
+    state.slot.dataset.mobileRoute = mobile ? "true" : "false";
+    state.slot.dataset.mobileRouteState = routeState;
+    state.control.dataset.mobileRoute = mobile ? "true" : "false";
+    state.control.dataset.mobileRouteState = routeState;
+    state.mobileRouteTitleNode.textContent = routeTitle || "Tap a station";
+    state.mobileRouteDetailNode.textContent = routeDetail;
+    state.mobileRouteDetailNode.hidden = !routeDetail;
+
+    state.toggle.hidden = mobile;
+    state.annotation.hidden = mobile && routeState !== "source-latched";
+    state.helpToggle.hidden = mobile;
+    state.snippetPlayground.hidden = mobile || state.snippetPlayground.hidden;
+    state.touchFahrplan.hidden = mobile || state.touchFahrplan.hidden;
+    state.dmx.hidden = mobile || state.dmx.hidden;
+
+    if (mobile) {
+      state.clear.hidden = true;
+      state.cancel.hidden = !(routeState === "source-latched" ||
+        routeState === "confirming");
+    }
+    state.mobileRouteOpen.hidden = !(mobile &&
+      routeState === "completed" &&
+      state.completedRoute);
+    state.mobileRouteEvidence.hidden = !(mobile &&
+      routeState === "completed" &&
+      state.completedRoute &&
+      state.completedRoute.requestId);
+
+    if (mobile) {
+      state.compactCapabilities = ["Lay route"];
+      if (!state.annotation.hidden) {
+        state.compactCapabilities.push("Annotation");
+      }
+      if (!state.mobileRouteOpen.hidden) {
+        state.compactCapabilities.push("Open route");
+      }
+      if (!state.mobileRouteEvidence.hidden) {
+        state.compactCapabilities.push("Evidence");
+      }
     }
   }
 
@@ -2089,6 +2252,7 @@
     }
     presentation = dockPresentationForState(state, session, sessionVisible);
     applyDockPresentation(state, presentation);
+    applyMobileRouteStrip(state);
   }
 
   function refreshAllPaneStates(manager) {
@@ -2121,6 +2285,7 @@
     }
     liveStates(manager).forEach(function (otherState) {
       clearFeedback(otherState);
+      otherState.completedRoute = null;
       otherState.rediscoveryRequested = false;
       setHoverElement(otherState, null);
     });
@@ -2290,6 +2455,7 @@
     }
     liveStates(manager).forEach(function (otherState) {
       clearFeedback(otherState);
+      otherState.completedRoute = null;
       otherState.rediscoveryRequested = false;
       setHoverElement(otherState, null);
     });
@@ -2503,14 +2669,19 @@
   function invalidClick(state) {
     setStatus(
       state,
-      "Click a source or target in the active view, not in the Connect controls."
+      mobileRouteViewport()
+        ? "Tap a station in the active view."
+        : "Click a source or target in the active view, not in the Connect controls."
     );
   }
 
   function onRootClick(state, event) {
     var manager = state.manager;
     var session = manager.session;
-    if (!state.enabled || !sessionActive(manager)) {
+    var mobileIdleRoute = mobileRouteViewport() &&
+      state.available &&
+      !sessionActive(manager);
+    if ((!state.enabled || !sessionActive(manager)) && !mobileIdleRoute) {
       return;
     }
     event.preventDefault();
@@ -2526,6 +2697,12 @@
       return;
     }
     var anchor = state.provider.buildAnchor(element, state.surface, state.root, event.target);
+    if (mobileIdleRoute) {
+      startConnectSession(state);
+      beginConnection(state, element, anchor);
+      updateLineFromMouse(state, event.clientX, event.clientY);
+      return;
+    }
     if (session.phase === "choose-source") {
       beginConnection(state, element, anchor);
       updateLineFromMouse(state, event.clientX, event.clientY);
@@ -2564,6 +2741,10 @@
     var toggle = slot.querySelector(".hyperdoc-dom-connect-toggle");
     var annotation = slot.querySelector(".hyperdoc-dock-annotation");
     var snippetPlayground = slot.querySelector(".hyperdoc-dock-snippet-playground");
+    var mobileRouteTitleNode = slot.querySelector(".hyperdoc-mobile-route-title");
+    var mobileRouteDetailNode = slot.querySelector(".hyperdoc-mobile-route-detail");
+    var mobileRouteOpen = slot.querySelector(".hyperdoc-mobile-route-open");
+    var mobileRouteEvidence = slot.querySelector(".hyperdoc-mobile-route-evidence");
     var touchFahrplan = slot.querySelector(".hyperdoc-dock-touch-fahrplan");
     var dmx = slot.querySelector(".hyperdoc-dock-dmx");
     var cue = slot.querySelector(".hyperdoc-dom-connect-cue");
@@ -2583,6 +2764,8 @@
     var providerHandoffLabel = slot.querySelector(".hyperdoc-dock-provider-handoff-label");
     var dismiss = slot.querySelector(".hyperdoc-dock-dismiss");
     if (!control || !toggle || !annotation || !snippetPlayground ||
+        !mobileRouteTitleNode || !mobileRouteDetailNode ||
+        !mobileRouteOpen || !mobileRouteEvidence ||
         !touchFahrplan || !dmx ||
         !cue || !sourceSummary || !sourceChip || !clear ||
         !stateBadge || !coachmarkTitle || !coachmarkSummary ||
@@ -2599,6 +2782,10 @@
       toggle: toggle,
       annotation: annotation,
       snippetPlayground: snippetPlayground,
+      mobileRouteTitleNode: mobileRouteTitleNode,
+      mobileRouteDetailNode: mobileRouteDetailNode,
+      mobileRouteOpen: mobileRouteOpen,
+      mobileRouteEvidence: mobileRouteEvidence,
       touchFahrplan: touchFahrplan,
       dmx: dmx,
       cue: cue,
@@ -2663,7 +2850,8 @@
       coachmarkCapabilities: [],
       providerHandoffs: [],
       providerHelpSummary: "",
-      providerHelpDetail: ""
+      providerHelpDetail: "",
+      completedRoute: null
     };
     pane.hyperdocDomConnectState = state;
     registerState(manager, state);
@@ -2712,6 +2900,22 @@
       event.preventDefault();
       event.stopPropagation();
       openSnippetPlayground(state, event);
+    });
+    mobileRouteOpen.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      openCompletedRoute(state);
+    });
+    mobileRouteEvidence.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      openRequestEvidence(
+        state,
+        state.completedRoute && state.completedRoute.requestId || null,
+        "",
+        "Route evidence",
+        ""
+      );
     });
     touchFahrplan.addEventListener("click", function (event) {
       event.preventDefault();
@@ -2782,6 +2986,7 @@
         var center = elementCenter(state.surface, state.sourceElement);
         setLine(state.line, center, center);
       }
+      refreshPaneStateFromSession(state);
     });
     var observer = new MutationObserver(function () {
       schedulePaneSurfaceSync(state);

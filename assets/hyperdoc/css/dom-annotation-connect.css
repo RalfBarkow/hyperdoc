@@ -64,6 +64,10 @@
   color: rgba(74, 55, 34, 0.72);
 }
 
+.hyperdoc-mobile-route-copy {
+  display: none;
+}
+
 .hyperdoc-dock-actions {
   display: inline-flex;
   flex-wrap: wrap;
@@ -513,8 +517,48 @@
     justify-content: flex-start;
   }
 
-  .hyperdoc-dock-actions {
+  .hyperdoc-dock-compact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    justify-content: stretch;
     width: 100%;
+    max-width: none;
+    min-height: 2.35rem;
+    box-sizing: border-box;
+    padding: 0.38rem 0.5rem;
+    border-radius: 0.65rem;
+  }
+
+  .hyperdoc-dock-label {
+    display: none;
+  }
+
+  .hyperdoc-mobile-route-copy {
+    display: grid;
+    gap: 0.08rem;
+    min-width: 0;
+  }
+
+  .hyperdoc-mobile-route-title {
+    min-width: 0;
+    color: #3f3428;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hyperdoc-mobile-route-detail {
+    color: rgba(74, 55, 34, 0.72);
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+
+  .hyperdoc-dock-actions {
+    justify-content: flex-end;
+    width: auto;
   }
 
   .hyperdoc-dom-connect-help-panel,

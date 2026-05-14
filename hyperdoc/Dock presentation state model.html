@@ -5,8 +5,9 @@
 <p>
   This page makes the Dock coachmark model inspectable as a first-class
   HyperDoc object instead of leaving it only in prose or JS. The model records
-  the presentation states, transitions, UX claims, and the implementation
-  evidence that grounds those claims in source files and tests.
+  the desktop coachmark states, mobile route-strip states, transitions, UX
+  claims, and the implementation evidence that grounds those claims in source
+  files and tests.
 </p>
 
 <p>
@@ -32,6 +33,11 @@
   <li><b>active</b>: <b>Lay route</b> / Connect is mid-gesture, so the Dock stays expanded with task-state UI.</li>
   <li><b>degraded</b>: the richer chrome has receded after use or dismissal, while compact access remains.</li>
   <li><b>rediscovery</b>: the user explicitly reopens the richer coachmark layer with <b>Guide</b>.</li>
+  <li><b>idle</b>: the narrow route strip says <b>Tap a station</b>.</li>
+  <li><b>source-latched</b>: the route strip says <b>From: &lt;source&gt;</b> and asks for a target station or operation.</li>
+  <li><b>destination-candidate</b>: the second tap has identified an endpoint and route safety is evaluated.</li>
+  <li><b>confirming</b>: an operation route that is not safe direct-open exposes only <b>Dry run</b>, <b>Confirm</b>, and <b>Cancel</b>.</li>
+  <li><b>completed</b>: the first-class route is saved or reopened, with <b>Open route</b> and <b>Evidence</b> when available.</li>
 </ul>
 
 <p>
@@ -49,6 +55,13 @@
   <li><b>Active -&gt; Degraded</b>: when the stateful route-laying gesture ends, the Dock recedes.</li>
   <li><b>Degraded -&gt; Rediscovery</b>: <b>Guide</b> reopens the richer coachmark layer.</li>
   <li><b>Rediscovery -&gt; Degraded</b>: closing rediscovery returns the pane to compact capabilities.</li>
+  <li><b>Idle -&gt; Source latched</b>: the first mobile tap selects the source station.</li>
+  <li><b>Source latched -&gt; Destination candidate</b>: the second mobile tap selects a destination station or operation.</li>
+  <li><b>Destination candidate -&gt; Completed</b>: safe direct-open routes such as source -&gt; Annotation complete immediately.</li>
+  <li><b>Destination candidate -&gt; Confirming</b>: mutating operation routes require explicit confirmation.</li>
+  <li><b>Confirming -&gt; Confirming</b>: dry run adds evidence without committing the operation route.</li>
+  <li><b>Confirming -&gt; Completed</b>: confirm opens or saves the route.</li>
+  <li><b>Completed -&gt; Idle</b>: opening the route/evidence or starting another route returns the strip to <b>Tap a station</b>.</li>
 </ul>
 
 <h2>Claim-code evidence</h2>
@@ -64,6 +77,7 @@
   <li><b>Active route-laying keeps task state visible</b>: JS task-state handling, pane snapshot parsing, explorer views, and the same browser regression.</li>
   <li><b>Route/traversal workflows stay in the pane body</b>: Touch-Fahrplan topic view, DMX pane surfaces, and the coachmark runtime.</li>
   <li><b>Dock presentation state is inspectable</b>: current pane snapshots, explorer views, and the focused Lisp smoke.</li>
+  <li><b>Mobile Dock uses route-first two-tap flow</b>: the DOM Connect runtime, CSS route strip, Playwright mobile check, and Annotation smoke keep the narrow viewport contract grounded.</li>
 </ul>
 
 <h2>Shared UX grammar</h2>
@@ -95,11 +109,18 @@
 </p>
 
 <p>
-  In the current runtime, active Connect uses the cue
+  In the current desktop runtime, active Connect uses the cue
   <b>Click a target anchor or tap Annotation.</b>
   That keeps the teaching layer honest: the Dock introduces Annotation as a
   valid target completion path, while the richer relation inspection still
   happens in the opened annotation pane.
+</p>
+
+<p>
+  In the current mobile runtime, the corresponding cue is route-first:
+  <b>Tap a station</b>, then <b>From: Text pages</b>, then tap
+  <b>Annotation</b>. Connect remains the internal capability name behind that
+  route, but it is not the durable mobile label.
 </p>
 
 <h2>Runtime inspection seam</h2>
