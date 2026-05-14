@@ -152,6 +152,17 @@
                   :serial t
                   :components ((:file "codex")))))
 
+(defsystem #:hyperdoc/codex/examples
+    :description "Inspectable Codex collaboration examples"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/codex)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "codex-examples")))))
+
 (defsystem #:hyperdoc/shop3
     :description "SHOP3-backed HTN planning layer for HyperDoc operations"
     :author "Ralf Barkow <ralf.barkow@me.com>"
