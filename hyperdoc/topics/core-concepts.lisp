@@ -36,6 +36,270 @@
                  "DMX Topic"
                  "Demonstrating DMX Topic Proxies in HyperDoc")))
 
+;; Kioskberrli case-study dashboard objects.
+(defparameter *kioskberrli-dashboard-status-vocabulary*
+  '("declared" "blocked" "corrected" "missing evidence" "verified" "unknown"))
+
+(defclass kioskberrli-dashboard-status ()
+  ((id :accessor id-of :initarg :id)
+   (section :accessor kioskberrli-dashboard-status-section-of :initarg :section)
+   (status :accessor kioskberrli-dashboard-status-status-of :initarg :status)
+   (summary :accessor summary-of :initarg :summary)
+   (evidence :accessor kioskberrli-dashboard-status-evidence-of
+             :initarg :evidence
+             :initform nil)
+   (missing-evidence :accessor kioskberrli-dashboard-status-missing-evidence-of
+                     :initarg :missing-evidence
+                     :initform nil)
+   (next-action :accessor kioskberrli-dashboard-status-next-action-of
+                :initarg :next-action
+                :initform nil)
+   (related-stations :accessor kioskberrli-dashboard-status-related-stations-of
+                     :initarg :related-stations
+                     :initform nil)))
+
+(defclass kioskberrli-topic-dashboard ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (summary :accessor summary-of :initarg :summary)
+   (status-vocabulary :accessor kioskberrli-dashboard-status-vocabulary-of
+                      :initarg :status-vocabulary)
+   (sections :accessor kioskberrli-dashboard-sections-of :initarg :sections)
+   (stations :accessor kioskberrli-dashboard-stations-of :initarg :stations)))
+
+(defmethod print-object ((object kioskberrli-dashboard-status) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A: ~A"
+            (kioskberrli-dashboard-status-section-of object)
+            (kioskberrli-dashboard-status-status-of object))))
+
+(defmethod print-object ((object kioskberrli-topic-dashboard) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defclass codex-home ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (summary :accessor summary-of :initarg :summary)
+   (current-slice :accessor codex-home-current-slice-of
+                  :initarg :current-slice)
+   (primary-review-object :accessor codex-home-primary-review-object-of
+                          :initarg :primary-review-object)
+   (related-objects :accessor codex-home-related-objects-of
+                    :initarg :related-objects)
+   (relevant-pages :accessor codex-home-relevant-pages-of
+                   :initarg :relevant-pages)
+   (validation-commands :accessor codex-home-validation-commands-of
+                        :initarg :validation-commands)))
+
+(defmethod print-object ((object codex-home) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defun kioskberrli-dashboard-status-vocabulary ()
+  (copy-list *kioskberrli-dashboard-status-vocabulary*))
+
+(defun ensure-kioskberrli-dashboard-status (status)
+  (unless (member status *kioskberrli-dashboard-status-vocabulary*
+                  :test #'string=)
+    (error "Unknown Kioskberrli dashboard status ~S" status))
+  status)
+
+(defun make-kioskberrli-dashboard-status
+    (&key id section status summary evidence missing-evidence next-action related-stations)
+  (make-instance 'kioskberrli-dashboard-status
+                 :id id
+                 :section section
+                 :status (ensure-kioskberrli-dashboard-status status)
+                 :summary summary
+                 :evidence evidence
+                 :missing-evidence missing-evidence
+                 :next-action next-action
+                 :related-stations related-stations))
+
+(defun kioskberrli-dashboard-stations ()
+  '("Kioskberrli"
+    "Kioskberrli sdImage imageSize Failure"
+    "Kioskberrli Cross-Host Build Failure"
+    "Salon Pi 4 Kiosk Hardening Checklist"
+    "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+    "Pre-flight Checklist for Raspberry Pi NixOS SD Images"
+    "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+    "Two Installation Models: SD Image vs Classic Installer"
+    "Invariant: Boot Partition Must Be Big Enough"
+    "Prepare the AArch64 image"
+    "Hauptsache Entry Model"))
+
+(defun kioskberrli-dashboard-status ()
+  (make-kioskberrli-dashboard-status
+   :id "kioskberrli-current-status"
+   :section "Current status"
+   :status "blocked"
+   :summary "The Kioskberrli system is declared, the obsolete sdImage.imageSize source error is corrected, and the current blocker is the missing valid Linux build environment for the aarch64 SD image."
+   :evidence '("Kioskberrli sdImage imageSize Failure records the corrected source-level option removal."
+               "Kioskberrli Cross-Host Build Failure records the active aarch64-linux build-host mismatch.")
+   :missing-evidence '("successful project SD-image build on a valid Linux builder"
+                       "flash, boot, network, kiosk-session, and landing-page evidence from the physical Pi")
+   :next-action "Rerun the project SD-image build on a valid Linux builder or through a configured remote Linux builder, then record the resulting artifact."
+   :related-stations '("Kioskberrli Cross-Host Build Failure"
+                       "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+
+(defun kioskberrli-current-blocker ()
+  (make-kioskberrli-dashboard-status
+   :id "kioskberrli-current-blocker"
+   :section "Current blocker"
+   :status "blocked"
+   :summary "The source correction moved the build past the removed option, but the declared image target still requires an aarch64-linux build result that the current x86_64-darwin host cannot realize locally."
+   :evidence '("Required system: aarch64-linux"
+               "Current system: x86_64-darwin")
+   :missing-evidence '("build log from a valid aarch64-linux or suitable Linux builder")
+   :next-action "Build on a Linux machine or configure a remote Linux builder, then rerun the same sdImage target."
+   :related-stations '("Kioskberrli Cross-Host Build Failure"
+                       "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+
+(defun kioskberrli-build-evidence-status ()
+  (make-kioskberrli-dashboard-status
+   :id "kioskberrli-build-evidence"
+   :section "Build evidence"
+   :status "missing evidence"
+   :summary "The correction for sdImage.imageSize is recorded as corrected, but no successful project SD-image artifact has been recorded from a valid Linux builder."
+   :evidence '("sdImage.imageSize correction path is documented as corrected."
+               "Runbook names the project build target.")
+   :missing-evidence '("successful nix build output for .#nixosConfigurations.kioskberrli.config.system.build.sdImage"
+                       "artifact path and exact build provenance")
+   :next-action "Capture the successful builder, command, artifact path, and nixpkgs revision once the build completes."
+   :related-stations '("Kioskberrli sdImage imageSize Failure"
+                       "Kioskberrli Cross-Host Build Failure"
+                       "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+
+(defun kioskberrli-flash-boot-evidence-status ()
+  (make-kioskberrli-dashboard-status
+   :id "kioskberrli-flash-boot-evidence"
+   :section "Flash / boot evidence"
+   :status "missing evidence"
+   :summary "No recorded evidence yet proves that the generated image was flashed, booted on the physical Raspberry Pi 4, reached the network, and started the kiosk session."
+   :missing-evidence '("SD-card flash record"
+                       "first boot observation on the physical Pi 4"
+                       "network reachability"
+                       "automatic kiosk session startup")
+   :next-action "After a valid build artifact exists, flash the .img, boot the Pi, and record the observed boot and network state."
+   :related-stations '("Pre-flight Checklist for Raspberry Pi NixOS SD Images"
+                       "Invariant: Boot Partition Must Be Big Enough")))
+
+(defun kioskberrli-public-display-layout-status ()
+  (make-kioskberrli-dashboard-status
+   :id "kioskberrli-public-display-layout"
+   :section "Public-display layout state"
+   :status "declared"
+   :summary "The public-display target is declared as the hauptsache landing page on a salon wall screen, but the physical kiosk display loop has not yet been verified."
+   :evidence '("Landing page target: https://hauptsache.dreyeck.ch/assets/home/index.html"
+               "Hauptsache Entry Model separates public entry surface, wiki workspace, and kiosk device.")
+   :missing-evidence '("browser starts automatically on the Pi"
+                       "landing page appears after reboot and after browser/session recovery")
+   :next-action "Verify the kiosk session on target hardware after build and boot evidence exists."
+   :related-stations '("Hauptsache Entry Model"
+                       "Salon Pi 4 Kiosk Hardening Checklist")))
+
+(defun kioskberrli-dashboard ()
+  (make-instance 'kioskberrli-topic-dashboard
+                 :id "kioskberrli-dashboard"
+                 :title "Kioskberrli Dashboard"
+                 :summary "Case-study topic dashboard for Kioskberrli operational status, blockers, evidence, and related topic stations."
+                 :status-vocabulary (kioskberrli-dashboard-status-vocabulary)
+                 :sections (list (kioskberrli-dashboard-status)
+                                 (kioskberrli-current-blocker)
+                                 (kioskberrli-build-evidence-status)
+                                 (kioskberrli-flash-boot-evidence-status)
+                                 (kioskberrli-public-display-layout-status))
+                 :stations (kioskberrli-dashboard-stations)))
+
+(defun codex ()
+  (make-instance 'codex-home
+                 :id "codex-home"
+                 :title "Codex home"
+                 :summary "Inspectable collaboration home surface for the current HyperDoc review slice."
+                 :current-slice "Kioskberrli mobile station-board view"
+                 :primary-review-object (kioskberrli-dashboard)
+                 :related-objects (list (kioskberrli-dashboard-status)
+                                        (kioskberrli-current-blocker)
+                                        (kioskberrli-build-evidence-status)
+                                        (kioskberrli-dashboard-stations))
+                 :relevant-pages '("Kioskberrli"
+                                   "Kioskberrli Dashboard"
+                                   "Kioskberrli Cross-Host Build Failure")
+                 :validation-commands
+                 '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/tests)'"
+                   "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/tests)' --eval '(hyperdoc/tests:run-kioskberrli-dashboard-smoke-tests)'"
+                   "tools/validate-documentation-slice.sh --page 'hyperdoc/Kioskberrli Dashboard.html'"
+                   "git diff --check")))
+
+(defun kioskberrli-topic ()
+  (make-topic
+   :id "kioskberrli"
+   :title "Kioskberrli"
+   :summary "Raspberry Pi 4 based kiosk case study for making the hauptsache landing page physically present in the salon."
+   :references '("Kioskberrli Dashboard"
+                 "Kioskberrli"
+                 "Salon Pi 4 Kiosk Hardening Checklist"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Hauptsache Entry Model")))
+
+(defun kioskberrli-dashboard-topic ()
+  (make-topic
+   :id "kioskberrli-dashboard"
+   :title "Kioskberrli Dashboard"
+   :summary "Case-study dashboard for Kioskberrli status, blockers, evidence gaps, next action, and related topic stations."
+   :references '("Kioskberrli"
+                 "Kioskberrli Cross-Host Build Failure"
+                 "Salon Pi 4 Kiosk Hardening Checklist"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+
+(defun kioskberrli-sdimage-imagesize-failure-topic ()
+  (make-topic
+   :id "kioskberrli-sdimage-imagesize-failure"
+   :title "Kioskberrli sdImage imageSize Failure"
+   :summary "Completed correction topic for the obsolete sdImage.imageSize option in the Kioskberrli SD-image configuration."
+   :references '("Kioskberrli Dashboard"
+                 "Kioskberrli sdImage imageSize Failure"
+                 "Kioskberrli Cross-Host Build Failure")))
+
+(defun kioskberrli-cross-host-build-failure-topic ()
+  (make-topic
+   :id "kioskberrli-cross-host-build-failure"
+   :title "Kioskberrli Cross-Host Build Failure"
+   :summary "Active Kioskberrli blocker: the aarch64-linux SD-image target needs a valid Linux builder rather than the current x86_64-darwin host."
+   :references '("Kioskberrli Dashboard"
+                 "Kioskberrli Cross-Host Build Failure"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+
+(defun salon-pi-4-kiosk-hardening-checklist-topic ()
+  (make-topic
+   :id "salon-pi-4-kiosk-hardening-checklist"
+   :title "Salon Pi 4 Kiosk Hardening Checklist"
+   :summary "Checklist for turning the declared Kioskberrli SD-image target into a credible maintained salon kiosk."
+   :references '("Kioskberrli Dashboard"
+                 "Salon Pi 4 Kiosk Hardening Checklist"
+                 "Kioskberrli"
+                 "Hauptsache Entry Model")))
+
+(defun invariant-boot-partition-must-be-big-enough-topic ()
+  (make-topic
+   :id "invariant-boot-partition-must-be-big-enough"
+   :title "Invariant: Boot Partition Must Be Big Enough"
+   :summary "Operational invariant that the Raspberry Pi SD-image boot partition must have enough capacity for kernels, initrds, extlinux state, and generations."
+   :references '("Kioskberrli Dashboard"
+                 "Invariant: Boot Partition Must Be Big Enough"
+                 "Pre-flight Checklist for Raspberry Pi NixOS SD Images")))
+
+(defun hauptsache-entry-model-topic ()
+  (make-topic
+   :id "hauptsache-entry-model"
+   :title "Hauptsache Entry Model"
+   :summary "Public-entry model that separates the landing page, FedWiki workspace, and physical Kioskberrli device."
+   :references '("Kioskberrli Dashboard"
+                 "Hauptsache Entry Model"
+                 "Kioskberrli")))
+
 ;; Topic objects for AArch64 SD-image preparation flow.
 (defun prepare-aarch64-image-topic ()
   (make-topic
@@ -1193,4 +1457,3 @@
    :summary "A higher-level pedagogical grouping that orders and relates teaching sequences into a larger progression such as a lesson, module, or course."
    :references '("Winston and Horn Lisp (1989)"
                  "Winston and Horn Lisp topic arrangement")))
-
