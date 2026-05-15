@@ -8,6 +8,14 @@
 (require :asdf)
 (asdf:load-system :hyperdoc/server :force t)
 
+(defparameter *release-doc-runtime-support-systems*
+  '(:hyperdoc-goldberg-programmer-as-reader)
+  "ASDF systems that provide packages/functions referenced by shipped page expr links.")
+
+(defun load-release-doc-runtime-support-systems ()
+  (dolist (system *release-doc-runtime-support-systems*)
+    (asdf:load-system system)))
+
 (defun whitespace-char-p (ch)
   (or (char= ch #\Space)
       (char= ch #\Tab)
@@ -80,6 +88,7 @@
       (symbol-name symbol)))
 
 (defun run-check ()
+  (load-release-doc-runtime-support-systems)
   (let ((all-symbols (copy-list *required-release-symbols*))
         (symbol-pages (make-hash-table :test #'eq)))
     (dolist (page (shipped-hyperdoc-html-pages))
