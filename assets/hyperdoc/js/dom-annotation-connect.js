@@ -734,6 +734,7 @@
   var DOCK_CAPABILITY_CONNECT = "connect";
   var DOCK_CAPABILITY_SNIPPET = "snippet";
   var MOBILE_ROUTE_MEDIA_QUERY = "(max-width: 720px)";
+  var MOBILE_ROUTE_SUCCESS_FEEDBACK_MS = 1600;
   var DOCK_INTRODUCTION_PRIORITY = [
     DOCK_CAPABILITY_SNIPPET,
     DOCK_CAPABILITY_CONNECT
@@ -870,6 +871,12 @@
   }
 
   function mobileRouteStateForSession(state, session) {
+    if (state &&
+        state.completedRoute &&
+        state.mobileRouteSuccessUntil &&
+        Date.now() < state.mobileRouteSuccessUntil) {
+      return "completed";
+    }
     if (state && state.feedback &&
         !state.feedback.hidden &&
         state.feedback.dataset.kind === "success") {
@@ -919,14 +926,14 @@
       return "Opening route";
     }
     if (routeState === "completed") {
-      return "Open route or evidence when available";
+      return "";
     }
     return "";
   }
 
   function connectionSuccessText(session) {
-    var sourceLabel = anchorLabel(session && session.sourceAnchor, "source");
-    var targetLabel = anchorLabel(session && session.targetAnchor, "target");
+    var sourceLabel = anchorLabel(session && session.sourceAnchor, null);
+    var targetLabel = anchorLabel(session && session.targetAnchor, null);
     if (sourceLabel && targetLabel) {
       return 'Route saved: "' + sourceLabel + '" to "' + targetLabel + '".';
     }
@@ -1095,7 +1102,33 @@
     completeConnection(state, buildAnnotationTargetAnchor(state));
   }
 
+  function clearMobileRouteSuccess(state) {
+    if (!state) {
+      return;
+    }
+    state.mobileRouteSuccessUntil = null;
+    if (state.mobileRouteSuccessTimer) {
+      window.clearTimeout(state.mobileRouteSuccessTimer);
+      state.mobileRouteSuccessTimer = null;
+    }
+  }
+
+  function showMobileRouteSuccess(state) {
+    if (!state) {
+      return;
+    }
+    clearMobileRouteSuccess(state);
+    state.mobileRouteSuccessUntil =
+      Date.now() + MOBILE_ROUTE_SUCCESS_FEEDBACK_MS;
+    state.mobileRouteSuccessTimer = window.setTimeout(function () {
+      state.mobileRouteSuccessTimer = null;
+      state.mobileRouteSuccessUntil = null;
+      refreshPaneStateFromSession(state);
+    }, MOBILE_ROUTE_SUCCESS_FEEDBACK_MS);
+  }
+
   function clearFeedback(state) {
+    clearMobileRouteSuccess(state);
     state.feedback.hidden = true;
     state.feedback.textContent = "";
     state.feedback.innerHTML = "";
@@ -1103,6 +1136,15 @@
   }
 
   function setFeedback(state, kind, text) {
+    if (kind === "success" && mobileRouteViewport()) {
+      state.feedback.hidden = true;
+      state.feedback.textContent = "";
+      state.feedback.innerHTML = "";
+      delete state.feedback.dataset.kind;
+      showMobileRouteSuccess(state);
+      return;
+    }
+    clearMobileRouteSuccess(state);
     state.feedback.dataset.kind = kind;
     state.feedback.textContent = text;
     state.feedback.hidden = false;
@@ -2823,6 +2865,8 @@
       resetTimer: null,
       syncingPaneSurface: false,
       syncPaneSurfaceScheduled: false,
+      mobileRouteSuccessTimer: null,
+      mobileRouteSuccessUntil: null,
       provider: providerApiForKind("dom-v1"),
       providerKind: "dom-v1",
       surface: null,
