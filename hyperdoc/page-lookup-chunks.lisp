@@ -5,7 +5,10 @@
 (in-package :hyperdoc)
 
 (defparameter *page-lookup-topic-source-path*
-  (asdf:system-relative-pathname :hyperdoc "hyperdoc/topics.lisp"))
+  (asdf:system-relative-pathname :hyperdoc "hyperdoc/topics/generated-slices.lisp"))
+
+(defparameter *page-lookup-topic-source-roots*
+  (list (asdf:system-relative-pathname :hyperdoc "hyperdoc/topics/")))
 
 (defparameter *page-lookup-topic-loader*
   #'load)
@@ -13,6 +16,8 @@
 (defparameter +no-info-date+ -1)
 
 (defvar *page-lookup-current-source-signature-table* nil)
+
+(defvar *page-lookup-topic-source-scan-conditions* nil)
 
 (defclass page-lookup-target-chunk ()
   ((id :reader id-of :initarg :id)
@@ -74,10 +79,54 @@
 (defun page-lookup-topic-source-path ()
   (uiop:ensure-pathname *page-lookup-topic-source-path*))
 
+(defun page-lookup-topic-source-roots ()
+  (cond
+    ((null *page-lookup-topic-source-roots*)
+     nil)
+    ((listp *page-lookup-topic-source-roots*)
+     *page-lookup-topic-source-roots*)
+    (t
+     (list *page-lookup-topic-source-roots*))))
+
+(defun page-lookup-topic-source-file-paths-under (root)
+  (let ((pathname (uiop:ensure-pathname root)))
+    (cond
+      ((uiop:directory-exists-p pathname)
+       (sort
+        (copy-list
+         (directory
+          (merge-pathnames "*.lisp"
+                           (uiop:ensure-directory-pathname pathname))))
+        #'string<
+        :key #'namestring))
+      ((uiop:file-exists-p pathname)
+       (list pathname))
+      (t
+       nil))))
+
+(defun page-lookup-topic-source-paths ()
+  (let ((seen (make-hash-table :test #'equal))
+        (paths nil))
+    (labels ((add-path (path)
+               (when (and path (uiop:file-exists-p path))
+                 (let ((key (namestring (uiop:ensure-pathname path))))
+                   (unless (gethash key seen)
+                     (setf (gethash key seen) t)
+                     (push path paths))))))
+      (dolist (root (page-lookup-topic-source-roots))
+        (dolist (path (page-lookup-topic-source-file-paths-under root))
+          (add-path path)))
+      (add-path (page-lookup-topic-source-path))
+      (nreverse paths))))
+
 (defun page-lookup-topic-source-write-date ()
-  (or (ignore-errors
-        (file-write-date (page-lookup-topic-source-path)))
-      +no-info-date+))
+  (reduce #'max
+          (remove nil
+                  (mapcar (lambda (path)
+                            (ignore-errors
+                              (file-write-date path)))
+                          (page-lookup-topic-source-paths)))
+          :initial-value +no-info-date+))
 
 (defun page-lookup-title->stable-key (title)
   (let ((pending-separator-p nil))
@@ -108,18 +157,26 @@
 (defun page-lookup-topic-source-signature-table ()
   (or *page-lookup-current-source-signature-table*
       (let ((table (make-hash-table :test #'eq)))
-        (with-open-file (stream (page-lookup-topic-source-path)
-                                :direction :input
-                                :external-format :utf-8)
-          (with-standard-io-syntax
-            (let ((*package* (find-package :hyperdoc)))
-              (loop for form = (read stream nil :eof)
-                    until (eq form :eof)
-                    do (when (and (consp form)
-                                  (eq (first form) 'defun)
-                                  (symbolp (second form)))
-                         (setf (gethash (second form) table)
-                               (prin1-to-string form)))))))
+        (setf *page-lookup-topic-source-scan-conditions* nil)
+        (dolist (path (page-lookup-topic-source-paths))
+          (handler-case
+              (with-open-file (stream path
+                                      :direction :input
+                                      :external-format :utf-8)
+                (with-standard-io-syntax
+                  (let ((*package* (find-package :hyperdoc)))
+                    (loop for form = (read stream nil :eof)
+                          until (eq form :eof)
+                          do (when (and (consp form)
+                                        (eq (first form) 'defun)
+                                        (symbolp (second form)))
+                               (setf (gethash (second form) table)
+                                     (prin1-to-string form)))))))
+            (error (condition)
+              (push (list :path path
+                          :condition condition
+                          :message (princ-to-string condition))
+                    *page-lookup-topic-source-scan-conditions*))))
         table)))
 
 (defun authored-topic-factory-source-signature (title)
@@ -210,11 +267,11 @@
     (declare (ignore title))
     (case (topic-page-lookup-chunk-state chunk)
       (:needs-topic-creation
-       "Ensure the authored topic factory basis chunk first. That appends a placeholder topic factory to topics.lisp, reloads the source, and then rebuilds topic indexes through the target chunk.")
+       "Ensure the authored topic factory basis chunk first. That appends a placeholder topic factory to the generated topic source, reloads the source, and then rebuilds topic indexes through the target chunk.")
       (:needs-local-materialization
        (if (topic-page-resolves-p (page-lookup-topic-title-of chunk))
-           "Ensure the target chunk. That reloads topics.lisp and rebuilds topic indexes so the materialized per-topic signature matches the current authored topic factory."
-           "Ensure the target chunk. That reloads topics.lisp and rebuilds topic indexes until the Topics page resolves again."))
+           "Ensure the target chunk. That reloads the generated topic source and rebuilds topic indexes so the materialized per-topic signature matches the current authored topic factory."
+           "Ensure the target chunk. That reloads the generated topic source and rebuilds topic indexes until the Topics page resolves again."))
       (:fixed
        "No repair is needed. Ensuring the target chunk should be a no-op while the authored topic factory and materialized topic entry stay in sync.")
       (otherwise
@@ -236,6 +293,7 @@
             summary)))
 
 (defun append-placeholder-topic-factory! (title)
+  (ensure-directories-exist (page-lookup-topic-source-path))
   (with-open-file (stream (page-lookup-topic-source-path)
                           :direction :output
                           :if-exists :append

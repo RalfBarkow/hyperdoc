@@ -32,6 +32,7 @@
    :run-authored-html-render-safety-smoke-tests
    :run-lookup-issue-docs-render-smoke-tests
    :run-page-lookup-issues-smoke-tests
+   :run-page-lookup-disconnection-smoke-tests
    :run-function-lookup-issues-smoke-tests
    :run-class-lookup-issues-smoke-tests
    :run-collective-knowledge-slice-smoke-tests

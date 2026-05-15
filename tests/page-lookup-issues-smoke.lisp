@@ -131,7 +131,9 @@
          (original-topics (hyperdoc::page-lookup-topic-source-path)))
     (page-lookup-copy-file original-topics temp-topics)
     (unwind-protect
-         (let ((hyperdoc::*page-lookup-topic-source-path* temp-topics))
+         (let ((hyperdoc::*page-lookup-topic-source-path* temp-topics)
+               (hyperdoc::*page-lookup-topic-source-roots* nil)
+               (hyperdoc::*page-lookup-current-source-signature-table* nil))
            (funcall thunk symbol temp-topics original-topics))
       (restore-topic-factory-test-state! symbol state)
       (ignore-errors
