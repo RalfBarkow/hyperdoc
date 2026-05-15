@@ -142,3 +142,28 @@
    :title "Synthetic Cyclic Codex Context NOR Structural Proof"
    :interpretation
    "NOR-style structural proof failed as expected: the synthetic witness graph contains forbidden cyclic previous-context structure without creating a live cyclic Lisp object."))
+
+(defun codex-recent-changes-example ()
+  (codex-recent-changes))
+
+(defun codex-next-example ()
+  (codex-next))
+
+(defun codex-next-for-kioskberrli-pending-work-example ()
+  (let ((changes
+          (make-instance
+           'codex-recent-changes
+           :id "codex-kioskberrli-pending-recent-changes"
+           :title "Kioskberrli Pending Recent Changes"
+           :source "Deterministic Codex example"
+           :captured-at "2026-05-15 example snapshot"
+           :scope "Only the pending Kioskberrli boundary entry."
+           :summary
+           "Example recent-changes object focused on pending Kioskberrli station-board work."
+           :entries (list (codex--kioskberrli-pending-change))
+           :neighborhood '("Codex" "Kioskberrli Dashboard")
+           :provenance
+           '("Deterministic example."
+             "No external services, git, validation, server startup, or file mutation.")
+           :limit 2)))
+    (codex-next-for-recent-changes changes :limit 2)))

@@ -14,6 +14,8 @@
              (views:html
               (:li (:tt (views:esc command))))))
     (let ((context-window (codex-home-context-window-of home))
+          (recent-changes (codex-home-recent-changes-of home))
+          (next (codex-home-next-of home))
           (primary (codex-home-primary-review-object-of home))
           (related (codex-home-related-objects-of home))
           (commit-boundary (codex-home-commit-boundary-of home)))
@@ -38,6 +40,10 @@
                               (:ul
                                (:li (object-ref context-window
                                                 "Context window"))
+                               (:li (object-ref recent-changes
+                                                "Recent Changes"))
+                               (:li (object-ref next
+                                                "Next"))
                                (:li (object-ref primary
                                                 "kioskberrli-dashboard"))
                                (:li (object-ref (first related)
@@ -164,6 +170,275 @@
                             (:h2 "Provenance")
                             (text-list
                              (codex-context-window-provenance-of window)))))))
+
+(views:defview 👀recent-changes (changes codex-recent-changes)
+  (labels ((text-list (items)
+             (if items
+                 (views:html
+                  (:ul
+                   (dolist (item items)
+                     (views:html
+                      (:li (views:esc item))))))
+                 (views:html
+                  (:p "None"))))
+           (entry-list (entries)
+             (views:html
+              (:ul
+               (dolist (entry entries)
+                 (views:html
+                  (:li
+                   (views:object-ref entry :display (title-of entry))
+                   " "
+                   (:small
+                    (views:esc
+                     (prin1-to-string
+                      (codex-recent-change-kind-of entry)))))))))))
+    (views:html-view :title "Recent Changes" :priority 0
+                     (views:add-asset-path "/hyperbook/"
+                                           (asdf:system-relative-pathname
+                                            :hyperbook
+                                            "assets/hyperbook/"))
+                     (views:include-css "/hyperbook/css/hyperbook.css")
+                     (views:html
+                      (:div :class "hyperbook-page"
+                            (:h1 (views:esc (title-of changes)))
+                            (:p (:b "Source: ")
+                                (views:esc
+                                 (codex-recent-changes-source-of changes)))
+                            (:p (:b "Captured at: ")
+                                (views:esc
+                                 (codex-recent-changes-captured-at-of changes)))
+                            (:p (:b "Scope: ")
+                                (views:esc
+                                 (codex-recent-changes-scope-of changes)))
+                            (:p (views:esc (summary-of changes)))
+                            (:h2 "Neighborhood")
+                            (text-list
+                             (codex-recent-changes-neighborhood-of changes))
+                            (:h2 "Entries")
+                            (entry-list
+                             (codex-recent-changes-entries-of changes))
+                            (:h2 "Next")
+                            (:p
+                             (views:object-ref
+                              (codex-next-for-recent-changes
+                               changes
+                               :limit
+                               (codex-recent-changes-limit-of changes))
+                              :display "Next routes from this snapshot"))
+                            (:h2 "Provenance")
+                            (text-list
+                             (codex-recent-changes-provenance-of changes)))))))
+
+(views:defview 👀change (change codex-recent-change)
+  (labels ((text-list (items)
+             (if items
+                 (views:html
+                  (:ul
+                   (dolist (item items)
+                     (views:html
+                      (:li (views:esc item))))))
+                 (views:html
+                  (:p "None"))))
+           (maybe-object (label object)
+             (when object
+               (views:html
+                (:p (:b (views:esc label))
+                    ": "
+                    (views:object-ref
+                     object
+                     :display (or (ignore-errors (title-of object))
+                                  (prin1-to-string object))))))))
+    (views:html-view :title "Change" :priority 0
+                     (views:add-asset-path "/hyperbook/"
+                                           (asdf:system-relative-pathname
+                                            :hyperbook
+                                            "assets/hyperbook/"))
+                     (views:include-css "/hyperbook/css/hyperbook.css")
+                     (views:html
+                      (:div :class "hyperbook-page"
+                            (:h1 (views:esc (title-of change)))
+                            (:p (:b "Kind: ")
+                                (views:esc
+                                 (prin1-to-string
+                                  (codex-recent-change-kind-of change))))
+                            (:p (:b "Changed at: ")
+                                (views:esc
+                                 (codex-recent-change-changed-at-of change)))
+                            (:p (:b "Actor: ")
+                                (views:esc
+                                 (codex-recent-change-actor-of change)))
+                            (:p (views:esc (summary-of change)))
+                            (maybe-object
+                             "Source object"
+                             (codex-recent-change-source-object-of change))
+                            (maybe-object
+                             "Target object"
+                             (codex-recent-change-target-object-of change))
+                            (:h2 "Affected files")
+                            (text-list
+                             (codex-recent-change-affected-files-of change))
+                            (:h2 "Affected pages")
+                            (text-list
+                             (codex-recent-change-affected-pages-of change))
+                            (:h2 "Evidence")
+                            (text-list
+                             (codex-recent-change-evidence-of change))
+                            (:h2 "Route hints")
+                            (text-list
+                             (codex-recent-change-route-hints-of change)))))))
+
+(views:defview 👀next (next codex-next)
+  (labels ((text-list (items)
+             (if items
+                 (views:html
+                  (:ul
+                   (dolist (item items)
+                     (views:html
+                      (:li (views:esc item))))))
+                 (views:html
+                  (:p "None"))))
+           (value-ref (value)
+             (cond
+               ((null value)
+                (views:html "None"))
+               ((stringp value)
+                (views:html (views:esc value)))
+               ((or (symbolp value) (numberp value))
+                (views:html (views:esc (prin1-to-string value))))
+               (t
+                (views:object-ref
+                 value
+                 :display (or (ignore-errors (title-of value))
+                              (prin1-to-string value))))))
+           (route-label (route)
+             (format nil "~A -> ~A / ~A"
+                     (codex-next-route-source-topic-of route)
+                     (or (codex-next-route-target-topic-of route)
+                         "operation")
+                     (codex-next-route-target-operation-of route)))
+           (route-list (routes)
+             (views:html
+              (:ul
+               (loop for route in routes
+                     repeat 5
+                     do (views:html
+                         (:li
+                          (views:object-ref route
+                                            :display (route-label route)))))))))
+    (views:html-view :title "Next" :priority 0
+                     (views:add-asset-path "/hyperbook/"
+                                           (asdf:system-relative-pathname
+                                            :hyperbook
+                                            "assets/hyperbook/"))
+                     (views:include-css "/hyperbook/css/hyperbook.css")
+                     (views:html
+                      (:div :class "hyperbook-page"
+                            (:h1 (views:esc (title-of next)))
+                            (:p (:b "Source: ")
+                                (value-ref (codex-next-source-of next)))
+                            (:p (:b "Generated at: ")
+                                (views:esc
+                                 (codex-next-generated-at-of next)))
+                            (:p (views:esc (summary-of next)))
+                            (:h2 "Primary routes")
+                            (route-list (codex-next-routes-of next))
+                            (:h2 "Provenance")
+                            (text-list
+                             (codex-next-provenance-of next)))))))
+
+(views:defview 👀route (route codex-next-route)
+  (labels ((text-list (items)
+             (if items
+                 (views:html
+                  (:ul
+                   (dolist (item items)
+                     (views:html
+                      (:li (views:esc item))))))
+                 (views:html
+                 (:p "None"))))
+           (value-string (value)
+             (cond
+               ((null value) "None")
+               ((stringp value) value)
+               ((or (symbolp value) (numberp value))
+                (prin1-to-string value))
+               (t (princ-to-string value))))
+           (value-row (label value)
+             (views:html
+              (:p (:b (views:esc label))
+                  ": "
+                  (views:esc (value-string value)))))
+           (object-list (objects)
+             (if objects
+                 (views:html
+                  (:ul
+                   (dolist (object objects)
+                     (views:html
+                      (:li
+                       (views:object-ref
+                        object
+                        :display (or (ignore-errors (title-of object))
+                                     (prin1-to-string object))))))))
+                 (views:html
+                  (:p "None"))))
+           (derived-change (change)
+             (if change
+                 (views:object-ref change :display (title-of change))
+                 (views:html "None"))))
+    (views:html-view :title "Route" :priority 0
+                     (views:add-asset-path "/hyperbook/"
+                                           (asdf:system-relative-pathname
+                                            :hyperbook
+                                            "assets/hyperbook/"))
+                     (views:include-css "/hyperbook/css/hyperbook.css")
+                     (views:html
+                      (:div :class "hyperbook-page"
+                            (:h1 (views:esc (title-of route)))
+                            (:p (:b "Route: ")
+                                (views:esc
+                                 (format nil "~A -> ~A / ~A"
+                                         (codex-next-route-source-topic-of
+                                          route)
+                                         (or
+                                          (codex-next-route-target-topic-of
+                                           route)
+                                          "operation")
+                                         (codex-next-route-target-operation-of
+                                          route))))
+                            (value-row
+                             "Source topic"
+                             (codex-next-route-source-topic-of route))
+                            (value-row
+                             "Target topic"
+                             (codex-next-route-target-topic-of route))
+                            (value-row
+                             "Target operation"
+                             (codex-next-route-target-operation-of route))
+                            (:p (:b "Reason: ")
+                                (views:esc
+                                 (codex-next-route-reason-of route)))
+                            (:p (:b "Derived from: ")
+                                (derived-change
+                                 (codex-next-route-derived-from-of route)))
+                            (value-row
+                             "Priority"
+                             (codex-next-route-priority-of route))
+                            (value-row
+                             "Safety level"
+                             (codex-next-route-safety-level-of route))
+                            (value-row
+                             "Status"
+                             (codex-next-route-status-of route))
+                            (value-row
+                             "Action label"
+                             (codex-next-route-action-label-of route))
+                            (:h2 "Evidence")
+                            (text-list
+                             (codex-next-route-evidence-of route))
+                            (:h2 "Related objects")
+                            (object-list
+                             (codex-next-route-related-objects-of route)))))))
 
 (views:defview 👀raw (window codex-context-window)
   (let ((raw-text (codex-context-window-raw-text-of window)))

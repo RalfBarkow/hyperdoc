@@ -10,6 +10,10 @@
                   :initarg :current-slice)
    (context-window :accessor codex-home-context-window-of
                    :initarg :context-window)
+   (recent-changes :accessor codex-home-recent-changes-of
+                   :initarg :recent-changes)
+   (next :accessor codex-home-next-of
+         :initarg :next)
    (primary-review-object :accessor codex-home-primary-review-object-of
                           :initarg :primary-review-object)
    (related-objects :accessor codex-home-related-objects-of
@@ -107,6 +111,114 @@
 
 (defmethod print-object ((object codex-context-window-structural-proof)
                          stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defclass codex-recent-changes ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (source :accessor codex-recent-changes-source-of
+           :initarg :source)
+   (captured-at :accessor codex-recent-changes-captured-at-of
+                :initarg :captured-at)
+   (scope :accessor codex-recent-changes-scope-of
+          :initarg :scope)
+   (summary :accessor summary-of :initarg :summary)
+   (entries :accessor codex-recent-changes-entries-of
+            :initarg :entries)
+   (neighborhood :accessor codex-recent-changes-neighborhood-of
+                 :initarg :neighborhood)
+   (provenance :accessor codex-recent-changes-provenance-of
+               :initarg :provenance)
+   (limit :accessor codex-recent-changes-limit-of
+          :initarg :limit)))
+
+(defmethod print-object ((object codex-recent-changes) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defclass codex-recent-change ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (kind :accessor codex-recent-change-kind-of
+         :initarg :kind)
+   (changed-at :accessor codex-recent-change-changed-at-of
+               :initarg :changed-at)
+   (actor :accessor codex-recent-change-actor-of
+          :initarg :actor)
+   (summary :accessor summary-of :initarg :summary)
+   (source-object :accessor codex-recent-change-source-object-of
+                  :initarg :source-object
+                  :initform nil)
+   (target-object :accessor codex-recent-change-target-object-of
+                  :initarg :target-object
+                  :initform nil)
+   (affected-files :accessor codex-recent-change-affected-files-of
+                   :initarg :affected-files
+                   :initform nil)
+   (affected-pages :accessor codex-recent-change-affected-pages-of
+                   :initarg :affected-pages
+                   :initform nil)
+   (evidence :accessor codex-recent-change-evidence-of
+             :initarg :evidence
+             :initform nil)
+   (route-hints :accessor codex-recent-change-route-hints-of
+                :initarg :route-hints
+                :initform nil)))
+
+(defmethod print-object ((object codex-recent-change) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defclass codex-next ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (source :accessor codex-next-source-of
+           :initarg :source)
+   (changes :accessor codex-next-changes-of
+            :initarg :changes)
+   (routes :accessor codex-next-routes-of
+           :initarg :routes)
+   (summary :accessor summary-of :initarg :summary)
+   (generated-at :accessor codex-next-generated-at-of
+                 :initarg :generated-at)
+   (provenance :accessor codex-next-provenance-of
+               :initarg :provenance)))
+
+(defmethod print-object ((object codex-next) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defclass codex-next-route ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (source-topic :accessor codex-next-route-source-topic-of
+                 :initarg :source-topic)
+   (target-topic :accessor codex-next-route-target-topic-of
+                 :initarg :target-topic
+                 :initform nil)
+   (target-operation :accessor codex-next-route-target-operation-of
+                     :initarg :target-operation)
+   (reason :accessor codex-next-route-reason-of
+           :initarg :reason)
+   (derived-from :accessor codex-next-route-derived-from-of
+                 :initarg :derived-from)
+   (priority :accessor codex-next-route-priority-of
+             :initarg :priority)
+   (safety-level :accessor codex-next-route-safety-level-of
+                 :initarg :safety-level)
+   (status :accessor codex-next-route-status-of
+           :initarg :status)
+   (action-label :accessor codex-next-route-action-label-of
+                 :initarg :action-label)
+   (evidence :accessor codex-next-route-evidence-of
+             :initarg :evidence
+             :initform nil)
+   (related-objects :accessor codex-next-route-related-objects-of
+                    :initarg :related-objects
+                    :initform nil)))
+
+(defmethod print-object ((object codex-next-route) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
@@ -331,6 +443,255 @@
      :raw-text
      "Codex context window snapshot: Codex Home is approved; current slice is the Kioskberrli mobile station-board object view; source topic is Kioskberrli; target topic is Kioskberrli Cross-Host Build Failure; primary topics are Current status, Build evidence, Flash / boot evidence, Public-display layout state, and Related topic board.")))
 
+(defun codex-recent-changes-neighborhood ()
+  '("Codex"
+    "Codex context window"
+    "Codex examples"
+    "Recursive context-window structural proof"
+    "Kioskberrli station-board pending work"))
+
+(defun codex--recent-change (id title kind summary
+                             &key changed-at actor source-object
+                               target-object affected-files affected-pages
+                               evidence route-hints)
+  (make-instance 'codex-recent-change
+                 :id id
+                 :title title
+                 :kind kind
+                 :changed-at changed-at
+                 :actor actor
+                 :summary summary
+                 :source-object source-object
+                 :target-object target-object
+                 :affected-files affected-files
+                 :affected-pages affected-pages
+                 :evidence evidence
+                 :route-hints route-hints))
+
+(defun codex--kioskberrli-pending-change ()
+  (codex--recent-change
+   "kioskberrli-station-board-pending"
+   "Kioskberrli station-board work pending"
+   :working-tree
+   "Uncommitted Kioskberrli station-board/page/test work remains pending and should stay out of this Codex topic-system slice."
+   :changed-at "2026-05-15 pending workspace state"
+   :actor "user workspace"
+   :target-object (kioskberrli-dashboard)
+   :affected-files '("hyperdoc/Kioskberrli Dashboard.html"
+                     "hyperdoc/Kioskberrli.html"
+                     "tests/kioskberrli-dashboard-smoke.lisp"
+                     "tests/package.lisp")
+   :affected-pages '("Kioskberrli Dashboard" "Kioskberrli")
+   :evidence '("Observed as pre-existing dirty workspace state before this slice."
+               "This deterministic model entry records the boundary; it does not query git.")
+   :route-hints '("Continue only after inspecting live CLOG rendering."
+                  "Choose whether the next change belongs to an authored page or an inspector object view.")))
+
+(defun codex--default-recent-change-entries ()
+  (list
+   (codex--recent-change
+    "codex-home-added"
+    "Codex home object added"
+    :topic
+    "Codex became the shared inspectable home object for collaboration review state."
+    :changed-at "2026-05-14 committed Codex slice"
+    :actor "Codex/User collaboration"
+    :affected-files '("hyperdoc/codex.lisp"
+                      "hyperdoc-explorer/codex.lisp")
+    :affected-pages '("Codex")
+    :evidence '("Committed slice d6ee511 introduced the Codex topic ASDF coordinate."
+                "(hyperdoc::codex) is the shared inspectable home object.")
+    :route-hints '("Keep the home compact."
+                   "Link to derived objects instead of inlining them."))
+   (codex--recent-change
+    "codex-context-window-added"
+    "Codex context window added"
+    :context-window
+    "The Codex context-window object became reachable from Codex Home as the bounded current-context surface."
+    :changed-at "2026-05-14 committed Codex slice"
+    :actor "Codex/User collaboration"
+    :target-object (codex-context-window)
+    :affected-files '("hyperdoc/codex.lisp"
+                      "hyperdoc-explorer/codex.lisp")
+    :affected-pages '("Codex")
+    :evidence '("(hyperdoc::codex-context-window) loads through :hyperdoc/codex."
+                "Codex Home links to the context-window object.")
+    :route-hints '("Inspect the context window before broadening the slice."))
+   (codex--recent-change
+    "codex-examples-coordinate-added"
+    "Codex examples ASDF coordinate added"
+    :example
+    "The :hyperdoc/codex/examples system provides deterministic inspectable Codex examples."
+    :changed-at "2026-05-14 committed Codex slice"
+    :actor "Codex/User collaboration"
+    :affected-files '("hyperdoc.asd"
+                      "hyperdoc/codex-examples.lisp")
+    :evidence '(":hyperdoc/codex/examples loads deterministic examples."
+                "Examples do not call services, run validation, or mutate files.")
+    :route-hints '("Use examples as the first proof objects for new Codex concepts."))
+   (codex--recent-change
+    "codex-recursive-structural-proof-added"
+    "Recursive context-window structural proof added"
+    :proof
+    "A NOR-style structural proof checks finite context-window traversal for forbidden recursive shapes."
+    :changed-at "2026-05-14 committed Codex slice"
+    :actor "Codex/User collaboration"
+    :affected-files '("hyperdoc/codex.lisp"
+                      "hyperdoc/codex-examples.lisp"
+                      "hyperdoc-explorer/codex.lisp")
+    :evidence '("codex-context-window-nor-proof returns an inspectable proof object."
+                "Recursive examples expose finite and cyclic witness graphs.")
+    :route-hints '("Inspect proof examples as route evidence before adding live adapters."))
+   (codex--kioskberrli-pending-change)))
+
+(defun codex-recent-changes ()
+  (make-instance
+   'codex-recent-changes
+   :id "codex-recent-changes"
+   :title "Recent Changes"
+   :source "Deterministic Codex collaboration snapshot"
+   :captured-at "2026-05-15 bounded model snapshot"
+   :scope "Current Codex collaboration neighborhood; no live federation, git, MCP, or remote queries."
+   :summary "What changed recently in this collaboration neighborhood."
+   :entries (codex--default-recent-change-entries)
+   :neighborhood (codex-recent-changes-neighborhood)
+   :provenance '("Motivated by Federated Wiki's recent changes here and nearby idea."
+                 "Encoded as deterministic inspectable model data for this slice."
+                 "No external services, git discovery, MCP queries, or mutation.")
+   :limit 5))
+
+(defun codex--recent-change-by-id (changes id)
+  (find id (codex-recent-changes-entries-of changes)
+        :key #'id-of
+        :test #'equal))
+
+(defun codex--next-route (id title source-topic target-topic
+                          target-operation reason derived-from priority
+                          safety-level status action-label
+                          &key evidence related-objects)
+  (make-instance 'codex-next-route
+                 :id id
+                 :title title
+                 :source-topic source-topic
+                 :target-topic target-topic
+                 :target-operation target-operation
+                 :reason reason
+                 :derived-from derived-from
+                 :priority priority
+                 :safety-level safety-level
+                 :status status
+                 :action-label action-label
+                 :evidence evidence
+                 :related-objects related-objects))
+
+(defun codex--next-routes-for-recent-changes (changes)
+  (let ((context-change
+          (codex--recent-change-by-id changes "codex-context-window-added"))
+        (proof-change
+          (codex--recent-change-by-id
+           changes "codex-recursive-structural-proof-added"))
+        (kioskberrli-change
+          (codex--recent-change-by-id
+           changes "kioskberrli-station-board-pending")))
+    (append
+     (when context-change
+       (list
+        (codex--next-route
+         "inspect-codex-context-window"
+         "Inspect context window"
+         "Codex"
+         "Codex context window"
+         "inspect current context"
+         "The recent change made the bounded context-window object reachable from Codex Home."
+         context-change
+         1
+         :inspect
+         :available
+         "Inspect"
+         :evidence '("(hyperdoc::codex-context-window) is deterministic and inspectable.")
+         :related-objects (list (codex-context-window)))))
+     (when proof-change
+       (list
+        (codex--next-route
+         "inspect-structural-proof-examples"
+         "Inspect structural proof"
+         "Codex"
+         "recursive context-window NOR proof"
+         "inspect proof examples"
+         "The proof recent change supplies deterministic evidence for bounded recursive context-window traversal."
+         proof-change
+         2
+         :inspect
+         :available
+         "Inspect"
+         :evidence '("Use codex-recursive-context-window-nor-proof-example after loading :hyperdoc/codex/examples."))))
+     (when kioskberrli-change
+       (list
+        (codex--next-route
+         "continue-kioskberrli-station-board-view"
+         "Continue station-board view"
+         "Codex"
+         "Kioskberrli Dashboard / Kioskberrli mobile station-board"
+         "inspect pending station-board work"
+         "Pending Kioskberrli work is visible in the collaboration neighborhood but needs live-rendering evidence before continuation."
+         kioskberrli-change
+         3
+         :dry-run
+         :needs-evidence
+         "Inspect"
+         :evidence '("Pre-existing workspace state says Kioskberrli page/test work remains pending.")
+         :related-objects (list (kioskberrli-dashboard)))
+        (codex--next-route
+         "decide-kioskberrli-page-vs-object-view"
+         "Decide page vs object view"
+         "Kioskberrli Dashboard"
+         "Kioskberrli mobile station-board"
+         "choose authored-page path or inspector-view path"
+         "The pending work can plausibly continue as authored HyperDoc page work or as an inspector object-view change; the boundary needs confirmation."
+         kioskberrli-change
+         4
+         :confirm
+         :needs-evidence
+         "Decide"
+         :evidence '("The current slice must not mix Kioskberrli page/test edits into Codex topic-system work.")
+         :related-objects (list (kioskberrli-dashboard)))))
+     (when context-change
+       (list
+        (codex--next-route
+         "plan-mcp-context-window-refresh"
+         "Plan MCP refresh"
+         "Codex context window"
+         "DMX / MCP shared workspace"
+         "plan context-window refresh adapter"
+         "A later adapter can refresh Codex context from MCP or DMX once the deterministic object shape is accepted."
+         context-change
+         5
+         :dry-run
+         :deferred
+         "Plan"
+         :evidence '("This slice intentionally does not query MCP, DMX, git, or remote sites.")))))))
+
+(defun codex-next-for-recent-changes (changes &key limit)
+  (let* ((effective-limit (max 0 (or limit 5)))
+         (routes (codex--next-routes-for-recent-changes changes))
+         (primary-routes (subseq routes 0 (min effective-limit
+                                                (length routes)))))
+    (make-instance
+     'codex-next
+     :id "codex-next"
+     :title "Next"
+     :source changes
+     :changes changes
+     :routes primary-routes
+     :summary "Given these recent changes, plausible source-to-target operation routes for the next Codex move."
+     :generated-at "2026-05-15 deterministic route derivation"
+     :provenance '("Derived from codex-recent-changes entries."
+                   "At most five primary routes are generated by default."
+                   "No external services, git discovery, MCP queries, validation runs, or mutation."))))
+
+(defun codex-next ()
+  (codex-next-for-recent-changes (codex-recent-changes)))
+
 (defun codex ()
   (make-instance 'codex-home
                  :id "codex-home"
@@ -338,6 +699,8 @@
                  :summary "Inspectable collaboration home surface for the current HyperDoc review slice."
                  :current-slice "Kioskberrli mobile station-board view"
                  :context-window (codex-context-window)
+                 :recent-changes (codex-recent-changes)
+                 :next (codex-next)
                  :primary-review-object (kioskberrli-dashboard)
                  :related-objects (list (kioskberrli-dashboard-status)
                                         (kioskberrli-current-blocker)
