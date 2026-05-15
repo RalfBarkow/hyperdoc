@@ -720,8 +720,7 @@
    :references '("A framework for maintaining the coherence of a running Lisp"
                  "McDermott Running Image Coherence Crosswalk"
                  "Core Chunk Classes"
-                 "Chunk notes and manifest notes in a DMX workspace"
-                 "Touch-Fahrplan view for Zotero topic enrichment")))
+                 "Chunk notes and manifest notes in a DMX workspace")))
 
 (defun normal-association-submit-path-vs-evidence-path-topic ()
   (make-topic

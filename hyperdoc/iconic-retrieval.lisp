@@ -1071,8 +1071,7 @@
   (let* ((pages '("Iconic route language in HyperDoc"
                   "Inspectable iconic retrieval objects"
                   "Focused semantic source stations"
-                  "Symbols and semantics in Mind and Mechanism"
-                  "Touch-Fahrplan view for Zotero topic enrichment"))
+                  "Symbols and semantics in Mind and Mechanism"))
          (cue
           (make-linguistic-retrieval-cue
            :id "cue/follow-route"

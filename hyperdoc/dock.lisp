@@ -524,15 +524,6 @@ the primary pane-local object in this slice."))
    "hyperdoc-explorer/dock.lisp"
    :target-name "dock presentation explorer views"))
 
-(defun dock-touch-fahrplan-evidence ()
-  (make-dock-implementation-evidence
-   "dock-evidence/touch-fahrplan"
-   "Touch-Fahrplan body workflow"
-   "The richer Touch-Fahrplan route workflow remains in the topic-pane body surface instead of becoming a permanent Dock identity."
-   "source file"
-   "hyperdoc-explorer/topic-enrichment.lisp"
-   :target-name "Touch-Fahrplan topic view"))
-
 (defun dock-dmx-evidence ()
   (make-dock-implementation-evidence
    "dock-evidence/dmx-external"
@@ -635,11 +626,10 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-claim-code-relation
                  :id "dock-claim/provider-handoff"
                  :title "Provider-specific workflows stay in the pane body"
-                 :summary "Touch-Fahrplan and DMX are introduced from the Dock only as contextual handoffs; their richer workflow remains in the body-level surface."
+                 :summary "DMX is introduced from the Dock only as a contextual handoff; richer traversal remains in the body-level surface."
                  :claim-text
-                 "The Dock may surface a newly relevant provider handoff, but the route or traversal UI belongs to its own pane surface."
+                 "The Dock may surface a newly relevant provider handoff, but the traversal UI belongs to its own pane surface."
                  :evidence (list (dock-js-coachmark-evidence)
-                                 (dock-touch-fahrplan-evidence)
                                  (dock-dmx-evidence)
                                  (dock-playwright-evidence))))
 
@@ -693,7 +683,7 @@ the primary pane-local object in this slice."))
                                     "Acknowledge the capability teaching and recede to degraded."
                                     "Start Connect (stateful capability only)."
                                     "Switch to a steady-state pane where only compact access remains.")
-                 :capabilities '("Connect" "Annotation" "Snippet" "Touch-Fahrplan handoff" "DMX handoff")
+                 :capabilities '("Connect" "Annotation" "Snippet" "DMX handoff")
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-provider-handoff-claim))))
 
@@ -738,7 +728,7 @@ the primary pane-local object in this slice."))
                  :exit-conditions '("Guide closes again."
                                     "Dismiss coachmark."
                                     "Connect becomes active.")
-                 :capabilities '("Connect" "Annotation" "Snippet" "Touch-Fahrplan handoff" "DMX handoff")
+                 :capabilities '("Connect" "Annotation" "Snippet" "DMX handoff")
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-provider-handoff-claim))))
 

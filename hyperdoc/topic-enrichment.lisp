@@ -349,21 +349,21 @@
 (defun topic-enrichment-route-topic-anchor (definition)
   (topic-enrichment-route-anchor
    (topic-enrichment-route-definition-topic-of definition)
-   "touch-fahrplan"
+   "topic-enrichment"
    "topic"
    (title-of (topic-enrichment-route-definition-topic-of definition))))
 
 (defun topic-enrichment-route-source-anchor (definition)
   (topic-enrichment-route-anchor
    (topic-enrichment-route-definition-source-designator-of definition)
-   "touch-fahrplan"
+   "topic-enrichment"
    "zotero-source"
    (title-of (topic-enrichment-route-definition-source-designator-of definition))))
 
 (defun topic-enrichment-route-annotation (definition)
   (make-dom-relation-annotation
    :context-object (topic-enrichment-route-definition-topic-of definition)
-   :context-view-title "Touch-Fahrplan route"
+   :context-view-title "Topic enrichment route"
    :source-anchor (topic-enrichment-route-topic-anchor definition)
    :target-anchor (topic-enrichment-route-source-anchor definition)
    :relation-kind (topic-enrichment-route-definition-relation-kind-of definition)
@@ -393,7 +393,7 @@
         :relation-kind (or relation-kind "topic-enrichment-route")
         :notes (or notes
                    (format nil
-                           "Runtime-authored durable Touch-Fahrplan route for ~A."
+                           "Runtime-authored durable topic-enrichment route for ~A."
                            (title-of topic)))))
 
 (defun persist-topic-enrichment-route-definition!

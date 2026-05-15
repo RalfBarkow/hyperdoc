@@ -167,7 +167,6 @@
      "Land the local editorial center in HyperDoc's own language and add the minimum new pages and topics needed to make the imported concept durable."
      :touched-pages
      '("Iconic route language in HyperDoc"
-       "Touch-Fahrplan view for Zotero topic enrichment"
        "Focused semantic source stations"
        "Symbols and semantics in Mind and Mechanism")
      :topic-growth-allowed-p t)

@@ -443,30 +443,9 @@
                    (hyperdoc::inspectable-zotero-enrichment-plan-for-a-topic-topic
                     "Inspectable Zotero enrichment plan for a topic")
                    (hyperdoc::topic-enrichment-report-topic
-                    "Topic enrichment report")
-                   (hyperdoc::touch-fahrplan-view-for-zotero-topic-enrichment-topic
-                    "Touch-Fahrplan view for Zotero topic enrichment")))
+                    "Topic enrichment report")))
     (destructuring-bind (symbol title) entry
-      (assert-topic-function-present symbol title)))
-  (assert-hyperdoc-page-present "Touch-Fahrplan view for Zotero topic enrichment")
-  (assert-page-source-contains
-   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
-   "(chunk-topic-enrichment-query-plan)")
-  (assert-page-source-contains
-   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
-   "topic-source-route")
-  (assert-page-source-contains
-   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
-   "No hidden expr-style evaluation happens at render time")
-  (assert-page-source-contains
-   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
-   "Run plan")
-  (assert-page-source-contains
-   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
-   "Create durable route")
-  (assert-page-source-contains
-   "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html"
-   "*topic-enrichment-route-definitions*"))
+      (assert-topic-function-present symbol title))))
 
 (defun run-dock-capabilities-doc-slice-smoke-test ()
   (dolist (entry '((hyperdoc::dock-capabilities-in-hyperdoc-topic
@@ -496,7 +475,7 @@
    "Inspection stays in the inspector tabs")
   (assert-page-source-contains
    "hyperdoc/Dock capabilities in HyperDoc.html"
-   "Touch-Fahrplan and DMX are not competing permanent Dock identities")
+   "DMX is not a competing permanent Dock identity")
   (assert-page-source-contains
    "hyperdoc/Dock capabilities in HyperDoc.html"
    "Guide")
@@ -524,9 +503,6 @@
   (assert-page-source-contains
    "hyperdoc/Dock presentation state model.html"
    "Click a target anchor or tap Annotation.")
-  (assert-page-source-contains
-   "hyperdoc/Dock presentation state model.html"
-   "Touch-Fahrplan")
   (assert-page-source-contains
    "hyperdoc/Dock presentation state model.html"
    "DMX"))

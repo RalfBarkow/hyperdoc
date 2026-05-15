@@ -129,8 +129,7 @@
    :summary "Potentially grounded semantic station or inspectable world-state proxy that a HyperDoc route can retrieve or re-enter, rather than a bare symbolic label."
    :references '("Iconic route language in HyperDoc"
                  "Inspectable iconic retrieval objects"
-                 "Focused semantic source stations"
-                 "Touch-Fahrplan view for Zotero topic enrichment")))
+                 "Focused semantic source stations")))
 
 (defun iconic-hypothesis-topic ()
   (make-topic
@@ -148,7 +147,6 @@
    :summary "HyperDoc reading in which understanding succeeds when a cue or route re-enters the grounded state, evidence chain, trajectory, or interpretation path that makes the meaning inspectable."
    :references '("Iconic route language in HyperDoc"
                  "Inspectable iconic retrieval objects"
-                 "Touch-Fahrplan view for Zotero topic enrichment"
                  "Focused semantic source stations"
                  "Symbols and semantics in Mind and Mechanism")))
 
@@ -159,7 +157,6 @@
    :summary "View that language cues can serve as durable route starters into richer grounded semantic state, not only as names or labels."
    :references '("Iconic route language in HyperDoc"
                  "Inspectable iconic retrieval objects"
-                 "Touch-Fahrplan view for Zotero topic enrichment"
                  "Symbols and semantics in Mind and Mechanism")))
 
 (defun neural-state-machine-model-topic ()
@@ -179,7 +176,6 @@
    :references '("Iconic route language in HyperDoc"
                  "Inspectable iconic retrieval objects"
                  "Skillization in HyperDoc"
-                 "Touch-Fahrplan view for Zotero topic enrichment"
                  "Focused semantic source stations"
                  "Symbols and semantics in Mind and Mechanism")))
 
@@ -377,8 +373,7 @@
    :summary
    "First-class route/association object that ties one HyperDoc topic station to a read-only Zotero source station before any live Zotero query runs."
    :references
-   '("Touch-Fahrplan view for Zotero topic enrichment"
-     "Zotero library bridge for HyperDoc"
+   '("Zotero library bridge for HyperDoc"
      "Bibliography subcollections in HyperDoc"
      "Associations"
      "Normal association submit path vs evidence path")))
@@ -388,8 +383,7 @@
    :id "inspectable-zotero-enrichment-plan-for-a-topic"
    :title "Inspectable Zotero enrichment plan for a topic"
    :summary "Inspectable query-plan object that makes the intended Zotero query text, match mode, backend seam, execution path, and repair hints visible before the live query boundary."
-   :references '("Touch-Fahrplan view for Zotero topic enrichment"
-                 "Topic-to-Zotero enrichment route"
+   :references '("Topic-to-Zotero enrichment route"
                  "Zotero library bridge for HyperDoc")))
 
 (defun topic-enrichment-report-topic ()
@@ -397,20 +391,8 @@
    :id "topic-enrichment-report"
    :title "Topic enrichment report"
    :summary "Inspectable report object that keeps Zotero query evidence, matched items, candidate signals, and editorial consequences separate on the enriched topic path."
-   :references '("Touch-Fahrplan view for Zotero topic enrichment"
-                 "Inspectable Zotero enrichment plan for a topic"
+   :references '("Inspectable Zotero enrichment plan for a topic"
                  "Bibliography subcollections in HyperDoc")))
-
-(defun touch-fahrplan-view-for-zotero-topic-enrichment-topic ()
-  (make-topic
-   :id "touch-fahrplan-view-for-zotero-topic-enrichment"
-   :title "Touch-Fahrplan view for Zotero topic enrichment"
-   :summary "Topic-pane view that treats topics and sources as stations, prefers the user-facing action label Lay route, and makes the durable route chain an inspectable retrieval path rather than a hidden live query."
-   :references '("Touch-Fahrplan view for Zotero topic enrichment"
-                 "Iconic route language in HyperDoc"
-                 "Topic-to-Zotero enrichment route"
-                 "Inspectable Zotero enrichment plan for a topic"
-                 "Topic enrichment report")))
 
 (defun annotation-topic ()
   (make-topic
@@ -420,31 +402,28 @@
    :references '("Dock capabilities in HyperDoc"
                  "Dock presentation state model"
                  "A DOM-annotation connect gesture"
-                 "Associations"
-                 "Touch-Fahrplan view for Zotero topic enrichment")))
+                 "Associations")))
 
 (defun dock-capabilities-in-hyperdoc-topic ()
   (make-topic
    :id "dock-capabilities-in-hyperdoc"
    :title "Dock capabilities in HyperDoc"
-   :summary "Pane-local Dock framing in which inspector tabs stay the durable inspection surface while Connect is introduced to users as Lay route, Annotation remains a sibling capability, and richer Touch-Fahrplan or DMX route/traversal workflows stay in the pane body."
+   :summary "Pane-local Dock framing in which inspector tabs stay the durable inspection surface while Connect is introduced to users as Lay route, Annotation remains a sibling capability, and richer DMX traversal stays in the pane body."
    :references '("Dock capabilities in HyperDoc"
                  "Discoverability propagation in HyperDoc"
                  "Dock presentation state model"
                  "Annotation"
-                 "A DOM-annotation connect gesture"
-                 "Touch-Fahrplan view for Zotero topic enrichment")))
+                 "A DOM-annotation connect gesture")))
 
 (defun dock-presentation-state-model-topic ()
   (make-topic
    :id "dock-presentation-state-model"
    :title "Dock presentation state model"
-   :summary "Inspectable state model for latent, introduction, active, degraded, and rediscovery Dock presentation, together with claim-code evidence for how Lay route / Connect, Annotation, Touch-Fahrplan route-laying, and DMX traversal fit the same UX grammar."
+   :summary "Inspectable state model for latent, introduction, active, degraded, and rediscovery Dock presentation, together with claim-code evidence for how Lay route / Connect, Annotation, mobile route-laying, and DMX traversal fit the same UX grammar."
    :references '("Dock presentation state model"
                  "Discoverability propagation in HyperDoc"
                  "Dock capabilities in HyperDoc"
-                 "Annotation"
-                 "Touch-Fahrplan view for Zotero topic enrichment")))
+                 "Annotation")))
 
 (defun source-pane-layout-evidence-topic ()
   (make-topic
@@ -469,4 +448,3 @@
                  "Authoritative Journal-Backed Page Store"
                  "Annotation"
                  "A DOM-annotation connect gesture")))
-

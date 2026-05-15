@@ -28,7 +28,6 @@
     "hyperdoc/topic-enrichment*.lisp",
     "hyperdoc/Zotero*.html",
     "hyperdoc/*Zotero*.html",
-    "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html",
     "hyperdoc-inspector/zotero-bridge.lisp",
     "hyperdoc-inspector/topic-enrichment.lisp",
     "hyperdoc-explorer/topic-enrichment.lisp",

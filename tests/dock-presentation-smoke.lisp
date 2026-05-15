@@ -52,8 +52,8 @@
              :selectedSourcePane t
              :pendingRequestId "assoc-123"
              :compactCapabilities ("Connect" "Annotation" "Guide")
-             :coachmarkCapabilities ("Touch-Fahrplan")
-             :providerHandoffs ("Touch-Fahrplan")))))
+             :coachmarkCapabilities ("DMX")
+             :providerHandoffs ("DMX")))))
     (assert-true (typep model 'hyperdoc::dock-presentation-model)
                  "Dock presentation model entrypoint must materialize an inspectable model object")
     (dolist (title '("latent" "introduction" "active" "degraded" "rediscovery"
@@ -76,11 +76,6 @@
                  "Dock model should keep the core degrade-chrome claim inspectable")
     (assert-true provider-claim
                  "Dock model should keep the provider handoff claim inspectable")
-    (assert-true (find "Touch-Fahrplan body workflow"
-                       (hyperdoc::evidence-of provider-claim)
-                       :key #'hyperdoc::title-of
-                       :test #'string=)
-                 "Provider claim should include Touch-Fahrplan evidence")
     (assert-true (find "DMX body handoff"
                        (hyperdoc::evidence-of provider-claim)
                        :key #'hyperdoc::title-of
@@ -118,10 +113,10 @@
     (assert-equal '("Connect" "Annotation" "Guide")
                   (hyperdoc::compact-capabilities-of snapshot)
                   "Pane snapshot should preserve compact capability access after degradation")
-    (assert-equal '("Touch-Fahrplan")
+    (assert-equal '("DMX")
                   (hyperdoc::coachmark-capabilities-of snapshot)
                   "Pane snapshot should expose the currently expanded coachmark capabilities")
-    (assert-equal '("Touch-Fahrplan")
+    (assert-equal '("DMX")
                   (hyperdoc::provider-handoffs-of snapshot)
                   "Pane snapshot should preserve provider handoff buttons separately from compact Dock identity"))
   (format t "~&Dock presentation smoke tests passed.~%")

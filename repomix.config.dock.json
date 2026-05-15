@@ -35,7 +35,6 @@
     "hyperdoc/Dock presentation state model.html",
     "hyperdoc/Dock:coachmark:inspector-tabs UX model.md",
     "hyperdoc/A DOM-annotation connect gesture.md",
-    "hyperdoc/Touch-Fahrplan view for Zotero topic enrichment.html",
     "tests/dock-presentation-smoke.lisp",
     "tests/dock-annotation-smoke.lisp",
     "tests/playwright/dock-presentation.spec.js",

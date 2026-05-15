@@ -139,8 +139,7 @@
      "Route summary must preserve the Touch-Fahrplan follow label")
     (dolist (page-title '("Iconic route language in HyperDoc"
                           "Focused semantic source stations"
-                          "Symbols and semantics in Mind and Mechanism"
-                          "Touch-Fahrplan view for Zotero topic enrichment"))
+                          "Symbols and semantics in Mind and Mechanism"))
       (iconic-retrieval-assert-true
        (member page-title page-titles :test #'string=)
        (format nil "Route page titles must include ~A" page-title)))
@@ -195,8 +194,7 @@
   (dolist (title '("Iconic route language in HyperDoc"
                    "Inspectable iconic retrieval objects"
                    "Focused semantic source stations"
-                   "Symbols and semantics in Mind and Mechanism"
-                   "Touch-Fahrplan view for Zotero topic enrichment"))
+                   "Symbols and semantics in Mind and Mechanism"))
     (iconic-retrieval-assert-true
      (hyperbook:find-page hyperdoc::*hyperdoc* title :signal-error? t)
      (format nil "Missing HyperDoc page ~A" title)))

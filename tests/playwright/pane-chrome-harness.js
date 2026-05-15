@@ -33,7 +33,6 @@ function paneChrome(page, paneIndex) {
     feedback: currentPane.locator(".hyperdoc-dom-connect-feedback"),
     helpToggle: currentPane.locator(".hyperdoc-dom-connect-help-toggle"),
     helpPanel: currentPane.locator(".hyperdoc-dom-connect-help-panel"),
-    touchFahrplanButton: currentPane.locator(".hyperdoc-dock-touch-fahrplan"),
     dmxButton: currentPane.locator(".hyperdoc-dock-dmx"),
     dismissButton: currentPane.locator(".hyperdoc-dock-dismiss"),
   };
@@ -64,7 +63,6 @@ async function readPaneChromeState(page, paneIndex) {
     const coachmarkSummary = slot?.querySelector(".hyperdoc-dock-coachmark-summary");
     const coachmarkDetail = slot?.querySelector(".hyperdoc-dock-coachmark-detail");
     const providerHandoff = slot?.querySelector(".hyperdoc-dock-provider-handoff");
-    const touchFahrplan = slot?.querySelector(".hyperdoc-dock-touch-fahrplan");
     const dmx = slot?.querySelector(".hyperdoc-dock-dmx");
     const dismiss = slot?.querySelector(".hyperdoc-dock-dismiss");
     const dockInspect = slot?.querySelector(".hyperdoc-dock-inspect");
@@ -133,7 +131,6 @@ async function readPaneChromeState(page, paneIndex) {
         ? Array.from(providerHandoff.querySelectorAll("button:not([hidden])"))
             .map((node) => node.textContent?.trim() || "")
         : [],
-      touchFahrplanHidden: !!touchFahrplan?.hidden,
       dmxHidden: !!dmx?.hidden,
       dismissHidden: !!dismiss?.hidden,
       providerKind: providerSurface?.dataset.hyperdocConnectProviderKind || null,

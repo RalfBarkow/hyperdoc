@@ -1503,10 +1503,6 @@
     return null;
   }
 
-  function touchFahrplanTabButton(pane) {
-    return tabButtonByExactText(pane, "Touch-Fahrplan");
-  }
-
   function externalTabButton(pane) {
     return tabButtonByExactText(pane, "External");
   }
@@ -1518,15 +1514,6 @@
     var node = pane.querySelector(".inspector-title-bar-object") ||
       pane.querySelector(".inspector-title-bar-class");
     return collapseWhitespace(node && node.textContent || "");
-  }
-
-  function zoteroDockAvailable(state) {
-    return !!(
-      state &&
-      state.surface &&
-      state.surface.dataset.hyperdocDockZoteroAvailable === "true" &&
-      touchFahrplanTabButton(state.pane)
-    );
   }
 
   function dmxDockAvailable(state) {
@@ -1634,37 +1621,18 @@
   }
 
   function syncDockCapabilities(state) {
-    if (!state || !state.touchFahrplan || !state.dmx || !state.snippetPlayground) {
+    if (!state || !state.dmx || !state.snippetPlayground) {
       return;
     }
-    var showTouchFahrplan = zoteroDockAvailable(state);
     var showDmx = dmxDockAvailable(state);
     var showSnippetPlayground = snippetDockAvailable(state);
-    state.touchFahrplan.hidden = !showTouchFahrplan;
     state.dmx.hidden = !showDmx;
     state.snippetPlayground.hidden = !showSnippetPlayground;
-    state.providerHandoff.hidden = !(showTouchFahrplan || showDmx);
+    state.providerHandoff.hidden = !showDmx;
     state.providerHandoffs = [];
-    if (showTouchFahrplan) {
-      state.providerHandoffs.push("Touch-Fahrplan");
-    }
     if (showDmx) {
       state.providerHandoffs.push("DMX");
     }
-  }
-
-  function openZoteroDockCapability(state) {
-    var tab = touchFahrplanTabButton(state && state.pane);
-    if (!tab || !zoteroDockAvailable(state)) {
-      return;
-    }
-    markDockCapabilityUsed(
-      state,
-      state.introducedCapability || DOCK_CAPABILITY_CONNECT,
-      "touch-fahrplan-opened"
-    );
-    refreshPaneStateFromSession(state);
-    tab.click();
   }
 
   function openDmxDockCapability(state) {
@@ -1720,8 +1688,6 @@
           '<div class="hyperdoc-dock-provider-handoff" hidden>' +
             '<span class="hyperdoc-dock-provider-handoff-label">Open richer workflow</span>' +
             '<div class="hyperdoc-dock-provider-actions">' +
-              '<button type="button" class="hyperdoc-dock-touch-fahrplan" ' +
-                      'title="Open the Touch-Fahrplan pane view for this topic." hidden>Touch-Fahrplan</button>' +
               '<button type="button" class="hyperdoc-dock-dmx" ' +
                       'title="Open the External DMX handoff view for this pane." hidden>DMX</button>' +
             '</div>' +
@@ -2212,7 +2178,6 @@
     state.annotation.hidden = mobile && routeState !== "source-latched";
     state.helpToggle.hidden = mobile;
     state.snippetPlayground.hidden = mobile || state.snippetPlayground.hidden;
-    state.touchFahrplan.hidden = mobile || state.touchFahrplan.hidden;
     state.dmx.hidden = mobile || state.dmx.hidden;
 
     if (mobile) {
@@ -2787,7 +2752,6 @@
     var mobileRouteDetailNode = slot.querySelector(".hyperdoc-mobile-route-detail");
     var mobileRouteOpen = slot.querySelector(".hyperdoc-mobile-route-open");
     var mobileRouteEvidence = slot.querySelector(".hyperdoc-mobile-route-evidence");
-    var touchFahrplan = slot.querySelector(".hyperdoc-dock-touch-fahrplan");
     var dmx = slot.querySelector(".hyperdoc-dock-dmx");
     var cue = slot.querySelector(".hyperdoc-dom-connect-cue");
     var sourceSummary = slot.querySelector(".hyperdoc-dom-connect-source-summary");
@@ -2808,7 +2772,7 @@
     if (!control || !toggle || !annotation || !snippetPlayground ||
         !mobileRouteTitleNode || !mobileRouteDetailNode ||
         !mobileRouteOpen || !mobileRouteEvidence ||
-        !touchFahrplan || !dmx ||
+        !dmx ||
         !cue || !sourceSummary || !sourceChip || !clear ||
         !stateBadge || !coachmarkTitle || !coachmarkSummary ||
         !coachmarkDetail || !providerHandoff || !providerHandoffLabel || !dismiss ||
@@ -2828,7 +2792,6 @@
       mobileRouteDetailNode: mobileRouteDetailNode,
       mobileRouteOpen: mobileRouteOpen,
       mobileRouteEvidence: mobileRouteEvidence,
-      touchFahrplan: touchFahrplan,
       dmx: dmx,
       cue: cue,
       sourceSummary: sourceSummary,
@@ -2960,11 +2923,6 @@
         "Route evidence",
         ""
       );
-    });
-    touchFahrplan.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-      openZoteroDockCapability(state);
     });
     dmx.addEventListener("click", function (event) {
       event.preventDefault();

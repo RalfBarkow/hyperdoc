@@ -143,16 +143,6 @@
   background: rgba(15, 118, 110, 0.12);
 }
 
-.hyperdoc-dock-touch-fahrplan {
-  border-color: #0f766e;
-  color: #115e59;
-}
-
-.hyperdoc-dock-touch-fahrplan:hover,
-.hyperdoc-dock-touch-fahrplan:focus {
-  background: rgba(15, 118, 110, 0.12);
-}
-
 .hyperdoc-dock-dmx {
   border-color: #1d4ed8;
   color: #1d4ed8;

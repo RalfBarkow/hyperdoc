@@ -500,7 +500,6 @@
                                        (:file "markdown-pages")
                                        (:file "code-pages")
                                        (:file "topics")
-                                       (:file "topic-enrichment")
                                        (:file "links-in-code")
                                        (:file "localhost-fedwiki-page-promotion-plans")
                                        (:file "tools")
