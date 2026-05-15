@@ -1,0 +1,72 @@
+<h1>Goldberg Smalltalk to HyperDoc crosswalk</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Goldberg's Smalltalk-80 examples are not copied as a nostalgia exercise. They
+  are translated into HyperDoc architectural commitments: readable layers,
+  uniform objects, dynamic cross-reference, source-state coherence, and history
+  as part of the reading surface.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Readable malleable layer"><tt>Readable malleable layer</tt></a></li>
+  <li><a hyperbook="topics" page="Hidden protected layer"><tt>Hidden protected layer</tt></a></li>
+  <li><a hyperbook="topics" page="Message-set browser"><tt>Message-set browser</tt></a></li>
+  <li><a hyperbook="topics" page="Program as dynamic database"><tt>Program as dynamic database</tt></a></li>
+  <li><a hyperbook="topics" page="Change file as audit trail"><tt>Change file as audit trail</tt></a></li>
+</ul>
+
+<h2>Crosswalk</h2>
+
+<table>
+  <tr><th>Goldberg / Smalltalk-80 idea</th><th>HyperDoc carry-forward</th></tr>
+  <tr>
+    <td>Readable, malleable layers above hidden implementation layers</td>
+    <td>Keep user-facing pages, topics, and operations inspectable while making runtime and datastore boundaries explicit.</td>
+  </tr>
+  <tr>
+    <td>System browser organized by classes and messages</td>
+    <td>Topic pages, source pages, code-path graphs, and backlinks act as browsable indexes over multiple object kinds.</td>
+  </tr>
+  <tr>
+    <td>Message-set browser for implementors and senders</td>
+    <td><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-reader-question-demo :what-knows-about-that)"><tt>What part of the system knows about that?</tt></a> becomes an operation returning owners, references, and backlinks.</td>
+  </tr>
+  <tr>
+    <td>One code database with multiple access paths</td>
+    <td>Generated authoring artifacts, page files, topic objects, and runtime inspector objects should remain linked instead of becoming divergent documentation stores.</td>
+  </tr>
+  <tr>
+    <td>Change file as ordered audit trail</td>
+    <td>Journal, provenance, and materialization metadata answer <a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-reader-question-demo :how-did-i-get-here)"><tt>How did I get here?</tt></a>.</td>
+  </tr>
+  <tr>
+    <td>Debugger and inspector for current state and why/why-not questions</td>
+    <td>Failure objects, state-machine traces, and operation reports make negative outcomes readable.</td>
+  </tr>
+</table>
+
+<h2>ASDF system boundary</h2>
+
+<p>
+  The generated ASDF system deliberately keeps registration and materialization as
+  explicit operations. Loading the system makes objects and operations available;
+  it does not silently rewrite the host HyperDoc registry or page tree.
+</p>
+
+<ul>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:register-goldberg-topics-into-hyperdoc)"><tt>(register-goldberg-topics-into-hyperdoc)</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:materialize-goldberg-hyperdoc-pages)"><tt>(materialize-goldberg-hyperdoc-pages)</tt></a></li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Goldberg Programmer as Reader">Goldberg Programmer as Reader</a></li>
+  <li><a page="Goldberg reader operations">Goldberg reader operations</a></li>
+  <li><a hyperbook="topics" page="HyperDoc Evaluation and Inspection Model"><tt>HyperDoc Evaluation and Inspection Model</tt></a></li>
+  <li><a hyperbook="topics" page="Running Image Coherence Rebuild Workflow"><tt>Running Image Coherence Rebuild Workflow</tt></a></li>
+</ul>

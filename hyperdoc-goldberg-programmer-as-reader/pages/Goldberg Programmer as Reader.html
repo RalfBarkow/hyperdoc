@@ -1,0 +1,81 @@
+<!-- HyperDoc Zettel slice derived from Adele Goldberg, "Programmer as Reader". -->
+<h1>Goldberg Programmer as Reader</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page rewrites Adele Goldberg's <i>Programmer as Reader</i> as a HyperDoc
+  source station. The central claim is not merely that programmers should write
+  clearer code, but that exploratory systems should be designed so programmers
+  can read the running system, its parts, its interfaces, and its history.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Goldberg Programmer as Reader"><tt>Goldberg Programmer as Reader</tt></a></li>
+  <li><a hyperbook="topics" page="Program read bug"><tt>Program read bug</tt></a></li>
+  <li><a hyperbook="topics" page="Exploratory programming environment"><tt>Exploratory programming environment</tt></a></li>
+  <li><a hyperbook="topics" page="Programming by incremental refinement"><tt>Programming by incremental refinement</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-zettel-summary)"><tt>(goldberg-zettel-summary)</tt></a></li>
+</ul>
+
+<h2>Source claim</h2>
+
+<p>
+  Goldberg distinguishes ordinary runtime correctness from readability. A program
+  may be free of write-and-run bugs while still having read bugs: failures that
+  prevent later readers from learning, finding reusable parts, and safely rewriting.
+</p>
+
+<p>
+  HyperDoc carries this claim forward by treating a documentation page, a topic,
+  a code object, an inspector view, and a clickable operation as different surfaces
+  over one reader problem: <i>how does the system answer the programmer's next
+  comprehension question?</i>
+</p>
+
+<h2>HyperDoc rewrite</h2>
+
+<ul>
+  <li>
+    A <b>topic</b> captures a reusable concept from the paper, such as
+    <a hyperbook="topics" page="Message-set browser"><tt>Message-set browser</tt></a>
+    or <a hyperbook="topics" page="Change file as audit trail"><tt>Change file as audit trail</tt></a>.
+  </li>
+  <li>
+    A <b>page</b> is an authored reading surface that preserves local context and
+    editorial order.
+  </li>
+  <li>
+    A <b>reader operation</b> turns a comprehension question into a clickable example.
+  </li>
+  <li>
+    The ASDF system <tt>hyperdoc-goldberg-programmer-as-reader</tt> keeps the code,
+    pages, and materialization operations together.
+  </li>
+</ul>
+
+<h2>Start reading by question</h2>
+
+<ul>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-reader-question-demo :what-is-that)"><tt>What is that?</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-reader-question-demo :where-is-it)"><tt>Where is it?</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-reader-question-demo :what-knows-about-that)"><tt>What part of the system knows about that?</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-reader-question-demo :why-not-happened)"><tt>Why didn't that happen?</tt></a></li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Goldberg Programmer as Reader topic arrangement">Goldberg Programmer as Reader topic arrangement</a></li>
+  <li><a page="Goldberg reading comprehension questions">Goldberg reading comprehension questions</a></li>
+  <li><a page="Goldberg reader operations">Goldberg reader operations</a></li>
+  <li><a page="Goldberg Smalltalk to HyperDoc crosswalk">Goldberg Smalltalk to HyperDoc crosswalk</a></li>
+</ul>
+
+<h2>Source</h2>
+
+<p>
+  Adele Goldberg, <i>Programmer as Reader</i>, IEEE Software, 1987.
+</p>

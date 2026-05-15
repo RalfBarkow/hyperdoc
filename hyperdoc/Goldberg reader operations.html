@@ -1,0 +1,58 @@
+<h1>Goldberg reader operations</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page turns Goldberg's reading-comprehension questions into explicit
+  operation objects. Each link below is intentionally executable as a HyperDoc
+  expression link after the ASDF system is loaded.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Reader operation"><tt>Reader operation</tt></a></li>
+  <li><a hyperbook="topics" page="Goldberg why question"><tt>Goldberg why question</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:all-goldberg-reader-operations)"><tt>(all-goldberg-reader-operations)</tt></a></li>
+</ul>
+
+<h2>Clickable operation set</h2>
+
+<ul>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :invoke-response-operation)"><tt>Invoke response</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :available-actions-operation)"><tt>Show available actions</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :requirements-operation)"><tt>Explain function requirements</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :explain-token-operation)"><tt>Explain token</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :locate-definition-operation)"><tt>Locate definition or example</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :behavior-search-operation)"><tt>Search behavior</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :knowledge-owner-operation)"><tt>Find knowledge owners</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :history-operation)"><tt>Show how I got here</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :return-route-operation)"><tt>Show how I can get back</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :current-state-operation)"><tt>Inspect current state</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :why-happened-operation)"><tt>Explain why it happened</tt></a></li>
+  <li><a expr="(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :why-not-operation)"><tt>Explain why it did not happen</tt></a></li>
+</ul>
+
+<h2>Operation contract</h2>
+
+<p>
+  A reader operation has an identifier, title, associated question, summary,
+  preconditions, steps, result, and a canonical clickable expression. It is not
+  meant to be a hidden command. It is a readable object that can be inspected
+  before it is run or materialized.
+</p>
+
+<h2>Minimal operational use</h2>
+
+<pre><code>(asdf:load-system :hyperdoc-goldberg-programmer-as-reader)
+(hyperdoc-goldberg-programmer-as-reader:goldberg-reader-question-demo :what-is-that)
+(hyperdoc-goldberg-programmer-as-reader:goldberg-operation-report :why-not-operation)</code></pre>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Goldberg reading comprehension questions">Goldberg reading comprehension questions</a></li>
+  <li><a page="Goldberg Programmer as Reader topic arrangement">Goldberg Programmer as Reader topic arrangement</a></li>
+  <li><a hyperbook="topics" page="Failure as Inspectable Object"><tt>Failure as Inspectable Object</tt></a></li>
+  <li><a hyperbook="topics" page="Clickable Correction Path from Error to Merge"><tt>Clickable Correction Path from Error to Merge</tt></a></li>
+</ul>
