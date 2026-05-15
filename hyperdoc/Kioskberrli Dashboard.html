@@ -1,0 +1,142 @@
+<h1>Kioskberrli Dashboard</h1>
+
+<in-package>hyperdoc</in-package>
+
+<div class="kioskberrli-station-board">
+  <p>
+    From: <a page="Kioskberrli">Kioskberrli</a><br>
+    To: <a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a>
+  </p>
+
+  <p>
+    <b>blocked</b> &middot; build blocked &middot; flash missing evidence &middot; boot missing evidence
+  </p>
+
+  <ul id="primary-dashboard-topics">
+    <li><a href="#current-status">Current status</a></li>
+    <li><a href="#build-evidence">Build evidence</a></li>
+    <li><a href="#flash-boot-evidence">Flash / boot evidence</a></li>
+    <li><a href="#public-display-layout-state">Public-display layout state</a></li>
+    <li><a href="#related-topic-board">Related topic board</a></li>
+  </ul>
+</div>
+
+<h2 id="current-status">Current status</h2>
+
+<p>
+  Overall status: <b>blocked</b>. The current blocker is
+  <a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a>:
+  the declared <tt>aarch64-linux</tt> SD-image target still needs a valid Linux
+  builder or remote Linux builder.
+</p>
+
+<p>
+  The previous blocker,
+  <a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a>,
+  is corrected. Removing the obsolete <tt>sdImage.imageSize</tt> option moved
+  the work forward, but it did not prove that the kiosk image builds, flashes,
+  boots, or displays the landing page.
+</p>
+
+<p>
+  Dashboard status vocabulary: declared, blocked, corrected, missing evidence,
+  verified, unknown.
+</p>
+
+<h2 id="build-evidence">Build evidence</h2>
+
+<p>
+  Build evidence is still <b>missing evidence</b> because the project SD-image
+  build has not been recorded as successful on a valid Linux builder. Do not
+  read this dashboard as a claim that a build succeeded.
+</p>
+
+<pre>
+nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
+</pre>
+
+<p>
+  The runbook keeps the command sequence:
+  <a page="Runbook - Build and Flash NixOS SD Image for Kioskberrli">Runbook - Build and Flash NixOS SD Image for Kioskberrli</a>.
+  The current blocker page explains why the same target is blocked on the
+  present host.
+</p>
+
+<h2 id="flash-boot-evidence">Flash / boot evidence</h2>
+
+<p>
+  Flash evidence is <b>missing evidence</b>. Boot evidence is
+  <b>missing evidence</b>. The real hardware workflow has not yet been proven
+  on the physical Raspberry Pi 4 with the selected SD card.
+</p>
+
+<p>
+  After a valid image artifact exists, the next evidence to record is SD-card
+  flashing, first boot on the Pi, network reachability, kiosk-session startup,
+  and landing-page display after reboot.
+</p>
+
+<h2 id="public-display-layout-state">Public-display layout state</h2>
+
+<p>
+  The passive display target is declared:
+  <tt>https://hauptsache.dreyeck.ch/assets/home/index.html</tt>. The station
+  board can describe a maintenance or failure view conceptually, but this slice
+  does not add a runtime public-display framework.
+</p>
+
+<p>
+  The public-display boundary remains the one described by
+  <a page="Hauptsache Entry Model">Hauptsache Entry Model</a>: landing page,
+  FedWiki workspace, and physical kiosk device stay distinct.
+</p>
+
+<h2 id="related-topic-board">Related topic board</h2>
+
+<ul>
+  <li><a page="Runbook - Build and Flash NixOS SD Image for Kioskberrli">Runbook - Build and Flash NixOS SD Image for Kioskberrli</a></li>
+  <li><a page="Salon Pi 4 Kiosk Hardening Checklist">Salon Pi 4 Kiosk Hardening Checklist</a></li>
+  <li><a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a></li>
+  <li><a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a></li>
+  <li><a page="Prepare the AArch64 image">Prepare the AArch64 image</a></li>
+  <li><a page="Hauptsache Entry Model">Hauptsache Entry Model</a></li>
+</ul>
+
+<h2>Topic identity</h2>
+
+<p>
+  <tt>Kioskberrli</tt> is the Raspberry Pi 4 kiosk case study for making the
+  <tt>hauptsache</tt> landing page physically present inside the salon.
+</p>
+
+<dl>
+  <dt>Topic</dt>
+  <dd><a page="Kioskberrli">Kioskberrli</a></dd>
+
+  <dt>Hardware target</dt>
+  <dd>Raspberry Pi 4 Model B, <tt>aarch64-linux</tt></dd>
+
+  <dt>Public display target</dt>
+  <dd><tt>https://hauptsache.dreyeck.ch/assets/home/index.html</tt></dd>
+
+  <dt>Scope boundary</dt>
+  <dd>Case-study dashboard only; no generic dashboard framework.</dd>
+</dl>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Kioskberrli Dashboard"><tt>Kioskberrli Dashboard</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskberrli"><tt>Kioskberrli</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-dashboard)"><tt>kioskberrli-dashboard</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-dashboard-status)"><tt>kioskberrli-dashboard-status</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-current-blocker)"><tt>kioskberrli-current-blocker</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-build-evidence-status)"><tt>kioskberrli-build-evidence-status</tt></a></li>
+</ul>
+
+<h2>Inspect station list</h2>
+
+<p>
+  Inspect the full station list:
+  <a expr="(hyperdoc::kioskberrli-dashboard-stations)"><tt>kioskberrli-dashboard-stations</tt></a>.
+</p>

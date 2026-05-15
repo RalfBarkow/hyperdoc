@@ -619,6 +619,7 @@
                                        (:file "git-commit-assimilation-smoke")
                                        (:file "skillization-smoke")
                                        (:file "mech-deployment-provenance-smoke")
+                                       (:file "kioskberrli-dashboard-smoke")
                                        (:file "py4dmx-cluster-smoke")
                                        (:file "scxml-compiler-smoke")
                              (:file "running-image-coherence-rebuild-smoke")
