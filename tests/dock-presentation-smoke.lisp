@@ -29,7 +29,12 @@
                 :key #'hyperdoc::title-of
                 :test #'string=))
          (mobile-route-claim
-          (find "Mobile Dock uses route-first two-tap flow"
+          (find "Mobile Dock gates route capture behind explicit Connect"
+                claims
+                :key #'hyperdoc::title-of
+                :test #'string=))
+         (mobile-tabs-claim
+          (find "Mobile inspector tabs collapse without losing active tab semantics"
                 claims
                 :key #'hyperdoc::title-of
                 :test #'string=))
@@ -48,6 +53,11 @@
              :introducedCapability "connect"
              :presentationScope "browser-session"
              :coachmarkVisible t
+             :capabilitiesLayerState "capabilities-open"
+             :routeCaptureActive t
+             :inspectorTabsLayerState "tabs-collapsed"
+             :bodyTapDefaultAction "route-laying"
+             :routeCaptureStartedBy "CONNECT_CHOSEN"
              :selectedSourceLabel "Text pages"
              :selectedSourcePane t
              :pendingRequestId "assoc-123"
@@ -57,8 +67,11 @@
     (assert-true (typep model 'hyperdoc::dock-presentation-model)
                  "Dock presentation model entrypoint must materialize an inspectable model object")
     (dolist (title '("latent" "introduction" "active" "degraded" "rediscovery"
-                     "idle" "source-latched" "destination-candidate"
-                     "confirming" "completed"))
+                     "capabilities-collapsed" "capabilities-open"
+                     "route-introduction" "source-latched"
+                     "destination-candidate" "confirming" "completed"
+                     "route-cancelled" "tabs-collapsed" "tabs-open"
+                     "tab-selected"))
       (assert-true (member title state-titles :test #'string=)
                    (format nil "Dock model must include the ~A state" title)))
     (dolist (state states)
@@ -67,9 +80,9 @@
                                 :test #'string=))
                    (format nil "Dock state ~A should not enumerate Inspect as a Dock capability"
                            (hyperdoc::title-of state))))
-    (assert-equal 13
+    (assert-equal 20
                   (length transitions)
-                  "Dock presentation model should expose desktop coachmark transitions plus mobile route-strip transitions")
+                  "Dock presentation model should expose desktop coachmark transitions plus mobile progressive chrome transitions")
     (assert-true (member "Degrade chrome, not capability"
                          claim-titles
                          :test #'string=)
@@ -82,12 +95,14 @@
                        :test #'string=)
                  "Provider claim should include DMX evidence")
     (assert-true mobile-route-claim
-                 "Dock model should keep the mobile route-strip claim inspectable")
+                 "Dock model should keep the mobile route-capture claim inspectable")
     (assert-true (find "Dock coachmark runtime state"
                        (hyperdoc::evidence-of mobile-route-claim)
                        :key #'hyperdoc::title-of
                        :test #'string=)
-                 "Mobile route-strip claim should include JS runtime evidence")
+                 "Mobile route-capture claim should include JS runtime evidence")
+    (assert-true mobile-tabs-claim
+                 "Dock model should keep the mobile inspector-tabs claim inspectable")
     (dolist (claim claims)
       (assert-true (plusp (length (hyperdoc::evidence-of claim)))
                    (format nil "Dock claim ~A should point to implementation evidence"
@@ -110,6 +125,20 @@
                   "Pane snapshot should expose the current Dock presentation memory scope")
     (assert-true (hyperdoc::coachmark-visible-p-of snapshot)
                  "Pane snapshot should preserve whether the expanded coachmark is visible")
+    (assert-equal "capabilities-open"
+                  (hyperdoc::capabilities-layer-state-of snapshot)
+                  "Pane snapshot should expose the capabilities layer state")
+    (assert-true (hyperdoc::route-capture-active-p-of snapshot)
+                 "Pane snapshot should expose route capture activity")
+    (assert-equal "tabs-collapsed"
+                  (hyperdoc::inspector-tabs-layer-state-of snapshot)
+                  "Pane snapshot should expose the inspector tabs layer state")
+    (assert-equal "route-laying"
+                  (hyperdoc::body-tap-default-action-of snapshot)
+                  "Pane snapshot should say when page-body taps are route-laying taps")
+    (assert-equal "CONNECT_CHOSEN"
+                  (hyperdoc::route-capture-started-by-of snapshot)
+                  "Pane snapshot should preserve the transition that began route capture")
     (assert-equal '("Connect" "Annotation" "Guide")
                   (hyperdoc::compact-capabilities-of snapshot)
                   "Pane snapshot should preserve compact capability access after degradation")

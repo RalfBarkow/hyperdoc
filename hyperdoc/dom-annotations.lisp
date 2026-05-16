@@ -102,6 +102,21 @@
    (coachmark-visible :initarg :coachmark-visible
                       :initform nil
                       :reader coachmark-visible-p-of)
+   (capabilities-layer-state :initarg :capabilities-layer-state
+                             :initform nil
+                             :reader capabilities-layer-state-of)
+   (route-capture-active :initarg :route-capture-active
+                         :initform nil
+                         :reader route-capture-active-p-of)
+   (inspector-tabs-layer-state :initarg :inspector-tabs-layer-state
+                               :initform nil
+                               :reader inspector-tabs-layer-state-of)
+   (body-tap-default-action :initarg :body-tap-default-action
+                            :initform nil
+                            :reader body-tap-default-action-of)
+   (route-capture-started-by :initarg :route-capture-started-by
+                             :initform nil
+                             :reader route-capture-started-by-of)
    (selected-source-label :initarg :selected-source-label
                           :initform nil
                           :reader selected-source-label-of)
@@ -869,6 +884,11 @@
                    :introduced-capability introduced-capability
                    :presentation-scope (getf json :presentationScope)
                    :coachmark-visible (getf json :coachmarkVisible)
+                   :capabilities-layer-state (getf json :capabilitiesLayerState)
+                   :route-capture-active (getf json :routeCaptureActive)
+                   :inspector-tabs-layer-state (getf json :inspectorTabsLayerState)
+                   :body-tap-default-action (getf json :bodyTapDefaultAction)
+                   :route-capture-started-by (getf json :routeCaptureStartedBy)
                    :selected-source-label selected-source-label
                    :selected-source-pane (getf json :selectedSourcePane)
                    :pending-request-id (getf json :pendingRequestId)

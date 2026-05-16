@@ -30,9 +30,12 @@ Semantic boundary:
 
 Current follow-up note:
 - plain click on `Connect` still starts the existing gesture
-- on smartphone/narrow viewports, the Dock route strip starts the same
-  internal Connect route with the first station tap, so the visible grammar is
-  `Tap a station` followed by `From: <source> -- tap target or operation`
+- on smartphone/narrow viewports, the Dock first collapses behind the `)(`
+  capabilities affordance so ordinary links and text keep normal document
+  behavior
+- tapping `)(` reveals Connect, Annotation, and Guide; only then does choosing
+  Connect start route-laying and show `Tap a station` followed by
+  `From: <source> -- tap target or operation`
 - `Shift`-click on `Connect` opens the live Connect state snapshot object with `Summary`, `Panes`, `Transitions`, and `Payload / Anchors` views
 - `Option` / `Alt`-click on `Connect` opens the deeper model/evidence side behind the same capability
 - repeated modifier-click inspection from the same live pane reuses the same inspection target where the existing inspector reuse rules already apply, instead of opening an unbounded stack of duplicates
@@ -88,13 +91,14 @@ If a true drag-line is too invasive for the first slice, acceptable fallback:
 - with a temporary overlay if possible
 
 Mobile refinement:
-- the canonical mobile form is now two taps with no separate Connect button:
-  tap a source station, then tap a destination station or operation
+- the canonical mobile form is now progressive:
+  tap `)(`, tap Connect, then tap a source station and destination station or
+  operation
 - Annotation is a destination operation in that route language, so
-  `Tap Text pages` followed by `Tap Annotation` creates or reopens the
+  `Tap )( -> Connect -> Text pages -> Annotation` creates or reopens the
   first-class source-to-Annotation relation
-- the route strip carries the teaching copy; the large coachmark is not shown
-  by default on narrow viewports
+- the route strip carries the teaching copy only after explicit Connect; the
+  large coachmark is not shown by default on narrow viewports
 
 But prefer an actual temporary line if it is cheap in the current CLOG
 inspector architecture. That line is the initial `drag-to-connect`

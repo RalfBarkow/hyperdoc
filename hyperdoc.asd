@@ -51,6 +51,7 @@
                                (:file "interaction-nets")
                                (:file "source-stations")
                                (:file "dm6-inline-proof")
+                               (:file "mobile-progressive-chrome")
                                (:file "metagraph-fluree")))))
 
 (defsystem #:hyperdoc/dmx-topics
@@ -586,6 +587,7 @@
                                        (:file "relation-topic-proposals-smoke")
                                        (:file "dock-presentation-smoke")
                                        (:file "dock-annotation-smoke")
+                                       (:file "mobile-progressive-chrome-smoke")
                                        (:file "dmx-annotations-smoke")
                                        (:file "dmx-workspace-journal-sink-smoke")
                                        (:file "dmx-auth-session-boundary-smoke")

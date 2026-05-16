@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+    xmlns="http://www.w3.org/2005/07/scxml"
+    version="1.0"
+    name="mobile-progressive-chrome"
+    initial="capabilities-collapsed">
+
+  <!--
+    SCXML-like behavior model for mobile HyperDoc chrome.
+
+    Logical parallel regions:
+      capabilities-layer
+      inspector-tabs-layer
+      route-laying
+
+    Guards:
+      narrow-viewport?
+      capabilities-open?
+      route-capture-active?
+      target-is-link?
+
+    Invariants:
+      LINK_CLICK follows the link unless route-capture-active?
+      STATION_TAP can latch source only after CONNECT_CHOSEN
+      capabilities-collapsed implies route-capture-inactive
+      tabs-collapsed does not disable active tab semantics
+  -->
+
+  <state id="capabilities-collapsed">
+    <transition event="CAPABILITIES_TOGGLE" target="capabilities-open"/>
+    <transition event="LINK_CLICK" target="capabilities-collapsed"/>
+  </state>
+
+  <state id="capabilities-open">
+    <transition event="CAPABILITIES_CLOSE" target="capabilities-collapsed"/>
+    <transition event="CAPABILITIES_TOGGLE" target="capabilities-collapsed"/>
+    <transition event="CONNECT_CHOSEN" target="route-introduction"/>
+    <transition event="GUIDE_CHOSEN" target="capabilities-open"/>
+    <transition event="ANNOTATION_CHOSEN" target="capabilities-open"/>
+    <transition event="LINK_CLICK" target="capabilities-open"/>
+  </state>
+
+  <state id="route-introduction">
+    <transition event="STATION_TAP" target="route-active-source-latched"/>
+    <transition event="ROUTE_CANCEL" target="route-cancelled"/>
+    <transition event="CAPABILITIES_CLOSE" target="route-cancelled"/>
+  </state>
+
+  <state id="route-active-source-latched">
+    <transition event="STATION_TAP" target="route-completed"/>
+    <transition event="ANNOTATION_CHOSEN" target="route-completed"/>
+    <transition event="ROUTE_CANCEL" target="route-cancelled"/>
+    <transition event="CAPABILITIES_CLOSE" target="route-cancelled"/>
+  </state>
+
+  <state id="route-completed">
+    <transition event="ROUTE_COMPLETE" target="capabilities-open"/>
+    <transition event="CAPABILITIES_CLOSE" target="capabilities-collapsed"/>
+  </state>
+
+  <state id="route-cancelled">
+    <transition event="CAPABILITIES_TOGGLE" target="capabilities-open"/>
+    <transition event="CAPABILITIES_CLOSE" target="capabilities-collapsed"/>
+  </state>
+
+  <state id="tabs-collapsed">
+    <transition event="INSPECTOR_TABS_TOGGLE" target="tabs-open"/>
+  </state>
+
+  <state id="tabs-open">
+    <transition event="INSPECTOR_TABS_TOGGLE" target="tabs-collapsed"/>
+    <transition event="INSPECTOR_TAB_SELECT" target="tab-selected"/>
+  </state>
+
+  <state id="tab-selected">
+    <transition event="INSPECTOR_TABS_TOGGLE" target="tabs-open"/>
+    <transition event="INSPECTOR_TAB_SELECT" target="tabs-collapsed"/>
+  </state>
+</scxml>

@@ -2161,6 +2161,15 @@
                                                           "-")))))
                             (:tr (:th "Context object")
                                  (:td (maybe-dom-object-ref (context-object-of annotation))))
+                            (when (target-object-of annotation)
+                              (views:html
+                               (:tr (:th (views:esc
+                                          (if (annotation-target-anchor-p
+                                               (target-anchor-of annotation))
+                                              "Annotation topic"
+                                              "Target object")))
+                                    (:td (maybe-dom-object-ref
+                                          (target-object-of annotation))))))
                             (:tr (:th "Matching patch target")
                                  (:td (if (matching-patch-target-of annotation)
                                           (views:object-ref
@@ -3936,6 +3945,21 @@
                             (render-connect-field-row "Coachmark visible"
                                                       (dom-connect-bool-label
                                                        (coachmark-visible-p-of snapshot)))
+                            (render-connect-field-row "Capabilities layer"
+                                                      (capabilities-layer-state-of snapshot))
+                            (render-connect-field-row "Route capture active"
+                                                      (dom-connect-bool-label
+                                                       (route-capture-active-p-of
+                                                        snapshot)))
+                            (render-connect-field-row "Inspector tabs layer"
+                                                      (inspector-tabs-layer-state-of
+                                                       snapshot))
+                            (render-connect-field-row "Body tap default action"
+                                                      (body-tap-default-action-of
+                                                       snapshot))
+                            (render-connect-field-row "Route capture started by"
+                                                      (route-capture-started-by-of
+                                                       snapshot))
                             (render-connect-field-row "Selected source label"
                                                       (selected-source-label-of snapshot))
                             (render-connect-field-row "Selected source pane"

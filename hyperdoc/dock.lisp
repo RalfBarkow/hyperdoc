@@ -587,6 +587,60 @@ the primary pane-local object in this slice."))
    "tests/dock-annotation-smoke.lisp"
    :target-name "run-dock-annotation-smoke-tests"))
 
+(defun mobile-progressive-chrome-js-evidence ()
+  (make-dock-implementation-evidence
+   "mobile-progressive-chrome-evidence/js-runtime"
+   "Mobile progressive chrome runtime"
+   "The browser-side Dock runtime owns the capabilities layer state, inspector-tab layer state, and route-capture gate."
+   "source file"
+   "assets/hyperdoc/js/dom-annotation-connect.js"
+   :target-name "mobile progressive chrome runtime"))
+
+(defun mobile-progressive-chrome-css-evidence ()
+  (make-dock-implementation-evidence
+   "mobile-progressive-chrome-evidence/css"
+   "Mobile progressive chrome styling"
+   "The CSS collapses mobile capabilities behind )( and inspector tabs behind the rotated )( progressive-enhancement button."
+   "source file"
+   "assets/hyperdoc/css/dom-annotation-connect.css"
+   :target-name "mobile progressive chrome styling"))
+
+(defun mobile-progressive-chrome-playwright-evidence ()
+  (make-dock-implementation-evidence
+   "mobile-progressive-chrome-evidence/playwright"
+   "Mobile progressive chrome browser regression"
+   "Playwright coverage verifies collapsed mobile chrome, preserved link clicks, explicit Connect route entry, and inspector tab toggling."
+   "test"
+   "tests/playwright/mobile-progressive-chrome.spec.js"
+   :target-name "mobile progressive chrome browser tests"))
+
+(defun mobile-progressive-chrome-smoke-evidence ()
+  (make-dock-implementation-evidence
+   "mobile-progressive-chrome-evidence/smoke"
+   "Mobile progressive chrome Lisp smoke coverage"
+   "Focused smoke coverage keeps the layered state model, SCXML artifact, plan tasks, and documentation page inspectable."
+   "test"
+   "tests/mobile-progressive-chrome-smoke.lisp"
+   :target-name "run-mobile-progressive-chrome-smoke-tests"))
+
+(defun mobile-progressive-chrome-scxml-evidence ()
+  (make-dock-implementation-evidence
+   "mobile-progressive-chrome-evidence/scxml"
+   "Mobile progressive chrome SCXML artifact"
+   "The SCXML-like behavior artifact records layered events, guards, and invariants for the mobile progressive chrome runtime."
+   "artifact"
+   "hyperdoc/mobile-progressive-chrome.scxml"
+   :target-name "mobile-progressive-chrome"))
+
+(defun mobile-progressive-chrome-doc-evidence ()
+  (make-dock-implementation-evidence
+   "mobile-progressive-chrome-evidence/docs"
+   "Mobile progressive chrome documentation"
+   "The durable HyperDoc page documents the route-capture boundary, compact glyph controls, and regeneration-independent behavior."
+   "documentation"
+   "hyperdoc/Mobile progressive chrome in HyperDoc.html"
+   :target-name "Mobile progressive chrome in HyperDoc"))
+
 (defun annotation-capability-evidence-target ()
   (make-instance 'dock-claim-code-relation
                  :id "dock-claim/annotation-capability"
@@ -647,14 +701,29 @@ the primary pane-local object in this slice."))
 (defun dock-mobile-route-strip-claim ()
   (make-instance 'dock-claim-code-relation
                  :id "dock-claim/mobile-route-strip"
-                 :title "Mobile Dock uses route-first two-tap flow"
-                 :summary "On narrow viewports the Dock collapses to a route strip: tap a source station, then tap a target station or operation."
+                 :title "Mobile Dock gates route capture behind explicit Connect"
+                 :summary "On narrow viewports the Dock collapses to )( first; route capture starts only after the user opens capabilities and chooses Connect."
                  :claim-text
-                 "Mobile Dock presentation exposes the Touch-Fahrplan route language first. Connect remains the internal capability, but the visible flow is a compact route strip that latches a source station, accepts a destination station or operation such as Annotation, and opens the first-class route object."
+                 "Mobile Dock presentation preserves normal document semantics by default. The closed capabilities layer exposes only )( and never captures page-body taps. The explicit Connect choice enters route-introduction, then station taps can latch a source and target."
                  :evidence (list (dock-js-coachmark-evidence)
                                  (dock-css-coachmark-evidence)
                                  (dock-playwright-evidence)
+                                 (mobile-progressive-chrome-js-evidence)
+                                 (mobile-progressive-chrome-css-evidence)
+                                 (mobile-progressive-chrome-playwright-evidence)
                                  (dock-annotation-smoke-evidence))))
+
+(defun mobile-progressive-chrome-tabs-claim ()
+  (make-instance 'dock-claim-code-relation
+                 :id "dock-claim/mobile-inspector-tabs-layer"
+                 :title "Mobile inspector tabs collapse without losing active tab semantics"
+                 :summary "On narrow viewports the inspector tab row collapses behind a rotated )( button while the active tab and normal tab selection semantics remain intact."
+                 :claim-text
+                 "Inspector tabs are a progressive-enhancement layer on mobile. Collapsing the labels reduces chrome height, but the active tab remains known, the full tab row can be reopened, and selecting a tab changes the active pane content through the existing inspector tab buttons."
+                 :evidence (list (mobile-progressive-chrome-js-evidence)
+                                 (mobile-progressive-chrome-css-evidence)
+                                 (mobile-progressive-chrome-playwright-evidence)
+                                 (mobile-progressive-chrome-smoke-evidence))))
 
 (defun dock-latent-state ()
   (make-instance 'dock-presentation-state
@@ -734,15 +803,46 @@ the primary pane-local object in this slice."))
 
 (defun dock-mobile-route-idle-state ()
   (make-instance 'dock-presentation-state
-                 :id "dock-mobile-route-state/idle"
-                 :title "idle"
-                 :summary "The narrow Dock route strip is waiting for the first tap on a source station."
-                 :compact-representation "Tap a station"
-                 :expanded-representation "No coachmark overlay by default on mobile."
-                 :entry-triggers '("Narrow viewport with no latched source or pending route.")
-                 :exit-conditions '("Tap a station.")
-                 :capabilities '("Lay route")
+                 :id "dock-capabilities-layer/collapsed"
+                 :title "capabilities-collapsed"
+                 :summary "The narrow Dock capabilities layer is closed; only the )( button is visible and page-body taps remain normal document actions."
+                 :compact-representation ")("
+                 :expanded-representation "None."
+                 :entry-triggers '("Narrow viewport with no explicit capabilities opening."
+                                   "Capabilities close."
+                                   "Route cancellation returns to the closed layer when it was the prior layer.")
+                 :exit-conditions '("CAPABILITIES_TOGGLE opens the capabilities layer.")
+                 :capabilities '("Open capabilities")
                  :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-capabilities-open-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-capabilities-layer/open"
+                 :title "capabilities-open"
+                 :summary "The narrow Dock capabilities layer is open, exposing Connect, Annotation, and Guide without yet capturing station taps."
+                 :compact-representation "Connect, Annotation, Guide."
+                 :expanded-representation "No route guidance until Connect is chosen."
+                 :entry-triggers '("CAPABILITIES_TOGGLE from capabilities-collapsed.")
+                 :exit-conditions '("CAPABILITIES_CLOSE collapses the layer."
+                                    "CONNECT_CHOSEN enters route-introduction."
+                                    "GUIDE_CHOSEN opens rediscovery guidance.")
+                 :capabilities '("Connect" "Annotation" "Guide")
+                 :claims (list (dock-mobile-route-strip-claim)
+                               (dock-degrade-chrome-claim))))
+
+(defun dock-mobile-route-introduction-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-mobile-route-state/route-introduction"
+                 :title "route-introduction"
+                 :summary "Connect has been explicitly chosen on a narrow viewport and route capture is ready, but no source station is latched yet."
+                 :compact-representation "Tap a station with Cancel."
+                 :expanded-representation "Route guidance copy only while route capture is active."
+                 :entry-triggers '("CONNECT_CHOSEN from capabilities-open.")
+                 :exit-conditions '("STATION_TAP latches the source station."
+                                    "ROUTE_CANCEL exits capture.")
+                 :capabilities '("Lay route" "Cancel")
+                 :claims (list (dock-mobile-route-strip-claim)
+                               (dock-connect-active-claim))))
 
 (defun dock-mobile-route-source-latched-state ()
   (make-instance 'dock-presentation-state
@@ -751,7 +851,7 @@ the primary pane-local object in this slice."))
                  :summary "A source station is latched and the route strip asks for a destination station or operation."
                  :compact-representation "From: <source> -- tap target or operation."
                  :expanded-representation "Only the route operation choices required now, plus Cancel."
-                 :entry-triggers '("Tap a source station while the mobile route strip is idle.")
+                 :entry-triggers '("STATION_TAP after CONNECT_CHOSEN.")
                  :exit-conditions '("Tap destination station."
                                     "Tap destination operation."
                                     "Cancel.")
@@ -796,9 +896,63 @@ the primary pane-local object in this slice."))
                                    "Confirmed operation route completes.")
                  :exit-conditions '("Open route."
                                     "Open evidence."
-                                    "Tap another station.")
+                                    "Start another explicit Connect route.")
                  :capabilities '("Open route" "Evidence" "Lay route")
                  :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-mobile-route-cancelled-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-mobile-route-state/cancelled"
+                 :title "route-cancelled"
+                 :summary "Route capture has been cancelled and page-body taps have returned to normal document semantics."
+                 :compact-representation "Returns to capabilities-open or capabilities-collapsed deterministically."
+                 :expanded-representation "None."
+                 :entry-triggers '("ROUTE_CANCEL."
+                                   "CAPABILITIES_CLOSE while route capture is transient.")
+                 :exit-conditions '("Prior layer state is restored.")
+                 :capabilities '("Open capabilities")
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-inspector-tabs-collapsed-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-inspector-tabs-layer/collapsed"
+                 :title "tabs-collapsed"
+                 :summary "The mobile inspector tab row is hidden behind a rotated )( button while the active tab remains known."
+                 :compact-representation "Rotated )( with active tab in the button's accessible label."
+                 :expanded-representation "None."
+                 :entry-triggers '("Narrow viewport initial enhancement."
+                                   "Tab selected on a narrow viewport."
+                                   "Inspector tabs toggle closed.")
+                 :exit-conditions '("INSPECTOR_TABS_TOGGLE opens the tab list.")
+                 :capabilities '("Open inspector tabs")
+                 :claims (list (dock-degrade-chrome-claim)
+                               (mobile-progressive-chrome-tabs-claim))))
+
+(defun dock-inspector-tabs-open-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-inspector-tabs-layer/open"
+                 :title "tabs-open"
+                 :summary "The full inspector tab row is visible for selecting Source, Links, Parse tree, Source surface, Backlinks, and other views."
+                 :compact-representation "Rotated )( indicates the layer can close."
+                 :expanded-representation "Full inspector tab list."
+                 :entry-triggers '("INSPECTOR_TABS_TOGGLE from tabs-collapsed.")
+                 :exit-conditions '("INSPECTOR_TABS_TOGGLE closes the layer."
+                                    "INSPECTOR_TAB_SELECT may collapse the layer on narrow viewports.")
+                 :capabilities '("Inspector tabs")
+                 :claims (list (dock-degrade-chrome-claim)
+                               (mobile-progressive-chrome-tabs-claim))))
+
+(defun dock-inspector-tab-selected-state ()
+  (make-instance 'dock-presentation-state
+                 :id "dock-inspector-tabs-layer/tab-selected"
+                 :title "tab-selected"
+                 :summary "An inspector tab selection changed the active tab; on narrow viewports the row collapses again to preserve vertical space."
+                 :compact-representation "Rotated )( with updated active-tab label."
+                 :expanded-representation "The selected tab content remains visible."
+                 :entry-triggers '("INSPECTOR_TAB_SELECT.")
+                 :exit-conditions '("Transition to tabs-collapsed on narrow viewports or tabs-open on desktop.")
+                 :capabilities '("Inspector tabs")
+                 :claims (list (mobile-progressive-chrome-tabs-claim))))
 
 (defun dock-introduction-to-active-transition ()
   (make-instance 'dock-presentation-transition
@@ -869,14 +1023,48 @@ the primary pane-local object in this slice."))
 
 (defun dock-route-idle-to-source-latched-transition ()
   (make-instance 'dock-presentation-transition
-                 :id "dock-mobile-route-transition/idle-source-latched"
-                 :title "Idle -> Source latched"
-                 :summary "The first mobile tap latches a source station without exposing a separate Connect toolbar step."
-                 :from-state (dock-mobile-route-idle-state)
+                 :id "dock-mobile-route-transition/route-introduction-source-latched"
+                 :title "Route introduction -> Source latched"
+                 :summary "The first station tap can latch a source only after Connect has been explicitly chosen."
+                 :from-state (dock-mobile-route-introduction-state)
                  :to-state (dock-mobile-route-source-latched-state)
-                 :trigger "Tap source station."
+                 :trigger "STATION_TAP after CONNECT_CHOSEN."
                  :exit-condition "Route strip shows From: <source> and asks for target or operation."
                  :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-capabilities-collapsed-to-open-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-capabilities-transition/collapsed-open"
+                 :title "Capabilities collapsed -> Capabilities open"
+                 :summary "The literal )( button opens the capability layer without starting route capture."
+                 :from-state (dock-mobile-route-idle-state)
+                 :to-state (dock-capabilities-open-state)
+                 :trigger "CAPABILITIES_TOGGLE."
+                 :exit-condition "Connect, Annotation, and Guide are visible; body taps are still document actions."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-capabilities-open-to-collapsed-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-capabilities-transition/open-collapsed"
+                 :title "Capabilities open -> Capabilities collapsed"
+                 :summary "Closing the capability layer removes capability chrome and preserves normal document interaction."
+                 :from-state (dock-capabilities-open-state)
+                 :to-state (dock-mobile-route-idle-state)
+                 :trigger "CAPABILITIES_CLOSE."
+                 :exit-condition "Only )( remains visible and route capture is inactive."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-capabilities-open-to-route-introduction-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-capabilities-transition/open-route-introduction"
+                 :title "Capabilities open -> Route introduction"
+                 :summary "Choosing Connect is the explicit transition that starts route capture on mobile."
+                 :from-state (dock-capabilities-open-state)
+                 :to-state (dock-mobile-route-introduction-state)
+                 :trigger "CONNECT_CHOSEN."
+                 :exit-condition "Tap a station appears and the next body tap can latch a route source."
+                 :claims (list (dock-mobile-route-strip-claim)
+                               (dock-connect-active-claim))))
 
 (defun dock-route-source-latched-to-destination-candidate-transition ()
   (make-instance 'dock-presentation-transition
@@ -935,48 +1123,106 @@ the primary pane-local object in this slice."))
 
 (defun dock-route-completed-to-idle-transition ()
   (make-instance 'dock-presentation-transition
-                 :id "dock-mobile-route-transition/completed-idle"
-                 :title "Completed -> Idle"
+                 :id "dock-mobile-route-transition/completed-capabilities-open"
+                 :title "Completed -> Capabilities open"
                  :summary "Opening the route or evidence clears the compact completed state and normal inspection continues."
                  :from-state (dock-mobile-route-completed-state)
-                 :to-state (dock-mobile-route-idle-state)
-                 :trigger "Open route, open evidence, or start another route."
-                 :exit-condition "Route strip returns to Tap a station."
+                 :to-state (dock-capabilities-open-state)
+                 :trigger "Open route, open evidence, or start another explicit route."
+                 :exit-condition "Route capture is inactive."
                  :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-route-cancelled-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-mobile-route-transition/capture-cancelled"
+                 :title "Route capture -> Route cancelled"
+                 :summary "Cancel or closing the capabilities layer exits transient route capture."
+                 :from-state (dock-mobile-route-introduction-state)
+                 :to-state (dock-mobile-route-cancelled-state)
+                 :trigger "ROUTE_CANCEL or CAPABILITIES_CLOSE."
+                 :exit-condition "Body taps are document actions again."
+                 :claims (list (dock-mobile-route-strip-claim))))
+
+(defun dock-tabs-collapsed-to-open-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-inspector-tabs-transition/collapsed-open"
+                 :title "Tabs collapsed -> Tabs open"
+                 :summary "The rotated )( inspector control expands the existing inspector tab row."
+                 :from-state (dock-inspector-tabs-collapsed-state)
+                 :to-state (dock-inspector-tabs-open-state)
+                 :trigger "INSPECTOR_TABS_TOGGLE."
+                 :exit-condition "Full inspector tab list is visible."
+                 :claims (list (mobile-progressive-chrome-tabs-claim))))
+
+(defun dock-tabs-open-to-selected-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-inspector-tabs-transition/open-tab-selected"
+                 :title "Tabs open -> Tab selected"
+                 :summary "Selecting a tab changes the active inspector view through the existing tab button."
+                 :from-state (dock-inspector-tabs-open-state)
+                 :to-state (dock-inspector-tab-selected-state)
+                 :trigger "INSPECTOR_TAB_SELECT."
+                 :exit-condition "Active tab changes and the content view remains visible."
+                 :claims (list (mobile-progressive-chrome-tabs-claim))))
+
+(defun dock-tabs-selected-to-collapsed-transition ()
+  (make-instance 'dock-presentation-transition
+                 :id "dock-inspector-tabs-transition/selected-collapsed"
+                 :title "Tab selected -> Tabs collapsed"
+                 :summary "On narrow viewports the tab row collapses after selection to return vertical space to the content."
+                 :from-state (dock-inspector-tab-selected-state)
+                 :to-state (dock-inspector-tabs-collapsed-state)
+                 :trigger "narrow-viewport? guard after INSPECTOR_TAB_SELECT."
+                 :exit-condition "The rotated )( remains and its accessible label names the active tab."
+                 :claims (list (mobile-progressive-chrome-tabs-claim))))
 
 (defun dock-presentation-model ()
   (make-instance 'dock-presentation-model
                  :id "dock-presentation-model"
                  :title "Dock presentation model"
-                 :summary "Inspectable SCXML-style state model for Dock presentation: desktop coachmark behavior plus the mobile route-first strip."
+                 :summary "Inspectable SCXML-style state model for Dock presentation: desktop coachmark behavior composed with mobile capabilities and inspector-tabs progressive-enhancement layers."
                  :states (list (dock-latent-state)
                                (dock-introduction-state)
                                (dock-active-state)
                                (dock-degraded-state)
                                (dock-rediscovery-state)
                                (dock-mobile-route-idle-state)
+                               (dock-capabilities-open-state)
+                               (dock-mobile-route-introduction-state)
                                (dock-mobile-route-source-latched-state)
                                (dock-mobile-route-destination-candidate-state)
                                (dock-mobile-route-confirming-state)
-                               (dock-mobile-route-completed-state))
+                               (dock-mobile-route-completed-state)
+                               (dock-mobile-route-cancelled-state)
+                               (dock-inspector-tabs-collapsed-state)
+                               (dock-inspector-tabs-open-state)
+                               (dock-inspector-tab-selected-state))
                  :transitions (list (dock-introduction-to-active-transition)
                                     (dock-introduction-to-degraded-transition)
                                     (dock-degraded-to-active-transition)
                                     (dock-active-to-degraded-transition)
                                     (dock-degraded-to-rediscovery-transition)
                                     (dock-rediscovery-to-degraded-transition)
+                                    (dock-capabilities-collapsed-to-open-transition)
+                                    (dock-capabilities-open-to-collapsed-transition)
+                                    (dock-capabilities-open-to-route-introduction-transition)
                                     (dock-route-idle-to-source-latched-transition)
                                     (dock-route-source-latched-to-destination-candidate-transition)
                                     (dock-route-destination-candidate-to-completed-transition)
                                     (dock-route-destination-candidate-to-confirming-transition)
                                     (dock-route-confirming-dry-run-transition)
                                     (dock-route-confirming-to-completed-transition)
-                                    (dock-route-completed-to-idle-transition))
+                                    (dock-route-completed-to-idle-transition)
+                                    (dock-route-cancelled-transition)
+                                    (dock-tabs-collapsed-to-open-transition)
+                                    (dock-tabs-open-to-selected-transition)
+                                    (dock-tabs-selected-to-collapsed-transition))
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-connect-active-claim)
                                (dock-provider-handoff-claim)
                                (dock-runtime-inspection-claim)
-                               (dock-mobile-route-strip-claim))))
+                               (dock-mobile-route-strip-claim)
+                               (mobile-progressive-chrome-tabs-claim))))
 
 (defun chunk-dock-presentation-model ()
   (dock-presentation-model))
@@ -986,3 +1232,207 @@ the primary pane-local object in this slice."))
 
 (defun guide-capability-evidence-target ()
   (dock-runtime-inspection-claim))
+
+(defclass mobile-progressive-chrome-scxml-artifact ()
+  ((id :reader id-of :initarg :id)
+   (title :reader title-of :initarg :title)
+   (summary :reader summary-of :initarg :summary)
+   (relative-path :reader relative-path-of :initarg :relative-path)
+   (events :reader mobile-progressive-chrome-scxml-events-of
+           :initarg :events :initform nil)
+   (guards :reader mobile-progressive-chrome-scxml-guards-of
+           :initarg :guards :initform nil)
+   (invariants :reader mobile-progressive-chrome-scxml-invariants-of
+               :initarg :invariants :initform nil)))
+
+(defclass mobile-progressive-chrome-plan ()
+  ((id :reader id-of :initarg :id)
+   (title :reader title-of :initarg :title)
+   (summary :reader summary-of :initarg :summary)
+   (tasks :reader mobile-progressive-chrome-plan-tasks-of
+          :initarg :tasks :initform nil)))
+
+(defclass mobile-progressive-chrome-plan-task ()
+  ((id :reader id-of :initarg :id)
+   (title :reader title-of :initarg :title)
+   (summary :reader summary-of :initarg :summary)
+   (status :reader mobile-progressive-chrome-plan-task-status-of
+           :initarg :status)
+   (implementation-evidence-path
+    :reader mobile-progressive-chrome-plan-task-implementation-evidence-path-of
+    :initarg :implementation-evidence-path
+    :initform nil)
+   (validation-evidence-path
+    :reader mobile-progressive-chrome-plan-task-validation-evidence-path-of
+    :initarg :validation-evidence-path
+    :initform nil)
+   (dependency-ids
+    :reader mobile-progressive-chrome-plan-task-dependency-ids-of
+    :initarg :dependency-ids
+    :initform nil)))
+
+(defmethod print-object ((object mobile-progressive-chrome-scxml-artifact) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object mobile-progressive-chrome-plan) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defmethod print-object ((object mobile-progressive-chrome-plan-task) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A" (title-of object))))
+
+(defun mobile-progressive-chrome-scxml-pathname ()
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/mobile-progressive-chrome.scxml"))
+
+(defun mobile-progressive-chrome-scxml-source ()
+  (uiop:read-file-string (mobile-progressive-chrome-scxml-pathname)))
+
+(defun mobile-progressive-chrome-scxml-artifact ()
+  (make-instance 'mobile-progressive-chrome-scxml-artifact
+                 :id "mobile-progressive-chrome-scxml"
+                 :title "Mobile progressive chrome SCXML"
+                 :summary "SCXML-like behavior artifact for the capabilities layer, inspector-tabs layer, and route-laying capture boundary."
+                 :relative-path "hyperdoc/mobile-progressive-chrome.scxml"
+                 :events '("CAPABILITIES_TOGGLE"
+                           "CAPABILITIES_CLOSE"
+                           "INSPECTOR_TABS_TOGGLE"
+                           "INSPECTOR_TAB_SELECT"
+                           "CONNECT_CHOSEN"
+                           "STATION_TAP"
+                           "LINK_CLICK"
+                           "ROUTE_CANCEL"
+                           "ROUTE_COMPLETE"
+                           "GUIDE_CHOSEN"
+                           "ANNOTATION_CHOSEN")
+                 :guards '("narrow-viewport?"
+                           "capabilities-open?"
+                           "route-capture-active?"
+                           "target-is-link?")
+                 :invariants
+                 '("LINK_CLICK follows the link unless route-capture-active?"
+                   "STATION_TAP can latch source only after CONNECT_CHOSEN"
+                   "capabilities-collapsed implies route-capture-inactive"
+                   "tabs-collapsed does not disable active tab semantics")))
+
+(defun make-mobile-progressive-chrome-plan-task
+    (id title status implementation-evidence-path validation-evidence-path
+     &key summary dependency-ids)
+  (make-instance
+   'mobile-progressive-chrome-plan-task
+   :id id
+   :title title
+   :summary (or summary title)
+   :status status
+   :implementation-evidence-path implementation-evidence-path
+   :validation-evidence-path validation-evidence-path
+   :dependency-ids dependency-ids))
+
+(defun mobile-progressive-chrome-plan ()
+  (make-instance
+   'mobile-progressive-chrome-plan
+   :id "mobile-progressive-chrome-plan"
+   :title "Mobile progressive chrome plan"
+   :summary "SHOP3-like implementation plan for collapsing mobile capabilities and inspector tabs while preserving normal links until explicit Connect."
+   :tasks
+   (list
+    (make-mobile-progressive-chrome-plan-task
+     "survey-current-dock-runtime"
+     "Survey current Dock runtime"
+     "done"
+     "assets/hyperdoc/js/dom-annotation-connect.js"
+     "tests/playwright/dock-presentation.spec.js")
+    (make-mobile-progressive-chrome-plan-task
+     "identify-capability-capture-entry-points"
+     "Identify capability capture entry points"
+     "done"
+     "assets/hyperdoc/js/dom-annotation-connect.js"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     :dependency-ids '("survey-current-dock-runtime"))
+    (make-mobile-progressive-chrome-plan-task
+     "identify-inspector-tab-rendering-entry-points"
+     "Identify inspector tab rendering entry points"
+     "done"
+     "assets/hyperdoc/js/dom-annotation-connect.js"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     :dependency-ids '("survey-current-dock-runtime"))
+    (make-mobile-progressive-chrome-plan-task
+     "add-capabilities-layer-state"
+     "Add capabilities layer state"
+     "done"
+     "assets/hyperdoc/js/dom-annotation-connect.js"
+     "tests/mobile-progressive-chrome-smoke.lisp"
+     :dependency-ids '("identify-capability-capture-entry-points"))
+    (make-mobile-progressive-chrome-plan-task
+     "add-tabs-layer-state"
+     "Add tabs layer state"
+     "done"
+     "assets/hyperdoc/js/dom-annotation-connect.js"
+     "tests/mobile-progressive-chrome-smoke.lisp"
+     :dependency-ids '("identify-inspector-tab-rendering-entry-points"))
+    (make-mobile-progressive-chrome-plan-task
+     "gate-route-capture-behind-explicit-connect"
+     "Gate route capture behind explicit Connect"
+     "done"
+     "assets/hyperdoc/js/dom-annotation-connect.js"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     :dependency-ids '("add-capabilities-layer-state"))
+    (make-mobile-progressive-chrome-plan-task
+     "implement-capabilities-toggle-glyph"
+     "Implement capabilities )( toggle"
+     "done"
+     "assets/hyperdoc/js/dom-annotation-connect.js"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     :dependency-ids '("add-capabilities-layer-state"))
+    (make-mobile-progressive-chrome-plan-task
+     "implement-rotated-tabs-toggle-glyph"
+     "Implement rotated inspector-tabs )( toggle"
+     "done"
+     "assets/hyperdoc/css/dom-annotation-connect.css"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     :dependency-ids '("add-tabs-layer-state"))
+    (make-mobile-progressive-chrome-plan-task
+     "preserve-link-default-action-when-route-inactive"
+     "Preserve link default action when route inactive"
+     "done"
+     "assets/hyperdoc/js/dom-annotation-connect.js"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     :dependency-ids '("gate-route-capture-behind-explicit-connect"))
+    (make-mobile-progressive-chrome-plan-task
+     "update-state-model-view"
+     "Update state model view"
+     "done"
+     "hyperdoc/dock.lisp"
+     "tests/mobile-progressive-chrome-smoke.lisp"
+     :dependency-ids '("add-capabilities-layer-state" "add-tabs-layer-state"))
+    (make-mobile-progressive-chrome-plan-task
+     "add-scxml-behavior-model"
+     "Add SCXML behavior model"
+     "done"
+     "hyperdoc/mobile-progressive-chrome.scxml"
+     "tests/mobile-progressive-chrome-smoke.lisp"
+     :dependency-ids '("update-state-model-view"))
+    (make-mobile-progressive-chrome-plan-task
+     "add-mobile-regression-tests"
+     "Add mobile regression tests"
+     "done"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     :dependency-ids '("gate-route-capture-behind-explicit-connect"))
+    (make-mobile-progressive-chrome-plan-task
+     "update-durable-docs"
+     "Update durable docs"
+     "done"
+     "hyperdoc/Mobile progressive chrome in HyperDoc.html"
+     "tests/mobile-progressive-chrome-smoke.lisp"
+     :dependency-ids '("add-scxml-behavior-model"))
+    (make-mobile-progressive-chrome-plan-task
+     "validate"
+     "Validate"
+     "done"
+     "hyperdoc.asd"
+     "nix develop validation commands"
+     :dependency-ids '("add-mobile-regression-tests" "update-durable-docs")))))

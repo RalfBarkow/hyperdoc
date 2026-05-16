@@ -1,0 +1,71 @@
+<h1>Mobile progressive chrome in HyperDoc</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Mobile HyperDoc chrome follows the existing Dock rule: degrade chrome, not
+  capability. On narrow viewports, the capabilities layer starts collapsed
+  behind <code>)(</code>, and the inspector tabs layer starts collapsed behind a
+  rotated <code>)(</code>.
+</p>
+
+<h2>Operational contract</h2>
+
+<ul>
+  <li><b>Capabilities closed:</b> only <code>)(</code> is visible. Connect, Annotation, Guide, and route guidance are hidden, and page-body taps are normal document actions.</li>
+  <li><b>Capabilities open:</b> Connect, Annotation, and Guide are visible, but route capture is still inactive.</li>
+  <li><b>Route capture:</b> only choosing Connect enters route-introduction. Then <b>Tap a station</b> can latch a source and <b>From:</b> appears.</li>
+  <li><b>Ordinary links:</b> links remain ordinary links until route capture is active. In route mode, an anchor can be treated as a route endpoint because the user explicitly chose Connect.</li>
+  <li><b>Inspector tabs:</b> the rotated <code>)(</code> opens the existing tab row. Selecting a tab changes the active tab, then collapses again on narrow viewports to restore vertical space.</li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Mobile progressive chrome in HyperDoc"><tt>Mobile progressive chrome in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Mobile progressive chrome SCXML"><tt>Mobile progressive chrome SCXML</tt></a></li>
+  <li><a hyperbook="topics" page="Mobile progressive chrome plan"><tt>Mobile progressive chrome plan</tt></a></li>
+  <li><a expr="(chunk-dock-presentation-model)"><tt>(chunk-dock-presentation-model)</tt></a></li>
+  <li><a expr="(mobile-progressive-chrome-scxml-artifact)"><tt>(mobile-progressive-chrome-scxml-artifact)</tt></a></li>
+  <li><a expr="(mobile-progressive-chrome-plan)"><tt>(mobile-progressive-chrome-plan)</tt></a></li>
+</ul>
+
+<h2>State composition</h2>
+
+<p>
+  The high-level Dock states remain <b>latent</b>, <b>introduction</b>,
+  <b>active</b>, <b>degraded</b>, and <b>rediscovery</b>. They now compose with
+  two mobile layers: <b>capabilities-collapsed/open</b> and
+  <b>tabs-collapsed/open/tab-selected</b>. The route substates start only after
+  <b>CONNECT_CHOSEN</b>.
+</p>
+
+<p>
+  The state model answers why chrome is visible, whether page-body taps are
+  document actions or route-laying station taps, which transition started route
+  capture, and how to return to normal document interaction.
+</p>
+
+<h2>SCXML and plan artifacts</h2>
+
+<p>
+  <a expr="(mobile-progressive-chrome-scxml-artifact)"><tt>(mobile-progressive-chrome-scxml-artifact)</tt></a>
+  exposes the SCXML-like behavior model at
+  <code>hyperdoc/mobile-progressive-chrome.scxml</code>. It records the events,
+  guards, and invariants for capabilities, inspector tabs, and route capture.
+</p>
+
+<p>
+  <a expr="(mobile-progressive-chrome-plan)"><tt>(mobile-progressive-chrome-plan)</tt></a>
+  exposes the SHOP3-like implementation plan with task status, implementation
+  evidence paths, validation evidence paths, and dependency ids.
+</p>
+
+<h2>Proof page boundary</h2>
+
+<p>
+  The <a page="DM6 AppEmbed HyperDoc Inline Proof">DM6 inline proof page</a>
+  remains readable and navigable with JavaScript disabled. With JavaScript
+  enabled, the mobile chrome is progressively enhanced; it does not change the
+  DM6 AppEmbed schema, DMX persistence, or the page-local DM6 seed.
+</p>

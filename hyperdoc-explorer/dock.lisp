@@ -31,6 +31,15 @@
 (defmethod views:text-representation ((evidence dock-implementation-evidence))
   (shorten-dom-association-label (title-of evidence)))
 
+(defmethod views:text-representation ((artifact mobile-progressive-chrome-scxml-artifact))
+  (shorten-dom-association-label (title-of artifact)))
+
+(defmethod views:text-representation ((plan mobile-progressive-chrome-plan))
+  (shorten-dom-association-label (title-of plan)))
+
+(defmethod views:text-representation ((task mobile-progressive-chrome-plan-task))
+  (shorten-dom-association-label (title-of task)))
+
 (defmethod views:title-bar-action-buttons ((evidence dock-implementation-evidence))
   (let ((pathname (dock-evidence-pathname evidence)))
     (when pathname
@@ -216,3 +225,101 @@
                                                         (dom-connect-bool-label
                                                          (and pathname
                                                               (probe-file pathname)))))))))
+
+(views:defview 👀overview (artifact mobile-progressive-chrome-scxml-artifact)
+  (views:html-view :title "Overview" :priority 1
+                   (views:html
+                    (:h3 (views:esc (title-of artifact)))
+                    (:p (views:esc (summary-of artifact)))
+                    (:table :class "inspector-table"
+                            (render-connect-field-row "Relative path"
+                                                      (relative-path-of artifact))
+                            (render-connect-rich-field-row
+                             "Events"
+                             (mobile-progressive-chrome-scxml-events-of artifact))
+                            (render-connect-rich-field-row
+                             "Guards"
+                             (mobile-progressive-chrome-scxml-guards-of artifact))
+                            (render-connect-rich-field-row
+                             "Invariants"
+                             (mobile-progressive-chrome-scxml-invariants-of artifact))))))
+
+(views:defview 👀source (artifact mobile-progressive-chrome-scxml-artifact)
+  (views:html-view :title "SCXML" :priority 2
+                   (views:html
+                    (:pre :style "white-space: pre-wrap"
+                          (views:esc
+                           (mobile-progressive-chrome-scxml-source))))))
+
+(views:defview 👀overview (plan mobile-progressive-chrome-plan)
+  (views:html-view :title "Overview" :priority 1
+                   (views:html
+                    (:h3 (views:esc (title-of plan)))
+                    (:p (views:esc (summary-of plan)))
+                    (:table :class "inspector-table"
+                            (render-connect-field-row
+                             "Tasks"
+                             (length (mobile-progressive-chrome-plan-tasks-of plan)))
+                            (render-connect-rich-field-row
+                             "Done"
+                             (mapcar #'title-of
+                                     (remove-if-not
+                                      (lambda (task)
+                                        (string= "done"
+                                                 (mobile-progressive-chrome-plan-task-status-of
+                                                  task)))
+                                      (mobile-progressive-chrome-plan-tasks-of
+                                       plan))))))))
+
+(views:defview 👀tasks (plan mobile-progressive-chrome-plan)
+  (views:html-view :title "Tasks" :priority 2
+                   (views:html
+                    (:table :class "inspector-table"
+                            (:tr (:th "Task")
+                                 (:th "Status")
+                                 (:th "Implementation evidence")
+                                 (:th "Validation evidence")
+                                 (:th "Dependencies"))
+                            (loop for task in (mobile-progressive-chrome-plan-tasks-of plan)
+                                  do (views:html
+                                      (:tr
+                                       (:td (views:object-ref task))
+                                       (:td (views:esc
+                                             (mobile-progressive-chrome-plan-task-status-of
+                                              task)))
+                                       (:td (:tt
+                                             (views:esc
+                                              (or (mobile-progressive-chrome-plan-task-implementation-evidence-path-of
+                                                   task)
+                                                  "-"))))
+                                       (:td (:tt
+                                             (views:esc
+                                              (or (mobile-progressive-chrome-plan-task-validation-evidence-path-of
+                                                   task)
+                                                  "-"))))
+                                       (:td
+                                        (render-connect-data-cell
+                                         (mobile-progressive-chrome-plan-task-dependency-ids-of
+                                          task))))))))))
+
+(views:defview 👀overview (task mobile-progressive-chrome-plan-task)
+  (views:html-view :title "Overview" :priority 1
+                   (views:html
+                    (:h3 (views:esc (title-of task)))
+                    (:p (views:esc (summary-of task)))
+                    (:table :class "inspector-table"
+                            (render-connect-field-row
+                             "Status"
+                             (mobile-progressive-chrome-plan-task-status-of task))
+                            (render-connect-field-row
+                             "Implementation evidence"
+                             (mobile-progressive-chrome-plan-task-implementation-evidence-path-of
+                              task))
+                            (render-connect-field-row
+                             "Validation evidence"
+                             (mobile-progressive-chrome-plan-task-validation-evidence-path-of
+                              task))
+                            (render-connect-rich-field-row
+                             "Dependencies"
+                             (mobile-progressive-chrome-plan-task-dependency-ids-of
+                              task))))))
