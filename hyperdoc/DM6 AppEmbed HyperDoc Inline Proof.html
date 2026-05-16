@@ -4,7 +4,7 @@
 <link rel='stylesheet' href='/assets/dm6-elm/hyperdoc-dm6-inline.css'>
 
 <p>
-  This page verifies the stable dm6 embedding contract:
+  <a hyperbook="fedwiki:hyperdoc.dreyeck.ch/" page="dm6-appembed-hyperdoc-inline-proof">This page</a> verifies the stable dm6 embedding contract:
   <code>Elm.AppEmbed.init({ node, flags: { slug, stored } })</code>.
   It treats dm6-elm as an embedded application island and records evidence
   from boot, ports, stage snapshots, and semantic AppEmbed events.
@@ -24,6 +24,24 @@
   The embedded bundle is loaded from <code>/assets/dm6-elm/app.js</code>. The
   page supplies a stable slug and a clear <code>{}</code> stored-model fallback
   so a stale native model cannot masquerade as valid dm6 state.
+</p>
+
+<h2>Page-local DM6 seed</h2>
+
+<p>
+  The DM6 island below is seeded from this page's own Plump parse tree. Its
+  hidden <code>script.dm6-stored</code> contains generated native AppEmbed JSON:
+  topics, hierarchy associations, item sets, boxes, topic-map view props,
+  topic-list view props, and tool state.
+</p>
+
+<p>
+  Regenerate the seed after editing this page with
+  <code>(materialize-dm6-inline-proof-page-topicmap-seed!)</code>. The generator
+  deliberately excludes the generated <code>script.dm6-stored</code> node itself
+  so rerunning it does not turn the previous JSON into another topic. This is a
+  page-local topicmap seed, not DMX persistence and not an AppEmbed schema
+  change.
 </p>
 
 <section class='dm6-hyperdoc-map dm6-island' data-dm6-slug='dm6-hyperdoc-inline-proof' data-dm6-bundle='/assets/dm6-elm/app.js'>
@@ -54,7 +72,7 @@
     <div><b>Status:</b> <span class='dm6-status'>not mounted</span></div>
   </div>
   <details class='dm6-evidence-drawer'>
-    <summary>Evidence: <span class='dm6-evidence-count'>0</span> events - last: <span class='dm6-evidence-last'>none</span></summary>
+    <summary>Evidence timeline: <span class='dm6-evidence-count'>0</span> events - last: <span class='dm6-evidence-last'>none</span></summary>
     <div class='dm6-evidence-panel'>
       <div class='dm6-evidence-actions'>
         <button type='button' data-dm6-evidence-copy>Copy JSON</button>
@@ -69,7 +87,3126 @@
       <pre class='dm6-stored-visible'>{}</pre>
     </div>
   </details>
-  <script type='application/json' class='dm6-stored'>{}</script>
+      <script type="application/json" class="dm6-stored" data-dm6-generated="page-parse-tree-v1">
+{
+  "topics": [
+    {
+      "id": 0,
+      "icon": "",
+      "text": "page: DM6 AppEmbed HyperDoc Inline Proof",
+      "size": {
+        "view": {
+          "w": 0,
+          "h": 0
+        },
+        "editor": {
+          "w": 0,
+          "h": 0
+        }
+      },
+      "assocIds": [
+        77,
+        78,
+        79,
+        82,
+        83,
+        85,
+        86,
+        89,
+        90,
+        92,
+        95,
+        106,
+        107,
+        108,
+        110,
+        113,
+        114,
+        116,
+        117,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        132,
+        133,
+        135,
+        136
+      ]
+    },
+    {
+      "id": 1,
+      "icon": "circle",
+      "text": "h1: DM6 AppEmbed HyperDoc Inline Proof",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        77
+      ]
+    },
+    {
+      "id": 2,
+      "icon": "circle",
+      "text": "in-package: hyperdoc",
+      "size": {
+        "view": {
+          "w": 188,
+          "h": 42
+        },
+        "editor": {
+          "w": 188,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        78
+      ]
+    },
+    {
+      "id": 3,
+      "icon": "circle",
+      "text": "p: This page verifies the stable dm6 embedding contract: Elm.AppEmbed.init({ node, flags: { slug...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        79,
+        80,
+        81
+      ]
+    },
+    {
+      "id": 4,
+      "icon": "circle",
+      "text": "a: This page -> fedwiki:hyperdoc.dreyeck.ch//dm6-appembed-hyperdoc-inline-proof",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        80
+      ]
+    },
+    {
+      "id": 5,
+      "icon": "circle",
+      "text": "code: Elm.AppEmbed.init({ node, flags: { slug, stored } })",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        81
+      ]
+    },
+    {
+      "id": 6,
+      "icon": "circle",
+      "text": "h2: Goal",
+      "size": {
+        "view": {
+          "w": 140,
+          "h": 42
+        },
+        "editor": {
+          "w": 140,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        82
+      ]
+    },
+    {
+      "id": 7,
+      "icon": "circle",
+      "text": "p: Show that HyperDoc can host dm6-elm through AppEmbed without depending on internal dm6 module...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        83,
+        84
+      ]
+    },
+    {
+      "id": 8,
+      "icon": "circle",
+      "text": "code: AppEmbed",
+      "size": {
+        "view": {
+          "w": 146,
+          "h": 42
+        },
+        "editor": {
+          "w": 146,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        84
+      ]
+    },
+    {
+      "id": 9,
+      "icon": "circle",
+      "text": "h2: Starting situation",
+      "size": {
+        "view": {
+          "w": 202,
+          "h": 42
+        },
+        "editor": {
+          "w": 202,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        85
+      ]
+    },
+    {
+      "id": 10,
+      "icon": "circle",
+      "text": "p: The embedded bundle is loaded from /assets/dm6-elm/app.js. The page supplies a stable slug an...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        86,
+        87,
+        88
+      ]
+    },
+    {
+      "id": 11,
+      "icon": "circle",
+      "text": "code: /assets/dm6-elm/app.js",
+      "size": {
+        "view": {
+          "w": 244,
+          "h": 42
+        },
+        "editor": {
+          "w": 244,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        87
+      ]
+    },
+    {
+      "id": 12,
+      "icon": "circle",
+      "text": "code: {}",
+      "size": {
+        "view": {
+          "w": 140,
+          "h": 42
+        },
+        "editor": {
+          "w": 140,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        88
+      ]
+    },
+    {
+      "id": 13,
+      "icon": "circle",
+      "text": "h2: Page-local DM6 seed",
+      "size": {
+        "view": {
+          "w": 209,
+          "h": 42
+        },
+        "editor": {
+          "w": 209,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        89
+      ]
+    },
+    {
+      "id": 14,
+      "icon": "circle",
+      "text": "p: The DM6 island below is seeded from this page's own Plump parse tree. Its hidden script.dm6-s...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        90,
+        91
+      ]
+    },
+    {
+      "id": 15,
+      "icon": "circle",
+      "text": "code: script.dm6-stored",
+      "size": {
+        "view": {
+          "w": 209,
+          "h": 42
+        },
+        "editor": {
+          "w": 209,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        91
+      ]
+    },
+    {
+      "id": 16,
+      "icon": "circle",
+      "text": "p: Regenerate the seed after editing this page with (materialize-dm6-inline-proof-page-topicmap-...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        92,
+        93,
+        94
+      ]
+    },
+    {
+      "id": 17,
+      "icon": "circle",
+      "text": "code: (materialize-dm6-inline-proof-page-topicmap-seed!)",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        93
+      ]
+    },
+    {
+      "id": 18,
+      "icon": "circle",
+      "text": "code: script.dm6-stored",
+      "size": {
+        "view": {
+          "w": 209,
+          "h": 42
+        },
+        "editor": {
+          "w": 209,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        94
+      ]
+    },
+    {
+      "id": 19,
+      "icon": "circle",
+      "text": "section.dm6-hyperdoc-map.dm6-island: dm6-hyperdoc-inline-proof",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        95,
+        96,
+        99
+      ]
+    },
+    {
+      "id": 20,
+      "icon": "circle",
+      "text": "header.dm6-island-header: DM6 Topic Map Live AppEmbed canvas with structured evidence capture Select Move Cross Fit Res...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        96,
+        97,
+        98
+      ]
+    },
+    {
+      "id": 21,
+      "icon": "circle",
+      "text": "h2: DM6 Topic Map",
+      "size": {
+        "view": {
+          "w": 167,
+          "h": 42
+        },
+        "editor": {
+          "w": 167,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        97
+      ]
+    },
+    {
+      "id": 22,
+      "icon": "circle",
+      "text": "nav.dm6-toolbar: Select Move Cross Fit Reset Evidence",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        98
+      ]
+    },
+    {
+      "id": 23,
+      "icon": "circle",
+      "text": "details.dm6-evidence-drawer: Evidence timeline: 0 events - last: none",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105
+      ]
+    },
+    {
+      "id": 24,
+      "icon": "circle",
+      "text": "summary: Evidence timeline: 0 events - last: none",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        100
+      ]
+    },
+    {
+      "id": 25,
+      "icon": "circle",
+      "text": "h3: Evidence summary",
+      "size": {
+        "view": {
+          "w": 188,
+          "h": 42
+        },
+        "editor": {
+          "w": 188,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        101
+      ]
+    },
+    {
+      "id": 26,
+      "icon": "circle",
+      "text": "pre.dm6-evidence-summary: {}",
+      "size": {
+        "view": {
+          "w": 244,
+          "h": 42
+        },
+        "editor": {
+          "w": 244,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        102
+      ]
+    },
+    {
+      "id": 27,
+      "icon": "circle",
+      "text": "h3: Raw events",
+      "size": {
+        "view": {
+          "w": 146,
+          "h": 42
+        },
+        "editor": {
+          "w": 146,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        103
+      ]
+    },
+    {
+      "id": 28,
+      "icon": "circle",
+      "text": "h3: Stored model supplied to AppEmbed",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        104
+      ]
+    },
+    {
+      "id": 29,
+      "icon": "circle",
+      "text": "pre.dm6-stored-visible: {}",
+      "size": {
+        "view": {
+          "w": 230,
+          "h": 42
+        },
+        "editor": {
+          "w": 230,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        105
+      ]
+    },
+    {
+      "id": 30,
+      "icon": "circle",
+      "text": "h2: Step 1: Boot the embedded app",
+      "size": {
+        "view": {
+          "w": 279,
+          "h": 42
+        },
+        "editor": {
+          "w": 279,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        106
+      ]
+    },
+    {
+      "id": 31,
+      "icon": "circle",
+      "text": "p: Click: open this page and let the dm6 island mount.",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        107
+      ]
+    },
+    {
+      "id": 32,
+      "icon": "circle",
+      "text": "p: Observe: the status changes from not mounted to a mounted slug, and the evidence count increa...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        108,
+        109
+      ]
+    },
+    {
+      "id": 33,
+      "icon": "circle",
+      "text": "code: not mounted",
+      "size": {
+        "view": {
+          "w": 167,
+          "h": 42
+        },
+        "editor": {
+          "w": 167,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        109
+      ]
+    },
+    {
+      "id": 34,
+      "icon": "circle",
+      "text": "p: Why this matters: HyperDoc is booting window.Elm.AppEmbed as a Browser.element with string fl...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        110,
+        111,
+        112
+      ]
+    },
+    {
+      "id": 35,
+      "icon": "circle",
+      "text": "code: window.Elm.AppEmbed",
+      "size": {
+        "view": {
+          "w": 223,
+          "h": 42
+        },
+        "editor": {
+          "w": 223,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        111
+      ]
+    },
+    {
+      "id": 36,
+      "icon": "circle",
+      "text": "code: Browser.element",
+      "size": {
+        "view": {
+          "w": 195,
+          "h": 42
+        },
+        "editor": {
+          "w": 195,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        112
+      ]
+    },
+    {
+      "id": 37,
+      "icon": "circle",
+      "text": "h2: Step 2: Inspect the evidence drawer",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        113
+      ]
+    },
+    {
+      "id": 38,
+      "icon": "circle",
+      "text": "p: Click: press the Evidence control.",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        114,
+        115
+      ]
+    },
+    {
+      "id": 39,
+      "icon": "circle",
+      "text": "code: Evidence",
+      "size": {
+        "view": {
+          "w": 146,
+          "h": 42
+        },
+        "editor": {
+          "w": 146,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        115
+      ]
+    },
+    {
+      "id": 40,
+      "icon": "circle",
+      "text": "p: Observe: the summary lists mount, bundle, init, ports, stage snapshots, and any semantic AppE...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        116
+      ]
+    },
+    {
+      "id": 41,
+      "icon": "circle",
+      "text": "p: Why this matters: the page turns embedding effects into inspectable values instead of relying...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        117
+      ]
+    },
+    {
+      "id": 42,
+      "icon": "circle",
+      "text": "h2: Step 3: Mutate or navigate inside dm6",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        118
+      ]
+    },
+    {
+      "id": 43,
+      "icon": "circle",
+      "text": "p: Click: interact with the dm6 canvas by selecting or dragging when topics are present.",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        119
+      ]
+    },
+    {
+      "id": 44,
+      "icon": "circle",
+      "text": "p: Observe: AppEmbed evidence events such as selection, drag, cross, box change, and store snaps...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        120
+      ]
+    },
+    {
+      "id": 45,
+      "icon": "circle",
+      "text": "p: Why this matters: the timeline records dm6 model transitions at the embedding boundary withou...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        121
+      ]
+    },
+    {
+      "id": 46,
+      "icon": "circle",
+      "text": "h2: Evaluation: elm-pages Effects as Data",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        122
+      ]
+    },
+    {
+      "id": 47,
+      "icon": "circle",
+      "text": "p: elm-pages' insight transfers well because dm6-elm's embedding boundary also turns effects int...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        123
+      ]
+    },
+    {
+      "id": 48,
+      "icon": "circle",
+      "text": "p: The immediate target is not a full elm-pages-style test runner. The immediate target is an in...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        124
+      ]
+    },
+    {
+      "id": 49,
+      "icon": "circle",
+      "text": "h2: Expected result",
+      "size": {
+        "view": {
+          "w": 181,
+          "h": 42
+        },
+        "editor": {
+          "w": 181,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        125
+      ]
+    },
+    {
+      "id": 50,
+      "icon": "circle",
+      "text": "p: The proof succeeds when the page loads /assets/dm6-elm/app.js, exports Elm.AppEmbed, mounts w...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        126,
+        127,
+        128,
+        129,
+        130,
+        131
+      ]
+    },
+    {
+      "id": 51,
+      "icon": "circle",
+      "text": "code: /assets/dm6-elm/app.js",
+      "size": {
+        "view": {
+          "w": 244,
+          "h": 42
+        },
+        "editor": {
+          "w": 244,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        127
+      ]
+    },
+    {
+      "id": 52,
+      "icon": "circle",
+      "text": "code: Elm.AppEmbed",
+      "size": {
+        "view": {
+          "w": 174,
+          "h": 42
+        },
+        "editor": {
+          "w": 174,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        128
+      ]
+    },
+    {
+      "id": 53,
+      "icon": "circle",
+      "text": "code: slug",
+      "size": {
+        "view": {
+          "w": 140,
+          "h": 42
+        },
+        "editor": {
+          "w": 140,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        129
+      ]
+    },
+    {
+      "id": 54,
+      "icon": "circle",
+      "text": "code: stored",
+      "size": {
+        "view": {
+          "w": 140,
+          "h": 42
+        },
+        "editor": {
+          "w": 140,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        130
+      ]
+    },
+    {
+      "id": 55,
+      "icon": "circle",
+      "text": "code: hyperdoc:dm6-evidence",
+      "size": {
+        "view": {
+          "w": 237,
+          "h": 42
+        },
+        "editor": {
+          "w": 237,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        131
+      ]
+    },
+    {
+      "id": 56,
+      "icon": "circle",
+      "text": "h2: Boundary",
+      "size": {
+        "view": {
+          "w": 140,
+          "h": 42
+        },
+        "editor": {
+          "w": 140,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        132
+      ]
+    },
+    {
+      "id": 57,
+      "icon": "circle",
+      "text": "p: HyperDoc owns the host page, evidence adapter, and visible proof timeline. dm6-elm owns the p...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        133,
+        134
+      ]
+    },
+    {
+      "id": 58,
+      "icon": "circle",
+      "text": "code: AppEmbed",
+      "size": {
+        "view": {
+          "w": 146,
+          "h": 42
+        },
+        "editor": {
+          "w": 146,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        134
+      ]
+    },
+    {
+      "id": 59,
+      "icon": "circle",
+      "text": "h2: Inspectable objects",
+      "size": {
+        "view": {
+          "w": 209,
+          "h": 42
+        },
+        "editor": {
+          "w": 209,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        135
+      ]
+    },
+    {
+      "id": 60,
+      "icon": "circle",
+      "text": "ul: elm-pages Effects as Data DM6 embedded evidence timeline DM6 AppEmbed contract boundary dm6-e...",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        136,
+        137,
+        139,
+        141,
+        143,
+        145,
+        147,
+        149,
+        151
+      ]
+    },
+    {
+      "id": 61,
+      "icon": "circle",
+      "text": "li: elm-pages Effects as Data",
+      "size": {
+        "view": {
+          "w": 251,
+          "h": 42
+        },
+        "editor": {
+          "w": 251,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        137,
+        138
+      ]
+    },
+    {
+      "id": 62,
+      "icon": "circle",
+      "text": "a: elm-pages Effects as Data -> topics/elm-pages Effects as Data",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        138
+      ]
+    },
+    {
+      "id": 63,
+      "icon": "circle",
+      "text": "li: DM6 embedded evidence timeline",
+      "size": {
+        "view": {
+          "w": 286,
+          "h": 42
+        },
+        "editor": {
+          "w": 286,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        139,
+        140
+      ]
+    },
+    {
+      "id": 64,
+      "icon": "circle",
+      "text": "a: DM6 embedded evidence timeline -> topics/DM6 embedded evidence timeline",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        140
+      ]
+    },
+    {
+      "id": 65,
+      "icon": "circle",
+      "text": "li: DM6 AppEmbed contract boundary",
+      "size": {
+        "view": {
+          "w": 286,
+          "h": 42
+        },
+        "editor": {
+          "w": 286,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        141,
+        142
+      ]
+    },
+    {
+      "id": 66,
+      "icon": "circle",
+      "text": "a: DM6 AppEmbed contract boundary -> topics/DM6 AppEmbed contract boundary",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        142
+      ]
+    },
+    {
+      "id": 67,
+      "icon": "circle",
+      "text": "li: dm6-elm and elm-pages debugger comparison",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        143,
+        144
+      ]
+    },
+    {
+      "id": 68,
+      "icon": "circle",
+      "text": "a: dm6-elm and elm-pages debugger comparison -> topics/dm6-elm and elm-pages debugger comparison",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        144
+      ]
+    },
+    {
+      "id": 69,
+      "icon": "circle",
+      "text": "li: DM6 AppEmbed HyperDoc inline proof milestone",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        145,
+        146
+      ]
+    },
+    {
+      "id": 70,
+      "icon": "circle",
+      "text": "a: DM6 AppEmbed HyperDoc inline proof milestone -> topics/DM6 AppEmbed HyperDoc inline proof milestone",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        146
+      ]
+    },
+    {
+      "id": 71,
+      "icon": "circle",
+      "text": "li: DM6 page-local topicmap seed",
+      "size": {
+        "view": {
+          "w": 272,
+          "h": 42
+        },
+        "editor": {
+          "w": 272,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        147,
+        148
+      ]
+    },
+    {
+      "id": 72,
+      "icon": "circle",
+      "text": "a: DM6 page-local topicmap seed -> topics/DM6 page-local topicmap seed",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        148
+      ]
+    },
+    {
+      "id": 73,
+      "icon": "circle",
+      "text": "li: FedWiki twin: DM6 page-local topicmap seed",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        149,
+        150
+      ]
+    },
+    {
+      "id": 74,
+      "icon": "circle",
+      "text": "a: FedWiki twin: DM6 page-local topicmap seed -> fedwiki:wiki.ralfbarkow.ch/dm6-page-local-topicmap-seed",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        150
+      ]
+    },
+    {
+      "id": 75,
+      "icon": "circle",
+      "text": "li: dm6-page-topicmap-seed-report",
+      "size": {
+        "view": {
+          "w": 279,
+          "h": 42
+        },
+        "editor": {
+          "w": 279,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        151,
+        152
+      ]
+    },
+    {
+      "id": 76,
+      "icon": "circle",
+      "text": "a: dm6-page-topicmap-seed-report -> (dm6-page-topicmap-seed-report :pathname (dm6-inline-proof-page-pathname))",
+      "size": {
+        "view": {
+          "w": 300,
+          "h": 42
+        },
+        "editor": {
+          "w": 300,
+          "h": 42
+        }
+      },
+      "assocIds": [
+        152
+      ]
+    }
+  ],
+  "assocs": [
+    {
+      "id": 77,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 1
+    },
+    {
+      "id": 78,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 2
+    },
+    {
+      "id": 79,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 3
+    },
+    {
+      "id": 80,
+      "type": "Hierarchy",
+      "topicId1": 3,
+      "topicId2": 4
+    },
+    {
+      "id": 81,
+      "type": "Hierarchy",
+      "topicId1": 3,
+      "topicId2": 5
+    },
+    {
+      "id": 82,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 6
+    },
+    {
+      "id": 83,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 7
+    },
+    {
+      "id": 84,
+      "type": "Hierarchy",
+      "topicId1": 7,
+      "topicId2": 8
+    },
+    {
+      "id": 85,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 9
+    },
+    {
+      "id": 86,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 10
+    },
+    {
+      "id": 87,
+      "type": "Hierarchy",
+      "topicId1": 10,
+      "topicId2": 11
+    },
+    {
+      "id": 88,
+      "type": "Hierarchy",
+      "topicId1": 10,
+      "topicId2": 12
+    },
+    {
+      "id": 89,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 13
+    },
+    {
+      "id": 90,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 14
+    },
+    {
+      "id": 91,
+      "type": "Hierarchy",
+      "topicId1": 14,
+      "topicId2": 15
+    },
+    {
+      "id": 92,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 16
+    },
+    {
+      "id": 93,
+      "type": "Hierarchy",
+      "topicId1": 16,
+      "topicId2": 17
+    },
+    {
+      "id": 94,
+      "type": "Hierarchy",
+      "topicId1": 16,
+      "topicId2": 18
+    },
+    {
+      "id": 95,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 19
+    },
+    {
+      "id": 96,
+      "type": "Hierarchy",
+      "topicId1": 19,
+      "topicId2": 20
+    },
+    {
+      "id": 97,
+      "type": "Hierarchy",
+      "topicId1": 20,
+      "topicId2": 21
+    },
+    {
+      "id": 98,
+      "type": "Hierarchy",
+      "topicId1": 20,
+      "topicId2": 22
+    },
+    {
+      "id": 99,
+      "type": "Hierarchy",
+      "topicId1": 19,
+      "topicId2": 23
+    },
+    {
+      "id": 100,
+      "type": "Hierarchy",
+      "topicId1": 23,
+      "topicId2": 24
+    },
+    {
+      "id": 101,
+      "type": "Hierarchy",
+      "topicId1": 23,
+      "topicId2": 25
+    },
+    {
+      "id": 102,
+      "type": "Hierarchy",
+      "topicId1": 23,
+      "topicId2": 26
+    },
+    {
+      "id": 103,
+      "type": "Hierarchy",
+      "topicId1": 23,
+      "topicId2": 27
+    },
+    {
+      "id": 104,
+      "type": "Hierarchy",
+      "topicId1": 23,
+      "topicId2": 28
+    },
+    {
+      "id": 105,
+      "type": "Hierarchy",
+      "topicId1": 23,
+      "topicId2": 29
+    },
+    {
+      "id": 106,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 30
+    },
+    {
+      "id": 107,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 31
+    },
+    {
+      "id": 108,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 32
+    },
+    {
+      "id": 109,
+      "type": "Hierarchy",
+      "topicId1": 32,
+      "topicId2": 33
+    },
+    {
+      "id": 110,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 34
+    },
+    {
+      "id": 111,
+      "type": "Hierarchy",
+      "topicId1": 34,
+      "topicId2": 35
+    },
+    {
+      "id": 112,
+      "type": "Hierarchy",
+      "topicId1": 34,
+      "topicId2": 36
+    },
+    {
+      "id": 113,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 37
+    },
+    {
+      "id": 114,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 38
+    },
+    {
+      "id": 115,
+      "type": "Hierarchy",
+      "topicId1": 38,
+      "topicId2": 39
+    },
+    {
+      "id": 116,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 40
+    },
+    {
+      "id": 117,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 41
+    },
+    {
+      "id": 118,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 42
+    },
+    {
+      "id": 119,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 43
+    },
+    {
+      "id": 120,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 44
+    },
+    {
+      "id": 121,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 45
+    },
+    {
+      "id": 122,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 46
+    },
+    {
+      "id": 123,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 47
+    },
+    {
+      "id": 124,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 48
+    },
+    {
+      "id": 125,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 49
+    },
+    {
+      "id": 126,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 50
+    },
+    {
+      "id": 127,
+      "type": "Hierarchy",
+      "topicId1": 50,
+      "topicId2": 51
+    },
+    {
+      "id": 128,
+      "type": "Hierarchy",
+      "topicId1": 50,
+      "topicId2": 52
+    },
+    {
+      "id": 129,
+      "type": "Hierarchy",
+      "topicId1": 50,
+      "topicId2": 53
+    },
+    {
+      "id": 130,
+      "type": "Hierarchy",
+      "topicId1": 50,
+      "topicId2": 54
+    },
+    {
+      "id": 131,
+      "type": "Hierarchy",
+      "topicId1": 50,
+      "topicId2": 55
+    },
+    {
+      "id": 132,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 56
+    },
+    {
+      "id": 133,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 57
+    },
+    {
+      "id": 134,
+      "type": "Hierarchy",
+      "topicId1": 57,
+      "topicId2": 58
+    },
+    {
+      "id": 135,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 59
+    },
+    {
+      "id": 136,
+      "type": "Hierarchy",
+      "topicId1": 0,
+      "topicId2": 60
+    },
+    {
+      "id": 137,
+      "type": "Hierarchy",
+      "topicId1": 60,
+      "topicId2": 61
+    },
+    {
+      "id": 138,
+      "type": "Hierarchy",
+      "topicId1": 61,
+      "topicId2": 62
+    },
+    {
+      "id": 139,
+      "type": "Hierarchy",
+      "topicId1": 60,
+      "topicId2": 63
+    },
+    {
+      "id": 140,
+      "type": "Hierarchy",
+      "topicId1": 63,
+      "topicId2": 64
+    },
+    {
+      "id": 141,
+      "type": "Hierarchy",
+      "topicId1": 60,
+      "topicId2": 65
+    },
+    {
+      "id": 142,
+      "type": "Hierarchy",
+      "topicId1": 65,
+      "topicId2": 66
+    },
+    {
+      "id": 143,
+      "type": "Hierarchy",
+      "topicId1": 60,
+      "topicId2": 67
+    },
+    {
+      "id": 144,
+      "type": "Hierarchy",
+      "topicId1": 67,
+      "topicId2": 68
+    },
+    {
+      "id": 145,
+      "type": "Hierarchy",
+      "topicId1": 60,
+      "topicId2": 69
+    },
+    {
+      "id": 146,
+      "type": "Hierarchy",
+      "topicId1": 69,
+      "topicId2": 70
+    },
+    {
+      "id": 147,
+      "type": "Hierarchy",
+      "topicId1": 60,
+      "topicId2": 71
+    },
+    {
+      "id": 148,
+      "type": "Hierarchy",
+      "topicId1": 71,
+      "topicId2": 72
+    },
+    {
+      "id": 149,
+      "type": "Hierarchy",
+      "topicId1": 60,
+      "topicId2": 73
+    },
+    {
+      "id": 150,
+      "type": "Hierarchy",
+      "topicId1": 73,
+      "topicId2": 74
+    },
+    {
+      "id": 151,
+      "type": "Hierarchy",
+      "topicId1": 60,
+      "topicId2": 75
+    },
+    {
+      "id": 152,
+      "type": "Hierarchy",
+      "topicId1": 75,
+      "topicId2": 76
+    }
+  ],
+  "itemSets": [
+    {
+      "id": 1,
+      "items": [
+        {
+          "topicId": 1
+        },
+        {
+          "topicId": 2
+        },
+        {
+          "topicId": 3
+        },
+        {
+          "topicId": 4
+        },
+        {
+          "topicId": 5
+        },
+        {
+          "topicId": 6
+        },
+        {
+          "topicId": 7
+        },
+        {
+          "topicId": 8
+        },
+        {
+          "topicId": 9
+        },
+        {
+          "topicId": 10
+        },
+        {
+          "topicId": 11
+        },
+        {
+          "topicId": 12
+        },
+        {
+          "topicId": 13
+        },
+        {
+          "topicId": 14
+        },
+        {
+          "topicId": 15
+        },
+        {
+          "topicId": 16
+        },
+        {
+          "topicId": 17
+        },
+        {
+          "topicId": 18
+        },
+        {
+          "topicId": 19
+        },
+        {
+          "topicId": 20
+        },
+        {
+          "topicId": 21
+        },
+        {
+          "topicId": 22
+        },
+        {
+          "topicId": 23
+        },
+        {
+          "topicId": 24
+        },
+        {
+          "topicId": 25
+        },
+        {
+          "topicId": 26
+        },
+        {
+          "topicId": 27
+        },
+        {
+          "topicId": 28
+        },
+        {
+          "topicId": 29
+        },
+        {
+          "topicId": 30
+        },
+        {
+          "topicId": 31
+        },
+        {
+          "topicId": 32
+        },
+        {
+          "topicId": 33
+        },
+        {
+          "topicId": 34
+        },
+        {
+          "topicId": 35
+        },
+        {
+          "topicId": 36
+        },
+        {
+          "topicId": 37
+        },
+        {
+          "topicId": 38
+        },
+        {
+          "topicId": 39
+        },
+        {
+          "topicId": 40
+        },
+        {
+          "topicId": 41
+        },
+        {
+          "topicId": 42
+        },
+        {
+          "topicId": 43
+        },
+        {
+          "topicId": 44
+        },
+        {
+          "topicId": 45
+        },
+        {
+          "topicId": 46
+        },
+        {
+          "topicId": 47
+        },
+        {
+          "topicId": 48
+        },
+        {
+          "topicId": 49
+        },
+        {
+          "topicId": 50
+        },
+        {
+          "topicId": 51
+        },
+        {
+          "topicId": 52
+        },
+        {
+          "topicId": 53
+        },
+        {
+          "topicId": 54
+        },
+        {
+          "topicId": 55
+        },
+        {
+          "topicId": 56
+        },
+        {
+          "topicId": 57
+        },
+        {
+          "topicId": 58
+        },
+        {
+          "topicId": 59
+        },
+        {
+          "topicId": 60
+        },
+        {
+          "topicId": 61
+        },
+        {
+          "topicId": 62
+        },
+        {
+          "topicId": 63
+        },
+        {
+          "topicId": 64
+        },
+        {
+          "topicId": 65
+        },
+        {
+          "topicId": 66
+        },
+        {
+          "topicId": 67
+        },
+        {
+          "topicId": 68
+        },
+        {
+          "topicId": 69
+        },
+        {
+          "topicId": 70
+        },
+        {
+          "topicId": 71
+        },
+        {
+          "topicId": 72
+        },
+        {
+          "topicId": 73
+        },
+        {
+          "topicId": 74
+        },
+        {
+          "topicId": 75
+        },
+        {
+          "topicId": 76
+        }
+      ]
+    }
+  ],
+  "boxes": [
+    {
+      "id": 0,
+      "itemSetId": 1,
+      "topics": [
+        {
+          "id": 1,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 2,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 3,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 4,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 5,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 6,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 7,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 8,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 9,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 10,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 11,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 12,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 13,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 14,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 15,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 16,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 17,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 18,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 19,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 20,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 21,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 22,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 23,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 24,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 25,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 26,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 27,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 28,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 29,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 30,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 31,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 32,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 33,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 34,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 35,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 36,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 37,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 38,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 39,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 40,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 41,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 42,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 43,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 44,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 45,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 46,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 47,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 48,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 49,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 50,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 51,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 52,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 53,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 54,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 55,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 56,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 57,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 58,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 59,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 60,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 61,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 62,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 63,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 64,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 65,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 66,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 67,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 68,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 69,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 70,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 71,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 72,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 73,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 74,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 75,
+          "expansion": "Collapsed"
+        },
+        {
+          "id": 76,
+          "expansion": "Collapsed"
+        }
+      ],
+      "renderer": "TopicMap"
+    }
+  ],
+  "boxId": 0,
+  "nextId": 153,
+  "topicMap": {
+    "viewProps": [
+      {
+        "id": 0,
+        "rect": {
+          "x1": 0,
+          "y1": 0,
+          "x2": 1400,
+          "y2": 5660
+        },
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "topics": [
+          {
+            "id": 1,
+            "pos": {
+              "x": 80,
+              "y": 80
+            }
+          },
+          {
+            "id": 2,
+            "pos": {
+              "x": 80,
+              "y": 152
+            }
+          },
+          {
+            "id": 3,
+            "pos": {
+              "x": 80,
+              "y": 224
+            }
+          },
+          {
+            "id": 4,
+            "pos": {
+              "x": 340,
+              "y": 296
+            }
+          },
+          {
+            "id": 5,
+            "pos": {
+              "x": 340,
+              "y": 368
+            }
+          },
+          {
+            "id": 6,
+            "pos": {
+              "x": 80,
+              "y": 440
+            }
+          },
+          {
+            "id": 7,
+            "pos": {
+              "x": 80,
+              "y": 512
+            }
+          },
+          {
+            "id": 8,
+            "pos": {
+              "x": 340,
+              "y": 584
+            }
+          },
+          {
+            "id": 9,
+            "pos": {
+              "x": 80,
+              "y": 656
+            }
+          },
+          {
+            "id": 10,
+            "pos": {
+              "x": 80,
+              "y": 728
+            }
+          },
+          {
+            "id": 11,
+            "pos": {
+              "x": 340,
+              "y": 800
+            }
+          },
+          {
+            "id": 12,
+            "pos": {
+              "x": 340,
+              "y": 872
+            }
+          },
+          {
+            "id": 13,
+            "pos": {
+              "x": 80,
+              "y": 944
+            }
+          },
+          {
+            "id": 14,
+            "pos": {
+              "x": 80,
+              "y": 1016
+            }
+          },
+          {
+            "id": 15,
+            "pos": {
+              "x": 340,
+              "y": 1088
+            }
+          },
+          {
+            "id": 16,
+            "pos": {
+              "x": 80,
+              "y": 1160
+            }
+          },
+          {
+            "id": 17,
+            "pos": {
+              "x": 340,
+              "y": 1232
+            }
+          },
+          {
+            "id": 18,
+            "pos": {
+              "x": 340,
+              "y": 1304
+            }
+          },
+          {
+            "id": 19,
+            "pos": {
+              "x": 80,
+              "y": 1376
+            }
+          },
+          {
+            "id": 20,
+            "pos": {
+              "x": 340,
+              "y": 1448
+            }
+          },
+          {
+            "id": 21,
+            "pos": {
+              "x": 600,
+              "y": 1520
+            }
+          },
+          {
+            "id": 22,
+            "pos": {
+              "x": 600,
+              "y": 1592
+            }
+          },
+          {
+            "id": 23,
+            "pos": {
+              "x": 340,
+              "y": 1664
+            }
+          },
+          {
+            "id": 24,
+            "pos": {
+              "x": 600,
+              "y": 1736
+            }
+          },
+          {
+            "id": 25,
+            "pos": {
+              "x": 600,
+              "y": 1808
+            }
+          },
+          {
+            "id": 26,
+            "pos": {
+              "x": 600,
+              "y": 1880
+            }
+          },
+          {
+            "id": 27,
+            "pos": {
+              "x": 600,
+              "y": 1952
+            }
+          },
+          {
+            "id": 28,
+            "pos": {
+              "x": 600,
+              "y": 2024
+            }
+          },
+          {
+            "id": 29,
+            "pos": {
+              "x": 600,
+              "y": 2096
+            }
+          },
+          {
+            "id": 30,
+            "pos": {
+              "x": 80,
+              "y": 2168
+            }
+          },
+          {
+            "id": 31,
+            "pos": {
+              "x": 80,
+              "y": 2240
+            }
+          },
+          {
+            "id": 32,
+            "pos": {
+              "x": 80,
+              "y": 2312
+            }
+          },
+          {
+            "id": 33,
+            "pos": {
+              "x": 340,
+              "y": 2384
+            }
+          },
+          {
+            "id": 34,
+            "pos": {
+              "x": 80,
+              "y": 2456
+            }
+          },
+          {
+            "id": 35,
+            "pos": {
+              "x": 340,
+              "y": 2528
+            }
+          },
+          {
+            "id": 36,
+            "pos": {
+              "x": 340,
+              "y": 2600
+            }
+          },
+          {
+            "id": 37,
+            "pos": {
+              "x": 80,
+              "y": 2672
+            }
+          },
+          {
+            "id": 38,
+            "pos": {
+              "x": 80,
+              "y": 2744
+            }
+          },
+          {
+            "id": 39,
+            "pos": {
+              "x": 340,
+              "y": 2816
+            }
+          },
+          {
+            "id": 40,
+            "pos": {
+              "x": 80,
+              "y": 2888
+            }
+          },
+          {
+            "id": 41,
+            "pos": {
+              "x": 80,
+              "y": 2960
+            }
+          },
+          {
+            "id": 42,
+            "pos": {
+              "x": 80,
+              "y": 3032
+            }
+          },
+          {
+            "id": 43,
+            "pos": {
+              "x": 80,
+              "y": 3104
+            }
+          },
+          {
+            "id": 44,
+            "pos": {
+              "x": 80,
+              "y": 3176
+            }
+          },
+          {
+            "id": 45,
+            "pos": {
+              "x": 80,
+              "y": 3248
+            }
+          },
+          {
+            "id": 46,
+            "pos": {
+              "x": 80,
+              "y": 3320
+            }
+          },
+          {
+            "id": 47,
+            "pos": {
+              "x": 80,
+              "y": 3392
+            }
+          },
+          {
+            "id": 48,
+            "pos": {
+              "x": 80,
+              "y": 3464
+            }
+          },
+          {
+            "id": 49,
+            "pos": {
+              "x": 80,
+              "y": 3536
+            }
+          },
+          {
+            "id": 50,
+            "pos": {
+              "x": 80,
+              "y": 3608
+            }
+          },
+          {
+            "id": 51,
+            "pos": {
+              "x": 340,
+              "y": 3680
+            }
+          },
+          {
+            "id": 52,
+            "pos": {
+              "x": 340,
+              "y": 3752
+            }
+          },
+          {
+            "id": 53,
+            "pos": {
+              "x": 340,
+              "y": 3824
+            }
+          },
+          {
+            "id": 54,
+            "pos": {
+              "x": 340,
+              "y": 3896
+            }
+          },
+          {
+            "id": 55,
+            "pos": {
+              "x": 340,
+              "y": 3968
+            }
+          },
+          {
+            "id": 56,
+            "pos": {
+              "x": 80,
+              "y": 4040
+            }
+          },
+          {
+            "id": 57,
+            "pos": {
+              "x": 80,
+              "y": 4112
+            }
+          },
+          {
+            "id": 58,
+            "pos": {
+              "x": 340,
+              "y": 4184
+            }
+          },
+          {
+            "id": 59,
+            "pos": {
+              "x": 80,
+              "y": 4256
+            }
+          },
+          {
+            "id": 60,
+            "pos": {
+              "x": 80,
+              "y": 4328
+            }
+          },
+          {
+            "id": 61,
+            "pos": {
+              "x": 340,
+              "y": 4400
+            }
+          },
+          {
+            "id": 62,
+            "pos": {
+              "x": 600,
+              "y": 4472
+            }
+          },
+          {
+            "id": 63,
+            "pos": {
+              "x": 340,
+              "y": 4544
+            }
+          },
+          {
+            "id": 64,
+            "pos": {
+              "x": 600,
+              "y": 4616
+            }
+          },
+          {
+            "id": 65,
+            "pos": {
+              "x": 340,
+              "y": 4688
+            }
+          },
+          {
+            "id": 66,
+            "pos": {
+              "x": 600,
+              "y": 4760
+            }
+          },
+          {
+            "id": 67,
+            "pos": {
+              "x": 340,
+              "y": 4832
+            }
+          },
+          {
+            "id": 68,
+            "pos": {
+              "x": 600,
+              "y": 4904
+            }
+          },
+          {
+            "id": 69,
+            "pos": {
+              "x": 340,
+              "y": 4976
+            }
+          },
+          {
+            "id": 70,
+            "pos": {
+              "x": 600,
+              "y": 5048
+            }
+          },
+          {
+            "id": 71,
+            "pos": {
+              "x": 340,
+              "y": 5120
+            }
+          },
+          {
+            "id": 72,
+            "pos": {
+              "x": 600,
+              "y": 5192
+            }
+          },
+          {
+            "id": 73,
+            "pos": {
+              "x": 340,
+              "y": 5264
+            }
+          },
+          {
+            "id": 74,
+            "pos": {
+              "x": 600,
+              "y": 5336
+            }
+          },
+          {
+            "id": 75,
+            "pos": {
+              "x": 340,
+              "y": 5408
+            }
+          },
+          {
+            "id": 76,
+            "pos": {
+              "x": 600,
+              "y": 5480
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "topicList": {
+    "viewProps": [
+      {
+        "id": 0,
+        "order": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          59,
+          60,
+          61,
+          62,
+          63,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76
+        ],
+        "size": {
+          "w": 1400,
+          "h": 5660
+        }
+      }
+    ]
+  },
+  "tool": {
+    "lineStyle": "Cornered"
+  }
+}
+  </script>
+
+
 </section>
 
 <h2>Step 1: Boot the embedded app</h2>
@@ -132,6 +3269,9 @@
   <li><a hyperbook="topics" page="DM6 AppEmbed contract boundary"><tt>DM6 AppEmbed contract boundary</tt></a></li>
   <li><a hyperbook="topics" page="dm6-elm and elm-pages debugger comparison"><tt>dm6-elm and elm-pages debugger comparison</tt></a></li>
   <li><a hyperbook="topics" page="DM6 AppEmbed HyperDoc inline proof milestone"><tt>DM6 AppEmbed HyperDoc inline proof milestone</tt></a></li>
+  <li><a hyperbook="topics" page="DM6 page-local topicmap seed"><tt>DM6 page-local topicmap seed</tt></a></li>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="dm6-page-local-topicmap-seed"><tt>FedWiki twin: DM6 page-local topicmap seed</tt></a></li>
+  <li><a expr="(dm6-page-topicmap-seed-report :pathname (dm6-inline-proof-page-pathname))"><tt>dm6-page-topicmap-seed-report</tt></a></li>
 </ul>
 
 <script src='/assets/dm6-elm/hyperdoc-dm6-inline.js'></script>

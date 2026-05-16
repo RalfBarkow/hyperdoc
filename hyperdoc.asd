@@ -20,7 +20,8 @@
                   :components ((:file "package")
                                (:file "core")
                                (:file "defining")
-                               (:file "links-in-code")))))
+                               (:file "links-in-code")
+                               (:file "dm6-page-topicmap-api")))))
 
 (defsystem #:hyperdoc/topics
     :description "Inspectable authored topic registry for HyperDoc"
@@ -470,6 +471,7 @@
                  #:html-inspector-views
                  #:html-inspector-views/standard
                  #:cl-who
+                 #:shasht
                  #:alexandria
                  #:arrow-macros
                  #:njson/jzon
@@ -500,6 +502,7 @@
                                        (:file "source-pane-layout")
                                        (:file "html-pages")
                                        (:file "markdown-pages")
+                                       (:file "../hyperdoc/dm6-page-topicmap")
                                        (:file "code-pages")
                                        (:file "topics")
                                        (:file "links-in-code")
@@ -610,6 +613,7 @@
                                        (:file "dmx-mcp-smoke")
                                        (:file "dmx-incident-arc-smoke")
                                        (:file "dmx-shared-workspace-docs-smoke")
+                                       (:file "dm6-page-topicmap-smoke")
                                        (:file "neo4j-duplicate-username-repair-smoke")
                                        (:file "hyperdoc-neo4j-topic-delete-tool-operation-ir-smoke")
                                        (:file "fedwiki-site-dmx-import")

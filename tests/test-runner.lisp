@@ -41,6 +41,7 @@
   (run-dmx-annotation-acceptance-scxml-runbook-smoke-tests)
   (run-dmx-mcp-smoke-tests)
   (run-dmx-incident-arc-smoke-tests)
+  (run-dm6-page-topicmap-smoke-tests)
   (run-dmx-shared-workspace-docs-smoke-tests)
   (run-neo4j-duplicate-username-repair-smoke-tests)
   (run-hyperdoc-neo4j-topic-delete-tool-operation-ir-smoke-tests)

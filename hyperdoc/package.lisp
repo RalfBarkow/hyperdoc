@@ -65,6 +65,16 @@
    #:documentation-validation-checks-of
    #:documentation-validation-coverage-report-of
    #:print-documentation-slice-validation-report
+   ;; DM6 page-local topicmap seeds
+   #:page-dm6-topicmap-source-dom
+   #:page-dm6-topicmap-dom-nodes
+   #:page-dm6-topicmap-node-label
+   #:page-dm6-topicmap-native-model
+   #:page-dm6-topicmap-json
+   #:insert-or-replace-dm6-stored-script!
+   #:dm6-page-topicmap-seed-report
+   #:dm6-inline-proof-page-pathname
+   #:materialize-dm6-inline-proof-page-topicmap-seed!
    ;; Access to the global catalog of registered HyperDocs
    #:*catalog* #:hyperdocs-of
    ;; Access to HyperDoc data

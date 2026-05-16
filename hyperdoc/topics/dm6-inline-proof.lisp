@@ -54,6 +54,15 @@
                  "DM6 AppEmbed HyperDoc Inline Proof"
                  "Git History Surface for HyperDoc")))
 
+(defun dm6-page-local-topicmap-seed-topic ()
+  (make-topic
+   :id "dm6-page-local-topicmap-seed"
+   :title "DM6 page-local topicmap seed"
+   :summary "A generated native AppEmbed model embedded in a HyperDoc DM6 island, derived deterministically from the page's own Plump parse tree while excluding the generated seed script itself."
+   :references '("DM6 AppEmbed HyperDoc Inline Proof"
+                 "DM6 AppEmbed contract boundary"
+                 "DM6 embedded evidence timeline")))
+
 (defun dm6-appembed-contract-boundary-topic ()
   (make-topic
    :id "dm6-appembed-contract-boundary"
