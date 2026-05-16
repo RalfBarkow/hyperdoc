@@ -735,6 +735,10 @@
   var DOCK_CAPABILITY_SNIPPET = "snippet";
   var MOBILE_ROUTE_MEDIA_QUERY = "(max-width: 720px)";
   var MOBILE_ROUTE_SUCCESS_FEEDBACK_MS = 1600;
+  var CAPABILITIES_COLLAPSED = "capabilities-collapsed";
+  var CAPABILITIES_OPEN = "capabilities-open";
+  var TABS_COLLAPSED = "tabs-collapsed";
+  var TABS_OPEN = "tabs-open";
   var DOCK_INTRODUCTION_PRIORITY = [
     DOCK_CAPABILITY_SNIPPET,
     DOCK_CAPABILITY_CONNECT
@@ -743,6 +747,32 @@
   function mobileRouteViewport() {
     return !!(window.matchMedia &&
       window.matchMedia(MOBILE_ROUTE_MEDIA_QUERY).matches);
+  }
+
+  function defaultCapabilitiesLayerState() {
+    return mobileRouteViewport() ? CAPABILITIES_COLLAPSED : CAPABILITIES_OPEN;
+  }
+
+  function defaultInspectorTabsLayerState() {
+    return mobileRouteViewport() ? TABS_COLLAPSED : TABS_OPEN;
+  }
+
+  function routeCaptureActive(state) {
+    var session = state && state.manager && state.manager.session;
+    if (!session || !sessionActive(state.manager)) {
+      return false;
+    }
+    if (session.phase === "choose-source") {
+      return session.originPaneId === state.paneId;
+    }
+    return session.phase === "choose-target" || session.phase === "submitting";
+  }
+
+  function capabilitiesLayerOpen(state) {
+    return !mobileRouteViewport() ||
+      !state ||
+      state.capabilitiesLayerState !== CAPABILITIES_COLLAPSED ||
+      routeCaptureActive(state);
   }
 
   function createDockPresentationMemory() {
@@ -821,6 +851,14 @@
       mobileRouteState: state.mobileRouteState || null,
       mobileRouteTitle: state.mobileRouteTitleNode &&
         state.mobileRouteTitleNode.textContent || null,
+      capabilitiesLayerState: state.capabilitiesLayerState ||
+        defaultCapabilitiesLayerState(),
+      routeCaptureActive: routeCaptureActive(state),
+      inspectorTabsLayerState: state.pane &&
+        state.pane.dataset.inspectorTabsLayer ||
+        defaultInspectorTabsLayerState(),
+      bodyTapDefaultAction: routeCaptureActive(state) ? "route-laying" : "document",
+      routeCaptureStartedBy: state.routeCaptureStartedBy || null,
       selectedSourceLabel: anchorLabel(session && session.sourceAnchor, null),
       selectedSourcePane: !!(session && session.sourcePaneId &&
         session.sourcePaneId === state.paneId),
@@ -886,7 +924,7 @@
       return "idle";
     }
     if (session.phase === "choose-source") {
-      return "idle";
+      return session.originPaneId === state.paneId ? "route-introduction" : "idle";
     }
     if (session.phase === "choose-target" && session.sourceAnchor) {
       return "source-latched";
@@ -914,6 +952,9 @@
     }
     if (routeState === "completed") {
       return "Route saved";
+    }
+    if (routeState === "route-introduction") {
+      return "Tap a station";
     }
     return "Tap a station";
   }
@@ -1657,26 +1698,30 @@
     slot.innerHTML =
       '<div class="hyperdoc-dom-connect-control hyperdoc-dock-control" data-hyperdoc-connect-ignore="true">' +
         '<div class="hyperdoc-dock-compact">' +
-          '<div class="hyperdoc-mobile-route-copy" aria-live="polite">' +
-            '<span class="hyperdoc-mobile-route-title">Tap a station</span>' +
-            '<span class="hyperdoc-mobile-route-detail" hidden></span>' +
+          '<button type="button" class="hyperdoc-capabilities-toggle" ' +
+                  'aria-label="Open capabilities" aria-expanded="false">)(</button>' +
+          '<div class="hyperdoc-capabilities-layer">' +
+            '<div class="hyperdoc-mobile-route-copy" aria-live="polite">' +
+              '<span class="hyperdoc-mobile-route-title"></span>' +
+              '<span class="hyperdoc-mobile-route-detail" hidden></span>' +
+            '</div>' +
+            '<span class="hyperdoc-dock-label">Capabilities</span>' +
+            '<div class="hyperdoc-dock-actions">' +
+              '<button type="button" class="hyperdoc-dom-connect-toggle hyperdoc-dock-action" ' +
+                      'title="Click a source anchor, then a target anchor.">Connect</button>' +
+              '<button type="button" class="hyperdoc-dock-annotation hyperdoc-dock-action" ' +
+                      'title="Tap to complete Connect to the generic Annotation target, or reopen the current-object annotation when Connect is idle.">Annotation</button>' +
+              '<button type="button" class="hyperdoc-dock-snippet-playground hyperdoc-dock-action" ' +
+                      'title="Open a snippet playground crosswalk for the current source surface." ' +
+                      'data-hyperdoc-snippet-playground-submit="true" hidden>Snippet</button>' +
+              '<button type="button" class="hyperdoc-mobile-route-open hyperdoc-dock-action" ' +
+                      'title="Open the saved route again." hidden>Open route</button>' +
+              '<button type="button" class="hyperdoc-mobile-route-evidence hyperdoc-dock-action" ' +
+                      'title="Open evidence for the current route request when available." hidden>Evidence</button>' +
+            '</div>' +
+            '<button type="button" class="hyperdoc-dom-connect-help-toggle hyperdoc-dock-guide" ' +
+                    'title="Rediscover Dock guidance" aria-label="Rediscover Dock guidance" aria-expanded="false">Guide</button>' +
           '</div>' +
-          '<span class="hyperdoc-dock-label">Capabilities</span>' +
-          '<div class="hyperdoc-dock-actions">' +
-            '<button type="button" class="hyperdoc-dom-connect-toggle hyperdoc-dock-action" ' +
-                    'title="Click a source anchor, then a target anchor.">Connect</button>' +
-            '<button type="button" class="hyperdoc-dock-annotation hyperdoc-dock-action" ' +
-                    'title="Tap to complete Connect to the generic Annotation target, or reopen the current-object annotation when Connect is idle.">Annotation</button>' +
-            '<button type="button" class="hyperdoc-dock-snippet-playground hyperdoc-dock-action" ' +
-                    'title="Open a snippet playground crosswalk for the current source surface." ' +
-                    'data-hyperdoc-snippet-playground-submit="true" hidden>Snippet</button>' +
-            '<button type="button" class="hyperdoc-mobile-route-open hyperdoc-dock-action" ' +
-                    'title="Open the saved route again." hidden>Open route</button>' +
-            '<button type="button" class="hyperdoc-mobile-route-evidence hyperdoc-dock-action" ' +
-                    'title="Open evidence for the current route request when available." hidden>Evidence</button>' +
-          '</div>' +
-          '<button type="button" class="hyperdoc-dom-connect-help-toggle hyperdoc-dock-guide" ' +
-                  'title="Rediscover Dock guidance" aria-label="Rediscover Dock guidance" aria-expanded="false">Guide</button>' +
         '</div>' +
         '<div class="hyperdoc-dom-connect-help-panel hyperdoc-dock-coachmark" aria-hidden="true">' +
           '<div class="hyperdoc-dock-coachmark-header">' +
@@ -1708,6 +1753,149 @@
         '</div>' +
       '</div>' +
       '<div class="hyperdoc-dom-connect-feedback" hidden></div>';
+  }
+
+  function syncCapabilitiesToggle(state) {
+    if (!state || !state.capabilitiesToggle || !state.capabilitiesLayer) {
+      return;
+    }
+    var open = capabilitiesLayerOpen(state);
+    var capture = routeCaptureActive(state);
+    state.slot.dataset.capabilitiesLayer = open ?
+      CAPABILITIES_OPEN :
+      CAPABILITIES_COLLAPSED;
+    state.slot.dataset.routeCapture = capture ? "active" : "inactive";
+    state.control.dataset.capabilitiesLayer = state.slot.dataset.capabilitiesLayer;
+    state.control.dataset.routeCapture = state.slot.dataset.routeCapture;
+    state.capabilitiesToggle.hidden = !mobileRouteViewport();
+    state.capabilitiesToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    state.capabilitiesToggle.setAttribute(
+      "aria-label",
+      open ? "Close capabilities" : "Open capabilities"
+    );
+    state.capabilitiesLayer.setAttribute("aria-hidden", open ? "false" : "true");
+  }
+
+  function setCapabilitiesLayerState(state, layerState, options) {
+    if (!state) {
+      return;
+    }
+    state.capabilitiesLayerState = layerState;
+    if (layerState === CAPABILITIES_COLLAPSED) {
+      state.routeCaptureStartedBy = null;
+      if (sessionActive(state.manager)) {
+        cancelConnectSession(state);
+        return;
+      }
+    }
+    if (!(options && options.skipRefresh)) {
+      refreshPaneStateFromSession(state);
+    }
+  }
+
+  function toggleCapabilitiesLayer(state) {
+    if (!state) {
+      return;
+    }
+    if (capabilitiesLayerOpen(state)) {
+      setCapabilitiesLayerState(state, CAPABILITIES_COLLAPSED);
+    } else {
+      setCapabilitiesLayerState(state, CAPABILITIES_OPEN);
+    }
+  }
+
+  function activeInspectorTabLabel(pane) {
+    var active = pane &&
+      pane.querySelector(".inspector-tabs button.active");
+    return active && collapseWhitespace(active.textContent || "") || "";
+  }
+
+  function syncInspectorTabsToggle(pane) {
+    if (!pane) {
+      return;
+    }
+    var button = pane.querySelector(".hyperdoc-inspector-tabs-toggle");
+    var tabs = pane.querySelector(".inspector-tabs");
+    if (!button || !tabs) {
+      return;
+    }
+    var mobile = mobileRouteViewport();
+    var layerState = mobile
+      ? (pane.dataset.inspectorTabsLayer || TABS_COLLAPSED)
+      : TABS_OPEN;
+    pane.dataset.inspectorTabsLayer = layerState;
+    tabs.dataset.inspectorTabsLayer = layerState;
+    var open = layerState === TABS_OPEN;
+    var label = activeInspectorTabLabel(pane) || "active tab";
+    button.hidden = !mobile;
+    button.setAttribute("aria-expanded", open ? "true" : "false");
+    button.setAttribute(
+      "aria-label",
+      (open ? "Close inspector tabs" : "Open inspector tabs") +
+        " (" + label + " active)"
+    );
+    button.dataset.activeTab = label;
+  }
+
+  function setInspectorTabsLayerState(pane, layerState) {
+    if (!pane) {
+      return;
+    }
+    pane.dataset.inspectorTabsLayer = layerState;
+    syncInspectorTabsToggle(pane);
+  }
+
+  function ensureInspectorTabsToggle(pane) {
+    var tabs = pane && pane.querySelector(".inspector-tabs");
+    if (!pane || !tabs || pane.dataset.hyperdocInspectorTabsEnhanced === "true") {
+      syncInspectorTabsToggle(pane);
+      return;
+    }
+    pane.dataset.hyperdocInspectorTabsEnhanced = "true";
+    if (!tabs.id) {
+      tabs.id = (pane.dataset.hyperdocConnectPaneId ||
+        ("pane-" + Math.random().toString(36).slice(2, 10))) +
+        "-inspector-tabs";
+    }
+    if (!pane.dataset.inspectorTabsLayer) {
+      pane.dataset.inspectorTabsLayer = defaultInspectorTabsLayerState();
+    }
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "hyperdoc-inspector-tabs-toggle";
+    button.setAttribute("aria-controls", tabs.id);
+    button.innerHTML =
+      '<span class="hyperdoc-inspector-tabs-glyph" aria-hidden="true">)(</span>';
+    tabs.parentNode.insertBefore(button, tabs);
+    button.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      setInspectorTabsLayerState(
+        pane,
+        pane.dataset.inspectorTabsLayer === TABS_OPEN ? TABS_COLLAPSED : TABS_OPEN
+      );
+    });
+    tabs.addEventListener("click", function (event) {
+      if (!event.target.closest("button")) {
+        return;
+      }
+      window.setTimeout(function () {
+        if (mobileRouteViewport()) {
+          setInspectorTabsLayerState(pane, TABS_COLLAPSED);
+        } else {
+          syncInspectorTabsToggle(pane);
+        }
+      }, 0);
+    });
+    syncInspectorTabsToggle(pane);
+  }
+
+  function enhanceInspectorTabs(root) {
+    var scope = root || document;
+    Array.prototype.forEach.call(
+      scope.querySelectorAll(".inspector-pane"),
+      ensureInspectorTabsToggle
+    );
   }
 
   function writeSubmitPayload(submitButton, payload, state, sourceJson, targetJson) {
@@ -2163,27 +2351,34 @@
     var routeState = mobile
       ? mobileRouteStateForSession(state, session)
       : "";
-    var routeTitle = mobile ? mobileRouteTitle(state, routeState, session) : "";
+    var capture = routeCaptureActive(state);
+    var layerOpen = capabilitiesLayerOpen(state);
+    var showRouteCopy = mobile && (capture || routeState === "completed");
+    var routeTitle = showRouteCopy ? mobileRouteTitle(state, routeState, session) : "";
     var routeDetail = mobile ? mobileRouteDetail(routeState) : "";
     state.mobileRouteState = routeState || null;
     state.slot.dataset.mobileRoute = mobile ? "true" : "false";
     state.slot.dataset.mobileRouteState = routeState;
     state.control.dataset.mobileRoute = mobile ? "true" : "false";
     state.control.dataset.mobileRouteState = routeState;
-    state.mobileRouteTitleNode.textContent = routeTitle || "Tap a station";
+    state.mobileRouteTitleNode.textContent = routeTitle;
     state.mobileRouteDetailNode.textContent = routeDetail;
-    state.mobileRouteDetailNode.hidden = !routeDetail;
+    state.mobileRouteDetailNode.hidden = !(showRouteCopy && routeDetail);
 
-    state.toggle.hidden = mobile;
-    state.annotation.hidden = mobile && routeState !== "source-latched";
-    state.helpToggle.hidden = mobile;
-    state.snippetPlayground.hidden = mobile || state.snippetPlayground.hidden;
+    state.toggle.hidden = mobile && (!layerOpen || capture);
+    state.annotation.hidden = mobile && (!layerOpen ||
+      (capture && routeState !== "source-latched"));
+    state.helpToggle.hidden = mobile && !layerOpen;
+    state.snippetPlayground.hidden = mobile &&
+      (!layerOpen || state.snippetPlayground.hidden);
     state.dmx.hidden = mobile || state.dmx.hidden;
 
     if (mobile) {
       state.clear.hidden = true;
-      state.cancel.hidden = !(routeState === "source-latched" ||
-        routeState === "confirming");
+      state.cancel.hidden = !(capture &&
+        (routeState === "route-introduction" ||
+         routeState === "source-latched" ||
+         routeState === "confirming"));
     }
     state.mobileRouteOpen.hidden = !(mobile &&
       routeState === "completed" &&
@@ -2194,9 +2389,18 @@
       state.completedRoute.requestId);
 
     if (mobile) {
-      state.compactCapabilities = ["Lay route"];
-      if (!state.annotation.hidden) {
-        state.compactCapabilities.push("Annotation");
+      if (!layerOpen) {
+        state.compactCapabilities = ["Open capabilities"];
+      } else if (capture) {
+        state.compactCapabilities = ["Lay route"];
+        if (!state.annotation.hidden) {
+          state.compactCapabilities.push("Annotation");
+        }
+      } else {
+        state.compactCapabilities = ["Connect", "Annotation", "Guide"];
+        if (!state.snippetPlayground.hidden) {
+          state.compactCapabilities.push("Snippet");
+        }
       }
       if (!state.mobileRouteOpen.hidden) {
         state.compactCapabilities.push("Open route");
@@ -2205,6 +2409,7 @@
         state.compactCapabilities.push("Evidence");
       }
     }
+    syncCapabilitiesToggle(state);
   }
 
   function refreshPaneStateFromSession(state) {
@@ -2282,6 +2487,8 @@
 
   function startConnectSession(state) {
     var manager = state.manager;
+    state.capabilitiesLayerState = CAPABILITIES_OPEN;
+    state.routeCaptureStartedBy = "CONNECT_CHOSEN";
     markDockCapabilityUsed(
       state,
       DOCK_CAPABILITY_CONNECT,
@@ -2414,6 +2621,7 @@
     clearSource(state);
     state.rediscoveryRequested = false;
     state.helpOpen = false;
+    state.routeCaptureStartedBy = null;
     if (!state.pendingRequest) {
       state.requestId = null;
     }
@@ -2685,10 +2893,7 @@
   function onRootClick(state, event) {
     var manager = state.manager;
     var session = manager.session;
-    var mobileIdleRoute = mobileRouteViewport() &&
-      state.available &&
-      !sessionActive(manager);
-    if ((!state.enabled || !sessionActive(manager)) && !mobileIdleRoute) {
+    if (!state.enabled || !sessionActive(manager)) {
       return;
     }
     event.preventDefault();
@@ -2704,12 +2909,6 @@
       return;
     }
     var anchor = state.provider.buildAnchor(element, state.surface, state.root, event.target);
-    if (mobileIdleRoute) {
-      startConnectSession(state);
-      beginConnection(state, element, anchor);
-      updateLineFromMouse(state, event.clientX, event.clientY);
-      return;
-    }
     if (session.phase === "choose-source") {
       beginConnection(state, element, anchor);
       updateLineFromMouse(state, event.clientX, event.clientY);
@@ -2739,12 +2938,15 @@
       pane.dataset.hyperdocConnectPaneId = "pane-" +
         Math.random().toString(36).slice(2, 10);
     }
+    ensureInspectorTabsToggle(pane);
     if (pane.hyperdocDomConnectState) {
       return pane.hyperdocDomConnectState;
     }
     ensurePaneControlMarkup(slot);
     var manager = connectManager();
     var control = slot.querySelector(".hyperdoc-dom-connect-control");
+    var capabilitiesToggle = slot.querySelector(".hyperdoc-capabilities-toggle");
+    var capabilitiesLayer = slot.querySelector(".hyperdoc-capabilities-layer");
     var toggle = slot.querySelector(".hyperdoc-dom-connect-toggle");
     var annotation = slot.querySelector(".hyperdoc-dock-annotation");
     var snippetPlayground = slot.querySelector(".hyperdoc-dock-snippet-playground");
@@ -2769,7 +2971,8 @@
     var providerHandoff = slot.querySelector(".hyperdoc-dock-provider-handoff");
     var providerHandoffLabel = slot.querySelector(".hyperdoc-dock-provider-handoff-label");
     var dismiss = slot.querySelector(".hyperdoc-dock-dismiss");
-    if (!control || !toggle || !annotation || !snippetPlayground ||
+    if (!control || !capabilitiesToggle || !capabilitiesLayer ||
+        !toggle || !annotation || !snippetPlayground ||
         !mobileRouteTitleNode || !mobileRouteDetailNode ||
         !mobileRouteOpen || !mobileRouteEvidence ||
         !dmx ||
@@ -2785,6 +2988,8 @@
       manager: manager,
       slot: slot,
       control: control,
+      capabilitiesToggle: capabilitiesToggle,
+      capabilitiesLayer: capabilitiesLayer,
       toggle: toggle,
       annotation: annotation,
       snippetPlayground: snippetPlayground,
@@ -2818,6 +3023,8 @@
       introducedCapability: null,
       presentationScope: DOCK_PRESENTATION_SCOPE,
       presentationEvent: null,
+      capabilitiesLayerState: defaultCapabilitiesLayerState(),
+      routeCaptureStartedBy: null,
       relevantDockCapabilities: [],
       rediscoveryRequested: false,
       hoverElement: null,
@@ -2867,6 +3074,8 @@
     slot.dataset.dockPresentation = "latent";
     slot.dataset.dockIntroducedCapability = "";
     slot.dataset.dockPresentationReason = "";
+    slot.dataset.capabilitiesLayer = state.capabilitiesLayerState;
+    slot.dataset.routeCapture = "inactive";
     toggle.dataset.mode = "inactive";
     control.dataset.connectState = "dormant";
     control.dataset.dockPresentation = "latent";
@@ -2875,9 +3084,21 @@
     if (!helpPanel.id) {
       helpPanel.id = (slot.id || "hyperdoc-dom-connect-pane-slot") + "-help-panel";
     }
+    if (!capabilitiesLayer.id) {
+      capabilitiesLayer.id =
+        (slot.id || state.paneId || "hyperdoc-dom-connect-pane-slot") +
+        "-capabilities-layer";
+    }
+    capabilitiesToggle.setAttribute("aria-controls", capabilitiesLayer.id);
+    capabilitiesToggle.setAttribute("aria-expanded", "false");
     helpToggle.setAttribute("aria-controls", helpPanel.id);
     helpToggle.setAttribute("aria-expanded", "false");
     helpPanel.setAttribute("aria-hidden", "true");
+    capabilitiesToggle.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleCapabilitiesLayer(state);
+    });
     toggle.addEventListener("click", function (event) {
       if (!state.available) {
         return;
@@ -2984,6 +3205,7 @@
       handleServerResult(state, event.detail || {});
     });
     window.addEventListener("resize", function () {
+      enhanceInspectorTabs(document);
       if (state.sourceElement && state.surface && state.line) {
         var center = elementCenter(state.surface, state.sourceElement);
         setLine(state.line, center, center);
@@ -3051,6 +3273,7 @@
 
   window.hyperdocDomConnect = {
     initCurrentView: function () {
+      enhanceInspectorTabs(document);
       if (!window.currentInspectorView) {
         return;
       }

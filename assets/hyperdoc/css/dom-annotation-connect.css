@@ -16,6 +16,10 @@
   position: relative;
 }
 
+.hyperdoc-inspector-tabs-toggle {
+  display: none;
+}
+
 .hyperdoc-dom-connect-pane-slot {
   display: flex;
   justify-content: flex-end;
@@ -54,6 +58,22 @@
   box-shadow: 0 4px 12px rgba(74, 52, 31, 0.08);
   min-height: 2rem;
   max-width: min(36rem, 100%);
+}
+
+.hyperdoc-capabilities-toggle {
+  display: none;
+  min-width: 2.15rem;
+  min-height: 2rem;
+  font-weight: 800;
+}
+
+.hyperdoc-capabilities-layer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  min-width: 0;
 }
 
 .hyperdoc-dock-label {
@@ -491,8 +511,34 @@
 }
 
 @media (max-width: 720px) {
+  .inspector-pane[data-inspector-tabs-layer="tabs-collapsed"] .inspector-tabs {
+    display: none;
+  }
+
+  .hyperdoc-inspector-tabs-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.15rem;
+    min-height: 2rem;
+    margin: 0.18rem 0 0.22rem;
+    border: 1px solid rgba(107, 79, 47, 0.34);
+    border-radius: 999px;
+    background: rgba(255, 250, 243, 0.98);
+    color: #3f3428;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .hyperdoc-inspector-tabs-glyph {
+    display: inline-block;
+    transform: rotate(90deg);
+  }
+
   .hyperdoc-dom-connect-pane-slot {
-    display: block;
+    display: flex;
+    justify-content: flex-end;
     margin: 0.28rem 0 0.4rem;
   }
 
@@ -508,11 +554,11 @@
   }
 
   .hyperdoc-dock-compact {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: inline-flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: stretch;
-    width: 100%;
+    justify-content: flex-end;
+    width: auto;
     max-width: none;
     min-height: 2.35rem;
     box-sizing: border-box;
@@ -520,14 +566,40 @@
     border-radius: 0.65rem;
   }
 
+  .hyperdoc-capabilities-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hyperdoc-dom-connect-pane-slot[data-capabilities-layer="capabilities-open"] .hyperdoc-dock-compact,
+  .hyperdoc-dom-connect-pane-slot[data-route-capture="active"] .hyperdoc-dock-compact {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .hyperdoc-dom-connect-pane-slot[data-capabilities-layer="capabilities-collapsed"] .hyperdoc-capabilities-layer {
+    display: none;
+  }
+
+  .hyperdoc-capabilities-layer {
+    flex: 1 1 auto;
+  }
+
   .hyperdoc-dock-label {
     display: none;
   }
 
   .hyperdoc-mobile-route-copy {
-    display: grid;
+    display: none;
     gap: 0.08rem;
     min-width: 0;
+  }
+
+  .hyperdoc-dom-connect-pane-slot[data-route-capture="active"] .hyperdoc-mobile-route-copy,
+  .hyperdoc-dom-connect-pane-slot[data-mobile-route-state="completed"] .hyperdoc-mobile-route-copy {
+    display: grid;
+    flex: 1 1 10rem;
   }
 
   .hyperdoc-mobile-route-title {
@@ -555,5 +627,12 @@
   .hyperdoc-dom-connect-feedback {
     left: 0;
     right: 0;
+  }
+
+  .hyperdoc-capabilities-toggle:focus-visible,
+  .hyperdoc-inspector-tabs-toggle:focus-visible,
+  .hyperdoc-dom-connect-pane-slot button:focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
   }
 }
