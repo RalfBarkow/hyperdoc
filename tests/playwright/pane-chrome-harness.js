@@ -14,10 +14,13 @@ function paneChrome(page, paneIndex) {
   return {
     pane: currentPane,
     tabRow: currentPane.locator(".inspector-tabs"),
+    inspectorTabsToggle: currentPane.locator(".hyperdoc-inspector-tabs-toggle"),
     tabs: currentPane.locator(".inspector-tabs button"),
     activeTab: currentPane.locator(".inspector-tabs button.active"),
     connectRow: currentPane.locator(".hyperdoc-dom-connect-pane-slot"),
     connectControl: currentPane.locator(".hyperdoc-dom-connect-control"),
+    capabilitiesToggle: currentPane.locator(".hyperdoc-capabilities-toggle"),
+    capabilitiesLayer: currentPane.locator(".hyperdoc-capabilities-layer"),
     connectToggle: currentPane.locator(".hyperdoc-dom-connect-toggle"),
     annotationButton: currentPane.locator(".hyperdoc-dock-annotation"),
     snippetButton: currentPane.locator(".hyperdoc-dock-snippet-playground"),
@@ -44,6 +47,8 @@ async function readPaneChromeState(page, paneIndex) {
     const tabRow = paneNode?.querySelector(".inspector-tabs");
     const slot = paneNode?.querySelector(".hyperdoc-dom-connect-pane-slot");
     const control = slot?.querySelector(".hyperdoc-dom-connect-control");
+    const capabilitiesToggle = slot?.querySelector(".hyperdoc-capabilities-toggle");
+    const capabilitiesLayer = slot?.querySelector(".hyperdoc-capabilities-layer");
     const toggle = slot?.querySelector(".hyperdoc-dom-connect-toggle");
     const routeTitle = slot?.querySelector(".hyperdoc-mobile-route-title");
     const routeDetail = slot?.querySelector(".hyperdoc-mobile-route-detail");
@@ -81,9 +86,31 @@ async function readPaneChromeState(page, paneIndex) {
       activeTab:
         paneNode?.querySelector(".inspector-tabs button.active")?.textContent?.trim() ||
         null,
+      inspectorTabsLayerState: paneNode?.dataset.inspectorTabsLayer || null,
+      inspectorTabsExpanded:
+        paneNode
+          ?.querySelector(".hyperdoc-inspector-tabs-toggle")
+          ?.getAttribute("aria-expanded") || null,
+      inspectorTabsLabel:
+        paneNode
+          ?.querySelector(".hyperdoc-inspector-tabs-toggle")
+          ?.getAttribute("aria-label") || null,
+      inspectorTabsToggleText:
+        paneNode
+          ?.querySelector(".hyperdoc-inspector-tabs-toggle")
+          ?.textContent?.trim() || null,
       slotHidden: !!slot?.hidden,
       slotHelpOpen: slot?.dataset.helpOpen || null,
       presentationState: slot?.dataset.dockPresentation || null,
+      capabilitiesLayerState: slot?.dataset.capabilitiesLayer || null,
+      capabilitiesToggleText: capabilitiesToggle?.textContent?.trim() || null,
+      capabilitiesExpanded:
+        capabilitiesToggle?.getAttribute("aria-expanded") || null,
+      capabilitiesLabel:
+        capabilitiesToggle?.getAttribute("aria-label") || null,
+      capabilitiesLayerAriaHidden:
+        capabilitiesLayer?.getAttribute("aria-hidden") || null,
+      routeCapture: slot?.dataset.routeCapture || null,
       mobileRouteMode: slot?.dataset.mobileRoute || null,
       mobileRouteState: slot?.dataset.mobileRouteState || null,
       routeTitleText: routeTitle?.textContent?.replace(/\s+/g, " ").trim() || null,
@@ -112,9 +139,17 @@ async function readPaneChromeState(page, paneIndex) {
       sourceSummaryHidden: !!sourceSummary?.hidden,
       sourceSummaryText:
         sourceSummary?.textContent?.replace(/\s+/g, " ").trim() || null,
+      sourceChipVisible:
+        !!sourceChip &&
+        !sourceSummary?.hidden &&
+        window.getComputedStyle(sourceSummary).display !== "none",
       sourceChipText: sourceChip?.textContent?.trim() || null,
       clearHidden: !!clearButton?.hidden,
       cancelHidden: !!cancelButton?.hidden,
+      cancelVisible:
+        !!cancelButton &&
+        !cancelButton.hidden &&
+        window.getComputedStyle(cancelButton).display !== "none",
       feedbackHidden: !!feedback?.hidden,
       feedbackKind: feedback?.dataset.kind || null,
       feedbackText: feedback?.textContent?.replace(/\s+/g, " ").trim() || null,
@@ -189,6 +224,9 @@ async function activatePaneTabWithChrome(page, paneIndex, title, options = {}) {
   const settleMs = options.settleMs === undefined ? 1500 : options.settleMs;
   const chrome = paneChrome(page, paneIndex);
   const tab = chrome.tabs.filter({ hasText: exactTextPattern(title) });
+  if (!(await tab.first().isVisible()) && await chrome.inspectorTabsToggle.isVisible()) {
+    await chrome.inspectorTabsToggle.click();
+  }
   await expect(tab).toBeVisible();
   await tab.click();
   await expect(chrome.activeTab).toHaveText(exactTextPattern(title));

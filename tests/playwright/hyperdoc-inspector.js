@@ -102,7 +102,7 @@ async function openHyperDoc(page, options = {}) {
         timeout: 20_000,
       });
     } else {
-      await expect(hyperdocPane.locator(".hyperdoc-mobile-route-title")).toBeVisible({
+      await expect(hyperdocPane.locator(".hyperdoc-capabilities-toggle")).toBeVisible({
         timeout: 20_000,
       });
     }
@@ -125,11 +125,16 @@ async function openTextPageFromHyperDoc(page, title) {
     .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
     .toBe(paneCountBefore + 1);
   const textPagePane = pane(page, 2);
-  await expect(
-    textPagePane.locator(".inspector-tabs button").filter({
-      hasText: exactTextPattern("Source"),
-    })
-  ).toBeVisible({ timeout: 20_000 });
+  await expect
+    .poll(
+      () =>
+        textPagePane
+          .locator(".inspector-tabs button")
+          .filter({ hasText: exactTextPattern("Source") })
+          .count(),
+      { timeout: 20_000 }
+    )
+    .toBeGreaterThan(0);
   await settleInspectorBindings(page);
   return textPagePane;
 }
@@ -147,11 +152,16 @@ async function openTopicPageFromHyperDoc(page, title) {
     .toBe(paneCountBefore + 1);
   const topicPagePane = pane(page, paneCountBefore);
   await expect(topicPagePane).toBeVisible({ timeout: 20_000 });
-  await expect(
-    topicPagePane.locator(".inspector-tabs button").filter({
-      hasText: exactTextPattern("Content"),
-    })
-  ).toBeVisible({ timeout: 20_000 });
+  await expect
+    .poll(
+      () =>
+        topicPagePane
+          .locator(".inspector-tabs button")
+          .filter({ hasText: exactTextPattern("Content") })
+          .count(),
+      { timeout: 20_000 }
+    )
+    .toBeGreaterThan(0);
   await settleInspectorBindings(page);
   return topicPagePane;
 }
@@ -175,11 +185,16 @@ async function openFedWikiPageFromTextPageLink(page, paneIndex, linkText) {
     .toBe(paneCountBefore + 1);
   const fedwikiPane = pane(page, paneCountBefore);
   await expect(fedwikiPane).toBeVisible({ timeout: 20_000 });
-  await expect(
-    fedwikiPane.locator(".inspector-tabs button").filter({
-      hasText: exactTextPattern("Story"),
-    }).first()
-  ).toBeVisible({ timeout: 20_000 });
+  await expect
+    .poll(
+      () =>
+        fedwikiPane
+          .locator(".inspector-tabs button")
+          .filter({ hasText: exactTextPattern("Story") })
+          .count(),
+      { timeout: 20_000 }
+    )
+    .toBeGreaterThan(0);
   await settleInspectorBindings(page);
   return fedwikiPane;
 }
@@ -194,6 +209,12 @@ async function activatePaneTab(page, paneIndex, title) {
     .locator(".inspector-tabs button")
     .filter({ hasText: exactTextPattern(title) })
     .first();
+  if (!(await tab.isVisible())) {
+    const tabsToggle = currentPane.locator(".hyperdoc-inspector-tabs-toggle");
+    if (await tabsToggle.isVisible()) {
+      await tabsToggle.click();
+    }
+  }
   await expect(tab).toBeVisible();
   let lastError = null;
   for (let attempt = 0; attempt < 5; attempt += 1) {

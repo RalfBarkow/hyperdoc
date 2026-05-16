@@ -123,7 +123,7 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(rediscovery.connectStateInspectPresent).toBe(false);
 });
 
-test("Mobile Dock route strip latches a source and opens Annotation as an operation", async ({
+test("Mobile Dock route capture starts only after explicit capabilities and Connect", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 780 });
@@ -135,9 +135,54 @@ test("Mobile Dock route strip latches a source and opens Annotation as an operat
 
   expect(idle.mobileRouteMode).toBe("true");
   expect(idle.mobileRouteState).toBe("idle");
-  expect(idle.routeTitleText).toBe("Tap a station");
+  expect(idle.capabilitiesLayerState).toBe("capabilities-collapsed");
+  expect(idle.capabilitiesToggleText).toBe(")(");
+  expect(idle.routeCapture).toBe("inactive");
+  expect(idle.routeTitleText).toBe(null);
   expect(idle.coachmarkVisible).toBe(false);
-  expect(idle.compactActions).not.toContain("Connect");
+  expect(idle.compactActions).toEqual([]);
+
+  await hyperdocPane
+    .locator(".hyperdoc-connect-provider-root li")
+    .filter({ hasText: exactTextPattern("Text pages") })
+    .click();
+
+  const afterBodyClick = await readPaneChromeState(page, 1);
+  await attachJson(testInfo, "dock-mobile-document-click.json", afterBodyClick);
+  expect(afterBodyClick.mobileRouteState).toBe("idle");
+  expect(afterBodyClick.routeCapture).toBe("inactive");
+  expect(afterBodyClick.routeTitleText).toBe(null);
+  expect(afterBodyClick.sourceSummaryHidden).toBe(true);
+  expect(afterBodyClick.sourceChipVisible).toBe(false);
+
+  const chrome = paneChrome(page, 1);
+  await expect(chrome.capabilitiesToggle).toBeVisible();
+  await chrome.capabilitiesToggle.click();
+
+  const capabilitiesOpen = await readPaneChromeState(page, 1);
+  await attachJson(testInfo, "dock-mobile-capabilities-open.json", capabilitiesOpen);
+  expect(capabilitiesOpen.capabilitiesLayerState).toBe("capabilities-open");
+  expect(capabilitiesOpen.routeCapture).toBe("inactive");
+  expect(capabilitiesOpen.compactActions).toEqual(
+    expect.arrayContaining(["Connect", "Annotation"])
+  );
+  expect(capabilitiesOpen.routeTitleText).toBe(null);
+
+  await expect(chrome.connectToggle).toBeVisible();
+  await chrome.connectToggle.click();
+
+  const routeReady = await readPaneChromeState(page, 1);
+  await attachJson(testInfo, "dock-mobile-route-ready.json", routeReady);
+  expect(routeReady.mobileRouteState).toBe("route-introduction");
+  expect(routeReady.routeCapture).toBe("active");
+  expect(routeReady.routeTitleText).toBe("Tap a station");
+  expect(routeReady.cancelHidden).toBe(false);
+
+  await expect
+    .poll(async () => (await readPaneChromeState(page, 1)).mobileRouteState, {
+      timeout: 10_000,
+    })
+    .toBe("route-introduction");
 
   await hyperdocPane
     .locator(".hyperdoc-connect-provider-root li")

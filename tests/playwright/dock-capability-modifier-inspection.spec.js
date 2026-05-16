@@ -354,7 +354,7 @@ test("Repeated Shift-click Guide reuses the Dock model pane and preserves traili
   const modelPane = await waitForPaneBodyText(
     page,
     modelPanes[0].index,
-    "Inspectable state model for the Dock as a progressive enhancement over inspector tabs"
+    "desktop coachmark behavior composed with mobile capabilities and inspector-tabs progressive-enhancement layers"
   );
   const paneCountAfterFirstShift = await waitForPaneCount(page, paneCountBefore + 1);
   const titlesAfterFirstShift = await readPaneTitles(page);
@@ -382,7 +382,7 @@ test("Repeated Shift-click Guide reuses the Dock model pane and preserves traili
 
   expect(paneCountAfterFirstShift).toBe(paneCountBefore + 1);
   expect(modelPane.bodyText).toContain(
-    "Inspectable state model for the Dock as a progressive enhancement over inspector tabs"
+    "desktop coachmark behavior composed with mobile capabilities and inspector-tabs progressive-enhancement layers"
   );
   expect(
     titlesAfterFirstShift.some((entry) => entry.title === linkedPageTitle)
