@@ -1,0 +1,116 @@
+<h1>Page systems as ASDF reload boundaries</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  A page system treats a page as a reloadable presentation system. Loading its
+  ASDF system re-provides the code, descriptors, runtime providers, inspection
+  targets, and validation checks needed to display and inspect that page.
+</p>
+
+<p>
+  Page systems are display, inspection, and reload boundaries. They are not
+  automatically implementation ownership boundaries: the runtime behavior may
+  still belong to the main HyperDoc, FedWiki, AppEmbed, or external adapter
+  systems.
+</p>
+
+<h2>Protocol</h2>
+
+<p>
+  The page-system protocol starts with <code>page-system</code> objects and
+  <code>page-runtime-provider</code> objects. A page system records the page
+  locator, ASDF system name, runtime systems, display contract, inspection
+  entry points, validation entry points, source files, artifacts, and reload
+  operation.
+</p>
+
+<p>
+  The reload operation is explicit:
+  <code>(page-system-reload system :force t)</code> delegates to
+  <code>asdf:load-system</code> for the page system name and then checks the
+  page display contract. Loading a page system should not silently start a
+  server; server startup remains an explicit runtime operation unless a
+  surrounding system already documents a different convention.
+</p>
+
+<h2>Naming convention</h2>
+
+<ul>
+  <li><code>hyperdoc/page/&lt;slug&gt;</code> for HyperDoc pages</li>
+  <li><code>fedwiki/page/&lt;domain&gt;/&lt;slug&gt;</code> for FedWiki pages</li>
+  <li><code>external/page/&lt;adapter&gt;/&lt;slug&gt;</code> for later external adapters</li>
+</ul>
+
+<p>
+  If an external locator is too long or unstable for an ASDF system name, the
+  page system can use a deterministic short ASDF id and keep the full locator
+  in <code>page-system-page-locator</code>.
+</p>
+
+<h2>Representative page systems</h2>
+
+<ul>
+  <li><a expr="(page-system-registry)"><tt>(page-system-registry)</tt></a></li>
+  <li><a expr="(find-page-system :hyperdoc/page/mobile-progressive-chrome)"><tt>(find-page-system :hyperdoc/page/mobile-progressive-chrome)</tt></a></li>
+  <li><a expr="(find-page-system :hyperdoc/page/dm6-appembed-inline-proof)"><tt>(find-page-system :hyperdoc/page/dm6-appembed-inline-proof)</tt></a></li>
+  <li><a expr="(find-page-system :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc)"><tt>(find-page-system :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc)</tt></a></li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Page system"><tt>Page system</tt></a></li>
+  <li><a hyperbook="topics" page="Page system ASDF boundary"><tt>Page system ASDF boundary</tt></a></li>
+  <li><a hyperbook="topics" page="Page runtime provider"><tt>Page runtime provider</tt></a></li>
+  <li><a hyperbook="topics" page="HyperDoc page system"><tt>HyperDoc page system</tt></a></li>
+  <li><a hyperbook="topics" page="FedWiki page system"><tt>FedWiki page system</tt></a></li>
+  <li><a hyperbook="topics" page="Page display contract"><tt>Page display contract</tt></a></li>
+  <li><a hyperbook="topics" page="Page reload report"><tt>Page reload report</tt></a></li>
+</ul>
+
+<h2>Mobile chrome generalization</h2>
+
+<p>
+  <code>hyperdoc/mobile-progressive-chrome</code> remains the feature-slice
+  system for the mobile chrome behavior and its SCXML/plan artifacts.
+  <code>hyperdoc/page/mobile-progressive-chrome</code> is the page-system
+  reload boundary for the page
+  <a page="Mobile progressive chrome in HyperDoc">Mobile progressive chrome in HyperDoc</a>.
+</p>
+
+<p>
+  The same protocol now covers the DM6 AppEmbed inline proof page and the
+  localhost FedWiki twin
+  <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="mobile-progressive-chrome-in-hyperdoc"><tt>mobile-progressive-chrome-in-hyperdoc</tt></a>.
+</p>
+
+<h2>Reload examples</h2>
+
+<pre><code>nix develop -c sbcl --noinform --disable-debugger \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc/page/mobile-progressive-chrome :force t)' \
+  --eval '(hyperdoc:find-page-system :hyperdoc/page/mobile-progressive-chrome)' \
+  --eval '(quit)'</code></pre>
+
+<pre><code>nix develop -c sbcl --noinform --disable-debugger \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc/page/dm6-appembed-inline-proof :force t)' \
+  --eval '(hyperdoc:find-page-system :hyperdoc/page/dm6-appembed-inline-proof)' \
+  --eval '(quit)'</code></pre>
+
+<pre><code>nix develop -c sbcl --noinform --disable-debugger \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc :force t)' \
+  --eval '(hyperdoc:find-page-system :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc)' \
+  --eval '(quit)'</code></pre>
+
+<h2>Boundary</h2>
+
+<p>
+  This architecture registers selected page systems. It does not generate one
+  committed ASDF file per page, does not embed large page content in system
+  definitions, and does not make page-system loading start long-running
+  servers. Future page kinds should add providers and descriptors without
+  bypassing the same reload/report protocol.
+</p>

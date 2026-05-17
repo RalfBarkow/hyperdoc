@@ -45,7 +45,9 @@
   <li><a hyperbook="topics" page="Mobile progressive chrome SCXML"><tt>Mobile progressive chrome SCXML</tt></a></li>
   <li><a hyperbook="topics" page="Mobile progressive chrome plan"><tt>Mobile progressive chrome plan</tt></a></li>
   <li><a hyperbook="topics" page="Mobile progressive chrome boundary layout claim"><tt>Mobile progressive chrome boundary layout claim</tt></a></li>
+  <li><a hyperbook="topics" page="Page system"><tt>Page system</tt></a></li>
   <li><a expr="(mobile-progressive-chrome-system-slice)"><tt>(mobile-progressive-chrome-system-slice)</tt></a></li>
+  <li><a expr="(find-page-system :hyperdoc/page/mobile-progressive-chrome)"><tt>(find-page-system :hyperdoc/page/mobile-progressive-chrome)</tt></a></li>
   <li><a expr="(chunk-dock-presentation-model)"><tt>(chunk-dock-presentation-model)</tt></a></li>
   <li><a expr="(mobile-progressive-chrome-scxml-artifact)"><tt>(mobile-progressive-chrome-scxml-artifact)</tt></a></li>
   <li><a expr="(mobile-progressive-chrome-plan)"><tt>(mobile-progressive-chrome-plan)</tt></a></li>
@@ -56,8 +58,16 @@
 <p>
   The mobile progressive chrome behavior belongs to the main HyperDoc runtime.
   The narrow <code>hyperdoc/mobile-progressive-chrome</code> ASDF system is a
-  documentation and inspection boundary for this page, the SCXML artifact, the
-  SHOP3-like implementation plan, and the validation entry points.
+  feature-slice system for this behavior, the SCXML artifact, the SHOP3-like
+  implementation plan, and the validation entry points.
+</p>
+
+<p>
+  The page-as-system reload boundary is
+  <code>hyperdoc/page/mobile-progressive-chrome</code>. It depends on the
+  feature-slice system and exposes this page's locator, runtime providers,
+  display contract, validation surfaces, and reload report through the generic
+  <a page="Page systems as ASDF reload boundaries">page-system protocol</a>.
 </p>
 
 <p>
@@ -71,6 +81,12 @@
   --eval '(require :asdf)' \
   --eval '(asdf:load-system :hyperdoc/mobile-progressive-chrome :force t)' \
   --eval '(hyperdoc:mobile-progressive-chrome-system-slice)' \
+  --eval '(quit)'</code></pre>
+
+<pre><code>nix develop -c sbcl --noinform --disable-debugger \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc/page/mobile-progressive-chrome :force t)' \
+  --eval '(hyperdoc:page-system-reload (hyperdoc:find-page-system :hyperdoc/page/mobile-progressive-chrome) :force t)' \
   --eval '(quit)'</code></pre>
 
 <pre><code>nix develop -c sbcl --noinform --disable-debugger \

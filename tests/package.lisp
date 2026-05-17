@@ -19,6 +19,7 @@
    :run-dock-presentation-smoke-tests
    :run-dock-annotation-smoke-tests
    :run-mobile-progressive-chrome-smoke-tests
+   :run-page-system-smoke-tests
    :run-dmx-annotations-smoke-tests
    :run-dmx-workspace-annotation-live-smoke-tests
    :run-dmx-workspace-journal-sink-smoke-tests
