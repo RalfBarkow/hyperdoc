@@ -139,10 +139,22 @@
                                        (:file "relation-topic-proposals")
                                        (:file "git-commit-equivalence")
                                        (:file "hyperdoc")
+                                       (:file "mobile-progressive-chrome")
                                        (:file "runtime-incidents")
                              (:file "fedwiki-dmx-importer-bug")
                                        (:file "projection-pipeline-operator")
                                        (:file "metagraph-fluree-examples")))))
+
+(defsystem #:hyperdoc/mobile-progressive-chrome
+    :description "Mobile progressive chrome documentation and inspection slice for HyperDoc"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "mobile-progressive-chrome")))))
 
 (defsystem #:hyperdoc/codex
     :description "Codex collaboration home topic for HyperDoc"
@@ -565,6 +577,7 @@
     :version "0.0.1"
     :serial t
     :depends-on (#:hyperdoc/mcp
+                 #:hyperdoc/mobile-progressive-chrome
                  #:hyperdoc/scxml
                  #:hyperdoc/explorer
                  #:hyperdoc/nor-graph-demo

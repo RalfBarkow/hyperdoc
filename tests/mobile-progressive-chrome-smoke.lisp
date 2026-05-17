@@ -21,6 +21,50 @@
   (mapcar #'hyperdoc::title-of
           (hyperdoc::states-of (hyperdoc::dock-presentation-model))))
 
+(defun run-mobile-progressive-chrome-asdf-system-smoke-test ()
+  (let ((system (asdf:find-system :hyperdoc/mobile-progressive-chrome)))
+    (mobile-progressive-chrome-assert-true
+     system
+     "ASDF must resolve :hyperdoc/mobile-progressive-chrome")
+    (asdf:load-system :hyperdoc/mobile-progressive-chrome :force t)
+    (let ((slice (hyperdoc:mobile-progressive-chrome-system-slice)))
+      (mobile-progressive-chrome-assert-equal
+       "hyperdoc/mobile-progressive-chrome"
+       (hyperdoc::mobile-progressive-chrome-system-name-of slice)
+       "Slice object must report the ASDF system name")
+      (mobile-progressive-chrome-assert-equal
+       "Mobile progressive chrome in HyperDoc"
+       (hyperdoc::mobile-progressive-chrome-page-title-of slice)
+       "Slice object must report the central page title")
+      (dolist (pathname
+               (list (hyperdoc::mobile-progressive-chrome-page-pathname-of slice)
+                     (hyperdoc::mobile-progressive-chrome-slice-scxml-pathname-of
+                      slice)
+                     (hyperdoc::mobile-progressive-chrome-playwright-spec-pathname-of
+                      slice)))
+        (mobile-progressive-chrome-assert-true
+         (uiop:file-exists-p pathname)
+         (format nil "Slice pathname must exist: ~A" pathname)))
+      (mobile-progressive-chrome-assert-true
+       (typep (hyperdoc::mobile-progressive-chrome-slice-plan-of slice)
+              'hyperdoc::mobile-progressive-chrome-plan)
+       "Slice object must expose the plan object")
+      (mobile-progressive-chrome-assert-true
+       (typep (hyperdoc::mobile-progressive-chrome-slice-state-model-of slice)
+              'hyperdoc::dock-presentation-model)
+       "Slice object must expose the Dock state model")
+      (mobile-progressive-chrome-assert-true
+       (typep (hyperdoc:mobile-progressive-chrome-page)
+              'hyperdoc::html-page)
+       "Slice helper must find the central HTML page")
+      (dolist (title '("Mobile progressive chrome ASDF system"
+                       "Mobile progressive chrome reload boundary"
+                       "Mobile progressive chrome page"
+                       "Mobile progressive chrome boundary layout claim"))
+        (mobile-progressive-chrome-assert-true
+         (hyperbook:find-page hyperdoc::*topics* title :signal-error? t)
+         (format nil "Topic cluster must include ~A" title))))))
+
 (defun run-mobile-progressive-chrome-state-model-smoke-test ()
   (let* ((model (hyperdoc::dock-presentation-model))
          (titles (mobile-progressive-chrome-state-titles))
@@ -146,6 +190,7 @@
                         "Route capture"
                         "Ordinary links"
                         "Boundary-mounted handles"
+                        "ASDF reload boundary"
                         "Mobile progressive chrome SCXML"
                         "mobile-progressive-chrome-plan"))
         (mobile-progressive-chrome-assert-true
@@ -153,6 +198,7 @@
          (format nil "Documentation page must contain ~S" needle))))))
 
 (defun run-mobile-progressive-chrome-smoke-tests ()
+  (run-mobile-progressive-chrome-asdf-system-smoke-test)
   (run-mobile-progressive-chrome-state-model-smoke-test)
   (run-mobile-progressive-chrome-scxml-smoke-test)
   (run-mobile-progressive-chrome-plan-smoke-test)

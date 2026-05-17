@@ -39,12 +39,45 @@
 
 <ul>
   <li><a hyperbook="topics" page="Mobile progressive chrome in HyperDoc"><tt>Mobile progressive chrome in HyperDoc</tt></a></li>
+  <li><a hyperbook="topics" page="Mobile progressive chrome page"><tt>Mobile progressive chrome page</tt></a></li>
+  <li><a hyperbook="topics" page="Mobile progressive chrome ASDF system"><tt>Mobile progressive chrome ASDF system</tt></a></li>
+  <li><a hyperbook="topics" page="Mobile progressive chrome reload boundary"><tt>Mobile progressive chrome reload boundary</tt></a></li>
   <li><a hyperbook="topics" page="Mobile progressive chrome SCXML"><tt>Mobile progressive chrome SCXML</tt></a></li>
   <li><a hyperbook="topics" page="Mobile progressive chrome plan"><tt>Mobile progressive chrome plan</tt></a></li>
+  <li><a hyperbook="topics" page="Mobile progressive chrome boundary layout claim"><tt>Mobile progressive chrome boundary layout claim</tt></a></li>
+  <li><a expr="(mobile-progressive-chrome-system-slice)"><tt>(mobile-progressive-chrome-system-slice)</tt></a></li>
   <li><a expr="(chunk-dock-presentation-model)"><tt>(chunk-dock-presentation-model)</tt></a></li>
   <li><a expr="(mobile-progressive-chrome-scxml-artifact)"><tt>(mobile-progressive-chrome-scxml-artifact)</tt></a></li>
   <li><a expr="(mobile-progressive-chrome-plan)"><tt>(mobile-progressive-chrome-plan)</tt></a></li>
 </ul>
+
+<h2>ASDF reload boundary</h2>
+
+<p>
+  The mobile progressive chrome behavior belongs to the main HyperDoc runtime.
+  The narrow <code>hyperdoc/mobile-progressive-chrome</code> ASDF system is a
+  documentation and inspection boundary for this page, the SCXML artifact, the
+  SHOP3-like implementation plan, and the validation entry points.
+</p>
+
+<p>
+  After changing slice-specific Lisp definitions, reload this boundary with
+  <code>asdf:load-system</code>. Use a root <code>hyperdoc</code> reload when
+  changing core runtime files such as <code>hyperdoc/dock.lisp</code>,
+  <code>hyperdoc/dom-annotations.lisp</code>, or the browser chrome assets.
+</p>
+
+<pre><code>nix develop -c sbcl --noinform --disable-debugger \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc/mobile-progressive-chrome :force t)' \
+  --eval '(hyperdoc:mobile-progressive-chrome-system-slice)' \
+  --eval '(quit)'</code></pre>
+
+<pre><code>nix develop -c sbcl --noinform --disable-debugger \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc/tests)' \
+  --eval '(hyperdoc/tests:run-mobile-progressive-chrome-smoke-tests)' \
+  --eval '(quit)'</code></pre>
 
 <h2>State composition</h2>
 

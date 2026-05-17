@@ -75,6 +75,14 @@
    #:dm6-page-topicmap-seed-report
    #:dm6-inline-proof-page-pathname
    #:materialize-dm6-inline-proof-page-topicmap-seed!
+   ;; Mobile progressive chrome reload boundary
+   #:mobile-progressive-chrome-page
+   #:mobile-progressive-chrome-system-slice
+   #:mobile-progressive-chrome-state-model
+   #:mobile-progressive-chrome-scxml-artifact
+   #:mobile-progressive-chrome-plan
+   #:reload-mobile-progressive-chrome-slice
+   #:run-mobile-progressive-chrome-slice-checks
    ;; Access to the global catalog of registered HyperDocs
    #:*catalog* #:hyperdocs-of
    ;; Access to HyperDoc data
