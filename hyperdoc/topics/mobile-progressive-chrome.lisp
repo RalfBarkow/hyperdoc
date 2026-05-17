@@ -9,6 +9,7 @@
    :title "Mobile progressive chrome in HyperDoc"
    :summary "Mobile HyperDoc behavior in which capabilities collapse behind )(, inspector tabs collapse behind a rotated )(, boundary handles consume no document space, and route capture starts only after explicit Connect."
    :references '("Mobile progressive chrome in HyperDoc"
+                 "Page systems as ASDF reload boundaries"
                  "Dock presentation state model"
                  "DM6 AppEmbed HyperDoc Inline Proof")))
 
@@ -16,8 +17,9 @@
   (make-topic
    :id "mobile-progressive-chrome-page"
    :title "Mobile progressive chrome page"
-   :summary "The central HyperDoc page for the mobile progressive chrome documentation slice and its inspectable ASDF reload boundary."
+   :summary "The central HyperDoc page for the mobile progressive chrome documentation slice, with a generic page-system boundary at hyperdoc/page/mobile-progressive-chrome."
    :references '("Mobile progressive chrome in HyperDoc"
+                 "Page systems as ASDF reload boundaries"
                  "Mobile progressive chrome ASDF system"
                  "Mobile progressive chrome reload boundary")))
 
@@ -34,8 +36,9 @@
   (make-topic
    :id "mobile-progressive-chrome-asdf-system"
    :title "Mobile progressive chrome ASDF system"
-   :summary "Narrow ASDF reload and inspection boundary for the mobile progressive chrome documentation slice; it is not a separate runtime implementation."
+   :summary "Feature-slice ASDF system for mobile progressive chrome documentation and inspection helpers; the page-system reload boundary is hyperdoc/page/mobile-progressive-chrome."
    :references '("Mobile progressive chrome in HyperDoc"
+                 "Page systems as ASDF reload boundaries"
                  "ASDF system"
                  "hyperdoc.asd"
                  "hyperdoc/mobile-progressive-chrome.lisp")))
@@ -44,8 +47,9 @@
   (make-topic
    :id "mobile-progressive-chrome-reload-boundary"
    :title "Mobile progressive chrome reload boundary"
-   :summary "Operational boundary for reloading slice-specific documentation and inspection helpers with hyperdoc/mobile-progressive-chrome while leaving core Dock runtime changes to the root HyperDoc system."
+   :summary "Operational boundary split between hyperdoc/mobile-progressive-chrome for feature-slice helpers and hyperdoc/page/mobile-progressive-chrome for page-system display inspection."
    :references '("Mobile progressive chrome in HyperDoc"
+                 "Page systems as ASDF reload boundaries"
                  "Mobile progressive chrome ASDF system"
                  "hyperdoc/mobile-progressive-chrome.lisp")))
 
