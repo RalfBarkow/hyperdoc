@@ -116,6 +116,7 @@
                   "preserve-link-default-action-when-route-inactive"
                   "add-scxml-behavior-model"
                   "add-mobile-regression-tests"
+                  "boundary-mounted-toggle-layout"
                   "validate"))
       (mobile-progressive-chrome-assert-true
        (member id ids :test #'string=)
@@ -144,6 +145,7 @@
       (dolist (needle '("Capabilities closed"
                         "Route capture"
                         "Ordinary links"
+                        "Boundary-mounted handles"
                         "Mobile progressive chrome SCXML"
                         "mobile-progressive-chrome-plan"))
         (mobile-progressive-chrome-assert-true

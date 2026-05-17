@@ -209,11 +209,17 @@ async function activatePaneTab(page, paneIndex, title) {
     .locator(".inspector-tabs button")
     .filter({ hasText: exactTextPattern(title) })
     .first();
-  if (!(await tab.isVisible())) {
-    const tabsToggle = currentPane.locator(".hyperdoc-inspector-tabs-toggle");
-    if (await tabsToggle.isVisible()) {
-      await tabsToggle.click();
-    }
+  const tabsToggle = currentPane.locator(".hyperdoc-inspector-tabs-toggle");
+  const tabsLayerState = await currentPane.evaluate((paneNode) =>
+    paneNode.getAttribute("data-inspector-tabs-layer")
+  );
+  if (
+    (await tabsToggle.isVisible()) &&
+    tabsLayerState !== "tabs-open"
+  ) {
+    await tabsToggle.click();
+  } else if (!(await tab.isVisible()) && (await tabsToggle.isVisible())) {
+    await tabsToggle.click();
   }
   await expect(tab).toBeVisible();
   let lastError = null;

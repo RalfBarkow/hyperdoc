@@ -38,6 +38,11 @@
                 claims
                 :key #'hyperdoc::title-of
                 :test #'string=))
+         (mobile-boundary-claim
+          (find "Mobile chrome toggles mount on the pane boundary"
+                claims
+                :key #'hyperdoc::title-of
+                :test #'string=))
          (snapshot
           (hyperdoc::make-dom-connect-pane-state-snapshot-from-json
            '(:paneId "pane-1"
@@ -103,6 +108,8 @@
                  "Mobile route-capture claim should include JS runtime evidence")
     (assert-true mobile-tabs-claim
                  "Dock model should keep the mobile inspector-tabs claim inspectable")
+    (assert-true mobile-boundary-claim
+                 "Dock model should keep the mobile boundary-layout claim inspectable")
     (dolist (claim claims)
       (assert-true (plusp (length (hyperdoc::evidence-of claim)))
                    (format nil "Dock claim ~A should point to implementation evidence"

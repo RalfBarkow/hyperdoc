@@ -725,6 +725,17 @@ the primary pane-local object in this slice."))
                                  (mobile-progressive-chrome-playwright-evidence)
                                  (mobile-progressive-chrome-smoke-evidence))))
 
+(defun mobile-progressive-chrome-boundary-layout-claim ()
+  (make-instance 'dock-claim-code-relation
+                 :id "dock-claim/mobile-boundary-toggle-layout"
+                 :title "Mobile chrome toggles mount on the pane boundary"
+                 :summary "On narrow viewports the collapsed inspector-tabs and capabilities handles attach to the inspector-pane boundary and consume no document vertical space."
+                 :claim-text
+                 "The mobile handles belong to the pane chrome seam, not to page content. The collapsed chrome layer has zero normal-flow height, the handles sit on the left and right inspector-pane boundaries, and expanded layers remain pane-local overlays."
+                 :evidence (list (mobile-progressive-chrome-css-evidence)
+                                 (mobile-progressive-chrome-playwright-evidence)
+                                 (mobile-progressive-chrome-smoke-evidence))))
+
 (defun dock-latent-state ()
   (make-instance 'dock-presentation-state
                  :id "dock-state/latent"
@@ -805,15 +816,16 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-state
                  :id "dock-capabilities-layer/collapsed"
                  :title "capabilities-collapsed"
-                 :summary "The narrow Dock capabilities layer is closed; only the )( button is visible and page-body taps remain normal document actions."
-                 :compact-representation ")("
+                 :summary "The narrow Dock capabilities layer is closed; only the right pane-boundary )( handle is visible and page-body taps remain normal document actions."
+                 :compact-representation "Right pane-boundary )( handle."
                  :expanded-representation "None."
                  :entry-triggers '("Narrow viewport with no explicit capabilities opening."
                                    "Capabilities close."
                                    "Route cancellation returns to the closed layer when it was the prior layer.")
                  :exit-conditions '("CAPABILITIES_TOGGLE opens the capabilities layer.")
                  :capabilities '("Open capabilities")
-                 :claims (list (dock-mobile-route-strip-claim))))
+                 :claims (list (dock-mobile-route-strip-claim)
+                               (mobile-progressive-chrome-boundary-layout-claim))))
 
 (defun dock-capabilities-open-state ()
   (make-instance 'dock-presentation-state
@@ -917,8 +929,8 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-state
                  :id "dock-inspector-tabs-layer/collapsed"
                  :title "tabs-collapsed"
-                 :summary "The mobile inspector tab row is hidden behind a rotated )( button while the active tab remains known."
-                 :compact-representation "Rotated )( with active tab in the button's accessible label."
+                 :summary "The mobile inspector tab row is hidden behind a left pane-boundary rotated )( handle while the active tab remains known."
+                 :compact-representation "Left pane-boundary rotated )( with active tab in the button's accessible label."
                  :expanded-representation "None."
                  :entry-triggers '("Narrow viewport initial enhancement."
                                    "Tab selected on a narrow viewport."
@@ -926,7 +938,8 @@ the primary pane-local object in this slice."))
                  :exit-conditions '("INSPECTOR_TABS_TOGGLE opens the tab list.")
                  :capabilities '("Open inspector tabs")
                  :claims (list (dock-degrade-chrome-claim)
-                               (mobile-progressive-chrome-tabs-claim))))
+                               (mobile-progressive-chrome-tabs-claim)
+                               (mobile-progressive-chrome-boundary-layout-claim))))
 
 (defun dock-inspector-tabs-open-state ()
   (make-instance 'dock-presentation-state
@@ -1180,7 +1193,7 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-model
                  :id "dock-presentation-model"
                  :title "Dock presentation model"
-                 :summary "Inspectable SCXML-style state model for Dock presentation: desktop coachmark behavior composed with mobile capabilities and inspector-tabs progressive-enhancement layers."
+                 :summary "Inspectable SCXML-style state model for Dock presentation: desktop coachmark behavior composed with mobile capabilities and inspector-tabs progressive-enhancement layers, with collapsed handles mounted on the pane boundary."
                  :states (list (dock-latent-state)
                                (dock-introduction-state)
                                (dock-active-state)
@@ -1222,7 +1235,8 @@ the primary pane-local object in this slice."))
                                (dock-provider-handoff-claim)
                                (dock-runtime-inspection-claim)
                                (dock-mobile-route-strip-claim)
-                               (mobile-progressive-chrome-tabs-claim))))
+                               (mobile-progressive-chrome-tabs-claim)
+                               (mobile-progressive-chrome-boundary-layout-claim))))
 
 (defun chunk-dock-presentation-model ()
   (dock-presentation-model))
@@ -1430,9 +1444,19 @@ the primary pane-local object in this slice."))
      "tests/mobile-progressive-chrome-smoke.lisp"
      :dependency-ids '("add-scxml-behavior-model"))
     (make-mobile-progressive-chrome-plan-task
+     "boundary-mounted-toggle-layout"
+     "Mount collapsed toggles on the pane boundary"
+     "done"
+     "assets/hyperdoc/css/dom-annotation-connect.css"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     :dependency-ids '("implement-capabilities-toggle-glyph"
+                       "implement-rotated-tabs-toggle-glyph"))
+    (make-mobile-progressive-chrome-plan-task
      "validate"
      "Validate"
      "done"
      "hyperdoc.asd"
      "nix develop validation commands"
-     :dependency-ids '("add-mobile-regression-tests" "update-durable-docs")))))
+     :dependency-ids '("add-mobile-regression-tests"
+                       "update-durable-docs"
+                       "boundary-mounted-toggle-layout")))))

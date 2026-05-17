@@ -11,7 +11,6 @@ const {
   pane,
   readConnectSessionState,
   readInspectorPaneState,
-  readPaneTitles,
   waitForPaneBodyText,
   waitForPaneLoadingBoundary,
 } = require("./hyperdoc-inspector");
@@ -29,6 +28,93 @@ async function openProofPageMobile(page) {
   await waitForPaneBodyText(page, 2, "DM6 Topic Map");
   await waitForPaneLoadingBoundary(page, 2);
   return proofPane;
+}
+
+async function readMobileBoundaryLayout(page, paneIndex) {
+  return page.evaluate((index) => {
+    function rectOf(node) {
+      if (!node) {
+        return null;
+      }
+      const rect = node.getBoundingClientRect();
+      return {
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+        centerX: rect.left + rect.width / 2,
+        centerY: rect.top + rect.height / 2,
+      };
+    }
+
+    function visible(node) {
+      if (!node) {
+        return false;
+      }
+      const rect = node.getBoundingClientRect();
+      const style = window.getComputedStyle(node);
+      return (
+        rect.width > 0 &&
+        rect.height > 0 &&
+        style.display !== "none" &&
+        style.visibility !== "hidden"
+      );
+    }
+
+    const paneNode = document.querySelectorAll(".inspector-pane")[index];
+    const titleBar = paneNode?.querySelector(":scope > .inspector-title-bar");
+    const body = paneNode?.querySelector(":scope > .inspector-body");
+    const chrome = paneNode?.querySelector(
+      ":scope > .hyperdoc-dom-connect-pane-chrome"
+    );
+    const tabsToggle = paneNode?.querySelector(".hyperdoc-inspector-tabs-toggle");
+    const capabilitiesToggle = paneNode?.querySelector(
+      ".hyperdoc-capabilities-toggle"
+    );
+    const activeView = body?.querySelector(":scope > .inspector-view:not([hidden])");
+    const firstContent = Array.from(
+      activeView?.querySelectorAll("h1,h2,h3,p,li,table,pre,blockquote") || []
+    ).find(visible);
+    const tabsToggleRect = rectOf(tabsToggle);
+    const capabilitiesToggleRect = rectOf(capabilitiesToggle);
+    const titleActions = Array.from(
+      titleBar?.querySelectorAll(
+        "button,a,[role='button'],[tabindex]:not([tabindex='-1']),.inspector-title-bar-object,.inspector-title-bar-class"
+      ) || []
+    )
+      .filter(visible)
+      .map((node) => {
+        const rect = rectOf(node);
+        const centerStack = rect
+          ? document.elementsFromPoint(rect.centerX, rect.centerY)
+          : [];
+        return {
+          tagName: node.tagName,
+          className: String(node.className || ""),
+          text: node.textContent?.replace(/\s+/g, " ").trim() || "",
+          rect,
+          coveredByHandle:
+            centerStack.includes(tabsToggle) ||
+            centerStack.includes(capabilitiesToggle),
+          elementAtCenter: centerStack[0]?.className
+            ? String(centerStack[0].className)
+            : centerStack[0]?.tagName || null,
+        };
+      });
+
+    return {
+      pane: rectOf(paneNode),
+      titleBar: rectOf(titleBar),
+      body: rectOf(body),
+      chrome: rectOf(chrome),
+      firstContent: rectOf(firstContent),
+      tabsToggle: tabsToggleRect,
+      capabilitiesToggle: capabilitiesToggleRect,
+      titleActions,
+    };
+  }, paneIndex);
 }
 
 test("mobile initial chrome collapses capabilities and inspector tabs", async ({
@@ -58,6 +144,40 @@ test("mobile initial chrome collapses capabilities and inspector tabs", async ({
   await expect(chrome.inspectorTabsToggle).toBeVisible();
   await expect(proofPane.getByText("Tap a station")).toHaveCount(0);
   await expect(proofPane.getByText(/^From:/)).toHaveCount(0);
+});
+
+test("mobile collapsed handles are mounted on the pane boundary", async ({
+  page,
+}, testInfo) => {
+  await openProofPageMobile(page);
+  const layout = await readMobileBoundaryLayout(page, 2);
+  await attachJson(testInfo, "mobile-boundary-handle-layout.json", layout);
+
+  expect(layout.pane).not.toBeNull();
+  expect(layout.body).not.toBeNull();
+  expect(layout.tabsToggle).not.toBeNull();
+  expect(layout.capabilitiesToggle).not.toBeNull();
+  expect(Math.abs(layout.tabsToggle.centerX - layout.pane.left)).toBeLessThanOrEqual(5);
+  expect(Math.abs(layout.capabilitiesToggle.centerX - layout.pane.right))
+    .toBeLessThanOrEqual(5);
+  expect(Math.abs(layout.tabsToggle.top - layout.body.top)).toBeLessThanOrEqual(8);
+  expect(Math.abs(layout.capabilitiesToggle.top - layout.body.top))
+    .toBeLessThanOrEqual(8);
+});
+
+test("mobile collapsed chrome does not push body content or cover title actions", async ({
+  page,
+}, testInfo) => {
+  await openProofPageMobile(page);
+  const layout = await readMobileBoundaryLayout(page, 2);
+  await attachJson(testInfo, "mobile-boundary-content-gap.json", layout);
+
+  expect(layout.chrome.height).toBeLessThanOrEqual(1);
+  expect(layout.body.top - layout.titleBar.bottom).toBeLessThanOrEqual(4);
+  expect(layout.firstContent.top - layout.body.top).toBeLessThan(120);
+  expect(layout.titleActions.length).toBeGreaterThan(0);
+  expect(layout.titleActions.filter((action) => action.coveredByHandle))
+    .toEqual([]);
 });
 
 test("mobile link click is normal while capabilities are collapsed", async ({
@@ -190,8 +310,14 @@ test("mobile progressive chrome state, SCXML, and plan artifacts are inspectable
     })
     .toBe(0);
 
-  const titles = await readPaneTitles(page);
-  await attachJson(testInfo, "mobile-progressive-artifact-panes.json", titles);
-  expect(titles.some((entry) => entry.title === "Mobile progressive chrome plan"))
-    .toBe(true);
+  await expect
+    .poll(
+      async () => (await readInspectorPaneState(page, paneCountBefore)).bodyText,
+      { timeout: 30_000 }
+    )
+    .toContain("Mobile progressive chrome plan");
+  const planState = await readInspectorPaneState(page, paneCountBefore);
+  await attachJson(testInfo, "mobile-progressive-plan-pane.json", planState);
+  expect(planState.bodyText).toContain("Mobile progressive chrome plan");
+  expect(planState.bodyText).toContain("Mount collapsed toggles on the pane boundary");
 });

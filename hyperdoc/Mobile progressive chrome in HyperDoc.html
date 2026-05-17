@@ -19,6 +19,22 @@
   <li><b>Inspector tabs:</b> the rotated <code>)(</code> opens the existing tab row. Selecting a tab changes the active tab, then collapses again on narrow viewports to restore vertical space.</li>
 </ul>
 
+<h2>Boundary-mounted handles</h2>
+
+<p>
+  In the collapsed mobile layout, the rotated inspector-tabs handle is attached
+  to the left boundary of the <code>.inspector-pane</code>, and the capabilities
+  handle is attached to the right boundary. They sit at the title/body seam as
+  pane-chrome affordances, not as controls floating over document content.
+</p>
+
+<p>
+  The collapsed chrome layer consumes no normal document height, so the active
+  <code>.inspector-body</code> starts immediately after the pane title boundary.
+  Opening either layer creates a pane-local overlay: tabs and capabilities stay
+  constrained to the pane instead of changing page content flow.
+</p>
+
 <h2>Inspectable objects</h2>
 
 <ul>
