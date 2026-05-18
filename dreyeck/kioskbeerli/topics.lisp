@@ -73,6 +73,16 @@
                  "Kioskberrli"
                  "Hauptsache Entry Model")))
 
+(defun kioskberrli-preconfigured-headless-image-topic ()
+  (%topic
+   :id "kioskberrli-preconfigured-headless-image"
+   :title "Kioskberrli preconfigured headless image"
+   :summary "Preferred maintenance target: a custom image enables OpenSSH, declares a normal admin user, seeds authorized keys, and avoids password/root SSH on first boot."
+   :references '("Salon Pi 4 Kiosk Hardening Checklist"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
+                 "Two Installation Models: SD Image vs Classic Installer")))
+
 (defun runbook-build-and-flash-sd-image-topic ()
   (%topic
    :id "runbook-build-and-flash-sd-image"

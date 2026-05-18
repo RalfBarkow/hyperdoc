@@ -66,6 +66,35 @@
    (member needle haystack :test #'string=)
    message))
 
+(defun run-kioskberrli-dashboard-boundary-smoke-test ()
+  (let ((core-concepts
+          (uiop:read-file-string
+           (kioskberrli-dashboard-relative-path
+            "hyperdoc/topics/core-concepts.lisp"))))
+    (dolist (legacy-definition
+              '("(defparameter *kioskberrli-dashboard-status-vocabulary*"
+                "(defclass kioskberrli-dashboard-status"
+                "(defclass kioskberrli-topic-dashboard"
+                "(defun kioskberrli-dashboard"
+                "(defun kioskberrli-topic"
+                "(defun kioskberrli-dashboard-topic"
+                "(defun kioskberrli-sdimage-imagesize-failure-topic"
+                "(defun kioskberrli-cross-host-build-failure-topic"
+                "(defun salon-pi-4-kiosk-hardening-checklist-topic"
+                "(defun kioskberrli-preconfigured-headless-image-topic"
+                "(defun runbook-build-and-flash-sd-image-topic"
+                "(defun preflight-rpi-sd-image-checklist-topic"
+                "(defun official-rpi-sd-image-tutorial-topic"
+                "(defun two-installation-models-topic"
+                "(defun invariant-boot-partition-must-be-big-enough-topic"
+                "(defun prepare-aarch64-image-topic"
+                "(defun hauptsache-entry-model-topic"))
+      (kioskberrli-dashboard-assert-true
+       (not (search legacy-definition core-concepts :test #'char=))
+       (format nil
+               "Kioskberrli implementation boundary leaked into core concepts: ~A"
+               legacy-definition)))))
+
 (defun assert-kioskberrli-dashboard-before
     (page-source left right message)
   (let ((left-position (search left page-source :test #'char=))
@@ -131,6 +160,8 @@
                    . "Kioskberrli Cross-Host Build Failure")
                   (hyperdoc::salon-pi-4-kiosk-hardening-checklist-topic
                    . "Salon Pi 4 Kiosk Hardening Checklist")
+                  (hyperdoc::kioskberrli-preconfigured-headless-image-topic
+                   . "Kioskberrli preconfigured headless image")
                   (hyperdoc::runbook-build-and-flash-sd-image-topic
                    . "Runbook - Build and Flash NixOS SD Image for Kioskberrli")
                   (hyperdoc::invariant-boot-partition-must-be-big-enough-topic
@@ -369,6 +400,7 @@
      "kioskberrli-dashboard-stations must remain below the primary dashboard topics.")))
 
 (defun run-kioskberrli-dashboard-smoke-tests ()
+  (run-kioskberrli-dashboard-boundary-smoke-test)
   (run-kioskberrli-dashboard-topic-object-smoke-test)
   (run-kioskberrli-dashboard-planner-smoke-test)
   (run-kioskberrli-dashboard-scxml-smoke-test)

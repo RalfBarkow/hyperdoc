@@ -49,6 +49,7 @@
    #:kioskberrli-sdimage-imagesize-failure-topic
    #:kioskberrli-cross-host-build-failure-topic
    #:salon-pi-4-kiosk-hardening-checklist-topic
+   #:kioskberrli-preconfigured-headless-image-topic
    #:runbook-build-and-flash-sd-image-topic
    #:preflight-rpi-sd-image-checklist-topic
    #:official-rpi-sd-image-tutorial-topic

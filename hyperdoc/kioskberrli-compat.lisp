@@ -58,6 +58,9 @@
 (defun salon-pi-4-kiosk-hardening-checklist-topic ()
   (%dreyeck-kioskbeerli-call 'salon-pi-4-kiosk-hardening-checklist-topic))
 
+(defun kioskberrli-preconfigured-headless-image-topic ()
+  (%dreyeck-kioskbeerli-call 'kioskberrli-preconfigured-headless-image-topic))
+
 (defun runbook-build-and-flash-sd-image-topic ()
   (%dreyeck-kioskbeerli-call 'runbook-build-and-flash-sd-image-topic))
 
