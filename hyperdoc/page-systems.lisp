@@ -5,7 +5,8 @@
 (defparameter *page-system-default-asdf-systems*
   '("hyperdoc/page/mobile-progressive-chrome"
     "hyperdoc/page/dm6-appembed-inline-proof"
-    "fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc"))
+    "fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc"
+    "fedwiki/page/wiki.ralfbarkow.ch/shop3"))
 
 (defun page-system-normalize-system-name (name)
   (etypecase name
@@ -29,7 +30,7 @@
                             (search needle haystack :start2 start :test #'char-equal))
         while position
         do (setf start (+ position (length needle)))
-           (incf count)
+        (incf count)
         finally (return count)))
 
 (defclass page-runtime-provider ()
@@ -45,7 +46,19 @@
                        :initform nil)
    (display-notes :reader page-runtime-provider-display-notes
                   :initarg :display-notes
-                  :initform nil)))
+                  :initform nil)
+   (source-repo :reader page-runtime-provider-source-repo
+                :initarg :source-repo
+                :initform nil)
+   (upstream-url :reader page-runtime-provider-upstream-url
+                 :initarg :upstream-url
+                 :initform nil)
+   (local-override-note :reader page-runtime-provider-local-override-note
+                        :initarg :local-override-note
+                        :initform nil)
+   (license-note :reader page-runtime-provider-license-note
+                 :initarg :license-note
+                 :initform nil)))
 
 (defmethod print-object ((provider page-runtime-provider) stream)
   (print-unreadable-object (provider stream :type t :identity nil)
@@ -53,14 +66,19 @@
 
 (defun make-page-runtime-provider
     (&key provider-id provider-kind asdf-system-name ensure-function
-       readiness-function display-notes)
+       readiness-function display-notes source-repo upstream-url
+       local-override-note license-note)
   (make-instance 'page-runtime-provider
                  :provider-id provider-id
                  :provider-kind provider-kind
                  :asdf-system-name asdf-system-name
                  :ensure-function ensure-function
                  :readiness-function readiness-function
-                 :display-notes display-notes))
+                 :display-notes display-notes
+                 :source-repo source-repo
+                 :upstream-url upstream-url
+                 :local-override-note local-override-note
+                 :license-note license-note))
 
 (defun hyperdoc-runtime-provider ()
   (make-page-runtime-provider
@@ -97,6 +115,51 @@
    :ensure-function "asdf:load-system :hyperdoc/fedwiki"
    :readiness-function "Local twin/materialization planning helpers are available"
    :display-notes "Provides localhost FedWiki materialization metadata and dry-run helpers."))
+
+(defparameter *shop3-asdf-system-name* "shop3")
+(defparameter *shop3-upstream-url* "https://github.com/shop-planner/shop3")
+(defparameter *shop3-flake-input* "github:shop-planner/shop3")
+
+(defun shop3-source-root-pathname ()
+  (or (when-let (root (uiop:getenv "SHOP3_SRC"))
+        (uiop:ensure-directory-pathname root))
+      (ignore-errors
+        (uiop:pathname-parent-directory-pathname
+         (asdf:system-source-directory *shop3-asdf-system-name*)))))
+
+(defun ensure-shop3-runtime ()
+  (asdf:load-system *shop3-asdf-system-name*)
+  (asdf:find-system *shop3-asdf-system-name*))
+
+(defun shop3-runtime-ready-p ()
+  (and (ignore-errors
+         (ensure-shop3-runtime)
+         t)
+       (find-package :shop3)
+       (find-package :shop3-user)))
+
+(defun shop3-runtime-provider ()
+  (make-page-runtime-provider
+   :provider-id "shop3-runtime-provider"
+   :provider-kind :common-lisp-planner
+   :asdf-system-name *shop3-asdf-system-name*
+   :ensure-function "asdf:load-system :shop3"
+   :readiness-function "ASDF resolves :shop3 and packages SHOP3/SHOP3-USER exist"
+   :display-notes "Provides the SHOP3 HTN planner runtime for the FedWiki shop3 page."
+   :source-repo *shop3-flake-input*
+   :upstream-url *shop3-upstream-url*
+   :local-override-note
+   "nix develop --override-input shop3 path:/path/to/shop3"
+   :license-note "MPL 1.1/GPL 2.0/LGPL 2.1; ASDF metadata says Mozilla Public License."))
+
+(defun hyperdoc-shop3-planning-runtime-provider ()
+  (make-page-runtime-provider
+   :provider-id "hyperdoc-shop3-planning-runtime"
+   :provider-kind :hyperdoc-shop3-planning-layer
+   :asdf-system-name "hyperdoc/shop3"
+   :ensure-function "asdf:load-system :hyperdoc/shop3"
+   :readiness-function "HYPERDOC/SHOP3 package and plan-object helpers are available"
+   :display-notes "Provides HyperDoc-facing SHOP3 plan objects and inspector views without running a planning problem on load."))
 
 (defclass page-system ()
   ((page-system-id :reader page-system-id :initarg :page-system-id)
@@ -155,12 +218,12 @@
 
 (defun make-page-system
     (class &key page-system-id page-system-title page-system-kind
-       page-system-asdf-system-name page-system-page-locator
-       page-system-runtime-providers page-system-runtime-entry-points
-       page-system-display-contract page-system-inspection-entry-points
-       page-system-validation-entry-points page-system-source-files
-       page-system-artifacts page-system-display-check-function
-       page-system-description)
+             page-system-asdf-system-name page-system-page-locator
+             page-system-runtime-providers page-system-runtime-entry-points
+             page-system-display-contract page-system-inspection-entry-points
+             page-system-validation-entry-points page-system-source-files
+             page-system-artifacts page-system-display-check-function
+             page-system-description)
   (make-instance class
                  :page-system-id page-system-id
                  :page-system-title page-system-title
@@ -237,28 +300,41 @@
             (page-system-reload-report-loaded-p report)
             (page-system-reload-report-display-ready-p report))))
 
+(defvar *page-system-latest-reload-reports*
+  (make-hash-table :test #'equal))
+
+(defun page-system-latest-reload-report (system)
+  (gethash (page-system-asdf-system-name system)
+           *page-system-latest-reload-reports*))
+
 (defmethod page-system-reload ((system page-system) &key (force t))
   (asdf:load-system (page-system-asdf-system-name system) :force force)
   (multiple-value-bind (ready warnings)
       (page-system-display-ready-p system)
-    (make-instance 'page-system-reload-report
-                   :page-system system
-                   :asdf-system-name (page-system-asdf-system-name system)
-                   :force force
-                   :loaded-p t
-                   :display-ready-p ready
-                   :checked-at (get-universal-time)
-                   :warnings warnings)))
+    (let ((report
+           (make-instance 'page-system-reload-report
+                          :page-system system
+                          :asdf-system-name
+                          (page-system-asdf-system-name system)
+                          :force force
+                          :loaded-p t
+                          :display-ready-p ready
+                          :checked-at (get-universal-time)
+                          :warnings warnings)))
+      (setf (gethash (page-system-asdf-system-name system)
+                     *page-system-latest-reload-reports*)
+            report)
+      report)))
 
 (defmethod page-system-asdf-form ((system page-system))
   `(asdf:defsystem ,(intern (string-upcase (page-system-asdf-system-name system))
                             :keyword)
-     :description ,(format nil "Page system for ~A" (page-system-title system))
-     :depends-on ,(mapcar (lambda (system-name)
-                            (intern (string-upcase system-name) :keyword))
-                          (page-system-runtime-systems system))
-     :serial t
-     :components nil))
+       :description ,(format nil "Page system for ~A" (page-system-title system))
+       :depends-on ,(mapcar (lambda (system-name)
+                              (intern (string-upcase system-name) :keyword))
+                            (page-system-runtime-systems system))
+       :serial t
+       :components nil))
 
 (defmethod materialize-page-system-asd ((system page-system) &key pathname)
   (let ((form (page-system-asdf-form system)))
@@ -301,19 +377,68 @@
        (plusp (length path))
        (char= (char path 0) #\/)))
 
+(defun page-system-package-function (package-name symbol-name)
+  (let* ((package (find-package package-name))
+         (symbol (and package
+                      (find-symbol symbol-name package))))
+    (when (and symbol (fboundp symbol))
+      (symbol-function symbol))))
+
+(defun page-system-call-package-function (package-name symbol-name &rest args)
+  (let ((function (page-system-package-function package-name symbol-name)))
+    (unless function
+      (error "No callable function ~A::~A is available."
+             package-name
+             symbol-name))
+    (apply function args)))
+
+(defun page-system-ensure-local-fedwiki-twin-page (hyperbook page-id pathname)
+  "Register a localhost FedWiki twin as a real FedWiki page when it is not in the remote sitemap."
+  (when (and hyperbook pathname (uiop:file-exists-p pathname))
+    (let* ((pages (page-system-call-package-function
+                   "HYPERBOOK/FEDWIKI"
+                   "PAGES-OF"
+                   hyperbook))
+           (slugs (page-system-call-package-function
+                   "HYPERBOOK/FEDWIKI"
+                   "SLUGS-OF"
+                   hyperbook))
+           (json (page-system-call-package-function
+                  "HYPERBOOK/FEDWIKI"
+                  "READ-LOCALHOST-FEDWIKI-PAGE-JSON-FILE"
+                  pathname))
+           (title (gethash "title" json))
+           (page (or (gethash page-id pages)
+                     (page-system-call-package-function
+                      "HYPERBOOK/FEDWIKI"
+                      "MAKE-FEDWIKI-PAGE"
+                      hyperbook
+                      page-id
+                      title))))
+      (page-system-call-package-function
+       "HYPERBOOK/FEDWIKI"
+       "SET-PAGE-DATA"
+       page
+       json)
+      (setf (gethash page-id pages) page
+            (gethash page-id slugs) title)
+      (when title
+        (setf (gethash title slugs) page-id))
+      page)))
+
 (defmethod page-system-rendered-page ((system page-system)
                                       &key signal-error?)
   (multiple-value-bind (hyperbook-id page-id)
       (page-system-locator-page-parts (page-system-page-locator system))
     (when page-id
       (let ((hyperbook
-              (cond
-                ((string= hyperbook-id "hyperdoc")
-                 (or (hyperbook:find-hyperbook hyperbook-id)
-                     *hyperdoc*))
-                (t
-                 (hyperbook:find-hyperbook hyperbook-id
-                                           :signal-error? signal-error?)))))
+             (cond
+               ((string= hyperbook-id "hyperdoc")
+                (or (hyperbook:find-hyperbook hyperbook-id)
+                    *hyperdoc*))
+               (t
+                (hyperbook:find-hyperbook hyperbook-id
+                                          :signal-error? signal-error?)))))
         (when hyperbook
           (hyperbook:find-page hyperbook
                                page-id
@@ -328,9 +453,17 @@
                         hyperbook-id
                         :signal-error? signal-error?)))
         (when hyperbook
-          (hyperbook:find-page hyperbook
-                               page-id
-                               :signal-error? signal-error?))))))
+          (or (page-system-ensure-local-fedwiki-twin-page
+               hyperbook
+               page-id
+               (page-system-local-twin-pathname system))
+              (hyperbook:find-page hyperbook
+                                   page-id
+                                   :signal-error? nil)
+              (when signal-error?
+                (hyperbook:find-page hyperbook
+                                     page-id
+                                     :signal-error? signal-error?))))))))
 
 (defmethod page-system-local-twin-pathname ((system page-system))
   (declare (ignore system))
@@ -428,8 +561,8 @@
 (defun dm6-appembed-inline-proof-page-system-display-ready-p (system)
   (declare (ignore system))
   (let* ((page-path
-           (page-system-repo-pathname
-            "hyperdoc/DM6 AppEmbed HyperDoc Inline Proof.html"))
+          (page-system-repo-pathname
+           "hyperdoc/DM6 AppEmbed HyperDoc Inline Proof.html"))
          (source (page-system-read-file-string page-path))
          (stored-count (page-system-count-substring
                         "class=\"dm6-stored\""
@@ -459,6 +592,29 @@
                          :test #'char=))
       (push "Localhost FedWiki twin does not expose the expected page title."
             missing))
+    (values (null missing) (nreverse missing))))
+
+(defun fedwiki-shop3-page-system-display-ready-p (system)
+  (let* ((path #P"/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/shop3")
+         (source (page-system-read-file-string path))
+         (missing nil))
+    (unless source
+      (push "Localhost FedWiki SHOP3 twin file is missing." missing))
+    (unless (and source
+                 (search "\"title\": \"SHOP3\"" source :test #'char=))
+      (push "Localhost FedWiki SHOP3 twin does not expose the expected page title."
+            missing))
+    (unless (ignore-errors
+              (page-system-rendered-page system :signal-error? t))
+      (push "FedWiki rendered page object does not resolve." missing))
+    (unless (ignore-errors
+              (asdf:find-system *shop3-asdf-system-name* nil))
+      (push "ASDF cannot find the SHOP3 planner system." missing))
+    (unless (shop3-runtime-ready-p)
+      (push "SHOP3 runtime did not load or expected packages are missing."
+            missing))
+    (unless (shop3-source-root-pathname)
+      (push "SHOP3 source provenance is not inspectable." missing))
     (values (null missing) (nreverse missing))))
 
 (defun make-mobile-progressive-chrome-page-system ()
@@ -603,6 +759,66 @@
    #'fedwiki-mobile-progressive-chrome-page-system-display-ready-p
    :page-system-description
    "Page-system reload boundary for the localhost FedWiki twin of the mobile progressive chrome documentation."))
+
+(defun make-fedwiki-shop3-page-system ()
+  (make-page-system
+   'fedwiki-page-system
+   :page-system-id "fedwiki-page-wiki.ralfbarkow.ch-shop3"
+   :page-system-title "SHOP3"
+   :page-system-kind :fedwiki
+   :page-system-asdf-system-name
+   "fedwiki/page/wiki.ralfbarkow.ch/shop3"
+   :page-system-page-locator "fedwiki:wiki.ralfbarkow.ch/shop3"
+   :page-system-runtime-providers
+   (list (hyperdoc-runtime-provider)
+         (fedwiki-client-runtime-provider)
+         (fedwiki-materialization-runtime-provider)
+         (shop3-runtime-provider)
+         (hyperdoc-shop3-planning-runtime-provider))
+   :page-system-runtime-entry-points
+   '("(hyperbook:find-hyperbook \"fedwiki:wiki.ralfbarkow.ch\")"
+     "(hyperbook:find-page * \"shop3\")"
+     "(asdf:load-system :shop3)"
+     "(asdf:load-system :hyperdoc/shop3)")
+   :page-system-display-contract
+   '("FedWiki page JSON resolves without live network"
+     "Story renderer runtime is provided by hyperbook/fedwiki"
+     "SHOP3 runtime is available through ASDF"
+     "SHOP3 source provenance is inspectable"
+     "Loading the page system does not run a planning problem automatically")
+   :page-system-inspection-entry-points
+   '("(find-page-system :fedwiki/page/wiki.ralfbarkow.ch/shop3)"
+     "Open rendered page"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/shop3"
+     "(asdf:find-system :shop3)"
+     "(ensure-shop3-runtime)"
+     "(shop3-source-root-pathname)"
+     "(shop3-runtime-provider)")
+   :page-system-validation-entry-points
+   '("hyperdoc/tests:run-page-system-smoke-tests"
+     "hyperdoc/tests:run-shop3-page-system-smoke-tests"
+     "asdf:load-system :fedwiki/page/wiki.ralfbarkow.ch/shop3"
+     "asdf:load-system :shop3")
+   :page-system-source-files
+   '("/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/shop3"
+     "hyperdoc/page-systems.lisp"
+     "hyperdoc/page-systems/fedwiki-shop3.lisp"
+     "fedwiki.asd"
+     "hyperdoc-shop3/package.lisp"
+     "hyperdoc-shop3/plan-objects.lisp"
+     "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp"
+     "hyperdoc-shop3/examples.lisp"
+     "hyperdoc-shop3/views.lisp"
+     "tests/page-system-smoke.lisp")
+   :page-system-artifacts
+   '("localhost FedWiki SHOP3 twin"
+     "SHOP3 flake input"
+     "SHOP3 runtime provider"
+     "HyperDoc SHOP3 planning layer")
+   :page-system-display-check-function
+   #'fedwiki-shop3-page-system-display-ready-p
+   :page-system-description
+   "Page-system reload boundary for the localhost FedWiki SHOP3 page and the external SHOP3 HTN planner runtime."))
 
 (eval-when (:load-toplevel :execute)
   (setf *topic-index-state* :stale))

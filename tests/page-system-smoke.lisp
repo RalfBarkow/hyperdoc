@@ -3,7 +3,9 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package :hyperdoc/tests)
     (make-package :hyperdoc/tests :use '(:cl)))
-  (export (list (intern "RUN-PAGE-SYSTEM-SMOKE-TESTS" :hyperdoc/tests))
+  (export (list (intern "RUN-PAGE-SYSTEM-SMOKE-TESTS" :hyperdoc/tests)
+                (intern "RUN-SHOP3-PAGE-SYSTEM-SMOKE-TESTS"
+                        :hyperdoc/tests))
           :hyperdoc/tests))
 
 (in-package :hyperdoc/tests)
@@ -50,14 +52,16 @@
          (dm6 (hyperdoc:find-page-system
                :hyperdoc/page/dm6-appembed-inline-proof))
          (fedwiki (hyperdoc:find-page-system
-                   :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc)))
+                   :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc))
+         (shop3 (hyperdoc:find-page-system
+                 :fedwiki/page/wiki.ralfbarkow.ch/shop3)))
     (page-system-assert-true
      (typep registry 'hyperdoc::page-system-registry)
      "Page-system registry must be an inspectable object")
     (page-system-assert-true
-     (>= (length systems) 3)
+     (>= (length systems) 4)
      "Registry must contain the representative page systems")
-    (dolist (system (list mobile dm6 fedwiki))
+    (dolist (system (list mobile dm6 fedwiki shop3))
       (page-system-assert-true
        (typep system 'hyperdoc:page-system)
        (format nil "Registered object must be a page-system: ~A" system)))
@@ -72,7 +76,13 @@
      (hyperdoc:find-page-system
       "fedwiki:wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc"
       :by :page-locator)
-     "Registry must find FedWiki page systems by page locator")))
+     "Registry must find FedWiki page systems by page locator")
+    (page-system-assert-equal
+     shop3
+     (hyperdoc:find-page-system
+      "fedwiki:wiki.ralfbarkow.ch/shop3"
+      :by :page-locator)
+     "Registry must find the SHOP3 FedWiki page system by page locator")))
 
 (defun run-page-system-asdf-smoke-test ()
   (let ((mobile (hyperdoc:find-page-system
@@ -229,6 +239,93 @@
        fedwiki-html
        "FedWiki page-system Overview view must expose actionable page links"))))
 
+(defun run-shop3-source-runtime-smoke-test ()
+  (page-system-assert-true
+   (asdf:find-system :shop3)
+   "ASDF must resolve the external SHOP3 system")
+  (asdf:load-system :shop3)
+  (page-system-assert-true
+   (find-package :shop3)
+   "SHOP3 package must exist after loading :shop3")
+  (page-system-assert-true
+   (find-package :shop3-user)
+   "SHOP3-USER package must exist after loading :shop3")
+  (page-system-assert-true
+   (ignore-errors (asdf:find-system :shop3/test nil))
+   "SHOP3 test system must be discoverable"))
+
+(defun run-shop3-page-system-asdf-smoke-test ()
+  (page-system-assert-true
+   (asdf:find-system :fedwiki/page/wiki.ralfbarkow.ch/shop3)
+   "ASDF must resolve :fedwiki/page/wiki.ralfbarkow.ch/shop3")
+  (asdf:load-system :fedwiki/page/wiki.ralfbarkow.ch/shop3 :force t)
+  (let ((system (hyperdoc:find-page-system
+                 :fedwiki/page/wiki.ralfbarkow.ch/shop3)))
+    (page-system-assert-true
+     (typep system 'hyperdoc:fedwiki-page-system)
+     "SHOP3 page-system must be a fedwiki-page-system")
+    (page-system-assert-equal
+     "SHOP3"
+     (hyperdoc:page-system-title system)
+     "SHOP3 page-system must report the FedWiki page title")
+    (page-system-assert-true
+     (member "shop3"
+             (hyperdoc:page-system-runtime-systems system)
+             :test #'string=)
+     "SHOP3 page-system must include the actual SHOP3 ASDF runtime")
+    (page-system-assert-true
+     (member "hyperdoc/shop3"
+             (hyperdoc:page-system-runtime-systems system)
+             :test #'string=)
+     "SHOP3 page-system must include the HyperDoc SHOP3 planning layer")
+    (page-system-assert-true
+     (find "SHOP3 runtime is available through ASDF"
+           (hyperdoc:page-system-display-contract system)
+           :test #'string=)
+     "SHOP3 display contract must mention the planner runtime")
+    (page-system-assert-true
+     (hyperdoc:page-system-local-twin-pathname system)
+     "SHOP3 page-system must expose a local twin pathname")
+    (when (probe-file (hyperdoc:page-system-local-twin-pathname system))
+      (let ((page (hyperdoc:page-system-rendered-page system
+                                                      :signal-error? t)))
+        (page-system-assert-true
+         (typep page 'hyperbook:page)
+         "SHOP3 page-system must resolve the rendered FedWiki page object")))
+    (multiple-value-bind (ready warnings)
+        (hyperdoc:page-system-display-ready-p system)
+      (page-system-assert-true
+       ready
+       (format nil "SHOP3 display contract must pass: ~S" warnings)))))
+
+(defun run-shop3-page-system-inspector-smoke-test ()
+  (let* ((system (hyperdoc:find-page-system
+                  :fedwiki/page/wiki.ralfbarkow.ch/shop3))
+         (html (page-system-render-view system "Overview"))
+         (provider
+          (find "shop3-runtime-provider"
+                (hyperdoc:page-system-runtime-providers system)
+                :key #'hyperdoc:page-runtime-provider-id
+                :test #'string=))
+         (provider-html (page-system-render-view provider "Overview")))
+    (dolist (needle '("Open rendered page"
+                      "Inspect local twin file"
+                      "Inspect SHOP3 ASDF system"
+                      "Load SHOP3 runtime"
+                      "SHOP3 runtime provider"
+                      "Runtime contract"))
+      (page-system-assert-contains
+       needle
+       html
+       "SHOP3 page-system Overview view must expose runtime actions"))
+    (dolist (needle '("common-lisp-planner"
+                      "github:shop-planner/shop3"
+                      "MPL 1.1"))
+      (page-system-assert-contains
+       needle
+       provider-html
+       "SHOP3 runtime-provider Overview view must expose source metadata"))))
+
 (defun run-page-system-documentation-smoke-test ()
   (let ((page (hyperbook:find-page hyperdoc:*hyperdoc*
                                    "Page systems as ASDF reload boundaries"
@@ -237,12 +334,13 @@
                                      "Mobile progressive chrome in HyperDoc"
                                      :signal-error? t)))
     (dolist (pair `((,page "Page systems as ASDF reload boundaries"
-                    ("page-system protocol"
-                     "hyperdoc/page/mobile-progressive-chrome"
-                     "fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc"))
-                   (,mobile "Mobile progressive chrome page"
-                    ("hyperdoc/page/mobile-progressive-chrome"
-                     "page-system protocol"))))
+                           ("page-system protocol"
+                            "hyperdoc/page/mobile-progressive-chrome"
+                            "fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc"
+                            "fedwiki/page/wiki.ralfbarkow.ch/shop3"))
+                    (,mobile "Mobile progressive chrome page"
+                             ("hyperdoc/page/mobile-progressive-chrome"
+                              "page-system protocol"))))
       (let ((text (plump:text (hyperbook:dom-of (first pair)))))
         (dolist (needle (third pair))
           (page-system-assert-contains
@@ -259,10 +357,39 @@
                    "HyperDoc page system"
                    "FedWiki page system"
                    "Page display contract"
-                   "Page reload report"))
+                   "Page reload report"
+                   "SHOP3 page as ASDF system"
+                   "SHOP3 runtime provider"
+                   "SHOP3 FedWiki page system"
+                   "External runtime provider"
+                   "HTN planner runtime"
+                   "Page system with external Lisp dependency"))
     (page-system-assert-true
      (hyperbook:find-page hyperdoc::*topics* title :signal-error? t)
      (format nil "Topic cluster must include ~A" title))))
+
+(defun run-shop3-page-system-documentation-smoke-test ()
+  (let ((page (hyperbook:find-page hyperdoc:*hyperdoc*
+                                   "SHOP3 page as ASDF system"
+                                   :signal-error? t)))
+    (let ((text (plump:text (hyperbook:dom-of page))))
+      (dolist (needle '("fedwiki/page/wiki.ralfbarkow.ch/shop3"
+                        "shop3"
+                        "github:shop-planner/shop3"
+                        "nix develop --override-input shop3"
+                        "does not run a planning problem"))
+        (page-system-assert-contains
+         needle
+         text
+         "SHOP3 page-system documentation must describe the reload boundary")))))
+
+(defun run-shop3-page-system-smoke-tests ()
+  (run-shop3-source-runtime-smoke-test)
+  (run-shop3-page-system-asdf-smoke-test)
+  (run-shop3-page-system-inspector-smoke-test)
+  (run-shop3-page-system-documentation-smoke-test)
+  (format t "~&SHOP3 page-system smoke tests passed.~%")
+  t)
 
 (defun run-page-system-smoke-tests ()
   (run-page-system-registry-smoke-test)

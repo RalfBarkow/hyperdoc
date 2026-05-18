@@ -1,0 +1,89 @@
+<h1>SHOP3 page as ASDF system</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The FedWiki slug <code>shop3</code> is represented by the ASDF page system
+  <code>fedwiki/page/wiki.ralfbarkow.ch/shop3</code>. Loading this page system
+  re-provides two runtime surfaces: the FedWiki display runtime needed to
+  render and inspect the page, and the external SHOP3 Common Lisp runtime
+  needed to inspect the HTN planner that the page names.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(find-page-system :fedwiki/page/wiki.ralfbarkow.ch/shop3)"><tt>(find-page-system :fedwiki/page/wiki.ralfbarkow.ch/shop3)</tt></a></li>
+  <li><a expr="(shop3-runtime-provider)"><tt>(shop3-runtime-provider)</tt></a></li>
+  <li><a expr="(ignore-errors (asdf:find-system :shop3))"><tt>(asdf:find-system :shop3)</tt></a></li>
+  <li><a expr="(shop3-source-root-pathname)"><tt>(shop3-source-root-pathname)</tt></a></li>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="shop3"><tt>FedWiki shop3 page</tt></a></li>
+  <li><a hyperbook="topics" page="SHOP3 page as ASDF system"><tt>SHOP3 page as ASDF system</tt></a></li>
+  <li><a hyperbook="topics" page="SHOP3 runtime provider"><tt>SHOP3 runtime provider</tt></a></li>
+  <li><a hyperbook="topics" page="External runtime provider"><tt>External runtime provider</tt></a></li>
+</ul>
+
+<h2>Runtime boundary</h2>
+
+<p>
+  SHOP3 is an external open-source Lisp repository. HyperDoc integrates it as
+  the flake input <code>shop3</code> using
+  <code>github:shop-planner/shop3</code>. The SHOP3 repository records several
+  dependencies as git submodules, but one historical nested submodule cannot be
+  fetched by Nix release builds without extra ref handling. HyperDoc therefore
+  exposes the planner source plus the required Lisp dependency repositories as
+  separate flake inputs: PDDL tools, fiveam-asdf, random-state,
+  documentation-utils, trivial-indent, trivial-garbage, and iterate.
+</p>
+
+<p>
+  Local development can override the flake input with the adjacent checkout:
+</p>
+
+<pre><code>nix develop --override-input shop3 path:/Users/rgb/workspace/shop3</code></pre>
+
+<p>
+  The committed runtime code does not depend on that absolute path. It uses the
+  flake input in normal dev/release mode and records the local path only as an
+  operator override.
+</p>
+
+<h2>Reload</h2>
+
+<pre><code>nix develop -c sbcl --noinform --disable-debugger \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :fedwiki/page/wiki.ralfbarkow.ch/shop3 :force t)' \
+  --eval '(hyperdoc:find-page-system :fedwiki/page/wiki.ralfbarkow.ch/shop3)' \
+  --eval '(quit)'</code></pre>
+
+<p>
+  Loading this boundary makes <code>:shop3</code>, the <code>SHOP3</code>
+  package, and the <code>SHOP3-USER</code> package available through ASDF. It
+  also loads the optional <code>hyperdoc/shop3</code> planning layer so HyperDoc
+  can inspect SHOP3-facing plan objects.
+</p>
+
+<h2>Display contract</h2>
+
+<ul>
+  <li>The local FedWiki twin at <code>/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/shop3</code> resolves without live network access.</li>
+  <li>The rendered page action resolves <code>(hyperbook:find-hyperbook "fedwiki:wiki.ralfbarkow.ch")</code> and <code>(hyperbook:find-page * "shop3")</code>.</li>
+  <li>The story renderer runtime is provided by <code>hyperbook/fedwiki</code>.</li>
+  <li>The SHOP3 runtime is available through <code>asdf:load-system :shop3</code>.</li>
+  <li>SHOP3 source provenance is inspectable through the flake input or ASDF source directory.</li>
+</ul>
+
+<h2>Validation</h2>
+
+<pre><code>nix develop -c sbcl --noinform --disable-debugger \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc/tests)' \
+  --eval '(hyperdoc/tests:run-shop3-page-system-smoke-tests)' \
+  --eval '(quit)'</code></pre>
+
+<h2>Boundary</h2>
+
+<p>
+  Loading the SHOP3 page system does not start a server and does not run a planning problem. It re-provides code, page descriptors, and inspector
+  actions. Running examples, plans, or tests remains an explicit operation.
+</p>

@@ -17,6 +17,11 @@
   (format nil "Page system registry (~D systems)"
           (length (page-system-registry-systems registry))))
 
+(defun page-system-display-string (value)
+  (if (keywordp value)
+      (string-downcase (symbol-name value))
+      (format nil "~A" value)))
+
 (defun render-page-system-list (items)
   (if items
       (views:html
@@ -40,7 +45,7 @@
        ((typep value 'standard-object)
         (views:object-ref value))
        (value
-        (views:esc (format nil "~A" value)))
+        (views:esc (page-system-display-string value)))
        (t
         (views:esc "-")))))))
 
@@ -53,23 +58,30 @@
 (defun render-page-system-page-locator-ref (system)
   (if-let (page (ignore-errors
                   (page-system-rendered-page system)))
-    (views:object-ref page
-                      :display (page-system-page-locator system)
-                      :select "Overview")
+      (views:object-ref page
+                        :display (page-system-page-locator system)
+                        :select "Overview")
     (views:html
      (:tt (views:esc (or (page-system-page-locator system) "-"))))))
 
 (defun render-page-system-local-twin-ref (system)
   (if-let (pathname (page-system-local-twin-pathname system))
-    (views:object-ref pathname
-                      :display (namestring pathname))
+      (views:object-ref pathname
+                        :display (namestring pathname))
     (views:html (:span "-"))))
+
+(defun page-system-shop3-runtime-provider (system)
+  (find "shop3-runtime-provider"
+        (page-system-runtime-providers system)
+        :key #'page-runtime-provider-id
+        :test #'string=))
 
 (defun render-page-system-action-strip (system)
   (let ((rendered-page (ignore-errors
                          (page-system-rendered-page system)))
-        (local-twin-pathname (page-system-local-twin-pathname system)))
-    (if (or rendered-page local-twin-pathname)
+        (local-twin-pathname (page-system-local-twin-pathname system))
+        (shop3-provider (page-system-shop3-runtime-provider system)))
+    (if (or rendered-page local-twin-pathname shop3-provider)
         (views:html
          (:div :class "page-system-actions"
                (when rendered-page
@@ -85,7 +97,39 @@
                   (views:eval-button
                    "Inspect local twin file"
                    (views:thunk local-twin-pathname)
-                   "Open the raw localhost FedWiki twin pathname.")))))
+                   "Open the raw localhost FedWiki twin pathname.")))
+               (when shop3-provider
+                 (views:html
+                  " "
+                  (views:eval-button
+                   "Inspect SHOP3 ASDF system"
+                   (views:thunk
+                    (asdf:find-system :shop3))
+                   "Open the ASDF system object for the external SHOP3 runtime.")
+                  " "
+                  (views:eval-button
+                   "Load SHOP3 runtime"
+                   (views:thunk
+                    (ensure-shop3-runtime))
+                   "Load the external SHOP3 HTN planner runtime through ASDF.")
+                  " "
+                  (views:eval-button
+                   "Inspect SHOP3 source repo"
+                   (views:thunk
+                    (shop3-source-root-pathname))
+                   "Open the SHOP3 source root resolved from the Nix flake input or ASDF.")
+                  " "
+                  (views:eval-button
+                   "Inspect SHOP3 runtime provider"
+                   (views:thunk shop3-provider)
+                   "Open the page-runtime-provider object for SHOP3.")
+                  " "
+                  (views:eval-button
+                   "Inspect latest reload report"
+                   (views:thunk
+                    (or (page-system-latest-reload-report system)
+                        (page-system-reload system :force nil)))
+                   "Open the latest page-system reload report, creating one if needed.")))))
         (views:html (:span "-")))))
 
 (defmethod views:title-bar-action-buttons ((system fedwiki-page-system))
@@ -155,13 +199,16 @@
                  (:th "ASDF system")
                  (:th "Ensure")
                  (:th "Readiness")
-                 (:th "Display notes"))
+                 (:th "Display notes")
+                 (:th "Source")
+                 (:th "Upstream"))
             (dolist (provider (page-system-runtime-providers system))
               (views:html
                (:tr
                 (:td (views:object-ref provider))
                 (:td (views:esc
-                      (format nil "~A" (page-runtime-provider-kind provider))))
+                      (page-system-display-string
+                       (page-runtime-provider-kind provider))))
                 (:td (views:esc
                       (page-runtime-provider-asdf-system-name provider)))
                 (:td (views:esc
@@ -172,6 +219,12 @@
                           "-")))
                 (:td (views:esc
                       (or (page-runtime-provider-display-notes provider)
+                          "-")))
+                (:td (views:esc
+                      (or (page-runtime-provider-source-repo provider)
+                          "-")))
+                (:td (views:esc
+                      (or (page-runtime-provider-upstream-url provider)
                           "-"))))))))))
 
 (views:defview 👀sources (system page-system)
@@ -204,6 +257,18 @@
                                      provider))
             (render-page-system-row "Display notes"
                                     (page-runtime-provider-display-notes
+                                     provider))
+            (render-page-system-row "Source repo"
+                                    (page-runtime-provider-source-repo
+                                     provider))
+            (render-page-system-row "Upstream URL"
+                                    (page-runtime-provider-upstream-url
+                                     provider))
+            (render-page-system-row "Local override"
+                                    (page-runtime-provider-local-override-note
+                                     provider))
+            (render-page-system-row "License"
+                                    (page-runtime-provider-license-note
                                      provider))))))
 
 (views:defview 👀overview (report page-system-reload-report)
@@ -243,7 +308,8 @@
               (views:html
                (:tr
                 (:td (views:object-ref system))
-                (:td (views:esc (format nil "~A" (page-system-kind system))))
+                (:td (views:esc (page-system-display-string
+                                 (page-system-kind system))))
                 (:td (views:esc (page-system-asdf-system-name system)))
                 (:td (views:esc (page-system-page-locator system)))
                 (:td (render-page-system-list

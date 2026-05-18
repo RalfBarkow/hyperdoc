@@ -61,3 +61,57 @@
    :references '("Page systems as ASDF reload boundaries"
                  "hyperdoc/page-systems.lisp"
                  "tests/page-system-smoke.lisp")))
+
+(defun shop3-page-as-asdf-system-topic ()
+  (make-topic
+   :id "shop3-page-as-asdf-system"
+   :title "SHOP3 page as ASDF system"
+   :summary "FedWiki SHOP3 page represented as an ASDF-backed page system that reloads both the FedWiki display runtime and the external SHOP3 HTN planner runtime."
+   :references '("SHOP3 page as ASDF system"
+                 "Page systems as ASDF reload boundaries"
+                 "fedwiki:wiki.ralfbarkow.ch/shop3")))
+
+(defun shop3-runtime-provider-topic ()
+  (make-topic
+   :id "shop3-runtime-provider"
+   :title "SHOP3 runtime provider"
+   :summary "External runtime provider that makes the open-source SHOP3 Common Lisp HTN planner available to page-system reloads through ASDF."
+   :references '("SHOP3 page as ASDF system"
+                 "https://github.com/shop-planner/shop3"
+                 "hyperdoc/page-systems.lisp")))
+
+(defun shop3-fedwiki-page-system-topic ()
+  (make-topic
+   :id "shop3-fedwiki-page-system"
+   :title "SHOP3 FedWiki page system"
+   :summary "The page-system instance named fedwiki/page/wiki.ralfbarkow.ch/shop3 for the localhost FedWiki SHOP3 page."
+   :references '("SHOP3 page as ASDF system"
+                 "fedwiki.asd"
+                 "hyperdoc/page-systems/fedwiki-shop3.lisp")))
+
+(defun external-runtime-provider-topic ()
+  (make-topic
+   :id "external-runtime-provider"
+   :title "External runtime provider"
+   :summary "Page-runtime provider whose ASDF system and source provenance come from an external open-source project rather than HyperDoc-owned runtime code."
+   :references '("Page systems as ASDF reload boundaries"
+                 "SHOP3 page as ASDF system"
+                 "hyperdoc/page-systems.lisp")))
+
+(defun htn-planner-runtime-topic ()
+  (make-topic
+   :id "htn-planner-runtime"
+   :title "HTN planner runtime"
+   :summary "Common Lisp runtime for Hierarchical Task Network planning, loaded explicitly for page systems that need planner objects inspectable in HyperDoc."
+   :references '("SHOP3 page as ASDF system"
+                 "SHOP3 Planning Layer for HyperDoc"
+                 "https://github.com/shop-planner/shop3")))
+
+(defun page-system-with-external-lisp-dependency-topic ()
+  (make-topic
+   :id "page-system-with-external-lisp-dependency"
+   :title "Page system with external Lisp dependency"
+   :summary "Page-system pattern where ASDF reload re-provides a page plus a non-HyperDoc Common Lisp system required to inspect the page's domain runtime."
+   :references '("SHOP3 page as ASDF system"
+                 "Page systems as ASDF reload boundaries"
+                 "hyperdoc/page-systems.lisp")))

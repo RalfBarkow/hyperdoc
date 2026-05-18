@@ -8,6 +8,14 @@
 , htmlInspectorViewsSrc
 , plumpInspectorViewsSrc
 , lwcellsSrc
+, shop3Src
+, shop3PddlToolsSrc
+, shop3FiveamAsdfSrc
+, shop3RandomStateSrc
+, shop3DocumentationUtilsSrc
+, shop3TrivialIndentSrc
+, shop3TrivialGarbageSrc
+, shop3IterateSrc
 , clMarkupSrc
 , releaseId
 , releaseRevision
@@ -28,9 +36,17 @@ let
     export HTML_INSPECTOR_VIEWS_SRC="${htmlInspectorViewsSrc}"
     export PLUMP_INSPECTOR_VIEWS_SRC="${plumpInspectorViewsSrc}"
     export LWCELLS_SRC="${lwcellsSrc}"
+    export SHOP3_SRC="${shop3Src}"
+    export SHOP3_PDDL_TOOLS_SRC="${shop3PddlToolsSrc}"
+    export SHOP3_FIVEAM_ASDF_SRC="${shop3FiveamAsdfSrc}"
+    export SHOP3_RANDOM_STATE_SRC="${shop3RandomStateSrc}"
+    export SHOP3_DOCUMENTATION_UTILS_SRC="${shop3DocumentationUtilsSrc}"
+    export SHOP3_TRIVIAL_INDENT_SRC="${shop3TrivialIndentSrc}"
+    export SHOP3_TRIVIAL_GARBAGE_SRC="${shop3TrivialGarbageSrc}"
+    export SHOP3_ITERATE_SRC="${shop3IterateSrc}"
     export CL_MARKUP_SRC="${clMarkupSrc}"
     export HTML_INSPECTOR_VIEWS_ASD="${htmlInspectorViewsSrc}/html-inspector-views.asd"
-    export CL_SOURCE_REGISTRY="${clogSrcPatched}//:${clogMoldableInspectorSrc}//:${htmlInspectorViewsSrc}//:${plumpInspectorViewsSrc}//:${lwcellsSrc}//:${arrowsSrc}//:${clMarkupSrc}//:$HYPERDOC_ROOT//:${namedClosurePkg}//"
+    export CL_SOURCE_REGISTRY="${clogSrcPatched}//:${clogMoldableInspectorSrc}//:${htmlInspectorViewsSrc}//:${plumpInspectorViewsSrc}//:${lwcellsSrc}//:${shop3Src}/shop3//:${shop3PddlToolsSrc}//:${shop3FiveamAsdfSrc}//:${shop3RandomStateSrc}//:${shop3DocumentationUtilsSrc}//:${shop3TrivialIndentSrc}//:${shop3TrivialGarbageSrc}//:${shop3IterateSrc}//:${arrowsSrc}//:${clMarkupSrc}//:$HYPERDOC_ROOT//:${namedClosurePkg}//"
     export HYPERDOC_ASDF_TREES="$CL_SOURCE_REGISTRY"
     export HYPERDOC_GIT_PROGRAM="''${HYPERDOC_GIT_PROGRAM:-${pkgs.git}/bin/git}"
   '';

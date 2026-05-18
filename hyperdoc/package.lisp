@@ -123,19 +123,30 @@
    #:page-runtime-provider-ensure-function
    #:page-runtime-provider-readiness-function
    #:page-runtime-provider-display-notes
+   #:page-runtime-provider-source-repo
+   #:page-runtime-provider-upstream-url
+   #:page-runtime-provider-local-override-note
+   #:page-runtime-provider-license-note
    #:page-system-reload-report
    #:page-system-reload-report-page-system
    #:page-system-reload-report-asdf-system-name
    #:page-system-reload-report-loaded-p
    #:page-system-reload-report-display-ready-p
    #:page-system-reload-report-warnings
+   #:page-system-latest-reload-report
    #:hyperdoc-runtime-provider
    #:hyperdoc-explorer-runtime-provider
    #:fedwiki-client-runtime-provider
    #:fedwiki-materialization-runtime-provider
+   #:shop3-source-root-pathname
+   #:ensure-shop3-runtime
+   #:shop3-runtime-ready-p
+   #:shop3-runtime-provider
+   #:hyperdoc-shop3-planning-runtime-provider
    #:make-mobile-progressive-chrome-page-system
    #:make-dm6-appembed-inline-proof-page-system
    #:make-fedwiki-mobile-progressive-chrome-page-system
+   #:make-fedwiki-shop3-page-system
    ;; Access to the global catalog of registered HyperDocs
    #:*catalog* #:hyperdocs-of
    ;; Access to HyperDoc data

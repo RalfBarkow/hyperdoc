@@ -18,5 +18,17 @@
     :serial t
     :depends-on (#:fedwiki)
     :components ((:module "hyperdoc/page-systems"
-                  :serial t
-                  :components ((:file "fedwiki-mobile-progressive-chrome")))))
+                          :serial t
+                          :components ((:file "fedwiki-mobile-progressive-chrome")))))
+
+(defsystem #:fedwiki/page/wiki.ralfbarkow.ch/shop3
+    :description "FedWiki page system for SHOP3"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:fedwiki
+                 #:hyperdoc/shop3)
+    :components ((:module "hyperdoc/page-systems"
+                          :serial t
+                          :components ((:file "fedwiki-shop3")))))

@@ -55,6 +55,7 @@
   <li><a expr="(find-page-system :hyperdoc/page/mobile-progressive-chrome)"><tt>(find-page-system :hyperdoc/page/mobile-progressive-chrome)</tt></a></li>
   <li><a expr="(find-page-system :hyperdoc/page/dm6-appembed-inline-proof)"><tt>(find-page-system :hyperdoc/page/dm6-appembed-inline-proof)</tt></a></li>
   <li><a expr="(find-page-system :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc)"><tt>(find-page-system :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc)</tt></a></li>
+  <li><a expr="(find-page-system :fedwiki/page/wiki.ralfbarkow.ch/shop3)"><tt>(find-page-system :fedwiki/page/wiki.ralfbarkow.ch/shop3)</tt></a></li>
 </ul>
 
 <h2>Inspectable objects</h2>
@@ -67,6 +68,8 @@
   <li><a hyperbook="topics" page="FedWiki page system"><tt>FedWiki page system</tt></a></li>
   <li><a hyperbook="topics" page="Page display contract"><tt>Page display contract</tt></a></li>
   <li><a hyperbook="topics" page="Page reload report"><tt>Page reload report</tt></a></li>
+  <li><a hyperbook="topics" page="SHOP3 page as ASDF system"><tt>SHOP3 page as ASDF system</tt></a></li>
+  <li><a hyperbook="topics" page="External runtime provider"><tt>External runtime provider</tt></a></li>
 </ul>
 
 <h2>Mobile chrome generalization</h2>
@@ -83,6 +86,17 @@
   The same protocol now covers the DM6 AppEmbed inline proof page and the
   localhost FedWiki twin
   <a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="mobile-progressive-chrome-in-hyperdoc"><tt>mobile-progressive-chrome-in-hyperdoc</tt></a>.
+</p>
+
+<h2>External runtime example</h2>
+
+<p>
+  <a page="SHOP3 page as ASDF system">SHOP3 page as ASDF system</a> is the
+  first page-system example with a non-HyperDoc Common Lisp runtime provider.
+  Loading <code>fedwiki/page/wiki.ralfbarkow.ch/shop3</code> re-provides the
+  FedWiki display runtime and the external <code>shop3</code> ASDF system from
+  the open-source SHOP3 HTN planner repository. The load makes the planner
+  runtime inspectable; it does not run a planning problem.
 </p>
 
 <h2>Reload examples</h2>
@@ -103,6 +117,12 @@
   --eval '(require :asdf)' \
   --eval '(asdf:load-system :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc :force t)' \
   --eval '(hyperdoc:find-page-system :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc)' \
+  --eval '(quit)'</code></pre>
+
+<pre><code>nix develop -c sbcl --noinform --disable-debugger \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :fedwiki/page/wiki.ralfbarkow.ch/shop3 :force t)' \
+  --eval '(hyperdoc:find-page-system :fedwiki/page/wiki.ralfbarkow.ch/shop3)' \
   --eval '(quit)'</code></pre>
 
 <h2>Boundary</h2>

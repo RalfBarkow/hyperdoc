@@ -24,9 +24,41 @@
       url = "github:kchanqvq/lwcells";
       flake = false;
     };
+    shop3 = {
+      url = "github:shop-planner/shop3";
+      flake = false;
+    };
+    shop3-pddl-tools = {
+      url = "github:rpgoldman/pddl-tools";
+      flake = false;
+    };
+    shop3-fiveam-asdf = {
+      url = "github:rpgoldman/fiveam-asdf";
+      flake = false;
+    };
+    shop3-random-state = {
+      url = "github:rpgoldman/random-state";
+      flake = false;
+    };
+    shop3-documentation-utils = {
+      url = "github:Shinmera/documentation-utils";
+      flake = false;
+    };
+    shop3-trivial-indent = {
+      url = "github:Shinmera/trivial-indent";
+      flake = false;
+    };
+    shop3-trivial-garbage = {
+      url = "github:shop-planner/trivial-garbage";
+      flake = false;
+    };
+    shop3-iterate = {
+      url = "git+https://gitlab.common-lisp.net/iterate/iterate.git";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, arrows-src, clog-moldable-inspector-src, html-inspector-views-src, plump-inspector-views-src, lwcells-src }:
+  outputs = { self, nixpkgs, flake-utils, arrows-src, clog-moldable-inspector-src, html-inspector-views-src, plump-inspector-views-src, lwcells-src, shop3, shop3-pddl-tools, shop3-fiveam-asdf, shop3-random-state, shop3-documentation-utils, shop3-trivial-indent, shop3-trivial-garbage, shop3-iterate }:
     let
       dreyeckHardwarePath = "${toString ./nix/hosts}/dreyeck-ch/hardware-configuration.nix";
       dreyeckHardwareModule =
@@ -62,6 +94,14 @@
         htmlInspectorViewsSrc = htmlInspectorViewsSrcPatched;
         plumpInspectorViewsSrc = plump-inspector-views-src;
         lwcellsSrc = lwcells-src;
+        shop3Src = shop3;
+        shop3PddlToolsSrc = shop3-pddl-tools;
+        shop3FiveamAsdfSrc = shop3-fiveam-asdf;
+        shop3RandomStateSrc = shop3-random-state;
+        shop3DocumentationUtilsSrc = shop3-documentation-utils;
+        shop3TrivialIndentSrc = shop3-trivial-indent;
+        shop3TrivialGarbageSrc = shop3-trivial-garbage;
+        shop3IterateSrc = shop3-iterate;
         clMarkupSrc = pkgs.sbclPackages."cl-markup".src;
         asdfSourceRegistryDefault = builtins.concatStringsSep ":" [
           "${clogSrcPatched}//"
@@ -69,6 +109,14 @@
           "${htmlInspectorViewsSrc}//"
           "${plumpInspectorViewsSrc}//"
           "${lwcellsSrc}//"
+          "${shop3Src}/shop3//"
+          "${shop3PddlToolsSrc}//"
+          "${shop3FiveamAsdfSrc}//"
+          "${shop3RandomStateSrc}//"
+          "${shop3DocumentationUtilsSrc}//"
+          "${shop3TrivialIndentSrc}//"
+          "${shop3TrivialGarbageSrc}//"
+          "${shop3IterateSrc}//"
           "${arrowsSrc}//"
           "${clMarkupSrc}//"
           "$PWD//"
@@ -81,6 +129,14 @@
           export HTML_INSPECTOR_VIEWS_SRC="${htmlInspectorViewsSrc}"
           export PLUMP_INSPECTOR_VIEWS_SRC="${plumpInspectorViewsSrc}"
           export LWCELLS_SRC="${lwcellsSrc}"
+          export SHOP3_SRC="${shop3Src}"
+          export SHOP3_PDDL_TOOLS_SRC="${shop3PddlToolsSrc}"
+          export SHOP3_FIVEAM_ASDF_SRC="${shop3FiveamAsdfSrc}"
+          export SHOP3_RANDOM_STATE_SRC="${shop3RandomStateSrc}"
+          export SHOP3_DOCUMENTATION_UTILS_SRC="${shop3DocumentationUtilsSrc}"
+          export SHOP3_TRIVIAL_INDENT_SRC="${shop3TrivialIndentSrc}"
+          export SHOP3_TRIVIAL_GARBAGE_SRC="${shop3TrivialGarbageSrc}"
+          export SHOP3_ITERATE_SRC="${shop3IterateSrc}"
           export CL_MARKUP_SRC="${clMarkupSrc}"
         '';
 
@@ -199,6 +255,14 @@
             htmlInspectorViewsSrc
             plumpInspectorViewsSrc
             lwcellsSrc
+            shop3Src
+            shop3PddlToolsSrc
+            shop3FiveamAsdfSrc
+            shop3RandomStateSrc
+            shop3DocumentationUtilsSrc
+            shop3TrivialIndentSrc
+            shop3TrivialGarbageSrc
+            shop3IterateSrc
             clMarkupSrc
             releaseId
             releaseRevision
@@ -259,6 +323,14 @@
             ln -snf "$PLUMP_INSPECTOR_VIEWS_SRC" .flake-deps/plump-inspector-views
             ln -snf "$CLOG_MOLDABLE_INSPECTOR_SRC" .flake-deps/clog-moldable-inspector
             ln -snf "$LWCELLS_SRC" .flake-deps/lwcells
+            ln -snf "$SHOP3_SRC/shop3" .flake-deps/shop3
+            ln -snf "$SHOP3_PDDL_TOOLS_SRC" .flake-deps/shop3-pddl-tools
+            ln -snf "$SHOP3_FIVEAM_ASDF_SRC" .flake-deps/shop3-fiveam-asdf
+            ln -snf "$SHOP3_RANDOM_STATE_SRC" .flake-deps/shop3-random-state
+            ln -snf "$SHOP3_DOCUMENTATION_UTILS_SRC" .flake-deps/shop3-documentation-utils
+            ln -snf "$SHOP3_TRIVIAL_INDENT_SRC" .flake-deps/shop3-trivial-indent
+            ln -snf "$SHOP3_TRIVIAL_GARBAGE_SRC" .flake-deps/shop3-trivial-garbage
+            ln -snf "$SHOP3_ITERATE_SRC" .flake-deps/shop3-iterate
             ln -snf "$ARROWS_SRC" .flake-deps/arrows
             ln -snf "$CL_MARKUP_SRC" .flake-deps/cl-markup
 
