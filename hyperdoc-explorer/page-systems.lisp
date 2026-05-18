@@ -44,6 +44,65 @@
        (t
         (views:esc "-")))))))
 
+(defun render-page-system-html-row (label renderer)
+  (views:html
+   (:tr
+    (:th (views:esc label))
+    (:td (funcall renderer)))))
+
+(defun render-page-system-page-locator-ref (system)
+  (if-let (page (ignore-errors
+                  (page-system-rendered-page system)))
+    (views:object-ref page
+                      :display (page-system-page-locator system)
+                      :select "Overview")
+    (views:html
+     (:tt (views:esc (or (page-system-page-locator system) "-"))))))
+
+(defun render-page-system-local-twin-ref (system)
+  (if-let (pathname (page-system-local-twin-pathname system))
+    (views:object-ref pathname
+                      :display (namestring pathname))
+    (views:html (:span "-"))))
+
+(defun render-page-system-action-strip (system)
+  (let ((rendered-page (ignore-errors
+                         (page-system-rendered-page system)))
+        (local-twin-pathname (page-system-local-twin-pathname system)))
+    (if (or rendered-page local-twin-pathname)
+        (views:html
+         (:div :class "page-system-actions"
+               (when rendered-page
+                 (views:html
+                  (views:eval-button
+                   "Open rendered page"
+                   (views:thunk
+                    (page-system-rendered-page system :signal-error? t))
+                   "Resolve the page locator and open the rendered page object.")))
+               (when local-twin-pathname
+                 (views:html
+                  " "
+                  (views:eval-button
+                   "Inspect local twin file"
+                   (views:thunk local-twin-pathname)
+                   "Open the raw localhost FedWiki twin pathname.")))))
+        (views:html (:span "-")))))
+
+(defmethod views:title-bar-action-buttons ((system fedwiki-page-system))
+  (views:html
+   (views:eval-button
+    "Open rendered page"
+    (views:thunk
+     (page-system-rendered-page system :signal-error? t))
+    "Resolve the FedWiki page-system locator and open the rendered page object.")
+   (when-let (pathname (page-system-local-twin-pathname system))
+     (views:html
+      " "
+      (views:eval-button
+       "Inspect local twin file"
+       (views:thunk pathname)
+       "Open the raw localhost FedWiki twin pathname.")))))
+
 (views:defview 👀overview (system page-system)
   (views:html-view
    :title "Overview"
@@ -52,12 +111,24 @@
     (:h3 (views:esc (page-system-title system)))
     (:p (views:esc (or (page-system-description system)
                        "Page-system reload boundary.")))
+    (:h4 "Page")
     (:table :class "inspector-table"
             (render-page-system-row "Kind" (page-system-kind system))
             (render-page-system-row "ASDF system"
                                     (page-system-asdf-system-name system))
-            (render-page-system-row "Page locator"
-                                    (page-system-page-locator system))
+            (render-page-system-html-row
+             "Page locator"
+             (lambda ()
+               (render-page-system-page-locator-ref system)))
+            (when (page-system-local-twin-pathname system)
+              (render-page-system-html-row
+               "Local twin path"
+               (lambda ()
+                 (render-page-system-local-twin-ref system)))))
+    (:h4 "Actions")
+    (render-page-system-action-strip system)
+    (:h4 "Runtime contract")
+    (:table :class "inspector-table"
             (render-page-system-row "Runtime systems"
                                     (page-system-runtime-systems system))
             (render-page-system-row "Runtime entry points"

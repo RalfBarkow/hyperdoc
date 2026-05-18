@@ -102,6 +102,8 @@
    #:materialize-page-system-asd
    #:page-system-summary
    #:page-system-runtime-systems
+   #:page-system-rendered-page
+   #:page-system-local-twin-pathname
    #:page-system-id
    #:page-system-title
    #:page-system-kind

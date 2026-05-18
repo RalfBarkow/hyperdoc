@@ -150,6 +150,9 @@
 (defun run-page-system-fedwiki-smoke-test ()
   (let ((system (hyperdoc:find-page-system
                  :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc)))
+    (asdf:load-system
+     :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc
+     :force t)
     (page-system-assert-contains
      "wiki.ralfbarkow.ch"
      (hyperdoc:page-system-page-locator system)
@@ -173,12 +176,21 @@
       (page-system-assert-true
        ready
        (format nil "FedWiki display contract must pass without live network: ~S"
-               warnings)))))
+               warnings)))
+    (let ((page (hyperdoc:page-system-rendered-page system
+                                                    :signal-error? t)))
+      (page-system-assert-true
+       (typep page 'hyperbook:page)
+       "FedWiki page system must resolve the rendered page object"))))
 
 (defun run-page-system-inspector-view-smoke-test ()
   (let* ((system (hyperdoc:find-page-system
                   :hyperdoc/page/mobile-progressive-chrome))
+         (fedwiki-system
+          (hyperdoc:find-page-system
+           :fedwiki/page/wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc))
          (html (page-system-render-view system "Overview"))
+         (fedwiki-html (page-system-render-view fedwiki-system "Overview"))
          (provider-html
           (page-system-render-view
            (first (hyperdoc:page-system-runtime-providers system))
@@ -207,7 +219,15 @@
     (page-system-assert-contains
      "Page system registry"
      registry-html
-     "Registry Overview view must render")))
+     "Registry Overview view must render")
+    (dolist (needle '("Open rendered page"
+                      "Local twin path"
+                      "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/mobile-progressive-chrome-in-hyperdoc"
+                      "Runtime contract"))
+      (page-system-assert-contains
+       needle
+       fedwiki-html
+       "FedWiki page-system Overview view must expose actionable page links"))))
 
 (defun run-page-system-documentation-smoke-test ()
   (let ((page (hyperbook:find-page hyperdoc:*hyperdoc*

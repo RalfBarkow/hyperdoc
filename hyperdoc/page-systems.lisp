@@ -192,6 +192,8 @@
 (defgeneric page-system-asdf-form (page-system))
 (defgeneric materialize-page-system-asd (page-system &key pathname))
 (defgeneric page-system-summary (page-system))
+(defgeneric page-system-rendered-page (page-system &key signal-error?))
+(defgeneric page-system-local-twin-pathname (page-system))
 
 (defmethod page-system-runtime-systems ((system page-system))
   (remove-duplicates
@@ -280,6 +282,67 @@
         :runtime-systems (page-system-runtime-systems system)
         :display-contract (page-system-display-contract system)))
 
+(defun page-system-locator-page-parts (locator)
+  (cond
+    ((uiop:string-prefix-p "hyperdoc:" locator)
+     (values "hyperdoc"
+             (subseq locator (length "hyperdoc:"))))
+    ((uiop:string-prefix-p "fedwiki:" locator)
+     (when-let (slash-position (position #\/ locator))
+       (values (subseq locator 0 slash-position)
+               (subseq locator (1+ slash-position)))))
+    (t
+     (when-let (slash-position (position #\/ locator))
+       (values (subseq locator 0 slash-position)
+               (subseq locator (1+ slash-position)))))))
+
+(defun page-system-absolute-path-string-p (path)
+  (and (stringp path)
+       (plusp (length path))
+       (char= (char path 0) #\/)))
+
+(defmethod page-system-rendered-page ((system page-system)
+                                      &key signal-error?)
+  (multiple-value-bind (hyperbook-id page-id)
+      (page-system-locator-page-parts (page-system-page-locator system))
+    (when page-id
+      (let ((hyperbook
+              (cond
+                ((string= hyperbook-id "hyperdoc")
+                 (or (hyperbook:find-hyperbook hyperbook-id)
+                     *hyperdoc*))
+                (t
+                 (hyperbook:find-hyperbook hyperbook-id
+                                           :signal-error? signal-error?)))))
+        (when hyperbook
+          (hyperbook:find-page hyperbook
+                               page-id
+                               :signal-error? signal-error?))))))
+
+(defmethod page-system-rendered-page ((system fedwiki-page-system)
+                                      &key signal-error?)
+  (multiple-value-bind (hyperbook-id page-id)
+      (page-system-locator-page-parts (page-system-page-locator system))
+    (when page-id
+      (let ((hyperbook (hyperbook:find-hyperbook
+                        hyperbook-id
+                        :signal-error? signal-error?)))
+        (when hyperbook
+          (hyperbook:find-page hyperbook
+                               page-id
+                               :signal-error? signal-error?))))))
+
+(defmethod page-system-local-twin-pathname ((system page-system))
+  (declare (ignore system))
+  nil)
+
+(defmethod page-system-local-twin-pathname ((system fedwiki-page-system))
+  (loop for source in (page-system-source-files system)
+        when (and (page-system-absolute-path-string-p source)
+                  (search "/.wiki/" source :test #'char=)
+                  (search "/pages/" source :test #'char=))
+        do (return (pathname source))))
+
 (defclass page-system-registry ()
   ((systems-by-asdf-name :reader page-system-registry-systems-by-asdf-name
                          :initform (make-hash-table :test #'equal))
@@ -344,8 +407,7 @@
 (defun page-system-all-source-files-exist-p (system)
   (every (lambda (path)
            (or (not (stringp path))
-               (and (> (length path) 0)
-                    (char= (char path 0) #\/)
+               (and (page-system-absolute-path-string-p path)
                     (uiop:file-exists-p path))
                (page-system-source-file-exists-p path)))
          (page-system-source-files system)))
