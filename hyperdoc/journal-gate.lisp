@@ -211,6 +211,7 @@
         (push copy normalized)))))
 
 (defexample journalmatic-commit-gate-script-example
+    (:system "hyperdoc")
     "Show exact commit-gate pass/fail results for one blocked and one passing page."
   (let* ((bad-page *journalmatic-example-page-with-chronology-error*)
          (good-page *journalmatic-example-page*)
@@ -227,6 +228,7 @@
                            :pass? (journalmatic-commit-gate-pass-p good-page)))))
 
 (defexample journalmatic-date-origin-example
+    (:system "hyperdoc")
     "Show Date.now-style millis and monotonic next-date behavior."
   (let* ((journal '((:type :create :date 1000)
                     (:type :add :id "a1" :date 1001)))
@@ -239,6 +241,7 @@
           :next-date next-date)))
 
 (defexample journalmatic-monotonic-normalization-example
+    (:system "hyperdoc")
     "Normalize out-of-order dates while preserving action order."
   (let* ((journal '((:type :create :date 1000)
                     (:type :add :id "a1" :date 1100)

@@ -708,11 +708,14 @@
 
 (defun inspect-graphviz-story-item-renderer-source-shape ()
   (let* ((pathname (graphviz-story-item-renderer-source-pathname))
+         (source (and (probe-file pathname)
+                      (uiop:read-file-string pathname)))
          (snippet
-          (source-snippet-between-markers
-           pathname
-           "(defmethod render-story-item ((type (eql :graphviz)) item page)"
-           ";; Images")))
+          (and source
+               (source-snippet-between-markers
+                pathname
+                "(defmethod render-story-item ((type (eql :graphviz)) item page)"
+                ";; Images"))))
     (cond
       ((null (probe-file pathname))
        (list :status :unavailable
@@ -726,16 +729,24 @@
        (let* ((dot-from-text-p
                (not (null (search "(text-of item)" snippet))))
               (dot-from-data-p
-               (not (null (search "(gethash \"dot\"" snippet))))
-              (engine-from-data-p
-               (not (null (search "(gethash \"engine\"" snippet))))
-              (fallback-title-present-p
+              (not (null (search "(gethash \"dot\"" snippet))))
+             (engine-from-data-p
+              (not (null (search "(gethash \"engine\"" snippet))))
+             (engine-helper-p
+              (and (not (null (search "(graphviz-story-item-engine-of item)"
+                                       snippet)))
+                   source
+                   (not (null (search "(defun graphviz-story-item-engine-of"
+                                      source)))
+                   (not (null (search "(gethash \"engine\"" source)))))
+             (fallback-title-present-p
                (not (null (search ":fallback-title \"Raw DOT source\""
                                   snippet))))
-              (recognized-text-backed-shape-p
+             (recognized-text-backed-shape-p
                (and dot-from-text-p
                     (not dot-from-data-p)
-                    engine-from-data-p
+                    (or engine-from-data-p
+                        engine-helper-p)
                     fallback-title-present-p)))
          (list :status (if recognized-text-backed-shape-p
                            :resolved
@@ -745,6 +756,7 @@
                :dot-from-text-p dot-from-text-p
                :dot-from-data-p dot-from-data-p
                :engine-from-data-p engine-from-data-p
+               :engine-helper-p engine-helper-p
                :fallback-title-present-p fallback-title-present-p
                :recognized-text-backed-shape-p
                recognized-text-backed-shape-p))))))
@@ -1270,6 +1282,8 @@
               (getf renderer-shape-info :dot-from-data-p))
       (format nil "Renderer source keeps engine lookup in item data: ~:[no~;yes~]."
               (getf renderer-shape-info :engine-from-data-p))
+      (format nil "Renderer source delegates engine lookup to graphviz-story-item-engine-of: ~:[no~;yes~]."
+              (getf renderer-shape-info :engine-helper-p))
       (format nil "Corpus trace still records a real localhost graphviz story item as text-backed DOT plus the shared graphviz helper path: ~:[no~;yes~]."
               (getf corpus-shape-info :recognized-text-backed-corpus-p))
       (format nil "The earlier local commit ~A already introduced the shared graphviz seam on hauptsache."

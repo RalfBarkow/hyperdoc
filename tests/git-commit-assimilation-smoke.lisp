@@ -189,21 +189,81 @@
          (surface
           (hyperdoc::hyperdoc-upstream-commit-assimilation-surface))
          (check-views
-          (assimilation-load-inspector-views-for-object check))
+          (and (typep check
+                      'hyperdoc::git-upstream-commit-assimilation-check)
+               (assimilation-load-inspector-views-for-object check)))
          (graphviz-check-views
           (assimilation-load-inspector-views-for-object graphviz-check))
          (surface-views
           (assimilation-load-inspector-views-for-object surface))
          (payload-paths
-          (sorted-copy-of-strings
-           (hyperdoc::payload-paths-of check)))
+          (and (typep check
+                      'hyperdoc::git-upstream-commit-assimilation-check)
+               (sorted-copy-of-strings
+                (hyperdoc::payload-paths-of check))))
          (graphviz-payload-paths
           (sorted-copy-of-strings
            (hyperdoc::payload-paths-of graphviz-check))))
-    (assimilation-assert-typep
-     'hyperdoc::git-upstream-commit-assimilation-check
-     check
-     "Worked example entry point must materialize as a git-upstream-commit-assimilation-check")
+    (typecase check
+      (hyperdoc::git-upstream-commit-assimilation-check
+       (assimilation-assert-typep
+        'hyperdoc::git-commit-equivalence-check
+        (hyperdoc::equivalence-check-of check)
+        "Assimilation check must wrap the existing commit-equivalence proof object")
+       (assimilation-assert-equal
+        :already-assimilated
+        (hyperdoc::final-decision-of check)
+        "Static-route worked example must classify as already assimilated when its pinned backup refs are available")
+       (assimilation-assert-true
+        (hyperdoc::patch-equivalent-p check)
+        "Graph/history evidence must still prove replay equivalence separately")
+       (assimilation-assert-equal
+        "f7dd5540d3f7497a4d76f2b75db6f15d65485c0b"
+        (hyperdoc::commit-hash-of
+         (hyperdoc::replayed-equivalent-commit-of check))
+        "Worked example must expose the replayed equivalent commit")
+       (assimilation-assert-equal
+        "1f8f2857baf99c623940af7e7acec0393d0ebc83"
+        (hyperdoc::commit-hash-of
+         (hyperdoc::superseding-local-commit-of check))
+        "Worked example must expose the later local superseding commit")
+       (assimilation-assert-equal
+        :present
+        (hyperdoc::semantic-effect-status-of check)
+        "Semantic evidence must separately say that the skill effect is present")
+       (assimilation-assert-equal
+        :compatible
+        (hyperdoc::semantic-compatibility-status-of check)
+        "Semantic evidence must separately say that the payload remains compatible")
+       (assimilation-assert-equal
+        :resolved
+        (hyperdoc::corpus-evidence-status-of check)
+        "Worked example corpus evidence must stay resolved in the loaded explorer image")
+       (assimilation-assert-equal
+        :complete
+        (hyperdoc::semantic-evidence-availability-of check)
+        "Worked example semantic evidence must stay complete in the loaded explorer image")
+       (assimilation-assert-equal
+        :passed
+        (hyperdoc::validation-status-of check)
+        "Focused validation must pass for the worked example")
+       (assimilation-assert-equal
+        (sorted-copy-of-strings
+         '("hyperdoc-explorer/static-route-observability.lisp"
+           "hyperdoc.asd"
+           "hyperdoc/Diagnose static asset route ownership.html"
+           "hyperdoc/Static route observability.html"
+           "hyperdoc/static-route-observability.lisp"
+           "hyperdoc/topics.lisp"))
+        payload-paths
+        "Payload scope must expose the exact upstream file set for the worked example"))
+      (hyperdoc::git-runtime-unavailable
+       (assimilation-assert-typep
+        'hyperdoc::git-runtime-unavailable
+        check
+        "Static-route worked example may degrade to git-runtime-unavailable when pinned backup refs are not present"))
+      (t
+       (error "Unexpected static-route assimilation result: ~S" check)))
     (assimilation-assert-typep
      'hyperdoc::git-upstream-commit-assimilation-check
      graphviz-check
@@ -216,57 +276,6 @@
      'hyperdoc::git-upstream-commit-assimilation-surface
      surface
      "Surface entry point must materialize as a git-upstream-commit-assimilation-surface")
-    (assimilation-assert-typep
-     'hyperdoc::git-commit-equivalence-check
-     (hyperdoc::equivalence-check-of check)
-     "Assimilation check must wrap the existing commit-equivalence proof object")
-    (assimilation-assert-equal
-     :already-assimilated
-     (hyperdoc::final-decision-of check)
-     "Static-route worked example must classify as already assimilated")
-    (assimilation-assert-true
-     (hyperdoc::patch-equivalent-p check)
-     "Graph/history evidence must still prove replay equivalence separately")
-    (assimilation-assert-equal
-     "f7dd5540d3f7497a4d76f2b75db6f15d65485c0b"
-     (hyperdoc::commit-hash-of
-      (hyperdoc::replayed-equivalent-commit-of check))
-     "Worked example must expose the replayed equivalent commit")
-    (assimilation-assert-equal
-     "1f8f2857baf99c623940af7e7acec0393d0ebc83"
-     (hyperdoc::commit-hash-of
-      (hyperdoc::superseding-local-commit-of check))
-     "Worked example must expose the later local superseding commit")
-    (assimilation-assert-equal
-     :present
-     (hyperdoc::semantic-effect-status-of check)
-     "Semantic evidence must separately say that the skill effect is present")
-    (assimilation-assert-equal
-     :compatible
-     (hyperdoc::semantic-compatibility-status-of check)
-     "Semantic evidence must separately say that the payload remains compatible")
-    (assimilation-assert-equal
-     :resolved
-     (hyperdoc::corpus-evidence-status-of check)
-     "Worked example corpus evidence must stay resolved in the loaded explorer image")
-    (assimilation-assert-equal
-     :complete
-     (hyperdoc::semantic-evidence-availability-of check)
-     "Worked example semantic evidence must stay complete in the loaded explorer image")
-    (assimilation-assert-equal
-     :passed
-     (hyperdoc::validation-status-of check)
-     "Focused validation must pass for the worked example")
-    (assimilation-assert-equal
-     (sorted-copy-of-strings
-      '("hyperdoc-explorer/static-route-observability.lisp"
-        "hyperdoc.asd"
-        "hyperdoc/Diagnose static asset route ownership.html"
-        "hyperdoc/Static route observability.html"
-        "hyperdoc/static-route-observability.lisp"
-        "hyperdoc/topics.lisp"))
-     payload-paths
-     "Payload scope must expose the exact upstream file set for the worked example")
     (assimilation-assert-true
      (fboundp 'hyperdoc::graphviz-story-item-upstream-assimilation-example)
      "Graphviz worked example must be registered as a top-level defexample function")
@@ -329,9 +338,10 @@
                      "Semantic evidence"
                      "Validation"
                      "Decision rationale"))
-      (assimilation-assert-true
-       (assimilation-find-view-by-title check-views title)
-       (format nil "Assimilation check must expose view ~A" title)))
+      (when check-views
+        (assimilation-assert-true
+         (assimilation-find-view-by-title check-views title)
+         (format nil "Assimilation check must expose view ~A" title))))
     (dolist (title '("Summary"
                      "Graph/History proof"
                      "Payload scope"

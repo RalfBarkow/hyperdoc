@@ -49,7 +49,7 @@
             hyperdoc::nor-graph-normal-form-failure)))
 
 (defun run-nor-graph-matcher-example-smoke-test ()
-  (asdf:load-system :hyperdoc/nor-graph-demo :force t)
+  (asdf:load-system :hyperdoc/nor-graph-demo)
   (nor-graph-smoke-assert-equal
    '((hyperdoc::nor-graph-active-pair-leaf-success t)
      (hyperdoc::nor-graph-active-pair-nor-failure nil)

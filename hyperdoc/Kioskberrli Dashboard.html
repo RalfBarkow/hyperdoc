@@ -107,6 +107,8 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 <p>
   <tt>Kioskberrli</tt> is the Raspberry Pi 4 kiosk case study for making the
   <tt>hauptsache</tt> landing page physically present inside the salon.
+  The dashboard page is the human-facing view; the root inspectable object is
+  <a expr="(hyperdoc::kioskberrli-dashboard)"><tt>kioskberrli-dashboard</tt></a>.
 </p>
 
 <dl>
@@ -120,7 +122,7 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
   <dd><tt>https://hauptsache.dreyeck.ch/assets/home/index.html</tt></dd>
 
   <dt>Scope boundary</dt>
-  <dd>Case-study dashboard only; no generic dashboard framework.</dd>
+  <dd>Case-study dashboard, plan-only planner, behavior chart, and trace; no live build, flash, SSH, HTTP mutation, or DMX mutation.</dd>
 </dl>
 
 <h2>Inspectable objects</h2>
@@ -132,6 +134,10 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
   <li><a expr="(hyperdoc::kioskberrli-dashboard-status)"><tt>kioskberrli-dashboard-status</tt></a></li>
   <li><a expr="(hyperdoc::kioskberrli-current-blocker)"><tt>kioskberrli-current-blocker</tt></a></li>
   <li><a expr="(hyperdoc::kioskberrli-build-evidence-status)"><tt>kioskberrli-build-evidence-status</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a></li>
 </ul>
 
 <h2>Inspect station list</h2>
@@ -139,4 +145,50 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 <p>
   Inspect the full station list:
   <a expr="(hyperdoc::kioskberrli-dashboard-stations)"><tt>kioskberrli-dashboard-stations</tt></a>.
+</p>
+
+<h2>Planner run</h2>
+
+<p>
+  The Kioskberrli planner is a SHOP3-like local plan object with named tasks,
+  dependencies, preconditions, effects, status, and evidence paths. It is
+  plan-only by default:
+  <a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a>.
+</p>
+
+<p>
+  The plan records the corrected obsolete <tt>sdImage.imageSize</tt> problem
+  and keeps the current blocker explicit: a suitable Linux builder is still
+  required before the <tt>aarch64-linux</tt> image can be realized.
+</p>
+
+<h2>Behavioral state machine</h2>
+
+<p>
+  The lifecycle chart is stored as
+  <tt>dreyeck/kioskbeerli/kioskbeerli.scxml</tt> and parsed as an inspectable
+  object:
+  <a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a>.
+</p>
+
+<p>
+  The chart distinguishes declared, corrected, blocked, image-built, flashed,
+  boot-observed, network-verified, kiosk-running, visible, maintenance-ready,
+  failed-with-evidence, and unknown states.
+</p>
+
+<h2>Project trace / record progress</h2>
+
+<p>
+  The project trace records evidence and missing evidence explicitly:
+  <a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a>.
+  The latest progress entry is available through
+  <a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a>.
+</p>
+
+<p>
+  Recording progress is an in-memory local operation. It records a trace entry;
+  it does not run Nix, flash devices, open SSH sessions, mutate HTTP state, or
+  write to DMX:
+  <a expr="(hyperdoc::record-kioskbeerli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from dashboard example.&quot;)"><tt>record-kioskbeerli-progress</tt></a>.
 </p>

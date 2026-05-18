@@ -114,7 +114,8 @@
     :in-order-to ((test-op (test-op "hyperdoc/tests")))
     :components ((:module "hyperdoc"
                           :serial t
-                          :components ((:file "decision-maps")
+                          :components ((:file "kioskberrli-compat")
+                                       (:file "decision-maps")
                                        (:file "code-path-graphs")
                                        (:file "whyline-output-questions")
                                        (:file "skillization")
@@ -605,6 +606,7 @@
                  #:hyperdoc/mobile-progressive-chrome
                  #:hyperdoc/scxml
                  #:hyperdoc/explorer
+                 #:dreyeck/kioskbeerli
                  #:hyperdoc/nor-graph-demo
                  #:hyperdoc/closures-nor-demo
                  #:hyperdoc/continuation-route-trace

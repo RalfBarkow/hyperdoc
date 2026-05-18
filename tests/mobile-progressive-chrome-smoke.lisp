@@ -26,7 +26,7 @@
     (mobile-progressive-chrome-assert-true
      system
      "ASDF must resolve :hyperdoc/mobile-progressive-chrome")
-    (asdf:load-system :hyperdoc/mobile-progressive-chrome :force t)
+    (asdf:load-system :hyperdoc/mobile-progressive-chrome)
     (let ((slice (hyperdoc:mobile-progressive-chrome-system-slice)))
       (mobile-progressive-chrome-assert-equal
        "hyperdoc/mobile-progressive-chrome"

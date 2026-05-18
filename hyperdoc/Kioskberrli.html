@@ -15,6 +15,8 @@
 <p>
   For the compact operational status view, open
   <a page="Kioskberrli Dashboard">Kioskberrli Dashboard</a>.
+  That dashboard is also the root inspectable object for the status vocabulary,
+  plan-only planner, SCXML-like behavior chart, and project trace.
 </p>
 
 <h4>Current hardware note</h4>
@@ -29,6 +31,10 @@
 <ul>
   <li><a hyperbook="topics" page="Kioskberrli"><tt>Kioskberrli</tt></a></li>
   <li><a hyperbook="topics" page="Kioskberrli Dashboard"><tt>Kioskberrli Dashboard</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-dashboard)"><tt>kioskberrli-dashboard</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
   <li><a hyperbook="topics" page="Satechi USB-C Pro Hub (4K HDMI)"><tt>Satechi USB-C Pro Hub (4K HDMI)</tt></a></li>
   <li><a hyperbook="topics" page="SD card"><tt>SD card</tt></a></li>
   <li><a hyperbook="topics" page="Micro SD card"><tt>Micro SD card</tt></a></li>
@@ -161,6 +167,7 @@ Raspberry Pi 4 Model B into the first Kioskberrli?
 <ul>
   <li>the obsolete <tt>sdImage.imageSize</tt> option has been removed</li>
   <li>the next blocker is the need for a valid Linux builder for the declared <tt>aarch64-linux</tt> target</li>
+  <li>build, flash, boot, network, kiosk-session, and landing-page proof remain explicit missing evidence until recorded</li>
 </ul>
 
 <p>
@@ -236,6 +243,7 @@ Raspberry Pi 4 Model B into the first Kioskberrli?
 
 <ul>
   <li><a page="Kioskberrli Dashboard">Kioskberrli Dashboard</a></li>
+  <li><a page="Kioskberrli Planner and Trace">Kioskberrli Planner and Trace</a></li>
   <li><a page="Hauptsache Entry Model">Hauptsache Entry Model</a></li>
   <li><a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a></li>
   <li><a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a></li>

@@ -1,6 +1,9 @@
 (in-package :hyperdoc/tests)
 
 (defun run-hyperdoc-tests ()
+  ;; This boundary check must run before compile-order tests intentionally load
+  ;; :hyperdoc/inspector, which depends on the optional Zotero backend.
+  (run-zotero-optional-smoke-tests)
   (run-compile-order-smoke-tests :force? nil)
   (run-code-path-graphs-smoke-tests)
   (run-dmx-topic-proxy-smoke-tests)
@@ -23,7 +26,6 @@
   (run-sly-evidence-bounds-smoke-tests)
   (run-dmx-workspace-assignment-auth-diagnosis-smoke-tests)
   (run-dmx-platform-workspace-assignment-semantics-smoke-tests)
-  (run-zotero-optional-smoke-tests)
   (run-article-allegation-slice-smoke-tests)
   (run-fedwiki-materialization-smoke-tests)
   (run-authored-html-render-safety-smoke-tests)
@@ -55,6 +57,7 @@
   (run-git-commit-assimilation-smoke-tests)
   (run-skillization-smoke-tests)
   (run-mech-deployment-provenance-smoke-tests)
+  (run-kioskberrli-dashboard-smoke-tests)
   (run-interaction-net-smoke-tests)
   (run-closure-nor-demo-smoke-tests)
   (run-nor-graph-matcher-smoke-tests)

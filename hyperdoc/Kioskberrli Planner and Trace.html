@@ -1,0 +1,74 @@
+<h1>Kioskberrli Planner and Trace</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the durable reference for the Kioskberrli operational objects
+  behind <a page="Kioskberrli Dashboard">Kioskberrli Dashboard</a>.
+  Kioskberrli remains the physical Raspberry Pi kiosk target for the
+  Hauptsache salon.
+</p>
+
+<h2>Root objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::kioskberrli-dashboard)"><tt>kioskberrli-dashboard</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
+</ul>
+
+<h2>Planner boundary</h2>
+
+<p>
+  The planner is SHOP3-like: it preserves named tasks, dependencies,
+  preconditions, effects, task status, and evidence paths. It is plan-only by
+  default and does not execute Nix builds, flash SD cards, mutate devices, open
+  SSH sessions, call HTTP endpoints, or write to DMX.
+</p>
+
+<p>
+  The obsolete <tt>sdImage.imageSize</tt> problem is recorded as corrected.
+  The current blocker is still cross-host <tt>aarch64-linux</tt> image
+  realization unless a suitable Linux builder exists.
+</p>
+
+<h2>Behavior boundary</h2>
+
+<p>
+  The behavior chart is stored in
+  <tt>dreyeck/kioskbeerli/kioskbeerli.scxml</tt>. It starts in
+  <tt>declared</tt> and models the route through source review, obsolete-option
+  correction, cross-host build blocking, Linux builder requirement, image
+  build, flash, boot, network, kiosk session, landing page, maintenance, and
+  failure-with-evidence states.
+</p>
+
+<h2>Trace boundary</h2>
+
+<p>
+  The trace records progress entries with task id, from-state, to-state,
+  status, evidence paths, and a note. Missing evidence is a first-class status,
+  not an aside. The dashboard should therefore say <tt>missing-evidence</tt> or
+  <tt>missing evidence</tt> when build, flash, boot, network, kiosk-session, or
+  landing-page proof is absent.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Kioskberrli Planner and Trace"><tt>Kioskberrli Planner and Trace</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskberrli Dashboard"><tt>Kioskberrli Dashboard</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskberrli"><tt>Kioskberrli</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a></li>
+  <li><a expr="(hyperdoc::record-kioskbeerli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from planner and trace page.&quot;)"><tt>record-kioskbeerli-progress</tt></a></li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Kioskberrli Dashboard">Kioskberrli Dashboard</a></li>
+  <li><a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a></li>
+  <li><a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a></li>
+  <li><a page="Runbook - Build and Flash NixOS SD Image for Kioskberrli">Runbook - Build and Flash NixOS SD Image for Kioskberrli</a></li>
+</ul>

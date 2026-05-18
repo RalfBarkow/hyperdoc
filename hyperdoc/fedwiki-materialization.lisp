@@ -469,12 +469,14 @@
     plan))
 
 (defexample fedwiki-materialization-page-preview-example
+    (:system "hyperdoc")
     "Plan materialization of the missing civilian-casualty-mitigation FedWiki page."
   (let ((plan (plan-fedwiki-page-materialization "civilian-casualty-mitigation")))
     (assert-equal 1 (length (fedwiki-materialization-entries-of plan)))
     plan))
 
 (defexample fedwiki-materialization-slice-preview-example
+    (:system "hyperdoc")
     "Plan slice-level materialization for the Minab article-allegation dry-run bundle."
   (let ((plan (plan-fedwiki-slice-materialization
                "minab-school-strike"

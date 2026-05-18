@@ -32,34 +32,49 @@
   (uiop:read-file-string
    (asdf:system-relative-pathname :hyperdoc "hyperdoc.asd")))
 
+(defun compile-order-asd-system-block (source system-marker)
+  (let ((start (search system-marker source :test #'char=)))
+    (compile-order-assert-true
+     start
+     (format nil "hyperdoc.asd must define ~A" system-marker))
+    (let ((next (search "(defsystem "
+                        source
+                        :start2 (1+ start)
+                        :test #'char=)))
+      (subseq source start next))))
+
 (defun run-hyperdoc-inspector-asd-order-smoke-test ()
-  (let ((source (compile-order-system-definition-source)))
+  (let* ((source (compile-order-system-definition-source))
+         (inspector-source
+          (compile-order-asd-system-block
+           source
+           "(defsystem #:hyperdoc/inspector")))
     (compile-order-assert-search
      "(defsystem #:hyperdoc/inspector"
-     source
+     inspector-source
      "hyperdoc.asd must define the hyperdoc/inspector system")
     (compile-order-assert-before
-     source
+     inspector-source
      "(:file \"package\")"
      "(:file \"code-path-graphs\")"
      "Inspector package must load before inspector implementation files")
     (compile-order-assert-before
-     source
+     inspector-source
      "(:file \"code-path-graphs\")"
      "(:file \"state-machines\")"
      "Code-path graphs must load before state-machines in the current inspector contract")
     (compile-order-assert-before
-     source
+     inspector-source
      "(:file \"state-machines\")"
      "(:file \"dmx-topics\")"
      "State-machine helpers must load before dmx-topics")
     (compile-order-assert-before
-     source
+     inspector-source
      "(:file \"surfaces\")"
      "(:file \"dmx-topics\")"
      "Surface helpers must load before dmx-topics")
     (compile-order-assert-before
-     source
+     inspector-source
      "(:file \"boundaries\")"
      "(:file \"dmx-topics\")"
      "Boundary helpers must load before dmx-topics"))

@@ -22,7 +22,7 @@
         thereis (eq plist-key key)))
 
 (defun continuation-route-smoke-route ()
-  (asdf:load-system :hyperdoc/continuation-route-trace :force t)
+  (asdf:load-system :hyperdoc/continuation-route-trace)
   (hyperdoc::make-continuation-route-trace-demo))
 
 (defun run-continuation-route-trace-object-smoke-test ()
