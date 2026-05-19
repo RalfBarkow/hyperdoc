@@ -133,6 +133,7 @@
    ;; DITA-style task topics.
    #:kioskbeerli-dita-task-topic
    #:kioskbeerli-dita-task-step
+   #:kioskbeerli-dita-task-view
    #:kioskbeerli-semi-headless-set-password-task
    #:kioskbeerli-lookup-task-topic
    #:kioskbeerli-task-topic-plan-task

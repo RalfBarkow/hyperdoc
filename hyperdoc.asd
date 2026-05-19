@@ -662,6 +662,7 @@
                                        (:file "fedwiki-site-dmx-import")
                                        (:file "check-runner-smoke")
                                        (:file "fedwiki-story-items-smoke")
+                                       (:file "view-contract-smoke")
                                        (:file "inspector-performance-smoke")
                                        (:file "merged-doc-slices-smoke")
                                        (:file "iconic-retrieval-smoke")

@@ -29,6 +29,70 @@
            (ignore-errors
              (hv:view-title view))))))
 
+(defparameter +view-contract-action-label+ "Inspect view contract")
+
+(defun active-inspector-view-object (pane)
+  (with-slots (views active-view) pane
+    (nth (or active-view 0) views)))
+
+(defun rendered-view-layout-snapshot-provider ()
+  (loop for package-name in '(:hyperdoc/inspector
+                              :hyperdoc
+                              :hyperbook/server
+                              :clog-moldable-inspector)
+        for package = (find-package package-name)
+        for symbol = (and package
+                          (find-symbol "RENDERED-VIEW-LAYOUT-SNAPSHOT"
+                                       package))
+        when (and symbol (fboundp symbol))
+          return symbol))
+
+(defun view-contract-layout-evidence (view subject)
+  (let ((provider (rendered-view-layout-snapshot-provider)))
+    (if provider
+        (handler-case
+            (let ((snapshot (funcall provider view subject)))
+              (if snapshot
+                  (list (list :layout-snapshot snapshot))
+                  '((:layout-snapshot :missing-evidence)
+                    (:explanation
+                     "A rendered-view-layout-snapshot provider exists, but it returned no snapshot for this view/subject."))))
+          (error (condition)
+            `((:layout-snapshot :missing-evidence)
+              (:explanation
+               ,(format nil
+                        "The rendered-view-layout-snapshot provider failed: ~A"
+                        condition)))))
+        '((:layout-snapshot :missing-evidence)
+          (:explanation
+           "No rendered-view-layout-snapshot provider is loaded for this view/subject.")))))
+
+(defun view-contract-evidence-with-layout (spec layout-evidence)
+  (append layout-evidence
+          (remove :layout-snapshot
+                  (hv:evidence-of spec)
+                  :key #'first)))
+
+(defun view-contract-for-view-and-subject (view subject)
+  (let ((spec (hv:view-specification view subject)))
+    (setf (hv:evidence-of spec)
+          (view-contract-evidence-with-layout
+           spec
+           (view-contract-layout-evidence view subject)))
+    spec))
+
+(defun view-contract-for-pane (pane)
+  (with-slots (object) pane
+    (let ((view (active-inspector-view-object pane)))
+      (unless view
+        (error "No active inspector view is available for this pane."))
+      (view-contract-for-view-and-subject view object))))
+
+(defun inspect-view-contract-for-pane (pane event)
+  (declare (ignore event))
+  (with-slots (inspector) pane
+    (create-pane inspector (view-contract-for-pane pane))))
+
 (defun dom-association-class-present-p (element class-name)
   (let ((classes (dom-association-attribute-value element "class")))
     (and (stringp classes)
@@ -636,6 +700,17 @@
                               (close-panes-after inspector pane))
                             (create-pane inspector view* :select "Source code"))
                           (select-view pane index*))))))
+      (let ((contract-button
+              (clog:create-button chrome
+                                  :content +view-contract-action-label+
+                                  :html-id (gensym "view-contract-action"))))
+        (clog:add-class contract-button "hyperdoc-view-contract-action")
+        (clog:set-on-mouse-click
+         contract-button
+         #'(lambda (obj event)
+             (declare (ignore obj))
+             (inspect-view-contract-for-pane pane event))
+         :cancel-event t))
       (clog:create-div chrome
                        :class "hyperdoc-dom-connect-pane-slot"
                        :content ""

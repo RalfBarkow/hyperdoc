@@ -253,6 +253,9 @@ services.openssh.settings.PasswordAuthentication = true;")
 
 ;;; Inspector views
 
+(defclass kioskbeerli-dita-task-view (html-inspector-views:html-view)
+  ())
+
 (defmethod html-inspector-views:text-representation
     ((topic kioskbeerli-dita-task-topic))
   (format nil "DITA task: ~A"
@@ -285,40 +288,111 @@ services.openssh.settings.PasswordAuthentication = true;")
 
 (html-inspector-views:defview kioskbeerli-dita-task-view
     (topic kioskbeerli-dita-task-topic)
-  (html-inspector-views:html-view
-      :title "DITA Task"
-      :priority 1
-    (html-inspector-views:html
-      (:div :class "kioskbeerli-dita-task"
-       (:h2 (html-inspector-views:esc
-             (%stringify (kioskbeerli-task-topic-title-of topic))))
-       (:p
-        (:strong "Short description: ")
-        (html-inspector-views:esc
-         (%stringify (kioskbeerli-task-topic-shortdesc-of topic))))
-       (:h3 "Context")
-       (:p (html-inspector-views:esc
-            (%stringify (kioskbeerli-task-topic-context-of topic))))
-       (:h3 "Prerequisites")
-       (:pre
-        (:code
+  (make-instance
+   'kioskbeerli-dita-task-view
+   :html nil
+   :references nil
+   :assets nil
+   :create-html
+   (html-inspector-views:thunk
+    (html-inspector-views:html-and-references
+     (html-inspector-views:html
+       (:div :class "kioskbeerli-dita-task"
+        (:h2 (html-inspector-views:esc
+              (%stringify (kioskbeerli-task-topic-title-of topic))))
+        (:p
+         (:strong "Short description: ")
          (html-inspector-views:esc
-          (%stringify (format nil "~{~A~%~}"
-                              (kioskbeerli-task-topic-prerequisites-of topic))))))
-       (:h3 "Steps")
-       (:pre
-        (:code
-         (html-inspector-views:esc
-          (%stringify (%task-topic-steps-text topic)))))
-       (:h3 "Expected result")
-       (:p (html-inspector-views:esc
-            (%stringify (kioskbeerli-task-topic-result-of topic))))
-       (:h3 "Postrequisites")
-       (:pre
-        (:code
-         (html-inspector-views:esc
-          (%stringify (format nil "~{~A~%~}"
-                              (kioskbeerli-task-topic-postrequisites-of topic))))))))))
+          (%stringify (kioskbeerli-task-topic-shortdesc-of topic))))
+        (:h3 "Context")
+        (:p (html-inspector-views:esc
+             (%stringify (kioskbeerli-task-topic-context-of topic))))
+        (:h3 "Prerequisites")
+        (:pre
+         (:code
+          (html-inspector-views:esc
+           (%stringify (format nil "~{~A~%~}"
+                               (kioskbeerli-task-topic-prerequisites-of topic))))))
+        (:h3 "Steps")
+        (:pre
+         (:code
+          (html-inspector-views:esc
+           (%stringify (%task-topic-steps-text topic)))))
+        (:h3 "Expected result")
+        (:p (html-inspector-views:esc
+             (%stringify (kioskbeerli-task-topic-result-of topic))))
+        (:h3 "Postrequisites")
+        (:pre
+         (:code
+          (html-inspector-views:esc
+           (%stringify (format nil "~{~A~%~}"
+                               (kioskbeerli-task-topic-postrequisites-of topic))))))))))
+   :title "DITA Task"
+   :priority 1))
+
+(defmethod html-inspector-views:view-specification
+    ((view kioskbeerli-dita-task-view)
+     (topic kioskbeerli-dita-task-topic))
+  (make-instance
+   'html-inspector-views:inspector-view-specification
+   :view-id "kioskbeerli-dita-task-view"
+   :view-title (html-inspector-views:view-title view)
+   :subject-type 'kioskbeerli-dita-task-topic
+   :reader-question
+   "What should the operator do next, and what evidence proves completion?"
+   :content-model
+   '(:title :shortdesc :context :prerequisites :steps
+     :expected-result :postrequisites :evidence)
+   :box-contract
+   '((:root-box
+      :class "kioskbeerli-dita-task"
+      :display :block
+      :inline-size :available
+      :block-size :auto
+      :max-inline-size "100%"
+      :overflow :auto)
+     (:prose-boxes
+      :content (:title :shortdesc :context :expected-result)
+      :inline-size :available
+      :max-inline-size "100%"
+      :overflow-wrap :anywhere
+      :margin-block :reader-rhythm)
+     (:steps-list-boxes
+      :content (:prerequisites :steps :postrequisites)
+      :display :block
+      :list-style :ordered
+      :inline-size :available
+      :max-inline-size "100%")
+     (:code-boxes
+      :content (:commands :configuration-snippets)
+      :display :block
+      :inline-size :available
+      :max-inline-size "100%"
+      :overflow :auto
+      :white-space :pre-wrap
+      :padding-inline :reader-rhythm))
+   :priority-policy
+   '(:mobile-primary t
+     :operator-task-primary t
+     :technical-secondary (:slots :print :operations)
+     :short-title "Task")
+   :actions
+   '((:inspect-plan-task :navigation-only)
+     (:inspect-progress :navigation-only)
+     (:inspect-state-link :navigation-only)
+     (:record-evidence :descriptive-only :external-mutation-not-performed))
+   :evidence
+   '((:layout-snapshot :missing-evidence)
+     (:design-reference "DMX topic 978985")
+     (:safety-boundary
+      "This contract performs no SSH, build, flash, HTTP, DMX write, or device mutation."))
+   :failure-modes
+   '(:preformatted-prose
+     :horizontal-overflow
+     :title-bar-domination
+     :hidden-affordance
+     :missing-evidence
+     :missing-layout-snapshot)))
 
 (html-inspector-views:defview kioskbeerli-plan-progress-state-view
     (topic kioskbeerli-dita-task-topic)

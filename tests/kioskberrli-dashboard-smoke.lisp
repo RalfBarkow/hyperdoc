@@ -408,6 +408,69 @@
      (string= "missing-evidence" (dreyeck/kioskbeerli:status-of latest))
      "Latest progress must preserve missing-evidence status.")))
 
+(defun run-kioskberrli-dashboard-dita-view-contract-smoke-test ()
+  (let* ((topic
+           (dreyeck/kioskbeerli:kioskbeerli-semi-headless-set-password-task))
+         (view
+           (dreyeck/kioskbeerli:kioskbeerli-dita-task-view topic))
+         (contract
+           (html-inspector-views:view-specification view topic))
+         (box-contract
+           (html-inspector-views:box-contract-of contract))
+         (box-names
+           (mapcar #'first box-contract))
+         (box-text
+           (prin1-to-string box-contract))
+         (contract-view-titles
+           (mapcar #'html-inspector-views:view-title
+                   (html-inspector-views:all-views contract))))
+    (kioskberrli-dashboard-assert-true
+     (typep view 'dreyeck/kioskbeerli:kioskbeerli-dita-task-view)
+     "DITA task view must be a typed view object.")
+    (kioskberrli-dashboard-assert-true
+     (typep contract 'html-inspector-views:inspector-view-specification)
+     "DITA task view must produce an inspector-view-specification.")
+    (kioskberrli-dashboard-assert-true
+     (string= "What should the operator do next, and what evidence proves completion?"
+              (html-inspector-views:reader-question-of contract))
+     "DITA task contract must preserve the required reader question.")
+    (kioskberrli-dashboard-assert-true
+     (equal '(:title :shortdesc :context :prerequisites :steps
+              :expected-result :postrequisites :evidence)
+            (html-inspector-views:content-model-of contract))
+     "DITA task contract must expose the required content model.")
+    (dolist (box-name '(:root-box :prose-boxes :steps-list-boxes :code-boxes))
+      (kioskberrli-dashboard-assert-true
+       (member box-name box-names)
+       (format nil "DITA task box contract must include ~S" box-name)))
+    (dolist (term '("INLINE-SIZE" "BLOCK-SIZE" "MAX-INLINE-SIZE"
+                    "OVERFLOW" "PADDING-INLINE"))
+      (kioskberrli-dashboard-assert-true
+       (search term box-text :test #'char=)
+       (format nil "DITA task box contract must use logical layout term ~A"
+               term)))
+    (kioskberrli-dashboard-assert-true
+     (member '(:layout-snapshot :missing-evidence)
+             (html-inspector-views:evidence-of contract)
+             :test #'equal)
+     "DITA task contract must report missing layout snapshot evidence.")
+    (kioskberrli-dashboard-assert-true
+     (search "EXTERNAL-MUTATION-NOT-PERFORMED"
+             (prin1-to-string (html-inspector-views:actions-of contract))
+             :test #'char=)
+     "DITA task contract actions must remain descriptive-only.")
+    (dolist (title '("Summary"
+                     "Content model"
+                     "Box contract"
+                     "Priority policy"
+                     "Actions"
+                     "Evidence"
+                     "Failure modes"))
+      (assert-kioskberrli-dashboard-string-member
+       title
+       contract-view-titles
+       (format nil "DITA task contract must expose view ~S" title)))))
+
 (defun run-kioskberrli-dashboard-page-smoke-test ()
   (assert-kioskberrli-hyperdoc-page-present "Kioskberrli Dashboard")
   (dolist (title '("Kioskberrli"
@@ -510,6 +573,7 @@
   (run-kioskberrli-dashboard-task-lookup-smoke-test)
   (run-kioskberrli-dashboard-scxml-smoke-test)
   (run-kioskberrli-dashboard-trace-smoke-test)
+  (run-kioskberrli-dashboard-dita-view-contract-smoke-test)
   (run-kioskberrli-dashboard-page-smoke-test)
   (format t "~&Kioskberrli dashboard smoke tests passed.~%")
   t)

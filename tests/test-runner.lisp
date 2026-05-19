@@ -51,6 +51,7 @@
   (run-fedwiki-site-dmx-import-tests)
   (run-check-runner-smoke-tests)
   (run-fedwiki-story-items-smoke-tests)
+  (run-view-contract-smoke-tests)
   (run-inspector-performance-smoke-tests)
   (run-merged-doc-slices-smoke-tests)
   (run-iconic-retrieval-smoke-tests)

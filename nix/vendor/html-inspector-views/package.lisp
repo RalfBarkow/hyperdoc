@@ -13,6 +13,17 @@
            #:view-html #:view-references #:view-assets #:view-create-html
            #:all-views #:specific-views
            #:rename #:priority
+           #:inspector-view-specification
+           #:view-id-of #:view-title-of #:subject-type-of
+           #:reader-question-of #:content-model-of #:box-contract-of
+           #:priority-policy-of #:actions-of #:evidence-of
+           #:failure-modes-of
+           #:view-specification
+           #:view-reader-question
+           #:view-content-model
+           #:view-box-contract
+           #:view-priority-policy
+           #:view-failure-modes
            #:defview
            #:👀items
            #:👀description
