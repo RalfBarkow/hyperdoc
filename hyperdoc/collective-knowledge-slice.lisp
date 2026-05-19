@@ -879,33 +879,46 @@
             (references-of chunk))))
 
 (defun render-the-life-cycle-of-collective-knowledge-topic-factory-snippet ()
-  (let* ((definition (the-life-cycle-of-collective-knowledge-topic-definition-chunk))
+  (let* ((definition
+           (the-life-cycle-of-collective-knowledge-topic-definition-chunk))
          (metadata
-          (list :topic-factory-snippet
-                :id (snippet-id-of definition)
-                :source-file *the-life-cycle-of-collective-knowledge-topic-asset*
-                :source-origin-id (source-origin-id-of definition)
-                :source-origin-path (source-origin-path-of definition)
-                :related-hyperdoc-page-title
-                (related-hyperdoc-page-title-of definition)
-                :related-topic-id (related-topic-id-of definition)
-                :related-topic-ids (related-topic-ids-of definition)
-                :provenance (provenance-of definition)))
+           (list :topic-factory-snippet
+                 :id (snippet-id-of definition)
+                 :source-file *the-life-cycle-of-collective-knowledge-topic-asset*
+                 :source-origin-id (source-origin-id-of definition)
+                 :source-origin-path (source-origin-path-of definition)
+                 :related-hyperdoc-page-title
+                 (related-hyperdoc-page-title-of definition)
+                 :related-topic-id (related-topic-id-of definition)
+                 :related-topic-ids
+                 (copy-list (related-topic-ids-of definition))
+                 :provenance
+                 (copy-tree (provenance-of definition))))
          (topic-forms
-          (mapcar #'render-the-life-cycle-topic-factory-form
-                  (the-life-cycle-of-collective-knowledge-topic-chunks))))
-    (with-output-to-string (stream)
-      (pprint metadata stream)
-      (terpri stream)
-      (terpri stream)
-      (format stream ";; Topic-factory snippet bundle for The Life Cycle of Collective Knowledge.~%~%")
-      (loop for form in topic-forms
-            for first? = t then nil
-            do (unless first?
-                 (terpri stream)
-                 (terpri stream))
-            (write-string form stream))
-      (terpri stream))))
+           (mapcar #'render-the-life-cycle-topic-factory-form
+                   (the-life-cycle-of-collective-knowledge-topic-chunks))))
+    (let ((*print-pretty* t)
+          (*print-array* nil)
+          (*print-circle* nil)
+          (*print-level* nil)
+          (*print-length* nil)
+          (*print-readably* nil)
+          (*print-escape* t)
+          (*print-case* :upcase)
+          (*package* (find-package :keyword)))
+      (with-output-to-string (stream)
+        (pprint metadata stream)
+        (terpri stream)
+        (terpri stream)
+        (format stream
+                ";; Topic-factory snippet bundle for The Life Cycle of Collective Knowledge.~%~%")
+        (loop for form in topic-forms
+              for first? = t then nil
+              do (unless first?
+                   (terpri stream)
+                   (terpri stream))
+                 (write-string form stream))
+        (terpri stream)))))
 
 (defun render-the-life-cycle-topic-list-item (chunk)
   (format nil
