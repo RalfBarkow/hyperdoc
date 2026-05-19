@@ -147,6 +147,18 @@
    #:make-dm6-appembed-inline-proof-page-system
    #:make-fedwiki-mobile-progressive-chrome-page-system
    #:make-fedwiki-shop3-page-system
+   ;; LISP-CRITIC review plan surface
+   #:hyperdoc-plan
+   #:hyperdoc-task-topic
+   #:hyperdoc-plan-task-relation
+   #:integrate-lisp-critic-in-review-plan
+   #:lisp-critic-review-plan-task-topics
+   #:lisp-critic-review-task-topic-by-id
+   #:lisp-critic-review-relations-for-task
+   #:lisp-critic-review-relations-answering
+   #:lisp-critic-review-goldberg-coverage
+   #:lisp-critic-fedwiki-asset-present-p
+   #:lisp-critic-review-normalize-goldberg-question-id
    ;; Access to the global catalog of registered HyperDocs
    #:*catalog* #:hyperdocs-of
    ;; Access to HyperDoc data

@@ -1,0 +1,96 @@
+<h1>Integrate LISP-CRITIC into HyperDoc automated review</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the durable plan surface for integrating the local FedWiki
+  LISP-CRITIC asset into HyperDoc automated code review. The scope here is a
+  plan, task, relation, and inspector-view surface. It does not load, execute,
+  vendor, copy, or normalize the critic.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(integrate-lisp-critic-in-review-plan)"><tt>integrate-lisp-critic-in-review-plan</tt></a></li>
+  <li><a expr="(lisp-critic-review-plan-task-topics)"><tt>lisp-critic-review-plan-task-topics</tt></a></li>
+  <li><a expr="(lisp-critic-review-goldberg-coverage)"><tt>lisp-critic-review-goldberg-coverage</tt></a></li>
+  <li><a hyperbook="topics" page="LISP-CRITIC review integration plan"><tt>LISP-CRITIC review integration plan</tt></a></li>
+  <li><a hyperbook="topics" page="Review contract"><tt>Review contract</tt></a></li>
+  <li><a hyperbook="topics" page="Asymmetric exemplar review"><tt>Asymmetric exemplar review</tt></a></li>
+</ul>
+
+<h2>Goal</h2>
+
+<p>
+  The concrete plan is
+  <a expr="(integrate-lisp-critic-in-review-plan)"><tt>integrate-lisp-critic-in-review</tt></a>.
+  Its goal is to use the FedWiki-sourced LISP-CRITIC asset as an inspectable
+  critic engine under HyperDoc review contracts.
+</p>
+
+<h2>Source station</h2>
+
+<p>
+  LISP-CRITIC is treated as a source-station-backed local asset:
+</p>
+
+<pre>(:fedwiki-asset
+ :site "wiki.ralfbarkow.ch"
+ :page "a-critic-for-lisp"
+ :asset-root "~/.wiki/wiki.ralfbarkow.ch/assets/pages/a-critic-for-lisp/")</pre>
+
+<p>
+  The plan records that path as data. Smoke tests may report whether the local
+  checkout exists, but the model and tests do not require a FedWiki server, DMX
+  server, network access, or the physical asset path to exist.
+</p>
+
+<h2>Contracts</h2>
+
+<p>
+  The plan reuses the existing review vocabulary rather than creating a
+  parallel review language. Its contract list is:
+</p>
+
+<ul>
+  <li><tt>:review-contract</tt></li>
+  <li><tt>:critic-contract</tt></li>
+  <li><tt>:source-station-contract</tt></li>
+  <li><tt>:view-contract</tt></li>
+</ul>
+
+<h2>Plan status</h2>
+
+<p>
+  The current status is <tt>:draft</tt>. The plan has first-class task
+  relations and inspector views, but the actual execution adapter remains a
+  deferred follow-up. No LISP-CRITIC invocation, source manifest checksum
+  policy, or finding normalization is implemented on this page.
+</p>
+
+<h2>Reading surfaces</h2>
+
+<p>
+  Inspect the plan with the <b>Summary</b> view to see the goal, status,
+  source station, contracts, and ordered task decomposition. Inspect the
+  <b>Goldberg coverage</b> view to see which DITA-like task topics answer
+  Programmer-as-Reader questions and which artifacts those relations produce.
+</p>
+
+<p>
+  The prompt question id <tt>:does-system-do-this</tt> is normalized to the
+  local Goldberg slice id <tt>:does-any-part-do-this</tt>. The mapping is
+  explicit in
+  <a expr="(lisp-critic-review-normalize-goldberg-question-id :does-system-do-this)"><tt>lisp-critic-review-normalize-goldberg-question-id</tt></a>.
+</p>
+
+<h2>Boundary</h2>
+
+<p>
+  This slice is descriptive and inspectable only. It does not perform live
+  builds, HTTP requests, SSH sessions, DMX writes, FedWiki writes, or
+  LISP-CRITIC execution. Later work should implement the execution adapter,
+  source manifest/checksum policy, invocation boundary, and finding
+  normalization as separate inspectable artifacts.
+</p>

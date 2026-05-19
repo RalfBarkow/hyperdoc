@@ -187,6 +187,26 @@
    :references '("Inspectable review contracts for automated code review"
                  "Konrad Feedback on Communication Pages")))
 
+(defun lisp-critic-review-integration-plan-topic ()
+  (make-topic
+   :id "lisp-critic-review-integration-plan"
+   :title "LISP-CRITIC review integration plan"
+   :summary "First-class HyperDoc plan for integrating the FedWiki-sourced LISP-CRITIC asset into automated review contracts without executing or vendoring it in this slice."
+   :references '("Integrate LISP-CRITIC into HyperDoc automated review"
+                 "DITA-like task topics for LISP-CRITIC review integration"
+                 "Inspectable review contracts for automated code review"
+                 "Goldberg reading comprehension questions")))
+
+(defun lisp-critic-review-task-decomposition-topic ()
+  (make-topic
+   :id "lisp-critic-review-task-decomposition"
+   :title "LISP-CRITIC review task decomposition"
+   :summary "DITA-like task topic decomposition and plan-task relation surface for the LISP-CRITIC review integration plan."
+   :references '("DITA-like task topics for LISP-CRITIC review integration"
+                 "Integrate LISP-CRITIC into HyperDoc automated review"
+                 "Review contract"
+                 "Goldberg reading comprehension questions")))
+
 (defun codex-resume-branch-context-topic ()
   (make-topic
    :id "codex-resume-branch-context"
@@ -319,4 +339,3 @@
    :references '("Create NixOS SD Card from HyperDoc Playground"
                  "Surface and Artifact Answers"
                  "sd-card-primary-semantic-entrypoints-example")))
-

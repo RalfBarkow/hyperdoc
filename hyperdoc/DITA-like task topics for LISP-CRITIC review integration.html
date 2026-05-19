@@ -1,0 +1,66 @@
+<h1>DITA-like task topics for LISP-CRITIC review integration</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page decomposes the LISP-CRITIC review integration plan into
+  DITA-like task topic objects. Each task topic is related back to the
+  concrete plan through a first-class plan-task relation.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(integrate-lisp-critic-in-review-plan)"><tt>integrate-lisp-critic-in-review-plan</tt></a></li>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;inventory-fedwiki-lisp-critic-asset&quot;)"><tt>inventory-fedwiki-lisp-critic-asset</tt></a></li>
+  <li><a expr="(lisp-critic-review-relations-for-task &quot;inventory-fedwiki-lisp-critic-asset&quot;)"><tt>relations for inventory-fedwiki-lisp-critic-asset</tt></a></li>
+  <li><a hyperbook="topics" page="LISP-CRITIC review task decomposition"><tt>LISP-CRITIC review task decomposition</tt></a></li>
+</ul>
+
+<h2>Task structure</h2>
+
+<p>
+  Each task topic records an id, title, short description, context,
+  prerequisites, steps, expected result, artifacts, evidence, and Goldberg
+  questions. The task object is not the plan; the relation object is what says
+  how a task belongs to a plan.
+</p>
+
+<h2>Tasks</h2>
+
+<ol>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;inventory-fedwiki-lisp-critic-asset&quot;)"><tt>inventory-fedwiki-lisp-critic-asset</tt></a>: inventory the FedWiki asset source station and produce <tt>critic-source-manifest</tt>.</li>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;define-critic-source-station-contract&quot;)"><tt>define-critic-source-station-contract</tt></a>: define the source-station contract and produce <tt>fedwiki-critic-source</tt>.</li>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;load-or-invoke-lisp-critic-without-vendoring&quot;)"><tt>load-or-invoke-lisp-critic-without-vendoring</tt></a>: define the future invocation boundary without execution.</li>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;normalize-lisp-critic-output-into-findings&quot;)"><tt>normalize-lisp-critic-output-into-findings</tt></a>: plan the <tt>lisp-critic-finding</tt> schema.</li>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;attach-critic-runs-to-review-contracts&quot;)"><tt>attach-critic-runs-to-review-contracts</tt></a>: bridge critic runs into existing review contracts.</li>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;render-critic-contract-and-run-views&quot;)"><tt>render-critic-contract-and-run-views</tt></a>: name the future inspector surfaces for source, rules, findings, raw output, and suppressions.</li>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;expose-task-plan-relation-views&quot;)"><tt>expose-task-plan-relation-views</tt></a>: expose the task-to-plan relation surface.</li>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;add-smoke-tests&quot;)"><tt>add-smoke-tests</tt></a>: validate the plan, relations, Goldberg coverage, and view construction.</li>
+  <li><a expr="(lisp-critic-review-task-topic-by-id &quot;materialize-documentation-pages&quot;)"><tt>materialize-documentation-pages</tt></a>: document the plan and task decomposition in HyperDoc.</li>
+</ol>
+
+<h2>Relations to plans</h2>
+
+<p>
+  Open any task topic and select the <b>Relations to plans</b> view. The view
+  shows the related plan, relation type, ordinal, dependencies, produced
+  artifacts, validated checks, and Goldberg questions answered.
+</p>
+
+<h2>Goldberg coverage</h2>
+
+<p>
+  Open the concrete plan and select <b>Goldberg coverage</b>. The coverage
+  view answers which task topics cover <tt>:where-is-it</tt>,
+  <tt>:what-is-that</tt>, <tt>:what-is-needed</tt>,
+  <tt>:why-happened</tt>, and <tt>:why-not-happened</tt>.
+</p>
+
+<h2>Boundary</h2>
+
+<p>
+  These task topics are planning and reading objects. They do not load the
+  LISP-CRITIC ASDF system, run the critic, call a FedWiki or DMX server, or
+  mutate local source stations.
+</p>
