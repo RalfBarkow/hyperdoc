@@ -21,9 +21,12 @@
    #:task-id-of
    #:from-state-of
    #:to-state-of
+   #:scxml-event-of
+   #:scxml-state-of
    #:note-of
    #:path-of
    #:kind-of
+   #:plan-run-of
 
    ;; Dashboard objects.
    #:kioskberrli-dashboard-status
@@ -65,6 +68,22 @@
    #:kioskbeerli-planner-run
    #:kioskberrli-planner-run
    #:kioskbeerli-plan-task-ids
+   #:kioskbeerli-lookup-plan-task
+   #:kioskberrli-lookup-plan-task
+   #:kioskbeerli-task-plan
+   #:kioskberrli-task-plan
+   #:kioskbeerli-task-progress
+   #:kioskberrli-task-progress
+   #:kioskbeerli-task-state-link
+   #:kioskberrli-task-state-link
+   #:kioskbeerli-task-dependents
+   #:kioskberrli-task-dependents
+   #:kioskbeerli-current-scxml-state
+   #:kioskberrli-current-scxml-state
+   #:kioskbeerli-next-missing-evidence-tasks
+   #:kioskberrli-next-missing-evidence-tasks
+   #:kioskbeerli-record-boot-observed
+   #:kioskberrli-record-boot-observed
    #:execution-mode-of
    #:dry-run-p
    #:planner-kind-of
@@ -112,3 +131,6 @@
    #:kioskbeerli-record-progress-example))
 
 (in-package :dreyeck/kioskbeerli)
+
+(trivial-package-local-nicknames:add-package-local-nickname
+ :views :html-inspector-views :dreyeck/kioskbeerli)

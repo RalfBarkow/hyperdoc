@@ -30,7 +30,31 @@
 <p>
   The obsolete <tt>sdImage.imageSize</tt> problem is recorded as corrected.
   The current blocker is still cross-host <tt>aarch64-linux</tt> image
-  realization unless a suitable Linux builder exists.
+  realization unless a suitable Linux builder exists. The first boot of the
+  physical Raspberry Pi is now recorded from the operator report
+  &quot;logged in as nixos on the booted Raspberry Pi&quot;; that evidence is
+  scoped to the <tt>boot-pi</tt> task only.
+</p>
+
+<h2>Task lookup boundary</h2>
+
+<p>
+  Individual plan tasks are navigable objects. Inspecting a task such as
+  <a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>boot-pi</tt></a>
+  shows its parent
+  <a expr="(hyperdoc::kioskbeerli-task-plan :boot-pi)">plan/run</a>,
+  dependencies and dependents, progress records, evidence status, and SCXML
+  link. The <tt>boot-pi</tt> task maps to event
+  <a expr="(hyperdoc::kioskbeerli-task-state-link :boot-pi)"><tt>PI_BOOTED</tt></a>
+  and state <tt>first-boot-observed</tt>.
+</p>
+
+<p>
+  The current lifecycle interpretation is exposed by
+  <a expr="(hyperdoc::kioskbeerli-current-scxml-state)"><tt>kioskbeerli-current-scxml-state</tt></a>.
+  The remaining next tasks that are still blocked or missing evidence are
+  inspectable through
+  <a expr="(hyperdoc::kioskbeerli-next-missing-evidence-tasks)"><tt>kioskbeerli-next-missing-evidence-tasks</tt></a>.
 </p>
 
 <h2>Behavior boundary</h2>
@@ -50,8 +74,18 @@
   The trace records progress entries with task id, from-state, to-state,
   status, evidence paths, and a note. Missing evidence is a first-class status,
   not an aside. The dashboard should therefore say <tt>missing-evidence</tt> or
-  <tt>missing evidence</tt> when build, flash, boot, network, kiosk-session, or
+  <tt>missing evidence</tt> when build, flash, network, kiosk-session, or
   landing-page proof is absent.
+</p>
+
+<p>
+  First boot is the current exception to that missing-evidence wording:
+  <a expr="(hyperdoc::kioskbeerli-record-boot-observed :actor &quot;operator&quot; :evidence &quot;logged in as nixos on the booted Raspberry Pi&quot;)"><tt>kioskbeerli-record-boot-observed</tt></a>
+  records <tt>boot-pi</tt> as <tt>verified</tt> and applies
+  <tt>PI_BOOTED</tt> to <tt>first-boot-observed</tt>. It does not infer
+  <tt>verify-network</tt>, <tt>verify-kiosk-session</tt>,
+  <tt>verify-landing-page</tt>, <tt>record-evidence</tt>, or
+  <tt>mark-dashboard-status</tt>.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -60,6 +94,9 @@
   <li><a hyperbook="topics" page="Kioskberrli Planner and Trace"><tt>Kioskberrli Planner and Trace</tt></a></li>
   <li><a hyperbook="topics" page="Kioskberrli Dashboard"><tt>Kioskberrli Dashboard</tt></a></li>
   <li><a hyperbook="topics" page="Kioskberrli"><tt>Kioskberrli</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>kioskbeerli-lookup-plan-task :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-task-progress :boot-pi)"><tt>kioskbeerli-task-progress :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-task-state-link :boot-pi)"><tt>kioskbeerli-task-state-link :boot-pi</tt></a></li>
   <li><a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a></li>
   <li><a expr="(hyperdoc::record-kioskbeerli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from planner and trace page.&quot;)"><tt>record-kioskbeerli-progress</tt></a></li>
 </ul>

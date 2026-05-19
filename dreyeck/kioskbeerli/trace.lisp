@@ -20,6 +20,7 @@
    (task-id :accessor task-id-of :initarg :task-id)
    (from-state :accessor from-state-of :initarg :from-state)
    (to-state :accessor to-state-of :initarg :to-state)
+   (scxml-event :accessor scxml-event-of :initarg :scxml-event :initform nil)
    (status :accessor status-of :initarg :status)
    (evidence-references :accessor evidence-references-of
                         :initarg :evidence-references
@@ -73,7 +74,7 @@
 
 (defun make-kioskbeerli-trace-entry
     (&key id (timestamp "stable-placeholder") (actor "codex")
-       task-id from-state to-state status evidence-paths note)
+       task-id from-state to-state scxml-event status evidence-paths note)
   (make-instance 'kioskbeerli-trace-entry
                  :id id
                  :timestamp timestamp
@@ -81,6 +82,7 @@
                  :task-id task-id
                  :from-state from-state
                  :to-state to-state
+                 :scxml-event scxml-event
                  :status (ensure-kioskbeerli-trace-status status)
                  :evidence-references (%evidence-references evidence-paths status)
                  :note note))
@@ -98,6 +100,7 @@
      :task-id "declare-target"
      :from-state "unknown"
      :to-state "declared"
+     :scxml-event nil
      :status "declared"
      :evidence-paths '("hyperdoc/Kioskberrli.html")
      :note "Physical Raspberry Pi kiosk target and landing page are declared.")
@@ -106,6 +109,7 @@
      :task-id "verify-obsolete-option-correction"
      :from-state "source-inspected"
      :to-state "obsolete-option-corrected"
+     :scxml-event "OBSOLETE_OPTION_REMOVED"
      :status "corrected"
      :evidence-paths '("hyperdoc/Kioskberrli sdImage imageSize Failure.html")
      :note "The obsolete sdImage.imageSize problem is documented as corrected.")
@@ -114,6 +118,7 @@
      :task-id "resolve-cross-host-build"
      :from-state "obsolete-option-corrected"
      :to-state "cross-host-build-blocked"
+     :scxml-event "BUILD_HOST_REJECTED"
      :status "blocked"
      :evidence-paths '("hyperdoc/Kioskberrli Cross-Host Build Failure.html")
      :note "The current blocker is aarch64 image realization without a suitable Linux builder.")
@@ -122,9 +127,20 @@
      :task-id "build-aarch64-image"
      :from-state "linux-builder-required"
      :to-state "linux-builder-required"
+     :scxml-event "EVIDENCE_MISSING"
      :status "missing-evidence"
      :evidence-paths '("missing: successful aarch64 SD-image build artifact")
-     :note "No successful build artifact, flash, boot, network, kiosk session, or landing-page evidence is recorded yet."))))
+     :note "No successful build artifact, flash, network, kiosk session, or landing-page evidence is recorded yet.")
+    (make-kioskbeerli-trace-entry
+     :id "trace-boot-pi-observed"
+     :actor "operator"
+     :task-id "boot-pi"
+     :from-state "sd-flashed"
+     :to-state "first-boot-observed"
+     :scxml-event "PI_BOOTED"
+     :status "verified"
+     :evidence-paths '("logged in as nixos on the booted Raspberry Pi")
+     :note "Operator reported being logged in as user nixos on the booted Raspberry Pi. This verifies first boot only; it does not verify network, kiosk session, or landing page."))))
 
 (defvar *kioskbeerli-project-trace* nil)
 
@@ -149,6 +165,7 @@
        task-id
        from-state
        to-state
+       scxml-event
        (status "unknown")
        evidence-paths
        note)
@@ -163,6 +180,7 @@
                 :task-id task-id
                 :from-state from-state
                 :to-state to-state
+                :scxml-event scxml-event
                 :status status
                 :evidence-paths evidence-paths
                 :note note)))
@@ -172,3 +190,26 @@
 
 (defun record-kioskberrli-progress (&rest args &key &allow-other-keys)
   (apply #'record-kioskbeerli-progress args))
+
+(defun kioskbeerli-record-boot-observed
+    (&key (trace (kioskbeerli-project-trace))
+       (timestamp "stable-placeholder")
+       (actor "operator")
+       (evidence "logged in as nixos on the booted Raspberry Pi"))
+  "Record the operator's first-boot observation only. This performs no SSH, HTTP, flash, build, device, or DMX mutation."
+  (record-kioskbeerli-progress
+   :trace trace
+   :id (format nil "trace-boot-pi-observed-~D"
+               (1+ (length (entries-of trace))))
+   :timestamp timestamp
+   :actor actor
+   :task-id "boot-pi"
+   :from-state "sd-flashed"
+   :to-state "first-boot-observed"
+   :scxml-event "PI_BOOTED"
+   :status "verified"
+   :evidence-paths (list evidence)
+   :note "Operator boot observation verifies first boot only; network, kiosk session, landing page, record-evidence, and dashboard-status tasks remain unevidenced unless separately recorded."))
+
+(defun kioskberrli-record-boot-observed (&rest args &key &allow-other-keys)
+  (apply #'kioskbeerli-record-boot-observed args))

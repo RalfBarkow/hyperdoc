@@ -83,9 +83,10 @@
    :status "blocked"
    :summary "The Kioskberrli system is declared, the obsolete sdImage.imageSize source error is corrected, and the current blocker is the missing valid Linux build environment for the aarch64 SD image."
    :evidence '("Kioskberrli sdImage imageSize Failure records the corrected source-level option removal."
-               "Kioskberrli Cross-Host Build Failure records the active aarch64-linux build-host mismatch.")
+               "Kioskberrli Cross-Host Build Failure records the active aarch64-linux build-host mismatch."
+               "Operator reported being logged in as nixos on the booted Raspberry Pi, which verifies first boot only.")
    :missing-evidence '("successful project SD-image build on a valid Linux builder"
-                       "flash, boot, network, kiosk-session, and landing-page evidence from the physical Pi")
+                       "flash, network, kiosk-session, and landing-page evidence from the physical Pi")
    :next-action "Rerun the project SD-image build on a valid Linux builder or through a configured remote Linux builder, then record the resulting artifact."
    :related-stations '("Kioskberrli Cross-Host Build Failure"
                        "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
@@ -123,12 +124,12 @@
    :id "kioskberrli-flash-boot-evidence"
    :section "Flash / boot evidence"
    :status "missing evidence"
-   :summary "No recorded evidence yet proves that the generated image was flashed, booted on the physical Raspberry Pi 4, reached the network, and started the kiosk session."
+   :summary "Boot evidence is now recorded from the operator's nixos login on the booted Raspberry Pi. Flash, network, kiosk-session, and landing-page evidence remain missing."
+   :evidence '("logged in as nixos on the booted Raspberry Pi")
    :missing-evidence '("SD-card flash record"
-                       "first boot observation on the physical Pi 4"
                        "network reachability"
                        "automatic kiosk session startup")
-   :next-action "After a valid build artifact exists, flash the .img, boot the Pi, and record the observed boot and network state."
+   :next-action "Record network reachability separately, then kiosk-session startup and landing-page display; do not infer those from first boot alone."
    :related-stations '("Pre-flight Checklist for Raspberry Pi NixOS SD Images"
                        "Invariant: Boot Partition Must Be Big Enough")))
 

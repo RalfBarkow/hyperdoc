@@ -24,7 +24,8 @@
                  #:hyperdoc/topics
                  #:hyperdoc/shop3
                  #:hyperdoc/scxml
-                 #:hyperdoc/scxml-workflows)
+                 #:hyperdoc/scxml-workflows
+                 #:html-inspector-views)
     :in-order-to ((test-op (test-op "dreyeck/kioskbeerli/tests")))
     :components ((:module "dreyeck/kioskbeerli"
                   :serial t

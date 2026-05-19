@@ -9,7 +9,7 @@
   </p>
 
   <p>
-    <b>blocked</b> &middot; build blocked &middot; flash missing evidence &middot; boot missing evidence
+    <b>blocked</b> &middot; build blocked &middot; flash missing evidence &middot; boot observed
   </p>
 
   <ul id="primary-dashboard-topics">
@@ -66,14 +66,15 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 
 <p>
   Flash evidence is <b>missing evidence</b>. Boot evidence is
-  <b>missing evidence</b>. The real hardware workflow has not yet been proven
-  on the physical Raspberry Pi 4 with the selected SD card.
+  <b>verified</b> for first boot only: the operator reported being logged in as
+  <tt>nixos</tt> on the booted Raspberry Pi. This does not prove network
+  reachability, kiosk-session startup, or landing-page display.
 </p>
 
 <p>
-  After a valid image artifact exists, the next evidence to record is SD-card
-  flashing, first boot on the Pi, network reachability, kiosk-session startup,
-  and landing-page display after reboot.
+  The next evidence to record separately is network reachability,
+  kiosk-session startup, landing-page display after reboot, and any missing
+  flash/build provenance.
 </p>
 
 <h2 id="public-display-layout-state">Public-display layout state</h2>
@@ -135,6 +136,8 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
   <li><a expr="(hyperdoc::kioskberrli-current-blocker)"><tt>kioskberrli-current-blocker</tt></a></li>
   <li><a expr="(hyperdoc::kioskberrli-build-evidence-status)"><tt>kioskberrli-build-evidence-status</tt></a></li>
   <li><a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>kioskbeerli-lookup-plan-task :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-task-state-link :boot-pi)"><tt>kioskbeerli-task-state-link :boot-pi</tt></a></li>
   <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
   <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
   <li><a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a></li>
@@ -154,6 +157,10 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
   dependencies, preconditions, effects, status, and evidence paths. It is
   plan-only by default:
   <a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a>.
+  Individual tasks are inspectable objects:
+  <a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>boot-pi</tt></a>
+  links to its plan/run, dependencies, dependents, progress records, and SCXML
+  state link.
 </p>
 
 <p>
@@ -184,6 +191,8 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
   <a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a>.
   The latest progress entry is available through
   <a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a>.
+  The current lifecycle state after recorded progress is
+  <a expr="(hyperdoc::kioskbeerli-current-scxml-state)"><tt>kioskbeerli-current-scxml-state</tt></a>.
 </p>
 
 <p>
@@ -191,4 +200,9 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
   it does not run Nix, flash devices, open SSH sessions, mutate HTTP state, or
   write to DMX:
   <a expr="(hyperdoc::record-kioskbeerli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from dashboard example.&quot;)"><tt>record-kioskbeerli-progress</tt></a>.
+  First-boot evidence is recorded narrowly with
+  <a expr="(hyperdoc::kioskbeerli-record-boot-observed :actor &quot;operator&quot; :evidence &quot;logged in as nixos on the booted Raspberry Pi&quot;)"><tt>kioskbeerli-record-boot-observed</tt></a>;
+  it applies <tt>PI_BOOTED</tt> and <tt>first-boot-observed</tt> without
+  verifying the later network, kiosk-session, landing-page, record-evidence, or
+  dashboard-status tasks.
 </p>

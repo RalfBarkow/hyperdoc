@@ -176,7 +176,23 @@
                     hyperdoc::kioskbeerli-behavior-chart
                     hyperdoc::kioskbeerli-project-trace
                     hyperdoc::kioskbeerli-latest-progress
-                    hyperdoc::record-kioskbeerli-progress))
+                    hyperdoc::record-kioskbeerli-progress
+                    hyperdoc::kioskbeerli-lookup-plan-task
+                    hyperdoc::kioskberrli-lookup-plan-task
+                    hyperdoc::kioskbeerli-task-plan
+                    hyperdoc::kioskberrli-task-plan
+                    hyperdoc::kioskbeerli-task-progress
+                    hyperdoc::kioskberrli-task-progress
+                    hyperdoc::kioskbeerli-task-state-link
+                    hyperdoc::kioskberrli-task-state-link
+                    hyperdoc::kioskbeerli-task-dependents
+                    hyperdoc::kioskberrli-task-dependents
+                    hyperdoc::kioskbeerli-current-scxml-state
+                    hyperdoc::kioskberrli-current-scxml-state
+                    hyperdoc::kioskbeerli-next-missing-evidence-tasks
+                    hyperdoc::kioskberrli-next-missing-evidence-tasks
+                    hyperdoc::kioskbeerli-record-boot-observed
+                    hyperdoc::kioskberrli-record-boot-observed))
     (kioskberrli-dashboard-assert-true
      (fboundp symbol)
      (format nil "Missing dashboard helper ~A" symbol)))
@@ -237,6 +253,91 @@
        "build-aarch64-image"
        (dreyeck/kioskbeerli:dependencies-of flash-task)
        "flash-sd-card must depend on build-aarch64-image."))))
+
+(defun run-kioskberrli-dashboard-task-lookup-smoke-test ()
+  (let* ((task (dreyeck/kioskbeerli:kioskbeerli-lookup-plan-task :boot-pi))
+         (run (dreyeck/kioskbeerli:kioskbeerli-task-plan task))
+         (state-link (dreyeck/kioskbeerli:kioskbeerli-task-state-link task))
+         (progress-before
+           (dreyeck/kioskbeerli:kioskbeerli-task-progress task)))
+    (kioskberrli-dashboard-assert-true
+     (typep task 'dreyeck/kioskbeerli:kioskbeerli-plan-task)
+     "lookup-plan-task must return the boot-pi task.")
+    (kioskberrli-dashboard-assert-true
+     (string= "boot-pi" (dreyeck/kioskbeerli:id-of task))
+     "lookup-plan-task must normalize :boot-pi to boot-pi.")
+    (kioskberrli-dashboard-assert-true
+     (typep run 'dreyeck/kioskbeerli:kioskbeerli-plan-run)
+     "boot-pi task must link to the planner run.")
+    (kioskberrli-dashboard-assert-true
+     (member task (dreyeck/kioskbeerli:tasks-of run))
+     "boot-pi task must be a member of its parent plan.")
+    (kioskberrli-dashboard-assert-true
+     (string= "PI_BOOTED"
+              (dreyeck/kioskbeerli:scxml-event-of state-link))
+     "boot-pi task must link to SCXML event PI_BOOTED.")
+    (kioskberrli-dashboard-assert-true
+     (string= "first-boot-observed"
+              (dreyeck/kioskbeerli:scxml-state-of state-link))
+     "boot-pi task must link to state first-boot-observed.")
+    (kioskberrli-dashboard-assert-true
+     (typep (dreyeck/kioskbeerli:kioskberrli-lookup-plan-task :boot-pi)
+            'dreyeck/kioskbeerli:kioskbeerli-plan-task)
+     "kioskberrli lookup compatibility alias must resolve boot-pi.")
+    (dreyeck/kioskbeerli:kioskbeerli-record-boot-observed
+     :actor "operator"
+     :evidence "logged in as nixos on the booted Raspberry Pi")
+    (let* ((progress-after
+             (dreyeck/kioskbeerli:kioskbeerli-task-progress :boot-pi))
+           (updated-task
+             (dreyeck/kioskbeerli:kioskbeerli-lookup-plan-task :boot-pi))
+           (next-task-ids
+             (mapcar #'dreyeck/kioskbeerli:id-of
+                     (dreyeck/kioskbeerli:kioskbeerli-next-missing-evidence-tasks))))
+      (kioskberrli-dashboard-assert-true
+       (> (length progress-after) (length progress-before))
+       "Recording boot observed must create a progress entry.")
+      (kioskberrli-dashboard-assert-true
+       (not (string= "missing-evidence"
+                     (dreyeck/kioskbeerli:status-of updated-task)))
+       "After recording boot observed, boot-pi must no longer be missing-evidence.")
+      (kioskberrli-dashboard-assert-true
+       (string= "verified" (dreyeck/kioskbeerli:status-of updated-task))
+       "After recording boot observed, boot-pi must be verified.")
+      (kioskberrli-dashboard-assert-true
+       (member "logged in as nixos on the booted Raspberry Pi"
+               (dreyeck/kioskbeerli:evidence-paths-of updated-task)
+               :test #'string=)
+       "boot-pi must carry the operator evidence text.")
+      (kioskberrli-dashboard-assert-true
+       (string= "first-boot-observed"
+                (dreyeck/kioskbeerli:kioskbeerli-current-scxml-state))
+       "Current SCXML state must be first-boot-observed after boot evidence.")
+      (dolist (later-task-id '("verify-network"
+                               "verify-kiosk-session"
+                               "verify-landing-page"
+                               "record-evidence"))
+        (kioskberrli-dashboard-assert-true
+         (string= "missing-evidence"
+                  (dreyeck/kioskbeerli:status-of
+                   (dreyeck/kioskbeerli:kioskbeerli-lookup-plan-task
+                    later-task-id)))
+         (format nil "~A must remain missing-evidence." later-task-id))
+        (assert-kioskberrli-dashboard-string-member
+         later-task-id
+         next-task-ids
+         (format nil "~A must remain a next missing-evidence task."
+                 later-task-id)))
+      (kioskberrli-dashboard-assert-true
+       (string= "blocked"
+                (dreyeck/kioskbeerli:status-of
+                 (dreyeck/kioskbeerli:kioskbeerli-lookup-plan-task
+                  :mark-dashboard-status)))
+       "mark-dashboard-status must remain blocked until separately evidenced.")
+      (assert-kioskberrli-dashboard-string-member
+       "mark-dashboard-status"
+       next-task-ids
+       "mark-dashboard-status must remain a next blocked task."))))
 
 (defun run-kioskberrli-dashboard-scxml-smoke-test ()
   (let* ((chart (dreyeck/kioskbeerli:kioskbeerli-behavior-chart))
@@ -340,7 +441,7 @@
      "Kioskberrli Dashboard"
      '("From: <a page=\"Kioskberrli\">Kioskberrli</a>"
        "To: <a page=\"Kioskberrli Cross-Host Build Failure\">Kioskberrli Cross-Host Build Failure</a>"
-       "blocked</b> &middot; build blocked &middot; flash missing evidence &middot; boot missing evidence"
+       "blocked</b> &middot; build blocked &middot; flash missing evidence &middot; boot observed"
        "<h2 id=\"current-status\">Current status</h2>"
        "<h2 id=\"build-evidence\">Build evidence</h2>"
        "<h2 id=\"flash-boot-evidence\">Flash / boot evidence</h2>"
@@ -359,8 +460,11 @@
        "expr=\"(hyperdoc::kioskberrli-dashboard-status)\""
        "expr=\"(hyperdoc::kioskberrli-dashboard-stations)\""
        "expr=\"(hyperdoc::kioskbeerli-planner-run)\""
+       "expr=\"(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)\""
+       "expr=\"(hyperdoc::kioskbeerli-task-state-link :boot-pi)\""
        "expr=\"(hyperdoc::kioskbeerli-behavior-chart)\""
        "expr=\"(hyperdoc::kioskbeerli-project-trace)\""
+       "expr=\"(hyperdoc::kioskbeerli-record-boot-observed"
        "expr=\"(hyperdoc::record-kioskbeerli-progress"
        "declared"
        "blocked"
@@ -403,6 +507,7 @@
   (run-kioskberrli-dashboard-boundary-smoke-test)
   (run-kioskberrli-dashboard-topic-object-smoke-test)
   (run-kioskberrli-dashboard-planner-smoke-test)
+  (run-kioskberrli-dashboard-task-lookup-smoke-test)
   (run-kioskberrli-dashboard-scxml-smoke-test)
   (run-kioskberrli-dashboard-trace-smoke-test)
   (run-kioskberrli-dashboard-page-smoke-test)

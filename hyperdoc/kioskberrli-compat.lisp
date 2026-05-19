@@ -114,3 +114,91 @@
 
 (defun record-kioskberrli-progress (&rest args &key &allow-other-keys)
   (apply #'%dreyeck-kioskbeerli-call 'record-kioskberrli-progress args))
+
+(defun kioskbeerli-lookup-plan-task
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskbeerli-lookup-plan-task
+         task-or-id
+         args))
+
+(defun kioskberrli-lookup-plan-task
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskberrli-lookup-plan-task
+         task-or-id
+         args))
+
+(defun kioskbeerli-task-plan
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskbeerli-task-plan
+         task-or-id
+         args))
+
+(defun kioskberrli-task-plan
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskberrli-task-plan
+         task-or-id
+         args))
+
+(defun kioskbeerli-task-progress
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskbeerli-task-progress
+         task-or-id
+         args))
+
+(defun kioskberrli-task-progress
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskberrli-task-progress
+         task-or-id
+         args))
+
+(defun kioskbeerli-task-state-link
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskbeerli-task-state-link
+         task-or-id
+         args))
+
+(defun kioskberrli-task-state-link
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskberrli-task-state-link
+         task-or-id
+         args))
+
+(defun kioskbeerli-task-dependents
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskbeerli-task-dependents
+         task-or-id
+         args))
+
+(defun kioskberrli-task-dependents
+    (task-or-id &rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call
+         'kioskberrli-task-dependents
+         task-or-id
+         args))
+
+(defun kioskbeerli-current-scxml-state (&rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call 'kioskbeerli-current-scxml-state args))
+
+(defun kioskberrli-current-scxml-state (&rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call 'kioskberrli-current-scxml-state args))
+
+(defun kioskbeerli-next-missing-evidence-tasks (&rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call 'kioskbeerli-next-missing-evidence-tasks args))
+
+(defun kioskberrli-next-missing-evidence-tasks (&rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call 'kioskberrli-next-missing-evidence-tasks args))
+
+(defun kioskbeerli-record-boot-observed (&rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call 'kioskbeerli-record-boot-observed args))
+
+(defun kioskberrli-record-boot-observed (&rest args &key &allow-other-keys)
+  (apply #'%dreyeck-kioskbeerli-call 'kioskberrli-record-boot-observed args))
