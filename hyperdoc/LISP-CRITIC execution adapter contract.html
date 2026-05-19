@@ -1,0 +1,78 @@
+<h1>LISP-CRITIC execution adapter contract</h1>
+
+<p>
+  This page defines the source-station-backed execution boundary for
+  LISP-CRITIC in HyperDoc. The adapter represents the local FedWiki asset as an
+  inspectable source station, tries to invoke it only when it is locally
+  present, and records a raw run record instead of pretending that normalized
+  review findings already exist.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(default-lisp-critic-source-station)"><tt>default-lisp-critic-source-station</tt></a></li>
+  <li><a expr="(default-lisp-critic-contract)"><tt>default-lisp-critic-contract</tt></a></li>
+  <li><a expr="(run-lisp-critic-contract (default-lisp-critic-contract) '(#P&quot;hyperdoc/lisp-critic-review-plan.lisp&quot;))"><tt>example raw run record</tt></a></li>
+</ul>
+
+<h2>Source station</h2>
+
+<p>
+  LISP-CRITIC remains a FedWiki-sourced local asset:
+  <tt>~/.wiki/wiki.ralfbarkow.ch/assets/pages/a-critic-for-lisp/</tt>.
+  HyperDoc records that source station as data with its site, page, asset root,
+  wrapper system, wrapper package, wrapper loader, and upstream file critique
+  entrypoint. This is not vendoring: no LISP-CRITIC source is copied into the
+  HyperDoc repository, and the test suite does not require the asset path to
+  exist.
+</p>
+
+<h2>Invocation boundary</h2>
+
+<p>
+  <a expr="(run-lisp-critic-contract)"><tt>run-lisp-critic-contract</tt></a>
+  returns a <tt>lisp-critic-run-record</tt>. When the source station is present,
+  the adapter loads the wrapper ASDF system <tt>:a-critic-for-lisp</tt>, calls
+  <tt>a-critic-for-lisp:load-lisp-critic</tt>, and invokes the upstream
+  <tt>lisp-critic:critique-file</tt> entrypoint for each reviewed file. Standard
+  textual output is captured as raw evidence.
+</p>
+
+<p>
+  The adapter deliberately records the invocation form and reviewed paths. It
+  does not normalize the output into <tt>lisp-critic-finding</tt> objects, attach
+  suppressions, or decide waivers in this slice.
+</p>
+
+<h2>Graceful absence</h2>
+
+<p>
+  If the FedWiki asset root is absent, the adapter returns a run record with
+  status <tt>:asset-missing</tt>. Load failures, unavailable critic APIs, and
+  critique failures are also captured as run records with condition summaries.
+  The default behavior is evidence-preserving and CI-safe: absence of the local
+  source station is not an unhandled error.
+</p>
+
+<h2>Relation to the review-plan surface</h2>
+
+<p>
+  The earlier page
+  <a page="Integrate LISP-CRITIC into HyperDoc automated review">
+  Integrate LISP-CRITIC into HyperDoc automated review</a>
+  models the plan, DITA-like task topics, Goldberg question coverage, and
+  first-class plan-task relations. This page lands the next task in that plan:
+  the executable boundary that can produce raw critic evidence while keeping
+  finding normalization, rule metadata, source manifests, checksum policy, and
+  suppression policy deferred.
+</p>
+
+<h2>Boundary</h2>
+
+<ul>
+  <li>No FedWiki pages are edited by this adapter.</li>
+  <li>No network, DMX server, browser, or physical device is required.</li>
+  <li>No LISP-CRITIC source is copied into HyperDoc.</li>
+  <li>Raw run records are evidence, not final review findings.</li>
+</ul>

@@ -159,6 +159,18 @@
    #:lisp-critic-review-goldberg-coverage
    #:lisp-critic-fedwiki-asset-present-p
    #:lisp-critic-review-normalize-goldberg-question-id
+   ;; LISP-CRITIC source-station critic contract
+   #:lisp-critic-source-station
+   #:lisp-critic-contract
+   #:lisp-critic-run-record
+   #:default-lisp-critic-source-station
+   #:default-lisp-critic-contract
+   #:lisp-critic-source-station-present-p
+   #:lisp-critic-contract-available-p
+   #:run-lisp-critic-contract
+   #:lisp-critic-run-record-status
+   #:lisp-critic-run-record-raw-output
+   #:lisp-critic-run-record-target-paths
    ;; Access to the global catalog of registered HyperDocs
    #:*catalog* #:hyperdocs-of
    ;; Access to HyperDoc data

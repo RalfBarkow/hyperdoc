@@ -17,6 +17,7 @@
   (run-boundary-smoke-tests)
   (run-relation-topic-proposals-smoke-tests)
   (run-lisp-critic-review-plan-smoke-tests)
+  (run-lisp-critic-contract-smoke-tests)
   (run-dock-presentation-smoke-tests)
   (run-dock-annotation-smoke-tests)
   (run-mobile-progressive-chrome-smoke-tests)

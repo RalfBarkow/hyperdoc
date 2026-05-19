@@ -207,6 +207,16 @@
                  "Review contract"
                  "Goldberg reading comprehension questions")))
 
+(defun lisp-critic-execution-adapter-contract-topic ()
+  (make-topic
+   :id "lisp-critic-execution-adapter-contract"
+   :title "LISP-CRITIC execution adapter contract"
+   :summary "Source-station-backed critic contract that invokes the local FedWiki LISP-CRITIC asset when available and records raw run evidence without normalizing findings."
+   :references '("LISP-CRITIC execution adapter contract"
+                 "Integrate LISP-CRITIC into HyperDoc automated review"
+                 "DITA-like task topics for LISP-CRITIC review integration"
+                 "Review contract")))
+
 (defun codex-resume-branch-context-topic ()
   (make-topic
    :id "codex-resume-branch-context"
