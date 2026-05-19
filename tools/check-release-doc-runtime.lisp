@@ -47,11 +47,82 @@
         (subseq expr start (or end (length expr)))))))
 
 (defun token->symbol (token)
-  (let ((*package* (find-package :hyperdoc)))
-    (multiple-value-bind (symbol position)
-        (read-from-string token)
-      (declare (ignore position))
-      symbol)))
+  "Resolve a page-derived Lisp symbol token without invoking READ.
+
+The release checker scans shipped HTML pages. Those pages may contain
+package-qualified symbols from optional extension packages that are not loaded
+in the release-smoke image. Calling READ-FROM-STRING on such tokens signals a
+reader package error before this checker can classify the reference.
+
+Returns a symbol when resolved. Returns NIL when unresolved."
+  (labels ((canon (string)
+             (string-upcase string))
+           (skip (reason &rest details)
+             (warn "Skipping unresolved page symbol token ~S: ~S ~S"
+                   token reason details)
+             nil)
+           (resolve-in-package (package-name symbol-name require-external-p)
+             (let ((package (find-package (canon package-name))))
+               (cond
+                 ((null package)
+                  (skip :missing-package
+                        :package package-name
+                        :symbol symbol-name))
+                 ((string= symbol-name "")
+                  (skip :missing-symbol-name
+                        :package package-name))
+                 (t
+                  (multiple-value-bind (symbol status)
+                      (find-symbol (canon symbol-name) package)
+                    (cond
+                      ((null status)
+                       (skip :missing-symbol
+                             :package package-name
+                             :symbol symbol-name))
+                      ((and require-external-p
+                            (not (eq status :external)))
+                       (skip :symbol-not-external
+                             :package package-name
+                             :symbol symbol-name
+                             :status status))
+                      (t
+                       symbol))))))))
+    (let ((colon (position #\: token)))
+      (cond
+        ((null colon)
+         (let ((package (or (find-package :hyperdoc) *package*)))
+           (multiple-value-bind (symbol status)
+               (find-symbol (canon token) package)
+             (if status
+                 symbol
+                 (skip :missing-bare-symbol
+                       :package (package-name package)
+                       :symbol token)))))
+
+        ((zerop colon)
+         (let ((symbol-name (subseq token 1)))
+           (multiple-value-bind (symbol status)
+               (find-symbol (canon symbol-name) "KEYWORD")
+             (if status
+                 symbol
+                 (skip :missing-keyword-symbol
+                       :symbol symbol-name)))))
+
+        (t
+         (let* ((double-colon-p
+                  (and (< (1+ colon) (length token))
+                       (char= (char token (1+ colon)) #\:)))
+                (package-name
+                  (subseq token 0 colon))
+                (symbol-start
+                  (+ colon (if double-colon-p 2 1)))
+                (symbol-name
+                  (if (<= symbol-start (length token))
+                      (subseq token symbol-start)
+                      "")))
+           (resolve-in-package package-name
+                               symbol-name
+                               (not double-colon-p))))))))
 
 (defun shipped-hyperdoc-html-pages ()
   (let* ((root (asdf:system-relative-pathname :hyperdoc "hyperdoc/")))
@@ -65,8 +136,9 @@
     (remove-duplicates
      (loop for expr in forms
            for token = (expr-function-token expr)
-           when token
-           collect (token->symbol token))
+           for symbol = (and token (token->symbol token))
+           when symbol
+             collect symbol)
      :test #'eq)))
 
 (defparameter *required-release-symbols*
