@@ -128,7 +128,26 @@
    #:kioskbeerli-dashboard-example
    #:kioskbeerli-plan-only-example
    #:kioskbeerli-scxml-example
-   #:kioskbeerli-record-progress-example))
+   #:kioskbeerli-record-progress-example
+
+   ;; DITA-style task topics.
+   #:kioskbeerli-dita-task-topic
+   #:kioskbeerli-dita-task-step
+   #:kioskbeerli-semi-headless-set-password-task
+   #:kioskbeerli-lookup-task-topic
+   #:kioskbeerli-task-topic-plan-task
+   #:kioskbeerli-task-topic-prerequisite-plan-task
+   #:kioskbeerli-task-topic-progress
+   #:kioskbeerli-task-topic-state-link
+   #:kioskbeerli-task-topic-dita-view
+   #:kioskbeerli-open-semi-headless-password-task-inspector
+   #:kioskberrli-semi-headless-set-password-task
+   #:kioskberrli-lookup-task-topic
+   #:kioskberrli-task-topic-plan-task
+   #:kioskberrli-task-topic-progress
+   #:kioskberrli-task-topic-state-link
+   #:kioskberrli-task-topic-dita-view
+   #:kioskberrli-open-semi-headless-password-task-inspector))
 
 (in-package :dreyeck/kioskbeerli)
 

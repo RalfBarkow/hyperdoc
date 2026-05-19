@@ -36,7 +36,8 @@
                                (:file "behavior")
                                (:file "trace")
                                (:file "examples")
-                               (:file "views")
+                               (:file "task-topics")
+                (:file "views")
                                (:static-file "kioskbeerli.scxml")))
                  (:module "hyperdoc"
                   :components ((:static-file "Kioskberrli.html")
