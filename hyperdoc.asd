@@ -110,7 +110,8 @@
     :serial t
     :depends-on (#:hyperdoc/topics
                  #:hyperdoc/checks
-                 #:hyperdoc/state-machines)
+                 #:hyperdoc/state-machines
+                 #:shasht)
     :in-order-to ((test-op (test-op "hyperdoc/tests")))
     :components ((:module "hyperdoc"
                           :serial t
@@ -144,6 +145,8 @@
                                        (:file "git-commit-equivalence")
                                        (:file "hyperdoc")
                                        (:file "page-systems")
+                                       (:file "source-artifacts")
+                                       (:file "topicmap-projection")
                                        (:file "mobile-progressive-chrome")
                                        (:file "runtime-incidents")
                              (:file "fedwiki-dmx-importer-bug")
@@ -462,6 +465,7 @@
                                        (:file "state-machines")
                                        (:file "authored-relation-artifacts")
                                        (:file "shared-projection-ir")
+                                       (:file "topicmap-views")
                                        (:file "surfaces")
                                        (:file "lisp-critic-review-plan-views")
                                        (:file "lisp-critic-contract-views")
@@ -663,6 +667,7 @@
                                        (:file "dmx-incident-arc-smoke")
                                        (:file "dmx-shared-workspace-docs-smoke")
                                        (:file "dm6-page-topicmap-smoke")
+                                       (:file "topicmap-view-smoke")
                                        (:file "neo4j-duplicate-username-repair-smoke")
                                        (:file "hyperdoc-neo4j-topic-delete-tool-operation-ir-smoke")
                                        (:file "fedwiki-site-dmx-import")

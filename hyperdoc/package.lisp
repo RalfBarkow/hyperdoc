@@ -75,6 +75,58 @@
    #:dm6-page-topicmap-seed-report
    #:dm6-inline-proof-page-pathname
    #:materialize-dm6-inline-proof-page-topicmap-seed!
+   ;; Native source artifacts and generic topicmap projections
+   #:file-artifact
+   #:make-file-artifact
+   #:ensure-file-artifact
+   #:relative-path-of
+   #:root-of
+   #:pathname-of
+   #:exists-p
+   #:size-of
+   #:content-of
+   #:content-target-of
+   #:source-content
+   #:source-content-from-pathname
+   #:source-content-from-artifact
+   #:source-content-from-object
+   #:source-target-of
+   #:source-title-of
+   #:source-text-of
+   #:parsed-topic
+   #:parsed-relation
+   #:topicmap-projection
+   #:inline-topicmap-view
+   #:topics-of
+   #:relations-of
+   #:layout-of
+   #:kind-of
+   #:source-index-of
+   #:source-of
+   #:from-of
+   #:to-of
+   #:evidence-of
+   #:projection-of
+   #:mode-of
+   #:selected-topic-of
+   #:input-owner-of
+   #:capabilities-of
+   #:topicmap-projection-of
+   #:topicmap-view-title-of
+   #:topicmap-view-input-owner-of
+   #:parse-source-content-into-topics
+   #:project-source-content-to-topicmap
+   #:project-artifact-to-topicmap
+   #:project-object-to-topicmap
+   #:make-inline-topicmap-view
+   #:topicmap-projection-native-model
+   #:topicmap-projection-json
+   #:render-inline-topicmap-projection-html
+   #:render-inline-topicmap-view-html
+   #:render-topicmap-view-of-object-html
+   #:write-topicmap-view-html
+   #:inspect-artifact-content
+   #:inspect-topicmap-view
    ;; Mobile progressive chrome reload boundary
    #:mobile-progressive-chrome-page
    #:mobile-progressive-chrome-system-slice

@@ -8,7 +8,8 @@
                 :if-let :when-let :compose)
   (:import-from :arrow-macros
                 :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:export :hyperdoc))
+  (:export :hyperdoc
+           :inspect-topicmap-view))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperdoc/inspector)
