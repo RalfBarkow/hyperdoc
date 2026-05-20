@@ -189,6 +189,17 @@
                   :serial t
                   :components ((:file "dm6-appembed-inline-proof")))))
 
+(defsystem #:hyperdoc/fedwiki-asdf-assets
+    :description "HyperDoc-native writer for page-local FedWiki ASDF assets"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "fedwiki-asdf-assets")))))
+
 (defsystem #:hyperdoc/codex
     :description "Codex collaboration home topic for HyperDoc"
     :author "Ralf Barkow <ralf.barkow@me.com>"
@@ -615,6 +626,7 @@
     :version "0.0.1"
     :serial t
     :depends-on (#:hyperdoc/mcp
+                 #:hyperdoc/fedwiki-asdf-assets
                  #:hyperdoc/mobile-progressive-chrome
                  #:hyperdoc/scxml
                  #:hyperdoc/explorer
@@ -672,6 +684,7 @@
                                        (:file "dmx-shared-workspace-docs-smoke")
                                        (:file "dm6-page-topicmap-smoke")
                                        (:file "topicmap-view-smoke")
+                                       (:file "fedwiki-asdf-assets-smoke")
                                        (:file "dmx-query-layer-smoke")
                                        (:file "neo4j-duplicate-username-repair-smoke")
                                        (:file "hyperdoc-neo4j-topic-delete-tool-operation-ir-smoke")

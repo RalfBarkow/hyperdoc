@@ -281,6 +281,28 @@
    #:make-dm6-appembed-inline-proof-page-system
    #:make-fedwiki-mobile-progressive-chrome-page-system
    #:make-fedwiki-shop3-page-system
+   ;; FedWiki page-local ASDF asset writer
+   #:page-asdf-asset-spec
+   #:page-asdf-asset-spec-system-name
+   #:page-asdf-asset-spec-page-slug
+   #:page-asdf-asset-spec-page-title
+   #:page-asdf-asset-spec-asset-root
+   #:page-asdf-asset-spec-source-topic-id
+   #:page-asdf-asset-spec-files
+   #:page-asdf-asset-spec-tests
+   #:page-asdf-asset-spec-rendered-pages
+   #:page-asdf-asset-spec-zip-name
+   #:fedwiki-page-assets-directory
+   #:make-page-asdf-asset-spec
+   #:write-page-asdf-system
+   #:load-page-asdf-system
+   #:test-page-asdf-system
+   #:inspect-page-asdf-system
+   #:write-page-asdf-rendered-artifacts
+   #:build-page-asdf-asset-zip
+   #:deploy-page-asdf-asset-zip
+   #:page-asdf-asset-workflow
+   #:make-metagraph-jsonld-fluree-asset-spec
    ;; LISP-CRITIC review plan surface
    #:hyperdoc-plan
    #:hyperdoc-task-topic

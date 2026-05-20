@@ -1,0 +1,14 @@
+metagraph-as-bipartite-graph-json-ld--fluree.asd
+src/package.lisp
+src/topicmaps.lisp
+src/projections.lisp
+src/install.lisp
+pages/Metagraph as Bipartite Graph JSON-LD Fluree Topicmap View.html
+pages/metagraph-conversation-story-topicmap.html
+pages/metagraph-layer-contract-topicmap.html
+pages/metagraph-planning-example-topicmap.html
+examples/mrepl-session.lisp
+tests/smoke.lisp
+README.md
+INSTALL-STEPS.md
+MANIFEST.txt
