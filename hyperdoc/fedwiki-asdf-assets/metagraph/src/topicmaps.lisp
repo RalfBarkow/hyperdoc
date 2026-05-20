@@ -69,9 +69,16 @@
                   ("editor" . ,size)))
       ("assocIds" . ,(mg-array assoc-ids)))))
 
+(defun mg-native-assoc-type (assoc)
+  (declare (ignore assoc))
+  "Association")
+
 (defun mg-native-assoc (assoc)
   `(("id" . ,(mg-assoc-id assoc))
-    ("type" . ,(getf assoc :type))
+    ("type" . ,(mg-native-assoc-type assoc))
+    ("semanticType" . ,(getf assoc :type))
+    ("role" . ,(or (getf assoc :role) ""))
+    ("label" . ,(or (getf assoc :label) ""))
     ("topicId1" . ,(getf assoc :from))
     ("topicId2" . ,(getf assoc :to))))
 

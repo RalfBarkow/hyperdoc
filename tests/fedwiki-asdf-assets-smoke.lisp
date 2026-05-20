@@ -29,6 +29,124 @@
   (when (and haystack (search needle haystack :test #'char=))
     (error "~A -- unexpected substring: ~S" message needle)))
 
+(defparameter +fedwiki-asdf-assets-dm6-native-assoc-types+
+  '("Association" "Hierarchy"))
+
+(defun fedwiki-asdf-assets-alist-field (alist key)
+  (cdr (assoc key alist :test #'string=)))
+
+(defun fedwiki-asdf-assets-sequence-items (value)
+  (cond
+    ((null value) nil)
+    ((vectorp value) (coerce value 'list))
+    ((listp value) value)
+    (t (error "Expected list or vector, got: ~S" value))))
+
+(defun fedwiki-asdf-assets-json-field (object key)
+  (gethash key object))
+
+(defun fedwiki-asdf-assets-semantic-assoc-by-id (id semantic-assocs)
+  (find id semantic-assocs :key (lambda (assoc)
+                                  (getf assoc :id))
+                         :test #'eql))
+
+(defun fedwiki-asdf-assets-assert-native-model-compatible (projection)
+  (let* ((key
+           (fedwiki-asdf-assets-call "MG-TOPICMAP-PROJECTION-KEY"
+                                     projection))
+         (semantic-topicmap
+           (fedwiki-asdf-assets-call
+            "MG-TOPICMAP-PROJECTION-SEMANTIC-TOPICMAP"
+            projection))
+         (native-topicmap
+           (fedwiki-asdf-assets-call
+            "MG-TOPICMAP-PROJECTION-NATIVE-TOPICMAP"
+            projection))
+         (semantic-assocs (getf semantic-topicmap :assocs))
+         (native-topics
+           (fedwiki-asdf-assets-sequence-items
+            (fedwiki-asdf-assets-alist-field native-topicmap "topics")))
+         (native-assocs
+           (fedwiki-asdf-assets-sequence-items
+            (fedwiki-asdf-assets-alist-field native-topicmap "assocs"))))
+    (fedwiki-asdf-assets-assert-true
+     native-topics
+     (format nil "Generated native model must contain non-empty topics for ~A"
+             key))
+    (fedwiki-asdf-assets-assert-true
+     native-assocs
+     (format nil "Generated native model must contain non-empty assocs for ~A"
+             key))
+    (dolist (native-assoc native-assocs)
+      (let* ((id (fedwiki-asdf-assets-alist-field native-assoc "id"))
+             (native-type
+               (fedwiki-asdf-assets-alist-field native-assoc "type"))
+             (semantic-type
+               (fedwiki-asdf-assets-alist-field native-assoc "semanticType"))
+             (semantic-assoc
+               (fedwiki-asdf-assets-semantic-assoc-by-id
+                id
+                semantic-assocs))
+             (original-semantic-type
+               (and semantic-assoc
+                    (getf semantic-assoc :type))))
+        (fedwiki-asdf-assets-assert-true
+         semantic-assoc
+         (format nil "Native assoc ~A must correspond to a semantic assoc in ~A"
+                 id
+                 key))
+        (fedwiki-asdf-assets-assert-true
+         (and native-type
+              (member native-type
+                      +fedwiki-asdf-assets-dm6-native-assoc-types+
+                      :test #'string=))
+         (format nil "Native assoc ~A in ~A must use a DM6 decoder type"
+                 id
+                 key))
+        (fedwiki-asdf-assets-assert-false
+         (equal native-type original-semantic-type)
+         (format nil
+                 "Native assoc ~A in ~A must not emit semantic relation name in type"
+                 id
+                 key))
+        (fedwiki-asdf-assets-assert-equal
+         original-semantic-type
+         semantic-type
+         (format nil
+                 "Native assoc ~A in ~A must preserve semantic relation metadata"
+                 id
+                 key))))))
+
+(defun fedwiki-asdf-assets-assert-rendered-json-model-populated (projection)
+  (let* ((key
+           (fedwiki-asdf-assets-call "MG-TOPICMAP-PROJECTION-KEY"
+                                     projection))
+         (json
+           (fedwiki-asdf-assets-call "MG-TOPICMAP-PROJECTION-JSON"
+                                     projection))
+         (model (shasht:read-json json))
+         (topics
+           (fedwiki-asdf-assets-sequence-items
+            (fedwiki-asdf-assets-json-field model "topics")))
+         (assocs
+           (fedwiki-asdf-assets-sequence-items
+            (fedwiki-asdf-assets-json-field model "assocs"))))
+    (fedwiki-asdf-assets-assert-true
+     topics
+     (format nil "Rendered model JSON must contain non-empty topics for ~A"
+             key))
+    (fedwiki-asdf-assets-assert-true
+     assocs
+     (format nil "Rendered model JSON must contain non-empty assocs for ~A"
+             key))))
+
+(defun fedwiki-asdf-assets-assert-metagraph-models-compatible ()
+  (dolist (which '(:conversation-story :layer-contract :planning-example))
+    (let ((projection
+            (fedwiki-asdf-assets-call "MG-TOPICMAP-PROJECTION" which)))
+      (fedwiki-asdf-assets-assert-native-model-compatible projection)
+      (fedwiki-asdf-assets-assert-rendered-json-model-populated projection))))
+
 (defun fedwiki-asdf-assets-temp-root ()
   (merge-pathnames
    (format nil "hyperdoc-fedwiki-asdf-assets-smoke-~D-~D/assets/pages/"
@@ -149,6 +267,7 @@
       (fedwiki-asdf-assets-assert-true
        (typep projection class)
        "MG-TOPICMAP-PROJECTION must return an MG-TOPICMAP-PROJECTION instance")
+      (fedwiki-asdf-assets-assert-metagraph-models-compatible)
       (dolist (needle '("class=\"dm6-hyperdoc-map dm6-island\""
                         "class=\"dm6-stored\""
                         "data-dm6-bundle=\"/assets/dm6-elm/app.js\""
