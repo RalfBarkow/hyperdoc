@@ -214,6 +214,22 @@
    :output :string
    :error-output :string))
 
+(defun run-fedwiki-asdf-assets-hyperbook-package-reload-smoke-test ()
+  (asdf:load-system :hyperbook)
+  (asdf:load-system :hyperdoc/fedwiki-asdf-assets)
+  (asdf:load-system :hyperbook :force t)
+  (asdf:load-system :hyperdoc/fedwiki-asdf-assets :force t)
+  (dolist (name '("LOOKUP-ISSUE"
+                  "MAKE-PAGE-LINK"
+                  "WEB-LINK"
+                  "👀LINKS"))
+    (multiple-value-bind (symbol status)
+        (find-symbol name :hyperbook)
+      (fedwiki-asdf-assets-assert-true
+       (and symbol (eq status :external))
+       (format nil "HYPERBOOK must keep ~A in its authoritative DEFPACKAGE exports"
+               name)))))
+
 (defun run-fedwiki-asdf-assets-layout-and-load-smoke-test ()
   (let* ((spec (fedwiki-asdf-assets-make-spec))
          (page-dir (fedwiki-asdf-assets-page-dir spec))
@@ -390,6 +406,7 @@
        "Second workflow ZIP must not reintroduce stale nested contents"))))
 
 (defun run-fedwiki-asdf-assets-smoke-tests ()
+  (run-fedwiki-asdf-assets-hyperbook-package-reload-smoke-test)
   (run-fedwiki-asdf-assets-layout-and-load-smoke-test)
   (run-fedwiki-asdf-assets-generated-api-smoke-test)
   (run-fedwiki-asdf-assets-inspector-smoke-test)
