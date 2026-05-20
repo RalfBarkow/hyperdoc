@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+  xmlns="http://www.w3.org/2005/07/scxml"
+  version="1.0"
+  name="inspector-title-bar"
+  initial="constructing">
+
+  <state id="constructing">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+    <transition event="titlebar.rendered" target="ready"/>
+  </state>
+
+  <state id="ready">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- semantic contract:
+         visible:
+           .inspector-title-bar-class
+           .inspector-title-bar-object
+           .inspector-title-bar-action-buttons
+           .inspector-title-bar-action-buttons .hyperdoc-view-contract-action
+
+         meanings:
+           .inspector-title-bar-class  = class/type presentation button
+           .inspector-title-bar-object = object/instance presentation button
+
+         default commands:
+           class.invoke         -> inspect class/type presentation
+           object.invoke        -> inspect object/instance presentation
+           view-contract.invoke -> inspect active pane view contract
+    -->
+
+    <transition event="class.hover" target="class-preview"/>
+    <transition event="class.focus" target="class-focused"/>
+    <transition event="class.menu" target="class-menu-open"/>
+    <transition event="class.invoke" target="class-invoking"/>
+
+    <transition event="object.hover" target="object-preview"/>
+    <transition event="object.focus" target="object-focused"/>
+    <transition event="object.menu" target="object-menu-open"/>
+    <transition event="object.invoke" target="object-invoking"/>
+
+    <transition event="view-contract.invoke" target="view-contract-invoking"/>
+  </state>
+
+  <state id="class-preview">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- temporary preview for the class/type presentation button. -->
+
+    <transition event="class.pointer.leave" target="ready"/>
+    <transition event="class.focus" target="class-focused"/>
+  </state>
+
+  <state id="class-focused">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- keyboard/pointer focus on the class/type presentation button. -->
+
+    <transition event="class.blur" target="ready"/>
+    <transition event="class.menu" target="class-menu-open"/>
+    <transition event="class.invoke" target="class-invoking"/>
+  </state>
+
+  <state id="class-menu-open">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- class/type menu commands:
+         inspect class
+         inspect class contract
+         inspect applicable views
+         copy class name
+    -->
+
+    <transition event="class.menu.dismiss" target="ready"/>
+    <transition event="class.command.inspect" target="class-invoking"/>
+  </state>
+
+  <state id="class-invoking">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- response:
+         open inspector pane for the class/type object.
+    -->
+
+    <transition event="class.invoked" target="ready"/>
+  </state>
+
+  <state id="object-preview">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- temporary preview for the object/instance presentation button. -->
+
+    <transition event="object.pointer.leave" target="ready"/>
+    <transition event="object.focus" target="object-focused"/>
+  </state>
+
+  <state id="object-focused">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- keyboard/pointer focus on the object/instance presentation button. -->
+
+    <transition event="object.blur" target="ready"/>
+    <transition event="object.menu" target="object-menu-open"/>
+    <transition event="object.invoke" target="object-invoking"/>
+  </state>
+
+  <state id="object-menu-open">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- object/instance menu commands:
+         inspect object
+         inspect slots
+         inspect print representation
+         copy printed representation
+    -->
+
+    <transition event="object.menu.dismiss" target="ready"/>
+    <transition event="object.command.inspect" target="object-invoking"/>
+  </state>
+
+  <state id="object-invoking">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- response:
+         open or refocus inspector pane for this object instance.
+    -->
+
+    <transition event="object.invoked" target="ready"/>
+  </state>
+
+  <state id="view-contract-invoking">
+    <onentry>
+      <raise event="trace.state.enter"/>
+    </onentry>
+
+    <!-- response:
+         open inspector for view-contract-for-pane(current-pane).
+         This is pane-scoped, not object-only.
+    -->
+
+    <transition event="view-contract.invoked" target="ready"/>
+  </state>
+</scxml>

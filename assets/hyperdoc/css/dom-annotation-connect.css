@@ -20,20 +20,32 @@
   position: relative;
 }
 
-.hyperdoc-view-contract-action {
-  margin: 0.2rem 0 0.15rem;
-  padding: 0.22rem 0.55rem;
+.inspector-title-bar .inspector-title-bar-action-buttons .hyperdoc-view-contract-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  margin: 0 0.2rem 0 0;
+  padding: 0;
   border: 1px solid rgba(80, 92, 110, 0.35);
   border-radius: 4px;
   background: #f8fafc;
   color: #253041;
-  font-size: 0.82rem;
+  line-height: 1;
+  vertical-align: middle;
 }
 
-.hyperdoc-view-contract-action:hover,
-.hyperdoc-view-contract-action:focus {
+.inspector-title-bar .inspector-title-bar-action-buttons .hyperdoc-view-contract-action:hover,
+.inspector-title-bar .inspector-title-bar-action-buttons .hyperdoc-view-contract-action:focus {
   background: #eef2f7;
   border-color: rgba(55, 70, 92, 0.55);
+}
+
+.hyperdoc-view-contract-icon {
+  width: 1rem;
+  height: 1rem;
+  pointer-events: none;
 }
 
 .hyperdoc-inspector-tabs-toggle {
