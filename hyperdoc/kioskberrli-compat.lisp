@@ -4,19 +4,21 @@
 
 (in-package :hyperdoc)
 
-;; The concrete dashboard/topic implementation lives in DREYECK/KIOSKBEERLI.
+;; The concrete dashboard/topic implementation lives in the canonical
+;; KIOSKBERRLI system/package. DREYECK/KIOSKBEERLI remains a package nickname
+;; and ASDF compatibility system only.
 ;; These wrappers preserve existing hyperdoc::kioskberrli-* page expressions
 ;; and the canonical visible Kioskberrli spelling.
 
 (defun %dreyeck-kioskbeerli-call (name &rest args)
-  (let* ((package (find-package :dreyeck/kioskbeerli))
+  (let* ((package (find-package :kioskberrli))
          (symbol (and package (find-symbol (string name) package))))
     (unless (and symbol (fboundp symbol))
-      (asdf:load-system :dreyeck/kioskbeerli)
-      (setf package (find-package :dreyeck/kioskbeerli)
+      (asdf:load-system :kioskberrli)
+      (setf package (find-package :kioskberrli)
             symbol (and package (find-symbol (string name) package))))
     (unless (and symbol (fboundp symbol))
-      (error "Missing dreyeck/kioskbeerli entry point ~A" name))
+      (error "Missing kioskberrli entry point ~A" name))
     (apply (symbol-function symbol) args)))
 
 (defun kioskberrli-dashboard-status-vocabulary ()

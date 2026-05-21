@@ -1,9 +1,10 @@
-;;;; Package definition for the Kioskberrli dreyeck subsystem
+;;;; Package definition for the canonical Kioskberrli subsystem
 ;;
 ;;;; Copyright (c) 2026
 
-(defpackage :dreyeck/kioskbeerli
+(defpackage :kioskberrli
   (:use :cl)
+  (:nicknames :dreyeck/kioskbeerli :kioskbeerli)
   (:import-from :hyperdoc
                 #:defexample)
   (:export
@@ -32,7 +33,6 @@
    #:kioskberrli-dashboard-status
    #:kioskberrli-topic-dashboard
    #:kioskberrli-dashboard
-   #:kioskberrli-dashboard-status
    #:kioskberrli-dashboard-status-vocabulary
    #:kioskberrli-dashboard-stations
    #:kioskberrli-current-blocker
@@ -63,6 +63,10 @@
    #:kioskberrli-planner-and-trace-topic
 
    ;; Planner.
+   #:kioskberrli-plan-task
+   #:kioskberrli-plan-run
+   #:kioskberrli-task-state-link
+   #:kioskberrli-plan-task-ids
    #:kioskbeerli-plan-task
    #:kioskbeerli-plan-run
    #:kioskbeerli-planner-run
@@ -94,20 +98,53 @@
    #:kioskbeerli-behavior-chart
    #:kioskberrli-behavior-chart
    #:kioskbeerli-behavior-scxml-pathname
+   #:kioskberrli-behavior-scxml-pathname
    #:kioskbeerli-behavior-state-ids
+   #:kioskberrli-behavior-state-ids
    #:kioskbeerli-behavior-events
+   #:kioskberrli-behavior-events
 
    ;; Trace.
+   #:kioskberrli-project-trace
+   #:kioskberrli-trace-entry
+   #:kioskberrli-evidence-reference
+   #:kioskberrli-trace-status-vocabulary
    #:kioskbeerli-project-trace
    #:kioskbeerli-trace-entry
    #:kioskbeerli-evidence-reference
    #:kioskbeerli-trace-status-vocabulary
    #:kioskbeerli-latest-progress
    #:record-kioskbeerli-progress
-   #:kioskberrli-project-trace
    #:kioskberrli-latest-progress
    #:record-kioskberrli-progress
+   #:record-trace-event
    #:evidence-references-of
+
+   ;; FedWiki asset materialization.
+   #:kioskberrli-fedwiki-asset-manifest
+   #:asset-root-of
+   #:page-slug-of
+   #:page-url-of
+   #:asset-url-prefix-of
+   #:asset-files-of
+   #:make-kioskberrli-fedwiki-asset-spec
+   #:materialize-fedwiki-assets
+
+   ;; Optional SQLite store.
+   #:kioskberrli-sqlite-store
+   #:kioskberrli-sqlite-unavailable
+   #:sqlite-unavailable-program-of
+   #:sqlite-unavailable-detail-of
+   #:sqlite-store-db-path-of
+   #:sqlite-store-program-of
+   #:sqlite-store-schema-status-of
+   #:sqlite-available-p
+   #:open-or-create-sqlite-store
+   #:ensure-sqlite-schema
+   #:persist-dashboard-snapshot
+   #:persist-plan
+   #:persist-task
+   #:persist-trace-event
 
    ;; sdImage failure reference objects.
    #:kioskberrli-option-existence-evidence
@@ -125,6 +162,10 @@
    #:kioskbeerli-correction-path
 
    ;; Examples.
+   #:make-demo-dashboard
+   #:make-demo-plan
+   #:make-demo-trace
+   #:inspect-demo-dashboard
    #:kioskbeerli-dashboard-example
    #:kioskbeerli-plan-only-example
    #:kioskbeerli-scxml-example
@@ -150,7 +191,7 @@
    #:kioskberrli-task-topic-dita-view
    #:kioskberrli-open-semi-headless-password-task-inspector))
 
-(in-package :dreyeck/kioskbeerli)
+(in-package :kioskberrli)
 
 (trivial-package-local-nicknames:add-package-local-nickname
- :views :html-inspector-views :dreyeck/kioskbeerli)
+ :views :html-inspector-views :kioskberrli)

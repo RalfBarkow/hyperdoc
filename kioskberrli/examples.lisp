@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2026
 
-(in-package :dreyeck/kioskbeerli)
+(in-package :kioskberrli)
 
 ;;
 ;; sdImage failure reference objects preserved from the existing Kioskberrli

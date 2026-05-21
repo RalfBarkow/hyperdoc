@@ -630,7 +630,7 @@
                  #:hyperdoc/mobile-progressive-chrome
                  #:hyperdoc/scxml
                  #:hyperdoc/explorer
-                 #:dreyeck/kioskbeerli
+                 #:kioskberrli
                  #:hyperdoc/nor-graph-demo
                  #:hyperdoc/closures-nor-demo
                  #:hyperdoc/continuation-route-trace

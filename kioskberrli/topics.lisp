@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2026
 
-(in-package :dreyeck/kioskbeerli)
+(in-package :kioskberrli)
 
 (defun %topic (&key id title summary references)
   (hyperdoc::make-topic

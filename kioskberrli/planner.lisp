@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2026
 
-(in-package :dreyeck/kioskbeerli)
+(in-package :kioskberrli)
 
 (defparameter *kioskbeerli-required-task-ids*
   '("declare-target"
@@ -54,6 +54,11 @@
    (scxml-state :accessor scxml-state-of :initarg :scxml-state)
    (summary :accessor summary-of :initarg :summary)))
 
+(setf (find-class 'kioskberrli-plan-task) (find-class 'kioskbeerli-plan-task)
+      (find-class 'kioskberrli-plan-run) (find-class 'kioskbeerli-plan-run)
+      (find-class 'kioskberrli-task-state-link)
+      (find-class 'kioskbeerli-task-state-link))
+
 (defmethod print-object ((object kioskbeerli-plan-task) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A: ~A" (id-of object) (status-of object))))
@@ -71,6 +76,9 @@
 
 (defun kioskbeerli-plan-task-ids ()
   (copy-list *kioskbeerli-required-task-ids*))
+
+(defun kioskberrli-plan-task-ids ()
+  (kioskbeerli-plan-task-ids))
 
 (defparameter *kioskbeerli-task-state-links*
   '(("declare-target" nil "declared" "Kioskberrli target is declared.")
@@ -228,7 +236,7 @@
           :preconditions '("observations exist")
           :effects '("trace records evidence or missing-evidence explicitly")
           :status "missing-evidence"
-          :evidence-paths '("dreyeck/kioskbeerli/trace.lisp"))
+          :evidence-paths '("kioskberrli/trace.lisp"))
    (%task "mark-dashboard-status"
           "Mark dashboard status"
           :dependencies '("record-evidence")

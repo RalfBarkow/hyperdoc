@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2026
 
-(in-package :dreyeck/kioskbeerli)
+(in-package :kioskberrli)
 
 (defparameter *kioskberrli-dashboard-status-vocabulary*
   '("declared" "blocked" "corrected" "missing evidence" "verified" "unknown"))
@@ -159,9 +159,9 @@
                                  (kioskberrli-flash-boot-evidence-status)
                                  (kioskberrli-public-display-layout-status))
                  :stations (kioskberrli-dashboard-stations)
-                 :planner-run (kioskbeerli-planner-run)
-                 :behavior-chart (kioskbeerli-behavior-chart)
-                 :project-trace (kioskbeerli-project-trace)))
+                 :planner-run (kioskberrli-planner-run)
+                 :behavior-chart (kioskberrli-behavior-chart)
+                 :project-trace (kioskberrli-project-trace)))
 
 (defun kioskbeerli-dashboard ()
   (kioskberrli-dashboard))

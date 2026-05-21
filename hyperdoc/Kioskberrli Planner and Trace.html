@@ -9,13 +9,19 @@
   Hauptsache salon.
 </p>
 
+<p>
+  The canonical implementation is the <tt>:kioskberrli</tt> ASDF system and
+  <tt>:kioskberrli</tt> package. The older <tt>kioskbeerli</tt> spelling and
+  <tt>:dreyeck/kioskbeerli</tt> system remain compatibility aliases only.
+</p>
+
 <h2>Root objects</h2>
 
 <ul>
   <li><a expr="(hyperdoc::kioskberrli-dashboard)"><tt>kioskberrli-dashboard</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-planner-run)"><tt>kioskberrli-planner-run</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-behavior-chart)"><tt>kioskberrli-behavior-chart</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-project-trace)"><tt>kioskberrli-project-trace</tt></a></li>
 </ul>
 
 <h2>Planner boundary</h2>
@@ -40,32 +46,41 @@
 
 <p>
   Individual plan tasks are navigable objects. Inspecting a task such as
-  <a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>boot-pi</tt></a>
+  <a expr="(hyperdoc::kioskberrli-lookup-plan-task :boot-pi)"><tt>boot-pi</tt></a>
   shows its parent
-  <a expr="(hyperdoc::kioskbeerli-task-plan :boot-pi)">plan/run</a>,
+  <a expr="(hyperdoc::kioskberrli-task-plan :boot-pi)">plan/run</a>,
   dependencies and dependents, progress records, evidence status, and SCXML
   link. The <tt>boot-pi</tt> task maps to event
-  <a expr="(hyperdoc::kioskbeerli-task-state-link :boot-pi)"><tt>PI_BOOTED</tt></a>
+  <a expr="(hyperdoc::kioskberrli-task-state-link :boot-pi)"><tt>PI_BOOTED</tt></a>
   and state <tt>first-boot-observed</tt>.
 </p>
 
 <p>
   The current lifecycle interpretation is exposed by
-  <a expr="(hyperdoc::kioskbeerli-current-scxml-state)"><tt>kioskbeerli-current-scxml-state</tt></a>.
+  <a expr="(hyperdoc::kioskberrli-current-scxml-state)"><tt>kioskberrli-current-scxml-state</tt></a>.
   The remaining next tasks that are still blocked or missing evidence are
   inspectable through
-  <a expr="(hyperdoc::kioskbeerli-next-missing-evidence-tasks)"><tt>kioskbeerli-next-missing-evidence-tasks</tt></a>.
+  <a expr="(hyperdoc::kioskberrli-next-missing-evidence-tasks)"><tt>kioskberrli-next-missing-evidence-tasks</tt></a>.
 </p>
 
 <h2>Behavior boundary</h2>
 
 <p>
   The behavior chart is stored in
-  <tt>dreyeck/kioskbeerli/kioskbeerli.scxml</tt>. It starts in
+  <tt>kioskberrli/kioskberrli.scxml</tt>. It starts in
   <tt>declared</tt> and models the route through source review, obsolete-option
   correction, cross-host build blocking, Linux builder requirement, image
   build, flash, boot, network, kiosk session, landing page, maintenance, and
   failure-with-evidence states.
+</p>
+
+<h2>FedWiki asset boundary</h2>
+
+<p>
+  FedWiki assets are generated distribution artifacts, not the source of truth.
+  Materialization writes the reloadable ASDF tree under
+  <tt>http://localhost:3000/assets/pages/kioskberrli/</tt>, with
+  <tt>kioskberrli.asd</tt> directly in that page asset directory.
 </p>
 
 <h2>Trace boundary</h2>
@@ -80,7 +95,7 @@
 
 <p>
   First boot is the current exception to that missing-evidence wording:
-  <a expr="(hyperdoc::kioskbeerli-record-boot-observed :actor &quot;operator&quot; :evidence &quot;logged in as nixos on the booted Raspberry Pi&quot;)"><tt>kioskbeerli-record-boot-observed</tt></a>
+  <a expr="(hyperdoc::kioskberrli-record-boot-observed :actor &quot;operator&quot; :evidence &quot;logged in as nixos on the booted Raspberry Pi&quot;)"><tt>kioskberrli-record-boot-observed</tt></a>
   records <tt>boot-pi</tt> as <tt>verified</tt> and applies
   <tt>PI_BOOTED</tt> to <tt>first-boot-observed</tt>. It does not infer
   <tt>verify-network</tt>, <tt>verify-kiosk-session</tt>,
@@ -94,11 +109,11 @@
   <li><a hyperbook="topics" page="Kioskberrli Planner and Trace"><tt>Kioskberrli Planner and Trace</tt></a></li>
   <li><a hyperbook="topics" page="Kioskberrli Dashboard"><tt>Kioskberrli Dashboard</tt></a></li>
   <li><a hyperbook="topics" page="Kioskberrli"><tt>Kioskberrli</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>kioskbeerli-lookup-plan-task :boot-pi</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-task-progress :boot-pi)"><tt>kioskbeerli-task-progress :boot-pi</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-task-state-link :boot-pi)"><tt>kioskbeerli-task-state-link :boot-pi</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a></li>
-  <li><a expr="(hyperdoc::record-kioskbeerli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from planner and trace page.&quot;)"><tt>record-kioskbeerli-progress</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-lookup-plan-task :boot-pi)"><tt>kioskberrli-lookup-plan-task :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-task-progress :boot-pi)"><tt>kioskberrli-task-progress :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-task-state-link :boot-pi)"><tt>kioskberrli-task-state-link :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-latest-progress)"><tt>kioskberrli-latest-progress</tt></a></li>
+  <li><a expr="(hyperdoc::record-kioskberrli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from planner and trace page.&quot;)"><tt>record-kioskberrli-progress</tt></a></li>
 </ul>
 
 <h2>Related</h2>

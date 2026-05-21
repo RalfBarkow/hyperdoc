@@ -2,7 +2,7 @@
 ;;
 ;;;; Copyright (c) 2026
 
-(in-package :dreyeck/kioskbeerli)
+(in-package :kioskberrli)
 
 (defparameter *kioskbeerli-trace-status-vocabulary*
   '("declared" "blocked" "corrected" "missing-evidence" "verified" "unknown"))
@@ -33,6 +33,13 @@
    (summary :accessor summary-of :initarg :summary)
    (entries :accessor entries-of :initarg :entries :initform nil)))
 
+(setf (find-class 'kioskberrli-evidence-reference)
+      (find-class 'kioskbeerli-evidence-reference)
+      (find-class 'kioskberrli-trace-entry)
+      (find-class 'kioskbeerli-trace-entry)
+      (find-class 'kioskberrli-project-trace)
+      (find-class 'kioskbeerli-project-trace))
+
 (defmethod print-object ((object kioskbeerli-evidence-reference) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A ~A" (status-of object) (path-of object))))
@@ -53,6 +60,9 @@
 
 (defun kioskbeerli-trace-status-vocabulary ()
   (copy-list *kioskbeerli-trace-status-vocabulary*))
+
+(defun kioskberrli-trace-status-vocabulary ()
+  (kioskbeerli-trace-status-vocabulary))
 
 (defun ensure-kioskbeerli-trace-status (status)
   (unless (member status *kioskbeerli-trace-status-vocabulary*

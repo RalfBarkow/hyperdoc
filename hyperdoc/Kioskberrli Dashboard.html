@@ -124,6 +124,12 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 
   <dt>Scope boundary</dt>
   <dd>Case-study dashboard, plan-only planner, behavior chart, and trace; no live build, flash, SSH, HTTP mutation, or DMX mutation.</dd>
+
+  <dt>Canonical ASDF system</dt>
+  <dd><tt>:kioskberrli</tt> with compatibility alias <tt>:dreyeck/kioskbeerli</tt></dd>
+
+  <dt>FedWiki assets</dt>
+  <dd><tt>http://localhost:3000/assets/pages/kioskberrli/kioskberrli.asd</tt></dd>
 </dl>
 
 <h2>Inspectable objects</h2>
@@ -135,12 +141,16 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
   <li><a expr="(hyperdoc::kioskberrli-dashboard-status)"><tt>kioskberrli-dashboard-status</tt></a></li>
   <li><a expr="(hyperdoc::kioskberrli-current-blocker)"><tt>kioskberrli-current-blocker</tt></a></li>
   <li><a expr="(hyperdoc::kioskberrli-build-evidence-status)"><tt>kioskberrli-build-evidence-status</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>kioskbeerli-lookup-plan-task :boot-pi</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-task-state-link :boot-pi)"><tt>kioskbeerli-task-state-link :boot-pi</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-planner-run)"><tt>kioskberrli-planner-run</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-lookup-plan-task :boot-pi)"><tt>kioskberrli-lookup-plan-task :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-task-state-link :boot-pi)"><tt>kioskberrli-task-state-link :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-behavior-chart)"><tt>kioskberrli-behavior-chart</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-project-trace)"><tt>kioskberrli-project-trace</tt></a></li>
+  <li><a expr="(hyperdoc::kioskberrli-latest-progress)"><tt>kioskberrli-latest-progress</tt></a></li>
+  <li><a expr="(kioskberrli:make-demo-dashboard)"><tt>kioskberrli:make-demo-dashboard</tt></a></li>
+  <li><a expr="(kioskberrli:make-demo-plan)"><tt>kioskberrli:make-demo-plan</tt></a></li>
+  <li><a expr="(kioskberrli:make-demo-trace)"><tt>kioskberrli:make-demo-trace</tt></a></li>
+  <li><a expr="(kioskberrli:materialize-fedwiki-assets :slug &quot;kioskberrli&quot;)"><tt>kioskberrli:materialize-fedwiki-assets</tt></a></li>
 </ul>
 
 <h2>Inspect station list</h2>
@@ -156,9 +166,9 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
   The Kioskberrli planner is a SHOP3-like local plan object with named tasks,
   dependencies, preconditions, effects, status, and evidence paths. It is
   plan-only by default:
-  <a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a>.
+  <a expr="(hyperdoc::kioskberrli-planner-run)"><tt>kioskberrli-planner-run</tt></a>.
   Individual tasks are inspectable objects:
-  <a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>boot-pi</tt></a>
+  <a expr="(hyperdoc::kioskberrli-lookup-plan-task :boot-pi)"><tt>boot-pi</tt></a>
   links to its plan/run, dependencies, dependents, progress records, and SCXML
   state link.
 </p>
@@ -173,9 +183,9 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 
 <p>
   The lifecycle chart is stored as
-  <tt>dreyeck/kioskbeerli/kioskbeerli.scxml</tt> and parsed as an inspectable
+  <tt>kioskberrli/kioskberrli.scxml</tt> and parsed as an inspectable
   object:
-  <a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a>.
+  <a expr="(hyperdoc::kioskberrli-behavior-chart)"><tt>kioskberrli-behavior-chart</tt></a>.
 </p>
 
 <p>
@@ -188,20 +198,20 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 
 <p>
   The project trace records evidence and missing evidence explicitly:
-  <a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a>.
+  <a expr="(hyperdoc::kioskberrli-project-trace)"><tt>kioskberrli-project-trace</tt></a>.
   The latest progress entry is available through
-  <a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a>.
+  <a expr="(hyperdoc::kioskberrli-latest-progress)"><tt>kioskberrli-latest-progress</tt></a>.
   The current lifecycle state after recorded progress is
-  <a expr="(hyperdoc::kioskbeerli-current-scxml-state)"><tt>kioskbeerli-current-scxml-state</tt></a>.
+  <a expr="(hyperdoc::kioskberrli-current-scxml-state)"><tt>kioskberrli-current-scxml-state</tt></a>.
 </p>
 
 <p>
   Recording progress is an in-memory local operation. It records a trace entry;
   it does not run Nix, flash devices, open SSH sessions, mutate HTTP state, or
   write to DMX:
-  <a expr="(hyperdoc::record-kioskbeerli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from dashboard example.&quot;)"><tt>record-kioskbeerli-progress</tt></a>.
+  <a expr="(hyperdoc::record-kioskberrli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from dashboard example.&quot;)"><tt>record-kioskberrli-progress</tt></a>.
   First-boot evidence is recorded narrowly with
-  <a expr="(hyperdoc::kioskbeerli-record-boot-observed :actor &quot;operator&quot; :evidence &quot;logged in as nixos on the booted Raspberry Pi&quot;)"><tt>kioskbeerli-record-boot-observed</tt></a>;
+  <a expr="(hyperdoc::kioskberrli-record-boot-observed :actor &quot;operator&quot; :evidence &quot;logged in as nixos on the booted Raspberry Pi&quot;)"><tt>kioskberrli-record-boot-observed</tt></a>;
   it applies <tt>PI_BOOTED</tt> and <tt>first-boot-observed</tt> without
   verifying the later network, kiosk-session, landing-page, record-evidence, or
   dashboard-status tasks.

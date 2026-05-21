@@ -1,6 +1,6 @@
 ;;;; Kioskberrli DITA-style task topics
 
-(in-package #:dreyeck/kioskbeerli)
+(in-package #:kioskberrli)
 
 (defun %stringify (value)
   (if (stringp value)
