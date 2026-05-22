@@ -255,8 +255,8 @@
      :missing)))
 
 (defun fedwiki-attached-asdf-system-available-examples (home)
-  (mapcar #'check-title-of
-          (discover-example-checks
+  (mapcar #'example-entry-title-of
+          (discover-examples
            :system (fedwiki-asdf-system-name-string
                     (fedwiki-attached-asdf-system-system-name home)))))
 

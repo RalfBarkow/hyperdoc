@@ -48,8 +48,9 @@
   (make-topic
    :id "fedwiki-attached-asdf-system"
    :title "FedWiki-attached ASDF system"
-   :summary "Inspectable system-home object that resolves a FedWiki page identity to local page assets, an exact ASDF entrypoint, ASDF system state, actions, tests, examples, and lookup recovery routes."
+   :summary "Inspectable system-home object that resolves a FedWiki page identity to local page assets, an exact ASDF entrypoint, ASDF system state, actions, tests, an Examples view, and lookup recovery routes."
    :references '("FedWiki-attached ASDF system"
+                 "Running HyperDoc Examples"
                  "Kioskberrli"
                  "hyperdoc/fedwiki-attached-asdf-system.lisp"
                  "hyperdoc-inspector/fedwiki-attached-asdf-system.lisp")))

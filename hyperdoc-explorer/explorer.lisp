@@ -432,7 +432,7 @@ PAGE-LOOKUP-FAILURE."
                 (:th (views:esc "Examples")))
            (loop for system in systems
                  for example-count = (length
-                                      (discover-example-checks
+                                      (discover-examples
                                        :system (asdf:component-name system)))
                  for source-file = (ignore-errors (asdf:system-source-file system))
                  do (views:html
@@ -507,7 +507,7 @@ PAGE-LOOKUP-FAILURE."
 (views:defview 👀overview (system asdf:system)
   (let* ((system-name (asdf:component-name system))
          (source-file (ignore-errors (asdf:system-source-file system)))
-         (example-count (length (discover-example-checks :system system-name)))
+         (example-count (length (discover-examples :system system-name)))
          (validation-systems (validation-subsystems-for-system system)))
     (views:html-view :title "Overview" :priority 1
                      (views:html

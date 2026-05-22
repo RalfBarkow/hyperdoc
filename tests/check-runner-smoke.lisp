@@ -47,6 +47,18 @@
 (defun erroring-check-smoke ()
   (error "expected smoke error"))
 
+(defun passing-example-smoke ()
+  :passing-example-value)
+
+(defun failing-example-smoke ()
+  (error 'hyperdoc::example-failure :message "expected example failure"))
+
+(defun erroring-example-smoke ()
+  (error "expected example error"))
+
+(defun skipped-example-smoke ()
+  (signal 'hyperdoc::example-skipped :message "expected example skip"))
+
 (defun rerun-pass-check-smoke ()
   (incf *rerun-pass-count*)
   :pass)
@@ -73,6 +85,16 @@
   (mapcar (lambda (spec)
             (getf (hyperdoc::check-locator-of spec) :function))
           (hyperdoc::discover-example-checks :system system)))
+
+(defun make-smoke-example-entry (id title function-symbol)
+  (make-instance 'hyperdoc:example-entry
+                 :system "hyperdoc/tests"
+                 :id id
+                 :title title
+                 :function function-symbol
+                 :locator (list :function function-symbol)
+                 :package "HYPERDOC/TESTS"
+                 :class-or-group "smoke"))
 
 (defun run-check-discovery-smoke-test ()
   (let* ((examples (hyperdoc::discover-example-checks :system "hyperdoc" :page "Examples"))
@@ -240,6 +262,80 @@
       (cr-assert-true (plusp (length ops-symbols))
                       "Ops example scope must expose registered examples"))))
 
+(defun run-example-model-discovery-smoke-test ()
+  (let* ((entries (hyperdoc:discover-examples
+                   :system "hyperdoc"
+                   :page "Examples"))
+         (entry (find 'hyperdoc::the-answer
+                      entries
+                      :key #'hyperdoc:example-entry-function-of))
+         (run (hyperdoc:make-example-run
+               :system "hyperdoc"
+               :page "Examples"))
+         (summary (hyperdoc:example-run-summary-of run)))
+    (cr-assert-true entry
+                    "Example discovery must expose the-answer as an example entry")
+    (cr-assert-typep 'hyperdoc:example-entry
+                     entry
+                     "Discovered examples must be first-class example entries")
+    (cr-assert-equal "hyperdoc"
+                     (hyperdoc:example-entry-system-of entry)
+                     "Example entry system scope")
+    (cr-assert-equal 0
+                     (getf summary :executed)
+                     "Example run summary before execution")
+    (cr-assert-equal (getf summary :total)
+                     (getf summary :not-executed)
+                     "All example entries must start as not executed")
+    (let ((result (hyperdoc:run-example-entry entry)))
+      (cr-assert-typep 'hyperdoc:example-result
+                       result
+                       "Running one example entry must return an example result")
+      (cr-assert-equal :success
+                       (hyperdoc:example-result-status-of result)
+                       "Successful example result status")
+      (cr-assert-equal 42
+                       (hyperdoc:example-result-value-of result)
+                       "Successful example result value"))))
+
+(defun run-example-run-status-smoke-test ()
+  (let* ((entries
+           (list
+            (make-smoke-example-entry "example:smoke:passing"
+                                      "Passing example"
+                                      'passing-example-smoke)
+            (make-smoke-example-entry "example:smoke:failing"
+                                      "Failing example"
+                                      'failing-example-smoke)
+            (make-smoke-example-entry "example:smoke:erroring"
+                                      "Erroring example"
+                                      'erroring-example-smoke)
+            (make-smoke-example-entry "example:smoke:skipped"
+                                      "Skipped example"
+                                      'skipped-example-smoke)))
+         (run (hyperdoc:make-example-run
+               :system "hyperdoc/tests"
+               :entries entries)))
+    (cr-assert-equal 0
+                     (getf (hyperdoc:example-run-summary-of run) :executed)
+                     "Example run must not execute entries during construction")
+    (hyperdoc:run-example-run! run)
+    (let ((summary (hyperdoc:example-run-summary-of run)))
+      (cr-assert-equal 4 (getf summary :total)
+                       "Example run total count")
+      (cr-assert-equal 4 (getf summary :executed)
+                       "Example run executed count")
+      (cr-assert-equal 1 (getf summary :success)
+                       "Example run success count")
+      (cr-assert-equal 1 (getf summary :failure)
+                       "Example run failure count")
+      (cr-assert-equal 1 (getf summary :error)
+                       "Example run error count")
+      (cr-assert-equal 1 (getf summary :skipped)
+                       "Example run skipped count")
+      (cr-assert-equal 0 (getf summary :not-executed)
+                       "Example run not-executed count"))))
+
 (defun known-test-check-spec (id)
   (find id
         (hyperdoc::discover-test-checks :system "hyperdoc")
@@ -382,11 +478,13 @@
   (run-documentation-slice-validation-discovery-smoke-test)
   (run-documentation-slice-validation-report-smoke-test)
   (run-example-system-attribution-smoke-test)
+  (run-example-model-discovery-smoke-test)
+  (run-example-run-status-smoke-test)
   (run-check-source-target-smoke-test)
   (run-passing-check-smoke-test)
   (run-failure-and-error-smoke-test)
   (run-batch-summary-smoke-test)
   (run-rerun-failed-smoke-test)
   (run-single-example-compatibility-smoke-test)
-  (format t "~&Check runner smoke tests passed.~%")
+  (format t "~&Runner smoke tests passed.~%")
   t)

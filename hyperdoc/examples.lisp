@@ -9,7 +9,7 @@
 ;;
 
 (eval-when (:load-toplevel :execute)
-  (register-example-check
+  (register-example
    'graphviz-story-item-upstream-assimilation-example
    :system "hyperdoc/examples/ops"
    :source-file (asdf:system-relative-pathname

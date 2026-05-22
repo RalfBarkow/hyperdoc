@@ -19,13 +19,13 @@ The syntax is the same as DEFUN, except that example functions take no
 arguments.
 
 An optional property list may be provided as the first body form to control
-check registration metadata:
+example registration metadata:
 
   (defexample my-example
     (:register t :system \"hyperdoc/examples/ops\")
     ...body...)
 
-Supported keys mirror REGISTER-EXAMPLE-CHECK keyword arguments."
+Supported keys mirror REGISTER-EXAMPLE keyword arguments."
   (let* ((source-file (or *compile-file-truename* *load-truename*))
          (options (and body
                        (listp (first body))
@@ -39,18 +39,21 @@ Supported keys mirror REGISTER-EXAMPLE-CHECK keyword arguments."
          (package (and options (getf options :package)))
          (page (and options (getf options :page)))
          (title (and options (getf options :title)))
-         (tags (and options (getf options :tags))))
+         (tags (and options (getf options :tags)))
+         (class-or-group (and options (getf options :class-or-group))))
     `(progn
        (defun ,name () ,@forms)
        ,(when register?
           `(eval-when (:load-toplevel :execute)
-             (register-example-check ',name
-                                     :source-file ,source-file
-                                     ,@(when system `(:system ,system))
-                                     ,@(when package `(:package ,package))
-                                     ,@(when page `(:page ,page))
-                                     ,@(when title `(:title ,title))
-                                     ,@(when tags `(:tags ,tags)))))
+             (register-example ',name
+                               :source-file ,source-file
+                               ,@(when system `(:system ,system))
+                               ,@(when package `(:package ,package))
+                               ,@(when page `(:page ,page))
+                               ,@(when title `(:title ,title))
+                               ,@(when tags `(:tags ,tags))
+                               ,@(when class-or-group
+                                   `(:class-or-group ,class-or-group)))))
        ',name)))
 
 ;;
