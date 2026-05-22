@@ -78,11 +78,13 @@
     :homepage "https://codeberg.org/khinsen/hyperdoc"
     :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
     :serial t
-    :depends-on (#:hyperdoc/topics
+                  :depends-on (#:hyperdoc/topics
                  #:shasht)
     :components ((:module "hyperdoc"
                   :serial t
                   :components ((:file "check-runner")
+                               (:file "example-source-artifacts")
+                               (:file "inspector-path-evidence")
                                (:file "example-core")
                                (:file "journal-gate")
                                (:file "validation")))))

@@ -813,15 +813,69 @@ must expose one of:
 - a source artifact object;
 - or an explicit source-unavailable diagnostic.
 
+Topic-backed source text must be backed by a durable source artifact store,
+initially SQLite-compatible. A topic-backed `example-source-reference` points
+to a persisted `example-source-artifact`; the inspector must render topic
+source by loading that artifact, not by scraping the raw function object or
+depending on transient in-memory source text.
+
+For a persisted `example-source-artifact`, the primary/default inspector view
+is `Source code`. It renders only source text. Source id, topic, language, form
+kind, provenance, and store/backend diagnostics belong in a separate `Meta`
+view. Do not put metadata, explanatory prose, or materialized-file diagnostics
+inside the `Source code` view. Use a `Summary` view only for an actual human
+summary, not as the source artifact's metadata view.
+
 For Examples work specifically:
 - `example-result` must expose its `example-entry`;
 - `example-entry` must expose function, locator, source-file, source-page, and tags;
 - the `example-result` summary must include a source-oriented row/action separate
   from the raw Function row;
 - file-backed examples must open a source/code view from the Source action;
+- supplied topic source text must be persisted before being exposed as a topic
+  source reference;
 - MREPL-only examples must explicitly report source unavailable or SLY MREPL.
 
 The minimal SLY MREPL demo must prove both:
 1. an inspectable runtime result exists, ending with `(i *example-result*)`;
 2. the result gives an inspector path toward source metadata, even if the demo
    function itself was defined in the MREPL and has no file-backed source.
+
+## Inspectable topic/association path evidence
+
+Everything transformed by Codex, ChatGPT, or agentic tooling must be representable in HyperDoc’s lingua franca: topics and associations.
+
+This applies to source artifacts, examples, runs, tests, inspector views, UI paths, SCXML transitions, Playwright observations, Codex handoffs, failures, diagnostics, and transformation results.
+
+Paths are first-class graph objects. A path must not remain only a prose description, console log, transient trace, or test helper. It must be translated into topics and associations so that a human can inspect, compare, annotate, and reason about it in CLOG/HyperDoc.
+
+The local persistence layer for these artifacts should be SQLite-backed and functionally equivalent to the relevant DMX topic/association model, without requiring Neo4j.
+
+For path-sensitive work, Codex must persist:
+
+- a path trace topic;
+- ordered path step topics;
+- associations between steps;
+- associations to source objects, methods, endpoints, SCXML states/events/transitions/actions, Playwright observations, rendered views, and DOM evidence;
+- provenance linking the trace to the agent run and validation command.
+
+When a bug is described as a mismatch between paths, Codex must produce an inspectable comparison artifact showing both paths side by side and identifying the first divergent step.
+
+For UI work, Codex must distinguish:
+
+- model/view path;
+- synthetic smoke-test path;
+- actual CLOG inspector path;
+- Playwright browser path;
+- SCXML behavior path.
+
+Acceptance for path-sensitive UI behavior requires:
+
+1. an inspectable path artifact;
+2. SQLite-backed topic/association persistence;
+3. a path comparison when more than one candidate path exists;
+4. a human-readable CLOG visualization;
+5. replay instructions from SLY MREPL;
+6. tests at the correct layer.
+
+Do not claim completion from a final result alone. For path-sensitive UI behavior, the route to the result is part of the product.

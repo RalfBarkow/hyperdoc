@@ -1492,6 +1492,23 @@
               "inspecting-example-source-artifact")
    :tabs view-titles))
 
+(defun maybe-record-example-source-artifact-clog-pane-path
+    (pane view-titles)
+  (with-slots (object) pane
+    (let* ((package (find-package "HYPERDOC"))
+           (symbol (and package
+                        (find-symbol
+                         "RECORD-EXAMPLE-SOURCE-ARTIFACT-CLOG-PANE-PATH"
+                         package))))
+      (when (and symbol (fboundp symbol))
+        (ignore-errors
+          (funcall (symbol-function symbol)
+                   object
+                   view-titles
+                   :dom-labels view-titles
+                   :recorder-events
+                   (inspector-scxml-ui-recorder-events)))))))
+
 (defun example-source-artifact-inspector-tab-event (tab-text)
   (cond
     ((string= tab-text "Source code") "select.source-code")
@@ -1572,6 +1589,8 @@
                :action-name "render-pane-tabs"
                :action #'render-tab-row)
               (example-source-artifact-inspector-record-pane-tabs-rendered
+               pane view-titles)
+              (maybe-record-example-source-artifact-clog-pane-path
                pane view-titles))
             (render-tab-row)))
       (clog:create-div chrome

@@ -33,10 +33,31 @@
    #:example-result
    #:example-run
    #:example-source-reference
+   #:example-source-artifact
+   #:example-source-sqlite-store
+   #:path-topic
+   #:path-association
+   #:inspector-path-step
+   #:inspector-path-trace
+   #:inspector-path-comparison
+   #:inspector-path-sqlite-store
    #:register-example
    #:discover-examples
    #:make-example-run
    #:make-example-source-reference
+   #:make-example-source-sqlite-store
+   #:make-example-source-artifact-inspector-contract-entry
+   #:make-example-source-artifact-inspector-contract-reference
+   #:make-example-source-artifact-inspector-contract-artifact
+   #:make-example-source-artifact-inspector-contract-result
+   #:default-example-source-sqlite-path
+   #:default-example-source-store
+   #:current-example-source-store
+   #:*example-source-store*
+   #:ensure-example-source-store-schema
+   #:find-example-source-artifact
+   #:persist-example-source-artifact
+   #:example-source-sqlite-available-p
    #:run-example-entry
    #:run-example-run!
    #:run-examples
@@ -69,6 +90,78 @@
    #:example-source-reference-source-file-of
    #:example-source-reference-source-page-of
    #:example-source-reference-tags-of
+   #:example-source-reference-source-kind-of
+   #:example-source-reference-source-artifact-of
+   #:example-source-reference-diagnostic-of
+   #:example-source-artifact-source-id-of
+   #:example-source-artifact-topic-id-of
+   #:example-source-artifact-topic-slug-of
+   #:example-source-artifact-topic-title-of
+   #:example-source-artifact-asdf-system-name-of
+   #:example-source-artifact-fedwiki-page-identity-of
+   #:example-source-artifact-function-symbol-of
+   #:example-source-artifact-locator-of
+   #:example-source-artifact-source-language-of
+   #:example-source-artifact-source-form-kind-of
+   #:example-source-artifact-source-text-of
+   #:example-source-artifact-created-at-of
+   #:example-source-artifact-updated-at-of
+   #:example-source-artifact-provenance-of
+   #:example-source-sqlite-store-db-path-of
+   #:example-source-sqlite-store-program-of
+   #:example-source-sqlite-store-schema-status-of
+   #:make-inspector-path-sqlite-store
+   #:default-inspector-path-sqlite-path
+   #:default-inspector-path-store
+   #:current-inspector-path-store
+   #:*inspector-path-store*
+   #:ensure-inspector-path-store-schema
+   #:persist-inspector-path-trace
+   #:persist-inspector-path-comparison
+   #:record-example-source-artifact-clog-pane-path
+   #:trace-and-persist-example-source-artifact-inspector-path
+   #:compare-and-persist-example-source-artifact-inspector-paths
+   #:inspector-path-sqlite-store-db-path-of
+   #:inspector-path-sqlite-store-program-of
+   #:inspector-path-sqlite-store-schema-status-of
+   #:path-topic-id-of
+   #:path-topic-type-of
+   #:path-topic-title-of
+   #:path-topic-value-of
+   #:path-association-id-of
+   #:path-association-type-of
+   #:path-association-from-topic-id-of
+   #:path-association-to-topic-id-of
+   #:inspector-path-step-id-of
+   #:inspector-path-step-index-of
+   #:inspector-path-step-path-name-of
+   #:inspector-path-step-phase-of
+   #:inspector-path-step-action-of
+   #:inspector-path-step-object-type-of
+   #:inspector-path-step-object-identity-of
+   #:inspector-path-step-entry-function-of
+   #:inspector-path-step-generic-function-of
+   #:inspector-path-step-selected-methods-of
+   #:inspector-path-step-scxml-record-of
+   #:inspector-path-step-view-titles-of
+   #:inspector-path-step-dom-labels-of
+   #:inspector-path-step-result-of
+   #:inspector-path-step-details-of
+   #:inspector-path-trace-id-of
+   #:inspector-path-trace-path-name-of
+   #:inspector-path-trace-object-of
+   #:inspector-path-trace-object-type-of
+   #:inspector-path-trace-object-identity-of
+   #:inspector-path-trace-entry-function-of
+   #:inspector-path-trace-steps-of
+   #:inspector-path-trace-result-of
+   #:inspector-path-trace-store-of
+   #:inspector-path-trace-topics-of
+   #:inspector-path-trace-associations-of
+   #:inspector-path-comparison-id-of
+   #:inspector-path-comparison-traces-of
+   #:inspector-path-comparison-equivalent-p-of
+   #:inspector-path-comparison-first-divergence-of
    #:run-ci-checks
    ;; Defining tools
    #:deftool #:html #:markdown #:html-generator

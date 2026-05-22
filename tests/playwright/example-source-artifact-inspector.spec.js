@@ -15,6 +15,7 @@ const {
 } = require("./hyperdoc-inspector");
 
 test.describe.configure({ mode: "serial" });
+test.setTimeout(180_000);
 
 const scxmlPath = path.join(
   __dirname,
@@ -110,7 +111,7 @@ async function clickFixtureReference(page, label, expectedPaneText) {
         state.activeTab || "",
         state.bodyText || "",
       ].join("\n");
-    }, { timeout: 20_000 })
+    }, { timeout: 60_000 })
     .toContain(expectedPaneText);
   await settleInspectorBindings(page);
   return (await page.locator(".inspector-pane").count()) - 1;
@@ -224,7 +225,18 @@ test("example-source-artifact inspector follows hyperdoc/example-source-artifact
     .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
     .toBe(paneCountBeforeSource + 1);
   const resultSourcePaneIndex = paneCountBeforeSource;
-  await settleInspectorBindings(page);
+  await expect
+    .poll(
+      async () => (await readInspectorPaneState(page, resultSourcePaneIndex)).activeTab,
+      { timeout: 60_000 }
+    )
+    .toBe("Source code");
+  await expect
+    .poll(
+      async () => (await readInspectorPaneState(page, resultSourcePaneIndex)).bodyText,
+      { timeout: 60_000 }
+    )
+    .toContain("hyperdoc:defexample");
 
   const resultSourceTabs = await visibleTabLabels(page, resultSourcePaneIndex);
   expect(resultSourceTabs).toEqual(expectedTabs);

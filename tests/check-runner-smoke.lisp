@@ -482,6 +482,13 @@
                      (get-universal-time))
              (uiop:temporary-directory))))
 
+(defun make-temp-inspector-path-store ()
+  (hyperdoc:make-inspector-path-sqlite-store
+   :db-path (merge-pathnames
+             (format nil "hyperdoc-inspector-path-evidence-~36R.sqlite"
+                     (get-universal-time))
+             (uiop:temporary-directory))))
+
 (defun run-example-source-artifact-inspector-scxml-smoke-test ()
   (asdf:load-system :hyperdoc/scxml)
   (let* ((chart (hyperdoc/scxml:parse-scxml-file
@@ -755,6 +762,109 @@
                               lookup-artifact)
                              "Topic source reference must load source text from SQLite"))))))
 
+(defun run-example-source-artifact-path-evidence-smoke-test ()
+  (if (not (hyperdoc:example-source-sqlite-available-p))
+      (format t "~&Skipping example source artifact path evidence smoke test; sqlite3 unavailable.~%")
+      (let* ((artifact
+               (hyperdoc:make-example-source-artifact-inspector-contract-artifact))
+             (store (make-temp-inspector-path-store))
+             (expected-tabs
+               '("Source code" "Meta" "Slots" "Print" "Operations" "Playground")))
+        (let ((hyperdoc:*inspector-path-store* store))
+          (let* ((actual
+                   (hyperdoc:record-example-source-artifact-clog-pane-path
+                    artifact
+                    expected-tabs
+                    :dom-labels expected-tabs
+                    :recorder-events
+                    '((:kind :scxml-loaded
+                       :machine "example-source-artifact-inspector")
+                      (:kind :state-entered
+                       :state "inspecting-example-source-artifact")
+                      (:kind :event-dispatched
+                       :event "tabs.rendered")
+                      (:kind :transition-selected
+                       :event "tabs.rendered"
+                       :target "inspecting-example-source-artifact")
+                      (:kind :guard-evaluated
+                       :event "tabs.rendered"
+                       :result "true")
+                      (:kind :action-invoked
+                       :event "tabs.rendered"
+                       :action "render-pane-tabs")
+                      (:kind :pane-tabs-rendered
+                       :tabs ("Source code" "Meta" "Slots" "Print"
+                              "Operations" "Playground")))))
+                 (trace
+                   (hyperdoc:trace-and-persist-example-source-artifact-inspector-path
+                    artifact
+                    :store store))
+                 (comparison
+                   (hyperdoc:compare-and-persist-example-source-artifact-inspector-paths
+                    artifact
+                    :store store)))
+            (cr-assert-typep 'hyperdoc:inspector-path-trace
+                             actual
+                             "Actual CLOG path trace must be inspectable")
+            (cr-assert-typep 'hyperdoc:inspector-path-trace
+                             trace
+                             "Trace entry point must return an inspector path trace")
+            (cr-assert-typep 'hyperdoc:inspector-path-comparison
+                             comparison
+                             "Comparison entry point must return an inspector path comparison")
+            (cr-assert-true
+             (hyperdoc:inspector-path-trace-topics-of trace)
+             "Trace must persist path topics")
+            (cr-assert-true
+             (hyperdoc:inspector-path-trace-associations-of trace)
+             "Trace must persist path associations")
+            (cr-assert-true
+             (hyperdoc:inspector-path-comparison-equivalent-p-of comparison)
+             "Model, synthetic, and recorded actual path labels must compare equivalent")
+            (cr-assert-equal
+             nil
+             (hyperdoc:inspector-path-comparison-first-divergence-of comparison)
+             "Equivalent paths must not report a first divergence")
+            (let* ((divergent-trace
+                     (make-instance
+                      'hyperdoc:inspector-path-trace
+                      :trace-id "path-trace:divergent-summary"
+                      :path-name "manual/divergent"
+                      :object artifact
+                      :steps
+                      (list
+                       (make-instance
+                        'hyperdoc:inspector-path-step
+                        :step-id "path-step:divergent-summary"
+                        :index 0
+                        :path-name "manual/divergent"
+                        :phase "dom-tab-labels"
+                        :dom-labels
+                        '("Source code" "Summary" "Slots" "Print"
+                          "Operations" "Playground")))))
+                   (divergent-comparison
+                     (make-instance
+                      'hyperdoc:inspector-path-comparison
+                      :comparison-id "path-comparison:divergent-summary"
+                      :object artifact
+                      :traces
+                      (list trace divergent-trace)
+                      :equivalent-p nil
+                      :first-divergence
+                      (list :actual-labels
+                            '("Source code" "Summary" "Slots" "Print"
+                              "Operations" "Playground")))))
+              (declare (ignore divergent-comparison))
+              (cr-assert-string-contains
+               "Summary"
+               (with-output-to-string (stream)
+                 (prin1
+                  '(:actual-labels
+                    ("Source code" "Summary" "Slots" "Print"
+                     "Operations" "Playground"))
+                  stream))
+               "Divergence evidence must make Summary visible")))))))
+
 (defun known-test-check-spec (id)
   (find id
         (hyperdoc::discover-test-checks :system "hyperdoc")
@@ -901,6 +1011,7 @@
   (run-example-run-status-smoke-test)
   (run-example-source-artifact-inspector-scxml-smoke-test)
   (run-topic-backed-example-source-artifact-smoke-test)
+  (run-example-source-artifact-path-evidence-smoke-test)
   (run-check-source-target-smoke-test)
   (run-passing-check-smoke-test)
   (run-failure-and-error-smoke-test)

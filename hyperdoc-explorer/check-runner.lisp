@@ -520,6 +520,14 @@
   (format nil "Source artifact ~A"
           (example-source-artifact-source-id-of artifact)))
 
+(defmethod views:text-representation ((trace inspector-path-trace))
+  (format nil "Inspector path trace ~A"
+          (inspector-path-trace-path-name-of trace)))
+
+(defmethod views:text-representation ((comparison inspector-path-comparison))
+  (format nil "Inspector path comparison ~:[diverged~;equivalent~]"
+          (inspector-path-comparison-equivalent-p-of comparison)))
+
 (defmethod views:text-representation ((run example-run))
   (let ((summary (example-run-summary-of run)))
     (format nil "Examples (~D success, ~D failure, ~D error)"
@@ -636,6 +644,242 @@
 (views:defview views:👀source (artifact example-source-artifact)
   (views:html-view :title "Source code" :priority 0
                    (render-example-source-artifact-source-only artifact)))
+
+(defun render-inspector-path-value (value)
+  (cond
+    ((null value) (views:html (:tt (views:esc "n/a"))))
+    ((listp value)
+     (views:html (:pre :style "white-space: pre-wrap"
+                       (views:esc
+                        (with-output-to-string (stream)
+                          (let ((*print-pretty* t)
+                                (*print-circle* t))
+                            (prin1 value stream)))))))
+    (t (views:html (:tt (views:esc (format nil "~A" value)))))))
+
+(defun render-inspector-path-step-row (step)
+  (views:html
+   (:tr
+    (:td (:tt (views:esc
+               (format nil "~D" (inspector-path-step-index-of step)))))
+    (:td (:tt (views:esc (inspector-path-step-path-name-of step))))
+    (:td (:tt (views:esc (inspector-path-step-phase-of step))))
+    (:td (render-inspector-path-value
+          (inspector-path-step-action-of step)))
+    (:td (render-inspector-path-value
+          (or (inspector-path-step-dom-labels-of step)
+              (inspector-path-step-view-titles-of step))))
+    (:td (render-inspector-path-value
+          (inspector-path-step-result-of step))))))
+
+(defun render-inspector-path-steps-table (steps)
+  (views:html
+   (:table :class "inspector-table"
+           (:tr (:th (views:esc "#"))
+                (:th (views:esc "Path"))
+                (:th (views:esc "Phase"))
+                (:th (views:esc "Action"))
+                (:th (views:esc "Views / DOM labels"))
+                (:th (views:esc "Result")))
+           (loop for step in steps
+                 do (render-inspector-path-step-row step)))))
+
+(defun render-inspector-path-topic-table (topics)
+  (views:html
+   (:table :class "inspector-table"
+           (:tr (:th (views:esc "Topic id"))
+                (:th (views:esc "Type"))
+                (:th (views:esc "Title")))
+           (loop for topic in topics
+                 do (views:html
+                     (:tr
+                      (:td (:code (views:esc (path-topic-id-of topic))))
+                      (:td (:tt (views:esc (path-topic-type-of topic))))
+                      (:td (views:esc (path-topic-title-of topic)))))))))
+
+(defun render-inspector-path-association-table (associations)
+  (views:html
+   (:table :class "inspector-table"
+           (:tr (:th (views:esc "Association id"))
+                (:th (views:esc "Type"))
+                (:th (views:esc "From"))
+                (:th (views:esc "To")))
+           (loop for association in associations
+                 do (views:html
+                     (:tr
+                      (:td (:code (views:esc
+                                   (path-association-id-of association))))
+                      (:td (:tt (views:esc
+                                 (path-association-type-of association))))
+                      (:td (:code (views:esc
+                                   (path-association-from-topic-id-of
+                                    association))))
+                      (:td (:code (views:esc
+                                   (path-association-to-topic-id-of
+                                    association))))))))))
+
+(defun inspector-path-scxml-steps (trace)
+  (remove-if-not #'inspector-path-step-scxml-record-of
+                 (inspector-path-trace-steps-of trace)))
+
+(defun inspector-path-dom-steps (trace)
+  (remove-if-not
+   (lambda (step)
+     (or (inspector-path-step-dom-labels-of step)
+         (inspector-path-step-view-titles-of step)))
+   (inspector-path-trace-steps-of trace)))
+
+(views:defview 👀overview (trace inspector-path-trace)
+  (views:html-view
+   :title "Overview"
+   :priority 0
+   (views:html
+    (:h3 (views:esc (title-of trace)))
+    (:table :class "inspector-table"
+            (:tr (:td (views:esc "Path"))
+                 (:td (:tt (views:esc
+                            (inspector-path-trace-path-name-of trace)))))
+            (:tr (:td (views:esc "Object type"))
+                 (:td (:tt (views:esc
+                            (inspector-path-trace-object-type-of trace)))))
+            (:tr (:td (views:esc "Object identity"))
+                 (:td (:tt (views:esc
+                            (inspector-path-trace-object-identity-of
+                             trace)))))
+            (:tr (:td (views:esc "Entry function"))
+                 (:td (:tt (views:esc
+                            (or (inspector-path-trace-entry-function-of trace)
+                                "n/a")))))
+            (:tr (:td (views:esc "Result"))
+                 (:td (:tt (views:esc
+                            (format nil "~A"
+                                    (inspector-path-trace-result-of
+                                     trace))))))
+            (:tr (:td (views:esc "SQLite store"))
+                 (:td (:tt (views:esc
+                            (typecase (inspector-path-trace-store-of trace)
+                              (inspector-path-sqlite-store
+                               (namestring
+                                (inspector-path-sqlite-store-db-path-of
+                                 (inspector-path-trace-store-of trace))))
+                              (t "n/a"))))))))))
+
+(views:defview 👀steps (trace inspector-path-trace)
+  (views:html-view
+   :title "Steps"
+   :priority 1
+   (render-inspector-path-steps-table
+    (inspector-path-trace-steps-of trace))))
+
+(views:defview 👀associations (trace inspector-path-trace)
+  (views:html-view
+   :title "Associations"
+   :priority 2
+   (render-inspector-path-association-table
+    (inspector-path-trace-associations-of trace))))
+
+(views:defview 👀scxml (trace inspector-path-trace)
+  (views:html-view
+   :title "SCXML"
+   :priority 3
+   (let ((steps (inspector-path-scxml-steps trace)))
+     (if steps
+         (render-inspector-path-steps-table steps)
+         (views:html (:p "No SCXML events were recorded for this trace."))))))
+
+(views:defview 👀dom (trace inspector-path-trace)
+  (views:html-view
+   :title "DOM evidence"
+   :priority 4
+   (let ((steps (inspector-path-dom-steps trace)))
+     (if steps
+         (render-inspector-path-steps-table steps)
+         (views:html (:p "No DOM or final label evidence was recorded."))))))
+
+(views:defview 👀raw (trace inspector-path-trace)
+  (views:html-view
+   :title "Raw topic graph"
+   :priority 5
+   (views:html
+    (:h4 "Topics")
+    (render-inspector-path-topic-table
+     (inspector-path-trace-topics-of trace))
+    (:h4 "Associations")
+    (render-inspector-path-association-table
+     (inspector-path-trace-associations-of trace)))))
+
+(views:defview 👀overview (comparison inspector-path-comparison)
+  (views:html-view
+   :title "Overview"
+   :priority 0
+   (let ((store (inspector-path-comparison-store-of comparison)))
+     (views:html
+      (:h3 "Inspector path comparison")
+      (:table :class "inspector-table"
+              (:tr (:td (views:esc "Equivalent"))
+                   (:td (:tt (views:esc
+                              (if (inspector-path-comparison-equivalent-p-of
+                                   comparison)
+                                  "yes"
+                                  "no")))))
+              (:tr (:td (views:esc "First divergence"))
+                   (:td (render-inspector-path-value
+                         (inspector-path-comparison-first-divergence-of
+                          comparison))))
+              (:tr (:td (views:esc "SQLite store"))
+                   (:td (:tt (views:esc
+                              (typecase store
+                                (inspector-path-sqlite-store
+                                 (namestring
+                                  (inspector-path-sqlite-store-db-path-of
+                                   store)))
+                                (t "n/a")))))))))))
+
+(views:defview 👀divergence (comparison inspector-path-comparison)
+  (views:html-view
+   :title "Divergence"
+   :priority 1
+   (let ((divergence
+           (inspector-path-comparison-first-divergence-of comparison)))
+     (if divergence
+         (render-inspector-path-value divergence)
+         (views:html (:p "No divergence recorded at the compared labels."))))))
+
+(views:defview 👀steps (comparison inspector-path-comparison)
+  (views:html-view
+   :title "Steps"
+   :priority 2
+   (views:html
+    (loop for trace in (inspector-path-comparison-traces-of comparison)
+          do (views:html
+              (:h4 (views:esc
+                    (inspector-path-trace-path-name-of trace)))
+              (render-inspector-path-steps-table
+               (inspector-path-trace-steps-of trace)))))))
+
+(views:defview 👀associations (comparison inspector-path-comparison)
+  (views:html-view
+   :title "Associations"
+   :priority 3
+   (views:html
+    (loop for trace in (inspector-path-comparison-traces-of comparison)
+          do (views:html
+              (:h4 (views:esc
+                    (inspector-path-trace-path-name-of trace)))
+              (render-inspector-path-association-table
+               (inspector-path-trace-associations-of trace)))))))
+
+(views:defview 👀raw (comparison inspector-path-comparison)
+  (views:html-view
+   :title "Raw topic graph"
+   :priority 4
+   (views:html
+    (:h4 "Comparison topics")
+    (render-inspector-path-topic-table
+     (inspector-path-comparison-topics-of comparison))
+    (:h4 "Comparison associations")
+    (render-inspector-path-association-table
+     (inspector-path-comparison-associations-of comparison)))))
 
 (views:defview 👀summary (entry example-entry)
   (let ((source-reference (example-source-reference-for entry)))
