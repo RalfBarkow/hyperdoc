@@ -40,7 +40,17 @@ Supported keys mirror REGISTER-EXAMPLE keyword arguments."
          (page (and options (getf options :page)))
          (title (and options (getf options :title)))
          (tags (and options (getf options :tags)))
-         (class-or-group (and options (getf options :class-or-group))))
+         (class-or-group (and options (getf options :class-or-group)))
+         (source-text (and options (getf options :source-text)))
+         (source-id (and options (getf options :source-id)))
+         (topic-id (and options (getf options :topic-id)))
+         (topic-slug (and options (getf options :topic-slug)))
+         (topic-title (and options (getf options :topic-title)))
+         (fedwiki-page-identity
+          (and options (getf options :fedwiki-page-identity)))
+         (source-language (and options (getf options :source-language)))
+         (source-form-kind (and options (getf options :source-form-kind)))
+         (provenance (and options (getf options :provenance))))
     `(progn
        (defun ,name () ,@forms)
        ,(when register?
@@ -53,7 +63,26 @@ Supported keys mirror REGISTER-EXAMPLE keyword arguments."
                                ,@(when title `(:title ,title))
                                ,@(when tags `(:tags ,tags))
                                ,@(when class-or-group
-                                   `(:class-or-group ,class-or-group)))))
+                                   `(:class-or-group ,class-or-group))
+                               ,@(when source-text
+                                   `(:source-text ,source-text))
+                               ,@(when source-id
+                                   `(:source-id ,source-id))
+                               ,@(when topic-id
+                                   `(:topic-id ,topic-id))
+                               ,@(when topic-slug
+                                   `(:topic-slug ,topic-slug))
+                               ,@(when topic-title
+                                   `(:topic-title ,topic-title))
+                               ,@(when fedwiki-page-identity
+                                   `(:fedwiki-page-identity
+                                     ,fedwiki-page-identity))
+                               ,@(when source-language
+                                   `(:source-language ,source-language))
+                               ,@(when source-form-kind
+                                   `(:source-form-kind ,source-form-kind))
+                               ,@(when provenance
+                                   `(:provenance ,provenance)))))
        ',name)))
 
 ;;

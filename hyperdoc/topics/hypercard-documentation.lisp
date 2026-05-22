@@ -963,10 +963,21 @@
   (make-topic
    :id "example-source-reference"
    :title "Example source reference"
-   :summary "Source-navigation object derived from an example entry, keeping function, locator, source-file, source-page, and tags separate from the raw runtime function object."
+   :summary "Source-navigation object derived from an example entry, resolving to a file source, persisted topic source artifact, or explicit unavailable diagnostic rather than the raw runtime function object."
    :references '("Running HyperDoc Examples"
                  "ASDF Systems, Examples, and Tests in HyperDoc"
                  "hyperdoc/check-runner.lisp"
+                 "hyperdoc/example-source-artifacts.lisp"
+                 "hyperdoc-explorer/check-runner.lisp")))
+
+(defun example-source-artifact-topic ()
+  (make-topic
+   :id "example-source-artifact"
+   :title "Example source artifact"
+   :summary "Durable persisted source record for topic-backed examples, carrying topic identity, ASDF system, function symbol, locator, source language/form kind, source text, timestamps, and provenance for inspector and future LISP-CRITIC use."
+   :references '("Running HyperDoc Examples"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "hyperdoc/example-source-artifacts.lisp"
                  "hyperdoc-explorer/check-runner.lisp")))
 
 (defun example-run-topic ()

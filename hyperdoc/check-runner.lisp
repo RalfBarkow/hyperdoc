@@ -53,7 +53,13 @@
    (source-page :initarg :source-page :initform nil
                 :reader example-source-reference-source-page-of)
    (tags :initarg :tags :initform nil
-         :reader example-source-reference-tags-of)))
+         :reader example-source-reference-tags-of)
+   (source-kind :initarg :source-kind :initform :unavailable
+                :reader example-source-reference-source-kind-of)
+   (source-artifact :initarg :source-artifact :initform nil
+                    :reader example-source-reference-source-artifact-of)
+   (diagnostic :initarg :diagnostic :initform nil
+               :reader example-source-reference-diagnostic-of)))
 
 (defclass check-spec ()
   ((kind :initarg :kind :reader check-kind-of)
@@ -249,7 +255,16 @@
                                            page
                                            title
                                            tags
-                                           class-or-group)
+                                           class-or-group
+                                           source-text
+                                           source-id
+                                           topic-id
+                                           topic-slug
+                                           topic-title
+                                           fedwiki-page-identity
+                                           source-language
+                                           source-form-kind
+                                           provenance)
   (let* ((resolved-system (or system
                               (source-file-system-name source-file)
                               "hyperdoc"))
@@ -264,6 +279,15 @@
                 :page page-title
                 :title (or title (make-example-title function-symbol))
                 :class-or-group class-or-group
+                :source-text source-text
+                :source-id source-id
+                :topic-id topic-id
+                :topic-slug topic-slug
+                :topic-title topic-title
+                :fedwiki-page-identity fedwiki-page-identity
+                :source-language source-language
+                :source-form-kind source-form-kind
+                :provenance provenance
                 :tags tags)))
     (unless (gethash function-symbol *example-registrations*)
       (setf *example-registration-order*
@@ -308,7 +332,17 @@
                     :system (getf registration :system)
                     :package (getf registration :package)
                     :page (getf registration :page)
-                    :source-file (getf registration :source-file))
+                    :source-file (getf registration :source-file)
+                    :source-text (getf registration :source-text)
+                    :source-id (getf registration :source-id)
+                    :topic-id (getf registration :topic-id)
+                    :topic-slug (getf registration :topic-slug)
+                    :topic-title (getf registration :topic-title)
+                    :fedwiki-page-identity
+                    (getf registration :fedwiki-page-identity)
+                    :source-language (getf registration :source-language)
+                    :source-form-kind (getf registration :source-form-kind)
+                    :provenance (getf registration :provenance))
      :package (getf registration :package)
      :source-file (getf registration :source-file)
      :source-page (getf registration :page)
@@ -424,15 +458,6 @@
 
 (defun example-run-duration-ms (run)
   (getf (example-run-summary-of run) :duration-ms))
-
-(defun make-example-source-reference (entry)
-  (make-instance 'example-source-reference
-                 :entry entry
-                 :function (example-entry-function-of entry)
-                 :locator (example-entry-locator-of entry)
-                 :source-file (example-entry-source-file-of entry)
-                 :source-page (example-entry-source-page-of entry)
-                 :tags (example-entry-tags-of entry)))
 
 (defun discover-examples (&key system package page)
   (loop for function-symbol in *example-registration-order*

@@ -84,10 +84,13 @@
 
 <p>
   File-backed examples expose a separate <tt>Source</tt> path that opens the
-  source/code view for the defining file. MREPL-only examples expose the same
-  source-oriented path, but the view reports <tt>SLY MREPL / source
-  unavailable</tt> instead of opening a generic function inspector as if it
-  were source.
+  source/code view for the defining file. When an example carries topic-backed
+  source text instead of a file, HyperDoc persists that text as an
+  <tt>example-source-artifact</tt> in the example source store and exposes a
+  topic source reference to that artifact. MREPL-only examples without supplied
+  source text expose the same source-oriented path, but the view reports
+  <tt>SLY MREPL / source unavailable</tt> instead of opening a generic function
+  inspector as if it were source.
 </p>
 
 <h4>What happens</h4>

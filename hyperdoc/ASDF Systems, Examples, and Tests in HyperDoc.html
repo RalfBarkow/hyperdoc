@@ -26,6 +26,7 @@
   <li><a hyperbook="topics" page="Example entry"><tt>Example entry</tt></a></li>
   <li><a hyperbook="topics" page="Example result"><tt>Example result</tt></a></li>
   <li><a hyperbook="topics" page="Example source reference"><tt>Example source reference</tt></a></li>
+  <li><a hyperbook="topics" page="Example source artifact"><tt>Example source artifact</tt></a></li>
   <li><a hyperbook="topics" page="Example run"><tt>Example run</tt></a></li>
   <li><a hyperbook="topics" page="Run action for examples"><tt>Run action for examples</tt></a></li>
   <li><a hyperbook="topics" page="Tests"><tt>Tests</tt></a></li>
@@ -179,8 +180,12 @@
   Source navigation is part of that model. An <tt>example-result</tt> exposes
   a separate source-oriented target derived from its <tt>example-entry</tt>,
   not only the raw function object. When source-file metadata is present, the
-  Source path opens the code view for that file; when the entry was created in
-  SLY MREPL or otherwise has no file-backed source, the inspector says so
+  Source path opens the code view for that file. When persisted topic source is
+  available, the Source path opens the <tt>example-source-artifact</tt> loaded
+  from the SQLite-compatible source store. When supplied source text is present
+  but no artifact exists yet, HyperDoc persists it first and then returns the
+  topic source reference. When the entry was created in SLY MREPL or otherwise
+  has no file-backed or persisted topic source, the inspector says so
   explicitly.
 </p>
 
