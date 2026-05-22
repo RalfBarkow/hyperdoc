@@ -30,6 +30,145 @@
   (unless (search needle haystack :test #'char=)
     (error "~A -- missing substring: ~S" message needle)))
 
+(defun cr-assert-string-not-contains (needle haystack message)
+  (when (search needle haystack :test #'char=)
+    (error "~A -- unexpected substring: ~S" message needle)))
+
+(defun cr-find-view-by-title (views title)
+  (find title
+        views
+        :key #'html-inspector-views:view-title
+        :test #'string=))
+
+(defun cr-view-titles (views)
+  (mapcar #'html-inspector-views:view-title views))
+
+(defun cr-count-view-title (title views)
+  (count title views
+         :key #'html-inspector-views:view-title
+         :test #'string=))
+
+(defun cr-assert-view-title-count (expected title views message)
+  (cr-assert-equal expected
+                   (cr-count-view-title title views)
+                   message))
+
+(defun cr-view-html-by-title-in-views (views title)
+  (let ((view (cr-find-view-by-title views title)))
+    (cr-assert-true view
+                    (format nil "Inspector view must exist: ~A" title))
+    (html-inspector-views:view-html view)))
+
+(defun cr-view-html-by-title (object title)
+  (cr-view-html-by-title-in-views
+   (html-inspector-views:all-views object)
+   title))
+
+(defun cr-load-clog-pane-views (object)
+  (let ((pane (make-instance 'clog-moldable-inspector::pane
+                             :inspector nil
+                             :object object)))
+    (clog-moldable-inspector::load-views pane)
+    (slot-value pane 'clog-moldable-inspector::views)))
+
+(defun cr-example-source-artifact-inspector-scxml-pathname ()
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "hyperdoc/example-source-artifact-inspector.scxml"))
+
+(defun cr-scxml-state-ids (chart)
+  (mapcar #'hyperdoc/scxml:scxml-state-id-of
+          (hyperdoc/scxml:scxml-chart-states-of chart)))
+
+(defun cr-scxml-find-state (chart state-id)
+  (find state-id
+        (hyperdoc/scxml:scxml-chart-states-of chart)
+        :key #'hyperdoc/scxml:scxml-state-id-of
+        :test #'string=))
+
+(defun cr-scxml-transition (chart source event target)
+  (let ((state (cr-scxml-find-state chart source)))
+    (and state
+         (find-if
+          (lambda (transition)
+            (and (equal event
+                        (hyperdoc/scxml:scxml-transition-event-of
+                         transition))
+                 (equal target
+                        (hyperdoc/scxml:scxml-transition-target-of
+                         transition))))
+          (hyperdoc/scxml:scxml-state-transitions-of state)))))
+
+(defun cr-scxml-state-log-expr (chart state-id label)
+  (let ((state (cr-scxml-find-state chart state-id)))
+    (loop for action in (and state
+                             (hyperdoc/scxml:scxml-state-onentry-actions-of
+                              state))
+          for attributes = (hyperdoc/scxml:scxml-action-attributes-of
+                            action)
+          when (and (eq :log
+                        (hyperdoc/scxml:scxml-action-kind-of action))
+                    (string= label (or (getf attributes :label) "")))
+            return (getf attributes :expr))))
+
+(defun cr-scxml-error-findings (findings)
+  (remove-if-not
+   (lambda (finding)
+     (eq :error
+         (hyperdoc/scxml:scxml-validation-finding-severity-of finding)))
+   findings))
+
+(defun cr-assert-example-source-artifact-tab-contract (views label)
+  (let ((titles (cr-view-titles views))
+        (first-view (first views)))
+    (cr-assert-true first-view
+                    (format nil "~A must expose inspector views" label))
+    (cr-assert-equal "Source code"
+                     (html-inspector-views:view-title first-view)
+                     (format nil "~A first/default view" label))
+    (cr-assert-equal "Meta"
+                     (second titles)
+                     (format nil "~A second view" label))
+    (cr-assert-view-title-count
+     1 "Source code" views
+     (format nil "~A must expose exactly one Source code view" label))
+    (cr-assert-view-title-count
+     1 "Meta" views
+     (format nil "~A must expose one Meta view" label))
+    (cr-assert-view-title-count
+     0 "Summary" views
+     (format nil "~A must not expose a Summary view" label))))
+
+(defun cr-assert-example-source-code-only-view (object needle label)
+  (let* ((view (html-inspector-views:👀source object))
+         (html (and view (html-inspector-views:view-html view))))
+    (cr-assert-true view
+                    (format nil "~A must expose a source view" label))
+    (cr-assert-equal "Source code"
+                     (html-inspector-views:view-title view)
+                     (format nil "~A source view title" label))
+    (cr-assert-string-contains needle html
+                               (format nil "~A source view" label))
+    (dolist (forbidden '("Source id"
+                         "Topic"
+                         "Language"
+                         "Materialized view file"))
+      (cr-assert-string-not-contains
+       forbidden html
+       (format nil "~A source view must be code-only" label)))))
+
+(defun cr-recorder-event-p (events kind &key event target action)
+  (find-if
+   (lambda (record)
+     (and (eq kind (getf record :kind))
+          (or (null event)
+              (equal event (getf record :event)))
+          (or (null target)
+              (equal target (getf record :target)))
+          (or (null action)
+              (equal action (getf record :action)))))
+   events))
+
 (defun make-smoke-check-spec (id title function-symbol &key (kind :test) tags)
   (make-instance 'hyperdoc::check-spec
                  :kind kind
@@ -336,6 +475,286 @@
       (cr-assert-equal 0 (getf summary :not-executed)
                        "Example run not-executed count"))))
 
+(defun make-temp-example-source-store ()
+  (hyperdoc:make-example-source-sqlite-store
+   :db-path (merge-pathnames
+             (format nil "hyperdoc-example-source-artifacts-~36R.sqlite"
+                     (get-universal-time))
+             (uiop:temporary-directory))))
+
+(defun run-example-source-artifact-inspector-scxml-smoke-test ()
+  (asdf:load-system :hyperdoc/scxml)
+  (let* ((chart (hyperdoc/scxml:parse-scxml-file
+                 (cr-example-source-artifact-inspector-scxml-pathname)))
+         (findings (hyperdoc/scxml:validate-scxml-chart chart))
+         (errors (cr-scxml-error-findings findings))
+         (state-ids (cr-scxml-state-ids chart)))
+    (cr-assert-equal
+     "example-source-artifact-inspector"
+     (hyperdoc/scxml:scxml-chart-name-of chart)
+     "Source artifact inspector SCXML chart name")
+    (cr-assert-equal
+     "inspecting-example-source-artifact"
+     (hyperdoc/scxml:scxml-chart-initial-state-of chart)
+     "Source artifact inspector SCXML initial state")
+    (cr-assert-true
+     (null errors)
+     (format nil "Source artifact inspector SCXML must validate: ~S"
+             (mapcar #'hyperdoc/scxml:scxml-validation-finding-code-of
+                     errors)))
+    (dolist (state '("inspecting-example-source-artifact"
+                     "source-code-selected"
+                     "meta-selected"
+                     "result-source-opened"))
+      (cr-assert-true
+       (member state state-ids :test #'string=)
+       (format nil "Source artifact inspector SCXML state missing: ~A"
+               state)))
+    (dolist (transition
+              '(("inspecting-example-source-artifact"
+                 "tabs.rendered"
+                 "inspecting-example-source-artifact")
+                ("inspecting-example-source-artifact"
+                 "select.source-code"
+                 "source-code-selected")
+                ("inspecting-example-source-artifact"
+                 "select.meta"
+                 "meta-selected")
+                ("inspecting-example-source-artifact"
+                 "inspect.example-result.source"
+                 "result-source-opened")
+                ("source-code-selected"
+                 "select.meta"
+                 "meta-selected")
+                ("meta-selected"
+                 "select.source-code"
+                 "source-code-selected")))
+      (destructuring-bind (source event target) transition
+        (cr-assert-true
+         (cr-scxml-transition chart source event target)
+         (format nil "Source artifact inspector transition missing: ~A --~A--> ~A"
+                 source event target))))
+    (cr-assert-equal
+     "Source code|Meta|Slots|Print|Operations|Playground"
+     (cr-scxml-state-log-expr chart
+                              "inspecting-example-source-artifact"
+                              "visible-tabs")
+     "Source artifact inspector SCXML visible tab contract")
+    (cr-assert-equal
+     "Summary"
+     (cr-scxml-state-log-expr chart
+                              "inspecting-example-source-artifact"
+                              "forbidden-tabs")
+     "Source artifact inspector SCXML forbidden tab contract"))
+  (let ((pane (make-instance 'clog-moldable-inspector::pane
+                             :inspector nil
+                             :object
+                             (make-instance
+                              'hyperdoc:example-source-artifact
+                              :source-id
+                              "example-source:scxml-dispatch-smoke"
+                              :topic-id "982311"
+                              :topic-slug
+                              "example-source-artifact-inspector-contract"
+                              :topic-title
+                              "Example source artifact inspector contract"
+                              :asdf-system-name "hyperdoc"
+                              :function-symbol
+                              "HYPERDOC::EXAMPLE-SOURCE-ARTIFACT-INSPECTOR-CONTRACT-EXAMPLE"
+                              :source-language :common-lisp
+                              :source-form-kind :defexample
+                              :source-text
+                              "(hyperdoc:defexample scxml-dispatch-smoke (:register nil) :ok)"
+                              :provenance :fedwiki-topic)))
+        (render-tabs-action-invoked-p nil)
+        (select-meta-action-invoked-p nil))
+    (clog-moldable-inspector::clear-inspector-scxml-ui-recorder)
+    (clog-moldable-inspector::example-source-artifact-inspector-initialize-pane
+     pane)
+    (clog-moldable-inspector::example-source-artifact-inspector-dispatch-event
+     pane "tabs.rendered"
+     :action-name "render-pane-tabs"
+     :action (lambda ()
+               (setf render-tabs-action-invoked-p t)))
+    (clog-moldable-inspector::example-source-artifact-inspector-record-pane-tabs-rendered
+     pane
+     '("Source code" "Meta" "Slots" "Print" "Operations" "Playground"))
+    (clog-moldable-inspector::example-source-artifact-inspector-dispatch-event
+     pane "select.meta"
+     :action-name "select-meta-view"
+     :action (lambda ()
+               (setf select-meta-action-invoked-p t)))
+    (let ((events
+            (clog-moldable-inspector::inspector-scxml-ui-recorder-events)))
+      (cr-assert-true events
+                      "SCXML recorder must not remain empty")
+      (dolist (kind '(:scxml-loaded
+                      :state-entered
+                      :event-dispatched
+                      :transition-selected
+                      :guard-evaluated
+                      :action-invoked
+                      :pane-tabs-rendered))
+        (cr-assert-true
+         (cr-recorder-event-p events kind)
+         (format nil "SCXML recorder missing event kind ~S" kind)))
+      (cr-assert-true
+       (cr-recorder-event-p events
+                            :event-dispatched
+                            :event "tabs.rendered")
+       "SCXML recorder must capture the tab-row render event")
+      (cr-assert-true
+       (cr-recorder-event-p events
+                            :transition-selected
+                            :event "tabs.rendered"
+                            :target "inspecting-example-source-artifact")
+       "SCXML recorder must capture the tab-row render transition")
+      (cr-assert-true
+       (cr-recorder-event-p events
+                            :action-invoked
+                            :event "tabs.rendered"
+                            :action "render-pane-tabs")
+       "SCXML recorder must capture the named tab-row render action")
+      (cr-assert-true
+       (cr-recorder-event-p events
+                            :event-dispatched
+                            :event "select.meta")
+       "SCXML recorder must capture the dispatched tab event")
+      (cr-assert-true
+       (cr-recorder-event-p events
+                            :transition-selected
+                            :event "select.meta"
+                            :target "meta-selected")
+       "SCXML recorder must capture the selected transition")
+      (cr-assert-true
+       (cr-recorder-event-p events
+                            :action-invoked
+                            :event "select.meta"
+                            :action "select-meta-view")
+       "SCXML recorder must capture the named tab action")
+      (cr-assert-true render-tabs-action-invoked-p
+                      "SCXML dispatch must invoke the tab-row render action")
+      (cr-assert-true select-meta-action-invoked-p
+                      "SCXML dispatch must invoke the supplied tab action"))))
+
+(defun run-topic-backed-example-source-artifact-smoke-test ()
+  (if (not (hyperdoc:example-source-sqlite-available-p))
+      (format t "~&Skipping topic-backed example source artifact smoke test; sqlite3 unavailable.~%")
+      (let* ((source-id "example-source:topic-backed-smoke")
+             (source-text
+               "(hyperdoc:defexample topic-backed-smoke (:register nil) :ok)")
+             (locator (list :function 'passing-example-smoke
+                            :source-id source-id
+                            :topic-id "982311"
+                            :topic-slug "example-source-reference"
+                            :topic-title "Example source reference"
+                            :fedwiki-page-identity "example-source-reference"
+                            :source-language :common-lisp
+                            :source-form-kind :defexample
+                            :provenance :sly-mrepl
+                            :source-text source-text))
+             (lookup-locator (list :function 'passing-example-smoke
+                                   :source-id source-id
+                                   :topic-id "982311"
+                                   :topic-slug "example-source-reference"
+                                   :topic-title "Example source reference"
+                                   :fedwiki-page-identity
+                                   "example-source-reference"
+                                   :source-language :common-lisp
+                                   :source-form-kind :defexample
+                                   :provenance :sly-mrepl))
+             (entry (make-instance
+                     'hyperdoc:example-entry
+                     :system "hyperdoc/tests"
+                     :id "example:topic-backed-smoke"
+                     :title "Topic-backed source artifact smoke"
+                     :function 'passing-example-smoke
+                     :locator locator
+                     :package "HYPERDOC/TESTS"
+                     :class-or-group "source"))
+             (store (make-temp-example-source-store)))
+        (asdf:load-system :hyperdoc/explorer)
+        (let ((hyperdoc:*example-source-store* store))
+          (let* ((reference (hyperdoc:make-example-source-reference entry))
+                 (artifact
+                   (hyperdoc:example-source-reference-source-artifact-of
+                    reference))
+                 (result (hyperdoc:run-example-entry entry)))
+            (cr-assert-equal :topic
+                             (hyperdoc:example-source-reference-source-kind-of
+                              reference)
+                             "Supplied source text must become a topic source reference")
+            (cr-assert-typep 'hyperdoc:example-source-artifact
+                             artifact
+                             "Topic source reference must point to a persisted source artifact")
+            (cr-assert-equal source-text
+                             (hyperdoc:example-source-artifact-source-text-of
+                              artifact)
+                             "Persisted source artifact text")
+            (let* ((artifact-views (html-inspector-views:all-views artifact))
+                   (clog-pane-views (cr-load-clog-pane-views artifact))
+                   (meta-html (cr-view-html-by-title-in-views
+                               clog-pane-views "Meta")))
+              (cr-assert-example-source-artifact-tab-contract
+               artifact-views
+               "Example source artifact html-inspector-views path")
+              (cr-assert-example-source-artifact-tab-contract
+               clog-pane-views
+               "Example source artifact CLOG pane load-views path")
+              (cr-assert-example-source-code-only-view
+               artifact "hyperdoc:defexample" "Example source artifact")
+              (cr-assert-example-source-code-only-view
+               reference "hyperdoc:defexample" "Example source reference")
+              (cr-assert-example-source-code-only-view
+               entry "hyperdoc:defexample" "Example entry")
+              (cr-assert-example-source-code-only-view
+               result "hyperdoc:defexample" "Example result")
+              (dolist (metadata '("Source id"
+                                  "Topic id"
+                                  "Topic slug"
+                                  "Topic title"
+                                  "Language"
+                                  "Form kind"
+                                  "Provenance"
+                                  "Store/backend"))
+                (cr-assert-string-contains
+                 metadata meta-html
+                 "Example source artifact Meta view must expose metadata")))
+            (multiple-value-bind (loaded status detail)
+                (hyperdoc:find-example-source-artifact store source-id)
+              (declare (ignore detail))
+              (cr-assert-equal :ok status
+                               "Persisted source artifact lookup status")
+              (cr-assert-typep 'hyperdoc:example-source-artifact
+                               loaded
+                               "Persisted source artifact lookup type")
+              (cr-assert-equal source-text
+                               (hyperdoc:example-source-artifact-source-text-of
+                                loaded)
+                               "Persisted source artifact lookup text")))
+          (let* ((lookup-entry
+                   (make-instance
+                    'hyperdoc:example-entry
+                    :system "hyperdoc/tests"
+                    :id "example:topic-backed-smoke"
+                    :title "Topic-backed source artifact lookup"
+                    :function 'passing-example-smoke
+                    :locator lookup-locator
+                    :package "HYPERDOC/TESTS"))
+                 (lookup-reference
+                   (hyperdoc:make-example-source-reference lookup-entry))
+                 (lookup-artifact
+                   (hyperdoc:example-source-reference-source-artifact-of
+                    lookup-reference)))
+            (cr-assert-equal :topic
+                             (hyperdoc:example-source-reference-source-kind-of
+                              lookup-reference)
+                             "Existing topic source artifact must resolve without supplied source text")
+            (cr-assert-equal source-text
+                             (hyperdoc:example-source-artifact-source-text-of
+                              lookup-artifact)
+                             "Topic source reference must load source text from SQLite"))))))
+
 (defun known-test-check-spec (id)
   (find id
         (hyperdoc::discover-test-checks :system "hyperdoc")
@@ -480,6 +899,8 @@
   (run-example-system-attribution-smoke-test)
   (run-example-model-discovery-smoke-test)
   (run-example-run-status-smoke-test)
+  (run-example-source-artifact-inspector-scxml-smoke-test)
+  (run-topic-backed-example-source-artifact-smoke-test)
   (run-check-source-target-smoke-test)
   (run-passing-check-smoke-test)
   (run-failure-and-error-smoke-test)

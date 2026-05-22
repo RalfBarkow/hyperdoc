@@ -165,25 +165,27 @@
           pathname))))
 
 (defun example-source-status (reference)
-  (let ((pathname (example-source-pathname reference)))
-    (cond
-      ((and pathname (probe-file pathname)) :file-backed)
-      (pathname :source-file-missing)
-      ((example-source-reference-function-of reference) :mrepl)
-      (t :unavailable))))
+  (example-source-reference-source-kind-of reference))
 
 (defun example-source-status-label (status)
   (ecase status
-    (:file-backed "source file available")
-    (:source-file-missing "source file missing")
-    (:mrepl "SLY MREPL / source unavailable")
+    (:file "source file available")
+    (:topic "topic source artifact")
     (:unavailable "source unavailable")))
+
+(defun example-source-reference-status-label (reference)
+  (case (example-source-status reference)
+    (:unavailable
+     (or (example-source-reference-diagnostic-of reference)
+         (example-source-status-label :unavailable)))
+    (otherwise
+     (example-source-status-label (example-source-status reference)))))
 
 (defun example-source-file-label (reference)
   (let ((pathname (example-source-pathname reference)))
     (if pathname
         (namestring pathname)
-        (example-source-status-label (example-source-status reference)))))
+        (example-source-reference-status-label reference))))
 
 (defun example-source-system-directory (reference)
   (let* ((entry (example-source-reference-entry-of reference))
@@ -209,12 +211,17 @@
                :test #'string=)))))
 
 (defun example-source-reference-source-target (reference)
-  (or (loop for candidate in (example-source-file-candidates reference)
-            for target = (ignore-errors
-                           (source-pane-layout-source-target candidate))
-            when (typep target 'code-page)
-              do (return target))
-      (example-source-pathname reference)))
+  (case (example-source-status reference)
+    (:file
+     (or (loop for candidate in (example-source-file-candidates reference)
+               for target = (ignore-errors
+                              (source-pane-layout-source-target candidate))
+               when (typep target 'code-page)
+                 do (return target))
+         (example-source-pathname reference)))
+    (:topic
+     (example-source-reference-source-artifact-of reference))
+    (otherwise nil)))
 
 (defun example-source-navigation-target (reference)
   (let ((target (example-source-reference-source-target reference))
@@ -224,19 +231,33 @@
         (make-code-page-source-navigation target function-symbol)
         target)))
 
+(defun example-source-reference-default-view-title (reference)
+  (case (example-source-status reference)
+    (:topic "Source code")
+    (otherwise "Source")))
+
+(defun example-source-reference-navigation-object (reference)
+  (case (example-source-status reference)
+    (:topic (or (example-source-reference-source-artifact-of reference)
+                reference))
+    (otherwise reference)))
+
 (defun render-example-source-reference (reference &key (display "Source"))
-  (views:object-ref reference :display display :select "Source"))
+  (views:object-ref (example-source-reference-navigation-object reference)
+                    :display display
+                    :select (example-source-reference-default-view-title
+                             reference)))
 
 (defun render-example-source-unavailable (reference)
   (views:html
    (:h3 "Source unavailable")
    (:p
     (views:esc
-     (example-source-status-label (example-source-status reference))))
+     (example-source-reference-status-label reference)))
    (:p
     "The example result is inspectable, but this entry does not carry a "
-    "file-backed source location. This is expected for examples defined "
-    "directly in SLY MREPL.")
+    "file-backed or persisted topic source artifact. This is expected for "
+    "examples defined directly in SLY MREPL without supplied source text.")
    (:table :class "inspector-table"
            (:tr (:td (views:esc "Function"))
                 (:td (:tt (views:esc
@@ -247,12 +268,100 @@
                 (:td (views:object-ref
                       (example-source-reference-locator-of reference)))))))
 
+(defun render-example-source-artifact-source-only (artifact)
+  (views:html
+   (:pre :class "lisp-source-code-file hyperdoc-example-source-code"
+         (views:esc
+          (or (example-source-artifact-source-text-of artifact)
+              "")))))
+
+(defun render-example-source-artifact-meta (artifact)
+  (views:html
+   (:h3 (views:esc (title-of artifact)))
+   (:table :class "inspector-table"
+           (:tr (:td (views:esc "Source id"))
+                (:td (:code (views:esc
+                             (example-source-artifact-source-id-of
+                              artifact)))))
+           (:tr (:td (views:esc "Topic id"))
+                (:td (:tt (views:esc
+                           (or (example-source-artifact-topic-id-of artifact)
+                               "n/a")))))
+           (:tr (:td (views:esc "Topic slug"))
+                (:td (:tt (views:esc
+                           (or (example-source-artifact-topic-slug-of
+                                artifact)
+                               "n/a")))))
+           (:tr (:td (views:esc "Topic title"))
+                (:td (:tt (views:esc
+                           (or (example-source-artifact-topic-title-of
+                                artifact)
+                               "n/a")))))
+           (:tr (:td (views:esc "ASDF system"))
+                (:td (:tt (views:esc
+                           (or (example-source-artifact-asdf-system-name-of
+                                artifact)
+                               "n/a")))))
+           (:tr (:td (views:esc "FedWiki page"))
+                (:td (:tt (views:esc
+                           (or (example-source-artifact-fedwiki-page-identity-of
+                                artifact)
+                               "n/a")))))
+           (:tr (:td (views:esc "Function"))
+                (:td (:tt (views:esc
+                           (or (example-source-artifact-function-symbol-of
+                                artifact)
+                               "n/a")))))
+           (:tr (:td (views:esc "Locator"))
+                (:td (:tt (views:esc
+                           (or (example-source-artifact-locator-of artifact)
+                               "n/a")))))
+           (:tr (:td (views:esc "Language"))
+                (:td (:tt (views:esc
+                           (format nil "~(~A~)"
+                                   (example-source-artifact-source-language-of
+                                    artifact))))))
+           (:tr (:td (views:esc "Form kind"))
+                (:td (:tt (views:esc
+                           (format nil "~(~A~)"
+                                   (example-source-artifact-source-form-kind-of
+                                    artifact))))))
+           (:tr (:td (views:esc "Provenance"))
+                (:td (:tt (views:esc
+                           (format nil "~(~A~)"
+                                   (example-source-artifact-provenance-of
+                                    artifact))))))
+           (:tr (:td (views:esc "Created"))
+                (:td (:tt (views:esc
+                           (or (example-source-artifact-created-at-of artifact)
+                               "n/a")))))
+           (:tr (:td (views:esc "Updated"))
+                (:td (:tt (views:esc
+                           (or (example-source-artifact-updated-at-of artifact)
+                               "n/a")))))
+           (:tr (:td (views:esc "Store/backend"))
+                (:td (:tt (views:esc
+                           (typecase (current-example-source-store)
+                             (example-source-sqlite-store
+                              "SQLite-compatible example source artifact store")
+                             (t "example source artifact store"))))))
+           (:tr (:td (views:esc "Store path"))
+                (:td (:tt (views:esc
+                           (typecase (current-example-source-store)
+                             (example-source-sqlite-store
+                              (namestring
+                               (example-source-sqlite-store-db-path-of
+                                (current-example-source-store))))
+                             (t "n/a"))))))
+           (:tr (:td (views:esc "LISP-CRITIC"))
+                (:td (:tt (views:esc "review protocol placeholder")))))))
+
 (defun example-source-view (example)
   (let* ((reference (example-source-reference-for example))
          (status (example-source-status reference))
          (target (example-source-navigation-target reference)))
     (case status
-      (:file-backed
+      (:file
        (typecase target
          ((or code-page code-page-source-navigation source-pane-file-target)
           (let ((view (views:👀source target)))
@@ -272,13 +381,16 @@
                             (:p (:tt (views:esc
                                       (example-source-file-label
                                        reference)))))))))
-      (:source-file-missing
-       (views:html-view :title "Source" :priority 2
-                        (views:html
-                         (:h3 "Source file missing")
-                         (:p (:tt (views:esc
-                                   (example-source-file-label reference))))
-                         (:p "The entry has source-file metadata, but the file is not present in this image."))))
+      (:topic
+       (if target
+           (let ((view (views:👀source target)))
+             (if view
+                 view
+                 (views:html-view
+                  :title "Source code" :priority 0
+                  (render-example-source-artifact-source-only target))))
+           (views:html-view :title "Source" :priority 2
+                            (render-example-source-unavailable reference))))
       (otherwise
        (views:html-view :title "Source" :priority 2
                         (render-example-source-unavailable reference))))))
@@ -404,6 +516,10 @@
           (example-entry-title-of
            (example-source-reference-entry-of reference))))
 
+(defmethod views:text-representation ((artifact example-source-artifact))
+  (format nil "Source artifact ~A"
+          (example-source-artifact-source-id-of artifact)))
+
 (defmethod views:text-representation ((run example-run))
   (let ((summary (example-run-summary-of run)))
     (format nil "Examples (~D success, ~D failure, ~D error)"
@@ -476,8 +592,8 @@
                                    (:td (render-example-source-reference
                                          reference
                                          :display
-                                         (example-source-status-label
-                                          (example-source-status reference)))))
+                                         (example-source-reference-status-label
+                                          reference))))
                               (:tr (:td (views:esc "Source file"))
                                    (:td (:tt (views:esc
                                               (example-source-file-label
@@ -487,6 +603,14 @@
                                               (or (example-source-reference-source-page-of
                                                    reference)
                                                   "n/a")))))
+                              (:tr (:td (views:esc "Source artifact"))
+                                   (:td (if (example-source-reference-source-artifact-of
+                                            reference)
+                                            (views:object-ref
+                                             (example-source-reference-source-artifact-of
+                                              reference))
+                                            (views:html
+                                             (:tt (views:esc "n/a"))))))
                               (:tr (:td (views:esc "Locator"))
                                    (:td (views:object-ref
                                          (example-source-reference-locator-of
@@ -497,8 +621,21 @@
                                             (views:html
                                              (:tt (views:esc "n/a")))))))))))
 
-(views:defview 👀source (reference example-source-reference)
+(views:defview views:👀source (reference example-source-reference)
   (example-source-view reference))
+
+(views:defview 👀summary (artifact example-source-artifact)
+  (views:html-view :title "Meta" :priority 1
+                   (render-example-source-artifact-meta artifact)))
+
+;; Suppress the package-local legacy source view for artifacts. The exported
+;; html-inspector-views source generic below owns the single Source code tab.
+(views:defview 👀source (artifact example-source-artifact)
+  nil)
+
+(views:defview views:👀source (artifact example-source-artifact)
+  (views:html-view :title "Source code" :priority 0
+                   (render-example-source-artifact-source-only artifact)))
 
 (views:defview 👀summary (entry example-entry)
   (let ((source-reference (example-source-reference-for entry)))
@@ -531,9 +668,8 @@
                                    (:td (render-example-source-reference
                                          source-reference
                                          :display
-                                         (example-source-status-label
-                                          (example-source-status
-                                           source-reference)))))
+                                         (example-source-reference-status-label
+                                          source-reference))))
                               (:tr (:td (views:esc "Source file"))
                                    (:td (:tt (views:esc
                                               (example-source-file-label
@@ -549,7 +685,7 @@
                                    (:td (views:object-ref
                                          (example-entry-tags-of entry)))))))))
 
-(views:defview 👀source (entry example-entry)
+(views:defview views:👀source (entry example-entry)
   (example-source-view entry))
 
 (views:defview 👀summary (result example-result)
@@ -587,9 +723,8 @@
                                    (:td (render-example-source-reference
                                          source-reference
                                          :display
-                                         (example-source-status-label
-                                          (example-source-status
-                                           source-reference)))))
+                                         (example-source-reference-status-label
+                                          source-reference))))
                               (:tr (:td (views:esc "Source file"))
                                    (:td (:tt (views:esc
                                               (example-source-file-label
@@ -618,7 +753,7 @@
                                (views:esc
                                 (example-result-backtrace-of result)))))))))
 
-(views:defview 👀source (result example-result)
+(views:defview views:👀source (result example-result)
   (example-source-view result))
 
 (views:defview 👀summary (run example-run)

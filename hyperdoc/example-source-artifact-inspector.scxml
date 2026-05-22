@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml
+  xmlns="http://www.w3.org/2005/07/scxml"
+  version="1.0"
+  name="example-source-artifact-inspector"
+  initial="inspecting-example-source-artifact">
+
+  <state id="inspecting-example-source-artifact">
+    <onentry>
+      <log label="visible-tabs" expr="Source code|Meta|Slots|Print|Operations|Playground"/>
+      <log label="forbidden-tabs" expr="Summary"/>
+    </onentry>
+    <transition id="render-pane-tabs" event="tabs.rendered" target="inspecting-example-source-artifact"/>
+    <transition id="select-source-code" event="select.source-code" target="source-code-selected"/>
+    <transition id="select-meta" event="select.meta" target="meta-selected"/>
+    <transition id="inspect-example-result-source" event="inspect.example-result.source" target="result-source-opened"/>
+  </state>
+
+  <state id="source-code-selected">
+    <onentry>
+      <log label="source-code-required-content" expr="hyperdoc:defexample"/>
+      <log label="source-code-forbidden-content" expr="Source id|Topic|Language|Materialized view file"/>
+      <log label="action" expr="select-source-code-view"/>
+    </onentry>
+    <transition id="select-source-code-again" event="select.source-code" target="source-code-selected"/>
+    <transition id="select-meta-from-source" event="select.meta" target="meta-selected"/>
+    <transition id="inspect-example-result-source-from-source" event="inspect.example-result.source" target="result-source-opened"/>
+  </state>
+
+  <state id="meta-selected">
+    <onentry>
+      <log label="meta-required-content" expr="Source id|Topic|Language|Form kind|Provenance|Store/backend"/>
+      <log label="action" expr="select-meta-view"/>
+    </onentry>
+    <transition id="select-source-code-from-meta" event="select.source-code" target="source-code-selected"/>
+    <transition id="select-meta-again" event="select.meta" target="meta-selected"/>
+    <transition id="inspect-example-result-source-from-meta" event="inspect.example-result.source" target="result-source-opened"/>
+  </state>
+
+  <state id="result-source-opened">
+    <onentry>
+      <log label="expected-target" expr="same code-only source surface for example-source-artifact"/>
+      <log label="result-source-required-content" expr="hyperdoc:defexample"/>
+      <log label="result-source-forbidden-content" expr="Source id|Topic|Language|Materialized view file"/>
+      <log label="action" expr="open-artifact-source-code"/>
+    </onentry>
+    <transition id="select-source-code-from-result" event="select.source-code" target="source-code-selected"/>
+    <transition id="select-meta-from-result" event="select.meta" target="meta-selected"/>
+  </state>
+</scxml>

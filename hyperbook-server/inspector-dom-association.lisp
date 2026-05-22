@@ -1245,6 +1245,292 @@
                    (encode-json-string-for-browser detail)
                    "null"))))))
 
+(defparameter *inspector-scxml-ui-recorder-events* '())
+(defparameter *example-source-artifact-inspector-scxml-pane-states*
+  (make-hash-table :test #'eq))
+
+(defun clear-inspector-scxml-ui-recorder ()
+  (setf *inspector-scxml-ui-recorder-events* '())
+  (clrhash *example-source-artifact-inspector-scxml-pane-states*)
+  t)
+
+(defun inspector-scxml-ui-recorder-events ()
+  (nreverse (copy-list *inspector-scxml-ui-recorder-events*)))
+
+(defun inspector-scxml-ui-json-value (value)
+  (cond
+    ((null value) "null")
+    ((stringp value) (encode-json-string-for-browser value))
+    ((pathnamep value) (encode-json-string-for-browser (namestring value)))
+    ((keywordp value)
+     (encode-json-string-for-browser
+      (string-downcase (symbol-name value))))
+    ((symbolp value)
+     (encode-json-string-for-browser
+      (string-downcase (symbol-name value))))
+    ((listp value)
+     (format nil "[~{~A~^,~}]"
+             (mapcar #'inspector-scxml-ui-json-value value)))
+    (t
+     (encode-json-string-for-browser (princ-to-string value)))))
+
+(defun inspector-scxml-ui-json-event (event)
+  (format nil "{~{~A~^,~}}"
+          (loop for (key value) on event by #'cddr
+                collect
+                (format nil "~A:~A"
+                        (encode-json-string-for-browser
+                         (string-downcase (symbol-name key)))
+                        (inspector-scxml-ui-json-value value)))))
+
+(defun inspector-scxml-ui-record (pane kind &rest data)
+  (let ((event (append (list :kind kind) data)))
+    (push event *inspector-scxml-ui-recorder-events*)
+    (when pane
+      (ignore-errors
+        (clog:js-execute
+         (clog-obj pane)
+         (format nil
+                 "(function(){window.hyperdocInspectorScxmlEvents=window.hyperdocInspectorScxmlEvents||[];window.hyperdocInspectorScxmlEvents.push(~A);})()"
+                 (inspector-scxml-ui-json-event event)))))
+    event))
+
+(defun hyperdoc-runtime-class-p (object class-name)
+  (let* ((package (find-package "HYPERDOC"))
+         (symbol (and package (find-symbol class-name package)))
+         (class (and symbol (find-class symbol nil))))
+    (and class (typep object class))))
+
+(defun example-source-artifact-object-p (object)
+  (hyperdoc-runtime-class-p object "EXAMPLE-SOURCE-ARTIFACT"))
+
+(defun example-source-reference-object-p (object)
+  (hyperdoc-runtime-class-p object "EXAMPLE-SOURCE-REFERENCE"))
+
+(defun example-result-object-p (object)
+  (hyperdoc-runtime-class-p object "EXAMPLE-RESULT"))
+
+(defun example-source-artifact-inspector-scxml-pathname ()
+  (handler-case
+      (asdf:system-relative-pathname
+       :hyperdoc
+       "hyperdoc/example-source-artifact-inspector.scxml")
+    (error () nil)))
+
+(defun example-source-artifact-inspector-chart ()
+  (let ((pathname (example-source-artifact-inspector-scxml-pathname)))
+    (when pathname
+      (handler-case
+          (inspector-title-bar-ui-call-scxml
+           "PARSE-SCXML-FILE"
+           pathname)
+        (error () nil)))))
+
+(defun example-source-artifact-inspector-chart-initial-state (chart)
+  (inspector-title-bar-ui-call-scxml "SCXML-CHART-INITIAL-STATE-OF" chart))
+
+(defun example-source-artifact-inspector-chart-name (chart)
+  (inspector-title-bar-ui-call-scxml "SCXML-CHART-NAME-OF" chart))
+
+(defun example-source-artifact-inspector-chart-states (chart)
+  (inspector-title-bar-ui-call-scxml "SCXML-CHART-STATES-OF" chart))
+
+(defun example-source-artifact-inspector-state-id (state)
+  (inspector-title-bar-ui-call-scxml "SCXML-STATE-ID-OF" state))
+
+(defun example-source-artifact-inspector-state-onentry-actions (state)
+  (inspector-title-bar-ui-call-scxml "SCXML-STATE-ONENTRY-ACTIONS-OF" state))
+
+(defun example-source-artifact-inspector-action-kind (action)
+  (inspector-title-bar-ui-call-scxml "SCXML-ACTION-KIND-OF" action))
+
+(defun example-source-artifact-inspector-action-attributes (action)
+  (inspector-title-bar-ui-call-scxml "SCXML-ACTION-ATTRIBUTES-OF" action))
+
+(defun example-source-artifact-inspector-transition-event (transition)
+  (inspector-title-bar-ui-call-scxml "SCXML-TRANSITION-EVENT-OF" transition))
+
+(defun example-source-artifact-inspector-transition-target (transition)
+  (inspector-title-bar-ui-call-scxml "SCXML-TRANSITION-TARGET-OF" transition))
+
+(defun example-source-artifact-inspector-transition-id (transition)
+  (inspector-title-bar-ui-call-scxml "SCXML-TRANSITION-ID-OF" transition))
+
+(defun example-source-artifact-inspector-state-transitions (state)
+  (inspector-title-bar-ui-call-scxml "SCXML-STATE-TRANSITIONS-OF" state))
+
+(defun example-source-artifact-inspector-find-state (chart state-id)
+  (find state-id
+        (example-source-artifact-inspector-chart-states chart)
+        :key #'example-source-artifact-inspector-state-id
+        :test #'string=))
+
+(defun example-source-artifact-inspector-state-logs (chart state-id)
+  (let ((state (example-source-artifact-inspector-find-state chart state-id)))
+    (loop for action in (and state
+                             (example-source-artifact-inspector-state-onentry-actions
+                              state))
+          when (eq :log
+                   (example-source-artifact-inspector-action-kind action))
+            collect
+            (let ((attributes
+                    (example-source-artifact-inspector-action-attributes
+                     action)))
+              (format nil "~A=~A"
+                      (getf attributes :label)
+                      (getf attributes :expr))))))
+
+(defun example-source-artifact-inspector-transition-for
+    (chart state-id event)
+  (let ((state (example-source-artifact-inspector-find-state chart state-id)))
+    (find event
+          (and state
+               (example-source-artifact-inspector-state-transitions state))
+          :key #'example-source-artifact-inspector-transition-event
+          :test #'string=)))
+
+(defun example-source-artifact-inspector-action-name (event target-state)
+  (cond
+    ((string= event "tabs.rendered") "render-pane-tabs")
+    ((string= event "select.source-code") "select-source-code-view")
+    ((string= event "select.meta") "select-meta-view")
+    ((string= event "inspect.example-result.source")
+     "open-artifact-source-code")
+    (t (format nil "transition-to-~A" target-state))))
+
+(defun example-source-artifact-inspector-initialize-pane (pane)
+  (let ((chart (example-source-artifact-inspector-chart)))
+    (if chart
+        (let ((initial-state
+                (or (example-source-artifact-inspector-chart-initial-state chart)
+                    "inspecting-example-source-artifact")))
+          (setf (gethash pane
+                         *example-source-artifact-inspector-scxml-pane-states*)
+                initial-state)
+          (inspector-scxml-ui-record
+           pane :scxml-loaded
+           :machine (or (example-source-artifact-inspector-chart-name chart)
+                        "example-source-artifact-inspector")
+           :source (example-source-artifact-inspector-scxml-pathname))
+          (inspector-scxml-ui-record
+           pane :state-entered
+           :state initial-state
+           :logs (example-source-artifact-inspector-state-logs
+                  chart initial-state))
+          chart)
+        (progn
+          (inspector-scxml-ui-record
+           pane :scxml-unavailable
+           :source (or (example-source-artifact-inspector-scxml-pathname)
+                       "hyperdoc/example-source-artifact-inspector.scxml"))
+          nil))))
+
+(defun example-source-artifact-inspector-current-state (pane chart)
+  (or (gethash pane *example-source-artifact-inspector-scxml-pane-states*)
+      (and chart
+           (example-source-artifact-inspector-chart-initial-state chart))
+      "inspecting-example-source-artifact"))
+
+(defun example-source-artifact-inspector-dispatch-event
+    (pane event &key action-name action)
+  (let* ((chart (or (example-source-artifact-inspector-chart)
+                    (example-source-artifact-inspector-initialize-pane pane)))
+         (state (example-source-artifact-inspector-current-state pane chart))
+         (transition (and chart
+                          (example-source-artifact-inspector-transition-for
+                           chart state event))))
+    (inspector-scxml-ui-record pane :event-dispatched
+                               :state state
+                               :event event)
+    (inspector-scxml-ui-record pane :guard-evaluated
+                               :state state
+                               :event event
+                               :guard "none"
+                               :result "true")
+    (if transition
+        (let* ((target
+                 (example-source-artifact-inspector-transition-target transition))
+               (resolved-action-name
+                 (or action-name
+                     (example-source-artifact-inspector-action-name
+                      event target))))
+          (inspector-scxml-ui-record
+           pane :transition-selected
+           :state state
+           :event event
+           :transition (or (example-source-artifact-inspector-transition-id
+                            transition)
+                           event)
+           :target target)
+          (setf (gethash pane
+                         *example-source-artifact-inspector-scxml-pane-states*)
+                target)
+          (inspector-scxml-ui-record
+           pane :state-entered
+           :state target
+           :logs (example-source-artifact-inspector-state-logs chart target))
+          (inspector-scxml-ui-record
+           pane :action-invoked
+           :state target
+           :event event
+           :action resolved-action-name)
+          (when action
+            (funcall action))
+          t)
+        (progn
+          (inspector-scxml-ui-record pane :transition-missing
+                                     :state state
+                                     :event event)
+          nil))))
+
+(defun example-source-artifact-inspector-record-pane-tabs-rendered
+    (pane view-titles)
+  (inspector-scxml-ui-record
+   pane :pane-tabs-rendered
+   :state (or (gethash pane
+                       *example-source-artifact-inspector-scxml-pane-states*)
+              "inspecting-example-source-artifact")
+   :tabs view-titles))
+
+(defun example-source-artifact-inspector-tab-event (tab-text)
+  (cond
+    ((string= tab-text "Source code") "select.source-code")
+    ((string= tab-text "Meta") "select.meta")
+    (t nil)))
+
+(defun maybe-handle-example-source-artifact-inspector-tab-click
+    (pane tab-text index)
+  (with-slots (object) pane
+    (let ((event (and (example-source-artifact-object-p object)
+                      (example-source-artifact-inspector-tab-event
+                       tab-text))))
+      (when event
+        (example-source-artifact-inspector-dispatch-event
+         pane event
+         :action-name
+         (example-source-artifact-inspector-action-name event nil)
+         :action #'(lambda () (select-view pane index)))
+        t))))
+
+(defun maybe-handle-example-source-artifact-inspector-inspect-click
+    (pane element target view-ref event)
+  (declare (ignore element))
+  (with-slots (object inspector) pane
+    (when (and (not (getf event :alt-key))
+               (example-result-object-p object)
+               (string= (or view-ref "") "Source code")
+               (or (example-source-artifact-object-p target)
+                   (example-source-reference-object-p target)))
+      (example-source-artifact-inspector-initialize-pane pane)
+      (example-source-artifact-inspector-dispatch-event
+       pane "inspect.example-result.source"
+       :action-name "open-artifact-source-code"
+       :action #'(lambda ()
+                   (unless (getf event :shift-key)
+                     (close-panes-after inspector pane))
+                   (create-pane inspector target :select view-ref)))
+      t)))
+
 ;; Extend the pane tab row with a dedicated slot for the pane-level Connect
 ;; control. The DOM overlay and anchor machinery remain in the rendered view.
 (defun create-tabs (pane)
@@ -1253,25 +1539,41 @@
            (chrome (clog:create-div clog-obj
                                     :class "hyperdoc-dom-connect-pane-chrome"))
            (tabs (clog:create-div chrome :class "inspector-tabs")))
-      (loop for tab-text in view-titles
-            for tab-id in tab-ids
-            for view in views
-            for index from 0
-            do (let* ((tab (clog:create-button tabs
-                                               :content tab-text
-                                               :html-id tab-id))
-                      (view* view)
-                      (index* index))
-                 (clog:set-on-mouse-click
-                  tab
-                  #'(lambda (obj event)
-                      (declare (ignore obj))
-                      (if (getf event :alt-key)
-                          (progn
-                            (unless (getf event :shift-key)
-                              (close-panes-after inspector pane))
-                            (create-pane inspector view* :select "Source code"))
-                          (select-view pane index*))))))
+      (labels ((render-tab-row ()
+                 (loop for tab-text in view-titles
+                       for tab-id in tab-ids
+                       for view in views
+                       for index from 0
+                       do (let* ((tab (clog:create-button tabs
+                                                          :content tab-text
+                                                          :html-id tab-id))
+                                 (view* view)
+                                 (tab-text* tab-text)
+                                 (index* index))
+                            (clog:set-on-mouse-click
+                             tab
+                             #'(lambda (obj event)
+                                 (declare (ignore obj))
+                                 (if (getf event :alt-key)
+                                     (progn
+                                       (unless (getf event :shift-key)
+                                         (close-panes-after inspector pane))
+                                       (create-pane inspector view*
+                                                    :select "Source code"))
+                                     (unless
+                                         (maybe-handle-example-source-artifact-inspector-tab-click
+                                          pane tab-text* index*)
+                                       (select-view pane index*)))))))))
+        (if (example-source-artifact-object-p (pane-object pane))
+            (progn
+              (example-source-artifact-inspector-initialize-pane pane)
+              (example-source-artifact-inspector-dispatch-event
+               pane "tabs.rendered"
+               :action-name "render-pane-tabs"
+               :action #'render-tab-row)
+              (example-source-artifact-inspector-record-pane-tabs-rendered
+               pane view-titles))
+            (render-tab-row)))
       (clog:create-div chrome
                        :class "hyperdoc-dom-connect-pane-slot"
                        :content ""

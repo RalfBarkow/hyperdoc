@@ -485,12 +485,16 @@
        :select view-ref
        :alt? (getf event :alt-key)
        :shift? (getf event :shift-key))
-      (when (getf event :alt-key)
-        (clog:jquery-trigger (clog:parent element) "click"))
-      (unless (getf event :alt-key)
-        (unless (getf event :shift-key)
-          (close-panes-after inspector pane))
-        (create-pane inspector target :select view-ref))
+      (unless
+          (and (fboundp 'maybe-handle-example-source-artifact-inspector-inspect-click)
+               (maybe-handle-example-source-artifact-inspector-inspect-click
+                pane element target view-ref event))
+        (when (getf event :alt-key)
+          (clog:jquery-trigger (clog:parent element) "click"))
+        (unless (getf event :alt-key)
+          (unless (getf event :shift-key)
+            (close-panes-after inspector pane))
+          (create-pane inspector target :select view-ref)))
       (maybe-log-inspector-performance
        :click/inspect-done
        :target (maybe-summarize-object-for-log target)
