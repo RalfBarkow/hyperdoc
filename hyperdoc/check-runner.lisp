@@ -1,10 +1,59 @@
-;;;; Checks runner
+;;;; Example runner and legacy check-runner compatibility
 ;;
 ;;;; Copyright (c) 2026
 
 (in-package :hyperdoc)
 
-                                        ;(A narrow in-image check runner for examples and smoke tests.)
+(defclass example-entry ()
+  ((system :initarg :system :reader example-entry-system-of)
+   (id :initarg :id :reader example-entry-id-of)
+   (title :initarg :title :reader example-entry-title-of)
+   (function :initarg :function :reader example-entry-function-of)
+   (locator :initarg :locator :initform nil :reader example-entry-locator-of)
+   (package :initarg :package :initform nil :reader example-entry-package-of)
+   (source-file :initarg :source-file :initform nil
+                :reader example-entry-source-file-of)
+   (source-page :initarg :source-page :initform nil
+                :reader example-entry-source-page-of)
+   (tags :initarg :tags :initform nil :reader example-entry-tags-of)
+   (class-or-group :initarg :class-or-group :initform nil
+                   :reader example-entry-class-or-group-of)))
+
+(defclass example-result ()
+  ((entry :initarg :entry :reader example-result-entry-of)
+   (status :initarg :status :accessor example-result-status-of)
+   (value :initarg :value :initform nil :accessor example-result-value-of)
+   (condition :initarg :condition :initform nil
+              :accessor example-result-condition-of)
+   (backtrace :initarg :backtrace :initform nil
+              :accessor example-result-backtrace-of)
+   (duration-ms :initarg :duration-ms :initform 0
+                :accessor example-result-duration-ms-of)
+   (assertions :initarg :assertions :initform nil
+               :accessor example-result-assertions-of)))
+
+(defclass example-run ()
+  ((system :initarg :system :initform nil :accessor example-run-system-of)
+   (entries :initarg :entries :initform nil :accessor example-run-entries-of)
+   (results :initarg :results :initform nil :accessor example-run-results-of)
+   (started-at :initarg :started-at :initform nil
+               :accessor example-run-started-at-of)
+   (finished-at :initarg :finished-at :initform nil
+                :accessor example-run-finished-at-of)
+   (summary :initarg :summary :initform nil :accessor example-run-summary-of)))
+
+(defclass example-source-reference ()
+  ((entry :initarg :entry :reader example-source-reference-entry-of)
+   (function :initarg :function :initform nil
+             :reader example-source-reference-function-of)
+   (locator :initarg :locator :initform nil
+            :reader example-source-reference-locator-of)
+   (source-file :initarg :source-file :initform nil
+                :reader example-source-reference-source-file-of)
+   (source-page :initarg :source-page :initform nil
+                :reader example-source-reference-source-page-of)
+   (tags :initarg :tags :initform nil
+         :reader example-source-reference-tags-of)))
 
 (defclass check-spec ()
   ((kind :initarg :kind :reader check-kind-of)
@@ -29,6 +78,16 @@
    (finished-at :initarg :finished-at :initform nil :accessor check-run-finished-at-of)
    (status-summary :initarg :status-summary :initform nil :accessor check-run-status-summary-of)))
 
+(define-condition example-failure (error)
+  ((message :initarg :message :reader example-failure-message))
+  (:report (lambda (condition stream)
+             (write-string (example-failure-message condition) stream))))
+
+(define-condition example-skipped (condition)
+  ((message :initarg :message :reader example-skipped-message))
+  (:report (lambda (condition stream)
+             (write-string (example-skipped-message condition) stream))))
+
 (define-condition check-failure (error)
   ((message :initarg :message :reader check-failure-message))
   (:report (lambda (condition stream)
@@ -39,8 +98,12 @@
   (:report (lambda (condition stream)
              (write-string (check-skipped-message condition) stream))))
 
-(defparameter *example-check-registrations* (make-hash-table :test #'eq))
-(defparameter *example-check-order* nil)
+(defparameter *example-registrations* (make-hash-table :test #'eq))
+(defparameter *example-registration-order* nil)
+
+;; Legacy compatibility names for the old check-runner implementation.
+(defparameter *example-check-registrations* *example-registrations*)
+(defparameter *example-check-order* *example-registration-order*)
 
 (defparameter *known-test-check-registrations*
   '((:package "HYPERDOC/TESTS"
@@ -148,6 +211,14 @@
           (string-capitalize (string-downcase (symbol-name kind)))
           (string-downcase (symbol-name function-symbol))))
 
+(defun make-example-id (function-symbol)
+  (format nil "example:~A:~(~A~)"
+          (package-name (symbol-package function-symbol))
+          (symbol-name function-symbol)))
+
+(defun make-example-title (function-symbol)
+  (format nil "Example: ~(~A~)" (symbol-name function-symbol)))
+
 (defun normalized-source-file (pathname)
   (when pathname
     (or (ignore-errors (truename pathname))
@@ -170,13 +241,15 @@
                       (component-defines-source-file-p system source-file))
             return (asdf:component-name system)))))
 
-(defun register-example-check (function-symbol &key system
-                                                 (package (symbol-package function-symbol))
-                                                 (source-file (or *load-truename*
-                                                                  *compile-file-truename*))
-                                                 page
-                                                 title
-                                                 tags)
+(defun register-example (function-symbol &key id
+                                           system
+                                           (package (symbol-package function-symbol))
+                                           (source-file (or *load-truename*
+                                                            *compile-file-truename*))
+                                           page
+                                           title
+                                           tags
+                                           class-or-group)
   (let* ((resolved-system (or system
                               (source-file-system-name source-file)
                               "hyperdoc"))
@@ -184,17 +257,25 @@
          (page-title (or page (source-file-page-title source-file)))
          (registration
           (list :function function-symbol
+                :id (or id (make-example-id function-symbol))
                 :system (normalize-string-designator resolved-system)
                 :package package-name
                 :source-file source-file
                 :page page-title
-                :title (or title (make-check-title :example function-symbol))
+                :title (or title (make-example-title function-symbol))
+                :class-or-group class-or-group
                 :tags tags)))
-    (unless (gethash function-symbol *example-check-registrations*)
-      (setf *example-check-order* (append *example-check-order*
-                                          (list function-symbol))))
-    (setf (gethash function-symbol *example-check-registrations*) registration)
+    (unless (gethash function-symbol *example-registrations*)
+      (setf *example-registration-order*
+            (append *example-registration-order* (list function-symbol))
+            *example-check-order* *example-registration-order*))
+    (setf (gethash function-symbol *example-registrations*) registration
+          (gethash function-symbol *example-check-registrations*) registration)
     function-symbol))
+
+(defun register-example-check (function-symbol &rest args)
+  "Legacy compatibility shim for older example check registration callers."
+  (apply #'register-example function-symbol args))
 
 (defun example-registration-matches-p (registration &key system package page)
   (and (or (null system)
@@ -206,19 +287,54 @@
        (or (null page)
            (equal (getf registration :page) page))))
 
-(defun make-example-check-spec (registration)
+(defun example-registration-class-or-group (registration)
+  (let ((tags (getf registration :tags)))
+    (or (getf registration :class-or-group)
+        (and (listp tags)
+             (or (getf tags :class)
+                 (getf tags :group)
+                 (getf tags :suite)))
+        (getf registration :package))))
+
+(defun make-example-entry-from-registration (registration)
   (let ((function-symbol (getf registration :function)))
-    (make-instance 'check-spec
-                   :kind :example
-                   :id (make-check-id :example function-symbol)
-                   :title (getf registration :title)
-                   :locator (list :function function-symbol
-                                  :system (getf registration :system)
-                                  :package (getf registration :package)
-                                  :page (getf registration :page)
-                                  :source-file (getf registration :source-file))
-                   :tags (append (list :page (getf registration :page))
-                                 (getf registration :tags)))))
+    (make-instance
+     'example-entry
+     :system (getf registration :system)
+     :id (getf registration :id)
+     :title (getf registration :title)
+     :function function-symbol
+     :locator (list :function function-symbol
+                    :system (getf registration :system)
+                    :package (getf registration :package)
+                    :page (getf registration :page)
+                    :source-file (getf registration :source-file))
+     :package (getf registration :package)
+     :source-file (getf registration :source-file)
+     :source-page (getf registration :page)
+     :tags (append (list :page (getf registration :page))
+                   (getf registration :tags))
+     :class-or-group (example-registration-class-or-group registration))))
+
+(defun legacy-example-entry-to-check-spec (entry)
+  "Legacy compatibility shim exposing an example entry as a check spec."
+  (make-instance 'check-spec
+                 :kind :example
+                 :id (example-entry-id-of entry)
+                 :title (example-entry-title-of entry)
+                 :locator (or (example-entry-locator-of entry)
+                              (list :function (example-entry-function-of entry)
+                                    :system (example-entry-system-of entry)
+                                    :package (example-entry-package-of entry)
+                                    :page (example-entry-source-page-of entry)
+                                    :source-file
+                                    (example-entry-source-file-of entry)))
+                 :tags (example-entry-tags-of entry)))
+
+(defun make-example-check-spec (registration)
+  "Legacy compatibility shim for callers expecting an example check spec."
+  (legacy-example-entry-to-check-spec
+   (make-example-entry-from-registration registration)))
 
 (defun resolve-function-symbol (locator)
   (or (getf locator :function)
@@ -274,15 +390,64 @@
     (ignore-errors
       (uiop:print-condition-backtrace condition :stream stream))))
 
-(defun discover-example-checks (&key system package page)
-  (loop for function-symbol in *example-check-order*
-        for registration = (gethash function-symbol *example-check-registrations*)
+(defun ensure-example-run-summary (run)
+  (let* ((results (example-run-results-of run))
+         (total (length (example-run-entries-of run)))
+         (successes 0)
+         (failures 0)
+         (errors 0)
+         (skipped 0))
+    (dolist (result results)
+      (ecase (example-result-status-of result)
+        (:success (incf successes))
+        (:failure (incf failures))
+        (:error (incf errors))
+        (:skipped (incf skipped))))
+    (let ((not-executed (max 0 (- total (length results)))))
+      (setf (example-run-summary-of run)
+            (list :total total
+                  :executed (length results)
+                  :success successes
+                  :failure failures
+                  :error errors
+                  :skipped skipped
+                  :not-executed not-executed
+                  :status (cond
+                            ((plusp errors) :error)
+                            ((plusp failures) :failure)
+                            ((plusp skipped) :skipped)
+                            ((and (zerop not-executed) (plusp total)) :success)
+                            (t :not-executed)))))))
+
+(defmethod initialize-instance :after ((run example-run) &key)
+  (ensure-example-run-summary run))
+
+(defun example-run-duration-ms (run)
+  (getf (example-run-summary-of run) :duration-ms))
+
+(defun make-example-source-reference (entry)
+  (make-instance 'example-source-reference
+                 :entry entry
+                 :function (example-entry-function-of entry)
+                 :locator (example-entry-locator-of entry)
+                 :source-file (example-entry-source-file-of entry)
+                 :source-page (example-entry-source-page-of entry)
+                 :tags (example-entry-tags-of entry)))
+
+(defun discover-examples (&key system package page)
+  (loop for function-symbol in *example-registration-order*
+        for registration = (gethash function-symbol *example-registrations*)
         when (and registration
                   (example-registration-matches-p registration
                                                   :system system
                                                   :package package
                                                   :page page))
-        collect (make-example-check-spec registration)))
+        collect (make-example-entry-from-registration registration)))
+
+(defun discover-example-checks (&key system package page)
+  "Legacy compatibility shim returning example entries as check specs."
+  (mapcar #'legacy-example-entry-to-check-spec
+          (discover-examples :system system :package package :page page)))
 
 (defun ensure-test-checks-loaded ()
   (ignore-errors
@@ -325,6 +490,84 @@
             (discover-example-checks :system system :package package :page page))
           (when include-tests
             (discover-test-checks :system system :package package))))
+
+(defun resolve-example-function (entry)
+  (let ((symbol (or (example-entry-function-of entry)
+                    (resolve-function-symbol
+                     (example-entry-locator-of entry)))))
+    (unless (and symbol (fboundp symbol))
+      (error "Example function unavailable for ~A"
+             (example-entry-id-of entry)))
+    (symbol-function symbol)))
+
+(defun run-example-entry (entry &key force?)
+  (declare (ignore force?))
+  (let ((start (get-internal-real-time)))
+    (handler-case
+        (let ((value (funcall (resolve-example-function entry))))
+          (make-instance 'example-result
+                         :entry entry
+                         :status :success
+                         :value value
+                         :duration-ms (duration-ms-since start)))
+      ((or example-skipped check-skipped) (condition)
+        (make-instance 'example-result
+                       :entry entry
+                       :status :skipped
+                       :condition condition
+                       :backtrace (condition-backtrace-string condition)
+                       :duration-ms (duration-ms-since start)))
+      ((or example-failure check-failure) (condition)
+        (make-instance 'example-result
+                       :entry entry
+                       :status :failure
+                       :condition condition
+                       :backtrace (condition-backtrace-string condition)
+                       :duration-ms (duration-ms-since start)))
+      (error (condition)
+        (make-instance 'example-result
+                       :entry entry
+                       :status :error
+                       :condition condition
+                       :backtrace (condition-backtrace-string condition)
+                       :duration-ms (duration-ms-since start))))))
+
+(defun make-example-run (&key system package page (entries nil entries-supplied-p))
+  (let ((normalized-system (and system (normalize-string-designator system))))
+    (make-instance 'example-run
+                   :system normalized-system
+                   :entries (if entries-supplied-p
+                                entries
+                                (discover-examples :system normalized-system
+                                                   :package package
+                                                   :page page)))))
+
+(defun run-example-run! (run &key fail-fast? entries)
+  (let* ((selected-entries (or entries (example-run-entries-of run)))
+         (results '())
+         (started-at (current-check-timestamp))
+         (start-ticks (get-internal-real-time)))
+    (setf (example-run-started-at-of run) started-at)
+    (dolist (entry selected-entries)
+      (let ((result (run-example-entry entry)))
+        (push result results)
+        (when (and fail-fast?
+                   (member (example-result-status-of result)
+                           '(:failure :error)))
+          (return))))
+    (setf (example-run-results-of run) (nreverse results)
+          (example-run-finished-at-of run) (current-check-timestamp))
+    (ensure-example-run-summary run)
+    (setf (getf (example-run-summary-of run) :duration-ms)
+          (duration-ms-since start-ticks))
+    run))
+
+(defun run-examples (entries &key fail-fast? system)
+  (let ((run (make-instance 'example-run
+                            :system (and system
+                                         (normalize-string-designator system))
+                            :entries entries)))
+    (run-example-run! run :fail-fast? fail-fast?)))
 
 (defun run-check (check-spec &key force?)
   (declare (ignore force?))

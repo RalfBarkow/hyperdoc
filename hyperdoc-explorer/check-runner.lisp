@@ -1,4 +1,4 @@
-;;;; Views for the HyperDoc checks runner
+;;;; Views for examples and legacy check-runner objects
 ;;
 ;;;; Copyright (c) 2026
 
@@ -27,6 +27,56 @@
 
 (defun count-string (value)
   (format nil "~D" value))
+
+(defun example-status-label (status)
+  (ecase status
+    (:success "success")
+    (:failure "failure")
+    (:error "error")
+    (:skipped "skipped")
+    (:not-executed "not executed")))
+
+(defun example-summary-value (run key)
+  (getf (example-run-summary-of run) key 0))
+
+(defun render-example-summary-chip (text)
+  (views:html
+   (:span :class "hyperdoc-example-summary-chip"
+          (views:esc text))
+   " "))
+
+(defun render-example-run-summary (run)
+  (views:html
+   (:p
+    (render-example-summary-chip
+     (format nil "~D example~:P"
+             (example-summary-value run :total)))
+    (render-example-summary-chip
+     (format nil "~D executed"
+             (example-summary-value run :executed)))
+    (render-example-summary-chip
+     (format nil "~D success~:P"
+             (example-summary-value run :success)))
+    (render-example-summary-chip
+     (format nil "~D failure~:P"
+             (example-summary-value run :failure)))
+    (render-example-summary-chip
+     (format nil "~D error~:P"
+             (example-summary-value run :error)))
+    (render-example-summary-chip
+     (format nil "~D skipped"
+             (example-summary-value run :skipped)))
+    (render-example-summary-chip
+     (format nil "~D not executed"
+             (example-summary-value run :not-executed))))))
+
+(defun render-example-execution-location ()
+  (views:html
+   (:p
+    (:span :class "hyperdoc-example-local-active" (views:esc "Local active"))
+    " "
+    (:span :class "hyperdoc-example-remote-disabled"
+           (views:esc "Remote unavailable")))))
 
 (defun examples-concept-target ()
   (or (ignore-errors
@@ -67,17 +117,24 @@
      (string-downcase (symbol-name system-designator)))))
 
 (defun examples-runner-for-system (system-designator)
-  (make-discovered-check-run :system (asdf-system-name-string system-designator)
-                             :include-examples t
-                             :include-tests nil))
+  (make-example-run :system (asdf-system-name-string system-designator)))
+
+(defun examples-runner-for-fedwiki-home (home)
+  (let* ((loaded (load-fedwiki-attached-asdf-system home))
+         (system-name (fedwiki-asdf-system-name-string
+                       (fedwiki-attached-asdf-system-system-name home))))
+    (if (typep loaded 'asdf:system)
+        (values (examples-runner-for-system loaded) nil)
+        (values (make-example-run :system system-name :entries nil)
+                loaded))))
 
 (defun validation-runner-for-system (system-designator)
   (make-discovered-check-run :system (asdf-system-name-string system-designator)
                              :include-examples nil
                              :include-tests t))
 
-(defun discovered-example-checks-for-system (system)
-  (discover-example-checks :system (asdf-system-name-string system)))
+(defun discovered-examples-for-system (system)
+  (discover-examples :system (asdf-system-name-string system)))
 
 (defun discovered-validation-checks-for-system (system)
   (discover-test-checks :system (asdf-system-name-string system)))
@@ -87,6 +144,194 @@
 
 (defun check-locator-package (spec)
   (getf (check-locator-of spec) :package))
+
+(defun example-source-reference-for (example)
+  (etypecase example
+    (example-source-reference example)
+    (example-result
+     (make-example-source-reference (example-result-entry-of example)))
+    (example-entry
+     (make-example-source-reference example))))
+
+(defun example-function-label (function-symbol)
+  (if function-symbol
+      (format nil "~(~A~)" function-symbol)
+      "n/a"))
+
+(defun example-source-pathname (reference)
+  (when-let (source-file (example-source-reference-source-file-of reference))
+    (let ((pathname (pathname source-file)))
+      (or (ignore-errors (truename pathname))
+          pathname))))
+
+(defun example-source-status (reference)
+  (let ((pathname (example-source-pathname reference)))
+    (cond
+      ((and pathname (probe-file pathname)) :file-backed)
+      (pathname :source-file-missing)
+      ((example-source-reference-function-of reference) :mrepl)
+      (t :unavailable))))
+
+(defun example-source-status-label (status)
+  (ecase status
+    (:file-backed "source file available")
+    (:source-file-missing "source file missing")
+    (:mrepl "SLY MREPL / source unavailable")
+    (:unavailable "source unavailable")))
+
+(defun example-source-file-label (reference)
+  (let ((pathname (example-source-pathname reference)))
+    (if pathname
+        (namestring pathname)
+        (example-source-status-label (example-source-status reference)))))
+
+(defun example-source-system-directory (reference)
+  (let* ((entry (example-source-reference-entry-of reference))
+         (system-name (example-entry-system-of entry)))
+    (when system-name
+      (ignore-errors
+        (asdf:system-source-directory (asdf:find-system system-name))))))
+
+(defun example-source-file-candidates (reference)
+  (when-let (pathname (example-source-pathname reference))
+    (let ((system-directory (example-source-system-directory reference))
+          (hyperdoc-directory (ignore-errors
+                                (asdf:system-source-directory :hyperdoc))))
+      (remove nil
+              (remove-duplicates
+               (list (namestring pathname)
+                     (and system-directory
+                          (ignore-errors
+                            (enough-namestring pathname system-directory)))
+                     (and hyperdoc-directory
+                          (ignore-errors
+                            (enough-namestring pathname hyperdoc-directory))))
+               :test #'string=)))))
+
+(defun example-source-reference-source-target (reference)
+  (or (loop for candidate in (example-source-file-candidates reference)
+            for target = (ignore-errors
+                           (source-pane-layout-source-target candidate))
+            when (typep target 'code-page)
+              do (return target))
+      (example-source-pathname reference)))
+
+(defun example-source-navigation-target (reference)
+  (let ((target (example-source-reference-source-target reference))
+        (function-symbol (example-source-reference-function-of reference)))
+    (if (and function-symbol
+             (typep target 'code-page))
+        (make-code-page-source-navigation target function-symbol)
+        target)))
+
+(defun render-example-source-reference (reference &key (display "Source"))
+  (views:object-ref reference :display display :select "Source"))
+
+(defun render-example-source-unavailable (reference)
+  (views:html
+   (:h3 "Source unavailable")
+   (:p
+    (views:esc
+     (example-source-status-label (example-source-status reference))))
+   (:p
+    "The example result is inspectable, but this entry does not carry a "
+    "file-backed source location. This is expected for examples defined "
+    "directly in SLY MREPL.")
+   (:table :class "inspector-table"
+           (:tr (:td (views:esc "Function"))
+                (:td (:tt (views:esc
+                           (example-function-label
+                            (example-source-reference-function-of
+                             reference))))))
+           (:tr (:td (views:esc "Locator"))
+                (:td (views:object-ref
+                      (example-source-reference-locator-of reference)))))))
+
+(defun example-source-view (example)
+  (let* ((reference (example-source-reference-for example))
+         (status (example-source-status reference))
+         (target (example-source-navigation-target reference)))
+    (case status
+      (:file-backed
+       (typecase target
+         ((or code-page code-page-source-navigation source-pane-file-target)
+          (let ((view (views:👀source target)))
+            (if view
+                (views:rename view :title "Source" :priority 2)
+                (views:html-view :title "Source" :priority 2
+                                 (views:html
+                                  (:p "Source target has no Source view.")
+                                  (:p (views:object-ref target)))))))
+         (pathname
+          (views:html-view :title "Source" :priority 2
+                           (hb:render-file-source-surface target)))
+         (t
+          (views:html-view :title "Source" :priority 2
+                           (views:html
+                            (:p "Source file is available but no source view could be resolved.")
+                            (:p (:tt (views:esc
+                                      (example-source-file-label
+                                       reference)))))))))
+      (:source-file-missing
+       (views:html-view :title "Source" :priority 2
+                        (views:html
+                         (:h3 "Source file missing")
+                         (:p (:tt (views:esc
+                                   (example-source-file-label reference))))
+                         (:p "The entry has source-file metadata, but the file is not present in this image."))))
+      (otherwise
+       (views:html-view :title "Source" :priority 2
+                        (render-example-source-unavailable reference))))))
+
+(defun example-result-for-entry (entry results)
+  (find (example-entry-id-of entry)
+        results
+        :key (lambda (result)
+               (example-entry-id-of (example-result-entry-of result)))
+        :test #'equal))
+
+(defun render-example-entry-table (run)
+  (let ((results (example-run-results-of run)))
+    (views:html
+     (:table :class "inspector-table"
+             (:tr (:th (views:esc "Status"))
+                  (:th (views:esc "Class / Package / Group"))
+                  (:th (views:esc "Selector / Example"))
+                  (:th (views:esc "Result"))
+                  (:th (views:esc "Actions")))
+             (loop for entry in (example-run-entries-of run)
+                   for result = (example-result-for-entry entry results)
+                   for source-reference = (example-source-reference-for entry)
+                   do (views:html
+                       (:tr
+                        (:td (:tt (views:esc
+                                   (if result
+                                       (example-status-label
+                                        (example-result-status-of result))
+                                       (example-status-label
+                                        :not-executed)))))
+                        (:td (:tt (views:esc
+                                   (or (example-entry-class-or-group-of entry)
+                                       (example-entry-package-of entry)
+                                       "n/a"))))
+                        (:td (views:object-ref entry))
+                        (:td (if result
+                                 (views:object-ref result)
+                                 (views:html (:tt (views:esc "N/A")))))
+                        (:td
+                         (views:eval-button
+                          "Run"
+                          (views:thunk (run-example-entry entry))
+                          "Run this example and inspect the result")
+                         " "
+                         (render-example-source-reference source-reference)
+                         (when result
+                           (views:html
+                            " "
+                            (views:eval-button
+                             "Result"
+                             (views:thunk result)
+                             "Inspect this example result")))))))))))
 
 (defun resolve-check-source-target (check)
   (typecase check
@@ -124,24 +369,6 @@
                         (views:html
                          (:p "No source target could be resolved for this check.")))))))
 
-(defun render-example-spec-table (specs)
-  (views:html
-   (:table :class "inspector-table"
-           (:tr (:th (views:esc "Example"))
-                (:th (views:esc "Page"))
-                (:th (views:esc "Package"))
-                (:th (views:esc "Run")))
-           (loop for spec in specs
-                 do (views:html
-                     (:tr
-                      (:td (views:object-ref spec))
-                      (:td (:tt (views:esc (or (check-locator-page spec) "n/a"))))
-                      (:td (:tt (views:esc (or (check-locator-package spec) "n/a"))))
-                      (:td (views:eval-button
-                            "Run"
-                            (views:thunk (run-check spec))
-                            "Run this example and inspect the result"))))))))
-
 (defun render-validation-spec-table (specs)
   (views:html
    (:table :class "inspector-table"
@@ -162,6 +389,27 @@
 
 (defmethod views:text-representation ((spec check-spec))
   (format nil "~A" (check-title-of spec)))
+
+(defmethod views:text-representation ((entry example-entry))
+  (example-entry-title-of entry))
+
+(defmethod views:text-representation ((result example-result))
+  (format nil "[~A] ~A"
+          (string-upcase
+           (example-status-label (example-result-status-of result)))
+          (example-entry-title-of (example-result-entry-of result))))
+
+(defmethod views:text-representation ((reference example-source-reference))
+  (format nil "Source for ~A"
+          (example-entry-title-of
+           (example-source-reference-entry-of reference))))
+
+(defmethod views:text-representation ((run example-run))
+  (let ((summary (example-run-summary-of run)))
+    (format nil "Examples (~D success, ~D failure, ~D error)"
+            (getf summary :success 0)
+            (getf summary :failure 0)
+            (getf summary :error 0))))
 
 (defmethod views:text-representation ((result check-result))
   (format nil "[~A] ~A"
@@ -185,9 +433,16 @@
    " "
    (views:action-button "Rerun failed"
                         (views:thunk
-                         (rerun-failed-checks! run)
+                        (rerun-failed-checks! run)
                          t)
                         "Rerun failed, errored, or skipped tests and examples")))
+
+(defmethod views:title-bar-action-buttons ((run example-run))
+  (views:action-button "Run Examples"
+                       (views:thunk
+                        (run-example-run! run)
+                        t)
+                       "Run examples for this system scope"))
 
 (defmethod views:title-bar-action-buttons ((result check-result))
   (views:action-button "Rerun"
@@ -195,6 +450,193 @@
                         (refresh-check-result! result)
                         t)
                        "Rerun this item"))
+
+(defmethod views:title-bar-action-buttons ((result example-result))
+  (views:action-button "Run"
+                       (views:thunk
+                        (run-example-entry (example-result-entry-of result))
+                        t)
+                       "Run this example again"))
+
+(views:defview 👀summary (reference example-source-reference)
+  (let* ((entry (example-source-reference-entry-of reference))
+         (target (example-source-navigation-target reference)))
+    (views:html-view :title "Summary" :priority 1
+                     (views:html
+                      (:h3 "Example source")
+                      (:table :class "inspector-table"
+                              (:tr (:td (views:esc "Example entry"))
+                                   (:td (views:object-ref entry)))
+                              (:tr (:td (views:esc "Function"))
+                                   (:td (:tt (views:esc
+                                              (example-function-label
+                                               (example-source-reference-function-of
+                                                reference))))))
+                              (:tr (:td (views:esc "Source"))
+                                   (:td (render-example-source-reference
+                                         reference
+                                         :display
+                                         (example-source-status-label
+                                          (example-source-status reference)))))
+                              (:tr (:td (views:esc "Source file"))
+                                   (:td (:tt (views:esc
+                                              (example-source-file-label
+                                               reference)))))
+                              (:tr (:td (views:esc "Source page"))
+                                   (:td (:tt (views:esc
+                                              (or (example-source-reference-source-page-of
+                                                   reference)
+                                                  "n/a")))))
+                              (:tr (:td (views:esc "Locator"))
+                                   (:td (views:object-ref
+                                         (example-source-reference-locator-of
+                                          reference))))
+                              (:tr (:td (views:esc "Resolved target"))
+                                   (:td (if target
+                                            (views:object-ref target)
+                                            (views:html
+                                             (:tt (views:esc "n/a")))))))))))
+
+(views:defview 👀source (reference example-source-reference)
+  (example-source-view reference))
+
+(views:defview 👀summary (entry example-entry)
+  (let ((source-reference (example-source-reference-for entry)))
+    (views:html-view :title "Summary" :priority 1
+                     (views:html
+                      (:h3 (views:esc (example-entry-title-of entry)))
+                      (:p
+                       (views:eval-button "Run"
+                                          (views:thunk
+                                           (run-example-entry entry))
+                                          "Run this example and inspect the result"))
+                      (:table :class "inspector-table"
+                              (:tr (:td (views:esc "Identifier"))
+                                   (:td (:code (views:esc
+                                                (example-entry-id-of entry)))))
+                              (:tr (:td (views:esc "System"))
+                                   (:td (:tt (views:esc
+                                              (or (example-entry-system-of entry)
+                                                  "n/a")))))
+                              (:tr (:td (views:esc "Package"))
+                                   (:td (:tt (views:esc
+                                              (or (example-entry-package-of entry)
+                                                  "n/a")))))
+                              (:tr (:td (views:esc "Function"))
+                                   (:td (:tt (views:esc
+                                              (example-function-label
+                                               (example-entry-function-of
+                                                entry))))))
+                              (:tr (:td (views:esc "Source"))
+                                   (:td (render-example-source-reference
+                                         source-reference
+                                         :display
+                                         (example-source-status-label
+                                          (example-source-status
+                                           source-reference)))))
+                              (:tr (:td (views:esc "Source file"))
+                                   (:td (:tt (views:esc
+                                              (example-source-file-label
+                                               source-reference)))))
+                              (:tr (:td (views:esc "Page"))
+                                   (:td (:tt (views:esc
+                                              (or (example-entry-source-page-of entry)
+                                                  "n/a")))))
+                              (:tr (:td (views:esc "Locator"))
+                                   (:td (views:object-ref
+                                         (example-entry-locator-of entry))))
+                              (:tr (:td (views:esc "Tags"))
+                                   (:td (views:object-ref
+                                         (example-entry-tags-of entry)))))))))
+
+(views:defview 👀source (entry example-entry)
+  (example-source-view entry))
+
+(views:defview 👀summary (result example-result)
+  (let* ((entry (example-result-entry-of result))
+         (source-reference (example-source-reference-for result)))
+    (views:html-view :title "Summary" :priority 1
+                     (views:html
+                      (:h3 (views:esc (example-entry-title-of entry)))
+                      (:p
+                       (:b (views:esc "Status: "))
+                       (:tt (views:esc
+                             (example-status-label
+                              (example-result-status-of result)))))
+                      (:p
+                       (views:eval-button "Run"
+                                          (views:thunk
+                                           (run-example-entry entry))
+                                          "Run this example again"))
+                      (:table :class "inspector-table"
+                              (:tr (:td (views:esc "Identifier"))
+                                   (:td (:code (views:esc
+                                                (example-entry-id-of entry)))))
+                              (:tr (:td (views:esc "System"))
+                                   (:td (:tt (views:esc
+                                              (or (example-entry-system-of entry)
+                                                  "n/a")))))
+                              (:tr (:td (views:esc "Example entry"))
+                                   (:td (views:object-ref entry)))
+                              (:tr (:td (views:esc "Function"))
+                                   (:td (:tt (views:esc
+                                              (example-function-label
+                                               (example-entry-function-of
+                                                entry))))))
+                              (:tr (:td (views:esc "Source"))
+                                   (:td (render-example-source-reference
+                                         source-reference
+                                         :display
+                                         (example-source-status-label
+                                          (example-source-status
+                                           source-reference)))))
+                              (:tr (:td (views:esc "Source file"))
+                                   (:td (:tt (views:esc
+                                              (example-source-file-label
+                                               source-reference)))))
+                              (:tr (:td (views:esc "Locator"))
+                                   (:td (views:object-ref
+                                         (example-entry-locator-of entry))))
+                              (:tr (:td (views:esc "Duration"))
+                                   (:td (:tt (views:esc
+                                              (format nil "~D ms"
+                                                      (example-result-duration-ms-of
+                                                       result))))))
+                              (:tr (:td (views:esc "Assertions"))
+                                   (:td (views:object-ref
+                                         (example-result-assertions-of result))))
+                              (:tr (:td (views:esc "Value"))
+                                   (:td (views:object-ref
+                                         (example-result-value-of result))))
+                              (:tr (:td (views:esc "Condition"))
+                                   (:td (views:object-ref
+                                         (example-result-condition-of result)))))
+                      (when (example-result-backtrace-of result)
+                        (views:html
+                         (:h4 "Backtrace")
+                         (:pre :style "white-space: pre-wrap"
+                               (views:esc
+                                (example-result-backtrace-of result)))))))))
+
+(views:defview 👀source (result example-result)
+  (example-source-view result))
+
+(views:defview 👀summary (run example-run)
+  (views:html-view :title "Summary" :priority 1
+                   (views:html
+                    (:h3 "Examples")
+                    (:p
+                     (views:action-button "Run Examples"
+                                          (views:thunk
+                                           (run-example-run! run)
+                                           t)
+                                          "Run examples for this system scope"))
+                    (render-example-execution-location)
+                    (render-example-run-summary run)
+                    (if (example-run-entries-of run)
+                        (render-example-entry-table run)
+                        (views:html
+                         (:p "No examples are currently registered for this system."))))))
 
 (views:defview 👀summary (spec check-spec)
   (let ((source-target (resolve-check-source-target spec)))
@@ -350,30 +792,64 @@
                         (views:html (:p "Tests and examples have been discovered but not run yet."))))))
 
 (views:defview 👀examples (system asdf:system)
-  (let* ((specs (discovered-example-checks-for-system system))
-         (run (examples-runner-for-system system)))
+  (let ((run (examples-runner-for-system system)))
     (views:html-view :title "Examples" :priority 2
                      (include-hyperbook-link-assets)
                      (views:html
-                      (:h3 "Scoped examples")
+                      (:h3 "Examples")
                       (:p
                        (render-examples-concept-ref)
                        " belong to this ASDF system and act as runnable explanatory slices of its behavior.")
                       (:p
-                       (views:eval-button "Inspect example set"
+                       (views:eval-button "Inspect Examples"
                                           (views:thunk run)
-                                          "Open the discovered examples as an inspectable run object")
+                                          "Open the examples as an inspectable run object")
                        " "
-                       (views:eval-button "Run all examples"
+                       (views:eval-button "Run Examples"
                                           (views:thunk
-                                           (run-check-run! run)
+                                           (run-example-run! run)
                                            run)
-                                          "Run all discovered examples and inspect the results"))
+                                          "Run examples for this system scope and inspect the results"))
+                      (render-example-execution-location)
+                      (render-example-run-summary run)
+                      (if (example-run-entries-of run)
+                          (render-example-entry-table run)
+                          (views:html
+                           (:p "No examples are currently registered for this system.")))))))
+
+(views:defview 👀examples (home fedwiki-attached-asdf-system)
+  (multiple-value-bind (run load-failure)
+      (examples-runner-for-fedwiki-home home)
+    (views:html-view :title "Examples" :priority 2
+                     (include-hyperbook-link-assets)
+                     (views:html
+                      (:h3 "Examples")
                       (:p
-                       (:b (views:esc "Discovered: "))
-                       (:tt (views:esc (count-string (check-summary-value run :total)))))
-                      (if specs
-                          (render-example-spec-table specs)
+                       (render-examples-concept-ref)
+                       " belong to the ASDF system attached to this FedWiki page home.")
+                      (:p
+                       (:b (views:esc "ASDF entrypoint: "))
+                       (:tt (views:esc
+                             (namestring (fedwiki-page-asdf-entrypoint home)))))
+                      (when load-failure
+                        (views:html
+                         (:p
+                          (:b (views:esc "Load state: "))
+                          (views:object-ref load-failure))))
+                      (:p
+                       (views:eval-button "Inspect Examples"
+                                          (views:thunk run)
+                                          "Open the examples as an inspectable run object")
+                       " "
+                       (views:eval-button "Run Examples"
+                                          (views:thunk
+                                           (run-example-run! run)
+                                           run)
+                                          "Run examples for this system scope and inspect the results"))
+                      (render-example-execution-location)
+                      (render-example-run-summary run)
+                      (if (example-run-entries-of run)
+                          (render-example-entry-table run)
                           (views:html
                            (:p "No examples are currently registered for this system.")))))))
 

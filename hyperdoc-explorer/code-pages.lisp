@@ -73,7 +73,8 @@
                                   define-modify-macro
                                   defclass
                                   define-condition
-                                  defstruct)
+                                  defstruct
+                                  defexample)
                            :test #'eq)
                    (ignore-errors (cst:raw (cst:second cst))))))
         (or (code-page-definition-name-string raw-name)

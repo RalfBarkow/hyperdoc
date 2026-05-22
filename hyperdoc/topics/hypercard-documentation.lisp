@@ -932,12 +932,52 @@
   (make-topic
    :id "scoped-examples"
    :title "Scoped examples"
-   :summary "HyperDoc examples belong to a specific scope object and should be presented as exploratory runnable slices of that scope rather than as root-level global affordances."
+   :summary "HyperDoc examples belong to a specific ASDF system scope and are presented as exploratory runnable slices with first-class example-entry, example-result, and example-run objects."
    :references '("Understanding ASDF Systems in HyperDoc"
                  "ASDF Systems, Examples, and Tests in HyperDoc"
                  "Running HyperDoc Examples"
                  "Documentation Surfaces in HyperDoc"
                  "HyperDoc Runtime Model")))
+
+(defun example-entry-topic ()
+  (make-topic
+   :id "example-entry"
+   :title "Example entry"
+   :summary "First-class descriptor for one loaded defexample registration, scoped by ASDF system and carrying selector, package, source file, source page, locator, tags, and optional class/group label."
+   :references '("Running HyperDoc Examples"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "hyperdoc/check-runner.lisp"
+                 "hyperdoc/example-core.lisp")))
+
+(defun example-result-topic ()
+  (make-topic
+   :id "example-result"
+   :title "Example result"
+   :summary "Inspectable execution result for one example entry, preserving status, value, condition, backtrace, duration, assertions, and a source path derived from the entry metadata."
+   :references '("Running HyperDoc Examples"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "HyperDoc Evaluation and Inspection Model"
+                 "hyperdoc/check-runner.lisp")))
+
+(defun example-source-reference-topic ()
+  (make-topic
+   :id "example-source-reference"
+   :title "Example source reference"
+   :summary "Source-navigation object derived from an example entry, keeping function, locator, source-file, source-page, and tags separate from the raw runtime function object."
+   :references '("Running HyperDoc Examples"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "hyperdoc/check-runner.lisp"
+                 "hyperdoc-explorer/check-runner.lisp")))
+
+(defun example-run-topic ()
+  (make-topic
+   :id "example-run"
+   :title "Example run"
+   :summary "System-scoped batch object for running examples only, with example entries, example results, timestamps, and summary counts for executed, success, failure, error, skipped, and not-executed examples."
+   :references '("Running HyperDoc Examples"
+                 "ASDF Systems, Examples, and Tests in HyperDoc"
+                 "FedWiki-attached ASDF system"
+                 "hyperdoc/check-runner.lisp")))
 
 (defun run-action-for-examples-topic ()
   (make-topic
@@ -1013,7 +1053,7 @@
   (make-topic
    :id "hyperdoc-checks-runner"
    :title "HyperDoc test runner"
-   :summary "An in-image runner that discovers examples and repo-local smoke tests through an inspectable check runtime, executes them in batch, and exposes rerunnable results through system-scoped test surfaces and the CLI."
+   :summary "Legacy in-image runner boundary retained for current repository validation and compatibility while examples move to first-class example-entry, example-result, and example-run objects."
    :references '("Understanding ASDF Systems in HyperDoc"
                  "HyperDoc Test Runner"
                  "ASDF Systems, Examples, and Tests in HyperDoc"
@@ -1077,4 +1117,3 @@
                  "HyperDoc Test Runner"
                  "Running HyperDoc Examples"
                  "Documentation Architecture in HyperDoc")))
-

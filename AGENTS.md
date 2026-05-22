@@ -776,3 +776,52 @@ Even for short/non-edit answers, provide at least a minimal reconstruction block
 
 For non-edit turns, these can be marked as:
 - `No file changes; proposed artifact deltas: ...`
+
+## SLY MREPL inspectability requirement
+
+For any Common Lisp change that introduces or refactors runtime objects,
+Codex must provide one copy-pasteable SLY MREPL snippet that creates and
+inspects a minimal object through the CLOG inspector.
+
+The snippet must:
+- load required ASDF systems when needed;
+- not depend on pre-existing repository examples unless the task is specifically about those examples;
+- construct a minimal fixture object directly;
+- exercise the changed runtime path;
+- bind important objects to globals such as `*example-entry*`, `*example-result*`, or `*example-run*`;
+- print type, status, and core value;
+- end with `(i <object>)`;
+- be actually pasteable into SLY MREPL.
+
+For the Examples runtime, the minimum demo is:
+1. create one `hyperdoc:example-entry`;
+2. run it with `hyperdoc:run-example-entry`;
+3. inspect the resulting `hyperdoc:example-result` with `(i *example-result*)`.
+
+Passing tests are not enough unless this MREPL inspection path is also provided.
+
+## Inspectable source navigation requirement
+
+For any Common Lisp runtime object that displays a function, method, example,
+test, action, or runnable entry, Codex must provide a source-navigation path in
+the inspector when source metadata is available.
+
+A runtime function object is not sufficient as a source target. The inspector
+must expose one of:
+- a source-file/pathname target;
+- a symbol or locator target with a source view;
+- a source artifact object;
+- or an explicit source-unavailable diagnostic.
+
+For Examples work specifically:
+- `example-result` must expose its `example-entry`;
+- `example-entry` must expose function, locator, source-file, source-page, and tags;
+- the `example-result` summary must include a source-oriented row/action separate
+  from the raw Function row;
+- file-backed examples must open a source/code view from the Source action;
+- MREPL-only examples must explicitly report source unavailable or SLY MREPL.
+
+The minimal SLY MREPL demo must prove both:
+1. an inspectable runtime result exists, ending with `(i *example-result*)`;
+2. the result gives an inspector path toward source metadata, even if the demo
+   function itself was defined in the MREPL and has no file-backed source.

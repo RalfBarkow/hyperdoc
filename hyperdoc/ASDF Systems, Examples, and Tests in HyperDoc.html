@@ -23,6 +23,10 @@
 <ul>
   <li><a hyperbook="topics" page="ASDF systems as scope"><tt>ASDF systems as scope</tt></a></li>
   <li><a hyperbook="topics" page="Scoped examples"><tt>Scoped examples</tt></a></li>
+  <li><a hyperbook="topics" page="Example entry"><tt>Example entry</tt></a></li>
+  <li><a hyperbook="topics" page="Example result"><tt>Example result</tt></a></li>
+  <li><a hyperbook="topics" page="Example source reference"><tt>Example source reference</tt></a></li>
+  <li><a hyperbook="topics" page="Example run"><tt>Example run</tt></a></li>
   <li><a hyperbook="topics" page="Run action for examples"><tt>Run action for examples</tt></a></li>
   <li><a hyperbook="topics" page="Tests"><tt>Tests</tt></a></li>
   <li><a hyperbook="topics" page="ASDF system"><tt>ASDF system</tt></a></li>
@@ -58,7 +62,7 @@
   definition as the place where project layout, components, dependencies, and
   publication metadata come together. That is exactly why HyperDoc should
   attach examples and tests to ASDF systems rather than to a root-level
-  package list or a free-floating checks console.
+  package list or a free-floating verification console.
 </p>
 
 <p>
@@ -166,6 +170,18 @@
 <p>
   This keeps the GT lesson intact in HyperDoc terms: pick a scope object, list
   its examples, and let each example run into an inspectable result object.
+  The runtime objects for that surface are <tt>example-entry</tt>,
+  <tt>example-result</tt>, and <tt>example-run</tt>; tests intentionally use a
+  separate future model rather than sharing the example run object.
+</p>
+
+<p>
+  Source navigation is part of that model. An <tt>example-result</tt> exposes
+  a separate source-oriented target derived from its <tt>example-entry</tt>,
+  not only the raw function object. When source-file metadata is present, the
+  Source path opens the code view for that file; when the entry was created in
+  SLY MREPL or otherwise has no file-backed source, the inspector says so
+  explicitly.
 </p>
 
 <h2>Tests are separate from identity</h2>
@@ -185,18 +201,20 @@
 <p>
   Examples and tests are related because both are runnable. They are distinct
   because examples are exploratory and pedagogical, while tests are operational
-  and verification-oriented. Internally they currently share the
-  <tt>check-*</tt> runtime model.
+  and verification-oriented. The Examples surface therefore discovers only
+  loaded <tt>defexample</tt> registrations for the owning ASDF system and does
+  not run test entry points.
 </p>
 
 <h2>Relation to HyperDoc Test Runner</h2>
 
 <p>
-  The <a page="HyperDoc Test Runner">HyperDoc Test Runner</a> remains the
-  runtime model for <tt>check-spec</tt>, <tt>check-result</tt>, and
-  <tt>check-run</tt>. What changes is placement: the runner should be entered
-  through system-scoped test surfaces, not taught as a primary facet of
-  the HyperDoc root object.
+  The <a page="HyperDoc Test Runner">HyperDoc Test Runner</a> is now a legacy
+  compatibility boundary for the older runner implementation and for current
+  repository validation entry points. It should not be used to explain the
+  Examples surface. The test-side refactor is deliberately separate and should
+  introduce <tt>test-case</tt>, <tt>test-result</tt>, <tt>test-run</tt>, and
+  <tt>test-runner</tt> rather than reusing <tt>example-run</tt>.
 </p>
 
 <p>

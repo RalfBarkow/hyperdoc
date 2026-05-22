@@ -29,6 +29,46 @@
    #:defexample
    #:assert-test #:assert-equalp #:assert-equal
    #:assert-eql #:assert-within-tolerance
+   #:example-entry
+   #:example-result
+   #:example-run
+   #:example-source-reference
+   #:register-example
+   #:discover-examples
+   #:make-example-run
+   #:make-example-source-reference
+   #:run-example-entry
+   #:run-example-run!
+   #:run-examples
+   #:example-entry-system-of
+   #:example-entry-id-of
+   #:example-entry-title-of
+   #:example-entry-function-of
+   #:example-entry-locator-of
+   #:example-entry-package-of
+   #:example-entry-source-file-of
+   #:example-entry-source-page-of
+   #:example-entry-tags-of
+   #:example-entry-class-or-group-of
+   #:example-result-entry-of
+   #:example-result-status-of
+   #:example-result-value-of
+   #:example-result-condition-of
+   #:example-result-backtrace-of
+   #:example-result-duration-ms-of
+   #:example-result-assertions-of
+   #:example-run-system-of
+   #:example-run-entries-of
+   #:example-run-results-of
+   #:example-run-started-at-of
+   #:example-run-finished-at-of
+   #:example-run-summary-of
+   #:example-source-reference-entry-of
+   #:example-source-reference-function-of
+   #:example-source-reference-locator-of
+   #:example-source-reference-source-file-of
+   #:example-source-reference-source-page-of
+   #:example-source-reference-tags-of
    #:run-ci-checks
    ;; Defining tools
    #:deftool #:html #:markdown #:html-generator

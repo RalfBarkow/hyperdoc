@@ -56,6 +56,40 @@
   plan brought that form into the image.
 </p>
 
+<h4>Examples view</h4>
+
+<p>
+  ASDF system objects and FedWiki-attached ASDF system home objects expose an
+  <tt>Examples</tt> view. It lists <tt>example-entry</tt> objects before
+  execution, shows <tt>N/A</tt> as the result for rows that have not run, and
+  uses <tt>Run Examples</tt> to produce an inspectable <tt>example-run</tt>
+  with <tt>example-result</tt> objects.
+</p>
+
+<p>
+  For a FedWiki-attached ASDF system home, the view loads through the exact
+  page-local <tt>.asd</tt> entrypoint already resolved by the home object. It
+  runs locally only; the remote lane is rendered as unavailable and does not
+  fetch, pull, or execute remote repository controls.
+</p>
+
+<h4>Source navigation</h4>
+
+<p>
+  An <tt>example-result</tt> keeps the raw function visible, but source
+  navigation does not treat the function object as the source object. The
+  result points back through its <tt>example-entry</tt>, which carries the
+  function symbol, locator, source file, source page, and tags.
+</p>
+
+<p>
+  File-backed examples expose a separate <tt>Source</tt> path that opens the
+  source/code view for the defining file. MREPL-only examples expose the same
+  source-oriented path, but the view reports <tt>SLY MREPL / source
+  unavailable</tt> instead of opening a generic function inspector as if it
+  were source.
+</p>
+
 <h4>What happens</h4>
 
 <ol>
