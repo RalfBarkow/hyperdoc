@@ -44,6 +44,16 @@
    :references '("Page systems as ASDF reload boundaries"
                  "fedwiki:wiki.ralfbarkow.ch/mobile-progressive-chrome-in-hyperdoc")))
 
+(defun fedwiki-attached-asdf-system-topic ()
+  (make-topic
+   :id "fedwiki-attached-asdf-system"
+   :title "FedWiki-attached ASDF system"
+   :summary "Inspectable system-home object that resolves a FedWiki page identity to local page assets, an exact ASDF entrypoint, ASDF system state, actions, tests, examples, and lookup recovery routes."
+   :references '("FedWiki-attached ASDF system"
+                 "Kioskberrli"
+                 "hyperdoc/fedwiki-attached-asdf-system.lisp"
+                 "hyperdoc-inspector/fedwiki-attached-asdf-system.lisp")))
+
 (defun page-display-contract-topic ()
   (make-topic
    :id "page-display-contract"

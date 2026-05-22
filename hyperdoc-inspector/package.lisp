@@ -9,7 +9,8 @@
   (:import-from :arrow-macros
                 :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:export :hyperdoc
-           :inspect-topicmap-view))
+           :inspect-topicmap-view
+           :inspect-system-home-page))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperdoc/inspector)

@@ -23,10 +23,11 @@
   The source-controlled Lisp implementation is the canonical
   <tt>:kioskberrli</tt> ASDF system and <tt>:kioskberrli</tt> package.
   The older <tt>kioskbeerli</tt> and <tt>:dreyeck/kioskbeerli</tt> names are
-  compatibility aliases only. The localhost FedWiki attachment point is
-  <tt>http://localhost:3000/view/kioskberrli</tt>; generated distribution
-  assets are addressed under
-  <tt>http://localhost:3000/assets/pages/kioskberrli/</tt>.
+  compatibility aliases only. The localhost FedWiki client URL
+  <tt>http://localhost:3000/view/kioskberrli</tt> names the page identity; it
+  is not the operational SLY route for loading the system. The local
+  page-attached ASDF entrypoint is
+  <tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/kioskberrli/kioskberrli.asd</tt>.
 </p>
 
 <h4>Current hardware note</h4>
@@ -47,6 +48,8 @@
   <li><a expr="(hyperdoc::kioskberrli-project-trace)"><tt>kioskberrli-project-trace</tt></a></li>
   <li><a expr="(kioskberrli:make-demo-dashboard)"><tt>kioskberrli:make-demo-dashboard</tt></a></li>
   <li><a expr="(kioskberrli:materialize-fedwiki-assets :slug &quot;kioskberrli&quot;)"><tt>kioskberrli:materialize-fedwiki-assets</tt></a></li>
+  <li><a expr="(hyperdoc:make-fedwiki-attached-asdf-system :slug &quot;kioskberrli&quot; :site-root #p&quot;/Users/rgb/.wiki/wiki.ralfbarkow.ch/&quot; :system :kioskberrli :system-file &quot;kioskberrli&quot; :test-system :kioskberrli/tests)"><tt>FedWiki-attached ASDF system home</tt></a></li>
+  <li><a hyperbook="topics" page="FedWiki-attached ASDF system"><tt>FedWiki-attached ASDF system</tt></a></li>
   <li><a hyperbook="topics" page="Satechi USB-C Pro Hub (4K HDMI)"><tt>Satechi USB-C Pro Hub (4K HDMI)</tt></a></li>
   <li><a hyperbook="topics" page="SD card"><tt>SD card</tt></a></li>
   <li><a hyperbook="topics" page="Micro SD card"><tt>Micro SD card</tt></a></li>

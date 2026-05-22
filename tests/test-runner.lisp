@@ -50,6 +50,7 @@
   (run-dm6-page-topicmap-smoke-tests)
   (run-topicmap-view-smoke-tests)
   (run-fedwiki-asdf-assets-smoke-tests)
+  (run-fedwiki-attached-asdf-system-smoke-tests)
   (run-dmx-shared-workspace-docs-smoke-tests)
   (run-neo4j-duplicate-username-repair-smoke-tests)
   (run-hyperdoc-neo4j-topic-delete-tool-operation-ir-smoke-tests)

@@ -281,6 +281,35 @@
    #:make-dm6-appembed-inline-proof-page-system
    #:make-fedwiki-mobile-progressive-chrome-page-system
    #:make-fedwiki-shop3-page-system
+   ;; FedWiki-attached ASDF system homes
+   #:fedwiki-attached-asdf-system
+   #:fedwiki-asdf-system-lookup-failure
+   #:fedwiki-page-asset-root
+   #:fedwiki-page-asdf-entrypoint
+   #:make-fedwiki-attached-asdf-system
+   #:load-fedwiki-attached-asdf-system
+   #:asdf-system-home-page-of
+   #:fedwiki-attached-asdf-system-slug
+   #:fedwiki-attached-asdf-system-site-root
+   #:fedwiki-attached-asdf-system-system-name
+   #:fedwiki-attached-asdf-system-system-file
+   #:fedwiki-attached-asdf-system-test-system-name
+   #:fedwiki-attached-asdf-system-package-name
+   #:fedwiki-attached-asdf-system-compatibility-system-name
+   #:fedwiki-attached-asdf-system-previous-object
+   #:fedwiki-attached-asdf-system-source-directory
+   #:fedwiki-attached-asdf-system-state
+   #:fedwiki-attached-asdf-system-available-actions
+   #:fedwiki-attached-asdf-system-available-examples
+   #:fedwiki-attached-asdf-system-available-tests
+   #:fedwiki-attached-asdf-system-route-trace
+   #:fedwiki-attached-asdf-system-candidate-routes
+   #:fedwiki-attached-asdf-system-home-page-text
+   #:fedwiki-asdf-lookup-failure-home
+   #:fedwiki-asdf-lookup-failure-routes
+   #:fedwiki-asdf-lookup-failure-condition
+   #:fedwiki-asdf-lookup-failure-home-page
+   #:fedwiki-asdf-lookup-failure-text
    ;; FedWiki page-local ASDF asset writer
    #:page-asdf-asset-spec
    #:page-asdf-asset-spec-system-name
