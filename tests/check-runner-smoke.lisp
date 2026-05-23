@@ -489,6 +489,127 @@
                      (get-universal-time))
              (uiop:temporary-directory))))
 
+(defun cr-json-object-value (object key)
+  (cond
+    ((hash-table-p object)
+     (multiple-value-bind (value present-p)
+         (gethash key object)
+       (and present-p value)))
+    ((and (listp object) (assoc key object :test #'string=))
+     (cdr (assoc key object :test #'string=)))
+    (t nil)))
+
+(defun cr-json-array-list (value)
+  (cond
+    ((null value) nil)
+    ((vectorp value) (coerce value 'list))
+    ((listp value) value)
+    (t (list value))))
+
+(defun cr-inspector-path-sqlite-output (store sql)
+  (multiple-value-bind (output status detail)
+      (hyperdoc::inspector-path-sqlite-run store sql)
+    (unless (eq status :ok)
+      (error "SQLite query failed: ~A -- ~A" sql detail))
+    output))
+
+(defun cr-inspector-path-sqlite-scalar (store sql)
+  (string-trim '(#\Space #\Tab #\Newline #\Return)
+               (cr-inspector-path-sqlite-output store sql)))
+
+(defun cr-read-json-string (json)
+  (with-input-from-string (stream json)
+    (shasht:read-json stream)))
+
+(defun run-inspector-path-json-encoding-smoke-test ()
+  (if (not (hyperdoc:example-source-sqlite-available-p))
+      (format t "~&Skipping inspector path JSON encoding smoke test; sqlite3 unavailable.~%")
+      (let* ((store (make-temp-inspector-path-store))
+             (labels '("Source code" "Source code" "Meta"))
+             (dom-labels '("DOM label" "DOM label" "Meta"))
+             (step
+               (make-instance
+                'hyperdoc:inspector-path-step
+                :step-id "path-step:json-encoding"
+                :index 0
+                :path-name "smoke/json-encoding"
+                :phase "labels"
+                :action "render Source code"
+                :view-titles labels
+                :dom-labels dom-labels
+                :details "plain string"))
+             (trace
+               (make-instance
+                'hyperdoc:inspector-path-trace
+                :trace-id "path-trace:json-encoding"
+                :path-name "smoke/json-encoding"
+                :entry-function "smoke"
+                :steps (list step)
+                :result :ok)))
+        (hyperdoc:persist-inspector-path-trace trace :store store)
+        (let* ((step-topic (hyperdoc::inspector-path-step-topic-of step))
+               (topic-id (hyperdoc:path-topic-id-of step-topic))
+               (value-json
+                 (cr-inspector-path-sqlite-scalar
+                  store
+                  (format nil "SELECT value_json FROM path_topics WHERE topic_id = ~A;"
+                          (hyperdoc::example-source-sqlite-string-literal
+                           topic-id))))
+               (properties-json
+                 (cr-inspector-path-sqlite-scalar
+                  store
+                  "SELECT properties_json FROM path_associations WHERE association_type = 'hyperdoc.path.contains-step' LIMIT 1;"))
+               (topic-value (cr-read-json-string value-json))
+               (association-properties (cr-read-json-string properties-json))
+               (decoded-view-titles
+                 (cr-json-array-list
+                  (cr-json-object-value topic-value "view-titles")))
+               (decoded-dom-labels
+                 (cr-json-array-list
+                  (cr-json-object-value topic-value "dom-labels"))))
+          (cr-assert-equal
+           "render Source code"
+           (cr-json-object-value topic-value "action")
+           "Path evidence action must round-trip as a JSON string")
+          (cr-assert-equal
+           "plain string"
+           (cr-json-object-value topic-value "details")
+           "Path evidence details must round-trip as a JSON string")
+          (cr-assert-equal labels
+                           decoded-view-titles
+                           "View titles must round-trip as an ordered JSON array with duplicates")
+          (cr-assert-equal dom-labels
+                           decoded-dom-labels
+                           "DOM labels must round-trip as an ordered JSON array with duplicates")
+          (cr-assert-string-not-contains
+           "[\"S\",\"o\",\"u\""
+           value-json
+           "View titles must not serialize as character arrays")
+          (cr-assert-string-not-contains
+           "{\"S\""
+           value-json
+           "View titles must not serialize as malformed first-character object maps")
+          (cr-assert-equal
+           0
+           (cr-json-object-value association-properties "index")
+           "Association properties JSON must remain parseable")
+          (let ((path-topics-schema
+                  (cr-inspector-path-sqlite-output
+                   store
+                   "PRAGMA table_info(path_topics);"))
+                (path-associations-schema
+                  (cr-inspector-path-sqlite-output
+                   store
+                   "PRAGMA table_info(path_associations);")))
+            (dolist (column '("topic_id" "value_json"))
+              (cr-assert-string-contains
+               column path-topics-schema
+               "path_topics schema must remain valid"))
+            (dolist (column '("association_id" "properties_json"))
+              (cr-assert-string-contains
+               column path-associations-schema
+               "path_associations schema must remain valid")))))))
+
 (defun run-example-source-artifact-inspector-scxml-smoke-test ()
   (asdf:load-system :hyperdoc/scxml)
   (let* ((chart (hyperdoc/scxml:parse-scxml-file
@@ -1012,6 +1133,7 @@
   (run-example-source-artifact-inspector-scxml-smoke-test)
   (run-topic-backed-example-source-artifact-smoke-test)
   (run-example-source-artifact-path-evidence-smoke-test)
+  (run-inspector-path-json-encoding-smoke-test)
   (run-check-source-target-smoke-test)
   (run-passing-check-smoke-test)
   (run-failure-and-error-smoke-test)

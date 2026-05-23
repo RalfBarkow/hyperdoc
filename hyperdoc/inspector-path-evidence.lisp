@@ -158,6 +158,9 @@
 (defun inspector-path->json-value (value)
   (cond
     ((null value) nil)
+    ((stringp value) value)
+    ((characterp value) (string value))
+    ((numberp value) value)
     ((keywordp value) (string-downcase (symbol-name value)))
     ((symbolp value) (format nil "~A" value))
     ((pathnamep value) (namestring value))
