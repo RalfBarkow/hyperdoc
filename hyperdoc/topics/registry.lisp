@@ -17,6 +17,61 @@
 (defclass topic-page (hb:page)
   ((topic :reader topic-of :initarg :topic :type topic)))
 
+(defclass topic-constructor-call-diagnostic ()
+  ((symbol :reader topic-constructor-call-symbol-of :initarg :symbol)
+   (mode :reader topic-constructor-call-mode-of :initarg :mode)
+   (status :reader topic-constructor-call-status-of :initarg :status)
+   (title :reader topic-constructor-call-title-of :initarg :title
+          :initform nil)
+   (value-type :reader topic-constructor-call-value-type-of
+               :initarg :value-type
+               :initform nil)
+   (condition-type :reader topic-constructor-call-condition-type-of
+                   :initarg :condition-type
+                   :initform nil)
+   (condition-message :reader topic-constructor-call-condition-message-of
+                      :initarg :condition-message
+                      :initform nil)))
+
+(defclass topic-registry-diagnostic ()
+  ((id :reader topic-registry-diagnostic-id-of :initarg :id)
+   (loaded-topic-files
+    :reader topic-registry-diagnostic-loaded-topic-files-of
+    :initarg :loaded-topic-files)
+   (discovered-constructors
+    :reader topic-registry-diagnostic-discovered-constructors-of
+    :initarg :discovered-constructors)
+   (constructor-calls
+    :reader topic-registry-diagnostic-constructor-calls-of
+    :initarg :constructor-calls)
+   (initial-index-state
+    :reader topic-registry-diagnostic-initial-index-state-of
+    :initarg :initial-index-state)
+   (initial-titles
+    :reader topic-registry-diagnostic-initial-titles-of
+    :initarg :initial-titles)
+   (first-rebuild-titles
+    :reader topic-registry-diagnostic-first-rebuild-titles-of
+    :initarg :first-rebuild-titles)
+   (second-rebuild-titles
+    :reader topic-registry-diagnostic-second-rebuild-titles-of
+    :initarg :second-rebuild-titles)
+   (cached-provider-titles
+    :reader topic-registry-diagnostic-cached-provider-titles-of
+    :initarg :cached-provider-titles)
+   (nil-provider-titles
+    :reader topic-registry-diagnostic-nil-provider-titles-of
+    :initarg :nil-provider-titles)
+   (current-titles
+    :reader topic-registry-diagnostic-current-titles-of
+    :initarg :current-titles)
+   (sqlite-statuses
+    :reader topic-registry-diagnostic-sqlite-statuses-of
+    :initarg :sqlite-statuses)
+   (recommended-repair
+    :reader topic-registry-diagnostic-recommended-repair-of
+    :initarg :recommended-repair)))
+
 (defvar *topics* (make-instance 'topics-hyperbook :id "topics"))
 (defvar *topics-by-id* (make-hash-table :test #'equal))
 (defvar *topics-by-title* (make-hash-table :test #'equal))
@@ -79,28 +134,246 @@
       (and (fboundp symbol)
            (symbol-function symbol))))
 
+(defun topic-registry-sorted-titles ()
+  (sort (loop for title being the hash-keys of *topics-by-title*
+              collect title)
+        #'string<))
+
+(defun topic-registry-constructor-symbols ()
+  (sort (loop for symbol being the symbols of (find-package :hyperdoc)
+              when (topic-constructor-symbol-p symbol)
+                collect symbol)
+        #'string<
+        :key #'symbol-name))
+
+(defun topic-registry-loaded-topic-files ()
+  (cond
+    ((fboundp 'page-lookup-topic-source-paths)
+     (mapcar #'namestring (funcall 'page-lookup-topic-source-paths)))
+    (t
+     (let ((root (asdf:system-relative-pathname :hyperdoc
+                                                "hyperdoc/topics/")))
+       (mapcar #'namestring
+               (sort (copy-list
+                      (directory
+                       (merge-pathnames "*.lisp"
+                                        (uiop:ensure-directory-pathname root))))
+                     #'string<
+                     :key #'namestring))))))
+
+(defun topic-registry-isolated-constructor-call (symbol mode)
+  (let ((*topics-by-id* (make-hash-table :test #'equal))
+        (*topics-by-title* (make-hash-table :test #'equal))
+        (*topic-index-materialization-signature-provider* nil))
+    (handler-case
+        (let* ((function (ecase mode
+                           (:effective (authored-topic-factory symbol))
+                           (:direct (and (fboundp symbol)
+                                         (symbol-function symbol)))))
+               (value (and function (funcall function))))
+          (if (typep value 'topic)
+              (make-instance 'topic-constructor-call-diagnostic
+                             :symbol symbol
+                             :mode mode
+                             :status :success
+                             :title (title-of value)
+                             :value-type (type-of value))
+              (make-instance 'topic-constructor-call-diagnostic
+                             :symbol symbol
+                             :mode mode
+                             :status :non-topic
+                             :value-type (type-of value))))
+      (error (condition)
+        (make-instance 'topic-constructor-call-diagnostic
+                       :symbol symbol
+                       :mode mode
+                       :status :error
+                       :condition-type (type-of condition)
+                       :condition-message (princ-to-string condition))))))
+
+(defun topic-registry-constructor-call-diagnostics
+    (&key (modes '(:effective)))
+  (loop for symbol in (topic-registry-constructor-symbols)
+        append (loop for mode in modes
+                     collect (topic-registry-isolated-constructor-call
+                              symbol
+                              mode))))
+
+(defun topic-registry-run-rebuild-snapshot (&key signature-provider)
+  (let ((*topic-index-materialization-signature-provider*
+          signature-provider))
+    (rebuild-topic-indexes)
+    (topic-registry-sorted-titles)))
+
+(defun topic-registry-current-signature-provider ()
+  *topic-index-materialization-signature-provider*)
+
+(defun topic-registry-current-source-signature-table ()
+  (and (fboundp 'page-lookup-topic-source-signature-table)
+       (funcall 'page-lookup-topic-source-signature-table)))
+
+(defun topic-registry-cached-provider (provider)
+  (let ((signature-table (topic-registry-current-source-signature-table)))
+    (lambda (symbol topic)
+      (cond
+        (signature-table
+         (gethash symbol signature-table))
+        (provider
+         (funcall provider symbol topic))
+        (t nil)))))
+
+(defun call-with-topic-registry-source-signature-table (thunk)
+  (let ((source-table-symbol
+          (find-symbol "*PAGE-LOOKUP-CURRENT-SOURCE-SIGNATURE-TABLE*"
+                       :hyperdoc)))
+    (if (and source-table-symbol
+             (boundp source-table-symbol)
+             (fboundp 'page-lookup-topic-source-signature-table))
+        (let ((signature-table (topic-registry-current-source-signature-table)))
+          (progv (list source-table-symbol)
+              (list signature-table)
+            (funcall thunk)))
+        (funcall thunk))))
+
+(defun topic-registry-whitespace-split (string)
+  (remove-if #'(lambda (part) (zerop (length part)))
+             (uiop:split-string string
+                                :separator '(#\Space #\Tab #\Newline
+                                             #\Return))))
+
+(defun topic-registry-sqlite-output (db-path argument)
+  (handler-case
+      (uiop:run-program (list "sqlite3" (namestring db-path) argument)
+                        :output :string
+                        :error-output :string
+                        :ignore-error-status t)
+    (error (condition)
+      (declare (ignore condition))
+      nil)))
+
+(defun topic-registry-sqlite-table-counts (db-path)
+  (let* ((tables-output (topic-registry-sqlite-output db-path ".tables"))
+         (tables (and tables-output
+                      (topic-registry-whitespace-split tables-output))))
+    (loop for table in tables
+          collect (list
+                   :table table
+                   :count
+                   (let ((count-output
+                           (topic-registry-sqlite-output
+                            db-path
+                            (format nil "SELECT count(*) FROM ~A;"
+                                    table))))
+                     (and count-output
+                          (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                       count-output)))))))
+
+(defun topic-registry-sqlite-statuses ()
+  (let ((paths (list
+                (list :example-source-artifacts
+                      (merge-pathnames
+                       #P"hyperdoc/example-source-artifacts.sqlite"
+                       (merge-pathnames #P".cache/" (user-homedir-pathname))))
+                (list :inspector-path-evidence
+                      (merge-pathnames
+                       #P"hyperdoc/inspector-path-evidence.sqlite"
+                       (merge-pathnames #P".cache/" (user-homedir-pathname)))))))
+    (loop for (name path) in paths
+          collect (list
+                   :name name
+                   :path (namestring path)
+                   :exists-p (not (null (probe-file path)))
+                   :tables (and (probe-file path)
+                                (topic-registry-sqlite-table-counts path))))))
+
+(defun topic-registry-diagnostic-recommendation
+    (first-count second-count cached-provider-count nil-provider-count)
+  (cond
+    ((and (< first-count 3)
+          (or (> second-count first-count)
+              (> cached-provider-count first-count)
+              (> nil-provider-count first-count)))
+     "The first registry rebuild is partial while the page-lookup materialization signature provider is active. Cache or precompute the source-signature table for the rebuild, keep constructor errors visible in diagnostics, then invalidate stale CLOG panes by rebuilding the Topics index.")
+    ((> cached-provider-count first-count)
+     "The cached-provider rebuild sees more topics than the ordinary rebuild; make the signature provider cache per source write date or bind the precomputed table during rebuild.")
+    ((> nil-provider-count first-count)
+     "The materialization signature provider changes registry materialization; isolate it from constructor execution and record its failures separately.")
+    (t
+     "The registry materializes consistently in this image. If the browser still shows only two topics, refresh or recreate the CLOG pane after rebuilding the topic indexes.")))
+
+(defun make-topic-registry-diagnostic ()
+  (let* ((initial-state *topic-index-state*)
+         (initial-titles (topic-registry-sorted-titles))
+         (constructors (topic-registry-constructor-symbols))
+         (constructor-calls
+           (topic-registry-constructor-call-diagnostics
+            :modes '(:effective :direct)))
+         (provider (topic-registry-current-signature-provider))
+         (first-rebuild-titles
+           (topic-registry-run-rebuild-snapshot
+            :signature-provider provider))
+         (second-rebuild-titles
+           (topic-registry-run-rebuild-snapshot
+            :signature-provider provider))
+         (cached-provider-titles
+           (topic-registry-run-rebuild-snapshot
+            :signature-provider (topic-registry-cached-provider provider)))
+         (nil-provider-titles
+           (topic-registry-run-rebuild-snapshot
+            :signature-provider nil))
+         (current-titles
+           (progn
+             (topic-registry-run-rebuild-snapshot
+              :signature-provider (topic-registry-cached-provider provider))
+             (topic-registry-sorted-titles))))
+    (make-instance 'topic-registry-diagnostic
+                   :id (format nil "topic-registry-diagnostic-~36R"
+                               (get-universal-time))
+                   :loaded-topic-files (topic-registry-loaded-topic-files)
+                   :discovered-constructors constructors
+                   :constructor-calls constructor-calls
+                   :initial-index-state initial-state
+                   :initial-titles initial-titles
+                   :first-rebuild-titles first-rebuild-titles
+                   :second-rebuild-titles second-rebuild-titles
+                   :cached-provider-titles cached-provider-titles
+                   :nil-provider-titles nil-provider-titles
+                   :current-titles current-titles
+                   :sqlite-statuses (topic-registry-sqlite-statuses)
+                   :recommended-repair
+                   (topic-registry-diagnostic-recommendation
+                    (length first-rebuild-titles)
+                    (length second-rebuild-titles)
+                    (length cached-provider-titles)
+                    (length nil-provider-titles)))))
+
 (defun rebuild-topic-indexes ()
-  (clrhash *topics-by-id*)
-  (clrhash *topics-by-title*)
-  (clrhash *topic-index-materialization-signatures*)
-  (do-symbols (symbol (find-package :hyperdoc))
-    (when (topic-constructor-symbol-p symbol)
-      (handler-case
-          (let ((topic (funcall (authored-topic-factory symbol))))
-            (when (typep topic 'topic)
-              (%register-topic topic)
-              (when *topic-index-materialization-signature-provider*
-                (let ((signature
-                       (ignore-errors
-                         (funcall *topic-index-materialization-signature-provider*
-                                  symbol
-                                  topic))))
-                  (when signature
-                    (setf (gethash symbol *topic-index-materialization-signatures*)
-                          signature))))))
-        (error () nil))))
-  (setf *topic-index-state* :ready
-        *topic-index-derived-at* (get-universal-time)))
+  (call-with-topic-registry-source-signature-table
+   (lambda ()
+     (clrhash *topics-by-id*)
+     (clrhash *topics-by-title*)
+     (clrhash *topic-index-materialization-signatures*)
+     (do-symbols (symbol (find-package :hyperdoc))
+       (when (topic-constructor-symbol-p symbol)
+         (handler-case
+             (let ((topic (funcall (authored-topic-factory symbol))))
+               (when (typep topic 'topic)
+                 (%register-topic topic)
+                 (when *topic-index-materialization-signature-provider*
+                   (let ((signature
+                           (ignore-errors
+                             (funcall
+                              *topic-index-materialization-signature-provider*
+                              symbol
+                              topic))))
+                     (when signature
+                       (setf (gethash
+                              symbol
+                              *topic-index-materialization-signatures*)
+                             signature))))))
+           (error () nil))))
+     (setf *topic-index-state* :ready
+           *topic-index-derived-at* (get-universal-time)))))
 
 (defun ensure-topic-indexes ()
   (unless (eq *topic-index-state* :ready)
@@ -124,4 +397,3 @@
                    :hyperbook hb
                    :id (title-of topic)
                    :topic topic)))
-

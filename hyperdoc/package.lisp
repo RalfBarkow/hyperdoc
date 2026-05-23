@@ -162,6 +162,29 @@
    #:inspector-path-comparison-traces-of
    #:inspector-path-comparison-equivalent-p-of
    #:inspector-path-comparison-first-divergence-of
+   #:topic-registry-diagnostic
+   #:topic-constructor-call-diagnostic
+   #:make-topic-registry-diagnostic
+   #:topic-registry-diagnostic-id-of
+   #:topic-registry-diagnostic-loaded-topic-files-of
+   #:topic-registry-diagnostic-discovered-constructors-of
+   #:topic-registry-diagnostic-constructor-calls-of
+   #:topic-registry-diagnostic-initial-index-state-of
+   #:topic-registry-diagnostic-initial-titles-of
+   #:topic-registry-diagnostic-first-rebuild-titles-of
+   #:topic-registry-diagnostic-second-rebuild-titles-of
+   #:topic-registry-diagnostic-cached-provider-titles-of
+   #:topic-registry-diagnostic-nil-provider-titles-of
+   #:topic-registry-diagnostic-current-titles-of
+   #:topic-registry-diagnostic-sqlite-statuses-of
+   #:topic-registry-diagnostic-recommended-repair-of
+   #:topic-constructor-call-symbol-of
+   #:topic-constructor-call-mode-of
+   #:topic-constructor-call-status-of
+   #:topic-constructor-call-title-of
+   #:topic-constructor-call-value-type-of
+   #:topic-constructor-call-condition-type-of
+   #:topic-constructor-call-condition-message-of
    #:run-ci-checks
    ;; Defining tools
    #:deftool #:html #:markdown #:html-generator

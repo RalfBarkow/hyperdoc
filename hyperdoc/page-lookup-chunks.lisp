@@ -399,7 +399,13 @@
     (ensure-chunk chunk)))
 
 (setf *topic-index-materialization-signature-provider*
-      (lambda (symbol topic)
-        (declare (ignore topic))
-        (gethash symbol
-                 (page-lookup-topic-source-signature-table))))
+      (let ((cached-write-date nil)
+            (cached-table nil))
+        (lambda (symbol topic)
+          (declare (ignore topic))
+          (let ((write-date (page-lookup-topic-source-write-date)))
+            (unless (and cached-table
+                         (eql cached-write-date write-date))
+              (setf cached-table (page-lookup-topic-source-signature-table)
+                    cached-write-date write-date))
+            (gethash symbol cached-table)))))
