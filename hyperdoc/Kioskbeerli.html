@@ -68,6 +68,19 @@
   intentionally postponed.
 </p>
 
+<p>
+  A separate optional hardware-acceleration milestone remains pending:
+  add the pinned <tt>nixos-hardware</tt> Raspberry Pi 4 module through a flake
+  input, not through the tutorial's moving <tt>fetchTarball</tt> from
+  <tt>master</tt>. The future Den/flake shape is
+  <tt>inputs.nixos-hardware.url = "github:NixOS/nixos-hardware";</tt> with
+  <tt>inputs.nixos-hardware.nixosModules.raspberry-pi-4</tt> imported by the
+  host configuration. That step should be validated with <tt>nix flake show</tt>
+  and <tt>nixos-rebuild test --flake .#kioskbeerli-pi</tt> before any
+  <tt>switch</tt>, and it is before or separate from kiosk/Cage/Chromium
+  enablement.
+</p>
+
 <h4>Inspectable objects</h4>
 
 <ul>

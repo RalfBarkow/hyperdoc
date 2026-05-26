@@ -88,6 +88,52 @@ is:
 users/guest/hashed-password
 ```
 
+## Pending optional hardware acceleration milestone
+
+A separate future milestone is to add the pinned `nixos-hardware` Raspberry Pi
+4 module for hardware-specific support:
+
+```text
+Add pinned nixos-hardware Raspberry Pi 4 module
+```
+
+The tutorial-style import uses an unpinned tarball from the moving `master`
+branch:
+
+```nix
+imports = [
+  "${fetchTarball "https://github.com/NixOS/nixos-hardware/tarball/master"}/raspberry-pi/4"
+];
+```
+
+Do not use that form in the Den/flake configuration. The future Kioskbeerli
+change should add a pinned flake input instead:
+
+```nix
+inputs.nixos-hardware.url = "github:NixOS/nixos-hardware";
+```
+
+and then import the module through the flake input:
+
+```nix
+inputs.nixos-hardware.nixosModules.raspberry-pi-4
+```
+
+This milestone is not implemented yet. It belongs after the verified Den
+base-system milestone and before, or separate from, kiosk/Cage/Chromium
+enablement. It should be reviewed as its own small step so hardware support can
+be validated independently from browser kiosk behavior.
+
+Required validation before any `switch`:
+
+```sh
+nix flake show
+nixos-rebuild test --flake .#kioskbeerli-pi
+```
+
+Do not run `switch` for this milestone until the flake output and test rebuild
+have both been inspected.
+
 ## Verify from SLY/HyperDoc
 
 Use this read-only SLY/MREPL sequence when the
