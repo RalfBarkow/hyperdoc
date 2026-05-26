@@ -27,6 +27,8 @@
      (:file "examples")
      (:file "task-topics")
      (:file "sqlite-store")
+     (:file "dmx-associative-mirror")
+     (:file "dmx-sql-topicmap")
      (:file "fedwiki-assets")
      (:file "core")
      (:file "views")
