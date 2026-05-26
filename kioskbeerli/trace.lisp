@@ -87,6 +87,37 @@
                  :evidence-references (%evidence-references evidence-paths status)
                  :note note))
 
+(defun kioskbeerli-den-dendritic-nix-learning-checkpoint ()
+  "Return the Den/Dendritic Nix learning checkpoint.
+
+This is an inspectable source object only. It performs no Nix, device, SQLite,
+DMX, flake, or nixos-rebuild mutation."
+  (make-kioskbeerli-trace-entry
+   :id "trace-den-dendritic-nix-learning-checkpoint"
+   :actor "codex"
+   :task-id "learn-den-dendritic-nix"
+   :from-state "maintenance-access-verified"
+   :to-state "implementation-path-deferred"
+   :scxml-event "IMPLEMENTATION_PATH_DEFERRED"
+   :status "blocked"
+   :evidence-paths
+   '("definition: Den is a data transformation pipeline over infrastructure entities"
+     "definition: Dendritic Nix is based on flake-parts modules option"
+     "boundary: Den/Dendritic Nix is not yet accepted as the Kioskbeerli implementation path"
+     "boundary: nixos-rebuild test/switch remains deferred"
+     "boundary: flake activation remains deferred"
+     "next: learning/inspection, not deployment")
+   :note
+   (concatenate
+    'string
+    "Learning checkpoint: Den is a data transformation pipeline over "
+    "infrastructure entities, to which functions/aspects are applied to "
+    "produce configurations. Dendritic Nix is a pattern for writing Nix "
+    "configurations based on flake-parts' modules option. Den/Dendritic Nix "
+    "is not yet accepted as the Kioskbeerli implementation path. "
+    "nixos-rebuild test/switch remains deferred. flake activation remains "
+    "deferred. The next task is learning/inspection, not deployment.")))
+
 (defun %default-kioskbeerli-trace ()
   (make-instance
    'kioskbeerli-project-trace
@@ -140,7 +171,8 @@
      :scxml-event "PI_BOOTED"
      :status "verified"
      :evidence-paths '("logged in as nixos on the booted Raspberry Pi")
-     :note "Operator reported being logged in as user nixos on the booted Raspberry Pi. This verifies first boot only; it does not verify network, kiosk session, or landing page."))))
+     :note "Operator reported being logged in as user nixos on the booted Raspberry Pi. This verifies first boot only; it does not verify network, kiosk session, or landing page.")
+    (kioskbeerli-den-dendritic-nix-learning-checkpoint))))
 
 (defvar *kioskbeerli-project-trace* nil)
 

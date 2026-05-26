@@ -117,6 +117,7 @@
    #:record-kioskbeerli-progress
    #:kioskbeerli-latest-progress
    #:record-kioskbeerli-progress
+   #:kioskbeerli-den-dendritic-nix-learning-checkpoint
    #:record-trace-event
    #:evidence-references-of
 

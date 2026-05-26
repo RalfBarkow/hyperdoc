@@ -75,6 +75,44 @@
                   (length (entries-of trace))
                   "RECORD-TRACE-EVENT must append one trace entry")))
 
+(defun run-den-dendritic-nix-learning-checkpoint-smoke-test ()
+  (let* ((checkpoint (kioskbeerli-den-dendritic-nix-learning-checkpoint))
+         (trace (make-demo-trace))
+         (trace-checkpoint
+           (find "trace-den-dendritic-nix-learning-checkpoint"
+                 (entries-of trace)
+                 :key #'id-of
+                 :test #'string=)))
+    (assert-true (typep checkpoint 'kioskbeerli-trace-entry)
+                 "Den/Dendritic Nix checkpoint must be an inspectable trace entry")
+    (assert-equal "learn-den-dendritic-nix"
+                  (task-id-of checkpoint)
+                  "Checkpoint must record the learning task")
+    (assert-equal "blocked"
+                  (status-of checkpoint)
+                  "Checkpoint must block activation until the implementation path is accepted")
+    (assert-contains
+     "Den/Dendritic Nix is not yet accepted as the Kioskbeerli implementation path"
+     (note-of checkpoint)
+     "Checkpoint must preserve the non-acceptance boundary")
+    (assert-contains "functions/aspects are applied to produce configurations"
+                     (note-of checkpoint)
+                     "Checkpoint must preserve the working Den definition")
+    (assert-contains "flake-parts' modules option"
+                     (note-of checkpoint)
+                     "Checkpoint must preserve the Dendritic Nix definition")
+    (assert-contains "nixos-rebuild test/switch remains deferred"
+                     (note-of checkpoint)
+                     "Checkpoint must defer nixos-rebuild")
+    (assert-contains "flake activation remains deferred"
+                     (note-of checkpoint)
+                     "Checkpoint must defer flake activation")
+    (assert-contains "The next task is learning/inspection, not deployment"
+                     (note-of checkpoint)
+                     "Checkpoint must keep the next task non-deployment")
+    (assert-true trace-checkpoint
+                 "Default project trace must include the checkpoint")))
+
 (defun run-fedwiki-asset-smoke-test ()
   (let* ((root (smoke-temp-root))
          (manifest (materialize-fedwiki-assets :slug "kioskbeerli"
@@ -151,6 +189,7 @@
   (run-asdf-load-smoke-test)
   (run-demo-object-smoke-test)
   (run-trace-event-smoke-test)
+  (run-den-dendritic-nix-learning-checkpoint-smoke-test)
   (run-fedwiki-asset-smoke-test)
   (run-sqlite-smoke-test)
   (run-no-chatgpt-dependency-smoke-test)
