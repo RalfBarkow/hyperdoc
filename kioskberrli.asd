@@ -29,6 +29,7 @@
      (:file "sqlite-store")
      (:file "dmx-associative-mirror")
      (:file "dmx-sql-topicmap")
+     (:file "dmx-sql-topicmap-hyperdoc")
      (:file "fedwiki-assets")
      (:file "core")
      (:file "views")
