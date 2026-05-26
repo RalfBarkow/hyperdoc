@@ -80,6 +80,46 @@
              (uiop:symbol-call :kioskbeerli/sops-nix-secrets/tests
                                :run-sops-nix-secrets-smoke-tests)))
 
+(asdf:defsystem #:kioskbeerli/pi-simulation
+  :description "Inspectable plan-only Kioskbeerli Pi simulation subsystem."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :depends-on (#:kioskbeerli
+               #:hyperdoc/scxml
+               #:html-inspector-views)
+  :in-order-to ((asdf:test-op (asdf:test-op "kioskbeerli/pi-simulation/tests")))
+  :components
+  ((:module "kioskbeerli/pi-simulation"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "plan-objects")
+     (:file "commands")
+     (:file "topics")
+     (:file "scxml")
+     (:file "views")
+     (:static-file "kioskbeerli-pi-simulation.scxml")))))
+
+(asdf:defsystem #:kioskbeerli/pi-simulation/tests
+  :description "Smoke tests for the Kioskbeerli Pi simulation planning subsystem."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :depends-on (#:kioskbeerli/pi-simulation)
+  :components
+  ((:module "kioskbeerli/pi-simulation/tests"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "smoke"))))
+  :perform (asdf:test-op (op system)
+             (declare (ignore op system))
+             (uiop:symbol-call :kioskbeerli/pi-simulation/tests
+                               :run-pi-simulation-smoke-tests)))
+
 (asdf:defsystem #:kioskbeerli/tests
   :description "Smoke tests for the canonical Kioskbeerli system."
   :author "Ralf Barkow"

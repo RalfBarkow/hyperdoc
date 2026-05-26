@@ -1,0 +1,133 @@
+<h1>Kioskbeerli Pi simulation</h1>
+
+<p>
+  This page documents the plan-first subsystem for simulating the Kioskbeerli
+  Pi state without mutating the real Raspberry Pi. The ASDF system is
+  <tt>:kioskbeerli/pi-simulation</tt>.
+</p>
+
+<p>
+  The simulation starts from the documented Den base-system milestone:
+  the real Pi has runtime hostname <tt>myhostname</tt>, Den hostname
+  <tt>kioskbeerli</tt>, and a flake output
+  <tt>nixosConfigurations.kioskbeerli-pi</tt>. The simulation subsystem does
+  not contact the Pi, run <tt>nixos-rebuild</tt>, boot a VM by default, create
+  secrets, write DMX, or enable kiosk/Cage/Chromium on the real target.
+</p>
+
+<h4>Inspectable subsystem</h4>
+
+<pre><code>(asdf:load-system :kioskbeerli/pi-simulation)
+
+(defparameter *example-plan*
+  (kioskbeerli/pi-simulation:make-pi-simulation-plan))
+
+(defparameter *example-session*
+  (kioskbeerli/pi-simulation:make-pi-simulation-session
+   :plan *example-plan*))
+
+(format t "~&~A~%mode=~S levels=~D tasks=~D next=~D~%"
+        (type-of *example-session*)
+        (kioskbeerli/pi-simulation:execution-mode-of *example-session*)
+        (length (kioskbeerli/pi-simulation:levels-of *example-plan*))
+        (length (kioskbeerli/pi-simulation:tasks-of *example-plan*))
+        (length (kioskbeerli/pi-simulation:next-actions-of *example-session*)))
+
+(i *example-session*)</code></pre>
+
+<p>
+  Public entrypoints:
+</p>
+
+<ul>
+  <li><tt>make-pi-simulation-plan</tt></li>
+  <li><tt>make-pi-simulation-session</tt></li>
+  <li><tt>pi-simulation-scxml-chart</tt></li>
+  <li><tt>pi-simulation-command-specs</tt></li>
+  <li><tt>pi-simulation-next-actions</tt></li>
+  <li><tt>inspect-pi-simulation-plan</tt></li>
+</ul>
+
+<h4>Fidelity levels</h4>
+
+<ul>
+  <li>Level 0: ASDF/plan-only simulation.</li>
+  <li>Level 1: Nix flake evaluation simulation.</li>
+  <li>Level 2: VM derivation build simulation.</li>
+  <li>Level 3: optional VM/MicroVM boot smoke, skipped unless a Linux virtualization backend is configured.</li>
+</ul>
+
+<p>
+  Level 3 is not part of default checks. A VM boot is an explicit operator
+  action after backend detection and is skipped cleanly by default.
+</p>
+
+<h4>Nix shape</h4>
+
+<p>
+  The future Nix shape keeps the real and simulated targets separate:
+</p>
+
+<pre><code>nixosConfigurations.kioskbeerli-pi       # real target
+nixosConfigurations.kioskbeerli-pi-sim   # simulation target
+checks.&lt;system&gt;.kioskbeerli-pi-sim-eval
+checks.&lt;system&gt;.kioskbeerli-pi-sim-build</code></pre>
+
+<p>
+  The subsystem currently records non-executing command specs for:
+</p>
+
+<pre><code>nix flake show
+nix eval .#nixosConfigurations.kioskbeerli-pi.config.networking.hostName
+nix eval --raw --expr '(import ./nix/den/kioskbeerli.nix)."kioskbeerli-pi".hostName'
+nix build .#nixosConfigurations.kioskbeerli-pi-sim.config.system.build.toplevel
+nix build .#nixosConfigurations.kioskbeerli-pi-sim.config.system.build.vm</code></pre>
+
+<h4>Make targets</h4>
+
+<p>
+  These Make targets are plan-first wrappers. They load the ASDF subsystem and
+  print plan or command-spec information. They do not contact the Pi, run
+  <tt>nixos-rebuild</tt>, create secrets, write DMX, or boot a VM by default.
+</p>
+
+<pre><code>make kioskbeerli-pi-sim-plan
+make kioskbeerli-pi-sim-eval
+make kioskbeerli-pi-sim-build
+make kioskbeerli-pi-sim-run</code></pre>
+
+<p>
+  <tt>make kioskbeerli-pi-sim-run</tt> reports skipped when no
+  <tt>KIOSKBEERLI_PI_SIM_BACKEND</tt> is configured. It is not part of default
+  <tt>make check</tt>.
+</p>
+
+<h4>Behavior contract</h4>
+
+<p>
+  The SCXML artifact is
+  <tt>kioskbeerli/pi-simulation/kioskbeerli-pi-simulation.scxml</tt>. Progress
+  states include <tt>plan-created</tt>, <tt>den-baseline-loaded</tt>,
+  <tt>sim-flake-generated</tt>, <tt>eval-planned</tt>, <tt>eval-passed</tt>,
+  <tt>vm-build-planned</tt>, <tt>vm-built</tt>,
+  <tt>boot-backend-detected</tt>, <tt>vm-booted</tt>,
+  <tt>probes-passed</tt>, and <tt>complete</tt>.
+</p>
+
+<p>
+  Blocked states include <tt>blocked-no-linux-backend</tt>,
+  <tt>blocked-no-kvm</tt>, <tt>blocked-cross-arch</tt>,
+  <tt>blocked-secret-fixture</tt>, <tt>blocked-vm-build</tt>, and
+  <tt>blocked-vm-boot</tt>.
+</p>
+
+<h4>Tests</h4>
+
+<pre><code>(asdf:load-system :kioskbeerli/pi-simulation/tests :force t)
+(kioskbeerli/pi-simulation/tests:run-pi-simulation-smoke-tests)</code></pre>
+
+<p>
+  The smoke tests verify ASDF loading, fidelity levels, non-executed command
+  specs, SCXML structure, default plan-only mode, skipped VM boot without a
+  backend, and absence of real Pi contact or forbidden execution markers.
+</p>

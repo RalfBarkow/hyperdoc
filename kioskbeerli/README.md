@@ -58,6 +58,31 @@ concept-topic, reference-topic, guard, failure, recovery, and command-spec
 objects. It does not run `ssh`, `sudo`, `sops`, `nixos-rebuild`, or DMX writes,
 and it does not contain cleartext secrets or password hashes.
 
+## Pi Simulation Planning Subsystem
+
+The plan-first Pi simulation subsystem is `:kioskbeerli/pi-simulation`.
+
+```lisp
+(asdf:load-system :kioskbeerli/pi-simulation)
+(kioskbeerli/pi-simulation:make-pi-simulation-session)
+```
+
+It models simulation fidelity levels 0-3: ASDF-only planning, Nix flake
+evaluation, VM derivation build, and optional VM/MicroVM boot smoke. VM boot is
+skipped by default and is not part of default `make check`.
+
+Plan-first Make targets are available:
+
+```sh
+make kioskbeerli-pi-sim-plan
+make kioskbeerli-pi-sim-eval
+make kioskbeerli-pi-sim-build
+make kioskbeerli-pi-sim-run
+```
+
+The `eval` and `build` targets print non-executing Nix command specs. The `run`
+target reports skipped unless `KIOSKBEERLI_PI_SIM_BACKEND` is explicitly set.
+
 ## FedWiki Page Assets
 
 The localhost FedWiki page is:

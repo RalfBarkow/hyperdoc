@@ -100,6 +100,29 @@ is inspectable only by default: it does not run `ssh`, `sudo`, `sops`,
 `nixos-rebuild`, or DMX writes, and it does not contain cleartext secrets or
 password hashes.
 
+The plan-first simulation subsystem for checking the resulting Pi state without
+mutating the real target is:
+
+```lisp
+(asdf:load-system :kioskbeerli/pi-simulation)
+(kioskbeerli/pi-simulation:make-pi-simulation-session)
+```
+
+It is documented in `hyperdoc/Kioskbeerli Pi simulation.html`. The subsystem
+models fidelity levels 0-3 and records future Nix shapes for
+`nixosConfigurations.kioskbeerli-pi-sim` and simulation checks. Its Make
+targets are plan-first:
+
+```sh
+make kioskbeerli-pi-sim-plan
+make kioskbeerli-pi-sim-eval
+make kioskbeerli-pi-sim-build
+make kioskbeerli-pi-sim-run
+```
+
+The run target skips cleanly unless a Linux virtualization backend is explicitly
+configured. It is not part of default `make check`.
+
 ## Pending optional hardware acceleration milestone
 
 A separate future milestone is to add the pinned `nixos-hardware` Raspberry Pi
