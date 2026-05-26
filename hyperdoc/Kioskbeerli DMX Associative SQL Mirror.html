@@ -1,0 +1,159 @@
+<h1>Kioskbeerli DMX Associative SQL Mirror</h1>
+
+<p>
+  This page records the committed Kioskbeerli path from an inspectable project
+  trace to a DMX-shaped local SQLite mirror and then to a HyperDoc topicmap
+  projection. The mirror is local evidence storage. It is not live DMX or Neo4j
+  synchronization.
+</p>
+
+<h2>Current implementation</h2>
+
+<ul>
+  <li><a href="../kioskbeerli/dmx-associative-mirror.lisp">kioskbeerli/dmx-associative-mirror.lisp</a> persists trace entries into DMX-shaped SQL tables.</li>
+  <li><a href="../kioskbeerli/dmx-sql-topicmap.lisp">kioskbeerli/dmx-sql-topicmap.lisp</a> parses the SQL mirror into projection nodes and edges.</li>
+  <li><a href="../kioskbeerli/dmx-sql-topicmap-hyperdoc.lisp">kioskbeerli/dmx-sql-topicmap-hyperdoc.lisp</a> adapts the projection to HyperDoc's topicmap inspector model.</li>
+  <li><a href="../tests/kioskbeerli-dmx-associative-mirror-smoke.lisp">tests/kioskbeerli-dmx-associative-mirror-smoke.lisp</a> is the narrow standalone mirror smoke test.</li>
+</ul>
+
+<h2>Accepted evidence</h2>
+
+<p>
+  The persisted mirror evidence currently accepted for this slice is:
+</p>
+
+<ul>
+  <li>The local SQLite database contains a DMX-shaped mirror, not a flat event log.</li>
+  <li>The persisted trace contains 7 trace-event topics.</li>
+  <li>The persisted trace contains 14 provenance associations.</li>
+  <li>The topicmap projection contains 33 nodes and 49 edges.</li>
+  <li>The projection title is <code>Kioskbeerli persisted DMX SQL topicmap</code>.</li>
+  <li>Inspecting the projection opens the HyperDoc/DM6 Topicmap view.</li>
+  <li>The visible graph includes state, status, provenance, and topic nodes.</li>
+  <li>The old pathname/content-chunk fallback is no longer the observed inspector path.</li>
+</ul>
+
+<h2>SQL model</h2>
+
+<pre><code>dmx_sql_object
+  common identity for topics and assocs
+
+dmx_sql_topic
+  topic-shaped objects
+
+dmx_sql_assoc
+  association-shaped objects
+
+dmx_sql_assoc_player
+  role-bearing players of associations
+
+dmx_sql_property
+  extensible properties / occurrence-like values
+
+dmx_sql_sync_identity
+  correspondence between SQL local object and a DMX host identity
+
+dmx_sql_sync_journal
+  observed reads, staged writes, sync decisions, and conflicts</code></pre>
+
+<h2>Identity invariant</h2>
+
+<p>
+  DMX numeric ids are host-local. The SQL mirror therefore records remote ids
+  only inside <code>dmx_sql_sync_identity</code>. Durable cross-host identity uses
+  stable URIs such as <code>dmx://dreyeck/topic/982950</code> or local mirror URIs
+  such as <code>hyperdoc:kioskbeerli/trace-event/trace-ssh-copy-id-verified</code>.
+</p>
+
+<h2>MREPL inspection</h2>
+
+<p>
+  These forms inspect an existing local SQLite mirror. They do not write to DMX,
+  Neo4j, Nix, or the Raspberry Pi.
+</p>
+
+<pre><code>(require :asdf)
+(asdf:load-system :kioskbeerli)
+
+(defparameter *dmx-assoc-db*
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "var/dmx-associative-mirror.sqlite"))
+
+(kioskbeerli.dmx-associative-mirror:dmx-sql-counts
+ :db-path *dmx-assoc-db*)
+
+(kioskbeerli.dmx-associative-mirror:dmx-sql-trace-events
+ :db-path *dmx-assoc-db*)
+
+(kioskbeerli.dmx-associative-mirror:dmx-sql-provenance-associations
+ :db-path *dmx-assoc-db*)</code></pre>
+
+<h2>Topicmap projection</h2>
+
+<p>
+  The projection layer reads the DMX-shaped SQL mirror and constructs stable
+  node and edge objects. The HyperDoc adapter then turns that projection into
+  the native topicmap representation rendered by the DM6/AppEmbed inspector
+  island.
+</p>
+
+<pre><code>(defparameter *kb-dmx-sql-topicmap*
+  (kioskbeerli.dmx-sql-topicmap:make-dmx-sql-topicmap-projection
+   :db-path *dmx-assoc-db*
+   :title "Kioskbeerli persisted DMX SQL topicmap"))
+
+(kioskbeerli.dmx-sql-topicmap:projection-summary
+ *kb-dmx-sql-topicmap*)
+
+(kioskbeerli.dmx-sql-topicmap:projection-topicmap-payload
+ *kb-dmx-sql-topicmap*)
+
+(i *kb-dmx-sql-topicmap*)</code></pre>
+
+<h2>Local persistence boundary</h2>
+
+<p>
+  The mirror writer persists into the local SQLite file only. The generated
+  database under <code>var/</code> is intentionally untracked. Rebuilding it is a
+  local evidence operation, not a DMX write and not a deployment action.
+</p>
+
+<pre><code>;; Writes only the local SQLite mirror named by *dmx-assoc-db*.
+;; Do not use this when only read-only inspection is intended.
+(kioskbeerli.dmx-associative-mirror:persist-kioskbeerli-trace-as-dmx-sql
+ (kioskbeerli:make-demo-trace)
+ :db-path *dmx-assoc-db*)</code></pre>
+
+<h2>Boundary</h2>
+
+<ul>
+  <li>This page documents the local mirror and projection that are committed in source.</li>
+  <li>It does not claim live DMX or Neo4j synchronization.</li>
+  <li>It does not run <code>nixos-rebuild</code>.</li>
+  <li>It does not activate a flake or mutate the Pi.</li>
+  <li>Generated SQLite databases, WAL/SHM files, and trace dumps remain untracked runtime artifacts.</li>
+</ul>
+
+<script type="application/json" id="hyperdoc-topic-chunks">
+{
+  "pageTitle": "Kioskbeerli DMX Associative SQL Mirror",
+  "pageSummary": "Durable reference page for the committed Kioskbeerli local DMX-shaped SQLite mirror and HyperDoc/DM6 topicmap projection.",
+  "sourceFiles": [
+    "kioskbeerli/dmx-associative-mirror.lisp",
+    "kioskbeerli/dmx-sql-topicmap.lisp",
+    "kioskbeerli/dmx-sql-topicmap-hyperdoc.lisp",
+    "tests/kioskbeerli-dmx-associative-mirror-smoke.lisp"
+  ],
+  "acceptedEvidence": {
+    "traceEventTopics": 7,
+    "provenanceAssociations": 14,
+    "topicmapNodes": 33,
+    "topicmapEdges": 49,
+    "inspectorView": "HyperDoc/DM6 Topicmap"
+  },
+  "database": "var/dmx-associative-mirror.sqlite",
+  "generatedArtifactsTracked": false,
+  "liveDmxNeo4jSynchronization": false
+}
+</script>
