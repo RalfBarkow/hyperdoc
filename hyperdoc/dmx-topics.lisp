@@ -998,7 +998,7 @@
     (preflight-rpi-sd-image-checklist-topic :topic-id 912384 :topicmap-id 912102)
     (two-installation-models-topic :topic-id 912384 :topicmap-id 912102)
     (rpi-first-boot-access-paths-topic :topic-id 912384 :topicmap-id 912102)
-    (kioskberrli-preconfigured-headless-image-topic :topic-id 912384 :topicmap-id 912102)
+    (kioskbeerli-preconfigured-headless-image-topic :topic-id 912384 :topicmap-id 912102)
     (dmx-topic-912138 :topic-id 912138 :topicmap-id 912102 :label "Explicit DMX topic mapping")
     (nix-shell-topic :topic-id 912384 :topicmap-id 912102)
     (wget-topic :topic-id 912384 :topicmap-id 912102)

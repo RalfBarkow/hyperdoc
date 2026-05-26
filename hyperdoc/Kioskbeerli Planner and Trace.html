@@ -1,0 +1,126 @@
+<h1>Kioskbeerli Planner and Trace</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page is the durable reference for the Kioskbeerli operational objects
+  behind <a page="Kioskbeerli Dashboard">Kioskbeerli Dashboard</a>.
+  Kioskbeerli remains the physical Raspberry Pi kiosk target for the
+  Hauptsache salon.
+</p>
+
+<p>
+  The canonical implementation is the <tt>:kioskbeerli</tt> ASDF system and
+  <tt>:kioskbeerli</tt> package. The older <tt>kioskbeerli</tt> spelling and
+  <tt>:dreyeck/kioskbeerli</tt> system remain compatibility aliases only.
+</p>
+
+<h2>Root objects</h2>
+
+<ul>
+  <li><a expr="(hyperdoc::kioskbeerli-dashboard)"><tt>kioskbeerli-dashboard</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
+</ul>
+
+<h2>Planner boundary</h2>
+
+<p>
+  The planner is SHOP3-like: it preserves named tasks, dependencies,
+  preconditions, effects, task status, and evidence paths. It is plan-only by
+  default and does not execute Nix builds, flash SD cards, mutate devices, open
+  SSH sessions, call HTTP endpoints, or write to DMX.
+</p>
+
+<p>
+  The obsolete <tt>sdImage.imageSize</tt> problem is recorded as corrected.
+  The current blocker is still cross-host <tt>aarch64-linux</tt> image
+  realization unless a suitable Linux builder exists. The first boot of the
+  physical Raspberry Pi is now recorded from the operator report
+  &quot;logged in as nixos on the booted Raspberry Pi&quot;; that evidence is
+  scoped to the <tt>boot-pi</tt> task only.
+</p>
+
+<h2>Task lookup boundary</h2>
+
+<p>
+  Individual plan tasks are navigable objects. Inspecting a task such as
+  <a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>boot-pi</tt></a>
+  shows its parent
+  <a expr="(hyperdoc::kioskbeerli-task-plan :boot-pi)">plan/run</a>,
+  dependencies and dependents, progress records, evidence status, and SCXML
+  link. The <tt>boot-pi</tt> task maps to event
+  <a expr="(hyperdoc::kioskbeerli-task-state-link :boot-pi)"><tt>PI_BOOTED</tt></a>
+  and state <tt>first-boot-observed</tt>.
+</p>
+
+<p>
+  The current lifecycle interpretation is exposed by
+  <a expr="(hyperdoc::kioskbeerli-current-scxml-state)"><tt>kioskbeerli-current-scxml-state</tt></a>.
+  The remaining next tasks that are still blocked or missing evidence are
+  inspectable through
+  <a expr="(hyperdoc::kioskbeerli-next-missing-evidence-tasks)"><tt>kioskbeerli-next-missing-evidence-tasks</tt></a>.
+</p>
+
+<h2>Behavior boundary</h2>
+
+<p>
+  The behavior chart is stored in
+  <tt>kioskbeerli/kioskbeerli.scxml</tt>. It starts in
+  <tt>declared</tt> and models the route through source review, obsolete-option
+  correction, cross-host build blocking, Linux builder requirement, image
+  build, flash, boot, network, kiosk session, landing page, maintenance, and
+  failure-with-evidence states.
+</p>
+
+<h2>FedWiki asset boundary</h2>
+
+<p>
+  FedWiki assets are generated distribution artifacts, not the source of truth.
+  Materialization writes the reloadable ASDF tree under
+  <tt>http://localhost:3000/assets/pages/kioskbeerli/</tt>, with
+  <tt>kioskbeerli.asd</tt> directly in that page asset directory.
+</p>
+
+<h2>Trace boundary</h2>
+
+<p>
+  The trace records progress entries with task id, from-state, to-state,
+  status, evidence paths, and a note. Missing evidence is a first-class status,
+  not an aside. The dashboard should therefore say <tt>missing-evidence</tt> or
+  <tt>missing evidence</tt> when build, flash, network, kiosk-session, or
+  landing-page proof is absent.
+</p>
+
+<p>
+  First boot is the current exception to that missing-evidence wording:
+  <a expr="(hyperdoc::kioskbeerli-record-boot-observed :actor &quot;operator&quot; :evidence &quot;logged in as nixos on the booted Raspberry Pi&quot;)"><tt>kioskbeerli-record-boot-observed</tt></a>
+  records <tt>boot-pi</tt> as <tt>verified</tt> and applies
+  <tt>PI_BOOTED</tt> to <tt>first-boot-observed</tt>. It does not infer
+  <tt>verify-network</tt>, <tt>verify-kiosk-session</tt>,
+  <tt>verify-landing-page</tt>, <tt>record-evidence</tt>, or
+  <tt>mark-dashboard-status</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Kioskbeerli Planner and Trace"><tt>Kioskbeerli Planner and Trace</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskbeerli Dashboard"><tt>Kioskbeerli Dashboard</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskbeerli"><tt>Kioskbeerli</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>kioskbeerli-lookup-plan-task :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-task-progress :boot-pi)"><tt>kioskbeerli-task-progress :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-task-state-link :boot-pi)"><tt>kioskbeerli-task-state-link :boot-pi</tt></a></li>
+  <li><a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a></li>
+  <li><a expr="(hyperdoc::record-kioskbeerli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from planner and trace page.&quot;)"><tt>record-kioskbeerli-progress</tt></a></li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Kioskbeerli Dashboard">Kioskbeerli Dashboard</a></li>
+  <li><a page="Kioskbeerli Cross-Host Build Failure">Kioskbeerli Cross-Host Build Failure</a></li>
+  <li><a page="Kioskbeerli sdImage imageSize Failure">Kioskbeerli sdImage imageSize Failure</a></li>
+  <li><a page="Runbook - Build and Flash NixOS SD Image for Kioskbeerli">Runbook - Build and Flash NixOS SD Image for Kioskbeerli</a></li>
+</ul>

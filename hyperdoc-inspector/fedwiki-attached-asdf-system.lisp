@@ -237,7 +237,7 @@
            "The page-attached ASDF route did not load. Inspect the candidate routes before retrying a fallback."))
       (:p (:strong "Package-reader consequence: ")
           "forms such as "
-          (:code "kioskberrli:...")
+          (:code "kioskbeerli:...")
           " fail at read time if the system did not load and the package does not exist.")
       (render-fedwiki-home-state-table
        (getf (hyperdoc:asdf-system-home-page-of home) :state))

@@ -32,7 +32,7 @@
    :max-depth 0
    :raw-text nil))
 
-(defun codex-kioskberrli-context-window-example ()
+(defun codex-kioskbeerli-context-window-example ()
   (codex-context-window))
 
 (defun codex-recursive-context-window-example ()
@@ -149,19 +149,19 @@
 (defun codex-next-example ()
   (codex-next))
 
-(defun codex-next-for-kioskberrli-pending-work-example ()
+(defun codex-next-for-kioskbeerli-pending-work-example ()
   (let ((changes
           (make-instance
            'codex-recent-changes
-           :id "codex-kioskberrli-pending-recent-changes"
-           :title "Kioskberrli Pending Recent Changes"
+           :id "codex-kioskbeerli-pending-recent-changes"
+           :title "Kioskbeerli Pending Recent Changes"
            :source "Deterministic Codex example"
            :captured-at "2026-05-15 example snapshot"
-           :scope "Only the pending Kioskberrli boundary entry."
+           :scope "Only the pending Kioskbeerli boundary entry."
            :summary
-           "Example recent-changes object focused on pending Kioskberrli station-board work."
-           :entries (list (codex--kioskberrli-pending-change))
-           :neighborhood '("Codex" "Kioskberrli Dashboard")
+           "Example recent-changes object focused on pending Kioskbeerli station-board work."
+           :entries (list (codex--kioskbeerli-pending-change))
+           :neighborhood '("Codex" "Kioskbeerli Dashboard")
            :provenance
            '("Deterministic example."
              "No external services, git, validation, server startup, or file mutation.")

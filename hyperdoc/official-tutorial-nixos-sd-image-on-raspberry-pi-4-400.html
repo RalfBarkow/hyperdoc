@@ -29,7 +29,7 @@
   <li><a expr="(hyperdoc::official-headless-ssh-connect-handoff-defect)"><tt>Headless-connect handoff defect object</tt></a></li>
   <li><a expr="(hyperdoc::official-headless-ssh-connect-handoff-patch-target)"><tt>Headless-connect handoff patch target object</tt></a></li>
   <li><a hyperbook="topics" page="Raspberry Pi first-boot access paths"><tt>Raspberry Pi first-boot access paths</tt></a></li>
-  <li><a hyperbook="topics" page="Kioskberrli preconfigured headless image"><tt>Kioskberrli preconfigured headless image</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskbeerli preconfigured headless image"><tt>Kioskbeerli preconfigured headless image</tt></a></li>
   <li><a expr="(hyperdoc::rpi-first-boot-access-dry-run-example)"><tt>First-boot access dry-run examples</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-tutorial-step-navigation-example)"><tt>Step navigation regression check</tt></a></li>
   <li><a expr="(hyperdoc::official-rpi-zstd-to-img-handoff-regression-example)"><tt>Handoff correction regression check</tt></a></li>
@@ -97,7 +97,7 @@
 <ol>
   <li><b>Stock official SD image:</b> boot does not by itself imply SSH readiness. If the image already has network reachability plus SSH/login prerequisites, use the explicit connect step; otherwise continue from a local console.</li>
   <li><b>Semi-headless bootstrap:</b> use a local console once to set a password or authorized key, confirm <tt>sshd</tt>, and discover hostname/IP; then resume remote maintenance over SSH.</li>
-  <li><b>Fully headless first boot:</b> this requires a custom preconfigured image or another preseeded access path. That is the preferred long-term maintenance story for <tt>Kioskberrli</tt>, but it is not what the stock official SD-image tutorial guarantees by itself.</li>
+  <li><b>Fully headless first boot:</b> this requires a custom preconfigured image or another preseeded access path. That is the preferred long-term maintenance story for <tt>Kioskbeerli</tt>, but it is not what the stock official SD-image tutorial guarantees by itself.</li>
 </ol>
 
 <p>
@@ -200,7 +200,7 @@
 
 <p>
   For a concrete custom-image fragment that intentionally makes first boot
-  fully headless for <tt>Kioskberrli</tt>, see
+  fully headless for <tt>Kioskbeerli</tt>, see
   <a page="Salon Pi 4 Kiosk Hardening Checklist">Salon Pi 4 Kiosk Hardening Checklist</a>.
 </p>
 
@@ -239,7 +239,7 @@
 
 <p>
   For the operational sequence used in this project, see
-  <a page="Runbook - Build and Flash NixOS SD Image for Kioskberrli">Runbook - Build and Flash NixOS SD Image for Kioskberrli</a>.
+  <a page="Runbook - Build and Flash NixOS SD Image for Kioskbeerli">Runbook - Build and Flash NixOS SD Image for Kioskbeerli</a>.
 </p>
 
 <p>

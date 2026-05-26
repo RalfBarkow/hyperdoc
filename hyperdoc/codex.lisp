@@ -361,8 +361,8 @@
   (let ((previous
           (make-instance
            'codex-context-window
-           :id "codex-kioskberrli-previous-context-window"
-           :title "Previous Kioskberrli Context"
+           :id "codex-kioskbeerli-previous-context-window"
+           :title "Previous Kioskbeerli Context"
            :source "Codex/User collaboration thread"
            :captured-at "2026-05-14 previous review snapshot"
            :summary
@@ -386,47 +386,47 @@
            :max-depth 1)))
     (make-instance
      'codex-context-window
-     :id "codex-kioskberrli-context-window"
+     :id "codex-kioskbeerli-context-window"
      :title "Codex Context Window"
      :source "Codex/User collaboration thread"
      :captured-at "2026-05-14 review snapshot"
      :summary
-     "Current collaboration context for Codex Home and the Kioskberrli mobile station-board view: source topic Kioskberrli, target topic Kioskberrli Cross-Host Build Failure, and five primary mobile dashboard topics."
+     "Current collaboration context for Codex Home and the Kioskbeerli mobile station-board view: source topic Kioskbeerli, target topic Kioskbeerli Cross-Host Build Failure, and five primary mobile dashboard topics."
      :entries
      (list
       (codex-context-window-entry
        "slice"
-       "Kioskberrli station-board review"
-       "The pending review target is the object view for (hyperdoc::kioskberrli-dashboard), not the authored Kioskberrli Dashboard HTML page."
+       "Kioskbeerli station-board review"
+       "The pending review target is the object view for (hyperdoc::kioskbeerli-dashboard), not the authored Kioskbeerli Dashboard HTML page."
        :timestamp "2026-05-14"
-       :references '("Kioskberrli Dashboard"
-                     "Kioskberrli"
-                     "Kioskberrli Cross-Host Build Failure")
-       :derived-objects (list (kioskberrli-dashboard)
-                              (kioskberrli-dashboard-status)
-                              (kioskberrli-current-blocker)
-                              (kioskberrli-build-evidence-status)
-                              (kioskberrli-dashboard-stations)))
+       :references '("Kioskbeerli Dashboard"
+                     "Kioskbeerli"
+                     "Kioskbeerli Cross-Host Build Failure")
+       :derived-objects (list (kioskbeerli-dashboard)
+                              (kioskbeerli-dashboard-status)
+                              (kioskbeerli-current-blocker)
+                              (kioskbeerli-build-evidence-status)
+                              (kioskbeerli-dashboard-stations)))
       (codex-context-window-entry
        "design"
        "Mobile station-board grammar"
-       "The desired first mobile viewport is source topic Kioskberrli, target topic Kioskberrli Cross-Host Build Failure, and the five visible dashboard topics: Current status, Build evidence, Flash / boot evidence, Public-display layout state, and Related topic board."
+       "The desired first mobile viewport is source topic Kioskbeerli, target topic Kioskbeerli Cross-Host Build Failure, and the five visible dashboard topics: Current status, Build evidence, Flash / boot evidence, Public-display layout state, and Related topic board."
        :timestamp "2026-05-14"
        :references '("Touch-Fahrplan route language"
-                     "Kioskberrli Cross-Host Build Failure")
-       :derived-objects (list (kioskberrli-dashboard))))
+                     "Kioskbeerli Cross-Host Build Failure")
+       :derived-objects (list (kioskbeerli-dashboard))))
      :open-questions
      '("Is this Codex context-window object useful as the first inspectable current-context surface?"
-       "After approval, should the next slice add only the Station board view for (hyperdoc::kioskberrli-dashboard)?")
+       "After approval, should the next slice add only the Station board view for (hyperdoc::kioskbeerli-dashboard)?")
      :proposed-actions
      '("Inspect (hyperdoc::codex-context-window) from SLY/CLOG."
-       "If accepted, keep the next Kioskberrli iteration scoped to the dashboard object view and avoid editing the authored HTML page.")
+       "If accepted, keep the next Kioskbeerli iteration scoped to the dashboard object view and avoid editing the authored HTML page.")
      :related-objects
-     (list (kioskberrli-dashboard)
-           (kioskberrli-dashboard-status)
-           (kioskberrli-current-blocker)
-           (kioskberrli-build-evidence-status)
-           (kioskberrli-dashboard-stations))
+     (list (kioskbeerli-dashboard)
+           (kioskbeerli-dashboard-status)
+           (kioskbeerli-current-blocker)
+           (kioskbeerli-build-evidence-status)
+           (kioskbeerli-dashboard-stations))
      :validation-commands
      '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/codex/explorer)' --eval '(assert (fboundp (quote hyperdoc::codex)))' --eval '(assert (fboundp (quote hyperdoc::codex-context-window)))' --eval '(assert (hyperdoc::codex-context-window))' --eval '(uiop:quit)'"
        "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/codex/explorer)' --eval '(let* ((object (hyperdoc::codex-context-window)) (pane (make-instance (find-symbol \"PANE\" \"CLOG-MOLDABLE-INSPECTOR\") :inspector nil :object object))) (funcall (find-symbol \"LOAD-VIEWS\" \"CLOG-MOLDABLE-INSPECTOR\") pane) (let ((titles (mapcar (find-symbol \"VIEW-TITLE\" \"HTML-INSPECTOR-VIEWS\") (slot-value pane (find-symbol \"VIEWS\" \"CLOG-MOLDABLE-INSPECTOR\"))))) (assert (member \"Context\" titles :test #'string=))))' --eval '(uiop:quit)'"
@@ -441,14 +441,14 @@
      :depth 1
      :max-depth 1
      :raw-text
-     "Codex context window snapshot: Codex Home is approved; current slice is the Kioskberrli mobile station-board object view; source topic is Kioskberrli; target topic is Kioskberrli Cross-Host Build Failure; primary topics are Current status, Build evidence, Flash / boot evidence, Public-display layout state, and Related topic board.")))
+     "Codex context window snapshot: Codex Home is approved; current slice is the Kioskbeerli mobile station-board object view; source topic is Kioskbeerli; target topic is Kioskbeerli Cross-Host Build Failure; primary topics are Current status, Build evidence, Flash / boot evidence, Public-display layout state, and Related topic board.")))
 
 (defun codex-recent-changes-neighborhood ()
   '("Codex"
     "Codex context window"
     "Codex examples"
     "Recursive context-window structural proof"
-    "Kioskberrli station-board pending work"))
+    "Kioskbeerli station-board pending work"))
 
 (defun codex--recent-change (id title kind summary
                              &key changed-at actor source-object
@@ -468,20 +468,20 @@
                  :evidence evidence
                  :route-hints route-hints))
 
-(defun codex--kioskberrli-pending-change ()
+(defun codex--kioskbeerli-pending-change ()
   (codex--recent-change
-   "kioskberrli-station-board-pending"
-   "Kioskberrli station-board work pending"
+   "kioskbeerli-station-board-pending"
+   "Kioskbeerli station-board work pending"
    :working-tree
-   "Uncommitted Kioskberrli station-board/page/test work remains pending and should stay out of this Codex topic-system slice."
+   "Uncommitted Kioskbeerli station-board/page/test work remains pending and should stay out of this Codex topic-system slice."
    :changed-at "2026-05-15 pending workspace state"
    :actor "user workspace"
-   :target-object (kioskberrli-dashboard)
-   :affected-files '("hyperdoc/Kioskberrli Dashboard.html"
-                     "hyperdoc/Kioskberrli.html"
-                     "tests/kioskberrli-dashboard-smoke.lisp"
+   :target-object (kioskbeerli-dashboard)
+   :affected-files '("hyperdoc/Kioskbeerli Dashboard.html"
+                     "hyperdoc/Kioskbeerli.html"
+                     "tests/kioskbeerli-dashboard-smoke.lisp"
                      "tests/package.lisp")
-   :affected-pages '("Kioskberrli Dashboard" "Kioskberrli")
+   :affected-pages '("Kioskbeerli Dashboard" "Kioskbeerli")
    :evidence '("Observed as pre-existing dirty workspace state before this slice."
                "This deterministic model entry records the boundary; it does not query git.")
    :route-hints '("Continue only after inspecting live CLOG rendering."
@@ -542,7 +542,7 @@
     :evidence '("codex-context-window-nor-proof returns an inspectable proof object."
                 "Recursive examples expose finite and cyclic witness graphs.")
     :route-hints '("Inspect proof examples as route evidence before adding live adapters."))
-   (codex--kioskberrli-pending-change)))
+   (codex--kioskbeerli-pending-change)))
 
 (defun codex-recent-changes ()
   (make-instance
@@ -590,9 +590,9 @@
         (proof-change
           (codex--recent-change-by-id
            changes "codex-recursive-structural-proof-added"))
-        (kioskberrli-change
+        (kioskbeerli-change
           (codex--recent-change-by-id
-           changes "kioskberrli-station-board-pending")))
+           changes "kioskbeerli-station-board-pending")))
     (append
      (when context-change
        (list
@@ -625,36 +625,36 @@
          :available
          "Inspect"
          :evidence '("Use codex-recursive-context-window-nor-proof-example after loading :hyperdoc/codex/examples."))))
-     (when kioskberrli-change
+     (when kioskbeerli-change
        (list
         (codex--next-route
-         "continue-kioskberrli-station-board-view"
+         "continue-kioskbeerli-station-board-view"
          "Continue station-board view"
          "Codex"
-         "Kioskberrli Dashboard / Kioskberrli mobile station-board"
+         "Kioskbeerli Dashboard / Kioskbeerli mobile station-board"
          "inspect pending station-board work"
-         "Pending Kioskberrli work is visible in the collaboration neighborhood but needs live-rendering evidence before continuation."
-         kioskberrli-change
+         "Pending Kioskbeerli work is visible in the collaboration neighborhood but needs live-rendering evidence before continuation."
+         kioskbeerli-change
          3
          :dry-run
          :needs-evidence
          "Inspect"
-         :evidence '("Pre-existing workspace state says Kioskberrli page/test work remains pending.")
-         :related-objects (list (kioskberrli-dashboard)))
+         :evidence '("Pre-existing workspace state says Kioskbeerli page/test work remains pending.")
+         :related-objects (list (kioskbeerli-dashboard)))
         (codex--next-route
-         "decide-kioskberrli-page-vs-object-view"
+         "decide-kioskbeerli-page-vs-object-view"
          "Decide page vs object view"
-         "Kioskberrli Dashboard"
-         "Kioskberrli mobile station-board"
+         "Kioskbeerli Dashboard"
+         "Kioskbeerli mobile station-board"
          "choose authored-page path or inspector-view path"
          "The pending work can plausibly continue as authored HyperDoc page work or as an inspector object-view change; the boundary needs confirmation."
-         kioskberrli-change
+         kioskbeerli-change
          4
          :confirm
          :needs-evidence
          "Decide"
-         :evidence '("The current slice must not mix Kioskberrli page/test edits into Codex topic-system work.")
-         :related-objects (list (kioskberrli-dashboard)))))
+         :evidence '("The current slice must not mix Kioskbeerli page/test edits into Codex topic-system work.")
+         :related-objects (list (kioskbeerli-dashboard)))))
      (when context-change
        (list
         (codex--next-route
@@ -697,21 +697,21 @@
                  :id "codex-home"
                  :title "Codex"
                  :summary "Inspectable collaboration home surface for the current HyperDoc review slice."
-                 :current-slice "Kioskberrli mobile station-board view"
+                 :current-slice "Kioskbeerli mobile station-board view"
                  :context-window (codex-context-window)
                  :recent-changes (codex-recent-changes)
                  :next (codex-next)
-                 :primary-review-object (kioskberrli-dashboard)
-                 :related-objects (list (kioskberrli-dashboard-status)
-                                        (kioskberrli-current-blocker)
-                                        (kioskberrli-build-evidence-status)
-                                        (kioskberrli-dashboard-stations))
-                 :relevant-pages '("Kioskberrli"
-                                   "Kioskberrli Dashboard"
-                                   "Kioskberrli Cross-Host Build Failure")
+                 :primary-review-object (kioskbeerli-dashboard)
+                 :related-objects (list (kioskbeerli-dashboard-status)
+                                        (kioskbeerli-current-blocker)
+                                        (kioskbeerli-build-evidence-status)
+                                        (kioskbeerli-dashboard-stations))
+                 :relevant-pages '("Kioskbeerli"
+                                   "Kioskbeerli Dashboard"
+                                   "Kioskbeerli Cross-Host Build Failure")
                  :validation-commands
                  '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/tests)'"
-                   "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/tests)' --eval '(hyperdoc/tests:run-kioskberrli-dashboard-smoke-tests)'"
-                   "tools/validate-documentation-slice.sh --page 'hyperdoc/Kioskberrli Dashboard.html'"
+                   "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/tests)' --eval '(hyperdoc/tests:run-kioskbeerli-dashboard-smoke-tests)'"
+                   "tools/validate-documentation-slice.sh --page 'hyperdoc/Kioskbeerli Dashboard.html'"
                    "git diff --check")
                  :commit-boundary "Codex materializes collaboration/review records and links to the target topic or system. Implementation changes still belong to the relevant target subsystem."))

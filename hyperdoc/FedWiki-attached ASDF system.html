@@ -13,10 +13,10 @@
 </p>
 
 <pre>
-FedWiki page identity: kioskberrli
--> local page asset root: ~/.wiki/wiki.ralfbarkow.ch/assets/pages/kioskberrli/
--> ASDF entrypoint: kioskberrli.asd
--> ASDF system object: :kioskberrli
+FedWiki page identity: kioskbeerli
+-> local page asset root: ~/.wiki/wiki.ralfbarkow.ch/assets/pages/kioskbeerli/
+-> ASDF entrypoint: kioskbeerli.asd
+-> ASDF system object: :kioskbeerli
 -> inspector Overview / system home page
 </pre>
 
@@ -31,17 +31,17 @@ FedWiki page identity: kioskberrli
 <h4>MREPL flow</h4>
 
 <pre>
-(defparameter *kioskberrli-home*
+(defparameter *kioskbeerli-home*
   (hyperdoc:make-fedwiki-attached-asdf-system
-   :slug "kioskberrli"
+   :slug "kioskbeerli"
    :site-root #p"/Users/rgb/.wiki/wiki.ralfbarkow.ch/"
-   :system :kioskberrli
-   :system-file "kioskberrli"
-   :test-system :kioskberrli/tests))
+   :system :kioskbeerli
+   :system-file "kioskbeerli"
+   :test-system :kioskbeerli/tests))
 
-(hyperdoc:asdf-system-home-page-of *kioskberrli-home*)
-(hyperdoc:load-fedwiki-attached-asdf-system *kioskberrli-home*)
-(clog-moldable-inspector:clog-inspect :object *kioskberrli-home*)
+(hyperdoc:asdf-system-home-page-of *kioskbeerli-home*)
+(hyperdoc:load-fedwiki-attached-asdf-system *kioskbeerli-home*)
+(clog-moldable-inspector:clog-inspect :object *kioskbeerli-home*)
 </pre>
 
 <h4>Lookup failure boundary</h4>
@@ -56,19 +56,19 @@ FedWiki page identity: kioskberrli
 
 <p>
   The report also states the package-reader consequence: a form such as
-  <tt>kioskberrli:make-demo-dashboard</tt> cannot even be read until a
-  successful load creates the <tt>KIOSKBERRLI</tt> package.
+  <tt>kioskbeerli:make-demo-dashboard</tt> cannot even be read until a
+  successful load creates the <tt>KIOSKBEERLI</tt> package.
 </p>
 
 <h4>Boundary</h4>
 
 <p>
   This protocol does not fetch
-  <tt>http://localhost:3000/view/kioskberrli</tt>, does not require the browser
+  <tt>http://localhost:3000/view/kioskbeerli</tt>, does not require the browser
   to be open, and does not write DMX. The URL remains a FedWiki client page
   identity; the operational route is through local file-backed assets, starting
   from the local pathname
-  <tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/kioskberrli/kioskberrli.asd</tt>.
+  <tt>/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/kioskbeerli/kioskbeerli.asd</tt>.
 </p>
 
 <h4>Inspectable objects</h4>
@@ -77,6 +77,6 @@ FedWiki page identity: kioskberrli
   <li><a hyperbook="topics" page="FedWiki-attached ASDF system"><tt>FedWiki-attached ASDF system</tt></a></li>
   <li><a hyperbook="topics" page="ASDF system"><tt>ASDF system</tt></a></li>
   <li><a hyperbook="topics" page="FedWiki page system"><tt>FedWiki page system</tt></a></li>
-  <li><a page="Kioskberrli">Kioskberrli</a></li>
-  <li><a expr="(hyperdoc:make-fedwiki-attached-asdf-system :slug &quot;kioskberrli&quot; :site-root #p&quot;/Users/rgb/.wiki/wiki.ralfbarkow.ch/&quot; :system :kioskberrli :system-file &quot;kioskberrli&quot; :test-system :kioskberrli/tests)"><tt>kioskberrli home object</tt></a></li>
+  <li><a page="Kioskbeerli">Kioskbeerli</a></li>
+  <li><a expr="(hyperdoc:make-fedwiki-attached-asdf-system :slug &quot;kioskbeerli&quot; :site-root #p&quot;/Users/rgb/.wiki/wiki.ralfbarkow.ch/&quot; :system :kioskbeerli :system-file &quot;kioskbeerli&quot; :test-system :kioskbeerli/tests)"><tt>kioskbeerli home object</tt></a></li>
 </ul>

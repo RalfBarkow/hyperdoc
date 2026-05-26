@@ -45,15 +45,15 @@
                                (:li (object-ref next
                                                 "Next"))
                                (:li (object-ref primary
-                                                "kioskberrli-dashboard"))
+                                                "kioskbeerli-dashboard"))
                                (:li (object-ref (first related)
-                                                "kioskberrli-dashboard-status"))
+                                                "kioskbeerli-dashboard-status"))
                                (:li (object-ref (second related)
-                                                "kioskberrli-current-blocker"))
+                                                "kioskbeerli-current-blocker"))
                                (:li (object-ref (third related)
-                                                "kioskberrli-build-evidence-status"))
+                                                "kioskbeerli-build-evidence-status"))
                                (:li (object-ref (fourth related)
-                                                "kioskberrli-dashboard-stations")))
+                                                "kioskbeerli-dashboard-stations")))
                               (:h2 "Pages")
                               (:ul
                                (dolist (title (codex-home-relevant-pages-of home))
@@ -159,11 +159,11 @@
                             (:h2 "Related objects")
                             (object-list
                              (codex-context-window-related-objects-of window)
-                             '("kioskberrli-dashboard"
-                               "kioskberrli-dashboard-status"
-                               "kioskberrli-current-blocker"
-                               "kioskberrli-build-evidence-status"
-                               "kioskberrli-dashboard-stations"))
+                             '("kioskbeerli-dashboard"
+                               "kioskbeerli-dashboard-status"
+                               "kioskbeerli-current-blocker"
+                               "kioskbeerli-build-evidence-status"
+                               "kioskbeerli-dashboard-stations"))
                             (:h2 "Validation commands")
                             (command-list
                              (codex-context-window-validation-commands-of window))

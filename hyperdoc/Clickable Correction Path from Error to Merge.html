@@ -9,7 +9,7 @@
 </p>
 
 <p>
-  For the current <tt>kioskberrli</tt> failure, the path should be:
+  For the current <tt>kioskbeerli</tt> failure, the path should be:
 </p>
 
 <pre>
@@ -28,7 +28,7 @@ merge only after the verified correction
 
 <p>
   The starting point is the normalized failure object:
-  <a expr="(kioskberrli-sd-image-failure-context)"><tt>kioskberrli-sd-image-failure-context</tt></a>
+  <a expr="(kioskbeerli-sd-image-failure-context)"><tt>kioskbeerli-sd-image-failure-context</tt></a>
 </p>
 
 <p>
@@ -40,7 +40,7 @@ merge only after the verified correction
 <p>
   The next click should not be another abstract explanation. It should point to
   the source edit that removes the obsolete option:
-  <a expr="(suggested-patch (kioskberrli-sd-image-failure-context))"><tt>suggested-patch</tt></a>
+  <a expr="(suggested-patch (kioskbeerli-sd-image-failure-context))"><tt>suggested-patch</tt></a>
 </p>
 
 <p>
@@ -54,7 +54,7 @@ merge only after the verified correction
 
 <p>
   The correction is not credible until the pinned build target is rerun:
-  <a expr="(repro-build-command (kioskberrli-sd-image-failure-context))"><tt>repro-build-command</tt></a>
+  <a expr="(repro-build-command (kioskbeerli-sd-image-failure-context))"><tt>repro-build-command</tt></a>
 </p>
 
 <p>
@@ -67,7 +67,7 @@ merge only after the verified correction
   image build. It did, however, prove that the original
   <tt>sdImage.imageSize</tt> failure is gone and expose the next concrete
   blocker:
-  <a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a>.
+  <a page="Kioskbeerli Cross-Host Build Failure">Kioskbeerli Cross-Host Build Failure</a>.
 </p>
 
 <h4>4. Merge step</h4>
@@ -86,7 +86,7 @@ merge only after the verified correction
 <p>
   The correction path object should therefore remain explicit about the final
   step:
-  <a expr="(correction-path (kioskberrli-sd-image-failure-context))"><tt>correction-path</tt></a>
+  <a expr="(correction-path (kioskbeerli-sd-image-failure-context))"><tt>correction-path</tt></a>
 </p>
 
 <h4>Why this matters</h4>
@@ -105,8 +105,8 @@ merge only after the verified correction
 <h4>Related</h4>
 
 <ul>
-  <li><a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a></li>
-  <li><a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a></li>
-  <li><a page="Understanding Kioskberrli sdImage Failure Context">Understanding Kioskberrli sdImage Failure Context</a></li>
+  <li><a page="Kioskbeerli sdImage imageSize Failure">Kioskbeerli sdImage imageSize Failure</a></li>
+  <li><a page="Kioskbeerli Cross-Host Build Failure">Kioskbeerli Cross-Host Build Failure</a></li>
+  <li><a page="Understanding Kioskbeerli sdImage Failure Context">Understanding Kioskbeerli sdImage Failure Context</a></li>
   <li><a page="Mech Credible Maintenance Story">Mech Credible Maintenance Story</a></li>
 </ul>

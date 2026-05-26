@@ -173,7 +173,7 @@
                     (fedwiki-attached-asdf-system-system-file home))))
 
 (defun fedwiki-asdf-default-compatibility-system (system)
-  (when (string= (fedwiki-asdf-system-name-string system) "kioskberrli")
+  (when (string= (fedwiki-asdf-system-name-string system) "kioskbeerli")
     :dreyeck/kioskbeerli))
 
 (defun make-fedwiki-attached-asdf-system
@@ -243,7 +243,7 @@
 (defun fedwiki-attached-asdf-system-sqlite-status (home)
   (cond
     ((not (string= (fedwiki-attached-asdf-system-package-name home)
-                   "KIOSKBERRLI"))
+                   "KIOSKBEERLI"))
      :not-applicable)
     ((ignore-errors
        (uiop:run-program '("sqlite3" "--version")
@@ -269,9 +269,9 @@
                     test-system)
             tests))
     (when (string= (fedwiki-attached-asdf-system-package-name home)
-                   "KIOSKBERRLI")
-      (push "(kioskberrli/tests:run-kioskberrli-smoke-tests)" tests)
-      (push "(uiop:symbol-call :kioskberrli/tests :run-kioskberrli-smoke-tests)"
+                   "KIOSKBEERLI")
+      (push "(kioskbeerli/tests:run-kioskbeerli-smoke-tests)" tests)
+      (push "(uiop:symbol-call :kioskbeerli/tests :run-kioskbeerli-smoke-tests)"
             tests))
     (nreverse tests)))
 
@@ -346,8 +346,8 @@
              "(hyperdoc/inspector:inspect-system-home-page *)"
              "Inspect Overview, Source, Examples, Tests, Files, Plan, and Dependencies views when present."
              (and (string= (fedwiki-attached-asdf-system-package-name home)
-                           "KIOSKBERRLI")
-                  "(uiop:symbol-call :kioskberrli/tests :run-kioskberrli-smoke-tests)")))))
+                           "KIOSKBEERLI")
+                  "(uiop:symbol-call :kioskbeerli/tests :run-kioskbeerli-smoke-tests)")))))
 
 (defun fedwiki-asdf-route-result-string (result condition)
   (cond
@@ -507,7 +507,7 @@
      (list
       (unless (getf state :package-present-p)
         (format nil
-                "Package ~A is absent because the ASDF system has not loaded or failed during load; reader forms such as kioskberrli:... fail before evaluation when that package does not exist."
+                "Package ~A is absent because the ASDF system has not loaded or failed during load; reader forms such as kioskbeerli:... fail before evaluation when that package does not exist."
                 (getf state :package-name)))
       (unless (getf state :tests-found-p)
         "Tests are not available as callable package functions until the test system has been loaded.")
@@ -549,7 +549,7 @@
            :answer '("ASDF knows systems, components, source files, dependencies, and loaded state."
                      "The FedWiki asset materializer knows page-local asset paths."
                      "The inspector knows the Overview and lookup-failure views."
-                     "The Kioskberrli package knows dashboard, planner, trace, examples, tests, and optional SQLite APIs."))
+                     "The Kioskbeerli package knows dashboard, planner, trace, examples, tests, and optional SQLite APIs."))
      (list :question "How did I get here? What has been happening?"
            :answer (fedwiki-attached-asdf-system-route-trace home))
      (list :question "How can I get back?"
@@ -673,7 +673,7 @@
         (when (getf route :condition-message)
           (format stream "  condition: ~A~%"
                   (getf route :condition-message))))
-      (format stream "~%Package-reader consequence: reader forms such as kioskberrli:... fail at read time if the system did not load and the package does not exist.~%~%")
+      (format stream "~%Package-reader consequence: reader forms such as kioskbeerli:... fail at read time if the system did not load and the package does not exist.~%~%")
       (write-string home-text stream))))
 
 (defmethod asdf-system-home-page-of ((failure fedwiki-asdf-system-lookup-failure))

@@ -2,7 +2,7 @@
 
 <p>
   This page is a practical checklist for turning the declared
-  <tt>Kioskberrli</tt> build target into a credible maintenance story.
+  <tt>Kioskbeerli</tt> build target into a credible maintenance story.
   The target is a wall-mounted Raspberry Pi 4 Model B in the
   <tt>hauptsache</tt> hairdressing salon.
 </p>
@@ -14,7 +14,7 @@
 
 <p>
   One current example of that gap is the upstream module breakage documented in
-  <a page="Kioskberrli sdImage imageSize Failure">Kioskberrli sdImage imageSize Failure</a>.
+  <a page="Kioskbeerli sdImage imageSize Failure">Kioskbeerli sdImage imageSize Failure</a>.
 </p>
 
 <p>
@@ -27,7 +27,7 @@
 
 <ul>
   <li><a hyperbook="topics" page="Raspberry Pi first-boot access paths"><tt>Raspberry Pi first-boot access paths</tt></a></li>
-  <li><a hyperbook="topics" page="Kioskberrli preconfigured headless image"><tt>Kioskberrli preconfigured headless image</tt></a></li>
+  <li><a hyperbook="topics" page="Kioskbeerli preconfigured headless image"><tt>Kioskbeerli preconfigured headless image</tt></a></li>
   <li><a expr="(hyperdoc::rpi-first-boot-access-dry-run-example)"><tt>First-boot access dry-run examples</tt></a></li>
 </ul>
 
@@ -41,8 +41,8 @@
 </ul>
 
 <pre>
-cd kioskberrli
-nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
+cd kioskbeerli
+nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage
 </pre>
 
 <h4>2. Flash and boot evidence</h4>
@@ -93,7 +93,7 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 <pre>
 { ... }:
 {
-  networking.hostName = "kioskberrli";
+  networking.hostName = "kioskbeerli";
 
   services.openssh.enable = true;
   services.openssh.settings.PasswordAuthentication = false;
@@ -167,14 +167,14 @@ nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage
 
 <p>
   Only after these points are demonstrated do we have the beginning of a
-  credible maintenance story for <tt>Kioskberrli</tt>.
+  credible maintenance story for <tt>Kioskbeerli</tt>.
 </p>
 
 <h4>Related</h4>
 
 <ul>
-  <li><a page="Kioskberrli">Kioskberrli</a></li>
-  <li><a page="Kioskberrli Cross-Host Build Failure">Kioskberrli Cross-Host Build Failure</a></li>
+  <li><a page="Kioskbeerli">Kioskbeerli</a></li>
+  <li><a page="Kioskbeerli Cross-Host Build Failure">Kioskbeerli Cross-Host Build Failure</a></li>
   <li><a page="Hauptsache Entry Model">Hauptsache Entry Model</a></li>
   <li><a page="Landing Page Redirect to Local Boot">Landing Page Redirect to Local Boot</a></li>
 </ul>

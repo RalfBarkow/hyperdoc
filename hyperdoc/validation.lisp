@@ -9,7 +9,7 @@
     "hyperdoc/two-installation-models-sd-image-vs-classic-installer.html"
     "hyperdoc/invariant-boot-partition-must-be-big-enough.html"
     "hyperdoc/preflight-checklist-for-raspberry-pi-nixos-sd-images.html"
-    "hyperdoc/Runbook - Build and Flash NixOS SD Image for Kioskberrli.html"
+    "hyperdoc/Runbook - Build and Flash NixOS SD Image for Kioskbeerli.html"
     "hyperdoc/Prepare the AArch64 image.html"))
 
 (defclass documentation-validation-check ()

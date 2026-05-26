@@ -1,0 +1,168 @@
+<h1>Kioskbeerli sdImage imageSize Failure</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The current <tt>kioskbeerli</tt> build failure is specific: in the locked
+  nixpkgs revision used by the project, the SD-image module set no longer
+  accepts <tt>sdImage.imageSize</tt>.
+</p>
+
+<p>
+  This is not just a typo in <tt>kiosk.nix</tt>. It reflects a module-shape
+  change in upstream NixOS.
+</p>
+
+<h4>Observed configuration</h4>
+
+<p>
+  The current <tt>kiosk.nix</tt> contains:
+</p>
+
+<pre>
+sdImage = {
+  compressImage = true;
+  imageSize = 4096; # MiB
+};
+</pre>
+
+<h4>Locked upstream revision</h4>
+
+<p>
+  The <tt>kioskbeerli</tt> flake locks <tt>nixpkgs</tt> to revision:
+</p>
+
+<p>
+  <a expr="(kioskbeerli-nixpkgs-lock-object)"><tt>cf59864ef8aa2e178cccedbe2c178185b0365705</tt></a>
+</p>
+
+<p>
+  The corresponding lock file is also available as an inspectable pathname:
+  <a expr="(kioskbeerli-flake-lock-pathname)"><tt>kioskbeerli/flake.lock</tt></a>
+</p>
+
+<p>
+  If one of these helper objects is reported as undefined at runtime, see
+  <a page="Reloading HyperDoc After Adding Lisp Objects">Reloading HyperDoc After Adding Lisp Objects</a>.
+</p>
+
+<p>
+  In the corresponding module sources, the relevant files are:
+</p>
+
+<ul>
+  <li><a expr="(kioskbeerli-sd-image-module-reference :aarch64)"><tt>nixos/modules/installer/sd-card/sd-image-aarch64.nix</tt></a></li>
+  <li><a expr="(kioskbeerli-sd-image-module-reference :core)"><tt>nixos/modules/installer/sd-card/sd-image.nix</tt></a></li>
+</ul>
+
+<p>
+  The whole reference set is available as one inspectable object:
+  <a expr="(kioskbeerli-sd-image-failure-context)"><tt>kioskbeerli-sd-image-failure-context</tt></a>
+</p>
+
+<h4>What the module provides now</h4>
+
+<p>
+  In this upstream version, the SD-image module still provides options such as:
+</p>
+
+<ul>
+  <li><tt>sdImage.compressImage</tt></li>
+  <li><tt>sdImage.firmwareSize</tt></li>
+  <li><tt>sdImage.firmwarePartitionOffset</tt></li>
+  <li><tt>sdImage.populateFirmwareCommands</tt></li>
+  <li><tt>sdImage.populateRootCommands</tt></li>
+  <li><tt>sdImage.expandOnBoot</tt></li>
+</ul>
+
+<p>
+  But it no longer defines an option named <tt>sdImage.imageSize</tt>.
+</p>
+
+<h4>What replaced it</h4>
+
+<p>
+  There is no direct one-option replacement for total image size in this module
+  set. Instead, the image size is computed internally from:
+</p>
+
+<ul>
+  <li>the apparent size of the root filesystem image</li>
+  <li><tt>sdImage.firmwareSize</tt></li>
+  <li><tt>sdImage.firmwarePartitionOffset</tt></li>
+</ul>
+
+<p>
+  The module then truncates the final image to exactly that computed size.
+</p>
+
+<p>
+  In other words, upstream moved from “configure total SD image size” to
+  “derive image size from the generated partitions and expand the root
+  partition on boot if needed”.
+</p>
+
+<h4>Why this matters for a credible maintenance story</h4>
+
+<p>
+  The failure is useful because it shows that the declared kiosk build path has
+  not yet been demonstrated on the current upstream module set. This is exactly
+  the kind of boundary that a credible maintenance story should make visible.
+</p>
+
+<ul>
+  <li>The repository declares an image build target.</li>
+  <li>The actual module API has changed.</li>
+  <li>The kiosk configuration must now be updated before the build path is credible.</li>
+</ul>
+
+<h4>Current local status</h4>
+
+<p>
+  The local <tt>kioskbeerli</tt> configuration has now been patched to remove
+  <tt>sdImage.imageSize</tt> from <tt>kiosk.nix</tt>.
+</p>
+
+<p>
+  That correction path is complete. Rerunning the build now gets past the
+  original SD-image module error.
+</p>
+
+<h4>Pragmatic next step</h4>
+
+<p>
+  The next concrete failure is now different. It is no longer an obsolete
+  option problem. It is a build-host problem: trying to realize an
+  <tt>aarch64-linux</tt> image from an <tt>x86_64-darwin</tt> machine without a
+  suitable Linux builder.
+</p>
+
+<p>
+  So this page should now be read as a completed correction topic:
+</p>
+
+<pre>
+visible error
+  -&gt;
+remove obsolete option
+  -&gt;
+rerun build
+  -&gt;
+original module failure disappears
+</pre>
+
+<p>
+  The next maintenance topic is separate and should be tracked separately:
+  <a page="Kioskbeerli Cross-Host Build Failure">Kioskbeerli Cross-Host Build Failure</a>.
+</p>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a page="Kioskbeerli">Kioskbeerli</a></li>
+  <li><a page="Kioskbeerli Cross-Host Build Failure">Kioskbeerli Cross-Host Build Failure</a></li>
+  <li><a page="Salon Pi 4 Kiosk Hardening Checklist">Salon Pi 4 Kiosk Hardening Checklist</a></li>
+  <li><a page="Understanding Kioskbeerli sdImage Failure Context">Understanding Kioskbeerli sdImage Failure Context</a></li>
+  <li><a page="Clickable Correction Path from Error to Merge">Clickable Correction Path from Error to Merge</a></li>
+  <li><a page="Hauptsache Entry Model">Hauptsache Entry Model</a></li>
+</ul>

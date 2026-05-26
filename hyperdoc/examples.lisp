@@ -124,7 +124,7 @@
     (format stream "~A" (title-of object))))
 
 (defun sd-card-imagesize-correction-step ()
-  (let* ((context (kioskberrli-sd-image-failure-context))
+  (let* ((context (kioskbeerli-sd-image-failure-context))
          (patch (suggested-patch context))
          (verify (repro-build-command context)))
     (make-instance 'sd-card-correction-step
@@ -153,7 +153,7 @@
        (compressed-image "nixos-aarch64.img.zst")
        (raw-image "nixos-aarch64.img")
        (disk "diskN")
-       (kioskberrli-root "~/workspace/hauptsache/kioskberrli"))
+       (kioskbeerli-root "~/workspace/hauptsache/kioskbeerli"))
   (declare (ignore compressed-image))
   (list
    (make-instance 'sd-card-runbook-section
@@ -219,20 +219,20 @@
    (make-instance 'sd-card-runbook-section
                   :id "path-b-build-project-image"
                   :title "Path B - Build project image"
-                  :summary "Build kioskberrli SD image from project source."
+                  :summary "Build kioskbeerli SD image from project source."
                   :steps
                   (list
                    (make-instance 'sd-card-procedure-step
-                                  :id "build-kioskberrli-sd-image"
-                                  :title "Build kioskberrli SD image"
+                                  :id "build-kioskbeerli-sd-image"
+                                  :title "Build kioskbeerli SD image"
                                   :summary "Run project build for sdImage target."
-                                  :commands (list (format nil "cd ~A" kioskberrli-root)
-                                                  "nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage"
+                                  :commands (list (format nil "cd ~A" kioskbeerli-root)
+                                                  "nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage"
                                                   "ls -lah result/sd-image/")
                                   :verification
                                   "result/sd-image must contain the expected artifact."
                                   :raw-structure
-                                  (list :command "nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage"))
+                                  (list :command "nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage"))
                    (sd-card-imagesize-correction-step))
                   :raw-structure
                   (list :section "Path B - Build project image"))
@@ -303,7 +303,7 @@
        (compressed-image "nixos-aarch64.img.zst")
        (raw-image "nixos-aarch64.img")
        (disk "diskN")
-       (kioskberrli-root "~/workspace/hauptsache/kioskberrli"))
+       (kioskbeerli-root "~/workspace/hauptsache/kioskbeerli"))
   "Return a semantic runbook object for preparing and flashing an aarch64 SD image.
 Raw list structure is preserved as a secondary view."
   (let* ((sections (make-sd-card-runbook-sections
@@ -311,7 +311,7 @@ Raw list structure is preserved as a secondary view."
                     :compressed-image compressed-image
                     :raw-image raw-image
                     :disk disk
-                    :kioskberrli-root kioskberrli-root))
+                    :kioskbeerli-root kioskbeerli-root))
          (runbook (make-instance 'sd-card-runbook
                                  :id "create-nixos-sd-card-playground-runbook"
                                  :title "Create NixOS SD Card from HyperDoc Playground"
@@ -542,7 +542,7 @@ Raw list structure is preserved as a secondary view."
        (model :official)
        (network-reachable-p t)
        (ssh-login-ready-p nil)
-       (host-or-ip "kioskberrli.local")
+       (host-or-ip "kioskbeerli.local")
        (admin-user "rgb"))
   "Return a semantic runbook for first-boot access decisions without executing network actions.
 
@@ -635,7 +635,7 @@ for the fully headless preconfigured-image path."
               (section (make-instance 'sd-card-runbook-section
                                       :id "custom-image-first-boot-access"
                                       :title "Fully headless custom-image first boot"
-                                      :summary "Preferred Kioskberrli maintenance path once access is declaratively preseeded into the image."
+                                      :summary "Preferred Kioskbeerli maintenance path once access is declaratively preseeded into the image."
                                       :steps (list preseed-step
                                                    boot-step
                                                    discover-step
@@ -659,7 +659,7 @@ for the fully headless preconfigured-image path."
        (model :official)
        (network-reachable-p t)
        (ssh-login-ready-p nil)
-       (host-or-ip "kioskberrli.local")
+       (host-or-ip "kioskbeerli.local")
        (admin-user "rgb"))
   "Print the first-boot access logic without executing network or SSH actions."
   (let* ((runbook (rpi-first-boot-access-command-plan
@@ -707,14 +707,14 @@ for the fully headless preconfigured-image path."
        (compressed-image "nixos-aarch64.img.zst")
        (raw-image "nixos-aarch64.img")
        (disk "diskN")
-       (kioskberrli-root "~/workspace/hauptsache/kioskberrli"))
+       (kioskbeerli-root "~/workspace/hauptsache/kioskbeerli"))
   "Print the SD-card runbook commands without executing shell actions."
   (let ((runbook (sd-card-creation-command-plan
                   :download-url download-url
                   :compressed-image compressed-image
                   :raw-image raw-image
                   :disk disk
-                  :kioskberrli-root kioskberrli-root)))
+                  :kioskbeerli-root kioskbeerli-root)))
     (format stream "~&SD card creation command plan (dry-run):~%")
     (loop for section in (sections-of runbook)
           do (progn
@@ -770,7 +770,7 @@ for the fully headless preconfigured-image path."
           :fully-headless-custom-image
           (transcript "Fully headless custom image first boot (dry-run)"
                       :model :custom-image
-                      :host-or-ip "kioskberrli.local"
+                      :host-or-ip "kioskbeerli.local"
                       :admin-user "rgb"))))
 
 (defexample sd-card-primary-semantic-entrypoints-example
@@ -901,7 +901,7 @@ for the fully headless preconfigured-image path."
                     (rpi-first-boot-access-dry-run
                      :stream stream
                      :model :custom-image
-                     :host-or-ip "kioskberrli.local"
+                     :host-or-ip "kioskbeerli.local"
                      :admin-user "rgb")))))
       (assert-eql 'sd-card-runbook (type-of official-remote-runbook))
       (assert-eql 'sd-card-runbook (type-of official-local-runbook))
@@ -1058,12 +1058,12 @@ for the fully headless preconfigured-image path."
                     ("hyperdoc/Prepare the AArch64 image.html"
                      "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
                      "expr=\"(hyperdoc::rpi-first-boot-access-dry-run-example)\"")
-                    ("hyperdoc/Runbook - Build and Flash NixOS SD Image for Kioskberrli.html"
+                    ("hyperdoc/Runbook - Build and Flash NixOS SD Image for Kioskbeerli.html"
                      "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
                      "expr=\"(hyperdoc::rpi-first-boot-access-dry-run-example)\"")
                     ("hyperdoc/Salon Pi 4 Kiosk Hardening Checklist.html"
                      "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
-                     "hyperbook=\"topics\" page=\"Kioskberrli preconfigured headless image\"")
+                     "hyperbook=\"topics\" page=\"Kioskbeerli preconfigured headless image\"")
                     ("hyperdoc/two-installation-models-sd-image-vs-classic-installer.html"
                      "hyperbook=\"topics\" page=\"Raspberry Pi first-boot access paths\""
                      "expr=\"(hyperdoc::rpi-first-boot-access-dry-run-example)\"")))
@@ -1082,35 +1082,35 @@ for the fully headless preconfigured-image path."
             :snippet-page "hyperdoc/Salon Pi 4 Kiosk Hardening Checklist.html"))))
 
 ;;
-;; hauptsache / kioskberrli reference objects
+;; hauptsache / kioskbeerli reference objects
 ;;
 
-(defclass kioskberrli-option-existence-evidence ()
+(defclass kioskbeerli-option-existence-evidence ()
   ((option-name :initarg :option-name :reader option-name-of)
    (exists-p :initarg :exists-p :reader exists-p-of)
    (evidence-kind :initarg :evidence-kind :reader evidence-kind-of)
    (explanation :initarg :explanation :reader explanation-of)))
 
-(defmethod print-object ((object kioskberrli-option-existence-evidence) stream)
+(defmethod print-object ((object kioskbeerli-option-existence-evidence) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A => ~:[absent~;present~]"
             (option-name-of object)
             (exists-p-of object))))
 
-(defclass kioskberrli-sd-image-failure-context ()
+(defclass kioskbeerli-sd-image-failure-context ()
   ((topic :initarg :topic :reader topic-of)
    (flake-lock :initarg :flake-lock :reader flake-lock-of)
    (nixpkgs :initarg :nixpkgs :reader nixpkgs-of)
    (modules :initarg :modules :reader modules-of)
    (removed-option :initarg :removed-option :reader removed-option-of)))
 
-(defmethod print-object ((object kioskberrli-sd-image-failure-context) stream)
+(defmethod print-object ((object kioskbeerli-sd-image-failure-context) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A ~A"
             (topic-of object)
             (removed-option-of object))))
 
-(defclass kioskberrli-patch-suggestion ()
+(defclass kioskbeerli-patch-suggestion ()
   ((file :initarg :file :reader file-of)
    (change-kind :initarg :change-kind :reader change-kind-of)
    (target-option :initarg :target-option :reader target-option-of)
@@ -1118,39 +1118,39 @@ for the fully headless preconfigured-image path."
    (new-form :initarg :new-form :reader new-form-of)
    (explanation :initarg :explanation :reader explanation-of)))
 
-(defmethod print-object ((object kioskberrli-patch-suggestion) stream)
+(defmethod print-object ((object kioskbeerli-patch-suggestion) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A in ~A"
             (change-kind-of object)
             (file-of object))))
 
-(defclass kioskberrli-build-command ()
+(defclass kioskbeerli-build-command ()
   ((command :initarg :command :reader command-of)
    (purpose :initarg :purpose :reader purpose-of)))
 
-(defmethod print-object ((object kioskberrli-build-command) stream)
+(defmethod print-object ((object kioskbeerli-build-command) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (command-of object))))
 
-(defclass kioskberrli-correction-path ()
+(defclass kioskbeerli-correction-path ()
   ((steps :initarg :steps :reader steps-of)
    (summary :initarg :summary :reader summary-of)))
 
-(defmethod print-object ((object kioskberrli-correction-path) stream)
+(defmethod print-object ((object kioskbeerli-correction-path) stream)
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (summary-of object))))
 
-(defun kioskberrli-flake-lock-pathname ()
-  #P"/Users/rgb/workspace/hauptsache/kioskberrli/flake.lock")
+(defun kioskbeerli-flake-lock-pathname ()
+  #P"/Users/rgb/workspace/hauptsache/kioskbeerli/flake.lock")
 
-(defun kioskberrli-nixpkgs-lock-object ()
+(defun kioskbeerli-nixpkgs-lock-object ()
   (list :input "nixpkgs"
-        :flake-lock (kioskberrli-flake-lock-pathname)
+        :flake-lock (kioskbeerli-flake-lock-pathname)
         :revision "cf59864ef8aa2e178cccedbe2c178185b0365705"
         :ref "nixos-unstable"
         :repo "NixOS/nixpkgs"))
 
-(defun kioskberrli-sd-image-module-reference (kind)
+(defun kioskbeerli-sd-image-module-reference (kind)
   (ecase kind
     (:aarch64
      (list :module :sd-image-aarch64
@@ -1159,9 +1159,9 @@ for the fully headless preconfigured-image path."
      (list :module :sd-image
            :relative-path "nixos/modules/installer/sd-card/sd-image.nix"))))
 
-(defun kioskberrli-sd-image-module-references ()
-  (list (kioskberrli-sd-image-module-reference :aarch64)
-        (kioskberrli-sd-image-module-reference :core)))
+(defun kioskbeerli-sd-image-module-references ()
+  (list (kioskbeerli-sd-image-module-reference :aarch64)
+        (kioskbeerli-sd-image-module-reference :core)))
 
 (defgeneric option-exists? (object)
   (:documentation "Return evidence for whether the context's relevant option
@@ -1177,8 +1177,8 @@ context."))
 (defgeneric correction-path (object)
   (:documentation "Return the correction path from visible failure to merge."))
 
-(defmethod option-exists? ((context kioskberrli-sd-image-failure-context))
-  (make-instance 'kioskberrli-option-existence-evidence
+(defmethod option-exists? ((context kioskbeerli-sd-image-failure-context))
+  (make-instance 'kioskbeerli-option-existence-evidence
                  :option-name (removed-option-of context)
                  :exists-p nil
                  :evidence-kind :failure-context
@@ -1187,9 +1187,9 @@ context."))
                          "The failure context records ~A as removed or absent in the pinned upstream SD-image API, so setting it should fail option evaluation."
                          (removed-option-of context))))
 
-(defmethod suggested-patch ((context kioskberrli-sd-image-failure-context))
-  (make-instance 'kioskberrli-patch-suggestion
-                 :file #P"/Users/rgb/workspace/hauptsache/kioskberrli/kiosk.nix"
+(defmethod suggested-patch ((context kioskbeerli-sd-image-failure-context))
+  (make-instance 'kioskbeerli-patch-suggestion
+                 :file #P"/Users/rgb/workspace/hauptsache/kioskbeerli/kiosk.nix"
                  :change-kind :remove-obsolete-option
                  :target-option (removed-option-of context)
                  :old-form "sdImage.imageSize = 4096;"
@@ -1197,14 +1197,14 @@ context."))
                  :explanation
                  "Remove the obsolete option from kiosk.nix, then rerun the SD-image build against the pinned flake lock."))
 
-(defmethod repro-build-command ((context kioskberrli-sd-image-failure-context))
+(defmethod repro-build-command ((context kioskbeerli-sd-image-failure-context))
   (declare (ignore context))
-  (make-instance 'kioskberrli-build-command
-                 :command "nix build .#nixosConfigurations.kioskberrli.config.system.build.sdImage"
+  (make-instance 'kioskbeerli-build-command
+                 :command "nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage"
                  :purpose "Verify that the kiosk SD-image target now evaluates and builds on the pinned module set."))
 
-(defmethod correction-path ((context kioskberrli-sd-image-failure-context))
-  (make-instance 'kioskberrli-correction-path
+(defmethod correction-path ((context kioskbeerli-sd-image-failure-context))
+  (make-instance 'kioskbeerli-correction-path
                  :summary "visible error -> patch -> verify -> merge"
                  :steps
                  (list
@@ -1218,12 +1218,12 @@ context."))
                         :object
                         "After a successful verification build, commit the correction and merge it through the normal repo workflow."))))
 
-(defun kioskberrli-sd-image-failure-context ()
-  (make-instance 'kioskberrli-sd-image-failure-context
+(defun kioskbeerli-sd-image-failure-context ()
+  (make-instance 'kioskbeerli-sd-image-failure-context
                  :topic :sdimage-imagesize-failure
-                 :flake-lock (kioskberrli-flake-lock-pathname)
-                 :nixpkgs (kioskberrli-nixpkgs-lock-object)
-                 :modules (kioskberrli-sd-image-module-references)
+                 :flake-lock (kioskbeerli-flake-lock-pathname)
+                 :nixpkgs (kioskbeerli-nixpkgs-lock-object)
+                 :modules (kioskbeerli-sd-image-module-references)
                  :removed-option "sdImage.imageSize"))
 
 (defexample wiki-client-blame-operation-example

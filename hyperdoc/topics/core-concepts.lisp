@@ -43,7 +43,7 @@
    :title "Create NixOS SD card from HyperDoc Playground task"
    :summary "DITA-style task for producing and flashing a Raspberry Pi NixOS SD card using runbook-aligned command plans from Playground."
    :references '("Create NixOS SD Card from HyperDoc Playground"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Prepare the AArch64 image")))
 
 (defun sd-card-command-plan-playground-topic ()
@@ -52,7 +52,7 @@
    :title "SD card command plan in Playground"
    :summary "Inspectable command-plan and dry-run functions that mirror the official runbook sequence."
    :references '("Create NixOS SD Card from HyperDoc Playground"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "SBCL Process")))
 
 (defun sd-card-procedure-step-raw-structure-fix-topic ()
@@ -123,7 +123,7 @@
    :summary "Distinguishes stock official SD-image boot, one-time local-console bootstrap, and fully headless preconfigured-image access."
    :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
                  "Prepare the AArch64 image"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Salon Pi 4 Kiosk Hardening Checklist"
                  "Two Installation Models: SD Image vs Classic Installer")))
 
@@ -133,7 +133,7 @@
    :title "nixos-rebuild"
    :summary "Umbrella topic for rebuild operations in this SD-image workflow."
    :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Two Installation Models: SD Image vs Classic Installer")))
 
 (defun nixos-rebuild-boot-topic ()
@@ -142,7 +142,7 @@
    :title "nixos-rebuild boot"
    :summary "Write next boot generation to /boot; preferred first rebuild in the flashed SD-image workflow."
    :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Invariant: Boot Partition Must Be Big Enough"
                  "Two Installation Models: SD Image vs Classic Installer")))
 
@@ -152,7 +152,7 @@
    :title "nixos-rebuild switch"
    :summary "Activate immediately; only use later, after reboot safety is established."
    :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Pre-flight Checklist for Raspberry Pi NixOS SD Images")))
 
 (defun nixos-rebuild-test-topic ()
@@ -169,7 +169,7 @@
    :title "First rebuild before first reboot"
    :summary "The first configuration change after flashing should be followed by nixos-rebuild boot, then reboot."
    :references '("Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Two Installation Models: SD Image vs Classic Installer")))
 
 (defun reboot-safety-gate-topic ()
@@ -178,7 +178,7 @@
    :title "Reboot safety gate"
    :summary "Pre-flight checks required before trusting the next reboot after rebuild."
    :references '("Pre-flight Checklist for Raspberry Pi NixOS SD Images"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Invariant: Boot Partition Must Be Big Enough")))
 
 (defun boot-partition-capacity-for-nixos-rebuild-boot-topic ()
@@ -188,7 +188,7 @@
    :summary "nixos-rebuild boot depends on adequate /boot capacity and intact extlinux state."
    :references '("Invariant: Boot Partition Must Be Big Enough"
                  "Pre-flight Checklist for Raspberry Pi NixOS SD Images"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli")))
 
 (defun sd-image-first-rebuild-model-topic ()
   (make-topic
@@ -197,7 +197,7 @@
    :summary "The preinstalled-image workflow uses nixos-rebuild boot; contrast with installer workflow."
    :references '("Two Installation Models: SD Image vs Classic Installer"
                  "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli")))
 
 (defun classic-installer-model-topic ()
   (make-topic
@@ -689,7 +689,7 @@
    :title "Download artifact from Hydra"
    :summary "Normative successful path: resolve the exact Hydra build behind latest/download/1, read build product 1 metadata, download the named .img.zst explicitly as the published filename, verify it against the published SHA-256, decompress to .img, and use .img as flash input while .img.zst may remain as preserved download identity."
    :references '("Prepare the AArch64 image"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Hydra artifact to flashable image handoff"
                  "Hydra latest SD-image job"
                  "Hydra latest download link"
@@ -703,7 +703,7 @@
    :title "Hydra artifact to flashable image handoff"
    :summary "Decompression handoff transforms the downloaded .img.zst artifact into a flashable .img; both files may coexist afterward and only .img is flash input."
    :references '("Prepare the AArch64 image"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
                  "hydra-filename-outcome-states-example")))
 
@@ -713,7 +713,7 @@
    :title "Hydra artifact SHA-256"
    :summary "Published SHA-256 for Hydra build product 1; the authoritative machine-readable source is the exact build JSON field buildproducts[\"1\"][\"sha256hash\"]."
    :references '("Prepare the AArch64 image"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Verify Hydra artifact checksum"
                  "https://hydra.nixos.org/job/nixos/unstable/nixos.sd_image.aarch64-linux/latest/download/1")))
 
@@ -723,7 +723,7 @@
    :title "Verify Hydra artifact checksum"
    :summary "Resolve the exact Hydra build behind latest/download/1, fetch build product 1 metadata from that build URL as JSON, and compare the local SHA-256 to buildproducts[\"1\"][\"sha256hash\"] before decompression."
    :references '("Prepare the AArch64 image"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli"
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli"
                  "Hydra latest download link"
                  "Hydra artifact SHA-256")))
 
@@ -735,7 +735,7 @@
    :summary "Choose exactly one source for the SD image artifact: official prebuilt image or project build output."
    :references '("Prepare the AArch64 image"
                  "Official Tutorial: NixOS SD Image on Raspberry Pi 4/400"
-                 "Runbook - Build and Flash NixOS SD Image for Kioskberrli")))
+                 "Runbook - Build and Flash NixOS SD Image for Kioskbeerli")))
 
 (defun aarch64-procedure-record-provenance-topic ()
   (make-topic

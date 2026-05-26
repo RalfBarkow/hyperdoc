@@ -1,0 +1,227 @@
+<h1>Understanding Kioskbeerli sdImage Failure Context</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The Print view for the <tt>kioskbeerli-sd-image-failure-context</tt> object is
+  already showing a normalized failure capsule rather than a raw log.
+</p>
+
+<p>
+  A printed shape such as:
+</p>
+
+<pre>
+(TOPIC SDIMAGE-IMAGESIZE-FAILURE FLAKE-LOCK ...)
+</pre>
+
+<p>
+  should be read as a structured explanation of the failure, not just as a Lisp
+  data dump.
+</p>
+
+<h4>Topic</h4>
+
+<p>
+  <tt>TOPIC SDIMAGE-IMAGESIZE-FAILURE</tt> is the classification label for this
+  failure mode. The issue is not a generic kiosk error. It is specifically that
+  the pinned upstream NixOS SD-image module set does not provide an
+  <tt>sdImage.imageSize</tt> option, so any configuration that still sets it
+  fails option evaluation.
+</p>
+
+<h4>Flake lock</h4>
+
+<p>
+  <tt>FLAKE-LOCK .../kioskbeerli/flake.lock</tt> records the exact lock file used
+  as input. That makes the failure reproducible and tied to a concrete project
+  artifact rather than a vague upstream state.
+</p>
+
+<p>
+  In the running inspector this can be represented as an inspectable pathname
+  object rather than only plain text.
+</p>
+
+<h4>Locked nixpkgs input</h4>
+
+<p>
+  The nested input object for <tt>nixpkgs</tt> pins the exact upstream revision,
+  ref, and repository. This means the failure is not abstract. It means: the
+  option set defined by nixpkgs at revision
+  <a expr="(kioskbeerli-nixpkgs-lock-object)"><tt>cf59864ef8aa2e178cccedbe2c178185b0365705</tt></a>
+  no longer matches the older kiosk configuration.
+</p>
+
+<p>
+  That is why the failure belongs in a credible maintenance story. It is a
+  historically specific mismatch between a declared configuration and a pinned
+  upstream module API.
+</p>
+
+<h4>Modules involved</h4>
+
+<p>
+  The module list records the upstream sources that define the current SD-image
+  behavior:
+</p>
+
+<ul>
+  <li><a expr="(kioskbeerli-sd-image-module-reference :aarch64)"><tt>nixos/modules/installer/sd-card/sd-image-aarch64.nix</tt></a></li>
+  <li><a expr="(kioskbeerli-sd-image-module-reference :core)"><tt>nixos/modules/installer/sd-card/sd-image.nix</tt></a></li>
+</ul>
+
+<p>
+  This matters because it shows the failure lives in the standard NixOS SD-card
+  image pipeline, not in a private local module invented by the project.
+</p>
+
+<h4>Removed/absent option</h4>
+
+<p>
+  <tt>REMOVED-OPTION sdImage.imageSize</tt> is the crux. The old kiosk
+  configuration still sets:
+</p>
+
+<pre>
+sdImage.imageSize = 4096;
+</pre>
+
+<p>
+  But in the pinned upstream SD-image module set, total image size is computed
+  internally from the size of the generated root filesystem image plus the
+  firmware partition and gap settings.
+</p>
+
+<p>
+  In other words: the SD-image builder auto-sizes the image to fit its contents
+  and then grows the root partition on first boot.
+</p>
+
+<p>
+  This is why the failure capsule should be read as: the option is not part of
+  the pinned API anymore, whether you describe that as removed or simply absent,
+  therefore the configuration must stop setting it.
+</p>
+
+<h4>Verification step before claiming replacements</h4>
+
+<p>
+  The truthful next step is to verify the pinned option set against the kiosk
+  configuration. The failure context object should therefore expose an
+  operation such as:
+</p>
+
+<pre>
+#optionExists? "sdImage.imageSize"
+</pre>
+
+<p>
+  That lets the inspector show evidence directly instead of relying on memory
+  of upstream changes.
+</p>
+
+<p>
+  The current HyperDoc object now exposes that check directly:
+  <a expr="(option-exists? (kioskbeerli-sd-image-failure-context))"><tt>option-exists? sdImage.imageSize</tt></a>
+</p>
+
+<h4>What operations to add to the failure context object</h4>
+
+<p>
+  The failure object already stores the who, what, and where. The next useful
+  step is to make it operational by giving it obvious inspector-visible
+  operations.
+</p>
+
+<h4>1. Provenance and reproduction operations</h4>
+
+<ul>
+  <li><tt>#flakeLockPath</tt>, <tt>#nixpkgsRevision</tt>, <tt>#nixpkgsRef</tt>, and <tt>#nixpkgsRepo</tt></li>
+  <li><tt>#reproBuildCommand</tt> to emit the exact build invocation</li>
+  <li><tt>#explainWhyPinnedRevisionMatters</tt> to explain why the option set looks this way at this revision</li>
+  <li><tt>#sdImageModuleSource</tt> and <tt>#sdImageStatesAutoSized</tt> to expose the upstream evidence directly</li>
+</ul>
+
+<p>
+  These operations turn the object into a reproducible debugging capsule.
+</p>
+
+<h4>2. Option-resolution operations</h4>
+
+<ul>
+  <li><tt>#removedOptions</tt></li>
+  <li><tt>#optionExists? "sdImage.imageSize"</tt></li>
+  <li><tt>#suggestedPatch</tt> for this topic should mean: remove the obsolete option</li>
+  <li><tt>#sizingKnobsStillAvailable</tt> for the settings the pinned module still accepts</li>
+</ul>
+
+<p>
+  This is the "what should I change next?" layer. It reduces the need to keep
+  re-reading upstream module internals during maintenance.
+</p>
+
+<h4>3. Module and documentation operations</h4>
+
+<ul>
+  <li><tt>#modulesInvolved</tt> plus <tt>#openModuleSource:</tt></li>
+  <li><tt>#sdImageSizingExcerpt</tt> to point directly at the sizing algorithm</li>
+  <li><tt>#docLinks</tt> for the relevant external references</li>
+</ul>
+
+<p>
+  That makes the object self-documenting rather than only descriptive.
+</p>
+
+<h4>4. Classification and routing operations</h4>
+
+<ul>
+  <li><tt>#topic</tt></li>
+  <li><tt>#severity</tt></li>
+  <li><tt>#recommendedNextStep</tt></li>
+  <li><tt>#affectedFiles</tt></li>
+</ul>
+
+<p>
+  This would let HyperBook show collections such as "all blocking kiosk build
+  failures" as ordinary inspector views.
+</p>
+
+<h4>Minimal Nix-level implication</h4>
+
+<p>
+  The immediate configuration consequence is simple: the old
+  <tt>sdImage.imageSize</tt> setting must not remain in <tt>kiosk.nix</tt>.
+</p>
+
+<p>
+  The important documentation point is not to overstate a replacement before
+  the pinned module set is verified. The failure context object should first
+  tell the truth about the missing option, then point to the next verification
+  step.
+</p>
+
+<h4>Related documentation links</h4>
+
+<ul>
+  <li><a href="https://noogle.dev/f/lib/mkRemovedOptionModule">lib.mkRemovedOptionModule</a></li>
+  <li><a href="https://raw.githubusercontent.com/NixOS/nixpkgs/cf59864ef8aa2e178cccedbe2c178185b0365705/nixos/modules/installer/sd-card/sd-image.nix">Pinned sd-image.nix (cf598...)</a></li>
+  <li><a href="https://raw.githubusercontent.com/NixOS/nixpkgs/cf59864ef8aa2e178cccedbe2c178185b0365705/nixos/modules/installer/sd-card/sd-image-aarch64.nix">Pinned sd-image-aarch64.nix (cf598...)</a></li>
+  <li><a href="https://nixos.org/manual/nixos/stable/">NixOS Manual (image.repart)</a></li>
+  <li><a href="https://mynixos.com/nixpkgs/option/image.repart.imageSize">image.repart.imageSize</a></li>
+  <li><a href="https://discourse.nixos.org/t/what-is-config-system-build-sdimage/23412">What is config.system.build.sdImage?</a></li>
+  <li><a href="https://discourse.nixos.org/t/creating-an-sdimage-with-nix-build-nixpkgs/19298">Creating an sdImage with nix build</a></li>
+  <li><a href="https://nixos.wiki/wiki/NixOS_on_ARM">NixOS on ARM</a></li>
+  <li><a href="https://kokosinski.me/blog/2026/02/14/nixos-on-rpi5.html">Creating NixOS SD Card Installer for Raspberry Pi 5</a></li>
+  <li><a href="https://github.com/NixOS/nixpkgs/issues/435489">sdImage.expandOnBoot issue discussion</a></li>
+  <li><a href="https://discourse.nixos.org/t/unable-to-boot-btrfs-enabled-sd-image/74209">Btrfs-enabled sd-image discussion</a></li>
+</ul>
+
+<h4>Related</h4>
+
+<ul>
+  <li><a page="Kioskbeerli sdImage imageSize Failure">Kioskbeerli sdImage imageSize Failure</a></li>
+  <li><a page="Clickable Correction Path from Error to Merge">Clickable Correction Path from Error to Merge</a></li>
+  <li><a page="Salon Pi 4 Kiosk Hardening Checklist">Salon Pi 4 Kiosk Hardening Checklist</a></li>
+  <li><a page="Kioskbeerli">Kioskbeerli</a></li>
+</ul>

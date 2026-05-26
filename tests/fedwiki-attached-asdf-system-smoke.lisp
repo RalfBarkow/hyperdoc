@@ -68,12 +68,12 @@
 
 (defun fedwiki-attached-asdf-kiosk-home (&key site-root)
   (hyperdoc:make-fedwiki-attached-asdf-system
-   :slug "kioskberrli"
+   :slug "kioskbeerli"
    :site-root (or site-root
                   #P"/Users/rgb/.wiki/wiki.ralfbarkow.ch/")
-   :system :kioskberrli
-   :system-file "kioskberrli"
-   :test-system :kioskberrli/tests))
+   :system :kioskbeerli
+   :system-file "kioskbeerli"
+   :test-system :kioskbeerli/tests))
 
 (defun fedwiki-attached-mrepl-only-example ()
   :mrepl-only-value)
@@ -90,13 +90,13 @@
      (typep home 'hyperdoc:fedwiki-attached-asdf-system)
      "Constructor must return a fedwiki-attached-asdf-system object")
     (fedwiki-attached-asdf-assert-equal
-     (merge-pathnames "assets/pages/kioskberrli/" site-root)
+     (merge-pathnames "assets/pages/kioskbeerli/" site-root)
      asset-root
      "Asset root must be derived from site root, assets/pages, and slug")
     (fedwiki-attached-asdf-assert-equal
-     (merge-pathnames "kioskberrli.asd" asset-root)
+     (merge-pathnames "kioskbeerli.asd" asset-root)
      entrypoint
-     "ASDF entrypoint must be the flat page-local kioskberrli.asd")
+     "ASDF entrypoint must be the flat page-local kioskbeerli.asd")
     (fedwiki-attached-asdf-assert-equal
      :fedwiki-attached-asdf-system-home-page
      (getf home-model :kind)
@@ -117,15 +117,15 @@
        label
        home-text
        "Home-page text must expose Goldberg reading question labels"))
-    (dolist (needle '("Page identity: kioskberrli"
+    (dolist (needle '("Page identity: kioskbeerli"
                       "Asset root:"
                       "ASDF entrypoint:"
-                      "System: :KIOSKBERRLI"
-                      "kioskberrli.asd"))
+                      "System: :KIOSKBEERLI"
+                      "kioskbeerli.asd"))
       (fedwiki-attached-asdf-assert-contains
        needle
        home-text
-       "Home-page text must expose the kioskberrli identity chain"))
+       "Home-page text must expose the kioskbeerli identity chain"))
     (fedwiki-attached-asdf-assert-not-contains
      "chatgpt-hyperdoc"
      home-text
@@ -138,7 +138,7 @@
     (dolist (needle '("FedWiki-attached ASDF system home page"
                       "The FedWiki client URL names the page identity only"
                       "Page identity"
-                      "kioskberrli"
+                      "kioskbeerli"
                       "Available actions"
                       "Reading questions"
                       "How do I invoke response?"
@@ -149,7 +149,7 @@
        "Inspector Overview must render a comprehension-first system home page"))))
 
 (defun fedwiki-attached-asdf-write-fixture (site-root)
-  (let* ((asset-root (merge-pathnames "assets/pages/kioskberrli/" site-root))
+  (let* ((asset-root (merge-pathnames "assets/pages/kioskbeerli/" site-root))
          (asd (merge-pathnames "fedwiki-attached-smoke.asd" asset-root)))
     (fedwiki-attached-asdf-write-file
      asd
@@ -221,7 +221,7 @@
   (let* ((site-root (fedwiki-attached-asdf-temp-site-root))
          (asd (fedwiki-attached-asdf-write-fixture site-root))
          (home (hyperdoc:make-fedwiki-attached-asdf-system
-                :slug "kioskberrli"
+                :slug "kioskbeerli"
                 :site-root site-root
                 :system :fedwiki-attached-smoke
                 :system-file "fedwiki-attached-smoke"
@@ -248,7 +248,7 @@
   (let* ((site-root (fedwiki-attached-asdf-temp-site-root))
          (asd (fedwiki-attached-asdf-write-fixture site-root))
          (home (hyperdoc:make-fedwiki-attached-asdf-system
-                :slug "kioskberrli"
+                :slug "kioskbeerli"
                 :site-root site-root
                 :system :fedwiki-attached-smoke
                 :system-file "fedwiki-attached-smoke"
@@ -370,9 +370,9 @@
     (dolist (needle '("local FedWiki page asset .asd"
                       "workspace source .asd"
                       "compatibility ASDF route"
-                      "/Users/rgb/workspace/hyperdoc/kioskberrli.asd"
+                      "/Users/rgb/workspace/hyperdoc/kioskbeerli.asd"
                       "dreyeck/kioskbeerli"
-                      "kioskberrli:"
+                      "kioskbeerli:"
                       "package does not exist"
                       "reader forms"))
       (fedwiki-attached-asdf-assert-contains
@@ -384,7 +384,7 @@
                       "workspace source .asd"
                       "compatibility ASDF route"
                       "Package-reader consequence"
-                      "kioskberrli:"))
+                      "kioskbeerli:"))
       (fedwiki-attached-asdf-assert-contains
        needle
        html
@@ -408,14 +408,14 @@
                         "local file-backed assets"
                         "make-fedwiki-attached-asdf-system"
                         "load-fedwiki-attached-asdf-system"
-                        "kioskberrli.asd"))
+                        "kioskbeerli.asd"))
         (fedwiki-attached-asdf-assert-contains
          needle
          text
          "Documentation must state the local file-backed workflow boundary")))))
 
 (defun run-fedwiki-attached-asdf-existing-overview-smoke-test ()
-  (let* ((system (asdf:find-system :kioskberrli))
+  (let* ((system (asdf:find-system :kioskbeerli))
          (html (fedwiki-attached-asdf-render-view system "Overview")))
     (dolist (needle '("ASDF systems are the primary exploration scope"
                       "Source file"
@@ -426,12 +426,12 @@
        html
        "Existing ASDF system Overview view must continue to render"))))
 
-(defun run-fedwiki-attached-asdf-kioskberrli-smoke-test ()
-  (asdf:load-system :kioskberrli)
-  (asdf:load-system :kioskberrli/tests :force t)
+(defun run-fedwiki-attached-asdf-kioskbeerli-smoke-test ()
+  (asdf:load-system :kioskbeerli)
+  (asdf:load-system :kioskbeerli/tests :force t)
   (fedwiki-attached-asdf-assert-true
-   (uiop:symbol-call :kioskberrli/tests :run-kioskberrli-smoke-tests)
-   "Existing Kioskberrli smoke tests must still pass"))
+   (uiop:symbol-call :kioskbeerli/tests :run-kioskbeerli-smoke-tests)
+   "Existing Kioskbeerli smoke tests must still pass"))
 
 (defun run-fedwiki-attached-asdf-system-smoke-tests ()
   (run-fedwiki-attached-asdf-construction-smoke-test)
@@ -442,6 +442,6 @@
   (run-fedwiki-attached-asdf-lookup-failure-smoke-test)
   (run-fedwiki-attached-asdf-documentation-smoke-test)
   (run-fedwiki-attached-asdf-existing-overview-smoke-test)
-  (run-fedwiki-attached-asdf-kioskberrli-smoke-test)
+  (run-fedwiki-attached-asdf-kioskbeerli-smoke-test)
   (format t "~&FedWiki-attached ASDF system smoke tests passed.~%")
   t)

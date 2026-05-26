@@ -73,7 +73,7 @@
    :run-git-commit-assimilation-smoke-tests
    :run-skillization-smoke-tests
    :run-mech-deployment-provenance-smoke-tests
-   :run-kioskberrli-dashboard-smoke-tests
+   :run-kioskbeerli-dashboard-smoke-tests
    :run-py4dmx-cluster-smoke-tests
    :run-scxml-compiler-smoke-tests
    :run-interaction-net-smoke-tests
