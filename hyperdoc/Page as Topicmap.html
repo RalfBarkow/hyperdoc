@@ -1,0 +1,129 @@
+<h1>Page as Topicmap</h1>
+
+<p>
+  Page-as-topicmap is the local HyperDoc projection that turns an authored page
+  into a DM6/AppEmbed Topicmap seed. It reads the page's Plump DOM, keeps
+  meaningful document nodes, writes native DM6 model JSON, and can materialize
+  that JSON as a <code>script.dm6-stored</code> seed inside a DM6 island.
+</p>
+
+<h2>What is implemented</h2>
+
+<ul>
+  <li><a href="../hyperdoc/dm6-page-topicmap.lisp">hyperdoc/dm6-page-topicmap.lisp</a> contains the DOM traversal, native DM6 model construction, JSON generation, script insertion, and inspectable seed report.</li>
+  <li><a href="../hyperdoc/dm6-page-topicmap-api.lisp">hyperdoc/dm6-page-topicmap-api.lisp</a> keeps narrow public entry points available when only the core HyperDoc system is loaded.</li>
+  <li><a href="../tests/dm6-page-topicmap-smoke.lisp">tests/dm6-page-topicmap-smoke.lisp</a> covers native model shape, self-exclusion of generated seed scripts, deterministic hierarchy associations, <code>nextId</code>, and proof-page materialization.</li>
+  <li><a href="DM6 AppEmbed HyperDoc Inline Proof.html">DM6 AppEmbed HyperDoc Inline Proof</a> is the committed proof page seeded from its own parse tree.</li>
+</ul>
+
+<h2>Projection model</h2>
+
+<p>
+  The generator creates one root topic for the page and one topic for each kept
+  DOM node. Kept nodes include headings, paragraphs, lists, code blocks, tables,
+  structural elements, anchors, and HyperDoc custom elements. Ordinary
+  <code>script</code> and <code>style</code> nodes are skipped, and generated
+  <code>script.dm6-stored</code> seeds are explicitly excluded so regeneration
+  does not fold the previous seed back into the topicmap.
+</p>
+
+<p>
+  Parent-child DOM structure becomes deterministic <code>Hierarchy</code>
+  associations. Topic ids, association ids, topic order, and positions are
+  derived from traversal order rather than random layout. The exported JSON uses
+  the current native AppEmbed shape with <code>topics</code>, <code>assocs</code>,
+  <code>itemSets</code>, <code>boxes</code>, <code>topicMap</code>,
+  <code>topicList</code>, and <code>tool</code>.
+</p>
+
+<h2>Relation to DM6/AppEmbed</h2>
+
+<p>
+  AppEmbed reads the materialized <code>script.dm6-stored</code> JSON and decodes
+  it as a native model. The page-as-topicmap generator is therefore a source-side
+  seed generator, not a change to the compiled Elm bundle and not a new AppEmbed
+  schema. The current proof page uses the <code>TopicMap</code> renderer.
+</p>
+
+<h2>Relation to the Kioskbeerli SQL mirror</h2>
+
+<p>
+  Page-as-topicmap and the Kioskbeerli DMX SQL topicmap projection share the
+  same broad goal of rendering structured source material as a topicmap, but
+  they have different sources and persistence boundaries.
+</p>
+
+<ul>
+  <li>Page-as-topicmap derives topics from a HyperDoc page DOM and may rewrite that page's local <code>script.dm6-stored</code> seed.</li>
+  <li>The Kioskbeerli SQL mirror projection derives topics and edges from a generated SQLite mirror and renders an inspected projection object.</li>
+  <li>Page-as-topicmap is not DMX persistence, not Neo4j synchronization, and not a Kioskbeerli trace mirror.</li>
+</ul>
+
+<h2>Inspect without rewriting</h2>
+
+<p>
+  This MREPL path creates an inspectable report and does not change any page
+  file.
+</p>
+
+<pre><code>(require :asdf)
+(asdf:load-system :hyperdoc/explorer)
+
+(defparameter *page-topicmap-report*
+  (hyperdoc:dm6-page-topicmap-seed-report
+   :pathname (hyperdoc:dm6-inline-proof-page-pathname)))
+
+(i *page-topicmap-report*)</code></pre>
+
+<h2>Regenerate the proof seed</h2>
+
+<p>
+  This MREPL path rewrites only
+  <code>hyperdoc/DM6 AppEmbed HyperDoc Inline Proof.html</code>. Use it after
+  editing that page when the embedded DM6 seed should be refreshed from the
+  page's current DOM.
+</p>
+
+<pre><code>(require :asdf)
+(asdf:load-system :hyperdoc/explorer)
+
+(defparameter *materialized-page-topicmap-report*
+  (hyperdoc:materialize-dm6-inline-proof-page-topicmap-seed!))
+
+(i *materialized-page-topicmap-report*)</code></pre>
+
+<h2>Boundary</h2>
+
+<ul>
+  <li>This is a page-local topicmap seed generator.</li>
+  <li>It does not write to DMX or Neo4j.</li>
+  <li>It does not run NixOS deployment commands or activate flakes.</li>
+  <li>It does not modify <code>assets/dm6-elm/app.js</code>.</li>
+  <li>It does not claim a general HyperDoc-to-DM6 command port; it currently materializes native seed JSON for AppEmbed to load.</li>
+</ul>
+
+<h2>Replay checks</h2>
+
+<pre><code>nix develop -c sbcl --no-userinit --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :hyperdoc :force t)' \
+  --eval '(asdf:test-system :hyperdoc)' \
+  --eval '(quit)'</code></pre>
+
+<script type="application/json" id="hyperdoc-topic-chunks">
+{
+  "pageTitle": "Page as Topicmap",
+  "pageSummary": "Durable reference page for the HyperDoc page-local DOM to DM6/AppEmbed Topicmap seed generator.",
+  "sourceFiles": [
+    "hyperdoc/dm6-page-topicmap.lisp",
+    "hyperdoc/dm6-page-topicmap-api.lisp",
+    "tests/dm6-page-topicmap-smoke.lisp",
+    "hyperdoc/DM6 AppEmbed HyperDoc Inline Proof.html"
+  ],
+  "projectionSource": "HyperDoc page DOM",
+  "renderer": "DM6/AppEmbed Topicmap",
+  "materializedSeedMarker": "page-parse-tree-v1",
+  "writesDmx": false,
+  "writesNeo4j": false
+}
+</script>
