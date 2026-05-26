@@ -1,0 +1,155 @@
+<h1>Related topics for topic</h1>
+
+<p>
+  <code>related-topics-for-topic</code> is a FedWiki-attached ASDF page asset
+  for read-only topic-neighborhood discovery. It asks one narrow question:
+  which topic-like objects does the local HyperDoc working context already know
+  about a selected topic?
+</p>
+
+<p>
+  The asset is intentionally a discovery tool, not a synchronization tool. It
+  reads local text and local mirror data, returns a structured report, and leaves
+  all source systems unchanged.
+</p>
+
+<h2>Classification</h2>
+
+<ul>
+  <li>This HyperDoc page is repo-local durable documentation.</li>
+  <li>The page asset bundle belongs to the FedWiki page-asset workflow.</li>
+  <li>The copied bundle at <code>assets/pages/related-topics-for-topic/related-topics-for-topic.zip</code> is not HyperDoc source and should not be committed here.</li>
+  <li>The source asset currently lives under <code>/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/related-topics-for-topic/</code>.</li>
+</ul>
+
+<h2>Implementation Shape</h2>
+
+<p>
+  The page asset defines the ASDF system <code>related-topics-for-topic</code>.
+  Its public package exports a report object, hit objects, the general query
+  function, a DMX-topic convenience wrapper, an <code>ssh-copy-id</code>
+  convenience fixture, and a printer for SLY/MREPL inspection.
+</p>
+
+<ul>
+  <li><code>related-topic-hit</code>: one discovered relation-like hit.</li>
+  <li><code>related-topic-report</code>: the topic query, warnings, timestamp, and deduplicated hits.</li>
+  <li><code>related-topics-for-topic</code>: general read-only query entry point.</li>
+  <li><code>related-topics-for-dmx-topic</code>: wrapper for a DMX topic id and title.</li>
+  <li><code>ssh-copy-id-related-topics</code>: motivating Kioskbeerli maintenance-access example, not the general contract.</li>
+  <li><code>print-related-topic-report</code>: compact text rendering for inspection sessions.</li>
+</ul>
+
+<h2>Discovery Surfaces</h2>
+
+<p>
+  The current asset searches local, read-only surfaces that already exist on
+  disk:
+</p>
+
+<ul>
+  <li><b>HyperDoc source tree:</b> text matches in the current checkout, excluding runtime outputs such as <code>var/</code>, SQLite files, FASLs, and build results.</li>
+  <li><b>FedWiki-attached ASDF systems/assets:</b> page asset directories under <code>/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/</code>.</li>
+  <li><b>DMX associative SQL mirrors:</b> local SQLite mirror rows, when <code>var/dmx-associative-mirror.sqlite</code> exists.</li>
+  <li><b>Future guarded DMX Neo4j reads:</b> planned local or remote read adapters, not implemented by this asset slice.</li>
+</ul>
+
+<p>
+  This is broader than the Kioskbeerli <code>ssh-copy-id</code> maintenance
+  trace. That trace is one useful topic for proving the workflow. The general
+  asset is about any topic designator that can be represented as an id, title,
+  URI, and optional search terms.
+</p>
+
+<h2>Read-only Contract</h2>
+
+<ul>
+  <li>It does not write DMX topics or associations.</li>
+  <li>It does not write Neo4j.</li>
+  <li>It does not synchronize FedWiki, HyperDoc, SQL, or DMX stores.</li>
+  <li>It does not unzip or materialize page assets during a query.</li>
+  <li>It reports missing local inputs as warnings instead of turning discovery into setup.</li>
+</ul>
+
+<h2>Load and Inspect</h2>
+
+<p>
+  The following SLY/MREPL sequence matches the current page-asset layout. It
+  loads the local FedWiki-attached ASDF system, runs the motivating
+  <code>ssh-copy-id</code> query, prints a compact report, and leaves the report
+  inspectable.
+</p>
+
+<pre>(require :asdf)
+
+(asdf:load-asd
+ #P"/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/related-topics-for-topic/related-topics-for-topic.asd"
+ :name "related-topics-for-topic")
+
+(asdf:load-system :related-topics-for-topic)
+
+(defparameter *related-topics-report*
+  (related-topics-for-topic:related-topics-for-topic
+   :topic-id 983869
+   :title "ssh-copy-id"
+   :uri "dmx://dreyeck/topic/983869"
+   :hyperdoc-root #P"/Users/rgb/workspace/hyperdoc/"
+   :fedwiki-site-root #P"/Users/rgb/.wiki/wiki.ralfbarkow.ch/"
+   :dmx-sql-db #P"/Users/rgb/workspace/hyperdoc/var/dmx-associative-mirror.sqlite"
+   :include-sql-neighborhood t))
+
+(related-topics-for-topic:print-related-topic-report *related-topics-report*)
+
+(i *related-topics-report*)</pre>
+
+<p>
+  The focused ASDF test entry point in the page asset is:
+</p>
+
+<pre>(require :asdf)
+
+(asdf:load-asd
+ #P"/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/related-topics-for-topic/related-topics-for-topic.asd"
+ :name "related-topics-for-topic")
+
+(asdf:test-system :related-topics-for-topic/tests)</pre>
+
+<h2>Boundary</h2>
+
+<p>
+  The durable HyperDoc concern is the workflow boundary: related-topic discovery
+  can span HyperDoc source, FedWiki-attached page assets, and local SQL mirror
+  evidence without implying live DMX or Neo4j integration. A future adapter may
+  add guarded local or remote DMX Neo4j reads, but that would be another slice
+  with its own inspection, authorization, and validation contract.
+</p>
+
+<h2>Replay Checks</h2>
+
+<pre>git diff --check</pre>
+
+<script type="application/json" class="hyperdoc-topic-chunks">
+{
+  "page": "Related topics for topic",
+  "kind": "workflow-boundary",
+  "classification": {
+    "hyperdocPage": "repo-local durable documentation",
+    "fedwikiAssetBundle": "FedWiki page-asset workflow, not committed here"
+  },
+  "sourceSurfaces": [
+    "HyperDoc source tree",
+    "FedWiki-attached ASDF systems/assets",
+    "DMX associative SQL mirrors",
+    "future guarded DMX Neo4j read adapters"
+  ],
+  "writesDmx": false,
+  "writesNeo4j": false,
+  "synchronizesStores": false,
+  "implementation": [
+    "related-topics-for-topic.asd",
+    "package.lisp",
+    "related-topics.lisp",
+    "tests/smoke.lisp"
+  ]
+}
+</script>
