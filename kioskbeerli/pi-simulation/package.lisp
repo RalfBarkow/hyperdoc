@@ -55,6 +55,8 @@
    #:pi-simulation-scxml-chart
    #:pi-simulation-command-specs
    #:pi-simulation-next-actions
+   #:pi-simulation-shop3-plan-result
+   #:pi-simulation-shop3-plan-steps
    #:inspect-pi-simulation-plan
 
    ;; Test/inspection helpers.

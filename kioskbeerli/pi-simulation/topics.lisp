@@ -227,6 +227,24 @@
                    :scxml-event event
                    :command-specs (%command-specs-for-task id))))
 
+(defun %pi-simulation-task->shop3-step (task)
+  (list '!plan-pi-simulation-task
+        (id-of task)
+        (level-of task)
+        (state-id-of task)))
+
+(defun pi-simulation-shop3-plan-steps (&optional plan)
+  "Return the HyperDoc SHOP3 checklist projection for PLAN.
+
+The simulation keeps rich local task objects, but also projects those tasks to
+SHOP3-style plan steps so HYPERDOC/SHOP3 checklist helpers can inspect the
+simulation through the shared planning layer."
+  (mapcar #'%pi-simulation-task->shop3-step
+          (if plan
+              (tasks-of plan)
+              (mapcar #'%make-pi-simulation-task
+                      *pi-simulation-task-data*))))
+
 (defun make-pi-simulation-plan (&key (execution-mode :plan-only))
   "Return the inspectable Kioskbeerli Pi simulation plan.
 
@@ -235,16 +253,34 @@ not contact the Pi, run nixos-rebuild, boot a VM, create secrets, or write DMX."
   (unless (eq execution-mode :plan-only)
     (error "Kioskbeerli Pi simulation only supports :PLAN-ONLY, not ~S."
            execution-mode))
-  (make-instance 'pi-simulation-plan
-                 :id "kioskbeerli-pi-simulation-plan"
-                 :title "Kioskbeerli Pi simulation plan"
-                 :summary "Plan-first simulation model for the Kioskbeerli Pi NixOS state across ASDF, Nix evaluation, VM derivation build, and optional VM boot smoke fidelity levels."
-                 :execution-mode execution-mode
-                 :dry-run-p t
-                 :levels (pi-simulation-fidelity-levels)
-                 :tasks (mapcar #'%make-pi-simulation-task
-                                 *pi-simulation-task-data*)
-                 :command-specs (pi-simulation-command-specs)))
+  (let* ((tasks (mapcar #'%make-pi-simulation-task
+                        *pi-simulation-task-data*))
+         (shop3-steps (mapcar #'%pi-simulation-task->shop3-step tasks)))
+    (make-instance 'pi-simulation-plan
+                   :id "kioskbeerli-pi-simulation-plan"
+                   :title "Kioskbeerli Pi simulation plan"
+                   :summary "Plan-first simulation model for the Kioskbeerli Pi NixOS state across ASDF, Nix evaluation, VM derivation build, and optional VM boot smoke fidelity levels."
+                   :problem-name 'kioskbeerli-pi-simulation
+                   :plans (list shop3-steps)
+                   :raw-plans (list shop3-steps)
+                   :plan-trees nil
+                   :final-states nil
+                   :time 0
+                   :execution-mode execution-mode
+                   :dry-run-p t
+                   :levels (pi-simulation-fidelity-levels)
+                   :tasks tasks
+                   :command-specs (pi-simulation-command-specs))))
+
+(defun pi-simulation-shop3-plan-result (&optional (plan (make-pi-simulation-plan)))
+  "Return PLAN as a HyperDoc SHOP3 plan result.
+
+PI-SIMULATION-PLAN subclasses HYPERDOC/SHOP3:HYPERDOC-HTN-PLAN-RESULT. This
+adapter makes the relationship explicit at call sites that want the shared
+SHOP3 planning protocol rather than the domain-specific simulation task graph."
+  (unless (typep plan 'hyperdoc/shop3:hyperdoc-htn-plan-result)
+    (error "Not a HyperDoc SHOP3 plan result: ~S" plan))
+  plan)
 
 (defun pi-simulation-lookup-plan-task
     (task-or-id &key (plan (make-pi-simulation-plan)))

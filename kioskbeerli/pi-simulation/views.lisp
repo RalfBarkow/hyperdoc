@@ -61,7 +61,16 @@
        (:tr (:td "Execution mode")
             (:td (:tt (html-inspector-views:esc
                        (princ-to-string (execution-mode-of plan))))))
-       (:tr (:td "Dry run") (:td (:tt (if (dry-run-p plan) "true" "false")))))
+       (:tr (:td "Dry run") (:td (:tt (if (dry-run-p plan) "true" "false"))))
+       (:tr (:td "HyperDoc SHOP3 result")
+            (:td (:tt (if (typep plan 'hyperdoc/shop3:hyperdoc-htn-plan-result)
+                          "true"
+                          "false"))))
+       (:tr (:td "SHOP3 checklist steps")
+            (:td (:tt (html-inspector-views:esc
+                       (princ-to-string
+                        (length (hyperdoc/shop3:hyperdoc-plan-checklist
+                                 (pi-simulation-shop3-plan-result plan)))))))))
       (:h4 "Fidelity levels")
       (%render-object-list (levels-of plan))
       (:h4 "Next actions")

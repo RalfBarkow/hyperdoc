@@ -111,7 +111,10 @@ mutating the real target is:
 It is documented in `hyperdoc/Kioskbeerli Pi simulation.html`. The subsystem
 models fidelity levels 0-3 and records future Nix shapes for
 `nixosConfigurations.kioskbeerli-pi-sim` and simulation checks. Its Make
-targets are plan-first:
+targets are plan-first. Its plan object is a
+`hyperdoc/shop3:hyperdoc-htn-plan-result` subclass with a SHOP3 checklist
+projection over the local simulation tasks; this projection is inspectable and
+does not execute `shop3:find-plans` or mutate external systems:
 
 ```sh
 make kioskbeerli-pi-sim-plan

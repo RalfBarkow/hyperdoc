@@ -87,6 +87,7 @@
   :version "0.1.0"
   :serial t
   :depends-on (#:kioskbeerli
+               #:hyperdoc/shop3
                #:hyperdoc/scxml
                #:html-inspector-views)
   :in-order-to ((asdf:test-op (asdf:test-op "kioskbeerli/pi-simulation/tests")))

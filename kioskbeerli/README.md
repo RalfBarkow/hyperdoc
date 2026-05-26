@@ -67,6 +67,10 @@ The plan-first Pi simulation subsystem is `:kioskbeerli/pi-simulation`.
 (kioskbeerli/pi-simulation:make-pi-simulation-session)
 ```
 
+The plan object is also a `hyperdoc/shop3:hyperdoc-htn-plan-result`; the
+subsystem projects its local simulation tasks into HyperDoc SHOP3 checklist
+steps without running `shop3:find-plans` or executing commands.
+
 It models simulation fidelity levels 0-3: ASDF-only planning, Nix flake
 evaluation, VM derivation build, and optional VM/MicroVM boot smoke. VM boot is
 skipped by default and is not part of default `make check`.

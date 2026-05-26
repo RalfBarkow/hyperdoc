@@ -23,13 +23,10 @@
    (scxml-event :accessor scxml-event-of :initarg :scxml-event)
    (command-specs :accessor command-specs-of :initarg :command-specs :initform nil)))
 
-(defclass pi-simulation-plan ()
+(defclass pi-simulation-plan (hyperdoc/shop3:hyperdoc-htn-plan-result)
   ((id :accessor id-of :initarg :id)
    (title :accessor title-of :initarg :title)
    (summary :accessor summary-of :initarg :summary)
-   (execution-mode :accessor execution-mode-of
-                   :initarg :execution-mode
-                   :initform :plan-only)
    (dry-run-p :accessor dry-run-p :initarg :dry-run-p :initform t)
    (levels :accessor levels-of :initarg :levels)
    (tasks :accessor tasks-of :initarg :tasks)
@@ -92,6 +89,9 @@
    (backend :accessor backend-of :initarg :backend :initform nil)
    (reason :accessor reason-of :initarg :reason)
    (evidence :accessor evidence-of :initarg :evidence :initform nil)))
+
+(defmethod execution-mode-of ((object pi-simulation-plan))
+  (hyperdoc/shop3:execution-mode-of object))
 
 (defmethod print-object ((object pi-simulation-fidelity-level) stream)
   (print-unreadable-object (object stream :type t)

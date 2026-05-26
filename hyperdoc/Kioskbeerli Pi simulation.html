@@ -45,8 +45,32 @@
   <li><tt>pi-simulation-scxml-chart</tt></li>
   <li><tt>pi-simulation-command-specs</tt></li>
   <li><tt>pi-simulation-next-actions</tt></li>
+  <li><tt>pi-simulation-shop3-plan-result</tt></li>
+  <li><tt>pi-simulation-shop3-plan-steps</tt></li>
   <li><tt>inspect-pi-simulation-plan</tt></li>
 </ul>
+
+<h4>SHOP3 boundary</h4>
+
+<p>
+  <tt>pi-simulation-plan</tt> is a real
+  <tt>hyperdoc/shop3:hyperdoc-htn-plan-result</tt> subclass. The local
+  simulation tasks remain the domain-specific source of task metadata, while
+  <tt>pi-simulation-shop3-plan-steps</tt> projects them into SHOP3-style
+  checklist steps accepted by <tt>hyperdoc/shop3:hyperdoc-plan-checklist</tt>.
+</p>
+
+<p>
+  This boundary is a HyperDoc SHOP3 protocol projection, not a call to
+  <tt>shop3:find-plans</tt> and not an execution engine. It exists so the
+  plan participates in the shared HyperDoc planning inspector without losing
+  the safer local plan-only task structure.
+</p>
+
+<pre><code>(typep *example-plan* 'hyperdoc/shop3:hyperdoc-htn-plan-result)
+(hyperdoc/shop3:hyperdoc-plan-summary
+ (kioskbeerli/pi-simulation:pi-simulation-shop3-plan-result
+  *example-plan*))</code></pre>
 
 <h4>Fidelity levels</h4>
 
@@ -128,6 +152,7 @@ make kioskbeerli-pi-sim-run</code></pre>
 
 <p>
   The smoke tests verify ASDF loading, fidelity levels, non-executed command
-  specs, SCXML structure, default plan-only mode, skipped VM boot without a
-  backend, and absence of real Pi contact or forbidden execution markers.
+  specs, SCXML structure, default plan-only mode, explicit HyperDoc SHOP3
+  plan-result participation, skipped VM boot without a backend, and absence of
+  real Pi contact or forbidden execution markers.
 </p>
