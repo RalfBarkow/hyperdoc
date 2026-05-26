@@ -37,6 +37,37 @@
   <tt>4K HDMI</tt> in the Kioskbeerli path.
 </p>
 
+<h4>Current Den base-system milestone</h4>
+
+<p>
+  The Raspberry Pi has reached the <tt>Kioskbeerli Den base-system milestone</tt>:
+  the Den-based flake switch survived reboot on the target accessed as
+  <tt>guest@192.168.178.34</tt>.
+</p>
+
+<ul>
+  <li>Runtime hostname: <tt>myhostname</tt>.</li>
+  <li>Den intended hostname: <tt>kioskbeerli</tt>.</li>
+  <li>Current system: <tt>/nix/store/qa4s1sfd2xkzyg1z6mllyg96np7yi7y5-nixos-system-myhostname-24.11.20250630.50ab793</tt>.</li>
+  <li>System profile: <tt>system-3-link</tt>.</li>
+  <li>Root filesystem: <tt>/dev/disk/by-label/NIXOS_SD</tt>.</li>
+  <li>Checkpoint health: <tt>0</tt> failed units, no systemd jobs, and <tt>8.6G</tt> free on <tt>/</tt>.</li>
+</ul>
+
+<p>
+  The reconstruction runbook lives in
+  <tt>kioskbeerli/raspberry-pi-den-base-system.md</tt>. It records the local
+  backup at <tt>var/kioskbeerli-pi-backup/</tt>, read-only verification from
+  SLY and shell, and the restore path for <tt>/etc/nixos</tt>.
+</p>
+
+<p>
+  The next safe task is encrypted <tt>sops-nix</tt> secrets, beginning with
+  <tt>users/guest/hashed-password</tt>. <tt>sops-nix</tt>, kiosk/Cage/Chromium,
+  Raspberry Pi SD-card module activation, and hostname forcing are still
+  intentionally postponed.
+</p>
+
 <h4>Inspectable objects</h4>
 
 <ul>
@@ -156,50 +187,10 @@ Raspberry Pi 4 Model B into the first Kioskbeerli?
 <h4>Pragmatic next step</h4>
 
 <p>
-  The <tt>hauptsache</tt> project now contains a dedicated
-  <tt>kioskbeerli/</tt> flake that declares an SD-card image build path for the
-  Raspberry Pi 4 Model B.
-</p>
-
-<p>
-  The current build target is:
-</p>
-
-<pre>
-.#nixosConfigurations.kioskbeerli.config.system.build.sdImage
-</pre>
-
-<p>
-  This is not yet the same as a demonstrated kiosk artifact. A credible
-  maintenance story still requires build, flash, boot, network, kiosk-startup,
-  and landing-page evidence on the target hardware.
-</p>
-
-<p>
-  At the moment, even the build step now has two distinct chapters:
-</p>
-
-<ul>
-  <li>the obsolete <tt>sdImage.imageSize</tt> option has been removed</li>
-  <li>the next blocker is the need for a valid Linux builder for the declared <tt>aarch64-linux</tt> target</li>
-  <li>build, flash, boot, network, kiosk-session, and landing-page proof remain explicit missing evidence until recorded</li>
-</ul>
-
-<p>
-  The next checklist should make explicit:
-</p>
-
-<ul>
-  <li>SSH-based maintenance without on-site keyboard use</li>
-  <li>browser/session recovery after crashes and power loss</li>
-  <li>network fallback in salon conditions</li>
-  <li>SD-card durability and image rebuild workflow</li>
-  <li>the exact landing-page handoff behavior in production</li>
-</ul>
-
-<p>
-  The repo root can also provide a development shell for this work, but the SD
-  image artifact itself belongs in <tt>hauptsache/kioskbeerli</tt>.
+  The next checklist should now start from the survived-reboot Den base-system
+  checkpoint, not from SD-image build uncertainty. The safe next implementation
+  task is encrypted <tt>sops-nix</tt> secrets; kiosk mode and hostname forcing
+  remain later review boundaries.
 </p>
 
 <h4>Branch history note</h4>

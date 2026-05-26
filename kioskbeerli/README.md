@@ -33,6 +33,16 @@ a downstream namespace alias.
 These entrypoints are local and safe: they do not build Nix images, flash SD
 cards, contact devices, write DMX, or require Neo4j.
 
+## Raspberry Pi Den Base-System Milestone
+
+The current Pi checkpoint is documented in
+[`raspberry-pi-den-base-system.md`](raspberry-pi-den-base-system.md).
+
+That runbook records the verified Den-based flake switch that survived reboot,
+the local backup under `var/kioskbeerli-pi-backup/`, read-only verification
+commands, and the reconstruction path for `/etc/nixos`. The backup remains a
+local operator artifact and is not committed.
+
 ## FedWiki Page Assets
 
 The localhost FedWiki page is:
