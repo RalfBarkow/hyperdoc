@@ -66,6 +66,8 @@
   <tt>users/guest/hashed-password</tt>. <tt>sops-nix</tt>, kiosk/Cage/Chromium,
   Raspberry Pi SD-card module activation, and hostname forcing are still
   intentionally postponed.
+  The plan-only ASDF subsystem for this next mutation is documented at
+  <a page="Kioskbeerli sops-nix secrets">Kioskbeerli sops-nix secrets</a>.
 </p>
 
 <p>
@@ -91,6 +93,8 @@
   <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
   <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
   <li><a expr="(kioskbeerli:make-demo-dashboard)"><tt>kioskbeerli:make-demo-dashboard</tt></a></li>
+  <li><a expr="(progn (asdf:load-system :kioskbeerli/sops-nix-secrets) (uiop:symbol-call :kioskbeerli/sops-nix-secrets :make-sops-nix-secrets-session))"><tt>kioskbeerli/sops-nix-secrets:make-sops-nix-secrets-session</tt></a></li>
+  <li><a page="Kioskbeerli sops-nix secrets"><tt>Kioskbeerli sops-nix secrets</tt></a></li>
   <li><a expr="(kioskbeerli:materialize-fedwiki-assets :slug &quot;kioskbeerli&quot;)"><tt>kioskbeerli:materialize-fedwiki-assets</tt></a></li>
   <li><a expr="(hyperdoc:make-fedwiki-attached-asdf-system :slug &quot;kioskbeerli&quot; :site-root #p&quot;/Users/rgb/.wiki/wiki.ralfbarkow.ch/&quot; :system :kioskbeerli :system-file &quot;kioskbeerli&quot; :test-system :kioskbeerli/tests)"><tt>FedWiki-attached ASDF system home</tt></a></li>
   <li><a hyperbook="topics" page="FedWiki-attached ASDF system"><tt>FedWiki-attached ASDF system</tt></a></li>

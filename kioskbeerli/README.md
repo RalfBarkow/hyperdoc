@@ -43,6 +43,21 @@ the local backup under `var/kioskbeerli-pi-backup/`, read-only verification
 commands, and the reconstruction path for `/etc/nixos`. The backup remains a
 local operator artifact and is not committed.
 
+## sops-nix Secrets Planning Subsystem
+
+The next planned Pi mutation is documented and modeled by the plan-only ASDF
+subsystem `:kioskbeerli/sops-nix-secrets`.
+
+```lisp
+(asdf:load-system :kioskbeerli/sops-nix-secrets)
+(kioskbeerli/sops-nix-secrets:make-sops-nix-secrets-session)
+```
+
+This subsystem is inspectable by default. It creates plan, SCXML, task-topic,
+concept-topic, reference-topic, guard, failure, recovery, and command-spec
+objects. It does not run `ssh`, `sudo`, `sops`, `nixos-rebuild`, or DMX writes,
+and it does not contain cleartext secrets or password hashes.
+
 ## FedWiki Page Assets
 
 The localhost FedWiki page is:

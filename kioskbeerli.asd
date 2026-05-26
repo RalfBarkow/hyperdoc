@@ -36,6 +36,50 @@
      (:static-file "kioskbeerli.scxml")
      (:static-file "README.md")))))
 
+(asdf:defsystem #:kioskbeerli/sops-nix-secrets
+  :description "Inspectable plan-only Kioskbeerli sops-nix secrets milestone subsystem."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :depends-on (#:kioskbeerli
+               #:hyperdoc/scxml
+               #:html-inspector-views)
+  :in-order-to ((asdf:test-op (asdf:test-op "kioskbeerli/sops-nix-secrets/tests")))
+  :components
+  ((:module "kioskbeerli/sops-nix-secrets"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "plan-objects")
+     (:file "commands")
+     (:file "guards")
+     (:file "domain")
+     (:file "task-topics")
+     (:file "topics")
+     (:file "scxml")
+     (:file "problem")
+     (:file "views")
+     (:static-file "sops-nix-secrets.scxml")))))
+
+(asdf:defsystem #:kioskbeerli/sops-nix-secrets/tests
+  :description "Smoke tests for the Kioskbeerli sops-nix secrets planning subsystem."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :depends-on (#:kioskbeerli/sops-nix-secrets)
+  :components
+  ((:module "kioskbeerli/sops-nix-secrets/tests"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "smoke"))))
+  :perform (asdf:test-op (op system)
+             (declare (ignore op system))
+             (uiop:symbol-call :kioskbeerli/sops-nix-secrets/tests
+                               :run-sops-nix-secrets-smoke-tests)))
+
 (asdf:defsystem #:kioskbeerli/tests
   :description "Smoke tests for the canonical Kioskbeerli system."
   :author "Ralf Barkow"

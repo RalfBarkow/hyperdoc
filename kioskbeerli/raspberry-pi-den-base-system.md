@@ -88,6 +88,18 @@ is:
 users/guest/hashed-password
 ```
 
+The plan-only ASDF subsystem for that next mutation is:
+
+```lisp
+(asdf:load-system :kioskbeerli/sops-nix-secrets)
+(kioskbeerli/sops-nix-secrets:make-sops-nix-secrets-session)
+```
+
+It is documented in `hyperdoc/Kioskbeerli sops-nix secrets.html`. The subsystem
+is inspectable only by default: it does not run `ssh`, `sudo`, `sops`,
+`nixos-rebuild`, or DMX writes, and it does not contain cleartext secrets or
+password hashes.
+
 ## Pending optional hardware acceleration milestone
 
 A separate future milestone is to add the pinned `nixos-hardware` Raspberry Pi
