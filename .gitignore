@@ -39,8 +39,17 @@ result
 /annotation-*.sexp
 
 # Local HyperDoc journal/run records
+/var/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+/var/*.txt
 /var/hyperdoc-local-journal/
 /var/neo4j*/
+
+# Local exported bundles/placeholders
+/kioskbeerli-dmx-associative-mirror/
+/hyperdoc/Kioskbeerli
 
 # local DMX credentials
 .dmx-admin-password
