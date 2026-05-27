@@ -18,13 +18,10 @@
                      :initarg :related-task-ids
                      :initform nil)))
 
-(defclass sops-nix-secrets-plan ()
+(defclass sops-nix-secrets-plan (hyperdoc/shop3:hyperdoc-htn-plan-result)
   ((id :accessor id-of :initarg :id)
    (title :accessor title-of :initarg :title)
    (summary :accessor summary-of :initarg :summary)
-   (execution-mode :accessor execution-mode-of
-                   :initarg :execution-mode
-                   :initform :plan-only)
    (dry-run-p :accessor dry-run-p :initarg :dry-run-p :initform t)
    (tasks :accessor tasks-of :initarg :tasks)
    (guards :accessor guards-of :initarg :guards :initform nil)
@@ -123,6 +120,9 @@
    (plan :accessor plan-of :initarg :plan)
    (guards :accessor guards-of :initarg :guards)
    (references :accessor references-of :initarg :references)))
+
+(defmethod execution-mode-of ((object sops-nix-secrets-plan))
+  (hyperdoc/shop3:execution-mode-of object))
 
 (defmethod print-object ((object sops-nix-secrets-plan-task) stream)
   (print-unreadable-object (object stream :type t)

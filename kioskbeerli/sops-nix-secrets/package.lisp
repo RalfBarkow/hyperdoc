@@ -64,6 +64,8 @@
    #:sops-nix-secrets-scxml-state-ids
    #:sops-nix-secrets-topic-bundle
    #:sops-nix-secrets-next-actions
+   #:sops-nix-secrets-shop3-plan-result
+   #:sops-nix-secrets-shop3-plan-steps
    #:inspect-sops-nix-secrets-plan
    #:make-sops-nix-secrets-problem
 

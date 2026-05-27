@@ -68,7 +68,16 @@
             (:td (:tt (if (dry-run-p plan) "true" "false"))))
        (:tr (:td "Guards")
             (:td (:tt (html-inspector-views:esc
-                       (princ-to-string (length (guards-of plan))))))))
+                       (princ-to-string (length (guards-of plan)))))))
+       (:tr (:td "HyperDoc SHOP3 result")
+            (:td (:tt (if (typep plan 'hyperdoc/shop3:hyperdoc-htn-plan-result)
+                          "true"
+                          "false"))))
+       (:tr (:td "SHOP3 checklist steps")
+            (:td (:tt (html-inspector-views:esc
+                       (princ-to-string
+                        (length (hyperdoc/shop3:hyperdoc-plan-checklist
+                                 (sops-nix-secrets-shop3-plan-result plan)))))))))
       (:h4 "Next actions")
       (%render-object-list (sops-nix-secrets-next-actions :plan plan))
       (:h4 "Tasks")

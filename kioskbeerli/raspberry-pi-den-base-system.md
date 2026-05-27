@@ -98,7 +98,8 @@ The plan-only ASDF subsystem for that next mutation is:
 It is documented in `hyperdoc/Kioskbeerli sops-nix secrets.html`. The subsystem
 is inspectable only by default: it does not run `ssh`, `sudo`, `sops`,
 `nixos-rebuild`, or DMX writes, and it does not contain cleartext secrets or
-password hashes.
+password hashes. Its plan object participates in HyperDoc's SHOP3 layer as a
+plan-result protocol projection, not as a `shop3:find-plans` execution.
 
 The plan-first simulation subsystem for checking the resulting Pi state without
 mutating the real target is:

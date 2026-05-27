@@ -220,6 +220,19 @@
                    :scxml-event event
                    :command-specs (%command-specs-for-task id))))
 
+(defun %sops-nix-secrets-task->shop3-step (task)
+  (list '!plan-sops-nix-secrets-task
+        (id-of task)
+        (state-id-of task)))
+
+(defun sops-nix-secrets-shop3-plan-steps (&optional plan)
+  "Return the HyperDoc SHOP3 checklist projection for PLAN."
+  (mapcar #'%sops-nix-secrets-task->shop3-step
+          (if plan
+              (tasks-of plan)
+              (mapcar #'%make-sops-nix-secrets-task
+                      *sops-nix-secrets-task-data*))))
+
 (defun make-sops-nix-secrets-plan (&key (execution-mode :plan-only))
   "Return the inspectable plan for the next Kioskbeerli Pi mutation.
 
@@ -228,16 +241,31 @@ does not ssh, sudo, rebuild, switch, run sops, write DMX, or mutate the Pi."
   (unless (eq execution-mode :plan-only)
     (error "Kioskbeerli sops-nix secrets planning only supports :PLAN-ONLY, not ~S."
            execution-mode))
-  (make-instance 'sops-nix-secrets-plan
-                 :id "kioskbeerli-sops-nix-secrets-plan"
-                 :title "Create encrypted sops-nix secrets"
-                 :summary "Plan-only SHOP3-style task graph for the next Kioskbeerli Pi mutation: encrypted sops-nix secrets, starting with users/guest/hashed-password."
-                 :execution-mode execution-mode
-                 :dry-run-p t
-                 :tasks (mapcar #'%make-sops-nix-secrets-task
-                                 *sops-nix-secrets-task-data*)
-                 :guards (sops-nix-secrets-guards)
-                 :command-specs (sops-nix-secrets-command-specs)))
+  (let* ((tasks (mapcar #'%make-sops-nix-secrets-task
+                        *sops-nix-secrets-task-data*))
+         (shop3-steps (mapcar #'%sops-nix-secrets-task->shop3-step tasks)))
+    (make-instance 'sops-nix-secrets-plan
+                   :id "kioskbeerli-sops-nix-secrets-plan"
+                   :title "Create encrypted sops-nix secrets"
+                   :summary "Plan-only HyperDoc SHOP3 protocol projection for the next Kioskbeerli Pi mutation: encrypted sops-nix secrets, starting with users/guest/hashed-password."
+                   :problem-name 'kioskbeerli-sops-nix-secrets
+                   :plans (list shop3-steps)
+                   :raw-plans (list shop3-steps)
+                   :plan-trees nil
+                   :final-states nil
+                   :time 0
+                   :execution-mode execution-mode
+                   :dry-run-p t
+                   :tasks tasks
+                   :guards (sops-nix-secrets-guards)
+                   :command-specs (sops-nix-secrets-command-specs))))
+
+(defun sops-nix-secrets-shop3-plan-result
+    (&optional (plan (make-sops-nix-secrets-plan)))
+  "Return PLAN as a HyperDoc SHOP3 plan result."
+  (unless (typep plan 'hyperdoc/shop3:hyperdoc-htn-plan-result)
+    (error "Not a HyperDoc SHOP3 plan result: ~S" plan))
+  plan)
 
 (defun sops-nix-secrets-lookup-plan-task
     (task-or-id &key (plan (make-sops-nix-secrets-plan)))
