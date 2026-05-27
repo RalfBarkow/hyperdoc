@@ -129,6 +129,24 @@
                   (hyperdoc/shop3:execution-mode-of shop3-result)
                   "SHOP3 result must preserve the plan-only execution mode")))
 
+(defun run-shop3-class-precedence-smoke-test ()
+  (let* ((plan (make-pi-simulation-plan))
+         (class-names
+           (mapcar #'class-name
+                   (sb-mop:class-precedence-list
+                    (class-of plan)))))
+    (assert-equal 'kioskbeerli/pi-simulation:pi-simulation-plan
+                  (first class-names)
+                  "Pi simulation plan must be the most specific class")
+    (assert-equal 'hyperdoc/shop3:hyperdoc-htn-plan-result
+                  (second class-names)
+                  "HyperDoc SHOP3 plan result must be the direct superclass")
+    (assert-true (member 'standard-object class-names)
+                 "Class precedence must include STANDARD-OBJECT")
+    (assert-equal 't
+                  (car (last class-names))
+                  "Class precedence must end at T")))
+
 (defun run-command-spec-smoke-test ()
   (let ((specs (pi-simulation-command-specs)))
     (assert-true specs
@@ -221,6 +239,7 @@
   (run-fidelity-level-smoke-test)
   (run-local-task-structure-smoke-test)
   (run-shop3-boundary-smoke-test)
+  (run-shop3-class-precedence-smoke-test)
   (run-command-spec-smoke-test)
   (run-scxml-smoke-test)
   (run-boot-skip-smoke-test)

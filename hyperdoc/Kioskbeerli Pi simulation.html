@@ -17,23 +17,63 @@
 
 <h4>Inspectable subsystem</h4>
 
-<pre><code>(asdf:load-system :kioskbeerli/pi-simulation)
+<pre><code>(in-package :cl-user)
+
+(require :asdf)
+
+(defparameter *hyperdoc-root*
+  #p"/Users/rgb/workspace/hyperdoc/")
+
+(uiop:chdir *hyperdoc-root*)
+
+(asdf:load-asd
+ (merge-pathnames #p"kioskbeerli.asd" *hyperdoc-root*))
+
+(asdf:load-system :kioskbeerli/pi-simulation :force t)
 
 (defparameter *example-plan*
   (kioskbeerli/pi-simulation:make-pi-simulation-plan))
 
-(defparameter *example-session*
-  (kioskbeerli/pi-simulation:make-pi-simulation-session
-   :plan *example-plan*))
+(defparameter *example-shop3-result*
+  (kioskbeerli/pi-simulation:pi-simulation-shop3-plan-result
+   *example-plan*))
 
-(format t "~&~A~%mode=~S levels=~D tasks=~D next=~D~%"
-        (type-of *example-session*)
-        (kioskbeerli/pi-simulation:execution-mode-of *example-session*)
-        (length (kioskbeerli/pi-simulation:levels-of *example-plan*))
-        (length (kioskbeerli/pi-simulation:tasks-of *example-plan*))
-        (length (kioskbeerli/pi-simulation:next-actions-of *example-session*)))
+(format t "~&type=~S shop3=~S mode=~S steps=~D tasks=~D~%"
+        (type-of *example-plan*)
+        (typep *example-plan*
+               'hyperdoc/shop3:hyperdoc-htn-plan-result)
+        (hyperdoc/shop3:execution-mode-of *example-shop3-result*)
+        (length
+         (hyperdoc/shop3:hyperdoc-plan-checklist *example-shop3-result*))
+        (length (kioskbeerli/pi-simulation:tasks-of *example-plan*)))
 
-(i *example-session*)</code></pre>
+(mapcar #'class-name
+        (sb-mop:class-precedence-list
+         (class-of *example-plan*)))
+
+(asdf:load-system :hyperdoc/server)
+(asdf:load-system :hyperdoc/inspector)
+
+(clog-moldable-inspector:clog-inspect
+ :object *example-plan*)
+
+(kioskbeerli/pi-simulation:inspect-pi-simulation-plan
+ *example-plan*)</code></pre>
+
+<p>
+  Some local SLY images define <tt>(i ...)</tt> as a user shortcut, but the
+  stable inspector entrypoint is
+  <tt>clog-moldable-inspector:clog-inspect</tt> after loading
+  <tt>:hyperdoc/server</tt> and <tt>:hyperdoc/inspector</tt>.
+</p>
+
+<p>
+  On SBCL the class precedence list also includes the implementation-specific
+  <tt>SB-PCL::SLOT-OBJECT</tt> between <tt>STANDARD-OBJECT</tt> and
+  <tt>T</tt>. The durable boundary is that
+  <tt>KIOSKBEERLI/PI-SIMULATION:PI-SIMULATION-PLAN</tt> is followed directly
+  by <tt>HYPERDOC/SHOP3:HYPERDOC-HTN-PLAN-RESULT</tt>.
+</p>
 
 <p>
   Public entrypoints:
@@ -153,6 +193,7 @@ make kioskbeerli-pi-sim-run</code></pre>
 <p>
   The smoke tests verify ASDF loading, fidelity levels, non-executed command
   specs, SCXML structure, default plan-only mode, explicit HyperDoc SHOP3
-  plan-result participation, skipped VM boot without a backend, and absence of
-  real Pi contact or forbidden execution markers.
+  plan-result participation, class precedence through
+  <tt>hyperdoc/shop3:hyperdoc-htn-plan-result</tt>, skipped VM boot without a
+  backend, and absence of real Pi contact or forbidden execution markers.
 </p>
