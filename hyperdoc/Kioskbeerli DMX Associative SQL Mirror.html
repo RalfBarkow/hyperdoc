@@ -89,6 +89,63 @@ dmx_sql_sync_journal
 (kioskbeerli.dmx-associative-mirror:dmx-sql-provenance-associations
  :db-path *dmx-assoc-db*)</code></pre>
 
+<h2>Persisting the SHOP3 coverage assertion</h2>
+
+<p>
+  The mirror can also record the verified sops-nix planning boundary as local
+  DMX-shaped SQL topics. The parser is intentionally narrow: it recognizes the
+  assertion that the SHOP3 checklist projection covers all 16 local tasks, then
+  persists four stable topics and four local associations. This writes only to
+  the SQLite mirror named by <tt>*dmx-assoc-db*</tt>; it does not write to live
+  DMX or Neo4j, contact the Pi, run <tt>sops</tt>, or run
+  <tt>nixos-rebuild</tt>.
+</p>
+
+<pre><code>(require :asdf)
+(asdf:load-system :kioskbeerli)
+
+(defparameter *dmx-assoc-db*
+  (asdf:system-relative-pathname
+   :hyperdoc
+   "var/dmx-associative-mirror.sqlite"))
+
+(kioskbeerli.dmx-associative-mirror:persist-shop3-checklist-coverage-assertion-as-dmx-sql-topics
+ "its SHOP3 checklist projection covers all 16 local tasks"
+ :db-path *dmx-assoc-db*
+ :subject-uri "hyperdoc:kioskbeerli/sops-nix-secrets/plan"
+ :subject-label "Kioskbeerli sops-nix secrets plan"
+ :plan-system ":kioskbeerli/sops-nix-secrets"
+ :checklist-count 16
+ :task-count 16
+ :evidence "SLY verification: type=SOPS-NIX-SECRETS-PLAN shop3=T mode=:PLAN-ONLY steps=16 tasks=16"
+ :source "operator SLY verification")
+
+(kioskbeerli.dmx-associative-mirror:dmx-sql-counts
+ :db-path *dmx-assoc-db*)
+
+(kioskbeerli.dmx-sql-topicmap:make-dmx-sql-topicmap-projection
+ :db-path *dmx-assoc-db*
+ :title "Kioskbeerli persisted DMX SQL topicmap")</code></pre>
+
+<p>
+  Stable topic URIs:
+</p>
+
+<ul>
+  <li><tt>hyperdoc:kioskbeerli/sops-nix-secrets/plan</tt></li>
+  <li><tt>hyperdoc:kioskbeerli/sops-nix-secrets/shop3-checklist-projection</tt></li>
+  <li><tt>hyperdoc:kioskbeerli/sops-nix-secrets/local-task-graph</tt></li>
+  <li><tt>hyperdoc:kioskbeerli/sops-nix-secrets/assertion/shop3-checklist-covers-16-local-tasks</tt></li>
+</ul>
+
+<p>
+  The associations use <tt>hyperdoc.relation.has-projection</tt>,
+  <tt>hyperdoc.relation.covers</tt>, <tt>hyperdoc.relation.asserts</tt>, and
+  <tt>hyperdoc.relation.has-evidence</tt>. Re-running the persistence function
+  is idempotent by stable URI/local association id; <tt>:replace-existing?</tt>
+  updates evidence and properties without duplicating mirror objects.
+</p>
+
 <h2>Topicmap projection</h2>
 
 <p>

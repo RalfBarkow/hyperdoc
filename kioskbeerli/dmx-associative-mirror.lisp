@@ -16,6 +16,7 @@
    #:seed-kioskbeerli-provenance-topics
    #:persist-kioskbeerli-trace-as-dmx-sql
    #:persist-kioskbeerli-trace-entry-as-dmx-sql
+   #:persist-shop3-checklist-coverage-assertion-as-dmx-sql-topics
    #:dmx-sql-counts
    #:dmx-sql-trace-events
    #:dmx-sql-provenance-associations
@@ -276,6 +277,332 @@ self-evaluating in ordinary function calls."
                     :payload-json payload-json
                     :sync-state sync-state)
   local-id)
+
+(define-condition shop3-checklist-coverage-assertion-parse-failure (error)
+  ((assertion :initarg :assertion :reader parse-failure-assertion)
+   (reason :initarg :reason :reader parse-failure-reason))
+  (:report
+   (lambda (condition stream)
+     (format stream "Could not parse SHOP3 checklist coverage assertion ~S: ~A"
+             (parse-failure-assertion condition)
+             (parse-failure-reason condition)))))
+
+(defun fail-shop3-checklist-coverage-parse (assertion reason)
+  (error 'shop3-checklist-coverage-assertion-parse-failure
+         :assertion assertion
+         :reason reason))
+
+(defun final-integer-in-string (string)
+  (loop with start = nil
+        with value = nil
+        for index from 0 below (length string)
+        for ch = (char string index)
+        do (cond
+             ((and (digit-char-p ch) (not start))
+              (setf start index))
+             ((and start (not (digit-char-p ch)))
+              (setf value (parse-integer string :start start :end index)
+                    start nil)))
+        finally
+           (return (if start
+                       (parse-integer string :start start)
+                       value))))
+
+(defun parse-shop3-checklist-coverage-assertion (assertion)
+  (unless (stringp assertion)
+    (fail-shop3-checklist-coverage-parse assertion "assertion must be a string"))
+  (let* ((normalized (string-downcase assertion))
+         (count (final-integer-in-string normalized)))
+    (unless (search "shop3 checklist projection" normalized)
+      (fail-shop3-checklist-coverage-parse
+       assertion
+       "expected the phrase \"SHOP3 checklist projection\""))
+    (unless (search "cover" normalized)
+      (fail-shop3-checklist-coverage-parse
+       assertion
+       "expected a coverage relation"))
+    (unless (search "local task" normalized)
+      (fail-shop3-checklist-coverage-parse
+       assertion
+       "expected local tasks as the covered object"))
+    (unless count
+      (fail-shop3-checklist-coverage-parse
+       assertion
+       "expected a numeric local task count"))
+    (list :projection-kind "SHOP3 checklist projection"
+          :relation "covers"
+          :count count
+          :object "local tasks")))
+
+(defun dmx-sql-scalar (db-path sql)
+  (multiple-value-bind (stdout stderr exit-code)
+      (sqlite-run db-path sql)
+    (unless (zerop exit-code)
+      (error "SQLite scalar query failed:~%~A~%~A" stdout stderr))
+    (string-trim '(#\Space #\Tab #\Newline #\Return) stdout)))
+
+(defun dmx-sql-object-exists-p (db-path local-id)
+  (string= "1"
+           (dmx-sql-scalar
+            db-path
+            (format nil
+                    "select exists(select 1 from dmx_sql_object where local_id = ~A);"
+                    (sql-literal local-id)))))
+
+(defun dmx-sql-property-exists-p (db-path property-id)
+  (string= "1"
+           (dmx-sql-scalar
+            db-path
+            (format nil
+                    "select exists(select 1 from dmx_sql_property where id = ~A);"
+                    (sql-literal property-id)))))
+
+(defun dmx-sql-topic-local-id (uri)
+  (format nil "topic:~A" uri))
+
+(defun dmx-sql-assoc-local-id (slug)
+  (format nil "assoc:hyperdoc:kioskbeerli/sops-nix-secrets/~A" slug))
+
+(defun dmx-sql-property-id (object-id property-uri)
+  (format nil "property:~A:~A" object-id property-uri))
+
+(defun record-dmx-sql-property
+    (db-path object-id property-uri value &key replace-existing?)
+  (let* ((property-id (dmx-sql-property-id object-id property-uri))
+         (exists (dmx-sql-property-exists-p db-path property-id)))
+    (when (or replace-existing? (not exists))
+      (sqlite-run
+       db-path
+       (format nil
+"INSERT OR ~A INTO dmx_sql_property(id, object_id, property_uri, value, value_json)
+ VALUES(~A, ~A, ~A, ~A, NULL);"
+               (if replace-existing? "REPLACE" "IGNORE")
+               (sql-literal property-id)
+               (sql-literal object-id)
+               (sql-literal property-uri)
+               (sql-literal value))))
+    (cond
+      ((not exists) :created)
+      (replace-existing? :updated)
+      (t :unchanged))))
+
+(defun record-dmx-sql-topic
+    (db-path local-id type-uri value &key uri payload-json replace-existing?)
+  (let ((exists (dmx-sql-object-exists-p db-path local-id)))
+    (when (or replace-existing? (not exists))
+      (upsert-dmx-topic db-path local-id type-uri value
+                        :uri uri
+                        :payload-json payload-json
+                        :sync-state "local")
+      (when uri
+        (upsert-dmx-sync-identity db-path local-id "hyperdoc-local-sql-mirror"
+                                  :remote-uri uri
+                                  :remote-type-uri type-uri
+                                  :sync-state "mirror-provenance")))
+    (cond
+      ((not exists) :created)
+      (replace-existing? :updated)
+      (t :unchanged))))
+
+(defun record-dmx-sql-assoc
+    (db-path assoc-id assoc-type-uri player1-id player1-role player2-id player2-role
+     &key value payload-json replace-existing?)
+  (let ((exists (dmx-sql-object-exists-p db-path assoc-id)))
+    (when (or replace-existing? (not exists))
+      (upsert-dmx-assoc db-path assoc-id assoc-type-uri
+                        player1-id player1-role
+                        player2-id player2-role
+                        :value value
+                        :payload-json payload-json))
+    (cond
+      ((not exists) :created)
+      (replace-existing? :updated)
+      (t :unchanged))))
+
+(defun count-record-states (states state)
+  (count state states :test #'eq))
+
+(defun persist-shop3-checklist-coverage-assertion-as-dmx-sql-topics
+    (assertion
+     &key
+       (db-path *default-dmx-associative-mirror-path*)
+       (subject-uri "hyperdoc:kioskbeerli/sops-nix-secrets/plan")
+       (subject-label "Kioskbeerli sops-nix secrets plan")
+       (plan-system ":kioskbeerli/sops-nix-secrets")
+       checklist-count
+       task-count
+       evidence
+       source
+       replace-existing?)
+  "Persist one parsed SHOP3 checklist coverage assertion into the local SQL mirror.
+
+This function writes only to the DMX-shaped SQLite mirror named by DB-PATH. It
+does not write live DMX or Neo4j, contact the Pi, run sops, run nixos-rebuild,
+or execute any plan command."
+  (let* ((parsed (parse-shop3-checklist-coverage-assertion assertion))
+         (parsed-count (getf parsed :count))
+         (checklist-count (or checklist-count parsed-count))
+         (task-count (or task-count parsed-count)))
+    (unless (= checklist-count parsed-count)
+      (fail-shop3-checklist-coverage-parse
+       assertion
+       (format nil "checklist count ~D does not match parsed count ~D"
+               checklist-count parsed-count)))
+    (unless (= task-count parsed-count)
+      (fail-shop3-checklist-coverage-parse
+       assertion
+       (format nil "task count ~D does not match parsed count ~D"
+               task-count parsed-count)))
+    (initialize-dmx-associative-mirror :db-path db-path)
+    (let* ((projection-uri "hyperdoc:kioskbeerli/sops-nix-secrets/shop3-checklist-projection")
+           (task-graph-uri "hyperdoc:kioskbeerli/sops-nix-secrets/local-task-graph")
+           (assertion-uri
+             (format nil
+                     "hyperdoc:kioskbeerli/sops-nix-secrets/assertion/shop3-checklist-covers-~D-local-tasks"
+                     parsed-count))
+           (plan-topic (dmx-sql-topic-local-id subject-uri))
+           (projection-topic (dmx-sql-topic-local-id projection-uri))
+           (task-graph-topic (dmx-sql-topic-local-id task-graph-uri))
+           (assertion-topic (dmx-sql-topic-local-id assertion-uri))
+           (has-projection-assoc
+             (dmx-sql-assoc-local-id "plan-has-shop3-checklist-projection"))
+           (covers-assoc
+             (dmx-sql-assoc-local-id "shop3-checklist-projection-covers-local-task-graph"))
+           (asserts-assoc
+             (dmx-sql-assoc-local-id "assertion-asserts-shop3-checklist-coverage"))
+           (has-evidence-assoc
+             (dmx-sql-assoc-local-id "assertion-has-evidence"))
+           (topic-states
+             (list
+              (record-dmx-sql-topic db-path plan-topic
+                                    "hyperdoc.shop3.plan"
+                                    subject-label
+                                    :uri subject-uri
+                                    :payload-json
+                                    (json-object :plan-system plan-system)
+                                    :replace-existing? replace-existing?)
+              (record-dmx-sql-topic db-path projection-topic
+                                    "hyperdoc.shop3.checklist-projection"
+                                    "SHOP3 checklist projection"
+                                    :uri projection-uri
+                                    :payload-json
+                                    (json-object :checklist-count checklist-count
+                                                 :execution-mode ":PLAN-ONLY")
+                                    :replace-existing? replace-existing?)
+              (record-dmx-sql-topic db-path task-graph-topic
+                                    "hyperdoc.task-graph"
+                                    "Local task graph"
+                                    :uri task-graph-uri
+                                    :payload-json
+                                    (json-object :task-count task-count)
+                                    :replace-existing? replace-existing?)
+              (record-dmx-sql-topic db-path assertion-topic
+                                    "hyperdoc.assertion"
+                                    assertion
+                                    :uri assertion-uri
+                                    :payload-json
+                                    (json-object :status "verified"
+                                                 :evidence evidence
+                                                 :source source
+                                                 :boundary "plan-only; no command execution; no Pi mutation")
+                                    :replace-existing? replace-existing?)))
+           (property-states
+             (list
+              (record-dmx-sql-property db-path projection-topic
+                                       "hyperdoc.property.checklist-count"
+                                       checklist-count
+                                       :replace-existing? replace-existing?)
+              (record-dmx-sql-property db-path projection-topic
+                                       "hyperdoc.property.execution-mode"
+                                       ":PLAN-ONLY"
+                                       :replace-existing? replace-existing?)
+              (record-dmx-sql-property db-path projection-topic
+                                       "hyperdoc.property.plan-system"
+                                       plan-system
+                                       :replace-existing? replace-existing?)
+              (record-dmx-sql-property db-path task-graph-topic
+                                       "hyperdoc.property.task-count"
+                                       task-count
+                                       :replace-existing? replace-existing?)
+              (record-dmx-sql-property db-path assertion-topic
+                                       "hyperdoc.property.status"
+                                       "verified"
+                                       :replace-existing? replace-existing?)
+              (record-dmx-sql-property db-path assertion-topic
+                                       "hyperdoc.property.evidence"
+                                       evidence
+                                       :replace-existing? replace-existing?)
+              (record-dmx-sql-property db-path assertion-topic
+                                       "hyperdoc.property.source"
+                                       source
+                                       :replace-existing? replace-existing?)
+              (record-dmx-sql-property db-path assertion-topic
+                                       "hyperdoc.property.boundary"
+                                       "plan-only; no command execution; no Pi mutation"
+                                       :replace-existing? replace-existing?)))
+           (assoc-states
+             (list
+              (record-dmx-sql-assoc db-path has-projection-assoc
+                                    "hyperdoc.relation.has-projection"
+                                    plan-topic "hyperdoc.role.source"
+                                    projection-topic "hyperdoc.role.target"
+                                    :replace-existing? replace-existing?)
+              (record-dmx-sql-assoc db-path covers-assoc
+                                    "hyperdoc.relation.covers"
+                                    projection-topic "hyperdoc.role.source"
+                                    task-graph-topic "hyperdoc.role.target"
+                                    :payload-json
+                                    (json-object :checklist-count checklist-count
+                                                 :task-count task-count
+                                                 :coverage "complete")
+                                    :replace-existing? replace-existing?)
+              (record-dmx-sql-assoc db-path asserts-assoc
+                                    "hyperdoc.relation.asserts"
+                                    assertion-topic "hyperdoc.role.assertion"
+                                    task-graph-topic "hyperdoc.role.target"
+                                    :payload-json
+                                    (json-object :asserted-association covers-assoc
+                                                 :source projection-topic
+                                                 :target task-graph-topic)
+                                    :replace-existing? replace-existing?)
+              (record-dmx-sql-assoc db-path has-evidence-assoc
+                                    "hyperdoc.relation.has-evidence"
+                                    assertion-topic "hyperdoc.role.assertion"
+                                    assertion-topic "hyperdoc.role.evidence"
+                                    :value "Evidence stored as assertion properties."
+                                    :payload-json
+                                    (json-object :evidence evidence
+                                                 :source source)
+                                    :replace-existing? replace-existing?))))
+      (declare (ignore property-states))
+      (record-dmx-sql-property db-path covers-assoc
+                               "hyperdoc.property.checklist-count"
+                               checklist-count
+                               :replace-existing? replace-existing?)
+      (record-dmx-sql-property db-path covers-assoc
+                               "hyperdoc.property.task-count"
+                               task-count
+                               :replace-existing? replace-existing?)
+      (record-dmx-sql-property db-path covers-assoc
+                               "hyperdoc.property.coverage"
+                               "complete"
+                               :replace-existing? replace-existing?)
+      (list :ok t
+            :db-path db-path
+            :assertion assertion
+            :topics 4
+            :associations 4
+            :topics-created (count-record-states topic-states :created)
+            :topics-updated (count-record-states topic-states :updated)
+            :associations-created (count-record-states assoc-states :created)
+            :associations-updated (count-record-states assoc-states :updated)
+            :stable-uris (list subject-uri projection-uri task-graph-uri assertion-uri)
+            :counts (list :checklist-count checklist-count
+                          :task-count task-count)
+            :checklist-count checklist-count
+            :task-count task-count
+            :coverage :complete
+            :boundary :local-sql-mirror-only))))
 
 (defun persist-kioskbeerli-trace-entry-as-dmx-sql (db-path trace entry)
   "Represent one Kioskbeerli trace ENTRY as DMX-shaped SQL topics and associations."

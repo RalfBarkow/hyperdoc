@@ -704,6 +704,7 @@
                                        (:file "skillization-smoke")
                                        (:file "mech-deployment-provenance-smoke")
                                        (:file "kioskbeerli-dashboard-smoke")
+                                       (:file "kioskbeerli-dmx-associative-mirror-smoke")
                                        (:file "py4dmx-cluster-smoke")
                                        (:file "scxml-compiler-smoke")
                              (:file "running-image-coherence-rebuild-smoke")
