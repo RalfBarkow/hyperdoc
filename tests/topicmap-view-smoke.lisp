@@ -125,6 +125,29 @@
      (html-inspector-views:view-html topicmap)
      "file-artifact Topicmap view")))
 
+(defun run-topicmap-view-html-page-dispatch-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((page (hyperbook:find-page hyperdoc:*hyperdoc*
+                                     "Kioskbeerli"
+                                     :signal-error? t))
+         (projection (hyperdoc:topicmap-projection-of page))
+         (views (topicmap-view-load-inspector-views-for-object page))
+         (topicmap (topicmap-view-find-view-by-title views "Topicmap")))
+    (topicmap-view-assert-typep
+     'hyperdoc:topicmap-projection
+     projection
+     "Kioskbeerli html-page must produce a native topicmap projection")
+    (topicmap-view-assert-contains
+     "projection: Kioskbeerli"
+     (hyperdoc:render-topicmap-view-of-object-html page)
+     "Kioskbeerli html-page projection must use the page title as source title")
+    (topicmap-view-assert-true
+     topicmap
+     "Kioskbeerli html-page inspector dispatch must expose Topicmap")
+    (assert-dm6-inline-topicmap-island
+     (html-inspector-views:view-html topicmap)
+     "Kioskbeerli html-page Topicmap view")))
+
 (defun run-topicmap-view-no-fallback-tab-smoke-test ()
   (asdf:load-system :hyperdoc/inspector)
   (let ((views (topicmap-view-load-inspector-views-for-object
@@ -218,6 +241,7 @@
   (run-topicmap-view-rendering-smoke-test)
   (run-topicmap-view-inspector-content-smoke-test)
   (run-topicmap-view-artifact-dispatch-smoke-test)
+  (run-topicmap-view-html-page-dispatch-smoke-test)
   (run-topicmap-view-no-fallback-tab-smoke-test)
   (run-topicmap-view-public-entrypoint-smoke-test)
   (run-topicmap-view-overlay-contract-smoke-test)

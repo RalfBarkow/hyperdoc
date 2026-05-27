@@ -22,6 +22,15 @@
 (defmethod page-class ((filetype (eql :html)))
   (find-class 'html-page))
 
+(defmethod topicmap-projection-of ((page html-page))
+  (let ((file (file-of page)))
+    (when (and file (uiop:file-exists-p file))
+      (topicmap-projection-of
+       (source-content-from-object
+        page
+        :title (title-of page)
+        :text (uiop:read-file-string file))))))
+
 ;;
 ;; Load an HTML page, parse it, set the title, and compile a
 ;; list of the links it contains.
