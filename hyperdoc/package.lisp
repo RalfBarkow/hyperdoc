@@ -521,6 +521,7 @@
    #:make-runtime-coherence-report
    #:make-inspector-runtime-coherence-report
    #:make-html-inspector-views-environment-coherence-report
+   #:make-html-inspector-views-asdf-visibility-coherence-report
    #:make-html-inspector-views-live-method-coherence-report
    #:repair-html-inspector-views-standard-live-methods
    #:make-current-plan-browser-coherence-report
@@ -535,6 +536,7 @@
    #:clog-moldable-inspector-system-chunk
    #:html-inspector-views-environment-chunk
    #:html-inspector-views-environment-repair-advice
+   #:html-inspector-views-asdf-visibility-chunk
    #:html-inspector-base-system-chunk
    #:html-inspector-standard-view-chunk
    #:html-inspector-views-live-method-chunk

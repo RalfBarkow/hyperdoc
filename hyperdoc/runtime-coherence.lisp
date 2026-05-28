@@ -4,11 +4,21 @@
 
 (defparameter *coherence-chunk-statuses*
   '(:unknown
+    :ok
     :good
     :missing
     :missing-package
     :missing-generic-function
     :missing-null-method
+    :packages-present-asdf-missing
+    :base-system-missing
+    :standard-system-missing
+    :missing-html-inspector-views-src
+    :missing-html-inspector-views-asd-env
+    :missing-html-inspector-views-asd
+    :asdf-subsystem-not-visible
+    :nix-derivation-mismatch
+    :stale-sly-environment
     :stale
     :blocked
     :failed-safe-call
@@ -112,6 +122,15 @@
             :missing-package
             :missing-generic-function
             :missing-null-method
+            :packages-present-asdf-missing
+            :base-system-missing
+            :standard-system-missing
+            :missing-html-inspector-views-src
+            :missing-html-inspector-views-asd-env
+            :missing-html-inspector-views-asd
+            :asdf-subsystem-not-visible
+            :nix-derivation-mismatch
+            :stale-sly-environment
             :stale
             :blocked
             :failed-safe-call
@@ -140,9 +159,12 @@
           :by-status (coherence-status-counts chunks)
           :blocking-chunks (mapcar #'coherence-chunk-id-of blocking)
           :good-chunks (mapcar #'coherence-chunk-id-of
-                               (remove :good chunks
-                                       :key #'coherence-chunk-status-of
-                                       :test-not #'eq)))))
+                               (remove-if-not
+                                (lambda (chunk)
+                                  (member (coherence-chunk-status-of chunk)
+                                          '(:good :ok)
+                                          :test #'eq))
+                                chunks)))))
 
 (defun runtime-coherence-default-actions (chunks)
   (let ((blocking (runtime-coherence-blocking-chunks chunks))
@@ -177,6 +199,18 @@
     (condition (condition)
       (values nil condition))))
 
+(defun safe-asdf-system-source-file (system)
+  (handler-case
+      (multiple-value-bind (symbol status)
+          (find-symbol "SYSTEM-SOURCE-FILE" :asdf)
+        (values (and system
+                     status
+                     (fboundp symbol)
+                     (funcall symbol system))
+                nil))
+    (condition (condition)
+      (values nil condition))))
+
 (defun maybe-directory-pathname (path)
   (when path
     (handler-case
@@ -195,6 +229,28 @@
   (let ((directory (maybe-directory-pathname root)))
     (and directory
          (merge-pathnames relative-path directory))))
+
+(defun safe-namestring (path)
+  (and path
+       (handler-case
+           (namestring (pathname path))
+         (condition ()
+           nil))))
+
+(defun nix-store-path-p (path)
+  (let ((namestring (safe-namestring path)))
+    (and namestring
+         (search "/nix/store/" namestring :test #'char=))))
+
+(defun nix-store-derivation-key (path)
+  (let* ((namestring (safe-namestring path))
+         (prefix "/nix/store/")
+         (start (and namestring
+                     (search prefix namestring :test #'char=))))
+    (when start
+      (let* ((key-start (+ start (length prefix)))
+             (key-end (position #\/ namestring :start key-start)))
+        (subseq namestring key-start key-end)))))
 
 (defun directory-exists-p (path)
   (and path
@@ -604,6 +660,248 @@
    :extra-evidence
    (list (list :ordinary-probe-mode :non-mutating
                :load-system-called nil))))
+
+(defun html-inspector-views-repo-local-asd-pathname ()
+  (handler-case
+      (asdf:system-relative-pathname
+       :hyperdoc
+       "nix/vendor/html-inspector-views/html-inspector-views.asd")
+    (condition ()
+      nil)))
+
+(defun html-inspector-views-asdf-system-evidence
+    (package-name system-name)
+  (let ((package (find-package package-name)))
+    (multiple-value-bind (system find-condition)
+        (safe-find-asdf-system system-name)
+      (multiple-value-bind (source-file source-file-condition)
+          (safe-asdf-system-source-file system)
+        (multiple-value-bind (source-directory source-directory-condition)
+            (safe-asdf-system-source-directory system)
+          (values
+           (list :package-name package-name
+                 :package package
+                 :package-present (not (null package))
+                 :asdf-system-name system-name
+                 :asdf-system system
+                 :asdf-system-found (not (null system))
+                 :asdf-system-source-file source-file
+                 :asdf-system-source-directory source-directory
+                 :conditions
+                 (remove
+                  nil
+                  (list (and find-condition
+                             (list :probe 'asdf:find-system
+                                   :condition
+                                   (condition-evidence find-condition)))
+                        (and source-file-condition
+                             (list :probe 'asdf:system-source-file
+                                   :condition
+                                   (condition-evidence source-file-condition)))
+                        (and source-directory-condition
+                             (list :probe 'asdf:system-source-directory
+                                   :condition
+                                   (condition-evidence
+                                    source-directory-condition))))))
+           (or find-condition
+               source-file-condition
+               source-directory-condition)))))))
+
+(defun html-inspector-views-asdf-visibility-diagnoses
+    (&key base-package-present-p
+          standard-package-present-p
+          base-system-found-p
+          standard-system-found-p
+          src-directory-exists-p
+          expected-asd-exists-p
+          explicit-asd-set-p
+          explicit-asd-exists-p
+          stale-src-relative-to-repo-p
+          nix-derivation-mismatch-p)
+  (remove
+   nil
+   (list
+    (when (and (or base-package-present-p
+                   standard-package-present-p)
+               (or (not base-system-found-p)
+                   (not standard-system-found-p)))
+      :packages-present-asdf-missing)
+    (when (not src-directory-exists-p)
+      :missing-html-inspector-views-src)
+    (when (not explicit-asd-set-p)
+      :missing-html-inspector-views-asd-env)
+    (when (not expected-asd-exists-p)
+      :missing-html-inspector-views-asd)
+    (when (and explicit-asd-set-p
+               (not explicit-asd-exists-p))
+      :missing-html-inspector-views-asd)
+    (when stale-src-relative-to-repo-p
+      :stale-sly-environment)
+    (when nix-derivation-mismatch-p
+      :nix-derivation-mismatch)
+    (when (and (not base-system-found-p)
+               (not standard-system-found-p))
+      :asdf-subsystem-not-visible)
+    (when (not base-system-found-p)
+      :base-system-missing)
+    (when (not standard-system-found-p)
+      :standard-system-missing))))
+
+(defun html-inspector-views-asdf-visibility-status (diagnoses)
+  (cond
+    ((null diagnoses)
+     :ok)
+    ((member :packages-present-asdf-missing diagnoses :test #'eq)
+     :packages-present-asdf-missing)
+    ((member :stale-sly-environment diagnoses :test #'eq)
+     :stale-sly-environment)
+    ((member :nix-derivation-mismatch diagnoses :test #'eq)
+     :nix-derivation-mismatch)
+    ((member :missing-html-inspector-views-src diagnoses :test #'eq)
+     :missing-html-inspector-views-src)
+    ((member :missing-html-inspector-views-asd-env diagnoses :test #'eq)
+     :missing-html-inspector-views-asd-env)
+    ((member :missing-html-inspector-views-asd diagnoses :test #'eq)
+     :missing-html-inspector-views-asd)
+    ((member :asdf-subsystem-not-visible diagnoses :test #'eq)
+     :asdf-subsystem-not-visible)
+    ((member :base-system-missing diagnoses :test #'eq)
+     :base-system-missing)
+    ((member :standard-system-missing diagnoses :test #'eq)
+     :standard-system-missing)
+    (t
+     :blocked)))
+
+(defun html-inspector-views-asdf-visibility-chunk
+    (&key (base-package-name "HTML-INSPECTOR-VIEWS")
+          (standard-package-name "HTML-INSPECTOR-VIEWS/STANDARD")
+          (base-system-name :html-inspector-views)
+          (standard-system-name :html-inspector-views/standard)
+          (html-inspector-views-src (uiop:getenv "HTML_INSPECTOR_VIEWS_SRC"))
+          (html-inspector-views-asd (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD"))
+          (cl-source-registry (uiop:getenv "CL_SOURCE_REGISTRY")))
+  (handler-case
+      (multiple-value-bind (base-evidence base-condition)
+          (html-inspector-views-asdf-system-evidence
+           base-package-name
+           base-system-name)
+        (multiple-value-bind (standard-evidence standard-condition)
+            (html-inspector-views-asdf-system-evidence
+             standard-package-name
+             standard-system-name)
+          (let* ((src-directory
+                   (maybe-directory-pathname html-inspector-views-src))
+                 (src-directory-exists-p
+                   (directory-exists-p src-directory))
+                 (expected-asd
+                   (child-pathname src-directory
+                                   #P"html-inspector-views.asd"))
+                 (expected-asd-exists-p
+                   (pathname-exists-p expected-asd))
+                 (explicit-asd-set-p
+                   (not (null html-inspector-views-asd)))
+                 (explicit-asd-path
+                   (and explicit-asd-set-p
+                        (pathname html-inspector-views-asd)))
+                 (explicit-asd-exists-p
+                   (and explicit-asd-set-p
+                        (pathname-exists-p explicit-asd-path)))
+                 (repo-local-asd
+                   (html-inspector-views-repo-local-asd-pathname))
+                 (repo-local-asd-exists-p
+                   (pathname-exists-p repo-local-asd))
+                 (src-stale-relative-to-repo-p
+                   (and repo-local-asd-exists-p
+                        html-inspector-views-src
+                        (not expected-asd-exists-p)))
+                 (src-derivation
+                   (nix-store-derivation-key src-directory))
+                 (explicit-asd-derivation
+                   (nix-store-derivation-key explicit-asd-path))
+                 (nix-derivation-mismatch-p
+                   (and src-derivation
+                        explicit-asd-derivation
+                        (not (string= src-derivation
+                                      explicit-asd-derivation))))
+                 (diagnoses
+                   (html-inspector-views-asdf-visibility-diagnoses
+                    :base-package-present-p
+                    (getf base-evidence :package-present)
+                    :standard-package-present-p
+                    (getf standard-evidence :package-present)
+                    :base-system-found-p
+                    (getf base-evidence :asdf-system-found)
+                    :standard-system-found-p
+                    (getf standard-evidence :asdf-system-found)
+                    :src-directory-exists-p src-directory-exists-p
+                    :expected-asd-exists-p expected-asd-exists-p
+                    :explicit-asd-set-p explicit-asd-set-p
+                    :explicit-asd-exists-p explicit-asd-exists-p
+                    :stale-src-relative-to-repo-p
+                    src-stale-relative-to-repo-p
+                    :nix-derivation-mismatch-p
+                    nix-derivation-mismatch-p))
+                 (status
+                   (html-inspector-views-asdf-visibility-status
+                    diagnoses)))
+            (make-coherence-chunk
+             :id "html-inspector-views-asdf-visibility"
+             :title "HTML inspector views ASDF visibility"
+             :kind :asdf-system
+             :status status
+             :value (list :diagnoses diagnoses
+                          :base-system-name base-system-name
+                          :standard-system-name standard-system-name
+                          :html-inspector-views-src
+                          html-inspector-views-src
+                          :html-inspector-views-asd
+                          html-inspector-views-asd)
+             :evidence
+             (list
+              (append (list :scope :base) base-evidence)
+              (append (list :scope :standard) standard-evidence)
+              (list :environment
+                    :html-inspector-views-src html-inspector-views-src
+                    :html-inspector-views-src-directory src-directory
+                    :html-inspector-views-src-exists
+                    src-directory-exists-p
+                    :expected-asd expected-asd
+                    :expected-asd-exists expected-asd-exists-p
+                    :html-inspector-views-asd html-inspector-views-asd
+                    :html-inspector-views-asd-set explicit-asd-set-p
+                    :html-inspector-views-asd-exists
+                    explicit-asd-exists-p
+                    :cl-source-registry cl-source-registry
+                    :repo-local-asd repo-local-asd
+                    :repo-local-asd-exists repo-local-asd-exists-p
+                    :src-stale-relative-to-repo
+                    src-stale-relative-to-repo-p
+                    :nix-derivation-mismatch
+                    nix-derivation-mismatch-p)
+              (list :diagnoses diagnoses))
+             :last-error (or base-condition standard-condition)
+             :repair-options
+             (unless (eq status :ok)
+               '(:re-enter-updated-nix-dev-shell
+                 :repair-cl-source-registry
+                 :bind-html-inspector-views-src-and-asd-to-current-derivation))
+             :depends-on '("html-inspector-views-environment")))))
+    (condition (condition)
+      (make-coherence-chunk
+       :id "html-inspector-views-asdf-visibility"
+       :title "HTML inspector views ASDF visibility"
+       :kind :asdf-system
+       :status :blocked
+       :value (list :diagnoses '(:blocked)
+                    :html-inspector-views-src html-inspector-views-src
+                    :html-inspector-views-asd html-inspector-views-asd)
+       :evidence (list (condition-evidence condition))
+       :last-error condition
+       :repair-options
+       '(:re-enter-updated-nix-dev-shell
+         :repair-cl-source-registry
+         :bind-html-inspector-views-src-and-asd-to-current-derivation)
+       :depends-on '("html-inspector-views-environment")))))
 
 (defun html-inspector-views-environment-advice-from-observation
     (src-directory-exists-p
@@ -1022,6 +1320,8 @@
           '("clog-asdf-code-root"
             "clog-static-asset-root"
             "clog-moldable-inspector-system"
+            "html-inspector-views-environment"
+            "html-inspector-views-asdf-visibility"
             "html-inspector-views-base-system")
           :test #'string=))
 
@@ -1113,6 +1413,30 @@
      :title title
      :observed-at observed-at
      :chunks (list chunk))))
+
+(defun make-html-inspector-views-asdf-visibility-coherence-report
+    (&key (title "HTML inspector views ASDF visibility coherence report")
+          (observed-at (get-universal-time))
+          (base-package-name "HTML-INSPECTOR-VIEWS")
+          (standard-package-name "HTML-INSPECTOR-VIEWS/STANDARD")
+          (base-system-name :html-inspector-views)
+          (standard-system-name :html-inspector-views/standard)
+          (html-inspector-views-src (uiop:getenv "HTML_INSPECTOR_VIEWS_SRC"))
+          (html-inspector-views-asd (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD"))
+          (cl-source-registry (uiop:getenv "CL_SOURCE_REGISTRY")))
+  (make-runtime-coherence-report
+   :title title
+   :observed-at observed-at
+   :chunks
+   (list
+    (html-inspector-views-asdf-visibility-chunk
+     :base-package-name base-package-name
+     :standard-package-name standard-package-name
+     :base-system-name base-system-name
+     :standard-system-name standard-system-name
+     :html-inspector-views-src html-inspector-views-src
+     :html-inspector-views-asd html-inspector-views-asd
+     :cl-source-registry cl-source-registry))))
 
 (defun make-html-inspector-views-live-method-coherence-report
     (&key (title "HTML inspector views live method coherence report")
@@ -1254,6 +1578,10 @@
   (let* ((clog-code-root (clog-asdf-code-root-chunk))
          (clog-static-root (clog-static-asset-root-chunk))
          (clog-inspector (clog-moldable-inspector-system-chunk))
+         (html-environment
+           (html-inspector-views-environment-chunk))
+         (html-asdf-visibility
+           (html-inspector-views-asdf-visibility-chunk))
          (html-base (html-inspector-base-system-chunk))
          (graphviz (s-graphviz-optional-capability-chunk))
          (html-standard
@@ -1269,6 +1597,8 @@
      :chunks (list clog-code-root
                    clog-static-root
                    clog-inspector
+                   html-environment
+                   html-asdf-visibility
                    html-base
                    html-standard
                    html-standard-live-methods
