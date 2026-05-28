@@ -520,6 +520,7 @@
    #:make-coherence-chunk
    #:make-runtime-coherence-report
    #:make-inspector-runtime-coherence-report
+   #:make-html-inspector-views-environment-coherence-report
    #:make-current-plan-browser-coherence-report
    #:asdf-root-candidate-p
    #:static-asset-root-candidate-p
@@ -530,6 +531,8 @@
    #:clog-static-asset-root-chunk
    #:attempt-load-asdf-system-chunk
    #:clog-moldable-inspector-system-chunk
+   #:html-inspector-views-environment-chunk
+   #:html-inspector-views-environment-repair-advice
    #:html-inspector-base-system-chunk
    #:html-inspector-standard-view-chunk
    #:html-inspector-standard-dependency-cache-chunk

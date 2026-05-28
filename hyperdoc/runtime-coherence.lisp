@@ -171,6 +171,18 @@
       (condition ()
         nil))))
 
+(defun pathname-exists-p (path)
+  (and path
+       (handler-case
+           (probe-file (pathname path))
+         (condition ()
+           nil))))
+
+(defun child-pathname (root relative-path)
+  (let ((directory (maybe-directory-pathname root)))
+    (and directory
+         (merge-pathnames relative-path directory))))
+
 (defun directory-exists-p (path)
   (and path
        (handler-case
@@ -555,6 +567,149 @@
    (list (list :ordinary-probe-mode :non-mutating
                :load-system-called nil))))
 
+(defun html-inspector-views-environment-advice-from-observation
+    (src-directory-exists-p
+     expected-asd-exists-p
+     explicit-asd-set-p
+     explicit-asd-exists-p
+     base-system
+     standard-system
+     &key src-value
+          explicit-asd-value)
+  (cond
+    ((not src-directory-exists-p)
+     :missing-html-inspector-views-src)
+    ((and (not expected-asd-exists-p)
+          (or (and src-value
+                   (search "/nix/store/" (namestring (pathname src-value))
+                           :test #'char=))
+              (and explicit-asd-value
+                   (search "/nix/store/" (namestring (pathname explicit-asd-value))
+                           :test #'char=))))
+     :stale-sly-environment)
+    ((not expected-asd-exists-p)
+     :missing-html-inspector-views-asd)
+    ((not explicit-asd-set-p)
+     :missing-html-inspector-views-asd)
+    ((and explicit-asd-set-p
+          (not explicit-asd-exists-p))
+     :missing-html-inspector-views-asd)
+    ((or (not base-system)
+         (not standard-system))
+     :asdf-subsystem-not-visible)
+    (t
+     :ok)))
+
+(defun status-for-html-inspector-views-environment-advice (advice)
+  (ecase advice
+    (:ok :good)
+    (:missing-html-inspector-views-src :missing)
+    ((:stale-sly-environment
+      :missing-html-inspector-views-asd
+      :asdf-subsystem-not-visible)
+     :blocked)))
+
+(defun html-inspector-views-environment-chunk
+    (&key (html-inspector-views-src (uiop:getenv "HTML_INSPECTOR_VIEWS_SRC"))
+          (html-inspector-views-asd (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD")))
+  (handler-case
+      (let* ((src-directory (maybe-directory-pathname html-inspector-views-src))
+             (src-directory-exists-p (directory-exists-p src-directory))
+             (expected-asd (child-pathname src-directory
+                                           #P"html-inspector-views.asd"))
+             (expected-asd-exists-p (pathname-exists-p expected-asd))
+             (explicit-asd-set-p (not (null html-inspector-views-asd)))
+             (explicit-asd-path (and html-inspector-views-asd
+                                     (pathname html-inspector-views-asd)))
+             (explicit-asd-exists-p
+               (and explicit-asd-set-p
+                    (pathname-exists-p explicit-asd-path)))
+             (base-condition nil)
+             (standard-condition nil))
+        (multiple-value-bind (base-system base-error)
+            (safe-find-asdf-system :html-inspector-views)
+          (setf base-condition base-error)
+          (multiple-value-bind (standard-system standard-error)
+              (safe-find-asdf-system :html-inspector-views/standard)
+            (setf standard-condition standard-error)
+            (let* ((advice
+                     (html-inspector-views-environment-advice-from-observation
+                      src-directory-exists-p
+                      expected-asd-exists-p
+                      explicit-asd-set-p
+                      explicit-asd-exists-p
+                      base-system
+                      standard-system
+                      :src-value html-inspector-views-src
+                      :explicit-asd-value html-inspector-views-asd))
+                   (status
+                     (status-for-html-inspector-views-environment-advice
+                      advice)))
+              (make-coherence-chunk
+               :id "html-inspector-views-environment"
+               :title "HTML inspector views environment"
+               :kind :asdf-code-root
+               :status status
+               :value (list :repair-advice advice
+                            :html-inspector-views-src html-inspector-views-src
+                            :html-inspector-views-asd html-inspector-views-asd)
+               :evidence
+               (list
+                (list :env-var "HTML_INSPECTOR_VIEWS_SRC"
+                      :value html-inspector-views-src
+                      :directory src-directory
+                      :directory-exists src-directory-exists-p
+                      :expected-asd expected-asd
+                      :expected-asd-exists expected-asd-exists-p)
+                (list :env-var "HTML_INSPECTOR_VIEWS_ASD"
+                      :value html-inspector-views-asd
+                      :set explicit-asd-set-p
+                      :path explicit-asd-path
+                      :exists explicit-asd-exists-p)
+                (list :probe 'asdf:find-system
+                      :system-name :html-inspector-views
+                      :system base-system
+                      :found (not (null base-system)))
+                (list :probe 'asdf:find-system
+                      :system-name :html-inspector-views/standard
+                      :system standard-system
+                      :found (not (null standard-system)))
+                (list :repair-advice advice
+                      :message
+                      "This chunk checks process environment coherence for the HTML inspector views source derivation."))
+               :last-error (or base-condition standard-condition)
+               :repair-options
+               (unless (eq advice :ok)
+                 '(:re-enter-updated-nix-dev-shell
+                   :bind-html-inspector-views-src-and-asd-to-current-derivation)))))))
+    (condition (condition)
+      (make-coherence-chunk
+       :id "html-inspector-views-environment"
+       :title "HTML inspector views environment"
+       :kind :asdf-code-root
+       :status :failed
+       :value (list :repair-advice :stale-sly-environment
+                    :html-inspector-views-src html-inspector-views-src
+                    :html-inspector-views-asd html-inspector-views-asd)
+       :evidence (list (condition-evidence condition))
+       :last-error condition
+       :repair-options
+       '(:re-enter-updated-nix-dev-shell
+         :bind-html-inspector-views-src-and-asd-to-current-derivation)))))
+
+(defun html-inspector-views-environment-repair-advice
+    (&key (html-inspector-views-src (uiop:getenv "HTML_INSPECTOR_VIEWS_SRC"))
+          (html-inspector-views-asd (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD")))
+  (handler-case
+      (getf
+       (coherence-chunk-value-of
+        (html-inspector-views-environment-chunk
+         :html-inspector-views-src html-inspector-views-src
+         :html-inspector-views-asd html-inspector-views-asd))
+       :repair-advice)
+    (condition ()
+      :stale-sly-environment)))
+
 (defun s-graphviz-optional-capability-chunk (&key load-probe)
   (if load-probe
       (attempt-load-asdf-system-chunk
@@ -793,6 +948,20 @@
                  :recommended-next-actions
                  (or recommended-next-actions
                      (runtime-coherence-default-actions chunks))))
+
+(defun make-html-inspector-views-environment-coherence-report
+    (&key (title "HTML inspector views environment coherence report")
+          (observed-at (get-universal-time))
+          (html-inspector-views-src (uiop:getenv "HTML_INSPECTOR_VIEWS_SRC"))
+          (html-inspector-views-asd (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD")))
+  (let ((chunk
+          (html-inspector-views-environment-chunk
+           :html-inspector-views-src html-inspector-views-src
+           :html-inspector-views-asd html-inspector-views-asd)))
+    (make-runtime-coherence-report
+     :title title
+     :observed-at observed-at
+     :chunks (list chunk))))
 
 (defun make-inspector-runtime-coherence-report (&key
                                                   (title "Inspector runtime coherence report")
