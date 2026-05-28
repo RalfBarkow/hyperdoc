@@ -46,6 +46,8 @@
                   "clog-static-asset-root"
                   "clog-moldable-inspector-system"
                   "html-inspector-views-base-system"
+                  "html-inspector-views-environment"
+                  "html-inspector-views-asdf-visibility"
                   "html-inspector-views-standard-view"
                   "html-inspector-views-standard-live-methods"
                   "html-inspector-views-standard-dependency-cache"
@@ -90,6 +92,22 @@
     (when package
       (delete-package package))))
 
+(defun rc-find-evidence (scope chunk)
+  (find scope
+        (hyperdoc:coherence-chunk-evidence-of chunk)
+        :key (lambda (entry)
+               (and (listp entry)
+                    (getf entry :scope)))))
+
+(defun rc-environment-evidence (chunk)
+  (let ((entry (find :environment
+                     (hyperdoc:coherence-chunk-evidence-of chunk)
+                     :key (lambda (entry)
+                            (and (listp entry)
+                                 (first entry))))))
+    (and entry
+         (rest entry))))
+
 (defun rc-with-live-method-fixture (thunk)
   (let* ((package-name (rc-temp-package-name "LIVE-METHODS"))
          (package (make-package package-name :use '(:cl)))
@@ -105,6 +123,17 @@
                           collect dependency)))
            (funcall thunk package-name depends-on dependencies))
       (rc-delete-package-if-present package-name))))
+
+(defun rc-with-package-pair-fixture (thunk)
+  (let ((base-package-name (rc-temp-package-name "BASE-PACKAGE"))
+        (standard-package-name (rc-temp-package-name "STANDARD-PACKAGE")))
+    (unwind-protect
+         (progn
+           (make-package base-package-name :use '(:cl))
+           (make-package standard-package-name :use '(:cl))
+           (funcall thunk base-package-name standard-package-name))
+      (rc-delete-package-if-present standard-package-name)
+      (rc-delete-package-if-present base-package-name))))
 
 (defun rc-classify-clog-src-no-asd-smoke-test ()
   (let ((directory (rc-make-temp-directory "no-asd")))
@@ -329,6 +358,89 @@
                                   :if-does-not-exist :ignore)))
   t)
 
+(defun rc-html-inspector-asdf-visibility-absent-smoke-test ()
+  (let* ((base-package-name (rc-temp-package-name "ABSENT-BASE"))
+         (standard-package-name (rc-temp-package-name "ABSENT-STANDARD"))
+         (base-system-name (rc-temp-package-name "absent-base-system"))
+         (standard-system-name (rc-temp-package-name "absent-standard-system"))
+         (report
+           (hyperdoc:make-html-inspector-views-asdf-visibility-coherence-report
+            :base-package-name base-package-name
+            :standard-package-name standard-package-name
+            :base-system-name base-system-name
+            :standard-system-name standard-system-name
+            :html-inspector-views-src nil
+            :html-inspector-views-asd nil
+            :cl-source-registry nil))
+         (chunk (first (hyperdoc:runtime-coherence-report-chunks-of report)))
+         (base-evidence (rc-find-evidence :base chunk))
+         (standard-evidence (rc-find-evidence :standard chunk))
+         (environment-evidence (rc-environment-evidence chunk)))
+    (rc-assert-true
+     chunk
+     "ASDF visibility report must construct when packages and systems are absent")
+    (rc-assert-true
+     (not (eq (hyperdoc:coherence-chunk-status-of chunk)
+              :missing-package))
+     "ASDF visibility must not collapse absent ASDF systems into missing package status")
+    (rc-assert-true
+     (and base-evidence
+          (not (getf base-evidence :package-present))
+          (not (getf base-evidence :asdf-system-found)))
+     "Base evidence must record package presence and ASDF visibility separately")
+    (rc-assert-true
+     (and standard-evidence
+          (not (getf standard-evidence :package-present))
+          (not (getf standard-evidence :asdf-system-found)))
+     "Standard evidence must record package presence and ASDF visibility separately")
+    (rc-assert-true
+     (and environment-evidence
+          (not (getf environment-evidence :html-inspector-views-asd-set)))
+     "Missing HTML_INSPECTOR_VIEWS_ASD must be recorded as environment evidence"))
+  t)
+
+(defun rc-html-inspector-asdf-visibility-packages-present-smoke-test ()
+  (rc-with-package-pair-fixture
+   (lambda (base-package-name standard-package-name)
+     (let* ((base-system-name (rc-temp-package-name "missing-base-system"))
+            (standard-system-name
+              (rc-temp-package-name "missing-standard-system"))
+            (report
+              (hyperdoc:make-html-inspector-views-asdf-visibility-coherence-report
+               :base-package-name base-package-name
+               :standard-package-name standard-package-name
+               :base-system-name base-system-name
+               :standard-system-name standard-system-name
+               :html-inspector-views-src nil
+               :html-inspector-views-asd nil
+               :cl-source-registry nil))
+            (chunk
+              (first (hyperdoc:runtime-coherence-report-chunks-of report)))
+            (base-evidence (rc-find-evidence :base chunk))
+            (standard-evidence (rc-find-evidence :standard chunk))
+            (diagnoses
+              (getf (hyperdoc:coherence-chunk-value-of chunk)
+                    :diagnoses)))
+       (rc-assert-equal
+        :packages-present-asdf-missing
+        (hyperdoc:coherence-chunk-status-of chunk)
+        "Package-present ASDF-missing state must be explicit")
+       (rc-assert-true
+        (and (getf base-evidence :package-present)
+             (not (getf base-evidence :asdf-system-found))
+             (getf standard-evidence :package-present)
+             (not (getf standard-evidence :asdf-system-found)))
+        "Package and ASDF visibility evidence must stay independent")
+       (rc-assert-true
+        (member :missing-html-inspector-views-asd-env
+                diagnoses
+                :test #'eq)
+        "Missing HTML_INSPECTOR_VIEWS_ASD must not be confused with missing package")
+       (rc-assert-true
+        (member :asdf-subsystem-not-visible diagnoses :test #'eq)
+        "Missing ASDF subsystem visibility must be recorded as a diagnosis"))))
+  t)
+
 (defun rc-static-root-missing-assets-degrades-smoke-test ()
   (let ((directory (rc-make-temp-directory "missing-static-assets")))
     (unwind-protect
@@ -406,6 +518,8 @@
   (rc-live-method-report-missing-null-method-smoke-test)
   (rc-live-method-repair-installs-null-method-smoke-test)
   (rc-html-inspector-views-environment-missing-asd-smoke-test)
+  (rc-html-inspector-asdf-visibility-absent-smoke-test)
+  (rc-html-inspector-asdf-visibility-packages-present-smoke-test)
   (rc-static-root-missing-assets-degrades-smoke-test)
   (rc-report-construction-does-not-load-systems-smoke-test)
   (rc-current-plan-browser-report-smoke-test)
