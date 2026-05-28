@@ -17,6 +17,8 @@
   <li><a hyperbook="topics" page="Inspector optional dependency"><tt>Inspector optional dependency</tt></a></li>
   <li><a hyperbook="topics" page="Browser inspection session chunk"><tt>Browser inspection session chunk</tt></a></li>
   <li><a expr="(make-inspector-runtime-coherence-report)"><tt>(make-inspector-runtime-coherence-report)</tt></a></li>
+  <li><a expr="(make-html-inspector-views-environment-coherence-report)"><tt>(make-html-inspector-views-environment-coherence-report)</tt></a></li>
+  <li><a expr="(html-inspector-views-environment-repair-advice)"><tt>(html-inspector-views-environment-repair-advice)</tt></a></li>
   <li><a expr="(make-current-plan-browser-coherence-report :root-object '(:synthetic-plan-result) :summary '(:synthetic-summary) :checklist '(:synthetic-checklist))"><tt>(make-current-plan-browser-coherence-report ...)</tt></a></li>
   <li><a expr="(clog-asdf-code-root-chunk)"><tt>(clog-asdf-code-root-chunk)</tt></a></li>
   <li><a expr="(clog-static-asset-root-chunk)"><tt>(clog-static-asset-root-chunk)</tt></a></li>
@@ -47,6 +49,40 @@
   by evidence: whether the path contains an ASDF definition, whether it is a
   static root, or whether <tt>CLOG_SRC/static-files/</tt> is the patched asset
   root.
+</p>
+
+<h2>HTML inspector environment coherence</h2>
+
+<p>
+  A long-running SLY image can keep environment variables from an older Nix
+  development shell after Codex changes the flake or the
+  <tt>html-inspector-views</tt> override. In that case
+  <tt>HTML_INSPECTOR_VIEWS_SRC</tt> may still point at an old Nix-store
+  derivation, while the current runtime expectation for
+  <tt>HTML_INSPECTOR_VIEWS_ASD</tt> is a different
+  <tt>html-inspector-views.asd</tt> path.
+</p>
+
+<p>
+  This is environment coherence, not object coherence. A plan result, topic,
+  or projection can still be a good object chunk while the image's shell
+  environment names a stale or incomplete inspector source root. The
+  environment chunk records the raw <tt>HTML_INSPECTOR_VIEWS_SRC</tt> value,
+  whether the directory exists, whether it contains
+  <tt>html-inspector-views.asd</tt>, whether
+  <tt>HTML_INSPECTOR_VIEWS_ASD</tt> is set, whether that explicit ASD path
+  exists, and whether ASDF can see both <tt>html-inspector-views</tt> and
+  <tt>html-inspector-views/standard</tt>.
+</p>
+
+<p>
+  The repair advice is deliberately non-mutating. Re-enter the updated
+  <tt>nix develop</tt> shell, or explicitly bind
+  <tt>HTML_INSPECTOR_VIEWS_SRC</tt> and
+  <tt>HTML_INSPECTOR_VIEWS_ASD</tt> to a current derivation. The report should
+  name the stale or missing environment chunk; it should not repair this by
+  restarting the Lisp image or by loading more ASDF systems during ordinary
+  report construction.
 </p>
 
 <h2>Optional inspector capability</h2>
