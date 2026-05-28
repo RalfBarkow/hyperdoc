@@ -781,7 +781,8 @@ For non-edit turns, these can be marked as:
 
 For any Common Lisp change that introduces or refactors runtime objects,
 Codex must provide one copy-pasteable SLY MREPL snippet that creates and
-inspects a minimal object through the CLOG inspector.
+inspects a minimal object. The snippet must define its own safe `i` helper
+unless the surrounding page already defines it.
 
 The snippet must:
 - load required ASDF systems when needed;
@@ -792,6 +793,39 @@ The snippet must:
 - print type, status, and core value;
 - end with `(i <object>)`;
 - be actually pasteable into SLY MREPL.
+- never call `slynk:inspect-in-emacs` directly or depend on SLYNK private
+  dynamic state such as `slynk::*buffer-package*`;
+- prefer `clog-moldable-inspector:clog-inspect` only when the
+  `CLOG-MOLDABLE-INSPECTOR` package and `CLOG-INSPECT` function are already
+  loaded; otherwise use `cl:inspect`.
+
+Use this `i` shape for snippets unless the slice has a more specific stable
+inspector entrypoint:
+
+```lisp
+(defun i (object)
+  "Safe inspector helper for SLY mREPL.
+Prefer CLOG only if it is already loaded; otherwise use CL:INSPECT.
+Never calls SLYNK:INSPECT-IN-EMACS directly."
+  (let* ((clog-package (find-package "CLOG-MOLDABLE-INSPECTOR"))
+         (clog-symbol
+           (and clog-package
+                (find-symbol "CLOG-INSPECT" clog-package))))
+    (cond
+      ((and clog-symbol (fboundp clog-symbol))
+       (handler-case
+           (progn
+             (funcall (symbol-function clog-symbol) :object object)
+             object)
+         (condition (condition)
+           (format t "~&CLOG inspector failed; falling back to CL:INSPECT: ~A~%"
+                   condition)
+           (inspect object)
+           object)))
+      (t
+       (inspect object)
+       object))))
+```
 
 For the Examples runtime, the minimum demo is:
 1. create one `hyperdoc:example-entry`;

@@ -123,6 +123,61 @@
   support.
 </p>
 
+<h2>SLY MREPL inspection helper</h2>
+
+<p>
+  Pasteable MREPL snippets should not call SLYNK's Emacs-inspector entrypoint
+  directly. That path relies on SLYNK private dynamic state that may be unbound
+  in an MREPL evaluation. The stable local helper is: use the CLOG inspector
+  only when <tt>CLOG-MOLDABLE-INSPECTOR:CLOG-INSPECT</tt> is already loaded;
+  otherwise use <tt>cl:inspect</tt>. A textual report printer should be
+  available for no-inspector verification.
+</p>
+
+<pre><code>(require :asdf)
+(asdf:load-system :hyperdoc)
+
+(defun i (object)
+  "Safe inspector helper for SLY mREPL.
+Prefer CLOG only if it is already loaded; otherwise use CL:INSPECT.
+Never calls SLYNK:INSPECT-IN-EMACS directly."
+  (let* ((clog-package (find-package "CLOG-MOLDABLE-INSPECTOR"))
+         (clog-symbol
+           (and clog-package
+                (find-symbol "CLOG-INSPECT" clog-package))))
+    (cond
+      ((and clog-symbol (fboundp clog-symbol))
+       (handler-case
+           (progn
+             (funcall (symbol-function clog-symbol) :object object)
+             object)
+         (condition (condition)
+           (format t "~&amp;CLOG inspector failed; falling back to CL:INSPECT: ~A~%"
+                   condition)
+           (inspect object)
+           object)))
+      (t
+       (inspect object)
+       object))))
+
+(defun print-runtime-coherence-report (report)
+  (format t "~&amp;~%Report type: ~S~%" (type-of report))
+  (format t "~&amp;Summary: ~S~%"
+          (hyperdoc:runtime-coherence-report-summary-of report))
+  (format t "~&amp;~%Chunks:~%")
+  (dolist (chunk (hyperdoc:runtime-coherence-report-chunks-of report))
+    (format t "~&amp;  ~A  ~S~%"
+            (hyperdoc:coherence-chunk-id-of chunk)
+            (hyperdoc:coherence-chunk-status-of chunk)))
+  report)
+
+(defparameter *example-result*
+  (hyperdoc:make-html-inspector-views-asdf-visibility-coherence-report))
+
+(print-runtime-coherence-report *example-result*)
+
+(i *example-result*)</code></pre>
+
 <h2>Live method-table coherence</h2>
 
 <p>
