@@ -521,6 +521,7 @@
    #:make-runtime-coherence-report
    #:make-inspector-runtime-coherence-report
    #:make-html-inspector-views-environment-coherence-report
+   #:make-html-inspector-views-live-method-coherence-report
    #:make-current-plan-browser-coherence-report
    #:asdf-root-candidate-p
    #:static-asset-root-candidate-p
@@ -535,6 +536,7 @@
    #:html-inspector-views-environment-repair-advice
    #:html-inspector-base-system-chunk
    #:html-inspector-standard-view-chunk
+   #:html-inspector-views-live-method-chunk
    #:html-inspector-standard-dependency-cache-chunk
    #:s-graphviz-optional-capability-chunk
    #:browser-inspection-session-chunk

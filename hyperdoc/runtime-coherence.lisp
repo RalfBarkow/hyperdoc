@@ -6,8 +6,12 @@
   '(:unknown
     :good
     :missing
+    :missing-package
+    :missing-generic-function
+    :missing-null-method
     :stale
     :blocked
+    :failed-safe-call
     :failed
     :optional-unavailable))
 
@@ -103,7 +107,16 @@
                  :depends-on depends-on))
 
 (defun coherence-chunk-status-blocking-p (status)
-  (member status '(:missing :stale :blocked :failed) :test #'eq))
+  (member status
+          '(:missing
+            :missing-package
+            :missing-generic-function
+            :missing-null-method
+            :stale
+            :blocked
+            :failed-safe-call
+            :failed)
+          :test #'eq))
 
 (defun coherence-status-counts (chunks)
   (let ((counts (make-hash-table :test #'eq)))
@@ -313,6 +326,31 @@
            (values nil condition t symbol))))
       (t
        (values nil nil nil nil)))))
+
+(defun loaded-symbol-state (package-designator symbol-name)
+  (let ((package (find-package package-designator)))
+    (multiple-value-bind (symbol status)
+        (if package
+            (find-symbol symbol-name package)
+            (values nil nil))
+      (list :package-name package-designator
+            :package package
+            :package-present (not (null package))
+            :symbol-name symbol-name
+            :symbol symbol
+            :symbol-status status
+            :symbol-present (not (null status))
+            :fbound (and symbol
+                         (fboundp symbol))))))
+
+(defun loaded-symbol-state-symbol (state)
+  (getf state :symbol))
+
+(defun loaded-symbol-state-fbound-p (state)
+  (not (null (getf state :fbound))))
+
+(defun html-inspector-standard-package-name ()
+  "HTML-INSPECTOR-VIEWS/STANDARD")
 
 (defun clog-src-static-files-root ()
   (when-let (clog-src (uiop:getenv "CLOG_SRC"))
@@ -772,6 +810,119 @@
          :depends-on (coherence-chunk-depends-on-of base))
         base)))
 
+(defun html-inspector-views-live-method-chunk
+    (&key (package-name (html-inspector-standard-package-name)))
+  (handler-case
+      (let* ((package (find-package package-name))
+             (depends-on-state
+               (loaded-symbol-state package-name "SYSTEM-DEPENDS-ON"))
+             (dependencies-state
+               (loaded-symbol-state package-name "SYSTEM-DEPENDENCIES"))
+             (depends-on-symbol
+               (loaded-symbol-state-symbol depends-on-state))
+             (dependencies-symbol
+               (loaded-symbol-state-symbol dependencies-state))
+             (null-class (find-class 'null))
+             (depends-on-null-method nil)
+             (method-condition nil)
+             (depends-on-result nil)
+             (depends-on-condition nil)
+             (depends-on-called nil)
+             (dependencies-result nil)
+             (dependencies-condition nil)
+             (dependencies-called nil))
+        (when (loaded-symbol-state-fbound-p depends-on-state)
+          (multiple-value-setq (depends-on-null-method method-condition)
+            (generic-method-present-p (symbol-function depends-on-symbol)
+                                      (list null-class)))
+          (multiple-value-setq (depends-on-result depends-on-condition
+                                                  depends-on-called)
+            (safe-call-loaded-function package-name
+                                       "SYSTEM-DEPENDS-ON"
+                                       nil)))
+        (when (loaded-symbol-state-fbound-p dependencies-state)
+          (multiple-value-setq (dependencies-result dependencies-condition
+                                                    dependencies-called)
+            (safe-call-loaded-function package-name
+                                       "SYSTEM-DEPENDENCIES"
+                                       nil)))
+        (let* ((condition (or method-condition
+                              depends-on-condition
+                              dependencies-condition))
+               (status
+                 (cond
+                   ((null package)
+                    :missing-package)
+                   ((or (not (loaded-symbol-state-fbound-p depends-on-state))
+                        (not (loaded-symbol-state-fbound-p dependencies-state))
+                        method-condition)
+                    :missing-generic-function)
+                   ((not depends-on-null-method)
+                    :missing-null-method)
+                   (condition
+                    :failed-safe-call)
+                   (t
+                    :good))))
+          (make-coherence-chunk
+           :id "html-inspector-views-standard-live-methods"
+           :title "HTML inspector standard live methods"
+           :kind :optional-inspector-view
+           :status status
+           :value (list :package package
+                        :system-depends-on depends-on-symbol
+                        :system-dependencies dependencies-symbol
+                        :null-method-present depends-on-null-method)
+           :evidence
+           (list
+            (list :probe 'find-package
+                  :package-name package-name
+                  :present (not (null package)))
+            (list :probe 'find-symbol
+                  :symbol "SYSTEM-DEPENDS-ON"
+                  :present (getf depends-on-state :symbol-present)
+                  :fbound (loaded-symbol-state-fbound-p depends-on-state)
+                  :symbol-status (getf depends-on-state :symbol-status))
+            (list :probe 'find-symbol
+                  :symbol "SYSTEM-DEPENDENCIES"
+                  :present (getf dependencies-state :symbol-present)
+                  :fbound (loaded-symbol-state-fbound-p dependencies-state)
+                  :symbol-status (getf dependencies-state :symbol-status))
+            (list :probe 'find-method
+                  :generic-function 'system-depends-on
+                  :specializers '(null)
+                  :present depends-on-null-method
+                  :condition (and method-condition
+                                  (condition-evidence method-condition)))
+            (list :probe 'safe-call
+                  :form '(system-depends-on nil)
+                  :performed depends-on-called
+                  :result depends-on-result
+                  :condition (and depends-on-condition
+                                  (condition-evidence depends-on-condition)))
+            (list :probe 'safe-call
+                  :form '(system-dependencies nil)
+                  :performed dependencies-called
+                  :result dependencies-result
+                  :condition (and dependencies-condition
+                                  (condition-evidence dependencies-condition))))
+           :last-error condition
+           :repair-options
+           (when (member status
+                         '(:missing-null-method :failed-safe-call)
+                         :test #'eq)
+             '(:repair-html-inspector-views-standard-live-methods))
+           :depends-on '("html-inspector-views-standard-view"))))
+    (condition (condition)
+      (make-coherence-chunk
+       :id "html-inspector-views-standard-live-methods"
+       :title "HTML inspector standard live methods"
+       :kind :optional-inspector-view
+       :status :failed-safe-call
+       :evidence (list (condition-evidence condition))
+       :last-error condition
+       :repair-options '(:repair-html-inspector-views-standard-live-methods)
+       :depends-on '("html-inspector-views-standard-view")))))
+
 (defun html-inspector-standard-dependency-cache-chunk ()
   (let* ((package-name :html-inspector-views/standard)
          (package (find-package package-name))
@@ -963,6 +1114,16 @@
      :observed-at observed-at
      :chunks (list chunk))))
 
+(defun make-html-inspector-views-live-method-coherence-report
+    (&key (title "HTML inspector views live method coherence report")
+          (observed-at (get-universal-time))
+          (package-name (html-inspector-standard-package-name)))
+  (make-runtime-coherence-report
+   :title title
+   :observed-at observed-at
+   :chunks (list (html-inspector-views-live-method-chunk
+                  :package-name package-name))))
+
 (defun make-inspector-runtime-coherence-report (&key
                                                   (title "Inspector runtime coherence report")
                                                   (observed-at (get-universal-time)))
@@ -974,6 +1135,8 @@
          (html-standard
            (html-inspector-standard-view-chunk
             :s-graphviz-chunk graphviz))
+         (html-standard-live-methods
+           (html-inspector-views-live-method-chunk))
          (html-standard-cache
            (html-inspector-standard-dependency-cache-chunk)))
     (make-runtime-coherence-report
@@ -984,6 +1147,7 @@
                    clog-inspector
                    html-base
                    html-standard
+                   html-standard-live-methods
                    html-standard-cache
                    graphviz))))
 
