@@ -522,6 +522,7 @@
    #:make-inspector-runtime-coherence-report
    #:make-html-inspector-views-environment-coherence-report
    #:make-html-inspector-views-live-method-coherence-report
+   #:repair-html-inspector-views-standard-live-methods
    #:make-current-plan-browser-coherence-report
    #:asdf-root-candidate-p
    #:static-asset-root-candidate-p

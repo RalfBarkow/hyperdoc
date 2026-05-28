@@ -1124,6 +1124,130 @@
    :chunks (list (html-inspector-views-live-method-chunk
                   :package-name package-name))))
 
+(defun html-inspector-views-live-method-safe-call-evidence (chunk form)
+  (find form
+        (coherence-chunk-evidence-of chunk)
+        :key (lambda (entry)
+               (and (listp entry)
+                    (getf entry :form)))
+        :test #'equal))
+
+(defun html-inspector-views-live-method-repair-chunk
+    (&key (package-name (html-inspector-standard-package-name)))
+  (handler-case
+      (let* ((before (html-inspector-views-live-method-chunk
+                      :package-name package-name))
+             (before-status (coherence-chunk-status-of before))
+             (before-value (coherence-chunk-value-of before))
+             (depends-on-symbol (getf before-value :system-depends-on))
+             (null-method-before (getf before-value :null-method-present))
+             (installed nil)
+             (install-condition nil)
+             (repair-attempted nil))
+        (cond
+          ((member before-status
+                   '(:missing-package :missing-generic-function)
+                   :test #'eq)
+           nil)
+          ((not null-method-before)
+           (setf repair-attempted t)
+           (handler-case
+               (progn
+                 (eval
+                  `(defmethod ,depends-on-symbol ((system null))
+                     nil))
+                 (setf installed t))
+             (condition (condition)
+               (setf install-condition condition)))))
+        (let* ((after (html-inspector-views-live-method-chunk
+                       :package-name package-name))
+               (status
+                 (cond
+                   (install-condition
+                    :failed-safe-call)
+                   ((member before-status
+                            '(:missing-package :missing-generic-function)
+                            :test #'eq)
+                    before-status)
+                   (t
+                    (coherence-chunk-status-of after)))))
+          (make-coherence-chunk
+           :id "html-inspector-views-standard-live-methods-repair"
+           :title "HTML inspector standard live method repair"
+           :kind :optional-inspector-view
+           :status status
+           :value (list :package-name package-name
+                        :before-status before-status
+                        :after-status (coherence-chunk-status-of after)
+                        :system-depends-on depends-on-symbol
+                        :null-method-present-before null-method-before
+                        :null-method-installed installed
+                        :null-method-present-after
+                        (getf (coherence-chunk-value-of after)
+                              :null-method-present))
+           :evidence
+           (list
+            (list :phase :before
+                  :package-present
+                  (not (null (getf before-value :package)))
+                  :generic-function-present
+                  (not (null depends-on-symbol))
+                  :null-method-present null-method-before
+                  :status before-status)
+            (list :phase :repair
+                  :attempted repair-attempted
+                  :null-method-installed installed
+                  :condition (and install-condition
+                                  (condition-evidence install-condition)))
+            (list :phase :after
+                  :package-present
+                  (not (null (getf (coherence-chunk-value-of after)
+                                   :package)))
+                  :generic-function-present
+                  (not (null (getf (coherence-chunk-value-of after)
+                                   :system-depends-on)))
+                  :null-method-present
+                  (getf (coherence-chunk-value-of after)
+                        :null-method-present)
+                  :status (coherence-chunk-status-of after)
+                  :system-depends-on-call
+                  (html-inspector-views-live-method-safe-call-evidence
+                   after
+                   '(system-depends-on nil))
+                  :system-dependencies-call
+                  (html-inspector-views-live-method-safe-call-evidence
+                   after
+                   '(system-dependencies nil))))
+           :last-error (or install-condition
+                           (coherence-chunk-last-error-of after)
+                           (coherence-chunk-last-error-of before))
+           :repair-options
+           (when (member status
+                         '(:missing-null-method :failed-safe-call)
+                         :test #'eq)
+             '(:repair-html-inspector-views-standard-live-methods))
+           :depends-on '("html-inspector-views-standard-live-methods"))))
+    (condition (condition)
+      (make-coherence-chunk
+       :id "html-inspector-views-standard-live-methods-repair"
+       :title "HTML inspector standard live method repair"
+       :kind :optional-inspector-view
+       :status :failed-safe-call
+       :evidence (list (condition-evidence condition))
+       :last-error condition
+       :repair-options '(:repair-html-inspector-views-standard-live-methods)
+       :depends-on '("html-inspector-views-standard-live-methods")))))
+
+(defun repair-html-inspector-views-standard-live-methods
+    (&key (title "HTML inspector views live method repair report")
+          (observed-at (get-universal-time))
+          (package-name (html-inspector-standard-package-name)))
+  (make-runtime-coherence-report
+   :title title
+   :observed-at observed-at
+   :chunks (list (html-inspector-views-live-method-repair-chunk
+                  :package-name package-name))))
+
 (defun make-inspector-runtime-coherence-report (&key
                                                   (title "Inspector runtime coherence report")
                                                   (observed-at (get-universal-time)))
