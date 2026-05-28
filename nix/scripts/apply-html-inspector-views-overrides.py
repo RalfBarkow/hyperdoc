@@ -9,13 +9,17 @@ from pathlib import Path
 EXPECTED_UPSTREAM_SHA256 = {
     "assets/html-inspector-views/js/process-graphviz-elements.js": "6d473aab0e649924fdfc9809e530a1403fac09284ca2942e927df2186b5478f8",
     "html-inspector-views.asd": "bd2bf5f2f28c8bef9b193607183320e3927590a1ca94829e236dc9f4d8a78396",
+    "image.lisp": "28a61e68ca7c00bb93191382db855a5159a096a514ef213da11cc5b52098d67c",
     "package.lisp": "6e43f754e4112931cdf9eabd37f25a74d22dcaf3f595856ae1110ab0ac138512",
+    "systems.lisp": "8708f6e1b55ddb05c55b2d8569b75817882887dfc3cff1c7a32835d57c4b9ba8",
     "view-support.lisp": "861e3c9e53be74085b2799061caa0ec8b9dc2bef825e8bd00794481cbad5562f",
 }
 
 FILES_TO_ENSURE = [
     "html-inspector-views.asd",
     "package.lisp",
+    "image.lisp",
+    "systems.lisp",
     "view-contracts.lisp",
     "view-support.lisp",
     "assets/html-inspector-views/js/process-graphviz-elements.js",
