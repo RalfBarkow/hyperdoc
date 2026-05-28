@@ -20,6 +20,7 @@
     :nix-derivation-mismatch
     :stale-sly-environment
     :stale
+    :degraded
     :blocked
     :failed-safe-call
     :failed
@@ -171,13 +172,17 @@
         (optional-unavailable
           (remove :optional-unavailable chunks
                   :key #'coherence-chunk-status-of
+                  :test-not #'eq))
+        (degraded
+          (remove :degraded chunks
+                  :key #'coherence-chunk-status-of
                   :test-not #'eq)))
     (append
      (when blocking
        (list "Inspect blocked or failed chunks before re-deriving browser inspection state."))
-     (when optional-unavailable
+     (when (or optional-unavailable degraded)
        (list "Treat optional inspector capabilities as degraded, not as plan-object failure."))
-     (unless (or blocking optional-unavailable)
+     (unless (or blocking optional-unavailable degraded)
        (list "No repair action is indicated by this non-mutating coherence report.")))))
 
 (defun condition-evidence (condition)
@@ -236,6 +241,36 @@
            (namestring (pathname path))
          (condition ()
            nil))))
+
+(defun set-process-environment-variable (name value)
+  (handler-case
+      #+sbcl
+      (progn
+        (require :sb-posix)
+        (let ((package (find-package "SB-POSIX")))
+          (if value
+              (funcall (find-symbol "SETENV" package)
+                       name
+                       value
+                       1)
+              (funcall (find-symbol "UNSETENV" package)
+                       name)))
+        (values t nil))
+      #-sbcl
+      (values nil :unsupported-implementation)
+    (condition (condition)
+      (values nil condition))))
+
+(defun environment-mutation-evidence (name value)
+  (multiple-value-bind (success condition)
+      (set-process-environment-variable name value)
+    (list :env-var name
+          :target-value value
+          :set success
+          :condition (and condition
+                          (if (typep condition 'condition)
+                              (condition-evidence condition)
+                              condition)))))
 
 (defun nix-store-path-p (path)
   (let ((namestring (safe-namestring path)))
@@ -1046,6 +1081,157 @@
     (condition ()
       :stale-sly-environment)))
 
+(defun html-inspector-views-environment-asdf-repair-chunk
+    (&key (system-name :html-inspector-views)
+          (standard-system-name :html-inspector-views/standard))
+  (handler-case
+      (let* ((before-src (uiop:getenv "HTML_INSPECTOR_VIEWS_SRC"))
+             (before-asd (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD"))
+             (base-condition nil)
+             (source-file-condition nil)
+             (source-directory-condition nil)
+             (standard-condition nil))
+        (multiple-value-bind (base-system base-error)
+            (safe-find-asdf-system system-name)
+          (setf base-condition base-error)
+          (multiple-value-bind (source-file source-file-error)
+              (safe-asdf-system-source-file base-system)
+            (setf source-file-condition source-file-error)
+            (multiple-value-bind (source-directory source-directory-error)
+                (safe-asdf-system-source-directory base-system)
+              (setf source-directory-condition source-directory-error)
+              (multiple-value-bind (standard-system standard-error)
+                  (safe-find-asdf-system standard-system-name)
+                (setf standard-condition standard-error)
+                (let* ((derived-source-file
+                         (or source-file
+                             (child-pathname source-directory
+                                             #P"html-inspector-views.asd")))
+                       (derived-source-directory
+                         (or source-directory
+                             (and derived-source-file
+                                  (uiop:pathname-directory-pathname
+                                   derived-source-file))))
+                       (source-directory-exists-p
+                         (directory-exists-p derived-source-directory))
+                       (source-file-exists-p
+                         (pathname-exists-p derived-source-file))
+                       (target-src
+                         (safe-namestring
+                          (maybe-directory-pathname derived-source-directory)))
+                       (target-asd
+                         (safe-namestring derived-source-file))
+                       (status
+                         (cond
+                           ((not base-system)
+                            :asdf-subsystem-not-visible)
+                           ((not source-directory-exists-p)
+                            :missing-html-inspector-views-src)
+                           ((not source-file-exists-p)
+                            :missing-html-inspector-views-asd)
+                           (t
+                            :good)))
+                       (mutation-evidence
+                         (when (eq status :good)
+                           (list
+                            (environment-mutation-evidence
+                             "HTML_INSPECTOR_VIEWS_SRC"
+                             target-src)
+                            (environment-mutation-evidence
+                             "HTML_INSPECTOR_VIEWS_ASD"
+                             target-asd))))
+                       (mutation-success-p
+                         (and mutation-evidence
+                              (every (lambda (entry)
+                                       (getf entry :set))
+                                     mutation-evidence)))
+                       (final-status
+                         (if (and (eq status :good)
+                                  (not mutation-success-p))
+                             :failed
+                             status)))
+                  (make-coherence-chunk
+                   :id "html-inspector-views-environment-asdf-repair"
+                   :title "HTML inspector views environment repair from ASDF"
+                   :kind :asdf-code-root
+                   :status final-status
+                   :value (list :before-html-inspector-views-src before-src
+                                :before-html-inspector-views-asd before-asd
+                                :target-html-inspector-views-src target-src
+                                :target-html-inspector-views-asd target-asd
+                                :base-system-found (not (null base-system))
+                                :standard-system-found
+                                (not (null standard-system)))
+                   :evidence
+                   (append
+                    (list
+                     (list :before
+                           :html-inspector-views-src before-src
+                           :html-inspector-views-asd before-asd)
+                     (list :probe 'asdf:find-system
+                           :system-name system-name
+                           :system base-system
+                           :found (not (null base-system)))
+                     (list :probe 'asdf:find-system
+                           :system-name standard-system-name
+                           :system standard-system
+                           :found (not (null standard-system)))
+                     (list :source-file derived-source-file
+                           :source-file-exists source-file-exists-p
+                           :source-directory derived-source-directory
+                           :source-directory-exists
+                           source-directory-exists-p))
+                    mutation-evidence
+                    (list
+                     (list :after
+                           :html-inspector-views-src
+                           (uiop:getenv "HTML_INSPECTOR_VIEWS_SRC")
+                           :html-inspector-views-asd
+                           (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD"))))
+                   :last-error (or base-condition
+                                   source-file-condition
+                                   source-directory-condition
+                                   standard-condition)
+                   :repair-options
+                   (unless (eq final-status :good)
+                     '(:re-enter-updated-nix-dev-shell
+                       :repair-cl-source-registry
+                       :bind-html-inspector-views-src-and-asd-to-current-derivation))
+                   :depends-on '("html-inspector-views-asdf-visibility"))))))))
+    (condition (condition)
+      (make-coherence-chunk
+       :id "html-inspector-views-environment-asdf-repair"
+       :title "HTML inspector views environment repair from ASDF"
+       :kind :asdf-code-root
+       :status :failed
+       :value (list :before-html-inspector-views-src
+                    (uiop:getenv "HTML_INSPECTOR_VIEWS_SRC")
+                    :before-html-inspector-views-asd
+                    (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD"))
+       :evidence (list (condition-evidence condition))
+       :last-error condition
+       :repair-options
+       '(:re-enter-updated-nix-dev-shell
+         :repair-cl-source-registry
+         :bind-html-inspector-views-src-and-asd-to-current-derivation)
+       :depends-on '("html-inspector-views-asdf-visibility")))))
+
+(defun repair-html-inspector-views-environment-from-asdf
+    (&key (title "HTML inspector views environment repair from ASDF")
+          (observed-at (get-universal-time))
+          (system-name :html-inspector-views)
+          (standard-system-name :html-inspector-views/standard))
+  (let ((repair-chunk
+          (html-inspector-views-environment-asdf-repair-chunk
+           :system-name system-name
+           :standard-system-name standard-system-name)))
+    (make-runtime-coherence-report
+     :title title
+     :observed-at observed-at
+     :chunks (list repair-chunk
+                   (html-inspector-views-environment-chunk)
+                   (html-inspector-views-asdf-visibility-chunk)))))
+
 (defun s-graphviz-optional-capability-chunk (&key load-probe)
   (if load-probe
       (attempt-load-asdf-system-chunk
@@ -1089,10 +1275,9 @@
          :id (coherence-chunk-id-of base)
          :title (coherence-chunk-title-of base)
          :kind (coherence-chunk-kind-of base)
-         :status (if (eq (coherence-chunk-status-of base)
-                         :optional-unavailable)
-                     :optional-unavailable
-                     :blocked)
+         :status (if (eq (coherence-chunk-status-of base) :good)
+                     :degraded
+                     (coherence-chunk-status-of base))
          :value (coherence-chunk-value-of base)
          :evidence (append
                     (coherence-chunk-evidence-of base)
@@ -1329,7 +1514,7 @@
   (and (eq (coherence-chunk-kind-of chunk)
            :optional-inspector-view)
        (member (coherence-chunk-status-of chunk)
-               '(:optional-unavailable :blocked :failed :stale)
+               '(:degraded :optional-unavailable :blocked :failed :stale)
                :test #'eq)))
 
 (defun browser-inspection-session-chunk (&key root-object

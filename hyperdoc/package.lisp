@@ -521,6 +521,7 @@
    #:make-runtime-coherence-report
    #:make-inspector-runtime-coherence-report
    #:make-html-inspector-views-environment-coherence-report
+   #:repair-html-inspector-views-environment-from-asdf
    #:make-html-inspector-views-asdf-visibility-coherence-report
    #:make-html-inspector-views-live-method-coherence-report
    #:repair-html-inspector-views-standard-live-methods
