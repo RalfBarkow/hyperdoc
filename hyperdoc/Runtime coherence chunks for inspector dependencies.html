@@ -18,6 +18,8 @@
   <li><a hyperbook="topics" page="Browser inspection session chunk"><tt>Browser inspection session chunk</tt></a></li>
   <li><a expr="(make-inspector-runtime-coherence-report)"><tt>(make-inspector-runtime-coherence-report)</tt></a></li>
   <li><a expr="(make-html-inspector-views-environment-coherence-report)"><tt>(make-html-inspector-views-environment-coherence-report)</tt></a></li>
+  <li><a expr="(make-html-inspector-views-live-method-coherence-report)"><tt>(make-html-inspector-views-live-method-coherence-report)</tt></a></li>
+  <li><a expr="(repair-html-inspector-views-standard-live-methods)"><tt>(repair-html-inspector-views-standard-live-methods)</tt></a></li>
   <li><a expr="(html-inspector-views-environment-repair-advice)"><tt>(html-inspector-views-environment-repair-advice)</tt></a></li>
   <li><a expr="(make-current-plan-browser-coherence-report :root-object '(:synthetic-plan-result) :summary '(:synthetic-summary) :checklist '(:synthetic-checklist))"><tt>(make-current-plan-browser-coherence-report ...)</tt></a></li>
   <li><a expr="(clog-asdf-code-root-chunk)"><tt>(clog-asdf-code-root-chunk)</tt></a></li>
@@ -83,6 +85,43 @@
   name the stale or missing environment chunk; it should not repair this by
   restarting the Lisp image or by loading more ASDF systems during ordinary
   report construction.
+</p>
+
+<h2>Live method-table coherence</h2>
+
+<p>
+  <tt>asdf:clear-system</tt> and source-level ASDF repair do not remove
+  already-loaded generic functions, methods, ASDF hooks, or dependency caches
+  from a running image. The patched source for
+  <tt>html-inspector-views/standard</tt> and the live method table in SLY are
+  therefore separate coherence chunks.
+</p>
+
+<p>
+  A long-running SLY image can keep a stale
+  <tt>HTML-INSPECTOR-VIEWS/STANDARD::SYSTEM-DEPENDS-ON</tt> generic function
+  that lacks the <tt>(null)</tt> method even after the source tree contains
+  that method. In that state the source chunk may be repaired while
+  <tt>(system-depends-on nil)</tt> still signals in the already-loaded image.
+</p>
+
+<p>
+  <tt>make-html-inspector-views-live-method-coherence-report</tt> probes only
+  the running package and symbols. It records whether the standard package is
+  present, whether <tt>SYSTEM-DEPENDS-ON</tt> and
+  <tt>SYSTEM-DEPENDENCIES</tt> are fbound, whether the
+  <tt>SYSTEM-DEPENDS-ON</tt> generic has a <tt>(null)</tt> method, and whether
+  safe calls on <tt>nil</tt> return without escaping a condition.
+</p>
+
+<p>
+  <tt>repair-html-inspector-views-standard-live-methods</tt> is the explicit
+  mutating operation for this chunk. It does not load
+  <tt>:hyperdoc/inspector</tt> or <tt>:html-inspector-views/standard</tt>.
+  When the package and generic function are already present but the
+  <tt>(null)</tt> method is missing, it installs that method by runtime symbol
+  resolution and records the before state, installation step, and post-repair
+  safe-call evidence.
 </p>
 
 <h2>Optional inspector capability</h2>
