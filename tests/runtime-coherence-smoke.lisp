@@ -47,11 +47,27 @@
                   "clog-moldable-inspector-system"
                   "html-inspector-views-base-system"
                   "html-inspector-views-standard-view"
+                  "html-inspector-views-standard-dependency-cache"
                   "s-graphviz-optional-capability"))
       (rc-assert-true
        (rc-find-chunk id chunks)
        (format nil "Report must include chunk ~A" id))))
   t)
+
+(defun rc-loaded-symbol (package-designator symbol-name)
+  (let ((package (find-package package-designator)))
+    (when package
+      (multiple-value-bind (symbol status)
+          (find-symbol symbol-name package)
+        (when (and status
+                   (fboundp symbol))
+          symbol)))))
+
+(defun rc-required-loaded-symbol (package-designator symbol-name)
+  (or (rc-loaded-symbol package-designator symbol-name)
+      (error "Expected loaded symbol ~A::~A"
+             package-designator
+             symbol-name)))
 
 (defun rc-make-temp-directory (label)
   (let ((directory
@@ -113,6 +129,51 @@
                 '(:blocked :optional-unavailable)
                 :test #'eq)
         "Standard view chunk must record Graphviz degradation, not signal"))))
+  t)
+
+(defun rc-html-inspector-standard-dependency-cache-smoke-test ()
+  (let* ((package-name :html-inspector-views/standard)
+         (package (find-package package-name))
+         (depends-on (rc-required-loaded-symbol package-name
+                                                "SYSTEM-DEPENDS-ON"))
+         (dependencies (rc-required-loaded-symbol package-name
+                                                  "SYSTEM-DEPENDENCIES"))
+         (find-system (rc-required-loaded-symbol package-name
+                                                 "FIND-SYSTEM"))
+         (missing-reason (rc-required-loaded-symbol package-name
+                                                    "MISSING-COMPONENT-REASON"))
+         (missing-class (find-class
+                         (find-symbol "MISSING-COMPONENT" package)
+                         nil))
+         (chunk (hyperdoc:html-inspector-standard-dependency-cache-chunk))
+         (missing (funcall find-system
+                           "hyperdoc-runtime-coherence-missing-smoke/system")))
+    (rc-assert-true package
+                    "html-inspector-views/standard must be loaded in this smoke")
+    (rc-assert-equal nil
+                     (funcall depends-on nil)
+                     "SYSTEM-DEPENDS-ON on NIL must be nil-safe")
+    (rc-assert-equal nil
+                     (funcall dependencies nil)
+                     "SYSTEM-DEPENDENCIES on NIL must be nil-safe")
+    (rc-assert-true
+     (and missing-class
+          (typep missing missing-class))
+     "Missing ASDF systems must degrade into MISSING-COMPONENT records")
+    (rc-assert-equal :missing
+                     (funcall missing-reason missing)
+                     "Missing ASDF systems must record a missing-component reason")
+    (rc-assert-equal
+     :good
+     (hyperdoc:coherence-chunk-status-of chunk)
+     "Loaded standard dependency cache must report nil-safe coherence")
+    (rc-assert-true
+     (some (lambda (entry)
+             (and (listp entry)
+                  (eq (getf entry :probe) 'find-method)
+                  (getf entry :present)))
+           (hyperdoc:coherence-chunk-evidence-of chunk))
+     "Dependency cache chunk must record the null SYSTEM-DEPENDS-ON method"))
   t)
 
 (defun rc-static-root-missing-assets-degrades-smoke-test ()
@@ -186,6 +247,7 @@
   (rc-report-contains-runtime-support-chunks-smoke-test)
   (rc-classify-clog-src-no-asd-smoke-test)
   (rc-graphviz-missing-degrades-smoke-test)
+  (rc-html-inspector-standard-dependency-cache-smoke-test)
   (rc-static-root-missing-assets-degrades-smoke-test)
   (rc-report-construction-does-not-load-systems-smoke-test)
   (rc-current-plan-browser-report-smoke-test)

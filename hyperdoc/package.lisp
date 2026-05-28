@@ -532,6 +532,7 @@
    #:clog-moldable-inspector-system-chunk
    #:html-inspector-base-system-chunk
    #:html-inspector-standard-view-chunk
+   #:html-inspector-standard-dependency-cache-chunk
    #:s-graphviz-optional-capability-chunk
    #:browser-inspection-session-chunk
    #:coherence-chunk-id-of

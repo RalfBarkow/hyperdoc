@@ -268,6 +268,40 @@
     (when symbol
       (apply symbol args))))
 
+(defun loaded-class-symbol (package-designator symbol-name)
+  (let ((package (find-package package-designator)))
+    (when package
+      (multiple-value-bind (symbol status)
+          (find-symbol symbol-name package)
+        (when status
+          symbol)))))
+
+(defun loaded-class (package-designator symbol-name)
+  (let ((symbol (loaded-class-symbol package-designator symbol-name)))
+    (when symbol
+      (handler-case
+          (find-class symbol nil)
+        (condition ()
+          nil)))))
+
+(defun generic-method-present-p (generic-function specializers)
+  (handler-case
+      (values (not (null (find-method generic-function nil specializers nil)))
+              nil)
+    (condition (condition)
+      (values nil condition))))
+
+(defun safe-call-loaded-function (package-designator symbol-name &rest args)
+  (let ((symbol (loaded-function-symbol package-designator symbol-name)))
+    (cond
+      (symbol
+       (handler-case
+           (values (apply symbol args) nil t symbol)
+         (condition (condition)
+           (values nil condition t symbol))))
+      (t
+       (values nil nil nil nil)))))
+
 (defun clog-src-static-files-root ()
   (when-let (clog-src (uiop:getenv "CLOG_SRC"))
     (let* ((root (maybe-directory-pathname clog-src))
@@ -583,6 +617,100 @@
          :depends-on (coherence-chunk-depends-on-of base))
         base)))
 
+(defun html-inspector-standard-dependency-cache-chunk ()
+  (let* ((package-name :html-inspector-views/standard)
+         (package (find-package package-name))
+         (depends-on-symbol
+           (loaded-function-symbol package-name "SYSTEM-DEPENDS-ON"))
+         (dependencies-symbol
+           (loaded-function-symbol package-name "SYSTEM-DEPENDENCIES"))
+         (precompute-layers-symbol
+           (loaded-function-symbol package-name "PRECOMPUTE-LAYERS"))
+         (missing-component-class
+           (loaded-class package-name "MISSING-COMPONENT"))
+         (null-class (find-class 'null))
+         (depends-on-null-method nil)
+         (method-condition nil)
+         (depends-on-result nil)
+         (depends-on-condition nil)
+         (dependencies-result nil)
+         (dependencies-condition nil)
+         (depends-on-called nil)
+         (dependencies-called nil))
+    (when depends-on-symbol
+      (multiple-value-setq (depends-on-null-method method-condition)
+        (generic-method-present-p (symbol-function depends-on-symbol)
+                                  (list null-class)))
+      (multiple-value-setq (depends-on-result depends-on-condition
+                                              depends-on-called)
+        (safe-call-loaded-function package-name "SYSTEM-DEPENDS-ON" nil)))
+    (when dependencies-symbol
+      (multiple-value-setq (dependencies-result dependencies-condition
+                                                dependencies-called)
+        (safe-call-loaded-function package-name "SYSTEM-DEPENDENCIES" nil)))
+    (let* ((condition (or method-condition
+                          depends-on-condition
+                          dependencies-condition))
+           (status
+             (cond
+               ((null package)
+                :good)
+               (condition
+                :failed)
+               ((not depends-on-symbol)
+                :stale)
+               ((not dependencies-symbol)
+                :stale)
+               ((not depends-on-null-method)
+                :stale)
+               ((not missing-component-class)
+                :stale)
+               (t
+                :good))))
+      (make-coherence-chunk
+       :id "html-inspector-views-standard-dependency-cache"
+       :title "HTML inspector standard dependency cache"
+       :kind :optional-inspector-view
+       :status status
+       :value (list :package package
+                    :system-depends-on depends-on-symbol
+                    :system-dependencies dependencies-symbol
+                    :precompute-layers precompute-layers-symbol
+                    :missing-component-class missing-component-class)
+       :evidence
+       (list (list :probe 'find-package
+                   :package-name package-name
+                   :present (not (null package)))
+             (list :probe 'find-symbol
+                   :system-depends-on-present (not (null depends-on-symbol))
+                   :system-dependencies-present (not (null dependencies-symbol))
+                   :precompute-layers-present (not (null precompute-layers-symbol))
+                   :missing-component-class-present
+                   (not (null missing-component-class)))
+             (list :probe 'find-method
+                   :generic-function 'system-depends-on
+                   :specializers '(null)
+                   :present depends-on-null-method)
+             (list :probe 'safe-call
+                   :form '(system-depends-on nil)
+                   :performed depends-on-called
+                   :result depends-on-result)
+             (list :probe 'safe-call
+                   :form '(system-dependencies nil)
+                   :performed dependencies-called
+                   :result dependencies-result)
+             (if package
+                 (list :message
+                       "Loaded standard inspector dependency precompute is nil-safe when this chunk is :good.")
+                 (list :message
+                       "Standard inspector package is not loaded, so no running-image dependency cache is active.")))
+       :last-error condition
+       :repair-options
+       (when (member status '(:stale :failed) :test #'eq)
+         '(:reload-html-inspector-views-standard-source
+           :recompute-html-inspector-dependency-cache))
+       :depends-on '("html-inspector-views-standard-view")))))
+
 (defun required-browser-inspection-support-chunk-p (chunk)
   (member (coherence-chunk-id-of chunk)
           '("clog-asdf-code-root"
@@ -595,7 +723,7 @@
   (and (eq (coherence-chunk-kind-of chunk)
            :optional-inspector-view)
        (member (coherence-chunk-status-of chunk)
-               '(:optional-unavailable :blocked :failed)
+               '(:optional-unavailable :blocked :failed :stale)
                :test #'eq)))
 
 (defun browser-inspection-session-chunk (&key root-object
@@ -676,7 +804,9 @@
          (graphviz (s-graphviz-optional-capability-chunk))
          (html-standard
            (html-inspector-standard-view-chunk
-            :s-graphviz-chunk graphviz)))
+            :s-graphviz-chunk graphviz))
+         (html-standard-cache
+           (html-inspector-standard-dependency-cache-chunk)))
     (make-runtime-coherence-report
      :title title
      :observed-at observed-at
@@ -685,6 +815,7 @@
                    clog-inspector
                    html-base
                    html-standard
+                   html-standard-cache
                    graphviz))))
 
 (defun make-current-plan-browser-coherence-report (&key root-object
