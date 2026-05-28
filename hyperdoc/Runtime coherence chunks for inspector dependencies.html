@@ -18,6 +18,7 @@
   <li><a hyperbook="topics" page="Browser inspection session chunk"><tt>Browser inspection session chunk</tt></a></li>
   <li><a expr="(make-inspector-runtime-coherence-report)"><tt>(make-inspector-runtime-coherence-report)</tt></a></li>
   <li><a expr="(make-html-inspector-views-environment-coherence-report)"><tt>(make-html-inspector-views-environment-coherence-report)</tt></a></li>
+  <li><a expr="(make-html-inspector-views-asdf-visibility-coherence-report)"><tt>(make-html-inspector-views-asdf-visibility-coherence-report)</tt></a></li>
   <li><a expr="(make-html-inspector-views-live-method-coherence-report)"><tt>(make-html-inspector-views-live-method-coherence-report)</tt></a></li>
   <li><a expr="(repair-html-inspector-views-standard-live-methods)"><tt>(repair-html-inspector-views-standard-live-methods)</tt></a></li>
   <li><a expr="(html-inspector-views-environment-repair-advice)"><tt>(html-inspector-views-environment-repair-advice)</tt></a></li>
@@ -85,6 +86,41 @@
   name the stale or missing environment chunk; it should not repair this by
   restarting the Lisp image or by loading more ASDF systems during ordinary
   report construction.
+</p>
+
+<h2>ASDF visibility versus package presence</h2>
+
+<p>
+  A Common Lisp package can remain present in a long-running image after ASDF
+  loses visibility of the system definition that originally created it. Package
+  presence, ASDF system visibility, and live method-table coherence are three
+  different chunks. The package names <tt>HTML-INSPECTOR-VIEWS</tt> and
+  <tt>HTML-INSPECTOR-VIEWS/STANDARD</tt> can be present while
+  <tt>asdf:find-system</tt> no longer finds
+  <tt>html-inspector-views</tt> or
+  <tt>html-inspector-views/standard</tt>.
+</p>
+
+<p>
+  <tt>make-html-inspector-views-asdf-visibility-coherence-report</tt> models
+  that mismatch directly. For the base and standard systems it records the
+  package name and package presence separately from the ASDF system name,
+  ASDF visibility, source file, source directory, and captured
+  <tt>asdf:find-system</tt> condition. It also records the environment inputs
+  that can explain the mismatch: <tt>HTML_INSPECTOR_VIEWS_SRC</tt>,
+  <tt>HTML_INSPECTOR_VIEWS_ASD</tt>, <tt>CL_SOURCE_REGISTRY</tt>, the expected
+  <tt>html-inspector-views.asd</tt> under the source root, the explicit ASD
+  path when set, and the repo-local vendored ASD file.
+</p>
+
+<p>
+  The observed dirty-image state can therefore be represented without
+  flattening it into a generic inspector failure: packages are present, the
+  live method table has been repaired, ASDF systems are missing, and browser
+  inspection remains blocked by <tt>:packages-present-asdf-missing</tt> or
+  <tt>:asdf-subsystem-not-visible</tt>. The plan object remains a separate
+  good chunk; the blocked chunk is ASDF visibility for optional inspector
+  support.
 </p>
 
 <h2>Live method-table coherence</h2>
