@@ -521,6 +521,13 @@
    #:make-runtime-coherence-report
    #:make-inspector-runtime-coherence-report
    #:make-current-plan-browser-coherence-report
+   #:asdf-root-candidate-p
+   #:static-asset-root-candidate-p
+   #:path-contains-asd-p
+   #:path-contains-required-clog-static-assets-p
+   #:classify-clog-src
+   #:clog-asdf-code-root-chunk
+   #:clog-static-asset-root-chunk
    #:coherence-chunk-id-of
    #:coherence-chunk-title-of
    #:coherence-chunk-kind-of
