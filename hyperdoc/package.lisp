@@ -528,6 +528,12 @@
    #:classify-clog-src
    #:clog-asdf-code-root-chunk
    #:clog-static-asset-root-chunk
+   #:attempt-load-asdf-system-chunk
+   #:clog-moldable-inspector-system-chunk
+   #:html-inspector-base-system-chunk
+   #:html-inspector-standard-view-chunk
+   #:s-graphviz-optional-capability-chunk
+   #:browser-inspection-session-chunk
    #:coherence-chunk-id-of
    #:coherence-chunk-title-of
    #:coherence-chunk-kind-of

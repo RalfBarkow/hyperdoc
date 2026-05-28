@@ -410,6 +410,247 @@
        '(:repair-clog-static-root
          :set-clog-src-to-overlay-with-static-files)))))
 
+(defun package-present-p (package-name)
+  (not (null (find-package package-name))))
+
+(defun asdf-system-probe-chunk (system-name
+                                &key id
+                                     title
+                                     (kind :asdf-system)
+                                     package-name
+                                     optionalp
+                                     depends-on
+                                     extra-evidence)
+  (multiple-value-bind (system condition)
+      (safe-find-asdf-system system-name)
+    (let* ((package-present (and package-name
+                                 (package-present-p package-name)))
+           (status
+             (cond
+               (condition
+                (if optionalp :optional-unavailable :failed))
+               (system
+                :good)
+               (optionalp
+                :optional-unavailable)
+               (t
+                :missing))))
+      (make-coherence-chunk
+       :id id
+       :title title
+       :kind kind
+       :status status
+       :value system
+       :evidence (append
+                  (list (list :probe 'asdf:find-system
+                              :system-name system-name
+                              :system system
+                              :found (not (null system)))
+                        (list :probe 'find-package
+                              :package-name package-name
+                              :present package-present)
+                        (list :load-probe-performed nil))
+                  extra-evidence)
+       :last-error condition
+       :repair-options
+       (when (and (not system)
+                  (not optionalp))
+         (list :repair-asdf-source-registry))
+       :depends-on depends-on))))
+
+(defun attempt-load-asdf-system-chunk (system-name
+                                       &key id
+                                            title
+                                            (kind :asdf-system)
+                                            package-name
+                                            optionalp
+                                            depends-on)
+  (handler-case
+      (let ((loaded (asdf:load-system system-name)))
+        (make-coherence-chunk
+         :id (or id
+                 (format nil "~(~A~)-asdf-system" system-name))
+         :title (or title
+                    (format nil "~A ASDF system" system-name))
+         :kind kind
+         :status (if loaded :good :unknown)
+         :value (asdf:find-system system-name nil)
+         :evidence (list (list :probe 'asdf:load-system
+                               :system-name system-name
+                               :loaded loaded)
+                         (list :probe 'find-package
+                               :package-name package-name
+                               :present (and package-name
+                                             (package-present-p package-name))))
+         :depends-on depends-on))
+    (condition (condition)
+      (make-coherence-chunk
+       :id (or id
+               (format nil "~(~A~)-asdf-system" system-name))
+       :title (or title
+                  (format nil "~A ASDF system" system-name))
+       :kind kind
+       :status (if optionalp :optional-unavailable :failed)
+       :last-error condition
+       :evidence (list (condition-evidence condition)
+                       (list :probe 'asdf:load-system
+                             :system-name system-name
+                             :loaded nil))
+       :depends-on depends-on))))
+
+(defun clog-moldable-inspector-system-chunk ()
+  (asdf-system-probe-chunk
+   :clog-moldable-inspector
+   :id "clog-moldable-inspector-system"
+   :title "CLOG moldable inspector ASDF system"
+   :kind :asdf-system
+   :package-name :clog-moldable-inspector
+   :depends-on '("clog-asdf-code-root" "clog-static-asset-root")
+   :extra-evidence
+   (list (list :ordinary-probe-mode :non-mutating
+               :load-system-called nil))))
+
+(defun html-inspector-base-system-chunk ()
+  (asdf-system-probe-chunk
+   :html-inspector-views
+   :id "html-inspector-views-base-system"
+   :title "HTML inspector views base ASDF system"
+   :kind :asdf-system
+   :package-name :html-inspector-views
+   :extra-evidence
+   (list (list :ordinary-probe-mode :non-mutating
+               :load-system-called nil))))
+
+(defun s-graphviz-optional-capability-chunk (&key load-probe)
+  (if load-probe
+      (attempt-load-asdf-system-chunk
+       :s-graphviz
+       :id "s-graphviz-optional-capability"
+       :title "s-graphviz optional capability"
+       :kind :optional-inspector-view
+       :package-name :s-graphviz
+       :optionalp t)
+      (asdf-system-probe-chunk
+       :s-graphviz
+       :id "s-graphviz-optional-capability"
+       :title "s-graphviz optional capability"
+       :kind :optional-inspector-view
+       :package-name :s-graphviz
+       :optionalp t
+       :extra-evidence
+       (list (list :ordinary-probe-mode :non-mutating
+                   :load-system-called nil)))))
+
+(defun html-inspector-standard-view-chunk (&key
+                                             s-graphviz-chunk)
+  (let* ((graphviz (or s-graphviz-chunk
+                       (s-graphviz-optional-capability-chunk)))
+         (base (asdf-system-probe-chunk
+                :html-inspector-views/standard
+                :id "html-inspector-views-standard-view"
+                :title "HTML inspector standard views"
+                :kind :optional-inspector-view
+                :package-name :html-inspector-views/standard
+                :optionalp t
+                :depends-on '("html-inspector-views-base-system"
+                              "s-graphviz-optional-capability")
+                :extra-evidence
+                (list (list :ordinary-probe-mode :non-mutating
+                            :load-system-called nil)))))
+    (if (member (coherence-chunk-status-of graphviz)
+                '(:optional-unavailable :failed :blocked)
+                :test #'eq)
+        (make-coherence-chunk
+         :id (coherence-chunk-id-of base)
+         :title (coherence-chunk-title-of base)
+         :kind (coherence-chunk-kind-of base)
+         :status (if (eq (coherence-chunk-status-of base)
+                         :optional-unavailable)
+                     :optional-unavailable
+                     :blocked)
+         :value (coherence-chunk-value-of base)
+         :evidence (append
+                    (coherence-chunk-evidence-of base)
+                    (list (list :optional-boundary
+                                :s-graphviz
+                                :optional-capability-status
+                                (coherence-chunk-status-of graphviz)
+                                :effect
+                                "Graphviz-backed standard views are degraded without crashing the report.")))
+         :last-error (or (coherence-chunk-last-error-of base)
+                         (coherence-chunk-last-error-of graphviz))
+         :repair-options '(:enable-graphviz-optional-capability)
+         :depends-on (coherence-chunk-depends-on-of base))
+        base)))
+
+(defun required-browser-inspection-support-chunk-p (chunk)
+  (member (coherence-chunk-id-of chunk)
+          '("clog-asdf-code-root"
+            "clog-static-asset-root"
+            "clog-moldable-inspector-system"
+            "html-inspector-views-base-system")
+          :test #'string=))
+
+(defun degraded-optional-inspector-chunk-p (chunk)
+  (and (eq (coherence-chunk-kind-of chunk)
+           :optional-inspector-view)
+       (member (coherence-chunk-status-of chunk)
+               '(:optional-unavailable :blocked :failed)
+               :test #'eq)))
+
+(defun browser-inspection-session-chunk (&key root-object
+                                              summary
+                                              checklist
+                                              projections
+                                              support-chunks)
+  (let* ((required-blocking
+           (remove-if-not
+            (lambda (chunk)
+              (and (required-browser-inspection-support-chunk-p chunk)
+                   (coherence-chunk-status-blocking-p
+                    (coherence-chunk-status-of chunk))))
+            support-chunks))
+         (optional-degraded
+           (remove-if-not #'degraded-optional-inspector-chunk-p
+                          support-chunks))
+         (root-good (not (null root-object))))
+    (make-coherence-chunk
+     :id "browser-inspection-session"
+     :title "Browser inspection session"
+     :kind :browser-inspection-session
+     :basis root-object
+     :status (cond
+               (required-blocking :blocked)
+               (root-good :good)
+               (t :unknown))
+     :value (list :root-object root-object
+                  :summary summary
+                  :checklist checklist
+                  :projections projections)
+     :evidence (list
+                (list :root-object-present root-good
+                      :root-object-type (and root-object
+                                             (type-of root-object)))
+                (list :blocking-runtime-support-chunks
+                      (mapcar #'coherence-chunk-id-of
+                              required-blocking))
+                (list :optional-degraded-chunks
+                      (mapcar #'coherence-chunk-id-of
+                              optional-degraded))
+                (if required-blocking
+                    (list :message
+                          "Object state is preserved, but browser inspection is blocked by runtime support chunks."
+                          :plan-object-status
+                          (if root-good :good :unknown))
+                    (list :message
+                          "No required browser-inspection support chunk is blocking this non-mutating report."
+                          :plan-object-status
+                          (if root-good :good :unknown))))
+     :repair-options
+     (when required-blocking
+       '(:inspect-blocking-runtime-support-chunks))
+     :depends-on (mapcar #'coherence-chunk-id-of support-chunks))))
+
 (defun make-runtime-coherence-report (&key (title "Runtime coherence report")
                                            (observed-at (get-universal-time))
                                            (chunks nil)
@@ -428,11 +669,23 @@
 (defun make-inspector-runtime-coherence-report (&key
                                                   (title "Inspector runtime coherence report")
                                                   (observed-at (get-universal-time)))
-  (make-runtime-coherence-report
-   :title title
-   :observed-at observed-at
-   :chunks (list (clog-asdf-code-root-chunk)
-                 (clog-static-asset-root-chunk))))
+  (let* ((clog-code-root (clog-asdf-code-root-chunk))
+         (clog-static-root (clog-static-asset-root-chunk))
+         (clog-inspector (clog-moldable-inspector-system-chunk))
+         (html-base (html-inspector-base-system-chunk))
+         (graphviz (s-graphviz-optional-capability-chunk))
+         (html-standard
+           (html-inspector-standard-view-chunk
+            :s-graphviz-chunk graphviz)))
+    (make-runtime-coherence-report
+     :title title
+     :observed-at observed-at
+     :chunks (list clog-code-root
+                   clog-static-root
+                   clog-inspector
+                   html-base
+                   html-standard
+                   graphviz))))
 
 (defun make-current-plan-browser-coherence-report (&key root-object
                                                         summary
@@ -440,31 +693,44 @@
                                                         projections
                                                         (title "Plan browser coherence report")
                                                         (observed-at (get-universal-time)))
-  (declare (ignore checklist))
-  (let ((chunks
-          (remove
-           nil
-           (list
-            (when root-object
-              (make-coherence-chunk
-               :id "current-plan-result"
-               :title "Current plan result"
-               :kind :plan-result
-               :status :good
-               :value root-object
-               :evidence (list (list :object-type (type-of root-object)))))
-            (when projections
-              (make-coherence-chunk
-               :id "current-plan-projections"
-               :title "Current plan projections"
-               :kind :projection
-               :status :good
-               :value projections
-               :evidence (list (list :projection-count
-                                     (length projections)))))))))
+  (let* ((support-report (make-inspector-runtime-coherence-report))
+         (support-chunks
+           (runtime-coherence-report-chunks-of support-report))
+         (plan-chunks
+           (remove
+            nil
+            (list
+             (when root-object
+               (make-coherence-chunk
+                :id "current-plan-result"
+                :title "Current plan result"
+                :kind :plan-result
+                :status :good
+                :value root-object
+                :evidence (list (list :object-type (type-of root-object))
+                                (list :summary summary)
+                                (list :checklist checklist))))
+             (when projections
+               (make-coherence-chunk
+                :id "current-plan-projections"
+                :title "Current plan projections"
+                :kind :projection
+                :status :good
+                :value projections
+                :evidence (list (list :projection-count
+                                      (length projections))))))))
+         (session-chunk
+           (browser-inspection-session-chunk
+            :root-object root-object
+            :summary summary
+            :checklist checklist
+            :projections projections
+            :support-chunks support-chunks))
+         (chunks (append plan-chunks
+                         support-chunks
+                         (list session-chunk))))
     (make-runtime-coherence-report
      :title title
      :observed-at observed-at
      :chunks chunks
-     :summary (or summary
-                  (runtime-coherence-default-summary chunks)))))
+     :summary (runtime-coherence-default-summary chunks))))
