@@ -47,6 +47,7 @@
                   "clog-moldable-inspector-system"
                   "html-inspector-views-base-system"
                   "html-inspector-views-standard-view"
+                  "html-inspector-views-standard-live-methods"
                   "html-inspector-views-standard-dependency-cache"
                   "s-graphviz-optional-capability"))
       (rc-assert-true
@@ -78,6 +79,32 @@
            (uiop:temporary-directory))))
     (ensure-directories-exist (merge-pathnames #P".keep" directory))
     directory))
+
+(defun rc-temp-package-name (label)
+  (format nil "HYPERDOC-RUNTIME-COHERENCE-~A-~A"
+          label
+          (gensym)))
+
+(defun rc-delete-package-if-present (package-name)
+  (let ((package (find-package package-name)))
+    (when package
+      (delete-package package))))
+
+(defun rc-with-live-method-fixture (thunk)
+  (let* ((package-name (rc-temp-package-name "LIVE-METHODS"))
+         (package (make-package package-name :use '(:cl)))
+         (depends-on (intern "SYSTEM-DEPENDS-ON" package))
+         (dependencies (intern "SYSTEM-DEPENDENCIES" package)))
+    (unwind-protect
+         (progn
+           (eval `(defgeneric ,depends-on (system)))
+           (eval `(defmethod ,depends-on ((system string))
+                    nil))
+           (eval `(defun ,dependencies (system)
+                    (loop for dependency in (,depends-on system)
+                          collect dependency)))
+           (funcall thunk package-name depends-on dependencies))
+      (rc-delete-package-if-present package-name))))
 
 (defun rc-classify-clog-src-no-asd-smoke-test ()
   (let ((directory (rc-make-temp-directory "no-asd")))
@@ -174,6 +201,87 @@
                   (getf entry :present)))
            (hyperdoc:coherence-chunk-evidence-of chunk))
      "Dependency cache chunk must record the null SYSTEM-DEPENDS-ON method"))
+  t)
+
+(defun rc-live-method-report-missing-package-smoke-test ()
+  (let* ((package-name (rc-temp-package-name "MISSING-PACKAGE"))
+         (report (hyperdoc:make-html-inspector-views-live-method-coherence-report
+                  :package-name package-name))
+         (chunk (first (hyperdoc:runtime-coherence-report-chunks-of report))))
+    (rc-assert-equal
+     :missing-package
+     (hyperdoc:coherence-chunk-status-of chunk)
+     "Live method report must degrade when the standard package is absent"))
+  t)
+
+(defun rc-live-method-repair-missing-package-smoke-test ()
+  (let* ((package-name (rc-temp-package-name "MISSING-REPAIR-PACKAGE"))
+         (report (hyperdoc:repair-html-inspector-views-standard-live-methods
+                  :package-name package-name))
+         (chunk (first (hyperdoc:runtime-coherence-report-chunks-of report))))
+    (rc-assert-equal
+     :missing-package
+     (hyperdoc:coherence-chunk-status-of chunk)
+     "Live method repair must not signal when the standard package is absent"))
+  t)
+
+(defun rc-live-method-report-missing-null-method-smoke-test ()
+  (rc-with-live-method-fixture
+   (lambda (package-name depends-on dependencies)
+     (declare (ignore depends-on dependencies))
+     (let* ((report
+              (hyperdoc:make-html-inspector-views-live-method-coherence-report
+               :package-name package-name))
+            (chunk
+              (first (hyperdoc:runtime-coherence-report-chunks-of report))))
+       (rc-assert-equal
+        :missing-null-method
+        (hyperdoc:coherence-chunk-status-of chunk)
+        "A present generic without a NULL method must report :missing-null-method")
+       (rc-assert-true
+        (some (lambda (entry)
+                (and (listp entry)
+                     (eq (getf entry :probe) 'find-method)
+                     (not (getf entry :present))))
+              (hyperdoc:coherence-chunk-evidence-of chunk))
+        "The missing NULL method must be recorded as chunk evidence"))))
+  t)
+
+(defun rc-live-method-repair-installs-null-method-smoke-test ()
+  (rc-with-live-method-fixture
+   (lambda (package-name depends-on dependencies)
+     (let* ((report
+              (hyperdoc:repair-html-inspector-views-standard-live-methods
+               :package-name package-name))
+            (chunk
+              (first (hyperdoc:runtime-coherence-report-chunks-of report)))
+            (after
+              (find :after
+                    (hyperdoc:coherence-chunk-evidence-of chunk)
+                    :key (lambda (entry)
+                           (and (listp entry)
+                                (getf entry :phase))))))
+       (rc-assert-equal
+        :good
+        (hyperdoc:coherence-chunk-status-of chunk)
+        "Live method repair must produce a good chunk after installing the NULL method")
+       (rc-assert-true
+        (getf (hyperdoc:coherence-chunk-value-of chunk)
+              :null-method-installed)
+        "Repair evidence must record that the NULL method was installed")
+       (rc-assert-equal
+        nil
+        (funcall depends-on nil)
+        "SYSTEM-DEPENDS-ON on NIL must return NIL after repair")
+       (rc-assert-equal
+        nil
+        (funcall dependencies nil)
+        "SYSTEM-DEPENDENCIES on NIL must return NIL after repair")
+       (rc-assert-true
+        (and after
+             (getf after :system-depends-on-call)
+             (getf after :system-dependencies-call))
+        "Repair evidence must include successful post-repair safe-call records"))))
   t)
 
 (defun rc-html-inspector-views-environment-missing-asd-smoke-test ()
@@ -293,6 +401,10 @@
   (rc-classify-clog-src-no-asd-smoke-test)
   (rc-graphviz-missing-degrades-smoke-test)
   (rc-html-inspector-standard-dependency-cache-smoke-test)
+  (rc-live-method-report-missing-package-smoke-test)
+  (rc-live-method-repair-missing-package-smoke-test)
+  (rc-live-method-report-missing-null-method-smoke-test)
+  (rc-live-method-repair-installs-null-method-smoke-test)
   (rc-html-inspector-views-environment-missing-asd-smoke-test)
   (rc-static-root-missing-assets-degrades-smoke-test)
   (rc-report-construction-does-not-load-systems-smoke-test)
