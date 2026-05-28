@@ -18,6 +18,7 @@
   <li><a hyperbook="topics" page="Browser inspection session chunk"><tt>Browser inspection session chunk</tt></a></li>
   <li><a expr="(make-inspector-runtime-coherence-report)"><tt>(make-inspector-runtime-coherence-report)</tt></a></li>
   <li><a expr="(make-html-inspector-views-environment-coherence-report)"><tt>(make-html-inspector-views-environment-coherence-report)</tt></a></li>
+  <li><a expr="(repair-html-inspector-views-environment-from-asdf)"><tt>(repair-html-inspector-views-environment-from-asdf)</tt></a></li>
   <li><a expr="(make-html-inspector-views-asdf-visibility-coherence-report)"><tt>(make-html-inspector-views-asdf-visibility-coherence-report)</tt></a></li>
   <li><a expr="(make-html-inspector-views-live-method-coherence-report)"><tt>(make-html-inspector-views-live-method-coherence-report)</tt></a></li>
   <li><a expr="(repair-html-inspector-views-standard-live-methods)"><tt>(repair-html-inspector-views-standard-live-methods)</tt></a></li>
@@ -86,6 +87,19 @@
   name the stale or missing environment chunk; it should not repair this by
   restarting the Lisp image or by loading more ASDF systems during ordinary
   report construction.
+</p>
+
+<p>
+  <tt>repair-html-inspector-views-environment-from-asdf</tt> is the explicit
+  mutating repair for the case where ASDF already sees the current
+  <tt>html-inspector-views</tt> system but the process environment still names
+  a stale derivation. It uses ASDF's visible base system as the source of truth,
+  derives the source directory and <tt>html-inspector-views.asd</tt> pathname,
+  binds <tt>HTML_INSPECTOR_VIEWS_SRC</tt> and
+  <tt>HTML_INSPECTOR_VIEWS_ASD</tt>, and returns a
+  <tt>runtime-coherence-report</tt> with before, mutation, and after evidence.
+  If ASDF cannot see the base system, the repair reports
+  <tt>:asdf-subsystem-not-visible</tt> instead of guessing a path.
 </p>
 
 <h2>ASDF visibility versus package presence</h2>
@@ -224,7 +238,11 @@ Never calls SLYNK:INSPECT-IN-EMACS directly."
   standard views as an
   <a hyperbook="topics" page="Inspector optional dependency"><tt>inspector optional dependency</tt></a>
   boundary. Missing or broken Graphviz support becomes a chunk status such as
-  <tt>:optional-unavailable</tt> or <tt>:blocked</tt>. It must not crash a
+  <tt>:optional-unavailable</tt>. When
+  <tt>html-inspector-views/standard</tt> itself is ASDF-visible and only the
+  Graphviz-backed capability is unavailable, the standard-view chunk is
+  <tt>:degraded</tt>, not <tt>:blocked</tt>. Non-Graphviz standard views remain
+  usable; the missing capability is recorded as evidence instead of crashing a
   report about an unrelated plan object.
 </p>
 
