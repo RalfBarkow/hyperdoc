@@ -512,6 +512,30 @@
    #:lisp-critic-run-record-status
    #:lisp-critic-run-record-raw-output
    #:lisp-critic-run-record-target-paths
+   ;; Runtime coherence chunks
+   #:coherence-chunk
+   #:runtime-coherence-report
+   #:*coherence-chunk-statuses*
+   #:*coherence-chunk-kinds*
+   #:make-coherence-chunk
+   #:make-runtime-coherence-report
+   #:make-inspector-runtime-coherence-report
+   #:make-current-plan-browser-coherence-report
+   #:coherence-chunk-id-of
+   #:coherence-chunk-title-of
+   #:coherence-chunk-kind-of
+   #:coherence-chunk-basis-of
+   #:coherence-chunk-status-of
+   #:coherence-chunk-value-of
+   #:coherence-chunk-evidence-of
+   #:coherence-chunk-last-error-of
+   #:coherence-chunk-repair-options-of
+   #:coherence-chunk-depends-on-of
+   #:runtime-coherence-report-title-of
+   #:runtime-coherence-report-observed-at-of
+   #:runtime-coherence-report-chunks-of
+   #:runtime-coherence-report-summary-of
+   #:runtime-coherence-report-recommended-next-actions-of
    ;; Access to the global catalog of registered HyperDocs
    #:*catalog* #:hyperdocs-of
    ;; Access to HyperDoc data

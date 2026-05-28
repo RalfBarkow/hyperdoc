@@ -124,6 +124,7 @@
                                        (:file "skillization")
                                        (:file "mech-deployment-provenance")
                                        (:file "page-lookup-chunks")
+                                       (:file "runtime-coherence")
                                        (:file "authored-relation-artifacts")
                                        (:file "page-lookup-issue-authored-source")
                                        (:file "page-lookup-issue-artifacts")
