@@ -176,6 +176,51 @@
      "Dependency cache chunk must record the null SYSTEM-DEPENDS-ON method"))
   t)
 
+(defun rc-html-inspector-views-environment-missing-asd-smoke-test ()
+  (let ((directory (rc-make-temp-directory "html-inspector-src-no-asd")))
+    (unwind-protect
+         (let* ((report
+                  (hyperdoc:make-html-inspector-views-environment-coherence-report
+                   :html-inspector-views-src directory
+                   :html-inspector-views-asd nil))
+                (chunks (hyperdoc:runtime-coherence-report-chunks-of report))
+                (chunk (rc-find-chunk "html-inspector-views-environment"
+                                      chunks))
+                (advice
+                  (hyperdoc:html-inspector-views-environment-repair-advice
+                   :html-inspector-views-src directory
+                   :html-inspector-views-asd nil)))
+           (rc-assert-true
+            chunk
+            "HTML inspector environment report must include its environment chunk")
+           (rc-assert-true
+            (member (hyperdoc:coherence-chunk-status-of chunk)
+                    '(:blocked :failed)
+                    :test #'eq)
+            "A source directory without html-inspector-views.asd must degrade into a chunk status")
+           (rc-assert-equal
+            :missing-html-inspector-views-asd
+            (getf (hyperdoc:coherence-chunk-value-of chunk)
+                  :repair-advice)
+            "Missing html-inspector-views.asd must be recorded as repair advice")
+           (rc-assert-equal
+            :missing-html-inspector-views-asd
+            advice
+            "Repair advice function must return a non-signaling keyword diagnosis")
+           (rc-assert-true
+            (some (lambda (entry)
+                    (and (listp entry)
+                         (string= (getf entry :env-var)
+                                  "HTML_INSPECTOR_VIEWS_SRC")
+                         (getf entry :directory-exists)
+                         (not (getf entry :expected-asd-exists))))
+                  (hyperdoc:coherence-chunk-evidence-of chunk))
+            "Missing html-inspector-views.asd must be visible in chunk evidence"))
+      (uiop:delete-directory-tree directory
+                                  :validate t
+                                  :if-does-not-exist :ignore)))
+  t)
+
 (defun rc-static-root-missing-assets-degrades-smoke-test ()
   (let ((directory (rc-make-temp-directory "missing-static-assets")))
     (unwind-protect
@@ -248,6 +293,7 @@
   (rc-classify-clog-src-no-asd-smoke-test)
   (rc-graphviz-missing-degrades-smoke-test)
   (rc-html-inspector-standard-dependency-cache-smoke-test)
+  (rc-html-inspector-views-environment-missing-asd-smoke-test)
   (rc-static-root-missing-assets-degrades-smoke-test)
   (rc-report-construction-does-not-load-systems-smoke-test)
   (rc-current-plan-browser-report-smoke-test)
