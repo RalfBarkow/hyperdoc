@@ -1,0 +1,94 @@
+<h1>Runtime coherence chunks for inspector dependencies</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page records the first concrete runtime-support slice for keeping a
+  good object in the running Lisp image inspectable even when unrelated browser
+  inspector support has drifted out of coherence.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Runtime coherence chunk"><tt>Runtime coherence chunk</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF code root"><tt>ASDF code root</tt></a></li>
+  <li><a hyperbook="topics" page="Static asset root"><tt>Static asset root</tt></a></li>
+  <li><a hyperbook="topics" page="Inspector optional dependency"><tt>Inspector optional dependency</tt></a></li>
+  <li><a hyperbook="topics" page="Browser inspection session chunk"><tt>Browser inspection session chunk</tt></a></li>
+  <li><a expr="(make-inspector-runtime-coherence-report)"><tt>(make-inspector-runtime-coherence-report)</tt></a></li>
+  <li><a expr="(make-current-plan-browser-coherence-report :root-object '(:synthetic-plan-result) :summary '(:synthetic-summary) :checklist '(:synthetic-checklist))"><tt>(make-current-plan-browser-coherence-report ...)</tt></a></li>
+  <li><a expr="(clog-asdf-code-root-chunk)"><tt>(clog-asdf-code-root-chunk)</tt></a></li>
+  <li><a expr="(clog-static-asset-root-chunk)"><tt>(clog-static-asset-root-chunk)</tt></a></li>
+  <li><a expr="(s-graphviz-optional-capability-chunk)"><tt>(s-graphviz-optional-capability-chunk)</tt></a></li>
+</ul>
+
+<h2>Boundary</h2>
+
+<p>
+  The repair target is not "restart the Lisp image". Restarting may produce a
+  cleaner image, but it also throws away the good chunks that should remain
+  inspectable. The runtime coherence report preserves the object chunk and
+  records which support chunk blocks browser inspection.
+</p>
+
+<p>
+  The first split is between an <a hyperbook="topics" page="ASDF code root"><tt>ASDF code root</tt></a>
+  and a <a hyperbook="topics" page="Static asset root"><tt>static asset root</tt></a>.
+  ASDF answers where Lisp systems such as <tt>:clog</tt> resolve from. Static
+  assets answer where files such as <tt>boot.html</tt>, <tt>js/boot.js</tt>,
+  and <tt>js/jquery.min.js</tt> are served from. Those can be different roots.
+</p>
+
+<p>
+  <tt>CLOG_SRC</tt> is currently overloaded. In the observed image it pointed
+  at a patched CLOG source/static overlay, not at a directory containing
+  <tt>clog.asd</tt>. The coherence model therefore classifies <tt>CLOG_SRC</tt>
+  by evidence: whether the path contains an ASDF definition, whether it is a
+  static root, or whether <tt>CLOG_SRC/static-files/</tt> is the patched asset
+  root.
+</p>
+
+<h2>Optional inspector capability</h2>
+
+<p>
+  <tt>html-inspector-views/standard</tt> currently reaches Graphviz support
+  through <tt>s-graphviz</tt>. That is a real ASDF dependency in the current
+  upstream design, but the runtime coherence report treats Graphviz-backed
+  standard views as an
+  <a hyperbook="topics" page="Inspector optional dependency"><tt>inspector optional dependency</tt></a>
+  boundary. Missing or broken Graphviz support becomes a chunk status such as
+  <tt>:optional-unavailable</tt> or <tt>:blocked</tt>. It must not crash a
+  report about an unrelated plan object.
+</p>
+
+<h2>Plan object preservation</h2>
+
+<p>
+  A SHOP3 plan result can be a good <tt>:plan-result</tt> chunk while the
+  browser-inspection session is blocked by CLOG static assets, CLOG inspector
+  loading, or optional view support. The session chunk says exactly that:
+  "plan object is good; browser inspector is blocked by runtime support chunk
+  X." The next action is to re-derive or repair that support chunk, not to
+  discard the plan object.
+</p>
+
+<h2>Non-mutating default</h2>
+
+<p>
+  Ordinary report construction probes with <tt>asdf:find-system</tt>,
+  <tt>find-package</tt>, <tt>fboundp</tt>, <tt>probe-file</tt>, and environment
+  classification. It does not call <tt>asdf:load-system</tt>. Any ASDF load
+  probe belongs behind an explicitly named operation such as
+  <tt>attempt-load-asdf-system-chunk</tt>, where failures are captured as chunk
+  evidence.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
+  <li><a page="Static Asset Path Resolution">Static Asset Path Resolution</a></li>
+  <li><a page="s-graphviz Dependency Boundary">s-graphviz Dependency Boundary</a></li>
+  <li><a page="Running Image Coherence Rebuild Workflow">Running Image Coherence Rebuild Workflow</a></li>
+</ul>

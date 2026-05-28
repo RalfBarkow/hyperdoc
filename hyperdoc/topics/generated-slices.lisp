@@ -708,6 +708,7 @@
    :title "Running image coherence"
    :summary "The problem of keeping a live Lisp image internally consistent and intelligible as chunks, dependencies, and derived runtime state evolve and must stay fresh relative to their basis."
    :references '("A framework for maintaining the coherence of a running Lisp"
+                 "Runtime coherence chunks for inspector dependencies"
                  "McDermott Running Image Coherence Crosswalk"
                  "Drew McDermott Lisp, Planning, and Software"
                  "Source-oriented and image-oriented development in Common Lisp")))
@@ -718,9 +719,57 @@
    :title "Chunk"
    :summary "McDermott’s inspectable unit of running-image coherence: a piece of information with a particular state, form, or location whose freshness can be maintained relative to a basis."
    :references '("A framework for maintaining the coherence of a running Lisp"
+                 "Runtime coherence chunks for inspector dependencies"
                  "McDermott Running Image Coherence Crosswalk"
                  "Core Chunk Classes"
                  "Chunk notes and manifest notes in a DMX workspace")))
+
+(defun runtime-coherence-chunk-topic ()
+  (make-topic
+   :id "runtime-coherence-chunk"
+   :title "Runtime coherence chunk"
+   :summary "Inspectable runtime-support unit that records kind, basis, status, value, evidence, last error, repair options, and dependencies without mutating the running image by default."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "A framework for maintaining the coherence of a running Lisp"
+                 "hyperdoc/runtime-coherence.lisp")))
+
+(defun asdf-code-root-topic ()
+  (make-topic
+   :id "asdf-code-root"
+   :title "ASDF code root"
+   :summary "Runtime coherence chunk for the filesystem root from which ASDF resolves a Lisp system definition and source, distinct from any static asset root."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "Understanding ASDF Systems in HyperDoc"
+                 "ASDF Components Workflow"
+                 "hyperdoc/runtime-coherence.lisp")))
+
+(defun static-asset-root-topic ()
+  (make-topic
+   :id "static-asset-root"
+   :title "Static asset root"
+   :summary "Runtime coherence chunk for the filesystem root that serves browser assets such as CLOG boot files, distinct from the ASDF code root."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "Static Asset Path Resolution"
+                 "hyperdoc/runtime-coherence.lisp"
+                 "hyperbook-server/server.lisp")))
+
+(defun inspector-optional-dependency-topic ()
+  (make-topic
+   :id "inspector-optional-dependency"
+   :title "Inspector optional dependency"
+   :summary "Inspector-view capability whose absence or load failure should degrade into a recorded chunk status instead of crashing unrelated object inspection."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "s-graphviz Dependency Boundary"
+                 "hyperdoc/runtime-coherence.lisp")))
+
+(defun browser-inspection-session-chunk-topic ()
+  (make-topic
+   :id "browser-inspection-session-chunk"
+   :title "Browser inspection session chunk"
+   :summary "Derived coherence chunk that preserves the inspected root object while reporting which runtime-support chunks block or degrade browser inspection."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "Shared Inspector Projection"
+                 "hyperdoc/runtime-coherence.lisp")))
 
 (defun normal-association-submit-path-vs-evidence-path-topic ()
   (make-topic
