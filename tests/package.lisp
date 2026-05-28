@@ -77,6 +77,7 @@
    :run-kioskbeerli-dmx-associative-mirror-smoke-tests
    :run-py4dmx-cluster-smoke-tests
    :run-scxml-compiler-smoke-tests
+   :run-runtime-coherence-smoke-tests
    :run-interaction-net-smoke-tests
    :run-closure-nor-demo-smoke-tests
    :run-nor-graph-matcher-smoke-tests
