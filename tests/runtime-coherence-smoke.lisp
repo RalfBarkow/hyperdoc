@@ -92,6 +92,33 @@
     (when package
       (delete-package package))))
 
+(defun rc-setenv (name value)
+  (require :sb-posix)
+  (let ((package (find-package "SB-POSIX")))
+    (if value
+        (funcall (find-symbol "SETENV" package)
+                 name
+                 value
+                 1)
+        (funcall (find-symbol "UNSETENV" package)
+                 name))))
+
+(defun rc-with-environment-bindings (bindings thunk)
+  (let ((old-values
+          (mapcar (lambda (binding)
+                    (cons (first binding)
+                          (uiop:getenv (first binding))))
+                  bindings)))
+    (unwind-protect
+         (progn
+           (dolist (binding bindings)
+             (rc-setenv (first binding)
+                        (second binding)))
+           (funcall thunk))
+      (dolist (binding old-values)
+        (rc-setenv (car binding)
+                   (cdr binding))))))
+
 (defun rc-find-evidence (scope chunk)
   (find scope
         (hyperdoc:coherence-chunk-evidence-of chunk)
@@ -182,9 +209,20 @@
         "Missing s-graphviz must become an optional chunk status")
        (rc-assert-true
         (member (hyperdoc:coherence-chunk-status-of standard)
-                '(:blocked :optional-unavailable)
+                '(:degraded :optional-unavailable)
                 :test #'eq)
-        "Standard view chunk must record Graphviz degradation, not signal"))))
+        "Standard view chunk must record Graphviz degradation, not signal")
+       (when (eq (hyperdoc:coherence-chunk-status-of standard)
+                 :degraded)
+         (let ((summary
+                 (hyperdoc:runtime-coherence-report-summary-of
+                  (hyperdoc:make-runtime-coherence-report
+                   :chunks (list standard)))))
+           (rc-assert-true
+            (not (member "html-inspector-views-standard-view"
+                         (getf summary :blocking-chunks)
+                         :test #'string=))
+            "Graphviz-only degradation must not block browser inspection"))))))
   t)
 
 (defun rc-html-inspector-standard-dependency-cache-smoke-test ()
@@ -358,6 +396,45 @@
                                   :if-does-not-exist :ignore)))
   t)
 
+(defun rc-html-inspector-environment-repair-from-asdf-smoke-test ()
+  (rc-with-environment-bindings
+   '(("HTML_INSPECTOR_VIEWS_SRC" "/tmp/hyperdoc-stale-html-inspector-views/")
+     ("HTML_INSPECTOR_VIEWS_ASD" "/tmp/hyperdoc-stale-html-inspector-views/html-inspector-views.asd"))
+   (lambda ()
+     (let* ((report
+              (hyperdoc:repair-html-inspector-views-environment-from-asdf))
+            (chunks (hyperdoc:runtime-coherence-report-chunks-of report))
+            (repair
+              (rc-find-chunk "html-inspector-views-environment-asdf-repair"
+                             chunks))
+            (value (and repair
+                        (hyperdoc:coherence-chunk-value-of repair)))
+            (target-src
+              (getf value :target-html-inspector-views-src))
+            (target-asd
+              (getf value :target-html-inspector-views-asd)))
+       (rc-assert-true
+        repair
+        "Environment repair report must include its explicit repair chunk")
+       (rc-assert-equal
+        :good
+        (hyperdoc:coherence-chunk-status-of repair)
+        "ASDF-visible html-inspector-views must repair stale environment variables")
+       (rc-assert-true
+        (and target-src
+             target-asd
+             (probe-file target-asd))
+        "Repair chunk must record existing ASDF-derived source and ASD paths")
+       (rc-assert-equal
+        target-src
+        (uiop:getenv "HTML_INSPECTOR_VIEWS_SRC")
+        "Repair must bind HTML_INSPECTOR_VIEWS_SRC to the ASDF-derived source root")
+       (rc-assert-equal
+        target-asd
+        (uiop:getenv "HTML_INSPECTOR_VIEWS_ASD")
+        "Repair must bind HTML_INSPECTOR_VIEWS_ASD to the ASDF-derived ASD path"))))
+  t)
+
 (defun rc-html-inspector-asdf-visibility-absent-smoke-test ()
   (let* ((base-package-name (rc-temp-package-name "ABSENT-BASE"))
          (standard-package-name (rc-temp-package-name "ABSENT-STANDARD"))
@@ -518,6 +595,7 @@
   (rc-live-method-report-missing-null-method-smoke-test)
   (rc-live-method-repair-installs-null-method-smoke-test)
   (rc-html-inspector-views-environment-missing-asd-smoke-test)
+  (rc-html-inspector-environment-repair-from-asdf-smoke-test)
   (rc-html-inspector-asdf-visibility-absent-smoke-test)
   (rc-html-inspector-asdf-visibility-packages-present-smoke-test)
   (rc-static-root-missing-assets-degrades-smoke-test)
