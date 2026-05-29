@@ -520,6 +520,14 @@
    #:make-coherence-chunk
    #:make-runtime-coherence-report
    #:make-inspector-runtime-coherence-report
+   #:make-clog-moldable-inspector-coherence-report
+   #:ensure-running-image-coherent
+   #:load-coherent-system
+   #:derive
+   #:derive-date
+   #:chunk-up-to-date-p
+   #:chunks-update
+   #:coherence-report
    #:make-html-inspector-views-environment-coherence-report
    #:repair-html-inspector-views-environment-from-asdf
    #:make-html-inspector-views-asdf-visibility-coherence-report
@@ -531,6 +539,20 @@
    #:path-contains-asd-p
    #:path-contains-required-clog-static-assets-p
    #:classify-clog-src
+   #:expected-dev-shell-cl-source-registry-chunk
+   #:current-image-cl-source-registry-chunk
+   #:foreign-asdf-source-registry-contaminants-chunk
+   #:asdf-system-visibility-chunk
+   #:clog-moldable-inspector-readiness-chunk
+   #:runtime-coherence-current-chunk-map
+   #:runtime-coherence-stale-chunks
+   #:runtime-coherence-source-registry-diff
+   #:runtime-coherence-selected-asdf-source-files
+   #:runtime-coherence-restart-repair-recommendation
+   #:default-runtime-coherence-sqlite-path
+   #:runtime-coherence-sqlite-available-p
+   #:persist-runtime-coherence-event
+   #:persist-runtime-coherence-report
    #:clog-asdf-code-root-chunk
    #:clog-static-asset-root-chunk
    #:attempt-load-asdf-system-chunk

@@ -20,6 +20,8 @@
     :nix-derivation-mismatch
     :stale-sly-environment
     :stale
+    :foreign-contaminant
+    :refused
     :degraded
     :blocked
     :failed-safe-call
@@ -31,6 +33,9 @@
     :static-asset-root
     :asdf-system
     :optional-inspector-view
+    :source-registry
+    :coherence-gate
+    :persistence
     :browser-inspection-session
     :plan-result
     :projection))
@@ -133,10 +138,36 @@
             :nix-derivation-mismatch
             :stale-sly-environment
             :stale
+            :foreign-contaminant
+            :refused
             :blocked
             :failed-safe-call
             :failed)
           :test #'eq))
+
+(defgeneric derive (chunk &key &allow-other-keys)
+  (:documentation "Derive CHUNK from its basis and return a coherence chunk."))
+
+(defgeneric chunks-update (chunks &key &allow-other-keys)
+  (:documentation "Derive a list of CHUNKS and return the updated chunks."))
+
+(defgeneric coherence-report (object &key &allow-other-keys)
+  (:documentation "Return a runtime coherence report for OBJECT or profile."))
+
+(defmethod derive ((chunk coherence-chunk) &key &allow-other-keys)
+  chunk)
+
+(defmethod derive-date ((chunk coherence-chunk))
+  (or (getf (coherence-chunk-value-of chunk) :observed-at)
+      (getf (coherence-chunk-basis-of chunk) :observed-at)
+      (get-universal-time)))
+
+(defmethod chunk-up-to-date-p ((chunk coherence-chunk))
+  (not (coherence-chunk-status-blocking-p
+        (coherence-chunk-status-of chunk))))
+
+(defmethod chunks-update ((chunks list) &key &allow-other-keys)
+  (mapcar #'derive chunks))
 
 (defun coherence-status-counts (chunks)
   (let ((counts (make-hash-table :test #'eq)))
@@ -241,6 +272,138 @@
            (namestring (pathname path))
          (condition ()
            nil))))
+
+(defun runtime-coherence-now-string (&optional (universal-time
+                                                 (get-universal-time)))
+  (multiple-value-bind (second minute hour day month year)
+      (decode-universal-time universal-time 0)
+    (format nil "~4,'0D-~2,'0D-~2,'0DT~2,'0D:~2,'0D:~2,'0DZ"
+            year month day hour minute second)))
+
+(defun runtime-coherence-print-value (value)
+  (with-output-to-string (stream)
+    (let ((*print-pretty* nil)
+          (*print-circle* t)
+          (*print-length* 80)
+          (*print-level* 12))
+      (prin1 value stream))))
+
+(defun runtime-coherence-keyword-label (value)
+  (cond
+    ((null value) nil)
+    ((keywordp value) (string-downcase (symbol-name value)))
+    ((symbolp value) (string-downcase (symbol-name value)))
+    (t (format nil "~A" value))))
+
+(defun hyperdoc-repo-root-pathname ()
+  (handler-case
+      (uiop:ensure-directory-pathname
+       (asdf:system-source-directory :hyperdoc))
+    (condition ()
+      (uiop:ensure-directory-pathname
+       (truename *default-pathname-defaults*)))))
+
+(defun pathname-prefix-p (prefix path)
+  (let ((prefix-name (safe-namestring
+                      (maybe-directory-pathname prefix)))
+        (path-name (safe-namestring path)))
+    (and prefix-name
+         path-name
+         (<= (length prefix-name) (length path-name))
+         (string= prefix-name
+                  (subseq path-name 0 (length prefix-name))))))
+
+(defun source-path-authority (path &key
+                                     (repo-root
+                                      (hyperdoc-repo-root-pathname)))
+  (let ((namestring (safe-namestring path)))
+    (cond
+      ((null namestring)
+       :missing)
+      ((pathname-prefix-p repo-root path)
+       :repo)
+      ((search "/nix/store/" namestring :test #'char=)
+       :nix-store)
+      ((or (search "/common-lisp/" namestring :test #'char=)
+           (search "/quicklisp/" namestring :test #'char=)
+           (search "/Downloads/" namestring :test #'char=))
+       :foreign-contaminant)
+      (t
+       :unknown-host))))
+
+(defun source-path-authority-accepted-p
+    (authority &key (expected-authorities '(:repo :nix-store)))
+  (member authority expected-authorities :test #'eq))
+
+(defun cl-source-registry-entries
+    (&optional (registry (uiop:getenv "CL_SOURCE_REGISTRY")))
+  (remove-if
+   (lambda (entry)
+     (zerop (length entry)))
+   (if registry
+       (uiop:split-string registry :separator ":")
+       nil)))
+
+(defun cl-source-registry-entry-evidence
+    (entry &key (repo-root (hyperdoc-repo-root-pathname)))
+  (let* ((pathname
+           (handler-case
+               (pathname entry)
+             (condition ()
+               nil)))
+         (authority
+           (source-path-authority pathname :repo-root repo-root)))
+    (list :entry entry
+          :pathname pathname
+          :exists (and pathname
+                       (or (directory-exists-p pathname)
+                           (pathname-exists-p pathname)))
+          :authority authority
+          :accepted (source-path-authority-accepted-p authority))))
+
+(defun asdf-system-source-authority-evidence
+    (system-name &key (repo-root (hyperdoc-repo-root-pathname))
+                     (expected-authorities '(:repo :nix-store)))
+  (multiple-value-bind (system find-condition)
+      (safe-find-asdf-system system-name)
+    (multiple-value-bind (source-file source-file-condition)
+        (safe-asdf-system-source-file system)
+      (multiple-value-bind (source-directory source-directory-condition)
+          (safe-asdf-system-source-directory system)
+        (let* ((source-path (or source-file source-directory))
+               (authority
+                 (source-path-authority source-path :repo-root repo-root))
+               (accepted
+                 (source-path-authority-accepted-p
+                  authority
+                  :expected-authorities expected-authorities)))
+          (values
+           (list :system-name system-name
+                 :system system
+                 :found (not (null system))
+                 :source-file source-file
+                 :source-directory source-directory
+                 :source-authority authority
+                 :source-authority-accepted accepted
+                 :conditions
+                 (remove
+                  nil
+                  (list (and find-condition
+                             (list :probe 'asdf:find-system
+                                   :condition
+                                   (condition-evidence find-condition)))
+                        (and source-file-condition
+                             (list :probe 'asdf:system-source-file
+                                   :condition
+                                   (condition-evidence source-file-condition)))
+                        (and source-directory-condition
+                             (list :probe 'asdf:system-source-directory
+                                   :condition
+                                   (condition-evidence
+                                    source-directory-condition))))))
+           (or find-condition
+               source-file-condition
+               source-directory-condition)))))))
 
 (defun set-process-environment-variable (name value)
   (handler-case
@@ -631,6 +794,207 @@
        (when (and (not system)
                   (not optionalp))
          (list :repair-asdf-source-registry))
+       :depends-on depends-on))))
+
+(defun runtime-coherence-system-id (system-name suffix)
+  (let ((base (string-downcase (string system-name))))
+    (format nil "~A-~A"
+            (with-output-to-string (stream)
+              (loop for char across base
+                    do (write-char (if (find char "/:"
+                                             :test #'char=)
+                                       #\-
+                                       char)
+                                   stream)))
+            suffix)))
+
+(defun expected-dev-shell-cl-source-registry-chunk
+    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          (repo-root (hyperdoc-repo-root-pathname)))
+  (let* ((systems '(:hyperdoc :s-graphviz :clog-ace
+                    :html-inspector-views/standard
+                    :clog-moldable-inspector))
+         (system-evidence
+           (mapcar (lambda (system-name)
+                     (asdf-system-source-authority-evidence
+                      system-name
+                      :repo-root repo-root))
+                   systems))
+         (repo-root-exists-p (directory-exists-p repo-root))
+         (nix-visible-p
+           (some (lambda (entry)
+                   (search "/nix/store/" entry :test #'char=))
+                 (cl-source-registry-entries registry))))
+    (make-coherence-chunk
+     :id "expected-dev-shell-cl-source-registry"
+     :title "Expected dev-shell CL_SOURCE_REGISTRY"
+     :kind :source-registry
+     :status (if repo-root-exists-p :good :failed)
+     :value (list :repo-root repo-root
+                  :expected-authorities '(:repo :nix-store)
+                  :nix-store-entry-visible nix-visible-p)
+     :basis (list :profile :clog-moldable-inspector
+                  :model :mcdermott-chunk-basis-derive)
+     :evidence
+     (list (list :repo-root repo-root
+                 :repo-root-exists repo-root-exists-p)
+           (list :expected-authorities '(:repo :nix-store))
+           (list :current-cl-source-registry registry
+                 :nix-store-entry-visible nix-visible-p)
+           (list :selected-systems system-evidence))
+     :repair-options
+     (unless repo-root-exists-p
+       '(:enter-hyperdoc-repo
+         :re-enter-nix-develop)))))
+
+(defun current-image-cl-source-registry-chunk
+    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          (repo-root (hyperdoc-repo-root-pathname)))
+  (let* ((entries (cl-source-registry-entries registry))
+         (entry-evidence
+           (mapcar (lambda (entry)
+                     (cl-source-registry-entry-evidence
+                      entry
+                      :repo-root repo-root))
+                   entries)))
+    (make-coherence-chunk
+     :id "current-image-cl-source-registry"
+     :title "Current image CL_SOURCE_REGISTRY"
+     :kind :source-registry
+     :status (if registry :good :unknown)
+     :value (list :cl-source-registry registry
+                  :entries entries)
+     :basis (list :environment-variable "CL_SOURCE_REGISTRY")
+     :evidence
+     (list (list :env-var "CL_SOURCE_REGISTRY"
+                 :value registry
+                 :entry-count (length entries))
+           (list :entries entry-evidence))
+     :repair-options
+     (unless registry
+       '(:inspect-asdf-source-registry
+         :re-enter-nix-develop)))))
+
+(defun foreign-asdf-source-registry-contaminants-chunk
+    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          (repo-root (hyperdoc-repo-root-pathname))
+          (system-names '(:s-graphviz
+                          :clog-ace
+                          :html-inspector-views/standard
+                          :clog-moldable-inspector)))
+  (let* ((entry-evidence
+           (mapcar (lambda (entry)
+                     (cl-source-registry-entry-evidence
+                      entry
+                      :repo-root repo-root))
+                   (cl-source-registry-entries registry)))
+         (system-evidence
+           (mapcar (lambda (system-name)
+                     (asdf-system-source-authority-evidence
+                      system-name
+                      :repo-root repo-root))
+                   system-names))
+         (foreign-entries
+           (remove-if-not
+            (lambda (entry)
+              (eq (getf entry :authority) :foreign-contaminant))
+            entry-evidence))
+         (foreign-systems
+           (remove-if-not
+            (lambda (entry)
+              (eq (getf entry :source-authority)
+                  :foreign-contaminant))
+            system-evidence))
+         (foreign (append foreign-entries foreign-systems)))
+    (make-coherence-chunk
+     :id "foreign-asdf-source-registry-contaminants"
+     :title "Foreign ASDF source-registry contaminants"
+     :kind :source-registry
+     :status (if foreign :foreign-contaminant :good)
+     :value (list :foreign-count (length foreign)
+                  :foreign foreign)
+     :basis (list :current-cl-source-registry registry
+                  :selected-system-names system-names
+                  :expected-authorities '(:repo :nix-store))
+     :evidence
+     (list (list :registry-entries entry-evidence)
+           (list :selected-systems system-evidence)
+           (list :foreign-contaminants foreign)
+           (list :message
+                 "Foreign source roots such as ~/common-lisp, Quicklisp, or Downloads are not authoritative for the HyperDoc Nix/repo inspector profile."))
+     :repair-options
+     (when foreign
+       '(:remove-foreign-source-registry-contaminant
+         :derive-asdf-visibility-from-repo-nix-universe
+         :re-enter-nix-develop)))))
+
+(defun asdf-system-visibility-chunk
+    (system-name &key id
+                      title
+                      package-name
+                      (requiredp t)
+                      (expected-authorities '(:repo :nix-store))
+                      (repo-root (hyperdoc-repo-root-pathname))
+                      depends-on)
+  (multiple-value-bind (source-evidence condition)
+      (asdf-system-source-authority-evidence
+       system-name
+       :repo-root repo-root
+       :expected-authorities expected-authorities)
+    (let* ((foundp (getf source-evidence :found))
+           (authority (getf source-evidence :source-authority))
+           (acceptedp
+             (getf source-evidence :source-authority-accepted))
+           (package-present
+             (and package-name
+                  (package-present-p package-name)))
+           (status
+             (cond
+               ((not foundp)
+                (if requiredp
+                    :asdf-subsystem-not-visible
+                    :optional-unavailable))
+               (condition
+                :failed)
+               ((not acceptedp)
+                :foreign-contaminant)
+               (t
+                :good))))
+      (make-coherence-chunk
+       :id (or id
+               (runtime-coherence-system-id system-name "asdf-visibility"))
+       :title (or title
+                  (format nil "~A ASDF visibility" system-name))
+       :kind :asdf-system
+       :status status
+       :value (list :system-name system-name
+                    :found foundp
+                    :source-authority authority
+                    :source-authority-accepted acceptedp
+                    :package-present package-present)
+       :basis (list :system-name system-name
+                    :expected-authorities expected-authorities
+                    :repo-root repo-root)
+       :evidence
+       (list (append (list :probe 'asdf:find-system)
+                     source-evidence)
+             (list :probe 'find-package
+                   :package-name package-name
+                   :present package-present)
+             (list :ordinary-probe-mode :non-mutating
+                   :load-system-called nil))
+       :last-error condition
+       :repair-options
+       (unless (eq status :good)
+         (case status
+           (:foreign-contaminant
+            '(:remove-foreign-source-registry-contaminant
+              :rederive-asdf-system-from-repo-nix-universe))
+           (:asdf-subsystem-not-visible
+            '(:repair-asdf-source-registry
+              :re-enter-nix-develop))
+           (otherwise
+            '(:inspect-asdf-visibility))))
        :depends-on depends-on))))
 
 (defun attempt-load-asdf-system-chunk (system-name
@@ -1500,6 +1864,167 @@
            :recompute-html-inspector-dependency-cache))
        :depends-on '("html-inspector-views-standard-view")))))
 
+(defun clog-moldable-inspector-profile-visibility-chunks ()
+  (list
+   (asdf-system-visibility-chunk
+    :s-graphviz
+    :id "s-graphviz-asdf-visibility"
+    :title "s-graphviz ASDF visibility"
+    :package-name :s-graphviz
+    :requiredp t
+    :depends-on '("expected-dev-shell-cl-source-registry"
+                  "current-image-cl-source-registry"
+                  "foreign-asdf-source-registry-contaminants"))
+   (asdf-system-visibility-chunk
+    :clog-ace
+    :id "clog-ace-asdf-visibility"
+    :title "CLOG ACE ASDF visibility"
+    :package-name :clog-ace
+    :requiredp t
+    :depends-on '("expected-dev-shell-cl-source-registry"
+                  "current-image-cl-source-registry"
+                  "foreign-asdf-source-registry-contaminants"))
+   (asdf-system-visibility-chunk
+    :html-inspector-views/standard
+    :id "html-inspector-views-standard-asdf-visibility"
+    :title "HTML inspector standard ASDF visibility"
+    :package-name :html-inspector-views/standard
+    :requiredp t
+    :depends-on '("html-inspector-views-environment"
+                  "html-inspector-views-asdf-visibility"
+                  "foreign-asdf-source-registry-contaminants"))
+   (asdf-system-visibility-chunk
+    :clog-moldable-inspector
+    :id "clog-moldable-inspector-asdf-visibility"
+    :title "CLOG moldable inspector ASDF visibility"
+    :package-name :clog-moldable-inspector
+    :requiredp t
+    :depends-on '("clog-asdf-code-root"
+                  "clog-static-asset-root"
+                  "s-graphviz-asdf-visibility"
+                  "clog-ace-asdf-visibility"
+                  "html-inspector-views-standard-asdf-visibility"))))
+
+(defun clog-moldable-inspector-readiness-required-chunk-p (chunk)
+  (member (coherence-chunk-id-of chunk)
+          '("expected-dev-shell-cl-source-registry"
+            "foreign-asdf-source-registry-contaminants"
+            "clog-asdf-code-root"
+            "clog-static-asset-root"
+            "s-graphviz-asdf-visibility"
+            "clog-ace-asdf-visibility"
+            "html-inspector-views-standard-asdf-visibility"
+            "clog-moldable-inspector-asdf-visibility"
+            "clog-moldable-inspector-system"
+            "html-inspector-views-standard-live-methods"
+            "html-inspector-views-standard-dependency-cache")
+          :test #'string=))
+
+(defun clog-moldable-inspector-readiness-chunk (chunks)
+  (let* ((required-blocking
+           (remove-if-not
+            (lambda (chunk)
+              (and (clog-moldable-inspector-readiness-required-chunk-p chunk)
+                   (coherence-chunk-status-blocking-p
+                    (coherence-chunk-status-of chunk))))
+            chunks))
+         (degraded
+           (remove-if-not
+            (lambda (chunk)
+              (member (coherence-chunk-status-of chunk)
+                      '(:degraded :optional-unavailable)
+                      :test #'eq))
+            chunks)))
+    (make-coherence-chunk
+     :id "clog-moldable-inspector-readiness"
+     :title "CLOG moldable inspector readiness"
+     :kind :coherence-gate
+     :status (cond
+               (required-blocking :blocked)
+               (degraded :degraded)
+               (t :good))
+     :basis (list :profile :clog-moldable-inspector
+                  :required-chunks
+                  (mapcar #'coherence-chunk-id-of
+                          (remove-if-not
+                           #'clog-moldable-inspector-readiness-required-chunk-p
+                           chunks)))
+     :value (list :blocking-chunks
+                  (mapcar #'coherence-chunk-id-of required-blocking)
+                  :degraded-chunks
+                  (mapcar #'coherence-chunk-id-of degraded))
+     :evidence
+     (list
+      (list :blocking-runtime-support-chunks
+            (mapcar (lambda (chunk)
+                      (list :id (coherence-chunk-id-of chunk)
+                            :status (coherence-chunk-status-of chunk)))
+                    required-blocking))
+      (list :degraded-runtime-support-chunks
+            (mapcar (lambda (chunk)
+                      (list :id (coherence-chunk-id-of chunk)
+                            :status (coherence-chunk-status-of chunk)))
+                    degraded))
+      (if required-blocking
+          (list :message
+                "Refuse to load CLOG moldable inspector until required ASDF visibility and source-registry chunks are coherent.")
+          (list :message
+                "CLOG moldable inspector load is coherent enough for the guarded profile.")))
+     :repair-options
+     (when required-blocking
+       '(:inspect-source-registry-diff
+         :remove-foreign-asdf-contaminants
+         :repair-asdf-visibility
+         :re-enter-nix-develop-as-fallback))
+     :depends-on (mapcar #'coherence-chunk-id-of chunks))))
+
+(defun make-clog-moldable-inspector-profile-chunks ()
+  (let* ((expected-registry
+           (expected-dev-shell-cl-source-registry-chunk))
+         (current-registry
+           (current-image-cl-source-registry-chunk))
+         (foreign-contaminants
+           (foreign-asdf-source-registry-contaminants-chunk))
+         (clog-code-root
+           (clog-asdf-code-root-chunk))
+         (clog-static-root
+           (clog-static-asset-root-chunk))
+         (html-environment
+           (html-inspector-views-environment-chunk))
+         (html-asdf-visibility
+           (html-inspector-views-asdf-visibility-chunk))
+         (profile-visibility
+           (clog-moldable-inspector-profile-visibility-chunks))
+         (clog-inspector
+           (clog-moldable-inspector-system-chunk))
+         (html-standard-live-methods
+           (html-inspector-views-live-method-chunk))
+         (html-standard-cache
+           (html-inspector-standard-dependency-cache-chunk))
+         (chunks
+           (append (list expected-registry
+                         current-registry
+                         foreign-contaminants
+                         clog-code-root
+                         clog-static-root
+                         html-environment
+                         html-asdf-visibility)
+                   profile-visibility
+                   (list clog-inspector
+                         html-standard-live-methods
+                         html-standard-cache))))
+    (append chunks
+            (list (clog-moldable-inspector-readiness-chunk chunks)))))
+
+(defun make-clog-moldable-inspector-coherence-report
+    (&key (title "CLOG moldable inspector running-image coherence report")
+          (observed-at (get-universal-time)))
+  (let ((chunks (make-clog-moldable-inspector-profile-chunks)))
+    (make-runtime-coherence-report
+     :title title
+     :observed-at observed-at
+     :chunks chunks)))
+
 (defun required-browser-inspection-support-chunk-p (chunk)
   (member (coherence-chunk-id-of chunk)
           '("clog-asdf-code-root"
@@ -1584,6 +2109,422 @@
                  :recommended-next-actions
                  (or recommended-next-actions
                      (runtime-coherence-default-actions chunks))))
+
+(defmethod derive-date ((report runtime-coherence-report))
+  (runtime-coherence-report-observed-at-of report))
+
+(defmethod coherence-report ((report runtime-coherence-report)
+                             &key &allow-other-keys)
+  report)
+
+(defmethod coherence-report ((profile (eql :clog-moldable-inspector))
+                             &key (title "CLOG moldable inspector running-image coherence report")
+                                  (observed-at (get-universal-time))
+                                  &allow-other-keys)
+  (make-clog-moldable-inspector-coherence-report
+   :title title
+   :observed-at observed-at))
+
+(defmethod coherence-report ((object t)
+                             &key (profile :clog-moldable-inspector)
+                                  &allow-other-keys)
+  (declare (ignore object))
+  (coherence-report profile))
+
+(defun default-runtime-coherence-sqlite-path ()
+  (handler-case
+      (asdf:system-relative-pathname
+       :hyperdoc
+       "var/runtime-coherence.sqlite")
+    (condition ()
+      (merge-pathnames #P"var/runtime-coherence.sqlite"
+                       (uiop:ensure-directory-pathname
+                        *default-pathname-defaults*)))))
+
+(defun runtime-coherence-sqlite-available-p
+    (&key (sqlite-program "sqlite3"))
+  (and sqlite-program
+       (not (string= sqlite-program ""))
+       (handler-case
+           (multiple-value-bind (output error-output exit-code)
+               (uiop:run-program (list sqlite-program "--version")
+                                 :output :string
+                                 :error-output :string
+                                 :ignore-error-status t)
+             (declare (ignore output error-output))
+             (zerop exit-code))
+         (condition ()
+           nil))))
+
+(defun runtime-coherence-sqlite-string-literal (value)
+  (if (null value)
+      "NULL"
+      (format nil "'~A'"
+              (with-output-to-string (stream)
+                (loop for char across (format nil "~A" value)
+                      do (if (char= char #\')
+                             (write-string "''" stream)
+                             (write-char char stream)))))))
+
+(defun runtime-coherence-sqlite-run
+    (sql &key (db-path (default-runtime-coherence-sqlite-path))
+              (sqlite-program "sqlite3")
+              json-p)
+  (let* ((pathname (etypecase db-path
+                     (pathname db-path)
+                     (string (pathname db-path))))
+         (parent (uiop:pathname-directory-pathname pathname)))
+    (cond
+      ((not (runtime-coherence-sqlite-available-p
+             :sqlite-program sqlite-program))
+       (values nil :backend-unavailable
+               (format nil "sqlite3 is unavailable: ~A" sqlite-program)))
+      (t
+       (ensure-directories-exist parent)
+       (handler-case
+           (multiple-value-bind (output error-output exit-code)
+               (uiop:run-program
+                (append (list sqlite-program)
+                        (when json-p (list "-json"))
+                        (list (namestring pathname) sql))
+                :output :string
+                :error-output :output
+                :ignore-error-status t)
+             (declare (ignore error-output))
+             (if (zerop exit-code)
+                 (values output :ok nil)
+                 (values output :error
+                         (format nil "sqlite3 exited with code ~D: ~A"
+                                 exit-code
+                                 output))))
+         (condition (condition)
+           (values nil :error (princ-to-string condition))))))))
+
+(defun runtime-coherence-sqlite-schema-sql ()
+  "CREATE TABLE IF NOT EXISTS runtime_coherence_events(
+    event_id integer primary key autoincrement,
+    timestamp text not null,
+    report_title text,
+    chunk_id text not null,
+    status text not null,
+    kind text,
+    basis text,
+    evidence text,
+    repair_action text,
+    condition_class text,
+    condition_message text
+  );
+
+  CREATE INDEX IF NOT EXISTS runtime_coherence_events_chunk_idx
+    ON runtime_coherence_events(chunk_id);
+
+  CREATE INDEX IF NOT EXISTS runtime_coherence_events_status_idx
+    ON runtime_coherence_events(status);")
+
+(defun ensure-runtime-coherence-sqlite-schema
+    (&key (db-path (default-runtime-coherence-sqlite-path))
+          (sqlite-program "sqlite3"))
+  (multiple-value-bind (output status detail)
+      (runtime-coherence-sqlite-run
+       (runtime-coherence-sqlite-schema-sql)
+       :db-path db-path
+       :sqlite-program sqlite-program)
+    (declare (ignore output))
+    (values (eq status :ok) status detail)))
+
+(defun coherence-condition-class-name (condition)
+  (and condition
+       (typep condition 'condition)
+       (format nil "~A" (type-of condition))))
+
+(defun coherence-condition-message (condition)
+  (and condition
+       (if (typep condition 'condition)
+           (princ-to-string condition)
+           (format nil "~A" condition))))
+
+(defun persist-runtime-coherence-event
+    (chunk &key report-title
+                repair-action
+                (timestamp (runtime-coherence-now-string))
+                (db-path (default-runtime-coherence-sqlite-path))
+                (sqlite-program "sqlite3"))
+  (multiple-value-bind (schema-ready-p schema-status schema-detail)
+      (ensure-runtime-coherence-sqlite-schema
+       :db-path db-path
+       :sqlite-program sqlite-program)
+    (if (not schema-ready-p)
+        (values nil schema-status schema-detail)
+        (let* ((condition (coherence-chunk-last-error-of chunk))
+               (sql
+                 (format nil
+                         "INSERT INTO runtime_coherence_events
+                          (timestamp, report_title, chunk_id, status, kind,
+                           basis, evidence, repair_action, condition_class,
+                           condition_message)
+                          VALUES(~A, ~A, ~A, ~A, ~A, ~A, ~A, ~A, ~A, ~A);"
+                         (runtime-coherence-sqlite-string-literal timestamp)
+                         (runtime-coherence-sqlite-string-literal report-title)
+                         (runtime-coherence-sqlite-string-literal
+                          (coherence-chunk-id-of chunk))
+                         (runtime-coherence-sqlite-string-literal
+                          (runtime-coherence-keyword-label
+                           (coherence-chunk-status-of chunk)))
+                         (runtime-coherence-sqlite-string-literal
+                          (runtime-coherence-keyword-label
+                           (coherence-chunk-kind-of chunk)))
+                         (runtime-coherence-sqlite-string-literal
+                          (runtime-coherence-print-value
+                           (coherence-chunk-basis-of chunk)))
+                         (runtime-coherence-sqlite-string-literal
+                          (runtime-coherence-print-value
+                           (coherence-chunk-evidence-of chunk)))
+                         (runtime-coherence-sqlite-string-literal
+                          (or repair-action
+                              (runtime-coherence-print-value
+                               (coherence-chunk-repair-options-of chunk))))
+                         (runtime-coherence-sqlite-string-literal
+                          (coherence-condition-class-name condition))
+                         (runtime-coherence-sqlite-string-literal
+                          (coherence-condition-message condition)))))
+          (runtime-coherence-sqlite-run
+           sql
+           :db-path db-path
+           :sqlite-program sqlite-program)))))
+
+(defun persist-runtime-coherence-report
+    (report &key repair-action
+                 (db-path (default-runtime-coherence-sqlite-path))
+                 (sqlite-program "sqlite3"))
+  (let ((results nil))
+    (dolist (chunk (runtime-coherence-report-chunks-of report))
+      (multiple-value-bind (output status detail)
+          (persist-runtime-coherence-event
+           chunk
+           :report-title (runtime-coherence-report-title-of report)
+           :repair-action repair-action
+           :db-path db-path
+           :sqlite-program sqlite-program)
+        (push (list :chunk-id (coherence-chunk-id-of chunk)
+                    :status status
+                    :detail detail
+                    :output output)
+              results)))
+    (nreverse results)))
+
+(defun runtime-coherence-current-chunk-map (report)
+  (mapcar (lambda (chunk)
+            (cons (coherence-chunk-id-of chunk) chunk))
+          (runtime-coherence-report-chunks-of report)))
+
+(defun runtime-coherence-stale-chunks (report)
+  (remove-if-not
+   (lambda (chunk)
+     (or (coherence-chunk-status-blocking-p
+          (coherence-chunk-status-of chunk))
+         (member (coherence-chunk-status-of chunk)
+                 '(:degraded :optional-unavailable)
+                 :test #'eq)))
+   (runtime-coherence-report-chunks-of report)))
+
+(defun runtime-coherence-selected-asdf-source-files
+    (&optional (system-names '(:s-graphviz
+                               :clog-ace
+                               :html-inspector-views/standard
+                               :clog-moldable-inspector)))
+  (mapcar (lambda (system-name)
+            (let ((evidence
+                    (asdf-system-source-authority-evidence system-name)))
+              (list :system-name system-name
+                    :found (getf evidence :found)
+                    :source-file (getf evidence :source-file)
+                    :source-directory (getf evidence :source-directory)
+                    :source-authority
+                    (getf evidence :source-authority))))
+          system-names))
+
+(defun runtime-coherence-source-registry-diff (report)
+  (let ((current
+          (find "current-image-cl-source-registry"
+                (runtime-coherence-report-chunks-of report)
+                :key #'coherence-chunk-id-of
+                :test #'string=))
+        (foreign
+          (find "foreign-asdf-source-registry-contaminants"
+                (runtime-coherence-report-chunks-of report)
+                :key #'coherence-chunk-id-of
+                :test #'string=)))
+    (list :current-cl-source-registry
+          (and current
+               (getf (coherence-chunk-value-of current)
+                     :cl-source-registry))
+          :entries
+          (and current
+               (getf (coherence-chunk-value-of current)
+                     :entries))
+          :foreign-contaminants
+          (and foreign
+               (getf (coherence-chunk-value-of foreign)
+                     :foreign)))))
+
+(defun runtime-coherence-restart-repair-recommendation (report)
+  (let ((blocking (runtime-coherence-blocking-chunks
+                   (runtime-coherence-report-chunks-of report))))
+    (cond
+      ((null blocking)
+       :ok)
+      ((some (lambda (chunk)
+               (eq (coherence-chunk-status-of chunk)
+                   :foreign-contaminant))
+             blocking)
+       :repair-source-registry-before-restart)
+      ((some (lambda (chunk)
+               (eq (coherence-chunk-status-of chunk)
+                   :asdf-subsystem-not-visible))
+             blocking)
+       :derive-asdf-visibility-or-re-enter-dev-shell)
+      (t
+       :inspect-blocking-chunks))))
+
+(defun ensure-running-image-coherent
+    (&key (profile :clog-moldable-inspector)
+          (persist-events t)
+          (db-path (default-runtime-coherence-sqlite-path))
+          (sqlite-program "sqlite3"))
+  (let ((report (coherence-report profile)))
+    (when persist-events
+      (persist-runtime-coherence-report
+       report
+       :repair-action "ensure-running-image-coherent"
+       :db-path db-path
+       :sqlite-program sqlite-program))
+    report))
+
+(defun runtime-coherence-report-with-extra-chunk (report chunk)
+  (let ((chunks (append (runtime-coherence-report-chunks-of report)
+                        (list chunk))))
+    (make-runtime-coherence-report
+     :title (runtime-coherence-report-title-of report)
+     :observed-at (runtime-coherence-report-observed-at-of report)
+     :chunks chunks
+     :summary (runtime-coherence-default-summary chunks))))
+
+(defun load-coherent-system
+    (system-name &key (profile system-name)
+                      force
+                      (persist-events t)
+                      (db-path (default-runtime-coherence-sqlite-path))
+                      (sqlite-program "sqlite3"))
+  (let* ((report (ensure-running-image-coherent
+                  :profile profile
+                  :persist-events persist-events
+                  :db-path db-path
+                  :sqlite-program sqlite-program))
+         (blocking (runtime-coherence-blocking-chunks
+                    (runtime-coherence-report-chunks-of report))))
+    (cond
+      ((and blocking
+            (not force))
+       (let* ((gate
+                (make-coherence-chunk
+                 :id "load-coherent-system-gate"
+                 :title "Coherent ASDF load gate"
+                 :kind :coherence-gate
+                 :status :refused
+                 :basis (list :system-name system-name
+                              :profile profile)
+                 :value (list :load-system-called nil
+                              :blocking-chunks
+                              (mapcar #'coherence-chunk-id-of blocking))
+                 :evidence
+                 (list
+                  (list :system-name system-name
+                        :profile profile
+                        :load-system-called nil)
+                  (list :blocking-chunks
+                        (mapcar (lambda (chunk)
+                                  (list :id (coherence-chunk-id-of chunk)
+                                        :status
+                                        (coherence-chunk-status-of chunk)))
+                                blocking))
+                  (list :message
+                        "ASDF load was refused because the running image has incoherent profile chunks."))
+                 :repair-options
+                 '(:inspect-blocking-chunks
+                   :repair-asdf-visibility
+                   :remove-foreign-source-registry-contaminants)))
+              (refused-report
+                (runtime-coherence-report-with-extra-chunk report gate)))
+         (when persist-events
+           (persist-runtime-coherence-report
+            refused-report
+            :repair-action "load-coherent-system-refused"
+            :db-path db-path
+            :sqlite-program sqlite-program))
+         (values nil refused-report)))
+      (t
+       (handler-case
+           (let* ((loaded (asdf:load-system system-name))
+                  (gate
+                    (make-coherence-chunk
+                     :id "load-coherent-system-gate"
+                     :title "Coherent ASDF load gate"
+                     :kind :coherence-gate
+                     :status (if loaded :good :unknown)
+                     :basis (list :system-name system-name
+                                  :profile profile
+                                  :force force)
+                     :value (list :load-system-called t
+                                  :loaded loaded)
+                     :evidence
+                     (list (list :system-name system-name
+                                 :profile profile
+                                 :load-system-called t
+                                 :loaded loaded)))))
+             (let ((loaded-report
+                     (runtime-coherence-report-with-extra-chunk
+                      report
+                      gate)))
+               (when persist-events
+                 (persist-runtime-coherence-report
+                  loaded-report
+                  :repair-action "load-coherent-system-loaded"
+                  :db-path db-path
+                  :sqlite-program sqlite-program))
+               (values loaded loaded-report)))
+         (condition (condition)
+           (let* ((gate
+                    (make-coherence-chunk
+                     :id "load-coherent-system-gate"
+                     :title "Coherent ASDF load gate"
+                     :kind :coherence-gate
+                     :status :failed
+                     :basis (list :system-name system-name
+                                  :profile profile
+                                  :force force)
+                     :value (list :load-system-called t
+                                  :loaded nil)
+                     :evidence
+                     (list (list :system-name system-name
+                                 :profile profile
+                                 :load-system-called t
+                                 :loaded nil)
+                           (condition-evidence condition))
+                     :last-error condition
+                     :repair-options
+                     '(:inspect-asdf-load-condition
+                       :repair-running-image-coherence)))
+                  (failed-report
+                    (runtime-coherence-report-with-extra-chunk
+                     report
+                     gate)))
+             (when persist-events
+               (persist-runtime-coherence-report
+                failed-report
+                :repair-action "load-coherent-system-failed"
+                :db-path db-path
+                :sqlite-program sqlite-program))
+             (values nil failed-report))))))))
 
 (defun make-html-inspector-views-environment-coherence-report
     (&key (title "HTML inspector views environment coherence report")
@@ -1760,7 +2701,13 @@
 (defun make-inspector-runtime-coherence-report (&key
                                                   (title "Inspector runtime coherence report")
                                                   (observed-at (get-universal-time)))
-  (let* ((clog-code-root (clog-asdf-code-root-chunk))
+  (let* ((expected-registry
+           (expected-dev-shell-cl-source-registry-chunk))
+         (current-registry
+           (current-image-cl-source-registry-chunk))
+         (foreign-contaminants
+           (foreign-asdf-source-registry-contaminants-chunk))
+         (clog-code-root (clog-asdf-code-root-chunk))
          (clog-static-root (clog-static-asset-root-chunk))
          (clog-inspector (clog-moldable-inspector-system-chunk))
          (html-environment
@@ -1775,20 +2722,31 @@
          (html-standard-live-methods
            (html-inspector-views-live-method-chunk))
          (html-standard-cache
-           (html-inspector-standard-dependency-cache-chunk)))
+           (html-inspector-standard-dependency-cache-chunk))
+         (profile-visibility
+           (clog-moldable-inspector-profile-visibility-chunks))
+         (without-readiness
+           (append (list expected-registry
+                         current-registry
+                         foreign-contaminants
+                         clog-code-root
+                         clog-static-root
+                         clog-inspector
+                         html-environment
+                         html-asdf-visibility
+                         html-base
+                         html-standard
+                         html-standard-live-methods
+                         html-standard-cache
+                         graphviz)
+                   profile-visibility))
+         (readiness
+           (clog-moldable-inspector-readiness-chunk without-readiness)))
     (make-runtime-coherence-report
      :title title
      :observed-at observed-at
-     :chunks (list clog-code-root
-                   clog-static-root
-                   clog-inspector
-                   html-environment
-                   html-asdf-visibility
-                   html-base
-                   html-standard
-                   html-standard-live-methods
-                   html-standard-cache
-                   graphviz))))
+     :chunks (append without-readiness
+                     (list readiness)))))
 
 (defun make-current-plan-browser-coherence-report (&key root-object
                                                         summary
