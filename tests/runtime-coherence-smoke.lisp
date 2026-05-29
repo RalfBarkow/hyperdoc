@@ -82,6 +82,39 @@
     (ensure-directories-exist (merge-pathnames #P".keep" directory))
     directory))
 
+(defun rc-make-repo-temp-directory (label)
+  (let ((directory
+          (merge-pathnames
+           (format nil "var/runtime-coherence-smoke/~A-~A-~A/"
+                   label
+                   (get-universal-time)
+                   (gensym))
+           (asdf:system-source-directory :hyperdoc))))
+    (ensure-directories-exist (merge-pathnames #P".keep" directory))
+    directory))
+
+(defun rc-source-registry-tree-entry (directory)
+  (format nil "~A/"
+          (namestring (uiop:ensure-directory-pathname directory))))
+
+(defparameter *rc-s-graphviz-asd-loaded* nil)
+
+(defvar *rc-allow-real-asdf-find-system* nil)
+
+(defun rc-write-s-graphviz-asd-fixture (directory &key invalid)
+  (let ((asd-path (merge-pathnames #P"s-graphviz.asd"
+                                   (uiop:ensure-directory-pathname
+                                    directory))))
+    (with-open-file (stream asd-path
+                            :direction :output
+                            :if-exists :supersede
+                            :if-does-not-exist :create)
+      (if invalid
+          (format stream "(asdf:defsystem ")
+          (format stream
+                  "(asdf:defsystem #:s-graphviz~%  :description \"Runtime coherence smoke fixture\"~%  :components nil)~%~%(let ((symbol (find-symbol \"*RC-S-GRAPHVIZ-ASD-LOADED*\" \"HYPERDOC/TESTS\")))~%  (when symbol~%    (setf (symbol-value symbol) t)))~%")))
+    asd-path))
+
 (defun rc-temp-package-name (label)
   (format nil "HYPERDOC-RUNTIME-COHERENCE-~A-~A"
           label
@@ -198,6 +231,17 @@
                  override)
            (funcall thunk))
       (setf (symbol-function 'asdf:load-system) original))))
+
+(defun rc-with-asdf-load-asd-allowing-real-find-system (thunk)
+  (let ((original (symbol-function 'asdf:load-asd)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'asdf:load-asd)
+                 (lambda (&rest args)
+                   (let ((*rc-allow-real-asdf-find-system* t))
+                     (apply original args))))
+           (funcall thunk))
+      (setf (symbol-function 'asdf:load-asd) original))))
 
 (defun rc-graphviz-missing-degrades-smoke-test ()
   (rc-with-asdf-find-system-override
@@ -619,10 +663,12 @@
               (rc-assert-true
                (null load-calls)
                "Coherence gate must refuse before ASDF:LOAD-SYSTEM")
-              (rc-assert-equal
-               :asdf-subsystem-not-visible
-               (hyperdoc:coherence-chunk-status-of chunk)
-               "Missing s-graphviz must be an ASDF visibility chunk status")
+              (rc-assert-true
+               (member (hyperdoc:coherence-chunk-status-of chunk)
+                       '(:asdf-subsystem-not-visible
+                         :dev-shell-asdf-system-not-visible)
+                       :test #'eq)
+               "Missing s-graphviz must be a structured ASDF visibility chunk status")
               (rc-assert-equal
                :refused
                (hyperdoc:coherence-chunk-status-of gate)
@@ -829,10 +875,164 @@
                   "Repair persistence count query must succeed")
                  (rc-assert-true
                   (plusp (parse-integer output :junk-allowed t))
-                  "Repair must persist derivation attempts to SQLite")))
+                  "Repair must persist derivation attempts to SQLite"))
+               (multiple-value-bind (output status detail)
+                   (hyperdoc::runtime-coherence-sqlite-run
+                    "SELECT count(*) FROM runtime_coherence_events WHERE chunk_id = 'derive-asdf-system-visibility-s-graphviz' AND evidence LIKE '%direct-asd-load-attempts%';"
+                    :db-path db-path)
+                 (declare (ignore detail))
+                 (rc-assert-equal
+                  :ok
+                  status
+                  "Repair persistence detail query must succeed")
+                 (rc-assert-true
+                  (plusp (parse-integer output :junk-allowed t))
+                  "s-graphviz derivation persistence must include direct ASD attempt evidence")))
           (uiop:delete-directory-tree directory
                                       :validate t
                                       :if-does-not-exist :ignore))))
+  t)
+
+(defun rc-derive-s-graphviz-visibility-loads-explicit-asd-smoke-test ()
+  (let* ((directory (rc-make-repo-temp-directory "s-graphviz-asd"))
+         (registry (rc-source-registry-tree-entry directory)))
+    (unwind-protect
+         (progn
+           (setf *rc-s-graphviz-asd-loaded* nil)
+           (rc-write-s-graphviz-asd-fixture directory)
+           (rc-with-environment-bindings
+            `(("CL_SOURCE_REGISTRY" ,registry))
+            (lambda ()
+              (rc-with-asdf-load-asd-allowing-real-find-system
+               (lambda ()
+                 (rc-with-asdf-find-system-override
+                  (lambda (system-name &rest args)
+                    (declare (ignore args))
+                    (when (and (string= (string-downcase
+                                          (string system-name))
+                                         "s-graphviz")
+                               (not *rc-allow-real-asdf-find-system*)
+                               (not *rc-s-graphviz-asd-loaded*))
+                      (values t nil)))
+                  (lambda ()
+                    (let* ((chunk
+                             (hyperdoc:derive-asdf-system-visibility
+                              :current
+                              :s-graphviz
+                              :registry registry
+                              :repo-root directory
+                              :mutate t))
+                           (attempts
+                             (second
+                              (find :direct-asd-load-attempts
+                                    (hyperdoc:coherence-chunk-evidence-of
+                                     chunk)
+                                    :key #'first))))
+                      (rc-assert-equal
+                       :good
+                       (hyperdoc:coherence-chunk-status-of chunk)
+                       "Explicit dev-shell ASD loading must repair s-graphviz visibility")
+                      (rc-assert-true
+                       *rc-s-graphviz-asd-loaded*
+                       "The s-graphviz ASD fixture must be loaded directly")
+                      (rc-assert-true
+                       (some (lambda (attempt)
+                               (getf attempt :load-asd-succeeded))
+                             attempts)
+                       "Derivation evidence must record a successful direct ASD load")))))))))
+      (ignore-errors (asdf:clear-system :s-graphviz))
+      (uiop:delete-directory-tree directory
+                                  :validate t
+                                  :if-does-not-exist :ignore)))
+  t)
+
+(defun rc-derive-s-graphviz-visibility-missing-dev-shell-smoke-test ()
+  (let ((directory (rc-make-repo-temp-directory "missing-s-graphviz-asd")))
+    (unwind-protect
+         (rc-with-asdf-find-system-override
+          (lambda (system-name &rest args)
+            (declare (ignore args))
+            (when (string= (string-downcase (string system-name))
+                           "s-graphviz")
+              (values t nil)))
+          (lambda ()
+            (let ((chunk
+                    (hyperdoc:derive-asdf-system-visibility
+                     :current
+                     :s-graphviz
+                     :registry nil
+                     :repo-root directory
+                     :mutate t)))
+              (rc-assert-equal
+               :dev-shell-asdf-system-not-visible
+               (hyperdoc:coherence-chunk-status-of chunk)
+               "Missing dev-shell discovery must be explicit")
+              (rc-assert-true
+               (find :dev-shell-discovery-result
+                     (hyperdoc:coherence-chunk-evidence-of chunk)
+                     :key #'first)
+               "Missing dev-shell discovery must retain lookup evidence"))))
+      (uiop:delete-directory-tree directory
+                                  :validate t
+                                  :if-does-not-exist :ignore)))
+  t)
+
+(defun rc-reload-selected-asd-definitions-records-condition-smoke-test ()
+  (let* ((directory (rc-make-repo-temp-directory "broken-s-graphviz-asd"))
+         (registry (rc-source-registry-tree-entry directory)))
+    (unwind-protect
+         (progn
+           (rc-write-s-graphviz-asd-fixture directory :invalid t)
+           (rc-with-asdf-find-system-override
+            (lambda (system-name &rest args)
+              (declare (ignore args))
+              (when (string= (string-downcase (string system-name))
+                             "s-graphviz")
+                (values t nil)))
+            (lambda ()
+              (let* ((chunk
+                       (hyperdoc:reload-selected-asd-definitions
+                        :current
+                        '(:s-graphviz)
+                        :registry registry
+                        :repo-root directory
+                        :mutate t))
+                     (records
+                       (getf (hyperdoc:coherence-chunk-value-of chunk)
+                             :records))
+                     (attempts
+                       (getf (first records) :load-asd-attempts)))
+                (rc-assert-equal
+                 :failed
+                 (hyperdoc:coherence-chunk-status-of chunk)
+                 "Broken ASD reload must fail as a repair action")
+                (rc-assert-true
+                 (getf (first attempts) :condition)
+                 "Failed ASD reload must record condition evidence")
+                (rc-assert-true
+                 (getf (first records) :definition-discovery)
+                 "Failed ASD reload must retain lookup path evidence")))))
+      (ignore-errors (asdf:clear-system :s-graphviz))
+      (uiop:delete-directory-tree directory
+                                  :validate t
+                                  :if-does-not-exist :ignore)))
+  t)
+
+(defun rc-explain-asdf-visibility-report-smoke-test ()
+  (let ((report
+          (hyperdoc:explain-asdf-visibility
+           :s-graphviz
+           :profile :clog-moldable-inspector
+           :mutate nil
+           :persist-events nil)))
+    (rc-assert-true
+     (typep report 'hyperdoc:runtime-coherence-report)
+     "ASDF visibility explanation must be a runtime coherence report")
+    (rc-assert-true
+     (rc-find-chunk
+      "derive-asdf-system-visibility-s-graphviz"
+      (hyperdoc:runtime-coherence-report-chunks-of report))
+     "ASDF visibility explanation must include the derivation action chunk"))
   t)
 
 (defun rc-html-inspector-dependency-cache-degrades-not-fatal-smoke-test ()
@@ -894,6 +1094,10 @@
   (rc-quarantine-foreign-source-registry-smoke-test)
   (rc-repair-running-image-coherence-returns-plan-smoke-test)
   (rc-repair-running-image-coherence-persists-events-smoke-test)
+  (rc-derive-s-graphviz-visibility-loads-explicit-asd-smoke-test)
+  (rc-derive-s-graphviz-visibility-missing-dev-shell-smoke-test)
+  (rc-reload-selected-asd-definitions-records-condition-smoke-test)
+  (rc-explain-asdf-visibility-report-smoke-test)
   (rc-html-inspector-dependency-cache-degrades-not-fatal-smoke-test)
   (rc-current-plan-browser-report-smoke-test)
   (format t "~&Runtime coherence smoke tests passed.~%")
