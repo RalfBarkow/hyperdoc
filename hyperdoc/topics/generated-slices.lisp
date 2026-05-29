@@ -791,6 +791,16 @@
                  "s-graphviz Dependency Boundary"
                  "hyperdoc/runtime-coherence.lisp")))
 
+(defun running-image-coherence-repair-plan-topic ()
+  (make-topic
+   :id "running-image-coherence-repair-plan"
+   :title "Running image coherence repair plan"
+   :summary "Inspectable repair-plan object returned when HyperDoc can derive concrete running-image repair actions but cannot safely complete every stale chunk automatically."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "Running Image Coherence Rebuild Workflow"
+                 "Startup load-set mismatch"
+                 "hyperdoc/runtime-coherence.lisp")))
+
 (defun asdf-system-visibility-chunk-topic ()
   (make-topic
    :id "asdf-system-visibility-chunk"

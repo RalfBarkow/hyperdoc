@@ -17,11 +17,13 @@
   <li><a hyperbook="topics" page="Inspector optional dependency"><tt>Inspector optional dependency</tt></a></li>
   <li><a hyperbook="topics" page="Browser inspection session chunk"><tt>Browser inspection session chunk</tt></a></li>
   <li><a hyperbook="topics" page="Running image coherence gate"><tt>Running image coherence gate</tt></a></li>
+  <li><a hyperbook="topics" page="Running image coherence repair plan"><tt>Running image coherence repair plan</tt></a></li>
   <li><a hyperbook="topics" page="ASDF source-registry contaminant"><tt>ASDF source-registry contaminant</tt></a></li>
   <li><a hyperbook="topics" page="ASDF system visibility chunk"><tt>ASDF system visibility chunk</tt></a></li>
   <li><a hyperbook="topics" page="CLOG moldable inspector readiness"><tt>CLOG moldable inspector readiness</tt></a></li>
   <li><a expr="(make-inspector-runtime-coherence-report)"><tt>(make-inspector-runtime-coherence-report)</tt></a></li>
   <li><a expr="(ensure-running-image-coherent :profile :clog-moldable-inspector :persist-events nil)"><tt>(ensure-running-image-coherent :profile :clog-moldable-inspector)</tt></a></li>
+  <li><a expr="(repair-running-image-coherence :profile :clog-moldable-inspector :mutate nil :persist-events nil)"><tt>(repair-running-image-coherence :profile :clog-moldable-inspector)</tt></a></li>
   <li><a expr="(load-coherent-system :clog-moldable-inspector :profile :clog-moldable-inspector)"><tt>(load-coherent-system :clog-moldable-inspector ...)</tt></a></li>
   <li><a expr="(make-clog-moldable-inspector-coherence-report)"><tt>(make-clog-moldable-inspector-coherence-report)</tt></a></li>
   <li><a expr="(make-html-inspector-views-environment-coherence-report)"><tt>(make-html-inspector-views-environment-coherence-report)</tt></a></li>
@@ -69,10 +71,13 @@
 <p>
   The CLOG moldable inspector startup path now has an explicit
   <a hyperbook="topics" page="Running image coherence gate"><tt>running image coherence gate</tt></a>.
-  The canonical entry point is:
+  The canonical startup sequence is repair first, guarded load second:
 </p>
 
-<pre><code>(hyperdoc:load-coherent-system :clog-moldable-inspector
+<pre><code>(hyperdoc:repair-running-image-coherence
+ :profile :clog-moldable-inspector)
+
+(hyperdoc:load-coherent-system :clog-moldable-inspector
                                :profile :clog-moldable-inspector)</code></pre>
 
 <p>
@@ -91,8 +96,9 @@
   image. The basis is not just source text; it includes ASDF's current source
   registry, process environment variables, loaded packages, live generic
   functions, and selected system source files. The deriver is
-  <tt>ensure-running-image-coherent</tt> for diagnosis and
-  <tt>load-coherent-system</tt> for the guarded load boundary.
+  <tt>ensure-running-image-coherent</tt> for diagnosis,
+  <tt>repair-running-image-coherence</tt> for explicit derivation or repair
+  planning, and <tt>load-coherent-system</tt> for the guarded load boundary.
 </p>
 
 <p>
@@ -102,6 +108,35 @@
   <tt>load-coherent-system-gate</tt> chunk. It does not silently load from the
   foreign root, and it does not invoke Quicklisp, a Downloads helper script, or
   a restart as the primary fix.
+</p>
+
+<h2>Derivable repair chunks</h2>
+
+<p>
+  Refusal is no longer the only shape for stale running-image chunks. The
+  repair entry point derives the expected dev-shell source registry, current
+  image source registry, source-registry equivalence, foreign ASDF
+  contaminants, ASDF visibility for <tt>:s-graphviz</tt> and
+  <tt>:clog-ace</tt>, and <tt>:clog-moldable-inspector</tt> readiness.
+</p>
+
+<pre><code>(multiple-value-bind (repaired-p report repair-plan)
+    (hyperdoc:repair-running-image-coherence
+     :profile :clog-moldable-inspector)
+  (declare (ignore repaired-p report))
+  repair-plan)
+
+(hyperdoc:load-coherent-system :clog-moldable-inspector
+                               :profile :clog-moldable-inspector)</code></pre>
+
+<p>
+  The repair actions are explicit: import the dev-shell source registry,
+  clear ASDF's source-registry cache, quarantine foreign ASDF source
+  contaminants, reload selected <tt>.asd</tt> definitions, and rederive ASDF
+  visibility for selected systems. None of those actions call
+  <tt>asdf:load-system</tt>. If a repair is unsafe or incomplete, the result
+  is an inspectable <a hyperbook="topics" page="Running image coherence repair plan"><tt>running image coherence repair plan</tt></a>
+  with action chunks and evidence, not a bare debugger failure.
 </p>
 
 <h2>Source-registry contaminants</h2>

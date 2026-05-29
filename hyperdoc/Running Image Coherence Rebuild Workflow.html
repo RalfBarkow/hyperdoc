@@ -101,9 +101,11 @@
   inspector load proceed.
 </p>
 
-<pre><code>(defparameter *inspector-coherence*
-  (hyperdoc:ensure-running-image-coherent
-   :profile :clog-moldable-inspector))
+<pre><code>(multiple-value-bind (repaired-p report repair-plan)
+    (hyperdoc:repair-running-image-coherence
+     :profile :clog-moldable-inspector)
+  (declare (ignore repaired-p report))
+  repair-plan)
 
 (multiple-value-bind (loaded report)
     (hyperdoc:load-coherent-system :clog-moldable-inspector
@@ -113,9 +115,9 @@
 
 <p>
   Restarting inside the updated dev shell remains a fallback recommendation
-  when the report cannot derive a coherent ASDF basis. It is not the primary
-  repair model. The primary behavior is an inspectable report or an explicit
-  repair operation.
+  when the repair plan cannot derive a coherent ASDF basis. It is not the
+  primary repair model. The primary behavior is an inspectable report,
+  explicit derivation actions, or an inspectable repair-plan object.
 </p>
 
 <h2>Page-lookup gate</h2>
@@ -146,11 +148,21 @@
 <lisp-code>
 (asdf:load-system :hyperdoc)
 
-(defparameter *runtime-coherence*
-  (hyperdoc:ensure-running-image-coherent
-   :profile :clog-moldable-inspector))
+(defparameter *runtime-coherence* nil)
+(defparameter *runtime-repair-plan* nil)
 
-(hyperdoc:runtime-coherence-report-summary-of *runtime-coherence*)
+(multiple-value-bind (repaired-p report repair-plan)
+    (hyperdoc:repair-running-image-coherence
+     :profile :clog-moldable-inspector)
+  (declare (ignore repaired-p))
+  (setf *runtime-coherence* report
+        *runtime-repair-plan* repair-plan))
+
+(multiple-value-bind (repaired-p report repair-plan)
+    (hyperdoc:repair-running-image-coherence
+     :profile :clog-moldable-inspector)
+  (declare (ignore repaired-p repair-plan))
+  (hyperdoc:runtime-coherence-report-summary-of report))
 
 (multiple-value-bind (loaded report)
     (hyperdoc:load-coherent-system :clog-moldable-inspector

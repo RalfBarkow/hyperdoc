@@ -57,17 +57,21 @@
 
 <pre><code>(asdf:load-system :hyperdoc)
 
+(hyperdoc:repair-running-image-coherence
+ :profile :clog-moldable-inspector)
+
 (hyperdoc:load-coherent-system :clog-moldable-inspector
                                :profile :clog-moldable-inspector)</code></pre>
 
 <p>
-  The guard first returns an inspectable <tt>runtime-coherence-report</tt>.
-  If the current image cannot see required inspector systems from the repo/Nix
-  source universe, or if ASDF resolves one from a foreign
-  <tt>~/common-lisp</tt>, the report contains a refused gate chunk and no
-  <tt>asdf:load-system</tt> call is made for the inspector. Quicklisp,
-  Downloads helper scripts, and silent foreign checkouts are outside this
-  startup contract.
+  The repair step first returns values <tt>repaired-p</tt>, report, and
+  repair-plan. If the current image cannot see required inspector systems from
+  the repo/Nix source universe, or if ASDF resolves one from a foreign
+  <tt>~/common-lisp</tt>, the plan records the stale chunks and concrete
+  repair actions. The guarded load then refuses with a structured gate chunk
+  if coherence is still incomplete, and no <tt>asdf:load-system</tt> call is
+  made for the inspector. Quicklisp, Downloads helper scripts, and silent
+  foreign checkouts are outside this startup contract.
 </p>
 
 <h2>Next step</h2>
