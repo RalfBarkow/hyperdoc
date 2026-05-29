@@ -68,6 +68,29 @@
   That means any fix must address the dependency boundary itself.
 </p>
 
+<h4>Running-image gate</h4>
+
+<p>
+  The current HyperDoc startup path models this as an ASDF visibility chunk,
+  not as an instruction to clone a dependency by hand. For the
+  <tt>:clog-moldable-inspector</tt> profile, <tt>:s-graphviz</tt> must be
+  visible from the repo/Nix source universe before the gate allows
+  <tt>:clog-moldable-inspector</tt> to load.
+</p>
+
+<pre><code>(hyperdoc:load-coherent-system :clog-moldable-inspector
+                               :profile :clog-moldable-inspector)</code></pre>
+
+<p>
+  If <tt>asdf:find-system</tt> returns <tt>NIL</tt> for
+  <tt>:s-graphviz</tt>, the report records
+  <tt>s-graphviz-asdf-visibility</tt> as
+  <tt>:asdf-subsystem-not-visible</tt>. If another dependency, such as
+  <tt>:clog-ace</tt>, resolves from <tt>~/common-lisp</tt>, that is a
+  separate source-registry contaminant. The gate refuses the load before ASDF
+  can mix those bases.
+</p>
+
 <h4>Current boundary</h4>
 
 <ul>
@@ -92,13 +115,19 @@
 <h4>Pragmatic conclusion</h4>
 
 <p>
-  The immediate local correction is simple: keep <tt>s-graphviz</tt> in the
-  dev shell. The actual repair still remains open.
+  The immediate local correction is no longer an ad hoc Downloads or Quicklisp
+  repair. Run the coherence gate first. If the report says
+  <tt>:s-graphviz</tt> is not visible, repair the repo/Nix ASDF visibility or
+  re-enter the updated dev shell as a fallback. Do not allow a foreign
+  <tt>~/common-lisp</tt> registry entry to satisfy adjacent inspector systems
+  silently.
 </p>
 
 <h4>Related</h4>
 
 <ul>
+  <li><a page="Runtime coherence chunks for inspector dependencies">Runtime coherence chunks for inspector dependencies</a></li>
+  <li><a page="Startup load-set mismatch">Startup load-set mismatch</a></li>
   <li><a page="Reloading HyperDoc After Adding Lisp Objects">Reloading HyperDoc After Adding Lisp Objects</a></li>
   <li><a page="Kioskbeerli sdImage imageSize Failure">Kioskbeerli sdImage imageSize Failure</a></li>
   <li><a page="Salon Pi 4 Kiosk Hardening Checklist">Salon Pi 4 Kiosk Hardening Checklist</a></li>

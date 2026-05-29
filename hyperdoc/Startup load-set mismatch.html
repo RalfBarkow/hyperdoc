@@ -13,6 +13,8 @@
   <li><a hyperbook="topics" page="HyperBook server vs HyperDoc server load set"><tt>HyperBook server vs HyperDoc server load set</tt></a></li>
   <li><a hyperbook="topics" page="Load before serve for scoped examples"><tt>Load before serve for scoped examples</tt></a></li>
   <li><a hyperbook="topics" page="Probe dreyeck runtime load set"><tt>Probe dreyeck runtime load set</tt></a></li>
+  <li><a hyperbook="topics" page="Running image coherence gate"><tt>Running image coherence gate</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF source-registry contaminant"><tt>ASDF source-registry contaminant</tt></a></li>
 </ul>
 
 <h2>Diagnosis from this slice</h2>
@@ -38,9 +40,41 @@
   parity still fails should the discovery path itself become the main suspect.
 </p>
 
+<h2>Source-registry mismatch</h2>
+
+<p>
+  A newer mismatch appears when a long-running SLY image was not born from the
+  HyperDoc <tt>direnv</tt>/<tt>nix develop</tt> environment. The image may
+  have enough ASDF visibility to load parts of HyperDoc, but still report
+  <tt>:s-graphviz -&gt; NIL</tt> while resolving <tt>:clog-ace</tt> from
+  <tt>/Users/rgb/common-lisp/clog-ace/clog-ace.asd</tt>. That is not a
+  healthy partial success; it is a contaminated basis.
+</p>
+
+<p>
+  The canonical inspector startup path is therefore guarded:
+</p>
+
+<pre><code>(asdf:load-system :hyperdoc)
+
+(hyperdoc:load-coherent-system :clog-moldable-inspector
+                               :profile :clog-moldable-inspector)</code></pre>
+
+<p>
+  The guard first returns an inspectable <tt>runtime-coherence-report</tt>.
+  If the current image cannot see required inspector systems from the repo/Nix
+  source universe, or if ASDF resolves one from a foreign
+  <tt>~/common-lisp</tt>, the report contains a refused gate chunk and no
+  <tt>asdf:load-system</tt> call is made for the inspector. Quicklisp,
+  Downloads helper scripts, and silent foreign checkouts are outside this
+  startup contract.
+</p>
+
 <h2>Next step</h2>
 
 <p>
   Continue with <a page="Load before serve for scoped examples">Load before serve for scoped examples</a>
   and <a page="Probe dreyeck runtime load set">Probe dreyeck runtime load set</a>.
+  For browser inspector startup, start with
+  <a page="Runtime coherence chunks for inspector dependencies">Runtime coherence chunks for inspector dependencies</a>.
 </p>

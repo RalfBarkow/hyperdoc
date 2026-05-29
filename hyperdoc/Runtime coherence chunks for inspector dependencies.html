@@ -16,7 +16,14 @@
   <li><a hyperbook="topics" page="Static asset root"><tt>Static asset root</tt></a></li>
   <li><a hyperbook="topics" page="Inspector optional dependency"><tt>Inspector optional dependency</tt></a></li>
   <li><a hyperbook="topics" page="Browser inspection session chunk"><tt>Browser inspection session chunk</tt></a></li>
+  <li><a hyperbook="topics" page="Running image coherence gate"><tt>Running image coherence gate</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF source-registry contaminant"><tt>ASDF source-registry contaminant</tt></a></li>
+  <li><a hyperbook="topics" page="ASDF system visibility chunk"><tt>ASDF system visibility chunk</tt></a></li>
+  <li><a hyperbook="topics" page="CLOG moldable inspector readiness"><tt>CLOG moldable inspector readiness</tt></a></li>
   <li><a expr="(make-inspector-runtime-coherence-report)"><tt>(make-inspector-runtime-coherence-report)</tt></a></li>
+  <li><a expr="(ensure-running-image-coherent :profile :clog-moldable-inspector :persist-events nil)"><tt>(ensure-running-image-coherent :profile :clog-moldable-inspector)</tt></a></li>
+  <li><a expr="(load-coherent-system :clog-moldable-inspector :profile :clog-moldable-inspector)"><tt>(load-coherent-system :clog-moldable-inspector ...)</tt></a></li>
+  <li><a expr="(make-clog-moldable-inspector-coherence-report)"><tt>(make-clog-moldable-inspector-coherence-report)</tt></a></li>
   <li><a expr="(make-html-inspector-views-environment-coherence-report)"><tt>(make-html-inspector-views-environment-coherence-report)</tt></a></li>
   <li><a expr="(repair-html-inspector-views-environment-from-asdf)"><tt>(repair-html-inspector-views-environment-from-asdf)</tt></a></li>
   <li><a expr="(make-html-inspector-views-asdf-visibility-coherence-report)"><tt>(make-html-inspector-views-asdf-visibility-coherence-report)</tt></a></li>
@@ -26,6 +33,8 @@
   <li><a expr="(make-current-plan-browser-coherence-report :root-object '(:synthetic-plan-result) :summary '(:synthetic-summary) :checklist '(:synthetic-checklist))"><tt>(make-current-plan-browser-coherence-report ...)</tt></a></li>
   <li><a expr="(clog-asdf-code-root-chunk)"><tt>(clog-asdf-code-root-chunk)</tt></a></li>
   <li><a expr="(clog-static-asset-root-chunk)"><tt>(clog-static-asset-root-chunk)</tt></a></li>
+  <li><a expr="(foreign-asdf-source-registry-contaminants-chunk)"><tt>(foreign-asdf-source-registry-contaminants-chunk)</tt></a></li>
+  <li><a expr="(asdf-system-visibility-chunk :s-graphviz :package-name :s-graphviz)"><tt>(asdf-system-visibility-chunk :s-graphviz ...)</tt></a></li>
   <li><a expr="(s-graphviz-optional-capability-chunk)"><tt>(s-graphviz-optional-capability-chunk)</tt></a></li>
 </ul>
 
@@ -54,6 +63,93 @@
   static root, or whether <tt>CLOG_SRC/static-files/</tt> is the patched asset
   root.
 </p>
+
+<h2>Running-image coherence gate</h2>
+
+<p>
+  The CLOG moldable inspector startup path now has an explicit
+  <a hyperbook="topics" page="Running image coherence gate"><tt>running image coherence gate</tt></a>.
+  The canonical entry point is:
+</p>
+
+<pre><code>(hyperdoc:load-coherent-system :clog-moldable-inspector
+                               :profile :clog-moldable-inspector)</code></pre>
+
+<p>
+  The gate first derives a chunk map for the
+  <tt>:clog-moldable-inspector</tt> profile. It checks the expected repo/Nix
+  source universe, the current image's <tt>CL_SOURCE_REGISTRY</tt>, foreign
+  source-registry contaminants, ASDF visibility for <tt>:s-graphviz</tt>,
+  <tt>:clog-ace</tt>, <tt>:html-inspector-views/standard</tt>, and
+  <tt>:clog-moldable-inspector</tt>, plus CLOG static assets, live
+  <tt>html-inspector-views/standard</tt> method-table coherence, and
+  dependency-precompute safety.
+</p>
+
+<p>
+  This is McDermott's chunk/basis/derive model applied to a dirty Common Lisp
+  image. The basis is not just source text; it includes ASDF's current source
+  registry, process environment variables, loaded packages, live generic
+  functions, and selected system source files. The deriver is
+  <tt>ensure-running-image-coherent</tt> for diagnosis and
+  <tt>load-coherent-system</tt> for the guarded load boundary.
+</p>
+
+<p>
+  If <tt>:s-graphviz</tt> is invisible, or <tt>:clog-ace</tt> resolves from
+  <tt>~/common-lisp</tt> while the repo/Nix universe should be authoritative,
+  the gate returns a <tt>runtime-coherence-report</tt> with a refused
+  <tt>load-coherent-system-gate</tt> chunk. It does not silently load from the
+  foreign root, and it does not invoke Quicklisp, a Downloads helper script, or
+  a restart as the primary fix.
+</p>
+
+<h2>Source-registry contaminants</h2>
+
+<p>
+  <a hyperbook="topics" page="ASDF source-registry contaminant"><tt>ASDF source-registry contaminant</tt></a>
+  names the case where ASDF can find a system, but the source file comes from
+  a non-authoritative root. The observed shape is:
+</p>
+
+<pre><code>:S-GRAPHVIZ -&gt; NIL
+:CLOG-ACE   -&gt; /Users/rgb/common-lisp/clog-ace/clog-ace.asd</code></pre>
+
+<p>
+  That is worse than a simple missing dependency. It proves that the running
+  image has a foreign source-registry basis mixed into the inspector load path.
+  The contaminant chunk records registry entries and selected ASDF system
+  source files whose authority is not <tt>:repo</tt> or <tt>:nix-store</tt>.
+</p>
+
+<h2>Persistence and inspection</h2>
+
+<p>
+  Coherence events are persisted, when <tt>sqlite3</tt> is available, to
+  <tt>var/runtime-coherence.sqlite</tt>. Each event records the chunk id,
+  status, kind, basis, evidence, repair action, condition class/message, and
+  timestamp. Persistence is diagnostic: failure to write the SQLite event log
+  must not turn a coherence report into a debugger break.
+</p>
+
+<p>
+  The plain report object is the inspectable surface. Helper functions expose
+  the current chunk map, stale chunks, source-registry diff, selected ASDF
+  source files, and restart/repair recommendation:
+</p>
+
+<pre><code>(let ((report (ensure-running-image-coherent
+               :profile :clog-moldable-inspector
+               :persist-events nil)))
+  (list :summary (runtime-coherence-report-summary-of report)
+        :stale (mapcar #'coherence-chunk-id-of
+                       (runtime-coherence-stale-chunks report))
+        :source-registry-diff
+        (runtime-coherence-source-registry-diff report)
+        :selected-source-files
+        (runtime-coherence-selected-asdf-source-files)
+        :recommendation
+        (runtime-coherence-restart-repair-recommendation report)))</code></pre>
 
 <h2>HTML inspector environment coherence</h2>
 
@@ -186,7 +282,9 @@ Never calls SLYNK:INSPECT-IN-EMACS directly."
   report)
 
 (defparameter *example-result*
-  (hyperdoc:make-html-inspector-views-asdf-visibility-coherence-report))
+  (hyperdoc:ensure-running-image-coherent
+   :profile :clog-moldable-inspector
+   :persist-events nil))
 
 (print-runtime-coherence-report *example-result*)
 

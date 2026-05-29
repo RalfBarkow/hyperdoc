@@ -771,6 +771,44 @@
                  "Shared Inspector Projection"
                  "hyperdoc/runtime-coherence.lisp")))
 
+(defun running-image-coherence-gate-topic ()
+  (make-topic
+   :id "running-image-coherence-gate"
+   :title "Running image coherence gate"
+   :summary "Explicit guard that derives runtime coherence chunks before allowing a risky ASDF load in a long-running Lisp image."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "Running Image Coherence Rebuild Workflow"
+                 "Startup load-set mismatch"
+                 "hyperdoc/runtime-coherence.lisp")))
+
+(defun asdf-source-registry-contaminant-topic ()
+  (make-topic
+   :id "asdf-source-registry-contaminant"
+   :title "ASDF source-registry contaminant"
+   :summary "Foreign source root, such as ~/common-lisp or Quicklisp, that can satisfy ASDF lookup outside HyperDoc's repo/Nix source universe."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "Startup load-set mismatch"
+                 "s-graphviz Dependency Boundary"
+                 "hyperdoc/runtime-coherence.lisp")))
+
+(defun asdf-system-visibility-chunk-topic ()
+  (make-topic
+   :id "asdf-system-visibility-chunk"
+   :title "ASDF system visibility chunk"
+   :summary "Runtime coherence chunk that records package presence, ASDF system visibility, source file, source directory, and source authority separately."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "s-graphviz Dependency Boundary"
+                 "hyperdoc/runtime-coherence.lisp")))
+
+(defun clog-moldable-inspector-readiness-topic ()
+  (make-topic
+   :id "clog-moldable-inspector-readiness"
+   :title "CLOG moldable inspector readiness"
+   :summary "Derived gate chunk that refuses CLOG inspector loading until required ASDF visibility, source-registry, CLOG asset, and live-method chunks are coherent."
+   :references '("Runtime coherence chunks for inspector dependencies"
+                 "Running Image Coherence Rebuild Workflow"
+                 "hyperdoc/runtime-coherence.lisp")))
+
 (defun normal-association-submit-path-vs-evidence-path-topic ()
   (make-topic
    :id "normal-association-submit-path-vs-evidence-path"

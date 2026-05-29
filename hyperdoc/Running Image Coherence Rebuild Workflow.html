@@ -73,10 +73,50 @@
     <td>The reload, rescan, repair, or materialization operation that brings a derived chunk up to date.</td>
   </tr>
   <tr>
+    <td>Coherence gate</td>
+    <td>A deriver boundary that refuses a risky ASDF load until the selected runtime-support chunks are coherent.</td>
+  </tr>
+  <tr>
     <td>Coherent image</td>
     <td>A Lisp image whose loaded systems, text pages, derived state, and authored links agree after rebuild.</td>
   </tr>
 </table>
+
+<h2>Inspector startup gate</h2>
+
+<p>
+  Browser inspector startup now uses the repo-native running-image gate before
+  loading <tt>:clog-moldable-inspector</tt>. This matters when Emacs/SLY is
+  attached to a Lisp process that was not born from HyperDoc's
+  <tt>direnv</tt>/<tt>nix develop</tt> environment. The process may have a
+  mixed ASDF source registry: one system missing from the repo/Nix universe,
+  another resolving from <tt>~/common-lisp</tt>.
+</p>
+
+<p>
+  The gate preserves the expectation as an artifact. It records the expected
+  dev-shell source universe, current <tt>CL_SOURCE_REGISTRY</tt>, foreign
+  contaminants, selected ASDF source files, live method-table coherence, and
+  dependency-precompute safety. Only after those chunks are coherent should the
+  inspector load proceed.
+</p>
+
+<pre><code>(defparameter *inspector-coherence*
+  (hyperdoc:ensure-running-image-coherent
+   :profile :clog-moldable-inspector))
+
+(multiple-value-bind (loaded report)
+    (hyperdoc:load-coherent-system :clog-moldable-inspector
+                                   :profile :clog-moldable-inspector)
+  (declare (ignore loaded))
+  report)</code></pre>
+
+<p>
+  Restarting inside the updated dev shell remains a fallback recommendation
+  when the report cannot derive a coherent ASDF basis. It is not the primary
+  repair model. The primary behavior is an inspectable report or an explicit
+  repair operation.
+</p>
 
 <h2>Page-lookup gate</h2>
 
@@ -104,10 +144,19 @@
 <h2>REPL sketch</h2>
 
 <lisp-code>
-(asdf:load-system :hyperdoc/explorer)
-(asdf:load-system :hyperdoc/inspector)
+(asdf:load-system :hyperdoc)
 
-(hyperdoc::reload-text-pages hyperdoc::*hyperdoc*)
+(defparameter *runtime-coherence*
+  (hyperdoc:ensure-running-image-coherent
+   :profile :clog-moldable-inspector))
+
+(hyperdoc:runtime-coherence-report-summary-of *runtime-coherence*)
+
+(multiple-value-bind (loaded report)
+    (hyperdoc:load-coherent-system :clog-moldable-inspector
+                                   :profile :clog-moldable-inspector)
+  (declare (ignore loaded))
+  report)
 
 (loop for page being the hash-values of (hyperdoc::pages-of hyperdoc::*hyperdoc*)
       append (hyperbook:lookup-issues-of page))
@@ -121,6 +170,7 @@
   <li><a page="A framework for maintaining the coherence of a running Lisp">A framework for maintaining the coherence of a running Lisp</a></li>
   <li><a page="McDermott Running Image Coherence Crosswalk">McDermott Running Image Coherence Crosswalk</a></li>
   <li><a page="Core Chunk Classes">Core Chunk Classes</a></li>
+  <li><a page="Runtime coherence chunks for inspector dependencies">Runtime coherence chunks for inspector dependencies</a></li>
   <li><a page="Make the issue repair function disappear as the primary abstraction">Make the issue repair function disappear as the primary abstraction</a></li>
   <li><a page="State machine">State machine</a></li>
   <li><a page="State-machine run">State-machine run</a></li>
