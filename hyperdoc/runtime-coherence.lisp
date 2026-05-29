@@ -17,6 +17,7 @@
     :missing-html-inspector-views-asd-env
     :missing-html-inspector-views-asd
     :asdf-subsystem-not-visible
+    :dev-shell-asdf-system-not-visible
     :nix-derivation-mismatch
     :stale-sly-environment
     :stale
@@ -190,6 +191,7 @@
             :missing-html-inspector-views-asd-env
             :missing-html-inspector-views-asd
             :asdf-subsystem-not-visible
+            :dev-shell-asdf-system-not-visible
             :nix-derivation-mismatch
             :stale-sly-environment
             :stale
@@ -537,6 +539,128 @@
                            (pathname-exists-p pathname)))
           :authority authority
           :accepted (source-path-authority-accepted-p authority))))
+
+(defun asdf-system-definition-filename (system-name)
+  (let* ((downcase-name
+           (string-downcase (string system-name)))
+         (base-name
+           (let ((slash (position #\/ downcase-name)))
+             (if slash
+                 (subseq downcase-name 0 slash)
+                 downcase-name))))
+    (format nil "~A.asd" base-name)))
+
+(defun source-registry-search-roots
+    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          entries
+          (repo-root (hyperdoc-repo-root-pathname)))
+  (remove-duplicates
+   (loop for entry in (or entries
+                          (accepted-source-registry-entries
+                           :registry registry
+                           :repo-root repo-root))
+         for pathname = (cl-source-registry-entry-pathname entry)
+         when pathname
+           collect pathname)
+   :test #'equal))
+
+(defun bounded-find-file-under-root
+    (root filename &key (max-depth 2))
+  (labels ((walk (directory depth)
+             (let ((candidate (merge-pathnames filename directory)))
+               (cond
+                 ((pathname-exists-p candidate)
+                  (list candidate))
+                 ((<= depth 0)
+                  nil)
+                 (t
+                  (handler-case
+                      (loop for subdirectory in (uiop:subdirectories directory)
+                            append (walk subdirectory (1- depth)))
+                    (condition ()
+                      nil)))))))
+    (and (directory-exists-p root)
+         (walk (uiop:ensure-directory-pathname root)
+               max-depth))))
+
+(defun asdf-definition-discovery
+    (system-name &key
+                   (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+                   entries
+                   (repo-root (hyperdoc-repo-root-pathname))
+                   (max-depth 2))
+  (let* ((effective-entries
+           (or entries
+               (accepted-source-registry-entries
+                :registry registry
+                :repo-root repo-root)))
+         (filename (asdf-system-definition-filename system-name))
+         (roots
+           (source-registry-search-roots
+            :registry registry
+            :entries effective-entries
+            :repo-root repo-root))
+         (lookup-records
+           (loop for root in roots
+                 for direct-path = (merge-pathnames filename root)
+                 for found = (bounded-find-file-under-root
+                              root
+                              filename
+                              :max-depth max-depth)
+                 collect (list :source-registry-entry-root root
+                               :expected-asd-path direct-path
+                               :expected-asd-path-exists
+                               (pathname-exists-p direct-path)
+                               :found-asd-files found)))
+         (candidates
+           (remove-duplicates
+            (loop for record in lookup-records
+                  append (getf record :found-asd-files))
+            :test #'equal)))
+    (list :system-name system-name
+          :expected-asd-filename filename
+          :source-registry registry
+          :source-registry-entries
+          (mapcar (lambda (entry)
+                    (cl-source-registry-entry-evidence
+                     entry
+                     :repo-root repo-root))
+                  effective-entries)
+          :search-roots roots
+          :lookup-records lookup-records
+          :candidate-asd-files candidates)))
+
+(defun dev-shell-asdf-definition-discovery
+    (system-name &key
+                   registry
+                   (repo-root (hyperdoc-repo-root-pathname))
+                   (max-depth 3))
+  (let* ((entries
+           (dev-shell-source-registry-entries
+            :registry registry
+            :hyperdoc-root repo-root))
+         (effective-registry
+           (join-source-registry-entries entries)))
+    (asdf-definition-discovery
+     system-name
+     :registry effective-registry
+     :entries entries
+     :repo-root repo-root
+     :max-depth max-depth)))
+
+(defun asdf-definition-candidates
+    (system-name &key
+                   (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+                   entries
+                   (repo-root (hyperdoc-repo-root-pathname))
+                   (max-depth 2))
+  (getf (asdf-definition-discovery
+         system-name
+         :registry registry
+         :entries entries
+         :repo-root repo-root
+         :max-depth max-depth)
+        :candidate-asd-files))
 
 (defun asdf-system-source-authority-evidence
     (system-name &key (repo-root (hyperdoc-repo-root-pathname))
@@ -1215,6 +1339,13 @@
        :repo-root repo-root
        :expected-authorities expected-authorities)
     (let* ((foundp (getf source-evidence :found))
+           (dev-shell-discovery
+             (unless foundp
+               (dev-shell-asdf-definition-discovery
+                system-name
+                :repo-root repo-root)))
+           (dev-shell-candidates
+             (getf dev-shell-discovery :candidate-asd-files))
            (authority (getf source-evidence :source-authority))
            (acceptedp
              (getf source-evidence :source-authority-accepted))
@@ -1224,9 +1355,13 @@
            (status
              (cond
                ((not foundp)
-                (if requiredp
-                    :asdf-subsystem-not-visible
-                    :optional-unavailable))
+                (cond
+                  ((not requiredp)
+                   :optional-unavailable)
+                  (dev-shell-candidates
+                   :asdf-subsystem-not-visible)
+                  (t
+                   :dev-shell-asdf-system-not-visible)))
                (condition
                 :failed)
                ((not acceptedp)
@@ -1242,6 +1377,8 @@
        :status status
        :value (list :system-name system-name
                     :found foundp
+                    :dev-shell-candidate-asd-files
+                    dev-shell-candidates
                     :source-authority authority
                     :source-authority-accepted acceptedp
                     :package-present package-present)
@@ -1251,6 +1388,9 @@
        :evidence
        (list (append (list :probe 'asdf:find-system)
                      source-evidence)
+             (list :probe 'dev-shell-asdf-definition-discovery
+                   :performed (not foundp)
+                   :result dev-shell-discovery)
              (list :probe 'find-package
                    :package-name package-name
                    :present package-present)
@@ -1266,6 +1406,10 @@
            (:asdf-subsystem-not-visible
             '(:repair-asdf-source-registry
               :re-enter-nix-develop))
+           (:dev-shell-asdf-system-not-visible
+            '(:inspect-dev-shell-source-registry
+              :verify-nix-dev-shell-contains-system
+              :re-enter-nix-develop-as-fallback))
            (otherwise
             '(:inspect-asdf-visibility))))
        :depends-on depends-on))))
@@ -2986,62 +3130,70 @@
           '(:import-dev-shell-source-registry
             :re-enter-nix-develop-as-fallback)))))))
 
-(defun asdf-system-definition-filename (system-name)
-  (let* ((downcase-name
-           (string-downcase (string system-name)))
-         (base-name
-           (let ((slash (position #\/ downcase-name)))
-             (if slash
-                 (subseq downcase-name 0 slash)
-                 downcase-name))))
-    (format nil "~A.asd" base-name)))
+(defun asdf-load-asd-attempt-record
+    (asd-path &key (mutate t) phase)
+  (let ((exists (pathname-exists-p asd-path))
+        (error-condition nil)
+        (observed-conditions nil)
+        (loaded nil)
+        (called nil))
+    (when (and mutate exists)
+      (setf called t)
+      (handler-bind
+          ((condition
+             (lambda (caught)
+               (push caught observed-conditions))))
+        (handler-case
+            (progn
+              (asdf:load-asd asd-path)
+              (setf loaded t))
+          (error (caught)
+            (setf error-condition caught)))))
+    (values
+     (list :asd-path asd-path
+           :phase phase
+           :exists exists
+           :load-asd-called called
+           :load-asd-succeeded loaded
+           :conditions
+           (mapcar #'condition-evidence
+                   (nreverse observed-conditions))
+           :condition (and error-condition
+                           (condition-evidence error-condition)))
+     error-condition)))
 
-(defun source-registry-search-roots
-    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
-          (repo-root (hyperdoc-repo-root-pathname)))
-  (remove-duplicates
-   (loop for entry in (accepted-source-registry-entries
-                       :registry registry
-                       :repo-root repo-root)
-         for pathname = (cl-source-registry-entry-pathname entry)
-         when pathname
-           collect pathname)
-   :test #'equal))
+(defun asdf-load-asd-attempt-records
+    (asd-paths &key (mutate t) stop-after-success)
+  (let ((records nil)
+        (conditions nil)
+        (loaded nil))
+    (dolist (asd-path asd-paths)
+      (if (and stop-after-success loaded)
+          (push (list :asd-path asd-path
+                      :exists (pathname-exists-p asd-path)
+                      :load-asd-called nil
+                      :load-asd-succeeded nil
+                      :skipped-after-success t)
+                records)
+          (multiple-value-bind (record condition)
+              (asdf-load-asd-attempt-record
+               asd-path
+               :mutate mutate)
+            (when condition
+              (push condition conditions))
+            (when (getf record :load-asd-succeeded)
+              (setf loaded t))
+            (push record records))))
+    (values (nreverse records)
+            loaded
+            (nreverse conditions))))
 
-(defun bounded-find-file-under-root
-    (root filename &key (max-depth 2))
-  (labels ((walk (directory depth)
-             (let ((candidate (merge-pathnames filename directory)))
-               (cond
-                 ((pathname-exists-p candidate)
-                  (list candidate))
-                 ((<= depth 0)
-                  nil)
-                 (t
-                  (handler-case
-                      (loop for subdirectory in (uiop:subdirectories directory)
-                            append (walk subdirectory (1- depth)))
-                    (condition ()
-                      nil)))))))
-    (and (directory-exists-p root)
-         (walk (uiop:ensure-directory-pathname root)
-               max-depth))))
-
-(defun asdf-definition-candidates
-    (system-name &key
-                   (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
-                   (repo-root (hyperdoc-repo-root-pathname))
-                   (max-depth 2))
-  (let ((filename (asdf-system-definition-filename system-name)))
-    (remove-duplicates
-     (loop for root in (source-registry-search-roots
-                        :registry registry
-                        :repo-root repo-root)
-           append (bounded-find-file-under-root
-                   root
-                   filename
-                   :max-depth max-depth))
-     :test #'equal)))
+(defun pathname-parent-directory (pathname)
+  (and pathname
+       (handler-case
+           (uiop:pathname-directory-pathname pathname)
+         (condition ()
+           nil))))
 
 (defun reload-selected-asd-definitions
     (attached-image systems &key
@@ -3056,35 +3208,44 @@
                       system
                       :repo-root repo-root))
              (already-found (getf before :found))
+             (discovery
+               (asdf-definition-discovery
+                system
+                :registry registry
+                :repo-root repo-root
+                :max-depth max-depth))
              (candidates
                (unless already-found
-                 (asdf-definition-candidates
-                  system
-                  :registry registry
-                  :repo-root repo-root
-                  :max-depth max-depth)))
+                 (getf discovery :candidate-asd-files)))
+             (attempt-records nil)
              (loaded nil)
-             (load-condition nil))
-        (when (and candidates mutate)
-          (handler-case
-              (progn
-                (asdf:load-asd (first candidates))
-                (setf loaded t))
-            (condition (condition)
-              (setf load-condition condition)
-              (push condition conditions))))
+             (load-conditions nil))
+        (unless already-found
+          (multiple-value-setq
+              (attempt-records loaded load-conditions)
+            (asdf-load-asd-attempt-records
+             candidates
+             :mutate mutate
+             :stop-after-success t))
+          (setf conditions (append load-conditions conditions)))
         (push (list :system-name system
+                    :expected-asd-filename
+                    (getf discovery :expected-asd-filename)
+                    :current-image-lookup before
                     :already-found already-found
+                    :definition-discovery discovery
                     :candidate-asd-files candidates
                     :mutation-performed (and mutate
                                              (not already-found)
                                              (not (null candidates)))
-                    :load-asd-called (and mutate
-                                           (not already-found)
-                                           (not (null candidates)))
+                    :load-asd-attempts attempt-records
+                    :load-asd-called
+                    (some (lambda (record)
+                            (getf record :load-asd-called))
+                          attempt-records)
                     :loaded loaded
-                    :condition (and load-condition
-                                    (condition-evidence load-condition)))
+                    :conditions (mapcar #'condition-evidence
+                                        load-conditions))
               records)))
     (let* ((ordered-records (nreverse records))
            (missing-candidates
@@ -3099,8 +3260,10 @@
                     ordered-records))
            (status
              (cond
-               (conditions :failed)
                ((not mutate) :planned)
+               ((and conditions
+                     (not loaded-or-already))
+                :failed)
                (missing-candidates :blocked)
                (loaded-or-already :good)
                (t :stale))))
@@ -3138,33 +3301,172 @@
                                      char)
                                  stream)))))
 
+(defun asdf-find-system-probe-record
+    (system-name &key (repo-root (hyperdoc-repo-root-pathname)))
+  (multiple-value-bind (evidence condition)
+      (asdf-system-source-authority-evidence
+       system-name
+       :repo-root repo-root)
+    (append evidence
+            (list :condition (and condition
+                                  (condition-evidence condition))))))
+
+(defun asdf-central-registry-matching-entries
+    (&optional (needles '("graphviz" "s-graphviz")))
+  (loop for entry in asdf:*central-registry*
+        for namestring = (safe-namestring entry)
+        when (and namestring
+                  (some (lambda (needle)
+                          (search needle namestring
+                                  :test #'char-equal))
+                        needles))
+          collect (list :entry entry
+                        :namestring namestring
+                        :exists (or (directory-exists-p entry)
+                                    (pathname-exists-p entry)))))
+
+(defun push-asd-parent-into-central-registry
+    (asd-path &key (mutate t))
+  (let ((parent (pathname-parent-directory asd-path)))
+    (cond
+      ((not parent)
+       (list :asd-path asd-path
+             :parent-directory nil
+             :pushed nil
+             :condition
+             (list :message "Could not derive an ASD parent directory.")))
+      ((not mutate)
+       (list :asd-path asd-path
+             :parent-directory parent
+             :pushed nil
+             :planned t
+             :already-present
+             (member parent asdf:*central-registry* :test #'equal)))
+      (t
+       (let ((already-present
+               (member parent asdf:*central-registry* :test #'equal)))
+         (unless already-present
+           (push parent asdf:*central-registry*))
+         (list :asd-path asd-path
+               :parent-directory parent
+               :pushed (not already-present)
+               :already-present already-present
+               :central-registry-size
+               (length asdf:*central-registry*)))))))
+
+(defun clear-asdf-system-cache-record
+    (system-name &key (mutate t))
+  (let* ((package (find-package "ASDF"))
+         (symbol (and package
+                      (find-symbol "CLEAR-SYSTEM" package)))
+         (fbound (and symbol
+                      (fboundp symbol)))
+         (condition nil)
+         (called nil))
+    (when (and mutate fbound)
+      (handler-case
+          (progn
+            (funcall (symbol-function symbol) system-name)
+            (setf called t))
+        (condition (caught)
+          (setf condition caught))))
+    (values
+     (list :system-name system-name
+           :function-present fbound
+           :called called
+           :planned (and (not mutate) fbound)
+           :condition (and condition
+                           (condition-evidence condition)))
+     condition)))
+
 (defun derive-asdf-system-visibility
     (attached-image system-name &key
                                 (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
                                 (repo-root (hyperdoc-repo-root-pathname))
                                 (mutate t))
-  (let* ((reload
-           (reload-selected-asd-definitions
-            attached-image
-            (list system-name)
-            :registry registry
-            :repo-root repo-root
-            :mutate mutate))
-         (visibility
-           (asdf-visible system-name
-                         :repo-root repo-root
-                         :requiredp t))
-         (status
-           (cond
-             ((eq (coherence-chunk-status-of visibility) :good)
-              :good)
-             ((eq (coherence-chunk-status-of reload) :planned)
-              :planned)
-             ((coherence-chunk-status-blocking-p
-               (coherence-chunk-status-of reload))
-              (coherence-chunk-status-of reload))
-             (t
-              (coherence-chunk-status-of visibility)))))
+  (let* ((current-registry registry)
+         (dev-shell-discovery
+           (dev-shell-asdf-definition-discovery
+            system-name
+            :registry current-registry
+            :repo-root repo-root))
+         (imported-dev-shell-registry
+           (getf dev-shell-discovery :source-registry))
+         (dev-shell-candidates
+           (getf dev-shell-discovery :candidate-asd-files))
+         (before-lookup
+           (asdf-find-system-probe-record
+            system-name
+            :repo-root repo-root))
+         (central-registry-before
+           (asdf-central-registry-matching-entries))
+         (load-attempts nil)
+         (central-registry-actions nil)
+         (clear-cache-records nil)
+         (clear-cache-conditions nil)
+         (load-conditions nil))
+    (unless (getf before-lookup :found)
+      (dolist (candidate dev-shell-candidates)
+        (multiple-value-bind (attempt condition)
+            (asdf-load-asd-attempt-record
+             candidate
+             :mutate mutate
+             :phase :before-cache-clear)
+          (push attempt load-attempts)
+          (when condition
+            (push condition load-conditions)))
+        (push (push-asd-parent-into-central-registry
+               candidate
+               :mutate mutate)
+              central-registry-actions)
+        (multiple-value-bind (clear-record clear-condition)
+            (clear-asdf-system-cache-record
+             system-name
+             :mutate mutate)
+          (push clear-record clear-cache-records)
+          (when clear-condition
+            (push clear-condition clear-cache-conditions)))
+        (when (and mutate
+                   (not (getf (asdf-find-system-probe-record
+                               system-name
+                               :repo-root repo-root)
+                              :found)))
+          (multiple-value-bind (attempt condition)
+              (asdf-load-asd-attempt-record
+               candidate
+               :mutate mutate
+               :phase :after-cache-clear)
+            (push attempt load-attempts)
+            (when condition
+              (push condition load-conditions))))
+        (when (and mutate
+                   (getf (asdf-find-system-probe-record
+                          system-name
+                          :repo-root repo-root)
+                         :found))
+          (return))))
+    (let* ((after-lookup
+             (asdf-find-system-probe-record
+              system-name
+              :repo-root repo-root))
+           (visibility
+             (asdf-visible system-name
+                           :repo-root repo-root
+                           :requiredp t))
+           (central-registry-after
+             (asdf-central-registry-matching-entries))
+           (status
+             (cond
+               ((getf after-lookup :found)
+                :good)
+               ((not dev-shell-candidates)
+                :dev-shell-asdf-system-not-visible)
+               ((not mutate)
+                :planned)
+               ((or load-conditions clear-cache-conditions)
+                :failed)
+               (t
+                (coherence-chunk-status-of visibility)))))
     (runtime-coherence-repair-action-chunk
      :id (runtime-coherence-system-repair-action-id
           "derive-asdf-system-visibility"
@@ -3172,27 +3474,58 @@
      :title (format nil "Derive ASDF visibility for ~A" system-name)
      :status status
      :basis (list :attached-image attached-image
-                  :system-name system-name)
+                  :system-name system-name
+                  :current-cl-source-registry current-registry
+                  :imported-dev-shell-cl-source-registry
+                  imported-dev-shell-registry)
      :value (list :system-name system-name
-                  :reload-status (coherence-chunk-status-of reload)
+                  :current-image-found-before
+                  (getf before-lookup :found)
+                  :current-image-found-after
+                  (getf after-lookup :found)
+                  :dev-shell-candidate-asd-files
+                  dev-shell-candidates
                   :visibility-status
                   (coherence-chunk-status-of visibility))
      :evidence
-     (list (list :reload-selected-asd-definitions
-                 :status (coherence-chunk-status-of reload)
-                 :value (coherence-chunk-value-of reload)
-                 :evidence (coherence-chunk-evidence-of reload))
+     (list (list :current-image-asdf-find-system-before
+                 before-lookup)
+           (list :dev-shell-discovery-result
+                 dev-shell-discovery)
+           (list :current-cl-source-registry
+                 current-registry)
+           (list :imported-dev-shell-cl-source-registry
+                 imported-dev-shell-registry)
+           (list :central-registry-before-graphviz-entries
+                 central-registry-before)
+           (list :direct-asd-load-attempts
+                 (nreverse load-attempts))
+           (list :central-registry-actions
+                 (nreverse central-registry-actions))
+           (list :clear-asdf-system-cache
+                 (nreverse clear-cache-records))
+           (list :current-image-asdf-find-system-after
+                 after-lookup)
+           (list :central-registry-after-graphviz-entries
+                 central-registry-after)
            (list :asdf-visibility
                  :status (coherence-chunk-status-of visibility)
                  :value (coherence-chunk-value-of visibility)
                  :evidence (coherence-chunk-evidence-of visibility)))
-     :last-error (or (coherence-chunk-last-error-of reload)
+     :last-error (or (first load-conditions)
+                     (first clear-cache-conditions)
                      (coherence-chunk-last-error-of visibility))
      :repair-options
      (unless (eq status :good)
-       '(:inspect-asdf-definition-candidates
-         :import-dev-shell-source-registry
-         :re-enter-nix-develop-as-fallback)))))
+       (case status
+         (:dev-shell-asdf-system-not-visible
+          '(:inspect-dev-shell-source-registry
+            :verify-nix-dev-shell-contains-system
+            :re-enter-nix-develop-as-fallback))
+         (otherwise
+          '(:inspect-asdf-definition-candidates
+            :import-dev-shell-source-registry
+            :re-enter-nix-develop-as-fallback))))))))
 
 (defun ensure-running-image-coherent
     (&key (profile :clog-moldable-inspector)
@@ -3329,6 +3662,68 @@ ASDF source-registry cache clearing, and selected ASD definition reload."
         (values repaired-p
                 final-report
                 plan)))))
+
+(defun explain-asdf-visibility
+    (system-name &key
+                   (profile :clog-moldable-inspector)
+                   (hyperdoc-root (hyperdoc-repo-root-pathname))
+                   (attached-image :current)
+                   (mutate nil)
+                   (persist-events nil)
+                   (db-path (default-runtime-coherence-sqlite-path))
+                   (sqlite-program "sqlite3"))
+  "Return an inspectable report explaining ASDF visibility for SYSTEM-NAME.
+
+By default this is diagnostic-only.  It records the current image lookup,
+repo/Nix dev-shell discovery, source-registry differences, direct ASD repair
+attempts, and condition trail without calling ASDF:LOAD-SYSTEM."
+  (let* ((expected
+           (expected-dev-shell-source-registry
+            :repo-root hyperdoc-root))
+         (current
+           (current-image-source-registry))
+         (equivalence
+           (source-registry-equivalent-to-dev-shell
+            :repo-root hyperdoc-root))
+         (foreign
+           (foreign-asdf-source-contaminants
+            :repo-root hyperdoc-root))
+         (visibility
+           (asdf-visible system-name
+                         :repo-root hyperdoc-root
+                         :requiredp t))
+         (derivation
+           (derive-asdf-system-visibility
+            attached-image
+            system-name
+            :repo-root hyperdoc-root
+            :mutate mutate))
+         (chunks
+           (list expected
+                 current
+                 equivalence
+                 foreign
+                 visibility
+                 derivation))
+         (report
+           (make-runtime-coherence-report
+            :title (format nil "~A ASDF visibility explanation"
+                           system-name)
+            :chunks chunks
+            :summary
+            (append (runtime-coherence-default-summary chunks)
+                    (list :profile profile
+                          :system-name system-name
+                          :mutated mutate
+                          :attempted-repair-action
+                          (coherence-chunk-id-of derivation))))))
+    (when persist-events
+      (persist-runtime-coherence-report
+       report
+       :repair-action "explain-asdf-visibility"
+       :db-path db-path
+       :sqlite-program sqlite-program))
+    report))
 
 (defun load-coherent-system
     (system-name &key (profile system-name)

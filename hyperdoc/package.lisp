@@ -525,6 +525,7 @@
    #:make-clog-moldable-inspector-coherence-report
    #:ensure-running-image-coherent
    #:repair-running-image-coherence
+   #:explain-asdf-visibility
    #:load-coherent-system
    #:derive
    #:derive-date
