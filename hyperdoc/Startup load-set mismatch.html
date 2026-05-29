@@ -74,6 +74,21 @@
   foreign checkouts are outside this startup contract.
 </p>
 
+<p>
+  For <tt>:s-graphviz</tt>, the repair plan distinguishes two missing-system
+  cases. <tt>:asdf-subsystem-not-visible</tt> means the current image cannot
+  see the system but the dev-shell probe has found a candidate ASD path that
+  may be loaded explicitly. <tt>:dev-shell-asdf-system-not-visible</tt> means
+  the dev-shell probe did not find <tt>s-graphviz.asd</tt>, so the blocker is
+  no longer just an attached-image cache problem. Use the focused diagnostic
+  when the repair plan needs to show every registry row and direct ASD load
+  attempt:
+</p>
+
+<pre><code>(hyperdoc:explain-asdf-visibility
+ :s-graphviz
+ :profile :clog-moldable-inspector)</code></pre>
+
 <h2>Next step</h2>
 
 <p>

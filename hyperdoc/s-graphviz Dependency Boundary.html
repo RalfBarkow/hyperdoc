@@ -87,9 +87,13 @@
 <p>
   If <tt>asdf:find-system</tt> returns <tt>NIL</tt> for
   <tt>:s-graphviz</tt>, the report records
-  <tt>s-graphviz-asdf-visibility</tt> as
-  <tt>:asdf-subsystem-not-visible</tt>. If another dependency, such as
-  <tt>:clog-ace</tt>, resolves from <tt>~/common-lisp</tt>, that is a
+  <tt>s-graphviz-asdf-visibility</tt> with the most specific available
+  visibility status. <tt>:asdf-subsystem-not-visible</tt> means the current
+  image cannot see the system while the dev-shell probe can still name a
+  candidate ASD. <tt>:dev-shell-asdf-system-not-visible</tt> means the
+  authoritative repo/Nix probe could not find <tt>s-graphviz.asd</tt> either.
+  If another dependency, such as <tt>:clog-ace</tt>, resolves from
+  <tt>~/common-lisp</tt>, that is a
   separate source-registry contaminant. The gate refuses the load before ASDF
   can mix those bases. The repair step may import the repo/Nix dev-shell
   source registry, clear ASDF's source-registry cache, reload selected
@@ -97,6 +101,20 @@
   If that is unsafe or incomplete, it returns a repair plan that records the
   stale chunk and concrete next repair action.
 </p>
+
+<p>
+  The <tt>:s-graphviz</tt> deriver now prefers an explicit ASD file discovered
+  by the dev-shell probe. If it finds
+  <tt>/nix/store/.../s-graphviz.asd</tt>, it calls
+  <tt>asdf:load-asd</tt> on that exact pathname, pushes the parent directory
+  into <tt>asdf:*central-registry*</tt>, clears the selected ASDF cache entry,
+  and reruns <tt>asdf:find-system</tt>. The action evidence includes every
+  ASD path tried and every captured condition.
+</p>
+
+<pre><code>(hyperdoc:explain-asdf-visibility
+ :s-graphviz
+ :profile :clog-moldable-inspector)</code></pre>
 
 <h4>Current boundary</h4>
 

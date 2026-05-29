@@ -25,6 +25,7 @@
   <li><a expr="(ensure-running-image-coherent :profile :clog-moldable-inspector :persist-events nil)"><tt>(ensure-running-image-coherent :profile :clog-moldable-inspector)</tt></a></li>
   <li><a expr="(repair-running-image-coherence :profile :clog-moldable-inspector :mutate nil :persist-events nil)"><tt>(repair-running-image-coherence :profile :clog-moldable-inspector)</tt></a></li>
   <li><a expr="(load-coherent-system :clog-moldable-inspector :profile :clog-moldable-inspector)"><tt>(load-coherent-system :clog-moldable-inspector ...)</tt></a></li>
+  <li><a expr="(explain-asdf-visibility :s-graphviz :profile :clog-moldable-inspector)"><tt>(explain-asdf-visibility :s-graphviz ...)</tt></a></li>
   <li><a expr="(make-clog-moldable-inspector-coherence-report)"><tt>(make-clog-moldable-inspector-coherence-report)</tt></a></li>
   <li><a expr="(make-html-inspector-views-environment-coherence-report)"><tt>(make-html-inspector-views-environment-coherence-report)</tt></a></li>
   <li><a expr="(repair-html-inspector-views-environment-from-asdf)"><tt>(repair-html-inspector-views-environment-from-asdf)</tt></a></li>
@@ -138,6 +139,41 @@
   is an inspectable <a hyperbook="topics" page="Running image coherence repair plan"><tt>running image coherence repair plan</tt></a>
   with action chunks and evidence, not a bare debugger failure.
 </p>
+
+<h2>s-graphviz ASD derivation evidence</h2>
+
+<p>
+  The <tt>:s-graphviz</tt> failure mode needs evidence beyond "ASDF did not
+  find the subsystem". The deriver now records the current image lookup, the
+  dev-shell discovery result, the current and imported
+  <tt>CL_SOURCE_REGISTRY</tt> values, matching
+  <tt>asdf:*central-registry*</tt> entries, and every exact
+  <tt>asdf:load-asd</tt> attempt.
+</p>
+
+<p>
+  When the dev-shell discovery finds an exact path such as
+  <tt>/nix/store/.../s-graphviz.asd</tt>, the repair action prefers that
+  concrete file over another registry search. It loads that ASD path directly,
+  pushes the ASD parent directory into <tt>asdf:*central-registry*</tt>, clears
+  ASDF's cached entry for the selected system, reloads the same ASD if the
+  cache clear removed the definition, and then reruns
+  <tt>asdf:find-system</tt>. Each phase is stored in the action evidence and,
+  when event persistence is enabled, in <tt>var/runtime-coherence.sqlite</tt>.
+</p>
+
+<p>
+  If the dev-shell probe cannot find <tt>s-graphviz.asd</tt>, the blocker is
+  recorded as <tt>:dev-shell-asdf-system-not-visible</tt>. That status means
+  the authoritative repo/Nix universe itself did not expose the required ASD
+  definition to the repair layer. It is more specific than
+  <tt>:asdf-subsystem-not-visible</tt>, which only says that the current image
+  cannot see the system.
+</p>
+
+<pre><code>(hyperdoc:explain-asdf-visibility
+ :s-graphviz
+ :profile :clog-moldable-inspector)</code></pre>
 
 <h2>Source-registry contaminants</h2>
 

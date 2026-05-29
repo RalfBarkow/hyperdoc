@@ -101,6 +101,16 @@
   inspector load proceed.
 </p>
 
+<p>
+  When <tt>:s-graphviz</tt> is the blocker, the repair plan must explain the
+  exact ASDF visibility path. It records whether the dev-shell probe found
+  <tt>s-graphviz.asd</tt>, which source-registry rows were searched, which
+  direct <tt>asdf:load-asd</tt> attempts ran, whether ASDF's system cache was
+  cleared, and which condition class/message was captured. If the dev shell
+  cannot expose the ASD at all, the chunk status is
+  <tt>:dev-shell-asdf-system-not-visible</tt>.
+</p>
+
 <pre><code>(multiple-value-bind (repaired-p report repair-plan)
     (hyperdoc:repair-running-image-coherence
      :profile :clog-moldable-inspector)
@@ -112,6 +122,14 @@
                                    :profile :clog-moldable-inspector)
   (declare (ignore loaded))
   report)</code></pre>
+
+<p>
+  For a focused view of one system's visibility derivation, use:
+</p>
+
+<pre><code>(hyperdoc:explain-asdf-visibility
+ :s-graphviz
+ :profile :clog-moldable-inspector)</code></pre>
 
 <p>
   Restarting inside the updated dev shell remains a fallback recommendation
@@ -169,6 +187,11 @@
                                    :profile :clog-moldable-inspector)
   (declare (ignore loaded))
   report)
+
+(defparameter *s-graphviz-visibility*
+  (hyperdoc:explain-asdf-visibility
+   :s-graphviz
+   :profile :clog-moldable-inspector))
 
 (loop for page being the hash-values of (hyperdoc::pages-of hyperdoc::*hyperdoc*)
       append (hyperbook:lookup-issues-of page))
