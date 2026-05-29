@@ -709,6 +709,132 @@
                                       :if-does-not-exist :ignore))))
   t)
 
+(defun rc-running-image-derivers-smoke-test ()
+  (let ((derivers
+          '((hyperdoc:expected-dev-shell-source-registry)
+            (hyperdoc:current-image-source-registry)
+            (hyperdoc:source-registry-equivalent-to-dev-shell)
+            (hyperdoc:foreign-asdf-source-contaminants)
+            (hyperdoc:asdf-visible :s-graphviz)
+            (hyperdoc:asdf-visible :clog-ace)
+            (hyperdoc:system-ready :clog-moldable-inspector))))
+    (dolist (basis derivers)
+      (let ((chunk (hyperdoc:derive basis)))
+        (rc-assert-true
+         (typep chunk 'hyperdoc:coherence-chunk)
+         (format nil "Deriver ~S must return a coherence chunk" basis)))))
+  t)
+
+(defun rc-source-registry-equivalence-detects-foreign-smoke-test ()
+  (rc-with-environment-bindings
+   '(("CL_SOURCE_REGISTRY" "/Users/rgb/common-lisp/clog-ace//:/nix/store/example//"))
+   (lambda ()
+     (let ((chunk (hyperdoc:source-registry-equivalent-to-dev-shell)))
+       (rc-assert-equal
+        :foreign-contaminant
+        (hyperdoc:coherence-chunk-status-of chunk)
+        "Source-registry equivalence must reject foreign registry entries")
+       (rc-assert-true
+        (getf (hyperdoc:coherence-chunk-value-of chunk)
+              :foreign-extra-entries)
+        "Source-registry equivalence evidence must retain foreign entries"))))
+  t)
+
+(defun rc-quarantine-foreign-source-registry-smoke-test ()
+  (rc-with-environment-bindings
+   '(("CL_SOURCE_REGISTRY" "/Users/rgb/common-lisp/clog-ace//:/nix/store/example//"))
+   (lambda ()
+     (let ((chunk
+             (hyperdoc:quarantine-foreign-asdf-source-contaminants
+              :current
+              :initialize-asdf nil)))
+       (rc-assert-equal
+        :good
+        (hyperdoc:coherence-chunk-status-of chunk)
+        "Quarantine action must complete when it only mutates CL_SOURCE_REGISTRY")
+       (rc-assert-true
+        (not (search "/Users/rgb/common-lisp"
+                     (or (uiop:getenv "CL_SOURCE_REGISTRY") "")
+                     :test #'char=))
+        "Quarantine action must remove foreign ~/common-lisp entries")
+       (rc-assert-true
+        (search "/nix/store/example"
+                (or (uiop:getenv "CL_SOURCE_REGISTRY") "")
+                :test #'char=)
+        "Quarantine action must keep accepted Nix entries"))))
+  t)
+
+(defun rc-repair-running-image-coherence-returns-plan-smoke-test ()
+  (let ((load-calls nil))
+    (rc-with-asdf-find-system-override
+     (lambda (system-name &rest args)
+       (declare (ignore args))
+       (when (member (string-downcase (string system-name))
+                     '("s-graphviz" "clog-ace")
+                     :test #'string=)
+         (values t nil)))
+     (lambda ()
+       (rc-with-asdf-load-system-override
+        (lambda (system-name &rest args)
+          (declare (ignore args))
+          (push system-name load-calls)
+          (error "Repair must not call ASDF:LOAD-SYSTEM for ~S"
+                 system-name))
+        (lambda ()
+          (multiple-value-bind (repaired-p report repair-plan)
+              (hyperdoc:repair-running-image-coherence
+               :profile :clog-moldable-inspector
+               :mutate nil
+               :persist-events nil)
+            (declare (ignore repaired-p))
+            (rc-assert-true
+             (typep report 'hyperdoc:runtime-coherence-report)
+             "Repair must return a runtime coherence report")
+            (rc-assert-true
+             (typep repair-plan 'hyperdoc:runtime-coherence-repair-plan)
+             "Incomplete repair must return an inspectable repair-plan object")
+            (rc-assert-true
+             (null load-calls)
+             "Repair planning must not call ASDF:LOAD-SYSTEM")
+            (rc-assert-true
+             (find "derive-asdf-system-visibility-s-graphviz"
+                   (hyperdoc:runtime-coherence-repair-plan-actions-of
+                    repair-plan)
+                   :key #'hyperdoc:coherence-chunk-id-of
+                   :test #'string=)
+             "Repair plan must include a concrete s-graphviz visibility derivation action")))))))
+  t)
+
+(defun rc-repair-running-image-coherence-persists-events-smoke-test ()
+  (if (not (hyperdoc:runtime-coherence-sqlite-available-p))
+      (format t "~&Skipping repair persistence smoke test; sqlite3 unavailable.~%")
+      (let* ((directory (rc-make-temp-directory "runtime-coherence-repair-sqlite"))
+             (db-path (merge-pathnames #P"runtime-coherence.sqlite"
+                                       directory)))
+        (unwind-protect
+             (progn
+               (hyperdoc:repair-running-image-coherence
+                :profile :clog-moldable-inspector
+                :mutate nil
+                :persist-events t
+                :db-path db-path)
+               (multiple-value-bind (output status detail)
+                   (hyperdoc::runtime-coherence-sqlite-run
+                    "SELECT count(*) FROM runtime_coherence_events;"
+                    :db-path db-path)
+                 (declare (ignore detail))
+                 (rc-assert-equal
+                  :ok
+                  status
+                  "Repair persistence count query must succeed")
+                 (rc-assert-true
+                  (plusp (parse-integer output :junk-allowed t))
+                  "Repair must persist derivation attempts to SQLite")))
+          (uiop:delete-directory-tree directory
+                                      :validate t
+                                      :if-does-not-exist :ignore))))
+  t)
+
 (defun rc-html-inspector-dependency-cache-degrades-not-fatal-smoke-test ()
   (let ((chunk (hyperdoc:html-inspector-standard-dependency-cache-chunk)))
     (rc-assert-true
@@ -763,6 +889,11 @@
   (rc-foreign-common-lisp-registry-contaminant-smoke-test)
   (rc-asdf-visibility-records-package-and-system-smoke-test)
   (rc-runtime-coherence-sqlite-persistence-smoke-test)
+  (rc-running-image-derivers-smoke-test)
+  (rc-source-registry-equivalence-detects-foreign-smoke-test)
+  (rc-quarantine-foreign-source-registry-smoke-test)
+  (rc-repair-running-image-coherence-returns-plan-smoke-test)
+  (rc-repair-running-image-coherence-persists-events-smoke-test)
   (rc-html-inspector-dependency-cache-degrades-not-fatal-smoke-test)
   (rc-current-plan-browser-report-smoke-test)
   (format t "~&Runtime coherence smoke tests passed.~%")
