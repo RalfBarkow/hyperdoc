@@ -190,6 +190,15 @@
            (funcall thunk))
       (setf (symbol-function 'asdf:find-system) original))))
 
+(defun rc-with-asdf-load-system-override (override thunk)
+  (let ((original (symbol-function 'asdf:load-system)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'asdf:load-system)
+                 override)
+           (funcall thunk))
+      (setf (symbol-function 'asdf:load-system) original))))
+
 (defun rc-graphviz-missing-degrades-smoke-test ()
   (rc-with-asdf-find-system-override
    (lambda (system-name &rest args)
@@ -560,6 +569,155 @@
       (setf (symbol-function 'asdf:load-system) original)))
   t)
 
+(defun rc-running-image-report-contains-gate-chunks-smoke-test ()
+  (let* ((report (hyperdoc:make-inspector-runtime-coherence-report))
+         (chunks (hyperdoc:runtime-coherence-report-chunks-of report)))
+    (dolist (id '("expected-dev-shell-cl-source-registry"
+                  "current-image-cl-source-registry"
+                  "foreign-asdf-source-registry-contaminants"
+                  "s-graphviz-asdf-visibility"
+                  "clog-ace-asdf-visibility"
+                  "html-inspector-views-standard-asdf-visibility"
+                  "clog-moldable-inspector-asdf-visibility"
+                  "clog-moldable-inspector-readiness"))
+      (rc-assert-true
+       (rc-find-chunk id chunks)
+       (format nil "Inspector report must include running-image gate chunk ~A"
+               id))))
+  t)
+
+(defun rc-s-graphviz-missing-blocks-coherent-load-smoke-test ()
+  (let ((load-calls nil))
+    (rc-with-asdf-find-system-override
+     (lambda (system-name &rest args)
+       (declare (ignore args))
+       (when (string= (string-downcase (string system-name))
+                      "s-graphviz")
+         (values t nil)))
+     (lambda ()
+       (rc-with-asdf-load-system-override
+        (lambda (system-name &rest args)
+          (declare (ignore args))
+          (push system-name load-calls)
+          (error "Guard should not call ASDF:LOAD-SYSTEM for ~S"
+                 system-name))
+        (lambda ()
+          (multiple-value-bind (loaded report)
+              (hyperdoc:load-coherent-system
+               :clog-moldable-inspector
+               :profile :clog-moldable-inspector
+               :persist-events nil)
+            (declare (ignore loaded))
+            (let ((chunk
+                    (rc-find-chunk
+                     "s-graphviz-asdf-visibility"
+                     (hyperdoc:runtime-coherence-report-chunks-of report)))
+                  (gate
+                    (rc-find-chunk
+                     "load-coherent-system-gate"
+                     (hyperdoc:runtime-coherence-report-chunks-of report))))
+              (rc-assert-true
+               (null load-calls)
+               "Coherence gate must refuse before ASDF:LOAD-SYSTEM")
+              (rc-assert-equal
+               :asdf-subsystem-not-visible
+               (hyperdoc:coherence-chunk-status-of chunk)
+               "Missing s-graphviz must be an ASDF visibility chunk status")
+              (rc-assert-equal
+               :refused
+               (hyperdoc:coherence-chunk-status-of gate)
+               "Guarded load must return a refused gate chunk"))))))))
+  t)
+
+(defun rc-foreign-common-lisp-registry-contaminant-smoke-test ()
+  (rc-with-environment-bindings
+   '(("CL_SOURCE_REGISTRY" "/Users/rgb/common-lisp/clog-ace//:/nix/store/example//"))
+   (lambda ()
+     (let ((chunk
+             (hyperdoc:foreign-asdf-source-registry-contaminants-chunk)))
+       (rc-assert-equal
+        :foreign-contaminant
+        (hyperdoc:coherence-chunk-status-of chunk)
+        "A ~/common-lisp source-registry entry must be reported as foreign")
+       (rc-assert-true
+        (getf (hyperdoc:coherence-chunk-value-of chunk)
+              :foreign)
+        "Foreign contaminant evidence must name the rejected registry entry"))))
+  t)
+
+(defun rc-asdf-visibility-records-package-and-system-smoke-test ()
+  (let* ((chunk
+           (hyperdoc:asdf-system-visibility-chunk
+            :s-graphviz
+            :package-name :s-graphviz
+            :requiredp t))
+         (evidence
+           (hyperdoc:coherence-chunk-evidence-of chunk)))
+    (rc-assert-true
+     (some (lambda (entry)
+             (and (listp entry)
+                  (eq (getf entry :probe) 'asdf:find-system)
+                  (getf entry :system-name)))
+           evidence)
+     "ASDF visibility chunk must record the ASDF system probe")
+    (rc-assert-true
+     (some (lambda (entry)
+             (and (listp entry)
+                  (eq (getf entry :probe) 'find-package)
+                  (eq (getf entry :package-name) :s-graphviz)))
+           evidence)
+     "ASDF visibility chunk must record package presence separately"))
+  t)
+
+(defun rc-runtime-coherence-sqlite-persistence-smoke-test ()
+  (if (not (hyperdoc:runtime-coherence-sqlite-available-p))
+      (format t "~&Skipping runtime coherence SQLite smoke test; sqlite3 unavailable.~%")
+      (let* ((directory (rc-make-temp-directory "runtime-coherence-sqlite"))
+             (db-path (merge-pathnames #P"runtime-coherence.sqlite"
+                                       directory)))
+        (unwind-protect
+             (let* ((chunk
+                      (hyperdoc:make-coherence-chunk
+                       :id "runtime-coherence-sqlite-smoke"
+                       :title "Runtime coherence SQLite smoke"
+                       :kind :persistence
+                       :status :good
+                       :basis '(:smoke-test t)
+                       :evidence '((:message "SQLite smoke evidence"))))
+                    (report
+                      (hyperdoc:make-runtime-coherence-report
+                       :title "Runtime coherence SQLite smoke report"
+                       :chunks (list chunk))))
+               (hyperdoc:persist-runtime-coherence-report
+                report
+                :repair-action "runtime-coherence-sqlite-smoke"
+                :db-path db-path)
+               (multiple-value-bind (output status detail)
+                   (hyperdoc::runtime-coherence-sqlite-run
+                    "SELECT count(*) FROM runtime_coherence_events;"
+                    :db-path db-path)
+                 (declare (ignore detail))
+                 (rc-assert-equal
+                  :ok
+                  status
+                  "SQLite count query must succeed")
+                 (rc-assert-true
+                  (plusp (parse-integer output :junk-allowed t))
+                  "SQLite event table must contain a persisted coherence event")))
+          (uiop:delete-directory-tree directory
+                                      :validate t
+                                      :if-does-not-exist :ignore))))
+  t)
+
+(defun rc-html-inspector-dependency-cache-degrades-not-fatal-smoke-test ()
+  (let ((chunk (hyperdoc:html-inspector-standard-dependency-cache-chunk)))
+    (rc-assert-true
+     (member (hyperdoc:coherence-chunk-status-of chunk)
+             '(:good :stale :failed)
+             :test #'eq)
+     "Dependency precompute safety must be recorded as a chunk status"))
+  t)
+
 (defun rc-current-plan-browser-report-smoke-test ()
   (let* ((report
            (hyperdoc:make-current-plan-browser-coherence-report
@@ -600,6 +758,12 @@
   (rc-html-inspector-asdf-visibility-packages-present-smoke-test)
   (rc-static-root-missing-assets-degrades-smoke-test)
   (rc-report-construction-does-not-load-systems-smoke-test)
+  (rc-running-image-report-contains-gate-chunks-smoke-test)
+  (rc-s-graphviz-missing-blocks-coherent-load-smoke-test)
+  (rc-foreign-common-lisp-registry-contaminant-smoke-test)
+  (rc-asdf-visibility-records-package-and-system-smoke-test)
+  (rc-runtime-coherence-sqlite-persistence-smoke-test)
+  (rc-html-inspector-dependency-cache-degrades-not-fatal-smoke-test)
   (rc-current-plan-browser-report-smoke-test)
   (format t "~&Runtime coherence smoke tests passed.~%")
   t)
