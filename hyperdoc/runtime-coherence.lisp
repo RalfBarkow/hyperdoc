@@ -21,6 +21,7 @@
     :stale-sly-environment
     :stale
     :foreign-contaminant
+    :planned
     :refused
     :degraded
     :blocked
@@ -36,6 +37,8 @@
     :source-registry
     :coherence-gate
     :persistence
+    :repair-plan
+    :repair-action
     :browser-inspection-session
     :plan-result
     :projection))
@@ -95,6 +98,58 @@
    (recommended-next-actions
     :reader runtime-coherence-report-recommended-next-actions-of
     :initarg :recommended-next-actions)))
+
+(defclass runtime-coherence-repair-plan ()
+  ((profile
+    :reader runtime-coherence-repair-plan-profile-of
+    :initarg :profile)
+   (created-at
+    :reader runtime-coherence-repair-plan-created-at-of
+    :initarg :created-at)
+   (initial-report
+    :reader runtime-coherence-repair-plan-initial-report-of
+    :initarg :initial-report
+    :initform nil)
+   (actions
+    :reader runtime-coherence-repair-plan-actions-of
+    :initarg :actions
+    :initform nil)
+   (final-report
+    :reader runtime-coherence-repair-plan-final-report-of
+    :initarg :final-report
+    :initform nil)
+   (repaired-p
+    :reader runtime-coherence-repair-plan-repaired-p
+    :initarg :repaired-p
+    :initform nil)
+   (summary
+    :reader runtime-coherence-repair-plan-summary-of
+    :initarg :summary
+    :initform nil)))
+
+(defun make-runtime-coherence-repair-plan
+    (&key profile
+          (created-at (get-universal-time))
+          initial-report
+          actions
+          final-report
+          repaired-p
+          summary)
+  (make-instance 'runtime-coherence-repair-plan
+                 :profile profile
+                 :created-at created-at
+                 :initial-report initial-report
+                 :actions actions
+                 :final-report final-report
+                 :repaired-p repaired-p
+                 :summary (or summary
+                              (list :profile profile
+                                    :action-count (length actions)
+                                    :repaired-p repaired-p
+                                    :final-summary
+                                    (and final-report
+                                         (runtime-coherence-report-summary-of
+                                          final-report))))))
 
 (defun make-coherence-chunk (&key id
                                   title
@@ -166,8 +221,43 @@
   (not (coherence-chunk-status-blocking-p
         (coherence-chunk-status-of chunk))))
 
+(defmethod derive-date ((plan runtime-coherence-repair-plan))
+  (runtime-coherence-repair-plan-created-at-of plan))
+
 (defmethod chunks-update ((chunks list) &key &allow-other-keys)
   (mapcar #'derive chunks))
+
+(defun runtime-coherence-operation-name (operation)
+  (etypecase operation
+    (symbol (string-downcase (symbol-name operation)))
+    (string (string-downcase operation))))
+
+(defmethod derive ((basis cons) &key &allow-other-keys)
+  (let ((operation (runtime-coherence-operation-name (first basis))))
+    (cond
+      ((string= operation "expected-dev-shell-source-registry")
+       (expected-dev-shell-source-registry))
+      ((string= operation "current-image-source-registry")
+       (current-image-source-registry))
+      ((string= operation "source-registry-equivalent-to-dev-shell")
+       (source-registry-equivalent-to-dev-shell))
+      ((string= operation "foreign-asdf-source-contaminants")
+       (foreign-asdf-source-contaminants))
+      ((string= operation "asdf-visible")
+       (asdf-visible (second basis)))
+      ((string= operation "system-ready")
+       (system-ready (second basis)))
+      (t
+       (make-coherence-chunk
+        :id "unknown-runtime-coherence-deriver"
+        :title "Unknown runtime coherence deriver"
+        :kind :repair-action
+        :status :blocked
+        :basis basis
+        :evidence
+        (list (list :operation operation
+                    :message
+                    "No runtime coherence deriver is registered for this basis.")))))))
 
 (defun coherence-status-counts (chunks)
   (let ((counts (make-hash-table :test #'eq)))
@@ -344,11 +434,98 @@
        (uiop:split-string registry :separator ":")
        nil)))
 
+(defun cl-source-registry-entry-tree-p (entry)
+  (let ((length (length entry)))
+    (and (>= length 2)
+         (char= (char entry (- length 1)) #\/)
+         (char= (char entry (- length 2)) #\/))))
+
+(defun cl-source-registry-entry-path-string (entry)
+  (if (cl-source-registry-entry-tree-p entry)
+      (subseq entry 0 (1- (length entry)))
+      entry))
+
+(defun cl-source-registry-entry-pathname (entry)
+  (handler-case
+      (uiop:ensure-directory-pathname
+       (cl-source-registry-entry-path-string entry))
+    (condition ()
+      nil)))
+
+(defun source-registry-tree-entry (pathname)
+  (let ((namestring (safe-namestring
+                     (maybe-directory-pathname pathname))))
+    (and namestring
+         (format nil "~A/" namestring))))
+
+(defun source-registry-entry-normal-key (entry)
+  (let ((pathname (cl-source-registry-entry-pathname entry)))
+    (or (safe-namestring (and pathname
+                              (maybe-directory-pathname pathname)))
+        entry)))
+
+(defun source-registry-entry-equivalent-p (left right)
+  (string= (source-registry-entry-normal-key left)
+           (source-registry-entry-normal-key right)))
+
+(defun source-registry-entry-member-p (entry entries)
+  (member entry entries :test #'source-registry-entry-equivalent-p))
+
+(defun source-registry-set-difference (left right)
+  (remove-if (lambda (entry)
+               (source-registry-entry-member-p entry right))
+             left))
+
+(defun join-source-registry-entries (entries)
+  (with-output-to-string (stream)
+    (loop for entry in entries
+          for firstp = t then nil
+          do (progn
+               (unless firstp
+                 (write-char #\: stream))
+               (write-string entry stream)))))
+
+(defun accepted-source-registry-entries
+    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          (repo-root (hyperdoc-repo-root-pathname))
+          (expected-authorities '(:repo :nix-store)))
+  (remove-if-not
+   (lambda (entry)
+     (let* ((pathname (cl-source-registry-entry-pathname entry))
+            (authority
+              (source-path-authority pathname :repo-root repo-root)))
+       (source-path-authority-accepted-p
+        authority
+        :expected-authorities expected-authorities)))
+   (cl-source-registry-entries registry)))
+
+(defun dev-shell-source-registry-entries
+    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          (hyperdoc-root (hyperdoc-repo-root-pathname)))
+  (let* ((root (uiop:ensure-directory-pathname hyperdoc-root))
+         (flake-deps (merge-pathnames #P".flake-deps/" root))
+         (clog-src (uiop:getenv "CLOG_SRC"))
+         (explicit
+           (remove nil
+                   (list (and clog-src
+                              (source-registry-tree-entry clog-src))
+                         (and (directory-exists-p flake-deps)
+                              (source-registry-tree-entry flake-deps))
+                         (source-registry-tree-entry root))))
+         (accepted-current
+           (accepted-source-registry-entries
+            :registry registry
+            :repo-root root)))
+    (remove-duplicates
+     (append explicit accepted-current)
+     :test #'source-registry-entry-equivalent-p)))
+
 (defun cl-source-registry-entry-evidence
     (entry &key (repo-root (hyperdoc-repo-root-pathname)))
   (let* ((pathname
            (handler-case
-               (pathname entry)
+               (or (cl-source-registry-entry-pathname entry)
+                   (pathname entry))
              (condition ()
                nil)))
          (authority
@@ -814,6 +991,10 @@
   (let* ((systems '(:hyperdoc :s-graphviz :clog-ace
                     :html-inspector-views/standard
                     :clog-moldable-inspector))
+         (expected-entries
+           (dev-shell-source-registry-entries
+            :registry registry
+            :hyperdoc-root repo-root))
          (system-evidence
            (mapcar (lambda (system-name)
                      (asdf-system-source-authority-evidence
@@ -832,6 +1013,9 @@
      :status (if repo-root-exists-p :good :failed)
      :value (list :repo-root repo-root
                   :expected-authorities '(:repo :nix-store)
+                  :expected-cl-source-registry
+                  (join-source-registry-entries expected-entries)
+                  :expected-entries expected-entries
                   :nix-store-entry-visible nix-visible-p)
      :basis (list :profile :clog-moldable-inspector
                   :model :mcdermott-chunk-basis-derive)
@@ -841,11 +1025,22 @@
            (list :expected-authorities '(:repo :nix-store))
            (list :current-cl-source-registry registry
                  :nix-store-entry-visible nix-visible-p)
+           (list :expected-entries expected-entries)
            (list :selected-systems system-evidence))
      :repair-options
      (unless repo-root-exists-p
        '(:enter-hyperdoc-repo
-         :re-enter-nix-develop)))))
+       :re-enter-nix-develop)))))
+
+(defun expected-dev-shell-source-registry (&key
+                                             (registry
+                                              (uiop:getenv
+                                               "CL_SOURCE_REGISTRY"))
+                                             (repo-root
+                                              (hyperdoc-repo-root-pathname)))
+  (expected-dev-shell-cl-source-registry-chunk
+   :registry registry
+   :repo-root repo-root))
 
 (defun current-image-cl-source-registry-chunk
     (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
@@ -869,11 +1064,77 @@
      (list (list :env-var "CL_SOURCE_REGISTRY"
                  :value registry
                  :entry-count (length entries))
-           (list :entries entry-evidence))
+         (list :entries entry-evidence))
      :repair-options
      (unless registry
        '(:inspect-asdf-source-registry
          :re-enter-nix-develop)))))
+
+(defun current-image-source-registry (&key
+                                        (registry
+                                         (uiop:getenv "CL_SOURCE_REGISTRY"))
+                                        (repo-root
+                                         (hyperdoc-repo-root-pathname)))
+  (current-image-cl-source-registry-chunk
+   :registry registry
+   :repo-root repo-root))
+
+(defun source-registry-equivalent-to-dev-shell
+    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          (repo-root (hyperdoc-repo-root-pathname)))
+  (let* ((expected
+           (dev-shell-source-registry-entries
+            :registry registry
+            :hyperdoc-root repo-root))
+         (current
+           (cl-source-registry-entries registry))
+         (missing
+           (source-registry-set-difference expected current))
+         (extra
+           (source-registry-set-difference current expected))
+         (foreign-extra
+           (remove-if-not
+            (lambda (entry)
+              (let ((evidence
+                      (cl-source-registry-entry-evidence
+                       entry
+                       :repo-root repo-root)))
+                (eq (getf evidence :authority)
+                    :foreign-contaminant)))
+            extra))
+         (equivalent-p
+           (and (null missing)
+                (null extra))))
+    (make-coherence-chunk
+     :id "source-registry-equivalent-to-dev-shell"
+     :title "Current source registry equivalent to dev shell"
+     :kind :source-registry
+     :status (cond
+               (equivalent-p :good)
+               (foreign-extra :foreign-contaminant)
+               (registry :stale)
+               (t :missing))
+     :value (list :equivalent equivalent-p
+                  :expected-entries expected
+                  :current-entries current
+                  :missing-entries missing
+                  :extra-entries extra
+                  :foreign-extra-entries foreign-extra)
+     :basis (list :expected-dev-shell-source-registry expected
+                  :current-image-source-registry current)
+     :evidence
+     (list (list :expected-entries expected)
+           (list :current-entries current)
+           (list :missing-entries missing)
+           (list :extra-entries extra)
+           (list :foreign-extra-entries foreign-extra)
+           (list :message
+                 "The attached image source registry must be equivalent to the repo/Nix dev-shell registry before guarded inspector loading."))
+     :repair-options
+     (unless equivalent-p
+       '(:import-dev-shell-source-registry
+         :quarantine-foreign-asdf-source-contaminants
+         :clear-asdf-source-registry-cache)))))
 
 (defun foreign-asdf-source-registry-contaminants-chunk
     (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
@@ -927,6 +1188,18 @@
        '(:remove-foreign-source-registry-contaminant
          :derive-asdf-visibility-from-repo-nix-universe
          :re-enter-nix-develop)))))
+
+(defun foreign-asdf-source-contaminants
+    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          (repo-root (hyperdoc-repo-root-pathname))
+          (system-names '(:s-graphviz
+                          :clog-ace
+                          :html-inspector-views/standard
+                          :clog-moldable-inspector)))
+  (foreign-asdf-source-registry-contaminants-chunk
+   :registry registry
+   :repo-root repo-root
+   :system-names system-names))
 
 (defun asdf-system-visibility-chunk
     (system-name &key id
@@ -996,6 +1269,25 @@
            (otherwise
             '(:inspect-asdf-visibility))))
        :depends-on depends-on))))
+
+(defun asdf-visible (system-name &key id
+                                   title
+                                   package-name
+                                   (requiredp t)
+                                   (expected-authorities
+                                    '(:repo :nix-store))
+                                   (repo-root
+                                    (hyperdoc-repo-root-pathname))
+                                   depends-on)
+  (asdf-system-visibility-chunk
+   system-name
+   :id id
+   :title title
+   :package-name (or package-name system-name)
+   :requiredp requiredp
+   :expected-authorities expected-authorities
+   :repo-root repo-root
+   :depends-on depends-on))
 
 (defun attempt-load-asdf-system-chunk (system-name
                                        &key id
@@ -1874,6 +2166,7 @@
     :requiredp t
     :depends-on '("expected-dev-shell-cl-source-registry"
                   "current-image-cl-source-registry"
+                  "source-registry-equivalent-to-dev-shell"
                   "foreign-asdf-source-registry-contaminants"))
    (asdf-system-visibility-chunk
     :clog-ace
@@ -1883,6 +2176,7 @@
     :requiredp t
     :depends-on '("expected-dev-shell-cl-source-registry"
                   "current-image-cl-source-registry"
+                  "source-registry-equivalent-to-dev-shell"
                   "foreign-asdf-source-registry-contaminants"))
    (asdf-system-visibility-chunk
     :html-inspector-views/standard
@@ -1892,6 +2186,7 @@
     :requiredp t
     :depends-on '("html-inspector-views-environment"
                   "html-inspector-views-asdf-visibility"
+                  "source-registry-equivalent-to-dev-shell"
                   "foreign-asdf-source-registry-contaminants"))
    (asdf-system-visibility-chunk
     :clog-moldable-inspector
@@ -1908,6 +2203,7 @@
 (defun clog-moldable-inspector-readiness-required-chunk-p (chunk)
   (member (coherence-chunk-id-of chunk)
           '("expected-dev-shell-cl-source-registry"
+            "source-registry-equivalent-to-dev-shell"
             "foreign-asdf-source-registry-contaminants"
             "clog-asdf-code-root"
             "clog-static-asset-root"
@@ -1978,11 +2274,36 @@
          :re-enter-nix-develop-as-fallback))
      :depends-on (mapcar #'coherence-chunk-id-of chunks))))
 
+(defun system-ready (system-name &key chunks)
+  (case system-name
+    (:clog-moldable-inspector
+     (clog-moldable-inspector-readiness-chunk
+      (or chunks
+          (let ((profile-chunks
+                  (make-clog-moldable-inspector-profile-chunks)))
+            (remove "clog-moldable-inspector-readiness"
+                    profile-chunks
+                    :key #'coherence-chunk-id-of
+                    :test #'string=)))))
+    (otherwise
+     (make-coherence-chunk
+      :id (runtime-coherence-system-id system-name "readiness")
+      :title (format nil "~A readiness" system-name)
+      :kind :coherence-gate
+      :status :blocked
+      :basis (list :system-name system-name)
+      :evidence
+      (list (list :message
+                  "No running-image coherence readiness profile is registered for this system."))
+      :repair-options '(:define-coherence-profile)))))
+
 (defun make-clog-moldable-inspector-profile-chunks ()
   (let* ((expected-registry
            (expected-dev-shell-cl-source-registry-chunk))
          (current-registry
            (current-image-cl-source-registry-chunk))
+         (source-registry-equivalence
+           (source-registry-equivalent-to-dev-shell))
          (foreign-contaminants
            (foreign-asdf-source-registry-contaminants-chunk))
          (clog-code-root
@@ -2004,6 +2325,7 @@
          (chunks
            (append (list expected-registry
                          current-registry
+                         source-registry-equivalence
                          foreign-contaminants
                          clog-code-root
                          clog-static-root
@@ -2386,6 +2708,492 @@
       (t
        :inspect-blocking-chunks))))
 
+(defun runtime-coherence-find-chunk (id report-or-chunks)
+  (find id
+        (etypecase report-or-chunks
+          (runtime-coherence-report
+           (runtime-coherence-report-chunks-of report-or-chunks))
+          (list report-or-chunks))
+        :key #'coherence-chunk-id-of
+        :test #'string=))
+
+(defun source-registry-forms-from-entries (entries)
+  (append
+   (list :source-registry)
+   (loop for entry in entries
+         for pathname = (cl-source-registry-entry-pathname entry)
+         when pathname
+           collect (list :tree pathname))
+   (list :ignore-inherited-configuration)))
+
+(defun initialize-asdf-source-registry-from-entries (entries)
+  (handler-case
+      (progn
+        (asdf:initialize-source-registry
+         (source-registry-forms-from-entries entries))
+        (values t nil))
+    (condition (condition)
+      (values nil condition))))
+
+(defun runtime-coherence-repair-action-chunk
+    (&key id title
+          (status :unknown)
+          basis
+          value
+          evidence
+          last-error
+          repair-options
+          depends-on)
+  (make-coherence-chunk
+   :id id
+   :title title
+   :kind :repair-action
+   :status status
+   :basis basis
+   :value value
+   :evidence evidence
+   :last-error last-error
+   :repair-options repair-options
+   :depends-on depends-on))
+
+(defun import-dev-shell-source-registry
+    (hyperdoc-root attached-image
+     &key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          (mutate t))
+  (let* ((entries
+           (dev-shell-source-registry-entries
+            :registry registry
+            :hyperdoc-root hyperdoc-root))
+         (source-registry
+           (join-source-registry-entries entries))
+         (env-evidence nil)
+         (initialize-success nil)
+         (initialize-condition nil))
+    (cond
+      ((null entries)
+       (runtime-coherence-repair-action-chunk
+        :id "import-dev-shell-source-registry"
+        :title "Import dev-shell source registry"
+        :status :blocked
+        :basis (list :hyperdoc-root hyperdoc-root
+                     :attached-image attached-image)
+        :value (list :imported nil)
+        :evidence
+        (list (list :message
+                    "Could not derive a non-empty repo/Nix source registry to import."))
+        :repair-options '(:re-enter-nix-develop-as-fallback)))
+      ((not mutate)
+       (runtime-coherence-repair-action-chunk
+        :id "import-dev-shell-source-registry"
+        :title "Import dev-shell source registry"
+        :status :planned
+        :basis (list :hyperdoc-root hyperdoc-root
+                     :attached-image attached-image)
+        :value (list :imported nil
+                     :planned-cl-source-registry source-registry
+                     :entries entries)
+        :evidence
+        (list (list :mutation-performed nil)
+              (list :planned-cl-source-registry source-registry))))
+      (t
+       (setf env-evidence
+             (environment-mutation-evidence
+              "CL_SOURCE_REGISTRY"
+              source-registry))
+       (multiple-value-setq (initialize-success initialize-condition)
+         (initialize-asdf-source-registry-from-entries entries))
+       (runtime-coherence-repair-action-chunk
+        :id "import-dev-shell-source-registry"
+        :title "Import dev-shell source registry"
+        :status (if (and (getf env-evidence :set)
+                         initialize-success)
+                    :good
+                    :failed)
+        :basis (list :hyperdoc-root hyperdoc-root
+                     :attached-image attached-image)
+        :value (list :imported (and (getf env-evidence :set)
+                                    initialize-success)
+                     :cl-source-registry source-registry
+                     :entries entries)
+        :evidence
+        (list (list :env-mutation env-evidence)
+              (list :asdf-initialize-source-registry
+                    :success initialize-success
+                    :condition (and initialize-condition
+                                    (condition-evidence
+                                     initialize-condition))))
+        :last-error (or (getf env-evidence :condition)
+                        initialize-condition)
+        :repair-options
+        (unless (and (getf env-evidence :set)
+                     initialize-success)
+          '(:inspect-process-environment
+            :re-enter-nix-develop-as-fallback)))))))
+
+(defun clear-asdf-source-registry-cache
+    (attached-image &key (mutate t))
+  (let* ((package (find-package "ASDF"))
+         (symbol (and package
+                      (find-symbol "CLEAR-SOURCE-REGISTRY" package)))
+         (fbound (and symbol
+                      (fboundp symbol)))
+         (condition nil)
+         (called nil))
+    (cond
+      ((not mutate)
+       (runtime-coherence-repair-action-chunk
+        :id "clear-asdf-source-registry-cache"
+        :title "Clear ASDF source-registry cache"
+        :status :planned
+        :basis (list :attached-image attached-image)
+        :value (list :called nil
+                     :function-present fbound)
+        :evidence (list (list :mutation-performed nil
+                              :function-present fbound))))
+      ((not fbound)
+       (runtime-coherence-repair-action-chunk
+        :id "clear-asdf-source-registry-cache"
+        :title "Clear ASDF source-registry cache"
+        :status :blocked
+        :basis (list :attached-image attached-image)
+        :value (list :called nil
+                     :function-present nil)
+        :evidence
+        (list (list :package-present (not (null package))
+                    :symbol symbol
+                    :fbound fbound
+                    :message
+                    "ASDF does not expose CLEAR-SOURCE-REGISTRY in this image."))
+        :repair-options '(:initialize-source-registry-explicitly)))
+      (t
+       (handler-case
+           (progn
+             (funcall (symbol-function symbol))
+             (setf called t))
+         (condition (caught)
+           (setf condition caught)))
+       (runtime-coherence-repair-action-chunk
+        :id "clear-asdf-source-registry-cache"
+        :title "Clear ASDF source-registry cache"
+        :status (if (and called (null condition))
+                    :good
+                    :failed)
+        :basis (list :attached-image attached-image)
+        :value (list :called called
+                     :function-present fbound)
+        :evidence
+        (list (list :function symbol
+                    :called called
+                    :condition (and condition
+                                    (condition-evidence condition))))
+        :last-error condition
+        :repair-options
+        (when condition
+          '(:initialize-source-registry-explicitly)))))))
+
+(defun quarantine-foreign-asdf-source-contaminants
+    (attached-image &key
+                      (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+                      (repo-root (hyperdoc-repo-root-pathname))
+                      (mutate t)
+                      (initialize-asdf t))
+  (let* ((entries (cl-source-registry-entries registry))
+         (entry-evidence
+           (mapcar (lambda (entry)
+                     (cl-source-registry-entry-evidence
+                      entry
+                      :repo-root repo-root))
+                   entries))
+         (foreign
+           (remove-if-not
+            (lambda (entry)
+              (eq (getf entry :authority)
+                  :foreign-contaminant))
+            entry-evidence))
+         (kept
+           (loop for entry in entries
+                 for evidence in entry-evidence
+                 unless (eq (getf evidence :authority)
+                            :foreign-contaminant)
+                   collect entry))
+         (sanitized (join-source-registry-entries kept))
+         (env-evidence nil)
+         (initialize-success nil)
+         (initialize-condition nil))
+    (cond
+      ((null foreign)
+       (runtime-coherence-repair-action-chunk
+        :id "quarantine-foreign-asdf-source-contaminants"
+        :title "Quarantine foreign ASDF source contaminants"
+        :status :good
+        :basis (list :attached-image attached-image
+                     :repo-root repo-root)
+        :value (list :foreign-count 0
+                     :cl-source-registry registry)
+        :evidence (list (list :foreign-contaminants nil
+                              :message
+                              "No foreign source-registry contaminants were present."))))
+      ((not mutate)
+       (runtime-coherence-repair-action-chunk
+        :id "quarantine-foreign-asdf-source-contaminants"
+        :title "Quarantine foreign ASDF source contaminants"
+        :status :planned
+        :basis (list :attached-image attached-image
+                     :repo-root repo-root)
+        :value (list :foreign-count (length foreign)
+                     :sanitized-cl-source-registry sanitized)
+        :evidence
+        (list (list :mutation-performed nil)
+              (list :foreign-contaminants foreign)
+              (list :kept-entries kept))))
+      (t
+       (setf env-evidence
+             (environment-mutation-evidence
+              "CL_SOURCE_REGISTRY"
+              sanitized))
+       (when initialize-asdf
+         (multiple-value-setq (initialize-success initialize-condition)
+           (initialize-asdf-source-registry-from-entries kept)))
+       (runtime-coherence-repair-action-chunk
+        :id "quarantine-foreign-asdf-source-contaminants"
+        :title "Quarantine foreign ASDF source contaminants"
+        :status (if (and (getf env-evidence :set)
+                         (or (not initialize-asdf)
+                             initialize-success))
+                    :good
+                    :failed)
+        :basis (list :attached-image attached-image
+                     :repo-root repo-root)
+        :value (list :foreign-count (length foreign)
+                     :sanitized-cl-source-registry sanitized
+                     :foreign-contaminants foreign)
+        :evidence
+        (list (list :foreign-contaminants foreign)
+              (list :kept-entries kept)
+              (list :env-mutation env-evidence)
+              (list :asdf-initialize-source-registry
+                    :attempted initialize-asdf
+                    :success initialize-success
+                    :condition (and initialize-condition
+                                    (condition-evidence
+                                     initialize-condition))))
+        :last-error (or (getf env-evidence :condition)
+                        initialize-condition)
+        :repair-options
+        (unless (and (getf env-evidence :set)
+                     (or (not initialize-asdf)
+                         initialize-success))
+          '(:import-dev-shell-source-registry
+            :re-enter-nix-develop-as-fallback)))))))
+
+(defun asdf-system-definition-filename (system-name)
+  (let* ((downcase-name
+           (string-downcase (string system-name)))
+         (base-name
+           (let ((slash (position #\/ downcase-name)))
+             (if slash
+                 (subseq downcase-name 0 slash)
+                 downcase-name))))
+    (format nil "~A.asd" base-name)))
+
+(defun source-registry-search-roots
+    (&key (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+          (repo-root (hyperdoc-repo-root-pathname)))
+  (remove-duplicates
+   (loop for entry in (accepted-source-registry-entries
+                       :registry registry
+                       :repo-root repo-root)
+         for pathname = (cl-source-registry-entry-pathname entry)
+         when pathname
+           collect pathname)
+   :test #'equal))
+
+(defun bounded-find-file-under-root
+    (root filename &key (max-depth 2))
+  (labels ((walk (directory depth)
+             (let ((candidate (merge-pathnames filename directory)))
+               (cond
+                 ((pathname-exists-p candidate)
+                  (list candidate))
+                 ((<= depth 0)
+                  nil)
+                 (t
+                  (handler-case
+                      (loop for subdirectory in (uiop:subdirectories directory)
+                            append (walk subdirectory (1- depth)))
+                    (condition ()
+                      nil)))))))
+    (and (directory-exists-p root)
+         (walk (uiop:ensure-directory-pathname root)
+               max-depth))))
+
+(defun asdf-definition-candidates
+    (system-name &key
+                   (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+                   (repo-root (hyperdoc-repo-root-pathname))
+                   (max-depth 2))
+  (let ((filename (asdf-system-definition-filename system-name)))
+    (remove-duplicates
+     (loop for root in (source-registry-search-roots
+                        :registry registry
+                        :repo-root repo-root)
+           append (bounded-find-file-under-root
+                   root
+                   filename
+                   :max-depth max-depth))
+     :test #'equal)))
+
+(defun reload-selected-asd-definitions
+    (attached-image systems &key
+                              (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+                              (repo-root (hyperdoc-repo-root-pathname))
+                              (mutate t)
+                              (max-depth 2))
+  (let ((records nil)
+        (conditions nil))
+    (dolist (system systems)
+      (let* ((before (asdf-system-source-authority-evidence
+                      system
+                      :repo-root repo-root))
+             (already-found (getf before :found))
+             (candidates
+               (unless already-found
+                 (asdf-definition-candidates
+                  system
+                  :registry registry
+                  :repo-root repo-root
+                  :max-depth max-depth)))
+             (loaded nil)
+             (load-condition nil))
+        (when (and candidates mutate)
+          (handler-case
+              (progn
+                (asdf:load-asd (first candidates))
+                (setf loaded t))
+            (condition (condition)
+              (setf load-condition condition)
+              (push condition conditions))))
+        (push (list :system-name system
+                    :already-found already-found
+                    :candidate-asd-files candidates
+                    :mutation-performed (and mutate
+                                             (not already-found)
+                                             (not (null candidates)))
+                    :load-asd-called (and mutate
+                                           (not already-found)
+                                           (not (null candidates)))
+                    :loaded loaded
+                    :condition (and load-condition
+                                    (condition-evidence load-condition)))
+              records)))
+    (let* ((ordered-records (nreverse records))
+           (missing-candidates
+             (remove-if (lambda (record)
+                          (or (getf record :already-found)
+                              (getf record :candidate-asd-files)))
+                        ordered-records))
+           (loaded-or-already
+             (every (lambda (record)
+                      (or (getf record :already-found)
+                          (getf record :loaded)))
+                    ordered-records))
+           (status
+             (cond
+               (conditions :failed)
+               ((not mutate) :planned)
+               (missing-candidates :blocked)
+               (loaded-or-already :good)
+               (t :stale))))
+      (runtime-coherence-repair-action-chunk
+       :id "reload-selected-asd-definitions"
+       :title "Reload selected ASD definitions"
+       :status status
+       :basis (list :attached-image attached-image
+                    :systems systems
+                    :source-registry registry
+                    :repo-root repo-root)
+       :value (list :systems systems
+                    :records ordered-records
+                    :missing-candidates missing-candidates)
+       :evidence
+       (list (list :records ordered-records)
+             (list :load-system-called nil)
+             (list :message
+                   "This repair action reloads selected .asd definitions only; it does not call ASDF:LOAD-SYSTEM."))
+       :last-error (first conditions)
+       :repair-options
+       (when (or conditions missing-candidates)
+         '(:import-dev-shell-source-registry
+           :inspect-selected-asdf-source-files
+           :re-enter-nix-develop-as-fallback))))))
+
+(defun runtime-coherence-system-repair-action-id (prefix system-name)
+  (format nil "~A-~A"
+          prefix
+          (with-output-to-string (stream)
+            (loop for char across (string-downcase (string system-name))
+                  do (write-char (if (find char "/:"
+                                           :test #'char=)
+                                     #\-
+                                     char)
+                                 stream)))))
+
+(defun derive-asdf-system-visibility
+    (attached-image system-name &key
+                                (registry (uiop:getenv "CL_SOURCE_REGISTRY"))
+                                (repo-root (hyperdoc-repo-root-pathname))
+                                (mutate t))
+  (let* ((reload
+           (reload-selected-asd-definitions
+            attached-image
+            (list system-name)
+            :registry registry
+            :repo-root repo-root
+            :mutate mutate))
+         (visibility
+           (asdf-visible system-name
+                         :repo-root repo-root
+                         :requiredp t))
+         (status
+           (cond
+             ((eq (coherence-chunk-status-of visibility) :good)
+              :good)
+             ((eq (coherence-chunk-status-of reload) :planned)
+              :planned)
+             ((coherence-chunk-status-blocking-p
+               (coherence-chunk-status-of reload))
+              (coherence-chunk-status-of reload))
+             (t
+              (coherence-chunk-status-of visibility)))))
+    (runtime-coherence-repair-action-chunk
+     :id (runtime-coherence-system-repair-action-id
+          "derive-asdf-system-visibility"
+          system-name)
+     :title (format nil "Derive ASDF visibility for ~A" system-name)
+     :status status
+     :basis (list :attached-image attached-image
+                  :system-name system-name)
+     :value (list :system-name system-name
+                  :reload-status (coherence-chunk-status-of reload)
+                  :visibility-status
+                  (coherence-chunk-status-of visibility))
+     :evidence
+     (list (list :reload-selected-asd-definitions
+                 :status (coherence-chunk-status-of reload)
+                 :value (coherence-chunk-value-of reload)
+                 :evidence (coherence-chunk-evidence-of reload))
+           (list :asdf-visibility
+                 :status (coherence-chunk-status-of visibility)
+                 :value (coherence-chunk-value-of visibility)
+                 :evidence (coherence-chunk-evidence-of visibility)))
+     :last-error (or (coherence-chunk-last-error-of reload)
+                     (coherence-chunk-last-error-of visibility))
+     :repair-options
+     (unless (eq status :good)
+       '(:inspect-asdf-definition-candidates
+         :import-dev-shell-source-registry
+         :re-enter-nix-develop-as-fallback)))))
+
 (defun ensure-running-image-coherent
     (&key (profile :clog-moldable-inspector)
           (persist-events t)
@@ -2408,6 +3216,119 @@
      :observed-at (runtime-coherence-report-observed-at-of report)
      :chunks chunks
      :summary (runtime-coherence-default-summary chunks))))
+
+(defun runtime-coherence-report-repaired-p (report)
+  (null (runtime-coherence-blocking-chunks
+         (runtime-coherence-report-chunks-of report))))
+
+(defun runtime-coherence-persist-action-chunk
+    (chunk action-name &key
+                  (db-path (default-runtime-coherence-sqlite-path))
+                  (sqlite-program "sqlite3"))
+  (persist-runtime-coherence-event
+   chunk
+   :report-title "Running image coherence repair"
+   :repair-action action-name
+   :db-path db-path
+   :sqlite-program sqlite-program))
+
+(defun repair-running-image-coherence
+    (&key (profile :clog-moldable-inspector)
+          (hyperdoc-root (hyperdoc-repo-root-pathname))
+          (attached-image :current)
+          (systems '(:s-graphviz
+                     :clog-ace
+                     :html-inspector-views/standard
+                     :clog-moldable-inspector))
+          (mutate t)
+          (persist-events t)
+          (db-path (default-runtime-coherence-sqlite-path))
+          (sqlite-program "sqlite3"))
+  "Derive or plan repairs for PROFILE in the current running Lisp image.
+
+This function does not call ASDF:LOAD-SYSTEM.  Mutating steps are explicit
+repair actions on the attached image: source-registry import/quarantine,
+ASDF source-registry cache clearing, and selected ASD definition reload."
+  (let ((initial-report
+          (ensure-running-image-coherent
+           :profile profile
+           :persist-events persist-events
+           :db-path db-path
+           :sqlite-program sqlite-program))
+        (actions nil))
+    (labels ((record (chunk action-name)
+               (push chunk actions)
+               (when persist-events
+                 (runtime-coherence-persist-action-chunk
+                  chunk
+                  action-name
+                  :db-path db-path
+                  :sqlite-program sqlite-program))
+               chunk))
+      (record
+       (quarantine-foreign-asdf-source-contaminants
+        attached-image
+        :repo-root hyperdoc-root
+        :mutate mutate)
+       "quarantine-foreign-asdf-source-contaminants")
+      (record
+       (import-dev-shell-source-registry
+        hyperdoc-root
+        attached-image
+        :mutate mutate)
+       "import-dev-shell-source-registry")
+      (record
+       (clear-asdf-source-registry-cache
+        attached-image
+        :mutate mutate)
+       "clear-asdf-source-registry-cache")
+      (record
+       (reload-selected-asd-definitions
+        attached-image
+        systems
+        :repo-root hyperdoc-root
+        :mutate mutate)
+       "reload-selected-asd-definitions")
+      (dolist (system '(:s-graphviz :clog-ace))
+        (record
+         (derive-asdf-system-visibility
+          attached-image
+          system
+          :repo-root hyperdoc-root
+          :mutate mutate)
+         (format nil "derive-asdf-system-visibility ~A" system)))
+      (let* ((final-report
+               (ensure-running-image-coherent
+                :profile profile
+                :persist-events persist-events
+                :db-path db-path
+                :sqlite-program sqlite-program))
+             (repaired-p
+               (runtime-coherence-report-repaired-p final-report))
+             (ordered-actions (nreverse actions))
+             (plan
+               (make-runtime-coherence-repair-plan
+                :profile profile
+                :initial-report initial-report
+                :actions ordered-actions
+                :final-report final-report
+                :repaired-p repaired-p
+                :summary (list :profile profile
+                               :mutated mutate
+                               :repaired-p repaired-p
+                               :actions
+                               (mapcar
+                                (lambda (chunk)
+                                  (list :id (coherence-chunk-id-of chunk)
+                                        :status
+                                        (coherence-chunk-status-of chunk)))
+                                ordered-actions)
+                               :final-summary
+                               (runtime-coherence-report-summary-of
+                                final-report)))))
+        (values repaired-p
+                final-report
+                plan)))))
 
 (defun load-coherent-system
     (system-name &key (profile system-name)
@@ -2705,6 +3626,8 @@
            (expected-dev-shell-cl-source-registry-chunk))
          (current-registry
            (current-image-cl-source-registry-chunk))
+         (source-registry-equivalence
+           (source-registry-equivalent-to-dev-shell))
          (foreign-contaminants
            (foreign-asdf-source-registry-contaminants-chunk))
          (clog-code-root (clog-asdf-code-root-chunk))
@@ -2728,6 +3651,7 @@
          (without-readiness
            (append (list expected-registry
                          current-registry
+                         source-registry-equivalence
                          foreign-contaminants
                          clog-code-root
                          clog-static-root

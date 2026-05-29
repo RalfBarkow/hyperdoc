@@ -515,13 +515,16 @@
    ;; Runtime coherence chunks
    #:coherence-chunk
    #:runtime-coherence-report
+   #:runtime-coherence-repair-plan
    #:*coherence-chunk-statuses*
    #:*coherence-chunk-kinds*
    #:make-coherence-chunk
    #:make-runtime-coherence-report
+   #:make-runtime-coherence-repair-plan
    #:make-inspector-runtime-coherence-report
    #:make-clog-moldable-inspector-coherence-report
    #:ensure-running-image-coherent
+   #:repair-running-image-coherence
    #:load-coherent-system
    #:derive
    #:derive-date
@@ -542,6 +545,17 @@
    #:expected-dev-shell-cl-source-registry-chunk
    #:current-image-cl-source-registry-chunk
    #:foreign-asdf-source-registry-contaminants-chunk
+   #:expected-dev-shell-source-registry
+   #:current-image-source-registry
+   #:source-registry-equivalent-to-dev-shell
+   #:foreign-asdf-source-contaminants
+   #:asdf-visible
+   #:system-ready
+   #:import-dev-shell-source-registry
+   #:clear-asdf-source-registry-cache
+   #:quarantine-foreign-asdf-source-contaminants
+   #:reload-selected-asd-definitions
+   #:derive-asdf-system-visibility
    #:asdf-system-visibility-chunk
    #:clog-moldable-inspector-readiness-chunk
    #:runtime-coherence-current-chunk-map
@@ -553,6 +567,13 @@
    #:runtime-coherence-sqlite-available-p
    #:persist-runtime-coherence-event
    #:persist-runtime-coherence-report
+   #:runtime-coherence-repair-plan-profile-of
+   #:runtime-coherence-repair-plan-created-at-of
+   #:runtime-coherence-repair-plan-initial-report-of
+   #:runtime-coherence-repair-plan-actions-of
+   #:runtime-coherence-repair-plan-final-report-of
+   #:runtime-coherence-repair-plan-repaired-p
+   #:runtime-coherence-repair-plan-summary-of
    #:clog-asdf-code-root-chunk
    #:clog-static-asset-root-chunk
    #:attempt-load-asdf-system-chunk
