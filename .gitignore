@@ -58,3 +58,12 @@ tools/dmx-curl/.dmx-admin-password
 tools/dmx-curl/note.json
 topic-936040-*.json
 topic-936040-*.txt
+
+# Local build/cache artifacts
+.cache/
+bundle-deploy/hyperdoc-standalone/
+bundle-deploy/hyperdoc-frame/
+result
+result-*
+repomix-output-hyperdoc*.md
+repomix-output-hyperdoc*.xml
