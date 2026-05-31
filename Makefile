@@ -83,7 +83,7 @@ $(FRAME_EXE): $(CLOGFRAME_NIX)
 	@echo "==> Building CLOG Frame via Nix"
 	mkdir -p "$(dir $(FRAME_EXE))"
 	nix build --impure \
-		--expr 'let flake = builtins.getFlake "path:$(CURDIR)"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in pkgs.callPackage ./$(CLOGFRAME_NIX) { }' \
+		--expr 'let flake = builtins.getFlake "git+file://$(CURDIR)"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in pkgs.callPackage ./$(CLOGFRAME_NIX) { }' \
 		--out-link "$(CLOGFRAME_RESULT)"
 	test -x "$(CLOGFRAME_RESULT)/bin/clogframe"
 	install -m 0755 "$(CLOGFRAME_RESULT)/bin/clogframe" "$(FRAME_EXE)"
