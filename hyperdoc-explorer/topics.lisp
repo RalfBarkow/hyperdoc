@@ -299,17 +299,33 @@
 
 (views:defview 👀loaded-topic-files
     (diagnostic topic-registry-diagnostic)
-  (views:html-view
-   :title "Loaded topic files"
-   :priority 2
-   (views:html
-    (:table :class "inspector-table"
-            (:tr (:th (views:esc "Path")))
-            (loop for path in
-                  (topic-registry-diagnostic-loaded-topic-files-of
-                   diagnostic)
-                  do (views:html
-                      (:tr (:td (:tt (views:esc path))))))))))
+  (let ((topicmap
+          (topic-registry-diagnostic-topic-files-topicmap diagnostic)))
+    (views:html-view
+     :title "Loaded topic files"
+     :priority 2
+     (views:html
+      (:table :class "inspector-table"
+              (:tr (:th (views:esc "Path"))
+                   (:th (views:esc "Status"))
+                   (:th (views:esc "Factories")))
+              (loop for file in
+                    (topic-files-topicmap-source-files-of topicmap)
+                    do (views:html
+                        (:tr
+                         (:td (views:object-ref
+                               file
+                               :display
+                               (namestring
+                                (topic-source-file-pathname-of file))))
+                         (:td (:tt (views:esc
+                                    (topic-registry-diagnostic-string
+                                     (topic-source-file-status-of file)))))
+                         (:td (:tt (views:esc
+                                    (format nil "~D"
+                                            (length
+                                             (topic-source-file-factories-of
+                                              file))))))))))))))
 
 (views:defview 👀constructors (diagnostic topic-registry-diagnostic)
   (views:html-view

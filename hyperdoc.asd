@@ -485,6 +485,7 @@
                                        (:file "authored-relation-artifacts")
                                        (:file "shared-projection-ir")
                                        (:file "topicmap-views")
+                                       (:file "topic-files-topicmap")
                                        (:file "surfaces")
                                        (:file "lisp-critic-review-plan-views")
                                        (:file "lisp-critic-contract-views")
