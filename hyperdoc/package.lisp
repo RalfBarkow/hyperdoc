@@ -283,6 +283,12 @@
    #:write-topicmap-view-html
    #:inspect-artifact-content
    #:inspect-topicmap-view
+   #:topic-source-file
+   #:topic-factory-source-record
+   #:topic-files-topicmap
+   #:make-topic-files-topicmap
+   #:materialize-topic-files-topicmap
+   #:topic-files-topicmap-payload
    ;; DMX logical query layer and read-only topic inventory
    #:dmx-store-target
    #:dmx-neo4j-store-target

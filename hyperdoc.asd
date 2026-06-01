@@ -151,6 +151,7 @@
                                        (:file "fedwiki-attached-asdf-system")
                                        (:file "source-artifacts")
                                        (:file "topicmap-projection")
+                                       (:file "topic-files-topicmap")
                                        (:file "dmx-query-layer")
                                        (:file "dmx-query-operations")
                                        (:file "dmx-sqlite-query-store")
