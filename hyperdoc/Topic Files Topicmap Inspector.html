@@ -1,0 +1,177 @@
+<h1>Topic Files Topicmap Inspector</h1>
+<in-package>hyperdoc</in-package>
+
+<p>
+  This reference page records the inspector slice that turns the topic
+  registry diagnostic's loaded source paths into inspectable source-file
+  objects and a persisted SQLite-backed topicmap projection.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Topic Files Topicmap Inspector"><tt>Topic Files Topicmap Inspector</tt></a></li>
+  <li><a hyperbook="topics" page="Topic files topicmap"><tt>Topic files topicmap</tt></a></li>
+  <li><a hyperbook="topics" page="Topic source file"><tt>Topic source file</tt></a></li>
+  <li><a hyperbook="topics" page="Topic factory source record"><tt>Topic factory source record</tt></a></li>
+  <li><a expr="(make-topic-registry-diagnostic)"><tt>(make-topic-registry-diagnostic)</tt></a></li>
+  <li><a expr="(make-topic-files-topicmap)"><tt>(make-topic-files-topicmap)</tt></a></li>
+  <li><a expr="(topic-files-topicmap-payload (make-topic-files-topicmap))"><tt>(topic-files-topicmap-payload ...)</tt></a></li>
+</ul>
+
+<h2>Runtime contract</h2>
+
+<p>
+  <tt>topic-source-file</tt> represents one loaded topic file as a source
+  artifact. It carries the pathname, parse status, top-level form count,
+  observed <tt>in-package</tt> forms, parser failures, and discovered factory
+  records.
+</p>
+
+<p>
+  <tt>topic-factory-source-record</tt> represents a <tt>defun</tt> whose body
+  contains a <tt>make-topic</tt> form. When keyword values are statically
+  available, the record preserves <tt>:id</tt>, <tt>:title</tt>,
+  <tt>:summary</tt>, and <tt>:references</tt>.
+</p>
+
+<p>
+  <tt>topic-files-topicmap</tt> is the projection owner. It parses the loaded
+  files, materializes rows into SQLite, and exposes
+  <tt>topic-files-topicmap-payload</tt> as a renderer-neutral plist with
+  <tt>:nodes</tt> and <tt>:edges</tt>, following the projection/payload
+  separation used by <tt>kioskbeerli.dmx-sql-topicmap</tt>.
+</p>
+
+<h2>SQLite persistence</h2>
+
+<p>
+  The default database path is <tt>var/topics.sqlite</tt>. Tests and replay
+  snippets should pass a temporary <tt>:db-path</tt> so local validation does
+  not depend on the durable working database.
+</p>
+
+<p>
+  The materializer owns these tables:
+</p>
+
+<ul>
+  <li><tt>topic_source_file</tt></li>
+  <li><tt>topic_factory</tt></li>
+  <li><tt>topic_node</tt></li>
+  <li><tt>topic_reference</tt></li>
+  <li><tt>topic_file_edge</tt></li>
+</ul>
+
+<h2>Parsing boundary</h2>
+
+<p>
+  Source files are read with <tt>*read-eval*</tt> bound to <tt>nil</tt>.
+  Top-level <tt>in-package</tt> forms are recorded and used for subsequent
+  reads when the package exists. Read failures, missing packages, and missing
+  files are stored as file diagnostics and SQLite rows rather than surfacing
+  as hard CLOG browser failures.
+</p>
+
+<h2>Inspector views</h2>
+
+<p>
+  The topic registry diagnostic keeps its existing diagnostic role but gains
+  an inspectable Loaded topic files table and a Topicmap view. Each loaded path
+  is now rendered as an object reference to a <tt>topic-source-file</tt>.
+</p>
+
+<p>
+  <tt>topic-files-topicmap</tt> provides Overview, Files, Factories, Topics,
+  References, Topicmap, and SQLite views. The Topicmap view renders from the
+  persisted payload, not directly from transient parser records.
+</p>
+
+<h2>SLY MREPL replay</h2>
+
+<pre><code>(require :asdf)
+(asdf:load-system :hyperdoc)
+(asdf:load-system :hyperdoc/inspector)
+
+(defun i (object)
+  "Safe inspector helper for SLY mREPL.
+Prefer CLOG only if it is already loaded; otherwise use CL:INSPECT.
+Never calls SLYNK:INSPECT-IN-EMACS directly."
+  (let* ((clog-package (find-package "CLOG-MOLDABLE-INSPECTOR"))
+         (clog-symbol
+           (and clog-package
+                (find-symbol "CLOG-INSPECT" clog-package))))
+    (cond
+      ((and clog-symbol (fboundp clog-symbol))
+       (handler-case
+           (progn
+             (funcall (symbol-function clog-symbol) :object object)
+             object)
+         (condition (condition)
+           (format t "~&amp;CLOG inspector failed; falling back to CL:INSPECT: ~A~%"
+                   condition)
+           (inspect object)
+           object)))
+      (t
+       (inspect object)
+       object))))
+
+(defparameter *topic-registry-diagnostic*
+  (hyperdoc:make-topic-registry-diagnostic))
+
+(defparameter *topic-files-topicmap-db*
+  (merge-pathnames "topic-files-topicmap-mrepl/topics.sqlite"
+                   (uiop:temporary-directory)))
+
+(defparameter *topic-files-topicmap*
+  (hyperdoc:make-topic-files-topicmap
+   :source-files
+   (hyperdoc:topic-registry-diagnostic-loaded-topic-files-of
+    *topic-registry-diagnostic*)
+   :db-path *topic-files-topicmap-db*))
+
+(defparameter *topic-files-topicmap-result*
+  (hyperdoc:materialize-topic-files-topicmap *topic-files-topicmap*))
+
+(defparameter *topic-files-topicmap-payload*
+  (hyperdoc:topic-files-topicmap-payload *topic-files-topicmap*))
+
+(format t "~&amp;topicmap type: ~S~%" (type-of *topic-files-topicmap*))
+(format t "status: ~S~%"
+        (hyperdoc::topic-files-topicmap-materialization-status-of
+         *topic-files-topicmap*))
+(format t "source files: ~D~%"
+        (length
+         (hyperdoc::topic-files-topicmap-source-files-of
+          *topic-files-topicmap*)))
+(format t "payload nodes: ~D edges: ~D~%"
+        (length (getf *topic-files-topicmap-payload* :nodes))
+        (length (getf *topic-files-topicmap-payload* :edges)))
+
+(i *topic-files-topicmap*)</code></pre>
+
+<h2>Replay checks</h2>
+
+<ul>
+  <li>Load <tt>:hyperdoc</tt> and <tt>:hyperdoc/inspector</tt>.</li>
+  <li>Construct <tt>(make-topic-registry-diagnostic)</tt>.</li>
+  <li>Construct a <tt>topic-files-topicmap</tt> with a temporary SQLite path.</li>
+  <li>Run <tt>materialize-topic-files-topicmap</tt>.</li>
+  <li>Assert source files, <tt>topic_factory</tt> rows, and <tt>topic_node</tt> rows are non-empty.</li>
+  <li>Assert <tt>topic-files-topicmap-payload</tt> contains <tt>:nodes</tt> and <tt>:edges</tt>.</li>
+  <li>Assert inspector views include Overview, Files, Factories, Topicmap, and SQLite.</li>
+</ul>
+
+<h2>FedWiki counterpart</h2>
+
+<ul>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="topic-files-topicmap-inspector">Topic Files Topicmap Inspector</a></li>
+</ul>
+
+<h2>Related pages / references</h2>
+
+<ul>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+  <li><a page="Topics HyperBook in HyperDoc">Topics HyperBook in HyperDoc</a></li>
+  <li><a page="DM6 AppEmbed HyperDoc Inline Proof">DM6 AppEmbed HyperDoc Inline Proof</a></li>
+</ul>

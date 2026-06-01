@@ -53,7 +53,8 @@
                                (:file "dm6-inline-proof")
                                (:file "page-systems")
                                (:file "mobile-progressive-chrome")
-                               (:file "metagraph-fluree")))))
+                               (:file "metagraph-fluree")
+                               (:file "topic-files-topicmap")))))
 
 (defsystem #:hyperdoc/dmx-topics
     :description "DMX-backed topic proxy objects for HyperDoc"
@@ -691,6 +692,7 @@
                                        (:file "dmx-shared-workspace-docs-smoke")
                                        (:file "dm6-page-topicmap-smoke")
                                        (:file "topicmap-view-smoke")
+                                       (:file "topic-files-topicmap-smoke")
                                        (:file "fedwiki-asdf-assets-smoke")
                                        (:file "fedwiki-attached-asdf-system-smoke")
                                        (:file "dmx-query-layer-smoke")
