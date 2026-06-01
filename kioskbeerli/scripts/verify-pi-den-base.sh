@@ -45,7 +45,7 @@ if [ -d /etc/nixos ]; then
 
   echo "--- Den hostname ---"
   nix --extra-experimental-features "nix-command flakes" \
-    eval --raw --expr "(import ./nix/den/kioskbeerli.nix).\"kioskbeerli-pi\".hostName"
+    eval --impure --raw --expr "(import ./nix/den/kioskbeerli.nix).\"kioskbeerli-pi\".hostName"
   echo
 else
   echo "--- flake show ---"
