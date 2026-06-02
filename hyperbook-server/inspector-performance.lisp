@@ -127,6 +127,73 @@
                       (clog:client-width parent)))
             0)))
 
+(defparameter +hyperdoc-reel-css-url+
+  "/assets/hyperdoc/css/hyperdoc-reel.css")
+
+(defparameter +hyperdoc-reel-js-url+
+  "/assets/hyperdoc/js/hyperdoc-reel.js")
+
+(defun versioned-reel-asset-url (asset-url asset-relative-path)
+  (let* ((asset-file (asdf:system-relative-pathname
+                      :hyperbook/server
+                      asset-relative-path))
+         (date (ignore-errors (file-write-date asset-file))))
+    (if date
+        (format nil "~A?date=~A" asset-url date)
+        asset-url)))
+
+(defun ensure-reel-asset-path ()
+  (clog-connection:add-plugin-path
+   "^/assets/"
+   (uiop:ensure-directory-pathname
+    (asdf:system-relative-pathname :hyperbook/server ""))))
+
+(defun load-hyperdoc-reel-assets (body)
+  (when (typep body 'clog:clog-body)
+    (ensure-reel-asset-path)
+    (let ((html-document (clog:html-document body)))
+      (clog:load-css
+       html-document
+       (versioned-reel-asset-url
+        +hyperdoc-reel-css-url+
+        "assets/hyperdoc/css/hyperdoc-reel.css"))
+      (clog:load-script
+       html-document
+       (versioned-reel-asset-url
+        +hyperdoc-reel-js-url+
+        "assets/hyperdoc/js/hyperdoc-reel.js")
+       :wait-for-load nil))))
+
+(defun make-reel-button (parent class label glyph)
+  (let ((button (clog:create-button
+                 parent
+                 :class class
+                 :content (format nil
+                                  "<span class=\"hyperdoc-sr\">~A</span><span aria-hidden=\"true\">~A</span>"
+                                  label
+                                  glyph))))
+    (setf (clog:attribute button "type") "button")
+    (setf (clog:attribute button "aria-label") label)
+    button))
+
+(defun create-inspector (parent-obj &key (pane-width "600px") (playground? t))
+  (let* ((reel (clog:create-section parent-obj :section
+                                    :class "hyperdoc-reel"))
+         (buttons (clog:create-div reel :class "hyperdoc-reel__buttons"))
+         (scrollable (clog:create-div reel
+                                      :class "inspector hyperdoc-reel__scrollable hyperdoc-reel__list")))
+    (setf (clog:attribute reel "role") "group")
+    (setf (clog:attribute reel "aria-label") "Inspector views")
+    (setf (clog:hiddenp buttons) t)
+    (make-reel-button buttons "hyperdoc-reel__prev" "previous" "&lt;")
+    (make-reel-button buttons "hyperdoc-reel__next" "next" "&gt;")
+    (setf (clog:attribute scrollable "role") "list")
+    (setf (clog:attribute scrollable "tabindex") "0")
+    (make-instance 'inspector
+                   :clog-obj scrollable
+                   :pane-width pane-width
+                   :playground? playground?)))
+
 (defun create-dom (pane)
   (with-slots (clog-obj view-ids) pane
     (let* ((parent (clog:parent-element clog-obj))
@@ -156,9 +223,10 @@
                                (inspector-pane-width inspector)))
            (dom-start (current-time-millis)))
       (setf (clog-obj pane) (clog:create-div (clog-obj inspector)
-                                             :class "inspector-pane"
+                                             :class "inspector-pane hyperdoc-reel__item"
                                              :style style-attr))
       (setf (clog:attribute (clog-obj pane) "tabindex") "0")
+      (setf (clog:attribute (clog-obj pane) "role") "listitem")
       (clog:focus (clog-obj pane))
       (let ((load-start (current-time-millis)))
         (load-views pane)
@@ -185,6 +253,21 @@
                                  :object (summarize-object-for-log object)
                                  :ms (elapsed-millis pane-start))
       pane)))
+
+(defun on-new-inspector (body &key (object *object*)
+                                   (pane-width *pane-width*)
+                                   (title "Inspector")
+                                   (playground? t))
+  (let ((sb (clog:create-style-block (clog:connection-body body))))
+    (setf (clog:text sb) *css*))
+  (load-hyperdoc-reel-assets body)
+  (when (typep body 'clog:clog-body)
+    (let ((html-document (clog:html-document body)))
+      (setf (clog:title html-document) title)))
+  (let ((inspector (create-inspector body
+                                     :pane-width pane-width
+                                     :playground? playground?)))
+    (create-pane inspector object)))
 
 (defmethod select-view ((pane pane) view-index-or-title)
   (let ((start (current-time-millis)))
