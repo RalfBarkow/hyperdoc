@@ -171,6 +171,14 @@
         *prompt-roundtrip-validation*)</code></pre>
 
 <p>
+  If a replay still mentions <tt>*example-output-path*</tt>,
+  <tt>*example-prompt*</tt>, or calls
+  <tt>materialize-s-expression-prompt-page</tt> with an executable prompt as the
+  second argument, it is the stale pre-contract replay. Reload this page and use
+  <tt>*prompt-page-path*</tt> followed by <tt>*prompt-result*</tt>.
+</p>
+
+<p>
   Load the inspector only for the split-view tab or CLOG-backed inspection.
   This second section is intentionally outside the pure core boundary.
 </p>

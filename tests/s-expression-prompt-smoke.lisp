@@ -464,6 +464,15 @@
                :if-exists :supersede))
             "Did you swap the arguments?"
             "Materialization helper must diagnose the old response/path call shape")
+           (s-expression-prompt-smoke-assert-error-contains
+            (lambda ()
+              (hyperdoc:materialize-s-expression-prompt-page
+               output-path
+               prompt
+               :title "Generated S-Expression Prompt Artifact"
+               :if-exists :supersede))
+            "old replay shape"
+            "Materialization helper must diagnose the stale executable-prompt replay shape")
            (format t "~&S-expression prompt generated page smoke test passed.~%")
            t)
       (when (probe-file output-path)

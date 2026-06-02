@@ -745,9 +745,11 @@ Canonical SLY mREPL call:
            response
            (type-of response)))
   (unless (typep response 'split-view-response)
-    (error "MATERIALIZE-S-EXPRESSION-PROMPT-PAGE expects the second argument to be a HYPERDOC:SPLIT-VIEW-RESPONSE. Got ~S of type ~S. Did you swap the arguments? Canonical call: (hyperdoc:materialize-s-expression-prompt-page *prompt-page-path* *prompt-result* :if-exists :supersede)."
-           response
-           (type-of response)))
+    (if (typep response 'executable-prompt)
+        (error "MATERIALIZE-S-EXPRESSION-PROMPT-PAGE expects the second argument to be a HYPERDOC:SPLIT-VIEW-RESPONSE. Got an EXECUTABLE-PROMPT instead. This is the old replay shape; construct or reload the split-view response as *prompt-result* first, then call (hyperdoc:materialize-s-expression-prompt-page *prompt-page-path* *prompt-result* :if-exists :supersede).")
+        (error "MATERIALIZE-S-EXPRESSION-PROMPT-PAGE expects the second argument to be a HYPERDOC:SPLIT-VIEW-RESPONSE. Got ~S of type ~S. Did you swap the arguments? Canonical call: (hyperdoc:materialize-s-expression-prompt-page *prompt-page-path* *prompt-result* :if-exists :supersede)."
+               response
+               (type-of response))))
   (let* ((path (pathname pathname))
          (html
            (split-view-response-to-hyperdoc-html
