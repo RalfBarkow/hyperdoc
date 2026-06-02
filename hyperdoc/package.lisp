@@ -303,6 +303,7 @@
    #:topicmap-program-to-hyperdoc-html
    #:split-view-response-to-hyperdoc-html
    #:executable-prompt-to-hyperdoc-html
+   #:materialize-s-expression-prompt-page
    #:hyperdoc-html-to-split-view-response
    #:hyperdoc-html-to-executable-prompt
    #:topicmap-program-topics

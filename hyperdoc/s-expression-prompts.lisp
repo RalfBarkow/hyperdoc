@@ -322,6 +322,13 @@
              :output-contract
              (executable-prompt-output-contract-of prompt))))
 
+(defun s-expression-prompt-replay-path-form (path)
+  (if path
+      (format nil "#P~A"
+              (s-expression-prompt-sexp-string
+               (namestring (pathname path))))
+      "#P\"/path/to/generated-s-expression-prompt.html\""))
+
 (defun s-expression-prompt-add-story-metadata (plist key value)
   (if value
       (append plist (list key value))
@@ -536,8 +543,68 @@
                    (s-expression-prompt-html-escape (getf item :text))))
   (write-string "</ol>" stream))
 
+(defun s-expression-prompt-sly-mrepl-replay-string (path)
+  (format nil
+          "(require :asdf)
+(asdf:load-system :hyperdoc/s-expression-prompts)
+
+(defparameter *example-page-path* ~A)
+
+(defparameter *example-reloaded-program*
+  (hyperdoc:hyperdoc-html-to-topicmap-program *example-page-path*))
+
+(defparameter *example-reloaded-response*
+  (hyperdoc:hyperdoc-html-to-split-view-response *example-page-path*))
+
+(defparameter *example-reloaded-prompt*
+  (hyperdoc:hyperdoc-html-to-executable-prompt *example-page-path*))
+
+(assert (hyperdoc:split-view-response-valid-p *example-reloaded-response*))
+
+(format t \"~~&~~S ~~S~~%\"
+        (type-of *example-reloaded-response*)
+        (hyperdoc:split-view-response-validation-result-of
+         *example-reloaded-response*))"
+          (s-expression-prompt-replay-path-form path)))
+
+(defun s-expression-prompt-inspector-replay-string ()
+  "(asdf:load-system :hyperdoc/inspector)
+
+(defun i (object)
+  \"Safe inspector helper for SLY mREPL.
+Prefer CLOG only if it is already loaded; otherwise use CL:INSPECT.
+Never calls SLYNK:INSPECT-IN-EMACS directly.\"
+  (let* ((clog-package (find-package \"CLOG-MOLDABLE-INSPECTOR\"))
+         (clog-symbol
+           (and clog-package
+                (find-symbol \"CLOG-INSPECT\" clog-package))))
+    (cond
+      ((and clog-symbol (fboundp clog-symbol))
+       (handler-case
+           (progn
+             (funcall (symbol-function clog-symbol) :object object)
+             object)
+         (condition (condition)
+           (format t \"~&CLOG inspector failed; falling back to CL:INSPECT: ~A~%\"
+                   condition)
+           (inspect object)
+           object)))
+      (t
+       (inspect object)
+       object))))
+
+(i *example-reloaded-response*)")
+
+(defun s-expression-prompt-write-pane (stream title class body)
+  (format stream
+          "<section class=\"s-expression-prompt-pane ~A\"><h2>~A</h2>~A</section>~%"
+          (s-expression-prompt-html-escape class)
+          (s-expression-prompt-html-escape title)
+          body))
+
 (defun topicmap-program-to-hyperdoc-html
-    (program &key story-items prompt title validation-result)
+    (program &key story-items prompt title validation-result
+                  replay-source-path)
   (let* ((story-items (or story-items
                           (topicmap-program-to-fedwiki-story-items program)))
          (source (s-expression-prompt-program-get program :source))
@@ -552,25 +619,52 @@
       (format stream
               "<h1>~A</h1>~%~%<article class=\"s-expression-prompt-split-view\" data-hyperdoc-s-expression-prompt=\"split-view-response\" data-hyperdoc-materialization-version=\"1\">~%"
               (s-expression-prompt-html-escape title))
-      (write-string "<h2>FedWiki story view</h2>" stream)
-      (s-expression-prompt-write-story-html stream story-items)
-      (write-string "<h2>Topic map program view</h2>" stream)
-      (s-expression-prompt-write-embedded-form
+      (s-expression-prompt-write-pane
        stream
-       "s-expression-prompt-topicmap-program"
-       "data-hyperdoc-topicmap-program"
-       program)
+       "FedWiki story pane"
+       "fedwiki-story-pane"
+       (with-output-to-string (pane-stream)
+         (s-expression-prompt-write-story-html pane-stream story-items)))
+      (s-expression-prompt-write-pane
+       stream
+       "Topicmap program pane"
+       "topicmap-program-pane"
+       (with-output-to-string (pane-stream)
+         (s-expression-prompt-write-embedded-form
+          pane-stream
+          "s-expression-prompt-topicmap-program"
+          "data-hyperdoc-topicmap-program"
+          program)))
+      (s-expression-prompt-write-pane
+       stream
+       "Validation pane"
+       "validation-pane"
+       (with-output-to-string (pane-stream)
+         (s-expression-prompt-write-embedded-form
+          pane-stream
+          "s-expression-prompt-validation-result"
+          "data-hyperdoc-validation-result"
+          validation-result)))
+      (s-expression-prompt-write-pane
+       stream
+       "SLY mREPL replay pane"
+       "sly-mrepl-replay-pane"
+       (format nil "<pre><code>~A</code></pre>"
+               (s-expression-prompt-html-escape
+                (s-expression-prompt-sly-mrepl-replay-string
+                 replay-source-path))))
+      (s-expression-prompt-write-pane
+       stream
+       "Optional inspector replay pane"
+       "optional-inspector-replay-pane"
+       (format nil "<pre><code>~A</code></pre>"
+               (s-expression-prompt-html-escape
+                (s-expression-prompt-inspector-replay-string))))
       (s-expression-prompt-write-embedded-form
        stream
        "s-expression-prompt-fedwiki-story-items"
        "data-hyperdoc-fedwiki-story-items"
        story-items
-       :hidden-p t)
-      (s-expression-prompt-write-embedded-form
-       stream
-       "s-expression-prompt-validation-result"
-       "data-hyperdoc-validation-result"
-       validation-result
        :hidden-p t)
       (when layers
         (s-expression-prompt-write-embedded-form
@@ -581,16 +675,19 @@
          :hidden-p t))
       (write-string "</article>" stream))))
 
-(defun split-view-response-to-hyperdoc-html (response &key prompt title)
+(defun split-view-response-to-hyperdoc-html
+    (response &key prompt title replay-source-path)
   (topicmap-program-to-hyperdoc-html
    (split-view-response-topicmap-program-of response)
    :story-items (split-view-response-fedwiki-story-items-of response)
    :prompt prompt
    :title title
+   :replay-source-path replay-source-path
    :validation-result (or (split-view-response-validation-result-of response)
                           (validate-split-view-response response))))
 
-(defun executable-prompt-to-hyperdoc-html (prompt &key response title)
+(defun executable-prompt-to-hyperdoc-html
+    (prompt &key response title replay-source-path)
   (let* ((program (executable-prompt-topicmap-program-of prompt))
          (response (or response
                        (make-split-view-response
@@ -600,7 +697,62 @@
     (split-view-response-to-hyperdoc-html
      response
      :prompt prompt
-     :title title)))
+     :title title
+     :replay-source-path replay-source-path)))
+
+(defun materialize-s-expression-prompt-page
+    (pathname artifact &key prompt title (if-exists :supersede))
+  (let* ((path (pathname pathname))
+         (response
+           (etypecase artifact
+             (split-view-response artifact)
+             (executable-prompt
+              (make-split-view-response
+               :fedwiki-story-items
+               (topicmap-program-to-fedwiki-story-items
+                (executable-prompt-topicmap-program-of artifact))
+               :topicmap-program
+               (executable-prompt-topicmap-program-of artifact)))))
+         (prompt (or prompt
+                     (and (typep artifact 'executable-prompt)
+                          artifact)))
+         (html
+           (split-view-response-to-hyperdoc-html
+            response
+            :prompt prompt
+            :title title
+            :replay-source-path path)))
+    (ensure-directories-exist path)
+    (with-open-file (stream path
+                            :direction :output
+                            :if-exists if-exists
+                            :if-does-not-exist :create
+                            :external-format :utf-8)
+      (write-string html stream))
+    (let* ((reloaded-program (hyperdoc-html-to-topicmap-program path))
+           (reloaded-response (hyperdoc-html-to-split-view-response path))
+           (program-validation
+             (validate-topicmap-program-equivalence
+              (split-view-response-topicmap-program-of response)
+              reloaded-program))
+           (roundtrip-validation
+             (validate-split-view-response-roundtrip
+              response
+              reloaded-response))
+           (success-p
+             (and (getf program-validation :success-p)
+                  (getf roundtrip-validation :success-p))))
+      (list :status (if success-p :success :failure)
+            :success-p success-p
+            :path path
+            :program-validation program-validation
+            :roundtrip-validation roundtrip-validation
+            :shape (if success-p
+                       '(:success :materialized-hyperdoc-page
+                         :embedded-topicmap-program
+                         :reload-equivalent)
+                       '(:failure :materialized-hyperdoc-page
+                         :reload-mismatch))))))
 
 (defun hyperdoc-html-to-split-view-response (source &key (validate t))
   (let* ((dom (s-expression-prompt-source-dom source))

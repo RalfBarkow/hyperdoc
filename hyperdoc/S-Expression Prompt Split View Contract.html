@@ -47,6 +47,27 @@
   succeeds only when both views name the same topic ids and relation ids.
 </p>
 
+<h2>Authoring artifact shape</h2>
+
+<p>
+  Every executable prompt page materialized for the normal HyperDoc authoring
+  workflow exposes one split-view artifact with five panes:
+</p>
+
+<ol>
+  <li>FedWiki story pane</li>
+  <li>Topicmap program pane</li>
+  <li>Validation pane</li>
+  <li>SLY mREPL replay pane</li>
+  <li>Optional inspector replay pane</li>
+</ol>
+
+<p>
+  The generated page embeds the durable topicmap program. Reloading the page
+  reconstructs the program and validates semantic equivalence before any
+  optional inspector code is loaded.
+</p>
+
 <h2>Projection authority</h2>
 
 <p>
@@ -66,6 +87,7 @@
   <li><tt>topicmap-program-to-fedwiki-story-items</tt> renders the human story projection.</li>
   <li><tt>topicmap-program-to-hyperdoc-html</tt> materializes the durable program and optional story/prompt layers as a HyperDoc HTML split-view page.</li>
   <li><tt>split-view-response-to-hyperdoc-html</tt> materializes a validated response while preserving story order.</li>
+  <li><tt>materialize-s-expression-prompt-page</tt> writes the five-pane authoring artifact to a HyperDoc HTML file, reloads it, and returns round-trip validation evidence.</li>
   <li><tt>validate-split-view-response</tt> verifies the crosswalk between story items and the program.</li>
   <li><tt>validate-topicmap-program-equivalence</tt> verifies that a reloaded program preserves source, input, output contract, topics, relations, and relation evidence.</li>
   <li><tt>validate-split-view-response-roundtrip</tt> verifies program equivalence plus FedWiki story item order.</li>
@@ -110,20 +132,26 @@
    (hyperdoc:topicmap-program-to-fedwiki-story-items *example-program*)
    :topicmap-program *example-program*))
 
-(defparameter *example-html-page*
-  (hyperdoc:split-view-response-to-hyperdoc-html
-   *example-response*
-   :prompt *example-prompt*
+(defparameter *example-output-path*
+  (merge-pathnames "prompt-split-view-roundtrip.html"
+                   (uiop:temporary-directory)))
+
+(defparameter *example-materialization*
+  (hyperdoc:materialize-s-expression-prompt-page
+   *example-output-path*
+   *example-prompt*
    :title "Prompt Split View Round Trip"))
 
+(assert (getf *example-materialization* :success-p))
+
 (defparameter *example-reloaded-program*
-  (hyperdoc:hyperdoc-html-to-topicmap-program *example-html-page*))
+  (hyperdoc:hyperdoc-html-to-topicmap-program *example-output-path*))
 
 (defparameter *example-reloaded-response*
-  (hyperdoc:hyperdoc-html-to-split-view-response *example-html-page*))
+  (hyperdoc:hyperdoc-html-to-split-view-response *example-output-path*))
 
 (defparameter *example-reloaded-prompt*
-  (hyperdoc:hyperdoc-html-to-executable-prompt *example-html-page*))
+  (hyperdoc:hyperdoc-html-to-executable-prompt *example-output-path*))
 
 (defparameter *example-program-validation*
   (hyperdoc:validate-topicmap-program-equivalence
@@ -203,6 +231,7 @@ Never calls SLYNK:INSPECT-IN-EMACS directly."
   <li><source-of-function>hyperdoc-html-to-topicmap-program</source-of-function></li>
   <li><source-of-function>topicmap-program-to-fedwiki-story-items</source-of-function></li>
   <li><source-of-function>split-view-response-to-hyperdoc-html</source-of-function></li>
+  <li><source-of-function>materialize-s-expression-prompt-page</source-of-function></li>
   <li><source-of-function>validate-topicmap-program-equivalence</source-of-function></li>
   <li><source-of-function>validate-split-view-response</source-of-function></li>
 </ul>

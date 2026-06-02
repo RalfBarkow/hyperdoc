@@ -9,6 +9,8 @@
                         :hyperdoc/tests)
                 (intern "RUN-S-EXPRESSION-PROMPT-ROUNDTRIP-SMOKE-TEST"
                         :hyperdoc/tests)
+                (intern "RUN-S-EXPRESSION-PROMPT-GENERATED-PAGE-SMOKE-TEST"
+                        :hyperdoc/tests)
                 (intern "RUN-S-EXPRESSION-PROMPT-SMOKE-TESTS"
                         :hyperdoc/tests))
           :hyperdoc/tests))
@@ -149,6 +151,13 @@
      <p>The topic map program is durable.</p>
      <p><a page=\"Codex handover for HyperDoc\">Canonical handover</a></p>
    </article>")
+
+(defun s-expression-prompt-smoke-temp-page-path ()
+  (merge-pathnames
+   (format nil "hyperdoc-s-expression-prompt-~D-~D.html"
+           (get-universal-time)
+           (random 1000000))
+   (uiop:temporary-directory)))
 
 (defun s-expression-prompt-smoke-program ()
   (hyperdoc:html-page-to-topicmap-program
@@ -344,8 +353,79 @@
      (equal (hyperdoc:executable-prompt-output-contract-of prompt)
             (hyperdoc:executable-prompt-output-contract-of reloaded-prompt))
      "Executable prompt output contract layer must survive materialization")
+    (run-s-expression-prompt-generated-page-smoke-test)
     (format t "~&S-expression prompt roundtrip smoke test passed.~%")
     t))
+
+(defun run-s-expression-prompt-generated-page-smoke-test ()
+  (asdf:load-system :hyperdoc/s-expression-prompts)
+  (let* ((program (s-expression-prompt-smoke-program))
+         (prompt
+           (hyperdoc:make-executable-prompt
+            :knowledge '(:rules (:program-is-durable)
+                         :authoring (:normal-hyperdoc-page-workflow))
+            :input (getf (rest program) :input)
+            :output-contract (getf (rest program) :output-contract)
+            :topicmap-program program))
+         (output-path (s-expression-prompt-smoke-temp-page-path)))
+    (unwind-protect
+         (let* ((report
+                  (hyperdoc:materialize-s-expression-prompt-page
+                   output-path
+                   prompt
+                   :title "Generated S-Expression Prompt Artifact"))
+                (html (uiop:read-file-string output-path))
+                (reloaded-program
+                  (hyperdoc:hyperdoc-html-to-topicmap-program output-path))
+                (program-validation
+                  (hyperdoc:validate-topicmap-program-equivalence
+                   program
+                   reloaded-program)))
+           (s-expression-prompt-smoke-assert
+            (getf report :success-p)
+            "Generated prompt page helper must validate its reload")
+           (s-expression-prompt-smoke-assert
+            (uiop:file-exists-p output-path)
+            "Generated prompt page helper must write the output file")
+           (s-expression-prompt-smoke-assert-contains
+            "FedWiki story pane"
+            html
+            "Generated prompt page must expose the FedWiki story pane")
+           (s-expression-prompt-smoke-assert-contains
+            "Topicmap program pane"
+            html
+            "Generated prompt page must expose the topicmap program pane")
+           (s-expression-prompt-smoke-assert-contains
+            "Validation pane"
+            html
+            "Generated prompt page must expose the validation pane")
+           (s-expression-prompt-smoke-assert-contains
+            "SLY mREPL replay pane"
+            html
+            "Generated prompt page must expose the SLY mREPL replay pane")
+           (s-expression-prompt-smoke-assert-contains
+            "Optional inspector replay pane"
+            html
+            "Generated prompt page must expose the optional inspector replay pane")
+           (s-expression-prompt-smoke-assert-contains
+            "data-hyperdoc-topicmap-program=\"true\""
+            html
+            "Generated prompt page must embed the durable topicmap program")
+           (s-expression-prompt-smoke-assert-contains
+            "(asdf:load-system :hyperdoc/s-expression-prompts)"
+            html
+            "Generated prompt page must include pure-core SLY replay")
+           (s-expression-prompt-smoke-assert-contains
+            "(asdf:load-system :hyperdoc/inspector)"
+            html
+            "Generated prompt page must include optional late inspector replay")
+           (s-expression-prompt-smoke-assert
+            (getf program-validation :success-p)
+            "Generated prompt page reload must reconstruct an equivalent program")
+           (format t "~&S-expression prompt generated page smoke test passed.~%")
+           t)
+      (when (probe-file output-path)
+        (delete-file output-path)))))
 
 (defun run-s-expression-prompt-smoke-tests ()
   (run-s-expression-prompt-pure-core-smoke-test)
