@@ -329,6 +329,11 @@
                (namestring (pathname path))))
       "#P\"/path/to/generated-s-expression-prompt.html\""))
 
+(defun s-expression-prompt-path-designator-p (object)
+  (or (stringp object)
+      (pathnamep object)
+      (streamp object)))
+
 (defun s-expression-prompt-add-story-metadata (plist key value)
   (if value
       (append plist (list key value))
@@ -548,23 +553,43 @@
           "(require :asdf)
 (asdf:load-system :hyperdoc/s-expression-prompts)
 
-(defparameter *example-page-path* ~A)
+(defparameter *prompt-page-path* ~A)
 
-(defparameter *example-reloaded-program*
-  (hyperdoc:hyperdoc-html-to-topicmap-program *example-page-path*))
+(defparameter *prompt-program*
+  (hyperdoc:hyperdoc-html-to-topicmap-program *prompt-page-path*))
 
-(defparameter *example-reloaded-response*
-  (hyperdoc:hyperdoc-html-to-split-view-response *example-page-path*))
+(defparameter *prompt-result*
+  (hyperdoc:hyperdoc-html-to-split-view-response *prompt-page-path*))
 
-(defparameter *example-reloaded-prompt*
-  (hyperdoc:hyperdoc-html-to-executable-prompt *example-page-path*))
+(defparameter *prompt-materialization*
+  (hyperdoc:materialize-s-expression-prompt-page
+   *prompt-page-path*
+   *prompt-result*
+   :if-exists :supersede))
 
-(assert (hyperdoc:split-view-response-valid-p *example-reloaded-response*))
+(defparameter *prompt-reloaded-program*
+  (hyperdoc:hyperdoc-html-to-topicmap-program *prompt-page-path*))
+
+(defparameter *prompt-reloaded-result*
+  (hyperdoc:hyperdoc-html-to-split-view-response *prompt-page-path*))
+
+(defparameter *prompt-program-validation*
+  (hyperdoc:validate-topicmap-program-equivalence
+   *prompt-program*
+   *prompt-reloaded-program*))
+
+(defparameter *prompt-roundtrip-validation*
+  (hyperdoc:validate-split-view-response-roundtrip
+   *prompt-result*
+   *prompt-reloaded-result*))
+
+(assert (getf *prompt-materialization* :success-p))
+(assert (getf *prompt-program-validation* :success-p))
+(assert (getf *prompt-roundtrip-validation* :success-p))
 
 (format t \"~~&~~S ~~S~~%\"
-        (type-of *example-reloaded-response*)
-        (hyperdoc:split-view-response-validation-result-of
-         *example-reloaded-response*))"
+        (type-of *prompt-reloaded-result*)
+        *prompt-roundtrip-validation*)"
           (s-expression-prompt-replay-path-form path)))
 
 (defun s-expression-prompt-inspector-replay-string ()
@@ -593,7 +618,7 @@ Never calls SLYNK:INSPECT-IN-EMACS directly.\"
        (inspect object)
        object))))
 
-(i *example-reloaded-response*)")
+(i *prompt-reloaded-result*)")
 
 (defun s-expression-prompt-write-pane (stream title class body)
   (format stream
@@ -701,21 +726,29 @@ Never calls SLYNK:INSPECT-IN-EMACS directly.\"
      :replay-source-path replay-source-path)))
 
 (defun materialize-s-expression-prompt-page
-    (pathname artifact &key prompt title (if-exists :supersede))
+    (pathname response &key prompt title (if-exists :supersede))
+  "Materialize RESPONSE as a split-view HyperDoc HTML page at PATHNAME.
+
+Lambda list:
+  (materialize-s-expression-prompt-page pathname response
+   &key prompt title (if-exists :supersede))
+
+Canonical SLY mREPL call:
+  (hyperdoc:materialize-s-expression-prompt-page
+   *prompt-page-path*
+  *prompt-result*
+  :if-exists :supersede)"
+  (unless (s-expression-prompt-path-designator-p pathname)
+    (error "MATERIALIZE-S-EXPRESSION-PROMPT-PAGE expects the first argument to be a string, pathname, or file stream path designator and the second argument to be a HYPERDOC:SPLIT-VIEW-RESPONSE. Got first argument ~S of type ~S and second argument ~S of type ~S. Did you swap the arguments? Canonical call: (hyperdoc:materialize-s-expression-prompt-page *prompt-page-path* *prompt-result* :if-exists :supersede)."
+           pathname
+           (type-of pathname)
+           response
+           (type-of response)))
+  (unless (typep response 'split-view-response)
+    (error "MATERIALIZE-S-EXPRESSION-PROMPT-PAGE expects the second argument to be a HYPERDOC:SPLIT-VIEW-RESPONSE. Got ~S of type ~S. Did you swap the arguments? Canonical call: (hyperdoc:materialize-s-expression-prompt-page *prompt-page-path* *prompt-result* :if-exists :supersede)."
+           response
+           (type-of response)))
   (let* ((path (pathname pathname))
-         (response
-           (etypecase artifact
-             (split-view-response artifact)
-             (executable-prompt
-              (make-split-view-response
-               :fedwiki-story-items
-               (topicmap-program-to-fedwiki-story-items
-                (executable-prompt-topicmap-program-of artifact))
-               :topicmap-program
-               (executable-prompt-topicmap-program-of artifact)))))
-         (prompt (or prompt
-                     (and (typep artifact 'executable-prompt)
-                          artifact)))
          (html
            (split-view-response-to-hyperdoc-html
             response

@@ -30,6 +30,16 @@
   (unless (and haystack (search needle haystack :test #'char=))
     (error "~A -- missing substring: ~S" message needle)))
 
+(defun s-expression-prompt-smoke-assert-error-contains (thunk needle message)
+  (handler-case
+      (progn
+        (funcall thunk)
+        (error "~A -- expected an error containing: ~S" message needle))
+    (error (condition)
+      (unless (search needle (princ-to-string condition) :test #'char=)
+        (error "~A -- expected error containing: ~S actual error: ~A"
+               message needle condition)))))
+
 (defparameter *s-expression-prompt-smoke-forbidden-systems*
   '("drakma"
     "cl+ssl"
@@ -367,12 +377,18 @@
             :input (getf (rest program) :input)
             :output-contract (getf (rest program) :output-contract)
             :topicmap-program program))
+         (response
+           (hyperdoc:make-split-view-response
+            :fedwiki-story-items
+            (hyperdoc:topicmap-program-to-fedwiki-story-items program)
+            :topicmap-program program))
          (output-path (s-expression-prompt-smoke-temp-page-path)))
     (unwind-protect
          (let* ((report
                   (hyperdoc:materialize-s-expression-prompt-page
                    output-path
-                   prompt
+                   response
+                   :prompt prompt
                    :title "Generated S-Expression Prompt Artifact"))
                 (html (uiop:read-file-string output-path))
                 (reloaded-program
@@ -416,12 +432,38 @@
             html
             "Generated prompt page must include pure-core SLY replay")
            (s-expression-prompt-smoke-assert-contains
+            "*prompt-page-path*"
+            html
+            "Generated prompt page replay must bind the prompt page path")
+           (s-expression-prompt-smoke-assert-contains
+            "*prompt-result*"
+            html
+            "Generated prompt page replay must bind the split-view response")
+           (s-expression-prompt-smoke-assert-contains
+            "(hyperdoc:materialize-s-expression-prompt-page"
+            html
+            "Generated prompt page replay must materialize the split-view response")
+           (s-expression-prompt-smoke-assert-contains
+            "*prompt-page-path*
+   *prompt-result*
+   :if-exists :supersede"
+            html
+            "Generated prompt page replay must use path first and response second")
+           (s-expression-prompt-smoke-assert-contains
             "(asdf:load-system :hyperdoc/inspector)"
             html
             "Generated prompt page must include optional late inspector replay")
            (s-expression-prompt-smoke-assert
             (getf program-validation :success-p)
             "Generated prompt page reload must reconstruct an equivalent program")
+           (s-expression-prompt-smoke-assert-error-contains
+            (lambda ()
+              (hyperdoc:materialize-s-expression-prompt-page
+               response
+               output-path
+               :if-exists :supersede))
+            "Did you swap the arguments?"
+            "Materialization helper must diagnose the old response/path call shape")
            (format t "~&S-expression prompt generated page smoke test passed.~%")
            t)
       (when (probe-file output-path)

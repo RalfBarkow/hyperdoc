@@ -112,65 +112,63 @@
 <pre><code>(require :asdf)
 (asdf:load-system :hyperdoc/s-expression-prompts)
 
-(defparameter *example-program*
+(defparameter *prompt-program*
   (hyperdoc:html-page-to-topicmap-program
    "&lt;article&gt;&lt;h1&gt;Prompt Split View&lt;/h1&gt;&lt;p&gt;Program is durable.&lt;/p&gt;&lt;/article&gt;"
    :source-path "smoke.html"
    :source-title "Prompt Split View"))
 
-(defparameter *example-prompt*
+(defparameter *prompt*
   (hyperdoc:make-executable-prompt
    :knowledge '(:rules (:program-is-durable)
                 :boundaries (:no-http-stack :no-dmx-write-path))
-   :input (getf (rest *example-program*) :input)
-   :output-contract (getf (rest *example-program*) :output-contract)
-   :topicmap-program *example-program*))
+   :input (getf (rest *prompt-program*) :input)
+   :output-contract (getf (rest *prompt-program*) :output-contract)
+   :topicmap-program *prompt-program*))
 
-(defparameter *example-response*
+(defparameter *prompt-result*
   (hyperdoc:make-split-view-response
    :fedwiki-story-items
-   (hyperdoc:topicmap-program-to-fedwiki-story-items *example-program*)
-   :topicmap-program *example-program*))
+   (hyperdoc:topicmap-program-to-fedwiki-story-items *prompt-program*)
+   :topicmap-program *prompt-program*))
 
-(defparameter *example-output-path*
+(defparameter *prompt-page-path*
   (merge-pathnames "prompt-split-view-roundtrip.html"
                    (uiop:temporary-directory)))
 
-(defparameter *example-materialization*
+(defparameter *prompt-materialization*
   (hyperdoc:materialize-s-expression-prompt-page
-   *example-output-path*
-   *example-prompt*
-   :title "Prompt Split View Round Trip"))
+   *prompt-page-path*
+   *prompt-result*
+   :if-exists :supersede))
 
-(assert (getf *example-materialization* :success-p))
+(assert (getf *prompt-materialization* :success-p))
 
-(defparameter *example-reloaded-program*
-  (hyperdoc:hyperdoc-html-to-topicmap-program *example-output-path*))
+(defparameter *prompt-reloaded-program*
+  (hyperdoc:hyperdoc-html-to-topicmap-program *prompt-page-path*))
 
-(defparameter *example-reloaded-response*
-  (hyperdoc:hyperdoc-html-to-split-view-response *example-output-path*))
+(defparameter *prompt-reloaded-result*
+  (hyperdoc:hyperdoc-html-to-split-view-response *prompt-page-path*))
 
-(defparameter *example-reloaded-prompt*
-  (hyperdoc:hyperdoc-html-to-executable-prompt *example-output-path*))
+(defparameter *prompt-reloaded-prompt*
+  (hyperdoc:hyperdoc-html-to-executable-prompt *prompt-page-path*))
 
-(defparameter *example-program-validation*
+(defparameter *prompt-program-validation*
   (hyperdoc:validate-topicmap-program-equivalence
-   *example-program*
-   *example-reloaded-program*))
+   *prompt-program*
+   *prompt-reloaded-program*))
 
-(defparameter *example-roundtrip-validation*
+(defparameter *prompt-roundtrip-validation*
   (hyperdoc:validate-split-view-response-roundtrip
-   *example-response*
-   *example-reloaded-response*))
+   *prompt-result*
+   *prompt-reloaded-result*))
 
-(assert (getf *example-program-validation* :success-p))
-(assert (getf *example-roundtrip-validation* :success-p))
-(assert (equal (hyperdoc:executable-prompt-knowledge-of *example-prompt*)
-               (hyperdoc:executable-prompt-knowledge-of *example-reloaded-prompt*)))
+(assert (getf *prompt-program-validation* :success-p))
+(assert (getf *prompt-roundtrip-validation* :success-p))
 
 (format t "~&amp;~S ~S~%"
-        (type-of *example-reloaded-response*)
-        *example-roundtrip-validation*)</code></pre>
+        (type-of *prompt-reloaded-result*)
+        *prompt-roundtrip-validation*)</code></pre>
 
 <p>
   Load the inspector only for the split-view tab or CLOG-backed inspection.
@@ -202,7 +200,7 @@ Never calls SLYNK:INSPECT-IN-EMACS directly."
        (inspect object)
        object))))
 
-(i *example-reloaded-response*)</code></pre>
+(i *prompt-reloaded-result*)</code></pre>
 
 <h2>Inspector surface</h2>
 
