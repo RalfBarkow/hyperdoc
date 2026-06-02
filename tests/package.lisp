@@ -61,6 +61,8 @@
    :run-topicmap-view-smoke-tests
    :run-topic-files-topicmap-smoke-tests
    :run-s-expression-prompt-pure-core-smoke-test
+   :run-s-expression-prompt-pure-boundary-smoke-test
+   :run-s-expression-prompt-roundtrip-smoke-test
    :run-s-expression-prompt-smoke-tests
    :run-fedwiki-asdf-assets-smoke-tests
    :run-fedwiki-attached-asdf-system-smoke-tests

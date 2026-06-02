@@ -5,6 +5,10 @@
     (make-package :hyperdoc/tests :use '(:cl)))
   (export (list (intern "RUN-S-EXPRESSION-PROMPT-PURE-CORE-SMOKE-TEST"
                         :hyperdoc/tests)
+                (intern "RUN-S-EXPRESSION-PROMPT-PURE-BOUNDARY-SMOKE-TEST"
+                        :hyperdoc/tests)
+                (intern "RUN-S-EXPRESSION-PROMPT-ROUNDTRIP-SMOKE-TEST"
+                        :hyperdoc/tests)
                 (intern "RUN-S-EXPRESSION-PROMPT-SMOKE-TESTS"
                         :hyperdoc/tests))
           :hyperdoc/tests))
@@ -23,6 +27,77 @@
 (defun s-expression-prompt-smoke-assert-contains (needle haystack message)
   (unless (and haystack (search needle haystack :test #'char=))
     (error "~A -- missing substring: ~S" message needle)))
+
+(defparameter *s-expression-prompt-smoke-forbidden-systems*
+  '("drakma"
+    "cl+ssl"
+    "hunchentoot"
+    "clack"
+    "usocket"
+    "hyperbook/server"
+    "hyperbook/explorer"
+    "hyperbook/wikipedia"
+    "hyperbook/fedwiki"))
+
+(defun s-expression-prompt-smoke-system-name (designator)
+  (string-downcase
+   (etypecase designator
+     (string designator)
+     (symbol (symbol-name designator)))))
+
+(defun s-expression-prompt-smoke-dependency-name (dependency)
+  (cond
+    ((and (consp dependency)
+          (eq (first dependency) :version))
+     (second dependency))
+    ((and (consp dependency)
+          (eq (first dependency) :feature))
+     (third dependency))
+    ((consp dependency)
+     (first dependency))
+    (t dependency)))
+
+(defun s-expression-prompt-smoke-hyperdoc-server-system-p (system-name)
+  (and (search "hyperdoc/" system-name :test #'char=)
+       (or (search "server" system-name :test #'char=)
+           (search "explorer" system-name :test #'char=)
+           (search "inspector" system-name :test #'char=))))
+
+(defun s-expression-prompt-smoke-forbidden-system-p (system-name)
+  (or (member system-name
+              *s-expression-prompt-smoke-forbidden-systems*
+              :test #'string=)
+      (s-expression-prompt-smoke-hyperdoc-server-system-p system-name)))
+
+(defun s-expression-prompt-smoke-system-dependency-closure (root)
+  (let ((seen (make-hash-table :test #'equal))
+        (result nil))
+    (labels ((visit (designator)
+               (let* ((name (s-expression-prompt-smoke-system-name designator))
+                      (system (ignore-errors
+                                (asdf:find-system name nil))))
+                 (unless (gethash name seen)
+                   (setf (gethash name seen) t)
+                   (push name result)
+                   (when system
+                     (dolist (dependency (asdf:system-depends-on system))
+                       (let ((dependency-name
+                               (s-expression-prompt-smoke-dependency-name
+                                dependency)))
+                         (when dependency-name
+                           (visit dependency-name)))))))))
+      (visit root)
+      (nreverse result))))
+
+(defun s-expression-prompt-smoke-loaded-system-names ()
+  (sort
+   (remove-duplicates
+    (loop for system in (asdf:already-loaded-systems)
+          for name = (or (ignore-errors (asdf:component-name system))
+                         system)
+          collect (s-expression-prompt-smoke-system-name name))
+    :test #'string=)
+   #'string<))
 
 (defun s-expression-prompt-smoke-symbol (package-name symbol-name)
   (let* ((package (find-package package-name))
@@ -189,8 +264,93 @@
   (format t "~&S-expression prompt pure core smoke tests passed.~%")
   t)
 
+(defun run-s-expression-prompt-pure-boundary-smoke-test ()
+  (asdf:load-system :hyperdoc/s-expression-prompts)
+  (let* ((closure
+           (s-expression-prompt-smoke-system-dependency-closure
+            :hyperdoc/s-expression-prompts))
+         (loaded (s-expression-prompt-smoke-loaded-system-names))
+         (forbidden-closure
+           (remove-if-not #'s-expression-prompt-smoke-forbidden-system-p
+                          closure))
+         (forbidden-loaded
+           (remove-if-not #'s-expression-prompt-smoke-forbidden-system-p
+                          loaded)))
+    (when (or forbidden-closure forbidden-loaded)
+      (error "Pure prompt core boundary violation.~%Forbidden dependency closure entries: ~S~%Forbidden loaded systems: ~S~%Dependency closure: ~S~%Loaded systems: ~S"
+             forbidden-closure
+             forbidden-loaded
+             closure
+             loaded))
+    (format t "~&S-expression prompt pure boundary smoke test passed.~%")
+    t))
+
+(defun run-s-expression-prompt-roundtrip-smoke-test ()
+  (asdf:load-system :hyperdoc/s-expression-prompts)
+  (let* ((program (s-expression-prompt-smoke-program))
+         (prompt
+           (hyperdoc:make-executable-prompt
+            :knowledge '(:rules (:program-is-durable)
+                         :repo-boundaries (:no-dmx-write-path)
+                         :validation (:roundtrip-equivalence))
+            :input (getf (rest program) :input)
+            :output-contract (getf (rest program) :output-contract)
+            :topicmap-program program))
+         (response
+           (hyperdoc:make-split-view-response
+            :fedwiki-story-items
+            (hyperdoc:topicmap-program-to-fedwiki-story-items program)
+            :topicmap-program program))
+         (html
+           (hyperdoc:split-view-response-to-hyperdoc-html
+            response
+            :prompt prompt
+            :title "S-Expression Prompt Round Trip"))
+         (reloaded-program
+           (hyperdoc:hyperdoc-html-to-topicmap-program html))
+         (reloaded-response
+           (hyperdoc:hyperdoc-html-to-split-view-response html))
+         (reloaded-prompt
+           (hyperdoc:hyperdoc-html-to-executable-prompt html))
+         (program-validation
+           (hyperdoc:validate-topicmap-program-equivalence
+            program reloaded-program))
+         (roundtrip-validation
+           (hyperdoc:validate-split-view-response-roundtrip
+            response reloaded-response)))
+    (s-expression-prompt-smoke-assert-contains
+     "data-hyperdoc-topicmap-program=\"true\""
+     html
+     "Materialized HyperDoc HTML must embed the durable topicmap program")
+    (s-expression-prompt-smoke-assert-contains
+     "data-hyperdoc-fedwiki-story-items=\"true\""
+     html
+     "Materialized HyperDoc HTML must embed FedWiki story items in order")
+    (s-expression-prompt-smoke-assert
+     (getf program-validation :success-p)
+     "Reloaded topicmap program must be semantically equivalent")
+    (s-expression-prompt-smoke-assert
+     (getf roundtrip-validation :success-p)
+     "Reloaded split-view response must preserve program and story order")
+    (s-expression-prompt-smoke-assert
+     (equal (hyperdoc:executable-prompt-knowledge-of prompt)
+            (hyperdoc:executable-prompt-knowledge-of reloaded-prompt))
+     "Executable prompt knowledge layer must survive materialization")
+    (s-expression-prompt-smoke-assert
+     (equal (hyperdoc:executable-prompt-input-of prompt)
+            (hyperdoc:executable-prompt-input-of reloaded-prompt))
+     "Executable prompt input layer must survive materialization")
+    (s-expression-prompt-smoke-assert
+     (equal (hyperdoc:executable-prompt-output-contract-of prompt)
+            (hyperdoc:executable-prompt-output-contract-of reloaded-prompt))
+     "Executable prompt output contract layer must survive materialization")
+    (format t "~&S-expression prompt roundtrip smoke test passed.~%")
+    t))
+
 (defun run-s-expression-prompt-smoke-tests ()
   (run-s-expression-prompt-pure-core-smoke-test)
+  (run-s-expression-prompt-pure-boundary-smoke-test)
+  (run-s-expression-prompt-roundtrip-smoke-test)
   (asdf:load-system :hyperdoc/explorer)
   (run-s-expression-prompt-inspector-smoke-test)
   (format t "~&S-expression prompt split-view smoke tests passed.~%")

@@ -261,6 +261,67 @@
 (defun topicmap-program-relations (program)
   (copy-tree (s-expression-prompt-program-get program :relations)))
 
+(defun s-expression-prompt-html-escape (value)
+  (with-output-to-string (stream)
+    (loop for char across (princ-to-string (or value ""))
+          do (case char
+               (#\& (write-string "&amp;" stream))
+               (#\< (write-string "&lt;" stream))
+               (#\> (write-string "&gt;" stream))
+               (#\" (write-string "&quot;" stream))
+               (t (write-char char stream))))))
+
+(defun s-expression-prompt-sexp-string (object)
+  (with-output-to-string (stream)
+    (let ((*print-pretty* t)
+          (*print-right-margin* 96)
+          (*print-readably* t))
+      (write object :stream stream))))
+
+(defun s-expression-prompt-read-sexp (text label)
+  (let ((*read-eval* nil))
+    (multiple-value-bind (object position)
+        (read-from-string (or text "") nil :eof)
+      (when (eq object :eof)
+        (error "Missing embedded S-expression payload for ~A." label))
+      (let ((trailing (subseq text position)))
+        (unless (string= "" (s-expression-prompt-trim trailing))
+          (error "Trailing unreadable payload after embedded ~A: ~S"
+                 label trailing)))
+      object)))
+
+(defun s-expression-prompt-find-node-by-attribute
+    (node attribute &optional expected-value)
+  (labels ((matches-p (candidate)
+             (let ((value (s-expression-prompt-plump-attribute
+                           candidate attribute)))
+               (and value
+                    (or (null expected-value)
+                        (string= value expected-value)))))
+           (walk (candidate)
+             (or (and (matches-p candidate) candidate)
+                 (loop for child in (s-expression-prompt-plump-children
+                                     candidate)
+                       for found = (walk child)
+                       when found return found))))
+    (walk node)))
+
+(defun s-expression-prompt-embedded-sexp
+    (dom attribute label &optional expected-value)
+  (let ((node (s-expression-prompt-find-node-by-attribute
+               dom attribute expected-value)))
+    (and node
+         (s-expression-prompt-read-sexp
+          (s-expression-prompt-plump-text node)
+          label))))
+
+(defun s-expression-prompt-prompt-layers (prompt)
+  (and prompt
+       (list :knowledge (executable-prompt-knowledge-of prompt)
+             :input (executable-prompt-input-of prompt)
+             :output-contract
+             (executable-prompt-output-contract-of prompt))))
+
 (defun s-expression-prompt-add-story-metadata (plist key value)
   (if value
       (append plist (list key value))
@@ -390,6 +451,24 @@
      :source-evidence source-evidence
      :operator-task operator-task)))
 
+(defun hyperdoc-html-to-topicmap-program
+    (source &key source-path source-title selected-story-items
+                 source-evidence operator-task)
+  (let ((dom (s-expression-prompt-source-dom source)))
+    (or (s-expression-prompt-embedded-sexp
+         dom
+         "data-hyperdoc-topicmap-program"
+         "topicmap program"
+         "true")
+        (plump-dom-to-topicmap-program
+         dom
+         :source source
+         :source-path source-path
+         :source-title source-title
+         :selected-story-items selected-story-items
+         :source-evidence source-evidence
+         :operator-task operator-task))))
+
 (defun topicmap-program-to-fedwiki-story-items (program)
   (let ((source (s-expression-prompt-program-get program :source))
         (topics (topicmap-program-topics program))
@@ -421,6 +500,142 @@
                           (getf relation :kind)
                           (getf relation :from)
                           (getf relation :to)))))))
+
+(defun s-expression-prompt-story-item-anchor (item position)
+  (s-expression-prompt-slug
+   (format nil "story ~A"
+           (or (getf item :id)
+               (getf item :topic-id)
+               (getf item :relation-id)
+               position))))
+
+(defun s-expression-prompt-write-embedded-form
+    (stream id attribute object &key hidden-p)
+  (format stream
+          "<pre id=\"~A\" data-hyperdoc-embedded-form=\"true\" ~A=\"true\"~:[~; hidden=\"hidden\"~]>~A</pre>~%"
+          (s-expression-prompt-html-escape id)
+          attribute
+          hidden-p
+          (s-expression-prompt-html-escape
+           (s-expression-prompt-sexp-string object))))
+
+(defun s-expression-prompt-write-story-html (stream story-items)
+  (write-string "<ol class=\"s-expression-prompt-story-items\">" stream)
+  (loop for item in story-items
+        for position from 1
+        for item-id = (getf item :id)
+        for topic-id = (getf item :topic-id)
+        for relation-id = (getf item :relation-id)
+        do (format stream
+                   "<li id=\"~A\" data-story-item-id=\"~A\"~@[ data-topic-id=\"~A\"~]~@[ data-relation-id=\"~A\"~]>~A</li>~%"
+                   (s-expression-prompt-story-item-anchor item position)
+                   (s-expression-prompt-html-escape item-id)
+                   (and topic-id (s-expression-prompt-html-escape topic-id))
+                   (and relation-id
+                        (s-expression-prompt-html-escape relation-id))
+                   (s-expression-prompt-html-escape (getf item :text))))
+  (write-string "</ol>" stream))
+
+(defun topicmap-program-to-hyperdoc-html
+    (program &key story-items prompt title validation-result)
+  (let* ((story-items (or story-items
+                          (topicmap-program-to-fedwiki-story-items program)))
+         (source (s-expression-prompt-program-get program :source))
+         (title (or title
+                    (getf source :title)
+                    "S-Expression Prompt Split View"))
+         (validation-result
+           (or validation-result
+               (validate-split-view-response story-items program)))
+         (layers (s-expression-prompt-prompt-layers prompt)))
+    (with-output-to-string (stream)
+      (format stream
+              "<h1>~A</h1>~%~%<article class=\"s-expression-prompt-split-view\" data-hyperdoc-s-expression-prompt=\"split-view-response\" data-hyperdoc-materialization-version=\"1\">~%"
+              (s-expression-prompt-html-escape title))
+      (write-string "<h2>FedWiki story view</h2>" stream)
+      (s-expression-prompt-write-story-html stream story-items)
+      (write-string "<h2>Topic map program view</h2>" stream)
+      (s-expression-prompt-write-embedded-form
+       stream
+       "s-expression-prompt-topicmap-program"
+       "data-hyperdoc-topicmap-program"
+       program)
+      (s-expression-prompt-write-embedded-form
+       stream
+       "s-expression-prompt-fedwiki-story-items"
+       "data-hyperdoc-fedwiki-story-items"
+       story-items
+       :hidden-p t)
+      (s-expression-prompt-write-embedded-form
+       stream
+       "s-expression-prompt-validation-result"
+       "data-hyperdoc-validation-result"
+       validation-result
+       :hidden-p t)
+      (when layers
+        (s-expression-prompt-write-embedded-form
+         stream
+         "s-expression-prompt-executable-prompt-layers"
+         "data-hyperdoc-executable-prompt-layers"
+         layers
+         :hidden-p t))
+      (write-string "</article>" stream))))
+
+(defun split-view-response-to-hyperdoc-html (response &key prompt title)
+  (topicmap-program-to-hyperdoc-html
+   (split-view-response-topicmap-program-of response)
+   :story-items (split-view-response-fedwiki-story-items-of response)
+   :prompt prompt
+   :title title
+   :validation-result (or (split-view-response-validation-result-of response)
+                          (validate-split-view-response response))))
+
+(defun executable-prompt-to-hyperdoc-html (prompt &key response title)
+  (let* ((program (executable-prompt-topicmap-program-of prompt))
+         (response (or response
+                       (make-split-view-response
+                        :fedwiki-story-items
+                        (topicmap-program-to-fedwiki-story-items program)
+                        :topicmap-program program))))
+    (split-view-response-to-hyperdoc-html
+     response
+     :prompt prompt
+     :title title)))
+
+(defun hyperdoc-html-to-split-view-response (source &key (validate t))
+  (let* ((dom (s-expression-prompt-source-dom source))
+         (program (hyperdoc-html-to-topicmap-program dom))
+         (story-items
+           (or (s-expression-prompt-embedded-sexp
+                dom
+                "data-hyperdoc-fedwiki-story-items"
+                "FedWiki story items"
+                "true")
+               (topicmap-program-to-fedwiki-story-items program))))
+    (make-split-view-response
+     :fedwiki-story-items story-items
+     :topicmap-program program
+     :validate validate)))
+
+(defun hyperdoc-html-to-executable-prompt (source)
+  (let* ((dom (s-expression-prompt-source-dom source))
+         (program (hyperdoc-html-to-topicmap-program dom))
+         (layers
+           (or (s-expression-prompt-embedded-sexp
+                dom
+                "data-hyperdoc-executable-prompt-layers"
+                "executable prompt layers"
+                "true")
+               (list :knowledge nil
+                     :input (s-expression-prompt-program-get program :input)
+                     :output-contract
+                     (s-expression-prompt-program-get program
+                                                      :output-contract)))))
+    (make-executable-prompt
+     :knowledge (getf layers :knowledge)
+     :input (getf layers :input)
+     :output-contract (getf layers :output-contract)
+     :topicmap-program program)))
 
 (defun s-expression-prompt-sorted-ids (ids)
   (sort (copy-list (remove nil ids :test #'equal)) #'string<))
@@ -497,6 +712,77 @@
                      '(:failure :crosswalk-mismatch
                        :missing-story-topics :extra-story-topics
                        :missing-story-relations :extra-story-relations)))))
+
+(defun validate-topicmap-program-equivalence (expected actual)
+  (let* ((source-pass-p
+           (equal (s-expression-prompt-program-get expected :source)
+                  (s-expression-prompt-program-get actual :source)))
+         (input-pass-p
+           (equal (s-expression-prompt-program-get expected :input)
+                  (s-expression-prompt-program-get actual :input)))
+         (output-contract-pass-p
+           (equal (s-expression-prompt-program-get expected :output-contract)
+                  (s-expression-prompt-program-get actual :output-contract)))
+         (topics-pass-p
+           (equal (topicmap-program-topics expected)
+                  (topicmap-program-topics actual)))
+         (relations-pass-p
+           (equal (topicmap-program-relations expected)
+                  (topicmap-program-relations actual)))
+         (success-p
+           (and source-pass-p
+                input-pass-p
+                output-contract-pass-p
+                topics-pass-p
+                relations-pass-p)))
+    (list :status (if success-p :success :failure)
+          :success-p success-p
+          :source-match-p source-pass-p
+          :input-match-p input-pass-p
+          :output-contract-match-p output-contract-pass-p
+          :topics-match-p topics-pass-p
+          :relations-match-p relations-pass-p
+          :expected-topic-ids (s-expression-prompt-program-topic-ids expected)
+          :actual-topic-ids (s-expression-prompt-program-topic-ids actual)
+          :expected-relation-ids
+          (s-expression-prompt-program-relation-ids expected)
+          :actual-relation-ids
+          (s-expression-prompt-program-relation-ids actual)
+          :shape (if success-p
+                     '(:success :topicmap-program-equivalent
+                       :layers-preserved :topics-preserved
+                       :relations-preserved :relation-evidence-preserved)
+                     '(:failure :topicmap-program-mismatch
+                       :source :input :output-contract
+                       :topics :relations)))))
+
+(defun validate-split-view-response-roundtrip (original reloaded)
+  (let* ((program-validation
+           (validate-topicmap-program-equivalence
+            (split-view-response-topicmap-program-of original)
+            (split-view-response-topicmap-program-of reloaded)))
+         (story-order-pass-p
+           (equal (split-view-response-fedwiki-story-items-of original)
+                  (split-view-response-fedwiki-story-items-of reloaded)))
+         (reloaded-crosswalk
+           (validate-split-view-response reloaded))
+         (success-p
+           (and (getf program-validation :success-p)
+                story-order-pass-p
+                (getf reloaded-crosswalk :success-p))))
+    (list :status (if success-p :success :failure)
+          :success-p success-p
+          :program-validation program-validation
+          :story-order-match-p story-order-pass-p
+          :reloaded-crosswalk reloaded-crosswalk
+          :shape (if success-p
+                     '(:success :split-view-roundtrip
+                       :topicmap-program-equivalent
+                       :story-item-order-preserved)
+                     '(:failure :split-view-roundtrip-mismatch
+                       :program-validation
+                       :story-order
+                       :reloaded-crosswalk)))))
 
 (defun split-view-response-valid-p (response)
   (getf (or (split-view-response-validation-result-of response)

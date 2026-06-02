@@ -297,11 +297,19 @@
    #:split-view-response-topicmap-program-of
    #:split-view-response-validation-result-of
    #:html-page-to-topicmap-program
+   #:hyperdoc-html-to-topicmap-program
    #:plump-dom-to-topicmap-program
    #:topicmap-program-to-fedwiki-story-items
+   #:topicmap-program-to-hyperdoc-html
+   #:split-view-response-to-hyperdoc-html
+   #:executable-prompt-to-hyperdoc-html
+   #:hyperdoc-html-to-split-view-response
+   #:hyperdoc-html-to-executable-prompt
    #:topicmap-program-topics
    #:topicmap-program-relations
    #:validate-split-view-response
+   #:validate-topicmap-program-equivalence
+   #:validate-split-view-response-roundtrip
    #:split-view-response-valid-p
    #:topicmap-program-pretty-string
    #:split-view-response-story-view

@@ -61,9 +61,14 @@
 
 <ul>
   <li><tt>html-page-to-topicmap-program</tt> projects a HyperDoc HTML page, pathname, HTML string, or Plump-backed page DOM into the S-expression topic/relation program.</li>
+  <li><tt>hyperdoc-html-to-topicmap-program</tt> reloads a materialized HyperDoc split-view page by reading the embedded durable program, falling back to plain HTML projection when no embedded program is present.</li>
   <li><tt>plump-dom-to-topicmap-program</tt> projects a parsed Plump DOM/tree into the same program form.</li>
   <li><tt>topicmap-program-to-fedwiki-story-items</tt> renders the human story projection.</li>
+  <li><tt>topicmap-program-to-hyperdoc-html</tt> materializes the durable program and optional story/prompt layers as a HyperDoc HTML split-view page.</li>
+  <li><tt>split-view-response-to-hyperdoc-html</tt> materializes a validated response while preserving story order.</li>
   <li><tt>validate-split-view-response</tt> verifies the crosswalk between story items and the program.</li>
+  <li><tt>validate-topicmap-program-equivalence</tt> verifies that a reloaded program preserves source, input, output contract, topics, relations, and relation evidence.</li>
+  <li><tt>validate-split-view-response-roundtrip</tt> verifies program equivalence plus FedWiki story item order.</li>
 </ul>
 
 <p>
@@ -105,9 +110,39 @@
    (hyperdoc:topicmap-program-to-fedwiki-story-items *example-program*)
    :topicmap-program *example-program*))
 
+(defparameter *example-html-page*
+  (hyperdoc:split-view-response-to-hyperdoc-html
+   *example-response*
+   :prompt *example-prompt*
+   :title "Prompt Split View Round Trip"))
+
+(defparameter *example-reloaded-program*
+  (hyperdoc:hyperdoc-html-to-topicmap-program *example-html-page*))
+
+(defparameter *example-reloaded-response*
+  (hyperdoc:hyperdoc-html-to-split-view-response *example-html-page*))
+
+(defparameter *example-reloaded-prompt*
+  (hyperdoc:hyperdoc-html-to-executable-prompt *example-html-page*))
+
+(defparameter *example-program-validation*
+  (hyperdoc:validate-topicmap-program-equivalence
+   *example-program*
+   *example-reloaded-program*))
+
+(defparameter *example-roundtrip-validation*
+  (hyperdoc:validate-split-view-response-roundtrip
+   *example-response*
+   *example-reloaded-response*))
+
+(assert (getf *example-program-validation* :success-p))
+(assert (getf *example-roundtrip-validation* :success-p))
+(assert (equal (hyperdoc:executable-prompt-knowledge-of *example-prompt*)
+               (hyperdoc:executable-prompt-knowledge-of *example-reloaded-prompt*)))
+
 (format t "~&amp;~S ~S~%"
-        (type-of *example-prompt*)
-        (hyperdoc:split-view-response-validation-result-of *example-response*))</code></pre>
+        (type-of *example-reloaded-response*)
+        *example-roundtrip-validation*)</code></pre>
 
 <p>
   Load the inspector only for the split-view tab or CLOG-backed inspection.
@@ -139,7 +174,7 @@ Never calls SLYNK:INSPECT-IN-EMACS directly."
        (inspect object)
        object))))
 
-(i *example-response*)</code></pre>
+(i *example-reloaded-response*)</code></pre>
 
 <h2>Inspector surface</h2>
 
@@ -156,6 +191,7 @@ Never calls SLYNK:INSPECT-IN-EMACS directly."
   <li>No DMX write-path mutation is implied by this contract.</li>
   <li>No public deployment behavior is implied by this contract.</li>
   <li>No broad UI redesign is implied by this contract.</li>
+  <li>The pure prompt core is <tt>:hyperdoc/s-expression-prompts</tt>; it must not depend on or load <tt>:drakma</tt>, <tt>:cl+ssl</tt>, <tt>:hunchentoot</tt>, <tt>:clack</tt>, <tt>:usocket</tt>, or HyperDoc server/explorer/inspector systems.</li>
   <li>Existing topicmap projection semantics stay intact; this route adds a durable executable prompt program above them.</li>
 </ul>
 
@@ -164,7 +200,10 @@ Never calls SLYNK:INSPECT-IN-EMACS directly."
 <ul>
   <li><source-of-function>make-executable-prompt</source-of-function></li>
   <li><source-of-function>html-page-to-topicmap-program</source-of-function></li>
+  <li><source-of-function>hyperdoc-html-to-topicmap-program</source-of-function></li>
   <li><source-of-function>topicmap-program-to-fedwiki-story-items</source-of-function></li>
+  <li><source-of-function>split-view-response-to-hyperdoc-html</source-of-function></li>
+  <li><source-of-function>validate-topicmap-program-equivalence</source-of-function></li>
   <li><source-of-function>validate-split-view-response</source-of-function></li>
 </ul>
 
