@@ -447,12 +447,22 @@
             "*prompt-page-path*
    *prompt-result*
    :if-exists :supersede"
-            html
+           html
             "Generated prompt page replay must use path first and response second")
            (s-expression-prompt-smoke-assert-contains
             "(asdf:load-system :hyperdoc/inspector)"
             html
             "Generated prompt page must include optional late inspector replay")
+           (s-expression-prompt-smoke-assert-contains
+            "(handler-case
+     (progn
+       (asdf:load-system :hyperdoc/inspector)"
+            html
+            "Generated prompt page must guard optional inspector loading")
+           (s-expression-prompt-smoke-assert-contains
+            "Optional HyperDoc inspector load failed; pure split-view replay remains valid"
+            html
+            "Generated prompt page must keep pure replay valid when optional inspector loading fails")
            (s-expression-prompt-smoke-assert
             (getf program-validation :success-p)
             "Generated prompt page reload must reconstruct an equivalent program")

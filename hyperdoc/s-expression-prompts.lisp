@@ -593,7 +593,13 @@
           (s-expression-prompt-replay-path-form path)))
 
 (defun s-expression-prompt-inspector-replay-string ()
-  "(asdf:load-system :hyperdoc/inspector)
+  "(handler-case
+     (progn
+       (asdf:load-system :hyperdoc/inspector)
+       (format t \"~&Optional HyperDoc inspector loaded.~%\"))
+   (condition (condition)
+     (format t \"~&Optional HyperDoc inspector load failed; pure split-view replay remains valid: ~A~%\"
+             condition)))
 
 (defun i (object)
   \"Safe inspector helper for SLY mREPL.

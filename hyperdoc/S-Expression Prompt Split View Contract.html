@@ -180,10 +180,17 @@
 
 <p>
   Load the inspector only for the split-view tab or CLOG-backed inspection.
-  This second section is intentionally outside the pure core boundary.
+  This second section is intentionally outside the pure core boundary. If it
+  cannot load the inspector stack, the pure replay above remains the authority.
 </p>
 
-<pre><code>(asdf:load-system :hyperdoc/inspector)
+<pre><code>(handler-case
+     (progn
+       (asdf:load-system :hyperdoc/inspector)
+       (format t "~&amp;Optional HyperDoc inspector loaded.~%"))
+   (condition (condition)
+     (format t "~&amp;Optional HyperDoc inspector load failed; pure split-view replay remains valid: ~A~%"
+             condition)))
 
 (defun i (object)
   "Safe inspector helper for SLY mREPL.
