@@ -1,4 +1,16 @@
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (unless (find-package :hyperdoc/tests)
+    (defpackage :hyperdoc/tests
+      (:use :cl)
+      (:export :run-hyperdoc-tests
+               :run-s-expression-prompt-smoke-tests))))
+
 (in-package :hyperdoc/tests)
+
+(eval-when (:load-toplevel :execute)
+  (unless (fboundp 'run-s-expression-prompt-smoke-tests)
+    (require :asdf)
+    (asdf:load-system :hyperdoc/tests)))
 
 (defun run-hyperdoc-tests ()
   ;; This boundary check must run before compile-order tests intentionally load
@@ -51,6 +63,7 @@
   (run-dm6-page-topicmap-smoke-tests)
   (run-topicmap-view-smoke-tests)
   (run-topic-files-topicmap-smoke-tests)
+  (run-s-expression-prompt-smoke-tests)
   (run-fedwiki-asdf-assets-smoke-tests)
   (run-fedwiki-attached-asdf-system-smoke-tests)
   (run-dmx-shared-workspace-docs-smoke-tests)

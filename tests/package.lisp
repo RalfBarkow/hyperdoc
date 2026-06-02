@@ -60,6 +60,7 @@
    :run-dm6-page-topicmap-smoke-tests
    :run-topicmap-view-smoke-tests
    :run-topic-files-topicmap-smoke-tests
+   :run-s-expression-prompt-smoke-tests
    :run-fedwiki-asdf-assets-smoke-tests
    :run-fedwiki-attached-asdf-system-smoke-tests
    :run-dmx-shared-workspace-docs-smoke-tests

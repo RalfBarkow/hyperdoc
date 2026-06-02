@@ -283,6 +283,29 @@
    #:write-topicmap-view-html
    #:inspect-artifact-content
    #:inspect-topicmap-view
+   ;; Executable S-expression prompt split views
+   #:executable-prompt
+   #:split-view-response
+   #:make-executable-prompt
+   #:make-split-view-response
+   #:executable-prompt-knowledge-of
+   #:executable-prompt-input-of
+   #:executable-prompt-output-contract-of
+   #:executable-prompt-topicmap-program-of
+   #:executable-prompt-program-form
+   #:split-view-response-fedwiki-story-items-of
+   #:split-view-response-topicmap-program-of
+   #:split-view-response-validation-result-of
+   #:html-page-to-topicmap-program
+   #:plump-dom-to-topicmap-program
+   #:topicmap-program-to-fedwiki-story-items
+   #:topicmap-program-topics
+   #:topicmap-program-relations
+   #:validate-split-view-response
+   #:split-view-response-valid-p
+   #:topicmap-program-pretty-string
+   #:split-view-response-story-view
+   #:split-view-response-program-view
    #:topic-source-file
    #:topic-factory-source-record
    #:topic-files-topicmap

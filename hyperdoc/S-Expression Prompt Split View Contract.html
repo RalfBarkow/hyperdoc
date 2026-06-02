@@ -1,0 +1,109 @@
+<h1>S-Expression Prompt Split View Contract</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This page defines the reference contract for executable prompts that must
+  move between HyperDoc pages, FedWiki stories, topic maps, inspector views, and
+  rendered HTML. The durable object is the S-expression topic/relation program;
+  the other surfaces are projections unless a slice explicitly changes that
+  authority.
+</p>
+
+<h2>Page genre</h2>
+
+<p>
+  Reference/contract page. This is not a walkthrough example; it names the
+  invariants that prompt/projection slices must preserve.
+</p>
+
+<h2>Three-layer executable prompt</h2>
+
+<ol>
+  <li><b>Knowledge:</b> rules, constraints, invariants, repo boundaries, terminology, and validation policy.</li>
+  <li><b>Input:</b> concrete execution data such as source page path, parsed DOM/tree, selected story items, source evidence, and the operator task.</li>
+  <li><b>Output contract:</b> required response views, validation predicates, replay expectations, and exact success/failure shape.</li>
+</ol>
+
+<p>
+  In Lisp this is represented by <tt>executable-prompt</tt>. The prompt can
+  carry its durable topic map program directly, while still preserving the
+  three explicit layers for inspection and replay.
+</p>
+
+<h2>Split-view response</h2>
+
+<p>
+  A valid response for this workflow has two synchronized views:
+</p>
+
+<ul>
+  <li><b>FedWiki story view:</b> a human-readable sequence of story items.</li>
+  <li><b>Topic map program view:</b> the corresponding S-expression topic/relation program.</li>
+</ul>
+
+<p>
+  The split view is represented by <tt>split-view-response</tt>. Validation
+  succeeds only when both views name the same topic ids and relation ids.
+</p>
+
+<h2>Projection authority</h2>
+
+<p>
+  The topic map program is the durable program. HTML pages, parsed Plump DOM
+  trees, FedWiki story JSON, DMX topic maps, inspector views, and rendered pages
+  are projections of that program. A projection slice must not silently invert
+  authority by treating rendered HTML or story JSON as the durable source unless
+  the task says so explicitly.
+</p>
+
+<h2>Validation contract</h2>
+
+<ul>
+  <li><tt>html-page-to-topicmap-program</tt> projects a HyperDoc HTML page, pathname, HTML string, or Plump-backed page DOM into the S-expression topic/relation program.</li>
+  <li><tt>plump-dom-to-topicmap-program</tt> projects a parsed Plump DOM/tree into the same program form.</li>
+  <li><tt>topicmap-program-to-fedwiki-story-items</tt> renders the human story projection.</li>
+  <li><tt>validate-split-view-response</tt> verifies the crosswalk between story items and the program.</li>
+</ul>
+
+<p>
+  Success shape is <tt>(:success :fedwiki-story-view
+  :topic-map-program-view :validated-crosswalk)</tt>. Failure shape is
+  <tt>(:failure :crosswalk-mismatch :missing-story-topics
+  :extra-story-topics :missing-story-relations :extra-story-relations)</tt>.
+</p>
+
+<h2>Inspector surface</h2>
+
+<p>
+  The inspector exposes a <tt>Split view</tt> tab for
+  <tt>split-view-response</tt> objects. The tab shows the story items first for
+  human reading, then the exact S-expression program, then the validation
+  result.
+</p>
+
+<h2>Boundary</h2>
+
+<ul>
+  <li>No DMX write-path mutation is implied by this contract.</li>
+  <li>No public deployment behavior is implied by this contract.</li>
+  <li>No broad UI redesign is implied by this contract.</li>
+  <li>Existing topicmap projection semantics stay intact; this route adds a durable executable prompt program above them.</li>
+</ul>
+
+<h2>Source entry points</h2>
+
+<ul>
+  <li><source-of-function>make-executable-prompt</source-of-function></li>
+  <li><source-of-function>html-page-to-topicmap-program</source-of-function></li>
+  <li><source-of-function>topicmap-program-to-fedwiki-story-items</source-of-function></li>
+  <li><source-of-function>validate-split-view-response</source-of-function></li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="Codex handover for HyperDoc">Codex handover for HyperDoc</a></li>
+  <li><a page="Surface and Artifact Answers">Surface and Artifact Answers</a></li>
+  <li><a page="Authoring Documentation in HyperDoc">Authoring Documentation in HyperDoc</a></li>
+</ul>

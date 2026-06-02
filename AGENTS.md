@@ -70,6 +70,48 @@ This repository is a Common Lisp multi-system project centered on HyperDoc and H
   - keep fast-moving collaborative trail in localhost FedWiki pages,
   - maintain navigable links/counterparts per topic instead of forcing identical content in both places.
 
+## S-Expression Prompt / Split-View Contract
+
+When a slice touches prompt design, executable prompts, page-to-topicmap
+projection, FedWiki story generation, HyperDoc page generation, or inspector
+topicmap views, treat the prompt as a homoiconic S-expression program with
+three explicit layers:
+
+1. Knowledge
+   - rules
+   - constraints
+   - invariants
+   - repo boundaries
+   - terminology
+   - validation policy
+
+2. Input
+   - concrete execution data
+   - source page path
+   - parsed DOM/tree
+   - selected story items
+   - source evidence
+   - operator task
+
+3. Output contract
+   - required response views
+   - validation predicates
+   - replay expectations
+   - exact success/failure shape
+
+A valid HyperDoc prompt response in this workflow must be representable as a
+split view:
+
+- FedWiki story view: human-readable sequence of story items.
+- Topic map program view: the corresponding S-expression topic/relation program.
+
+The topic map program is not an external syntax tree. It is the durable program.
+HTML, FedWiki story JSON, DMX topic maps, inspector views, and rendered pages are
+projections of that program unless the slice explicitly says otherwise.
+
+Do not create a prose-only answer for these slices. Preserve the program form,
+validate it, and expose it through the inspector.
+
 ## Touch-Fahrplan Route Terminology
 
 When a slice touches Connect, Dock, Annotation, Touch-Fahrplan, or DMX
