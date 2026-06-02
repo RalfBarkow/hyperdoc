@@ -151,19 +151,18 @@
 (defun load-hyperdoc-reel-assets (body)
   (when (typep body 'clog:clog-body)
     (ensure-reel-asset-path)
-    (let ((html-document (clog:html-document body)))
-      (clog:load-css
-       html-document
-       (versioned-reel-asset-url
-        +hyperdoc-reel-css-url+
-        "assets/hyperdoc/css/hyperdoc-reel.css"))
-      (clog:load-script
-       html-document
-       (versioned-reel-asset-url
-        +hyperdoc-reel-js-url+
-        "assets/hyperdoc/js/hyperdoc-reel.js")
-       :wait-for-load nil
-       :load-only-once nil))))
+    (let ((css-url (versioned-reel-asset-url
+                    +hyperdoc-reel-css-url+
+                    "assets/hyperdoc/css/hyperdoc-reel.css"))
+          (js-url (versioned-reel-asset-url
+                   +hyperdoc-reel-js-url+
+                   "assets/hyperdoc/js/hyperdoc-reel.js")))
+      (clog:js-execute
+       body
+       (format nil
+               "(function(){var href=~S;var src=~S;if(!document.querySelector('link[data-hyperdoc-reel-css]')){var link=document.createElement('link');link.rel='stylesheet';link.href=href;link.dataset.hyperdocReelCss='true';document.head.appendChild(link);}if(!document.querySelector('script[data-hyperdoc-reel-js]')){var script=document.createElement('script');script.src=src;script.defer=true;script.dataset.hyperdocReelJs='true';document.head.appendChild(script);}else if(window.hyperdocReel){window.hyperdocReel.init(document);}})()"
+               css-url
+               js-url)))))
 
 (defun make-reel-button (parent class label glyph)
   (let ((button (clog:create-button
@@ -261,13 +260,13 @@
                                    (playground? t))
   (let ((sb (clog:create-style-block (clog:connection-body body))))
     (setf (clog:text sb) *css*))
-  (load-hyperdoc-reel-assets body)
   (when (typep body 'clog:clog-body)
     (let ((html-document (clog:html-document body)))
       (setf (clog:title html-document) title)))
   (let ((inspector (create-inspector body
                                      :pane-width pane-width
                                      :playground? playground?)))
+    (load-hyperdoc-reel-assets body)
     (create-pane inspector object)))
 
 (defmethod select-view ((pane pane) view-index-or-title)

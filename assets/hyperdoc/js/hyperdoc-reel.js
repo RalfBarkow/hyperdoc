@@ -145,9 +145,16 @@
 
   function ensureItemSemantics(scrollable) {
     reelItems(scrollable).forEach(function (item, index) {
-      item.classList.add("hyperdoc-reel__item");
-      item.setAttribute("role", "listitem");
-      item.setAttribute("aria-label", "Inspector pane " + (index + 1));
+      if (!item.classList.contains("hyperdoc-reel__item")) {
+        item.classList.add("hyperdoc-reel__item");
+      }
+      if (item.getAttribute("role") !== "listitem") {
+        item.setAttribute("role", "listitem");
+      }
+      var label = "Inspector pane " + (index + 1);
+      if (item.getAttribute("aria-label") !== label) {
+        item.setAttribute("aria-label", label);
+      }
     });
   }
 
@@ -215,6 +222,10 @@
     scrollable.addEventListener("scroll", debouncedUpdate, { passive: true });
     window.addEventListener("resize", debouncedUpdate, { passive: true });
 
+    ensureItemSemantics(scrollable);
+    observeItems(state);
+    update(state);
+
     state.mutationObserver = new MutationObserver(function () {
       ensureItemSemantics(scrollable);
       observeItems(state);
@@ -226,10 +237,6 @@
       attributes: true,
       attributeFilter: ["hidden", "class"]
     });
-
-    ensureItemSemantics(scrollable);
-    observeItems(state);
-    update(state);
     return state;
   }
 
