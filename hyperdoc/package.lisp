@@ -379,6 +379,14 @@
    #:mobile-progressive-chrome-plan
    #:reload-mobile-progressive-chrome-slice
    #:run-mobile-progressive-chrome-slice-checks
+   ;; Inspector Reel/carousel documentation slice
+   #:reel-accessible-carousel-page
+   #:reel-accessible-carousel-slice
+   #:reel-accessible-carousel-state-model
+   #:reel-accessible-carousel-scxml-artifact
+   #:reel-accessible-carousel-plan
+   #:reel-accessible-carousel-goldberg-answers
+   #:run-reel-accessible-carousel-slice-checks
    ;; Page-as-ASDF-system reload boundaries
    #:page-system
    #:hyperdoc-page-system

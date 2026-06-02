@@ -21,6 +21,7 @@
    :run-dock-presentation-smoke-tests
    :run-dock-annotation-smoke-tests
    :run-mobile-progressive-chrome-smoke-tests
+   :run-reel-accessible-carousel-smoke-tests
    :run-page-system-smoke-tests
    :run-shop3-page-system-smoke-tests
    :run-dmx-annotations-smoke-tests

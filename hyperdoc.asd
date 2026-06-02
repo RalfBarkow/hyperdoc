@@ -53,6 +53,7 @@
                                (:file "dm6-inline-proof")
                                (:file "page-systems")
                                (:file "mobile-progressive-chrome")
+                               (:file "reel-accessible-carousel")
                                (:file "metagraph-fluree")
                                (:file "topic-files-topicmap")))))
 
@@ -157,6 +158,7 @@
                                        (:file "dmx-query-operations")
                                        (:file "dmx-sqlite-query-store")
                                        (:file "mobile-progressive-chrome")
+                                       (:file "reel-accessible-carousel")
                                        (:file "runtime-incidents")
                              (:file "fedwiki-dmx-importer-bug")
                                        (:file "projection-pipeline-operator")
@@ -662,6 +664,7 @@
                                        (:file "dock-presentation-smoke")
                                        (:file "dock-annotation-smoke")
                                        (:file "mobile-progressive-chrome-smoke")
+                                       (:file "reel-accessible-carousel-smoke")
                                        (:file "page-system-smoke")
                                        (:file "dmx-annotations-smoke")
                                        (:file "dmx-workspace-journal-sink-smoke")

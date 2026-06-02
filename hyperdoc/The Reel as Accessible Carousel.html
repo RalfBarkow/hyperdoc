@@ -1,0 +1,116 @@
+<h1>The Reel as Accessible Carousel</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Page genre: reference/contract. HyperDoc inspector panes use Every Layout's
+  Reel as the layout primitive and BBC GEL's carousel guidance as the
+  accessibility contract. This is not an autoplay carousel; it is a
+  user-controlled horizontal inspector surface.
+</p>
+
+<h2>Claim</h2>
+
+<p>
+  HyperDoc inspector panes should be horizontally navigable as a browser-native
+  Reel with accessible carousel controls, not as an opaque custom carousel
+  widget.
+</p>
+
+<ul>
+  <li>Every Layout's Reel gives the horizontal overflow layout primitive.</li>
+  <li>BBC GEL gives the user-controlled carousel accessibility contract.</li>
+  <li>Robert Best's scroll-snap lineup and Paul Rodwell's page-local component reorder are prior FedWiki CSS-native layout experiments.</li>
+</ul>
+
+<h2>Inspector Contract</h2>
+
+<ul>
+  <li>Panes remain in document order.</li>
+  <li>Horizontal overflow remains native for touch, trackpad, wheel, shift-wheel, scrollbar, and keyboard focus.</li>
+  <li>Previous and next buttons enhance the native scroll container; they are real <code>button type="button"</code> controls.</li>
+  <li>Buttons are hidden until JavaScript initializes, then scroll by half the scrollable viewport width.</li>
+  <li>Boundary buttons disable at the left and right scroll limits.</li>
+  <li>Less-than-half-visible panes become inert when browser support allows it; fallback focus management keeps obscured panes from trapping keyboard focus.</li>
+  <li>Reduced-motion preference is respected.</li>
+  <li>Autoplay must never be introduced.</li>
+</ul>
+
+<h2>Implementation Surface</h2>
+
+<ul>
+  <li><code>hyperbook-server/inspector-performance.lisp</code> creates <code>section.hyperdoc-reel</code>, hidden controls, and the scrollable <code>.inspector.hyperdoc-reel__scrollable</code> adapter.</li>
+  <li><code>assets/hyperdoc/css/hyperdoc-reel.css</code> provides the namespaced Reel layout, snap affordance, reduced-motion rule, and high-contrast boundaries.</li>
+  <li><code>assets/hyperdoc/js/hyperdoc-reel.js</code> initializes every <code>.hyperdoc-reel</code>, reveals controls, debounces scroll updates, tracks boundary buttons, and applies inertness.</li>
+</ul>
+
+<h2>Inspectable Objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="The Reel as Accessible Carousel"><tt>The Reel as Accessible Carousel</tt></a></li>
+  <li><a hyperbook="topics" page="Inspector pane surface"><tt>Inspector pane surface</tt></a></li>
+  <li><a hyperbook="topics" page="Accessible Reel carousel contract"><tt>Accessible Reel carousel contract</tt></a></li>
+  <li><a hyperbook="topics" page="Reel progressive enhancement state model"><tt>Reel progressive enhancement state model</tt></a></li>
+  <li><a hyperbook="topics" page="Reel as Accessible Carousel plan"><tt>Reel as Accessible Carousel plan</tt></a></li>
+  <li><a expr="(reel-accessible-carousel-slice)"><tt>(reel-accessible-carousel-slice)</tt></a></li>
+  <li><a expr="(reel-accessible-carousel-scxml-artifact)"><tt>(reel-accessible-carousel-scxml-artifact)</tt></a></li>
+  <li><a expr="(reel-accessible-carousel-plan)"><tt>(reel-accessible-carousel-plan)</tt></a></li>
+  <li><a expr="(reel-accessible-carousel-goldberg-answers)"><tt>(reel-accessible-carousel-goldberg-answers)</tt></a></li>
+</ul>
+
+<h2>SHOP3 Task</h2>
+
+<pre><code class="language-lisp">(:task apply-the-reel-as-accessible-carousel
+  :given
+  ((hyperdoc-inspector-pane-surface exists)
+   (browser-native-horizontal-overflow available)
+   (gel-carousel-accessibility-contract available))
+  :achieve
+  ((inspector-panes-behave-as-accessible-reel)
+   (keyboard-mouse-touch-navigation-supported)
+   (offscreen-panes-do-not-trap-focus)
+   (layout-behavior-is-test-covered)))</code></pre>
+
+<h2>SCXML Sketch</h2>
+
+<pre><code class="language-xml">&lt;scxml initial="uninitialized"&gt;
+  &lt;state id="uninitialized"&gt;
+    &lt;transition event="dom.ready" target="enhanced"/&gt;
+  &lt;/state&gt;
+  &lt;state id="enhanced"&gt;
+    &lt;transition event="scroll" target="updating-boundary-buttons"/&gt;
+    &lt;transition event="intersection.changed" target="updating-pane-inertness"/&gt;
+  &lt;/state&gt;
+  &lt;state id="updating-boundary-buttons"&gt;
+    &lt;transition event="done" target="enhanced"/&gt;
+  &lt;/state&gt;
+  &lt;state id="updating-pane-inertness"&gt;
+    &lt;transition event="done" target="enhanced"/&gt;
+  &lt;/state&gt;
+&lt;/scxml&gt;</code></pre>
+
+<h2>Goldberg Questions</h2>
+
+<dl>
+  <dt>What is this component?</dt>
+  <dd>A user-controlled horizontal inspector pane Reel.</dd>
+  <dt>What problem does it solve?</dt>
+  <dd>It gives multiple inspector panes a perceivable, accessible horizontal navigation model.</dd>
+  <dt>What are its parts?</dt>
+  <dd>Group, buttons, scrollable viewport, pane list, pane items, inertness observer.</dd>
+  <dt>What happens without JavaScript?</dt>
+  <dd>Native horizontal scrolling remains usable.</dd>
+  <dt>What happens with JavaScript?</dt>
+  <dd>Buttons, inertness, and boundary disabling are added.</dd>
+  <dt>What must never happen?</dt>
+  <dd>Autoplay, focus traps in obscured panes, or a custom widget that suppresses native scrolling.</dd>
+</dl>
+
+<h2>Boundary</h2>
+
+<p>
+  This contract covers the inspector pane row. It does not replace Dock identity,
+  pane body route traversal, Annotation, or Touch-Fahrplan route-laying. The
+  Reel controls move through existing inspector panes; command dispatch and pane
+  content semantics remain owned by the inspector and HyperDoc runtime.
+</p>

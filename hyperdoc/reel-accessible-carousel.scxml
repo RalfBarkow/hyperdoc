@@ -1,0 +1,15 @@
+<scxml initial="uninitialized">
+  <state id="uninitialized">
+    <transition event="dom.ready" target="enhanced"/>
+  </state>
+  <state id="enhanced">
+    <transition event="scroll" target="updating-boundary-buttons"/>
+    <transition event="intersection.changed" target="updating-pane-inertness"/>
+  </state>
+  <state id="updating-boundary-buttons">
+    <transition event="done" target="enhanced"/>
+  </state>
+  <state id="updating-pane-inertness">
+    <transition event="done" target="enhanced"/>
+  </state>
+</scxml>
