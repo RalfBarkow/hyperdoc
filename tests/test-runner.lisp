@@ -3,6 +3,7 @@
     (defpackage :hyperdoc/tests
       (:use :cl)
       (:export :run-hyperdoc-tests
+               :run-s-expression-prompt-pure-core-smoke-test
                :run-s-expression-prompt-smoke-tests))))
 
 (in-package :hyperdoc/tests)

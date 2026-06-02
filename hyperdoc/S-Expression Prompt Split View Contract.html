@@ -73,6 +73,74 @@
   :extra-story-topics :missing-story-relations :extra-story-relations)</tt>.
 </p>
 
+<h2>SLY mREPL replay</h2>
+
+<p>
+  The first section loads only the pure prompt/projection core. It must be able
+  to construct executable prompts, parse local HTML strings, project topicmap
+  programs, generate story items, and validate the split view without loading
+  HTTP, TLS, DMX write-path, server, explorer, or inspector systems.
+</p>
+
+<pre><code>(require :asdf)
+(asdf:load-system :hyperdoc/s-expression-prompts)
+
+(defparameter *example-program*
+  (hyperdoc:html-page-to-topicmap-program
+   "&lt;article&gt;&lt;h1&gt;Prompt Split View&lt;/h1&gt;&lt;p&gt;Program is durable.&lt;/p&gt;&lt;/article&gt;"
+   :source-path "smoke.html"
+   :source-title "Prompt Split View"))
+
+(defparameter *example-prompt*
+  (hyperdoc:make-executable-prompt
+   :knowledge '(:rules (:program-is-durable)
+                :boundaries (:no-http-stack :no-dmx-write-path))
+   :input (getf (rest *example-program*) :input)
+   :output-contract (getf (rest *example-program*) :output-contract)
+   :topicmap-program *example-program*))
+
+(defparameter *example-response*
+  (hyperdoc:make-split-view-response
+   :fedwiki-story-items
+   (hyperdoc:topicmap-program-to-fedwiki-story-items *example-program*)
+   :topicmap-program *example-program*))
+
+(format t "~&amp;~S ~S~%"
+        (type-of *example-prompt*)
+        (hyperdoc:split-view-response-validation-result-of *example-response*))</code></pre>
+
+<p>
+  Load the inspector only for the split-view tab or CLOG-backed inspection.
+  This second section is intentionally outside the pure core boundary.
+</p>
+
+<pre><code>(asdf:load-system :hyperdoc/inspector)
+
+(defun i (object)
+  "Safe inspector helper for SLY mREPL.
+Prefer CLOG only if it is already loaded; otherwise use CL:INSPECT.
+Never calls SLYNK:INSPECT-IN-EMACS directly."
+  (let* ((clog-package (find-package "CLOG-MOLDABLE-INSPECTOR"))
+         (clog-symbol
+           (and clog-package
+                (find-symbol "CLOG-INSPECT" clog-package))))
+    (cond
+      ((and clog-symbol (fboundp clog-symbol))
+       (handler-case
+           (progn
+             (funcall (symbol-function clog-symbol) :object object)
+             object)
+         (condition (condition)
+           (format t "~&amp;CLOG inspector failed; falling back to CL:INSPECT: ~A~%"
+                   condition)
+           (inspect object)
+           object)))
+      (t
+       (inspect object)
+       object))))
+
+(i *example-response*)</code></pre>
+
 <h2>Inspector surface</h2>
 
 <p>

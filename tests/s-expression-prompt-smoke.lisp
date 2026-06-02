@@ -3,7 +3,9 @@
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package :hyperdoc/tests)
     (make-package :hyperdoc/tests :use '(:cl)))
-  (export (list (intern "RUN-S-EXPRESSION-PROMPT-SMOKE-TESTS"
+  (export (list (intern "RUN-S-EXPRESSION-PROMPT-PURE-CORE-SMOKE-TEST"
+                        :hyperdoc/tests)
+                (intern "RUN-S-EXPRESSION-PROMPT-SMOKE-TESTS"
                         :hyperdoc/tests))
           :hyperdoc/tests))
 
@@ -22,15 +24,49 @@
   (unless (and haystack (search needle haystack :test #'char=))
     (error "~A -- missing substring: ~S" message needle)))
 
+(defun s-expression-prompt-smoke-symbol (package-name symbol-name)
+  (let* ((package (find-package package-name))
+         (symbol (and package (find-symbol symbol-name package))))
+    (unless symbol
+      (error "Required symbol is unavailable: ~A::~A"
+             package-name symbol-name))
+    symbol))
+
+(defun s-expression-prompt-smoke-function (package-name symbol-name)
+  (let ((symbol (s-expression-prompt-smoke-symbol package-name symbol-name)))
+    (unless (fboundp symbol)
+      (error "Required function is unavailable: ~A::~A"
+             package-name symbol-name))
+    (symbol-function symbol)))
+
 (defun s-expression-prompt-smoke-load-inspector-views (object)
-  (let ((pane (make-instance 'clog-moldable-inspector::pane
-                             :inspector nil
-                             :object object)))
-    (clog-moldable-inspector::load-views pane)
-    (slot-value pane 'clog-moldable-inspector::views)))
+  (let* ((pane-class
+           (s-expression-prompt-smoke-symbol
+            "CLOG-MOLDABLE-INSPECTOR" "PANE"))
+         (load-views
+           (s-expression-prompt-smoke-function
+            "CLOG-MOLDABLE-INSPECTOR" "LOAD-VIEWS"))
+         (views-slot
+           (s-expression-prompt-smoke-symbol
+            "CLOG-MOLDABLE-INSPECTOR" "VIEWS"))
+         (pane (make-instance pane-class
+                              :inspector nil
+                              :object object)))
+    (funcall load-views pane)
+    (slot-value pane views-slot)))
+
+(defun s-expression-prompt-smoke-view-title (view)
+  (funcall
+   (s-expression-prompt-smoke-function "HTML-INSPECTOR-VIEWS" "VIEW-TITLE")
+   view))
+
+(defun s-expression-prompt-smoke-view-html (view)
+  (funcall
+   (s-expression-prompt-smoke-function "HTML-INSPECTOR-VIEWS" "VIEW-HTML")
+   view))
 
 (defun s-expression-prompt-smoke-find-view (views title)
-  (find title views :key #'html-inspector-views:view-title :test #'string=))
+  (find title views :key #'s-expression-prompt-smoke-view-title :test #'string=))
 
 (defun s-expression-prompt-smoke-html ()
   "<article id=\"split-view-contract\">
@@ -120,7 +156,7 @@
     (s-expression-prompt-smoke-assert
      view
      "Split-view response inspector must expose a Split view")
-    (let ((html (html-inspector-views:view-html view)))
+    (let ((html (s-expression-prompt-smoke-view-html view)))
       (s-expression-prompt-smoke-assert-contains
        "FedWiki story view"
        html
@@ -135,10 +171,27 @@
        "Inspector split view must render durable program topic ids")))
   t)
 
-(defun run-s-expression-prompt-smoke-tests ()
-  (asdf:load-system :hyperdoc/explorer)
+(defun run-s-expression-prompt-pure-core-smoke-test ()
+  (asdf:load-system :hyperdoc/s-expression-prompts)
+  (let ((program
+          (hyperdoc:html-page-to-topicmap-program
+           "<article><h1>Prompt Split View</h1><p>Program is durable.</p></article>"
+           :source-path "smoke.html"
+           :source-title "Prompt Split View")))
+    (s-expression-prompt-smoke-assert
+     program
+     "Pure prompt core must project local HTML into a topicmap program")
+    (s-expression-prompt-smoke-assert
+     (getf (rest program) :topics)
+     "Pure prompt core projection must produce topic entries"))
   (run-s-expression-prompt-object-smoke-test)
   (run-s-expression-prompt-crosswalk-smoke-test)
+  (format t "~&S-expression prompt pure core smoke tests passed.~%")
+  t)
+
+(defun run-s-expression-prompt-smoke-tests ()
+  (run-s-expression-prompt-pure-core-smoke-test)
+  (asdf:load-system :hyperdoc/explorer)
   (run-s-expression-prompt-inspector-smoke-test)
   (format t "~&S-expression prompt split-view smoke tests passed.~%")
   t)

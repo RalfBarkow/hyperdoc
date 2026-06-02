@@ -23,6 +23,31 @@
                                (:file "links-in-code")
                                (:file "dm6-page-topicmap-api")))))
 
+(defsystem #:hyperdoc/s-expression-prompts
+    :description "Pure executable S-expression prompt model and HTML projection core"
+    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :license  "BSD"
+    :version "0.0.1"
+    :homepage "https://codeberg.org/khinsen/hyperdoc"
+    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :serial t
+    :depends-on (#:hyperdoc/kernel
+                 #:plump)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "s-expression-prompts")))))
+
+(defsystem #:hyperdoc/s-expression-prompts/tests
+    :description "Smoke tests for the pure executable S-expression prompt core"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/s-expression-prompts)
+    :components ((:module "tests"
+                  :serial t
+                  :components ((:file "s-expression-prompt-smoke")))))
+
 (defsystem #:hyperdoc/topics
     :description "Inspectable authored topic registry for HyperDoc"
     :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -115,6 +140,7 @@
     :depends-on (#:hyperdoc/topics
                  #:hyperdoc/checks
                  #:hyperdoc/state-machines
+                 #:hyperdoc/s-expression-prompts
                  #:shasht)
     :in-order-to ((test-op (test-op "hyperdoc/tests")))
     :components ((:module "hyperdoc"
@@ -153,7 +179,6 @@
                                        (:file "fedwiki-attached-asdf-system")
                                        (:file "source-artifacts")
                                        (:file "topicmap-projection")
-                                       (:file "s-expression-prompts")
                                        (:file "topic-files-topicmap")
                                        (:file "dmx-query-layer")
                                        (:file "dmx-query-operations")
