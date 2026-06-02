@@ -162,7 +162,8 @@
        (versioned-reel-asset-url
         +hyperdoc-reel-js-url+
         "assets/hyperdoc/js/hyperdoc-reel.js")
-       :wait-for-load nil))))
+       :wait-for-load nil
+       :load-only-once nil))))
 
 (defun make-reel-button (parent class label glyph)
   (let ((button (clog:create-button

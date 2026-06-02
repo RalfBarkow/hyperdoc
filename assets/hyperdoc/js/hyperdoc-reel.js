@@ -222,6 +222,7 @@
     });
     state.mutationObserver.observe(scrollable, {
       childList: true,
+      subtree: true,
       attributes: true,
       attributeFilter: ["hidden", "class"]
     });
