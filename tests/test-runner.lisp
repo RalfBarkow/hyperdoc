@@ -10,7 +10,14 @@
 (eval-when (:load-toplevel :execute)
   (unless (fboundp 'run-s-expression-prompt-smoke-tests)
     (require :asdf)
-    (asdf:load-system :hyperdoc/tests)))
+    (let* ((asdf-package (find-package "ASDF"))
+           (load-system-symbol
+             (and asdf-package
+                  (find-symbol "LOAD-SYSTEM" asdf-package))))
+      (unless (and load-system-symbol
+                   (fboundp load-system-symbol))
+        (error "ASDF:LOAD-SYSTEM is unavailable after REQUIRE :ASDF."))
+      (funcall (symbol-function load-system-symbol) :hyperdoc/tests))))
 
 (defun run-hyperdoc-tests ()
   ;; This boundary check must run before compile-order tests intentionally load

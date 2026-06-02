@@ -22,6 +22,16 @@
   (unless (and haystack (search needle haystack :test #'char=))
     (error "~A -- missing substring: ~S" message needle)))
 
+(defun s-expression-prompt-smoke-load-inspector-views (object)
+  (let ((pane (make-instance 'clog-moldable-inspector::pane
+                             :inspector nil
+                             :object object)))
+    (clog-moldable-inspector::load-views pane)
+    (slot-value pane 'clog-moldable-inspector::views)))
+
+(defun s-expression-prompt-smoke-find-view (views title)
+  (find title views :key #'html-inspector-views:view-title :test #'string=))
+
 (defun s-expression-prompt-smoke-html ()
   "<article id=\"split-view-contract\">
      <h1>S-Expression Prompt Split View Contract</h1>
@@ -97,9 +107,38 @@
        "Failure shape must report missing story topics"))
     response))
 
+(defun run-s-expression-prompt-inspector-smoke-test ()
+  (asdf:load-system :hyperdoc/inspector)
+  (let* ((program (s-expression-prompt-smoke-program))
+         (response
+           (hyperdoc:make-split-view-response
+            :fedwiki-story-items
+            (hyperdoc:topicmap-program-to-fedwiki-story-items program)
+            :topicmap-program program))
+         (views (s-expression-prompt-smoke-load-inspector-views response))
+         (view (s-expression-prompt-smoke-find-view views "Split view")))
+    (s-expression-prompt-smoke-assert
+     view
+     "Split-view response inspector must expose a Split view")
+    (let ((html (html-inspector-views:view-html view)))
+      (s-expression-prompt-smoke-assert-contains
+       "FedWiki story view"
+       html
+       "Inspector split view must expose the human story view")
+      (s-expression-prompt-smoke-assert-contains
+       "Topic map program view"
+       html
+       "Inspector split view must expose the S-expression program view")
+      (s-expression-prompt-smoke-assert-contains
+       "source-page"
+       html
+       "Inspector split view must render durable program topic ids")))
+  t)
+
 (defun run-s-expression-prompt-smoke-tests ()
   (asdf:load-system :hyperdoc/explorer)
   (run-s-expression-prompt-object-smoke-test)
   (run-s-expression-prompt-crosswalk-smoke-test)
+  (run-s-expression-prompt-inspector-smoke-test)
   (format t "~&S-expression prompt split-view smoke tests passed.~%")
   t)
