@@ -25,11 +25,11 @@
 
 (defsystem #:hyperdoc/s-expression-prompts
     :description "Pure executable S-expression prompt model and HTML projection core"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc/kernel
                  #:plump)
@@ -50,11 +50,11 @@
 
 (defsystem #:hyperdoc/topics
     :description "Inspectable authored topic registry for HyperDoc"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc/kernel)
     :components ((:module "hyperdoc/topics"
@@ -84,11 +84,11 @@
 
 (defsystem #:hyperdoc/dmx-topics
     :description "DMX-backed topic proxy objects for HyperDoc"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc/topics
                  #:drakma
@@ -99,11 +99,11 @@
 
 (defsystem #:hyperdoc/checks
     :description "In-image example and documentation validation checks for HyperDoc"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
                   :depends-on (#:hyperdoc/topics
                  #:shasht)
@@ -118,11 +118,11 @@
 
 (defsystem #:hyperdoc/state-machines
     :description "Reusable state-machine objects for HyperDoc workflows"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc/topics)
     :components ((:module "hyperdoc"
@@ -309,11 +309,11 @@
 
 (defsystem #:hyperdoc/zotero-support
     :description "Optional Zotero loading boundary and unavailable-backend objects"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc/topics)
     :components ((:module "hyperdoc"
@@ -322,11 +322,11 @@
 
 (defsystem #:hyperdoc/bibliography
     :description "Bibliography subcollections and authoring plans for HyperDoc"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc/topics
                  #:hyperdoc/zotero-support)
@@ -336,11 +336,11 @@
 
 (defsystem #:hyperdoc/zotero
     :description "Optional Zotero backend for HyperDoc"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc/bibliography
                  #:shasht)
@@ -381,7 +381,7 @@
 
 (defsystem #:hyperdoc/nor-demo
     :description "Teaching slice for the NOR-only matcher demonstration"
-    :author "Ralf Barkow"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
@@ -392,7 +392,7 @@
 
 (defsystem #:hyperdoc/nor-graph-demo
     :description "Graph leaf tests for the NOR matcher teaching demo"
-    :author "Ralf Barkow"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
@@ -403,7 +403,7 @@
 
 (defsystem #:hyperdoc/closures-nor-demo
     :description "Graham closure teaching slice for the NOR graph matcher"
-    :author "Ralf Barkow"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
@@ -414,7 +414,7 @@
 
 (defsystem #:hyperdoc/continuation-route-trace
     :description "Inspectable route bridge for closure-backed NOR matcher traces"
-    :author "Ralf Barkow"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
@@ -425,11 +425,11 @@
 
 (defsystem #:hyperdoc/dmx-import
     :description "FedWiki to DMX import support for HyperDoc"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc
                  #:hyperdoc/dmx-topics
@@ -471,11 +471,11 @@
 
 (defsystem #:hyperdoc/mcp
     :description "Streamable HTTP MCP server for the DMX shared workspace"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc/dmx-import
                  #:hunchentoot)
@@ -539,11 +539,11 @@
 
 (defsystem #:hyperdoc/inspector/zotero
     :description "Zotero-backed inspector views for HyperDoc"
-    :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
     :license  "BSD"
     :version "0.0.1"
-    :homepage "https://codeberg.org/khinsen/hyperdoc"
-    :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+    :homepage "https://codeberg.org/rgb/hyperdoc"
+    :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
     :serial t
     :depends-on (#:hyperdoc/inspector
                  #:hyperdoc/zotero)
