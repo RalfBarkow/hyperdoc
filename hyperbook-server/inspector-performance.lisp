@@ -179,8 +179,9 @@
 (defun create-inspector (parent-obj &key (pane-width "600px") (playground? t))
   (let* ((reel (clog:create-section parent-obj :section
                                     :class "hyperdoc-reel"))
-         (buttons (clog:create-div reel :class "hyperdoc-reel__buttons"))
-         (scrollable (clog:create-div reel
+         (viewport (clog:create-div reel :class "hyperdoc-reel__viewport"))
+         (buttons (clog:create-div viewport :class "hyperdoc-reel__buttons"))
+         (scrollable (clog:create-div viewport
                                       :class "inspector hyperdoc-reel__scrollable hyperdoc-reel__list")))
     (setf (clog:attribute reel "role") "group")
     (setf (clog:attribute reel "aria-label") "Inspector views")

@@ -24,7 +24,7 @@ const reelCssPath = path.join(
   "hyperdoc-reel.css"
 );
 
-async function mountStickyReelFixture(page) {
+async function mountReadingReelFixture(page) {
   await page.setContent(`
     <style>
       ${fs.readFileSync(reelCssPath, "utf8")}
@@ -45,10 +45,28 @@ async function mountStickyReelFixture(page) {
       .pane-fixture {
         box-sizing: border-box;
         flex: 0 0 min(52rem, 100vw);
-        min-height: 42rem;
-        padding: 1rem;
+        min-height: 0;
         border: 1px solid #999;
         background: #fafafa;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .pane-title {
+        flex: 0 0 auto;
+        padding: 0.5rem 0.75rem;
+        background: #ddd;
+      }
+
+      .inspector-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+        padding: 1rem;
+      }
+
+      .long-reading-content {
+        min-height: 72rem;
       }
 
       .after-reel {
@@ -56,15 +74,29 @@ async function mountStickyReelFixture(page) {
       }
     </style>
     <section class="hyperdoc-reel" role="group" aria-label="Inspector views">
-      <div class="hyperdoc-reel__buttons" hidden>
-        <button class="hyperdoc-reel__prev" type="button" aria-label="previous">previous</button>
-        <button class="hyperdoc-reel__next" type="button" aria-label="next">next</button>
-      </div>
-      <div class="hyperdoc-reel__scrollable" tabindex="0">
-        <div class="hyperdoc-reel__item pane-fixture">ordinary page pane one</div>
-        <div class="inspector-pane pane-fixture">inspector pane two</div>
-        <div class="hyperdoc-reel__item pane-fixture">ordinary page pane three</div>
-        <div class="inspector-pane pane-fixture">inspector pane four</div>
+      <div class="hyperdoc-reel__viewport">
+        <div class="hyperdoc-reel__buttons" hidden>
+          <button class="hyperdoc-reel__prev" type="button" aria-label="previous">previous</button>
+          <button class="hyperdoc-reel__next" type="button" aria-label="next">next</button>
+        </div>
+        <div class="hyperdoc-reel__scrollable" tabindex="0">
+          <div class="hyperdoc-reel__item pane-fixture">
+            <div class="pane-title">ordinary page pane one</div>
+            <div class="inspector-body"><div class="long-reading-content">ordinary body one</div></div>
+          </div>
+          <div class="inspector-pane pane-fixture">
+            <div class="pane-title">inspector pane two</div>
+            <div class="inspector-body"><div class="long-reading-content">inspector body two</div></div>
+          </div>
+          <div class="hyperdoc-reel__item pane-fixture">
+            <div class="pane-title">ordinary page pane three</div>
+            <div class="inspector-body"><div class="long-reading-content">ordinary body three</div></div>
+          </div>
+          <div class="inspector-pane pane-fixture">
+            <div class="pane-title">inspector pane four</div>
+            <div class="inspector-body"><div class="long-reading-content">inspector body four</div></div>
+          </div>
+        </div>
       </div>
     </section>
     <div class="after-reel"></div>
@@ -73,6 +105,109 @@ async function mountStickyReelFixture(page) {
   await page.evaluate((source) => {
     window.eval(source);
   }, fs.readFileSync(reelScriptPath, "utf8"));
+}
+
+async function scrollReadingPaneAndMeasureRail(page, paneIndex = 1) {
+  return page.evaluate((index) => {
+    const reel = document.querySelector(".hyperdoc-reel");
+    const scrollable = reel?.querySelector(".hyperdoc-reel__scrollable");
+    const buttons = reel?.querySelector(".hyperdoc-reel__buttons");
+    const prev = reel?.querySelector(".hyperdoc-reel__prev");
+    const next = reel?.querySelector(".hyperdoc-reel__next");
+    const pane = document.querySelectorAll(".inspector-pane")[index];
+    const activeView = pane?.querySelector(".inspector-view:not([hidden])");
+    const readingScroller =
+      pane?.querySelector(".inspector-body") ||
+      activeView ||
+      pane;
+    const maxScrollTop = Math.max(
+      0,
+      (readingScroller?.scrollHeight || 0) - (readingScroller?.clientHeight || 0)
+    );
+
+    if (readingScroller && maxScrollTop > 0) {
+      readingScroller.scrollTop = Math.min(maxScrollTop, 360);
+      readingScroller.dispatchEvent(new Event("scroll"));
+    }
+
+    const buttonsRect = buttons?.getBoundingClientRect();
+    const scrollableRect = scrollable?.getBoundingClientRect();
+    const paneRect = pane?.getBoundingClientRect();
+    const scrollerRect = readingScroller?.getBoundingClientRect();
+    const styles = buttons && window.getComputedStyle(buttons);
+    return {
+      hasViewport: !!reel?.querySelector(".hyperdoc-reel__viewport"),
+      readingScrollerClassName: readingScroller?.className || "",
+      readingScrollTop: readingScroller?.scrollTop || 0,
+      readingMaxScrollTop: maxScrollTop,
+      buttonsTop: buttonsRect?.top ?? null,
+      buttonsBottom: buttonsRect?.bottom ?? null,
+      buttonsLeft: buttonsRect?.left ?? null,
+      buttonsRight: buttonsRect?.right ?? null,
+      scrollableTop: scrollableRect?.top ?? null,
+      scrollableBottom: scrollableRect?.bottom ?? null,
+      scrollableLeft: scrollableRect?.left ?? null,
+      scrollableRight: scrollableRect?.right ?? null,
+      paneBottom: paneRect?.bottom ?? null,
+      scrollerBottom: scrollerRect?.bottom ?? null,
+      viewportHeight: window.innerHeight,
+      position: styles?.position || null,
+      insetBlockEnd: styles?.insetBlockEnd || null,
+      backgroundColor: styles?.backgroundColor || null,
+      paddingBlockStart: styles?.paddingBlockStart || null,
+      paddingBlockEnd: styles?.paddingBlockEnd || null,
+      prevDisabled: !!prev?.disabled,
+      nextDisabled: !!next?.disabled,
+    };
+  }, paneIndex);
+}
+
+async function readReelButtonBoundaryState(page) {
+  return page.evaluate(async () => {
+    const reel = document.querySelector(".hyperdoc-reel");
+    const scrollable = reel?.querySelector(".hyperdoc-reel__scrollable");
+    const prev = reel?.querySelector(".hyperdoc-reel__prev");
+    const next = reel?.querySelector(".hyperdoc-reel__next");
+    const waitForReelUpdate = () =>
+      new Promise((resolve) => window.setTimeout(resolve, 120));
+
+    if (!scrollable) {
+      return null;
+    }
+
+    const originalScrollLeft = scrollable.scrollLeft;
+    const maxScrollLeft = Math.max(
+      0,
+      scrollable.scrollWidth - scrollable.clientWidth
+    );
+    const capture = () => ({
+      scrollLeft: scrollable.scrollLeft,
+      prevDisabled: !!prev?.disabled,
+      nextDisabled: !!next?.disabled,
+    });
+
+    scrollable.scrollLeft = 0;
+    scrollable.dispatchEvent(new Event("scroll"));
+    await waitForReelUpdate();
+    const atStart = capture();
+
+    scrollable.scrollLeft = maxScrollLeft;
+    scrollable.dispatchEvent(new Event("scroll"));
+    await waitForReelUpdate();
+    const atEnd = capture();
+
+    scrollable.scrollLeft = originalScrollLeft;
+    scrollable.dispatchEvent(new Event("scroll"));
+    await waitForReelUpdate();
+
+    return {
+      maxScrollLeft,
+      originalScrollLeft,
+      atStart,
+      atEnd,
+      restored: capture(),
+    };
+  });
 }
 
 test("multi-pane inspector renders as an accessible Reel adapter", async ({
@@ -135,12 +270,12 @@ for (const viewport of [
   { width: 1280, height: 800 },
   { width: 1366, height: 768 },
 ]) {
-  test(`Reel controls remain locally sticky at ${viewport.width}x${viewport.height}`, async ({
+  test(`Reel controls remain reachable while reading a pane fixture at ${viewport.width}x${viewport.height}`, async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.setViewportSize(viewport);
-    await mountStickyReelFixture(page);
+    await mountReadingReelFixture(page);
 
     const buttons = page.locator(".hyperdoc-reel__buttons");
     const prev = page.locator(".hyperdoc-reel__prev");
@@ -153,25 +288,13 @@ for (const viewport of [
     await expect(prev).toBeDisabled();
     await expect(next).toBeEnabled();
 
-    await page.evaluate(() => window.scrollTo(0, 320));
-    const stickyState = await page.evaluate(() => {
-      const buttonsNode = document.querySelector(".hyperdoc-reel__buttons");
+    const railState = await scrollReadingPaneAndMeasureRail(page, 1);
+    const scrollState = await page.evaluate(() => {
       const scrollableNode = document.querySelector(".hyperdoc-reel__scrollable");
-      const rect = buttonsNode.getBoundingClientRect();
-      const styles = window.getComputedStyle(buttonsNode);
       return {
-        top: rect.top,
-        bottom: rect.bottom,
-        viewportHeight: window.innerHeight,
-        position: styles.position,
-        insetBlockStart: styles.insetBlockStart,
-        backgroundColor: styles.backgroundColor,
-        paddingBlockStart: styles.paddingBlockStart,
-        paddingBlockEnd: styles.paddingBlockEnd,
         overflowX: window.getComputedStyle(scrollableNode).overflowX,
         scrollWidth: scrollableNode.scrollWidth,
         clientWidth: scrollableNode.clientWidth,
-        pageScrollY: window.scrollY,
         children: Array.from(scrollableNode.children).map((node) => ({
           role: node.getAttribute("role"),
           isReelItem: node.classList.contains("hyperdoc-reel__item"),
@@ -180,29 +303,32 @@ for (const viewport of [
       };
     });
 
-    expect(stickyState.pageScrollY).toBeGreaterThan(0);
-    expect(stickyState.position).toBe("sticky");
-    expect(stickyState.insetBlockStart).toBe("0px");
-    expect(stickyState.top).toBeGreaterThanOrEqual(-1);
-    expect(stickyState.bottom).toBeLessThanOrEqual(stickyState.viewportHeight + 1);
-    expect(stickyState.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
-    expect(parseFloat(stickyState.paddingBlockStart)).toBeGreaterThan(0);
-    expect(parseFloat(stickyState.paddingBlockEnd)).toBeGreaterThan(0);
-    expect(stickyState.overflowX).toBe("auto");
-    expect(stickyState.scrollWidth).toBeGreaterThan(stickyState.clientWidth);
-    expect(stickyState.children.every((child) => child.role === "listitem")).toBe(true);
-    expect(stickyState.children.some((child) => child.isInspectorPane)).toBe(true);
-    expect(stickyState.children.every((child) => child.isReelItem)).toBe(true);
+    expect(railState.hasViewport).toBe(true);
+    expect(railState.readingScrollerClassName).toContain("inspector-body");
+    expect(railState.readingMaxScrollTop).toBeGreaterThan(0);
+    expect(railState.readingScrollTop).toBeGreaterThan(0);
+    expect(railState.position).toBe("absolute");
+    expect(railState.insetBlockEnd).not.toBe("auto");
+    expect(railState.buttonsTop).toBeGreaterThanOrEqual(railState.scrollableTop - 1);
+    expect(railState.buttonsBottom).toBeLessThanOrEqual(railState.scrollableBottom + 1);
+    expect(railState.buttonsBottom).toBeLessThanOrEqual(railState.viewportHeight + 1);
+    expect(railState.scrollerBottom).toBeLessThanOrEqual(railState.buttonsTop + 1);
+    expect(railState.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+    expect(parseFloat(railState.paddingBlockStart)).toBeGreaterThan(0);
+    expect(parseFloat(railState.paddingBlockEnd)).toBeGreaterThan(0);
+    expect(scrollState.overflowX).toBe("auto");
+    expect(scrollState.scrollWidth).toBeGreaterThan(scrollState.clientWidth);
+    expect(scrollState.children.every((child) => child.role === "listitem")).toBe(true);
+    expect(scrollState.children.some((child) => child.isInspectorPane)).toBe(true);
+    expect(scrollState.children.every((child) => child.isReelItem)).toBe(true);
 
     await page.keyboard.press("Tab");
     const focusState = await page.evaluate(() => ({
       className: document.activeElement.className,
       label: document.activeElement.getAttribute("aria-label"),
-      pageScrollY: window.scrollY,
     }));
     expect(focusState.className).toContain("hyperdoc-reel__next");
     expect(focusState.label).toBe("next");
-    expect(focusState.pageScrollY).toBeGreaterThan(0);
 
     const initialScrollLeft = await scrollable.evaluate((node) => node.scrollLeft);
     const nativeScrollLeft = await scrollable.evaluate((node) => {
@@ -212,6 +338,58 @@ for (const viewport of [
     });
     expect(nativeScrollLeft).toBeGreaterThan(initialScrollLeft);
     await expect(prev).toBeEnabled();
+  });
+
+  test(`Live HyperDoc reel controls remain reachable while reading at ${viewport.width}x${viewport.height}`, async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize(viewport);
+    await openHyperDoc(page, { timeout: 45_000 });
+    await settleInspectorBindings(page, 1000);
+
+    const buttons = page.locator(".hyperdoc-reel__buttons");
+    const prev = page.locator(".hyperdoc-reel__prev");
+    const next = page.locator(".hyperdoc-reel__next");
+
+    await expect(buttons).toBeVisible();
+    await expect(prev).toHaveAttribute("aria-label", "previous");
+    await expect(next).toHaveAttribute("aria-label", "next");
+
+    const boundaryState = await readReelButtonBoundaryState(page);
+    await testInfo.attach(`live-boundary-state-${viewport.width}x${viewport.height}.json`, {
+      body: JSON.stringify(boundaryState, null, 2),
+      contentType: "application/json",
+    });
+    expect(boundaryState).not.toBeNull();
+    expect(boundaryState.maxScrollLeft).toBeGreaterThan(0);
+    expect(boundaryState.atStart.scrollLeft).toBeLessThan(
+      boundaryState.maxScrollLeft / 4
+    );
+    expect(boundaryState.atStart.prevDisabled).toBe(true);
+    expect(boundaryState.atStart.nextDisabled).toBe(false);
+    expect(boundaryState.atEnd.scrollLeft).toBeGreaterThan(
+      boundaryState.maxScrollLeft * 0.75
+    );
+    expect(boundaryState.atEnd.prevDisabled).toBe(false);
+    expect(boundaryState.atEnd.nextDisabled).toBe(true);
+
+    const railState = await scrollReadingPaneAndMeasureRail(page, 1);
+    await testInfo.attach(`live-reading-rail-${viewport.width}x${viewport.height}.json`, {
+      body: JSON.stringify(railState, null, 2),
+      contentType: "application/json",
+    });
+
+    expect(railState.hasViewport).toBe(true);
+    expect(railState.readingScrollerClassName).toContain("inspector-body");
+    expect(railState.readingMaxScrollTop).toBeGreaterThan(0);
+    expect(railState.readingScrollTop).toBeGreaterThan(0);
+    expect(railState.buttonsTop).toBeGreaterThanOrEqual(railState.scrollableTop - 1);
+    expect(railState.buttonsBottom).toBeLessThanOrEqual(railState.scrollableBottom + 1);
+    expect(railState.buttonsBottom).toBeLessThanOrEqual(railState.viewportHeight + 1);
+    expect(railState.scrollerBottom).toBeLessThanOrEqual(railState.buttonsTop + 1);
+    expect(railState.prevDisabled).toBe(boundaryState.restored.prevDisabled);
+    expect(railState.nextDisabled).toBe(boundaryState.restored.nextDisabled);
   });
 }
 

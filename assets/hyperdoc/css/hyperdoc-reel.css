@@ -12,14 +12,27 @@
 
 .hyperdoc-reel {
   --hyperdoc-reel-control-size: 2.25rem;
+  --hyperdoc-reel-control-clearance: calc(var(--hyperdoc-reel-control-size) + 2rem);
   --hyperdoc-reel-control-background: #fff;
   --hyperdoc-reel-control-border: #d8d8d8;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 0.35rem;
+  grid-template-rows: minmax(0, 1fr);
   height: 98vh;
   min-height: 0;
   position: relative;
+}
+
+.hyperdoc-reel__viewport {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  position: relative;
+}
+
+.hyperdoc-reel__viewport,
+.hyperdoc-reel > .hyperdoc-reel__scrollable {
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .hyperdoc-reel__buttons {
@@ -27,11 +40,13 @@
   justify-content: flex-end;
   gap: 0.35rem;
   padding: 0.35rem 0.5rem;
-  position: sticky;
-  inset-block-start: 0;
-  z-index: 2;
+  position: absolute;
+  inset-block-end: 0.65rem;
+  inset-inline-end: 0.75rem;
+  z-index: 3;
   background: var(--hyperdoc-reel-control-background);
-  border-block-end: 1px solid var(--hyperdoc-reel-control-border);
+  border: 1px solid var(--hyperdoc-reel-control-border);
+  border-radius: 6px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
 }
 
@@ -72,6 +87,11 @@
   min-height: 0;
   scrollbar-gutter: stable;
   scroll-snap-type: x proximity;
+}
+
+.hyperdoc-reel .inspector-pane,
+.hyperdoc-reel .inspector-pane-maximized {
+  padding-block-end: var(--hyperdoc-reel-control-clearance);
 }
 
 .hyperdoc-reel__scrollable:focus-visible {
@@ -117,7 +137,7 @@
 
   .hyperdoc-reel__buttons {
     background: Canvas;
-    border-block-end-color: CanvasText;
+    border-color: CanvasText;
     box-shadow: none;
   }
 

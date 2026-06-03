@@ -102,7 +102,7 @@
     var scrollable = state.scrollable;
     var maxScrollLeft = Math.max(0, scrollable.scrollWidth - scrollable.clientWidth);
     var current = Math.max(0, scrollable.scrollLeft);
-    var tolerance = 2;
+    var tolerance = 16;
 
     if (state.prev) {
       state.prev.disabled = current <= tolerance;
