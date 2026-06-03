@@ -43,8 +43,8 @@ This suite materializes the current DOM association findings as browser tests:
 - `provider-surface sync settles across a Pages round trip`
   - proves Connect availability follows the active view across a connectable/non-connectable switch
   - guards the resync timing boundary that previously left pane chrome in a stale state
-- `source view exposes source anchors and opens an association`
-  - proves the `source-v1` provider behavior on the `Creating a HyperDoc` page through the active Source view rather than a hidden Content surface
+- `plain Source stays readable and Connect source opens a source-line association`
+  - proves the `source-v1` provider behavior on the `Creating a HyperDoc` page through the explicit Connect source view after confirming the default Source view is plain/readable
   - asserts the authoritative transport remains `button-payload-v2` for source-line anchors too
 
 The bibliography authoring-plan follow-up also has a live-gated browser suite:

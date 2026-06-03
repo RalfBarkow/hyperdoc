@@ -57,6 +57,31 @@
                  "Communication Surfaces Policy"
                  "Using authenticated workspace assignment repair console")))
 
+(defun source-readable-view-contract-topic ()
+  (make-topic
+   :id "source-readable-view-contract"
+   :title "Source readable view contract"
+   :summary "Inspector contract that makes the default Source tab a plain readable file-content view, without source-v1 provider metadata."
+   :references '("Make Alternate Source the Default Source View"
+                 "Source pane layout evidence")))
+
+(defun connect-source-view-topic ()
+  (make-topic
+   :id "connect-source-view"
+   :title "Connect source view"
+   :summary "Inspector contract for the explicit source-v1 source-line anchoring surface titled Connect source."
+   :references '("Make Alternate Source the Default Source View"
+                 "Source pane layout evidence"
+                 "Dock capabilities in HyperDoc")))
+
+(defun source-surface-strategy-contract-topic ()
+  (make-topic
+   :id "source-surface-strategy-contract"
+   :title "Source surface strategy contract"
+   :summary "Strategy abstraction that keeps plain and connect source surfaces inspectable, swappable, and diagnosable while plain is the default."
+   :references '("Make Alternate Source the Default Source View"
+                 "Source pane layout evidence")))
+
 ;; Topic objects for answer-surface distinction.
 (defun surface-answer-topic ()
   (make-topic

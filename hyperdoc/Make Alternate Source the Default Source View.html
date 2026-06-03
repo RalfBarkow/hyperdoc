@@ -1,0 +1,128 @@
+<h1>Make Alternate Source the Default Source View</h1>
+
+<p>
+  HyperDoc text pages now split reading from source-line anchoring. The
+  inspector tab titled <tt>Source</tt> is the readable plain file-content source
+  view. The inspector tab titled <tt>Connect source</tt> is the connect-capable
+  <tt>source-v1</tt> view used for source-line anchors.
+</p>
+
+<h2>Contract</h2>
+
+<ul>
+  <li><tt>Source</tt> renders the plain readable source surface that the swap
+      preview formerly exposed as <tt>Alternate Source</tt>.</li>
+  <li><tt>Source</tt> does not expose <tt>data-hyperdoc-connect-provider-kind="source-v1"</tt>
+      or other stale Connect provider metadata.</li>
+  <li><tt>Connect source</tt> uses <tt>render-source-connect-surface</tt> and
+      keeps the <tt>source-v1</tt> provider path available for route-laying from
+      source lines.</li>
+  <li>The strategy machinery remains first class:
+      <tt>source-surface-strategy</tt>,
+      <tt>plain-source-surface-strategy</tt>,
+      <tt>connect-source-surface-strategy</tt>,
+      <tt>source-surface-swap-preview</tt>, and
+      <tt>source-surface-strategy-catalog</tt>.</li>
+  <li>The default and effective source-surface strategy for text pages is
+      <tt>:plain</tt>. A swap preview from the default source path offers
+      <tt>:connect</tt> as the alternate candidate.</li>
+</ul>
+
+<h2>Runtime Boundary</h2>
+
+<p>
+  <tt>Source</tt> is for reading. <tt>Connect source</tt> is for source-line
+  anchoring. The Dock/Connect workflow must therefore use the explicit
+  <tt>Connect source</tt> surface when an operator wants to lay a route from
+  source text. This preserves the readable default without removing the
+  source-v1 provider path.
+</p>
+
+<h2>Inspectable Objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Source readable view contract"><tt>Source readable view contract</tt></a></li>
+  <li><a hyperbook="topics" page="Connect source view"><tt>Connect source view</tt></a></li>
+  <li><a hyperbook="topics" page="Source surface strategy contract"><tt>Source surface strategy contract</tt></a></li>
+  <li><a hyperbook="topics" page="Source pane layout evidence"><tt>Source pane layout evidence</tt></a></li>
+  <li><a expr="(chunk-source-pane-layout-evidence)"><tt>(chunk-source-pane-layout-evidence)</tt></a></li>
+</ul>
+
+<h2>Diagnostics</h2>
+
+<p>
+  The <tt>Source surface</tt> diagnostic view should report
+  <tt>Default strategy = plain (Plain source)</tt>,
+  <tt>Effective strategy = plain (Plain source)</tt>, and
+  <tt>Winner = default</tt> for ordinary text pages. The
+  <tt>Source strategies</tt> view should still list both <tt>:plain</tt> and
+  <tt>:connect</tt>, with only <tt>:connect</tt> marked connect-capable.
+</p>
+
+<h2>SLY mREPL Check</h2>
+
+<pre><code>(require :asdf)
+(asdf:load-system :hyperdoc/explorer)
+
+(defun i (object)
+  "Safe inspector helper for SLY mREPL.
+Prefer CLOG only if it is already loaded; otherwise use CL:INSPECT.
+Never calls SLYNK:INSPECT-IN-EMACS directly."
+  (let* ((clog-package (find-package "CLOG-MOLDABLE-INSPECTOR"))
+         (clog-symbol
+           (and clog-package
+                (find-symbol "CLOG-INSPECT" clog-package))))
+    (if (and clog-symbol (fboundp clog-symbol))
+        (funcall clog-symbol object)
+        (cl:inspect object))))
+
+(defparameter *source-contract-file*
+  (merge-pathnames "hyperdoc-source-contract-mrepl.html"
+                   (uiop:temporary-directory)))
+
+(uiop:with-output-file (stream *source-contract-file*
+                       :if-exists :supersede)
+  (write-string "&lt;h1&gt;Source contract fixture&lt;/h1&gt;&#10;&lt;p&gt;Line anchor fixture.&lt;/p&gt;&#10;"
+                stream))
+
+(defparameter *source-contract-page*
+  (make-instance 'hyperdoc::html-page
+                 :id "source-contract-fixture"
+                 :hyperbook (make-instance 'hyperbook:hyperbook :id "mrepl")
+                 :file *source-contract-file*))
+
+(defparameter *source-contract-report*
+  (hyperdoc::source-surface-resolution-report-for *source-contract-page*))
+
+(defparameter *source-contract-source-view*
+  (hyperdoc::render-source-surface-for-page *source-contract-page*))
+
+(defparameter *source-contract-connect-view*
+  (hyperdoc::render-source-surface-for-page-with-designator
+   *source-contract-page*
+   :connect
+   :title "Connect source"))
+
+(format t "~&default=~A effective=~A source-view=~A connect-view=~A~%"
+        (getf *source-contract-report* :default-strategy-id)
+        (getf *source-contract-report* :effective-strategy-id)
+        (type-of *source-contract-source-view*)
+        (type-of *source-contract-connect-view*))
+
+(i *source-contract-report*)</code></pre>
+
+<h2>Related Pages</h2>
+
+<ul>
+  <li><a page="Source pane layout evidence">Source pane layout evidence</a></li>
+  <li><a page="Dock capabilities in HyperDoc">Dock capabilities in HyperDoc</a></li>
+  <li><a page="A DOM-annotation connect gesture">A DOM-annotation connect gesture</a></li>
+</ul>
+
+<h2>Local FedWiki Counterpart</h2>
+
+<ul>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="make-alternate-source-the-default-source-view">[wiki.ralfbarkow.ch] Make Alternate Source the Default Source View</a></li>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="source-readable-view-contract">[wiki.ralfbarkow.ch] Source readable view contract</a></li>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="connect-source-view">[wiki.ralfbarkow.ch] Connect source view</a></li>
+</ul>

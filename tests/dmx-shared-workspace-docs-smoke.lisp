@@ -626,7 +626,8 @@
      '("Installation-dependent"
        "registered non-Basic AuthorizationMethod"))))
 
-(defun assert-connectable-page-source-view (page-title expected-source-snippet)
+(defun assert-page-source-and-connect-source-views
+    (page-title expected-source-snippet)
   (asdf:load-system :hyperdoc/explorer)
   (let* ((page (hyperbook:find-page hyperdoc::*hyperdoc*
                                     page-title
@@ -636,66 +637,83 @@
           (hyperdoc::effective-source-surface-strategy-for page))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (source-view (dmx-shared-workspace-docs-find-view-by-title views "Source"))
-         (source-html (and source-view
-                           (html-inspector-views:view-html source-view))))
-    (assert-type 'hyperdoc::connect-source-surface-strategy
+         (connect-source-view
+          (dmx-shared-workspace-docs-find-view-by-title views "Connect source"))
+         (connect-source-html
+          (and connect-source-view
+               (html-inspector-views:view-html connect-source-view))))
+    (assert-type 'hyperdoc::plain-source-surface-strategy
                  strategy
-                 (format nil "~A must keep the connect Source strategy"
+                 (format nil "~A must use the plain Source strategy by default"
                          page-title))
-    (assert-type 'hyperdoc::connect-source-surface-strategy
+    (assert-type 'hyperdoc::plain-source-surface-strategy
                  effective-strategy
-                 (format nil "~A effective Source strategy must stay connect"
+                 (format nil "~A effective Source strategy must stay plain"
                          page-title))
-    (assert-true (hyperdoc::source-surface-connect-capable-p strategy)
-                 (format nil "~A Source strategy must stay connect-capable"
+    (assert-true (not (hyperdoc::source-surface-connect-capable-p strategy))
+                 (format nil "~A Source strategy must not claim connect capability"
                          page-title))
-    (assert-true (hyperdoc::source-surface-connect-capable-p effective-strategy)
-                 (format nil "~A effective Source strategy must stay connect-capable"
+    (assert-true (not (hyperdoc::source-surface-connect-capable-p
+                       effective-strategy))
+                 (format nil "~A effective Source strategy must not claim connect capability"
                          page-title))
     (assert-true source-view
                  (format nil "~A must expose a Source view" page-title))
-    (assert (search "hyperdoc-dom-connect-surface" source-html :test #'char=)
+    (assert-true connect-source-view
+                 (format nil "~A must expose a Connect source view"
+                         page-title))
+    (assert-true
+     (typep source-view 'clog-moldable-inspector::clog-view)
+     (format nil "~A Source must materialize as the readable file-content CLOG view"
+             page-title))
+    (assert-equal "Source"
+                  (html-inspector-views:view-title source-view)
+                  (format nil "~A readable Source view must keep the Source title"
+                          page-title))
+    (assert-equal 10
+                  (html-inspector-views:view-priority source-view)
+                  (format nil "~A readable Source view must keep the Source priority"
+                          page-title))
+    (assert (search "hyperdoc-dom-connect-surface"
+                    connect-source-html
+                    :test #'char=)
             ()
-            (format nil "~A Source must render the connectable surface shell"
+            (format nil "~A Connect source must render the connectable shell"
                     page-title))
-    (assert (search "hyperdoc-connect-provider-surface" source-html :test #'char=)
+    (assert (search "hyperdoc-connect-provider-surface"
+                    connect-source-html
+                    :test #'char=)
             ()
-            (format nil "~A Source must expose the connect-provider surface"
+            (format nil "~A Connect source must expose the provider surface"
                     page-title))
-    (assert (search "hyperdoc-source-pane" source-html :test #'char=)
+    (assert (search "hyperdoc-source-connect-view"
+                    connect-source-html
+                    :test #'char=)
             ()
-            (format nil "~A Source must render the source-pane body wrapper"
-                    page-title))
-    (assert (search "hyperdoc-source-connect-view" source-html :test #'char=)
-            ()
-            (format nil "~A Source must render the source-connect view"
-                    page-title))
-    (assert (search "hyperdoc-source-connect-line-number" source-html :test #'char=)
-            ()
-            (format nil "~A Source must render source line numbers"
+            (format nil "~A Connect source must render the source-connect view"
                     page-title))
     (assert (search "data-hyperdoc-connect-source-anchor"
-                    source-html
+                    connect-source-html
                     :test #'char=)
             ()
-            (format nil "~A Source must render source anchor lines"
+            (format nil "~A Connect source must render source anchor lines"
                     page-title))
-    (assert (search expected-source-snippet source-html :test #'char=)
+    (assert (search expected-source-snippet connect-source-html :test #'char=)
             ()
-            (format nil "~A Source must render escaped source text"
+            (format nil "~A Connect source must render escaped source text"
                     page-title))
     (assert (search "data-hyperdoc-connect-provider-kind='source-v1'"
-                    source-html
+                    connect-source-html
                     :test #'char=)
             ()
-            (format nil "~A Source must keep source-v1 provider metadata"
+            (format nil "~A Connect source must keep source-v1 provider metadata"
                     page-title))))
 
 (defun run-dmx-shared-workspace-source-view-smoke-test ()
-  (assert-connectable-page-source-view
+  (assert-page-source-and-connect-source-views
    "Workspace-native annotations in a DMX workspace"
    "&lt;h1&gt;Workspace-native annotations in a DMX workspace&lt;/h1&gt;")
-  (assert-connectable-page-source-view
+  (assert-page-source-and-connect-source-views
    "A DOM-annotation connect gesture"
    "# A DOM-annotation connect gesture"))
 
@@ -709,47 +727,48 @@
                                     :signal-error? t))
          (default-strategy
           (hyperdoc::effective-source-surface-strategy-for page)))
-    (assert-type 'hyperdoc::connect-source-surface-strategy
+    (assert-type 'hyperdoc::plain-source-surface-strategy
                  default-strategy
-                 (format nil "~A default effective strategy must stay connect"
+                 (format nil "~A default effective strategy must stay plain"
                          page-title))
-    (assert-true (hyperdoc::source-surface-connect-capable-p default-strategy)
-                 (format nil "~A default effective strategy must stay connect-capable"
+    (assert-true (not (hyperdoc::source-surface-connect-capable-p
+                       default-strategy))
+                 (format nil "~A default effective strategy must not be connect-capable"
                          page-title))
-    (hyperdoc::with-source-surface-strategy-override (:plain)
+    (hyperdoc::with-source-surface-strategy-override (:connect)
       (let* ((override-strategy
               (hyperdoc::effective-source-surface-strategy-for page))
              (source-view (hyperdoc::render-source-surface-for-page page))
              (source-html (html-inspector-views:view-html source-view)))
-        (assert-type 'hyperdoc::plain-source-surface-strategy
+        (assert-type 'hyperdoc::connect-source-surface-strategy
                      override-strategy
-                     (format nil "~A override must select the plain strategy"
+                     (format nil "~A override must select the connect strategy"
                              page-title))
-        (assert-true (not (hyperdoc::source-surface-connect-capable-p
-                           override-strategy))
-                     (format nil "~A plain override must not be connect-capable"
+        (assert-true (hyperdoc::source-surface-connect-capable-p
+                      override-strategy)
+                     (format nil "~A connect override must be connect-capable"
                              page-title))
         (assert-true (search "hyperdoc-source-pane" source-html :test #'char=)
-                     (format nil "~A plain override must still render the source pane"
+                     (format nil "~A connect override must still render the source pane"
                              page-title))
-        (assert-true (search "hyperdoc-source-pane-line-number"
+        (assert-true (search "hyperdoc-source-connect-line-number"
                              source-html
                              :test #'char=)
-                     (format nil "~A plain override must render numbered source lines"
+                     (format nil "~A connect override must render anchor line numbers"
                              page-title))
         (assert-true (search expected-source-snippet source-html :test #'char=)
-                     (format nil "~A plain override must still render escaped source text"
+                     (format nil "~A connect override must still render escaped source text"
                              page-title))
-        (assert-true (null (search "hyperdoc-connect-provider-surface"
-                                   source-html
-                                   :test #'char=))
-                     (format nil "~A plain override must suppress the connect-provider surface"
+        (assert-true (search "hyperdoc-connect-provider-surface"
+                             source-html
+                             :test #'char=)
+                     (format nil "~A connect override must expose the connect-provider surface"
                              page-title))
         (assert-true
-         (null (search "data-hyperdoc-connect-provider-kind='source-v1'"
-                       source-html
-                       :test #'char=))
-         (format nil "~A plain override must suppress source-v1 provider metadata"
+         (search "data-hyperdoc-connect-provider-kind='source-v1'"
+                 source-html
+                 :test #'char=)
+         (format nil "~A connect override must expose source-v1 provider metadata"
                  page-title))))))
 
 (defun run-source-surface-strategy-class-policy-smoke-test ()
@@ -760,28 +779,29 @@
                                     :signal-error? t))
          (default-strategy
           (hyperdoc::effective-source-surface-strategy-for page)))
-    (assert-type 'hyperdoc::connect-source-surface-strategy
+    (assert-type 'hyperdoc::plain-source-surface-strategy
                  default-strategy
-                 (format nil "~A default effective strategy must stay connect"
+                 (format nil "~A default effective strategy must stay plain"
                          page-title))
     (hyperdoc::with-source-surface-strategy-class-policy
-        ('hyperdoc::text-page :plain)
+        ('hyperdoc::text-page :connect)
       (let ((policy-strategy
              (hyperdoc::effective-source-surface-strategy-for page)))
-        (assert-type 'hyperdoc::plain-source-surface-strategy
+        (assert-type 'hyperdoc::connect-source-surface-strategy
                      policy-strategy
-                     (format nil "~A class policy must select the plain strategy"
+                     (format nil "~A class policy must select the connect strategy"
                              page-title))
-        (hyperdoc::with-source-surface-strategy-override (:connect)
+        (hyperdoc::with-source-surface-strategy-override (:plain)
           (let ((override-strategy
                  (hyperdoc::effective-source-surface-strategy-for page)))
-            (assert-type 'hyperdoc::connect-source-surface-strategy
+            (assert-type 'hyperdoc::plain-source-surface-strategy
                          override-strategy
                          (format nil "~A dynamic override must win over class policy"
                                  page-title))
             (assert-true
-             (hyperdoc::source-surface-connect-capable-p override-strategy)
-             (format nil "~A connect override must remain connect-capable"
+             (not (hyperdoc::source-surface-connect-capable-p
+                   override-strategy))
+             (format nil "~A plain override must remain non-connect-capable"
                      page-title))))))))
 
 (defun run-source-surface-resolution-report-smoke-test ()
@@ -805,16 +825,16 @@
     (assert-true (not (getf default-report :class-policy-matched-p))
                  (format nil "~A default report must not expose a class policy"
                          page-title))
-    (assert-type 'hyperdoc::connect-source-surface-strategy
+    (assert-type 'hyperdoc::plain-source-surface-strategy
                  (getf default-report :default-strategy)
-                 (format nil "~A default report must expose the connect default"
+                 (format nil "~A default report must expose the plain default"
                          page-title))
-    (assert-type 'hyperdoc::connect-source-surface-strategy
+    (assert-type 'hyperdoc::plain-source-surface-strategy
                  (getf default-report :effective-strategy)
-                 (format nil "~A default report must expose the connect effective strategy"
+                 (format nil "~A default report must expose the plain effective strategy"
                          page-title))
     (hyperdoc::with-source-surface-strategy-class-policy
-        ('hyperdoc::text-page :plain)
+        ('hyperdoc::text-page :connect)
       (let ((policy-report
              (hyperdoc::source-surface-resolution-report-for page)))
         (assert-true (eq (getf policy-report :winner) :class-policy)
@@ -827,15 +847,15 @@
                          'hyperdoc::text-page)
                      (format nil "~A class policy report must expose the matched class"
                              page-title))
-        (assert-type 'hyperdoc::plain-source-surface-strategy
+        (assert-type 'hyperdoc::connect-source-surface-strategy
                      (getf policy-report :class-policy-strategy)
-                     (format nil "~A class policy report must expose the plain strategy"
+                     (format nil "~A class policy report must expose the connect strategy"
                              page-title))
-        (assert-type 'hyperdoc::plain-source-surface-strategy
+        (assert-type 'hyperdoc::connect-source-surface-strategy
                      (getf policy-report :effective-strategy)
-                     (format nil "~A class policy report must expose the plain effective strategy"
+                     (format nil "~A class policy report must expose the connect effective strategy"
                              page-title))
-        (hyperdoc::with-source-surface-strategy-override (:connect)
+        (hyperdoc::with-source-surface-strategy-override (:plain)
           (let ((override-report
                  (hyperdoc::source-surface-resolution-report-for page)))
             (assert-true (eq (getf override-report :winner) :override)
@@ -847,13 +867,13 @@
             (assert-true (getf override-report :class-policy-matched-p)
                          (format nil "~A override report must still expose the matched class policy"
                                  page-title))
-            (assert-type 'hyperdoc::connect-source-surface-strategy
+            (assert-type 'hyperdoc::plain-source-surface-strategy
                          (getf override-report :override-strategy)
-                         (format nil "~A override report must expose the connect override"
+                         (format nil "~A override report must expose the plain override"
                                  page-title))
-            (assert-type 'hyperdoc::connect-source-surface-strategy
+            (assert-type 'hyperdoc::plain-source-surface-strategy
                          (getf override-report :effective-strategy)
-                         (format nil "~A override report must expose the connect effective strategy"
+                         (format nil "~A override report must expose the plain effective strategy"
                                  page-title))))))))
 
 (defun run-source-surface-strategy-identity-smoke-test ()
@@ -864,68 +884,68 @@
                                     :signal-error? t))
          (default-report
           (hyperdoc::source-surface-resolution-report-for page)))
-    (assert-equal :connect
+    (assert-equal :plain
                   (getf default-report :default-strategy-id)
-                  (format nil "~A default report must expose the connect default id"
+                  (format nil "~A default report must expose the plain default id"
                           page-title))
-    (assert-equal "Connect source"
+    (assert-equal "Plain source"
                   (getf default-report :default-strategy-label)
-                  (format nil "~A default report must expose the connect default label"
+                  (format nil "~A default report must expose the plain default label"
                           page-title))
-    (assert-equal :connect
+    (assert-equal :plain
                   (getf default-report :effective-strategy-id)
-                  (format nil "~A default report must expose the connect effective id"
+                  (format nil "~A default report must expose the plain effective id"
                           page-title))
-    (assert-equal "Connect source"
+    (assert-equal "Plain source"
                   (getf default-report :effective-strategy-label)
-                  (format nil "~A default report must expose the connect effective label"
+                  (format nil "~A default report must expose the plain effective label"
                           page-title))
     (hyperdoc::with-source-surface-strategy-class-policy
-        ('hyperdoc::text-page :plain)
+        ('hyperdoc::text-page :connect)
       (let ((policy-report
              (hyperdoc::source-surface-resolution-report-for page)))
-        (assert-equal :plain
+        (assert-equal :connect
                       (getf policy-report :class-policy-strategy-id)
-                      (format nil "~A class policy report must expose the plain strategy id"
+                      (format nil "~A class policy report must expose the connect strategy id"
                               page-title))
-        (assert-equal "Plain source"
+        (assert-equal "Connect source"
                       (getf policy-report :class-policy-strategy-label)
-                      (format nil "~A class policy report must expose the plain strategy label"
+                      (format nil "~A class policy report must expose the connect strategy label"
                               page-title))
-        (assert-equal :plain
+        (assert-equal :connect
                       (getf policy-report :effective-strategy-id)
-                      (format nil "~A class policy report must expose the plain effective id"
+                      (format nil "~A class policy report must expose the connect effective id"
                               page-title))
-        (assert-equal "Plain source"
+        (assert-equal "Connect source"
                       (getf policy-report :effective-strategy-label)
-                      (format nil "~A class policy report must expose the plain effective label"
+                      (format nil "~A class policy report must expose the connect effective label"
                               page-title))
-        (hyperdoc::with-source-surface-strategy-override (:connect)
+        (hyperdoc::with-source-surface-strategy-override (:plain)
           (let ((override-report
                  (hyperdoc::source-surface-resolution-report-for page)))
-            (assert-equal :connect
-                          (getf override-report :override-strategy-id)
-                          (format nil "~A override report must expose the connect override id"
-                                  page-title))
-            (assert-equal "Connect source"
-                          (getf override-report :override-strategy-label)
-                          (format nil "~A override report must expose the connect override label"
-                                  page-title))
             (assert-equal :plain
-                          (getf override-report :class-policy-strategy-id)
-                          (format nil "~A override report must still expose the plain class policy id"
+                          (getf override-report :override-strategy-id)
+                          (format nil "~A override report must expose the plain override id"
                                   page-title))
             (assert-equal "Plain source"
-                          (getf override-report :class-policy-strategy-label)
-                          (format nil "~A override report must still expose the plain class policy label"
+                          (getf override-report :override-strategy-label)
+                          (format nil "~A override report must expose the plain override label"
                                   page-title))
             (assert-equal :connect
-                          (getf override-report :effective-strategy-id)
-                          (format nil "~A override report must expose the connect effective id"
+                          (getf override-report :class-policy-strategy-id)
+                          (format nil "~A override report must still expose the connect class policy id"
                                   page-title))
             (assert-equal "Connect source"
+                          (getf override-report :class-policy-strategy-label)
+                          (format nil "~A override report must still expose the connect class policy label"
+                                  page-title))
+            (assert-equal :plain
+                          (getf override-report :effective-strategy-id)
+                          (format nil "~A override report must expose the plain effective id"
+                                  page-title))
+            (assert-equal "Plain source"
                           (getf override-report :effective-strategy-label)
-                          (format nil "~A override report must expose the connect effective label"
+                          (format nil "~A override report must expose the plain effective label"
                                   page-title))))))))
 
 (defun run-source-surface-strategy-catalog-smoke-test ()
@@ -1002,8 +1022,7 @@
           (hyperdoc::render-source-surface-for-page-with-designator
            page
            :plain))
-         (connect-html (html-inspector-views:view-html connect-view))
-         (plain-html (html-inspector-views:view-html plain-view)))
+         (connect-html (html-inspector-views:view-html connect-view)))
     (assert-true
      (hyperdoc::source-surface-designator-supported-p :connect)
      "Connect designator must be supported.")
@@ -1039,11 +1058,14 @@
      (search "source-v1" connect-html :test #'char=)
      "Connect designator rendering must use the connect path.")
     (assert-true
-     (null (search "source-provider" plain-html :test #'char=))
-     "Plain designator rendering must not expose connect provider metadata.")
-    (assert-true
-     (null (search "source-v1" plain-html :test #'char=))
-     "Plain designator rendering must not expose the connect runtime contract.")))
+     (typep plain-view 'clog-moldable-inspector::clog-view)
+     "Plain designator rendering must use the readable file-content CLOG path.")
+    (assert-equal "Source"
+                  (html-inspector-views:view-title plain-view)
+                  "Plain designator rendering must keep the Source title.")
+    (assert-equal 10
+                  (html-inspector-views:view-priority plain-view)
+                  "Plain designator rendering must keep the Source priority.")))
 
 (defun run-source-surface-swap-preview-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -1051,9 +1073,9 @@
          (page (hyperbook:find-page hyperdoc::*hyperdoc*
                                     page-title
                                     :signal-error? t))
-         (preview (hyperdoc::make-source-surface-swap-preview page :plain))
-         (plain-symbol-preview
-          (hyperdoc::make-source-surface-swap-preview page 'plain))
+         (preview (hyperdoc::make-source-surface-swap-preview page :connect))
+         (connect-symbol-preview
+          (hyperdoc::make-source-surface-swap-preview page 'connect))
          (unsupported-preview
           (hyperdoc::make-source-surface-swap-preview page :bogus))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object preview))
@@ -1069,18 +1091,18 @@
           (html-inspector-views/standard:source-code-view
            #'hyperdoc::👀alternate-source
            :in-file? nil))
-         (expected-alternate-view
+         (expected-current-view
           (hyperdoc::->
            page
            hyperdoc::file-of
            html-inspector-views:👀content
-           (html-inspector-views:rename :title "Alternate Source" :priority 4)))
+           (html-inspector-views:rename :title "Current Source" :priority 3)))
          (overview-html (and overview-view
                              (html-inspector-views:view-html overview-view)))
          (compare-html (and compare-view
                             (html-inspector-views:view-html compare-view)))
-         (current-html (and current-view
-                            (html-inspector-views:view-html current-view)))
+         (alternate-html (and alternate-view
+                              (html-inspector-views:view-html alternate-view)))
          (alternate-source-code-html
           (and alternate-source-code-view
                (html-inspector-views:view-html alternate-source-code-view))))
@@ -1088,32 +1110,32 @@
                  preview
                  "Swap preview must materialize as an inspectable object.")
     (assert-type 'hyperdoc::source-surface-swap-preview
-                 plain-symbol-preview
-                 "Symbolic plain swap preview must materialize as an inspectable object.")
-    (assert-equal :connect
+                 connect-symbol-preview
+                 "Symbolic connect swap preview must materialize as an inspectable object.")
+    (assert-equal :plain
                   (hyperdoc::source-surface-swap-preview-current-designator-of
                    preview)
-                  "Swap preview must snapshot the current connect designator.")
+                  "Swap preview must snapshot the current plain designator.")
     (assert-equal :default
                   (getf (hyperdoc::source-surface-swap-preview-current-report-of
                          preview)
                         :winner)
                   "Swap preview must preserve the current default-resolution winner.")
-    (assert-equal :plain
+    (assert-equal :connect
                   (hyperdoc::source-surface-swap-preview-alternate-designator-of
                    preview)
                   "Swap preview must retain the requested alternate designator.")
-    (assert-equal :plain
+    (assert-equal :connect
                   (hyperdoc::source-surface-swap-preview-alternate-designator-of
-                   plain-symbol-preview)
-                  "Swap preview must normalize symbolic plain to the plain designator.")
+                   connect-symbol-preview)
+                  "Swap preview must normalize symbolic connect to the connect designator.")
     (assert-true
      (hyperdoc::source-surface-swap-preview-alternate-supported-p preview)
-     "Plain alternate designator must be supported for swap preview.")
+     "Connect alternate designator must be supported for swap preview.")
     (assert-true
      (hyperdoc::source-surface-swap-preview-alternate-supported-p
-      plain-symbol-preview)
-     "Symbolic plain alternate designator must stay supported for swap preview.")
+      connect-symbol-preview)
+     "Symbolic connect alternate designator must stay supported for swap preview.")
     (assert-true
      (not (hyperdoc::source-surface-swap-preview-alternate-supported-p
            unsupported-preview))
@@ -1124,11 +1146,17 @@
     (assert-true alternate-source-code-view
                  "The Alternate Source definition must expose a Source code view.")
     (assert-true
-     (typep alternate-view 'clog-moldable-inspector::clog-view)
-     "The Alternate Source runtime surface must materialize as the historical file-content view type.")
+     (typep current-view 'clog-moldable-inspector::clog-view)
+     "The Current Source runtime surface must materialize as the readable file-content view type.")
     (assert-true
-     (typep expected-alternate-view 'clog-moldable-inspector::clog-view)
-     "The expected historical text-page Source path must materialize as a CLOG view.")
+     (typep expected-current-view 'clog-moldable-inspector::clog-view)
+     "The expected readable text-page Source path must materialize as a CLOG view.")
+    (assert-equal "Current Source"
+                  (html-inspector-views:view-title current-view)
+                  "The Current Source preview must keep the readable Source title.")
+    (assert-equal 3
+                  (html-inspector-views:view-priority current-view)
+                  "The Current Source preview must keep the readable Source priority.")
     (assert-shared-workspace-page-contains-all
      overview-html
      (format nil "~A swap preview overview" page-title)
@@ -1136,8 +1164,8 @@
        "Current Source path"
        "Requested alternate"
        "Alternate supported"
-       "connect"
        "plain"
+       "connect"
        "yes"))
     (assert-shared-workspace-page-contains-all
      compare-html
@@ -1151,32 +1179,27 @@
        "no"))
     (assert-true
      (search "data-hyperdoc-connect-provider-kind='source-v1'"
-             current-html
+             alternate-html
              :test #'char=)
-     "Swap preview current Source must keep the connect runtime contract.")
+     "Swap preview alternate Connect source must keep the connect runtime contract.")
     (assert-true
-     (not (typep current-view 'clog-moldable-inspector::clog-view))
-     "The Current Source runtime surface must remain the non-historical connect-oriented view type.")
+     (not (typep alternate-view 'clog-moldable-inspector::clog-view))
+     "The Alternate Source runtime surface must materialize as the connect-oriented view type.")
     (assert-true
-     (search "👀content"
+     (search "render-source-surface-for-page-with-designator"
              alternate-source-code-html
              :test #'char-equal)
-     "The Alternate Source definition must expose the old plain file/content path directly.")
+     "The Alternate Source definition must render through the designator-based API.")
     (assert-true
-     (search "file-of"
+     (search "source-surface-swap-preview-alternate-designator-of"
              alternate-source-code-html
              :test #'char-equal)
-     "The Alternate Source definition must read as the direct text-page file/content path.")
+     "The Alternate Source definition must use the preview's alternate designator.")
     (assert-true
-     (search "rename"
+     (search "Alternate Source"
              alternate-source-code-html
              :test #'char-equal)
-     "The Alternate Source definition must rename the historical plain Source path into the Alternate Source tab.")
-    (assert-true
-     (search "->"
-             alternate-source-code-html
-             :test #'char-equal)
-     "The Alternate Source definition must read as the historical upstream threaded Source path.")
+     "The Alternate Source definition must still title the alternate view.")
     (assert-true
      (null (search "make-precomputed-html-view"
                    alternate-source-code-html
@@ -1188,6 +1211,11 @@
                    :test #'char-equal))
      "The Alternate Source definition must not route through the Plain source view.")
     (assert-true
+     (null (search "👀content"
+                   alternate-source-code-html
+                   :test #'char-equal))
+     "The Alternate Source definition must not special-case the plain file-content path.")
+    (assert-true
      (null (search "render-file-source-surface"
                    alternate-source-code-html
                    :test #'char-equal))
@@ -1196,12 +1224,17 @@
      (null (search "render-plain-source-surface-for-page"
                    alternate-source-code-html
                    :test #'char-equal))
-     "The Alternate Source definition must not expose the modern plain strategy wrapper.")
+     "The Alternate Source definition must not bypass the designator strategy.")
     (assert-true
      (null (search "views:view-html"
                    alternate-source-code-html
                    :test #'char-equal))
      "The Alternate Source definition must not expose copied HTML plumbing.")
+    (assert-true
+     (search "source-v1"
+             alternate-html
+             :test #'char-equal)
+     "The Alternate Source runtime HTML must expose source-v1 metadata for the connect preview.")
     (handler-case
         (progn
           (hyperdoc::render-source-surface-for-page-with-designator page :bogus)
@@ -1234,11 +1267,11 @@
          (report (hyperdoc::source-surface-resolution-report-for page))
          (candidates (hyperdoc::source-surface-swap-preview-candidates-for-page
                       page))
-         (plain-candidate
-          (find :plain candidates
+         (connect-candidate
+          (find :connect candidates
                 :key (lambda (candidate) (getf candidate :designator))))
-         (plain-preview (and plain-candidate
-                             (getf plain-candidate :preview)))
+         (connect-preview (and connect-candidate
+                               (getf connect-candidate :preview)))
          (page-views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (operations-view
           (dmx-shared-workspace-docs-find-view-by-title
@@ -1246,9 +1279,9 @@
            "Source swap operations"))
          (operations-html (and operations-view
                                (html-inspector-views:view-html operations-view)))
-         (preview-views (and plain-preview
+         (preview-views (and connect-preview
                              (dmx-shared-workspace-docs-load-inspector-views-for-object
-                              plain-preview)))
+                              connect-preview)))
          (preview-overview
           (and preview-views
                (dmx-shared-workspace-docs-find-view-by-title
@@ -1259,18 +1292,15 @@
                (dmx-shared-workspace-docs-find-view-by-title
                 preview-views
                 "Alternate Source")))
-         (expected-alternate-view
-          (hyperdoc::->
-           page
-           hyperdoc::file-of
-           html-inspector-views:👀content
-           (html-inspector-views:rename :title "Alternate Source" :priority 4)))
          (preview-overview-html
           (and preview-overview
-               (html-inspector-views:view-html preview-overview))))
-    (assert-equal :connect
+               (html-inspector-views:view-html preview-overview)))
+         (preview-alternate-html
+          (and preview-alternate
+               (html-inspector-views:view-html preview-alternate))))
+    (assert-equal :plain
                   (getf report :effective-strategy-id)
-                  (format nil "~A current effective Source path must stay connect by default"
+                  (format nil "~A current effective Source path must stay plain by default"
                           page-title))
     (assert-true operations-view
                  (format nil "~A must expose a Source swap operations view"
@@ -1278,8 +1308,8 @@
     (assert-true candidates
                  (format nil "~A must expose at least one Source swap preview candidate"
                          page-title))
-    (assert-true plain-candidate
-                 (format nil "~A must expose a plain Source swap preview candidate"
+    (assert-true connect-candidate
+                 (format nil "~A must expose a connect Source swap preview candidate"
                          page-title))
     (assert-true
      (every (lambda (candidate)
@@ -1289,8 +1319,8 @@
      (format nil "~A page-level swap candidates must materialize as inspectable preview objects"
              page-title))
     (assert-type 'hyperdoc::source-surface-swap-preview
-                 plain-preview
-                 (format nil "~A plain candidate must materialize as a swap preview object"
+                 connect-preview
+                 (format nil "~A connect candidate must materialize as a swap preview object"
                          page-title))
     (assert-shared-workspace-page-contains-all
      operations-html
@@ -1301,33 +1331,32 @@
        "Label"
        "Connect-capable"
        "Preview"
-       "connect"
-       "Plain source"
        "plain"
-       "no"))
+       "Plain source"
+       "connect"
+       "Connect source"
+       "yes"))
     (assert-true preview-overview
-                 "Plain preview reached from the page-level view must expose Overview.")
+                 "Connect preview reached from the page-level view must expose Overview.")
     (assert-true preview-alternate
-                 "Plain preview reached from the page-level view must expose Alternate Source.")
+                 "Connect preview reached from the page-level view must expose Alternate Source.")
     (assert-true
-     (typep preview-alternate 'clog-moldable-inspector::clog-view)
-     "Plain preview reached from the page-level view must expose the historical Alternate Source as a CLOG view.")
+     (not (typep preview-alternate 'clog-moldable-inspector::clog-view))
+     "Connect preview reached from the page-level view must expose the connect-oriented Alternate Source.")
     (assert-true
-     (typep expected-alternate-view 'clog-moldable-inspector::clog-view)
-     "The direct historical text-page Source path must materialize as a CLOG view.")
+     (search "data-hyperdoc-connect-provider-kind='source-v1'"
+             preview-alternate-html
+             :test #'char=)
+     "Connect preview reached from the page-level view must expose source-v1 provider metadata.")
     (assert-shared-workspace-page-contains-all
      preview-overview-html
-     (format nil "~A plain swap preview overview" page-title)
+     (format nil "~A connect swap preview overview" page-title)
      '("Current winner"
        "Current Source path"
        "Requested alternate"
        "Alternate supported"
-       "connect"
-       "plain"))
-    (assert-true
-     (typep preview-alternate
-            (type-of expected-alternate-view))
-     "Plain preview reached from the page-level view must stay on the historical text-page Source path instead of the connect-oriented HTML view.")))
+       "plain"
+       "connect"))))
 
 (defun run-source-surface-resolution-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -1352,9 +1381,9 @@
        "Default strategy"
        "Override present"
        "Class policy matched"
-       "Connect source"
+       "Plain source"
        "default"
-       "connect"))))
+       "plain"))))
 
 (defun run-plain-source-view-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -1366,62 +1395,98 @@
                                     :signal-error? t))
          (views (dmx-shared-workspace-docs-load-inspector-views-for-object page))
          (source-view (dmx-shared-workspace-docs-find-view-by-title views "Source"))
+         (connect-source-view
+          (dmx-shared-workspace-docs-find-view-by-title views "Connect source"))
          (plain-view
           (dmx-shared-workspace-docs-find-view-by-title views "Plain source"))
          (plain-source-code-view
           (html-inspector-views/standard:source-code-view
            #'hyperdoc::👀plain-source
            :in-file? nil))
-         (source-html (and source-view
-                           (html-inspector-views:view-html source-view)))
-         (plain-html (and plain-view
-                          (html-inspector-views:view-html plain-view)))
+         (plain-helper-source-code-view
+          (html-inspector-views/standard:source-code-view
+           #'hyperdoc::render-plain-source-surface-for-page
+           :in-file? nil))
+         (connect-source-html
+          (and connect-source-view
+               (html-inspector-views:view-html connect-source-view)))
          (plain-source-code-html
           (and plain-source-code-view
-               (html-inspector-views:view-html plain-source-code-view))))
+               (html-inspector-views:view-html plain-source-code-view)))
+         (plain-helper-source-code-html
+          (and plain-helper-source-code-view
+               (html-inspector-views:view-html plain-helper-source-code-view))))
     (assert-true plain-view
                  (format nil "~A must expose a Plain source view" page-title))
     (assert-true source-view
                  (format nil "~A must still expose the Source view" page-title))
+    (assert-true connect-source-view
+                 (format nil "~A must expose the Connect source view" page-title))
     (assert-true plain-source-code-view
                  "The text-page Plain source definition must expose a Source code view.")
-    (assert-true (search "data-hyperdoc-connect-provider-kind='source-v1'"
-                         source-html
-                         :test #'char=)
-                 (format nil "~A Source view must remain connect-enabled"
-                         page-title))
-    (assert-true (search "hyperdoc-source-pane" plain-html :test #'char=)
-                 (format nil "~A Plain source view must render the source pane"
-                         page-title))
-    (assert-true (search "hyperdoc-source-pane-line-number"
-                         plain-html
-                         :test #'char=)
-                 (format nil "~A Plain source view must render numbered lines"
-                         page-title))
-    (assert-true (search expected-source-snippet plain-html :test #'char=)
-                 (format nil "~A Plain source view must render escaped source text"
-                         page-title))
-    (assert-true (null (search "hyperdoc-connect-provider-surface"
-                               plain-html
-                               :test #'char=))
-                 (format nil "~A Plain source view must suppress the connect-provider surface"
-                         page-title))
+    (assert-true plain-helper-source-code-view
+                 "The plain Source helper must expose a Source code view.")
     (assert-true
-     (null (search "data-hyperdoc-connect-provider-kind='source-v1'"
-                   plain-html
-                   :test #'char=))
-     (format nil "~A Plain source view must suppress source-v1 provider metadata"
+     (typep source-view 'clog-moldable-inspector::clog-view)
+     (format nil "~A Source view must use the readable file-content CLOG view"
              page-title))
     (assert-true
-     (search "render-file-source-surface"
+     (typep plain-view 'clog-moldable-inspector::clog-view)
+     (format nil "~A Plain source view must use the readable file-content CLOG view"
+             page-title))
+    (assert-equal "Source"
+                  (html-inspector-views:view-title source-view)
+                  (format nil "~A Source view must keep the Source title"
+                          page-title))
+    (assert-equal 10
+                  (html-inspector-views:view-priority source-view)
+                  (format nil "~A Source view must keep the Source priority"
+                          page-title))
+    (assert-equal "Plain source"
+                  (html-inspector-views:view-title plain-view)
+                  (format nil "~A Plain source view must keep the alias title"
+                          page-title))
+    (assert-equal 12
+                  (html-inspector-views:view-priority plain-view)
+                  (format nil "~A Plain source view must keep the alias priority"
+                          page-title))
+    (assert-true
+     (search expected-source-snippet
+             connect-source-html
+             :test #'char=)
+     (format nil "~A Connect source view must still render escaped source text"
+             page-title))
+    (assert-true
+     (search "data-hyperdoc-connect-provider-kind='source-v1'"
+             connect-source-html
+             :test #'char=)
+     (format nil "~A Connect source view must expose source-v1 provider metadata"
+             page-title))
+    (assert-true
+     (search "render-plain-source-surface-for-page"
              plain-source-code-html
              :test #'char-equal)
-     "The text-page Plain source definition must expose the historical file/content path directly.")
+     "The text-page Plain source definition must call the plain Source helper.")
     (assert-true
-     (null (search "render-plain-source-surface-for-page"
-                   plain-source-code-html
+     (search "👀content"
+             plain-helper-source-code-html
+             :test #'char-equal)
+     "The plain Source helper must expose the historical file/content path directly.")
+    (assert-true
+     (search "file-of"
+             plain-helper-source-code-html
+             :test #'char-equal)
+     "The plain Source helper must read from the page file.")
+    (assert-true
+     (search "rename"
+             plain-helper-source-code-html
+             :test #'char-equal)
+     "The plain Source helper must preserve view title/priority through rename.")
+    (assert-true
+     (null (search "render-file-source-surface"
+                   plain-helper-source-code-html
                    :test #'char-equal))
-     "The text-page Plain source definition must no longer read as the plain strategy wrapper.")))
+     "The plain Source helper must not fall back to the older helper wrapper.")))
 
 (defun run-source-pane-layout-evidence-smoke-test ()
   (asdf:load-system :hyperdoc/explorer)
@@ -1477,15 +1542,17 @@
      "Source pane layout dispatch view"
      '("html-page"
        "markdown-page"
+       ":plain"
+       "Connect source view"
        "text-page"
        "render-source-connect-surface"
        "hyperdoc-explorer/explorer.lisp"
-       "hyperbook-explorer/html-books.lisp"))
+       "hyperdoc-explorer/source-surfaces.lisp"))
     (assert-shared-workspace-page-contains-all
      runtime-html
      "Source pane layout runtime view"
      '("source-v1"
-       "Source"
+       "Connect source"
        "latent"
        "Connect"
        "Annotation"

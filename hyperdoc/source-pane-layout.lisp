@@ -79,20 +79,20 @@
 (defun source-pane-layout-dispatch-detail-rows ()
   (list
    (list :page-class "html-page"
-         :effective-method "text-page -> views:👀source -> render-source-connect-surface"
+         :effective-method "text-page -> views:👀source -> :plain -> views:👀content"
          :method-source-file "hyperdoc-explorer/explorer.lisp"
          :reason
-         "hyperdoc::html-page subclasses text-page and does not override Source, so the connectable Source surface stays active.")
+         "hyperdoc::html-page subclasses text-page and now inherits the plain default Source strategy for readable file-content source.")
    (list :page-class "markdown-page"
-         :effective-method "text-page -> views:👀source -> render-source-connect-surface"
+         :effective-method "text-page -> views:👀source -> :plain -> views:👀content"
          :method-source-file "hyperdoc-explorer/explorer.lisp"
          :reason
-         "hyperdoc::markdown-page subclasses html-page, which still inherits the same text-page Source path.")
-   (list :page-class "plain HyperBook html-page (contrast path)"
-         :effective-method "hyperbook::html-page -> hb:render-file-source-surface"
-         :method-source-file "hyperbook-explorer/html-books.lisp"
+         "hyperdoc::markdown-page subclasses html-page, which still inherits the plain text-page Source path.")
+   (list :page-class "text-page Connect source view"
+         :effective-method "views:👀connect-source -> render-source-connect-surface"
+         :method-source-file "hyperdoc-explorer/source-surfaces.lisp"
          :reason
-         "This is the shared plain file-source path reused for generic file targets and line rendering, but it is not the active HyperDoc html/markdown Source method.")))
+         "Connect remains explicit and provider-backed; source-line route laying uses this view instead of the readable Source default.")))
 
 (defun source-pane-layout-pane-shell-detail-columns ()
   '(("Function" . :function)
@@ -120,7 +120,11 @@
    (list :function "render-source-connect-surface"
          :source-file "hyperdoc-explorer/dom-annotations.lisp"
          :contribution
-         "Builds the source-v1 provider for Source tabs and threads optional focused-line landing into the provider.")
+         "Builds the source-v1 provider for Connect source tabs and threads optional focused-line landing into the provider.")
+   (list :function "render-plain-source-surface-for-page"
+         :source-file "hyperdoc-explorer/source-surfaces.lisp"
+         :contribution
+         "Routes the default Source strategy through the readable file-content source view that the swap preview formerly exposed as Alternate Source.")
    (list :function "render-anchor-provider-surface"
          :source-file "hyperdoc-explorer/dom-annotations.lisp"
          :contribution
@@ -144,11 +148,7 @@
    (list :helper "hb:render-file-source-surface"
          :source-file "hyperbook-explorer/html-books.lisp"
          :responsibility
-         "Plain non-connect source pane used when a file should be inspectable without source-anchor controls.")
-   (list :helper "hyperbook::html-page -> views:👀source"
-         :source-file "hyperbook-explorer/html-books.lisp"
-         :responsibility
-         "Contrast path showing the plain html-page Source implementation that HyperDoc html/markdown pages do not dispatch through.")))
+         "Plain non-connect source pane used underneath file-content Source views when a file should be inspectable without source-anchor controls.")))
 
 (defun source-pane-layout-css-detail-columns ()
   '(("Selector" . :selector)
@@ -176,7 +176,7 @@
    (list :selector ".hyperdoc-source-connect-view"
          :role "Connectable source surface"
          :layout-relationship
-         "Provides the bordered scrolling source-reading surface used for connectable Source tabs.")
+         "Provides the bordered scrolling source-reading surface used for Connect source tabs.")
    (list :selector ".hyperdoc-source-pane-view"
          :role "Plain source surface"
          :layout-relationship
@@ -205,11 +205,11 @@
   (make-source-pane-layout-evidence
    "source-pane-layout/dispatch"
    "HTML/Markdown Source dispatch"
-   "The current effective Source path for HyperDoc html-page and markdown-page stays connectable because both classes inherit the text-page Source method."
+   "The current effective Source path for HyperDoc html-page and markdown-page is plain/readable; Connect source is the explicit connectable source-line path."
    "Dispatch"
    "Shows which Source method actually wins for HyperDoc html and markdown pages."
    "hyperdoc-explorer/html-pages.lisp"
-   "This is the dispatch seam that explains why html/markdown Source remains connectable and why the plain HyperBook html-page Source path is only a contrast path here."
+   "This is the dispatch seam that explains why Source is for reading while Connect source remains available for source-line anchoring."
    :detail-columns (source-pane-layout-dispatch-detail-columns)
    :detail-rows (source-pane-layout-dispatch-detail-rows)))
 
@@ -229,11 +229,11 @@
   (make-source-pane-layout-evidence
    "source-pane-layout/server-composition"
    "Server-side source/connect composition"
-   "Server-side wrappers compose the connectable source surface, the hidden bridge controls, and the Source body wrapper beneath the pane chrome."
+   "Server-side wrappers compose both the plain Source surface and the Connect source surface with its hidden bridge controls."
    "Server composition"
-   "Shows which wrapper owns the connectable Source surface and which one owns the Source body layout."
+   "Shows which wrapper owns the Connect source surface and which one owns the plain Source body layout."
    "hyperdoc-explorer/dom-annotations.lisp"
-   "This is the inner server-side composition layer between the inherited Source method and the browser-side pane-slot handshake."
+   "This is the inner server-side composition layer between the readable Source strategy and the browser-side pane-slot handshake for Connect source."
    :detail-columns (source-pane-layout-server-composition-detail-columns)
    :detail-rows (source-pane-layout-server-composition-detail-rows)))
 
@@ -241,11 +241,11 @@
   (make-source-pane-layout-evidence
    "source-pane-layout/shared-rendering"
    "Shared and plain file-source rendering"
-   "HyperBook provides the shared line renderer and the plain non-connect file-source pane; HyperDoc reuses the line renderer inside its connectable Source body."
+   "HyperBook provides the shared line renderer and the plain non-connect file-source pane; HyperDoc uses it for Source and reuses the line renderer inside Connect source."
    "Shared rendering"
    "Separates plain file-source responsibilities from connectable source-surface responsibilities."
    "hyperbook-explorer/html-books.lisp"
-   "This layer is the contrast point that makes it inspectable why plain file rendering and connectable Source rendering share lines but not the same outer surface contract."
+   "This layer makes it inspectable why plain file rendering and connectable source-line anchoring share lines but not the same outer surface contract."
    :detail-columns (source-pane-layout-shared-rendering-detail-columns)
    :detail-rows (source-pane-layout-shared-rendering-detail-rows)))
 
@@ -265,9 +265,9 @@
   (make-source-pane-layout-evidence
    "source-pane-layout/js"
    "Pane-slot and source-surface runtime handshake"
-   "Browser-side initialization discovers the active connect surface, populates the pane slot with dock controls, and keeps pane state synchronized when tabs switch."
+   "Browser-side initialization discovers the active Connect source surface, populates the pane slot with dock controls, and keeps pane state synchronized when tabs switch."
    "JS"
-   "Shows which runtime functions populate the pane slot and bind the connectable Source surface."
+   "Shows which runtime functions populate the pane slot and bind the connectable source surface."
    "assets/hyperdoc/js/dom-annotation-connect.js"
    "This is the runtime layer that turns the pane slot into a live dock-control row and binds the source surface beneath it."
    :detail-columns (source-pane-layout-js-detail-columns)
@@ -276,15 +276,15 @@
 (defun source-pane-layout-runtime-snapshot ()
   (make-dom-connect-pane-state-snapshot-from-json
    '(:paneId "source-pane-layout"
-     :activeTab "Source"
-     :contextViewTitle "Source"
+     :activeTab "Connect source"
+     :contextViewTitle "Connect source"
      :providerKind "source-v1"
      :available t
      :enabled t
      :phase "dormant"
      :helpOpen nil
      :presentationState "latent"
-     :presentationReason "connectable-source-pane"
+     :presentationReason "connect-source-pane"
      :coachmarkVisible nil
      :selectedSourceLabel nil
      :selectedSourcePane nil
@@ -298,7 +298,7 @@
                  :id "source-pane-layout-evidence"
                  :title "Source pane layout evidence"
                  :summary
-                 "Inspectable evidence chain for the current html/markdown Source path: inherited dispatch, pane-slot shell, connectable source composition, shared line rendering, layout CSS, browser-side pane-slot handshake, and representative runtime state."
+                 "Inspectable evidence chain for the split html/markdown source contract: plain Source dispatch, explicit Connect source composition, shared line rendering, layout CSS, browser-side pane-slot handshake, and representative runtime state."
                  :evidence
                  (list (source-pane-dispatch-evidence)
                        (source-pane-pane-shell-evidence)

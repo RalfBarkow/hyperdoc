@@ -550,7 +550,7 @@ test("provider-surface sync settles across a Pages round trip", async ({
   expect(sync.returned.paneTitles[1].activeTab).toBe("Main page");
 });
 
-test("source view exposes source anchors and opens an association", async (
+test("plain Source stays readable and Connect source opens a source-line association", async (
   { page },
   testInfo
 ) => {
@@ -558,12 +558,17 @@ test("source view exposes source anchors and opens an association", async (
 
   const result = await runSourceAssociation(page, "Creating a HyperDoc");
 
+  await attachJson(testInfo, "plain-source-pane-state.json", result.plainSourceState);
   await attachJson(testInfo, "source-pane-state.json", result.sourceState);
   await attachJson(testInfo, "source-browser-trace.json", result.trace);
   await attachJson(testInfo, "source-pane-titles.json", result.paneTitles);
 
+  expect(result.plainSourceState.activeTab).toBe("Source");
+  expect(result.plainSourceState.providerKind).toBe(null);
+  expect(result.plainSourceState.plainLineCount).toBeGreaterThan(5);
+  expect(result.plainSourceState.lineCount).toBe(0);
   expect(result.sourceState.providerKind).toBe("source-v1");
-  expect(result.sourceState.activeTab).toBe("Source");
+  expect(result.sourceState.activeTab).toBe("Connect source");
   expect(result.sourceState.lineCount).toBeGreaterThan(5);
 
   expect(result.trace.requestId).toBeTruthy();

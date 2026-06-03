@@ -9,7 +9,7 @@ const {
   openTextPageFromHyperDoc,
   readPaneTitles,
   resetDockPresentation,
-  selectSourceTab,
+  selectConnectSourceTab,
   settleInspectorBindings,
 } = require("./hyperdoc-inspector");
 const {
@@ -235,7 +235,7 @@ test("Dock introduces Snippet independently on first eligible Source pane", asyn
     page,
     "Workspace-native annotations in a DMX workspace"
   );
-  await selectSourceTab(page, 2);
+  await selectConnectSourceTab(page, 2);
   await settleInspectorBindings(page, 1500);
 
   const sourceIntroduction = await readPaneChromeState(page, 2);

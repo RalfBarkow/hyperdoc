@@ -7,7 +7,7 @@ const {
   openFedWikiPageFromTextPageLink,
   openHyperDoc,
   openTextPageFromHyperDoc,
-  selectSourceTab,
+  selectConnectSourceTab,
   settleInspectorBindings,
 } = require("./hyperdoc-inspector");
 
@@ -158,7 +158,7 @@ function installPageErrorTrace(page) {
 async function openSnippetPlaygroundFixture(page, title) {
   await openHyperDoc(page);
   await openTextPageFromHyperDoc(page, title);
-  await selectSourceTab(page, 2);
+  await selectConnectSourceTab(page, 2);
   await settleInspectorBindings(page, 1500);
 }
 

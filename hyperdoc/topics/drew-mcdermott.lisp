@@ -429,8 +429,9 @@
   (make-topic
    :id "source-pane-layout-evidence"
    :title "Source pane layout evidence"
-   :summary "Inspectable evidence cluster for the current html/markdown Source path: inherited Source dispatch, pane-slot shell, source-pane wrapper, shared line rendering, layout CSS, browser-side pane-slot handshake, and representative Source-pane runtime state."
+   :summary "Inspectable evidence cluster for the split html/markdown source contract: plain Source reading, explicit Connect source anchoring, pane-slot shell, shared line rendering, CSS, JS, and representative runtime state."
    :references '("Source pane layout evidence"
+                 "Make Alternate Source the Default Source View"
                  "Workspace-native annotations in a DMX workspace"
                  "A DOM-annotation connect gesture"
                  "Dock capabilities in HyperDoc")))

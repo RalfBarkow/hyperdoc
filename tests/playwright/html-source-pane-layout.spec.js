@@ -7,7 +7,7 @@ const {
   openFedWikiPageFromTextPageLink,
   openHyperDoc,
   openTextPageFromHyperDoc,
-  selectSourceTab,
+  selectConnectSourceTab,
   settleInspectorBindings,
 } = require("./hyperdoc-inspector");
 const { readPaneChromeState } = require("./pane-chrome-harness");
@@ -60,7 +60,7 @@ async function readSourcePaneLayout(page, paneIndex) {
   }, paneIndex);
 }
 
-test("HTML Source keeps dock chrome above a full-width source pane", async ({
+test("HTML Connect source keeps dock chrome above a full-width source pane", async ({
   page,
 }, testInfo) => {
   await openHyperDoc(page);
@@ -68,7 +68,7 @@ test("HTML Source keeps dock chrome above a full-width source pane", async ({
     page,
     "Workspace-native annotations in a DMX workspace"
   );
-  await selectSourceTab(page, 2);
+  await selectConnectSourceTab(page, 2);
   await settleInspectorBindings(page, 1500);
 
   const chrome = await readPaneChromeState(page, 2);
@@ -79,7 +79,7 @@ test("HTML Source keeps dock chrome above a full-width source pane", async ({
     layout,
   });
 
-  expect(chrome.activeTab).toBe("Source");
+  expect(chrome.activeTab).toBe("Connect source");
   expect(chrome.slotHidden).toBe(false);
   expect(layout.controlPresent).toBe(true);
   expect(layout.controlText).toContain("Connect");
@@ -127,7 +127,7 @@ test("snippet playground opens in a fresh pane to the right without collapsing t
 }, testInfo) => {
   await openHyperDoc(page);
   await openTextPageFromHyperDoc(page, "Mech CODE Block analysis");
-  await selectSourceTab(page, 2);
+  await selectConnectSourceTab(page, 2);
   await settleInspectorBindings(page, 1500);
 
   const panesBefore = page.locator(".inspector-pane");

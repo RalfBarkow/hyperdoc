@@ -203,6 +203,10 @@ async function selectSourceTab(page, paneIndex) {
   await activatePaneTab(page, paneIndex, "Source");
 }
 
+async function selectConnectSourceTab(page, paneIndex) {
+  await activatePaneTab(page, paneIndex, "Connect source");
+}
+
 async function activatePaneTab(page, paneIndex, title) {
   const currentPane = pane(page, paneIndex);
   const tab = currentPane
@@ -552,6 +556,11 @@ async function readSourcePaneState(page, paneIndex) {
     const lines = activeView
       ? Array.from(activeView.querySelectorAll(".hyperdoc-source-connect-line"))
       : [];
+    const plainLines = activeView
+      ? Array.from(
+          activeView.querySelectorAll(".hyperdoc-source-pane-line, .ace_line")
+        )
+      : [];
     return {
       paneCount: document.querySelectorAll(".inspector-pane").length,
       title: titleNode?.textContent?.trim() || null,
@@ -561,10 +570,14 @@ async function readSourcePaneState(page, paneIndex) {
       providerKind: surface?.dataset.hyperdocConnectProviderKind || null,
       viewKind: surface?.dataset.hyperdocConnectViewKind || null,
       lineCount: lines.length,
+      plainLineCount: plainLines.length,
       firstLines: lines.slice(0, 5).map((line) => ({
         line: line.dataset.hyperdocSourceStartLine || null,
         label: line.dataset.hyperdocSourceLabel || null,
         value: line.dataset.hyperdocSourceValue || null,
+        text: line.textContent?.replace(/\s+/g, " ").trim().slice(0, 120) || "",
+      })),
+      firstPlainLines: plainLines.slice(0, 5).map((line) => ({
         text: line.textContent?.replace(/\s+/g, " ").trim().slice(0, 120) || "",
       })),
     };
@@ -691,6 +704,15 @@ async function runSourceAssociation(page, title) {
   await openHyperDoc(page);
   await openTextPageFromHyperDoc(page, title);
   await selectSourceTab(page, 2);
+  await expect.poll(
+    () =>
+      activeView(pane(page, 2))
+        .locator(".hyperdoc-source-pane-line, .ace_line")
+        .count(),
+    { timeout: 20_000 }
+  ).toBeGreaterThan(5);
+  const plainSourceState = await readSourcePaneState(page, 2);
+  await selectConnectSourceTab(page, 2);
   const sourceState = await waitForSourceProvider(page, 2);
   await clearDomConnectTrace(page);
   await startConnectInPane(page, 2);
@@ -702,6 +724,7 @@ async function runSourceAssociation(page, title) {
   await lineButtons.nth(2).click();
   const trace = await waitForAssociationResult(page);
   return {
+    plainSourceState,
     sourceState,
     trace,
     paneTitles: await readPaneTitles(page),
@@ -734,6 +757,7 @@ module.exports = {
   runHyperDocToFedWikiAssociation,
   runTwoPaneContentAssociation,
   runSourceAssociation,
+  selectConnectSourceTab,
   selectSourceTab,
   settleInspectorBindings,
   startConnectInPane,

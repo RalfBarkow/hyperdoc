@@ -231,7 +231,7 @@
                    (let ((runtime-snapshot (runtime-snapshot-of model)))
                      (views:html
                       (:p
-                       "This evidence table links the current html/markdown Source chain from dispatch to pane-slot shell, connect surface, shared line renderer, CSS, JS, and representative runtime state.")
+                       "This evidence table links the current html/markdown Source contract from plain dispatch to the explicit Connect source surface, shared line renderer, CSS, JS, and representative runtime state.")
                       (:table :class "inspector-table"
                               (:tr (:th "Layer")
                                    (:th "Role")
@@ -256,7 +256,7 @@
                                          "hyperdoc/dom-annotations.lisp"))
                                    (:td
                                     (views:esc
-                                     "Makes the current connectable Source-pane contract inspectable through the existing pane-state snapshot seam."))))))))
+                                     "Makes the current Connect source pane-state contract inspectable through the existing pane-state snapshot seam."))))))))
 
 (views:defview 👀dispatch (model source-pane-layout-model)
   (views:html-view :title "Dispatch" :priority 3
@@ -266,7 +266,7 @@
                            "source-pane-layout/dispatch")))
                      (views:html
                       (:p
-                       "html-page and markdown-page are connectable again because both inherit HyperDoc's text-page Source method rather than dispatching through the plain HyperBook html-page Source path.")
+                       "html-page and markdown-page now use plain Source for reading while the explicit Connect source view keeps source-line anchoring available.")
                       (when dispatch-evidence
                         (source-pane-layout-render-detail-table
                          (detail-columns-of dispatch-evidence)
@@ -277,7 +277,7 @@
                    (let ((snapshot (runtime-snapshot-of model)))
                      (views:html
                       (:p
-                       "The representative runtime state keeps the current Source pane explicitly connectable: provider kind source-v1, dormant Dock presentation, and compact Connect/Annotation/Guide capability access.")
+                       "The representative runtime state keeps the Connect source pane explicitly connectable: provider kind source-v1, dormant Dock presentation, and compact Connect/Annotation/Guide capability access.")
                       (:table :class "inspector-table"
                               (render-connect-field-row "Snapshot"
                                                         snapshot)
