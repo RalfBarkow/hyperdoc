@@ -45,6 +45,7 @@
   (run-dock-annotation-smoke-tests)
   (run-mobile-progressive-chrome-smoke-tests)
   (run-reel-accessible-carousel-smoke-tests)
+  (run-layout-topicmap-smoke-tests)
   (run-dmx-annotations-smoke-tests)
   (run-dmx-workspace-journal-sink-smoke-tests)
   (run-dmx-auth-session-boundary-smoke-tests)

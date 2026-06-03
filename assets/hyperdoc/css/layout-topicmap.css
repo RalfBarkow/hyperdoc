@@ -1,0 +1,223 @@
+.hyperdoc-layout-topicmap {
+  box-sizing: border-box;
+  color: #161616;
+  font: 15px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 1rem;
+}
+
+.hyperdoc-layout-topicmap * {
+  box-sizing: border-box;
+}
+
+.hyperdoc-layout-header {
+  border-bottom: 1px solid #d6d9dc;
+  margin-block-end: 1rem;
+  padding-block-end: 0.8rem;
+}
+
+.hyperdoc-layout-header h1,
+.hyperdoc-layout-topicmap h1,
+.hyperdoc-layout-topicmap h2,
+.hyperdoc-layout-topicmap h3 {
+  letter-spacing: 0;
+  margin-block-start: 0;
+}
+
+.hyperdoc-layout-header h1 {
+  font-size: 1.35rem;
+  margin-block-end: 0.35rem;
+}
+
+.hyperdoc-layout-header p,
+.hyperdoc-layout-section p {
+  max-width: 74rem;
+}
+
+.hyperdoc-layout-section {
+  margin-block: 1rem;
+}
+
+.hyperdoc-layout-section h2 {
+  font-size: 1rem;
+  margin-block-end: 0.55rem;
+}
+
+.hyperdoc-layout-section h3 {
+  font-size: 0.95rem;
+  margin-block-end: 0.45rem;
+}
+
+.hyperdoc-layout-topics {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.hyperdoc-layout-topic {
+  background: #fff;
+  border: 1px solid #c9d0d5;
+  border-radius: 6px;
+  min-height: 13.5rem;
+  padding: 0.8rem;
+}
+
+.hyperdoc-layout-topic:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+.hyperdoc-layout-topic header {
+  align-items: start;
+  border-bottom: 1px solid #e4e7e9;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-block-end: 0.65rem;
+  padding-block-end: 0.5rem;
+}
+
+.hyperdoc-layout-topic strong {
+  font-size: 0.98rem;
+}
+
+.hyperdoc-layout-topic code,
+.hyperdoc-layout-topicmap code {
+  font-size: 0.86em;
+}
+
+.hyperdoc-layout-topic--drag-source {
+  border-color: #256f8f;
+  cursor: grab;
+}
+
+.hyperdoc-layout-topic--drag-source:active {
+  cursor: grabbing;
+}
+
+.hyperdoc-layout-topic--drop-target {
+  border-color: #67823a;
+}
+
+.hyperdoc-layout-topic.is-dragging {
+  opacity: 0.58;
+}
+
+.hyperdoc-layout-topic.is-drop-ready {
+  background: #f4fbf6;
+  border-color: #2f7d4f;
+  box-shadow: 0 0 0 3px rgb(47 125 79 / 0.18);
+}
+
+.hyperdoc-layout-topic__field {
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: 5.75rem minmax(0, 1fr);
+  margin-block: 0.22rem;
+}
+
+.hyperdoc-layout-topic__field dt {
+  color: #4a4f54;
+  font-weight: 650;
+}
+
+.hyperdoc-layout-topic__field dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.hyperdoc-layout-topic__measurement {
+  background: #f6f7f8;
+  border: 1px solid #dce0e3;
+  border-radius: 4px;
+  font-size: 0.86rem;
+  margin-block: 0.65rem 0;
+  padding: 0.45rem 0.55rem;
+}
+
+.hyperdoc-layout-patch {
+  background: #fbfcfd;
+  border: 2px solid #256f8f;
+  border-radius: 6px;
+  margin-block: 1rem;
+  padding: 0.9rem;
+}
+
+.hyperdoc-layout-patch[hidden] {
+  display: none;
+}
+
+.hyperdoc-layout-patch header h2 {
+  font-size: 1.1rem;
+  margin-block-end: 0.25rem;
+}
+
+.hyperdoc-layout-patch__facts {
+  display: grid;
+  gap: 0.25rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+}
+
+.hyperdoc-layout-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-block: 0.8rem;
+}
+
+.hyperdoc-layout-actions button {
+  border: 1px solid #555;
+  border-radius: 4px;
+  background: #f7f7f7;
+  color: #111;
+  cursor: pointer;
+  min-height: 2.1rem;
+  padding: 0.35rem 0.7rem;
+}
+
+.hyperdoc-layout-actions button:hover {
+  background: #e9eef1;
+}
+
+.hyperdoc-layout-actions button:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
+.hyperdoc-layout-apply-status {
+  color: #3f464c;
+}
+
+.hyperdoc-layout-inspectable-ref {
+  margin-block-end: 0;
+}
+
+.hyperdoc-layout-model-links p {
+  margin-block: 0.35rem;
+}
+
+.hyperdoc-layout-relations td,
+.hyperdoc-layout-topology td {
+  vertical-align: top;
+}
+
+.hyperdoc-reel[data-layout-preview="buttons-in-pane"] .hyperdoc-reel__buttons {
+  outline: 3px solid #2f7d4f;
+  outline-offset: 2px;
+}
+
+.inspector-pane[data-layout-preview-target="buttons-in-pane"] {
+  outline: 2px solid #2f7d4f;
+  outline-offset: -4px;
+}
+
+@media (max-width: 760px) {
+  .hyperdoc-layout-topicmap {
+    padding: 0.75rem;
+  }
+
+  .hyperdoc-layout-topic__field {
+    grid-template-columns: 1fr;
+  }
+}

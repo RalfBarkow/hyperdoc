@@ -1,0 +1,169 @@
+<h1>Layout as Topicmap</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Page genre: reference/contract. Inspector layout is modeled as first-class
+  topics and relations so a visible chrome move can be inspected as a patch
+  before renderer or durable layout mutation.
+</p>
+
+<h2>Claim</h2>
+
+<p>
+  The reel controls are not another isolated CSS exception. They are a layout
+  topic whose parent box can change through a visible, inspectable patch while
+  native horizontal scrolling and button accessibility remain invariant.
+</p>
+
+<h2>Content Model</h2>
+
+<ul>
+  <li><code>layout-topic</code>: selector, element id, class list, bounding box capture status, scroll context, role/kind, evidence, and stability classification.</li>
+  <li><code>layout-relation</code>: containment, control, and scroll relations between layout topics.</li>
+  <li><code>layout-topicmap</code>: immutable snapshot of the reel/inspector-pane subset.</li>
+  <li><code>move-topic-into-box-patch</code>: before topology, after topology, source evidence, target evidence, proposed implementation effect, and preview/apply policy.</li>
+</ul>
+
+<h2>Current Topology</h2>
+
+<pre><code class="language-lisp">(layout-topicmap
+  (:topic hyperdoc-reel :selector ".hyperdoc-reel" :kind :layout-container)
+  (:topic hyperdoc-reel__viewport :selector ".hyperdoc-reel__viewport" :kind :layout-viewport)
+  (:topic hyperdoc-reel__buttons :selector ".hyperdoc-reel__buttons" :kind :control-rail)
+  (:topic hyperdoc-reel__scrollable :selector ".hyperdoc-reel__scrollable" :kind :scroll-container)
+  (:topic inspector-pane :selector ".inspector-pane" :kind :pane)
+  (:relation contains hyperdoc-reel hyperdoc-reel__viewport)
+  (:relation contains hyperdoc-reel__viewport hyperdoc-reel__buttons)
+  (:relation contains hyperdoc-reel__viewport hyperdoc-reel__scrollable)
+  (:relation contains hyperdoc-reel__scrollable inspector-pane)
+  (:relation controls hyperdoc-reel__buttons hyperdoc-reel__scrollable))</code></pre>
+
+<h2>Allowed First Mutation</h2>
+
+<pre><code class="language-lisp">(move-topic-into-box
+  :topic 'hyperdoc-reel__buttons
+  :from 'hyperdoc-reel__viewport
+  :to 'inspector-pane
+  :relation :contains
+  :placement :bottom-control-rail
+  :preserve '(:native-horizontal-overflow
+              :button-labels
+              :disabled-boundary-states
+              :keyboard-reachability))</code></pre>
+
+<h2>Inspector View Specification</h2>
+
+<p>
+  The <code>Layout topicmap</code> view on a HyperDoc object renders the topics
+  as boxes, the relations as tables, and the standard contract sections:
+  Content Model, Box Contract, Priority Policy, Actions, Evidence, and Failure
+  Modes. Dragging <code>hyperdoc-reel__buttons</code> onto
+  <code>inspector-pane</code> reveals an inspectable
+  <code>move-topic-into-box-patch</code>.
+</p>
+
+<h2>Preview and Apply Boundary</h2>
+
+<ul>
+  <li>Preview may align the existing control rail over the pane as runtime evidence.</li>
+  <li>Preview records live selector, class, bounding box, and scroll-context evidence.</li>
+  <li>The DOM is not the source of truth; the source of truth is the Lisp layout object and patch object.</li>
+  <li>Apply creates durable override evidence for the inspectable patch object; renderer mutation remains explicit.</li>
+</ul>
+
+<h2>Invariants</h2>
+
+<ul>
+  <li>The existing overflowable reel model remains intact.</li>
+  <li><code>.hyperdoc-reel__scrollable</code> remains native horizontal overflow and preserves <code>scrollLeft</code>.</li>
+  <li>Previous/next remain real keyboard-focusable buttons.</li>
+  <li>Existing labels and disabled boundary states remain intact.</li>
+  <li>The patch has before/after topology and source/target evidence.</li>
+</ul>
+
+<h2>Inspectable Objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Layout as Topicmap"><tt>Layout as Topicmap</tt></a></li>
+  <li><a hyperbook="topics" page="Inspector Reel layout topicmap"><tt>Inspector Reel layout topicmap</tt></a></li>
+  <li><a hyperbook="topics" page="move-topic-into-box-patch"><tt>move-topic-into-box-patch</tt></a></li>
+  <li><a expr="(reel-inspector-layout-topicmap)"><tt>(reel-inspector-layout-topicmap)</tt></a></li>
+  <li><a expr="(make-reel-buttons-into-pane-patch)"><tt>(make-reel-buttons-into-pane-patch)</tt></a></li>
+</ul>
+
+<h2>SHOP3 Task</h2>
+
+<pre><code class="language-lisp">(:task layout-topicmap-move-reel-buttons-into-pane)
+
+(:method layout-topicmap-move-reel-buttons-into-pane
+  ((:precondition
+    (and (layout-subject hyperdoc-reel)
+         (layout-topic hyperdoc-reel__buttons)
+         (layout-topic inspector-pane)))
+   (:ordered-tasks
+    (!capture-layout-snapshot hyperdoc-reel)
+    (!project-layout-snapshot-to-topicmap)
+    (!render-layout-topicmap-view)
+    (!enable-drag-source hyperdoc-reel__buttons)
+    (!enable-drop-target inspector-pane)
+    (!create-move-topic-into-box-patch hyperdoc-reel__buttons inspector-pane)
+    (!preview-layout-patch)
+    (!verify-reel-accessibility-invariants)
+    (!commit-periodically))))</code></pre>
+
+<h2>SCXML Sketch</h2>
+
+<pre><code class="language-xml">&lt;scxml initial="capture-layout"&gt;
+  &lt;state id="capture-layout"&gt;
+    &lt;transition event="snapshot.ready" target="render-topicmap"/&gt;
+  &lt;/state&gt;
+  &lt;state id="render-topicmap"&gt;
+    &lt;transition event="drag.started" target="dragging-topic"/&gt;
+  &lt;/state&gt;
+  &lt;state id="dragging-topic"&gt;
+    &lt;transition event="drop.accepted" target="create-patch"/&gt;
+    &lt;transition event="drop.rejected" target="render-topicmap"/&gt;
+  &lt;/state&gt;
+  &lt;state id="create-patch"&gt;
+    &lt;transition event="patch.created" target="inspect-patch"/&gt;
+  &lt;/state&gt;
+  &lt;state id="inspect-patch"&gt;
+    &lt;transition event="preview.requested" target="preview-patch"/&gt;
+    &lt;transition event="cancel" target="render-topicmap"/&gt;
+  &lt;/state&gt;
+  &lt;state id="preview-patch"&gt;
+    &lt;transition event="invariants.pass" target="ready-to-apply"/&gt;
+    &lt;transition event="invariants.fail" target="inspect-patch"/&gt;
+  &lt;/state&gt;
+  &lt;state id="ready-to-apply"&gt;
+    &lt;transition event="apply" target="done"/&gt;
+  &lt;/state&gt;
+  &lt;final id="done"/&gt;
+&lt;/scxml&gt;</code></pre>
+
+<h2>Goldberg Questions</h2>
+
+<ul>
+  <li>What are the visible layout parts?</li>
+  <li>Which box owns which child?</li>
+  <li>Which object controls scrolling?</li>
+  <li>Which box is the user actually reading in?</li>
+  <li>Which part is an affordance rather than content?</li>
+  <li>What changes when the Buttons topic moves into the Pane topic?</li>
+  <li>What invariant must not be broken?</li>
+  <li>What evidence proves the patch is only previewed?</li>
+  <li>What evidence proves the patch is durable when applied?</li>
+  <li>Where is the source of truth: DOM, layout snapshot, or Lisp layout object?</li>
+  <li>How can a reader undo or inspect the layout patch?</li>
+  <li>How does this generalize from reel buttons to other pane chrome?</li>
+</ul>
+
+<h2>Boundary</h2>
+
+<p>
+  This first slice covers the reel controls and inspector pane only. It does not
+  replace the accessible Reel implementation, introduce a custom carousel, or
+  generalize arbitrary layout editing beyond the single
+  <code>hyperdoc-reel__buttons</code> into <code>inspector-pane</code> move.
+</p>

@@ -419,6 +419,41 @@
    #:reel-accessible-carousel-plan
    #:reel-accessible-carousel-goldberg-answers
    #:run-reel-accessible-carousel-slice-checks
+   ;; Inspector layout topicmap editor slice
+   #:layout-topic
+   #:layout-relation
+   #:layout-topicmap
+   #:layout-patch
+   #:move-topic-into-box-patch
+   #:layout-topic-selector-of
+   #:layout-topic-element-id-of
+   #:layout-topic-class-list-of
+   #:layout-topic-bounding-box-of
+   #:layout-topic-scroll-context-of
+   #:layout-topic-role-of
+   #:layout-topic-stability-of
+   #:layout-topicmap-captured-at-of
+   #:layout-patch-before-topicmap-of
+   #:layout-patch-after-topicmap-of
+   #:layout-patch-source-evidence-of
+   #:layout-patch-target-evidence-of
+   #:layout-patch-proposed-implementation-effect-of
+   #:layout-patch-apply-policy-of
+   #:layout-patch-topic-id-of
+   #:layout-patch-from-parent-id-of
+   #:layout-patch-to-parent-id-of
+   #:layout-patch-relation-kind-of
+   #:layout-patch-placement-of
+   #:layout-patch-preserve-of
+   #:reel-inspector-layout-topicmap
+   #:layout-topicmap-topic
+   #:layout-topicmap-relations-of-kind
+   #:layout-topicmap-parent-of
+   #:layout-topicmap-children-of
+   #:layout-topicmap-contains-edges
+   #:layout-topicmap-with-moved-topic
+   #:make-move-topic-into-box-patch
+   #:make-reel-buttons-into-pane-patch
    ;; Page-as-ASDF-system reload boundaries
    #:page-system
    #:hyperdoc-page-system
