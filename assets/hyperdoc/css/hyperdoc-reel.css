@@ -12,18 +12,27 @@
 
 .hyperdoc-reel {
   --hyperdoc-reel-control-size: 2.25rem;
+  --hyperdoc-reel-control-background: #fff;
+  --hyperdoc-reel-control-border: #d8d8d8;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0.35rem;
   height: 98vh;
   min-height: 0;
+  position: relative;
 }
 
 .hyperdoc-reel__buttons {
   display: flex;
   justify-content: flex-end;
   gap: 0.35rem;
-  padding-inline: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  background: var(--hyperdoc-reel-control-background);
+  border-block-end: 1px solid var(--hyperdoc-reel-control-border);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
 }
 
 .hyperdoc-reel__buttons[hidden] {
@@ -104,6 +113,12 @@
     border-color: ButtonText;
     background: ButtonFace;
     color: ButtonText;
+  }
+
+  .hyperdoc-reel__buttons {
+    background: Canvas;
+    border-block-end-color: CanvasText;
+    box-shadow: none;
   }
 
   .hyperdoc-reel__item {

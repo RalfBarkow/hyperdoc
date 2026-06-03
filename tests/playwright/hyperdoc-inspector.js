@@ -46,18 +46,19 @@ async function settleInspectorBindings(page, timeout = 1500) {
 
 async function openHyperDoc(page, options = {}) {
   const expectDesktopDock = options.expectDesktopDock !== false;
+  const timeout = options.timeout || 20_000;
   await gotoCatalog(page);
   const catalogPane = pane(page, 0);
   await tableCellByExactText(catalogPane, "HyperDoc").click();
   await expect
-    .poll(() => page.locator(".inspector-pane").count(), { timeout: 20_000 })
+    .poll(() => page.locator(".inspector-pane").count(), { timeout })
     .toBeGreaterThan(1);
   const hyperdocPane = pane(page, 1);
-  await expect(hyperdocPane).toBeVisible({ timeout: 20_000 });
+  await expect(hyperdocPane).toBeVisible({ timeout });
   await expect
     .poll(
       async () => hyperdocPane.locator(".inspector-tabs button").count(),
-      { timeout: 20_000 }
+      { timeout }
     )
     .toBeGreaterThan(0);
   const tabTexts = await hyperdocPane.locator(".inspector-tabs button").allTextContents();
