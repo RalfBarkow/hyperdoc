@@ -54,7 +54,7 @@
 (defgeneric source-surface-strategy-for (page))
 
 (defmethod source-surface-strategy-for ((page text-page))
-  *connect-source-surface-strategy*)
+  *plain-source-surface-strategy*)
 
 (defun normalize-source-surface-designator (designator)
   (typecase designator
@@ -217,6 +217,13 @@
 (defgeneric render-source-surface-with-strategy
     (strategy page &key title priority))
 
+(defun render-plain-source-surface-for-page
+    (page &key (title "Source") (priority 10))
+  (-> page
+      file-of
+      views:👀content
+      (views:rename :title title :priority priority)))
+
 (defmethod render-source-surface-with-strategy
     ((strategy connect-source-surface-strategy) (page text-page)
      &key (title "Source") (priority 10))
@@ -226,8 +233,7 @@
 (defmethod render-source-surface-with-strategy
     ((strategy plain-source-surface-strategy) (page text-page)
      &key (title "Source") (priority 10))
-  (views:html-view :title title :priority priority
-                   (hb:render-file-source-surface (file-of page))))
+  (render-plain-source-surface-for-page page :title title :priority priority))
 
 (defun source-surface-resolution-report-display-value (value)
   (typecase value
@@ -337,8 +343,17 @@
    :priority priority))
 
 (views:defview 👀plain-source (page text-page)
-  (views:html-view :title "Plain source" :priority 12
-                   (hb:render-file-source-surface (file-of page))))
+  (render-plain-source-surface-for-page
+   page
+   :title "Plain source"
+   :priority 12))
+
+(views:defview 👀connect-source (page text-page)
+  (render-source-surface-for-page-with-designator
+   page
+   :connect
+   :title "Connect source"
+   :priority 11))
 
 (defun render-source-surface-for-page (page &key (title "Source") (priority 10))
   (render-source-surface-for-page-with-designator
@@ -527,17 +542,11 @@
          (designator
           (normalize-source-surface-designator
            (source-surface-swap-preview-alternate-designator-of preview))))
-    (if (and (typep page 'text-page)
-             (eql designator :plain))
-        (-> page
-            file-of
-            views:👀content
-            (views:rename :title "Alternate Source" :priority 4))
-        (render-source-surface-for-page-with-designator
-         page
-         designator
-         :title "Alternate Source"
-         :priority 4))))
+    (render-source-surface-for-page-with-designator
+     page
+     designator
+     :title "Alternate Source"
+     :priority 4)))
 
 (defun render-source-surface-swap-operations-for-page (page)
   (let* ((report (source-surface-resolution-report-for page))
