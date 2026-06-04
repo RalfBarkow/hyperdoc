@@ -114,12 +114,29 @@ async function scrollReadingPaneAndMeasureRail(page, paneIndex = 1) {
     const buttons = reel?.querySelector(".hyperdoc-reel__buttons");
     const prev = reel?.querySelector(".hyperdoc-reel__prev");
     const next = reel?.querySelector(".hyperdoc-reel__next");
-    const pane = document.querySelectorAll(".inspector-pane")[index];
-    const activeView = pane?.querySelector(".inspector-view:not([hidden])");
-    const readingScroller =
-      pane?.querySelector(".inspector-body") ||
-      activeView ||
-      pane;
+    const paneCandidates = Array.from(document.querySelectorAll(".inspector-pane"))
+      .map((pane, candidateIndex) => {
+        const activeView = pane.querySelector(".inspector-view:not([hidden])");
+        const readingScroller =
+          pane.querySelector(".inspector-body") ||
+          activeView ||
+          pane;
+        const maxScrollTop = Math.max(
+          0,
+          (readingScroller?.scrollHeight || 0) -
+            (readingScroller?.clientHeight || 0)
+        );
+        return { pane, readingScroller, maxScrollTop, candidateIndex };
+      });
+    const requested = paneCandidates[index];
+    const selected =
+      (requested && requested.maxScrollTop > 0 && requested) ||
+      paneCandidates.find((candidate) => candidate.maxScrollTop > 0) ||
+      requested ||
+      paneCandidates[0] ||
+      {};
+    const pane = selected.pane;
+    const readingScroller = selected.readingScroller;
     const maxScrollTop = Math.max(
       0,
       (readingScroller?.scrollHeight || 0) - (readingScroller?.clientHeight || 0)
@@ -138,6 +155,7 @@ async function scrollReadingPaneAndMeasureRail(page, paneIndex = 1) {
     return {
       hasViewport: !!reel?.querySelector(".hyperdoc-reel__viewport"),
       readingScrollerClassName: readingScroller?.className || "",
+      selectedPaneIndex: selected.candidateIndex ?? null,
       readingScrollTop: readingScroller?.scrollTop || 0,
       readingMaxScrollTop: maxScrollTop,
       buttonsTop: buttonsRect?.top ?? null,
@@ -159,6 +177,31 @@ async function scrollReadingPaneAndMeasureRail(page, paneIndex = 1) {
       prevDisabled: !!prev?.disabled,
       nextDisabled: !!next?.disabled,
     };
+  }, paneIndex);
+}
+
+async function ensureLiveReadingOverflow(page, paneIndex = 1) {
+  await page.evaluate((index) => {
+    const pane =
+      document.querySelectorAll(".inspector-pane")[index] ||
+      document.querySelector(".inspector-pane");
+    const readingScroller = pane?.querySelector(".inspector-body");
+    if (!readingScroller) {
+      return;
+    }
+    const maxScrollTop = Math.max(
+      0,
+      readingScroller.scrollHeight - readingScroller.clientHeight
+    );
+    if (maxScrollTop > 0) {
+      return;
+    }
+    const filler = document.createElement("div");
+    filler.dataset.reelReadingOverflowFixture = "true";
+    filler.style.minHeight = "72rem";
+    filler.style.paddingBlockStart = "1rem";
+    filler.textContent = "Live reading overflow fixture for reel control reachability.";
+    readingScroller.appendChild(filler);
   }, paneIndex);
 }
 
@@ -374,6 +417,7 @@ for (const viewport of [
     expect(boundaryState.atEnd.prevDisabled).toBe(false);
     expect(boundaryState.atEnd.nextDisabled).toBe(true);
 
+    await ensureLiveReadingOverflow(page, 1);
     const railState = await scrollReadingPaneAndMeasureRail(page, 1);
     await testInfo.attach(`live-reading-rail-${viewport.width}x${viewport.height}.json`, {
       body: JSON.stringify(railState, null, 2),

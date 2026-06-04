@@ -189,6 +189,58 @@
   color: #3f464c;
 }
 
+.hyperdoc-layout-repair-plan-summary {
+  border-block: 1px solid #d8dde1;
+  padding-block: 0.35rem;
+}
+
+.hyperdoc-layout-rule-results td {
+  vertical-align: top;
+}
+
+.hyperdoc-layout-rule-result--pass {
+  background: #f2f7f1;
+}
+
+.hyperdoc-layout-rule-result--repair {
+  background: #fff8e5;
+}
+
+.hyperdoc-layout-rule-result--fail {
+  background: #fff0f0;
+}
+
+.hyperdoc-layout-renderer-effect-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.hyperdoc-layout-renderer-effect {
+  background: #fff;
+  border: 1px solid #d8dde1;
+  border-inline-start: 4px solid #256f8f;
+  padding: 0.65rem 0.75rem;
+}
+
+.hyperdoc-layout-renderer-effect header {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+  margin-block-end: 0.35rem;
+}
+
+.hyperdoc-layout-renderer-effect dl {
+  margin: 0;
+}
+
+.hyperdoc-layout-no-failures {
+  background: #f2f7f1;
+  border-inline-start: 4px solid #2f7d4f;
+  margin-block: 0;
+  padding: 0.55rem 0.7rem;
+}
+
 .hyperdoc-layout-inspectable-ref {
   margin-block-end: 0;
 }

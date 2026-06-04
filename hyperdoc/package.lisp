@@ -425,6 +425,11 @@
    #:layout-topicmap
    #:layout-patch
    #:move-topic-into-box-patch
+   #:layout-rule
+   #:layout-rule-result
+   #:layout-rule-failure
+   #:layout-repair-plan
+   #:layout-renderer-effect
    #:layout-topic-selector-of
    #:layout-topic-element-id-of
    #:layout-topic-class-list-of
@@ -432,6 +437,29 @@
    #:layout-topic-scroll-context-of
    #:layout-topic-role-of
    #:layout-topic-stability-of
+   #:layout-rule-description-of
+   #:layout-rule-invariant-of
+   #:layout-rule-severity-of
+   #:layout-rule-result-rule-of
+   #:layout-rule-result-status-of
+   #:layout-rule-result-message-of
+   #:layout-rule-result-renderer-effects-of
+   #:layout-rule-result-failure-of
+   #:layout-rule-failure-rule-id-of
+   #:layout-rule-failure-message-of
+   #:layout-repair-plan-patch-of
+   #:layout-repair-plan-rule-results-of
+   #:layout-repair-plan-renderer-effects-of
+   #:layout-repair-plan-status-of
+   #:layout-repair-plan-failure-modes-of
+   #:layout-repair-plan-preview-apply-boundary-of
+   #:layout-renderer-effect-phase-of
+   #:layout-renderer-effect-target-of
+   #:layout-renderer-effect-placement-of
+   #:layout-renderer-effect-style-property-of
+   #:layout-renderer-effect-style-value-of
+   #:layout-renderer-effect-attributes-of
+   #:layout-renderer-effect-replay-of
    #:layout-topicmap-captured-at-of
    #:layout-patch-before-topicmap-of
    #:layout-patch-after-topicmap-of
@@ -454,6 +482,9 @@
    #:layout-topicmap-with-moved-topic
    #:make-move-topic-into-box-patch
    #:make-reel-buttons-into-pane-patch
+   #:default-layout-rules
+   #:apply-layout-rule
+   #:derive-layout-repair-plan
    ;; Page-as-ASDF-system reload boundaries
    #:page-system
    #:hyperdoc-page-system

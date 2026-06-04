@@ -42,6 +42,7 @@ async function dragButtonsTopicOntoPaneTopic(layout) {
 async function readPreviewInvariantState(page) {
   return page.evaluate(async () => {
     const wait = () => new Promise((resolve) => window.setTimeout(resolve, 140));
+    const patch = document.querySelector(".hyperdoc-layout-patch");
     const reel = document.querySelector(".hyperdoc-reel");
     const buttons = document.querySelector(".hyperdoc-reel__buttons");
     const prev = document.querySelector(".hyperdoc-reel__prev");
@@ -50,6 +51,7 @@ async function readPreviewInvariantState(page) {
     const targetPane = document.querySelector(
       '.inspector-pane[data-layout-preview-target="buttons-in-pane"]'
     );
+    const targetPaneBody = targetPane?.querySelector(".inspector-body") || null;
 
     const buttonRect = buttons?.getBoundingClientRect();
     const paneRect = targetPane?.getBoundingClientRect();
@@ -104,9 +106,20 @@ async function readPreviewInvariantState(page) {
 
     return {
       geometry,
+      repairPlanStatus: patch?.getAttribute("data-layout-repair-plan-status") || null,
+      renderedEffectCount: patch
+        ? patch.querySelectorAll(".hyperdoc-layout-renderer-effect").length
+        : 0,
+      previewSource: patch?.getAttribute("data-preview-source") || null,
+      previewEffectCount: patch?.getAttribute("data-preview-effect-count") || null,
       previewState: reel?.getAttribute("data-layout-preview") || null,
       previewParent: buttons?.getAttribute("data-layout-preview-parent") || null,
+      previewEffect: buttons?.getAttribute("data-layout-preview-effect") || null,
       buttonPosition: buttons ? window.getComputedStyle(buttons).position : null,
+      paneClearance: targetPaneBody?.getAttribute("data-layout-preview-clearance") || null,
+      paneClearanceEffect:
+        targetPaneBody?.getAttribute("data-layout-preview-clearance-effect") || null,
+      panePaddingBottom: targetPaneBody?.style.paddingBottom || null,
       overflowX: window.getComputedStyle(scrollable).overflowX,
       scrollWidth: scrollable.scrollWidth,
       clientWidth: scrollable.clientWidth,
@@ -137,14 +150,42 @@ test("Layout topicmap drag creates an inspectable move patch", async ({
   const patch = await dragButtonsTopicOntoPaneTopic(layout);
   await expect(patch).toContainText("Before topology");
   await expect(patch).toContainText("After topology");
+  await expect(patch).toContainText("Derived repair plan");
+  await expect(patch).toContainText("Rule results");
+  await expect(patch).toContainText("Renderer effects");
+  await expect(patch).toHaveAttribute("data-layout-repair-plan-status", "previewable");
+  await expect(
+    patch.locator('[data-layout-rule-result-status="pass"]')
+  ).toHaveCount(4);
+  await expect(
+    patch.locator('[data-layout-rule-result-status="repair"]')
+  ).toHaveCount(3);
+  await expect(
+    patch.locator('[data-layout-rule-result-status="fail"]')
+  ).toHaveCount(0);
+  await expect(
+    patch.locator(
+      '[data-layout-effect-phase="preview"][data-layout-effect-kind="position-control-rail"]'
+    )
+  ).toBeVisible();
+  await expect(
+    patch.locator(
+      '[data-layout-effect-phase="preview"][data-layout-effect-kind="set-style"]'
+    )
+  ).toBeVisible();
+  await expect(
+    patch.locator(
+      '[data-layout-effect-phase="apply"][data-layout-effect-kind="durable-override"]'
+    )
+  ).toBeVisible();
   await expect(patch).toContainText("hyperdoc-reel__viewport");
   await expect(patch).toContainText("inspector-pane");
   await expect(patch).toContainText("Source");
   await expect(patch).toContainText("Target");
-  const inspectRef = patch.locator(
-    '.hyperdoc-layout-inspectable-ref [id^="inspect-"]'
-  );
+  const inspectRef = patch.locator('.hyperdoc-layout-inspectable-ref:has-text("Inspect move-topic-into-box-patch") [id^="inspect-"]');
   await expect(inspectRef).toContainText("Inspect move-topic-into-box-patch");
+  const planInspectRef = patch.locator('.hyperdoc-layout-inspectable-ref:has-text("Inspect layout-repair-plan") [id^="inspect-"]');
+  await expect(planInspectRef).toContainText("Inspect layout-repair-plan");
 
   await attachJson(testInfo, "layout-topicmap-pane-titles.json", await readPaneTitles(page));
 });
@@ -172,9 +213,17 @@ for (const viewport of [
     );
 
     expect(state.geometry.buttonsInsidePane).toBe(true);
+    expect(state.repairPlanStatus).toBe("previewable");
+    expect(state.renderedEffectCount).toBe(3);
+    expect(state.previewSource).toBe("renderer-effects");
+    expect(state.previewEffectCount).toBe("2");
     expect(state.previewState).toBe("buttons-in-pane");
     expect(state.previewParent).toContain("hyperdoc-reel__viewport");
+    expect(state.previewEffect).toBe("position-control-rail-in-pane");
     expect(state.buttonPosition).toBe("fixed");
+    expect(state.paneClearance).toBe("reserved");
+    expect(state.paneClearanceEffect).toBe("reserve-pane-bottom-clearance");
+    expect(state.panePaddingBottom).toBe("4.5rem");
     expect(state.overflowX).toBe("auto");
     expect(state.scrollWidth).toBeGreaterThan(state.clientWidth);
     expect(state.maxScrollLeft).toBeGreaterThan(0);
@@ -207,5 +256,15 @@ for (const viewport of [
       "data-layout-apply-state",
       "durable-override-created"
     );
+    await expect(patch).toHaveAttribute(
+      "data-layout-apply-source",
+      "renderer-effects"
+    );
+    await expect(patch).toHaveAttribute(
+      "data-layout-apply-effect",
+      "create-durable-layout-override"
+    );
+    const durableOverride = await patch.getAttribute("data-layout-durable-override");
+    expect(durableOverride.toLowerCase()).toContain("layout-renderer-override");
   });
 }

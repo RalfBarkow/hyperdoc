@@ -279,9 +279,43 @@
     return first(".hyperdoc-reel__scrollable");
   }
 
+  function previewPaneBody(pane) {
+    return pane
+      ? pane.querySelector(".inspector-body") || pane
+      : null;
+  }
+
+  function rendererEffects(patch, phase) {
+    if (!patch) {
+      return [];
+    }
+    return toArray(
+      patch.querySelectorAll(
+        '.hyperdoc-layout-renderer-effect[data-layout-effect-phase="' + phase + '"]'
+      )
+    );
+  }
+
+  function effectKind(effect) {
+    return effect ? effect.getAttribute("data-layout-effect-kind") || "" : "";
+  }
+
+  function effectId(effect) {
+    return effect ? effect.getAttribute("data-layout-effect-id") || "" : "";
+  }
+
   function storeOriginalStyle(buttons) {
     if (!buttons.hasAttribute("data-layout-original-style")) {
       buttons.setAttribute("data-layout-original-style", buttons.getAttribute("style") || "");
+    }
+  }
+
+  function storeOriginalInlineProperty(element, property) {
+    var dataName = "data-layout-original-" + property.replace(/[A-Z]/g, function (match) {
+      return "-" + match.toLowerCase();
+    });
+    if (element && !element.hasAttribute(dataName)) {
+      element.setAttribute(dataName, element.style[property] || "");
     }
   }
 
@@ -309,14 +343,56 @@
     buttons.style.zIndex = "1000";
   }
 
+  function applyPreviewEffect(surface, patch, effect) {
+    var pane = activePreview && activePreview.pane;
+    var buttons = activePreview && activePreview.buttons;
+    var reel = activePreview && activePreview.reel;
+    var kind = effectKind(effect);
+    if (kind === "set-style") {
+      var target = effect.getAttribute("data-layout-effect-target");
+      var property = effect.getAttribute("data-layout-effect-style-property");
+      var value = effect.getAttribute("data-layout-effect-style-value");
+      var body = target === "active-pane-body" ? previewPaneBody(pane) : null;
+      if (!body || !property || !value) {
+        return false;
+      }
+      storeOriginalInlineProperty(body, property);
+      body.style[property] = value;
+      body.setAttribute("data-layout-preview-clearance", "reserved");
+      body.setAttribute("data-layout-preview-clearance-effect", effectId(effect));
+      return true;
+    }
+    if (kind === "position-control-rail") {
+      if (!pane || !buttons || !reel) {
+        return false;
+      }
+      reel.setAttribute("data-layout-preview", "buttons-in-pane");
+      buttons.setAttribute("data-layout-preview", "buttons-in-pane");
+      buttons.setAttribute("data-layout-preview-effect", effectId(effect));
+      buttons.setAttribute(
+        "data-layout-preview-parent",
+        buttons.parentElement ? trimText(buttons.parentElement.className) : ""
+      );
+      pane.setAttribute("data-layout-preview-target", "buttons-in-pane");
+      pane.setAttribute("data-layout-preview-effect", effectId(effect));
+      positionPreviewRail();
+      return true;
+    }
+    return false;
+  }
+
   function activatePreview(surface, patch) {
     var pane = previewTargetPane(surface);
     var buttons = previewButtons();
     var reel = previewReel();
     var scrollable = previewScrollable();
-    if (!pane || !buttons || !reel || !scrollable) {
+    var effects = rendererEffects(patch, "preview");
+    if (!pane || !buttons || !reel || !scrollable || effects.length === 0 ||
+        patch.getAttribute("data-layout-repair-plan-status") === "blocked") {
       if (patch) {
         patch.setAttribute("data-preview-state", "failed");
+        patch.setAttribute("data-preview-source", "renderer-effects");
+        patch.setAttribute("data-preview-effect-count", String(effects.length));
       }
       return;
     }
@@ -328,18 +404,44 @@
       reel: reel,
       scrollable: scrollable
     };
-    reel.setAttribute("data-layout-preview", "buttons-in-pane");
-    buttons.setAttribute("data-layout-preview", "buttons-in-pane");
-    buttons.setAttribute(
-      "data-layout-preview-parent",
-      buttons.parentElement ? trimText(buttons.parentElement.className) : ""
-    );
-    pane.setAttribute("data-layout-preview-target", "buttons-in-pane");
+    var consumed = effects.reduce(function (count, effect) {
+      return count + (applyPreviewEffect(surface, patch, effect) ? 1 : 0);
+    }, 0);
     if (patch) {
-      patch.setAttribute("data-preview-state", "previewed");
+      patch.setAttribute("data-preview-source", "renderer-effects");
+      patch.setAttribute("data-preview-effect-count", String(consumed));
+      patch.setAttribute(
+        "data-preview-state",
+        consumed === effects.length ? "previewed" : "failed"
+      );
     }
-    positionPreviewRail();
     captureRuntimeEvidence(surface);
+  }
+
+  function applyDurableEffects(patch, status) {
+    var effect = rendererEffects(patch, "apply").find(function (candidate) {
+      return effectKind(candidate) === "durable-override";
+    });
+    if (!effect || patch.getAttribute("data-layout-repair-plan-status") === "blocked") {
+      patch.setAttribute("data-layout-apply-state", "failed");
+      patch.setAttribute("data-layout-apply-source", "renderer-effects");
+      if (status) {
+        status.textContent =
+          "Apply failed because the repair plan has no durable override effect.";
+      }
+      return;
+    }
+    patch.setAttribute("data-layout-apply-state", "durable-override-created");
+    patch.setAttribute("data-layout-apply-source", "renderer-effects");
+    patch.setAttribute("data-layout-apply-effect", effectId(effect));
+    patch.setAttribute(
+      "data-layout-durable-override",
+      effect.getAttribute("data-layout-effect-replay") || effectId(effect)
+    );
+    if (status) {
+      status.textContent =
+        "Durable override evidence created from the apply-phase renderer effect.";
+    }
   }
 
   function wirePatchActions(surface) {
@@ -357,11 +459,7 @@
     }
     if (apply) {
       apply.addEventListener("click", function () {
-        patch.setAttribute("data-layout-apply-state", "durable-override-created");
-        if (status) {
-          status.textContent =
-            "Durable override evidence created for the inspectable patch object; renderer mutation remains explicit.";
-        }
+        applyDurableEffects(patch, status);
       });
     }
   }

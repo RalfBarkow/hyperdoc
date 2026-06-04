@@ -70,6 +70,66 @@
    (preserve :initarg :preserve :initform nil
              :reader layout-patch-preserve-of)))
 
+(defclass layout-rule ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (description :initarg :description :reader layout-rule-description-of)
+   (invariant :initarg :invariant :reader layout-rule-invariant-of)
+   (severity :initarg :severity :initform :hard
+             :reader layout-rule-severity-of)
+   (evidence :initarg :evidence :initform nil :reader evidence-of)))
+
+(defclass layout-renderer-effect ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (phase :initarg :phase :reader layout-renderer-effect-phase-of)
+   (kind :initarg :kind :reader kind-of)
+   (target :initarg :target :reader layout-renderer-effect-target-of)
+   (placement :initarg :placement :initform nil
+              :reader layout-renderer-effect-placement-of)
+   (style-property :initarg :style-property :initform nil
+                   :reader layout-renderer-effect-style-property-of)
+   (style-value :initarg :style-value :initform nil
+                :reader layout-renderer-effect-style-value-of)
+   (attributes :initarg :attributes :initform nil
+               :reader layout-renderer-effect-attributes-of)
+   (replay :initarg :replay :initform nil
+           :reader layout-renderer-effect-replay-of)
+   (evidence :initarg :evidence :initform nil :reader evidence-of)))
+
+(defclass layout-rule-failure ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (rule-id :initarg :rule-id :reader layout-rule-failure-rule-id-of)
+   (message :initarg :message :reader layout-rule-failure-message-of)
+   (evidence :initarg :evidence :initform nil :reader evidence-of)))
+
+(defclass layout-rule-result ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (rule :initarg :rule :reader layout-rule-result-rule-of)
+   (status :initarg :status :reader layout-rule-result-status-of)
+   (message :initarg :message :reader layout-rule-result-message-of)
+   (renderer-effects :initarg :renderer-effects :initform nil
+                     :reader layout-rule-result-renderer-effects-of)
+   (failure :initarg :failure :initform nil
+            :reader layout-rule-result-failure-of)
+   (evidence :initarg :evidence :initform nil :reader evidence-of)))
+
+(defclass layout-repair-plan ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (patch :initarg :patch :reader layout-repair-plan-patch-of)
+   (rule-results :initarg :rule-results :reader layout-repair-plan-rule-results-of)
+   (renderer-effects :initarg :renderer-effects
+                     :reader layout-repair-plan-renderer-effects-of)
+   (status :initarg :status :reader layout-repair-plan-status-of)
+   (failure-modes :initarg :failure-modes :initform nil
+                  :reader layout-repair-plan-failure-modes-of)
+   (preview-apply-boundary :initarg :preview-apply-boundary
+                           :reader layout-repair-plan-preview-apply-boundary-of)
+   (evidence :initarg :evidence :initform nil :reader evidence-of)))
+
 (defmethod print-object ((topic layout-topic) stream)
   (print-unreadable-object (topic stream :type t :identity nil)
     (format stream "~A" (id-of topic))))
@@ -94,6 +154,33 @@
             (layout-patch-topic-id-of patch)
             (layout-patch-from-parent-id-of patch)
             (layout-patch-to-parent-id-of patch))))
+
+(defmethod print-object ((rule layout-rule) stream)
+  (print-unreadable-object (rule stream :type t :identity nil)
+    (format stream "~A" (id-of rule))))
+
+(defmethod print-object ((effect layout-renderer-effect) stream)
+  (print-unreadable-object (effect stream :type t :identity nil)
+    (format stream "~A ~A" (layout-renderer-effect-phase-of effect) (id-of effect))))
+
+(defmethod print-object ((failure layout-rule-failure) stream)
+  (print-unreadable-object (failure stream :type t :identity nil)
+    (format stream "~A: ~A"
+            (layout-rule-failure-rule-id-of failure)
+            (layout-rule-failure-message-of failure))))
+
+(defmethod print-object ((result layout-rule-result) stream)
+  (print-unreadable-object (result stream :type t :identity nil)
+    (format stream "~A ~A"
+            (id-of (layout-rule-result-rule-of result))
+            (layout-rule-result-status-of result))))
+
+(defmethod print-object ((plan layout-repair-plan) stream)
+  (print-unreadable-object (plan stream :type t :identity nil)
+    (format stream "~A ~A (~D effects)"
+            (layout-repair-plan-status-of plan)
+            (id-of (layout-repair-plan-patch-of plan))
+            (length (layout-repair-plan-renderer-effects-of plan)))))
 
 (defun make-layout-topic
     (id title selector kind
@@ -389,6 +476,309 @@
    "inspector-pane"
    :relation-kind :contains
    :placement :bottom-control-rail))
+
+(defun make-layout-rule (id title description invariant &key severity evidence)
+  (make-instance
+   'layout-rule
+   :id id
+   :title title
+   :description description
+   :invariant invariant
+   :severity (or severity :hard)
+   :evidence evidence))
+
+(defun default-layout-rules ()
+  (list
+   (make-layout-rule
+    "preserve-native-horizontal-overflow"
+    "Native horizontal overflow is preserved"
+    "The horizontal pane row remains a native overflow container; no custom carousel replaces scrollLeft."
+    :native-horizontal-overflow
+    :evidence '(:source "hyperdoc-reel__scrollable" :preserve-token :native-horizontal-overflow))
+   (make-layout-rule
+    "preserve-labelled-buttons"
+    "Previous/next buttons remain real labelled buttons"
+    "The previous and next controls remain button elements with accessible labels and boundary disabled state."
+    :labelled-buttons
+    :evidence '(:source "hyperdoc-reel__buttons" :labels ("previous" "next")))
+   (make-layout-rule
+    "keep-controls-keyboard-reachable"
+    "Controls remain keyboard reachable"
+    "The control rail must be reachable by focus after preview and after horizontal scroll state updates."
+    :keyboard-reachability
+    :evidence '(:source "hyperdoc-reel__buttons" :preserve-token :keyboard-reachability))
+   (make-layout-rule
+    "reserve-pane-bottom-clearance"
+    "Pane reserves bottom clearance for local control rail"
+    "Preview must leave a safe reading area when the control rail is floated inside the pane viewport."
+    :pane-bottom-clearance
+    :severity :repair
+    :evidence '(:target "inspector-pane" :effect "reserve bottom padding in active pane body"))
+   (make-layout-rule
+    "control-rail-remains-chrome"
+    "Control rail remains chrome, not document content"
+    "The rail is projected as pane-local chrome; the preview does not make it part of the document body."
+    :chrome-not-content
+    :evidence '(:target "hyperdoc-reel__buttons" :placement :bottom-control-rail))
+   (make-layout-rule
+    "preview-is-transient"
+    "Preview does not become durable state"
+    "Preview effects may set runtime attributes and styles but do not alter the durable topology."
+    :preview-transience
+    :evidence '(:phase :preview :durable nil))
+   (make-layout-rule
+    "apply-creates-durable-override"
+    "Apply creates a durable replayable artifact"
+    "Apply records explicit replay metadata for the renderer override instead of treating preview DOM state as source truth."
+    :durable-override
+    :severity :repair
+    :evidence '(:phase :apply :artifact :layout-repair-plan))))
+
+(defun layout-renderer-effect
+    (id title phase kind target
+     &key placement style-property style-value attributes replay evidence)
+  (make-instance
+   'layout-renderer-effect
+   :id id
+   :title title
+   :phase phase
+   :kind kind
+   :target target
+   :placement placement
+   :style-property style-property
+   :style-value style-value
+   :attributes attributes
+   :replay replay
+   :evidence evidence))
+
+(defun layout-rule-failure (rule message &key evidence)
+  (make-instance
+   'layout-rule-failure
+   :id (format nil "failure-~A" (id-of rule))
+   :title (format nil "Failure: ~A" (title-of rule))
+   :rule-id (id-of rule)
+   :message message
+   :evidence evidence))
+
+(defun layout-rule-result
+    (rule status message &key renderer-effects failure evidence)
+  (make-instance
+   'layout-rule-result
+   :id (format nil "result-~A" (id-of rule))
+   :title (title-of rule)
+   :rule rule
+   :status status
+   :message message
+   :renderer-effects renderer-effects
+   :failure failure
+   :evidence evidence))
+
+(defun layout-topicmap-has-control-relation-p (topicmap from to)
+  (some (lambda (relation)
+          (and (eq (kind-of relation) :controls)
+               (equal (from-of relation) from)
+               (equal (to-of relation) to)))
+        (relations-of topicmap)))
+
+(defun layout-patch-preserves-p (patch token)
+  (member token (layout-patch-preserve-of patch) :test #'eq))
+
+(defun layout-rule-pass (rule message &key evidence)
+  (layout-rule-result rule :pass message :evidence evidence))
+
+(defun layout-rule-repair (rule message effects &key evidence)
+  (layout-rule-result
+   rule
+   :repair
+   message
+   :renderer-effects effects
+   :evidence evidence))
+
+(defun layout-rule-fail (rule message &key evidence)
+  (layout-rule-result
+   rule
+   :fail
+   message
+   :failure (layout-rule-failure rule message :evidence evidence)
+   :evidence evidence))
+
+(defun layout-preview-control-rail-effect (patch)
+  (layout-renderer-effect
+   "position-control-rail-in-pane"
+   "Position control rail inside pane viewport"
+   :preview
+   :position-control-rail
+   "hyperdoc-reel__buttons"
+   :placement :fixed-bottom-end-inside-pane
+   :attributes `(("data-layout-preview" . "buttons-in-pane")
+                 ("data-layout-preview-parent" . ,(layout-patch-from-parent-id-of patch)))
+   :evidence
+   '(:consumes "active inspector pane bounding box"
+     :preserves "existing button elements and scrollLeft owner")))
+
+(defun layout-preview-bottom-clearance-effect ()
+  (layout-renderer-effect
+   "reserve-pane-bottom-clearance"
+   "Reserve bottom clearance in active pane body"
+   :preview
+   :set-style
+   "active-pane-body"
+   :style-property "paddingBottom"
+   :style-value "4.5rem"
+   :evidence
+   '(:reason "Floating rail must not obscure readable pane content.")))
+
+(defun layout-apply-durable-override-effect (patch)
+  (layout-renderer-effect
+   "create-durable-layout-override"
+   "Create durable replay metadata for layout override"
+   :apply
+   :durable-override
+   "layout-repair-plan"
+   :replay `(:artifact-type :layout-renderer-override
+             :patch-id ,(id-of patch)
+             :topic ,(layout-patch-topic-id-of patch)
+             :from ,(layout-patch-from-parent-id-of patch)
+             :to ,(layout-patch-to-parent-id-of patch)
+             :placement ,(layout-patch-placement-of patch)
+             :preserve ,(layout-patch-preserve-of patch))
+   :evidence
+   '(:policy "apply records replayable metadata; preview DOM styles are transient")))
+
+(defun apply-layout-rule (rule patch)
+  (let ((before (layout-patch-before-topicmap-of patch))
+        (after (layout-patch-after-topicmap-of patch)))
+    (case (layout-rule-invariant-of rule)
+      (:native-horizontal-overflow
+       (if (and (layout-patch-preserves-p patch :native-horizontal-overflow)
+                (layout-topicmap-topic after "hyperdoc-reel__scrollable"))
+           (layout-rule-pass
+            rule
+            "Native scroll container remains present and preserved by patch."
+            :evidence (layout-topicmap-topic after "hyperdoc-reel__scrollable"))
+           (layout-rule-fail
+            rule
+            "Patch would remove or stop preserving the native horizontal scroll container."
+            :evidence (list :preserve (layout-patch-preserve-of patch)
+                            :after-topics (mapcar #'id-of (topics-of after))))))
+      (:labelled-buttons
+       (let ((buttons (layout-topicmap-topic after "hyperdoc-reel__buttons")))
+         (if (and buttons
+                  (layout-patch-preserves-p patch :button-labels)
+                  (layout-patch-preserves-p patch :disabled-boundary-states))
+             (layout-rule-pass
+              rule
+              "Button topic remains present with labels and boundary-state preservation tokens."
+              :evidence (evidence-of buttons))
+             (layout-rule-fail
+              rule
+              "Patch does not preserve labelled previous/next button semantics."
+              :evidence (list :buttons buttons
+                              :preserve (layout-patch-preserve-of patch))))))
+      (:keyboard-reachability
+       (if (layout-patch-preserves-p patch :keyboard-reachability)
+           (layout-rule-pass
+            rule
+            "Patch explicitly preserves keyboard reachability for the rail controls."
+            :evidence (layout-patch-preserve-of patch))
+           (layout-rule-fail
+            rule
+            "Patch lacks keyboard-reachability preservation evidence."
+            :evidence (layout-patch-preserve-of patch))))
+      (:pane-bottom-clearance
+       (if (layout-topicmap-topic after (layout-patch-to-parent-id-of patch))
+           (layout-rule-repair
+            rule
+            "Renderer must reserve pane body bottom clearance before floating the rail."
+            (list (layout-preview-bottom-clearance-effect))
+            :evidence (layout-topicmap-topic after
+                                             (layout-patch-to-parent-id-of patch)))
+           (layout-rule-fail
+            rule
+            "Cannot reserve bottom clearance because target pane is missing."
+            :evidence (layout-patch-to-parent-id-of patch))))
+      (:chrome-not-content
+       (if (and (equal (layout-patch-topic-id-of patch) "hyperdoc-reel__buttons")
+                (eq (layout-patch-placement-of patch) :bottom-control-rail))
+           (layout-rule-repair
+            rule
+            "Renderer positions the existing rail as pane chrome without reparenting it into document content."
+            (list (layout-preview-control-rail-effect patch))
+            :evidence (list :topic (layout-patch-topic-id-of patch)
+                            :placement (layout-patch-placement-of patch)))
+           (layout-rule-fail
+            rule
+            "Patch target is not a known control rail chrome move."
+            :evidence (list :topic (layout-patch-topic-id-of patch)
+                            :placement (layout-patch-placement-of patch)))))
+      (:preview-transience
+       (if (equal (layout-topicmap-parent-of before
+                                             (layout-patch-topic-id-of patch))
+                  (layout-patch-from-parent-id-of patch))
+           (layout-rule-pass
+            rule
+            "Before topology remains available; preview effects are transient renderer instructions."
+            :evidence (layout-topicmap-contains-edges before))
+           (layout-rule-fail
+            rule
+            "Before topology no longer records the original parent."
+            :evidence (layout-topicmap-contains-edges before))))
+      (:durable-override
+       (layout-rule-repair
+        rule
+        "Apply must create replayable durable override metadata from the repair plan."
+        (list (layout-apply-durable-override-effect patch))
+        :evidence (layout-patch-apply-policy-of patch)))
+      (otherwise
+       (layout-rule-fail
+        rule
+        (format nil "No evaluator is registered for layout invariant ~S."
+                (layout-rule-invariant-of rule))
+        :evidence (layout-rule-invariant-of rule))))))
+
+(defun layout-repair-plan-status (rule-results)
+  (cond
+    ((some (lambda (result)
+             (eq (layout-rule-result-status-of result) :fail))
+           rule-results)
+     :blocked)
+    ((some (lambda (result)
+             (eq (layout-rule-result-status-of result) :repair))
+           rule-results)
+     :previewable)
+    (t
+     :pass)))
+
+(defun compute-layout-repair-plan-failure-modes (rule-results)
+  (loop for result in rule-results
+        for failure = (layout-rule-result-failure-of result)
+        when failure
+          collect failure))
+
+(defun derive-layout-repair-plan (patch &key (rules (default-layout-rules)))
+  (let* ((rule-results (mapcar (lambda (rule)
+                                 (apply-layout-rule rule patch))
+                               rules))
+         (effects (loop for result in rule-results
+                        append (layout-rule-result-renderer-effects-of result)))
+         (status (layout-repair-plan-status rule-results)))
+    (make-instance
+     'layout-repair-plan
+     :id (format nil "repair-plan-for-~A" (id-of patch))
+     :title "layout-repair-plan"
+     :patch patch
+     :rule-results rule-results
+     :renderer-effects effects
+     :status status
+     :failure-modes (compute-layout-repair-plan-failure-modes rule-results)
+     :preview-apply-boundary
+     '(:preview "consume renderer effects only; runtime styles are transient"
+       :apply "create durable replay metadata from apply-phase renderer effect")
+     :evidence
+     (list :source-patch (id-of patch)
+           :rule-count (length rules)
+           :effect-count (length effects)
+           :status status))))
 
 (defmethod topicmap-view-title-of ((topicmap layout-topicmap))
   (title-of topicmap))

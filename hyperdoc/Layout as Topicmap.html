@@ -23,6 +23,10 @@
   <li><code>layout-relation</code>: containment, control, and scroll relations between layout topics.</li>
   <li><code>layout-topicmap</code>: immutable snapshot of the reel/inspector-pane subset.</li>
   <li><code>move-topic-into-box-patch</code>: before topology, after topology, source evidence, target evidence, proposed implementation effect, and preview/apply policy.</li>
+  <li><code>layout-rule</code>: named invariant evaluator for deciding whether a patch can be previewed, repaired, or blocked.</li>
+  <li><code>layout-rule-result</code>: pass/repair/fail status, evidence, renderer effects, and optional failure object for one rule.</li>
+  <li><code>layout-repair-plan</code>: rule-derived plan for a layout patch, including rule results, renderer effects, failure modes, and preview/apply boundary.</li>
+  <li><code>layout-renderer-effect</code>: declarative preview/apply effect consumed by the renderer instead of direct ad hoc DOM mutation.</li>
 </ul>
 
 <h2>Current Topology</h2>
@@ -52,6 +56,25 @@
               :disabled-boundary-states
               :keyboard-reachability))</code></pre>
 
+<h2>Rule-Based Repair Layer</h2>
+
+<p>
+  Direct manipulation creates the patch. The rule engine derives a
+  <code>layout-repair-plan</code> from that patch before the renderer previews
+  or applies anything. A failed rule produces a failure object; it does not
+  silently corrupt layout.
+</p>
+
+<ul>
+  <li>Native horizontal overflow is preserved.</li>
+  <li>Previous/next buttons remain real labelled buttons.</li>
+  <li>Controls remain keyboard reachable.</li>
+  <li>The pane reserves bottom clearance for a local control rail.</li>
+  <li>The control rail remains chrome, not document content.</li>
+  <li>Preview does not become durable state.</li>
+  <li>Apply creates a durable override object or explicit replayable artifact.</li>
+</ul>
+
 <h2>Inspector View Specification</h2>
 
 <p>
@@ -60,16 +83,25 @@
   Content Model, Box Contract, Priority Policy, Actions, Evidence, and Failure
   Modes. Dragging <code>hyperdoc-reel__buttons</code> onto
   <code>inspector-pane</code> reveals an inspectable
-  <code>move-topic-into-box-patch</code>.
+  <code>move-topic-into-box-patch</code> and a derived
+  <code>layout-repair-plan</code>.
+</p>
+
+<p>
+  The repair plan exposes these views: Overview, Before topology, After
+  topology, Rule results, Renderer effects, Evidence, Failure modes, and
+  Preview/apply boundary.
 </p>
 
 <h2>Preview and Apply Boundary</h2>
 
 <ul>
+  <li>Preview consumes preview-phase <code>layout-renderer-effect</code> objects only.</li>
   <li>Preview may align the existing control rail over the pane as runtime evidence.</li>
+  <li>Preview reserves bottom clearance in the active pane body so the rail does not cover readable content.</li>
   <li>Preview records live selector, class, bounding box, and scroll-context evidence.</li>
   <li>The DOM is not the source of truth; the source of truth is the Lisp layout object and patch object.</li>
-  <li>Apply creates durable override evidence for the inspectable patch object; renderer mutation remains explicit.</li>
+  <li>Apply consumes an apply-phase durable-override renderer effect and records replay metadata for the inspectable patch object.</li>
 </ul>
 
 <h2>Invariants</h2>
@@ -88,8 +120,10 @@
   <li><a hyperbook="topics" page="Layout as Topicmap"><tt>Layout as Topicmap</tt></a></li>
   <li><a hyperbook="topics" page="Inspector Reel layout topicmap"><tt>Inspector Reel layout topicmap</tt></a></li>
   <li><a hyperbook="topics" page="move-topic-into-box-patch"><tt>move-topic-into-box-patch</tt></a></li>
+  <li><a hyperbook="topics" page="layout-repair-plan"><tt>layout-repair-plan</tt></a></li>
   <li><a expr="(reel-inspector-layout-topicmap)"><tt>(reel-inspector-layout-topicmap)</tt></a></li>
   <li><a expr="(make-reel-buttons-into-pane-patch)"><tt>(make-reel-buttons-into-pane-patch)</tt></a></li>
+  <li><a expr="(derive-layout-repair-plan (make-reel-buttons-into-pane-patch))"><tt>(derive-layout-repair-plan (make-reel-buttons-into-pane-patch))</tt></a></li>
 </ul>
 
 <h2>SHOP3 Task</h2>
@@ -110,6 +144,23 @@
     (!create-move-topic-into-box-patch hyperdoc-reel__buttons inspector-pane)
     (!preview-layout-patch)
     (!verify-reel-accessibility-invariants)
+    (!commit-periodically))))</code></pre>
+
+<h2>Rule-Based Repair SHOP3 Task</h2>
+
+<pre><code class="language-lisp">(:task rule-based-layout-repair-for-topicmap)
+(:method rule-based-layout-repair-for-topicmap
+  ((:precondition
+    (and (layout-topicmap-exists)
+         (move-topic-into-box-patch-exists)))
+   (:ordered-tasks
+    (!define-layout-rule-model)
+    (!define-layout-repair-plan-model)
+    (!derive-repair-plan-from-layout-patch)
+    (!render-rule-results-in-inspector)
+    (!project-renderer-effects-to-preview)
+    (!preserve-reel-accessibility-invariants)
+    (!persist-apply-as-durable-override)
     (!commit-periodically))))</code></pre>
 
 <h2>SCXML Sketch</h2>
@@ -142,6 +193,30 @@
   &lt;final id="done"/&gt;
 &lt;/scxml&gt;</code></pre>
 
+<h2>Rule-Based Repair SCXML Sketch</h2>
+
+<pre><code class="language-xml">&lt;scxml initial="patch-created"&gt;
+  &lt;state id="patch-created"&gt;
+    &lt;transition event="derive.requested" target="derive-rules"/&gt;
+  &lt;/state&gt;
+  &lt;state id="derive-rules"&gt;
+    &lt;transition event="rules.pass" target="previewable"/&gt;
+    &lt;transition event="rules.fail" target="blocked"/&gt;
+  &lt;/state&gt;
+  &lt;state id="previewable"&gt;
+    &lt;transition event="preview" target="preview-active"/&gt;
+    &lt;transition event="cancel" target="patch-created"/&gt;
+  &lt;/state&gt;
+  &lt;state id="preview-active"&gt;
+    &lt;transition event="apply" target="durable-override"/&gt;
+    &lt;transition event="revert" target="previewable"/&gt;
+  &lt;/state&gt;
+  &lt;state id="blocked"&gt;
+    &lt;transition event="inspect-failure" target="patch-created"/&gt;
+  &lt;/state&gt;
+  &lt;final id="durable-override"/&gt;
+&lt;/scxml&gt;</code></pre>
+
 <h2>Goldberg Questions</h2>
 
 <ul>
@@ -164,6 +239,6 @@
 <p>
   This first slice covers the reel controls and inspector pane only. It does not
   replace the accessible Reel implementation, introduce a custom carousel, or
-  generalize arbitrary layout editing beyond the single
+  generalize arbitrary layout editing beyond rule-based repair of the single
   <code>hyperdoc-reel__buttons</code> into <code>inspector-pane</code> move.
 </p>

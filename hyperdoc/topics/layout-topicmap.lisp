@@ -32,3 +32,15 @@
                  "hyperdoc/layout-topicmap.lisp"
                  "hyperdoc-explorer/layout-topicmap.lisp"
                  "tests/layout-topicmap-smoke.lisp")))
+
+(defun layout-repair-plan-topic ()
+  (make-topic
+   :id "layout-repair-plan"
+   :title "layout-repair-plan"
+   :summary "Inspectable rule-derived plan that records layout rule results, preview renderer effects, apply-phase durable override effects, evidence, and failure modes for a layout patch."
+   :references '("Layout as Topicmap"
+                 "hyperdoc/layout-topicmap.lisp"
+                 "hyperdoc-explorer/layout-topicmap.lisp"
+                 "assets/hyperdoc/js/layout-topicmap.js"
+                 "tests/layout-topicmap-smoke.lisp"
+                 "tests/playwright/layout-topicmap.spec.js")))

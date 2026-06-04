@@ -113,11 +113,81 @@
      (hyperdoc:layout-patch-proposed-implementation-effect-of patch)
      "Patch must expose proposed implementation effect")))
 
+(defun run-layout-repair-plan-smoke-test ()
+  (asdf:load-system :hyperdoc)
+  (let* ((topicmap (hyperdoc:reel-inspector-layout-topicmap))
+         (patch (hyperdoc:make-reel-buttons-into-pane-patch topicmap))
+         (plan (hyperdoc:derive-layout-repair-plan patch))
+         (results (hyperdoc:layout-repair-plan-rule-results-of plan))
+         (effects (hyperdoc:layout-repair-plan-renderer-effects-of plan))
+         (statuses (mapcar #'hyperdoc:layout-rule-result-status-of results))
+         (preview-effects
+           (remove-if-not (lambda (effect)
+                            (eq (hyperdoc:layout-renderer-effect-phase-of
+                                 effect)
+                                :preview))
+                          effects))
+         (apply-effects
+           (remove-if-not (lambda (effect)
+                            (eq (hyperdoc:layout-renderer-effect-phase-of
+                                 effect)
+                                :apply))
+                          effects)))
+    (layout-topicmap-assert-true
+     (typep plan 'hyperdoc:layout-repair-plan)
+     "Layout patch must derive a layout-repair-plan object")
+    (layout-topicmap-assert-equal
+     :previewable
+     (hyperdoc:layout-repair-plan-status-of plan)
+     "Repair plan must be previewable when hard invariants pass and repairs exist")
+    (layout-topicmap-assert-equal
+     7
+     (length results)
+     "Default repair plan must evaluate the first seven layout rules")
+    (layout-topicmap-assert-true
+     (member :pass statuses)
+     "Rule results must expose pass status")
+    (layout-topicmap-assert-true
+     (member :repair statuses)
+     "Rule results must expose repair status")
+    (layout-topicmap-assert-true
+     (not (member :fail statuses))
+     "Valid reel-button patch must not fail default layout rules")
+    (layout-topicmap-assert-true
+     (find :position-control-rail preview-effects :key #'hyperdoc:kind-of)
+     "Preview renderer effects must include local control-rail placement")
+    (layout-topicmap-assert-true
+     (find :set-style preview-effects :key #'hyperdoc:kind-of)
+     "Preview renderer effects must reserve pane bottom clearance")
+    (layout-topicmap-assert-true
+     (find :durable-override apply-effects :key #'hyperdoc:kind-of)
+     "Apply renderer effects must create durable replay metadata")
+    (layout-topicmap-assert-true
+     (hyperdoc:layout-repair-plan-preview-apply-boundary-of plan)
+     "Repair plan must expose the preview/apply boundary")
+    (let* ((unknown-rule
+             (hyperdoc::make-layout-rule
+              "unknown-invariant"
+              "Unknown invariant"
+              "Unsupported rules fail explicitly."
+              :unknown-invariant))
+           (failure-result
+             (hyperdoc:apply-layout-rule unknown-rule patch)))
+      (layout-topicmap-assert-equal
+       :fail
+       (hyperdoc:layout-rule-result-status-of failure-result)
+       "Unsupported rule invariant must fail explicitly")
+      (layout-topicmap-assert-true
+       (typep (hyperdoc:layout-rule-result-failure-of failure-result)
+              'hyperdoc:layout-rule-failure)
+       "Unsupported rule invariant must produce a failure object"))))
+
 (defun run-layout-topicmap-topic-cluster-smoke-test ()
   (asdf:load-system :hyperdoc)
   (dolist (title '("Layout as Topicmap"
                    "Inspector Reel layout topicmap"
-                   "move-topic-into-box-patch"))
+                   "move-topic-into-box-patch"
+                   "layout-repair-plan"))
     (layout-topicmap-assert-true
      (hyperbook:find-page hyperdoc::*topics* title :signal-error? t)
      (format nil "Topic cluster must include ~A" title))))
@@ -125,6 +195,7 @@
 (defun run-layout-topicmap-smoke-tests ()
   (run-layout-topicmap-snapshot-smoke-test)
   (run-layout-topicmap-move-patch-smoke-test)
+  (run-layout-repair-plan-smoke-test)
   (run-layout-topicmap-topic-cluster-smoke-test)
   (format t "~&Layout topicmap smoke tests passed.~%")
   t)
