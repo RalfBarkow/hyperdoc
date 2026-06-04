@@ -342,6 +342,34 @@
    #:executable-dita-default-pddl-domain
    #:executable-dita-default-scxml-contract
    #:executable-dita-next-task-score
+   #:executable-dita-sqlite-task-row
+   #:executable-dita-next-task-candidate-row
+   #:executable-dita-next-task-selection
+   #:read-executable-dita-task-row
+   #:select-executable-dita-next-task-candidate-rows
+   #:make-executable-dita-next-task-selection
+   #:executable-dita-sqlite-task-row-id
+   #:executable-dita-sqlite-task-row-title
+   #:executable-dita-sqlite-task-row-status
+   #:executable-dita-sqlite-task-row-created-at
+   #:executable-dita-sqlite-task-row-sexp-size
+   #:executable-dita-sqlite-task-row-dita-size
+   #:executable-dita-sqlite-task-row-hyperdoc-html-size
+   #:executable-dita-sqlite-task-row-scxml-size
+   #:executable-dita-next-task-candidate-row-id
+   #:executable-dita-next-task-candidate-row-task-id
+   #:executable-dita-next-task-candidate-row-candidate
+   #:executable-dita-next-task-candidate-row-cost
+   #:executable-dita-next-task-candidate-row-risk
+   #:executable-dita-next-task-candidate-row-expected-value
+   #:executable-dita-next-task-candidate-row-blocked-p
+   #:executable-dita-next-task-candidate-row-selected-p
+   #:executable-dita-next-task-candidate-row-score
+   #:executable-dita-next-task-selection-task-id
+   #:executable-dita-next-task-selection-db-path
+   #:executable-dita-next-task-selection-candidates
+   #:executable-dita-next-task-selection-selected-candidate
+   #:executable-dita-next-task-selection-include-blocked-p
    #:topic-source-file
    #:topic-factory-source-record
    #:topic-files-topicmap

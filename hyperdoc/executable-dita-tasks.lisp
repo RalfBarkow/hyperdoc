@@ -51,6 +51,81 @@
 (defmethod summary-of ((task executable-dita-task))
   (executable-dita-task-summary task))
 
+(defclass executable-dita-sqlite-task-row ()
+  ((id :initarg :id :reader executable-dita-sqlite-task-row-id)
+   (title :initarg :title :reader executable-dita-sqlite-task-row-title)
+   (status :initarg :status :reader executable-dita-sqlite-task-row-status)
+   (created-at :initarg :created-at
+               :reader executable-dita-sqlite-task-row-created-at)
+   (sexp-size :initarg :sexp-size
+              :reader executable-dita-sqlite-task-row-sexp-size)
+   (dita-size :initarg :dita-size
+              :reader executable-dita-sqlite-task-row-dita-size)
+   (hyperdoc-html-size
+    :initarg :hyperdoc-html-size
+    :reader executable-dita-sqlite-task-row-hyperdoc-html-size)
+   (scxml-size :initarg :scxml-size
+               :reader executable-dita-sqlite-task-row-scxml-size)
+   (task :initarg :task :reader executable-dita-sqlite-task-row-task)))
+
+(defclass executable-dita-next-task-candidate-row ()
+  ((id :initarg :id :reader executable-dita-next-task-candidate-row-id)
+   (task-id :initarg :task-id
+            :reader executable-dita-next-task-candidate-row-task-id)
+   (candidate :initarg :candidate
+              :reader executable-dita-next-task-candidate-row-candidate)
+   (cost :initarg :cost
+         :reader executable-dita-next-task-candidate-row-cost)
+   (risk :initarg :risk
+         :reader executable-dita-next-task-candidate-row-risk)
+   (expected-value
+    :initarg :expected-value
+    :reader executable-dita-next-task-candidate-row-expected-value)
+   (blocked-p :initarg :blocked-p
+              :reader executable-dita-next-task-candidate-row-blocked-p)
+   (selected-p :initarg :selected-p
+               :reader executable-dita-next-task-candidate-row-selected-p)
+   (score :initarg :score
+          :reader executable-dita-next-task-candidate-row-score)))
+
+(defclass executable-dita-next-task-selection ()
+  ((task-id :initarg :task-id
+            :reader executable-dita-next-task-selection-task-id)
+   (db-path :initarg :db-path
+            :reader executable-dita-next-task-selection-db-path)
+   (candidates :initarg :candidates
+               :reader executable-dita-next-task-selection-candidates)
+   (selected-candidate
+    :initarg :selected-candidate
+    :reader executable-dita-next-task-selection-selected-candidate)
+   (include-blocked-p
+    :initarg :include-blocked-p
+    :reader executable-dita-next-task-selection-include-blocked-p)))
+
+(defmethod print-object ((row executable-dita-sqlite-task-row) stream)
+  (print-unreadable-object (row stream :type t :identity nil)
+    (format stream "~A ~A"
+            (executable-dita-sqlite-task-row-id row)
+            (executable-dita-sqlite-task-row-status row))))
+
+(defmethod print-object ((row executable-dita-next-task-candidate-row) stream)
+  (print-unreadable-object (row stream :type t :identity nil)
+    (format stream "~A score=~,2F~:[~; selected~]~:[~; blocked~]"
+            (executable-dita-next-task-candidate-row-id row)
+            (or (executable-dita-next-task-candidate-row-score row) 0.0d0)
+            (executable-dita-next-task-candidate-row-selected-p row)
+            (executable-dita-next-task-candidate-row-blocked-p row))))
+
+(defmethod print-object ((selection executable-dita-next-task-selection) stream)
+  (print-unreadable-object (selection stream :type t :identity nil)
+    (format stream "~A selected=~A"
+            (executable-dita-next-task-selection-task-id selection)
+            (and (executable-dita-next-task-selection-selected-candidate
+                  selection)
+                 (executable-dita-next-task-candidate-row-id
+                  (executable-dita-next-task-selection-selected-candidate
+                   selection))))))
+
 (defun make-executable-dita-task
     (&key id title summary context pddl scxml operators preconditions
        postconditions failure-modes)
@@ -198,7 +273,7 @@
     (format stream "<h2>Inspectable objects</h2>~%~%")
     (format stream "<ul>~%")
     (format stream "  <li><a expr=\"(executable-dita-task-smoke-example)\"><tt>executable-dita-task-smoke-example</tt></a></li>~%")
-    (format stream "  <li><a expr=\"(executable-dita-task-&gt;sexp (executable-dita-task-smoke-example))\"><tt>canonical S-expression</tt></a></li>~%")
+    (format stream "  <li><a expr=\"(executable-dita-task->sexp (executable-dita-task-smoke-example))\"><tt>canonical S-expression</tt></a></li>~%")
     (format stream "  <li><a expr=\"(executable-dita-default-pddl-domain)\"><tt>executable-dita-default-pddl-domain</tt></a></li>~%")
     (format stream "  <li><a expr=\"(executable-dita-default-scxml-contract)\"><tt>executable-dita-default-scxml-contract</tt></a></li>~%")
     (format stream "</ul>~%~%")
@@ -521,6 +596,19 @@ CREATE TABLE IF NOT EXISTS executable_dita_next_task_candidates(
           :selected-p selected-p
           :score score)))
 
+(defun executable-dita-candidate-row-from-plist (plist)
+  (make-instance
+   'executable-dita-next-task-candidate-row
+   :id (getf plist :id)
+   :task-id (getf plist :task-id)
+   :candidate (getf plist :candidate)
+   :cost (getf plist :cost)
+   :risk (getf plist :risk)
+   :expected-value (getf plist :expected-value)
+   :blocked-p (getf plist :blocked-p)
+   :selected-p (getf plist :selected-p)
+   :score (getf plist :score)))
+
 (defun executable-dita-mark-selected-candidate
     (db-path task-id candidate-id sqlite-program)
   (executable-dita-sqlite-exec
@@ -572,6 +660,88 @@ CREATE TABLE IF NOT EXISTS executable_dita_next_task_candidates(
        sqlite-program)
       (setf (getf (first rows) :selected-p) t))
     rows))
+
+(defun select-executable-dita-next-task-candidate-rows
+    (&key task-id (limit 10) include-blocked-p
+       (db-path (executable-dita-default-sqlite-path))
+       (sqlite-program "sqlite3"))
+  (mapcar #'executable-dita-candidate-row-from-plist
+          (select-executable-dita-next-task-candidates
+           :task-id task-id
+           :limit limit
+           :include-blocked-p include-blocked-p
+           :db-path db-path
+           :sqlite-program sqlite-program)))
+
+(defun make-executable-dita-next-task-selection
+    (&key task-id (limit 10) include-blocked-p
+       (db-path (executable-dita-default-sqlite-path))
+       (sqlite-program "sqlite3"))
+  (let* ((candidates
+           (select-executable-dita-next-task-candidate-rows
+            :task-id task-id
+            :limit limit
+            :include-blocked-p include-blocked-p
+            :db-path db-path
+            :sqlite-program sqlite-program))
+         (selected
+           (or (find-if #'executable-dita-next-task-candidate-row-selected-p
+                        candidates)
+               (find-if-not #'executable-dita-next-task-candidate-row-blocked-p
+                            candidates))))
+    (make-instance
+     'executable-dita-next-task-selection
+     :task-id task-id
+     :db-path db-path
+     :candidates candidates
+     :selected-candidate selected
+     :include-blocked-p include-blocked-p)))
+
+(defun executable-dita-parse-task-row-line (line task)
+  (destructuring-bind (id title status created-at sexp-size dita-size
+                          hyperdoc-html-size scxml-size)
+      (uiop:split-string line :separator (list #\Tab))
+    (make-instance
+     'executable-dita-sqlite-task-row
+     :id id
+     :title title
+     :status status
+     :created-at created-at
+     :sexp-size (parse-integer sexp-size)
+     :dita-size (parse-integer dita-size)
+     :hyperdoc-html-size (parse-integer hyperdoc-html-size)
+     :scxml-size (parse-integer scxml-size)
+     :task task)))
+
+(defun read-executable-dita-task-row
+    (task-id &key (db-path (executable-dita-default-sqlite-path))
+       (sqlite-program "sqlite3"))
+  (ensure-executable-dita-sqlite-schema
+   :db-path db-path
+   :sqlite-program sqlite-program)
+  (let* ((task (read-executable-dita-task
+                task-id
+                :db-path db-path
+                :sqlite-program sqlite-program))
+         (sql
+           (format nil
+                   "SELECT id, title, status, created_at,
+                           coalesce(length(sexp), 0),
+                           coalesce(length(dita_xml), 0),
+                           coalesce(length(hyperdoc_html), 0),
+                           coalesce(length(scxml), 0)
+                    FROM executable_dita_tasks
+                    WHERE id = ~A
+                    LIMIT 1;"
+                   (executable-dita-sqlite-string-literal task-id)))
+         (lines
+           (executable-dita-sqlite-query-lines
+            db-path
+            sql
+            :sqlite-program sqlite-program)))
+    (and task
+         lines
+         (executable-dita-parse-task-row-line (first lines) task))))
 
 (defun executable-dita-task-smoke-example ()
   (make-executable-dita-task

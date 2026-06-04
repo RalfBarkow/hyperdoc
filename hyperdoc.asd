@@ -54,11 +54,13 @@
     :license "BSD"
     :version "0.0.1"
     :serial t
-    :depends-on (#:hyperdoc/kernel)
+    :depends-on (#:hyperdoc/kernel
+                 #:html-inspector-views)
     :components ((:module "hyperdoc"
                   :serial t
                   :components ((:file "shared-sexpression-plans")
-                               (:file "executable-dita-tasks")))))
+                               (:file "executable-dita-tasks")
+                               (:file "executable-dita-task-views")))))
 
 (defsystem #:hyperdoc/executable-dita-tasks/tests
     :description "Smoke tests for executable DITA task objects"
