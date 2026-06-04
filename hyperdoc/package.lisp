@@ -315,6 +315,33 @@
    #:topicmap-program-pretty-string
    #:split-view-response-story-view
    #:split-view-response-program-view
+   ;; Executable DITA task contracts
+   #:executable-dita-task
+   #:make-executable-dita-task
+   #:executable-dita-task-id
+   #:executable-dita-task-title
+   #:executable-dita-task-summary
+   #:executable-dita-task-context
+   #:executable-dita-task-pddl
+   #:executable-dita-task-scxml
+   #:executable-dita-task-operators
+   #:executable-dita-task-preconditions
+   #:executable-dita-task-postconditions
+   #:executable-dita-task-failure-modes
+   #:executable-dita-task->sexp
+   #:sexp->executable-dita-task
+   #:executable-dita-task->dita
+   #:executable-dita-task->hyperdoc-html
+   #:executable-dita-task->scxml
+   #:persist-executable-dita-task
+   #:read-executable-dita-task
+   #:store-executable-dita-next-task-candidate
+   #:select-executable-dita-next-task-candidates
+   #:executable-dita-task-smoke-example
+   #:executable-dita-default-sqlite-path
+   #:executable-dita-default-pddl-domain
+   #:executable-dita-default-scxml-contract
+   #:executable-dita-next-task-score
    #:topic-source-file
    #:topic-factory-source-record
    #:topic-files-topicmap

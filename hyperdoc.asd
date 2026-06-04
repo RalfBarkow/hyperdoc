@@ -48,6 +48,34 @@
                   :serial t
                   :components ((:file "s-expression-prompt-smoke")))))
 
+(defsystem #:hyperdoc/executable-dita-tasks
+    :description "Executable DITA task objects with S-expression, DITA, HyperDoc, SCXML, and SQLite projections"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/kernel)
+    :components ((:module "hyperdoc"
+                  :serial t
+                  :components ((:file "shared-sexpression-plans")
+                               (:file "executable-dita-tasks")))))
+
+(defsystem #:hyperdoc/executable-dita-tasks/tests
+    :description "Smoke tests for executable DITA task objects"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/executable-dita-tasks)
+    :components ((:module "tests"
+                  :serial t
+                  :components ((:file "package")
+                               (:file "executable-dita-tasks-smoke"))))
+    :perform (test-op (op c)
+                      (declare (ignore op c))
+                      (uiop:symbol-call :hyperdoc/tests
+                                        :run-executable-dita-tasks-smoke-test)))
+
 (defsystem #:hyperdoc/topics
     :description "Inspectable authored topic registry for HyperDoc"
     :author "Ralf Barkow <ralf.barkow@me.com>"
@@ -142,6 +170,7 @@
                  #:hyperdoc/checks
                  #:hyperdoc/state-machines
                  #:hyperdoc/s-expression-prompts
+                 #:hyperdoc/executable-dita-tasks
                  #:shasht)
     :in-order-to ((test-op (test-op "hyperdoc/tests")))
     :components ((:module "hyperdoc"

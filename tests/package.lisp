@@ -66,6 +66,7 @@
    :run-s-expression-prompt-roundtrip-smoke-test
    :run-s-expression-prompt-generated-page-smoke-test
    :run-s-expression-prompt-smoke-tests
+   :run-executable-dita-tasks-smoke-test
    :run-fedwiki-asdf-assets-smoke-tests
    :run-fedwiki-attached-asdf-system-smoke-tests
    :run-dmx-shared-workspace-docs-smoke-tests
