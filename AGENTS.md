@@ -141,6 +141,25 @@ Quicklisp package-prefixed symbols in readable source, do not require `:shop3`
 for the smoke test, and do not load full `:kioskbeerli` just to inspect or
 persist executable DITA task objects.
 
+## Kioskbeerli ASDF Boundary
+
+Kioskbeerli is a downstream application/system, not a HyperDoc core dependency.
+
+Preserve this direction:
+
+- Kioskbeerli may depend on public HyperDoc APIs for pages, topics, SCXML,
+  inspector views, and evidence objects.
+- HyperDoc must not depend on `:kioskbeerli`, `:dreyeck/kioskbeerli`, or
+  Kioskbeerli compatibility wrappers in the `HYPERDOC` package.
+- Do not add wrapper functions in `HYPERDOC` merely to keep Kioskbeerli page
+  snippets loadable from HyperDoc core. Move those snippets and tests to the
+  Kioskbeerli ASDF system instead.
+- HyperDoc pages may mention Kioskbeerli as documentation-only evidence, but
+  `:hyperdoc`, `:hyperdoc/executable-dita-tasks`, and their tests must load
+  without loading full `:kioskbeerli`.
+- The intended external Kioskbeerli ASDF root is
+  `/Users/rgb/workspace/hauptsache/kioskbeerli`.
+
 ## Touch-Fahrplan Route Terminology
 
 When a slice touches Connect, Dock, Annotation, Touch-Fahrplan, or DMX
