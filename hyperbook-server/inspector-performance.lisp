@@ -173,6 +173,9 @@
     (t
      (hv:html (:tt (hv:esc (format nil "~A" value)))))))
 
+(defun render-debugger-boolean (value)
+  (hv:html (:tt (hv:esc (if value "true" "false")))))
+
 (defun universal-time-label (universal-time)
   (multiple-value-bind (second minute hour date month year)
       (decode-universal-time universal-time)
@@ -208,7 +211,7 @@
                              (html-page-content-render-report-start-timestamp-of
                               report))))))
             (:tr (:td "HTML cache hit?")
-                 (:td (render-debugger-value
+                 (:td (render-debugger-boolean
                        (html-page-content-render-report-html-cache-hit?-of report))))
             (:tr (:td "HTML ms")
                  (:td (render-debugger-value
@@ -296,14 +299,46 @@
 (defun set-html-page-render-state (view-element state)
   (setf (clog:attribute view-element "data-hyperdoc-render-state") state
         (clog:attribute view-element "aria-busy")
-        (if (string= state "loading")
-            "true"
-            "false")))
+        (if (member state '("ready" "error") :test #'string=)
+            "false"
+            "true")))
 
-(defun show-html-page-render-loading-state (view-element)
-  (set-html-page-render-state view-element "loading")
-  (setf (clog:inner-html view-element)
-        "<div class=\"hyperdoc-html-page-loading\" role=\"status\" aria-live=\"polite\">Loading content...</div>"))
+(defun show-html-page-render-debug-state
+    (pane view-element report &key (state "debugging")
+                               (message "Materializing html-page Content view."))
+  (set-html-page-render-state view-element state)
+  (multiple-value-bind (html references assets)
+      (hv:html-and-references
+       (:div :class "hyperdoc-html-page-render-debugger"
+             :role "status"
+             :aria-live "polite"
+             :data-hyperdoc-content-render-debugger "true"
+             (:h3 "Content render debugger")
+             (:p (hv:esc message))
+             (:table :class "inspector-table"
+                     (:tr (:td "Object")
+                          (:td (hv:esc
+                                (html-page-content-render-report-object-summary-of
+                                 report))))
+                     (:tr (:td "View")
+                          (:td (:tt (hv:esc
+                                     (html-page-content-render-report-view-title-of
+                                      report)))))
+                     (:tr (:td "Last completed phase")
+                          (:td (render-debugger-value
+                                (html-page-content-render-report-last-completed-phase-of
+                                 report))))
+                     (:tr (:td "Condition")
+                          (:td (render-debugger-value
+                                (html-page-content-render-report-condition-of
+                                 report)))))
+             (:p (hv:object-ref report
+                                :display "Inspect render report"
+                                :select "Overview"))))
+    (declare (ignore assets))
+    (setf (clog:inner-html view-element) html)
+    (set-event-handlers pane view-element references))
+  report)
 
 (defun default-pane-selection (pane select)
   (cond
@@ -520,38 +555,101 @@
                                :ms (elapsed-millis start))))
 
 (defmethod create-view-element :around ((pane pane) parent-element (view hv:html-view))
-  (let ((loading-state? (first-html-page-content-render-p pane view)))
-    (when loading-state?
-      (show-html-page-render-loading-state parent-element)
+  (let* ((debug-state? (first-html-page-content-render-p pane view))
+         (report (and debug-state?
+                      (make-html-page-content-render-report
+                       (pane-object pane)
+                       view))))
+    (when debug-state?
+      (record-html-page-content-render-event
+       report
+       :debugger-visible
+       :message "Browser-visible Content render debugger inserted.")
+      (show-html-page-render-debug-state pane parent-element report)
       (log-inspector-performance :view/loading
                                  :object (summarize-object-for-log (pane-object pane))
                                  :view (hv:view-title view)))
-    (let* ((html-start (current-time-millis))
-           (html-cached? (html-view-realized-p view))
-           (html (hv:view-html view))
-           (references (hv:view-references view))
-           (assets (hv:view-assets view))
-           (html-ms (elapsed-millis html-start))
-           (html-length (length html))
-           (html-node-count (count #\< html))
-           (insert-start (current-time-millis))
-           (result (call-next-method))
-           (post-insert-ms (elapsed-millis insert-start))
-           (dom-nodes (dom-node-count parent-element)))
-      (when loading-state?
-        (set-html-page-render-state parent-element "ready"))
-      (log-inspector-performance :view/render
-                                 :object (summarize-object-for-log (pane-object pane))
-                                 :view (hv:view-title view)
-                                 :html-cache-hit? html-cached?
-                                 :html-ms html-ms
-                                 :insert-ms post-insert-ms
-                                 :html-length html-length
-                                 :html-node-count html-node-count
-                                 :reference-count (length references)
-                                 :asset-count (length assets)
-                                 :dom-node-count dom-nodes)
-      result)))
+    (flet ((render-view ()
+             (let* ((html-start (current-time-millis))
+                    (html-cached? (html-view-realized-p view)))
+               (when report
+                 (setf (html-page-content-render-report-html-cache-hit?-of report)
+                       html-cached?)
+                 (record-html-page-content-render-event
+                  report
+                  :html-materialization-start
+                  :message "Content view HTML materialization started."
+                  :completedp nil))
+               (let* ((html (hv:view-html view))
+                      (references (hv:view-references view))
+                      (assets (hv:view-assets view))
+                      (html-ms (elapsed-millis html-start))
+                      (html-length (length html))
+                      (html-node-count (count #\< html))
+                      (insert-start (current-time-millis)))
+                 (when report
+                   (setf (html-page-content-render-report-html-ms-of report)
+                         html-ms
+                         (html-page-content-render-report-reference-count-of report)
+                         (length references)
+                         (html-page-content-render-report-asset-count-of report)
+                         (length assets))
+                   (record-html-page-content-render-event
+                    report
+                    :html-materialized
+                    :message "Content view HTML materialized."
+                    :details (list :html-length html-length
+                                   :html-node-count html-node-count
+                                   :reference-count (length references)
+                                   :asset-count (length assets))))
+                 (let* ((result (call-next-method))
+                        (post-insert-ms (elapsed-millis insert-start))
+                        (dom-nodes (dom-node-count parent-element)))
+                   (when report
+                     (set-html-page-render-state parent-element "ready")
+                     (record-html-page-content-render-event
+                      report
+                      :dom-inserted
+                      :message "Rendered Content view replaced debugger placeholder."
+                      :details (list :insert-ms post-insert-ms
+                                     :dom-node-count dom-nodes)))
+                   (log-inspector-performance :view/render
+                                              :object (summarize-object-for-log (pane-object pane))
+                                              :view (hv:view-title view)
+                                              :html-cache-hit? html-cached?
+                                              :html-ms html-ms
+                                              :insert-ms post-insert-ms
+                                              :html-length html-length
+                                              :html-node-count html-node-count
+                                              :reference-count (length references)
+                                              :asset-count (length assets)
+                                              :dom-node-count dom-nodes)
+                   result)))))
+      (if report
+          (handler-case
+              (render-view)
+            (error (condition)
+              (record-html-page-content-render-condition report condition)
+              (record-html-page-content-render-event
+               report
+               :render-failed
+               :message (princ-to-string condition)
+               :details (list :condition-type (type-of condition))
+               :completedp nil)
+              (show-html-page-render-debug-state
+               pane parent-element report
+               :state "error"
+               :message "Content rendering failed. Inspect the render report for the failing phase and condition.")
+              (log-inspector-performance :view/render-error
+                                         :object (summarize-object-for-log (pane-object pane))
+                                         :view (hv:view-title view)
+                                         :condition-type (type-of condition)
+                                         :condition-message (princ-to-string condition)
+                                         :last-completed-phase
+                                         (html-page-content-render-report-last-completed-phase-of
+                                          report))
+              report))
+          (render-view)))))
 
 (in-package #:html-inspector-views/standard)
 
