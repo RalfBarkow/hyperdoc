@@ -182,12 +182,92 @@
               'hyperdoc:layout-rule-failure)
        "Unsupported rule invariant must produce a failure object"))))
 
+(defun run-layout-override-smoke-test ()
+  (asdf:load-system :hyperdoc)
+  (let* ((topicmap (hyperdoc:reel-inspector-layout-topicmap))
+         (patch (hyperdoc:make-reel-buttons-into-pane-patch topicmap))
+         (plan (hyperdoc:derive-layout-repair-plan patch))
+         (override (hyperdoc:make-layout-override-from-repair-plan plan))
+         (store (hyperdoc:persist-layout-override override))
+         (loaded (hyperdoc:load-layout-overrides store))
+         (replayed (hyperdoc:replay-layout-overrides topicmap store))
+         (revert-patch (hyperdoc:layout-override-revert-patch override))
+         (reverted (hyperdoc:layout-patch-after-topicmap-of revert-patch))
+         (bad-store
+           (hyperdoc:persist-layout-override
+            (make-instance
+             'hyperdoc:layout-override
+             :id "bad-layout-override"
+             :title "layout-override"
+             :source-patch-id "missing-patch"
+             :source-repair-plan-id "missing-plan"
+             :topic-id "missing-topic"
+             :from-parent-id "missing-parent"
+             :to-parent-id "inspector-pane"
+             :relation-kind :contains
+             :placement :bottom-control-rail
+             :preserve nil
+             :before-topicmap topicmap
+             :after-topicmap topicmap
+             :rule-results nil
+             :renderer-effects nil
+             :created-at 0
+             :revert-info nil)))
+         (failure (hyperdoc:replay-layout-overrides topicmap bad-store)))
+    (layout-topicmap-assert-true
+     (typep override 'hyperdoc:layout-override)
+     "Applying a repair plan must create a layout-override object")
+    (layout-topicmap-assert-equal
+     (hyperdoc::id-of patch)
+     (hyperdoc:layout-override-source-patch-id-of override)
+     "Override must record the source patch id")
+    (layout-topicmap-assert-equal
+     "hyperdoc-reel__viewport"
+     (hyperdoc:layout-topicmap-parent-of
+      (hyperdoc:layout-override-before-topicmap-of override)
+      "hyperdoc-reel__buttons")
+     "Override must capture before-topology")
+    (layout-topicmap-assert-equal
+     "inspector-pane"
+     (hyperdoc:layout-topicmap-parent-of
+      (hyperdoc:layout-override-after-topicmap-of override)
+      "hyperdoc-reel__buttons")
+     "Override must capture after-topology")
+    (layout-topicmap-assert-true
+     (hyperdoc:layout-override-rule-results-of override)
+     "Override must persist rule-result summaries")
+    (layout-topicmap-assert-true
+     (find :durable-override
+           (hyperdoc:layout-override-renderer-effects-of override)
+           :key #'hyperdoc:kind-of)
+     "Override must persist apply-phase renderer effects")
+    (layout-topicmap-assert-equal
+     1
+     (length loaded)
+     "Persisted override store must reload one override")
+    (layout-topicmap-assert-equal
+     "inspector-pane"
+     (hyperdoc:layout-topicmap-parent-of replayed "hyperdoc-reel__buttons")
+     "Replay must reconstruct the after-topology")
+    (layout-topicmap-assert-true
+     (typep revert-patch 'hyperdoc:move-topic-into-box-patch)
+     "Revert must create an inspectable inverse move patch")
+    (layout-topicmap-assert-equal
+     "hyperdoc-reel__viewport"
+     (hyperdoc:layout-topicmap-parent-of reverted "hyperdoc-reel__buttons")
+     "Revert patch must restore the original parent topology")
+    (layout-topicmap-assert-true
+     (typep failure 'hyperdoc:layout-rule-failure)
+     "Failed replay must produce an inspectable layout-rule-failure object")))
+
 (defun run-layout-topicmap-topic-cluster-smoke-test ()
   (asdf:load-system :hyperdoc)
   (dolist (title '("Layout as Topicmap"
                    "Inspector Reel layout topicmap"
                    "move-topic-into-box-patch"
-                   "layout-repair-plan"))
+                   "layout-repair-plan"
+                   "layout-override"
+                   "layout-override-store"))
     (layout-topicmap-assert-true
      (hyperbook:find-page hyperdoc::*topics* title :signal-error? t)
      (format nil "Topic cluster must include ~A" title))))
@@ -196,6 +276,7 @@
   (run-layout-topicmap-snapshot-smoke-test)
   (run-layout-topicmap-move-patch-smoke-test)
   (run-layout-repair-plan-smoke-test)
+  (run-layout-override-smoke-test)
   (run-layout-topicmap-topic-cluster-smoke-test)
   (format t "~&Layout topicmap smoke tests passed.~%")
   t)

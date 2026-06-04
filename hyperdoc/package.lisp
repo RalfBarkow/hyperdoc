@@ -430,6 +430,8 @@
    #:layout-rule-failure
    #:layout-repair-plan
    #:layout-renderer-effect
+   #:layout-override
+   #:layout-override-store
    #:layout-topic-selector-of
    #:layout-topic-element-id-of
    #:layout-topic-class-list-of
@@ -460,6 +462,25 @@
    #:layout-renderer-effect-style-value-of
    #:layout-renderer-effect-attributes-of
    #:layout-renderer-effect-replay-of
+   #:layout-override-source-patch-id-of
+   #:layout-override-source-repair-plan-id-of
+   #:layout-override-topic-id-of
+   #:layout-override-from-parent-id-of
+   #:layout-override-to-parent-id-of
+   #:layout-override-relation-kind-of
+   #:layout-override-placement-of
+   #:layout-override-preserve-of
+   #:layout-override-before-topicmap-of
+   #:layout-override-after-topicmap-of
+   #:layout-override-rule-results-of
+   #:layout-override-renderer-effects-of
+   #:layout-override-created-at-of
+   #:layout-override-revert-info-of
+   #:layout-override-replay-status-of
+   #:layout-override-replay-failure-of
+   #:layout-override-store-storage-kind-of
+   #:layout-override-store-storage-key-of
+   #:layout-override-store-overrides-of
    #:layout-topicmap-captured-at-of
    #:layout-patch-before-topicmap-of
    #:layout-patch-after-topicmap-of
@@ -485,6 +506,12 @@
    #:default-layout-rules
    #:apply-layout-rule
    #:derive-layout-repair-plan
+   #:make-layout-override-store
+   #:make-layout-override-from-repair-plan
+   #:persist-layout-override
+   #:load-layout-overrides
+   #:replay-layout-overrides
+   #:layout-override-revert-patch
    ;; Page-as-ASDF-system reload boundaries
    #:page-system
    #:hyperdoc-page-system

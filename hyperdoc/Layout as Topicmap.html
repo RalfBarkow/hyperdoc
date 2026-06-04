@@ -27,6 +27,8 @@
   <li><code>layout-rule-result</code>: pass/repair/fail status, evidence, renderer effects, and optional failure object for one rule.</li>
   <li><code>layout-repair-plan</code>: rule-derived plan for a layout patch, including rule results, renderer effects, failure modes, and preview/apply boundary.</li>
   <li><code>layout-renderer-effect</code>: declarative preview/apply effect consumed by the renderer instead of direct ad hoc DOM mutation.</li>
+  <li><code>layout-override</code>: durable replay artifact created from an applied repair plan; it records source patch id, before/after topology, rule summaries, renderer effects, evidence, timestamp, and revert information.</li>
+  <li><code>layout-override-store</code>: explicit replay boundary for persisted overrides; the browser inspector uses the session-local key <code>hyperdoc.layout.overrides.v1</code>.</li>
 </ul>
 
 <h2>Current Topology</h2>
@@ -104,6 +106,25 @@
   <li>Apply consumes an apply-phase durable-override renderer effect and records replay metadata for the inspectable patch object.</li>
 </ul>
 
+<h2>Persist and Replay Boundary</h2>
+
+<p>
+  Expectation: applying a repair plan should survive a reload. Observed
+  boundary: preview state is transient, but apply now creates a
+  <code>layout-override</code> and stores the replay payload in the inspector
+  override store. This slice does not write FedWiki JSON; it uses the smallest
+  browser session persistence boundary already appropriate for a local
+  inspector preview/apply workflow.
+</p>
+
+<ul>
+  <li><code>make-layout-override-from-repair-plan</code> captures source patch id, before topology, after topology, rule result ids/statuses, renderer effects, evidence, timestamp, and revert information.</li>
+  <li><code>persist-layout-override</code> records the override in a <code>layout-override-store</code>.</li>
+  <li><code>load-layout-overrides</code> exposes persisted overrides for inspection.</li>
+  <li><code>replay-layout-overrides</code> reconstructs the after-topology or returns a <code>layout-rule-failure</code> when replay evidence no longer matches.</li>
+  <li><code>layout-override-revert-patch</code> creates an inspectable inverse patch that restores the original parent topology.</li>
+</ul>
+
 <h2>Invariants</h2>
 
 <ul>
@@ -121,9 +142,13 @@
   <li><a hyperbook="topics" page="Inspector Reel layout topicmap"><tt>Inspector Reel layout topicmap</tt></a></li>
   <li><a hyperbook="topics" page="move-topic-into-box-patch"><tt>move-topic-into-box-patch</tt></a></li>
   <li><a hyperbook="topics" page="layout-repair-plan"><tt>layout-repair-plan</tt></a></li>
+  <li><a hyperbook="topics" page="layout-override"><tt>layout-override</tt></a></li>
+  <li><a hyperbook="topics" page="layout-override-store"><tt>layout-override-store</tt></a></li>
   <li><a expr="(reel-inspector-layout-topicmap)"><tt>(reel-inspector-layout-topicmap)</tt></a></li>
   <li><a expr="(make-reel-buttons-into-pane-patch)"><tt>(make-reel-buttons-into-pane-patch)</tt></a></li>
   <li><a expr="(derive-layout-repair-plan (make-reel-buttons-into-pane-patch))"><tt>(derive-layout-repair-plan (make-reel-buttons-into-pane-patch))</tt></a></li>
+  <li><a expr="(make-layout-override-from-repair-plan (derive-layout-repair-plan (make-reel-buttons-into-pane-patch)))"><tt>(make-layout-override-from-repair-plan (derive-layout-repair-plan (make-reel-buttons-into-pane-patch)))</tt></a></li>
+  <li><a expr="(persist-layout-override (make-layout-override-from-repair-plan (derive-layout-repair-plan (make-reel-buttons-into-pane-patch))))"><tt>(persist-layout-override (make-layout-override-from-repair-plan (derive-layout-repair-plan (make-reel-buttons-into-pane-patch))))</tt></a></li>
 </ul>
 
 <h2>SHOP3 Task</h2>
@@ -161,6 +186,23 @@
     (!project-renderer-effects-to-preview)
     (!preserve-reel-accessibility-invariants)
     (!persist-apply-as-durable-override)
+    (!commit-periodically))))</code></pre>
+
+<h2>Persist and Replay SHOP3 Task</h2>
+
+<pre><code class="language-lisp">(:task persist-and-replay-layout-repair-overrides)
+(:method persist-and-replay-layout-repair-overrides
+  ((:precondition
+    (and (layout-repair-plan-exists)
+         (apply-phase-durable-override-effect-exists)))
+   (:ordered-tasks
+    (!define-layout-override-model)
+    (!persist-layout-override-from-repair-plan)
+    (!load-layout-overrides)
+    (!replay-layout-overrides)
+    (!verify-after-topology-after-reload)
+    (!define-revert-patch)
+    (!verify-reel-accessibility-invariants)
     (!commit-periodically))))</code></pre>
 
 <h2>SCXML Sketch</h2>
@@ -215,6 +257,30 @@
     &lt;transition event="inspect-failure" target="patch-created"/&gt;
   &lt;/state&gt;
   &lt;final id="durable-override"/&gt;
+&lt;/scxml&gt;</code></pre>
+
+<h2>Persist and Replay SCXML Sketch</h2>
+
+<pre><code class="language-xml">&lt;scxml initial="repair-plan-ready"&gt;
+  &lt;state id="repair-plan-ready"&gt;
+    &lt;transition event="apply" target="persist-override"/&gt;
+  &lt;/state&gt;
+  &lt;state id="persist-override"&gt;
+    &lt;transition event="persist.ok" target="reload-check"/&gt;
+    &lt;transition event="persist.fail" target="failure"/&gt;
+  &lt;/state&gt;
+  &lt;state id="reload-check"&gt;
+    &lt;transition event="replay.ok" target="applied"/&gt;
+    &lt;transition event="replay.fail" target="failure"/&gt;
+  &lt;/state&gt;
+  &lt;state id="applied"&gt;
+    &lt;transition event="revert" target="revert-override"/&gt;
+  &lt;/state&gt;
+  &lt;state id="revert-override"&gt;
+    &lt;transition event="revert.ok" target="repair-plan-ready"/&gt;
+    &lt;transition event="revert.fail" target="failure"/&gt;
+  &lt;/state&gt;
+  &lt;state id="failure"/&gt;
 &lt;/scxml&gt;</code></pre>
 
 <h2>Goldberg Questions</h2>

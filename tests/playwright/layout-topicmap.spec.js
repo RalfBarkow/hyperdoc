@@ -10,6 +10,8 @@ const {
   settleInspectorBindings,
 } = require("./hyperdoc-inspector");
 
+const LAYOUT_OVERRIDE_STORE_KEY = "hyperdoc.layout.overrides.v1";
+
 async function openLayoutTopicmap(page) {
   await openHyperDoc(page, { timeout: 45_000 });
   await activatePaneTab(page, 1, "Layout topicmap");
@@ -49,7 +51,7 @@ async function readPreviewInvariantState(page) {
     const next = document.querySelector(".hyperdoc-reel__next");
     const scrollable = document.querySelector(".hyperdoc-reel__scrollable");
     const targetPane = document.querySelector(
-      '.inspector-pane[data-layout-preview-target="buttons-in-pane"]'
+      '.inspector-pane[data-layout-preview-target="buttons-in-pane"], .inspector-pane[data-layout-replay-target="buttons-in-pane"]'
     );
     const targetPaneBody = targetPane?.querySelector(".inspector-body") || null;
 
@@ -112,13 +114,24 @@ async function readPreviewInvariantState(page) {
         : 0,
       previewSource: patch?.getAttribute("data-preview-source") || null,
       previewEffectCount: patch?.getAttribute("data-preview-effect-count") || null,
-      previewState: reel?.getAttribute("data-layout-preview") || null,
+      previewState:
+        reel?.getAttribute("data-layout-preview") ||
+        reel?.getAttribute("data-layout-replay") ||
+        null,
       previewParent: buttons?.getAttribute("data-layout-preview-parent") || null,
-      previewEffect: buttons?.getAttribute("data-layout-preview-effect") || null,
+      previewEffect:
+        buttons?.getAttribute("data-layout-preview-effect") ||
+        buttons?.getAttribute("data-layout-replay-effect") ||
+        null,
       buttonPosition: buttons ? window.getComputedStyle(buttons).position : null,
-      paneClearance: targetPaneBody?.getAttribute("data-layout-preview-clearance") || null,
+      paneClearance:
+        targetPaneBody?.getAttribute("data-layout-preview-clearance") ||
+        targetPaneBody?.getAttribute("data-layout-replay-clearance") ||
+        null,
       paneClearanceEffect:
-        targetPaneBody?.getAttribute("data-layout-preview-clearance-effect") || null,
+        targetPaneBody?.getAttribute("data-layout-preview-clearance-effect") ||
+        targetPaneBody?.getAttribute("data-layout-replay-clearance-effect") ||
+        null,
       panePaddingBottom: targetPaneBody?.style.paddingBottom || null,
       overflowX: window.getComputedStyle(scrollable).overflowX,
       scrollWidth: scrollable.scrollWidth,
@@ -264,7 +277,106 @@ for (const viewport of [
       "data-layout-apply-effect",
       "create-durable-layout-override"
     );
+    await expect(patch).toHaveAttribute("data-layout-override-state", "persisted");
+    await expect(patch).toHaveAttribute(
+      "data-layout-override-store-key",
+      LAYOUT_OVERRIDE_STORE_KEY
+    );
     const durableOverride = await patch.getAttribute("data-layout-durable-override");
     expect(durableOverride.toLowerCase()).toContain("layout-renderer-override");
   });
 }
+
+test("Layout patch apply persists and replays override after reload", async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  const layout = await openLayoutTopicmap(page);
+  await page.evaluate((key) => window.localStorage.removeItem(key), LAYOUT_OVERRIDE_STORE_KEY);
+  const patch = await dragButtonsTopicOntoPaneTopic(layout);
+
+  await patch.locator(".hyperdoc-layout-apply").click();
+  await expect(patch).toHaveAttribute("data-layout-override-state", "persisted");
+  const persistedOverrideId = await patch.getAttribute("data-layout-override-id");
+  expect(persistedOverrideId).toBeTruthy();
+
+  const persistedStore = await page.evaluate((key) => {
+    return JSON.parse(window.localStorage.getItem(key));
+  }, LAYOUT_OVERRIDE_STORE_KEY);
+  await attachJson(testInfo, "layout-override-store-after-apply.json", persistedStore);
+  expect(persistedStore.storageKey).toBe(LAYOUT_OVERRIDE_STORE_KEY);
+  expect(persistedStore.overrides).toHaveLength(1);
+  const [override] = persistedStore.overrides;
+  expect(override.id).toBe(persistedOverrideId);
+  expect(override.sourcePatchId).toBe("move-hyperdoc-reel__buttons-into-inspector-pane");
+  expect(override.beforeTopology).toContainEqual({
+    parentId: "hyperdoc-reel__viewport",
+    childId: "hyperdoc-reel__buttons",
+  });
+  expect(override.afterTopology).toContainEqual({
+    parentId: "inspector-pane",
+    childId: "hyperdoc-reel__buttons",
+  });
+  expect(override.rendererEffects.map((effect) => effect.kind)).toEqual(
+    expect.arrayContaining(["position-control-rail", "set-style", "durable-override"])
+  );
+
+  const reloadedLayout = await openLayoutTopicmap(page);
+  const replayedPatch = reloadedLayout.locator(
+    '.hyperdoc-layout-patch[data-layout-patch-kind="move-topic-into-box-patch"]'
+  );
+  await expect(replayedPatch).toBeVisible();
+  await expect(replayedPatch).toHaveAttribute("data-layout-patch-status", "replayed");
+  await expect(replayedPatch).toHaveAttribute("data-layout-override-state", "replayed");
+  await expect(replayedPatch).toHaveAttribute(
+    "data-layout-replayed-override-id",
+    persistedOverrideId
+  );
+  await expect(
+    reloadedLayout.locator(
+      '[data-layout-topic-id="hyperdoc-reel__buttons"][data-layout-replayed-parent-id="inspector-pane"]'
+    )
+  ).toBeVisible();
+  await expect(
+    replayedPatch.locator(
+      '[data-layout-topology-title="After topology"] [data-layout-parent-id="inspector-pane"][data-layout-child-id="hyperdoc-reel__buttons"]'
+    )
+  ).toBeVisible();
+
+  const replayState = await readPreviewInvariantState(page);
+  await attachJson(testInfo, "layout-override-replay-invariants.json", replayState);
+  expect(replayState.geometry.buttonsInsidePane).toBe(true);
+  expect(replayState.repairPlanStatus).toBe("previewable");
+  expect(replayState.renderedEffectCount).toBe(3);
+  expect(replayState.previewState).toBe("buttons-in-pane");
+  expect(replayState.previewEffect).toBe("position-control-rail-in-pane");
+  expect(replayState.buttonPosition).toBe("fixed");
+  expect(replayState.paneClearance).toBe("reserved");
+  expect(replayState.paneClearanceEffect).toBe("reserve-pane-bottom-clearance");
+  expect(replayState.overflowX).toBe("auto");
+  expect(replayState.scrollWidth).toBeGreaterThan(replayState.clientWidth);
+  expect(replayState.maxScrollLeft).toBeGreaterThan(0);
+  expect(replayState.atStart.prevDisabled).toBe(true);
+  expect(replayState.atStart.nextDisabled).toBe(false);
+  expect(replayState.atEnd.prevDisabled).toBe(false);
+  expect(replayState.atEnd.nextDisabled).toBe(true);
+  expect(replayState.prevLabel).toBe("previous");
+  expect(replayState.nextLabel).toBe("next");
+  expect(replayState.prevType).toBe("button");
+  expect(replayState.nextType).toBe("button");
+
+  await page.evaluate(async () => {
+    const scrollable = document.querySelector(".hyperdoc-reel__scrollable");
+    scrollable.scrollLeft = 0;
+    scrollable.dispatchEvent(new Event("scroll"));
+    await new Promise((resolve) => window.setTimeout(resolve, 140));
+  });
+  await page.locator(".hyperdoc-reel__next").focus();
+  const focusState = await page.evaluate(() => ({
+    className: document.activeElement.className,
+    label: document.activeElement.getAttribute("aria-label"),
+  }));
+  expect(focusState.className).toContain("hyperdoc-reel__next");
+  expect(focusState.label).toBe("next");
+});

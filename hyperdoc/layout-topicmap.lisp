@@ -130,6 +130,53 @@
                            :reader layout-repair-plan-preview-apply-boundary-of)
    (evidence :initarg :evidence :initform nil :reader evidence-of)))
 
+(defclass layout-override ()
+  ((id :initarg :id :reader id-of)
+   (title :initarg :title :reader title-of)
+   (source-patch-id :initarg :source-patch-id
+                    :reader layout-override-source-patch-id-of)
+   (source-repair-plan-id :initarg :source-repair-plan-id
+                          :reader layout-override-source-repair-plan-id-of)
+   (topic-id :initarg :topic-id :reader layout-override-topic-id-of)
+   (from-parent-id :initarg :from-parent-id
+                   :reader layout-override-from-parent-id-of)
+   (to-parent-id :initarg :to-parent-id
+                 :reader layout-override-to-parent-id-of)
+   (relation-kind :initarg :relation-kind :initform :contains
+                  :reader layout-override-relation-kind-of)
+   (placement :initarg :placement :initform :bottom-control-rail
+              :reader layout-override-placement-of)
+   (preserve :initarg :preserve :initform nil
+             :reader layout-override-preserve-of)
+   (before-topicmap :initarg :before-topicmap
+                    :reader layout-override-before-topicmap-of)
+   (after-topicmap :initarg :after-topicmap
+                   :reader layout-override-after-topicmap-of)
+   (rule-results :initarg :rule-results :initform nil
+                 :reader layout-override-rule-results-of)
+   (renderer-effects :initarg :renderer-effects :initform nil
+                     :reader layout-override-renderer-effects-of)
+   (evidence :initarg :evidence :initform nil :reader evidence-of)
+   (created-at :initarg :created-at :reader layout-override-created-at-of)
+   (revert-info :initarg :revert-info :initform nil
+                :reader layout-override-revert-info-of)
+   (replay-status :initarg :replay-status :initform :pending
+                  :reader layout-override-replay-status-of)
+   (replay-failure :initarg :replay-failure :initform nil
+                   :reader layout-override-replay-failure-of)))
+
+(defclass layout-override-store ()
+  ((id :initarg :id :initform "layout-override-store" :reader id-of)
+   (title :initarg :title :initform "layout-override-store" :reader title-of)
+   (storage-kind :initarg :storage-kind :initform :browser-local-storage
+                 :reader layout-override-store-storage-kind-of)
+   (storage-key :initarg :storage-key
+                :initform "hyperdoc.layout.overrides.v1"
+                :reader layout-override-store-storage-key-of)
+   (overrides :initarg :overrides :initform nil
+              :reader layout-override-store-overrides-of)
+   (evidence :initarg :evidence :initform nil :reader evidence-of)))
+
 (defmethod print-object ((topic layout-topic) stream)
   (print-unreadable-object (topic stream :type t :identity nil)
     (format stream "~A" (id-of topic))))
@@ -181,6 +228,19 @@
             (layout-repair-plan-status-of plan)
             (id-of (layout-repair-plan-patch-of plan))
             (length (layout-repair-plan-renderer-effects-of plan)))))
+
+(defmethod print-object ((override layout-override) stream)
+  (print-unreadable-object (override stream :type t :identity nil)
+    (format stream "~A: ~A -> ~A"
+            (layout-override-topic-id-of override)
+            (layout-override-from-parent-id-of override)
+            (layout-override-to-parent-id-of override))))
+
+(defmethod print-object ((store layout-override-store) stream)
+  (print-unreadable-object (store stream :type t :identity nil)
+    (format stream "~A (~D overrides)"
+            (layout-override-store-storage-key-of store)
+            (length (layout-override-store-overrides-of store)))))
 
 (defun make-layout-topic
     (id title selector kind
@@ -779,6 +839,201 @@
            :rule-count (length rules)
            :effect-count (length effects)
            :status status))))
+
+(defun layout-rule-result-summary (result)
+  (let ((rule (layout-rule-result-rule-of result)))
+    (list :id (id-of result)
+          :rule-id (id-of rule)
+          :status (layout-rule-result-status-of result)
+          :message (layout-rule-result-message-of result))))
+
+(defun layout-override-replay-failure (message &key evidence)
+  (layout-rule-failure
+   (make-layout-rule
+    "replay-layout-override"
+    "Replay layout override"
+    "Persisted layout overrides must replay against the expected topology and renderer-effect contract."
+    :layout-override-replay
+    :severity :hard
+    :evidence '(:phase :replay))
+   message
+   :evidence evidence))
+
+(defun make-layout-override-store
+    (&key (id "layout-override-store")
+      (title "layout-override-store")
+      (storage-kind :browser-local-storage)
+      (storage-key "hyperdoc.layout.overrides.v1")
+      overrides
+      evidence)
+  (make-instance
+   'layout-override-store
+   :id id
+   :title title
+   :storage-kind storage-kind
+   :storage-key storage-key
+   :overrides overrides
+   :evidence (or evidence
+                 '(:boundary "Browser localStorage is the durable session replay store for the inspector Layout topicmap slice."))))
+
+(defun make-layout-override-from-repair-plan
+    (plan &key id created-at)
+  (let* ((patch (layout-repair-plan-patch-of plan))
+         (effects (layout-repair-plan-renderer-effects-of plan))
+         (apply-effect (find :durable-override effects :key #'kind-of)))
+    (cond
+      ((eq (layout-repair-plan-status-of plan) :blocked)
+       (layout-override-replay-failure
+        "Blocked repair plans cannot create durable layout overrides."
+        :evidence (layout-repair-plan-failure-modes-of plan)))
+      ((null apply-effect)
+       (layout-override-replay-failure
+        "Repair plan has no apply-phase durable-override renderer effect."
+        :evidence (mapcar #'kind-of effects)))
+      (t
+       (make-instance
+        'layout-override
+        :id (or id
+                (format nil "layout-override-for-~A" (id-of patch)))
+        :title "layout-override"
+        :source-patch-id (id-of patch)
+        :source-repair-plan-id (id-of plan)
+        :topic-id (layout-patch-topic-id-of patch)
+        :from-parent-id (layout-patch-from-parent-id-of patch)
+        :to-parent-id (layout-patch-to-parent-id-of patch)
+        :relation-kind (layout-patch-relation-kind-of patch)
+        :placement (layout-patch-placement-of patch)
+        :preserve (layout-patch-preserve-of patch)
+        :before-topicmap (layout-patch-before-topicmap-of patch)
+        :after-topicmap (layout-patch-after-topicmap-of patch)
+        :rule-results
+        (mapcar #'layout-rule-result-summary
+                (layout-repair-plan-rule-results-of plan))
+        :renderer-effects effects
+        :created-at (or created-at (get-universal-time))
+        :revert-info
+        (list :artifact-type :layout-override-revert-patch
+              :topic (layout-patch-topic-id-of patch)
+              :from (layout-patch-to-parent-id-of patch)
+              :to (layout-patch-from-parent-id-of patch)
+              :relation (layout-patch-relation-kind-of patch)
+              :placement :restore-original-parent)
+        :evidence
+        (list :source-plan (id-of plan)
+              :source-patch (id-of patch)
+              :apply-effect (id-of apply-effect)
+              :before-parent (layout-patch-from-parent-id-of patch)
+              :after-parent (layout-patch-to-parent-id-of patch)))))))
+
+(defun persist-layout-override
+    (override &optional
+      (store (make-layout-override-store)))
+  (let ((kept-overrides
+          (remove (id-of override)
+                  (layout-override-store-overrides-of store)
+                  :key #'id-of
+                  :test #'equal)))
+    (make-layout-override-store
+     :id (id-of store)
+     :title (title-of store)
+     :storage-kind (layout-override-store-storage-kind-of store)
+     :storage-key (layout-override-store-storage-key-of store)
+     :overrides (append kept-overrides (list override))
+     :evidence (append (copy-list (evidence-of store))
+                       (list :last-persisted-override (id-of override))))))
+
+(defun load-layout-overrides (store)
+  (layout-override-store-overrides-of store))
+
+(defun layout-override-renderer-effects-valid-p (override)
+  (and (find :durable-override
+             (layout-override-renderer-effects-of override)
+             :key #'kind-of)
+       (find :position-control-rail
+             (layout-override-renderer-effects-of override)
+             :key #'kind-of)
+       (find :set-style
+             (layout-override-renderer-effects-of override)
+             :key #'kind-of)))
+
+(defun replay-layout-override (topicmap override)
+  (cond
+    ((not (typep override 'layout-override))
+     (layout-override-replay-failure
+      "Replay input is not a layout-override object."
+      :evidence override))
+    ((not (layout-override-renderer-effects-valid-p override))
+     (layout-override-replay-failure
+      "Persisted override is missing required renderer effects."
+      :evidence (mapcar #'kind-of
+                        (layout-override-renderer-effects-of override))))
+    ((not (layout-topicmap-topic topicmap
+                                 (layout-override-topic-id-of override)))
+     (layout-override-replay-failure
+      "Replay topic is missing from the base layout topicmap."
+      :evidence (list :topic (layout-override-topic-id-of override)
+                      :topicmap (id-of topicmap))))
+    ((not (layout-topicmap-topic topicmap
+                                 (layout-override-to-parent-id-of override)))
+     (layout-override-replay-failure
+      "Replay target parent is missing from the base layout topicmap."
+      :evidence (list :parent (layout-override-to-parent-id-of override)
+                      :topicmap (id-of topicmap))))
+    (t
+     (let ((current-parent
+             (layout-topicmap-parent-of
+              topicmap
+              (layout-override-topic-id-of override)
+              :relation-kind (layout-override-relation-kind-of override))))
+       (cond
+         ((equal current-parent
+                 (layout-override-to-parent-id-of override))
+          topicmap)
+         ((equal current-parent
+                 (layout-override-from-parent-id-of override))
+          (layout-topicmap-with-moved-topic
+           topicmap
+           (layout-override-topic-id-of override)
+           (layout-override-to-parent-id-of override)
+           :relation-kind (layout-override-relation-kind-of override)
+           :source-parent-id (layout-override-from-parent-id-of override)))
+         (t
+          (layout-override-replay-failure
+           "Replay source parent no longer matches the persisted before-topology."
+           :evidence (list :topic (layout-override-topic-id-of override)
+                           :expected-parent
+                           (layout-override-from-parent-id-of override)
+                           :accepted-replayed-parent
+                           (layout-override-to-parent-id-of override)
+                           :actual-parent current-parent))))))))
+
+(defun replay-layout-overrides (topicmap overrides-or-store)
+  (let ((overrides
+          (if (typep overrides-or-store 'layout-override-store)
+              (load-layout-overrides overrides-or-store)
+              overrides-or-store)))
+    (reduce
+     (lambda (current override)
+       (if (typep current 'layout-rule-failure)
+           current
+           (replay-layout-override current override)))
+     overrides
+     :initial-value topicmap)))
+
+(defun layout-override-revert-patch (override)
+  (handler-case
+      (make-move-topic-into-box-patch
+       (layout-override-after-topicmap-of override)
+       (layout-override-topic-id-of override)
+       (layout-override-from-parent-id-of override)
+       :relation-kind (layout-override-relation-kind-of override)
+       :placement :restore-original-parent
+       :preserve (layout-override-preserve-of override))
+    (error (condition)
+      (layout-override-replay-failure
+       "Cannot create a revert patch from the persisted layout override."
+       :evidence (list :override (id-of override)
+                       :condition (princ-to-string condition))))))
 
 (defmethod topicmap-view-title-of ((topicmap layout-topicmap))
   (title-of topicmap))

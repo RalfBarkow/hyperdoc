@@ -44,3 +44,26 @@
                  "assets/hyperdoc/js/layout-topicmap.js"
                  "tests/layout-topicmap-smoke.lisp"
                  "tests/playwright/layout-topicmap.spec.js")))
+
+(defun layout-override-topic ()
+  (make-topic
+   :id "layout-override"
+   :title "layout-override"
+   :summary "Durable replay artifact created from an applied layout-repair-plan; it records the source patch, before/after topology, rule summaries, renderer effects, evidence, timestamp, and revert data."
+   :references '("Layout as Topicmap"
+                 "hyperdoc/layout-topicmap.lisp"
+                 "hyperdoc-explorer/layout-topicmap.lisp"
+                 "assets/hyperdoc/js/layout-topicmap.js"
+                 "tests/layout-topicmap-smoke.lisp"
+                 "tests/playwright/layout-topicmap.spec.js")))
+
+(defun layout-override-store-topic ()
+  (make-topic
+   :id "layout-override-store"
+   :title "layout-override-store"
+   :summary "Explicit session replay boundary for persisted layout overrides; the browser inspector uses a small localStorage store keyed by hyperdoc.layout.overrides.v1."
+   :references '("Layout as Topicmap"
+                 "hyperdoc/layout-topicmap.lisp"
+                 "assets/hyperdoc/js/layout-topicmap.js"
+                 "tests/layout-topicmap-smoke.lisp"
+                 "tests/playwright/layout-topicmap.spec.js")))

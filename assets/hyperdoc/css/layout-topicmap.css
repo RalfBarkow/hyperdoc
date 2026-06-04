@@ -241,6 +241,26 @@
   padding: 0.55rem 0.7rem;
 }
 
+.hyperdoc-layout-override-store {
+  background: #f6f8fa;
+  border-inline-start: 4px solid #6b7d8a;
+  padding-inline: 0.75rem;
+}
+
+.hyperdoc-layout-override-store__status {
+  color: #3f464c;
+  margin-block-end: 0;
+}
+
+.hyperdoc-layout-override-store__status[data-layout-override-store-state="persisted"],
+.hyperdoc-layout-override-store__status[data-layout-override-store-state="replayed"] {
+  color: #1d6a45;
+}
+
+.hyperdoc-layout-override-store__status[data-layout-override-store-state="failed"] {
+  color: #9a2d2d;
+}
+
 .hyperdoc-layout-inspectable-ref {
   margin-block-end: 0;
 }
@@ -259,8 +279,18 @@
   outline-offset: 2px;
 }
 
+.hyperdoc-reel[data-layout-replay="buttons-in-pane"] .hyperdoc-reel__buttons {
+  outline: 3px solid #256f8f;
+  outline-offset: 2px;
+}
+
 .inspector-pane[data-layout-preview-target="buttons-in-pane"] {
   outline: 2px solid #2f7d4f;
+  outline-offset: -4px;
+}
+
+.inspector-pane[data-layout-replay-target="buttons-in-pane"] {
+  outline: 2px solid #256f8f;
   outline-offset: -4px;
 }
 

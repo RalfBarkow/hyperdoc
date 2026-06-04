@@ -48,6 +48,7 @@
       :data-layout-topic-id topic-id
       :data-layout-selector (layout-topic-selector-of topic)
       :data-layout-kind (layout-topicmap-view-string (kind-of topic))
+      :data-layout-parent-id (or parent-id "")
       :data-layout-draggable (if drag-source-p "true" "false")
       :data-layout-drop-target (if drop-target-p "true" "false")
       (:header
@@ -88,6 +89,7 @@
 (defun render-layout-topology-table (topicmap title)
   (views:html
    (:section :class "hyperdoc-layout-section"
+             :data-layout-topology-title title
              (:h3 (views:esc title))
              (:table :class "inspector-table hyperdoc-layout-topology"
                      (:tr (:th (views:esc "Parent box"))
@@ -95,6 +97,9 @@
                      (loop for edge in (layout-topicmap-contains-edges topicmap)
                            do (views:html
                                (:tr
+                                :data-layout-topology-edge "true"
+                                :data-layout-parent-id (first edge)
+                                :data-layout-child-id (second edge)
                                 (:td (:code (views:esc (first edge))))
                                 (:td (:code (views:esc (second edge)))))))))))
 
@@ -121,6 +126,7 @@
                                     (layout-topicmap-view-string
                                      (layout-rule-result-status-of result))
                                     :data-layout-rule-id (id-of rule)
+                                    :data-layout-rule-result-id (id-of result)
                                     (:td (:code (views:esc
                                                  (layout-topicmap-view-string
                                                   (layout-rule-result-status-of
@@ -237,6 +243,23 @@
                                   plan)
                                  :apply))))))))
 
+(defun render-layout-override-store-status ()
+  (views:html
+   (:section
+    :class "hyperdoc-layout-section hyperdoc-layout-override-store"
+    :data-layout-override-store-key "hyperdoc.layout.overrides.v1"
+    (:h3 (views:esc "Override store"))
+    (:table :class "inspector-table"
+            (:tr (:th (views:esc "Storage kind"))
+                 (:td (:code (views:esc "browser-local-storage"))))
+            (:tr (:th (views:esc "Storage key"))
+                 (:td (:code (views:esc "hyperdoc.layout.overrides.v1"))))
+            (:tr (:th (views:esc "Boundary"))
+                 (:td (views:esc
+                       "Apply persists a replay artifact; preview remains transient renderer state."))))
+    (:p :class "hyperdoc-layout-override-store__status"
+        (views:esc "No persisted layout override replayed in this inspector surface yet.")))))
+
 (defun render-layout-repair-plan-summary (plan)
   (views:html
    (:section :class "hyperdoc-layout-section hyperdoc-layout-repair-plan-summary"
@@ -293,12 +316,25 @@
               (:li (views:esc "An apply action without a durable override or renderer patch would make the DOM the source of truth."))))))
 
 (defun render-layout-patch-panel (patch)
-  (let ((plan (derive-layout-repair-plan patch)))
+  (let* ((plan (derive-layout-repair-plan patch))
+         (override (make-layout-override-from-repair-plan plan))
+         (store (and (typep override 'layout-override)
+                     (persist-layout-override override))))
     (views:html
      (:section
       :class "hyperdoc-layout-patch"
       :hidden "hidden"
       :data-layout-patch-kind "move-topic-into-box-patch"
+      :data-layout-patch-id (id-of patch)
+      :data-layout-patch-topic-id (layout-patch-topic-id-of patch)
+      :data-layout-patch-from-parent-id (layout-patch-from-parent-id-of patch)
+      :data-layout-patch-to-parent-id (layout-patch-to-parent-id-of patch)
+      :data-layout-patch-relation-kind
+      (layout-topicmap-view-string (layout-patch-relation-kind-of patch))
+      :data-layout-patch-placement
+      (layout-topicmap-view-string (layout-patch-placement-of patch))
+      :data-layout-patch-preserve
+      (layout-topicmap-view-string (layout-patch-preserve-of patch))
       :data-layout-patch-status "template"
       :data-layout-repair-plan-id (id-of plan)
       :data-layout-repair-plan-status
@@ -350,6 +386,7 @@
                                            patch))))))))
       (render-layout-failure-modes plan)
       (render-layout-preview-apply-boundary plan)
+      (render-layout-override-store-status)
       (:div :class "hyperdoc-layout-actions"
             (:button :type "button"
                      :class "hyperdoc-layout-preview"
@@ -359,6 +396,10 @@
                      :class "hyperdoc-layout-apply"
                      :data-layout-action "apply-renderer-effects"
                      (views:esc "Apply"))
+            (:button :type "button"
+                     :class "hyperdoc-layout-revert"
+                     :data-layout-action "revert-layout-override"
+                     (views:esc "Revert"))
             (:span :class "hyperdoc-layout-apply-status"
                    (views:esc "Preview and apply consume renderer effects from the derived repair plan.")))
       (:p :class "hyperdoc-layout-inspectable-ref"
@@ -368,7 +409,19 @@
       (:p :class "hyperdoc-layout-inspectable-ref"
           (views:object-ref plan
                             :display "Inspect layout-repair-plan"
-                            :select "Overview"))))))
+                            :select "Overview"))
+      (when (typep override 'layout-override)
+        (views:html
+         (:p :class "hyperdoc-layout-inspectable-ref"
+             (views:object-ref override
+                               :display "Inspect layout-override"
+                               :select "Overview"))))
+      (when store
+        (views:html
+         (:p :class "hyperdoc-layout-inspectable-ref"
+             (views:object-ref store
+                               :display "Inspect layout-override-store"
+                               :select "Overview"))))))))
 
 (defun render-layout-topicmap-editor (topicmap)
   (let ((patch (make-reel-buttons-into-pane-patch topicmap)))
@@ -601,3 +654,231 @@
    (views:html
     (:div :class "hyperdoc-layout-topicmap hyperdoc-layout-topicmap--repair-plan"
           (render-layout-preview-apply-boundary plan)))))
+
+(views:defview layout-override-overview (override layout-override)
+  (views:html-view
+   :title "Overview"
+   :priority 1
+   (include-layout-topicmap-assets)
+   (views:html
+    (:div :class "hyperdoc-layout-topicmap hyperdoc-layout-topicmap--override"
+          (:h1 (views:esc (title-of override)))
+          (:table :class "inspector-table"
+                  (:tr (:th (views:esc "Override"))
+                       (:td (:code (views:esc (id-of override)))))
+                  (:tr (:th (views:esc "Source patch"))
+                       (:td (:code (views:esc
+                                    (layout-override-source-patch-id-of
+                                     override)))))
+                  (:tr (:th (views:esc "Source repair plan"))
+                       (:td (:code (views:esc
+                                    (layout-override-source-repair-plan-id-of
+                                     override)))))
+                  (:tr (:th (views:esc "Topic"))
+                       (:td (:code (views:esc
+                                    (layout-override-topic-id-of override)))))
+                  (:tr (:th (views:esc "Move"))
+                       (:td (:code
+                             (views:esc
+                              (format nil "~A -> ~A"
+                                      (layout-override-from-parent-id-of
+                                       override)
+                                      (layout-override-to-parent-id-of
+                                       override))))))
+                  (:tr (:th (views:esc "Placement"))
+                       (:td (:code (views:esc
+                                    (layout-topicmap-view-string
+                                     (layout-override-placement-of
+                                      override))))))
+                  (:tr (:th (views:esc "Created at"))
+                       (:td (:code (views:esc
+                                    (layout-topicmap-view-string
+                                     (layout-override-created-at-of
+                                      override))))))
+                  (:tr (:th (views:esc "Replay status"))
+                       (:td (:code (views:esc
+                                    (layout-topicmap-view-string
+                                     (layout-override-replay-status-of
+                                      override)))))))
+          (render-layout-renderer-effects
+           (layout-override-renderer-effects-of override)
+           :title "Renderer effects")))))
+
+(views:defview layout-override-before-topology (override layout-override)
+  (views:html-view
+   :title "Before topology"
+   :priority 2
+   (include-layout-topicmap-assets)
+   (views:html
+    (:div :class "hyperdoc-layout-topicmap hyperdoc-layout-topicmap--override"
+          (render-layout-topology-table
+           (layout-override-before-topicmap-of override)
+           "Before topology")))))
+
+(views:defview layout-override-after-topology (override layout-override)
+  (views:html-view
+   :title "After topology"
+   :priority 3
+   (include-layout-topicmap-assets)
+   (views:html
+    (:div :class "hyperdoc-layout-topicmap hyperdoc-layout-topicmap--override"
+          (render-layout-topology-table
+           (layout-override-after-topicmap-of override)
+           "After topology")))))
+
+(views:defview layout-override-rule-results (override layout-override)
+  (views:html-view
+   :title "Rule results"
+   :priority 4
+   (include-layout-topicmap-assets)
+   (views:html
+    (:div :class "hyperdoc-layout-topicmap hyperdoc-layout-topicmap--override"
+          (:section :class "hyperdoc-layout-section"
+                    (:h3 (views:esc "Rule results"))
+                    (:table :class "inspector-table hyperdoc-layout-rule-results"
+                            (:tr (:th (views:esc "Status"))
+                                 (:th (views:esc "Rule"))
+                                 (:th (views:esc "Result"))
+                                 (:th (views:esc "Message")))
+                            (loop for result in
+                                  (layout-override-rule-results-of override)
+                                  do (views:html
+                                      (:tr
+                                       :class "hyperdoc-layout-rule-result"
+                                       :data-layout-rule-result-status
+                                       (layout-topicmap-view-string
+                                        (getf result :status))
+                                       :data-layout-rule-id
+                                       (getf result :rule-id)
+                                       (:td (:code
+                                             (views:esc
+                                              (layout-topicmap-view-string
+                                               (getf result :status)))))
+                                       (:td (:code
+                                             (views:esc
+                                              (getf result :rule-id))))
+                                       (:td (:code
+                                             (views:esc
+                                              (getf result :id))))
+                                       (:td (views:esc
+                                             (getf result :message))))))))))))
+
+(views:defview layout-override-renderer-effects (override layout-override)
+  (views:html-view
+   :title "Renderer effects"
+   :priority 5
+   (include-layout-topicmap-assets)
+   (views:html
+    (:div :class "hyperdoc-layout-topicmap hyperdoc-layout-topicmap--override"
+          (render-layout-renderer-effects
+           (layout-override-renderer-effects-of override))))))
+
+(views:defview layout-override-evidence (override layout-override)
+  (views:html-view
+   :title "Evidence"
+   :priority 6
+   (include-layout-topicmap-assets)
+   (views:html
+    (:div :class "hyperdoc-layout-topicmap hyperdoc-layout-topicmap--override"
+          (:table :class "inspector-table"
+                  (:tr (:th (views:esc "Evidence"))
+                       (:td (:pre (views:esc
+                                   (layout-topicmap-view-string
+                                    (evidence-of override))))))
+                  (:tr (:th (views:esc "Revert info"))
+                       (:td (:pre (views:esc
+                                   (layout-topicmap-view-string
+                                    (layout-override-revert-info-of
+                                     override))))))
+                  (:tr (:th (views:esc "Replay failure"))
+                       (:td (:pre (views:esc
+                                   (layout-topicmap-view-string
+                                    (layout-override-replay-failure-of
+                                     override)))))))))))
+
+(views:defview layout-override-revert (override layout-override)
+  (views:html-view
+   :title "Revert"
+   :priority 7
+   (include-layout-topicmap-assets)
+   (let ((revert (layout-override-revert-patch override)))
+     (views:html
+      (:div :class "hyperdoc-layout-topicmap hyperdoc-layout-topicmap--override"
+            (:section :class "hyperdoc-layout-section"
+                      (:h3 (views:esc "Revert patch"))
+                      (if (typep revert 'move-topic-into-box-patch)
+                          (views:html
+                           (:table :class "inspector-table"
+                                   (:tr (:th (views:esc "Topic"))
+                                        (:td (:code
+                                              (views:esc
+                                               (layout-patch-topic-id-of
+                                                revert)))))
+                                   (:tr (:th (views:esc "From"))
+                                        (:td (:code
+                                              (views:esc
+                                               (layout-patch-from-parent-id-of
+                                                revert)))))
+                                   (:tr (:th (views:esc "To"))
+                                        (:td (:code
+                                              (views:esc
+                                               (layout-patch-to-parent-id-of
+                                                revert))))))
+                           (render-layout-topology-table
+                            (layout-patch-after-topicmap-of revert)
+                            "Reverted topology"))
+                          (views:html
+                           (:p :class "hyperdoc-layout-failure"
+                               (views:esc
+                                (layout-rule-failure-message-of
+                                 revert)))))))))))
+
+(views:defview layout-override-store-overview (store layout-override-store)
+  (views:html-view
+   :title "Overview"
+   :priority 1
+   (include-layout-topicmap-assets)
+   (views:html
+    (:div :class "hyperdoc-layout-topicmap hyperdoc-layout-topicmap--override-store"
+          (:h1 (views:esc (title-of store)))
+          (:table :class "inspector-table"
+                  (:tr (:th (views:esc "Store"))
+                       (:td (:code (views:esc (id-of store)))))
+                  (:tr (:th (views:esc "Storage kind"))
+                       (:td (:code (views:esc
+                                    (layout-topicmap-view-string
+                                     (layout-override-store-storage-kind-of
+                                      store))))))
+                  (:tr (:th (views:esc "Storage key"))
+                       (:td (:code (views:esc
+                                    (layout-override-store-storage-key-of
+                                     store)))))
+                  (:tr (:th (views:esc "Overrides"))
+                       (:td (:code (views:esc
+                                    (format nil "~D"
+                                            (length
+                                             (layout-override-store-overrides-of
+                                              store))))))))
+          (:section :class "hyperdoc-layout-section"
+                    (:h3 (views:esc "Overrides"))
+                    (:table :class "inspector-table"
+                            (:tr (:th (views:esc "Override"))
+                                 (:th (views:esc "Patch"))
+                                 (:th (views:esc "Move")))
+                            (loop for override in
+                                  (layout-override-store-overrides-of store)
+                                  do (views:html
+                                      (:tr
+                                       (:td (:code (views:esc
+                                                    (id-of override))))
+                                       (:td (:code
+                                             (views:esc
+                                              (layout-override-source-patch-id-of
+                                               override))))
+                                       (:td (:code
+                                             (views:esc
+                                              (format nil "~A -> ~A"
+                                                      (layout-override-from-parent-id-of
+                                                       override)
+                                                      (layout-override-to-parent-id-of
+                                                       override))))))))))))))

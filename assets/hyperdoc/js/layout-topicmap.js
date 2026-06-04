@@ -3,6 +3,7 @@
 
   var initialized = new WeakSet();
   var activePreview = null;
+  var OVERRIDE_STORE_KEY = "hyperdoc.layout.overrides.v1";
 
   function toArray(nodes) {
     return Array.prototype.slice.call(nodes || []);
@@ -18,6 +19,74 @@
 
   function trimText(value) {
     return String(value || "").replace(/\s+/g, " ").trim();
+  }
+
+  function emptyOverrideStore() {
+    return {
+      version: 1,
+      storageKey: OVERRIDE_STORE_KEY,
+      overrides: []
+    };
+  }
+
+  function canUseLocalStorage() {
+    try {
+      var key = OVERRIDE_STORE_KEY + ".probe";
+      window.localStorage.setItem(key, "1");
+      window.localStorage.removeItem(key);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function readOverrideStore() {
+    if (!canUseLocalStorage()) {
+      return emptyOverrideStore();
+    }
+    try {
+      var raw = window.localStorage.getItem(OVERRIDE_STORE_KEY);
+      if (!raw) {
+        return emptyOverrideStore();
+      }
+      var parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.overrides)) {
+        return emptyOverrideStore();
+      }
+      parsed.version = parsed.version || 1;
+      parsed.storageKey = parsed.storageKey || OVERRIDE_STORE_KEY;
+      return parsed;
+    } catch (error) {
+      return emptyOverrideStore();
+    }
+  }
+
+  function writeOverrideStore(store) {
+    if (!canUseLocalStorage()) {
+      return false;
+    }
+    window.localStorage.setItem(OVERRIDE_STORE_KEY, JSON.stringify(store));
+    return true;
+  }
+
+  function upsertOverride(override) {
+    var store = readOverrideStore();
+    store.overrides = store.overrides.filter(function (candidate) {
+      return candidate.id !== override.id;
+    });
+    store.overrides.push(override);
+    store.updatedAt = override.createdAt;
+    return writeOverrideStore(store) ? store : null;
+  }
+
+  function removeOverride(overrideId) {
+    var store = readOverrideStore();
+    var before = store.overrides.length;
+    store.overrides = store.overrides.filter(function (candidate) {
+      return candidate.id !== overrideId;
+    });
+    store.updatedAt = new Date().toISOString();
+    return writeOverrideStore(store) && store.overrides.length !== before;
   }
 
   function rectObject(element) {
@@ -90,6 +159,16 @@
     return evidence;
   }
 
+  function updateOverrideStoreStatus(surface, message, state) {
+    var status = surface.querySelector(".hyperdoc-layout-override-store__status");
+    if (status) {
+      status.textContent = message;
+      if (state) {
+        status.setAttribute("data-layout-override-store-state", state);
+      }
+    }
+  }
+
   function setStatus(surface, message) {
     var patch = surface.querySelector(".hyperdoc-layout-patch");
     if (patch) {
@@ -111,6 +190,95 @@
       preview.focus();
     }
     return patch;
+  }
+
+  function topologyRows(patch, title) {
+    var section = toArray(patch.querySelectorAll("[data-layout-topology-title]")).find(
+      function (candidate) {
+        return candidate.getAttribute("data-layout-topology-title") === title;
+      }
+    );
+    return section
+      ? toArray(section.querySelectorAll("[data-layout-topology-edge]")).map(
+          function (row) {
+            return {
+              parentId: row.getAttribute("data-layout-parent-id") || "",
+              childId: row.getAttribute("data-layout-child-id") || ""
+            };
+          }
+        )
+      : [];
+  }
+
+  function ruleResultRecords(patch) {
+    return toArray(patch.querySelectorAll("[data-layout-rule-result-status]")).map(
+      function (row) {
+        return {
+          id: row.getAttribute("data-layout-rule-result-id") || null,
+          ruleId: row.getAttribute("data-layout-rule-id") || "",
+          status: row.getAttribute("data-layout-rule-result-status") || ""
+        };
+      }
+    );
+  }
+
+  function rendererEffectRecords(patch) {
+    return toArray(patch.querySelectorAll("[data-layout-renderer-effect]")).map(
+      function (effect) {
+        return {
+          id: effect.getAttribute("data-layout-effect-id") || "",
+          phase: effect.getAttribute("data-layout-effect-phase") || "",
+          kind: effect.getAttribute("data-layout-effect-kind") || "",
+          target: effect.getAttribute("data-layout-effect-target") || "",
+          placement: effect.getAttribute("data-layout-effect-placement") || "",
+          styleProperty: effect.getAttribute("data-layout-effect-style-property") || "",
+          styleValue: effect.getAttribute("data-layout-effect-style-value") || "",
+          attributes: effect.getAttribute("data-layout-effect-attributes") || "",
+          replay: effect.getAttribute("data-layout-effect-replay") || ""
+        };
+      }
+    );
+  }
+
+  function makeOverrideFromPatch(surface, patch, effect) {
+    var patchId = patch.getAttribute("data-layout-patch-id") ||
+      patch.getAttribute("data-layout-repair-plan-id") ||
+      "layout-patch";
+    var topicId = patch.getAttribute("data-layout-patch-topic-id") || "";
+    var fromParentId = patch.getAttribute("data-layout-patch-from-parent-id") || "";
+    var toParentId = patch.getAttribute("data-layout-patch-to-parent-id") || "";
+    var createdAt = new Date().toISOString();
+    var evidence = surface.__hyperdocLayoutEvidence || captureRuntimeEvidence(surface);
+    return {
+      id: "layout-override-for-" + patchId,
+      title: "layout-override",
+      topicmapId: surface.getAttribute("data-layout-topicmap-id") || "",
+      sourcePatchId: patchId,
+      sourceRepairPlanId: patch.getAttribute("data-layout-repair-plan-id") || "",
+      topicId: topicId,
+      fromParentId: fromParentId,
+      toParentId: toParentId,
+      relationKind: patch.getAttribute("data-layout-patch-relation-kind") || "contains",
+      placement: patch.getAttribute("data-layout-patch-placement") || "",
+      preserve: patch.getAttribute("data-layout-patch-preserve") || "",
+      beforeTopology: topologyRows(patch, "Before topology"),
+      afterTopology: topologyRows(patch, "After topology"),
+      ruleResults: ruleResultRecords(patch),
+      rendererEffects: rendererEffectRecords(patch),
+      evidence: {
+        source: "layout-repair-plan apply-phase renderer effect",
+        runtimeEvidence: evidence,
+        applyEffectId: effect ? effect.getAttribute("data-layout-effect-id") : null
+      },
+      createdAt: createdAt,
+      revert: {
+        artifactType: "layout-override-revert-patch",
+        topicId: topicId,
+        fromParentId: toParentId,
+        toParentId: fromParentId,
+        relationKind: patch.getAttribute("data-layout-patch-relation-kind") || "contains"
+      }
+    };
   }
 
   function clearDropReady(surface) {
@@ -319,6 +487,184 @@
     }
   }
 
+  function restoreOriginalInlineProperty(element, property) {
+    var dataName = "data-layout-original-" + property.replace(/[A-Z]/g, function (match) {
+      return "-" + match.toLowerCase();
+    });
+    if (element && element.hasAttribute(dataName)) {
+      element.style[property] = element.getAttribute(dataName) || "";
+    }
+  }
+
+  function rendererEffectsValid(records) {
+    var kinds = (records || []).map(function (record) {
+      return record.kind;
+    });
+    return kinds.indexOf("durable-override") !== -1 &&
+      kinds.indexOf("position-control-rail") !== -1 &&
+      kinds.indexOf("set-style") !== -1;
+  }
+
+  function setTopicCardParent(surface, topicId, parentId, source) {
+    var card = topic(surface, topicId);
+    if (!card) {
+      return false;
+    }
+    card.setAttribute("data-layout-parent-id", parentId);
+    if (source) {
+      card.setAttribute("data-layout-" + source + "-parent-id", parentId);
+    }
+    toArray(card.querySelectorAll(".hyperdoc-layout-topic__field")).forEach(
+      function (field) {
+        var label = trimText(field.querySelector("dt")?.textContent || "");
+        var value = field.querySelector("dd");
+        if (label === "Parent" && value) {
+          value.textContent = parentId;
+        }
+      }
+    );
+    return true;
+  }
+
+  function effectRecordByKind(override, kind) {
+    return (override.rendererEffects || []).find(function (record) {
+      return record.kind === kind;
+    });
+  }
+
+  function applyStyleEffectRecord(pane, record, mode) {
+    var body = previewPaneBody(pane);
+    if (!body || !record || !record.styleProperty || !record.styleValue) {
+      return false;
+    }
+    storeOriginalInlineProperty(body, record.styleProperty);
+    body.style[record.styleProperty] = record.styleValue;
+    body.setAttribute("data-layout-" + mode + "-clearance", "reserved");
+    body.setAttribute("data-layout-" + mode + "-clearance-effect", record.id);
+    return true;
+  }
+
+  function applyRailEffectRecord(pane, buttons, reel, record, mode) {
+    if (!pane || !buttons || !reel || !record) {
+      return false;
+    }
+    reel.setAttribute("data-layout-" + mode, "buttons-in-pane");
+    buttons.setAttribute("data-layout-" + mode, "buttons-in-pane");
+    buttons.setAttribute("data-layout-" + mode + "-effect", record.id);
+    pane.setAttribute("data-layout-" + mode + "-target", "buttons-in-pane");
+    pane.setAttribute("data-layout-" + mode + "-effect", record.id);
+    positionPreviewRail();
+    return true;
+  }
+
+  function applyOverrideRendererEffects(surface, override, mode) {
+    var pane = previewTargetPane(surface);
+    var buttons = previewButtons();
+    var reel = previewReel();
+    var scrollable = previewScrollable();
+    if (!pane || !buttons || !reel || !scrollable) {
+      return false;
+    }
+    storeOriginalStyle(buttons);
+    activePreview = {
+      surface: surface,
+      pane: pane,
+      buttons: buttons,
+      reel: reel,
+      scrollable: scrollable,
+      mode: mode
+    };
+    var styleApplied = applyStyleEffectRecord(
+      pane,
+      effectRecordByKind(override, "set-style"),
+      mode
+    );
+    var railApplied = applyRailEffectRecord(
+      pane,
+      buttons,
+      reel,
+      effectRecordByKind(override, "position-control-rail"),
+      mode
+    );
+    positionPreviewRail();
+    return styleApplied && railApplied;
+  }
+
+  function revealPatchForReplay(surface, patch, override) {
+    patch.hidden = false;
+    patch.setAttribute("data-layout-patch-status", "replayed");
+    patch.setAttribute("data-layout-override-id", override.id);
+    patch.setAttribute("data-layout-override-state", "replayed");
+    patch.setAttribute("data-layout-override-store-key", OVERRIDE_STORE_KEY);
+    patch.setAttribute("data-layout-replayed-override-id", override.id);
+    patch.setAttribute("data-layout-replay-source", "layout-override-store");
+    setTopicCardParent(surface, override.topicId, override.toParentId, "replayed");
+    setStatus(surface, "layout-override replayed");
+    updateOverrideStoreStatus(
+      surface,
+      "Replayed " + override.id + " from " + OVERRIDE_STORE_KEY + ".",
+      "replayed"
+    );
+  }
+
+  function matchingOverride(surface, patch) {
+    var store = readOverrideStore();
+    var topicmapId = surface.getAttribute("data-layout-topicmap-id") || "";
+    var patchId = patch ? patch.getAttribute("data-layout-patch-id") || "" : "";
+    var matches = store.overrides.filter(function (override) {
+      return override.topicmapId === topicmapId && override.sourcePatchId === patchId;
+    });
+    return matches.length ? matches[matches.length - 1] : null;
+  }
+
+  function replayLayoutOverrides(surface) {
+    var patch = surface.querySelector(".hyperdoc-layout-patch");
+    if (!patch) {
+      return;
+    }
+    var override = matchingOverride(surface, patch);
+    if (!override) {
+      return;
+    }
+    if (!rendererEffectsValid(override.rendererEffects)) {
+      patch.hidden = false;
+      patch.setAttribute("data-layout-patch-status", "replay-failed");
+      patch.setAttribute("data-layout-override-state", "replay-failed");
+      patch.setAttribute("data-layout-replay-failure", "renderer-effects-missing");
+      updateOverrideStoreStatus(
+        surface,
+        "Replay failed: persisted override is missing renderer effects.",
+        "failed"
+      );
+      return;
+    }
+    if (!setTopicCardParent(surface, override.topicId, override.toParentId, "replayed")) {
+      patch.hidden = false;
+      patch.setAttribute("data-layout-patch-status", "replay-failed");
+      patch.setAttribute("data-layout-override-state", "replay-failed");
+      patch.setAttribute("data-layout-replay-failure", "topic-missing");
+      updateOverrideStoreStatus(
+        surface,
+        "Replay failed: persisted override topic is missing from the Layout topicmap.",
+        "failed"
+      );
+      return;
+    }
+    if (!applyOverrideRendererEffects(surface, override, "replay")) {
+      patch.hidden = false;
+      patch.setAttribute("data-layout-patch-status", "replay-failed");
+      patch.setAttribute("data-layout-override-state", "replay-failed");
+      patch.setAttribute("data-layout-replay-failure", "renderer-target-missing");
+      updateOverrideStoreStatus(
+        surface,
+        "Replay failed: renderer effect target was not present.",
+        "failed"
+      );
+      return;
+    }
+    revealPatchForReplay(surface, patch, override);
+  }
+
   function positionPreviewRail() {
     if (!activePreview) {
       return;
@@ -418,7 +764,7 @@
     captureRuntimeEvidence(surface);
   }
 
-  function applyDurableEffects(patch, status) {
+  function applyDurableEffects(surface, patch, status) {
     var effect = rendererEffects(patch, "apply").find(function (candidate) {
       return effectKind(candidate) === "durable-override";
     });
@@ -431,16 +777,83 @@
       }
       return;
     }
+    var override = makeOverrideFromPatch(surface, patch, effect);
+    var store = upsertOverride(override);
+    if (!store) {
+      patch.setAttribute("data-layout-apply-state", "failed");
+      patch.setAttribute("data-layout-apply-source", "renderer-effects");
+      patch.setAttribute("data-layout-override-state", "persist-failed");
+      if (status) {
+        status.textContent =
+          "Apply failed because the layout override store is unavailable.";
+      }
+      updateOverrideStoreStatus(
+        surface,
+        "Apply failed: local override store is unavailable.",
+        "failed"
+      );
+      return;
+    }
     patch.setAttribute("data-layout-apply-state", "durable-override-created");
     patch.setAttribute("data-layout-apply-source", "renderer-effects");
     patch.setAttribute("data-layout-apply-effect", effectId(effect));
+    patch.setAttribute("data-layout-override-id", override.id);
+    patch.setAttribute("data-layout-override-state", "persisted");
+    patch.setAttribute("data-layout-override-store-key", OVERRIDE_STORE_KEY);
     patch.setAttribute(
       "data-layout-durable-override",
       effect.getAttribute("data-layout-effect-replay") || effectId(effect)
     );
+    patch.setAttribute(
+      "data-layout-persisted-override-count",
+      String(store.overrides.length)
+    );
+    setTopicCardParent(surface, override.topicId, override.toParentId, "applied");
+    updateOverrideStoreStatus(
+      surface,
+      "Persisted " + override.id + " for replay from " + OVERRIDE_STORE_KEY + ".",
+      "persisted"
+    );
     if (status) {
       status.textContent =
-        "Durable override evidence created from the apply-phase renderer effect.";
+        "Durable override persisted from the apply-phase renderer effect.";
+    }
+  }
+
+  function revertLayoutOverride(surface, patch, status) {
+    var overrideId = patch.getAttribute("data-layout-override-id");
+    if (!overrideId) {
+      var current = matchingOverride(surface, patch);
+      overrideId = current ? current.id : "";
+    }
+    if (!overrideId || !removeOverride(overrideId)) {
+      patch.setAttribute("data-layout-revert-state", "failed");
+      if (status) {
+        status.textContent = "Revert failed because no persisted override was found.";
+      }
+      updateOverrideStoreStatus(
+        surface,
+        "Revert failed: no matching persisted override was found.",
+        "failed"
+      );
+      return;
+    }
+    var topicId = patch.getAttribute("data-layout-patch-topic-id") || "";
+    var fromParentId = patch.getAttribute("data-layout-patch-from-parent-id") || "";
+    setTopicCardParent(surface, topicId, fromParentId, "reverted");
+    var pane = previewTargetPane(surface);
+    var body = previewPaneBody(pane);
+    restoreOriginalInlineProperty(body, "paddingBottom");
+    patch.setAttribute("data-layout-revert-state", "reverted");
+    patch.setAttribute("data-layout-override-state", "reverted");
+    patch.setAttribute("data-layout-reverted-override-id", overrideId);
+    updateOverrideStoreStatus(
+      surface,
+      "Reverted " + overrideId + " and removed it from " + OVERRIDE_STORE_KEY + ".",
+      "reverted"
+    );
+    if (status) {
+      status.textContent = "Persisted layout override reverted.";
     }
   }
 
@@ -451,6 +864,7 @@
     }
     var preview = patch.querySelector(".hyperdoc-layout-preview");
     var apply = patch.querySelector(".hyperdoc-layout-apply");
+    var revert = patch.querySelector(".hyperdoc-layout-revert");
     var status = patch.querySelector(".hyperdoc-layout-apply-status");
     if (preview) {
       preview.addEventListener("click", function () {
@@ -459,7 +873,12 @@
     }
     if (apply) {
       apply.addEventListener("click", function () {
-        applyDurableEffects(patch, status);
+        applyDurableEffects(surface, patch, status);
+      });
+    }
+    if (revert) {
+      revert.addEventListener("click", function () {
+        revertLayoutOverride(surface, patch, status);
       });
     }
   }
@@ -467,12 +886,14 @@
   function initSurface(surface) {
     if (initialized.has(surface)) {
       captureRuntimeEvidence(surface);
+      replayLayoutOverrides(surface);
       return;
     }
     initialized.add(surface);
     captureRuntimeEvidence(surface);
     wireDragDrop(surface);
     wirePatchActions(surface);
+    replayLayoutOverrides(surface);
   }
 
   function init(root) {
@@ -490,6 +911,15 @@
         ? root
         : first(".hyperdoc-layout-topicmap", root || document);
       return surface ? captureRuntimeEvidence(surface) : null;
+    },
+    readOverrideStore: readOverrideStore,
+    replayOverrides: function (root) {
+      var surface = root && root.matches && root.matches(".hyperdoc-layout-topicmap")
+        ? root
+        : first(".hyperdoc-layout-topicmap", root || document);
+      if (surface) {
+        replayLayoutOverrides(surface);
+      }
     },
     repositionPreviews: positionPreviewRail
   };
