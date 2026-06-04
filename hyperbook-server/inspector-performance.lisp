@@ -82,6 +82,217 @@
        (not (html-view-realized-p view))
        (html-page-object-p (pane-object pane))))
 
+(defclass html-page-content-render-event ()
+  ((phase :initarg :phase
+          :reader html-page-content-render-event-phase-of)
+   (timestamp :initarg :timestamp
+              :reader html-page-content-render-event-timestamp-of)
+   (elapsed-ms :initarg :elapsed-ms
+               :reader html-page-content-render-event-elapsed-ms-of)
+   (message :initarg :message
+            :initform nil
+            :reader html-page-content-render-event-message-of)
+   (details :initarg :details
+            :initform nil
+            :reader html-page-content-render-event-details-of)
+   (completedp :initarg :completedp
+               :initform t
+               :reader html-page-content-render-event-completedp)))
+
+(defclass html-page-content-render-report ()
+  ((object :initarg :object
+           :reader html-page-content-render-report-object-of)
+   (object-summary :initarg :object-summary
+                   :reader html-page-content-render-report-object-summary-of)
+   (view-title :initarg :view-title
+               :reader html-page-content-render-report-view-title-of)
+   (start-timestamp :initarg :start-timestamp
+                    :reader html-page-content-render-report-start-timestamp-of)
+   (start-millis :initarg :start-millis
+                 :reader html-page-content-render-report-start-millis-of)
+   (events :initform nil
+           :accessor html-page-content-render-report-events-of)
+   (html-cache-hit? :initform nil
+                    :accessor html-page-content-render-report-html-cache-hit?-of)
+   (html-ms :initform nil
+            :accessor html-page-content-render-report-html-ms-of)
+   (reference-count :initform nil
+                    :accessor html-page-content-render-report-reference-count-of)
+   (asset-count :initform nil
+                :accessor html-page-content-render-report-asset-count-of)
+   (condition :initform nil
+              :accessor html-page-content-render-report-condition-of)
+   (condition-type :initform nil
+                   :accessor html-page-content-render-report-condition-type-of)
+   (condition-message :initform nil
+                      :accessor html-page-content-render-report-condition-message-of)
+   (last-completed-phase :initform nil
+                         :accessor html-page-content-render-report-last-completed-phase-of)))
+
+(defun make-html-page-content-render-report (object view)
+  (make-instance 'html-page-content-render-report
+                 :object object
+                 :object-summary (summarize-object-for-log object)
+                 :view-title (hv:view-title view)
+                 :start-timestamp (get-universal-time)
+                 :start-millis (current-time-millis)))
+
+(defun record-html-page-content-render-event
+    (report phase &key message details (completedp t))
+  (let ((event (make-instance 'html-page-content-render-event
+                              :phase phase
+                              :timestamp (get-universal-time)
+                              :elapsed-ms (elapsed-millis
+                                           (html-page-content-render-report-start-millis-of
+                                            report))
+                              :message message
+                              :details details
+                              :completedp completedp)))
+    (setf (html-page-content-render-report-events-of report)
+          (append (html-page-content-render-report-events-of report)
+                  (list event)))
+    (when completedp
+      (setf (html-page-content-render-report-last-completed-phase-of report)
+            phase))
+    event))
+
+(defun record-html-page-content-render-condition (report condition)
+  (setf (html-page-content-render-report-condition-of report) condition
+        (html-page-content-render-report-condition-type-of report)
+        (type-of condition)
+        (html-page-content-render-report-condition-message-of report)
+        (princ-to-string condition))
+  report)
+
+(defun render-debugger-value (value)
+  (cond
+    ((null value)
+     (hv:html (:span :style "opacity: 0.55;" "-")))
+    ((typep value 'condition)
+     (hv:object-ref value))
+    (t
+     (hv:html (:tt (hv:esc (format nil "~A" value)))))))
+
+(defun universal-time-label (universal-time)
+  (multiple-value-bind (second minute hour date month year)
+      (decode-universal-time universal-time)
+    (format nil "~4,'0D-~2,'0D-~2,'0D ~2,'0D:~2,'0D:~2,'0D"
+            year month date hour minute second)))
+
+(defmethod hv:text-representation ((event html-page-content-render-event))
+  (format nil "~A (~D ms)"
+          (html-page-content-render-event-phase-of event)
+          (html-page-content-render-event-elapsed-ms-of event)))
+
+(defmethod hv:text-representation ((report html-page-content-render-report))
+  (format nil "Content render report for ~A"
+          (html-page-content-render-report-object-summary-of report)))
+
+(hv:defview 👀overview (report html-page-content-render-report)
+  (hv:html-view
+   :title "Overview"
+   :priority 1
+   (hv:html
+    (:h3 "Content Render Debugger")
+    (:p "This report records html-page Content materialization phases for the browser-visible inspector pane.")
+    (:table :class "inspector-table"
+            (:tr (:td "Object")
+                 (:td (hv:esc
+                       (html-page-content-render-report-object-summary-of report))))
+            (:tr (:td "View")
+                 (:td (:tt (hv:esc
+                            (html-page-content-render-report-view-title-of report)))))
+            (:tr (:td "Started at")
+                 (:td (:tt (hv:esc
+                            (universal-time-label
+                             (html-page-content-render-report-start-timestamp-of
+                              report))))))
+            (:tr (:td "HTML cache hit?")
+                 (:td (render-debugger-value
+                       (html-page-content-render-report-html-cache-hit?-of report))))
+            (:tr (:td "HTML ms")
+                 (:td (render-debugger-value
+                       (html-page-content-render-report-html-ms-of report))))
+            (:tr (:td "References")
+                 (:td (render-debugger-value
+                       (html-page-content-render-report-reference-count-of report))))
+            (:tr (:td "Assets")
+                 (:td (render-debugger-value
+                       (html-page-content-render-report-asset-count-of report))))
+            (:tr (:td "Last completed phase")
+                 (:td (render-debugger-value
+                       (html-page-content-render-report-last-completed-phase-of
+                        report))))
+            (:tr (:td "Condition")
+                 (:td (render-debugger-value
+                       (html-page-content-render-report-condition-of report))))))))
+
+(hv:defview 👀events (report html-page-content-render-report)
+  (hv:html-view
+   :title "Events"
+   :priority 2
+   (hv:html
+    (:table :class "inspector-table"
+            (:tr (:th "Phase")
+                 (:th "Elapsed ms")
+                 (:th "Completed?")
+                 (:th "Message")
+                 (:th "Details"))
+            (loop for event in (html-page-content-render-report-events-of report)
+                  do (hv:html
+                      (:tr
+                       (:td (:tt (hv:esc
+                                  (format nil "~A"
+                                          (html-page-content-render-event-phase-of
+                                           event)))))
+                       (:td (hv:esc
+                             (format nil "~D"
+                                     (html-page-content-render-event-elapsed-ms-of
+                                      event))))
+                       (:td (hv:esc
+                             (if (html-page-content-render-event-completedp event)
+                                 "yes"
+                                 "no")))
+                       (:td (render-debugger-value
+                             (html-page-content-render-event-message-of event)))
+                       (:td (render-debugger-value
+                             (html-page-content-render-event-details-of
+                              event))))))))))
+
+(hv:defview 👀condition (report html-page-content-render-report)
+  (hv:html-view
+   :title "Condition"
+   :priority 3
+   (hv:html
+    (if (html-page-content-render-report-condition-of report)
+        (hv:html
+         (:h3 "Render condition")
+         (:table :class "inspector-table"
+                 (:tr (:td "Type")
+                      (:td (:tt (hv:esc
+                                 (format nil "~A"
+                                         (html-page-content-render-report-condition-type-of
+                                          report))))))
+                 (:tr (:td "Message")
+                      (:td (hv:esc
+                            (html-page-content-render-report-condition-message-of
+                             report))))
+                 (:tr (:td "Condition object")
+                      (:td (hv:object-ref
+                            (html-page-content-render-report-condition-of report))))))
+        (hv:html
+         (:p "No render condition has been recorded."))))))
+
+(hv:defview 👀page-object (report html-page-content-render-report)
+  (hv:html-view
+   :title "Page / Object"
+   :priority 4
+   (hv:html
+    (:h3 "Rendered object")
+    (:p (hv:object-ref
+         (html-page-content-render-report-object-of report)
+         :display (html-page-content-render-report-object-summary-of report))))))
+
 (defun set-html-page-render-state (view-element state)
   (setf (clog:attribute view-element "data-hyperdoc-render-state") state
         (clog:attribute view-element "aria-busy")
