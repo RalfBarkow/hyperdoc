@@ -82,8 +82,6 @@
    :run-git-commit-assimilation-smoke-tests
    :run-skillization-smoke-tests
    :run-mech-deployment-provenance-smoke-tests
-   :run-kioskbeerli-dashboard-smoke-tests
-   :run-kioskbeerli-dmx-associative-mirror-smoke-tests
    :run-py4dmx-cluster-smoke-tests
    :run-scxml-compiler-smoke-tests
    :run-runtime-coherence-smoke-tests

@@ -177,8 +177,7 @@
     :in-order-to ((test-op (test-op "hyperdoc/tests")))
     :components ((:module "hyperdoc"
                           :serial t
-                          :components ((:file "kioskbeerli-compat")
-                                       (:file "decision-maps")
+                          :components ((:file "decision-maps")
                                        (:file "code-path-graphs")
                                        (:file "whyline-output-questions")
                                        (:file "skillization")
@@ -701,7 +700,6 @@
                  #:hyperdoc/mobile-progressive-chrome
                  #:hyperdoc/scxml
                  #:hyperdoc/explorer
-                 #:kioskbeerli
                  #:hyperdoc/nor-graph-demo
                  #:hyperdoc/closures-nor-demo
                  #:hyperdoc/continuation-route-trace
@@ -774,8 +772,6 @@
                                        (:file "git-commit-assimilation-smoke")
                                        (:file "skillization-smoke")
                                        (:file "mech-deployment-provenance-smoke")
-                                       (:file "kioskbeerli-dashboard-smoke")
-                                       (:file "kioskbeerli-dmx-associative-mirror-smoke")
                                        (:file "py4dmx-cluster-smoke")
                                        (:file "scxml-compiler-smoke")
                                        (:file "runtime-coherence-smoke")

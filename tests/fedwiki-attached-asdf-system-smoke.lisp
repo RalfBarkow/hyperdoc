@@ -414,25 +414,6 @@
          text
          "Documentation must state the local file-backed workflow boundary")))))
 
-(defun run-fedwiki-attached-asdf-existing-overview-smoke-test ()
-  (let* ((system (asdf:find-system :kioskbeerli))
-         (html (fedwiki-attached-asdf-render-view system "Overview")))
-    (dolist (needle '("ASDF systems are the primary exploration scope"
-                      "Source file"
-                      "Examples"
-                      "Test systems"))
-      (fedwiki-attached-asdf-assert-contains
-       needle
-       html
-       "Existing ASDF system Overview view must continue to render"))))
-
-(defun run-fedwiki-attached-asdf-kioskbeerli-smoke-test ()
-  (asdf:load-system :kioskbeerli)
-  (asdf:load-system :kioskbeerli/tests :force t)
-  (fedwiki-attached-asdf-assert-true
-   (uiop:symbol-call :kioskbeerli/tests :run-kioskbeerli-smoke-tests)
-   "Existing Kioskbeerli smoke tests must still pass"))
-
 (defun run-fedwiki-attached-asdf-system-smoke-tests ()
   (run-fedwiki-attached-asdf-construction-smoke-test)
   (run-fedwiki-attached-asdf-inspector-smoke-test)
@@ -441,7 +422,5 @@
   (run-example-result-mrepl-source-unavailable-smoke-test)
   (run-fedwiki-attached-asdf-lookup-failure-smoke-test)
   (run-fedwiki-attached-asdf-documentation-smoke-test)
-  (run-fedwiki-attached-asdf-existing-overview-smoke-test)
-  (run-fedwiki-attached-asdf-kioskbeerli-smoke-test)
   (format t "~&FedWiki-attached ASDF system smoke tests passed.~%")
   t)
