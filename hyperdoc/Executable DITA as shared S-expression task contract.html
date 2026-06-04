@@ -17,6 +17,8 @@
   <li><a expr="(executable-dita-task->dita (executable-dita-task-smoke-example))"><tt>executable-dita-task-&gt;dita</tt></a></li>
   <li><a expr="(executable-dita-task->hyperdoc-html (executable-dita-task-smoke-example))"><tt>executable-dita-task-&gt;hyperdoc-html</tt></a></li>
   <li><a expr="(executable-dita-task->scxml (executable-dita-task-smoke-example))"><tt>executable-dita-task-&gt;scxml</tt></a></li>
+  <li><a expr="(read-executable-dita-task-row &quot;task.executable-dita-contract&quot;)"><tt>read-executable-dita-task-row</tt></a></li>
+  <li><a expr="(make-executable-dita-next-task-selection :task-id &quot;task.executable-dita-contract&quot; :include-blocked-p t)"><tt>make-executable-dita-next-task-selection</tt></a></li>
   <li><a expr="(executable-dita-default-pddl-domain)"><tt>executable-dita-default-pddl-domain</tt></a></li>
   <li><a expr="(executable-dita-default-scxml-contract)"><tt>executable-dita-default-scxml-contract</tt></a></li>
 </ul>
@@ -55,6 +57,29 @@
   <li><b>SCXML</b> is an execution-state contract. It classifies transitions but does not run arbitrary shell commands.</li>
   <li><b>SQLite</b> records canonical task S-expressions, emitted projection strings, and ranked next-task candidates.</li>
 </ul>
+
+<h2>Inspector views</h2>
+
+<p>
+  The narrow system <tt>hyperdoc/executable-dita-tasks</tt> installs
+  read-only moldable inspector views for the task object and its evidence
+  rows. These views are projections. They do not replace the canonical
+  S-expression and they do not execute operators.
+</p>
+
+<ul>
+  <li><b>Task object views</b>: Summary, S-expression, DITA XML, HyperDoc HTML, SCXML, SQLite row, and Next tasks.</li>
+  <li><b>SQLite task-row view</b>: Summary of persisted row metadata plus a reference back to the task object.</li>
+  <li><b>Next-task candidate view</b>: Summary of candidate id, cost, risk, expected value, score, blocked flag, selected flag, and candidate S-expression.</li>
+  <li><b>Selection views</b>: Ranked candidates and Selection for the SQLite-backed next-task decision.</li>
+</ul>
+
+<p>
+  SQLite <tt>selected_p</tt> records the candidate selected for the current
+  implementation slice. Score ranking remains visible separately, so the
+  inspector can show both the highest-scoring unblocked candidate and the
+  currently selected candidate.
+</p>
 
 <h2>Planning boundary</h2>
 
@@ -126,6 +151,8 @@ Never calls SLYNK:INSPECT-IN-EMACS directly."
 
 (defparameter *example-task*
   (hyperdoc:executable-dita-task-smoke-example))
+(defparameter *example-db-path*
+  (hyperdoc:executable-dita-default-sqlite-path))
 (defparameter *example-sexp*
   (hyperdoc:executable-dita-task->sexp *example-task*))
 (defparameter *example-roundtrip*
@@ -137,19 +164,54 @@ Never calls SLYNK:INSPECT-IN-EMACS directly."
 (defparameter *example-scxml*
   (hyperdoc:executable-dita-task->scxml *example-roundtrip*))
 
+(hyperdoc:persist-executable-dita-task
+ *example-roundtrip*
+ :db-path *example-db-path*)
+
+(dolist (candidate
+         '((:id "candidate.inspect-sqlite-evidence"
+            :title "Inspect persisted SQLite evidence"
+            :cost 1 :risk 0.1d0 :expected-value 5 :blocked-p nil)
+           (:id "candidate.add-inspector-views"
+            :title "Add inspector views for executable DITA tasks"
+            :cost 3 :risk 0.5d0 :expected-value 9
+            :selected-p t :blocked-p nil)
+           (:id "candidate.skip-guarded-operator-boundary"
+            :title "Skip guarded operator boundary"
+            :cost 1 :risk 4 :expected-value 20 :blocked-p t)))
+  (hyperdoc:store-executable-dita-next-task-candidate
+   (hyperdoc:executable-dita-task-id *example-roundtrip*)
+   candidate
+   :db-path *example-db-path*))
+
+(defparameter *example-row*
+  (hyperdoc:read-executable-dita-task-row
+   (hyperdoc:executable-dita-task-id *example-roundtrip*)
+   :db-path *example-db-path*))
+(defparameter *example-selection*
+  (hyperdoc:make-executable-dita-next-task-selection
+   :task-id (hyperdoc:executable-dita-task-id *example-roundtrip*)
+   :db-path *example-db-path*
+   :include-blocked-p t))
+(defparameter *example-view-titles*
+  (mapcar #'html-inspector-views:view-title
+          (html-inspector-views:all-views *example-roundtrip*)))
+
 (format t "~&type: ~S~%status: ~S~%core value: ~A~%"
-        (type-of *example-roundtrip*)
-        :constructed
-        (hyperdoc:executable-dita-task-id *example-roundtrip*))
-(i *example-roundtrip*)
+        (type-of *example-selection*)
+        :persisted-and-ranked
+        (hyperdoc:executable-dita-next-task-candidate-row-id
+         (hyperdoc:executable-dita-next-task-selection-selected-candidate
+          *example-selection*)))
+(i *example-selection*)
 </pre>
 
 <h2>Boundary</h2>
 
 <p>
   This page documents the first implementation slice only. It does not promise
-  SHOP3 execution, inspector-specific task views, remote collaboration, or
-  generated projection files as committed artifacts.
+  SHOP3 execution, remote collaboration, generated projection files as
+  committed artifacts, or unguarded operator execution from inspector views.
 </p>
 
 <h2>Related</h2>

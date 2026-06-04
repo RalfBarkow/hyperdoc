@@ -130,6 +130,10 @@ Preserve this model:
 - Operator execution is guarded; print/inspect is the safe default.
 - SQLite evidence for this contract stays under
   `/Users/rgb/workspace/hyperdoc/var/`.
+- Moldable inspector views are read-only projections of the task object,
+  SQLite task row, SQLite next-task candidates, and ranked selection output.
+  They must expose canonical S-expression, DITA, HyperDoc HTML, SCXML, and
+  SQLite evidence without becoming a second source of truth.
 
 For the first implementation surface, load the narrow ASDF system
 `hyperdoc/executable-dita-tasks`. Do not require Quicklisp, do not use
