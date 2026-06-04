@@ -1,0 +1,192 @@
+<h1>Content Render Debugger</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The <a hyperbook="topics" page="Content render debugger"><tt>Content render
+  debugger</tt></a> is the browser-visible failure and progress surface for the
+  first materialization of an <tt>html-page</tt> inspector <tt>Content</tt>
+  view.
+</p>
+
+<p>
+  Its contract is narrow: the inspector may briefly show a diagnostic
+  placeholder while an <tt>html-page</tt> Content view is materializing, but it
+  must never leave a bare <tt>Loading content...</tt> string as the operator
+  surface. The placeholder is a render debugger with an inspectable report
+  object.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Content render debugger"><tt>Content render debugger</tt></a></li>
+</ul>
+
+<h2>Expectation</h2>
+
+<p>
+  The page <tt>Lisp as Trep</tt> was expected to render real page content in the
+  html-page Content pane. The attached page was small and valid HTML. It also
+  contained a remote FedWiki HyperBook link to <tt>fedwiki:hyperdoc.dreyeck.ch/</tt>
+  page <tt>lisp-as-trep</tt>.
+</p>
+
+<h2>Observed reality</h2>
+
+<p>
+  The visible text <tt>Loading content...</tt> was not page content. It was an
+  inert placeholder injected by the inspector runtime in the html-page Content
+  view path. When render materialization failed or stalled before replacement,
+  the browser surface preserved neither the failing condition nor the last
+  completed phase.
+</p>
+
+<h2>Why the expectation was plausible</h2>
+
+<p>
+  A reader seeing <tt>Loading content...</tt> inside the Content pane reasonably
+  reads it as a page-loading state. The remote FedWiki link in the small source
+  page was a plausible suspect, but the placeholder came from the inspector
+  runtime, not from the source HTML.
+</p>
+
+<h2>Classification</h2>
+
+<p>
+  This was a disappointed expectation. The product surface promised a content
+  state but did not expose the runtime evidence needed to distinguish page
+  content, remote-link lookup, html materialization, DOM insertion, and render
+  failure.
+</p>
+
+<h2>Resolution</h2>
+
+<p>
+  The Content pane now creates an
+  <tt>html-page-content-render-report</tt> before first materialization and
+  renders a visible <tt>Content render debugger</tt> placeholder that links to
+  that report. On successful render, the existing real Content output replaces
+  the debugger. On error, the debugger remains visible and inspectable instead
+  of silently leaving the stale loading placeholder.
+</p>
+
+<h2>Report contract</h2>
+
+<p>
+  The render report records:
+</p>
+
+<ul>
+  <li>object summary</li>
+  <li>view title</li>
+  <li>render phase events</li>
+  <li>start timestamp</li>
+  <li><tt>html-cache-hit?</tt></li>
+  <li><tt>html-ms</tt> when available</li>
+  <li>reference count when available</li>
+  <li>asset count when available</li>
+  <li>condition type and message when rendering fails</li>
+  <li>last completed phase</li>
+</ul>
+
+<p>
+  The report is inspectable through normal <tt>html-inspector-views</tt> views:
+  <tt>Overview</tt>, <tt>Events</tt>, <tt>Condition</tt>, and
+  <tt>Page / Object</tt>.
+</p>
+
+<h2>Runtime boundary</h2>
+
+<ul>
+  <li>The debugger path applies only to first-render <tt>html-page</tt> Content views.</li>
+  <li>Non-Content views are not wrapped by the html-page Content debugger.</li>
+  <li>Non-html-page Content view errors are not swallowed by this path.</li>
+  <li>Existing <tt>*trace-output*</tt> inspector performance logging remains, but the browser-visible debugger is the authoritative operator surface.</li>
+</ul>
+
+<h2>SLY MREPL inspectability</h2>
+
+<pre><code>(require :asdf)
+(asdf:load-system :hyperdoc/server)
+
+(defun i (object)
+  "Safe inspector helper for SLY mREPL.
+Prefer CLOG only if it is already loaded; otherwise use CL:INSPECT.
+Never calls SLYNK:INSPECT-IN-EMACS directly."
+  (let* ((clog-package (find-package "CLOG-MOLDABLE-INSPECTOR"))
+         (clog-symbol
+           (and clog-package
+                (find-symbol "CLOG-INSPECT" clog-package))))
+    (if (and clog-symbol (fboundp clog-symbol))
+        (funcall (symbol-function clog-symbol) :object object)
+        (cl:inspect object))))
+
+(defparameter *example-page*
+  (make-instance 'hyperdoc::html-page
+                 :hyperbook (make-instance 'hyperbook:hyperbook
+                                            :id "mrepl-render-debugger")
+                 :id "Content render debugger MREPL fixture"
+                 :file nil))
+
+(defparameter *example-view*
+  (html-inspector-views:make-html-view
+   (html-inspector-views:thunk
+    (html-inspector-views:html-and-references
+     (:p "Rendered content from MREPL fixture")))
+   :title "Content"
+   :priority 1))
+
+(defparameter *example-report*
+  (clog-moldable-inspector::make-html-page-content-render-report
+   *example-page*
+   *example-view*))
+
+(clog-moldable-inspector::record-html-page-content-render-event
+ *example-report*
+ :debugger-visible
+ :message "MREPL report created.")
+
+(setf (clog-moldable-inspector::html-page-content-render-report-html-cache-hit?-of
+       *example-report*)
+      nil
+      (clog-moldable-inspector::html-page-content-render-report-html-ms-of
+       *example-report*)
+      1
+      (clog-moldable-inspector::html-page-content-render-report-reference-count-of
+       *example-report*)
+      0
+      (clog-moldable-inspector::html-page-content-render-report-asset-count-of
+       *example-report*)
+      0)
+
+(clog-moldable-inspector::record-html-page-content-render-event
+ *example-report*
+ :html-materialized
+ :message "MREPL HTML materialized.")
+
+(format t "~&type=~S~%status=~S~%core-value=~A~%"
+        (type-of *example-report*)
+        (clog-moldable-inspector::html-page-content-render-report-last-completed-phase-of
+         *example-report*)
+        (html-inspector-views:view-title
+         (first (html-inspector-views:all-views *example-report*))))
+
+(i *example-report*)</code></pre>
+
+<h2>Replay checks</h2>
+
+<ul>
+  <li><tt>asdf:load-system :hyperdoc/server</tt> must succeed.</li>
+  <li><tt>hyperdoc/tests:run-inspector-performance-smoke-tests</tt> must pass.</li>
+  <li>The failure smoke test must leave a visible <tt>Content render debugger</tt> pane with an inspectable report link.</li>
+  <li>The placeholder path must not emit the literal bare string <tt>Loading content...</tt>.</li>
+  <li>Playwright snapshot transport must accept the immediate <tt>debugging</tt> or final <tt>ready</tt> state.</li>
+</ul>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="content-render-debugger">Content render debugger</a></li>
+  <li><a page="Journal Gate Script and Lisp Implementation">Journal Gate Script and Lisp Implementation</a></li>
+</ul>

@@ -88,6 +88,16 @@
                  "Stepper Debugger Surface"
                  "hyperbook-server/playground-stepper.lisp")))
 
+(defun content-render-debugger-topic ()
+  (make-topic
+   :id "content-render-debugger"
+   :title "Content render debugger"
+   :summary "Browser-visible html-page Content render report surface that replaces the inert loading placeholder and preserves inspectable render failure evidence."
+   :references '("Content Render Debugger"
+                 "hyperbook-server/inspector-performance.lisp"
+                 "tests/inspector-performance-smoke.lisp"
+                 "tests/playwright/snapshot-transport.spec.js")))
+
 ;; Topic objects for Konrad feedback thread (2026-03-05).
 (defun graph-based-discovery-and-traversal-topic ()
   (make-topic
@@ -152,4 +162,3 @@
    :summary "Hypertext where pages describe and operationalize the graph and traversal logic that produces their own context."
    :references '("Konrad Feedback on Communication Pages"
                  "Concepts, DMX Topics, and Topic Maps")))
-

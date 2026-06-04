@@ -21,6 +21,15 @@
          (format nil "class ~A" (or (class-name object) "<anonymous-class>")))
         (hv:view
          (format nil "view ~A" (hv:view-title object)))
+        (hyperbook:page
+         (let ((id (ignore-errors (hyperbook:id-of object)))
+               (title (ignore-errors (hyperbook:title-of object))))
+           (cond
+             ((and title id (not (string= title id)))
+              (format nil "~A (~A)" title id))
+             (title title)
+             (id id)
+             (t (format nil "~A" (type-of object))))))
         (t
          (format nil "~A" (type-of object))))
     (error ()
@@ -176,6 +185,20 @@
 (defun render-debugger-boolean (value)
   (hv:html (:tt (hv:esc (if value "true" "false")))))
 
+(defun render-debugger-phase-label (phase)
+  (cond
+    ((null phase)
+     nil)
+    ((symbolp phase)
+     (string-downcase (symbol-name phase)))
+    (t
+     (format nil "~(~A~)" phase))))
+
+(defun render-debugger-phase (phase)
+  (if phase
+      (hv:html (:tt (hv:esc (render-debugger-phase-label phase))))
+      (render-debugger-value nil)))
+
 (defun universal-time-label (universal-time)
   (multiple-value-bind (second minute hour date month year)
       (decode-universal-time universal-time)
@@ -184,7 +207,8 @@
 
 (defmethod hv:text-representation ((event html-page-content-render-event))
   (format nil "~A (~D ms)"
-          (html-page-content-render-event-phase-of event)
+          (render-debugger-phase-label
+           (html-page-content-render-event-phase-of event))
           (html-page-content-render-event-elapsed-ms-of event)))
 
 (defmethod hv:text-representation ((report html-page-content-render-report))
@@ -223,7 +247,7 @@
                  (:td (render-debugger-value
                        (html-page-content-render-report-asset-count-of report))))
             (:tr (:td "Last completed phase")
-                 (:td (render-debugger-value
+                 (:td (render-debugger-phase
                        (html-page-content-render-report-last-completed-phase-of
                         report))))
             (:tr (:td "Condition")
@@ -244,10 +268,8 @@
             (loop for event in (html-page-content-render-report-events-of report)
                   do (hv:html
                       (:tr
-                       (:td (:tt (hv:esc
-                                  (format nil "~A"
-                                          (html-page-content-render-event-phase-of
-                                           event)))))
+                       (:td (render-debugger-phase
+                             (html-page-content-render-event-phase-of event)))
                        (:td (hv:esc
                              (format nil "~D"
                                      (html-page-content-render-event-elapsed-ms-of
@@ -325,7 +347,7 @@
                                      (html-page-content-render-report-view-title-of
                                       report)))))
                      (:tr (:td "Last completed phase")
-                          (:td (render-debugger-value
+                          (:td (render-debugger-phase
                                 (html-page-content-render-report-last-completed-phase-of
                                  report))))
                      (:tr (:td "Condition")
@@ -571,7 +593,8 @@
                                  :view (hv:view-title view)))
     (flet ((render-view ()
              (let* ((html-start (current-time-millis))
-                    (html-cached? (html-view-realized-p view)))
+                    (html-cached? (html-view-realized-p view))
+                    (insert-start nil))
                (when report
                  (setf (html-page-content-render-report-html-cache-hit?-of report)
                        html-cached?)
@@ -580,13 +603,17 @@
                   :html-materialization-start
                   :message "Content view HTML materialization started."
                   :completedp nil))
-               (let* ((html (hv:view-html view))
+               (let* ((result (progn
+                                (setf insert-start (current-time-millis))
+                                (call-next-method)))
+                      (html (hv:view-html view))
                       (references (hv:view-references view))
                       (assets (hv:view-assets view))
                       (html-ms (elapsed-millis html-start))
                       (html-length (length html))
                       (html-node-count (count #\< html))
-                      (insert-start (current-time-millis)))
+                      (post-insert-ms (elapsed-millis insert-start))
+                      (dom-nodes (dom-node-count parent-element)))
                  (when report
                    (setf (html-page-content-render-report-html-ms-of report)
                          html-ms
@@ -602,29 +629,26 @@
                                    :html-node-count html-node-count
                                    :reference-count (length references)
                                    :asset-count (length assets))))
-                 (let* ((result (call-next-method))
-                        (post-insert-ms (elapsed-millis insert-start))
-                        (dom-nodes (dom-node-count parent-element)))
-                   (when report
-                     (set-html-page-render-state parent-element "ready")
-                     (record-html-page-content-render-event
-                      report
-                      :dom-inserted
-                      :message "Rendered Content view replaced debugger placeholder."
-                      :details (list :insert-ms post-insert-ms
-                                     :dom-node-count dom-nodes)))
-                   (log-inspector-performance :view/render
-                                              :object (summarize-object-for-log (pane-object pane))
-                                              :view (hv:view-title view)
-                                              :html-cache-hit? html-cached?
-                                              :html-ms html-ms
-                                              :insert-ms post-insert-ms
-                                              :html-length html-length
-                                              :html-node-count html-node-count
-                                              :reference-count (length references)
-                                              :asset-count (length assets)
-                                              :dom-node-count dom-nodes)
-                   result)))))
+                 (when report
+                   (set-html-page-render-state parent-element "ready")
+                   (record-html-page-content-render-event
+                    report
+                    :dom-inserted
+                    :message "Rendered Content view replaced debugger placeholder."
+                    :details (list :insert-ms post-insert-ms
+                                   :dom-node-count dom-nodes)))
+                 (log-inspector-performance :view/render
+                                            :object (summarize-object-for-log (pane-object pane))
+                                            :view (hv:view-title view)
+                                            :html-cache-hit? html-cached?
+                                            :html-ms html-ms
+                                            :insert-ms post-insert-ms
+                                            :html-length html-length
+                                            :html-node-count html-node-count
+                                            :reference-count (length references)
+                                            :asset-count (length assets)
+                                            :dom-node-count dom-nodes)
+                 result))))
       (if report
           (handler-case
               (render-view)

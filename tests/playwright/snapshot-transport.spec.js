@@ -13,7 +13,14 @@ const {
 
 test.describe.configure({ mode: "serial" });
 
-async function openTextPageContent(page, title, expectedText, testInfo, attachmentPrefix) {
+async function openTextPageContent(
+  page,
+  title,
+  expectedText,
+  expectedSourceText,
+  testInfo,
+  attachmentPrefix
+) {
   const textPagePane = await openTextPageFromHyperDoc(page, title);
   const immediateState = await readInspectorPaneState(page, 2);
   await attachJson(testInfo, `${attachmentPrefix}-immediate.json`, immediateState);
@@ -23,12 +30,14 @@ async function openTextPageContent(page, title, expectedText, testInfo, attachme
   expect(immediateState.tabNames).toEqual(
     expect.arrayContaining(["Content", "Source", "Links", "Parse tree"])
   );
-  expect(["loading", "ready"]).toContain(immediateState.renderState);
-  if (immediateState.renderState === "loading") {
-    expect(immediateState.loadingVisible).toBe(true);
-    expect(immediateState.loadingMessage).toContain("Loading content");
+  expect(["debugging", "ready"]).toContain(immediateState.renderState);
+  if (immediateState.renderState === "debugging") {
+    expect(immediateState.renderDebuggerVisible).toBe(true);
+    expect(immediateState.renderDebuggerText).toContain("Content render debugger");
+    expect(immediateState.renderDebuggerInspectableLink).toBe(true);
+    expect(immediateState.renderDebuggerText).not.toContain("Loading content");
   } else {
-    expect(immediateState.loadingVisible).toBe(false);
+    expect(immediateState.renderDebuggerVisible).toBe(false);
     expect(immediateState.bodyText).not.toBe("");
   }
 
@@ -39,10 +48,11 @@ async function openTextPageContent(page, title, expectedText, testInfo, attachme
   expect(contentState.bodyText).toContain(expectedText);
 
   await activatePaneTab(page, 2, "Source");
+  await waitForPaneBodyText(page, 2, expectedSourceText);
   const sourceState = await readInspectorPaneState(page, 2);
   await attachJson(testInfo, `${attachmentPrefix}-source.json`, sourceState);
 
-  expect(sourceState.bodyText).toContain("<h1>");
+  expect(sourceState.bodyText).toContain(expectedSourceText);
   return { textPagePane, immediateState, contentState, sourceState };
 }
 
@@ -54,6 +64,7 @@ test("Snapshot transport page opens with rendered authored content", async ({
     page,
     "Snapshot transport",
     "Snapshot transport is the submit-boundary carrier seam",
+    "(dom-connect-snapshot-transport)",
     testInfo,
     "snapshot-transport"
   );
@@ -71,6 +82,7 @@ test("Normal association submit path vs evidence path eventually renders in Cont
     page,
     "Normal association submit path vs evidence path",
     "This page makes the submit-boundary asymmetry explicit",
+    "(dom-connect-submit-path-comparison)",
     testInfo,
     "submit-path-comparison"
   );
@@ -78,5 +90,5 @@ test("Normal association submit path vs evidence path eventually renders in Cont
   expect(contentState.bodyText).toContain("writeSubmitPayload()");
   expect(contentState.bodyText).toContain("prepareEvidenceButton()");
   expect(contentState.bodyText).toContain("Snapshot transport");
-  expect(sourceState.bodyText).toContain("<source-of-function>");
+  expect(sourceState.bodyText).toContain("(dom-connect-submit-path-comparison)");
 });

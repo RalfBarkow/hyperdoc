@@ -479,10 +479,18 @@ async function readInspectorPaneState(page, paneIndex) {
   return page.evaluate((index) => {
     const paneNode = document.querySelectorAll(".inspector-pane")[index];
     const activeView = paneNode?.querySelector(".inspector-view:not([hidden])");
-    const loadingNode = activeView?.querySelector(".hyperdoc-html-page-loading");
+    const debuggerNode = activeView?.querySelector(
+      ".hyperdoc-html-page-render-debugger"
+    );
     const titleNode =
       paneNode?.querySelector(".inspector-title-bar-object") ||
       paneNode?.querySelector(".inspector-title-bar-class");
+    const bodyText = activeView?.innerText?.replace(/\s+/g, " ").trim() || "";
+    const rawRenderState = activeView?.dataset.hyperdocRenderState || null;
+    const renderState =
+      rawRenderState === "debugging" && !debuggerNode && bodyText
+        ? "ready"
+        : rawRenderState;
     const tables = activeView
       ? Array.from(activeView.querySelectorAll("table.inspector-table")).map((table) =>
           Array.from(table.querySelectorAll("tr")).map((row) =>
@@ -502,11 +510,16 @@ async function readInspectorPaneState(page, paneIndex) {
             button.textContent?.trim() || ""
           )
         : [],
-      renderState: activeView?.dataset.hyperdocRenderState || null,
-      loadingVisible: !!loadingNode,
-      loadingMessage: loadingNode?.textContent?.replace(/\s+/g, " ").trim() || "",
-      bodyText:
-        activeView?.innerText?.replace(/\s+/g, " ").trim() || "",
+      renderState,
+      rawRenderState,
+      loadingVisible: !!debuggerNode,
+      loadingMessage: debuggerNode?.textContent?.replace(/\s+/g, " ").trim() || "",
+      renderDebuggerVisible: !!debuggerNode,
+      renderDebuggerText:
+        debuggerNode?.textContent?.replace(/\s+/g, " ").trim() || "",
+      renderDebuggerInspectableLink:
+        !!debuggerNode?.querySelector(".inspector-inspect"),
+      bodyText,
       tables,
     };
   }, paneIndex);
