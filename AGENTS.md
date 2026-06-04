@@ -112,6 +112,31 @@ projections of that program unless the slice explicitly says otherwise.
 Do not create a prose-only answer for these slices. Preserve the program form,
 validate it, and expose it through the inspector.
 
+## Executable DITA Task Contract
+
+When a slice touches Codex prompts, executable plans, DITA-like task topics,
+SCXML execution contracts, or prompt/plan/evidence sharing, prefer representing
+the work as an `executable-dita-task` object when the task has durable identity
+and replay value.
+
+Preserve this model:
+
+- The canonical S-expression task object is the source of truth.
+- DITA XML, HyperDoc HTML, SCXML XML, SQLite rows, and rendered pages are
+  projections of that object.
+- Stable identity is the task `:id`.
+- PDDL/SHOP3-shaped fields are data unless the planner runtime is explicitly
+  coherent in the current slice.
+- Operator execution is guarded; print/inspect is the safe default.
+- SQLite evidence for this contract stays under
+  `/Users/rgb/workspace/hyperdoc/var/`.
+
+For the first implementation surface, load the narrow ASDF system
+`hyperdoc/executable-dita-tasks`. Do not require Quicklisp, do not use
+Quicklisp package-prefixed symbols in readable source, do not require `:shop3`
+for the smoke test, and do not load full `:kioskbeerli` just to inspect or
+persist executable DITA task objects.
+
 ## Touch-Fahrplan Route Terminology
 
 When a slice touches Connect, Dock, Annotation, Touch-Fahrplan, or DMX

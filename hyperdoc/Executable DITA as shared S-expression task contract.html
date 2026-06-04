@@ -1,0 +1,162 @@
+<h1>Executable DITA as shared S-expression task contract</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Executable DITA task objects give HyperDoc one canonical task contract for
+  prompt, plan, evidence, and projection sharing. The source of truth is a
+  Lisp-readable S-expression task object; DITA XML, HyperDoc HTML, SCXML, and
+  SQLite rows are projections of that object.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(executable-dita-task-smoke-example)"><tt>executable-dita-task-smoke-example</tt></a></li>
+  <li><a expr="(executable-dita-task->sexp (executable-dita-task-smoke-example))"><tt>executable-dita-task-&gt;sexp</tt></a></li>
+  <li><a expr="(executable-dita-task->dita (executable-dita-task-smoke-example))"><tt>executable-dita-task-&gt;dita</tt></a></li>
+  <li><a expr="(executable-dita-task->hyperdoc-html (executable-dita-task-smoke-example))"><tt>executable-dita-task-&gt;hyperdoc-html</tt></a></li>
+  <li><a expr="(executable-dita-task->scxml (executable-dita-task-smoke-example))"><tt>executable-dita-task-&gt;scxml</tt></a></li>
+  <li><a expr="(executable-dita-default-pddl-domain)"><tt>executable-dita-default-pddl-domain</tt></a></li>
+  <li><a expr="(executable-dita-default-scxml-contract)"><tt>executable-dita-default-scxml-contract</tt></a></li>
+</ul>
+
+<h2>Contract</h2>
+
+<p>
+  The canonical shape is:
+</p>
+
+<pre>
+(:executable-dita-task
+ (:id "task.executable-dita-contract")
+ (:title "Implement Executable DITA task objects")
+ (:summary "Represent DITA-like task topics as canonical S-expression task objects with DITA, HyperDoc, SCXML, and SQLite projections.")
+ (:context ...)
+ (:pddl ...)
+ (:scxml ...)
+ (:preconditions ...)
+ (:operators ...)
+ (:postconditions ...)
+ (:failure-modes ...))
+</pre>
+
+<p>
+  The stable identity is <tt>:id</tt>. The mutable surfaces are status,
+  evidence, next-task candidates, emitted projections, and implementation
+  commits. SQLite is the durable store, but not the semantic authority.
+</p>
+
+<h2>Projection boundaries</h2>
+
+<ul>
+  <li><b>DITA XML</b> is a task-topic projection for document exchange.</li>
+  <li><b>HyperDoc HTML</b> is a readable and clickable projection for local documentation.</li>
+  <li><b>SCXML</b> is an execution-state contract. It classifies transitions but does not run arbitrary shell commands.</li>
+  <li><b>SQLite</b> records canonical task S-expressions, emitted projection strings, and ranked next-task candidates.</li>
+</ul>
+
+<h2>Planning boundary</h2>
+
+<p>
+  PDDL and SHOP3-shaped fields are stored as data in this slice. The narrow
+  system <tt>hyperdoc/executable-dita-tasks</tt> does not require
+  <tt>shop3</tt> and does not load full <tt>kioskbeerli</tt>. Planner execution
+  belongs to a later runtime-coherence slice.
+</p>
+
+<h2>Safe execution boundary</h2>
+
+<p>
+  Operator execution is guarded. The safe default is print and inspect. A task
+  may name operators and checks, but mutation requires an explicit execution
+  guard outside this first slice.
+</p>
+
+<h2>SQLite evidence</h2>
+
+<p>
+  The default evidence database is:
+</p>
+
+<pre>/Users/rgb/workspace/hyperdoc/var/shared-sexpression-plans.sqlite</pre>
+
+<p>
+  It contains <tt>executable_dita_tasks</tt> and
+  <tt>executable_dita_next_task_candidates</tt>. The ranking rule for
+  next-task candidates is:
+</p>
+
+<pre>score = expected_value / max(cost, 1) - risk</pre>
+
+<h2>Goldberg questions</h2>
+
+<ol>
+  <li><b>What is the program about?</b> It represents executable DITA tasks as canonical S-expressions with projections.</li>
+  <li><b>What are the main objects?</b> Executable task, PDDL plan lookup, SCXML contract, operator, precondition, postcondition, failure mode, SQLite record.</li>
+  <li><b>What is the stable identity?</b> <tt>:id</tt> in the canonical S-expression task object.</li>
+  <li><b>What changes over time?</b> Status, evidence, next-task candidates, projection files, and implementation commits.</li>
+  <li><b>What is the source of truth?</b> The canonical S-expression task object, with SQLite as durable store.</li>
+  <li><b>What is only a projection?</b> DITA XML, HyperDoc HTML, SCXML XML, and any rendered page.</li>
+  <li><b>What is the safe default?</b> Print and inspect. Do not mutate unless explicitly guarded.</li>
+  <li><b>What is the planning boundary?</b> PDDL/SHOP3 fields are data in this slice; actual SHOP3 execution is later.</li>
+  <li><b>What is the execution boundary?</b> SCXML classifies state transitions; it does not itself run arbitrary shell commands.</li>
+  <li><b>What is the evidence boundary?</b> Completion requires persisted evidence: SQLite rows, emitted projections, and smoke-test output.</li>
+  <li><b>What should Codex not do?</b> Do not use Quicklisp, do not load full <tt>:kioskbeerli</tt>, do not hide planner failures, do not commit generated SQLite DBs, and do not write implementation files under <tt>/Users/rgb/workspace/hauptsache</tt>.</li>
+  <li><b>What is the next useful inspection?</b> Inspect the task object, its projections, the SQLite row, and the ranked next-task candidates.</li>
+</ol>
+
+<h2>SLY mREPL replay</h2>
+
+<pre>
+(require :asdf)
+(asdf:load-system :hyperdoc/executable-dita-tasks)
+
+(defun i (object)
+  "Safe inspector helper for SLY mREPL.
+Prefer CLOG only if it is already loaded; otherwise use CL:INSPECT.
+Never calls SLYNK:INSPECT-IN-EMACS directly."
+  (let* ((clog-package (find-package "CLOG-MOLDABLE-INSPECTOR"))
+         (clog-symbol
+           (and clog-package
+                (find-symbol "CLOG-INSPECT" clog-package))))
+    (if (and clog-symbol (fboundp clog-symbol))
+        (funcall (symbol-function clog-symbol) object)
+        (cl:inspect object))))
+
+(defparameter *example-task*
+  (hyperdoc:executable-dita-task-smoke-example))
+(defparameter *example-sexp*
+  (hyperdoc:executable-dita-task->sexp *example-task*))
+(defparameter *example-roundtrip*
+  (hyperdoc:sexp->executable-dita-task *example-sexp*))
+(defparameter *example-dita*
+  (hyperdoc:executable-dita-task->dita *example-roundtrip*))
+(defparameter *example-html*
+  (hyperdoc:executable-dita-task->hyperdoc-html *example-roundtrip*))
+(defparameter *example-scxml*
+  (hyperdoc:executable-dita-task->scxml *example-roundtrip*))
+
+(format t "~&type: ~S~%status: ~S~%core value: ~A~%"
+        (type-of *example-roundtrip*)
+        :constructed
+        (hyperdoc:executable-dita-task-id *example-roundtrip*))
+(i *example-roundtrip*)
+</pre>
+
+<h2>Boundary</h2>
+
+<p>
+  This page documents the first implementation slice only. It does not promise
+  SHOP3 execution, inspector-specific task views, remote collaboration, or
+  generated projection files as committed artifacts.
+</p>
+
+<h2>Related</h2>
+
+<ul>
+  <li><a page="DITA-like task topics for LISP-CRITIC review integration">DITA-like task topics for LISP-CRITIC review integration</a></li>
+  <li><a page="S-Expression Prompt Split View Contract">S-Expression Prompt Split View Contract</a></li>
+  <li><a page="Surface and Artifact Answers">Surface and Artifact Answers</a></li>
+  <li><a page="Runtime coherence chunks for inspector dependencies">Runtime coherence chunks for inspector dependencies</a></li>
+</ul>
