@@ -173,8 +173,8 @@
                     (fedwiki-attached-asdf-system-system-file home))))
 
 (defun fedwiki-asdf-default-compatibility-system (system)
-  (when (string= (fedwiki-asdf-system-name-string system) "kioskbeerli")
-    :dreyeck/kioskbeerli))
+  (declare (ignore system))
+  nil)
 
 (defun make-fedwiki-attached-asdf-system
     (&key slug

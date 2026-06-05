@@ -22,8 +22,9 @@
 <p>
   The source-controlled Lisp implementation is the canonical
   <tt>:kioskbeerli</tt> ASDF system and <tt>:kioskbeerli</tt> package.
-  The older <tt>kioskbeerli</tt> and <tt>:dreyeck/kioskbeerli</tt> names are
-  compatibility aliases only. The localhost FedWiki client URL
+  The older <tt>dreyeck/kioskbeerli</tt> package name remains a package
+  nickname after loading <tt>:kioskbeerli</tt>; it is no longer a HyperDoc-side
+  ASDF compatibility system. The localhost FedWiki client URL
   <tt>http://localhost:3000/view/kioskbeerli</tt> names the page identity; it
   is not the operational SLY route for loading the system. The local
   page-attached ASDF entrypoint is
@@ -90,16 +91,16 @@
 <ul>
   <li><a hyperbook="topics" page="Kioskbeerli"><tt>Kioskbeerli</tt></a></li>
   <li><a hyperbook="topics" page="Kioskbeerli Dashboard"><tt>Kioskbeerli Dashboard</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-dashboard)"><tt>kioskbeerli-dashboard</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
-  <li><a expr="(kioskbeerli:make-demo-dashboard)"><tt>kioskbeerli:make-demo-dashboard</tt></a></li>
-  <li><a expr="(progn (asdf:load-system :kioskbeerli/sops-nix-secrets) (uiop:symbol-call :kioskbeerli/sops-nix-secrets :make-sops-nix-secrets-session))"><tt>kioskbeerli/sops-nix-secrets:make-sops-nix-secrets-session</tt></a></li>
+  <li><tt>kioskbeerli:kioskbeerli-dashboard</tt> (standalone <tt>:kioskbeerli</tt> system)</li>
+  <li><tt>kioskbeerli:kioskbeerli-planner-run</tt> (standalone <tt>:kioskbeerli</tt> system)</li>
+  <li><tt>kioskbeerli:kioskbeerli-behavior-chart</tt> (standalone <tt>:kioskbeerli</tt> system)</li>
+  <li><tt>kioskbeerli:kioskbeerli-project-trace</tt> (standalone <tt>:kioskbeerli</tt> system)</li>
+  <li><tt>kioskbeerli:make-demo-dashboard</tt> (standalone <tt>:kioskbeerli</tt> system)</li>
+  <li><tt>kioskbeerli/sops-nix-secrets:make-sops-nix-secrets-session</tt> (after loading <tt>:kioskbeerli/sops-nix-secrets</tt>)</li>
   <li><a page="Kioskbeerli sops-nix secrets"><tt>Kioskbeerli sops-nix secrets</tt></a></li>
-  <li><a expr="(progn (asdf:load-system :kioskbeerli/pi-simulation) (uiop:symbol-call :kioskbeerli/pi-simulation :make-pi-simulation-session))"><tt>kioskbeerli/pi-simulation:make-pi-simulation-session</tt></a></li>
+  <li><tt>kioskbeerli/pi-simulation:make-pi-simulation-session</tt> (after loading <tt>:kioskbeerli/pi-simulation</tt>)</li>
   <li><a page="Kioskbeerli Pi simulation"><tt>Kioskbeerli Pi simulation</tt></a></li>
-  <li><a expr="(kioskbeerli:materialize-fedwiki-assets :slug &quot;kioskbeerli&quot;)"><tt>kioskbeerli:materialize-fedwiki-assets</tt></a></li>
+  <li><tt>kioskbeerli:materialize-fedwiki-assets</tt> (standalone <tt>:kioskbeerli</tt> system)</li>
   <li><a expr="(hyperdoc:make-fedwiki-attached-asdf-system :slug &quot;kioskbeerli&quot; :site-root #p&quot;/Users/rgb/.wiki/wiki.ralfbarkow.ch/&quot; :system :kioskbeerli :system-file &quot;kioskbeerli&quot; :test-system :kioskbeerli/tests)"><tt>FedWiki-attached ASDF system home</tt></a></li>
   <li><a hyperbook="topics" page="FedWiki-attached ASDF system"><tt>FedWiki-attached ASDF system</tt></a></li>
   <li><a hyperbook="topics" page="Satechi USB-C Pro Hub (4K HDMI)"><tt>Satechi USB-C Pro Hub (4K HDMI)</tt></a></li>

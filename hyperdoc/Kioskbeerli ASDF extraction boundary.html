@@ -20,10 +20,10 @@
 <h2>Current HyperDoc-side split</h2>
 
 <p>
-  HyperDoc no longer loads <tt>hyperdoc/kioskbeerli-compat.lisp</tt> from the
-  <tt>:hyperdoc</tt> system. The aggregate <tt>:hyperdoc/tests</tt> system no
-  longer depends on <tt>:kioskbeerli</tt> and no longer loads the Kioskbeerli
-  dashboard or DMX associative mirror smoke files.
+  HyperDoc no longer contains the Kioskbeerli ASDF definition or Lisp source
+  tree. The aggregate <tt>:hyperdoc/tests</tt> system does not depend on
+  <tt>:kioskbeerli</tt>, and the HyperDoc <tt>dreyeck.asd</tt> scaffold no
+  longer defines <tt>:dreyeck/kioskbeerli</tt> compatibility systems.
 </p>
 
 <h2>External target</h2>
@@ -31,20 +31,18 @@
 <pre>/Users/rgb/workspace/hauptsache/kioskbeerli</pre>
 
 <p>
-  The target already contains the Kioskbeerli Nix flake, NixOS module, README,
-  and operational scripts. The Lisp/ASDF extraction should move the
-  Kioskbeerli ASDF definition and Lisp tree there in a separate migration
-  slice.
+  The target contains the Kioskbeerli Nix flake, NixOS module, README,
+  operational scripts, <tt>kioskbeerli.asd</tt>, and Lisp source tree.
 </p>
 
 <h2>Migration plan</h2>
 
 <ol>
-  <li>Move <tt>/Users/rgb/workspace/hyperdoc/kioskbeerli.asd</tt> to <tt>/Users/rgb/workspace/hauptsache/kioskbeerli/kioskbeerli.asd</tt>.</li>
-  <li>Move <tt>/Users/rgb/workspace/hyperdoc/kioskbeerli/</tt> to <tt>/Users/rgb/workspace/hauptsache/kioskbeerli/kioskbeerli/</tt>.</li>
+  <li><b>Done</b>: move <tt>/Users/rgb/workspace/hyperdoc/kioskbeerli.asd</tt> to <tt>/Users/rgb/workspace/hauptsache/kioskbeerli/kioskbeerli.asd</tt>.</li>
+  <li><b>Done</b>: move <tt>/Users/rgb/workspace/hyperdoc/kioskbeerli/</tt> to <tt>/Users/rgb/workspace/hauptsache/kioskbeerli/kioskbeerli/</tt>.</li>
   <li>Keep Kioskbeerli ASDF dependencies pointed at public HyperDoc systems, not private HyperDoc compatibility wrappers.</li>
-  <li>Move Kioskbeerli-specific smoke tests out of <tt>:hyperdoc/tests</tt> and into <tt>:kioskbeerli/tests</tt>.</li>
-  <li>Keep <tt>:dreyeck/kioskbeerli</tt> only as a downstream compatibility alias outside the HyperDoc core load path.</li>
+  <li><b>Done</b>: keep Kioskbeerli-specific smoke tests out of <tt>:hyperdoc/tests</tt>; the standalone Kioskbeerli smoke tests live in <tt>:kioskbeerli/tests</tt>.</li>
+  <li><b>Done</b>: remove the HyperDoc-side <tt>:dreyeck/kioskbeerli</tt> ASDF compatibility alias.</li>
   <li>Validate HyperDoc with <tt>:hyperdoc</tt> and <tt>:hyperdoc/executable-dita-tasks</tt> without registering or loading <tt>:kioskbeerli</tt>.</li>
   <li>Validate Kioskbeerli separately from the external target after its ASDF source registry is explicit.</li>
 </ol>

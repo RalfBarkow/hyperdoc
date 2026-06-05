@@ -14,28 +14,6 @@
                           :components ((:file "package")
                                        (:file "server")))))
 
-(defsystem #:dreyeck/kioskbeerli
-    :description "Compatibility alias for the canonical kioskbeerli system"
-    :author "Ralf Barkow"
-    :license "BSD"
-    :version "0.0.1"
-    :serial t
-    :depends-on (#:kioskbeerli)
-    :in-order-to ((test-op (test-op "dreyeck/kioskbeerli/tests"))))
-
-(defsystem #:dreyeck/kioskbeerli/tests
-    :description "Compatibility alias for the canonical Kioskbeerli smoke tests"
-    :author "Ralf Barkow"
-    :license "BSD"
-    :version "0.0.1"
-    :serial t
-    :depends-on (#:kioskbeerli/tests)
-    :perform (test-op (op c)
-                      (declare (ignore op c))
-                      (uiop:symbol-call :kioskbeerli/tests
-                                        :run-kioskbeerli-smoke-tests)))
-
 (defsystem #:dreyeck
     :description "Minimal downstream dreyeck scaffold"
-    :depends-on (#:dreyeck/server
-                 #:dreyeck/kioskbeerli))
+    :depends-on (#:dreyeck/server))

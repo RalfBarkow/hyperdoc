@@ -369,9 +369,7 @@
      "Missing page-attached .asd must produce an inspectable lookup-failure object")
     (dolist (needle '("local FedWiki page asset .asd"
                       "workspace source .asd"
-                      "compatibility ASDF route"
                       "/Users/rgb/workspace/hyperdoc/kioskbeerli.asd"
-                      "dreyeck/kioskbeerli"
                       "kioskbeerli:"
                       "package does not exist"
                       "reader forms"))
@@ -382,13 +380,18 @@
     (dolist (needle '("Candidate routes"
                       "local FedWiki page asset .asd"
                       "workspace source .asd"
-                      "compatibility ASDF route"
                       "Package-reader consequence"
                       "kioskbeerli:"))
       (fedwiki-attached-asdf-assert-contains
        needle
        html
-       "Lookup-failure Overview must render route candidates"))))
+       "Lookup-failure Overview must render route candidates"))
+    (dolist (needle '("compatibility ASDF route"
+                      "dreyeck/kioskbeerli"))
+      (fedwiki-attached-asdf-assert-not-contains
+       needle
+       text
+       "Lookup-failure text must not promise removed compatibility routes"))))
 
 (defun run-fedwiki-attached-asdf-documentation-smoke-test ()
   (let ((page (hyperbook:find-page hyperdoc:*hyperdoc*

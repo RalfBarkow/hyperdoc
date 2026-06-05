@@ -157,7 +157,7 @@ Preserve this direction:
 - HyperDoc pages may mention Kioskbeerli as documentation-only evidence, but
   `:hyperdoc`, `:hyperdoc/executable-dita-tasks`, and their tests must load
   without loading full `:kioskbeerli`.
-- The intended external Kioskbeerli ASDF root is
+- The external Kioskbeerli ASDF root is
   `/Users/rgb/workspace/hauptsache/kioskbeerli`.
 
 ## Touch-Fahrplan Route Terminology

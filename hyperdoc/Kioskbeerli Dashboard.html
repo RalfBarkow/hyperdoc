@@ -108,8 +108,9 @@ nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage
 <p>
   <tt>Kioskbeerli</tt> is the Raspberry Pi 4 kiosk case study for making the
   <tt>hauptsache</tt> landing page physically present inside the salon.
-  The dashboard page is the human-facing view; the root inspectable object is
-  <a expr="(hyperdoc::kioskbeerli-dashboard)"><tt>kioskbeerli-dashboard</tt></a>.
+  The dashboard page is the human-facing view. The root inspectable object now
+  lives in the standalone <tt>:kioskbeerli</tt> system as
+  <tt>kioskbeerli:kioskbeerli-dashboard</tt>.
 </p>
 
 <dl>
@@ -126,7 +127,7 @@ nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage
   <dd>Case-study dashboard, plan-only planner, behavior chart, and trace; no live build, flash, SSH, HTTP mutation, or DMX mutation.</dd>
 
   <dt>Canonical ASDF system</dt>
-  <dd><tt>:kioskbeerli</tt> with compatibility alias <tt>:dreyeck/kioskbeerli</tt></dd>
+  <dd><tt>:kioskbeerli</tt>; <tt>dreyeck/kioskbeerli</tt> is only a package nickname after load</dd>
 
   <dt>FedWiki assets</dt>
   <dd><tt>http://localhost:3000/assets/pages/kioskbeerli/kioskbeerli.asd</tt></dd>
@@ -137,27 +138,28 @@ nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage
 <ul>
   <li><a hyperbook="topics" page="Kioskbeerli Dashboard"><tt>Kioskbeerli Dashboard</tt></a></li>
   <li><a hyperbook="topics" page="Kioskbeerli"><tt>Kioskbeerli</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-dashboard)"><tt>kioskbeerli-dashboard</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-dashboard-status)"><tt>kioskbeerli-dashboard-status</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-current-blocker)"><tt>kioskbeerli-current-blocker</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-build-evidence-status)"><tt>kioskbeerli-build-evidence-status</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>kioskbeerli-lookup-plan-task :boot-pi</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-task-state-link :boot-pi)"><tt>kioskbeerli-task-state-link :boot-pi</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a></li>
-  <li><a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a></li>
-  <li><a expr="(kioskbeerli:make-demo-dashboard)"><tt>kioskbeerli:make-demo-dashboard</tt></a></li>
-  <li><a expr="(kioskbeerli:make-demo-plan)"><tt>kioskbeerli:make-demo-plan</tt></a></li>
-  <li><a expr="(kioskbeerli:make-demo-trace)"><tt>kioskbeerli:make-demo-trace</tt></a></li>
-  <li><a expr="(kioskbeerli:materialize-fedwiki-assets :slug &quot;kioskbeerli&quot;)"><tt>kioskbeerli:materialize-fedwiki-assets</tt></a></li>
+  <li><tt>kioskbeerli:kioskbeerli-dashboard</tt></li>
+  <li><tt>kioskbeerli:kioskbeerli-dashboard-status</tt></li>
+  <li><tt>kioskbeerli:kioskbeerli-current-blocker</tt></li>
+  <li><tt>kioskbeerli:kioskbeerli-build-evidence-status</tt></li>
+  <li><tt>kioskbeerli:kioskbeerli-planner-run</tt></li>
+  <li><tt>kioskbeerli:kioskbeerli-lookup-plan-task :boot-pi</tt></li>
+  <li><tt>kioskbeerli:kioskbeerli-task-state-link :boot-pi</tt></li>
+  <li><tt>kioskbeerli:kioskbeerli-behavior-chart</tt></li>
+  <li><tt>kioskbeerli:kioskbeerli-project-trace</tt></li>
+  <li><tt>kioskbeerli:kioskbeerli-latest-progress</tt></li>
+  <li><tt>kioskbeerli:make-demo-dashboard</tt></li>
+  <li><tt>kioskbeerli:make-demo-plan</tt></li>
+  <li><tt>kioskbeerli:make-demo-trace</tt></li>
+  <li><tt>kioskbeerli:materialize-fedwiki-assets</tt></li>
 </ul>
 
 <h2>Inspect station list</h2>
 
 <p>
-  Inspect the full station list:
-  <a expr="(hyperdoc::kioskbeerli-dashboard-stations)"><tt>kioskbeerli-dashboard-stations</tt></a>.
+  Inspect the full station list through the standalone
+  <tt>kioskbeerli:kioskbeerli-dashboard-stations</tt> object after loading
+  <tt>:kioskbeerli</tt>.
 </p>
 
 <h2>Planner run</h2>
@@ -165,10 +167,10 @@ nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage
 <p>
   The Kioskbeerli planner is a SHOP3-like local plan object with named tasks,
   dependencies, preconditions, effects, status, and evidence paths. It is
-  plan-only by default:
-  <a expr="(hyperdoc::kioskbeerli-planner-run)"><tt>kioskbeerli-planner-run</tt></a>.
-  Individual tasks are inspectable objects:
-  <a expr="(hyperdoc::kioskbeerli-lookup-plan-task :boot-pi)"><tt>boot-pi</tt></a>
+  plan-only by default in
+  <tt>kioskbeerli:kioskbeerli-planner-run</tt>. Individual tasks are
+  inspectable objects such as
+  <tt>(kioskbeerli:kioskbeerli-lookup-plan-task :boot-pi)</tt>, which
   links to its plan/run, dependencies, dependents, progress records, and SCXML
   state link.
 </p>
@@ -183,9 +185,8 @@ nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage
 
 <p>
   The lifecycle chart is stored as
-  <tt>kioskbeerli/kioskbeerli.scxml</tt> and parsed as an inspectable
-  object:
-  <a expr="(hyperdoc::kioskbeerli-behavior-chart)"><tt>kioskbeerli-behavior-chart</tt></a>.
+  <tt>kioskbeerli/kioskbeerli.scxml</tt> and parsed as the standalone
+  inspectable object <tt>kioskbeerli:kioskbeerli-behavior-chart</tt>.
 </p>
 
 <p>
@@ -197,21 +198,20 @@ nix build .#nixosConfigurations.kioskbeerli.config.system.build.sdImage
 <h2>Project trace / record progress</h2>
 
 <p>
-  The project trace records evidence and missing evidence explicitly:
-  <a expr="(hyperdoc::kioskbeerli-project-trace)"><tt>kioskbeerli-project-trace</tt></a>.
-  The latest progress entry is available through
-  <a expr="(hyperdoc::kioskbeerli-latest-progress)"><tt>kioskbeerli-latest-progress</tt></a>.
-  The current lifecycle state after recorded progress is
-  <a expr="(hyperdoc::kioskbeerli-current-scxml-state)"><tt>kioskbeerli-current-scxml-state</tt></a>.
+  The project trace records evidence and missing evidence explicitly in
+  <tt>kioskbeerli:kioskbeerli-project-trace</tt>. The latest progress entry is
+  available through <tt>kioskbeerli:kioskbeerli-latest-progress</tt>. The
+  current lifecycle state after recorded progress is
+  <tt>kioskbeerli:kioskbeerli-current-scxml-state</tt>.
 </p>
 
 <p>
   Recording progress is an in-memory local operation. It records a trace entry;
   it does not run Nix, flash devices, open SSH sessions, mutate HTTP state, or
-  write to DMX:
-  <a expr="(hyperdoc::record-kioskbeerli-progress :task-id &quot;build-aarch64-image&quot; :from-state &quot;linux-builder-required&quot; :to-state &quot;linux-builder-required&quot; :status &quot;missing-evidence&quot; :evidence-paths '(&quot;missing: successful aarch64 SD-image build artifact&quot;) :note &quot;Missing evidence recorded from dashboard example.&quot;)"><tt>record-kioskbeerli-progress</tt></a>.
-  First-boot evidence is recorded narrowly with
-  <a expr="(hyperdoc::kioskbeerli-record-boot-observed :actor &quot;operator&quot; :evidence &quot;logged in as nixos on the booted Raspberry Pi&quot;)"><tt>kioskbeerli-record-boot-observed</tt></a>;
+  write to DMX. In the standalone system the corresponding operators are
+  <tt>kioskbeerli:record-kioskbeerli-progress</tt> and
+  <tt>kioskbeerli:kioskbeerli-record-boot-observed</tt>. First-boot evidence is
+  recorded narrowly;
   it applies <tt>PI_BOOTED</tt> and <tt>first-boot-observed</tt> without
   verifying the later network, kiosk-session, landing-page, record-evidence, or
   dashboard-status tasks.

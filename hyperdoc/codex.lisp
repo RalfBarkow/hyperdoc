@@ -397,7 +397,7 @@
       (codex-context-window-entry
        "slice"
        "Kioskbeerli station-board review"
-       "The pending review target is the object view for (hyperdoc::kioskbeerli-dashboard), not the authored Kioskbeerli Dashboard HTML page."
+       "The pending review target is the standalone Kioskbeerli dashboard object, not the authored Kioskbeerli Dashboard HTML page."
        :timestamp "2026-05-14"
        :references '("Kioskbeerli Dashboard"
                      "Kioskbeerli"
@@ -417,7 +417,7 @@
        :derived-objects (list (kioskbeerli-dashboard))))
      :open-questions
      '("Is this Codex context-window object useful as the first inspectable current-context surface?"
-       "After approval, should the next slice add only the Station board view for (hyperdoc::kioskbeerli-dashboard)?")
+       "After approval, should the next slice add only the Station board view for kioskbeerli:kioskbeerli-dashboard in the standalone Kioskbeerli system?")
      :proposed-actions
      '("Inspect (hyperdoc::codex-context-window) from SLY/CLOG."
        "If accepted, keep the next Kioskbeerli iteration scoped to the dashboard object view and avoid editing the authored HTML page.")
