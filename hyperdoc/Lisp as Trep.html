@@ -1,0 +1,17 @@
+<h1>Lisp as Trep</h1>
+
+<p>
+<a hyperbook="fedwiki:hyperdoc.dreyeck.ch/" page="lisp-as-trep">Lisp as Trep</a> – Lisp should be read here as Trep: a processor of binary cons trees. Lists are a surface contract over binary cons structure: proper lists are right-spined cons trees ending in NIL, dotted pairs expose the raw cons node, and shared or destructive structure generalizes trees into graphs.
+</p>
+
+<p>
+<a hyperbook="fedwiki:hyperdoc.dreyeck.ch/" page="lisp-as-trep">Built from dotted pairs</a> – Operationally, this means that compound structure is built from cons cells. Each cons cell has a left field, CAR, and a right field, CDR. Dot notation exposes both fields directly: (A . B).
+</p>
+
+<p>
+<a hyperbook="fedwiki:hyperdoc.dreyeck.ch/" page="lisp-as-trep">Proper list as cons tree</a> – The surface form (A B C) is shorthand for the dotted-pair structure (A . (B . (C . NIL))). It can be constructed by (CONS 'A (CONS 'B (CONS 'C NIL))).
+</p>
+
+<p>
+<a hyperbook="fedwiki:hyperdoc.dreyeck.ch/" page="lisp-as-trep">Dotted list</a> – The surface form (A B . C) is shorthand for (A . (B . C)); the final CDR is the atom C instead of NIL, so this is not a proper list.
+</p>
