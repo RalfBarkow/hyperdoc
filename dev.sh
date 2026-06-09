@@ -262,6 +262,28 @@ nix develop --command sbcl --no-userinit --disable-debugger \
                  (interface (uiop:getenv "HYPERDOC_LISP_SERVER_INTERFACE"))
                  (port (parse-integer (uiop:getenv "HYPERDOC_LISP_SERVER_PORT"))))
             (asdf:load-system system)
+
+            ;; SLY/Slynk over sly-connect otherwise keeps
+            ;; SLYNK:*GLOBALLY-REDIRECT-IO* and
+            ;; SLYNK:*USE-DEDICATED-OUTPUT-STREAM* at :STARTED-FROM-EMACS.
+            ;; Set the policy before CREATE-SERVER accepts the MREPL connection.
+            (when (string= (string-upcase package-name) "SLYNK")
+              (ignore-errors
+                (asdf:load-system :slynk/mrepl))
+              (let ((slynk-package (or (find-package "SLYNK")
+                                       (error "Package SLYNK not found after loading ~A."
+                                              system))))
+                (labels ((set-slynk-variable (name value)
+                           (let ((symbol (find-symbol name slynk-package)))
+                             (unless symbol
+                               (error "Expected Slynk variable ~A not found in package ~A."
+                                      name slynk-package))
+                             (setf (symbol-value symbol) value))))
+                  (set-slynk-variable "*GLOBALLY-REDIRECT-IO*" t)
+                  (set-slynk-variable "*USE-DEDICATED-OUTPUT-STREAM*" t))
+                (format t "~&[dev] Slynk global I/O redirection policy enabled before CREATE-SERVER.~%")
+                (finish-output)))
+
             (let* ((pkg (or (find-package (string-upcase package-name))
                             (error "Package ~A not found after loading ~A."
                                    package-name system)))
