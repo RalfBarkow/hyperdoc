@@ -46,34 +46,6 @@
       output)))
 
 
-(defun ensure-fedwiki-loader-schema (store)
-  (ensure-directories-exist
-   (uiop/pathname:pathname-directory-pathname
-    (fedwiki-loader-db-path-of store)))
-  (fedwiki-loader-run-sql store
-                          "CREATE TABLE IF NOT EXISTS fedwiki_asset_aliases (
-      logical_path text primary key,
-      system_name text,
-      asset_kind text,
-      site_domain text,
-      page_slug text,
-      asset_path text,
-      local_path text,
-      priority integer default 100,
-      updated_at text default current_timestamp
-    );
-
-    CREATE TABLE IF NOT EXISTS fedwiki_resolution_attempts (
-      id text primary key,
-      logical_path text,
-      stage text,
-      status text,
-      detail text,
-      created_at text default current_timestamp
-    );")
-  store)
-
-
 (defun make-default-fedwiki-loader-store
        (
         &key
@@ -339,11 +311,31 @@ The page-attached convention is:
         (when pathname (finish pathname)))
       (multiple-value-bind (pathname attempt)
           (fedwiki-loader-sqlite-alias-attempt logical-path :system-name
-           system-name :store store)
+                                               system-name :store store)
         (record attempt)
         (when pathname (finish pathname)))
       (error 'fedwiki-loadable-not-found :logical-path logical-path :attempts
              (nreverse attempts)))))
+
+
+(defun ensure-fedwiki-loader-schema (store)
+  "Ensure the SQLite objects used by the FedWiki loader exist.
+
+This function is intentionally idempotent: callers may run it before
+every alias lookup.  A missing alias table is not an exceptional
+repository state; it simply means there are no registered aliases yet."
+  (fedwiki-loader-run-sql store
+                          "create table if not exists loadable_asset_aliases (
+          id integer primary key autoincrement,
+          logical_path text not null,
+          system_name text,
+          resolved_path text not null,
+          created_at text not null default (datetime('now'))
+        );")
+  (fedwiki-loader-run-sql store
+                          "create index if not exists loadable_asset_aliases_lookup_idx
+          on loadable_asset_aliases(logical_path, system_name, id);")
+  store)
 
 
 (export
