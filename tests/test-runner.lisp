@@ -1,3 +1,4 @@
+
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (unless (find-package :hyperdoc/tests)
     (defpackage :hyperdoc/tests
@@ -9,85 +10,67 @@
                :run-s-expression-prompt-generated-page-smoke-test
                :run-s-expression-prompt-smoke-tests))))
 
+
 (in-package :hyperdoc/tests)
+
 
 (eval-when (:load-toplevel :execute)
   (unless (fboundp 'run-s-expression-prompt-smoke-tests)
     (require :asdf)
     (let* ((asdf-package (find-package "ASDF"))
            (load-system-symbol
-             (and asdf-package
-                  (find-symbol "LOAD-SYSTEM" asdf-package))))
-      (unless (and load-system-symbol
-                   (fboundp load-system-symbol))
+            (and asdf-package (find-symbol "LOAD-SYSTEM" asdf-package))))
+      (unless (and load-system-symbol (fboundp load-system-symbol))
         (error "ASDF:LOAD-SYSTEM is unavailable after REQUIRE :ASDF."))
       (funcall (symbol-function load-system-symbol) :hyperdoc/tests))))
 
 
 (defun run-fedwiki-loader-examples-smoke-tests ()
-  "Run the ASDF-backed FedWiki loader examples from the legacy test runner.
+  "Run FedWiki loader examples from the legacy test runner without recursive ASDF operations.
 
-This keeps the examples-driven suite visible from both:
-  1. ASDF:TEST-SYSTEM on :HYPERDOC-FEDWIKI-LOADER-EXAMPLES;
-  2. the existing HYPERDOC/TESTS smoke boundary."
+This function intentionally avoids ASDF:LOAD-SYSTEM and ASDF:TEST-SYSTEM.
+It may itself be called while ASDF is already executing TEST-OP for
+HYPERDOC/TESTS. Calling ASDF operations from here would violate ASDF's
+non-recursive operate contract."
   (require :asdf)
-  (let* ((asdf-package
-           (find-package "ASDF"))
-         (load-asd
-           (and asdf-package
-                (find-symbol "LOAD-ASD" asdf-package)))
-         (load-system
-           (and asdf-package
-                (find-symbol "LOAD-SYSTEM" asdf-package)))
-         (test-system
-           (and asdf-package
-                (find-symbol "TEST-SYSTEM" asdf-package)))
-         (find-system
-           (and asdf-package
-                (find-symbol "FIND-SYSTEM" asdf-package)))
+  (let* ((asdf-package (find-package "ASDF"))
          (system-source-directory
-           (and asdf-package
-                (find-symbol "SYSTEM-SOURCE-DIRECTORY" asdf-package))))
-    (unless (and load-system test-system find-system system-source-directory)
-      (error "Required ASDF entry points are unavailable."))
+          (and asdf-package
+               (find-symbol "SYSTEM-SOURCE-DIRECTORY" asdf-package)))
+         (root
+          (or
+           (and system-source-directory
+                (ignore-errors
+                 (funcall (symbol-function system-source-directory)
+                          :hyperdoc)))
+           (ignore-errors (truename #P"/Users/rgb/workspace/hyperdoc/"))
+           (uiop/os:getcwd)))
+         (examples-source
+          (merge-pathnames #P"hyperdoc/fedwiki-loader-examples.lisp" root))
+         (hyperdoc-package (find-package "HYPERDOC"))
+         (assert-runner
+          (and hyperdoc-package
+               (find-symbol "ASSERT-FEDWIKI-LOADER-EXAMPLES-PASS"
+                            hyperdoc-package))))
+    (unless (and assert-runner (fboundp assert-runner))
+      (unless (probe-file examples-source)
+        (error "FedWiki loader examples source not found: ~A" examples-source))
+      (load examples-source)
+      (setf hyperdoc-package (find-package "HYPERDOC"))
+      (setf assert-runner
+              (and hyperdoc-package
+                   (find-symbol "ASSERT-FEDWIKI-LOADER-EXAMPLES-PASS"
+                                hyperdoc-package))))
+    (unless (and assert-runner (fboundp assert-runner))
+      (error
+       "ASSERT-FEDWIKI-LOADER-EXAMPLES-PASS is unavailable after loading ~A"
+       examples-source))
+    (let ((suite (funcall (symbol-function assert-runner))))
+      (format t "~&FedWiki loader examples smoke tests passed.~%")
+      suite)))
 
-    (unless (ignore-errors
-              (funcall (symbol-function find-system)
-                       :hyperdoc-fedwiki-loader-examples
-                       nil))
-      (unless load-asd
-        (error "ASDF:LOAD-ASD is unavailable; cannot register examples system."))
-      (funcall
-       (symbol-function load-asd)
-       (merge-pathnames
-        #p"hyperdoc-fedwiki-loader-examples.asd"
-        (funcall (symbol-function system-source-directory)
-                 :hyperdoc))))
-
-    (funcall (symbol-function load-system)
-             :hyperdoc-fedwiki-loader-examples)
-    (funcall (symbol-function test-system)
-             :hyperdoc-fedwiki-loader-examples)
-
-    (let* ((hyperdoc-package
-             (find-package "HYPERDOC"))
-           (runner
-             (and hyperdoc-package
-                  (find-symbol "RUN-FEDWIKI-LOADER-EXAMPLES"
-                               hyperdoc-package))))
-      (unless (and runner
-                   (fboundp runner))
-        (error "RUN-FEDWIKI-LOADER-EXAMPLES is unavailable after loading examples system."))
-      (let ((suite
-              (funcall (symbol-function runner))))
-        (unless (eq (getf suite :status) :pass)
-          (error "FedWiki loader examples smoke failed: ~S" suite))
-        (format t "~&FedWiki loader examples smoke tests passed.~%")
-        t))))
 
 (defun run-hyperdoc-tests ()
-  ;; This boundary check must run before compile-order tests intentionally load
-  ;; :hyperdoc/inspector, which depends on the optional Zotero backend.
   (run-zotero-optional-smoke-tests)
   (run-compile-order-smoke-tests :force? nil)
   (run-code-path-graphs-smoke-tests)
@@ -160,5 +143,6 @@ This keeps the examples-driven suite visible from both:
   (run-nor-graph-matcher-smoke-tests)
   (run-continuation-route-trace-smoke-tests)
   t)
+
 
 (export '(run-hyperdoc-tests))
