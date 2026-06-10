@@ -23,6 +23,68 @@
         (error "ASDF:LOAD-SYSTEM is unavailable after REQUIRE :ASDF."))
       (funcall (symbol-function load-system-symbol) :hyperdoc/tests))))
 
+
+(defun run-fedwiki-loader-examples-smoke-tests ()
+  "Run the ASDF-backed FedWiki loader examples from the legacy test runner.
+
+This keeps the examples-driven suite visible from both:
+  1. ASDF:TEST-SYSTEM on :HYPERDOC-FEDWIKI-LOADER-EXAMPLES;
+  2. the existing HYPERDOC/TESTS smoke boundary."
+  (require :asdf)
+  (let* ((asdf-package
+           (find-package "ASDF"))
+         (load-asd
+           (and asdf-package
+                (find-symbol "LOAD-ASD" asdf-package)))
+         (load-system
+           (and asdf-package
+                (find-symbol "LOAD-SYSTEM" asdf-package)))
+         (test-system
+           (and asdf-package
+                (find-symbol "TEST-SYSTEM" asdf-package)))
+         (find-system
+           (and asdf-package
+                (find-symbol "FIND-SYSTEM" asdf-package)))
+         (system-source-directory
+           (and asdf-package
+                (find-symbol "SYSTEM-SOURCE-DIRECTORY" asdf-package))))
+    (unless (and load-system test-system find-system system-source-directory)
+      (error "Required ASDF entry points are unavailable."))
+
+    (unless (ignore-errors
+              (funcall (symbol-function find-system)
+                       :hyperdoc-fedwiki-loader-examples
+                       nil))
+      (unless load-asd
+        (error "ASDF:LOAD-ASD is unavailable; cannot register examples system."))
+      (funcall
+       (symbol-function load-asd)
+       (merge-pathnames
+        #p"hyperdoc-fedwiki-loader-examples.asd"
+        (funcall (symbol-function system-source-directory)
+                 :hyperdoc))))
+
+    (funcall (symbol-function load-system)
+             :hyperdoc-fedwiki-loader-examples)
+    (funcall (symbol-function test-system)
+             :hyperdoc-fedwiki-loader-examples)
+
+    (let* ((hyperdoc-package
+             (find-package "HYPERDOC"))
+           (runner
+             (and hyperdoc-package
+                  (find-symbol "RUN-FEDWIKI-LOADER-EXAMPLES"
+                               hyperdoc-package))))
+      (unless (and runner
+                   (fboundp runner))
+        (error "RUN-FEDWIKI-LOADER-EXAMPLES is unavailable after loading examples system."))
+      (let ((suite
+              (funcall (symbol-function runner))))
+        (unless (eq (getf suite :status) :pass)
+          (error "FedWiki loader examples smoke failed: ~S" suite))
+        (format t "~&FedWiki loader examples smoke tests passed.~%")
+        t))))
+
 (defun run-hyperdoc-tests ()
   ;; This boundary check must run before compile-order tests intentionally load
   ;; :hyperdoc/inspector, which depends on the optional Zotero backend.
@@ -55,6 +117,7 @@
   (run-dmx-platform-workspace-assignment-semantics-smoke-tests)
   (run-article-allegation-slice-smoke-tests)
   (run-fedwiki-materialization-smoke-tests)
+  (run-fedwiki-loader-examples-smoke-tests)
   (run-authored-html-render-safety-smoke-tests)
   (run-lookup-issue-docs-render-smoke-tests)
   (run-page-lookup-issues-smoke-tests)
