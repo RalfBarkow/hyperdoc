@@ -92,22 +92,35 @@
                     (eq loaded :page-asset))))
          (if ok
              (fedwiki-loader-example-pass id :given
-              (list :logical-path logical-path :system-name "clog" :root root)
-              :operation
-              '(fedwiki-resolve-loadable "clog/./tutorial/01-tutorial.lisp"
-                                         :system-name "clog")
-              :then (list :resolved (truename asset) :loaded :page-asset)
-              :evidence (list :resolved resolved :loaded loaded))
+                                          (list :logical-path logical-path
+                                                :system-name "clog" :root root)
+                                          :operation
+                                          '(fedwiki-resolve-loadable
+                                            "clog/./tutorial/01-tutorial.lisp"
+                                            :system-name "clog")
+                                          :then
+                                          (list :resolved (truename asset)
+                                                :loaded :page-asset)
+                                          :evidence
+                                          (list :resolved resolved :loaded
+                                                loaded))
              (fedwiki-loader-example-fail id :given
-              (list :logical-path logical-path :system-name "clog" :root root)
-              :operation 'fedwiki-resolve-loadable :expected
-              (list :resolved (truename asset) :loaded :page-asset) :actual
-              (list :resolved resolved :loaded loaded))))
+                                          (list :logical-path logical-path
+                                                :system-name "clog" :root root)
+                                          :operation 'fedwiki-resolve-loadable
+                                          :expected
+                                          (list :resolved (truename asset)
+                                                :loaded :page-asset)
+                                          :actual
+                                          (list :resolved resolved :loaded
+                                                loaded))))
        (condition (condition)
         (fedwiki-loader-example-fail id :given
-         (list :logical-path logical-path :system-name "clog" :root root)
-         :operation 'fedwiki-resolve-loadable :condition
-         (princ-to-string condition)))))))
+                                     (list :logical-path logical-path
+                                           :system-name "clog" :root root)
+                                     :operation 'fedwiki-resolve-loadable
+                                     :condition
+                                     (princ-to-string condition)))))))
 
 
 (defun fedwiki-loader-example-missing-loadable-attempts ()
@@ -126,28 +139,43 @@
               (fedwiki-resolve-loadable logical-path :system-name "clog" :store
                                         store)))
          (fedwiki-loader-example-fail id :given
-          (list :logical-path logical-path :system-name "clog" :root root)
-          :operation 'fedwiki-resolve-loadable :expected
-          'fedwiki-loadable-not-found :actual resolved))
+                                      (list :logical-path logical-path
+                                            :system-name "clog" :root root)
+                                      :operation 'fedwiki-resolve-loadable
+                                      :expected 'fedwiki-loadable-not-found
+                                      :actual resolved))
        (fedwiki-loadable-not-found (condition)
         (let* ((attempts (fedwiki-loadable-attempts-of condition))
                (actual (fedwiki-loader-example-stage-statuses attempts)))
           (if (equal actual expected)
               (fedwiki-loader-example-pass id :given
-               (list :logical-path logical-path :system-name "clog" :root root)
-               :operation 'fedwiki-resolve-loadable :then
-               (list :attempt-stage-statuses expected) :evidence
-               (list :logical-path (fedwiki-loadable-logical-path-of condition)
-                     :attempts attempts))
+                                           (list :logical-path logical-path
+                                                 :system-name "clog" :root
+                                                 root)
+                                           :operation 'fedwiki-resolve-loadable
+                                           :then
+                                           (list :attempt-stage-statuses
+                                                 expected)
+                                           :evidence
+                                           (list :logical-path
+                                                 (fedwiki-loadable-logical-path-of
+                                                  condition)
+                                                 :attempts attempts))
               (fedwiki-loader-example-fail id :given
-               (list :logical-path logical-path :system-name "clog" :root root)
-               :operation 'fedwiki-resolve-loadable :expected expected :actual
-               actual :evidence (list :attempts attempts)))))
+                                           (list :logical-path logical-path
+                                                 :system-name "clog" :root
+                                                 root)
+                                           :operation 'fedwiki-resolve-loadable
+                                           :expected expected :actual actual
+                                           :evidence
+                                           (list :attempts attempts)))))
        (condition (condition)
         (fedwiki-loader-example-fail id :given
-         (list :logical-path logical-path :system-name "clog" :root root)
-         :operation 'fedwiki-resolve-loadable :condition
-         (princ-to-string condition)))))))
+                                     (list :logical-path logical-path
+                                           :system-name "clog" :root root)
+                                     :operation 'fedwiki-resolve-loadable
+                                     :condition
+                                     (princ-to-string condition)))))))
 
 
 (defparameter *fedwiki-loader-example-functions*
@@ -183,7 +211,51 @@
           suite))))
 
 
+(defun fedwiki-loader-example-assert-pass (result)
+  (unless (fedwiki-loader-example-result-pass-p result)
+    (error "FedWiki loader example failed: ~S" result))
+  result)
+
+
+(defexample fedwiki-loader-page-attached-asset-hit-registered-example
+  (:register t :system "hyperdoc-fedwiki-loader-examples" :page
+   "FedWiki loader examples" :title
+   "Page-attached Lisp asset resolves before SQLite alias fallback"
+   :class-or-group "fedwiki-loader" :tags
+   '(:kind :example :suite "fedwiki-loader" :resolver :page-attached-asset))
+  (fedwiki-loader-example-assert-pass
+   (fedwiki-loader-example-page-attached-asset-hit)))
+
+
+(defexample fedwiki-loader-missing-loadable-attempts-registered-example
+  (:register t :system "hyperdoc-fedwiki-loader-examples" :page
+   "FedWiki loader examples" :title
+   "Missing loadable reports exact path page asset and SQLite miss attempts"
+   :class-or-group "fedwiki-loader" :tags
+   '(:kind :example :suite "fedwiki-loader" :resolver :missing-loadable))
+  (fedwiki-loader-example-assert-pass
+   (fedwiki-loader-example-missing-loadable-attempts)))
+
+
+(defun discover-fedwiki-loader-examples ()
+  (discover-examples :system "hyperdoc-fedwiki-loader-examples" :page
+                     "FedWiki loader examples"))
+
+
+(defun run-discovered-fedwiki-loader-examples ()
+  (run-examples (discover-fedwiki-loader-examples)))
+
+
+(defun inspect-discovered-fedwiki-loader-examples ()
+  (let ((run (run-discovered-fedwiki-loader-examples)))
+    (let* ((package (find-package :clog-moldable-inspector))
+           (symbol (and package (find-symbol "CLOG-INSPECT" package))))
+      (if (and symbol (fboundp symbol))
+          (funcall (symbol-function symbol) run)
+          run))))
+
+
 (export
- '(run-fedwiki-loader-examples assert-fedwiki-loader-examples-pass
-   inspect-fedwiki-loader-examples))
+ '(discover-fedwiki-loader-examples run-discovered-fedwiki-loader-examples
+   inspect-discovered-fedwiki-loader-examples))
 
