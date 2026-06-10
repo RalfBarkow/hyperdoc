@@ -25,25 +25,30 @@ WIDTH="${HYPERDOC_FRAME_WIDTH:-1280}"
 HEIGHT="${HYPERDOC_FRAME_HEIGHT:-900}"
 DEVELOPMENT="${HYPERDOC_DEVELOPMENT:-0}"
 
-resolve_openssl_lib_dir() {
-  if [ -n "${HYPERDOC_OPENSSL_LIB_DIR:-}" ]; then
-    printf '%s\n' "${HYPERDOC_OPENSSL_LIB_DIR}"
+resolve_runtime_library_path() {
+  if [ -n "${HYPERDOC_RUNTIME_LIBRARY_PATH:-}" ]; then
+    printf '%s\n' "${HYPERDOC_RUNTIME_LIBRARY_PATH}"
     return 0
   fi
 
   if command -v nix >/dev/null 2>&1; then
-    nix eval --raw --impure --expr 'let flake = builtins.getFlake "git+file://'"${REPO_ROOT}"'"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in "${pkgs.openssl.out}/lib"' 2>/dev/null && return 0
-    nix build --no-link --print-out-paths nixpkgs#openssl 2>/dev/null | tail -n 1 | sed 's,$,/lib,' && return 0
+    nix eval --raw --impure --expr 'let flake = builtins.getFlake "git+file://'"${REPO_ROOT}"'"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in builtins.concatStringsSep ":" [ "${pkgs.openssl.out}/lib" "${pkgs.sqlite.out}/lib" ]' 2>/dev/null && return 0
   fi
 
   return 1
 }
 
-OPENSSL_LIB_DIR="$(resolve_openssl_lib_dir || true)"
-if [ -n "${OPENSSL_LIB_DIR}" ] && [ -r "${OPENSSL_LIB_DIR}/libcrypto.so.3" ]; then
-  export LD_LIBRARY_PATH="${OPENSSL_LIB_DIR}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-else
-  echo "Warning: OpenSSL 3 runtime library directory not found; libcrypto.so.3 may fail to load." >&2
+RUNTIME_LIBRARY_PATH="$(resolve_runtime_library_path || true)"
+if [ -n "${RUNTIME_LIBRARY_PATH}" ]; then
+  export LD_LIBRARY_PATH="${RUNTIME_LIBRARY_PATH}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+fi
+
+if ! printf '%s' "${LD_LIBRARY_PATH:-}" | tr ':' '\n' | while IFS= read -r d; do test -r "$d/libcrypto.so.3" && exit 0; done; then
+  echo "Warning: OpenSSL 3 runtime library not found in LD_LIBRARY_PATH; libcrypto.so.3 may fail to load." >&2
+fi
+
+if ! printf '%s' "${LD_LIBRARY_PATH:-}" | tr ':' '\n' | while IFS= read -r d; do test -r "$d/libsqlite3.so.0" && exit 0; done; then
+  echo "Warning: SQLite runtime library not found in LD_LIBRARY_PATH; libsqlite3.so.0 may fail to load." >&2
 fi
 
 free_port() {
