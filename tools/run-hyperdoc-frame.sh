@@ -97,8 +97,8 @@ for _ in $(seq 1 120); do
     : > "$FRAME_LOG_FILE"
 
     set +e
-    "$FRAME" "$TITLE" "$PORT" "$WIDTH" "$HEIGHT" >> "$FRAME_LOG_FILE" 2>&1
-    FRAME_STATUS="$?"
+    "$FRAME" "$TITLE" "$PORT" "$WIDTH" "$HEIGHT" 2>&1 | tee -a "$FRAME_LOG_FILE"
+    FRAME_STATUS="${PIPESTATUS[0]}"
     set -e
 
     echo
