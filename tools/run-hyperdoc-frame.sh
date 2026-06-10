@@ -5,50 +5,38 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ -x "${SCRIPT_DIR}/clogframe" ] && [ -x "${SCRIPT_DIR}/../hyperdoc-standalone/hyperdoc" ]; then
   FRAME_DIR="${SCRIPT_DIR}"
-  BUNDLE_DIR="$(cd "${FRAME_DIR}/.." && pwd)"
-  REPO_ROOT="$(cd "${BUNDLE_DIR}/.." && pwd)"
 else
-  REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-  BUNDLE_DIR="${REPO_ROOT}/bundle-deploy"
-  FRAME_DIR="${BUNDLE_DIR}/hyperdoc-frame"
+  FRAME_DIR="$(cd "${SCRIPT_DIR}/../bundle-deploy/hyperdoc-frame" && pwd)"
 fi
 
-SERVER="${HYPERDOC_SERVER:-${BUNDLE_DIR}/hyperdoc-standalone/hyperdoc}"
-FRAME="${HYPERDOC_FRAME:-${FRAME_DIR}/clogframe}"
+CLOSURE_ENV="${HYPERDOC_RUNTIME_CLOSURE_ENV:-${FRAME_DIR}/hyperdoc-runtime-closure.env}"
 
-PID_FILE="${FRAME_DIR}/hyperdoc-server.pid"
-PORT_FILE="${FRAME_DIR}/hyperdoc-server.port"
-LOG_FILE="${FRAME_DIR}/hyperdoc-server.log"
+if [ ! -r "${CLOSURE_ENV}" ]; then
+  echo "Missing HyperDoc runtime closure manifest: ${CLOSURE_ENV}" >&2
+  echo "Rebuild the bundle so make generates hyperdoc-runtime-closure.env." >&2
+  exit 1
+fi
+
+. "${CLOSURE_ENV}"
+
+SERVER="${HYPERDOC_SERVER:?HYPERDOC_SERVER missing from runtime closure}"
+FRAME="${HYPERDOC_FRAME:?HYPERDOC_FRAME missing from runtime closure}"
+BOOT_PATH="${HYPERDOC_BOOT_PATH:-/boot.html}"
+PID_FILE="${HYPERDOC_PID_FILE:?HYPERDOC_PID_FILE missing from runtime closure}"
+PORT_FILE="${HYPERDOC_PORT_FILE:?HYPERDOC_PORT_FILE missing from runtime closure}"
+LOG_FILE="${HYPERDOC_LOG_FILE:?HYPERDOC_LOG_FILE missing from runtime closure}"
+FRAME_LOG_FILE="${HYPERDOC_FRAME_LOG_FILE:-${FRAME_DIR}/hyperdoc-frame.log}"
+KEEP_SERVER_AFTER_FRAME="${HYPERDOC_KEEP_SERVER_AFTER_FRAME:-0}"
 
 TITLE="${HYPERDOC_FRAME_TITLE:-HyperDoc}"
 WIDTH="${HYPERDOC_FRAME_WIDTH:-1280}"
 HEIGHT="${HYPERDOC_FRAME_HEIGHT:-900}"
 DEVELOPMENT="${HYPERDOC_DEVELOPMENT:-0}"
 
-resolve_runtime_library_path() {
-  if [ -n "${HYPERDOC_RUNTIME_LIBRARY_PATH:-}" ]; then
-    printf '%s\n' "${HYPERDOC_RUNTIME_LIBRARY_PATH}"
-    return 0
-  fi
-
-  if command -v nix >/dev/null 2>&1; then
-    nix eval --raw --impure --expr 'let flake = builtins.getFlake "git+file://'"${REPO_ROOT}"'"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in builtins.concatStringsSep ":" [ "${pkgs.openssl.out}/lib" "${pkgs.sqlite.out}/lib" ]' 2>/dev/null && return 0
-  fi
-
-  return 1
-}
-
-RUNTIME_LIBRARY_PATH="$(resolve_runtime_library_path || true)"
-if [ -n "${RUNTIME_LIBRARY_PATH}" ]; then
-  export LD_LIBRARY_PATH="${RUNTIME_LIBRARY_PATH}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-fi
-
-if ! printf '%s' "${LD_LIBRARY_PATH:-}" | tr ':' '\n' | while IFS= read -r d; do test -r "$d/libcrypto.so.3" && exit 0; done; then
-  echo "Warning: OpenSSL 3 runtime library not found in LD_LIBRARY_PATH; libcrypto.so.3 may fail to load." >&2
-fi
-
-if ! printf '%s' "${LD_LIBRARY_PATH:-}" | tr ':' '\n' | while IFS= read -r d; do test -r "$d/libsqlite3.so.0" && exit 0; done; then
-  echo "Warning: SQLite runtime library not found in LD_LIBRARY_PATH; libsqlite3.so.0 may fail to load." >&2
+if [ -n "${HYPERDOC_RUNTIME_LIBRARY_PATH:-}" ]; then
+  export LD_LIBRARY_PATH="${HYPERDOC_RUNTIME_LIBRARY_PATH}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+  export DYLD_LIBRARY_PATH="${HYPERDOC_RUNTIME_LIBRARY_PATH}${DYLD_LIBRARY_PATH:+:${DYLD_LIBRARY_PATH}}"
+  export DYLD_FALLBACK_LIBRARY_PATH="${HYPERDOC_RUNTIME_LIBRARY_PATH}${DYLD_FALLBACK_LIBRARY_PATH:+:${DYLD_FALLBACK_LIBRARY_PATH}}"
 fi
 
 free_port() {
@@ -60,18 +48,18 @@ alive() {
 }
 
 ready() {
-  curl -fsS "http://127.0.0.1:$1/boot.html" >/dev/null 2>&1
+  curl -fsS "http://127.0.0.1:$1${BOOT_PATH}" >/dev/null 2>&1
 }
 
-mkdir -p "${FRAME_DIR}"
+mkdir -p "$(dirname "$PID_FILE")"
 
 if [ ! -x "$SERVER" ]; then
-  echo "Missing server executable: $SERVER" >&2
+  echo "Missing server executable from runtime closure: $SERVER" >&2
   exit 1
 fi
 
 if [ ! -x "$FRAME" ]; then
-  echo "Missing CLOG Frame executable: $FRAME" >&2
+  echo "Missing CLOG Frame executable from runtime closure: $FRAME" >&2
   exit 1
 fi
 
@@ -103,12 +91,45 @@ fi
 
 for _ in $(seq 1 120); do
   if ready "$PORT"; then
-    echo "HyperDoc: http://127.0.0.1:$PORT/boot.html"
-    "$FRAME" "$TITLE" "${PORT}/boot.html" "$WIDTH" "$HEIGHT"
+    BOOT_URL="http://127.0.0.1:${PORT}${BOOT_PATH}"
+    echo "HyperDoc: ${BOOT_URL}"
+    echo "CLOG Frame log: ${FRAME_LOG_FILE}"
+    : > "$FRAME_LOG_FILE"
+
+    set +e
+    "$FRAME" "$TITLE" "$PORT" "$WIDTH" "$HEIGHT" >> "$FRAME_LOG_FILE" 2>&1
+    FRAME_STATUS="$?"
+    set -e
+
     echo
     echo "CLOG Frame closed."
-    echo "HyperDoc server is still running on port $PORT."
-    echo "Stop it with: make stop"
+
+    if [ "${KEEP_SERVER_AFTER_FRAME}" = "1" ]; then
+      echo "HyperDoc server is still running on port $PORT."
+      echo "Stop it with: make stop"
+    else
+      if alive; then
+        SERVER_PID="$(cat "$PID_FILE")"
+        echo "Stopping HyperDoc server $SERVER_PID"
+        kill "$SERVER_PID" 2>/dev/null || true
+        for _ in $(seq 1 40); do
+          kill -0 "$SERVER_PID" 2>/dev/null || break
+          sleep 0.25
+        done
+        if kill -0 "$SERVER_PID" 2>/dev/null; then
+          echo "HyperDoc server did not stop after TERM; killing $SERVER_PID"
+          kill -9 "$SERVER_PID" 2>/dev/null || true
+        fi
+      fi
+      rm -f "$PID_FILE" "$PORT_FILE"
+    fi
+
+    if [ "$FRAME_STATUS" -ne 0 ]; then
+      echo "CLOG Frame exited with status $FRAME_STATUS. Log follows:" >&2
+      tail -n 80 "$FRAME_LOG_FILE" >&2 || true
+      exit "$FRAME_STATUS"
+    fi
+
     exit 0
   fi
   sleep 0.25

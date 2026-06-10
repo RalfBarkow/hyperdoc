@@ -15,14 +15,15 @@
 .DEFAULT_GOAL := all
 
 .PHONY: all explain-build run stop status clean rebuild help \
-	build-standalone build-clog-frame build-runner \
+	build-standalone build-clog-frame build-runtime-closure build-runner \
 	repomix repomix-help repomix-clean repomix-all \
 	repomix-core repomix-dock repomix-validation repomix-fedwiki \
 	repomix-dmx repomix-deployment repomix-dm6 repomix-zotero \
 	repomix-full
 
 SBCL ?= sbcl
-LISP ?= nix develop -c $(SBCL)
+LISP_ENV ?= env -u CL_SOURCE_REGISTRY -u CL_SOURCE_REGISTRY_CONFIG -u ASDF_OUTPUT_TRANSLATIONS -u ASDF_OUTPUT_TRANSLATIONS_CONFIG
+LISP ?= $(LISP_ENV) nix develop -c $(SBCL)
 
 BUNDLE_DIR ?= bundle-deploy
 SERVER_DIR ?= $(BUNDLE_DIR)/hyperdoc-standalone
@@ -36,6 +37,9 @@ PID_FILE ?= $(FRAME_DIR)/hyperdoc-server.pid
 PORT_FILE ?= $(FRAME_DIR)/hyperdoc-server.port
 LOG_FILE ?= $(FRAME_DIR)/hyperdoc-server.log
 
+RUNTIME_CLOSURE_ENV ?= $(FRAME_DIR)/hyperdoc-runtime-closure.env
+RUNTIME_CLOSURE_SEXP ?= $(FRAME_DIR)/hyperdoc-runtime-closure.sexp
+
 HYPERDOC_SYSTEM ?= :hyperdoc/server
 
 CLOGFRAME_NIX ?= nix/clogframe.nix
@@ -45,11 +49,12 @@ REPOMIX_PACK = core
 PACK = $(REPOMIX_PACK)
 REPOMIX_FOCUSED_PACKS = core dock validation fedwiki dmx deployment dm6 zotero
 
-all: explain-build $(SERVER_EXE) $(FRAME_EXE) $(RUNNER)
+all: explain-build $(SERVER_EXE) $(FRAME_EXE) $(RUNTIME_CLOSURE_ENV) $(RUNNER)
 	@echo
 	@echo "Built:"
 	@echo "  $(SERVER_EXE)"
 	@echo "  $(FRAME_EXE)"
+	@echo "  $(RUNTIME_CLOSURE_ENV)"
 	@echo "  $(RUNNER)"
 	@echo
 	@echo "Run with:"
@@ -59,7 +64,8 @@ explain-build:
 	@echo "make builds a standalone HyperDoc CLOG Frame bundle:"
 	@echo "  1. HyperDoc SBCL server executable"
 	@echo "  2. native CLOG Frame executable via Nix"
-	@echo "  3. launcher script"
+	@echo "  3. runtime closure manifest"
+	@echo "  4. launcher script"
 	@echo
 	@echo "Other useful goals:"
 	@echo "  make run           launch CLOG Frame"
@@ -89,13 +95,23 @@ $(FRAME_EXE): $(CLOGFRAME_NIX)
 	install -m 0755 "$(CLOGFRAME_RESULT)/bin/clogframe" "$(FRAME_EXE)"
 	@echo "==> Built $(FRAME_EXE)"
 
-$(RUNNER): Makefile tools/run-hyperdoc-frame.sh $(SERVER_EXE) $(FRAME_EXE)
+$(RUNTIME_CLOSURE_ENV): Makefile tools/write-hyperdoc-runtime-closure.lisp $(SERVER_EXE) $(FRAME_EXE)
+	@echo "==> Generating HyperDoc runtime closure"
+	mkdir -p "$(dir $(RUNTIME_CLOSURE_ENV))"
+	$(LISP) --no-userinit --no-sysinit --non-interactive \
+		--eval '(defparameter cl-user::*hyperdoc-root* #P"$(CURDIR)/")' \
+		--eval '(defparameter cl-user::*hyperdoc-runtime-env* #P"$(abspath $(RUNTIME_CLOSURE_ENV))")' \
+		--eval '(defparameter cl-user::*hyperdoc-runtime-sexp* #P"$(abspath $(RUNTIME_CLOSURE_SEXP))")' \
+		--load tools/write-hyperdoc-runtime-closure.lisp
+	@echo "==> Built $(RUNTIME_CLOSURE_ENV)"
+
+$(RUNNER): Makefile tools/run-hyperdoc-frame.sh $(SERVER_EXE) $(FRAME_EXE) $(RUNTIME_CLOSURE_ENV)
 	@echo "==> Installing runner"
 	mkdir -p "$(dir $(RUNNER))"
 	install -m 0755 tools/run-hyperdoc-frame.sh "$(RUNNER)"
 	@echo "==> Built $(RUNNER)"
 
-run: all
+run: all $(RUNTIME_CLOSURE_ENV)
 	"$(RUNNER)"
 
 stop:
@@ -131,6 +147,7 @@ rebuild: clean all
 
 build-standalone: $(SERVER_EXE)
 build-clog-frame: $(FRAME_EXE)
+build-runtime-closure: $(RUNTIME_CLOSURE_ENV)
 build-runner: $(RUNNER)
 
 help:
