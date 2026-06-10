@@ -122,44 +122,6 @@
         (t nil)))))
 
 
-(defun fedwiki-resolve-loadable
-       (logical-path
-        &key (store (make-default-fedwiki-loader-store)) system-name)
-  (let ((attempts nil))
-    (labels ((note (stage status detail)
-               (push (list :stage stage :status status :detail detail)
-                     attempts)))
-      (let ((p (ignore-errors (pathname logical-path))))
-        (when (and p (probe-file p))
-          (note :exact-path :ok (namestring p))
-          (return-from fedwiki-resolve-loadable (truename p)))
-        (note :exact-path :miss logical-path))
-      (let* ((sql
-              (format nil "SELECT local_path FROM fedwiki_asset_aliases
-                           WHERE logical_path = ~A
-                           ~@[AND system_name = ~A~]
-                           ORDER BY priority ASC
-                           LIMIT 1;"
-                      (fedwiki-loader-sql-string logical-path)
-                      (and system-name
-                           (fedwiki-loader-sql-string system-name))))
-             (row
-              (fedwiki-loader-first-json-row
-               (fedwiki-loader-run-sql store sql :json-p t)))
-             (local-path (and row (gethash "local_path" row))))
-        (cond
-         ((and local-path (probe-file local-path))
-          (note :sqlite-alias :ok local-path)
-          (return-from fedwiki-resolve-loadable (truename local-path)))
-         (local-path (note :sqlite-alias :stale local-path))
-         (t (note :sqlite-alias :miss logical-path))))
-      (restart-case (error 'fedwiki-loadable-not-found :logical-path
-                           logical-path :attempts (nreverse attempts) :pathname
-                           logical-path)
-        (use-value (pathname) :report "Use a pathname for this loadable."
-                   pathname)))))
-
-
 (defvar *original-clog-load-tutorial* nil)
 
 
@@ -203,6 +165,185 @@
                                                            :store
                                                            effective-store)))))))
   :installed)
+
+
+(defun fedwiki-loader-default-root ()
+  (or
+   (ignore-errors
+    (when (boundp '*hyperdoc-root*)
+      (truename (symbol-value '*hyperdoc-root*))))
+   (ignore-errors (asdf/system:system-source-directory :hyperdoc))
+   (ignore-errors (truename #P"/Users/rgb/workspace/hyperdoc/"))
+   (uiop/os:getcwd)))
+
+
+(defun fedwiki-loader-string-prefix-p (prefix string)
+  (let ((prefix (string prefix)) (string (string string)))
+    (and (<= (length prefix) (length string))
+         (string= prefix string :end2 (length prefix)))))
+
+
+(defun fedwiki-loader-drop-prefix (prefix string)
+  (if (fedwiki-loader-string-prefix-p prefix string)
+      (subseq string (length prefix))
+      string))
+
+
+(defun fedwiki-loader-normalize-logical-asset-path
+       (logical-path &key system-name)
+  (let* ((path (namestring (pathname logical-path)))
+         (system-prefix
+          (and system-name
+               (format nil "~A/" (string-downcase (string system-name)))))
+         (without-system
+          (if system-prefix
+              (fedwiki-loader-drop-prefix system-prefix path)
+              path)))
+    (fedwiki-loader-drop-prefix "./" without-system)))
+
+
+(defun fedwiki-loader-slug-character (character)
+  (cond ((alphanumericp character) (char-downcase character)) (t #\-)))
+
+
+(defun fedwiki-loader-collapse-hyphens (string)
+  (with-output-to-string (out)
+    (let ((previous-hyphen-p nil))
+      (loop for character across string
+            for hyphen-p = (char= character #\-)
+            do (unless (and hyphen-p previous-hyphen-p)
+                 (write-char character out)) (setf previous-hyphen-p
+                                                     hyphen-p)))))
+
+
+(defun fedwiki-loader-trim-hyphens (string) (string-trim "-" string))
+
+
+(defun fedwiki-loader-slugify (value)
+  (fedwiki-loader-trim-hyphens
+   (fedwiki-loader-collapse-hyphens
+    (map 'string #'fedwiki-loader-slug-character (string value)))))
+
+
+(defun fedwiki-loader-page-slug-for-logical-path
+       (logical-path &key system-name page-slug)
+  (or page-slug
+      (let ((asset-path
+             (fedwiki-loader-normalize-logical-asset-path logical-path
+                                                          :system-name
+                                                          system-name)))
+        (cond
+         ((and system-name (string-equal (string system-name) "clog")
+               (fedwiki-loader-string-prefix-p "tutorial/" asset-path))
+          "clog-tutorials")
+         (system-name (fedwiki-loader-slugify system-name))
+         (t "loadable-assets")))))
+
+
+(defun fedwiki-loader-page-asset-pathname
+       (logical-path &key system-name page-slug root)
+  (let* ((root (or root (fedwiki-loader-default-root)))
+         (slug
+          (fedwiki-loader-page-slug-for-logical-path logical-path :system-name
+                                                     system-name :page-slug
+                                                     page-slug))
+         (asset-path
+          (fedwiki-loader-normalize-logical-asset-path logical-path
+                                                       :system-name
+                                                       system-name))
+         (relative (format nil "assets/pages/~A/~A" slug asset-path)))
+    (merge-pathnames relative root)))
+
+
+(defun fedwiki-loader-page-asset-attempt
+       (logical-path &key system-name page-slug root)
+  (let ((candidate
+         (fedwiki-loader-page-asset-pathname logical-path :system-name
+                                             system-name :page-slug page-slug
+                                             :root root)))
+    (if (probe-file candidate)
+        (values (truename candidate)
+                (list :stage :page-attached-asset :status :hit :detail
+                      (namestring candidate)))
+        (values nil
+                (list :stage :page-attached-asset :status :miss :detail
+                      (namestring candidate))))))
+
+
+(defun fedwiki-loader-sqlite-alias-attempt
+       (logical-path &key system-name store)
+  (handler-case
+   (let* ((store (or store (default-fedwiki-loader-store))))
+     (ensure-fedwiki-loader-schema store)
+     (let ((row
+            (fedwiki-loader-first-json-row
+             (fedwiki-loader-run-sql store
+                                     (format nil "select resolved_path
+                                 from loadable_asset_aliases
+                                where logical_path = ~A
+                                  and (~A is null or system_name = ~A)
+                                order by id desc
+                                limit 1;"
+                                             (fedwiki-loader-sql-string
+                                              logical-path)
+                                             (fedwiki-loader-sql-string
+                                              system-name)
+                                             (fedwiki-loader-sql-string
+                                              system-name))
+                                     :json-p t))))
+       (if row
+           (let ((resolved (cdr (assoc :|resolved_path| row))))
+             (if (and resolved (probe-file resolved))
+                 (values (truename resolved)
+                         (list :stage :sqlite-alias :status :hit :detail
+                               resolved))
+                 (values nil
+                         (list :stage :sqlite-alias :status :dangling :detail
+                               resolved))))
+           (values nil
+                   (list :stage :sqlite-alias :status :miss :detail
+                         logical-path)))))
+   (condition (condition)
+    (values nil
+            (list :stage :sqlite-alias :status :error :detail
+                  (princ-to-string condition))))))
+
+
+(defun fedwiki-resolve-loadable (logical-path &key system-name page-slug store)
+  "Resolve LOGICAL-PATH using:
+  1. direct pathname;
+  2. FedWiki page-attached asset convention;
+  3. SQLite asset alias table.
+
+The page-attached convention is:
+  assets/pages/<page-slug>/<asset-path>"
+  (let ((attempts nil))
+    (labels ((record (attempt)
+               (push attempt attempts))
+             (finish (pathname)
+               (return-from fedwiki-resolve-loadable pathname)))
+      (let ((direct (pathname logical-path)))
+        (if (probe-file direct)
+            (progn
+             (record
+              (list :stage :exact-path :status :hit :detail
+                    (namestring direct)))
+             (finish (truename direct)))
+            (record
+             (list :stage :exact-path :status :miss :detail
+                   (namestring direct)))))
+      (multiple-value-bind (pathname attempt)
+          (fedwiki-loader-page-asset-attempt logical-path :system-name
+                                             system-name :page-slug page-slug)
+        (record attempt)
+        (when pathname (finish pathname)))
+      (multiple-value-bind (pathname attempt)
+          (fedwiki-loader-sqlite-alias-attempt logical-path :system-name
+           system-name :store store)
+        (record attempt)
+        (when pathname (finish pathname)))
+      (error 'fedwiki-loadable-not-found :logical-path logical-path :attempts
+             (nreverse attempts)))))
 
 
 (export
