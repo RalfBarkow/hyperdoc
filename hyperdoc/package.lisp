@@ -660,6 +660,57 @@
    #:fedwiki-asdf-lookup-failure-condition
    #:fedwiki-asdf-lookup-failure-home-page
    #:fedwiki-asdf-lookup-failure-text
+   #:fedwiki-register-asset-alias
+   #:hyperdoc-source-pathname-content
+   #:hyperdoc-source-pathname-exists-p
+   #:assert-fedwiki-loader-examples-pass
+   #:hyperdoc-source-pathname-root-of
+   #:ensure-hyperdoc-source-pathname
+   #:hyperdoc-source-pathname-definition-counts
+   #:fedwiki-loadable-not-found
+   #:hyperdoc-source-pathname-topicmap
+   #:hyperdoc-source-pathname
+   #:make-hyperdoc-source-pathname
+   #:hyperdoc-source-pathname-load
+   #:inspect-fedwiki-loader-examples
+   #:fedwiki-loadable-attempts-of
+   #:default-fedwiki-loader-store
+   #:install-clog-tutorial-fedwiki-loader
+   #:load-fedwiki-resolved-file
+   #:make-default-fedwiki-loader-store
+   #:hyperdoc-source-pathname-title-of
+   #:ensure-fedwiki-loader-schema
+   #:hyperdoc-source-pathname-pathname-of
+   #:hyperdoc-source-pathname-topic-source-file
+   #:hyperdoc-source-pathname-read/check
+   #:run-fedwiki-loader-examples
+   #:discover-fedwiki-loader-examples
+   #:hyperdoc-source-pathname-lines
+   #:hyperdoc-source-pathname-inspect
+   #:inspect-discovered-fedwiki-loader-examples
+   #:uninstall-clog-tutorial-fedwiki-loader
+   #:fedwiki-loadable-logical-path-of
+   #:hyperdoc-source-pathname-source-shape
+   #:hyperdoc-source-pathname-definition-index
+   #:fedwiki-resolve-loadable
+   #:run-discovered-fedwiki-loader-examples
+   #:hyperdoc-source-pathname-title
+   #:hyperdoc-source-pathname-relative-namestring
+
+   #:fedwiki-attached-asdf-capability-relation
+   #:make-fedwiki-attached-asdf-capability-relation
+   #:fedwiki-asdf-relation-from-home-of
+   #:fedwiki-asdf-relation-to-home-of
+   #:fedwiki-asdf-relation-capability-of
+   #:fedwiki-asdf-relation-entry-package-name-of
+   #:fedwiki-asdf-relation-entry-symbol-name-of
+   #:fedwiki-asdf-relation-reason-of
+   #:fedwiki-asdf-relation-load-policy-of
+   #:fedwiki-asdf-relation-state
+   #:fedwiki-asdf-relation-provider-ready-p
+   #:fedwiki-asdf-relation-load-provider
+   #:invoke-fedwiki-attached-asdf-capability
+   #:fedwiki-asdf-relation-summary-lines
    ;; FedWiki page-local ASDF asset writer
    #:page-asdf-asset-spec
    #:page-asdf-asset-spec-system-name
