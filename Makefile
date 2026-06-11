@@ -39,6 +39,9 @@ LOG_FILE ?= $(FRAME_DIR)/hyperdoc-server.log
 
 RUNTIME_CLOSURE_ENV ?= $(FRAME_DIR)/hyperdoc-runtime-closure.env
 RUNTIME_CLOSURE_SEXP ?= $(FRAME_DIR)/hyperdoc-runtime-closure.sexp
+RUNTIME_CLOSURE_VALIDATION_SEXP ?= $(FRAME_DIR)/hyperdoc-runtime-closure-validation.sexp
+RUNTIME_CLOSURE_VALIDATION_HTML ?= $(FRAME_DIR)/hyperdoc-runtime-closure-validation.html
+
 
 HYPERDOC_SYSTEM ?= :hyperdoc/server
 
@@ -148,6 +151,17 @@ rebuild: clean all
 build-standalone: $(SERVER_EXE)
 build-clog-frame: $(FRAME_EXE)
 build-runtime-closure: $(RUNTIME_CLOSURE_ENV)
+validate-runtime-closure: $(RUNTIME_CLOSURE_ENV) tools/validate-hyperdoc-runtime-closure.lisp
+	@echo "==> Validating HyperDoc runtime closure"
+	$(LISP) --no-userinit --no-sysinit --non-interactive \
+		--eval '(defparameter cl-user::*hyperdoc-root* #P"$(CURDIR)/")' \
+		--eval '(defparameter cl-user::*hyperdoc-runtime-closure-sexp* #P"$(abspath $(RUNTIME_CLOSURE_SEXP))")' \
+		--eval '(defparameter cl-user::*hyperdoc-runtime-validation-sexp* #P"$(abspath $(RUNTIME_CLOSURE_VALIDATION_SEXP))")' \
+		--eval '(defparameter cl-user::*hyperdoc-runtime-validation-html* #P"$(abspath $(RUNTIME_CLOSURE_VALIDATION_HTML))")' \
+		--load tools/validate-hyperdoc-runtime-closure.lisp
+	@echo "==> Wrote $(RUNTIME_CLOSURE_VALIDATION_SEXP)"
+	@echo "==> Wrote $(RUNTIME_CLOSURE_VALIDATION_HTML)"
+
 build-runner: $(RUNNER)
 
 help:
@@ -231,3 +245,5 @@ repomix-help:
 	@echo "  make repomix-all"
 	@echo "  make repomix-full"
 	@echo "  make repomix-clean"
+
+.PHONY: validate-runtime-closure
