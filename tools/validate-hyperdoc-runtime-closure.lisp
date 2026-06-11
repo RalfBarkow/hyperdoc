@@ -346,6 +346,173 @@
               (getf finding :detail)))
     report))
 
+;;;; Runtime closure validation teardown classification overrides.
+;;;; These definitions intentionally appear before the command-line entrypoint
+;;;; so the validator can distinguish loadability failure from probe shutdown noise.
+
+(defun proof-log-tail (log-text &optional (limit 2000))
+  (if (> (length log-text) limit)
+      (subseq log-text (- (length log-text) limit))
+      log-text))
+
+(defun proof-log-has-teardown-noise-p (log-text)
+  (or (search "JOIN-THREAD-ERROR" log-text :test #'char=)
+      (search "thread failed" log-text :test #'char=)
+      (search "unhandled condition in --disable-debugger mode, quitting"
+              log-text
+              :test #'char=)))
+
+(defun validation-finding-fail-p (finding)
+  (eq (getf finding :status) :fail))
+
+(defun validation-finding-warn-p (finding)
+  (eq (getf finding :status) :warn))
+
+(defun validation-overall-status (findings)
+  (cond
+    ((some #'validation-finding-fail-p findings)
+     :fail)
+    ((some #'validation-finding-warn-p findings)
+     :warn)
+    (t
+     :ok)))
+
+(defun report-ok-p (report)
+  "Return true when REPORT has no hard failures.
+
+A :WARN finding is still a successful proof run. It marks a condition that is
+worth inspecting, but does not invalidate loadability."
+  (notany #'validation-finding-fail-p
+          (getf report :findings)))
+
+(defun saved-image-dynamic-port-smoke (closure validation-sexp-path)
+  (let* ((server (closure-get closure :server-executable))
+         (boot-path (or (closure-get closure :boot-path) "/boot.html"))
+         (library-path (runtime-library-env closure))
+         (log-path (server-smoke-log-path validation-sexp-path))
+         (port (choose-validation-port))
+         (url (format nil "http://127.0.0.1:~D~A" port boot-path))
+         (argv (list "env"
+                     (format nil "HYPERDOC_PORT=~D" port)
+                     "HYPERDOC_DEVELOPMENT=0"
+                     (format nil "HYPERDOC_RUNTIME_LIBRARY_PATH=~A" library-path)
+                     (format nil "LD_LIBRARY_PATH=~A" library-path)
+                     (format nil "DYLD_LIBRARY_PATH=~A" library-path)
+                     (format nil "DYLD_FALLBACK_LIBRARY_PATH=~A" library-path)
+                     server))
+         (process nil)
+         (ready nil)
+         (readiness-finding nil))
+    (ensure-directories-exist log-path)
+    (with-open-file (log-stream log-path
+                                :direction :output
+                                :if-exists :supersede
+                                :if-does-not-exist :create
+                                :external-format :utf-8)
+      (unwind-protect
+           (progn
+             (setf process
+                   (uiop:launch-program
+                    argv
+                    :output log-stream
+                    :error-output log-stream
+                    :input :interactive))
+             (loop repeat 120
+                   do (progn
+                        (finish-output log-stream)
+                        (when (curl-ok-p url)
+                          (setf ready t)
+                          (return))
+                        (sleep 0.25)))
+             (finish-output log-stream)
+             (let ((log-text (read-file-string/safe log-path)))
+               (setf readiness-finding
+                     (cond
+                       ((not ready)
+                        (finding "saved-image/dynamic-port"
+                                 :fail
+                                 (format nil "server did not become ready at ~A" url)
+                                 :port port
+                                 :url url
+                                 :log-file (namestring log-path)
+                                 :log-tail (proof-log-tail log-text)))
+                       ((not (search (format nil "Port: ~D" port)
+                                     log-text
+                                     :test #'char=))
+                        (finding "saved-image/dynamic-port"
+                                 :fail
+                                 (format nil "server responded at ~A, but log did not prove HYPERDOC_PORT=~D"
+                                         url port)
+                                 :port port
+                                 :url url
+                                 :log-file (namestring log-path)
+                                 :log-tail (proof-log-tail log-text)))
+                       (t
+                        (finding "saved-image/dynamic-port"
+                                 :ok
+                                 (format nil "served ~A and logged Port: ~D" url port)
+                                 :port port
+                                 :url url
+                                 :log-file (namestring log-path)))))))
+        (when process
+          (ignore-errors (uiop:terminate-process process))
+          (sleep 0.5)
+          (ignore-errors (uiop:wait-process process)))
+        (finish-output log-stream)))
+    (let* ((post-log-text (read-file-string/safe log-path))
+           (teardown-finding
+             (if (proof-log-has-teardown-noise-p post-log-text)
+                 (finding
+                  "saved-image/probe-teardown"
+                  :warn
+                  "saved image served the requested boot URL, but forced probe teardown logged Hunchentoot/SBCL thread shutdown noise"
+                  :port port
+                  :url url
+                  :log-file (namestring log-path)
+                  :log-tail (proof-log-tail post-log-text))
+                 (finding
+                  "saved-image/probe-teardown"
+                  :ok
+                  "probe process terminated without recognized teardown noise"
+                  :port port
+                  :url url
+                  :log-file (namestring log-path)))))
+      (list readiness-finding teardown-finding))))
+
+(defun validate-hyperdoc-runtime-closure
+    (&key closure-sexp-path validation-sexp-path validation-html-path repo-root)
+  (let* ((closure (read-runtime-closure closure-sexp-path))
+         (findings
+           (append
+            (audit-findings closure repo-root closure-sexp-path)
+            (closure-preflight-findings closure)
+            (validate-native-library-loadability closure)
+            (saved-image-dynamic-port-smoke closure validation-sexp-path)))
+         (overall (validation-overall-status findings))
+         (report
+           (list
+            :hyperdoc-runtime-closure-validation-report t
+            :title "HyperDoc Runtime Closure Validation Report"
+            :generated-at (now-utc-string)
+            :closure-sexp (namestring closure-sexp-path)
+            :validation-sexp (namestring validation-sexp-path)
+            :validation-html (namestring validation-html-path)
+            :overall-status overall
+            :findings findings)))
+    (write-report-sexp report validation-sexp-path)
+    (write-report-html report validation-html-path)
+    (format t "~&HyperDoc Runtime Closure Validation Report~%")
+    (format t "  closure: ~A~%" closure-sexp-path)
+    (format t "  report:  ~A~%" validation-sexp-path)
+    (format t "  html:    ~A~%" validation-html-path)
+    (format t "  overall: ~A~%" overall)
+    (dolist (finding findings)
+      (format t "  ~A  ~A  ~A~%"
+              (getf finding :status)
+              (getf finding :name)
+              (getf finding :detail)))
+    report))
+
 (let* ((repo-root
          (uiop:ensure-directory-pathname
           (or (and (boundp 'cl-user::*hyperdoc-root*)
