@@ -88,8 +88,7 @@ $(SERVER_EXE): Makefile tools/save-hyperdoc-standalone.lisp
 $(FRAME_EXE): $(CLOGFRAME_NIX)
 	@echo "==> Building CLOG Frame via Nix"
 	mkdir -p "$(dir $(FRAME_EXE))"
-	nix build --impure \
-		--expr 'let flake = builtins.getFlake "git+file://$(CURDIR)"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in pkgs.callPackage ./$(CLOGFRAME_NIX) { }' \
+	nix build .#clogframe \
 		--out-link "$(CLOGFRAME_RESULT)"
 	test -x "$(CLOGFRAME_RESULT)/bin/clogframe"
 	install -m 0755 "$(CLOGFRAME_RESULT)/bin/clogframe" "$(FRAME_EXE)"
@@ -98,8 +97,7 @@ $(FRAME_EXE): $(CLOGFRAME_NIX)
 $(SERVER_WRAPPER): $(RUNTIME_WRAPPER_NIX)
 	@echo "==> Building HyperDoc runtime server wrapper via Nix"
 	mkdir -p "$(dir $(SERVER_WRAPPER))"
-	nix build --impure \
-		--expr 'let flake = builtins.getFlake "git+file://$(CURDIR)"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in pkgs.callPackage ./$(RUNTIME_WRAPPER_NIX) { }' \
+	nix build .#hyperdoc-runtime-wrapper \
 		--out-link "$(RUNTIME_WRAPPER_RESULT)"
 	test -x "$(RUNTIME_WRAPPER_RESULT)/bin/hyperdoc-runtime-server"
 	install -m 0755 "$(RUNTIME_WRAPPER_RESULT)/bin/hyperdoc-runtime-server" "$(SERVER_WRAPPER)"

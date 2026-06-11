@@ -87,6 +87,29 @@ for _ in $(seq 1 120); do
     BOOT_URL="http://127.0.0.1:${PORT}${BOOT_PATH}"
     echo "HyperDoc: ${BOOT_URL}"
     echo "CLOG Frame log: ${FRAME_LOG_FILE}"
+
+hyperdoc_frame_dendritic_traversal() {
+  rc=$?
+  if [ -f "${FRAME_LOG_FILE:-}" ] && grep -Eq 'Could not create default EGL display|EGL_BAD_PARAMETER' "$FRAME_LOG_FILE"; then
+    {
+      echo
+      echo "Dendritic traversal: native WebKitGTK CLOG Frame path is blocked."
+      echo "  classification: :webkitgtk-egl-parallels"
+      echo "  blocked-dendrite: :native-clogframe-webkitgtk"
+      echo "  evidence: EGL_BAD_PARAMETER / Could not create default EGL display"
+      if grep -Eq 'libgvfscommon.so: undefined symbol: g_variant_builder_init_static|libgvfsdbus.so' "$FRAME_LOG_FILE"; then
+        echo "  secondary-evidence: :gvfs-gio-module-mismatch"
+      fi
+      echo "  alternative[1]: HYPERDOC_FRAME_MODE=browser HYPERDOC_KEEP_SERVER_AFTER_FRAME=1 nix develop -c make run"
+      echo "  alternative[2]: open ${BOOT_URL:-http://127.0.0.1:${SERVER_PORT:-<port>}/boot.html} in the VM browser"
+      echo "  alternative[3]: ssh -L 8080:127.0.0.1:${SERVER_PORT:-<port>} rgb@10.211.55.7"
+      echo "  decision: stop patching WebKitGTK launch env; traverse to browser-frame mode"
+    } | tee -a "$FRAME_LOG_FILE" >&2
+  fi
+  return "$rc"
+}
+trap hyperdoc_frame_dendritic_traversal EXIT
+
     : > "$FRAME_LOG_FILE"
 
     # HyperDoc CLOG Frame Parallels-safe graphical defaults.

@@ -378,6 +378,7 @@ EOF
 
         packages = {
           inherit lispfmt;
+          clogframe = pkgs.callPackage ./nix/clogframe.nix { };
           hyperdoc-release = releasePackage;
           hyperdoc-runtime-wrapper = runtimeWrapperPackage;
           default = releasePackage;
