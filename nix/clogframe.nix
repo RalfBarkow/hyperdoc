@@ -95,7 +95,10 @@ pkgs.stdenv.mkDerivation {
     if [ "${lib.boolToString pkgs.stdenv.isLinux}" = "true" ]; then
       wrapProgram "$out/bin/clogframe" \
         --prefix LD_LIBRARY_PATH : "${linuxRuntimeLibraryPath}" \
-        --set-default GDK_BACKEND x11 \
+        --set-default GDK_BACKEND wayland \
+        --set-default GIO_USE_VFS local \
+        --set-default GTK_USE_PORTAL 0 \
+        --set-default NO_AT_BRIDGE 1 \
         --set-default WEBKIT_DISABLE_DMABUF_RENDERER 1 \
         --set-default WEBKIT_DISABLE_COMPOSITING_MODE 1 \
         --set-default LIBGL_ALWAYS_SOFTWARE 1 \
