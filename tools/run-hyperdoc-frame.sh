@@ -131,6 +131,37 @@ for _ in $(seq 1 120); do
       echo "  GDK_GL=${GDK_GL:-}"
     } >> "$FRAME_LOG_FILE"
 
+    if [ "${HYPERDOC_FRAME_MODE:-clogframe}" = "browser" ]; then
+      {
+        echo "Frame mode: browser"
+        echo "Opening HyperDoc in VM browser: ${BOOT_URL}"
+        echo "  DISPLAY=${DISPLAY:-}"
+        echo "  WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-}"
+        echo "  XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-}"
+        echo "  DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS:-}"
+      } >> "$FRAME_LOG_FILE"
+
+      export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+      export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-0}"
+      export DISPLAY="${DISPLAY:-:0}"
+      export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=$XDG_RUNTIME_DIR/bus}"
+
+      if command -v xdg-open >/dev/null 2>&1; then
+        xdg-open "$BOOT_URL" >> "$FRAME_LOG_FILE" 2>&1 || true
+      elif command -v gio >/dev/null 2>&1; then
+        gio open "$BOOT_URL" >> "$FRAME_LOG_FILE" 2>&1 || true
+      else
+        echo "No xdg-open or gio available; open manually: $BOOT_URL" >> "$FRAME_LOG_FILE"
+      fi
+
+      echo "Browser frame mode active. Stop with: make stop" >> "$FRAME_LOG_FILE"
+      echo "Browser frame mode active. HyperDoc: ${BOOT_URL}"
+
+      while true; do
+        sleep 3600
+      done
+    fi
+
     set +e
     "$FRAME" "$TITLE" "$PORT" "$WIDTH" "$HEIGHT" 2>&1 | tee -a "$FRAME_LOG_FILE"
     FRAME_STATUS="${PIPESTATUS[0]}"
