@@ -11,6 +11,14 @@ let
     if pkgs ? webkitgtk_4_1 then pkgs.webkitgtk_4_1
     else if pkgs ? webkitgtk_4_0 then pkgs.webkitgtk_4_0
     else pkgs.webkitgtk;
+
+  linuxRuntimeLibraryPath = lib.makeLibraryPath [
+    pkgs.gtk3
+    webkitgtkPackage
+    pkgs.glib
+    pkgs.libglvnd
+    pkgs.mesa
+  ];
 in
 pkgs.stdenv.mkDerivation {
   pname = "clogframe";
@@ -22,6 +30,7 @@ pkgs.stdenv.mkDerivation {
   nativeBuildInputs =
     lib.optionals pkgs.stdenv.isLinux [
       pkgs.pkg-config
+      pkgs.makeWrapper
     ];
 
   buildInputs =
@@ -82,6 +91,18 @@ pkgs.stdenv.mkDerivation {
 
     mkdir -p "$out/bin"
     install -m 0755 "$NIX_BUILD_TOP/clogframe-src/clogframe" "$out/bin/clogframe"
+
+    if [ "${lib.boolToString pkgs.stdenv.isLinux}" = "true" ]; then
+      wrapProgram "$out/bin/clogframe" \
+        --prefix LD_LIBRARY_PATH : "${linuxRuntimeLibraryPath}" \
+        --set-default GDK_BACKEND x11 \
+        --set-default WEBKIT_DISABLE_DMABUF_RENDERER 1 \
+        --set-default WEBKIT_DISABLE_COMPOSITING_MODE 1 \
+        --set-default LIBGL_ALWAYS_SOFTWARE 1 \
+        --set-default MESA_LOADER_DRIVER_OVERRIDE llvmpipe \
+        --set-default GSK_RENDERER cairo \
+        --set-default GDK_GL disable
+    fi
 
     runHook postInstall
   '';

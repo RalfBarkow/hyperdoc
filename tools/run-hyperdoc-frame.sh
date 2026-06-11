@@ -89,6 +89,20 @@ for _ in $(seq 1 120); do
     echo "CLOG Frame log: ${FRAME_LOG_FILE}"
     : > "$FRAME_LOG_FILE"
 
+    {
+      echo "CLOG Frame display env:"
+      echo "  DISPLAY=${DISPLAY:-}"
+      echo "  WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-}"
+      echo "  XDG_SESSION_TYPE=${XDG_SESSION_TYPE:-}"
+      echo "  GDK_BACKEND=${GDK_BACKEND:-}"
+      echo "  WEBKIT_DISABLE_DMABUF_RENDERER=${WEBKIT_DISABLE_DMABUF_RENDERER:-}"
+      echo "  WEBKIT_DISABLE_COMPOSITING_MODE=${WEBKIT_DISABLE_COMPOSITING_MODE:-}"
+      echo "  LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE:-}"
+      echo "  MESA_LOADER_DRIVER_OVERRIDE=${MESA_LOADER_DRIVER_OVERRIDE:-}"
+      echo "  GSK_RENDERER=${GSK_RENDERER:-}"
+      echo "  GDK_GL=${GDK_GL:-}"
+    } >> "$FRAME_LOG_FILE"
+
     set +e
     "$FRAME" "$TITLE" "$PORT" "$WIDTH" "$HEIGHT" 2>&1 | tee -a "$FRAME_LOG_FILE"
     FRAME_STATUS="${PIPESTATUS[0]}"
