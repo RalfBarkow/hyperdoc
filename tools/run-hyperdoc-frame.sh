@@ -5,26 +5,19 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [ -x "${SCRIPT_DIR}/clogframe" ] && [ -x "${SCRIPT_DIR}/../hyperdoc-standalone/hyperdoc" ]; then
   FRAME_DIR="${SCRIPT_DIR}"
+  BUNDLE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 else
   FRAME_DIR="$(cd "${SCRIPT_DIR}/../bundle-deploy/hyperdoc-frame" && pwd)"
+  BUNDLE_DIR="$(cd "${FRAME_DIR}/.." && pwd)"
 fi
 
-CLOSURE_ENV="${HYPERDOC_RUNTIME_CLOSURE_ENV:-${FRAME_DIR}/hyperdoc-runtime-closure.env}"
-
-if [ ! -r "${CLOSURE_ENV}" ]; then
-  echo "Missing HyperDoc runtime closure manifest: ${CLOSURE_ENV}" >&2
-  echo "Rebuild the bundle so make generates hyperdoc-runtime-closure.env." >&2
-  exit 1
-fi
-
-. "${CLOSURE_ENV}"
-
-SERVER="${HYPERDOC_SERVER:?HYPERDOC_SERVER missing from runtime closure}"
-FRAME="${HYPERDOC_FRAME:?HYPERDOC_FRAME missing from runtime closure}"
+SERVER="${HYPERDOC_SERVER:-${BUNDLE_DIR}/hyperdoc-standalone/hyperdoc}"
+SERVER_WRAPPER="${HYPERDOC_SERVER_WRAPPER:-${FRAME_DIR}/hyperdoc-runtime-server}"
+FRAME="${HYPERDOC_FRAME:-${FRAME_DIR}/clogframe}"
 BOOT_PATH="${HYPERDOC_BOOT_PATH:-/boot.html}"
-PID_FILE="${HYPERDOC_PID_FILE:?HYPERDOC_PID_FILE missing from runtime closure}"
-PORT_FILE="${HYPERDOC_PORT_FILE:?HYPERDOC_PORT_FILE missing from runtime closure}"
-LOG_FILE="${HYPERDOC_LOG_FILE:?HYPERDOC_LOG_FILE missing from runtime closure}"
+PID_FILE="${HYPERDOC_PID_FILE:-${FRAME_DIR}/hyperdoc-server.pid}"
+PORT_FILE="${HYPERDOC_PORT_FILE:-${FRAME_DIR}/hyperdoc-server.port}"
+LOG_FILE="${HYPERDOC_LOG_FILE:-${FRAME_DIR}/hyperdoc-server.log}"
 FRAME_LOG_FILE="${HYPERDOC_FRAME_LOG_FILE:-${FRAME_DIR}/hyperdoc-frame.log}"
 KEEP_SERVER_AFTER_FRAME="${HYPERDOC_KEEP_SERVER_AFTER_FRAME:-0}"
 
@@ -32,12 +25,6 @@ TITLE="${HYPERDOC_FRAME_TITLE:-HyperDoc}"
 WIDTH="${HYPERDOC_FRAME_WIDTH:-1280}"
 HEIGHT="${HYPERDOC_FRAME_HEIGHT:-900}"
 DEVELOPMENT="${HYPERDOC_DEVELOPMENT:-0}"
-
-if [ -n "${HYPERDOC_RUNTIME_LIBRARY_PATH:-}" ]; then
-  export LD_LIBRARY_PATH="${HYPERDOC_RUNTIME_LIBRARY_PATH}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
-  export DYLD_LIBRARY_PATH="${HYPERDOC_RUNTIME_LIBRARY_PATH}${DYLD_LIBRARY_PATH:+:${DYLD_LIBRARY_PATH}}"
-  export DYLD_FALLBACK_LIBRARY_PATH="${HYPERDOC_RUNTIME_LIBRARY_PATH}${DYLD_FALLBACK_LIBRARY_PATH:+:${DYLD_FALLBACK_LIBRARY_PATH}}"
-fi
 
 free_port() {
   python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()'
@@ -54,12 +41,18 @@ ready() {
 mkdir -p "$(dirname "$PID_FILE")"
 
 if [ ! -x "$SERVER" ]; then
-  echo "Missing server executable from runtime closure: $SERVER" >&2
+  echo "Missing HyperDoc server executable: $SERVER" >&2
+  exit 1
+fi
+
+if [ ! -x "$SERVER_WRAPPER" ]; then
+  echo "Missing Nix runtime server wrapper: $SERVER_WRAPPER" >&2
+  echo "Rebuild the bundle with make build-runtime-wrapper." >&2
   exit 1
 fi
 
 if [ ! -x "$FRAME" ]; then
-  echo "Missing CLOG Frame executable from runtime closure: $FRAME" >&2
+  echo "Missing CLOG Frame executable: $FRAME" >&2
   exit 1
 fi
 
@@ -82,8 +75,8 @@ if ! alive; then
   echo "Starting HyperDoc server on port $PORT"
   : > "$LOG_FILE"
 
-  HYPERDOC_PORT="$PORT" HYPERDOC_DEVELOPMENT="$DEVELOPMENT" \
-    nohup "$SERVER" >> "$LOG_FILE" 2>&1 < /dev/null &
+  HYPERDOC_SERVER="$SERVER" HYPERDOC_PORT="$PORT" HYPERDOC_DEVELOPMENT="$DEVELOPMENT" \
+    nohup "$SERVER_WRAPPER" >> "$LOG_FILE" 2>&1 < /dev/null &
 
   echo "$!" > "$PID_FILE"
   echo "$PORT" > "$PORT_FILE"

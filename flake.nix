@@ -268,6 +268,7 @@
             releaseRevision
             flakeLockSha256;
         };
+        runtimeWrapperPackage = pkgs.callPackage ./nix/hyperdoc-runtime-wrapper.nix { };
       in {
         devShells.default = pkgs.mkShell {
           packages = [
@@ -378,12 +379,18 @@ EOF
         packages = {
           inherit lispfmt;
           hyperdoc-release = releasePackage;
+          hyperdoc-runtime-wrapper = runtimeWrapperPackage;
           default = releasePackage;
         };
 
         apps.default = {
           type = "app";
           program = "${releasePackage}/bin/hyperdoc-release-start";
+        };
+
+        apps.hyperdoc-runtime-server = {
+          type = "app";
+          program = "${runtimeWrapperPackage}/bin/hyperdoc-runtime-server";
         };
 
         apps.mcp-release = {

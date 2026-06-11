@@ -15,7 +15,7 @@
 .DEFAULT_GOAL := all
 
 .PHONY: all explain-build run stop status clean rebuild help \
-	build-standalone build-clog-frame build-runtime-closure build-runner \
+	build-standalone build-clog-frame build-runtime-wrapper build-runtime-closure build-runner \
 	repomix repomix-help repomix-clean repomix-all \
 	repomix-core repomix-dock repomix-validation repomix-fedwiki \
 	repomix-dmx repomix-deployment repomix-dm6 repomix-zotero \
@@ -31,33 +31,30 @@ FRAME_DIR ?= $(BUNDLE_DIR)/hyperdoc-frame
 
 SERVER_EXE ?= $(SERVER_DIR)/hyperdoc
 FRAME_EXE ?= $(FRAME_DIR)/clogframe
+SERVER_WRAPPER ?= $(FRAME_DIR)/hyperdoc-runtime-server
 RUNNER ?= $(FRAME_DIR)/run-hyperdoc-frame
 
 PID_FILE ?= $(FRAME_DIR)/hyperdoc-server.pid
 PORT_FILE ?= $(FRAME_DIR)/hyperdoc-server.port
 LOG_FILE ?= $(FRAME_DIR)/hyperdoc-server.log
 
-RUNTIME_CLOSURE_ENV ?= $(FRAME_DIR)/hyperdoc-runtime-closure.env
-RUNTIME_CLOSURE_SEXP ?= $(FRAME_DIR)/hyperdoc-runtime-closure.sexp
-RUNTIME_CLOSURE_VALIDATION_SEXP ?= $(FRAME_DIR)/hyperdoc-runtime-closure-validation.sexp
-RUNTIME_CLOSURE_VALIDATION_HTML ?= $(FRAME_DIR)/hyperdoc-runtime-closure-validation.html
-
-
 HYPERDOC_SYSTEM ?= :hyperdoc/server
 
 CLOGFRAME_NIX ?= nix/clogframe.nix
 CLOGFRAME_RESULT ?= result-clogframe
+RUNTIME_WRAPPER_NIX ?= nix/hyperdoc-runtime-wrapper.nix
+RUNTIME_WRAPPER_RESULT ?= result-hyperdoc-runtime-wrapper
 
 REPOMIX_PACK = core
 PACK = $(REPOMIX_PACK)
 REPOMIX_FOCUSED_PACKS = core dock validation fedwiki dmx deployment dm6 zotero
 
-all: explain-build $(SERVER_EXE) $(FRAME_EXE) $(RUNTIME_CLOSURE_ENV) $(RUNNER)
+all: explain-build $(SERVER_EXE) $(FRAME_EXE) $(SERVER_WRAPPER) $(RUNNER)
 	@echo
 	@echo "Built:"
 	@echo "  $(SERVER_EXE)"
 	@echo "  $(FRAME_EXE)"
-	@echo "  $(RUNTIME_CLOSURE_ENV)"
+	@echo "  $(SERVER_WRAPPER)"
 	@echo "  $(RUNNER)"
 	@echo
 	@echo "Run with:"
@@ -67,7 +64,7 @@ explain-build:
 	@echo "make builds a standalone HyperDoc CLOG Frame bundle:"
 	@echo "  1. HyperDoc SBCL server executable"
 	@echo "  2. native CLOG Frame executable via Nix"
-	@echo "  3. runtime closure manifest"
+	@echo "  3. Nix-owned runtime server wrapper"
 	@echo "  4. launcher script"
 	@echo
 	@echo "Other useful goals:"
@@ -98,23 +95,23 @@ $(FRAME_EXE): $(CLOGFRAME_NIX)
 	install -m 0755 "$(CLOGFRAME_RESULT)/bin/clogframe" "$(FRAME_EXE)"
 	@echo "==> Built $(FRAME_EXE)"
 
-$(RUNTIME_CLOSURE_ENV): Makefile tools/write-hyperdoc-runtime-closure.lisp $(SERVER_EXE) $(FRAME_EXE)
-	@echo "==> Generating HyperDoc runtime closure"
-	mkdir -p "$(dir $(RUNTIME_CLOSURE_ENV))"
-	$(LISP) --no-userinit --no-sysinit --non-interactive \
-		--eval '(defparameter cl-user::*hyperdoc-root* #P"$(CURDIR)/")' \
-		--eval '(defparameter cl-user::*hyperdoc-runtime-env* #P"$(abspath $(RUNTIME_CLOSURE_ENV))")' \
-		--eval '(defparameter cl-user::*hyperdoc-runtime-sexp* #P"$(abspath $(RUNTIME_CLOSURE_SEXP))")' \
-		--load tools/write-hyperdoc-runtime-closure.lisp
-	@echo "==> Built $(RUNTIME_CLOSURE_ENV)"
+$(SERVER_WRAPPER): $(RUNTIME_WRAPPER_NIX)
+	@echo "==> Building HyperDoc runtime server wrapper via Nix"
+	mkdir -p "$(dir $(SERVER_WRAPPER))"
+	nix build --impure \
+		--expr 'let flake = builtins.getFlake "git+file://$(CURDIR)"; pkgs = import flake.inputs.nixpkgs { system = builtins.currentSystem; }; in pkgs.callPackage ./$(RUNTIME_WRAPPER_NIX) { }' \
+		--out-link "$(RUNTIME_WRAPPER_RESULT)"
+	test -x "$(RUNTIME_WRAPPER_RESULT)/bin/hyperdoc-runtime-server"
+	install -m 0755 "$(RUNTIME_WRAPPER_RESULT)/bin/hyperdoc-runtime-server" "$(SERVER_WRAPPER)"
+	@echo "==> Built $(SERVER_WRAPPER)"
 
-$(RUNNER): Makefile tools/run-hyperdoc-frame.sh $(SERVER_EXE) $(FRAME_EXE) $(RUNTIME_CLOSURE_ENV)
+$(RUNNER): Makefile tools/run-hyperdoc-frame.sh $(SERVER_EXE) $(FRAME_EXE) $(SERVER_WRAPPER)
 	@echo "==> Installing runner"
 	mkdir -p "$(dir $(RUNNER))"
 	install -m 0755 tools/run-hyperdoc-frame.sh "$(RUNNER)"
 	@echo "==> Built $(RUNNER)"
 
-run: all $(RUNTIME_CLOSURE_ENV)
+run: all
 	"$(RUNNER)"
 
 stop:
@@ -143,24 +140,20 @@ status:
 
 clean:
 	-$(MAKE) stop
-	rm -rf "$(SERVER_DIR)" "$(FRAME_DIR)" "$(CLOGFRAME_RESULT)" result
+	rm -rf "$(SERVER_DIR)" "$(FRAME_DIR)" "$(CLOGFRAME_RESULT)" "$(RUNTIME_WRAPPER_RESULT)" result
 	rm -rf .cache/clog
 
 rebuild: clean all
 
 build-standalone: $(SERVER_EXE)
 build-clog-frame: $(FRAME_EXE)
-build-runtime-closure: $(RUNTIME_CLOSURE_ENV)
-validate-runtime-closure: $(RUNTIME_CLOSURE_ENV) tools/validate-hyperdoc-runtime-closure.lisp
-	@echo "==> Validating HyperDoc runtime closure"
-	$(LISP) --no-userinit --no-sysinit --non-interactive \
-		--eval '(defparameter cl-user::*hyperdoc-root* #P"$(CURDIR)/")' \
-		--eval '(defparameter cl-user::*hyperdoc-runtime-closure-sexp* #P"$(abspath $(RUNTIME_CLOSURE_SEXP))")' \
-		--eval '(defparameter cl-user::*hyperdoc-runtime-validation-sexp* #P"$(abspath $(RUNTIME_CLOSURE_VALIDATION_SEXP))")' \
-		--eval '(defparameter cl-user::*hyperdoc-runtime-validation-html* #P"$(abspath $(RUNTIME_CLOSURE_VALIDATION_HTML))")' \
-		--load tools/validate-hyperdoc-runtime-closure.lisp
-	@echo "==> Wrote $(RUNTIME_CLOSURE_VALIDATION_SEXP)"
-	@echo "==> Wrote $(RUNTIME_CLOSURE_VALIDATION_HTML)"
+build-runtime-wrapper: $(SERVER_WRAPPER)
+build-runtime-closure: build-runtime-wrapper
+validate-runtime-closure: $(SERVER_EXE) $(SERVER_WRAPPER) tools/validate-hyperdoc-runtime-wrapper.sh
+	@echo "==> Validating HyperDoc Nix runtime wrapper"
+	HYPERDOC_SERVER="$(abspath $(SERVER_EXE))" \
+		HYPERDOC_SERVER_WRAPPER="$(abspath $(SERVER_WRAPPER))" \
+		tools/validate-hyperdoc-runtime-wrapper.sh
 
 build-runner: $(RUNNER)
 
