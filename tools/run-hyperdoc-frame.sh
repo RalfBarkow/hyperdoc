@@ -89,12 +89,40 @@ for _ in $(seq 1 120); do
     echo "CLOG Frame log: ${FRAME_LOG_FILE}"
     : > "$FRAME_LOG_FILE"
 
+    # HyperDoc CLOG Frame Parallels-safe graphical defaults.
+    # Keep the VM session on Wayland, but force WebKit/GDK away from the
+    # Parallels EGL/GVFS failure path.
+    : "${GDK_BACKEND:=wayland}"
+    : "${GIO_USE_VFS:=local}"
+    : "${GTK_USE_PORTAL:=0}"
+    : "${NO_AT_BRIDGE:=1}"
+    : "${WEBKIT_DISABLE_DMABUF_RENDERER:=1}"
+    : "${WEBKIT_DISABLE_COMPOSITING_MODE:=1}"
+    : "${LIBGL_ALWAYS_SOFTWARE:=1}"
+    : "${MESA_LOADER_DRIVER_OVERRIDE:=llvmpipe}"
+    : "${GSK_RENDERER:=cairo}"
+    : "${GDK_GL:=disable}"
+
+    export GDK_BACKEND
+    export GIO_USE_VFS
+    export GTK_USE_PORTAL
+    export NO_AT_BRIDGE
+    export WEBKIT_DISABLE_DMABUF_RENDERER
+    export WEBKIT_DISABLE_COMPOSITING_MODE
+    export LIBGL_ALWAYS_SOFTWARE
+    export MESA_LOADER_DRIVER_OVERRIDE
+    export GSK_RENDERER
+    export GDK_GL
+
     {
       echo "CLOG Frame display env:"
       echo "  DISPLAY=${DISPLAY:-}"
       echo "  WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-}"
       echo "  XDG_SESSION_TYPE=${XDG_SESSION_TYPE:-}"
       echo "  GDK_BACKEND=${GDK_BACKEND:-}"
+      echo "  GIO_USE_VFS=${GIO_USE_VFS:-}"
+      echo "  GTK_USE_PORTAL=${GTK_USE_PORTAL:-}"
+      echo "  NO_AT_BRIDGE=${NO_AT_BRIDGE:-}"
       echo "  WEBKIT_DISABLE_DMABUF_RENDERER=${WEBKIT_DISABLE_DMABUF_RENDERER:-}"
       echo "  WEBKIT_DISABLE_COMPOSITING_MODE=${WEBKIT_DISABLE_COMPOSITING_MODE:-}"
       echo "  LIBGL_ALWAYS_SOFTWARE=${LIBGL_ALWAYS_SOFTWARE:-}"
