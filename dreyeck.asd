@@ -52,3 +52,35 @@
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck.dmx.workspace-selection/tests
                                :run-workspace-selection-smoke-tests)))
+
+(defsystem #:dreyeck/dmx/sqlite
+  :description "Dreyeck-owned DMX-shaped SQLite schema, value API, and integrity checks."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/dmx/sqlite/tests")))
+  :components
+  ((:module "dreyeck/dmx/sqlite"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "store")))))
+
+(defsystem #:dreyeck/dmx/sqlite/tests
+  :description "Tests for the Dreyeck-owned DMX-shaped SQLite store."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :depends-on (#:dreyeck/dmx/sqlite)
+  :components
+  ((:module "dreyeck/dmx/sqlite/tests"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "smoke"))))
+  :perform (asdf:test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck.dmx.sqlite/tests
+                               :run-dmx-sqlite-smoke-tests)))
