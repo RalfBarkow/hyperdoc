@@ -141,3 +141,37 @@ this function never synthesizes a heuristic fallback."
             '("Implement generic property values under :dreyeck/dmx/sqlite."
               "Add generic query-run and journal read/value surfaces."
               "Add generic sync workflow read models before recorder replay.")))))
+
+(defun %selected-first-consumer (plan)
+  (cond
+    ((dmx-sqlite-workspace-plan-action-p plan '!select-kioskbeerli-diagnostics-readiness)
+     :kioskbeerli-diagnostics-readiness)
+    ((dmx-sqlite-workspace-plan-action-p plan '!select-recorder-replay-readiness)
+     :recorder-replay-readiness)
+    ((dmx-sqlite-workspace-plan-action-p plan '!select-fedwiki-materialization-readiness)
+     :fedwiki-materialization-readiness)
+    ((dmx-sqlite-workspace-plan-action-p plan '!select-live-sync-readiness)
+     :live-sync-readiness)
+    ((dmx-sqlite-workspace-plan-action-p plan '!defer-first-consumer-for-more-evidence)
+     :defer-for-more-evidence)
+    (t (error "Live SHOP3 returned no first-consumer action: ~S" plan))))
+
+(defun select-dmx-sqlite-first-consumer-with-shop3 ()
+  "Select only a bounded first consumer candidate through live SHOP3 planning."
+  (multiple-value-bind (raw-plans run-time plan-trees final-states)
+      (%live-shop3-find-plans 'dreyeck-dmx-sqlite-first-consumer-selection-001)
+    (unless raw-plans (error "SHOP3:FIND-PLANS found no first-consumer plan."))
+    (let* ((plans (mapcar #'%plan->safe-sexp raw-plans))
+           (selected-plan (first plans))
+           (selected-consumer (%selected-first-consumer selected-plan)))
+      (list :kind :shop3-dmx-sqlite-first-consumer-selection
+            :planner :shop3 :find-plans-symbol "SHOP3:FIND-PLANS"
+            :planner-call :live :heuristic-fallback nil
+            :live-planner-call-count *shop3-find-plans-call-count*
+            :facts *dmx-sqlite-first-consumer-facts*
+            :plans plans :raw-plans raw-plans :selected-plan selected-plan
+            :selected-consumer selected-consumer :selected-repo :hyperdoc
+            :selected-system :dreyeck/dmx/sqlite
+            :non-actions '(:fedwiki-materialization :live-sync-execution :recorder-replay)
+            :next-actions '("Review the bounded consumer only; do not implement it yet.")
+            :plan-trees plan-trees :final-states final-states :run-time run-time))))

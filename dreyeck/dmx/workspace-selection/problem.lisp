@@ -61,3 +61,27 @@
    (keep-hyperdoc-core-virtually-unchanged)
    (extensions-belong-in-dreyeck))
   ((select-dmx-sqlite-next-task)))
+
+(defparameter *dmx-sqlite-first-consumer-facts*
+  '((repo hyperdoc) (repo hauptsache) (dreyeck-owns-dmx-sqlite)
+    (property-journal-sync-surface-merged)
+    (hauptsache-depends-on-dreyeck-dmx-sqlite)
+    (hauptsache-kioskbeerli-tests-pass)
+    (fedwiki-materialization-not-started) (live-sync-execution-not-started)
+    (recorder-prototype-isolated) (no-pi-contact-allowed)
+    (no-live-sync-allowed) (no-fedwiki-materialization-allowed)
+    (no-recorder-replay-allowed) (bounded-consumer-selection-only)
+    (keep-hyperdoc-core-virtually-unchanged) (extensions-belong-in-dreyeck)))
+
+(defproblem dreyeck-dmx-sqlite-first-consumer-selection-001
+  dreyeck-dmx-workspace-selection
+  ((repo hyperdoc) (repo hauptsache) (dreyeck-owns-dmx-sqlite)
+   (property-journal-sync-surface-merged)
+   (hauptsache-depends-on-dreyeck-dmx-sqlite)
+   (hauptsache-kioskbeerli-tests-pass)
+   (fedwiki-materialization-not-started) (live-sync-execution-not-started)
+   (recorder-prototype-isolated) (no-pi-contact-allowed)
+   (no-live-sync-allowed) (no-fedwiki-materialization-allowed)
+   (no-recorder-replay-allowed) (bounded-consumer-selection-only)
+   (keep-hyperdoc-core-virtually-unchanged) (extensions-belong-in-dreyeck))
+  ((select-dmx-sqlite-first-consumer)))
