@@ -121,6 +121,40 @@
                           :remote-type-uri "dmx.test.topic.changed"
                           :replace-existing? t)
                          "Explicit sync identity replacement must update")
+           (assert-equal :created
+                         (record-dmx-property-value
+                          db "property:left-title" "topic:left" "dmx.test.title"
+                          :value "Left title" :target-object-id "topic:right"
+                          :sync-state "observed")
+                         "First property value must be created")
+           (assert-equal :unchanged
+                         (record-dmx-property-value
+                          db "property:left-title" "topic:left" "dmx.test.title"
+                          :value "Left title" :target-object-id "topic:right"
+                          :sync-state "observed")
+                         "Matching property replay must be unchanged")
+           (assert-equal :conflict
+                         (record-dmx-property-value
+                          db "property:left-title" "topic:left" "dmx.test.title"
+                          :value "Changed" :target-object-id "topic:right")
+                         "Different property replay must conflict")
+           (assert-equal :updated
+                         (record-dmx-property-value
+                          db "property:left-title" "topic:left" "dmx.test.title"
+                          :value "Changed" :target-object-id "topic:right"
+                          :replace-existing? t)
+                         "Explicit property replacement must update")
+           (assert-equal :created
+                         (record-dmx-query-run-value
+                          db "query:neighborhood:left" "dmx.query.neighborhood"
+                          :local-object-id "topic:left" :result-json "{\"count\":1}")
+                         "Query-run recording must create")
+           (assert-equal :created
+                         (record-dmx-journal-entry-value
+                          db "journal:neighborhood:left" "dmx.journal.query"
+                          "read" "observed" :local-object-id "topic:left"
+                          :query-run-id "query:neighborhood:left")
+                         "Journal recording must create")
            (let ((object (dmx-sqlite-object db "topic:left"))
                  (topic (dmx-sqlite-topic db "topic:left"))
                  (association (dmx-sqlite-association db "assoc:left-right"))
@@ -131,6 +165,13 @@
                  (neighborhood (dmx-sqlite-object-neighborhood db "topic:left"))
                  (identities (dmx-sqlite-sync-identities
                               db :local-object-id "topic:left"))
+                 (remote-identities (dmx-sqlite-sync-identities-for-remote
+                                     db "local" :remote-id 1))
+                 (properties (dmx-sqlite-object-properties db "topic:left"))
+                 (query-run (dmx-sqlite-query-run db "query:neighborhood:left"))
+                 (journal (dmx-sqlite-journal-entries db
+                                                       :query-run-id "query:neighborhood:left"))
+                 (workflow (dmx-sqlite-sync-workflow-summary db))
                  (report (dmx-sqlite-integrity-report db)))
              (assert-equal "topic:left" (getf object :local-id)
                            "Logical object lookup must use local id")
@@ -160,6 +201,18 @@
                            "Logical sync identity lookup must find the local identity")
              (assert-equal 1 (getf (first identities) :remote-id)
                            "Logical sync identity lookup must preserve remote id")
+             (assert-equal 1 (length remote-identities)
+                           "Remote sync identity lookup must preserve the identity")
+             (assert-equal 1 (length properties)
+                           "Object property listing must return the property")
+             (assert-equal "topic:right" (getf (first properties) :target-object-id)
+                           "Property target-object reference must be readable")
+             (assert-equal "query:neighborhood:left" (getf query-run :id)
+                           "Query-run lookup must return the recorded observation")
+             (assert-equal 1 (length journal)
+                           "Journal read model must return the query-run journal entry")
+             (assert-equal 1 (getf workflow :query-run-count)
+                           "Sync workflow summary must count query runs")
              (assert-true (getf report :ok-p)
                           "A writer-produced store must have an empty integrity report"))
            (assert-sql-ok
@@ -167,16 +220,28 @@
             "PRAGMA foreign_keys = OFF; INSERT INTO dmx_sql_assoc_player(assoc_id, player_no, role_type_uri, player_kind, player_local_id) VALUES('assoc:left-right', 99, 'dmx.role.broken', 'topic', 'topic:missing');"
             "Fixture insertion of a broken association player must succeed")
            (assert-sql-ok
-            db
-            "PRAGMA foreign_keys = OFF; INSERT INTO dmx_sql_sync_identity(id, local_object_id, host, remote_id, sync_state) VALUES('identity:broken', 'topic:missing', 'broken-host', 7, 'observed');"
+           db
+           "PRAGMA foreign_keys = OFF; INSERT INTO dmx_sql_sync_identity(id, local_object_id, host, remote_id, sync_state) VALUES('identity:broken', 'topic:missing', 'broken-host', 7, 'observed');"
             "Fixture insertion of a broken sync identity must succeed")
+           (assert-sql-ok
+            db
+            "PRAGMA foreign_keys = OFF; INSERT INTO dmx_sql_property(id, object_id, property_uri) VALUES('property:broken', 'topic:missing', 'dmx.test.title');"
+            "Fixture insertion of a broken property owner must succeed")
+           (assert-sql-ok
+            db
+            "PRAGMA foreign_keys = OFF; UPDATE dmx_sql_property_target SET target_object_id = 'topic:missing' WHERE property_id = 'property:left-title';"
+            "Fixture update of a broken property target must succeed")
            (let ((report (dmx-sqlite-integrity-report db)))
              (assert-true (not (getf report :ok-p))
                           "Broken imported references must fail the integrity report")
              (assert-equal 1 (length (getf report :broken-association-players))
                            "Integrity report must identify broken association players")
              (assert-equal 1 (length (getf report :broken-sync-identities))
-                           "Integrity report must identify broken sync identity references"))
+                           "Integrity report must identify broken sync identity references")
+             (assert-equal 1 (length (getf report :broken-property-owners))
+                           "Integrity report must identify broken property owners")
+             (assert-equal 1 (length (getf report :broken-property-targets))
+                           "Integrity report must identify broken property targets"))
            (multiple-value-bind (counts error exit-code) (dmx-sql-counts :db-path db)
              (declare (ignore error))
              (assert-equal 0 exit-code "Count query must succeed")

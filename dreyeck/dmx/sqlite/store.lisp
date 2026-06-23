@@ -88,6 +88,33 @@ CREATE TABLE IF NOT EXISTS dmx_sql_sync_journal (
   payload_json TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS dmx_sql_property_target (
+  property_id TEXT PRIMARY KEY REFERENCES dmx_sql_property(id) ON DELETE CASCADE,
+  target_object_id TEXT NOT NULL REFERENCES dmx_sql_object(local_id)
+);
+
+CREATE TABLE IF NOT EXISTS dmx_sql_property_observation (
+  property_id TEXT PRIMARY KEY REFERENCES dmx_sql_property(id) ON DELETE CASCADE,
+  sync_state TEXT NOT NULL DEFAULT 'local',
+  modified_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS dmx_sql_query_run (
+  id TEXT PRIMARY KEY,
+  query_kind TEXT NOT NULL,
+  local_object_id TEXT REFERENCES dmx_sql_object(local_id),
+  status TEXT NOT NULL DEFAULT 'observed',
+  payload_json TEXT,
+  result_json TEXT,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  modified_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS dmx_sql_journal_query_run (
+  journal_id TEXT PRIMARY KEY REFERENCES dmx_sql_sync_journal(id) ON DELETE CASCADE,
+  query_run_id TEXT NOT NULL REFERENCES dmx_sql_query_run(id)
+);
 ")
 
 (defun sqlite-run
@@ -447,6 +474,117 @@ current callers mostly record binary topic associations."
                                    :sync-state effective-sync-state))
     state))
 
+(defun dmx-sql-record-content-state (db-path id table equal-sql replace-existing?)
+  (dmx-sql-record-state
+   (dmx-sql-exists-p db-path
+                      (format nil "select exists(select 1 from ~A where id = ~A);"
+                              table (sql-literal id)))
+   (dmx-sql-exists-p db-path equal-sql)
+   replace-existing?))
+
+(defun ensure-dmx-sql-object-reference (db-path local-id label)
+  (unless (dmx-sql-object-exists-p db-path local-id)
+    (error "DMX ~A ~A does not name an existing object." label local-id)))
+
+(defun record-dmx-property-value
+    (db-path property-id object-id property-uri
+     &key value value-json target-object-id sync-state replace-existing?)
+  "Record a generic property value and optional target-object reference."
+  (ensure-dmx-sql-object-reference db-path object-id "property owner")
+  (when target-object-id
+    (ensure-dmx-sql-object-reference db-path target-object-id "property target"))
+  (let* ((effective-state (or sync-state "local"))
+         (same-sql
+           (format nil
+                   "select exists(select 1 from dmx_sql_property p left join dmx_sql_property_target t on t.property_id = p.id left join dmx_sql_property_observation o on o.property_id = p.id where p.id = ~A and ~A and ~A and ~A and ~A and ~A and ~A);"
+                   (sql-literal property-id)
+                   (sql-is-clause "p.object_id" object-id)
+                   (sql-is-clause "p.property_uri" property-uri)
+                   (sql-is-clause "p.value" value)
+                   (sql-is-clause "p.value_json" value-json)
+                   (sql-is-clause "t.target_object_id" target-object-id)
+                   (sql-is-clause "o.sync_state" effective-state)))
+         (state (dmx-sql-record-content-state
+                 db-path property-id "dmx_sql_property" same-sql replace-existing?)))
+    (when (member state '(:created :updated))
+      (multiple-value-bind (stdout stderr exit-code)
+          (sqlite-run
+           db-path
+           (format nil
+                   "BEGIN; INSERT OR REPLACE INTO dmx_sql_property(id, object_id, property_uri, value, value_json) VALUES(~A, ~A, ~A, ~A, ~A); DELETE FROM dmx_sql_property_target WHERE property_id = ~A; ~A INSERT OR REPLACE INTO dmx_sql_property_observation(property_id, sync_state, modified_at) VALUES(~A, ~A, CURRENT_TIMESTAMP); COMMIT;"
+                   (sql-literal property-id) (sql-literal object-id)
+                   (sql-literal property-uri) (sql-literal value)
+                   (sql-literal value-json) (sql-literal property-id)
+                   (if target-object-id
+                       (format nil "INSERT INTO dmx_sql_property_target(property_id, target_object_id) VALUES(~A, ~A);"
+                               (sql-literal property-id) (sql-literal target-object-id))
+                       "")
+                   (sql-literal property-id) (sql-literal effective-state)))
+        (unless (zerop exit-code)
+          (error "Could not record DMX property:~%~A~%~A" stdout stderr))))
+    state))
+
+(defun record-dmx-query-run-value
+    (db-path run-id query-kind &key local-object-id status payload-json result-json replace-existing?)
+  "Record a durable generic query-run observation."
+  (when local-object-id
+    (ensure-dmx-sql-object-reference db-path local-object-id "query-run owner"))
+  (let* ((effective-status (or status "observed"))
+         (same-sql
+           (format nil
+                   "select exists(select 1 from dmx_sql_query_run where id = ~A and ~A and ~A and ~A and ~A and ~A);"
+                   (sql-literal run-id) (sql-is-clause "query_kind" query-kind)
+                   (sql-is-clause "local_object_id" local-object-id)
+                   (sql-is-clause "status" effective-status)
+                   (sql-is-clause "payload_json" payload-json)
+                   (sql-is-clause "result_json" result-json)))
+         (state (dmx-sql-record-content-state
+                 db-path run-id "dmx_sql_query_run" same-sql replace-existing?)))
+    (when (member state '(:created :updated))
+      (sqlite-run db-path
+                  (format nil
+                          "INSERT OR REPLACE INTO dmx_sql_query_run(id, query_kind, local_object_id, status, payload_json, result_json, modified_at) VALUES(~A, ~A, ~A, ~A, ~A, ~A, CURRENT_TIMESTAMP);"
+                          (sql-literal run-id) (sql-literal query-kind)
+                          (sql-literal local-object-id) (sql-literal effective-status)
+                          (sql-literal payload-json) (sql-literal result-json))))
+    state))
+
+(defun record-dmx-journal-entry-value
+    (db-path journal-id journal-kind action status
+     &key local-object-id host remote-id detail payload-json query-run-id replace-existing?)
+  "Record a generic journal observation, optionally linked to a query run."
+  (when local-object-id
+    (ensure-dmx-sql-object-reference db-path local-object-id "journal owner"))
+  (when query-run-id
+    (unless (dmx-sql-exists-p db-path
+                              (format nil "select exists(select 1 from dmx_sql_query_run where id = ~A);"
+                                      (sql-literal query-run-id)))
+      (error "DMX journal query run ~A is absent." query-run-id)))
+  (let* ((same-sql
+           (format nil
+                   "select exists(select 1 from dmx_sql_sync_journal j left join dmx_sql_journal_query_run q on q.journal_id = j.id where j.id = ~A and ~A and ~A and ~A and ~A and ~A and ~A and ~A and ~A);"
+                   (sql-literal journal-id) (sql-is-clause "j.journal_kind" journal-kind)
+                   (sql-is-clause "j.action" action) (sql-is-clause "j.status" status)
+                   (sql-is-clause "j.local_object_id" local-object-id)
+                   (sql-is-clause "j.host" host) (sql-is-clause "j.remote_id" remote-id)
+                   (sql-is-clause "j.detail" detail) (sql-is-clause "q.query_run_id" query-run-id)))
+         (state (dmx-sql-record-content-state
+                 db-path journal-id "dmx_sql_sync_journal" same-sql replace-existing?)))
+    (when (member state '(:created :updated))
+      (sqlite-run db-path
+                  (format nil
+                          "BEGIN; INSERT OR REPLACE INTO dmx_sql_sync_journal(id, journal_kind, local_object_id, host, remote_id, action, status, detail, payload_json) VALUES(~A, ~A, ~A, ~A, ~A, ~A, ~A, ~A, ~A); DELETE FROM dmx_sql_journal_query_run WHERE journal_id = ~A; ~A COMMIT;"
+                          (sql-literal journal-id) (sql-literal journal-kind)
+                          (sql-literal local-object-id) (sql-literal host)
+                          (sql-integer-or-null remote-id) (sql-literal action)
+                          (sql-literal status) (sql-literal detail)
+                          (sql-literal payload-json) (sql-literal journal-id)
+                          (if query-run-id
+                              (format nil "INSERT INTO dmx_sql_journal_query_run(journal_id, query_run_id) VALUES(~A, ~A);"
+                                      (sql-literal journal-id) (sql-literal query-run-id))
+                              ""))))
+    state))
+
 (defun dmx-sql-scalar (db-path sql)
   (multiple-value-bind (stdout stderr exit-code)
       (sqlite-run db-path sql :separator (string #\Tab))
@@ -716,6 +854,132 @@ topic existence separate from relationship evidence."
                   :last-seen-at (dmx-sqlite-nullable-string last-seen-at)
                   :sync-state sync-state)))))
 
+(defun dmx-sqlite-properties
+    (db-path &key object-id property-uri target-object-id)
+  "List generic properties with owner, scalar value, target, and observation state."
+  (let ((clauses
+          (remove nil
+                  (list (when object-id
+                          (format nil "p.object_id = ~A" (sql-literal object-id)))
+                        (when property-uri
+                          (format nil "p.property_uri = ~A" (sql-literal property-uri)))
+                        (when target-object-id
+                          (format nil "t.target_object_id = ~A"
+                                  (sql-literal target-object-id)))))))
+    (loop for row in
+          (dmx-sqlite-query-rows
+           db-path
+           (format nil
+                   "select p.id, p.object_id, p.property_uri, coalesce(p.value, ''), coalesce(p.value_json, ''), coalesce(t.target_object_id, ''), coalesce(o.sync_state, 'local') from dmx_sql_property p left join dmx_sql_property_target t on t.property_id = p.id left join dmx_sql_property_observation o on o.property_id = p.id where ~A order by p.object_id, p.property_uri, p.id;"
+                   (if clauses (format nil "~{~A~^ and ~}" clauses) "1 = 1")))
+          collect
+          (destructuring-bind (id owner-uri key value value-json target sync-state) row
+            (list :id id :object-id owner-uri :property-uri key
+                  :value (dmx-sqlite-nullable-string value)
+                  :value-json (dmx-sqlite-nullable-string value-json)
+                  :target-object-id (dmx-sqlite-nullable-string target)
+                  :sync-state sync-state)))))
+
+(defun dmx-sqlite-object-properties (db-path object-id)
+  (dmx-sqlite-properties db-path :object-id object-id))
+
+(defun dmx-sqlite-property-values (db-path &key object-id property-uri)
+  (dmx-sqlite-properties db-path :object-id object-id :property-uri property-uri))
+
+(defun dmx-sqlite-query-runs (db-path &key run-id local-object-id query-kind status)
+  "List durable generic query-run observations."
+  (let ((clauses
+          (remove nil
+                  (list (when run-id
+                          (format nil "id = ~A" (sql-literal run-id)))
+                        (when local-object-id
+                          (format nil "local_object_id = ~A" (sql-literal local-object-id)))
+                        (when query-kind
+                          (format nil "query_kind = ~A" (sql-literal query-kind)))
+                        (when status
+                          (format nil "status = ~A" (sql-literal status)))))))
+    (loop for row in
+          (dmx-sqlite-query-rows
+           db-path
+           (format nil
+                   "select id, query_kind, coalesce(local_object_id, ''), status, coalesce(payload_json, ''), coalesce(result_json, '') from dmx_sql_query_run where ~A order by id;"
+                   (if clauses (format nil "~{~A~^ and ~}" clauses) "1 = 1")))
+          collect
+          (destructuring-bind (id kind object status-value payload result) row
+            (list :id id :query-kind kind
+                  :local-object-id (dmx-sqlite-nullable-string object)
+                  :status status-value
+                  :payload-json (dmx-sqlite-nullable-string payload)
+                  :result-json (dmx-sqlite-nullable-string result))))))
+
+(defun dmx-sqlite-query-run (db-path run-id)
+  (first (dmx-sqlite-query-runs db-path :run-id run-id)))
+
+(defun dmx-sqlite-journal-entries (db-path &key local-object-id query-run-id)
+  "List generic journal observations and optional query-run links."
+  (let ((clauses
+          (remove nil
+                  (list (when local-object-id
+                          (format nil "j.local_object_id = ~A" (sql-literal local-object-id)))
+                        (when query-run-id
+                          (format nil "q.query_run_id = ~A" (sql-literal query-run-id)))))))
+    (loop for row in
+          (dmx-sqlite-query-rows
+           db-path
+           (format nil
+                   "select j.id, j.journal_kind, coalesce(j.local_object_id, ''), coalesce(j.host, ''), coalesce(j.remote_id, ''), j.action, j.status, coalesce(j.detail, ''), coalesce(j.payload_json, ''), coalesce(q.query_run_id, '') from dmx_sql_sync_journal j left join dmx_sql_journal_query_run q on q.journal_id = j.id where ~A order by j.id;"
+                   (if clauses (format nil "~{~A~^ and ~}" clauses) "1 = 1")))
+          collect
+          (destructuring-bind (id kind object host remote action status detail payload run) row
+            (list :id id :journal-kind kind
+                  :local-object-id (dmx-sqlite-nullable-string object)
+                  :host (dmx-sqlite-nullable-string host)
+                  :remote-id (dmx-sqlite-nullable-integer remote)
+                  :action action :status status
+                  :detail (dmx-sqlite-nullable-string detail)
+                  :payload-json (dmx-sqlite-nullable-string payload)
+                  :query-run-id (dmx-sqlite-nullable-string run))))))
+
+(defun dmx-sqlite-sync-identities-for-remote (db-path host &key remote-id remote-uri)
+  (dmx-sqlite-sync-identities db-path :host host :remote-id remote-id :remote-uri remote-uri))
+
+(defun dmx-sqlite-sync-identity-conflicts (db-path)
+  "Return impossible imported remote identities that point at multiple local objects."
+  (loop for row in
+        (dmx-sqlite-query-rows
+         db-path
+         "select host, coalesce(remote_id, ''), coalesce(remote_uri, ''), count(distinct local_object_id) from dmx_sql_sync_identity group by host, remote_id, remote_uri having count(distinct local_object_id) > 1 order by host;")
+        collect
+        (destructuring-bind (host remote-id remote-uri count) row
+          (list :host host :remote-id (dmx-sqlite-nullable-integer remote-id)
+                :remote-uri (dmx-sqlite-nullable-string remote-uri)
+                :local-object-count (parse-integer count)))))
+
+(defun dmx-sqlite-sync-workflow-summary (db-path)
+  (let ((identities (dmx-sqlite-sync-identities db-path))
+        (conflicts (dmx-sqlite-sync-identity-conflicts db-path)))
+    (list :identity-count (length identities)
+          :conflicts conflicts
+          :query-run-count (length (dmx-sqlite-query-runs db-path))
+          :journal-entry-count (length (dmx-sqlite-journal-entries db-path))
+          :ok-p (null conflicts))))
+
+(defun dmx-sqlite-reference-integrity-findings (db-path)
+  (flet ((rows (sql)
+           (mapcar (lambda (row) (list :id (first row) :reference (second row)))
+                   (dmx-sqlite-query-rows db-path sql))))
+    (list
+     :broken-property-owners
+     (rows "select p.id, p.object_id from dmx_sql_property p left join dmx_sql_object o on o.local_id = p.object_id where o.local_id is null order by p.id;")
+     :broken-property-targets
+     (rows "select t.property_id, t.target_object_id from dmx_sql_property_target t left join dmx_sql_object o on o.local_id = t.target_object_id where o.local_id is null order by t.property_id;")
+     :broken-query-run-objects
+     (rows "select q.id, q.local_object_id from dmx_sql_query_run q left join dmx_sql_object o on o.local_id = q.local_object_id where q.local_object_id is not null and o.local_id is null order by q.id;")
+     :broken-journal-objects
+     (rows "select j.id, j.local_object_id from dmx_sql_sync_journal j left join dmx_sql_object o on o.local_id = j.local_object_id where j.local_object_id is not null and o.local_id is null order by j.id;")
+     :broken-journal-query-runs
+     (rows "select j.journal_id, j.query_run_id from dmx_sql_journal_query_run j left join dmx_sql_query_run q on q.id = j.query_run_id where q.id is null order by j.journal_id;"))))
+
 (defun dmx-sqlite-integrity-report (db-path)
   "Return logical integrity findings without changing the SQLite store.
 
@@ -749,10 +1013,21 @@ current writer-side checks or were imported by external tooling."
                          :remote-id (dmx-sqlite-nullable-integer remote-id)
                          :remote-uri (dmx-sqlite-nullable-string remote-uri)))))
          (topics (dmx-sqlite-topics db-path))
-         (associations (dmx-sqlite-associations db-path)))
+         (associations (dmx-sqlite-associations db-path))
+         (references (dmx-sqlite-reference-integrity-findings db-path)))
     (list :ok-p (and (null broken-association-players)
-                     (null broken-sync-identities))
+                     (null broken-sync-identities)
+                     (null (getf references :broken-property-owners))
+                     (null (getf references :broken-property-targets))
+                     (null (getf references :broken-query-run-objects))
+                     (null (getf references :broken-journal-objects))
+                     (null (getf references :broken-journal-query-runs)))
           :counts (list :topics (length topics)
                         :associations (length associations))
           :broken-association-players broken-association-players
-          :broken-sync-identities broken-sync-identities)))
+          :broken-sync-identities broken-sync-identities
+          :broken-property-owners (getf references :broken-property-owners)
+          :broken-property-targets (getf references :broken-property-targets)
+          :broken-query-run-objects (getf references :broken-query-run-objects)
+          :broken-journal-objects (getf references :broken-journal-objects)
+          :broken-journal-query-runs (getf references :broken-journal-query-runs))))
