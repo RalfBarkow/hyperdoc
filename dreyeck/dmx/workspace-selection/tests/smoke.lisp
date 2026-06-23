@@ -55,5 +55,23 @@
         (getf result :selected-plan)
         'dreyeck.dmx.workspace-selection::!select-property-journal-sync)
        "Selected SHOP3 plan must contain !SELECT-PROPERTY-JOURNAL-SYNC")))
+  (let ((*shop3-find-plans-call-count* 0))
+    (let ((result (select-dmx-sqlite-first-consumer-with-shop3)))
+      (assert-true (getf result :plans) "First-consumer selection must return a plan")
+      (assert-true (eq :live (getf result :planner-call)) "First-consumer planning must be live")
+      (assert-true (not (getf result :heuristic-fallback)) "First-consumer selection must not fall back")
+      (assert-true (member (getf result :selected-consumer)
+                           '(:kioskbeerli-diagnostics-readiness :recorder-replay-readiness
+                             :fedwiki-materialization-readiness :live-sync-readiness
+                             :defer-for-more-evidence))
+                   "Selected consumer must be a declared candidate")
+      (assert-true
+       (dmx-sqlite-workspace-plan-action-p
+        (getf result :selected-plan)
+        'dreyeck.dmx.workspace-selection::!select-kioskbeerli-diagnostics-readiness)
+       "Bounded plan must select Kioskbeerli diagnostics readiness")
+      (assert-true (null (intersection (getf result :non-actions)
+                                       '(:kioskbeerli-diagnostics-readiness)))
+                   "No consumer implementation action is present")))
   (format t "~&Dreyeck DMX SQLite workspace-selection smoke tests passed.~%")
   t)
