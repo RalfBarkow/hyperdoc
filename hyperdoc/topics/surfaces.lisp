@@ -134,6 +134,15 @@
    :references '("Skillization in HyperDoc"
                  "Operational definition: skill pattern, conceptual center, discoverability propagation")))
 
+(defun ownership-extraction-with-compatibility-shell-topic ()
+  (make-topic
+   :id "ownership-extraction-with-compatibility-shell"
+   :title "Ownership Extraction with Compatibility Shell"
+   :summary "Refactoring pattern for moving situated project state out of a reusable substrate while leaving temporary compatibility coordinates behind."
+   :references '("Ownership Extraction with Compatibility Shell"
+                 "Codex Belongs to Dreyeck"
+                 "afa829b9 refactor(codex): move collaboration surface into dreyeck")))
+
 (defun conceptual-center-topic ()
   (make-topic
    :id "conceptual-center"

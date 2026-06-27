@@ -5,6 +5,10 @@ server substrate. Dreyeck owns situated collaboration state: Codex, Recent
 Changes, Next, handover routes, and Kioskbeerli context-window/dashboard
 surfaces.
 
+This refactor is the canonical example for the reusable pattern
+`Ownership Extraction with Compatibility Shell`, also named locally as the
+`Substrate / Situated-Surface Split`.
+
 This source refactor moves the canonical Codex collaboration implementation out
 of HyperDoc core and into Dreyeck:
 
