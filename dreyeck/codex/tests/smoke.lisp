@@ -39,6 +39,18 @@
       (find-symbol "👀BUILD-REFEREE-SUBGRAPH" "DREYECK/CODEX")
     (and status (fboundp symbol))))
 
+(defun domkin-2017-source-subgraph-view-present-p ()
+  (multiple-value-bind (symbol status)
+      (find-symbol "👀DOMKIN-2017-SOURCE-SUBGRAPH" "DREYECK/CODEX")
+    (and status (fboundp symbol))))
+
+(defun entry-present-p (entries id)
+  (let ((entry
+          (find id entries
+                :key (lambda (item) (getf item :id))
+                :test #'equal)))
+    (and entry (getf entry :present-p))))
+
 (defun run-dreyeck-codex-smoke-tests ()
   (let ((db (temporary-dreyeck-codex-dmx-db-path)))
     (unwind-protect
@@ -50,7 +62,11 @@
                   (surface
                     (make-test-codex-dmx-learning-topics inspection db))
                   (subgraph
-                    (codex-dmx-build-referee-subgraph surface)))
+                    (codex-dmx-build-referee-subgraph surface))
+                  (domkin-surface
+                    (codex-domkin-2017-source-topics :db-path db))
+                  (domkin-subgraph
+                    (codex-domkin-2017-source-subgraph domkin-surface)))
              (assert-equal
               :build-referee-topics-in-production-dmx
               (getf subgraph :view)
@@ -85,7 +101,62 @@
               "Build/referee subgraph must report no missing associations")
              (assert-true
               (build-referee-subgraph-view-present-p)
-              "Explorer load must install the Build Referee Subgraph view"))
+              "Explorer load must install the Build Referee Subgraph view")
+             (assert-equal
+              :domkin-2017-source-subgraph
+              (getf domkin-subgraph :view)
+              "Projection must identify the Domkin 2017 source subgraph")
+             (assert-equal
+              :passed
+              (getf domkin-subgraph :status)
+              "Domkin 2017 source subgraph projection must pass")
+             (assert-equal
+              nil
+              (getf domkin-subgraph :missing-topic-ids)
+              "Domkin 2017 source subgraph must report no missing topics")
+             (assert-equal
+              nil
+              (getf domkin-subgraph :missing-association-ids)
+              "Domkin 2017 source subgraph must report no missing associations")
+             (dolist (topic-id '("domkin-2017-loading-multiple-asdf-versions"
+                                 "common-lisp-dependency-hell"
+                                 "package-name-conflict"
+                                 "global-package-registry"
+                                 "asdf-unversioned-system-registry"
+                                 "package-renaming-conflict-resolution"
+                                 "load-system-with-renamings"
+                                 "asdf-public-api-gap"
+                                 "asdf-plan-api-underdocumented"
+                                 "implicit-transitive-dependency-limitation"
+                                 "runtime-intern-eval-renaming-limitation"
+                                 "hyperdoc-asdf-session-action-reading"))
+               (assert-true
+                (entry-present-p (getf domkin-subgraph :topics) topic-id)
+                (format nil
+                        "Domkin 2017 source subgraph must include topic ~A"
+                        topic-id)))
+             (dolist (association-id
+                      '("assoc:domkin-2017-loading-multiple-asdf-versions:addresses:common-lisp-dependency-hell"
+                        "assoc:common-lisp-dependency-hell:manifests-as:package-name-conflict"
+                        "assoc:package-name-conflict:occurs-in:global-package-registry"
+                        "assoc:load-system-with-renamings:implements:package-renaming-conflict-resolution"
+                        "assoc:load-system-with-renamings:performs:dependency-tree-conflict-analysis"
+                        "assoc:asdf-public-api-gap:limits:load-system-with-renamings"
+                        "assoc:asdf-plan-api-underdocumented:limits:alternative-asdf-system-strategies"
+                        "assoc:implicit-transitive-dependency-limitation:constrains:load-system-with-renamings"
+                        "assoc:runtime-intern-eval-renaming-limitation:constrains:load-system-with-renamings"
+                        "assoc:hyperdoc-asdf-session-action-reading:derived-from:domkin-2017-loading-multiple-asdf-versions"
+                        "assoc:build-referee-decision-route:responds-to:asdf-plan-api-underdocumented"
+                        "assoc:lisp-referee-form:responds-to:asdf-monolithic-loading-strategy"))
+               (assert-true
+                (entry-present-p (getf domkin-subgraph :associations)
+                                 association-id)
+                (format nil
+                        "Domkin 2017 source subgraph must include association ~A"
+                        association-id)))
+             (assert-true
+              (domkin-2017-source-subgraph-view-present-p)
+              "Explorer load must install the Domkin 2017 Source Subgraph view"))
            (format t "~&Dreyeck Codex smoke tests passed.~%")
            t)
       (when (probe-file db)

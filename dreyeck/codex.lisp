@@ -333,6 +333,59 @@ symbol name without depending on them."
             (title-of object)
             (codex-dmx-learning-topics-status-of object))))
 
+(defclass codex-domkin-2017-source-topics ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (summary :accessor summary-of :initarg :summary)
+   (source :accessor codex-domkin-2017-source-topics-source-of
+           :initarg :source)
+   (paper-title
+    :accessor codex-domkin-2017-source-topics-paper-title-of
+    :initarg :paper-title)
+   (production-db-path
+    :accessor codex-domkin-2017-source-topics-production-db-path-of
+    :initarg :production-db-path)
+   (status :accessor codex-domkin-2017-source-topics-status-of
+           :initarg :status)
+   (topic-count
+    :accessor codex-domkin-2017-source-topics-topic-count-of
+    :initarg :topic-count)
+   (expected-topic-count
+    :accessor codex-domkin-2017-source-topics-expected-topic-count-of
+    :initarg :expected-topic-count)
+   (association-count
+    :accessor codex-domkin-2017-source-topics-association-count-of
+    :initarg :association-count)
+   (expected-association-count
+    :accessor
+    codex-domkin-2017-source-topics-expected-association-count-of
+    :initarg :expected-association-count)
+   (missing-topic-ids
+    :accessor codex-domkin-2017-source-topics-missing-topic-ids-of
+    :initarg :missing-topic-ids)
+   (missing-association-ids
+    :accessor codex-domkin-2017-source-topics-missing-association-ids-of
+    :initarg :missing-association-ids)
+   (topics :accessor codex-domkin-2017-source-topics-topics-of
+           :initarg :topics)
+   (associations
+    :accessor codex-domkin-2017-source-topics-associations-of
+    :initarg :associations)
+   (source-artifact
+    :accessor codex-domkin-2017-source-topics-source-artifact-of
+    :initarg :source-artifact)
+   (materialization-status
+    :accessor codex-domkin-2017-source-topics-materialization-status-of
+    :initarg :materialization-status)
+   (build-tasks :accessor codex-domkin-2017-source-topics-build-tasks-of
+                :initarg :build-tasks)))
+
+(defmethod print-object ((object codex-domkin-2017-source-topics) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A ~A"
+            (title-of object)
+            (codex-domkin-2017-source-topics-status-of object))))
+
 (defparameter *codex-build-referee-subgraph-topic-ids*
   '("plan-then-perform-build-session"
     "build-referee-decision-route"
@@ -414,6 +467,34 @@ DMX/build layers."
      :topics topics
      :associations associations
      :source "dreyeck/codex:codex-dmx-learning-topics")))
+
+(defun codex-domkin-2017-source-subgraph (surface)
+  "Return the Domkin 2017 ASDF source subgraph as inspectable Lisp data."
+  (list
+   :view :domkin-2017-source-subgraph
+   :source (codex-domkin-2017-source-topics-source-of surface)
+   :title (codex-domkin-2017-source-topics-paper-title-of surface)
+   :production-db-path
+   (codex-domkin-2017-source-topics-production-db-path-of surface)
+   :status (codex-domkin-2017-source-topics-status-of surface)
+   :topic-count
+   (codex-domkin-2017-source-topics-topic-count-of surface)
+   :expected-topic-count
+   (codex-domkin-2017-source-topics-expected-topic-count-of surface)
+   :association-count
+   (codex-domkin-2017-source-topics-association-count-of surface)
+   :expected-association-count
+   (codex-domkin-2017-source-topics-expected-association-count-of
+    surface)
+   :missing-topic-ids
+   (codex-domkin-2017-source-topics-missing-topic-ids-of surface)
+   :missing-association-ids
+   (codex-domkin-2017-source-topics-missing-association-ids-of surface)
+   :topics (codex-domkin-2017-source-topics-topics-of surface)
+   :associations
+   (codex-domkin-2017-source-topics-associations-of surface)
+   :source-artifact
+   (codex-domkin-2017-source-topics-source-artifact-of surface)))
 
 (defun codex-dmx-learning-topic-status ()
   "Return the read-only Codex status object for DMX learning topic materialization."
@@ -497,6 +578,35 @@ work while inspecting."
      :referee-route referee-route
      :optional-provider-results
      (list (codex-context-provider-result 'dmx-learning-topic-provider)))))
+
+(defun codex-domkin-2017-source-topics
+    (&key (db-path dreyeck.dmx.sqlite:*dreyeck-dmx-production-db-path*))
+  "Return Codex's read-only inspection object for the Domkin 2017 DMX subgraph."
+  (let ((inspection
+          (dreyeck.dmx.sqlite:dmx-materialized-domkin-2017-source-topics
+           :db-path db-path)))
+    (make-instance
+     'codex-domkin-2017-source-topics
+     :id "codex-domkin-2017-source-topics"
+     :title "Codex Domkin 2017 Source Topics"
+     :summary
+     "Codex-facing inspection of Domkin 2017 ASDF source topics materialized in the Dreyeck DMX SQLite production store."
+     :source (getf inspection :source)
+     :paper-title (getf inspection :title)
+     :production-db-path (getf inspection :production-db-path)
+     :status (getf inspection :status)
+     :topic-count (getf inspection :topic-count)
+     :expected-topic-count (getf inspection :expected-topic-count)
+     :association-count (getf inspection :association-count)
+     :expected-association-count
+     (getf inspection :expected-association-count)
+     :missing-topic-ids (getf inspection :missing-topic-ids)
+     :missing-association-ids (getf inspection :missing-association-ids)
+     :topics (getf inspection :topics)
+     :associations (getf inspection :associations)
+     :source-artifact (getf inspection :source-artifact)
+     :materialization-status (getf inspection :materialization-status)
+     :build-tasks (dreyeck/build:list-build-tasks))))
 
 (defun codex-context-window-entry (role title text
                                    &key timestamp references derived-objects)

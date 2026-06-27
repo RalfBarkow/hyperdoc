@@ -956,6 +956,150 @@
                               (association-table
                                (getf subgraph :associations))))))))
 
+(views:defview 👀domkin-2017-source-subgraph
+    (surface codex-domkin-2017-source-topics)
+  (labels ((value-string (value)
+             (cond
+               ((null value) "NIL")
+               ((keywordp value) (symbol-name value))
+               ((symbolp value) (prin1-to-string value))
+               (t (format nil "~A" value))))
+           (code-value (value)
+             (views:html
+              (:tt (views:esc (value-string value)))))
+           (present-label (present-p)
+             (if present-p "present" "missing"))
+           (summary-row (label value)
+             (views:html
+              (:p (:b (views:esc label))
+                  ": "
+                  (code-value value))))
+           (topic-table (topics)
+             (views:html
+              (:table :class "hyperbook-table"
+                      (:thead
+                       (:tr
+                        (:th "ID")
+                        (:th "Present")
+                        (:th "Title")
+                        (:th "Topic Type")
+                        (:th "Type URI")
+                        (:th "Source")
+                        (:th "Page Hint")
+                        (:th "Projection Status")
+                        (:th "Summary")))
+                      (:tbody
+                       (dolist (topic topics)
+                         (views:html
+                          (:tr
+                           (:td (:tt (views:esc (getf topic :id))))
+                           (:td
+                            (views:esc
+                             (present-label (getf topic :present-p))))
+                           (:td (views:esc (or (getf topic :title) "")))
+                           (:td (code-value (getf topic :topic-type)))
+                           (:td
+                            (:tt
+                             (views:esc (or (getf topic :type-uri) ""))))
+                           (:td
+                            (:tt
+                             (views:esc (or (getf topic :source) ""))))
+                           (:td
+                            (views:esc (or (getf topic :page-hint) "")))
+                           (:td
+                            (code-value (getf topic :projection-status)))
+                           (:td (views:esc (or (getf topic :summary) ""))))))))))
+           (association-table (associations)
+             (views:html
+              (:table :class "hyperbook-table"
+                      (:thead
+                       (:tr
+                        (:th "Source")
+                        (:th "Predicate")
+                        (:th "Target")
+                        (:th "Type URI")
+                        (:th "Present")
+                        (:th "ID")))
+                      (:tbody
+                       (dolist (association associations)
+                         (views:html
+                          (:tr
+                           (:td
+                            (:tt
+                             (views:esc
+                              (or (getf association :source) ""))))
+                           (:td
+                            (:tt
+                             (views:esc
+                              (or (getf association :predicate) ""))))
+                           (:td
+                            (:tt
+                             (views:esc
+                              (or (getf association :target) ""))))
+                           (:td
+                            (:tt
+                             (views:esc
+                              (or (getf association :type-uri) ""))))
+                           (:td
+                            (views:esc
+                             (present-label
+                              (getf association :present-p))))
+                           (:td
+                            (:tt
+                             (views:esc
+                              (or (getf association :id) ""))))))))))))
+    (let ((subgraph (codex-domkin-2017-source-subgraph surface)))
+      (views:html-view :title "Domkin 2017 Source Subgraph" :priority 1
+                       (views:add-asset-path "/hyperbook/"
+                                             (asdf:system-relative-pathname
+                                              :hyperbook
+                                              "assets/hyperbook/"))
+                       (views:include-css "/hyperbook/css/hyperbook.css")
+                       (views:html
+                        (:div :class "hyperbook-page"
+                              (:h1 "Domkin 2017 Source Subgraph")
+                              (:p (:b "Source: ")
+                                  (:tt
+                                   (views:esc
+                                    (or (getf subgraph :source)
+                                        "unknown"))))
+                              (:p (:b "Paper: ")
+                                  (views:esc
+                                   (or (getf subgraph :title) "")))
+                              (:p (:b "Production DB: ")
+                                  (:tt
+                                   (views:esc
+                                    (or (getf subgraph
+                                              :production-db-path)
+                                        "unknown"))))
+                              (summary-row "Status"
+                                           (getf subgraph :status))
+                              (:p (:b "Topics: ")
+                                  (views:esc
+                                   (format nil "~D / ~D"
+                                           (getf subgraph :topic-count)
+                                           (getf subgraph
+                                                 :expected-topic-count))))
+                              (:p (:b "Associations: ")
+                                  (views:esc
+                                   (format nil "~D / ~D"
+                                           (getf subgraph
+                                                 :association-count)
+                                           (getf subgraph
+                                                 :expected-association-count))))
+                              (summary-row
+                               "Missing topics"
+                               (getf subgraph :missing-topic-ids))
+                              (summary-row
+                               "Missing associations"
+                               (getf subgraph
+                                     :missing-association-ids))
+                              (:h2 "Topics")
+                              (topic-table (getf subgraph :topics))
+                              (:h2 "Associations")
+                              (association-table
+                               (getf subgraph :associations))))))))
+
 (views:defview 👀raw (window codex-context-window)
   (let ((raw-text (codex-context-window-raw-text-of window)))
     (when raw-text

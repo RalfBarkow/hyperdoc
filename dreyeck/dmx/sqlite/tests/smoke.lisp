@@ -224,7 +224,10 @@
                   (status
                     (durable-note-materialization-status :db-path db))
                   (learning-topics
-                    (dmx-materialized-learning-topics :db-path db)))
+                    (dmx-materialized-learning-topics :db-path db))
+                  (domkin-source-topics
+                    (dmx-materialized-domkin-2017-source-topics
+                     :db-path db)))
              (assert-equal :durable-note-materialization
                            (getf first-run :kind)
                            "Materializer must return a structured run object")
@@ -305,6 +308,41 @@
                 (format nil
                         "Materializer must create required build/referee association ~A"
                         association-id)))
+             (dolist (topic-id '("domkin-2017-loading-multiple-asdf-versions"
+                                 "common-lisp-dependency-hell"
+                                 "package-name-conflict"
+                                 "global-package-registry"
+                                 "asdf-unversioned-system-registry"
+                                 "package-renaming-conflict-resolution"
+                                 "load-system-with-renamings"
+                                 "asdf-public-api-gap"
+                                 "asdf-plan-api-underdocumented"
+                                 "implicit-transitive-dependency-limitation"
+                                 "runtime-intern-eval-renaming-limitation"
+                                 "hyperdoc-asdf-session-action-reading"))
+               (assert-true
+                (dmx-sqlite-topic db topic-id)
+                (format nil
+                        "Materializer must create required Domkin 2017 topic ~A"
+                        topic-id)))
+             (dolist (association-id
+                      '("assoc:domkin-2017-loading-multiple-asdf-versions:addresses:common-lisp-dependency-hell"
+                        "assoc:common-lisp-dependency-hell:manifests-as:package-name-conflict"
+                        "assoc:package-name-conflict:occurs-in:global-package-registry"
+                        "assoc:load-system-with-renamings:implements:package-renaming-conflict-resolution"
+                        "assoc:load-system-with-renamings:performs:dependency-tree-conflict-analysis"
+                        "assoc:asdf-public-api-gap:limits:load-system-with-renamings"
+                        "assoc:asdf-plan-api-underdocumented:limits:alternative-asdf-system-strategies"
+                        "assoc:implicit-transitive-dependency-limitation:constrains:load-system-with-renamings"
+                        "assoc:runtime-intern-eval-renaming-limitation:constrains:load-system-with-renamings"
+                        "assoc:hyperdoc-asdf-session-action-reading:derived-from:domkin-2017-loading-multiple-asdf-versions"
+                        "assoc:build-referee-decision-route:responds-to:asdf-plan-api-underdocumented"
+                        "assoc:lisp-referee-form:responds-to:asdf-monolithic-loading-strategy"))
+               (assert-true
+                (dmx-sqlite-association db association-id)
+                (format nil
+                        "Materializer must create required Domkin 2017 association ~A"
+                        association-id)))
              (assert-equal
               :passed
               (getf status :last-validation-status)
@@ -321,6 +359,22 @@
               (namestring db)
               (getf learning-topics :production-db-path)
               "Learning-topic query must expose the selected DB path")
+             (assert-equal
+              :dmx-materialized-domkin-2017-source-topics
+              (getf domkin-source-topics :kind)
+              "Domkin source query must return a structured inspection object")
+             (assert-equal
+              :passed
+              (getf domkin-source-topics :status)
+              "Domkin source query must validate present source topics")
+             (assert-equal
+              nil
+              (getf domkin-source-topics :missing-topic-ids)
+              "Domkin source query must report no missing topics")
+             (assert-equal
+              nil
+              (getf domkin-source-topics :missing-association-ids)
+              "Domkin source query must report no missing associations")
              (assert-true
               (every (lambda (result)
                        (eq (getf result :state) :unchanged))

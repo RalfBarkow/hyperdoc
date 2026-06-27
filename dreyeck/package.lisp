@@ -26,6 +26,8 @@
            #:codex-dmx-learning-topics
            #:codex-dmx-learning-topic-status
            #:codex-dmx-build-referee-subgraph
+           #:codex-domkin-2017-source-topics
+           #:codex-domkin-2017-source-subgraph
            #:codex-build-referee-route
            #:codex-context-window-example
            #:codex-kioskbeerli-context-window-example
@@ -57,6 +59,8 @@
                 #:codex-dmx-learning-topics
                 #:codex-dmx-learning-topic-status
                 #:codex-dmx-build-referee-subgraph
+                #:codex-domkin-2017-source-topics
+                #:codex-domkin-2017-source-subgraph
                 #:codex-build-referee-route)
   (:export #:install-dreyeck-server-scaffold
            #:codex
@@ -67,4 +71,6 @@
            #:codex-dmx-learning-topics
            #:codex-dmx-learning-topic-status
            #:codex-dmx-build-referee-subgraph
+           #:codex-domkin-2017-source-topics
+           #:codex-domkin-2017-source-subgraph
            #:codex-build-referee-route))

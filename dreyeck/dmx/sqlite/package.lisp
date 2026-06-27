@@ -40,6 +40,7 @@
    #:materialize-durable-notes-into-production-db
    #:durable-note-materialization-status
    #:dmx-materialized-learning-topics
+   #:dmx-materialized-domkin-2017-source-topics
    #:normalize-dmx-association-players
    #:topic-association-players
    #:dmx-sql-association-has-role-bearing-players-p
