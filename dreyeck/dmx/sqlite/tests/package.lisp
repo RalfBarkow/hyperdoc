@@ -26,6 +26,8 @@
                 #:dmx-sqlite-sync-identities-for-remote
                 #:dmx-sqlite-sync-workflow-summary
                 #:dmx-sqlite-integrity-report
+                #:materialize-durable-notes-into-production-db
+                #:durable-note-materialization-status
                 #:dmx-sql-association-has-role-bearing-players-p
                 #:dmx-sql-counts)
   (:export #:run-dmx-sqlite-smoke-tests))

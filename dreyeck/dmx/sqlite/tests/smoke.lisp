@@ -215,6 +215,44 @@
                            "Sync workflow summary must count query runs")
              (assert-true (getf report :ok-p)
                           "A writer-produced store must have an empty integrity report"))
+           (let* ((first-run
+                    (materialize-durable-notes-into-production-db
+                     :db-path db))
+                  (second-run
+                    (materialize-durable-notes-into-production-db
+                     :db-path db))
+                  (status
+                    (durable-note-materialization-status :db-path db)))
+             (assert-equal :durable-note-materialization
+                           (getf first-run :kind)
+                           "Materializer must return a structured run object")
+             (assert-true (dmx-sqlite-topic db "hyperdoc-core")
+                          "Materializer must create the HyperDoc Core topic")
+             (assert-true
+              (dmx-sqlite-topic
+               db "ownership-extraction-with-compatibility-shell")
+              "Materializer must create the ownership extraction pattern topic")
+             (assert-true (dmx-sqlite-topic db "codex-belongs-to-dreyeck")
+                          "Materializer must create the Codex/Dreyeck decision topic")
+             (assert-true
+              (dmx-sqlite-association
+               db
+               "assoc:hyperdoc-core:supplies-boundary-for:ownership-extraction-with-compatibility-shell")
+              "Materializer must create the HyperDoc boundary association")
+             (assert-equal
+              :passed
+              (getf status :last-validation-status)
+              "Materialization status must validate the seeded topic store")
+             (assert-true
+              (every (lambda (result)
+                       (eq (getf result :state) :unchanged))
+                     (getf second-run :topic-results))
+              "Second materializer run must not duplicate or rewrite topics")
+             (assert-true
+              (every (lambda (result)
+                       (eq (getf result :state) :unchanged))
+                     (getf second-run :association-results))
+              "Second materializer run must not duplicate or rewrite associations"))
            (assert-sql-ok
             db
             "PRAGMA foreign_keys = OFF; INSERT INTO dmx_sql_assoc_player(assoc_id, player_no, role_type_uri, player_kind, player_local_id) VALUES('assoc:left-right', 99, 'dmx.role.broken', 'topic', 'topic:missing');"

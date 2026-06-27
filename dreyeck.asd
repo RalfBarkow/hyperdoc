@@ -101,7 +101,8 @@
     :serial t
     :components
     ((:file "package")
-     (:file "store")))))
+     (:file "store")
+     (:file "durable-notes")))))
 
 (defsystem #:dreyeck/dmx/sqlite/tests
   :description "Tests for the Dreyeck-owned DMX-shaped SQLite store."

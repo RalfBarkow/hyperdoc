@@ -4,6 +4,7 @@
   (:use #:cl)
   (:export
    #:*default-dmx-associative-mirror-path*
+   #:*dreyeck-dmx-production-db-path*
    #:initialize-dmx-associative-mirror
    #:sqlite-run
    #:record-dmx-topic-value
@@ -36,6 +37,8 @@
    #:dmx-sqlite-sync-identity-conflicts
    #:dmx-sqlite-sync-workflow-summary
    #:dmx-sqlite-integrity-report
+   #:materialize-durable-notes-into-production-db
+   #:durable-note-materialization-status
    #:normalize-dmx-association-players
    #:topic-association-players
    #:dmx-sql-association-has-role-bearing-players-p
