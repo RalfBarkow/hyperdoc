@@ -333,6 +333,88 @@ symbol name without depending on them."
             (title-of object)
             (codex-dmx-learning-topics-status-of object))))
 
+(defparameter *codex-build-referee-subgraph-topic-ids*
+  '("plan-then-perform-build-session"
+    "build-referee-decision-route"
+    "add-plan-then-perform-session-state-to-dreyeck-build"
+    "render-build-referee-decisions-as-routes"
+    "lisp-referee-form"
+    "dreyeck/build:build-session-next-action"
+    "asdf-3-3-session-action-model"
+    "domkin-2017"))
+
+(defparameter *codex-build-referee-subgraph-association-ids*
+  '("assoc:plan-then-perform-build-session:refines:codex-is-not-the-build-system"
+    "assoc:plan-then-perform-build-session:supports:reusable-common-lisp-build-tasks-for-codex"
+    "assoc:plan-then-perform-build-session:inspired-by:asdf-3-3-session-action-model"
+    "assoc:asdf-3-3-session-action-model:described-by:domkin-2017"
+    "assoc:build-referee-decision-route:renders:lisp-referee-form"
+    "assoc:build-referee-decision-route:explains:plan-then-perform-build-session"
+    "assoc:build-referee-decision-route:supports:codex-is-not-the-build-system"
+    "assoc:build-referee-decision-route:inspects:dreyeck/build:build-session-next-action"))
+
+(defun codex--entry-by-id (entries id)
+  (find id entries
+        :key (lambda (entry) (getf entry :id))
+        :test #'equal))
+
+(defun codex--required-entry (entries id)
+  (or (codex--entry-by-id entries id)
+      (list :id id :present-p nil)))
+
+(defun codex--present-entry-p (entry)
+  (and entry (getf entry :present-p) t))
+
+(defun codex--missing-entry-ids (entries)
+  (loop for entry in entries
+        unless (codex--present-entry-p entry)
+          collect (getf entry :id)))
+
+(defun codex-dmx-build-referee-subgraph (surface)
+  "Return the build/referee learned-topic subgraph of a Codex DMX surface.
+
+This is a read-only projection from CODEX-DMX-LEARNING-TOPICS.  It does not
+materialize, validate, or decide the next build action; those remain in the
+DMX/build layers."
+  (let* ((all-topic-entries
+           (append (codex-dmx-learning-topics-topics-of surface)
+                   (codex-dmx-learning-topics-support-topics-of surface)))
+         (association-entries
+           (codex-dmx-learning-topics-associations-of surface))
+         (topics
+           (loop for id in *codex-build-referee-subgraph-topic-ids*
+                 collect (codex--required-entry all-topic-entries id)))
+         (associations
+           (loop for id in *codex-build-referee-subgraph-association-ids*
+                 collect (codex--required-entry association-entries id)))
+         (missing-topic-ids (codex--missing-entry-ids topics))
+         (missing-association-ids (codex--missing-entry-ids associations))
+         (topic-count (count-if #'codex--present-entry-p topics))
+         (association-count
+           (count-if #'codex--present-entry-p associations))
+         (passed?
+           (and (eq :passed (codex-dmx-learning-topics-status-of surface))
+                (null missing-topic-ids)
+                (null missing-association-ids))))
+    (list
+     :view :build-referee-topics-in-production-dmx
+     :claim
+     "Production DMX SQLite contains the build/referee learned topics."
+     :production-db-path
+     (codex-dmx-learning-topics-production-db-path-of surface)
+     :status (if passed? :passed :failed)
+     :topic-count topic-count
+     :expected-topic-count
+     (length *codex-build-referee-subgraph-topic-ids*)
+     :association-count association-count
+     :expected-association-count
+     (length *codex-build-referee-subgraph-association-ids*)
+     :missing-topic-ids missing-topic-ids
+     :missing-association-ids missing-association-ids
+     :topics topics
+     :associations associations
+     :source "dreyeck/codex:codex-dmx-learning-topics")))
+
 (defun codex-dmx-learning-topic-status ()
   "Return the read-only Codex status object for DMX learning topic materialization."
   (let* ((session (dreyeck/build:make-build-session))

@@ -55,6 +55,23 @@
                   :serial t
                   :components ((:file "codex")))))
 
+(defsystem #:dreyeck/codex/tests
+    :description "Smoke tests for the Dreyeck Codex collaboration surface"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:dreyeck/codex/explorer
+                 #:dreyeck/dmx/sqlite)
+    :components ((:module "dreyeck/codex/tests"
+                  :serial t
+                  :components ((:file "package")
+                               (:file "smoke"))))
+    :perform (asdf:test-op (operation component)
+               (declare (ignore operation component))
+               (uiop:symbol-call :dreyeck/codex/tests
+                                 :run-dreyeck-codex-smoke-tests)))
+
 (defsystem #:dreyeck/dmx/workspace-selection
   :description "Live SHOP3 selection of the Dreyeck DMX SQLite ASDF owner."
   :author "Ralf Barkow"
