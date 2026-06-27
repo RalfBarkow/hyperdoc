@@ -8,6 +8,14 @@
 <h1>Merge proposed topic additions into <tt>hyperdoc/topics.lisp</tt></h1>
 
 <p>
+Historical note: this page title still names the former monolithic
+<tt>hyperdoc/topics.lisp</tt> path. Current topic object code lives under
+<tt>hyperdoc/topics/</tt>. That source directory is code layout, not the
+production topic store; durable project topics belong in the Dreyeck/DMX
+SQLite production database.
+</p>
+
+<p>
 The merge key is the <b>canonical topic title</b>, not the proposed function name.
 In the current Topics model, authored links resolve through the exact topic title,
 backlinks are derived from those title-based links, and the topic index also has a
@@ -32,7 +40,7 @@ So duplicate titles are the real collision domain. A fresh function name does no
 <h2>Recommended merge procedure</h2>
 
 <ol>
-  <li>For each proposed topic, search <tt>hyperdoc/topics.lisp</tt> for the exact <tt>:title</tt> string.</li>
+  <li>For each proposed topic, search the topic factory files under <tt>hyperdoc/topics/</tt> for the exact <tt>:title</tt> string.</li>
   <li>If the title already exists, keep the existing function name and merge only the content fields that need updating:
     <ul>
       <li>keep the existing <tt>:id</tt> unless you are intentionally doing a larger migration</li>

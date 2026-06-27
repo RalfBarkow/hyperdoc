@@ -188,5 +188,6 @@ runtime shims when the boundary is wrong.
 
 ## Related pages / references
 
+- <a page="HyperDoc Core">HyperDoc Core</a>
 - <a page="Codex Belongs to Dreyeck">Codex Belongs to Dreyeck</a>
 - `afa829b9 refactor(codex): move collaboration surface into dreyeck`

@@ -3,10 +3,18 @@
 <in-package>hyperdoc</in-package>
 
 <p>
-  A topic factory is an authored Lisp function in <tt>hyperdoc/topics.lisp</tt>
+  A topic factory is an authored Lisp function currently living under <tt>hyperdoc/topics/</tt>
   that returns a topic object, typically through <tt>make-topic</tt>. Its role
   is not only construction in one moment, but durable reconstruction of the
   topic-page surface used by HyperBook <tt>topics</tt>.
+</p>
+
+<p>
+  This is the current Common Lisp code layout, not the final production topic
+  store. Durable project topics should be persisted as first-class
+  Dreyeck/DMX SQLite topics and associations; Markdown notes and HyperDoc pages
+  are seeds, exports, handover artifacts, or human-readable projections unless
+  a slice explicitly says otherwise.
 </p>
 
 <h2>Inspectable objects</h2>

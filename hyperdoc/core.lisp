@@ -67,7 +67,7 @@
 (defclass code-page (page)
   ((file :reader file-of :initarg :file)))
 
-;; Inspectable topic objects are defined in hyperdoc/topics.lisp.
+;; Inspectable topic object code currently lives under hyperdoc/topics/.
 
 ;; Create a HyperDoc instance.
 ;;

@@ -20,7 +20,7 @@
   becomes a subject of review, it should first be promoted into a reviewed topic
   proposal object. That proposal can carry a candidate <tt>:id</tt>,
   <tt>:title</tt>, <tt>:summary</tt>, editorial references, and an exact-title
-  merge classification without automatically editing <tt>hyperdoc/topics.lisp</tt>
+  merge classification without automatically editing topic factory code under <tt>hyperdoc/topics/</tt>
   or creating new page files.
 </p>
 
@@ -37,7 +37,7 @@
 
 <p>
   The reviewed promotion step exists because authored topic factories in
-  <tt>hyperdoc/topics.lisp</tt> are durable reconstruction points. A live relation
+  <tt>hyperdoc/topics/</tt> are durable Lisp reconstruction points. A live relation
   object can propose a topic, but it must not silently materialize one.
 </p>
 
@@ -276,7 +276,7 @@ IdentityTitleAssociationTopic
 <p>
   Operationally, the exact canonical title remains the merge key in HyperDoc's
   current Topics model. If a relation proposal says
-  <tt>:merge-into-existing-topic</tt>, search <tt>hyperdoc/topics.lisp</tt> for
+  <tt>:merge-into-existing-topic</tt>, search topic factory files under <tt>hyperdoc/topics/</tt> for
   that exact <tt>:title</tt> string and edit the existing factory in place. Add a
   new factory only when the proposal says the exact title is new.
 </p>

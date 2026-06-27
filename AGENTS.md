@@ -674,12 +674,12 @@ index page.
 When adding/updating a concept cluster (e.g. new external input, architecture note, workflow correction), update all three surfaces together:
 
 1. HyperDoc page(s): update or add `hyperdoc/*.html` page content.
-2. Lisp topic objects: update `hyperdoc/topics.lisp` with inspectable topic constructors.
+2. Lisp topic object code: update `hyperdoc/topics/` with inspectable topic constructors.
 3. Localhost FedWiki twins: update/add pages in `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages`.
 
 ### Topic object requirements
 
-- Define one topic function per inspectable concept in `hyperdoc/topics.lisp`.
+- Define one topic function per inspectable concept in `hyperdoc/topics/`.
 - Each topic must include:
   - `:id` (stable slug/key),
   - `:title` (human label),
@@ -719,7 +719,7 @@ For the full rationale and examples, see
 `hyperdoc/Authoring Documentation in HyperDoc.html`.
 
 1. Create/update a durable HyperDoc page when the distinction should remain stable.
-2. Add topic objects in `hyperdoc/topics.lisp` when concepts must be reusable inspectable handles.
+2. Add topic object code in `hyperdoc/topics/` when concepts must be reusable inspectable handles.
 3. Link page-to-topic relations explicitly with `hyperbook="topics" page="Exact Topic Title"`.
 4. Add FedWiki twins when collaborative journaling/parallel working trace is useful; do not force literal page symmetry.
 5. Split commits by surface:

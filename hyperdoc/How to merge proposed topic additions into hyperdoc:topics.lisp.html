@@ -5,6 +5,14 @@ Use <strong>exact topic title</strong> as the merge key.
 </p>
 
 <p>
+Historical note: this page title still names the former monolithic
+<code>hyperdoc/topics.lisp</code> path. Current topic object code lives under
+<code>hyperdoc/topics/</code>. That source directory is code layout, not the
+production topic store; durable project topics belong in the Dreyeck/DMX
+SQLite production database.
+</p>
+
+<p>
 That is the correct rule in the current Topics model because authored topic links resolve through a
 Topics HyperBook page title, and topic pages are rebuilt from topic-constructor functions and then
 registered by title. The real collision domain is duplicate <code>:title</code> values, not duplicate
@@ -14,7 +22,7 @@ Lisp function names.
 <h2>Merge rule</h2>
 
 <ol>
-  <li>For each proposed topic, search <code>hyperdoc/topics.lisp</code> for the exact <code>:title</code> string.</li>
+  <li>For each proposed topic, search the topic factory files under <code>hyperdoc/topics/</code> for the exact <code>:title</code> string.</li>
   <li>If that title already exists, edit the existing factory in place.</li>
   <li>If that title does not exist, add a new <code>...-topic</code> factory.</li>
   <li>Keep the existing canonical title stable unless you are intentionally doing a link migration, because title changes break authored <code>page=</code> targets until those links are updated.</li>
@@ -46,7 +54,7 @@ That creates a duplicate title collision in the topic-page layer.
 
 <ol>
   <li>Open the proposed snippet.</li>
-  <li>For each proposed <code>:title</code>, grep or search <code>hyperdoc/topics.lisp</code>.</li>
+  <li>For each proposed <code>:title</code>, grep or search the topic factory files under <code>hyperdoc/topics/</code>.</li>
   <li>Reuse the existing topic function when the title already exists.</li>
   <li>Add only truly new titles as new topic factories.</li>
   <li>Reload <code>:hyperdoc</code> or the relevant system.</li>

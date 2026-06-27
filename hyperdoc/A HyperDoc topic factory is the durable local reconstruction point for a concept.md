@@ -8,7 +8,9 @@ Then the right mental model is **three layers**, not two:
 
 That is the interplay Codex should preserve.
 
-In your current HyperDoc design, the **Topics HyperBook** is built from **authored topic factories**. Those factories are durable functions that return topic objects with a stable key, canonical title, summary, and editorial references, and HyperDoc uses them to rebuild the topic-page surface. The repo is explicit that this authored topic-page surface is intentionally distinct from live DMX-backed runtime proxies.  
+In your current HyperDoc design, the **Topics HyperBook** is built from **authored topic factories** whose code currently lives under `hyperdoc/topics/`. Those factories are durable functions that return topic objects with a stable key, canonical title, summary, and editorial references, and HyperDoc uses them to rebuild the topic-page surface. The repo is explicit that this authored topic-page surface is intentionally distinct from live DMX-backed runtime proxies.
+
+That source layout is not the long-term production topic store. Production topic persistence belongs in the Dreyeck/DMX SQLite database as first-class topics and associations. Markdown notes and HyperDoc pages are useful seeds, exports, handover artifacts, and human-readable projections.
 
 For your concrete example, the DMX side is a separate graph object: topic **917064**, type **`dmx.notes.note`**, value **“Encryption boundaries on the small web”**, with timestamp children and a composed child title topic **917059** via composition assoc **917067**. ([dmx.ralfbarkow.ch][1])
 

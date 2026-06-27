@@ -127,7 +127,7 @@ nix develop --command sbcl --script tools/article-allegation-slice.lisp \
 
 Live writes stay branch- and repo-aware:
 
-- HyperDoc pages, `topics.lisp`, and helper code belong in the `hyperdoc` repo on branch `hauptsache`.
+- HyperDoc pages, topic object code under `hyperdoc/topics/`, and helper code belong in the `hyperdoc` repo on branch `hauptsache`; production project topic persistence belongs to the Dreyeck/DMX SQLite database.
 - FedWiki twins and daily-anchor updates belong in `/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages` on branch `localhost`.
 - The helper checks those branch expectations before `--write-live` touches real files.
 

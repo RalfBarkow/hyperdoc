@@ -63,14 +63,22 @@
   editorial neighborhood without asserting identity.
 </p>
 
-<h2>Topic objects in topics.lisp</h2>
+<h2>Topic object code and production topic storage</h2>
 
 <p>
-  Topic objects in <tt>hyperdoc/topics.lisp</tt> are explicit inspectable
-  semantic handles with a stable key, title, summary, and optional editorial
-  references. They are exposed as first-class pages in HyperBook
+  Topic object code currently lives under <tt>hyperdoc/topics/</tt>. These
+  Common Lisp factories are explicit inspectable semantic handles with a stable
+  key, title, summary, and optional editorial references. They are exposed as
+  first-class pages in HyperBook
   <tt>topics</tt>. A HyperDoc page is not the same thing as a topic object:
   pages carry narrative structure; topics carry inspectable concept identity.
+</p>
+
+<p>
+  Production topic persistence belongs to the Dreyeck/DMX SQLite database.
+  Markdown notes and HyperDoc pages may serve as bootstrap documents, exports,
+  handover artifacts, or human-readable projections, but they are not the final
+  production topic store.
 </p>
 
 <h2>Inspectable objects embedded in pages</h2>

@@ -4,10 +4,16 @@
 
 <p>
   Authored topic factories are the preserved topic-constructor functions in
-  <tt>hyperdoc/topics.lisp</tt> that keep HyperDoc's topic-page surface
+  <tt>hyperdoc/topics/</tt> that keep HyperDoc's topic-page surface
   rebuildable. They are the authoring layer that remains available even when
   selected similarly named wrapper entry points are redirected to live
   DMX-backed runtime proxies.
+</p>
+
+<p>
+  The source directory is a current code location. It is not the long-term
+  authoritative topic store for durable project knowledge. Production topic
+  persistence belongs to the Dreyeck/DMX SQLite database.
 </p>
 
 <h2>Inspectable objects</h2>

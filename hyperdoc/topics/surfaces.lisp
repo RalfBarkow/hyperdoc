@@ -139,9 +139,21 @@
    :id "ownership-extraction-with-compatibility-shell"
    :title "Ownership Extraction with Compatibility Shell"
    :summary "Refactoring pattern for moving situated project state out of a reusable substrate while leaving temporary compatibility coordinates behind."
-   :references '("Ownership Extraction with Compatibility Shell"
+   :references '("HyperDoc Core"
+                 "Ownership Extraction with Compatibility Shell"
                  "Codex Belongs to Dreyeck"
                  "afa829b9 refactor(codex): move collaboration surface into dreyeck")))
+
+(defun hyperdoc-core-topic ()
+  (make-topic
+   :id "hyperdoc-core"
+   :title "HyperDoc core"
+   :summary "Ownership boundary for Konrad Hinsen's upstream HyperDoc lineage and generic substrate patches, distinct from the local hyperdoc/ path and from Dreyeck-owned production topic storage."
+   :references '("HyperDoc Core"
+                 "Ownership Extraction with Compatibility Shell"
+                 "Codex Belongs to Dreyeck"
+                 "https://codeberg.org/khinsen/hyperdoc/"
+                 "0d5bd1b0fba64f0bf9ab1cea21f01603c058f7cc")))
 
 (defun conceptual-center-topic ()
   (make-topic

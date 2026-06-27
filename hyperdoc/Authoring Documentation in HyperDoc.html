@@ -33,12 +33,14 @@
   <li>A durable page should avoid transient branch status, release churn, or commit narration.</li>
 </ul>
 
-<h2>When to add a topic object in topics.lisp</h2>
+<h2>When to add topic object code</h2>
 
 <ul>
   <li>Add a topic object when a concept needs reusable inspectable identity.</li>
   <li>Use topics for concept reuse across multiple pages, not only one local narrative.</li>
   <li>Topic objects are reusable semantic handles, not mere page metadata.</li>
+  <li>Topic object code currently lives under <tt>hyperdoc/topics/</tt>.</li>
+  <li>Production topic persistence belongs to the Dreyeck/DMX SQLite database; Markdown and HyperDoc notes are transitional seeds, exports, handover artifacts, or human-readable projections unless a slice explicitly says otherwise.</li>
   <li>Keep stable topic key and topic title separate: the key preserves Lisp identity, while the title is the canonical page id in HyperBook <tt>topics</tt>.</li>
 </ul>
 
@@ -133,7 +135,7 @@
 </p>
 
 <ul>
-  <li>Keep repo boundaries explicit: HyperDoc pages and <tt>topics.lisp</tt> stay in the <tt>hyperdoc</tt> repo on <tt>hauptsache</tt>; FedWiki twins and daily anchors stay in the <tt>pages</tt> repo on <tt>localhost</tt>.</li>
+  <li>Keep repo boundaries explicit: HyperDoc pages and topic object code under <tt>hyperdoc/topics/</tt> stay in the <tt>hyperdoc</tt> repo on <tt>hauptsache</tt>; FedWiki twins and daily anchors stay in the <tt>pages</tt> repo on <tt>localhost</tt>; production project topic persistence belongs to the Dreyeck/DMX SQLite database.</li>
   <li>Prefer the compact spec shape: slice id, mode, incident title, source label, epistemic status, summary, incident section list, concept list with topic handles, anchor date, and safeguard flags.</li>
   <li>Use <tt>--print-plan</tt> to inspect the derived page titles, topic handles, FedWiki slugs, and daily-anchor target before any dry-run or live write.</li>
   <li>Use <tt>tools/fedwiki-materialization.lisp</tt> for narrow live-page repair when HyperBook reports missing FedWiki slugs from a generated or topic-backed article slice; start with <tt>--print-plan</tt>, then materialize only the selected page or slice into the <tt>pages</tt> repo on <tt>localhost</tt>. That operation repairs the pages worktree; if <tt>fedwiki:wiki.ralfbarkow.ch</tt> still reports the slug missing afterwards, the remaining fault is site publication or sitemap refresh, not article-slice authoring.</li>

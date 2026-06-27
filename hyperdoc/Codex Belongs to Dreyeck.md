@@ -9,6 +9,9 @@ This refactor is the canonical example for the reusable pattern
 `Ownership Extraction with Compatibility Shell`, also named locally as the
 `Substrate / Situated-Surface Split`.
 
+The boundary test for this move is recorded in `HyperDoc Core`: local path under
+`hyperdoc/` is not sufficient evidence of HyperDoc core ownership.
+
 This source refactor moves the canonical Codex collaboration implementation out
 of HyperDoc core and into Dreyeck:
 

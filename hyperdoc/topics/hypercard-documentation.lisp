@@ -827,7 +827,7 @@
   (make-topic
    :id "authored-topic-factories"
    :title "Authored topic factories"
-   :summary "Authored topic-constructor functions preserved in hyperdoc/topics.lisp as the durable reconstruction layer for HyperDoc’s topic-page surface."
+   :summary "Authored topic-constructor functions currently living under hyperdoc/topics/ as the Lisp reconstruction layer for HyperDoc's topic-page surface, distinct from Dreyeck/DMX production topic persistence."
    :references '("Authored topic factories"
                  "Topic factory"
                  "Topics HyperBook in HyperDoc"
