@@ -1,6 +1,6 @@
 ;;;; Inspectable Codex context-window examples
 
-(in-package :hyperdoc)
+(in-package :dreyeck/codex)
 
 (defun codex-context-window-example ()
   (make-instance
@@ -24,7 +24,7 @@
    :proposed-actions '("Inspect the context-window object from SLY/CLOG.")
    :related-objects nil
    :validation-commands
-   '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/codex/examples)' --eval '(assert (hyperdoc::codex-context-window-example))' --eval '(uiop:quit)'")
+   '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :dreyeck/codex/examples)' --eval '(assert (dreyeck/codex:codex-context-window-example))' --eval '(uiop:quit)'")
    :provenance
    '("Deterministic example."
      "No external services, mutation, server startup, or eval bridge.")
@@ -100,7 +100,7 @@
      :proposed-actions '("Inspect each context-window level as an object link.")
      :related-objects nil
      :validation-commands
-     '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/codex/examples)' --eval '(assert (= 3 (length (hyperdoc::codex-context-window-chain (hyperdoc::codex-recursive-context-window-example) :limit 10))))' --eval '(uiop:quit)'")
+     '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :dreyeck/codex/examples)' --eval '(assert (= 3 (length (dreyeck/codex:codex-context-window-chain (dreyeck/codex:codex-recursive-context-window-example) :limit 10))))' --eval '(uiop:quit)'")
      :provenance '("Finite recursive example.")
      :previous-context-window previous
      :nested-context-windows (list previous initial)

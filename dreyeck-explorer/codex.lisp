@@ -1,6 +1,10 @@
 ;;;; Explorer view for Codex collaboration home topic
 
-(in-package :hyperdoc)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (trivial-package-local-nicknames:add-package-local-nickname
+   :views :html-inspector-views :dreyeck/codex))
+
+(in-package :dreyeck/codex)
 
 (views:defview 👀home (home codex-home)
   (labels ((page-ref (title)

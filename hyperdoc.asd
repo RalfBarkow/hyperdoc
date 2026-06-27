@@ -268,26 +268,28 @@
                   :components ((:file "fedwiki-asdf-assets")))))
 
 (defsystem #:hyperdoc/codex
-    :description "Codex collaboration home topic for HyperDoc"
+    :description "Temporary compatibility wrappers for the Dreyeck-owned Codex collaboration surface"
     :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
-    :depends-on (#:hyperdoc)
+    :depends-on (#:hyperdoc
+                 #:dreyeck/codex)
     :components ((:module "hyperdoc"
                   :serial t
-                  :components ((:file "codex")))))
+                  :components ((:file "codex-compat")))))
 
 (defsystem #:hyperdoc/codex/examples
-    :description "Inspectable Codex collaboration examples"
+    :description "Temporary compatibility wrappers for Dreyeck Codex examples"
     :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
-    :depends-on (#:hyperdoc/codex)
+    :depends-on (#:hyperdoc/codex
+                 #:dreyeck/codex/examples)
     :components ((:module "hyperdoc"
                   :serial t
-                  :components ((:file "codex-examples")))))
+                  :components ((:file "codex-examples-compat")))))
 
 (defsystem #:hyperdoc/shop3
     :description "SHOP3-backed HTN planning layer for HyperDoc operations"
@@ -650,16 +652,13 @@
                                        (:file "page-lookup-rebuild-gate")))))
 
 (defsystem #:hyperdoc/codex/explorer
-    :description "Explorer views for the Codex collaboration home topic"
+    :description "Temporary compatibility coordinate for Dreyeck Codex explorer views"
     :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
     :depends-on (#:hyperdoc/codex
-                 #:hyperdoc/explorer)
-    :components ((:module "hyperdoc-explorer"
-                  :serial t
-                  :components ((:file "codex")))))
+                 #:dreyeck/codex/explorer))
 
 (defsystem #:hyperdoc/explorer/examples/ops
     :description "Explorer views for HyperDoc ops/local examples"

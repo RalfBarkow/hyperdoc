@@ -1,28 +1,53 @@
 ;;;; Codex collaboration home topic
 
-(in-package :hyperdoc)
+(in-package :dreyeck/codex)
+
+(defun codex--context-provider-candidates (provider-symbol)
+  (let ((provider-name (symbol-name provider-symbol)))
+    (remove-duplicates
+     (append
+      (list provider-symbol)
+      (loop for package-name in '("KIOSKBEERLI"
+                                  "DREYECK/KIOSKBEERLI"
+                                  "HYPERDOC")
+            for package = (find-package package-name)
+            for candidate = (and package
+                                 (find-symbol provider-name package))
+            when candidate
+              collect candidate))
+     :test #'eq)))
+
+(defun codex--resolve-context-provider (provider-symbol)
+  (find-if #'fboundp
+           (codex--context-provider-candidates provider-symbol)))
 
 (defun codex-context-provider-result (provider-symbol)
   "Call an optional CODEX-CONTEXT-WINDOW provider without letting a missing or failing provider abort CODEX.
 
 The context window is a continuation surface. Optional project dashboards
 such as KIOSKBEERLI-DASHBOARD must degrade to inspectable data, not to
-an UNDEFINED-FUNCTION condition."
-  (cond
-    ((fboundp provider-symbol)
-     (handler-case
-         (funcall provider-symbol)
-       (error (condition)
-         (list
-          :provider provider-symbol
-          :status :provider-error
-          :condition condition
-          :repair-hint "Inspect the provider condition; CODEX-CONTEXT-WINDOW stayed alive."))))
-    (t
-     (list
-      :provider provider-symbol
-      :status :missing-optional-provider
-      :repair-hint "Load or file out this optional dashboard provider; CODEX-CONTEXT-WINDOW intentionally continues."))))
+an UNDEFINED-FUNCTION condition. PROVIDER-SYMBOL may be a Dreyeck-owned
+symbol; the dispatcher resolves loaded downstream provider packages by
+symbol name without depending on them."
+  (let ((resolved-provider (codex--resolve-context-provider provider-symbol)))
+    (cond
+      (resolved-provider
+       (handler-case
+           (funcall resolved-provider)
+         (error (condition)
+           (list
+            :provider provider-symbol
+            :resolved-provider resolved-provider
+            :status :provider-error
+            :condition condition
+            :repair-hint "Inspect the provider condition; CODEX-CONTEXT-WINDOW stayed alive."))))
+      (t
+       (list
+        :provider provider-symbol
+        :candidate-providers (codex--context-provider-candidates
+                              provider-symbol)
+        :status :missing-optional-provider
+        :repair-hint "Load or file out this optional dashboard provider; CODEX-CONTEXT-WINDOW intentionally continues.")))))
 
 
 
@@ -398,8 +423,8 @@ an UNDEFINED-FUNCTION condition."
              "Codex home approved"
              "The Codex Home view is accepted as the entry surface. The next Codex slice adds an inspectable context-window object reachable from that home surface."
              :timestamp "2026-05-14"
-             :references '("Codex" "hyperdoc/codex.lisp"
-                           "hyperdoc-explorer/codex.lisp")
+             :references '("Codex" "dreyeck/codex.lisp"
+                           "dreyeck-explorer/codex.lisp")
              :derived-objects nil))
            :open-questions nil
            :proposed-actions nil
@@ -443,7 +468,8 @@ an UNDEFINED-FUNCTION condition."
      '("Is this Codex context-window object useful as the first inspectable current-context surface?"
        "After approval, should the next slice add only the Station board view for kioskbeerli:kioskbeerli-dashboard in the standalone Kioskbeerli system?")
      :proposed-actions
-     '("Inspect (hyperdoc::codex-context-window) from SLY/CLOG."
+     '("Inspect (dreyeck/codex:codex-context-window) from SLY/CLOG."
+       "Use (hyperdoc::codex-context-window) only as the temporary compatibility entry point."
        "If accepted, keep the next Kioskbeerli iteration scoped to the dashboard object view and avoid editing the authored HTML page.")
      :related-objects
      (list (codex-context-provider-result 'kioskbeerli-dashboard)
@@ -452,12 +478,13 @@ an UNDEFINED-FUNCTION condition."
            (codex-context-provider-result 'kioskbeerli-build-evidence-status)
            (codex-context-provider-result 'kioskbeerli-dashboard-stations))
      :validation-commands
-     '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/codex/explorer)' --eval '(assert (fboundp (quote hyperdoc::codex)))' --eval '(assert (fboundp (quote hyperdoc::codex-context-window)))' --eval '(assert (hyperdoc::codex-context-window))' --eval '(uiop:quit)'"
-       "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/codex/explorer)' --eval '(let* ((object (hyperdoc::codex-context-window)) (pane (make-instance (find-symbol \"PANE\" \"CLOG-MOLDABLE-INSPECTOR\") :inspector nil :object object))) (funcall (find-symbol \"LOAD-VIEWS\" \"CLOG-MOLDABLE-INSPECTOR\") pane) (let ((titles (mapcar (find-symbol \"VIEW-TITLE\" \"HTML-INSPECTOR-VIEWS\") (slot-value pane (find-symbol \"VIEWS\" \"CLOG-MOLDABLE-INSPECTOR\"))))) (assert (member \"Context\" titles :test #'string=))))' --eval '(uiop:quit)'"
+     '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :dreyeck/codex/explorer)' --eval '(assert (dreyeck/codex:codex-context-window))' --eval '(uiop:quit)'"
+       "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/codex/explorer)' --eval '(assert (hyperdoc::codex-context-window))' --eval '(uiop:quit)'"
        "git diff --check")
      :provenance
      '("AGENTS.md read before implementation."
-       "Codex topic systems :hyperdoc/codex and :hyperdoc/codex/explorer already existed."
+       "Codex canonical systems are :dreyeck/codex and :dreyeck/codex/explorer."
+       "HyperDoc Codex systems remain as temporary compatibility coordinates."
        "This object stores validation commands as strings only; it does not execute forms in the user's live Lisp image."
        "No server, external service, browser automation, or deployment behavior is part of this slice.")
      :previous-context-window previous
@@ -513,6 +540,28 @@ an UNDEFINED-FUNCTION condition."
 
 (defun codex--default-recent-change-entries ()
   (list
+   (codex--recent-change
+    "codex-moved-to-dreyeck"
+    "Codex moved to Dreyeck"
+    :architecture
+    "Codex collaboration objects, examples, and explorer views moved from HyperDoc core into Dreyeck-owned systems while HyperDoc keeps temporary compatibility wrappers."
+    :changed-at "2026-06-27 source refactor"
+    :actor "Codex/User collaboration"
+    :affected-files '("dreyeck/codex.lisp"
+                      "dreyeck/codex-examples.lisp"
+                      "dreyeck-explorer/codex.lisp"
+                      "dreyeck.asd"
+                      "dreyeck/package.lisp"
+                      "hyperdoc.asd"
+                      "hyperdoc/codex-compat.lisp"
+                      "hyperdoc/codex-examples-compat.lisp"
+                      "hyperdoc/Codex Belongs to Dreyeck.md")
+    :affected-pages '("Codex Belongs to Dreyeck")
+    :evidence '(":dreyeck/codex, :dreyeck/codex/examples, and :dreyeck/codex/explorer are canonical."
+                ":hyperdoc/codex, :hyperdoc/codex/examples, and :hyperdoc/codex/explorer remain compatibility coordinates."
+                "The old HYPERDOC:: entry functions delegate to DREYECK/CODEX.")
+    :route-hints '("Migrate pages and inspector forms to DREYECK/CODEX symbols."
+                   "Remove HyperDoc compatibility wrappers after callers have moved."))
    (codex--recent-change
     "codex-home-added"
     "Codex home object added"
@@ -632,7 +681,8 @@ an UNDEFINED-FUNCTION condition."
          :inspect
          :available
          "Inspect"
-         :evidence '("(hyperdoc::codex-context-window) is deterministic and inspectable.")
+         :evidence '("(dreyeck/codex:codex-context-window) is deterministic and inspectable."
+                     "(hyperdoc::codex-context-window) remains as temporary compatibility.")
          :related-objects (list (codex-context-window)))))
      (when proof-change
        (list
@@ -648,7 +698,8 @@ an UNDEFINED-FUNCTION condition."
          :inspect
          :available
          "Inspect"
-         :evidence '("Use codex-recursive-context-window-nor-proof-example after loading :hyperdoc/codex/examples."))))
+         :evidence '("Use codex-recursive-context-window-nor-proof-example after loading :dreyeck/codex/examples."
+                     ":hyperdoc/codex/examples remains a temporary compatibility coordinate."))))
      (when kioskbeerli-change
        (list
         (codex--next-route
@@ -720,7 +771,7 @@ an UNDEFINED-FUNCTION condition."
   (make-instance 'codex-home
                  :id "codex-home"
                  :title "Codex"
-                 :summary "Inspectable collaboration home surface for the current HyperDoc review slice."
+                 :summary "Inspectable Dreyeck collaboration home surface for situated review state."
                  :current-slice "Kioskbeerli mobile station-board view"
                  :context-window (codex-context-window)
                  :recent-changes (codex-recent-changes)

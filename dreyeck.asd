@@ -15,8 +15,44 @@
                                        (:file "server")))))
 
 (defsystem #:dreyeck
-    :description "Minimal downstream dreyeck scaffold"
-    :depends-on (#:dreyeck/server))
+    :description "Downstream Dreyeck collaboration and server scaffold"
+    :depends-on (#:dreyeck/server
+                 #:dreyeck/codex))
+
+(defsystem #:dreyeck/codex
+    :description "Dreyeck-owned Codex collaboration and review surface"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc)
+    :components ((:module "dreyeck"
+                  :serial t
+                  :components ((:file "package")
+                               (:file "codex")))))
+
+(defsystem #:dreyeck/codex/examples
+    :description "Inspectable Dreyeck Codex collaboration examples"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:dreyeck/codex)
+    :components ((:module "dreyeck"
+                  :serial t
+                  :components ((:file "codex-examples")))))
+
+(defsystem #:dreyeck/codex/explorer
+    :description "Explorer views for the Dreyeck Codex collaboration surface"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:dreyeck/codex
+                 #:hyperdoc/explorer)
+    :components ((:module "dreyeck-explorer"
+                  :serial t
+                  :components ((:file "codex")))))
 
 (defsystem #:dreyeck/dmx/workspace-selection
   :description "Live SHOP3 selection of the Dreyeck DMX SQLite ASDF owner."
