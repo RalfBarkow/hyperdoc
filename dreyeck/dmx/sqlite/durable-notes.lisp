@@ -65,6 +65,12 @@
      :source "hyperdoc/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "SHOP3-shaped plan for materializing durable Markdown-note seeds into the Dreyeck DMX SQLite store.")
+    (:id "inspect-dmx-materialized-learning-topics"
+     :type :shop3-plan
+     :title "Inspect DMX Materialized Learning Topics"
+     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :summary "SHOP3-shaped plan for exposing materialized DMX learning topics through Codex and inspector surfaces.")
     (:id "markdown-note-as-seed-or-projection"
      :type :project-concept
      :title "Markdown Note as Seed or Projection"
@@ -87,11 +93,41 @@
      :canonical-example "Missing Kioskbeerli providers return structured Codex provider results."
      :projection-status :derived-from-seed-note
      :summary "Missing situated providers should be represented as inspectable data instead of debugger conditions.")
+    (:id "codex-is-not-the-build-system"
+     :type :learned-boundary-rule
+     :title "Codex Is Not the Build System"
+     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :summary "Codex should invoke reusable deterministic project tasks instead of embedding build, replay, or validation logic.")
+    (:id "reusable-common-lisp-build-tasks-for-codex"
+     :type :learned-problem-solution
+     :title "Reusable Common Lisp Build Tasks for Codex"
+     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :summary "Common Lisp task functions provide the stable build/check layer Codex and inspectors can call.")
+    (:id "dmx-learning-topic-inspection"
+     :type :inspection-surface
+     :title "DMX Learning Topic Inspection"
+     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :summary "Inspection of learned DMX topics should show production DB path, required topics, associations, and replay status.")
+    (:id "codex-dmx-learning-topics"
+     :type :codex-surface
+     :title "Codex DMX Learning Topics"
+     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :summary "Codex-facing surface for materialized DMX learning topics backed by reusable build tasks.")
     (:id "dreyeck-dmx-sqlite-production-db"
      :type :production-store
      :title "Dreyeck DMX SQLite Production DB"
      :projection-status :configured-production-store
      :summary "The local DMX-shaped SQLite store for durable Dreyeck project topics.")
+    (:id "durable-note-materialization-status"
+     :type :build-check
+     :title "Durable Note Materialization Status"
+     :source "dreyeck/dmx/sqlite/durable-notes.lisp"
+     :projection-status :support-topic
+     :summary "Structured status report for the durable-note to DMX SQLite materialization.")
     (:id "dmx-topic"
      :type :dmx-object-type
      :title "DMX Topic"
@@ -145,7 +181,19 @@
      :target "dmx-topic")
     (:source "dreyeck-dmx-sqlite-production-db"
      :predicate "stores"
-     :target "durable-project-topics")))
+     :target "durable-project-topics")
+    (:source "codex-is-not-the-build-system"
+     :predicate "recommends"
+     :target "reusable-common-lisp-build-tasks-for-codex")
+    (:source "reusable-common-lisp-build-tasks-for-codex"
+     :predicate "supports"
+     :target "codex-dmx-learning-topics")
+    (:source "codex-dmx-learning-topics"
+     :predicate "inspects"
+     :target "dreyeck-dmx-sqlite-production-db")
+    (:source "dmx-learning-topic-inspection"
+     :predicate "depends-on"
+     :target "durable-note-materialization-status")))
 
 (defparameter *durable-note-materialization-required-topic-ids*
   '("hyperdoc-core"
@@ -155,7 +203,38 @@
     "materialize-durable-notes-into-dreyeck-dmx-sqlite"
     "markdown-note-as-seed-or-projection"
     "hyperdoc-core-vs-local-hyperdoc-path"
-    "optional-provider-becomes-inspectable-data"))
+    "optional-provider-becomes-inspectable-data"
+    "inspect-dmx-materialized-learning-topics"
+    "codex-is-not-the-build-system"
+    "reusable-common-lisp-build-tasks-for-codex"
+    "dmx-learning-topic-inspection"
+    "codex-dmx-learning-topics"
+    "durable-note-materialization-status"))
+
+(defparameter *dmx-learning-topic-ids*
+  '("codex-is-not-the-build-system"
+    "reusable-common-lisp-build-tasks-for-codex"
+    "dmx-learning-topic-inspection"
+    "codex-dmx-learning-topics"))
+
+(defparameter *dmx-learning-support-topic-ids*
+  '("inspect-dmx-materialized-learning-topics"
+    "durable-note-materialization-status"
+    "dreyeck-dmx-sqlite-production-db"))
+
+(defparameter *dmx-learning-association-keys*
+  '(("codex-is-not-the-build-system"
+     "recommends"
+     "reusable-common-lisp-build-tasks-for-codex")
+    ("reusable-common-lisp-build-tasks-for-codex"
+     "supports"
+     "codex-dmx-learning-topics")
+    ("codex-dmx-learning-topics"
+     "inspects"
+     "dreyeck-dmx-sqlite-production-db")
+    ("dmx-learning-topic-inspection"
+     "depends-on"
+     "durable-note-materialization-status")))
 
 (defun durable-note-source-pathname (source)
   (when source
@@ -210,6 +289,25 @@
           (getf definition :source)
           (getf definition :predicate)
           (getf definition :target)))
+
+(defun durable-note-topic-definition (topic-id)
+  (find topic-id
+        *durable-note-materialization-topic-definitions*
+        :key (lambda (definition) (getf definition :id))
+        :test #'equal))
+
+(defun durable-note-association-key (definition)
+  (list (getf definition :source)
+        (getf definition :predicate)
+        (getf definition :target)))
+
+(defun dmx-learning-association-definitions ()
+  (remove-if-not
+   (lambda (definition)
+     (member (durable-note-association-key definition)
+             *dmx-learning-association-keys*
+             :test #'equal))
+   *durable-note-materialization-association-definitions*))
 
 (defun durable-note-topic-payload-json (definition source-info)
   (let ((title (or (getf definition :title)
@@ -376,6 +474,87 @@
           :missing-notes (getf validation :missing-notes)
           :last-validation-status (getf validation :status)
           :validation validation)))
+
+(defun dmx-materialized-learning-topic-entry (db-path topic-id db-exists?)
+  (let* ((definition (durable-note-topic-definition topic-id))
+         (source-info (durable-note-source-info (getf definition :source)))
+         (row (and db-exists? (dmx-sqlite-topic db-path topic-id))))
+    (list :id topic-id
+          :present-p (and row t)
+          :title (or (getf row :value)
+                     (getf definition :title)
+                     topic-id)
+          :topic-type (getf definition :type)
+          :type-uri (getf row :type-uri)
+          :source (getf definition :source)
+          :source-exists-p (getf source-info :exists-p)
+          :projection-status (getf definition :projection-status)
+          :summary (getf definition :summary)
+          :db-object row)))
+
+(defun dmx-materialized-learning-association-entry
+    (db-path definition db-exists?)
+  (let* ((association-id (durable-note-association-id definition))
+         (row (and db-exists?
+                   (dmx-sqlite-association db-path association-id))))
+    (list :id association-id
+          :present-p (and row t)
+          :source (getf definition :source)
+          :predicate (getf definition :predicate)
+          :target (getf definition :target)
+          :type-uri (getf row :type-uri)
+          :players (getf row :players)
+          :db-object row)))
+
+(defun dmx-materialized-learning-topics
+    (&key (db-path *dreyeck-dmx-production-db-path*))
+  "Return the materialized learning-topic subset from the DMX production store.
+
+This is a read-only inspection query. Materialization and replay checks stay in
+the build task layer that calls the existing materializer."
+  (let* ((db-exists? (probe-file db-path))
+         (status (durable-note-materialization-status :db-path db-path))
+         (learning-topics
+           (loop for topic-id in *dmx-learning-topic-ids*
+                 collect
+                 (dmx-materialized-learning-topic-entry
+                  db-path topic-id db-exists?)))
+         (support-topics
+           (loop for topic-id in *dmx-learning-support-topic-ids*
+                 collect
+                 (dmx-materialized-learning-topic-entry
+                  db-path topic-id db-exists?)))
+         (learning-associations
+           (loop for definition in (dmx-learning-association-definitions)
+                 collect
+                 (dmx-materialized-learning-association-entry
+                  db-path definition db-exists?)))
+         (missing-learning-topic-ids
+           (loop for topic in learning-topics
+                 unless (getf topic :present-p)
+                   collect (getf topic :id)))
+         (missing-learning-association-ids
+           (loop for association in learning-associations
+                 unless (getf association :present-p)
+                   collect (getf association :id)))
+         (passed? (and (eq :passed (getf status :last-validation-status))
+                       (null missing-learning-topic-ids)
+                       (null missing-learning-association-ids))))
+    (list :kind :dmx-materialized-learning-topics
+          :status (if passed? :passed :failed)
+          :production-db-path (namestring db-path)
+          :production-db-exists-p (and db-exists? t)
+          :materialization-status status
+          :last-validation-status (getf status :last-validation-status)
+          :last-replay-status :not-run
+          :learning-topic-ids *dmx-learning-topic-ids*
+          :support-topic-ids *dmx-learning-support-topic-ids*
+          :topics learning-topics
+          :support-topics support-topics
+          :associations learning-associations
+          :missing-learning-topic-ids missing-learning-topic-ids
+          :missing-learning-association-ids
+          missing-learning-association-ids)))
 
 (defun materialize-durable-notes-into-production-db
     (&key (db-path *dreyeck-dmx-production-db-path*) (replace-existing? t))

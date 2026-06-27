@@ -14,6 +14,22 @@
                    (views:html (views:esc title)))))
            (object-ref (object label)
              (views:object-ref object :display label))
+           (value-label (object fallback)
+             (or (ignore-errors (title-of object))
+                 (let ((provider (ignore-errors (getf object :provider))))
+                   (when provider
+                     (format nil "~(~A~)" provider)))
+                 fallback
+                 (prin1-to-string object)))
+           (value-ref (object &optional fallback)
+             (cond
+               ((null object)
+                (views:html "None"))
+               ((or (stringp object) (symbolp object) (numberp object))
+                (views:html (views:esc (prin1-to-string object))))
+               (t
+                (views:object-ref object
+                                  :display (value-label object fallback)))))
            (command-item (command)
              (views:html
               (:li (:tt (views:esc command))))))
@@ -48,16 +64,11 @@
                                                 "Recent Changes"))
                                (:li (object-ref next
                                                 "Next"))
-                               (:li (object-ref primary
-                                                "kioskbeerli-dashboard"))
-                               (:li (object-ref (first related)
-                                                "kioskbeerli-dashboard-status"))
-                               (:li (object-ref (second related)
-                                                "kioskbeerli-current-blocker"))
-                               (:li (object-ref (third related)
-                                                "kioskbeerli-build-evidence-status"))
-                               (:li (object-ref (fourth related)
-                                                "kioskbeerli-dashboard-stations")))
+                               (:li (value-ref primary
+                                               "Primary review object"))
+                               (dolist (object related)
+                                 (views:html
+                                  (:li (value-ref object "Related object")))))
                               (:h2 "Pages")
                               (:ul
                                (dolist (title (codex-home-relevant-pages-of home))
@@ -443,6 +454,180 @@
                             (:h2 "Related objects")
                             (object-list
                              (codex-next-route-related-objects-of route)))))))
+
+(views:defview 👀dmx-learning-status
+    (status codex-dmx-learning-topic-status)
+  (labels ((code-value (value)
+             (views:html
+              (:tt (views:esc (prin1-to-string value)))))
+           (task-list (tasks)
+             (views:html
+              (:ul
+               (dolist (task tasks)
+                 (views:html
+                  (:li
+                   (code-value (getf task :id))
+                   " "
+                   (views:esc (getf task :title)))))))))
+    (let* ((task-result
+             (codex-dmx-learning-topic-status-task-result-of status))
+           (result (getf task-result :result))
+           (materialization (getf result :materialization-status)))
+      (views:html-view :title "DMX Status" :priority 0
+                       (views:add-asset-path "/hyperbook/"
+                                             (asdf:system-relative-pathname
+                                              :hyperbook
+                                              "assets/hyperbook/"))
+                       (views:include-css "/hyperbook/css/hyperbook.css")
+                       (views:html
+                        (:div :class "hyperbook-page"
+                              (:h1 (views:esc (title-of status)))
+                              (:p (views:esc (summary-of status)))
+                              (:p (:b "Task status: ")
+                                  (code-value
+                                   (codex-dmx-learning-topic-status-status-of
+                                    status)))
+                              (:p (:b "Production DB: ")
+                                  (:tt
+                                   (views:esc
+                                    (or
+                                     (codex-dmx-learning-topic-status-production-db-path-of
+                                      status)
+                                     "unknown"))))
+                              (:p (:b "Validation: ")
+                                  (code-value
+                                   (getf materialization
+                                         :last-validation-status)))
+                              (:p (:b "Topics: ")
+                                  (views:esc
+                                   (prin1-to-string
+                                    (getf materialization
+                                          :materialized-topic-count))))
+                              (:p (:b "Associations: ")
+                                  (views:esc
+                                   (prin1-to-string
+                                    (getf materialization
+                                          :materialized-association-count))))
+                              (:h2 "Build tasks")
+                              (task-list
+                               (codex-dmx-learning-topic-status-build-tasks-of
+                                status))
+                              (:h2 "Raw task result")
+                              (:pre
+                               (views:esc
+                                (prin1-to-string task-result)))))))))
+
+(views:defview 👀dmx-learning-topics (surface codex-dmx-learning-topics)
+  (labels ((code-value (value)
+             (views:html
+              (:tt (views:esc (prin1-to-string value)))))
+           (present-label (present-p)
+             (if present-p "present" "missing"))
+           (topic-list (topics)
+             (if topics
+                 (views:html
+                  (:ul
+                   (dolist (topic topics)
+                     (views:html
+                      (:li
+                       (:b (views:esc (getf topic :title)))
+                       " "
+                       (:small
+                        (views:esc
+                         (format nil "~A / ~A"
+                                 (getf topic :id)
+                                 (present-label
+                                  (getf topic :present-p)))))
+                       (:br)
+                       (views:esc (or (getf topic :summary) "")))))))
+                 (views:html (:p "None"))))
+           (association-list (associations)
+             (if associations
+                 (views:html
+                  (:ul
+                   (dolist (association associations)
+                     (views:html
+                      (:li
+                       (code-value (getf association :id))
+                       " "
+                       (:small
+                        (views:esc
+                         (present-label
+                          (getf association :present-p))))
+                       (:br)
+                       (views:esc
+                        (format nil "~A ~A ~A"
+                                (getf association :source)
+                                (getf association :predicate)
+                                (getf association :target))))))))
+                 (views:html (:p "None"))))
+           (task-list (tasks)
+             (views:html
+              (:ul
+               (dolist (task tasks)
+                 (views:html
+                  (:li
+                   (code-value (getf task :id))
+                   " "
+                   (views:esc (getf task :title))))))))
+           (provider-list (providers)
+             (if providers
+                 (views:html
+                  (:ul
+                   (dolist (provider providers)
+                     (views:html
+                      (:li (code-value provider))))))
+                 (views:html (:p "None")))))
+    (views:html-view :title "DMX Learning Topics" :priority 0
+                     (views:add-asset-path "/hyperbook/"
+                                           (asdf:system-relative-pathname
+                                            :hyperbook
+                                            "assets/hyperbook/"))
+                     (views:include-css "/hyperbook/css/hyperbook.css")
+                     (views:html
+                      (:div :class "hyperbook-page"
+                            (:h1 (views:esc (title-of surface)))
+                            (:p (views:esc (summary-of surface)))
+                            (:p (:b "Task status: ")
+                                (code-value
+                                 (codex-dmx-learning-topics-status-of
+                                  surface)))
+                            (:p (:b "Last replay: ")
+                                (code-value
+                                 (codex-dmx-learning-topics-last-replay-status-of
+                                  surface)))
+                            (:p (:b "Production DB: ")
+                                (:tt
+                                 (views:esc
+                                  (or
+                                   (codex-dmx-learning-topics-production-db-path-of
+                                    surface)
+                                   "unknown"))))
+                            (:h2 "Learning topics")
+                            (topic-list
+                             (codex-dmx-learning-topics-topics-of surface))
+                            (:h2 "Support topics")
+                            (topic-list
+                             (codex-dmx-learning-topics-support-topics-of
+                              surface))
+                            (:h2 "Associations")
+                            (association-list
+                             (codex-dmx-learning-topics-associations-of
+                              surface))
+                            (:h2 "Build tasks")
+                            (task-list
+                             (codex-dmx-learning-topics-build-tasks-of
+                              surface))
+                            (:h2 "Optional providers")
+                            (provider-list
+                             (codex-dmx-learning-topics-optional-provider-results-of
+                              surface))
+                            (:h2 "Validation task")
+                            (:pre
+                             (views:esc
+                              (prin1-to-string
+                               (codex-dmx-learning-topics-validation-task-result-of
+                                surface)))))))))
 
 (views:defview 👀raw (window codex-context-window)
   (let ((raw-text (codex-context-window-raw-text-of window)))

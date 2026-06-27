@@ -39,6 +39,7 @@
    #:dmx-sqlite-integrity-report
    #:materialize-durable-notes-into-production-db
    #:durable-note-materialization-status
+   #:dmx-materialized-learning-topics
    #:normalize-dmx-association-players
    #:topic-association-players
    #:dmx-sql-association-has-role-bearing-players-p

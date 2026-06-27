@@ -25,7 +25,8 @@
     :license "BSD"
     :version "0.0.1"
     :serial t
-    :depends-on (#:hyperdoc)
+    :depends-on (#:hyperdoc
+                 #:dreyeck/build)
     :components ((:module "dreyeck"
                   :serial t
                   :components ((:file "package")
@@ -121,3 +122,36 @@
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck.dmx.sqlite/tests
                                :run-dmx-sqlite-smoke-tests)))
+
+(defsystem #:dreyeck/build
+  :description "Reusable Dreyeck build/check tasks for Codex and inspectors."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/build/tests")))
+  :depends-on (#:dreyeck/dmx/sqlite)
+  :components
+  ((:module "dreyeck/build"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "tasks")))))
+
+(defsystem #:dreyeck/build/tests
+  :description "Smoke tests for reusable Dreyeck build/check tasks."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :depends-on (#:dreyeck/build)
+  :components
+  ((:module "dreyeck/build/tests"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "smoke"))))
+  :perform (asdf:test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/build/tests
+                               :run-dreyeck-build-smoke-tests)))

@@ -222,7 +222,9 @@
                     (materialize-durable-notes-into-production-db
                      :db-path db))
                   (status
-                    (durable-note-materialization-status :db-path db)))
+                    (durable-note-materialization-status :db-path db))
+                  (learning-topics
+                    (dmx-materialized-learning-topics :db-path db)))
              (assert-equal :durable-note-materialization
                            (getf first-run :kind)
                            "Materializer must return a structured run object")
@@ -239,10 +241,40 @@
                db
                "assoc:hyperdoc-core:supplies-boundary-for:ownership-extraction-with-compatibility-shell")
               "Materializer must create the HyperDoc boundary association")
+             (assert-true
+              (dmx-sqlite-topic db "codex-is-not-the-build-system")
+              "Materializer must create the Codex/build-system boundary topic")
+             (assert-true
+              (dmx-sqlite-topic
+               db "reusable-common-lisp-build-tasks-for-codex")
+              "Materializer must create the reusable build-task topic")
+             (assert-true
+              (dmx-sqlite-topic db "dmx-learning-topic-inspection")
+              "Materializer must create the DMX learning inspection topic")
+             (assert-true
+              (dmx-sqlite-topic db "codex-dmx-learning-topics")
+              "Materializer must create the Codex DMX learning topic surface")
+             (assert-true
+              (dmx-sqlite-association
+               db
+               "assoc:codex-is-not-the-build-system:recommends:reusable-common-lisp-build-tasks-for-codex")
+              "Materializer must create the Codex/build-task recommendation")
              (assert-equal
               :passed
               (getf status :last-validation-status)
               "Materialization status must validate the seeded topic store")
+             (assert-equal
+              :dmx-materialized-learning-topics
+              (getf learning-topics :kind)
+              "Learning-topic query must return a structured inspection object")
+             (assert-equal
+              :passed
+              (getf learning-topics :status)
+              "Learning-topic query must validate present learning topics")
+             (assert-equal
+              (namestring db)
+              (getf learning-topics :production-db-path)
+              "Learning-topic query must expose the selected DB path")
              (assert-true
               (every (lambda (result)
                        (eq (getf result :state) :unchanged))

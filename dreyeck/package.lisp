@@ -23,6 +23,8 @@
            #:codex-context-window-nor-proof
            #:codex-recent-changes-neighborhood
            #:codex-next-for-recent-changes
+           #:codex-dmx-learning-topics
+           #:codex-dmx-learning-topic-status
            #:codex-context-window-example
            #:codex-kioskbeerli-context-window-example
            #:codex-recursive-context-window-example
@@ -49,10 +51,14 @@
                 #:codex-context-window
                 #:codex-recent-changes
                 #:codex-next
-                #:codex-context-provider-result)
+                #:codex-context-provider-result
+                #:codex-dmx-learning-topics
+                #:codex-dmx-learning-topic-status)
   (:export #:install-dreyeck-server-scaffold
            #:codex
            #:codex-context-window
            #:codex-recent-changes
            #:codex-next
-           #:codex-context-provider-result))
+           #:codex-context-provider-result
+           #:codex-dmx-learning-topics
+           #:codex-dmx-learning-topic-status))

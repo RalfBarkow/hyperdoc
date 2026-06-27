@@ -271,6 +271,108 @@ symbol name without depending on them."
   (print-unreadable-object (object stream :type t)
     (format stream "~A" (title-of object))))
 
+(defclass codex-dmx-learning-topic-status ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (summary :accessor summary-of :initarg :summary)
+   (production-db-path
+    :accessor codex-dmx-learning-topic-status-production-db-path-of
+    :initarg :production-db-path)
+   (status :accessor codex-dmx-learning-topic-status-status-of
+           :initarg :status)
+   (build-tasks :accessor codex-dmx-learning-topic-status-build-tasks-of
+                :initarg :build-tasks)
+   (task-result :accessor codex-dmx-learning-topic-status-task-result-of
+                :initarg :task-result)))
+
+(defmethod print-object ((object codex-dmx-learning-topic-status) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A ~A"
+            (title-of object)
+            (codex-dmx-learning-topic-status-status-of object))))
+
+(defclass codex-dmx-learning-topics ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (summary :accessor summary-of :initarg :summary)
+   (production-db-path
+    :accessor codex-dmx-learning-topics-production-db-path-of
+    :initarg :production-db-path)
+   (status :accessor codex-dmx-learning-topics-status-of
+           :initarg :status)
+   (topics :accessor codex-dmx-learning-topics-topics-of
+           :initarg :topics)
+   (support-topics :accessor codex-dmx-learning-topics-support-topics-of
+                   :initarg :support-topics)
+   (associations :accessor codex-dmx-learning-topics-associations-of
+                 :initarg :associations)
+   (last-replay-status
+    :accessor codex-dmx-learning-topics-last-replay-status-of
+    :initarg :last-replay-status)
+   (build-tasks :accessor codex-dmx-learning-topics-build-tasks-of
+                :initarg :build-tasks)
+   (inspect-task-result
+    :accessor codex-dmx-learning-topics-inspect-task-result-of
+    :initarg :inspect-task-result)
+   (validation-task-result
+    :accessor codex-dmx-learning-topics-validation-task-result-of
+    :initarg :validation-task-result)
+   (optional-provider-results
+    :accessor codex-dmx-learning-topics-optional-provider-results-of
+    :initarg :optional-provider-results)))
+
+(defmethod print-object ((object codex-dmx-learning-topics) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A ~A"
+            (title-of object)
+            (codex-dmx-learning-topics-status-of object))))
+
+(defun codex-dmx-learning-topic-status ()
+  "Return the read-only Codex status object for DMX learning topic materialization."
+  (let* ((task-result
+           (dreyeck/build:run-build-task
+            :dmx-durable-note-materialization-status))
+         (result (getf task-result :result)))
+    (make-instance
+     'codex-dmx-learning-topic-status
+     :id "codex-dmx-learning-topic-status"
+     :title "Codex DMX Learning Topic Status"
+     :summary
+     "Read-only Codex status for the durable-note materialization backing DMX learning topics."
+     :production-db-path (getf result :production-db-path)
+     :status (getf task-result :status)
+     :build-tasks (dreyeck/build:list-build-tasks)
+     :task-result task-result)))
+
+(defun codex-dmx-learning-topics ()
+  "Return the Codex inspection surface for materialized DMX learning topics.
+
+The surface invokes Dreyeck build/check tasks. It does not inline materializer
+or validation logic in Codex."
+  (let* ((validation-task-result
+           (dreyeck/build:run-build-task :validate-dmx-learning-topics))
+         (inspect-task-result
+           (dreyeck/build:run-build-task :inspect-dmx-learning-topics))
+         (inspection (getf inspect-task-result :result))
+         (validation (getf validation-task-result :result)))
+    (make-instance
+     'codex-dmx-learning-topics
+     :id "codex-dmx-learning-topics"
+     :title "Codex DMX Learning Topics"
+     :summary
+     "Codex-facing inspection of materialized learning topics in the Dreyeck DMX SQLite production store."
+     :production-db-path (getf inspection :production-db-path)
+     :status (getf inspect-task-result :status)
+     :topics (getf inspection :topics)
+     :support-topics (getf inspection :support-topics)
+     :associations (getf inspection :associations)
+     :last-replay-status (getf validation :last-replay-status)
+     :build-tasks (dreyeck/build:list-build-tasks)
+     :inspect-task-result inspect-task-result
+     :validation-task-result validation-task-result
+     :optional-provider-results
+     (list (codex-context-provider-result 'dmx-learning-topic-provider)))))
+
 (defun codex-context-window-entry (role title text
                                    &key timestamp references derived-objects)
   (make-instance 'codex-context-entry
@@ -497,6 +599,7 @@ symbol name without depending on them."
 (defun codex-recent-changes-neighborhood ()
   '("Codex"
     "Codex context window"
+    "DMX learning topic inspection"
     "Codex examples"
     "Recursive context-window structural proof"
     "Kioskbeerli station-board pending work"))
@@ -538,8 +641,30 @@ symbol name without depending on them."
    :route-hints '("Continue only after inspecting live CLOG rendering."
                   "Choose whether the next change belongs to an authored page or an inspector object view.")))
 
+(defun codex--dmx-learning-topics-change ()
+  (codex--recent-change
+   "dmx-learning-topics-inspection-added"
+   "DMX learning-topic inspection added"
+   :inspection
+   "Codex can inspect materialized DMX learning topics through reusable Dreyeck Common Lisp build/check tasks."
+   :changed-at "2026-06-27 current slice"
+   :actor "Codex/User collaboration"
+   :target-object (codex-dmx-learning-topic-status)
+   :affected-files '("hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+                     "dreyeck/dmx/sqlite/durable-notes.lisp"
+                     "dreyeck/build/tasks.lisp"
+                     "dreyeck/codex.lisp"
+                     "dreyeck-explorer/codex.lisp")
+   :affected-pages nil
+   :evidence '("The SHOP3 plan artifact was created before implementation."
+               "(dreyeck/build:run-build-task :validate-dmx-learning-topics) replays the materializer."
+               "(dreyeck/codex:codex-dmx-learning-topics) calls the task layer instead of embedding build logic.")
+   :route-hints '("Inspect (dreyeck/codex:codex-dmx-learning-topics)."
+                  "Use (dreyeck/build:list-build-tasks) to see the reusable task boundary.")))
+
 (defun codex--default-recent-change-entries ()
   (list
+   (codex--dmx-learning-topics-change)
    (codex--recent-change
     "codex-moved-to-dreyeck"
     "Codex moved to Dreyeck"
@@ -658,7 +783,10 @@ symbol name without depending on them."
                  :related-objects related-objects))
 
 (defun codex--next-routes-for-recent-changes (changes)
-  (let ((context-change
+  (let ((dmx-learning-change
+          (codex--recent-change-by-id
+           changes "dmx-learning-topics-inspection-added"))
+        (context-change
           (codex--recent-change-by-id changes "codex-context-window-added"))
         (proof-change
           (codex--recent-change-by-id
@@ -667,6 +795,24 @@ symbol name without depending on them."
           (codex--recent-change-by-id
            changes "kioskbeerli-station-board-pending")))
     (append
+     (when dmx-learning-change
+       (list
+        (codex--next-route
+         "inspect-dmx-materialized-learning-topics"
+         "Inspect DMX learning topics"
+         "Codex"
+         "Codex DMX learning topics"
+         "inspect materialized learning topics"
+         "The current slice makes materialized DMX learning topics reachable through a Codex surface backed by reusable build tasks."
+         dmx-learning-change
+         1
+         :inspect
+         :available
+         "Inspect"
+         :evidence '("(dreyeck/codex:codex-dmx-learning-topics) returns the inspection object."
+                     "(dreyeck/build:run-build-task :inspect-dmx-learning-topics) returns the structured query result."
+                     "(dreyeck/build:run-build-task :validate-dmx-learning-topics) verifies materializer replay idempotence.")
+         :related-objects (list (codex-dmx-learning-topic-status)))))
      (when context-change
        (list
         (codex--next-route
@@ -677,7 +823,7 @@ symbol name without depending on them."
          "inspect current context"
          "The recent change made the bounded context-window object reachable from Codex Home."
          context-change
-         1
+         2
          :inspect
          :available
          "Inspect"
@@ -694,7 +840,7 @@ symbol name without depending on them."
          "inspect proof examples"
          "The proof recent change supplies deterministic evidence for bounded recursive context-window traversal."
          proof-change
-         2
+         3
          :inspect
          :available
          "Inspect"
@@ -710,7 +856,7 @@ symbol name without depending on them."
          "inspect pending station-board work"
          "Pending Kioskbeerli work is visible in the collaboration neighborhood but needs live-rendering evidence before continuation."
          kioskbeerli-change
-         3
+         4
          :dry-run
          :needs-evidence
          "Inspect"
@@ -724,7 +870,7 @@ symbol name without depending on them."
          "choose authored-page path or inspector-view path"
          "The pending work can plausibly continue as authored HyperDoc page work or as an inspector object-view change; the boundary needs confirmation."
          kioskbeerli-change
-         4
+         5
          :confirm
          :needs-evidence
          "Decide"
@@ -740,7 +886,7 @@ symbol name without depending on them."
          "plan context-window refresh adapter"
          "A later adapter can refresh Codex context from MCP or DMX once the deterministic object shape is accepted."
          context-change
-         5
+         6
          :dry-run
          :deferred
          "Plan"
@@ -772,21 +918,19 @@ symbol name without depending on them."
                  :id "codex-home"
                  :title "Codex"
                  :summary "Inspectable Dreyeck collaboration home surface for situated review state."
-                 :current-slice "Kioskbeerli mobile station-board view"
+                 :current-slice "DMX materialized learning topic inspection"
                  :context-window (codex-context-window)
                  :recent-changes (codex-recent-changes)
                  :next (codex-next)
-                 :primary-review-object (codex-context-provider-result 'kioskbeerli-dashboard)
-                 :related-objects (list (codex-context-provider-result 'kioskbeerli-dashboard-status)
-                                        (codex-context-provider-result 'kioskbeerli-current-blocker)
-                                        (codex-context-provider-result 'kioskbeerli-build-evidence-status)
-                                        (codex-context-provider-result 'kioskbeerli-dashboard-stations))
-                 :relevant-pages '("Kioskbeerli"
-                                   "Kioskbeerli Dashboard"
-                                   "Kioskbeerli Cross-Host Build Failure")
+                 :primary-review-object (codex-dmx-learning-topic-status)
+                 :related-objects (list (codex-context-provider-result
+                                         'dmx-learning-topic-provider))
+                 :relevant-pages '("Codex Belongs to Dreyeck"
+                                   "HyperDoc Core"
+                                   "Ownership Extraction with Compatibility Shell")
                  :validation-commands
-                 '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/tests)'"
-                   "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/tests)' --eval '(hyperdoc/tests:run-kioskbeerli-dashboard-smoke-tests)'"
-                   "tools/validate-documentation-slice.sh --page 'hyperdoc/Kioskbeerli Dashboard.html'"
+                 '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :dreyeck/codex/explorer)' --eval '(assert (dreyeck/codex:codex-dmx-learning-topics))' --eval '(uiop:quit)'"
+                   "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:test-system :dreyeck/build)' --eval '(uiop:quit)'"
+                   "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:test-system :dreyeck/dmx/sqlite)' --eval '(uiop:quit)'"
                    "git diff --check")
                  :commit-boundary "Codex materializes collaboration/review records and links to the target topic or system. Implementation changes still belong to the relevant target subsystem."))

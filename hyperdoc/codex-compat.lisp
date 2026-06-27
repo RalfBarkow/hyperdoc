@@ -60,6 +60,14 @@
   "Temporary compatibility wrapper for DREYECK/CODEX:CODEX-NEXT."
   (dreyeck/codex:codex-next))
 
+(defun codex-dmx-learning-topics ()
+  "Temporary compatibility wrapper for DREYECK/CODEX:CODEX-DMX-LEARNING-TOPICS."
+  (dreyeck/codex:codex-dmx-learning-topics))
+
+(defun codex-dmx-learning-topic-status ()
+  "Temporary compatibility wrapper for DREYECK/CODEX:CODEX-DMX-LEARNING-TOPIC-STATUS."
+  (dreyeck/codex:codex-dmx-learning-topic-status))
+
 (defun codex ()
   "Temporary compatibility wrapper for DREYECK/CODEX:CODEX."
   (dreyeck/codex:codex))
