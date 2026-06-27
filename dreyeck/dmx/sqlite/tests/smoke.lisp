@@ -249,16 +249,24 @@
                db "reusable-common-lisp-build-tasks-for-codex")
               "Materializer must create the reusable build-task topic")
              (assert-true
-              (dmx-sqlite-topic db "dmx-learning-topic-inspection")
-              "Materializer must create the DMX learning inspection topic")
+             (dmx-sqlite-topic db "dmx-learning-topic-inspection")
+             "Materializer must create the DMX learning inspection topic")
              (assert-true
               (dmx-sqlite-topic db "codex-dmx-learning-topics")
               "Materializer must create the Codex DMX learning topic surface")
+             (assert-true
+              (dmx-sqlite-topic db "plan-then-perform-build-session")
+              "Materializer must create the plan-then-perform learned pattern topic")
              (assert-true
               (dmx-sqlite-association
                db
                "assoc:codex-is-not-the-build-system:recommends:reusable-common-lisp-build-tasks-for-codex")
               "Materializer must create the Codex/build-task recommendation")
+             (assert-true
+              (dmx-sqlite-association
+               db
+               "assoc:plan-then-perform-build-session:inspired-by:asdf-3-3-session-action-model")
+              "Materializer must create the plan/session ASDF source association")
              (assert-equal
               :passed
               (getf status :last-validation-status)

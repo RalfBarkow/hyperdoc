@@ -618,6 +618,12 @@
                             (task-list
                              (codex-dmx-learning-topics-build-tasks-of
                               surface))
+                            (:h2 "Referee next action")
+                            (:pre
+                             (views:esc
+                              (prin1-to-string
+                               (codex-dmx-learning-topics-referee-result-of
+                                surface))))
                             (:h2 "Optional providers")
                             (provider-list
                              (codex-dmx-learning-topics-optional-provider-results-of

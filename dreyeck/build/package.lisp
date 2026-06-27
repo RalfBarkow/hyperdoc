@@ -7,5 +7,11 @@
                 #:durable-note-materialization-status
                 #:dmx-materialized-learning-topics
                 #:materialize-durable-notes-into-production-db)
-  (:export #:list-build-tasks
+  (:export #:make-build-session
+           #:plan-build-task
+           #:check-build-task
+           #:perform-build-task
+           #:build-session-status
+           #:build-session-next-action
+           #:list-build-tasks
            #:run-build-task))

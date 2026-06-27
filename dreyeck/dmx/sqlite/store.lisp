@@ -627,24 +627,54 @@ current callers mostly record binary topic associations."
 
 (defun ensure-dmx-association-player-integrity (db-path players)
   "Reject association players that do not name an existing object of their kind."
-  (dolist (player players)
-    (let ((player-local-id (getf player :player-local-id))
-          (player-kind (getf player :player-kind))
-          (role-type-uri (getf player :role-type-uri)))
-      (unless (member player-kind '("topic" "assoc") :test #'string=)
-        (error "DMX association player ~A has invalid kind ~S."
-               player-local-id player-kind))
-      (unless (and role-type-uri (plusp (length role-type-uri)))
-        (error "DMX association player ~A must have a role type URI."
-               player-local-id))
-      (unless (dmx-sql-exists-p
-               db-path
-               (format nil
-                       "select exists(select 1 from dmx_sql_object where local_id = ~A and object_kind = ~A);"
-                       (sql-literal player-local-id)
-                       (sql-literal player-kind)))
-        (error "DMX association player ~A does not name an existing ~A."
-               player-local-id player-kind)))))
+  (let ((object-keys nil))
+    (dolist (player players)
+      (let ((player-local-id (getf player :player-local-id))
+            (player-kind (getf player :player-kind))
+            (role-type-uri (getf player :role-type-uri)))
+        (unless (member player-kind '("topic" "assoc") :test #'string=)
+          (error "DMX association player ~A has invalid kind ~S."
+                 player-local-id player-kind))
+        (unless (and role-type-uri (plusp (length role-type-uri)))
+          (error "DMX association player ~A must have a role type URI."
+                 player-local-id))
+        (pushnew (list player-local-id player-kind)
+                 object-keys
+                 :test #'equal)))
+    (let* ((object-keys (nreverse object-keys))
+           (where
+             (and object-keys
+                  (format nil "~{(~A)~^ or ~}"
+                          (loop for (player-local-id player-kind)
+                                  in object-keys
+                                collect
+                                (format nil
+                                        "local_id = ~A and object_kind = ~A"
+                                        (sql-literal player-local-id)
+                                        (sql-literal player-kind))))))
+           (existing-count
+             (if where
+                 (parse-integer
+                  (dmx-sql-scalar
+                   db-path
+                   (format nil
+                           "select count(*) from dmx_sql_object where ~A;"
+                           where)))
+                 0)))
+      (when (/= existing-count (length object-keys))
+        ;; This branch is exceptional; use precise per-player diagnostics only
+        ;; after the batched validation says something is missing.
+        (dolist (player players)
+          (let ((player-local-id (getf player :player-local-id))
+                (player-kind (getf player :player-kind)))
+            (unless (dmx-sql-exists-p
+                     db-path
+                     (format nil
+                             "select exists(select 1 from dmx_sql_object where local_id = ~A and object_kind = ~A);"
+                             (sql-literal player-local-id)
+                             (sql-literal player-kind)))
+              (error "DMX association player ~A does not name an existing ~A."
+                     player-local-id player-kind))))))))
 
 (defun dmx-sql-counts (&key (db-path *default-dmx-associative-mirror-path*))
   "Return SQLite's object-kind count table for the DMX-shaped store."

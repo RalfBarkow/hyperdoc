@@ -71,6 +71,12 @@
      :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "SHOP3-shaped plan for exposing materialized DMX learning topics through Codex and inspector surfaces.")
+    (:id "add-plan-then-perform-session-state-to-dreyeck-build"
+     :type :shop3-plan
+     :title "Add Plan-Then-Perform Session State to Dreyeck Build"
+     :source "hyperdoc/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :summary "SHOP3-shaped plan for adding ASDF-inspired session/action state to the Dreyeck build task layer.")
     (:id "markdown-note-as-seed-or-projection"
      :type :project-concept
      :title "Markdown Note as Seed or Projection"
@@ -117,6 +123,23 @@
      :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "Codex-facing surface for materialized DMX learning topics backed by reusable build tasks.")
+    (:id "plan-then-perform-build-session"
+     :type :learned-build-pattern
+     :title "Plan-Then-Perform Build Session"
+     :source "hyperdoc/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :canonical-example "Dreyeck build session tracks up-to-date-before-session, needed-in-session, and done-in-session independently."
+     :summary "Separate planning, validity checking, and performing so Codex can inspect deterministic project checks without becoming the build system.")
+    (:id "asdf-3-3-session-action-model"
+     :type :source-pattern
+     :title "ASDF 3.3 Session/Action Model"
+     :projection-status :support-topic
+     :summary "ASDF-inspired distinction between session planning, action validity, and action performance.")
+    (:id "domkin-2017"
+     :type :bibliographic-reference
+     :title "Domkin 2017"
+     :projection-status :support-topic
+     :summary "Vsevolod Domkin's ELS 2017 paper on loading multiple versions of an ASDF system in one Lisp image.")
     (:id "dreyeck-dmx-sqlite-production-db"
      :type :production-store
      :title "Dreyeck DMX SQLite Production DB"
@@ -193,7 +216,19 @@
      :target "dreyeck-dmx-sqlite-production-db")
     (:source "dmx-learning-topic-inspection"
      :predicate "depends-on"
-     :target "durable-note-materialization-status")))
+     :target "durable-note-materialization-status")
+    (:source "plan-then-perform-build-session"
+     :predicate "refines"
+     :target "codex-is-not-the-build-system")
+    (:source "plan-then-perform-build-session"
+     :predicate "supports"
+     :target "reusable-common-lisp-build-tasks-for-codex")
+    (:source "plan-then-perform-build-session"
+     :predicate "inspired-by"
+     :target "asdf-3-3-session-action-model")
+    (:source "asdf-3-3-session-action-model"
+     :predicate "described-by"
+     :target "domkin-2017")))
 
 (defparameter *durable-note-materialization-required-topic-ids*
   '("hyperdoc-core"
@@ -205,22 +240,30 @@
     "hyperdoc-core-vs-local-hyperdoc-path"
     "optional-provider-becomes-inspectable-data"
     "inspect-dmx-materialized-learning-topics"
+    "add-plan-then-perform-session-state-to-dreyeck-build"
     "codex-is-not-the-build-system"
     "reusable-common-lisp-build-tasks-for-codex"
     "dmx-learning-topic-inspection"
     "codex-dmx-learning-topics"
+    "plan-then-perform-build-session"
+    "asdf-3-3-session-action-model"
+    "domkin-2017"
     "durable-note-materialization-status"))
 
 (defparameter *dmx-learning-topic-ids*
   '("codex-is-not-the-build-system"
     "reusable-common-lisp-build-tasks-for-codex"
     "dmx-learning-topic-inspection"
-    "codex-dmx-learning-topics"))
+    "codex-dmx-learning-topics"
+    "plan-then-perform-build-session"))
 
 (defparameter *dmx-learning-support-topic-ids*
   '("inspect-dmx-materialized-learning-topics"
+    "add-plan-then-perform-session-state-to-dreyeck-build"
     "durable-note-materialization-status"
-    "dreyeck-dmx-sqlite-production-db"))
+    "dreyeck-dmx-sqlite-production-db"
+    "asdf-3-3-session-action-model"
+    "domkin-2017"))
 
 (defparameter *dmx-learning-association-keys*
   '(("codex-is-not-the-build-system"
@@ -234,7 +277,19 @@
      "dreyeck-dmx-sqlite-production-db")
     ("dmx-learning-topic-inspection"
      "depends-on"
-     "durable-note-materialization-status")))
+     "durable-note-materialization-status")
+    ("plan-then-perform-build-session"
+     "refines"
+     "codex-is-not-the-build-system")
+    ("plan-then-perform-build-session"
+     "supports"
+     "reusable-common-lisp-build-tasks-for-codex")
+    ("plan-then-perform-build-session"
+     "inspired-by"
+     "asdf-3-3-session-action-model")
+    ("asdf-3-3-session-action-model"
+     "described-by"
+     "domkin-2017")))
 
 (defun durable-note-source-pathname (source)
   (when source
@@ -406,26 +461,40 @@
   (remove-if (lambda (note) (getf note :exists-p))
              (durable-note-known-seed-notes)))
 
+(defun durable-note-present-topic-ids (db-path topic-ids)
+  (when topic-ids
+    (mapcar
+     #'first
+     (dmx-sqlite-query-rows
+      db-path
+      (format nil
+              "select local_id from dmx_sql_object where object_kind = 'topic' and ~A order by local_id;"
+              (dmx-sqlite-string-in-clause "local_id" topic-ids))))))
+
 (defun durable-note-materialized-topic-count (db-path)
-  (count-if (lambda (definition)
-              (dmx-sqlite-topic db-path (getf definition :id)))
-            *durable-note-materialization-topic-definitions*))
+  (length
+   (durable-note-present-topic-ids
+    db-path
+    (mapcar (lambda (definition) (getf definition :id))
+            *durable-note-materialization-topic-definitions*))))
 
 (defun durable-note-materialized-association-count (db-path)
   (count-if (lambda (definition)
-              (dmx-sqlite-association
+              (dmx-sql-object-exists-p
                db-path
                (durable-note-association-id definition)))
             *durable-note-materialization-association-definitions*))
 
 (defun durable-note-missing-topic-ids (db-path topic-ids)
-  (remove-if (lambda (topic-id) (dmx-sqlite-topic db-path topic-id))
-             topic-ids))
+  (let ((present-topic-ids (durable-note-present-topic-ids db-path topic-ids)))
+    (remove-if (lambda (topic-id)
+                 (member topic-id present-topic-ids :test #'equal))
+               topic-ids)))
 
 (defun durable-note-missing-association-ids (db-path definitions)
   (loop for definition in definitions
         for assoc-id = (durable-note-association-id definition)
-        unless (dmx-sqlite-association db-path assoc-id)
+        unless (dmx-sql-object-exists-p db-path assoc-id)
           collect assoc-id))
 
 (defun durable-note-materialization-validation (db-path)
@@ -496,14 +565,13 @@
     (db-path definition db-exists?)
   (let* ((association-id (durable-note-association-id definition))
          (row (and db-exists?
-                   (dmx-sqlite-association db-path association-id))))
+                   (dmx-sqlite-object db-path association-id))))
     (list :id association-id
           :present-p (and row t)
           :source (getf definition :source)
           :predicate (getf definition :predicate)
           :target (getf definition :target)
           :type-uri (getf row :type-uri)
-          :players (getf row :players)
           :db-object row)))
 
 (defun dmx-materialized-learning-topics

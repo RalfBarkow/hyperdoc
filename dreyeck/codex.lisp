@@ -317,6 +317,9 @@ symbol name without depending on them."
    (validation-task-result
     :accessor codex-dmx-learning-topics-validation-task-result-of
     :initarg :validation-task-result)
+   (referee-result
+    :accessor codex-dmx-learning-topics-referee-result-of
+    :initarg :referee-result)
    (optional-provider-results
     :accessor codex-dmx-learning-topics-optional-provider-results-of
     :initarg :optional-provider-results)))
@@ -329,10 +332,15 @@ symbol name without depending on them."
 
 (defun codex-dmx-learning-topic-status ()
   "Return the read-only Codex status object for DMX learning topic materialization."
-  (let* ((task-result
-           (dreyeck/build:run-build-task
-            :dmx-durable-note-materialization-status))
+  (let* ((session (dreyeck/build:make-build-session))
+         (_plan
+           (dreyeck/build:plan-build-task
+            session :dmx-durable-note-materialization-status))
+         (task-result
+           (dreyeck/build:check-build-task
+            session :dmx-durable-note-materialization-status))
          (result (getf task-result :result)))
+    (declare (ignore _plan))
     (make-instance
      'codex-dmx-learning-topic-status
      :id "codex-dmx-learning-topic-status"
@@ -347,14 +355,26 @@ symbol name without depending on them."
 (defun codex-dmx-learning-topics ()
   "Return the Codex inspection surface for materialized DMX learning topics.
 
-The surface invokes Dreyeck build/check tasks. It does not inline materializer
-or validation logic in Codex."
-  (let* ((validation-task-result
-           (dreyeck/build:run-build-task :validate-dmx-learning-topics))
+The surface invokes Dreyeck build/check session APIs. It does not inline
+materializer or validation logic in Codex, and it does not replay materializer
+work while inspecting."
+  (let* ((session (dreyeck/build:make-build-session))
+         (_plan
+           (dreyeck/build:plan-build-task
+            session :validate-dmx-learning-topics))
+         (validation-task-result
+           (dreyeck/build:check-build-task
+            session :validate-dmx-learning-topics))
          (inspect-task-result
-           (dreyeck/build:run-build-task :inspect-dmx-learning-topics))
+           (dreyeck/build:check-build-task
+            session :inspect-dmx-learning-topics))
+         (referee-result
+           (dreyeck/build:build-session-next-action
+            session
+            :task-id :validate-dmx-learning-topics))
          (inspection (getf inspect-task-result :result))
          (validation (getf validation-task-result :result)))
+    (declare (ignore _plan))
     (make-instance
      'codex-dmx-learning-topics
      :id "codex-dmx-learning-topics"
@@ -370,6 +390,7 @@ or validation logic in Codex."
      :build-tasks (dreyeck/build:list-build-tasks)
      :inspect-task-result inspect-task-result
      :validation-task-result validation-task-result
+     :referee-result referee-result
      :optional-provider-results
      (list (codex-context-provider-result 'dmx-learning-topic-provider)))))
 
@@ -657,8 +678,10 @@ or validation logic in Codex."
                      "dreyeck-explorer/codex.lisp")
    :affected-pages nil
    :evidence '("The SHOP3 plan artifact was created before implementation."
-               "(dreyeck/build:run-build-task :validate-dmx-learning-topics) replays the materializer."
-               "(dreyeck/codex:codex-dmx-learning-topics) calls the task layer instead of embedding build logic.")
+               "(dreyeck/build:plan-build-task ...) records session action state."
+               "(dreyeck/build:check-build-task ...) gives Codex non-mutating inspection."
+               "(dreyeck/build:build-session-next-action ...) is the Lisp referee form for next admissible action selection."
+               "(dreyeck/codex:codex-dmx-learning-topics) calls the session task layer instead of embedding build logic.")
    :route-hints '("Inspect (dreyeck/codex:codex-dmx-learning-topics)."
                   "Use (dreyeck/build:list-build-tasks) to see the reusable task boundary.")))
 
@@ -810,8 +833,9 @@ or validation logic in Codex."
          :available
          "Inspect"
          :evidence '("(dreyeck/codex:codex-dmx-learning-topics) returns the inspection object."
-                     "(dreyeck/build:run-build-task :inspect-dmx-learning-topics) returns the structured query result."
-                     "(dreyeck/build:run-build-task :validate-dmx-learning-topics) verifies materializer replay idempotence.")
+                     "(dreyeck/build:check-build-task ... :inspect-dmx-learning-topics) returns the structured query result without replay."
+                     "(dreyeck/build:build-session-next-action ...) returns the next admissible action as inspectable Lisp data."
+                     "(dreyeck/build:perform-build-task ... :validate-dmx-learning-topics) verifies materializer replay only when the session marks it needed.")
          :related-objects (list (codex-dmx-learning-topic-status)))))
      (when context-change
        (list
@@ -929,7 +953,7 @@ or validation logic in Codex."
                                    "HyperDoc Core"
                                    "Ownership Extraction with Compatibility Shell")
                  :validation-commands
-                 '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :dreyeck/codex/explorer)' --eval '(assert (dreyeck/codex:codex-dmx-learning-topics))' --eval '(uiop:quit)'"
+                 '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :dreyeck/codex/explorer)' --eval '(let ((session (dreyeck/build:make-build-session))) (dreyeck/build:plan-build-task session :validate-dmx-learning-topics) (dreyeck/build:check-build-task session :validate-dmx-learning-topics) (assert (dreyeck/codex:codex-dmx-learning-topics)))' --eval '(uiop:quit)'"
                    "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:test-system :dreyeck/build)' --eval '(uiop:quit)'"
                    "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:test-system :dreyeck/dmx/sqlite)' --eval '(uiop:quit)'"
                    "git diff --check")
