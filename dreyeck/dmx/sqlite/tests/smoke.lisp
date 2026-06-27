@@ -263,6 +263,19 @@
              (assert-true
               (dmx-sqlite-topic db "dreyeck/build:build-session-next-action")
               "Materializer must create the Lisp referee function topic")
+             (dolist (topic-id '("add-plan-then-perform-session-state-to-dreyeck-build"
+                                 "render-build-referee-decisions-as-routes"
+                                 "plan-then-perform-build-session"
+                                 "build-referee-decision-route"
+                                 "lisp-referee-form"
+                                 "dreyeck/build:build-session-next-action"
+                                 "asdf-3-3-session-action-model"
+                                 "domkin-2017"))
+               (assert-true
+                (dmx-sqlite-topic db topic-id)
+                (format nil
+                        "Materializer must create required build/referee topic ~A"
+                        topic-id)))
              (assert-true
               (dmx-sqlite-association
                db
@@ -278,6 +291,20 @@
                db
                "assoc:build-referee-decision-route:inspects:dreyeck/build:build-session-next-action")
               "Materializer must create the referee route/function inspection association")
+             (dolist (association-id
+                      '("assoc:plan-then-perform-build-session:refines:codex-is-not-the-build-system"
+                        "assoc:plan-then-perform-build-session:supports:reusable-common-lisp-build-tasks-for-codex"
+                        "assoc:plan-then-perform-build-session:inspired-by:asdf-3-3-session-action-model"
+                        "assoc:asdf-3-3-session-action-model:described-by:domkin-2017"
+                        "assoc:build-referee-decision-route:renders:lisp-referee-form"
+                        "assoc:build-referee-decision-route:explains:plan-then-perform-build-session"
+                        "assoc:build-referee-decision-route:supports:codex-is-not-the-build-system"
+                        "assoc:build-referee-decision-route:inspects:dreyeck/build:build-session-next-action"))
+               (assert-true
+                (dmx-sqlite-association db association-id)
+                (format nil
+                        "Materializer must create required build/referee association ~A"
+                        association-id)))
              (assert-equal
               :passed
               (getf status :last-validation-status)

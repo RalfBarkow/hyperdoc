@@ -83,6 +83,12 @@
      :source "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "SHOP3-shaped plan for rendering build referee decisions as inspectable route objects.")
+    (:id "materialize-build-referee-learning-topics"
+     :type :shop3-plan
+     :title "Materialize Build Referee Learning Topics"
+     :source "hyperdoc/materialize-build-referee-learning-topics-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :summary "SHOP3-shaped plan for materializing the learned build-session and Lisp referee topics into the Dreyeck DMX SQLite store.")
     (:id "markdown-note-as-seed-or-projection"
      :type :project-concept
      :title "Markdown Note as Seed or Projection"
@@ -279,6 +285,7 @@
     "inspect-dmx-materialized-learning-topics"
     "add-plan-then-perform-session-state-to-dreyeck-build"
     "render-build-referee-decisions-as-routes"
+    "materialize-build-referee-learning-topics"
     "codex-is-not-the-build-system"
     "reusable-common-lisp-build-tasks-for-codex"
     "dmx-learning-topic-inspection"
@@ -303,6 +310,7 @@
   '("inspect-dmx-materialized-learning-topics"
     "add-plan-then-perform-session-state-to-dreyeck-build"
     "render-build-referee-decisions-as-routes"
+    "materialize-build-referee-learning-topics"
     "durable-note-materialization-status"
     "dreyeck-dmx-sqlite-production-db"
     "lisp-referee-form"
@@ -528,6 +536,30 @@
               "select local_id from dmx_sql_object where object_kind = 'topic' and ~A order by local_id;"
               (dmx-sqlite-string-in-clause "local_id" topic-ids))))))
 
+(defun durable-note-object-rows-by-id (db-path object-kind local-ids)
+  (when local-ids
+    (dmx-sqlite-object-rows
+     db-path
+     :where (format nil "~A and ~A"
+                    (sql-is-clause "object_kind" object-kind)
+                    (dmx-sqlite-string-in-clause "local_id" local-ids))
+     :order-by "local_id")))
+
+(defun durable-note-row-for-id (rows local-id)
+  (find local-id rows
+        :key (lambda (row) (getf row :local-id))
+        :test #'equal))
+
+(defun durable-note-association-ids (definitions)
+  (mapcar #'durable-note-association-id definitions))
+
+(defun durable-note-present-association-ids (db-path definitions)
+  (mapcar (lambda (row) (getf row :local-id))
+          (durable-note-object-rows-by-id
+           db-path
+           "assoc"
+           (durable-note-association-ids definitions))))
+
 (defun durable-note-materialized-topic-count (db-path)
   (length
    (durable-note-present-topic-ids
@@ -536,11 +568,10 @@
             *durable-note-materialization-topic-definitions*))))
 
 (defun durable-note-materialized-association-count (db-path)
-  (count-if (lambda (definition)
-              (dmx-sql-object-exists-p
-               db-path
-               (durable-note-association-id definition)))
-            *durable-note-materialization-association-definitions*))
+  (length
+   (durable-note-present-association-ids
+    db-path
+    *durable-note-materialization-association-definitions*)))
 
 (defun durable-note-missing-topic-ids (db-path topic-ids)
   (let ((present-topic-ids (durable-note-present-topic-ids db-path topic-ids)))
@@ -549,10 +580,11 @@
                topic-ids)))
 
 (defun durable-note-missing-association-ids (db-path definitions)
-  (loop for definition in definitions
-        for assoc-id = (durable-note-association-id definition)
-        unless (dmx-sql-object-exists-p db-path assoc-id)
-          collect assoc-id))
+  (let ((present-association-ids
+          (durable-note-present-association-ids db-path definitions)))
+    (remove-if (lambda (assoc-id)
+                 (member assoc-id present-association-ids :test #'equal))
+               (durable-note-association-ids definitions))))
 
 (defun durable-note-materialization-validation (db-path)
   (let* ((db-exists? (probe-file db-path))
@@ -601,10 +633,9 @@
           :last-validation-status (getf validation :status)
           :validation validation)))
 
-(defun dmx-materialized-learning-topic-entry (db-path topic-id db-exists?)
+(defun dmx-materialized-learning-topic-entry (topic-id row)
   (let* ((definition (durable-note-topic-definition topic-id))
-         (source-info (durable-note-source-info (getf definition :source)))
-         (row (and db-exists? (dmx-sqlite-topic db-path topic-id))))
+         (source-info (durable-note-source-info (getf definition :source))))
     (list :id topic-id
           :present-p (and row t)
           :title (or (getf row :value)
@@ -618,11 +649,8 @@
           :summary (getf definition :summary)
           :db-object row)))
 
-(defun dmx-materialized-learning-association-entry
-    (db-path definition db-exists?)
-  (let* ((association-id (durable-note-association-id definition))
-         (row (and db-exists?
-                   (dmx-sqlite-object db-path association-id))))
+(defun dmx-materialized-learning-association-entry (definition row)
+  (let ((association-id (durable-note-association-id definition)))
     (list :id association-id
           :present-p (and row t)
           :source (getf definition :source)
@@ -639,21 +667,40 @@ This is a read-only inspection query. Materialization and replay checks stay in
 the build task layer that calls the existing materializer."
   (let* ((db-exists? (probe-file db-path))
          (status (durable-note-materialization-status :db-path db-path))
+         (learning-topic-ids *dmx-learning-topic-ids*)
+         (support-topic-ids *dmx-learning-support-topic-ids*)
+         (all-topic-ids (append learning-topic-ids support-topic-ids))
+         (topic-rows
+           (and db-exists?
+                (durable-note-object-rows-by-id db-path "topic" all-topic-ids)))
+         (learning-association-definitions
+           (dmx-learning-association-definitions))
+         (association-rows
+           (and db-exists?
+                (durable-note-object-rows-by-id
+                 db-path
+                 "assoc"
+                 (durable-note-association-ids
+                  learning-association-definitions))))
          (learning-topics
-           (loop for topic-id in *dmx-learning-topic-ids*
+           (loop for topic-id in learning-topic-ids
                  collect
                  (dmx-materialized-learning-topic-entry
-                  db-path topic-id db-exists?)))
+                  topic-id
+                  (durable-note-row-for-id topic-rows topic-id))))
          (support-topics
-           (loop for topic-id in *dmx-learning-support-topic-ids*
+           (loop for topic-id in support-topic-ids
                  collect
                  (dmx-materialized-learning-topic-entry
-                  db-path topic-id db-exists?)))
+                  topic-id
+                  (durable-note-row-for-id topic-rows topic-id))))
          (learning-associations
-           (loop for definition in (dmx-learning-association-definitions)
+           (loop for definition in learning-association-definitions
+                 for association-id = (durable-note-association-id definition)
                  collect
                  (dmx-materialized-learning-association-entry
-                  db-path definition db-exists?)))
+                  definition
+                  (durable-note-row-for-id association-rows association-id))))
          (missing-learning-topic-ids
            (loop for topic in learning-topics
                  unless (getf topic :present-p)
@@ -672,8 +719,8 @@ the build task layer that calls the existing materializer."
           :materialization-status status
           :last-validation-status (getf status :last-validation-status)
           :last-replay-status :not-run
-          :learning-topic-ids *dmx-learning-topic-ids*
-          :support-topic-ids *dmx-learning-support-topic-ids*
+          :learning-topic-ids learning-topic-ids
+          :support-topic-ids support-topic-ids
           :topics learning-topics
           :support-topics support-topics
           :associations learning-associations
