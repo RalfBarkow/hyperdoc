@@ -320,6 +320,9 @@ symbol name without depending on them."
    (referee-result
     :accessor codex-dmx-learning-topics-referee-result-of
     :initarg :referee-result)
+   (referee-route
+    :accessor codex-dmx-learning-topics-referee-route-of
+    :initarg :referee-route)
    (optional-provider-results
     :accessor codex-dmx-learning-topics-optional-provider-results-of
     :initarg :optional-provider-results)))
@@ -352,6 +355,21 @@ symbol name without depending on them."
      :build-tasks (dreyeck/build:list-build-tasks)
      :task-result task-result)))
 
+(defun codex-build-referee-route
+    (&key (task-id :validate-dmx-learning-topics) db-path)
+  "Return Codex's display object for the build-owned referee route.
+
+Codex plans and checks so the route has session state to render, but the route
+and next-action decision are owned by DREYECK/BUILD."
+  (let ((session (if db-path
+                     (dreyeck/build:make-build-session :db-path db-path)
+                     (dreyeck/build:make-build-session))))
+    (dreyeck/build:plan-build-task session task-id)
+    (dreyeck/build:check-build-task session task-id)
+    (dreyeck/build:build-session-next-action-route
+     session
+     :task-id task-id)))
+
 (defun codex-dmx-learning-topics ()
   "Return the Codex inspection surface for materialized DMX learning topics.
 
@@ -368,10 +386,13 @@ work while inspecting."
          (inspect-task-result
            (dreyeck/build:check-build-task
             session :inspect-dmx-learning-topics))
-         (referee-result
-           (dreyeck/build:build-session-next-action
+         (referee-route
+           (dreyeck/build:build-session-next-action-route
             session
             :task-id :validate-dmx-learning-topics))
+         (referee-result
+           (dreyeck/build:build-referee-decision-route-referee-result-of
+            referee-route))
          (inspection (getf inspect-task-result :result))
          (validation (getf validation-task-result :result)))
     (declare (ignore _plan))
@@ -391,6 +412,7 @@ work while inspecting."
      :inspect-task-result inspect-task-result
      :validation-task-result validation-task-result
      :referee-result referee-result
+     :referee-route referee-route
      :optional-provider-results
      (list (codex-context-provider-result 'dmx-learning-topic-provider)))))
 

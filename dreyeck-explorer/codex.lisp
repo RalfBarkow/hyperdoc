@@ -455,6 +455,162 @@
                             (object-list
                              (codex-next-route-related-objects-of route)))))))
 
+(views:defview 👀build-referee-route
+    (route dreyeck/build:build-referee-decision-route)
+  (labels ((value-string (value)
+             (cond
+               ((null value) "None")
+               ((stringp value) value)
+               ((or (symbolp value) (numberp value))
+                (prin1-to-string value))
+               (t (princ-to-string value))))
+           (value-row (label value)
+             (views:html
+              (:p (:b (views:esc label))
+                  ": "
+                  (views:esc (value-string value)))))
+           (code-value (value)
+             (views:html
+              (:tt (views:esc (prin1-to-string value)))))
+           (boolean-label (value)
+             (if value "true" "false"))
+           (operation-label (operation)
+             (or (getf operation :action-label)
+                 (value-string operation)))
+           (candidate-table (candidates)
+             (if candidates
+                 (views:html
+                  (:table
+                   (:thead
+                    (:tr
+                     (:th "Task")
+                     (:th "Action")
+                     (:th "Selected")
+                     (:th "Needed")
+                     (:th "Done")
+                     (:th "Up-to-date")
+                     (:th "Safe")
+                     (:th "Reason")))
+                   (:tbody
+                    (dolist (candidate candidates)
+                      (views:html
+                       (:tr
+                        (:td (code-value (getf candidate :task)))
+                        (:td (code-value (getf candidate :next-action)))
+                        (:td
+                         (views:esc
+                          (boolean-label (getf candidate :selected-p))))
+                        (:td
+                         (views:esc
+                          (boolean-label
+                           (getf candidate :needed-in-session-p))))
+                        (:td
+                         (views:esc
+                          (boolean-label
+                           (getf candidate :done-in-session-p))))
+                        (:td
+                         (views:esc
+                          (boolean-label
+                           (getf candidate
+                                 :up-to-date-before-session-p))))
+                        (:td
+                         (views:esc
+                          (boolean-label
+                           (getf candidate :safe-to-perform-p))))
+                        (:td
+                         (views:esc
+                          (value-string (getf candidate :reason))))))))))
+                 (views:html (:p "None")))))
+    (views:html-view :title "Build Referee Route" :priority 0
+                     (views:add-asset-path "/hyperbook/"
+                                           (asdf:system-relative-pathname
+                                            :hyperbook
+                                            "assets/hyperbook/"))
+                     (views:include-css "/hyperbook/css/hyperbook.css")
+                     (views:html
+                      (:div :class "hyperbook-page"
+                            (:h1
+                             (views:esc
+                              (dreyeck/build:build-referee-decision-route-title-of
+                               route)))
+                            (:p
+                             (views:esc
+                              (dreyeck/build:build-referee-decision-route-summary-of
+                               route)))
+                            (value-row
+                             "Requested goal"
+                             (dreyeck/build:build-referee-decision-route-requested-goal-of
+                              route))
+                            (value-row
+                             "Selected task"
+                             (dreyeck/build:build-referee-decision-route-selected-task-of
+                              route))
+                            (value-row
+                             "Selected action"
+                             (dreyeck/build:build-referee-decision-route-selected-action-of
+                              route))
+                            (value-row
+                             "Decoded operation"
+                             (operation-label
+                              (dreyeck/build:build-referee-decision-route-decoded-operation-of
+                               route)))
+                            (value-row
+                             "Why selected"
+                             (dreyeck/build:build-referee-decision-route-reason-of
+                              route))
+                            (:h2 "State")
+                            (value-row
+                             "Up-to-date before session"
+                             (boolean-label
+                              (dreyeck/build:build-referee-decision-route-up-to-date-before-session-p-of
+                               route)))
+                            (value-row
+                             "Needed in session"
+                             (boolean-label
+                              (dreyeck/build:build-referee-decision-route-needed-in-session-p-of
+                               route)))
+                            (value-row
+                             "Done in session"
+                             (boolean-label
+                              (dreyeck/build:build-referee-decision-route-done-in-session-p-of
+                               route)))
+                            (:h2 "Dependencies")
+                            (:pre
+                             (views:esc
+                              (prin1-to-string
+                               (dreyeck/build:build-referee-decision-route-dependencies-of
+                                route))))
+                            (:h2 "Perform")
+                            (value-row
+                             "Safe to perform"
+                             (boolean-label
+                              (dreyeck/build:build-referee-decision-route-safe-to-perform-p-of
+                               route)))
+                            (value-row
+                             "Safe reason"
+                             (dreyeck/build:build-referee-decision-route-safe-to-perform-reason-of
+                              route))
+                            (value-row
+                             "Perform entry point"
+                             (dreyeck/build:build-referee-decision-route-perform-entry-point-of
+                              route))
+                            (:h2 "Candidate actions")
+                            (candidate-table
+                             (dreyeck/build:build-referee-decision-route-candidate-actions-of
+                              route))
+                            (:h2 "Raw referee result")
+                            (:pre
+                             (views:esc
+                              (prin1-to-string
+                               (dreyeck/build:build-referee-decision-route-referee-result-of
+                                route))))
+                            (:h2 "Session status")
+                            (:pre
+                             (views:esc
+                              (prin1-to-string
+                               (dreyeck/build:build-referee-decision-route-session-status-of
+                                route)))))))))
+
 (views:defview 👀dmx-learning-status
     (status codex-dmx-learning-topic-status)
   (labels ((code-value (value)
@@ -618,6 +774,37 @@
                             (task-list
                              (codex-dmx-learning-topics-build-tasks-of
                               surface))
+                            (:h2 "Build referee route")
+                            (:p
+                             (:b "Selected next action: ")
+                             (code-value
+                              (dreyeck/build:build-referee-decision-route-selected-action-of
+                               (codex-dmx-learning-topics-referee-route-of
+                                surface))))
+                            (:p
+                             (:b "Decoded operation: ")
+                             (views:esc
+                              (or
+                               (getf
+                                (dreyeck/build:build-referee-decision-route-decoded-operation-of
+                                 (codex-dmx-learning-topics-referee-route-of
+                                  surface))
+                                :action-label)
+                               "")))
+                            (:p
+                             (:b "Safe to perform: ")
+                             (views:esc
+                              (if
+                               (dreyeck/build:build-referee-decision-route-safe-to-perform-p-of
+                                (codex-dmx-learning-topics-referee-route-of
+                                 surface))
+                               "true"
+                               "false")))
+                            (:p
+                             (views:object-ref
+                              (codex-dmx-learning-topics-referee-route-of
+                               surface)
+                              :display "Inspect build referee route"))
                             (:h2 "Referee next action")
                             (:pre
                              (views:esc

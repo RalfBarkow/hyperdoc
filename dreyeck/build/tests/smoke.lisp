@@ -53,21 +53,31 @@
                   (checked-referee
                     (build-session-next-action
                      session :task-id :validate-dmx-learning-topics))
+                  (checked-route
+                    (build-session-next-action-route
+                     session :task-id :validate-dmx-learning-topics))
+                  (route-selected-task
+                    (build-referee-decision-route-selected-task-of
+                     checked-route))
+                  (route-selected-state-before-perform
+                    (action-state-for-task
+                     (build-session-status session)
+                     route-selected-task))
                   (perform
                     (perform-build-task
-                     session :dmx-durable-note-materialization-status))
+                     session route-selected-task))
                   (performed-status (build-session-status session))
                   (performed-state
                     (action-state-for-task
                      performed-status
-                     :dmx-durable-note-materialization-status))
+                     route-selected-task))
                   (second-perform
                     (perform-build-task
-                     session :dmx-durable-note-materialization-status))
+                     session route-selected-task))
                   (final-referee
                     (build-session-next-action
                      session
-                     :task-id :dmx-durable-note-materialization-status))
+                     :task-id route-selected-task))
                   (validate
                     (run-build-task :validate-dmx-learning-topics
                                     :db-path compat-db))
@@ -113,10 +123,59 @@
              (assert-equal :reader-and-display-surface
                            (getf checked-referee :codex-role)
                            "Codex role must be recorded as reader/display")
+             (assert-true
+              (typep checked-route 'build-referee-decision-route)
+              "Build session must produce a referee route object")
+             (assert-equal (getf checked-referee :next-action)
+                           (build-referee-decision-route-selected-action-of
+                            checked-route)
+                           "Route must preserve the referee selected action")
+             (assert-equal :perform-build-task
+                           (build-referee-decision-route-selected-action-of
+                            checked-route)
+                           "Checked route must select explicit performance next")
+             (assert-true
+              (getf
+               (build-referee-decision-route-decoded-operation-of
+                checked-route)
+               :action-label)
+              "Route must include a decoded operation label")
+             (assert-true
+              (build-referee-decision-route-candidate-actions-of
+               checked-route)
+              "Route must include candidate actions")
+             (assert-true
+              (build-referee-decision-route-needed-in-session-p-of
+               checked-route)
+              "Route must expose needed-in-session state")
+             (assert-true
+              (not
+               (build-referee-decision-route-done-in-session-p-of
+                checked-route))
+              "Route must expose not-done state before perform")
+             (assert-true
+              (not
+               (build-referee-decision-route-up-to-date-before-session-p-of
+                checked-route))
+              "Route must expose up-to-date-before-session state")
+             (assert-true
+              (build-referee-decision-route-safe-to-perform-p-of
+               checked-route)
+              "Route must mark the selected checked action safe to perform")
+             (assert-equal 'perform-build-task
+                           (build-referee-decision-route-perform-entry-point-of
+                            checked-route)
+                           "Route must expose the explicit perform entry point")
+             (assert-true route-selected-state-before-perform
+                          "Route selected task must have session state")
+             (assert-true
+              (not (getf route-selected-state-before-perform
+                         :done-in-session-p))
+              "Route creation must not mark the selected action done")
              (assert-equal :failed (getf perform :status)
-                           "Performing a needed status task must record its result without materializing")
+                           "Performing the selected route task must record its result")
              (assert-true (getf performed-state :done-in-session-p)
-                          "Perform must mark the action done in the session")
+                          "Explicit perform must mark the route action done in the session")
              (assert-equal :already-done (getf second-perform :status)
                            "Second same-session perform must not duplicate work")
              (assert-equal :complete (getf final-referee :next-action)
@@ -140,7 +199,8 @@
                                  "reusable-common-lisp-build-tasks-for-codex"
                                  "dmx-learning-topic-inspection"
                                  "codex-dmx-learning-topics"
-                                 "plan-then-perform-build-session"))
+                                 "plan-then-perform-build-session"
+                                 "build-referee-decision-route"))
                (assert-true
                 (find topic-id (getf learning-topics :topics)
                       :key (lambda (topic) (getf topic :id))

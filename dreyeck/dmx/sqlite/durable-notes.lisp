@@ -77,6 +77,12 @@
      :source "hyperdoc/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "SHOP3-shaped plan for adding ASDF-inspired session/action state to the Dreyeck build task layer.")
+    (:id "render-build-referee-decisions-as-routes"
+     :type :shop3-plan
+     :title "Render Build Referee Decisions as Routes"
+     :source "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :summary "SHOP3-shaped plan for rendering build referee decisions as inspectable route objects.")
     (:id "markdown-note-as-seed-or-projection"
      :type :project-concept
      :title "Markdown Note as Seed or Projection"
@@ -130,6 +136,25 @@
      :projection-status :seeded-from-shop3-plan
      :canonical-example "Dreyeck build session tracks up-to-date-before-session, needed-in-session, and done-in-session independently."
      :summary "Separate planning, validity checking, and performing so Codex can inspect deterministic project checks without becoming the build system.")
+    (:id "build-referee-decision-route"
+     :type :learned-inspector-pattern
+     :title "Build Referee Decision Route"
+     :source "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :canonical-example "A Dreyeck build referee route shows the requested goal, candidate actions, selected action, decoded operation, status dimensions, reason, and safe-to-perform flag."
+     :summary "A Lisp referee result should be rendered as an inspectable route without making Codex the next-move decision owner.")
+    (:id "lisp-referee-form"
+     :type :architecture-boundary
+     :title "Lisp Referee Form"
+     :source "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp"
+     :projection-status :support-topic
+     :summary "An inspectable Common Lisp form or function that owns next admissible action selection.")
+    (:id "dreyeck/build:build-session-next-action"
+     :type :lisp-referee-form
+     :title "dreyeck/build:build-session-next-action"
+     :source "dreyeck/build/tasks.lisp"
+     :projection-status :support-topic
+     :summary "The authoritative Dreyeck build referee function that selects and decodes the next admissible action.")
     (:id "asdf-3-3-session-action-model"
      :type :source-pattern
      :title "ASDF 3.3 Session/Action Model"
@@ -228,7 +253,19 @@
      :target "asdf-3-3-session-action-model")
     (:source "asdf-3-3-session-action-model"
      :predicate "described-by"
-     :target "domkin-2017")))
+     :target "domkin-2017")
+    (:source "build-referee-decision-route"
+     :predicate "renders"
+     :target "lisp-referee-form")
+    (:source "build-referee-decision-route"
+     :predicate "explains"
+     :target "plan-then-perform-build-session")
+    (:source "build-referee-decision-route"
+     :predicate "supports"
+     :target "codex-is-not-the-build-system")
+    (:source "build-referee-decision-route"
+     :predicate "inspects"
+     :target "dreyeck/build:build-session-next-action")))
 
 (defparameter *durable-note-materialization-required-topic-ids*
   '("hyperdoc-core"
@@ -241,11 +278,15 @@
     "optional-provider-becomes-inspectable-data"
     "inspect-dmx-materialized-learning-topics"
     "add-plan-then-perform-session-state-to-dreyeck-build"
+    "render-build-referee-decisions-as-routes"
     "codex-is-not-the-build-system"
     "reusable-common-lisp-build-tasks-for-codex"
     "dmx-learning-topic-inspection"
     "codex-dmx-learning-topics"
     "plan-then-perform-build-session"
+    "build-referee-decision-route"
+    "lisp-referee-form"
+    "dreyeck/build:build-session-next-action"
     "asdf-3-3-session-action-model"
     "domkin-2017"
     "durable-note-materialization-status"))
@@ -255,13 +296,17 @@
     "reusable-common-lisp-build-tasks-for-codex"
     "dmx-learning-topic-inspection"
     "codex-dmx-learning-topics"
-    "plan-then-perform-build-session"))
+    "plan-then-perform-build-session"
+    "build-referee-decision-route"))
 
 (defparameter *dmx-learning-support-topic-ids*
   '("inspect-dmx-materialized-learning-topics"
     "add-plan-then-perform-session-state-to-dreyeck-build"
+    "render-build-referee-decisions-as-routes"
     "durable-note-materialization-status"
     "dreyeck-dmx-sqlite-production-db"
+    "lisp-referee-form"
+    "dreyeck/build:build-session-next-action"
     "asdf-3-3-session-action-model"
     "domkin-2017"))
 
@@ -289,7 +334,19 @@
      "asdf-3-3-session-action-model")
     ("asdf-3-3-session-action-model"
      "described-by"
-     "domkin-2017")))
+     "domkin-2017")
+    ("build-referee-decision-route"
+     "renders"
+     "lisp-referee-form")
+    ("build-referee-decision-route"
+     "explains"
+     "plan-then-perform-build-session")
+    ("build-referee-decision-route"
+     "supports"
+     "codex-is-not-the-build-system")
+    ("build-referee-decision-route"
+     "inspects"
+     "dreyeck/build:build-session-next-action")))
 
 (defun durable-note-source-pathname (source)
   (when source

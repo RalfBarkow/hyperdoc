@@ -334,6 +334,245 @@ result unless FORCE is true."
         :actions (build-session-action-states session)
         :errors (copy-list (getf session :errors))))
 
+(defclass build-referee-decision-route ()
+  ((id :accessor build-referee-decision-route-id-of
+       :initarg :id)
+   (title :accessor build-referee-decision-route-title-of
+          :initarg :title)
+   (summary :accessor build-referee-decision-route-summary-of
+            :initarg :summary)
+   (session-id :accessor build-referee-decision-route-session-id-of
+               :initarg :session-id)
+   (requested-goal
+    :accessor build-referee-decision-route-requested-goal-of
+    :initarg :requested-goal)
+   (candidate-actions
+    :accessor build-referee-decision-route-candidate-actions-of
+    :initarg :candidate-actions)
+   (selected-task
+    :accessor build-referee-decision-route-selected-task-of
+    :initarg :selected-task)
+   (selected-action
+    :accessor build-referee-decision-route-selected-action-of
+    :initarg :selected-action)
+   (decoded-operation
+    :accessor build-referee-decision-route-decoded-operation-of
+    :initarg :decoded-operation)
+   (dependencies
+    :accessor build-referee-decision-route-dependencies-of
+    :initarg :dependencies)
+   (up-to-date-before-session-p
+    :accessor build-referee-decision-route-up-to-date-before-session-p-of
+    :initarg :up-to-date-before-session-p)
+   (needed-in-session-p
+    :accessor build-referee-decision-route-needed-in-session-p-of
+    :initarg :needed-in-session-p)
+   (done-in-session-p
+    :accessor build-referee-decision-route-done-in-session-p-of
+    :initarg :done-in-session-p)
+   (reason :accessor build-referee-decision-route-reason-of
+           :initarg :reason)
+   (safe-to-perform-p
+    :accessor build-referee-decision-route-safe-to-perform-p-of
+    :initarg :safe-to-perform-p)
+   (safe-to-perform-reason
+    :accessor build-referee-decision-route-safe-to-perform-reason-of
+    :initarg :safe-to-perform-reason)
+   (perform-entry-point
+    :accessor build-referee-decision-route-perform-entry-point-of
+    :initarg :perform-entry-point)
+   (source :accessor build-referee-decision-route-source-of
+           :initarg :source)
+   (referee-result
+    :accessor build-referee-decision-route-referee-result-of
+    :initarg :referee-result)
+   (session-status
+    :accessor build-referee-decision-route-session-status-of
+    :initarg :session-status)))
+
+(defmethod print-object ((object build-referee-decision-route) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A ~A"
+            (build-referee-decision-route-requested-goal-of object)
+            (build-referee-decision-route-selected-action-of object))))
+
+(defun build-action-state-for-task (status task-id)
+  (find task-id (getf status :actions)
+        :key (lambda (state) (getf state :task-name))
+        :test #'eq))
+
+(defun build-task-display-title (task-id)
+  (getf (build-task-definition task-id) :title))
+
+(defun build-referee-operation-entry-point (action)
+  (case action
+    (:plan-build-task 'plan-build-task)
+    (:check-build-task 'check-build-task)
+    (:perform-build-task 'perform-build-task)
+    (otherwise nil)))
+
+(defun build-referee-action-label (action task-id)
+  (case action
+    (:plan-build-task
+     (format nil "Plan ~A" (build-task-display-title task-id)))
+    (:check-build-task
+     (format nil "Check ~A" (build-task-display-title task-id)))
+    (:perform-build-task
+     (format nil "Perform ~A" (build-task-display-title task-id)))
+    (:complete
+     (format nil "~A is complete or not needed"
+             (build-task-display-title task-id)))
+    (otherwise
+     (format nil "~(~A~) ~A" action (build-task-display-title task-id)))))
+
+(defun decode-build-referee-operation (action task-id)
+  (let ((definition (build-task-definition task-id)))
+    (list :kind :build-referee-decoded-operation
+          :task task-id
+          :task-title (getf definition :title)
+          :task-summary (getf definition :summary)
+          :action action
+          :action-label (build-referee-action-label action task-id)
+          :entry-point (build-referee-operation-entry-point action)
+          :mutates-p (and (eq action :perform-build-task)
+                          (build-task-mutates-p task-id))
+          :dependencies (build-task-dependencies task-id))))
+
+(defun build-referee-safe-to-perform (action state)
+  (cond
+    ((not (eq action :perform-build-task))
+     (values nil :selected-action-is-not-perform))
+    ((null state)
+     (values nil :selected-task-has-no-session-state))
+    ((getf state :done-in-session-p)
+     (values nil :already-done-in-session))
+    ((not (getf state :needed-in-session-p))
+     (values nil :not-needed-in-session))
+    (t
+     (values t :checked-needed-and-not-done))))
+
+(defun build-referee-candidate-action
+    (task-id action state reason action-call selected-p)
+  (multiple-value-bind (safe-to-perform-p safe-reason)
+      (build-referee-safe-to-perform action state)
+    (list :kind :build-referee-candidate-action
+          :task task-id
+          :selected-p selected-p
+          :next-action action
+          :decoded-operation (decode-build-referee-operation action task-id)
+          :dependencies (build-task-dependencies task-id)
+          :up-to-date-before-session-p
+          (and state (getf state :up-to-date-before-session-p))
+          :needed-in-session-p
+          (and state (getf state :needed-in-session-p))
+          :done-in-session-p
+          (and state (getf state :done-in-session-p))
+          :reason reason
+          :safe-to-perform-p safe-to-perform-p
+          :safe-to-perform-reason safe-reason
+          :perform-entry-point 'perform-build-task
+          :action-call action-call
+          :action-state (and state (copy-tree state)))))
+
+(defun build-referee-route-candidate-actions (referee session-status)
+  (let* ((requested-task (getf referee :requested-task))
+         (selected-task (getf referee :task))
+         (selected-action (getf referee :next-action))
+         (dependency-actions
+           (copy-tree (getf referee :dependency-actions)))
+         (requested-state
+           (build-action-state-for-task session-status requested-task))
+         (requested-candidate
+           (build-referee-candidate-action
+            requested-task
+            (if (eq selected-task requested-task)
+                selected-action
+                (build-session-next-action-for-state requested-state))
+            requested-state
+            (if (eq selected-task requested-task)
+                (getf referee :reason)
+                (build-session-next-action-reason
+                 (build-session-next-action-for-state requested-state)
+                 requested-state))
+            (if (eq selected-task requested-task)
+                (getf referee :action-call)
+                (build-session-next-action-call
+                 (build-session-next-action-for-state requested-state)
+                 requested-task))
+            (eq selected-task requested-task))))
+    (append
+     (loop for dependency-action in dependency-actions
+           for task = (getf dependency-action :task)
+           for action = (getf dependency-action :next-action)
+           for state = (build-action-state-for-task session-status task)
+           collect
+           (build-referee-candidate-action
+            task
+            action
+            state
+            (getf dependency-action :reason)
+            (getf dependency-action :action-call)
+            (eq selected-task task)))
+     (list requested-candidate))))
+
+(defun build-session-next-action-route
+    (session &key (task-id :validate-dmx-learning-topics)
+             (db-path (getf session :db-path)))
+  "Return an inspectable route projection of the Lisp referee decision.
+
+This projection reads BUILD-SESSION-NEXT-ACTION and BUILD-SESSION-STATUS. It
+does not plan, check, or perform work on its own."
+  (let* ((referee (build-session-next-action session
+                                             :task-id task-id
+                                             :db-path db-path))
+         (session-status (build-session-status session))
+         (selected-task (getf referee :task))
+         (selected-action (getf referee :next-action))
+         (selected-state
+           (build-action-state-for-task session-status selected-task))
+         (candidate-actions
+           (build-referee-route-candidate-actions referee session-status))
+         (selected-candidate
+           (find selected-task candidate-actions
+                 :key (lambda (candidate) (getf candidate :task))
+                 :test #'eq)))
+    (make-instance
+     'build-referee-decision-route
+     :id (format nil "build-referee-route-~A-~(~A~)"
+                 (getf session :id)
+                 task-id)
+     :title "Build Referee Route"
+     :summary
+     "Inspectable route projection of a Dreyeck build referee decision."
+     :session-id (getf session :id)
+     :requested-goal task-id
+     :candidate-actions candidate-actions
+     :selected-task selected-task
+     :selected-action selected-action
+     :decoded-operation
+     (decode-build-referee-operation selected-action selected-task)
+     :dependencies (build-task-dependencies selected-task)
+     :up-to-date-before-session-p
+     (and selected-state
+          (getf selected-state :up-to-date-before-session-p))
+     :needed-in-session-p
+     (and selected-state
+          (getf selected-state :needed-in-session-p))
+     :done-in-session-p
+     (and selected-state
+          (getf selected-state :done-in-session-p))
+     :reason (getf referee :reason)
+     :safe-to-perform-p
+     (and selected-candidate
+          (getf selected-candidate :safe-to-perform-p))
+     :safe-to-perform-reason
+     (and selected-candidate
+          (getf selected-candidate :safe-to-perform-reason))
+     :perform-entry-point 'perform-build-task
+     :source "dreyeck/build:build-session-next-action"
+     :referee-result referee
+     :session-status session-status)))
+
 (defun build-session-next-action-for-state (state)
   (cond
     ((null state)

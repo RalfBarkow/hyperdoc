@@ -68,6 +68,12 @@
   "Temporary compatibility wrapper for DREYECK/CODEX:CODEX-DMX-LEARNING-TOPIC-STATUS."
   (dreyeck/codex:codex-dmx-learning-topic-status))
 
+(defun codex-build-referee-route (&key task-id db-path)
+  "Compatibility wrapper for DREYECK/CODEX:CODEX-BUILD-REFEREE-ROUTE."
+  (dreyeck/codex:codex-build-referee-route
+   :task-id (or task-id :validate-dmx-learning-topics)
+   :db-path db-path))
+
 (defun codex ()
   "Temporary compatibility wrapper for DREYECK/CODEX:CODEX."
   (dreyeck/codex:codex))

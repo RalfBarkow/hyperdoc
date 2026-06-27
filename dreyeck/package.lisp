@@ -25,6 +25,7 @@
            #:codex-next-for-recent-changes
            #:codex-dmx-learning-topics
            #:codex-dmx-learning-topic-status
+           #:codex-build-referee-route
            #:codex-context-window-example
            #:codex-kioskbeerli-context-window-example
            #:codex-recursive-context-window-example
@@ -53,7 +54,8 @@
                 #:codex-next
                 #:codex-context-provider-result
                 #:codex-dmx-learning-topics
-                #:codex-dmx-learning-topic-status)
+                #:codex-dmx-learning-topic-status
+                #:codex-build-referee-route)
   (:export #:install-dreyeck-server-scaffold
            #:codex
            #:codex-context-window
@@ -61,4 +63,5 @@
            #:codex-next
            #:codex-context-provider-result
            #:codex-dmx-learning-topics
-           #:codex-dmx-learning-topic-status))
+           #:codex-dmx-learning-topic-status
+           #:codex-build-referee-route))
