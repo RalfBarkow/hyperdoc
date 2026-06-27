@@ -2,6 +2,30 @@
 
 (in-package :hyperdoc)
 
+(defun codex-context-provider-result (provider-symbol)
+  "Call an optional CODEX-CONTEXT-WINDOW provider without letting a missing or failing provider abort CODEX.
+
+The context window is a continuation surface. Optional project dashboards
+such as KIOSKBEERLI-DASHBOARD must degrade to inspectable data, not to
+an UNDEFINED-FUNCTION condition."
+  (cond
+    ((fboundp provider-symbol)
+     (handler-case
+         (funcall provider-symbol)
+       (error (condition)
+         (list
+          :provider provider-symbol
+          :status :provider-error
+          :condition condition
+          :repair-hint "Inspect the provider condition; CODEX-CONTEXT-WINDOW stayed alive."))))
+    (t
+     (list
+      :provider provider-symbol
+      :status :missing-optional-provider
+      :repair-hint "Load or file out this optional dashboard provider; CODEX-CONTEXT-WINDOW intentionally continues."))))
+
+
+
 (defclass codex-home ()
   ((id :accessor id-of :initarg :id)
    (title :accessor title-of :initarg :title)
@@ -402,11 +426,11 @@
        :references '("Kioskbeerli Dashboard"
                      "Kioskbeerli"
                      "Kioskbeerli Cross-Host Build Failure")
-       :derived-objects (list (kioskbeerli-dashboard)
-                              (kioskbeerli-dashboard-status)
-                              (kioskbeerli-current-blocker)
-                              (kioskbeerli-build-evidence-status)
-                              (kioskbeerli-dashboard-stations)))
+       :derived-objects (list (codex-context-provider-result 'kioskbeerli-dashboard)
+                              (codex-context-provider-result 'kioskbeerli-dashboard-status)
+                              (codex-context-provider-result 'kioskbeerli-current-blocker)
+                              (codex-context-provider-result 'kioskbeerli-build-evidence-status)
+                              (codex-context-provider-result 'kioskbeerli-dashboard-stations)))
       (codex-context-window-entry
        "design"
        "Mobile station-board grammar"
@@ -414,7 +438,7 @@
        :timestamp "2026-05-14"
        :references '("Touch-Fahrplan route language"
                      "Kioskbeerli Cross-Host Build Failure")
-       :derived-objects (list (kioskbeerli-dashboard))))
+       :derived-objects (list (codex-context-provider-result 'kioskbeerli-dashboard))))
      :open-questions
      '("Is this Codex context-window object useful as the first inspectable current-context surface?"
        "After approval, should the next slice add only the Station board view for kioskbeerli:kioskbeerli-dashboard in the standalone Kioskbeerli system?")
@@ -422,11 +446,11 @@
      '("Inspect (hyperdoc::codex-context-window) from SLY/CLOG."
        "If accepted, keep the next Kioskbeerli iteration scoped to the dashboard object view and avoid editing the authored HTML page.")
      :related-objects
-     (list (kioskbeerli-dashboard)
-           (kioskbeerli-dashboard-status)
-           (kioskbeerli-current-blocker)
-           (kioskbeerli-build-evidence-status)
-           (kioskbeerli-dashboard-stations))
+     (list (codex-context-provider-result 'kioskbeerli-dashboard)
+           (codex-context-provider-result 'kioskbeerli-dashboard-status)
+           (codex-context-provider-result 'kioskbeerli-current-blocker)
+           (codex-context-provider-result 'kioskbeerli-build-evidence-status)
+           (codex-context-provider-result 'kioskbeerli-dashboard-stations))
      :validation-commands
      '("nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/codex/explorer)' --eval '(assert (fboundp (quote hyperdoc::codex)))' --eval '(assert (fboundp (quote hyperdoc::codex-context-window)))' --eval '(assert (hyperdoc::codex-context-window))' --eval '(uiop:quit)'"
        "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :hyperdoc/codex/explorer)' --eval '(let* ((object (hyperdoc::codex-context-window)) (pane (make-instance (find-symbol \"PANE\" \"CLOG-MOLDABLE-INSPECTOR\") :inspector nil :object object))) (funcall (find-symbol \"LOAD-VIEWS\" \"CLOG-MOLDABLE-INSPECTOR\") pane) (let ((titles (mapcar (find-symbol \"VIEW-TITLE\" \"HTML-INSPECTOR-VIEWS\") (slot-value pane (find-symbol \"VIEWS\" \"CLOG-MOLDABLE-INSPECTOR\"))))) (assert (member \"Context\" titles :test #'string=))))' --eval '(uiop:quit)'"
@@ -476,7 +500,7 @@
    "Uncommitted Kioskbeerli station-board/page/test work remains pending and should stay out of this Codex topic-system slice."
    :changed-at "2026-05-15 pending workspace state"
    :actor "user workspace"
-   :target-object (kioskbeerli-dashboard)
+   :target-object (codex-context-provider-result 'kioskbeerli-dashboard)
    :affected-files '("hyperdoc/Kioskbeerli Dashboard.html"
                      "hyperdoc/Kioskbeerli.html"
                      "tests/kioskbeerli-dashboard-smoke.lisp"
@@ -640,7 +664,7 @@
          :needs-evidence
          "Inspect"
          :evidence '("Pre-existing workspace state says Kioskbeerli page/test work remains pending.")
-         :related-objects (list (kioskbeerli-dashboard)))
+         :related-objects (list (codex-context-provider-result 'kioskbeerli-dashboard)))
         (codex--next-route
          "decide-kioskbeerli-page-vs-object-view"
          "Decide page vs object view"
@@ -654,7 +678,7 @@
          :needs-evidence
          "Decide"
          :evidence '("The current slice must not mix Kioskbeerli page/test edits into Codex topic-system work.")
-         :related-objects (list (kioskbeerli-dashboard)))))
+         :related-objects (list (codex-context-provider-result 'kioskbeerli-dashboard)))))
      (when context-change
        (list
         (codex--next-route
@@ -701,11 +725,11 @@
                  :context-window (codex-context-window)
                  :recent-changes (codex-recent-changes)
                  :next (codex-next)
-                 :primary-review-object (kioskbeerli-dashboard)
-                 :related-objects (list (kioskbeerli-dashboard-status)
-                                        (kioskbeerli-current-blocker)
-                                        (kioskbeerli-build-evidence-status)
-                                        (kioskbeerli-dashboard-stations))
+                 :primary-review-object (codex-context-provider-result 'kioskbeerli-dashboard)
+                 :related-objects (list (codex-context-provider-result 'kioskbeerli-dashboard-status)
+                                        (codex-context-provider-result 'kioskbeerli-current-blocker)
+                                        (codex-context-provider-result 'kioskbeerli-build-evidence-status)
+                                        (codex-context-provider-result 'kioskbeerli-dashboard-stations))
                  :relevant-pages '("Kioskbeerli"
                                    "Kioskbeerli Dashboard"
                                    "Kioskbeerli Cross-Host Build Failure")
