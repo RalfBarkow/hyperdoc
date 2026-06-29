@@ -85,7 +85,8 @@
           new-assoc-id))
 
 (defun association-edge-journal-payload-json
-    (old-edge new-edge old-assoc-id new-assoc-id reason evidence actor)
+    (old-edge new-edge old-assoc-id new-assoc-id reason evidence actor
+     convergence)
   (json-object
    :old-edge old-edge
    :new-edge new-edge
@@ -93,32 +94,27 @@
    :new-association-id new-assoc-id
    :reason reason
    :evidence evidence
-   :actor actor))
+   :actor actor
+   :convergence convergence))
 
-(defun reassign-association-edge-sql
-    (old-assoc-id new-assoc-id source predicate old-target new-target journal-id
-     reason evidence actor)
+(defun delete-old-association-edge-sql (old-assoc-id)
   (format nil
-"PRAGMA foreign_keys = ON;
-BEGIN;
-DELETE FROM dmx_sql_assoc_player WHERE assoc_id = ~A;
+"DELETE FROM dmx_sql_assoc_player WHERE assoc_id = ~A;
 DELETE FROM dmx_sql_assoc WHERE local_id = ~A;
-DELETE FROM dmx_sql_object WHERE local_id = ~A;
-INSERT INTO dmx_sql_object(local_id, object_kind, uri, type_uri, value, payload_json, sync_state, modified_at)
+DELETE FROM dmx_sql_object WHERE local_id = ~A;~%"
+          (sql-literal old-assoc-id)
+          (sql-literal old-assoc-id)
+          (sql-literal old-assoc-id)))
+
+(defun insert-new-association-edge-sql (new-assoc-id source predicate new-target)
+  (format nil
+"INSERT INTO dmx_sql_object(local_id, object_kind, uri, type_uri, value, payload_json, sync_state, modified_at)
 VALUES(~A, 'assoc', NULL, ~A, ~A, NULL, 'local', CURRENT_TIMESTAMP);
 INSERT INTO dmx_sql_assoc(local_id) VALUES(~A);
 INSERT INTO dmx_sql_assoc_player(assoc_id, player_no, role_type_uri, player_kind, player_local_id)
 VALUES(~A, 1, 'dmx.role.player1', 'topic', ~A);
 INSERT INTO dmx_sql_assoc_player(assoc_id, player_no, role_type_uri, player_kind, player_local_id)
-VALUES(~A, 2, 'dmx.role.player2', 'topic', ~A);
-INSERT OR REPLACE INTO dmx_sql_sync_journal(
-  id, journal_kind, local_object_id, action, status, detail, payload_json)
-VALUES(~A, 'dreyeck.dmx.sqlite.edge-reassignment', ~A,
-       'reassign-association-edge', 'passed', ~A, ~A);
-COMMIT;"
-          (sql-literal old-assoc-id)
-          (sql-literal old-assoc-id)
-          (sql-literal old-assoc-id)
+VALUES(~A, 2, 'dmx.role.player2', 'topic', ~A);~%"
           (sql-literal new-assoc-id)
           (sql-literal (association-edge-type-uri predicate))
           (sql-literal predicate)
@@ -126,7 +122,16 @@ COMMIT;"
           (sql-literal new-assoc-id)
           (sql-literal source)
           (sql-literal new-assoc-id)
-          (sql-literal new-target)
+          (sql-literal new-target)))
+
+(defun journal-edge-reassignment-sql
+    (journal-id new-assoc-id source predicate old-target new-target
+     old-assoc-id reason evidence actor convergence)
+  (format nil
+"INSERT OR REPLACE INTO dmx_sql_sync_journal(
+  id, journal_kind, local_object_id, action, status, detail, payload_json)
+VALUES(~A, 'dreyeck.dmx.sqlite.edge-reassignment', ~A,
+       'reassign-association-edge', 'passed', ~A, ~A);~%"
           (sql-literal journal-id)
           (sql-literal new-assoc-id)
           (sql-literal reason)
@@ -138,7 +143,26 @@ COMMIT;"
             new-assoc-id
             reason
             evidence
-            actor))))
+            actor
+            convergence))))
+
+(defun reassign-association-edge-sql
+    (old-assoc-id new-assoc-id source predicate old-target new-target journal-id
+     reason evidence actor convergence remove-old-p add-new-p)
+  (format nil
+"PRAGMA foreign_keys = ON;
+BEGIN;
+~A~A~ACOMMIT;"
+          (if remove-old-p
+              (delete-old-association-edge-sql old-assoc-id)
+              "")
+          (if add-new-p
+              (insert-new-association-edge-sql
+               new-assoc-id source predicate new-target)
+              "")
+          (journal-edge-reassignment-sql
+           journal-id new-assoc-id source predicate old-target new-target
+           old-assoc-id reason evidence actor convergence)))
 
 (defun reassign-association-edge
     (db-path old-edge new-edge &key reason evidence actor
@@ -167,18 +191,29 @@ COMMIT;"
                (association-edge-id old-source old-predicate new-target))
              (old-present-before
                (association-edge-present-p db-path old-edge))
+             (new-edge-present-before
+               (association-edge-present-p db-path new-edge))
              (new-object-present-before
                (dmx-sql-object-exists-p db-path new-assoc-id)))
         (when (and require-old-edge-p (not old-present-before))
           (error "Required old association edge ~S is absent." old-edge))
-        (when new-object-present-before
-          (error "New association edge object ~S already exists." new-assoc-id))
-        (let* ((before (association-edge-association-ids db-path))
+        (when (and new-object-present-before (not new-edge-present-before))
+          (error "New association edge object ~S already exists but does not match ~S."
+                 new-assoc-id
+                 new-edge))
+        (let* ((remove-old-p old-present-before)
+               (add-new-p (not new-edge-present-before))
+               (before (association-edge-association-ids db-path))
                (expected
                  (list :removed-association-ids
-                       (if old-present-before (list old-assoc-id) nil)
+                       (if remove-old-p (list old-assoc-id) nil)
                        :added-association-ids
-                       (list new-assoc-id)))
+                       (if add-new-p (list new-assoc-id) nil)))
+               (convergence
+                 (list :new-edge-already-present-p new-edge-present-before
+                       :already-completed-p
+                       (and (not old-present-before)
+                            new-edge-present-before)))
                (journal-id
                  (association-edge-journal-id old-assoc-id new-assoc-id))
                (sql
@@ -192,7 +227,10 @@ COMMIT;"
                   journal-id
                   reason
                   evidence
-                  actor)))
+                  actor
+                  convergence
+                  remove-old-p
+                  add-new-p)))
           (multiple-value-bind (stdout stderr exit-code)
               (sqlite-run db-path sql)
             (unless (zerop exit-code)
@@ -211,11 +249,14 @@ COMMIT;"
             (list :operation :reassign-association-edge
                   :status (if unexpected :failed :passed)
                   :atomic-change
-                  (list :removed old-edge
-                        :added new-edge)
+                  (list :removed (and remove-old-p old-edge)
+                        :added (and add-new-p new-edge)
+                        :already-present
+                        (and new-edge-present-before new-edge))
                   :expected-graph-delta expected
                   :actual-graph-delta actual
                   :unexpected-graph-delta unexpected
+                  :convergence convergence
                   :derivative-effects
                   (list :journal-entry journal-entry)
                   :reason reason)))))))

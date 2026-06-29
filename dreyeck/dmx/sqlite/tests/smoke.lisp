@@ -29,23 +29,75 @@
      (error () t))
    message))
 
-(defun association-edge-reassignment-fixture-db ()
+(defun record-test-described-by-edge (db target)
+  (record-dmx-association-value
+   db
+   (format nil "assoc:a:described-by:~A" target)
+   "dreyeck.dmx.association.described-by"
+   :players
+   (topic-association-players
+    "a" "dmx.role.player1" target "dmx.role.player2")
+   :value "described-by"))
+
+(defun association-edge-reassignment-fixture-db
+    (&key (old-edge-present-p t) (new-edge-present-p nil))
   (let ((db (temporary-dmx-sqlite-path)))
     (initialize-dmx-associative-mirror :db-path db :clear t)
     (dolist (topic-id '("a" "old-source" "new-source"))
       (record-dmx-topic-value db topic-id "dmx.test.topic" topic-id))
-    (record-dmx-association-value
-     db
-     "assoc:a:described-by:old-source"
-     "dreyeck.dmx.association.described-by"
-     :players
-     (topic-association-players
-      "a" "dmx.role.player1" "old-source" "dmx.role.player2")
-     :value "described-by")
+    (when old-edge-present-p
+      (record-test-described-by-edge db "old-source"))
+    (when new-edge-present-p
+      (record-test-described-by-edge db "new-source"))
     db))
 
-(defun run-association-edge-reassignment-fixture-test ()
-  (let ((db (association-edge-reassignment-fixture-db)))
+(defun assert-edge-reassignment-report-delta
+    (report removed-association-ids added-association-ids message)
+  (assert-equal
+   removed-association-ids
+   (getf (getf report :expected-graph-delta) :removed-association-ids)
+   (format nil "~A expected removed ids" message))
+  (assert-equal
+   added-association-ids
+   (getf (getf report :expected-graph-delta) :added-association-ids)
+   (format nil "~A expected added ids" message))
+  (assert-equal
+   removed-association-ids
+   (getf (getf report :actual-graph-delta) :removed-association-ids)
+   (format nil "~A actual removed ids" message))
+  (assert-equal
+   added-association-ids
+   (getf (getf report :actual-graph-delta) :added-association-ids)
+   (format nil "~A actual added ids" message))
+  (assert-equal
+   nil
+   (getf report :unexpected-graph-delta)
+   (format nil "~A unexpected delta" message)))
+
+(defun assert-edge-reassignment-outcome
+    (db report old-present-p new-present-p message)
+  (assert-equal :passed
+                (getf report :status)
+                (format nil "~A status" message))
+  (assert-equal old-present-p
+                (not
+                 (not
+                  (association-edge-present-p
+                   db
+                   '("a" "described-by" "old-source"))))
+                (format nil "~A old edge presence" message))
+  (assert-equal new-present-p
+                (not
+                 (not
+                  (association-edge-present-p
+                   db
+                   '("a" "described-by" "new-source"))))
+                (format nil "~A new edge presence" message)))
+
+(defun run-association-edge-reassignment-case-a-test ()
+  (let ((db (association-edge-reassignment-fixture-db
+             :old-edge-present-p t
+             :new-edge-present-p nil)))
     (unwind-protect
          (let ((report
                  (reassign-association-edge
@@ -54,33 +106,13 @@
                   '("a" "described-by" "new-source")
                   :reason
                   "Fixture source correction for one association edge.")))
-           (assert-equal :passed
-                         (getf report :status)
-                         "Edge reassignment report must pass")
-           (assert-true
-            (not
-             (association-edge-present-p
-              db
-              '("a" "described-by" "old-source")))
-            "Old association edge must be absent after reassignment")
-           (assert-true
-            (association-edge-present-p
-             db
-             '("a" "described-by" "new-source"))
-            "New association edge must be present after reassignment")
-           (assert-equal
+           (assert-edge-reassignment-outcome
+            db report nil t "Case A")
+           (assert-edge-reassignment-report-delta
+            report
             '("assoc:a:described-by:old-source")
-            (getf (getf report :actual-graph-delta)
-                  :removed-association-ids)
-            "Exactly one association id must be removed")
-           (assert-equal
             '("assoc:a:described-by:new-source")
-            (getf (getf report :actual-graph-delta)
-                  :added-association-ids)
-            "Exactly one association id must be added")
-           (assert-equal nil
-                         (getf report :unexpected-graph-delta)
-                         "Edge reassignment must have no unexpected graph delta")
+            "Case A")
            (assert-error
             (lambda ()
               (reassign-association-edge
@@ -107,6 +139,105 @@
             "Edge reassignment must reject a missing new target topic"))
       (when (probe-file db)
         (delete-file db)))))
+
+(defun run-association-edge-reassignment-case-b-test ()
+  (let ((db (association-edge-reassignment-fixture-db
+             :old-edge-present-p t
+             :new-edge-present-p t)))
+    (unwind-protect
+         (let ((report
+                 (reassign-association-edge
+                  db
+                  '("a" "described-by" "old-source")
+                  '("a" "described-by" "new-source")
+                  :reason
+                  "Fixture converges when the replacement edge already exists.")))
+           (assert-edge-reassignment-outcome
+            db report nil t "Case B")
+           (assert-edge-reassignment-report-delta
+            report
+            '("assoc:a:described-by:old-source")
+            nil
+            "Case B")
+           (assert-equal
+            nil
+            (getf (getf report :atomic-change) :added)
+            "Case B must not report an inserted edge")
+           (assert-equal
+            '("a" "described-by" "new-source")
+            (getf (getf report :atomic-change) :already-present)
+            "Case B must report the already-present replacement edge")
+           (assert-equal
+            t
+            (getf (getf report :convergence) :new-edge-already-present-p)
+            "Case B convergence must report the preexisting new edge"))
+      (when (probe-file db)
+        (delete-file db)))))
+
+(defun run-association-edge-reassignment-case-c-test ()
+  (let ((db (association-edge-reassignment-fixture-db
+             :old-edge-present-p nil
+             :new-edge-present-p t)))
+    (unwind-protect
+         (let ((report
+                 (reassign-association-edge
+                  db
+                  '("a" "described-by" "old-source")
+                  '("a" "described-by" "new-source")
+                  :reason
+                  "Fixture accepts already-completed convergence."
+                  :require-old-edge-p nil)))
+           (assert-edge-reassignment-outcome
+            db report nil t "Case C")
+           (assert-edge-reassignment-report-delta
+            report nil nil "Case C")
+           (assert-equal
+            nil
+            (getf (getf report :atomic-change) :removed)
+            "Case C must not report a removed edge")
+           (assert-equal
+            nil
+            (getf (getf report :atomic-change) :added)
+            "Case C must not report an inserted edge")
+           (assert-equal
+            t
+            (getf (getf report :convergence) :already-completed-p)
+            "Case C must report already-completed convergence")
+           (assert-error
+            (lambda ()
+              (reassign-association-edge
+               db
+               '("a" "described-by" "old-source")
+               '("a" "described-by" "new-source")))
+            "Case E must still reject absent old edge when required"))
+      (when (probe-file db)
+        (delete-file db)))))
+
+(defun run-association-edge-reassignment-case-d-test ()
+  (let ((db (association-edge-reassignment-fixture-db
+             :old-edge-present-p nil
+             :new-edge-present-p nil)))
+    (unwind-protect
+         (let ((report
+                 (reassign-association-edge
+                  db
+                  '("a" "described-by" "old-source")
+                  '("a" "described-by" "new-source")
+                  :reason
+                  "Fixture inserts the replacement edge when old is optional."
+                  :require-old-edge-p nil)))
+           (assert-edge-reassignment-outcome
+            db report nil t "Case D")
+           (assert-edge-reassignment-report-delta
+            report nil '("assoc:a:described-by:new-source") "Case D"))
+      (when (probe-file db)
+        (delete-file db)))))
+
+(defun run-association-edge-reassignment-fixture-test ()
+  (run-association-edge-reassignment-case-a-test)
+  (run-association-edge-reassignment-case-b-test)
+  (run-association-edge-reassignment-case-c-test)
+  (run-association-edge-reassignment-case-d-test))
 
 (defun run-dmx-sqlite-smoke-tests ()
   (run-association-edge-reassignment-fixture-test)
