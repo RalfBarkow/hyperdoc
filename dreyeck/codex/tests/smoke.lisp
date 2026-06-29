@@ -34,6 +34,30 @@
    :referee-route nil
    :optional-provider-results nil))
 
+(defun record-test-described-by-edge (db source target)
+  (record-dmx-association-value
+   db
+   (format nil "assoc:~A:described-by:~A" source target)
+   "dreyeck.dmx.association.described-by"
+   :players
+   (topic-association-players
+    source "dmx.role.player1" target "dmx.role.player2")
+   :value "described-by"))
+
+(defun initialize-repaired-edge-reader-surface-fixture (db)
+  (initialize-dmx-associative-mirror :db-path db :clear t)
+  (dolist (topic-id
+           '("asdf-3-3-session-action-model"
+             "domkin-2017"
+             "goldman-pipping-rideau-2017-asdf-3-3"
+             "bounded-convergent-association-edge-reassignment"
+             "bounded-convergent-association-edge-reassignment-fedwiki-page"))
+    (record-dmx-topic-value db topic-id "dmx.test.topic" topic-id))
+  (record-test-described-by-edge
+   db
+   "asdf-3-3-session-action-model"
+   "goldman-pipping-rideau-2017-asdf-3-3"))
+
 (defun build-referee-subgraph-view-present-p ()
   (multiple-value-bind (symbol status)
       (find-symbol "👀BUILD-REFEREE-SUBGRAPH" "DREYECK/CODEX")
@@ -58,11 +82,13 @@
     (and entry (getf entry :present-p))))
 
 (defun run-dreyeck-codex-smoke-tests ()
-  (let ((db (temporary-dreyeck-codex-dmx-db-path)))
+  (let ((db (temporary-dreyeck-codex-dmx-db-path))
+        (reader-db (temporary-dreyeck-codex-dmx-db-path)))
     (unwind-protect
          (progn
            (initialize-dmx-associative-mirror :db-path db :clear t)
            (materialize-durable-notes-into-production-db :db-path db)
+           (initialize-repaired-edge-reader-surface-fixture reader-db)
            (let* ((inspection
                     (dmx-materialized-learning-topics :db-path db))
                   (surface
@@ -73,11 +99,25 @@
                     (codex-domkin-2017-source-topics :db-path db))
                   (domkin-subgraph
                     (codex-domkin-2017-source-subgraph domkin-surface))
+                  (repaired-old-edge
+                    '("asdf-3-3-session-action-model"
+                      "described-by"
+                      "domkin-2017"))
+                  (repaired-new-edge
+                    '("asdf-3-3-session-action-model"
+                      "described-by"
+                      "goldman-pipping-rideau-2017-asdf-3-3"))
                   (reader-surface
                     (codex-dmx-association-edge-reassignment-reader-surface
-                     :db-path db
-                     :old-edge '("a" "described-by" "old-source")
-                     :new-edge '("a" "described-by" "new-source"))))
+                     :db-path db))
+                  (repaired-reader-surface
+                    (codex-dmx-association-edge-reassignment-reader-surface
+                     :db-path reader-db
+                     :old-edge repaired-old-edge
+                     :new-edge repaired-new-edge))
+                  (repaired-primary-answer
+                    (dreyeck/codex::codex-dmx-operation-reader-surface-primary-answer-of
+                     repaired-reader-surface)))
              (assert-equal
               :build-referee-topics-in-production-dmx
               (getf subgraph :view)
@@ -136,6 +176,39 @@
               (association-edge-reassignment-reader-surface-view-present-p)
               "Explorer load must install the association edge reader-surface view")
              (assert-equal
+              nil
+              (association-edge-present-p reader-db repaired-old-edge)
+              "Regression fixture old edge must be absent")
+             (assert-true
+              (association-edge-present-p reader-db repaired-new-edge)
+              "Regression fixture new edge must be present")
+             (assert-true
+              (dreyeck/codex::codex-dmx-operation-reader-surface-operation-topic-of
+               repaired-reader-surface)
+              "Regression fixture must expose the operation topic")
+             (assert-true
+              (dreyeck/codex::codex-dmx-operation-reader-surface-fedwiki-page-topic-of
+               repaired-reader-surface)
+              "Regression fixture must expose the FedWiki page topic")
+             (assert-equal
+              :passed
+              (getf repaired-primary-answer :status)
+              "Regression fixture primary answer must pass")
+             (assert-equal
+              nil
+              (getf repaired-primary-answer :unexpected-graph-delta)
+              "Regression fixture primary answer must report no unexpected delta")
+             (assert-equal
+              :passed
+              (dreyeck/codex::codex-dmx-operation-reader-surface-status-of
+               repaired-reader-surface)
+              "Reader surface status must pass when old edge is absent and new edge is present")
+             (assert-equal
+              (getf repaired-primary-answer :status)
+              (dreyeck/codex::codex-dmx-operation-reader-surface-status-of
+               repaired-reader-surface)
+              "Reader surface status must not fail while the primary answer passes")
+             (assert-equal
               :domkin-2017-source-subgraph
               (getf domkin-subgraph :view)
               "Projection must identify the Domkin 2017 source subgraph")
@@ -193,4 +266,6 @@
            (format t "~&Dreyeck Codex smoke tests passed.~%")
            t)
       (when (probe-file db)
-        (delete-file db)))))
+        (delete-file db))
+      (when (probe-file reader-db)
+        (delete-file reader-db)))))

@@ -618,6 +618,28 @@ work while inspecting."
      :optional-provider-results
      (list (codex-context-provider-result 'dmx-learning-topic-provider)))))
 
+(defun codex-dmx-association-edge-reader-surface-status
+    (db-path reader-surface inspection)
+  (let* ((primary-answer (getf reader-surface :primary-answer))
+         (atomic-change (getf primary-answer :atomic-change))
+         (old-edge (getf atomic-change :removed))
+         (new-edge (getf atomic-change :added-or-confirmed))
+         (primary-status (getf primary-answer :status))
+         (unexpected-graph-delta
+           (getf primary-answer :unexpected-graph-delta)))
+    (if (and old-edge new-edge)
+        (if (and (eq primary-status :passed)
+                 (null unexpected-graph-delta)
+                 (not
+                  (dreyeck.dmx.sqlite:association-edge-present-p
+                   db-path old-edge))
+                 (dreyeck.dmx.sqlite:association-edge-present-p
+                  db-path new-edge))
+            :passed
+            :failed)
+        (or primary-status
+            (getf inspection :status)))))
+
 (defun codex-dmx-association-edge-reassignment-reader-surface
     (&key
        (db-path dreyeck.dmx.sqlite:*dreyeck-dmx-production-db-path*)
@@ -651,7 +673,9 @@ work while inspecting."
      :summary
      "Reader-facing answer for the convergent DMX SQLite association edge reassignment operation."
      :production-db-path (getf inspection :production-db-path)
-     :status (getf inspection :status)
+     :status
+     (codex-dmx-association-edge-reader-surface-status
+      db-path reader-surface inspection)
      :reader-question (getf reader-surface :reader-question)
      :primary-answer (getf reader-surface :primary-answer)
      :operation-topic operation-topic

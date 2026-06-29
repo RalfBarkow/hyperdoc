@@ -9,6 +9,10 @@
                 #:codex-domkin-2017-source-subgraph)
   (:import-from #:dreyeck.dmx.sqlite
                 #:initialize-dmx-associative-mirror
+                #:record-dmx-topic-value
+                #:record-dmx-association-value
                 #:materialize-durable-notes-into-production-db
-                #:dmx-materialized-learning-topics)
+                #:dmx-materialized-learning-topics
+                #:association-edge-present-p
+                #:topic-association-players)
   (:export #:run-dreyeck-codex-smoke-tests))
