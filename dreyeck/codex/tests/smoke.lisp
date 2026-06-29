@@ -49,10 +49,11 @@
   (dolist (topic-id
            '("asdf-3-3-session-action-model"
              "domkin-2017"
-             "goldman-pipping-rideau-2017-asdf-3-3"
-             "bounded-convergent-association-edge-reassignment"
-             "bounded-convergent-association-edge-reassignment-fedwiki-page"))
+             "goldman-pipping-rideau-2017-asdf-3-3"))
     (record-dmx-topic-value db topic-id "dmx.test.topic" topic-id))
+  (materialize-operation-documentation-topics
+   db
+   "bounded-convergent-association-edge-reassignment")
   (record-test-described-by-edge
    db
    "asdf-3-3-session-action-model"
@@ -117,6 +118,12 @@
                      :new-edge repaired-new-edge))
                   (repaired-primary-answer
                     (dreyeck/codex::codex-dmx-operation-reader-surface-primary-answer-of
+                     repaired-reader-surface))
+                  (repaired-operation-topic
+                    (dreyeck/codex::codex-dmx-operation-reader-surface-operation-topic-of
+                     repaired-reader-surface))
+                  (repaired-fedwiki-page-topic
+                    (dreyeck/codex::codex-dmx-operation-reader-surface-fedwiki-page-topic-of
                      repaired-reader-surface)))
              (assert-equal
               :build-referee-topics-in-production-dmx
@@ -183,13 +190,19 @@
               (association-edge-present-p reader-db repaired-new-edge)
               "Regression fixture new edge must be present")
              (assert-true
-              (dreyeck/codex::codex-dmx-operation-reader-surface-operation-topic-of
-               repaired-reader-surface)
-              "Regression fixture must expose the operation topic")
+              (getf repaired-operation-topic :present-p)
+              "Regression fixture must expose the materialized operation topic")
+             (assert-equal
+              "bounded-convergent-association-edge-reassignment"
+              (getf repaired-operation-topic :id)
+              "Regression fixture operation topic id must be stable")
              (assert-true
-              (dreyeck/codex::codex-dmx-operation-reader-surface-fedwiki-page-topic-of
-               repaired-reader-surface)
-              "Regression fixture must expose the FedWiki page topic")
+              (getf repaired-fedwiki-page-topic :present-p)
+              "Regression fixture must expose the materialized FedWiki page topic")
+             (assert-equal
+              "bounded-convergent-association-edge-reassignment-fedwiki-page"
+              (getf repaired-fedwiki-page-topic :id)
+              "Regression fixture FedWiki page topic id must be stable")
              (assert-equal
               :passed
               (getf repaired-primary-answer :status)

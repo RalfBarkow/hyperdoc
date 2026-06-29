@@ -31,6 +31,9 @@
                 #:dmx-sqlite-integrity-report
                 #:materialize-durable-notes-into-production-db
                 #:durable-note-materialization-status
+                #:required-operation-documentation-topic-ids
+                #:materialize-operation-documentation-topics
+                #:operation-documentation-topic-materialization-status
                 #:dmx-materialized-learning-topics
                 #:dmx-materialized-operation-reader-surface-topics
                 #:dmx-materialized-domkin-2017-source-topics

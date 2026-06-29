@@ -244,8 +244,84 @@
   (run-association-edge-reassignment-case-c-test)
   (run-association-edge-reassignment-case-d-test))
 
+(defun run-operation-documentation-topic-materialization-test ()
+  (let ((db (temporary-dmx-sqlite-path))
+        (operation "bounded-convergent-association-edge-reassignment")
+        (required-topic-ids
+          '("bounded-convergent-association-edge-reassignment"
+            "operation-reader-surface-documentation-pattern"
+            "expected-vs-actual-graph-delta"
+            "atomic-vs-derivative-effects"
+            "single-source-of-truth-for-maintained-graph"
+            "operation-reader-question"
+            "bounded-convergent-association-edge-reassignment-fedwiki-page"))
+        (required-association-ids
+          '("assoc:bounded-convergent-association-edge-reassignment:instantiates:operation-reader-surface-documentation-pattern"
+            "assoc:bounded-convergent-association-edge-reassignment:uses:expected-vs-actual-graph-delta"
+            "assoc:bounded-convergent-association-edge-reassignment:separates:atomic-vs-derivative-effects"
+            "assoc:bounded-convergent-association-edge-reassignment:respects:single-source-of-truth-for-maintained-graph"
+            "assoc:operation-reader-surface-documentation-pattern:answers:operation-reader-question"
+            "assoc:bounded-convergent-association-edge-reassignment:documented-by:bounded-convergent-association-edge-reassignment-fedwiki-page")))
+    (unwind-protect
+         (progn
+           (initialize-dmx-associative-mirror :db-path db :clear t)
+           (dolist (topic-id required-topic-ids)
+             (assert-true
+              (member topic-id
+                      (required-operation-documentation-topic-ids operation)
+                      :test #'equal)
+              (format nil
+                      "Required operation documentation topic ids must include ~A"
+                      topic-id)))
+           (let* ((materialization
+                    (materialize-operation-documentation-topics
+                     db
+                     operation))
+                  (status
+                    (operation-documentation-topic-materialization-status
+                     db
+                     operation))
+                  (operation-reader-surface-topics
+                    (dmx-materialized-operation-reader-surface-topics
+                     :db-path db)))
+             (assert-equal
+              :operation-documentation-topic-materialization
+              (getf materialization :kind)
+              "Operation documentation materializer must return a structured report")
+             (assert-equal
+              :passed
+              (getf status :status)
+              "Operation documentation materialization status must pass")
+             (assert-equal
+              nil
+              (getf status :missing-topic-ids)
+              "Operation documentation materialization must report no missing topics")
+             (assert-equal
+              nil
+              (getf status :missing-association-ids)
+              "Operation documentation materialization must report no missing associations")
+             (dolist (topic-id required-topic-ids)
+               (assert-true
+                (dmx-sqlite-topic db topic-id)
+                (format nil
+                        "Operation documentation materializer must create topic ~A"
+                        topic-id)))
+             (dolist (association-id required-association-ids)
+               (assert-true
+                (dmx-sqlite-association db association-id)
+                (format nil
+                        "Operation documentation materializer must create association ~A"
+                        association-id)))
+             (assert-equal
+              :passed
+              (getf operation-reader-surface-topics :status)
+              "Operation reader-surface topic query must pass after explicit materialization")))
+      (when (probe-file db)
+        (delete-file db)))))
+
 (defun run-dmx-sqlite-smoke-tests ()
   (run-association-edge-reassignment-fixture-test)
+  (run-operation-documentation-topic-materialization-test)
   (let ((db (temporary-dmx-sqlite-path)))
     (unwind-protect
          (progn
@@ -623,6 +699,7 @@
                         "assoc:bounded-convergent-association-edge-reassignment:separates:atomic-vs-derivative-effects"
                         "assoc:bounded-convergent-association-edge-reassignment:respects:single-source-of-truth-for-maintained-graph"
                         "assoc:operation-reader-surface-documentation-pattern:answers:operation-reader-question"
+                        "assoc:bounded-convergent-association-edge-reassignment:documented-by:bounded-convergent-association-edge-reassignment-fedwiki-page"
                         "assoc:bounded-convergent-association-edge-reassignment-fedwiki-page:documents:bounded-convergent-association-edge-reassignment"))
                (assert-true
                 (dmx-sqlite-association db association-id)

@@ -12,6 +12,7 @@
                 #:record-dmx-topic-value
                 #:record-dmx-association-value
                 #:materialize-durable-notes-into-production-db
+                #:materialize-operation-documentation-topics
                 #:dmx-materialized-learning-topics
                 #:association-edge-present-p
                 #:topic-association-players)

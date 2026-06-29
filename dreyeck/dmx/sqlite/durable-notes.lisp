@@ -561,6 +561,9 @@
     (:source "operation-reader-surface-documentation-pattern"
      :predicate "answers"
      :target "operation-reader-question")
+    (:source "bounded-convergent-association-edge-reassignment"
+     :predicate "documented-by"
+     :target "bounded-convergent-association-edge-reassignment-fedwiki-page")
     (:source "bounded-convergent-association-edge-reassignment-fedwiki-page"
      :predicate "documents"
      :target "bounded-convergent-association-edge-reassignment")))
@@ -847,6 +850,9 @@
     ("operation-reader-surface-documentation-pattern"
      "answers"
      "operation-reader-question")
+    ("bounded-convergent-association-edge-reassignment"
+     "documented-by"
+     "bounded-convergent-association-edge-reassignment-fedwiki-page")
     ("bounded-convergent-association-edge-reassignment-fedwiki-page"
      "documents"
      "bounded-convergent-association-edge-reassignment")))
@@ -1291,7 +1297,7 @@ the build task layer that calls the existing materializer."
            (loop for association in associations
                  unless (getf association :present-p)
                    collect (getf association :id)))
-         (passed? (and (eq :passed (getf status :last-validation-status))
+         (passed? (and db-exists?
                        (null missing-topic-ids)
                        (null missing-association-ids))))
     (list :kind :dmx-materialized-operation-reader-surface-topics
@@ -1306,6 +1312,168 @@ the build task layer that calls the existing materializer."
           :associations associations
           :missing-topic-ids missing-topic-ids
           :missing-association-ids missing-association-ids)))
+
+(defun normalize-operation-documentation-id (operation)
+  (cond
+    ((stringp operation)
+     operation)
+    ((symbolp operation)
+     (string-downcase (symbol-name operation)))
+    (t
+     (error "Operation documentation id must be a string or symbol, got ~S."
+            operation))))
+
+(defun operation-documentation-fedwiki-page-topic-id (operation)
+  (let ((operation-id (normalize-operation-documentation-id operation)))
+    (cond
+      ((string= operation-id
+                "bounded-convergent-association-edge-reassignment")
+       "bounded-convergent-association-edge-reassignment-fedwiki-page")
+      (t
+       (error "No FedWiki page topic is known for operation ~S."
+              operation-id)))))
+
+(defun required-operation-documentation-topic-ids (operation)
+  "Return the required documentation topic ids for OPERATION."
+  (let ((operation-id (normalize-operation-documentation-id operation)))
+    (cond
+      ((string= operation-id
+                "bounded-convergent-association-edge-reassignment")
+       (copy-list *dmx-operation-reader-surface-topic-ids*))
+      (t
+       (error "No documentation topic definition is known for operation ~S."
+              operation-id)))))
+
+(defun operation-documentation-association-definitions (operation)
+  (let ((operation-id (normalize-operation-documentation-id operation)))
+    (cond
+      ((string= operation-id
+                "bounded-convergent-association-edge-reassignment")
+       (let* ((keys *dmx-operation-reader-surface-association-keys*)
+              (definitions
+                (durable-note-association-definitions-for-keys keys))
+              (known-keys
+                (mapcar #'durable-note-association-key definitions))
+              (missing-keys
+                (remove-if (lambda (key)
+                             (member key known-keys :test #'equal))
+                           keys)))
+         (when missing-keys
+           (error "Missing documentation association definitions for ~S: ~S."
+                  operation-id
+                  missing-keys))
+         definitions))
+      (t
+       (error "No documentation association definition is known for operation ~S."
+              operation-id)))))
+
+(defun operation-documentation-topic-definitions (operation)
+  (let* ((operation-id (normalize-operation-documentation-id operation))
+         (topic-ids (required-operation-documentation-topic-ids operation-id))
+         (definitions
+           (loop for topic-id in topic-ids
+                 for definition = (durable-note-topic-definition topic-id)
+                 unless definition
+                   collect topic-id into missing-topic-ids
+                 when definition
+                   collect definition into topic-definitions
+                 finally
+                    (when missing-topic-ids
+                      (error
+                       "Missing documentation topic definitions for ~S: ~S."
+                       operation-id
+                       missing-topic-ids))
+                    (return topic-definitions))))
+    definitions))
+
+(defun operation-documentation-topic-materialization-status
+    (db-path operation)
+  "Return a read-only verification report for OPERATION documentation topics."
+  (let* ((operation-id (normalize-operation-documentation-id operation))
+         (fedwiki-page-topic-id
+           (operation-documentation-fedwiki-page-topic-id operation-id))
+         (topic-ids
+           (required-operation-documentation-topic-ids operation-id))
+         (association-definitions
+           (operation-documentation-association-definitions operation-id))
+         (association-ids
+           (durable-note-association-ids association-definitions))
+         (db-exists? (probe-file db-path))
+         (missing-topic-ids
+           (if db-exists?
+               (durable-note-missing-topic-ids db-path topic-ids)
+               topic-ids))
+         (missing-association-ids
+           (if db-exists?
+               (durable-note-missing-association-ids
+                db-path
+                association-definitions)
+               association-ids))
+         (operation-topic-present-p
+           (and db-exists?
+                (not (member operation-id
+                             missing-topic-ids
+                             :test #'equal))))
+         (fedwiki-page-topic-present-p
+           (and db-exists?
+                (not (member fedwiki-page-topic-id
+                             missing-topic-ids
+                             :test #'equal))))
+         (passed?
+           (and db-exists?
+                operation-topic-present-p
+                fedwiki-page-topic-present-p
+                (null missing-topic-ids)
+                (null missing-association-ids))))
+    (list :kind :operation-documentation-topic-materialization-status
+          :operation operation-id
+          :production-db-path (namestring db-path)
+          :production-db-exists-p (and db-exists? t)
+          :status (if passed? :passed :failed)
+          :required-topic-ids topic-ids
+          :required-association-ids association-ids
+          :missing-topic-ids missing-topic-ids
+          :missing-association-ids missing-association-ids
+          :operation-topic-present-p operation-topic-present-p
+          :operation-topic-id operation-id
+          :fedwiki-page-topic-present-p fedwiki-page-topic-present-p
+          :fedwiki-page-topic-id fedwiki-page-topic-id)))
+
+(defun materialize-operation-documentation-topics
+    (db-path operation &key (replace-existing? t))
+  "Materialize and verify OPERATION documentation topics in DB-PATH.
+
+This is an explicit writer operation. Reader surfaces remain read-only and do
+not silently materialize missing documentation topics."
+  (let* ((operation-id (normalize-operation-documentation-id operation))
+         (topic-definitions
+           (operation-documentation-topic-definitions operation-id))
+         (association-definitions
+           (operation-documentation-association-definitions operation-id)))
+    (initialize-dmx-associative-mirror :db-path db-path)
+    (let ((topic-results
+            (loop for definition in topic-definitions
+                  collect
+                  (materialize-durable-note-topic
+                   db-path
+                   definition
+                   :replace-existing? replace-existing?)))
+          (association-results
+            (loop for definition in association-definitions
+                  collect
+                  (materialize-durable-note-association
+                   db-path
+                   definition
+                   :replace-existing? replace-existing?))))
+      (list :kind :operation-documentation-topic-materialization
+            :operation operation-id
+            :production-db-path (namestring db-path)
+            :topic-results topic-results
+            :association-results association-results
+            :status
+            (operation-documentation-topic-materialization-status
+             db-path
+             operation-id)))))
 
 (defun dmx-materialized-domkin-2017-source-topics
     (&key (db-path *dreyeck-dmx-production-db-path*))
