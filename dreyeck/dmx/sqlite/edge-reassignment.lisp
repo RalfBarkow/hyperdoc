@@ -260,3 +260,46 @@ BEGIN;
                   :derivative-effects
                   (list :journal-entry journal-entry)
                   :reason reason)))))))
+
+(defun association-edge-reassignment-reader-surface
+    (&key old-edge new-edge raw-report
+          (source-of-truth "production DMX SQLite DB"))
+  "Return the reader-facing operation answer before raw evidence."
+  (let* ((normalized-old-edge
+           (and old-edge
+                (normalize-association-edge-triple old-edge "Old edge")))
+         (normalized-new-edge
+           (and new-edge
+                (normalize-association-edge-triple new-edge "New edge")))
+         (reported-atomic-change
+           (getf raw-report :atomic-change))
+         (removed-edge
+           (or (getf reported-atomic-change :removed)
+               normalized-old-edge))
+         (added-or-confirmed-edge
+           (or (getf reported-atomic-change :added)
+               (getf reported-atomic-change :already-present)
+               normalized-new-edge))
+         (primary-answer
+           (list :operation :reassign-association-edge
+                 :status (or (getf raw-report :status) :passed)
+                 :atomic-change
+                 (list :removed removed-edge
+                       :added-or-confirmed added-or-confirmed-edge)
+                 :unexpected-graph-delta
+                 (getf raw-report :unexpected-graph-delta)
+                 :source-of-truth source-of-truth)))
+    (list :kind :association-edge-reassignment-reader-surface
+          :reader-question
+          "Did one bounded association edge move to the intended target, and did the graph remain otherwise unchanged?"
+          :primary-answer primary-answer
+          :secondary-evidence
+          (list :raw-report raw-report
+                :raw-report-secondary-p t)
+          :goldberg-questions
+          '((:what-changed
+             "The atomic change is one removed edge and one added or confirmed edge.")
+            (:what-stayed-true
+             "The source and predicate stay immutable, topics must already exist, and unexpected graph delta must be nil.")
+            (:what-is-derivative
+             "Journal entries and materializer evidence explain the change but are not the maintained graph source of truth.")))))

@@ -14,6 +14,7 @@
    #:record-dmx-query-run-value
    #:record-dmx-journal-entry-value
    #:reassign-association-edge
+   #:association-edge-reassignment-reader-surface
    #:association-edge-present-p
    #:sql-literal
    #:json-object
@@ -42,6 +43,7 @@
    #:materialize-durable-notes-into-production-db
    #:durable-note-materialization-status
    #:dmx-materialized-learning-topics
+   #:dmx-materialized-operation-reader-surface-topics
    #:dmx-materialized-domkin-2017-source-topics
    #:normalize-dmx-association-players
    #:topic-association-players

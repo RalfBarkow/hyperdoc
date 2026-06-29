@@ -673,6 +673,111 @@
                                (views:esc
                                 (prin1-to-string task-result)))))))))
 
+(views:defview 👀association-edge-reassignment-reader-surface
+    (surface codex-dmx-operation-reader-surface)
+  (labels ((code-value (value)
+             (views:html
+              (:tt (views:esc (prin1-to-string value)))))
+           (present-label (present-p)
+             (if present-p "present" "missing"))
+           (topic-list (topics)
+             (if topics
+                 (views:html
+                  (:ul
+                   (dolist (topic topics)
+                     (views:html
+                      (:li
+                       (:b (views:esc (getf topic :title)))
+                       " "
+                       (:small
+                        (views:esc
+                         (format nil "~A / ~A"
+                                 (getf topic :id)
+                                 (present-label
+                                  (getf topic :present-p)))))
+                       (:br)
+                       (views:esc (or (getf topic :summary) "")))))))
+                 (views:html (:p "None"))))
+           (association-list (associations)
+             (if associations
+                 (views:html
+                  (:ul
+                   (dolist (association associations)
+                     (views:html
+                      (:li
+                       (code-value (getf association :id))
+                       " "
+                       (:small
+                        (views:esc
+                         (present-label
+                          (getf association :present-p))))
+                       (:br)
+                       (views:esc
+                        (format nil "~A ~A ~A"
+                                (getf association :source)
+                                (getf association :predicate)
+                                (getf association :target))))))))
+                 (views:html (:p "None")))))
+    (views:html-view :title "Association Edge Reassignment Reader Surface"
+                     :priority 0
+                     (views:add-asset-path "/hyperbook/"
+                                           (asdf:system-relative-pathname
+                                            :hyperbook
+                                            "assets/hyperbook/"))
+                     (views:include-css "/hyperbook/css/hyperbook.css")
+                     (views:html
+                      (:div :class "hyperbook-page"
+                            (:h1 (views:esc (title-of surface)))
+                            (:p (views:esc (summary-of surface)))
+                            (:h2 "Reader question")
+                            (:p
+                             (views:esc
+                              (codex-dmx-operation-reader-surface-reader-question-of
+                               surface)))
+                            (:h2 "Primary answer")
+                            (:pre
+                             (views:esc
+                              (prin1-to-string
+                               (codex-dmx-operation-reader-surface-primary-answer-of
+                                surface))))
+                            (:p (:b "Status: ")
+                                (code-value
+                                 (codex-dmx-operation-reader-surface-status-of
+                                  surface)))
+                            (:p (:b "Production DB: ")
+                                (:tt
+                                 (views:esc
+                                  (or
+                                   (codex-dmx-operation-reader-surface-production-db-path-of
+                                    surface)
+                                   "unknown"))))
+                            (:h2 "Operation topic")
+                            (:pre
+                             (views:esc
+                              (prin1-to-string
+                               (codex-dmx-operation-reader-surface-operation-topic-of
+                                surface))))
+                            (:h2 "FedWiki page topic")
+                            (:pre
+                             (views:esc
+                              (prin1-to-string
+                               (codex-dmx-operation-reader-surface-fedwiki-page-topic-of
+                                surface))))
+                            (:h2 "Documentation topics")
+                            (topic-list
+                             (codex-dmx-operation-reader-surface-topics-of
+                              surface))
+                            (:h2 "Associations")
+                            (association-list
+                             (codex-dmx-operation-reader-surface-associations-of
+                              surface))
+                            (:h2 "Secondary evidence")
+                            (:pre
+                             (views:esc
+                              (prin1-to-string
+                               (codex-dmx-operation-reader-surface-secondary-evidence-of
+                                surface)))))))))
+
 (views:defview 👀dmx-learning-topics (surface codex-dmx-learning-topics)
   (labels ((code-value (value)
              (views:html

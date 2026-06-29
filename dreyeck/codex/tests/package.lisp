@@ -4,6 +4,7 @@
   (:use #:cl)
   (:import-from #:dreyeck/codex
                 #:codex-dmx-build-referee-subgraph
+                #:codex-dmx-association-edge-reassignment-reader-surface
                 #:codex-domkin-2017-source-topics
                 #:codex-domkin-2017-source-subgraph)
   (:import-from #:dreyeck.dmx.sqlite

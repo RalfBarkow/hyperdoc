@@ -8,6 +8,11 @@
   (unless value
     (error "~A" message)))
 
+(defun entry-by-id (entries id)
+  (find id entries
+        :key (lambda (entry) (getf entry :id))
+        :test #'equal))
+
 (defun assert-sql-ok (db-path sql message)
   (multiple-value-bind (stdout stderr exit-code)
       (sqlite-run db-path sql)
@@ -445,9 +450,18 @@
                     (durable-note-materialization-status :db-path db))
                   (learning-topics
                     (dmx-materialized-learning-topics :db-path db))
+                  (operation-reader-surface-topics
+                    (dmx-materialized-operation-reader-surface-topics
+                     :db-path db))
                   (domkin-source-topics
                     (dmx-materialized-domkin-2017-source-topics
-                     :db-path db)))
+                     :db-path db))
+                  (fedwiki-page-path
+                    #p"/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/bounded-convergent-association-edge-reassignment")
+                  (reader-surface
+                    (association-edge-reassignment-reader-surface
+                     :old-edge '("a" "described-by" "old-source")
+                     :new-edge '("a" "described-by" "new-source"))))
              (assert-equal :durable-note-materialization
                            (getf first-run :kind)
                            "Materializer must return a structured run object")
@@ -579,6 +593,72 @@
               (namestring db)
               (getf learning-topics :production-db-path)
               "Learning-topic query must expose the selected DB path")
+             (assert-equal
+              :dmx-materialized-operation-reader-surface-topics
+              (getf operation-reader-surface-topics :kind)
+              "Operation reader-surface query must return a structured inspection object")
+             (assert-equal
+              :passed
+              (getf operation-reader-surface-topics :status)
+              "Operation reader-surface query must validate present topics")
+             (dolist (topic-id '("operation-reader-surface-documentation-pattern"
+                                 "bounded-convergent-association-edge-reassignment"
+                                 "expected-vs-actual-graph-delta"
+                                 "atomic-vs-derivative-effects"))
+               (assert-true
+                (entry-by-id
+                 (getf operation-reader-surface-topics :topics)
+                 topic-id)
+                (format nil
+                        "Operation reader-surface topic query must include ~A"
+                        topic-id))
+               (assert-true
+                (dmx-sqlite-topic db topic-id)
+                (format nil
+                        "Materializer must create operation reader-surface topic ~A"
+                        topic-id)))
+             (dolist (association-id
+                      '("assoc:bounded-convergent-association-edge-reassignment:instantiates:operation-reader-surface-documentation-pattern"
+                        "assoc:bounded-convergent-association-edge-reassignment:uses:expected-vs-actual-graph-delta"
+                        "assoc:bounded-convergent-association-edge-reassignment:separates:atomic-vs-derivative-effects"
+                        "assoc:bounded-convergent-association-edge-reassignment:respects:single-source-of-truth-for-maintained-graph"
+                        "assoc:operation-reader-surface-documentation-pattern:answers:operation-reader-question"
+                        "assoc:bounded-convergent-association-edge-reassignment-fedwiki-page:documents:bounded-convergent-association-edge-reassignment"))
+               (assert-true
+                (dmx-sqlite-association db association-id)
+                (format nil
+                        "Materializer must create operation reader-surface association ~A"
+                        association-id)))
+             (assert-true
+              (entry-by-id
+               (getf operation-reader-surface-topics :topics)
+               "bounded-convergent-association-edge-reassignment-fedwiki-page")
+              "Operation reader-surface query must include the FedWiki page artifact topic")
+             (assert-true
+              (probe-file fedwiki-page-path)
+              "FedWiki page artifact must exist")
+             (assert-true
+              (search "dreyeck.dmx.sqlite:reassign-association-edge"
+                      (uiop:read-file-string fedwiki-page-path))
+              "FedWiki page artifact must mention the operation")
+             (assert-equal
+              :association-edge-reassignment-reader-surface
+              (getf reader-surface :kind)
+              "Reader-surface constructor must return a structured object")
+             (assert-equal
+              :reassign-association-edge
+              (getf (getf reader-surface :primary-answer) :operation)
+              "Reader surface primary answer must name the operation")
+             (assert-equal
+              '("a" "described-by" "new-source")
+              (getf (getf (getf reader-surface :primary-answer)
+                          :atomic-change)
+                    :added-or-confirmed)
+              "Reader surface primary answer must expose the added-or-confirmed edge")
+             (assert-equal
+              nil
+              (getf (getf reader-surface :secondary-evidence) :raw-report)
+              "Reader surface primary answer must not require a raw materializer dump")
              (assert-equal
               :dmx-materialized-domkin-2017-source-topics
               (getf domkin-source-topics :kind)

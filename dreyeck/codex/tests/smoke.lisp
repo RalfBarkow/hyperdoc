@@ -44,6 +44,12 @@
       (find-symbol "👀DOMKIN-2017-SOURCE-SUBGRAPH" "DREYECK/CODEX")
     (and status (fboundp symbol))))
 
+(defun association-edge-reassignment-reader-surface-view-present-p ()
+  (multiple-value-bind (symbol status)
+      (find-symbol "👀ASSOCIATION-EDGE-REASSIGNMENT-READER-SURFACE"
+                   "DREYECK/CODEX")
+    (and status (fboundp symbol))))
+
 (defun entry-present-p (entries id)
   (let ((entry
           (find id entries
@@ -66,7 +72,12 @@
                   (domkin-surface
                     (codex-domkin-2017-source-topics :db-path db))
                   (domkin-subgraph
-                    (codex-domkin-2017-source-subgraph domkin-surface)))
+                    (codex-domkin-2017-source-subgraph domkin-surface))
+                  (reader-surface
+                    (codex-dmx-association-edge-reassignment-reader-surface
+                     :db-path db
+                     :old-edge '("a" "described-by" "old-source")
+                     :new-edge '("a" "described-by" "new-source"))))
              (assert-equal
               :build-referee-topics-in-production-dmx
               (getf subgraph :view)
@@ -102,6 +113,28 @@
              (assert-true
               (build-referee-subgraph-view-present-p)
               "Explorer load must install the Build Referee Subgraph view")
+             (assert-equal
+              :passed
+              (dreyeck/codex::codex-dmx-operation-reader-surface-status-of
+               reader-surface)
+              "Reader surface must validate its materialized topic cluster")
+             (assert-equal
+              :reassign-association-edge
+              (getf
+               (dreyeck/codex::codex-dmx-operation-reader-surface-primary-answer-of
+                reader-surface)
+               :operation)
+              "Reader surface primary answer must name the operation")
+             (assert-equal
+              nil
+              (getf
+               (dreyeck/codex::codex-dmx-operation-reader-surface-secondary-evidence-of
+                reader-surface)
+               :raw-report)
+              "Reader surface must not require a raw materializer dump")
+             (assert-true
+              (association-edge-reassignment-reader-surface-view-present-p)
+              "Explorer load must install the association edge reader-surface view")
              (assert-equal
               :domkin-2017-source-subgraph
               (getf domkin-subgraph :view)

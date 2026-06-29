@@ -212,7 +212,49 @@
      :source "hyperdoc/HyperDoc Core.md"
      :commit-anchor "1f4e6298"
      :projection-status :derived-from-seed-note
-     :summary "Situated code owned by Dreyeck, Kioskbeerli, Hauptsache, DMX integration, Codex, or another project layer.")))
+     :summary "Situated code owned by Dreyeck, Kioskbeerli, Hauptsache, DMX integration, Codex, or another project layer.")
+    (:id "bounded-convergent-association-edge-reassignment"
+     :type :dmx-operation
+     :title "Bounded Convergent Association Edge Reassignment"
+     :source "dreyeck/dmx/sqlite/edge-reassignment.lisp"
+     :projection-status :documented-reader-surface
+     :summary "The DMX SQLite operation that moves one bounded association edge to a new target while converging when the target edge is already present.")
+    (:id "operation-reader-surface-documentation-pattern"
+     :type :documentation-pattern
+     :title "Operation Reader Surface Documentation Pattern"
+     :source "hyperdoc/document-operation-reader-surface-shop3-plan.sexp"
+     :projection-status :seeded-from-shop3-plan
+     :summary "A documentation pattern that starts from the reader's operation question, then separates atomic graph change, derivative evidence, and source-of-truth boundaries.")
+    (:id "expected-vs-actual-graph-delta"
+     :type :reader-surface-concept
+     :title "Expected vs Actual Graph Delta"
+     :source "dreyeck/dmx/sqlite/edge-reassignment.lisp"
+     :projection-status :documented-reader-surface
+     :summary "The operation reports the intended association-id delta and the measured association-id delta so unexpected graph changes are explicit.")
+    (:id "atomic-vs-derivative-effects"
+     :type :reader-surface-concept
+     :title "Atomic vs Derivative Effects"
+     :source "hyperdoc/document-operation-reader-surface-shop3-plan.sexp"
+     :projection-status :documented-reader-surface
+     :summary "The reader surface presents the graph edge change as the atomic effect and journals or materializer evidence as derivative effects.")
+    (:id "single-source-of-truth-for-maintained-graph"
+     :type :architecture-boundary
+     :title "Single Source of Truth for Maintained Graph"
+     :source "hyperdoc/document-operation-reader-surface-shop3-plan.sexp"
+     :projection-status :documented-reader-surface
+     :summary "The production DMX SQLite DB remains the source of truth for the maintained graph; documentation and FedWiki pages are reader surfaces, not repairs.")
+    (:id "operation-reader-question"
+     :type :reader-question
+     :title "Operation Reader Question"
+     :source "hyperdoc/document-operation-reader-surface-shop3-plan.sexp"
+     :projection-status :documented-reader-surface
+     :summary "The first question an operation report must answer is what graph fact changed and whether the result is coherent.")
+    (:id "bounded-convergent-association-edge-reassignment-fedwiki-page"
+     :type :fedwiki-page-artifact
+     :title "Bounded Convergent Association Edge Reassignment FedWiki Page"
+     :source-reference "fedwiki:wiki.ralfbarkow.ch/bounded-convergent-association-edge-reassignment"
+     :projection-status :reader-surface-documentation
+     :summary "The localhost FedWiki reader page for bounded convergent association edge reassignment.")))
 
 (defparameter *domkin-2017-source-artifact*
   "hyperdoc/domkin-2017-asdf-source-topics.sexp")
@@ -503,7 +545,25 @@
      :target "codex-is-not-the-build-system")
     (:source "build-referee-decision-route"
      :predicate "inspects"
-     :target "dreyeck/build:build-session-next-action")))
+     :target "dreyeck/build:build-session-next-action")
+    (:source "bounded-convergent-association-edge-reassignment"
+     :predicate "instantiates"
+     :target "operation-reader-surface-documentation-pattern")
+    (:source "bounded-convergent-association-edge-reassignment"
+     :predicate "uses"
+     :target "expected-vs-actual-graph-delta")
+    (:source "bounded-convergent-association-edge-reassignment"
+     :predicate "separates"
+     :target "atomic-vs-derivative-effects")
+    (:source "bounded-convergent-association-edge-reassignment"
+     :predicate "respects"
+     :target "single-source-of-truth-for-maintained-graph")
+    (:source "operation-reader-surface-documentation-pattern"
+     :predicate "answers"
+     :target "operation-reader-question")
+    (:source "bounded-convergent-association-edge-reassignment-fedwiki-page"
+     :predicate "documents"
+     :target "bounded-convergent-association-edge-reassignment")))
 
 (defparameter *domkin-2017-source-association-keys*
   '(("domkin-2017" "describes" "domkin-2017-loading-multiple-asdf-versions")
@@ -695,7 +755,14 @@
     "dreyeck/build:build-session-next-action"
     "asdf-3-3-session-action-model"
     "domkin-2017"
-    "durable-note-materialization-status"))
+    "durable-note-materialization-status"
+    "bounded-convergent-association-edge-reassignment"
+    "operation-reader-surface-documentation-pattern"
+    "expected-vs-actual-graph-delta"
+    "atomic-vs-derivative-effects"
+    "single-source-of-truth-for-maintained-graph"
+    "operation-reader-question"
+    "bounded-convergent-association-edge-reassignment-fedwiki-page"))
 
 (defparameter *dmx-learning-topic-ids*
   '("codex-is-not-the-build-system"
@@ -754,6 +821,35 @@
     ("build-referee-decision-route"
      "inspects"
      "dreyeck/build:build-session-next-action")))
+
+(defparameter *dmx-operation-reader-surface-topic-ids*
+  '("bounded-convergent-association-edge-reassignment"
+    "operation-reader-surface-documentation-pattern"
+    "expected-vs-actual-graph-delta"
+    "atomic-vs-derivative-effects"
+    "single-source-of-truth-for-maintained-graph"
+    "operation-reader-question"
+    "bounded-convergent-association-edge-reassignment-fedwiki-page"))
+
+(defparameter *dmx-operation-reader-surface-association-keys*
+  '(("bounded-convergent-association-edge-reassignment"
+     "instantiates"
+     "operation-reader-surface-documentation-pattern")
+    ("bounded-convergent-association-edge-reassignment"
+     "uses"
+     "expected-vs-actual-graph-delta")
+    ("bounded-convergent-association-edge-reassignment"
+     "separates"
+     "atomic-vs-derivative-effects")
+    ("bounded-convergent-association-edge-reassignment"
+     "respects"
+     "single-source-of-truth-for-maintained-graph")
+    ("operation-reader-surface-documentation-pattern"
+     "answers"
+     "operation-reader-question")
+    ("bounded-convergent-association-edge-reassignment-fedwiki-page"
+     "documents"
+     "bounded-convergent-association-edge-reassignment")))
 
 (defun durable-note-all-topic-definitions ()
   (append *durable-note-materialization-topic-definitions*
@@ -839,6 +935,10 @@
              *dmx-learning-association-keys*
              :test #'equal))
    (durable-note-all-association-definitions)))
+
+(defun dmx-operation-reader-surface-association-definitions ()
+  (durable-note-association-definitions-for-keys
+   *dmx-operation-reader-surface-association-keys*))
 
 (defun durable-note-topic-payload-json (definition source-info)
   (let ((title (or (getf definition :title)
@@ -1152,6 +1252,60 @@ the build task layer that calls the existing materializer."
           :missing-learning-topic-ids missing-learning-topic-ids
           :missing-learning-association-ids
           missing-learning-association-ids)))
+
+(defun dmx-materialized-operation-reader-surface-topics
+    (&key (db-path *dreyeck-dmx-production-db-path*))
+  "Return the materialized operation-reader-surface topic cluster."
+  (let* ((db-exists? (probe-file db-path))
+         (status (durable-note-materialization-status :db-path db-path))
+         (topic-ids *dmx-operation-reader-surface-topic-ids*)
+         (topic-rows
+           (and db-exists?
+                (durable-note-object-rows-by-id db-path "topic" topic-ids)))
+         (association-definitions
+           (dmx-operation-reader-surface-association-definitions))
+         (association-rows
+           (and db-exists?
+                (durable-note-object-rows-by-id
+                 db-path
+                 "assoc"
+                 (durable-note-association-ids association-definitions))))
+         (topics
+           (loop for topic-id in topic-ids
+                 collect
+                 (dmx-materialized-learning-topic-entry
+                  topic-id
+                  (durable-note-row-for-id topic-rows topic-id))))
+         (associations
+           (loop for definition in association-definitions
+                 for association-id = (durable-note-association-id definition)
+                 collect
+                 (dmx-materialized-learning-association-entry
+                  definition
+                  (durable-note-row-for-id association-rows association-id))))
+         (missing-topic-ids
+           (loop for topic in topics
+                 unless (getf topic :present-p)
+                   collect (getf topic :id)))
+         (missing-association-ids
+           (loop for association in associations
+                 unless (getf association :present-p)
+                   collect (getf association :id)))
+         (passed? (and (eq :passed (getf status :last-validation-status))
+                       (null missing-topic-ids)
+                       (null missing-association-ids))))
+    (list :kind :dmx-materialized-operation-reader-surface-topics
+          :status (if passed? :passed :failed)
+          :production-db-path (namestring db-path)
+          :production-db-exists-p (and db-exists? t)
+          :materialization-status status
+          :last-validation-status (getf status :last-validation-status)
+          :topic-ids topic-ids
+          :association-keys *dmx-operation-reader-surface-association-keys*
+          :topics topics
+          :associations associations
+          :missing-topic-ids missing-topic-ids
+          :missing-association-ids missing-association-ids)))
 
 (defun dmx-materialized-domkin-2017-source-topics
     (&key (db-path *dreyeck-dmx-production-db-path*))

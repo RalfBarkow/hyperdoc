@@ -333,6 +333,45 @@ symbol name without depending on them."
             (title-of object)
             (codex-dmx-learning-topics-status-of object))))
 
+(defclass codex-dmx-operation-reader-surface ()
+  ((id :accessor id-of :initarg :id)
+   (title :accessor title-of :initarg :title)
+   (summary :accessor summary-of :initarg :summary)
+   (production-db-path
+    :accessor codex-dmx-operation-reader-surface-production-db-path-of
+    :initarg :production-db-path)
+   (status :accessor codex-dmx-operation-reader-surface-status-of
+           :initarg :status)
+   (reader-question
+    :accessor codex-dmx-operation-reader-surface-reader-question-of
+    :initarg :reader-question)
+   (primary-answer
+    :accessor codex-dmx-operation-reader-surface-primary-answer-of
+    :initarg :primary-answer)
+   (operation-topic
+    :accessor codex-dmx-operation-reader-surface-operation-topic-of
+    :initarg :operation-topic)
+   (fedwiki-page-topic
+    :accessor codex-dmx-operation-reader-surface-fedwiki-page-topic-of
+    :initarg :fedwiki-page-topic)
+   (topics :accessor codex-dmx-operation-reader-surface-topics-of
+           :initarg :topics)
+   (associations
+    :accessor codex-dmx-operation-reader-surface-associations-of
+    :initarg :associations)
+   (secondary-evidence
+    :accessor codex-dmx-operation-reader-surface-secondary-evidence-of
+    :initarg :secondary-evidence)
+   (materialization-status
+    :accessor codex-dmx-operation-reader-surface-materialization-status-of
+    :initarg :materialization-status)))
+
+(defmethod print-object ((object codex-dmx-operation-reader-surface) stream)
+  (print-unreadable-object (object stream :type t)
+    (format stream "~A ~A"
+            (title-of object)
+            (codex-dmx-operation-reader-surface-status-of object))))
+
 (defclass codex-domkin-2017-source-topics ()
   ((id :accessor id-of :initarg :id)
    (title :accessor title-of :initarg :title)
@@ -578,6 +617,49 @@ work while inspecting."
      :referee-route referee-route
      :optional-provider-results
      (list (codex-context-provider-result 'dmx-learning-topic-provider)))))
+
+(defun codex-dmx-association-edge-reassignment-reader-surface
+    (&key
+       (db-path dreyeck.dmx.sqlite:*dreyeck-dmx-production-db-path*)
+       old-edge
+       new-edge
+       raw-report)
+  "Return Codex's reader-facing surface for association edge reassignment."
+  (let* ((reader-surface
+           (dreyeck.dmx.sqlite:association-edge-reassignment-reader-surface
+            :old-edge old-edge
+            :new-edge new-edge
+            :raw-report raw-report))
+         (inspection
+           (dreyeck.dmx.sqlite:dmx-materialized-operation-reader-surface-topics
+            :db-path db-path))
+         (topics (getf inspection :topics))
+         (operation-topic
+           (find "bounded-convergent-association-edge-reassignment"
+                 topics
+                 :key (lambda (topic) (getf topic :id))
+                 :test #'equal))
+         (fedwiki-page-topic
+           (find "bounded-convergent-association-edge-reassignment-fedwiki-page"
+                 topics
+                 :key (lambda (topic) (getf topic :id))
+                 :test #'equal)))
+    (make-instance
+     'codex-dmx-operation-reader-surface
+     :id "codex-dmx-association-edge-reassignment-reader-surface"
+     :title "Association Edge Reassignment Reader Surface"
+     :summary
+     "Reader-facing answer for the convergent DMX SQLite association edge reassignment operation."
+     :production-db-path (getf inspection :production-db-path)
+     :status (getf inspection :status)
+     :reader-question (getf reader-surface :reader-question)
+     :primary-answer (getf reader-surface :primary-answer)
+     :operation-topic operation-topic
+     :fedwiki-page-topic fedwiki-page-topic
+     :topics topics
+     :associations (getf inspection :associations)
+     :secondary-evidence (getf reader-surface :secondary-evidence)
+     :materialization-status (getf inspection :materialization-status))))
 
 (defun codex-domkin-2017-source-topics
     (&key (db-path dreyeck.dmx.sqlite:*dreyeck-dmx-production-db-path*))

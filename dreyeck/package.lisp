@@ -25,6 +25,7 @@
            #:codex-next-for-recent-changes
            #:codex-dmx-learning-topics
            #:codex-dmx-learning-topic-status
+           #:codex-dmx-association-edge-reassignment-reader-surface
            #:codex-dmx-build-referee-subgraph
            #:codex-domkin-2017-source-topics
            #:codex-domkin-2017-source-subgraph
@@ -58,6 +59,7 @@
                 #:codex-context-provider-result
                 #:codex-dmx-learning-topics
                 #:codex-dmx-learning-topic-status
+                #:codex-dmx-association-edge-reassignment-reader-surface
                 #:codex-dmx-build-referee-subgraph
                 #:codex-domkin-2017-source-topics
                 #:codex-domkin-2017-source-subgraph
@@ -70,6 +72,7 @@
            #:codex-context-provider-result
            #:codex-dmx-learning-topics
            #:codex-dmx-learning-topic-status
+           #:codex-dmx-association-edge-reassignment-reader-surface
            #:codex-dmx-build-referee-subgraph
            #:codex-domkin-2017-source-topics
            #:codex-domkin-2017-source-subgraph
