@@ -120,6 +120,7 @@
     :components
     ((:file "package")
      (:file "store")
+     (:file "edge-reassignment")
      (:file "durable-notes")))))
 
 (defsystem #:dreyeck/dmx/sqlite/tests

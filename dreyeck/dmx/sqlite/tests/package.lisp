@@ -8,6 +8,8 @@
                 #:record-dmx-property-value
                 #:record-dmx-query-run-value
                 #:record-dmx-journal-entry-value
+                #:reassign-association-edge
+                #:association-edge-present-p
                 #:sqlite-run
                 #:dmx-sqlite-object
                 #:dmx-sqlite-topic
@@ -30,6 +32,7 @@
                 #:durable-note-materialization-status
                 #:dmx-materialized-learning-topics
                 #:dmx-materialized-domkin-2017-source-topics
+                #:topic-association-players
                 #:dmx-sql-association-has-role-bearing-players-p
                 #:dmx-sql-counts)
   (:export #:run-dmx-sqlite-smoke-tests))

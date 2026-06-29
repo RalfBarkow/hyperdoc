@@ -13,6 +13,8 @@
    #:record-dmx-property-value
    #:record-dmx-query-run-value
    #:record-dmx-journal-entry-value
+   #:reassign-association-edge
+   #:association-edge-present-p
    #:sql-literal
    #:json-object
    #:dmx-sql-scalar

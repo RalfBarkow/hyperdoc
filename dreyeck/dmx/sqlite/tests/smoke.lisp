@@ -20,7 +20,96 @@
    (format nil "dreyeck-dmx-sqlite-~D.sqlite" (random 1000000))
    (uiop:temporary-directory)))
 
+(defun assert-error (thunk message)
+  (assert-true
+   (handler-case
+       (progn
+         (funcall thunk)
+         nil)
+     (error () t))
+   message))
+
+(defun association-edge-reassignment-fixture-db ()
+  (let ((db (temporary-dmx-sqlite-path)))
+    (initialize-dmx-associative-mirror :db-path db :clear t)
+    (dolist (topic-id '("a" "old-source" "new-source"))
+      (record-dmx-topic-value db topic-id "dmx.test.topic" topic-id))
+    (record-dmx-association-value
+     db
+     "assoc:a:described-by:old-source"
+     "dreyeck.dmx.association.described-by"
+     :players
+     (topic-association-players
+      "a" "dmx.role.player1" "old-source" "dmx.role.player2")
+     :value "described-by")
+    db))
+
+(defun run-association-edge-reassignment-fixture-test ()
+  (let ((db (association-edge-reassignment-fixture-db)))
+    (unwind-protect
+         (let ((report
+                 (reassign-association-edge
+                  db
+                  '("a" "described-by" "old-source")
+                  '("a" "described-by" "new-source")
+                  :reason
+                  "Fixture source correction for one association edge.")))
+           (assert-equal :passed
+                         (getf report :status)
+                         "Edge reassignment report must pass")
+           (assert-true
+            (not
+             (association-edge-present-p
+              db
+              '("a" "described-by" "old-source")))
+            "Old association edge must be absent after reassignment")
+           (assert-true
+            (association-edge-present-p
+             db
+             '("a" "described-by" "new-source"))
+            "New association edge must be present after reassignment")
+           (assert-equal
+            '("assoc:a:described-by:old-source")
+            (getf (getf report :actual-graph-delta)
+                  :removed-association-ids)
+            "Exactly one association id must be removed")
+           (assert-equal
+            '("assoc:a:described-by:new-source")
+            (getf (getf report :actual-graph-delta)
+                  :added-association-ids)
+            "Exactly one association id must be added")
+           (assert-equal nil
+                         (getf report :unexpected-graph-delta)
+                         "Edge reassignment must have no unexpected graph delta")
+           (assert-error
+            (lambda ()
+              (reassign-association-edge
+               db
+               '("a" "described-by" "old-source")
+               '("changed-source" "described-by" "new-source")
+               :require-old-edge-p nil))
+            "Edge reassignment must reject source changes")
+           (assert-error
+            (lambda ()
+              (reassign-association-edge
+               db
+               '("a" "described-by" "old-source")
+               '("a" "changed-predicate" "new-source")
+               :require-old-edge-p nil))
+            "Edge reassignment must reject predicate changes")
+           (assert-error
+            (lambda ()
+              (reassign-association-edge
+               db
+               '("a" "described-by" "old-source")
+               '("a" "described-by" "missing-target")
+               :require-old-edge-p nil))
+            "Edge reassignment must reject a missing new target topic"))
+      (when (probe-file db)
+        (delete-file db)))))
+
 (defun run-dmx-sqlite-smoke-tests ()
+  (run-association-edge-reassignment-fixture-test)
   (let ((db (temporary-dmx-sqlite-path)))
     (unwind-protect
          (progn
