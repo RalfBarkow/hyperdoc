@@ -12,6 +12,8 @@
 <ul>
   <li><a hyperbook="hyperdoc" page="Topics HyperBook in HyperDoc"><tt>Topics HyperBook in HyperDoc</tt></a></li>
   <li><a hyperbook="hyperdoc" page="Topic Title Changes and Canonical Link Maintenance"><tt>Topic Title Changes and Canonical Link Maintenance</tt></a></li>
+  <li><a hyperbook="topics" page="Static HyperDoc HTML page gate"><tt>Static HyperDoc HTML page gate</tt></a></li>
+  <li><a hyperbook="topics" page="Executable HyperDoc HTML page gate"><tt>Executable HyperDoc HTML page gate</tt></a></li>
 </ul>
 
 <h2>What makes the HTML repo-native</h2>
@@ -60,6 +62,22 @@
   When the page refers to runtime objects such as ASDF systems, Lisp functions,
   or Lisp classes, use the corresponding HyperBook surface rather than faking a
   static local page.
+</p>
+
+<h2>Validation gate effect</h2>
+
+<p>
+  A generated repo-native page can take the light page gate only when the staged
+  slice is limited to direct <tt>hyperdoc/*.html</tt> additions or edits and the
+  page is static: it has a title, the HyperDoc package declaration, and no
+  executable or runtime markers.
+</p>
+
+<p>
+  HTML that contains embedded expression links, computed HTML, source
+  transclusions, scripts, loader forms, or other runtime behavior is executable
+  HyperDoc HTML. It must use the full load gate until a narrower page-runtime
+  validation surface exists.
 </p>
 
 <h2>Recommended authored structure</h2>

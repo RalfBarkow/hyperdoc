@@ -3,9 +3,14 @@
  (:title "Path-sensitive HyperDoc pre-commit gate")
  (:type :shop3-plan)
  (:planner :shop3)
- (:status :problem-and-ordered-implementation-plan)
+ (:status :implemented-validated-pending-commit)
  (:created-before-implementation t)
  (:repo-root "/Users/rgb/workspace/hyperdoc")
+ (:execution-status
+  ((planned t)
+   (implemented t)
+   (validated t)
+   (commit-status :pending-commit)))
 
  (:problem-topic
   (path-sensitive-hyperdoc-pre-commit-gate

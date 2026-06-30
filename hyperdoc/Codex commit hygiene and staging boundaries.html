@@ -19,6 +19,9 @@
   <li><a hyperbook="topics" page="Inventory outcome"><tt>Inventory outcome</tt></a></li>
   <li><a hyperbook="topics" page="Continuity shell by design"><tt>Continuity shell by design</tt></a></li>
   <li><a hyperbook="topics" page="Exact outcome reporting"><tt>Exact outcome reporting</tt></a></li>
+  <li><a hyperbook="topics" page="Path-sensitive pre-commit gate"><tt>Path-sensitive pre-commit gate</tt></a></li>
+  <li><a hyperbook="topics" page="Static HyperDoc HTML page gate"><tt>Static HyperDoc HTML page gate</tt></a></li>
+  <li><a hyperbook="topics" page="Executable HyperDoc HTML page gate"><tt>Executable HyperDoc HTML page gate</tt></a></li>
   <li><a hyperbook="topics" page="Reconstruction protocol"><tt>Reconstruction protocol</tt></a></li>
 </ul>
 
@@ -116,6 +119,35 @@ nix develop --command git diff --cached -- [exact files]</pre>
   authoritative reported git verification should come from the same repo shell
   used for validation.
 </p>
+
+<h2>Path-sensitive pre-commit gate</h2>
+
+<p>
+  The tracked pre-commit dispatcher is <tt>tools/pre-commit-gate.sh</tt>. It
+  first runs the Lisp shape check, then classifies the staged paths before
+  selecting a validation gate. The light gate is reserved for staged changes
+  limited to direct <tt>hyperdoc/*.html</tt> additions or edits that have
+  static repo-native page shape and no executable or runtime markers.
+</p>
+
+<p>
+  All Lisp, ASDF, Nix, Makefile, runtime, server, inspector, explorer, test,
+  validation-tool, mixed, deleted, renamed, copied, executable-HTML, and
+  uncertain changes continue to use the full <tt>:hyperbook/server</tt> load
+  gate. This keeps pure page materialization from masquerading as a runtime
+  change without weakening the runtime gate.
+</p>
+
+<p>
+  Local Git hook files are not durable repository artifacts. A checkout-local
+  <tt>.git/hooks/pre-commit</tt> should be only a wrapper that delegates to the
+  tracked dispatcher.
+</p>
+
+<pre>#!/usr/bin/env bash
+set -euo pipefail
+
+exec tools/pre-commit-gate.sh "$@"</pre>
 
 <h2>Durable pattern, not incident report</h2>
 

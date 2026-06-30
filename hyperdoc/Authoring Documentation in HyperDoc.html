@@ -114,7 +114,7 @@
 <h2>Workflow note: mandatory vs optional gates</h2>
 
 <ul>
-  <li><b>Mandatory for HyperDoc page slices:</b> load gate, topic gate for newly added topic functions, and page coverage gate.</li>
+  <li><b>Mandatory for HyperDoc page slices:</b> use the path-sensitive pre-commit gate. Static direct <tt>hyperdoc/*.html</tt> additions or edits may use the light page gate; Lisp/topic/runtime or executable HTML slices still use the full load gate, topic gate for newly added topic functions, and page coverage gate.</li>
   <li><b>Mandatory when FedWiki files are touched:</b> <tt>json.tool</tt> syntax checks on changed page files.</li>
   <li><b>Optional but recommended where relevant:</b> FedWiki journal semantic checks for creation, chronology, revision, and malformed findings.</li>
   <li><b>When to add topic objects:</b> when a concept should be reused as an inspectable semantic handle across pages.</li>

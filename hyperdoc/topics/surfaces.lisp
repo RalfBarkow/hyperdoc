@@ -330,6 +330,33 @@
                  "Surface and Artifact Answers"
                  "Reconstruction protocol")))
 
+(defun path-sensitive-pre-commit-gate-topic ()
+  (make-topic
+   :id "path-sensitive-pre-commit-gate"
+   :title "Path-sensitive pre-commit gate"
+   :summary "Pre-commit validation should classify the staged HyperDoc slice before selecting either the light static-page gate or the full Lisp/Nix/server load gate."
+   :references '("Codex commit hygiene and staging boundaries"
+                 "Generate repo-native HyperDoc HTML"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun static-hyperdoc-html-page-gate-topic ()
+  (make-topic
+   :id "static-hyperdoc-html-page-gate"
+   :title "Static HyperDoc HTML page gate"
+   :summary "The light page gate is limited to direct staged hyperdoc/*.html additions or edits with repo-native page shape and no executable or runtime markers."
+   :references '("Codex commit hygiene and staging boundaries"
+                 "Generate repo-native HyperDoc HTML"
+                 "Authoring Documentation in HyperDoc")))
+
+(defun executable-hyperdoc-html-page-gate-topic ()
+  (make-topic
+   :id "executable-hyperdoc-html-page-gate"
+   :title "Executable HyperDoc HTML page gate"
+   :summary "HyperDoc HTML that embeds executable expressions, generated source references, scripts, or loader/runtime behavior must take the full load gate until a stronger page-runtime gate exists."
+   :references '("Codex commit hygiene and staging boundaries"
+                 "Generate repo-native HyperDoc HTML"
+                 "Authoring Documentation in HyperDoc")))
+
 (defun docs-topic-slice-and-coverage-gate-workflow-topic ()
   (make-topic
    :id "docs-topic-slice-and-coverage-gate-workflow"
