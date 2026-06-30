@@ -1,0 +1,89 @@
+<h1>How to Read a Web reader operations</h1>
+<in-package>hyperdoc</in-package>
+<p>Each operation is meant to answer a Goldberg-style comprehension question.</p>
+<ul>
+<li><b>WHAT-IS-THIS</b>: What object am I looking at?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;HOW-TO-READ-A-WEB-SUMMARY&quot; PACKAGE)
+            (ERROR &quot;HOW-TO-READ-A-WEB-SUMMARY not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>HOW-TO-READ-A-WEB-SUMMARY</tt></a></li>
+<li><b>WHY-IS-IT-HERE</b>: Why is this object here?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;CUT-UP-AND-REARRANGE-REPORT&quot; PACKAGE)
+            (ERROR &quot;CUT-UP-AND-REARRANGE-REPORT not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>CUT-UP-AND-REARRANGE-REPORT</tt></a></li>
+<li><b>WHAT-CAN-I-DO</b>: What actions are available?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;WEB-CAPABILITY-REPORT&quot; PACKAGE)
+            (ERROR &quot;WEB-CAPABILITY-REPORT not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>WEB-CAPABILITY-REPORT</tt></a></li>
+<li><b>WHAT-MUST-BE-TRUE</b>: What preconditions are required?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;EXISTING-HYPERDOC-FUNCTION-PROBE&quot; PACKAGE)
+            (ERROR &quot;EXISTING-HYPERDOC-FUNCTION-PROBE not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>EXISTING-HYPERDOC-FUNCTION-PROBE</tt></a></li>
+<li><b>WHERE-IS-THE-DEFINITION</b>: Where is a concept defined?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;WHERE-USED-MAP&quot; PACKAGE)
+            (ERROR &quot;WHERE-USED-MAP not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>WHERE-USED-MAP</tt></a></li>
+<li><b>WHERE-IS-IT-USED</b>: Where is this section used?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;WHERE-USED-MAP&quot; PACKAGE)
+            (ERROR &quot;WHERE-USED-MAP not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>WHERE-USED-MAP</tt></a></li>
+<li><b>WHAT-IS-THE-MACHINE-VIEW</b>: What will the computer see?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;TANGLE-WEB&quot; PACKAGE)
+            (ERROR &quot;TANGLE-WEB not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>TANGLE-WEB</tt></a></li>
+<li><b>WHAT-IS-THE-READER-VIEW</b>: What will the reader see?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;WEAVE-WEB-HTML&quot; PACKAGE)
+            (ERROR &quot;WEAVE-WEB-HTML not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>WEAVE-WEB-HTML</tt></a></li>
+<li><b>WHAT-IS-MISSING</b>: What is missing for a full WEB clone?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;WEB-CAPABILITY-REPORT&quot; PACKAGE)
+            (ERROR &quot;WEB-CAPABILITY-REPORT not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>WEB-CAPABILITY-REPORT</tt></a></li>
+<li><b>HOW-DID-WE-GET-HERE</b>: What path produced this result?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;CUT-UP-AND-REARRANGE-REPORT&quot; PACKAGE)
+            (ERROR &quot;CUT-UP-AND-REARRANGE-REPORT not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>CUT-UP-AND-REARRANGE-REPORT</tt></a></li>
+<li><b>CAN-I-RECREATE-IT</b>: Can I recreate the page/system?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;MATERIALIZE-HOW-TO-READ-A-WEB-BUNDLE&quot; PACKAGE)
+            (ERROR &quot;MATERIALIZE-HOW-TO-READ-A-WEB-BUNDLE not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>MATERIALIZE-HOW-TO-READ-A-WEB-BUNDLE</tt></a></li>
+<li><b>IS-EXISTING-HYPERDOC-ENOUGH</b>: Do existing HyperDoc functions already cover this?<br><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;EXISTING-HYPERDOC-FUNCTION-PROBE&quot; PACKAGE)
+            (ERROR &quot;EXISTING-HYPERDOC-FUNCTION-PROBE not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>EXISTING-HYPERDOC-FUNCTION-PROBE</tt></a></li>
+</ul>

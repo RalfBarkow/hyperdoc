@@ -1,0 +1,31 @@
+<h1>How to Read a Web function coverage</h1>
+<in-package>hyperdoc</in-package>
+<p>This surface answers whether we already have the needed Lisp functions for the Knuth operation.</p>
+<p><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;WEB-CAPABILITY-REPORT&quot; PACKAGE)
+            (ERROR &quot;WEB-CAPABILITY-REPORT not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>(web-capability-report)</tt></a></p>
+<p><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;EXISTING-HYPERDOC-FUNCTION-PROBE&quot; PACKAGE)
+            (ERROR &quot;EXISTING-HYPERDOC-FUNCTION-PROBE not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>(existing-hyperdoc-function-probe)</tt></a></p>
+<table><tr><th>Capability</th><th>Status</th><th>Functions</th></tr>
+<tr><td>numbered WEB sections</td><td><code>PRESENT</code></td><td><code>(WEB-SECTION WEB-SECTION-NUMBER READER-ORDER)</code></td></tr>
+<tr><td>reader-order weave</td><td><code>PRESENT</code></td><td><code>(WEAVE-WEB-HTML WRITE-DEMO-ARTIFACTS)</code></td></tr>
+<tr><td>machine-order tangle</td><td><code>PRESENT</code></td><td><code>(MACHINE-ROOTS TANGLE-WEB EXPAND-SECTION-REFERENCES)</code></td></tr>
+<tr><td>named replacement sections</td><td><code>PRESENT</code></td><td><code>(NAMED-SECTION-NAMES NAMED-SECTION-TEXT EXPAND-SECTION-REFERENCES)</code></td></tr>
+<tr><td>append repeated section names</td><td><code>PRESENT</code></td><td><code>(NAMED-SECTION-PIECES NAMED-SECTION-TEXT)</code></td></tr>
+<tr><td>macro replacement</td><td><code>BASIC</code></td><td><code>(MACRO-ALIST EXPAND-MACROS)</code></td></tr>
+<tr><td>where-used backlinks</td><td><code>PRESENT</code></td><td><code>(WHERE-USED-MAP SECTION-REFERENCES)</code></td></tr>
+<tr><td>identifier index</td><td><code>PARTIAL</code></td><td><code>(WHERE-USED-MAP)</code></td></tr>
+<tr><td>mini-index on each page</td><td><code>MISSING</code></td><td><code>(IDENTIFIER-TOKENIZER PAGE-LOCAL-INDEX)</code></td></tr>
+<tr><td>syntax typography / pretty WEB printing</td><td><code>MISSING</code></td><td><code>(LANGUAGE-AWARE-PRETTY-PRINTER)</code></td></tr>
+<tr><td>FedWiki page materialization</td><td><code>PRESENT</code></td><td><code>(FEDWIKI-PAGE-JSON WRITE-FEDWIKI-PAGE MATERIALIZE-HOW-TO-READ-A-WEB-BUNDLE)</code></td></tr>
+<tr><td>ASDF page-attached load boundary</td><td><code>PRESENT</code></td><td><code>(HOW-TO-READ-A-WEB-SUMMARY INSPECT-HOW-TO-READ-A-WEB)</code></td></tr>
+</table>

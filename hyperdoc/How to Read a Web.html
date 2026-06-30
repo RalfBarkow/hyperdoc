@@ -1,0 +1,34 @@
+<h1>How to Read a Web</h1>
+<in-package>hyperdoc</in-package>
+<p>This page is the HyperDoc reader surface for the FedWiki-attached ASDF system <tt>how-to-read-a-web</tt>.</p>
+<h2>Inspectable objects</h2><ul>
+<li><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;HOW-TO-READ-A-WEB-SUMMARY&quot; PACKAGE)
+            (ERROR &quot;HOW-TO-READ-A-WEB-SUMMARY not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>(how-to-read-a-web-summary)</tt></a></li>
+<li><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;CUT-UP-AND-REARRANGE-REPORT&quot; PACKAGE)
+            (ERROR &quot;CUT-UP-AND-REARRANGE-REPORT not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>(cut-up-and-rearrange-report)</tt></a></li>
+<li><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;TANGLE-WEB&quot; PACKAGE)
+            (ERROR &quot;TANGLE-WEB not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>(tangle-web)</tt></a></li>
+<li><a expr="(LET* ((PACKAGE
+        (OR (FIND-PACKAGE &quot;HOW-TO-READ-A-WEB&quot;)
+            (ERROR &quot;HOW-TO-READ-A-WEB package not loaded.&quot;)))
+       (SYMBOL
+        (OR (FIND-SYMBOL &quot;WEAVE-WEB-HTML&quot; PACKAGE)
+            (ERROR &quot;WEAVE-WEB-HTML not found.&quot;))))
+  (FUNCALL (SYMBOL-FUNCTION SYMBOL)))"><tt>(weave-web-html)</tt></a></li>
+</ul>
+<p>The page slug and ASDF system name are intentionally identical: <tt>how-to-read-a-web</tt>.</p>
