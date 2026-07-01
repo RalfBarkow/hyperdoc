@@ -3,16 +3,16 @@
  (:title "Kernighan/Plauger critical reading to rewriting style plan")
  (:type :shop3-plan)
  (:planner :shop3-style-ordered-task-decomposition)
- (:status :implemented-validated-pending-commit)
+ (:status :implemented-validated-committed)
  (:created-before-implementation t)
  (:repo-root "/Users/rgb/workspace/hyperdoc")
  (:execution-status
   ((planned t)
    (implemented t)
    (validated t)
-   (commit-status :pending-implementation-commit)
+   (commit-status :implementation-committed)
    (plan-commit "fb534f63245bc52d8bfe156769c1007aed3740b4")
-   (implementation-commit nil)
+   (implementation-commit "acb9e3e6ec6e7563c2feaba2d9a876db5dd49dee")
    (closeout-commit nil)))
 
  (:problem-topic
