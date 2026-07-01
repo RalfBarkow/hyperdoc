@@ -757,6 +757,26 @@
    #:lisp-critic-run-record-status
    #:lisp-critic-run-record-raw-output
    #:lisp-critic-run-record-target-paths
+   ;; Kernighan/Plauger critical reading and programming style
+   #:program-code-fragment
+   #:reader-difficulty
+   #:program-shortcoming
+   #:program-rewrite
+   #:before-after-comparison
+   #:programming-style-rule
+   #:critical-reading-example
+   #:kernighan-plauger-critical-reading-summary
+   #:make-critical-reading-example
+   #:critical-reading-examples
+   #:critical-reading-plan
+   #:criticize-program-fragment
+   #:rewrite-program-fragment
+   #:derive-style-rule
+   #:critical-reading-report
+   #:programming-style-coverage-report
+   #:goldberg-long-recognized-problem-crosswalk
+   #:knuth-web-projection-crosswalk
+   #:inspect-kernighan-plauger-critical-reading
    ;; Runtime coherence chunks
    #:coherence-chunk
    #:runtime-coherence-report

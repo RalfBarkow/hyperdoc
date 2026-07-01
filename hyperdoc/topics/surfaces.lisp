@@ -263,6 +263,56 @@
                  "DITA-like task topics for LISP-CRITIC review integration"
                  "Review contract")))
 
+(defun programming-style-readability-problem-topic ()
+  (make-topic
+   :id "programming-style-readability-problem"
+   :title "Programming style readability problem"
+   :summary "Distinction between execution success and human readability: a program can run while still being hard to understand, criticize, rewrite, maintain, and learn from."
+   :references '("Programming style readability problem"
+                 "Goldberg Programmer as Reader"
+                 "Kernighan Plauger critical reading plan"
+                 "Critical reading to rewriting")))
+
+(defun kernighan-plauger-critical-reading-topic ()
+  (make-topic
+   :id "kernighan-plauger-critical-reading"
+   :title "Kernighan/Plauger critical reading"
+   :summary "Base programming-style method: read a real program example critically, identify shortcomings, rewrite it for clarity, compare before and after, and extract a reusable style rule."
+   :references '("Kernighan Plauger critical reading plan"
+                 "Programming style readability problem"
+                 "Critical reading to rewriting"
+                 "Inspectable review contracts for automated code review")))
+
+(defun critical-reading-rewriting-style-rule-topic ()
+  (make-topic
+   :id "critical-reading-rewriting-style-rule"
+   :title "Critical reading to rewriting"
+   :summary "Reader operation cycle that turns concrete program criticism into a clearer rewrite and then into a transferable programming-style lesson."
+   :references '("Critical reading to rewriting"
+                 "Kernighan Plauger critical reading plan"
+                 "Programming style readability problem"
+                 "Goldberg reader operations")))
+
+(defun goldberg-long-recognized-problem-crosswalk-topic ()
+  (make-topic
+   :id "goldberg-long-recognized-problem-crosswalk"
+   :title "Goldberg long recognized problem crosswalk"
+   :summary "Crosswalk showing Goldberg's Programmer as Reader as an exploratory-environment restatement of the older program-readability problem."
+   :references '("Goldberg long recognized problem crosswalk"
+                 "Goldberg Programmer as Reader"
+                 "Goldberg reader operations"
+                 "Programming style readability problem")))
+
+(defun knuth-web-projection-response-topic ()
+  (make-topic
+   :id "knuth-web-projection-response"
+   :title "Knuth WEB as projection response"
+   :summary "Crosswalk that treats WEB as a projection-oriented response: reader-order arrangement with a preserved machine-order projection, distinct from the Kernighan/Plauger base style-training cycle."
+   :references '("Knuth WEB as projection response"
+                 "How to Read a Web"
+                 "How to Read a Web topic arrangement"
+                 "Critical reading to rewriting")))
+
 (defun codex-resume-branch-context-topic ()
   (make-topic
    :id "codex-resume-branch-context"

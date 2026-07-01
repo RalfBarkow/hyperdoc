@@ -86,6 +86,7 @@ non-recursive operate contract."
   (run-relation-topic-proposals-smoke-tests)
   (run-lisp-critic-review-plan-smoke-tests)
   (run-lisp-critic-contract-smoke-tests)
+  (run-programming-style-critical-reading-smoke-tests)
   (run-dock-presentation-smoke-tests)
   (run-dock-annotation-smoke-tests)
   (run-mobile-progressive-chrome-smoke-tests)
