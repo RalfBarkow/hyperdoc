@@ -2,7 +2,7 @@
  (:id physics-not-advice-fedwiki-asdf-system)
  (:title "Physics, Not Advice FedWiki ASDF System")
  (:type :shop3-plan)
- (:status :open)
+ (:status :closed)
  (:created-for-slice
   "FedWiki page-attached ASDF, DMX SQLite, and page JSON artifact for the concept page Physics, Not Advice")
  (:repo-root "/Users/rgb/workspace/hyperdoc")
@@ -10,6 +10,14 @@
  (:slug "physics-not-advice")
  (:system "physics-not-advice")
  (:plan-topic physics-not-advice-fedwiki-asdf-system)
+ (:commit-references
+  ((plan-commit "57b3edf7")
+   (plan-page-commit "f01cf661")
+   (assets-implementation-commit "6868edf2")
+   (concept-page-commit "97f7acb5")
+   (hyperdoc-contract-test-commit "1834851a")
+   (plan-page-close-commit "c94d41cb")
+   (closing-commit "commit containing this plan closure")))
 
  :problem
  ((page-title "Physics, Not Advice")
@@ -262,6 +270,50 @@
   (!replay-page-history physics-not-advice)
   (!validate-reconstruction-idempotence physics-not-advice)
   (!close-plan-artifact physics-not-advice-plan))
+
+ :closure
+ ((closed-on "2026-07-02")
+  (plan-commit "57b3edf7")
+  (plan-page-commit "f01cf661")
+  (assets-implementation-commit "6868edf2")
+  (concept-page-commit "97f7acb5")
+  (hyperdoc-contract-test-commit "1834851a")
+  (plan-page-close-commit "c94d41cb")
+  (implementation-status
+   ((plan-artifact
+     "/Users/rgb/workspace/hyperdoc/hyperdoc/physics-not-advice-fedwiki-asdf-system-plan.sexp")
+    (plan-page
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice-reconstruction-plan")
+    (page-attached-asdf-system
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/physics-not-advice")
+    (sqlite-asset
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/physics-not-advice/physics-not-advice.dmx.sqlite")
+    (fedwiki-page-projection
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice")
+    (legacy-page-system-registry-created nil)
+    (repo-local-hyperdoc-page-asdf-system-created nil)))
+  (validation-results
+   ((plan-page-title "Physics, Not Advice Reconstruction Plan")
+    (plan-page-story-items 3)
+    (plan-page-journal-actions 4)
+    (concept-page-title "Physics, Not Advice")
+    (concept-page-story-items 6)
+    (concept-page-journal-actions 7)
+    (sqlite-counts ((dmx_topics 18)
+                    (dmx_associations 11)
+                    (dmx_assoc_players 22)
+                    (source_fragments 3)
+                    (fedwiki_pages 1)
+                    (fedwiki_story_items 6)
+                    (fedwiki_journal_actions 7)
+                    (shop3_plan_steps 10)))
+    (asdf-load-system "physics-not-advice")
+    (asdf-test-system "physics-not-advice/test")
+    (page-attached-contract-smoke-test pass)
+    (reconstruction-idempotent t)
+    (network-required nil)
+    (git-diff-check-passes t)
+    (pre-commit-load-gate-passes t))))
 
  :acceptance
  ((fedwiki-page-title "Physics, Not Advice")
