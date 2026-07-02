@@ -1,0 +1,191 @@
+(:artifact
+ (:id the-1998-ai-planning-systems-competition-fedwiki-asdf-system)
+ (:title "The 1998 AI Planning Systems Competition FedWiki ASDF System")
+ (:type :shop3-plan)
+ (:status :open)
+ (:created-for-slice
+  "FedWiki-attached ASDF reading artifact for Drew V. McDermott, The 1998 AI Planning Systems Competition")
+ (:repo-root "/Users/rgb/workspace/hyperdoc")
+ (:slug "the-1998-ai-planning-systems-competition")
+ (:system "the-1998-ai-planning-systems-competition")
+ (:plan-topic the-1998-ai-planning-systems-competition-fedwiki-asdf-system)
+
+ :knowledge
+ ((reading-source
+   ((author "Drew V. McDermott")
+    (title "The 1998 AI Planning Systems Competition")
+    (venue "AI Magazine 21(2)")
+    (year 2000)))
+  (source-boundary
+   ((do-not-copy-whole-pdf)
+    (store-bibliography-source-anchors-short-excerpts-and-paraphrases)
+    (dmx-sqlite-asset authoritative-local-basis)
+    (fedwiki-page projection-from-dmx-sqlite)
+    (validation local-first)
+    (validation no-live-dmx-server)
+    (validation no-live-fedwiki-server)))
+  (reading-claims
+   ((competition first-automated-planning-competition)
+    (competition creates-shared-planning-domains)
+    (competition supports-meaningful-planner-comparison)
+    (competition starts-benchmark-repository)
+    (pddl represents physics-not-advice)
+    (hierarchical-planning-track failed-under-advice-separation)
+    (zettel-6537 reads-planning-as-contingency-reduction)
+    (shop3-methods expose-contingency-reduction))))
+
+ :input
+ ((repository-conventions
+   ("hyperdoc/fedwiki-asdf-assets.lisp"
+    "hyperdoc/fedwiki-attached-asdf-system.lisp"
+    "hyperdoc/fedwiki-attached-asdf-relations.lisp"
+    "hyperdoc-inspector/fedwiki-attached-asdf-system.lisp"
+    "hyperdoc-inspector/fedwiki-attached-asdf-relations.lisp"
+    "hyperdoc/topics/page-systems.lisp"
+    "hyperdoc/fedwiki-asdf-assets/metagraph"
+    "dreyeck/dmx/sqlite"
+    "hyperdoc/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"
+    "hyperdoc/materialize-build-referee-learning-topics-plan.sexp"))
+  (target-layout
+   ("hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.asd"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/package.lisp"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/model.lisp"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/topics.lisp"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/dmx-sqlite.lisp"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/fedwiki-page.lisp"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/materialize.lisp"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/inspect.lisp"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/assets/the-1998-ai-planning-systems-competition.dmx.sqlite"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/pages/the-1998-ai-planning-systems-competition.json"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/examples/mrepl-session.lisp"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/tests/smoke.lisp"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/README.md"
+    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/MANIFEST.txt")))
+
+ :shop3
+ ((:task create-the-1998-ai-planning-systems-competition-fedwiki-asdf-system
+   :goal
+   ((plan-artifact recorded)
+    (plan-artifact validated)
+    (plan-artifact committed)
+    (fedwiki-attached-asdf-system created)
+    (dmx-topic-sqlite-asset created)
+    (reading-topics seeded)
+    (fedwiki-page materialized-from-dmx)
+    (page-reconstruction idempotent)
+    (smoke-tests pass)
+    (implementation committed)
+    (plan-artifact closed)))
+
+  (:operator !record-plan-artifact
+   :preconditions ((repo-root "/Users/rgb/workspace/hyperdoc"))
+   :effects ((plan-artifact recorded)
+             (plan-status :open)))
+
+  (:operator !validate-plan-artifact
+   :preconditions ((plan-artifact recorded))
+   :effects ((plan-artifact validates-required-operators)
+             (plan-artifact validates-target-layout)
+             (plan-artifact validated)))
+
+  (:operator !commit-plan-artifact
+   :preconditions ((plan-artifact validated)
+                   (git-working-tree clean-before-plan))
+   :effects ((plan-artifact committed)
+             (plan-commit "pending")))
+
+  (:operator !create-fedwiki-attached-asdf-system
+   :preconditions ((plan-artifact committed))
+   :effects ((asdf-system "the-1998-ai-planning-systems-competition")
+             (asdf-test-system "the-1998-ai-planning-systems-competition/test")
+             (fedwiki-attached-home inspectable)
+             (page-system discoverable)))
+
+  (:operator !create-dmx-topic-sqlite-asset
+   :preconditions ((asdf-system "the-1998-ai-planning-systems-competition"))
+   :effects ((sqlite-asset
+              "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/assets/the-1998-ai-planning-systems-competition.dmx.sqlite")
+             (dmx-topics-table exists)
+             (dmx-associations-table exists)
+             (dmx-assoc-players-table exists)
+             (fedwiki-pages-table exists)
+             (fedwiki-story-items-table exists)
+             (fedwiki-journal-actions-table exists)
+             (source-fragments-table exists)))
+
+  (:operator !seed-reading-topics
+   :preconditions ((sqlite-asset exists))
+   :effects ((required-topics exist)
+             (required-associations exist)
+             (source-fragments recorded)))
+
+  (:operator !materialize-fedwiki-page-from-dmx
+   :preconditions ((required-topics exist)
+                   (required-associations exist))
+   :effects ((fedwiki-page-json
+              "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/pages/the-1998-ai-planning-systems-competition.json")
+             (fedwiki-page includes-physics-not-advice)
+             (fedwiki-page includes-planung-als-reduktion)))
+
+  (:operator !validate-reconstruction-idempotence
+   :preconditions ((fedwiki-page-json exists))
+   :effects ((second-materialization semantic-diff nil)
+             (page-reconstruction idempotent)))
+
+  (:operator !run-smoke-tests
+   :preconditions ((page-reconstruction idempotent))
+   :effects ((asdf-load-system succeeds)
+             (db-opens t)
+             (schema-status inspectable)
+             (required-topics exist)
+             (required-associations exist)
+             (page-reconstruction includes-physics-not-advice)
+             (page-reconstruction includes-planung-als-reduktion)
+             (network-required nil)
+             (smoke-tests pass)))
+
+  (:operator !commit-implementation
+   :preconditions ((smoke-tests pass))
+   :effects ((implementation committed)
+             (implementation-commit "pending")))
+
+  (:operator !close-plan-artifact
+   :preconditions ((implementation committed))
+   :effects ((plan-status :closed)
+             (plan-artifact records-commit-references)
+             (plan-artifact closed))))
+
+ :output-contract
+ ((required-topic-ids
+   ("the-1998-ai-planning-systems-competition"
+    "mcdermott-2000-planning-competition"
+    "planning-competition"
+    "aips-1998"
+    "pddl"
+    "physics-not-advice"
+    "domain-physics"
+    "planner-advice"
+    "benchmark-repository"
+    "syntax-checker"
+    "solution-checker"
+    "strips-track"
+    "adl-track"
+    "classical-planning"
+    "hierarchical-planning"
+    "reactive-planning"
+    "learning-in-planning"
+    "plan-library"
+    "plan-library-as-advice"
+    "problematization"
+    "zettel-6537"
+    "planning-as-contingency-reduction"
+    "shop3-methods-as-explicit-contingency-reduction"
+    "fedwiki-page-projection"
+    "dmx-sqlite-as-reconstruction-basis"))
+  (validation
+   ((asdf-load-system "the-1998-ai-planning-systems-competition")
+    (sqlite-asset-exists t)
+    (materialization-idempotent t)
+    (smoke-tests-pass t)
+    (network-required nil)
+    (git-diff-check-passes t)))))
