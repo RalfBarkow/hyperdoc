@@ -2,7 +2,7 @@
  (:id repair-the-1998-ai-planning-systems-competition-fedwiki-asdf-placement)
  (:title "Repair The 1998 AI Planning Systems Competition FedWiki ASDF Placement")
  (:type :shop3-plan)
- (:status :open)
+ (:status :closed)
  (:created-for-slice
   "Correct the McDermott 2000 FedWiki page-attached ASDF system placement")
  (:repo-root "/Users/rgb/workspace/hyperdoc")
@@ -44,6 +44,48 @@
    "/Users/rgb/workspace/hyperdoc/hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/")
   (user-copied-readme
    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/README.md"))
+
+ :repair-commits
+ ((plan-commit
+   (:repo "/Users/rgb/workspace/hyperdoc"
+    :commit "ff9c058f"
+    :summary "docs(planning): plan FedWiki ASDF placement repair"))
+  (hyperdoc-implementation
+   (:repo "/Users/rgb/workspace/hyperdoc"
+    :commit "3ce91527"
+    :summary "fix(planning): move McDermott ASDF system to page assets"))
+  (fedwiki-assets
+   (:repo "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets"
+    :commit "de8679e2"
+    :summary "fix(planning): add McDermott page-attached ASDF assets"))
+  (fedwiki-pages
+   (:repo "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages"
+    :commit "d5ed7df5"
+    :summary "fix(planning): materialize McDermott FedWiki page projection")))
+
+ :validation-results
+ ((misplaced-root-removed t)
+  (asset-side-pages-directory-absent t)
+  (canonical-paths-present t)
+  (staged-whitespace-checks-pass t)
+  (sqlite-counts
+   ((dmx-topics 25)
+    (dmx-associations 18)
+    (fedwiki-story-items 9)))
+  (page-local-asdf-load-through-fedwiki-attached-system t)
+  (test-system-passes t)
+  (materialization
+   ((db-path
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.dmx.sqlite")
+    (page-path
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/the-1998-ai-planning-systems-competition")
+    (topics-present-p t)
+    (associations-present-p t)
+    (network-required-p nil)))
+  (idempotence
+   ((idempotent-p t)
+    (page-bytes 3188)
+    (network-required-p nil))))
 
  :shop3
  ((:task repair-the-1998-ai-planning-systems-competition-fedwiki-asdf-placement
@@ -142,7 +184,9 @@
   (:operator !commit-repair
    :preconditions ((smoke-tests pass))
    :effects ((repair committed)
-             (repair-commit "pending")))
+             (hyperdoc-implementation-commit "3ce91527")
+             (fedwiki-assets-commit "de8679e2")
+             (fedwiki-pages-commit "d5ed7df5")))
 
   (:operator !close-plan-artifact
    :preconditions ((repair committed))
