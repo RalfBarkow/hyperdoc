@@ -32,7 +32,7 @@
     (preferred "page-local ASDF entrypoint")
     (preferred "attached DMX topic SQLite database")
     (preferred "FedWiki page projection")
-    (avoid "authoritative local basis")
+    (avoid "obsolete local-source-of-truth wording")
     (avoid "SQLite DB is the FedWiki page")))
   (sqlite-role
    "The DMX topic SQLite database is an attached page asset containing structured topics, associations, source fragments, story-item data, and reconstruction data used by the page-local ASDF system to materialize or verify the FedWiki page projection."))
@@ -108,7 +108,7 @@
    :preconditions ((fedwiki-page materialized-to-page-store))
    :effects ((readme uses-page-attached-asdf-contract)
              (agents uses-page-attached-asdf-contract)
-             (misleading-authoritative-local-basis-wording removed)))
+             (misleading-local-source-of-truth-wording removed)))
 
   (:operator !rewrite-path-constants
    :preconditions ((readme-and-agents-terminology rewritten))

@@ -622,17 +622,20 @@
     (system)
   (declare (ignore system))
   (let* ((db-path
-           (page-system-repo-pathname
-            "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/assets/the-1998-ai-planning-systems-competition.dmx.sqlite"))
+           #P"/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.dmx.sqlite")
+         (asd-path
+           #P"/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.asd")
          (page-path
-           (page-system-repo-pathname
-            "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/pages/the-1998-ai-planning-systems-competition.json"))
+           #P"/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/the-1998-ai-planning-systems-competition")
          (source (page-system-read-file-string page-path))
          (missing nil))
     (unless (uiop:file-exists-p db-path)
-      (push "Page-attached DMX SQLite asset is missing." missing))
+      (push "Attached DMX topic SQLite database is missing." missing))
+    (unless (uiop:file-exists-p asd-path)
+      (push "Page-local ASDF entrypoint is missing." missing))
     (unless source
-      (push "Projected FedWiki page JSON is missing." missing))
+      (push "FedWiki page projection is missing from the page store."
+            missing))
     (unless (and source
                  (search "physics, not advice" source :test #'char=))
       (push "Projected page is missing the physics/not-advice bridge."
@@ -863,22 +866,22 @@
          (make-page-runtime-provider
           :provider-id
           "mcdermott-2000-fedwiki-attached-dmx-sqlite"
-          :provider-kind :fedwiki-attached-asdf-reading-artifact
+          :provider-kind :fedwiki-page-attached-asdf-system
           :asdf-system-name "the-1998-ai-planning-systems-competition"
           :ensure-function
-          "asdf:load-system :the-1998-ai-planning-systems-competition"
+          "(hyperdoc:load-fedwiki-attached-asdf-system (the-1998-ai-planning-systems-competition:fedwiki-attached-home))"
           :readiness-function
-          "DMX SQLite asset exists and can reconstruct the FedWiki page"
+          "Attached DMX topic SQLite database exists and can reconstruct the FedWiki page projection"
           :display-notes
-          "Provides a page-attached DMX SQLite topic basis plus reproducible FedWiki page projection."))
+          "Provides a page-local ASDF entrypoint, attached DMX topic SQLite database, and reproducible FedWiki page projection."))
    :page-system-runtime-entry-points
-   '("(asdf:load-system :the-1998-ai-planning-systems-competition)"
-     "(the-1998-ai-planning-systems-competition:inspect-artifact)"
-     "(the-1998-ai-planning-systems-competition:materialize-reading-artifact)"
+   '("(hyperdoc:load-fedwiki-attached-asdf-system (the-1998-ai-planning-systems-competition:fedwiki-attached-home))"
+     "(the-1998-ai-planning-systems-competition:inspect-page-attached-system)"
+     "(the-1998-ai-planning-systems-competition:materialize-fedwiki-page-projection)"
      "(the-1998-ai-planning-systems-competition:validate-reconstruction-idempotence)")
    :page-system-display-contract
-   '("FedWiki page JSON is projected from the page-attached DMX SQLite asset"
-     "SQLite asset remains the durable local topic basis"
+   '("FedWiki page projection is materialized into the FedWiki page store"
+     "Attached DMX topic SQLite database remains under the page-attached asset root"
      "Projection includes the physics/not-advice reading"
      "Projection includes the Zettel 6537 bridge"
      "No live DMX or FedWiki server is required")
@@ -888,32 +891,33 @@
      "(the-1998-ai-planning-systems-competition:capability-relation)"
      "(the-1998-ai-planning-systems-competition:schema-status)")
    :page-system-validation-entry-points
-   '("asdf:load-system :the-1998-ai-planning-systems-competition"
+   '("hyperdoc:load-fedwiki-attached-asdf-system"
      "asdf:test-system :the-1998-ai-planning-systems-competition/test"
      "the-1998-ai-planning-systems-competition:validate-reconstruction-idempotence")
    :page-system-source-files
-   '("hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.asd"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/assets/the-1998-ai-planning-systems-competition.dmx.sqlite"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/pages/the-1998-ai-planning-systems-competition.json"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/package.lisp"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/model.lisp"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/topics.lisp"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/dmx-sqlite.lisp"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/fedwiki-page.lisp"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/materialize.lisp"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/inspect.lisp"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/tests/smoke.lisp"
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/examples/mrepl-session.lisp")
+   '("/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/the-1998-ai-planning-systems-competition"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.asd"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.dmx.sqlite"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/package.lisp"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/model.lisp"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/topics.lisp"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/dmx-sqlite.lisp"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/fedwiki-page.lisp"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/materialize.lisp"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/inspect.lisp"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/tests/package.lisp"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/tests/smoke.lisp"
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/examples/mrepl-session.lisp")
    :page-system-artifacts
    '("page-attached ASDF system"
-     "DMX SQLite topic database"
+     "attached DMX topic SQLite database"
      "FedWiki page JSON projection"
      "smoke tests"
      "inspector entrypoints")
    :page-system-display-check-function
    #'fedwiki-the-1998-ai-planning-systems-competition-display-ready-p
    :page-system-description
-   "Page-system reload boundary for the McDermott 2000 AIPS Planning Competition reading artifact."))
+   "Page-system reload boundary for the McDermott 2000 AIPS Planning Competition page-attached ASDF system."))
 
 (eval-when (:load-toplevel :execute)
   (setf *topic-index-state* :stale))

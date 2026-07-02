@@ -4,7 +4,7 @@
  (:type :shop3-plan)
  (:status :closed)
  (:created-for-slice
-  "FedWiki-attached ASDF reading artifact for Drew V. McDermott, The 1998 AI Planning Systems Competition")
+  "FedWiki page-attached ASDF system for Drew V. McDermott, The 1998 AI Planning Systems Competition")
  (:repo-root "/Users/rgb/workspace/hyperdoc")
  (:slug "the-1998-ai-planning-systems-competition")
  (:system "the-1998-ai-planning-systems-competition")
@@ -23,7 +23,7 @@
   (source-boundary
    ((do-not-copy-whole-pdf)
     (store-bibliography-source-anchors-short-excerpts-and-paraphrases)
-    (dmx-sqlite-asset authoritative-local-basis)
+    (dmx-sqlite-asset attached-page-asset)
     (fedwiki-page projection-from-dmx-sqlite)
     (validation local-first)
     (validation no-live-dmx-server)
@@ -51,20 +51,22 @@
     "hyperdoc/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"
     "hyperdoc/materialize-build-referee-learning-topics-plan.sexp"))
   (target-layout
-   ("hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.asd"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/package.lisp"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/model.lisp"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/topics.lisp"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/dmx-sqlite.lisp"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/fedwiki-page.lisp"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/materialize.lisp"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/src/inspect.lisp"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/assets/the-1998-ai-planning-systems-competition.dmx.sqlite"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/pages/the-1998-ai-planning-systems-competition.json"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/examples/mrepl-session.lisp"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/tests/smoke.lisp"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/README.md"
-    "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/MANIFEST.txt")))
+   ("/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.asd"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/package.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/model.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/topics.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/dmx-sqlite.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/fedwiki-page.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/materialize.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/src/inspect.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.dmx.sqlite"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/the-1998-ai-planning-systems-competition"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/examples/mrepl-session.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/tests/package.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/tests/smoke.lisp"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/README.md"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/AGENTS.md"
+    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/MANIFEST.txt")))
 
  :shop3
  ((:task create-the-1998-ai-planning-systems-competition-fedwiki-asdf-system
@@ -108,7 +110,7 @@
   (:operator !create-dmx-topic-sqlite-asset
    :preconditions ((asdf-system "the-1998-ai-planning-systems-competition"))
    :effects ((sqlite-asset
-              "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/assets/the-1998-ai-planning-systems-competition.dmx.sqlite")
+              "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.dmx.sqlite")
              (dmx-topics-table exists)
              (dmx-associations-table exists)
              (dmx-assoc-players-table exists)
@@ -127,7 +129,7 @@
    :preconditions ((required-topics exist)
                    (required-associations exist))
    :effects ((fedwiki-page-json
-              "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/pages/the-1998-ai-planning-systems-competition.json")
+              "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/the-1998-ai-planning-systems-competition")
              (fedwiki-page includes-physics-not-advice)
              (fedwiki-page includes-planung-als-reduktion)))
 
@@ -165,11 +167,11 @@
   (implementation-commit "ab0fd446")
   (implementation-status
    ((page-attached-asdf-system
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition")
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition")
     (sqlite-asset
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/assets/the-1998-ai-planning-systems-competition.dmx.sqlite")
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.dmx.sqlite")
     (fedwiki-page-projection
-     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/pages/the-1998-ai-planning-systems-competition.json")
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/the-1998-ai-planning-systems-competition")
     (page-system
      "fedwiki/page/wiki.ralfbarkow.ch/the-1998-ai-planning-systems-competition")))
   (validation-results

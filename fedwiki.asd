@@ -34,13 +34,12 @@
                           :components ((:file "fedwiki-shop3")))))
 
 (defsystem #:fedwiki/page/wiki.ralfbarkow.ch/the-1998-ai-planning-systems-competition
-    :description "FedWiki page system for the McDermott 2000 AIPS Planning Competition reading artifact"
+    :description "FedWiki page system for the McDermott 2000 AIPS Planning Competition page-attached ASDF system"
     :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
-    :depends-on (#:fedwiki
-                 #:the-1998-ai-planning-systems-competition)
+    :depends-on (#:fedwiki)
     :components ((:module "hyperdoc/page-systems"
                           :serial t
                           :components ((:file "fedwiki-the-1998-ai-planning-systems-competition")))))

@@ -1,4 +1,4 @@
-;;;; Page-system descriptor for the McDermott 2000 FedWiki reading artifact.
+;;;; Page-system descriptor for the McDermott 2000 page-attached ASDF system.
 
 (in-package :hyperdoc)
 
