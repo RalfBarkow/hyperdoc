@@ -2,7 +2,7 @@
  (:id refactor-page-systems-to-fedwiki-page-attached-asdf)
  (:title "Retire Legacy Page-System Registry In Favor Of FedWiki Page-Attached ASDF")
  (:type :shop3-plan)
- (:status :open)
+ (:status :closed)
  (:created-for-slice
   "Delete the obsolete HyperDoc page-system registry after the McDermott page-attached ASDF repair")
  (:repo-root "/Users/rgb/workspace/hyperdoc")
@@ -205,4 +205,41 @@
   (underlying-mobile-progressive-chrome-system-preserved t)
   (dm6-proof-validation-path-preserved t)
   (no-fedwiki-page-central-registry-created t)
-  (submodule-pages-and-assets-untouched t)))
+  (submodule-pages-and-assets-untouched t))
+
+ :closure
+ ((plan-commit
+   "001ed324 docs(page-assets): revise plan to retire page systems")
+  (refactor-commit
+   "6318917b refactor(page-assets): remove legacy page-system registry")
+  (close-plan-commit
+   "docs(page-assets): close page-system retirement plan")
+  (implemented
+   ((fedwiki-asd-individual-page-defsystems removed)
+    (hyperdoc-page-asdf-defsystems removed)
+    (legacy-page-system-registry removed)
+    (legacy-page-system-descriptor-directory removed)
+    (legacy-explorer-page-system-views removed)
+    (legacy-page-system-smoke-test retired)
+    (page-attached-asdf-contract-smoke-test added)
+    (obsolete-page-system-documents marked-obsolete)
+    (hyperdoc-reload-namespace-created nil)
+    (replacement-default-registry-created nil)))
+  (validation
+   ((pre-commit-load-gate pass)
+    (asdf-load-system-hyperdoc pass)
+    (mcdermott-page-attached-asdf-load pass)
+    (mcdermott-page-attached-asdf-test-system pass)
+    (mcdermott-materialization-idempotent t)
+    (mcdermott-live-network-required nil)
+    (mcdermott-page-path
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/the-1998-ai-planning-systems-competition")
+    (mcdermott-asdf-path
+     "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.asd")
+    (mobile-progressive-chrome-smoke pass)
+    (dm6-page-topicmap-smoke pass)
+    (page-attached-asdf-contract-smoke pass)
+    (search-gates pass-with-obsolete-migration-notes-only)
+    (full-hyperdoc-test-suite
+     (residual-failure
+      "lookup-issue-docs-render-smoke reached an unrelated CLOG view-html method mismatch after the target page-attached ASDF, mobile, DM6, FedWiki, and render-safety smoke tests had passed."))))))
