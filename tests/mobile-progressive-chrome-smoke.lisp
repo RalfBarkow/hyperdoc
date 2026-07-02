@@ -58,7 +58,6 @@
               'hyperdoc::html-page)
        "Slice helper must find the central HTML page")
       (dolist (title '("Mobile progressive chrome ASDF system"
-                       "Mobile progressive chrome reload boundary"
                        "Mobile progressive chrome page"
                        "Mobile progressive chrome boundary layout claim"))
         (mobile-progressive-chrome-assert-true
@@ -190,7 +189,7 @@
                         "Route capture"
                         "Ordinary links"
                         "Boundary-mounted handles"
-                        "ASDF reload boundary"
+                        "ASDF feature slice"
                         "Mobile progressive chrome SCXML"
                         "mobile-progressive-chrome-plan"))
         (mobile-progressive-chrome-assert-true

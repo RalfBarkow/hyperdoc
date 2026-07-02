@@ -157,7 +157,7 @@
    :effects ((lisp-path-constants point-at-page-attached-asset-root)
              (tests point-at-page-attached-asset-root)
              (examples point-at-page-attached-asset-root)
-             (page-system-descriptor points-at-fedwiki-page-and-assets)
+             (obsolete-page-system-descriptor scheduled-for-retirement)
              (plan-artifacts record-placement-correction)))
 
   (:operator !validate-page-local-asdf-load

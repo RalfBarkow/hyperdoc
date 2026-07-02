@@ -24,8 +24,7 @@
    :run-mobile-progressive-chrome-smoke-tests
    :run-reel-accessible-carousel-smoke-tests
    :run-layout-topicmap-smoke-tests
-   :run-page-system-smoke-tests
-   :run-shop3-page-system-smoke-tests
+   :run-page-attached-asdf-contract-smoke-tests
    :run-dmx-annotations-smoke-tests
    :run-dmx-workspace-annotation-live-smoke-tests
    :run-dmx-workspace-journal-sink-smoke-tests

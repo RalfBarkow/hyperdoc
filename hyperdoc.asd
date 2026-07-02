@@ -106,7 +106,6 @@
                                (:file "interaction-nets")
                                (:file "source-stations")
                                (:file "dm6-inline-proof")
-                               (:file "page-systems")
                                (:file "mobile-progressive-chrome")
                                (:file "reel-accessible-carousel")
                                (:file "layout-topicmap")
@@ -207,7 +206,6 @@
                                        (:file "programming-style-critical-reading")
                                        (:file "git-commit-equivalence")
                                        (:file "hyperdoc")
-                                       (:file "page-systems")
                                        (:file "fedwiki-attached-asdf-system")
                                        (:file "fedwiki-attached-asdf-relations")
                                        (:file "source-artifacts")
@@ -234,28 +232,6 @@
     :components ((:module "hyperdoc"
                   :serial t
                   :components ((:file "mobile-progressive-chrome")))))
-
-(defsystem #:hyperdoc/page/mobile-progressive-chrome
-    :description "Page system for Mobile progressive chrome in HyperDoc"
-    :author "Ralf Barkow <ralf.barkow@me.com>"
-    :license "BSD"
-    :version "0.0.1"
-    :serial t
-    :depends-on (#:hyperdoc/mobile-progressive-chrome)
-    :components ((:module "hyperdoc/page-systems"
-                  :serial t
-                  :components ((:file "mobile-progressive-chrome")))))
-
-(defsystem #:hyperdoc/page/dm6-appembed-inline-proof
-    :description "Page system for DM6 AppEmbed HyperDoc Inline Proof"
-    :author "Ralf Barkow <ralf.barkow@me.com>"
-    :license "BSD"
-    :version "0.0.1"
-    :serial t
-    :depends-on (#:hyperdoc/explorer)
-    :components ((:module "hyperdoc/page-systems"
-                  :serial t
-                  :components ((:file "dm6-appembed-inline-proof")))))
 
 (defsystem #:hyperdoc/fedwiki-asdf-assets
     :description "HyperDoc-native writer for page-local FedWiki ASDF assets"
@@ -635,7 +611,6 @@
                                        (:file "runtime-incidents")
                                        (:file "dom-annotations")
                                        (:file "dock")
-                                       (:file "page-systems")
                                        (:file "source-pane-layout")
                                        (:file "html-pages")
                                        (:file "markdown-pages")
@@ -728,7 +703,7 @@
                                        (:file "mobile-progressive-chrome-smoke")
                                        (:file "reel-accessible-carousel-smoke")
                                        (:file "layout-topicmap-smoke")
-                                       (:file "page-system-smoke")
+                                       (:file "page-attached-asdf-contract-smoke")
                                        (:file "dmx-annotations-smoke")
                                        (:file "dmx-workspace-journal-sink-smoke")
                                        (:file "dmx-auth-session-boundary-smoke")

@@ -92,6 +92,7 @@ non-recursive operate contract."
   (run-mobile-progressive-chrome-smoke-tests)
   (run-reel-accessible-carousel-smoke-tests)
   (run-layout-topicmap-smoke-tests)
+  (run-page-attached-asdf-contract-smoke-tests)
   (run-dmx-annotations-smoke-tests)
   (run-dmx-workspace-journal-sink-smoke-tests)
   (run-dmx-auth-session-boundary-smoke-tests)

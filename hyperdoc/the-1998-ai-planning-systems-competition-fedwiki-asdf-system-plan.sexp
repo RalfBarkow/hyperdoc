@@ -45,7 +45,7 @@
     "hyperdoc/fedwiki-attached-asdf-relations.lisp"
     "hyperdoc-inspector/fedwiki-attached-asdf-system.lisp"
     "hyperdoc-inspector/fedwiki-attached-asdf-relations.lisp"
-    "hyperdoc/topics/page-systems.lisp"
+    "hyperdoc/topics/asdf.lisp"
     "hyperdoc/fedwiki-asdf-assets/metagraph"
     "dreyeck/dmx/sqlite"
     "hyperdoc/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"
@@ -105,7 +105,7 @@
    :effects ((asdf-system "the-1998-ai-planning-systems-competition")
              (asdf-test-system "the-1998-ai-planning-systems-competition/test")
              (fedwiki-attached-home inspectable)
-             (page-system discoverable)))
+             (obsolete-repo-local-page-asdf-route not-used)))
 
   (:operator !create-dmx-topic-sqlite-asset
    :preconditions ((asdf-system "the-1998-ai-planning-systems-competition"))
@@ -172,16 +172,15 @@
      "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.dmx.sqlite")
     (fedwiki-page-projection
      "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/the-1998-ai-planning-systems-competition")
-    (page-system
-     "fedwiki/page/wiki.ralfbarkow.ch/the-1998-ai-planning-systems-competition")))
+    (obsolete-repo-local-page-asdf-route
+     removed-by-page-system-retirement)))
   (validation-results
    ((asdf-load-system "the-1998-ai-planning-systems-competition")
     (asdf-test-system "the-1998-ai-planning-systems-competition/test")
     (sqlite-counts ((dmx_topics 25)
                     (dmx_associations 18)
                     (fedwiki_story_items 9)))
-    (page-system-load
-     "fedwiki/page/wiki.ralfbarkow.ch/the-1998-ai-planning-systems-competition")
+    (obsolete-repo-local-page-asdf-load removed-by-page-system-retirement)
     (reconstruction-idempotent t)
     (network-required nil)
     (git-diff-check-passes t)

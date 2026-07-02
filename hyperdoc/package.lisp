@@ -458,7 +458,7 @@
    #:dmx-sync-plan-item-safe-p
    #:dmx-ensure-sqlite-query-schema
    #:dmx-sqlite-schema-status
-   ;; Mobile progressive chrome reload boundary
+   ;; Mobile progressive chrome feature slice
    #:mobile-progressive-chrome-page
    #:mobile-progressive-chrome-system-slice
    #:mobile-progressive-chrome-state-model
@@ -567,70 +567,6 @@
    #:load-layout-overrides
    #:replay-layout-overrides
    #:layout-override-revert-patch
-   ;; Page-as-ASDF-system reload boundaries
-   #:page-system
-   #:hyperdoc-page-system
-   #:fedwiki-page-system
-   #:external-page-system
-   #:page-runtime-provider
-   #:page-system-registry
-   #:page-system-registry-systems
-   #:register-page-system
-   #:find-page-system
-   #:ensure-page-system
-   #:page-system-reload
-   #:page-system-display-ready-p
-   #:page-system-inspection-targets
-   #:page-system-validation-checks
-   #:page-system-asdf-form
-   #:materialize-page-system-asd
-   #:page-system-summary
-   #:page-system-runtime-systems
-   #:page-system-rendered-page
-   #:page-system-local-twin-pathname
-   #:page-system-id
-   #:page-system-title
-   #:page-system-kind
-   #:page-system-asdf-system-name
-   #:page-system-page-locator
-   #:page-system-runtime-providers
-   #:page-system-runtime-entry-points
-   #:page-system-display-contract
-   #:page-system-inspection-entry-points
-   #:page-system-validation-entry-points
-   #:page-system-source-files
-   #:page-system-artifacts
-   #:page-system-description
-   #:page-runtime-provider-id
-   #:page-runtime-provider-kind
-   #:page-runtime-provider-asdf-system-name
-   #:page-runtime-provider-ensure-function
-   #:page-runtime-provider-readiness-function
-   #:page-runtime-provider-display-notes
-   #:page-runtime-provider-source-repo
-   #:page-runtime-provider-upstream-url
-   #:page-runtime-provider-local-override-note
-   #:page-runtime-provider-license-note
-   #:page-system-reload-report
-   #:page-system-reload-report-page-system
-   #:page-system-reload-report-asdf-system-name
-   #:page-system-reload-report-loaded-p
-   #:page-system-reload-report-display-ready-p
-   #:page-system-reload-report-warnings
-   #:page-system-latest-reload-report
-   #:hyperdoc-runtime-provider
-   #:hyperdoc-explorer-runtime-provider
-   #:fedwiki-client-runtime-provider
-   #:fedwiki-materialization-runtime-provider
-   #:shop3-source-root-pathname
-   #:ensure-shop3-runtime
-   #:shop3-runtime-ready-p
-   #:shop3-runtime-provider
-   #:hyperdoc-shop3-planning-runtime-provider
-   #:make-mobile-progressive-chrome-page-system
-   #:make-dm6-appembed-inline-proof-page-system
-   #:make-fedwiki-mobile-progressive-chrome-page-system
-   #:make-fedwiki-shop3-page-system
    ;; FedWiki-attached ASDF system homes
    #:fedwiki-attached-asdf-system
    #:fedwiki-asdf-system-lookup-failure
