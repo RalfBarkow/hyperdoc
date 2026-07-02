@@ -2,13 +2,17 @@
  (:id the-1998-ai-planning-systems-competition-fedwiki-asdf-system)
  (:title "The 1998 AI Planning Systems Competition FedWiki ASDF System")
  (:type :shop3-plan)
- (:status :open)
+ (:status :closed)
  (:created-for-slice
   "FedWiki-attached ASDF reading artifact for Drew V. McDermott, The 1998 AI Planning Systems Competition")
  (:repo-root "/Users/rgb/workspace/hyperdoc")
  (:slug "the-1998-ai-planning-systems-competition")
  (:system "the-1998-ai-planning-systems-competition")
  (:plan-topic the-1998-ai-planning-systems-competition-fedwiki-asdf-system)
+ (:commit-references
+  ((plan-commit "96cf921f")
+   (implementation-commit "ab0fd446")
+   (closing-commit "commit containing this plan closure")))
 
  :knowledge
  ((reading-source
@@ -92,7 +96,7 @@
    :preconditions ((plan-artifact validated)
                    (git-working-tree clean-before-plan))
    :effects ((plan-artifact committed)
-             (plan-commit "pending")))
+             (plan-commit "96cf921f")))
 
   (:operator !create-fedwiki-attached-asdf-system
    :preconditions ((plan-artifact committed))
@@ -147,13 +151,39 @@
   (:operator !commit-implementation
    :preconditions ((smoke-tests pass))
    :effects ((implementation committed)
-             (implementation-commit "pending")))
+             (implementation-commit "ab0fd446")))
 
   (:operator !close-plan-artifact
    :preconditions ((implementation committed))
    :effects ((plan-status :closed)
              (plan-artifact records-commit-references)
              (plan-artifact closed))))
+
+ :closure
+ ((closed-on "2026-07-02")
+  (plan-commit "96cf921f")
+  (implementation-commit "ab0fd446")
+  (implementation-status
+   ((page-attached-asdf-system
+     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition")
+    (sqlite-asset
+     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/assets/the-1998-ai-planning-systems-competition.dmx.sqlite")
+    (fedwiki-page-projection
+     "hyperdoc/fedwiki-asdf-assets/the-1998-ai-planning-systems-competition/pages/the-1998-ai-planning-systems-competition.json")
+    (page-system
+     "fedwiki/page/wiki.ralfbarkow.ch/the-1998-ai-planning-systems-competition")))
+  (validation-results
+   ((asdf-load-system "the-1998-ai-planning-systems-competition")
+    (asdf-test-system "the-1998-ai-planning-systems-competition/test")
+    (sqlite-counts ((dmx_topics 25)
+                    (dmx_associations 18)
+                    (fedwiki_story_items 9)))
+    (page-system-load
+     "fedwiki/page/wiki.ralfbarkow.ch/the-1998-ai-planning-systems-competition")
+    (reconstruction-idempotent t)
+    (network-required nil)
+    (git-diff-check-passes t)
+    (pre-commit-load-gate-passes t))))
 
  :output-contract
  ((required-topic-ids
