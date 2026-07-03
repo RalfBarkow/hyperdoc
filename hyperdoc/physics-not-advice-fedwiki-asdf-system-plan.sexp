@@ -51,6 +51,8 @@
    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/physics-not-advice/physics-not-advice.asd")
   (sqlite-asset
    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/physics-not-advice/physics-not-advice.dmx.sqlite")
+  (plan-fedwiki-page
+   "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice-reconstruction-plan")
   (fedwiki-page
    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice"))
 
@@ -58,6 +60,9 @@
  ((:task create-physics-not-advice-fedwiki-asdf-artifact
    :parameters (?plan ?page)
    :goal ((plan-artifact recorded)
+          (plan-page-projection materialized)
+          (plan-page-journal-actions recorded)
+          (plan-page-projection validated)
           (plan-artifact validated)
           (topics recorded)
           (associations recorded)
@@ -65,7 +70,13 @@
           (dmx-sqlite-asset seeded)
           (dmx-sqlite-schema valid)
           (fedwiki-story-items drafted)
+          (fedwiki-story-ids-derived)
+          (fedwiki-story-ids-valid)
+          (semantic-fedwiki-story-ids-absent)
           (fedwiki-journal-actions recorded)
+          (fedwiki-journal-actions-schema-valid)
+          (fedwiki-journal-replay-valid)
+          (journalmatic-revision-gate-passed)
           (fedwiki-page-json projected)
           (fedwiki-journal-gate valid)
           (asdf-system written)
@@ -81,6 +92,35 @@
    :ordered-subtasks
    ((!record-plan-artifact
      "hyperdoc/physics-not-advice-fedwiki-asdf-system-plan.sexp")
+    (!materialize-plan-as-fedwiki-page
+     physics-not-advice-fedwiki-asdf-system-plan
+     physics-not-advice-reconstruction-plan
+     "Physics, Not Advice Reconstruction Plan")
+    (!record-plan-page-journal-action
+     physics-not-advice-reconstruction-plan 1 create nil)
+    (!record-plan-page-journal-action
+     physics-not-advice-reconstruction-plan 2 add plan-synopsis)
+    (!record-plan-page-journal-action
+     physics-not-advice-reconstruction-plan 3 add problem)
+    (!record-plan-page-journal-action
+     physics-not-advice-reconstruction-plan 4 add domain)
+    (!record-plan-page-journal-action
+     physics-not-advice-reconstruction-plan 5 add selected-ordered-plan)
+    (!record-plan-page-journal-action
+     physics-not-advice-reconstruction-plan 6 add artifact-topology)
+    (!record-plan-page-journal-action
+     physics-not-advice-reconstruction-plan 7 add validation-contract)
+    (!record-plan-page-journal-action
+     physics-not-advice-reconstruction-plan 8 add closeout-contract)
+    (!derive-fedwiki-story-ids
+     physics-not-advice-reconstruction-plan wiki-client-compatible-16hex)
+    (!validate-fedwiki-story-id-shape physics-not-advice-reconstruction-plan)
+    (!reject-semantic-fedwiki-story-ids physics-not-advice-reconstruction-plan)
+    (!validate-fedwiki-journal-action-schema physics-not-advice-reconstruction-plan)
+    (!replay-fedwiki-journal-with-wiki-client-semantics
+     physics-not-advice-reconstruction-plan)
+    (!run-journalmatic-revision-gate physics-not-advice-reconstruction-plan)
+    (!validate-plan-page-projection physics-not-advice-reconstruction-plan)
     (!validate-plan-artifact physics-not-advice-plan)
     (model-physics-not-advice-reading physics-not-advice)
     (materialize-physics-not-advice-artifact physics-not-advice)
@@ -114,7 +154,14 @@
     (!draft-fedwiki-story-item advice-taker-bridge)
     (!draft-fedwiki-story-item shop3-methods-question)
     (!draft-fedwiki-story-item reconstruction-contract)
-    (!record-fedwiki-journal-action create)
+    (!derive-fedwiki-story-ids physics-not-advice wiki-client-compatible-16hex)
+    (!validate-fedwiki-story-id-shape physics-not-advice)
+    (!reject-semantic-fedwiki-story-ids physics-not-advice)
+    (!record-fedwiki-journal-action physics-not-advice create)
+    (!record-fedwiki-journal-action physics-not-advice add)
+    (!validate-fedwiki-journal-action-schema physics-not-advice)
+    (!replay-fedwiki-journal-with-wiki-client-semantics physics-not-advice)
+    (!run-journalmatic-revision-gate physics-not-advice)
     (!project-fedwiki-page-json physics-not-advice)
     (!validate-fedwiki-journal-gate physics-not-advice)
     (!write-asdf-system physics-not-advice)
@@ -133,8 +180,29 @@
              (plan-path ?path)
              (plan-status :open)))
 
-  (:op (!validate-plan-artifact ?plan)
+  (:op (!materialize-plan-as-fedwiki-page ?plan ?slug ?title)
    :preconditions ((plan-artifact recorded))
+   :effects ((plan-page-projection materialized)
+             (plan-page-slug ?slug)
+             (plan-page-title ?title)
+             (plan-page-json-path
+              "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice-reconstruction-plan")))
+
+  (:op (!record-plan-page-journal-action ?slug ?order ?action ?logical-item)
+   :preconditions ((plan-page-projection materialized))
+   :effects ((plan-page-journal-actions recorded)
+             (plan-page-journal-action ?slug ?order ?action ?logical-item)))
+
+  (:op (!validate-plan-page-projection ?slug)
+   :preconditions ((plan-page-journal-actions recorded)
+                   (journalmatic-revision-gate-passed ?slug))
+   :effects ((plan-page-projection validated)
+             (plan-page-title "Physics, Not Advice Reconstruction Plan")
+             (plan-page-journal-replay-valid t)))
+
+  (:op (!validate-plan-artifact ?plan)
+   :preconditions ((plan-artifact recorded)
+                   (plan-page-projection validated))
    :effects ((plan-artifact validates-required-primitive-operators)
              (plan-artifact uses-op-not-operator)
              (primitive-task-names-use-bang t)
@@ -182,25 +250,62 @@
   (:op (!draft-fedwiki-story-item ?item)
    :preconditions ((dmx-sqlite-schema valid))
    :effects ((fedwiki-story-item drafted)
-             (fedwiki-story-item-id ?item)))
+             (fedwiki-story-logical-name ?item)))
 
-  (:op (!record-fedwiki-journal-action ?action)
+  (:op (!derive-fedwiki-story-ids ?page ?source)
    :preconditions ((fedwiki-story-item drafted))
+   :effects ((fedwiki-story-ids-derived ?page ?source)
+             (fedwiki-story-id-source ?source)
+             (fedwiki-story-runtime-id-shape 16-hex)))
+
+  (:op (!validate-fedwiki-story-id-shape ?page)
+   :preconditions ((fedwiki-story-ids-derived ?page ?source))
+   :effects ((fedwiki-story-ids-valid ?page)
+             (fedwiki-story-runtime-id-shape 16-hex)
+             (wiki-client-compatible-story-ids t)))
+
+  (:op (!reject-semantic-fedwiki-story-ids ?page)
+   :preconditions ((fedwiki-story-ids-valid ?page))
+   :effects ((semantic-fedwiki-story-ids-absent ?page)
+             (semantic-labels-retained-as-logical-item-ids t)))
+
+  (:op (!record-fedwiki-journal-action ?page ?action)
+   :preconditions ((semantic-fedwiki-story-ids-absent ?page))
    :effects ((fedwiki-journal-action recorded)
              (fedwiki-journal-action-type ?action)))
 
+  (:op (!validate-fedwiki-journal-action-schema ?page)
+   :preconditions ((fedwiki-journal-action recorded)
+                   (semantic-fedwiki-story-ids-absent ?page))
+   :effects ((fedwiki-journal-actions-schema-valid ?page)
+             (journal-add-item-ids-match-story-ids t)
+             (journal-action-ids-use-runtime-ids t)))
+
+  (:op (!replay-fedwiki-journal-with-wiki-client-semantics ?page)
+   :preconditions ((fedwiki-journal-actions-schema-valid ?page))
+   :effects ((fedwiki-journal-replay-valid ?page)
+             (fedwiki-current-story-reconstructed-from-journal t)))
+
+  (:op (!run-journalmatic-revision-gate ?page)
+   :preconditions ((fedwiki-journal-replay-valid ?page))
+   :effects ((journalmatic-revision-gate-passed ?page)
+             (journalmatic-findings-clear (:revision :malformed))))
+
   (:op (!project-fedwiki-page-json ?page)
    :preconditions ((fedwiki-story-item drafted)
-                   (fedwiki-journal-action recorded))
+                   (journalmatic-revision-gate-passed ?page))
    :effects ((fedwiki-page-json projected)
              (fedwiki-page-json-path
               "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice")))
 
   (:op (!validate-fedwiki-journal-gate ?page)
-   :preconditions ((fedwiki-page-json projected))
+   :preconditions ((fedwiki-page-json projected)
+                   (journalmatic-revision-gate-passed ?page))
    :effects ((fedwiki-journal-gate valid)
              (fedwiki-page-title "Physics, Not Advice")
-             (fedwiki-journal-create-action present)))
+             (fedwiki-journal-create-action present)
+             (fedwiki-journal-revision-error absent)
+             (fedwiki-journal-malformed-error absent)))
 
   (:op (!write-asdf-system ?page)
    :preconditions ((dmx-sqlite-schema valid))
@@ -240,6 +345,35 @@
  :selected-ordered-plan
  ((!record-plan-artifact
    "hyperdoc/physics-not-advice-fedwiki-asdf-system-plan.sexp")
+  (!materialize-plan-as-fedwiki-page
+   physics-not-advice-fedwiki-asdf-system-plan
+   physics-not-advice-reconstruction-plan
+   "Physics, Not Advice Reconstruction Plan")
+  (!record-plan-page-journal-action
+   physics-not-advice-reconstruction-plan 1 create nil)
+  (!record-plan-page-journal-action
+   physics-not-advice-reconstruction-plan 2 add plan-synopsis)
+  (!record-plan-page-journal-action
+   physics-not-advice-reconstruction-plan 3 add problem)
+  (!record-plan-page-journal-action
+   physics-not-advice-reconstruction-plan 4 add domain)
+  (!record-plan-page-journal-action
+   physics-not-advice-reconstruction-plan 5 add selected-ordered-plan)
+  (!record-plan-page-journal-action
+   physics-not-advice-reconstruction-plan 6 add artifact-topology)
+  (!record-plan-page-journal-action
+   physics-not-advice-reconstruction-plan 7 add validation-contract)
+  (!record-plan-page-journal-action
+   physics-not-advice-reconstruction-plan 8 add closeout-contract)
+  (!derive-fedwiki-story-ids
+   physics-not-advice-reconstruction-plan wiki-client-compatible-16hex)
+  (!validate-fedwiki-story-id-shape physics-not-advice-reconstruction-plan)
+  (!reject-semantic-fedwiki-story-ids physics-not-advice-reconstruction-plan)
+  (!validate-fedwiki-journal-action-schema physics-not-advice-reconstruction-plan)
+  (!replay-fedwiki-journal-with-wiki-client-semantics
+   physics-not-advice-reconstruction-plan)
+  (!run-journalmatic-revision-gate physics-not-advice-reconstruction-plan)
+  (!validate-plan-page-projection physics-not-advice-reconstruction-plan)
   (!validate-plan-artifact physics-not-advice-plan)
   (!record-topic physics-not-advice "Physics, Not Advice")
   (!record-topic mcdermott-physics-not-advice "McDermott Physics Not Advice")
@@ -261,7 +395,14 @@
   (!draft-fedwiki-story-item advice-taker-bridge)
   (!draft-fedwiki-story-item shop3-methods-question)
   (!draft-fedwiki-story-item reconstruction-contract)
-  (!record-fedwiki-journal-action create)
+  (!derive-fedwiki-story-ids physics-not-advice wiki-client-compatible-16hex)
+  (!validate-fedwiki-story-id-shape physics-not-advice)
+  (!reject-semantic-fedwiki-story-ids physics-not-advice)
+  (!record-fedwiki-journal-action physics-not-advice create)
+  (!record-fedwiki-journal-action physics-not-advice add)
+  (!validate-fedwiki-journal-action-schema physics-not-advice)
+  (!replay-fedwiki-journal-with-wiki-client-semantics physics-not-advice)
+  (!run-journalmatic-revision-gate physics-not-advice)
   (!project-fedwiki-page-json physics-not-advice)
   (!validate-fedwiki-journal-gate physics-not-advice)
   (!write-asdf-system physics-not-advice)
@@ -279,6 +420,13 @@
   (concept-page-commit "97f7acb5")
   (hyperdoc-contract-test-commit "1834851a")
   (plan-page-close-commit "c94d41cb")
+  (corrective-repair
+   ((story-id-boundary-defect
+     "Semantic story item labels were incorrectly used as FedWiki runtime ids.")
+    (repair
+     "FedWiki story ids are now stable opaque 16-hex runtime ids, with semantic labels retained as logical story item names in SQLite and Lisp metadata.")
+    (prevention
+     "The selected plan now derives ids, validates id shape, rejects semantic story ids, validates journal action schema, replays with wiki-client semantics, and runs the journalmatic revision gate before page projection.")))
   (implementation-status
    ((plan-artifact
      "/Users/rgb/workspace/hyperdoc/hyperdoc/physics-not-advice-fedwiki-asdf-system-plan.sexp")
@@ -294,19 +442,22 @@
     (repo-local-hyperdoc-page-asdf-system-created nil)))
   (validation-results
    ((plan-page-title "Physics, Not Advice Reconstruction Plan")
-    (plan-page-story-items 3)
-    (plan-page-journal-actions 4)
+    (plan-page-story-items 7)
+    (plan-page-journal-actions 8)
     (concept-page-title "Physics, Not Advice")
     (concept-page-story-items 6)
     (concept-page-journal-actions 7)
-    (sqlite-counts ((dmx_topics 18)
-                    (dmx_associations 11)
-                    (dmx_assoc_players 22)
+    (sqlite-counts ((dmx_topics 19)
+                    (dmx_associations 12)
+                    (dmx_assoc_players 24)
                     (source_fragments 3)
-                    (fedwiki_pages 1)
-                    (fedwiki_story_items 6)
-                    (fedwiki_journal_actions 7)
-                    (shop3_plan_steps 10)))
+                    (fedwiki_pages 2)
+                    (fedwiki_story_items 13)
+                    (fedwiki_journal_actions 15)
+                    (shop3_plan_steps 33)))
+    (fedwiki-story-id-shape "16 lowercase hex")
+    (semantic-fedwiki-story-ids-absent t)
+    (journalmatic-findings nil)
     (asdf-load-system "physics-not-advice")
     (asdf-test-system "physics-not-advice/test")
     (page-attached-contract-smoke-test pass)
@@ -337,6 +488,12 @@
    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/physics-not-advice/physics-not-advice.asd")
   (fedwiki-page-json
    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice")
+  (fedwiki-story-item-id-policy
+   ((runtime-id-shape "16 lowercase hex")
+    (semantic-labels-in-runtime-id-fields nil)
+    (journal-add-id-matches-item-id t)
+    (journal-after-references-runtime-ids t)
+    (journalmatic-revision-gate-required-before-commit t)))
   (no-hyperdoc-page-system-registry-created t)
   (no-repo-local-hyperdoc-page-asdf-system-created t)
   (live-network-required nil)))
