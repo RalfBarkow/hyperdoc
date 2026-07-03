@@ -56,6 +56,16 @@
   (fedwiki-page
    "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice"))
 
+ :given
+ ((fedwiki-live-route
+   physics-not-advice
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+  (fedwiki-live-route
+   physics-not-advice-reconstruction-plan
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")
+  (server-discovery-policy
+   "Server discovery is a contingency branch only when no live route has been supplied or the supplied route is proven unreachable. It must not run before !use-given-fedwiki-live-route."))
+
  :domain
  ((:task create-physics-not-advice-fedwiki-asdf-artifact
    :parameters (?plan ?page)
@@ -84,6 +94,12 @@
           (asdf-load valid)
           (page-history replayed)
           (reconstruction idempotent)
+          (fedwiki-live-route-selected)
+          (server-discovery-forbidden)
+          (fedwiki-live-route-reachable)
+          (fedwiki-live-page-inspected)
+          (fedwiki-live-page-errors-absent)
+          (fedwiki-live-verification-recorded)
           (plan-artifact closed)))
 
   (:method create-physics-not-advice-fedwiki-asdf-artifact
@@ -172,7 +188,42 @@
    :ordered-subtasks
    ((!validate-asdf-load physics-not-advice)
     (!replay-page-history physics-not-advice)
-    (!validate-reconstruction-idempotence physics-not-advice)))
+    (!validate-reconstruction-idempotence physics-not-advice)
+    (!use-given-fedwiki-live-route
+     physics-not-advice
+     "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+    (!forbid-unplanned-server-discovery physics-not-advice)
+    (!verify-fedwiki-live-route-reachable
+     physics-not-advice
+     "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+    (!inspect-fedwiki-live-page-errors
+     physics-not-advice
+     "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+    (!assert-fedwiki-live-page-error-absent physics-not-advice errors-found)
+    (!assert-fedwiki-live-page-error-absent physics-not-advice revision)
+    (!assert-fedwiki-live-page-error-absent physics-not-advice malformed)
+    (!record-fedwiki-live-verification-evidence
+     physics-not-advice
+     "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+    (!use-given-fedwiki-live-route
+     physics-not-advice-reconstruction-plan
+     "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")
+    (!forbid-unplanned-server-discovery physics-not-advice-reconstruction-plan)
+    (!verify-fedwiki-live-route-reachable
+     physics-not-advice-reconstruction-plan
+     "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")
+    (!inspect-fedwiki-live-page-errors
+     physics-not-advice-reconstruction-plan
+     "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")
+    (!assert-fedwiki-live-page-error-absent
+     physics-not-advice-reconstruction-plan errors-found)
+    (!assert-fedwiki-live-page-error-absent
+     physics-not-advice-reconstruction-plan revision)
+    (!assert-fedwiki-live-page-error-absent
+     physics-not-advice-reconstruction-plan malformed)
+    (!record-fedwiki-live-verification-evidence
+     physics-not-advice-reconstruction-plan
+     "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")))
 
   (:op (!record-plan-artifact ?path)
    :preconditions ((repo-root "/Users/rgb/workspace/hyperdoc"))
@@ -336,8 +387,44 @@
    :effects ((reconstruction idempotent)
              (live-network-required nil)))
 
+  (:op (!use-given-fedwiki-live-route ?page ?url)
+   :preconditions ((fedwiki-live-route ?page ?url))
+   :effects ((fedwiki-live-route-selected ?page ?url)))
+
+  (:op (!forbid-unplanned-server-discovery ?page)
+   :preconditions ((fedwiki-live-route ?page ?url))
+   :effects ((server-discovery-forbidden ?page)
+             (server-discovery-contingency-only t)))
+
+  (:op (!verify-fedwiki-live-route-reachable ?page ?url)
+   :preconditions ((fedwiki-live-route-selected ?page ?url)
+                   (server-discovery-forbidden ?page))
+   :effects ((fedwiki-live-route-reachable ?page ?url)))
+
+  (:op (!inspect-fedwiki-live-page-errors ?page ?url)
+   :preconditions ((fedwiki-live-route-reachable ?page ?url))
+   :effects ((fedwiki-live-page-inspected ?page ?url)
+             (fedwiki-live-ui-route-used ?url)))
+
+  (:op (!assert-fedwiki-live-page-error-absent ?page ?error-class)
+   :preconditions ((fedwiki-live-page-inspected ?page ?url))
+   :effects ((fedwiki-live-page-error-absent ?page ?error-class)))
+
+  (:op (!record-fedwiki-live-verification-evidence ?page ?url)
+   :preconditions ((fedwiki-live-page-error-absent ?page errors-found)
+                   (fedwiki-live-page-error-absent ?page revision)
+                   (fedwiki-live-page-error-absent ?page malformed))
+   :effects ((fedwiki-live-verification-recorded ?page ?url)
+             (fedwiki-live-verification-route ?page ?url)))
+
   (:op (!close-plan-artifact ?plan)
-   :preconditions ((reconstruction idempotent))
+   :preconditions ((reconstruction idempotent)
+                   (fedwiki-live-verification-recorded
+                    physics-not-advice
+                    "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+                   (fedwiki-live-verification-recorded
+                    physics-not-advice-reconstruction-plan
+                    "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan"))
    :effects ((plan-status :closed)
              (plan-artifact records-validation)
              (plan-artifact closed))))
@@ -410,6 +497,41 @@
   (!validate-asdf-load physics-not-advice)
   (!replay-page-history physics-not-advice)
   (!validate-reconstruction-idempotence physics-not-advice)
+  (!use-given-fedwiki-live-route
+   physics-not-advice
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+  (!forbid-unplanned-server-discovery physics-not-advice)
+  (!verify-fedwiki-live-route-reachable
+   physics-not-advice
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+  (!inspect-fedwiki-live-page-errors
+   physics-not-advice
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+  (!assert-fedwiki-live-page-error-absent physics-not-advice errors-found)
+  (!assert-fedwiki-live-page-error-absent physics-not-advice revision)
+  (!assert-fedwiki-live-page-error-absent physics-not-advice malformed)
+  (!record-fedwiki-live-verification-evidence
+   physics-not-advice
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+  (!use-given-fedwiki-live-route
+   physics-not-advice-reconstruction-plan
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")
+  (!forbid-unplanned-server-discovery physics-not-advice-reconstruction-plan)
+  (!verify-fedwiki-live-route-reachable
+   physics-not-advice-reconstruction-plan
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")
+  (!inspect-fedwiki-live-page-errors
+   physics-not-advice-reconstruction-plan
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")
+  (!assert-fedwiki-live-page-error-absent
+   physics-not-advice-reconstruction-plan errors-found)
+  (!assert-fedwiki-live-page-error-absent
+   physics-not-advice-reconstruction-plan revision)
+  (!assert-fedwiki-live-page-error-absent
+   physics-not-advice-reconstruction-plan malformed)
+  (!record-fedwiki-live-verification-evidence
+   physics-not-advice-reconstruction-plan
+   "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")
   (!close-plan-artifact physics-not-advice-plan))
 
  :closure
@@ -426,7 +548,11 @@
     (repair
      "FedWiki story ids are now stable opaque 16-hex runtime ids, with semantic labels retained as logical story item names in SQLite and Lisp metadata.")
     (prevention
-     "The selected plan now derives ids, validates id shape, rejects semantic story ids, validates journal action schema, replays with wiki-client semantics, and runs the journalmatic revision gate before page projection.")))
+     "The selected plan now derives ids, validates id shape, rejects semantic story ids, validates journal action schema, replays with wiki-client semantics, and runs the journalmatic revision gate before page projection.")
+    (live-route-process-defect
+     "Live FedWiki verification was treated as server discovery even though concrete live routes were supplied as current state.")
+    (live-route-process-prevention
+     "The plan records fedwiki-live-route facts and requires !use-given-fedwiki-live-route before any reachability or inspection step. Server discovery is a contingency branch only when no live route has been supplied or the supplied route is proven unreachable.")))
   (implementation-status
    ((plan-artifact
      "/Users/rgb/workspace/hyperdoc/hyperdoc/physics-not-advice-fedwiki-asdf-system-plan.sexp")
@@ -454,13 +580,26 @@
                     (fedwiki_pages 2)
                     (fedwiki_story_items 13)
                     (fedwiki_journal_actions 15)
-                    (shop3_plan_steps 33)))
+                    (shop3_plan_steps 49)))
     (fedwiki-story-id-shape "16 lowercase hex")
     (semantic-fedwiki-story-ids-absent t)
     (journalmatic-findings nil)
     (asdf-load-system "physics-not-advice")
     (asdf-test-system "physics-not-advice/test")
     (page-attached-contract-smoke-test pass)
+    (live-fedwiki-ui-verification
+     ((physics-not-advice
+       ((route
+         "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice")
+        (errors-found absent)
+        (revision absent)
+        (malformed absent)))
+      (physics-not-advice-reconstruction-plan
+       ((route
+         "http://localhost:3000/view/welcome-visitors/view/2026-07-02/view/scan-page/view/physics-not-advice-reconstruction-plan")
+        (errors-found absent)
+        (revision absent)
+        (malformed absent)))))
     (reconstruction-idempotent t)
     (network-required nil)
     (git-diff-check-passes t)
@@ -494,6 +633,14 @@
     (journal-add-id-matches-item-id t)
     (journal-after-references-runtime-ids t)
     (journalmatic-revision-gate-required-before-commit t)))
+  (fedwiki-live-route-policy
+   ((known-route-first t)
+    (server-discovery-contingency-only t)
+    (server-discovery-before-use-given-route nil)
+    (checked-strings
+     ("Errors found on Physics, Not Advice"
+      "REVISION journal cannot construct the current version"
+      "MALFORMED journal contains actions that are malformed"))))
   (no-hyperdoc-page-system-registry-created t)
   (no-repo-local-hyperdoc-page-asdf-system-created t)
   (live-network-required nil)))
