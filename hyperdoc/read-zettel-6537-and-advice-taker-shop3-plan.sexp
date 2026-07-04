@@ -272,6 +272,10 @@
     (:repo "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages"
      :commit "c0e241e3"
      :role :fedwiki-topic-twins-and-daily-anchor))
+   (fedwiki-pages-repair-commit
+    (:repo "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages"
+     :commit "116a2479"
+     :role :fedwiki-narrative-twin-link-repair))
    (validation
     ((:command "git diff --check" :status :passed)
      (:command "nix develop -c sbcl ... RUN-SOURCE-READER-SURFACE-TEST"
