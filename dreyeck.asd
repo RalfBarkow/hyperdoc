@@ -175,3 +175,16 @@
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/build/tests
                                :run-dreyeck-build-smoke-tests)))
+
+(defsystem #:dreyeck/zettelkasten
+  :description "Dreyeck-owned Zettelkasten3 .zkn3 archive reader and HTN task operators."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :components
+  ((:module "dreyeck/zettelkasten"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "zkn3")))))
