@@ -860,6 +860,9 @@
 (defparameter *source-reader-task-plan-artifact-source*
   "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
 
+(defparameter *zettelkasten-file-reader-plan-artifact-source*
+  "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")
+
 (defparameter *source-reader-task-topic-definitions*
   `((:id "read-zettel-6537-and-advice-taker"
      :type :shop3-plan
@@ -959,7 +962,52 @@
      :title "Persist reader task topics"
      :source ,*source-reader-task-plan-artifact-source*
      :projection-status :seeded-from-shop3-plan
-     :summary "Task topic for idempotently materializing the reader task topics into the DMX SQLite mirror.")))
+     :summary "Task topic for idempotently materializing the reader task topics into the DMX SQLite mirror.")
+    (:id "implement-zettel-6537-zettelkasten-file-reader"
+     :type :shop3-plan
+     :title "Implement Zettel 6537 Zettelkasten File Reader"
+     :source ,*zettelkasten-file-reader-plan-artifact-source*
+     :projection-status :seeded-from-follow-up-shop3-plan
+     :summary "Follow-up plan that records the direct Zettelkasten-file reader for Zettel 6537 before implementation.")
+    (:id "zettel-6537"
+     :type :zettel
+     :title "Zettel 6537"
+     :source ,*zettelkasten-file-reader-plan-artifact-source*
+     :source-reference "HYPERDOC_ZETTELKASTEN_ROOTS:6537"
+     :projection-status :authority-distinction-recorded
+     :summary "Zettelkasten note whose authoritative text is read from the configured local Zettelkasten roots.")
+    (:id "zettel-6537-zettelkasten-file-source"
+     :type :source-station
+     :title "Zettel 6537 Zettelkasten File Source"
+     :source ,*zettelkasten-file-reader-plan-artifact-source*
+     :source-reference "HYPERDOC_ZETTELKASTEN_ROOTS:6537"
+     :projection-status :authoritative-source
+     :summary "Authoritative local file source for Zettel 6537, discovered through the configured Zettelkasten roots.")
+    (:id "zettelkasten-file-reader"
+     :type :source-reader
+     :title "Zettelkasten File Reader"
+     :source ,*zettelkasten-file-reader-plan-artifact-source*
+     :projection-status :seeded-from-follow-up-shop3-plan
+     :summary "Read-only source reader that searches configured Zettelkasten roots and reads matching note files directly.")
+    (:id "zettelkasten-file-source-authority"
+     :type :architecture-rule
+     :title "Zettelkasten File Source Authority"
+     :source ,*zettelkasten-file-reader-plan-artifact-source*
+     :projection-status :seeded-from-follow-up-shop3-plan
+     :summary "Authority rule stating that Zettel 6537 text is sourced first from the local Zettelkasten file, not from its FedWiki projection.")
+    (:id "zettel-6537-fedwiki-projection"
+     :type :source-projection
+     :title "Zettel 6537 FedWiki Projection"
+     :source ,*zettelkasten-file-reader-plan-artifact-source*
+     :source-reference "fedwiki:wiki.ralfbarkow.ch/physics-not-advice#zettel-6537"
+     :projection-status :projection-context
+     :summary "FedWiki projection and interpretive bridge for Zettel 6537 evidence on the Physics, Not Advice page.")
+    (:id "zettel-6537-source-authority-reconciliation"
+     :type :task-topic
+     :title "Zettel 6537 Source Authority Reconciliation"
+     :source ,*zettelkasten-file-reader-plan-artifact-source*
+     :projection-status :seeded-from-follow-up-shop3-plan
+     :summary "Task topic that reconciles the authoritative Zettelkasten file reader with the existing FedWiki projection reader.")))
 
 (defparameter *source-reader-task-association-definitions*
   '((:source "read-zettel-6537-and-advice-taker"
@@ -1025,7 +1073,43 @@
     (:source "persist-reader-task-topics-task"
      :predicate "uses"
      :target "dmx-sqlite-task-topic-store"
-     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")))
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "implement-zettel-6537-zettelkasten-file-reader"
+     :predicate "requires"
+     :target "zettelkasten-file-source-authority"
+     :source-artifact "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")
+    (:source "implement-zettel-6537-zettelkasten-file-reader"
+     :predicate "defines"
+     :target "zettelkasten-file-reader"
+     :source-artifact "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")
+    (:source "implement-zettel-6537-zettelkasten-file-reader"
+     :predicate "persists-to"
+     :target "dmx-sqlite-task-topic-store"
+     :source-artifact "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")
+    (:source "zettelkasten-file-reader"
+     :predicate "reads"
+     :target "zettel-6537-zettelkasten-file-source"
+     :source-artifact "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")
+    (:source "zettel-6537"
+     :predicate "has-authoritative-source"
+     :target "zettel-6537-zettelkasten-file-source"
+     :source-artifact "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")
+    (:source "zettel-6537"
+     :predicate "has-projection"
+     :target "zettel-6537-fedwiki-projection"
+     :source-artifact "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")
+    (:source "physics-not-advice-source-station"
+     :predicate "contextualizes"
+     :target "zettel-6537"
+     :source-artifact "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")
+    (:source "zettel-6537-source-authority-reconciliation"
+     :predicate "reconciles"
+     :target "zettel-6537-zettelkasten-file-source"
+     :source-artifact "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")
+    (:source "zettel-6537-source-authority-reconciliation"
+     :predicate "reconciles"
+     :target "zettel-6537-fedwiki-projection"
+     :source-artifact "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")))
 
 (defun durable-note-all-topic-definitions ()
   (append *durable-note-materialization-topic-definitions*

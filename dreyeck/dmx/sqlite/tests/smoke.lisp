@@ -449,15 +449,45 @@
                "zettel-6537-source-station")
               "Source-reader task inspection must include the Zettel source station")
              (assert-true
-             (entry-by-id
-              (getf inspection :topics)
-              "physics-not-advice-source-station")
-             "Source-reader task inspection must include the FedWiki source station")
-            (assert-true
-             (entry-by-id
-              (getf inspection :topics)
-              "advice-taker-source-station")
-             "Source-reader task inspection must include the Advice Taker source station")))
+              (entry-by-id
+               (getf inspection :topics)
+               "physics-not-advice-source-station")
+              "Source-reader task inspection must include the FedWiki source station")
+             (assert-true
+              (entry-by-id
+               (getf inspection :topics)
+               "advice-taker-source-station")
+              "Source-reader task inspection must include the Advice Taker source station")
+             (assert-true
+              (entry-by-id
+               (getf inspection :topics)
+               "implement-zettel-6537-zettelkasten-file-reader")
+              "Source-reader task inspection must include the follow-up Zettelkasten reader plan")
+             (assert-true
+              (entry-by-id
+               (getf inspection :topics)
+               "zettel-6537-zettelkasten-file-source")
+              "Source-reader task inspection must include the authoritative Zettelkasten file source")
+             (assert-true
+              (entry-by-id
+               (getf inspection :topics)
+               "zettel-6537-fedwiki-projection")
+              "Source-reader task inspection must include the FedWiki projection topic")
+             (assert-true
+              (entry-by-id
+               (getf inspection :associations)
+               "assoc:zettel-6537:has-authoritative-source:zettel-6537-zettelkasten-file-source")
+              "Source-reader task inspection must include the Zettel authoritative-source edge")
+             (assert-true
+              (entry-by-id
+               (getf inspection :associations)
+               "assoc:zettel-6537:has-projection:zettel-6537-fedwiki-projection")
+              "Source-reader task inspection must include the Zettel projection edge")
+             (assert-true
+              (entry-by-id
+               (getf inspection :associations)
+               "assoc:physics-not-advice-source-station:contextualizes:zettel-6537")
+              "Source-reader task inspection must include the Physics, Not Advice contextualization edge")))
       (when (probe-file db)
         (delete-file db)))))
 
