@@ -1,6 +1,6 @@
 (:shop3-plan-artifact
- (:id read-sheet-6537-and-advice-taker)
- (:title "Read Sheet 6537 and Advice Taker")
+ (:id read-zettel-6537-and-advice-taker)
+ (:title "Read Zettel 6537 and Advice Taker")
  (:type :shop3-plan)
  (:planner :shop3)
  (:status :open)
@@ -24,7 +24,7 @@
        (plan-created-before-implementation ?plan)))
 
      (:operator (!define-task-topic ?task ?topic-id ?title)
-      ((plan-artifact-recorded read-sheet-6537-and-advice-taker))
+      ((plan-artifact-recorded read-zettel-6537-and-advice-taker))
       ()
       ((task-topic-defined ?task ?topic-id ?title)
        (dmx-topic-identity-stable ?topic-id)))
@@ -53,8 +53,8 @@
 
      (:operator (!materialize-task-topics-to-dmx-sqlite ?plan ?db)
       ((plan-artifact-recorded ?plan)
-       (task-topic-defined read-sheet-6537 read-sheet-6537-task
-                           "Read sheet 6537")
+       (task-topic-defined read-zettel-6537 read-zettel-6537-task
+                           "Read Zettel 6537")
        (task-topic-defined read-advice-taker-note
                            read-advice-taker-note-task
                            "Read Advice Taker note")
@@ -73,7 +73,7 @@
 
      (:operator (!implement-zettel-reader ?task)
       ((dmx-sqlite-task-topics-materialized
-        read-sheet-6537-and-advice-taker
+        read-zettel-6537-and-advice-taker
         dreyeck-dmx-sqlite-production-db)
        (reader-task-defined zettel-reader zettel-6537 ?task))
       ()
@@ -82,7 +82,7 @@
 
      (:operator (!implement-fedwiki-page-reader ?task)
       ((dmx-sqlite-task-topics-materialized
-        read-sheet-6537-and-advice-taker
+        read-zettel-6537-and-advice-taker
         dreyeck-dmx-sqlite-production-db)
        (reader-task-defined fedwiki-page-reader physics-not-advice ?task))
       ()
@@ -93,7 +93,7 @@
 
      (:operator (!implement-advice-taker-note-reader ?task)
       ((dmx-sqlite-task-topics-materialized
-        read-sheet-6537-and-advice-taker
+        read-zettel-6537-and-advice-taker
         dreyeck-dmx-sqlite-production-db)
        (reader-task-defined advice-taker-note-reader advice-taker ?task))
       ()
@@ -155,9 +155,9 @@
      (:method (define-source-reader-task-topics ?plan)
       ((shop3-plan-artifact ?plan))
       ((!record-plan-artifact ?plan)
-       (!define-task-topic read-sheet-6537
-                           read-sheet-6537-task
-                           "Read sheet 6537")
+       (!define-task-topic read-zettel-6537
+                           read-zettel-6537-task
+                           "Read Zettel 6537")
        (!define-task-topic read-advice-taker-note
                            read-advice-taker-note-task
                            "Read Advice Taker note")
@@ -171,12 +171,12 @@
                            persist-reader-task-topics-task
                            "Persist reader task topics")))
 
-     (:method (read-sheet-6537-and-advice-taker ?plan)
+     (:method (read-zettel-6537-and-advice-taker ?plan)
       ((shop3-plan-artifact ?plan))
       ((!record-plan-artifact ?plan)
-       (!define-task-topic read-sheet-6537
-                           read-sheet-6537-task
-                           "Read sheet 6537")
+       (!define-task-topic read-zettel-6537
+                           read-zettel-6537-task
+                           "Read Zettel 6537")
        (!define-task-topic read-advice-taker-note
                            read-advice-taker-note-task
                            "Read Advice Taker note")
@@ -210,9 +210,9 @@
        (!close-plan-artifact ?plan))))))
 
  (:problem
-  (defproblem read-sheet-6537-and-advice-taker-problem
+  (defproblem read-zettel-6537-and-advice-taker-problem
     source-reader-task-decomposition
-    ((shop3-plan-artifact read-sheet-6537-and-advice-taker)
+    ((shop3-plan-artifact read-zettel-6537-and-advice-taker)
      (repo-root "/Users/rgb/workspace/hyperdoc")
      (production-store dreyeck-dmx-sqlite-production-db)
      (fedwiki-page physics-not-advice)
@@ -220,14 +220,14 @@
      (source-note advice-taker)
      (project hyperdoc-8470)
      (prior-project shop3-8853))
-    ((read-sheet-6537-and-advice-taker
-      read-sheet-6537-and-advice-taker))))
+    ((read-zettel-6537-and-advice-taker
+      read-zettel-6537-and-advice-taker))))
 
  (:selected-plan
-  ((!record-plan-artifact read-sheet-6537-and-advice-taker)
-   (!define-task-topic read-sheet-6537
-                       read-sheet-6537-task
-                       "Read sheet 6537")
+  ((!record-plan-artifact read-zettel-6537-and-advice-taker)
+   (!define-task-topic read-zettel-6537
+                       read-zettel-6537-task
+                       "Read Zettel 6537")
    (!define-task-topic read-advice-taker-note
                        read-advice-taker-note-task
                        "Read Advice Taker note")
@@ -247,33 +247,33 @@
    (!define-advice-taker-reader-task advice-taker
                                      read-advice-taker-note-task)
    (!materialize-task-topics-to-dmx-sqlite
-    read-sheet-6537-and-advice-taker
+    read-zettel-6537-and-advice-taker
     dreyeck-dmx-sqlite-production-db)
    (!implement-zettel-reader define-zettel-reader-task)
    (!implement-fedwiki-page-reader define-fedwiki-page-reader-task)
    (!implement-advice-taker-note-reader read-advice-taker-note-task)
-   (!create-reader-surfaces read-sheet-6537-and-advice-taker)
-   (!run-smoke-tests read-sheet-6537-and-advice-taker)
-   (!commit-plan-artifact read-sheet-6537-and-advice-taker)
-   (!commit-task-topic-materialization read-sheet-6537-and-advice-taker)
-   (!commit-reader-implementation read-sheet-6537-and-advice-taker)
-   (!commit-documentation-projection read-sheet-6537-and-advice-taker)
-   (!close-plan-artifact read-sheet-6537-and-advice-taker)))
+   (!create-reader-surfaces read-zettel-6537-and-advice-taker)
+   (!run-smoke-tests read-zettel-6537-and-advice-taker)
+   (!commit-plan-artifact read-zettel-6537-and-advice-taker)
+   (!commit-task-topic-materialization read-zettel-6537-and-advice-taker)
+   (!commit-reader-implementation read-zettel-6537-and-advice-taker)
+   (!commit-documentation-projection read-zettel-6537-and-advice-taker)
+   (!close-plan-artifact read-zettel-6537-and-advice-taker)))
 
  (:output-contract
   ((required-topic-ids
-    ("read-sheet-6537-and-advice-taker"
+    ("read-zettel-6537-and-advice-taker"
      "source-reader-task-decomposition"
      "zettel-reader"
      "fedwiki-page-reader"
      "advice-taker-note-reader"
-     "sheet-6537-source-station"
+     "zettel-6537-source-station"
      "physics-not-advice-source-station"
      "advice-taker-source-station"
      "explicit-task-decomposition-topic"
      "shop3-plan-as-topic"
      "dmx-sqlite-task-topic-store"
-     "read-sheet-6537-task"
+     "read-zettel-6537-task"
      "read-advice-taker-note-task"
      "define-zettel-reader-task"
      "define-fedwiki-page-reader-task"
