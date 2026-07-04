@@ -41,6 +41,9 @@
                 #:materialize-source-reader-task-topics
                 #:source-reader-task-topic-materialization-status
                 #:dmx-materialized-source-reader-task-topics
+                #:locate-zettel-note-file
+                #:read-zettelkasten-note-file
+                #:read-zettel-6537-zettelkasten-source
                 #:read-zettel-6537-source
                 #:read-physics-not-advice-source
                 #:read-advice-taker-source

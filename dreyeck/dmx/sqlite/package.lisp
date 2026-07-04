@@ -54,6 +54,9 @@
    #:dmx-materialized-source-reader-task-topics
    #:read-local-fedwiki-page-source
    #:read-physics-not-advice-source
+   #:locate-zettel-note-file
+   #:read-zettelkasten-note-file
+   #:read-zettel-6537-zettelkasten-source
    #:read-zettel-6537-source
    #:read-advice-taker-source
    #:read-zettel-6537-and-advice-taker-sources

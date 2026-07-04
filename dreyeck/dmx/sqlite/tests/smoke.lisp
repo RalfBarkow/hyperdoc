@@ -79,6 +79,28 @@
    (format nil "dreyeck-dmx-sqlite-~D.sqlite" (random 1000000))
    (uiop:temporary-directory)))
 
+(defparameter *zettel-6537-fixture-text*
+  "Planung als Reduktion und Bestimmung einer strukturell angelegten Offenheit für andere Möglichkeiten
+Planung wäre danach Reduktion und Bestimmung einer strukturell angelegten Offenheit für andere Möglichkeiten. Wenn diese Auffassung zutrifft, dann müßte alle Planung beginnen mit einer Konzeptualisierung ihres Gegenstandes, die diesen als kontingent begreift und seine anderen Möglichkeiten aufdeckt. Man könnte dies als eine »Problematisierung« des Gegenstandes bezeichnen.
+")
+
+(defun temporary-zettelkasten-root ()
+  (merge-pathnames
+   (format nil "dreyeck-zettelkasten-fixture-~D/" (random 1000000))
+   (uiop:temporary-directory)))
+
+(defun write-zettel-6537-fixture-file (root)
+  (let* ((directory (uiop:ensure-directory-pathname root))
+         (path (merge-pathnames "6537-planung.md" directory)))
+    (ensure-directories-exist path)
+    (with-open-file (stream path
+                            :direction :output
+                            :if-exists :supersede
+                            :if-does-not-exist :create
+                            :external-format :utf-8)
+      (write-string *zettel-6537-fixture-text* stream))
+    path))
+
 (defun assert-error (thunk message)
   (assert-true
    (handler-case
@@ -492,95 +514,220 @@
         (delete-file db)))))
 
 (defun run-source-reader-surface-test ()
-  (let* ((zettel (read-zettel-6537-source))
-         (physics (read-physics-not-advice-source))
-         (advice-taker (read-advice-taker-source))
-         (surface-set (read-zettel-6537-and-advice-taker-sources)))
-    (assert-source-reader-result
-     zettel
-     :zettel-reader
-     "Zettel 6537 reader")
-    (assert-equal
-     "zettel-6537"
-     (getf (getf zettel :source-identity) :id)
-     "Zettel 6537 reader source id")
-    (assert-equal
-     "zettel-6537-source-station"
-     (getf (getf zettel :source-identity) :source-station)
-     "Zettel 6537 reader source station")
-    (assert-true
-     (topic-entry-by-id (getf zettel :derived-topics) "zettel-6537")
-     "Zettel 6537 reader must derive the Zettel topic")
-    (assert-any-text-contains
-     (result-fragment-texts zettel)
-     "Zettel 6537"
-     "Zettel 6537 reader must retain readable source text")
-    (assert-source-reader-result
-     physics
-     :fedwiki-page-reader
-     "Physics, Not Advice reader")
-    (assert-equal
-     "physics-not-advice"
-     (getf (getf physics :source-identity) :slug)
-     "Physics, Not Advice reader slug")
-    (assert-true
-     (topic-entry-by-id (getf physics :derived-topics) "zettel-6537")
-     "Physics, Not Advice reader must derive the Zettel 6537 bridge")
-    (assert-any-text-contains
-     (result-fragment-texts physics)
-     "Advice Taker"
-     "Physics, Not Advice reader must retain Advice Taker source text")
-    (assert-source-reader-result
-     advice-taker
-     :advice-taker-note-reader
-     "Advice Taker reader")
-    (assert-equal
-     "advice-taker-source-station"
-     (getf (getf advice-taker :source-identity) :source-station)
-     "Advice Taker reader source station")
-    (assert-true
-     (topic-entry-by-id (getf advice-taker :derived-topics) "advice-taker")
-     "Advice Taker reader must derive the Advice Taker topic")
-    (assert-any-text-contains
-     (result-fragment-texts advice-taker)
-     "Advice Taker"
-     "Advice Taker reader must retain local page or topicmap text")
-    (if (getf (getf advice-taker :provenance) :transcript-present-p)
-        (assert-equal
-         nil
-         (getf advice-taker :failure-state)
-         "Advice Taker reader must be complete when transcript is present")
-        (progn
-          (assert-equal
-           :partial
-           (getf (getf advice-taker :failure-state) :status)
-           "Advice Taker reader must report partial status without transcript")
-          (assert-equal
-           :transcript-missing
-           (getf (getf advice-taker :failure-state) :reason)
-           "Advice Taker reader must preserve transcript-missing reason")))
-    (assert-equal
-     :source-reader-surface-set
-     (getf surface-set :kind)
-     "Combined source-reader surface set kind")
-    (assert-equal
-     "read-zettel-6537-and-advice-taker"
-     (getf surface-set :plan)
-     "Combined source-reader surface set plan id")
-    (assert-equal
-     nil
-     (getf surface-set :network-required-p)
-     "Combined source-reader surface set must be local-only")
-    (assert-equal
-     3
-     (length (getf surface-set :sources))
-     "Combined source-reader surface set must include three sources")))
+  (let* ((root (temporary-zettelkasten-root))
+         (path nil))
+    (unwind-protect
+         (progn
+           (setf path (write-zettel-6537-fixture-file root))
+           (let* ((roots (list root))
+                  (zettelkasten
+                    (read-zettel-6537-zettelkasten-source :roots roots))
+                  (zettel (read-zettel-6537-source))
+                  (physics (read-physics-not-advice-source))
+                  (advice-taker (read-advice-taker-source))
+                  (surface-set
+                    (read-zettel-6537-and-advice-taker-sources
+                     :zettelkasten-roots roots))
+                  (surface-sources (getf surface-set :sources)))
+             (assert-equal
+              :zettelkasten-file-reader
+              (getf zettelkasten :kind)
+              "Zettelkasten file reader kind")
+             (assert-equal
+              "zettel-6537"
+              (getf (getf zettelkasten :source-identity) :id)
+              "Zettelkasten file reader source id")
+             (assert-equal
+              (namestring path)
+              (getf (getf zettelkasten :provenance) :path)
+              "Zettelkasten file reader provenance path")
+             (assert-equal
+              nil
+              (getf zettelkasten :failure-state)
+              "Zettelkasten file reader must succeed against fixture roots")
+             (assert-any-text-contains
+              (result-fragment-texts zettelkasten)
+              "Planung als Reduktion"
+              "Zettelkasten file reader must retain fixture Zettel text")
+             (assert-source-reader-result
+              zettel
+              :zettel-reader
+              "Zettel 6537 FedWiki projection reader")
+             (assert-equal
+              "zettel-6537"
+              (getf (getf zettel :source-identity) :id)
+              "Zettel 6537 projection reader source id")
+             (assert-equal
+              "zettel-6537-source-station"
+              (getf (getf zettel :source-identity) :source-station)
+              "Zettel 6537 projection reader source station")
+             (assert-true
+              (topic-entry-by-id (getf zettel :derived-topics) "zettel-6537")
+              "Zettel 6537 projection reader must derive the Zettel topic")
+             (assert-any-text-contains
+              (result-fragment-texts zettel)
+              "Zettel 6537"
+              "Zettel 6537 projection reader must retain readable source text")
+             (assert-source-reader-result
+              physics
+              :fedwiki-page-reader
+              "Physics, Not Advice reader")
+             (assert-equal
+              "physics-not-advice"
+              (getf (getf physics :source-identity) :slug)
+              "Physics, Not Advice reader slug")
+             (assert-true
+              (topic-entry-by-id (getf physics :derived-topics) "zettel-6537")
+              "Physics, Not Advice reader must derive the Zettel 6537 bridge")
+             (assert-any-text-contains
+              (result-fragment-texts physics)
+              "Advice Taker"
+              "Physics, Not Advice reader must retain Advice Taker source text")
+             (assert-source-reader-result
+              advice-taker
+              :advice-taker-note-reader
+              "Advice Taker reader")
+             (assert-equal
+              "advice-taker-source-station"
+              (getf (getf advice-taker :source-identity) :source-station)
+              "Advice Taker reader source station")
+             (assert-true
+              (topic-entry-by-id (getf advice-taker :derived-topics) "advice-taker")
+              "Advice Taker reader must derive the Advice Taker topic")
+             (assert-any-text-contains
+              (result-fragment-texts advice-taker)
+              "Advice Taker"
+              "Advice Taker reader must retain local page or topicmap text")
+             (if (getf (getf advice-taker :provenance) :transcript-present-p)
+                 (assert-equal
+                  nil
+                  (getf advice-taker :failure-state)
+                  "Advice Taker reader must be complete when transcript is present")
+                 (progn
+                   (assert-equal
+                    :partial
+                    (getf (getf advice-taker :failure-state) :status)
+                    "Advice Taker reader must report partial status without transcript")
+                   (assert-equal
+                    :transcript-missing
+                    (getf (getf advice-taker :failure-state) :reason)
+                    "Advice Taker reader must preserve transcript-missing reason")))
+             (assert-equal
+              :source-reader-surface-set
+              (getf surface-set :kind)
+              "Combined source-reader surface set kind")
+             (assert-equal
+              "read-zettel-6537-and-advice-taker"
+              (getf surface-set :plan)
+              "Combined source-reader surface set plan id")
+             (assert-equal
+              nil
+              (getf surface-set :network-required-p)
+              "Combined source-reader surface set must be local-only")
+             (assert-equal
+              4
+              (length surface-sources)
+              "Combined source-reader surface set must include four sources")
+             (assert-equal
+              :zettelkasten-file-reader
+              (getf (first surface-sources) :kind)
+              "Combined source-reader surface set must start with authoritative file source")
+             (assert-equal
+              :zettel-reader
+              (getf (second surface-sources) :reader)
+              "Combined source-reader surface set must retain FedWiki projection reader")))
+      (when (and path (probe-file path))
+        (delete-file path))
+      (when (uiop:directory-exists-p root)
+        (uiop:delete-directory-tree root :validate t)))))
+
+(defun run-zettelkasten-file-reader-test ()
+  (let* ((root (temporary-zettelkasten-root))
+         (empty-root (temporary-zettelkasten-root))
+         (path nil))
+    (unwind-protect
+         (progn
+           (ensure-directories-exist (merge-pathnames "marker" empty-root))
+           (setf path (write-zettel-6537-fixture-file root))
+           (let* ((roots (list root))
+                  (located (locate-zettel-note-file "6537" :roots roots))
+                  (note (read-zettelkasten-note-file located))
+                  (result
+                    (read-zettel-6537-zettelkasten-source :roots roots))
+                  (empty-roots-result
+                    (read-zettel-6537-zettelkasten-source :roots nil))
+                  (missing-result
+                    (read-zettel-6537-zettelkasten-source
+                     :roots (list empty-root))))
+             (assert-equal
+              (namestring path)
+              (namestring located)
+              "Zettelkasten file locator must find the fixture file")
+             (assert-any-text-contains
+              (list (getf note :text))
+              "Planung als Reduktion"
+              "Raw Zettelkasten note reader must preserve fixture text")
+             (assert-equal
+              :zettelkasten-file-reader
+              (getf result :kind)
+              "Direct Zettelkasten reader must expose explicit reader kind")
+             (assert-equal
+              "zettel-6537"
+              (getf (getf result :source-identity) :id)
+              "Direct Zettelkasten reader source id")
+             (assert-equal
+              (namestring path)
+              (getf (getf result :source-identity) :path)
+              "Direct Zettelkasten reader source identity must name fixture path")
+             (assert-equal
+              (namestring path)
+              (getf (getf result :provenance) :path)
+              "Direct Zettelkasten reader provenance must name fixture path")
+             (assert-any-text-contains
+              (result-fragment-texts result)
+              "Planung als Reduktion"
+              "Direct Zettelkasten reader fragments must include planning phrase")
+             (assert-any-text-contains
+              (result-fragment-texts result)
+              "Problematisierung"
+              "Direct Zettelkasten reader fragments must include Problematisierung")
+             (assert-true
+              (topic-entry-by-id (getf result :derived-topics) "zettel-6537")
+              "Direct Zettelkasten reader must derive the Zettel topic")
+             (assert-true
+              (topic-entry-by-id
+               (getf result :derived-topics)
+               "planning-as-contingency-reduction")
+              "Direct Zettelkasten reader must derive planning-as-contingency-reduction")
+             (assert-equal
+              :failed
+              (getf (getf empty-roots-result :failure-state) :status)
+              "Direct Zettelkasten reader must report failed status for empty roots")
+             (assert-equal
+              :zettelkasten-roots-missing
+              (getf (getf empty-roots-result :failure-state) :reason)
+              "Direct Zettelkasten reader must explain missing roots")
+             (assert-equal
+              :failed
+              (getf (getf missing-result :failure-state) :status)
+              "Direct Zettelkasten reader must report failed status for missing note")
+             (assert-equal
+              :zettel-file-missing
+              (getf (getf missing-result :failure-state) :reason)
+              "Direct Zettelkasten reader must explain missing note file")))
+      (when (and path (probe-file path))
+        (delete-file path))
+      (when (uiop:directory-exists-p root)
+        (uiop:delete-directory-tree root :validate t))
+      (when (uiop:directory-exists-p empty-root)
+        (uiop:delete-directory-tree empty-root :validate t)))))
 
 (defun run-dmx-sqlite-smoke-tests ()
   (run-association-edge-reassignment-fixture-test)
   (run-operation-documentation-topic-materialization-test)
   (run-source-reader-task-topic-materialization-test)
   (run-source-reader-surface-test)
+  (run-zettelkasten-file-reader-test)
   (let ((db (temporary-dmx-sqlite-path)))
     (unwind-protect
          (progn

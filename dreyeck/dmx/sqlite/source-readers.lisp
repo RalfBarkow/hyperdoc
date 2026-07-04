@@ -14,6 +14,9 @@
 (defparameter *advice-taker-asd-path*
   (merge-pathnames "advice-taker.asd" *advice-taker-asset-root*))
 
+(defparameter *source-reader-zettelkasten-note-file-extensions*
+  '("md" "markdown" "org" "txt" "text" "rst" "adoc"))
+
 (defun source-reader-json-keyword (key)
   (intern (string-upcase key) :keyword))
 
@@ -53,9 +56,9 @@
   (format nil "fedwiki:~A/~A" site slug))
 
 (defun source-reader-result
-    (&key reader source-identity provenance extracted-fragments derived-topics
-       failure-state)
-  (list :kind :source-reader-result
+    (&key (kind :source-reader-result) reader source-identity provenance
+       extracted-fragments derived-topics failure-state)
+  (list :kind kind
         :reader reader
         :source-identity source-identity
         :provenance provenance
@@ -110,6 +113,230 @@
 (defun source-reader-text-contains-p (text needle)
   (and text
        (search needle text :test #'char-equal)))
+
+(defun source-reader-blank-string-p (value)
+  (or (null value)
+      (and (stringp value)
+           (zerop (length (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                       value))))))
+
+(defun source-reader-expand-home-path-string (string)
+  (cond
+    ((or (null string) (string= string ""))
+     string)
+    ((string= string "~")
+     (namestring (user-homedir-pathname)))
+    ((uiop:string-prefix-p "~/" string)
+     (format nil "~A~A"
+             (namestring (user-homedir-pathname))
+             (subseq string 2)))
+    (t string)))
+
+(defun source-reader-normalize-path-designator (designator &key directoryp)
+  (typecase designator
+    (null nil)
+    (pathname
+     (if directoryp
+         (uiop:ensure-directory-pathname designator)
+         designator))
+    (string
+     (let ((path (pathname
+                  (source-reader-expand-home-path-string designator))))
+       (if directoryp
+           (uiop:ensure-directory-pathname path)
+           path)))))
+
+(defun source-reader-normalize-root-list (roots)
+  (let ((root-list (if (listp roots) roots (list roots))))
+    (remove nil
+            (mapcar (lambda (root)
+                      (source-reader-normalize-path-designator
+                       root
+                       :directoryp t))
+                    root-list))))
+
+(defun source-reader-getenv-note-roots
+    (&optional (name "HYPERDOC_ZETTELKASTEN_ROOTS"))
+  (let ((value (uiop:getenv name)))
+    (and (not (source-reader-blank-string-p value))
+         (source-reader-normalize-root-list
+          (remove-if #'source-reader-blank-string-p
+                     (uiop:split-string value
+                                        :separator '(#\: #\Newline)))))))
+
+(defun source-reader-note-file-extension-p (pathname)
+  (let ((type (and pathname (pathname-type pathname))))
+    (and type
+         (member (string-downcase type)
+                 *source-reader-zettelkasten-note-file-extensions*
+                 :test #'string=))))
+
+(defun source-reader-collect-note-files-under (root)
+  (labels ((collect (directory)
+             (append
+              (remove-if-not #'source-reader-note-file-extension-p
+                             (ignore-errors
+                               (uiop:directory-files directory)))
+              (loop for subdirectory in (ignore-errors
+                                          (uiop:subdirectories directory))
+                    append (collect subdirectory)))))
+    (collect (uiop:ensure-directory-pathname root))))
+
+(defun source-reader-existing-roots (roots)
+  (remove-if-not #'uiop:directory-exists-p
+                 (source-reader-normalize-root-list roots)))
+
+(defun source-reader-zettel-file-name-match-p (pathname zettel-number)
+  (let ((name (or (pathname-name pathname) "")))
+    (search zettel-number name :test #'char=)))
+
+(defun locate-zettel-note-file
+    (zettel-number &key (roots (source-reader-getenv-note-roots)))
+  "Locate a Zettelkasten note file by ZETTEL-NUMBER under ROOTS.
+
+ROOTS defaults to HYPERDOC_ZETTELKASTEN_ROOTS using the existing
+colon/newline-separated convention used by HyperDoc's Zotero note lookup."
+  (let* ((existing-roots (source-reader-existing-roots roots))
+         (candidates
+           (sort
+            (remove-if-not
+             (lambda (pathname)
+               (source-reader-zettel-file-name-match-p pathname zettel-number))
+             (remove-duplicates
+              (loop for root in existing-roots
+                    append (source-reader-collect-note-files-under root))
+              :test #'equal))
+            #'string<
+            :key #'namestring)))
+    (first candidates)))
+
+(defun read-zettelkasten-note-file (pathname)
+  "Read a local Zettelkasten note file as a structured text object."
+  (let* ((normalized-path
+           (source-reader-normalize-path-designator pathname))
+         (text
+           (with-open-file (stream normalized-path
+                                   :direction :input
+                                   :external-format :utf-8)
+             (with-output-to-string (output)
+               (loop for char = (read-char stream nil nil)
+                     while char
+                     do (write-char char output))))))
+    (list :kind :zettelkasten-note-file
+          :pathname normalized-path
+          :path (namestring normalized-path)
+          :text text
+          :character-count (length text))))
+
+(defun source-reader-zettel-6537-identity (&key path)
+  (append
+   (list :kind :zettelkasten-note
+         :id "zettel-6537"
+         :title "Zettel 6537"
+         :source-station "zettel-6537-zettelkasten-file-source"
+         :authority :authoritative-source)
+   (when path
+     (list :path (namestring path)))))
+
+(defun source-reader-zettel-6537-failure
+    (reason detail roots &key path)
+  (source-reader-result
+   :kind :zettelkasten-file-reader
+   :reader :zettelkasten-file-reader
+   :source-identity (source-reader-zettel-6537-identity :path path)
+   :provenance
+   (append
+    (list :reader :zettelkasten-file-reader
+          :access-mode :local-file
+          :configured-roots (mapcar #'namestring
+                                    (source-reader-normalize-root-list roots))
+          :network-required-p nil)
+    (when path
+      (list :path (namestring path))))
+   :extracted-fragments nil
+   :derived-topics nil
+   :failure-state
+   (list :status :failed
+         :reason reason
+         :detail detail)))
+
+(defun source-reader-zettel-6537-file-fragments (note)
+  (let ((path (getf note :path))
+        (text (getf note :text)))
+    (list
+     (list :id "zettel-6537-zettelkasten-file-text"
+           :source-id (format nil "file:~A#zettel-6537" path)
+           :index 0
+           :type :text
+           :fragment-kind :zettelkasten-note-file
+           :text text))))
+
+(defun source-reader-zettel-6537-derived-file-topics (note)
+  (let ((path (getf note :path)))
+    (list
+     (source-reader-derived-topic
+      "zettel-6537"
+      "Zettel 6537"
+      :kind :zettel
+      :source :zettelkasten-file
+      :evidence path)
+     (source-reader-derived-topic
+      "planning-as-contingency-reduction"
+      "Planning as Contingency Reduction"
+      :kind :interpretive-claim
+      :source :zettelkasten-file
+      :evidence "Planung als Reduktion")
+     (source-reader-derived-topic
+      "zettelkasten-file-source-authority"
+      "Zettelkasten File Source Authority"
+      :kind :source-authority
+      :source :zettelkasten-file
+      :evidence path))))
+
+(defun read-zettel-6537-zettelkasten-source
+    (&key (roots (source-reader-getenv-note-roots)))
+  "Read the authoritative Zettel 6537 text from configured Zettelkasten roots."
+  (let ((normalized-roots (source-reader-normalize-root-list roots)))
+    (cond
+      ((null normalized-roots)
+       (source-reader-zettel-6537-failure
+        :zettelkasten-roots-missing
+        "No Zettelkasten roots were supplied or configured via HYPERDOC_ZETTELKASTEN_ROOTS."
+        roots))
+      (t
+       (let ((path (locate-zettel-note-file "6537" :roots normalized-roots)))
+         (cond
+           ((null path)
+            (source-reader-zettel-6537-failure
+             :zettel-file-missing
+             "No note file whose filename includes 6537 was found in the configured Zettelkasten roots."
+             normalized-roots))
+           (t
+            (handler-case
+                (let ((note (read-zettelkasten-note-file path)))
+                  (source-reader-result
+                   :kind :zettelkasten-file-reader
+                   :reader :zettelkasten-file-reader
+                   :source-identity
+                   (source-reader-zettel-6537-identity :path path)
+                   :provenance
+                   (list :reader :zettelkasten-file-reader
+                         :access-mode :local-file
+                         :configured-roots (mapcar #'namestring normalized-roots)
+                         :path (namestring path)
+                         :character-count (getf note :character-count)
+                         :network-required-p nil)
+                   :extracted-fragments
+                   (source-reader-zettel-6537-file-fragments note)
+                   :derived-topics
+                   (source-reader-zettel-6537-derived-file-topics note)
+                   :failure-state nil))
+              (error (condition)
+                (source-reader-zettel-6537-failure
+                 :zettel-file-read-failed
+                 (princ-to-string condition)
+                 normalized-roots
+                 :path path))))))))))
 
 (defun source-reader-wikilinks (text)
   (loop with start = 0
@@ -239,7 +466,10 @@
         (source-reader-text-contains-p text "structurally opened"))))
 
 (defun read-zettel-6537-source ()
-  "Read Zettel 6537 evidence from the local Physics, Not Advice page."
+  "Read Zettel 6537 projection/context evidence from Physics, Not Advice.
+
+The authoritative Zettel 6537 text reader is
+READ-ZETTEL-6537-ZETTELKASTEN-SOURCE."
   (let* ((slug "physics-not-advice")
          (site *default-fedwiki-site*)
          (path (source-reader-fedwiki-page-path slug))
@@ -405,12 +635,18 @@
                :network-required-p nil)
          condition)))))
 
-(defun read-zettel-6537-and-advice-taker-sources ()
-  "Return all source-reader surfaces selected by the SHOP3 plan."
+(defun read-zettel-6537-and-advice-taker-sources
+    (&key (zettelkasten-roots (source-reader-getenv-note-roots)))
+  "Return all source-reader surfaces selected by the SHOP3 plan.
+
+The local Zettelkasten file reader is the authoritative Zettel 6537 text
+source. The FedWiki-backed Zettel reader remains a projection/context reader."
   (list :kind :source-reader-surface-set
         :plan "read-zettel-6537-and-advice-taker"
         :network-required-p nil
         :sources
-        (list (read-zettel-6537-source)
+        (list (read-zettel-6537-zettelkasten-source
+               :roots zettelkasten-roots)
+              (read-zettel-6537-source)
               (read-physics-not-advice-source)
               (read-advice-taker-source))))
