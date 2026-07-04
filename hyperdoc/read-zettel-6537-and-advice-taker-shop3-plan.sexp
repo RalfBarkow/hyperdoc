@@ -9,7 +9,7 @@
  (:production-store dreyeck-dmx-sqlite-production-db)
  (:source-context
   ((fedwiki-page physics-not-advice)
-   (zettel-sheet zettel-6537)
+   (zettel-note zettel-6537)
    (source-note advice-taker)
    (project hyperdoc-8470)
    (prior-project shop3-8853)))
@@ -31,7 +31,7 @@
 
      (:operator (!define-zettel-reader-task ?source ?task)
       ((task-topic-defined ?task ?topic-id ?title)
-       (zettel-sheet ?source))
+       (zettel-note ?source))
       ()
       ((reader-task-defined zettel-reader ?source ?task)
        (reader-boundary ?task :read-only)))
@@ -216,7 +216,7 @@
      (repo-root "/Users/rgb/workspace/hyperdoc")
      (production-store dreyeck-dmx-sqlite-production-db)
      (fedwiki-page physics-not-advice)
-     (zettel-sheet zettel-6537)
+     (zettel-note zettel-6537)
      (source-note advice-taker)
      (project hyperdoc-8470)
      (prior-project shop3-8853))
