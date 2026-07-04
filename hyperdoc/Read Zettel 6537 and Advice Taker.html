@@ -1,0 +1,99 @@
+<h1>Read Zettel 6537 and Advice Taker</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This reference page records the plan-first source-reader contract for the
+  HyperDoc 8470 continuation from SHOP3 8853. The durable source identity is
+  <b>Zettel 6537</b>. The SHOP3-shaped plan artifact is
+  <tt>hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp</tt>.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Read Zettel 6537 and Advice Taker"><tt>Read Zettel 6537 and Advice Taker</tt></a></li>
+  <li><a hyperbook="topics" page="Source-reader task decomposition"><tt>Source-reader task decomposition</tt></a></li>
+  <li><a hyperbook="topics" page="Zettel reader"><tt>Zettel reader</tt></a></li>
+  <li><a hyperbook="topics" page="FedWiki page reader"><tt>FedWiki page reader</tt></a></li>
+  <li><a hyperbook="topics" page="Advice Taker note reader"><tt>Advice Taker note reader</tt></a></li>
+  <li><a hyperbook="topics" page="Zettel 6537 Source Station"><tt>Zettel 6537 Source Station</tt></a></li>
+  <li><a hyperbook="topics" page="Physics, Not Advice Source Station"><tt>Physics, Not Advice Source Station</tt></a></li>
+  <li><a hyperbook="topics" page="Advice Taker Source Station"><tt>Advice Taker Source Station</tt></a></li>
+  <li><a hyperbook="topics" page="DMX SQLite task-topic store"><tt>DMX SQLite task-topic store</tt></a></li>
+  <li><a hyperbook="topics" page="Source-reader replay validation"><tt>Source-reader replay validation</tt></a></li>
+</ul>
+
+<h2>Contract</h2>
+
+<p>
+  The first move is the plan artifact and explicit task-topic cluster. The
+  reader implementation is downstream from that artifact: it may read local
+  source surfaces, but it must not rewrite Zettel, FedWiki, or Advice Taker
+  source content while establishing the reader boundary.
+</p>
+
+<ul>
+  <li><tt>read-zettel-6537-and-advice-taker</tt> is the stable plan/topic id.</li>
+  <li><tt>read-zettel-6537-task</tt> is the task topic for the Zettel source station.</li>
+  <li><tt>zettel-6537-source-station</tt>, <tt>physics-not-advice-source-station</tt>, and <tt>advice-taker-source-station</tt> are source stations.</li>
+  <li><tt>materialize-source-reader-task-topics</tt> records the task-topic cluster in the Dreyeck DMX SQLite mirror.</li>
+</ul>
+
+<h2>Reader surfaces</h2>
+
+<p>
+  The implemented reader surfaces are local-only and evidence-preserving:
+  <tt>read-zettel-6537-source</tt> extracts Zettel evidence from the local
+  <tt>physics-not-advice</tt> page, <tt>read-physics-not-advice-source</tt>
+  reads the local FedWiki page JSON, and <tt>read-advice-taker-source</tt>
+  reads the local FedWiki page plus Advice Taker ASDF asset. Each result carries
+  source identity, provenance, extracted fragments, derived topics, failure
+  state, and <tt>:network-required-p nil</tt>.
+</p>
+
+<p>
+  The Advice Taker reader treats a missing transcript as a partial source
+  state, not an unhandled error. It preserves the page and topicmap summaries
+  and records <tt>:reason :transcript-missing</tt> when the transcript text is
+  absent.
+</p>
+
+<h2>Replay checks</h2>
+
+<pre>
+git diff --check
+
+nix develop -c sbcl --noinform --disable-debugger --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :dreyeck/dmx/sqlite/tests)' \
+  --eval '(funcall (intern "RUN-SOURCE-READER-SURFACE-TEST" "DREYECK.DMX.SQLITE/TESTS"))' \
+  --eval '(format t "source-reader-surface-ok~%")' \
+  --eval '(uiop:quit)'
+
+nix develop -c sbcl --noinform --disable-debugger --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system :dreyeck/dmx/sqlite/tests)' \
+  --eval '(funcall (intern "RUN-SOURCE-READER-TASK-TOPIC-MATERIALIZATION-TEST" "DREYECK.DMX.SQLITE/TESTS"))' \
+  --eval '(format t "source-reader-task-materialization-ok~%")' \
+  --eval '(uiop:quit)'
+</pre>
+
+<h2>Boundary</h2>
+
+<ul>
+  <li>No network, DMX server, browser, or device is required.</li>
+  <li>No Zettel or FedWiki reader writes source content in this slice.</li>
+  <li>No full Kioskbeerli load is required.</li>
+  <li>The SHOP3 fields are durable plan data; they are not proof that a planner runtime is coherent for this slice.</li>
+</ul>
+
+<h2>Related surfaces</h2>
+
+<ul>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="physics-not-advice">Physics, Not Advice</a></li>
+  <li><a hyperbook="fedwiki:wiki.ralfbarkow.ch" page="advice-taker">Advice Taker</a></li>
+  <li><a page="Focused semantic source stations">Focused semantic source stations</a></li>
+  <li><a page="Source-station assimilation routine">Source-station assimilation routine</a></li>
+  <li><a page="SHOP3 Planning Layer for HyperDoc">SHOP3 Planning Layer for HyperDoc</a></li>
+</ul>

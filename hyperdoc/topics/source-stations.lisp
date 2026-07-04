@@ -72,6 +72,93 @@
                  "Lafont 1990 Interaction Nets")))
 
 
+;; Zettel 6537 / Advice Taker source-reader topics.
+
+(defun read-zettel-6537-and-advice-taker-topic ()
+  (make-topic
+   :id "read-zettel-6537-and-advice-taker"
+   :title "Read Zettel 6537 and Advice Taker"
+   :summary "Plan-first source-reader slice that records SHOP3 task topics before reading Zettel 6537, Physics Not Advice, and the Advice Taker note through local-only reader surfaces."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp"
+                 "Source-station assimilation routine"
+                 "Focused semantic source stations")))
+
+(defun source-reader-task-decomposition-topic ()
+  (make-topic
+   :id "source-reader-task-decomposition"
+   :title "Source-reader task decomposition"
+   :summary "SHOP3-shaped decomposition that requires plan artifact and explicit task-topic materialization before any source-reader implementation code is added."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")))
+
+(defun zettel-reader-topic ()
+  (make-topic
+   :id "zettel-reader"
+   :title "Zettel reader"
+   :summary "Read-only local source reader that extracts Zettel note evidence from the localhost FedWiki Physics, Not Advice page without network access."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "Physics, Not Advice")))
+
+(defun fedwiki-page-reader-topic ()
+  (make-topic
+   :id "fedwiki-page-reader"
+   :title "FedWiki page reader"
+   :summary "Read-only local reader for localhost FedWiki page JSON, returning source identity, provenance, story fragments, derived topics, and bounded failure state."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "Physics, Not Advice"
+                 "Advice Taker")))
+
+(defun advice-taker-note-reader-topic ()
+  (make-topic
+   :id "advice-taker-note-reader"
+   :title "Advice Taker note reader"
+   :summary "Read-only local reader for the Advice Taker FedWiki page and ASDF asset, reporting partial status when the transcript text is absent."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "Advice Taker")))
+
+(defun zettel-6537-source-station-topic ()
+  (make-topic
+   :id "zettel-6537-source-station"
+   :title "Zettel 6537 Source Station"
+   :summary "Stable source station for the Zettel 6537 planning-as-contingency-reduction evidence on the Physics, Not Advice localhost FedWiki page."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "Physics, Not Advice"
+                 "Focused semantic source stations")))
+
+(defun physics-not-advice-source-station-topic ()
+  (make-topic
+   :id "physics-not-advice-source-station"
+   :title "Physics, Not Advice Source Station"
+   :summary "Stable source station for the localhost FedWiki page physics-not-advice, used as the bridge between Zettel 6537, Advice Taker, PDDL, and planning-as-contingency-reduction."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "Physics, Not Advice")))
+
+(defun advice-taker-source-station-topic ()
+  (make-topic
+   :id "advice-taker-source-station"
+   :title "Advice Taker Source Station"
+   :summary "Stable source station for the Advice Taker localhost FedWiki page and local ASDF topicmap asset."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "Advice Taker")))
+
+(defun dmx-sqlite-task-topic-store-topic ()
+  (make-topic
+   :id "dmx-sqlite-task-topic-store"
+   :title "DMX SQLite task-topic store"
+   :summary "Dreyeck DMX SQLite mirror surface that stores the source-reader plan/task topic cluster under stable local ids for later inspection."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")))
+
+(defun source-reader-replay-validation-topic ()
+  (make-topic
+   :id "source-reader-replay-validation"
+   :title "Source-reader replay validation"
+   :summary "Replay contract for the Zettel 6537 and Advice Taker reader slice: local-only readers, idempotent task-topic materialization, parseable source artifacts, and no network requirement."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "Source-station assimilation routine")))
+
+
 ;; SIFT careers source-station topics.
 
 (defun smart-information-flow-technologies-topic ()
