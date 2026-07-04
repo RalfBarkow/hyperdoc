@@ -857,6 +857,176 @@
      "documents"
      "bounded-convergent-association-edge-reassignment")))
 
+(defparameter *source-reader-task-plan-artifact-source*
+  "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+
+(defparameter *source-reader-task-topic-definitions*
+  `((:id "read-zettel-6537-and-advice-taker"
+     :type :shop3-plan
+     :title "Read Zettel 6537 and Advice Taker"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "SHOP3-shaped plan that records the source-reader task topics before reading Zettel 6537, Physics Not Advice, or the Advice Taker note.")
+    (:id "source-reader-task-decomposition"
+     :type :task-decomposition-model
+     :title "Source Reader Task Decomposition"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "Task model requiring plan and task-topic recording before source-reader implementation.")
+    (:id "zettel-reader"
+     :type :source-reader
+     :title "Zettel Reader"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "Read-only source reader for Zettel note evidence such as Zettel 6537.")
+    (:id "fedwiki-page-reader"
+     :type :source-reader
+     :title "FedWiki Page Reader"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "Local-first source reader for localhost FedWiki page JSON and page-attached assets.")
+    (:id "advice-taker-note-reader"
+     :type :source-reader
+     :title "Advice Taker Note Reader"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "Source reader that exposes Advice Taker evidence as a source station rather than as prose alone.")
+    (:id "zettel-6537-source-station"
+     :type :source-station
+     :title "Zettel 6537 Source Station"
+     :source "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice"
+     :source-reference "fedwiki:wiki.ralfbarkow.ch/physics-not-advice#zettel-6537"
+     :projection-status :seeded-from-local-fedwiki-page
+     :summary "Stable source station for the Zettel 6537 planning-as-contingency-reduction evidence.")
+    (:id "physics-not-advice-source-station"
+     :type :source-station
+     :title "Physics Not Advice Source Station"
+     :source "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/physics-not-advice"
+     :source-reference "fedwiki:wiki.ralfbarkow.ch/physics-not-advice"
+     :projection-status :seeded-from-local-fedwiki-page
+     :summary "Stable site-plus-slug source station for the local Physics, Not Advice FedWiki page.")
+    (:id "advice-taker-source-station"
+     :type :source-station
+     :title "Advice Taker Source Station"
+     :source "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/advice-taker"
+     :source-reference "fedwiki:wiki.ralfbarkow.ch/advice-taker"
+     :projection-status :seeded-from-local-fedwiki-page
+     :summary "Stable source station for the Advice Taker note and its page-attached topicmap asset.")
+    (:id "explicit-task-decomposition-topic"
+     :type :architecture-rule
+     :title "Explicit Task Decomposition Topic"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "A reader implementation task must be named as a topic before the reader is implemented.")
+    (:id "shop3-plan-as-topic"
+     :type :architecture-rule
+     :title "SHOP3 Plan as Topic"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "A SHOP3 plan artifact is itself a durable topic and page projection, not an invisible build note.")
+    (:id "dmx-sqlite-task-topic-store"
+     :type :production-store
+     :title "DMX SQLite Task Topic Store"
+     :source "dreyeck/dmx/sqlite/durable-notes.lisp"
+     :projection-status :configured-production-store
+     :summary "The Dreyeck DMX SQLite mirror stores source-reader task topics under stable local ids.")
+    (:id "read-zettel-6537-task"
+     :type :task-topic
+     :title "Read Zettel 6537"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "Task topic for reading the Zettel 6537 source station after the plan has recorded it.")
+    (:id "read-advice-taker-note-task"
+     :type :task-topic
+     :title "Read Advice Taker note"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "Task topic for reading the Advice Taker note and producing source-station evidence.")
+    (:id "define-zettel-reader-task"
+     :type :task-topic
+     :title "Define Zettel reader"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "Task topic that authorizes the read-only Zettel reader implementation.")
+    (:id "define-fedwiki-page-reader-task"
+     :type :task-topic
+     :title "Define FedWiki page reader"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "Task topic that authorizes the local-first FedWiki page reader implementation.")
+    (:id "persist-reader-task-topics-task"
+     :type :task-topic
+     :title "Persist reader task topics"
+     :source ,*source-reader-task-plan-artifact-source*
+     :projection-status :seeded-from-shop3-plan
+     :summary "Task topic for idempotently materializing the reader task topics into the DMX SQLite mirror.")))
+
+(defparameter *source-reader-task-association-definitions*
+  '((:source "read-zettel-6537-and-advice-taker"
+     :predicate "uses"
+     :target "source-reader-task-decomposition"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "read-zettel-6537-and-advice-taker"
+     :predicate "requires"
+     :target "explicit-task-decomposition-topic"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "read-zettel-6537-and-advice-taker"
+     :predicate "is"
+     :target "shop3-plan-as-topic"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "read-zettel-6537-and-advice-taker"
+     :predicate "persists-to"
+     :target "dmx-sqlite-task-topic-store"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "source-reader-task-decomposition"
+     :predicate "decomposes-into"
+     :target "read-zettel-6537-task"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "source-reader-task-decomposition"
+     :predicate "decomposes-into"
+     :target "read-advice-taker-note-task"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "source-reader-task-decomposition"
+     :predicate "decomposes-into"
+     :target "define-zettel-reader-task"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "source-reader-task-decomposition"
+     :predicate "decomposes-into"
+     :target "define-fedwiki-page-reader-task"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "source-reader-task-decomposition"
+     :predicate "decomposes-into"
+     :target "persist-reader-task-topics-task"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "define-zettel-reader-task"
+     :predicate "defines"
+     :target "zettel-reader"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "define-fedwiki-page-reader-task"
+     :predicate "defines"
+     :target "fedwiki-page-reader"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "read-advice-taker-note-task"
+     :predicate "defines"
+     :target "advice-taker-note-reader"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "read-zettel-6537-task"
+     :predicate "reads"
+     :target "zettel-6537-source-station"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "define-fedwiki-page-reader-task"
+     :predicate "reads"
+     :target "physics-not-advice-source-station"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "read-advice-taker-note-task"
+     :predicate "reads"
+     :target "advice-taker-source-station"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
+    (:source "persist-reader-task-topics-task"
+     :predicate "uses"
+     :target "dmx-sqlite-task-topic-store"
+     :source-artifact "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")))
+
 (defun durable-note-all-topic-definitions ()
   (append *durable-note-materialization-topic-definitions*
           *domkin-2017-source-topic-definitions*))
@@ -1474,6 +1644,153 @@ not silently materialize missing documentation topics."
             (operation-documentation-topic-materialization-status
              db-path
              operation-id)))))
+
+(defun source-reader-task-topic-ids ()
+  "Return stable local ids for the source-reader task topic set."
+  (mapcar (lambda (definition) (getf definition :id))
+          *source-reader-task-topic-definitions*))
+
+(defun source-reader-task-association-ids ()
+  (durable-note-association-ids *source-reader-task-association-definitions*))
+
+(defun source-reader-task-topic-definition (topic-id)
+  (find topic-id
+        *source-reader-task-topic-definitions*
+        :key (lambda (definition) (getf definition :id))
+        :test #'equal))
+
+(defun source-reader-task-topic-materialization-status
+    (&key (db-path *dreyeck-dmx-production-db-path*))
+  "Return a read-only verification report for source-reader task topics."
+  (let* ((db-exists? (probe-file db-path))
+         (topic-ids (source-reader-task-topic-ids))
+         (association-definitions *source-reader-task-association-definitions*)
+         (association-ids (source-reader-task-association-ids))
+         (missing-topic-ids
+           (if db-exists?
+               (durable-note-missing-topic-ids db-path topic-ids)
+               topic-ids))
+         (missing-association-ids
+           (if db-exists?
+               (durable-note-missing-association-ids
+                db-path
+                association-definitions)
+               association-ids))
+         (passed? (and db-exists?
+                       (null missing-topic-ids)
+                       (null missing-association-ids))))
+    (list :kind :source-reader-task-topic-materialization-status
+          :plan "read-zettel-6537-and-advice-taker"
+          :production-db-path (namestring db-path)
+          :production-db-exists-p (and db-exists? t)
+          :status (if passed? :passed :failed)
+          :required-topic-ids topic-ids
+          :required-association-ids association-ids
+          :missing-topic-ids missing-topic-ids
+          :missing-association-ids missing-association-ids
+          :network-required-p nil)))
+
+(defun materialize-source-reader-task-topics
+    (&key (db-path *dreyeck-dmx-production-db-path*) (replace-existing? t))
+  "Materialize source-reader plan/task topics into the DMX SQLite mirror.
+
+This is an explicit writer operation. Source readers themselves remain
+read-only and do not silently create missing task topics."
+  (initialize-dmx-associative-mirror :db-path db-path)
+  (let ((topic-results
+          (loop for definition in *source-reader-task-topic-definitions*
+                collect
+                (materialize-durable-note-topic
+                 db-path
+                 definition
+                 :replace-existing? replace-existing?)))
+        (association-results
+          (loop for definition in *source-reader-task-association-definitions*
+                collect
+                (materialize-durable-note-association
+                 db-path
+                 definition
+                 :replace-existing? replace-existing?))))
+    (list :kind :source-reader-task-topic-materialization
+          :plan "read-zettel-6537-and-advice-taker"
+          :production-db-path (namestring db-path)
+          :topic-results topic-results
+          :association-results association-results
+          :status
+          (source-reader-task-topic-materialization-status
+           :db-path db-path))))
+
+(defun dmx-materialized-source-reader-task-topic-entry (topic-id row)
+  (let* ((definition (source-reader-task-topic-definition topic-id))
+         (source-info (durable-note-source-info (getf definition :source))))
+    (list :id topic-id
+          :present-p (and row t)
+          :title (or (getf row :value)
+                     (getf definition :title)
+                     topic-id)
+          :topic-type (getf definition :type)
+          :type-uri (getf row :type-uri)
+          :source (getf definition :source)
+          :source-reference (getf definition :source-reference)
+          :source-exists-p (getf source-info :exists-p)
+          :projection-status (getf definition :projection-status)
+          :summary (getf definition :summary)
+          :db-object row)))
+
+(defun dmx-materialized-source-reader-task-association-entry (definition row)
+  (let ((association-id (durable-note-association-id definition)))
+    (list :id association-id
+          :present-p (and row t)
+          :source (getf definition :source)
+          :predicate (getf definition :predicate)
+          :target (getf definition :target)
+          :source-artifact (getf definition :source-artifact)
+          :type-uri (getf row :type-uri)
+          :db-object row)))
+
+(defun dmx-materialized-source-reader-task-topics
+    (&key (db-path *dreyeck-dmx-production-db-path*))
+  "Return the materialized source-reader task topic cluster."
+  (let* ((db-exists? (probe-file db-path))
+         (status (source-reader-task-topic-materialization-status
+                  :db-path db-path))
+         (topic-ids (source-reader-task-topic-ids))
+         (topic-rows
+           (and db-exists?
+                (durable-note-object-rows-by-id db-path "topic" topic-ids)))
+         (association-definitions *source-reader-task-association-definitions*)
+         (association-rows
+           (and db-exists?
+                (durable-note-object-rows-by-id
+                 db-path
+                 "assoc"
+                 (durable-note-association-ids
+                  association-definitions))))
+         (topics
+           (loop for topic-id in topic-ids
+                 collect
+                 (dmx-materialized-source-reader-task-topic-entry
+                  topic-id
+                  (durable-note-row-for-id topic-rows topic-id))))
+         (associations
+           (loop for definition in association-definitions
+                 for association-id = (durable-note-association-id definition)
+                 collect
+                 (dmx-materialized-source-reader-task-association-entry
+                  definition
+                  (durable-note-row-for-id association-rows association-id)))))
+    (list :kind :dmx-materialized-source-reader-task-topics
+          :status (getf status :status)
+          :production-db-path (namestring db-path)
+          :production-db-exists-p (and db-exists? t)
+          :materialization-status status
+          :topic-ids topic-ids
+          :association-ids (source-reader-task-association-ids)
+          :topics topics
+          :associations associations
+          :missing-topic-ids (getf status :missing-topic-ids)
+          :missing-association-ids (getf status :missing-association-ids)
+          :network-required-p nil)))
 
 (defun dmx-materialized-domkin-2017-source-topics
     (&key (db-path *dreyeck-dmx-production-db-path*))

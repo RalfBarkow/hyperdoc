@@ -319,9 +319,98 @@
       (when (probe-file db)
         (delete-file db)))))
 
+(defun run-source-reader-task-topic-materialization-test ()
+  (let ((db (temporary-dmx-sqlite-path)))
+    (unwind-protect
+         (progn
+           (initialize-dmx-associative-mirror :db-path db :clear t)
+           (let* ((first-run
+                    (materialize-source-reader-task-topics :db-path db))
+                  (second-run
+                    (materialize-source-reader-task-topics :db-path db))
+                  (status
+                    (source-reader-task-topic-materialization-status
+                     :db-path db))
+                  (inspection
+                    (dmx-materialized-source-reader-task-topics
+                     :db-path db)))
+             (assert-equal
+              :source-reader-task-topic-materialization
+              (getf first-run :kind)
+              "Source-reader task materializer must return a structured report")
+             (assert-equal
+              :passed
+              (getf status :status)
+              "Source-reader task topic materialization must pass")
+             (assert-equal
+              nil
+              (getf status :missing-topic-ids)
+              "Source-reader task topic materialization must report no missing topics")
+             (assert-equal
+              nil
+              (getf status :missing-association-ids)
+              "Source-reader task topic materialization must report no missing associations")
+             (assert-equal
+              nil
+              (getf status :network-required-p)
+              "Source-reader task topic materialization must be local-only")
+             (dolist (topic-id (source-reader-task-topic-ids))
+               (assert-true
+                (dmx-sqlite-topic db topic-id)
+                (format nil
+                        "Source-reader materializer must create topic ~A"
+                        topic-id)))
+             (dolist (association-id (getf status :required-association-ids))
+               (assert-true
+                (dmx-sqlite-association db association-id)
+                (format nil
+                        "Source-reader materializer must create association ~A"
+                        association-id)))
+             (assert-true
+              (every (lambda (result)
+                       (eq (getf result :state) :unchanged))
+                     (getf second-run :topic-results))
+              "Second source-reader materializer run must not rewrite topics")
+             (assert-true
+              (every (lambda (result)
+                       (eq (getf result :state) :unchanged))
+                     (getf second-run :association-results))
+              "Second source-reader materializer run must not rewrite associations")
+             (assert-equal
+              :dmx-materialized-source-reader-task-topics
+              (getf inspection :kind)
+              "Source-reader task inspection must return a structured object")
+             (assert-equal
+              :passed
+              (getf inspection :status)
+              "Source-reader task inspection must validate present topics")
+             (assert-true
+              (entry-by-id
+               (getf inspection :topics)
+               "read-zettel-6537-and-advice-taker")
+              "Source-reader task inspection must include the plan topic")
+             (assert-true
+              (entry-by-id
+               (getf inspection :topics)
+               "zettel-6537-source-station")
+              "Source-reader task inspection must include the Zettel source station")
+             (assert-true
+              (entry-by-id
+               (getf inspection :topics)
+               "physics-not-advice-source-station")
+              "Source-reader task inspection must include the FedWiki source station")
+             (assert-true
+              (entry-by-id
+               (getf inspection :topics)
+               "advice-taker-source-station")
+              "Source-reader task inspection must include the Advice Taker source station")))
+      (when (probe-file db)
+        (delete-file db)))))
+
 (defun run-dmx-sqlite-smoke-tests ()
   (run-association-edge-reassignment-fixture-test)
   (run-operation-documentation-topic-materialization-test)
+  (run-source-reader-task-topic-materialization-test)
   (let ((db (temporary-dmx-sqlite-path)))
     (unwind-protect
          (progn

@@ -37,6 +37,10 @@
                 #:dmx-materialized-learning-topics
                 #:dmx-materialized-operation-reader-surface-topics
                 #:dmx-materialized-domkin-2017-source-topics
+                #:source-reader-task-topic-ids
+                #:materialize-source-reader-task-topics
+                #:source-reader-task-topic-materialization-status
+                #:dmx-materialized-source-reader-task-topics
                 #:topic-association-players
                 #:dmx-sql-association-has-role-bearing-players-p
                 #:dmx-sql-counts)
