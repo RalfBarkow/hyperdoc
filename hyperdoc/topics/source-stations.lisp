@@ -78,7 +78,7 @@
   (make-topic
    :id "read-zettel-6537-and-advice-taker"
    :title "Read Zettel 6537 and Advice Taker"
-   :summary "Plan-first source-reader slice that records SHOP3 task topics before reading Zettel 6537, Physics Not Advice, and the Advice Taker note through local-only reader surfaces."
+   :summary "Plan-first source-reader slice that records SHOP3 task topics before reading authoritative Zettel 6537 file text, FedWiki projection/context, and the Advice Taker note through local-only reader surfaces."
    :references '("Read Zettel 6537 and Advice Taker"
                  "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp"
                  "Source-station assimilation routine"
@@ -96,8 +96,67 @@
   (make-topic
    :id "zettel-reader"
    :title "Zettel reader"
-   :summary "Read-only local source reader that extracts Zettel note evidence from the localhost FedWiki Physics, Not Advice page without network access."
+   :summary "Read-only local projection/context reader that extracts Zettel evidence from the localhost FedWiki Physics, Not Advice page without treating that page as the authoritative Zettel text source."
    :references '("Read Zettel 6537 and Advice Taker"
+                 "Physics, Not Advice")))
+
+(defun implement-zettel-6537-zettelkasten-file-reader-topic ()
+  (make-topic
+   :id "implement-zettel-6537-zettelkasten-file-reader"
+   :title "Implement Zettel 6537 Zettelkasten file reader"
+   :summary "Follow-up SHOP3 task that adds the direct Zettelkasten-file reader only after materializing the authority/projection task topics and edges."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")))
+
+(defun zettel-6537-topic ()
+  (make-topic
+   :id "zettel-6537"
+   :title "Zettel 6537"
+   :summary "Durable Zettel identity for the German planning passage whose authoritative text is read from configured local Zettelkasten file roots."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp"
+                 "Physics, Not Advice")))
+
+(defun zettel-6537-zettelkasten-file-source-topic ()
+  (make-topic
+   :id "zettel-6537-zettelkasten-file-source"
+   :title "Zettel 6537 Zettelkasten File Source"
+   :summary "Authoritative local file source for Zettel 6537, located by filename through configured Zettelkasten roots or an explicit fixture root override."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp"
+                 "Zettelkasten note lookup for Zotero resolution")))
+
+(defun zettelkasten-file-reader-topic ()
+  (make-topic
+   :id "zettelkasten-file-reader"
+   :title "Zettelkasten file reader"
+   :summary "Local-only note-file reader that locates a Zettel by filename under configured roots, reads UTF-8 text, and returns source identity, provenance, fragments, derived topics, and explicit failure state."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "Zettelkasten note lookup for Zotero resolution")))
+
+(defun zettelkasten-file-source-authority-topic ()
+  (make-topic
+   :id "zettelkasten-file-source-authority"
+   :title "Zettelkasten file source authority"
+   :summary "Authority boundary stating that configured Zettelkasten files, not FedWiki projections, provide the canonical text for Zettel 6537 reader evidence."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp")))
+
+(defun zettel-6537-fedwiki-projection-topic ()
+  (make-topic
+   :id "zettel-6537-fedwiki-projection"
+   :title "Zettel 6537 FedWiki Projection"
+   :summary "Projection and interpretive bridge for Zettel 6537 through the localhost FedWiki Physics, Not Advice page."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "Physics, Not Advice")))
+
+(defun zettel-6537-source-authority-reconciliation-topic ()
+  (make-topic
+   :id "zettel-6537-source-authority-reconciliation"
+   :title "Zettel 6537 Source Authority Reconciliation"
+   :summary "Boundary topic that reconciles the authoritative Zettelkasten file source with the FedWiki Physics, Not Advice projection/context bridge."
+   :references '("Read Zettel 6537 and Advice Taker"
+                 "hyperdoc/implement-zettel-6537-zettelkasten-file-reader-shop3-plan.sexp"
                  "Physics, Not Advice")))
 
 (defun fedwiki-page-reader-topic ()
@@ -121,7 +180,7 @@
   (make-topic
    :id "zettel-6537-source-station"
    :title "Zettel 6537 Source Station"
-   :summary "Stable source station for the Zettel 6537 planning-as-contingency-reduction evidence on the Physics, Not Advice localhost FedWiki page."
+   :summary "Stable source-station handle for FedWiki-projected Zettel 6537 planning evidence; the authoritative text source is the Zettelkasten file source."
    :references '("Read Zettel 6537 and Advice Taker"
                  "Physics, Not Advice"
                  "Focused semantic source stations")))
