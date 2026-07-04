@@ -52,6 +52,11 @@
    #:materialize-source-reader-task-topics
    #:source-reader-task-topic-materialization-status
    #:dmx-materialized-source-reader-task-topics
+   #:read-local-fedwiki-page-source
+   #:read-physics-not-advice-source
+   #:read-zettel-6537-source
+   #:read-advice-taker-source
+   #:read-zettel-6537-and-advice-taker-sources
    #:normalize-dmx-association-players
    #:topic-association-players
    #:dmx-sql-association-has-role-bearing-players-p

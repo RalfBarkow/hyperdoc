@@ -114,6 +114,7 @@
   :version "0.1.0"
   :serial t
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/dmx/sqlite/tests")))
+  :depends-on (#:shasht)
   :components
   ((:module "dreyeck/dmx/sqlite"
     :serial t
@@ -121,7 +122,8 @@
     ((:file "package")
      (:file "store")
      (:file "edge-reassignment")
-     (:file "durable-notes")))))
+     (:file "durable-notes")
+     (:file "source-readers")))))
 
 (defsystem #:dreyeck/dmx/sqlite/tests
   :description "Tests for the Dreyeck-owned DMX-shaped SQLite store."

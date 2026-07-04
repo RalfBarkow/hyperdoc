@@ -13,6 +13,60 @@
         :key (lambda (entry) (getf entry :id))
         :test #'equal))
 
+(defun plist-key-present-p (plist key)
+  (loop for tail on plist by #'cddr
+        thereis (eql (first tail) key)))
+
+(defun topic-entry-by-id (topics id)
+  (entry-by-id topics id))
+
+(defun result-fragment-texts (result)
+  (loop for fragment in (getf result :extracted-fragments)
+        collect (getf fragment :text)))
+
+(defun assert-plist-has-keys (plist keys message)
+  (dolist (key keys)
+    (assert-true
+     (plist-key-present-p plist key)
+     (format nil "~A must include key ~S" message key))))
+
+(defun assert-source-reader-result (result reader message)
+  (assert-equal
+   :source-reader-result
+   (getf result :kind)
+   (format nil "~A kind" message))
+  (assert-equal reader
+                (getf result :reader)
+                (format nil "~A reader" message))
+  (assert-equal nil
+                (getf result :network-required-p)
+                (format nil "~A network requirement" message))
+  (assert-plist-has-keys
+   result
+   '(:kind :reader :source-identity :provenance :extracted-fragments
+     :derived-topics :failure-state :network-required-p)
+   message)
+  (assert-true
+   (getf result :source-identity)
+   (format nil "~A must include source identity" message))
+  (assert-true
+   (getf result :provenance)
+   (format nil "~A must include provenance" message))
+  (assert-true
+   (getf result :extracted-fragments)
+   (format nil "~A must include extracted fragments" message))
+  (assert-true
+   (getf result :derived-topics)
+   (format nil "~A must include derived topics" message)))
+
+(defun assert-any-text-contains (texts needle message)
+  (assert-true
+   (some (lambda (text)
+           (and (stringp text)
+                (search needle text :test #'char-equal)))
+         texts)
+   message))
+
 (defun assert-sql-ok (db-path sql message)
   (multiple-value-bind (stdout stderr exit-code)
       (sqlite-run db-path sql)
@@ -395,22 +449,108 @@
                "zettel-6537-source-station")
               "Source-reader task inspection must include the Zettel source station")
              (assert-true
-              (entry-by-id
-               (getf inspection :topics)
-               "physics-not-advice-source-station")
-              "Source-reader task inspection must include the FedWiki source station")
-             (assert-true
-              (entry-by-id
-               (getf inspection :topics)
-               "advice-taker-source-station")
-              "Source-reader task inspection must include the Advice Taker source station")))
+             (entry-by-id
+              (getf inspection :topics)
+              "physics-not-advice-source-station")
+             "Source-reader task inspection must include the FedWiki source station")
+            (assert-true
+             (entry-by-id
+              (getf inspection :topics)
+              "advice-taker-source-station")
+             "Source-reader task inspection must include the Advice Taker source station")))
       (when (probe-file db)
         (delete-file db)))))
+
+(defun run-source-reader-surface-test ()
+  (let* ((zettel (read-zettel-6537-source))
+         (physics (read-physics-not-advice-source))
+         (advice-taker (read-advice-taker-source))
+         (surface-set (read-zettel-6537-and-advice-taker-sources)))
+    (assert-source-reader-result
+     zettel
+     :zettel-reader
+     "Zettel 6537 reader")
+    (assert-equal
+     "zettel-6537"
+     (getf (getf zettel :source-identity) :id)
+     "Zettel 6537 reader source id")
+    (assert-equal
+     "zettel-6537-source-station"
+     (getf (getf zettel :source-identity) :source-station)
+     "Zettel 6537 reader source station")
+    (assert-true
+     (topic-entry-by-id (getf zettel :derived-topics) "zettel-6537")
+     "Zettel 6537 reader must derive the Zettel topic")
+    (assert-any-text-contains
+     (result-fragment-texts zettel)
+     "Zettel 6537"
+     "Zettel 6537 reader must retain readable source text")
+    (assert-source-reader-result
+     physics
+     :fedwiki-page-reader
+     "Physics, Not Advice reader")
+    (assert-equal
+     "physics-not-advice"
+     (getf (getf physics :source-identity) :slug)
+     "Physics, Not Advice reader slug")
+    (assert-true
+     (topic-entry-by-id (getf physics :derived-topics) "zettel-6537")
+     "Physics, Not Advice reader must derive the Zettel 6537 bridge")
+    (assert-any-text-contains
+     (result-fragment-texts physics)
+     "Advice Taker"
+     "Physics, Not Advice reader must retain Advice Taker source text")
+    (assert-source-reader-result
+     advice-taker
+     :advice-taker-note-reader
+     "Advice Taker reader")
+    (assert-equal
+     "advice-taker-source-station"
+     (getf (getf advice-taker :source-identity) :source-station)
+     "Advice Taker reader source station")
+    (assert-true
+     (topic-entry-by-id (getf advice-taker :derived-topics) "advice-taker")
+     "Advice Taker reader must derive the Advice Taker topic")
+    (assert-any-text-contains
+     (result-fragment-texts advice-taker)
+     "Advice Taker"
+     "Advice Taker reader must retain local page or topicmap text")
+    (if (getf (getf advice-taker :provenance) :transcript-present-p)
+        (assert-equal
+         nil
+         (getf advice-taker :failure-state)
+         "Advice Taker reader must be complete when transcript is present")
+        (progn
+          (assert-equal
+           :partial
+           (getf (getf advice-taker :failure-state) :status)
+           "Advice Taker reader must report partial status without transcript")
+          (assert-equal
+           :transcript-missing
+           (getf (getf advice-taker :failure-state) :reason)
+           "Advice Taker reader must preserve transcript-missing reason")))
+    (assert-equal
+     :source-reader-surface-set
+     (getf surface-set :kind)
+     "Combined source-reader surface set kind")
+    (assert-equal
+     "read-zettel-6537-and-advice-taker"
+     (getf surface-set :plan)
+     "Combined source-reader surface set plan id")
+    (assert-equal
+     nil
+     (getf surface-set :network-required-p)
+     "Combined source-reader surface set must be local-only")
+    (assert-equal
+     3
+     (length (getf surface-set :sources))
+     "Combined source-reader surface set must include three sources")))
 
 (defun run-dmx-sqlite-smoke-tests ()
   (run-association-edge-reassignment-fixture-test)
   (run-operation-documentation-topic-materialization-test)
   (run-source-reader-task-topic-materialization-test)
+  (run-source-reader-surface-test)
   (let ((db (temporary-dmx-sqlite-path)))
     (unwind-protect
          (progn
