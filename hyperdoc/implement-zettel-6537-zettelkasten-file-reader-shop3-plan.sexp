@@ -3,7 +3,8 @@
  (:title "Implement Zettel 6537 Zettelkasten File Reader")
  (:type :shop3-plan)
  (:planner :shop3)
- (:status :open)
+ (:status :closed)
+ (:closed-at "2026-07-04")
  (:created-before-implementation t)
  (:repo-root "/Users/rgb/workspace/hyperdoc")
  (:predecessor-plan "hyperdoc/read-zettel-6537-and-advice-taker-shop3-plan.sexp")
@@ -137,6 +138,46 @@
    (!update-hyperdoc-documentation-projection)
    (!commit-plan-artifact implement-zettel-6537-zettelkasten-file-reader)
    (!close-plan-artifact implement-zettel-6537-zettelkasten-file-reader)))
+
+ (:completion-evidence
+  ((hyperdoc-commits
+    ((:commit "066b2d70"
+      :message "docs(hyperdoc): plan zettelkasten file reader"
+      :evidence "Plan artifact and authority/projection task topics were recorded before reader implementation.")
+     (:commit "bf3ea90f"
+      :message "feat(dmx): add zettelkasten file reader"
+      :evidence "Exported locate-zettel-note-file, read-zettelkasten-note-file, and read-zettel-6537-zettelkasten-source; added fixture-root smoke tests.")
+     (:commit "86738d82"
+      :message "docs(hyperdoc): document zettelkasten reader authority"
+      :evidence "Updated HyperDoc page and topic constructors to distinguish Zettelkasten file authority from FedWiki projection/context.")))
+   (fedwiki-commits
+    ((:commit "c465c4c7"
+      :message "docs(fedwiki): add zettel file reader twins"
+      :evidence "Added localhost FedWiki twins for new authority/projection topics and updated the narrative/daily pages.")))
+   (validation-commands
+    ((:command "git diff --check"
+      :status :passed)
+     (:command "nix develop -c sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :dreyeck/dmx/sqlite/tests)' --eval '(funcall (intern \"RUN-ZETTELKASTEN-FILE-READER-TEST\" \"DREYECK.DMX.SQLITE/TESTS\"))' --eval '(format t \"zettelkasten-file-reader-ok~%\")' --eval '(funcall (intern \"RUN-SOURCE-READER-SURFACE-TEST\" \"DREYECK.DMX.SQLITE/TESTS\"))' --eval '(format t \"source-reader-surface-ok~%\")' --eval '(uiop:quit)'"
+      :status :passed
+      :output "zettelkasten-file-reader-ok; source-reader-surface-ok")
+     (:command "nix develop -c timeout 120 sbcl --noinform --disable-debugger --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system :dreyeck/dmx/sqlite/tests)' --eval '(funcall (intern \"RUN-SOURCE-READER-TASK-TOPIC-MATERIALIZATION-TEST\" \"DREYECK.DMX.SQLITE/TESTS\"))' --eval '(format t \"source-reader-task-materialization-ok~%\")' --eval '(uiop:quit)'"
+      :status :passed
+      :output "source-reader-task-materialization-ok")
+     (:command "tools/validate-documentation-slice.sh --page \"hyperdoc/Read Zettel 6537 and Advice Taker.html\" --topic read-zettel-6537-and-advice-taker-topic --topic implement-zettel-6537-zettelkasten-file-reader-topic --topic zettel-6537-topic --topic zettel-6537-zettelkasten-file-source-topic --topic zettelkasten-file-reader-topic --topic zettelkasten-file-source-authority-topic --topic zettel-6537-fedwiki-projection-topic --topic zettel-6537-source-authority-reconciliation-topic --topic zettel-reader-topic --topic source-reader-replay-validation-topic"
+      :status :passed
+      :output "DOC_SLICE_VALIDATION_OK")
+     (:command "python3 -m json.tool <changed-fedwiki-pages>"
+      :status :passed
+      :output "fedwiki-json-ok")
+     (:command "nix develop -c sbcl --no-userinit --script tools/journal-gate.lisp <changed-fedwiki-pages>"
+      :status :passed
+      :output "all changed FedWiki pages PASS? T")))
+   (authority-boundary
+    ((zettelkasten-file-reader "authoritative source for Zettel 6537")
+     (fedwiki-physics-not-advice-reader
+      "projection / interpretive bridge / context")
+     (test-root-boundary
+      "smoke tests use temporary fixture roots and do not require private Zettelkasten files")))))
 
  (:output-contract
   ((required-topic-ids
