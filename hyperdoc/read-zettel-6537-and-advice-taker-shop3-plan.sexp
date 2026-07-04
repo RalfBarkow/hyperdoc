@@ -3,7 +3,7 @@
  (:title "Read Zettel 6537 and Advice Taker")
  (:type :shop3-plan)
  (:planner :shop3)
- (:status :open)
+ (:status :closed)
  (:created-before-implementation t)
  (:repo-root "/Users/rgb/workspace/hyperdoc")
  (:production-store dreyeck-dmx-sqlite-production-db)
@@ -259,6 +259,31 @@
    (!commit-reader-implementation read-zettel-6537-and-advice-taker)
    (!commit-documentation-projection read-zettel-6537-and-advice-taker)
    (!close-plan-artifact read-zettel-6537-and-advice-taker)))
+
+ (:completion-evidence
+  ((hyperdoc-commits
+    ((:commit "24977fdc" :role :plan-artifact)
+     (:commit "c57c9e3c" :role :zettel-terminology-correction)
+     (:commit "392a2424" :role :dmx-sqlite-task-topic-materialization)
+     (:commit "923b7b2e" :role :zettel-note-predicate-correction)
+     (:commit "2794b950" :role :local-source-reader-surfaces)
+     (:commit "810091fa" :role :hyperdoc-documentation-projection)))
+   (fedwiki-pages-commit
+    (:repo "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages"
+     :commit "c0e241e3"
+     :role :fedwiki-topic-twins-and-daily-anchor))
+   (validation
+    ((:command "git diff --check" :status :passed)
+     (:command "nix develop -c sbcl ... RUN-SOURCE-READER-SURFACE-TEST"
+      :status :passed)
+     (:command "nix develop -c sbcl ... RUN-SOURCE-READER-TASK-TOPIC-MATERIALIZATION-TEST"
+      :status :passed)
+     (:command "tools/validate-documentation-slice.sh --page \"hyperdoc/Read Zettel 6537 and Advice Taker.html\" ..."
+      :status :passed)
+     (:command "python3 -m json.tool <new-fedwiki-page>"
+      :status :passed)
+     (:command "nix develop -c sbcl --script tools/journal-gate.lisp <new-fedwiki-pages>"
+      :status :passed)))))
 
  (:output-contract
   ((required-topic-ids
