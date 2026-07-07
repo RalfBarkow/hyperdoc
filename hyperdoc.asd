@@ -814,3 +814,27 @@
   :components ((:module "hyperdoc-inspector"
                 :serial t
                 :components ((:file "git-commit-inspection-views")))))
+
+(defsystem #:hyperdoc/zkn3-import-report-projection
+  :description "HyperDoc/CLOG adapter views for ZKN3 import report projections"
+  :author "Ralf Barkow <ralf.barkow@me.com>"
+  :license "BSD"
+  :version "0.0.1"
+  :serial t
+  :depends-on (#:hyperdoc/inspector
+               #:html-inspector-views
+               #:clog-moldable-inspector)
+  :components ((:module "hyperdoc-inspector"
+                :serial t
+                :components ((:file "zkn3-import-report-projection")))))
+
+(defsystem #:hyperdoc/zkn3-import-report-projection/tests
+  :description "Smoke tests for ZKN3 import report projection inspector views"
+  :author "Ralf Barkow <ralf.barkow@me.com>"
+  :license "BSD"
+  :version "0.0.1"
+  :serial t
+  :depends-on (#:hyperdoc/zkn3-import-report-projection)
+  :components ((:module "tests"
+                :serial t
+                :components ((:file "zkn3-import-report-projection-smoke")))))
