@@ -16,12 +16,12 @@
  (:assimilate-existing-artifact
   "hyperdoc/task-location-problem-determined-htn.sexp" :record-this-result
   "hyperdoc/llm-wiki-note-8892-task-location-htn-assimilation-result.sexp")
- :form-level-defect-repaired
- (:failed-task (!assimilate-untracked-task-location-problem-determined-htn)
-  :reader-error "Comma not inside a backquote." :cause
-  "The previous generated form used comma syntax in data construction. This replacement uses only ordinary LIST and QUOTE construction."
-  :prevention
-  "For SLY pasteable maintenance forms, avoid quasiquote/comma in generated artifact construction when ordinary LIST is sufficient.")
+ :form-level-defects-repaired
+ (:first-reader-error "Comma not inside a backquote."
+  :second-compiled-program-error "DECLARE appeared in an evaluated position."
+  :responsible-form-task
+  (!assimilate-untracked-task-location-problem-determined-htn) :prevention
+  "Use ordinary LIST/QUOTE construction for SLY-pasteable maintenance forms, and do not emit DECLARE except in valid declaration positions.")
  :htn-correction
  (:close-slice-method-must-include
   ((!scan-project-owned-untracked-artifacts :scope
