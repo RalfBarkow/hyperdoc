@@ -1,0 +1,787 @@
+(:artifact llm-wiki-note-8892-okf-profile-fedwiki-slug-repair-result
+ :kind fedwiki-page-slug-repair-result
+ :status recorded
+
+ :diagnosis
+ (:canonical-file-slug "hyperdoc-fedwiki-okf-profile"
+  :old-title "HyperDoc/FedWiki OKF Profile"
+  :old-title-derived-slug "hyperdocfedwiki-okf-profile"
+  :symptom "Scan Page fetched hyperdocfedwiki-okf-profile.json while canonical file was hyperdoc-fedwiki-okf-profile.")
+
+ :repair
+ (:canonical-page
+  (:slug "hyperdoc-fedwiki-okf-profile"
+   :title "HyperDoc FedWiki OKF Profile"
+   :path "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/hyperdoc-fedwiki-okf-profile"
+   :written t
+   :title-slug-now-matches-file t)
+
+  :alias-page
+  (:slug "hyperdocfedwiki-okf-profile"
+   :title "HyperDoc/FedWiki OKF Profile"
+   :path "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/hyperdocfedwiki-okf-profile"
+   :written t
+   :purpose "Support existing [[HyperDoc/FedWiki OKF Profile]] links."))
+
+ :git-results
+ (:pages-submodule
+  (:commit "9e341a8e"
+   :status-after "M 2026-03-05
+ M 2026-03-06
+ M 2026-03-14
+ M 2026-03-26
+ M 2026-03-28
+ M 2026-03-31
+ M 2026-04-20
+ M 2026-05-22
+ M 2026-05-25
+ M 2026-05-28
+ M 2026-06-03
+ M 2026-07-04
+ M a
+ M aarch64-procedure-select-source
+ M aarch64-procedure-verify-integrity
+ M aiml-links
+ M anarchive
+ M bounded-convergent-association-edge-reassignment
+ M carver-mead-on-semiconductors
+ M code-path-graphs-in-hyperdoc
+ M common-workspace
+ M composing-pages
+ M constitution-builder
+ M create-nixos-sd-card-from-hyperdoc-playground
+ M create-sd-card-from-playground-task
+ M d
+ M den
+ M design-with-the-nor
+ M dita-task-topic
+ M dojo-practices-2026
+ M flashlight-over-north-star
+ M guide
+ M how-scrape-works
+ M hydra-download-artifact-procedure
+ M hydra-sha256
+ M hyperdoc
+ M hyperdoc-link-integrity-checker
+ M inspector
+ M journal
+ M life-with-transistors
+ M micro-sd-card
+ M mobile-progressive-chrome-in-hyperdoc
+ M models-for-seeing-systems
+ M official-rpi-sd-image-tutorial
+ M official-tutorial-nixos-sd-image-on-a-raspberry-pi-4-400
+ M official-tutorial-nixos-sd-image-on-raspberry-pi-4-400
+ M official-tutorial-nixos-sd-image-on-raspberry-pi-4400
+ M opening-external-fedwiki-sites
+ M optional-semantic-adaptation-for-fedwiki-story-items
+ M patterns-of-war
+ M preflight-rpi-sd-image-checklist
+ M prepare-aarch64-image
+ M prepare-the-aarch64-image
+ M quick-brown-fox
+ M recognizing-chapters
+ D runbook---build-and-flash-nixos-sd-image-for-kioskberrli
+ D runbook-build-and-flash-nixos-sd-image-for-kioskberrli
+ M runbook-build-and-flash-sd-image
+ M satechi-usbc-pro-hub-4k-hdmi
+ D scratch
+ M sd-card
+ M sd-card-command-plan-playground
+ M side-road
+ M structure-sharing
+ M tail-recursion
+ M tdliche-konflikte
+ M testing-story-print-mech
+ M the-principle-of-void-equivalence
+ M thompsons-stories
+ M topic-files-topicmap
+ M transcend-16gb-micro-sd-card
+ D understanding-kioskberrli-sdimage-failure-context
+ M watch-everything
+ M writing-excercise
+ M z8482
+ M z8554
+ M z8562
+ M z8691
+?? .DS_Store
+?? 2026-03-16
+?? 2026-03-19
+?? 2026-03-20
+?? 2026-03-21
+?? 2026-03-22
+?? 2026-03-23
+?? 2026-03-24
+?? 2026-04-04
+?? 2026-04-08
+?? 2026-04-12
+?? 2026-04-14
+?? 2026-04-17
+?? 2026-04-21
+?? 2026-04-22
+?? 2026-04-23
+?? 2026-04-29
+?? 2026-04-30
+?? 2026-05-02
+?? 2026-05-03
+?? 2026-05-04
+?? 2026-05-05
+?? 2026-05-06
+?? 2026-05-07
+?? 2026-05-08
+?? 2026-05-09
+?? 2026-05-10
+?? 2026-05-11
+?? 2026-05-12
+?? 2026-05-13
+?? 2026-05-14
+?? 2026-05-15
+?? 2026-05-17
+?? 2026-05-18
+?? 2026-05-19
+?? 2026-05-21
+?? 2026-05-23
+?? 2026-05-24
+?? 2026-05-26
+?? 2026-05-27
+?? 2026-05-28.backup-3988934163
+?? 2026-05-28.backup-before-revision-repair-1779948020
+?? 2026-05-29
+?? 2026-05-30
+?? 2026-05-31
+?? 2026-06-01
+?? 2026-06-04
+?? 2026-06-05
+?? 2026-06-06
+?? 2026-06-07
+?? 2026-06-08
+?? 2026-06-09
+?? 2026-06-10
+?? 2026-06-11
+?? 2026-06-12
+?? 2026-06-13
+?? 2026-06-14
+?? 2026-06-17
+?? 2026-06-21
+?? 2026-06-26
+?? 2026-06-28
+?? 2026-06-29
+?? 2026-06-30
+?? 2026-07-02
+?? 2026-07-03
+?? 2026-07-06
+?? 2026-07-08
+?? 30-years-of-progress
+?? 7-partial-scenarios
+?? a-critic-for-lisp
+?? a-framework-for-maintaining-the-coherence-of-a-running-lisp
+?? a-moldable-inspector-for-common-lisp
+?? a-problem-inverted
+?? a-war-according-to-the-book
+?? about-similarity-plugin
+?? add-cons-cell-topic
+?? add-the-hyperdoc-relation-protocol
+?? addresses-vs-places
+?? admin-repair-surface
+?? advice-taker
+?? alistair-davidson
+?? apollo-json-blob
+?? appendworkspacenote
+?? asdf-manual
+?? asdf-system-boundary
+?? asdfx-fedwiki-system
+?? audio-alignment
+?? be-nice-feel-good
+?? belonging-vs-fitting-in
+?? bike-bus-to-school
+?? boyle-heights-fire
+?? build-a-dmx-to-dm6-adapter
+?? build-aarch64-image
+?? build-and-install-for-next-boot
+?? build-explicit-dmx-authorization-header-client
+?? bundle-deploy
+?? calvin-on-creativity
+?? can-big-tech-learn
+?? can-healthcare-learn
+?? capability-link-collaboration-object
+?? capability-scoped-extension-and-webxdc-slice-review
+?? cargo-culture
+?? check-the-scxml-artifact-is-present
+?? choice-of-a-partial-scenario
+?? christian-ekrem
+?? chunk-note
+?? chunk-notes-and-manifest-notes-in-a-dmx-workspace
+?? chw-hybrid-coop
+?? civilisation-remembering-itself
+?? clients-of-secs
+?? clog
+?? clog-builder-master-class
+?? codex-dmx-access-boundary
+?? commoning-revisited
+?? compare-two-forms
+?? compile-paragraphs-from-sequential-links
+?? confirm-local-check-output
+?? connect-state-machine-view-handover
+?? consolidate-page-databases-into-site-database
+?? content-topic
+?? context-window-workspace-as-shared-blackboard
+?? controllable-dialogue
+?? copy-partial-scenario
+?? cotomi-act
+?? counterfactual-cluster-estimation
+?? current-lisp-image
+?? current-plan-and-next-task
+?? cyber-fighter-command
+?? cybernetic-eigenforms-and-markov-blankets
+?? data-dignity
+?? debug-shop3-find-plans
+?? debugging-reinvented-in-hyperdoc
+?? decisive-preboot-eval-gate
+?? define-an-inspectable-object-for-the-button
+?? define-an-inspectable-trace-object
+?? define-safe-slot-helpers
+?? define-sqlite-schema-for-page-site-and-federation-databases
+?? demo-and-notes
+?? demo-of-json
+?? den-pipeline
+?? design-a-general-admin-repair-surface
+?? diffmatic
+?? divine-love-and-quantum-potential
+?? divine-regeneration
+?? dm6-appembed-contract-boundary
+?? dm6-appembed-hyperdoc-inline-proof
+?? dm6-elm-and-elm-pages-debugger-comparison
+?? dm6-elm-artifact-inspector-runbook
+?? dm6-embedded-evidence-timeline
+?? dmx-associative-mirror
+?? dmx-context-window
+?? dmx-topic-proxy
+?? dmx-webclient-url-alone-is-not-a-durable-codex-interface
+?? dmx-workspace-sharing-mode
+?? documents-as-a-maintained-wiki
+?? domkin-2017-source-subgraph
+?? dynamic-symmetry
+?? elements-of-a-guide
+?? elm-pages-effects-as-data
+?? every-layout
+?? evolution-of-energy
+?? example-run
+?? exchange-artifact
+?? executable-dita-task
+?? execute-dmx-annotation-workspace-dashboard-action
+?? export-to-pandoc
+?? extract-pane-subject
+?? federated-sim-search
+?? fedwiki-attached-asdf-system
+?? fedwiki-image-skill
+?? fedwiki-story-item-rendering-trust-boundary
+?? fedwiki-to-dmx-importer-workspace-assignment-bug
+?? feeding-the-solo-popup
+?? fermilabs-dune
+?? find-plans
+?? find-the-real-nixos-vm-ip-from-macos
+?? fine-grained-content-addressing
+?? focused-semantic-source-stations
+?? from-remembered-refusals-to-repairable-routes
+?? fuzzy-search
+?? garys-eval-approach
+?? gateway-review
+?? gel-carousel
+?? gemma
+?? git-merge-intent-surface-and-codex-handover
+?? goldbergs-questions-applied
+?? graphviz-demo
+?? guide-examples
+?? guides-are-not-serious
+?? halli-hallo-hallu
+?? harness-engineering-as-categorical-architecture
+?? hauptsache-repomix-refresh
+?? hitchhiker-brief-001-when-story-became-data
+?? hitchhikers-anarchive
+?? hitchhikers-guide
+?? hitchhikersearth
+?? how-hyperdoc-differs-from-the-www
+?? how-to-connect-the-fedwiki-page-view-to-the-lower-level-graphviz-code
+?? how-to-extract-the-dot-script-from-the-story-item
+?? how-to-read-fedwiki-as-database
+?? howard-t-odum
+?? hybrid-chw-coop
+?? hyperdoc---a-hypermedia-substrate-for-knowledge-workers
+?? hyperdoc-as-a-protocol
+?? hyperdoc-neo4j-topic-delete-tool-operation-model
+?? hyperdoc-runtime-closure
+?? hyperdocs-generic-pathname-topicmap-view
+?? igor-engraver
+?? image-as-deployment-artifact
+?? influence-generation
+?? initial-latency
+?? inspect-kioskbeerli-pi-live-state
+?? inspect-the-current-state
+?? inspect-the-page-system
+?? inspect-the-relevant-scxml-snippet
+?? inspect-view-contract
+?? inspect-where-the-wrong-provenance-lives
+?? inspectable-execution
+?? inspectable-loadability-proof
+?? inspector-runtime-coherence-report
+?? install-staged-etcnixos
+?? introduce-a-dispatcher-object
+?? introduction-to-ai-planning
+?? ken-robinson-a-wake-up-call
+?? keyword-argument
+?? kfix-grep-runtime
+?? kfix-inspect
+?? kioskbeerli-den-runtime-workflow
+?? kioskbeerli-dynamic-drm-workbench-v3
+?? kioskbeerli-state-parser
+?? kms-openability-shop3-plan
+?? lafont-1990-interaction-nets
+?? last-codex-result
+?? law-speaker
+?? layout-override
+?? layout-topicmap
+?? learning-how-to-learn
+?? legal-opinions-and-german-civil-law
+?? lightning-maps
+?? lineup-formatting
+?? link-redirection
+?? link-to-the-lisp-function-page
+?? links-2026-05
+?? links-2026-06
+?? links-2026-07
+?? links-aiml-2026-05
+?? links-aiml-2026-07
+?? lisp-as-trep
+?? listennotes-outpost
+?? llm-wiki
+?? load-a-program
+?? load-and-inspect-the-relation-protocol
+?? making-objects-writable
+?? manifest-note
+?? many-gates-makes-tetris
+?? marian-goodell
+?? marquam-gulch
+?? mech-code-block
+?? meetralfbarkowch
+?? metagraph-as-bipartite-graph-json-ld--fluree
+?? module-load-errors
+?? moral-graphs-and-phase-transitions
+?? narration-cursor
+?? narrative-mice
+?? native-elm
+?? new-little-library
+?? next
+?? nixos-manual
+?? nixos-official-graphical-iso-task
+?? non-member-beneficiaries
+?? non-webkit-frame-proof
+?? normal-association-submit-path-vs-evidence-path
+?? not-the-same-page
+?? note-on-inscriptions-and-symbols
+?? object-disoriented
+?? only-inspect-the-scxml-file-first
+?? onnx
+?? open-current-plans-page-inspector
+?? openalex-and-sci-hub
+?? original-creator-pages
+?? out-of-memory-is-an-engineering-case
+?? page-component-reorder
+?? page-databases-merge-into-federation-database
+?? page-lookup-rebuild-gate
+?? page-scoped-asdf-systems
+?? pariss-school-streets
+?? partnership-structure
+?? passion-regained
+?? paula-says-a-mile-a-day
+?? pddl
+?? pedagogy-of-poverty
+?? people-can-make-new-symbols
+?? persist-dock-annotation-local-first
+?? plan-idempotent-repair
+?? plugins-in-use
+?? portacle
+?? print-functions
+?? probability-cloud-and-cybernetic-eigenform
+?? probe-the-existing-click-path
+?? product-market-fit
+?? production-process
+?? programmer-as-reader
+?? programming-methods-pure-lisp
+?? progression-from-repl-experiment-to-updating-the-current-lisp-image
+?? projection-pipeline-operator-plan
+?? proton-motive-force
+?? provision-linux-builder.broken-1780667807000
+?? purpose-of-play
+?? purposeful-brilliance
+?? re-lighting-fires
+?? read-topic-by-id-and-uri
+?? read-workspace-and-topicmap
+?? readable-malleable-layer
+?? reconstruct-the-1996-c2-wiki-viewer-inside-hyperdoc
+?? reconstruct-topic-936040-annotation-projection-path
+?? recreating-the-injector
+?? recycle-this-box
+?? reduction-of-openness
+?? reimagination
+?? reimagining-the-gospel
+?? related-topics-for-topic.before-assets-path-fix.3990138852
+?? related-topics-for-topic.before-fixed-journal.3990137795
+?? related-topics-for-topic.before-rewrite.3990137449
+?? related-topics-for-topic.before-rewrite.3990137466
+?? relational-brilliance
+?? render-a-live-canvas-you-control
+?? render-example-source-artifact-source-only
+?? render-story-item
+?? renderupload-the-display-only-den-tree
+?? reopen-workspace-annotation
+?? repair-public-key-login
+?? replace-the-assertion
+?? restricting-user-access-with-rbash
+?? route-planning-bridge
+?? runbook---build-and-flash-nixos-sd-image-for-kioskbeerli
+?? runbook-build-and-flash-nixos-sd-image-for-kioskbeerli
+?? running-image-coherence
+?? s-expression-prompt-idea
+?? sbcl-spaces
+?? scoped-examples
+?? selection-of-variables
+?? self-employed-chws-secs
+?? self-host-a-small-gpu-cluster-on-hetzner-or-lambda-for-qwen
+?? session-qvkapb
+?? shakti-and-divine-love
+?? shared-inspector-projection
+?? sharing-claude-skills
+?? shop3
+?? show-feedback-cycles
+?? similarity-plugin
+?? similarity-plugin-spec
+?? skillfish
+?? skills-for-the-future-and-school-culture
+?? skills-for-the-future-initiative
+?? source-edits-required
+?? special-invitations
+?? standalone-executable
+?? start-in-sly-with-a-clean-baseline
+?? state-machine-visualization
+?? story-pages
+?? substrates-2026-workshop
+?? switch-generation-19
+?? symbolic-regression
+?? sync-identity
+?? sysdef-exhaustivecentral-registry-search
+?? test-assets-folder
+?? testing-userscripts
+?? the-black-box
+?? the-first-mice
+?? the-hitchhiker-vision-fish-docs
+?? the-life-cycle-of-collective-knowledge
+?? the-reel
+?? the-rest-is-politics-leading
+?? the-shape-of-letters
+?? third-paradigm
+?? timebank-plugin
+?? topic-registry-diagnostic
+?? topics-hyperbook
+?? touch-fahrplan
+?? touch-fahrplan-review
+?? touch-timetable
+?? trailing-colons
+?? two-graphs
+?? two-jobs
+?? two-maps
+?? understanding-kioskbeerli-sdimage-failure-context
+?? universal-wave-function-and-shiva
+?? use-an-in-memory-recorder
+?? use-ordinary-trace
+?? verify-hydra-artifact-checksum
+?? verify-sqlite-has-the-repaired-page
+?? verify-the-two-hyperdoc-systems
+?? why-did-the-stroke-color-become-purple
+?? why-swarm
+?? wiki040
+?? write-the-shop3-correction-plan-artifact
+?? writers-draft
+?? writing-2026-04
+?? writing-2026-05
+?? writing-2026-07
+?? you-cannot-be-serious
+?? youtube-dl
+?? yt-dlp
+?? z3710
+?? z5072
+?? z5114
+?? z5668
+?? z6129
+?? z6313
+?? z6537
+?? z7582
+?? z8210
+?? z8821
+?? z8822
+?? z8823
+?? z8824
+?? z8825
+?? z8826
+?? z8827
+?? z8828
+?? z8829
+?? z8830
+?? z8831
+?? z8832
+?? z8833
+?? z8834
+?? z8835
+?? z8836
+?? z8837
+?? z8838
+?? z8839
+?? z8840
+?? z8841
+?? z8842
+?? z8843
+?? z8844
+?? z8845
+?? z8846
+?? z8847
+?? z8848
+?? z8849
+?? z8850
+?? z8851
+?? z8852
+?? z8853
+?? z8854
+?? z8855
+?? z8856
+?? z8857
+?? z8858
+?? z8859
+?? z8860
+?? z8861
+?? z8862
+?? z8863
+?? z8864
+?? z8865
+?? z8866
+?? z8867
+?? z8868
+?? z8869
+?? z8870
+?? z8871
+?? z8872
+?? z8873
+?? z8874
+?? z8875
+?? z8876
+?? z8877
+?? z8878
+?? z8879
+?? z8880
+?? z8881
+?? z8882
+?? z8883
+?? z8884
+?? z8885
+?? z8886
+?? z8887
+?? z8888
+?? z8889
+?? z8890
+?? z8891
+?? z8892
+?? z8893
+?? z8894
+?? z8895
+?? z8896
+?? z8897
+?? z8898
+?? z8899
+?? z8900
+?? z8901
+?? z8902
+?? z8903
+?? z8904
+?? z8905
+?? z8906
+?? z8907
+?? z8908
+?? z8909
+?? z8910
+?? z8911
+?? z8912
+?? z8913
+?? z8914
+?? z8915
+?? z8916
+?? z8917
+?? z8918
+?? z8919
+?? z8920
+?? z8921
+?? z8922
+?? z8923
+?? z8924
+?? z8925
+?? z8926
+?? z8927
+?? z8928
+?? z8929
+?? z8930
+?? z8931
+?? z8932
+?? z8933
+?? z8934
+?? z8935
+?? z8936
+?? z8937
+?? z8938
+?? z8939
+?? z8940
+?? z8941
+?? z8942
+?? z8943
+?? z8944
+?? z8945
+?? z8946
+?? z8947
+?? z8948
+?? z8949
+?? z8950
+?? z8951
+?? z8952
+?? z8953
+?? z8954
+?? z8955
+?? z8956
+?? z8957
+?? z8958
+?? z8959
+?? z8960
+?? z8961
+?? z8962
+?? z8963
+?? z8964
+?? z8965
+?? z8966
+?? z8967
+?? z8968
+?? z8969
+?? z8970
+?? z8971
+?? z8972
+?? z8973
+?? z8974
+?? z8975
+?? z8976
+?? z8977
+?? z8978
+?? z8979
+?? z8980
+?? z8981
+?? z8982
+?? z8983
+?? z8984
+?? z8985
+?? z8986
+?? z8987
+?? z8988
+?? z8989
+?? z8990
+?? z8991
+?? z8992
+?? z8993
+?? z8994
+?? z8995
+?? z8996
+?? z8997
+?? z8998
+?? z8999
+?? z9000
+?? z9001
+?? z9002
+?? z9003
+?? z9004
+?? z9005
+?? z9006
+?? z9007
+?? z9008
+?? z9009
+?? z9010
+?? z9011
+?? z9012
+?? z9013
+?? z9014
+?? z9015
+?? z9016
+?? z9017
+?? z9018
+?? z9019
+?? z9020
+?? z9021
+?? z9022
+?? z9023
+?? z9024
+?? z9025
+?? z9026
+?? z9027
+?? z9028
+?? z9029
+?? z9030
+?? z9031
+?? z9032
+?? z9033
+?? z9034
+?? z9035
+?? z9036
+?? z9037
+?? z9038
+?? z9039
+?? z9040
+?? z9041
+?? z9042
+?? z9043
+?? z9044
+?? z9045
+?? z9046
+?? z9047
+?? z9048
+?? z9049
+?? z9050
+?? z9051
+?? z9052
+?? z9053
+?? z9054
+?? z9055
+?? z9056
+?? z9057
+?? z9058
+?? z9059
+?? z9060
+?? z9061
+?? z9062
+?? z9063
+?? z9064
+?? z9065
+?? z9066
+?? z9067
+?? zach-beane
+?? zettelkasten-desk-for-hyperdoc")
+
+  :site-superproject
+  (:commit "242b707"
+   :status-after "m assets
+ m pages"))
+
+ :boundary
+ (:fedwiki-page-written t
+  :slug-repair t
+  :okf-converter-implemented nil
+  :okf-importer-implemented nil
+  :okf-exporter-implemented nil
+  :zkn3-source-edited nil
+  :contact-db-materialization-resumed nil)
+
+ :next
+ (!inspect-fedwiki-page-projection-for-okf-profile
+  :mode :read-only-validation
+  :canonical-page "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/hyperdoc-fedwiki-okf-profile"
+  :alias-page "/Users/rgb/.wiki/wiki.ralfbarkow.ch/pages/hyperdocfedwiki-okf-profile"))
