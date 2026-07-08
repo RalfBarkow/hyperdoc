@@ -484,3 +484,144 @@
     (assert-equal "minab-school-strike"
                   (fedwiki-materialization-selector-of plan))
     plan))
+
+
+
+;;;; Remote FedWiki fork materialization
+;;;; Filed out from the live image during Zettel 9124.
+
+(defun fedwiki-materialization-json-slot (json string-key keyword-key)
+  "Return JSON slot STRING-KEY / KEYWORD-KEY from a hash-table or plist-like object."
+  (cond
+    ((hash-table-p json)
+     (or (gethash string-key json)
+         (gethash keyword-key json)))
+    ((listp json)
+     (or (getf json keyword-key)
+         (getf json (intern (string-upcase string-key) :keyword))))
+    (t nil)))
+
+(defun (setf fedwiki-materialization-json-slot)
+    (value json string-key keyword-key)
+  "Set JSON slot STRING-KEY / KEYWORD-KEY on a hash-table or plist-like object."
+  (cond
+    ((hash-table-p json)
+     (setf (gethash string-key json) value))
+    ((listp json)
+     (setf (getf json keyword-key) value))
+    (t
+     (error "Cannot set JSON slot ~S / ~S on ~S"
+            string-key keyword-key json))))
+
+(defun fedwiki-materialization-json-sequence-list (sequence)
+  "Return SEQUENCE as a list, accepting vectors and lists but not strings."
+  (cond
+    ((null sequence) nil)
+    ((and (vectorp sequence)
+          (not (stringp sequence)))
+     (loop for item across sequence collect item))
+    ((and (listp sequence)
+          (not (stringp sequence)))
+     sequence)
+    (t
+     (error "Expected JSON sequence, got ~S" sequence))))
+
+(defun fedwiki-materialization-copy-json (value)
+  "Deep-copy the JSON-like structures used by HyperDoc FedWiki pages."
+  (cond
+    ((hash-table-p value)
+     (let ((copy (make-hash-table :test (hash-table-test value))))
+       (loop for key being the hash-keys of value
+             using (hash-value subvalue)
+             do (setf (gethash key copy)
+                      (fedwiki-materialization-copy-json subvalue)))
+       copy))
+    ((and (vectorp value)
+          (not (stringp value)))
+     (coerce
+      (loop for item across value
+            collect (fedwiki-materialization-copy-json item))
+      'vector))
+    ((consp value)
+     (copy-tree value))
+    (t value)))
+
+(defun fedwiki-materialization-append-json-sequence (sequence item)
+  "Append ITEM to SEQUENCE, preserving vector-vs-list representation."
+  (let ((items
+          (append (fedwiki-materialization-json-sequence-list sequence)
+                  (list item))))
+    (if (vectorp sequence)
+        (coerce items 'vector)
+        items)))
+
+(defun fedwiki-materialization-json-object-keys (json)
+  "Return JSON object keys for hash-table or plist-like JSON objects."
+  (cond
+    ((hash-table-p json)
+     (loop for key being the hash-keys of json collect key))
+    ((listp json)
+     (loop for (key value) on json by #'cddr
+           collect key))
+    (t nil)))
+
+(defun fedwiki-materialization-canonical-fork-action-key-p (key)
+  "Return true when KEY is one of the canonical fork journal action keys."
+  (member key
+          '("type" "site" "date" :type :site :date)
+          :test #'equal))
+
+(defun fedwiki-materialization-make-explicit-fork-action
+    (&key site date)
+  "Return the canonical FedWiki fork journal action."
+  (unless (and (stringp site)
+               (> (length site) 0))
+    (error "Missing source site for fork action: ~S" site))
+  (unless (numberp date)
+    (error "Missing numeric fork action date: ~S" date))
+  (list :type "fork"
+        :site site
+        :date date))
+
+(defun fedwiki-materialization-canonical-fork-action-p (action)
+  "Return true when ACTION is a canonical FedWiki fork action."
+  (and (equal (fedwiki-materialization-json-slot action "type" :type)
+              "fork")
+       (stringp
+        (fedwiki-materialization-json-slot action "site" :site))
+       (numberp
+        (fedwiki-materialization-json-slot action "date" :date))
+       (every #'fedwiki-materialization-canonical-fork-action-key-p
+              (fedwiki-materialization-json-object-keys action))))
+
+(defun fedwiki-materialization-page-story-item-ids (page)
+  "Return the story item ids of PAGE, preserving story order."
+  (loop for item in
+        (fedwiki-materialization-json-sequence-list
+         (fedwiki-materialization-json-slot page "story" :story))
+        collect
+        (fedwiki-materialization-json-slot item "id" :id)))
+
+(defun fedwiki-materialization-page-with-appended-fork-action
+    (remote-page fork-action)
+  "Return a local fork candidate copied from REMOTE-PAGE.
+
+The operation preserves the page title, story item ids, story order, and source
+journal entries. It appends FORK-ACTION as the final journal action. It does not
+write the page, does not normalize plugin items, and does not add HyperDoc-only
+provenance to the canonical page JSON."
+  (unless remote-page
+    (error "Missing remote page JSON."))
+  (unless (fedwiki-materialization-canonical-fork-action-p fork-action)
+    (error "Not a canonical FedWiki fork action: ~S" fork-action))
+  (let* ((copy
+           (fedwiki-materialization-copy-json remote-page))
+         (journal
+           (fedwiki-materialization-json-slot copy "journal" :journal))
+         (new-journal
+           (fedwiki-materialization-append-json-sequence
+            journal
+            (fedwiki-materialization-copy-json fork-action))))
+    (setf (fedwiki-materialization-json-slot copy "journal" :journal)
+          new-journal)
+    copy))
