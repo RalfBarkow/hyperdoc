@@ -1,0 +1,1114 @@
+;;;; What Graphviz Does working-tree provenance inspection
+;;;; Filed out from the live HyperDoc image.
+;;;; Timestamp: 2026-07-09 09:07:55
+
+(in-package #:cl-user)
+
+(defpackage #:hyperdoc/what-graphviz-does-working-tree-provenance-inspection
+  (:use #:cl)
+  (:export
+   #:*wgd-file-out-metadata*
+   #:*wgd-task-plan-provenance-inspection-plan*
+   #:*wgd-next-executable-check-selection-plan*
+   #:*wgd-task-envelope-normalization-check*
+   #:*wgd-check-only-smoke-test-diff*
+   #:*wgd-check-only-evidence-readability*
+   #:*wgd-current-plan-stack-and-lisp-persistence-check*
+   #:*wgd-file-out-current-inspection-plans-decision*
+   #:*wgd-file-out-current-inspection-plans-result*
+   #:wgd-working-tree-provenance-inspection-objects
+   #:wgd-inspect-working-tree-provenance-inspection-objects))
+
+(in-package #:hyperdoc/what-graphviz-does-working-tree-provenance-inspection)
+
+(defparameter *wgd-file-out-metadata*
+  '(:TASK
+    (!FILE-OUT-WRITE-STAGE-AND-COMMIT-CURRENT-INSPECTION-PLANS :REPO :HYPERDOC
+     :TARGET
+     "hyperdoc/what-graphviz-does-working-tree-provenance-inspection.lisp")
+    :FILED-OUT-AT "2026-07-09 09:07:55" :COMMIT-MESSAGE
+    "docs(fedwiki): file out WGD provenance inspection" :SOURCE-PACKAGE
+    "CL-USER" :STAGE-BOUNDARY
+    ((MAY-WRITE-LISP-FILE T) (MAY-LOAD-WRITTEN-LISP-FILE T) (MAY-STAGE T)
+     (MAY-COMMIT T) (MAY-RUN-GIT-STATUS T) (MAY-RUN-NIX NIL) (MAY-DELETE NIL)
+     (MAY-FETCH-REMOTE-PAGE-JSON NIL) (MAY-WRITE-LOCAL-PAGE-JSON NIL)
+     (MAY-WRITE-PAGE-ATTACHED-ASDF NIL) (MAY-CREATE-SQLITE NIL))))
+
+(defparameter *wgd-task-plan-provenance-inspection-plan*
+  '(:TASK
+ (!INSPECT-TASK-AND-PLAN-PROVENANCE-FOR-CURRENT-WORKING-TREE :REPO :HYPERDOC)
+ :STAGE-BOUNDARY
+ ((MAY-INSPECT-EXISTING-OBJECTS T) (MAY-READ-PARENT-RELATION-RESULT T)
+  (MAY-READ-STAGING-POLICY-PLAN T) (MAY-RUN-GIT NIL) (MAY-RUN-NIX NIL)
+  (MAY-READ-WORKING-TREE-FILES NIL) (MAY-STAGE NIL) (MAY-COMMIT NIL)
+  (MAY-DELETE NIL) (MAY-FETCH-REMOTE-PAGE-JSON NIL)
+  (MAY-WRITE-LOCAL-PAGE-JSON NIL) (MAY-WRITE-PAGE-ATTACHED-ASDF NIL)
+  (MAY-CREATE-SQLITE NIL))
+ :AVAILABLE-INPUT-OBJECTS
+ (:PARENT-RELATION-RESULT-PRESENT-P T :STAGING-POLICY-PLAN-PRESENT-P T)
+ :QUESTION
+ "Which tasks and plans were involved in the changes currently grouped into the three policy classes?"
+ :ANSWER-AS-PROVENANCE-MAP
+ ((:POLICY-CLASS :REMOTE-FORK-REGRESSION-SMOKE :FILES
+   ("tests/fedwiki-materialization-smoke.lisp") :GOVERNING-EPISODE :ZETTEL-9124
+   :MODIFYING-TASK (!FILE-OUT-LIVE-REMOTE-FORK-FUNCTIONALITY :REPO :HYPERDOC)
+   :MORE-PRECISE-OWNING-TASK
+   (!ADD-REMOTE-FORK-MATERIALIZATION-SMOKE-REGRESSION :REPO :HYPERDOC :FILE
+    "tests/fedwiki-materialization-smoke.lisp")
+   :RELATED-PLAN
+   "hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+   :RELATED-PLAN-STEPS
+   ((!ADAPT-FEDWIKI-MATERIALIZATION-ENTRY-FOR-REMOTE-FORK-PAGE :PAGE
+     WHAT-GRAPHVIZ-DOES)
+    (!WRITE-REMOTE-FORK-MATERIALIZATION-ENTRY :PAGE WHAT-GRAPHVIZ-DOES))
+   :STAGING-POLICY
+   (:CANDIDATE-COMMIT "test(fedwiki): cover remote fork materialization"
+    :REQUIRES ((CHECK-LISP-PARENS-PASSES T) (REMOTE-FORK-SMOKE-PRESENT T))))
+  (:POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE :FILES
+   ("hyperdoc/what-graphviz-does-*.evidence.sexp") :GOVERNING-PLAN
+   "hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+   :PARENT-PLAN-TASK
+   (!MATERIALIZE-LOCAL-FORK-FROM-JSON :PAGE WHAT-GRAPHVIZ-DOES) :CREATING-TASKS
+   ((!FETCH-REMOTE-PAGE-JSON :PAGE WHAT-GRAPHVIZ-DOES)
+    (!VALIDATE-REMOTE-PAGE-TITLE :PAGE WHAT-GRAPHVIZ-DOES :TITLE
+     "What Graphviz Does")
+    (!VALIDATE-REMOTE-PAGE-STORY-SHAPE :PAGE WHAT-GRAPHVIZ-DOES)
+    (!REPAIR-FETCH-RESULT-RETENTION-FOR-STORY-SHAPE-VALIDATION :PAGE
+     WHAT-GRAPHVIZ-DOES)
+    (!VALIDATE-REMOTE-PAGE-STORY-SHAPE-FROM-RETAINED-JSON :PAGE
+     WHAT-GRAPHVIZ-DOES)
+    (!PRESERVE-SOURCE-STORY-ITEMS :PAGE WHAT-GRAPHVIZ-DOES
+     :PRESERVE-EXISTING-ITEM-IDS T :PRESERVE-EXISTING-STORY-ORDER T)
+    (!CONSTRUCT-EXPLICIT-FORK-JOURNAL-ACTION :PAGE WHAT-GRAPHVIZ-DOES :TYPE
+     FORK :SITE "does.ward.dojo.fed.wiki" :DATE
+     EXECUTION-TIME-MONOTONIC-EPOCH-MILLIS)
+    (!RETAIN-HYPERDOC-ONLY-FORK-PROVENANCE :PAGE WHAT-GRAPHVIZ-DOES
+     :SOURCE-SITE "does.ward.dojo.fed.wiki" :TARGET-SITE "wiki.ralfbarkow.ch")
+    (!ADAPT-FEDWIKI-MATERIALIZATION-ENTRY-FOR-REMOTE-FORK-PAGE :PAGE
+     WHAT-GRAPHVIZ-DOES)
+    (!WRITE-REMOTE-FORK-MATERIALIZATION-ENTRY :PAGE WHAT-GRAPHVIZ-DOES)
+    (!LOAD-PAGE-ASDF-ASSET-WRITER-SYSTEM :SYSTEM :HYPERDOC/FEDWIKI-ASDF-ASSETS)
+    (!REPAIR-PAGE-ASDF-ASSET-WRITER-LOAD-BOUNDARY :SYSTEM
+     :HYPERDOC/FEDWIKI-ASDF-ASSETS)
+    (!REPAIR-PAGE-ATTACHED-ASDF-HOME-OBJECT-EVIDENCE :PAGE WHAT-GRAPHVIZ-DOES)
+    (!REPAIR-PAGE-ATTACHED-ASDF-HOME-EVIDENCE-DESCRIPTORS :PAGE
+     WHAT-GRAPHVIZ-DOES)
+    (!NORMALIZE-PAGE-ATTACHED-ASDF-HOME-EVIDENCE-DESCRIPTORS :PAGE
+     WHAT-GRAPHVIZ-DOES))
+   :STAGING-POLICY
+   (:CANDIDATE-COMMIT
+    "docs(fedwiki): record What Graphviz Does fork materialization evidence"
+    :REQUIRES
+    ((ALL-SELECTED-EVIDENCE-READABLE T) (NO-UNREADABLE-LIVE-OBJECT-SYNTAX T)
+     (EACH-FILE-RELATED-TO-PLAN-TASK T))))
+  (:POLICY-CLASS :ASDF-WRITER-LOAD-BOUNDARY-DIAGNOSTIC-EVIDENCE :FILES
+   ("hyperdoc/zettel-9121-diagnose-page-asdf-asset-writer-load-boundary-failure.evidence.sexp"
+    "hyperdoc/zettel-9122-clean-smoke-tail-inspection.evidence.sexp"
+    "hyperdoc/zettel-9123-clean-smoke-tail-capture.evidence.sexp")
+   :ORIGINATING-PLAN
+   "hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+   :ORIGINATING-PLAN-GATE
+   (!LOAD-PAGE-ASDF-ASSET-WRITER-SYSTEM :SYSTEM :HYPERDOC/FEDWIKI-ASDF-ASSETS)
+   :DIAGNOSTIC-CHAIN
+   ((!DIAGNOSE-PAGE-ASDF-ASSET-WRITER-LOAD-BOUNDARY-FAILURE :SYSTEM
+     :HYPERDOC/FEDWIKI-ASDF-ASSETS)
+    (!INSPECT-ZETTEL-9122-CLEAN-SMOKE-TAIL :SYSTEM
+     :HYPERDOC/FEDWIKI-ASDF-ASSETS)
+    (!RERUN-ZETTEL-9122-CLEAN-SMOKE-WITH-TAIL-CAPTURE :SYSTEM
+     :HYPERDOC/FEDWIKI-ASDF-ASSETS))
+   :COMPACT-BLOCKER "system hyperdoc is out of date" :STAGING-POLICY
+   (:DEFER T :REASON
+    "These files belong to the ASDF writer load-boundary blocker chain, not to the smoke-test commit.")))
+ :HTN-AS-DATA
+ ((:TASK
+   (!INSPECT-TASK-AND-PLAN-PROVENANCE-FOR-CURRENT-WORKING-TREE :REPO
+    :HYPERDOC))
+  (:METHOD INSPECT-PROVENANCE-WITHOUT-EXECUTION :SUBTASKS
+   ((!CONFIRM-NON-EXECUTION-BOUNDARY) (!INSPECT-EXISTING-RELATION-RESULT)
+    (!INSPECT-EXISTING-STAGING-POLICY-PLAN)
+    (!MAP-POLICY-CLASS-TO-GOVERNING-TASK-AND-PLAN :POLICY-CLASS
+     :REMOTE-FORK-REGRESSION-SMOKE)
+    (!MAP-POLICY-CLASS-TO-GOVERNING-TASK-AND-PLAN :POLICY-CLASS
+     :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE)
+    (!MAP-POLICY-CLASS-TO-GOVERNING-TASK-AND-PLAN :POLICY-CLASS
+     :ASDF-WRITER-LOAD-BOUNDARY-DIAGNOSTIC-EVIDENCE)
+    (!INSPECT-PROVENANCE-MAP))))
+ :SHOP3-PLAN-AS-DATA
+ ((!CONFIRM-NON-EXECUTION-BOUNDARY :MAY-RUN-GIT NIL :MAY-RUN-NIX NIL :MAY-STAGE
+   NIL :MAY-COMMIT NIL :MAY-DELETE NIL :MAY-WRITE NIL)
+  (!INSPECT-EXISTING-RELATION-RESULT :OBJECT
+   *WGD-RELATE-PLAN-INSPECTION-TO-CURRENT-WORKING-TREE-RESULT*)
+  (!INSPECT-EXISTING-STAGING-POLICY-PLAN :OBJECT
+   *WGD-Z9124-STAGING-POLICY-PLAN-INSPECTION*)
+  (!MAP-POLICY-CLASS-TO-GOVERNING-TASK-AND-PLAN :POLICY-CLASS
+   :REMOTE-FORK-REGRESSION-SMOKE :TASK
+   (!FILE-OUT-LIVE-REMOTE-FORK-FUNCTIONALITY :REPO :HYPERDOC) :PLAN
+   "Zettel 9124 file-out / persistence episode")
+  (!MAP-POLICY-CLASS-TO-GOVERNING-TASK-AND-PLAN :POLICY-CLASS
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE :TASK
+   (!MATERIALIZE-LOCAL-FORK-FROM-JSON :PAGE WHAT-GRAPHVIZ-DOES) :PLAN
+   "hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp")
+  (!MAP-POLICY-CLASS-TO-GOVERNING-TASK-AND-PLAN :POLICY-CLASS
+   :ASDF-WRITER-LOAD-BOUNDARY-DIAGNOSTIC-EVIDENCE :TASK
+   (!LOAD-PAGE-ASDF-ASSET-WRITER-SYSTEM :SYSTEM :HYPERDOC/FEDWIKI-ASDF-ASSETS)
+   :PLAN "ASDF writer load-boundary diagnostic chain")
+  (!INSPECT-PROVENANCE-MAP))
+ :ACCEPTANCE
+ ((PROVENANCE-MAP-INSPECTABLE T) (HTN-VISIBLE-AS-DATA T)
+  (SHOP3-PLAN-VISIBLE-AS-DATA T) (NO-SHELL-COMMAND-RUN T) (NO-FILE-IO-RUN T)
+  (NO-STAGE-PERFORMED T) (NO-COMMIT-PERFORMED T) (NO-DELETE-PERFORMED T)
+  (NO-FETCH-PERFORMED T) (NO-WRITE-PERFORMED T))
+ :NEXT-TASK
+ (!CHOOSE-NEXT-EXECUTABLE-CHECK :OPTIONS
+  ((!CHECK-ONLY-SMOKE-TEST-DIFF) (!CHECK-ONLY-EVIDENCE-READABILITY)
+   (!CHECK-ONLY-PLAN-ARTIFACT-READABILITY)))))
+
+(defparameter *wgd-next-executable-check-selection-plan*
+  '(:TASK
+ (!CHOOSE-NEXT-EXECUTABLE-CHECK :REPO :HYPERDOC :OPTIONS
+  ((!CHECK-ONLY-SMOKE-TEST-DIFF) (!CHECK-ONLY-EVIDENCE-READABILITY)
+   (!CHECK-ONLY-PLAN-ARTIFACT-READABILITY)))
+ :STAGE-BOUNDARY
+ ((MAY-INSPECT-PLAN T) (MAY-RUN-GIT NIL) (MAY-RUN-NIX NIL)
+  (MAY-READ-WORKING-TREE-FILES NIL) (MAY-STAGE NIL) (MAY-COMMIT NIL)
+  (MAY-DELETE NIL) (MAY-FETCH-REMOTE-PAGE-JSON NIL)
+  (MAY-WRITE-LOCAL-PAGE-JSON NIL) (MAY-WRITE-PAGE-ATTACHED-ASDF NIL)
+  (MAY-CREATE-SQLITE NIL))
+ :HTN-AS-DATA
+ ((:TASK (!CHOOSE-NEXT-EXECUTABLE-CHECK :REPO :HYPERDOC))
+  (:METHOD CHOOSE-READ-ONLY-CHECK-BEFORE-ANY-STAGING :SUBTASKS
+   ((!INSPECT-CURRENT-PROVENANCE-MAP) (!SELECT-ONE-READ-ONLY-CHECK)
+    (!CONSTRUCT-RUNNABLE-CHECK-FORM) (!INSPECT-RUNNABLE-CHECK-FORM))))
+ :SHOP3-PLAN-AS-DATA
+ ((!INSPECT-CURRENT-PROVENANCE-MAP :OBJECT
+   *WGD-TASK-PLAN-PROVENANCE-INSPECTION-PLAN*)
+  (!SELECT-ONE-READ-ONLY-CHECK :SELECTED
+   (!CHECK-ONLY-PLAN-ARTIFACT-READABILITY))
+  (!CONSTRUCT-RUNNABLE-CHECK-FORM :FOR (!CHECK-ONLY-PLAN-ARTIFACT-READABILITY))
+  (!INSPECT-RUNNABLE-CHECK-FORM))
+ :CANDIDATE-CHECKS
+ ((:CHECK (!CHECK-ONLY-SMOKE-TEST-DIFF) :READS
+   ("git diff -- tests/fedwiki-materialization-smoke.lisp") :WRITES NIL
+   :PURPOSE
+   "Confirm the modified smoke test really contains the remote fork regression.")
+  (:CHECK (!CHECK-ONLY-EVIDENCE-READABILITY) :READS
+   ("hyperdoc/what-graphviz-does-*.evidence.sexp"
+    "hyperdoc/zettel-912[123]-*.evidence.sexp")
+   :WRITES NIL :PURPOSE
+   "Separate durable readable evidence from diagnostic/unreadable evidence.")
+  (:CHECK (!CHECK-ONLY-PLAN-ARTIFACT-READABILITY) :READS
+   ("hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+    "hyperdoc/what-graphviz-does-local-fork-materialization-preparation-close.sexp")
+   :WRITES NIL :PURPOSE
+   "Verify the governing plan artifacts before touching staged files."))
+ :SELECTED-NEXT-CHECK (!CHECK-ONLY-PLAN-ARTIFACT-READABILITY) :ACCEPTANCE
+ ((NEXT-CHECK-PLAN-INSPECTABLE T) (NO-SHELL-COMMAND-RUN T) (NO-FILE-IO-RUN T)
+  (NO-STAGE-PERFORMED T) (NO-COMMIT-PERFORMED T) (NO-WRITE-PERFORMED T))))
+
+(defparameter *wgd-task-envelope-normalization-check*
+  '(:TASK
+ (!NORMALIZE-TASK-ENVELOPE-RECOGNITION-FOR-PLAN-ARTIFACTS :REPO :HYPERDOC)
+ :DIAGNOSIS
+ ((PREVIOUS-CHECK-RESULT
+   ((ALL-PLAN-ARTIFACTS-READABLE T)
+    (ALL-PLAN-ARTIFACTS-ARE-TASK-ENVELOPES NIL)))
+  (CAUSE
+   "The file forms have head TASK, but the recognizer used EQ against CL-USER::TASK. Recognition must compare the symbol-name TASK, independent of package.")
+  (FIX
+   "Use WGD-TEN-SYMBOL-NAMED-P for the envelope head and then use CDDR as the payload plist."))
+ :STAGE-BOUNDARY
+ ((MAY-READ-PLAN-ARTIFACTS T) (MAY-RUN-GIT NIL) (MAY-RUN-NIX NIL)
+  (MAY-READ-WORKING-TREE-FILES NIL) (MAY-STAGE NIL) (MAY-COMMIT NIL)
+  (MAY-DELETE NIL) (MAY-FETCH-REMOTE-PAGE-JSON NIL)
+  (MAY-WRITE-LOCAL-PAGE-JSON NIL) (MAY-WRITE-PAGE-ATTACHED-ASDF NIL)
+  (MAY-CREATE-SQLITE NIL))
+ :INPUTS
+ (#1="hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+  #2="hyperdoc/what-graphviz-does-local-fork-materialization-preparation-close.sexp")
+ :REPORTS
+ ((:PATH #1# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD :TASK
+   :FORM-HEAD-PACKAGE #3="KEYWORD" :FORM-HEAD-SYMBOL-NAME #4="TASK"
+   :TASK-ENVELOPE-P T :TASK
+   (!RECORD-CANDIDATE-CHILD-MATERIALIZATION-PLAN WHAT-GRAPHVIZ-DOES)
+   :TASK-OPERATOR !RECORD-CANDIDATE-CHILD-MATERIALIZATION-PLAN :PAYLOAD-PLIST-P
+   T :STAGE-BOUNDARY
+   ((MAY-WRITE-PLAN-ARTIFACT T) (MAY-FETCH-REMOTE-PAGE-JSON NIL)
+    (MAY-CONSTRUCT-FORK-JOURNAL-ACTION NIL) (MAY-LOAD-MISSING-SOURCE-FILES NIL)
+    (MAY-WRITE-LOCAL-PAGE-JSON NIL) (MAY-WRITE-PAGE-ATTACHED-ASDF NIL)
+    (MAY-CREATE-SQLITE NIL))
+   :ARTIFACT
+   (:PATH
+    "/Users/rgb/workspace/hyperdoc/hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+    :KIND :HYPERDOC-PLAN-ARTIFACT :TOPIC :WHAT-GRAPHVIZ-DOES :TITLE
+    "What Graphviz Does local fork materialization plan" :STATUS
+    :RECORDED-CANDIDATE-CHILD-PLAN)
+   :RECORDED-PLAN-PRESENT-P T :RECORDED-INSPECTION-PRESENT-P T
+   :RECORDED-PLAN-CURRENT-TASK
+   (!REVISE-CANDIDATE-CHILD-MATERIALIZATION-PLAN-WITH-DESIGNED-OPERATORS
+    WHAT-GRAPHVIZ-DOES)
+   :RECORDED-PLAN-EXECUTION-READINESS
+   (:STATUS REVISED-PLAN-VALID-BUT-NOT-EXECUTED :REASON
+    "The revised candidate child plan is coherent and gate-complete, but it still requires a later execution-stage boundary before fetching, loading, writing, or creating SQLite.")
+   :RECORDED-PLAN-EXECUTION-GATES-PRESENT-P T :RECORDED-INSPECTION-CURRENT-TASK
+   (!INSPECT-REVISED-CANDIDATE-CHILD-MATERIALIZATION-PLAN WHAT-GRAPHVIZ-DOES)
+   :EXECUTION-READINESS
+   (:STATUS REVISED-PLAN-VALID-BUT-NOT-EXECUTED :REASON
+    "This artifact records the prepared child materialization plan. It does not execute the plan.")
+   :EXECUTION-GATES-PRESENT-P T :RECORDED-PLAN-ARTIFACT NIL
+   :ACCEPTANCE-FOR-CURRENT-TASK
+   ((CANDIDATE-CHILD-MATERIALIZATION-PLAN-RECORDED T) (PLAN-ARTIFACT-WRITTEN T)
+    (RECORDED-PLAN-IS-NON-EXECUTED T) (EXECUTION-GATES-RECORDED T)
+    (CANONICAL-FEDWIKI-BOUNDARIES-RECORDED T) (NO-LOAD-PERFORMED T)
+    (NO-FETCH-PERFORMED T) (NO-PAGE-JSON-WRITTEN T) (NO-ASDF-WRITTEN T)
+    (NO-SQLITE-CREATED T))
+   :NEXT-VALID-TASKS
+   ((!CLOSE-PREPARE-HYPERDOC-LOCAL-FORK-MATERIALIZATION-PLAN
+     WHAT-GRAPHVIZ-DOES)
+    (!OPEN-EXECUTION-STAGE-FOR-LOCAL-FORK-MATERIALIZATION WHAT-GRAPHVIZ-DOES))
+   :RECOMMENDED-NEXT-TASK NIL :MARKERS
+   (:MENTIONS-WGD-PLAN-TITLE-P T :MENTIONS-MATERIALIZE-LOCAL-FORK-P T
+    :MENTIONS-FETCH-TASK-P T :MENTIONS-FORK-ACTION-TASK-P T
+    :MENTIONS-WRITE-TASK-P T :MENTIONS-ASDF-LOAD-GATE-P T
+    :MENTIONS-PREPARATION-CLOSE-P T))
+  (:PATH #2# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD :TASK
+   :FORM-HEAD-PACKAGE #3# :FORM-HEAD-SYMBOL-NAME #4# :TASK-ENVELOPE-P T :TASK
+   (!CLOSE-PREPARE-HYPERDOC-LOCAL-FORK-MATERIALIZATION-PLAN WHAT-GRAPHVIZ-DOES)
+   :TASK-OPERATOR !CLOSE-PREPARE-HYPERDOC-LOCAL-FORK-MATERIALIZATION-PLAN
+   :PAYLOAD-PLIST-P T :STAGE-BOUNDARY
+   ((MAY-WRITE-PREPARATION-CLOSURE-ARTIFACT T) (MAY-FETCH-REMOTE-PAGE-JSON NIL)
+    (MAY-CONSTRUCT-FORK-JOURNAL-ACTION NIL) (MAY-LOAD-MISSING-SOURCE-FILES NIL)
+    (MAY-WRITE-LOCAL-PAGE-JSON NIL) (MAY-WRITE-PAGE-ATTACHED-ASDF NIL)
+    (MAY-CREATE-SQLITE NIL) (MAY-COMMIT NIL))
+   :ARTIFACT NIL :RECORDED-PLAN-PRESENT-P NIL :RECORDED-INSPECTION-PRESENT-P
+   NIL :RECORDED-PLAN-CURRENT-TASK NIL :RECORDED-PLAN-EXECUTION-READINESS NIL
+   :RECORDED-PLAN-EXECUTION-GATES-PRESENT-P NIL
+   :RECORDED-INSPECTION-CURRENT-TASK NIL :EXECUTION-READINESS NIL
+   :EXECUTION-GATES-PRESENT-P NIL :RECORDED-PLAN-ARTIFACT
+   (:PATH
+    "/Users/rgb/workspace/hyperdoc/hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+    :EXISTS-P T)
+   :ACCEPTANCE-FOR-CURRENT-TASK
+   ((PREPARATION-PLAN-CLOSED T) (RECORDED-PLAN-ARTIFACT-EXISTS T)
+    (PREPARATION-CLOSURE-ARTIFACT-WRITTEN T) (EXECUTION-STAGE-NOT-OPENED T)
+    (NO-LOAD-PERFORMED T) (NO-FETCH-PERFORMED T) (NO-PAGE-JSON-WRITTEN T)
+    (NO-ASDF-WRITTEN T) (NO-SQLITE-CREATED T) (NO-COMMIT-PERFORMED T))
+   :NEXT-VALID-TASKS
+   ((!OPEN-EXECUTION-STAGE-FOR-LOCAL-FORK-MATERIALIZATION WHAT-GRAPHVIZ-DOES)
+    (!COMMIT-RECORDED-LOCAL-FORK-MATERIALIZATION-PLAN-ARTIFACTS
+     WHAT-GRAPHVIZ-DOES))
+   :RECOMMENDED-NEXT-TASK
+   (!COMMIT-RECORDED-LOCAL-FORK-MATERIALIZATION-PLAN-ARTIFACTS
+    WHAT-GRAPHVIZ-DOES)
+   :MARKERS
+   (:MENTIONS-WGD-PLAN-TITLE-P NIL :MENTIONS-MATERIALIZE-LOCAL-FORK-P NIL
+    :MENTIONS-FETCH-TASK-P NIL :MENTIONS-FORK-ACTION-TASK-P NIL
+    :MENTIONS-WRITE-TASK-P NIL :MENTIONS-ASDF-LOAD-GATE-P NIL
+    :MENTIONS-PREPARATION-CLOSE-P T)))
+ :DERIVED-STATE
+ (:ALL-PLAN-ARTIFACTS-EXIST-P T :ALL-PLAN-ARTIFACTS-READABLE-P T
+  :ALL-PLAN-ARTIFACTS-SINGLE-FORM-P T :ALL-PLAN-ARTIFACTS-ARE-TASK-ENVELOPES-P
+  T :ALL-PLAN-ARTIFACT-PAYLOADS-ARE-KEYWORD-PLISTS-P T
+  :NO-UNREADABLE-LIVE-OBJECT-SYNTAX-P T
+  :WGD-PLAN-CORE-EXECUTION-GATES-MENTIONED-P T)
+ :HTN-AS-DATA
+ ((:TASK
+   (!NORMALIZE-TASK-ENVELOPE-RECOGNITION-FOR-PLAN-ARTIFACTS :REPO :HYPERDOC))
+  (:METHOD PACKAGE-INDEPENDENT-TASK-ENVELOPE-RECOGNITION :SUBTASKS
+   ((!CONFIRM-READ-ONLY-PLAN-ARTIFACT-BOUNDARY)
+    (!READ-PLAN-ARTIFACT-AS-SINGLE-FORM
+     "hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp")
+    (!RECOGNIZE-TASK-ENVELOPE-BY-SYMBOL-NAME :HEAD-SYMBOL-NAME "TASK"
+     :TASK-POSITION SECOND :PAYLOAD-PLIST-POSITION CDDR)
+    (!READ-PLAN-ARTIFACT-AS-SINGLE-FORM
+     "hyperdoc/what-graphviz-does-local-fork-materialization-preparation-close.sexp")
+    (!RECOGNIZE-TASK-ENVELOPE-BY-SYMBOL-NAME :HEAD-SYMBOL-NAME "TASK"
+     :TASK-POSITION SECOND :PAYLOAD-PLIST-POSITION CDDR)
+    (!INSPECT-NORMALIZED-TASK-ENVELOPE-REPORTS))))
+ :SHOP3-PLAN-AS-DATA
+ ((!CONFIRM-READ-ONLY-PLAN-ARTIFACT-BOUNDARY :MAY-READ-PLAN-ARTIFACTS T
+   :MAY-RUN-GIT NIL :MAY-RUN-NIX NIL :MAY-STAGE NIL :MAY-COMMIT NIL :MAY-WRITE
+   NIL)
+  (!READ-PLAN-ARTIFACT-AS-SINGLE-FORM
+   "hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp")
+  (!RECOGNIZE-TASK-ENVELOPE-BY-SYMBOL-NAME :HEAD-SYMBOL-NAME "TASK"
+   :TASK-POSITION SECOND :PAYLOAD-PLIST-POSITION CDDR)
+  (!READ-PLAN-ARTIFACT-AS-SINGLE-FORM
+   "hyperdoc/what-graphviz-does-local-fork-materialization-preparation-close.sexp")
+  (!RECOGNIZE-TASK-ENVELOPE-BY-SYMBOL-NAME :HEAD-SYMBOL-NAME "TASK"
+   :TASK-POSITION SECOND :PAYLOAD-PLIST-POSITION CDDR)
+  (!INSPECT-NORMALIZED-TASK-ENVELOPE-REPORTS))
+ :ACCEPTANCE
+ ((NORMALIZED-TASK-ENVELOPE-CHECK-RAN T) (ALL-PLAN-ARTIFACTS-EXIST T)
+  (ALL-PLAN-ARTIFACTS-READABLE T) (ALL-PLAN-ARTIFACTS-SINGLE-FORM T)
+  (ALL-PLAN-ARTIFACTS-ARE-TASK-ENVELOPES T)
+  (ALL-PLAN-ARTIFACT-PAYLOADS-ARE-KEYWORD-PLISTS T)
+  (NO-UNREADABLE-LIVE-OBJECT-SYNTAX T) (NO-GIT-RUN T) (NO-NIX-RUN T)
+  (NO-STAGE-PERFORMED T) (NO-COMMIT-PERFORMED T) (NO-WRITE-PERFORMED T))
+ :NEXT-TASK
+ (!CHOOSE-NEXT-EXECUTABLE-CHECK :OPTIONS
+  ((!CHECK-ONLY-SMOKE-TEST-DIFF) (!CHECK-ONLY-EVIDENCE-READABILITY)))))
+
+(defparameter *wgd-check-only-smoke-test-diff*
+  '(:TASK
+ (!CHECK-ONLY-SMOKE-TEST-DIFF :REPO :HYPERDOC :FILE
+  "tests/fedwiki-materialization-smoke.lisp")
+ :STAGE-BOUNDARY
+ ((MAY-RUN-GIT T) (MAY-RUN-NIX NIL) (MAY-READ-WORKING-TREE-FILES NIL)
+  (MAY-STAGE NIL) (MAY-COMMIT NIL) (MAY-DELETE NIL)
+  (MAY-FETCH-REMOTE-PAGE-JSON NIL) (MAY-WRITE-LOCAL-PAGE-JSON NIL)
+  (MAY-WRITE-PAGE-ATTACHED-ASDF NIL) (MAY-CREATE-SQLITE NIL))
+ :PROVENANCE-BEING-CHECKED
+ (:POLICY-CLASS :REMOTE-FORK-REGRESSION-SMOKE :GOVERNING-EPISODE :ZETTEL-9124
+  :MODIFYING-TASK (!FILE-OUT-LIVE-REMOTE-FORK-FUNCTIONALITY :REPO :HYPERDOC)
+  :OWNING-FOLLOW-UP-TASK
+  (!ADD-REMOTE-FORK-MATERIALIZATION-SMOKE-REGRESSION :REPO :HYPERDOC :FILE
+   "tests/fedwiki-materialization-smoke.lisp")
+  :RELATED-WGD-PLAN-STEPS
+  ((!ADAPT-FEDWIKI-MATERIALIZATION-ENTRY-FOR-REMOTE-FORK-PAGE :PAGE
+    WHAT-GRAPHVIZ-DOES)
+   (!WRITE-REMOTE-FORK-MATERIALIZATION-ENTRY :PAGE WHAT-GRAPHVIZ-DOES)))
+ :GIT-DIFF-COMMAND
+ (:COMMAND
+  (#1="git" "--no-pager" "diff" "--no-ext-diff" "--unified=80" "--"
+   #2="tests/fedwiki-materialization-smoke.lisp")
+  :STDOUT
+  "diff --git a/tests/fedwiki-materialization-smoke.lisp b/tests/fedwiki-materialization-smoke.lisp
+index 73032ec9..d2babab2 100644
+--- a/tests/fedwiki-materialization-smoke.lisp
++++ b/tests/fedwiki-materialization-smoke.lisp
+@@ -1,61 +1,115 @@
+ ;;;; Smoke tests for FedWiki materialization plans
+ ;;
+ ;;;; Copyright (c) 2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
+ 
+ (eval-when (:compile-toplevel :load-toplevel :execute)
+   (unless (find-package :hyperdoc/tests)
+     (make-package :hyperdoc/tests :use '(:cl)))
+   (export (list (intern \"RUN-FEDWIKI-MATERIALIZATION-SMOKE-TESTS\" :hyperdoc/tests))
+           :hyperdoc/tests))
+ 
+ (in-package :hyperdoc/tests)
+ 
+ (defun fedwiki-materialization-smoke-tempdir ()
+   (uiop:ensure-directory-pathname
+    (merge-pathnames
+     (format nil \"fedwiki-materialization-smoke-~D/\" (get-universal-time))
+     (uiop:temporary-directory))))
+ 
+ (defun run-fedwiki-materialization-smoke-tests ()
+   (let* ((root (fedwiki-materialization-smoke-tempdir))
+          (pages-dir (merge-pathnames \"pages/\" root))
+          (page-plan
+           (hyperdoc:plan-fedwiki-page-materialization
+            \"civilian-casualty-mitigation\"
+            :fedwiki-pages-directory pages-dir
+            :fedwiki-repo-root root
+            :hyperdoc-repo-root (asdf:system-source-directory :hyperdoc)
+            :expected-fedwiki-branch nil))
+          (page-entry (first (hyperdoc::fedwiki-materialization-entries-of page-plan)))
+          (slice-plan
+           (hyperdoc:plan-fedwiki-slice-materialization
+            \"minab-school-strike\"
+            :include-daily-anchor-p t
+            :fedwiki-pages-directory pages-dir
+            :fedwiki-repo-root root
+            :hyperdoc-repo-root (asdf:system-source-directory :hyperdoc)
+            :expected-fedwiki-branch nil)))
+     (assert-equal 1
+                   (length (hyperdoc::fedwiki-materialization-entries-of page-plan))
+                   \"Page materialization must plan exactly one entry\")
+     (assert-equal :topic-fedwiki-page
+                   (hyperdoc::fedwiki-materialization-entry-source-kind-of page-entry)
+                   \"Missing topic-linked page should fall back to topic-derived materialization\")
+     (assert-equal :create
+                   (hyperdoc::fedwiki-materialization-entry-action-of page-entry)
+                   \"Missing page should be planned as a create\")
+     (assert-equal 8
+                   (length (hyperdoc::fedwiki-materialization-entries-of slice-plan))
+                   \"Slice plan should include seven FedWiki pages plus the daily anchor\")
+     (hyperdoc::materialize-fedwiki-materialization-plan page-plan)
+     (let* ((target (merge-pathnames \"civilian-casualty-mitigation\" pages-dir))
+            (page (hyperdoc::article-allegation-read-json-file target)))
+       (assert-true (uiop:file-exists-p target)
+                    \"Materialization should create the requested live page\")
+       (assert-string= \"Civilian casualty mitigation in targeting operations\"
+                       (getf page :title)
+                       \"Topic-derived FedWiki page title should match the topic title\")
+       (assert-true (hyperdoc::journalmatic-commit-gate-pass-p page)
+                    \"Materialized page must satisfy the journal gate\")))
+   (format t \"~&FedWiki materialization smoke tests passed.~%\")
+   t)
++
++
++;;;; Remote FedWiki fork materialization
++;;;; Filed out from the live image during Zettel 9124.
++
++
++(DEFUN RUN-FEDWIKI-MATERIALIZATION-REMOTE-FORK-SMOKE-TESTS ()
++  (LET* ((REMOTE-PAGE
++          (LIST :TITLE \"What Graphviz Does\" :STORY
++                (LIST
++                 (LIST :ID \"c558c39c83b0a0b9\" :TYPE \"paragraph\" :TEXT
++                       \"first paragraph\")
++                 (LIST :ID \"34e2de627fb48408\" :TYPE \"paragraph\" :TEXT
++                       \"second paragraph\")
++                 (LIST :ID \"6f9382b76ff19154\" :TYPE \"html\" :TEXT
++                       \"<p>html</p>\"))
++                :JOURNAL
++                (LIST (LIST :TYPE \"create\" :DATE 1783522915030)
++                      (LIST :TYPE \"edit\" :DATE 1783522915032))))
++         (FORK-ACTION
++          (HYPERDOC::FEDWIKI-MATERIALIZATION-MAKE-EXPLICIT-FORK-ACTION :SITE
++           \"does.ward.dojo.fed.wiki\" :DATE 1783525442000))
++         (FORK-PAGE
++          (HYPERDOC::FEDWIKI-MATERIALIZATION-PAGE-WITH-APPENDED-FORK-ACTION
++           REMOTE-PAGE FORK-ACTION))
++         (REMOTE-STORY-IDS
++          (HYPERDOC::FEDWIKI-MATERIALIZATION-PAGE-STORY-ITEM-IDS REMOTE-PAGE))
++         (FORK-STORY-IDS
++          (HYPERDOC::FEDWIKI-MATERIALIZATION-PAGE-STORY-ITEM-IDS FORK-PAGE))
++         (REMOTE-JOURNAL (GETF REMOTE-PAGE :JOURNAL))
++         (FORK-JOURNAL (GETF FORK-PAGE :JOURNAL))
++         (LAST-ACTION (CAR (LAST FORK-JOURNAL))))
++    (ASSERT-EQUAL \"What Graphviz Does\" (GETF FORK-PAGE :TITLE)
++     \"Remote fork candidate must preserve the source page title.\")
++    (ASSERT-EQUAL REMOTE-STORY-IDS FORK-STORY-IDS
++     \"Remote fork candidate must preserve source story ids and order.\")
++    (ASSERT-EQUAL 2 (LENGTH REMOTE-JOURNAL)
++     \"Remote page fixture must begin with two source journal actions.\")
++    (ASSERT-EQUAL 3 (LENGTH FORK-JOURNAL)
++     \"Remote fork candidate must append exactly one fork journal action.\")
++    (ASSERT-EQUAL \"fork\" (GETF LAST-ACTION :TYPE)
++     \"Last journal action must be the explicit fork action.\")
++    (ASSERT-EQUAL \"does.ward.dojo.fed.wiki\" (GETF LAST-ACTION :SITE)
++     \"Fork action must retain the source site.\")
++    (ASSERT-EQUAL 1783525442000 (GETF LAST-ACTION :DATE)
++     \"Fork action must retain the selected monotonic date.\")
++    (ASSERT-TRUE
++     (HYPERDOC::FEDWIKI-MATERIALIZATION-CANONICAL-FORK-ACTION-P LAST-ACTION)
++     \"Fork action must be canonical type/site/date.\")
++    (ASSERT-TRUE (NOT (GETF FORK-PAGE :SOURCE-SLUG))
++     \"Canonical page JSON must not include HyperDoc-only source slug.\")
++    (ASSERT-TRUE (NOT (GETF FORK-PAGE :TARGET-SITE))
++     \"Canonical page JSON must not include HyperDoc-only target site.\")
++    T))
+"
+  :STDERR "" :EXIT-CODE 0)
+ :GIT-CACHED-DIFF-COMMAND
+ (:COMMAND
+  (#1# "--no-pager" "diff" "--cached" "--no-ext-diff" "--unified=80" "--" #2#)
+  :STDOUT "" :STDERR "" :EXIT-CODE 0)
+ :DIFF-SUMMARY
+ (:UNSTAGED-DIFF-PRESENT-P T :CACHED-DIFF-PRESENT-P NIL :ADDED-LINE-COUNT 54
+  :REMOVED-LINE-COUNT 0 :REMOTE-FORK-SMOKE-MARKER-PRESENT-P T
+  :FORK-ACTION-CONSTRUCTOR-MARKER-PRESENT-P T :FORK-APPENDER-MARKER-PRESENT-P T
+  :CANONICAL-FORK-ACTION-MARKER-PRESENT-P T :STORY-IDS-MARKER-PRESENT-P NIL)
+ :MARKER-REPORT
+ ((:MARKER "RUN-FEDWIKI-MATERIALIZATION-REMOTE-FORK-SMOKE-TESTS"
+   :PRESENT-IN-DIFF-P T)
+  (:MARKER "FEDWIKI-MATERIALIZATION-PAGE-WITH-APPENDED-FORK-ACTION"
+   :PRESENT-IN-DIFF-P T)
+  (:MARKER "FEDWIKI-MATERIALIZATION-MAKE-EXPLICIT-FORK-ACTION"
+   :PRESENT-IN-DIFF-P T)
+  (:MARKER "FEDWIKI-MATERIALIZATION-CANONICAL-FORK-ACTION-P" :PRESENT-IN-DIFF-P
+   T)
+  (:MARKER "FEDWIKI-MATERIALIZATION-STORY-IDS" :PRESENT-IN-DIFF-P NIL))
+ :ADDED-LINES-PREVIEW
+ ("+" "+" "+;;;; Remote FedWiki fork materialization"
+  "+;;;; Filed out from the live image during Zettel 9124." "+" "+"
+  "+(DEFUN RUN-FEDWIKI-MATERIALIZATION-REMOTE-FORK-SMOKE-TESTS ()"
+  "+  (LET* ((REMOTE-PAGE"
+  "+          (LIST :TITLE \"What Graphviz Does\" :STORY"
+  "+                (LIST"
+  "+                 (LIST :ID \"c558c39c83b0a0b9\" :TYPE \"paragraph\" :TEXT"
+  "+                       \"first paragraph\")"
+  "+                 (LIST :ID \"34e2de627fb48408\" :TYPE \"paragraph\" :TEXT"
+  "+                       \"second paragraph\")"
+  "+                 (LIST :ID \"6f9382b76ff19154\" :TYPE \"html\" :TEXT"
+  "+                       \"<p>html</p>\"))" "+                :JOURNAL"
+  "+                (LIST (LIST :TYPE \"create\" :DATE 1783522915030)"
+  "+                      (LIST :TYPE \"edit\" :DATE 1783522915032))))"
+  "+         (FORK-ACTION"
+  "+          (HYPERDOC::FEDWIKI-MATERIALIZATION-MAKE-EXPLICIT-FORK-ACTION :SITE"
+  "+           \"does.ward.dojo.fed.wiki\" :DATE 1783525442000))"
+  "+         (FORK-PAGE"
+  "+          (HYPERDOC::FEDWIKI-MATERIALIZATION-PAGE-WITH-APPENDED-FORK-ACTION"
+  "+           REMOTE-PAGE FORK-ACTION))" "+         (REMOTE-STORY-IDS"
+  "+          (HYPERDOC::FEDWIKI-MATERIALIZATION-PAGE-STORY-ITEM-IDS REMOTE-PAGE))"
+  "+         (FORK-STORY-IDS"
+  "+          (HYPERDOC::FEDWIKI-MATERIALIZATION-PAGE-STORY-ITEM-IDS FORK-PAGE))"
+  "+         (REMOTE-JOURNAL (GETF REMOTE-PAGE :JOURNAL))"
+  "+         (FORK-JOURNAL (GETF FORK-PAGE :JOURNAL))"
+  "+         (LAST-ACTION (CAR (LAST FORK-JOURNAL))))"
+  "+    (ASSERT-EQUAL \"What Graphviz Does\" (GETF FORK-PAGE :TITLE)"
+  "+     \"Remote fork candidate must preserve the source page title.\")"
+  "+    (ASSERT-EQUAL REMOTE-STORY-IDS FORK-STORY-IDS"
+  "+     \"Remote fork candidate must preserve source story ids and order.\")"
+  "+    (ASSERT-EQUAL 2 (LENGTH REMOTE-JOURNAL)"
+  "+     \"Remote page fixture must begin with two source journal actions.\")"
+  "+    (ASSERT-EQUAL 3 (LENGTH FORK-JOURNAL)"
+  "+     \"Remote fork candidate must append exactly one fork journal action.\")")
+ :REMOVED-LINES-PREVIEW NIL :HTN-AS-DATA
+ ((:TASK
+   (!CHECK-ONLY-SMOKE-TEST-DIFF :REPO :HYPERDOC :FILE
+    "tests/fedwiki-materialization-smoke.lisp"))
+  (:METHOD INSPECT-SMOKE-TEST-DIFF-ONLY :SUBTASKS
+   ((!CONFIRM-READ-ONLY-GIT-DIFF-BOUNDARY)
+    (!RUN-GIT-DIFF-FOR-ONE-FILE "tests/fedwiki-materialization-smoke.lisp")
+    (!RUN-GIT-CACHED-DIFF-FOR-ONE-FILE
+     "tests/fedwiki-materialization-smoke.lisp")
+    (!INSPECT-REMOTE-FORK-SMOKE-MARKERS) (!INSPECT-SMOKE-TEST-DIFF-SUMMARY))))
+ :SHOP3-PLAN-AS-DATA
+ ((!CONFIRM-READ-ONLY-GIT-DIFF-BOUNDARY :MAY-RUN-GIT T :MAY-RUN-NIX NIL
+   :MAY-STAGE NIL :MAY-COMMIT NIL :MAY-WRITE NIL)
+  (!RUN-GIT-DIFF-FOR-ONE-FILE "tests/fedwiki-materialization-smoke.lisp")
+  (!RUN-GIT-CACHED-DIFF-FOR-ONE-FILE
+   "tests/fedwiki-materialization-smoke.lisp")
+  (!INSPECT-REMOTE-FORK-SMOKE-MARKERS) (!INSPECT-SMOKE-TEST-DIFF-SUMMARY))
+ :ACCEPTANCE
+ ((SMOKE-TEST-DIFF-CHECKED T) (GIT-DIFF-EXIT-CODE 0)
+  (GIT-CACHED-DIFF-EXIT-CODE 0) (REMOTE-FORK-SMOKE-MARKER-PRESENT T)
+  (FORK-ACTION-CONSTRUCTOR-MARKER-PRESENT T) (FORK-APPENDER-MARKER-PRESENT T)
+  (NO-NIX-RUN T) (NO-STAGE-PERFORMED T) (NO-COMMIT-PERFORMED T)
+  (NO-WRITE-PERFORMED T))
+ :NEXT-TASK
+ (!CHOOSE-NEXT-EXECUTABLE-CHECK :OPTIONS ((!CHECK-ONLY-EVIDENCE-READABILITY)))))
+
+(defparameter *wgd-check-only-evidence-readability*
+  '(:TASK (!CHECK-ONLY-EVIDENCE-READABILITY :REPO :HYPERDOC) :STAGE-BOUNDARY
+ ((MAY-READ-EVIDENCE-FILES T) (MAY-RUN-GIT NIL) (MAY-RUN-NIX NIL)
+  (MAY-STAGE NIL) (MAY-COMMIT NIL) (MAY-DELETE NIL)
+  (MAY-FETCH-REMOTE-PAGE-JSON NIL) (MAY-WRITE-LOCAL-PAGE-JSON NIL)
+  (MAY-WRITE-PAGE-ATTACHED-ASDF NIL) (MAY-CREATE-SQLITE NIL))
+ :INPUTS
+ ((#1="hyperdoc/what-graphviz-does-remote-page-fetch.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #2=(!FETCH-REMOTE-PAGE-JSON WHAT-GRAPHVIZ-DOES))
+  (#3="hyperdoc/what-graphviz-does-remote-title-validation.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #4=(!VALIDATE-REMOTE-PAGE-TITLE WHAT-GRAPHVIZ-DOES "What Graphviz Does"))
+  (#5="hyperdoc/what-graphviz-does-remote-story-shape-validation.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #6=(!VALIDATE-REMOTE-PAGE-STORY-SHAPE WHAT-GRAPHVIZ-DOES))
+  (#7="hyperdoc/what-graphviz-does-fetch-retention-repair.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #8=(!REPAIR-FETCH-RESULT-RETENTION-FOR-STORY-SHAPE-VALIDATION
+       WHAT-GRAPHVIZ-DOES))
+  (#9="hyperdoc/what-graphviz-does-retained-story-shape-validation.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #10=(!VALIDATE-REMOTE-PAGE-STORY-SHAPE-FROM-RETAINED-JSON
+        WHAT-GRAPHVIZ-DOES))
+  (#11="hyperdoc/what-graphviz-does-source-story-preservation.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #12=(!PRESERVE-SOURCE-STORY-ITEMS PAGE WHAT-GRAPHVIZ-DOES
+        PRESERVE-EXISTING-ITEM-IDS T PRESERVE-EXISTING-STORY-ORDER T))
+  (#13="hyperdoc/what-graphviz-does-explicit-fork-action.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #14=(!CONSTRUCT-EXPLICIT-FORK-JOURNAL-ACTION PAGE WHAT-GRAPHVIZ-DOES))
+  (#15="hyperdoc/what-graphviz-does-hyperdoc-fork-provenance.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #16=(!RETAIN-HYPERDOC-ONLY-FORK-PROVENANCE PAGE WHAT-GRAPHVIZ-DOES))
+  (#17="hyperdoc/what-graphviz-does-materialization-entry-adaptation.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #18=(!ADAPT-FEDWIKI-MATERIALIZATION-ENTRY-FOR-REMOTE-FORK-PAGE
+        WHAT-GRAPHVIZ-DOES))
+  (#19="hyperdoc/what-graphviz-does-write-remote-fork-materialization-entry.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #20=(!WRITE-REMOTE-FORK-MATERIALIZATION-ENTRY WHAT-GRAPHVIZ-DOES))
+  (#21="hyperdoc/what-graphviz-does-load-page-asdf-asset-writer-system.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #22=(!LOAD-PAGE-ASDF-ASSET-WRITER-SYSTEM SYSTEM
+        HYPERDOC/FEDWIKI-ASDF-ASSETS))
+  (#23="hyperdoc/what-graphviz-does-repair-page-asdf-asset-writer-load-boundary.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #24=(!REPAIR-PAGE-ASDF-ASSET-WRITER-LOAD-BOUNDARY SYSTEM
+        HYPERDOC/FEDWIKI-ASDF-ASSETS))
+  (#25="hyperdoc/what-graphviz-does-page-attached-asdf-home.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #26=(!REPAIR-PAGE-ATTACHED-ASDF-HOME-OBJECT-EVIDENCE WHAT-GRAPHVIZ-DOES))
+  (#27="hyperdoc/what-graphviz-does-page-attached-asdf-home.clean.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #28=(!REPAIR-PAGE-ATTACHED-ASDF-HOME-EVIDENCE-DESCRIPTORS
+        WHAT-GRAPHVIZ-DOES))
+  (#29="hyperdoc/what-graphviz-does-page-attached-asdf-home.strict.evidence.sexp"
+   :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   #30=(!NORMALIZE-PAGE-ATTACHED-ASDF-HOME-EVIDENCE-DESCRIPTORS
+        WHAT-GRAPHVIZ-DOES))
+  (#31="hyperdoc/zettel-9121-diagnose-page-asdf-asset-writer-load-boundary-failure.evidence.sexp"
+   :ASDF-WRITER-LOAD-BOUNDARY-DIAGNOSTIC-EVIDENCE
+   #32=(!DIAGNOSE-PAGE-ASDF-ASSET-WRITER-LOAD-BOUNDARY-FAILURE SYSTEM
+        HYPERDOC/FEDWIKI-ASDF-ASSETS))
+  (#33="hyperdoc/zettel-9122-clean-smoke-tail-inspection.evidence.sexp"
+   :ASDF-WRITER-LOAD-BOUNDARY-DIAGNOSTIC-EVIDENCE
+   #34=(!INSPECT-ZETTEL-9122-CLEAN-SMOKE-TAIL SYSTEM
+        HYPERDOC/FEDWIKI-ASDF-ASSETS))
+  (#35="hyperdoc/zettel-9123-clean-smoke-tail-capture.evidence.sexp"
+   :ASDF-WRITER-LOAD-BOUNDARY-DIAGNOSTIC-EVIDENCE
+   #36=(!RERUN-ZETTEL-9122-CLEAN-SMOKE-WITH-TAIL-CAPTURE SYSTEM
+        HYPERDOC/FEDWIKI-ASDF-ASSETS)))
+ :REPORTS
+ ((:PATH #1# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #2# :EXISTS-P T :READABLE-P NIL :REASON
+   :CONTAINS-UNREADABLE-PRINTED-LIVE-OBJECT-SYNTAX
+   :CONTAINS-SHARP-ANGLE-LIVE-OBJECT-SYNTAX-P T
+   :EXPECTED-TASK-OPERATOR-MENTIONED-P T)
+  (:PATH #3# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #4# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!VALIDATE-REMOTE-PAGE-TITLE WHAT-GRAPHVIZ-DOES "What Graphviz Does")
+   :TASK-OPERATOR-NAME #37="!VALIDATE-REMOTE-PAGE-TITLE"
+   :EXPECTED-TASK-OPERATOR-NAME #37# :EXPECTED-TASK-OPERATOR-MENTIONED-P T
+   :PAYLOAD-PLIST-P T :ACCEPTANCE-FOR-CURRENT-TASK
+   ((REMOTE-PAGE-TITLE-VALIDATED T) (TITLE-MATCHES-EXPECTED-P T)
+    (NO-REFETCH-PERFORMED T) (NO-FORK-ACTION-CONSTRUCTED T)
+    (NO-LOCAL-PAGE-JSON-WRITTEN T) (NO-ASDF-WRITTEN T) (NO-SQLITE-CREATED T)
+    (NO-COMMIT-PERFORMED T))
+   :NEXT-TASK (!VALIDATE-REMOTE-PAGE-STORY-SHAPE WHAT-GRAPHVIZ-DOES))
+  (:PATH #5# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #6# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!VALIDATE-REMOTE-PAGE-STORY-SHAPE WHAT-GRAPHVIZ-DOES) :TASK-OPERATOR-NAME
+   #38="!VALIDATE-REMOTE-PAGE-STORY-SHAPE" :EXPECTED-TASK-OPERATOR-NAME #38#
+   :EXPECTED-TASK-OPERATOR-MENTIONED-P T :PAYLOAD-PLIST-P T
+   :ACCEPTANCE-FOR-CURRENT-TASK
+   ((REMOTE-PAGE-STORY-SHAPE-VALIDATED NIL)
+    (SOURCE-PAGE-JSON-REUSED-FROM-FETCH-EVIDENCE T) (NO-REFETCH-PERFORMED T)
+    (NO-FORK-ACTION-CONSTRUCTED T) (NO-LOCAL-PAGE-JSON-WRITTEN T)
+    (NO-ASDF-WRITTEN T) (NO-SQLITE-CREATED T) (NO-COMMIT-PERFORMED T))
+   :NEXT-TASK
+   (!PRESERVE-SOURCE-STORY-ITEMS :PAGE WHAT-GRAPHVIZ-DOES
+    :PRESERVE-EXISTING-ITEM-IDS T :PRESERVE-EXISTING-STORY-ORDER T))
+  (:PATH #7# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #8# :EXISTS-P T :READABLE-P NIL :REASON
+   :CONTAINS-UNREADABLE-PRINTED-LIVE-OBJECT-SYNTAX
+   :CONTAINS-SHARP-ANGLE-LIVE-OBJECT-SYNTAX-P T
+   :EXPECTED-TASK-OPERATOR-MENTIONED-P T)
+  (:PATH #9# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #10# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!VALIDATE-REMOTE-PAGE-STORY-SHAPE-FROM-RETAINED-JSON WHAT-GRAPHVIZ-DOES)
+   :TASK-OPERATOR-NAME
+   #39="!VALIDATE-REMOTE-PAGE-STORY-SHAPE-FROM-RETAINED-JSON"
+   :EXPECTED-TASK-OPERATOR-NAME #39# :EXPECTED-TASK-OPERATOR-MENTIONED-P T
+   :PAYLOAD-PLIST-P T :ACCEPTANCE-FOR-CURRENT-TASK
+   ((REMOTE-PAGE-STORY-SHAPE-VALIDATED-FROM-RETAINED-JSON T)
+    (RETAINED-PAGE-JSON-USED T) (NO-REFETCH-PERFORMED T)
+    (NO-FORK-ACTION-CONSTRUCTED T) (NO-LOCAL-PAGE-JSON-WRITTEN T)
+    (NO-ASDF-WRITTEN T) (NO-SQLITE-CREATED T) (NO-COMMIT-PERFORMED T))
+   :NEXT-TASK
+   (!PRESERVE-SOURCE-STORY-ITEMS :PAGE WHAT-GRAPHVIZ-DOES
+    :PRESERVE-EXISTING-ITEM-IDS T :PRESERVE-EXISTING-STORY-ORDER T))
+  (:PATH #11# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #12# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!PRESERVE-SOURCE-STORY-ITEMS :PAGE WHAT-GRAPHVIZ-DOES
+    :PRESERVE-EXISTING-ITEM-IDS T :PRESERVE-EXISTING-STORY-ORDER T)
+   :TASK-OPERATOR-NAME #40="!PRESERVE-SOURCE-STORY-ITEMS"
+   :EXPECTED-TASK-OPERATOR-NAME #40# :EXPECTED-TASK-OPERATOR-MENTIONED-P T
+   :PAYLOAD-PLIST-P T :ACCEPTANCE-FOR-CURRENT-TASK
+   ((SOURCE-STORY-ITEMS-PRESERVED T) (SOURCE-STORY-ITEM-IDS-RECORDED T)
+    (SOURCE-STORY-ORDER-RECORDED T) (NO-STORY-ITEM-IDS-REWRITTEN T)
+    (NO-STORY-ORDER-REWRITTEN T) (NO-GRAPHVIZ-EXECUTED T)
+    (NO-FORK-ACTION-CONSTRUCTED T) (NO-LOCAL-PAGE-JSON-WRITTEN T)
+    (NO-ASDF-WRITTEN T) (NO-SQLITE-CREATED T) (NO-COMMIT-PERFORMED T))
+   :NEXT-TASK
+   (!CONSTRUCT-EXPLICIT-FORK-JOURNAL-ACTION :PAGE WHAT-GRAPHVIZ-DOES :TYPE
+    "fork" :SITE "does.ward.dojo.fed.wiki" :DATE
+    :EXECUTION-TIME-MONOTONIC-EPOCH-MILLIS))
+  (:PATH #13# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #14# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!CONSTRUCT-EXPLICIT-FORK-JOURNAL-ACTION :PAGE WHAT-GRAPHVIZ-DOES :TYPE
+    "fork" :SITE "does.ward.dojo.fed.wiki" :DATE
+    :EXECUTION-TIME-MONOTONIC-EPOCH-MILLIS)
+   :TASK-OPERATOR-NAME #41="!CONSTRUCT-EXPLICIT-FORK-JOURNAL-ACTION"
+   :EXPECTED-TASK-OPERATOR-NAME #41# :EXPECTED-TASK-OPERATOR-MENTIONED-P T
+   :PAYLOAD-PLIST-P T :ACCEPTANCE-FOR-CURRENT-TASK
+   ((EXPLICIT-FORK-JOURNAL-ACTION-CONSTRUCTED T) (FORK-ACTION-TYPE-IS-FORK T)
+    (FORK-ACTION-SITE-IS-SOURCE-SITE T)
+    (FORK-ACTION-DATE-MONOTONIC-WITH-SOURCE-JOURNAL T)
+    (HYPERDOC-ONLY-PROVENANCE-KEPT-OUTSIDE-CANONICAL-ACTION T)
+    (NO-LOCAL-PAGE-JSON-WRITTEN T) (NO-ASDF-WRITTEN T) (NO-SQLITE-CREATED T)
+    (NO-COMMIT-PERFORMED T))
+   :NEXT-TASK
+   (!RETAIN-HYPERDOC-ONLY-FORK-PROVENANCE :PAGE WHAT-GRAPHVIZ-DOES :SOURCE-SLUG
+    "what-graphviz-does" :TARGET-SITE "wiki.ralfbarkow.ch" :TARGET-SLUG
+    "what-graphviz-does"))
+  (:PATH #15# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #16# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!RETAIN-HYPERDOC-ONLY-FORK-PROVENANCE :PAGE WHAT-GRAPHVIZ-DOES :SOURCE-SLUG
+    "what-graphviz-does" :TARGET-SITE "wiki.ralfbarkow.ch" :TARGET-SLUG
+    "what-graphviz-does")
+   :TASK-OPERATOR-NAME #42="!RETAIN-HYPERDOC-ONLY-FORK-PROVENANCE"
+   :EXPECTED-TASK-OPERATOR-NAME #42# :EXPECTED-TASK-OPERATOR-MENTIONED-P T
+   :PAYLOAD-PLIST-P T :ACCEPTANCE-FOR-CURRENT-TASK
+   ((HYPERDOC-ONLY-FORK-PROVENANCE-RETAINED T)
+    (CANONICAL-FORK-ACTION-NOT-EXTENDED T)
+    (SOURCE-SLUG-KEPT-OUTSIDE-CANONICAL-ACTION T)
+    (TARGET-SITE-KEPT-OUTSIDE-CANONICAL-ACTION T)
+    (TARGET-SLUG-KEPT-OUTSIDE-CANONICAL-ACTION T)
+    (NO-LOCAL-PAGE-JSON-WRITTEN T) (NO-ASDF-WRITTEN T) (NO-SQLITE-CREATED T)
+    (NO-COMMIT-PERFORMED T))
+   :NEXT-TASK
+   (!ADAPT-FEDWIKI-MATERIALIZATION-ENTRY-FOR-REMOTE-FORK-PAGE
+    WHAT-GRAPHVIZ-DOES))
+  (:PATH #17# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #18# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!ADAPT-FEDWIKI-MATERIALIZATION-ENTRY-FOR-REMOTE-FORK-PAGE
+    WHAT-GRAPHVIZ-DOES)
+   :TASK-OPERATOR-NAME
+   #43="!ADAPT-FEDWIKI-MATERIALIZATION-ENTRY-FOR-REMOTE-FORK-PAGE"
+   :EXPECTED-TASK-OPERATOR-NAME #43# :EXPECTED-TASK-OPERATOR-MENTIONED-P T
+   :PAYLOAD-PLIST-P T :ACCEPTANCE-FOR-CURRENT-TASK
+   ((LOCAL-FORK-PAGE-CANDIDATE-CONSTRUCTED T)
+    (SOURCE-STORY-ITEM-IDS-PRESERVED T) (SOURCE-STORY-ORDER-PRESERVED T)
+    (SOURCE-JOURNAL-PRESERVED-WITH-FORK-ACTION-APPENDED T)
+    (CANONICAL-FORK-ACTION-APPENDED T)
+    (HYPERDOC-ONLY-PROVENANCE-NOT-IN-CANONICAL-PAGE-JSON T)
+    (NO-LOCAL-PAGE-JSON-WRITTEN T) (NO-ASDF-WRITTEN T) (NO-SQLITE-CREATED T)
+    (NO-COMMIT-PERFORMED T))
+   :NEXT-TASK (!WRITE-REMOTE-FORK-MATERIALIZATION-ENTRY WHAT-GRAPHVIZ-DOES))
+  (:PATH #19# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #20# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!WRITE-REMOTE-FORK-MATERIALIZATION-ENTRY WHAT-GRAPHVIZ-DOES)
+   :TASK-OPERATOR-NAME #44="!WRITE-REMOTE-FORK-MATERIALIZATION-ENTRY"
+   :EXPECTED-TASK-OPERATOR-NAME #44# :EXPECTED-TASK-OPERATOR-MENTIONED-P T
+   :PAYLOAD-PLIST-P T :ACCEPTANCE-FOR-CURRENT-TASK
+   ((LOCAL-PAGE-JSON-WRITTEN-AS-FORK T)
+    (EXISTING-TARGET-PAGE-BACKED-UP-IF-PRESENT T) (WRITTEN-PAGE-TITLE-VALID T)
+    (WRITTEN-STORY-ITEM-IDS-PRESERVED T)
+    (WRITTEN-JOURNAL-HAS-FORK-ACTION-APPENDED T) (NO-ASDF-WRITTEN T)
+    (NO-SQLITE-CREATED T) (NO-COMMIT-PERFORMED T))
+   :NEXT-TASK (!PLAN-PAGE-ATTACHED-ASDF-HOME-OBJECT WHAT-GRAPHVIZ-DOES))
+  (:PATH #21# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #22# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P NIL :TASK NIL :TASK-OPERATOR-NAME NIL
+   :EXPECTED-TASK-OPERATOR-NAME "!LOAD-PAGE-ASDF-ASSET-WRITER-SYSTEM"
+   :EXPECTED-TASK-OPERATOR-MENTIONED-P T :PAYLOAD-PLIST-P T
+   :ACCEPTANCE-FOR-CURRENT-TASK NIL :NEXT-TASK NIL)
+  (:PATH #23# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #24# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P NIL :TASK NIL :TASK-OPERATOR-NAME NIL
+   :EXPECTED-TASK-OPERATOR-NAME "!REPAIR-PAGE-ASDF-ASSET-WRITER-LOAD-BOUNDARY"
+   :EXPECTED-TASK-OPERATOR-MENTIONED-P T :PAYLOAD-PLIST-P T
+   :ACCEPTANCE-FOR-CURRENT-TASK NIL :NEXT-TASK NIL)
+  (:PATH #25# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #26# :EXISTS-P T :READABLE-P NIL :REASON
+   :CONTAINS-UNREADABLE-PRINTED-LIVE-OBJECT-SYNTAX
+   :CONTAINS-SHARP-ANGLE-LIVE-OBJECT-SYNTAX-P T
+   :EXPECTED-TASK-OPERATOR-MENTIONED-P T)
+  (:PATH #27# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #28# :EXISTS-P T :READABLE-P NIL :REASON
+   :CONTAINS-UNREADABLE-PRINTED-LIVE-OBJECT-SYNTAX
+   :CONTAINS-SHARP-ANGLE-LIVE-OBJECT-SYNTAX-P T
+   :EXPECTED-TASK-OPERATOR-MENTIONED-P T)
+  (:PATH #29# :POLICY-CLASS :WHAT-GRAPHVIZ-DOES-EXECUTION-EVIDENCE
+   :EXPECTED-TASK #30# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P NIL :TASK NIL :TASK-OPERATOR-NAME NIL
+   :EXPECTED-TASK-OPERATOR-NAME
+   "!NORMALIZE-PAGE-ATTACHED-ASDF-HOME-EVIDENCE-DESCRIPTORS"
+   :EXPECTED-TASK-OPERATOR-MENTIONED-P T :PAYLOAD-PLIST-P T
+   :ACCEPTANCE-FOR-CURRENT-TASK NIL :NEXT-TASK NIL)
+  (:PATH #31# :POLICY-CLASS :ASDF-WRITER-LOAD-BOUNDARY-DIAGNOSTIC-EVIDENCE
+   :EXPECTED-TASK #32# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P NIL :TASK NIL :TASK-OPERATOR-NAME NIL
+   :EXPECTED-TASK-OPERATOR-NAME
+   "!DIAGNOSE-PAGE-ASDF-ASSET-WRITER-LOAD-BOUNDARY-FAILURE"
+   :EXPECTED-TASK-OPERATOR-MENTIONED-P T :PAYLOAD-PLIST-P T
+   :ACCEPTANCE-FOR-CURRENT-TASK NIL :NEXT-TASK NIL)
+  (:PATH #33# :POLICY-CLASS :ASDF-WRITER-LOAD-BOUNDARY-DIAGNOSTIC-EVIDENCE
+   :EXPECTED-TASK #34# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!INSPECT-ZETTEL-9122-CLEAN-SMOKE-TAIL :SYSTEM
+    :HYPERDOC/FEDWIKI-ASDF-ASSETS)
+   :TASK-OPERATOR-NAME #45="!INSPECT-ZETTEL-9122-CLEAN-SMOKE-TAIL"
+   :EXPECTED-TASK-OPERATOR-NAME #45# :EXPECTED-TASK-OPERATOR-MENTIONED-P T
+   :PAYLOAD-PLIST-P T :ACCEPTANCE-FOR-CURRENT-TASK NIL :NEXT-TASK
+   (!RERUN-ZETTEL-9122-CLEAN-SMOKE-WITH-TAIL-CAPTURE :SYSTEM
+    :HYPERDOC/FEDWIKI-ASDF-ASSETS))
+  (:PATH #35# :POLICY-CLASS :ASDF-WRITER-LOAD-BOUNDARY-DIAGNOSTIC-EVIDENCE
+   :EXPECTED-TASK #36# :EXISTS-P T :READABLE-P T :SINGLE-FORM-P T :FORM-HEAD
+   :TASK :TASK-ENVELOPE-P T :TASK
+   (!RERUN-ZETTEL-9122-CLEAN-SMOKE-WITH-TAIL-CAPTURE :SYSTEM
+    :HYPERDOC/FEDWIKI-ASDF-ASSETS)
+   :TASK-OPERATOR-NAME #46="!RERUN-ZETTEL-9122-CLEAN-SMOKE-WITH-TAIL-CAPTURE"
+   :EXPECTED-TASK-OPERATOR-NAME #46# :EXPECTED-TASK-OPERATOR-MENTIONED-P T
+   :PAYLOAD-PLIST-P T :ACCEPTANCE-FOR-CURRENT-TASK NIL :NEXT-TASK
+   (!CLASSIFY-VISIBLE-CLEAN-SMOKE-FAILURE :SYSTEM
+    :HYPERDOC/FEDWIKI-ASDF-ASSETS)))
+ :DERIVED-STATE
+ (:TARGET-COUNT 18 :ALL-EVIDENCE-FILES-EXIST-P T :READABLE-COUNT 14
+  :UNREADABLE-COUNT 4 :TASK-ENVELOPE-COUNT 10 :PAYLOAD-PLIST-COUNT 14
+  :EXPECTED-TASK-OPERATOR-MENTIONED-COUNT 18
+  :CONTAINS-UNREADABLE-LIVE-OBJECT-SYNTAX-COUNT 4
+  :WHAT-GRAPHVIZ-DOES-EVIDENCE-READABLE-P NIL
+  :ASDF-LOAD-BOUNDARY-EVIDENCE-READABLE-P T)
+ :UNREADABLE-PATHS (#1# #7# #25# #27#) :PATHS-WITH-LIVE-OBJECT-SYNTAX
+ (#1# #7# #25# #27#) :PATHS-NOT-MENTIONING-EXPECTED-TASK-OPERATOR NIL
+ :HTN-AS-DATA
+ ((:TASK (!CHECK-ONLY-EVIDENCE-READABILITY :REPO :HYPERDOC))
+  (:METHOD READ-EVIDENCE-FILES-ONLY :SUBTASKS
+   ((!CONFIRM-READ-ONLY-EVIDENCE-BOUNDARY)
+    (!READ-WHAT-GRAPHVIZ-DOES-EVIDENCE-FILES)
+    (!READ-ZETTEL-9121-9123-LOAD-BOUNDARY-EVIDENCE-FILES)
+    (!CLASSIFY-READABLE-VS-UNREADABLE-EVIDENCE)
+    (!INSPECT-EVIDENCE-READABILITY-REPORT))))
+ :SHOP3-PLAN-AS-DATA
+ ((!CONFIRM-READ-ONLY-EVIDENCE-BOUNDARY :MAY-READ-EVIDENCE-FILES T :MAY-RUN-GIT
+   NIL :MAY-RUN-NIX NIL :MAY-STAGE NIL :MAY-COMMIT NIL :MAY-WRITE NIL)
+  (!READ-WHAT-GRAPHVIZ-DOES-EVIDENCE-FILES)
+  (!READ-ZETTEL-9121-9123-LOAD-BOUNDARY-EVIDENCE-FILES)
+  (!CLASSIFY-READABLE-VS-UNREADABLE-EVIDENCE)
+  (!INSPECT-EVIDENCE-READABILITY-REPORT))
+ :ACCEPTANCE
+ ((EVIDENCE-READABILITY-CHECKED T) (ALL-EVIDENCE-FILES-EXIST T)
+  (ALL-EVIDENCE-READABLE NIL) (NO-UNREADABLE-LIVE-OBJECT-SYNTAX NIL)
+  (EACH-FILE-MENTIONS-EXPECTED-TASK-OPERATOR T) (NO-GIT-RUN T) (NO-NIX-RUN T)
+  (NO-STAGE-PERFORMED T) (NO-COMMIT-PERFORMED T) (NO-WRITE-PERFORMED T))
+ :NEXT-TASK
+ (!DECIDE-FILE-STAGING-SPLITS-FROM-CHECKED-PROVENANCE :REPO :HYPERDOC)))
+
+(defparameter *wgd-current-plan-stack-and-lisp-persistence-check*
+  '(:TASK (!INSPECT-CURRENT-PLAN-STACK-AND-LISP-PERSISTENCE :REPO :HYPERDOC)
+ :STAGE-BOUNDARY
+ ((MAY-INSPECT-EXISTING-OBJECTS T) (MAY-RUN-GIT-GREP T) (MAY-RUN-NIX NIL)
+  (MAY-READ-WORKING-TREE-FILES-VIA-GIT-GREP T) (MAY-STAGE NIL) (MAY-COMMIT NIL)
+  (MAY-DELETE NIL) (MAY-FETCH-REMOTE-PAGE-JSON NIL)
+  (MAY-WRITE-LOCAL-PAGE-JSON NIL) (MAY-WRITE-PAGE-ATTACHED-ASDF NIL)
+  (MAY-CREATE-SQLITE NIL))
+ :CURRENTLY-FOLLOWED-PLAN-STACK
+ ((:CURRENT-IMMEDIATE-PLAN
+   (!DECIDE-FILE-STAGING-SPLITS-FROM-CHECKED-PROVENANCE :REPO :HYPERDOC)
+   :SOURCE *WGD-CHECK-ONLY-EVIDENCE-READABILITY*)
+  (:PARENT-CHECK (!CHECK-ONLY-EVIDENCE-READABILITY :REPO :HYPERDOC) :RESULT
+   ((ALL-EVIDENCE-FILES-EXIST T) (ALL-EVIDENCE-READABLE NIL)
+    (UNREADABLE-COUNT 4) (NO-UNREADABLE-LIVE-OBJECT-SYNTAX NIL)))
+  (:PARENT-CHECK
+   (!CHECK-ONLY-SMOKE-TEST-DIFF :REPO :HYPERDOC :FILE
+    "tests/fedwiki-materialization-smoke.lisp")
+   :RESULT
+   ((REMOTE-FORK-SMOKE-MARKER-PRESENT T)
+    (FORK-ACTION-CONSTRUCTOR-MARKER-PRESENT T)
+    (FORK-APPENDER-MARKER-PRESENT T)))
+  (:PARENT-CHECK
+   (!NORMALIZE-TASK-ENVELOPE-RECOGNITION-FOR-PLAN-ARTIFACTS :REPO :HYPERDOC)
+   :RESULT
+   ((ALL-PLAN-ARTIFACTS-READABLE T) (ALL-PLAN-ARTIFACTS-ARE-TASK-ENVELOPES T)
+    (ALL-PLAN-ARTIFACT-PAYLOADS-ARE-KEYWORD-PLISTS T)))
+  (:GOVERNING-PLAN
+   "hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+   :PLAN-TASK (!MATERIALIZE-LOCAL-FORK-FROM-JSON WHAT-GRAPHVIZ-DOES))
+  (:GOVERNING-EPISODE :ZETTEL-9124 :PLAN-TASK
+   (!FILE-OUT-LIVE-REMOTE-FORK-FUNCTIONALITY :REPO :HYPERDOC))
+  (:RELATED-BLOCKER-CHAIN :PAGE-ATTACHED-ASDF-WRITER-LOAD-BOUNDARY
+   :ORIGINATING-GATE
+   (!LOAD-PAGE-ASDF-ASSET-WRITER-SYSTEM :SYSTEM
+    :HYPERDOC/FEDWIKI-ASDF-ASSETS)))
+ :AVAILABLE-INSPECTION-OBJECTS
+ (:PROVENANCE-PLAN-PRESENT-P T :NEXT-CHECK-SELECTION-PLAN-PRESENT-P T
+  :PLAN-ARTIFACT-NORMALIZATION-CHECK-PRESENT-P T
+  :SMOKE-TEST-DIFF-CHECK-PRESENT-P T :EVIDENCE-READABILITY-CHECK-PRESENT-P T)
+ :LISP-PERSISTENCE-QUESTION
+ "Have all current tasks been saved as .lisp code in the HyperDoc repository?"
+ :ANSWER :NO-NOT-ALL-CURRENT-TASKS-ARE-SAVED-AS-LISP-CODE
+ :LISP-PERSISTENCE-SUMMARY
+ (:CHECKED-OPERATORS-COUNT 28 :OPERATORS-PRESENT-IN-LISP-COUNT 0
+  :OPERATORS-MISSING-FROM-LISP-COUNT 28 :OPERATORS-PRESENT-IN-LISP NIL
+  :OPERATORS-MISSING-FROM-LISP
+  (!INSPECT-TASK-AND-PLAN-PROVENANCE-FOR-CURRENT-WORKING-TREE
+   !CHOOSE-NEXT-EXECUTABLE-CHECK !CHECK-ONLY-PLAN-ARTIFACT-READABILITY
+   !NORMALIZE-TASK-ENVELOPE-RECOGNITION-FOR-PLAN-ARTIFACTS
+   !CHECK-ONLY-SMOKE-TEST-DIFF !CHECK-ONLY-EVIDENCE-READABILITY
+   !DECIDE-FILE-STAGING-SPLITS-FROM-CHECKED-PROVENANCE
+   !FILE-OUT-LIVE-REMOTE-FORK-FUNCTIONALITY
+   !ADD-REMOTE-FORK-MATERIALIZATION-SMOKE-REGRESSION
+   !MATERIALIZE-LOCAL-FORK-FROM-JSON !FETCH-REMOTE-PAGE-JSON
+   !VALIDATE-REMOTE-PAGE-TITLE !VALIDATE-REMOTE-PAGE-STORY-SHAPE
+   !REPAIR-FETCH-RESULT-RETENTION-FOR-STORY-SHAPE-VALIDATION
+   !VALIDATE-REMOTE-PAGE-STORY-SHAPE-FROM-RETAINED-JSON
+   !PRESERVE-SOURCE-STORY-ITEMS !CONSTRUCT-EXPLICIT-FORK-JOURNAL-ACTION
+   !RETAIN-HYPERDOC-ONLY-FORK-PROVENANCE
+   !ADAPT-FEDWIKI-MATERIALIZATION-ENTRY-FOR-REMOTE-FORK-PAGE
+   !WRITE-REMOTE-FORK-MATERIALIZATION-ENTRY !LOAD-PAGE-ASDF-ASSET-WRITER-SYSTEM
+   !REPAIR-PAGE-ASDF-ASSET-WRITER-LOAD-BOUNDARY
+   !REPAIR-PAGE-ATTACHED-ASDF-HOME-OBJECT-EVIDENCE
+   !REPAIR-PAGE-ATTACHED-ASDF-HOME-EVIDENCE-DESCRIPTORS
+   !NORMALIZE-PAGE-ATTACHED-ASDF-HOME-EVIDENCE-DESCRIPTORS
+   !DIAGNOSE-PAGE-ASDF-ASSET-WRITER-LOAD-BOUNDARY-FAILURE
+   !INSPECT-ZETTEL-9122-CLEAN-SMOKE-TAIL
+   !RERUN-ZETTEL-9122-CLEAN-SMOKE-WITH-TAIL-CAPTURE))
+ :INTERPRETATION
+ ((:SAVED-AS-SOURCE-CODE
+   "The durable implementation code for remote fork materialization is in hyperdoc/fedwiki-materialization.lisp, and the modified smoke regression is in tests/fedwiki-materialization-smoke.lisp, but the smoke test is still an unstaged working-tree modification.")
+  (:SAVED-AS-PLAN-OR-EVIDENCE-ARTIFACTS
+   "The WGD plan, preparation close artifact, and execution evidence are .sexp artifacts, not .lisp source code.")
+  (:NOT-YET-SAVED-AS-LISP
+   "The ad hoc inspection/check plans created in the REPL during this conversation are currently inspectable image objects unless explicitly filed out.")
+  (:NOT-READY-TO-SAVE-ALL-EVIDENCE
+   "The latest evidence readability check found four evidence files containing unreadable printed live-object syntax, so those should not be blindly committed as durable plan evidence."))
+ :HTN-AS-DATA
+ ((:TASK (!INSPECT-CURRENT-PLAN-STACK-AND-LISP-PERSISTENCE :REPO :HYPERDOC))
+  (:METHOD INSPECT-WITHOUT-WRITING :SUBTASKS
+   ((!INSPECT-CURRENT-PLAN-STACK)
+    (!GIT-GREP-CURRENT-TASK-OPERATORS-IN-LISP-FILES)
+    (!CLASSIFY-SOURCE-CODE-VS-PLAN-ARTIFACT-VS-REPL-OBJECT)
+    (!INSPECT-LISP-PERSISTENCE-SUMMARY))))
+ :SHOP3-PLAN-AS-DATA
+ ((!INSPECT-CURRENT-PLAN-STACK)
+  (!GIT-GREP-CURRENT-TASK-OPERATORS-IN-LISP-FILES :PATTERNS "*.lisp" :WRITE
+   NIL)
+  (!CLASSIFY-SOURCE-CODE-VS-PLAN-ARTIFACT-VS-REPL-OBJECT)
+  (!INSPECT-LISP-PERSISTENCE-SUMMARY))
+ :ACCEPTANCE
+ ((CURRENT-PLAN-STACK-INSPECTED T) (LISP-PERSISTENCE-CHECKED-BY-GIT-GREP T)
+  (NO-NIX-RUN T) (NO-STAGE-PERFORMED T) (NO-COMMIT-PERFORMED T)
+  (NO-WRITE-PERFORMED T) (NO-FETCH-PERFORMED T))
+ :NEXT-TASK
+ (!DECIDE-WHETHER-TO-FILE-OUT-CURRENT-INSPECTION-PLANS :REPO :HYPERDOC
+  :CANDIDATE-FILE
+  "hyperdoc/what-graphviz-does-working-tree-provenance-inspection.lisp")))
+
+(defparameter *wgd-file-out-current-inspection-plans-decision*
+  '(:TASK
+ (!DECIDE-WHETHER-TO-FILE-OUT-CURRENT-INSPECTION-PLANS :REPO :HYPERDOC
+  :CANDIDATE-FILE
+  "hyperdoc/what-graphviz-does-working-tree-provenance-inspection.lisp")
+ :STAGE-BOUNDARY
+ ((MAY-INSPECT-EXISTING-OBJECTS T) (MAY-RUN-GIT-STATUS T)
+  (MAY-RUN-GIT-LS-FILES T) (MAY-RUN-NIX NIL) (MAY-WRITE-LISP-FILE NIL)
+  (MAY-STAGE NIL) (MAY-COMMIT NIL) (MAY-DELETE NIL)
+  (MAY-FETCH-REMOTE-PAGE-JSON NIL) (MAY-WRITE-LOCAL-PAGE-JSON NIL)
+  (MAY-WRITE-PAGE-ATTACHED-ASDF NIL) (MAY-CREATE-SQLITE NIL))
+ :CURRENT-PLAN-STACK
+ ((:IMMEDIATE-PLAN
+   (!DECIDE-FILE-STAGING-SPLITS-FROM-CHECKED-PROVENANCE :REPO :HYPERDOC))
+  (:ACTIVE-PARENT-CHECK (!CHECK-ONLY-EVIDENCE-READABILITY :REPO :HYPERDOC)
+   :RESULT
+   ((TARGET-COUNT 18) (ALL-EVIDENCE-FILES-EXIST T) (READABLE-COUNT 14)
+    (UNREADABLE-COUNT 4) (CONTAINS-UNREADABLE-LIVE-OBJECT-SYNTAX-COUNT 4)
+    (EACH-FILE-MENTIONS-EXPECTED-TASK-OPERATOR T)))
+  (:PARENT-CHECK
+   (!CHECK-ONLY-SMOKE-TEST-DIFF :REPO :HYPERDOC :FILE
+    "tests/fedwiki-materialization-smoke.lisp")
+   :RESULT
+   ((REMOTE-FORK-SMOKE-MARKER-PRESENT T)
+    (FORK-ACTION-CONSTRUCTOR-MARKER-PRESENT T) (FORK-APPENDER-MARKER-PRESENT T)
+    (NO-STAGE-PERFORMED T)))
+  (:PARENT-CHECK
+   (!NORMALIZE-TASK-ENVELOPE-RECOGNITION-FOR-PLAN-ARTIFACTS :REPO :HYPERDOC)
+   :RESULT
+   ((ALL-PLAN-ARTIFACTS-READABLE T) (ALL-PLAN-ARTIFACTS-ARE-TASK-ENVELOPES T)
+    (ALL-PLAN-ARTIFACT-PAYLOADS-ARE-KEYWORD-PLISTS T)))
+  (:GOVERNING-PLAN
+   "hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+   :PLAN-TASK (!MATERIALIZE-LOCAL-FORK-FROM-JSON WHAT-GRAPHVIZ-DOES))
+  (:GOVERNING-EPISODE :ZETTEL-9124 :PLAN-TASK
+   (!FILE-OUT-LIVE-REMOTE-FORK-FUNCTIONALITY :REPO :HYPERDOC))
+  (:RELATED-BLOCKER-CHAIN :PAGE-ATTACHED-ASDF-WRITER-LOAD-BOUNDARY
+   :ORIGINATING-GATE
+   (!LOAD-PAGE-ASDF-ASSET-WRITER-SYSTEM :SYSTEM
+    :HYPERDOC/FEDWIKI-ASDF-ASSETS)))
+ :PERSISTENCE-ANSWER
+ (:NO :NOT-ALL-CURRENT-TASKS-AND-PLANS-ARE-SAVED-AS-LISP-CODE)
+ :PERSISTENCE-CLASSIFICATION
+ (:DURABLE-IMPLEMENTATION-SOURCE
+  ((:PATH "hyperdoc/fedwiki-materialization.lisp" :EXISTS-P T :TRACKED-P T
+    :GIT-STATUS #1="")
+   (:PATH "tests/fedwiki-materialization-smoke.lisp" :EXISTS-P T :TRACKED-P T
+    :GIT-STATUS " M tests/fedwiki-materialization-smoke.lisp
+"))
+  :DURABLE-PLAN-ARTIFACTS
+  ((:PATH "hyperdoc/what-graphviz-does-local-fork-materialization-plan.sexp"
+    :EXISTS-P T :TRACKED-P T :GIT-STATUS #1#)
+   (:PATH
+    "hyperdoc/what-graphviz-does-local-fork-materialization-preparation-close.sexp"
+    :EXISTS-P T :TRACKED-P T :GIT-STATUS #1#))
+  :REPL-ONLY-INSPECTION-OBJECTS
+  ((:OBJECT "*WGD-TASK-PLAN-PROVENANCE-INSPECTION-PLAN*" :BOUND-P T :KIND
+    :INSPECTABLE-LIST-OBJECT)
+   (:OBJECT "*WGD-NEXT-EXECUTABLE-CHECK-SELECTION-PLAN*" :BOUND-P T :KIND
+    :INSPECTABLE-LIST-OBJECT)
+   (:OBJECT "*WGD-TASK-ENVELOPE-NORMALIZATION-CHECK*" :BOUND-P T :KIND
+    :INSPECTABLE-LIST-OBJECT)
+   (:OBJECT "*WGD-CHECK-ONLY-SMOKE-TEST-DIFF*" :BOUND-P T :KIND
+    :INSPECTABLE-LIST-OBJECT)
+   (:OBJECT "*WGD-CHECK-ONLY-EVIDENCE-READABILITY*" :BOUND-P T :KIND
+    :INSPECTABLE-LIST-OBJECT)
+   (:OBJECT "*WGD-CURRENT-PLAN-STACK-AND-LISP-PERSISTENCE-CHECK*" :BOUND-P T
+    :KIND :INSPECTABLE-LIST-OBJECT))
+  :CANDIDATE-FILE-OUT-TARGET
+  (:PATH "hyperdoc/what-graphviz-does-working-tree-provenance-inspection.lisp"
+   :EXISTS-P NIL :TRACKED-P NIL :GIT-STATUS #1#))
+ :IMPORTANT-CORRECTION
+ ((:PREVIOUS-GIT-GREP-RESULT
+   "OPERATORS-PRESENT-IN-LISP-COUNT 0 is not by itself proof that implementation is absent.")
+  (:REASON
+   "The !... names are HTN/SHOP3 task names and evidence-task labels, not necessarily Common Lisp DEFUN names. The implementation source uses ordinary Common Lisp function names such as FEDWIKI-MATERIALIZATION-MAKE-EXPLICIT-FORK-ACTION, while the current inspection/check plans are mostly REPL objects.")
+  (:CORRECT-QUESTION
+   "Which parts are implementation source, which parts are .sexp plan/evidence artifacts, and which parts are still only live-image inspection objects?"))
+ :FILE-OUT-DECISION
+ (:RECOMMENDED T :WHAT-TO-FILE-OUT
+  (:CURRENT-INSPECTION-AND-CHECK-PLAN-OBJECTS
+   ("*WGD-TASK-PLAN-PROVENANCE-INSPECTION-PLAN*"
+    "*WGD-NEXT-EXECUTABLE-CHECK-SELECTION-PLAN*"
+    "*WGD-TASK-ENVELOPE-NORMALIZATION-CHECK*"
+    "*WGD-CHECK-ONLY-SMOKE-TEST-DIFF*" "*WGD-CHECK-ONLY-EVIDENCE-READABILITY*"
+    "*WGD-CURRENT-PLAN-STACK-AND-LISP-PERSISTENCE-CHECK*"))
+  :CANDIDATE-FILE
+  "hyperdoc/what-graphviz-does-working-tree-provenance-inspection.lisp" :WHY
+  "These are currently useful inspection/planning machinery in the live image. If we want them to survive image restart and become reusable HyperDoc plan-inspection tools, file them out as Lisp.")
+ :HTN-AS-DATA
+ ((:TASK
+   (!DECIDE-WHETHER-TO-FILE-OUT-CURRENT-INSPECTION-PLANS :REPO :HYPERDOC
+    :CANDIDATE-FILE
+    "hyperdoc/what-graphviz-does-working-tree-provenance-inspection.lisp"))
+  (:METHOD DECIDE-FILE-OUT-WITHOUT-WRITING :SUBTASKS
+   ((!INSPECT-CURRENT-PLAN-STACK) (!CLASSIFY-PERSISTENCE-STATE)
+    (!DISTINGUISH-IMPLEMENTATION-SOURCE-FROM-HTN-TASK-LABELS)
+    (!SELECT-CANDIDATE-FILE-OUT-TARGET) (!INSPECT-FILE-OUT-DECISION))))
+ :SHOP3-PLAN-AS-DATA
+ ((!INSPECT-CURRENT-PLAN-STACK)
+  (!CLASSIFY-PERSISTENCE-STATE :CLASSES
+   (:DURABLE-IMPLEMENTATION-SOURCE :DURABLE-PLAN-ARTIFACTS
+    :SEXP-EVIDENCE-ARTIFACTS :REPL-ONLY-INSPECTION-OBJECTS))
+  (!DISTINGUISH-IMPLEMENTATION-SOURCE-FROM-HTN-TASK-LABELS)
+  (!SELECT-CANDIDATE-FILE-OUT-TARGET
+   "hyperdoc/what-graphviz-does-working-tree-provenance-inspection.lisp")
+  (!INSPECT-FILE-OUT-DECISION))
+ :ACCEPTANCE
+ ((CURRENT-PLAN-STACK-IDENTIFIED T) (PERSISTENCE-STATE-CLASSIFIED T)
+  (ANSWERED-WHETHER-ALL-TASKS-ARE-LISP-CODE T)
+  (FILE-OUT-DECISION-INSPECTABLE T) (NO-NIX-RUN T) (NO-WRITE-PERFORMED T)
+  (NO-STAGE-PERFORMED T) (NO-COMMIT-PERFORMED T) (NO-FETCH-PERFORMED T))
+ :NEXT-TASK
+ (!OPEN-WRITE-STAGE-TO-FILE-OUT-CURRENT-INSPECTION-PLANS :REPO :HYPERDOC
+  :TARGET
+  "hyperdoc/what-graphviz-does-working-tree-provenance-inspection.lisp")))
+
+(defparameter *wgd-file-out-current-inspection-plans-result*
+  '(!INSPECT-FILED-OUT-CURRENT-INSPECTION-PLANS :REPO :HYPERDOC :FILE
+ "hyperdoc/what-graphviz-does-working-tree-provenance-inspection.lisp"))
+
+(defun wgd-working-tree-provenance-inspection-objects ()
+  (list
+   (list :name "*wgd-file-out-metadata*" :object *wgd-file-out-metadata*)
+   (list :name "*wgd-task-plan-provenance-inspection-plan*" :object *wgd-task-plan-provenance-inspection-plan*)
+   (list :name "*wgd-next-executable-check-selection-plan*" :object *wgd-next-executable-check-selection-plan*)
+   (list :name "*wgd-task-envelope-normalization-check*" :object *wgd-task-envelope-normalization-check*)
+   (list :name "*wgd-check-only-smoke-test-diff*" :object *wgd-check-only-smoke-test-diff*)
+   (list :name "*wgd-check-only-evidence-readability*" :object *wgd-check-only-evidence-readability*)
+   (list :name "*wgd-current-plan-stack-and-lisp-persistence-check*" :object *wgd-current-plan-stack-and-lisp-persistence-check*)
+   (list :name "*wgd-file-out-current-inspection-plans-decision*" :object *wgd-file-out-current-inspection-plans-decision*)
+   (list :name "*wgd-file-out-current-inspection-plans-result*" :object *wgd-file-out-current-inspection-plans-result*)
+   ))
+
+(defun wgd-inspect-working-tree-provenance-inspection-objects ()
+  (if (fboundp 'cl-user::hd-inspect)
+      (funcall (symbol-function 'cl-user::hd-inspect)
+               (wgd-working-tree-provenance-inspection-objects))
+      (wgd-working-tree-provenance-inspection-objects)))
+
+;;;; End of filed-out WGD working-tree provenance inspection objects.
