@@ -268,13 +268,46 @@
                   :serial t
                   :components ((:file "codex-examples-compat")))))
 
+(defsystem #:hyperdoc/shop3-provider-boundary
+    :description "Narrow ASDF source-registry boundary for optional SHOP3 provider loading"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:asdf
+                 #:uiop)
+    :components
+    ((:module "hyperdoc-shop3"
+      :serial t
+      :components
+      ((:file "provider-boundary-package")
+       (:file "provider-boundary")))))
+
+(defsystem #:hyperdoc/shop3-provider-boundary/tests
+    :description "Smoke tests for the narrow SHOP3 provider source-registry boundary"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/shop3-provider-boundary)
+    :components
+    ((:module "tests"
+      :serial t
+      :components
+      ((:file "shop3-provider-boundary-smoke"))))
+    :perform (test-op (op c)
+                      (declare (ignore op c))
+                      (uiop:symbol-call :hyperdoc/tests
+                                        :run-shop3-provider-boundary-smoke-tests)))
+
 (defsystem #:hyperdoc/shop3
     :description "SHOP3-backed HTN planning layer for HyperDoc operations"
     :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
-    :depends-on (#:hyperdoc
+    :depends-on (#:hyperdoc/shop3-provider-boundary
+                 #:hyperdoc
                  #:shop3)
     :components
     ((:module "hyperdoc-shop3"

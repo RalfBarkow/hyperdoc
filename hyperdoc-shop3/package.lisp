@@ -5,7 +5,14 @@
 (defpackage #:hyperdoc/shop3
   (:use #:common-lisp
         #:shop3)
+  (:import-from #:hyperdoc/shop3-provider
+   #:register-shop3-provider-source-registry
+   #:shop3-provider-boundary-report-selected-directories
+   #:shop3-provider-boundary-report-rejected-directories)
   (:export
+   #:register-shop3-provider-source-registry
+   #:shop3-provider-boundary-report-selected-directories
+   #:shop3-provider-boundary-report-rejected-directories
    #:hyperdoc-htn-plan-result
    #:problem-name-of
    #:plans-of

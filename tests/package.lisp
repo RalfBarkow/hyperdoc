@@ -84,6 +84,7 @@
    :run-mech-deployment-provenance-smoke-tests
    :run-py4dmx-cluster-smoke-tests
    :run-scxml-compiler-smoke-tests
+   :run-shop3-provider-boundary-smoke-tests
    :run-runtime-coherence-smoke-tests
    :run-interaction-net-smoke-tests
    :run-closure-nor-demo-smoke-tests
