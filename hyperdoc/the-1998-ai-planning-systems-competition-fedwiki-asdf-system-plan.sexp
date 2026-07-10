@@ -48,7 +48,7 @@
     "hyperdoc/topics/asdf.lisp"
     "hyperdoc/fedwiki-asdf-assets/metagraph"
     "dreyeck/dmx/sqlite"
-    "hyperdoc/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"
+    "dreyeck/dmx/sqlite/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"
     "hyperdoc/materialize-build-referee-learning-topics-plan.sexp"))
   (target-layout
    ("/Users/rgb/.wiki/wiki.ralfbarkow.ch/assets/pages/the-1998-ai-planning-systems-competition/the-1998-ai-planning-systems-competition.asd"

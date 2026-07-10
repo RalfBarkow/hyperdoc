@@ -99,7 +99,7 @@
     (dreyeck-dmx-sqlite-production-db stores durable-project-topics)))
   (validation
    ((shop3-plan-artifact-exists
-     "hyperdoc/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp")
+     "dreyeck/dmx/sqlite/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp")
     (asdf-load-system dreyeck/dmx/sqlite)
     (materializer-idempotent t)
     (status-object-inspectable t)

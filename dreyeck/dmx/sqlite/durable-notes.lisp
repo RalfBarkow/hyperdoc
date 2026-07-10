@@ -17,7 +17,7 @@
   "Production-path configuration for durable local DMX topic materialization.")
 
 (defparameter *durable-note-materialization-plan-source*
-  "hyperdoc/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp")
+  "dreyeck/dmx/sqlite/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp")
 
 (defparameter *durable-note-materialization-seed-notes*
   '(("hyperdoc/HyperDoc Core.md" "hyperdoc-core")
@@ -62,7 +62,7 @@
     (:id "materialize-durable-notes-into-dreyeck-dmx-sqlite"
      :type :shop3-plan
      :title "Materialize Durable Notes into Dreyeck DMX SQLite"
-     :source "hyperdoc/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"
+     :source "dreyeck/dmx/sqlite/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "SHOP3-shaped plan for materializing durable Markdown-note seeds into the Dreyeck DMX SQLite store.")
     (:id "inspect-dmx-materialized-learning-topics"

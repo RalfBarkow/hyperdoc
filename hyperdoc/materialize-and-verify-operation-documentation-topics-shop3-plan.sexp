@@ -8,7 +8,7 @@
  (:repo-root "/Users/rgb/workspace/hyperdoc")
  (:created-after-existing-plan-search
   ("hyperdoc/document-operation-reader-surface-shop3-plan.sexp"
-   "hyperdoc/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"))
+   "dreyeck/dmx/sqlite/materialize-durable-notes-into-dreyeck-dmx-sqlite-plan.sexp"))
 
  (:domain
   (defdomain operation-documentation-topic-materialization
