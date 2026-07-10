@@ -23,13 +23,13 @@
    :native-authority-boundaries-known true)
   :subtasks
   ((!record-plan-artifact
-    :artifact "hyperdoc/contact-db-codex-next-htn.sexp")
+    :artifact "dreyeck/codex/contact-db/contact-db-codex-next-htn.sexp")
    (!record-shop3-selected-plan
-    :artifact "hyperdoc/contact-db-codex-next-shop3-plan.sexp")
+    :artifact "dreyeck/codex/contact-db/contact-db-codex-next-shop3-plan.sexp")
    (!record-codex-prompt
-    :artifact "hyperdoc/contact-db-codex-next-prompt.md")
+    :artifact "dreyeck/codex/contact-db/contact-db-codex-next-prompt.md")
    (!handoff-to-codex
-    :prompt "hyperdoc/contact-db-codex-next-prompt.md")))
+    :prompt "dreyeck/codex/contact-db/contact-db-codex-next-prompt.md")))
 
  :selected-next-primitive
  (!materialize-hyperdoc-contact-db-topic
