@@ -97,7 +97,7 @@
     :title "Build Referee Subgraph"))
   (validation
    ((shop3-plan-artifact-exists
-     "hyperdoc/add-build-referee-subgraph-inspector-view-plan.sexp")
+     "dreyeck/build/add-build-referee-subgraph-inspector-view-plan.sexp")
     (subgraph-topic-count 8)
     (subgraph-association-count 8)
     (missing-topic-ids nil)
