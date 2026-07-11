@@ -1,5 +1,5 @@
 (:ARTIFACT (:ID REFACTOR-HYPERDOC-REUSABLE-EXTRACTION-HTN) (:TYPE :HTN-SHOP3-TASK-LIBRARY)
- (:STATUS :DRAFT-FILED-OUT-FROM-TEMPORARY-TOPIC-DB-UPDATED-THROUGH-FOURTH-EXTRACTION)
+ (:STATUS :DRAFT-FILED-OUT-FROM-TEMPORARY-TOPIC-DB-UPDATED-THROUGH-FIFTH-EXTRACTION)
  (:SOURCE-TOPIC-DB "/Users/rgb/workspace/hyperdoc/var/dmx-associative-mirror.sqlite")
  (:TEMPORARY-RUN-ID "temporary-htn-assimilation-20260711-1155")
  (:TOPIC-DB-ANCHOR "topic:hyperdoc-refactor:temporary:reusable-extraction-htn")
@@ -55,6 +55,19 @@
    (:TASK !REVIEW-FOURTH-EXTRACTION-SLICE-AFTER-EXECUTION :SPECIALIZES
     !REVIEW-EXECUTED-EXTRACTION-SLICE :EVIDENCE
     "hyperdoc/evidence/refactor-hyperdoc-fourth-dreyeck-extraction-post-review.sexp" :STATUS
+    :ACCEPTED)
+   (:TASK !SELECT-FIFTH-LOW-RISK-DREYECK-EXTRACTION-SLICE :SPECIALIZES
+    !SELECT-LOW-RISK-DOWNSTREAM-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-fifth-dreyeck-extraction-selection.sexp")
+   (:TASK !REVIEW-FIFTH-SLICE-SELECTION-BEFORE-EXECUTION :SPECIALIZES
+    !REVIEW-SELECTED-EXTRACTION-SLICE-BEFORE-EXECUTION :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-fifth-dreyeck-extraction-review.sexp")
+   (:TASK !EXECUTE-FIFTH-LOW-RISK-DREYECK-EXTRACTION-SLICE :SPECIALIZES
+    !EXECUTE-REVIEWED-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-fifth-dreyeck-extraction-result.sexp" :STATUS :EXECUTED)
+   (:TASK !REVIEW-FIFTH-EXTRACTION-SLICE-AFTER-EXECUTION :SPECIALIZES
+    !REVIEW-EXECUTED-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-fifth-dreyeck-extraction-post-review.sexp" :STATUS
     :ACCEPTED)))
  (:METHOD-TEMPLATE
   (:METHOD REUSABLE-REFACTORING-SLICE-CYCLE :TASK
