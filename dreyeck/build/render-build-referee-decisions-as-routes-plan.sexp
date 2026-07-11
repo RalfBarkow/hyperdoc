@@ -110,7 +110,7 @@
     (build-referee-decision-route inspects dreyeck/build:build-session-next-action)))
   (validation
    ((shop3-plan-artifact-exists
-     "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp")
+     "dreyeck/build/render-build-referee-decisions-as-routes-plan.sexp")
     (route-can-be-created-from-build-session t)
     (route-includes-selected-action-and-decoded-operation t)
     (route-includes-session-status-dimensions t)

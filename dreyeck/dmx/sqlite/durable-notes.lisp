@@ -80,7 +80,7 @@
     (:id "render-build-referee-decisions-as-routes"
      :type :shop3-plan
      :title "Render Build Referee Decisions as Routes"
-     :source "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp"
+     :source "dreyeck/build/render-build-referee-decisions-as-routes-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "SHOP3-shaped plan for rendering build referee decisions as inspectable route objects.")
     (:id "materialize-build-referee-learning-topics"
@@ -145,14 +145,14 @@
     (:id "build-referee-decision-route"
      :type :learned-inspector-pattern
      :title "Build Referee Decision Route"
-     :source "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp"
+     :source "dreyeck/build/render-build-referee-decisions-as-routes-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :canonical-example "A Dreyeck build referee route shows the requested goal, candidate actions, selected action, decoded operation, status dimensions, reason, and safe-to-perform flag."
      :summary "A Lisp referee result should be rendered as an inspectable route without making Codex the next-move decision owner.")
     (:id "lisp-referee-form"
      :type :architecture-boundary
      :title "Lisp Referee Form"
-     :source "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp"
+     :source "dreyeck/build/render-build-referee-decisions-as-routes-plan.sexp"
      :projection-status :support-topic
      :summary "An inspectable Common Lisp form or function that owns next admissible action selection.")
     (:id "dreyeck/build:build-session-next-action"

@@ -34,7 +34,7 @@
   (build-referee-source
    ("dreyeck/build/tasks.lisp"
     "dreyeck/build/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
-    "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp"))
+    "dreyeck/build/render-build-referee-decisions-as-routes-plan.sexp"))
   (missing-required-topics
    (add-plan-then-perform-session-state-to-dreyeck-build
     render-build-referee-decisions-as-routes
