@@ -68,7 +68,7 @@
     (:id "inspect-dmx-materialized-learning-topics"
      :type :shop3-plan
      :title "Inspect DMX Materialized Learning Topics"
-     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :source "dreyeck/codex/inspect-dmx-materialized-learning-topics-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "SHOP3-shaped plan for exposing materialized DMX learning topics through Codex and inspector surfaces.")
     (:id "add-plan-then-perform-session-state-to-dreyeck-build"
@@ -114,25 +114,25 @@
     (:id "codex-is-not-the-build-system"
      :type :learned-boundary-rule
      :title "Codex Is Not the Build System"
-     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :source "dreyeck/codex/inspect-dmx-materialized-learning-topics-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "Codex should invoke reusable deterministic project tasks instead of embedding build, replay, or validation logic.")
     (:id "reusable-common-lisp-build-tasks-for-codex"
      :type :learned-problem-solution
      :title "Reusable Common Lisp Build Tasks for Codex"
-     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :source "dreyeck/codex/inspect-dmx-materialized-learning-topics-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "Common Lisp task functions provide the stable build/check layer Codex and inspectors can call.")
     (:id "dmx-learning-topic-inspection"
      :type :inspection-surface
      :title "DMX Learning Topic Inspection"
-     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :source "dreyeck/codex/inspect-dmx-materialized-learning-topics-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "Inspection of learned DMX topics should show production DB path, required topics, associations, and replay status.")
     (:id "codex-dmx-learning-topics"
      :type :codex-surface
      :title "Codex DMX Learning Topics"
-     :source "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+     :source "dreyeck/codex/inspect-dmx-materialized-learning-topics-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "Codex-facing surface for materialized DMX learning topics backed by reusable build tasks.")
     (:id "plan-then-perform-build-session"

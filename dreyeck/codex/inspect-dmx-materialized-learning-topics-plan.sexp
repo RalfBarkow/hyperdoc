@@ -109,7 +109,7 @@
      durable-note-materialization-status)))
   (validation
    ((shop3-plan-artifact-exists
-     "hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp")
+     "dreyeck/codex/inspect-dmx-materialized-learning-topics-plan.sexp")
     (codex-surface-loads t)
     (build-task-layer-loads t)
     (materialization-status-passed t)

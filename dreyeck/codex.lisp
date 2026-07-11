@@ -991,7 +991,7 @@ work while inspecting."
    :changed-at "2026-06-27 current slice"
    :actor "Codex/User collaboration"
    :target-object (codex-dmx-learning-topic-status)
-   :affected-files '("hyperdoc/inspect-dmx-materialized-learning-topics-plan.sexp"
+   :affected-files '("dreyeck/codex/inspect-dmx-materialized-learning-topics-plan.sexp"
                      "dreyeck/dmx/sqlite/durable-notes.lisp"
                      "dreyeck/build/tasks.lisp"
                      "dreyeck/codex.lisp"
