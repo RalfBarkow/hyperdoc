@@ -129,7 +129,7 @@
      domkin-2017)))
   (validation
    ((shop3-plan-artifact-exists
-     "hyperdoc/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp")
+     "dreyeck/build/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp")
     (session-can-be-created t)
     (plan-records-needed-state-without-performing t)
     (check-status-does-not-mutate t)

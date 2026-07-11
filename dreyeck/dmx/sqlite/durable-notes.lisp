@@ -74,7 +74,7 @@
     (:id "add-plan-then-perform-session-state-to-dreyeck-build"
      :type :shop3-plan
      :title "Add Plan-Then-Perform Session State to Dreyeck Build"
-     :source "hyperdoc/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
+     :source "dreyeck/build/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "SHOP3-shaped plan for adding ASDF-inspired session/action state to the Dreyeck build task layer.")
     (:id "render-build-referee-decisions-as-routes"
@@ -138,7 +138,7 @@
     (:id "plan-then-perform-build-session"
      :type :learned-build-pattern
      :title "Plan-Then-Perform Build Session"
-     :source "hyperdoc/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
+     :source "dreyeck/build/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :canonical-example "Dreyeck build session tracks up-to-date-before-session, needed-in-session, and done-in-session independently."
      :summary "Separate planning, validity checking, and performing so Codex can inspect deterministic project checks without becoming the build system.")

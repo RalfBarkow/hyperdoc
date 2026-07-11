@@ -33,7 +33,7 @@
     "dreyeck/dmx/sqlite/tests/smoke.lisp"))
   (build-referee-source
    ("dreyeck/build/tasks.lisp"
-    "hyperdoc/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
+    "dreyeck/build/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
     "hyperdoc/render-build-referee-decisions-as-routes-plan.sexp"))
   (missing-required-topics
    (add-plan-then-perform-session-state-to-dreyeck-build

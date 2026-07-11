@@ -665,7 +665,7 @@ store."
           :source :build-session-next-action
           :session-id (getf session :id)
           :shop3-plan-source
-          "hyperdoc/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
+          "dreyeck/build/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
           :requested-task task-id
           :task selected-task
           :next-action selected-action
