@@ -1,5 +1,5 @@
 (:ARTIFACT (:ID REFACTOR-HYPERDOC-REUSABLE-EXTRACTION-HTN) (:TYPE :HTN-SHOP3-TASK-LIBRARY)
- (:STATUS :DRAFT-FILED-OUT-FROM-TEMPORARY-TOPIC-DB)
+ (:STATUS :DRAFT-FILED-OUT-FROM-TEMPORARY-TOPIC-DB-UPDATED-THROUGH-FOURTH-EXTRACTION)
  (:SOURCE-TOPIC-DB "/Users/rgb/workspace/hyperdoc/var/dmx-associative-mirror.sqlite")
  (:TEMPORARY-RUN-ID "temporary-htn-assimilation-20260711-1155")
  (:TOPIC-DB-ANCHOR "topic:hyperdoc-refactor:temporary:reusable-extraction-htn")
@@ -38,7 +38,24 @@
     !REVIEW-SELECTED-EXTRACTION-SLICE-BEFORE-EXECUTION :EVIDENCE
     "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-review.sexp")
    (:TASK !EXECUTE-THIRD-LOW-RISK-DREYECK-EXTRACTION-SLICE :SPECIALIZES
-    !EXECUTE-REVIEWED-EXTRACTION-SLICE :STATUS :NOT-YET-EXECUTED)))
+    !EXECUTE-REVIEWED-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-result.sexp" :STATUS :EXECUTED)
+   (:TASK !REVIEW-THIRD-EXTRACTION-SLICE-AFTER-EXECUTION :SPECIALIZES
+    !REVIEW-EXECUTED-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-review.sexp" :STATUS :ACCEPTED)
+   (:TASK !SELECT-FOURTH-LOW-RISK-DREYECK-EXTRACTION-SLICE :SPECIALIZES
+    !SELECT-LOW-RISK-DOWNSTREAM-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-fourth-dreyeck-extraction-selection.sexp")
+   (:TASK !REVIEW-FOURTH-SLICE-SELECTION-BEFORE-EXECUTION :SPECIALIZES
+    !REVIEW-SELECTED-EXTRACTION-SLICE-BEFORE-EXECUTION :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-fourth-dreyeck-extraction-review.sexp")
+   (:TASK !EXECUTE-FOURTH-LOW-RISK-DREYECK-EXTRACTION-SLICE :SPECIALIZES
+    !EXECUTE-REVIEWED-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-fourth-dreyeck-extraction-result.sexp" :STATUS :EXECUTED)
+   (:TASK !REVIEW-FOURTH-EXTRACTION-SLICE-AFTER-EXECUTION :SPECIALIZES
+    !REVIEW-EXECUTED-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-fourth-dreyeck-extraction-post-review.sexp" :STATUS
+    :ACCEPTED)))
  (:METHOD-TEMPLATE
   (:METHOD REUSABLE-REFACTORING-SLICE-CYCLE :TASK
    (!ADVANCE-HYPERDOC-TO-DREYECK-EXTRACTION-BY-ONE-REVIEWED-SLICE ?PLAN ?INVENTORY)
