@@ -31,7 +31,7 @@
  (:candidate-groups
   ((:name :dreyeck-dmx-build-referee-learning-plan
     :files
-    (("hyperdoc/materialize-build-referee-learning-topics-plan.sexp"
+    (("dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp"
       :kind :shop3-plan-artifact
       :classification :dreyeck-owned-situated-surface
       :classification-basis
@@ -73,7 +73,7 @@
  (:selected-group
   (:name :dreyeck-dmx-build-referee-learning-plan
    :files
-   ((:from "hyperdoc/materialize-build-referee-learning-topics-plan.sexp"
+   ((:from "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp"
      :to "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp"
      :kind :shop3-plan-artifact
      :classification :dreyeck-owned-situated-surface))
@@ -95,7 +95,7 @@
    :inbound-reference-summary
    ((:commands
      ("git grep -n \"materialize-build-referee-learning-topics-plan\" || true"
-      "git grep -n \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\" || true"))
+      "git grep -n \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\" || true"))
     (:exact-source-path-references
      ((:file "dreyeck/dmx/sqlite/durable-notes.lisp"
        :line 89
@@ -106,7 +106,7 @@
       (:file "hyperdoc/the-1998-ai-planning-systems-competition-fedwiki-asdf-system-plan.sexp"
        :line 52
        :classification :plan-cross-reference)
-      (:file "hyperdoc/materialize-build-referee-learning-topics-plan.sexp"
+      (:file "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp"
        :line 126
        :classification :selected-file-self-reference)))
     (:hyperdoc-core-required-by-asdf nil)

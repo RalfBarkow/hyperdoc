@@ -5,7 +5,7 @@
  (:SOURCE-SELECTION "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp")
  (:SOURCE-REVIEW "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-review.sexp")
  (:SOURCE-PLAN #1="hyperdoc/refactor-hyperdoc-to-upstream-core-and-dreyeck-systems-plan.sexp")
- (:SELECTED-SOURCE-PLAN #2="hyperdoc/materialize-build-referee-learning-topics-plan.sexp")
+ (:SELECTED-SOURCE-PLAN #2="dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp")
  (:TOPIC-DB-ANCHOR "topic:hyperdoc-refactor:temporary:third-extraction-htn-assimilation")
  (:REVIEWED-TEMPORARY-DB-STATE (:REQUIRED-TOPIC-COUNT 14) (:MISSING-TOPICS NIL)
   (:FAILED-ASSOCIATION-CHECKS NIL) (:REVIEW-VERDICT :ACCEPTED))

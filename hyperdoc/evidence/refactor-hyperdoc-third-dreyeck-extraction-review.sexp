@@ -24,7 +24,7 @@
        :ANYTHING-REQUIRING-COMPATIBILITY-SHELL-UNLESS-VERY-SMALL))))
    (:CANDIDATE-GROUPS
     ((:NAME :DREYECK-DMX-BUILD-REFEREE-LEARNING-PLAN :FILES
-      (("hyperdoc/materialize-build-referee-learning-topics-plan.sexp" :KIND :SHOP3-PLAN-ARTIFACT
+      (("dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp" :KIND :SHOP3-PLAN-ARTIFACT
         :CLASSIFICATION :DREYECK-OWNED-SITUATED-SURFACE :CLASSIFICATION-BASIS
         (:TARGET-STORE DREYECK-DMX-SQLITE-PRODUCTION-DB :MATERIALIZER
          "dreyeck.dmx.sqlite:materialize-durable-notes-into-production-db" :TARGET-SYSTEM
@@ -55,7 +55,7 @@
       "Classified by the page-content-overlays bucket, but HTML page discovery and registry/config references make it a larger execution slice.")))
    (:SELECTED-GROUP
     (:NAME :DREYECK-DMX-BUILD-REFEREE-LEARNING-PLAN :FILES
-     ((:FROM "hyperdoc/materialize-build-referee-learning-topics-plan.sexp" :TO
+     ((:FROM "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp" :TO
        "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp" :KIND
        :SHOP3-PLAN-ARTIFACT :CLASSIFICATION :DREYECK-OWNED-SITUATED-SURFACE))
      :CURRENT-OWNER :HYPERDOC :TARGET-OWNER :DREYECK/DMX/SQLITE :TARGET-SYSTEM :DREYECK/DMX/SQLITE
@@ -69,7 +69,7 @@
      :INBOUND-REFERENCE-SUMMARY
      ((:COMMANDS
        ("git grep -n \"materialize-build-referee-learning-topics-plan\" || true"
-        "git grep -n \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\" || true"))
+        "git grep -n \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\" || true"))
       (:EXACT-SOURCE-PATH-REFERENCES
        ((:FILE "dreyeck/dmx/sqlite/durable-notes.lisp" :LINE 89 :CLASSIFICATION
          :ACTIVE-DREYECK-DMX-SOURCE)
@@ -77,7 +77,7 @@
          :CLASSIFICATION :PLAN-CROSS-REFERENCE)
         (:FILE "hyperdoc/the-1998-ai-planning-systems-competition-fedwiki-asdf-system-plan.sexp"
          :LINE 52 :CLASSIFICATION :PLAN-CROSS-REFERENCE)
-        (:FILE "hyperdoc/materialize-build-referee-learning-topics-plan.sexp" :LINE 126
+        (:FILE "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp" :LINE 126
          :CLASSIFICATION :SELECTED-FILE-SELF-REFERENCE)))
       (:HYPERDOC-CORE-REQUIRED-BY-ASDF NIL) (:HYPERBOOK-REQUIRED-BY-ASDF NIL)
       (:HYPERBOOK-SERVER-REQUIRED-BY-ASDF NIL) (:SOURCE-REFERENCE-REPAIR-LIKELY-REQUIRED-P T))
@@ -101,51 +101,51 @@
     (:IF-SELECTED (!REVIEW-THIRD-SLICE-SELECTION-BEFORE-EXECUTION) :IF-NO-SAFE-CANDIDATE
      (!MANUAL-REVIEW-DOWNSTREAM-CANDIDATE-INVENTORY))))
   :SELECTED-FILE
-  (:FROM "hyperdoc/materialize-build-referee-learning-topics-plan.sexp" :TO
+  (:FROM "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp" :TO
    "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp" :CLASSIFICATION
    :DREYECK-OWNED-SITUATED-SURFACE :TARGET-SYSTEM :DREYECK/DMX/SQLITE)
   :FILE-STATE (:OLD-FILE-PRESENT-P T :TARGET-DIRECTORY-PRESENT-P T :NEW-FILE-PRESENT-P NIL)
   :REFERENCE-SCAN
   (:OLD-PATH-REFERENCES
    (#1=(:PATH #2="dreyeck/dmx/sqlite/durable-notes.lisp" :LINE 89 :TEXT
-        "     :source \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
+        "     :source \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 34
-     :TEXT "    ((\"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
+     :TEXT "    ((\"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 76
-     :TEXT "   ((:from \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
+     :TEXT "   ((:from \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 98
      :TEXT
-     "      \"git grep -n \\\"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\\\" || true\"))")
+     "      \"git grep -n \\\"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\\\" || true\"))")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 109
-     :TEXT "      (:file \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
+     :TEXT "      (:file \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
     #3=(:PATH #4="hyperdoc/kernighan-plauger-critical-reading-style-plan.sexp" :LINE 93 :TEXT
-        "     \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
-    #5=(:PATH #6="hyperdoc/materialize-build-referee-learning-topics-plan.sexp" :LINE 126 :TEXT
-        "     \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\")")
+        "     \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
+    #5=(:PATH #6="dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp" :LINE 126 :TEXT
+        "     \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\")")
     #7=(:PATH #8="hyperdoc/the-1998-ai-planning-systems-competition-fedwiki-asdf-system-plan.sexp"
-        :LINE 52 :TEXT "    \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"))"))
+        :LINE 52 :TEXT "    \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"))"))
    :TRACKED-SOURCE-OLD-PATH-REFERENCES (#1# #3# #5# #7#) :BASENAME-REFERENCES
    ((:PATH "dreyeck/dmx/sqlite/durable-notes.lisp" :LINE 89 :TEXT
-     "     :source \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
+     "     :source \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 34
-     :TEXT "    ((\"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
+     :TEXT "    ((\"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 76
-     :TEXT "   ((:from \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
+     :TEXT "   ((:from \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 77
      :TEXT "     :to \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 97
      :TEXT "     (\"git grep -n \\\"materialize-build-referee-learning-topics-plan\\\" || true\"")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 98
      :TEXT
-     "      \"git grep -n \\\"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\\\" || true\"))")
+     "      \"git grep -n \\\"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\\\" || true\"))")
     (:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 109
-     :TEXT "      (:file \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
+     :TEXT "      (:file \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
     (:PATH "hyperdoc/kernighan-plauger-critical-reading-style-plan.sexp" :LINE 93 :TEXT
-     "     \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"")
-    (:PATH "hyperdoc/materialize-build-referee-learning-topics-plan.sexp" :LINE 126 :TEXT
-     "     \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\")")
+     "     \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")
+    (:PATH "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp" :LINE 126 :TEXT
+     "     \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\")")
     (:PATH "hyperdoc/the-1998-ai-planning-systems-competition-fedwiki-asdf-system-plan.sexp" :LINE
-     52 :TEXT "    \"hyperdoc/materialize-build-referee-learning-topics-plan.sexp\"))"))
+     52 :TEXT "    \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"))"))
    :NEW-PATH-REFERENCES
    ((:PATH "hyperdoc/evidence/refactor-hyperdoc-third-dreyeck-extraction-selection.sexp" :LINE 77
      :TEXT "     :to \"dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp\"")))
