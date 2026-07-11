@@ -84,8 +84,30 @@
     :ACCEPTED)
    (:TASK !ASSIMILATE-SIXTH-EXTRACTION-SLICE-INTO-REUSABLE-HTN :SPECIALIZES
     !ASSIMILATE-REFACTORING-EPISODE-INTO-HTN :EVIDENCE
-    "hyperdoc/evidence/refactor-hyperdoc-sixth-extraction-htn-assimilation.sexp" :STATUS
-    :ACCEPTED)))
+    "hyperdoc/evidence/refactor-hyperdoc-sixth-extraction-htn-assimilation.sexp" :STATUS :ACCEPTED)
+   (:TASK !RECORD-LIVE-LISP-EXECUTOR-ARCHITECTURE-DECISION :SPECIALIZES
+    !ADAPT-CURRENT-PLAN-WITH-REUSED-OR-GENERALIZED-TASKS :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-live-lisp-executor-architecture-decision.sexp" :ROLE
+    :ARCHITECTURE-CORRECTION-BEFORE-OWNER-SELECTION)
+   (:TASK !REDECIDE-BUILD-REFEREE-SUBGRAPH-OWNER-UNDER-LIVE-LISP-EXECUTOR-MODEL :SPECIALIZES
+    !CLASSIFY-REFACTORING-CANDIDATE-OWNERSHIP :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-seventh-build-referee-subgraph-owner-redecision.sexp"
+    :ROLE :OWNER-REDECISION-UNDER-CORRECTED-EXECUTOR-MODEL)
+   (:TASK !SELECT-SEVENTH-LOW-RISK-DREYECK-EXTRACTION-SLICE :SPECIALIZES
+    !SELECT-LOW-RISK-DOWNSTREAM-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-seventh-dreyeck-extraction-selection.sexp")
+   (:TASK !REVIEW-SEVENTH-SLICE-SELECTION-BEFORE-EXECUTION :SPECIALIZES
+    !REVIEW-SELECTED-EXTRACTION-SLICE-BEFORE-EXECUTION :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-seventh-dreyeck-extraction-review.sexp")
+   (:TASK !EXECUTE-SEVENTH-LOW-RISK-DREYECK-EXTRACTION-SLICE :SPECIALIZES
+    !EXECUTE-REVIEWED-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-seventh-dreyeck-extraction-result.sexp")
+   (:TASK !RECORD-SEVENTH-EXTRACTION-POST-REVIEW-WITH-DEFERRED-HYPERDOC-LOAD-BOUNDARY-REPAIR
+    :SPECIALIZES !REVIEW-EXECUTED-EXTRACTION-SLICE :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-seventh-dreyeck-extraction-post-review.sexp")
+   (:TASK !ASSIMILATE-SEVENTH-EXTRACTION-INTO-REUSABLE-HTN :SPECIALIZES
+    !ASSIMILATE-REFACTORING-EPISODE-INTO-HTN :EVIDENCE
+    "hyperdoc/evidence/refactor-hyperdoc-seventh-extraction-htn-assimilation.sexp")))
  (:METHOD-TEMPLATE
   (:METHOD REUSABLE-REFACTORING-SLICE-CYCLE :TASK
    (!ADVANCE-HYPERDOC-TO-DREYECK-EXTRACTION-BY-ONE-REVIEWED-SLICE ?PLAN ?INVENTORY)
@@ -245,4 +267,13 @@
       :TYPE-URI "hyperdoc.refactor.htn_abstract_task" :VALUE
       "!select-low-risk-downstream-extraction-slice" :PAYLOAD-JSON
       "{\"summary\":\"Reusable abstract HTN task candidate learned from repeated extraction slices.\",\"source\":\"mREPL temporary assimilation\",\"temporary-run-id\":\"temporary-htn-assimilation-20260711-1155\"}"
-      :SYNC-STATE "temporary"))))))
+      :SYNC-STATE "temporary")))))
+ (:EPISODE-ASSIMILATIONS
+  ((:EPISODE :SEVENTH-DREYECK-EXTRACTION :BASE "628aa5f0" :MOVED-FILE
+    ("hyperdoc/add-build-referee-subgraph-inspector-view-plan.sexp"
+     "dreyeck/build/add-build-referee-subgraph-inspector-view-plan.sexp")
+    :TARGET-SYSTEM :DREYECK/BUILD :EXECUTOR-ROLE :COHERENT-LIVE-LISP-IMAGE :CODEX-ROLE
+    :LEGACY-COMPATIBILITY-OR-READER-DISPLAY-SURFACE :POST-REVIEW-VERDICT :ACCEPTED
+    :LIVE-OLD-PATH-REFERENCES NIL :ASDF-UPDATE-REQUIRED-P NIL :NEW-ASDF-SUBSYSTEM-NEEDED-P NIL
+    :NEW-ABSTRACT-TASK-CANDIDATES
+    (!RECORD-EXECUTOR-ARCHITECTURE-DECISION-BEFORE-OWNER-SELECTION)))))
