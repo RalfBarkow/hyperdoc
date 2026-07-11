@@ -86,7 +86,7 @@
     (:id "materialize-build-referee-learning-topics"
      :type :shop3-plan
      :title "Materialize Build Referee Learning Topics"
-     :source "hyperdoc/materialize-build-referee-learning-topics-plan.sexp"
+     :source "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp"
      :projection-status :seeded-from-shop3-plan
      :summary "SHOP3-shaped plan for materializing the learned build-session and Lisp referee topics into the Dreyeck DMX SQLite store.")
     (:id "markdown-note-as-seed-or-projection"

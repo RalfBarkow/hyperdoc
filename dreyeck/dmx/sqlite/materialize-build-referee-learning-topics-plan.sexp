@@ -123,7 +123,7 @@
     (assoc:build-referee-decision-route:inspects:dreyeck/build:build-session-next-action)))
   (validation
    ((shop3-plan-artifact-exists
-     "hyperdoc/materialize-build-referee-learning-topics-plan.sexp")
+     "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp")
     (first-production-replay-materializes-required-seeds t)
     (second-production-replay-idempotent t)
     (validate-dmx-learning-topics-passed t)

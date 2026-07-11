@@ -90,7 +90,7 @@
      "hyperdoc/How to Read a Web function coverage.html"))
    (shop3-plan-artifacts
     ("hyperdoc/add-plan-then-perform-session-state-to-dreyeck-build-plan.sexp"
-     "hyperdoc/materialize-build-referee-learning-topics-plan.sexp"
+     "dreyeck/dmx/sqlite/materialize-build-referee-learning-topics-plan.sexp"
      "hyperdoc/path-sensitive-hyperdoc-pre-commit-gate-plan.sexp"
      "hyperdoc-shop3/shop3-parser-documentation-plan.sexp"))
    (critic-and-review-contracts
