@@ -1,0 +1,406 @@
+(:REFACTOR-HYPERDOC-EIGHTH-EXTRACTION-COMMIT-3-EXECUTION-PROBLEM-MATERIALIZATION
+ (:ARTIFACT-KIND
+  :EXECUTION-PROBLEM-MATERIALIZATION-FROM-LIVE-SHOP3-PLAN)
+
+ (:PHASE-BOUNDARY
+  (:ORDER
+   (:LOCALIZATION-PROBLEM
+    :PREPARATION-PROBLEM
+    :EXECUTION-PROBLEM
+    :EXECUTOR
+    :REVIEW))
+  (:THIS-SLICE :EXECUTION-PROBLEM)
+  (:EXECUTOR-INVOKED NIL)
+  (:REPOSITORY-EXECUTION-MUTATIONS NIL))
+
+ (:PREPARATION-PROVENANCE
+  (:COMMIT "fc3293d3308d66033ed4549a9e6d9ca071f2fcd3")
+  (:SUBJECT-COMMIT "ab1926eb807e5e8721b888a34736ada458209a40")
+  (:DOMAIN
+   DREYECK/SHOP3::EIGHTH-DREYECK-EXTRACTION-COMMIT-3-PREPARATION-DOMAIN)
+  (:PROBLEM
+   DREYECK/SHOP3::EIGHTH-DREYECK-EXTRACTION-COMMIT-3-PREPARATION)
+  (:PLAN-LENGTH 6)
+  (:FINAL-STATE-CONFIRMED T)
+  (:EXECUTION-CONTRACT-DEFINED T))
+
+ (:EXECUTION-PLANNING-PROVENANCE
+  (:DOMAIN
+   DREYECK/SHOP3::EIGHTH-DREYECK-EXTRACTION-COMMIT-3-EXECUTION-DOMAIN)
+  (:PROBLEM
+   DREYECK/SHOP3::EIGHTH-DREYECK-EXTRACTION-COMMIT-3-EXECUTION)
+  (:TOP-LEVEL-TASK
+   (DREYECK/SHOP3::EXECUTE-EIGHTH-DREYECK-EXTRACTION-COMMIT-3
+    "/Users/rgb/workspace/hyperdoc/"
+    DREYECK/SHOP3::HAUPTSACHE
+    "fc3293d3308d66033ed4549a9e6d9ca071f2fcd3"))
+  (:TOP-LEVEL-TASK-KIND :COMPOUND)
+  (:OPERATOR-SCHEMAS 12)
+  (:METHOD-COUNT 1)
+  (:PLANNER SHOP3:FIND-PLANS)
+  (:PLANNER-CALL :LIVE)
+  (:HEURISTIC-FALLBACK NIL)
+  (:EXECUTOR-INVOKED NIL)
+  (:RAW-PLAN
+   ((DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/package.lisp") 1.0
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/manual-topics.lisp") 1.0
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/plan-objects.lisp") 1.0
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp") 1.0
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/examples.lisp") 1.0
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/views.lisp") 1.0
+    (DREYECK/SHOP3::!WRITE-SHOP3-REFERENCE-BOUNDARY-CHECKER
+     "tools/check-shop3-reference-boundary.lisp") 1.0
+    (DREYECK/SHOP3::!WRITE-SHOP3-REFERENCE-BOUNDARY-FIXTURE
+     :ALLOWED
+     "tools/testdata/shop3-reference-boundary/allowed-added-lines.diff") 1.0
+    (DREYECK/SHOP3::!WRITE-SHOP3-REFERENCE-BOUNDARY-FIXTURE
+     :REJECTED
+     "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff") 1.0
+    (DREYECK/SHOP3::!WIRE-SHOP3-REFERENCE-BOUNDARY-CHECKER
+     "tools/pre-commit-gate.sh") 1.0
+    (DREYECK/SHOP3::!RUN-SHOP3-REFERENCE-BOUNDARY-FIXTURES) 1.0
+    (DREYECK/SHOP3::!RUN-DIRECT-SHOP3-LOAD-AND-GAP-CANARY) 1.0
+    (DREYECK/SHOP3::!RUN-COMPATIBILITY-SHOP3-LOAD-AND-GAP-CANARY) 1.0
+    (DREYECK/SHOP3::!RUN-DUAL-LOAD-IDENTITY-CANARY) 1.0
+    (DREYECK/SHOP3::!RUN-SHOP3-PROVIDER-BOUNDARY-TESTS) 1.0
+    (DREYECK/SHOP3::!RUN-REPOSITORY-LOAD-GATE) 1.0
+    (DREYECK/SHOP3::!WRITE-COMMIT-3-EXECUTION-EVIDENCE
+     "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp") 1.0
+    (DREYECK/SHOP3::!RECORD-COMMIT-3-EXECUTION-COMPLETE) 1.0))
+  (:SHORTER-PLAN
+   ((DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/package.lisp")
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/manual-topics.lisp")
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/plan-objects.lisp")
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp")
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/examples.lisp")
+    (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+     "hyperdoc-shop3/views.lisp")
+    (DREYECK/SHOP3::!WRITE-SHOP3-REFERENCE-BOUNDARY-CHECKER
+     "tools/check-shop3-reference-boundary.lisp")
+    (DREYECK/SHOP3::!WRITE-SHOP3-REFERENCE-BOUNDARY-FIXTURE
+     :ALLOWED
+     "tools/testdata/shop3-reference-boundary/allowed-added-lines.diff")
+    (DREYECK/SHOP3::!WRITE-SHOP3-REFERENCE-BOUNDARY-FIXTURE
+     :REJECTED
+     "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff")
+    (DREYECK/SHOP3::!WIRE-SHOP3-REFERENCE-BOUNDARY-CHECKER
+     "tools/pre-commit-gate.sh")
+    (DREYECK/SHOP3::!RUN-SHOP3-REFERENCE-BOUNDARY-FIXTURES)
+    (DREYECK/SHOP3::!RUN-DIRECT-SHOP3-LOAD-AND-GAP-CANARY)
+    (DREYECK/SHOP3::!RUN-COMPATIBILITY-SHOP3-LOAD-AND-GAP-CANARY)
+    (DREYECK/SHOP3::!RUN-DUAL-LOAD-IDENTITY-CANARY)
+    (DREYECK/SHOP3::!RUN-SHOP3-PROVIDER-BOUNDARY-TESTS)
+    (DREYECK/SHOP3::!RUN-REPOSITORY-LOAD-GATE)
+    (DREYECK/SHOP3::!WRITE-COMMIT-3-EXECUTION-EVIDENCE
+     "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp")
+    (DREYECK/SHOP3::!RECORD-COMMIT-3-EXECUTION-COMPLETE)))
+  (:PLAN-LENGTH 18)
+  (:RUN-TIME 0.108836)
+  (:PLAN-TREE
+   (((DREYECK/SHOP3::EXECUTE-EIGHTH-DREYECK-EXTRACTION-COMMIT-3
+      "/Users/rgb/workspace/hyperdoc/"
+      DREYECK/SHOP3::HAUPTSACHE
+      "fc3293d3308d66033ed4549a9e6d9ca071f2fcd3")
+     #:METH-EXECUTE-EIGHTH-DREYECK-EXTRACTION-COMMIT-32250--226
+     ((1.0 (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+            "hyperdoc-shop3/package.lisp") 0)
+      (1.0 (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+            "hyperdoc-shop3/manual-topics.lisp") 1)
+      (1.0 (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+            "hyperdoc-shop3/plan-objects.lisp") 2)
+      (1.0 (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+            "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp") 3)
+      (1.0 (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+            "hyperdoc-shop3/examples.lisp") 4)
+      (1.0 (DREYECK/SHOP3::!DELETE-LEGACY-SHOP3-COPY
+            "hyperdoc-shop3/views.lisp") 5)
+      (1.0 (DREYECK/SHOP3::!WRITE-SHOP3-REFERENCE-BOUNDARY-CHECKER
+            "tools/check-shop3-reference-boundary.lisp") 6)
+      (1.0 (DREYECK/SHOP3::!WRITE-SHOP3-REFERENCE-BOUNDARY-FIXTURE
+            :ALLOWED
+            "tools/testdata/shop3-reference-boundary/allowed-added-lines.diff") 7)
+      (1.0 (DREYECK/SHOP3::!WRITE-SHOP3-REFERENCE-BOUNDARY-FIXTURE
+            :REJECTED
+            "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff") 8)
+      (1.0 (DREYECK/SHOP3::!WIRE-SHOP3-REFERENCE-BOUNDARY-CHECKER
+            "tools/pre-commit-gate.sh") 9)
+      (1.0 (DREYECK/SHOP3::!RUN-SHOP3-REFERENCE-BOUNDARY-FIXTURES) 10)
+      (1.0 (DREYECK/SHOP3::!RUN-DIRECT-SHOP3-LOAD-AND-GAP-CANARY) 11)
+      (1.0
+       (DREYECK/SHOP3::!RUN-COMPATIBILITY-SHOP3-LOAD-AND-GAP-CANARY) 12)
+      (1.0 (DREYECK/SHOP3::!RUN-DUAL-LOAD-IDENTITY-CANARY) 13)
+      (1.0 (DREYECK/SHOP3::!RUN-SHOP3-PROVIDER-BOUNDARY-TESTS) 14)
+      (1.0 (DREYECK/SHOP3::!RUN-REPOSITORY-LOAD-GATE) 15)
+      (1.0 (DREYECK/SHOP3::!WRITE-COMMIT-3-EXECUTION-EVIDENCE
+            "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp") 16)
+      (1.0 (DREYECK/SHOP3::!RECORD-COMMIT-3-EXECUTION-COMPLETE) 17)))))
+  (:PLAN-TREE-PROJECTION :RAW-SHOP3-PLAN-TREE)
+  (:FINAL-STATE
+   ((DREYECK/SHOP3::COMMIT-3-EXECUTION-PLANNED)
+    (DREYECK/SHOP3::NEXT-TASK
+     DREYECK/SHOP3::REVIEW-EIGHTH-DREYECK-EXTRACTION-COMMIT-3)
+    (DREYECK/SHOP3::COMMIT-3-EXECUTION-EVIDENCE-WRITTEN
+     "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp")
+    (DREYECK/SHOP3::REPOSITORY-LOAD-GATE-PASSED)
+    (DREYECK/SHOP3::PROVIDER-BOUNDARY-TESTS-PASSED)
+    (DREYECK/SHOP3::DUAL-LOAD-IDENTITY-CANARY-PASSED)
+    (DREYECK/SHOP3::COMPATIBILITY-SHOP3-CANARY-PASSED)
+    (DREYECK/SHOP3::DIRECT-SHOP3-CANARY-PASSED)
+    (DREYECK/SHOP3::ALLOWED-LINT-FIXTURE-PASSED)
+    (DREYECK/SHOP3::REJECTED-LINT-FIXTURE-REJECTED)
+    (DREYECK/SHOP3::SHOP3-REFERENCE-BOUNDARY-CHECKER-WIRED
+     "tools/pre-commit-gate.sh")
+    (DREYECK/SHOP3::SHOP3-REFERENCE-BOUNDARY-FIXTURE-WRITTEN
+     :REJECTED
+     "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff")
+    (DREYECK/SHOP3::SHOP3-REFERENCE-BOUNDARY-FIXTURE-WRITTEN
+     :ALLOWED
+     "tools/testdata/shop3-reference-boundary/allowed-added-lines.diff")
+    (DREYECK/SHOP3::SHOP3-REFERENCE-BOUNDARY-CHECKER-WRITTEN
+     "tools/check-shop3-reference-boundary.lisp")
+    (DREYECK/SHOP3::LEGACY-COPY-DELETION-PERFORMED
+     "hyperdoc-shop3/views.lisp")
+    (DREYECK/SHOP3::LEGACY-COPY-DELETION-PERFORMED
+     "hyperdoc-shop3/examples.lisp")
+    (DREYECK/SHOP3::LEGACY-COPY-DELETION-PERFORMED
+     "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp")
+    (DREYECK/SHOP3::LEGACY-COPY-DELETION-PERFORMED
+     "hyperdoc-shop3/plan-objects.lisp")
+    (DREYECK/SHOP3::LEGACY-COPY-DELETION-PERFORMED
+     "hyperdoc-shop3/manual-topics.lisp")
+    (DREYECK/SHOP3::LEGACY-COPY-DELETION-PERFORMED
+     "hyperdoc-shop3/package.lisp")
+    (DREYECK/SHOP3::SELECTED-COMMIT-3-EXECUTION-EVIDENCE-PATH
+     "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-ADD-PATH
+     "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-ADD-PATH
+     "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-ADD-PATH
+     "tools/testdata/shop3-reference-boundary/allowed-added-lines.diff")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-ADD-PATH
+     "tools/check-shop3-reference-boundary.lisp")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-MODIFY-PATH
+     "tools/pre-commit-gate.sh")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-DELETE-PATH
+     "hyperdoc-shop3/views.lisp")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-DELETE-PATH
+     "hyperdoc-shop3/examples.lisp")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-DELETE-PATH
+     "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-DELETE-PATH
+     "hyperdoc-shop3/plan-objects.lisp")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-DELETE-PATH
+     "hyperdoc-shop3/manual-topics.lisp")
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-DELETE-PATH
+     "hyperdoc-shop3/package.lisp")
+    (DREYECK/SHOP3::FORBIDDEN-NEW-LIVE-REFERENCE
+     DREYECK/SHOP3::NEW-PRIMARY-OWNER-CLAIM
+     "(DEFPACKAGE #:HYPERDOC/SHOP3")
+    (DREYECK/SHOP3::FORBIDDEN-NEW-LIVE-REFERENCE
+     DREYECK/SHOP3::NEW-ASDF-COMPONENT-ROOT "hyperdoc-shop3/")
+    (DREYECK/SHOP3::FORBIDDEN-NEW-LIVE-REFERENCE
+     DREYECK/SHOP3::NEW-IN-PACKAGE "\"HYPERDOC/SHOP3\"")
+    (DREYECK/SHOP3::FORBIDDEN-NEW-LIVE-REFERENCE
+     DREYECK/SHOP3::NEW-IN-PACKAGE "#:HYPERDOC/SHOP3")
+    (DREYECK/SHOP3::FORBIDDEN-NEW-LIVE-REFERENCE
+     DREYECK/SHOP3::NEW-IN-PACKAGE ":HYPERDOC/SHOP3")
+    (DREYECK/SHOP3::FORBIDDEN-NEW-LIVE-REFERENCE
+     DREYECK/SHOP3::NEW-PACKAGE-QUALIFIER "HYPERDOC/SHOP3::")
+    (DREYECK/SHOP3::FORBIDDEN-NEW-LIVE-REFERENCE
+     DREYECK/SHOP3::NEW-PACKAGE-QUALIFIER "HYPERDOC/SHOP3:")
+    (DREYECK/SHOP3::FORBIDDEN-NEW-LIVE-REFERENCE
+     DREYECK/SHOP3::NEW-ASDF-DEPENDENCY "#:HYPERDOC/SHOP3")
+    (DREYECK/SHOP3::FORBIDDEN-NEW-LIVE-REFERENCE
+     DREYECK/SHOP3::NEW-ASDF-DEPENDENCY ":HYPERDOC/SHOP3")
+    (DREYECK/SHOP3::REFERENCE-CLASSIFICATION-USES-PATH-AND-KIND
+     DREYECK/SHOP3::TRUE)
+    (DREYECK/SHOP3::REFERENCE-POLICY DREYECK/SHOP3::ADDED-LINES-ONLY)
+    (DREYECK/SHOP3::SELECTED-REFERENCE-BOUNDARY-GATE
+     "tools/pre-commit-gate.sh")
+    (DREYECK/SHOP3::SELECTED-REFERENCE-BOUNDARY-FIXTURE
+     :REJECTED
+     "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff")
+    (DREYECK/SHOP3::SELECTED-REFERENCE-BOUNDARY-FIXTURE
+     :ALLOWED
+     "tools/testdata/shop3-reference-boundary/allowed-added-lines.diff")
+    (DREYECK/SHOP3::SELECTED-REFERENCE-BOUNDARY-CHECKER
+     "tools/check-shop3-reference-boundary.lisp")
+    (DREYECK/SHOP3::SELECTED-DELETION-TARGET "hyperdoc-shop3/views.lisp")
+    (DREYECK/SHOP3::SELECTED-DELETION-TARGET "hyperdoc-shop3/examples.lisp")
+    (DREYECK/SHOP3::SELECTED-DELETION-TARGET
+     "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp")
+    (DREYECK/SHOP3::SELECTED-DELETION-TARGET
+     "hyperdoc-shop3/plan-objects.lisp")
+    (DREYECK/SHOP3::SELECTED-DELETION-TARGET
+     "hyperdoc-shop3/manual-topics.lisp")
+    (DREYECK/SHOP3::SELECTED-DELETION-TARGET
+     "hyperdoc-shop3/package.lisp")
+    (DREYECK/SHOP3::LEGACY-IMPLEMENTATION-COPY "hyperdoc-shop3/views.lisp")
+    (DREYECK/SHOP3::LEGACY-IMPLEMENTATION-COPY "hyperdoc-shop3/examples.lisp")
+    (DREYECK/SHOP3::LEGACY-IMPLEMENTATION-COPY
+     "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp")
+    (DREYECK/SHOP3::LEGACY-IMPLEMENTATION-COPY
+     "hyperdoc-shop3/plan-objects.lisp")
+    (DREYECK/SHOP3::LEGACY-IMPLEMENTATION-COPY
+     "hyperdoc-shop3/manual-topics.lisp")
+    (DREYECK/SHOP3::LEGACY-IMPLEMENTATION-COPY "hyperdoc-shop3/package.lisp")
+    (DREYECK/SHOP3::PROJECTION-REPAIR-DEFERRED)
+    (DREYECK/SHOP3::DOCUMENTATION-WORKFLOWS-PRESERVED)
+    (DREYECK/SHOP3::PROVIDER-BOUNDARY-FILES-PRESERVED)
+    (DREYECK/SHOP3::LEGACY-SHOP3-PACKAGE-NICKNAME
+     DREYECK/SHOP3::HYPERDOC/SHOP3)
+    (DREYECK/SHOP3::PRIMARY-SHOP3-PACKAGE DREYECK/SHOP3::DREYECK/SHOP3)
+    (DREYECK/SHOP3::COMPATIBILITY-SHOP3-DEPENDS-ON
+     DREYECK/SHOP3::DREYECK/SHOP3)
+    (DREYECK/SHOP3::COMPATIBILITY-SHOP3-DIRECT-COMPONENT-COUNT 0)
+    (DREYECK/SHOP3::CANONICAL-SHOP3-DIRECT-COMPONENT-COUNT 6)
+    (DREYECK/SHOP3::EXECUTION-CONTRACT-DEFINED)
+    (DREYECK/SHOP3::PREPARATION-FINAL-STATE-CONFIRMED)
+    (DREYECK/SHOP3::PREPARATION-PLAN-LENGTH 6)
+    (DREYECK/SHOP3::PREPARATION-PROBLEM-MATERIALIZED-AT
+     "fc3293d3308d66033ed4549a9e6d9ca071f2fcd3")
+    (DREYECK/SHOP3::COMMIT-3-PREPARED
+     "/Users/rgb/workspace/hyperdoc/"
+     DREYECK/SHOP3::HAUPTSACHE
+     "ab1926eb807e5e8721b888a34736ada458209a40")
+    (DREYECK/SHOP3::BASIS-COMMIT
+     "fc3293d3308d66033ed4549a9e6d9ca071f2fcd3")
+    (DREYECK/SHOP3::TARGET-BRANCH DREYECK/SHOP3::HAUPTSACHE)
+    (DREYECK/SHOP3::REPOSITORY "/Users/rgb/workspace/hyperdoc/"))))
+
+ (:EXECUTION-CHANGED-PATH-CONTRACT
+  (:DELETIONS
+   ("hyperdoc-shop3/package.lisp"
+    "hyperdoc-shop3/manual-topics.lisp"
+    "hyperdoc-shop3/plan-objects.lisp"
+    "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp"
+    "hyperdoc-shop3/examples.lisp"
+    "hyperdoc-shop3/views.lisp"))
+  (:MODIFICATIONS ("tools/pre-commit-gate.sh"))
+  (:ADDITIONS
+   ("tools/check-shop3-reference-boundary.lisp"
+    "tools/testdata/shop3-reference-boundary/allowed-added-lines.diff"
+    "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff"
+    "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp")))
+
+ (:ACTION-TO-PATH-MAPPING
+  ((:ACTION :DELETE-LEGACY-SHOP3-COPY
+    :PATHS
+    ("hyperdoc-shop3/package.lisp"
+     "hyperdoc-shop3/manual-topics.lisp"
+     "hyperdoc-shop3/plan-objects.lisp"
+     "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp"
+     "hyperdoc-shop3/examples.lisp"
+     "hyperdoc-shop3/views.lisp"))
+   (:ACTION :WRITE-SHOP3-REFERENCE-BOUNDARY-CHECKER
+    :PATH "tools/check-shop3-reference-boundary.lisp")
+   (:ACTION :WRITE-SHOP3-REFERENCE-BOUNDARY-FIXTURE
+    :PATHS
+    ("tools/testdata/shop3-reference-boundary/allowed-added-lines.diff"
+     "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff"))
+   (:ACTION :WIRE-SHOP3-REFERENCE-BOUNDARY-CHECKER
+    :PATH "tools/pre-commit-gate.sh")
+   (:ACTION :WRITE-COMMIT-3-EXECUTION-EVIDENCE
+    :PATH
+    "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp")))
+
+ (:LINT-POLICY
+  (:NEW-ASDF-DEPENDENCY (":HYPERDOC/SHOP3" "#:HYPERDOC/SHOP3"))
+  (:NEW-PACKAGE-QUALIFIER ("HYPERDOC/SHOP3:" "HYPERDOC/SHOP3::"))
+  (:NEW-IN-PACKAGE
+   (":HYPERDOC/SHOP3" "#:HYPERDOC/SHOP3" "\"HYPERDOC/SHOP3\""))
+  (:NEW-ASDF-COMPONENT-ROOT "hyperdoc-shop3/")
+  (:NEW-PRIMARY-OWNER-CLAIM "(DEFPACKAGE #:HYPERDOC/SHOP3"))
+
+ (:MATERIALIZATION-CHANGED-PATH-CONTRACT
+  ("dreyeck.asd"
+   "dreyeck/shop3/extraction-planning/execution-domain.lisp"
+   "dreyeck/shop3/extraction-planning/execution-problem.lisp"
+   "dreyeck/shop3/extraction-planning/runner.lisp"
+   "dreyeck/shop3/extraction-planning/tests/smoke.lisp"
+   "hyperdoc/refactor-hyperdoc-reusable-extraction-htn.sexp"
+   "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution-problem-materialization.sexp"))
+ (:PATH-CONTRACT-DEVIATION NIL)
+
+ (:VALIDATION
+  ((:CHECK :DOMAIN-REGISTERED :STATUS :PASSED)
+   (:CHECK :PROBLEM-REGISTERED :STATUS :PASSED)
+   (:CHECK :PLAN-COUNT :EXPECTED 1 :ACTUAL 1 :STATUS :PASSED)
+   (:CHECK :PLAN-LENGTH :EXPECTED 18 :ACTUAL 18 :STATUS :PASSED)
+   (:CHECK :EXACT-ORDERED-PLAN :STATUS :PASSED)
+   (:CHECK :EXACT-SIX-DELETION-ACTIONS :STATUS :PASSED)
+   (:CHECK :PLAN-TREE-PRESENT :STATUS :PASSED)
+   (:CHECK :FINAL-STATE-PRESENT :STATUS :PASSED)
+   (:CHECK :FINAL-STATE-EXECUTION-PLANNED :STATUS :PASSED)
+   (:CHECK :CAPTURED-RAW-SHORTER-PLAN-AND-FINAL-STATE-EQUAL-LIVE-RUN
+    :STATUS :PASSED)
+   (:CHECK :HEURISTIC-FALLBACK :EXPECTED NIL :ACTUAL NIL :STATUS :PASSED)
+   (:CHECK :EXECUTOR-INVOKED :EXPECTED NIL :ACTUAL NIL :STATUS :PASSED)
+   (:CHECK :ASDF-LOAD :MARKER "EXECUTION_PROBLEM_LOAD_OK" :STATUS :PASSED)
+   (:CHECK :ASDF-TEST :MARKER "EXECUTION_PROBLEM_TEST_OK" :STATUS :PASSED)
+   (:CHECK :EVIDENCE-SAFE-SINGLE-FORM :STATUS :PASSED)
+   (:CHECK :REUSABLE-HTN-SAFE-SINGLE-FORM :STATUS :PASSED)
+   (:CHECK :ONLY-CONTRACTED-MATERIALIZATION-PATHS-CHANGED :STATUS :PASSED)
+   (:CHECK :ELEVEN-EXECUTION-CONTRACT-PATHS-UNCHANGED :STATUS :PASSED)
+   (:CHECK :SIX-LEGACY-FILES-STILL-PRESENT :STATUS :PASSED)
+   (:CHECK :REPOSITORY-LOAD-GATE
+    :SYSTEM :HYPERBOOK/SERVER :MARKER "LOAD_GATE_OK" :STATUS :PASSED)
+   (:CHECK :ORIGINAL-WORKTREE-STAGED-FILES-PRESERVED
+    :BLOBS
+    (("hyperdoc/shop3-zettel-journey-contract.lisp"
+      "fec17cb44b315313f256f5fd1e647ecee049af95")
+     ("hyperdoc/shop3-zettel-plan-provenance-index.sexp"
+      "13289505c477d0bf84d66ed28d97f629683de3bd")
+     ("tests/shop3-zettel-journey-smoke.lisp"
+      "c7746ca7cee24ce18a0f1d819e8ede402b602ea5"))
+    :STATUS :PASSED)
+   (:CHECK :TEMPORARY-WORKTREE-REMOVED :STATUS :AFTER-COMMIT)))
+
+ (:NON-ACTIONS
+  (:REPOSITORY-EXECUTION-MUTATIONS NIL)
+  (:LEGACY-FILES-DELETED 0)
+  (:CHECKER-WRITTEN NIL)
+  (:FIXTURES-WRITTEN NIL)
+  (:PRE-COMMIT-GATE-MODIFIED NIL)
+  (:COMMIT-3-EXECUTION-EVIDENCE-WRITTEN NIL)
+  (:EXECUTOR-RUN NIL)
+  (:PROVIDER-BOUNDARY-MOVE NIL)
+  (:DOCUMENTATION-OR-SCXML-CHANGES NIL)
+  (:PLAN-TREE-PROJECTION-REPAIR NIL)
+  (:HYPERDOC-PAGE-TOPIC-OR-FEDWIKI-CHANGES NIL)
+  (:PI-OR-SECRETS-MUTATION NIL)
+  (:PUSHED NIL))
+
+ (:ANSWER-RECONSTRUCTION
+  (:SURFACE
+   (:PROCESS-TRACE
+    (:INSPECTED :PREPARATION-PROBLEM-FINAL-STATE-AND-EVIDENCE)
+    (:DECIDED :EXACT-ELEVEN-PATH-EXECUTOR-CONTRACT)
+    (:EXECUTED :LIVE-SHOP3-FIND-PLANS-ONLY)
+    (:OBSERVED :ONE-EIGHTEEN-ACTION-PLAN-WITH-NO-EXECUTOR-MUTATION)))
+  (:ARTIFACT
+   (:HYPERDOC-PAGE-DELTA NIL)
+   (:LISP-EXECUTION-DOMAIN-PROBLEM-RUNNER-AND-SMOKE-DELTA T)
+   (:FEDWIKI-TWIN-DELTA NIL)
+   (:DAILY-ANCHOR-DELTA NIL)
+   (:REPLAY-CHECKS
+    (:ASDF-LOAD :ASDF-TEST :LIVE-FIND-PLANS :SAFE-SINGLE-FORM
+     :EXACT-CHANGED-PATHS :NON-MUTATION-CHECKS :REPOSITORY-LOAD-GATE))))
+
+ (:CLASSIFICATION
+  :EIGHTH-DREYECK-EXTRACTION-COMMIT-3-EXECUTION-PROBLEM-MATERIALIZED)
+ (:NEXT
+  (!PERFORM-EIGHTH-DREYECK-EXTRACTION-COMMIT-3
+   :FROM-LIVE-SHOP3-EXECUTION-PLAN T)))

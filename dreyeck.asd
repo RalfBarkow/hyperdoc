@@ -23,7 +23,7 @@
        (:file "views")))))
 
 (defsystem #:dreyeck/shop3/extraction-planning
-  :description "Live SHOP3 localization and preparation problems for eighth extraction commit 3."
+  :description "Live SHOP3 localization, preparation, and execution problems for eighth extraction commit 3."
   :author "Ralf Barkow"
   :license "BSD"
   :version "0.1.0"
@@ -37,10 +37,12 @@
      (:file "extraction-planning/problem")
      (:file "extraction-planning/preparation-domain")
      (:file "extraction-planning/preparation-problem")
+     (:file "extraction-planning/execution-domain")
+     (:file "extraction-planning/execution-problem")
      (:file "extraction-planning/runner")))))
 
 (defsystem #:dreyeck/shop3/extraction-planning/tests
-  :description "Runtime smoke tests for the live commit-3 localization and preparation problems."
+  :description "Runtime smoke tests for the live commit-3 localization, preparation, and execution problems."
   :author "Ralf Barkow"
   :license "BSD"
   :version "0.1.0"
@@ -57,7 +59,7 @@
              (declare (ignore operation component))
              (uiop:symbol-call
               :dreyeck/shop3/extraction-planning/tests
-              :run-eighth-extraction-commit-3-localization-smoke-tests-and-preparation)))
+              :run-eighth-extraction-commit-3-localization-preparation-and-execution-smoke-tests)))
 
 (defsystem #:dreyeck/server
     :description "Minimal downstream dreyeck server scaffold"

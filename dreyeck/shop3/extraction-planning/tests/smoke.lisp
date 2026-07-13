@@ -189,3 +189,139 @@
 (defun run-eighth-extraction-commit-3-localization-smoke-tests-and-preparation ()
   (run-eighth-extraction-commit-3-localization-smoke-tests)
   (run-eighth-extraction-commit-3-preparation-smoke-tests))
+
+(defun run-eighth-extraction-commit-3-execution-problem-smoke-tests ()
+  (let* ((domain-symbol
+           'dreyeck/shop3::eighth-dreyeck-extraction-commit-3-execution-domain)
+         (problem-symbol
+           'dreyeck/shop3::eighth-dreyeck-extraction-commit-3-execution)
+         (package (find-package :dreyeck/shop3))
+         (resolved-problem-symbol
+           (and package
+                (find-symbol
+                 "EIGHTH-DREYECK-EXTRACTION-COMMIT-3-EXECUTION"
+                 package))))
+    (commit-3-smoke-assert
+     (shop3:find-domain domain-symbol nil)
+     "The commit-3 execution domain must be registered.")
+    (commit-3-smoke-assert
+     (shop3:find-problem problem-symbol nil)
+     "The commit-3 execution problem must be registered.")
+    (commit-3-smoke-assert
+     (eq problem-symbol resolved-problem-symbol)
+     "The execution problem symbol must be owned by DREYECK/SHOP3."))
+  (let* ((result
+           (dreyeck/shop3::run-eighth-dreyeck-extraction-commit-3-execution-plan))
+         (raw-plans (getf result :raw-plans))
+         (plan (first (getf result :shorter-plans)))
+         (expected-plan
+           '((dreyeck/shop3::!delete-legacy-shop3-copy
+              "hyperdoc-shop3/package.lisp")
+             (dreyeck/shop3::!delete-legacy-shop3-copy
+              "hyperdoc-shop3/manual-topics.lisp")
+             (dreyeck/shop3::!delete-legacy-shop3-copy
+              "hyperdoc-shop3/plan-objects.lisp")
+             (dreyeck/shop3::!delete-legacy-shop3-copy
+              "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp")
+             (dreyeck/shop3::!delete-legacy-shop3-copy
+              "hyperdoc-shop3/examples.lisp")
+             (dreyeck/shop3::!delete-legacy-shop3-copy
+              "hyperdoc-shop3/views.lisp")
+             (dreyeck/shop3::!write-shop3-reference-boundary-checker
+              "tools/check-shop3-reference-boundary.lisp")
+             (dreyeck/shop3::!write-shop3-reference-boundary-fixture
+              :allowed
+              "tools/testdata/shop3-reference-boundary/allowed-added-lines.diff")
+             (dreyeck/shop3::!write-shop3-reference-boundary-fixture
+              :rejected
+              "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff")
+             (dreyeck/shop3::!wire-shop3-reference-boundary-checker
+              "tools/pre-commit-gate.sh")
+             (dreyeck/shop3::!run-shop3-reference-boundary-fixtures)
+             (dreyeck/shop3::!run-direct-shop3-load-and-gap-canary)
+             (dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary)
+             (dreyeck/shop3::!run-dual-load-identity-canary)
+             (dreyeck/shop3::!run-shop3-provider-boundary-tests)
+             (dreyeck/shop3::!run-repository-load-gate)
+             (dreyeck/shop3::!write-commit-3-execution-evidence
+              "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp")
+             (dreyeck/shop3::!record-commit-3-execution-complete)))
+         (final-state (first (getf result :final-states)))
+         (required-final-atoms
+           '((dreyeck/shop3::commit-3-execution-planned)
+             (dreyeck/shop3::shop3-reference-boundary-checker-written
+              "tools/check-shop3-reference-boundary.lisp")
+             (dreyeck/shop3::shop3-reference-boundary-checker-wired
+              "tools/pre-commit-gate.sh")
+             (dreyeck/shop3::allowed-lint-fixture-passed)
+             (dreyeck/shop3::rejected-lint-fixture-rejected)
+             (dreyeck/shop3::direct-shop3-canary-passed)
+             (dreyeck/shop3::compatibility-shop3-canary-passed)
+             (dreyeck/shop3::dual-load-identity-canary-passed)
+             (dreyeck/shop3::provider-boundary-tests-passed)
+             (dreyeck/shop3::repository-load-gate-passed)
+             (dreyeck/shop3::commit-3-execution-evidence-written
+              "hyperdoc/evidence/refactor-hyperdoc-eighth-extraction-commit-3-execution.sexp")
+             (dreyeck/shop3::next-task
+              dreyeck/shop3::review-eighth-dreyeck-extraction-commit-3)
+             (dreyeck/shop3::canonical-shop3-direct-component-count 6)
+             (dreyeck/shop3::compatibility-shop3-direct-component-count 0)
+             (dreyeck/shop3::compatibility-shop3-depends-on
+              dreyeck/shop3::dreyeck/shop3)
+             (dreyeck/shop3::primary-shop3-package
+              dreyeck/shop3::dreyeck/shop3)
+             (dreyeck/shop3::legacy-shop3-package-nickname
+              dreyeck/shop3::hyperdoc/shop3)
+             (dreyeck/shop3::provider-boundary-files-preserved)
+             (dreyeck/shop3::documentation-workflows-preserved)
+             (dreyeck/shop3::projection-repair-deferred))))
+    (commit-3-smoke-assert
+     (and raw-plans (= 1 (length raw-plans)))
+     "Live SHOP3 must return exactly one first execution plan.")
+    (commit-3-smoke-assert
+     (equal expected-plan plan)
+     "The execution problem must return the exact ordered primitive plan.")
+    (commit-3-smoke-assert
+     (= 18 (length plan))
+     "The shortened execution plan must contain eighteen actions.")
+    (commit-3-smoke-assert
+     (= 6 (count 'dreyeck/shop3::!delete-legacy-shop3-copy
+                 plan :key #'first :test #'eq))
+     "The execution plan must contain exactly six deletion actions.")
+    (commit-3-smoke-assert
+     (getf result :plan-trees)
+     "The execution problem result must contain a plan tree.")
+    (commit-3-smoke-assert
+     (getf result :final-states)
+     "The execution problem result must contain a final state.")
+    (dolist (atom required-final-atoms)
+      (commit-3-smoke-assert
+       (member atom final-state :test #'equal)
+       (format nil "The execution final state must contain ~S." atom)))
+    (dolist (path '("hyperdoc-shop3/package.lisp"
+                    "hyperdoc-shop3/manual-topics.lisp"
+                    "hyperdoc-shop3/plan-objects.lisp"
+                    "hyperdoc-shop3/hyperdoc-maintenance-domain.lisp"
+                    "hyperdoc-shop3/examples.lisp"
+                    "hyperdoc-shop3/views.lisp"))
+      (commit-3-smoke-assert
+       (member (list 'dreyeck/shop3::legacy-implementation-copy path)
+               final-state :test #'equal)
+       "Stable legacy-copy classification facts must remain in the final state.")
+      (commit-3-smoke-assert
+       (member (list 'dreyeck/shop3::legacy-copy-deletion-performed path)
+               final-state :test #'equal)
+       "Every selected legacy-copy deletion must be modeled as performed."))
+    (commit-3-smoke-assert
+     (null (getf result :heuristic-fallback))
+     "The execution runner must not expose a heuristic fallback.")
+    (commit-3-smoke-assert
+     (null (getf result :executor-invoked))
+     "Planning must not invoke the executor."))
+  (format t "~&Eighth extraction commit-3 SHOP3 execution problem smoke tests passed.~%")
+  t)
+
+(defun run-eighth-extraction-commit-3-localization-preparation-and-execution-smoke-tests ()
+  (run-eighth-extraction-commit-3-localization-smoke-tests)
+  (run-eighth-extraction-commit-3-preparation-smoke-tests)
+  (run-eighth-extraction-commit-3-execution-problem-smoke-tests))
