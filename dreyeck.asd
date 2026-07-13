@@ -2,6 +2,26 @@
 ;;
 ;;;; Copyright (c) 2026
 
+(defsystem #:dreyeck/shop3
+    :description "SHOP3-backed HTN planning layer owned by Dreyeck"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/shop3-provider-boundary
+                 #:hyperdoc
+                 #:shop3)
+    :components
+    ((:module "dreyeck/shop3"
+      :serial t
+      :components
+      ((:file "package")
+       (:file "manual-topics")
+       (:file "plan-objects")
+       (:file "hyperdoc-maintenance-domain")
+       (:file "examples")
+       (:file "views")))))
+
 (defsystem #:dreyeck/server
     :description "Minimal downstream dreyeck server scaffold"
     :author "Codex"

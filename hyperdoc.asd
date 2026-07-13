@@ -301,24 +301,12 @@
                                         :run-shop3-provider-boundary-smoke-tests)))
 
 (defsystem #:hyperdoc/shop3
-    :description "SHOP3-backed HTN planning layer for HyperDoc operations"
+    :description "Compatibility system for the Dreyeck-owned SHOP3 planning layer"
     :author "Ralf Barkow <ralf.barkow@me.com>"
     :license "BSD"
     :version "0.0.1"
     :serial t
-    :depends-on (#:hyperdoc/shop3-provider-boundary
-                 #:hyperdoc
-                 #:shop3)
-    :components
-    ((:module "hyperdoc-shop3"
-      :serial t
-      :components
-      ((:file "package")
-       (:file "manual-topics")
-       (:file "plan-objects")
-       (:file "hyperdoc-maintenance-domain")
-       (:file "examples")
-       (:file "views")))))
+    :depends-on (#:dreyeck/shop3))
 
 (defsystem #:hyperdoc/scxml
     :description "SCXML parser and ANSI Common Lisp code generator for HyperDoc"
