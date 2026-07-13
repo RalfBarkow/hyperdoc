@@ -22,6 +22,41 @@
        (:file "examples")
        (:file "views")))))
 
+(defsystem #:dreyeck/shop3/extraction-planning
+  :description "Live SHOP3 problem for the eighth extraction commit-3 localization."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :depends-on (#:dreyeck/shop3)
+  :components
+  ((:module "dreyeck/shop3"
+    :serial t
+    :components
+    ((:file "extraction-planning/domain")
+     (:file "extraction-planning/problem")
+     (:file "extraction-planning/runner")))))
+
+(defsystem #:dreyeck/shop3/extraction-planning/tests
+  :description "Runtime smoke test for the live commit-3 localization problem."
+  :author "Ralf Barkow"
+  :license "BSD"
+  :version "0.1.0"
+  :serial t
+  :depends-on (#:dreyeck/shop3/extraction-planning
+               #:fiveam-asdf)
+  :components
+  ((:module "dreyeck/shop3/extraction-planning/tests"
+    :serial t
+    :components
+    ((:file "package")
+     (:file "smoke"))))
+  :perform (asdf:test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call
+              :dreyeck/shop3/extraction-planning/tests
+              :run-eighth-extraction-commit-3-localization-smoke-tests)))
+
 (defsystem #:dreyeck/server
     :description "Minimal downstream dreyeck server scaffold"
     :author "Codex"
