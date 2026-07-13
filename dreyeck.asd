@@ -39,7 +39,9 @@
      (:file "extraction-planning/preparation-problem")
      (:file "extraction-planning/execution-domain")
      (:file "extraction-planning/execution-problem")
-     (:file "extraction-planning/runner")))))
+     (:file "extraction-planning/runner")
+     (:file "extraction-planning/executor-package")
+     (:file "extraction-planning/executor")))))
 
 (defsystem #:dreyeck/shop3/extraction-planning/tests
   :description "Runtime smoke tests for the live commit-3 localization, preparation, and execution problems."
@@ -48,18 +50,20 @@
   :version "0.1.0"
   :serial t
   :depends-on (#:dreyeck/shop3/extraction-planning
+               #:hyperdoc/shop3-provider-boundary/tests
                #:fiveam-asdf)
   :components
   ((:module "dreyeck/shop3/extraction-planning/tests"
     :serial t
     :components
     ((:file "package")
-     (:file "smoke"))))
+     (:file "smoke")
+     (:file "executor-smoke"))))
   :perform (asdf:test-op (operation component)
              (declare (ignore operation component))
              (uiop:symbol-call
               :dreyeck/shop3/extraction-planning/tests
-              :run-eighth-extraction-commit-3-localization-preparation-and-execution-smoke-tests)))
+              :run-eighth-extraction-commit-3-planning-and-executor-smoke-tests)))
 
 (defsystem #:dreyeck/server
     :description "Minimal downstream dreyeck server scaffold"
