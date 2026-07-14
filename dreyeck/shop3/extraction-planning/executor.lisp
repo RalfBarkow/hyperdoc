@@ -32,6 +32,32 @@
   repository-root
   registry)
 
+(defstruct (commit-3-execution-context
+             (:constructor %make-commit-3-execution-context))
+  executor
+  repository-root
+  expected-head
+  expected-branch
+  provenance-commit
+  canonical-plan
+  canonical-plan-fingerprint
+  authorization-object
+  creation-report)
+
+(defparameter +commit-3-provenance-commit+
+  "6265f68e1c6cd27c74773a7589819bad0f75f06b")
+
+(defparameter +commit-3-provenance-subject+
+  "fix(shop3): preserve HyperDoc package identity")
+
+(defparameter +commit-3-provenance-path+
+  "dreyeck/shop3/package.lisp")
+
+(defparameter *commit-3-private-authorization-object*
+  (cons :perform-eighth-dreyeck-extraction-commit-3 (gensym "AUTHORIZATION-")))
+
+(defvar *commit-3-dynamic-execution-authority* nil)
+
 (defvar *execution-correlation-counter* 0)
 
 (defun %next-correlation-id ()
@@ -383,6 +409,430 @@ Returns the normalized plan, a structured failure, and the observed input shape.
        (values nil (%failure :unsupported-plan-representation :value plan)
                (list :representation :unknown :input-length length))))))
 
+(defun %canonical-directory (directory)
+  (handler-case
+      (values (uiop:ensure-directory-pathname (truename directory)) nil)
+    (error (condition)
+      (values nil (%failure :repository-root-unavailable
+                            :repository-root directory
+                            :message (princ-to-string condition))))))
+
+(defun %full-commit-id-p (value)
+  (and (stringp value)
+       (= 40 (length value))
+       (every (lambda (character) (digit-char-p character 16)) value)))
+
+(defun %readable-plan-string (canonical-plan)
+  (with-standard-io-syntax
+    (let ((*package* (find-package :keyword))
+          (*print-pretty* nil)
+          (*print-readably* t))
+      (write-to-string canonical-plan))))
+
+(defun %sha-256-hex (string)
+  (handler-case
+      (multiple-value-bind (output error-output exit-code)
+          (uiop:run-program
+           '("shasum" "-a" "256")
+           :input (make-string-input-stream string)
+           :output :string
+           :error-output :string
+           :ignore-error-status t)
+        (if (zerop exit-code)
+            (let ((separator (position #\Space output)))
+              (if (and separator (= separator 64))
+                  (values (subseq output 0 separator) nil)
+                  (values nil (%failure :sha-256-invalid-output
+                                        :output output))))
+            (values nil (%failure :sha-256-unavailable
+                                  :exit-code exit-code
+                                  :error-output error-output))))
+    (error (condition)
+      (values nil (%failure :sha-256-unavailable
+                            :message (princ-to-string condition))))))
+
+(defun %canonical-plan-fingerprint (canonical-plan)
+  (%sha-256-hex (%readable-plan-string canonical-plan)))
+
+(defun %git-command (repository-root &rest arguments)
+  (handler-case
+      (multiple-value-bind (output error-output exit-code)
+          (uiop:run-program
+           (cons "git" arguments)
+           :directory repository-root
+           :output :string
+           :error-output :string
+           :ignore-error-status t)
+        (values (string-right-trim '(#\Newline #\Return) output)
+                (string-right-trim '(#\Newline #\Return) error-output)
+                exit-code))
+    (error (condition)
+      (values "" (princ-to-string condition) 127))))
+
+(defun %nonempty-lines (string)
+  (remove-if (lambda (line) (zerop (length line)))
+             (uiop:split-string string :separator '(#\Newline #\Return))))
+
+(defun %repository-observation (repository-root)
+  (multiple-value-bind (inside inside-error inside-code)
+      (%git-command repository-root "rev-parse" "--is-inside-work-tree")
+    (declare (ignore inside-error))
+    (multiple-value-bind (top-level top-level-error top-level-code)
+        (%git-command repository-root "rev-parse" "--show-toplevel")
+      (declare (ignore top-level-error))
+      (multiple-value-bind (head head-error head-code)
+          (%git-command repository-root "rev-parse" "HEAD")
+        (declare (ignore head-error))
+        (multiple-value-bind (branch branch-error branch-code)
+            (%git-command repository-root "branch" "--show-current")
+          (declare (ignore branch-error))
+          (multiple-value-bind (status status-error status-code)
+              (%git-command repository-root "status" "--porcelain=v2"
+                            "--untracked-files=all")
+            (declare (ignore status-error))
+            (multiple-value-bind (conflicts conflicts-error conflicts-code)
+                (%git-command repository-root "diff" "--name-only"
+                              "--diff-filter=U")
+              (declare (ignore conflicts-error))
+              (multiple-value-bind (merge merge-error merge-code)
+                  (%git-command repository-root "rev-parse" "--verify" "-q"
+                                "MERGE_HEAD")
+                (declare (ignore merge merge-error))
+                (multiple-value-bind (rebase-merge rebase-merge-error
+                                      rebase-merge-code)
+                    (%git-command repository-root "rev-parse" "--git-path"
+                                  "rebase-merge")
+                  (declare (ignore rebase-merge-error))
+                  (multiple-value-bind (rebase-apply rebase-apply-error
+                                        rebase-apply-code)
+                      (%git-command repository-root "rev-parse" "--git-path"
+                                    "rebase-apply")
+                    (declare (ignore rebase-apply-error))
+                    (multiple-value-bind (cherry cherry-error cherry-code)
+                        (%git-command repository-root "rev-parse" "--verify" "-q"
+                                      "CHERRY_PICK_HEAD")
+                      (declare (ignore cherry cherry-error))
+                      (multiple-value-bind (revert revert-error revert-code)
+                          (%git-command repository-root "rev-parse" "--verify" "-q"
+                                        "REVERT_HEAD")
+                        (declare (ignore revert revert-error))
+                        (let* ((root
+                                 (and (zerop top-level-code)
+                                      (ignore-errors
+                                        (uiop:ensure-directory-pathname
+                                         (truename top-level)))))
+                               (rebase-merge-path
+                                 (and (zerop rebase-merge-code)
+                                      (merge-pathnames rebase-merge
+                                                       repository-root)))
+                               (rebase-apply-path
+                                 (and (zerop rebase-apply-code)
+                                      (merge-pathnames rebase-apply
+                                                       repository-root)))
+                               (operation-clean-p
+                                 (and (not (zerop merge-code))
+                                      (not (zerop cherry-code))
+                                      (not (zerop revert-code))
+                                      (or (null rebase-merge-path)
+                                          (not (probe-file rebase-merge-path)))
+                                      (or (null rebase-apply-path)
+                                          (not (probe-file rebase-apply-path)))
+                                      (zerop conflicts-code)
+                                      (zerop (length conflicts)))))
+                          (list
+                           :inside-work-tree-p
+                           (and (zerop inside-code) (string= inside "true"))
+                           :repository-root root
+                           :observed-head (and (zerop head-code) head)
+                           :observed-branch (and (zerop branch-code) branch)
+                           :worktree-clean-p
+                           (and (zerop status-code) (zerop (length status)))
+                           :repository-status status
+                           :conflicted-paths (%nonempty-lines conflicts)
+                           :merge-in-progress-p (zerop merge-code)
+                           :rebase-in-progress-p
+                           (or (and rebase-merge-path
+                                    (not (null (probe-file rebase-merge-path))))
+                               (and rebase-apply-path
+                                    (not (null (probe-file rebase-apply-path)))))
+                           :cherry-pick-in-progress-p (zerop cherry-code)
+                           :revert-in-progress-p (zerop revert-code)
+                           :repository-operation-state-clean-p
+                           operation-clean-p))))))))))))))
+
+(defun %repository-observation-failure
+    (observation expected-root expected-head expected-branch)
+  (cond
+    ((not (getf observation :inside-work-tree-p))
+     (%failure :execution-context-not-git-repository))
+    ((not (equal (getf observation :repository-root) expected-root))
+     (%failure :execution-context-repository-root-mismatch
+               :expected expected-root
+               :observed (getf observation :repository-root)))
+    ((not (string= (or (getf observation :observed-head) "") expected-head))
+     (%failure :execution-context-head-mismatch
+               :expected expected-head
+               :observed (getf observation :observed-head)))
+    ((not (string= (or (getf observation :observed-branch) "")
+                   expected-branch))
+     (%failure :execution-context-branch-mismatch
+               :expected expected-branch
+               :observed (getf observation :observed-branch)))
+    ((not (getf observation :repository-operation-state-clean-p))
+     (%failure :execution-context-repository-operation-in-progress
+               :merge-in-progress-p
+               (getf observation :merge-in-progress-p)
+               :rebase-in-progress-p
+               (getf observation :rebase-in-progress-p)
+               :cherry-pick-in-progress-p
+               (getf observation :cherry-pick-in-progress-p)
+               :revert-in-progress-p
+               (getf observation :revert-in-progress-p)
+               :conflicted-paths (getf observation :conflicted-paths)))
+    ((not (getf observation :worktree-clean-p))
+     (%failure :execution-context-worktree-dirty
+               :status (getf observation :repository-status)))
+    (t nil)))
+
+(defun %provenance-observation (repository-root provenance-commit)
+  (multiple-value-bind (exists-output exists-error exists-code)
+      (%git-command repository-root "cat-file" "-e"
+                    (format nil "~A^{commit}" provenance-commit))
+    (declare (ignore exists-output exists-error))
+    (let ((exists-p (zerop exists-code)))
+      (multiple-value-bind (reachable-output reachable-error reachable-code)
+          (%git-command repository-root "merge-base" "--is-ancestor"
+                        provenance-commit "HEAD")
+        (declare (ignore reachable-output reachable-error))
+        (multiple-value-bind (subject subject-error subject-code)
+            (%git-command repository-root "log" "-1" "--pretty=%s"
+                          provenance-commit)
+          (declare (ignore subject-error))
+          (multiple-value-bind (paths paths-error paths-code)
+              (%git-command repository-root "diff-tree" "--no-commit-id"
+                            "--name-only" "-r" provenance-commit)
+            (declare (ignore paths-error))
+            (let ((paths-list (if (zerop paths-code)
+                                  (%nonempty-lines paths)
+                                  nil)))
+              (list
+               :provenance-commit provenance-commit
+               :provenance-exists-p exists-p
+               :provenance-reachable-p
+               (and exists-p (zerop reachable-code))
+               :provenance-subject subject
+               :provenance-subject-match-p
+               (and (zerop subject-code)
+                    (string= subject +commit-3-provenance-subject+))
+               :provenance-paths paths-list
+               :provenance-paths-match-p
+               (equal paths-list (list +commit-3-provenance-path+))))))))))
+
+(defun %provenance-observation-failure (observation)
+  (cond
+    ((not (getf observation :provenance-exists-p))
+     (%failure :execution-context-provenance-missing
+               :commit (getf observation :provenance-commit)))
+    ((not (getf observation :provenance-reachable-p))
+     (%failure :execution-context-provenance-unreachable
+               :commit (getf observation :provenance-commit)))
+    ((not (getf observation :provenance-subject-match-p))
+     (%failure :execution-context-provenance-subject-mismatch
+               :expected +commit-3-provenance-subject+
+               :observed (getf observation :provenance-subject)))
+    ((not (getf observation :provenance-paths-match-p))
+     (%failure :execution-context-provenance-paths-mismatch
+               :expected (list +commit-3-provenance-path+)
+               :observed (getf observation :provenance-paths)))
+    (t nil)))
+
+(defun %context-construction-failure (type &rest details)
+  (list :status :failed
+        :authorization-purpose :perform-eighth-dreyeck-extraction-commit-3
+        :failure (apply #'%failure type details)))
+
+(defun make-commit-3-execution-context
+    (executor plan repository-root expected-head expected-branch
+     provenance-commit)
+  "Create an opaque, repository-bound authorization context for commit 3."
+  (unless (plan-executor-p executor)
+    (return-from make-commit-3-execution-context
+      (values nil (%context-construction-failure
+                   :execution-context-invalid-executor))))
+  (multiple-value-bind (root root-failure)
+      (%canonical-directory repository-root)
+    (when root-failure
+      (return-from make-commit-3-execution-context
+        (values nil (list :status :failed
+                          :authorization-purpose
+                          :perform-eighth-dreyeck-extraction-commit-3
+                          :failure root-failure))))
+    (unless (equal root (plan-executor-repository-root executor))
+      (return-from make-commit-3-execution-context
+        (values nil (%context-construction-failure
+                     :execution-context-repository-root-mismatch
+                     :expected (plan-executor-repository-root executor)
+                     :observed root))))
+    (unless (and (stringp expected-branch)
+                 (string= expected-branch "hauptsache"))
+      (return-from make-commit-3-execution-context
+        (values nil (%context-construction-failure
+                     :execution-context-branch-mismatch
+                     :expected "hauptsache" :observed expected-branch))))
+    (unless (%full-commit-id-p expected-head)
+      (return-from make-commit-3-execution-context
+        (values nil (%context-construction-failure
+                     :execution-context-invalid-expected-head
+                     :expected-head expected-head))))
+    (unless (and (stringp provenance-commit)
+                 (string= provenance-commit +commit-3-provenance-commit+))
+      (return-from make-commit-3-execution-context
+        (values nil (%context-construction-failure
+                     :execution-context-provenance-commit-mismatch
+                     :expected +commit-3-provenance-commit+
+                     :observed provenance-commit))))
+    (multiple-value-bind (canonical-plan plan-failure plan-shape)
+        (normalize-shop3-plan plan)
+      (declare (ignore plan-shape))
+      (when plan-failure
+        (return-from make-commit-3-execution-context
+          (values nil (list :status :failed
+                            :authorization-purpose
+                            :perform-eighth-dreyeck-extraction-commit-3
+                            :failure plan-failure))))
+      (let ((current-plan
+              (getf (commit-3-execution-plan) :normalized-plan)))
+        (unless (equal canonical-plan current-plan)
+          (return-from make-commit-3-execution-context
+            (values nil (%context-construction-failure
+                         :execution-context-plan-mismatch
+                         :expected-action-count (length current-plan)
+                         :observed-action-count (length canonical-plan))))))
+      (multiple-value-bind (fingerprint fingerprint-failure)
+          (%canonical-plan-fingerprint canonical-plan)
+        (when fingerprint-failure
+          (return-from make-commit-3-execution-context
+            (values nil (list :status :failed
+                              :authorization-purpose
+                              :perform-eighth-dreyeck-extraction-commit-3
+                              :failure fingerprint-failure))))
+        (let* ((repository-observation (%repository-observation root))
+               (repository-failure
+                 (%repository-observation-failure
+                  repository-observation root expected-head expected-branch)))
+          (when repository-failure
+            (return-from make-commit-3-execution-context
+              (values nil (list :status :failed
+                                :authorization-purpose
+                                :perform-eighth-dreyeck-extraction-commit-3
+                                :failure repository-failure
+                                :repository-observation
+                                repository-observation))))
+          (let* ((provenance-observation
+                   (%provenance-observation root provenance-commit))
+                 (provenance-failure
+                   (%provenance-observation-failure provenance-observation)))
+            (when provenance-failure
+              (return-from make-commit-3-execution-context
+                (values nil (list :status :failed
+                                  :authorization-purpose
+                                  :perform-eighth-dreyeck-extraction-commit-3
+                                  :failure provenance-failure
+                                  :repository-observation
+                                  repository-observation
+                                  :provenance-observation
+                                  provenance-observation))))
+            (let ((creation-report
+                    (list :status :created
+                          :authorization-purpose
+                          :perform-eighth-dreyeck-extraction-commit-3
+                          :repository-root root
+                          :expected-head expected-head
+                          :expected-branch expected-branch
+                          :canonical-plan-action-count
+                          (length canonical-plan)
+                          :canonical-plan-fingerprint fingerprint
+                          :repository-observation repository-observation
+                          :provenance-observation provenance-observation)))
+              (values
+               (%make-commit-3-execution-context
+                :executor executor
+                :repository-root root
+                :expected-head expected-head
+                :expected-branch expected-branch
+                :provenance-commit provenance-commit
+                :canonical-plan canonical-plan
+                :canonical-plan-fingerprint fingerprint
+                :authorization-object *commit-3-private-authorization-object*
+                :creation-report creation-report)
+               nil))))))))
+
+(defun commit-3-execution-context-report (execution-context)
+  "Return a sanitized report without exposing the private capability object."
+  (if (commit-3-execution-context-p execution-context)
+      (list :status :available
+            :authorization-purpose
+            :perform-eighth-dreyeck-extraction-commit-3
+            :repository-root
+            (commit-3-execution-context-repository-root execution-context)
+            :expected-head
+            (commit-3-execution-context-expected-head execution-context)
+            :expected-branch
+            (commit-3-execution-context-expected-branch execution-context)
+            :provenance-commit
+            (commit-3-execution-context-provenance-commit execution-context)
+            :canonical-plan-action-count
+            (length
+             (commit-3-execution-context-canonical-plan execution-context))
+            :canonical-plan-fingerprint
+            (commit-3-execution-context-canonical-plan-fingerprint
+             execution-context)
+            :creation-report
+            (copy-tree
+             (commit-3-execution-context-creation-report execution-context)))
+      (list :status :failed
+            :authorization-purpose
+            :perform-eighth-dreyeck-extraction-commit-3
+            :failure (%failure :execution-context-wrong-type))))
+
+(defun %make-private-test-execution-context
+    (executor plan repository-root expected-head expected-branch
+     provenance-commit)
+  "Construct a fixture-bound context for tests without exporting a bypass."
+  (multiple-value-bind (canonical-plan failure shape)
+      (normalize-shop3-plan plan)
+    (declare (ignore shape))
+    (when failure
+      (error "Cannot construct private test context: ~S" failure))
+    (multiple-value-bind (fingerprint fingerprint-failure)
+        (%canonical-plan-fingerprint canonical-plan)
+      (when fingerprint-failure
+        (error "Cannot fingerprint private test context: ~S"
+               fingerprint-failure))
+      (multiple-value-bind (root root-failure)
+          (%canonical-directory repository-root)
+        (when root-failure
+          (error "Cannot resolve private test repository: ~S" root-failure))
+        (%make-commit-3-execution-context
+         :executor executor
+         :repository-root root
+         :expected-head expected-head
+         :expected-branch expected-branch
+         :provenance-commit provenance-commit
+         :canonical-plan canonical-plan
+         :canonical-plan-fingerprint fingerprint
+         :authorization-object *commit-3-private-authorization-object*
+         :creation-report
+         (list :status :private-test-context
+               :authorization-purpose
+               :perform-eighth-dreyeck-extraction-commit-3
+               :repository-root root
+               :expected-head expected-head
+               :expected-branch expected-branch
+               :provenance-commit provenance-commit
+               :canonical-plan-action-count (length canonical-plan)
+               :canonical-plan-fingerprint fingerprint))))))
+
 (defun commit-3-execution-plan ()
   "Run the accepted live SHOP3 problem and expose its related plan projections."
   (let* ((planner-result
@@ -467,6 +917,21 @@ Returns the normalized plan, a structured failure, and the observed input shape.
           (list :action-result result
                 :events (list (%event :action-failed position correlation-id
                                       action result))))))
+    (when (and (eq mode :execute)
+               (not (eq *commit-3-dynamic-execution-authority*
+                        *commit-3-private-authorization-object*)))
+      (let* ((condition
+               (%failure :execute-plan-required
+                         :handler-invoked-p nil
+                         :action-started-event-count 0))
+             (result (%action-result position action mode :failed nil nil
+                                    nil nil condition)))
+        (return-from execute-plan-action
+          (list :action-result result
+                :handler-invoked-p nil
+                :action-started-event-count 0
+                :events (list (%event :action-failed position correlation-id
+                                      action result))))))
     (multiple-value-bind (spec validation failure)
         (%validate-action executor action)
       (when failure
@@ -549,10 +1014,321 @@ Returns the normalized plan, a structured failure, and the observed input shape.
 (defun %result-failed-p (result)
   (member (getf result :status) '(:failed :rejected) :test #'eq))
 
+(defun %gate-steps ()
+  (mapcar (lambda (entry)
+            (list :step-number (first entry)
+                  :name (second entry)
+                  :status :not-reached
+                  :failure-type nil))
+          '((1 :normalize-plan)
+            (2 :validate-all-actions)
+            (3 :require-execute-handler-for-every-action)
+            (4 :validate-context-type)
+            (5 :validate-executor-identity)
+            (6 :validate-authorization-object)
+            (7 :validate-canonical-plan-match)
+            (8 :reobserve-repository-state)
+            (9 :verify-provenance-integrity)
+            (10 :bind-private-dynamic-execution-authority)
+            (11 :invoke-first-handler))))
+
+(defun %mark-gate-step (gate-steps step-number status &optional failure-type)
+  (let ((step (find step-number gate-steps
+                    :key (lambda (entry) (getf entry :step-number)))))
+    (setf (getf step :status) status
+          (getf step :failure-type) failure-type))
+  gate-steps)
+
+(defun %registry-readiness (executor)
+  (if (plan-executor-p executor)
+      (let* ((registry (plan-executor-registry executor))
+             (implemented
+               (count-if #'operator-specification-execute-handler registry)))
+        (values (length registry) implemented (- (length registry) implemented)))
+      (values 0 0 0)))
+
+(defun %base-armed-report (executor correlation-id)
+  (multiple-value-bind (registered implemented missing)
+      (%registry-readiness executor)
+    (list :mode :execute
+          :status :pending
+          :failure nil
+          :failure-type nil
+          :execution-authorized-p nil
+          :executor-identity-match-p nil
+          :repository-root nil
+          :observed-head nil
+          :observed-branch nil
+          :worktree-clean-p nil
+          :repository-operation-state-clean-p nil
+          :provenance-commit nil
+          :provenance-exists-p nil
+          :provenance-reachable-p nil
+          :provenance-subject-match-p nil
+          :provenance-paths-match-p nil
+          :canonical-plan-action-count 0
+          :canonical-plan-fingerprint nil
+          :canonical-plan-match-p nil
+          :registered-operator-count registered
+          :implemented-handler-count implemented
+          :missing-handler-count missing
+          :missing-action-indexes nil
+          :missing-operators nil
+          :plan-valid-p nil
+          :actions nil
+          :planned-action-count 0
+          :executed-action-count 0
+          :mutations-performed nil
+          :handler-invoked-p nil
+          :action-started-event-count 0
+          :stopped-p t
+          :events (list (%event :plan-started nil correlation-id nil))
+          :gate-steps (%gate-steps))))
+
+(defun %finish-armed-failure (report correlation-id step-number failure)
+  (%mark-gate-step (getf report :gate-steps) step-number :failed
+                   (getf failure :type))
+  (setf (getf report :status) :failed
+        (getf report :failure) failure
+        (getf report :failure-type) (getf failure :type)
+        (getf report :stopped-p) t
+        (getf report :events)
+        (nconc (getf report :events)
+               (list (%event :plan-stopped nil correlation-id nil failure))))
+  (list :plan-result report))
+
+(defun %validate-all-actions (executor actions)
+  (unless (plan-executor-p executor)
+    (return-from %validate-all-actions
+      (values nil nil (%failure :invalid-executor))))
+  (let ((specifications nil)
+        (validations nil))
+    (loop for action in actions
+          for position from 1
+          do (multiple-value-bind (spec validation failure)
+                 (%validate-action executor action)
+               (when failure
+                 (return-from %validate-all-actions
+                   (values nil nil
+                           (append failure (list :action-index position)))))
+               (push spec specifications)
+               (push validation validations)))
+    (values (nreverse specifications) (nreverse validations) nil)))
+
+(defun %missing-handler-data (actions specifications)
+  (let ((indexes nil)
+        (operators nil))
+    (loop for action in actions
+          for specification in specifications
+          for position from 1
+          unless (operator-specification-execute-handler specification)
+            do (push position indexes)
+               (pushnew (first action) operators :test #'eq))
+    (values (nreverse indexes) (nreverse operators))))
+
+(defun %result-mutating-p (executor result)
+  (and (eq :succeeded (getf result :status))
+       (let ((specification
+               (find (first (getf result :action))
+                     (plan-executor-registry executor)
+                     :key #'operator-specification-operator
+                     :test #'eq)))
+         (not (eq :non-mutating-validation
+                  (operator-specification-mutation-class specification))))))
+
+(defun execute-plan-armed (executor plan execution-context)
+  "Execute PLAN only after the complete, ordered commit-3 arming gate passes."
+  (let* ((correlation-id (%next-correlation-id))
+         (report (%base-armed-report executor correlation-id))
+         (actions nil)
+         (specifications nil))
+    (multiple-value-bind (normalized normalization-failure observed-shape)
+        (normalize-shop3-plan plan)
+      (declare (ignore observed-shape))
+      (when normalization-failure
+        (return-from execute-plan-armed
+          (%finish-armed-failure report correlation-id 1
+                                 normalization-failure)))
+      (setf actions normalized
+            (getf report :canonical-plan-action-count) (length normalized))
+      (multiple-value-bind (fingerprint fingerprint-failure)
+          (%canonical-plan-fingerprint normalized)
+        (when fingerprint-failure
+          (return-from execute-plan-armed
+            (%finish-armed-failure report correlation-id 1
+                                   fingerprint-failure)))
+        (setf (getf report :canonical-plan-fingerprint) fingerprint))
+      (%mark-gate-step (getf report :gate-steps) 1 :passed))
+    (when (null actions)
+      (return-from execute-plan-armed
+        (%finish-armed-failure report correlation-id 2
+                               (%failure :empty-plan))))
+    (multiple-value-bind (validated-specifications validations action-failure)
+        (%validate-all-actions executor actions)
+      (declare (ignore validations))
+      (when action-failure
+        (return-from execute-plan-armed
+          (%finish-armed-failure report correlation-id 2 action-failure)))
+      (setf specifications validated-specifications
+            (getf report :plan-valid-p) t)
+      (%mark-gate-step (getf report :gate-steps) 2 :passed))
+    (multiple-value-bind (missing-indexes missing-operators)
+        (%missing-handler-data actions specifications)
+      (setf (getf report :missing-action-indexes) missing-indexes
+            (getf report :missing-operators) missing-operators
+            (getf report :missing-handler-count) (length missing-operators))
+      (when missing-operators
+        (return-from execute-plan-armed
+          (%finish-armed-failure
+           report correlation-id 3
+           (%failure :execute-handler-unavailable
+                     :missing-handler-count (length missing-operators)
+                     :missing-action-indexes missing-indexes
+                     :missing-operators missing-operators
+                     :registered-operator-count
+                     (getf report :registered-operator-count)
+                     :implemented-handler-count
+                     (getf report :implemented-handler-count)
+                     :execution-authorized-p nil
+                     :handler-invoked-p nil
+                     :executed-action-count 0
+                     :mutations-performed nil
+                     :action-started-event-count 0))))
+      (%mark-gate-step (getf report :gate-steps) 3 :passed))
+    (unless (commit-3-execution-context-p execution-context)
+      (return-from execute-plan-armed
+        (%finish-armed-failure
+         report correlation-id 4
+         (%failure :execution-context-wrong-type))))
+    (%mark-gate-step (getf report :gate-steps) 4 :passed)
+    (let ((identity-match-p
+            (eq executor
+                (commit-3-execution-context-executor execution-context))))
+      (setf (getf report :executor-identity-match-p) identity-match-p)
+      (unless identity-match-p
+        (return-from execute-plan-armed
+          (%finish-armed-failure
+           report correlation-id 5
+           (%failure :execution-context-executor-mismatch))))
+      (%mark-gate-step (getf report :gate-steps) 5 :passed))
+    (unless (eq (commit-3-execution-context-authorization-object
+                 execution-context)
+                *commit-3-private-authorization-object*)
+      (return-from execute-plan-armed
+        (%finish-armed-failure
+         report correlation-id 6
+         (%failure :execution-context-authorization-mismatch))))
+    (%mark-gate-step (getf report :gate-steps) 6 :passed)
+    (let ((plan-match-p
+            (equal actions
+                   (commit-3-execution-context-canonical-plan
+                    execution-context))))
+      (setf (getf report :canonical-plan-match-p) plan-match-p)
+      (unless plan-match-p
+        (return-from execute-plan-armed
+          (%finish-armed-failure
+           report correlation-id 7
+           (%failure :execution-context-plan-mismatch
+                     :context-fingerprint
+                     (commit-3-execution-context-canonical-plan-fingerprint
+                      execution-context)
+                     :execution-fingerprint
+                     (getf report :canonical-plan-fingerprint)))))
+      (%mark-gate-step (getf report :gate-steps) 7 :passed))
+    (let* ((repository-root
+             (commit-3-execution-context-repository-root execution-context))
+           (observation (%repository-observation repository-root))
+           (failure
+             (%repository-observation-failure
+              observation repository-root
+              (commit-3-execution-context-expected-head execution-context)
+              (commit-3-execution-context-expected-branch execution-context))))
+      (setf (getf report :repository-root) repository-root
+            (getf report :observed-head) (getf observation :observed-head)
+            (getf report :observed-branch) (getf observation :observed-branch)
+            (getf report :worktree-clean-p)
+            (getf observation :worktree-clean-p)
+            (getf report :repository-operation-state-clean-p)
+            (getf observation :repository-operation-state-clean-p))
+      (when failure
+        (return-from execute-plan-armed
+          (%finish-armed-failure report correlation-id 8 failure)))
+      (%mark-gate-step (getf report :gate-steps) 8 :passed))
+    (let* ((provenance-commit
+             (commit-3-execution-context-provenance-commit execution-context))
+           (observation
+             (%provenance-observation
+              (commit-3-execution-context-repository-root execution-context)
+              provenance-commit))
+           (failure (%provenance-observation-failure observation)))
+      (setf (getf report :provenance-commit) provenance-commit
+            (getf report :provenance-exists-p)
+            (getf observation :provenance-exists-p)
+            (getf report :provenance-reachable-p)
+            (getf observation :provenance-reachable-p)
+            (getf report :provenance-subject-match-p)
+            (getf observation :provenance-subject-match-p)
+            (getf report :provenance-paths-match-p)
+            (getf observation :provenance-paths-match-p))
+      (when failure
+        (return-from execute-plan-armed
+          (%finish-armed-failure report correlation-id 9 failure)))
+      (%mark-gate-step (getf report :gate-steps) 9 :passed))
+    (let ((*commit-3-dynamic-execution-authority*
+            *commit-3-private-authorization-object*)
+          (events (getf report :events))
+          (results nil)
+          (failure nil)
+          (executed-count 0))
+      (setf (getf report :execution-authorized-p) t)
+      (%mark-gate-step (getf report :gate-steps) 10 :passed)
+      (loop for action in actions
+            for position from 1
+            until failure
+            do (let* ((response
+                        (execute-plan-action
+                         executor action :mode :execute :position position
+                         :context execution-context
+                         :correlation-id correlation-id))
+                      (result (getf response :action-result)))
+                 (setf events
+                       (nconc events (copy-list (getf response :events))))
+                 (push result results)
+                 (when (eq :succeeded (getf result :status))
+                   (incf executed-count))
+                 (when (%result-failed-p result)
+                   (setf failure (getf result :condition)))))
+      (setf results (nreverse results)
+            (getf report :actions) results
+            (getf report :planned-action-count) (length actions)
+            (getf report :executed-action-count) executed-count
+            (getf report :mutations-performed)
+            (some (lambda (result) (%result-mutating-p executor result)) results)
+            (getf report :handler-invoked-p)
+            (not (null
+                  (find :action-started events
+                        :key (lambda (event) (getf event :type)))))
+            (getf report :action-started-event-count)
+            (count :action-started events
+                   :key (lambda (event) (getf event :type)))
+            (getf report :events) events)
+      (if failure
+          (return-from execute-plan-armed
+            (%finish-armed-failure report correlation-id 11 failure))
+          (progn
+            (%mark-gate-step (getf report :gate-steps) 11 :passed)
+            (setf (getf report :status) :succeeded
+                  (getf report :stopped-p) nil
+                  (getf report :failure) nil
+                  (getf report :failure-type) nil
+                  (getf report :events)
+                  (nconc (getf report :events)
+                         (list (%event :plan-completed nil correlation-id nil))))
+            (list :plan-result report))))))
+
 (defun execute-plan (executor plan &key (mode :plan-only) context)
-  "Execute PLAN through normalization, preflight, closed dispatch, and handlers.
-PLAN-ONLY is the default and never invokes execute handlers. EXECUTE always
-preflights every action before invoking the first handler."
+  "Render PLAN in plan-only mode. Legacy execute mode is permanently closed."
+  (declare (ignorable context))
   (let ((correlation-id (%next-correlation-id)))
     (unless (member mode '(:plan-only :execute) :test #'eq)
       (let ((failure (%failure :invalid-execution-mode :mode mode)))
@@ -566,12 +1342,39 @@ preflights every action before invoking the first handler."
                       (list (%event :plan-started nil correlation-id nil)
                             (%event :plan-stopped nil correlation-id nil
                                     failure)))))))
+    (when (eq mode :execute)
+      (let ((failure
+              (%failure :armed-entry-point-required
+                        :execution-authorized-p nil
+                        :handler-invoked-p nil
+                        :executed-action-count 0
+                        :mutations-performed nil
+                        :action-started-event-count 0)))
+        (return-from execute-plan
+          (list :plan-result
+                (list :mode :execute
+                      :status :failed
+                      :failure-type :armed-entry-point-required
+                      :plan-valid-p nil
+                      :actions nil
+                      :planned-action-count 0
+                      :executed-action-count 0
+                      :mutations-performed nil
+                      :execution-authorized-p nil
+                      :handler-invoked-p nil
+                      :action-started-event-count 0
+                      :stopped-p t
+                      :failure failure
+                      :events
+                      (list (%event :plan-started nil correlation-id nil)
+                            (%event :plan-stopped nil correlation-id nil
+                                    failure)))))))
     (multiple-value-bind (actions normalization-failure shape)
         (normalize-shop3-plan plan)
       (when normalization-failure
         (return-from execute-plan
           (list :plan-result
-                (list :mode mode :plan-valid-p nil :plan-shape shape
+                (list :mode :plan-only :plan-valid-p nil :plan-shape shape
                       :actions nil :planned-action-count 0
                       :executed-action-count 0 :mutations-performed nil
                       :stopped-p t :failure normalization-failure
@@ -588,76 +1391,35 @@ preflights every action before invoking the first handler."
               do (let* ((response
                           (execute-plan-action
                            executor action :mode :plan-only :position position
-                           :context context :correlation-id correlation-id))
+                           :context nil :correlation-id correlation-id))
                         (result (getf response :action-result)))
-                   (setf events (nconc events (copy-list (getf response :events))))
+                   (setf events
+                         (nconc events (copy-list (getf response :events))))
                    (push result planned-results)
                    (when (%result-failed-p result)
                      (setf failure (getf result :condition)))))
         (setf planned-results (nreverse planned-results))
-        (when failure
-          (setf events
-                (nconc events
-                       (list (%event :plan-stopped nil correlation-id nil
-                                     failure))))
-          (return-from execute-plan
-            (list :plan-result
-                  (list :mode mode :plan-valid-p nil :plan-shape shape
-                        :actions planned-results
-                        :planned-action-count
-                        (count :planned planned-results
-                               :key (lambda (result) (getf result :status)))
-                        :executed-action-count 0 :mutations-performed nil
-                        :stopped-p t :failure failure :events events))))
-        (when (eq mode :plan-only)
-          (setf events
-                (nconc events
-                       (list (%event :plan-completed nil correlation-id nil))))
-          (return-from execute-plan
-            (list :plan-result
-                  (list :mode :plan-only :plan-valid-p t :plan-shape shape
-                        :actions planned-results
-                        :planned-action-count (length planned-results)
-                        :executed-action-count 0 :mutations-performed nil
-                        :stopped-p nil :failure nil :events events))))
-        (let ((executed-results nil)
-              (executed-count 0))
-          (loop for action in actions
-                for position from 1
-                until failure
-                do (let* ((response
-                            (execute-plan-action
-                             executor action :mode :execute :position position
-                             :context context :correlation-id correlation-id))
-                          (result (getf response :action-result)))
-                     (setf events
-                           (nconc events (copy-list (getf response :events))))
-                     (push result executed-results)
-                     (when (eq :succeeded (getf result :status))
-                       (incf executed-count))
-                     (when (%result-failed-p result)
-                       (setf failure (getf result :condition)))))
-          (setf executed-results (nreverse executed-results))
-          (setf events
-                (nconc events
-                       (list (%event (if failure :plan-stopped :plan-completed)
-                                     nil correlation-id nil failure))))
-          (list :plan-result
-                (list :mode :execute :plan-valid-p t :plan-shape shape
-                      :actions executed-results
-                      :planned-action-count (length planned-results)
-                      :executed-action-count executed-count
-                      :mutations-performed
-                      (some (lambda (result)
-                              (and (eq :succeeded (getf result :status))
-                                   (let ((spec
-                                           (find (first (getf result :action))
-                                                 (plan-executor-registry executor)
-                                                 :key #'operator-specification-operator
-                                                 :test #'eq)))
-                                     (not (eq :non-mutating-validation
-                                              (operator-specification-mutation-class
-                                               spec))))))
-                            executed-results)
-                      :stopped-p (not (null failure))
-                      :failure failure :events events)))))))
+        (if failure
+            (progn
+              (setf events
+                    (nconc events
+                           (list (%event :plan-stopped nil correlation-id nil
+                                         failure))))
+              (list :plan-result
+                    (list :mode :plan-only :plan-valid-p nil :plan-shape shape
+                          :actions planned-results
+                          :planned-action-count
+                          (count :planned planned-results
+                                 :key (lambda (result) (getf result :status)))
+                          :executed-action-count 0 :mutations-performed nil
+                          :stopped-p t :failure failure :events events)))
+            (progn
+              (setf events
+                    (nconc events
+                           (list (%event :plan-completed nil correlation-id nil))))
+              (list :plan-result
+                    (list :mode :plan-only :plan-valid-p t :plan-shape shape
+                          :actions planned-results
+                          :planned-action-count (length planned-results)
+                          :executed-action-count 0 :mutations-performed nil
+                          :stopped-p nil :failure nil :events events))))))))
