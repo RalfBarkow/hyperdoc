@@ -148,16 +148,14 @@
   '((dreyeck/shop3::!run-repository-load-gate)))
 
 (defun executor-test-validation-plan ()
-  '((dreyeck/shop3::!run-shop3-reference-boundary-fixtures)
-    (dreyeck/shop3::!run-direct-shop3-load-and-gap-canary)
+  '((dreyeck/shop3::!run-direct-shop3-load-and-gap-canary)
     (dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary)
     (dreyeck/shop3::!run-dual-load-identity-canary)
     (dreyeck/shop3::!run-shop3-provider-boundary-tests)
     (dreyeck/shop3::!run-repository-load-gate)))
 
 (defun executor-test-validation-operators ()
-  '(dreyeck/shop3::!run-shop3-reference-boundary-fixtures
-    dreyeck/shop3::!run-direct-shop3-load-and-gap-canary
+  '(dreyeck/shop3::!run-direct-shop3-load-and-gap-canary
     dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary
     dreyeck/shop3::!run-dual-load-identity-canary
     dreyeck/shop3::!run-shop3-provider-boundary-tests
@@ -485,8 +483,8 @@
              (dreyeck/shop3/executor:commit-3-non-mutating-validation-subplan))
            (validation-plan-2
              (dreyeck/shop3/executor:commit-3-non-mutating-validation-subplan)))
-      (commit-3-smoke-assert (= 6 (length validation-plan-1))
-                             "The public validation subplan must have six actions.")
+      (commit-3-smoke-assert (= 5 (length validation-plan-1))
+                             "The public validation subplan must have five actions.")
       (commit-3-smoke-assert
        (equal (executor-test-validation-plan) validation-plan-1)
        "The public validation subplan must preserve exact operator order.")
@@ -502,7 +500,38 @@
         (commit-3-smoke-assert (null failure)
                                "The validation subplan must normalize.")
         (commit-3-smoke-assert (equal validation-plan-1 normalized-validation)
-                               "Validation normalization must be idempotent.")))
+                               "Validation normalization must be idempotent."))
+      (commit-3-smoke-assert
+       (null (find 'dreyeck/shop3::!run-shop3-reference-boundary-fixtures
+                   validation-plan-1 :key #'first :test #'eq))
+       "The pre-mutation plan must defer reference-boundary fixture validation."))
+    (let* ((reference-position
+             (position 'dreyeck/shop3::!run-shop3-reference-boundary-fixtures
+                       normalized :key #'first :test #'eq))
+           (checker-position
+             (position 'dreyeck/shop3::!write-shop3-reference-boundary-checker
+                       normalized :key #'first :test #'eq))
+           (fixture-positions
+             (loop for action in normalized
+                   for position from 0
+                   when (eq (first action)
+                            'dreyeck/shop3::!write-shop3-reference-boundary-fixture)
+                     collect position))
+           (wire-position
+             (position 'dreyeck/shop3::!wire-shop3-reference-boundary-checker
+                       normalized :key #'first :test #'eq)))
+      (commit-3-smoke-assert
+       (integerp reference-position)
+       "The full execution plan must retain reference-boundary validation.")
+      (commit-3-smoke-assert
+       (and (integerp checker-position)
+            (integerp wire-position)
+            (= 2 (length fixture-positions))
+            (< checker-position reference-position)
+            (every (lambda (position) (< position reference-position))
+                   fixture-positions)
+            (< wire-position reference-position))
+       "The full plan must run reference-boundary validation only after its authoritative artifacts are materialized."))
     (dolist (public-name
              '("COMMIT-3-NON-MUTATING-VALIDATION-SUBPLAN"
                "MAKE-COMMIT-3-VALIDATION-EXECUTION-CONTEXT"))
@@ -548,9 +577,9 @@
             specification)
            validation-classes)))
       (commit-3-smoke-assert
-       (equal (make-list 6 :initial-element :non-mutating-validation)
+       (equal (make-list 5 :initial-element :non-mutating-validation)
               (nreverse validation-classes))
-       "All six validation operators must have the exact safe mutation class."))
+       "All five pre-mutation validation operators must have the exact safe mutation class."))
     (dolist (operator
              '(dreyeck/shop3::!delete-legacy-shop3-copy
                dreyeck/shop3::!write-shop3-reference-boundary-checker
@@ -708,10 +737,10 @@
               executor (executor-test-validation-plan) nil))
            (body (executor-test-result-body result)))
       (commit-3-smoke-assert (getf body :plan-valid-p)
-                             "The six-action validation subplan must be valid.")
+                             "The five-action validation subplan must be valid.")
       (commit-3-smoke-assert
-       (= 6 (getf body :canonical-plan-action-count))
-       "The validation subplan must contain six actions.")
+       (= 5 (getf body :canonical-plan-action-count))
+       "The validation subplan must contain five actions.")
       (commit-3-smoke-assert
        (zerop (getf body :missing-handler-count))
        "The validation subplan must have complete handler coverage.")
@@ -818,8 +847,8 @@
                  (getf report :authorization-purpose))
              "The validation report must expose the validation purpose.")
             (commit-3-smoke-assert
-             (= 6 (getf report :canonical-plan-action-count))
-             "The validation context must store the six-action plan.")
+             (= 5 (getf report :canonical-plan-action-count))
+             "The validation context must store the five-action plan.")
             (commit-3-smoke-assert
              (not (member
                    dreyeck/shop3/executor::*commit-3-validation-private-authorization-object*

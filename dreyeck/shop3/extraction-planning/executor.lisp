@@ -62,8 +62,7 @@
         (gensym "VALIDATION-AUTHORIZATION-")))
 
 (defparameter +commit-3-non-mutating-validation-subplan+
-  '((dreyeck/shop3::!run-shop3-reference-boundary-fixtures)
-    (dreyeck/shop3::!run-direct-shop3-load-and-gap-canary)
+  '((dreyeck/shop3::!run-direct-shop3-load-and-gap-canary)
     (dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary)
     (dreyeck/shop3::!run-dual-load-identity-canary)
     (dreyeck/shop3::!run-shop3-provider-boundary-tests)
