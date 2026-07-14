@@ -2,8 +2,8 @@
 ;;
 ;;;; Copyright (c) 2026
 
-(defpackage #:dreyeck/shop3
-  (:nicknames #:hyperdoc/shop3)
+(defpackage #:hyperdoc/shop3
+  (:nicknames #:dreyeck/shop3)
   (:use #:common-lisp
         #:shop3)
   (:import-from #:hyperdoc/shop3-provider
