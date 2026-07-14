@@ -16,6 +16,9 @@
     (or (getf body :failure-type)
         (getf (getf body :failure) :type))))
 
+(defun executor-test-context-construction-failure-type (failure)
+  (getf (getf failure :failure) :type))
+
 (defun executor-test-file-string (pathname)
   (with-open-file (stream pathname :direction :input)
     (let ((contents (make-string (file-length stream))))
@@ -78,9 +81,65 @@
                                    :validate t
                                    :if-does-not-exist :ignore))))
 
-(defun executor-test-context (executor plan root head provenance)
+(defun make-validation-context-test-repository ()
+  (let ((root
+          (uiop:ensure-directory-pathname
+           (merge-pathnames
+            (format nil "shop3-validation-context-~D-~D/"
+                    (get-universal-time) (random 1000000))
+            (uiop:temporary-directory)))))
+    (executor-test-git (uiop:temporary-directory)
+                       "clone" "--no-local" "--quiet"
+                       "/Users/rgb/workspace/hyperdoc" (namestring root))
+    (list :root root
+          :head (executor-test-git root "rev-parse" "HEAD")
+          :provenance
+          "6265f68e1c6cd27c74773a7589819bad0f75f06b")))
+
+(defmacro with-validation-context-test-repository
+    ((root head provenance) &body body)
+  `(let* ((fixture (make-validation-context-test-repository))
+          (,root (getf fixture :root))
+          (,head (getf fixture :head))
+          (,provenance (getf fixture :provenance)))
+     (unwind-protect
+          (locally ,@body)
+       (uiop:delete-directory-tree ,root
+                                   :validate t
+                                   :if-does-not-exist :ignore))))
+
+(defun executor-test-context
+    (executor plan root head provenance
+     &optional
+       (authorization-object
+         dreyeck/shop3/executor::*commit-3-private-authorization-object*)
+       (authorization-pair-enforced-p nil))
   (dreyeck/shop3/executor::%make-private-test-execution-context
-   executor plan root head "hauptsache" provenance))
+   executor plan root head "hauptsache" provenance
+   authorization-object authorization-pair-enforced-p))
+
+(defun executor-test-noop-handler (executor action context)
+  (declare (ignore executor action context))
+  (list :status :succeeded :observed-effects '((:test-noop t))))
+
+(defun executor-test-install-full-plan-noop-handlers (executor)
+  (dolist (operator
+           '(dreyeck/shop3::!delete-legacy-shop3-copy
+             dreyeck/shop3::!write-shop3-reference-boundary-checker
+             dreyeck/shop3::!write-shop3-reference-boundary-fixture
+             dreyeck/shop3::!wire-shop3-reference-boundary-checker
+             dreyeck/shop3::!write-commit-3-execution-evidence
+             dreyeck/shop3::!record-commit-3-execution-complete))
+    (let ((specification
+            (find operator
+                  (dreyeck/shop3/executor::plan-executor-registry executor)
+                  :key
+                  #'dreyeck/shop3/executor::operator-specification-operator)))
+      (setf
+       (dreyeck/shop3/executor::operator-specification-execute-handler
+        specification)
+       #'executor-test-noop-handler)))
+  executor)
 
 (defun executor-test-provider-plan ()
   '((dreyeck/shop3::!run-shop3-provider-boundary-tests)))
@@ -101,6 +160,7 @@
     dreyeck/shop3::!run-direct-shop3-load-and-gap-canary
     dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary
     dreyeck/shop3::!run-dual-load-identity-canary
+    dreyeck/shop3::!run-shop3-provider-boundary-tests
     dreyeck/shop3::!run-repository-load-gate))
 
 (defun executor-test-unique-temporary-root (label)
@@ -421,6 +481,48 @@
                                     (null shorter-failure)
                                     (equal from-raw from-shorter))
                                "Raw and shorter plans must canonicalize equally.")))
+    (let* ((validation-plan-1
+             (dreyeck/shop3/executor:commit-3-non-mutating-validation-subplan))
+           (validation-plan-2
+             (dreyeck/shop3/executor:commit-3-non-mutating-validation-subplan)))
+      (commit-3-smoke-assert (= 6 (length validation-plan-1))
+                             "The public validation subplan must have six actions.")
+      (commit-3-smoke-assert
+       (equal (executor-test-validation-plan) validation-plan-1)
+       "The public validation subplan must preserve exact operator order.")
+      (commit-3-smoke-assert (not (eq validation-plan-1 validation-plan-2))
+                             "Each validation subplan call must return a fresh list.")
+      (commit-3-smoke-assert (equal validation-plan-1 validation-plan-2)
+                             "Validation subplan calls must be deterministic.")
+      (commit-3-smoke-assert (integerp (list-length validation-plan-1))
+                             "The validation subplan must be a proper list.")
+      (multiple-value-bind (normalized-validation failure shape)
+          (dreyeck/shop3/executor:normalize-shop3-plan validation-plan-1)
+        (declare (ignore shape))
+        (commit-3-smoke-assert (null failure)
+                               "The validation subplan must normalize.")
+        (commit-3-smoke-assert (equal validation-plan-1 normalized-validation)
+                               "Validation normalization must be idempotent.")))
+    (dolist (public-name
+             '("COMMIT-3-NON-MUTATING-VALIDATION-SUBPLAN"
+               "MAKE-COMMIT-3-VALIDATION-EXECUTION-CONTEXT"))
+      (multiple-value-bind (symbol status)
+          (find-symbol public-name :dreyeck/shop3/executor)
+        (commit-3-smoke-assert (and symbol (eq :external status) (fboundp symbol))
+                               (format nil "~A must be the only new public API."
+                                       public-name))))
+    (dolist (private-name
+             '("*COMMIT-3-VALIDATION-PRIVATE-AUTHORIZATION-OBJECT*"
+               "%MAKE-COMMIT-3-EXECUTION-CONTEXT"
+               "COMMIT-3-EXECUTION-CONTEXT-AUTHORIZATION-OBJECT"
+               "%MAKE-PRIVATE-TEST-EXECUTION-CONTEXT"
+               "%AUTHORIZATION-PURPOSE"))
+      (multiple-value-bind (symbol status)
+          (find-symbol private-name :dreyeck/shop3/executor)
+        (declare (ignore symbol))
+        (commit-3-smoke-assert (not (eq :external status))
+                               (format nil "~A must remain private."
+                                       private-name))))
     (commit-3-smoke-assert (= 12 (length registry))
                            "The closed registry must contain 12 operator schemas.")
     (commit-3-smoke-assert
@@ -429,6 +531,26 @@
     (commit-3-smoke-assert
      (= 6 (count-if-not (lambda (entry) (getf entry :execute-handler)) registry))
      "The registry must retain exactly six blocked handlers.")
+    (let ((validation-classes nil))
+      (dolist (action (executor-test-validation-plan))
+        (multiple-value-bind (specification failure)
+            (dreyeck/shop3/executor:resolve-operator-handler
+             executor (first action))
+          (commit-3-smoke-assert (null failure)
+                                 "Every validation operator must resolve.")
+          (commit-3-smoke-assert
+           (getf (find (first action) registry
+                       :key (lambda (entry) (getf entry :operator)))
+                 :execute-handler)
+           "Every validation operator must have an execute handler.")
+          (push
+           (dreyeck/shop3/executor::operator-specification-mutation-class
+            specification)
+           validation-classes)))
+      (commit-3-smoke-assert
+       (equal (make-list 6 :initial-element :non-mutating-validation)
+              (nreverse validation-classes))
+       "All six validation operators must have the exact safe mutation class."))
     (dolist (operator
              '(dreyeck/shop3::!delete-legacy-shop3-copy
                dreyeck/shop3::!write-shop3-reference-boundary-checker
@@ -637,6 +759,276 @@
        (eq :execution-context-plan-mismatch
            (getf (getf failure :failure) :type))
        "Public context construction must enforce the canonical commit-3 plan."))
+    (commit-3-smoke-assert
+     (handler-case
+         (progn
+           (apply
+            (symbol-function
+             'dreyeck/shop3/executor:make-commit-3-validation-execution-context)
+            (list executor #P"/tmp/" "head" "hauptsache" "provenance"
+                  :unexpected-plan))
+           nil)
+       (program-error () t))
+     "The validation constructor must accept no caller-supplied plan.")
+    (commit-3-smoke-assert
+     (handler-case
+         (progn
+           (apply
+            (symbol-function
+             'dreyeck/shop3/executor:make-commit-3-validation-execution-context)
+            (list executor #P"/tmp/" "head" "hauptsache"))
+           nil)
+       (program-error () t))
+     "The validation constructor must accept no authorization argument.")
+    (multiple-value-bind (context failure)
+        (dreyeck/shop3/executor:make-commit-3-validation-execution-context
+         :not-an-executor #P"/tmp/"
+         "0000000000000000000000000000000000000000"
+         "hauptsache"
+         "6265f68e1c6cd27c74773a7589819bad0f75f06b")
+      (commit-3-smoke-assert (null context)
+                             "A wrong executor must produce no context.")
+      (commit-3-smoke-assert
+       (eq :execution-context-invalid-executor
+           (executor-test-context-construction-failure-type failure))
+       "The validation constructor must reject a wrong executor."))
+    (let ((wrong-report
+            (dreyeck/shop3/executor:commit-3-execution-context-report
+             :not-a-context)))
+      (commit-3-smoke-assert
+       (equal '(:status :failed
+                :authorization-purpose nil
+                :failure (:type :execution-context-wrong-type))
+              wrong-report)
+       "A wrong context report must expose no authorization purpose."))
+    (with-validation-context-test-repository (root head provenance)
+      (let ((validation-executor
+              (dreyeck/shop3/executor:make-commit-3-executor
+               :repository-root root)))
+        (multiple-value-bind (validation-context failure)
+            (dreyeck/shop3/executor:make-commit-3-validation-execution-context
+             validation-executor root head "hauptsache" provenance)
+          (commit-3-smoke-assert (and validation-context (null failure))
+                                 "The public validation context must construct.")
+          (let ((report
+                  (dreyeck/shop3/executor:commit-3-execution-context-report
+                   validation-context)))
+            (commit-3-smoke-assert
+             (eq :execute-commit-3-non-mutating-validation-subplan
+                 (getf report :authorization-purpose))
+             "The validation report must expose the validation purpose.")
+            (commit-3-smoke-assert
+             (= 6 (getf report :canonical-plan-action-count))
+             "The validation context must store the six-action plan.")
+            (commit-3-smoke-assert
+             (not (member
+                   dreyeck/shop3/executor::*commit-3-validation-private-authorization-object*
+                   report :test #'eq))
+             "The validation report must not expose its capability object."))
+          (let* ((other-executor
+                   (dreyeck/shop3/executor:make-commit-3-executor
+                    :repository-root root))
+                 (result
+                   (dreyeck/shop3/executor:execute-plan-armed
+                    other-executor (executor-test-validation-plan)
+                    validation-context)))
+            (commit-3-smoke-assert
+             (eq :execution-context-executor-mismatch
+                 (executor-test-failure-type result))
+             "A validation context must reject a different executor.")))
+        (let ((dirty-path (merge-pathnames "dirty-validation-context.txt"
+                                           root)))
+          (unwind-protect
+               (progn
+                 (executor-test-write-string dirty-path "dirty\n")
+                 (multiple-value-bind (context failure)
+                     (dreyeck/shop3/executor:make-commit-3-validation-execution-context
+                      validation-executor root head "hauptsache" provenance)
+                   (commit-3-smoke-assert (null context)
+                                          "A dirty worktree must produce no context.")
+                   (commit-3-smoke-assert
+                    (eq :execution-context-worktree-dirty
+                        (executor-test-context-construction-failure-type
+                         failure))
+                    "The validation constructor must reject a dirty worktree.")))
+            (when (probe-file dirty-path)
+              (delete-file dirty-path))))
+        (multiple-value-bind (context failure)
+            (dreyeck/shop3/executor:make-commit-3-validation-execution-context
+             validation-executor root head "hauptsache"
+             "0000000000000000000000000000000000000000")
+          (commit-3-smoke-assert (null context)
+                                 "Wrong provenance must produce no context.")
+          (commit-3-smoke-assert
+           (eq :execution-context-provenance-commit-mismatch
+               (executor-test-context-construction-failure-type failure))
+           "The validation constructor must reject wrong provenance."))
+        (executor-test-git root "commit" "--quiet" "--allow-empty"
+                           "-m" "move validation fixture head")
+        (let ((moved-head (executor-test-git root "rev-parse" "HEAD")))
+          (multiple-value-bind (context failure)
+              (dreyeck/shop3/executor:make-commit-3-validation-execution-context
+               validation-executor root head "hauptsache" provenance)
+            (commit-3-smoke-assert (null context)
+                                   "A moved HEAD must produce no context.")
+            (commit-3-smoke-assert
+             (eq :execution-context-head-mismatch
+                 (executor-test-context-construction-failure-type failure))
+             "The validation constructor must reject a moved HEAD."))
+          (executor-test-git root "checkout" "--quiet" "-b" "other")
+          (multiple-value-bind (context failure)
+              (dreyeck/shop3/executor:make-commit-3-validation-execution-context
+               validation-executor root moved-head "hauptsache" provenance)
+            (commit-3-smoke-assert (null context)
+                                   "A wrong branch must produce no context.")
+            (commit-3-smoke-assert
+             (eq :execution-context-branch-mismatch
+                 (executor-test-context-construction-failure-type failure))
+             "The validation constructor must reject a wrong branch.")))))
+    (with-executor-test-repository (root head provenance)
+      (let* ((validation-plan (executor-test-validation-plan))
+             (full-plan normalized)
+             (full-capability
+               dreyeck/shop3/executor::*commit-3-private-authorization-object*)
+             (validation-capability
+               dreyeck/shop3/executor::*commit-3-validation-private-authorization-object*))
+        (flet ((assert-authorization-mismatch (result description)
+                 (let ((body (executor-test-result-body result)))
+                   (commit-3-smoke-assert
+                    (eq :execution-context-authorization-mismatch
+                        (executor-test-failure-type result))
+                    description)
+                   (commit-3-smoke-assert (null (getf body :handler-invoked-p))
+                                          "Capability mismatch must invoke no handler.")
+                   (commit-3-smoke-assert
+                    (zerop (getf body :action-started-event-count))
+                    "Capability mismatch must start no action.")
+                   (commit-3-smoke-assert
+                    (zerop (getf body :executed-action-count))
+                    "Capability mismatch must execute no action.")
+                   (commit-3-smoke-assert
+                    (null (getf body :mutations-performed))
+                    "Capability mismatch must perform no mutation."))))
+          (let* ((fixture-executor
+                   (dreyeck/shop3/executor:make-commit-3-executor
+                    :repository-root root))
+                 (context
+                   (executor-test-context
+                    fixture-executor validation-plan root head provenance
+                    full-capability t)))
+            (assert-authorization-mismatch
+             (dreyeck/shop3/executor:execute-plan-armed
+              fixture-executor validation-plan context)
+             "The full capability must reject the validation plan."))
+          (let* ((fixture-executor
+                   (executor-test-install-full-plan-noop-handlers
+                    (dreyeck/shop3/executor:make-commit-3-executor
+                     :repository-root root)))
+                 (context
+                   (executor-test-context
+                    fixture-executor full-plan root head provenance
+                    validation-capability t)))
+            (assert-authorization-mismatch
+             (dreyeck/shop3/executor:execute-plan-armed
+              fixture-executor full-plan context)
+             "The validation capability must reject the full plan."))
+          (let* ((fixture-executor
+                   (dreyeck/shop3/executor:make-commit-3-executor
+                    :repository-root root))
+                 (context
+                   (executor-test-context
+                    fixture-executor validation-plan root head provenance
+                    validation-capability t))
+                 (reordered-plan
+                   (append (rest validation-plan) (list (first validation-plan))))
+                 (result
+                   (dreyeck/shop3/executor:execute-plan-armed
+                    fixture-executor reordered-plan context)))
+            (commit-3-smoke-assert
+             (eq :execution-context-plan-mismatch
+                 (executor-test-failure-type result))
+             "A reordered validation plan must fail canonical plan matching."))
+          (let* ((fixture-executor
+                   (dreyeck/shop3/executor:make-commit-3-executor
+                    :repository-root root))
+                 (unknown-capability (cons :unknown-capability (gensym)))
+                 (context
+                   (executor-test-context
+                    fixture-executor validation-plan root head provenance
+                    unknown-capability t))
+                 (report
+                   (dreyeck/shop3/executor:commit-3-execution-context-report
+                    context)))
+            (commit-3-smoke-assert
+             (null (getf report :authorization-purpose))
+             "An unknown private capability must report no purpose.")
+            (assert-authorization-mismatch
+             (dreyeck/shop3/executor:execute-plan-armed
+              fixture-executor validation-plan context)
+             "An unknown private capability must fail authorization."))))
+      (dolist (mutation-class
+               '(nil :mutating :destructive :repository-write
+                 :future-unknown-class))
+        (let* ((validation-plan (executor-test-validation-plan))
+               (handler-invoked-p nil)
+               (fixture-executor
+                 (dreyeck/shop3/executor:make-commit-3-executor
+                  :repository-root root
+                  :handler-overrides
+                  (list
+                   (cons (first (first validation-plan))
+                         (lambda (executor action context)
+                           (declare (ignore executor action context))
+                           (setf handler-invoked-p t)
+                           (list :status :succeeded))))))
+               (specification
+                 (find (first (first validation-plan))
+                       (dreyeck/shop3/executor::plan-executor-registry
+                        fixture-executor)
+                       :key
+                       #'dreyeck/shop3/executor::operator-specification-operator))
+               (context nil))
+          (setf
+           (dreyeck/shop3/executor::operator-specification-mutation-class
+            specification)
+           mutation-class
+           context
+           (executor-test-context
+            fixture-executor validation-plan root head provenance
+            dreyeck/shop3/executor::*commit-3-validation-private-authorization-object*
+            t))
+          (let* ((result
+                   (dreyeck/shop3/executor:execute-plan-armed
+                    fixture-executor validation-plan context))
+                 (body (executor-test-result-body result))
+                 (failure (getf body :failure)))
+            (commit-3-smoke-assert
+             (eq :execution-context-scope-violation
+                 (executor-test-failure-type result))
+             (format nil "Mutation class ~S must violate validation scope."
+                     mutation-class))
+            (commit-3-smoke-assert
+             (eq :execute-commit-3-non-mutating-validation-subplan
+                 (getf failure :authorization-purpose))
+             "Scope failure must expose the validation purpose.")
+            (commit-3-smoke-assert
+             (equal '(1) (getf failure :violating-action-indexes))
+             "Scope failure must identify the violating action index.")
+            (commit-3-smoke-assert
+             (equal (list mutation-class)
+                    (getf failure :observed-mutation-classes))
+             "Scope failure must report the exact mutation class.")
+            (commit-3-smoke-assert (null handler-invoked-p)
+                                   "Scope failure must invoke no handler.")
+            (commit-3-smoke-assert
+             (zerop (getf body :action-started-event-count))
+             "Scope failure must start no action.")
+            (commit-3-smoke-assert
+             (zerop (getf body :executed-action-count))
+             "Scope failure must execute no action.")
+            (commit-3-smoke-assert
+             (null (getf body :mutations-performed))
+             "Scope failure must perform no mutation.")))))
     (with-executor-test-repository (root head provenance)
       (let* ((fixture-executor
                (dreyeck/shop3/executor:make-commit-3-executor

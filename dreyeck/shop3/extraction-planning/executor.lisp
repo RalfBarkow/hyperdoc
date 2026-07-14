@@ -42,6 +42,7 @@
   canonical-plan
   canonical-plan-fingerprint
   authorization-object
+  authorization-pair-enforced-p
   creation-report)
 
 (defparameter +commit-3-provenance-commit+
@@ -55,6 +56,40 @@
 
 (defparameter *commit-3-private-authorization-object*
   (cons :perform-eighth-dreyeck-extraction-commit-3 (gensym "AUTHORIZATION-")))
+
+(defparameter *commit-3-validation-private-authorization-object*
+  (cons :execute-commit-3-non-mutating-validation-subplan
+        (gensym "VALIDATION-AUTHORIZATION-")))
+
+(defparameter +commit-3-non-mutating-validation-subplan+
+  '((dreyeck/shop3::!run-shop3-reference-boundary-fixtures)
+    (dreyeck/shop3::!run-direct-shop3-load-and-gap-canary)
+    (dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary)
+    (dreyeck/shop3::!run-dual-load-identity-canary)
+    (dreyeck/shop3::!run-shop3-provider-boundary-tests)
+    (dreyeck/shop3::!run-repository-load-gate)))
+
+(defun commit-3-non-mutating-validation-subplan ()
+  "Return a fresh copy of the exact authorized validation-only subplan."
+  (copy-tree +commit-3-non-mutating-validation-subplan+))
+
+(defun %authorization-purpose (authorization-object)
+  (cond
+    ((eq authorization-object *commit-3-private-authorization-object*)
+     :perform-eighth-dreyeck-extraction-commit-3)
+    ((eq authorization-object
+         *commit-3-validation-private-authorization-object*)
+     :execute-commit-3-non-mutating-validation-subplan)
+    (t nil)))
+
+(defun %authorization-required-plan (authorization-object)
+  (cond
+    ((eq authorization-object *commit-3-private-authorization-object*)
+     (getf (commit-3-execution-plan) :normalized-plan))
+    ((eq authorization-object
+         *commit-3-validation-private-authorization-object*)
+     (commit-3-non-mutating-validation-subplan))
+    (t nil)))
 
 (defvar *commit-3-dynamic-execution-authority* nil)
 
@@ -988,48 +1023,52 @@ Returns the normalized plan, a structured failure, and the observed input shape.
                :observed (getf observation :provenance-paths)))
     (t nil)))
 
-(defun %context-construction-failure (type &rest details)
+(defun %context-construction-failure
+    (authorization-purpose type &rest details)
   (list :status :failed
-        :authorization-purpose :perform-eighth-dreyeck-extraction-commit-3
+        :authorization-purpose authorization-purpose
         :failure (apply #'%failure type details)))
 
-(defun make-commit-3-execution-context
-    (executor plan repository-root expected-head expected-branch
-     provenance-commit)
-  "Create an opaque, repository-bound authorization context for commit 3."
+(defun %make-checked-execution-context
+    (executor plan required-plan repository-root expected-head expected-branch
+     provenance-commit authorization-object authorization-purpose)
   (unless (plan-executor-p executor)
-    (return-from make-commit-3-execution-context
+    (return-from %make-checked-execution-context
       (values nil (%context-construction-failure
+                   authorization-purpose
                    :execution-context-invalid-executor))))
   (multiple-value-bind (root root-failure)
       (%canonical-directory repository-root)
     (when root-failure
-      (return-from make-commit-3-execution-context
+      (return-from %make-checked-execution-context
         (values nil (list :status :failed
-                          :authorization-purpose
-                          :perform-eighth-dreyeck-extraction-commit-3
+                          :authorization-purpose authorization-purpose
                           :failure root-failure))))
     (unless (equal root (plan-executor-repository-root executor))
-      (return-from make-commit-3-execution-context
+      (return-from %make-checked-execution-context
         (values nil (%context-construction-failure
+                     authorization-purpose
                      :execution-context-repository-root-mismatch
                      :expected (plan-executor-repository-root executor)
                      :observed root))))
     (unless (and (stringp expected-branch)
                  (string= expected-branch "hauptsache"))
-      (return-from make-commit-3-execution-context
+      (return-from %make-checked-execution-context
         (values nil (%context-construction-failure
+                     authorization-purpose
                      :execution-context-branch-mismatch
                      :expected "hauptsache" :observed expected-branch))))
     (unless (%full-commit-id-p expected-head)
-      (return-from make-commit-3-execution-context
+      (return-from %make-checked-execution-context
         (values nil (%context-construction-failure
+                     authorization-purpose
                      :execution-context-invalid-expected-head
                      :expected-head expected-head))))
     (unless (and (stringp provenance-commit)
                  (string= provenance-commit +commit-3-provenance-commit+))
-      (return-from make-commit-3-execution-context
+      (return-from %make-checked-execution-context
         (values nil (%context-construction-failure
+                     authorization-purpose
                      :execution-context-provenance-commit-mismatch
                      :expected +commit-3-provenance-commit+
                      :observed provenance-commit))))
@@ -1037,36 +1076,42 @@ Returns the normalized plan, a structured failure, and the observed input shape.
         (normalize-shop3-plan plan)
       (declare (ignore plan-shape))
       (when plan-failure
-        (return-from make-commit-3-execution-context
+        (return-from %make-checked-execution-context
           (values nil (list :status :failed
-                            :authorization-purpose
-                            :perform-eighth-dreyeck-extraction-commit-3
+                            :authorization-purpose authorization-purpose
                             :failure plan-failure))))
-      (let ((current-plan
-              (getf (commit-3-execution-plan) :normalized-plan)))
-        (unless (equal canonical-plan current-plan)
-          (return-from make-commit-3-execution-context
+      (multiple-value-bind (canonical-required-plan required-failure
+                            required-shape)
+          (normalize-shop3-plan required-plan)
+        (declare (ignore required-shape))
+        (when required-failure
+          (return-from %make-checked-execution-context
+            (values nil (list :status :failed
+                              :authorization-purpose authorization-purpose
+                              :failure required-failure))))
+        (unless (equal canonical-plan canonical-required-plan)
+          (return-from %make-checked-execution-context
             (values nil (%context-construction-failure
+                         authorization-purpose
                          :execution-context-plan-mismatch
-                         :expected-action-count (length current-plan)
+                         :expected-action-count
+                         (length canonical-required-plan)
                          :observed-action-count (length canonical-plan))))))
       (multiple-value-bind (fingerprint fingerprint-failure)
           (%canonical-plan-fingerprint canonical-plan)
         (when fingerprint-failure
-          (return-from make-commit-3-execution-context
+          (return-from %make-checked-execution-context
             (values nil (list :status :failed
-                              :authorization-purpose
-                              :perform-eighth-dreyeck-extraction-commit-3
+                              :authorization-purpose authorization-purpose
                               :failure fingerprint-failure))))
         (let* ((repository-observation (%repository-observation root))
                (repository-failure
                  (%repository-observation-failure
                   repository-observation root expected-head expected-branch)))
           (when repository-failure
-            (return-from make-commit-3-execution-context
+            (return-from %make-checked-execution-context
               (values nil (list :status :failed
-                                :authorization-purpose
-                                :perform-eighth-dreyeck-extraction-commit-3
+                                :authorization-purpose authorization-purpose
                                 :failure repository-failure
                                 :repository-observation
                                 repository-observation))))
@@ -1075,10 +1120,9 @@ Returns the normalized plan, a structured failure, and the observed input shape.
                  (provenance-failure
                    (%provenance-observation-failure provenance-observation)))
             (when provenance-failure
-              (return-from make-commit-3-execution-context
+              (return-from %make-checked-execution-context
                 (values nil (list :status :failed
-                                  :authorization-purpose
-                                  :perform-eighth-dreyeck-extraction-commit-3
+                                  :authorization-purpose authorization-purpose
                                   :failure provenance-failure
                                   :repository-observation
                                   repository-observation
@@ -1086,8 +1130,7 @@ Returns the normalized plan, a structured failure, and the observed input shape.
                                   provenance-observation))))
             (let ((creation-report
                     (list :status :created
-                          :authorization-purpose
-                          :perform-eighth-dreyeck-extraction-commit-3
+                          :authorization-purpose authorization-purpose
                           :repository-root root
                           :expected-head expected-head
                           :expected-branch expected-branch
@@ -1105,16 +1148,38 @@ Returns the normalized plan, a structured failure, and the observed input shape.
                 :provenance-commit provenance-commit
                 :canonical-plan canonical-plan
                 :canonical-plan-fingerprint fingerprint
-                :authorization-object *commit-3-private-authorization-object*
+                :authorization-object authorization-object
+                :authorization-pair-enforced-p t
                 :creation-report creation-report)
                nil))))))))
+
+(defun make-commit-3-execution-context
+    (executor plan repository-root expected-head expected-branch
+     provenance-commit)
+  "Create an opaque, repository-bound authorization context for commit 3."
+  (%make-checked-execution-context
+   executor plan (getf (commit-3-execution-plan) :normalized-plan)
+   repository-root expected-head expected-branch provenance-commit
+   *commit-3-private-authorization-object*
+   :perform-eighth-dreyeck-extraction-commit-3))
+
+(defun make-commit-3-validation-execution-context
+    (executor repository-root expected-head expected-branch provenance-commit)
+  "Create an opaque context for the exact non-mutating validation subplan."
+  (let ((plan (commit-3-non-mutating-validation-subplan)))
+    (%make-checked-execution-context
+     executor plan plan repository-root expected-head expected-branch
+     provenance-commit *commit-3-validation-private-authorization-object*
+     :execute-commit-3-non-mutating-validation-subplan)))
 
 (defun commit-3-execution-context-report (execution-context)
   "Return a sanitized report without exposing the private capability object."
   (if (commit-3-execution-context-p execution-context)
       (list :status :available
             :authorization-purpose
-            :perform-eighth-dreyeck-extraction-commit-3
+            (%authorization-purpose
+             (commit-3-execution-context-authorization-object
+              execution-context))
             :repository-root
             (commit-3-execution-context-repository-root execution-context)
             :expected-head
@@ -1133,13 +1198,15 @@ Returns the normalized plan, a structured failure, and the observed input shape.
             (copy-tree
              (commit-3-execution-context-creation-report execution-context)))
       (list :status :failed
-            :authorization-purpose
-            :perform-eighth-dreyeck-extraction-commit-3
+            :authorization-purpose nil
             :failure (%failure :execution-context-wrong-type))))
 
 (defun %make-private-test-execution-context
     (executor plan repository-root expected-head expected-branch
-     provenance-commit)
+     provenance-commit
+     &optional
+       (authorization-object *commit-3-private-authorization-object*)
+       (authorization-pair-enforced-p nil))
   "Construct a fixture-bound context for tests without exporting a bypass."
   (multiple-value-bind (canonical-plan failure shape)
       (normalize-shop3-plan plan)
@@ -1163,11 +1230,12 @@ Returns the normalized plan, a structured failure, and the observed input shape.
          :provenance-commit provenance-commit
          :canonical-plan canonical-plan
          :canonical-plan-fingerprint fingerprint
-         :authorization-object *commit-3-private-authorization-object*
+         :authorization-object authorization-object
+         :authorization-pair-enforced-p authorization-pair-enforced-p
          :creation-report
          (list :status :private-test-context
                :authorization-purpose
-               :perform-eighth-dreyeck-extraction-commit-3
+               (%authorization-purpose authorization-object)
                :repository-root root
                :expected-head expected-head
                :expected-branch expected-branch
@@ -1260,8 +1328,8 @@ Returns the normalized plan, a structured failure, and the observed input shape.
                 :events (list (%event :action-failed position correlation-id
                                       action result))))))
     (when (and (eq mode :execute)
-               (not (eq *commit-3-dynamic-execution-authority*
-                        *commit-3-private-authorization-object*)))
+               (null (%authorization-purpose
+                      *commit-3-dynamic-execution-authority*)))
       (let* ((condition
                (%failure :execute-plan-required
                          :handler-invoked-p nil
@@ -1367,12 +1435,14 @@ Returns the normalized plan, a structured failure, and the observed input shape.
             (3 :require-execute-handler-for-every-action)
             (4 :validate-context-type)
             (5 :validate-executor-identity)
-            (6 :validate-authorization-object)
+            (6 :recognize-authorization-object)
             (7 :validate-canonical-plan-match)
-            (8 :reobserve-repository-state)
-            (9 :verify-provenance-integrity)
-            (10 :bind-private-dynamic-execution-authority)
-            (11 :invoke-first-handler))))
+            (8 :validate-authorization-plan-pair)
+            (9 :guard-validation-mutation-scope)
+            (10 :reobserve-repository-state)
+            (11 :verify-provenance-integrity)
+            (12 :bind-private-dynamic-execution-authority)
+            (13 :invoke-first-handler))))
 
 (defun %mark-gate-step (gate-steps step-number status &optional failure-type)
   (let ((step (find step-number gate-steps
@@ -1396,6 +1466,7 @@ Returns the normalized plan, a structured failure, and the observed input shape.
           :status :pending
           :failure nil
           :failure-type nil
+          :authorization-purpose nil
           :execution-authorized-p nil
           :executor-identity-match-p nil
           :repository-root nil
@@ -1467,6 +1538,29 @@ Returns the normalized plan, a structured failure, and the observed input shape.
             do (push position indexes)
                (pushnew (first action) operators :test #'eq))
     (values (nreverse indexes) (nreverse operators))))
+
+(defun %authorization-plan-pair-valid-p (execution-context actions)
+  (or (not (commit-3-execution-context-authorization-pair-enforced-p
+            execution-context))
+      (equal actions
+             (%authorization-required-plan
+              (commit-3-execution-context-authorization-object
+               execution-context)))))
+
+(defun %validation-scope-violation-data (actions specifications)
+  (let ((indexes nil)
+        (operators nil)
+        (classes nil))
+    (loop for action in actions
+          for specification in specifications
+          for position from 1
+          for mutation-class =
+            (operator-specification-mutation-class specification)
+          unless (eq :non-mutating-validation mutation-class)
+            do (push position indexes)
+               (push (first action) operators)
+               (push mutation-class classes))
+    (values (nreverse indexes) (nreverse operators) (nreverse classes))))
 
 (defun %result-mutating-p (executor result)
   (and (eq :succeeded (getf result :status))
@@ -1553,14 +1647,22 @@ Returns the normalized plan, a structured failure, and the observed input shape.
            report correlation-id 5
            (%failure :execution-context-executor-mismatch))))
       (%mark-gate-step (getf report :gate-steps) 5 :passed))
-    (unless (eq (commit-3-execution-context-authorization-object
-                 execution-context)
-                *commit-3-private-authorization-object*)
-      (return-from execute-plan-armed
-        (%finish-armed-failure
-         report correlation-id 6
-         (%failure :execution-context-authorization-mismatch))))
-    (%mark-gate-step (getf report :gate-steps) 6 :passed)
+    (let* ((authorization-object
+             (commit-3-execution-context-authorization-object
+              execution-context))
+           (authorization-purpose
+             (%authorization-purpose authorization-object)))
+      (setf (getf report :authorization-purpose) authorization-purpose)
+      (unless authorization-purpose
+        (return-from execute-plan-armed
+          (%finish-armed-failure
+           report correlation-id 6
+           (%failure :execution-context-authorization-mismatch
+                     :handler-invoked-p nil
+                     :action-started-event-count 0
+                     :executed-action-count 0
+                     :mutations-performed nil))))
+      (%mark-gate-step (getf report :gate-steps) 6 :passed))
     (let ((plan-match-p
             (equal actions
                    (commit-3-execution-context-canonical-plan
@@ -1577,6 +1679,39 @@ Returns the normalized plan, a structured failure, and the observed input shape.
                      :execution-fingerprint
                      (getf report :canonical-plan-fingerprint)))))
       (%mark-gate-step (getf report :gate-steps) 7 :passed))
+    (unless (%authorization-plan-pair-valid-p execution-context actions)
+      (return-from execute-plan-armed
+        (%finish-armed-failure
+         report correlation-id 8
+         (%failure :execution-context-authorization-mismatch
+                   :authorization-purpose
+                   (getf report :authorization-purpose)
+                   :handler-invoked-p nil
+                   :action-started-event-count 0
+                   :executed-action-count 0
+                   :mutations-performed nil))))
+    (%mark-gate-step (getf report :gate-steps) 8 :passed)
+    (if (eq :execute-commit-3-non-mutating-validation-subplan
+            (getf report :authorization-purpose))
+        (multiple-value-bind (violating-indexes violating-operators
+                              observed-classes)
+            (%validation-scope-violation-data actions specifications)
+          (when violating-indexes
+            (return-from execute-plan-armed
+              (%finish-armed-failure
+               report correlation-id 9
+               (%failure :execution-context-scope-violation
+                         :authorization-purpose
+                         :execute-commit-3-non-mutating-validation-subplan
+                         :violating-action-indexes violating-indexes
+                         :violating-operators violating-operators
+                         :observed-mutation-classes observed-classes
+                         :handler-invoked-p nil
+                         :action-started-event-count 0
+                         :executed-action-count 0
+                         :mutations-performed nil))))
+          (%mark-gate-step (getf report :gate-steps) 9 :passed))
+        (%mark-gate-step (getf report :gate-steps) 9 :passed))
     (let* ((repository-root
              (commit-3-execution-context-repository-root execution-context))
            (observation (%repository-observation repository-root))
@@ -1594,8 +1729,8 @@ Returns the normalized plan, a structured failure, and the observed input shape.
             (getf observation :repository-operation-state-clean-p))
       (when failure
         (return-from execute-plan-armed
-          (%finish-armed-failure report correlation-id 8 failure)))
-      (%mark-gate-step (getf report :gate-steps) 8 :passed))
+          (%finish-armed-failure report correlation-id 10 failure)))
+      (%mark-gate-step (getf report :gate-steps) 10 :passed))
     (let* ((provenance-commit
              (commit-3-execution-context-provenance-commit execution-context))
            (observation
@@ -1614,16 +1749,17 @@ Returns the normalized plan, a structured failure, and the observed input shape.
             (getf observation :provenance-paths-match-p))
       (when failure
         (return-from execute-plan-armed
-          (%finish-armed-failure report correlation-id 9 failure)))
-      (%mark-gate-step (getf report :gate-steps) 9 :passed))
+          (%finish-armed-failure report correlation-id 11 failure)))
+      (%mark-gate-step (getf report :gate-steps) 11 :passed))
     (let ((*commit-3-dynamic-execution-authority*
-            *commit-3-private-authorization-object*)
+            (commit-3-execution-context-authorization-object
+             execution-context))
           (events (getf report :events))
           (results nil)
           (failure nil)
           (executed-count 0))
       (setf (getf report :execution-authorized-p) t)
-      (%mark-gate-step (getf report :gate-steps) 10 :passed)
+      (%mark-gate-step (getf report :gate-steps) 12 :passed)
       (loop for action in actions
             for position from 1
             until failure
@@ -1656,9 +1792,9 @@ Returns the normalized plan, a structured failure, and the observed input shape.
             (getf report :events) events)
       (if failure
           (return-from execute-plan-armed
-            (%finish-armed-failure report correlation-id 11 failure))
+            (%finish-armed-failure report correlation-id 13 failure))
           (progn
-            (%mark-gate-step (getf report :gate-steps) 11 :passed)
+            (%mark-gate-step (getf report :gate-steps) 13 :passed)
             (setf (getf report :status) :succeeded
                   (getf report :stopped-p) nil
                   (getf report :failure) nil
