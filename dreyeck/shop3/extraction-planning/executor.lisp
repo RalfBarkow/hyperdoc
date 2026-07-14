@@ -223,6 +223,338 @@
         :intended-effects '((:commit-3-execution-recorded-complete t))
         :intended-call '(:record-execution-complete)))
 
+(defparameter +shop3-gap-canary-contract-source+
+  #P"/Users/rgb/workspace/hauptsache/docs/operations/kioskbeerli-salon-switching-contract.shop3.lisp")
+
+(defun %gap-canary-evaluation-form (system marker)
+  (format nil
+          "(progn (asdf:load-system ~S) (load ~S) (let* ((runner (symbol-function (find-symbol \"RUN-KIOSKBEERLI-SALON-SWITCHING-CONTRACT-GAP-PLAN-OBJECT\" \"DREYECK/SHOP3\"))) (result (funcall runner)) (plans (dreyeck/shop3:plans-of result)) (expected '((dreyeck/shop3::!record-salon-secret-contract-gap \"/var/lib/kioskbeerli-secrets/kioskbeerli-wifi.env\")))) (assert (= 1 (length plans))) (assert (equal expected (first plans))) (format t \"~~&~A~~%\")))"
+          system
+          (namestring +shop3-gap-canary-contract-source+)
+          marker))
+
+(defun %dual-load-canary-evaluation-form ()
+  "(progn (asdf:load-system :dreyeck/shop3) (let ((package (find-package :dreyeck/shop3)) (class (find-class 'dreyeck/shop3:hyperdoc-htn-plan-result)) (function (symbol-function 'dreyeck/shop3:run-hyperdoc-asdf-refactor-plan-object))) (asdf:load-system :hyperdoc/shop3) (assert (eq package (find-package :hyperdoc/shop3))) (assert (eq class (find-class 'hyperdoc/shop3:hyperdoc-htn-plan-result))) (assert (eq function (symbol-function 'hyperdoc/shop3:run-hyperdoc-asdf-refactor-plan-object))) (format t \"~&DUAL_LOAD_PACKAGE_IDENTITY_CANARY=:PASS~%\")))")
+
+(defun %default-validation-command-resolver (name executor)
+  (let* ((root (plan-executor-repository-root executor))
+         (checker (merge-pathnames
+                   "tools/check-shop3-reference-boundary.lisp" root))
+         (allowed (merge-pathnames
+                   "tools/testdata/shop3-reference-boundary/allowed-added-lines.diff"
+                   root))
+         (rejected (merge-pathnames
+                    "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff"
+                    root))
+         (load-gate (merge-pathnames "tools/check-lisp-load-gate.sh" root))
+         (fresh-sbcl-prefix
+           '("nix" "develop" "--command" "sbcl" "--no-userinit"
+             "--non-interactive" "--eval" "(require :asdf)")))
+    (ecase name
+      (:reference-boundary-fixtures
+       (list
+        :dependencies
+        (list (list :kind :program :value "nix")
+              (list :kind :file :value checker)
+              (list :kind :file :value allowed)
+              (list :kind :file :value rejected))
+        :commands
+        (list
+         (list :argv
+               (list "nix" "develop" "--command" "sbcl" "--no-userinit"
+                     "--script" (namestring checker) "--diff-file"
+                     (namestring allowed))
+               :expected-exit-status 0
+               :expected-marker "SHOP3_REFERENCE_BOUNDARY_OK")
+         (list :argv
+               (list "nix" "develop" "--command" "sbcl" "--no-userinit"
+                     "--script" (namestring checker) "--diff-file"
+                     (namestring rejected))
+               :expected-exit-status 1
+               :expected-marker "SHOP3_REFERENCE_BOUNDARY_REJECTED"))))
+      (:direct-shop3-gap-canary
+       (list
+        :dependencies
+        (list (list :kind :program :value "nix")
+              (list :kind :file :value +shop3-gap-canary-contract-source+))
+        :commands
+        (list
+         (list :argv
+               (append fresh-sbcl-prefix
+                       (list "--eval"
+                             (%gap-canary-evaluation-form
+                              :dreyeck/shop3
+                              "DIRECT_DREYECK_SHOP3_GAP_CANARY=:PASS")))
+               :expected-exit-status 0
+               :expected-marker
+               "DIRECT_DREYECK_SHOP3_GAP_CANARY=:PASS"))))
+      (:compatibility-shop3-gap-canary
+       (list
+        :dependencies
+        (list (list :kind :program :value "nix")
+              (list :kind :file :value +shop3-gap-canary-contract-source+))
+        :commands
+        (list
+         (list :argv
+               (append fresh-sbcl-prefix
+                       (list "--eval"
+                             (%gap-canary-evaluation-form
+                              :hyperdoc/shop3
+                              "COMPATIBILITY_HYPERDOC_SHOP3_GAP_CANARY=:PASS")))
+               :expected-exit-status 0
+               :expected-marker
+               "COMPATIBILITY_HYPERDOC_SHOP3_GAP_CANARY=:PASS"))))
+      (:dual-load-package-identity-canary
+       (list
+        :dependencies (list (list :kind :program :value "nix"))
+        :commands
+        (list
+         (list :argv
+               (append fresh-sbcl-prefix
+                       (list "--eval" (%dual-load-canary-evaluation-form)))
+               :expected-exit-status 0
+               :expected-marker "DUAL_LOAD_PACKAGE_IDENTITY_CANARY=:PASS"))))
+      (:hyperbook-server-load-gate
+       (list
+        :dependencies
+        (list (list :kind :file :value load-gate))
+        :commands
+        (list
+         (list :argv (list (namestring load-gate) ":hyperbook/server")
+               :expected-exit-status 0
+               :expected-marker "LOAD_GATE_OK")))))))
+
+(defvar *validation-command-resolver*
+  #'%default-validation-command-resolver)
+
+(defun %validation-git (repository-root &rest arguments)
+  (handler-case
+      (multiple-value-bind (output error-output exit-status)
+          (uiop:run-program
+           (cons "git" arguments)
+           :directory repository-root
+           :output :string
+           :error-output :string
+           :ignore-error-status t)
+        (list :argv (cons "git" arguments)
+              :stdout output
+              :stderr error-output
+              :exit-status exit-status))
+    (error (condition)
+      (list :argv (cons "git" arguments)
+            :stdout ""
+            :stderr (princ-to-string condition)
+            :exit-status 127))))
+
+(defun %validation-git-output (repository-root &rest arguments)
+  (let ((record (apply #'%validation-git repository-root arguments)))
+    (if (zerop (getf record :exit-status))
+        (string-right-trim '(#\Newline #\Return) (getf record :stdout))
+        (list :git-observation-failure record))))
+
+(defun %validation-operation-state (repository-root)
+  (flet ((present-p (name)
+           (zerop (getf (%validation-git repository-root
+                                         "rev-parse" "--verify" "-q" name)
+                        :exit-status)))
+         (git-path-present-p (name)
+           (let ((path (%validation-git-output repository-root
+                                               "rev-parse" "--git-path" name)))
+             (and (stringp path)
+                  (probe-file (merge-pathnames path repository-root))))))
+    (list :merge-head-p (present-p "MERGE_HEAD")
+          :rebase-merge-p (not (null (git-path-present-p "rebase-merge")))
+          :rebase-apply-p (not (null (git-path-present-p "rebase-apply")))
+          :cherry-pick-head-p (present-p "CHERRY_PICK_HEAD")
+          :revert-head-p (present-p "REVERT_HEAD"))))
+
+(defun %validation-repository-snapshot (repository-root)
+  (list
+   :head (%validation-git-output repository-root "rev-parse" "HEAD")
+   :branch (%validation-git-output repository-root "branch" "--show-current")
+   :porcelain-v2-status
+   (%validation-git-output repository-root "status" "--porcelain=v2"
+                           "--untracked-files=all")
+   :cached-diff
+   (%validation-git-output repository-root "diff" "--cached" "--no-ext-diff"
+                           "--binary" "--")
+   :unmerged-paths
+   (%validation-git-output repository-root "diff" "--name-only"
+                           "--diff-filter=U" "--")
+   :merge-rebase-cherry-pick-revert-state
+   (%validation-operation-state repository-root)))
+
+(defun %dependency-observation (dependency)
+  (let* ((kind (getf dependency :kind))
+         (value (getf dependency :value))
+         (callable
+           (case kind
+             (:program
+              (handler-case
+                  (zerop
+                   (nth-value
+                    2
+                    (uiop:run-program
+                     (list value "--version")
+                     :output :string
+                     :error-output :string
+                     :ignore-error-status t)))
+                (error () nil)))
+             (:file (not (null (probe-file value))))
+             (otherwise nil))))
+    (list :kind kind :value value :exists-and-callable-p callable)))
+
+(defun %run-validation-command (command repository-root)
+  (let ((argv (getf command :argv))
+        (expected-exit-status (getf command :expected-exit-status))
+        (expected-marker (getf command :expected-marker)))
+    (handler-case
+        (multiple-value-bind (stdout stderr exit-status)
+            (uiop:run-program argv
+                              :directory repository-root
+                              :output :string
+                              :error-output :string
+                              :ignore-error-status t)
+          (let ((marker-observed-p
+                  (and (stringp expected-marker)
+                       (not (null (search expected-marker stdout))))))
+            (list :argv argv
+                  :directory repository-root
+                  :stdout stdout
+                  :stderr stderr
+                  :exit-status exit-status
+                  :expected-exit-status expected-exit-status
+                  :expected-marker expected-marker
+                  :marker-observed-p marker-observed-p
+                  :succeeded-p
+                  (and (= exit-status expected-exit-status)
+                       marker-observed-p))))
+      (error (condition)
+        (list :argv argv
+              :directory repository-root
+              :stdout ""
+              :stderr (princ-to-string condition)
+              :exit-status 127
+              :expected-exit-status expected-exit-status
+              :expected-marker expected-marker
+              :marker-observed-p nil
+              :succeeded-p nil)))))
+
+(defun %validation-handler-failure
+    (operator dependencies commands before after command-results reason)
+  (list
+   :status :failed
+   :observed-effects nil
+   :condition
+   (%failure :handler-failure
+             :operator operator
+             :reason reason
+             :execution-authorized-p t
+             :handler-invoked-p t
+             :executed-action-count 0
+             :mutations-performed nil
+             :later-handler-invoked-p nil
+             :dependencies dependencies
+             :command-specifications commands
+             :command-results command-results
+             :repository-before before
+             :repository-after after
+             :repository-unchanged-p (and after (equal before after)))))
+
+(defun %execute-non-mutating-validation (executor action resolver-name)
+  (let* ((operator (first action))
+         (root (plan-executor-repository-root executor))
+         (before (%validation-repository-snapshot root)))
+    (unless (functionp *validation-command-resolver*)
+      (return-from %execute-non-mutating-validation
+        (%validation-handler-failure
+         operator nil nil before (%validation-repository-snapshot root) nil
+         :command-resolver-uncallable)))
+    (let* ((specification
+             (handler-case
+                 (funcall *validation-command-resolver* resolver-name executor)
+               (error () nil)))
+           (dependencies (and (listp specification)
+                              (getf specification :dependencies)))
+           (commands (and (listp specification)
+                          (getf specification :commands)))
+           (dependency-observations
+             (and dependencies (mapcar #'%dependency-observation dependencies))))
+      (unless (and commands
+                   (every (lambda (entry)
+                            (getf entry :exists-and-callable-p))
+                          dependency-observations))
+        (return-from %execute-non-mutating-validation
+          (%validation-handler-failure
+           operator dependency-observations commands before
+           (%validation-repository-snapshot root) nil
+           :runtime-dependency-unavailable)))
+      (let ((command-results nil))
+        (dolist (command commands)
+          (push (%run-validation-command command root) command-results)
+          (unless (getf (first command-results) :succeeded-p)
+            (let ((after (%validation-repository-snapshot root)))
+              (return-from %execute-non-mutating-validation
+                (%validation-handler-failure
+                 operator dependency-observations commands before after
+                 (nreverse command-results) :command-validation-failed)))))
+        (setf command-results (nreverse command-results))
+        (let* ((after (%validation-repository-snapshot root))
+               (unchanged-p (equal before after)))
+          (unless unchanged-p
+            (return-from %execute-non-mutating-validation
+              (%validation-handler-failure
+               operator dependency-observations commands before after
+               command-results :repository-state-changed)))
+          (list
+           :status :succeeded
+           :observed-effects
+           (list
+            (list :operator operator
+                  :status :executed
+                  :mutation-class :non-mutating-validation
+                  :operator-arity 0
+                  :argv-list-command-p t
+                  :shell-command-string-p nil
+                  :directory-from-executor-repository-root-p t
+                  :capture-stdout-p t
+                  :capture-stderr-p t
+                  :capture-exit-status-p t
+                  :verify-expected-marker-p t
+                  :marker-observed-p t
+                  :verify-repository-unchanged-p t
+                  :repository-unchanged-p t
+                  :mutations-performed nil
+                  :dependencies dependency-observations
+                  :command-results command-results
+                  :repository-before before
+                  :repository-after after))))))))
+
+(defun %execute-reference-boundary-fixtures (executor action context)
+  (declare (ignore context))
+  (%execute-non-mutating-validation
+   executor action :reference-boundary-fixtures))
+
+(defun %execute-direct-shop3-gap-canary (executor action context)
+  (declare (ignore context))
+  (%execute-non-mutating-validation
+   executor action :direct-shop3-gap-canary))
+
+(defun %execute-compatibility-shop3-gap-canary (executor action context)
+  (declare (ignore context))
+  (%execute-non-mutating-validation
+   executor action :compatibility-shop3-gap-canary))
+
+(defun %execute-dual-load-identity-canary (executor action context)
+  (declare (ignore context))
+  (%execute-non-mutating-validation
+   executor action :dual-load-package-identity-canary))
+
+(defun %execute-repository-load-gate (executor action context)
+  (declare (ignore context))
+  (%execute-non-mutating-validation
+   executor action :hyperbook-server-load-gate))
+
 (defun %execute-provider-boundary-tests (executor action context)
   (declare (ignore executor action context))
   (unless (find-package :hyperdoc/tests)
@@ -289,21 +621,29 @@
    (%spec 'dreyeck/shop3::!run-shop3-reference-boundary-fixtures 0
           #'%validate-no-arguments :no-arguments :non-mutating-validation
           #'%render-validation :run-reference-boundary-fixtures
+          :execute-handler #'%execute-reference-boundary-fixtures
+          :execute-handler-name :run-reference-boundary-fixtures
           :precondition-observer :fixture-presence
           :postcondition-observer :fixture-results)
    (%spec 'dreyeck/shop3::!run-direct-shop3-load-and-gap-canary 0
           #'%validate-no-arguments :no-arguments :non-mutating-validation
           #'%render-validation :run-direct-shop3-canary
+          :execute-handler #'%execute-direct-shop3-gap-canary
+          :execute-handler-name :run-direct-shop3-canary
           :precondition-observer :direct-system-loadability
           :postcondition-observer :direct-gap-plan)
    (%spec 'dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary 0
           #'%validate-no-arguments :no-arguments :non-mutating-validation
           #'%render-validation :run-compatibility-shop3-canary
+          :execute-handler #'%execute-compatibility-shop3-gap-canary
+          :execute-handler-name :run-compatibility-shop3-canary
           :precondition-observer :compatibility-system-loadability
           :postcondition-observer :compatibility-gap-plan)
    (%spec 'dreyeck/shop3::!run-dual-load-identity-canary 0
           #'%validate-no-arguments :no-arguments :non-mutating-validation
           #'%render-validation :run-dual-load-identity-canary
+          :execute-handler #'%execute-dual-load-identity-canary
+          :execute-handler-name :run-dual-load-identity-canary
           :precondition-observer :dual-system-loadability
           :postcondition-observer :runtime-identities)
    (%spec 'dreyeck/shop3::!run-shop3-provider-boundary-tests 0
@@ -316,6 +656,8 @@
    (%spec 'dreyeck/shop3::!run-repository-load-gate 0
           #'%validate-no-arguments :no-arguments :non-mutating-validation
           #'%render-validation :run-repository-load-gate
+          :execute-handler #'%execute-repository-load-gate
+          :execute-handler-name :run-repository-load-gate
           :precondition-observer :repository-load-command
           :postcondition-observer :load-gate-marker)
    (%spec 'dreyeck/shop3::!write-commit-3-execution-evidence 1

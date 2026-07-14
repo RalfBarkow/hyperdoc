@@ -88,6 +88,252 @@
 (defun executor-test-load-gate-plan ()
   '((dreyeck/shop3::!run-repository-load-gate)))
 
+(defun executor-test-validation-plan ()
+  '((dreyeck/shop3::!run-shop3-reference-boundary-fixtures)
+    (dreyeck/shop3::!run-direct-shop3-load-and-gap-canary)
+    (dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary)
+    (dreyeck/shop3::!run-dual-load-identity-canary)
+    (dreyeck/shop3::!run-shop3-provider-boundary-tests)
+    (dreyeck/shop3::!run-repository-load-gate)))
+
+(defun executor-test-validation-operators ()
+  '(dreyeck/shop3::!run-shop3-reference-boundary-fixtures
+    dreyeck/shop3::!run-direct-shop3-load-and-gap-canary
+    dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary
+    dreyeck/shop3::!run-dual-load-identity-canary
+    dreyeck/shop3::!run-repository-load-gate))
+
+(defun executor-test-unique-temporary-root (label)
+  (uiop:ensure-directory-pathname
+   (merge-pathnames
+    (format nil "shop3-validation-~A-~D-~D/"
+            label (get-universal-time) (random 1000000))
+    (uiop:temporary-directory))))
+
+(defun executor-test-write-validation-command (temporary-root)
+  (let ((script (merge-pathnames "validation-command.lisp" temporary-root)))
+    (executor-test-write-string
+     script
+     (format nil
+             "(require :asdf)~%(let ((arguments (uiop:command-line-arguments)))~%  (when (third arguments)~%    (with-open-file (stream (third arguments) :direction :output :if-exists :supersede :if-does-not-exist :create)~%      (write-line \"unexpected mutation\" stream)))~%  (format t \"~~&~~A~~%\" (first arguments))~%  (uiop:quit (parse-integer (second arguments))))~%"))
+    script))
+
+(defun executor-test-validation-command-specification
+    (temporary-root marker &key missing-dependency-p command-failure-p
+                                reference-fixtures-p repository-mutation-path)
+  (let* ((script (executor-test-write-validation-command temporary-root))
+         (allowed (merge-pathnames "allowed-added-lines.diff" temporary-root))
+         (rejected (merge-pathnames "rejected-added-lines.diff" temporary-root))
+         (missing (merge-pathnames "missing-runtime-dependency" temporary-root)))
+    (when reference-fixtures-p
+      (executor-test-write-string allowed
+                                  "diff --git a/allowed b/allowed\n")
+      (executor-test-write-string rejected
+                                  "diff --git a/rejected b/rejected\n"))
+    (list
+     :dependencies
+     (append
+      (list (list :kind :program :value "sbcl")
+            (list :kind :file
+                  :value (if missing-dependency-p missing script)))
+      (when reference-fixtures-p
+        (list (list :kind :file :value allowed)
+              (list :kind :file :value rejected))))
+     :commands
+     (if reference-fixtures-p
+         (list
+          (list :argv (list "sbcl" "--no-userinit" "--script"
+                            (namestring script)
+                            "SHOP3_REFERENCE_BOUNDARY_OK" "0")
+                :expected-exit-status 0
+                :expected-marker "SHOP3_REFERENCE_BOUNDARY_OK")
+          (list :argv (list "sbcl" "--no-userinit" "--script"
+                            (namestring script)
+                            "SHOP3_REFERENCE_BOUNDARY_REJECTED" "1")
+                :expected-exit-status 1
+                :expected-marker "SHOP3_REFERENCE_BOUNDARY_REJECTED"))
+         (list
+          (list :argv (append
+                       (list "sbcl" "--no-userinit" "--script"
+                             (namestring script) marker
+                             (if command-failure-p "7" "0"))
+                       (when repository-mutation-path
+                         (list (namestring repository-mutation-path))))
+                :expected-exit-status 0
+                :expected-marker marker))))))
+
+(defun executor-test-run-repository-delta-validation-handler
+    (root head provenance)
+  (let* ((operator
+           'dreyeck/shop3::!run-direct-shop3-load-and-gap-canary)
+         (plan (list (list operator)))
+         (executor
+           (dreyeck/shop3/executor:make-commit-3-executor
+            :repository-root root))
+         (context (executor-test-context executor plan root head provenance))
+         (temporary-root (executor-test-unique-temporary-root "delta"))
+         (mutation-path (merge-pathnames "unexpected-validation-delta.txt" root)))
+    (unwind-protect
+         (let ((dreyeck/shop3/executor::*validation-command-resolver*
+                 (lambda (name ignored-executor)
+                   (declare (ignore ignored-executor))
+                   (commit-3-smoke-assert
+                    (eq :direct-shop3-gap-canary name)
+                    "The delta test must select the direct canary surface.")
+                   (executor-test-validation-command-specification
+                    temporary-root
+                    "DIRECT_DREYECK_SHOP3_GAP_CANARY=:PASS"
+                    :repository-mutation-path mutation-path))))
+           (let* ((result
+                    (dreyeck/shop3/executor:execute-plan-armed
+                     executor plan context))
+                  (body (executor-test-result-body result))
+                  (failure (getf body :failure)))
+             (commit-3-smoke-assert
+              (eq :handler-failure (executor-test-failure-type result))
+              "A successful command with a Git delta must fail closed.")
+             (commit-3-smoke-assert
+              (eq :repository-state-changed (getf failure :reason))
+              "Repository deltas must retain their exact failure reason.")
+             (commit-3-smoke-assert (null (getf body :mutations-performed))
+                                    "A delta failure must not authorize mutation.")))
+      (when (probe-file mutation-path)
+        (delete-file mutation-path))
+      (uiop:delete-directory-tree temporary-root
+                                  :validate t :if-does-not-exist :ignore))
+    (commit-3-smoke-assert
+     (zerop (length (executor-test-git root "status" "--porcelain=v2"
+                                       "--untracked-files=all")))
+     "The synthetic repository must be clean after delta-test cleanup.")))
+
+(defun executor-test-first-observed-validation (result)
+  (first
+   (getf (first (getf (executor-test-result-body result) :actions))
+         :observed-effects)))
+
+(defun executor-test-run-positive-validation-handler
+    (root head provenance operator resolver-name marker reference-fixtures-p)
+  (let* ((plan (list (list operator)))
+         (executor
+           (dreyeck/shop3/executor:make-commit-3-executor
+            :repository-root root))
+         (context (executor-test-context executor plan root head provenance))
+         (temporary-root (executor-test-unique-temporary-root "success"))
+         (repository-status-before (executor-test-git root "status"
+                                                       "--porcelain=v2"
+                                                       "--untracked-files=all"))
+         (result nil))
+    (unwind-protect
+         (progn
+           (ensure-directories-exist
+            (merge-pathnames "fixture-root-sentinel" temporary-root))
+           (let ((dreyeck/shop3/executor::*validation-command-resolver*
+                 (lambda (name ignored-executor)
+                   (declare (ignore ignored-executor))
+                   (commit-3-smoke-assert
+                    (eq resolver-name name)
+                    "The handler must request its exact command surface.")
+                   (executor-test-validation-command-specification
+                    temporary-root marker
+                    :reference-fixtures-p reference-fixtures-p))))
+           (commit-3-smoke-assert
+            (null (search (namestring (truename root))
+                          (namestring (truename temporary-root))))
+            "Temporary validation roots must be outside the repository truename.")
+           (setf result
+                 (dreyeck/shop3/executor:execute-plan-armed
+                  executor plan context))
+           (let ((body (executor-test-result-body result))
+                 (observed (executor-test-first-observed-validation result)))
+             (commit-3-smoke-assert (eq :succeeded (getf body :status))
+                                    "A validation fixture command must succeed.")
+             (commit-3-smoke-assert (eq :executed (getf observed :status))
+                                    "A positive handler must report EXECUTED.")
+             (commit-3-smoke-assert (getf observed :marker-observed-p)
+                                    "A positive handler must observe its marker.")
+             (commit-3-smoke-assert (getf observed :repository-unchanged-p)
+                                    "A positive handler must preserve Git state.")
+             (commit-3-smoke-assert (null (getf observed :mutations-performed))
+                                    "A validation handler must report no mutation.")
+             (dolist (key '(:argv-list-command-p
+                            :directory-from-executor-repository-root-p
+                            :capture-stdout-p
+                            :capture-stderr-p
+                            :capture-exit-status-p
+                            :verify-expected-marker-p
+                            :verify-repository-unchanged-p))
+               (commit-3-smoke-assert
+                (getf observed key)
+                (format nil "Positive handler evidence must assert ~S." key)))
+             (commit-3-smoke-assert
+              (null (getf observed :shell-command-string-p))
+              "Validation commands must never be shell command strings.")
+             (commit-3-smoke-assert
+              (string= repository-status-before
+                       (executor-test-git root "status" "--porcelain=v2"
+                                          "--untracked-files=all"))
+              "External validation fixtures must never alter repository status."))))
+      (uiop:delete-directory-tree temporary-root
+                                  :validate t :if-does-not-exist :ignore))
+    (commit-3-smoke-assert (null (probe-file temporary-root))
+                           "Success fixtures must be cleaned with UNWIND-PROTECT.")
+    result))
+
+(defun executor-test-run-negative-validation-handler
+    (root head provenance operator resolver-name marker reference-fixtures-p)
+  (let* ((later-handler-invoked-p nil)
+         (plan (list (list operator)
+                     '(dreyeck/shop3::!run-shop3-provider-boundary-tests)))
+         (executor
+           (dreyeck/shop3/executor:make-commit-3-executor
+            :repository-root root
+            :handler-overrides
+            (list
+             (cons 'dreyeck/shop3::!run-shop3-provider-boundary-tests
+                   (lambda (ignored-executor ignored-action ignored-context)
+                     (declare (ignore ignored-executor ignored-action
+                                      ignored-context))
+                     (setf later-handler-invoked-p t)
+                     (list :status :succeeded
+                           :observed-effects '((:later-handler t))))))))
+         (context (executor-test-context executor plan root head provenance))
+         (temporary-root (executor-test-unique-temporary-root "failure"))
+         (result nil))
+    (unwind-protect
+         (let ((dreyeck/shop3/executor::*validation-command-resolver*
+                 (lambda (name ignored-executor)
+                   (declare (ignore ignored-executor))
+                   (commit-3-smoke-assert
+                    (eq resolver-name name)
+                    "The negative handler must request its exact command surface.")
+                   (executor-test-validation-command-specification
+                    temporary-root marker
+                    :missing-dependency-p t
+                    :reference-fixtures-p reference-fixtures-p))))
+           (setf result
+                 (dreyeck/shop3/executor:execute-plan-armed
+                  executor plan context))
+           (let ((body (executor-test-result-body result)))
+             (commit-3-smoke-assert
+              (eq :handler-failure (executor-test-failure-type result))
+              "A missing runtime dependency must fail as HANDLER-FAILURE.")
+             (commit-3-smoke-assert (getf body :execution-authorized-p)
+                                    "The arming gate must authorize before dispatch.")
+             (commit-3-smoke-assert (getf body :handler-invoked-p)
+                                    "The failing handler must be invoked.")
+             (commit-3-smoke-assert
+              (zerop (getf body :executed-action-count))
+              "A failed validation action must not count as executed.")
+             (commit-3-smoke-assert (null (getf body :mutations-performed))
+                                    "A failed handler must report no mutations.")
+             (commit-3-smoke-assert (null later-handler-invoked-p)
+                                    "No later handler may run after failure.")))
+      (uiop:delete-directory-tree temporary-root
+                                  :validate t :if-does-not-exist :ignore))
+    (commit-3-smoke-assert (null (probe-file temporary-root))
+                           "Failure fixtures must be cleaned with UNWIND-PROTECT.")
+    result))
+
 (defun executor-test-assert-gate-report-shape (report)
   (dolist (key '(:status
                  :failure
@@ -126,6 +372,12 @@
          (raw (getf live :raw-plan))
          (shorter (getf live :shorter-plan))
          (normalized (getf live :normalized-plan))
+         (provider-handler-identity-before
+           (symbol-function
+            'dreyeck/shop3/executor::%execute-provider-boundary-tests))
+         (hyperdoc-repository-snapshot-before
+           (dreyeck/shop3/executor::%validation-repository-snapshot
+            #P"/Users/rgb/workspace/hyperdoc/"))
          (executor (dreyeck/shop3/executor:make-commit-3-executor))
          (registry (dreyeck/shop3/executor:operator-registry executor))
          (legacy-paths
@@ -172,11 +424,24 @@
     (commit-3-smoke-assert (= 12 (length registry))
                            "The closed registry must contain 12 operator schemas.")
     (commit-3-smoke-assert
-     (= 1 (count-if (lambda (entry) (getf entry :execute-handler)) registry))
-     "The registry must retain exactly one implemented execute handler.")
+     (= 6 (count-if (lambda (entry) (getf entry :execute-handler)) registry))
+     "The registry must expose exactly six implemented execute handlers.")
     (commit-3-smoke-assert
-     (= 11 (count-if-not (lambda (entry) (getf entry :execute-handler)) registry))
-     "The registry must retain exactly eleven missing handlers.")
+     (= 6 (count-if-not (lambda (entry) (getf entry :execute-handler)) registry))
+     "The registry must retain exactly six blocked handlers.")
+    (dolist (operator
+             '(dreyeck/shop3::!delete-legacy-shop3-copy
+               dreyeck/shop3::!write-shop3-reference-boundary-checker
+               dreyeck/shop3::!write-shop3-reference-boundary-fixture
+               dreyeck/shop3::!wire-shop3-reference-boundary-checker
+               dreyeck/shop3::!write-commit-3-execution-evidence
+               dreyeck/shop3::!record-commit-3-execution-complete))
+      (let ((entry (find operator registry :key (lambda (item)
+                                                  (getf item :operator)))))
+        (commit-3-smoke-assert entry
+                               "Each blocked operator must remain registered.")
+        (commit-3-smoke-assert (null (getf entry :execute-handler))
+                               "Blocked operators must retain no handler.")))
     (dolist (action normalized)
       (multiple-value-bind (spec failure)
           (dreyeck/shop3/executor:resolve-operator-handler executor (first action))
@@ -288,12 +553,16 @@
       (commit-3-smoke-assert
        (eq :execute-handler-unavailable (executor-test-failure-type result))
        "The current eighteen-action plan must stop at handler preflight.")
-      (commit-3-smoke-assert (= 11 (getf body :missing-handler-count))
-                             "The current plan must expose eleven missing handlers.")
+      (commit-3-smoke-assert (= 6 (getf body :missing-handler-count))
+                             "The current plan must expose six missing handlers.")
+      (commit-3-smoke-assert
+       (equal '(1 2 3 4 5 6 7 8 9 10 17 18)
+              (getf body :missing-action-indexes))
+       "Full preflight must report every occurrence of missing handlers.")
       (commit-3-smoke-assert (= 12 (getf body :registered-operator-count))
                              "The armed report must expose twelve registrations.")
-      (commit-3-smoke-assert (= 1 (getf body :implemented-handler-count))
-                             "The armed report must expose one implementation.")
+      (commit-3-smoke-assert (= 6 (getf body :implemented-handler-count))
+                             "The armed report must expose six implementations.")
       (commit-3-smoke-assert (null (getf body :handler-invoked-p))
                              "Handler preflight failure must invoke no handler.")
       (commit-3-smoke-assert (zerop (getf body :executed-action-count))
@@ -312,6 +581,37 @@
        "A missing first handler must fail in full-plan preflight.")
       (commit-3-smoke-assert (null (getf body :handler-invoked-p))
                              "A missing first handler must not be invoked."))
+    (let* ((result
+             (dreyeck/shop3/executor:execute-plan-armed
+              executor (executor-test-validation-plan) nil))
+           (body (executor-test-result-body result)))
+      (commit-3-smoke-assert (getf body :plan-valid-p)
+                             "The six-action validation subplan must be valid.")
+      (commit-3-smoke-assert
+       (= 6 (getf body :canonical-plan-action-count))
+       "The validation subplan must contain six actions.")
+      (commit-3-smoke-assert
+       (zerop (getf body :missing-handler-count))
+       "The validation subplan must have complete handler coverage.")
+      (commit-3-smoke-assert
+       (eq :execution-context-wrong-type (executor-test-failure-type result))
+       "Coverage preflight must stop before authoritative execution."))
+    (dolist (resolver-name
+             '(:direct-shop3-gap-canary
+               :compatibility-shop3-gap-canary
+               :dual-load-package-identity-canary
+               :hyperbook-server-load-gate))
+      (let* ((specification
+               (dreyeck/shop3/executor::%default-validation-command-resolver
+                resolver-name executor))
+             (observations
+               (mapcar #'dreyeck/shop3/executor::%dependency-observation
+                       (getf specification :dependencies))))
+        (commit-3-smoke-assert
+         (every (lambda (entry) (getf entry :exists-and-callable-p))
+                observations)
+         (format nil "The ~S invocation dependencies must be present."
+                 resolver-name))))
     (let* ((response
              (dreyeck/shop3/executor:execute-plan-action
               executor (first (executor-test-provider-plan)) :mode :execute))
@@ -409,6 +709,57 @@
                  dreyeck/shop3/executor::*commit-3-private-authorization-object*
                  public-report :test #'eq))
            "The public report must not expose the authorization object."))))
+    (with-executor-test-repository (root head provenance)
+      (let ((cases
+              '((dreyeck/shop3::!run-shop3-reference-boundary-fixtures
+                 :reference-boundary-fixtures
+                 "SHOP3_REFERENCE_BOUNDARY_OK" t)
+                (dreyeck/shop3::!run-direct-shop3-load-and-gap-canary
+                 :direct-shop3-gap-canary
+                 "DIRECT_DREYECK_SHOP3_GAP_CANARY=:PASS" nil)
+                (dreyeck/shop3::!run-compatibility-shop3-load-and-gap-canary
+                 :compatibility-shop3-gap-canary
+                 "COMPATIBILITY_HYPERDOC_SHOP3_GAP_CANARY=:PASS" nil)
+                (dreyeck/shop3::!run-dual-load-identity-canary
+                 :dual-load-package-identity-canary
+                 "DUAL_LOAD_PACKAGE_IDENTITY_CANARY=:PASS" nil)
+                (dreyeck/shop3::!run-repository-load-gate
+                 :hyperbook-server-load-gate "LOAD_GATE_OK" nil))))
+        (dolist (case cases)
+          (destructuring-bind
+              (operator resolver-name marker reference-fixtures-p) case
+            (executor-test-run-positive-validation-handler
+             root head provenance operator resolver-name marker
+             reference-fixtures-p)
+            (executor-test-run-negative-validation-handler
+             root head provenance operator resolver-name marker
+             reference-fixtures-p)))
+        (executor-test-run-repository-delta-validation-handler
+         root head provenance)
+        (let* ((plan
+                 '((dreyeck/shop3::!run-shop3-reference-boundary-fixtures)))
+               (default-executor
+                 (dreyeck/shop3/executor:make-commit-3-executor
+                  :repository-root root))
+               (default-context
+                 (executor-test-context default-executor plan
+                                        root head provenance))
+               (default-result
+                 (dreyeck/shop3/executor:execute-plan-armed
+                  default-executor plan default-context)))
+          (commit-3-smoke-assert
+           (eq :handler-failure (executor-test-failure-type default-result))
+           "The production reference handler must fail closed when its authoritative files are absent."))))
+    (commit-3-smoke-assert
+     (eq provider-handler-identity-before
+         (symbol-function
+          'dreyeck/shop3/executor::%execute-provider-boundary-tests))
+     "The existing provider-boundary handler identity must remain EQ.")
+    (commit-3-smoke-assert
+     (equal hyperdoc-repository-snapshot-before
+            (dreyeck/shop3/executor::%validation-repository-snapshot
+             #P"/Users/rgb/workspace/hyperdoc/"))
+     "Temporary fixture tests must preserve the exact HyperDoc Git snapshot.")
     (with-executor-test-repository (root head provenance)
       (let* ((fixture-executor
                (dreyeck/shop3/executor:make-commit-3-executor
