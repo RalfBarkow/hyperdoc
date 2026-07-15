@@ -161,6 +161,24 @@
     dreyeck/shop3::!run-shop3-provider-boundary-tests
     dreyeck/shop3::!run-repository-load-gate))
 
+(defun executor-test-package-reader-prefix-present-p (text)
+  (or (search "DREYECK/SHOP3:" text :test #'char-equal)
+      (search "HYPERDOC/SHOP3:" text :test #'char-equal)))
+
+(defun executor-test-clean-nix-development-shell-prefix ()
+  '("env"
+    "-u" "CL_SOURCE_REGISTRY"
+    "-u" "CL_SOURCE_REGISTRY_CONFIG"
+    "-u" "ASDF_OUTPUT_TRANSLATIONS"
+    "-u" "ASDF_OUTPUT_TRANSLATIONS_CONFIG"
+    "nix" "develop"))
+
+(defun executor-test-clean-nix-development-shell-command-p (argv)
+  (let ((prefix (executor-test-clean-nix-development-shell-prefix)))
+    (and (listp argv)
+         (<= (length prefix) (length argv))
+         (equal prefix (subseq argv 0 (length prefix))))))
+
 (defun executor-test-unique-temporary-root (label)
   (uiop:ensure-directory-pathname
    (merge-pathnames
@@ -532,6 +550,34 @@
                    fixture-positions)
             (< wire-position reference-position))
        "The full plan must run reference-boundary validation only after its authoritative artifacts are materialized."))
+    (dolist
+        (form
+         (list
+          (dreyeck/shop3/executor::%gap-canary-evaluation-form
+           :dreyeck/shop3
+           "DIRECT_DREYECK_SHOP3_GAP_CANARY=:PASS")
+          (dreyeck/shop3/executor::%gap-canary-evaluation-form
+           :hyperdoc/shop3
+           "COMPATIBILITY_HYPERDOC_SHOP3_GAP_CANARY=:PASS")
+          (dreyeck/shop3/executor::%dual-load-canary-evaluation-form)))
+      (commit-3-smoke-assert
+       (not (executor-test-package-reader-prefix-present-p form))
+       "Validation command forms must be readable before SHOP3 packages exist."))
+    (dolist (resolver-name
+             '(:reference-boundary-fixtures
+               :direct-shop3-gap-canary
+               :compatibility-shop3-gap-canary
+               :dual-load-package-identity-canary))
+      (let ((specification
+              (dreyeck/shop3/executor::%default-validation-command-resolver
+               resolver-name executor)))
+        (dolist (command (getf specification :commands))
+          (commit-3-smoke-assert
+           (executor-test-clean-nix-development-shell-command-p
+            (getf command :argv))
+           (format nil
+                   "The ~S production command must clean the ASDF environment before nested Nix entry."
+                   resolver-name)))))
     (dolist (public-name
              '("COMMIT-3-NON-MUTATING-VALIDATION-SUBPLAN"
                "MAKE-COMMIT-3-VALIDATION-EXECUTION-CONTEXT"))

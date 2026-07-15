@@ -261,14 +261,94 @@
   #P"/Users/rgb/workspace/hauptsache/docs/operations/kioskbeerli-salon-switching-contract.shop3.lisp")
 
 (defun %gap-canary-evaluation-form (system marker)
-  (format nil
-          "(progn (asdf:load-system ~S) (load ~S) (let* ((runner (symbol-function (find-symbol \"RUN-KIOSKBEERLI-SALON-SWITCHING-CONTRACT-GAP-PLAN-OBJECT\" \"DREYECK/SHOP3\"))) (result (funcall runner)) (plans (dreyeck/shop3:plans-of result)) (expected '((dreyeck/shop3::!record-salon-secret-contract-gap \"/var/lib/kioskbeerli-secrets/kioskbeerli-wifi.env\")))) (assert (= 1 (length plans))) (assert (equal expected (first plans))) (format t \"~~&~A~~%\")))"
-          system
-          (namestring +shop3-gap-canary-contract-source+)
-          marker))
+  (format
+   nil
+   "(progn
+      (asdf:load-system ~S)
+      (load ~S)
+      (let* ((package
+               (or (find-package \"DREYECK/SHOP3\")
+                   (error \"DREYECK/SHOP3 is unavailable after ASDF load.\")))
+             (runner-symbol
+               (or (find-symbol
+                    \"RUN-KIOSKBEERLI-SALON-SWITCHING-CONTRACT-GAP-PLAN-OBJECT\"
+                    package)
+                   (error \"The Kioskbeerli gap-plan runner is unavailable.\")))
+             (plans-of-symbol
+               (or (find-symbol \"PLANS-OF\" package)
+                   (error \"PLANS-OF is unavailable.\")))
+             (operator-symbol
+               (or (find-symbol
+                    \"!RECORD-SALON-SECRET-CONTRACT-GAP\"
+                    package)
+                   (error \"The expected gap-plan operator is unavailable.\"))))
+        (unless (fboundp runner-symbol)
+          (error \"The Kioskbeerli gap-plan runner is not fbound.\"))
+        (unless (fboundp plans-of-symbol)
+          (error \"PLANS-OF is not fbound.\"))
+        (let* ((runner (symbol-function runner-symbol))
+               (plans-of (symbol-function plans-of-symbol))
+               (result (funcall runner))
+               (plans (funcall plans-of result))
+               (expected
+                 (list
+                  (list
+                   operator-symbol
+                   \"/var/lib/kioskbeerli-secrets/kioskbeerli-wifi.env\"))))
+          (assert (= 1 (length plans)))
+          (assert (equal expected (first plans)))
+          (format t \"~~&~A~~%\"))))"
+   system
+   (namestring +shop3-gap-canary-contract-source+)
+   marker))
 
 (defun %dual-load-canary-evaluation-form ()
-  "(progn (asdf:load-system :dreyeck/shop3) (let ((package (find-package :dreyeck/shop3)) (class (find-class 'dreyeck/shop3:hyperdoc-htn-plan-result)) (function (symbol-function 'dreyeck/shop3:run-hyperdoc-asdf-refactor-plan-object))) (asdf:load-system :hyperdoc/shop3) (assert (eq package (find-package :hyperdoc/shop3))) (assert (eq class (find-class 'hyperdoc/shop3:hyperdoc-htn-plan-result))) (assert (eq function (symbol-function 'hyperdoc/shop3:run-hyperdoc-asdf-refactor-plan-object))) (format t \"~&DUAL_LOAD_PACKAGE_IDENTITY_CANARY=:PASS~%\")))")
+  "(progn
+     (asdf:load-system :dreyeck/shop3)
+     (let* ((direct-package
+              (or (find-package \"DREYECK/SHOP3\")
+                  (error \"DREYECK/SHOP3 is unavailable.\")))
+            (class-symbol
+              (or (find-symbol
+                   \"HYPERDOC-HTN-PLAN-RESULT\"
+                   direct-package)
+                  (error \"The plan-result class symbol is unavailable.\")))
+            (function-symbol
+              (or (find-symbol
+                   \"RUN-HYPERDOC-ASDF-REFACTOR-PLAN-OBJECT\"
+                   direct-package)
+                  (error \"The plan runner symbol is unavailable.\"))))
+       (unless (fboundp function-symbol)
+         (error \"The plan runner is not fbound.\"))
+       (let ((class (find-class class-symbol))
+             (function (symbol-function function-symbol)))
+         (asdf:load-system :hyperdoc/shop3)
+         (let* ((compatibility-package
+                  (or (find-package \"HYPERDOC/SHOP3\")
+                      (error \"HYPERDOC/SHOP3 is unavailable.\")))
+                (compatibility-class-symbol
+                  (or (find-symbol
+                       \"HYPERDOC-HTN-PLAN-RESULT\"
+                       compatibility-package)
+                      (error \"The compatibility class symbol is unavailable.\")))
+                (compatibility-function-symbol
+                  (or (find-symbol
+                       \"RUN-HYPERDOC-ASDF-REFACTOR-PLAN-OBJECT\"
+                       compatibility-package)
+                      (error
+                       \"The compatibility runner symbol is unavailable.\"))))
+           (unless (fboundp compatibility-function-symbol)
+             (error \"The compatibility runner is not fbound.\"))
+           (assert (eq direct-package compatibility-package))
+           (assert
+            (eq class
+                (find-class compatibility-class-symbol)))
+           (assert
+            (eq function
+                (symbol-function compatibility-function-symbol)))
+           (format
+            t
+            \"~&DUAL_LOAD_PACKAGE_IDENTITY_CANARY=:PASS~%\")))))")
 
 (defun %default-validation-command-resolver (name executor)
   (let* ((root (plan-executor-repository-root executor))
@@ -281,9 +361,22 @@
                     "tools/testdata/shop3-reference-boundary/rejected-added-lines.diff"
                     root))
          (load-gate (merge-pathnames "tools/check-lisp-load-gate.sh" root))
+         ;; The executor is itself commonly invoked from a Nix
+         ;; development shell.  Nested Nix entries must not inherit
+         ;; an ASDF registry or output-translation configuration.
+         (clean-asdf-environment-prefix
+           '("env"
+             "-u" "CL_SOURCE_REGISTRY"
+             "-u" "CL_SOURCE_REGISTRY_CONFIG"
+             "-u" "ASDF_OUTPUT_TRANSLATIONS"
+             "-u" "ASDF_OUTPUT_TRANSLATIONS_CONFIG"))
+         (nix-sbcl-prefix
+           (append clean-asdf-environment-prefix
+                   '("nix" "develop" "--command" "sbcl"
+                     "--no-userinit")))
          (fresh-sbcl-prefix
-           '("nix" "develop" "--command" "sbcl" "--no-userinit"
-             "--non-interactive" "--eval" "(require :asdf)")))
+           (append nix-sbcl-prefix
+                   '("--non-interactive" "--eval" "(require :asdf)"))))
     (ecase name
       (:reference-boundary-fixtures
        (list
@@ -295,15 +388,15 @@
         :commands
         (list
          (list :argv
-               (list "nix" "develop" "--command" "sbcl" "--no-userinit"
-                     "--script" (namestring checker) "--diff-file"
-                     (namestring allowed))
+               (append nix-sbcl-prefix
+                       (list "--script" (namestring checker) "--diff-file"
+                             (namestring allowed)))
                :expected-exit-status 0
                :expected-marker "SHOP3_REFERENCE_BOUNDARY_OK")
          (list :argv
-               (list "nix" "develop" "--command" "sbcl" "--no-userinit"
-                     "--script" (namestring checker) "--diff-file"
-                     (namestring rejected))
+               (append nix-sbcl-prefix
+                       (list "--script" (namestring checker) "--diff-file"
+                             (namestring rejected)))
                :expected-exit-status 1
                :expected-marker "SHOP3_REFERENCE_BOUNDARY_REJECTED"))))
       (:direct-shop3-gap-canary
