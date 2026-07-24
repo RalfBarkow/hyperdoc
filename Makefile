@@ -16,6 +16,7 @@
 
 .PHONY: all explain-build run stop status clean rebuild help \
 	build-standalone build-clog-frame build-runtime-wrapper build-runtime-closure build-runner \
+	hyperdoc-emacs-path \
 	repomix repomix-help repomix-clean repomix-all \
 	repomix-core repomix-dock repomix-validation repomix-fedwiki \
 	repomix-dmx repomix-deployment repomix-dm6 repomix-zotero \
@@ -155,12 +156,17 @@ validate-runtime-closure: $(SERVER_EXE) $(SERVER_WRAPPER) tools/validate-hyperdo
 
 build-runner: $(RUNNER)
 
+hyperdoc-emacs-path:
+	@path="$$(nix eval --raw .#hyperdoc-emacs.outPath)"; \
+		echo "$$path/bin/hyperdoc-emacs"
+
 help:
 	@echo "Standalone CLOG Frame:"
 	@echo "  make        build standalone CLOG Frame bundle"
 	@echo "  make run    launch it"
 	@echo "  make stop   stop background HyperDoc server"
 	@echo "  make status show server status"
+	@echo "  make hyperdoc-emacs-path show the reproducible Emacs launcher path"
 	@echo "  make clean  remove generated bundle"
 	@echo
 	@echo "Repomix:"

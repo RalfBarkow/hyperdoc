@@ -3,7 +3,12 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs-emacs.url = "github:NixOS/nixpkgs/nixos-25.11";
     flake-utils.url = "github:numtide/flake-utils";
+    gptel-src = {
+      url = "github:RalfBarkow/gptel/8701e2bd80c5d2091ce2decef5d34d6fce4a3ada";
+      flake = false;
+    };
     arrows-src = {
       url = "github:Harleqin/arrows";
       flake = false;
@@ -58,7 +63,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, flake-utils, arrows-src, clog-moldable-inspector-src, html-inspector-views-src, plump-inspector-views-src, lwcells-src, shop3, shop3-pddl-tools, shop3-fiveam-asdf, shop3-random-state, shop3-documentation-utils, shop3-trivial-indent, shop3-trivial-garbage, shop3-iterate }:
+  outputs = { self, nixpkgs, nixpkgs-emacs, flake-utils, gptel-src, arrows-src, clog-moldable-inspector-src, html-inspector-views-src, plump-inspector-views-src, lwcells-src, shop3, shop3-pddl-tools, shop3-fiveam-asdf, shop3-random-state, shop3-documentation-utils, shop3-trivial-indent, shop3-trivial-garbage, shop3-iterate }:
     let
       dreyeckHardwarePath = "${toString ./nix/hosts}/dreyeck-ch/hardware-configuration.nix";
       dreyeckHardwareModule =
@@ -70,6 +75,10 @@
         pkgs = import nixpkgs {
           inherit system;
         };
+        emacsPkgs = import nixpkgs-emacs {
+          inherit system;
+        };
+        emacsPackageSet = emacsPkgs.emacs.pkgs;
         namedClosurePkg = pkgs.callPackage ./nix/sbcl-named-closure.nix { };
         arrowsSrc = arrows-src;
         clogSrcPatched = pkgs.applyPatches {
@@ -182,13 +191,42 @@
           ps."eclector-concrete-syntax-tree"
         ]);
 
-        hyperdocEmacs = pkgs.emacs.pkgs.withPackages (epkgs: with epkgs; [
+        hyperdocGptel = emacsPackageSet.trivialBuild {
+          pname = "gptel";
+          version = "0.9.9.5";
+          src = gptel-src;
+          packageRequires = with emacsPackageSet; [
+            compat
+            transient
+          ];
+        };
+
+        hyperdocEmacs = emacsPackageSet.withPackages (epkgs: with epkgs; [
           slime
           sly
           paredit
           rainbow-delimiters
           magit
+          hyperdocGptel
         ]);
+
+        hyperdocEmacsBootstrap = pkgs.runCommand "hyperdoc-emacs-bootstrap" { } ''
+          mkdir -p "$out/share/hyperdoc"
+          cp ${./nix/emacs/hyperdoc-bootstrap.el} \
+            "$out/share/hyperdoc/hyperdoc-bootstrap.el"
+        '';
+
+        hyperdocEmacsCommand = pkgs.writeShellScriptBin "hyperdoc-emacs" ''
+          exec ${hyperdocEmacs}/bin/emacs -Q \
+            --load ${hyperdocEmacsBootstrap}/share/hyperdoc/hyperdoc-bootstrap.el \
+            "$@"
+        '';
+
+        hyperdocEmacsclient = pkgs.writeShellScriptBin "hyperdoc-emacsclient" ''
+          server_name="''${HYPERDOC_EMACS_SERVER_NAME:-hyperdoc}"
+          exec ${hyperdocEmacs}/bin/emacsclient \
+            --socket-name "$server_name" "$@"
+        '';
 
         hyperdocSlimeConnect = pkgs.writeShellScriptBin "hyperdoc-slime-connect" ''
           host="''${1:-127.0.0.1}"
@@ -200,9 +238,20 @@
         hyperdocSlyConnect = pkgs.writeShellScriptBin "hyperdoc-sly-connect" ''
           host="''${1:-127.0.0.1}"
           port="''${2:-''${SLYNK_PORT:-''${SWANK_PORT:-4006}}}"
-          exec ${hyperdocEmacs}/bin/emacs -Q \
-            --eval "(progn (require 'sly) (sly-connect \"$host\" $port))"
+          export HYPERDOC_SLY_HOST="$host"
+          export HYPERDOC_SLY_PORT="$port"
+          exec ${hyperdocEmacsCommand}/bin/hyperdoc-emacs \
+            --eval '(hyperdoc-sly-connect-from-environment)'
         '';
+
+        hyperdocEmacsLauncher = pkgs.symlinkJoin {
+          name = "hyperdoc-emacs-launcher";
+          paths = [
+            hyperdocEmacsCommand
+            hyperdocEmacsclient
+            hyperdocSlyConnect
+          ];
+        };
 
         lispfmt = pkgs.writeShellApplication {
           name = "lispfmt";
@@ -275,8 +324,8 @@
             sbclEnv
             namedClosurePkg
             hyperdocEmacs
+            hyperdocEmacsLauncher
             hyperdocSlimeConnect
-            hyperdocSlyConnect
             lispfmt
             pkgs.python3
             pkgs.git
@@ -370,6 +419,9 @@ Matching editor clients:
   hyperdoc-slime-connect 127.0.0.1 <printed-swank-port>
   hyperdoc-sly-connect   127.0.0.1 <printed-slynk-port>
 
+Matching HyperDoc emacsclient:
+  hyperdoc-emacsclient --eval '(server-running-p server-name)'
+
 URL:
   http://localhost:8080/boot.html
 EOF
@@ -377,7 +429,12 @@ EOF
         };
 
         packages = {
-          inherit lispfmt;
+          inherit lispfmt hyperdocEmacs hyperdocGptel
+            hyperdocEmacsBootstrap hyperdocEmacsLauncher;
+          hyperdoc-emacs = hyperdocEmacsLauncher;
+          hyperdoc-emacs-bootstrap = hyperdocEmacsBootstrap;
+          hyperdoc-emacsclient = hyperdocEmacsLauncher;
+          hyperdoc-sly-connect = hyperdocEmacsLauncher;
           clogframe = pkgs.callPackage ./nix/clogframe.nix { };
           hyperdoc-release = releasePackage;
           hyperdoc-runtime-wrapper = runtimeWrapperPackage;
@@ -392,6 +449,21 @@ EOF
         apps.hyperdoc-runtime-server = {
           type = "app";
           program = "${runtimeWrapperPackage}/bin/hyperdoc-runtime-server";
+        };
+
+        apps.hyperdoc-emacs = {
+          type = "app";
+          program = "${hyperdocEmacsLauncher}/bin/hyperdoc-emacs";
+        };
+
+        apps.hyperdoc-sly-connect = {
+          type = "app";
+          program = "${hyperdocEmacsLauncher}/bin/hyperdoc-sly-connect";
+        };
+
+        apps.hyperdoc-emacsclient = {
+          type = "app";
+          program = "${hyperdocEmacsLauncher}/bin/hyperdoc-emacsclient";
         };
 
         apps.mcp-release = {

@@ -50,6 +50,23 @@
         "type": "github"
       }
     },
+    "gptel-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784130458,
+        "narHash": "sha256-RTFLoswKWkMsB1KNMtIdlcM6/LnsL5/seQHsHglFxWs=",
+        "owner": "RalfBarkow",
+        "repo": "gptel",
+        "rev": "8701e2bd80c5d2091ce2decef5d34d6fce4a3ada",
+        "type": "github"
+      },
+      "original": {
+        "owner": "RalfBarkow",
+        "repo": "gptel",
+        "rev": "8701e2bd80c5d2091ce2decef5d34d6fce4a3ada",
+        "type": "github"
+      }
+    },
     "html-inspector-views-src": {
       "flake": false,
       "locked": {
@@ -98,6 +115,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-emacs": {
+      "locked": {
+        "lastModified": 1782847189,
+        "narHash": "sha256-twXPFqFsrrY5r28Zh7Homgcp2gUMBgQ6WDS98Q/3xFI=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "b6018f87da91d19d0ab4cf979885689b469cdd41",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "plump-inspector-views-src": {
       "flake": false,
       "locked": {
@@ -119,9 +152,11 @@
         "arrows-src": "arrows-src",
         "clog-moldable-inspector-src": "clog-moldable-inspector-src",
         "flake-utils": "flake-utils",
+        "gptel-src": "gptel-src",
         "html-inspector-views-src": "html-inspector-views-src",
         "lwcells-src": "lwcells-src",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-emacs": "nixpkgs-emacs",
         "plump-inspector-views-src": "plump-inspector-views-src",
         "shop3": "shop3",
         "shop3-documentation-utils": "shop3-documentation-utils",
