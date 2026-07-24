@@ -1,0 +1,193 @@
+<h1>Nix-owned gptel in the HyperDoc Emacs environment</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  This reference/contract page defines the reproducible HyperDoc Emacs launch
+  path. Nix owns the editor and its packages, an immutable repository bootstrap
+  owns startup configuration, and the operator manages llama-server separately.
+</p>
+
+<h2>Ownership contract</h2>
+
+<ul>
+  <li>The flake output <tt>hyperdocGptel</tt> builds gptel from the explicitly locked source revision.</li>
+  <li>The flake output <tt>hyperdocEmacs</tt> composes gptel, Transient, Compat, SLY, SLIME, Magit, and the existing editing packages from one Emacs package set.</li>
+  <li>The flake output <tt>hyperdocEmacsBootstrap</tt> copies the repository bootstrap into an immutable Nix-store output.</li>
+  <li>The <tt>hyperdoc-emacs</tt> launcher always executes that Emacs closure with <tt>-Q</tt> and loads that store bootstrap.</li>
+  <li>The bootstrap starts the named server <tt>hyperdoc</tt>, configures Local Gemma 4 E2B, and loads SLY.</li>
+  <li>Spacemacs, package.el, <tt>~/.emacs.d/elpa</tt>, and <tt>/Users/rgb/workspace/gptel</tt> own nothing in this path.</li>
+  <li>llama-server remains an independently managed operator process; startup never sends it a request.</li>
+</ul>
+
+<h2>Reproducible source boundary</h2>
+
+<p>
+  <tt>gptel-src</tt> is locked to revision
+  <tt>8701e2bd80c5d2091ce2decef5d34d6fce4a3ada</tt>. The package declares
+  version <tt>0.9.9.5</tt> and requires Emacs 27.1 or newer, Transient 0.7.8
+  or newer, and Compat 30.1.0.0 or newer. The separate
+  <tt>nixpkgs-emacs</tt> input supplies the coherent modern Emacs package set;
+  the repository's Common Lisp package set remains on its existing pin.
+</p>
+
+<h2>Live-session safety boundary</h2>
+
+<p>
+  Hot-loading is allowed only through an emacsclient whose server reports the
+  identity of the target Emacs process. Before loading, capture the SLY
+  connection object, inferior process, mREPL buffers, loaded Transient version,
+  and library locations. If the valuable Emacs process has no server socket,
+  preserve it unchanged: do not restart it, synthesize keyboard input, attach a
+  debugger, replace Transient in place, or guess which GUI process is the target.
+</p>
+
+<h2>Expectation artifact</h2>
+
+<dl>
+  <dt>Expectation</dt>
+  <dd>The running HyperDoc/SLY Emacs can be reached by a matching emacsclient and can therefore receive a verified hot-load.</dd>
+  <dt>Observed boundary</dt>
+  <dd>The earlier <tt>hyperdoc-sly-connect</tt> launcher started Emacs with <tt>-Q</tt> and connected SLY, but did not start an Emacs server.</dd>
+  <dt>Classification</dt>
+  <dd>False expectation for the current launcher contract: a SLY connection does not imply an Emacs server socket.</dd>
+  <dt>Resolution</dt>
+  <dd>Keep the public SLY launcher interface, but route it through the Nix-owned bootstrap that starts the dedicated server before the dynamic SLY connection.</dd>
+  <dt>Prevention</dt>
+  <dd>The matching <tt>hyperdoc-emacsclient</tt> always selects server name <tt>hyperdoc</tt>, with an environment override reserved for disposable tests.</dd>
+</dl>
+
+<h2>Operator commands</h2>
+
+<p>The canonical SLY launch preserves positional host and port arguments:</p>
+
+<pre>
+nix run .#hyperdoc-sly-connect -- 127.0.0.1 &lt;printed-slynk-port&gt;
+</pre>
+
+<p>The matching client selects the deterministic <tt>hyperdoc</tt> server:</p>
+
+<pre>
+nix run .#hyperdoc-emacsclient -- --eval '(server-running-p server-name)'
+</pre>
+
+<p>
+  HyperDoc owns port <tt>8080</tt>. The independently started llama-server owns
+  <tt>127.0.0.1:8081</tt>. From the operator's llama.cpp checkout its current
+  separate start form is:
+</p>
+
+<pre>
+./build/bin/llama-server \
+  -hf google/gemma-4-E2B-it-qat-q4_0-gguf:Q4_0 \
+  --host 127.0.0.1 --port 8081 --jinja
+</pre>
+
+<p>
+  This command is never run by the HyperDoc launcher. To inspect the configured
+  backend without sending a request, use the matching client:
+</p>
+
+<pre>
+nix run .#hyperdoc-emacsclient -- --eval \
+  '(list (gptel-backend-name gptel-backend)
+         (gptel-backend-url gptel-backend)
+         gptel-model
+         (locate-library "gptel")
+         (locate-library "gptel-openai"))'
+</pre>
+
+<p>
+  Both library paths must begin with <tt>/nix/store/</tt>; neither may name the
+  local gptel checkout or <tt>~/.emacs.d/elpa</tt>. Run
+  <tt>make hyperdoc-emacs-path</tt> to print the launcher selected by the flake
+  without launching it.
+</p>
+
+<h2>Replay checks</h2>
+
+<pre>
+nix eval --json .#packages.x86_64-darwin.hyperdocGptel
+nix build .#hyperdocGptel --no-link --print-out-paths
+nix build .#hyperdocEmacs --no-link --print-out-paths
+nix build .#hyperdoc-emacs-bootstrap --no-link --print-out-paths
+nix build .#hyperdoc-emacs --no-link --print-out-paths
+</pre>
+
+<p>
+  Run <tt>hyperdoc-emacs --batch</tt> with an isolated HOME and load
+  <tt>tests/hyperdoc-emacs-bootstrap-smoke.el</tt>. The check covers gptel,
+  gptel-openai, Transient, Compat, SLY, the exact backend fields, reload safety,
+  and an intercepted disposable SLY endpoint.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Nix-owned gptel Emacs integration"><tt>Nix-owned gptel Emacs integration</tt></a></li>
+  <li><a expr="(future-hyperdoc-emacs-program)"><tt>future-hyperdoc-emacs-program</tt></a> — canonical knowledge/input/output and split-view prompt program.</li>
+</ul>
+
+<p>
+  The matching FedWiki slug is
+  <tt>nix-owned-gptel-emacs-integration</tt>. Its twin and daily anchor remain
+  deferred because the localhost pages worktree contains extensive unrelated
+  unresolved changes; this reference deliberately does not publish a broken
+  link or mix a new journal action into that state.
+</p>
+
+<h2>SLY mREPL inspection</h2>
+
+<pre>
+(asdf:load-system :hyperdoc/topics)
+
+(defun i (object)
+  "Safe inspector helper for SLY mREPL.
+Prefer CLOG only if it is already loaded; otherwise use CL:INSPECT.
+Never calls SLYNK:INSPECT-IN-EMACS directly."
+  (let* ((clog-package (find-package "CLOG-MOLDABLE-INSPECTOR"))
+         (clog-symbol
+           (and clog-package
+                (find-symbol "CLOG-INSPECT" clog-package))))
+    (cond
+      ((and clog-symbol (fboundp clog-symbol))
+       (handler-case
+           (progn
+             (funcall (symbol-function clog-symbol) :object object)
+             object)
+         (condition (condition)
+           (format t "~&amp;CLOG inspector failed; falling back to CL:INSPECT: ~A~%"
+                   condition)
+           (inspect object)
+           object)))
+      (t
+       (inspect object)
+       object))))
+
+(defparameter *gptel-emacs-integration-topic*
+  (hyperdoc::nix-owned-gptel-emacs-integration-topic))
+
+(format t "~&amp;type=~S id=~S title=~S~%"
+        (type-of *gptel-emacs-integration-topic*)
+        (hyperdoc::topic-id *gptel-emacs-integration-topic*)
+        (hyperdoc::topic-title *gptel-emacs-integration-topic*))
+
+(i *gptel-emacs-integration-topic*)
+</pre>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Reproducible DevEnv as Knowledge Artifact">Reproducible DevEnv as Knowledge Artifact</a></li>
+  <li><a href="https://github.com/karthink/gptel">gptel upstream</a></li>
+</ul>
+
+<h2>Boundary</h2>
+
+<p>
+  This contract configures—but does not contact—the local backend. It does not
+  start llama-server, mutate the connected Common Lisp image, reload HyperDoc,
+  or address an earlier live Emacs server. Environment overrides are limited to
+  <tt>HYPERDOC_GPTEL_HOST</tt>, <tt>HYPERDOC_GPTEL_MODEL</tt>, and the disposable
+  test server name.
+</p>

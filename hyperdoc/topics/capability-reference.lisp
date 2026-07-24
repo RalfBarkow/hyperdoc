@@ -768,3 +768,52 @@
                  "Acknowledgements"
                  "Design")))
 
+(defun nix-owned-gptel-emacs-integration-topic ()
+  (make-topic
+   :id "nix-owned-gptel-emacs-integration"
+   :title "Nix-owned gptel Emacs integration"
+   :summary "HyperDoc's Nix launcher loads a repository-owned immutable bootstrap that starts a dedicated Emacs server, configures the external local Gemma backend, and preserves the dynamic SLY endpoint without involving Spacemacs or package.el."
+   :references '("Nix-owned gptel in the HyperDoc Emacs environment"
+                 "Reproducible DevEnv as Knowledge Artifact"
+                 "https://github.com/karthink/gptel")))
+
+(defun future-hyperdoc-emacs-program ()
+  "Return the durable prompt program for the Nix-owned Emacs launcher slice."
+  '(:hyperdoc-prompt-program
+    :id make-future-hyperdoc-emacs-use-nix-owned-gptel-environment
+    :knowledge
+    ((:owner nix :objects (emacs gptel gptel-openai transient compat sly
+                           bootstrap launcher))
+     (:owner repository-bootstrap
+      :objects (server-startup backend-construction startup-coordination))
+     (:excluded-runtime-owners (spacemacs package.el local-gptel-checkout))
+     (:external-process llama-server)
+     (:invariants ((hyperdoc-port 8080) (llama-server-port 8081)
+                   (startup-network-request nil))))
+    :input
+    ((:backend-name "Local Gemma 4 E2B")
+     (:protocol "http")
+     (:host "127.0.0.1:8081")
+     (:endpoint "/v1/chat/completions")
+     (:model gemma-4-e2b)
+     (:sly-endpoint-source launcher-arguments-or-environment))
+    :output-contract
+    ((:nix-owned-emacs-closure t)
+     (:bootstrap-loaded-from-nix-store t)
+     (:server-name "hyperdoc")
+     (:streaming t)
+     (:authentication-header nil)
+     (:sly-launch-contract-preserved t)
+     (:llama-server-autostarted nil))
+    :split-view
+    (:fedwiki-story-view
+     ("Launch the Nix-owned HyperDoc Emacs."
+      "Observe the dedicated server and configured local backend."
+      "Supply the disposable or operator-selected SLY host and port."
+      "Keep HyperDoc and llama-server on distinct ports.")
+     :topic-map-program-view
+     ((owns nix hyperdoc-emacs-closure)
+      (loads hyperdoc-emacs-launcher repository-bootstrap-from-nix-store)
+      (configures repository-bootstrap local-gemma-4-e2b)
+      (connects hyperdoc-sly-connect dynamic-slynk-endpoint)
+      (manages-separately operator llama-server)))))
