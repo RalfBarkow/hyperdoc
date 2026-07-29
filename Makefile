@@ -18,7 +18,7 @@
 	build-standalone build-clog-frame build-runtime-wrapper build-runtime-closure build-runner \
 	hyperdoc-emacs-path \
 	repomix repomix-help repomix-clean repomix-all \
-	repomix-core repomix-dock repomix-validation repomix-fedwiki \
+	repomix-core repomix-roots repomix-dock repomix-validation repomix-fedwiki \
 	repomix-dmx repomix-deployment repomix-dm6 repomix-zotero \
 	repomix-full
 
@@ -48,7 +48,7 @@ RUNTIME_WRAPPER_RESULT ?= result-hyperdoc-runtime-wrapper
 
 REPOMIX_PACK = core
 PACK = $(REPOMIX_PACK)
-REPOMIX_FOCUSED_PACKS = core dock validation fedwiki dmx deployment dm6 zotero
+REPOMIX_FOCUSED_PACKS = core roots dock validation fedwiki dmx deployment dm6 zotero
 
 all: explain-build $(SERVER_EXE) $(FRAME_EXE) $(SERVER_WRAPPER) $(RUNNER)
 	@echo
@@ -174,6 +174,7 @@ help:
 	@echo "  make repomix PACK=dock"
 	@echo "  make repomix-full"
 	@echo "  make repomix-core"
+	@echo "  make repomix-roots"
 	@echo "  make repomix-all"
 	@echo "  make repomix-clean"
 
@@ -184,6 +185,10 @@ repomix:
 repomix-core:
 	@echo "==> Repomix: generating core pack"
 	tools/repomix-pack.sh core
+
+repomix-roots:
+	@echo "==> Repomix: generating Roots of Lisp pack"
+	tools/repomix-pack.sh roots
 
 repomix-dock:
 	@echo "==> Repomix: generating dock pack"
@@ -225,13 +230,14 @@ repomix-all:
 
 repomix-clean:
 	@echo "==> Repomix: removing generated outputs"
-	rm -f repomix-output-hyperdoc*.md repomix-output-hyperdoc*.xml
+	rm -f repomix-output-hyperdoc*.md repomix-output-hyperdoc*.xml repomix-output-hyperdoc*.manifest.json
 
 repomix-help:
 	@echo "Repomix targets:"
 	@echo "  make repomix"
 	@echo "  make repomix PACK=dock"
 	@echo "  make repomix-core"
+	@echo "  make repomix-roots"
 	@echo "  make repomix-dock"
 	@echo "  make repomix-validation"
 	@echo "  make repomix-fedwiki"

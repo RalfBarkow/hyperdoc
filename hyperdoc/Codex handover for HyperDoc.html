@@ -5,9 +5,9 @@
 <p>
   This page is the single canonical durable guidance for handing a HyperDoc
   slice to Codex. Keep repository-wide operating rules in <tt>AGENTS.md</tt>,
-  treat <tt>repomix-output-hyperdoc.md</tt> as the authoritative packed
-  snapshot when it is provided, and use the task prompt only for the current
-  slice contract and end-state inventory target.
+  use a manifest-qualified Repomix snapshot bundle for repository context,
+  and use the task prompt only for the current slice contract and end-state
+  inventory target. A lone Repomix output file is never authoritative.
 </p>
 
 <h2>Inspectable objects</h2>
@@ -39,8 +39,8 @@
 <p>
   <tt>AGENTS.md</tt> holds durable repo rules such as execution-environment
   policy, validation triage, documentation-surface distinctions, and
-  return-shape conventions. <tt>repomix-output-hyperdoc.md</tt> is the
-  authoritative read-only packed repo snapshot when present. The prompt should
+  return-shape conventions. A manifest-qualified snapshot bundle is the
+  authoritative read-only packed repo context when supplied. The prompt should
   stay slice-local: the current task, the file boundary, the done-when state,
   the validation command, any inventory target, and the completion contract.
 </p>
@@ -78,7 +78,7 @@
   <li>Do not send placeholders when the task is already concrete enough to fill in.</li>
   <li>Prefer an explicit file boundary over a broad subsystem request.</li>
   <li>Keep <tt>AGENTS.md</tt> authoritative for repo-wide execution, validation, and environment-triage rules; do not restate long host-vs-repo-shell guidance in slice prompts.</li>
-  <li>When present, read <tt>repomix-output-hyperdoc.md</tt> first and treat it as the authoritative packed snapshot of the repo.</li>
+  <li>Read the supplied snapshot manifest first. Trust only the numbered parts it names, after their sizes, hashes, file-section counts, required-file coverage, and closing boundaries validate.</li>
   <li>Prefer named validation surfaces and smoke checks over ad hoc success claims.</li>
   <li>When authoritative repo-shell validation uses <tt>sbcl --eval</tt>, require ASDF before any <tt>asdf:load-system</tt> form: use <tt>--eval '(require :asdf)'</tt> first instead of making bare <tt>asdf:</tt> the first package read.</li>
   <li>Prefer <tt>nix develop --command git ...</tt> when a prompt asks Codex to show repo diff or status.</li>
@@ -91,6 +91,91 @@
   <li>Require per-step <tt>Click / Observe / Why this matters</tt> wording for walkthrough examples; reject bare object-list pages even if links are clickable.</li>
   <li>For mutation/rewrite/debug walkthroughs, require explicit <tt>before -> cause -> action -> after</tt> payoff.</li>
 </ul>
+
+<h2>Manifest-qualified snapshot bundle</h2>
+
+<p>
+  Repository context is transferable only as a bounded bundle. The normal
+  handover consists of the stable <tt>core</tt> pack and exactly one
+  task-specific pack such as <tt>roots</tt>, their detailed pack manifests, and
+  one top-level bundle manifest that hashes those manifests and names every
+  supplied part in delivery order. A stale unnumbered output, an isolated
+  numbered part, or a packed file absent from the top-level manifest is
+  supporting evidence at most, never the authoritative snapshot.
+</p>
+
+<ol>
+  <li>Generate the stable core with <tt>tools/repomix-pack.sh core</tt>.</li>
+  <li>Generate one task pack, for example <tt>tools/repomix-pack.sh roots</tt>.</li>
+  <li>Create the single transfer authority with <tt>tools/repomix-snapshot-manifest.sh bundle roots-handover repomix-output-hyperdoc.roots-handover.manifest.json repomix-output-hyperdoc.core.manifest.json repomix-output-hyperdoc.roots.manifest.json</tt>.</li>
+  <li>Supply the top-level manifest, the two pack manifests it hashes, and every numbered part it names.</li>
+  <li>Run <tt>tools/repomix-snapshot-manifest.sh verify repomix-output-hyperdoc.roots-handover.manifest.json</tt> before treating any part as context.</li>
+</ol>
+
+<p>
+  Transfer-targeted configurations use stable source ordering rather than Git
+  change-frequency ordering, exact uncompressed Common Lisp and authored HTML,
+  a documented token budget, and a 500,000-byte split limit. The pack runner
+  verifies actual part sizes because split configuration alone is not delivery
+  evidence. Pack manifests record the Repomix version, HEAD, short Git status,
+  configuration hash, ordered parts, byte and line counts, SHA-256 hashes,
+  file-section counts, required-file coverage, and complete closing-boundary
+  checks. Each pack manifest also records the source state under
+  <tt>repository.source_state</tt>. Its <tt>schema</tt> is
+  <tt>hyperdoc-repomix-source-state/v1</tt>; its <tt>fingerprint</tt> is a Git
+  object ID over the observed index metadata, tracked worktree bytes, and
+  non-ignored untracked files. Verification recomputes this fingerprint and
+  rejects the manifest after any such source-state change; ignored files remain
+  outside the fingerprint. Bundle verification recursively verifies every child
+  pack manifest, so a stale child source state invalidates the bundle. The
+  top-level manifest covers both pack manifests and all of their parts. No
+  manifest receives <tt>completion_status: complete</tt> until its checks pass.
+</p>
+
+<p>
+  This boundary responds to an observed transfer failure: a delivered
+  741,376-byte file contained one <tt>assets/dm6-elm/app.js</tt> section and
+  stopped inside that generated bundle even though the local full snapshot
+  continued through its final file and closing fence. Size similarity must not
+  be used as a substitute for hash and boundary verification. The generated
+  DM6 application bundle is excluded from core, Roots, validation, every other
+  non-DM6 task pack, and the archival full pack. Its implementation evidence
+  belongs only in the dedicated <tt>dm6</tt> pack.
+</p>
+
+<h3>Observed full-snapshot diagnosis (2026-07-27)</h3>
+
+<table>
+  <tr><th>Measure</th><th>Local full snapshot</th><th>Delivered copy</th></tr>
+  <tr><td>Repomix available during inspection</td><td><tt>1.15.0</tt></td><td>not recorded in the delivered file</td></tr>
+  <tr><td>Bytes</td><td><tt>16,129,367</tt></td><td><tt>741,376</tt></td></tr>
+  <tr><td>Lines</td><td><tt>373,837</tt></td><td>not supplied</td></tr>
+  <tr><td>SHA-256</td><td><tt>453fb32bdaff0cdfbb3685a00bb09d44588cb1a7aa5bf2a9eaebc3fd8f54e4e9</tt></td><td>not supplied</td></tr>
+  <tr><td><tt>## File:</tt> sections</td><td><tt>1,305</tt></td><td><tt>1</tt></td></tr>
+  <tr><td>First file</td><td><tt>assets/dm6-elm/app.js</tt></td><td><tt>assets/dm6-elm/app.js</tt></td></tr>
+  <tr><td>Last file</td><td><tt>dreyeck/dmx/sqlite/tests/smoke.lisp</tt></td><td>abrupt stop inside the first file</td></tr>
+  <tr><td>Final non-empty line</td><td>a complete four-backtick closing fence</td><td>source content, not a closing fence</td></tr>
+  <tr><td>Complete Repomix boundary</td><td>yes</td><td>no</td></tr>
+</table>
+
+<p>
+  Independently, the first 741,376 bytes of the local file contain one file
+  section and stop inside <tt>assets/dm6-elm/app.js</tt> at
+  <tt>tokensTail:</tt>, matching the delivered copy's stated size, section
+  count, and abrupt location. The delivered copy itself was not available for
+  a hash comparison, so byte-for-byte identity is not claimed. The explicit
+  classification is nevertheless <strong>local generation complete; later
+  transfer or materialization truncated</strong>: local completeness follows
+  from the independently inspected final file and closing boundary, while
+  delivered incompleteness follows from its own abrupt ending.
+</p>
+
+<p>
+  The <tt>full</tt> pack is an exceptional local archive, not the default Codex
+  handover and not a transfer-safe replacement for core plus a task pack.
+  Excluding the generated DM6 bundle keeps that archive source-oriented; use
+  the dedicated DM6 pack when that generated artifact itself is under review.
+</p>
 
 <h2>Touch-first prompt-local rule</h2>
 
@@ -126,7 +211,7 @@
 
 <h2>Pasteable default implementation-slice prompt</h2>
 
-<pre>Read AGENTS.md and repomix-output-hyperdoc.md first. Treat repomix-output-hyperdoc.md as the authoritative packed snapshot of the repo.
+<pre>Read AGENTS.md and the supplied top-level bundle manifest first. Verify it, then read only the numbered core and task-pack parts it names. A lone repomix-output file is not authoritative.
 
 Then work from these repo truths:
 - HyperBook is the abstract page-and-link substrate; HyperDoc is the documentation-oriented realization layered on top of it.

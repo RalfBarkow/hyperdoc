@@ -14,7 +14,7 @@
     "topFilesLength": 20,
     "includeFullDirectoryStructure": true,
     "git": {
-      "sortByChanges": true,
+      "sortByChanges": false,
       "sortByChangesMaxCommits": 200,
       "includeDiffs": false,
       "includeLogs": false,
@@ -52,7 +52,8 @@
       "**/*.gif",
       "**/*.webp",
       "**/*.ico",
-      "deps/**/assets/**"
+      "deps/**/assets/**",
+      "assets/dm6-elm/app.js"
     ]
   },
   "security": {

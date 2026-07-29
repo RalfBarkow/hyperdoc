@@ -13,8 +13,10 @@
     "files": true,
     "topFilesLength": 20,
     "includeFullDirectoryStructure": false,
+    "splitOutput": 500000,
+    "tokenBudget": 350000,
     "git": {
-      "sortByChanges": true,
+      "sortByChanges": false,
       "sortByChangesMaxCommits": 200,
       "includeDiffs": false,
       "includeLogs": false,

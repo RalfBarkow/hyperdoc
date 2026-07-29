@@ -26,6 +26,7 @@ node_modules/
 test-results/
 repomix-output*.md
 repomix-output*.xml
+repomix-output*.manifest.json
 var/hyperdoc-local-journal/*.json
 target/
 *.class
@@ -67,3 +68,4 @@ result
 result-*
 repomix-output-hyperdoc*.md
 repomix-output-hyperdoc*.xml
+repomix-output-hyperdoc*.manifest.json

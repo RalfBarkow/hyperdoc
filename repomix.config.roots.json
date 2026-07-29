@@ -4,7 +4,7 @@
     "maxFileSize": 2000000
   },
   "output": {
-    "filePath": "repomix-output-hyperdoc.validation.md",
+    "filePath": "repomix-output-hyperdoc.roots.md",
     "style": "markdown",
     "parsableStyle": false,
     "compress": false,
@@ -14,11 +14,11 @@
     "topFilesLength": 20,
     "includeFullDirectoryStructure": false,
     "splitOutput": 500000,
-    "tokenBudget": 500000,
+    "tokenBudget": 220000,
     "git": {
       "sortByChanges": false,
       "sortByChangesMaxCommits": 200,
-      "includeDiffs": false,
+      "includeDiffs": true,
       "includeLogs": false,
       "includeLogsCount": 50
     }
@@ -26,21 +26,45 @@
   "include": [
     "AGENTS.md",
     "README.md",
-    "*.asd",
-    "package.lisp",
-    "tests/package.lisp",
-    "tests/test-runner.lisp",
-    "tests/*smoke.lisp",
+    ".gitignore",
+    "Makefile",
+    "repomix.config.core.json",
+    "repomix.config.roots.json",
+    "tools/repomix-pack.sh",
+    "tools/repomix-snapshot-manifest.sh",
+    "hyperdoc/Codex handover for HyperDoc.html",
+    "hyperdoc/Best handover to Codex for HyperDoc.html",
+    "hyperbook.asd",
+    "hyperdoc.asd",
+    "hyperdoc-graham-roots-of-lisp.asd",
+    "dev.sh",
+    "flake.nix",
+    "flake.lock",
+    "package.json",
+    "package-lock.json",
+    "nix/roots-of-lisp-lynn-assets.nix",
+    "nix/release/package.nix",
+    "hyperdoc/package.lisp",
+    "hyperdoc/core.lisp",
+    "hyperdoc/defining.lisp",
     "hyperdoc/check-runner.lisp",
-    "hyperdoc-explorer/check-runner.lisp",
-    "hyperdoc/HyperDoc Test Runner.html",
-    "hyperdoc/ASDF Systems, Examples, and Tests in HyperDoc.html",
-    "hyperdoc/Understanding ASDF Systems in HyperDoc.html"
+    "hyperdoc/example-core.lisp",
+    "hyperdoc/example-source-artifacts.lisp",
+    "hyperdoc/topics/registry.lisp",
+    "hyperdoc-explorer/package.lisp",
+    "hyperdoc-explorer/source-surfaces.lisp",
+    "hyperdoc-explorer/explorer.lisp",
+    "hyperdoc-explorer/code-pages.lisp",
+    "hyperdoc-explorer/example-core.lisp",
+    "hyperdoc-graham-roots-of-lisp/**",
+    "tests/playwright/playwright.config.js",
+    "tests/playwright/hyperdoc-inspector.js",
+    "tests/playwright/roots-of-lisp-lynn-runner.spec.js"
   ],
   "ignore": {
     "useGitignore": true,
     "useDotIgnore": true,
-    "useDefaultPatterns": true,
+    "useDefaultPatterns": false,
     "customPatterns": [
       ".direnv/**",
       ".cache/**",
@@ -53,6 +77,7 @@
       "var/**",
       "repomix-output*.xml",
       "repomix-output*.md",
+      "repomix-output*.manifest.json",
       ".DS_Store",
       "**/quicklisp.lisp",
       "**/*.fasl",
@@ -66,10 +91,7 @@
       "**/*.webp",
       "**/*.ico",
       "deps/**/assets/**",
-      "assets/dm6-elm/app.js",
-      "tests/dmx-annotations-smoke.lisp",
-      "tests/dmx-mcp-smoke.lisp",
-      "tests/dmx-topic-proxy-smoke.lisp"
+      "assets/dm6-elm/app.js"
     ]
   },
   "security": {
