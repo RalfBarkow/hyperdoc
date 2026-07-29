@@ -73,10 +73,12 @@
 ;;
 
 (defun make-hyperdoc (&key id title asdf-system-name subdirectory
-                        main-page-id tools data)
+                        code-subdirectory main-page-id tools data)
   "Create a HyperDoc instance with unique identifier ID (a string) and TITLE
 for the text and code pages located in SUBDIRECTORY relative to the base
-directory for ASDF-SYSTEM-NAME. The main page for the HyperDoc is the
+directory for ASDF-SYSTEM-NAME. CODE-SUBDIRECTORY may name a distinct ASDF
+module containing the Lisp code pages; it defaults to SUBDIRECTORY. The main
+page for the HyperDoc is the
 one whose id is MAIN-PAGE-ID.
 TOOLS is a list of symbols naming HyperDoc tools. DATA is a list of
 (SYMBOL . STRING) cons pairs in which SYMBOL names a global variable
@@ -90,7 +92,9 @@ the macro DEFHYPERDOC."
                      asdf-system-name
                      (concatenate 'string subdirectory "/")))
          (writable (is-writable? directory))
-         (component (asdf:find-component system subdirectory))
+         (component (asdf:find-component
+                     system
+                     (or code-subdirectory subdirectory)))
          (code-files (when component
                        (cl-source-file-components-under component)))
          (pages (make-hash-table :test #'equal))

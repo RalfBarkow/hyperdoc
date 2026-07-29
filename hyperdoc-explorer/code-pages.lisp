@@ -9,9 +9,15 @@
 ;;
 
 (views:defview views:👀source (page code-page)
-  (views:html-view :title "Source" :priority 1
+  (-> page
+      source-code-pathname
+      views/standard:source-view
+      (views:rename :title "Source" :priority 1)))
+
+(views:defview 👀connect-source (page code-page)
+  (views:html-view :title "Connect source" :priority 2
                    (render-source-connect-surface page
-                                                  "Source"
+                                                  "Connect source"
                                                   (source-code-pathname page))))
 
 (defclass code-page-source-navigation (code-page)
