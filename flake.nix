@@ -293,6 +293,7 @@
           else "unknown";
         flakeLockSha256 = builtins.hashFile "sha256" ./flake.lock;
         releaseId = "${releaseRevision}-${builtins.substring 0 12 flakeLockSha256}";
+        rootsOfLispLynnAssets = pkgs.callPackage ./nix/roots-of-lisp-lynn-assets.nix { };
         releasePackage = pkgs.callPackage ./nix/release/package.nix {
           releaseSource = self;
           inherit
@@ -315,7 +316,8 @@
             clMarkupSrc
             releaseId
             releaseRevision
-            flakeLockSha256;
+            flakeLockSha256
+            rootsOfLispLynnAssets;
         };
         runtimeWrapperPackage = pkgs.callPackage ./nix/hyperdoc-runtime-wrapper.nix { };
       in {
@@ -338,6 +340,7 @@
 
           shellHook = ''
             export HYPERDOC_ROOT="$PWD"
+            export HYPERDOC_ROOTS_LYNN_ASSET_ROOT="${rootsOfLispLynnAssets}/roots-of-lisp-lynn"
             export HYPERDOC_DMX_IMPORT_BASE_URL="''${HYPERDOC_DMX_IMPORT_BASE_URL:-https://dmx.ralfbarkow.ch}"
             export PLAYWRIGHT_BROWSERS_PATH="${pkgs.playwright-driver.browsers}"
             export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
@@ -436,6 +439,7 @@ EOF
           hyperdoc-emacsclient = hyperdocEmacsLauncher;
           hyperdoc-sly-connect = hyperdocEmacsLauncher;
           clogframe = pkgs.callPackage ./nix/clogframe.nix { };
+          roots-of-lisp-lynn-assets = rootsOfLispLynnAssets;
           hyperdoc-release = releasePackage;
           hyperdoc-runtime-wrapper = runtimeWrapperPackage;
           default = releasePackage;

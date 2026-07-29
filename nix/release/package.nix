@@ -20,6 +20,7 @@
 , releaseId
 , releaseRevision
 , flakeLockSha256
+, rootsOfLispLynnAssets
 }:
 
 let
@@ -30,6 +31,7 @@ let
     export HYPERDOC_RELEASE_REV="${releaseRevision}"
     export HYPERDOC_RELEASE_FLAKE_LOCK_SHA256="${flakeLockSha256}"
     export HYPERDOC_ROOT="$RELEASE_PREFIX/share/hyperdoc/source"
+    export HYPERDOC_ROOTS_LYNN_ASSET_ROOT="${rootsOfLispLynnAssets}/roots-of-lisp-lynn"
     export ARROWS_SRC="${arrowsSrc}"
     export CLOG_SRC="${clogSrcPatched}"
     export CLOG_MOLDABLE_INSPECTOR_SRC="${clogMoldableInspectorSrc}"

@@ -1,0 +1,399 @@
+<!--
+  Revised human-reading page for Paul Graham, "The Roots of Lisp".
+  Runnable examples follow the source-of-function pattern demonstrated on
+  HyperDoc's "Navigating a HyperDoc" page.
+-->
+<h1>The Roots of Lisp</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Paul Graham's article <i>The Roots of Lisp</i> (draft dated
+  18 January 2002) retraces a construction from John McCarthy's 1960
+  paper. McCarthy showed how a small number of rules for evaluating
+  expressions, together with a notation for functions, can define a
+  programming language.
+</p>
+
+<p>
+  Graham's central question is how Lisp can be described in Lisp itself.
+  His answer culminates in <tt>EVAL.</tt>: a function written in the
+  reconstructed Lisp that takes a Lisp expression and an environment and
+  returns the value of that expression.
+</p>
+
+<p>
+  This page follows the steps needed for that result. At the relevant
+  points, it includes examples. The play button ► belongs to the example. Clicking it runs that example and opens its result for inspection.
+</p>
+
+<h2>The two evaluators used on this page</h2>
+
+<p>
+  Two functions must be distinguished from the outset.
+  <tt>ROOTS-EVAL</tt> is Common Lisp code in this project. It implements
+  the evaluation rules of the reconstructed Lisp. <tt>EVAL.</tt> is a
+  function defined within that reconstructed Lisp. A run of
+  <tt>EVAL.</tt> therefore takes place inside <tt>ROOTS-EVAL</tt>.
+</p>
+
+<p>
+  The first function lets us test each step of the reconstruction. The
+  second is the result that Graham is working toward.
+</p>
+
+<h2>1. Why begin with seven operators?</h2>
+
+<p>
+  Graham first defines a Lisp expression as either an atom or a list of
+  expressions. If an expression is a non-empty list, its first element is
+  its operator and the remaining elements are its arguments. The next task
+  is to say how such expressions obtain values.
+</p>
+
+<p>
+  The seven primitive operators provide the first evaluation rules. They
+  are not seven examples chosen at random. Together they let a program
+  preserve an expression as data, distinguish atoms from lists, compare
+  atoms, take lists apart, construct lists, and choose between alternatives.
+  Those are the operations later used to define the evaluator.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operator</th>
+      <th>What it does</th>
+      <th>Why it is needed</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><tt>QUOTE</tt></td>
+      <td>Returns its argument without evaluating it.</td>
+      <td>Lets a list be treated as data rather than as a function call.</td>
+    </tr>
+    <tr>
+      <td><tt>ATOM</tt></td>
+      <td>Tests whether a value is an atom or the empty list.</td>
+      <td>Distinguishes the two kinds of expression.</td>
+    </tr>
+    <tr>
+      <td><tt>EQ</tt></td>
+      <td>Compares two atomic values.</td>
+      <td>Recognizes names and other atoms.</td>
+    </tr>
+    <tr>
+      <td><tt>CAR</tt></td>
+      <td>Returns the first element of a non-empty list.</td>
+      <td>Obtains an operator or the first part of data.</td>
+    </tr>
+    <tr>
+      <td><tt>CDR</tt></td>
+      <td>Returns the list after its first element.</td>
+      <td>Obtains the arguments or the remaining data.</td>
+    </tr>
+    <tr>
+      <td><tt>CONS</tt></td>
+      <td>Adds a value to the front of a list.</td>
+      <td>Constructs expressions and result lists.</td>
+    </tr>
+    <tr>
+      <td><tt>COND</tt></td>
+      <td>Tests clauses in order and evaluates the result of the first true clause.</td>
+      <td>Expresses case distinctions and recursive stopping conditions.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  <tt>QUOTE</tt> and <tt>COND</tt> do not evaluate all of their arguments.
+  The other five primitive operators do. This difference will reappear in
+  the definition of <tt>EVAL.</tt>.
+</p>
+
+<p>
+  The following example evaluates one expression for each primitive
+  operator. After clicking ►, open the <tt>Value</tt> of the resulting
+  <tt>EXAMPLE-RESULT</tt>. Each entry contains the expression that was run
+  and its inspectable <tt>ROOTS-EVALUATION</tt>.
+</p>
+
+<source-of-function>hyperdoc-graham-roots-of-lisp:roots-seven-primitives-example</source-of-function>
+
+<h2>2. How are new functions expressed?</h2>
+
+<p>
+  The primitive operators give values to a small set of forms. To define
+  further operations, Graham next introduces <tt>LAMBDA</tt>. In a call
+  whose operator is a <tt>LAMBDA</tt> expression, the arguments are
+  evaluated, their values are associated with the parameters, and the body
+  is evaluated with those associations available.
+</p>
+
+<pre><code>((lambda (x y)
+   (cons x (cdr y)))
+ 'z
+ '(a b c))</code></pre>
+
+<p>
+  This expression returns <tt>(Z B C)</tt>. A parameter may also occur in
+  the operator position. A function expression can therefore be passed as
+  an argument and then called:
+</p>
+
+<pre><code>((lambda (f)
+   (f '(b c)))
+ '(lambda (x)
+    (cons 'a x)))</code></pre>
+
+<p>
+  This expression returns <tt>(A B C)</tt>.
+</p>
+
+<p>
+  <tt>LABEL</tt> adds what ordinary <tt>LAMBDA</tt> lacks here: a name by
+  which the function can call itself. Graham uses it to define
+  <tt>SUBST</tt>, which replaces every occurrence of an atom inside a
+  nested expression.
+</p>
+
+<pre><code>((label subst
+   (lambda (x y z)
+     (cond
+       ((atom z)
+        (cond ((eq z y) x)
+              ('t z)))
+       ('t
+        (cons (subst x y (car z))
+              (subst x y (cdr z)))))))
+ 'm
+ 'b
+ '(a b (a b c) d))</code></pre>
+
+<p>
+  The expected value is <tt>(A M (A M C) D)</tt>. The recursive calls use
+  only the evaluation rules introduced so far. We will run this expression
+  below, first directly and then through <tt>EVAL.</tt>.
+</p>
+
+<h2>3. Why does EVAL. need more functions?</h2>
+
+<p>
+  Before defining <tt>EVAL.</tt>, Graham defines several functions from
+  the primitives and from <tt>LAMBDA</tt> and <tt>LABEL</tt>.
+  <tt>NULL.</tt>, <tt>AND.</tt>, and <tt>NOT.</tt> express recurring
+  tests. <tt>APPEND.</tt> combines lists. Two further functions prepare the
+  representation of an environment:
+</p>
+
+<pre><code>(pair. '(x y) '(a b))
+=> ((X A) (Y B))
+
+(assoc. 'x '((x a) (y b)))
+=> A</code></pre>
+
+<p>
+  <tt>PAIR.</tt> associates parameters with argument values.
+  <tt>ASSOC.</tt> finds the value associated with a name. An environment is
+  such a list of associations. These functions are introduced here because
+  <tt>EVAL.</tt> must construct and search environments when it evaluates
+  function calls; they are not an unrelated library inventory.
+</p>
+
+<h2>4. How does EVAL. assign a value to every expression?</h2>
+
+<p>
+  <tt>EVAL.</tt> takes two arguments: <tt>e</tt>, the expression to be
+  evaluated, and <tt>a</tt>, its environment. Its outer <tt>COND</tt>
+  distinguishes four kinds of expression.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Form of <tt>e</tt></th>
+      <th>Action of <tt>EVAL.</tt></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>An atom</td>
+      <td>Use <tt>ASSOC.</tt> to look up its value in the environment.</td>
+    </tr>
+    <tr>
+      <td>A list whose operator is an atom</td>
+      <td>Apply the rule for a primitive operator, <tt>COND</tt>, or a named function.</td>
+    </tr>
+    <tr>
+      <td>A call whose operator is a <tt>LABEL</tt> expression</td>
+      <td>Add the function's name and definition to the environment, then evaluate the call.</td>
+    </tr>
+    <tr>
+      <td>A call whose operator is a <tt>LAMBDA</tt> expression</td>
+      <td>Evaluate the arguments, associate their values with the parameters, and evaluate the body in the extended environment.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  This is the definition to which those four cases refer:
+</p>
+
+<pre><code>(defun eval. (e a)
+  (cond
+    ((atom e)
+     (assoc. e a))
+    ((atom (car e))
+     (cond
+       ((eq (car e) 'quote)
+        (cadr e))
+       ((eq (car e) 'atom)
+        (atom (eval. (cadr e) a)))
+       ((eq (car e) 'eq)
+        (eq (eval. (cadr e) a)
+            (eval. (caddr e) a)))
+       ((eq (car e) 'car)
+        (car (eval. (cadr e) a)))
+       ((eq (car e) 'cdr)
+        (cdr (eval. (cadr e) a)))
+       ((eq (car e) 'cons)
+        (cons (eval. (cadr e) a)
+              (eval. (caddr e) a)))
+       ((eq (car e) 'cond)
+        (evcon. (cdr e) a))
+       ('t
+        (eval. (cons (assoc. (car e) a)
+                     (cdr e))
+               a))))
+    ((eq (caar e) 'label)
+     (eval. (cons (caddar e) (cdr e))
+            (cons (list (cadar e) (car e)) a)))
+    ((eq (caar e) 'lambda)
+     (eval. (caddar e)
+            (append. (pair. (cadar e)
+                            (evlis. (cdr e) a))
+                     a)))))</code></pre>
+
+<p>
+  <tt>EVCON.</tt> examines the clauses of a <tt>COND</tt> expression.
+  <tt>EVLIS.</tt> evaluates the arguments of a function call. Both are
+  recursive functions defined by the same means as the earlier functions.
+  No new evaluation principle is introduced at this point.
+</p>
+
+<h2>5. The decisive comparison</h2>
+
+<p>
+  The two following runs answer different questions and must not be
+  collapsed into one.
+</p>
+
+<h3>First run: evaluate SUBST directly</h3>
+
+<p>
+  In the first run, the Common Lisp function <tt>ROOTS-EVAL</tt> receives
+  the <tt>LABEL</tt>/<tt>SUBST</tt> expression shown above. A successful
+  result establishes that this project implements the required
+  <tt>LAMBDA</tt>, <tt>LABEL</tt>, primitive, and environment rules. It
+  does not yet establish Graham's claim about <tt>EVAL.</tt>.
+</p>
+
+<source-of-function>hyperdoc-graham-roots-of-lisp:roots-direct-subst-example</source-of-function>
+
+<p>
+  Expected value: <tt>(A M (A M C) D)</tt>.
+</p>
+
+<h3>Second run: let EVAL. evaluate the same SUBST application</h3>
+
+<p>
+  In the second run, the definition of <tt>EVAL.</tt> and its supporting
+  functions have been loaded into the reconstructed Lisp. The
+  <tt>LABEL</tt>/<tt>SUBST</tt> application is quoted and passed to
+  <tt>EVAL.</tt> as data, together with an empty environment.
+  <tt>EVAL.</tt> must interpret that data as an expression and return its
+  value.
+</p>
+
+<source-of-function>hyperdoc-graham-roots-of-lisp:roots-surprise-example</source-of-function>
+
+<p>
+  Expected value: again <tt>(A M (A M C) D)</tt>. The equal values alone
+  do not identify the two runs. In the second trace, the outer computation
+  is the object-language function <tt>EVAL.</tt>; its recursive calls
+  perform the evaluation of the quoted <tt>SUBST</tt> application.
+</p>
+
+<p>
+  The page
+  <a page="The Surprise as an evaluation trace">The Surprise as an evaluation trace</a>
+  examines the two traces step by step.
+</p>
+
+<h2>6. What has been shown?</h2>
+
+<p>
+  The definition of <tt>EVAL.</tt> uses the language elements introduced
+  in the preceding steps. It is itself a Lisp expression, and it can
+  compute the value of another Lisp expression. This is the result Graham
+  describes when he says that Lisp can be written in itself.
+</p>
+
+<p>
+  The experiment does not remove the need for an implementation.
+  <tt>ROOTS-EVAL</tt>, written in Common Lisp, still executes the
+  reconstructed language and therefore executes <tt>EVAL.</tt>. The point
+  is that the rules of the reconstructed language can be expressed as a
+  function in that same language.
+</p>
+
+<p>
+  The reconstructed evaluator also retains historical limitations discussed
+  by Graham. In particular, its environment gives it dynamic rather than
+  lexical scope. It is not a model of all of modern Common Lisp.
+</p>
+
+<h2>Questions that follow from Graham's notes</h2>
+
+<ul>
+  <li>
+    <a page="Which bugs did Graham correct?">Which bugs did Graham correct?</a>
+    compares McCarthy's rule for calls to named functions with Graham's
+    correction.
+  </li>
+  <li>
+    <a page="Dynamic capture in MAPLIST and DIFF">Dynamic capture in MAPLIST and DIFF</a>
+    examines the consequence of the evaluator's dynamic environment for a
+    higher-order function.
+  </li>
+</ul>
+
+<h2>Separate implementation comparisons</h2>
+
+<p>
+  Ben Lynn's browser implementation adds a parser, a top level that retains
+  definitions between inputs, and a browser Run button. Those facilities
+  concern how a user submits and repeats evaluations; they are not additional
+  clauses of Graham's <tt>EVAL.</tt>.
+</p>
+
+<ul>
+  <li><a page="Stanford Lisp interpreter crosswalk">Stanford Lisp interpreter crosswalk</a></li>
+  <li><a page="Roots of Lisp runner comparison">Roots of Lisp runner comparison</a></li>
+  <li><a page="The Roots of Lisp reconstruction layers">The Roots of Lisp reconstruction layers</a></li>
+  <li><a page="What Made Lisp Different crosswalk">What Made Lisp Different crosswalk</a></li>
+</ul>
+
+<h2>Sources</h2>
+
+<ul>
+  <li>
+    Paul Graham, <i>The Roots of Lisp</i>, draft dated 18 January 2002.
+  </li>
+  <li>
+    John McCarthy, “Recursive Functions of Symbolic Expressions and Their
+    Computation by Machine, Part I,” <i>Communications of the ACM</i>
+    3(4), April 1960, pp. 184–195.
+  </li>
+</ul>

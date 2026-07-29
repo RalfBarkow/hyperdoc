@@ -1,0 +1,85 @@
+<!-- Walkthrough example page for the bounded dynamic-capture witness. -->
+<h1>Dynamic capture in MAPLIST and DIFF</h1>
+
+<in-package>hyperdoc</in-package>
+
+<h2>Goal</h2>
+
+<p>
+  Make the evaluator's dynamic environment visible with the smallest
+  executable witness, then relate that mechanism conservatively to the
+  MAPLIST/DIFF collision discussed by Graham.
+</p>
+
+<h2>Starting situation</h2>
+
+<pre>
+((lambda (x)
+   ((lambda (f)
+      ((lambda (x)
+         (f 'ignored))
+       'inner))
+    '(lambda (z) x)))
+ 'outer)
+</pre>
+
+<p>
+  A lexical closure would retain the outer binding of <tt>X</tt>. The historical
+  evaluator carries only the active association-list environment into the
+  call, so the inner binding is visible when <tt>F</tt> runs.
+</p>
+
+<h2>Step 1 — run the witness</h2>
+
+<p>
+  <b>Click:</b>
+  <a expr="(hyperdoc-graham-roots-of-lisp:roots-dynamic-binding-capture-example)">run the dynamic-capture example</a>.
+  <b>Observe:</b> the returned <tt>ROOTS-EVALUATION</tt> has status
+  <tt>:OK</tt> and value <tt>INNER</tt>.
+  <b>Why this matters:</b> the value is direct evidence of dynamic capture, not
+  a claim inferred only from the evaluator's source text.
+</p>
+
+<h2>Step 2 — inspect the binding trace</h2>
+
+<p>
+  <b>Click:</b> inspect the evaluation's event list and open its
+  <tt>:LAMBDA-BIND</tt> events.
+  <b>Observe:</b> the newest <tt>X</tt> binding is <tt>INNER</tt> when the quoted
+  function expression is applied.
+  <b>Why this matters:</b> the evaluator does not carry the function's
+  definition environment as a closure or FUNARG.
+</p>
+
+<h2>Expected result</h2>
+
+<table>
+  <tr><th>Historical dynamic environment</th><td><tt>INNER</tt></td></tr>
+  <tr><th>Lexical expectation</th><td><tt>OUTER</tt></td></tr>
+</table>
+
+<h2>Boundary</h2>
+
+<p>
+  Graham's local repair is to rename the colliding MAPLIST parameter. The
+  semantic repair would instead carry a function's definition environment as
+  a closure/FUNARG. This reconstruction deliberately makes neither semantic
+  change. It provides a source-backed explanation of the MAPLIST/DIFF collision
+  plus an executable minimal witness; it does not claim a full replay of those
+  historical definitions without a separately verified primary-source
+  transcription.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Dynamic capture in MAPLIST and DIFF">Dynamic capture in MAPLIST and DIFF topic</a></li>
+  <li><a expr="(asdf:system-relative-pathname :hyperdoc-graham-roots-of-lisp &quot;hyperdoc-graham-roots-of-lisp/src/examples.lisp&quot;)">Executable witness source</a></li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Which bugs did Graham correct?">Which bugs did Graham correct?</a></li>
+  <li><a page="The Roots of Lisp reconstruction layers">The Roots of Lisp reconstruction layers</a></li>
+</ul>

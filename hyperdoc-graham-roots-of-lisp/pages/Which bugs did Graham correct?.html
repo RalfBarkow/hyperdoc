@@ -1,0 +1,83 @@
+<!-- Walkthrough example page for the source-backed correction comparison. -->
+<h1>Which bugs did Graham correct?</h1>
+
+<in-package>hyperdoc</in-package>
+
+<h2>Goal</h2>
+
+<p>
+  Retrace one correction that differs in executable evaluator code, then keep
+  it separate from the dynamic-binding problem that Graham diagnoses without
+  converting the evaluator to lexical scope.
+</p>
+
+<h2>Starting situation</h2>
+
+<p>
+  Lynn says that Graham “corrects bugs,” but that phrase is not an enumerated
+  errata list. The identification here is a source-backed inference from
+  Graham's notes and the corresponding evaluator rules. Deliberate omissions,
+  such as dotted-pair syntax in a teaching parser or an omitted <tt>apply</tt>,
+  are simplifications rather than automatically bugs.
+</p>
+
+<h2>Step 1 — compare the named-call rules</h2>
+
+<p>
+  <b>Click:</b>
+  <a expr="(hyperdoc-graham-roots-of-lisp:roots-named-call-double-evaluation-example)">run the named-call retrace example</a>.
+  <b>Observe:</b> <tt>:GRAHAM-CORRECTED</tt> evaluates the quoted argument once
+  and returns <tt>(A B C)</tt>. <tt>:MCCARTHY-PAPER</tt> evaluates the argument,
+  inserts the value <tt>(B C)</tt> into the lambda application, and then tries
+  to evaluate that value again as an application whose operator is
+  <tt>B</tt>. The resulting language error is captured in the comparison.
+  <b>Why this matters:</b> Graham's change is an executable correction to the
+  named-call rule, not merely editorial commentary.
+</p>
+
+<h2>Step 2 — inspect the surviving binding problem</h2>
+
+<p>
+  <b>Click:</b>
+  <a expr="(hyperdoc-graham-roots-of-lisp:roots-dynamic-binding-capture-example)">run the minimal dynamic-capture example</a>.
+  <b>Observe:</b> the result is <tt>INNER</tt>, while a lexical closure reading
+  would preserve <tt>OUTER</tt>.
+  <b>Why this matters:</b> the named-call correction does not make the
+  evaluator lexical. Graham diagnoses the MAPLIST/DIFF name collision, but his
+  evaluator retains the historical dynamic environment.
+</p>
+
+<h2>Expected result</h2>
+
+<ul>
+  <li>Named-call comparison replay status: <tt>:CONFIRMED</tt>.</li>
+  <li>Corrected value: <tt>(A B C)</tt>.</li>
+  <li>Historical path: captured <tt>ROOTS-LANGUAGE-ERROR</tt> involving operator <tt>B</tt>.</li>
+  <li>Dynamic-capture value: <tt>INNER</tt>.</li>
+</ul>
+
+<h2>Boundary</h2>
+
+<p>
+  The historical rule is opt-in for one evaluation. The corrected rule remains
+  the default and is dynamically scoped to the call, so a historical replay
+  cannot leak into later evaluations. This page does not claim that Lynn's
+  phrase is a formal errata catalogue, and it does not label intentional
+  teaching simplifications as accidental defects.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Which bugs did Graham correct?">Which bugs did Graham correct? topic</a></li>
+  <li><a expr="(asdf:system-relative-pathname :hyperdoc-graham-roots-of-lisp &quot;src/examples.lisp&quot;)">Example source containing the rendered <tt>defexample</tt> forms</a></li>
+  <li><a expr="(asdf:system-relative-pathname :hyperdoc-graham-roots-of-lisp &quot;src/evaluator.lisp&quot;)">Evaluator source containing both named-call rules</a></li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="Dynamic capture in MAPLIST and DIFF">Dynamic capture in MAPLIST and DIFF</a></li>
+  <li><a page="The Surprise as an evaluation trace">The Surprise as an evaluation trace</a></li>
+  <li><a page="Stanford Lisp interpreter crosswalk">Stanford Lisp interpreter crosswalk</a></li>
+</ul>

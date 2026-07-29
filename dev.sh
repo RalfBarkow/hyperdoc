@@ -6,7 +6,7 @@ set -euo pipefail
 # - always enables development mode by default
 # - chooses free ports unless explicitly set
 # - supports both SLIME/Swank and SLY/Slynk
-# - loads hyperdoc/server before serving
+# - loads the selected HyperDoc application system before serving
 #
 # Usage:
 #   ./dev.sh
@@ -18,6 +18,7 @@ set -euo pipefail
 #   HYPERDOC_DEVELOPMENT=0|1        default: 1
 #   HYPERDOC_PORT=8080              optional; if busy, auto-pick another
 #   HYPERDOC_BIND_ADDRESS=127.0.0.1 default: 127.0.0.1
+#   HYPERDOC_APPLICATION_SYSTEM=...   default: hyperdoc/server
 #   SWANK_PORT=4005                 optional; SLIME/Swank port
 #   SWANK_INTERFACE=127.0.0.1       default: 127.0.0.1
 #   SLYNK_PORT=4006                 optional; SLY/Slynk port
@@ -32,6 +33,7 @@ cd "${ROOT}"
 
 export HYPERDOC_DEVELOPMENT="${HYPERDOC_DEVELOPMENT:-1}"
 export HYPERDOC_BIND_ADDRESS="${HYPERDOC_BIND_ADDRESS:-127.0.0.1}"
+export HYPERDOC_APPLICATION_SYSTEM="${HYPERDOC_APPLICATION_SYSTEM:-hyperdoc/server}"
 
 LISP_IDE="${LISP_IDE:-slime}"
 
@@ -138,6 +140,7 @@ cat <<EOF2
 HyperDoc dev launcher
 
   HYPERDOC_DEVELOPMENT=${HYPERDOC_DEVELOPMENT} (1 enables Playground eval)
+  Application system: ${HYPERDOC_APPLICATION_SYSTEM}
   HyperDoc: ${HYPERDOC_BIND_ADDRESS}:${HYPERDOC_PORT}
   ${LISP_SERVER_LABEL}: ${LISP_SERVER_INTERFACE}:${LISP_SERVER_PORT}
   Emacs: M-x ${LISP_CONNECT_COMMAND}  ${LISP_SERVER_INTERFACE}  ${LISP_SERVER_PORT}
@@ -244,6 +247,7 @@ nix develop --command sbcl --no-userinit --disable-debugger \
   --eval '(dolist (asd-file (list "njson.asd"
                                   "hyperbook.asd"
                                   "hyperdoc.asd"
+                                  "hyperdoc-graham-roots-of-lisp.asd"
                                   "interaction-net.asd"
                                   "dreyeck.asd"))
             (when (probe-file asd-file)
@@ -304,7 +308,12 @@ nix develop --command sbcl --no-userinit --disable-debugger \
             (finish-output))' \
   --eval '(handler-case
               (let ((port (parse-integer (uiop:getenv "HYPERDOC_PORT"))))
-                (asdf:load-system :hyperdoc/server)
+                (let ((application-system
+                        (uiop:getenv "HYPERDOC_APPLICATION_SYSTEM")))
+                  (unless (asdf:find-system application-system nil)
+                    (error "Application ASDF system ~S not found."
+                           application-system))
+                  (asdf:load-system application-system))
                 (let* ((pkg (or (find-package "HYPERBOOK/SERVER")
                                 (error "Package HYPERBOOK/SERVER not found.")))
                        (entry (find-symbol "SERVE-CATALOG" pkg)))

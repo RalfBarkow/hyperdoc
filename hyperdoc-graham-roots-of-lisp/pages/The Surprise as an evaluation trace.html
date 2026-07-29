@@ -1,0 +1,49 @@
+<h1>The Surprise as an evaluation trace</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Graham's "surprise" has two levels. The first is a compact evaluator written
+  from the seven operators. The second is reflexive: the evaluator is itself
+  an expression in the language it evaluates.
+</p>
+
+<h2>Two experiments that must remain separate</h2>
+
+<ol>
+  <li>
+    <p><tt>Host evaluator runs LABEL/SUBST directly</tt>.</p>
+    <source-of-function>hyperdoc-graham-roots-of-lisp:roots-direct-subst-example</source-of-function>
+  </li>
+  <li>
+    <p><tt>Object-language EVAL. runs LABEL/SUBST</tt>.</p>
+    <source-of-function>hyperdoc-graham-roots-of-lisp:roots-surprise-example</source-of-function>
+  </li>
+</ol>
+
+<h2>How to read the trace</h2>
+
+<ul>
+  <li><tt>:ENTER</tt> and <tt>:RETURN</tt> delimit one recursive evaluation.</li>
+  <li><tt>:ATOM-LOOKUP</tt> shows the explicit environment lookup.</li>
+  <li><tt>:NAMED-OPERATOR-REWRITE</tt> replaces a function name by its LAMBDA or LABEL expression.</li>
+  <li><tt>:LABEL-BIND</tt> makes recursion possible.</li>
+  <li><tt>:LAMBDA-BIND</tt> shows parameters, values, and the extended dynamic environment.</li>
+  <li><tt>:COND-TEST</tt> and <tt>:COND-SELECTED</tt> expose non-strict branching.</li>
+</ul>
+
+<p>
+  A bounded event limit affects only retained evidence. Evaluation continues,
+  and <tt>TRACE-TRUNCATED-P-OF</tt> records whether the trace was clipped.
+</p>
+
+<h2>Keep the host and object-language evaluators distinct</h2>
+
+<p>
+  HyperDoc's Common Lisp function <tt>ROOTS-EVAL</tt> is the host evaluator.
+  The definition <tt>EVAL.</tt> is object-language code loaded into a
+  <tt>ROOTS-SESSION</tt> and run inside that host. The Lynn browser runner is a
+  third implementation. The
+  <a page="Which bugs did Graham correct?">named-call retrace</a> compares two
+  explicitly selected host rules without changing the corrected default.
+</p>

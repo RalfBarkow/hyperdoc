@@ -1,0 +1,85 @@
+<!-- Reference/contract page for the bounded Ben Lynn runner integration. -->
+<h1>Roots of Lisp runner comparison</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Ben Lynn's browser runner and HyperDoc's Common Lisp reconstruction answer
+  related reading questions through different evaluators. This page keeps that
+  distinction executable and visible.
+</p>
+
+<h2>Why the upstream page is materialized locally</h2>
+
+<p>
+  The upstream response at
+  <a href="https://crypto.stanford.edu/~blynn/lambda/lisp.html">Ben Lynn's Lisp page</a>
+  sends <tt>X-Frame-Options: DENY</tt> and
+  <tt>Content-Security-Policy: frame-ancestors 'none'</tt>. A remote iframe is
+  therefore neither a reliable nor an intended integration. HyperDoc instead
+  serves six SHA-256-pinned files from a Nix fixed-output asset at the stable
+  local route <tt>/roots-of-lisp-lynn/lambda/lisp.html</tt>.
+</p>
+
+<h2>Run and compare</h2>
+
+<ul>
+  <li>
+    <a expr="(hyperdoc-graham-roots-of-lisp:make-roots-lynn-runner-artifact)">
+      Inspect the typed Lynn runner artifact
+    </a>
+    for its Runner, Provenance, Assets, and Source relation views.
+  </li>
+  <li>
+    <a expr="(hyperdoc-graham-roots-of-lisp:make-roots-lynn-runner-surface)">
+      Inspect the FedWiki/native side-by-side comparison
+    </a>.
+  </li>
+  <li>
+    <a expr="(hyperdoc-graham-roots-of-lisp:roots-direct-subst-example)">
+      Inspect HyperDoc's direct Common Lisp SUBST report
+    </a>.
+  </li>
+  <li>
+    <a expr="(hyperdoc-graham-roots-of-lisp:roots-surprise-example)">
+      Inspect HyperDoc's object-language EVAL. report
+    </a>.
+  </li>
+</ul>
+
+<h2>Execution boundary</h2>
+
+<table>
+  <tr>
+    <th>Ben Lynn path</th>
+    <td>Browser JavaScript, <tt>doh.wasm</tt>, and a compiled Haskell interpreter.</td>
+  </tr>
+  <tr>
+    <th>HyperDoc path</th>
+    <td>The Common Lisp implementation in
+      <a expr="(asdf:system-relative-pathname :hyperdoc-graham-roots-of-lisp &quot;src/evaluator.lisp&quot;)"><tt>src/evaluator.lisp</tt></a>,
+      returning inspectable evaluation and trace objects.</td>
+  </tr>
+</table>
+
+<p>
+  The runner iframe is a trusted local-development demonstration, not a
+  compute sandbox. The two side-by-side runner instances are independent;
+  this slice adds no shared state or <tt>postMessage</tt> synchronization.
+</p>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a hyperbook="topics" page="Roots of Lisp browser runner comparison">Roots of Lisp browser runner comparison topic</a></li>
+  <li><a expr="(hyperdoc-graham-roots-of-lisp:roots-lynn-fedwiki-page)">Source-faithful in-memory FedWiki page</a></li>
+  <li><a expr="(hyperdoc-graham-roots-of-lisp:roots-lynn-fedwiki-page-json)">Copy-pasteable FedWiki page JSON</a></li>
+</ul>
+
+<h2>Related pages</h2>
+
+<ul>
+  <li><a page="The Roots of Lisp">The Roots of Lisp</a></li>
+  <li><a page="The Surprise as an evaluation trace">The Surprise as an evaluation trace</a></li>
+  <li><a page="Stanford Lisp interpreter crosswalk">Stanford Lisp interpreter crosswalk</a></li>
+</ul>

@@ -1,0 +1,68 @@
+<h1>The Roots of Lisp reconstruction layers</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The reconstruction must not collapse four different things into one
+  "interpreter": semantic axioms, derived object-language definitions,
+  top-level/browser facilities, and documentation/inspection projections.
+</p>
+
+<h2>Layer 1 — semantic core</h2>
+
+<p>
+  <tt>ROOTS-EVAL</tt> consumes an already-read expression and an explicit
+  environment. QUOTE and COND are non-strict. ATOM, EQ, CAR, CDR, and CONS
+  evaluate their arguments. An unknown atomic operator is looked up and
+  rewritten to its LAMBDA or LABEL value.
+</p>
+
+<h2>Layer 2 — function notation and derived library</h2>
+
+<p>
+  LAMBDA pairs parameters with evaluated arguments and prepends those bindings
+  to the current environment. LABEL additionally binds its own name to its
+  function expression. The environment is therefore the dynamic environment
+  of the historical evaluator, not a Common Lisp lexical closure.
+</p>
+
+<p>
+  <a expr="(hyperdoc-graham-roots-of-lisp:roots-reading-order)">
+    <tt>Inspect the source-to-code reading order</tt>
+  </a>
+</p>
+
+<h2>Layer 3 — Stanford-style adapter</h2>
+
+<p>
+  <tt>ROOTS-INTERPRET-STRING</tt> provides a stateful top level. DEFUN and a
+  top-level use of LABEL update a session. LIST and c[ad]+r are treated as
+  surface abbreviations so Graham's code can be entered unchanged.
+</p>
+
+<h2>Layer 4 — HyperDoc projection</h2>
+
+<p>
+  The evaluator returns <tt>ROOTS-EVALUATION</tt> objects. Their event lists
+  make evaluation order, environment lookup, operator rewriting, clause
+  selection, LABEL recursion, and LAMBDA binding inspectable rather than
+  hidden in terminal output.
+</p>
+
+<p>
+  <a expr="(hyperdoc-graham-roots-of-lisp:roots-seven-primitives-example)">Run the registered seven-primitives example</a>
+  and inspect the returned evaluations. The source page for
+  <a expr="(asdf:system-relative-pathname :hyperdoc-graham-roots-of-lisp &quot;src/examples.lisp&quot;)"><tt>src/examples.lisp</tt></a>
+  renders HyperDoc's standard play affordance before each real
+  <tt>defexample</tt> form.
+</p>
+
+<h2>Historical rule boundary</h2>
+
+<p>
+  McCarthy's named-call rule, Graham's corrected rule, and the evaluator's
+  remaining dynamic environment are separate claims. Inspect
+  <a page="Which bugs did Graham correct?">Which bugs did Graham correct?</a>
+  before following the dynamic-capture case in
+  <a page="Dynamic capture in MAPLIST and DIFF">Dynamic capture in MAPLIST and DIFF</a>.
+</p>

@@ -1,0 +1,57 @@
+<h1>Stanford Lisp interpreter crosswalk</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  The Stanford page is an implementation adapter around Graham's paper, not
+  merely a transliteration. Its Haskell code adds a parser, error representation,
+  top-level definitions, LIST, generated accessors, persistent environment, and
+  a browser Run button.
+</p>
+
+<p>
+  <a expr="(hyperdoc-graham-roots-of-lisp:roots-stanford-crosswalk)">
+    <tt>Inspect the complete adapter crosswalk</tt>
+  </a>
+</p>
+
+<h2>One deliberate change</h2>
+
+<p>
+  The Stanford <tt>Expr</tt> type represents only atoms and proper lists. This
+  reconstruction uses Common Lisp cons trees, so quoted dotted pairs remain
+  representable. That makes the data model closer to the historical
+  S-expression substrate while leaving all Graham examples unchanged.
+</p>
+
+<h2>Parser boundary</h2>
+
+<p>
+  The Common Lisp reader is used as a parser with <tt>*READ-EVAL*</tt> bound to
+  NIL. Parsed forms are data passed to <tt>ROOTS-EVAL</tt>; they are never sent
+  to Common Lisp's <tt>EVAL</tt>.
+</p>
+
+<h2>Top-level boundary</h2>
+
+<p>
+  DEFUN is implemented by storing a LAMBDA expression in a
+  <tt>ROOTS-SESSION</tt>. This mutable top level must not be mistaken for a new
+  primitive in the semantic core.
+</p>
+
+<h2>Evaluator identity boundary</h2>
+
+<ul>
+  <li>Graham's corrected named-call rule is implemented by HyperDoc's Common Lisp host evaluator.</li>
+  <li>The object-language <tt>EVAL.</tt> definition runs inside that host evaluator.</li>
+  <li>Lynn's implementation is a separate Haskell/browser execution path.</li>
+  <li>The current reconstruction retains the historical dynamic environment; it is not silently upgraded to lexical scope.</li>
+</ul>
+
+<p>
+  Follow <a page="Which bugs did Graham correct?">Which bugs did Graham correct?</a>
+  for the executable named-call comparison and
+  <a page="Dynamic capture in MAPLIST and DIFF">Dynamic capture in MAPLIST and DIFF</a>
+  for the remaining binding limitation.
+</p>
