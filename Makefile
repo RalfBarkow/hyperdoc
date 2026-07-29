@@ -30,16 +30,33 @@ BUNDLE_DIR ?= bundle-deploy
 SERVER_DIR ?= $(BUNDLE_DIR)/hyperdoc-standalone
 FRAME_DIR ?= $(BUNDLE_DIR)/hyperdoc-frame
 
-SERVER_EXE ?= $(SERVER_DIR)/hyperdoc
+HYPERDOC_CATALOG ?= core
+
+ifeq ($(HYPERDOC_CATALOG),core)
+HYPERDOC_SYSTEM_DEFAULT := :hyperdoc/server
+HYPERDOC_SERVER_BASENAME_DEFAULT := hyperdoc
+HYPERDOC_RUNTIME_SUFFIX_DEFAULT :=
+else ifeq ($(HYPERDOC_CATALOG),roots)
+HYPERDOC_SYSTEM_DEFAULT := :hyperdoc-graham-roots-of-lisp/development-server
+HYPERDOC_SERVER_BASENAME_DEFAULT := hyperdoc-roots
+HYPERDOC_RUNTIME_SUFFIX_DEFAULT := -roots
+else
+$(error Unsupported HYPERDOC_CATALOG '$(HYPERDOC_CATALOG)'; supported values: core roots)
+endif
+
+HYPERDOC_SYSTEM ?= $(HYPERDOC_SYSTEM_DEFAULT)
+HYPERDOC_SERVER_BASENAME ?= $(HYPERDOC_SERVER_BASENAME_DEFAULT)
+HYPERDOC_RUNTIME_SUFFIX ?= $(HYPERDOC_RUNTIME_SUFFIX_DEFAULT)
+
+SERVER_EXE ?= $(SERVER_DIR)/$(HYPERDOC_SERVER_BASENAME)
 FRAME_EXE ?= $(FRAME_DIR)/clogframe
 SERVER_WRAPPER ?= $(FRAME_DIR)/hyperdoc-runtime-server
 RUNNER ?= $(FRAME_DIR)/run-hyperdoc-frame
 
-PID_FILE ?= $(FRAME_DIR)/hyperdoc-server.pid
-PORT_FILE ?= $(FRAME_DIR)/hyperdoc-server.port
-LOG_FILE ?= $(FRAME_DIR)/hyperdoc-server.log
-
-HYPERDOC_SYSTEM ?= :hyperdoc/server
+PID_FILE ?= $(FRAME_DIR)/hyperdoc-server$(HYPERDOC_RUNTIME_SUFFIX).pid
+PORT_FILE ?= $(FRAME_DIR)/hyperdoc-server$(HYPERDOC_RUNTIME_SUFFIX).port
+LOG_FILE ?= $(FRAME_DIR)/hyperdoc-server$(HYPERDOC_RUNTIME_SUFFIX).log
+FRAME_LOG_FILE ?= $(FRAME_DIR)/hyperdoc-frame$(HYPERDOC_RUNTIME_SUFFIX).log
 
 CLOGFRAME_NIX ?= nix/clogframe.nix
 CLOGFRAME_RESULT ?= result-clogframe
@@ -70,13 +87,17 @@ explain-build:
 	@echo
 	@echo "Other useful goals:"
 	@echo "  make run           launch CLOG Frame"
+	@echo "  make run HYPERDOC_CATALOG=roots"
+	@echo "                     launch catalog including Roots of Lisp"
+	@echo "  make stop HYPERDOC_CATALOG=roots"
+	@echo "                     stop the Roots catalog server"
 	@echo "  make stop          stop background HyperDoc server"
 	@echo "  make status        show server status"
 	@echo "  make repomix-full  build full Repomix pack"
 	@echo
 
 $(SERVER_EXE): Makefile tools/save-hyperdoc-standalone.lisp
-	@echo "==> Building HyperDoc server executable"
+	@echo "==> Building HyperDoc server executable ($(HYPERDOC_CATALOG): $(HYPERDOC_SYSTEM))"
 	rm -f result result-clogframe
 	mkdir -p "$(dir $(SERVER_EXE))"
 	$(LISP) --no-userinit --no-sysinit --non-interactive \
@@ -111,6 +132,11 @@ $(RUNNER): Makefile tools/run-hyperdoc-frame.sh $(SERVER_EXE) $(FRAME_EXE) $(SER
 	@echo "==> Built $(RUNNER)"
 
 run: all
+	HYPERDOC_SERVER="$(abspath $(SERVER_EXE))" \
+	HYPERDOC_PID_FILE="$(abspath $(PID_FILE))" \
+	HYPERDOC_PORT_FILE="$(abspath $(PORT_FILE))" \
+	HYPERDOC_LOG_FILE="$(abspath $(LOG_FILE))" \
+	HYPERDOC_FRAME_LOG_FILE="$(abspath $(FRAME_LOG_FILE))" \
 	"$(RUNNER)"
 
 stop:
@@ -138,7 +164,8 @@ status:
 	fi
 
 clean:
-	-$(MAKE) stop
+	-$(MAKE) stop HYPERDOC_CATALOG=core
+	-$(MAKE) stop HYPERDOC_CATALOG=roots
 	rm -rf "$(SERVER_DIR)" "$(FRAME_DIR)" "$(CLOGFRAME_RESULT)" "$(RUNTIME_WRAPPER_RESULT)" result
 	rm -rf .cache/clog
 

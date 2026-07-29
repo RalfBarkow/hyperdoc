@@ -3,7 +3,9 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if [ -x "${SCRIPT_DIR}/clogframe" ] && [ -x "${SCRIPT_DIR}/../hyperdoc-standalone/hyperdoc" ]; then
+# Detect an installed frame bundle from the frame-local executables.  Do not
+# require the default core server name: HYPERDOC_SERVER may select a profile.
+if [ -x "${SCRIPT_DIR}/clogframe" ] && [ -x "${SCRIPT_DIR}/hyperdoc-runtime-server" ]; then
   FRAME_DIR="${SCRIPT_DIR}"
   BUNDLE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 else
