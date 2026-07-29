@@ -92,7 +92,7 @@ pkgs.stdenv.mkDerivation {
     mkdir -p "$out/bin"
     install -m 0755 "$NIX_BUILD_TOP/clogframe-src/clogframe" "$out/bin/clogframe"
 
-    if [ "${lib.boolToString pkgs.stdenv.isLinux}" = "true" ]; then
+    ${lib.optionalString pkgs.stdenv.isLinux ''
       wrapProgram "$out/bin/clogframe" \
         --prefix LD_LIBRARY_PATH : "${linuxRuntimeLibraryPath}" \
         --set-default GDK_BACKEND wayland \
@@ -105,7 +105,7 @@ pkgs.stdenv.mkDerivation {
         --set-default MESA_LOADER_DRIVER_OVERRIDE llvmpipe \
         --set-default GSK_RENDERER cairo \
         --set-default GDK_GL disable
-    fi
+    ''}
 
     runHook postInstall
   '';
