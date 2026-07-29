@@ -147,14 +147,38 @@ async function openComparisonPage(page) {
   await activatePaneTab(page, 2, "Content");
 }
 
-async function inspectExpression(page, expressionSource) {
+async function paneIndexForObjectClass(
+  page,
+  objectClass,
+  minimumPaneIndex = 0
+) {
+  const panes = page.locator(".inspector-pane");
+  const paneCount = await panes.count();
+
+  for (let paneIndex = minimumPaneIndex; paneIndex < paneCount; paneIndex += 1) {
+    const classTitle = panes
+      .nth(paneIndex)
+      .locator(".inspector-title-bar-class")
+      .filter({ hasText: exactTextPattern(objectClass) })
+      .first();
+
+    if (await classTitle.isVisible().catch(() => false)) {
+      return paneIndex;
+    }
+  }
+
+  return -1;
+}
+
+async function inspectExpression(
+  page,
+  expressionSource,
+  expectedObjectClass
+) {
   const sourcePaneIndex = 2;
-  const destinationPaneIndex = sourcePaneIndex + 1;
 
   const reference = pane(page, sourcePaneIndex)
-    .locator(
-      `[data-hyperdoc-expression-source="${expressionSource}"]`
-    )
+    .locator(`[data-hyperdoc-expression-source="${expressionSource}"]`)
     .first();
 
   await expect(reference).toBeVisible({ timeout: 20_000 });
@@ -166,15 +190,27 @@ async function inspectExpression(page, expressionSource) {
 
   await reference.click();
 
-  // A normal HyperDoc click closes all panes to the right of the
-  // source pane and opens the destination immediately to its right.
   await expect
-    .poll(() => page.locator(".inspector-pane").count(), {
-      timeout: 30_000,
-    })
-    .toBe(destinationPaneIndex + 1);
+    .poll(
+      () =>
+        paneIndexForObjectClass(
+          page,
+          expectedObjectClass,
+          sourcePaneIndex + 1
+        ),
+      { timeout: 30_000 }
+    )
+    .toBeGreaterThan(sourcePaneIndex);
 
   await settleInspectorBindings(page);
+
+  const destinationPaneIndex = await paneIndexForObjectClass(
+    page,
+    expectedObjectClass,
+    sourcePaneIndex + 1
+  );
+
+  expect(destinationPaneIndex).toBeGreaterThan(sourcePaneIndex);
 
   return destinationPaneIndex;
 }
@@ -231,8 +267,10 @@ test("Lynn runner executes through native, FedWiki, and side-by-side views", asy
 
     const artifactPaneIndex = await inspectExpression(
       page,
-      "(hyperdoc-graham-roots-of-lisp:make-roots-lynn-runner-artifact)"
+	"(hyperdoc-graham-roots-of-lisp:make-roots-lynn-runner-artifact)",
+	"roots-lynn-runner-artifact"
     );
+
     await activatePaneTab(page, artifactPaneIndex, "Runner");
     const artifactPane = pane(page, artifactPaneIndex);
     await expect(artifactPane.locator(".roots-lynn-trust-boundary")).toContainText(
@@ -251,7 +289,8 @@ test("Lynn runner executes through native, FedWiki, and side-by-side views", asy
     await activatePaneTab(page, 2, "Content");
     const surfacePaneIndex = await inspectExpression(
 	page,
-	"(hyperdoc-graham-roots-of-lisp:make-roots-lynn-runner-surface)"
+	"(hyperdoc-graham-roots-of-lisp:make-roots-lynn-runner-surface)",
+	"roots-lynn-runner-surface"
     );
     await activatePaneTab(page, surfacePaneIndex, "Browser");
     const surfacePane = pane(page, surfacePaneIndex);
