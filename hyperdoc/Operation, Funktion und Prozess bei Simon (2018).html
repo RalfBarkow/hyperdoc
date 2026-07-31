@@ -1,0 +1,157 @@
+<h1>Operation, Funktion und Prozess bei Simon (2018)</h1>
+
+<in-package>hyperdoc</in-package>
+
+<p>
+  Dieser Referenz-/Vertragstext materialisiert quellengebundene Begriffssinne
+  aus Fritz B. Simon, <i>Formen</i> (2018), Kapitel 1 bis 3. Er trennt den
+  Quellenbegriff, seine normalisierte Paraphrase, technische Homonyme,
+  kontrollierte Ableitungen, Anwendungshypothesen und offene
+  Auslegungsfragen. Eine Paraphrase ist nicht der Wortlaut der Quelle.
+</p>
+
+<h2>Grundlagenclosure aus Kapitel 1 und 2</h2>
+
+<p>
+  Kapitel 3 wird nicht voraussetzungslos eingeführt. Der Slice führt daher
+  Beobachter, Beobachtung zweiter Ordnung, reflexive Beobachtung sowie
+  Beobachten, Unterscheiden, Innen und außen, Bezeichnen, Grenze und
+  Beobachtung als eigene Sinnidentitäten. Die Seite 13 ist für die drei
+  Kapitel-1-Stellen belegt. Für die Kapitel-2-Stellen hält dieser Slice keine
+  Seitenzahl fest, weil der hier geprüfte Evidenzbestand keine genaue Seite
+  ausweist; er setzt dafür ausdrücklich
+  <code>:page-status :not-recorded-in-current-slice</code>.
+</p>
+
+<p>
+  Kapitel 2 bestimmt Beobachten bereits als Kopplung von Unterscheiden und
+  Bezeichnen. Der Vertrag <code>beobachtung-bestimmen</code> darf diese Struktur
+  deshalb verwenden. Seine Grenze betrifft weitere Aussagen, die über die
+  direkt geprüften Kapitel 1 bis 3 hinausgehen.
+</p>
+
+<h2>Quellengebundene Sinne aus Kapitel 3</h2>
+
+<dl>
+  <dt><code>simon-2018:3.1:operation</code>, Abschnitt 3.1, S. 19</dt>
+  <dd>Normalisierte Paraphrase: Ereignis einer Veränderung relativ zu einer hypothetischen Innen-außen-Grenze.</dd>
+
+  <dt><code>simon-2018:3.2:function-of-operation</code>, Abschnitt 3.2, S. 19</dt>
+  <dd>Normalisierte Paraphrase: die einer Operation zugerechnete Wirkung, nicht eine Common-Lisp-Funktion.</dd>
+
+  <dt><code>simon-2018:3.2.1:operation-consumes-time</code>, Abschnitt 3.2.1, S. 19</dt>
+  <dd>Normalisierte Paraphrase: jede Operation verbraucht Zeit.</dd>
+
+  <dt><code>simon-2018:3.2.2:change-as-function</code>, Abschnitt 3.2.2, S. 19</dt>
+  <dd>Normalisierte Paraphrase: die zugerechnete Funktion kann in einer Veränderung bestehen.</dd>
+
+  <dt><code>simon-2018:3.2.3:preservation-as-function</code>, Abschnitt 3.2.3, S. 19</dt>
+  <dd>Normalisierte Paraphrase: die zugerechnete Funktion kann in der Verhinderung einer Veränderung und damit in der Erhaltung eines anderen Zustands bestehen.</dd>
+
+  <dt><code>simon-2018:3.3:process</code>, Abschnitt 3.3, S. 19</dt>
+  <dd>Normalisierte Paraphrase: geordnete, zeitlich gekoppelte Operationen bilden eine größere Einheit; die Ordnung darf Gleichzeitigkeit enthalten.</dd>
+
+  <dt><code>simon-2018:3.4:effect-durability</code>, Abschnitt 3.4, S. 19</dt>
+  <dd>Normalisierte Paraphrase: die bewirkte Veränderung beziehungsweise Funktion kann unterschiedlich haltbar sein.</dd>
+
+  <dt><code>simon-2018:3.4.1:event-momentariness</code>, Abschnitt 3.4.1, S. 20</dt>
+  <dd>Normalisierte Paraphrase: ein Ereignis ist augenblicklich; seine Wirkung kann fortdauern, ohne dass das Ereignis fortdauert.</dd>
+
+  <dt><code>simon-2018:3.4.2:process-duration</code>, Abschnitt 3.4.2, S. 20</dt>
+  <dd>Normalisierte Paraphrase: ein aus Ereignissen zusammengesetzter Prozess kann unterschiedlich lange dauern.</dd>
+</dl>
+
+<h2>Technische Homonyme</h2>
+
+<ul>
+  <li><code>common-lisp:function</code> bezeichnet einen Common-Lisp-Programmierbegriff, nicht die Wirkung einer Operation.</li>
+  <li><code>asdf:operation</code> bezeichnet eine ASDF-Operationsklasse oder -beschreibung, nicht schon ein beobachtetes Ereignis.</li>
+  <li><code>scxml:event</code> bezeichnet einen SCXML-Ereignisnamen oder -typ; die Bezeichnung ist nicht der vergangene Vollzug.</li>
+  <li><code>scxml:transition</code> bezeichnet eine Übergangsbeschreibung, nicht automatisch eine Simon-Operation.</li>
+  <li><code>operating-system:process</code> bezeichnet einen Betriebssystemprozess, nicht ohne weiteren Nachweis Simons geordnete Menge zeitlich gekoppelter Operationen.</li>
+  <li><code>hyperdoc:event-record</code> bezeichnet einen gespeicherten Datensatz, nicht das Ereignis selbst.</li>
+  <li><code>inspector:action-thunk</code> bezeichnet eine aufrufbare technische Aktion, nicht ohne Grenzrekonstruktion eine Simon-Operation.</li>
+</ul>
+
+<h2>Anwendungsvertrag</h2>
+
+<p>
+  Eine konkrete Simon-Operationshypothese verlangt einen beobachteten
+  Referenten, eine rekonstruierte hypothetische Grenze, Vorher, Nachher und
+  eine Richtung: <code>:outside-to-inside</code> oder
+  <code>:inside-to-outside</code>. Eine bloße technische Zustandsänderung reicht
+  nicht. Die Funktionsform ist genau eine von <code>:change</code>,
+  <code>:preservation</code> und <code>:undetermined</code>.
+</p>
+
+<p>
+  Beobachterzurechnung wird mit allgemeinen Rollen beschrieben:
+  <code>:operation-performer</code>, <code>:operation-carrier</code>,
+  <code>:observed-referent</code>, <code>:recording-system</code>,
+  <code>:attributing-observer</code>, <code>:addressed-observer</code> und
+  <code>:responsible-actor</code>. Eine Runtime-Coherence-Anwendungshypothese
+  darf diese Rollen auf Probe-Funktion, Lisp-Image, Report, Hostkontext und
+  menschlichen Operator abbilden; der allgemeine Vertrag erzwingt diese
+  Spezialrollen nicht.
+</p>
+
+<h2>Zeitdimensionen</h2>
+
+<p>
+  Der Slice besitzt keinen gemeinsamen <code>duration</code>-Wert. Er hält
+  <code>:event-duration</code>, <code>:process-duration</code> und
+  <code>:effect-durability</code> getrennt. Eine dauerhafte Wirkung ist damit
+  weder die Fortdauer des ursprünglichen Ereignisses noch automatisch die
+  Dauer des Prozesses.
+</p>
+
+<h2>Kontrollierte Ableitung</h2>
+
+<p>
+  Aus den getrennten Sinnidentitäten für Operation, Funktion und Erhaltung
+  wird kontrolliert abgeleitet: Eine Operation kann eine Veränderung
+  vollziehen, während ihre zugerechnete Funktion in der Erhaltung eines
+  anderen Zustands besteht. Diese Ableitung wird nicht als Simon-Zitat
+  ausgegeben.
+</p>
+
+<h2>Anwendungshypothese für HyperDoc</h2>
+
+<p>
+  Die Abbildung auf Runtime-Coherence bleibt ausdrücklich eine projektbezogene
+  Anwendungshypothese mit eigener Evidenz und Rollenbelegung.
+</p>
+
+<h2>Offene Auslegungsfragen</h2>
+
+<ul>
+  <li>Wie wird die hypothetische Innen-außen-Grenze einer technischen Anwendung evidenzgestützt rekonstruiert?</li>
+  <li>Welches Kopplungskriterium konstituiert in einer konkreten Anwendung die größere Prozesseinheit?</li>
+  <li>Welche genaue Seitenzuordnung gilt für die materialisierten Kapitel-2-Sinne? Der aktuelle Slice behauptet dazu keine Zahl.</li>
+  <li>Welche technischen Ereignisaufzeichnungen enthalten genug Evidenz, um einen vergangenen Vollzug zu rekonstruieren, ohne Aufzeichnung und Ereignis zu identifizieren?</li>
+</ul>
+
+<h2>Inspectable objects</h2>
+
+<ul>
+  <li><a expr="(simon-formen-source-grounded-senses)"><tt>(simon-formen-source-grounded-senses)</tt></a></li>
+  <li><a expr="(simon-formen-term-sense &quot;simon-2018:3.1:operation&quot;)"><tt>simon-2018:3.1:operation</tt></a></li>
+  <li><a expr="(simon-formen-term-sense &quot;simon-2018:3.2:function-of-operation&quot;)"><tt>simon-2018:3.2:function-of-operation</tt></a></li>
+  <li><a expr="(simon-formen-term-sense &quot;simon-2018:3.2.2:change-as-function&quot;)"><tt>simon-2018:3.2.2:change-as-function</tt></a></li>
+  <li><a expr="(simon-formen-term-sense &quot;simon-2018:3.2.3:preservation-as-function&quot;)"><tt>simon-2018:3.2.3:preservation-as-function</tt></a></li>
+  <li><a expr="(simon-formen-term-sense &quot;simon-2018:3.3:process&quot;)"><tt>simon-2018:3.3:process</tt></a></li>
+  <li><a expr="(simon-formen-term-sense &quot;simon-2018:3.4:effect-durability&quot;)"><tt>simon-2018:3.4:effect-durability</tt></a></li>
+  <li><a hyperbook="topics" page="Operation bei Simon (2018), 3.1"><tt>Operation bei Simon (2018), 3.1</tt></a></li>
+  <li><a hyperbook="topics" page="Funktion einer Operation bei Simon (2018), 3.2"><tt>Funktion einer Operation bei Simon (2018), 3.2</tt></a></li>
+  <li><a hyperbook="topics" page="Prozess bei Simon (2018), 3.3"><tt>Prozess bei Simon (2018), 3.3</tt></a></li>
+</ul>
+
+<h2>Boundary</h2>
+
+<p>
+  Dieser Slice ändert Definition 48.2 nicht, aktiviert keine
+  page-attached ASDF-Systeme und klassifiziert technische Operationen,
+  Ereignisse oder Prozesse nicht automatisch als Simon-Begriffe. Er enthält
+  normalisierte Sinnobjekte und kontrollierte Anwendungshypothesen, keine
+  Transkription der Buchseiten.
+</p>

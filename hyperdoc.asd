@@ -91,6 +91,7 @@
                   :serial t
                   :components ((:file "registry")
                                (:file "core-concepts")
+                               (:file "simon-formen")
                                (:file "winston-horn")
                                (:file "drew-mcdermott")
                                (:file "asdf")
@@ -111,6 +112,23 @@
                                (:file "layout-topicmap")
                                (:file "metagraph-fluree")
                                (:file "topic-files-topicmap")))))
+
+(defsystem #:hyperdoc/simon-operation-function-process/tests
+    :description "Focused source-grounded Simon operation/function/process tests"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :serial t
+    :depends-on (#:hyperdoc/topics
+                 #:hyperdoc/inspector)
+    :components ((:module "tests"
+                  :serial t
+                  :components ((:file "package")
+                               (:file "simon-operation-function-process-smoke"))))
+    :perform (test-op (op c)
+                      (declare (ignore op c))
+                      (uiop:symbol-call
+                       :hyperdoc/tests
+                       :run-simon-operation-function-process-smoke-tests)))
 
 (defsystem #:hyperdoc/dmx-topics
     :description "DMX-backed topic proxy objects for HyperDoc"
