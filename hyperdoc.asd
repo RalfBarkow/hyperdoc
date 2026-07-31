@@ -511,14 +511,32 @@
     :depends-on (#:hyperdoc
                  #:hyperbook/fedwiki
                  #:shasht)
+    :in-order-to ((test-op (test-op "hyperdoc/fedwiki-asdf-discovery/tests")))
     :components ((:module "hyperdoc"
                   :serial t
-                  :components ((:file "localhost-fedwiki-page-pipeline")
+                  :components ((:file "fedwiki-asdf-discovery")
+                               (:file "localhost-fedwiki-page-pipeline")
                                (:file "collective-knowledge-slice")
                                (:file "reproducible-devenv-as-knowledge-artifact-slice")
                                (:file "localhost-fedwiki-page-promotion-plans")
                                (:file "article-allegation-slice")
                                (:file "fedwiki-materialization")))))
+
+(defsystem #:hyperdoc/fedwiki-asdf-discovery/tests
+    :description "Focused read-only FedWiki ASDF asset discovery tests"
+    :author "Ralf Barkow <ralf.barkow@me.com>"
+    :license "BSD"
+    :version "0.0.1"
+    :serial t
+    :depends-on (#:hyperdoc/fedwiki)
+    :components ((:module "tests"
+                  :serial t
+                  :components ((:file "fedwiki-asdf-discovery-smoke"))))
+    :perform (test-op (op c)
+               (declare (ignore op c))
+               (uiop:symbol-call
+                :hyperdoc/tests
+                :run-fedwiki-asdf-discovery-smoke-tests)))
 
 (defsystem #:hyperdoc/mcp
     :description "Streamable HTTP MCP server for the DMX shared workspace"
@@ -712,6 +730,7 @@
     :version "0.0.1"
     :serial t
     :depends-on (#:hyperdoc/mcp
+                 #:hyperdoc/fedwiki-asdf-discovery/tests
                  #:hyperdoc/fedwiki-asdf-assets
                  #:hyperdoc/mobile-progressive-chrome
                  #:hyperdoc/scxml

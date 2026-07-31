@@ -69,6 +69,7 @@
    :run-executable-dita-tasks-smoke-test
    :run-simon-operation-function-process-smoke-tests
    :run-fedwiki-asdf-assets-smoke-tests
+   :run-fedwiki-asdf-discovery-smoke-tests
    :run-fedwiki-attached-asdf-system-smoke-tests
    :run-dmx-shared-workspace-docs-smoke-tests
    :run-neo4j-duplicate-username-repair-smoke-tests

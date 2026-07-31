@@ -597,6 +597,36 @@
    #:fedwiki-asdf-lookup-failure-home-page
    #:fedwiki-asdf-lookup-failure-text
    #:fedwiki-register-asset-alias
+   ;; Read-only FedWiki ASDF asset discovery (stages 2 through 4)
+   #:fedwiki-asdf-asset-candidate
+   #:fedwiki-asdf-asset-candidate-story-item-id
+   #:fedwiki-asdf-asset-candidate-raw-text
+   #:fedwiki-asdf-asset-candidate-asset-reference
+   #:fedwiki-asdf-asset-candidate-reference-status
+   #:fedwiki-asdf-asset-candidate-resolution-status
+   #:fedwiki-asdf-asset-candidate-evidence-source
+   #:fedwiki-asdf-asset-candidate-resolved-asset-root
+   #:fedwiki-asdf-asset-candidate-asd-candidates
+   #:fedwiki-asdf-asset-candidate-candidate-cardinality
+   #:fedwiki-asdf-asset-candidate-diagnostics
+   #:fedwiki-asdf-asset-discovery
+   #:fedwiki-asdf-asset-discovery-page-site
+   #:fedwiki-asdf-asset-discovery-page-slug
+   #:fedwiki-asdf-asset-discovery-page-title
+   #:fedwiki-asdf-asset-discovery-observed-at
+   #:fedwiki-asdf-asset-discovery-assets-items
+   #:fedwiki-asdf-asset-discovery-completion-status
+   #:fedwiki-asdf-asset-discovery-assets-item-cardinality
+   #:fedwiki-asdf-asset-discovery-asset-reference
+   #:fedwiki-asdf-asset-discovery-reference-status
+   #:fedwiki-asdf-asset-discovery-resolved-asset-root
+   #:fedwiki-asdf-asset-discovery-resolution-status
+   #:fedwiki-asdf-asset-discovery-asd-candidates
+   #:fedwiki-asdf-asset-discovery-candidate-cardinality
+   #:fedwiki-asdf-asset-discovery-selection-basis
+   #:fedwiki-asdf-asset-discovery-diagnostics
+   #:fedwiki-asdf-asset-discovery-evidence
+   #:discover-fedwiki-asdf-asset-candidates
    #:hyperdoc-source-pathname-content
    #:hyperdoc-source-pathname-exists-p
    #:assert-fedwiki-loader-examples-pass
