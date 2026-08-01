@@ -9,10 +9,47 @@
 
 .hyperdoc-dom-connect-pane-chrome {
   position: relative;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 
-.inspector-pane {
+.inspector-pane,
+.inspector-pane-maximized {
   position: relative;
+  min-width: 0;
+  max-width: calc(100% - 20px);
+}
+
+.inspector-title-bar,
+.inspector-tabs,
+.inspector-body,
+.inspector-view {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.inspector-title-bar {
+  overflow: hidden;
+}
+
+.inspector-title-bar .inspector-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+
+.inspector-title-bar .inspector-title-bar-object {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inspector-body .hyperbook-page,
+.inspector-body .hyperdoc-dom-connect-surface {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .inspector-tabs {
@@ -61,6 +98,7 @@
   justify-content: flex-end;
   position: relative;
   width: 100%;
+  min-width: 0;
   margin: 0.22rem 0 0.38rem;
   z-index: 2;
 }
@@ -75,6 +113,7 @@
   align-items: flex-end;
   gap: 0.42rem;
   max-width: min(36rem, 100%);
+  min-width: 0;
 }
 
 .hyperdoc-dock-control {
@@ -94,6 +133,25 @@
   box-shadow: 0 4px 12px rgba(74, 52, 31, 0.08);
   min-height: 2rem;
   max-width: min(36rem, 100%);
+  box-sizing: border-box;
+}
+
+.hyperdoc-connect-context-hint {
+  box-sizing: border-box;
+  width: min(36rem, 100%);
+  margin: 0;
+  padding: 0.32rem 0.55rem;
+  border-left: 3px solid #c2410c;
+  border-radius: 0.35rem;
+  background: rgba(255, 250, 243, 0.98);
+  color: #5a3821;
+  font-size: 0.88rem;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.hyperdoc-connect-context-hint[hidden] {
+  display: none;
 }
 
 .hyperdoc-capabilities-toggle {
@@ -547,9 +605,21 @@
 }
 
 @media (max-width: 720px) {
+  .inspector-body .hyperbook-page {
+    overflow-wrap: anywhere;
+  }
+
+  .inspector-body pre,
+  .inspector-body table {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
   .hyperdoc-dom-connect-pane-chrome {
-    height: 0;
-    min-height: 0;
+    --hyperdoc-mobile-pane-chrome-height: 2.75rem;
+    height: var(--hyperdoc-mobile-pane-chrome-height);
+    min-height: var(--hyperdoc-mobile-pane-chrome-height);
+    box-sizing: border-box;
     margin: 0;
     overflow: visible;
     pointer-events: none;
@@ -579,7 +649,7 @@
   .hyperdoc-inspector-tabs-toggle {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 0.2rem;
     z-index: 30;
     display: inline-flex;
     align-items: center;
@@ -594,7 +664,6 @@
     font: inherit;
     font-weight: 800;
     cursor: pointer;
-    transform: translate(-50%, 0);
     pointer-events: auto;
     box-shadow: 0 4px 12px rgba(74, 52, 31, 0.14);
   }
@@ -660,7 +729,7 @@
   .hyperdoc-capabilities-toggle {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 0.2rem;
     z-index: 31;
     display: inline-flex;
     align-items: center;
@@ -670,7 +739,6 @@
     border-radius: 999px;
     background: rgba(255, 250, 243, 0.98);
     color: #3f3428;
-    transform: translate(50%, 0);
     box-shadow: 0 4px 12px rgba(74, 52, 31, 0.14);
     pointer-events: auto;
   }
@@ -678,8 +746,42 @@
   .hyperdoc-dom-connect-pane-slot[data-capabilities-layer="capabilities-open"] .hyperdoc-dock-compact,
   .hyperdoc-dom-connect-pane-slot[data-route-capture="active"] .hyperdoc-dock-compact {
     width: calc(100% - 1rem);
-    margin: 1.25rem 0 0;
+    margin: 0;
+    padding-right: 2.9rem;
     justify-content: space-between;
+  }
+
+  .inspector-pane[data-hyperdoc-connect-active="true"] .hyperdoc-dom-connect-pane-chrome,
+  .inspector-pane-maximized[data-hyperdoc-connect-active="true"] .hyperdoc-dom-connect-pane-chrome {
+    height: auto;
+    overflow: visible;
+  }
+
+  .inspector-pane[data-hyperdoc-connect-active="true"] .hyperdoc-dom-connect-pane-slot,
+  .inspector-pane-maximized[data-hyperdoc-connect-active="true"] .hyperdoc-dom-connect-pane-slot {
+    position: relative;
+    height: auto;
+    padding: 0.25rem 0.45rem 0.35rem;
+    box-sizing: border-box;
+    pointer-events: auto;
+  }
+
+  .inspector-pane[data-hyperdoc-connect-active="true"] .hyperdoc-dom-connect-control,
+  .inspector-pane-maximized[data-hyperdoc-connect-active="true"] .hyperdoc-dom-connect-control {
+    position: relative;
+    width: 100%;
+    align-items: stretch;
+    pointer-events: auto;
+  }
+
+  .inspector-pane[data-hyperdoc-connect-active="true"] .hyperdoc-dock-compact,
+  .inspector-pane-maximized[data-hyperdoc-connect-active="true"] .hyperdoc-dock-compact {
+    width: 100%;
+    margin: 0;
+  }
+
+  .hyperdoc-connect-context-hint {
+    width: 100%;
   }
 
   .hyperdoc-dom-connect-pane-slot[data-capabilities-layer="capabilities-collapsed"] .hyperdoc-capabilities-layer {

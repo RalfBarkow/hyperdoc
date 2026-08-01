@@ -4,9 +4,11 @@
 
 <p>
   Inspector tabs are the durable base chrome. The <b>Dock</b> is now a
-  pane-local coachmark layer that progressively enhances those tabs when a
+  pane-local capability layer that progressively enhances those tabs when a
   capability such as <b>Lay route</b>, <b>Annotation</b>, or <b>Guide</b> has
-  become newly relevant, is currently active, or needs rediscovery. On narrow
+  become newly relevant, is currently active, or needs rediscovery. A large
+  coachmark is reserved for explicit rediscovery; introduction and active
+  guidance remain compactly in pane flow. On narrow
   mobile viewports, the same Dock collapses first to the <b>)(</b>
   capabilities affordance instead of showing a persistent capability block.
 </p>
@@ -63,7 +65,7 @@
 </p>
 
 <ul>
-  <li><b>Lay route</b> (<b>Connect</b> capability): the compact action stays available on desktop, while the coachmark expands only for teaching, active task state, or rediscovery. On mobile, the closed <b>)(</b> affordance preserves normal document interaction; opening it and choosing <b>Connect</b> starts the same internal route-laying path. The first implementation mechanic may still be <tt>drag-to-connect</tt> on desktop, with <tt>two-tap route-laying</tt> as the mobile route fallback after explicit Connect.</li>
+  <li><b>Lay route</b> (<b>Connect</b> capability): the compact action stays available on desktop. First introduction and active task guidance remain short and in-flow; only explicit Guide rediscovery opens the large coachmark. On mobile, the closed <b>)(</b> affordance preserves normal document interaction; opening it and choosing <b>Connect</b> starts the same internal route-laying path. The first implementation mechanic may still be <tt>drag-to-connect</tt> on desktop, with <tt>two-tap route-laying</tt> as the mobile route fallback after explicit Connect.</li>
   <li><b>Annotation</b>: when <b>Lay route</b> is waiting for a target station, tapping Annotation completes the relation against the generic Annotation topic; the canonical example in this slice is source Text pages -&gt; target Annotation; when Connect is idle, the same control reopens the current-object annotation shortcut through that same relation model.</li></ul>
 
 <p>
@@ -102,8 +104,8 @@
 
 <ul>
   <li><b>latent</b>: no expanded guidance is visible, but compact <b>Lay route</b>, Annotation, and Guide access remain.</li>
-  <li><b>introduction</b>: the coachmark expands because a capability has become newly relevant and needs teaching.</li>
-  <li><b>active</b>: the coachmark stays open because <b>Lay route</b> is mid-gesture and task-state controls matter.</li>
+  <li><b>introduction</b>: a concise in-flow notice marks a capability as newly relevant; the large coachmark remains closed.</li>
+  <li><b>active</b>: a compact in-flow hint names the next step and Escape cancellation while <b>Lay route</b> is mid-gesture; the large coachmark remains closed and the pane body remains operable.</li>
   <li><b>degraded</b>: the expanded Dock has receded after use or dismissal, while the same capability remains in compact form.</li>
   <li><b>rediscovery</b>: the user explicitly reopens the richer coachmark layer through <b>Guide</b>.</li>
 </ul>
@@ -154,11 +156,12 @@
 
 <p>
   This slice keeps the compact capability row visible in steady state and uses
-  <b>Guide</b> for desktop rediscovery. On mobile, ordinary teaching belongs
+  <b>Guide</b> as the only entry to the large desktop rediscovery coachmark. On mobile, ordinary teaching belongs
   behind the <b>)(</b> affordance and then in the route strip only after
   explicit Connect, so the large coachmark does not occupy the primary
-  viewport by default. This slice also collapses inspector tabs behind a
-  rotated <b>)(</b> affordance on narrow viewports.
+  viewport by default. A stable pane-chrome row keeps that affordance and the
+  rotated inspector-tabs <b>)(</b> inside the pane without covering its first
+  content block.
 </p>
 
 <p>

@@ -15,7 +15,7 @@
 <ul>
   <li><b>Capabilities closed:</b> only <code>)(</code> is visible. Connect, Annotation, Guide, and route guidance are hidden, and page-body taps are normal document actions.</li>
   <li><b>Capabilities open:</b> Connect, Annotation, and Guide are visible, but route capture is still inactive.</li>
-  <li><b>Route capture:</b> only choosing Connect enters route-introduction. Then <b>Tap a station</b> can latch a source and <b>From:</b> appears.</li>
+  <li><b>Route capture:</b> only choosing Connect enters route-introduction. A compact, in-flow hint asks for a page part and names Escape as the cancel action; it does not cover the page body. Then <b>Tap a station</b> can latch a source and <b>From:</b> appears.</li>
   <li><b>Ordinary links:</b> links remain ordinary links until route capture is active. In route mode, an anchor can be treated as a route endpoint because the user explicitly chose Connect.</li>
   <li><b>Inspector tabs:</b> Content and Source remain primary. Topicmap, Links, Parse tree, source variants, and generic inspector operations start behind <b>Inspect</b>. On narrow viewports, the rotated <code>)(</code> opens this existing tab row; selecting a tab collapses it again to restore vertical space.</li>
 </ul>
@@ -23,17 +23,29 @@
 <h2>Boundary-mounted handles</h2>
 
 <p>
-  In the collapsed mobile layout, the rotated inspector-tabs handle is attached
-  to the left boundary of the <code>.inspector-pane</code>, and the capabilities
-  handle is attached to the right boundary. They sit at the title/body seam as
-  pane-chrome affordances, not as controls floating over document content.
+  In the collapsed mobile layout, the rotated inspector-tabs handle is aligned
+  with the left edge of the <code>.inspector-pane</code>, and the capabilities
+  handle with the right edge. Both bounding boxes remain inside the pane and the
+  375-pixel viewport. They sit at the title/body seam as pane-chrome affordances,
+  not as controls floating over document content.
 </p>
 
 <p>
-  The collapsed chrome layer consumes no normal document height, so the active
-  <code>.inspector-body</code> starts immediately after the pane title boundary.
-  Opening either layer creates a pane-local overlay: tabs and capabilities stay
-  constrained to the pane instead of changing page content flow.
+  A stable pane-chrome row reserves enough normal-flow height for both handles,
+  so neither handle covers the heading or first content block. Opening the tabs
+  or idle capabilities layer keeps its controls in that pane-local boundary. Once
+  Connect is active, its short context strip participates in pane flow so that
+  the first content paragraph remains visible and selectable. Escape returns
+  focus to the Connect control.
+</p>
+
+<h2>Inspector simplification boundary</h2>
+
+<p>
+  A single pane uses a zero flex-item minimum and a viewport-clamped basis. This
+  distinguishes the Reel's intentional horizontal pane navigation from
+  accidental horizontal overflow inside one pane. Long titles yield space to
+  pane actions, while the body keeps vertical scrolling.
 </p>
 
 <p>
@@ -68,6 +80,14 @@
 </p>
 
 <p>
+  The slice inventory includes the DOM Connect runtime and CSS, Reel sizing CSS,
+  responsive inspector-pane construction, Dock/mobile model sources, the five
+  focused Lisp runners, and the Dock, mobile, integrated simplification, and Reel
+  Playwright specifications. These are evidence paths, not claims that one narrow
+  ASDF component owns every runtime file.
+</p>
+
+<p>
   After changing slice-specific Lisp definitions, reload
   <code>hyperdoc/mobile-progressive-chrome</code> with
   <code>asdf:load-system</code>. Use a root <code>hyperdoc</code> reload when
@@ -95,6 +115,12 @@
   two mobile layers: <b>capabilities-collapsed/open</b> and
   <b>tabs-collapsed/open/tab-selected</b>. The route substates start only after
   <b>CONNECT_CHOSEN</b>.
+</p>
+
+<p>
+  Introduction and active Connect guidance stay compactly in pane flow. The
+  large Coachmark is available only through rediscovery; the narrow viewport may
+  suppress even that overlay to preserve its boundary.
 </p>
 
 <p>

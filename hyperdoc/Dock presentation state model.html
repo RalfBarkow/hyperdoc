@@ -32,8 +32,8 @@
 
 <ul>
   <li><b>latent</b>: no expanded coachmark is visible, but compact access remains.</li>
-  <li><b>introduction</b>: the Dock expands because the capability is newly relevant and needs teaching.</li>
-  <li><b>active</b>: <b>Lay route</b> / Connect is mid-gesture, so the Dock stays expanded with task-state UI.</li>
+  <li><b>introduction</b>: a short in-flow notice marks the capability as newly relevant; no large coachmark is visible.</li>
+  <li><b>active</b>: <b>Lay route</b> / Connect is mid-gesture, so a compact in-flow hint names the next step and Escape cancellation while the pane body remains visible and operable.</li>
   <li><b>degraded</b>: the richer chrome has receded after use or dismissal, while compact access remains.</li>
   <li><b>rediscovery</b>: the user explicitly reopens the richer coachmark layer with <b>Guide</b>.</li>
   <li><b>capabilities-collapsed</b>: mobile shows only <code>)(</code>; page-body taps and ordinary links remain document actions.</li>
@@ -59,8 +59,8 @@
 <h2>Transitions</h2>
 
 <ul>
-  <li><b>Introduction -&gt; Active</b>: starting <b>Lay route</b> turns teaching chrome into task-state chrome.</li>
-  <li><b>Introduction -&gt; Degraded</b>: dismissing the coachmark retracts to compact capabilities.</li>
+  <li><b>Introduction -&gt; Active</b>: starting <b>Lay route</b> replaces the short introduction with compact in-flow task guidance.</li>
+  <li><b>Introduction -&gt; Degraded</b>: using or acknowledging a non-stateful capability removes its short introduction while compact access remains.</li>
   <li><b>Active -&gt; Degraded</b>: when the stateful route-laying gesture ends, the Dock recedes.</li>
   <li><b>Degraded -&gt; Rediscovery</b>: <b>Guide</b> reopens the richer coachmark layer.</li>
   <li><b>Rediscovery -&gt; Degraded</b>: closing rediscovery returns the pane to compact capabilities.</li>
@@ -87,10 +87,10 @@
 
 <ul>
   <li><b>Degrade chrome, not capability</b>: JS state runtime, CSS coachmark styling, and the focused Playwright regression.</li>
-  <li><b>Active route-laying keeps task state visible</b>: JS task-state handling, pane snapshot parsing, explorer views, and the same browser regression.</li>
+  <li><b>Active route-laying keeps task state visible without blocking content</b>: JS task-state handling, pane snapshot parsing, explorer views, and the same browser regression.</li>
   <li><b>Route/traversal workflows stay in the pane body</b>: DMX pane surfaces and the coachmark runtime.</li>
   <li><b>Dock presentation state is inspectable</b>: current pane snapshots, explorer views, and the focused Lisp smoke.</li>
-  <li><b>Mobile Dock gates route capture behind explicit Connect</b>: the DOM Connect runtime, CSS progressive chrome, Playwright mobile checks, and Annotation smoke keep the narrow viewport contract grounded.</li>
+  <li><b>Mobile Dock gates route capture behind explicit Connect</b>: the DOM Connect runtime, stable two-control pane-chrome row, Playwright checks at 630×670 and 375×667, and Annotation smoke keep the narrow viewport contract grounded.</li>
   <li><b>Mobile inspector tabs collapse without losing active tab semantics</b>: the inspector-tab toggle and browser tests keep the tab-row layer grounded.</li>
 </ul>
 

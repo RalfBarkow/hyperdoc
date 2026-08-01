@@ -1708,7 +1708,8 @@
             '<span class="hyperdoc-dock-label">Capabilities</span>' +
             '<div class="hyperdoc-dock-actions">' +
               '<button type="button" class="hyperdoc-dom-connect-toggle hyperdoc-dock-action" ' +
-                      'title="Click a source anchor, then a target anchor.">Connect</button>' +
+                      'title="Click a source anchor, then a target anchor." ' +
+                      'aria-pressed="false">Connect</button>' +
               '<button type="button" class="hyperdoc-dock-annotation hyperdoc-dock-action" ' +
                       'title="Tap to complete Connect to the generic Annotation target, or reopen the current-object annotation when Connect is idle.">Annotation</button>' +
               '<button type="button" class="hyperdoc-dock-snippet-playground hyperdoc-dock-action" ' +
@@ -1723,6 +1724,10 @@
                     'title="Rediscover Dock guidance" aria-label="Rediscover Dock guidance" aria-expanded="false">Guide</button>' +
           '</div>' +
         '</div>' +
+        '<p class="hyperdoc-connect-context-hint" data-hyperdoc-connect-hint ' +
+           'role="status" aria-live="polite" hidden>' +
+          'Select a part of the page to connect. Press Escape to cancel.' +
+        '</p>' +
         '<div class="hyperdoc-dom-connect-help-panel hyperdoc-dock-coachmark" aria-hidden="true">' +
           '<div class="hyperdoc-dock-coachmark-header">' +
             '<span class="hyperdoc-dock-state-badge">Introduction</span>' +
@@ -2294,7 +2299,7 @@
         detail:
           presentationState === "rediscovery"
             ? "Guide reopened Snippet guidance for this pane. The richer snippet workflow lives in the pane body, and the compact Snippet action remains available after this guidance recedes."
-            : "The Dock is temporarily expanded because Snippet became newly relevant here. The richer snippet workflow lives in the pane body, and the compact Snippet action remains available after this introduction recedes."
+            : "A short in-flow introduction marks Snippet as newly relevant here. The richer snippet workflow lives in the pane body, and the compact Snippet action remains available."
       };
     }
     if (presentationState === "active") {
@@ -2302,7 +2307,7 @@
         title: "Connect",
         summary: "Connect is active in this pane.",
         detail:
-          "Task state stays in the coachmark while the richer route or traversal workflow remains in the pane body. Annotation is also a valid target while Connect is waiting for one."
+          "Task guidance stays in the compact pane flow while the richer route or traversal workflow remains in the pane body. Annotation is also a valid target while Connect is waiting for one."
       };
     }
     if (presentationState === "rediscovery") {
@@ -2318,7 +2323,7 @@
         title: "Connect",
         summary: state.providerHelpSummary,
         detail:
-          "The Dock is temporarily expanded because Connect became newly relevant here. Annotation remains available after this introduction recedes and can complete an active Connect gesture as a generic target, while inspection stays in the inspector tabs."
+          "A short in-flow introduction marks Connect as newly relevant here. Annotation can complete an active Connect gesture as a generic target, while inspection stays in the inspector tabs."
       };
     }
     return {
@@ -2328,10 +2333,21 @@
     };
   }
 
+  function dockInFlowGuidanceCopy(presentationState, introducedCapability) {
+    if (presentationState === "active") {
+      return "Select a part of the page to connect. Press Escape to cancel.";
+    }
+    if (presentationState === "introduction" && !mobileRouteViewport()) {
+      if (introducedCapability === DOCK_CAPABILITY_SNIPPET) {
+        return "Snippet is available for this source surface.";
+      }
+      return "Connect can lay a route between page parts. Choose Connect to begin.";
+    }
+    return "";
+  }
+
   function applyDockPresentation(state, presentation) {
-    var coachmark = presentation.state === "introduction" ||
-      presentation.state === "active" ||
-      presentation.state === "rediscovery";
+    var coachmark = presentation.state === "rediscovery";
     if (mobileRouteViewport()) {
       coachmark = false;
     }
@@ -2365,6 +2381,12 @@
     state.coachmarkTitle.textContent = copy.title;
     state.coachmarkSummary.textContent = copy.summary;
     state.coachmarkDetail.textContent = copy.detail;
+    var inFlowGuidance = dockInFlowGuidanceCopy(
+      presentation.state,
+      introducedCapability
+    );
+    state.connectHint.textContent = inFlowGuidance;
+    state.connectHint.hidden = !inFlowGuidance;
     state.providerHandoffLabel.textContent =
       "Richer workflow lives in the pane body";
     state.dismiss.hidden = presentation.state === "active" || !coachmark;
@@ -2490,10 +2512,13 @@
     if (!available) {
       state.enabled = false;
       state.toggle.dataset.mode = "inactive";
+      state.toggle.setAttribute("aria-pressed", "false");
       state.presentationState = "hidden";
       state.introducedCapability = null;
       state.presentationReason = "provider-unavailable";
       state.helpOpen = false;
+      state.connectHint.hidden = true;
+      state.pane.dataset.hyperdocConnectActive = "false";
       state.slot.dataset.helpOpen = "false";
       state.slot.dataset.dockPresentation = "hidden";
       state.slot.dataset.dockIntroducedCapability = "";
@@ -2517,7 +2542,9 @@
     var presentation;
 
     state.enabled = activeForSource || activeForTarget;
+    state.pane.dataset.hyperdocConnectActive = sessionVisible ? "true" : "false";
     state.toggle.dataset.mode = sessionVisible ? "active" : "inactive";
+    state.toggle.setAttribute("aria-pressed", sessionVisible ? "true" : "false");
     if (state.surface) {
       state.surface.classList.toggle("hyperdoc-dom-connect-active", !!state.enabled);
     }
@@ -2593,12 +2620,21 @@
   function cancelConnectSession(state) {
     var manager = state.manager;
     var requestId = manager.session && manager.session.id;
+    var originPaneId = manager.session && manager.session.originPaneId;
+    var originState = liveStates(manager).find(function (candidate) {
+      return candidate.paneId === originPaneId;
+    }) || state;
     resetConnectSession(manager);
     if (requestId) {
       logStage(requestId, "session-cancelled", {
         paneId: state.paneId
       });
     }
+    window.requestAnimationFrame(function () {
+      if (originState.toggle && originState.toggle.isConnected) {
+        originState.toggle.focus();
+      }
+    });
   }
 
   function syncPaneSurface(state) {
@@ -3034,6 +3070,7 @@
     var cancel = slot.querySelector(".hyperdoc-dom-connect-cancel");
     var feedback = slot.querySelector(".hyperdoc-dom-connect-feedback");
     var helpPanel = slot.querySelector(".hyperdoc-dom-connect-help-panel");
+    var connectHint = slot.querySelector("[data-hyperdoc-connect-hint]");
     var status = slot.querySelector(".hyperdoc-dom-connect-status");
     var stateBadge = slot.querySelector(".hyperdoc-dock-state-badge");
     var coachmarkTitle = slot.querySelector(".hyperdoc-dock-coachmark-title");
@@ -3050,7 +3087,7 @@
         !cue || !sourceSummary || !sourceChip || !clear ||
         !stateBadge || !coachmarkTitle || !coachmarkSummary ||
         !coachmarkDetail || !providerHandoff || !providerHandoffLabel || !dismiss ||
-        !helpToggle || !cancel || !feedback || !helpPanel || !status) {
+        !helpToggle || !cancel || !feedback || !helpPanel || !connectHint || !status) {
       return null;
     }
     var state = {
@@ -3077,6 +3114,7 @@
       feedback: feedback,
       helpToggle: helpToggle,
       helpPanel: helpPanel,
+      connectHint: connectHint,
       status: status,
       stateBadge: stateBadge,
       coachmarkTitle: coachmarkTitle,
@@ -3152,6 +3190,7 @@
     control.dataset.dockPresentation = "latent";
     control.dataset.dockIntroducedCapability = "";
     control.dataset.dockPresentationReason = "";
+    pane.dataset.hyperdocConnectActive = "false";
     if (!helpPanel.id) {
       helpPanel.id = (slot.id || "hyperdoc-dom-connect-pane-slot") + "-help-panel";
     }

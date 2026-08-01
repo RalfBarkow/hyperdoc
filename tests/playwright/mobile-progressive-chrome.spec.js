@@ -21,8 +21,8 @@ const {
 
 const proofTitle = "DM6 AppEmbed HyperDoc Inline Proof";
 
-async function openProofPageMobile(page) {
-  await page.setViewportSize({ width: 390, height: 780 });
+async function openProofPageMobile(page, viewport = { width: 390, height: 780 }) {
+  await page.setViewportSize(viewport);
   await openHyperDoc(page, { expectDesktopDock: false });
   const proofPane = await openTextPageFromHyperDoc(page, proofTitle);
   await waitForPaneBodyText(page, 2, "DM6 Topic Map");
@@ -74,8 +74,10 @@ async function readMobileBoundaryLayout(page, paneIndex) {
       ".hyperdoc-capabilities-toggle"
     );
     const activeView = body?.querySelector(":scope > .inspector-view:not([hidden])");
+    const heading = Array.from(activeView?.querySelectorAll("h1") || [])
+      .find(visible);
     const firstContent = Array.from(
-      activeView?.querySelectorAll("h1,h2,h3,p,li,table,pre,blockquote") || []
+      activeView?.querySelectorAll("h2,h3,p,li,table,pre,blockquote") || []
     ).find(visible);
     const tabsToggleRect = rectOf(tabsToggle);
     const capabilitiesToggleRect = rectOf(capabilitiesToggle);
@@ -109,12 +111,38 @@ async function readMobileBoundaryLayout(page, paneIndex) {
       titleBar: rectOf(titleBar),
       body: rectOf(body),
       chrome: rectOf(chrome),
+      heading: rectOf(heading),
       firstContent: rectOf(firstContent),
       tabsToggle: tabsToggleRect,
       capabilitiesToggle: capabilitiesToggleRect,
       titleActions,
     };
   }, paneIndex);
+}
+
+function boxesIntersect(left, right) {
+  return !!left && !!right &&
+    left.left < right.right && left.right > right.left &&
+    left.top < right.bottom && left.bottom > right.top;
+}
+
+function expectStablePaneChrome(layout) {
+  expect(layout.pane).not.toBeNull();
+  expect(layout.chrome).not.toBeNull();
+  expect(layout.heading).not.toBeNull();
+  expect(layout.firstContent).not.toBeNull();
+  expect(layout.tabsToggle).not.toBeNull();
+  expect(layout.capabilitiesToggle).not.toBeNull();
+  for (const control of [layout.tabsToggle, layout.capabilitiesToggle]) {
+    expect(control.left).toBeGreaterThanOrEqual(layout.pane.left - 1);
+    expect(control.right).toBeLessThanOrEqual(layout.pane.right + 1);
+    expect(control.top).toBeGreaterThanOrEqual(layout.pane.top - 1);
+    expect(control.bottom).toBeLessThanOrEqual(layout.pane.bottom + 1);
+    expect(boxesIntersect(control, layout.heading)).toBe(false);
+    expect(boxesIntersect(control, layout.firstContent)).toBe(false);
+  }
+  expect(boxesIntersect(layout.tabsToggle, layout.capabilitiesToggle)).toBe(false);
+  expect(layout.body.top).toBeGreaterThanOrEqual(layout.chrome.bottom - 1);
 }
 
 test("mobile initial chrome collapses capabilities and inspector tabs", async ({
@@ -146,39 +174,40 @@ test("mobile initial chrome collapses capabilities and inspector tabs", async ({
   await expect(proofPane.getByText(/^From:/)).toHaveCount(0);
 });
 
-test("mobile collapsed handles are mounted on the pane boundary", async ({
-  page,
-}, testInfo) => {
-  await openProofPageMobile(page);
-  const layout = await readMobileBoundaryLayout(page, 2);
-  await attachJson(testInfo, "mobile-boundary-handle-layout.json", layout);
+for (const viewport of [
+  { width: 630, height: 670 },
+  { width: 375, height: 667 },
+]) {
+  test(`mobile pane chrome remains non-overlapping at ${viewport.width}x${viewport.height}`, async ({
+    page,
+  }, testInfo) => {
+    await openProofPageMobile(page, viewport);
+    const chrome = paneChrome(page, 2);
 
-  expect(layout.pane).not.toBeNull();
-  expect(layout.body).not.toBeNull();
-  expect(layout.tabsToggle).not.toBeNull();
-  expect(layout.capabilitiesToggle).not.toBeNull();
-  expect(Math.abs(layout.tabsToggle.centerX - layout.pane.left)).toBeLessThanOrEqual(5);
-  expect(Math.abs(layout.capabilitiesToggle.centerX - layout.pane.right))
-    .toBeLessThanOrEqual(5);
-  expect(Math.abs(layout.tabsToggle.top - layout.body.top)).toBeLessThanOrEqual(8);
-  expect(Math.abs(layout.capabilitiesToggle.top - layout.body.top))
-    .toBeLessThanOrEqual(8);
-});
+    async function check(label) {
+      const layout = await readMobileBoundaryLayout(page, 2);
+      await attachJson(
+        testInfo,
+        `mobile-pane-chrome-${viewport.width}x${viewport.height}-${label}.json`,
+        layout
+      );
+      expectStablePaneChrome(layout);
+      expect(layout.titleActions.length).toBeGreaterThan(0);
+      expect(layout.titleActions.filter((action) => action.coveredByHandle))
+        .toEqual([]);
+    }
 
-test("mobile collapsed chrome does not push body content or cover title actions", async ({
-  page,
-}, testInfo) => {
-  await openProofPageMobile(page);
-  const layout = await readMobileBoundaryLayout(page, 2);
-  await attachJson(testInfo, "mobile-boundary-content-gap.json", layout);
-
-  expect(layout.chrome.height).toBeLessThanOrEqual(1);
-  expect(layout.body.top - layout.titleBar.bottom).toBeLessThanOrEqual(4);
-  expect(layout.firstContent.top - layout.body.top).toBeLessThan(120);
-  expect(layout.titleActions.length).toBeGreaterThan(0);
-  expect(layout.titleActions.filter((action) => action.coveredByHandle))
-    .toEqual([]);
-});
+    await check("initial");
+    await chrome.inspectorTabsToggle.click();
+    await check("tabs-open");
+    await chrome.inspectorTabsToggle.click();
+    await check("tabs-closed");
+    await chrome.capabilitiesToggle.click();
+    await check("capabilities-open");
+    await chrome.capabilitiesToggle.click();
+    await check("capabilities-closed");
+  });
+}
 
 test("mobile link click is normal while capabilities are collapsed", async ({
   page,
@@ -322,5 +351,7 @@ test("mobile progressive chrome state, SCXML, and plan artifacts are inspectable
   const planState = await readInspectorPaneState(page, paneCountBefore);
   await attachJson(testInfo, "mobile-progressive-plan-pane.json", planState);
   expect(planState.bodyText).toContain("Mobile progressive chrome plan");
-  expect(planState.bodyText).toContain("Mount collapsed toggles on the pane boundary");
+  expect(planState.bodyText).toContain(
+    "Keep collapsed toggles inside a stable pane-chrome row"
+  );
 });

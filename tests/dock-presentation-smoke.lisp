@@ -39,7 +39,7 @@
                 :key #'hyperdoc::title-of
                 :test #'string=))
          (mobile-boundary-claim
-          (find "Mobile chrome toggles mount on the pane boundary"
+          (find "Mobile chrome toggles remain inside the pane boundary"
                 claims
                 :key #'hyperdoc::title-of
                 :test #'string=))
@@ -57,7 +57,7 @@
              :presentationReason "choose-target"
              :introducedCapability "connect"
              :presentationScope "browser-session"
-             :coachmarkVisible t
+             :coachmarkVisible nil
              :capabilitiesLayerState "capabilities-open"
              :routeCaptureActive t
              :inspectorTabsLayerState "tabs-collapsed"
@@ -67,7 +67,7 @@
              :selectedSourcePane t
              :pendingRequestId "assoc-123"
              :compactCapabilities ("Connect" "Annotation" "Guide")
-             :coachmarkCapabilities ("DMX")
+             :coachmarkCapabilities ()
              :providerHandoffs ("DMX")))))
     (assert-true (typep model 'hyperdoc::dock-presentation-model)
                  "Dock presentation model entrypoint must materialize an inspectable model object")
@@ -85,6 +85,31 @@
                                 :test #'string=))
                    (format nil "Dock state ~A should not enumerate Inspect as a Dock capability"
                            (hyperdoc::title-of state))))
+    (let ((introduction (find "introduction" states
+                              :key #'hyperdoc::title-of :test #'string=))
+          (active (find "active" states
+                        :key #'hyperdoc::title-of :test #'string=))
+          (rediscovery (find "rediscovery" states
+                             :key #'hyperdoc::title-of :test #'string=)))
+      (assert-true introduction "Dock model must materialize introduction")
+      (assert-true active "Dock model must materialize active")
+      (assert-true rediscovery "Dock model must materialize rediscovery")
+      (assert-true
+       (not (hyperdoc::dock-presentation-state-allows-large-coachmark-p
+             introduction))
+       "Introduction must not allow the large coachmark")
+      (assert-true
+       (not (hyperdoc::dock-presentation-state-allows-large-coachmark-p active))
+       "Active must not allow the large coachmark")
+      (assert-true
+       (hyperdoc::dock-presentation-state-allows-large-coachmark-p rediscovery)
+       "Rediscovery must be the only state that allows the large coachmark")
+      (assert-true (search "in-flow"
+                           (hyperdoc::compact-representation-of introduction))
+                   "Introduction must describe its in-flow representation")
+      (assert-true (search "in-flow"
+                           (hyperdoc::compact-representation-of active))
+                   "Active must describe its in-flow representation"))
     (assert-equal 20
                   (length transitions)
                   "Dock presentation model should expose desktop coachmark transitions plus mobile progressive chrome transitions")
@@ -130,8 +155,8 @@
     (assert-equal "browser-session"
                   (hyperdoc::presentation-scope-of snapshot)
                   "Pane snapshot should expose the current Dock presentation memory scope")
-    (assert-true (hyperdoc::coachmark-visible-p-of snapshot)
-                 "Pane snapshot should preserve whether the expanded coachmark is visible")
+    (assert-true (not (hyperdoc::coachmark-visible-p-of snapshot))
+                 "An active pane snapshot must not claim a visible large coachmark")
     (assert-equal "capabilities-open"
                   (hyperdoc::capabilities-layer-state-of snapshot)
                   "Pane snapshot should expose the capabilities layer state")
@@ -149,9 +174,9 @@
     (assert-equal '("Connect" "Annotation" "Guide")
                   (hyperdoc::compact-capabilities-of snapshot)
                   "Pane snapshot should preserve compact capability access after degradation")
-    (assert-equal '("DMX")
+    (assert-equal nil
                   (hyperdoc::coachmark-capabilities-of snapshot)
-                  "Pane snapshot should expose the currently expanded coachmark capabilities")
+                  "An active pane snapshot must expose no coachmark-only capabilities")
     (assert-equal '("DMX")
                   (hyperdoc::provider-handoffs-of snapshot)
                   "Pane snapshot should preserve provider handoff buttons separately from compact Dock identity"))

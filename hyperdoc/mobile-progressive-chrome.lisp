@@ -35,6 +35,10 @@
     :reader mobile-progressive-chrome-smoke-test-functions-of
     :initarg :smoke-test-functions
     :initform nil)
+   (validation-files
+    :reader mobile-progressive-chrome-validation-files-of
+    :initarg :validation-files
+    :initform nil)
    (playwright-spec-pathname
     :reader mobile-progressive-chrome-playwright-spec-pathname-of
     :initarg :playwright-spec-pathname)))
@@ -81,12 +85,28 @@
    :runtime-implementation-files
    '("assets/hyperdoc/js/dom-annotation-connect.js"
      "assets/hyperdoc/css/dom-annotation-connect.css"
+     "assets/hyperdoc/css/hyperdoc-reel.css"
+     "hyperbook-server/inspector-performance.lisp"
      "hyperdoc/dock.lisp"
      "hyperdoc/dom-annotations.lisp"
      "hyperdoc-explorer/dock.lisp"
      "hyperdoc-explorer/dom-annotations.lisp")
    :smoke-test-functions
-   '("hyperdoc/tests:run-mobile-progressive-chrome-smoke-tests")
+   '("hyperdoc/tests:run-dock-presentation-smoke-tests"
+     "hyperdoc/tests:run-mobile-progressive-chrome-smoke-tests"
+     "hyperdoc/tests:run-reel-accessible-carousel-smoke-tests"
+     "hyperdoc/tests:run-inspector-performance-smoke-tests"
+     "hyperdoc/tests:run-view-contract-smoke-tests")
+   :validation-files
+   '("tests/dock-presentation-smoke.lisp"
+     "tests/mobile-progressive-chrome-smoke.lisp"
+     "tests/reel-accessible-carousel-smoke.lisp"
+     "tests/inspector-performance-smoke.lisp"
+     "tests/view-contract-smoke.lisp"
+     "tests/playwright/dock-presentation.spec.js"
+     "tests/playwright/mobile-progressive-chrome.spec.js"
+     "tests/playwright/inspector-simplification.spec.js"
+     "tests/playwright/reel-accessible-carousel.spec.js")
    :playwright-spec-pathname (mobile-progressive-chrome-playwright-spec-pathname)))
 
 (defun reload-mobile-progressive-chrome-slice (&key (force? t))

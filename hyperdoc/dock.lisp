@@ -536,11 +536,11 @@ the primary pane-local object in this slice."))
 (defun dock-playwright-evidence ()
   (make-dock-implementation-evidence
    "dock-evidence/playwright"
-   "Dock coachmark browser regression"
-   "A focused browser regression proves capability-scoped introduction, Connect active-state ownership, Snippet degraded/rediscovery behavior, and provider handoff behavior without relying on toolbar permanence."
+   "Dock non-blocking guidance browser regression"
+   "A focused browser regression proves in-flow introduction, compact Connect active-state ownership, Snippet rediscovery behavior, and provider handoff behavior without relying on toolbar permanence."
    "test"
    "tests/playwright/dock-presentation.spec.js"
-   :target-name "Dock coachmark states degrade chrome without removing capability"))
+   :target-name "Dock keeps introduction and active Connect guidance out of the page body"))
 
 (defun dock-smoke-evidence ()
   (make-dock-implementation-evidence
@@ -668,9 +668,9 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-claim-code-relation
                  :id "dock-claim/connect-active"
                  :title "Active Connect keeps task state visible"
-                 :summary "During an in-flight Connect gesture, the expanded Dock stays visible with source, next step, and clear/cancel controls."
+                 :summary "During an in-flight Connect gesture, a compact in-flow hint keeps the next step and Escape cancellation visible without covering the pane body."
                  :claim-text
-                 "Connect uses the expanded coachmark only while the interaction is stateful, and the same pane snapshot exposes why the Dock is visible now."
+                 "Connect keeps its active context in pane flow while the large coachmark remains reserved for explicit rediscovery; the same pane snapshot exposes why the Dock is active now."
                  :evidence (list (dock-js-coachmark-evidence)
                                  (dock-pane-snapshot-evidence)
                                  (dock-pane-view-evidence)
@@ -728,10 +728,10 @@ the primary pane-local object in this slice."))
 (defun mobile-progressive-chrome-boundary-layout-claim ()
   (make-instance 'dock-claim-code-relation
                  :id "dock-claim/mobile-boundary-toggle-layout"
-                 :title "Mobile chrome toggles mount on the pane boundary"
-                 :summary "On narrow viewports the collapsed inspector-tabs and capabilities handles attach to the inspector-pane boundary and consume no document vertical space."
+                 :title "Mobile chrome toggles remain inside the pane boundary"
+                 :summary "On narrow viewports a stable pane-chrome row keeps the collapsed inspector-tabs and capabilities handles inside the inspector-pane boundary and clear of content."
                  :claim-text
-                 "The mobile handles belong to the pane chrome seam, not to page content. The collapsed chrome layer has zero normal-flow height, the handles sit on the left and right inspector-pane boundaries, and expanded layers remain pane-local overlays."
+                 "The mobile handles belong to a stable pane-chrome row, not to page content. Both handle bounds stay within the inspector pane and viewport, do not intersect each other or the first content, and active Connect guidance enters pane flow instead of covering content."
                  :evidence (list (mobile-progressive-chrome-css-evidence)
                                  (mobile-progressive-chrome-playwright-evidence)
                                  (mobile-progressive-chrome-smoke-evidence))))
@@ -754,13 +754,13 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-state
                  :id "dock-state/introduction"
                  :title "introduction"
-                 :summary "The Dock expands for first contextual teaching of one capability at the chosen presentation-memory scope."
-                 :compact-representation "Compact capability strip remains visible underneath the teaching layer."
-                 :expanded-representation "Coachmark summary, explanation, and contextual handoff actions."
+                 :summary "A short in-flow Dock introduction marks one capability as newly relevant at the chosen presentation-memory scope."
+                 :compact-representation "Compact capability strip plus a concise in-flow introduction."
+                 :expanded-representation "None; the large coachmark is reserved for rediscovery."
                  :entry-triggers
                  '("capability.newly_relevant guard: available && teachable && !introduced(capability, scope) && !active_session.")
-                 :exit-conditions '("Dismiss coachmark."
-                                    "Acknowledge the capability teaching and recede to degraded."
+                 :exit-conditions '("Use or acknowledge the introduced capability and recede to degraded."
+                                    "Guide requests rediscovery."
                                     "Start Connect (stateful capability only)."
                                     "Switch to a steady-state pane where only compact access remains.")
                  :capabilities '("Connect" "Annotation" "Snippet" "DMX handoff")
@@ -771,13 +771,12 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-state
                  :id "dock-state/active"
                  :title "active"
-                 :summary "The Dock stays expanded only for Dock-owned stateful capability sessions."
-                 :compact-representation "Compact capability strip remains present, but active Connect state owns the expanded surface."
-                 :expanded-representation "Status, next expected step, selected source summary, clear, and cancel."
+                 :summary "A Dock-owned stateful Connect session keeps compact context visible in pane flow without opening the large coachmark."
+                 :compact-representation "Compact capability strip plus an in-flow next-step and Escape-cancel hint."
+                 :expanded-representation "None; the pane body remains visible and operable."
                  :entry-triggers '("Connect enters choose-source, choose-target, or submitting.")
                  :exit-conditions '("Association succeeds."
-                                    "Connect is cancelled."
-                                    "Selected source is cleared and the gesture returns to choose-source.")
+                                    "Connect is cancelled.")
                  :capabilities '("Connect" "Annotation")
                  :claims (list (dock-connect-active-claim))))
 
@@ -811,6 +810,11 @@ the primary pane-local object in this slice."))
                  :capabilities '("Connect" "Annotation" "Snippet" "DMX handoff")
                  :claims (list (dock-degrade-chrome-claim)
                                (dock-provider-handoff-claim))))
+
+(defun dock-presentation-state-allows-large-coachmark-p (state)
+  "True only when STATE is the explicit rediscovery state.
+Viewport policy may still suppress the coachmark on a narrow mobile surface."
+  (string= (id-of state) "dock-state/rediscovery"))
 
 (defun dock-mobile-route-idle-state ()
   (make-instance 'dock-presentation-state
@@ -971,7 +975,7 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-transition
                  :id "dock-transition/introduction-active"
                  :title "Introduction -> Active"
-                 :summary "Starting a Dock-owned stateful capability session (Connect) turns teaching into task-state chrome."
+                 :summary "Starting Connect replaces the short introduction with compact in-flow task guidance."
                  :from-state (dock-introduction-state)
                  :to-state (dock-active-state)
                  :trigger "Connect clicked while stateful session ownership remains in the Dock."
@@ -982,10 +986,10 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-transition
                  :id "dock-transition/introduction-degraded"
                  :title "Introduction -> Degraded"
-                 :summary "Dismissing or acknowledging the capability introduction retracts the Dock to compact capabilities."
+                 :summary "Using or acknowledging a non-stateful capability removes its short introduction while compact access remains."
                  :from-state (dock-introduction-state)
                  :to-state (dock-degraded-state)
-                 :trigger "Dismiss clicked, outside-click dismiss, or explicit acknowledgement."
+                 :trigger "Capability used, pane context changed, or explicit acknowledgement."
                  :exit-condition "Compact actions remain visible."
                  :claims (list (dock-degrade-chrome-claim))))
 
@@ -1019,7 +1023,7 @@ the primary pane-local object in this slice."))
                  :from-state (dock-active-state)
                  :to-state (dock-degraded-state)
                  :trigger "Connect succeeds or is cancelled."
-                 :exit-condition "No expanded task-state chrome remains."
+                 :exit-condition "No active in-flow Connect guidance remains."
                  :claims (list (dock-connect-active-claim)
                                (dock-degrade-chrome-claim))))
 
@@ -1193,7 +1197,7 @@ the primary pane-local object in this slice."))
   (make-instance 'dock-presentation-model
                  :id "dock-presentation-model"
                  :title "Dock presentation model"
-                 :summary "Inspectable SCXML-style state model for Dock presentation: desktop coachmark behavior composed with mobile capabilities and inspector-tabs progressive-enhancement layers, with collapsed handles mounted on the pane boundary."
+                 :summary "Inspectable SCXML-style state model for Dock presentation: desktop coachmark behavior composed with mobile capabilities and inspector-tabs progressive-enhancement layers, with both mobile handles contained by a stable pane-chrome row."
                  :states (list (dock-latent-state)
                                (dock-introduction-state)
                                (dock-active-state)
@@ -1445,7 +1449,7 @@ the primary pane-local object in this slice."))
      :dependency-ids '("add-scxml-behavior-model"))
     (make-mobile-progressive-chrome-plan-task
      "boundary-mounted-toggle-layout"
-     "Mount collapsed toggles on the pane boundary"
+     "Keep collapsed toggles inside a stable pane-chrome row"
      "done"
      "assets/hyperdoc/css/dom-annotation-connect.css"
      "tests/playwright/mobile-progressive-chrome.spec.js"

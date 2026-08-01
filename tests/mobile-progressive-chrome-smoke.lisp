@@ -45,6 +45,23 @@
         (mobile-progressive-chrome-assert-true
          (uiop:file-exists-p pathname)
          (format nil "Slice pathname must exist: ~A" pathname)))
+      (dolist (relative-path
+               (append
+                (hyperdoc::mobile-progressive-chrome-runtime-implementation-files-of
+                 slice)
+                (hyperdoc::mobile-progressive-chrome-validation-files-of slice)))
+        (mobile-progressive-chrome-assert-true
+         (uiop:file-exists-p
+          (asdf:system-relative-pathname :hyperdoc relative-path))
+         (format nil "Slice evidence pathname must exist: ~A" relative-path)))
+      (mobile-progressive-chrome-assert-equal
+       '("hyperdoc/tests:run-dock-presentation-smoke-tests"
+         "hyperdoc/tests:run-mobile-progressive-chrome-smoke-tests"
+         "hyperdoc/tests:run-reel-accessible-carousel-smoke-tests"
+         "hyperdoc/tests:run-inspector-performance-smoke-tests"
+         "hyperdoc/tests:run-view-contract-smoke-tests")
+       (hyperdoc::mobile-progressive-chrome-smoke-test-functions-of slice)
+       "Slice inventory must expose all focused Lisp validation runners")
       (mobile-progressive-chrome-assert-true
        (typep (hyperdoc::mobile-progressive-chrome-slice-plan-of slice)
               'hyperdoc::mobile-progressive-chrome-plan)
@@ -100,6 +117,25 @@
              claims
              :test #'string=)
      "Dock model must expose the inspector-tabs layer claim")
+    (let ((introduction (find "introduction"
+                              (hyperdoc::states-of model)
+                              :key #'hyperdoc::title-of :test #'string=))
+          (active (find "active"
+                        (hyperdoc::states-of model)
+                        :key #'hyperdoc::title-of :test #'string=))
+          (rediscovery (find "rediscovery"
+                             (hyperdoc::states-of model)
+                             :key #'hyperdoc::title-of :test #'string=)))
+      (mobile-progressive-chrome-assert-true
+       (not (hyperdoc::dock-presentation-state-allows-large-coachmark-p
+             introduction))
+       "Introduction must keep the large coachmark closed")
+      (mobile-progressive-chrome-assert-true
+       (not (hyperdoc::dock-presentation-state-allows-large-coachmark-p active))
+       "Active must keep the large coachmark closed")
+      (mobile-progressive-chrome-assert-true
+       (hyperdoc::dock-presentation-state-allows-large-coachmark-p rediscovery)
+       "Rediscovery must be the only state that permits the large coachmark"))
     (mobile-progressive-chrome-assert-equal
      "capabilities-open"
      (hyperdoc::capabilities-layer-state-of snapshot)
@@ -163,7 +199,13 @@
                   "validate"))
       (mobile-progressive-chrome-assert-true
        (member id ids :test #'string=)
-       (format nil "Plan must include task ~A" id)))
+      (format nil "Plan must include task ~A" id)))
+    (let ((boundary-task
+            (find "boundary-mounted-toggle-layout"
+                  tasks :key #'hyperdoc::id-of :test #'string=)))
+      (mobile-progressive-chrome-assert-true
+       (search "stable pane-chrome row" (hyperdoc::title-of boundary-task))
+       "Boundary task must describe the stable pane-chrome row"))
     (dolist (status statuses)
       (mobile-progressive-chrome-assert-true
        (member status '("pending" "active" "done" "blocked") :test #'string=)
@@ -187,6 +229,7 @@
     (let ((text (plump:text (hyperbook:dom-of page))))
       (dolist (needle '("Capabilities closed"
                         "Route capture"
+                        "large Coachmark"
                         "Ordinary links"
                         "Boundary-mounted handles"
                         "ASDF feature slice"

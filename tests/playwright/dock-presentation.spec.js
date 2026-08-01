@@ -18,7 +18,7 @@ const {
   readPaneChromeState,
 } = require("./pane-chrome-harness");
 
-test("Dock coachmark states degrade chrome without removing capability", async ({
+test("Dock keeps introduction and active Connect guidance out of the page body", async ({
   page,
 }, testInfo) => {
   const hyperdocPane = await openHyperDoc(page);
@@ -30,7 +30,11 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(introduction.presentationState).toBe("introduction");
   expect(introduction.introducedCapability).toBe("connect");
   expect(introduction.presentationReason).toContain("connect.");
-  expect(introduction.coachmarkVisible).toBe(true);
+  expect(introduction.coachmarkVisible).toBe(false);
+  expect(introduction.connectHintVisible).toBe(true);
+  expect(introduction.connectHintText).toBe(
+    "Connect can lay a route between page parts. Choose Connect to begin."
+  );
   expect(introduction.coachmarkBadge).toBe("Introduction");
   expect(introduction.coachmarkTitle).toBe("Connect");
   expect(introduction.coachmarkSummary).toContain("Click");
@@ -42,23 +46,7 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(introduction.connectStateInspectPresent).toBe(false);
 
   const chrome = paneChrome(page, 1);
-  await expect(chrome.dismissButton).toBeVisible();
-  await chrome.dismissButton.click();
-
-  const degraded = await readPaneChromeState(page, 1);
-  await attachJson(testInfo, "dock-degraded.json", degraded);
-
-  expect(degraded.presentationState).toBe("degraded");
-  expect(degraded.introducedCapability).toBe("connect");
-  expect(degraded.presentationReason).toContain("connect.");
-  expect(degraded.coachmarkVisible).toBe(false);
-  expect(degraded.compactActions).toEqual(
-    expect.arrayContaining(["Connect", "Annotation"])
-  );
-  expect(degraded.compactActions).not.toContain("Inspect");
-  expect(degraded.compactActions).not.toContain("Touch-Fahrplan");
-  expect(degraded.compactActions).not.toContain("DMX");
-
+  await expect(chrome.dismissButton).not.toBeVisible();
   await expect(chrome.connectToggle).toBeVisible();
   await chrome.connectToggle.click();
 
@@ -67,8 +55,14 @@ test("Dock coachmark states degrade chrome without removing capability", async (
 
   expect(activeAfterStart.presentationState).toBe("active");
   expect(activeAfterStart.introducedCapability).toBe("connect");
-  expect(activeAfterStart.coachmarkVisible).toBe(true);
+  expect(activeAfterStart.coachmarkVisible).toBe(false);
   expect(activeAfterStart.coachmarkBadge).toBe("Active");
+  expect(activeAfterStart.toggleMode).toBe("active");
+  expect(activeAfterStart.togglePressed).toBe("true");
+  expect(activeAfterStart.connectHintVisible).toBe(true);
+  expect(activeAfterStart.connectHintText).toBe(
+    "Select a part of the page to connect. Press Escape to cancel."
+  );
   expect(activeAfterStart.statusText).toBe("Pick source");
   expect(activeAfterStart.cueText).toBe("Click a source anchor.");
   expect(activeAfterStart.dockInspectPresent).toBe(false);
@@ -89,9 +83,9 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(activeAfterSource.sourceChipText).toBe("Text pages");
   expect(activeAfterSource.clearHidden).toBe(false);
   expect(activeAfterSource.cancelHidden).toBe(false);
+  expect(activeAfterSource.connectHintVisible).toBe(true);
 
-  await expect(chrome.cancelButton).toBeVisible();
-  await chrome.cancelButton.click();
+  await page.keyboard.press("Escape");
 
   const degradedAfterCancel = await readPaneChromeState(page, 1);
   await attachJson(testInfo, "dock-degraded-after-cancel.json", degradedAfterCancel);
@@ -100,10 +94,14 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(degradedAfterCancel.introducedCapability).toBe("connect");
   expect(degradedAfterCancel.coachmarkVisible).toBe(false);
   expect(degradedAfterCancel.statusHidden).toBe(true);
+  expect(degradedAfterCancel.connectHintVisible).toBe(false);
+  expect(degradedAfterCancel.toggleMode).toBe("inactive");
+  expect(degradedAfterCancel.togglePressed).toBe("false");
   expect(degradedAfterCancel.compactActions).toEqual(
     expect.arrayContaining(["Connect", "Annotation"])
   );
   expect(degradedAfterCancel.compactActions).not.toContain("Inspect");
+  await expect(chrome.connectToggle).toBeFocused();
 
   const rediscovery = await openPaneChromeHelp(page, 1);
   await attachJson(testInfo, "dock-rediscovery.json", rediscovery);
@@ -111,6 +109,7 @@ test("Dock coachmark states degrade chrome without removing capability", async (
   expect(rediscovery.presentationState).toBe("rediscovery");
   expect(rediscovery.introducedCapability).toBe("connect");
   expect(rediscovery.coachmarkVisible).toBe(true);
+  expect(rediscovery.connectHintVisible).toBe(false);
   expect(rediscovery.coachmarkBadge).toBe("Rediscovery");
   expect(rediscovery.coachmarkDetail).toContain("compact row");
   expect(rediscovery.providerHandoffHidden).toBe(true);
@@ -229,7 +228,6 @@ test("Dock introduces Snippet independently on first eligible Source pane", asyn
   const rootIntroduction = await readPaneChromeState(page, 1);
   expect(rootIntroduction.presentationState).toBe("introduction");
   expect(rootIntroduction.introducedCapability).toBe("connect");
-  await paneChrome(page, 1).dismissButton.click();
 
   await openTextPageFromHyperDoc(
     page,
@@ -244,6 +242,11 @@ test("Dock introduces Snippet independently on first eligible Source pane", asyn
   expect(sourceIntroduction.presentationState).toBe("introduction");
   expect(sourceIntroduction.introducedCapability).toBe("snippet");
   expect(sourceIntroduction.presentationReason).toContain("snippet.");
+  expect(sourceIntroduction.coachmarkVisible).toBe(false);
+  expect(sourceIntroduction.connectHintVisible).toBe(true);
+  expect(sourceIntroduction.connectHintText).toBe(
+    "Snippet is available for this source surface."
+  );
   expect(sourceIntroduction.coachmarkTitle).toBe("Snippet");
   expect(sourceIntroduction.coachmarkSummary).toBe(
     "Open a snippet workflow for the current source surface."
@@ -254,18 +257,6 @@ test("Dock introduces Snippet independently on first eligible Source pane", asyn
   expect(sourceIntroduction.compactActions).toEqual(
     expect.arrayContaining(["Connect", "Annotation", "Snippet"])
   );
-
-  const sourceChrome = paneChrome(page, 2);
-  await expect(sourceChrome.dismissButton).toBeVisible();
-  await sourceChrome.dismissButton.click();
-
-  const sourceDegraded = await readPaneChromeState(page, 2);
-  await attachJson(testInfo, "dock-snippet-source-degraded.json", sourceDegraded);
-
-  expect(sourceDegraded.presentationState).toBe("degraded");
-  expect(sourceDegraded.introducedCapability).toBe("snippet");
-  expect(sourceDegraded.coachmarkVisible).toBe(false);
-  expect(sourceDegraded.compactActions).toContain("Snippet");
 
   const sourceRediscovery = await openPaneChromeHelp(page, 2);
   await attachJson(testInfo, "dock-snippet-source-rediscovery.json", sourceRediscovery);
@@ -291,7 +282,6 @@ test("Dock introduces Snippet independently on first eligible FedWiki pane", asy
   const rootIntroduction = await readPaneChromeState(page, 1);
   expect(rootIntroduction.presentationState).toBe("introduction");
   expect(rootIntroduction.introducedCapability).toBe("connect");
-  await paneChrome(page, 1).dismissButton.click();
 
   await openTextPageFromHyperDoc(
     page,
@@ -306,6 +296,11 @@ test("Dock introduces Snippet independently on first eligible FedWiki pane", asy
   expect(fedwikiIntroduction.presentationState).toBe("introduction");
   expect(fedwikiIntroduction.introducedCapability).toBe("snippet");
   expect(fedwikiIntroduction.presentationReason).toContain("snippet.");
+  expect(fedwikiIntroduction.coachmarkVisible).toBe(false);
+  expect(fedwikiIntroduction.connectHintVisible).toBe(true);
+  expect(fedwikiIntroduction.connectHintText).toBe(
+    "Snippet is available for this source surface."
+  );
   expect(fedwikiIntroduction.coachmarkTitle).toBe("Snippet");
   expect(fedwikiIntroduction.coachmarkSummary).toBe(
     "Open a snippet workflow for the current source surface."
@@ -313,18 +308,6 @@ test("Dock introduces Snippet independently on first eligible FedWiki pane", asy
   expect(fedwikiIntroduction.compactActions).toEqual(
     expect.arrayContaining(["Connect", "Annotation", "Snippet"])
   );
-
-  const fedwikiChrome = paneChrome(page, 3);
-  await expect(fedwikiChrome.dismissButton).toBeVisible();
-  await fedwikiChrome.dismissButton.click();
-
-  const fedwikiDegraded = await readPaneChromeState(page, 3);
-  await attachJson(testInfo, "dock-snippet-fedwiki-degraded.json", fedwikiDegraded);
-
-  expect(fedwikiDegraded.presentationState).toBe("degraded");
-  expect(fedwikiDegraded.introducedCapability).toBe("snippet");
-  expect(fedwikiDegraded.coachmarkVisible).toBe(false);
-  expect(fedwikiDegraded.compactActions).toContain("Snippet");
 
   const fedwikiRediscovery = await openPaneChromeHelp(page, 3);
   await attachJson(testInfo, "dock-snippet-fedwiki-rediscovery.json", fedwikiRediscovery);

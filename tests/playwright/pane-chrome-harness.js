@@ -37,6 +37,7 @@ function paneChrome(page, paneIndex) {
     feedback: currentPane.locator(".hyperdoc-dom-connect-feedback"),
     helpToggle: currentPane.locator(".hyperdoc-dom-connect-help-toggle"),
     helpPanel: currentPane.locator(".hyperdoc-dom-connect-help-panel"),
+    connectHint: currentPane.locator("[data-hyperdoc-connect-hint]"),
     dmxButton: currentPane.locator(".hyperdoc-dock-dmx"),
     dismissButton: currentPane.locator(".hyperdoc-dock-dismiss"),
   };
@@ -63,6 +64,7 @@ async function readPaneChromeState(page, paneIndex) {
     const cancelButton = slot?.querySelector(".hyperdoc-dom-connect-cancel");
     const feedback = slot?.querySelector(".hyperdoc-dom-connect-feedback");
     const helpPanel = slot?.querySelector(".hyperdoc-dom-connect-help-panel");
+    const connectHint = slot?.querySelector("[data-hyperdoc-connect-hint]");
     const snippetButton = slot?.querySelector(".hyperdoc-dock-snippet-playground");
     const stateBadge = slot?.querySelector(".hyperdoc-dock-state-badge");
     const coachmarkTitle = slot?.querySelector(".hyperdoc-dock-coachmark-title");
@@ -125,6 +127,7 @@ async function readPaneChromeState(page, paneIndex) {
       presentationReason: slot?.dataset.dockPresentationReason || null,
       connectState: slot?.dataset.connectState || null,
       toggleMode: toggle?.dataset.mode || null,
+      togglePressed: toggle?.getAttribute("aria-pressed") || null,
       toggleText: toggle?.textContent?.trim() || null,
       compactActions: slot
         ? Array.from(
@@ -162,6 +165,12 @@ async function readPaneChromeState(page, paneIndex) {
       connectStateInspectPresent: !!connectStateInspect,
       coachmarkVisible:
         !!helpPanel && window.getComputedStyle(helpPanel).display !== "none",
+      connectHintVisible:
+        !!connectHint &&
+        !connectHint.hidden &&
+        window.getComputedStyle(connectHint).display !== "none",
+      connectHintText:
+        connectHint?.textContent?.replace(/\s+/g, " ").trim() || null,
       coachmarkBadge: stateBadge?.textContent?.trim() || null,
       coachmarkTitle: coachmarkTitle?.textContent?.trim() || null,
       coachmarkSummary: coachmarkSummary?.textContent?.replace(/\s+/g, " ").trim() || null,

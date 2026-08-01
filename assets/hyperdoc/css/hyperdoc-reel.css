@@ -19,6 +19,8 @@
   grid-template-rows: minmax(0, 1fr);
   height: 98vh;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
   position: relative;
 }
 
@@ -26,6 +28,8 @@
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
   position: relative;
 }
 
@@ -85,6 +89,8 @@
   overflow-x: auto;
   overflow-y: hidden;
   min-height: 0;
+  min-width: 0;
+  max-width: 100%;
   scrollbar-gutter: stable;
   scroll-snap-type: x proximity;
 }
@@ -104,10 +110,12 @@
   flex-flow: row nowrap;
   align-items: stretch;
   justify-content: start;
+  min-width: 0;
 }
 
 .hyperdoc-reel__item {
   flex-shrink: 0;
+  min-width: 0;
   scroll-snap-align: start;
   transition: opacity 120ms ease-in-out;
 }

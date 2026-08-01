@@ -474,6 +474,33 @@
         (clog:create-div body :html-id id :class "inspector-view"))
       (scroll-inspector-parent-to-active-edge parent))))
 
+(defun responsive-inspector-pane-style (pane-width &key maximizedp)
+  (if maximizedp
+      "flex-basis: calc(100% - 20px); min-width: 0; max-width: calc(100% - 20px);"
+      (format nil
+              "flex-basis: min(~a, calc(100% - 20px)); min-width: 0; max-width: min(~a, calc(100% - 20px));"
+              pane-width
+              pane-width)))
+
+(defmethod minimize-pane ((inspector inspector) (pane pane))
+  (with-slots (panes pane-width) inspector
+    (fset:do-seq (some-pane panes)
+      (setf (clog:hiddenp (clog-obj some-pane)) nil))
+    (clog:remove-class (clog-obj pane) "inspector-pane-maximized")
+    (clog:add-class (clog-obj pane) "inspector-pane")
+    (setf (clog:attribute (clog-obj pane) "style")
+          (responsive-inspector-pane-style pane-width))))
+
+(defmethod maximize-pane ((inspector inspector) (pane pane))
+  (with-slots (panes) inspector
+    (fset:do-seq (some-pane panes)
+      (setf (clog:hiddenp (clog-obj some-pane))
+            (not (eq some-pane pane))))
+    (clog:remove-class (clog-obj pane) "inspector-pane")
+    (clog:add-class (clog-obj pane) "inspector-pane-maximized")
+    (setf (clog:attribute (clog-obj pane) "style")
+          (responsive-inspector-pane-style nil :maximizedp t))))
+
 ;; Replace upstream create-pane to log timings and to default class panes
 ;; to a cheap tab instead of the first source-heavy view.
 (defun create-pane (inspector object &key (select nil))
@@ -487,9 +514,8 @@
     (let* ((pane (make-instance 'pane
                                 :inspector inspector
                                 :object object))
-           (style-attr (format nil "flex-basis: ~a; min-width: min(~a, 95%);"
-                               (inspector-pane-width inspector)
-                               (inspector-pane-width inspector)))
+           (style-attr (responsive-inspector-pane-style
+                        (inspector-pane-width inspector)))
            (dom-start (current-time-millis)))
       (setf (clog-obj pane) (clog:create-div (clog-obj inspector)
                                              :class "inspector-pane hyperdoc-reel__item"

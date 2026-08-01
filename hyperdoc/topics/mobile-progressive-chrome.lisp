@@ -7,7 +7,7 @@
   (make-topic
    :id "mobile-progressive-chrome-in-hyperdoc"
    :title "Mobile progressive chrome in HyperDoc"
-   :summary "Mobile HyperDoc behavior in which capabilities collapse behind )(, inspector tabs collapse behind a rotated )(, boundary handles consume no document space, and route capture starts only after explicit Connect."
+   :summary "Mobile HyperDoc behavior in which a 375-pixel pane stays viewport-clamped, secondary inspector views start behind Inspect, Connect guidance remains non-blocking, local file paths are not HTTP-page links, and route capture starts only after explicit Connect."
    :references '("Mobile progressive chrome in HyperDoc"
                  "Dock presentation state model"
                  "DM6 AppEmbed HyperDoc Inline Proof")))
@@ -52,7 +52,7 @@
   (make-topic
    :id "mobile-progressive-chrome-boundary-layout-claim"
    :title "Mobile progressive chrome boundary layout claim"
-   :summary "Claim that collapsed mobile chrome handles mount on the inspector-pane boundary, consume no document vertical space, and keep expanded layers pane-local."
+   :summary "Claim that a stable mobile pane-chrome row keeps both handles inside the inspector-pane boundary and clear of content, keeps expanded layers pane-local, and lets an active Connect hint enter normal pane flow."
    :references '("Mobile progressive chrome in HyperDoc"
                  "Dock presentation state model"
                  "tests/playwright/mobile-progressive-chrome.spec.js"
