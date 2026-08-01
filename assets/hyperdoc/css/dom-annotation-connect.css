@@ -52,6 +52,10 @@
   display: none;
 }
 
+.hyperdoc-inspector-secondary-toggle {
+  font-weight: 700;
+}
+
 .hyperdoc-dom-connect-pane-slot {
   display: flex;
   justify-content: flex-end;

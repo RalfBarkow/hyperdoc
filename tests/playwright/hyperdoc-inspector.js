@@ -215,6 +215,9 @@ async function activatePaneTab(page, paneIndex, title) {
     .filter({ hasText: exactTextPattern(title) })
     .first();
   const tabsToggle = currentPane.locator(".hyperdoc-inspector-tabs-toggle");
+  const inspectToggle = currentPane.locator(
+    "[data-inspector-secondary-toggle]"
+  );
   const tabsLayerState = await currentPane.evaluate((paneNode) =>
     paneNode.getAttribute("data-inspector-tabs-layer")
   );
@@ -225,6 +228,15 @@ async function activatePaneTab(page, paneIndex, title) {
     await tabsToggle.click();
   } else if (!(await tab.isVisible()) && (await tabsToggle.isVisible())) {
     await tabsToggle.click();
+  }
+  if (
+    !(await tab.isVisible()) &&
+    (await tab.getAttribute("data-inspector-tab-group")) === "secondary"
+  ) {
+    await expect(inspectToggle).toBeVisible();
+    if ((await inspectToggle.getAttribute("aria-expanded")) !== "true") {
+      await inspectToggle.click();
+    }
   }
   await expect(tab).toBeVisible();
   let lastError = null;

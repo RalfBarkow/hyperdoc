@@ -1550,37 +1550,81 @@
 
 ;; Extend the pane tab row with a dedicated slot for the pane-level Connect
 ;; control. The DOM overlay and anchor machinery remain in the rendered view.
+(defparameter *secondary-inspector-view-titles*
+  '("Topicmap"
+    "Links"
+    "Parse tree"
+    "Connect source"
+    "Source surface"
+    "Backlinks"
+    "Plain source"
+    "Source strategies"
+    "Source swap operations"
+    "Lookup issues"
+    "URL"
+    "Slots"
+    "Print"
+    "Operations"))
+
+(defun secondary-inspector-view-p (title)
+  (member title *secondary-inspector-view-titles* :test #'string=))
+
 (defun create-tabs (pane)
   (with-slots (clog-obj inspector views tab-ids) pane
     (let* ((view-titles (mapcar #'hv:view-title views))
            (chrome (clog:create-div clog-obj
                                     :class "hyperdoc-dom-connect-pane-chrome"))
-           (tabs (clog:create-div chrome :class "inspector-tabs")))
-      (labels ((render-tab-row ()
+           (tabs (clog:create-div chrome :class "inspector-tabs"))
+           (secondary-views-p
+             (some #'secondary-inspector-view-p view-titles)))
+      (labels ((render-tab (tab-text tab-id view index secondaryp)
+                 (let ((tab (clog:create-button tabs
+                                                :content tab-text
+                                                :html-id tab-id))
+                       (view* view)
+                       (tab-text* tab-text)
+                       (index* index))
+                   (when secondaryp
+                     (setf (clog:hiddenp tab) t)
+                     (setf (clog:attribute tab "data-inspector-tab-group")
+                           "secondary"))
+                   (clog:set-on-mouse-click
+                    tab
+                    #'(lambda (obj event)
+                        (declare (ignore obj))
+                        (if (getf event :alt-key)
+                            (progn
+                              (unless (getf event :shift-key)
+                                (close-panes-after inspector pane))
+                              (create-pane inspector view* :select "Source code"))
+                            (unless
+                                (maybe-handle-example-source-artifact-inspector-tab-click
+                                 pane tab-text* index*)
+                              (select-view pane index*)))))))
+               (render-tabs (secondaryp)
                  (loop for tab-text in view-titles
                        for tab-id in tab-ids
                        for view in views
                        for index from 0
-                       do (let* ((tab (clog:create-button tabs
-                                                          :content tab-text
-                                                          :html-id tab-id))
-                                 (view* view)
-                                 (tab-text* tab-text)
-                                 (index* index))
-                            (clog:set-on-mouse-click
-                             tab
-                             #'(lambda (obj event)
-                                 (declare (ignore obj))
-                                 (if (getf event :alt-key)
-                                     (progn
-                                       (unless (getf event :shift-key)
-                                         (close-panes-after inspector pane))
-                                       (create-pane inspector view*
-                                                    :select "Source code"))
-                                     (unless
-                                         (maybe-handle-example-source-artifact-inspector-tab-click
-                                          pane tab-text* index*)
-                                       (select-view pane index*)))))))))
+                       when (eq (not (null (secondary-inspector-view-p tab-text)))
+                                secondaryp)
+                         do (render-tab tab-text tab-id view index secondaryp)))
+               (render-inspect-toggle ()
+                 (when secondary-views-p
+                   (let ((toggle
+                           (clog:create-button
+                            tabs
+                            :content "Inspect"
+                            :class "hyperdoc-inspector-secondary-toggle")))
+                     (setf (clog:attribute toggle "type") "button")
+                     (setf (clog:attribute toggle "aria-expanded") "false")
+                     (setf (clog:attribute toggle
+                                          "data-inspector-secondary-toggle")
+                           "true"))))
+               (render-tab-row ()
+                 (render-tabs nil)
+                 (render-inspect-toggle)
+                 (render-tabs t)))
         (if (example-source-artifact-object-p (pane-object pane))
             (progn
               (example-source-artifact-inspector-initialize-pane pane)

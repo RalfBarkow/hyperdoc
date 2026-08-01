@@ -263,6 +263,9 @@ test("mobile inspector tabs toggle opens existing tabs and collapses after selec
   await attachJson(testInfo, "mobile-tabs-open.json", opened);
   expect(opened.inspectorTabsLayerState).toBe("tabs-open");
   await expect(chrome.tabs.filter({ hasText: exactTextPattern("Source") }).first()).toBeVisible();
+  await expect(chrome.inspectToggle).toBeVisible();
+  await expect(chrome.tabs.filter({ hasText: exactTextPattern("Links") }).first()).not.toBeVisible();
+  await chrome.inspectToggle.click();
   await expect(chrome.tabs.filter({ hasText: exactTextPattern("Links") }).first()).toBeVisible();
   await expect(chrome.tabs.filter({ hasText: exactTextPattern("Parse tree") }).first()).toBeVisible();
 

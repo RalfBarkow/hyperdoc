@@ -15,6 +15,7 @@ function paneChrome(page, paneIndex) {
     pane: currentPane,
     tabRow: currentPane.locator(".inspector-tabs"),
     inspectorTabsToggle: currentPane.locator(".hyperdoc-inspector-tabs-toggle"),
+    inspectToggle: currentPane.locator("[data-inspector-secondary-toggle]"),
     tabs: currentPane.locator(".inspector-tabs button"),
     activeTab: currentPane.locator(".inspector-tabs button.active"),
     connectRow: currentPane.locator(".hyperdoc-dom-connect-pane-slot"),
@@ -99,6 +100,10 @@ async function readPaneChromeState(page, paneIndex) {
         paneNode
           ?.querySelector(".hyperdoc-inspector-tabs-toggle")
           ?.textContent?.trim() || null,
+      inspectExpanded:
+        paneNode
+          ?.querySelector("[data-inspector-secondary-toggle]")
+          ?.getAttribute("aria-expanded") || null,
       slotHidden: !!slot?.hidden,
       slotHelpOpen: slot?.dataset.helpOpen || null,
       presentationState: slot?.dataset.dockPresentation || null,
@@ -226,6 +231,15 @@ async function activatePaneTabWithChrome(page, paneIndex, title, options = {}) {
   const tab = chrome.tabs.filter({ hasText: exactTextPattern(title) });
   if (!(await tab.first().isVisible()) && await chrome.inspectorTabsToggle.isVisible()) {
     await chrome.inspectorTabsToggle.click();
+  }
+  if (
+    !(await tab.first().isVisible()) &&
+    (await tab.first().getAttribute("data-inspector-tab-group")) === "secondary"
+  ) {
+    await expect(chrome.inspectToggle).toBeVisible();
+    if ((await chrome.inspectToggle.getAttribute("aria-expanded")) !== "true") {
+      await chrome.inspectToggle.click();
+    }
   }
   await expect(tab).toBeVisible();
   await tab.click();

@@ -6,7 +6,8 @@
   Mobile HyperDoc chrome follows the existing Dock rule: degrade chrome, not
   capability. On narrow viewports, the capabilities layer starts collapsed
   behind <code>)(</code>, and the inspector tabs layer starts collapsed behind a
-  rotated <code>)(</code>.
+  rotated <code>)(</code>. At all viewport widths, primary inspector views remain
+  visible while secondary views start behind <b>Inspect</b>.
 </p>
 
 <h2>Operational contract</h2>
@@ -16,7 +17,7 @@
   <li><b>Capabilities open:</b> Connect, Annotation, and Guide are visible, but route capture is still inactive.</li>
   <li><b>Route capture:</b> only choosing Connect enters route-introduction. Then <b>Tap a station</b> can latch a source and <b>From:</b> appears.</li>
   <li><b>Ordinary links:</b> links remain ordinary links until route capture is active. In route mode, an anchor can be treated as a route endpoint because the user explicitly chose Connect.</li>
-  <li><b>Inspector tabs:</b> the rotated <code>)(</code> opens the existing tab row. Selecting a tab changes the active tab, then collapses again on narrow viewports to restore vertical space.</li>
+  <li><b>Inspector tabs:</b> Content and Source remain primary. Topicmap, Links, Parse tree, source variants, and generic inspector operations start behind <b>Inspect</b>. On narrow viewports, the rotated <code>)(</code> opens this existing tab row; selecting a tab collapses it again to restore vertical space.</li>
 </ul>
 
 <h2>Boundary-mounted handles</h2>

@@ -1837,6 +1837,72 @@
     button.dataset.activeTab = label;
   }
 
+  function syncInspectorSecondaryDisclosure(pane) {
+    if (!pane) {
+      return;
+    }
+    var tabs = pane.querySelector(".inspector-tabs");
+    var toggle = pane.querySelector("[data-inspector-secondary-toggle]");
+    if (!tabs || !toggle) {
+      return;
+    }
+    var secondaryTabs = tabs.querySelectorAll(
+      'button[data-inspector-tab-group="secondary"]'
+    );
+    var open = pane.dataset.inspectorInspectOpen === "true";
+    Array.prototype.forEach.call(secondaryTabs, function (tab) {
+      tab.hidden = !open;
+    });
+    toggle.hidden = secondaryTabs.length === 0;
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.setAttribute("aria-label", "Inspect secondary views");
+  }
+
+  function setInspectorSecondaryDisclosure(pane, open) {
+    if (!pane) {
+      return;
+    }
+    pane.dataset.inspectorInspectOpen = open ? "true" : "false";
+    syncInspectorSecondaryDisclosure(pane);
+  }
+
+  function ensureInspectorSecondaryDisclosure(pane) {
+    var tabs = pane && pane.querySelector(".inspector-tabs");
+    var toggle = pane &&
+      pane.querySelector("[data-inspector-secondary-toggle]");
+    if (!pane || !tabs || !toggle) {
+      return;
+    }
+    if (pane.dataset.hyperdocInspectorSecondaryEnhanced === "true") {
+      syncInspectorSecondaryDisclosure(pane);
+      return;
+    }
+    pane.dataset.hyperdocInspectorSecondaryEnhanced = "true";
+    pane.dataset.inspectorInspectOpen = "false";
+    toggle.setAttribute("aria-controls", tabs.id || "");
+    toggle.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      setInspectorSecondaryDisclosure(
+        pane,
+        pane.dataset.inspectorInspectOpen !== "true"
+      );
+    });
+    tabs.addEventListener("click", function (event) {
+      var tab = event.target.closest(
+        'button[data-inspector-tab-group="secondary"]'
+      );
+      if (!tab) {
+        return;
+      }
+      window.setTimeout(function () {
+        setInspectorSecondaryDisclosure(pane, false);
+        toggle.focus();
+      }, 0);
+    });
+    syncInspectorSecondaryDisclosure(pane);
+  }
+
   function setInspectorTabsLayerState(pane, layerState) {
     if (!pane) {
       return;
@@ -1876,7 +1942,8 @@
       );
     });
     tabs.addEventListener("click", function (event) {
-      if (!event.target.closest("button")) {
+      if (!event.target.closest("button") ||
+          event.target.closest("[data-inspector-secondary-toggle]")) {
         return;
       }
       window.setTimeout(function () {
@@ -1894,7 +1961,10 @@
     var scope = root || document;
     Array.prototype.forEach.call(
       scope.querySelectorAll(".inspector-pane"),
-      ensureInspectorTabsToggle
+      function (pane) {
+        ensureInspectorTabsToggle(pane);
+        ensureInspectorSecondaryDisclosure(pane);
+      }
     );
   }
 
@@ -2939,6 +3009,7 @@
         Math.random().toString(36).slice(2, 10);
     }
     ensureInspectorTabsToggle(pane);
+    ensureInspectorSecondaryDisclosure(pane);
     if (pane.hyperdocDomConnectState) {
       return pane.hyperdocDomConnectState;
     }

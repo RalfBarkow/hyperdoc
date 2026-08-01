@@ -392,9 +392,43 @@
                  source event target)))))
   t)
 
+(defun run-secondary-inspector-view-classification-smoke-test ()
+  (let ((expected
+          '("Topicmap"
+            "Links"
+            "Parse tree"
+            "Connect source"
+            "Source surface"
+            "Backlinks"
+            "Plain source"
+            "Source strategies"
+            "Source swap operations"
+            "Lookup issues"
+            "URL"
+            "Slots"
+            "Print"
+            "Operations")))
+    (view-contract-assert-equal
+     expected
+     clog-moldable-inspector::*secondary-inspector-view-titles*
+     "Secondary inspector view titles must match the production contract exactly")
+    (dolist (title expected)
+      (view-contract-assert-true
+       (not (null
+             (clog-moldable-inspector::secondary-inspector-view-p title)))
+       (format nil "Production contract must classify ~S as secondary" title)))
+    (dolist (title '("Content" "Source" "links" "TOPICMAP"
+                     "Unrecognized view"))
+      (view-contract-assert-true
+       (null (clog-moldable-inspector::secondary-inspector-view-p title))
+       (format nil "Production contract must not classify ~S as secondary"
+               title))))
+  t)
+
 (defun run-view-contract-smoke-tests ()
   (run-view-contract-package-protocol-smoke-test)
   (run-view-contract-hyperdoc-runtime-smoke-test)
+  (run-secondary-inspector-view-classification-smoke-test)
   (run-view-contract-title-bar-scxml-smoke-test)
   (format t "~&View contract smoke tests passed.~%")
   t)
