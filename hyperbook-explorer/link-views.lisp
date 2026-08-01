@@ -42,8 +42,17 @@
                              (:table :class "inspector-table"
                                      (dolist (link (mapcar #'url-of links))
                                        (views:html
-                                        (:tr (:td (:a :href link :target "_blank"
-                                                      (views:esc link)))))))))))
+                                        (:tr
+                                         (:td
+                                          (if (local-file-url-p link)
+                                              (views:html
+                                               (:span
+                                                :class "hyperbook-local-file-path"
+                                                :title "Local file path (not available from this HTTP page)"
+                                                (views:esc link)))
+                                              (views:html
+                                               (:a :href link :target "_blank"
+                                                   (views:esc link)))))))))))))
                    (when (no-links? links)
                      (views:html (views:esc "None")))))
 

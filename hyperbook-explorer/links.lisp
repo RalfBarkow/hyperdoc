@@ -116,6 +116,13 @@
 ;; Web links point to a URL
 ;;
 
+(defun local-file-url-p (url)
+  (and (stringp url)
+       (let* ((uri (handler-case (puri:parse-uri url)
+                     (error () nil)))
+              (scheme (and uri (puri:uri-scheme uri))))
+         (and scheme (string-equal "file" scheme)))))
+
 (defclass web-link (link)
   ((url :reader url-of :initarg :url :type string)))
 

@@ -95,6 +95,12 @@ HOOK may return three values: new hyperbook id, new page id, and a handled flag.
          (render-hyperbook-or-page-link hyperbook-id page-attr render-children
                                         :element element))
        t)
+      ((local-file-url-p href-attr)
+       (views:html
+        (:span :class "hyperbook-local-file-path"
+               :title "Local file path (not available from this HTTP page)"
+               (loop for child across (plump:children element)
+                     do (plump:serialize child plump:*stream*)))))
       (href-attr
        ;; Force target="_blank" for href links
        (views:html
