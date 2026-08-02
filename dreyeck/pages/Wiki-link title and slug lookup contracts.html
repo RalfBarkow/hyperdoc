@@ -1,0 +1,313 @@
+<h1>Wiki-link title and slug lookup contracts</h1>
+
+<in-package>dreyeck/wiki-link-contract-demo</in-package>
+
+<p>
+  This page provides an executable arrangement for observing and retracing title and slug lookup behavior for FedWiki links. It does not assume that the behavior is a bug, and it does not propose a correction. Its purpose is to make the relevant operations and their observable consequences retraceable in one running HyperDoc image.
+</p>
+
+<p>
+  A
+  <a expr="(find-class 'hyperbook/fedwiki::wiki-link)"
+     view="Source code"><code>WIKI-LINK</code></a>
+  stores target title and target slug separately. Its
+  <a expr="(find-method
+             #'hyperbook:key-of
+             nil
+             (list (find-class 'hyperbook/fedwiki::wiki-link)))"
+     view="Source code"><code>HB:KEY-OF</code></a>
+  method uses the stored target slug. The examples below compare observable
+  behavior without deciding in advance which lookup contract is intended.
+</p>
+
+<h2>How to retrace the observation</h2>
+
+<p>
+  Run the four examples in order by selecting their
+  <strong>►</strong> actions:
+</p>
+
+<ol>
+  <li>
+    Compare title lookup and slug lookup for an existing target.
+  </li>
+  <li>
+    Execute the expression found in the investigated upstream revision.
+  </li>
+  <li>
+    Execute direct slug lookup on the same missing-target fixture.
+  </li>
+  <li>
+    Execute the real stored thunk of the currently loaded implementation.
+  </li>
+</ol>
+
+<p>
+  Each example returns an inspectable observation object. Expected lookup
+  failures are caught and represented as data; they do not enter the
+  debugger. This makes it possible to compare the supplied values, the
+  selected operation, and the resulting failure evidence directly.
+</p>
+
+<h2>What can be observed?</h2>
+
+<h3>1. Existing target: equal local effects</h3>
+
+<p>
+  The first example creates an in-memory wiki at
+  <code>example.test</code> and installs one target page. It then looks up
+  that page once by its human-readable title and once by its canonical slug.
+</p>
+
+<p>
+  In this case both operations determine the same page because normalizing
+  the already canonical slug leaves it unchanged. The example therefore
+  demonstrates a local equality of effects:
+</p>
+
+<pre>
+title lookup ─┐
+              ├─ determines the same target page
+slug lookup  ─┘
+</pre>
+
+<p>
+  This result does not establish that the two operations accept the same
+  kind of input, preserve the same evidence, or have the same contract.
+</p>
+
+<source-of-function>wiki-link-successful-lookup-equivalence-example</source-of-function>
+
+<h3>2. Expression observed in the upstream revision</h3>
+
+<p>
+  At upstream commit <code>0d5bd1b</code>, the stored link thunk contained
+  the following expression:
+</p>
+
+<pre>
+(find-target-by-title target-slug source-page)
+</pre>
+
+<p>
+  The value supplied to <code>FIND-TARGET-BY-TITLE</code> is therefore the
+  already stored target slug. For an existing target, applying slug
+  normalization again can still lead to the expected page. For a missing
+  target, however, the resulting condition makes the selected operation
+  observable.
+</p>
+
+<p>
+  With the fixture used here, the condition records
+  <code>"missing-human-title"</code> both as slug evidence and as title
+  evidence:
+</p>
+
+<pre>
+condition slug:  "missing-human-title"
+title bound:     T
+condition title: "missing-human-title"
+</pre>
+
+<p>
+  The example currently reports <code>RED</code> under the explicitly stated
+  <em>strict slug-contract hypothesis</em>. This is a conditional
+  classification, not a general judgment that the upstream behavior is
+  erroneous.
+</p>
+
+<source-of-function>wiki-link-upstream-title-path-example</source-of-function>
+
+<h3>3. Comparison expression: direct slug lookup</h3>
+
+<p>
+  The next example executes a different operation on the same stored slug
+  and the same missing-target fixture:
+</p>
+
+<pre>
+(find-target-by-slug target-slug source-page)
+</pre>
+
+<p>
+  In this trace, the missing slug is recorded as slug evidence, while no
+  title evidence is bound:
+</p>
+
+<pre>
+condition slug:  "missing-human-title"
+title bound:     NIL
+condition title: NIL
+</pre>
+
+<p>
+  The example currently reports <code>GREEN</code> under the same strict
+  slug-contract hypothesis. The direct slug expression is included as a
+  comparison operation. On this page it is not yet presented as a proposed
+  correction.
+</p>
+
+<source-of-function>wiki-link-strict-slug-path-example</source-of-function>
+
+<h3>4. Stored thunk of the currently loaded implementation</h3>
+
+<p>
+  The final example does not reproduce either expression manually. It creates
+  a real link with <code>MAKE-WIKI-LINK</code>, obtains its stored thunk
+  through <code>HB:THUNK-OF</code>, and evaluates that thunk through
+  <code>VIEWS:EVAL-THUNK</code>.
+</p>
+
+<p>
+  It then compares the resulting missing-target evidence with the two traces
+  shown above and reports one of:
+</p>
+
+<ul>
+  <li><code>MATCHES-TITLE-PATH</code></li>
+  <li><code>MATCHES-SLUG-PATH</code></li>
+  <li><code>OTHER</code></li>
+</ul>
+
+<p>
+  This classification describes the behavior installed in the currently
+  running Lisp image. It does not by itself determine which behavior is
+  intended.
+</p>
+
+<source-of-function>wiki-link-installed-thunk-example</source-of-function>
+
+<h2>What follows from the examples?</h2>
+
+<p>The four executions support the following limited observations:</p>
+
+<ul>
+  <li>
+    <code>WIKI-LINK</code> preserves target title and target slug as
+    distinct values.
+  </li>
+  <li>
+    <code>HB:KEY-OF</code> uses the stored target slug.
+  </li>
+  <li>
+    Title lookup and direct slug lookup can determine the same existing page.
+  </li>
+  <li>
+    Their missing-target traces can nevertheless preserve different
+    evidence.
+  </li>
+  <li>
+    The investigated upstream expression passes the stored slug to
+    <code>FIND-TARGET-BY-TITLE</code>.
+  </li>
+  <li>
+    The behavior of the currently running implementation can be observed
+    independently through its real stored thunk.
+  </li>
+</ul>
+
+<p>
+  These observations do not establish the intended lookup contract or the
+  intended meaning of the condition slots.
+</p>
+
+<h2>Which contracts are compatible with the observation?</h2>
+
+<h3>Hypothesis A: distinct title and slug contracts</h3>
+
+<p>
+  Under this hypothesis, <code>FIND-TARGET-BY-TITLE</code> accepts a human
+  title, derives its canonical slug, and preserves both the supplied title
+  and the derived slug as failure evidence.
+</p>
+
+<p>
+  <code>FIND-TARGET-BY-SLUG</code> accepts an already canonical lookup key
+  and preserves only slug evidence. Because the stored thunk already has
+  <code>TARGET-SLUG</code>, passing that value to the title operation would
+  cross the two input contracts.
+</p>
+
+<p>
+  Under this hypothesis, the two example classifications
+  <code>RED</code> and <code>GREEN</code> distinguish non-conforming and
+  conforming traces.
+</p>
+
+<h3>Hypothesis B: normalization-tolerant locator resolution</h3>
+
+<p>
+  Under this hypothesis, <code>FIND-TARGET-BY-TITLE</code> is not restricted
+  to human-readable titles. It acts as a normalizing resolver that may accept
+  either a title or an already canonical slug.
+</p>
+
+<p>
+  Re-normalizing a canonical slug would then be intentional defensive
+  behavior. The observed successful lookup would be an instance of the
+  intended representation tolerance.
+</p>
+
+<p>
+  This interpretation raises a different set of questions about names and
+  failure evidence: the operation called <code>FIND-TARGET-BY-TITLE</code>
+  would have a broader locator contract, and the condition slot called
+  <code>TITLE</code> might contain a value that was supplied as a slug.
+</p>
+
+<h3>Hypothesis C: the TITLE slot records the supplied locator</h3>
+
+<p>
+  A further possibility is that the condition slot named
+  <code>TITLE</code> is intended to preserve the originally supplied lookup
+  expression rather than specifically a human-readable page title.
+</p>
+
+<p>
+  Under this interpretation, binding the slug in that slot would not
+  necessarily be incorrect, but the names <code>TITLE</code> and
+  <code>FIND-TARGET-BY-TITLE</code> would require a broader reading than
+  their ordinary wording suggests.
+</p>
+
+<h2>Questions left open</h2>
+
+<ul>
+  <li>
+    Is <code>FIND-TARGET-BY-TITLE</code> intended to accept only human
+    titles, or is it a generic normalizing locator resolver?
+  </li>
+  <li>
+    What distinct role is intended for
+    <code>FIND-TARGET-BY-SLUG</code>?
+  </li>
+  <li>
+    Does the condition slot <code>TITLE</code> mean a human page title, the
+    original lookup input, or something else?
+  </li>
+  <li>
+    Is the distinction between <code>TARGET-TITLE</code> and
+    <code>TARGET-SLUG</code> intended only for presentation and keying, or
+    also for selecting the lookup operation?
+  </li>
+  <li>
+    Should missing-target evidence preserve the representation in which the
+    lookup value was supplied?
+  </li>
+</ul>
+
+<h2>Scope of the demonstration</h2>
+
+<p>
+  This page is an observation and discussion aid. It does not decide whether
+  the upstream expression is a bug, a compatibility feature, or an instance
+  of a more general locator contract. It also does not recommend a patch.
+</p>
+
+<p>
+  All four examples use private in-memory fixtures under
+  <code>example.test</code>. During missing-target lookup they suppress the
+  plugin-page fallback locally and restore the original function afterward.
+  They do not read <code>~/.wiki</code>, contact a wiki, or write durable
+  data.
+</p>

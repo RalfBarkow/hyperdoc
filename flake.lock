@@ -1,0 +1,129 @@
+{
+  "nodes": {
+    "clog-moldable-inspector": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1764616980,
+        "narHash": "sha256-NsmOHUj3dw73rtnr5afdlxH4DadZjD3Ozk0mZUvwfag=",
+        "ref": "refs/heads/main",
+        "rev": "b369f0a4251c5c96472dc674811fb8f5d0184976",
+        "revCount": 219,
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/clog-moldable-inspector.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/clog-moldable-inspector.git"
+      }
+    },
+    "html-inspector-views": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1777476701,
+        "narHash": "sha256-w85sPKIAaFuo+EmkB6m3rwg2JDkeogwpJ2hNWcCLw5s=",
+        "ref": "refs/heads/main",
+        "rev": "386df8937a21457b3d91e1b61e070f836550ff71",
+        "revCount": 368,
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/html-inspector-views.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/html-inspector-views.git"
+      }
+    },
+    "lwcells": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1728184003,
+        "narHash": "sha256-zI67bTVQ6gP7Qm17k9PydnOetTPM+H4NJ+HqKIosCt0=",
+        "owner": "kchanqvq",
+        "repo": "lwcells",
+        "rev": "e7446ac146a31b630e74c9bce7dab34b50cc333d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "kchanqvq",
+        "repo": "lwcells",
+        "type": "github"
+      }
+    },
+    "named-closure": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1733252411,
+        "narHash": "sha256-xfXyblX8aNUFFFH5SFibIYMiVWi2ySvhuwlWdSbVl54=",
+        "owner": "BlueFlo0d",
+        "repo": "named-closure",
+        "rev": "d57305582137a24d6c8f8375fba496c653bb5699",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BlueFlo0d",
+        "repo": "named-closure",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1751274312,
+        "narHash": "sha256-/bVBlRpECLVzjV19t5KMdMFWSwKLtb5RyXdjz3LJT+g=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "50ab793786d9de88ee30ec4e4c24fb4236fc2674",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-24.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "njson": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1735849131,
+        "narHash": "sha256-A8DCCX7FNZoTh2J1KhwIgRO3OdOze+SmnS1GwdxVYS0=",
+        "owner": "atlas-engineer",
+        "repo": "njson",
+        "rev": "b8566457379f48ab3baf627f1cc3df76327fd631",
+        "type": "github"
+      },
+      "original": {
+        "owner": "atlas-engineer",
+        "repo": "njson",
+        "type": "github"
+      }
+    },
+    "plump-inspector-views": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1768292280,
+        "narHash": "sha256-PapF0m5tiIhPC6OH/eL4SrEtb3mlQ0wf2WPWZ1X3vvo=",
+        "ref": "refs/heads/main",
+        "rev": "dd3969d6e38dbfb1eb131a5559f3b5b26d67ca13",
+        "revCount": 9,
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/plump-inspector-views.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://codeberg.org/khinsen/plump-inspector-views.git"
+      }
+    },
+    "root": {
+      "inputs": {
+        "clog-moldable-inspector": "clog-moldable-inspector",
+        "html-inspector-views": "html-inspector-views",
+        "lwcells": "lwcells",
+        "named-closure": "named-closure",
+        "nixpkgs": "nixpkgs",
+        "njson": "njson",
+        "plump-inspector-views": "plump-inspector-views"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

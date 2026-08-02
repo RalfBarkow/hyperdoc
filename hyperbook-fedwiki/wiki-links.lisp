@@ -19,7 +19,7 @@
                  :target-slug target-slug
                  :thunk (views:thunk
                           (handler-case
-                              (find-target-by-title target-slug source-page)
+                              (find-target-by-slug target-slug source-page)
                             (error (c) c)))))
 
 (defclass fedwiki-links (hb:links)
