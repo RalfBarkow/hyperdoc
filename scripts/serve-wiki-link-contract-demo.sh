@@ -30,7 +30,6 @@ printf 'URL: http://127.0.0.1:%s/\n' "$port"
 exec sbcl --noinform --no-userinit --non-interactive \
   --eval '(require :asdf)' \
   --eval '(asdf:load-system "hyperdoc")' \
-  --eval '(asdf:load-system "hyperdoc/explorer")' \
   --eval '(asdf:load-system "hyperbook/server")' \
   --eval '(let ((system (uiop:getenv "HYPERDOC_DEMO_SYSTEM")))
             (when (and system (plusp (length system)))
