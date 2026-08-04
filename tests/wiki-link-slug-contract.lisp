@@ -213,8 +213,8 @@
     (handler-case
         (progn
           ;; MAKE-WIKI-LINK thunks return caught ERROR conditions as values.
-          ;; The observation helper must re-signal the identical unrelated one.
-          (dreyeck/wiki-link-contract-demo::%observe-wiki-lookup
+          ;; The execution-and-recording helper must re-signal the identical one.
+          (dreyeck/wiki-link-contract-demo::%execute-and-record-wiki-lookup
            :installed "missing-human-title" (lambda () unexpected))
           (error "The unrelated returned thunk condition did not escape."))
       (simple-error (caught)
@@ -227,7 +227,7 @@
   (dolist (invalid-value (list nil :not-a-page))
     (let ((rejected-p nil))
       (handler-case
-          (dreyeck/wiki-link-contract-demo::%observe-wiki-lookup
+          (dreyeck/wiki-link-contract-demo::%execute-and-record-wiki-lookup
            :slug "missing-human-title" (lambda () invalid-value))
         (hyperbook/fedwiki::wiki-lookup-failure ()
           (error "Invalid normal return ~S became lookup evidence."
@@ -299,6 +299,11 @@
            (substrings-between html
                                "<source-of-function>"
                                "</source-of-function>")))
+    (dolist (forbidden-phrase
+              '("executable observation" "executable observations"))
+      (check (null (search forbidden-phrase html :test #'char-equal))
+             "The HTML still contains the terminology regression ~S."
+             forbidden-phrase))
     (check (= 4 (length function-names))
            "The HTML contains ~D executable example references instead of four."
            (length function-names))

@@ -21,7 +21,7 @@
 (defstruct (wiki-link-lookup-observation
             (:constructor %make-wiki-link-lookup-observation
                 (route lookup-value outcome)))
-  "A fact-preserving observation of one Wiki-link lookup execution.
+  "A fact-preserving record of one Wiki-link lookup execution.
 
 ROUTE documents the operation invoked: :TITLE, :SLUG, or :INSTALLED.
 LOOKUP-VALUE is the exact string supplied to that operation, or the target
@@ -98,8 +98,8 @@ symbol function globally and is not safe for concurrent execution."
 FEDWIKI-PAGE or WIKI-LOOKUP-FAILURE."
             route lookup-value outcome))))
 
-(defun %observe-wiki-lookup (route lookup-value thunk)
-  "Observe THUNK, accepting only a FedWiki page or WIKI-LOOKUP-FAILURE."
+(defun %execute-and-record-wiki-lookup (route lookup-value thunk)
+  "Execute THUNK, validate its page or WIKI-LOOKUP-FAILURE outcome, and record it."
   (handler-case
       (%make-observation-from-outcome route lookup-value (funcall thunk))
     (hyperbook/fedwiki::wiki-lookup-failure (condition)
@@ -183,7 +183,7 @@ The result is :MATCHES-TITLE-PATH, :MATCHES-SLUG-PATH, :OTHER, or :RESOLVED."
     (:not-applicable :resolved)))
 
 (defexample wiki-link-successful-lookup-equivalence-example
-  "Observe page-object identity for title and slug lookup of an existing page."
+  "Execute title and slug lookup and retain both returned page objects."
   (let* ((source-page (%make-wiki-link-demo-source-page))
          (wiki (hyperbook:hyperbook-of source-page))
          (target-title "Existing Human Title")
@@ -194,41 +194,41 @@ The result is :MATCHES-TITLE-PATH, :MATCHES-SLUG-PATH, :OTHER, or :RESOLVED."
     (setf (gethash target-slug (hyperbook/fedwiki::pages-of wiki))
           target-page)
     (list
-     (%observe-wiki-lookup
+     (%execute-and-record-wiki-lookup
       :title target-title
       (lambda ()
         (hyperbook/fedwiki::find-target-by-title target-title source-page)))
-     (%observe-wiki-lookup
+     (%execute-and-record-wiki-lookup
       :slug target-slug
       (lambda ()
         (hyperbook/fedwiki::find-target-by-slug target-slug source-page))))))
 
 (defexample wiki-link-upstream-title-path-example
-  "Observe the original title operation supplied with a target slug."
+  "Execute the original title operation and retain its actual failure condition."
   (let* ((source-page (%make-wiki-link-demo-source-page))
          (target-slug "missing-human-title"))
     (%call-with-global-plugin-page-lookup-disabled
      (lambda ()
-       (%observe-wiki-lookup
+       (%execute-and-record-wiki-lookup
         :title target-slug
         (lambda ()
           (hyperbook/fedwiki::find-target-by-title
            target-slug source-page)))))))
 
 (defexample wiki-link-strict-slug-path-example
-  "Observe direct slug lookup for the same missing target slug."
+  "Execute direct slug lookup and retain its actual failure condition."
   (let* ((source-page (%make-wiki-link-demo-source-page))
          (target-slug "missing-human-title"))
     (%call-with-global-plugin-page-lookup-disabled
      (lambda ()
-       (%observe-wiki-lookup
+       (%execute-and-record-wiki-lookup
         :slug target-slug
         (lambda ()
           (hyperbook/fedwiki::find-target-by-slug
            target-slug source-page)))))))
 
 (defexample wiki-link-installed-thunk-example
-  "Observe the Wiki-link thunk installed in the currently loaded image."
+  "Execute the installed Wiki-link thunk and retain its actual runtime outcome."
   (let* ((source-page (%make-wiki-link-demo-source-page))
          (target-title "Missing Human Title")
          (target-slug "missing-human-title")
@@ -242,7 +242,7 @@ The result is :MATCHES-TITLE-PATH, :MATCHES-SLUG-PATH, :OTHER, or :RESOLVED."
          (installed-thunk (hyperbook:thunk-of link)))
     (%call-with-global-plugin-page-lookup-disabled
      (lambda ()
-       (%observe-wiki-lookup
+       (%execute-and-record-wiki-lookup
         :installed captured-target-slug
         (lambda ()
           (html-inspector-views:eval-thunk installed-thunk)))))))

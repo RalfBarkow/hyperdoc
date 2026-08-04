@@ -3,7 +3,7 @@
 <in-package>dreyeck/wiki-link-contract-demo</in-package>
 
 <p>
-  This page provides four executable observations of FedWiki title and slug
+  This page provides four executable examples of FedWiki title and slug
   lookup. It separates what the running code did from how that evidence can be
   read and from the contract questions that remain open. It does not change or
   prescribe production lookup behavior.
@@ -25,8 +25,9 @@
 <h2>1. Observed execution evidence</h2>
 
 <p>
-  Each execution returns a
-  <code>WIKI-LINK-LOOKUP-OBSERVATION</code> containing only three facts:
+  Each executable example returns a fact-preserving record of one lookup
+  execution: a <code>WIKI-LINK-LOOKUP-OBSERVATION</code> containing only three
+  facts:
 </p>
 
 <ul>
@@ -45,11 +46,12 @@
 </ul>
 
 <p>
-  The observation helper catches only <code>WIKI-LOOKUP-FAILURE</code>. A
-  normal <code>NIL</code> or non-page return is rejected, and unrelated
-  conditions escape unchanged. The successful-page check intentionally uses
-  the internal <code>FEDWIKI-PAGE</code> class: this is a small, explicit
-  white-box dependency of the demonstration.
+  The execution-and-recording helper catches only
+  <code>WIKI-LOOKUP-FAILURE</code>. A normal <code>NIL</code> or non-page
+  return is rejected, and unrelated conditions escape unchanged. The
+  successful-page check intentionally uses the internal
+  <code>FEDWIKI-PAGE</code> class: this is a small, explicit white-box
+  dependency of the demonstration.
 </p>
 
 <h3>Example 1: existing target</h3>
