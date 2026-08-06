@@ -182,6 +182,122 @@ The result is :MATCHES-TITLE-PATH, :MATCHES-SLUG-PATH, :OTHER, or :RESOLVED."
     (:other :other)
     (:not-applicable :resolved)))
 
+(defmethod html-inspector-views:text-representation
+    ((observation wiki-link-lookup-observation))
+  (format nil
+          "Wiki-link lookup ~S via ~S"
+          (wiki-link-lookup-observation-lookup-value observation)
+          (wiki-link-lookup-observation-route observation)))
+
+
+(defun %wiki-link-contract-view-row
+    (label value &key (depth 0))
+  (html-inspector-views:html
+    (:tr
+     (:td
+      :style (format nil
+                     "padding-left: ~Dem;"
+                     (* 2 depth))
+      (html-inspector-views:esc
+       (format nil "→ ~A" label)))
+     (:td
+      (:code
+       (html-inspector-views:esc
+        (prin1-to-string value)))))))
+
+
+(html-inspector-views:defview wiki-link-lookup-contract-view
+    (observation wiki-link-lookup-observation)
+
+  (let* ((route
+           (wiki-link-lookup-observation-route observation))
+
+         (lookup-value
+           (wiki-link-lookup-observation-lookup-value observation))
+
+         (outcome
+           (wiki-link-lookup-observation-outcome observation))
+
+         (failure-p
+           (eq :failure
+               (%wiki-link-lookup-outcome-kind observation)))
+
+         (title-bound-p
+           (and failure-p
+                (%wiki-lookup-failure-title-bound-p outcome)))
+
+         (title
+           (and title-bound-p
+                (%wiki-lookup-failure-title outcome)))
+
+         (slug
+           (and failure-p
+                (%wiki-lookup-failure-slug outcome))))
+
+    (html-inspector-views:html-view
+        :title "Lookup contract"
+        :priority 1
+
+      (html-inspector-views:html
+
+        (:h3
+         (html-inspector-views:esc
+          "Beobachtung"))
+
+        (:table
+         :class "inspector-table"
+
+         (%wiki-link-contract-view-row
+          "Route"
+          route)
+
+         (%wiki-link-contract-view-row
+          "Lookup value"
+          lookup-value)
+
+         (:tr
+          (:td
+           (html-inspector-views:esc
+            "→ Outcome"))
+          (:td
+           (:code
+            (html-inspector-views:esc
+             (prin1-to-string
+              (type-of outcome))))
+           " — "
+           (html-inspector-views:object-ref
+            outcome)))
+
+         (when failure-p
+           (html-inspector-views:html
+
+             (%wiki-link-contract-view-row
+              "title bound?"
+              title-bound-p
+              :depth 1)
+
+             (%wiki-link-contract-view-row
+              "title"
+              (if title-bound-p
+                  title
+                  :unbound)
+              :depth 1)
+
+             (%wiki-link-contract-view-row
+              "slug"
+              slug
+              :depth 1)))
+
+         (%wiki-link-contract-view-row
+          "Evidence shape"
+          (wiki-link-lookup-evidence-shape
+           observation))
+
+         (%wiki-link-contract-view-row
+          "Route/evidence relation"
+          (wiki-link-route-evidence-relation
+           observation)))))))
+
 (defexample wiki-link-successful-lookup-equivalence-example
   "Execute title and slug lookup and retain both returned page objects."
   (let* ((source-page (%make-wiki-link-demo-source-page))
@@ -249,7 +365,8 @@ The result is :MATCHES-TITLE-PATH, :MATCHES-SLUG-PATH, :OTHER, or :RESOLVED."
 
 (defhyperdoc *wiki-link-contract-demo*
   :title "Dreyeck Wiki-link contract demonstration"
-  :id "dreyeck/wiki-link-contract-demo"
-  :asdf-system-name "dreyeck/wiki-link-contract-demo"
+  :id "dreyeck/wiki-link"
+  :asdf-system-name "dreyeck/wiki-link"
   :subdirectory "dreyeck/pages"
+  ;; :code-subdirectory "dreyeck/src"
   :main-page-id "Wiki-link title and slug lookup contracts")
