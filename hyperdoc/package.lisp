@@ -37,6 +37,8 @@
            ;; Access to HyperDoc data
            #:title-of #:directory-of #:asdf-system-of #:pages-of
            #:hyperdoc-of #:file-of
+           ;; HTML page assets
+           #:*hyperdoc-html-page-assets*
            ;; HyperDoc's own HyperDoc
            #:*hyperdoc*))
 

@@ -1,6 +1,6 @@
 ;;;; HTML pages
 ;;
-;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Copyright (c) 2025-2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperdoc)
 
@@ -231,10 +231,7 @@
                  :css '("/hyperdoc/css/hyperdoc.css")
                  :tag-dispatchers '*hyperdoc-tags*))
 
-(defmethod hb:html-page-assets-of ((page page))
-  *hyperdoc-html-page-assets*)
-
-(defmethod hb:html-page-assets-of ((class-name (eql 'page)))
+(defmethod hb:html-page-assets-of ((hd hyperdoc))
   *hyperdoc-html-page-assets*)
 
 (defmethod hb:serialize-page-dom ((page page))

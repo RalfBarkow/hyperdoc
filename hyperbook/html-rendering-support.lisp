@@ -24,8 +24,6 @@
 
 (defgeneric html-page-assets-of (page-or-class-or-class-name)
   (:method ((page page))
-    *hyperbook-html-page-assets*)
-  (:method ((class class))
-    (html-page-assets-of (class-name class)))
-  (:method ((class-name (eql 'page)))
+    (html-page-assets-of (hyperbook-of page)))
+  (:method ((hb hyperbook))
     *hyperbook-html-page-assets*))
