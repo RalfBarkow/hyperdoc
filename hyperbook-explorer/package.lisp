@@ -24,7 +24,8 @@
           dom-of
           html-nodes
           render-node
-          serialize-a-element))
+          serialize-a-element
+          serialize-page-dom))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperbook)

@@ -51,7 +51,7 @@
 
 ;; The tags with special treatment in serialization
 
-(defvar *hyperdoc-tags* hb::*hyperbook-tags*)
+(defvar *hyperdoc-tags* nil)
 
 ;; A special variable holding the current package
 
@@ -185,8 +185,7 @@
     ;; src starts with "/", do the same.  Otherwise, it's a local file
     ;; that a browser cannot access, replace it with a data URL.
     (unless (or (puri:uri-scheme uri) (str:starts-with? "/" src))
-      (let* ((hyperdoc (-> hb::*current-page*
-                           (slot-value 'hyperbook)))
+      (let* ((hyperdoc hb::*current-hyperbook*)
              (directory (directory-of hyperdoc))
              (pathname (merge-pathnames src directory))
              (bytes (alexandria:read-file-into-byte-vector pathname))
@@ -219,29 +218,28 @@
              (views:object-ref value :display render-children :select view-attr)))))
 
 ;;
-;; Content view on HTML pages
+;; Customize the content view on HyperBook HTML pages
 ;;
 
-(views:defview views:👀content (page html-page)
-  (views:html-view :title "Content" :priority 1
-    (views:add-asset-path "/hyperbook/"
-                          (asdf:system-relative-pathname
-                           :hyperbook
-                           "assets/hyperbook/"))
-    (views:add-asset-path "/hyperdoc/"
-                          (asdf:system-relative-pathname
-                           :hyperdoc
-                           "assets/hyperdoc/"))
-    (views:include-css "/hyperbook/css/hyperbook.css")
-    (views:include-css "/hyperdoc/css/hyperdoc.css")
-    (let ((hb::*current-page* page)
-          (*current-package* (find-package "CL-USER")))
-      (when-let (dom (dom-of page))
-        (views:html
-          (:div :class "hyperbook-page"
-                (let ((plump:*tag-dispatchers* *hyperdoc-tags*))
-                  (plump:serialize dom views::*html-stream*))
-                (:br)))))))
+(defvar *hyperdoc-html-page-assets*
+  (make-instance 'hb:html-page-assets
+                 :inherit hb:*hyperbook-html-page-assets*
+                 :paths (list (cons "/hyperdoc/"
+                                    (asdf:system-relative-pathname
+                                     :hyperdoc
+                                     "assets/hyperdoc/")))
+                 :css '("/hyperdoc/css/hyperdoc.css")
+                 :tag-dispatchers '*hyperdoc-tags*))
+
+(defmethod hb:html-page-assets-of ((page page))
+  *hyperdoc-html-page-assets*)
+
+(defmethod hb:html-page-assets-of ((class-name (eql 'page)))
+  *hyperdoc-html-page-assets*)
+
+(defmethod hb:serialize-page-dom ((page page))
+  (let ((*current-package* (find-package "CL-USER")))
+    (call-next-method)))
 
 ;;
 ;; Parse tree view

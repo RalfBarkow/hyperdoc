@@ -25,6 +25,6 @@
            ;; HTML HyperBooks
            #:html-hyperbook #:html-files-of
            ;; HTML rendering support
-           #:html-page-assets-of
+           #:html-page-assets #:html-page-assets-of #:*HYPERBOOK-HTML-PAGE-ASSETS*
            ;; Documentation
            #:*hyperbook*))
