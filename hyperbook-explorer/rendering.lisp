@@ -1,6 +1,6 @@
 ;;;; Rendering DOM trees
 ;;
-;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Copyright (c) 2025-2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperbook)
 
@@ -137,15 +137,21 @@
 
 (views:defview views:👀content (page page)
   (when-let (dom (dom-of page))
-    (views:html-view :title "Content" :priority 1
-      (views:add-asset-path "/hyperbook/"
-                            (asdf:system-relative-pathname
-                             :hyperbook
-                             "assets/hyperbook/"))
-      (views:include-css "/hyperbook/css/hyperbook.css")
-      (let ((*current-page* page))
-        (views:html
-          (:div :class "hyperbook-page"
-                (let ((plump:*tag-dispatchers* *hyperbook-tags*))
-                  (plump:serialize dom views::*html-stream*))
-                (:br)))))))
+    (let ((assets (html-page-assets-of page)))
+      (views:html-view :title "Content" :priority 1
+        (loop for (url . filename) in (paths-of assets)
+              do (views:add-asset-path url filename))
+        (loop for filename in (css-of assets)
+              do (views:include-css filename))
+        (loop for filename in (js-of assets)
+              do (views:include-js filename))
+        (let* ((*current-page* page)
+               (dispatcher-ref (tag-dispatchers-of assets))
+               (dispatchers (if (symbolp dispatcher-ref)
+                                (symbol-value dispatcher-ref)
+                                dispatcher-ref)))
+          (views:html
+            (:div :class "hyperbook-page"
+                  (let ((plump:*tag-dispatchers* dispatchers))
+                    (plump:serialize dom views::*html-stream*))
+                  (:br))))))))

@@ -61,7 +61,7 @@
 ;; Process special tags
 ;;
 
-;; in-package: set the current package, no not render
+;; in-package: set the current package, do not render
 
 (plump:define-tag-dispatcher (in-package-tag *hyperdoc-tags*) (name)
   (string-equal name "in-package"))
