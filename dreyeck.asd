@@ -12,6 +12,26 @@
     :components
     ((:file "dreyeck-hyperdoc-deployment-inventory")))))
 
+(asdf:defsystem #:dreyeck/fedwiki-navigation
+  :description "Replayable Federated Wiki navigation prototype"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :components
+  ((:file "fedwiki-navigation")
+   (:file "make-navigation-fixture"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:load-op "dreyeck/fedwiki-navigation")))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (uiop:symbol-call
+    :dreyeck/fedwiki-navigation/prototype
+    :navigation-transcript-smoke-test)))
+
 (asdf:defsystem #:dreyeck/wiki-link
   :description "Examples of FedWiki title and slug lookup contracts"
   :license "BSD"
