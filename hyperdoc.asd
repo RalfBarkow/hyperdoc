@@ -43,52 +43,6 @@
                 :components ((:file "package")
                              (:file "hyperdoc")))))
 
-(defsystem #:hyperdoc/git
-  :description "Git-backed inspection objects for HyperDoc"
-  :author "Ralf Barkow <ralf.barkow@me.com>"
-  :license "BSD"
-  :version "0.0.1"
-  :homepage "https://codeberg.org/khinsen/hyperdoc"
-  :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
-  :serial t
-  :depends-on (#:hyperdoc
-               #:uiop)
-  :components ((:module "hyperdoc"
-                :serial t
-                :components ((:file "git-repository-checkout")
-                             (:file "git-commit-inspection"))))
-  :in-order-to ((test-op (test-op "hyperdoc/git/tests"))))
-
-(defsystem #:hyperdoc/inspector/git
-  :description "Inspector views for Git-backed HyperDoc objects"
-  :author "Ralf Barkow <ralf.barkow@me.com>"
-  :license "BSD"
-  :version "0.0.1"
-  :homepage "https://codeberg.org/khinsen/hyperdoc"
-  :source-control (:git "https://codeberg.org/rgb/hyperdoc.git")
-  :serial t
-  :depends-on (#:hyperdoc/git
-               #:hyperdoc/inspector
-               #:html-inspector-views)
-  :components ((:module "hyperdoc-inspector"
-                :serial t
-                :components ((:file "git-commit-inspection-views")))))
-
-(defsystem #:hyperdoc/git/tests
-  :description "Stable local-fixture tests for Git-backed HyperDoc objects"
-  :author "Ralf Barkow <ralf.barkow@me.com>"
-  :license "BSD"
-  :version "0.0.1"
-  :serial t
-  :depends-on (#:hyperdoc/inspector/git)
-  :components ((:module "tests"
-                :serial t
-                :components ((:file "git-commit-inspection-smoke"))))
-  :perform (test-op (op c)
-             (declare (ignore op c))
-             (uiop:symbol-call :hyperdoc/git/tests
-                               :run-git-commit-inspection-smoke-tests)))
-
 (defsystem #:hyperdoc/explorer
   :description "Explorer for HyperDocs"
   :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
@@ -127,3 +81,4 @@
                              (:file "codemeta")
                              (:file "examples")
                              (:file "hyperdoc")))))
+

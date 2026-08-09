@@ -1,7 +1,6 @@
-;;;; Source-backed Git commit inspection objects.
-;;;; Created from SLY MREPL; reload this file instead of redefining ad hoc.
+;;;; Source-backed Git commit inspection objects incubated by Dreyeck.
 
-(in-package :hyperdoc)
+(in-package #:dreyeck/git)
 
 (define-condition git-command-failed (error)
   ((repository-root
@@ -63,7 +62,7 @@
     :initarg :hash
     :type string))
   (:documentation
-   "Source-backed object representing a Git commit in the live HyperDoc checkout."))
+   "Source-backed object representing a Git commit in a Dreyeck checkout."))
 
 (defmethod print-object ((commit git-commit) stream)
   (print-unreadable-object (commit stream :type t :identity nil)
@@ -89,7 +88,7 @@
                    :hash hash)))
 
 (defun current-head-git-commit ()
-  "Return an inspectable object for HEAD in the current HyperDoc checkout."
+  "Return an inspectable object for HEAD in the current checkout."
   (setf *last-inspected-git-commit*
         (make-git-commit :commit-ish "HEAD")))
 
@@ -126,8 +125,6 @@
     (remove ""
             (uiop/utility:split-string output :separator '(#\Newline))
             :test #'string=)))
-
-;;;; Inspectable files changed by a Git commit.
 
 (defclass git-file-at-commit ()
   ((commit
@@ -185,9 +182,9 @@
   "Parse one git show --name-status row into a GIT-COMMIT-FILE-CHANGE."
   (let* ((parts (uiop:split-string line :separator '(#\Tab)))
          (status (or (first parts) ""))
-         (rename-or-copy? (git-status-rename-or-copy-p status))
-         (old-path (and rename-or-copy? (second parts)))
-         (path (if rename-or-copy?
+         (rename-or-copy-p (git-status-rename-or-copy-p status))
+         (old-path (and rename-or-copy-p (second parts)))
+         (path (if rename-or-copy-p
                    (third parts)
                    (second parts))))
     (make-instance 'git-commit-file-change

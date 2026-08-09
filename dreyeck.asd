@@ -48,3 +48,61 @@
     :serial t
     :components
     ((:file "wiki-link")))))
+
+(asdf:defsystem #:dreyeck/git
+  :description "Experimental Git-backed inspection objects incubated by Dreyeck"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:hyperdoc
+               #:uiop)
+  :components
+  ((:file "git-package")
+   (:file "git-repository-checkout")
+   (:file "git-commit-inspection"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/git/tests"))))
+
+(asdf:defsystem #:dreyeck/inspector/git
+  :description "Dreyeck inspector views for experimental Git objects"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/git
+               #:hyperdoc/inspector
+               #:html-inspector-views)
+  :components
+  ((:file "git-inspector-package")
+   (:file "git-commit-inspection-views")))
+
+(asdf:defsystem #:dreyeck/extension-system-boundaries
+  :description "Reusable ownership checks for Dreyeck extension systems"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:asdf
+               #:uiop)
+  :components
+  ((:file "extension-system-boundaries")))
+
+(asdf:defsystem #:dreyeck/git/tests
+  :description "Stable local-fixture and ownership tests for Dreyeck Git inspection"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/inspector/git
+               #:dreyeck/extension-system-boundaries)
+  :components
+  ((:file "git-commit-inspection-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (uiop:symbol-call
+    :dreyeck/git/tests
+    :run-git-commit-inspection-smoke-tests)))
