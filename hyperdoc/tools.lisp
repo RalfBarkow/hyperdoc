@@ -69,3 +69,24 @@
 (defmacro defplayground (symbol title initial-content)
   `(progn (defclass ,symbol (playground-page) ())
           (make-playground ',symbol ,title ,initial-content)))
+
+(defun system-repository-root-info (system)
+  "Return the Git root for SYSTEM and the source used to discover it."
+  (let* ((system (asdf:find-system system))
+         (source-file (ignore-errors (asdf:system-source-file system))))
+    (unless source-file
+      (error "ASDF system ~A has no source file for repository lookup."
+             (asdf:component-name system)))
+    (values
+     (uiop:ensure-directory-pathname
+      (pathname
+       (string-right-trim
+        '(#\Newline #\Return)
+        (uiop:run-program
+         (list "git" "-C"
+               (namestring
+                (uiop:pathname-directory-pathname source-file))
+               "rev-parse" "--show-toplevel")
+         :output :string
+         :error-output :output))))
+     :system-source-default)))
