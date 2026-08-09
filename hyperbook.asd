@@ -100,8 +100,8 @@
   :components ((:module "hyperbook-wikipedia"
                 :serial t
                 :components ((:file "package")
-                             (:file "wikipedia")
-                             (:file "wikipedia-editions")))))
+                             (:file "wikipedia-editions")
+                             (:file "wikipedia")))))
 
 (defsystem #:hyperbook/fedwiki
   :description "HyperBook interface to Federated Wiki"

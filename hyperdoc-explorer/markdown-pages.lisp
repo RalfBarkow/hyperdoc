@@ -24,7 +24,7 @@
 ;;
 
 (defmethod load-page ((page markdown-page))
-  (with-slots (file parse-tree title) page
+  (with-slots (file parse-tree links) page
     (let* ((plump:*tag-dispatchers* plump:*html-tags*)
            (text (alexandria:read-file-into-string file))
            (html (with-output-to-string (str)
