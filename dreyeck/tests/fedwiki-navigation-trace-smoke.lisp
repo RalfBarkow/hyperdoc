@@ -6,10 +6,6 @@
 
 (in-package #:dreyeck/fedwiki-navigation/tests)
 
-(defun run-fedwiki-navigation-trace-tests ()
-  (run-defexample-component-ownership-test)
-  (dreyeck/fedwiki-navigation/prototype:navigation-transcript-smoke-test)
-  
 (defun require-test (value control &rest arguments)
   (unless value
     (error (apply #'format nil control arguments)))
@@ -276,6 +272,7 @@
   t)
 
 (defun run-fedwiki-navigation-trace-tests ()
+  (run-defexample-component-ownership-test)
   (dreyeck/fedwiki-navigation/prototype:navigation-transcript-smoke-test)
   (require-test
    (typep
