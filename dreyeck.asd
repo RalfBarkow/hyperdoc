@@ -16,21 +16,47 @@
   :description "Replayable Federated Wiki navigation prototype"
   :license "BSD"
   :version "0.0.1"
+  :depends-on (#:asdf
+               #:uiop)
   :pathname "dreyeck/src/"
   :serial t
   :components
   ((:file "fedwiki-navigation")
-   (:file "make-navigation-fixture"))
+   (:file "make-navigation-fixture")
+   (:file "navigation-trace"))
   :in-order-to
   ((asdf:test-op
-    (asdf:load-op "dreyeck/fedwiki-navigation")))
+    (asdf:test-op "dreyeck/fedwiki-navigation/tests"))))
+
+(asdf:defsystem #:dreyeck/inspector/fedwiki-navigation
+  :description "Inspector views for source-backed FedWiki navigation traces"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/fedwiki-navigation
+               #:hyperdoc/inspector
+               #:html-inspector-views)
+  :components
+  ((:file "navigation-trace-views")))
+
+(asdf:defsystem #:dreyeck/fedwiki-navigation/tests
+  :description "Deterministic tests for source-backed FedWiki navigation traces"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/inspector/fedwiki-navigation
+               #:dreyeck/extension-system-boundaries)
+  :components
+  ((:file "fedwiki-navigation-trace-smoke"))
   :perform
   (asdf:test-op
    (operation component)
    (declare (ignore operation component))
    (uiop:symbol-call
-    :dreyeck/fedwiki-navigation/prototype
-    :navigation-transcript-smoke-test)))
+    :dreyeck/fedwiki-navigation/tests
+    :run-fedwiki-navigation-trace-tests)))
 
 (asdf:defsystem #:dreyeck/wiki-link
   :description "Examples of FedWiki title and slug lookup contracts"

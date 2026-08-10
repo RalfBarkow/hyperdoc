@@ -1,5 +1,57 @@
 (defpackage #:dreyeck/fedwiki-navigation/prototype
-  (:use #:cl))
+  (:use #:cl)
+  (:export
+   #:navigation-session
+   #:navigation-session-origin
+   #:navigation-session-lineup
+   #:make-navigation-fixture
+   #:session-location
+   #:run-navigation-transcript
+   #:navigation-transcript-smoke-test
+   #:navigation-trace
+   #:navigation-trace-initial-session-of
+   #:navigation-trace-commands-of
+   #:navigation-trace-steps-of
+   #:navigation-trace-final-session-of
+   #:navigation-trace-result-of
+   #:navigation-step
+   #:navigation-step-number-of
+   #:navigation-step-command-text-of
+   #:navigation-step-operation-of
+   #:navigation-step-arguments-of
+   #:navigation-step-before-of
+   #:navigation-step-producer-symbol-of
+   #:navigation-step-outcome-of
+   #:navigation-step-after-of
+   #:navigation-step-link-observation-of
+   #:navigation-step-implementation-of
+   #:navigation-step-dispatcher-implementation-of
+   #:navigation-step-explanation
+   #:navigation-position
+   #:navigation-position-current-page-slug-of
+   #:navigation-position-current-item-id-of
+   #:navigation-position-location-of
+   #:navigation-link-observation
+   #:navigation-link-observation-link-slug-of
+   #:navigation-link-observation-source-location-of
+   #:navigation-link-observation-target-location-of
+   #:navigation-test-outcome
+   #:navigation-test-outcome-passed-p
+   #:navigation-source-reference
+   #:navigation-source-reference-producer-symbol-of
+   #:navigation-source-reference-system-name-of
+   #:navigation-source-reference-component-name-of
+   #:navigation-source-reference-system
+   #:navigation-source-reference-component
+   #:navigation-source-reference-relative-pathname
+   #:navigation-source-reference-source-file
+   #:navigation-source-file
+   #:navigation-source-file-component-of
+   #:navigation-source-file-pathname-of
+   #:navigation-source-file-relative-pathname-of
+   #:navigation-source-file-contents
+   #:make-fedwiki-java-navigation-trace
+   #:fedwiki-java-navigation-trace-example))
 
 (in-package #:dreyeck/fedwiki-navigation/prototype)
 
@@ -22,6 +74,31 @@
   origin
   pages
   lineup)
+
+
+(defstruct (navigation-case-outcome
+             (:constructor make-navigation-case-outcome (text)))
+  (text "" :type string :read-only t))
+
+
+(defstruct (navigation-test-outcome
+             (:constructor make-navigation-test-outcome
+                 (fragment item-text passed-p)))
+  (fragment "" :type string :read-only t)
+  (item-text "" :type string :read-only t)
+  (passed-p nil :type boolean :read-only t))
+
+
+(define-condition navigation-test-failed (error)
+  ((fragment :reader navigation-test-failed-fragment-of
+             :initarg :fragment)
+   (item-text :reader navigation-test-failed-item-text-of
+              :initarg :item-text))
+  (:report
+   (lambda (condition stream)
+     (format stream "The current story item does not contain ~S: ~S"
+             (navigation-test-failed-fragment-of condition)
+             (navigation-test-failed-item-text-of condition)))))
 
 
 (defun session-current-panel (session)
@@ -51,6 +128,25 @@
 
 (defun text-contains-p (fragment text)
   (not (null (search fragment text :test #'char-equal))))
+
+
+(defun record-navigation-case (text)
+  "Return an observable annotation without changing the navigation session."
+  (make-navigation-case-outcome (copy-seq text)))
+
+
+(defun assert-current-item (session fragment)
+  "Assert that the current story item contains FRAGMENT."
+  (let* ((item (session-current-item session))
+         (text (navigation-item-text item)))
+    (unless (text-contains-p fragment text)
+      (error 'navigation-test-failed
+             :fragment fragment
+             :item-text text))
+    (make-navigation-test-outcome
+     (copy-seq fragment)
+     (copy-seq text)
+     t)))
 
 
 (defun find-next (session fragment)

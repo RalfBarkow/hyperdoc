@@ -24,6 +24,23 @@
       ("dreyeck/inspector/git" "hyperdoc/inspector")
       ("dreyeck/git/tests" "dreyeck/inspector/git")
       ("dreyeck/git/tests" "dreyeck/extension-system-boundaries"))
+     :upstream-systems ("hyperdoc" "hyperdoc/inspector"))
+    (:name :fedwiki-navigation-trace
+     :definition-file "dreyeck.asd"
+     :source-root "dreyeck/src/"
+     :test-root "dreyeck/tests/"
+     :source-systems ("dreyeck/fedwiki-navigation"
+                      "dreyeck/inspector/fedwiki-navigation")
+     :test-systems ("dreyeck/fedwiki-navigation/tests")
+     :required-dependencies
+     (("dreyeck/fedwiki-navigation" "asdf")
+      ("dreyeck/inspector/fedwiki-navigation"
+       "dreyeck/fedwiki-navigation")
+      ("dreyeck/inspector/fedwiki-navigation" "hyperdoc/inspector")
+      ("dreyeck/fedwiki-navigation/tests"
+       "dreyeck/inspector/fedwiki-navigation")
+      ("dreyeck/fedwiki-navigation/tests"
+       "dreyeck/extension-system-boundaries"))
      :upstream-systems ("hyperdoc" "hyperdoc/inspector")))
   "Declarative ownership boundaries for incubating Dreyeck extensions.")
 

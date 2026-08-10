@@ -93,10 +93,14 @@
         (:follow-link
          (follow-link session)))
       (ecase (first command)
+        (:case
+         (record-navigation-case (second command)))
         (:find-next
          (find-next session (second command)))
         (:move-back
-         (move-back session (second command))))))
+         (move-back session (second command)))
+        (:test
+         (assert-current-item session (second command))))))
 
 
 (defun run-navigation-transcript (session commands)
