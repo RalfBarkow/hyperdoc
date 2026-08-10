@@ -1,6 +1,6 @@
 ;;;; Rendering DOM trees
 ;;
-;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Copyright (c) 2025-2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperbook)
 
@@ -14,9 +14,10 @@
 
 (defvar *hyperbook-tags* plump:*html-tags*)
 
-;; A special variable holding the current page
+;; Special variables holding the current page and hyperbook
 
 (defvar *current-page* nil)
+(defvar *current-hyperbook* nil)
 
 ;; A container for HTML nodes to be rendered
 
@@ -69,7 +70,7 @@
     (cond
       (page-attr
        (let ((hyperbook-id (or hyperbook-attr
-                               (-> *current-page* hyperbook-of id-of))))
+                               (-> *current-hyperbook* id-of))))
          (render-hyperbook-page-link hyperbook-id page-attr render-children))
        t)
       (hyperbook-attr
@@ -135,17 +136,40 @@
 ;; Content view for pages
 ;;
 
+(defgeneric serialize-page-dom (page)
+  (:method ((page page))
+    (plump:serialize (dom-of page) views::*html-stream*)))
+
+(defun collect-assets (assets)
+  (let ((inherit (inherit-of (first assets))))
+    (if inherit
+        (cons inherit assets)
+        assets)))
+
+(defun collect-tag-dispatchers (all-assets)
+  (loop for assets in all-assets
+        for dispatcher-ref = (tag-dispatchers-of assets)
+        append (if (symbolp dispatcher-ref)
+                   (symbol-value dispatcher-ref)
+                   dispatcher-ref)))
+
 (views:defview views:👀content (page page)
   (when-let (dom (dom-of page))
-    (views:html-view :title "Content" :priority 1
-      (views:add-asset-path "/hyperbook/"
-                            (asdf:system-relative-pathname
-                             :hyperbook
-                             "assets/hyperbook/"))
-      (views:include-css "/hyperbook/css/hyperbook.css")
-      (let ((*current-page* page))
-        (views:html
-          (:div :class "hyperbook-page"
-                (let ((plump:*tag-dispatchers* *hyperbook-tags*))
-                  (plump:serialize dom views::*html-stream*))
-                (:br)))))))
+    (let* ((page-assets (html-page-assets-of page))
+           (all-assets (reverse (collect-assets (list page-assets)))))
+      (views:html-view :title "Content" :priority 1
+        (loop for assets in all-assets do
+          (loop for (url . filename) in (paths-of assets)
+                do (views:add-asset-path url filename))
+          (loop for filename in (css-of assets)
+                do (views:include-css filename))
+          (loop for filename in (js-of assets)
+                do (views:include-js filename)))
+        (let* ((*current-page* page)
+               (*current-hyperbook* (hyperbook-of page)))
+          (views:html
+            (:div :class "hyperbook-page"
+                  (let ((plump:*tag-dispatchers* (collect-tag-dispatchers
+                                                  all-assets)))
+                    (serialize-page-dom page))
+                  (:br))))))))

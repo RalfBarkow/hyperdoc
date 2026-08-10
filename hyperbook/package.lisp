@@ -24,5 +24,7 @@
            #:lookup-failure #:page-lookup-failure #:hyperbook-lookup-failure
            ;; HTML HyperBooks
            #:html-hyperbook #:html-files-of
+           ;; HTML rendering support
+           #:html-page-assets #:html-page-assets-of #:*HYPERBOOK-HTML-PAGE-ASSETS*
            ;; Documentation
            #:*hyperbook*))

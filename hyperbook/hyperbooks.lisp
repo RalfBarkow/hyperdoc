@@ -1,6 +1,6 @@
 ;;;; HyperBooks
 ;;
-;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Copyright (c) 2025-2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (in-package :hyperbook)
 

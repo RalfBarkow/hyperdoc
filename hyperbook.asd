@@ -1,6 +1,6 @@
 ;;;; System definitions for HyperBook
 ;;
-;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
+;;;; Copyright (c) 2025-2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
 (defsystem #:hyperbook
   :description "Hyperbook interface"
@@ -18,7 +18,8 @@
                         :components ((:file "package")
                                      (:file "hyperbooks")
                                      (:file "catalog")
-                                     (:file "html-books")))))
+                                     (:file "html-books")
+                                     (:file "html-rendering-support")))))
 
 (defsystem #:hyperbook/explorer
   :description "Explorer for HyperBooks"
