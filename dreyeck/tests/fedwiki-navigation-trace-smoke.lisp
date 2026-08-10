@@ -6,10 +6,97 @@
 
 (in-package #:dreyeck/fedwiki-navigation/tests)
 
+(defun run-fedwiki-navigation-trace-tests ()
+  (run-defexample-component-ownership-test)
+  (dreyeck/fedwiki-navigation/prototype:navigation-transcript-smoke-test)
+  
 (defun require-test (value control &rest arguments)
   (unless value
     (error (apply #'format nil control arguments)))
   value)
+
+(defun top-level-defexample-names (component)
+  (let ((end-of-file (gensym "END-OF-FILE"))
+        (defexample-symbol
+          (or (find-symbol "DEFEXAMPLE" "HYPERDOC")
+              (error "HYPERDOC:DEFEXAMPLE is unavailable."))))
+    (with-open-file
+        (stream
+         (asdf:component-pathname component)
+         :direction :input)
+      (loop
+        for form =
+          (let ((*read-eval* nil))
+            (read stream nil end-of-file))
+        until (eq form end-of-file)
+        when
+          (and
+           (consp form)
+           (eq (first form) defexample-symbol)
+           (symbolp (second form)))
+          collect
+            (symbol-name (second form))))))
+
+(defun run-defexample-component-ownership-test ()
+  (let* ((target
+           "FEDWIKI-JAVA-NAVIGATION-TRACE-EXAMPLE")
+         (trace-system
+           (asdf:find-system
+            "dreyeck/fedwiki-navigation"))
+         (views-system
+           (asdf:find-system
+            "dreyeck/inspector/fedwiki-navigation"))
+         (trace-component
+           (or
+            (asdf:find-component
+             trace-system
+             "navigation-trace")
+            (error
+             "Component navigation-trace was not found.")))
+         (views-component
+           (or
+            (asdf:find-component
+             views-system
+             "navigation-trace-views")
+            (error
+             "Component navigation-trace-views was not found.")))
+         (trace-examples
+           (top-level-defexample-names trace-component))
+         (views-examples
+           (top-level-defexample-names views-component))
+         (target-count
+           (count
+            target
+            (append trace-examples views-examples)
+            :test #'string=))
+         (dependencies
+           (asdf:system-depends-on trace-system)))
+    (require-test
+     (some
+      (lambda (dependency)
+        (and
+         (or (stringp dependency)
+             (symbolp dependency))
+         (string-equal
+          (string dependency)
+          "hyperdoc")))
+      dependencies)
+     "Owning system lacks direct HYPERDOC dependency: ~S."
+     dependencies)
+    (require-test
+     (= target-count 1)
+     "Expected exactly one ~A; found ~D."
+     target target-count)
+    (require-test
+     (member target trace-examples :test #'string=)
+     "~A is not owned by navigation-trace: ~S."
+     target trace-examples)
+    (require-test
+     (not
+      (member target views-examples :test #'string=))
+     "~A is still owned by navigation-trace-views: ~S."
+     target views-examples)
+    t))
 
 (defun trace-view-titles (object)
   (mapcar #'html-inspector-views:view-title

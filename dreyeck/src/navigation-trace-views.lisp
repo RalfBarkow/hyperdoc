@@ -228,7 +228,3 @@
     :priority 2)
    :title "Contents"
    :priority 2))
-
-(hyperdoc:defexample fedwiki-java-navigation-trace-example
-  "Run the durable seven-step local FEDWIKI-JAVA navigation trace."
-  (make-fedwiki-java-navigation-trace))

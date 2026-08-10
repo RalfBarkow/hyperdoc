@@ -34,6 +34,7 @@
      :test-systems ("dreyeck/fedwiki-navigation/tests")
      :required-dependencies
      (("dreyeck/fedwiki-navigation" "asdf")
+      ("dreyeck/fedwiki-navigation" "hyperdoc")
       ("dreyeck/inspector/fedwiki-navigation"
        "dreyeck/fedwiki-navigation")
       ("dreyeck/inspector/fedwiki-navigation" "hyperdoc/inspector")

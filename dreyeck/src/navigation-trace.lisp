@@ -400,3 +400,7 @@
   (run-navigation-trace
    (make-navigation-fixture)
    *fedwiki-java-navigation-trace-commands*))
+
+(hyperdoc:defexample fedwiki-java-navigation-trace-example
+  "Run the durable seven-step local FEDWIKI-JAVA navigation trace."
+  (make-fedwiki-java-navigation-trace))
