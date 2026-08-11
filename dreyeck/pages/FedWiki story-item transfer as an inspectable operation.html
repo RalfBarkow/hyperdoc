@@ -1,0 +1,96 @@
+<h1>FedWiki story-item transfer as an inspectable operation</h1>
+
+<in-package>dreyeck/fedwiki-story-item-transfer</in-package>
+
+<p>
+  We first materialize the transfer operation. Browser gestures can be added
+  later as ways to invoke it. This is the operation-first boundary: the Lisp
+  contract exists before any drag, Shift-click, or other gesture is assigned
+  to it.
+</p>
+
+<pre>
+Source story item
+  -&gt; Transfer action
+  -&gt; Transfer representation
+  -&gt; Inspectable outcome
+</pre>
+
+<h2>Reference preparation</h2>
+
+<p>
+  <code>PREPARE-STORY-ITEM-TRANSFER</code> currently accepts only the
+  non-destructive action <code>:REFERENCE</code>. The source page must already
+  be loaded and must contain the supplied story item by object identity. The
+  resulting <code>STORY-ITEM-TRANSFER</code> retains the source page, its
+  actual origin, the identical story item, an optional diagnostic target, and
+  the action's outcome. No page is loaded or changed by this operation.
+</p>
+
+<p>
+  For <code>:REFERENCE</code>, the outcome is the same story-item object by
+  <code>EQ</code>. The resource remains at its source origin; no story-item
+  data or image bytes are copied.
+</p>
+
+<h3>Production operations</h3>
+
+<p>
+  Source provenance is obtained through
+  <a expr="#'hyperbook/fedwiki::origin-of"
+     view="Source code"><code>ORIGIN-OF</code></a>.
+  Image resource addresses continue to use
+  <a expr="#'hyperbook/fedwiki::resolve-story-item-url"
+     view="Source code"><code>RESOLVE-STORY-ITEM-URL</code></a>.
+  The new preparation boundary is
+  <a expr="#'prepare-story-item-transfer"
+     view="Source code"><code>PREPARE-STORY-ITEM-TRANSFER</code></a>.
+</p>
+
+<h3>Executable image example</h3>
+
+<p>
+  This deterministic example constructs an in-memory FedWiki page and the
+  observed image story item through the existing page/story constructors. It
+  returns a <code>STORY-ITEM-TRANSFER</code> with action
+  <code>:REFERENCE</code>. Inspecting it permits navigation from the transfer
+  to its source page, source origin, and story item. The image section derives
+  the stored resource reference and resolved resource URL without adding
+  duplicate URL, width, height, or size slots to the transfer object.
+</p>
+
+<source-of-function>fedwiki-image-reference-transfer-example</source-of-function>
+
+<h2>Local-first interpretation</h2>
+
+<p>
+  The following is an interpretation and an open architecture question, not
+  an implemented storage policy:
+</p>
+
+<pre>
+REFERENCE
+  keeps ownership and resource bytes at the source origin
+
+future IMPORT
+  would fetch bytes, store a local asset, retain provenance,
+  and create a local resource reference
+</pre>
+
+<p>
+  This slice implements <code>REFERENCE</code>, not <code>IMPORT</code>.
+  <code>COPY</code> is also deferred: without a target page or persistence
+  contract, choosing a new local item identity and copy depth would claim
+  semantics the current object model does not yet provide. <code>MOVE</code>
+  remains outside the boundary because it would require a successful import
+  followed by deletion at the source.
+</p>
+
+<h2>Future gestures</h2>
+
+<p>
+  A future drag could invoke an existing transfer action. A modified drag
+  could later select another action, but no modifier mapping is decided or
+  encoded here. There are no HTML5 drag handlers, JavaScript events, page
+  writes, uploads, downloads, or persistence in this slice.
+</p>

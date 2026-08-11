@@ -13,7 +13,7 @@
     ((:file "dreyeck-hyperdoc-deployment-inventory")))))
 
 (asdf:defsystem #:dreyeck/wiki-link
-  :description "Examples of FedWiki title and slug lookup contracts"
+  :description "Dreyeck FedWiki lookup and story-item operation examples"
   :license "BSD"
   :version "0.0.1"
   :serial t
@@ -31,24 +31,29 @@
     :serial t
     :components
     ((:file "wiki-link")
-     (:file "fedwiki-journal-context-debugger")))))
+     (:file "fedwiki-journal-context-debugger")
+     (:file "fedwiki-story-item-transfer")))))
 
 (asdf:defsystem #:dreyeck/wiki-link/tests
-  :description "Deterministic tests for the executable FedWiki failure trace"
+  :description "Deterministic tests for Dreyeck FedWiki diagnostic operations"
   :license "BSD"
   :version "0.0.1"
   :pathname "dreyeck/tests/"
   :serial t
   :depends-on (#:dreyeck/wiki-link)
   :components
-  ((:file "fedwiki-journal-context-debugger-smoke"))
+  ((:file "fedwiki-journal-context-debugger-smoke")
+   (:file "fedwiki-story-item-transfer-smoke"))
   :perform
   (asdf:test-op
    (operation component)
    (declare (ignore operation component))
    (uiop:symbol-call
     :dreyeck/fedwiki-journal-context-debugger/tests
-    :run-fedwiki-journal-context-debugger-tests)))
+    :run-fedwiki-journal-context-debugger-tests)
+   (uiop:symbol-call
+    :dreyeck/fedwiki-story-item-transfer/tests
+    :run-fedwiki-story-item-transfer-tests)))
 
 (asdf:defsystem #:dreyeck/fedwiki-navigation
   :description "Replayable Federated Wiki navigation prototype"
