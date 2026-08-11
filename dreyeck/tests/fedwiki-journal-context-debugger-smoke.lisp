@@ -119,15 +119,33 @@
            (hyperbook/fedwiki::domain-name-of ordinary)))
   t)
 
-(defun make-story-item-fixture (type text &key url)
+(defun make-story-item-fixture (type text &key url width height size)
   (let ((data (make-hash-table :test #'equal)))
     (when url
       (setf (gethash "url" data) url))
+    (when width
+      (setf (gethash "width" data) width))
+    (when height
+      (setf (gethash "height" data) height))
+    (when size
+      (setf (gethash "size" data) size))
     (make-instance 'hyperbook/fedwiki::story-item
                    :item-type type
                    :id "story-item-fixture"
                    :text text
                    :data data)))
+
+(defun inline-style-property (element property)
+  (loop for declaration
+          in (uiop:split-string (or (plump:attribute element "style") "")
+                                :separator '(#\;))
+        for separator = (position #\: declaration)
+        when (and separator
+                  (string-equal property
+                                (string-trim '(#\Space #\Tab)
+                                             (subseq declaration 0 separator))))
+          return (string-trim '(#\Space #\Tab)
+                              (subseq declaration (1+ separator)))))
 
 (defun run-story-item-url-resolution-test ()
   (let* ((origin (make-initialized-wiki "hyperdoc.dreyeck.ch"))
@@ -182,23 +200,61 @@
            (make-story-item-fixture
             :image
             "[https://example.org/change diff]"
-            :url "/assets/plugins/image/test.jpg")))
+            :url "/assets/plugins/image/test.jpg"
+            :width 399
+            :height 129
+            :size "wide")))
     (multiple-value-bind (html references assets)
         (html-inspector-views:html-and-references
           (hyperbook/fedwiki::render-story-item :image item page))
       (declare (ignore references assets))
       (let* ((dom (plump:parse html))
+             (figures (plump:get-elements-by-tag-name dom "figure"))
              (images (plump:get-elements-by-tag-name dom "img"))
+             (captions (plump:get-elements-by-tag-name dom "figcaption"))
              (links (plump:get-elements-by-tag-name dom "a")))
+        (check (= 1 (length figures))
+               "Image story-item rendered ~D FIGURE elements."
+               (length figures))
         (check (= 1 (length images))
                "Image story-item rendered ~D IMG elements."
                (length images))
+        (check (= 1 (length captions))
+               "Image story-item rendered ~D FIGCAPTION elements."
+               (length captions))
         (check
          (string=
           "https://hyperdoc.dreyeck.ch/assets/plugins/image/test.jpg"
           (plump:attribute (first images) "src"))
          "Image renderer emitted the wrong SRC: ~S."
          (plump:attribute (first images) "src"))
+        (check (string= "399" (plump:attribute (first images) "width"))
+               "Image renderer did not retain stored width 399: ~S."
+               (plump:attribute (first images) "width"))
+        (check (string= "129" (plump:attribute (first images) "height"))
+               "Image renderer did not retain stored height 129: ~S."
+               (plump:attribute (first images) "height"))
+        (check (string= "wide"
+                        (plump:attribute (first figures)
+                                         "data-fedwiki-size"))
+               "Image renderer did not retain the FedWiki size hook: ~S."
+               (plump:attribute (first figures) "data-fedwiki-size"))
+        (check (string= "100%"
+                        (inline-style-property (first figures) "max-width"))
+               "Image figure lacks its pane-width bound: ~S."
+               (plump:attribute (first figures) "style"))
+        (check (string= "100%"
+                        (inline-style-property (first images) "max-width"))
+               "Image lacks its container-width bound: ~S."
+               (plump:attribute (first images) "style"))
+        (check (string= "auto"
+                        (inline-style-property (first images) "height"))
+               "Responsive image height is not automatic: ~S."
+               (plump:attribute (first images) "style"))
+        (check (string= "100%"
+                        (inline-style-property (first images) "width"))
+               "FedWiki WIDE did not request full container width: ~S."
+               (plump:attribute (first images) "style"))
         (check (= 1 (length links))
                "Image caption rendered ~D links instead of one."
                (length links))
@@ -209,6 +265,78 @@
         (check (string= "diff" (plump:text (first links)))
                "Image caption link text changed: ~S."
                (plump:text (first links))))))
+  t)
+
+(defun run-image-story-item-defensive-dimensions-test ()
+  (let* ((origin (make-initialized-wiki "fixture.example"))
+         (page
+           (hyperbook/fedwiki::make-fedwiki-page
+            origin "fixture-page" "Fixture page")))
+    (dolist (spec `((:label :small
+                     :item ,(make-story-item-fixture
+                             :image "Small"
+                             :url "https://example.org/small.jpg"
+                             :width 64 :height 32 :size "thumbnail")
+                     :expected-width "64"
+                     :expected-height "32"
+                     :expected-size "thumbnail")
+                    (:label :missing
+                     :item ,(make-story-item-fixture
+                             :image "Missing dimensions"
+                             :url "https://example.org/missing.jpg"))
+                    (:label :malformed
+                     :item ,(make-story-item-fixture
+                             :image "Malformed dimensions"
+                             :url "https://example.org/malformed.jpg"
+                             :width "not-a-number" :height -12 :size 42))))
+      (let ((label (getf spec :label))
+            (item (getf spec :item)))
+        (multiple-value-bind (html references assets)
+            (html-inspector-views:html-and-references
+              (hyperbook/fedwiki::render-story-item :image item page))
+          (declare (ignore references assets))
+          (let* ((dom (plump:parse html))
+                 (figure (first (plump:get-elements-by-tag-name dom "figure")))
+                 (image (first (plump:get-elements-by-tag-name dom "img"))))
+            (check figure "~S image fixture did not render a FIGURE." label)
+            (check image "~S image fixture did not render an IMG." label)
+            (check (string= "100%"
+                            (inline-style-property image "max-width"))
+                   "~S image fixture lacks its responsive width bound."
+                   label)
+            (check (string= "auto"
+                            (inline-style-property image "height"))
+                   "~S image fixture lacks automatic responsive height."
+                   label)
+            (check (null (inline-style-property image "width"))
+                   "~S image fixture was unnecessarily forced to full width."
+                   label)
+            (if (getf spec :expected-width)
+                (check (string= (getf spec :expected-width)
+                                (plump:attribute image "width"))
+                       "~S image width changed: ~S."
+                       label (plump:attribute image "width"))
+                (check (null (plump:attribute image "width"))
+                       "~S image retained an invalid width: ~S."
+                       label (plump:attribute image "width")))
+            (if (getf spec :expected-height)
+                (check (string= (getf spec :expected-height)
+                                (plump:attribute image "height"))
+                       "~S image height changed: ~S."
+                       label (plump:attribute image "height"))
+                (check (null (plump:attribute image "height"))
+                       "~S image retained an invalid height: ~S."
+                       label (plump:attribute image "height")))
+            (if (getf spec :expected-size)
+                (check (string= (getf spec :expected-size)
+                                (plump:attribute figure "data-fedwiki-size"))
+                       "~S image size hook changed: ~S."
+                       label
+                       (plump:attribute figure "data-fedwiki-size"))
+                (check (null (plump:attribute figure "data-fedwiki-size"))
+                       "~S image retained a non-string size hook: ~S."
+                       label
+                       (plump:attribute figure "data-fedwiki-size"))))))))
   t)
 
 (defun run-story-item-link-extraction-preservation-test ()
@@ -532,6 +660,7 @@
   (run-story-item-url-resolution-test)
   (run-remote-story-item-url-resolution-test)
   (run-image-story-item-rendering-test)
+  (run-image-story-item-defensive-dimensions-test)
   (run-story-item-link-extraction-preservation-test)
   (run-initialization-worker-containment-test)
   (run-local-page-with-failed-context-test)

@@ -206,15 +206,43 @@ Absolute and other non-site-relative URL values are returned unchanged."
                   url))
       url))
 
+(defun story-item-image-presentation-hints (item)
+  "Return ITEM's usable pixel width, pixel height, and FedWiki size.
+
+FedWiki records image dimensions as positive integer pixel counts. Other
+values are ignored rather than being copied into HTML dimension attributes.
+Any non-empty string size is retained as presentation metadata."
+  (let ((data (data-of item)))
+    (flet ((positive-pixel-count (value)
+             (and (integerp value)
+                  (plusp value)
+                  value)))
+      (values (positive-pixel-count (and data (gethash "width" data)))
+              (positive-pixel-count (and data (gethash "height" data)))
+              (let ((size (and data (gethash "size" data))))
+                (and (stringp size)
+                     (plusp (length size))
+                     size))))))
+
 (defmethod render-story-item ((type (eql :image)) item page)
-  (views:html
-    (:div :style "text-align:center; background-color: #eee;"
-          (:div :style "width: 80%; margin: 0 auto;"
-                (:img :src
-                      (resolve-story-item-url
-                       (gethash "url" (data-of item))
-                       page))
-                (:p (render-wiki-text (text-of item) page))))))
+  (multiple-value-bind (width height size)
+      (story-item-image-presentation-hints item)
+    (views:html
+      (:figure :class "fedwiki-image"
+               :data-fedwiki-size (and size (cl-who:escape-string size))
+               :style "box-sizing: border-box; max-width: 100%; margin: 0; text-align: center; background-color: #eee;"
+               (:img :src
+                     (resolve-story-item-url
+                      (gethash "url" (data-of item))
+                      page)
+                     :width width
+                     :height height
+                     :style
+                     (if (string= size "wide")
+                         "display: block; width: 100%; max-width: 100%; height: auto; margin: 0 auto;"
+                         "display: block; max-width: 100%; height: auto; margin: 0 auto;"))
+               (:figcaption
+                (render-wiki-text (text-of item) page))))))
 
 ;; Graphviz dot language
 
