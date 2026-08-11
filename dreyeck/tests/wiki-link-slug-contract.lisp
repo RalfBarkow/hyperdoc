@@ -1,17 +1,11 @@
 ;;;; Focused tests for the authored Wiki-link lookup contract demonstration
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (asdf:load-asd
-   (merge-pathnames "dreyeck.asd"
-                    (asdf:system-source-directory :hyperbook)))
-  (asdf:load-system :dreyeck/wiki-link))
-
-(defpackage :hyperbook/fedwiki/tests
+(defpackage :dreyeck/wiki-link/contract-tests
   (:use :cl)
   (:export :run-wiki-link-slug-contract-test
            :run-wiki-link-slug-contract-tests))
 
-(in-package :hyperbook/fedwiki/tests)
+(in-package :dreyeck/wiki-link/contract-tests)
 
 (defun check (value control &rest arguments)
   (unless value

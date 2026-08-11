@@ -42,12 +42,16 @@
   :serial t
   :depends-on (#:dreyeck/wiki-link)
   :components
-  ((:file "fedwiki-journal-context-debugger-smoke")
+  ((:file "wiki-link-slug-contract")
+   (:file "fedwiki-journal-context-debugger-smoke")
    (:file "fedwiki-story-item-transfer-smoke"))
   :perform
   (asdf:test-op
    (operation component)
    (declare (ignore operation component))
+   (uiop:symbol-call
+    :dreyeck/wiki-link/contract-tests
+    :run-wiki-link-slug-contract-tests)
    (uiop:symbol-call
     :dreyeck/fedwiki-journal-context-debugger/tests
     :run-fedwiki-journal-context-debugger-tests)

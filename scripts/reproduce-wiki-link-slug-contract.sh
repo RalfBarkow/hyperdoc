@@ -7,10 +7,10 @@ mode=${1:-all}
 
 case "$mode" in
   red)
-    runner=hyperbook/fedwiki/tests:run-wiki-link-slug-contract-test
+    runner=dreyeck/wiki-link/contract-tests:run-wiki-link-slug-contract-test
     ;;
   all)
-    runner=hyperbook/fedwiki/tests:run-wiki-link-slug-contract-tests
+    runner=dreyeck/wiki-link/contract-tests:run-wiki-link-slug-contract-tests
     ;;
   *)
     printf 'Usage: %s [red|all]\n' "$0" >&2
@@ -22,8 +22,5 @@ cd "$repo_dir"
 
 exec nix develop -c sbcl --noinform --no-userinit --non-interactive \
   --eval '(require :asdf)' \
-  --eval '(asdf:load-system :clog)' \
-  --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
-  --eval '(asdf:load-system :hyperbook/fedwiki)' \
-  --eval '(load (truename "tests/wiki-link-slug-contract.lisp"))' \
+  --eval '(asdf:load-system :dreyeck/wiki-link/tests)' \
   --eval "($runner)"

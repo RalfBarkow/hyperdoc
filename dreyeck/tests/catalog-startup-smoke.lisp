@@ -17,12 +17,19 @@
   (uiop:pathname-directory-pathname (dreyeck-asd-pathname)))
 
 (defun startup-script-pathname ()
+  (merge-pathnames #P"scripts/serve-catalog.sh"
+                   (repository-directory)))
+
+(defun historical-startup-script-pathname ()
   (merge-pathnames #P"scripts/serve-wiki-link-contract-demo.sh"
                    (repository-directory)))
 
-(defun demo-startup-script-pathname ()
+(defun deleted-demo-startup-script-pathname ()
   (merge-pathnames #P"dreyeck/scripts/serve-wiki-link-contract-demo.sh"
                    (repository-directory)))
+
+(defun repository-shell-script-pathnames ()
+  (directory (merge-pathnames #P"scripts/*.sh" (repository-directory))))
 
 (defun fresh-catalog-evaluations ()
   (list
@@ -50,19 +57,31 @@
          append (list "--eval" form))))
 
 (defun check-normal-startup-contract ()
-  (let ((source (uiop:read-file-string (startup-script-pathname)))
-        (demo-source
-          (uiop:read-file-string (demo-startup-script-pathname))))
-    (check (search
-            "HYPERDOC_CATALOG_SYSTEM=${HYPERDOC_CATALOG_SYSTEM:-dreyeck/catalog}"
-            source)
-           "Normal Catalog startup has no explicit dreyeck/catalog default.")
-    (check (search "asdf:load-system system" source)
-           "Normal Catalog startup does not load its configured Catalog system.")
-    (check (search
-            "HYPERDOC_DEMO_SYSTEM=${HYPERDOC_DEMO_SYSTEM:-dreyeck/wiki-link}"
-            demo-source)
-           "The isolated Wiki-link demo no longer defaults to dreyeck/wiki-link."))
+  (let ((script (startup-script-pathname)))
+    (check (uiop:file-exists-p script)
+           "The canonical Catalog launcher does not exist: ~A."
+           script)
+    (uiop:run-program (list "test" "-x" (namestring script)))
+    (let ((source (uiop:read-file-string script)))
+      (check (search
+              "HYPERDOC_CATALOG_SYSTEM=${HYPERDOC_CATALOG_SYSTEM:-dreyeck/catalog}"
+              source)
+             "Normal Catalog startup has no explicit dreyeck/catalog default.")
+      (check (search "asdf:load-system system" source)
+             "Normal Catalog startup does not load its configured Catalog system.")
+      (check (null (search "HYPERDOC_DEMO_SYSTEM" source))
+             "The canonical Catalog launcher still exposes the demo-system contract."))
+    (check (not (probe-file (historical-startup-script-pathname)))
+           "The historical root-level launcher still exists.")
+    (check (not (probe-file (deleted-demo-startup-script-pathname)))
+           "The deleted nested Dreyeck demo launcher still exists.")
+    (dolist (shell-script (repository-shell-script-pathnames))
+      (let ((shell-source (uiop:read-file-string shell-script)))
+        (check (null (search
+                      "dreyeck/scripts/serve-wiki-link-contract-demo.sh"
+                      shell-source))
+               "Active launcher ~A still refers to the deleted nested launcher."
+               shell-script))))
   t)
 
 (defun run-catalog-startup-smoke-tests ()
