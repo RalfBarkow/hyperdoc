@@ -36,5 +36,6 @@
    #:make-hyperdoc-host-not-found-intake
    #:make-hyperspec-component-intake
    #:upstream-reference-summary
+   #:*upstream-intake-hyperdoc*
    #:hyperdoc-host-not-found-upstream-intake-example
    #:hyperspec-component-upstream-intake-example))

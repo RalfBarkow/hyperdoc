@@ -44,6 +44,8 @@
       ("dreyeck/upstream-intake/tests"
        "dreyeck/inspector/upstream-intake")
       ("dreyeck/upstream-intake/tests"
+       "hyperdoc/explorer")
+      ("dreyeck/upstream-intake/tests"
        "dreyeck/extension-system-boundaries"))
      :upstream-systems ("hyperdoc" "hyperdoc/inspector"))
     (:name :fedwiki-navigation-trace

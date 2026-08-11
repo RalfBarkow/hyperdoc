@@ -1,0 +1,122 @@
+<h1>Upstream Intake as a Read-Only Observation</h1>
+
+<in-package>dreyeck/upstream-intake</in-package>
+
+<p>
+  An upstream hint is initially an object to observe, not a change to execute.
+  HyperDoc retains the reference and the locally observable facts so that a
+  later integration decision can be made explicitly and inspected in context.
+</p>
+
+<pre>
+OBSERVE
+  -&gt; LOCATE
+  -&gt; COMPARE
+  -&gt; CLASSIFY
+  -&gt; INSPECT
+</pre>
+
+<p>
+  This process does not continue automatically to <code>MERGE</code>,
+  <code>CHERRY-PICK</code>, <code>INSTALL</code>, or <code>SUPERSEDE</code>.
+  The intake records evidence; it does not prescribe an operation.
+</p>
+
+<h2>Two kinds of upstream reference</h2>
+
+<p>
+  A <code>:GIT-COMMIT</code> reference asks questions about commit identity and
+  the current local history:
+</p>
+
+<ul>
+  <li>Is the commit object present locally?</li>
+  <li>Is it an ancestor of the current <code>HEAD</code>?</li>
+  <li>What is its merge base with <code>HEAD</code>?</li>
+  <li>Which local or remote-tracking refs contain it?</li>
+  <li>Which fact-derived classification follows?</li>
+</ul>
+
+<p>
+  A <code>:COMPONENT</code> reference asks a different set of questions. It
+  retains a local subject, an upstream candidate, a proposed relation, a
+  verification status, and explicit contract observations. It does not use
+  Git ancestry as a proxy for capability equivalence.
+</p>
+
+<h2>Commit classifications</h2>
+
+<ul>
+  <li>
+    <code>:ALREADY-INTEGRATED</code>: the observed commit is an ancestor of the
+    current <code>HEAD</code>.
+  </li>
+  <li>
+    <code>:AVAILABLE-NOT-INTEGRATED</code>: the commit object is present, but is
+    not an ancestor of the current <code>HEAD</code>.
+  </li>
+  <li>
+    <code>:NOT-AVAILABLE-LOCALLY</code>: the checkout has no local commit object
+    for the supplied reference.
+  </li>
+</ul>
+
+<p>
+  None of these classifications means “merge required” or “cherry-pick
+  required.” Commit identity, patch equivalence, and an integration decision
+  are three distinct questions:
+</p>
+
+<pre>
+Git commit identity
+  != patch equivalence
+  != integration decision
+</pre>
+
+<p>
+  Component intake preserves an analogous distinction:
+</p>
+
+<pre>
+observed upstream capability
+  != verified contract equivalence
+  != supersession decision
+</pre>
+
+<h2>Implemented observation operations</h2>
+
+<p>
+  <code>MAKE-UPSTREAM-COMMIT-INTAKE</code> performs the local object, ancestry,
+  merge-base, and ref observations. Its implementation performs no fetch.
+</p>
+
+<source-of-function>make-upstream-commit-intake</source-of-function>
+
+<p>
+  <code>MAKE-COMPONENT-INTAKE</code> records a relation hypothesis and its
+  contract questions without evaluating the candidate implementation.
+</p>
+
+<source-of-function>make-component-intake</source-of-function>
+
+<p>
+  <code>UPSTREAM-REFERENCE-SUMMARY</code> turns either inspectable object into a
+  copy-pasteable Lisp plist. The object itself remains the primary evidence.
+</p>
+
+<source-of-function>upstream-reference-summary</source-of-function>
+
+<h2>Executable cases</h2>
+
+<ul>
+  <li>
+    <a page="An Upstream Commit Available but Not Integrated">
+      Inspect the real HyperDoc commit reference
+    </a>
+  </li>
+  <li>
+    <a page="An Upstream Supersession Hypothesis">
+      Inspect the HyperSpec component hypothesis
+    </a>
+  </li>
+</ul>

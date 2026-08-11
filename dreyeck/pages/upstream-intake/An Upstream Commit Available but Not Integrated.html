@@ -1,0 +1,74 @@
+<h1>An Upstream Commit Available but Not Integrated</h1>
+
+<in-package>dreyeck/upstream-intake</in-package>
+
+<p>
+  This case starts with the upstream commit
+  <code>4a0a9d859148e23b6f1ec8ec106145aa68c79c7c</code> from
+  <code>khinsen/hyperdoc</code>, whose subject is
+  <code>Catch and handle "host not found" error for fedwiki sites</code>. The
+  reference is observed against the
+  checkout that is current when this page is rendered.
+</p>
+
+<pre>
+upstream reference
+  -&gt; local commit-object lookup
+  -&gt; current HEAD
+  -&gt; ancestry test
+  -&gt; merge base
+  -&gt; refs containing commit
+  -&gt; classification
+</pre>
+
+<h2>Inspect the current observation</h2>
+
+<p>
+  The following link executes the existing factory and opens its
+  <code>Upstream Intake</code> view. The commit, current <code>HEAD</code>, and
+  merge base are object references. Following the upstream commit exposes the
+  existing Commit, Metadata, Stat, Changed files, and Patch views rather than
+  reproducing them on this page.
+</p>
+
+<p>
+  <a expr="(make-hyperdoc-host-not-found-intake)"
+     view="Upstream Intake">
+    Inspect the current host-not-found commit intake
+  </a>
+</p>
+
+<source-of-function>make-hyperdoc-host-not-found-intake</source-of-function>
+
+<h2>Historical evidence, not a permanent assertion</h2>
+
+<p>
+  At local commit <code>f840514</code>, the read-only observation was:
+</p>
+
+<pre>
+:OBJECT-PRESENT-P     T
+:ANCESTOR-OF-HEAD-P   NIL
+:MERGE-BASE           954cf797c1651959aaad249db80e7c73218584e9
+:CLASSIFICATION       :AVAILABLE-NOT-INTEGRATED
+</pre>
+
+<p>
+  These values are historical evidence. The executable example reads the
+  current repository state. If the upstream commit later becomes an ancestor
+  of <code>HEAD</code>, the classification may become
+  <code>:ALREADY-INTEGRATED</code>. Such a change is a new observation, not a
+  documentation or test failure.
+</p>
+
+<p>
+  “Available but not integrated” states a relation between two commits. It is
+  not an instruction to cherry-pick the upstream commit, and it says nothing
+  by itself about patch equivalence.
+</p>
+
+<nav>
+  <a page="Upstream Intake as a Read-Only Observation">Back to the overview</a>
+  ·
+  <a page="An Upstream Supersession Hypothesis">Next: component hypothesis</a>
+</nav>

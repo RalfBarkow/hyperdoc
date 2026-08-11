@@ -140,8 +140,11 @@
   :depends-on (#:dreyeck/git
                #:hyperdoc)
   :components
-  ((:file "upstream-intake-package")
-   (:file "upstream-intake"))
+  ((:module "dreyeck/pages/upstream-intake"
+    :pathname "../pages/upstream-intake/")
+   (:file "upstream-intake-package")
+   (:file "upstream-intake")
+   (:file "upstream-intake-hyperdoc"))
   :in-order-to
   ((asdf:test-op
     (asdf:test-op "dreyeck/upstream-intake/tests"))))
@@ -196,6 +199,7 @@
   :pathname "dreyeck/tests/"
   :serial t
   :depends-on (#:dreyeck/inspector/upstream-intake
+               #:hyperdoc/explorer
                #:dreyeck/extension-system-boundaries)
   :components
   ((:file "upstream-intake-smoke"))

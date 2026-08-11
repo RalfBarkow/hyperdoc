@@ -1,0 +1,78 @@
+<h1>An Upstream Supersession Hypothesis</h1>
+
+<in-package>dreyeck/upstream-intake</in-package>
+
+<p>
+  This case does not ask whether an upstream commit belongs in the current Git
+  history. It records a hypothesis that a broader upstream component could
+  replace a local HyperDoc-specific capability.
+</p>
+
+<pre>
+local subject
+  47e29b3fb89486cc29def9e4c504020d2a714a61
+  "Serve the Common Lisp HyperSpec locally"
+
+upstream candidate
+  khinsen/html-inspector-views-hyperspec
+
+proposed relation
+  :SUPERSEDES
+
+verification status
+  :UNVERIFIED
+</pre>
+
+<h2>Inspect the hypothesis</h2>
+
+<p>
+  The following link executes the existing factory. Its Inspector view links
+  the local subject to the existing Git commit views and shows the proposed
+  relation, verification status, and contract observations as current Lisp
+  data.
+</p>
+
+<p>
+  <a expr="(make-hyperspec-component-intake)"
+     view="Upstream Intake">
+    Inspect the HyperSpec supersession hypothesis
+  </a>
+</p>
+
+<source-of-function>make-hyperspec-component-intake</source-of-function>
+
+<h2>Contracts still to compare</h2>
+
+<ul>
+  <li><code>:EXISTING-SYMBOL-LOOKUP-PRESERVED</code></li>
+  <li><code>:LOCAL-HYPERSPEC-CORPUS</code></li>
+  <li><code>:REPRODUCIBLE-NIX-SOURCE</code></li>
+  <li><code>:SAME-ORIGIN-HTTP-SERVING</code></li>
+  <li><code>:NO-EXTERNAL-RUNTIME-FALLBACK</code></li>
+  <li><code>:DEFMETHOD-RESOLUTION</code></li>
+  <li><code>:RUNTIME-CLOSURE-AVAILABILITY</code></li>
+</ul>
+
+<p>
+  All seven observations remain <code>:UNKNOWN</code>. The upstream suggestion
+  is sufficient to record a candidate and comparison questions, but not to
+  mark any contract <code>:CONFIRMED</code>.
+</p>
+
+<pre>
+Proposed relation  :SUPERSEDES
+Verification       :UNVERIFIED
+</pre>
+
+<p>
+  <code>:SUPERSEDES</code> names the relation under review. It is not a verified
+  equivalence and does not remove, replace, or modify the local HyperSpec
+  implementation. Observing an upstream capability, verifying all relevant
+  contracts, and deciding on supersession remain separate steps.
+</p>
+
+<nav>
+  <a page="Upstream Intake as a Read-Only Observation">Back to the overview</a>
+  ·
+  <a page="An Upstream Commit Available but Not Integrated">See the Git commit case</a>
+</nav>

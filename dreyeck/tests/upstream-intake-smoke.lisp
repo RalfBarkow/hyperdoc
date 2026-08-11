@@ -265,6 +265,275 @@
              "Read-only Intake view offers a cherry-pick operation.")))
   t)
 
+(defparameter +upstream-intake-page-specs+
+  '(("Upstream Intake as a Read-Only Observation"
+     "Upstream Intake as a Read-Only Observation.html")
+    ("An Upstream Commit Available but Not Integrated"
+     "An Upstream Commit Available but Not Integrated.html")
+    ("An Upstream Supersession Hypothesis"
+     "An Upstream Supersession Hypothesis.html")))
+
+(defun page-elements (page tag-name)
+  (plump:get-elements-by-tag-name (hyperdoc::dom-of page) tag-name))
+
+(defun page-package (page)
+  (let* ((tags (page-elements page "in-package"))
+         (name (and (= 1 (length tags))
+                    (string-trim '(#\Space #\Tab #\Newline #\Return)
+                                 (plump:text (first tags))))))
+    (check name "Page ~S does not declare exactly one IN-PACKAGE."
+           (hyperbook:id-of page))
+    (or (find-package (string-upcase name))
+        (error "Page ~S names missing package ~S."
+               (hyperbook:id-of page) name))))
+
+(defun page-source-function-names (page)
+  (mapcar
+   (lambda (element)
+     (string-trim '(#\Space #\Tab #\Newline #\Return)
+                  (plump:text element)))
+   (page-elements page "source-of-function")))
+
+(defun page-expressions (page)
+  (loop for element in (page-elements page "a")
+        for expression = (plump:attribute element "expr")
+        when expression collect expression))
+
+(defun page-links (page)
+  (loop for element in (page-elements page "a")
+        for target = (plump:attribute element "page")
+        when target collect target))
+
+(defun resolve-page-source-references (page)
+  (let ((*package* (page-package page)))
+    (dolist (name (page-source-function-names page))
+      (multiple-value-bind (symbol position)
+          (read-from-string name)
+        (check (= position (length name))
+               "Source reference ~S has trailing syntax." name)
+        (check (fboundp symbol)
+               "Page ~S references missing function ~S."
+               (hyperbook:id-of page) symbol))))
+  t)
+
+(defun evaluate-page-expressions (page)
+  (let ((*package* (page-package page)))
+    (mapcar
+     (lambda (expression)
+       (let ((value (hyperdoc::parse-and-eval expression)))
+         (check (not (typep value 'condition))
+                "Page ~S expression ~S produced ~A."
+                (hyperbook:id-of page) expression value)
+         value))
+     (page-expressions page))))
+
+(defun view-named (title object)
+  (find title
+        (html-inspector-views:all-views object)
+        :key #'html-inspector-views:view-title
+        :test #'string=))
+
+(defun view-reference-values (view)
+  (mapcar #'cdr (html-inspector-views:view-references view)))
+
+(defun render-page (page)
+  (let ((view (view-named "Content" page)))
+    (check view "Page ~S has no Content view." (hyperbook:id-of page))
+    (values (html-inspector-views:view-html view) view)))
+
+(defun same-truename-p (first second)
+  (string= (namestring (truename first))
+           (namestring (truename second))))
+
+(defun pathname-under-directory-p (pathname directory)
+  (let ((pathname (namestring (truename pathname)))
+        (directory
+          (namestring
+           (uiop:ensure-directory-pathname (truename directory)))))
+    (and (<= (length directory) (length pathname))
+         (string= directory pathname :end2 (length directory)))))
+
+(defun run-page-asdf-and-catalog-test ()
+  (let* ((system (asdf:find-system :dreyeck/upstream-intake))
+         (module
+           (asdf:find-component system "dreyeck/pages/upstream-intake"))
+         (module-directory (asdf:component-pathname module))
+         (book dreyeck/upstream-intake:*upstream-intake-hyperdoc*)
+         (catalog-book
+           (hyperbook:find-hyperbook
+            "dreyeck/upstream-intake" :signal-error? t)))
+    (check (typep module 'asdf:module)
+           "Upstream Intake pages have no owning ASDF module.")
+    (check (same-truename-p module-directory
+                            (hyperdoc:directory-of book))
+           "ASDF module ~A and HyperDoc directory ~A differ."
+           module-directory (hyperdoc:directory-of book))
+    (check (eq book catalog-book)
+           "The registered Catalog object is not the Intake HyperDoc.")
+    (check (string= "Upstream Intake as a Read-Only Observation"
+                    (hyperbook:main-page-id-of book))
+           "Unexpected Upstream Intake main page ~S."
+           (hyperbook:main-page-id-of book))
+    (hyperdoc::ensure-pages-loaded book)
+    (check (= 3 (hash-table-count (hyperdoc:pages-of book)))
+           "Upstream Intake HyperDoc contains ~D pages instead of three."
+           (hash-table-count (hyperdoc:pages-of book)))
+    (dolist (spec +upstream-intake-page-specs+)
+      (destructuring-bind (title filename) spec
+        (let* ((page
+                 (hyperbook:find-page book title :signal-error? t))
+               (expected-file (merge-pathnames filename module-directory)))
+          (check (probe-file expected-file)
+                 "Page file is absent from the ASDF module: ~A."
+                 expected-file)
+          (check (same-truename-p expected-file (hyperdoc:file-of page))
+                 "Page ~S loaded from ~A instead of ~A."
+                 title (hyperdoc:file-of page) expected-file)
+          (check (pathname-under-directory-p
+                  (hyperdoc:file-of page) module-directory)
+                 "Page ~S is outside its ASDF page module."
+                 title))))
+    book))
+
+(defun check-page-navigation (overview commit-page component-page)
+  (check
+   (equal
+    '("An Upstream Commit Available but Not Integrated"
+      "An Upstream Supersession Hypothesis")
+    (page-links overview))
+   "Overview page navigation differs: ~S." (page-links overview))
+  (check
+   (member "Upstream Intake as a Read-Only Observation"
+           (page-links commit-page) :test #'string=)
+   "Commit page has no link back to the overview.")
+  (check
+   (member "Upstream Intake as a Read-Only Observation"
+           (page-links component-page) :test #'string=)
+   "Component page has no link back to the overview.")
+  t)
+
+(defun check-page-executable-contract
+    (page expected-expression expected-type expected-source)
+  (check (equal (list expected-expression) (page-expressions page))
+         "Page ~S expressions differ: ~S."
+         (hyperbook:id-of page) (page-expressions page))
+  (check (member expected-source
+                 (page-source-function-names page)
+                 :test #'string=)
+         "Page ~S does not show source for ~A."
+         (hyperbook:id-of page) expected-source)
+  (resolve-page-source-references page)
+  (let ((values (evaluate-page-expressions page)))
+    (check (= 1 (length values))
+           "Page ~S did not produce one Intake object."
+           (hyperbook:id-of page))
+    (check (typep (first values) expected-type)
+           "Page ~S produced ~S instead of ~S."
+           (hyperbook:id-of page) (first values) expected-type)
+    (first values)))
+
+(defun check-git-page-inspection (page intake)
+  (multiple-value-bind (html page-view)
+      (render-page page)
+    (declare (ignore html))
+    (let ((rendered-intake
+            (find-if
+             (lambda (value)
+               (typep
+                value
+                'dreyeck/upstream-intake:git-commit-upstream-reference))
+             (view-reference-values page-view))))
+      (check rendered-intake
+             "Commit page did not render an inspectable Git Intake object.")))
+  (let ((intake-view (view-named "Upstream Intake" intake)))
+    (check intake-view "Commit Intake has no Upstream Intake view.")
+    (html-inspector-views:view-html intake-view)
+    (let ((upstream-commit
+            (dreyeck/upstream-intake:git-commit-upstream-commit-of intake)))
+      (when upstream-commit
+        (check (find upstream-commit
+                     (view-reference-values intake-view)
+                     :test #'eq)
+               "Intake view does not link its existing upstream commit."))))
+  t)
+
+(defun check-component-page-inspection (page intake)
+  (multiple-value-bind (html page-view)
+      (render-page page)
+    (declare (ignore html))
+    (check
+     (find-if
+      (lambda (value)
+        (typep value
+               'dreyeck/upstream-intake:component-upstream-reference))
+      (view-reference-values page-view))
+     "Component page did not render an inspectable Component Intake."))
+  (let* ((intake-view (view-named "Upstream Intake" intake))
+         (html (and intake-view
+                    (html-inspector-views:view-html intake-view))))
+    (check intake-view "Component Intake has no Upstream Intake view.")
+    (dolist (text '("SUPERSEDES" "UNVERIFIED"
+                    "existing-symbol-lookup-preserved"
+                    "local-hyperspec-corpus"
+                    "reproducible-nix-source"
+                    "same-origin-http-serving"
+                    "no-external-runtime-fallback"
+                    "defmethod-resolution"
+                    "runtime-closure-availability"))
+      (check (search text html :test #'char-equal)
+             "Component Intake view lacks ~S." text)))
+  t)
+
+(defun run-hyperdoc-page-tests ()
+  (let* ((book (run-page-asdf-and-catalog-test))
+         (overview
+           (hyperbook:find-page
+            book "Upstream Intake as a Read-Only Observation"
+            :signal-error? t))
+         (commit-page
+           (hyperbook:find-page
+            book "An Upstream Commit Available but Not Integrated"
+            :signal-error? t))
+         (component-page
+           (hyperbook:find-page
+            book "An Upstream Supersession Hypothesis"
+            :signal-error? t))
+         (repository-root
+           (dreyeck/git:git-repository-root-of
+            (dreyeck/git:current-git-repository-checkout)))
+         (before (repository-state repository-root)))
+    (check-page-navigation overview commit-page component-page)
+    (check
+     (equal '("make-upstream-commit-intake"
+              "make-component-intake"
+              "upstream-reference-summary")
+            (page-source-function-names overview))
+     "Overview source references differ: ~S."
+     (page-source-function-names overview))
+    (resolve-page-source-references overview)
+    (multiple-value-bind (overview-html overview-view)
+        (render-page overview)
+      (declare (ignore overview-view))
+      (check (search "OBSERVE" overview-html)
+             "Overview page did not render its observation process."))
+    (let ((commit-intake
+            (check-page-executable-contract
+             commit-page
+             "(make-hyperdoc-host-not-found-intake)"
+             'dreyeck/upstream-intake:git-commit-upstream-reference
+             "make-hyperdoc-host-not-found-intake"))
+          (component-intake
+            (check-page-executable-contract
+             component-page
+             "(make-hyperspec-component-intake)"
+             'dreyeck/upstream-intake:component-upstream-reference
+             "make-hyperspec-component-intake")))
+      (check-git-page-inspection commit-page commit-intake)
+      (check-component-page-inspection component-page component-intake))
+    (check (equal before (repository-state repository-root))
+           "Rendering Intake pages changed Git state or FETCH_HEAD."))
+  t)
+
 (defun run-fixture-tests ()
   (let ((directory (make-fixture-directory)))
     (unwind-protect
@@ -293,6 +562,7 @@
 
 (defun run-upstream-intake-tests ()
   (run-fixture-tests)
+  (run-hyperdoc-page-tests)
   (check
    (fboundp
     'dreyeck/upstream-intake:hyperdoc-host-not-found-upstream-intake-example)
