@@ -210,7 +210,10 @@ images, etc.")
         (gethash "attribution")
         (gethash "site"))))
 
-(defun extract-context (journal)
+(defun context-site-references (journal)
+  "Return JOURNAL's ordered, deduplicated site-reference strings.
+
+Each site's position corresponds to its most recent occurrence in JOURNAL."
   (let (remote-sites)
     (loop for entry across journal
           for site = (site-of entry)
@@ -221,7 +224,16 @@ images, etc.")
             do (setf remote-sites
                      (cons site
                            (remove site remote-sites :test #'equal))))
-    (mapcar #'get-fedwiki remote-sites)))
+    remote-sites))
+
+(defun resolve-context-site-references
+    (site-references &optional (resolver #'get-fedwiki))
+  "Resolve SITE-REFERENCES in order with RESOLVER."
+  (mapcar resolver site-references))
+
+(defun extract-context (journal)
+  (resolve-context-site-references
+   (context-site-references journal)))
 
 ;;
 ;; Views

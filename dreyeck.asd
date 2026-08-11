@@ -19,6 +19,9 @@
   :serial t
   :depends-on (#:hyperdoc/explorer
                #:hyperbook/fedwiki)
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/wiki-link/tests")))
   :components
   ((:module "dreyeck/pages"
     :pathname "dreyeck/pages/")
@@ -27,7 +30,25 @@
     :pathname "dreyeck/src/"
     :serial t
     :components
-    ((:file "wiki-link")))))
+    ((:file "wiki-link")
+     (:file "fedwiki-journal-context-debugger")))))
+
+(asdf:defsystem #:dreyeck/wiki-link/tests
+  :description "Deterministic tests for the executable FedWiki failure trace"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/wiki-link)
+  :components
+  ((:file "fedwiki-journal-context-debugger-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (uiop:symbol-call
+    :dreyeck/fedwiki-journal-context-debugger/tests
+    :run-fedwiki-journal-context-debugger-tests)))
 
 (asdf:defsystem #:dreyeck/fedwiki-navigation
   :description "Replayable Federated Wiki navigation prototype"

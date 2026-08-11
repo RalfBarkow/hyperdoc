@@ -1,0 +1,152 @@
+<h1>FedWiki journal context as an executable failure trace</h1>
+
+<in-package>dreyeck/fedwiki-journal-context-debugger</in-package>
+
+<p>
+  This page materializes an observed FedWiki failure path as four executable,
+  inspectable steps. It preserves the journal reference, the operations that
+  consume it, and the actual runtime outcomes. It does not decide that the
+  reference is wrong and it does not change production resolution behavior.
+</p>
+
+<h2>Execution evidence</h2>
+
+<p>
+  The published <code>wiki-links.json</code> journal on dreyeck.ch contained
+  this entry:
+</p>
+
+<pre>
+{
+  "type": "fork",
+  "site": "localhost:3000",
+  "date": 1786347264584
+}
+</pre>
+
+<p>
+  Opening “Wiki Links” through HyperDoc then produced an unhandled
+  <code>USOCKET:NS-HOST-NOT-FOUND-ERROR</code> with
+  <code>HOST-OR-IP "localhost:3000"</code>. The observed backtrace included:
+</p>
+
+<pre>
+(USOCKET:GET-HOSTS-BY-NAME "localhost:3000")
+(USOCKET:SOCKET-CONNECT "localhost:3000" 443)
+(:IN HYPERBOOK/FEDWIKI::MAKE-FEDWIKI)
+</pre>
+
+<p>
+  The evidence path is retraced without calling <code>MAKE-FEDWIKI</code> from
+  an example:
+</p>
+
+<pre>
+fork journal entry
+  -&gt; SITE-OF
+  -&gt; "localhost:3000"
+  -&gt; context site references
+  -&gt; context resolution boundary / GET-FEDWIKI
+  -&gt; HTTPS protocol probe
+  -&gt; USOCKET:SOCKET-CONNECT host="localhost:3000", port=443
+  -&gt; actual runtime outcome
+</pre>
+
+<p>
+  The observed dreyeck.ch outcome at the final step was
+  <code>NS-HOST-NOT-FOUND-ERROR</code>. The executable probe below records the
+  actual outcome of the current host; it does not assert that every platform
+  must produce the same condition.
+</p>
+
+<h3>Production operations</h3>
+
+<p>
+  The trace crosses the real
+  <a expr="#'hyperbook/fedwiki::site-of"
+     view="Source code"><code>SITE-OF</code></a>,
+  <a expr="#'hyperbook/fedwiki::extract-context"
+     view="Source code"><code>EXTRACT-CONTEXT</code></a>,
+  <a expr="#'hyperbook/fedwiki::get-fedwiki"
+     view="Source code"><code>GET-FEDWIKI</code></a>, and
+  <a expr="#'hyperbook/fedwiki::make-fedwiki"
+     view="Source code"><code>MAKE-FEDWIKI</code></a>
+  operations. <code>EXTRACT-CONTEXT</code> now composes explicit reference
+  extraction and resolution operations. <code>MAKE-FEDWIKI</code> still runs
+  its protocol probe in its existing worker thread.
+</p>
+
+<p>
+  Each example returns a <code>FEDWIKI-DEBUG-STEP</code> containing only
+  <code>STEP</code>, <code>INPUT</code>, <code>OPERATION</code>, and
+  <code>OUTCOME</code>. The specialized inspector view keeps
+  <code>OUTCOME</code> clickable, including when it is the real condition
+  object.
+</p>
+
+<h3>1. Journal reference</h3>
+
+<p>
+  This example builds a real <code>JOURNAL-ENTRY</code> from the observed data
+  and invokes the real <code>SITE-OF</code> operation. Its outcome is the exact
+  string <code>"localhost:3000"</code>.
+</p>
+
+<source-of-function>fedwiki-journal-reference-example</source-of-function>
+
+<h3>2. Context references</h3>
+
+<p>
+  This local-only step calls the real <code>CONTEXT-SITE-REFERENCES</code>
+  operation. It preserves the ordering and deduplication rule used by
+  <code>EXTRACT-CONTEXT</code> and performs no resolution or network access.
+</p>
+
+<source-of-function>fedwiki-context-references-example</source-of-function>
+
+<h3>3. Resolution boundary</h3>
+
+<p>
+  The real <code>RESOLVE-CONTEXT-SITE-REFERENCES</code> operation receives a
+  local recording resolver. The step input contains the resolver's recorded
+  calls. The resolver also returns each exact string it receives, so the
+  operation outcome materializes that <code>"localhost:3000"</code> crossed
+  the resolver boundary. The example neither replaces a global function nor
+  accesses the network. Production calls use <code>GET-FEDWIKI</code> as the
+  default resolver.
+</p>
+
+<source-of-function>fedwiki-context-resolution-boundary-example</source-of-function>
+
+<h3>4. Protocol probe</h3>
+
+<p>
+  This step invokes the real synchronous <code>PROBE-FEDWIKI-PROTOCOL</code>
+  operation with <code>"localhost:3000"</code>. An <code>ERROR</code> is caught
+  in that same thread and retained as the step's raw outcome. Therefore the
+  public example makes the failure inspectable as a value instead of letting
+  it terminate the running HyperDoc process. A successful probe or immediate
+  connection refusal is likewise retained as its actual normal return value.
+</p>
+
+<source-of-function>fedwiki-protocol-probe-example</source-of-function>
+
+<h2>Local-first reading</h2>
+
+<p>
+  The following is an interpretation and open hypothesis, separate from the
+  execution evidence above:
+</p>
+
+<blockquote>
+  A journal site reference is evidence/provenance first. Resolving it to a
+  presently reachable network endpoint is a distinct, contextual operation.
+</blockquote>
+
+<p>
+  This reading does not establish a new production rule. In particular, the
+  trace does not rewrite or filter <code>localhost:3000</code>, split it into
+  a host and port, assign an alias, or make context extraction local-first.
+  Those remain separate design questions after the observed path has become
+  replayable and inspectable.
+</p>

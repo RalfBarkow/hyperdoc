@@ -56,24 +56,37 @@ that occurred when reading the site map.")))
 
 (defparameter *uri-scheme* "fedwiki:")
 
+(defun probe-fedwiki-protocol (domain-name)
+  "Return the currently supported HTTP protocol for DOMAIN-NAME.
+
+A successful connection to port 443 yields \"https\". An immediate
+CONNECTION-REFUSED-ERROR yields \"http\". All other conditions retain the
+existing production behavior and escape to the caller."
+  ;; Use low-level USOCKET because high-level access via drakma waits for a
+  ;; connection timeout rather than detecting an immediate refusal.
+  (handler-case
+      (progn
+        (-> domain-name
+          copy-seq                  ; ensure simple-string
+          (usocket:socket-connect 443)
+          (usocket:socket-close))
+        "https")
+    (usocket:connection-refused-error (condition)
+      (declare (ignore condition))
+      "http")))
+
 (defun make-fedwiki (domain-name)
   (let* ((wiki (make-instance 'fedwiki
                               :id (str:concat *uri-scheme* domain-name))))
     (setf (status-of wiki)
           (bt:make-thread
            #'(lambda ()
-               ;; Check if the site supports HTTPS. Use low-level USOCKET
-               ;; for this because high-level access via drakma waits for
-               ;; a connection timeout rather than detecting the immediate
-               ;; connection-refused error.
-               (handler-case
-                   (-> domain-name
-                     copy-seq ;; ensure simple-string
-                     (usocket:socket-connect 443)
-                     (usocket:socket-close))
-                 (usocket:connection-refused-error (c)
-                   (declare (ignore c))
-                   (setf (slot-value wiki 'protocol) "http")))
+               (let ((protocol (probe-fedwiki-protocol domain-name)))
+                 ;; Preserve the previous successful-probe behavior: the
+                 ;; initial HTTPS value remains untouched. Only a refused
+                 ;; connection changes the slot to HTTP.
+                 (when (string= protocol "http")
+                   (setf (slot-value wiki 'protocol) protocol)))
                (handler-case
                    (progn (fetch-sitemap wiki)
                           (fetch-plugin-data wiki)
