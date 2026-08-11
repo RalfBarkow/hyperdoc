@@ -163,6 +163,19 @@
   ((:file "upstream-intake-inspector-package")
    (:file "upstream-intake-views")))
 
+(asdf:defsystem #:dreyeck/catalog
+  :description "Explicit membership and runtime support for the Dreyeck HyperBook catalog"
+  :license "BSD"
+  :version "0.0.1"
+  ;; The HyperDoc systems declare membership. The inspector system supplies
+  ;; the executable Upstream Intake views reached from those pages.
+  :depends-on (#:dreyeck/wiki-link
+               #:dreyeck/upstream-intake
+               #:dreyeck/inspector/upstream-intake)
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/catalog/tests"))))
+
 (asdf:defsystem #:dreyeck/extension-system-boundaries
   :description "Reusable ownership checks for Dreyeck extension systems"
   :license "BSD"
@@ -210,3 +223,20 @@
    (uiop:symbol-call
     :dreyeck/upstream-intake/tests
     :run-upstream-intake-tests)))
+
+(asdf:defsystem #:dreyeck/catalog/tests
+  :description "Fresh-image contract tests for the Dreyeck HyperBook catalog"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:uiop)
+  :components
+  ((:file "catalog-startup-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (uiop:symbol-call
+    :dreyeck/catalog/tests
+    :run-catalog-startup-smoke-tests)))

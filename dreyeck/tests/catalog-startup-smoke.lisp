@@ -1,0 +1,76 @@
+(defpackage #:dreyeck/catalog/tests
+  (:use #:cl)
+  (:export #:run-catalog-startup-smoke-tests))
+
+(in-package #:dreyeck/catalog/tests)
+
+(defun check (condition format-control &rest format-arguments)
+  (unless condition
+    (error (apply #'format nil format-control format-arguments))))
+
+(defun dreyeck-asd-pathname ()
+  (truename
+   (asdf:system-source-file
+    (asdf:find-system "dreyeck/catalog/tests"))))
+
+(defun repository-directory ()
+  (uiop:pathname-directory-pathname (dreyeck-asd-pathname)))
+
+(defun startup-script-pathname ()
+  (merge-pathnames #P"scripts/serve-wiki-link-contract-demo.sh"
+                   (repository-directory)))
+
+(defun demo-startup-script-pathname ()
+  (merge-pathnames #P"dreyeck/scripts/serve-wiki-link-contract-demo.sh"
+                   (repository-directory)))
+
+(defun fresh-catalog-evaluations ()
+  (list
+   "(require :asdf)"
+   (format nil "(asdf:load-asd #P~S)"
+           (namestring (dreyeck-asd-pathname)))
+   "(asdf:load-system \"hyperdoc\")"
+   "(asdf:load-system \"hyperbook/server\")"
+   "(assert (null (find-package \"DREYECK/UPSTREAM-INTAKE\")))"
+   "(assert (not (asdf:component-loaded-p (asdf:find-system \"dreyeck/upstream-intake\"))))"
+   "(assert (null (hyperbook:find-hyperbook \"dreyeck/wiki-link\")))"
+   "(assert (null (hyperbook:find-hyperbook \"dreyeck/upstream-intake\")))"
+   "(asdf:load-system \"dreyeck/catalog\")"
+   "(assert (asdf:component-loaded-p (asdf:find-system \"dreyeck/upstream-intake\")))"
+   "(assert (find-package \"DREYECK/UPSTREAM-INTAKE\"))"
+   "(let* ((wiki (hyperbook:find-hyperbook \"dreyeck/wiki-link\" :signal-error? t)) (intake (hyperbook:find-hyperbook \"dreyeck/upstream-intake\" :signal-error? t))) (hyperdoc::ensure-pages-loaded wiki) (hyperdoc::ensure-pages-loaded intake) (assert (string= \"Wiki-link title and slug lookup contracts\" (hyperbook:main-page-id-of wiki))) (assert (hyperbook:find-page wiki \"Wiki-link title and slug lookup contracts\" :signal-error? t)) (assert (string= \"Upstream Intake as a Read-Only Observation\" (hyperbook:main-page-id-of intake))) (assert (= 3 (hash-table-count (hyperdoc:pages-of intake)))) (dolist (page-id '(\"Upstream Intake as a Read-Only Observation\" \"An Upstream Commit Available but Not Integrated\" \"An Upstream Supersession Hypothesis\")) (assert (hyperbook:find-page intake page-id :signal-error? t))) (format t \"FRESH-DREYECK-CATALOG=~S~%\" (mapcar (lambda (book) (list (hyperbook:id-of book) (hyperbook:title-of book))) (hyperbook:hyperbooks-of hyperbook:*catalog*))))"
+   "(let ((git-intake (dreyeck/upstream-intake:make-hyperdoc-host-not-found-intake)) (component-intake (dreyeck/upstream-intake:make-hyperspec-component-intake))) (assert (find \"Upstream Intake\" (html-inspector-views:all-views git-intake) :key #'html-inspector-views:view-title :test #'string=)) (assert (find \"Upstream Intake\" (html-inspector-views:all-views component-intake) :key #'html-inspector-views:view-title :test #'string=)))"
+   "(format t \"Fresh Dreyeck catalog startup tests passed.~%\")"))
+
+(defun fresh-catalog-command ()
+  (append
+   (list (namestring sb-ext:*runtime-pathname*)
+         "--noinform" "--no-userinit" "--non-interactive")
+   (loop for form in (fresh-catalog-evaluations)
+         append (list "--eval" form))))
+
+(defun check-normal-startup-contract ()
+  (let ((source (uiop:read-file-string (startup-script-pathname)))
+        (demo-source
+          (uiop:read-file-string (demo-startup-script-pathname))))
+    (check (search
+            "HYPERDOC_CATALOG_SYSTEM=${HYPERDOC_CATALOG_SYSTEM:-dreyeck/catalog}"
+            source)
+           "Normal Catalog startup has no explicit dreyeck/catalog default.")
+    (check (search "asdf:load-system system" source)
+           "Normal Catalog startup does not load its configured Catalog system.")
+    (check (search
+            "HYPERDOC_DEMO_SYSTEM=${HYPERDOC_DEMO_SYSTEM:-dreyeck/wiki-link}"
+            demo-source)
+           "The isolated Wiki-link demo no longer defaults to dreyeck/wiki-link."))
+  t)
+
+(defun run-catalog-startup-smoke-tests ()
+  (check-normal-startup-contract)
+  (uiop:run-program
+   (fresh-catalog-command)
+   :directory (repository-directory)
+   :output *standard-output*
+   :error-output *error-output*)
+  (format t "Dreyeck Catalog startup smoke tests passed.~%")
+  t)
