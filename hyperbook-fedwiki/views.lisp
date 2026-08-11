@@ -58,6 +58,14 @@
                         (or (-> entry date-of)
                             "")))))
 
+(views:defview views:👀items (entry journal-entry)
+  (views:key-value-table-view
+   (cons (cons "entry-type" (entry-type-of entry))
+         (cons (cons "date" (date-of entry))
+               (alexandria:hash-table-alist (data-of entry))))
+   :title "Items"
+   :priority 1))
+
 (views:defview 👀context (page fedwiki-page)
   (load-page page)
   (when-let (context (context-of page))
