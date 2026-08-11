@@ -36,10 +36,11 @@
 ;; Resolve a Wiki link, i.e. a slug in the context of a page
 ;;
 
-(defun lookup-slug-in-page-context (slug page)
+(defun lookup-slug-in-page-context
+    (slug page &key (plugin-page-resolver #'get-plugin-page))
   (let ((wiki (hb:hyperbook-of page)))
     (or (hb:find-page wiki slug)
-        (get-plugin-page wiki slug)
+        (funcall plugin-page-resolver wiki slug)
         (loop for remote in (context-of page)
               for page = (hb:find-page remote slug)
               when page

@@ -1,6 +1,6 @@
 ;;;; Wiki-link title and slug lookup contract examples
 
-(defpackage :dreyeck/wiki-link-contract-demo
+(defpackage :dreyeck/wiki-link
   (:use :cl)
   (:import-from :hyperdoc
                 #:defexample
@@ -16,7 +16,7 @@
    #:same-resolved-target-p
    #:installed-lookup-pattern))
 
-(in-package :dreyeck/wiki-link-contract-demo)
+(in-package :dreyeck/wiki-link)
 
 (defstruct (wiki-link-lookup-observation
             (:constructor %make-wiki-link-lookup-observation

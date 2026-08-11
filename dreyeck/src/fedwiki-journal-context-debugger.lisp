@@ -14,7 +14,8 @@
    #:fedwiki-journal-reference-example
    #:fedwiki-context-references-example
    #:fedwiki-context-resolution-boundary-example
-   #:fedwiki-protocol-probe-example))
+   #:fedwiki-protocol-probe-example
+   #:fedwiki-initialization-containment-example))
 
 (in-package :dreyeck/fedwiki-journal-context-debugger)
 
@@ -123,3 +124,41 @@
          (hyperbook/fedwiki::probe-fedwiki-protocol site-reference)
        (error (condition)
          condition)))))
+
+(defexample fedwiki-initialization-containment-example
+  "Retain one simulated low-level condition across production initialization."
+  (let* ((site-reference "localhost:3000")
+         (network-condition
+           (make-condition 'usocket:ns-host-not-found-error))
+         (wiki
+           (make-instance 'hyperbook/fedwiki::fedwiki
+                          :id (concatenate 'string
+                                           "fedwiki:"
+                                           site-reference))))
+    (flet ((failing-probe (domain-name)
+             (declare (ignore domain-name))
+             (error network-condition))
+           (unexpected-fetch (wiki)
+             (declare (ignore wiki))
+             (error "Initialization continued after the simulated probe failure.")))
+      (let ((probe-outcome
+              (handler-case
+                  (failing-probe site-reference)
+                (usocket:ns-host-not-found-error (condition)
+                  condition))))
+        (hyperbook/fedwiki::initialize-fedwiki
+         wiki site-reference
+         :protocol-probe #'failing-probe
+         :sitemap-fetcher #'unexpected-fetch
+         :plugin-data-fetcher #'unexpected-fetch)
+        (list
+         (make-fedwiki-debug-step
+          :step :simulated-protocol-probe
+          :input site-reference
+          :operation :injected-protocol-probe
+          :outcome probe-outcome)
+         (make-fedwiki-debug-step
+          :step :production-initialization-containment
+          :input wiki
+          :operation 'hyperbook/fedwiki::initialize-fedwiki
+          :outcome (hyperbook/fedwiki::status-of wiki)))))))

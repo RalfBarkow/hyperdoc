@@ -3,16 +3,16 @@
 <in-package>dreyeck/fedwiki-journal-context-debugger</in-package>
 
 <p>
-  This page materializes an observed FedWiki failure path as four executable,
+  This page materializes an observed FedWiki failure path as five executable,
   inspectable steps. It preserves the journal reference, the operations that
-  consume it, and the actual runtime outcomes. It does not decide that the
-  reference is wrong and it does not change production resolution behavior.
+  consume it, and the actual runtime outcomes. The fifth step demonstrates
+  the production containment boundary added after this failure was observed.
 </p>
 
 <h2>Execution evidence</h2>
 
 <p>
-  The published <code>wiki-links.json</code> journal on dreyeck.ch contained
+  The published <code>wiki-links.json</code> journal on hyperdoc.dreyeck.ch contained
   this entry:
 </p>
 
@@ -37,8 +37,8 @@
 </pre>
 
 <p>
-  The evidence path is retraced without calling <code>MAKE-FEDWIKI</code> from
-  an example:
+  The first four steps retrace the evidence path without calling
+  <code>MAKE-FEDWIKI</code> from an example:
 </p>
 
 <pre>
@@ -72,8 +72,9 @@ fork journal entry
   <a expr="#'hyperbook/fedwiki::make-fedwiki"
      view="Source code"><code>MAKE-FEDWIKI</code></a>
   operations. <code>EXTRACT-CONTEXT</code> now composes explicit reference
-  extraction and resolution operations. <code>MAKE-FEDWIKI</code> still runs
-  its protocol probe in its existing worker thread.
+  extraction and resolution operations. <code>MAKE-FEDWIKI</code> runs the
+  complete <code>INITIALIZE-FEDWIKI</code> operation in its worker thread;
+  specific operational failures become the proxy's retained status.
 </p>
 
 <p>
@@ -131,6 +132,19 @@ fork journal entry
 
 <source-of-function>fedwiki-protocol-probe-example</source-of-function>
 
+<h3>5. Initialization containment</h3>
+
+<p>
+  This deterministic, network-free step injects one simulated
+  <code>USOCKET:NS-HOST-NOT-FOUND-ERROR</code> at the protocol-probe boundary.
+  It then invokes the real <code>INITIALIZE-FEDWIKI</code> operation and shows
+  that <code>STATUS-OF</code> retains the identical condition object. No global
+  function is rebound. The preceding protocol-probe example remains the raw,
+  real low-level probe.
+</p>
+
+<source-of-function>fedwiki-initialization-containment-example</source-of-function>
+
 <h2>Local-first reading</h2>
 
 <p>
@@ -144,9 +158,9 @@ fork journal entry
 </blockquote>
 
 <p>
-  This reading does not establish a new production rule. In particular, the
-  trace does not rewrite or filter <code>localhost:3000</code>, split it into
-  a host and port, assign an alias, or make context extraction local-first.
-  Those remain separate design questions after the observed path has become
-  replayable and inspectable.
+  Production keeps the journal reference unchanged: it does not rewrite or
+  filter <code>localhost:3000</code>, split it into a host and port, or assign
+  an alias. A failed context proxy now retains its operational condition while
+  local page data remains available, and lookup can continue with subsequent
+  context proxies.
 </p>

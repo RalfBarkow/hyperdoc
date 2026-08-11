@@ -79,6 +79,159 @@
     (setf (hyperbook/fedwiki::status-of wiki) t)
     wiki))
 
+(defun make-network-condition ()
+  (make-condition 'usocket:ns-host-not-found-error))
+
+(defun make-page-json-with-context (&rest site-references)
+  (let ((json (make-hash-table :test #'equal))
+        (story-item (make-hash-table :test #'equal))
+        (journal
+          (map 'vector
+               (lambda (site-reference)
+                 (let ((entry (make-hash-table :test #'equal)))
+                   (setf (gethash "type" entry) "fork"
+                         (gethash "date" entry) 1000
+                         (gethash "site" entry) site-reference)
+                   entry))
+               site-references)))
+    (setf (gethash "type" story-item) "paragraph"
+          (gethash "id" story-item) "local-story-item"
+          (gethash "text" story-item) "Local page content"
+          (gethash "title" json) "Local page"
+          (gethash "story" json) (vector story-item)
+          (gethash "journal" json) journal)
+    json))
+
+(defun run-domain-name-preservation-test ()
+  (let ((with-port
+          (make-instance 'hyperbook/fedwiki::fedwiki
+                         :id "fedwiki:localhost:3000"))
+        (ordinary
+          (make-instance 'hyperbook/fedwiki::fedwiki
+                         :id "fedwiki:wiki.khinsen.net")))
+    (check (string= "localhost:3000"
+                    (hyperbook/fedwiki::domain-name-of with-port))
+           "DOMAIN-NAME-OF discarded the port: ~S."
+           (hyperbook/fedwiki::domain-name-of with-port))
+    (check (string= "wiki.khinsen.net"
+                    (hyperbook/fedwiki::domain-name-of ordinary))
+           "DOMAIN-NAME-OF changed an ordinary domain: ~S."
+           (hyperbook/fedwiki::domain-name-of ordinary)))
+  t)
+
+(defun run-initialization-worker-containment-test ()
+  (let ((lock (bt:make-lock "FedWiki initialization test lock"))
+        (gate (bt:make-condition-variable))
+        (probe-entered-p nil)
+        (release-probe-p nil)
+        (sitemap-fetch-count 0)
+        (plugin-fetch-count 0)
+        (network-condition (make-network-condition))
+        wiki
+        worker)
+    (flet ((failing-probe (domain-name)
+             (declare (ignore domain-name))
+             (bt:with-lock-held (lock)
+               (setf probe-entered-p t)
+               (bt:condition-notify gate)
+               (loop until release-probe-p
+                     do (bt:condition-wait gate lock)))
+             (error network-condition))
+           (fetch-sitemap (wiki)
+             (declare (ignore wiki))
+             (incf sitemap-fetch-count))
+           (fetch-plugin-data (wiki)
+             (declare (ignore wiki))
+             (incf plugin-fetch-count)))
+      (setf wiki
+            (hyperbook/fedwiki::make-fedwiki
+             "localhost:3000"
+             :protocol-probe #'failing-probe
+             :sitemap-fetcher #'fetch-sitemap
+             :plugin-data-fetcher #'fetch-plugin-data))
+      (bt:with-lock-held (lock)
+        (loop until probe-entered-p
+              do (bt:condition-wait gate lock)))
+      (setf worker (hyperbook/fedwiki::status-of wiki))
+      (check (typep worker 'bt:thread)
+             "STATUS-OF did not expose the loading thread: ~S."
+             worker)
+      (bt:with-lock-held (lock)
+        (setf release-probe-p t)
+        (bt:condition-notify gate))
+      (let ((join-outcome
+              (handler-case
+                  (progn
+                    (bt:join-thread worker)
+                    :normal)
+                (error (condition)
+                  condition))))
+        (check (eq :normal join-outcome)
+               "The initialization worker re-signaled ~S."
+               join-outcome))
+      (check (not (bt:thread-alive-p worker))
+             "The failed initialization worker is still alive.")
+      (check (eq network-condition
+                 (hyperbook/fedwiki::status-of wiki))
+             "STATUS-OF did not preserve the identical low-level condition.")
+      (check (zerop sitemap-fetch-count)
+             "Sitemap fetching continued after the failed probe.")
+      (check (zerop plugin-fetch-count)
+             "Plugin fetching continued after the failed probe.")))
+  t)
+
+(defun run-local-page-with-failed-context-test ()
+  (let* ((hyperbook/fedwiki::*neighborhood*
+           (make-hash-table :test #'equal))
+         (source (make-initialized-wiki "source.example"))
+         (failed (make-initialized-wiki "localhost:3000"))
+         (reachable (make-initialized-wiki "wiki.khinsen.net"))
+         (failure (make-network-condition))
+         (source-page
+           (hyperbook/fedwiki::make-fedwiki-page
+            source "local-page" "Local page"))
+         (target-page
+           (hyperbook/fedwiki::make-fedwiki-page
+            reachable "reachable-target" "Reachable target"))
+         (json
+           (make-page-json-with-context
+            "wiki.khinsen.net"
+            "localhost:3000")))
+    (setf (hyperbook/fedwiki::status-of failed) failure
+          (gethash "localhost:3000" hyperbook/fedwiki::*neighborhood*) failed
+          (gethash "wiki.khinsen.net" hyperbook/fedwiki::*neighborhood*) reachable
+          (gethash "reachable-target"
+                   (hyperbook/fedwiki::pages-of reachable)) target-page)
+    (hyperbook/fedwiki::set-page-data source-page json)
+    (check (= 1 (length (hyperbook/fedwiki::story-of source-page)))
+           "SET-PAGE-DATA did not retain the local story.")
+    (check (= 2 (length (hyperbook/fedwiki::journal-of source-page)))
+           "SET-PAGE-DATA did not retain the local journal.")
+    (check (equal (list failed reachable)
+                  (hyperbook/fedwiki::context-of source-page))
+           "SET-PAGE-DATA did not retain the ordered context: ~S."
+           (hyperbook/fedwiki::context-of source-page))
+    (check (eq failure (hyperbook/fedwiki::status-of failed))
+           "Context extraction changed the failed proxy status.")
+    (let ((resolved
+            (hyperbook/fedwiki::lookup-slug-in-page-context
+             "reachable-target"
+             source-page
+             :plugin-page-resolver (lambda (wiki slug)
+                                     (declare (ignore wiki slug))
+                                     nil))))
+      (check (typep resolved 'hyperbook/fedwiki::remote-fedwiki-page)
+             "Lookup did not continue to the reachable context: ~S."
+             resolved)
+      (check (eq reachable (hyperbook/fedwiki::origin-of resolved))
+             "Lookup resolved through the wrong context wiki: ~S."
+             (hyperbook/fedwiki::origin-of resolved))
+      (check (string= "reachable-target"
+                      (hyperbook/fedwiki::origin-id-of resolved))
+             "Lookup returned the wrong remote target: ~S."
+             (hyperbook/fedwiki::origin-id-of resolved))))
+  t)
+
 (defun run-extract-context-composition-test ()
   (let* ((journal (make-ordering-journal))
          (references
@@ -211,6 +364,23 @@
              outcome)))
   t)
 
+(defun run-initialization-containment-example-test ()
+  (let* ((steps
+           (dreyeck/fedwiki-journal-context-debugger:fedwiki-initialization-containment-example))
+         (probe-step (first steps))
+         (containment-step (second steps))
+         (probe-outcome (debug-step-outcome probe-step))
+         (containment-outcome (debug-step-outcome containment-step)))
+    (check (= 2 (length steps))
+           "Initialization containment example returned ~D steps."
+           (length steps))
+    (check (typep probe-outcome 'usocket:ns-host-not-found-error)
+           "The simulated probe outcome has the wrong type: ~S."
+           probe-outcome)
+    (check (eq probe-outcome containment-outcome)
+           "Production containment did not preserve the probe condition object."))
+  t)
+
 (defun run-inspector-view-test ()
   (let* ((outcome
            (make-condition 'simple-error
@@ -241,12 +411,16 @@
   t)
 
 (defun run-fedwiki-journal-context-debugger-tests ()
+  (run-domain-name-preservation-test)
+  (run-initialization-worker-containment-test)
+  (run-local-page-with-failed-context-test)
   (run-context-site-references-test)
   (run-resolution-boundary-test)
   (run-extract-context-composition-test)
   (run-deterministic-examples-test)
   (run-raw-outcome-retention-test)
   (run-protocol-probe-example-test)
+  (run-initialization-containment-example-test)
   (run-inspector-view-test)
   (format t "FedWiki journal-context debugger tests passed.~%")
   t)

@@ -4,6 +4,8 @@
 
 (in-package :hyperbook/fedwiki)
 
+(defparameter *uri-scheme* "fedwiki:")
+
 ;; A fedwiki object stores the information retrieved from
 ;; a wiki's site map. The HyperBook id is "fedwiki:"
 ;; followed by the wiki's domain name. Page ids are
@@ -32,17 +34,14 @@
              :documentation "Either 'https' is the server supports it, else 'http'")
    (status :accessor status-of :initform nil
            :documentation "The initialization status of the wiki,
-one of (1) the thread loading the site map, (2) t for a fully
-loaded site map, or (3) a conditon object recording an error
-that occurred when reading the site map.")))
+one of (1) the thread initializing the proxy, (2) t for a fully
+initialized proxy, or (3) a condition object recording an operational
+error that occurred during initialization.")))
 
 ;; Computed attributes
 
 (defun domain-name-of (wiki)
-  (->> wiki
-    hb:id-of
-    (str:split ":")
-    second))
+  (subseq (hb:id-of wiki) (length *uri-scheme*)))
 
 (defmethod hb:title-of ((wiki fedwiki))
   (domain-name-of wiki))
@@ -53,8 +52,6 @@ that occurred when reading the site map.")))
 ;;
 ;; Create a fedwiki proxy
 ;;
-
-(defparameter *uri-scheme* "fedwiki:")
 
 (defun probe-fedwiki-protocol (domain-name)
   "Return the currently supported HTTP protocol for DOMAIN-NAME.
@@ -75,27 +72,52 @@ existing production behavior and escape to the caller."
       (declare (ignore condition))
       "http")))
 
-(defun make-fedwiki (domain-name)
+(defun initialize-fedwiki
+    (wiki domain-name
+     &key
+       (protocol-probe #'probe-fedwiki-protocol)
+       (sitemap-fetcher #'fetch-sitemap)
+       (plugin-data-fetcher #'fetch-plugin-data))
+  "Initialize WIKI and retain specific operational failures in STATUS-OF."
+  (handler-case
+      (progn
+        (let ((protocol (funcall protocol-probe domain-name)))
+          ;; Preserve the previous successful-probe behavior: the initial
+          ;; HTTPS value remains untouched. Only a refused connection changes
+          ;; the slot to HTTP.
+          (when (string= protocol "http")
+            (setf (slot-value wiki 'protocol) protocol)))
+        (funcall sitemap-fetcher wiki)
+        (funcall plugin-data-fetcher wiki)
+        (setf (status-of wiki) t))
+    ((or stream-error
+         usocket:timeout-error
+         usocket:ns-host-not-found-error
+         shasht:shasht-invalid-char) (condition)
+      (setf (status-of wiki) condition))))
+
+(defun make-fedwiki
+    (domain-name
+     &key
+       (protocol-probe #'probe-fedwiki-protocol)
+       (sitemap-fetcher #'fetch-sitemap)
+       (plugin-data-fetcher #'fetch-plugin-data))
   (let* ((wiki (make-instance 'fedwiki
-                              :id (str:concat *uri-scheme* domain-name))))
-    (setf (status-of wiki)
-          (bt:make-thread
-           #'(lambda ()
-               (let ((protocol (probe-fedwiki-protocol domain-name)))
-                 ;; Preserve the previous successful-probe behavior: the
-                 ;; initial HTTPS value remains untouched. Only a refused
-                 ;; connection changes the slot to HTTP.
-                 (when (string= protocol "http")
-                   (setf (slot-value wiki 'protocol) protocol)))
-               (handler-case
-                   (progn (fetch-sitemap wiki)
-                          (fetch-plugin-data wiki)
-                          (setf (status-of wiki) t))
-                 ((or stream-error
-                   usocket:timeout-error
-                   usocket:ns-host-not-found-error
-                   shasht:shasht-invalid-char) (c)
-                   (setf (status-of wiki) c))))))
+                              :id (str:concat *uri-scheme* domain-name)))
+         (start-lock (bt:make-lock "FedWiki initialization start lock")))
+    ;; Holding START-LOCK until STATUS-OF has received the new thread prevents
+    ;; a fast initializer from publishing T or a condition before that SETF.
+    (bt:with-lock-held (start-lock)
+      (setf (status-of wiki)
+            (bt:make-thread
+             (lambda ()
+               (bt:with-lock-held (start-lock)
+                 nil)
+               (initialize-fedwiki
+                wiki domain-name
+                :protocol-probe protocol-probe
+                :sitemap-fetcher sitemap-fetcher
+                :plugin-data-fetcher plugin-data-fetcher)))))
     wiki))
 
 (defun fetch-sitemap (wiki)

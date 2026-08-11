@@ -4,7 +4,7 @@
   (asdf:load-asd
    (merge-pathnames "dreyeck.asd"
                     (asdf:system-source-directory :hyperbook)))
-  (asdf:load-system :dreyeck/wiki-link-contract-demo))
+  (asdf:load-system :dreyeck/wiki-link))
 
 (defpackage :hyperbook/fedwiki/tests
   (:use :cl)
@@ -19,23 +19,23 @@
   value)
 
 (defun observation-route (observation)
-  (dreyeck/wiki-link-contract-demo:wiki-link-lookup-observation-route
+  (dreyeck/wiki-link:wiki-link-lookup-observation-route
    observation))
 
 (defun observation-value (observation)
-  (dreyeck/wiki-link-contract-demo:wiki-link-lookup-observation-lookup-value
+  (dreyeck/wiki-link:wiki-link-lookup-observation-lookup-value
    observation))
 
 (defun observation-outcome (observation)
-  (dreyeck/wiki-link-contract-demo:wiki-link-lookup-observation-outcome
+  (dreyeck/wiki-link:wiki-link-lookup-observation-outcome
    observation))
 
 (defun evidence-shape (observation)
-  (dreyeck/wiki-link-contract-demo:wiki-link-lookup-evidence-shape
+  (dreyeck/wiki-link:wiki-link-lookup-evidence-shape
    observation))
 
 (defun route-evidence-relation (observation)
-  (dreyeck/wiki-link-contract-demo:wiki-link-route-evidence-relation
+  (dreyeck/wiki-link:wiki-link-route-evidence-relation
    observation))
 
 (defun condition-slot-value (condition slot)
@@ -50,7 +50,7 @@
                      :keyword))
            (closer-mop:class-slots
             (find-class
-             'dreyeck/wiki-link-contract-demo:wiki-link-lookup-observation)))))
+             'dreyeck/wiki-link:wiki-link-lookup-observation)))))
     (check (equal '(:route :lookup-value :outcome) slot-names)
            "Observation slots are ~S instead of ROUTE, LOOKUP-VALUE, OUTCOME."
            slot-names))
@@ -58,7 +58,7 @@
 
 (defun run-successful-lookup-observation-test ()
   (let* ((observations
-           (dreyeck/wiki-link-contract-demo::wiki-link-successful-lookup-equivalence-example))
+           (dreyeck/wiki-link::wiki-link-successful-lookup-equivalence-example))
          (title-observation (first observations))
          (slug-observation (second observations)))
     (check (= 2 (length observations))
@@ -70,7 +70,7 @@
     (check (equal "Existing Human Title"
                   (observation-value title-observation))
            "The title observation lost its exact lookup value.")
-    (check (dreyeck/wiki-link-contract-demo:wiki-link-lookup-resolved-p
+    (check (dreyeck/wiki-link:wiki-link-lookup-resolved-p
             title-observation)
            "FIND-TARGET-BY-TITLE did not resolve the existing page.")
     (check (typep (observation-outcome title-observation)
@@ -83,14 +83,14 @@
     (check (equal "existing-human-title"
                   (observation-value slug-observation))
            "The slug observation lost its exact lookup value.")
-    (check (dreyeck/wiki-link-contract-demo:wiki-link-lookup-resolved-p
+    (check (dreyeck/wiki-link:wiki-link-lookup-resolved-p
             slug-observation)
            "FIND-TARGET-BY-SLUG did not resolve the existing page.")
     (check (typep (observation-outcome slug-observation)
                   'hyperbook/fedwiki::fedwiki-page)
            "Slug lookup returned ~S instead of a FEDWIKI-PAGE."
            (observation-outcome slug-observation))
-    (check (dreyeck/wiki-link-contract-demo:same-resolved-target-p
+    (check (dreyeck/wiki-link:same-resolved-target-p
             title-observation slug-observation)
            "Title and slug lookup did not return the same page object by EQ.")
     (check (eq (observation-outcome title-observation)
@@ -107,9 +107,9 @@
 
 (defun run-failure-evidence-observation-test ()
   (let* ((title-observation
-           (dreyeck/wiki-link-contract-demo::wiki-link-upstream-title-path-example))
+           (dreyeck/wiki-link::wiki-link-upstream-title-path-example))
          (slug-observation
-           (dreyeck/wiki-link-contract-demo::wiki-link-strict-slug-path-example))
+           (dreyeck/wiki-link::wiki-link-strict-slug-path-example))
          (title-condition (observation-outcome title-observation))
          (slug-condition (observation-outcome slug-observation))
          (slug-slot 'hyperbook/fedwiki::slug)
@@ -149,7 +149,7 @@
            "Direct slug route has relation ~S."
            (route-evidence-relation slug-observation))
     (let ((title-route-with-slug-evidence
-            (dreyeck/wiki-link-contract-demo::%make-wiki-link-lookup-observation
+            (dreyeck/wiki-link::%make-wiki-link-lookup-observation
              :title
              (observation-value slug-observation)
              slug-condition)))
@@ -171,7 +171,7 @@
                            :slug lookup-value
                            :title lookup-value))
          (observation
-           (dreyeck/wiki-link-contract-demo::%make-wiki-link-lookup-observation
+           (dreyeck/wiki-link::%make-wiki-link-lookup-observation
             :slug lookup-value condition)))
     (check (eq :title-and-slug-evidence (evidence-shape observation))
            "The synthetic bound-title condition derived shape ~S."
@@ -183,7 +183,7 @@
 
 (defun run-installed-thunk-observation-test ()
   (let* ((observation
-           (dreyeck/wiki-link-contract-demo::wiki-link-installed-thunk-example))
+           (dreyeck/wiki-link::wiki-link-installed-thunk-example))
          (shape (evidence-shape observation))
          (outcome (observation-outcome observation)))
     (check (eq :installed (observation-route observation))
@@ -198,7 +198,7 @@
            "The installed thunk's actual outcome derived shape ~S."
            shape)
     (check (eq :matches-slug-path
-               (dreyeck/wiki-link-contract-demo:installed-lookup-pattern
+               (dreyeck/wiki-link:installed-lookup-pattern
                 observation))
            "The installed thunk pattern was not derived from its outcome.")
     (check (eq :not-declared (route-evidence-relation observation))
@@ -214,7 +214,7 @@
         (progn
           ;; MAKE-WIKI-LINK thunks return caught ERROR conditions as values.
           ;; The execution-and-recording helper must re-signal the identical one.
-          (dreyeck/wiki-link-contract-demo::%execute-and-record-wiki-lookup
+          (dreyeck/wiki-link::%execute-and-record-wiki-lookup
            :installed "missing-human-title" (lambda () unexpected))
           (error "The unrelated returned thunk condition did not escape."))
       (simple-error (caught)
@@ -227,7 +227,7 @@
   (dolist (invalid-value (list nil :not-a-page))
     (let ((rejected-p nil))
       (handler-case
-          (dreyeck/wiki-link-contract-demo::%execute-and-record-wiki-lookup
+          (dreyeck/wiki-link::%execute-and-record-wiki-lookup
            :slug "missing-human-title" (lambda () invalid-value))
         (hyperbook/fedwiki::wiki-lookup-failure ()
           (error "Invalid normal return ~S became lookup evidence."
@@ -243,7 +243,7 @@
   (let* ((name 'hyperbook/fedwiki::get-plugin-page)
          (original (symbol-function name)))
     (check (eq :normal
-               (dreyeck/wiki-link-contract-demo::%call-with-global-plugin-page-lookup-disabled
+               (dreyeck/wiki-link::%call-with-global-plugin-page-lookup-disabled
                 (lambda () :normal)))
            "The global suppression helper changed a normal return.")
     (check (eq original (symbol-function name))
@@ -253,7 +253,7 @@
                             :slug "missing-human-title"))
           (caught-p nil))
       (handler-case
-          (dreyeck/wiki-link-contract-demo::%call-with-global-plugin-page-lookup-disabled
+          (dreyeck/wiki-link::%call-with-global-plugin-page-lookup-disabled
            (lambda () (error failure)))
         (hyperbook/fedwiki::wiki-lookup-failure (caught)
           (setf caught-p t)
@@ -267,7 +267,7 @@
                             :format-control "Unexpected restoration exit"))
           (caught-p nil))
       (handler-case
-          (dreyeck/wiki-link-contract-demo::%call-with-global-plugin-page-lookup-disabled
+          (dreyeck/wiki-link::%call-with-global-plugin-page-lookup-disabled
            (lambda () (error unexpected)))
         (simple-error (caught)
           (setf caught-p t)
@@ -291,7 +291,7 @@
 (defun run-html-executable-reference-test ()
   (let* ((page-path
            (asdf:system-relative-pathname
-            :dreyeck/wiki-link-contract-demo
+            :dreyeck/wiki-link
             "dreyeck/pages/Wiki-link title and slug lookup contracts.html"))
          (html (uiop:read-file-string page-path))
          (dom (plump:parse page-path))
@@ -307,7 +307,7 @@
     (check (= 4 (length function-names))
            "The HTML contains ~D executable example references instead of four."
            (length function-names))
-    (let ((*package* (find-package :dreyeck/wiki-link-contract-demo)))
+    (let ((*package* (find-package :dreyeck/wiki-link)))
       (dolist (text function-names)
         (multiple-value-bind (name end)
             (read-from-string (string-trim '(#\Space #\Tab #\Newline) text))
@@ -330,15 +330,15 @@
 
 (defun run-all-four-examples-test ()
   (let* ((first-success
-           (dreyeck/wiki-link-contract-demo::wiki-link-successful-lookup-equivalence-example))
+           (dreyeck/wiki-link::wiki-link-successful-lookup-equivalence-example))
          (second-success
-           (dreyeck/wiki-link-contract-demo::wiki-link-successful-lookup-equivalence-example))
+           (dreyeck/wiki-link::wiki-link-successful-lookup-equivalence-example))
          (title-failure
-           (dreyeck/wiki-link-contract-demo::wiki-link-upstream-title-path-example))
+           (dreyeck/wiki-link::wiki-link-upstream-title-path-example))
          (slug-failure
-           (dreyeck/wiki-link-contract-demo::wiki-link-strict-slug-path-example))
+           (dreyeck/wiki-link::wiki-link-strict-slug-path-example))
          (installed
-           (dreyeck/wiki-link-contract-demo::wiki-link-installed-thunk-example)))
+           (dreyeck/wiki-link::wiki-link-installed-thunk-example)))
     (check (not (eq (observation-outcome (first first-success))
                     (observation-outcome (first second-success))))
            "Repeated successful examples shared a mutable page fixture.")
@@ -349,7 +349,7 @@
                   'hyperbook/fedwiki::wiki-lookup-failure)
            "The direct slug-path example is not executable.")
     (check (member
-            (dreyeck/wiki-link-contract-demo:installed-lookup-pattern installed)
+            (dreyeck/wiki-link:installed-lookup-pattern installed)
             '(:matches-title-path :matches-slug-path :other :resolved))
            "The installed example did not yield a valid observation."))
   t)
@@ -360,8 +360,8 @@
   t)
 
 (defun run-wiki-link-slug-contract-tests ()
-  (check (asdf:find-system :dreyeck/wiki-link-contract-demo nil)
-         "The demo ASDF system did not load.")
+  (check (asdf:find-system :dreyeck/wiki-link nil)
+         "The Wiki-link ASDF system did not load.")
   (run-observation-model-test)
   (run-successful-lookup-observation-test)
   (run-failure-evidence-observation-test)

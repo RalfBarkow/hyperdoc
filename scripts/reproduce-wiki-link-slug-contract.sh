@@ -20,7 +20,7 @@ esac
 
 cd "$repo_dir"
 
-exec nix develop "path:$repo_dir" -c sbcl --noinform --no-userinit --non-interactive \
+exec nix develop -c sbcl --noinform --no-userinit --non-interactive \
   --eval '(require :asdf)' \
   --eval '(asdf:load-system :clog)' \
   --eval '(asdf:load-asd (truename "hyperbook.asd"))' \
