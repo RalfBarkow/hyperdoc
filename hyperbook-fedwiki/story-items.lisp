@@ -193,11 +193,27 @@
 
 ;; Images
 
+(defun resolve-story-item-url (url page)
+  "Resolve a site-relative resource URL against PAGE's origin wiki.
+
+Absolute and other non-site-relative URL values are returned unchanged."
+  (if (and (stringp url)
+           (str:starts-with? "/" url)
+           (not (str:starts-with? "//" url)))
+      (let ((origin (origin-of page)))
+        (wiki-url (domain-name-of origin)
+                  (protocol-of origin)
+                  url))
+      url))
+
 (defmethod render-story-item ((type (eql :image)) item page)
   (views:html
     (:div :style "text-align:center; background-color: #eee;"
           (:div :style "width: 80%; margin: 0 auto;"
-                (:img :src (gethash "url" (data-of item)))
+                (:img :src
+                      (resolve-story-item-url
+                       (gethash "url" (data-of item))
+                       page))
                 (:p (render-wiki-text (text-of item) page))))))
 
 ;; Graphviz dot language
@@ -268,4 +284,3 @@
                                       unless (member type '(:paragraph :pagefold :image :reference))
                                         do (pushnew page (gethash type m)))))
     m))
-

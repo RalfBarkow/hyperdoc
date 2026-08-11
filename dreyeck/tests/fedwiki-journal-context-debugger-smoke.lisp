@@ -119,6 +119,123 @@
            (hyperbook/fedwiki::domain-name-of ordinary)))
   t)
 
+(defun make-story-item-fixture (type text &key url)
+  (let ((data (make-hash-table :test #'equal)))
+    (when url
+      (setf (gethash "url" data) url))
+    (make-instance 'hyperbook/fedwiki::story-item
+                   :item-type type
+                   :id "story-item-fixture"
+                   :text text
+                   :data data)))
+
+(defun run-story-item-url-resolution-test ()
+  (let* ((origin (make-initialized-wiki "hyperdoc.dreyeck.ch"))
+         (local-page
+           (hyperbook/fedwiki::make-fedwiki-page
+            origin "local-page" "Local page"))
+         (stored-url "/assets/plugins/image/test.jpg")
+         (absolute-url "https://example.org/image.jpg"))
+    (check
+     (string= "https://hyperdoc.dreyeck.ch/assets/plugins/image/test.jpg"
+              (hyperbook/fedwiki::resolve-story-item-url
+               stored-url local-page))
+     "Site-relative story-item URL did not resolve against its page origin.")
+    (check (string= absolute-url
+                    (hyperbook/fedwiki::resolve-story-item-url
+                     absolute-url local-page))
+           "Absolute story-item URL changed during resolution."))
+  t)
+
+(defun run-remote-story-item-url-resolution-test ()
+  (let* ((containing-wiki (make-initialized-wiki "dreyeck.ch"))
+         (origin-wiki (make-initialized-wiki "hyperdoc.dreyeck.ch"))
+         (remote-page
+           (make-instance 'hyperbook/fedwiki::remote-fedwiki-page
+                          :hyperbook containing-wiki
+                          :id "hyperdoc.dreyeck.ch/wiki-links"
+                          :title "Wiki Links"
+                          :origin origin-wiki
+                          :origin-id "wiki-links"))
+         (resolved
+           (hyperbook/fedwiki::resolve-story-item-url
+            "/assets/plugins/image/test.jpg"
+            remote-page)))
+    (check
+     (string= "https://hyperdoc.dreyeck.ch/assets/plugins/image/test.jpg"
+              resolved)
+     "Remote story-item URL used the containing wiki instead of ORIGIN-OF: ~S."
+     resolved)
+    (check
+     (not (string= "https://dreyeck.ch/assets/plugins/image/test.jpg"
+                   resolved))
+     "Remote story-item URL retained the containing HyperBook host: ~S."
+     resolved))
+  t)
+
+(defun run-image-story-item-rendering-test ()
+  (let* ((origin (make-initialized-wiki "hyperdoc.dreyeck.ch"))
+         (page
+           (hyperbook/fedwiki::make-fedwiki-page
+            origin "wiki-links" "Wiki Links"))
+         (item
+           (make-story-item-fixture
+            :image
+            "[https://example.org/change diff]"
+            :url "/assets/plugins/image/test.jpg")))
+    (multiple-value-bind (html references assets)
+        (html-inspector-views:html-and-references
+          (hyperbook/fedwiki::render-story-item :image item page))
+      (declare (ignore references assets))
+      (let* ((dom (plump:parse html))
+             (images (plump:get-elements-by-tag-name dom "img"))
+             (links (plump:get-elements-by-tag-name dom "a")))
+        (check (= 1 (length images))
+               "Image story-item rendered ~D IMG elements."
+               (length images))
+        (check
+         (string=
+          "https://hyperdoc.dreyeck.ch/assets/plugins/image/test.jpg"
+          (plump:attribute (first images) "src"))
+         "Image renderer emitted the wrong SRC: ~S."
+         (plump:attribute (first images) "src"))
+        (check (= 1 (length links))
+               "Image caption rendered ~D links instead of one."
+               (length links))
+        (check (string= "https://example.org/change"
+                        (plump:attribute (first links) "href"))
+               "Image caption link target changed: ~S."
+               (plump:attribute (first links) "href"))
+        (check (string= "diff" (plump:text (first links)))
+               "Image caption link text changed: ~S."
+               (plump:text (first links))))))
+  t)
+
+(defun run-story-item-link-extraction-preservation-test ()
+  (let* ((wiki (make-initialized-wiki "fixture.example"))
+         (page
+           (hyperbook/fedwiki::make-fedwiki-page
+            wiki "fixture-page" "Fixture page"))
+         (text "[https://example.org/image.jpg source]")
+         (expected-url "https://example.org/image.jpg"))
+    (dolist (type '(:paragraph :reference :image))
+      (let* ((raw-links
+               (hyperbook/fedwiki::extract-links-from-story-item
+                type
+                (make-story-item-fixture type text)
+                page))
+             (links (remove nil raw-links)))
+        (check (= 1 (length links))
+               "~S link extraction returned ~D non-NIL links instead of one."
+               type (length links))
+        (check (typep (first links) 'hyperbook:web-link)
+               "~S link extraction returned ~S instead of a WEB-LINK."
+               type (first links))
+        (check (string= expected-url (hyperbook:url-of (first links)))
+               "~S link extraction changed the URL to ~S."
+               type (hyperbook:url-of (first links))))))
+  t)
+
 (defun run-initialization-worker-containment-test ()
   (let ((lock (bt:make-lock "FedWiki initialization test lock"))
         (gate (bt:make-condition-variable))
@@ -412,6 +529,10 @@
 
 (defun run-fedwiki-journal-context-debugger-tests ()
   (run-domain-name-preservation-test)
+  (run-story-item-url-resolution-test)
+  (run-remote-story-item-url-resolution-test)
+  (run-image-story-item-rendering-test)
+  (run-story-item-link-extraction-preservation-test)
   (run-initialization-worker-containment-test)
   (run-local-page-with-failed-context-test)
   (run-context-site-references-test)
