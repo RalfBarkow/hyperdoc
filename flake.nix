@@ -36,6 +36,7 @@
   };
 
   outputs = {
+    self,
     nixpkgs,
     html-inspector-views,
     plump-inspector-views,
@@ -55,12 +56,32 @@
 
       forAllSystems = nixpkgs.lib.genAttrs systems;
     in {
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+          };
+        in {
+          common-lisp-hyperspec =
+            pkgs.callPackage ./nix/common-lisp-hyperspec.nix { };
+        }
+      );
+
+      checks = forAllSystems (system: {
+        common-lisp-hyperspec =
+          self.packages.${system}.common-lisp-hyperspec;
+      });
+
       devShells = forAllSystems (
         system:
         let
           pkgs = import nixpkgs {
             inherit system;
           };
+
+          commonLispHyperSpec =
+            self.packages.${system}.common-lisp-hyperspec;
 
           sbcl = pkgs.sbcl.withPackages (
             ps:
@@ -132,6 +153,7 @@
         in {
           default = pkgs.mkShell {
             packages = [
+              commonLispHyperSpec
               pkgs.git
               sbcl
               hyperdocEmacs
@@ -140,6 +162,7 @@
 
             shellHook = ''
               export CL_SOURCE_REGISTRY="${clog-moldable-inspector}//:${html-inspector-views}//:${plump-inspector-views}//:${lwcells}//:${named-closure}//:${njson}//:$PWD//"
+              export HYPERDOC_HYPERSPEC_ROOT="${commonLispHyperSpec}/share/common-lisp-hyperspec/HyperSpec"
             '';
           };
         }

@@ -8,7 +8,9 @@
    :if-let :when-let :compose)
   (:import-from :arrow-macros
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:export :hyperdoc))
+  (:export :hyperdoc
+           :hyperspec-http-root
+           :hyperspec-root-pathname))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperdoc/inspector)

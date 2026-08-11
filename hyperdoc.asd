@@ -33,6 +33,9 @@
   :homepage "https://codeberg.org/khinsen/hyperdoc"
   :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
   :serial t
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "hyperdoc/inspector/tests")))
   :depends-on (#:hyperdoc
                #:hyperbook/wikipedia
                #:html-inspector-views
@@ -41,7 +44,28 @@
   :components ((:module "inspector-hyperdoc"
                 :serial t
                 :components ((:file "package")
+                             (:file "hyperspec")
                              (:file "hyperdoc")))))
+
+(defsystem #:hyperdoc/inspector/tests
+  :description "Tests for HyperDoc inspector adaptations"
+  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "tests/"
+  :serial t
+  :depends-on (#:hyperdoc/inspector
+               #:hyperbook/server
+               #:clack-handler-hunchentoot
+               #:usocket)
+  :components ((:file "local-hyperspec"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (uiop:symbol-call
+    :hyperdoc/inspector/tests
+    :run-local-hyperspec-tests)))
 
 (defsystem #:hyperdoc/explorer
   :description "Explorer for HyperDocs"
@@ -81,4 +105,3 @@
                              (:file "codemeta")
                              (:file "examples")
                              (:file "hyperdoc")))))
-
