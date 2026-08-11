@@ -25,6 +25,27 @@
       ("dreyeck/git/tests" "dreyeck/inspector/git")
       ("dreyeck/git/tests" "dreyeck/extension-system-boundaries"))
      :upstream-systems ("hyperdoc" "hyperdoc/inspector"))
+    (:name :upstream-intake
+     :definition-file "dreyeck.asd"
+     :source-root "dreyeck/src/"
+     :test-root "dreyeck/tests/"
+     :source-systems ("dreyeck/upstream-intake"
+                      "dreyeck/inspector/upstream-intake")
+     :test-systems ("dreyeck/upstream-intake/tests")
+     :required-dependencies
+     (("dreyeck/upstream-intake" "dreyeck/git")
+      ("dreyeck/upstream-intake" "hyperdoc")
+      ("dreyeck/inspector/upstream-intake"
+       "dreyeck/upstream-intake")
+      ("dreyeck/inspector/upstream-intake"
+       "dreyeck/inspector/git")
+      ("dreyeck/inspector/upstream-intake"
+       "hyperdoc/inspector")
+      ("dreyeck/upstream-intake/tests"
+       "dreyeck/inspector/upstream-intake")
+      ("dreyeck/upstream-intake/tests"
+       "dreyeck/extension-system-boundaries"))
+     :upstream-systems ("hyperdoc" "hyperdoc/inspector"))
     (:name :fedwiki-navigation-trace
      :definition-file "dreyeck.asd"
      :source-root "dreyeck/src/"

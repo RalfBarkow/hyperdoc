@@ -131,6 +131,35 @@
   ((:file "git-inspector-package")
    (:file "git-commit-inspection-views")))
 
+(asdf:defsystem #:dreyeck/upstream-intake
+  :description "Read-only observations of upstream commits and components"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/git
+               #:hyperdoc)
+  :components
+  ((:file "upstream-intake-package")
+   (:file "upstream-intake"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/upstream-intake/tests"))))
+
+(asdf:defsystem #:dreyeck/inspector/upstream-intake
+  :description "Inspector views for read-only upstream intake observations"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/upstream-intake
+               #:dreyeck/inspector/git
+               #:hyperdoc/inspector
+               #:html-inspector-views)
+  :components
+  ((:file "upstream-intake-inspector-package")
+   (:file "upstream-intake-views")))
+
 (asdf:defsystem #:dreyeck/extension-system-boundaries
   :description "Reusable ownership checks for Dreyeck extension systems"
   :license "BSD"
@@ -159,3 +188,21 @@
    (uiop:symbol-call
     :dreyeck/git/tests
     :run-git-commit-inspection-smoke-tests)))
+
+(asdf:defsystem #:dreyeck/upstream-intake/tests
+  :description "Deterministic read-only Upstream Intake contract tests"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/inspector/upstream-intake
+               #:dreyeck/extension-system-boundaries)
+  :components
+  ((:file "upstream-intake-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (uiop:symbol-call
+    :dreyeck/upstream-intake/tests
+    :run-upstream-intake-tests)))

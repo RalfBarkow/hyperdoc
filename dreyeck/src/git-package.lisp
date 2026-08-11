@@ -15,8 +15,10 @@
    #:git-command-failed-exit-code-of
    #:git-command-failed-stdout-of
    #:git-command-failed-stderr-of
+   #:git-run-values
    #:git-run-string
    #:trim-git-output
+   #:git-current-branch
    #:git-commit
    #:git-commit-repository-of
    #:git-commit-ish-of
@@ -25,6 +27,10 @@
    #:current-head-git-commit
    #:git-commit-one-line
    #:git-commit-metadata
+   #:git-commit-object-present-p
+   #:git-commit-ancestor-p
+   #:git-commit-merge-base
+   #:git-commit-refs-containing
    #:git-commit-stat
    #:git-commit-patch
    #:git-commit-changed-files

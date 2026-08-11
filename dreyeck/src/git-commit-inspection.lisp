@@ -27,26 +27,52 @@
              (git-command-failed-exit-code-of condition)
              (git-command-failed-stderr-of condition)))))
 
+(defun git-run-values (repository-root &rest arguments)
+  "Run Git ARGUMENTS and return stdout, stderr, and the unmodified exit code.
+
+This is the status-aware reader underneath GIT-RUN-STRING. It deliberately
+does not turn a non-zero exit status into a condition, because some Git
+queries use exit statuses as data. It never retries, fetches, or otherwise
+changes the requested operation."
+  (uiop/run-program:run-program
+   (cons "git" arguments)
+   :directory repository-root
+   :output :string
+   :error-output :string
+   :ignore-error-status t))
+
+(defun signal-git-command-failed
+    (repository-root arguments stdout stderr exit-code)
+  (error 'git-command-failed
+         :repository-root repository-root
+         :arguments arguments
+         :exit-code exit-code
+         :stdout stdout
+         :stderr stderr))
+
 (defun git-run-string (repository-root &rest arguments)
-  "Run git command ARGUMENTS in REPOSITORY-ROOT and return stdout."
+  "Run Git ARGUMENTS in REPOSITORY-ROOT and return stdout.
+
+Unlike GIT-RUN-VALUES, this compatibility reader requires exit status zero."
   (multiple-value-bind (stdout stderr exit-code)
-      (uiop/run-program:run-program
-       (cons "git" arguments)
-       :directory repository-root
-       :output :string
-       :error-output :string
-       :ignore-error-status t)
+      (apply #'git-run-values repository-root arguments)
     (unless (zerop exit-code)
-      (error 'git-command-failed
-             :repository-root repository-root
-             :arguments arguments
-             :exit-code exit-code
-             :stdout stdout
-             :stderr stderr))
+      (signal-git-command-failed
+       repository-root arguments stdout stderr exit-code))
     stdout))
 
 (defun trim-git-output (string)
   (string-trim '(#\Space #\Tab #\Newline #\Return) string))
+
+(defun git-current-branch (repository)
+  "Return the checked-out branch name, or NIL for a detached HEAD."
+  (let ((branch
+          (trim-git-output
+           (git-run-string
+            (git-repository-root-of repository)
+            "branch" "--show-current"))))
+    (unless (zerop (length branch))
+      branch)))
 
 (defclass git-commit ()
   ((repository
@@ -103,6 +129,84 @@
    (git-repository-root-of (git-commit-repository-of commit))
    "show" "--no-patch" "--format=fuller" "--no-color"
    (git-commit-hash-of commit)))
+
+(defun git-commit-object-present-p (repository commit-ish)
+  "Return true when COMMIT-ISH names a commit object in REPOSITORY.
+
+A missing or non-commit object is normal negative evidence and returns NIL.
+No network operation is attempted."
+  (let* ((repository-root (git-repository-root-of repository))
+         (arguments
+           (list "cat-file" "-e" (format nil "~A^{commit}" commit-ish))))
+    (multiple-value-bind (stdout stderr exit-code)
+        (apply #'git-run-values repository-root arguments)
+      (case exit-code
+        (0 t)
+        ((1 128) nil)
+        (otherwise
+         (signal-git-command-failed
+          repository-root arguments stdout stderr exit-code))))))
+
+(defun same-git-repository-p (first second)
+  (equal (truename
+          (git-repository-root-of (git-commit-repository-of first)))
+         (truename
+          (git-repository-root-of (git-commit-repository-of second)))))
+
+(defun require-same-git-repository (first second)
+  (unless (same-git-repository-p first second)
+    (error "Git commits ~S and ~S belong to different repositories."
+           first second)))
+
+(defun git-commit-ancestor-p (possible-ancestor descendant)
+  "Return whether POSSIBLE-ANCESTOR is an ancestor of DESCENDANT.
+
+Git's exit status 1 is the ordinary NIL answer. Any other non-zero status is
+reported as GIT-COMMAND-FAILED."
+  (require-same-git-repository possible-ancestor descendant)
+  (let* ((repository-root
+           (git-repository-root-of
+            (git-commit-repository-of possible-ancestor)))
+         (arguments
+           (list "merge-base" "--is-ancestor"
+                 (git-commit-hash-of possible-ancestor)
+                 (git-commit-hash-of descendant))))
+    (multiple-value-bind (stdout stderr exit-code)
+        (apply #'git-run-values repository-root arguments)
+      (case exit-code
+        (0 t)
+        (1 nil)
+        (otherwise
+         (signal-git-command-failed
+          repository-root arguments stdout stderr exit-code))))))
+
+(defun git-commit-merge-base (first second)
+  "Return the merge base of two commits as an inspectable GIT-COMMIT."
+  (require-same-git-repository first second)
+  (let* ((repository (git-commit-repository-of first))
+         (hash
+           (trim-git-output
+            (git-run-string
+             (git-repository-root-of repository)
+             "merge-base"
+             (git-commit-hash-of first)
+             (git-commit-hash-of second)))))
+    (make-git-commit :repository repository :commit-ish hash)))
+
+(defun git-commit-refs-containing (commit)
+  "Return local and remote ref names containing COMMIT."
+  (let ((output
+          (git-run-string
+           (git-repository-root-of (git-commit-repository-of commit))
+           "for-each-ref"
+           "--format=%(refname)"
+           "--contains"
+           (git-commit-hash-of commit)
+           "refs/heads/"
+           "refs/remotes/")))
+    (remove ""
+            (uiop:split-string output :separator '(#\Newline))
+            :test #'string=)))
 
 (defun git-commit-stat (commit)
   (git-run-string
