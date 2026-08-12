@@ -10,7 +10,19 @@
 (in-package #:dreyeck/system-boundaries)
 
 (defparameter *extension-system-boundaries*
-  '((:name :git-commit-inspection
+  '((:name :topicmap-extension
+     :definition-file "dreyeck.asd"
+     :source-root "dreyeck/src/"
+     :test-root "dreyeck/tests/"
+     :source-systems ("dreyeck/topicmap"
+                      "dreyeck/inspector/topicmap")
+     :test-systems ("dreyeck/topicmap/tests")
+     :required-dependencies
+     (("dreyeck/inspector/topicmap" "dreyeck/topicmap")
+      ("dreyeck/inspector/topicmap" "hyperdoc/inspector")
+      ("dreyeck/topicmap/tests" "dreyeck/inspector/topicmap"))
+     :upstream-systems ("hyperdoc" "hyperdoc/inspector"))
+    (:name :git-commit-inspection
      :definition-file "dreyeck.asd"
      :source-root "dreyeck/src/"
      :test-root "dreyeck/tests/"
@@ -19,8 +31,9 @@
                       "dreyeck/extension-system-boundaries")
      :test-systems ("dreyeck/git/tests")
      :required-dependencies
-     (("dreyeck/git" "hyperdoc")
+     (("dreyeck/git" "dreyeck/topicmap")
       ("dreyeck/inspector/git" "dreyeck/git")
+      ("dreyeck/inspector/git" "dreyeck/inspector/topicmap")
       ("dreyeck/inspector/git" "hyperdoc/inspector")
       ("dreyeck/git/tests" "dreyeck/inspector/git")
       ("dreyeck/git/tests" "dreyeck/extension-system-boundaries"))

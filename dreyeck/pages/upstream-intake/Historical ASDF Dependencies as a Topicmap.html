@@ -1,4 +1,4 @@
-<h1>Historical ASDF Dependencies as a DMX Topicmap</h1>
+<h1>Historical ASDF Dependencies as a Topicmap</h1>
 
 <in-package>dreyeck/git</in-package>
 
@@ -37,18 +37,20 @@ Git commit e3f69fc
   </li>
   <li>
     <code>HISTORICAL-ASDF-REFERENCE-TOPICMAP</code> projects those objects onto
-    HyperDoc's general topics, typed associations, temporal scopes, and view
-    properties.
+    the general Dreyeck Topicmap contract: topics, typed associations, temporal
+    scopes, and view properties. DMX is the model reference for these concepts,
+    not a runtime dependency.
   </li>
   <li>
-    The generic Inspector view is named <code>Topicmap</code>. Any inspectable
-    object can participate by supplying the same renderer-independent
-    projection.
+    The generic Dreyeck Inspector view is named <code>Topicmap</code>. Any
+    inspectable object can participate by supplying the same
+    renderer-independent projection. HyperDoc provides its Inspector and
+    Lineup as an unchanged library.
   </li>
   <li>
-    The native CLOG presentation currently renders the projection as SVG and
-    keeps its topics inspectable. A DM6/Elm AppEmbed can be added as an
-    optional renderer, but is not part of this model's contract.
+    The current Dreyeck renderer presents the projection as native CLOG/SVG
+    and keeps its topics inspectable. DM6/Elm is neither a core dependency nor
+    part of this implementation slice.
   </li>
 </ul>
 

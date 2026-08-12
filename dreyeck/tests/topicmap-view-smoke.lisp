@@ -1,17 +1,17 @@
-;;;; Renderer-independent Topicmap model and generic Inspector view tests.
+;;;; Dreyeck-owned renderer-independent Topicmap and Inspector tests.
 
-(defpackage #:hyperdoc/inspector/topicmap-tests
+(defpackage #:dreyeck/topicmap/tests
   (:use #:cl)
   (:export #:run-topicmap-view-smoke-tests))
 
-(in-package #:hyperdoc/inspector/topicmap-tests)
+(in-package #:dreyeck/topicmap/tests)
 
 (defclass topicmap-fixture ()
   ((target :reader fixture-target-of :initarg :target)))
 
-(defmethod hyperdoc:topicmap-projection-of ((fixture topicmap-fixture))
+(defmethod dreyeck/topicmap:topicmap-projection-of ((fixture topicmap-fixture))
   (let ((source
-          (hyperdoc:make-topicmap-topic
+          (dreyeck/topicmap:make-topicmap-topic
            :id "fixture:source"
            :type :fixture-source
            :label "Fixture source"
@@ -19,19 +19,19 @@
            :temporal-scope :historical
            :view-properties '(:x 20 :y 30 :visible t :pinned t)))
         (target
-          (hyperdoc:make-topicmap-topic
+          (dreyeck/topicmap:make-topicmap-topic
            :id "fixture:target"
            :type :fixture-target
            :label "Fixture target"
            :object (fixture-target-of fixture)
            :temporal-scope :current
            :view-properties '(:x 300 :y 30 :visible t :pinned nil))))
-    (hyperdoc:make-topicmap-projection
+    (dreyeck/topicmap:make-topicmap-projection
      :source fixture
      :topics (list source target)
      :associations
      (list
-      (hyperdoc:make-topicmap-association
+      (dreyeck/topicmap:make-topicmap-association
        :id "fixture:association"
        :type :actual-relation
        :from "fixture:source"
@@ -49,25 +49,65 @@
         :key #'html-inspector-views:view-title
         :test #'string=))
 
+(defun direct-dependency-names (system-designator)
+  (mapcar #'string-downcase
+          (asdf:system-depends-on
+           (asdf:find-system system-designator))))
+
+(defun check-ownership-contract ()
+  (check (find-package "DREYECK/TOPICMAP")
+         "Renderer-independent Topicmap package is absent.")
+  (check (find-package "DREYECK/INSPECTOR/TOPICMAP")
+         "Topicmap Inspector package is absent.")
+  (check
+   (eq (symbol-package 'dreyeck/topicmap:topicmap-projection)
+       (find-package "DREYECK/TOPICMAP"))
+   "Topicmap model symbol is not owned by DREYECK/TOPICMAP.")
+  (let ((model-dependencies
+          (direct-dependency-names "dreyeck/topicmap"))
+        (inspector-dependencies
+          (direct-dependency-names "dreyeck/inspector/topicmap")))
+    (dolist (forbidden '("hyperdoc"
+                         "hyperdoc/inspector"
+                         "html-inspector-views"
+                         "clog-moldable-inspector"
+                         "dm6"
+                         "elm"))
+      (check (not (member forbidden model-dependencies :test #'string=))
+             "Renderer-independent system depends on ~A: ~S."
+             forbidden model-dependencies))
+    (check (member "dreyeck/topicmap" inspector-dependencies
+                   :test #'string=)
+           "Inspector system does not depend on the Dreyeck model.")
+    (check (member "hyperdoc/inspector" inspector-dependencies
+                   :test #'string=)
+           "Inspector extension does not use HyperDoc as a library."))
+  (dolist (upstream-system '("hyperdoc" "hyperdoc/inspector"))
+    (dolist (dependency (direct-dependency-names upstream-system))
+      (check (not (uiop:string-prefix-p "dreyeck/" dependency))
+             "Upstream system ~A depends back on ~A."
+             upstream-system dependency)))
+  t)
+
 (defun run-generic-topicmap-view-test ()
   (let* ((target (list :inspectable-target))
          (fixture (make-instance 'topicmap-fixture :target target))
-         (projection (hyperdoc:topicmap-projection-of fixture))
+         (projection (dreyeck/topicmap:topicmap-projection-of fixture))
          (view (view-named "Topicmap" fixture))
          (html (and view (html-inspector-views:view-html view))))
-    (check (= 2 (length (hyperdoc:topicmap-projection-topics-of projection)))
+    (check (= 2 (length (dreyeck/topicmap:topicmap-projection-topics-of projection)))
            "Generic fixture projection does not contain two topics.")
     (check
      (equal '(:actual-relation)
-            (mapcar #'hyperdoc:topicmap-association-type-of
-                    (hyperdoc:topicmap-projection-associations-of projection)))
+            (mapcar #'dreyeck/topicmap:topicmap-association-type-of
+                    (dreyeck/topicmap:topicmap-projection-associations-of projection)))
      "Generic projection did not preserve its actual association type.")
     (check view "Arbitrary projected object has no Topicmap view.")
-    (check (search "hyperdoc-topicmap-canvas"
-                   (hyperdoc/inspector:render-topicmap-html
+    (check (search "dreyeck-topicmap-canvas"
+                   (dreyeck/inspector/topicmap:render-topicmap-html
                     :native-svg projection))
            "Native renderer protocol did not render the projection.")
-    (dolist (marker '("hyperdoc-topicmap-canvas"
+    (dolist (marker '("dreyeck-topicmap-canvas"
                       "data-association-type='ACTUAL-RELATION'"
                       "data-temporal-scope='HISTORICAL'"
                       "data-pinned='true'"))
@@ -83,15 +123,15 @@
 (defun run-endpoint-validation-test ()
   (handler-case
       (progn
-        (hyperdoc:make-topicmap-projection
+        (dreyeck/topicmap:make-topicmap-projection
          :source :invalid
          :topics
          (list
-          (hyperdoc:make-topicmap-topic
+          (dreyeck/topicmap:make-topicmap-topic
            :id "present" :type :fixture :label "Present"))
          :associations
          (list
-          (hyperdoc:make-topicmap-association
+          (dreyeck/topicmap:make-topicmap-association
            :id "broken" :type :actual-relation
            :from "present" :to "missing")))
         (error "Projection accepted a missing association endpoint."))
@@ -103,6 +143,7 @@
   t)
 
 (defun run-topicmap-view-smoke-tests ()
+  (check-ownership-contract)
   (run-generic-topicmap-view-test)
   (run-endpoint-validation-test)
   (format t "Generic renderer-independent Topicmap view tests passed.~%")

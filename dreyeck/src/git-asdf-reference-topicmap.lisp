@@ -1,4 +1,4 @@
-;;;; Projection of historical ASDF references onto HyperDoc's topicmap model.
+;;;; Projection of historical ASDF references onto Dreyeck's topicmap model.
 
 (in-package #:dreyeck/git)
 
@@ -72,7 +72,7 @@
 
 (defun make-commit-topic (file)
   (let ((commit (git-file-commit-of file)))
-    (hyperdoc:make-topicmap-topic
+    (dreyeck/topicmap:make-topicmap-topic
      :id (historical-asdf-commit-id file)
      :type :git-commit
      :label
@@ -83,7 +83,7 @@
      :view-properties (historical-topic-properties 30 80))))
 
 (defun make-file-topic (file)
-  (hyperdoc:make-topicmap-topic
+  (dreyeck/topicmap:make-topicmap-topic
    :id (historical-asdf-file-id file)
    :type :git-file-at-commit
    :label
@@ -95,7 +95,7 @@
    :view-properties (historical-topic-properties 270 80)))
 
 (defun make-declaration-topic (declaration row)
-  (hyperdoc:make-topicmap-topic
+  (dreyeck/topicmap:make-topicmap-topic
    :id (historical-asdf-declaration-id declaration)
    :type :historical-asdf-system-declaration
    :label
@@ -112,7 +112,7 @@
    (historical-topic-properties 510 (+ 40 (* row 115)))))
 
 (defun make-reference-topic (reference row)
-  (hyperdoc:make-topicmap-topic
+  (dreyeck/topicmap:make-topicmap-topic
    :id (historical-asdf-reference-id reference)
    :type :historical-asdf-dependency-reference
    :label
@@ -141,7 +141,7 @@
            (if resolved-p
                (current-asdf-dependency-resolution-target-of resolution)
                resolution)))
-    (hyperdoc:make-topicmap-topic
+    (dreyeck/topicmap:make-topicmap-topic
      :id (current-asdf-target-id resolution)
      :type (if resolved-p :asdf-system :asdf-resolution)
      :label
@@ -159,7 +159,7 @@
      (current-topic-properties 990 (+ 40 (* row 115))))))
 
 (defun make-topicmap-association-between (type from to)
-  (hyperdoc:make-topicmap-association
+  (dreyeck/topicmap:make-topicmap-association
    :id (format nil "association:~(~A~):~A:~A" type from to)
    :type type
    :from from
@@ -186,33 +186,33 @@
          (topics
            (list commit-topic file-topic declaration-topic reference-topic
                  resolution-topic)))
-    (hyperdoc:make-topicmap-projection
+    (dreyeck/topicmap:make-topicmap-projection
      :source reference
      :topics topics
      :associations
      (list
       (make-topicmap-association-between
        :has-file-at-commit
-       (hyperdoc:topicmap-topic-id-of commit-topic)
-       (hyperdoc:topicmap-topic-id-of file-topic))
+       (dreyeck/topicmap:topicmap-topic-id-of commit-topic)
+       (dreyeck/topicmap:topicmap-topic-id-of file-topic))
       (make-topicmap-association-between
        :declares-system
-       (hyperdoc:topicmap-topic-id-of file-topic)
-       (hyperdoc:topicmap-topic-id-of declaration-topic))
+       (dreyeck/topicmap:topicmap-topic-id-of file-topic)
+       (dreyeck/topicmap:topicmap-topic-id-of declaration-topic))
       (make-topicmap-association-between
        :depends-on
-       (hyperdoc:topicmap-topic-id-of declaration-topic)
-       (hyperdoc:topicmap-topic-id-of reference-topic))
+       (dreyeck/topicmap:topicmap-topic-id-of declaration-topic)
+       (dreyeck/topicmap:topicmap-topic-id-of reference-topic))
       (make-topicmap-association-between
        (reference-resolution-association-type resolution)
-       (hyperdoc:topicmap-topic-id-of reference-topic)
-       (hyperdoc:topicmap-topic-id-of resolution-topic)))
+       (dreyeck/topicmap:topicmap-topic-id-of reference-topic)
+       (dreyeck/topicmap:topicmap-topic-id-of resolution-topic)))
      :view-properties '(:width 1240 :height 300))))
 
 (defun pushnew-topic (topic topics)
-  (if (find (hyperdoc:topicmap-topic-id-of topic)
+  (if (find (dreyeck/topicmap:topicmap-topic-id-of topic)
             topics
-            :key #'hyperdoc:topicmap-topic-id-of
+            :key #'dreyeck/topicmap:topicmap-topic-id-of
             :test #'string=)
       topics
       (append topics (list topic))))
@@ -226,8 +226,8 @@
            (list
             (make-topicmap-association-between
              :has-file-at-commit
-             (hyperdoc:topicmap-topic-id-of commit-topic)
-             (hyperdoc:topicmap-topic-id-of file-topic))))
+             (dreyeck/topicmap:topicmap-topic-id-of commit-topic)
+             (dreyeck/topicmap:topicmap-topic-id-of file-topic))))
          (row 0))
     (dolist
         (declaration
@@ -237,8 +237,8 @@
         (push
          (make-topicmap-association-between
           :declares-system
-          (hyperdoc:topicmap-topic-id-of file-topic)
-          (hyperdoc:topicmap-topic-id-of declaration-topic))
+          (dreyeck/topicmap:topicmap-topic-id-of file-topic)
+          (dreyeck/topicmap:topicmap-topic-id-of declaration-topic))
          associations)
         (let ((references
                 (historical-asdf-system-declaration-dependencies-of
@@ -253,19 +253,19 @@
               (push
                (make-topicmap-association-between
                 :depends-on
-                (hyperdoc:topicmap-topic-id-of declaration-topic)
-                (hyperdoc:topicmap-topic-id-of reference-topic))
+                (dreyeck/topicmap:topicmap-topic-id-of declaration-topic)
+                (dreyeck/topicmap:topicmap-topic-id-of reference-topic))
                associations)
               (push
                (make-topicmap-association-between
                 (reference-resolution-association-type resolution)
-                (hyperdoc:topicmap-topic-id-of reference-topic)
-                (hyperdoc:topicmap-topic-id-of resolution-topic))
+                (dreyeck/topicmap:topicmap-topic-id-of reference-topic)
+                (dreyeck/topicmap:topicmap-topic-id-of resolution-topic))
                associations)
               (incf row)))
           (when (null references)
             (incf row)))))
-    (hyperdoc:make-topicmap-projection
+    (dreyeck/topicmap:make-topicmap-projection
      :source projection
      :topics topics
      :associations (nreverse associations)
@@ -285,9 +285,9 @@
     ((reference historical-asdf-dependency-reference))
   (make-focused-reference-topicmap reference))
 
-(defmethod hyperdoc:topicmap-projection-of ((file git-file-at-commit))
+(defmethod dreyeck/topicmap:topicmap-projection-of ((file git-file-at-commit))
   (historical-asdf-reference-topicmap file))
 
-(defmethod hyperdoc:topicmap-projection-of
+(defmethod dreyeck/topicmap:topicmap-projection-of
     ((reference historical-asdf-dependency-reference))
   (historical-asdf-reference-topicmap reference))

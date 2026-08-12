@@ -19,7 +19,6 @@
                 :serial t
                 :components ((:file "package")
                              (:file "core")
-                             (:file "topicmap")
                              (:file "links-in-code")
                              (:file "defining")
                              (:file "examples")
@@ -46,7 +45,6 @@
                 :serial t
                 :components ((:file "package")
                              (:file "hyperspec")
-                             (:file "topicmap")
                              (:file "hyperdoc")))))
 
 (defsystem #:hyperdoc/inspector/tests
@@ -60,18 +58,14 @@
                #:hyperbook/server
                #:clack-handler-hunchentoot
                #:usocket)
-  :components ((:file "local-hyperspec")
-               (:file "topicmap-view-smoke"))
+  :components ((:file "local-hyperspec"))
   :perform
   (asdf:test-op
    (operation component)
    (declare (ignore operation component))
    (uiop:symbol-call
     :hyperdoc/inspector/tests
-    :run-local-hyperspec-tests)
-   (uiop:symbol-call
-    :hyperdoc/inspector/topicmap-tests
-    :run-topicmap-view-smoke-tests)))
+    :run-local-hyperspec-tests)))
 
 (defsystem #:hyperdoc/explorer
   :description "Explorer for HyperDocs"

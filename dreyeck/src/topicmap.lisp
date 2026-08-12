@@ -1,6 +1,6 @@
-;;;; Renderer-independent topicmap projection model.
+;;;; Dreyeck-owned renderer-independent topicmap projection model.
 
-(in-package #:hyperdoc)
+(in-package #:dreyeck/topicmap)
 
 (defclass topicmap-topic ()
   ((id

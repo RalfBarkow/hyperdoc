@@ -274,8 +274,8 @@
      "Observing an Upstream Commit.html")
     ("An Upstream Supersession Hypothesis"
      "An Upstream Supersession Hypothesis.html")
-    ("Historical ASDF Dependencies as a DMX Topicmap"
-     "Historical ASDF Dependencies as a DMX Topicmap.html")))
+    ("Historical ASDF Dependencies as a Topicmap"
+     "Historical ASDF Dependencies as a Topicmap.html")))
 
 (defun page-elements (page tag-name)
   (plump:get-elements-by-tag-name (hyperdoc::dom-of page) tag-name))
@@ -770,7 +770,7 @@
             :signal-error? t))
          (asdf-page
            (hyperbook:find-page
-            book "Historical ASDF Dependencies as a DMX Topicmap"
+            book "Historical ASDF Dependencies as a Topicmap"
             :signal-error? t))
          (repository-root
            (dreyeck/git:git-repository-root-of
@@ -802,7 +802,10 @@
       (declare (ignore asdf-view))
       (dolist (expected '("renderer-independent"
                           "ASDF:REGISTERED-SYSTEM"
-                          "optional renderer"))
+                          "general Dreyeck Topicmap contract"
+                          "unchanged library"
+                          "native CLOG/SVG"
+                          "neither a core dependency"))
         (check (search expected asdf-html :test #'char-equal)
                "Historical ASDF page lacks ~S."
                expected)))

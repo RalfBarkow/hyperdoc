@@ -83,8 +83,8 @@
         :test #'equal))
 
 (defun association-types (projection)
-  (mapcar #'hyperdoc:topicmap-association-type-of
-          (hyperdoc:topicmap-projection-associations-of projection)))
+  (mapcar #'dreyeck/topicmap:topicmap-association-type-of
+          (dreyeck/topicmap:topicmap-projection-associations-of projection)))
 
 (defun check-view-order (file)
   (let ((titles
@@ -98,10 +98,10 @@
 (defun check-topicmap-contract (reference expected-target)
   (let* ((projection
            (dreyeck/git:historical-asdf-reference-topicmap reference))
-         (topics (hyperdoc:topicmap-projection-topics-of projection))
+         (topics (dreyeck/topicmap:topicmap-projection-topics-of projection))
          (associations
-           (hyperdoc:topicmap-projection-associations-of projection))
-         (topic-ids (mapcar #'hyperdoc:topicmap-topic-id-of topics))
+           (dreyeck/topicmap:topicmap-projection-associations-of projection))
+         (topic-ids (mapcar #'dreyeck/topicmap:topicmap-topic-id-of topics))
          (topicmap-view (view-named "Topicmap" reference)))
     (check (= 5 (length topics))
            "Focused ASDF topicmap has ~D topics instead of five."
@@ -121,24 +121,24 @@
            "Topicmap contains a synthetic hierarchy relation.")
     (dolist (association associations)
       (check
-       (member (hyperdoc:topicmap-association-from-of association)
+       (member (dreyeck/topicmap:topicmap-association-from-of association)
                topic-ids :test #'string=)
        "Association ~S has a missing source endpoint."
        association)
       (check
-       (member (hyperdoc:topicmap-association-to-of association)
+       (member (dreyeck/topicmap:topicmap-association-to-of association)
                topic-ids :test #'string=)
        "Association ~S has a missing target endpoint."
        association))
     (dolist (topic topics)
-      (let ((properties (hyperdoc:topicmap-topic-view-properties-of topic)))
+      (let ((properties (dreyeck/topicmap:topicmap-topic-view-properties-of topic)))
         (dolist (key '(:x :y :visible :pinned))
           (check (member key properties)
                  "Topic ~S lacks view property ~S."
                  topic key))))
     (check topicmap-view "Dependency reference has no generic Topicmap view.")
     (let ((html (html-inspector-views:view-html topicmap-view)))
-      (dolist (marker '("hyperdoc-topicmap-canvas"
+      (dolist (marker '("dreyeck-topicmap-canvas"
                         "data-association-type='DEPENDS-ON'"
                         "data-temporal-scope='HISTORICAL'"
                         "data-pinned='true'"))

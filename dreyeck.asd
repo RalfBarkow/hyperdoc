@@ -106,13 +106,59 @@
     :dreyeck/fedwiki-navigation/tests
     :run-fedwiki-navigation-trace-tests)))
 
+(asdf:defsystem #:dreyeck/topicmap
+  :description "Renderer-independent Topicmap projection protocol owned by Dreyeck"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :components
+  ((:file "topicmap-package")
+   (:file "topicmap"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/topicmap/tests"))))
+
+(asdf:defsystem #:dreyeck/inspector/topicmap
+  :description "Generic Dreyeck Topicmap view and native CLOG/SVG renderer"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/topicmap
+               #:hyperdoc/inspector
+               #:html-inspector-views
+               #:trivial-package-local-nicknames)
+  :components
+  ((:file "topicmap-inspector-package")
+   (:file "topicmap-inspector")))
+
+(asdf:defsystem #:dreyeck/topicmap/tests
+  :description "Ownership and behavior tests for the Dreyeck Topicmap extension"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/inspector/topicmap
+               #:asdf
+               #:uiop)
+  :components
+  ((:file "topicmap-view-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (uiop:symbol-call
+    :dreyeck/topicmap/tests
+    :run-topicmap-view-smoke-tests)))
+
 (asdf:defsystem #:dreyeck/git
   :description "Experimental Git-backed inspection objects incubated by Dreyeck"
   :license "BSD"
   :version "0.0.1"
   :pathname "dreyeck/src/"
   :serial t
-  :depends-on (#:hyperdoc
+  :depends-on (#:dreyeck/topicmap
                #:asdf
                #:uiop)
   :components
@@ -132,6 +178,7 @@
   :pathname "dreyeck/src/"
   :serial t
   :depends-on (#:dreyeck/git
+               #:dreyeck/inspector/topicmap
                #:hyperdoc/inspector
                #:html-inspector-views)
   :components
