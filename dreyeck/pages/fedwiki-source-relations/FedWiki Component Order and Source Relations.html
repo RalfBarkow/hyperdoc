@@ -2,17 +2,75 @@
 
 <in-package>dreyeck/fedwiki-source-relations</in-package>
 
-<h2>1. Baseline and observed files</h2>
+<h2>1. Question and historical source</h2>
 
 <p>
-  This case is bound to merge commit
-  <code>56325b3e08581198649f9f47d7b23dc059ea671a</code>. It reads the Git blobs
-  for <code>hyperbook.asd</code>, <code>hyperbook-fedwiki/fedwiki.lisp</code>,
-  and <code>hyperbook-fedwiki/story-items.lisp</code> without evaluating them.
-  The Lisp observation, not this page, is the authoritative model.
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
+    hyperbook-fedwiki/fedwiki.lisp
+  </a>
+  is loaded before
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
+    hyperbook-fedwiki/story-items.lisp
+  </a>,
+  although definitions in the first file refer to definitions in the second.
+  We want to understand how the loading order and these source relations fit
+  together.
 </p>
 
-<h2>2. ASDF component order</h2>
+<p>
+  The observation is anchored at
+  <a expr="(fedwiki-source-relations-commit-of (fedwiki-source-relations-example))">
+    commit 56325b3e08581198649f9f47d7b23dc059ea671a
+  </a>.
+  Reading every source object from the same commit keeps the evidence in one
+  historical source state rather than mixing it with definitions currently
+  loaded in the Lisp image.
+</p>
+
+<p>
+  The three source objects used by the observation are
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook.asd&quot;)">
+    hyperbook.asd
+  </a>,
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
+    fedwiki.lisp
+  </a>,
+  and
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
+    story-items.lisp
+  </a>.
+</p>
+
+<h2>2. Construct the observation</h2>
+
+<p>
+  The current Lisp function below constructs a fresh observation of those
+  historical source objects.
+</p>
+
+<source-of-function>fedwiki-source-relations-example</source-of-function>
+
+<p>
+  <a expr="(fedwiki-source-relations-example)" view="Overview">
+    Inspect a fresh observation
+  </a>
+</p>
+
+<p>
+  The function above belongs to the current Lisp image. The commit, Git files,
+  definition evidence, and source fragments reached from the observation belong
+  to the fixed historical source state.
+</p>
+
+<h2>3. ASDF component order</h2>
+
+<p>
+  We first inspect
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook.asd&quot;)">
+    hyperbook.asd at the fixed commit
+  </a>.
+  Its serial <code>hyperbook/fedwiki</code> component contract yields:
+</p>
 
 <pre>
 package
@@ -26,272 +84,153 @@ views
 </pre>
 
 <p>
-  The serial contract therefore materializes
+  <a expr="(fedwiki-source-relations-example)" view="Component order">
+    Inspect the component-order evidence
+  </a>
+</p>
+
+<p>
+  The resulting relation is
   <code>fedwiki.lisp — :loads-before → story-items.lisp</code>.
 </p>
 
-<h2>3. Forward source use</h2>
+<h2>4. Forward source use</h2>
 
 <p>
-  <code>FETCH-SITE-OWNER</code> is defined in <code>fedwiki.lisp</code> and its
-  function body calls <code>PROCESS-TEXT-AND-LINKS</code>, defined in
-  <code>story-items.lisp</code>. The corresponding typed facts are
-  <code>:CALLS</code> and the derived file relation
+  <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:fetch-site-owner&quot;)">
+    FETCH-SITE-OWNER
+  </a>
+  is evidenced in
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
+    fedwiki.lisp
+  </a>.
+  Its function body calls
+  <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:process-text-and-links&quot;)">
+    PROCESS-TEXT-AND-LINKS
+  </a>,
+  evidenced in
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
+    story-items.lisp
+  </a>.
+</p>
+
+<p>
+  <a expr="(fedwiki-source-relations-example)" view="Source relations">
+    Follow the definition, fragment, and relation evidence
+  </a>
+</p>
+
+<p>
+  The typed source fact is <code>:CALLS</code>; from it the observation derives
   <code>fedwiki.lisp — :uses-definition-from → story-items.lisp</code>.
 </p>
 
-<h2>4. Reverse use through a development helper</h2>
+<h2>5. Reverse source use</h2>
 
 <p>
-  <code>FIND-EXAMPLES-FOR-STORY-ITEM-TYPES</code> occurs below the source
-  heading <code>;; find examples</code>. It is classified as a
-  <code>:DEVELOPMENT-HELPER</code>, not as proven unused code. It reads
-  <code>*NEIGHBORHOOD*</code> from <code>fedwiki.lisp</code>, producing the
-  reverse derived file relation.
+  <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:find-examples-for-story-item-types&quot;)">
+    FIND-EXAMPLES-FOR-STORY-ITEM-TYPES
+  </a>
+  is evidenced directly below the historical source heading
+  <code>;; find examples</code> in
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
+    story-items.lisp
+  </a>.
+  The observation classifies it as <code>:DEVELOPMENT-HELPER</code>; it does
+  not infer that the function is unused.
 </p>
 
-<h2>5. Existing loading routine</h2>
-
 <p>
-  The task is to compile, load, and then use the complete
-  <code>hyperbook/fedwiki</code> system. Its task location is the serial ASDF
-  component contract. With <code>fedwiki.lisp</code> before
-  <code>story-items.lisp</code>, <code>*NEIGHBORHOOD*</code> is already declared
-  when the latter compiles. The forward call initially occurs only inside a
-  function body, and its target exists after the complete system has loaded.
+  The helper reads
+  <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;special:neighborhood&quot;)">
+    *NEIGHBORHOOD*
+  </a>
+  from
+  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
+    fedwiki.lisp
+  </a>,
+  yielding the reverse derived file relation
+  <code>story-items.lisp — :uses-definition-from → fedwiki.lisp</code>.
 </p>
 
-<h2>6. Task and problem assessment</h2>
+<h2>6. Loading contract and assessment</h2>
 
 <p>
-  Under this current load-and-use contract, an existing routine solves the
-  stated task. Under definition 48.2, the observed mutual source use is
-  therefore not automatically a problem. Independent component loading,
-  exclusively forward provider relations, development-helper separation, or
-  the complete removal of compiler forward references would be stronger tasks
-  whose necessity has not yet been demonstrated.
+  The current task is to compile, load, and then use the complete
+  <code>hyperbook/fedwiki</code> system. The serial ASDF order places
+  <code>fedwiki.lisp</code> before <code>story-items.lisp</code>.
+  Consequently, <code>*NEIGHBORHOOD*</code> is declared before
+  <code>story-items.lisp</code> is compiled, while the forward call to
+  <code>PROCESS-TEXT-AND-LINKS</code> initially occurs only inside a function
+  body and its target exists after the complete system has loaded.
+</p>
+
+<p>
+  Under that load-and-use task, the observed mutual source use is therefore
+  evidence of coupling, but not by itself a demonstrated loading failure.
+  Independent component loading, one-way provider relations, helper separation,
+  or eliminating compiler forward references would be stronger requirements
+  that need their own motivation.
 </p>
 
 <h2>7. Topicmap projection</h2>
 
 <p>
-  The generic Dreyeck Topicmap projection has exactly seven topics and nine
-  associations. Its manually positioned symbol topics expose both directions
-  without adding duplicate file-to-file edges or changing the native SVG
-  renderer.
+  <a expr="(fedwiki-source-relations-example)" view="Topicmap">
+    Open the source relations as a Topicmap
+  </a>
 </p>
 
-<h2>8. Two unexecuted refactoring hypotheses</h2>
+<p>
+  The projection contains seven topics and nine associations. The topic objects
+  remain the same inspectable Git files and definition-evidence objects used
+  above, and every topic carries the fixed commit as temporal scope.
+</p>
+
+<h2>8. Refactoring hypotheses</h2>
+
+<p>
+  Observation and proposal remain separate. The current observation records
+  two proposals, both explicitly <code>:NOT-EXECUTED</code>.
+</p>
+
+<p>
+  <a expr="(fedwiki-source-relations-example)" view="Refactoring hypotheses">
+    Inspect the two refactoring hypotheses
+  </a>
+</p>
 
 <ol>
   <li>
-    Move <code>FIND-EXAMPLES-FOR-STORY-ITEM-TYPES</code> to a later
-    development/observation component. This is explicitly
-    <code>:NOT-EXECUTED</code>.
+    Move
+    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:find-examples-for-story-item-types&quot;)">
+      FIND-EXAMPLES-FOR-STORY-ITEM-TYPES
+    </a>
+    to a later development/observation component. This would remove the
+    development-helper reverse source relation if the helper is not required
+    during compilation or loading.
   </li>
   <li>
-    Extract the Wiki-text parser as a coherent earlier component such as
-    <code>wiki-text.lisp</code>. The unit consists of <code>*URL-REGEX*</code>,
-    <code>*ANY-EXCEPT-CLOSING-BRACKET-REGEX*</code>,
-    <code>*LINK-REGEX*</code>, and <code>PROCESS-TEXT-AND-LINKS</code>.
-    Moving only the function to <code>utilities.lisp</code> is incomplete.
+    Extract the Wiki-text parser as one coherent earlier component. The observed
+    unit consists of
+    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;special:url-regex&quot;)">
+      *URL-REGEX*
+    </a>,
+    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;special:any-except-closing-bracket-regex&quot;)">
+      *ANY-EXCEPT-CLOSING-BRACKET-REGEX*
+    </a>,
+    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;special:link-regex&quot;)">
+      *LINK-REGEX*
+    </a>,
+    and
+    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:process-text-and-links&quot;)">
+      PROCESS-TEXT-AND-LINKS
+    </a>.
+    Moving only the function would leave its parser dependencies behind.
   </li>
 </ol>
 
 <p>
   A <code>DECLAIM</code> or forward declaration could document a compiler
-  contract, but it would not decouple the source files.
+  contract, but it would not remove the observed source dependency.
 </p>
-
-<h2>9. Reproduce the observation step by step</h2>
-
-<p>
-  The following task is read-only. Each link constructs an independent
-  observation of the same fixed commit and opens the named Inspector view.
-  This keeps every step reproducible: it does not depend on an object left in
-  a REPL variable by an earlier step.
-</p>
-
-<h3>Before you begin</h3>
-
-<ul>
-  <li>
-    Load <code>dreyeck/inspector/fedwiki-source-relations</code> in the live
-    image. Opening this HyperDoc through the Dreyeck catalog already does so.
-  </li>
-  <li>
-    Use a checkout in which Git can resolve commit
-    <code>56325b3e08581198649f9f47d7b23dc059ea671a</code>.
-  </li>
-  <li>
-    Shift-click links if you want to keep several results open side by side.
-  </li>
-</ul>
-
-<ol class="steps">
-  <li class="step">
-    <h3>Materialize the fixed observation</h3>
-    <p class="cmd">
-      <a expr="(fedwiki-source-relations-example)" view="Overview">
-        Construct an observation and open Overview
-      </a>
-    </p>
-    <p class="stepresult">
-      <strong>Expected:</strong> an instance of
-      <code>FEDWIKI-SOURCE-RELATIONS-OBSERVATION</code> at commit
-      <code>56325b3e0858</code>, backed by three inspectable Git files.
-    </p>
-  </li>
-
-  <li class="step">
-    <h3>Read the loading routine</h3>
-    <p class="cmd">
-      <a expr="(fedwiki-source-relations-example)" view="Component order">
-        Construct an observation and open Component order
-      </a>
-    </p>
-    <p class="stepresult">
-      <strong>Expected:</strong> <code>fedwiki.lisp</code> occurs immediately
-      before <code>story-items.lisp</code> in the serial ASDF system.
-    </p>
-  </li>
-
-  <li class="step">
-    <h3>Follow the source evidence</h3>
-    <p class="cmd">
-      <a expr="(fedwiki-source-relations-example)" view="Source relations">
-        Construct an observation and open Source relations
-      </a>
-    </p>
-    <p class="stepresult">
-      <strong>Expected:</strong> seven definitions and thirteen typed or
-      explicitly derived relations. The Git files, definitions, and source
-      fragments remain clickable objects.
-    </p>
-  </li>
-
-  <li class="step">
-    <h3>Project the evidence as a Topicmap</h3>
-    <p class="cmd">
-      <a expr="(fedwiki-source-relations-example)" view="Topicmap">
-        Construct an observation and open Topicmap
-      </a>
-    </p>
-    <p class="stepresult">
-      <strong>Expected:</strong> seven topics and nine associations: five
-      <code>:DEFINES</code>, one <code>:CALLS</code>, two
-      <code>:READS-SPECIAL</code>, and one <code>:LOADS-BEFORE</code>. Every
-      topic has the fixed commit as its temporal scope.
-    </p>
-  </li>
-
-  <li class="step">
-    <h3>Keep proposals separate from observations</h3>
-    <p class="cmd">
-      <a expr="(fedwiki-source-relations-example)" view="Refactoring hypotheses">
-        Construct an observation and open Refactoring hypotheses
-      </a>
-    </p>
-    <p class="stepresult">
-      <strong>Expected:</strong> two hypotheses, both marked
-      <code>:NOT-EXECUTED</code>, with their required tests and falsifiers.
-    </p>
-  </li>
-</ol>
-
-<h2>10. How the clickable examples work</h2>
-
-<ol>
-  <li>
-    <code>&lt;in-package&gt;</code> selects
-    <code>DREYECK/FEDWIKI-SOURCE-RELATIONS</code> as the reader package for
-    embedded expressions.
-  </li>
-  <li>
-    While HyperDoc renders the page, it reads and evaluates each
-    <code>expr</code> attribute in that package. Errors become inspectable
-    condition values rather than unreadable page fragments.
-  </li>
-  <li>
-    HyperDoc retains the returned Lisp object as an object reference behind
-    the link. Clicking the link opens that object in a pane.
-  </li>
-  <li>
-    The <code>view</code> attribute selects the initial Inspector view. The
-    other views remain available as tabs because they are views of the same
-    observation type.
-  </li>
-  <li>
-    Reloading the text page evaluates the expressions again and therefore
-    creates fresh observations. The fixed Git commit, rather than object
-    identity, makes the results comparable.
-  </li>
-</ol>
-
-<h2>11. Equivalent SLY reading path</h2>
-
-<p>
-  The live image remains the authoritative evaluator. This is the minimal
-  reader-safe sequence corresponding to the first link.
-</p>
-
-<lisp-code>
-(asdf:load-system "dreyeck/inspector/fedwiki-source-relations")
-
-(defparameter *fedwiki-source-relations*
-  (dreyeck/fedwiki-source-relations:fedwiki-source-relations-example))
-
-(clog-moldable-inspector:clog-inspect :object *fedwiki-source-relations*)
-</lisp-code>
-
-<h2>12. Verification boundaries</h2>
-
-<table>
-  <thead>
-    <tr>
-      <th>Boundary</th>
-      <th>What it demonstrates</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Durable ASDF test</td>
-      <td>The source model, views, Topicmap, page, and catalog satisfy their contracts.</td>
-    </tr>
-    <tr>
-      <td>Live-image observation</td>
-      <td>The already running image exposes the five views and the expected 7/9 Topicmap.</td>
-    </tr>
-    <tr>
-      <td>Fresh Nix/SBCL process</td>
-      <td>No stale definition or previously loaded Dreyeck system is supplying the result.</td>
-    </tr>
-    <tr>
-      <td>Git state before/after</td>
-      <td>Observation, rendering, and tests do not change tracked state or <code>FETCH_HEAD</code>.</td>
-    </tr>
-    <tr>
-      <td><code>nix flake check</code></td>
-      <td>The Nix outputs still evaluate and the configured check succeeds.</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>
-  The durable test is safe to run explicitly from SLY:
-</p>
-
-<lisp-code>
-(asdf:test-system "dreyeck/fedwiki-source-relations/tests" :force t)
-</lisp-code>
-
-<p>
-  A fresh Nix/SBCL build is intentionally not an <code>expr</code> link.
-  HyperDoc evaluates link expressions while rendering a page, so such a link
-  would start the build merely by opening or reloading this documentation.
-  Process-isolated builds therefore remain explicit developer actions.
-</p>
-
-<h2>Implementation</h2>
-
-<source-of-function>fedwiki-source-relations-example</source-of-function>

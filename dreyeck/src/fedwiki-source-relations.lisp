@@ -1,4 +1,4 @@
-;;;; Source-backed facts about the FedWiki component-order case.
+;;;; Source-backed facts about the FedWiki component-order observation.
 
 (in-package #:dreyeck/fedwiki-source-relations)
 
@@ -96,7 +96,7 @@
                    :initarg :problem-status :type symbol)
    (problem-statement :reader fedwiki-source-relations-problem-statement-of
                       :initarg :problem-statement :type string))
-  (:documentation "The complete source-backed FedWiki component-order case."))
+  (:documentation "The complete source-backed FedWiki component-order observation."))
 
 (defmethod print-object ((fragment source-fragment-evidence) stream)
   (print-unreadable-object (fragment stream :type t :identity nil)
