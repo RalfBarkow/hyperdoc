@@ -1,0 +1,124 @@
+<h1>FedWiki Component Order and Source Relations</h1>
+
+<in-package>dreyeck/fedwiki-source-relations</in-package>
+
+<h2>1. Baseline and observed files</h2>
+
+<p>
+  This case is bound to merge commit
+  <code>56325b3e08581198649f9f47d7b23dc059ea671a</code>. It reads the Git blobs
+  for <code>hyperbook.asd</code>, <code>hyperbook-fedwiki/fedwiki.lisp</code>,
+  and <code>hyperbook-fedwiki/story-items.lisp</code> without evaluating them.
+  The Lisp observation, not this page, is the authoritative model.
+</p>
+
+<p>
+  <a expr="(fedwiki-source-relations-example)" view="Overview">
+    Construct and inspect a fresh FedWiki source-relations observation
+  </a>
+</p>
+
+<h2>2. ASDF component order</h2>
+
+<pre>
+package
+utilities
+pages
+fedwiki
+story-items
+wiki-links
+plugins
+views
+</pre>
+
+<p>
+  The serial contract therefore materializes
+  <code>fedwiki.lisp — :loads-before → story-items.lisp</code>.
+</p>
+
+<h2>3. Forward source use</h2>
+
+<p>
+  <code>FETCH-SITE-OWNER</code> is defined in <code>fedwiki.lisp</code> and its
+  function body calls <code>PROCESS-TEXT-AND-LINKS</code>, defined in
+  <code>story-items.lisp</code>. The corresponding typed facts are
+  <code>:CALLS</code> and the derived file relation
+  <code>fedwiki.lisp — :uses-definition-from → story-items.lisp</code>.
+</p>
+
+<h2>4. Reverse use through a development helper</h2>
+
+<p>
+  <code>FIND-EXAMPLES-FOR-STORY-ITEM-TYPES</code> occurs below the source
+  heading <code>;; find examples</code>. It is classified as a
+  <code>:DEVELOPMENT-HELPER</code>, not as proven unused code. It reads
+  <code>*NEIGHBORHOOD*</code> from <code>fedwiki.lisp</code>, producing the
+  reverse derived file relation.
+</p>
+
+<h2>5. Existing loading routine</h2>
+
+<p>
+  The task is to compile, load, and then use the complete
+  <code>hyperbook/fedwiki</code> system. Its task location is the serial ASDF
+  component contract. With <code>fedwiki.lisp</code> before
+  <code>story-items.lisp</code>, <code>*NEIGHBORHOOD*</code> is already declared
+  when the latter compiles. The forward call initially occurs only inside a
+  function body, and its target exists after the complete system has loaded.
+</p>
+
+<h2>6. Task and problem assessment</h2>
+
+<p>
+  Under this current load-and-use contract, an existing routine solves the
+  stated task. Under definition 48.2, the observed mutual source use is
+  therefore not automatically a problem. Independent component loading,
+  exclusively forward provider relations, development-helper separation, or
+  the complete removal of compiler forward references would be stronger tasks
+  whose necessity has not yet been demonstrated.
+</p>
+
+<h2>7. Topicmap projection</h2>
+
+<p>
+  The generic Dreyeck Topicmap projection has exactly seven topics and nine
+  associations. Its manually positioned symbol topics expose both directions
+  without adding duplicate file-to-file edges or changing the native SVG
+  renderer.
+</p>
+
+<h2>8. Two unexecuted refactoring hypotheses</h2>
+
+<ol>
+  <li>
+    Move <code>FIND-EXAMPLES-FOR-STORY-ITEM-TYPES</code> to a later
+    development/observation component. This is explicitly
+    <code>:NOT-EXECUTED</code>.
+  </li>
+  <li>
+    Extract the Wiki-text parser as a coherent earlier component such as
+    <code>wiki-text.lisp</code>. The unit consists of <code>*URL-REGEX*</code>,
+    <code>*ANY-EXCEPT-CLOSING-BRACKET-REGEX*</code>,
+    <code>*LINK-REGEX*</code>, and <code>PROCESS-TEXT-AND-LINKS</code>.
+    Moving only the function to <code>utilities.lisp</code> is incomplete.
+  </li>
+</ol>
+
+<p>
+  A <code>DECLAIM</code> or forward declaration could document a compiler
+  contract, but it would not decouple the source files.
+</p>
+
+<h2>9. Reproduce from SLY</h2>
+
+<pre>
+(asdf:load-system "dreyeck/inspector/fedwiki-source-relations")
+(defparameter *fedwiki-source-relations*
+  (dreyeck/fedwiki-source-relations:fedwiki-source-relations-example))
+(clog-moldable-inspector:clog-inspect
+ :object *fedwiki-source-relations*)
+</pre>
+
+<h2>Implementation</h2>
+
+<source-of-function>fedwiki-source-relations-example</source-of-function>

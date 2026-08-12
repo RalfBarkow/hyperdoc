@@ -38,6 +38,35 @@
       ("dreyeck/git/tests" "dreyeck/inspector/git")
       ("dreyeck/git/tests" "dreyeck/extension-system-boundaries"))
      :upstream-systems ("hyperdoc" "hyperdoc/inspector"))
+    (:name :fedwiki-source-relations
+     :definition-file "dreyeck.asd"
+     :source-root "dreyeck/src/"
+     :test-root "dreyeck/tests/"
+     :source-systems ("dreyeck/fedwiki-source-relations"
+                      "dreyeck/inspector/fedwiki-source-relations")
+     :test-systems ("dreyeck/fedwiki-source-relations/tests")
+     :required-dependencies
+     (("dreyeck/fedwiki-source-relations" "dreyeck/git")
+      ("dreyeck/fedwiki-source-relations" "dreyeck/topicmap")
+      ("dreyeck/fedwiki-source-relations" "hyperdoc")
+      ("dreyeck/inspector/fedwiki-source-relations"
+       "dreyeck/fedwiki-source-relations")
+      ("dreyeck/inspector/fedwiki-source-relations"
+       "dreyeck/inspector/git")
+      ("dreyeck/inspector/fedwiki-source-relations"
+       "dreyeck/inspector/topicmap")
+      ("dreyeck/inspector/fedwiki-source-relations"
+       "hyperdoc/inspector")
+      ("dreyeck/inspector/fedwiki-source-relations"
+       "html-inspector-views")
+      ("dreyeck/fedwiki-source-relations/tests"
+       "dreyeck/inspector/fedwiki-source-relations")
+      ("dreyeck/fedwiki-source-relations/tests"
+       "dreyeck/extension-system-boundaries")
+      ("dreyeck/fedwiki-source-relations/tests"
+       "hyperdoc/explorer"))
+     :upstream-systems ("hyperdoc" "hyperdoc/inspector"
+                        "hyperbook/fedwiki"))
     (:name :upstream-intake
      :definition-file "dreyeck.asd"
      :source-root "dreyeck/src/"

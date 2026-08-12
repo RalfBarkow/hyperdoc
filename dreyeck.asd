@@ -152,6 +152,59 @@
     :dreyeck/topicmap/tests
     :run-topicmap-view-smoke-tests)))
 
+(asdf:defsystem #:dreyeck/fedwiki-source-relations
+  :description "Source-backed observation of FedWiki component relations"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/git
+               #:dreyeck/topicmap
+               #:hyperdoc)
+  :components
+  ((:module "dreyeck/pages/fedwiki-source-relations"
+    :pathname "../pages/fedwiki-source-relations/")
+   (:file "fedwiki-source-relations-package")
+   (:file "fedwiki-source-relations")
+   (:file "fedwiki-source-relations-hyperdoc"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/fedwiki-source-relations/tests"))))
+
+(asdf:defsystem #:dreyeck/inspector/fedwiki-source-relations
+  :description "Inspector views for Dreyeck FedWiki source relations"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/fedwiki-source-relations
+               #:dreyeck/inspector/git
+               #:dreyeck/inspector/topicmap
+               #:hyperdoc/inspector
+               #:html-inspector-views)
+  :components
+  ((:file "fedwiki-source-relations-inspector-package")
+   (:file "fedwiki-source-relations-views")))
+
+(asdf:defsystem #:dreyeck/fedwiki-source-relations/tests
+  :description "Source and ownership tests for FedWiki source relations"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/inspector/fedwiki-source-relations
+               #:dreyeck/extension-system-boundaries
+               #:hyperdoc/explorer)
+  :components
+  ((:file "fedwiki-source-relations-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (uiop:symbol-call
+    :dreyeck/fedwiki-source-relations/tests
+    :run-fedwiki-source-relations-tests)))
+
 (asdf:defsystem #:dreyeck/git
   :description "Experimental Git-backed inspection objects incubated by Dreyeck"
   :license "BSD"
@@ -223,11 +276,12 @@
   :description "Explicit membership and runtime support for the Dreyeck HyperBook catalog"
   :license "BSD"
   :version "0.0.1"
-  ;; The HyperDoc systems declare membership. The inspector system supplies
-  ;; the executable Upstream Intake views reached from those pages.
+  ;; The HyperDoc systems declare membership. Their inspector systems supply
+  ;; the executable views reached from the catalog pages.
   :depends-on (#:dreyeck/wiki-link
                #:dreyeck/upstream-intake
-               #:dreyeck/inspector/upstream-intake)
+               #:dreyeck/inspector/upstream-intake
+               #:dreyeck/inspector/fedwiki-source-relations)
   :in-order-to
   ((asdf:test-op
     (asdf:test-op "dreyeck/catalog/tests"))))
