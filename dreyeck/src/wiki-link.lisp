@@ -364,7 +364,7 @@ The result is :MATCHES-TITLE-PATH, :MATCHES-SLUG-PATH, :OTHER, or :RESOLVED."
           (html-inspector-views:eval-thunk installed-thunk)))))))
 
 (defhyperdoc *wiki-link-contract-demo*
-  :title "Dreyeck Wiki-link contract demonstration"
+  :title "Wiki Links"
   :id "dreyeck/wiki-link"
   :asdf-system-name "dreyeck/wiki-link"
   :subdirectory "dreyeck/pages"

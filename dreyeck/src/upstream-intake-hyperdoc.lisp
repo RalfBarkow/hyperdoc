@@ -3,7 +3,7 @@
 (in-package #:dreyeck/upstream-intake)
 
 (hyperdoc:defhyperdoc *upstream-intake-hyperdoc*
-  :title "Dreyeck Upstream Intake"
+  :title "Upstream Intake"
   :id "dreyeck/upstream-intake"
   :asdf-system-name "dreyeck/upstream-intake"
   :subdirectory "dreyeck/pages/upstream-intake"
