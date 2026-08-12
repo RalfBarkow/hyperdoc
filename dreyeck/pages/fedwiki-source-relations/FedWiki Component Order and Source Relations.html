@@ -12,12 +12,6 @@
   The Lisp observation, not this page, is the authoritative model.
 </p>
 
-<p>
-  <a expr="(fedwiki-source-relations-example)" view="Overview">
-    Construct and inspect a fresh FedWiki source-relations observation
-  </a>
-</p>
-
 <h2>2. ASDF component order</h2>
 
 <pre>
@@ -109,15 +103,194 @@ views
   contract, but it would not decouple the source files.
 </p>
 
-<h2>9. Reproduce from SLY</h2>
+<h2>9. Reproduce the observation step by step</h2>
 
-<pre>
+<p>
+  The following task is read-only. Each link constructs an independent
+  observation of the same fixed commit and opens the named Inspector view.
+  This keeps every step reproducible: it does not depend on an object left in
+  a REPL variable by an earlier step.
+</p>
+
+<h3>Before you begin</h3>
+
+<ul>
+  <li>
+    Load <code>dreyeck/inspector/fedwiki-source-relations</code> in the live
+    image. Opening this HyperDoc through the Dreyeck catalog already does so.
+  </li>
+  <li>
+    Use a checkout in which Git can resolve commit
+    <code>56325b3e08581198649f9f47d7b23dc059ea671a</code>.
+  </li>
+  <li>
+    Shift-click links if you want to keep several results open side by side.
+  </li>
+</ul>
+
+<ol class="steps">
+  <li class="step">
+    <h3>Materialize the fixed observation</h3>
+    <p class="cmd">
+      <a expr="(fedwiki-source-relations-example)" view="Overview">
+        Construct an observation and open Overview
+      </a>
+    </p>
+    <p class="stepresult">
+      <strong>Expected:</strong> an instance of
+      <code>FEDWIKI-SOURCE-RELATIONS-OBSERVATION</code> at commit
+      <code>56325b3e0858</code>, backed by three inspectable Git files.
+    </p>
+  </li>
+
+  <li class="step">
+    <h3>Read the loading routine</h3>
+    <p class="cmd">
+      <a expr="(fedwiki-source-relations-example)" view="Component order">
+        Construct an observation and open Component order
+      </a>
+    </p>
+    <p class="stepresult">
+      <strong>Expected:</strong> <code>fedwiki.lisp</code> occurs immediately
+      before <code>story-items.lisp</code> in the serial ASDF system.
+    </p>
+  </li>
+
+  <li class="step">
+    <h3>Follow the source evidence</h3>
+    <p class="cmd">
+      <a expr="(fedwiki-source-relations-example)" view="Source relations">
+        Construct an observation and open Source relations
+      </a>
+    </p>
+    <p class="stepresult">
+      <strong>Expected:</strong> seven definitions and thirteen typed or
+      explicitly derived relations. The Git files, definitions, and source
+      fragments remain clickable objects.
+    </p>
+  </li>
+
+  <li class="step">
+    <h3>Project the evidence as a Topicmap</h3>
+    <p class="cmd">
+      <a expr="(fedwiki-source-relations-example)" view="Topicmap">
+        Construct an observation and open Topicmap
+      </a>
+    </p>
+    <p class="stepresult">
+      <strong>Expected:</strong> seven topics and nine associations: five
+      <code>:DEFINES</code>, one <code>:CALLS</code>, two
+      <code>:READS-SPECIAL</code>, and one <code>:LOADS-BEFORE</code>. Every
+      topic has the fixed commit as its temporal scope.
+    </p>
+  </li>
+
+  <li class="step">
+    <h3>Keep proposals separate from observations</h3>
+    <p class="cmd">
+      <a expr="(fedwiki-source-relations-example)" view="Refactoring hypotheses">
+        Construct an observation and open Refactoring hypotheses
+      </a>
+    </p>
+    <p class="stepresult">
+      <strong>Expected:</strong> two hypotheses, both marked
+      <code>:NOT-EXECUTED</code>, with their required tests and falsifiers.
+    </p>
+  </li>
+</ol>
+
+<h2>10. How the clickable examples work</h2>
+
+<ol>
+  <li>
+    <code>&lt;in-package&gt;</code> selects
+    <code>DREYECK/FEDWIKI-SOURCE-RELATIONS</code> as the reader package for
+    embedded expressions.
+  </li>
+  <li>
+    While HyperDoc renders the page, it reads and evaluates each
+    <code>expr</code> attribute in that package. Errors become inspectable
+    condition values rather than unreadable page fragments.
+  </li>
+  <li>
+    HyperDoc retains the returned Lisp object as an object reference behind
+    the link. Clicking the link opens that object in a pane.
+  </li>
+  <li>
+    The <code>view</code> attribute selects the initial Inspector view. The
+    other views remain available as tabs because they are views of the same
+    observation type.
+  </li>
+  <li>
+    Reloading the text page evaluates the expressions again and therefore
+    creates fresh observations. The fixed Git commit, rather than object
+    identity, makes the results comparable.
+  </li>
+</ol>
+
+<h2>11. Equivalent SLY reading path</h2>
+
+<p>
+  The live image remains the authoritative evaluator. This is the minimal
+  reader-safe sequence corresponding to the first link.
+</p>
+
+<lisp-code>
 (asdf:load-system "dreyeck/inspector/fedwiki-source-relations")
+
 (defparameter *fedwiki-source-relations*
   (dreyeck/fedwiki-source-relations:fedwiki-source-relations-example))
-(clog-moldable-inspector:clog-inspect
- :object *fedwiki-source-relations*)
-</pre>
+
+(clog-moldable-inspector:clog-inspect :object *fedwiki-source-relations*)
+</lisp-code>
+
+<h2>12. Verification boundaries</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Boundary</th>
+      <th>What it demonstrates</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Durable ASDF test</td>
+      <td>The source model, views, Topicmap, page, and catalog satisfy their contracts.</td>
+    </tr>
+    <tr>
+      <td>Live-image observation</td>
+      <td>The already running image exposes the five views and the expected 7/9 Topicmap.</td>
+    </tr>
+    <tr>
+      <td>Fresh Nix/SBCL process</td>
+      <td>No stale definition or previously loaded Dreyeck system is supplying the result.</td>
+    </tr>
+    <tr>
+      <td>Git state before/after</td>
+      <td>Observation, rendering, and tests do not change tracked state or <code>FETCH_HEAD</code>.</td>
+    </tr>
+    <tr>
+      <td><code>nix flake check</code></td>
+      <td>The Nix outputs still evaluate and the configured check succeeds.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  The durable test is safe to run explicitly from SLY:
+</p>
+
+<lisp-code>
+(asdf:test-system "dreyeck/fedwiki-source-relations/tests" :force t)
+</lisp-code>
+
+<p>
+  A fresh Nix/SBCL build is intentionally not an <code>expr</code> link.
+  HyperDoc evaluates link expressions while rendering a page, so such a link
+  would start the build merely by opening or reloading this documentation.
+  Process-isolated builds therefore remain explicit developer actions.
+</p>
 
 <h2>Implementation</h2>
 

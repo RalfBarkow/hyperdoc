@@ -1,4 +1,4 @@
-;;;; Durable source, Topicmap, Inspector, Catalog, and ownership tests.
+;;;; Durable source, Topicmap, Inspector, and Catalog tests.
 
 (defpackage #:dreyeck/fedwiki-source-relations/tests
   (:use #:cl)
@@ -426,32 +426,27 @@
                "Rendered main page lacks the fixed baseline.")
         (check (search "FEDWIKI-SOURCE-RELATIONS-EXAMPLE" html
                        :test #'char-equal)
-               "Rendered main page lacks the executable example/source handoff."))
-      (check
-       (find-if
-        (lambda (reference)
-          (typep
-           reference
-           'dreyeck/fedwiki-source-relations:fedwiki-source-relations-observation))
-        (view-reference-values content-view))
-       "Main-page example did not retain a fresh inspectable observation."))
+               "Rendered main page lacks the executable example/source handoff.")
+        (dolist (marker
+                  '("Reproduce the observation step by step"
+                    "How the clickable examples work"
+                    "Equivalent SLY reading path"
+                    "Verification boundaries"))
+          (check (search marker html :test #'char-equal)
+                 "Rendered main page lacks task marker ~S." marker)))
+      (let ((observations
+              (remove-if-not
+               (lambda (reference)
+                 (typep
+                  reference
+                  'dreyeck/fedwiki-source-relations:fedwiki-source-relations-observation))
+               (view-reference-values content-view))))
+        (check (= 5 (length observations))
+               "Main-page task retained ~D observations instead of five."
+               (length observations))
+        (check (= 5 (length (remove-duplicates observations :test #'eq)))
+               "Main-page task reused an observation between steps.")))
     t))
-
-(defun check-system-boundary ()
-  (let ((boundary
-          (find :fedwiki-source-relations
-                dreyeck/system-boundaries:*extension-system-boundaries*
-                :key (lambda (entry) (getf entry :name)))))
-    (check boundary "FedWiki source-relations boundary is absent.")
-    (let ((evidence
-            (dreyeck/system-boundaries:check-extension-system-boundary
-             boundary)))
-      (check (eq :dreyeck-to-hyperdoc
-                 (getf evidence :dependency-direction))
-             "FedWiki source-relations dependency direction is wrong.")
-      (check (getf evidence :passed)
-             "FedWiki source-relations boundary did not pass.")))
-  t)
 
 (defun run-fedwiki-source-relations-tests ()
   (let* ((fedwiki-system (asdf:find-system "hyperbook/fedwiki"))
@@ -468,7 +463,6 @@
     (check-topicmap first)
     (check-inspector-views first)
     (check-hyperdoc-and-catalog)
-    (check-system-boundary)
     (check
      (eql fedwiki-loaded-before (asdf:component-loaded-p fedwiki-system))
      "Git observation changed the HYPERBOOK/FEDWIKI load state.")

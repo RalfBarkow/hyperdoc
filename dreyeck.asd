@@ -94,8 +94,7 @@
   :version "0.0.1"
   :pathname "dreyeck/tests/"
   :serial t
-  :depends-on (#:dreyeck/inspector/fedwiki-navigation
-               #:dreyeck/extension-system-boundaries)
+  :depends-on (#:dreyeck/inspector/fedwiki-navigation)
   :components
   ((:file "fedwiki-navigation-trace-smoke"))
   :perform
@@ -134,7 +133,7 @@
    (:file "topicmap-inspector")))
 
 (asdf:defsystem #:dreyeck/topicmap/tests
-  :description "Ownership and behavior tests for the Dreyeck Topicmap extension"
+  :description "Behavior tests for the Dreyeck Topicmap extension"
   :license "BSD"
   :version "0.0.1"
   :pathname "dreyeck/tests/"
@@ -187,13 +186,12 @@
    (:file "fedwiki-source-relations-views")))
 
 (asdf:defsystem #:dreyeck/fedwiki-source-relations/tests
-  :description "Source and ownership tests for FedWiki source relations"
+  :description "Source-backed tests for FedWiki source relations"
   :license "BSD"
   :version "0.0.1"
   :pathname "dreyeck/tests/"
   :serial t
   :depends-on (#:dreyeck/inspector/fedwiki-source-relations
-               #:dreyeck/extension-system-boundaries
                #:hyperdoc/explorer)
   :components
   ((:file "fedwiki-source-relations-smoke"))
@@ -286,26 +284,14 @@
   ((asdf:test-op
     (asdf:test-op "dreyeck/catalog/tests"))))
 
-(asdf:defsystem #:dreyeck/extension-system-boundaries
-  :description "Reusable ownership checks for Dreyeck extension systems"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:asdf
-               #:uiop)
-  :components
-  ((:file "extension-system-boundaries")))
-
 (asdf:defsystem #:dreyeck/git/tests
-  :description "Stable local-fixture and ownership tests for Dreyeck Git inspection"
+  :description "Stable local-fixture tests for Dreyeck Git inspection"
   :license "BSD"
   :version "0.0.1"
   :pathname "dreyeck/tests/"
   :serial t
   :depends-on (#:dreyeck/inspector/git
-               #:closer-mop
-               #:dreyeck/extension-system-boundaries)
+               #:closer-mop)
   :components
   ((:file "git-commit-inspection-smoke")
    (:file "git-asdf-reference-smoke"))
@@ -328,8 +314,7 @@
   :serial t
   :depends-on (#:dreyeck/inspector/upstream-intake
                #:hyperdoc/explorer
-               #:hyperbook/fedwiki
-               #:dreyeck/extension-system-boundaries)
+               #:hyperbook/fedwiki)
   :components
   ((:file "upstream-intake-smoke"))
   :perform

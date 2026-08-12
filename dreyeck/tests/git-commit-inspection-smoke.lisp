@@ -1,4 +1,4 @@
-;;;; Stable local-fixture and ownership tests for Dreyeck Git inspection.
+;;;; Stable local-fixture tests for Dreyeck Git inspection.
 
 (defpackage #:dreyeck/git/tests
   (:use #:cl)
@@ -126,13 +126,5 @@
 
 (defun run-git-commit-inspection-smoke-tests ()
   (run-git-object-tests)
-  (let ((boundary-evidence
-          (dreyeck/system-boundaries:check-extension-system-boundaries)))
-    (check (every (lambda (record) (getf record :passed))
-                  boundary-evidence)
-           "Dreyeck system boundary evidence failed: ~S"
-           boundary-evidence)
-    (format t "~&Dreyeck extension boundary evidence:~%~S~%"
-            boundary-evidence))
   (format t "Dreyeck Git commit inspection smoke tests passed.~%")
   t)

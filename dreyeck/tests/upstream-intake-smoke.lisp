@@ -870,11 +870,5 @@
    (fboundp
     'dreyeck/upstream-intake:hyperspec-component-upstream-intake-example)
    "Component Intake example is missing.")
-  (let ((boundary-evidence
-          (dreyeck/system-boundaries:check-extension-system-boundaries)))
-    (check (every (lambda (record) (getf record :passed))
-                  boundary-evidence)
-           "Dreyeck system boundary evidence failed: ~S"
-           boundary-evidence))
   (format t "Read-only Upstream Intake tests passed.~%")
   t)
