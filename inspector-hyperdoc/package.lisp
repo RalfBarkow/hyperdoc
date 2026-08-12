@@ -10,7 +10,10 @@
    :-> :-<> :->> :-<>> :<> :some-> :some->>)
   (:export :hyperdoc
            :hyperspec-http-root
-           :hyperspec-root-pathname))
+           :hyperspec-root-pathname
+           :*topicmap-renderer*
+           :render-topicmap-html
+           :render-native-topicmap-html))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperdoc/inspector)

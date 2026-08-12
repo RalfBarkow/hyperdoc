@@ -113,11 +113,14 @@
   :pathname "dreyeck/src/"
   :serial t
   :depends-on (#:hyperdoc
+               #:asdf
                #:uiop)
   :components
   ((:file "git-package")
    (:file "git-repository-checkout")
-   (:file "git-commit-inspection"))
+   (:file "git-commit-inspection")
+   (:file "git-asdf-references")
+   (:file "git-asdf-reference-topicmap"))
   :in-order-to
   ((asdf:test-op
     (asdf:test-op "dreyeck/git/tests"))))
@@ -133,7 +136,8 @@
                #:html-inspector-views)
   :components
   ((:file "git-inspector-package")
-   (:file "git-commit-inspection-views")))
+   (:file "git-commit-inspection-views")
+   (:file "git-asdf-reference-views")))
 
 (asdf:defsystem #:dreyeck/upstream-intake
   :description "Read-only observations of upstream commits and components"
@@ -199,16 +203,21 @@
   :pathname "dreyeck/tests/"
   :serial t
   :depends-on (#:dreyeck/inspector/git
+               #:closer-mop
                #:dreyeck/extension-system-boundaries)
   :components
-  ((:file "git-commit-inspection-smoke"))
+  ((:file "git-commit-inspection-smoke")
+   (:file "git-asdf-reference-smoke"))
   :perform
   (asdf:test-op
    (operation component)
    (declare (ignore operation component))
    (uiop:symbol-call
     :dreyeck/git/tests
-    :run-git-commit-inspection-smoke-tests)))
+    :run-git-commit-inspection-smoke-tests)
+   (uiop:symbol-call
+    :dreyeck/git/asdf-reference-tests
+    :run-git-asdf-reference-smoke-tests)))
 
 (asdf:defsystem #:dreyeck/upstream-intake/tests
   :description "Deterministic read-only Upstream Intake contract tests"

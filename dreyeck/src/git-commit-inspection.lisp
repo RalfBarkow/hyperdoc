@@ -237,9 +237,18 @@ reported as GIT-COMMAND-FAILED."
    (path
     :reader git-file-path-of
     :initarg :path
-    :type string))
+    :type string)
+   (asdf-reference-projection
+    :accessor git-file-asdf-reference-projection-cache
+    :initform nil))
   (:documentation
    "A repository file path as seen at a particular Git commit."))
+
+(defun make-git-file-at-commit (&key commit path)
+  "Return PATH as it existed in COMMIT."
+  (check-type commit git-commit)
+  (check-type path string)
+  (make-instance 'git-file-at-commit :commit commit :path path))
 
 (defmethod print-object ((file git-file-at-commit) stream)
   (print-unreadable-object (file stream :type t :identity nil)
@@ -305,9 +314,9 @@ reported as GIT-COMMAND-FAILED."
 
 (defun git-commit-file-change-file (change)
   "Return the changed path as an inspectable file-at-commit object."
-  (make-instance 'git-file-at-commit
-                 :commit (git-commit-file-change-commit-of change)
-                 :path (git-commit-file-change-path-of change)))
+  (make-git-file-at-commit
+   :commit (git-commit-file-change-commit-of change)
+   :path (git-commit-file-change-path-of change)))
 
 (defun git-file-blob-spec (file)
   (format nil "~A:~A"

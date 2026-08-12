@@ -1,0 +1,87 @@
+<h1>Historical ASDF Dependencies as a DMX Topicmap</h1>
+
+<in-package>dreyeck/git</in-package>
+
+<p>
+  Commit <code>e3f69fcf37cca51f32bd55bcf372134e2cdb77a7</code>
+  contains a historical <code>dreyeck.asd</code>. Inspecting that Git blob now
+  should show what the file declared then without confusing it with the ASDF
+  registry in the current Lisp image.
+</p>
+
+<h2>Follow the reference through the Inspector</h2>
+
+<ol>
+  <li>Inspect the historical Git commit.</li>
+  <li>Open <code>dreyeck.asd</code> from its Changed files view.</li>
+  <li>Use <code>ASDF references</code> to inspect each declaration and dependency.</li>
+  <li>Use <code>Topicmap</code> for the same objects and typed relations.</li>
+  <li>Follow the current target only when it is already registered in ASDF.</li>
+</ol>
+
+<pre>
+Git commit e3f69fc
+  -[:has-file-at-commit]-&gt; dreyeck.asd at e3f69fc
+  -[:declares-system]-&gt; dreyeck/upstream-intake at e3f69fc
+  -[:depends-on]-&gt; CLOSER-MOP reference at e3f69fc
+  -[:resolves-to-in-current-image]-&gt; current ASDF:SYSTEM CLOSER-MOP
+</pre>
+
+<h2>Keep the four layers separate</h2>
+
+<ul>
+  <li>
+    The fachliche objects are a historical Git commit, its file, ASDF system
+    declarations, dependency references, and the current-image resolution
+    observations.
+  </li>
+  <li>
+    <code>HISTORICAL-ASDF-REFERENCE-TOPICMAP</code> projects those objects onto
+    HyperDoc's general topics, typed associations, temporal scopes, and view
+    properties.
+  </li>
+  <li>
+    The generic Inspector view is named <code>Topicmap</code>. Any inspectable
+    object can participate by supplying the same renderer-independent
+    projection.
+  </li>
+  <li>
+    The native CLOG presentation currently renders the projection as SVG and
+    keeps its topics inspectable. A DM6/Elm AppEmbed can be added as an
+    optional renderer, but is not part of this model's contract.
+  </li>
+</ul>
+
+<p>
+  Historical extraction never reads, loads, or evaluates the committed ASD
+  file. Simple string and symbol designators are canonicalized structurally;
+  unsupported forms remain inspectable evidence. Current resolution is a
+  separate observation against <code>ASDF:REGISTERED-SYSTEM</code>, so an
+  unresolved dependency does not trigger discovery, loading, Quicklisp, or a
+  network operation.
+</p>
+
+<h2>Reproduce the path from SLY</h2>
+
+<pre>
+(asdf:load-system "dreyeck/inspector/git")
+(defparameter *historical-dreyeck-commit*
+  (dreyeck/git:make-git-commit
+   :repository (dreyeck/git:current-git-repository-checkout)
+   :commit-ish "e3f69fcf37cca51f32bd55bcf372134e2cdb77a7"))
+(defparameter *historical-dreyeck-asd*
+  (dreyeck/git:make-git-file-at-commit
+   :commit *historical-dreyeck-commit*
+   :path "dreyeck.asd"))
+(clog-moldable-inspector:clog-inspect :object *historical-dreyeck-asd*)
+</pre>
+
+<h2>Implementation and provenance on demand</h2>
+
+<source-of-function>git-file-asdf-reference-projection</source-of-function>
+<source-of-function>historical-asdf-dependency-resolution</source-of-function>
+<source-of-function>historical-asdf-reference-topicmap</source-of-function>
+
+<nav>
+  <a page="Upstream Intake as a Read-Only Observation">Back to Upstream Intake</a>
+</nav>

@@ -35,6 +35,7 @@
    #:git-commit-patch
    #:git-commit-changed-files
    #:git-file-at-commit
+   #:make-git-file-at-commit
    #:git-file-commit-of
    #:git-file-path-of
    #:git-commit-file-change
@@ -45,4 +46,32 @@
    #:git-commit-file-changes
    #:git-commit-file-change-file
    #:git-file-blob-spec
-   #:git-file-contents))
+   #:git-file-contents
+   #:historical-asdf-file-projection
+   #:historical-asdf-file-projection-file-of
+   #:historical-asdf-file-projection-declarations-of
+   #:historical-asdf-file-projection-issues-of
+   #:historical-asdf-system-declaration
+   #:historical-asdf-system-declaration-file-of
+   #:historical-asdf-system-declaration-source-designator-of
+   #:historical-asdf-system-declaration-canonical-name-of
+   #:historical-asdf-system-declaration-dependencies-of
+   #:historical-asdf-dependency-reference
+   #:historical-asdf-dependency-reference-file-of
+   #:historical-asdf-dependency-reference-declaration-of
+   #:historical-asdf-dependency-reference-relation-of
+   #:historical-asdf-dependency-reference-source-designator-of
+   #:historical-asdf-dependency-reference-canonical-name-of
+   #:historical-asdf-dependency-reference-support-status-of
+   #:historical-asdf-dependency-resolution
+   #:current-asdf-dependency-resolution
+   #:current-asdf-dependency-resolution-reference-of
+   #:current-asdf-dependency-resolution-status-of
+   #:current-asdf-dependency-resolution-target-of
+   #:current-asdf-dependency-resolution-observed-in-of
+   #:historical-asdf-parse-issue
+   #:historical-asdf-parse-issue-file-of
+   #:historical-asdf-parse-issue-position-of
+   #:historical-asdf-parse-issue-message-of
+   #:git-file-asdf-reference-projection
+   #:historical-asdf-reference-topicmap))

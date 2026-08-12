@@ -273,7 +273,9 @@
     ("Observing an Upstream Commit"
      "Observing an Upstream Commit.html")
     ("An Upstream Supersession Hypothesis"
-     "An Upstream Supersession Hypothesis.html")))
+     "An Upstream Supersession Hypothesis.html")
+    ("Historical ASDF Dependencies as a DMX Topicmap"
+     "Historical ASDF Dependencies as a DMX Topicmap.html")))
 
 (defun page-elements (page tag-name)
   (plump:get-elements-by-tag-name (hyperdoc::dom-of page) tag-name))
@@ -434,8 +436,8 @@
            "Unexpected Upstream Intake main page ~S."
            (hyperbook:main-page-id-of book))
     (hyperdoc::ensure-pages-loaded book)
-    (check (= 3 (hash-table-count (hyperdoc:pages-of book)))
-           "Upstream Intake HyperDoc contains ~D pages instead of three."
+    (check (= 4 (hash-table-count (hyperdoc:pages-of book)))
+           "Upstream Intake HyperDoc contains ~D pages instead of four."
            (hash-table-count (hyperdoc:pages-of book)))
     (dolist (spec +upstream-intake-page-specs+)
       (destructuring-bind (title filename) spec
@@ -766,6 +768,10 @@
            (hyperbook:find-page
             book "An Upstream Supersession Hypothesis"
             :signal-error? t))
+         (asdf-page
+           (hyperbook:find-page
+            book "Historical ASDF Dependencies as a DMX Topicmap"
+            :signal-error? t))
          (repository-root
            (dreyeck/git:git-repository-root-of
             (dreyeck/git:current-git-repository-checkout)))
@@ -781,6 +787,25 @@
      "Overview source references differ: ~S."
      (page-source-function-names overview))
     (resolve-page-source-references overview)
+    (check
+     (equal '("git-file-asdf-reference-projection"
+              "historical-asdf-dependency-resolution"
+              "historical-asdf-reference-topicmap")
+            (page-source-function-names asdf-page))
+     "Historical ASDF page source references differ: ~S."
+     (page-source-function-names asdf-page))
+    (check (null (page-expressions asdf-page))
+           "Historical ASDF page unexpectedly evaluates expressions.")
+    (resolve-page-source-references asdf-page)
+    (multiple-value-bind (asdf-html asdf-view)
+        (render-page asdf-page)
+      (declare (ignore asdf-view))
+      (dolist (expected '("renderer-independent"
+                          "ASDF:REGISTERED-SYSTEM"
+                          "optional renderer"))
+        (check (search expected asdf-html :test #'char-equal)
+               "Historical ASDF page lacks ~S."
+               expected)))
     (multiple-value-bind (overview-html overview-view)
         (render-page overview)
       (declare (ignore overview-view))
