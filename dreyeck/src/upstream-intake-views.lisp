@@ -32,6 +32,115 @@
   (dreyeck/git:trim-git-output
    (dreyeck/git:git-commit-one-line commit)))
 
+(defun definition-identity (probe)
+  (format nil "~A::~A"
+          (dreyeck/upstream-intake:live-definition-probe-package-name probe)
+          (dreyeck/upstream-intake:live-definition-probe-symbol-name probe)))
+
+(defun definition-facts (observation)
+  (format nil
+          "package=~:[absent~;present~], symbol=~:[absent~;~:*~(~A~)~], fbound=~:[no~;yes~], bound=~:[no~;yes~], class=~:[no~;yes~], method=~:[no~;yes~]"
+          (dreyeck/upstream-intake:live-definition-observation-package-present-p
+           observation)
+          (dreyeck/upstream-intake:live-definition-observation-symbol-status
+           observation)
+          (dreyeck/upstream-intake:live-definition-observation-fboundp observation)
+          (dreyeck/upstream-intake:live-definition-observation-boundp observation)
+          (dreyeck/upstream-intake:live-definition-observation-class-present-p
+           observation)
+          (dreyeck/upstream-intake:live-definition-observation-method-present-p
+           observation)))
+
+(defun render-lisp-image-observation (reference)
+  (let ((image
+          (dreyeck/upstream-intake:upstream-reference-lisp-image-of
+           reference)))
+    (when image
+      (html-inspector-views:html
+        (:h3 (html-inspector-views:esc "Observed current Lisp image"))
+        (:p
+         (html-inspector-views:esc
+          "These rows are current facts. Observation does not load or redefine anything."))
+        (:table :class "inspector-table"
+                (render-intake-row
+                 "Evidence status"
+                 (dreyeck/upstream-intake:lisp-image-observation-evidence-status
+                  image))
+                (dolist
+                    (system
+                      (dreyeck/upstream-intake:lisp-image-observation-relevant-systems
+                       image))
+                  (render-intake-row
+                   (format nil "ASDF system ~A" (car system))
+                   (if (cdr system) "loaded" "not loaded")))
+                (when
+                    (dreyeck/upstream-intake:lisp-image-observation-candidate-system
+                     image)
+                  (render-intake-row
+                   (format
+                    nil "Candidate system ~A"
+                    (dreyeck/upstream-intake:lisp-image-observation-candidate-system
+                     image))
+                   (if
+                       (dreyeck/upstream-intake:lisp-image-observation-candidate-system-loaded-p
+                        image)
+                       "loaded"
+                       "not loaded"))))
+        (:h4 (html-inspector-views:esc "Definition facts"))
+        (:table :class "inspector-table"
+                (:tr
+                 (:th (html-inspector-views:esc "Identity"))
+                 (:th (html-inspector-views:esc "Evidence role"))
+                 (:th (html-inspector-views:esc "Observed facts")))
+                (dolist
+                    (observation
+                      (dreyeck/upstream-intake:lisp-image-observation-definitions
+                       image))
+                  (let ((probe
+                          (dreyeck/upstream-intake:live-definition-observation-probe
+                           observation)))
+                    (html-inspector-views:html
+                      (:tr
+                       (:td (:code
+                             (html-inspector-views:esc
+                              (definition-identity probe))))
+                       (:td (:code
+                             (html-inspector-views:esc
+                              (prin1-to-string
+                               (dreyeck/upstream-intake:live-definition-probe-change-kind
+                                probe)))))
+                       (:td
+                        (html-inspector-views:esc
+                         (definition-facts observation))))))))
+        (:h3 (html-inspector-views:esc "Potential consequences"))
+        (:p
+         (html-inspector-views:esc
+          "Potential consequences are inferences from the facts above, not effects that have occurred."))
+        (if
+            (dreyeck/upstream-intake:upstream-reference-potential-consequences-of
+             reference)
+            (html-inspector-views:html
+              (:ul
+               (dolist
+                   (consequence
+                     (dreyeck/upstream-intake:upstream-reference-potential-consequences-of
+                      reference))
+                 (html-inspector-views:html
+                   (:li
+                    (:code
+                     (html-inspector-views:esc
+                      (prin1-to-string
+                       (dreyeck/upstream-intake:potential-live-image-consequence-kind
+                        consequence))))
+                    (html-inspector-views:esc " — POTENTIAL: ")
+                    (html-inspector-views:esc
+                     (dreyeck/upstream-intake:potential-live-image-consequence-basis
+                      consequence)))))))
+            (html-inspector-views:html
+              (:p
+               (html-inspector-views:esc
+                "No definition-level consequence is inferred from the available evidence."))))))))
+
 (defun render-local-context (reference)
   (let ((context
           (dreyeck/upstream-intake:upstream-reference-local-context-of
@@ -112,7 +221,8 @@
               (render-intake-row
                "Classification"
                (dreyeck/upstream-intake:git-commit-upstream-classification-of
-                reference))))))
+                reference)))
+      (render-lisp-image-observation reference))))
 
 (defun render-component-local-subject (reference)
   (let ((subject
@@ -187,7 +297,34 @@
              "Status"
              (dreyeck/upstream-intake:component-upstream-status-of
               reference)))
-    (render-contract-observations reference)))
+    (render-contract-observations reference)
+    (html-inspector-views:html
+      (:h3 (html-inspector-views:esc "Documentation evidence"))
+      (:table :class "inspector-table"
+              (render-intake-row
+               "Documentation commit"
+               (dreyeck/upstream-intake:component-upstream-documentation-commit-of
+                reference))
+              (render-intake-row
+               "Observed scope"
+               (dreyeck/upstream-intake:component-upstream-documentation-scope-of
+                reference))
+              (let ((observation
+                      (dreyeck/upstream-intake:component-upstream-documentation-observation-of
+                       reference)))
+                (when observation
+                  (render-intake-row
+                   "Local documentation observation"
+                   (dreyeck/upstream-intake:git-commit-upstream-commit-of
+                    observation)
+                   :object t
+                   :display
+                   (dreyeck/upstream-intake:component-upstream-documentation-commit-of
+                    reference)))))
+      (:p
+       (html-inspector-views:esc
+        "A documentation-only commit can identify a candidate; it does not establish candidate runtime behavior or contract equivalence.")))
+    (render-lisp-image-observation reference)))
 
 (html-inspector-views:defview upstream-intake-view
     (reference dreyeck/upstream-intake:upstream-reference)

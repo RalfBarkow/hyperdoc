@@ -3,9 +3,9 @@
 <in-package>dreyeck/upstream-intake</in-package>
 
 <p>
-  This case does not ask whether an upstream commit belongs in the current Git
-  history. It records a hypothesis that a broader upstream component could
-  replace a local HyperDoc-specific capability.
+  Could a broader upstream component supersede the local HyperDoc-specific
+  HyperSpec capability? The evidence starts with the identities and status,
+  not with the factory implementation.
 </p>
 
 <pre>
@@ -23,23 +23,41 @@ verification status
   :UNVERIFIED
 </pre>
 
-<h2>Inspect the hypothesis</h2>
+<h2>Named executable example</h2>
 
 <p>
-  The following link executes the existing factory. Its Inspector view links
-  the local subject to the existing Git commit views and shows the proposed
-  relation, verification status, and contract observations as current Lisp
-  data.
+  <code>HYPERSPEC-COMPONENT-UPSTREAM-INTAKE-EXAMPLE</code> observes the local
+  HyperSpec definitions currently alive, while leaving the upstream candidate
+  unloaded and all comparison contracts unverified.
 </p>
 
 <p>
-  <a expr="(make-hyperspec-component-intake)"
+  <a expr="(hyperspec-component-upstream-intake-example)"
      view="Upstream Intake">
-    Inspect the HyperSpec supersession hypothesis
+    Run the named HyperSpec component example and inspect the current result
   </a>
 </p>
 
-<source-of-function>make-hyperspec-component-intake</source-of-function>
+<h2>What to notice</h2>
+
+<p>
+  The current image can report loaded local systems, functions, the URL
+  template variable, the existing HyperSpec page class, and the registered
+  content-view method. These are facts about the local subject. Because no
+  candidate runtime source is installed or loaded, definition overlap and
+  load consequences for the candidate remain unknown.
+</p>
+
+<h2>Documentation evidence is not capability evidence</h2>
+
+<p>
+  Commit <code>db6e40c55a6151164f56689f2034c8d7d9113ff8</code> in
+  <code>khinsen/html-inspector-views</code> is observed from a local checkout
+  when available. Its actual patch changes only <code>README.md</code> and
+  mentions <code>html-inspector-views-hyperspec</code>. That establishes a
+  documentation reference, not its implementing definitions or contract
+  equivalence.
+</p>
 
 <h2>Contracts still to compare</h2>
 
@@ -71,8 +89,17 @@ Verification       :UNVERIFIED
   contracts, and deciding on supersession remain separate steps.
 </p>
 
+<h2>Implementation and provenance on demand</h2>
+
+<p>
+  The factory source is retained as an optional explanation of how the
+  inspectable hypothesis is constructed.
+</p>
+
+<source-of-function>make-hyperspec-component-intake</source-of-function>
+
 <nav>
   <a page="Upstream Intake as a Read-Only Observation">Back to the overview</a>
   ·
-  <a page="An Upstream Commit Available but Not Integrated">See the Git commit case</a>
+  <a page="Observing an Upstream Commit">See the Git commit case</a>
 </nav>

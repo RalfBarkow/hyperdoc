@@ -142,7 +142,8 @@
   :pathname "dreyeck/src/"
   :serial t
   :depends-on (#:dreyeck/git
-               #:hyperdoc)
+               #:hyperdoc
+               #:closer-mop)
   :components
   ((:module "dreyeck/pages/upstream-intake"
     :pathname "../pages/upstream-intake/")
@@ -217,6 +218,7 @@
   :serial t
   :depends-on (#:dreyeck/inspector/upstream-intake
                #:hyperdoc/explorer
+               #:hyperbook/fedwiki
                #:dreyeck/extension-system-boundaries)
   :components
   ((:file "upstream-intake-smoke"))

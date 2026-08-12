@@ -1,0 +1,92 @@
+<h1>Observing an Upstream Commit</h1>
+
+<in-package>dreyeck/upstream-intake</in-package>
+
+<p>
+  What does it mean for an upstream commit to be present locally? This case
+  starts with
+  <code>4a0a9d859148e23b6f1ec8ec106145aa68c79c7c</code> from
+  <code>khinsen/hyperdoc</code>, whose subject is
+  <code>Catch and handle "host not found" error for fedwiki sites</code>. The
+  reference is observed against the checkout and Lisp image current when the
+  named example runs.
+</p>
+
+<h2>Named executable example</h2>
+
+<p>
+  <code>HYPERDOC-HOST-NOT-FOUND-UPSTREAM-INTAKE-EXAMPLE</code> observes the
+  upstream commit without integrating it. The returned object opens directly
+  in its <code>Upstream Intake</code> view.
+</p>
+
+<p>
+  <a expr="(hyperdoc-host-not-found-upstream-intake-example)"
+     view="Upstream Intake">
+    Run the named host-not-found example and inspect the current result
+  </a>
+</p>
+
+<h2>What to notice</h2>
+
+<ul>
+  <li>whether the commit object is present locally;</li>
+  <li>whether it is an ancestor of the current <code>HEAD</code>;</li>
+  <li>its current merge base and refs containing it;</li>
+  <li>the current classification, which is observation data rather than a title;</li>
+  <li>the actual changed file: <code>hyperbook-fedwiki/fedwiki.lisp</code>;</li>
+  <li>the changed definition: <code>HYPERBOOK/FEDWIKI::MAKE-FEDWIKI</code>;</li>
+  <li>whether that function is already fbound in the current Lisp image;</li>
+  <li>a separately labelled potential live function redefinition.</li>
+</ul>
+
+<h2>Interpretation</h2>
+
+<p>
+  Object presence is not integration. A live function overlap is not proof
+  that loading the commit is safe. The current branch has subsequently
+  refactored FedWiki initialization, so commit identity, patch equivalence,
+  current behavior, and an integration decision remain separate questions.
+</p>
+
+<h2>Historical evidence, not a permanent assertion</h2>
+
+<p>
+  At local commit <code>f840514</code>, the read-only observation was:
+</p>
+
+<pre>
+:OBJECT-PRESENT-P     T
+:ANCESTOR-OF-HEAD-P   NIL
+:MERGE-BASE           954cf797c1651959aaad249db80e7c73218584e9
+:CLASSIFICATION       :AVAILABLE-NOT-INTEGRATED
+</pre>
+
+<p>
+  These values are historical evidence. The executable example reads the
+  current repository state. If the upstream commit later becomes an ancestor
+  of <code>HEAD</code>, the classification may become
+  <code>:ALREADY-INTEGRATED</code>. Such a change is a new observation, not a
+  documentation or test failure.
+</p>
+
+<p>
+  No removed or renamed definition is evidenced by this patch, so this
+  observation does not assert a stale-live-definition consequence.
+</p>
+
+<h2>Implementation and provenance on demand</h2>
+
+<p>
+  The factory source answers “How is this observation constructed?” Following
+  the inspectable upstream commit supplies Commit, Metadata, Stat, Changed
+  files, and Patch views.
+</p>
+
+<source-of-function>make-hyperdoc-host-not-found-intake</source-of-function>
+
+<nav>
+  <a page="Upstream Intake as a Read-Only Observation">Back to the overview</a>
+  ·
+  <a page="An Upstream Supersession Hypothesis">Next: component hypothesis</a>
+</nav>

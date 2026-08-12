@@ -8,6 +8,11 @@
    #:upstream-reference-origin-of
    #:upstream-reference-reference-of
    #:upstream-reference-local-context-of
+   #:upstream-reference-lisp-image-of
+   #:upstream-reference-observed-overlap-of
+   #:upstream-reference-potential-consequences-of
+   #:upstream-reference-evidence-of
+   #:upstream-reference-evidence-status-of
    #:upstream-reference-observations
    #:upstream-local-context
    #:upstream-local-context-repository-of
@@ -27,10 +32,44 @@
    #:component-upstream-proposed-relation-of
    #:component-upstream-status-of
    #:component-upstream-contracts-of
+   #:component-upstream-documentation-commit-of
+   #:component-upstream-documentation-observation-of
+   #:component-upstream-documentation-scope-of
    #:contract-observation
    #:contract-observation-name-of
    #:contract-observation-status-of
    #:make-contract-observation
+   #:live-definition-probe
+   #:make-live-definition-probe
+   #:live-definition-probe-package-name
+   #:live-definition-probe-symbol-name
+   #:live-definition-probe-kind
+   #:live-definition-probe-change-kind
+   #:live-definition-probe-evidence
+   #:live-definition-probe-method-specializers
+   #:live-definition-observation
+   #:live-definition-observation-probe
+   #:live-definition-observation-package-present-p
+   #:live-definition-observation-symbol-present-p
+   #:live-definition-observation-symbol-status
+   #:live-definition-observation-fboundp
+   #:live-definition-observation-boundp
+   #:live-definition-observation-class-present-p
+   #:live-definition-observation-function-kind
+   #:live-definition-observation-method-present-p
+   #:lisp-image-observation
+   #:lisp-image-observation-relevant-systems
+   #:lisp-image-observation-candidate-system
+   #:lisp-image-observation-candidate-system-loaded-p
+   #:lisp-image-observation-definitions
+   #:lisp-image-observation-evidence-status
+   #:potential-live-image-consequence
+   #:potential-live-image-consequence-kind
+   #:potential-live-image-consequence-definition
+   #:potential-live-image-consequence-basis
+   #:potential-live-image-consequence-status
+   #:observe-current-lisp-image
+   #:observe-upstream-change
    #:make-upstream-commit-intake
    #:make-component-intake
    #:make-hyperdoc-host-not-found-intake

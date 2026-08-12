@@ -2,69 +2,107 @@
 
 <in-package>dreyeck/upstream-intake</in-package>
 
+<h2>Start with a concrete upstream commit</h2>
+
 <p>
-  An upstream hint is initially an object to observe, not a change to execute.
-  HyperDoc retains the reference and the locally observable facts so that a
-  later integration decision can be made explicitly and inspected in context.
+  Konrad Hinsen pointed to commit
+  <code>4a0a9d859148e23b6f1ec8ec106145aa68c79c7c</code> in
+  <code>khinsen/hyperdoc</code>. The first useful act is to observe that
+  reference against the checkout and Lisp image that are alive now.
 </p>
 
+<h3>Named executable example</h3>
+
+<p>
+  <code>HYPERDOC-HOST-NOT-FOUND-UPSTREAM-INTAKE-EXAMPLE</code> observes the
+  commit without integrating it. Run the named example and inspect its current
+  Git facts, live definition overlap, and separately labelled potential
+  consequences.
+</p>
+
+<p>
+  <a expr="(hyperdoc-host-not-found-upstream-intake-example)"
+     view="Upstream Intake">
+    Run the named host-not-found upstream observation
+  </a>
+</p>
+
+<h3>What happened in that observation?</h3>
+
+<p>
+  The observation asks whether the object is present, whether it is an
+  ancestor of the current <code>HEAD</code>, which merge base and containing
+  refs exist, and whether the changed <code>MAKE-FEDWIKI</code> definition is
+  already live. A possible function redefinition is shown as
+  <code>:POTENTIAL</code>, never as an effect that has occurred.
+</p>
+
+<p>
+  <a page="Observing an Upstream Commit">
+    Follow the complete commit-observation reading path
+  </a>
+</p>
+
+<h2>Observing an upstream change is a routine</h2>
+
 <pre>
-OBSERVE
-  -&gt; LOCATE
-  -&gt; COMPARE
-  -&gt; CLASSIFY
-  -&gt; INSPECT
+receive upstream hint
+  -&gt; retain reference
+  -&gt; locate local object or component
+  -&gt; compare local and upstream evidence
+  -&gt; inspect the current live Lisp image
+  -&gt; identify possible consequences
+  -&gt; retain the observation
+  -&gt; inspect
+  -&gt; only later: decide
 </pre>
 
 <p>
-  This process does not continue automatically to <code>MERGE</code>,
-  <code>CHERRY-PICK</code>, <code>INSTALL</code>, or <code>SUPERSEDE</code>.
-  The intake records evidence; it does not prescribe an operation.
+  <code>OBSERVE-UPSTREAM-CHANGE</code> is the recognizable read-only operation
+  behind this routine. Re-running an example produces a new observation of
+  the present checkout and present image. Integration is a separate operation.
 </p>
 
-<h2>Two kinds of upstream reference</h2>
+<h2>A second, deliberately different case</h2>
 
 <p>
-  A <code>:GIT-COMMIT</code> reference asks questions about commit identity and
-  the current local history:
+  Konrad also named <code>html-inspector-views-hyperspec</code> as a broader
+  upstream candidate for the local HyperSpec work in commit
+  <code>47e29b3fb89486cc29def9e4c504020d2a714a61</code>.
+  <code>HYPERSPEC-COMPONENT-UPSTREAM-INTAKE-EXAMPLE</code> retains that as an
+  unverified hypothesis and observes only the local capability already alive.
 </p>
 
+<p>
+  <a expr="(hyperspec-component-upstream-intake-example)"
+     view="Upstream Intake">
+    Run the named HyperSpec component observation
+  </a>
+</p>
+
+<p>
+  <a page="An Upstream Supersession Hypothesis">
+    Follow the complete component-hypothesis reading path
+  </a>
+</p>
+
+<h2>Compare the two kinds of reference</h2>
+
 <ul>
-  <li>Is the commit object present locally?</li>
-  <li>Is it an ancestor of the current <code>HEAD</code>?</li>
-  <li>What is its merge base with <code>HEAD</code>?</li>
-  <li>Which local or remote-tracking refs contain it?</li>
-  <li>Which fact-derived classification follows?</li>
+  <li>
+    A <code>:GIT-COMMIT</code> reference observes commit identity, current
+    ancestry, patch evidence, and live overlap for definitions evidenced by
+    that patch.
+  </li>
+  <li>
+    A <code>:COMPONENT</code> reference retains a local subject, candidate,
+    proposed relation, verification status, contract questions, and current
+    local live-image facts. Missing candidate runtime evidence stays unknown.
+  </li>
 </ul>
 
 <p>
-  A <code>:COMPONENT</code> reference asks a different set of questions. It
-  retains a local subject, an upstream candidate, a proposed relation, a
-  verification status, and explicit contract observations. It does not use
-  Git ancestry as a proxy for capability equivalence.
-</p>
-
-<h2>Commit classifications</h2>
-
-<ul>
-  <li>
-    <code>:ALREADY-INTEGRATED</code>: the observed commit is an ancestor of the
-    current <code>HEAD</code>.
-  </li>
-  <li>
-    <code>:AVAILABLE-NOT-INTEGRATED</code>: the commit object is present, but is
-    not an ancestor of the current <code>HEAD</code>.
-  </li>
-  <li>
-    <code>:NOT-AVAILABLE-LOCALLY</code>: the checkout has no local commit object
-    for the supplied reference.
-  </li>
-</ul>
-
-<p>
-  None of these classifications means “merge required” or “cherry-pick
-  required.” Commit identity, patch equivalence, and an integration decision
-  are three distinct questions:
+  Commit identity, patch equivalence, and integration decision remain distinct:
 </p>
 
 <pre>
@@ -83,40 +121,23 @@ observed upstream capability
   != supersession decision
 </pre>
 
-<h2>Implemented observation operations</h2>
+<h2>What intake deliberately does not do</h2>
 
 <p>
-  <code>MAKE-UPSTREAM-COMMIT-INTAKE</code> performs the local object, ancestry,
-  merge-base, and ref observations. Its implementation performs no fetch.
+  <code>OBSERVE != APPLY</code>, <code>COMPARE != LOAD</code>, and
+  <code>VERIFY != INSTALL</code>. Intake does not fetch, merge, cherry-pick,
+  install the candidate, load it, redefine live definitions, or confirm a
+  contract from similarity alone.
 </p>
 
+<h2>Implementation and provenance on demand</h2>
+
+<p>
+  These source views explain how the observations are constructed. They are
+  optional provenance detours after the examples and their interpretation.
+</p>
+
+<source-of-function>observe-upstream-change</source-of-function>
 <source-of-function>make-upstream-commit-intake</source-of-function>
-
-<p>
-  <code>MAKE-COMPONENT-INTAKE</code> records a relation hypothesis and its
-  contract questions without evaluating the candidate implementation.
-</p>
-
 <source-of-function>make-component-intake</source-of-function>
-
-<p>
-  <code>UPSTREAM-REFERENCE-SUMMARY</code> turns either inspectable object into a
-  copy-pasteable Lisp plist. The object itself remains the primary evidence.
-</p>
-
 <source-of-function>upstream-reference-summary</source-of-function>
-
-<h2>Executable cases</h2>
-
-<ul>
-  <li>
-    <a page="An Upstream Commit Available but Not Integrated">
-      Inspect the real HyperDoc commit reference
-    </a>
-  </li>
-  <li>
-    <a page="An Upstream Supersession Hypothesis">
-      Inspect the HyperSpec component hypothesis
-    </a>
-  </li>
-</ul>
