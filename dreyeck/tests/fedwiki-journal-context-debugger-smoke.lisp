@@ -626,6 +626,22 @@
            "Production containment did not preserve the probe condition object."))
   t)
 
+(defun run-journal-entry-items-view-test ()
+  (let* ((entry (make-journal-entry "items.example" 1000))
+         (view
+           (find "Items"
+                 (html-inspector-views:all-views entry)
+                 :key #'html-inspector-views:view-title
+                 :test #'string=)))
+    (check view
+           "Existing JOURNAL-ENTRY fixture lacks Konrad's Items view.")
+    (let ((html (html-inspector-views:view-html view)))
+      (dolist (key '("entry-type" "date" "site"))
+        (check (search key html :test #'char-equal)
+               "JOURNAL-ENTRY Items view lacks ~S: ~S."
+               key html))))
+  t)
+
 (defun run-inspector-view-test ()
   (let* ((outcome
            (make-condition 'simple-error
@@ -671,6 +687,7 @@
   (run-raw-outcome-retention-test)
   (run-protocol-probe-example-test)
   (run-initialization-containment-example-test)
+  (run-journal-entry-items-view-test)
   (run-inspector-view-test)
   (format t "FedWiki journal-context debugger tests passed.~%")
   t)
