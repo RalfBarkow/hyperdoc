@@ -9,6 +9,29 @@
    #:lisp-image-hauptsache-contract-example
    #:lisp-image-page-ownership-example
    #:current-lisp-hyperbooks-example
-   #:current-lisp-hyperbook-views-example))
+   #:current-lisp-hyperbook-views-example
+   #:lisp-image-entry
+   #:lisp-image-entry-kind
+   #:lisp-image-entry-symbol
+   #:lisp-image-entry-package-name
+   #:lisp-image-entry-symbol-status
+   #:lisp-image-entry-page-id
+
+   #:lisp-image-inventory
+   #:lisp-image-function-entries
+   #:lisp-image-class-entries
+
+   #:package-qualified-symbol-page-id
+   #:collect-lisp-function-entries
+   #:collect-lisp-class-entries
+   #:make-lisp-image-inventory
+   #:find-lisp-image-entry
+
+   #:lisp-image-inventory-example
+   #:lisp-image-inventory-summary-example
+   #:lisp-function-inventory-transfer-example
+   #:lisp-image-inventory-transfer-audit-example
+   #:lisp-function-page-id-failures-example
+   #:reader-safe-lisp-image-page-ids-example))
 
 (in-package #:dreyeck/lisp-image)

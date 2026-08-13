@@ -5,7 +5,7 @@
 <p>
   This page is the executable reading path for moving the Lisp-image
   browsing functionality from the historical hauptsache branch into
-  Dreyeck-owned subsystems.
+  dreyeck.ch-owned subsystems.
 </p>
 
 <p>
@@ -125,23 +125,180 @@
 <p>
   Our current refactoring hypothesis is therefore narrower than
   copying the hauptsache files: first recover Lisp-image enumeration
-  and browseability as Dreyeck-owned functionality. Lookup hardening
+  and browseability as dreyeck.ch-owned functionality. Lookup hardening
   remains a separate question until its necessity has been observed
   independently.
+</p>
+
+<h2>5. Model the running Lisp image</h2>
+
+<p>
+  The current Lisp functions and Lisp classes HyperBooks can be
+  addressed directly, but their current inspector views do not include
+  Loaded functions or Loaded classes.
+</p>
+
+<p>
+  Before adding such views, model enumeration independently of
+  HyperBook page construction. The dreyeck.ch-owned inventory records
+  which home-package symbols in the running Lisp image satisfy the
+  relevant predicates and assigns each one a package-qualified page
+  identifier.
+</p>
+
+<h3>5.1 Construct a fresh inventory</h3>
+
+<source-of-function>lisp-image-inventory-example</source-of-function>
+
+<p>
+  Inspect the returned Lisp-image inventory. It contains separate
+  collections for function-bound symbols and symbols with class
+  definitions. Each entry records the symbol, its home package,
+  whether it is internal or external, and the package-qualified page
+  identifier that could later be used to address a HyperBook page.
+</p>
+
+<p>
+  Function enumeration deliberately uses FBOUNDP without yet assuming
+  that every such name can be turned into a page by the current Lisp
+  functions HyperBook. Enumeration and page construction remain
+  separate concerns at this stage.
+</p>
+
+<h3>5.2 Inspect representative inventory entries</h3>
+
+<source-of-function>lisp-image-inventory-summary-example</source-of-function>
+
+<p>
+  The summary records the current number of function and class entries
+  and looks up two representative identifiers:
+  COMMON-LISP:CAR in the function inventory and
+  COMMON-LISP:STANDARD-OBJECT in the class inventory.
+</p>
+
+<p>
+  The counts are properties of the running Lisp image, not constants
+  of this page. Loading additional systems may legitimately change
+  them.
+</p>
+
+<h2>6. Observe transfer from inventory to HyperBook pages</h2>
+
+<p>
+  Membership in the function inventory is established with FBOUNDP.
+  That does not yet establish that the current Lisp functions
+  HyperBook can construct a page for every inventory entry.
+</p>
+
+<p>
+  Compare representative function-bound names with different language
+  roles: CAR as an ordinary function, WHEN and SETF as macros, and IF
+  as a special operator.
+</p>
+
+<source-of-function>lisp-function-inventory-transfer-example</source-of-function>
+
+<p>
+  For each name, the observation records its inventory entry, FBOUNDP,
+  MACRO-FUNCTION, SPECIAL-OPERATOR-P, and the result of asking the
+  current Lisp functions HyperBook for the corresponding page.
+  Lookup failures are retained as inspectable conditions instead of
+  aborting the observation.
+</p>
+
+<p>
+  This distinguishes two contracts that the historical implementation
+  combined: deciding which names belong to the running Lisp-image
+  inventory, and deciding which of those names can be represented by
+  the existing HyperBook page model.
+</p>
+
+<p>
+  In the current SBCL image, all four representative names transfer
+  successfully from inventory membership to existing Lisp-function
+  HyperBook pages. This includes an ordinary function, macros, and a
+  special operator.
+</p>
+
+<p>
+  The representative observation therefore does not justify changing
+  the current Lisp-function lookup implementation. Before adding
+  browseable Loaded views, audit the same transfer over the complete
+  function and class inventories.
+</p>
+
+<h2>7. Audit the complete inventory transfer</h2>
+
+<p>
+  The representative function names all transfer successfully to
+  pages of the existing Lisp functions HyperBook. That is not yet
+  evidence that every inventory entry does.
+</p>
+
+<p>
+  Audit the complete function and class inventories without changing
+  either HyperBook. The observation counts successful and unsuccessful
+  page lookups and retains a small sample of page identifiers for any
+  failures.
+</p>
+
+<source-of-function>lisp-image-inventory-transfer-audit-example</source-of-function>
+
+<p>
+  If the failure counts are zero, the existing HyperBooks already
+  provide the page-construction contract needed by the inventory.
+  Dreyeck can then add browseability by projecting inventory entries
+  through the existing FIND-PAGE methods rather than duplicating the
+  HyperBook page implementations.
+</p>
+
+<p>
+  If failures remain, inspect those failures before changing page
+  lookup behavior.
+</p>
+
+<h2>8. Inspect function page identifier failures</h2>
+
+<p>
+  The earlier complete transfer audit exposed a small set of function
+  inventory entries whose raw package-qualified identifiers did not
+  survive Lisp reader round-trip.
+</p>
+
+<source-of-function>lisp-function-page-id-failures-example</source-of-function>
+
+<p>
+  After introducing reader-safe package-qualified identifiers, the
+  current failure count should be zero. The earlier failures motivated
+  the identifier work in the following section; they were not missing
+  function definitions.
+</p>
+
+<h2>9. Make package-qualified page identifiers reader-safe</h2>
+
+<p>
+  A Lisp-image page identifier must read back as the identical symbol.
+  Familiar identifiers are retained when they already satisfy that
+  contract; otherwise package and symbol tokens are escaped.
+</p>
+
+<source-of-function>reader-safe-lisp-image-page-ids-example</source-of-function>
+
+<h3>9.1 Re-run the complete transfer audit</h3>
+
+<source-of-function>lisp-image-inventory-transfer-audit-example</source-of-function>
+
+<p>
+  The current running image now transfers every function and class
+  inventory entry through the existing HyperBooks. The earlier
+  function-page failures were identifier serialization failures, not
+  lookup failures.
 </p>
 
 <h2>Next observation</h2>
 
 <p>
-  If the current HyperBooks support direct lookup while Loaded
-  functions and Loaded classes are absent, the next step is to model
-  Lisp-image enumeration as dreyeck.ch-owned functionality.
-</p>
-
-<p>
-  That next observation should enumerate function and class
-  definitions in the running Lisp image without yet adding inspector
-  views or changing the existing HyperBook implementations. The
-  resulting inventory can then be inspected independently before it
-  is connected to browseable Loaded views.
+  Project dreyeck.ch-owned inventory entries to the existing HyperBook
+  page objects, and inspect that projection independently before
+  exposing it as Loaded functions and Loaded classes views.
 </p>

@@ -354,6 +354,7 @@
     :serial t
     :components
     ((:file "lisp-image-package")
+     (:file "lisp-image-inventory")
      (:file "lisp-image-observations")
      (:file "lisp-image-hyperdoc")))
    (:module "dreyeck/pages"
