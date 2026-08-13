@@ -218,16 +218,71 @@
           paths)
          "Derived file uses are not the two opposing paths: ~S."
          paths)))
-    (check (relation-named
-            "reads-special:process-text-and-links:link-regex" observation)
-           "PROCESS-TEXT-AND-LINKS has no typed *LINK-REGEX* read.")
-    (check (relation-named "reads-special:link-regex:url-regex" observation)
-           "*LINK-REGEX* has no typed *URL-REGEX* read.")
-    (check
-     (relation-named
-      "reads-special:link-regex:any-except-closing-bracket-regex" observation)
-     "*LINK-REGEX* has no typed bracket-regex read.")
+    (dolist
+        (spec
+         '(("calls:fetch-site-owner:process-text-and-links"
+            (:run-time)
+            :none-observed
+            nil)
+           ("reads-special:find-examples:neighborhood"
+            (:compile-time :run-time)
+            :required-component-order
+            (:special-proclamation))
+           ("reads-special:process-text-and-links:link-regex"
+            (:compile-time :run-time)
+            :required-within-file
+            (:special-proclamation))
+           ("reads-special:link-regex:url-regex"
+            (:compile-time :load-time)
+            :required-within-file
+            (:special-proclamation :load-time-value))
+           ("reads-special:link-regex:any-except-closing-bracket-regex"
+            (:compile-time :load-time)
+            :required-within-file
+            (:special-proclamation :load-time-value))
+           ("loads-before:fedwiki:story-items"
+            (:system-definition)
+            :observed-component-order
+            (:asdf-dependency))))
+      (destructuring-bind
+          (id phases ordering-constraint ordering-basis)
+          spec
+        (let ((relation (relation-named id observation)))
+          (check relation
+                 "Relation ~S is absent."
+                 id)
+          (check
+           (equal
+            phases
+            (dreyeck/fedwiki-source-relations:typed-source-relation-phases-of
+             relation))
+           "Relation ~S has phases ~S instead of ~S."
+           id
+           (dreyeck/fedwiki-source-relations:typed-source-relation-phases-of
+            relation)
+           phases)
+          (check
+           (eq
+            ordering-constraint
+            (dreyeck/fedwiki-source-relations:typed-source-relation-ordering-constraint-of
+             relation))
+           "Relation ~S has ordering constraint ~S instead of ~S."
+           id
+           (dreyeck/fedwiki-source-relations:typed-source-relation-ordering-constraint-of
+            relation)
+           ordering-constraint)
+          (check
+           (equal
+            ordering-basis
+            (dreyeck/fedwiki-source-relations:typed-source-relation-ordering-basis-of
+             relation))
+           "Relation ~S has ordering basis ~S instead of ~S."
+           id
+           (dreyeck/fedwiki-source-relations:typed-source-relation-ordering-basis-of
+            relation)
+           ordering-basis))))
     observation))
+
 
 (defun check-hypotheses (observation)
   (let* ((hypotheses
@@ -363,31 +418,31 @@
            (topicmap-html (html-inspector-views:view-html topicmap-view)))
       (dolist
           (object
-            (dreyeck/fedwiki-source-relations:fedwiki-source-relations-files-of
-             observation))
+	   (dreyeck/fedwiki-source-relations:fedwiki-source-relations-files-of
+	    observation))
         (check (member object overview-references :test #'eq)
                "Overview does not retain inspectable Git file ~S."
                object))
       (dolist
           (object
-            (append
-             (rest
-              (dreyeck/fedwiki-source-relations:fedwiki-source-relations-files-of
-               observation))
-             (dreyeck/fedwiki-source-relations:fedwiki-source-relations-definitions-of
-              observation)))
+	   (append
+	    (rest
+	     (dreyeck/fedwiki-source-relations:fedwiki-source-relations-files-of
+	      observation))
+	    (dreyeck/fedwiki-source-relations:fedwiki-source-relations-definitions-of
+	     observation)))
         (check (member object source-references :test #'eq)
                "Source-relations view does not retain inspectable ~S."
                object))
       (dolist (marker
-                '("dreyeck-topicmap-canvas"
-                  "data-topic-id='component:fedwiki'"
-                  "data-topic-id='function:fetch-site-owner'"
-                  "data-association-type='LOADS-BEFORE'"
-                  "data-association-type='DEFINES'"
-                  "data-association-type='CALLS'"
-                  "data-association-type='READS-SPECIAL'"
-                  "data-temporal-scope='56325b3e08581198649f9f47d7b23dc059ea671a'"))
+	       '("dreyeck-topicmap-canvas"
+		 "data-topic-id='component:fedwiki'"
+		 "data-topic-id='function:fetch-site-owner'"
+		 "data-association-type='LOADS-BEFORE'"
+		 "data-association-type='DEFINES'"
+		 "data-association-type='CALLS'"
+		 "data-association-type='READS-SPECIAL'"
+		 "data-temporal-scope='56325b3e08581198649f9f47d7b23dc059ea671a'"))
         (check (search marker topicmap-html :test #'char-equal)
                "Topicmap HTML lacks marker ~S." marker)))
     t))
@@ -428,12 +483,15 @@
                        :test #'char-equal)
                "Rendered main page lacks the executable example/source handoff.")
         (dolist (marker
-                  '("Reproduce the observation step by step"
-                    "How the clickable examples work"
-                    "Equivalent SLY reading path"
-                    "Verification boundaries"))
-          (check (search marker html :test #'char-equal)
-                 "Rendered main page lacks task marker ~S." marker)))
+                 '("ASDF order is an observation, not yet an explanation"
+                   "A forward function call does not establish the component order"
+                   "A relation in the opposite direction does constrain compilation"
+                   "Phase-sensitive source relations"
+                   "Current analysis boundary"))
+          (check
+           (search marker html)
+           "Rendered main page lacks content marker ~S."
+           marker)))
       (let ((observations
               (remove-if-not
                (lambda (reference)
@@ -441,11 +499,12 @@
                   reference
                   'dreyeck/fedwiki-source-relations:fedwiki-source-relations-observation))
                (view-reference-values content-view))))
-        (check (= 5 (length observations))
-               "Main-page task retained ~D observations instead of five."
+        (check (= 6 (length observations))
+               "Main page retained ~D observations instead of six."
                (length observations))
-        (check (= 5 (length (remove-duplicates observations :test #'eq)))
-               "Main-page task reused an observation between steps.")))
+        (check (= 6 (length (remove-duplicates observations :test #'eq)))
+               "Main page reused an observation between executable examples."))
+      )
     t))
 
 (defun run-fedwiki-source-relations-tests ()

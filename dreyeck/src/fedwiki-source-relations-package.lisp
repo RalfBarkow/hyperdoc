@@ -22,6 +22,9 @@
    #:typed-source-relation-id-of
    #:typed-source-relation-type-of
    #:typed-source-relation-source-of
+   #:typed-source-relation-phases-of
+   #:typed-source-relation-ordering-constraint-of
+   #:typed-source-relation-ordering-basis-of
    #:typed-source-relation-target-of
    #:typed-source-relation-role-of
    #:typed-source-relation-fragment-of
@@ -52,6 +55,7 @@
    #:fedwiki-source-relations-problem-statement-of
    #:fedwiki-source-relations-file
    #:fedwiki-source-relations-definition
+   #:fedwiki-source-relations-relation
    #:make-fedwiki-source-relations-observation
    #:fedwiki-source-relations-example
    #:*fedwiki-source-relations-hyperdoc*))

@@ -5,71 +5,75 @@
 <h2>1. Question and historical source</h2>
 
 <p>
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
+  The ASDF system <tt>hyperbook/fedwiki</tt> places
+  <a expr="(fedwiki-source-relations-file
+             (fedwiki-source-relations-example)
+             &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
     hyperbook-fedwiki/fedwiki.lisp
   </a>
-  is loaded before
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
+  immediately before
+  <a expr="(fedwiki-source-relations-file
+             (fedwiki-source-relations-example)
+             &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
     hyperbook-fedwiki/story-items.lisp
-  </a>,
-  although definitions in the first file refer to definitions in the second.
-  We want to understand how the loading order and these source relations fit
-  together.
-</p>
-
-<p>
-  The observation is anchored at
-  <a expr="(fedwiki-source-relations-commit-of (fedwiki-source-relations-example))">
-    commit 56325b3e08581198649f9f47d7b23dc059ea671a
   </a>.
-  Reading every source object from the same commit keeps the evidence in one
-  historical source state rather than mixing it with definitions currently
-  loaded in the Lisp image.
+  At the same time, source relations run in both directions between these
+  files.
 </p>
 
 <p>
-  The three source objects used by the observation are
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook.asd&quot;)">
+  The question is not whether every source reference determines file order,
+  nor whether arbitrary reordering can be proved safe. The narrower question is:
+  <strong>which observed source relations actually constrain the ASDF
+  component order?</strong>
+</p>
+
+<p>
+  The observation is bound to
+  <a expr="(fedwiki-source-relations-commit-of
+             (fedwiki-source-relations-example))">
+    merge commit 56325b3e08581198649f9f47d7b23dc059ea671a
+  </a>.
+  It reads
+  <a expr="(fedwiki-source-relations-file
+             (fedwiki-source-relations-example)
+             &quot;hyperbook.asd&quot;)">
     hyperbook.asd
   </a>,
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
-    fedwiki.lisp
+  <a expr="(fedwiki-source-relations-file
+             (fedwiki-source-relations-example)
+             &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
+    hyperbook-fedwiki/fedwiki.lisp
   </a>,
   and
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
-    story-items.lisp
-  </a>.
+  <a expr="(fedwiki-source-relations-file
+             (fedwiki-source-relations-example)
+             &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
+    hyperbook-fedwiki/story-items.lisp
+  </a>
+  as historical Git objects without evaluating those files.
 </p>
 
-<h2>2. Construct the observation</h2>
+<h3>Construct the observation</h3>
 
 <p>
-  The current Lisp function below constructs a fresh observation of those
-  historical source objects.
+  The following function constructs a fresh observation of that fixed source
+  state.
 </p>
 
 <source-of-function>fedwiki-source-relations-example</source-of-function>
 
 <p>
   <a expr="(fedwiki-source-relations-example)" view="Overview">
-    Inspect a fresh observation
+    Construct and inspect a fresh FedWiki source-relations observation
   </a>
 </p>
 
-<p>
-  The function above belongs to the current Lisp image. The commit, Git files,
-  definition evidence, and source fragments reached from the observation belong
-  to the fixed historical source state.
-</p>
 
-<h2>3. ASDF component order</h2>
+<h2>2. ASDF order is an observation, not yet an explanation</h2>
 
 <p>
-  We first inspect
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook.asd&quot;)">
-    hyperbook.asd at the fixed commit
-  </a>.
-  Its serial <code>hyperbook/fedwiki</code> component contract yields:
+  Parsing the historical ASDF definition gives this serial component order:
 </p>
 
 <pre>
@@ -84,153 +88,484 @@ views
 </pre>
 
 <p>
-  <a expr="(fedwiki-source-relations-example)" view="Component order">
-    Inspect the component-order evidence
+  This establishes an observed system-definition relation:
+</p>
+
+<p>
+  <a expr="(fedwiki-source-relations-relation
+             (fedwiki-source-relations-example)
+             &quot;loads-before:fedwiki:story-items&quot;)"
+     view="Overview">
+    Inspect fedwiki.lisp — :LOADS-BEFORE → story-items.lisp
   </a>
 </p>
 
 <p>
-  The resulting relation is
-  <code>fedwiki.lisp — :loads-before → story-items.lisp</code>.
-</p>
-
-<h2>4. Forward source use</h2>
-
-<p>
-  <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:fetch-site-owner&quot;)">
-    FETCH-SITE-OWNER
-  </a>
-  is evidenced in
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
-    fedwiki.lisp
-  </a>.
-  Its function body calls
-  <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:process-text-and-links&quot;)">
-    PROCESS-TEXT-AND-LINKS
-  </a>,
-  evidenced in
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
-    story-items.lisp
-  </a>.
+  Its phase is <tt>(:SYSTEM-DEFINITION)</tt>, its ordering constraint is
+  <tt>:OBSERVED-COMPONENT-ORDER</tt>, and its ordering basis is
+  <tt>(:ASDF-DEPENDENCY)</tt>.
 </p>
 
 <p>
-  <a expr="(fedwiki-source-relations-example)" view="Source relations">
-    Follow the definition, fragment, and relation evidence
-  </a>
+  This tells us what order ASDF specifies. It does not, by itself, tell us
+  which Lisp source relation makes that order necessary.
+</p>
+
+
+<h2>3. A forward function call does not establish the component order</h2>
+
+<p>
+  The source in <tt>fedwiki.lisp</tt> contains a call from
+  <tt>FETCH-SITE-OWNER</tt> to <tt>PROCESS-TEXT-AND-LINKS</tt>, whose
+  definition is in <tt>story-items.lisp</tt>.
 </p>
 
 <p>
-  The typed source fact is <code>:CALLS</code>; from it the observation derives
-  <code>fedwiki.lisp — :uses-definition-from → story-items.lisp</code>.
-</p>
-
-<h2>5. Reverse source use</h2>
-
-<p>
-  <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:find-examples-for-story-item-types&quot;)">
-    FIND-EXAMPLES-FOR-STORY-ITEM-TYPES
-  </a>
-  is evidenced directly below the historical source heading
-  <code>;; find examples</code> in
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/story-items.lisp&quot;)">
-    story-items.lisp
-  </a>.
-  The observation classifies it as <code>:DEVELOPMENT-HELPER</code>; it does
-  not infer that the function is unused.
+  Inspect the relation itself:
 </p>
 
 <p>
-  The helper reads
-  <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;special:neighborhood&quot;)">
-    *NEIGHBORHOOD*
-  </a>
-  from
-  <a expr="(fedwiki-source-relations-file (fedwiki-source-relations-example) &quot;hyperbook-fedwiki/fedwiki.lisp&quot;)">
-    fedwiki.lisp
-  </a>,
-  yielding the reverse derived file relation
-  <code>story-items.lisp — :uses-definition-from → fedwiki.lisp</code>.
-</p>
-
-<h2>6. Loading contract and assessment</h2>
-
-<p>
-  The current task is to compile, load, and then use the complete
-  <code>hyperbook/fedwiki</code> system. The serial ASDF order places
-  <code>fedwiki.lisp</code> before <code>story-items.lisp</code>.
-  Consequently, <code>*NEIGHBORHOOD*</code> is declared before
-  <code>story-items.lisp</code> is compiled, while the forward call to
-  <code>PROCESS-TEXT-AND-LINKS</code> initially occurs only inside a function
-  body and its target exists after the complete system has loaded.
-</p>
-
-<p>
-  Under that load-and-use task, the observed mutual source use is therefore
-  evidence of coupling, but not by itself a demonstrated loading failure.
-  Independent component loading, one-way provider relations, helper separation,
-  or eliminating compiler forward references would be stronger requirements
-  that need their own motivation.
-</p>
-
-<h2>7. Topicmap projection</h2>
-
-<p>
-  <a expr="(fedwiki-source-relations-example)" view="Topicmap">
-    Open the source relations as a Topicmap
+  <a expr="(fedwiki-source-relations-relation
+             (fedwiki-source-relations-example)
+             &quot;calls:fetch-site-owner:process-text-and-links&quot;)"
+     view="Overview">
+    Inspect FETCH-SITE-OWNER — :CALLS → PROCESS-TEXT-AND-LINKS
   </a>
 </p>
 
 <p>
-  The projection contains seven topics and nine associations. The topic objects
-  remain the same inspectable Git files and definition-evidence objects used
-  above, and every topic carries the fixed commit as temporal scope.
+  The observation classifies this relation as:
 </p>
 
-<h2>8. Refactoring hypotheses</h2>
+<pre>
+Phases               (:RUN-TIME)
+Ordering constraint  :NONE-OBSERVED
+Ordering basis       NIL
+</pre>
 
 <p>
-  Observation and proposal remain separate. The current observation records
-  two proposals, both explicitly <code>:NOT-EXECUTED</code>.
+  The reference occurs in a function body. Compiling the definition of
+  <tt>FETCH-SITE-OWNER</tt> therefore does not require
+  <tt>PROCESS-TEXT-AND-LINKS</tt> to have been loaded first. After the complete
+  system has loaded, the target function is available before the call can occur
+  at run time.
+</p>
+
+<p>
+  The derived file-level relation
+  <tt>fedwiki.lisp — :USES-DEFINITION-FROM → story-items.lisp</tt>
+  therefore records source use, but it does not provide a reason to reverse the
+  observed ASDF order.
+</p>
+
+
+<h2>4. A relation in the opposite direction does constrain compilation</h2>
+
+<p>
+  The reverse direction is different.
+  <tt>FIND-EXAMPLES-FOR-STORY-ITEM-TYPES</tt>, defined in
+  <tt>story-items.lisp</tt>, refers to <tt>*NEIGHBORHOOD*</tt>, whose
+  top-level <tt>DEFVAR</tt> is in <tt>fedwiki.lisp</tt>.
+</p>
+
+<p>
+  Inspect this relation:
+</p>
+
+<p>
+  <a expr="(fedwiki-source-relations-relation
+             (fedwiki-source-relations-example)
+             &quot;reads-special:find-examples:neighborhood&quot;)"
+     view="Overview">
+    Inspect FIND-EXAMPLES-FOR-STORY-ITEM-TYPES — :READS-SPECIAL → *NEIGHBORHOOD*
+  </a>
+</p>
+
+<p>
+  The observation classifies it as:
+</p>
+
+<pre>
+Phases               (:COMPILE-TIME :RUN-TIME)
+Ordering constraint  :REQUIRED-COMPONENT-ORDER
+Ordering basis       (:SPECIAL-PROCLAMATION)
+</pre>
+
+<p>
+  The distinction between the two phases matters. The value of
+  <tt>*NEIGHBORHOOD*</tt> is read when
+  <tt>FIND-EXAMPLES-FOR-STORY-ITEM-TYPES</tt> runs. But the top-level
+  <tt>DEFVAR</tt> also establishes that the variable is special, and that
+  proclamation must already be available when the reference in
+  <tt>story-items.lisp</tt> is compiled.
+</p>
+
+<p>
+  Under the observed source structure, this gives a concrete compile-time
+  reason for <tt>fedwiki.lisp</tt> to precede <tt>story-items.lisp</tt>.
+</p>
+
+
+<h2>5. The same relation type can have different phase semantics</h2>
+
+<p>
+  The remaining special-variable relations are internal to
+  <tt>story-items.lisp</tt>. They demonstrate why a relation type such as
+  <tt>:READS-SPECIAL</tt> is not sufficient on its own to characterize
+  ordering.
+</p>
+
+<h3>Function-body use of *LINK-REGEX*</h3>
+
+<p>
+  <a expr="(fedwiki-source-relations-relation
+             (fedwiki-source-relations-example)
+             &quot;reads-special:process-text-and-links:link-regex&quot;)"
+     view="Overview">
+    Inspect PROCESS-TEXT-AND-LINKS — :READS-SPECIAL → *LINK-REGEX*
+  </a>
+</p>
+
+<pre>
+Phases               (:COMPILE-TIME :RUN-TIME)
+Ordering constraint  :REQUIRED-WITHIN-FILE
+Ordering basis       (:SPECIAL-PROCLAMATION)
+</pre>
+
+<p>
+  Here the special proclamation matters while the function body is compiled,
+  while the variable's value is read when the function runs.
+</p>
+
+<h3>Load-time construction of *LINK-REGEX*</h3>
+
+<p>
+  <a expr="(fedwiki-source-relations-relation
+             (fedwiki-source-relations-example)
+             &quot;reads-special:link-regex:url-regex&quot;)"
+     view="Overview">
+    Inspect *LINK-REGEX* — :READS-SPECIAL → *URL-REGEX*
+  </a>
+</p>
+
+<p>
+  <a expr="(fedwiki-source-relations-relation
+             (fedwiki-source-relations-example)
+             &quot;reads-special:link-regex:any-except-closing-bracket-regex&quot;)"
+     view="Overview">
+    Inspect *LINK-REGEX* — :READS-SPECIAL → *ANY-EXCEPT-CLOSING-BRACKET-REGEX*
+  </a>
+</p>
+
+<pre>
+Phases               (:COMPILE-TIME :LOAD-TIME)
+Ordering constraint  :REQUIRED-WITHIN-FILE
+Ordering basis       (:SPECIAL-PROCLAMATION :LOAD-TIME-VALUE)
+</pre>
+
+<p>
+  These references occur in the top-level initializer of
+  <tt>*LINK-REGEX*</tt>. The earlier variables therefore contribute both
+  compile-time special proclamations and values required when that initializer
+  is evaluated while the file is loaded.
+</p>
+
+
+<h2>6. Phase-sensitive source relations</h2>
+
+<p>
+  The observation therefore distinguishes source use from ordering semantics:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Relation</th>
+      <th>Phase</th>
+      <th>Ordering consequence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ordinary function call</td>
+      <td><tt>:RUN-TIME</tt></td>
+      <td><tt>:NONE-OBSERVED</tt></td>
+    </tr>
+    <tr>
+      <td>cross-file special-variable reference</td>
+      <td><tt>:COMPILE-TIME</tt> and <tt>:RUN-TIME</tt></td>
+      <td><tt>:REQUIRED-COMPONENT-ORDER</tt></td>
+    </tr>
+    <tr>
+      <td>function-body special-variable reference within one file</td>
+      <td><tt>:COMPILE-TIME</tt> and <tt>:RUN-TIME</tt></td>
+      <td><tt>:REQUIRED-WITHIN-FILE</tt></td>
+    </tr>
+    <tr>
+      <td>top-level initializer dependency within one file</td>
+      <td><tt>:COMPILE-TIME</tt> and <tt>:LOAD-TIME</tt></td>
+      <td><tt>:REQUIRED-WITHIN-FILE</tt></td>
+    </tr>
+    <tr>
+      <td>ASDF serial relation</td>
+      <td><tt>:SYSTEM-DEFINITION</tt></td>
+      <td><tt>:OBSERVED-COMPONENT-ORDER</tt></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  In particular, <tt>:OBSERVED-COMPONENT-ORDER</tt> and
+  <tt>:REQUIRED-COMPONENT-ORDER</tt> are intentionally different claims.
+  The first records what the system definition says. The second records a
+  source relation whose phase semantics require that order under the current
+  source structure.
+</p>
+
+<p>
+  File-level <tt>:USES-DEFINITION-FROM</tt> relations are explicit derivations
+  from the corresponding definition-level relations. They inherit their
+  phase and ordering annotations; they do not constitute an independent
+  ordering argument.
+</p>
+
+
+<h2>7. Inspect the complete observation</h2>
+
+<p>
+  The individual examples above are projections of one source-backed
+  observation. The complete Inspector views keep the component order,
+  definition-level relations, file-level derivations, Topicmap projection, and
+  refactoring hypotheses available from the same object.
+</p>
+
+<ol class="steps">
+  <li class="step">
+    <h3>Inspect the component order</h3>
+    <p class="cmd">
+      <a expr="(fedwiki-source-relations-example)" view="Component order">
+        Construct an observation and open Component order
+      </a>
+    </p>
+  </li>
+
+  <li class="step">
+    <h3>Compare all phase-sensitive source relations</h3>
+    <p class="cmd">
+      <a expr="(fedwiki-source-relations-example)" view="Source relations">
+        Construct an observation and open Source relations
+      </a>
+    </p>
+  </li>
+
+  <li class="step">
+    <h3>Project the direct relations as a Topicmap</h3>
+    <p class="cmd">
+      <a expr="(fedwiki-source-relations-example)" view="Topicmap">
+        Construct an observation and open Topicmap
+      </a>
+    </p>
+  </li>
+
+  <li class="step">
+    <h3>Keep refactoring proposals separate from observations</h3>
+    <p class="cmd">
+      <a expr="(fedwiki-source-relations-example)" view="Refactoring hypotheses">
+        Construct an observation and open Refactoring hypotheses
+      </a>
+    </p>
+  </li>
+</ol>
+
+
+<h2>8. What the current evidence establishes</h2>
+
+<p>
+  The forward call from <tt>FETCH-SITE-OWNER</tt> to
+  <tt>PROCESS-TEXT-AND-LINKS</tt> does not establish a component-order
+  requirement.
+</p>
+
+<p>
+  The reverse reference from
+  <tt>FIND-EXAMPLES-FOR-STORY-ITEM-TYPES</tt> to
+  <tt>*NEIGHBORHOOD*</tt> does establish such a requirement under the current
+  source structure: the top-level <tt>DEFVAR</tt> in <tt>fedwiki.lisp</tt>
+  establishes the special proclamation needed when the corresponding
+  reference in <tt>story-items.lisp</tt> is compiled.
+</p>
+
+<p>
+  The observed serial order is therefore semantically relevant, but this does
+  not imply that the present organization is the only possible organization.
+  Moving definitions, separating development helpers, or extracting a
+  coherent earlier parser component would change the dependency structure and
+  must be evaluated as separate refactoring hypotheses.
+</p>
+
+
+<h2>9. Current analysis boundary</h2>
+
+<p>
+  The historical files, definitions, and exact source fragments in this
+  observation are backed by the fixed Git blobs. The phase and ordering
+  annotations shown on this page are, however, currently explicit
+  classifications in the observation builder.
+</p>
+
+<p>
+  In particular, the current implementation does <strong>not</strong> yet
+  derive all phase and ordering classifications automatically from arbitrary
+  Common Lisp source.
+</p>
+
+<p>
+  This is intentional for the present slice. The explicit classifications
+  define inspectable reference cases for a later source analyzer. Such an
+  analyzer could derive facts such as:
+</p>
+
+<ul>
+  <li>a reference occurs in a function body;</li>
+  <li>a reference occurs in a top-level initializer;</li>
+  <li>a top-level <tt>DEFVAR</tt> or <tt>DEFPARAMETER</tt> establishes a special proclamation;</li>
+  <li>a value is required at load time;</li>
+  <li>an ASDF component relation is supplied by the system definition.</li>
+</ul>
+
+<p>
+  Project-specific interpretations such as <tt>:PRODUCTION</tt> versus
+  <tt>:DEVELOPMENT-HELPER</tt> may remain curated even when more of the
+  Common Lisp phase analysis becomes derived.
+</p>
+
+
+<h2>10. Relation lookup as a HyperDoc operation</h2>
+
+<p>
+  The page does not duplicate the relation objects as prose-only examples.
+  It resolves relation IDs back to the fresh source-backed observation and
+  opens the resulting Lisp objects in the Inspector.
+</p>
+
+<source-of-function>fedwiki-source-relations-relation</source-of-function>
+
+<p>
+  This makes the explanatory path:
+</p>
+
+<pre>
+historical Git source
+        ↓
+source-backed observation
+        ↓
+typed source relation
+        ↓
+phase and ordering classification
+        ↓
+Inspector / HyperDoc
+</pre>
+
+
+<h2>11. Equivalent SLY reading path</h2>
+
+<p>
+  The same observation can be constructed explicitly in a SLY mREPL:
+</p>
+
+<lisp-code>
+(asdf:load-system "dreyeck/inspector/fedwiki-source-relations")
+
+(defparameter *fedwiki-source-relations*
+  (dreyeck/fedwiki-source-relations:fedwiki-source-relations-example))
+
+(clog-moldable-inspector:clog-inspect
+ :object *fedwiki-source-relations*)
+</lisp-code>
+
+<p>
+  A particular relation can then be selected from the same observation:
+</p>
+
+<lisp-code>
+(defparameter *neighborhood-read*
+  (dreyeck/fedwiki-source-relations:fedwiki-source-relations-relation
+   *fedwiki-source-relations*
+   "reads-special:find-examples:neighborhood"))
+
+(list
+ (dreyeck/fedwiki-source-relations:typed-source-relation-phases-of
+  *neighborhood-read*)
+ (dreyeck/fedwiki-source-relations:typed-source-relation-ordering-constraint-of
+  *neighborhood-read*)
+ (dreyeck/fedwiki-source-relations:typed-source-relation-ordering-basis-of
+  *neighborhood-read*))
+</lisp-code>
+
+<p>
+  Expected result:
+</p>
+
+<pre>
+((:COMPILE-TIME :RUN-TIME)
+ :REQUIRED-COMPONENT-ORDER
+ (:SPECIAL-PROCLAMATION))
+</pre>
+
+
+<h2>12. Refactoring remains a separate question</h2>
+
+<p>
+  The observation still carries two unexecuted refactoring hypotheses:
+  separating <tt>FIND-EXAMPLES-FOR-STORY-ITEM-TYPES</tt> as development
+  support, and extracting the Wiki-text parser as a coherent earlier
+  component. Neither proposal follows automatically from the phase analysis.
 </p>
 
 <p>
   <a expr="(fedwiki-source-relations-example)" view="Refactoring hypotheses">
-    Inspect the two refactoring hypotheses
+    Inspect the unexecuted refactoring hypotheses
   </a>
 </p>
 
-<ol>
-  <li>
-    Move
-    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:find-examples-for-story-item-types&quot;)">
-      FIND-EXAMPLES-FOR-STORY-ITEM-TYPES
-    </a>
-    to a later development/observation component. This would remove the
-    development-helper reverse source relation if the helper is not required
-    during compilation or loading.
-  </li>
-  <li>
-    Extract the Wiki-text parser as one coherent earlier component. The observed
-    unit consists of
-    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;special:url-regex&quot;)">
-      *URL-REGEX*
-    </a>,
-    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;special:any-except-closing-bracket-regex&quot;)">
-      *ANY-EXCEPT-CLOSING-BRACKET-REGEX*
-    </a>,
-    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;special:link-regex&quot;)">
-      *LINK-REGEX*
-    </a>,
-    and
-    <a expr="(fedwiki-source-relations-definition (fedwiki-source-relations-example) &quot;function:process-text-and-links&quot;)">
-      PROCESS-TEXT-AND-LINKS
-    </a>.
-    Moving only the function would leave its parser dependencies behind.
-  </li>
-</ol>
+<p>
+  A declaration could change what the compiler knows at a phase boundary
+  without necessarily changing source ownership. Conversely, moving a
+  definition can change the dependency graph itself. These are distinct
+  refactoring operations and should remain separately inspectable.
+</p>
+
+
+<h2>13. Verification</h2>
 
 <p>
-  A <code>DECLAIM</code> or forward declaration could document a compiler
-  contract, but it would not remove the observed source dependency.
+  The durable test for this slice is:
 </p>
+
+<lisp-code>
+(asdf:test-system "dreyeck/fedwiki-source-relations/tests" :force t)
+</lisp-code>
+
+<p>
+  The test should cover the source-backed observation, the phase and ordering
+  annotations, Inspector views, Topicmap projection, and this HyperDoc page.
+  Process-isolated checks remain explicit developer actions rather than
+  HyperDoc <tt>expr</tt> links.
+</p>
+
+
+<h2>14. Related concept</h2>
+
+<p>
+  The more general question of compile-time, load-time, and run-time
+  dependencies belongs to the System Definition Problem. A Federated Wiki page
+  with that title can be linked here once it has been published; this page
+  remains the concrete, source-backed FedWiki example.
+</p>
+
+
+<h2>Implementation</h2>
+
+<source-of-function>fedwiki-source-relations-example</source-of-function>
+
+<source-of-function>fedwiki-source-relations-relation</source-of-function>

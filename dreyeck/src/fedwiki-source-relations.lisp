@@ -46,6 +46,22 @@
    (target :reader typed-source-relation-target-of :initarg :target)
    (role :reader typed-source-relation-role-of :initarg :role
          :type (member :production :development-helper))
+   (phases :reader typed-source-relation-phases-of :initarg :phases
+           :initform '(:structural) :type list)
+   (ordering-constraint
+    :reader typed-source-relation-ordering-constraint-of
+    :initarg :ordering-constraint
+    :initform :not-applicable
+    :type (member :not-applicable
+                  :none-observed
+                  :observed-component-order
+                  :required-component-order
+                  :required-within-file))
+   (ordering-basis
+    :reader typed-source-relation-ordering-basis-of
+    :initarg :ordering-basis
+    :initform nil
+    :type list)
    (fragment :reader typed-source-relation-fragment-of :initarg :fragment
              :type source-fragment-evidence)
    (derived-from :reader typed-source-relation-derived-from-of
@@ -235,16 +251,40 @@
       (error "Observed FedWiki component order differs: ~S." positions))
     (unless (= 1 (- (position "story-items" +fedwiki-component-order+
                               :test #'string=)
-                     (position "fedwiki" +fedwiki-component-order+
+		    (position "fedwiki" +fedwiki-component-order+
                               :test #'string=)))
       (error "FEDWIKI is not immediately before STORY-ITEMS.")))
   t)
 
-(defun make-relation (id type source target role fragment &key derived-from)
+(defun make-relation (id type source target role fragment
+		      &key
+			derived-from
+			(phases
+			 (if derived-from
+			     (copy-list
+			      (typed-source-relation-phases-of derived-from))
+			     '(:structural)))
+			(ordering-constraint
+			 (if derived-from
+			     (typed-source-relation-ordering-constraint-of derived-from)
+			     :not-applicable))
+			(ordering-basis
+			 (if derived-from
+			     (copy-list
+			      (typed-source-relation-ordering-basis-of derived-from))
+			     nil)))
   (make-instance
    'typed-source-relation
-   :id id :type type :source source :target target :role role
-   :fragment fragment :derived-from derived-from))
+   :id id
+   :type type
+   :source source
+   :target target
+   :role role
+   :phases phases
+   :ordering-constraint ordering-constraint
+   :ordering-basis ordering-basis
+   :fragment fragment
+   :derived-from derived-from))
 
 (defun require-unique-ids (objects key label)
   (let ((ids (mapcar key objects)))
@@ -262,6 +302,12 @@
   (find id
         (fedwiki-source-relations-definitions-of observation)
         :key #'definition-evidence-id-of
+        :test #'string=))
+
+(defun fedwiki-source-relations-relation (observation id)
+  (find id
+        (fedwiki-source-relations-relations-of observation)
+        :key #'typed-source-relation-id-of
         :test #'string=))
 
 (defun make-fedwiki-source-relations-observation
@@ -348,9 +394,11 @@
                               :defines story-items-file process :production
                               (definition-evidence-fragment-of process)))
              (calls-process
-               (make-relation "calls:fetch-site-owner:process-text-and-links"
-                              :calls fetch process :production
-                              (definition-evidence-fragment-of fetch)))
+	       (make-relation "calls:fetch-site-owner:process-text-and-links"
+			      :calls fetch process :production
+			      (definition-evidence-fragment-of fetch)
+			      :phases '(:run-time)
+			      :ordering-constraint :none-observed))
              (defines-find
                (make-relation
                 "defines:story-items:find-examples-for-story-item-types"
@@ -361,33 +409,64 @@
                               fedwiki-file neighborhood :production
                               (definition-evidence-fragment-of neighborhood)))
              (reads-neighborhood
-               (make-relation
-                "reads-special:find-examples:neighborhood" :reads-special
-                find-examples neighborhood :development-helper
-                (definition-evidence-fragment-of find-examples)))
+	       (make-relation
+		"reads-special:find-examples:neighborhood"
+		:reads-special
+		find-examples
+		neighborhood
+		:development-helper
+		(definition-evidence-fragment-of find-examples)
+		:phases '(:compile-time :run-time)
+		:ordering-constraint :required-component-order
+		:ordering-basis '(:special-proclamation)))
              (defines-link-regex
                (make-relation "defines:story-items:link-regex" :defines
                               story-items-file link-regex :production
                               (definition-evidence-fragment-of link-regex)))
              (reads-link-regex
-               (make-relation
-                "reads-special:process-text-and-links:link-regex" :reads-special
-                process link-regex :production
-                (definition-evidence-fragment-of process)))
+	       (make-relation
+		"reads-special:process-text-and-links:link-regex"
+		:reads-special
+		process
+		link-regex
+		:production
+		(definition-evidence-fragment-of process)
+		:phases '(:compile-time :run-time)
+		:ordering-constraint :required-within-file
+		:ordering-basis '(:special-proclamation)))
              (reads-url-regex
-               (make-relation
-                "reads-special:link-regex:url-regex" :reads-special
-                link-regex url-regex :production
-                (definition-evidence-fragment-of link-regex)))
+	       (make-relation
+		"reads-special:link-regex:url-regex"
+		:reads-special
+		link-regex
+		url-regex
+		:production
+		(definition-evidence-fragment-of link-regex)
+		:phases '(:compile-time :load-time)
+		:ordering-constraint :required-within-file
+		:ordering-basis '(:special-proclamation :load-time-value)))
              (reads-any-regex
-               (make-relation
-                "reads-special:link-regex:any-except-closing-bracket-regex"
-                :reads-special link-regex any-regex :production
-                (definition-evidence-fragment-of link-regex)))
+	       (make-relation
+		"reads-special:link-regex:any-except-closing-bracket-regex"
+		:reads-special
+		link-regex
+		any-regex
+		:production
+		(definition-evidence-fragment-of link-regex)
+		:phases '(:compile-time :load-time)
+		:ordering-constraint :required-within-file
+		:ordering-basis '(:special-proclamation :load-time-value)))
              (loads-before
-               (make-relation "loads-before:fedwiki:story-items" :loads-before
-                              fedwiki-file story-items-file :production
-                              component-fragment))
+	       (make-relation
+		"loads-before:fedwiki:story-items"
+		:loads-before
+		fedwiki-file
+		story-items-file
+		:production
+		component-fragment
+		:phases '(:system-definition)
+		:ordering-constraint :observed-component-order
+		:ordering-basis '(:asdf-dependency)))
              (forward-file-use
                (make-relation
                 "uses-definition-from:fedwiki:story-items"
@@ -455,13 +534,13 @@
            :task-location "The serial component contract of ASDF system hyperbook/fedwiki."
            :existing-routine ":serial t with fedwiki.lisp immediately before story-items.lisp."
            :routine-effects
-           '("*NEIGHBORHOOD* is declared before story-items.lisp is compiled."
-             "The PROCESS-TEXT-AND-LINKS call is initially only in a function body."
-             "The target function exists after the complete system has loaded."
-             "The routine supports complete loading but does not remove mutual source use.")
+	   '("*NEIGHBORHOOD* is established by a top-level DEFVAR before story-items.lisp is compiled; its special proclamation is therefore available to the compiler."
+	     "The PROCESS-TEXT-AND-LINKS call occurs in a function body and does not by itself require story-items.lisp to precede fedwiki.lisp."
+	     "The complete load makes PROCESS-TEXT-AND-LINKS available before FETCH-SITE-OWNER can call it at run time."
+	     "The serial order therefore satisfies a FEDWIKI to STORY-ITEMS compile-time dependency while permitting the opposite run-time function call.")
            :problem-status :not-a-problem-under-current-load-and-use-contract
            :problem-statement
-           "Under the current complete load-and-use task, an existing serial routine already solves the task; by definition 48.2 this is not presently a problem. Independent component loading, one-way provider relations, helper separation, and eliminating compiler forward references are distinct unproven requirements."))))))
+	   "The forward function call from fedwiki.lisp to PROCESS-TEXT-AND-LINKS does not establish a component-order requirement. The reverse use of *NEIGHBORHOOD* does: the top-level DEFVAR in fedwiki.lisp establishes the special proclamation needed when the corresponding reference in story-items.lisp is compiled. Under the current source shape, the observed serial order is therefore semantically relevant."))))))
 
 (defun fedwiki-source-relations-example ()
   "Return a fresh source-backed observation without consulting a global cache."
