@@ -45,12 +45,21 @@
    "(assert (null (hyperbook:find-hyperbook \"dreyeck/wiki-link\")))"
    "(assert (null (hyperbook:find-hyperbook \"dreyeck/upstream-intake\")))"
    "(assert (null (hyperbook:find-hyperbook \"dreyeck/fedwiki-source-relations\")))"
+   "(assert (null (find-package \"DREYECK/LISP-IMAGE\")))"
+   "(assert (not (asdf:component-loaded-p (asdf:find-system \"dreyeck/lisp-image\"))))"
+   "(assert (null (hyperbook:find-hyperbook \"dreyeck/lisp-image\")))"
    "(asdf:load-system \"dreyeck/catalog\")"
+   "(assert (asdf:component-loaded-p (asdf:find-system \"dreyeck/lisp-image\")))"
+   "(assert (find-package \"DREYECK/LISP-IMAGE\"))"
    "(assert (asdf:component-loaded-p (asdf:find-system \"dreyeck/upstream-intake\")))"
    "(assert (asdf:component-loaded-p (asdf:find-system \"dreyeck/fedwiki-source-relations\")))"
    "(assert (find-package \"DREYECK/UPSTREAM-INTAKE\"))"
    "(assert (find-package \"DREYECK/FEDWIKI-SOURCE-RELATIONS\"))"
    "(let* ((wiki (hyperbook:find-hyperbook \"dreyeck/wiki-link\" :signal-error? t)) (intake (hyperbook:find-hyperbook \"dreyeck/upstream-intake\" :signal-error? t)) (relations (hyperbook:find-hyperbook \"dreyeck/fedwiki-source-relations\" :signal-error? t)) (members (hyperbook:hyperbooks-of hyperbook:*catalog*))) (hyperdoc::ensure-pages-loaded wiki) (hyperdoc::ensure-pages-loaded intake) (hyperdoc::ensure-pages-loaded relations) (assert (string= \"Wiki-link title and slug lookup contracts\" (hyperbook:main-page-id-of wiki))) (assert (hyperbook:find-page wiki \"Wiki-link title and slug lookup contracts\" :signal-error? t)) (assert (string= \"Upstream Intake as a Read-Only Observation\" (hyperbook:main-page-id-of intake))) (assert (= 4 (hash-table-count (hyperdoc:pages-of intake)))) (dolist (page-id '(\"Upstream Intake as a Read-Only Observation\" \"Observing an Upstream Commit\" \"An Upstream Supersession Hypothesis\" \"Historical ASDF Dependencies as a Topicmap\")) (assert (hyperbook:find-page intake page-id :signal-error? t))) (assert (= 1 (count \"dreyeck/fedwiki-source-relations\" members :key #'hyperbook:id-of :test #'string=))) (assert (string= \"FedWiki Component Order and Source Relations\" (hyperbook:title-of relations))) (assert (string= \"FedWiki Component Order and Source Relations\" (hyperbook:main-page-id-of relations))) (assert (= 1 (hash-table-count (hyperdoc:pages-of relations)))) (assert (hyperbook:find-page relations \"FedWiki Component Order and Source Relations\" :signal-error? t)) (format t \"FRESH-DREYECK-CATALOG=~S~%\" (mapcar (lambda (book) (list (hyperbook:id-of book) (hyperbook:title-of book))) members)))"
+
+   ;; new Lisp image catalog/ownership Contract
+   "(let* ((wiki (hyperbook:find-hyperbook \"dreyeck/wiki-link\" :signal-error? t)) (lisp-image (hyperbook:find-hyperbook \"dreyeck/lisp-image\" :signal-error? t)) (members (hyperbook:hyperbooks-of hyperbook:*catalog*))) (hyperdoc::ensure-pages-loaded wiki) (hyperdoc::ensure-pages-loaded lisp-image) (assert (= 1 (count \"dreyeck/lisp-image\" members :key #'hyperbook:id-of :test #'string=))) (assert (string= \"dreyeck.ch Lisp image\" (hyperbook:title-of lisp-image))) (assert (string= \"Lisp image HyperBook refactor\" (hyperbook:main-page-id-of lisp-image))) (assert (= 1 (hash-table-count (hyperdoc:pages-of lisp-image)))) (assert (hyperbook:find-page lisp-image \"Lisp image HyperBook refactor\" :signal-error? t)) (assert (null (hyperbook:find-page wiki \"Lisp image HyperBook refactor\" :signal-error? nil))))"
+
    "(let ((git-intake (dreyeck/upstream-intake:make-hyperdoc-host-not-found-intake)) (component-intake (dreyeck/upstream-intake:make-hyperspec-component-intake))) (assert (find \"Upstream Intake\" (html-inspector-views:all-views git-intake) :key #'html-inspector-views:view-title :test #'string=)) (assert (find \"Upstream Intake\" (html-inspector-views:all-views component-intake) :key #'html-inspector-views:view-title :test #'string=)))"
    "(format t \"Fresh Dreyeck catalog startup tests passed.~%\")"))
 

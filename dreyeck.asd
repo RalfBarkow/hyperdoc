@@ -271,7 +271,7 @@
    (:file "upstream-intake-views")))
 
 (asdf:defsystem #:dreyeck/catalog
-  :description "Explicit membership and runtime support for the Dreyeck HyperBook catalog"
+  :description "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
   :license "BSD"
   :version "0.0.1"
   ;; The HyperDoc systems declare membership. Their inspector systems supply
@@ -279,7 +279,8 @@
   :depends-on (#:dreyeck/wiki-link
                #:dreyeck/upstream-intake
                #:dreyeck/inspector/upstream-intake
-               #:dreyeck/inspector/fedwiki-source-relations)
+               #:dreyeck/inspector/fedwiki-source-relations
+	       #:dreyeck/lisp-image)
   :in-order-to
   ((asdf:test-op
     (asdf:test-op "dreyeck/catalog/tests"))))
@@ -358,7 +359,7 @@
      (:file "lisp-image-observations")
      (:file "lisp-image-views")
      (:file "lisp-image-hyperdoc")))
-   (:module "dreyeck/pages"
-    :pathname "dreyeck/pages/"
+   (:module "dreyeck/pages/lisp-image"
+    :pathname "dreyeck/pages/lisp-image/"
     :components
     ((:static-file "Lisp image HyperBook refactor.html")))))

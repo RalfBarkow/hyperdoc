@@ -4,7 +4,7 @@
   :id "dreyeck/lisp-image"
   :title "dreyeck.ch Lisp image"
   :asdf-system-name "dreyeck/lisp-image"
-  :subdirectory "dreyeck/pages"
+  :subdirectory "dreyeck/pages/lisp-image"
   :main-page-id "Lisp image HyperBook refactor")
 
 (hyperdoc:defexample lisp-image-page-ownership-example
