@@ -1,0 +1,98 @@
+<h1>Lisp image HyperBook refactor</h1>
+
+<in-package>dreyeck/lisp-image</in-package>
+
+<p>
+  This page is the executable reading path for moving the Lisp-image
+  browsing functionality from the historical hauptsache branch into
+  Dreyeck-owned subsystems.
+</p>
+
+<p>
+  The immediate problem is that the Lisp functions and Lisp classes
+  HyperBooks describe themselves as containing one page for each
+  corresponding symbol in the Lisp image, while the current dreyeck.ch
+  catalog does not provide a browseable page collection for all of
+  those definitions.
+</p>
+
+<h2>0. Which HyperDoc owns this page?</h2>
+
+<p>
+  An ASDF static-file component does not by itself make an HTML file
+  a page of an arbitrary HyperDoc. A HyperDoc discovers text pages in
+  its own configured directory.
+</p>
+
+<source-of-function>lisp-image-page-ownership-example</source-of-function>
+
+<h2>1. Establish the current repository state</h2>
+
+<p>
+  Before comparing implementations, observe which checkout is actually
+  being examined. This example is read-only. It runs git status and
+  git rev-parse against the repository that contains the loaded
+  HyperDoc system.
+</p>
+
+<source-of-function>lisp-image-repository-state-example</source-of-function>
+
+<p>
+  What to notice: the observation records the repository root, branch,
+  HEAD, working-tree state, command exit status, standard output, and
+  standard error. No branch is checked out and no source file is
+  modified.
+</p>
+
+<h2>2. Compare the historical hauptsache implementation</h2>
+
+<p>
+  The next observation compares only
+  hyperbook-explorer/lisp-functions.lisp and
+  hyperbook-explorer/lisp-classes.lisp between dreyeck.ch and
+  hauptsache. It reads Git history without evaluating source from
+  either branch.
+</p>
+
+<source-of-function>lisp-image-hauptsache-diff-example</source-of-function>
+
+<p>
+  This is deliberately narrower than comparing the branches as a
+  whole. The question at this point is which behavior made the two
+  Lisp HyperBooks browse the current Lisp image.
+</p>
+
+<h2>3. Separate the behavior we want from adjacent changes</h2>
+
+<p>
+  The historical diff contains more than one concern. The following
+  example separates inventory and browsing signals from lookup
+  hardening signals.
+</p>
+
+<source-of-function>lisp-image-hauptsache-contract-example</source-of-function>
+
+<p>
+  The inventory side contains package-qualified symbol names,
+  collection of function and class pages, and the Loaded functions
+  and Loaded classes views. The same historical diff also contains
+  changes to lookup behavior and lookup-issue construction.
+</p>
+
+<p>
+  Our current refactoring hypothesis is therefore narrower than
+  copying the hauptsache files: first recover Lisp-image enumeration
+  and browseability as Dreyeck-owned functionality. Lookup hardening
+  remains a separate question until its necessity has been observed
+  independently.
+</p>
+
+<h2>Next observation</h2>
+
+<p>
+  The next step on this page will inspect the currently loaded Lisp
+  functions and Lisp classes HyperBooks: their available views and the
+  behavior of direct page lookup for representative symbols. Only
+  after that observation will we introduce the Dreyeck-owned inventory
+  implementation.
+</p>

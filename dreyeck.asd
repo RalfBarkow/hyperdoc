@@ -341,3 +341,22 @@
    (uiop:symbol-call
     :dreyeck/catalog/tests
     :run-catalog-startup-smoke-tests)))
+
+(asdf:defsystem #:dreyeck/lisp-image
+  :description "dreyeck.ch-owned Lisp image inventory and executable HyperDoc reading path."
+  :license "BSD"
+  :version "0.0.1"
+  :serial t
+  :depends-on (#:hyperdoc/explorer)
+  :components
+  ((:module "dreyeck/src"
+    :pathname "dreyeck/src/"
+    :serial t
+    :components
+    ((:file "lisp-image-package")
+     (:file "lisp-image-observations")
+     (:file "lisp-image-hyperdoc")))
+   (:module "dreyeck/pages"
+    :pathname "dreyeck/pages/"
+    :components
+    ((:static-file "Lisp image HyperBook refactor.html")))))
