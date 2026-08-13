@@ -80,7 +80,7 @@
       lookup-signals))))
 
 (hyperdoc:defexample current-lisp-hyperbooks-example
-    "Inspect the current Lisp functions and Lisp classes HyperBooks before adding dreyeck.ch-owned image enumeration."
+    "Inspect direct page lookup in the current Lisp functions and Lisp classes HyperBooks."
   (let ((functions
           (hyperbook:find-hyperbook
            "lisp-functions"
@@ -93,6 +93,7 @@
      :lisp-functions
      (list
       :hyperbook functions
+      :known-page-id "COMMON-LISP:CAR"
       :known-page
       (hyperbook:find-page
        functions
@@ -101,8 +102,49 @@
      :lisp-classes
      (list
       :hyperbook classes
+      :known-page-id "COMMON-LISP:STANDARD-OBJECT"
       :known-page
       (hyperbook:find-page
        classes
        "COMMON-LISP:STANDARD-OBJECT"
        :signal-error? nil)))))
+
+(defun view-titles-of (object)
+  (mapcar #'html-inspector-views:view-title
+          (html-inspector-views:all-views object)))
+
+(hyperdoc:defexample current-lisp-hyperbook-views-example
+    "Inspect the views currently provided by the Lisp functions and Lisp classes HyperBooks."
+  (let* ((functions
+           (hyperbook:find-hyperbook
+            "lisp-functions"
+            :signal-error? t))
+         (classes
+           (hyperbook:find-hyperbook
+            "lisp-classes"
+            :signal-error? t))
+         (function-view-titles
+           (view-titles-of functions))
+         (class-view-titles
+           (view-titles-of classes)))
+    (list
+     :lisp-functions
+     (list
+      :hyperbook functions
+      :view-titles function-view-titles
+      :loaded-functions-present-p
+      (not
+       (null
+        (member "Loaded functions"
+                function-view-titles
+                :test #'string=))))
+     :lisp-classes
+     (list
+      :hyperbook classes
+      :view-titles class-view-titles
+      :loaded-classes-present-p
+      (not
+       (null
+        (member "Loaded classes"
+                class-view-titles
+                :test #'string=)))))))

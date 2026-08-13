@@ -11,9 +11,9 @@
 <p>
   The immediate problem is that the Lisp functions and Lisp classes
   HyperBooks describe themselves as containing one page for each
-  corresponding symbol in the Lisp image, while the current dreyeck.ch
-  catalog does not provide a browseable page collection for all of
-  those definitions.
+  corresponding symbol in the Lisp image, while the current
+  implementations do not expose all of those definitions as a
+  browseable page collection.
 </p>
 
 <h2>0. Which HyperDoc owns this page?</h2>
@@ -26,7 +26,50 @@
 
 <source-of-function>lisp-image-page-ownership-example</source-of-function>
 
-<h2>1. Establish the current repository state</h2>
+<h2>1. Observe the current Lisp HyperBooks</h2>
+
+<p>
+  Before restoring any historical implementation, observe what the
+  currently loaded Lisp functions and Lisp classes HyperBooks can
+  already do.
+</p>
+
+<p>
+  First distinguish direct lookup from enumeration. A HyperBook may
+  be able to construct a page for a package-qualified symbol whose
+  name is already known without offering a way to browse all such
+  pages in the running Lisp image.
+</p>
+
+<h3>1.1 Direct lookup of known pages</h3>
+
+<source-of-function>current-lisp-hyperbooks-example</source-of-function>
+
+<p>
+  Run this example and inspect the returned HyperBooks and page
+  objects. The relevant question is whether COMMON-LISP:CAR and
+  COMMON-LISP:STANDARD-OBJECT are already directly addressable.
+</p>
+
+<h3>1.2 Views of the two HyperBooks</h3>
+
+<source-of-function>current-lisp-hyperbook-views-example</source-of-function>
+
+<p>
+  This example asks the inspector model for the views that are
+  currently applicable to each HyperBook. In particular, it records
+  whether views titled Loaded functions and Loaded classes are
+  present.
+</p>
+
+<p>
+  If direct lookup succeeds while the two Loaded views are absent,
+  the missing capability is narrower than page lookup: the current
+  HyperBooks are addressable but do not expose the running Lisp image
+  as a browseable collection.
+</p>
+
+<h2>2. Establish the current repository state</h2>
 
 <p>
   Before comparing implementations, observe which checkout is actually
@@ -44,7 +87,7 @@
   modified.
 </p>
 
-<h2>2. Compare the historical hauptsache implementation</h2>
+<h2>3. Compare the historical hauptsache implementation</h2>
 
 <p>
   The next observation compares only
@@ -62,7 +105,7 @@
   Lisp HyperBooks browse the current Lisp image.
 </p>
 
-<h2>3. Separate the behavior we want from adjacent changes</h2>
+<h2>4. Separate the behavior we want from adjacent changes</h2>
 
 <p>
   The historical diff contains more than one concern. The following
@@ -90,9 +133,15 @@
 <h2>Next observation</h2>
 
 <p>
-  The next step on this page will inspect the currently loaded Lisp
-  functions and Lisp classes HyperBooks: their available views and the
-  behavior of direct page lookup for representative symbols. Only
-  after that observation will we introduce the Dreyeck-owned inventory
-  implementation.
+  If the current HyperBooks support direct lookup while Loaded
+  functions and Loaded classes are absent, the next step is to model
+  Lisp-image enumeration as dreyeck.ch-owned functionality.
+</p>
+
+<p>
+  That next observation should enumerate function and class
+  definitions in the running Lisp image without yet adding inspector
+  views or changing the existing HyperBook implementations. The
+  resulting inventory can then be inspected independently before it
+  is connected to browseable Loaded views.
 </p>
