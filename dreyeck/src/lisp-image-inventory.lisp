@@ -158,3 +158,72 @@
         entries
         :test #'string=
         :key #'lisp-image-entry-page-id))
+
+(defun lisp-image-entry-hyperbook (entry)
+  (hyperbook:find-hyperbook
+   (ecase (lisp-image-entry-kind entry)
+     (:function "lisp-functions")
+     (:class "lisp-classes"))
+   :signal-error? t))
+
+(defun project-lisp-image-entry-to-page (entry)
+  "Resolve ENTRY through its existing Lisp HyperBook and return the resulting page."
+  (hyperbook:find-page
+   (lisp-image-entry-hyperbook entry)
+   (lisp-image-entry-page-id entry)
+   :signal-error? t))
+
+(defclass lisp-image-page-collection ()
+  ((kind
+    :initarg :kind
+    :reader lisp-image-page-collection-kind)
+   (hyperbook
+    :initarg :hyperbook
+    :reader lisp-image-page-collection-hyperbook)
+   (entries
+    :initarg :entries
+    :reader lisp-image-page-collection-entries)
+   (pages
+    :initarg :pages
+    :reader lisp-image-page-collection-pages)))
+
+(defmethod print-object ((collection lisp-image-page-collection) stream)
+  (print-unreadable-object (collection stream :type t)
+    (format stream "~A ~D pages"
+            (lisp-image-page-collection-kind collection)
+            (length
+             (lisp-image-page-collection-pages collection)))))
+
+(defun project-lisp-image-entries-to-pages (entries hyperbook)
+  (mapcar
+   (lambda (entry)
+     (hyperbook:find-page
+      hyperbook
+      (lisp-image-entry-page-id entry)
+      :signal-error? t))
+   entries))
+
+(defun make-lisp-image-page-collection (kind inventory)
+  (multiple-value-bind (entries hyperbook)
+      (ecase kind
+        (:function
+         (values
+          (lisp-image-function-entries inventory)
+          (hyperbook:find-hyperbook
+           "lisp-functions"
+           :signal-error? t)))
+        (:class
+         (values
+          (lisp-image-class-entries inventory)
+          (hyperbook:find-hyperbook
+           "lisp-classes"
+           :signal-error? t))))
+    (make-instance
+     'lisp-image-page-collection
+     :kind kind
+     :hyperbook hyperbook
+     :entries entries
+     :pages
+     (project-lisp-image-entries-to-pages
+      entries
+      hyperbook))))

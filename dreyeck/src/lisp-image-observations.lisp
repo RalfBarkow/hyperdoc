@@ -356,3 +356,109 @@
           :round-trips-p
           (page-id-reads-as-symbol-p page-id symbol))))
      symbols)))
+
+(hyperdoc:defexample lisp-image-page-projection-example
+  "Project representative Lisp-image inventory entries through their existing HyperBooks."
+  (let* ((inventory
+           (make-lisp-image-inventory))
+         (function-entry
+           (find-lisp-image-entry
+            "COMMON-LISP:CAR"
+            (lisp-image-function-entries inventory)))
+         (class-entry
+           (find-lisp-image-entry
+            "COMMON-LISP:STANDARD-OBJECT"
+            (lisp-image-class-entries inventory))))
+    (list
+     :function
+     (list
+      :entry function-entry
+      :hyperbook
+      (lisp-image-entry-hyperbook function-entry)
+      :page
+      (project-lisp-image-entry-to-page function-entry))
+     :class
+     (list
+      :entry class-entry
+      :hyperbook
+      (lisp-image-entry-hyperbook class-entry)
+      :page
+      (project-lisp-image-entry-to-page class-entry)))))
+
+(hyperdoc:defexample lisp-image-page-collections-example
+  "Project the complete function and class inventories to pages of the existing HyperBooks."
+  (let* ((inventory
+           (make-lisp-image-inventory))
+         (function-collection
+           (make-lisp-image-page-collection
+            :function
+            inventory))
+         (class-collection
+           (make-lisp-image-page-collection
+            :class
+            inventory))
+         (function-entries
+           (lisp-image-page-collection-entries
+            function-collection))
+         (function-pages
+           (lisp-image-page-collection-pages
+            function-collection))
+         (class-entries
+           (lisp-image-page-collection-entries
+            class-collection))
+         (class-pages
+           (lisp-image-page-collection-pages
+            class-collection)))
+    (list
+     :function-collection function-collection
+     :function-entry-count (length function-entries)
+     :function-page-count (length function-pages)
+     :function-counts-match-p
+     (= (length function-entries)
+        (length function-pages))
+     :first-function-entry (first function-entries)
+     :first-function-page (first function-pages)
+     :class-collection class-collection
+     :class-entry-count (length class-entries)
+     :class-page-count (length class-pages)
+     :class-counts-match-p
+     (= (length class-entries)
+        (length class-pages))
+     :first-class-entry (first class-entries)
+     :first-class-page (first class-pages))))
+
+(hyperdoc:defexample lisp-image-loaded-views-example
+  "Verify that the Lisp functions and Lisp classes HyperBooks expose Dreyeck-owned Loaded views."
+  (let* ((functions
+           (hyperbook:find-hyperbook
+            "lisp-functions"
+            :signal-error? t))
+         (classes
+           (hyperbook:find-hyperbook
+            "lisp-classes"
+            :signal-error? t))
+         (function-view-titles
+           (view-titles-of functions))
+         (class-view-titles
+           (view-titles-of classes)))
+    (list
+     :lisp-functions
+     (list
+      :hyperbook functions
+      :view-titles function-view-titles
+      :loaded-functions-present-p
+      (not
+       (null
+        (member "Loaded functions"
+                function-view-titles
+                :test #'string=))))
+     :lisp-classes
+     (list
+      :hyperbook classes
+      :view-titles class-view-titles
+      :loaded-classes-present-p
+      (not
+       (null
+        (member "Loaded classes"
+                class-view-titles
+                :test #'string=)))))))

@@ -8,8 +8,10 @@
    #:lisp-image-hauptsache-diff-example
    #:lisp-image-hauptsache-contract-example
    #:lisp-image-page-ownership-example
+   
    #:current-lisp-hyperbooks-example
    #:current-lisp-hyperbook-views-example
+   
    #:lisp-image-entry
    #:lisp-image-entry-kind
    #:lisp-image-entry-symbol
@@ -32,6 +34,20 @@
    #:lisp-function-inventory-transfer-example
    #:lisp-image-inventory-transfer-audit-example
    #:lisp-function-page-id-failures-example
-   #:reader-safe-lisp-image-page-ids-example))
+   #:reader-safe-lisp-image-page-ids-example
+
+   #:project-lisp-image-entry-to-page
+   #:lisp-image-page-projection-example
+
+   #:lisp-image-page-collection
+   #:lisp-image-page-collection-kind
+   #:lisp-image-page-collection-hyperbook
+   #:lisp-image-page-collection-entries
+   #:lisp-image-page-collection-pages
+   #:project-lisp-image-entries-to-pages
+   #:make-lisp-image-page-collection
+   #:lisp-image-page-collections-example
+
+   #:lisp-image-loaded-views-example))
 
 (in-package #:dreyeck/lisp-image)

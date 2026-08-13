@@ -246,8 +246,8 @@
 
 <p>
   If the failure counts are zero, the existing HyperBooks already
-  provide the page-construction contract needed by the inventory.
-  Dreyeck can then add browseability by projecting inventory entries
+  provide the page-construction contract needed by the inventory;
+  dreyeck.ch can then add browseability by projecting inventory entries
   through the existing FIND-PAGE methods rather than duplicating the
   HyperBook page implementations.
 </p>
@@ -295,10 +295,82 @@
   lookup failures.
 </p>
 
-<h2>Next observation</h2>
+<h2>10. Project inventory entries through the existing HyperBooks</h2>
 
 <p>
-  Project dreyeck.ch-owned inventory entries to the existing HyperBook
-  page objects, and inspect that projection independently before
-  exposing it as Loaded functions and Loaded classes views.
+  The complete transfer audit establishes that every current
+  inventory entry can be resolved by the existing Lisp functions or
+  Lisp classes HyperBook. Make that relation explicit without
+  introducing another page model.
+</p>
+
+<source-of-function>lisp-image-page-projection-example</source-of-function>
+
+<p>
+  Inspect the representative projections. Each starts with a
+  dreyeck.ch-owned inventory entry, selects the HyperBook responsible
+  for that entry kind, and delegates page construction to that
+  HyperBook's existing FIND-PAGE method.
+</p>
+
+<p>
+  The inventory therefore remains responsible for enumeration and
+  reader-safe identifiers, while the existing HyperBooks remain
+  responsible for their page objects.
+</p>
+
+<h2>11. Project complete inventories to page collections</h2>
+
+<p>
+  Representative inventory entries can already be projected through
+  the existing Lisp functions and Lisp classes HyperBooks. Apply the
+  same projection to the complete inventories and retain the resulting
+  pages as explicit collections.
+</p>
+
+<source-of-function>lisp-image-page-collections-example</source-of-function>
+
+<p>
+  Each collection retains its inventory entries, the HyperBook
+  responsible for resolving them, and the resulting page objects.
+  The entry and page counts should agree for both collections.
+</p>
+
+<p>
+  This collection layer does not introduce another page
+  implementation. Enumeration remains dreyeck.ch-owned, while page
+  construction remains delegated to the existing HyperBooks.
+</p>
+
+<h2>12. Expose the page collections as Loaded views</h2>
+
+<p>
+  The complete function and class inventories project without loss to
+  page collections owned by the existing HyperBooks. The remaining
+  step is presentation: expose those collections as inspector views on
+  the Lisp functions and Lisp classes HyperBooks.
+</p>
+
+<source-of-function>lisp-image-loaded-views-example</source-of-function>
+
+<p>
+  The view methods are Dreyeck-owned extensions. They specialize on
+  the existing HyperBook objects, construct fresh Lisp-image
+  inventories, project those inventories to the existing page model,
+  and render the resulting pages with LIST-VIEW.
+</p>
+
+<p>
+  Neither Lisp HyperBook acquires a second enumeration implementation,
+  and page ownership remains unchanged.
+</p>
+
+<h3>12.1 Revisit the original view observation</h3>
+
+<source-of-function>current-lisp-hyperbook-views-example</source-of-function>
+
+<p>
+  The same observation that initially reported the Loaded functions
+  and Loaded classes views as absent should now report both as
+  present.
 </p>
