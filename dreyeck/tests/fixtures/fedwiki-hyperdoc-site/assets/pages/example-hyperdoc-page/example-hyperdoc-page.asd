@@ -13,7 +13,8 @@
 (asdf:defsystem "example-hyperdoc-page/presentation"
   :depends-on
   ("example-hyperdoc-page"
-   "hyperdoc")
+   "hyperdoc"
+   "hyperdoc/explorer")
   :serial t
   :components
   ((:file "hyperdoc")))

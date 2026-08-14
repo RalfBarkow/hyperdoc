@@ -117,20 +117,49 @@
        (all-fixture-systems-registered-p))
 
       (let ((hyperdoc
-              (hyperbook:find-hyperbook
-               *fixture-slug*)))
+	       (hyperbook:find-hyperbook
+		*fixture-slug*)))
 
-        (assert hyperdoc)
+	 (assert hyperdoc)
 
-        (assert
-         (typep
-          hyperdoc
-          'hyperdoc:hyperdoc))
+	 (assert
+	  (typep
+	   hyperdoc
+	   'hyperdoc:hyperdoc))
 
-        (assert
-         (string=
-          *fixture-slug*
-          (hyperbook:id-of hyperdoc))))
+	 (assert
+	  (string=
+	   *fixture-slug*
+	   (hyperbook:id-of hyperdoc)))
+
+	 ;; The presentation system must bring in enough of the HyperDoc
+	 ;; runtime for its main page to be resolved without an additional
+	 ;; manual LOAD-SYSTEM of HYPERDOC/EXPLORER.
+	 (let* ((main-page-id
+		  (hyperbook:main-page-id-of
+		   hyperdoc))
+		(main-page
+		  (hyperbook:find-page
+		   hyperdoc
+		   main-page-id)))
+
+	   (assert
+	    (string=
+	     "Example HyperDoc Page"
+	     main-page-id))
+
+	   (assert main-page)
+
+	   (assert
+	    (typep
+	     main-page
+	     'hyperdoc::page)))
+
+	 ;; Constructing the Inspector view set must likewise succeed from
+	 ;; the declared presentation-system runtime closure.
+	 (assert
+	  (html-inspector-views:all-views
+	   hyperdoc)))
 
       ;; A second explicit activation must remain valid and identify the
       ;; same logical page-attached HyperDoc.

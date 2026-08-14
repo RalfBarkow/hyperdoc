@@ -108,11 +108,12 @@
               :selected-presentation-system)))
 
            (assert
-            (= 1
-               (length
-                (getf
-                 activation
-                 :newly-registered-hyperdocs))))
+             (member
+              runtime-hyperdoc
+              (getf
+               activation
+               :newly-registered-hyperdocs)
+              :test #'eq))
 
            (assert
             (typep
