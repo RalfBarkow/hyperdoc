@@ -1,0 +1,16 @@
+{
+  "title": "Example HyperDoc Page",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "example-paragraph",
+      "text": "End-to-end FedWiki HyperDoc fixture."
+    },
+    {
+      "type": "assets",
+      "id": "example-assets",
+      "text": "pages/example-hyperdoc-page"
+    }
+  ],
+  "journal": []
+}

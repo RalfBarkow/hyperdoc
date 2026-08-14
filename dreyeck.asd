@@ -474,3 +474,45 @@
         :run-page-attached-hyperdoc-tests-in-fresh-process)
      (error
       "Dreyeck page-attached HyperDoc tests failed."))))
+
+
+(asdf:defsystem #:dreyeck/fedwiki-hyperdoc
+  :description "Activate local page-attached HyperDocs from FedWiki assets"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:asdf
+               #:uiop
+               #:hyperbook
+               #:hyperdoc
+               #:dreyeck/fedwiki-assets
+               #:dreyeck/page-attached-asdf
+               #:dreyeck/page-attached-hyperdoc)
+  :components
+  ((:file "fedwiki-hyperdoc-package")
+   (:file "fedwiki-hyperdoc"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/fedwiki-hyperdoc/tests"))))
+
+(asdf:defsystem #:dreyeck/fedwiki-hyperdoc/tests
+  :description "End-to-end tests for local FedWiki page-attached HyperDoc activation"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/fedwiki-hyperdoc)
+  :components
+  ((:file "fedwiki-hyperdoc-test-package")
+   (:file "fedwiki-hyperdoc-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/fedwiki-hyperdoc/tests
+        :run-fedwiki-hyperdoc-tests-in-fresh-process)
+     (error
+      "Dreyeck FedWiki HyperDoc tests failed."))))
