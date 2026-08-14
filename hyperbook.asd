@@ -138,6 +138,7 @@
   :depends-on (#:hyperbook
                #:hyperbook/explorer
                #:html-inspector-views
+               #:clog
                #:plump
                #:plump-inspector-views
                #:lquery
