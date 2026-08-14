@@ -568,3 +568,40 @@
         :run-local-fedwiki-page-tests-in-fresh-process)
      (error
       "Dreyeck local FedWiki page tests failed."))))
+
+
+(asdf:defsystem #:dreyeck/local-fedwiki-page/activation-inspector
+  :description "Explicit HyperDoc activation from local Federated Wiki page inspection"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/local-fedwiki-page/inspector
+               #:dreyeck/fedwiki-hyperdoc)
+  :components
+  ((:file "local-fedwiki-page-activation-inspector"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op
+     "dreyeck/local-fedwiki-page/activation-inspector/tests"))))
+
+(asdf:defsystem #:dreyeck/local-fedwiki-page/activation-inspector/tests
+  :description "Fresh-process tests for explicit local FedWiki HyperDoc activation"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/local-fedwiki-page/activation-inspector)
+  :components
+  ((:file "local-fedwiki-page-activation-inspector-test-package")
+   (:file "local-fedwiki-page-activation-inspector-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/local-fedwiki-page/activation-inspector/tests
+        :run-local-fedwiki-page-activation-inspector-tests-in-fresh-process)
+     (error
+      "Dreyeck local FedWiki page activation-inspector tests failed."))))
