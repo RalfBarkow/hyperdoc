@@ -436,3 +436,41 @@
         :run-page-attached-asdf-tests)
      (error
       "Dreyeck page-attached ASDF tests failed."))))
+
+
+(asdf:defsystem #:dreyeck/page-attached-hyperdoc
+  :description "Observe HyperDocs registered by explicitly loaded ASDF systems"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:asdf
+               #:hyperbook
+               #:hyperdoc)
+  :components
+  ((:file "page-attached-hyperdoc-package")
+   (:file "page-attached-hyperdoc"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/page-attached-hyperdoc/tests"))))
+
+(asdf:defsystem #:dreyeck/page-attached-hyperdoc/tests
+  :description "Deterministic tests for page-attached HyperDoc activation"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/page-attached-hyperdoc)
+  :components
+  ((:file "page-attached-hyperdoc-test-package")
+   (:file "page-attached-hyperdoc-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/page-attached-hyperdoc/tests
+        :run-page-attached-hyperdoc-tests-in-fresh-process)
+     (error
+      "Dreyeck page-attached HyperDoc tests failed."))))
