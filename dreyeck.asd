@@ -363,3 +363,39 @@
     :pathname "dreyeck/pages/lisp-image/"
     :components
     ((:static-file "Lisp image HyperBook refactor.html")))))
+
+
+(asdf:defsystem #:dreyeck/fedwiki-assets
+  :description "Read-only discovery of local assets referenced by Federated Wiki pages"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:uiop
+               #:shasht)
+  :components
+  ((:file "fedwiki-assets-package")
+   (:file "fedwiki-assets"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/fedwiki-assets/tests"))))
+
+(asdf:defsystem #:dreyeck/fedwiki-assets/tests
+  :description "Deterministic tests for local FedWiki asset discovery"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/fedwiki-assets)
+  :components
+  ((:file "fedwiki-assets-test-package")
+   (:file "fedwiki-assets-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/fedwiki-assets/tests
+        :run-fedwiki-assets-tests)
+     (error "Dreyeck FedWiki assets tests failed."))))

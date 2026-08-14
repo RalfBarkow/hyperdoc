@@ -1,0 +1,16 @@
+{
+  "title": "Example Page",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "example-paragraph",
+      "text": "Fixture page"
+    },
+    {
+      "type": "assets",
+      "id": "example-assets",
+      "text": "pages/example-page"
+    }
+  ],
+  "journal": []
+}
