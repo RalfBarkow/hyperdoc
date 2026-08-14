@@ -516,3 +516,55 @@
         :run-fedwiki-hyperdoc-tests-in-fresh-process)
      (error
       "Dreyeck FedWiki HyperDoc tests failed."))))
+
+
+(asdf:defsystem #:dreyeck/local-fedwiki-page
+  :description "Local Federated Wiki pages with explicit local provenance"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:uiop
+               #:hyperbook/fedwiki
+               #:dreyeck/fedwiki-assets)
+  :components
+  ((:file "local-fedwiki-page-package")
+   (:file "local-fedwiki-page"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/local-fedwiki-page/tests"))))
+
+
+(asdf:defsystem #:dreyeck/local-fedwiki-page/inspector
+  :description "Inspector integration for local Federated Wiki page provenance"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/local-fedwiki-page
+               #:hyperbook/fedwiki
+               #:html-inspector-views)
+  :components
+  ((:file "local-fedwiki-page-inspector-package")
+   (:file "local-fedwiki-page-inspector")))
+
+(asdf:defsystem #:dreyeck/local-fedwiki-page/tests
+  :description "Fresh-process tests for local FedWiki provenance and inspector discovery"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/local-fedwiki-page/inspector)
+  :components
+  ((:file "local-fedwiki-page-test-package")
+   (:file "local-fedwiki-page-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/local-fedwiki-page/tests
+        :run-local-fedwiki-page-tests-in-fresh-process)
+     (error
+      "Dreyeck local FedWiki page tests failed."))))
