@@ -41,6 +41,18 @@
       asdf-system-name-of
       asdf:find-system)))
 
+(defun cl-source-file-components-under (component)
+  (labels ((walk (c)
+             (cond
+               ((typep c 'asdf:cl-source-file)
+                (list c))
+               ((typep c 'asdf:module)
+                (mapcan #'walk (asdf:component-children c)))
+               (t
+                nil))))
+    (when component
+      (walk component))))
+
 ;;
 ;; Page classes. text-class is still quite abstract, concrete
 ;; subclasses for HTML and Markdown pages follow later.
@@ -60,10 +72,12 @@
 ;;
 
 (defun make-hyperdoc (&key id title asdf-system-name subdirectory
-                           main-page-id tools data)
+                           code-subdirectory main-page-id tools data)
   "Create a HyperDoc instance with unique identifier ID (a string) and TITLE
 for the text and code pages located in SUBDIRECTORY relative to the base
-directory for ASDF-SYSTEM-NAME. The main page for the HyperDoc is the
+directory for ASDF-SYSTEM-NAME. CODE-SUBDIRECTORY may name a distinct ASDF
+module containing the Lisp code pages; it defaults to SUBDIRECTORY. The main
+page for the HyperDoc is the
 one whose id is MAIN-PAGE-ID.
 TOOLS is a list of symbols naming HyperDoc tools. DATA is a list of
 (SYMBOL . STRING) cons pairs in which SYMBOL names a global variable
@@ -77,11 +91,11 @@ the macro DEFHYPERDOC."
                      asdf-system-name
                      (concatenate 'string subdirectory "/")))
          (writable (is-writable? directory))
-         (component (asdf:find-component system subdirectory))
+         (component (asdf:find-component
+                     system
+                     (or code-subdirectory subdirectory)))
          (code-files (when component
-                       (remove-if-not #'(lambda (c)
-                                          (typep c 'asdf:cl-source-file))
-                                      (asdf:component-children component))))
+                       (cl-source-file-components-under component)))
          (pages (make-hash-table :test #'equal))
          (code-pages (make-array (length code-files)
                                  :element-type '(or null code-page)
