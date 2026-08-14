@@ -399,3 +399,40 @@
         :dreyeck/fedwiki-assets/tests
         :run-fedwiki-assets-tests)
      (error "Dreyeck FedWiki assets tests failed."))))
+
+
+(asdf:defsystem #:dreyeck/page-attached-asdf
+  :description "Observable registration of trusted page-attached ASDF definitions"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:asdf
+               #:uiop)
+  :components
+  ((:file "page-attached-asdf-package")
+   (:file "page-attached-asdf"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/page-attached-asdf/tests"))))
+
+(asdf:defsystem #:dreyeck/page-attached-asdf/tests
+  :description "Deterministic tests for page-attached ASDF registration"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/page-attached-asdf)
+  :components
+  ((:file "page-attached-asdf-test-package")
+   (:file "page-attached-asdf-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/page-attached-asdf/tests
+        :run-page-attached-asdf-tests)
+     (error
+      "Dreyeck page-attached ASDF tests failed."))))
