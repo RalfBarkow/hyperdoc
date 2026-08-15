@@ -41,18 +41,19 @@ HYPERDOC_FEDWIKI_SITE_ROOT overrides the default ~/.wiki/dreyeck.ch/ root."
           (tbnl:url-decode encoded))))))
 
 (defun make-local-fedwiki-view-page
-    (site-root slug
+    (site-root
+     slug
      &key
        (wiki-id *default-wiki-id*))
-  "Hydrate SLUG exclusively from the local FedWiki page store at SITE-ROOT."
+  "Resolve SLUG through the registered LOCAL-FEDWIKI for SITE-ROOT."
   (let ((wiki
-          (make-instance
-           'hyperbook/fedwiki::fedwiki
-           :id wiki-id)))
-    (dreyeck/local-fedwiki-page:make-local-fedwiki-page
-     site-root
+          (dreyeck/local-fedwiki-page:register-local-fedwiki
+           site-root
+           wiki-id)))
+    (hyperbook:find-page
      wiki
-     slug)))
+     slug
+     :signal-error? t)))
 
 (defun install-local-fedwiki-view-route
     (site-root
@@ -101,16 +102,23 @@ HYPERDOC_FEDWIKI_SITE_ROOT overrides the default ~/.wiki/dreyeck.ch/ root."
        (development nil)
        (wiki-id *default-wiki-id*))
   "Serve the HyperBook catalog plus server-independent /view/<slug> FedWiki pages."
+
+  ;; Register the local FedWiki before SERVE-CATALOG installs the
+  ;; routes for all currently registered HyperBooks.
+  (dreyeck/local-fedwiki-page:register-local-fedwiki
+   site-root
+   wiki-id)
+
   (hyperbook/server:serve-catalog
    :port port
    :pane-width pane-width
    :development development)
+
   (install-local-fedwiki-view-route
    site-root
    :pane-width pane-width
    :development development
    :wiki-id wiki-id))
-
 
 (html-inspector-views:defview
     hyperbook/server::👀url

@@ -1,6 +1,10 @@
 (defpackage #:dreyeck/local-fedwiki-page
   (:use #:cl)
   (:export
+   #:local-fedwiki
+   #:local-fedwiki-site-root-of
+   #:make-local-fedwiki
+   #:register-local-fedwiki
    #:local-fedwiki-page
    #:local-fedwiki-page-site-root-of
    #:make-local-fedwiki-page
