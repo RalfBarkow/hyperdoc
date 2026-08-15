@@ -496,6 +496,44 @@
   ((asdf:test-op
     (asdf:test-op "dreyeck/fedwiki-hyperdoc/tests"))))
 
+(asdf:defsystem #:dreyeck/fedwiki-hyperdoc-demo
+  :description "Executable demonstration of local FedWiki page-attached HyperDoc activation"
+  :license "BSD"
+  :version "0.0.1"
+  :serial t
+  :depends-on (#:dreyeck/fedwiki-hyperdoc
+               #:hyperdoc/explorer)
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/fedwiki-hyperdoc-demo/tests")))
+  :components
+  ((:module "dreyeck/pages/fedwiki-hyperdoc-demo"
+    :pathname "dreyeck/pages/fedwiki-hyperdoc-demo/")
+   (:module "dreyeck/src"
+    :pathname "dreyeck/src/"
+    :components
+    ((:file "fedwiki-hyperdoc-demo")))))
+
+(asdf:defsystem #:dreyeck/fedwiki-hyperdoc-demo/tests
+  :description "Smoke tests for the executable FedWiki HyperDoc demonstration"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/fedwiki-hyperdoc-demo)
+  :components
+  ((:file "fedwiki-hyperdoc-demo-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/fedwiki-hyperdoc-demo/tests
+        :run-fedwiki-hyperdoc-demo-tests)
+     (error
+      "Dreyeck FedWiki HyperDoc demo tests failed."))))
+
 (asdf:defsystem #:dreyeck/fedwiki-hyperdoc/tests
   :description "End-to-end tests for local FedWiki page-attached HyperDoc activation"
   :license "BSD"

@@ -1,0 +1,232 @@
+<h1>From a FedWiki page to an inspectable HyperDoc</h1>
+
+<in-package>dreyeck/fedwiki-hyperdoc</in-package>
+
+<p>
+  This page follows one local Federated Wiki page through the production
+  boundaries that turn a page-attached ASDF definition into an inspectable
+  Runtime HyperDoc.
+</p>
+
+<pre>
+FedWiki page
+  -&gt; read-only asset discovery
+  -&gt; trusted page-attached ASD
+  -&gt; registered ASDF systems
+  -&gt; HyperDoc presentation system
+  -&gt; HyperDoc activation
+  -&gt; Runtime HyperDoc
+</pre>
+
+<h2>Prerequisite</h2>
+
+<p>
+  The executable examples use the local site
+  <code>~/.wiki/wiki.ralfbarkow.ch/</code> and the FedWiki slug
+  <code>reading-java-source-as-data</code>.
+</p>
+
+<h2>1. Observe the page-attached ASDF relation</h2>
+
+<p>
+  Discovery is read-only. It observes the relation between the local FedWiki
+  page and its page-attached asset bundle without evaluating the ASD file.
+</p>
+
+<p>
+  <a expr="(dreyeck/fedwiki-assets:page-attached-asdf-discovery-observation
+             (merge-pathnames
+              #P&quot;.wiki/wiki.ralfbarkow.ch/&quot;
+              (user-homedir-pathname))
+             &quot;reading-java-source-as-data&quot;)"
+     view="Overview">
+    Inspect the read-only page-attached ASDF discovery observation
+  </a>
+</p>
+
+<h2>2. Cross the trust boundary</h2>
+
+<p>
+  A discovered ASD is executable Lisp. Before it is evaluated, the production
+  operation verifies that its truename remains below the local site's assets
+  directory.
+</p>
+
+<p>
+  <a expr="(let* ((site-root
+                       (merge-pathnames
+                        #P&quot;.wiki/wiki.ralfbarkow.ch/&quot;
+                        (user-homedir-pathname)))
+                    (discovery
+                       (dreyeck/fedwiki-assets:page-attached-asdf-discovery-observation
+                        site-root
+                        &quot;reading-java-source-as-data&quot;))
+                    (asd
+                       (truename
+                        (first (getf discovery :asdf-files)))))
+               (list
+                :asd asd
+                :under-assets-root-p
+                (page-attached-asdf-under-assets-root-p
+                 site-root
+                 asd)))"
+     view="Overview">
+    Inspect the trusted ASD and its containment evidence
+  </a>
+</p>
+
+<h2>3. Register and inspect the systems defined by the ASD</h2>
+
+<p>
+  Registration is the first effectful boundary. The observation retains the
+  systems visible before and after evaluating the page-attached ASD.
+</p>
+
+<p>
+  <a expr="(let* ((site-root
+                       (merge-pathnames
+                        #P&quot;.wiki/wiki.ralfbarkow.ch/&quot;
+                        (user-homedir-pathname)))
+                    (discovery
+                       (dreyeck/fedwiki-assets:page-attached-asdf-discovery-observation
+                        site-root
+                        &quot;reading-java-source-as-data&quot;))
+                    (asd
+                       (truename
+                        (first (getf discovery :asdf-files)))))
+               (dreyeck/page-attached-asdf:asd-registration-observation
+                asd))"
+     view="Overview">
+    Register the page-attached ASD and inspect before/after evidence
+  </a>
+</p>
+
+<h2>4. Select the HyperDoc presentation system structurally</h2>
+
+<p>
+  The presentation system is not selected by a naming convention. A candidate
+  must have a plain direct ASDF dependency on <code>hyperdoc</code>.
+</p>
+
+<p>
+  <a expr="(let* ((site-root
+                       (merge-pathnames
+                        #P&quot;.wiki/wiki.ralfbarkow.ch/&quot;
+                        (user-homedir-pathname)))
+                    (discovery
+                       (dreyeck/fedwiki-assets:page-attached-asdf-discovery-observation
+                        site-root
+                        &quot;reading-java-source-as-data&quot;))
+                    (asd
+                       (truename
+                        (first (getf discovery :asdf-files))))
+                    (registration
+                       (dreyeck/page-attached-asdf:asd-registration-observation
+                        asd))
+                    (systems
+                       (getf registration :systems-after)))
+               (list
+                :systems systems
+                :presentation-candidates
+                (direct-hyperdoc-presentation-candidates systems)))"
+     view="Overview">
+    Inspect the ASDF systems and their HyperDoc presentation candidate
+  </a>
+</p>
+
+<h2>5. Load the presentation system and observe HyperDoc registration</h2>
+
+<p>
+  Loading the selected presentation system is effectful. The activation
+  observation distinguishes HyperDocs present before loading from the catalog
+  state afterwards.
+</p>
+
+<p>
+  <a expr="(let* ((site-root
+                       (merge-pathnames
+                        #P&quot;.wiki/wiki.ralfbarkow.ch/&quot;
+                        (user-homedir-pathname)))
+                    (discovery
+                       (dreyeck/fedwiki-assets:page-attached-asdf-discovery-observation
+                        site-root
+                        &quot;reading-java-source-as-data&quot;))
+                    (asd
+                       (truename
+                        (first (getf discovery :asdf-files))))
+                    (registration
+                       (dreyeck/page-attached-asdf:asd-registration-observation
+                        asd))
+                    (candidate
+                       (first
+                        (direct-hyperdoc-presentation-candidates
+                         (getf registration :systems-after)))))
+               (dreyeck/page-attached-hyperdoc:load-system-and-observe-hyperdocs
+                candidate))"
+     view="Overview">
+    Load the presentation system and inspect its HyperDoc activation
+  </a>
+</p>
+
+<p>
+  Repeating this example in the same Lisp image may produce no
+  <code>:NEWLY-REGISTERED-HYPERDOCS</code>, because the HyperDoc can already
+  be present. The before/after observation deliberately exposes that live-image
+  state rather than hiding it.
+</p>
+
+<h2>6. Run the production operation end to end</h2>
+
+<p>
+  The individual observations above are composed by the production operation
+  <code>ACTIVATE-LOCAL-FEDWIKI-PAGE-HYPERDOC</code>.
+</p>
+
+<p>
+  <a expr="#'activate-local-fedwiki-page-hyperdoc"
+     view="Source code">
+    Inspect the source of ACTIVATE-LOCAL-FEDWIKI-PAGE-HYPERDOC
+  </a>
+</p>
+
+<source-of-function>activate-local-fedwiki-page-hyperdoc</source-of-function>
+
+<p>
+  <a expr="(activate-local-fedwiki-page-hyperdoc
+             (merge-pathnames
+              #P&quot;.wiki/wiki.ralfbarkow.ch/&quot;
+              (user-homedir-pathname))
+             &quot;reading-java-source-as-data&quot;)"
+     view="Overview">
+    Inspect the complete FedWiki-to-HyperDoc activation result
+  </a>
+</p>
+
+<h2>7. Inspect the Runtime HyperDoc itself</h2>
+
+<p>
+  The end-to-end result retains the Runtime HyperDoc as an object rather than
+  reducing the operation to a success flag.
+</p>
+
+<p>
+  <a expr="(getf
+             (activate-local-fedwiki-page-hyperdoc
+              (merge-pathnames
+               #P&quot;.wiki/wiki.ralfbarkow.ch/&quot;
+               (user-homedir-pathname))
+              &quot;reading-java-source-as-data&quot;)
+             :runtime-hyperdoc)"
+     view="Overview">
+    Open the Runtime HyperDoc in the Moldable Inspector
+  </a>
+</p>
+
+<h2>What this demonstrates</h2>
+
+<p>
+  Discovery, trust, ASDF registration, presentation selection, HyperDoc
+  activation, and Runtime HyperDoc inspection are distinct relations. The
+  end-to-end production operation composes them while retaining evidence from
+  every stage.
+</p>
