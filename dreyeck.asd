@@ -704,3 +704,41 @@
         :run-local-fedwiki-view-tests)
      (error
       "Local FedWiki /view tests failed."))))
+
+(asdf:defsystem #:dreyeck/fedwiki-page-materialization
+  :description "Persist raw Federated Wiki Page JSON with explicit fork provenance"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/fedwiki-assets
+               #:shasht
+               #:uiop)
+  :components
+  ((:file "fedwiki-page-materialization-package")
+   (:file "fedwiki-page-materialization"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/fedwiki-page-materialization/tests"))))
+
+(asdf:defsystem #:dreyeck/fedwiki-page-materialization/tests
+  :description "Deterministic tests for local FedWiki page materialization"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/fedwiki-page-materialization)
+  :components
+  ((:file "fedwiki-page-materialization-test-package")
+   (:file "fedwiki-page-materialization-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare
+    (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/fedwiki-page-materialization/tests
+        :run-fedwiki-page-materialization-tests)
+     (error
+      "FedWiki page materialization tests failed."))))
