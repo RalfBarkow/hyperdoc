@@ -605,3 +605,26 @@
         :run-local-fedwiki-page-activation-inspector-tests-in-fresh-process)
      (error
       "Dreyeck local FedWiki page activation-inspector tests failed."))))
+
+
+(asdf:defsystem #:dreyeck/wiki-assets-acceptance/tests
+  :description "Fresh-process acceptance of tracked page-attached Wiki asset ASDF systems"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:asdf
+               #:uiop)
+  :components
+  ((:file "wiki-assets-acceptance-test-package")
+   (:file "wiki-assets-acceptance-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/wiki-assets-acceptance/tests
+        :run-wiki-assets-acceptance-tests-in-fresh-process)
+     (error
+      "Dreyeck Wiki-assets acceptance failed."))))
