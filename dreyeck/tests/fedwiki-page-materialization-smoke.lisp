@@ -43,32 +43,46 @@
            (aref source-journal 0))
          (site-root
            (make-test-site-root))
-         (slug
+         (plain-slug
            "materialization-example")
+         (fork-slug
+           "materialization-fork-example")
          (source-site
-           "hyperdoc.dreyeck.ch")
+           "source.example")
          (fork-date
            1786787819051))
 
     (unwind-protect
-         (let* ((target
+         (let* ((plain-target
                   (dreyeck/fedwiki-page-materialization:materialize-fedwiki-page-json
                    page-json
                    site-root
-                   slug
-                   :source-site source-site
-                   :fork-date fork-date))
-                (persisted
+                   plain-slug))
+                (plain-persisted
                   (dreyeck/fedwiki-assets:read-local-fedwiki-page
                    site-root
-                   slug))
-                (persisted-journal
-                  (gethash "journal" persisted))
-                (fork-entry
-                  (aref persisted-journal
-                        (1- (length persisted-journal)))))
+                   plain-slug))
+                (plain-journal
+                  (gethash "journal" plain-persisted))
 
-           ;; The source JSON remains untouched.
+                (fork-target
+                  (dreyeck/fedwiki-page-materialization:materialize-fedwiki-page-fork
+                   page-json
+                   site-root
+                   fork-slug
+                   :source-site source-site
+                   :fork-date fork-date))
+                (fork-persisted
+                  (dreyeck/fedwiki-assets:read-local-fedwiki-page
+                   site-root
+                   fork-slug))
+                (fork-journal
+                  (gethash "journal" fork-persisted))
+                (fork-entry
+                  (aref fork-journal
+                        (1- (length fork-journal)))))
+
+           ;; Neither persistence nor fork materialization mutates the source.
            (assert
             (eq source-journal
                 (gethash "journal" page-json)))
@@ -87,29 +101,62 @@
             (= 1000
                (gethash "date" source-entry)))
 
-           ;; The page exists at the canonical local page-store path.
+           ;; Plain materialization creates the canonical local page unchanged.
            (assert
-            (probe-file target))
+            (probe-file plain-target))
 
            (assert
             (equal
-             (truename target)
+             (truename plain-target)
              (truename
               (dreyeck/fedwiki-assets:local-fedwiki-page-pathname
                site-root
-               slug))))
+               plain-slug))))
 
-           ;; Existing journal history is preserved and one fork is appended.
            (assert
-            (= 2
-               (length persisted-journal)))
+            (= 1
+               (length plain-journal)))
 
            (assert
             (string=
              "create"
              (gethash
               "type"
-              (aref persisted-journal 0))))
+              (aref plain-journal 0))))
+
+           (assert
+            (= 1000
+               (gethash
+                "date"
+                (aref plain-journal 0))))
+
+           (assert
+            (string=
+             "Materialization Example"
+             (gethash "title" plain-persisted)))
+
+           ;; Explicit fork materialization adds exactly one fork relation.
+           (assert
+            (probe-file fork-target))
+
+           (assert
+            (equal
+             (truename fork-target)
+             (truename
+              (dreyeck/fedwiki-assets:local-fedwiki-page-pathname
+               site-root
+               fork-slug))))
+
+           (assert
+            (= 2
+               (length fork-journal)))
+
+           (assert
+            (string=
+             "create"
+             (gethash
+              "type"
+              (aref fork-journal 0))))
 
            (assert
             (string=
@@ -125,18 +172,17 @@
             (= fork-date
                (gethash "date" fork-entry)))
 
-           ;; Overwriting requires an explicit policy.
+           ;; Existing targets remain protected unless supersede is explicit.
            (let ((rejected-p nil))
-  (handler-case
-      (dreyeck/fedwiki-page-materialization:materialize-fedwiki-page-json
-       page-json
-       site-root
-       slug
-       :source-site source-site
-       :fork-date fork-date)
-    (error ()
-      (setf rejected-p t)))
-  (assert rejected-p))
+             (handler-case
+                 (dreyeck/fedwiki-page-materialization:materialize-fedwiki-page-json
+                  page-json
+                  site-root
+                  plain-slug)
+               (error ()
+                 (setf rejected-p t)))
+             (assert rejected-p))
+
            t)
 
       (when

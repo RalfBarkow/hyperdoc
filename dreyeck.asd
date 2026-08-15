@@ -706,7 +706,7 @@
       "Local FedWiki /view tests failed."))))
 
 (asdf:defsystem #:dreyeck/fedwiki-page-materialization
-  :description "Persist raw Federated Wiki Page JSON with explicit fork provenance"
+  :description "Persist raw Federated Wiki Page JSON; fork provenance is an explicit operation"
   :license "BSD"
   :version "0.0.1"
   :pathname "dreyeck/src/"

@@ -2,6 +2,7 @@
   (:use #:cl)
   (:export
    #:page-json-with-fork
-   #:materialize-fedwiki-page-json))
+   #:materialize-fedwiki-page-json
+   #:materialize-fedwiki-page-fork))
 
 (in-package #:dreyeck/fedwiki-page-materialization)

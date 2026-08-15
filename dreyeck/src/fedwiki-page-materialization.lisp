@@ -18,9 +18,7 @@
     (string
      (copy-seq value))
     (vector
-     (map 'vector
-          #'%copy-json-value
-          value))
+     (map 'vector #'%copy-json-value value))
     (cons
      (mapcar #'%copy-json-value value))
     (t
@@ -44,8 +42,8 @@
        fork-date)
   "Return an independent copy of PAGE-JSON with one fork journal entry appended.
 
-PAGE-JSON itself is not modified.  SOURCE-SITE and FORK-DATE describe the
-source of the materialization in Federated Wiki journal form."
+PAGE-JSON itself is not modified. SOURCE-SITE and FORK-DATE describe the
+appended Federated Wiki fork relation."
   (check-type page-json hash-table)
   (let* ((copy
            (%copy-json-value page-json))
@@ -78,19 +76,18 @@ source of the materialization in Federated Wiki journal form."
             (gensym "TMP-")))
    :type nil
    :defaults target))
+
 (defun materialize-fedwiki-page-json
     (page-json
      site-root
      slug
      &key
-       source-site
-       fork-date
        (if-exists :error))
-  "Persist PAGE-JSON as SITE-ROOT/pages/SLUG with appended fork provenance.
+  "Persist PAGE-JSON as SITE-ROOT/pages/SLUG without changing its semantics.
 
-The input PAGE-JSON is not modified.  The JSON is first written to a temporary
-file in the target directory and then renamed over the target.  Existing page
-files are rejected by default.  IF-EXISTS may be :ERROR or :SUPERSEDE."
+The input PAGE-JSON is not modified. The JSON is written through a temporary
+file in the target directory and then renamed over the target. Existing page
+files are rejected by default. IF-EXISTS may be :ERROR or :SUPERSEDE."
   (check-type page-json hash-table)
   (check-type slug string)
 
@@ -107,10 +104,7 @@ files are rejected by default.  IF-EXISTS may be :ERROR or :SUPERSEDE."
             site-root
             slug))
          (materialized-json
-           (page-json-with-fork
-            page-json
-            :source-site source-site
-            :fork-date fork-date)))
+           (%copy-json-value page-json)))
 
     (when
         (and
@@ -127,7 +121,7 @@ files are rejected by default.  IF-EXISTS may be :ERROR or :SUPERSEDE."
       (unwind-protect
            (progn
              (with-open-file
-                 (stream temporary
+                 (output temporary
                          :direction :output
                          :if-exists :error
                          :if-does-not-exist :create
@@ -136,8 +130,8 @@ files are rejected by default.  IF-EXISTS may be :ERROR or :SUPERSEDE."
                      (shasht:*write-indent-string* "  "))
                  (shasht:write-json
                   materialized-json
-                  stream))
-               (terpri stream))
+                  output))
+               (terpri output))
 
              (uiop:rename-file-overwriting-target
               temporary
@@ -150,3 +144,24 @@ files are rejected by default.  IF-EXISTS may be :ERROR or :SUPERSEDE."
             (and temporary
                  (probe-file temporary))
           (delete-file temporary))))))
+
+(defun materialize-fedwiki-page-fork
+    (page-json
+     site-root
+     slug
+     &key
+       source-site
+       fork-date
+       (if-exists :error))
+  "Append explicit FedWiki fork provenance and persist the resulting page.
+
+Unlike MATERIALIZE-FEDWIKI-PAGE-JSON, this operation deliberately changes the
+page journal by adding one fork entry."
+  (materialize-fedwiki-page-json
+   (page-json-with-fork
+    page-json
+    :source-site source-site
+    :fork-date fork-date)
+   site-root
+   slug
+   :if-exists if-exists))
