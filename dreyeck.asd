@@ -666,3 +666,41 @@
         :run-wiki-assets-acceptance-tests-in-fresh-process)
      (error
       "Dreyeck Wiki-assets acceptance failed."))))
+
+
+(asdf:defsystem #:dreyeck/local-fedwiki-view
+  :description "Serve locally persisted Federated Wiki JSON through /view/<slug>"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on (#:dreyeck/local-fedwiki-page
+               #:hyperbook/server)
+  :components
+  ((:file "local-fedwiki-view-package")
+   (:file "local-fedwiki-view"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op "dreyeck/local-fedwiki-view/tests"))))
+
+(asdf:defsystem #:dreyeck/local-fedwiki-view/tests
+  :description "Server-independence tests for local FedWiki JSON rendering"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on (#:dreyeck/local-fedwiki-view)
+  :components
+  ((:file "local-fedwiki-view-test-package")
+   (:file "local-fedwiki-view-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare
+    (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        :dreyeck/local-fedwiki-view/tests
+        :run-local-fedwiki-view-tests)
+     (error
+      "Local FedWiki /view tests failed."))))

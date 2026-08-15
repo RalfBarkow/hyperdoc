@@ -1,0 +1,59 @@
+{
+  "title": "Reading Java Source as Data",
+  "story": [
+    {
+      "type": "paragraph",
+      "id": "2aa8b9e428d7668a",
+      "text": "This page treats Java source as inspectable, source-preserving data.\nIt owns the page-attached ASDF system reading-java-source-as-data.\nThe first executable contract is that the system can be loaded and\ntested without parsing or modifying Java source."
+    },
+    {
+      "type": "assets",
+      "id": "d40b880246a7aa93",
+      "text": "pages/reading-java-source-as-data"
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "item": {
+        "title": "Reading Java Source as Data",
+        "story": []
+      },
+      "date": 1786684767182
+    },
+    {
+      "type": "edit",
+      "id": "2aa8b9e428d7668a",
+      "item": {
+        "type": "paragraph",
+        "id": "2aa8b9e428d7668a",
+        "text": "This page treats Java source as inspectable, source-preserving data.\nIt owns the page-attached ASDF system reading-java-source-as-data.\nThe first executable contract is that the system can be loaded and\ntested without parsing or modifying Java source."
+      },
+      "date": 1786684771855
+    },
+    {
+      "type": "fork",
+      "date": 1786702000862
+    },
+    {
+      "item": {
+        "type": "factory",
+        "id": "d40b880246a7aa93"
+      },
+      "id": "d40b880246a7aa93",
+      "type": "add",
+      "after": "2aa8b9e428d7668a",
+      "date": 1786702015654
+    },
+    {
+      "type": "edit",
+      "id": "d40b880246a7aa93",
+      "item": {
+        "type": "assets",
+        "id": "d40b880246a7aa93",
+        "text": "pages/reading-java-source-as-data"
+      },
+      "date": 1786702026033
+    }
+  ]
+}
