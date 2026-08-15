@@ -1,0 +1,112 @@
+<h1>HyperDoc and a Page-attached FedWiki ASDF System</h1>
+
+<in-package>cl-user</in-package>
+
+<p>
+  This page demonstrates the relation between a HyperDoc page,
+  a locally persisted Federated Wiki page, and the ASDF system
+  referenced by that page's <tt>assets</tt> story item.
+</p>
+
+<h2>1. Follow the semantic HyperBook link</h2>
+
+<p>
+  The Federated Wiki page is named by its HyperBook and page identifiers:
+</p>
+
+<p>
+  <a hyperbook="fedwiki:dreyeck.ch"
+     page="reading-java-source-as-data">
+    Reading Java Source as Data
+  </a>
+</p>
+
+<p>
+  The link resolves through the registered local
+  <tt>fedwiki:dreyeck.ch</tt> HyperBook. No Federated Wiki server
+  process is required for this lookup.
+</p>
+
+<h2>2. Resolve the persisted page as an object</h2>
+
+<p>
+  <a expr="(hyperbook:find-page
+              &quot;fedwiki:dreyeck.ch&quot;
+              &quot;reading-java-source-as-data&quot;
+              :signal-error? t)"
+     view="Overview">
+    Inspect the local FedWiki page object
+  </a>
+</p>
+
+<h2>3. Render the same page as its FedWiki Story</h2>
+
+<p>
+  <a expr="(hyperbook:find-page
+              &quot;fedwiki:dreyeck.ch&quot;
+              &quot;reading-java-source-as-data&quot;
+              :signal-error? t)"
+     view="Story">
+    Render Reading Java Source as Data as a Story
+  </a>
+</p>
+
+<p>
+  The same persisted page is also available through its canonical
+  local view route:
+  <a href="/view/reading-java-source-as-data">
+    /view/reading-java-source-as-data
+  </a>.
+</p>
+
+<h2>4. Follow the page-attached assets relation</h2>
+
+<p>
+  The page contains an <tt>assets</tt> story item whose logical
+  reference is:
+</p>
+
+<pre>
+pages/reading-java-source-as-data
+</pre>
+
+<p>
+  Resolve that relation read-only from the same local page object:
+</p>
+
+<p>
+  <a expr="(dreyeck/local-fedwiki-page:local-fedwiki-page-asdf-discovery
+              (hyperbook:find-page
+               &quot;fedwiki:dreyeck.ch&quot;
+               &quot;reading-java-source-as-data&quot;
+               :signal-error? t))"
+     view="Overview">
+    Inspect the page-attached ASDF discovery
+  </a>
+</p>
+
+<h2>5. What has been established</h2>
+
+<pre>
+HyperDoc
+   |
+   | hyperbook="fedwiki:dreyeck.ch"
+   | page="reading-java-source-as-data"
+   v
+LOCAL-FEDWIKI-PAGE
+   |
+   | assets story item
+   v
+pages/reading-java-source-as-data
+   |
+   v
+local assets directory
+   |
+   v
+reading-java-source-as-data.asd
+</pre>
+
+<p>
+  Discovery is deliberately read-only. Finding the ASD does not register,
+  load, or activate the page-attached ASDF systems.
+</p>

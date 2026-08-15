@@ -4,7 +4,7 @@
   "reading-java-source-as-data")
 
 (defparameter *fixture-wiki-id*
-  "fedwiki:local-fixture.invalid")
+  "fedwiki:dreyeck.ch")
 
 (defparameter *fixture-view-path*
   (format nil "/view/~A" *fixture-slug*))
@@ -53,6 +53,30 @@
    (null
     (dreyeck/local-fedwiki-view:view-slug-from-pathname
      (format nil "/not-view/~A" *fixture-slug*))))
+
+  ;; The authored HyperDoc page names the same executable contracts that
+  ;; this smoke test exercises below.
+  (let* ((demo-page
+           (asdf:system-relative-pathname
+            "dreyeck/local-fedwiki-view/tests"
+            "dreyeck/pages/HyperDoc and a Page-attached FedWiki ASDF System.html"))
+         (source
+           (uiop:read-file-string
+            (truename demo-page))))
+
+    (dolist
+        (needle
+         '("hyperbook=\"fedwiki:dreyeck.ch\""
+           "page=\"reading-java-source-as-data\""
+           "hyperbook:find-page"
+           "view=\"Story\""
+           "local-fedwiki-page-asdf-discovery"
+           "/view/reading-java-source-as-data"))
+      (assert
+       (search needle source :test #'char=)
+       ()
+       "HyperDoc demonstration page must declare ~S."
+       needle)))
 
   (let ((hyperbook:*catalog*
           (make-instance
@@ -154,11 +178,25 @@
                  '("pages/reading-java-source-as-data")
                  (getf discovery :assets-references)))
 
-               ;; The fixture deliberately contains the page JSON but not yet
-               ;; the referenced asset bundle.
-               (assert
-                (null
-                 (getf discovery :asdf-files)))
+               ;; The fixture contains the page JSON and one page-attached ASD.
+               ;; Discovery must resolve that relation without loading it.
+               (let* ((asdf-files
+                        (getf discovery :asdf-files))
+                      (expected-asd
+                        (asdf:system-relative-pathname
+                         "dreyeck/local-fedwiki-view/tests"
+                         "dreyeck/tests/fixtures/local-fedwiki-view-site/assets/pages/reading-java-source-as-data/reading-java-source-as-data.asd")))
+
+                 (assert
+                  (= 1
+                     (length asdf-files)))
+
+                 (assert
+                  (equal
+                   (truename expected-asd)
+                   (truename
+                    (first asdf-files)))))
+
 
                (assert
                 (search
