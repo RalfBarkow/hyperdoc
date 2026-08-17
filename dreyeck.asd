@@ -433,7 +433,7 @@
    (unless
        (uiop:symbol-call
         :dreyeck/page-attached-asdf/tests
-        :run-page-attached-asdf-tests)
+        :run-page-attached-asdf-tests-in-fresh-process)
      (error
       "Dreyeck page-attached ASDF tests failed."))))
 

@@ -159,3 +159,108 @@ The returned plist retains the observations from each stage."
              (asdf:component-name
               (hyperdoc:asdf-system-of
                runtime-hyperdoc)))))))))
+
+(defun activate-page-attached-hyperdoc-from-assets
+    (site-root slug &key system-name)
+  "Activate one page-attached HyperDoc directly from SITE-ROOT/assets.
+
+The explicit trusted ASD is the source-authority boundary for the whole
+registration, selection, and loading operation.  No local FedWiki page
+JSON is required."
+  (check-type slug string)
+  (let* ((effective-system-name
+           (or system-name slug))
+         (assets-root
+           (dreyeck/fedwiki-assets:local-fedwiki-assets-root
+            site-root))
+         (asset-root
+           (merge-pathnames
+            (format nil
+                    "pages/~A/"
+                    slug)
+            assets-root))
+         (asd
+           (truename
+            (merge-pathnames
+             (format nil
+                     "~A.asd"
+                     slug)
+             asset-root))))
+
+    (unless
+        (page-attached-asdf-under-assets-root-p
+         site-root
+         asd)
+      (error
+       "Refusing to evaluate page-attached ASD outside the local assets root: ~A"
+       asd))
+
+    (dreyeck/page-attached-asdf:call-with-asd-source-authority
+     asd
+     (lambda ()
+       (let* ((registration
+                (dreyeck/page-attached-asdf:asd-registration-observation
+                 asd
+                 :name effective-system-name))
+              (systems
+                (getf
+                 registration
+                 :systems-after))
+              (candidates
+                (direct-hyperdoc-presentation-candidates
+                 systems)))
+
+         (unless
+             (= 1
+                (length candidates))
+           (error
+            "Expected exactly one direct HyperDoc presentation candidate for ~S, got ~D: ~S"
+            slug
+            (length candidates)
+            candidates))
+
+         (let* ((presentation-system
+                  (first candidates))
+                (activation
+                  (dreyeck/page-attached-hyperdoc:load-system-and-observe-hyperdocs
+                   presentation-system))
+                (runtime-hyperdocs
+                  (hyperdocs-for-asdf-systems
+                   systems)))
+
+           (unless
+               (= 1
+                  (length runtime-hyperdocs))
+             (error
+              "Expected exactly one Runtime HyperDoc for ~S, got ~D: ~S"
+              slug
+              (length runtime-hyperdocs)
+              runtime-hyperdocs))
+
+           (let ((runtime-hyperdoc
+                   (first runtime-hyperdocs)))
+             (list
+              :route :assets
+              :site-root
+              (truename site-root)
+              :slug slug
+              :trusted-asd asd
+              :requested-system-name
+              effective-system-name
+              :registration registration
+              :systems-defined-by-asd
+              systems
+              :presentation-candidates
+              candidates
+              :selected-presentation-system
+              presentation-system
+              :activation activation
+              :runtime-hyperdoc
+              runtime-hyperdoc
+              :runtime-hyperdoc-id
+              (hyperbook:id-of
+               runtime-hyperdoc)
+              :runtime-hyperdoc-core-system
+              (asdf:component-name
+               (hyperdoc:asdf-system-of
+                runtime-hyperdoc))))))))))

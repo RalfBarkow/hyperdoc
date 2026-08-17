@@ -3,6 +3,7 @@
   (:export
    #:systems-defined-by-asd
    #:register-asd-systems
-   #:asd-registration-observation))
+   #:asd-registration-observation
+   #:call-with-asd-source-authority))
 
 (in-package #:dreyeck/page-attached-asdf)

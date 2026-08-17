@@ -41,7 +41,7 @@
     (when (asdf:find-system name nil)
       (asdf:clear-system name))))
 
-(defun run-fedwiki-hyperdoc-tests ()
+(defun run-local-page-fedwiki-hyperdoc-test ()
   (clear-fixture-systems)
   (remove-fixture-hyperdoc)
 
@@ -218,3 +218,157 @@
      :output *standard-output*
      :error-output *error-output*)
     t))
+
+(defun assets-only-fixture-site-root ()
+  (asdf:system-relative-pathname
+   "dreyeck/fedwiki-hyperdoc/tests"
+   "dreyeck/tests/fixtures/fedwiki-hyperdoc-assets-only-site/"))
+
+(defun assets-only-fixture-page-pathname ()
+  (merge-pathnames
+   "pages/example-hyperdoc-page"
+   (assets-only-fixture-site-root)))
+
+(defun assets-only-fixture-asd-pathname ()
+  (merge-pathnames
+   "assets/pages/example-hyperdoc-page/example-hyperdoc-page.asd"
+   (assets-only-fixture-site-root)))
+
+(defun run-assets-first-fedwiki-hyperdoc-test ()
+  "Activate a page-attached HyperDoc from assets without a local FedWiki page."
+  (clear-fixture-systems)
+  (remove-fixture-hyperdoc)
+
+  (unwind-protect
+       (progn
+         ;; This is the defining precondition of the assets-first fixture.
+         (assert
+          (null
+           (probe-file
+            (assets-only-fixture-page-pathname))))
+
+         (assert
+          (probe-file
+           (assets-only-fixture-asd-pathname)))
+
+         (let* ((observation
+                  (dreyeck/fedwiki-hyperdoc:activate-page-attached-hyperdoc-from-assets
+                   (assets-only-fixture-site-root)
+                   *fixture-slug*
+                   :system-name
+                   *fixture-core-system*))
+                (activation
+                  (getf
+                   observation
+                   :activation))
+                (runtime-hyperdoc
+                  (getf
+                   observation
+                   :runtime-hyperdoc)))
+
+           (assert
+            (eq
+             :assets
+             (getf
+              observation
+              :route)))
+
+           (assert
+            (equal
+             (truename
+              (assets-only-fixture-asd-pathname))
+             (getf
+              observation
+              :trusted-asd)))
+
+           (assert
+            (equal
+             (list
+              *fixture-core-system*
+              *fixture-presentation-system*
+              *fixture-test-system*)
+             (getf
+              observation
+              :systems-defined-by-asd)))
+
+           (assert
+            (equal
+             (list
+              *fixture-presentation-system*)
+             (getf
+              observation
+              :presentation-candidates)))
+
+           (assert
+            (string=
+             *fixture-presentation-system*
+             (getf
+              observation
+              :selected-presentation-system)))
+
+           (assert
+            (= 1
+               (length
+                (getf
+                 activation
+                 :newly-registered-hyperdocs))))
+
+           (assert
+            (typep
+             runtime-hyperdoc
+             'hyperdoc:hyperdoc))
+
+           (assert
+            (string=
+             *fixture-slug*
+             (getf
+              observation
+              :runtime-hyperdoc-id)))
+
+           (assert
+            (string=
+             *fixture-core-system*
+             (getf
+              observation
+              :runtime-hyperdoc-core-system)))
+
+           ;; The local FedWiki page remains absent throughout.
+           (assert
+            (null
+             (probe-file
+              (assets-only-fixture-page-pathname))))
+
+           ;; The same operation is idempotent in one live image.
+           (let* ((second-observation
+                    (dreyeck/fedwiki-hyperdoc:activate-page-attached-hyperdoc-from-assets
+                     (assets-only-fixture-site-root)
+                     *fixture-slug*
+                     :system-name
+                     *fixture-core-system*))
+                  (second-activation
+                    (getf
+                     second-observation
+                     :activation)))
+
+             (assert
+              (null
+               (getf
+                second-activation
+                :newly-registered-hyperdocs)))
+
+             (assert
+              (eq
+               runtime-hyperdoc
+               (getf
+                second-observation
+                :runtime-hyperdoc))))
+
+           t))
+
+    (remove-fixture-hyperdoc)
+    (clear-fixture-systems)))
+
+(defun run-fedwiki-hyperdoc-tests ()
+  (and
+   (run-local-page-fedwiki-hyperdoc-test)
+   (run-assets-first-fedwiki-hyperdoc-test)))
