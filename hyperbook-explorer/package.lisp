@@ -25,7 +25,9 @@
           html-nodes
           render-node
           serialize-a-element
-          serialize-page-dom))
+          serialize-page-dom
+          *current-page*
+          *current-hyperbook*))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperbook)
