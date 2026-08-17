@@ -235,7 +235,7 @@
   *hyperdoc-html-page-assets*)
 
 (defmethod hb:serialize-page-dom ((page page))
-  (let ((*current-package* (find-package "CL-USER")))
+  (let ((*current-package* (find-package "CL")))
     (call-next-method)))
 
 ;;
