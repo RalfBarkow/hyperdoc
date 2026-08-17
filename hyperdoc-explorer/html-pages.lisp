@@ -16,7 +16,8 @@
 ;; The page class for file type "html" is html-page.
 ;;
 
-(defmethod page-class ((filetype (eql :html)))
+(defmethod page-class ((hd hyperdoc) (filetype (eql :html)))
+  (declare (ignore hd))
   (find-class 'html-page))
 
 ;;

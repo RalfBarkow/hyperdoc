@@ -23,6 +23,8 @@
            #:defhyperdoc
            #:make-hyperdoc
            #:data-of
+           ;; Defining page classes for file types
+           #:page-class
            ;; Referencing HyperDocs and pages from code files
            #:see #:page #:hyperdoc
            ;; Defining examples and using assertions in them

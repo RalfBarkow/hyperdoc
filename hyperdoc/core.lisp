@@ -144,7 +144,7 @@ the macro DEFHYPERDOC."
   "Create a page instance in HyperDoc HDOC for the page stored in FILE."
   (let* ((type (pathname-type file))
          (type-as-kw (alexandria:make-keyword (string-upcase type)))
-         (page (make-instance (page-class type-as-kw)
+         (page (make-instance (page-class hdoc type-as-kw)
                               :hyperbook hdoc
                               :file file)))
     (load-page page)
@@ -172,7 +172,7 @@ the macro DEFHYPERDOC."
 ;; are in hyperdoc/explorer.
 ;;
 
-(defgeneric page-class (filetype))
+(defgeneric page-class (hdoc filetype))
 
 (defgeneric load-page (page))
 

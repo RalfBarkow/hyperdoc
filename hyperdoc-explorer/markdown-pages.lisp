@@ -16,7 +16,8 @@
 
 ;; The page class for file type "md" is markdown-page.
 
-(defmethod page-class ((filetype (eql :md)))
+(defmethod page-class ((hd hyperdoc ) (filetype (eql :md)))
+  (declare (ignore hd))
   (find-class 'markdown-page))
 
 ;;
