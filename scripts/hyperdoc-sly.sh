@@ -32,5 +32,7 @@ exec emacs -Q \
         ("sbcl"
          "--dynamic-space-size" "8192"
          "--noinform"
-         "--no-userinit"))
+         "--no-userinit"
+         "--eval" "(require :sb-posix)"
+         "--eval" "(sb-posix:unsetenv \"DYLD_LIBRARY_PATH\")"))
        (quote utf-8-unix)))'
