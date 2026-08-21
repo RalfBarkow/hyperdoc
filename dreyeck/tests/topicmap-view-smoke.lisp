@@ -142,9 +142,47 @@
              condition)))
   t)
 
-(defun run-topicmap-view-smoke-tests ()
-  (check-ownership-contract)
-  (run-generic-topicmap-view-test)
-  (run-endpoint-validation-test)
-  (format t "Generic renderer-independent Topicmap view tests passed.~%")
-  t)
+(DEFUN RUN-SEMANTIC-TOPICMAP-PRESENTATION-SMOKE-TEST ()
+  (LET* ((CONTAINED
+          (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-TOPIC :ID "test:contained"
+                         :TYPE :TEST-CONTAINED :LABEL "contained" :OBJECT
+                         :CONTAINED :TEMPORAL-SCOPE :CURRENT-LISP-IMAGE
+                         :VIEW-PROPERTIES
+                         '(:X 120 :Y 260 :VISIBLE T :PINNED T)))
+         (CONTAINER
+          (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-TOPIC :ID "test:container"
+                         :TYPE :TEST-CONTAINER :LABEL "container" :OBJECT
+                         :CONTAINER :TEMPORAL-SCOPE :CURRENT-LISP-IMAGE
+                         :VIEW-PROPERTIES
+                         '(:X 700 :Y 260 :VISIBLE T :PINNED T)))
+         (ASSOCIATION
+          (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION :ID
+                         "test:containment" :TYPE :CONTAINING-METHOD :FROM
+                         "test:contained" :TO "test:container" :PROPERTIES
+                         '(:PRESENTATION :STRUCTURAL-CONTAINMENT)))
+         (PROJECTION
+          (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-PROJECTION :SOURCE :TEST
+                         :TOPICS (LIST CONTAINED CONTAINER) :ASSOCIATIONS
+                         (LIST ASSOCIATION) :VIEW-PROPERTIES
+                         '(:WIDTH 1050 :HEIGHT 520 :POINT "test:contained")))
+         (HTML
+          (DREYECK/INSPECTOR/TOPICMAP:RENDER-TOPICMAP-HTML :NATIVE-SVG
+                                                           PROJECTION)))
+    (ASSERT (SEARCH "class='dreyeck-topicmap-structural-containment'" HTML))
+    (ASSERT (SEARCH "data-presentation='STRUCTURAL-CONTAINMENT'" HTML))
+    (ASSERT (SEARCH "class='dreyeck-topicmap-point-sign'" HTML))
+    (ASSERT (SEARCH "data-presentation='POINT'" HTML))
+    (ASSERT
+     (NULL
+      (SEARCH
+       "class='dreyeck-topicmap-association' data-association-id='test:containment'"
+       HTML)))
+    T))
+
+(DEFUN RUN-TOPICMAP-VIEW-SMOKE-TESTS ()
+  (CHECK-OWNERSHIP-CONTRACT)
+  (RUN-GENERIC-TOPICMAP-VIEW-TEST)
+  (RUN-ENDPOINT-VALIDATION-TEST)
+  (FORMAT T "Generic renderer-independent Topicmap view tests passed.~%")
+  (RUN-SEMANTIC-TOPICMAP-PRESENTATION-SMOKE-TEST)
+  T)

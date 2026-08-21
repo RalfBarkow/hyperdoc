@@ -48,74 +48,160 @@
         :key #'dreyeck/topicmap:topicmap-topic-id-of
         :test #'string=))
 
-(defun render-native-topicmap-svg (projection stream)
-  (let* ((properties
-           (dreyeck/topicmap:topicmap-projection-view-properties-of projection))
-         (width (topicmap-property properties :width 1200))
-         (height (topicmap-property properties :height 720)))
-    (format stream
-            "<svg class='dreyeck-topicmap-canvas' viewBox='0 0 ~D ~D' role='img' aria-label='Topicmap'>"
-            width height)
-    (write-string
-     "<defs><marker id='dreyeck-topicmap-arrow' markerWidth='10' markerHeight='7' refX='9' refY='3.5' orient='auto'><polygon points='0 0, 10 3.5, 0 7'></polygon></marker></defs>"
-     stream)
-    (dolist
-        (association
-          (dreyeck/topicmap:topicmap-projection-associations-of projection))
-      (let ((from
-              (topicmap-topic-by-id
-               projection
-               (dreyeck/topicmap:topicmap-association-from-of association)))
-            (to
-              (topicmap-topic-by-id
-               projection
-               (dreyeck/topicmap:topicmap-association-to-of association))))
-        (when (and from to
-                   (member from (topicmap-visible-topics projection))
-                   (member to (topicmap-visible-topics projection)))
-          (multiple-value-bind (from-x from-y)
-              (topicmap-topic-position from)
-            (multiple-value-bind (to-x to-y)
-                (topicmap-topic-position to)
-              (let ((x1 (+ from-x 105))
-                    (y1 (+ from-y 30))
-                    (x2 (+ to-x 105))
-                    (y2 (+ to-y 30)))
-                (format stream
-                        "<g class='dreyeck-topicmap-association' data-association-id='~A' data-association-type='~A'><line x1='~D' y1='~D' x2='~D' y2='~D' marker-end='url(#dreyeck-topicmap-arrow)'></line><text x='~D' y='~D'>~A</text></g>"
-                        (topicmap-html-escape
-                         (dreyeck/topicmap:topicmap-association-id-of association))
-                        (topicmap-html-escape
-                         (dreyeck/topicmap:topicmap-association-type-of association))
-                        x1 y1 x2 y2
-                        (round (/ (+ x1 x2) 2))
-                        (- (round (/ (+ y1 y2) 2)) 6)
-                        (topicmap-html-escape
-                         (dreyeck/topicmap:topicmap-association-type-of association)))))))))
-    (dolist (topic (topicmap-visible-topics projection))
-      (multiple-value-bind (x y)
-          (topicmap-topic-position topic)
-        (let ((properties
-                (dreyeck/topicmap:topicmap-topic-view-properties-of topic)))
-          (format stream
-                  "<g class='dreyeck-topicmap-topic' data-topic-id='~A' data-topic-type='~A' data-temporal-scope='~A' data-pinned='~:[false~;true~]'><rect x='~D' y='~D' width='210' height='60' rx='8'></rect><text x='~D' y='~D'>~A</text><text class='dreyeck-topicmap-topic-kind' x='~D' y='~D'>~A · ~A</text></g>"
-                  (topicmap-html-escape
-                   (dreyeck/topicmap:topicmap-topic-id-of topic))
-                  (topicmap-html-escape
-                   (dreyeck/topicmap:topicmap-topic-type-of topic))
-                  (topicmap-html-escape
-                   (dreyeck/topicmap:topicmap-topic-temporal-scope-of topic))
-                  (topicmap-property properties :pinned nil)
-                  x y (+ x 12) (+ y 24)
-                  (topicmap-html-escape
-                   (dreyeck/topicmap:topicmap-topic-label-of topic))
-                  (+ x 12) (+ y 46)
-                  (topicmap-html-escape
-                   (dreyeck/topicmap:topicmap-topic-type-of topic))
-                  (topicmap-html-escape
-                   (dreyeck/topicmap:topicmap-topic-temporal-scope-of topic))))))
-    (write-string "</svg>" stream)))
+(DEFUN %TOPICMAP-ASSOCIATION-PRESENTATION-OF (ASSOCIATION)
+  (TOPICMAP-PROPERTY
+   (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-PROPERTIES-OF ASSOCIATION)
+   :PRESENTATION :RELATION))
 
+(DEFUN %STRUCTURAL-CONTAINER-TOPIC-IDS (PROJECTION)
+  (REMOVE-DUPLICATES
+   (LOOP FOR ASSOCIATION IN (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
+                             PROJECTION)
+         WHEN (EQ :STRUCTURAL-CONTAINMENT
+                  (%TOPICMAP-ASSOCIATION-PRESENTATION-OF ASSOCIATION))
+         COLLECT (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TO-OF ASSOCIATION))
+   :TEST #'EQUAL))
+
+(DEFUN %RENDER-NATIVE-TOPICMAP-RELATION-SIGN (PROJECTION ASSOCIATION STREAM)
+  (LET ((FROM
+         (TOPICMAP-TOPIC-BY-ID PROJECTION
+                               (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
+                                ASSOCIATION)))
+        (TO
+         (TOPICMAP-TOPIC-BY-ID PROJECTION
+                               (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TO-OF
+                                ASSOCIATION))))
+    (WHEN
+        (AND FROM TO (MEMBER FROM (TOPICMAP-VISIBLE-TOPICS PROJECTION))
+             (MEMBER TO (TOPICMAP-VISIBLE-TOPICS PROJECTION)))
+      (MULTIPLE-VALUE-BIND (FROM-X FROM-Y)
+          (TOPICMAP-TOPIC-POSITION FROM)
+        (MULTIPLE-VALUE-BIND (TO-X TO-Y)
+            (TOPICMAP-TOPIC-POSITION TO)
+          (LET ((X1 (+ FROM-X 105))
+                (Y1 (+ FROM-Y 30))
+                (X2 (+ TO-X 105))
+                (Y2 (+ TO-Y 30)))
+            (FORMAT STREAM
+                    "<g class='dreyeck-topicmap-association' data-association-id='~A' data-association-type='~A' data-presentation='RELATION'><line x1='~D' y1='~D' x2='~D' y2='~D' marker-end='url(#dreyeck-topicmap-arrow)'></line><text x='~D' y='~D'>~A</text></g>"
+                    (TOPICMAP-HTML-ESCAPE
+                     (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF ASSOCIATION))
+                    (TOPICMAP-HTML-ESCAPE
+                     (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
+                      ASSOCIATION))
+                    X1 Y1 X2 Y2 (ROUND (/ (+ X1 X2) 2))
+                    (- (ROUND (/ (+ Y1 Y2) 2)) 6)
+                    (TOPICMAP-HTML-ESCAPE
+                     (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
+                      ASSOCIATION)))))))))
+
+(DEFUN %RENDER-NATIVE-TOPICMAP-STRUCTURAL-CONTAINMENT-SIGN
+       (PROJECTION ASSOCIATION STREAM)
+  (LET ((CONTAINED
+         (TOPICMAP-TOPIC-BY-ID PROJECTION
+                               (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
+                                ASSOCIATION)))
+        (CONTAINER
+         (TOPICMAP-TOPIC-BY-ID PROJECTION
+                               (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TO-OF
+                                ASSOCIATION))))
+    (WHEN
+        (AND CONTAINED CONTAINER
+             (MEMBER CONTAINED (TOPICMAP-VISIBLE-TOPICS PROJECTION))
+             (MEMBER CONTAINER (TOPICMAP-VISIBLE-TOPICS PROJECTION)))
+      (MULTIPLE-VALUE-BIND (X Y)
+          (TOPICMAP-TOPIC-POSITION CONTAINED)
+        (LET ((BOUNDARY-X (- X 30)) (BOUNDARY-Y (- Y 50)))
+          (FORMAT STREAM
+                  "<g class='dreyeck-topicmap-structural-containment' data-association-id='~A' data-association-type='~A' data-presentation='STRUCTURAL-CONTAINMENT'><rect x='~D' y='~D' width='270' height='140' rx='8' fill='none' stroke='currentColor' stroke-width='2'></rect><text x='~D' y='~D'>~A</text><text class='dreyeck-topicmap-topic-kind' x='~D' y='~D'>~A · CONTAINING-METHOD</text></g>"
+                  (TOPICMAP-HTML-ESCAPE
+                   (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF ASSOCIATION))
+                  (TOPICMAP-HTML-ESCAPE
+                   (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF ASSOCIATION))
+                  BOUNDARY-X BOUNDARY-Y (+ BOUNDARY-X 12) (+ BOUNDARY-Y 22)
+                  (TOPICMAP-HTML-ESCAPE
+                   (DREYECK/TOPICMAP:TOPICMAP-TOPIC-LABEL-OF CONTAINER))
+                  (+ BOUNDARY-X 12) (+ BOUNDARY-Y 40)
+                  (TOPICMAP-HTML-ESCAPE
+                   (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TYPE-OF CONTAINER))))))))
+
+(DEFUN %RENDER-NATIVE-TOPICMAP-SUBJECT-SIGN (TOPIC STREAM)
+  (MULTIPLE-VALUE-BIND (X Y)
+      (TOPICMAP-TOPIC-POSITION TOPIC)
+    (LET ((PROPERTIES
+           (DREYECK/TOPICMAP:TOPICMAP-TOPIC-VIEW-PROPERTIES-OF TOPIC)))
+      (FORMAT STREAM
+              "<g class='dreyeck-topicmap-topic' data-topic-id='~A' data-topic-type='~A' data-temporal-scope='~A' data-pinned='~:[false~;true~]'><rect x='~D' y='~D' width='210' height='60' rx='8'></rect><text x='~D' y='~D'>~A</text><text class='dreyeck-topicmap-topic-kind' x='~D' y='~D'>~A · ~A</text></g>"
+              (TOPICMAP-HTML-ESCAPE
+               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-ID-OF TOPIC))
+              (TOPICMAP-HTML-ESCAPE
+               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TYPE-OF TOPIC))
+              (TOPICMAP-HTML-ESCAPE
+               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TEMPORAL-SCOPE-OF TOPIC))
+              (TOPICMAP-PROPERTY PROPERTIES :PINNED NIL) X Y (+ X 12) (+ Y 24)
+              (TOPICMAP-HTML-ESCAPE
+               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-LABEL-OF TOPIC))
+              (+ X 12) (+ Y 46)
+              (TOPICMAP-HTML-ESCAPE
+               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TYPE-OF TOPIC))
+              (TOPICMAP-HTML-ESCAPE
+               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TEMPORAL-SCOPE-OF TOPIC))))))
+
+(DEFUN %TOPICMAP-POINT-TOPIC-ID (PROJECTION)
+  (TOPICMAP-PROPERTY
+   (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-VIEW-PROPERTIES-OF PROJECTION) :POINT
+   NIL))
+
+(DEFUN %TOPICMAP-POINT-TOPIC-P (PROJECTION TOPIC)
+  (LET ((POINT-ID (%TOPICMAP-POINT-TOPIC-ID PROJECTION)))
+    (AND POINT-ID
+         (EQUAL POINT-ID (DREYECK/TOPICMAP:TOPICMAP-TOPIC-ID-OF TOPIC)))))
+
+(DEFUN %RENDER-NATIVE-TOPICMAP-POINT-SIGN (TOPIC STREAM)
+  (MULTIPLE-VALUE-BIND (X Y)
+      (TOPICMAP-TOPIC-POSITION TOPIC)
+    (FORMAT STREAM
+            "<g class='dreyeck-topicmap-point-sign' data-topic-id='~A' data-presentation='POINT'><rect x='~D' y='~D' width='202' height='52' rx='6' fill='none' stroke='currentColor' stroke-width='2'></rect></g>"
+            (TOPICMAP-HTML-ESCAPE
+             (DREYECK/TOPICMAP:TOPICMAP-TOPIC-ID-OF TOPIC))
+            (+ X 4) (+ Y 4))))
+
+(DEFUN %RENDER-NATIVE-TOPICMAP-TOPIC-SIGN (PROJECTION TOPIC STREAM)
+  (%RENDER-NATIVE-TOPICMAP-SUBJECT-SIGN TOPIC STREAM)
+  (WHEN (%TOPICMAP-POINT-TOPIC-P PROJECTION TOPIC)
+    (%RENDER-NATIVE-TOPICMAP-POINT-SIGN TOPIC STREAM)))
+
+(DEFUN RENDER-NATIVE-TOPICMAP-SVG (PROJECTION STREAM)
+  (LET* ((PROPERTIES
+          (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-VIEW-PROPERTIES-OF PROJECTION))
+         (WIDTH (TOPICMAP-PROPERTY PROPERTIES :WIDTH 1200))
+         (HEIGHT (TOPICMAP-PROPERTY PROPERTIES :HEIGHT 720))
+         (VISIBLE-TOPICS (TOPICMAP-VISIBLE-TOPICS PROJECTION))
+         (STRUCTURAL-CONTAINER-IDS
+          (%STRUCTURAL-CONTAINER-TOPIC-IDS PROJECTION)))
+    (FORMAT STREAM
+            "<svg class='dreyeck-topicmap-canvas' viewBox='0 0 ~D ~D' role='img' aria-label='Topicmap'>"
+            WIDTH HEIGHT)
+    (WRITE-STRING
+     "<defs><marker id='dreyeck-topicmap-arrow' markerWidth='10' markerHeight='7' refX='9' refY='3.5' orient='auto'><polygon points='0 0, 10 3.5, 0 7'></polygon></marker></defs>"
+     STREAM)
+    (DOLIST
+        (ASSOCIATION
+         (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF PROJECTION))
+      (CASE (%TOPICMAP-ASSOCIATION-PRESENTATION-OF ASSOCIATION)
+        (:STRUCTURAL-CONTAINMENT
+         (%RENDER-NATIVE-TOPICMAP-STRUCTURAL-CONTAINMENT-SIGN PROJECTION
+                                                              ASSOCIATION
+                                                              STREAM))
+        (OTHERWISE
+         (%RENDER-NATIVE-TOPICMAP-RELATION-SIGN PROJECTION ASSOCIATION
+                                                STREAM))))
+    (DOLIST (TOPIC VISIBLE-TOPICS)
+      (UNLESS
+          (MEMBER (DREYECK/TOPICMAP:TOPICMAP-TOPIC-ID-OF TOPIC)
+                  STRUCTURAL-CONTAINER-IDS :TEST #'EQUAL)
+        (%RENDER-NATIVE-TOPICMAP-TOPIC-SIGN PROJECTION TOPIC STREAM)))
+    (WRITE-STRING "</svg>" STREAM)))
 (defun render-native-topicmap-html (projection)
   "Render PROJECTION as dependency-free SVG for the CLOG inspector."
   (with-output-to-string (stream)
