@@ -120,7 +120,143 @@
         "named-closure": "named-closure",
         "nixpkgs": "nixpkgs",
         "njson": "njson",
-        "plump-inspector-views": "plump-inspector-views"
+        "plump-inspector-views": "plump-inspector-views",
+        "shop3": "shop3",
+        "shop3-documentation-utils": "shop3-documentation-utils",
+        "shop3-fiveam-asdf": "shop3-fiveam-asdf",
+        "shop3-iterate": "shop3-iterate",
+        "shop3-pddl-tools": "shop3-pddl-tools",
+        "shop3-random-state": "shop3-random-state",
+        "shop3-trivial-garbage": "shop3-trivial-garbage",
+        "shop3-trivial-indent": "shop3-trivial-indent"
+      }
+    },
+    "shop3": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784845302,
+        "narHash": "sha256-uJ4Fxv82wvZn+tgZjAswcqXxHfNDh2w5kOKrJKVwsRU=",
+        "owner": "shop-planner",
+        "repo": "shop3",
+        "rev": "ce53f9b651acde8c44dc21eddb1a1c5b97f10536",
+        "type": "github"
+      },
+      "original": {
+        "owner": "shop-planner",
+        "repo": "shop3",
+        "type": "github"
+      }
+    },
+    "shop3-documentation-utils": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1755078873,
+        "narHash": "sha256-DkqB8Hc0VBrMLLcP3xBBwguOFVVe4dAHR9WCrgFe90E=",
+        "owner": "Shinmera",
+        "repo": "documentation-utils",
+        "rev": "fcbd927dee7f311915a27ee557e3db1d4510403c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Shinmera",
+        "repo": "documentation-utils",
+        "type": "github"
+      }
+    },
+    "shop3-fiveam-asdf": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1667321444,
+        "narHash": "sha256-B2eHl+dSrACNVI4rLwwom3Ocak+Pt4TEvdQUyu33sKE=",
+        "owner": "rpgoldman",
+        "repo": "fiveam-asdf",
+        "rev": "7f11d9f5bdf6be425ffc9c1744955b1c460d9183",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rpgoldman",
+        "repo": "fiveam-asdf",
+        "type": "github"
+      }
+    },
+    "shop3-iterate": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1751572348,
+        "narHash": "sha256-6bYX+Al8x2zBngRUw63vUPaVNP0lLXnzaJYZFP52bEw=",
+        "ref": "refs/heads/master",
+        "rev": "d27d7ff4821b9d8b011afaaa866d7993942430f4",
+        "revCount": 90,
+        "type": "git",
+        "url": "https://gitlab.common-lisp.net/iterate/iterate.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://gitlab.common-lisp.net/iterate/iterate.git"
+      }
+    },
+    "shop3-pddl-tools": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781887187,
+        "narHash": "sha256-SD9rOROOOFYM7jWcdPCaVAo7HDBgb6NW0i20VQIU4Ss=",
+        "owner": "rpgoldman",
+        "repo": "pddl-tools",
+        "rev": "fc2de73c9e6ef732cceb3c74d22a25724ae697e4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rpgoldman",
+        "repo": "pddl-tools",
+        "type": "github"
+      }
+    },
+    "shop3-random-state": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1754670728,
+        "narHash": "sha256-hKYYCN7nbPYR+fUkiSDURL+whwPHwciXaNDcxXjwBCM=",
+        "owner": "rpgoldman",
+        "repo": "random-state",
+        "rev": "1eda41f2f392b09305c72113226da0814a1137b8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "rpgoldman",
+        "repo": "random-state",
+        "type": "github"
+      }
+    },
+    "shop3-trivial-garbage": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1554414877,
+        "narHash": "sha256-xauepYecUQmKbUEFT0APAMujzQPxnGoJUcEVEIWtzpo=",
+        "owner": "shop-planner",
+        "repo": "trivial-garbage",
+        "rev": "fff99d96b6a94811606dc8019cd25c771575dc30",
+        "type": "github"
+      },
+      "original": {
+        "owner": "shop-planner",
+        "repo": "trivial-garbage",
+        "type": "github"
+      }
+    },
+    "shop3-trivial-indent": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1755086606,
+        "narHash": "sha256-I8VM8EBTZx0X49e76RuOTHZWgmJk/FoiL7FZAwTnb9c=",
+        "owner": "Shinmera",
+        "repo": "trivial-indent",
+        "rev": "87b35ff9202b107230e35790e93c471cc7880900",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Shinmera",
+        "repo": "trivial-indent",
+        "type": "github"
       }
     }
   },

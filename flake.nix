@@ -33,6 +33,46 @@
       url = "github:atlas-engineer/njson";
       flake = false;
     };
+
+    shop3 = {
+      url = "github:shop-planner/shop3";
+      flake = false;
+    };
+
+    shop3-pddl-tools = {
+      url = "github:rpgoldman/pddl-tools";
+      flake = false;
+    };
+
+    shop3-fiveam-asdf = {
+      url = "github:rpgoldman/fiveam-asdf";
+      flake = false;
+    };
+
+    shop3-random-state = {
+      url = "github:rpgoldman/random-state";
+      flake = false;
+    };
+
+    shop3-documentation-utils = {
+      url = "github:Shinmera/documentation-utils";
+      flake = false;
+    };
+
+    shop3-trivial-indent = {
+      url = "github:Shinmera/trivial-indent";
+      flake = false;
+    };
+
+    shop3-trivial-garbage = {
+      url = "github:shop-planner/trivial-garbage";
+      flake = false;
+    };
+
+    shop3-iterate = {
+      url = "git+https://gitlab.common-lisp.net/iterate/iterate.git";
+      flake = false;
+    };
   };
 
   outputs = {
@@ -44,6 +84,14 @@
     lwcells,
     named-closure,
     njson,
+    shop3,
+    shop3-pddl-tools,
+    shop3-fiveam-asdf,
+    shop3-random-state,
+    shop3-documentation-utils,
+    shop3-trivial-indent,
+    shop3-trivial-garbage,
+    shop3-iterate,
     ...
   }:
     let
@@ -161,7 +209,7 @@
             ];
 
             shellHook = ''
-              export CL_SOURCE_REGISTRY="${clog-moldable-inspector}//:${html-inspector-views}//:${plump-inspector-views}//:${lwcells}//:${named-closure}//:${njson}//:$PWD//"
+              export CL_SOURCE_REGISTRY="${clog-moldable-inspector}//:${html-inspector-views}//:${plump-inspector-views}//:${lwcells}//:${named-closure}//:${njson}//:${shop3}/shop3//:${shop3-pddl-tools}//:${shop3-fiveam-asdf}//:${shop3-random-state}//:${shop3-documentation-utils}//:${shop3-trivial-indent}//:${shop3-trivial-garbage}//:${shop3-iterate}//:$PWD//"
               export HYPERDOC_HYPERSPEC_ROOT="${commonLispHyperSpec}/share/common-lisp-hyperspec/HyperSpec"
             '';
           };
