@@ -216,6 +216,7 @@
   ((:file "git-package")
    (:file "git-repository-checkout")
    (:file "git-commit-inspection")
+   (:file "git-repository-topicmap")
    (:file "git-asdf-references")
    (:file "git-asdf-reference-topicmap"))
   :in-order-to
@@ -295,6 +296,7 @@
                #:closer-mop)
   :components
   ((:file "git-commit-inspection-smoke")
+   (:file "git-repository-topicmap-smoke")
    (:file "git-asdf-reference-smoke"))
   :perform
   (asdf:test-op
@@ -303,6 +305,8 @@
    (uiop:symbol-call
     :dreyeck/git/tests
     :run-git-commit-inspection-smoke-tests)
+   (uiop:symbol-call :dreyeck/git/tests
+                     :run-git-repository-topicmap-smoke-tests)
    (uiop:symbol-call
     :dreyeck/git/asdf-reference-tests
     :run-git-asdf-reference-smoke-tests)))
