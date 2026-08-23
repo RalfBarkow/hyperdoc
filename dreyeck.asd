@@ -765,6 +765,64 @@
     ((:file "package") (:file "manual-topics") (:file "plan-objects")
      (:file "examples") (:file "views")))))
 
+(asdf/parse-defsystem:defsystem #:dreyeck/image-audit
+  :description
+  "Function reconstruction audits for Dreyeck"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/src/"
+  :serial
+  t
+  :depends-on
+  nil
+  :components
+  ((:file "image-audit-package") (:file "image-function-audit"))
+  :in-order-to
+  ((asdf/lisp-action:test-op
+    (asdf/lisp-action:test-op "dreyeck/image-audit/tests"))))
+
+(asdf/parse-defsystem:defsystem #:dreyeck/image-audit/tests
+  :description
+  "Fresh-image smoke tests for Dreyeck image function audits"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/tests/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/image-audit)
+  :components
+  ((:file "image-audit-test-package") (:file "image-function-audit-smoke"))
+  :perform
+  (asdf/lisp-action:test-op (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop/package:symbol-call :dreyeck/image-audit/tests
+                                 :run-image-function-audit-tests-in-fresh-process)
+     (error "Dreyeck image function audit tests failed."))))
+
+(asdf/parse-defsystem:defsystem #:dreyeck/inspector/image
+  :description
+  "Dreyeck Inspector views for Lisp image reconstruction audits"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/src/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/image-audit #:hyperdoc/inspector #:html-inspector-views/standard)
+  :components
+  ((:file "image-inspector-package") (:file "image-only-functions-view")))
+
 (asdf/parse-defsystem:defsystem #:dreyeck/issue
   :description
   "Issue references and repository work contexts for Dreyeck"
