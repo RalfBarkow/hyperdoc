@@ -646,6 +646,9 @@
          :to (funcall endpoint-id
                       (typed-source-relation-target-of relation))
          :properties
-         (list :role (typed-source-relation-role-of relation))))
+         (if (eq (typed-source-relation-type-of relation) :defines)
+             (list :role (typed-source-relation-role-of relation) :presentation
+                   :structural-containment :contained-endpoint :to)
+             (list :role (typed-source-relation-role-of relation)))))
       relations)
      :view-properties '(:width 1120 :height 700))))

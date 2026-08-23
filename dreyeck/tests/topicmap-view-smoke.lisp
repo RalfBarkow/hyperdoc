@@ -179,10 +179,48 @@
        HTML)))
     T))
 
+(DEFUN RUN-SEMANTIC-TOPICMAP-ENDPOINT-ROLE-SMOKE-TEST ()
+  (LET* ((CONTAINED
+          (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-TOPIC :ID "test:contained" :TYPE
+                         :TEST-CONTAINED :LABEL "contained" :OBJECT :CONTAINED
+                         :TEMPORAL-SCOPE :CURRENT-LISP-IMAGE :VIEW-PROPERTIES
+                         '(:X 120 :Y 260 :VISIBLE T :PINNED T)))
+         (CONTAINER
+          (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-TOPIC :ID "test:container" :TYPE
+                         :TEST-CONTAINER :LABEL "container" :OBJECT :CONTAINER
+                         :TEMPORAL-SCOPE :CURRENT-LISP-IMAGE :VIEW-PROPERTIES
+                         '(:X 700 :Y 260 :VISIBLE T :PINNED T)))
+         (ASSOCIATION
+          (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION :ID "test:containment"
+                         :TYPE :CONTAINING-METHOD :FROM "test:container" :TO
+                         "test:contained" :PROPERTIES
+                         '(:PRESENTATION :STRUCTURAL-CONTAINMENT :CONTAINED-ENDPOINT
+                           :TO)))
+         (PROJECTION
+          (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-PROJECTION :SOURCE :TEST :TOPICS
+                         (LIST CONTAINED CONTAINER) :ASSOCIATIONS (LIST ASSOCIATION)
+                         :VIEW-PROPERTIES
+                         '(:WIDTH 1050 :HEIGHT 520 :POINT "test:contained")))
+         (HTML
+          (DREYECK/INSPECTOR/TOPICMAP:RENDER-TOPICMAP-HTML :NATIVE-SVG PROJECTION)))
+    (ASSERT (SEARCH "class='dreyeck-topicmap-structural-containment'" HTML))
+    (ASSERT (SEARCH "data-presentation='STRUCTURAL-CONTAINMENT'" HTML))
+    (ASSERT (SEARCH "class='dreyeck-topicmap-point-sign'" HTML))
+    (ASSERT (SEARCH "data-presentation='POINT'" HTML))
+    (ASSERT
+     (NULL
+      (SEARCH
+       "class='dreyeck-topicmap-association' data-association-id='test:containment'"
+       HTML)))
+    (ASSERT (SEARCH "data-topic-id='test:container'" HTML))
+    (ASSERT (SEARCH "data-topic-id='test:contained'" HTML))
+    T))
+
 (DEFUN RUN-TOPICMAP-VIEW-SMOKE-TESTS ()
   (CHECK-OWNERSHIP-CONTRACT)
   (RUN-GENERIC-TOPICMAP-VIEW-TEST)
   (RUN-ENDPOINT-VALIDATION-TEST)
   (FORMAT T "Generic renderer-independent Topicmap view tests passed.~%")
   (RUN-SEMANTIC-TOPICMAP-PRESENTATION-SMOKE-TEST)
+  (RUN-SEMANTIC-TOPICMAP-ENDPOINT-ROLE-SMOKE-TEST)
   T)

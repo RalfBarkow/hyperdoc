@@ -374,6 +374,25 @@
              "Topicmap lacks association type ~S." type))
     (check (= 5 (count :defines association-types))
            "Topicmap does not have five :DEFINES associations.")
+    (DOLIST (ASSOCIATION ASSOCIATIONS)
+      (LET* ((TYPE (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF ASSOCIATION))
+             (PROPERTIES
+              (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-PROPERTIES-OF ASSOCIATION))
+             (PRESENTATION (GETF PROPERTIES :PRESENTATION :RELATION)))
+        (IF (EQ TYPE :DEFINES)
+            (PROGN
+             (CHECK (EQ PRESENTATION :STRUCTURAL-CONTAINMENT)
+                    "Definition association ~A has presentation ~S instead of :STRUCTURAL-CONTAINMENT."
+                    (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF ASSOCIATION)
+                    PRESENTATION)
+             (CHECK (EQ (GETF PROPERTIES :CONTAINED-ENDPOINT) :TO)
+                    "Definition association ~A has contained endpoint ~S instead of :TO."
+                    (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF ASSOCIATION)
+                    (GETF PROPERTIES :CONTAINED-ENDPOINT)))
+            (CHECK (EQ PRESENTATION :RELATION)
+                   "Non-definition association ~A of type ~S has presentation ~S instead of :RELATION."
+                   (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF ASSOCIATION) TYPE
+                   PRESENTATION))))
     (check (= 1 (count :calls association-types))
            "Topicmap does not have one :CALLS association.")
     (check (= 2 (count :reads-special association-types))
