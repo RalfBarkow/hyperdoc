@@ -764,3 +764,43 @@
   ((:module "dreyeck/shop3" :serial t :components
     ((:file "package") (:file "manual-topics") (:file "plan-objects")
      (:file "examples") (:file "views")))))
+
+(asdf/parse-defsystem:defsystem #:dreyeck/issue
+  :description
+  "Issue references and repository work contexts for Dreyeck"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/src/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/git #:dreyeck/topicmap)
+  :components
+  ((:file "issue-package") (:file "issue-reference")
+   (:file "issue-work-context") (:file "issue-work-context-topicmap"))
+  :in-order-to
+  ((asdf/lisp-action:test-op (asdf/lisp-action:test-op "dreyeck/issue/tests"))))
+
+(asdf/parse-defsystem:defsystem #:dreyeck/issue/tests
+  :description
+  "Smoke tests for Dreyeck issue work contexts and Topicmap projection"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/tests/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/issue #:dreyeck/git/tests #:dreyeck/inspector/topicmap)
+  :components
+  ((:file "issue-work-context-topicmap-smoke"))
+  :perform
+  (asdf/lisp-action:test-op (operation component)
+   (declare (ignore operation component))
+   (uiop/package:symbol-call :dreyeck/issue/tests
+                             :run-issue-work-context-topicmap-smoke-tests)))
