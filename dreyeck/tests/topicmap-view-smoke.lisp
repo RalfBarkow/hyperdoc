@@ -120,6 +120,72 @@
            "Generic Topicmap legend does not retain its inspectable target."))
   t)
 
+(defun run-topicmap-workspace-test ()
+  (let* ((target (list :workspace-target))
+         (fixture (make-instance 'topicmap-fixture :target target))
+         (projection (dreyeck/topicmap:topicmap-projection-of fixture))
+         (topics (dreyeck/topicmap:topicmap-projection-topics-of projection))
+         (initial-topic (first topics))
+         (next-topic (second topics))
+         (initial-id (dreyeck/topicmap:topicmap-topic-id-of initial-topic))
+         (next-id (dreyeck/topicmap:topicmap-topic-id-of next-topic))
+         (workspace
+          (dreyeck/topicmap:make-topicmap-workspace projection initial-id)))
+    (check
+     (eq initial-topic
+         (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
+     "Workspace does not initially resolve its point topic.")
+    (check
+     (eq (dreyeck/topicmap:topicmap-topic-object-of initial-topic)
+         (dreyeck/topicmap:topicmap-workspace-current-object workspace))
+     "Workspace does not initially resolve the point's live object.")
+    (let ((workspace-projection
+           (dreyeck/topicmap:topicmap-projection-of workspace)))
+      (check
+       (eq workspace
+           (dreyeck/topicmap:topicmap-projection-source-of
+            workspace-projection))
+       "Workspace projection does not retain the workspace as source.")
+      (check
+       (equal initial-id
+              (getf
+               (dreyeck/topicmap:topicmap-projection-view-properties-of
+                workspace-projection)
+               :point))
+       "Workspace projection does not expose the initial point."))
+    (check
+     (eq next-topic
+         (dreyeck/topicmap:topicmap-workspace-go-to workspace next-id))
+     "Workspace navigation did not return the target topic.")
+    (check
+     (equal next-id (dreyeck/topicmap:topicmap-workspace-point-of workspace))
+     "Workspace navigation did not move the point.")
+    (check
+     (equal (list initial-id)
+            (dreyeck/topicmap:topicmap-workspace-history-of workspace))
+     "Workspace navigation did not record the previous point.")
+    (check
+     (eq next-topic
+         (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
+     "Workspace current topic does not follow navigation.")
+    (check
+     (eq (dreyeck/topicmap:topicmap-topic-object-of next-topic)
+         (dreyeck/topicmap:topicmap-workspace-current-object workspace))
+     "Workspace current live object does not follow navigation.")
+    (check
+     (equal next-id
+            (getf
+             (dreyeck/topicmap:topicmap-projection-view-properties-of
+              (dreyeck/topicmap:topicmap-projection-of workspace))
+             :point))
+     "Workspace projection does not expose the moved point.")
+    (dreyeck/topicmap:topicmap-workspace-go-to workspace next-id)
+    (check
+     (equal (list initial-id)
+            (dreyeck/topicmap:topicmap-workspace-history-of workspace))
+     "Navigating to the current point changed workspace history.")
+    t))
+
 (defun run-endpoint-validation-test ()
   (handler-case
       (progn
@@ -216,11 +282,12 @@
     (ASSERT (SEARCH "data-topic-id='test:contained'" HTML))
     T))
 
-(DEFUN RUN-TOPICMAP-VIEW-SMOKE-TESTS ()
-  (CHECK-OWNERSHIP-CONTRACT)
-  (RUN-GENERIC-TOPICMAP-VIEW-TEST)
-  (RUN-ENDPOINT-VALIDATION-TEST)
-  (FORMAT T "Generic renderer-independent Topicmap view tests passed.~%")
-  (RUN-SEMANTIC-TOPICMAP-PRESENTATION-SMOKE-TEST)
-  (RUN-SEMANTIC-TOPICMAP-ENDPOINT-ROLE-SMOKE-TEST)
-  T)
+(defun run-topicmap-view-smoke-tests ()
+  (check-ownership-contract)
+  (run-generic-topicmap-view-test)
+  (run-topicmap-workspace-test)
+  (run-endpoint-validation-test)
+  (format t "Generic renderer-independent Topicmap view tests passed.~%")
+  (run-semantic-topicmap-presentation-smoke-test)
+  (run-semantic-topicmap-endpoint-role-smoke-test)
+  t)
