@@ -205,37 +205,65 @@
     (%RENDER-NATIVE-TOPICMAP-POINT-SIGN TOPIC STREAM))
   (%RENDER-NATIVE-TOPICMAP-WORKSPACE-ACTION-SIGN PROJECTION TOPIC STREAM))
 
-(DEFUN RENDER-NATIVE-TOPICMAP-SVG (PROJECTION STREAM)
-  (LET* ((PROPERTIES
-          (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-VIEW-PROPERTIES-OF PROJECTION))
-         (WIDTH (TOPICMAP-PROPERTY PROPERTIES :WIDTH 1200))
-         (HEIGHT (TOPICMAP-PROPERTY PROPERTIES :HEIGHT 720))
-         (VISIBLE-TOPICS (TOPICMAP-VISIBLE-TOPICS PROJECTION))
-         (STRUCTURAL-CONTAINER-IDS
-          (%STRUCTURAL-CONTAINER-TOPIC-IDS PROJECTION)))
-    (FORMAT STREAM
-            "<svg class='dreyeck-topicmap-canvas' viewBox='0 0 ~D ~D' role='img' aria-label='Topicmap'>"
-            WIDTH HEIGHT)
-    (WRITE-STRING
+(defun topicmap-projection-viewbox-origin (common-lisp-user::projection)
+  (block topicmap-projection-viewbox-origin
+    (let* ((common-lisp-user::properties
+            (dreyeck/topicmap:topicmap-projection-view-properties-of
+             common-lisp-user::projection))
+           (common-lisp-user::width
+            (topicmap-property common-lisp-user::properties :width 1200))
+           (common-lisp-user::height
+            (topicmap-property common-lisp-user::properties :height 720))
+           (common-lisp-user::point-id
+            (topicmap-property common-lisp-user::properties :point nil))
+           (common-lisp-user::point-topic
+            (and common-lisp-user::point-id
+                 (topicmap-topic-by-id common-lisp-user::projection
+                                       common-lisp-user::point-id))))
+      (if common-lisp-user::point-topic
+          (multiple-value-bind (common-lisp-user::x common-lisp-user::y)
+              (topicmap-topic-position common-lisp-user::point-topic)
+            (values
+             (- (+ common-lisp-user::x 105)
+                (truncate common-lisp-user::width 2))
+             (- (+ common-lisp-user::y 30)
+                (truncate common-lisp-user::height 2))))
+          (values 0 0)))))
+
+(defun render-native-topicmap-svg (projection stream)
+  (let* ((properties
+          (dreyeck/topicmap:topicmap-projection-view-properties-of projection))
+         (width (topicmap-property properties :width 1200))
+         (height (topicmap-property properties :height 720))
+         (visible-topics (topicmap-visible-topics projection))
+         (structural-container-ids
+          (%structural-container-topic-ids projection)))
+    (multiple-value-bind (viewbox-x viewbox-y)
+        (topicmap-projection-viewbox-origin projection)
+      (format stream
+              "<svg class='dreyeck-topicmap-canvas' viewBox='~D ~D ~D ~D' role='img' aria-label='Topicmap'>"
+              viewbox-x viewbox-y width height))
+    (write-string
      "<defs><marker id='dreyeck-topicmap-arrow' markerWidth='10' markerHeight='7' refX='9' refY='3.5' orient='auto'><polygon points='0 0, 10 3.5, 0 7'></polygon></marker></defs>"
-     STREAM)
-    (DOLIST
-        (ASSOCIATION
-         (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF PROJECTION))
-      (CASE (%TOPICMAP-ASSOCIATION-PRESENTATION-OF ASSOCIATION)
-        (:STRUCTURAL-CONTAINMENT
-         (%RENDER-NATIVE-TOPICMAP-STRUCTURAL-CONTAINMENT-SIGN PROJECTION
-                                                              ASSOCIATION
-                                                              STREAM))
-        (OTHERWISE
-         (%RENDER-NATIVE-TOPICMAP-RELATION-SIGN PROJECTION ASSOCIATION
-                                                STREAM))))
-    (DOLIST (TOPIC VISIBLE-TOPICS)
-      (UNLESS
-          (MEMBER (DREYECK/TOPICMAP:TOPICMAP-TOPIC-ID-OF TOPIC)
-                  STRUCTURAL-CONTAINER-IDS :TEST #'EQUAL)
-        (%RENDER-NATIVE-TOPICMAP-TOPIC-SIGN PROJECTION TOPIC STREAM)))
-    (WRITE-STRING "</svg>" STREAM)))
+     stream)
+    (dolist
+        (association
+         (dreyeck/topicmap:topicmap-projection-associations-of projection))
+      (case (%topicmap-association-presentation-of association)
+        (:structural-containment
+         (%render-native-topicmap-structural-containment-sign projection
+                                                              association
+                                                              stream))
+        (otherwise
+         (%render-native-topicmap-relation-sign projection association
+                                                stream))))
+    (dolist (topic visible-topics)
+      (unless
+          (member (dreyeck/topicmap:topicmap-topic-id-of topic)
+                  structural-container-ids :test #'equal)
+        (%render-native-topicmap-topic-sign projection topic stream)))
+    (write-string "</svg>" stream)))
+
 (defun render-native-topicmap-html (projection)
   "Render PROJECTION as dependency-free SVG for the CLOG inspector."
   (with-output-to-string (stream)

@@ -543,12 +543,112 @@
              (dreyeck/topicmap:topicmap-workspace-current-topic
               common-lisp-user::workspace))))))
 
+(defun run-topicmap-workspace-point-relative-viewbox-test ()
+  (block run-topicmap-workspace-point-relative-viewbox-test
+    (let* ((common-lisp-user::target (list :point-relative-viewbox))
+           (common-lisp-user::fixture
+            (make-instance 'topicmap-fixture :target common-lisp-user::target))
+           (common-lisp-user::projection
+            (dreyeck/topicmap:topicmap-projection-of
+             common-lisp-user::fixture))
+           (common-lisp-user::topics
+            (dreyeck/topicmap:topicmap-projection-topics-of
+             common-lisp-user::projection))
+           (common-lisp-user::initial-id
+            (dreyeck/topicmap:topicmap-topic-id-of
+             (first common-lisp-user::topics)))
+           (common-lisp-user::next-id
+            (dreyeck/topicmap:topicmap-topic-id-of
+             (second common-lisp-user::topics)))
+           (common-lisp-user::workspace
+            (dreyeck/topicmap:make-topicmap-workspace
+             common-lisp-user::projection common-lisp-user::initial-id)))
+      (multiple-value-bind (common-lisp-user::x common-lisp-user::y)
+          (dreyeck/inspector/topicmap::topicmap-projection-viewbox-origin
+           common-lisp-user::projection)
+        (check (and (= 0 common-lisp-user::x) (= 0 common-lisp-user::y))
+               "Projection without a point does not retain the original viewBox origin."))
+      (check
+       (null
+        (member :point
+                (dreyeck/topicmap:topicmap-projection-view-properties-of
+                 common-lisp-user::projection)
+                :test #'eq))
+       "Base projection unexpectedly acquired a point.")
+      (let* ((common-lisp-user::workspace-projection
+              (dreyeck/topicmap:topicmap-projection-of
+               common-lisp-user::workspace))
+             (common-lisp-user::initial-html
+              (html-inspector-views:view-html
+               (dreyeck/inspector/topicmap::👀topicmap
+                common-lisp-user::workspace))))
+        (multiple-value-bind (common-lisp-user::x common-lisp-user::y)
+            (dreyeck/inspector/topicmap::topicmap-projection-viewbox-origin
+             common-lisp-user::workspace-projection)
+          (check (and (= -155 common-lisp-user::x) (= -20 common-lisp-user::y))
+                 "Initial workspace point does not determine the expected viewBox origin."))
+        (check
+         (search "viewBox='-155 -20 560 160'" common-lisp-user::initial-html)
+         "Initial workspace point is not centered by the rendered SVG viewBox.")
+        (check
+         (eq
+          (dreyeck/topicmap:topicmap-projection-topics-of
+           common-lisp-user::projection)
+          (dreyeck/topicmap:topicmap-projection-topics-of
+           common-lisp-user::workspace-projection))
+         "Workspace point-relative presentation replaced the projection topics.")
+        (check
+         (eq
+          (dreyeck/topicmap:topicmap-projection-associations-of
+           common-lisp-user::projection)
+          (dreyeck/topicmap:topicmap-projection-associations-of
+           common-lisp-user::workspace-projection))
+         "Workspace point-relative presentation replaced the projection associations."))
+      (dreyeck/topicmap:topicmap-workspace-go-to common-lisp-user::workspace
+                                                 common-lisp-user::next-id)
+      (let* ((common-lisp-user::workspace-projection
+              (dreyeck/topicmap:topicmap-projection-of
+               common-lisp-user::workspace))
+             (common-lisp-user::moved-html
+              (html-inspector-views:view-html
+               (dreyeck/inspector/topicmap::👀topicmap
+                common-lisp-user::workspace))))
+        (multiple-value-bind (common-lisp-user::x common-lisp-user::y)
+            (dreyeck/inspector/topicmap::topicmap-projection-viewbox-origin
+             common-lisp-user::workspace-projection)
+          (check (and (= 125 common-lisp-user::x) (= -20 common-lisp-user::y))
+                 "Moved workspace point does not determine the expected viewBox origin."))
+        (check
+         (search "viewBox='125 -20 560 160'" common-lisp-user::moved-html)
+         "Moved workspace point is not centered by the rendered SVG viewBox.")
+        (check
+         (string= common-lisp-user::next-id
+                  (dreyeck/topicmap:topicmap-workspace-point-of
+                   common-lisp-user::workspace))
+         "Point-relative rendering test did not retain the navigated workspace point.")
+        (check
+         (eq
+          (dreyeck/topicmap:topicmap-projection-topics-of
+           common-lisp-user::projection)
+          (dreyeck/topicmap:topicmap-projection-topics-of
+           common-lisp-user::workspace-projection))
+         "Navigation changed topic identity while changing the point of view.")
+        (check
+         (eq
+          (dreyeck/topicmap:topicmap-projection-associations-of
+           common-lisp-user::projection)
+          (dreyeck/topicmap:topicmap-projection-associations-of
+           common-lisp-user::workspace-projection))
+         "Navigation changed association identity while changing the point of view."))
+      t)))
+
 (defun run-topicmap-view-smoke-tests ()
   (check-ownership-contract)
   (run-generic-topicmap-view-test)
   (run-topicmap-workspace-test)
   (run-topicmap-workspace-inspector-action-test)
   (run-topicmap-workspace-association-navigation-test)
+  (run-topicmap-workspace-point-relative-viewbox-test)
   (run-topicmap-workspace-for-object-test)
   (run-endpoint-validation-test)
   (format t "Generic renderer-independent Topicmap view tests passed.~%")
