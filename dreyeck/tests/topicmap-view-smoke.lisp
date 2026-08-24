@@ -193,7 +193,8 @@
          (topics (dreyeck/topicmap:topicmap-projection-topics-of projection))
          (initial-topic (first topics))
          (initial-id (dreyeck/topicmap:topicmap-topic-id-of initial-topic))
-         (workspace (dreyeck/topicmap:make-topicmap-workspace projection initial-id))
+         (workspace
+          (dreyeck/topicmap:make-topicmap-workspace projection initial-id))
          (view (view-named "Topicmap" workspace))
          (html (and view (html-inspector-views:view-html view)))
          (action-references
@@ -201,19 +202,26 @@
                (remove-if-not
                 (lambda (reference)
                   (and (stringp (car reference))
-                       (uiop/utility:string-prefix-p "action-" (car reference))))
+                       (uiop/utility:string-prefix-p "action-" (car reference))
+                       (search
+                        (format nil
+                                "id='~A' class='dreyeck-topicmap-workspace-action "
+                                (car reference))
+                        html :test #'char-equal)))
                 (html-inspector-views:view-references view)))))
     (check view "Workspace has no Topicmap view.")
     (check html "Workspace Topicmap view rendered no HTML.")
     (check (= (length topics) (length action-references))
            "Workspace Topicmap does not expose one action per topic.")
     (check
-     (every (lambda (reference) (typep (cdr reference) 'html-inspector-views:thunk))
-            action-references)
+     (every
+      (lambda (reference) (typep (cdr reference) 'html-inspector-views:thunk))
+      action-references)
      "Workspace Topicmap actions are not Inspector thunks.")
     (let ((reached-topic-ids nil))
       (dolist (reference action-references)
-        (setf (dreyeck/topicmap:topicmap-workspace-point-of workspace) initial-id
+        (setf (dreyeck/topicmap:topicmap-workspace-point-of workspace)
+                initial-id
               (dreyeck/topicmap:topicmap-workspace-history-of workspace) nil)
         (let ((result (html-inspector-views:eval-thunk (cdr reference))))
           (check (typep result 'dreyeck/topicmap:topicmap-topic)
@@ -227,10 +235,12 @@
                           (dreyeck/inspector/topicmap::topicmap-html-escape
                            result-id))))
             (check
-             (eq result (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
+             (eq result
+                 (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
              "Workspace action result is not the current topic.")
             (check
-             (equal result-id (dreyeck/topicmap:topicmap-workspace-point-of workspace))
+             (equal result-id
+                    (dreyeck/topicmap:topicmap-workspace-point-of workspace))
              "Workspace action did not move the point.")
             (check
              (equal result-id
@@ -241,18 +251,24 @@
              "Workspace action did not update projection point.")
             (check
              (if (string= result-id initial-id)
-                 (null (dreyeck/topicmap:topicmap-workspace-history-of workspace))
+                 (null
+                  (dreyeck/topicmap:topicmap-workspace-history-of workspace))
                  (equal (list initial-id)
-                        (dreyeck/topicmap:topicmap-workspace-history-of workspace)))
+                        (dreyeck/topicmap:topicmap-workspace-history-of
+                         workspace)))
              "Workspace action produced incorrect history.")
-            (check (and html-after (search point-marker html-after :test #'char-equal))
-                   "Workspace Topicmap did not render the moved point.")
+            (check
+             (and html-after
+                  (search point-marker html-after :test #'char-equal))
+             "Workspace Topicmap did not render the moved point.")
             (push result-id reached-topic-ids))))
       (check
        (equal (sort (copy-list reached-topic-ids) #'string<)
-              (sort (mapcar #'dreyeck/topicmap:topicmap-topic-id-of topics) #'string<))
+              (sort (mapcar #'dreyeck/topicmap:topicmap-topic-id-of topics)
+                    #'string<))
        "Workspace Topicmap actions do not reach every topic."))
     t))
+
 
 (defun run-endpoint-validation-test ()
   (handler-case
@@ -350,11 +366,190 @@
     (ASSERT (SEARCH "data-topic-id='test:contained'" HTML))
     T))
 
+(defun run-topicmap-workspace-association-navigation-test ()
+  (block run-topicmap-workspace-association-navigation-test
+    (let* ((common-lisp-user::projection
+            (dreyeck/topicmap:make-topicmap-projection :source
+                                                       :workspace-association-test
+                                                       :topics
+                                                       (list
+                                                        (dreyeck/topicmap:make-topicmap-topic
+                                                         :id "point-a" :type
+                                                         :test :label "A"
+                                                         :object :a
+                                                         :view-properties
+                                                         '(:visible t))
+                                                        (dreyeck/topicmap:make-topicmap-topic
+                                                         :id "point-b" :type
+                                                         :test :label "B"
+                                                         :object :b
+                                                         :view-properties
+                                                         '(:visible t))
+                                                        (dreyeck/topicmap:make-topicmap-topic
+                                                         :id "point-c" :type
+                                                         :test :label "C"
+                                                         :object :c
+                                                         :view-properties
+                                                         '(:visible t)))
+                                                       :associations
+                                                       (list
+                                                        (dreyeck/topicmap:make-topicmap-association
+                                                         :id "r1" :type :r1
+                                                         :from "point-a" :to
+                                                         "point-b")
+                                                        (dreyeck/topicmap:make-topicmap-association
+                                                         :id "r2" :type :r2
+                                                         :from "point-b" :to
+                                                         "point-c"))))
+           (common-lisp-user::workspace
+            (dreyeck/topicmap:make-topicmap-workspace
+             common-lisp-user::projection "point-a"))
+           (common-lisp-user::associations
+            (dreyeck/topicmap:topicmap-projection-associations-of
+             common-lisp-user::projection))
+           (common-lisp-user::r1
+            (find "r1" common-lisp-user::associations :key
+                  #'dreyeck/topicmap:topicmap-association-id-of :test
+                  #'string=))
+           (common-lisp-user::r2
+            (find "r2" common-lisp-user::associations :key
+                  #'dreyeck/topicmap:topicmap-association-id-of :test
+                  #'string=)))
+      (labels ((common-lisp-user::association-types ()
+                 (mapcar #'dreyeck/topicmap:topicmap-association-type-of
+                         (dreyeck/topicmap::topicmap-associations-of-point
+                          common-lisp-user::workspace))))
+        (assert
+         (string= "point-a"
+                  (dreyeck/topicmap:topicmap-workspace-point-of
+                   common-lisp-user::workspace)))
+        (assert (equal '(:r1) (common-lisp-user::association-types)))
+        (assert
+         (eq :outgoing
+             (dreyeck/topicmap::topicmap-association-direction-at-point
+              common-lisp-user::workspace common-lisp-user::r1)))
+        (assert
+         (string= "point-b"
+                  (dreyeck/topicmap::topicmap-association-other-topic-id
+                   common-lisp-user::workspace common-lisp-user::r1)))
+        (dreyeck/topicmap:topicmap-workspace-go-to common-lisp-user::workspace
+                                                   "point-b")
+        (assert
+         (equal '("point-a")
+                (dreyeck/topicmap:topicmap-workspace-history-of
+                 common-lisp-user::workspace)))
+        (assert (equal '(:r1 :r2) (common-lisp-user::association-types)))
+        (assert
+         (eq :incoming
+             (dreyeck/topicmap::topicmap-association-direction-at-point
+              common-lisp-user::workspace common-lisp-user::r1)))
+        (assert
+         (eq :outgoing
+             (dreyeck/topicmap::topicmap-association-direction-at-point
+              common-lisp-user::workspace common-lisp-user::r2)))
+        (assert
+         (string= "point-a"
+                  (dreyeck/topicmap::topicmap-association-other-topic-id
+                   common-lisp-user::workspace common-lisp-user::r1)))
+        (assert
+         (string= "point-c"
+                  (dreyeck/topicmap::topicmap-association-other-topic-id
+                   common-lisp-user::workspace common-lisp-user::r2)))
+        (dreyeck/topicmap:topicmap-workspace-go-to common-lisp-user::workspace
+                                                   "point-c")
+        (assert
+         (equal '("point-b" "point-a")
+                (dreyeck/topicmap:topicmap-workspace-history-of
+                 common-lisp-user::workspace)))
+        (assert (equal '(:r2) (common-lisp-user::association-types)))
+        (assert
+         (eq :incoming
+             (dreyeck/topicmap::topicmap-association-direction-at-point
+              common-lisp-user::workspace common-lisp-user::r2)))
+        (assert
+         (string= "point-b"
+                  (dreyeck/topicmap::topicmap-association-other-topic-id
+                   common-lisp-user::workspace common-lisp-user::r2)))
+        (dreyeck/topicmap:topicmap-workspace-go-to common-lisp-user::workspace
+                                                   (dreyeck/topicmap::topicmap-association-other-topic-id
+                                                    common-lisp-user::workspace
+                                                    common-lisp-user::r2))
+        (assert
+         (string= "point-b"
+                  (dreyeck/topicmap:topicmap-workspace-point-of
+                   common-lisp-user::workspace)))
+        (assert
+         (equal '("point-c" "point-b" "point-a")
+                (dreyeck/topicmap:topicmap-workspace-history-of
+                 common-lisp-user::workspace)))
+        (let* ((common-lisp-user::view
+                (dreyeck/inspector/topicmap::👀topicmap
+                 common-lisp-user::workspace))
+               (common-lisp-user::html
+                (html-inspector-views:view-html common-lisp-user::view)))
+          (assert (search "Point" common-lisp-user::html))
+          (assert (search "Associations" common-lisp-user::html))
+          (assert
+           (search "dreyeck-topicmap-workspace-association"
+                   common-lisp-user::html))
+          (assert (search "R1" common-lisp-user::html))
+          (assert (search "R2" common-lisp-user::html)))
+        (list :status :passed :point
+              (dreyeck/topicmap:topicmap-workspace-point-of
+               common-lisp-user::workspace)
+              :history
+              (dreyeck/topicmap:topicmap-workspace-history-of
+               common-lisp-user::workspace)
+              :association-types (common-lisp-user::association-types))))))
+
+(defun run-topicmap-workspace-for-object-test ()
+  (block run-topicmap-workspace-for-object-test
+    (let* ((common-lisp-user::projection
+            (dreyeck/topicmap:make-topicmap-projection :source
+                                                       :workspace-for-object-test
+                                                       :topics
+                                                       (list
+                                                        (dreyeck/topicmap:make-topicmap-topic
+                                                         :id "first" :type
+                                                         :test :label "First"
+                                                         :object :first
+                                                         :view-properties
+                                                         '(:visible t)))
+                                                       :associations nil))
+           (common-lisp-user::workspace
+            (dreyeck/topicmap::make-topicmap-workspace-for-object
+             common-lisp-user::projection)))
+      (assert
+       (typep common-lisp-user::workspace
+              'dreyeck/topicmap:topicmap-workspace))
+      (assert
+       (string= "first"
+                (dreyeck/topicmap:topicmap-workspace-point-of
+                 common-lisp-user::workspace)))
+      (assert
+       (string= "First"
+                (dreyeck/topicmap:topicmap-topic-label-of
+                 (dreyeck/topicmap:topicmap-workspace-current-topic
+                  common-lisp-user::workspace))))
+      (assert
+       (eq common-lisp-user::workspace
+           (dreyeck/topicmap::make-topicmap-workspace-for-object
+            common-lisp-user::workspace)))
+      (list :status :passed :point
+            (dreyeck/topicmap:topicmap-workspace-point-of
+             common-lisp-user::workspace)
+            :current-label
+            (dreyeck/topicmap:topicmap-topic-label-of
+             (dreyeck/topicmap:topicmap-workspace-current-topic
+              common-lisp-user::workspace))))))
+
 (defun run-topicmap-view-smoke-tests ()
   (check-ownership-contract)
   (run-generic-topicmap-view-test)
   (run-topicmap-workspace-test)
   (run-topicmap-workspace-inspector-action-test)
+  (run-topicmap-workspace-association-navigation-test)
+  (run-topicmap-workspace-for-object-test)
   (run-endpoint-validation-test)
   (format t "Generic renderer-independent Topicmap view tests passed.~%")
   (run-semantic-topicmap-presentation-smoke-test)

@@ -176,6 +176,79 @@
       (SETF (TOPICMAP-WORKSPACE-POINT-OF WORKSPACE) TOPIC-ID))
     TOPIC))
 
+(defun topicmap-associations-of-point (common-lisp-user::workspace)
+  (block topicmap-associations-of-point
+    (let* ((common-lisp-user::point
+            (topicmap-workspace-point-of common-lisp-user::workspace))
+           (common-lisp-user::projection
+            (topicmap-workspace-projection-of common-lisp-user::workspace)))
+      (remove-if-not
+       (lambda (common-lisp-user::association)
+         (or
+          (string= common-lisp-user::point
+                   (topicmap-association-from-of
+                    common-lisp-user::association))
+          (string= common-lisp-user::point
+                   (topicmap-association-to-of
+                    common-lisp-user::association))))
+       (topicmap-projection-associations-of common-lisp-user::projection)))))
+
+(defun topicmap-association-direction-at-point
+       (common-lisp-user::workspace common-lisp-user::association)
+  (block topicmap-association-direction-at-point
+    (let ((common-lisp-user::point
+           (topicmap-workspace-point-of common-lisp-user::workspace)))
+      (cond
+       ((string= common-lisp-user::point
+                 (topicmap-association-from-of common-lisp-user::association))
+        :outgoing)
+       ((string= common-lisp-user::point
+                 (topicmap-association-to-of common-lisp-user::association))
+        :incoming)
+       (t
+        (error "Association ~S does not belong to workspace point ~S."
+               common-lisp-user::association common-lisp-user::point))))))
+
+(defun topicmap-association-other-topic-id
+       (common-lisp-user::workspace common-lisp-user::association)
+  (block topicmap-association-other-topic-id
+    (ecase
+        (topicmap-association-direction-at-point common-lisp-user::workspace
+                                                 common-lisp-user::association)
+      (:outgoing (topicmap-association-to-of common-lisp-user::association))
+      (:incoming
+       (topicmap-association-from-of common-lisp-user::association)))))
+
+(defun make-topicmap-workspace-for-object (common-lisp-user::object)
+  (block make-topicmap-workspace-for-object
+    (if (typep common-lisp-user::object 'topicmap-workspace)
+        common-lisp-user::object
+        (let ((common-lisp-user::projection
+               (topicmap-projection-of common-lisp-user::object)))
+          (when common-lisp-user::projection
+            (let* ((common-lisp-user::topics
+                    (topicmap-projection-topics-of
+                     common-lisp-user::projection))
+                   (common-lisp-user::projected-point
+                    (getf
+                     (topicmap-projection-view-properties-of
+                      common-lisp-user::projection)
+                     :point))
+                   (common-lisp-user::point-topic
+                    (or
+                     (and common-lisp-user::projected-point
+                          (find common-lisp-user::projected-point
+                                common-lisp-user::topics :key
+                                #'topicmap-topic-id-of :test #'string=))
+                     (find common-lisp-user::object common-lisp-user::topics
+                           :key #'topicmap-topic-object-of :test #'eq)
+                     (first common-lisp-user::topics))))
+              (when common-lisp-user::point-topic
+                (make-topicmap-workspace common-lisp-user::projection
+                                         (topicmap-topic-id-of
+                                          common-lisp-user::point-topic)))))))))
+
+
 (DEFMETHOD TOPICMAP-PROJECTION-OF ((WORKSPACE TOPICMAP-WORKSPACE))
   (LET* ((PROJECTION (TOPICMAP-WORKSPACE-PROJECTION-OF WORKSPACE))
          (VIEW-PROPERTIES

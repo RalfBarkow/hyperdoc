@@ -326,3 +326,95 @@
         (views:html
           (views:str (render-topicmap-html *topicmap-renderer* projection))
           (render-topicmap-legend projection))))))
+
+(defun render-topicmap-workspace-associations (common-lisp-user::projection)
+  (block render-topicmap-workspace-associations
+    (let ((common-lisp-user::workspace
+           (dreyeck/topicmap:topicmap-projection-source-of
+            common-lisp-user::projection)))
+      (when
+          (typep common-lisp-user::workspace
+                 'dreyeck/topicmap:topicmap-workspace)
+        (let* ((common-lisp-user::point-topic
+                (dreyeck/topicmap:topicmap-workspace-current-topic
+                 common-lisp-user::workspace))
+               (common-lisp-user::associations
+                (dreyeck/topicmap::topicmap-associations-of-point
+                 common-lisp-user::workspace))
+               (common-lisp-user::topics
+                (dreyeck/topicmap:topicmap-projection-topics-of
+                 common-lisp-user::projection)))
+          (views:html
+            (:h3 "Point")
+            (:p
+             (views:object-ref
+              (dreyeck/topicmap:topicmap-topic-object-of
+               common-lisp-user::point-topic)
+              :display
+              (dreyeck/topicmap:topicmap-topic-label-of
+               common-lisp-user::point-topic)))
+            (:h3 "Associations")
+            (if common-lisp-user::associations
+                (views:html
+                  (:table :class "inspector-table"
+                   (dolist
+                       (common-lisp-user::association
+                        common-lisp-user::associations)
+                     (let* ((common-lisp-user::direction
+                             (dreyeck/topicmap::topicmap-association-direction-at-point
+                              common-lisp-user::workspace
+                              common-lisp-user::association))
+                            (common-lisp-user::other-id
+                             (dreyeck/topicmap::topicmap-association-other-topic-id
+                              common-lisp-user::workspace
+                              common-lisp-user::association))
+                            (common-lisp-user::other-topic
+                             (find common-lisp-user::other-id
+                                   common-lisp-user::topics :key
+                                   #'dreyeck/topicmap:topicmap-topic-id-of
+                                   :test #'string=)))
+                       (when common-lisp-user::other-topic
+                         (views:html
+                           (:tr :class "dreyeck-topicmap-workspace-association"
+                            :data-association-id
+                            (dreyeck/topicmap:topicmap-association-id-of
+                             common-lisp-user::association)
+                            :data-direction
+                            (symbol-name common-lisp-user::direction)
+                            (:td
+                             (:tt
+                              (cl-who:esc
+                               (princ-to-string
+                                (dreyeck/topicmap:topicmap-association-type-of
+                                 common-lisp-user::association)))))
+                            (:td
+                             (cl-who:esc
+                              (if (eq common-lisp-user::direction :outgoing)
+                                  "→"
+                                  "←")))
+                            (:td
+                             (views:action-button
+                              (dreyeck/topicmap:topicmap-topic-label-of
+                               common-lisp-user::other-topic)
+                              (views:thunk
+                                (dreyeck/topicmap:topicmap-workspace-go-to
+                                 common-lisp-user::workspace
+                                 common-lisp-user::other-id))
+                              (format nil "Go to ~A"
+                                      (dreyeck/topicmap:topicmap-topic-label-of
+                                       common-lisp-user::other-topic)))))))))))
+                (views:html
+                  (:p "No associations.")))))))))
+
+(views:defview 👀topicmap (object dreyeck/topicmap:topicmap-workspace)
+               (let ((projection
+                      (dreyeck/topicmap:topicmap-projection-of object)))
+                 (when projection
+                   (views:html-view :title "Topicmap" :priority 4
+                                    (views:html
+                                      (cl-who:str
+                                       (render-topicmap-html
+                                        *topicmap-renderer* projection))
+                                      (render-topicmap-workspace-associations
+                                       projection)
+                                      (render-topicmap-legend projection))))))
