@@ -186,6 +186,74 @@
      "Navigating to the current point changed workspace history.")
     t))
 
+(defun run-topicmap-workspace-inspector-action-test ()
+  (let* ((target (list :workspace-target))
+         (fixture (make-instance 'topicmap-fixture :target target))
+         (projection (dreyeck/topicmap:topicmap-projection-of fixture))
+         (topics (dreyeck/topicmap:topicmap-projection-topics-of projection))
+         (initial-topic (first topics))
+         (initial-id (dreyeck/topicmap:topicmap-topic-id-of initial-topic))
+         (workspace (dreyeck/topicmap:make-topicmap-workspace projection initial-id))
+         (view (view-named "Topicmap" workspace))
+         (html (and view (html-inspector-views:view-html view)))
+         (action-references
+          (and view
+               (remove-if-not
+                (lambda (reference)
+                  (and (stringp (car reference))
+                       (uiop/utility:string-prefix-p "action-" (car reference))))
+                (html-inspector-views:view-references view)))))
+    (check view "Workspace has no Topicmap view.")
+    (check html "Workspace Topicmap view rendered no HTML.")
+    (check (= (length topics) (length action-references))
+           "Workspace Topicmap does not expose one action per topic.")
+    (check
+     (every (lambda (reference) (typep (cdr reference) 'html-inspector-views:thunk))
+            action-references)
+     "Workspace Topicmap actions are not Inspector thunks.")
+    (let ((reached-topic-ids nil))
+      (dolist (reference action-references)
+        (setf (dreyeck/topicmap:topicmap-workspace-point-of workspace) initial-id
+              (dreyeck/topicmap:topicmap-workspace-history-of workspace) nil)
+        (let ((result (html-inspector-views:eval-thunk (cdr reference))))
+          (check (typep result 'dreyeck/topicmap:topicmap-topic)
+                 "Workspace action did not return a topic.")
+          (let* ((result-id (dreyeck/topicmap:topicmap-topic-id-of result))
+                 (view-after (view-named "Topicmap" workspace))
+                 (html-after
+                  (and view-after (html-inspector-views:view-html view-after)))
+                 (point-marker
+                  (format nil "data-topic-id='~A' data-presentation='POINT'"
+                          (dreyeck/inspector/topicmap::topicmap-html-escape
+                           result-id))))
+            (check
+             (eq result (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
+             "Workspace action result is not the current topic.")
+            (check
+             (equal result-id (dreyeck/topicmap:topicmap-workspace-point-of workspace))
+             "Workspace action did not move the point.")
+            (check
+             (equal result-id
+                    (getf
+                     (dreyeck/topicmap:topicmap-projection-view-properties-of
+                      (dreyeck/topicmap:topicmap-projection-of workspace))
+                     :point))
+             "Workspace action did not update projection point.")
+            (check
+             (if (string= result-id initial-id)
+                 (null (dreyeck/topicmap:topicmap-workspace-history-of workspace))
+                 (equal (list initial-id)
+                        (dreyeck/topicmap:topicmap-workspace-history-of workspace)))
+             "Workspace action produced incorrect history.")
+            (check (and html-after (search point-marker html-after :test #'char-equal))
+                   "Workspace Topicmap did not render the moved point.")
+            (push result-id reached-topic-ids))))
+      (check
+       (equal (sort (copy-list reached-topic-ids) #'string<)
+              (sort (mapcar #'dreyeck/topicmap:topicmap-topic-id-of topics) #'string<))
+       "Workspace Topicmap actions do not reach every topic."))
+    t))
+
 (defun run-endpoint-validation-test ()
   (handler-case
       (progn
@@ -286,6 +354,7 @@
   (check-ownership-contract)
   (run-generic-topicmap-view-test)
   (run-topicmap-workspace-test)
+  (run-topicmap-workspace-inspector-action-test)
   (run-endpoint-validation-test)
   (format t "Generic renderer-independent Topicmap view tests passed.~%")
   (run-semantic-topicmap-presentation-smoke-test)
