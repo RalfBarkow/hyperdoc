@@ -347,26 +347,65 @@
     :dreyeck/catalog/tests
     :run-catalog-startup-smoke-tests)))
 
-(asdf:defsystem #:dreyeck/lisp-image
-  :description "dreyeck.ch-owned Lisp image inventory and executable HyperDoc reading path."
-  :license "BSD"
-  :version "0.0.1"
-  :serial t
-  :depends-on (#:hyperdoc/explorer)
+(asdf/parse-defsystem:defsystem #:dreyeck/lisp-image
+  :description
+  "dreyeck.ch-owned Lisp image inventory and executable HyperDoc reading path."
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :serial
+  t
+  :depends-on
+  (#:hyperdoc/explorer)
   :components
-  ((:module "dreyeck/src"
-    :pathname "dreyeck/src/"
-    :serial t
-    :components
-    ((:file "lisp-image-package")
-     (:file "lisp-image-inventory")
-     (:file "lisp-image-observations")
-     (:file "lisp-image-views")
-     (:file "lisp-image-hyperdoc")))
-   (:module "dreyeck/pages/lisp-image"
-    :pathname "dreyeck/pages/lisp-image/"
-    :components
-    ((:static-file "Lisp image HyperBook refactor.html")))))
+  ((:module "dreyeck/src" :pathname "dreyeck/src/" :serial t :components
+    ((:file "lisp-image-package") (:file "lisp-image-inventory")
+     (:file "lisp-image-definition-sources") (:file "lisp-image-observations")
+     (:file "lisp-image-views") (:file "lisp-image-hyperdoc")))
+   (:module "dreyeck/pages/lisp-image" :pathname "dreyeck/pages/lisp-image/"
+    :components ((:static-file "Lisp image HyperBook refactor.html")))))
+
+(asdf/parse-defsystem:defsystem #:dreyeck/lisp-image/topicmap
+  :depends-on
+  (#:dreyeck/lisp-image #:dreyeck/topicmap)
+  :description
+  "Topicmap projection adapter for live Lisp image subjects."
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/src/"
+  :serial
+  t
+  :components
+  ((:file "lisp-image-topicmap"))
+  :in-order-to
+  ((asdf/lisp-action:test-op
+    (asdf/lisp-action:test-op "dreyeck/lisp-image/topicmap/tests"))))
+
+(asdf/parse-defsystem:defsystem #:dreyeck/lisp-image/topicmap/tests
+  :description
+  "Behavior tests for live Lisp image Topicmap projections."
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/tests/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/lisp-image/topicmap #:asdf #:uiop)
+  :components
+  ((:file "lisp-image-topicmap-smoke"))
+  :perform
+  (asdf/lisp-action:test-op (operation component)
+   (declare (ignore operation component))
+   (uiop/package:symbol-call :dreyeck/lisp-image/topicmap/tests
+                             :run-lisp-image-topicmap-smoke-tests)))
+
 
 
 (asdf:defsystem #:dreyeck/fedwiki-assets
