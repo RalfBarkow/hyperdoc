@@ -4,6 +4,7 @@
    #:systems-defined-by-asd
    #:register-asd-systems
    #:asd-registration-observation
-   #:call-with-asd-source-authority))
+   #:call-with-asd-source-authority
+   #:component-primary-asd-pathname))
 
 (in-package #:dreyeck/page-attached-asdf)

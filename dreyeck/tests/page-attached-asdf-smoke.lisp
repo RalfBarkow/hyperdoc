@@ -149,10 +149,37 @@
 
       (clear-fixture-systems))))
 
+(defun run-component-primary-asd-pathname-test ()
+  (let ((target
+          (truename
+           (fixture-asd-pathname))))
+    (clear-fixture-systems)
+    (unwind-protect
+        (progn
+          (dreyeck/page-attached-asdf:register-asd-systems
+           target
+           :name
+           "page-attached-asdf-fixture")
+          (assert
+           (every
+            (lambda (name)
+              (let ((system
+                      (asdf:registered-system name)))
+                (and
+                 system
+                 (equal
+                  target
+                  (dreyeck/page-attached-asdf:component-primary-asd-pathname
+                   system)))))
+            *fixture-system-names*))
+          t)
+      (clear-fixture-systems))))
+
 (defun run-page-attached-asdf-tests ()
   (and
    (run-basic-registration-test)
-   (run-source-authority-test)))
+   (run-source-authority-test)
+   (run-component-primary-asd-pathname-test)))
 
 
 (defun current-lisp-executable ()

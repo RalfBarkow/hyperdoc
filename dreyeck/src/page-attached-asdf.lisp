@@ -49,6 +49,20 @@ during the materialization operation."
             asdf:*central-registry*)))
     (funcall function)))
 
+(defun component-primary-asd-pathname
+    (system)
+  (let* ((root
+           (asdf:component-pathname system))
+         (primary-name
+           (asdf/system:primary-system-name
+            (asdf:component-name system))))
+    (truename
+     (merge-pathnames
+      (make-pathname
+       :name primary-name
+       :type "asd")
+      root))))
+
 (defun register-asd-systems
     (asd-pathname &key name)
   "Evaluate trusted ASD-PATHNAME and return the systems it registers.
