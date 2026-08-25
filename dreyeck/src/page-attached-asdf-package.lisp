@@ -5,6 +5,7 @@
    #:register-asd-systems
    #:asd-registration-observation
    #:call-with-asd-source-authority
-   #:component-primary-asd-pathname))
+   #:component-primary-asd-pathname
+   #:run-asd-test-system-in-fresh-process))
 
 (in-package #:dreyeck/page-attached-asdf)

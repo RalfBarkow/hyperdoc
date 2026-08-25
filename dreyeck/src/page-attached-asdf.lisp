@@ -125,3 +125,65 @@ registration table and does not invoke FIND-SYSTEM."
      :systems-before before
      :systems-after after
      :newly-registered-systems new)))
+
+(defun run-asd-test-system-in-fresh-process
+    (asd-pathname primary-system-name test-system-name)
+  "Run TEST-SYSTEM-NAME in a fresh SBCL process with ASD-PATHNAME authoritative."
+  (let* ((asd
+           (truename asd-pathname))
+         (root
+           (uiop:pathname-directory-pathname
+            asd))
+         (runtime
+           (namestring
+            sb-ext:*runtime-pathname*))
+         (child-form
+           `(let ((asdf:*central-registry*
+                    (cons
+                     ,root
+                     asdf:*central-registry*)))
+              (asdf:load-asd
+               ,asd
+               :name
+               ,primary-system-name)
+              (let* ((cl-user::system
+                       (or
+                        (asdf:registered-system
+                         ,test-system-name)
+                        (error
+                         "ASDF system ~S was not registered by ~A."
+                         ,test-system-name
+                         ,asd)))
+                     (cl-user::source
+                       (asdf:system-source-file
+                        cl-user::system)))
+                (unless
+                    (and
+                     cl-user::source
+                     (equal
+                      ,asd
+                      (truename
+                       cl-user::source)))
+                  (error
+                   "System ~A resolved from ~A instead of ~A."
+                   ,test-system-name
+                   cl-user::source
+                   ,asd))
+                (asdf:test-system
+                 cl-user::system)))))
+    (uiop:run-program
+     (list
+      runtime
+      "--noinform"
+      "--no-userinit"
+      "--disable-debugger"
+      "--non-interactive"
+      "--eval"
+      "(require :asdf)"
+      "--eval"
+      (prin1-to-string
+       child-form))
+     :directory root
+     :output *standard-output*
+     :error-output *error-output*)
+    t))

@@ -175,26 +175,22 @@
           t)
       (clear-fixture-systems))))
 
-(defun run-page-attached-asdf-tests ()
+(defun run-page-attached-asdf-tests
+    ()
   (and
    (run-basic-registration-test)
    (run-source-authority-test)
-   (run-component-primary-asd-pathname-test)))
+   (run-component-primary-asd-pathname-test)
+   (dreyeck/page-attached-asdf:run-asd-test-system-in-fresh-process
+    (fixture-asd-pathname)
+    "page-attached-asdf-fixture"
+    "page-attached-asdf-fixture/tests")))
 
 
-(defun current-lisp-executable ()
-  #+sbcl
-  (or
-   (and sb-ext:*runtime-pathname*
-        (namestring sb-ext:*runtime-pathname*))
-   (uiop:argv0)
-   "sbcl")
-  #-sbcl
-  (or
-   (uiop:argv0)
-   "sbcl"))
 
-(defun run-page-attached-asdf-tests-in-fresh-process ()
+
+(defun run-page-attached-asdf-tests-in-fresh-process
+    ()
   "Run source-authority tests outside the enclosing ASDF TEST-OP."
   (let* ((root
            (asdf:system-source-directory
@@ -204,9 +200,12 @@
             (merge-pathnames
              "dreyeck.asd"
              root)))
+         (runtime
+           (namestring
+            sb-ext:*runtime-pathname*))
          (command
            (list
-            (current-lisp-executable)
+            runtime
             "--noinform"
             "--no-userinit"
             "--disable-debugger"
@@ -222,11 +221,9 @@
             "(asdf:load-system \"dreyeck/page-attached-asdf/tests\")"
             "--eval"
             "(unless (uiop:symbol-call :dreyeck/page-attached-asdf/tests :run-page-attached-asdf-tests) (uiop:quit 1))")))
-
     (uiop:run-program
      command
      :directory root
      :output *standard-output*
      :error-output *error-output*)
-
     t))
