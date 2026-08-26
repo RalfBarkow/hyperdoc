@@ -444,6 +444,48 @@
      (error "Dreyeck FedWiki assets tests failed."))))
 
 
+(asdf/parse-defsystem:defsystem #:dreyeck/fedwiki-journal
+  :description
+  "Generic invariant checks and inspectable findings for Federated Wiki journals"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/src/"
+  :serial
+  t
+  :depends-on
+  (#:hyperbook/fedwiki #:local-time)
+  :components
+  ((:file "fedwiki-journal-package") (:file "fedwiki-journal"))
+  :in-order-to
+  ((asdf/lisp-action:test-op
+    (asdf/lisp-action:test-op "dreyeck/fedwiki-journal/tests"))))
+
+(asdf/parse-defsystem:defsystem #:dreyeck/fedwiki-journal/tests
+  :description
+  "Deterministic tests for generic Federated Wiki journal checks"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/tests/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/fedwiki-journal)
+  :components
+  ((:file "fedwiki-journal-test-package") (:file "fedwiki-journal-smoke"))
+  :perform
+  (asdf/lisp-action:test-op (operation component)
+   (declare (ignore operation component))
+   (unless
+       (uiop/package:symbol-call :dreyeck/fedwiki-journal/tests
+                                 :run-fedwiki-journal-tests)
+     (error "Dreyeck FedWiki journal tests failed."))))
+
 (asdf:defsystem #:dreyeck/page-attached-asdf
   :description "Observable registration of trusted page-attached ASDF definitions"
   :license "BSD"
