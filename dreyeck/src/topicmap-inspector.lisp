@@ -27,13 +27,13 @@
   (let ((tail (member key properties)))
     (if tail (second tail) default)))
 
+
+
 (defun topicmap-visible-topics (projection)
   (remove-if-not
    (lambda (topic)
      (topicmap-property
-      (dreyeck/topicmap:topicmap-topic-view-properties-of topic)
-      :visible
-      t))
+      (dreyeck/topicmap:topicmap-topic-view-properties-of topic) :visible t))
    (dreyeck/topicmap:topicmap-projection-topics-of projection)))
 
 (defun topicmap-topic-position (topic)
@@ -139,27 +139,37 @@
                   (TOPICMAP-HTML-ESCAPE
                    (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF ASSOCIATION))))))))
 
-(DEFUN %RENDER-NATIVE-TOPICMAP-SUBJECT-SIGN (TOPIC STREAM)
-  (MULTIPLE-VALUE-BIND (X Y)
-      (TOPICMAP-TOPIC-POSITION TOPIC)
-    (LET ((PROPERTIES
-           (DREYECK/TOPICMAP:TOPICMAP-TOPIC-VIEW-PROPERTIES-OF TOPIC)))
-      (FORMAT STREAM
-              "<g class='dreyeck-topicmap-topic' data-topic-id='~A' data-topic-type='~A' data-temporal-scope='~A' data-pinned='~:[false~;true~]'><rect x='~D' y='~D' width='210' height='60' rx='8'></rect><text x='~D' y='~D'>~A</text><text class='dreyeck-topicmap-topic-kind' x='~D' y='~D'>~A · ~A</text></g>"
-              (TOPICMAP-HTML-ESCAPE
-               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-ID-OF TOPIC))
-              (TOPICMAP-HTML-ESCAPE
-               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TYPE-OF TOPIC))
-              (TOPICMAP-HTML-ESCAPE
-               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TEMPORAL-SCOPE-OF TOPIC))
-              (TOPICMAP-PROPERTY PROPERTIES :PINNED NIL) X Y (+ X 12) (+ Y 24)
-              (TOPICMAP-HTML-ESCAPE
-               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-LABEL-OF TOPIC))
-              (+ X 12) (+ Y 46)
-              (TOPICMAP-HTML-ESCAPE
-               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TYPE-OF TOPIC))
-              (TOPICMAP-HTML-ESCAPE
-               (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TEMPORAL-SCOPE-OF TOPIC))))))
+(defun topicmap-topic-path-of (topic)
+  (topicmap-property (dreyeck/topicmap:topicmap-topic-view-properties-of topic)
+                     :path nil))
+
+(defun %render-native-topicmap-subject-sign (topic stream)
+  (let ((path (topicmap-topic-path-of topic)))
+    (when path
+      (format stream "<a href='~A' data-presentation='RESOURCE-GET'>"
+              (topicmap-html-escape path)))
+    (multiple-value-bind (x y)
+        (topicmap-topic-position topic)
+      (let ((properties
+             (dreyeck/topicmap:topicmap-topic-view-properties-of topic)))
+        (format stream
+                "<g class='dreyeck-topicmap-topic' data-topic-id='~A' data-topic-type='~A' data-temporal-scope='~A' data-pinned='~:[false~;true~]'><rect x='~D' y='~D' width='210' height='60' rx='8'></rect><text x='~D' y='~D'>~A</text><text class='dreyeck-topicmap-topic-kind' x='~D' y='~D'>~A · ~A</text></g>"
+                (topicmap-html-escape
+                 (dreyeck/topicmap:topicmap-topic-id-of topic))
+                (topicmap-html-escape
+                 (dreyeck/topicmap:topicmap-topic-type-of topic))
+                (topicmap-html-escape
+                 (dreyeck/topicmap:topicmap-topic-temporal-scope-of topic))
+                (topicmap-property properties :pinned nil) x y (+ x 12)
+                (+ y 24)
+                (topicmap-html-escape
+                 (dreyeck/topicmap:topicmap-topic-label-of topic))
+                (+ x 12) (+ y 46)
+                (topicmap-html-escape
+                 (dreyeck/topicmap:topicmap-topic-type-of topic))
+                (topicmap-html-escape
+                 (dreyeck/topicmap:topicmap-topic-temporal-scope-of topic)))))
+    (when path (write-string "</a>" stream))))
 
 (DEFUN %TOPICMAP-POINT-TOPIC-ID (PROJECTION)
   (TOPICMAP-PROPERTY
@@ -188,16 +198,18 @@
          (VIEWS:THUNK
            (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-GO-TO SOURCE TOPIC-ID)))))))
 
-(DEFUN %RENDER-NATIVE-TOPICMAP-WORKSPACE-ACTION-SIGN (PROJECTION TOPIC STREAM)
-  (LET ((ACTION-ID (TOPICMAP-WORKSPACE-TOPIC-ACTION-ID PROJECTION TOPIC)))
-    (WHEN ACTION-ID
-      (MULTIPLE-VALUE-BIND (X Y)
-          (TOPICMAP-TOPIC-POSITION TOPIC)
-        (FORMAT STREAM
-                "<rect id='~A' class='dreyeck-topicmap-workspace-action inspector-action' data-topic-id='~A' data-presentation='WORKSPACE-GO-TO' x='~D' y='~D' width='210' height='60' rx='8' fill='transparent' style='cursor:pointer'></rect>"
-                (TOPICMAP-HTML-ESCAPE ACTION-ID)
-                (TOPICMAP-HTML-ESCAPE (DREYECK/TOPICMAP:TOPICMAP-TOPIC-ID-OF TOPIC)) X
-                Y)))))
+(defun %render-native-topicmap-workspace-action-sign (projection topic stream)
+  (unless (topicmap-topic-path-of topic)
+    (let ((action-id (topicmap-workspace-topic-action-id projection topic)))
+      (when action-id
+        (multiple-value-bind (x y)
+            (topicmap-topic-position topic)
+          (format stream
+                  "<rect id='~A' class='dreyeck-topicmap-workspace-action inspector-action' data-topic-id='~A' data-presentation='WORKSPACE-GO-TO' x='~D' y='~D' width='210' height='60' rx='8' fill='transparent' style='cursor:pointer'></rect>"
+                  (topicmap-html-escape action-id)
+                  (topicmap-html-escape
+                   (dreyeck/topicmap:topicmap-topic-id-of topic))
+                  x y))))))
 
 (DEFUN %RENDER-NATIVE-TOPICMAP-TOPIC-SIGN (PROJECTION TOPIC STREAM)
   (%RENDER-NATIVE-TOPICMAP-SUBJECT-SIGN TOPIC STREAM)
@@ -355,84 +367,74 @@
           (views:str (render-topicmap-html *topicmap-renderer* projection))
           (render-topicmap-legend projection))))))
 
-(defun render-topicmap-workspace-associations (common-lisp-user::projection)
-  (block render-topicmap-workspace-associations
-    (let ((common-lisp-user::workspace
-           (dreyeck/topicmap:topicmap-projection-source-of
-            common-lisp-user::projection)))
-      (when
-          (typep common-lisp-user::workspace
-                 'dreyeck/topicmap:topicmap-workspace)
-        (let* ((common-lisp-user::point-topic
-                (dreyeck/topicmap:topicmap-workspace-current-topic
-                 common-lisp-user::workspace))
-               (common-lisp-user::associations
-                (dreyeck/topicmap::topicmap-associations-of-point
-                 common-lisp-user::workspace))
-               (common-lisp-user::topics
-                (dreyeck/topicmap:topicmap-projection-topics-of
-                 common-lisp-user::projection)))
-          (views:html
-            (:h3 "Point")
-            (:p
-             (views:object-ref
-              (dreyeck/topicmap:topicmap-topic-object-of
-               common-lisp-user::point-topic)
-              :display
-              (dreyeck/topicmap:topicmap-topic-label-of
-               common-lisp-user::point-topic)))
-            (:h3 "Associations")
-            (if common-lisp-user::associations
-                (views:html
-                  (:table :class "inspector-table"
-                   (dolist
-                       (common-lisp-user::association
-                        common-lisp-user::associations)
-                     (let* ((common-lisp-user::direction
-                             (dreyeck/topicmap::topicmap-association-direction-at-point
-                              common-lisp-user::workspace
-                              common-lisp-user::association))
-                            (common-lisp-user::other-id
-                             (dreyeck/topicmap::topicmap-association-other-topic-id
-                              common-lisp-user::workspace
-                              common-lisp-user::association))
-                            (common-lisp-user::other-topic
-                             (find common-lisp-user::other-id
-                                   common-lisp-user::topics :key
-                                   #'dreyeck/topicmap:topicmap-topic-id-of
-                                   :test #'string=)))
-                       (when common-lisp-user::other-topic
+(defun render-topicmap-workspace-associations (projection)
+  (let ((workspace (dreyeck/topicmap:topicmap-projection-source-of projection)))
+    (when (typep workspace 'dreyeck/topicmap:topicmap-workspace)
+      (let* ((point-topic
+              (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
+             (associations
+              (dreyeck/topicmap::topicmap-associations-of-point workspace))
+             (topics
+              (dreyeck/topicmap:topicmap-projection-topics-of projection)))
+        (views:html
+          (:h3 "Point")
+          (:p
+           (views:object-ref
+            (dreyeck/topicmap:topicmap-topic-object-of point-topic) :display
+            (dreyeck/topicmap:topicmap-topic-label-of point-topic)))
+          (:h3 "Associations")
+          (if associations
+              (views:html
+                (:table :class "inspector-table"
+                 (dolist (association associations)
+                   (let* ((direction
+                           (dreyeck/topicmap::topicmap-association-direction-at-point
+                            workspace association))
+                          (other-id
+                           (dreyeck/topicmap::topicmap-association-other-topic-id
+                            workspace association))
+                          (other-topic
+                           (find other-id topics :key
+                                 #'dreyeck/topicmap:topicmap-topic-id-of :test
+                                 #'string=)))
+                     (when other-topic
+                       (let ((path (topicmap-topic-path-of other-topic)))
                          (views:html
                            (:tr :class "dreyeck-topicmap-workspace-association"
                             :data-association-id
                             (dreyeck/topicmap:topicmap-association-id-of
-                             common-lisp-user::association)
-                            :data-direction
-                            (symbol-name common-lisp-user::direction)
+                             association)
+                            :data-direction (symbol-name direction)
                             (:td
                              (:tt
                               (cl-who:esc
                                (princ-to-string
                                 (dreyeck/topicmap:topicmap-association-type-of
-                                 common-lisp-user::association)))))
+                                 association)))))
                             (:td
                              (cl-who:esc
-                              (if (eq common-lisp-user::direction :outgoing)
+                              (if (eq direction :outgoing)
                                   "→"
                                   "←")))
                             (:td
-                             (views:action-button
-                              (dreyeck/topicmap:topicmap-topic-label-of
-                               common-lisp-user::other-topic)
-                              (views:thunk
-                                (dreyeck/topicmap:topicmap-workspace-go-to
-                                 common-lisp-user::workspace
-                                 common-lisp-user::other-id))
-                              (format nil "Go to ~A"
-                                      (dreyeck/topicmap:topicmap-topic-label-of
-                                       common-lisp-user::other-topic)))))))))))
-                (views:html
-                  (:p "No associations.")))))))))
+                             (if path
+                                 (views:html
+                                   (:a :href path :data-presentation
+                                    "RESOURCE-GET"
+                                    (cl-who:esc
+                                     (dreyeck/topicmap:topicmap-topic-label-of
+                                      other-topic))))
+                                 (views:action-button
+                                  (dreyeck/topicmap:topicmap-topic-label-of
+                                   other-topic)
+                                  (views:thunk
+                                    (dreyeck/topicmap:topicmap-workspace-go-to
+                                     workspace other-id))
+                                  (format nil "Go to ~A"
+                                          (dreyeck/topicmap:topicmap-topic-label-of
+                                           other-topic)))))))))))))
+              (views:html
+                (:p "No associations."))))))))
 
 (views:defview 👀topicmap (object dreyeck/topicmap:topicmap-workspace)
                (let ((projection

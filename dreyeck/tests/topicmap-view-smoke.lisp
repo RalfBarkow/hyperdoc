@@ -642,6 +642,89 @@
          "Navigation changed association identity while changing the point of view."))
       t)))
 
+(defun run-topicmap-workspace-resource-get-test ()
+  (let* ((path "/workspace/topics/point-b")
+         (topic-a
+          (dreyeck/topicmap:make-topicmap-topic :id "point-a" :type :test
+                                                :label "A" :object :a
+                                                :view-properties
+                                                '(:visible t)))
+         (topic-b
+          (dreyeck/topicmap:make-topicmap-topic :id "point-b" :type :test
+                                                :label "B" :object :b
+                                                :view-properties
+                                                (list :visible t :path path)))
+         (projection
+          (dreyeck/topicmap:make-topicmap-projection :source :resource-get-test
+                                                     :topics
+                                                     (list topic-a topic-b)
+                                                     :associations
+                                                     (list
+                                                      (dreyeck/topicmap:make-topicmap-association
+                                                       :id "r1" :type :r1 :from
+                                                       "point-a" :to
+                                                       "point-b"))))
+         (workspace
+          (dreyeck/topicmap:make-topicmap-workspace projection "point-a"))
+         (point-before
+          (dreyeck/topicmap:topicmap-workspace-point-of workspace))
+         (history-before
+          (copy-list
+           (dreyeck/topicmap:topicmap-workspace-history-of workspace)))
+         (view (view-named "Topicmap" workspace))
+         (html (and view (html-inspector-views:view-html view)))
+         (action-references
+          (and view
+               (remove-if-not
+                (lambda (reference)
+                  (and (stringp (car reference))
+                       (uiop/utility:string-prefix-p "action-" (car reference))
+                       (search
+                        (format nil
+                                "id='~A' class='dreyeck-topicmap-workspace-action "
+                                (car reference))
+                        html :test #'char-equal)))
+                (html-inspector-views:view-references view)))))
+    (labels ((occurrences (needle)
+               (loop with start = 0
+                     for position = (search needle html :start2 start :test
+                                            #'char-equal)
+                     while position
+                     collect position
+                     do (setf start (+ position (length needle))))))
+      (check view "Resource-GET workspace has no Topicmap view.")
+      (check html "Resource-GET workspace rendered no HTML.")
+      (check (= 2 (length (occurrences path)))
+             "Resource path is not present in both topic and association navigation.")
+      (check (= 2 (length (occurrences "RESOURCE-GET")))
+             "Expected exactly two Resource-GET presentations.")
+      (check
+       (search "data-topic-id='point-a' data-presentation='WORKSPACE-GO-TO'"
+               html :test #'char-equal)
+       "Pathless topic lost its Workspace go-to action.")
+      (check
+       (null
+        (search "data-topic-id='point-b' data-presentation='WORKSPACE-GO-TO'"
+                html :test #'char-equal))
+       "Addressed topic still exposes Workspace go-to.")
+      (check (= 1 (length action-references))
+             "Expected exactly one remaining Inspector action.")
+      (check
+       (every
+        (lambda (reference)
+          (typep (cdr reference) 'html-inspector-views:thunk))
+        action-references)
+       "Remaining Inspector action is not a thunk.")
+      (check
+       (equal point-before
+              (dreyeck/topicmap:topicmap-workspace-point-of workspace))
+       "Rendering changed the workspace point.")
+      (check
+       (equal history-before
+              (dreyeck/topicmap:topicmap-workspace-history-of workspace))
+       "Rendering changed workspace history.")
+      t)))
+
 (defun run-topicmap-view-smoke-tests ()
   (check-ownership-contract)
   (run-generic-topicmap-view-test)
@@ -654,4 +737,5 @@
   (format t "Generic renderer-independent Topicmap view tests passed.~%")
   (run-semantic-topicmap-presentation-smoke-test)
   (run-semantic-topicmap-endpoint-role-smoke-test)
+  (run-topicmap-workspace-resource-get-test)
   t)
