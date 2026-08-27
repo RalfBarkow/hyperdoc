@@ -127,7 +127,8 @@ registration table and does not invoke FIND-SYSTEM."
      :newly-registered-systems new)))
 
 (defun run-asd-test-system-in-fresh-process
-    (asd-pathname primary-system-name test-system-name)
+    (asd-pathname primary-system-name test-system-name &key
+ (prerequisite-asd-pathnames nil))
   "Run TEST-SYSTEM-NAME in a fresh SBCL process with ASD-PATHNAME authoritative."
   (let* ((asd
            (truename asd-pathname))
@@ -172,17 +173,16 @@ registration table and does not invoke FIND-SYSTEM."
                 (asdf:test-system
                  cl-user::system)))))
     (uiop:run-program
-     (list
-      runtime
-      "--noinform"
-      "--no-userinit"
-      "--disable-debugger"
-      "--non-interactive"
-      "--eval"
-      "(require :asdf)"
-      "--eval"
-      (prin1-to-string
-       child-form))
+     (append
+ (list runtime "--noinform" "--no-userinit" "--disable-debugger"
+       "--non-interactive" "--eval" "(require :asdf)")
+ (mapcan
+  (lambda (prerequisite-asd-pathname)
+    (list "--eval"
+          (format nil "(asdf:load-asd #P~S)"
+                  (namestring (truename prerequisite-asd-pathname)))))
+  prerequisite-asd-pathnames)
+ (list "--eval" (prin1-to-string child-form)))
      :directory root
      :output *standard-output*
      :error-output *error-output*)

@@ -181,10 +181,26 @@
    (run-basic-registration-test)
    (run-source-authority-test)
    (run-component-primary-asd-pathname-test)
-   (dreyeck/page-attached-asdf:run-asd-test-system-in-fresh-process
-    (fixture-asd-pathname)
-    "page-attached-asdf-fixture"
-    "page-attached-asdf-fixture/tests")))
+   (and
+        (let
+             ((root
+                    (asdf/system:system-source-directory
+                                                         "dreyeck/page-attached-asdf/tests")))
+             (dreyeck/page-attached-asdf:run-asd-test-system-in-fresh-process
+                                                                              (merge-pathnames
+                                                                                               "dreyeck/tests/fixtures/page-attached-asdf/page-attached-asdf-prerequisite-target.asd"
+                                                                                               root)
+                                                                              "page-attached-asdf-prerequisite-target"
+                                                                              "page-attached-asdf-prerequisite-target/tests"
+                                                                              :prerequisite-asd-pathnames
+                                                                              (list
+                                                                                    (merge-pathnames
+                                                                                                     "dreyeck/tests/fixtures/page-attached-asdf-prerequisite/explicit-prerequisite.lisp"
+                                                                                                     root))))
+        (dreyeck/page-attached-asdf:run-asd-test-system-in-fresh-process
+                                                                         (fixture-asd-pathname)
+                                                                         "page-attached-asdf-fixture"
+                                                                         "page-attached-asdf-fixture/tests"))))
 
 
 
