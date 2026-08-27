@@ -1,5 +1,56 @@
 
 (IN-PACKAGE :DREYECK/FEDWIKI-JOURNAL/TESTS)
+(defun run-fedwiki-journal-copy-comparison-test ()
+  (labels ((entry (type date)
+             (let ((data (make-hash-table :test #'equal)))
+               (setf (gethash "type" data) type
+                     (gethash "date" data) date)
+               (hyperbook/fedwiki::make-journal-entry data)))
+           (page (wiki id &rest entries)
+             (let ((page (hyperbook/fedwiki::make-fedwiki-page wiki id id)))
+               (setf (slot-value page 'hyperbook/fedwiki::journal)
+                       (coerce entries 'vector))
+               page)))
+    (let* ((wiki
+            (make-instance 'hyperbook/fedwiki::fedwiki :id
+                           "journal-comparison-test"))
+           (left (page wiki "left" (entry "create" 1781148995000)))
+           (same (page wiki "same" (entry "create" 1781148995000)))
+           (later (page wiki "later" (entry "create" 1781148996000)))
+           (extra
+            (page wiki "extra" (entry "create" 1781148995000)
+             (entry "fork" 1781148997000)))
+           (date-mismatch
+            (first
+             (dreyeck/fedwiki-journal:journal-date-mismatches left later)))
+           (extra-mismatch
+            (first
+             (dreyeck/fedwiki-journal:journal-date-mismatches left extra)))
+           (comparison
+            (dreyeck/fedwiki-journal:make-fedwiki-journal-copy-comparison
+             "left" left "extra" extra)))
+      (and (null (dreyeck/fedwiki-journal:journal-date-mismatches left same))
+           (= 1 (getf date-mismatch :delta-seconds))
+           (= 1 (getf extra-mismatch :index))
+           (null (getf (getf extra-mismatch :left) :type))
+           (eq :fork (getf (getf extra-mismatch :right) :type))
+           (null (getf extra-mismatch :delta-seconds))
+           (string= "left"
+                    (dreyeck/fedwiki-journal:journal-comparison-left-name-of
+                     comparison))
+           (eq left
+               (dreyeck/fedwiki-journal:journal-comparison-left-page-of
+                comparison))
+           (string= "extra"
+                    (dreyeck/fedwiki-journal:journal-comparison-right-name-of
+                     comparison))
+           (eq extra
+               (dreyeck/fedwiki-journal:journal-comparison-right-page-of
+                comparison))
+           (equal (dreyeck/fedwiki-journal:journal-date-mismatches left extra)
+                  (dreyeck/fedwiki-journal:journal-comparison-mismatches-of
+                   comparison))))))
+
 (defun run-fedwiki-journal-repair-test ()
   (labels ((make-entry-data (type date)
              (let ((data (make-hash-table :test #'equal)))
@@ -70,4 +121,5 @@
               (eq bad (fedwiki-journal-finding-entry-of (first findings)))
               (eq :date-domain
                   (fedwiki-journal-finding-kind-of (first findings)))))))
-   (run-fedwiki-journal-repair-test)))
+   (and (run-fedwiki-journal-copy-comparison-test)
+        (run-fedwiki-journal-repair-test))))
