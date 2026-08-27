@@ -270,6 +270,90 @@
     t))
 
 
+(defun run-topicmap-workspace-snapshot-test ()
+  (let* ((topic-a
+           (dreyeck/topicmap:make-topicmap-topic
+            :id "snapshot:a"
+            :type :test
+            :label "A"
+            :object :a))
+         (topic-b
+           (dreyeck/topicmap:make-topicmap-topic
+            :id "snapshot:b"
+            :type :test
+            :label "B"
+            :object :b))
+         (topic-c
+           (dreyeck/topicmap:make-topicmap-topic
+            :id "snapshot:c"
+            :type :test
+            :label "C"
+            :object :c))
+         (projection
+           (dreyeck/topicmap:make-topicmap-projection
+            :source :workspace-snapshot-test
+            :topics (list topic-a topic-b topic-c)
+            :associations nil))
+         (workspace
+           (dreyeck/topicmap:make-topicmap-workspace
+            projection
+            "snapshot:a")))
+    (dreyeck/topicmap:topicmap-workspace-go-to
+     workspace
+     "snapshot:b")
+    (let* ((point-before
+             (dreyeck/topicmap:topicmap-workspace-point-of
+              workspace))
+           (history-before
+             (copy-list
+              (dreyeck/topicmap:topicmap-workspace-history-of
+               workspace)))
+           (snapshot
+             (dreyeck/topicmap:topicmap-workspace-snapshot-at
+              workspace
+              "snapshot:c")))
+      (check
+       (eq topic-b
+           (dreyeck/topicmap:topicmap-projection-topic-by-id
+            projection
+            "snapshot:b"))
+       "Projection lookup did not return the existing topic.")
+      (check
+       (null
+        (dreyeck/topicmap:topicmap-projection-topic-by-id
+         projection
+         "snapshot:missing"))
+       "Projection lookup resolved a missing topic.")
+      (check
+       (and
+        (not (eq workspace snapshot))
+        (eq projection
+            (dreyeck/topicmap:topicmap-workspace-projection-of
+             snapshot))
+        (string=
+         "snapshot:c"
+         (dreyeck/topicmap:topicmap-workspace-point-of
+          snapshot))
+        (null
+         (dreyeck/topicmap:topicmap-workspace-history-of
+          snapshot))
+        (eq topic-c
+            (dreyeck/topicmap:topicmap-workspace-current-topic
+             snapshot)))
+       "Workspace snapshot does not preserve its independent point over the shared projection.")
+      (check
+       (and
+        (string=
+         point-before
+         (dreyeck/topicmap:topicmap-workspace-point-of
+          workspace))
+        (equal
+         history-before
+         (dreyeck/topicmap:topicmap-workspace-history-of
+          workspace)))
+       "Creating a snapshot changed the source workspace.")
+      t)))
+
 (defun run-endpoint-validation-test ()
   (handler-case
       (progn
@@ -733,6 +817,7 @@
   (run-topicmap-workspace-association-navigation-test)
   (run-topicmap-workspace-point-relative-viewbox-test)
   (run-topicmap-workspace-for-object-test)
+  (run-topicmap-workspace-snapshot-test)
   (run-endpoint-validation-test)
   (format t "Generic renderer-independent Topicmap view tests passed.~%")
   (run-semantic-topicmap-presentation-smoke-test)

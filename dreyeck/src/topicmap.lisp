@@ -137,6 +137,14 @@
   projection)
 
 
+(defun topicmap-projection-topic-by-id (projection topic-id)
+  (check-type projection topicmap-projection)
+  (check-type topic-id string)
+  (find topic-id
+        (topicmap-projection-topics-of projection)
+        :key #'topicmap-topic-id-of
+        :test #'string=))
+
 (DEFCLASS TOPICMAP-WORKSPACE NIL
           ((PROJECTION :READER TOPICMAP-WORKSPACE-PROJECTION-OF :INITARG
             :PROJECTION)
@@ -150,6 +158,12 @@
             #'TOPICMAP-TOPIC-ID-OF :TEST #'STRING=)
     (ERROR "Topic ~S is absent from projection." POINT))
   (MAKE-INSTANCE 'TOPICMAP-WORKSPACE :PROJECTION PROJECTION :POINT POINT))
+
+(defun topicmap-workspace-snapshot-at (workspace topic-id)
+  (check-type workspace topicmap-workspace)
+  (make-topicmap-workspace
+   (topicmap-workspace-projection-of workspace)
+   topic-id))
 
 (DEFUN TOPICMAP-WORKSPACE-CURRENT-TOPIC (WORKSPACE)
   (OR

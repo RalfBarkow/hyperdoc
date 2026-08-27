@@ -31,4 +31,6 @@
            #:topicmap-workspace-history-of
            #:topicmap-workspace-current-topic
            #:topicmap-workspace-current-object
-           #:topicmap-workspace-go-to))
+           #:topicmap-workspace-go-to
+           #:topicmap-projection-topic-by-id
+           #:topicmap-workspace-snapshot-at))
