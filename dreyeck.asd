@@ -964,6 +964,35 @@
                                       (error
                                              "Dreyeck workspace-operation tests failed."))))
 
+(asdf:defsystem #:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION :description
+                "Evaluation-record projection for workspace operation invocations"
+                :license "BSD" :version "0.0.1" :pathname "dreyeck/src/"
+                :serial t :depends-on
+                (#:DREYECK/EVALUATION-RECORD #:DREYECK/WORKSPACE-OPERATION)
+                :components ((:file "evaluation-record-workspace-operation"))
+                :in-order-to
+                ((asdf:test-op
+                               (asdf:test-op
+                                             "dreyeck/evaluation-record/workspace-operation/tests"))))
+
+(asdf:defsystem #:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION/TESTS
+                :description
+                "Tests for workspace operation evaluation-record projection"
+                :license "BSD" :version "0.0.1" :pathname "dreyeck/tests/"
+                :serial t :depends-on
+                (#:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION) :components
+                ((:file "evaluation-record-workspace-operation-test-package")
+                 (:file "evaluation-record-workspace-operation-smoke"))
+                :perform
+                (asdf:test-op (operation component)
+                              (declare (ignore operation component))
+                              (unless
+                                      (uiop:symbol-call
+                                                        :DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION/TESTS
+                                                        :RUN-WORKSPACE-OPERATION-EVALUATION-RECORD-TESTS)
+                                      (error
+                                             "Workspace-operation evaluation-record tests failed."))))
+
 (asdf/parse-defsystem:defsystem #:dreyeck/image-audit
   :description
   "Function reconstruction audits for Dreyeck"
