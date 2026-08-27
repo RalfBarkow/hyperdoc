@@ -55,7 +55,8 @@
 
 (defun dreyeck/image-audit:reconstructed-package-function-coordinates
        (dreyeck/image-audit::package-designator
-        dreyeck/image-audit::reconstruction-systems)
+ dreyeck/image-audit::reconstruction-systems &key
+ (dreyeck/image-audit::prerequisite-asd-pathnames nil))
   "Return function coordinates observed after reconstructing the requested systems in a fresh Lisp process."
   (let* ((dreyeck/image-audit::root
           (asdf/system:system-source-directory "dreyeck/image-audit"))
@@ -63,21 +64,30 @@
           (truename (merge-pathnames "dreyeck.asd" dreyeck/image-audit::root)))
          (dreyeck/image-audit::reconstruction-load-source
           (format nil
-                  "(let ((*standard-output* (make-broadcast-stream)) (*trace-output* (make-broadcast-stream))) (asdf:load-system \"dreyeck/image-audit\")~{ (asdf:load-system ~S)~})"
+                  "(let ((*standard-output* (make-broadcast-stream)) (*trace-output* (make-broadcast-stream)) (*debug-io* (make-two-way-stream (make-string-input-stream \"\") (make-broadcast-stream)))) (asdf:load-system \"dreyeck/image-audit\")~{ (asdf:load-system ~S)~})"
                   dreyeck/image-audit::reconstruction-systems))
          (dreyeck/image-audit::reconstruction-observation-source
           (format nil
                   "(prin1 (dreyeck/image-audit:package-function-coordinates ~S))"
                   dreyeck/image-audit::package-designator))
          (dreyeck/image-audit::command
-          (list (dreyeck/image-audit::current-lisp-executable) "--noinform"
-                "--no-userinit" "--disable-debugger" "--non-interactive"
-                "--eval" "(require :asdf)" "--eval"
-                (format nil "(asdf:load-asd #P~S)"
-                        (namestring dreyeck/image-audit::asd))
-                "--eval" dreyeck/image-audit::reconstruction-load-source
-                "--eval"
-                dreyeck/image-audit::reconstruction-observation-source)))
+          (append
+ (list (dreyeck/image-audit::current-lisp-executable) "--noinform"
+       "--no-userinit" "--disable-debugger" "--non-interactive" "--eval"
+       "(require :asdf)")
+ (mapcan
+  (lambda (dreyeck/image-audit::prerequisite-asd-pathname)
+    (list "--eval"
+          (format nil "(asdf:load-asd #P~S)"
+                  (namestring
+                   (truename
+                    dreyeck/image-audit::prerequisite-asd-pathname)))))
+  dreyeck/image-audit::prerequisite-asd-pathnames)
+ (list "--eval"
+       (format nil "(asdf:load-asd #P~S)"
+               (namestring dreyeck/image-audit::asd))
+       "--eval" dreyeck/image-audit::reconstruction-load-source "--eval"
+       dreyeck/image-audit::reconstruction-observation-source))))
     (values
      (read-from-string
       (uiop/run-program:run-program dreyeck/image-audit::command :directory
@@ -86,12 +96,14 @@
 
 (defun dreyeck/image-audit:audit-package-functions
        (dreyeck/image-audit::package-designator
-        dreyeck/image-audit::reconstruction-systems)
+ dreyeck/image-audit::reconstruction-systems &key
+ (dreyeck/image-audit::prerequisite-asd-pathnames nil))
   (dreyeck/image-audit:make-image-function-audit
    dreyeck/image-audit::package-designator
    dreyeck/image-audit::reconstruction-systems
    (dreyeck/image-audit:package-function-coordinates
     dreyeck/image-audit::package-designator)
    (dreyeck/image-audit:reconstructed-package-function-coordinates
-    dreyeck/image-audit::package-designator
-    dreyeck/image-audit::reconstruction-systems)))
+ dreyeck/image-audit::package-designator
+ dreyeck/image-audit::reconstruction-systems :prerequisite-asd-pathnames
+ dreyeck/image-audit::prerequisite-asd-pathnames)))

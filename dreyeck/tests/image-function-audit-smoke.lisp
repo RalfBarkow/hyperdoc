@@ -57,7 +57,31 @@
      (null
       (dreyeck/image-audit:image-function-audit-image-only-function-coordinates-of
        audit)))
-    t))
+    (let* ((dreyeck/image-audit/tests::root
+        (asdf/system:system-source-directory "dreyeck/image-audit/tests"))
+       (dreyeck/image-audit/tests::prerequisite
+        (merge-pathnames
+         "dreyeck/tests/fixtures/image-audit-prerequisite/explicit-prerequisite.lisp"
+         dreyeck/image-audit/tests::root))
+       (dreyeck/image-audit/tests::system "image-audit-prerequisite-fixture")
+       (dreyeck/image-audit/tests::coordinate
+        (list (package-name (find-package "CL-USER"))
+              "IMAGE-AUDIT-PREREQUISITE-FIXTURE-FUNCTION")))
+  (assert
+   (null (asdf/system:find-system dreyeck/image-audit/tests::system nil)))
+  (let ((dreyeck/image-audit/tests::audit
+         (dreyeck/image-audit:audit-package-functions "CL-USER"
+                                                      (list
+                                                       dreyeck/image-audit/tests::system)
+                                                      :prerequisite-asd-pathnames
+                                                      (list
+                                                       dreyeck/image-audit/tests::prerequisite))))
+    (assert
+     (member dreyeck/image-audit/tests::coordinate
+             (dreyeck/image-audit:image-function-audit-reconstructed-function-coordinates-of
+              dreyeck/image-audit/tests::audit)
+             :test #'equal)))
+  t)))
 
 (defun dreyeck/image-audit/tests:run-image-function-audit-tests ()
   (and (dreyeck/image-audit/tests::run-image-function-audit-model-test)
