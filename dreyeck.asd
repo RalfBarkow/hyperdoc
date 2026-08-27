@@ -846,6 +846,29 @@
     ((:file "package") (:file "manual-topics") (:file "plan-objects")
      (:file "examples") (:file "views")))))
 
+(asdf:defsystem #:DREYECK/STATE-MACHINE :description
+                "Generic evidence-bearing state-machine runtime" :license "BSD"
+                :version "0.0.1" :pathname "dreyeck/src/" :serial t :components
+                ((:file "state-machine-package") (:file "state-machine"))
+                :in-order-to
+                ((asdf:test-op (asdf:test-op "dreyeck/state-machine/tests"))))
+
+(asdf:defsystem #:DREYECK/STATE-MACHINE/TESTS :description
+                "Deterministic tests for the generic state-machine runtime"
+                :license "BSD" :version "0.0.1" :pathname "dreyeck/tests/"
+                :serial t :depends-on (#:DREYECK/STATE-MACHINE) :components
+                ((:file "state-machine-test-package")
+                 (:file "state-machine-smoke"))
+                :perform
+                (asdf:test-op (operation component)
+                              (declare (ignore operation component))
+                              (unless
+                                      (uiop:symbol-call
+                                                        :DREYECK/STATE-MACHINE/TESTS
+                                                        :RUN-STATE-MACHINE-TESTS)
+                                      (error
+                                             "Dreyeck state-machine tests failed."))))
+
 (asdf/parse-defsystem:defsystem #:dreyeck/image-audit
   :description
   "Function reconstruction audits for Dreyeck"
