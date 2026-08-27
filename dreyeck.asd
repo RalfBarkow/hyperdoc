@@ -936,6 +936,34 @@
                                       (error
                                              "Dreyeck evaluation-record tests failed."))))
 
+(asdf:defsystem #:DREYECK/WORKSPACE-OPERATION :description
+                "Generic workspace operation and invocation records" :license
+                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :serial t
+                :components
+                ((:file "workspace-operation-package")
+                 (:file "workspace-operation"))
+                :in-order-to
+                ((asdf:test-op
+                               (asdf:test-op
+                                             "dreyeck/workspace-operation/tests"))))
+
+(asdf:defsystem #:DREYECK/WORKSPACE-OPERATION/TESTS :description
+                "Deterministic tests for workspace operation invocation"
+                :license "BSD" :version "0.0.1" :pathname "dreyeck/tests/"
+                :serial t :depends-on (#:DREYECK/WORKSPACE-OPERATION)
+                :components
+                ((:file "workspace-operation-test-package")
+                 (:file "workspace-operation-smoke"))
+                :perform
+                (asdf:test-op (operation component)
+                              (declare (ignore operation component))
+                              (unless
+                                      (uiop:symbol-call
+                                                        :DREYECK/WORKSPACE-OPERATION/TESTS
+                                                        :RUN-WORKSPACE-OPERATION-TESTS)
+                                      (error
+                                             "Dreyeck workspace-operation tests failed."))))
+
 (asdf/parse-defsystem:defsystem #:dreyeck/image-audit
   :description
   "Function reconstruction audits for Dreyeck"
