@@ -893,6 +893,49 @@
                                       (error
                                              "Dreyeck LISP-CRITIC tests failed."))))
 
+(asdf:defsystem #:DREYECK/EVALUATION-RECORD :description
+                "Generic protocol for projecting execution objects as evaluation records"
+                :license "BSD" :version "0.0.1" :pathname "dreyeck/src/"
+                :serial t :components
+                ((:file "evaluation-record-package")
+                 (:file "evaluation-record"))
+                :in-order-to
+                ((asdf:test-op
+                               (asdf:test-op
+                                             "dreyeck/evaluation-record/tests"))))
+
+(asdf:defsystem #:DREYECK/EVALUATION-RECORD/STATE-MACHINE :description
+                "Evaluation-record projection for state-machine runs" :license
+                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :depends-on
+                (#:DREYECK/EVALUATION-RECORD #:DREYECK/STATE-MACHINE)
+                :components ((:file "evaluation-record-state-machine")))
+
+(asdf:defsystem #:DREYECK/EVALUATION-RECORD/LISP-CRITIC :description
+                "Evaluation-record projection for LISP-CRITIC run records"
+                :license "BSD" :version "0.0.1" :pathname "dreyeck/src/"
+                :depends-on (#:DREYECK/EVALUATION-RECORD #:DREYECK/LISP-CRITIC)
+                :components ((:file "evaluation-record-lisp-critic")))
+
+(asdf:defsystem #:DREYECK/EVALUATION-RECORD/TESTS :description
+                "Tests for generic evaluation-record projections" :license
+                "BSD" :version "0.0.1" :pathname "dreyeck/tests/" :serial t
+                :depends-on
+                (#:DREYECK/EVALUATION-RECORD/STATE-MACHINE
+                                                           #:DREYECK/EVALUATION-RECORD/LISP-CRITIC
+                                                           #:DREYECK/STATE-MACHINE/TESTS)
+                :components
+                ((:file "evaluation-record-test-package")
+                 (:file "evaluation-record-smoke"))
+                :perform
+                (asdf:test-op (operation component)
+                              (declare (ignore operation component))
+                              (unless
+                                      (uiop:symbol-call
+                                                        :DREYECK/EVALUATION-RECORD/TESTS
+                                                        :RUN-EVALUATION-RECORD-TESTS)
+                                      (error
+                                             "Dreyeck evaluation-record tests failed."))))
+
 (asdf/parse-defsystem:defsystem #:dreyeck/image-audit
   :description
   "Function reconstruction audits for Dreyeck"
