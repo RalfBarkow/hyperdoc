@@ -993,6 +993,36 @@
                                       (error
                                              "Workspace-operation evaluation-record tests failed."))))
 
+(asdf:defsystem #:DREYECK/SLICE-SUMMARY :description
+                "Summary projections over ordered evaluation records" :license
+                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :serial t
+                :depends-on (#:DREYECK/EVALUATION-RECORD) :components
+                ((:file "slice-summary-package") (:file "slice-summary"))
+                :in-order-to
+                ((asdf:test-op (asdf:test-op "dreyeck/slice-summary/tests"))))
+
+(asdf:defsystem #:DREYECK/SLICE-SUMMARY/TESTS :description
+                "Tests for heterogeneous evaluation-record summaries" :license
+                "BSD" :version "0.0.1" :pathname "dreyeck/tests/" :serial t
+                :depends-on
+                (#:DREYECK/SLICE-SUMMARY
+                                         #:DREYECK/EVALUATION-RECORD/STATE-MACHINE
+                                         #:DREYECK/EVALUATION-RECORD/LISP-CRITIC
+                                         #:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION
+                                         #:DREYECK/STATE-MACHINE/TESTS)
+                :components
+                ((:file "slice-summary-test-package")
+                 (:file "slice-summary-smoke"))
+                :perform
+                (asdf:test-op (operation component)
+                              (declare (ignore operation component))
+                              (unless
+                                      (uiop:symbol-call
+                                                        :DREYECK/SLICE-SUMMARY/TESTS
+                                                        :RUN-SLICE-SUMMARY-TESTS)
+                                      (error
+                                             "Dreyeck slice-summary tests failed."))))
+
 (asdf/parse-defsystem:defsystem #:dreyeck/image-audit
   :description
   "Function reconstruction audits for Dreyeck"
