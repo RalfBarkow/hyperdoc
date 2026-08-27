@@ -154,8 +154,7 @@
 
 (DEFUN MAKE-TOPICMAP-WORKSPACE (PROJECTION POINT)
   (UNLESS
-      (FIND POINT (TOPICMAP-PROJECTION-TOPICS-OF PROJECTION) :KEY
-            #'TOPICMAP-TOPIC-ID-OF :TEST #'STRING=)
+      (topicmap-projection-topic-by-id projection point)
     (ERROR "Topic ~S is absent from projection." POINT))
   (MAKE-INSTANCE 'TOPICMAP-WORKSPACE :PROJECTION PROJECTION :POINT POINT))
 
@@ -167,10 +166,9 @@
 
 (DEFUN TOPICMAP-WORKSPACE-CURRENT-TOPIC (WORKSPACE)
   (OR
-   (FIND (TOPICMAP-WORKSPACE-POINT-OF WORKSPACE)
-         (TOPICMAP-PROJECTION-TOPICS-OF
-          (TOPICMAP-WORKSPACE-PROJECTION-OF WORKSPACE))
-         :KEY #'TOPICMAP-TOPIC-ID-OF :TEST #'STRING=)
+   (topicmap-projection-topic-by-id
+    (topicmap-workspace-projection-of workspace)
+    (topicmap-workspace-point-of workspace))
    (ERROR "Workspace point ~S no longer resolves."
           (TOPICMAP-WORKSPACE-POINT-OF WORKSPACE))))
 
@@ -179,10 +177,9 @@
 
 (DEFUN TOPICMAP-WORKSPACE-GO-TO (WORKSPACE TOPIC-ID)
   (LET ((TOPIC
-         (FIND TOPIC-ID
-               (TOPICMAP-PROJECTION-TOPICS-OF
-                (TOPICMAP-WORKSPACE-PROJECTION-OF WORKSPACE))
-               :KEY #'TOPICMAP-TOPIC-ID-OF :TEST #'STRING=)))
+         (topicmap-projection-topic-by-id
+          (topicmap-workspace-projection-of workspace)
+          topic-id)))
     (UNLESS TOPIC (ERROR "Topic ~S is absent from workspace." TOPIC-ID))
     (LET ((OLD-POINT (TOPICMAP-WORKSPACE-POINT-OF WORKSPACE)))
       (UNLESS (STRING= OLD-POINT TOPIC-ID)
