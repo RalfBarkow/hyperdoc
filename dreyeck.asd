@@ -869,6 +869,30 @@
                                       (error
                                              "Dreyeck state-machine tests failed."))))
 
+(asdf:defsystem #:DREYECK/LISP-CRITIC :description
+                "Generic LISP-CRITIC execution contracts and run records"
+                :license "BSD" :version "0.0.1" :pathname "dreyeck/src/"
+                :serial t :depends-on (#:ASDF #:UIOP) :components
+                ((:file "lisp-critic-package") (:file "lisp-critic"))
+                :in-order-to
+                ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/tests"))))
+
+(asdf:defsystem #:DREYECK/LISP-CRITIC/TESTS :description
+                "Deterministic tests for generic LISP-CRITIC execution contracts"
+                :license "BSD" :version "0.0.1" :pathname "dreyeck/tests/"
+                :serial t :depends-on (#:DREYECK/LISP-CRITIC) :components
+                ((:file "lisp-critic-test-package")
+                 (:file "lisp-critic-smoke"))
+                :perform
+                (asdf:test-op (operation component)
+                              (declare (ignore operation component))
+                              (unless
+                                      (uiop:symbol-call
+                                                        :DREYECK/LISP-CRITIC/TESTS
+                                                        :RUN-LISP-CRITIC-TESTS)
+                                      (error
+                                             "Dreyeck LISP-CRITIC tests failed."))))
+
 (asdf/parse-defsystem:defsystem #:dreyeck/image-audit
   :description
   "Function reconstruction audits for Dreyeck"
