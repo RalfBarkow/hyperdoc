@@ -1023,6 +1023,39 @@
                                       (error
                                              "Dreyeck slice-summary tests failed."))))
 
+(asdf:defsystem #:DREYECK/SLY-MREPL :description
+                "Model observed SLY mREPL evaluation records" :license "BSD"
+                :version "0.0.1" :pathname "dreyeck/src/" :serial t :components
+                ((:file "sly-mrepl-package") (:file "sly-mrepl")))
+
+(asdf:defsystem #:DREYECK/EVALUATION-RECORD/SLY-MREPL :description
+                "Evaluation-record adapter for SLY mREPL evaluations" :license
+                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :serial t
+                :depends-on (#:DREYECK/EVALUATION-RECORD #:DREYECK/SLY-MREPL)
+                :components ((:file "evaluation-record-sly-mrepl"))
+                :in-order-to
+                ((asdf:test-op
+                               (asdf:test-op
+                                             "dreyeck/evaluation-record/sly-mrepl/tests"))))
+
+(asdf:defsystem #:DREYECK/EVALUATION-RECORD/SLY-MREPL/TESTS :description
+                "Tests for SLY mREPL evaluation-record integration" :license
+                "BSD" :version "0.0.1" :pathname "dreyeck/tests/" :serial t
+                :depends-on
+                (#:DREYECK/EVALUATION-RECORD/SLY-MREPL #:DREYECK/SLICE-SUMMARY)
+                :components
+                ((:file "evaluation-record-sly-mrepl-test-package")
+                 (:file "evaluation-record-sly-mrepl-smoke"))
+                :perform
+                (asdf:test-op (operation component)
+                              (declare (ignore operation component))
+                              (unless
+                                      (uiop:symbol-call
+                                                        :DREYECK/EVALUATION-RECORD/SLY-MREPL/TESTS
+                                                        :RUN-SLY-MREPL-EVALUATION-RECORD-TESTS)
+                                      (error
+                                             "Dreyeck SLY mREPL evaluation-record tests failed."))))
+
 (asdf/parse-defsystem:defsystem #:dreyeck/image-audit
   :description
   "Function reconstruction audits for Dreyeck"
