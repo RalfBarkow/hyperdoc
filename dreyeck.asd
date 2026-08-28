@@ -1056,6 +1056,36 @@
                                       (error
                                              "Dreyeck SLY mREPL evaluation-record tests failed."))))
 
+(asdf:defsystem #:DREYECK/SLY-MREPL/RECORDING :description
+                "Capture SLY mREPL evaluations as Dreyeck records" :license
+                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :serial t
+                :depends-on (#:SLYNK/MREPL #:DREYECK/SLY-MREPL) :components
+                ((:file "sly-mrepl-recording-package")
+                 (:file "sly-mrepl-recording"))
+                :in-order-to
+                ((asdf:test-op
+                               (asdf:test-op
+                                             "dreyeck/sly-mrepl/recording/tests"))))
+
+(asdf:defsystem #:DREYECK/SLY-MREPL/RECORDING/TESTS :description
+                "Tests for SLY mREPL evaluation capture" :license "BSD"
+                :version "0.0.1" :pathname "dreyeck/tests/" :serial t
+                :depends-on
+                (#:DREYECK/SLY-MREPL/RECORDING
+                                               #:DREYECK/EVALUATION-RECORD/SLY-MREPL)
+                :components
+                ((:file "sly-mrepl-recording-test-package")
+                 (:file "sly-mrepl-recording-smoke"))
+                :perform
+                (asdf:test-op (operation component)
+                              (declare (ignore operation component))
+                              (unless
+                                      (uiop:symbol-call
+                                                        :DREYECK/SLY-MREPL/RECORDING/TESTS
+                                                        :RUN-SLY-MREPL-RECORDING-TESTS)
+                                      (error
+                                             "Dreyeck SLY mREPL recording tests failed."))))
+
 (asdf/parse-defsystem:defsystem #:dreyeck/image-audit
   :description
   "Function reconstruction audits for Dreyeck"
