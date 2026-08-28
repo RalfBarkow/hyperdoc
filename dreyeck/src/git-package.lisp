@@ -2,77 +2,53 @@
 
 (defpackage #:dreyeck/git
   (:use #:cl)
-  (:export
-   #:git-repository-checkout
-   #:git-repository-root-of
-   #:git-repository-root-source-of
-   #:git-program-of
-   #:make-current-git-repository-checkout
-   #:current-git-repository-checkout
-   #:git-command-failed
-   #:git-command-failed-repository-root-of
-   #:git-command-failed-arguments-of
-   #:git-command-failed-exit-code-of
-   #:git-command-failed-stdout-of
-   #:git-command-failed-stderr-of
-   #:git-run-values
-   #:git-run-string
-   #:trim-git-output
-   #:git-current-branch
-   #:git-commit
-   #:git-commit-repository-of
-   #:git-commit-ish-of
-   #:git-commit-hash-of
-   #:make-git-commit
-   #:current-head-git-commit
-   #:git-commit-one-line
-   #:git-commit-metadata
-   #:git-commit-object-present-p
-   #:git-commit-ancestor-p
-   #:git-commit-merge-base
-   #:git-commit-refs-containing
-   #:git-commit-stat
-   #:git-commit-patch
-   #:git-commit-changed-files
-   #:git-file-at-commit
-   #:make-git-file-at-commit
-   #:git-file-commit-of
-   #:git-file-path-of
-   #:git-commit-file-change
-   #:git-commit-file-change-commit-of
-   #:git-commit-file-change-status-of
-   #:git-commit-file-change-path-of
-   #:git-commit-file-change-old-path-of
-   #:git-commit-file-changes
-   #:git-commit-file-change-file
-   #:git-file-blob-spec
-   #:git-file-contents
-   #:historical-asdf-file-projection
-   #:historical-asdf-file-projection-file-of
-   #:historical-asdf-file-projection-declarations-of
-   #:historical-asdf-file-projection-issues-of
-   #:historical-asdf-system-declaration
-   #:historical-asdf-system-declaration-file-of
-   #:historical-asdf-system-declaration-source-designator-of
-   #:historical-asdf-system-declaration-canonical-name-of
-   #:historical-asdf-system-declaration-dependencies-of
-   #:historical-asdf-dependency-reference
-   #:historical-asdf-dependency-reference-file-of
-   #:historical-asdf-dependency-reference-declaration-of
-   #:historical-asdf-dependency-reference-relation-of
-   #:historical-asdf-dependency-reference-source-designator-of
-   #:historical-asdf-dependency-reference-canonical-name-of
-   #:historical-asdf-dependency-reference-support-status-of
-   #:historical-asdf-dependency-resolution
-   #:current-asdf-dependency-resolution
-   #:current-asdf-dependency-resolution-reference-of
-   #:current-asdf-dependency-resolution-status-of
-   #:current-asdf-dependency-resolution-target-of
-   #:current-asdf-dependency-resolution-observed-in-of
-   #:historical-asdf-parse-issue
-   #:historical-asdf-parse-issue-file-of
-   #:historical-asdf-parse-issue-position-of
-   #:historical-asdf-parse-issue-message-of
-   #:git-file-asdf-reference-projection
-   #:historical-asdf-reference-topicmap
-   #:commit-repository-slice))
+  (:export #:git-repository-checkout #:git-repository-root-of
+           #:git-repository-root-source-of #:git-program-of
+           #:make-current-git-repository-checkout
+           #:current-git-repository-checkout #:git-command-failed
+           #:git-command-failed-repository-root-of
+           #:git-command-failed-arguments-of #:git-command-failed-exit-code-of
+           #:git-command-failed-stdout-of #:git-command-failed-stderr-of
+           #:git-run-values #:git-run-string #:trim-git-output
+           #:git-current-branch #:git-commit #:git-commit-repository-of
+           #:git-commit-ish-of #:git-commit-hash-of #:make-git-commit
+           #:current-head-git-commit #:git-commit-one-line
+           #:git-commit-metadata #:git-commit-object-present-p
+           #:git-commit-ancestor-p #:git-commit-merge-base
+           #:git-commit-refs-containing #:git-commit-stat #:git-commit-patch
+           #:git-commit-changed-files #:git-file-at-commit
+           #:make-git-file-at-commit #:git-file-commit-of #:git-file-path-of
+           #:git-commit-file-change #:git-commit-file-change-commit-of
+           #:git-commit-file-change-status-of #:git-commit-file-change-path-of
+           #:git-commit-file-change-old-path-of #:git-commit-file-changes
+           #:git-commit-file-change-file #:git-file-blob-spec
+           #:git-file-contents #:historical-asdf-file-projection
+           #:historical-asdf-file-projection-file-of
+           #:historical-asdf-file-projection-declarations-of
+           #:historical-asdf-file-projection-issues-of
+           #:historical-asdf-system-declaration
+           #:historical-asdf-system-declaration-file-of
+           #:historical-asdf-system-declaration-source-designator-of
+           #:historical-asdf-system-declaration-canonical-name-of
+           #:historical-asdf-system-declaration-dependencies-of
+           #:historical-asdf-dependency-reference
+           #:historical-asdf-dependency-reference-file-of
+           #:historical-asdf-dependency-reference-declaration-of
+           #:historical-asdf-dependency-reference-relation-of
+           #:historical-asdf-dependency-reference-source-designator-of
+           #:historical-asdf-dependency-reference-canonical-name-of
+           #:historical-asdf-dependency-reference-support-status-of
+           #:historical-asdf-dependency-resolution
+           #:current-asdf-dependency-resolution
+           #:current-asdf-dependency-resolution-reference-of
+           #:current-asdf-dependency-resolution-status-of
+           #:current-asdf-dependency-resolution-target-of
+           #:current-asdf-dependency-resolution-observed-in-of
+           #:historical-asdf-parse-issue #:historical-asdf-parse-issue-file-of
+           #:historical-asdf-parse-issue-position-of
+           #:historical-asdf-parse-issue-message-of
+           #:git-file-asdf-reference-projection
+           #:historical-asdf-reference-topicmap #:commit-repository-slice
+           #:git-source-slice #:git-source-slice-commit-of
+           #:git-source-slice-selections-of #:git-source-slice-sparse-mode-of
+           #:make-git-source-slice #:materialize-git-source-slice))

@@ -203,25 +203,26 @@
     :dreyeck/fedwiki-source-relations/tests
     :run-fedwiki-source-relations-tests)))
 
-(asdf:defsystem #:dreyeck/git
-  :description "Experimental Git-backed inspection objects incubated by Dreyeck"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/topicmap
-               #:asdf
-               #:uiop)
+(asdf/parse-defsystem:defsystem #:dreyeck/git
+  :description
+  "Experimental Git-backed inspection objects incubated by Dreyeck"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/src/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/topicmap #:asdf #:uiop)
   :components
-  ((:file "git-package")
-   (:file "git-repository-checkout")
-   (:file "git-commit-inspection")
-   (:file "git-repository-topicmap")
-   (:file "git-asdf-references")
+  ((:file "git-package") (:file "git-repository-checkout")
+   (:file "git-commit-inspection") (:file "git-source-slice")
+   (:file "git-repository-topicmap") (:file "git-asdf-references")
    (:file "git-asdf-reference-topicmap"))
   :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/git/tests"))))
+  ((asdf/lisp-action:test-op (asdf/lisp-action:test-op "dreyeck/git/tests"))))
 
 (asdf:defsystem #:dreyeck/inspector/git
   :description "Dreyeck inspector views for experimental Git objects"
@@ -286,30 +287,33 @@
   ((asdf:test-op
     (asdf:test-op "dreyeck/catalog/tests"))))
 
-(asdf:defsystem #:dreyeck/git/tests
-  :description "Stable local-fixture tests for Dreyeck Git inspection"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/inspector/git
-               #:closer-mop)
+(asdf/parse-defsystem:defsystem #:dreyeck/git/tests
+  :description
+  "Stable local-fixture tests for Dreyeck Git inspection"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/tests/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/inspector/git #:closer-mop)
   :components
-  ((:file "git-commit-inspection-smoke")
-   (:file "git-repository-topicmap-smoke")
-   (:file "git-asdf-reference-smoke"))
+  ((:file "git-commit-inspection-smoke") (:file "git-source-slice-smoke")
+   (:file "git-repository-topicmap-smoke") (:file "git-asdf-reference-smoke"))
   :perform
-  (asdf:test-op
-   (operation component)
+  (asdf/lisp-action:test-op (operation component)
    (declare (ignore operation component))
-   (uiop:symbol-call
-    :dreyeck/git/tests
-    :run-git-commit-inspection-smoke-tests)
-   (uiop:symbol-call :dreyeck/git/tests
-                     :run-git-repository-topicmap-smoke-tests)
-   (uiop:symbol-call
-    :dreyeck/git/asdf-reference-tests
-    :run-git-asdf-reference-smoke-tests)))
+   (uiop/package:symbol-call :dreyeck/git/tests
+                             :run-git-commit-inspection-smoke-tests)
+   (uiop/package:symbol-call :dreyeck/git/tests
+                             :run-git-source-slice-smoke-tests)
+   (uiop/package:symbol-call :dreyeck/git/tests
+                             :run-git-repository-topicmap-smoke-tests)
+   (uiop/package:symbol-call :dreyeck/git/asdf-reference-tests
+                             :run-git-asdf-reference-smoke-tests)))
 
 (asdf:defsystem #:dreyeck/upstream-intake/tests
   :description "Deterministic read-only Upstream Intake contract tests"
