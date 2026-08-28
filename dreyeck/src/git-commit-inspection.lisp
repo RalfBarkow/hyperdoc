@@ -99,6 +99,42 @@ Unlike GIT-RUN-VALUES, this compatibility reader requires exit status zero."
 
 (defvar *last-inspected-git-commit* nil)
 
+(defun commit-repository-slice (repository files message)
+  "Stage FILES in REPOSITORY, validate the staged patch, and commit it.
+
+The repository index must be empty before the operation starts.  Return a
+structured observation.  If the selected files produce no staged change,
+return :NOTHING-TO-COMMIT rather than signaling an error."
+  (unless files
+    (error "A repository commit slice needs at least one file or pathspec."))
+  (let* ((root (git-repository-root-of repository))
+         (staged-before (git-run-string root "diff" "--cached" "--name-only")))
+    (unless (string= "" staged-before)
+      (error
+       "Refusing repository-slice commit because the index is not empty:~%~A"
+       staged-before))
+    (apply #'git-run-string root "add" "--" files)
+    (git-run-string root "diff" "--cached" "--check")
+    (let ((arguments '("diff" "--cached" "--quiet")))
+      (multiple-value-bind (stdout stderr exit-code)
+          (apply #'git-run-values root arguments)
+        (case exit-code
+          (0
+           (list :status :nothing-to-commit :repository repository :head
+                 (make-git-commit :repository repository) :worktree
+                 (git-run-string root "status" "--short")))
+          (1
+           (let ((stat (git-run-string root "diff" "--cached" "--stat"))
+                 (status-before (git-run-string root "status" "--short")))
+             (let ((commit-output (git-run-string root "commit" "-m" message)))
+               (list :status :committed :repository repository :commit-output
+                     commit-output :stat stat :status-before status-before
+                     :commit (make-git-commit :repository repository)
+                     :status-after (git-run-string root "status" "--short")))))
+          (otherwise
+           (signal-git-command-failed root arguments stdout stderr
+                                      exit-code)))))))
+
 (defun make-git-commit
     (&key
        (repository (current-git-repository-checkout))

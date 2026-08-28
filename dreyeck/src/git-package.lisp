@@ -74,4 +74,5 @@
    #:historical-asdf-parse-issue-position-of
    #:historical-asdf-parse-issue-message-of
    #:git-file-asdf-reference-projection
-   #:historical-asdf-reference-topicmap))
+   #:historical-asdf-reference-topicmap
+   #:commit-repository-slice))

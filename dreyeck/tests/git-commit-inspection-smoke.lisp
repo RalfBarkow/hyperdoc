@@ -124,7 +124,86 @@
                                   :if-does-not-exist :ignore)))
   t)
 
+(defun run-repository-slice-commit-test ()
+  (let ((directory (make-fixture-directory)))
+    (unwind-protect
+        (progn
+         (initialize-git-fixture directory)
+         (let ((common-lisp-user::repository
+                (make-instance 'dreyeck/git:git-repository-checkout :root
+                               directory :root-source :repository-slice-test)))
+           (write-fixture-source (merge-pathnames "example.lisp" directory) 3)
+           (let ((common-lisp-user::observation
+                  (dreyeck/git:commit-repository-slice
+                   common-lisp-user::repository '("example.lisp")
+                   "Fixture slice")))
+             (check
+              (eq :committed (getf common-lisp-user::observation :status))
+              "Repository slice did not commit: ~S"
+              common-lisp-user::observation))
+           (let ((common-lisp-user::observation
+                  (dreyeck/git:commit-repository-slice
+                   common-lisp-user::repository '("example.lisp")
+                   "Nothing to commit")))
+             (check
+              (eq :nothing-to-commit
+                  (getf common-lisp-user::observation :status))
+              "Expected :NOTHING-TO-COMMIT, got ~S."
+              common-lisp-user::observation))
+           (check
+            (string= ""
+                     (dreyeck/git:git-run-string directory "status" "--short"))
+            "Fixture is not clean after repository-slice test.")))
+      (uiop/filesystem:delete-directory-tree directory :validate t
+                                             :if-does-not-exist :ignore)))
+  t)
+
+(defun run-repository-slice-index-guard-test ()
+  (let ((directory (make-fixture-directory)))
+    (unwind-protect
+        (progn
+         (initialize-git-fixture directory)
+         (let ((common-lisp-user::repository
+                (make-instance 'dreyeck/git:git-repository-checkout :root
+                               directory :root-source
+                               :repository-slice-guard-test)))
+           (write-fixture-source (merge-pathnames "foreign.lisp" directory) 9)
+           (dreyeck/git:git-run-string directory "add" "--" "foreign.lisp")
+           (write-fixture-source (merge-pathnames "example.lisp" directory) 4)
+           (let ((common-lisp-user::head-before
+                  (dreyeck/git:git-run-string directory "rev-parse" "HEAD"))
+                 (common-lisp-user::refused-p nil))
+             (handler-case
+              (dreyeck/git:commit-repository-slice common-lisp-user::repository
+                                                   '("example.lisp")
+                                                   "Must not commit")
+              (error nil (setf common-lisp-user::refused-p t)))
+             (check common-lisp-user::refused-p
+                    "Repository slice accepted a nonempty index.")
+             (check
+              (string= "foreign.lisp"
+                       (dreyeck/git:trim-git-output
+                        (dreyeck/git:git-run-string directory "diff" "--cached"
+                                                    "--name-only")))
+              "Foreign staged path changed.")
+             (check
+              (string= "example.lisp"
+                       (dreyeck/git:trim-git-output
+                        (dreyeck/git:git-run-string directory "diff"
+                                                    "--name-only")))
+              "Selected path was staged despite refusal.")
+             (check
+              (string= common-lisp-user::head-before
+                       (dreyeck/git:git-run-string directory "rev-parse"
+                                                   "HEAD"))
+              "HEAD changed despite repository-slice refusal."))))
+      (uiop/filesystem:delete-directory-tree directory :validate t
+                                             :if-does-not-exist :ignore)))
+  t)
+
 (defun run-git-commit-inspection-smoke-tests ()
   (run-git-object-tests)
+  (run-repository-slice-commit-test)
+  (run-repository-slice-index-guard-test)
   (format t "Dreyeck Git commit inspection smoke tests passed.~%")
   t)
