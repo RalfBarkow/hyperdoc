@@ -1187,3 +1187,51 @@
    (declare (ignore operation component))
    (uiop/package:symbol-call :dreyeck/issue/tests
                              :run-issue-work-context-topicmap-smoke-tests)))
+
+
+(defsystem #:dreyeck/fedwiki-publication
+  :description
+  "Reconstruct publication inputs for a local Federated Wiki context"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/src/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/git
+   #:dreyeck/fedwiki-assets
+   #:dreyeck/local-fedwiki-page)
+  :components
+  ((:file "fedwiki-publication-package")
+   (:file "fedwiki-publication"))
+  :in-order-to
+  ((test-op
+    (test-op "dreyeck/fedwiki-publication/tests"))))
+
+(defsystem #:dreyeck/fedwiki-publication/tests
+  :description
+  "Tests for FedWiki publication reconstruction"
+  :license
+  "BSD"
+  :version
+  "0.0.1"
+  :pathname
+  "dreyeck/tests/"
+  :serial
+  t
+  :depends-on
+  (#:dreyeck/fedwiki-publication)
+  :components
+  ((:file "fedwiki-publication-test-package")
+   (:file "fedwiki-publication-smoke"))
+  :perform
+  (test-op
+   (operation component)
+   (declare
+    (ignore operation component))
+   (uiop:symbol-call
+    :dreyeck/fedwiki-publication/tests
+    :run-fedwiki-publication-smoke-tests)))
