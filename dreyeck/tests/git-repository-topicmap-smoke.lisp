@@ -1,5 +1,80 @@
 (in-package #:dreyeck/git/tests)
 
+
+(defun run-git-source-slice-topicmap-test ()
+  (let ((directory (make-fixture-directory)))
+    (unwind-protect
+        (progn
+         (initialize-git-fixture directory)
+         (let* ((common-lisp-user::repository
+                 (make-instance 'dreyeck/git:git-repository-checkout :root directory :root-source
+                                :git-source-slice-topicmap-test))
+                (common-lisp-user::commit
+                 (dreyeck/git:make-git-commit :repository common-lisp-user::repository :commit-ish
+                                              "HEAD~1"))
+                (common-lisp-user::slice
+                 (dreyeck/git:make-git-source-slice :commit common-lisp-user::commit :selections
+                                                    '("/example.lisp") :sparse-mode :no-cone))
+                (common-lisp-user::projection
+                 (dreyeck/topicmap:topicmap-projection-of common-lisp-user::slice))
+                (common-lisp-user::topics
+                 (dreyeck/topicmap:topicmap-projection-topics-of common-lisp-user::projection))
+                (common-lisp-user::associations
+                 (dreyeck/topicmap:topicmap-projection-associations-of
+                  common-lisp-user::projection))
+                (common-lisp-user::slice-topic
+                 (find common-lisp-user::slice common-lisp-user::topics :key
+                       #'dreyeck/topicmap:topicmap-topic-object-of :test #'eq))
+                (common-lisp-user::commit-topic
+                 (find common-lisp-user::commit common-lisp-user::topics :key
+                       #'dreyeck/topicmap:topicmap-topic-object-of :test #'eq))
+                (common-lisp-user::association (first common-lisp-user::associations))
+                (common-lisp-user::view-properties
+                 (dreyeck/topicmap:topicmap-projection-view-properties-of
+                  common-lisp-user::projection)))
+           (check
+            (eq common-lisp-user::slice
+                (dreyeck/topicmap:topicmap-projection-source-of common-lisp-user::projection))
+            "Projection source is not the Git source slice.")
+           (check (= 2 (length common-lisp-user::topics))
+                  "Expected exactly two source-slice topics, got ~S." common-lisp-user::topics)
+           (check common-lisp-user::slice-topic "No topic refers to the Git source slice.")
+           (check
+            (eq :git-source-slice
+                (dreyeck/topicmap:topicmap-topic-type-of common-lisp-user::slice-topic))
+            "Unexpected source-slice topic type ~S."
+            (dreyeck/topicmap:topicmap-topic-type-of common-lisp-user::slice-topic))
+           (check common-lisp-user::commit-topic "No topic refers to the source-slice commit.")
+           (check
+            (eq :git-commit
+                (dreyeck/topicmap:topicmap-topic-type-of common-lisp-user::commit-topic))
+            "Unexpected commit topic type ~S."
+            (dreyeck/topicmap:topicmap-topic-type-of common-lisp-user::commit-topic))
+           (check (= 1 (length common-lisp-user::associations))
+                  "Expected exactly one source-slice association, got ~S."
+                  common-lisp-user::associations)
+           (check
+            (eq 'dreyeck/git:git-source-slice-commit-of
+                (dreyeck/topicmap:topicmap-association-type-of common-lisp-user::association))
+            "Unexpected source-slice association type ~S."
+            (dreyeck/topicmap:topicmap-association-type-of common-lisp-user::association))
+           (check
+            (string= (dreyeck/topicmap:topicmap-topic-id-of common-lisp-user::slice-topic)
+                     (dreyeck/topicmap:topicmap-association-from-of common-lisp-user::association))
+            "Source-slice association does not start at the slice topic.")
+           (check
+            (string= (dreyeck/topicmap:topicmap-topic-id-of common-lisp-user::commit-topic)
+                     (dreyeck/topicmap:topicmap-association-to-of common-lisp-user::association))
+            "Source-slice association does not end at the commit topic.")
+           (check
+            (string= (dreyeck/topicmap:topicmap-topic-id-of common-lisp-user::slice-topic)
+                     (getf common-lisp-user::view-properties :point))
+            "Source-slice topic is not the projection point.")))
+      (uiop/filesystem:delete-directory-tree directory :validate t :if-does-not-exist :ignore)))
+  (format t "Dreyeck Git source-slice Topicmap test passed.~%")
+  t)
+
+
 (defun run-git-repository-topicmap-smoke-tests ()
   (let ((directory (make-fixture-directory)))
     (unwind-protect
@@ -107,5 +182,6 @@
             "Repository Inspector does not expose the Topicmap view.")))
       (uiop/filesystem:delete-directory-tree directory :validate t
                                              :if-does-not-exist :ignore)))
+  (run-git-source-slice-topicmap-test)
   (format t "Dreyeck Git repository Topicmap smoke tests passed.~%")
   t)

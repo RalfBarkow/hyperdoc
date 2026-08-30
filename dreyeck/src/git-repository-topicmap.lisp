@@ -80,3 +80,38 @@
 (defmethod dreyeck/topicmap:topicmap-projection-of
            ((common-lisp-user::repository git-repository-checkout))
   (git-repository-topicmap-projection common-lisp-user::repository))
+
+
+(defmethod dreyeck/topicmap:topicmap-projection-of
+           ((slice dreyeck/git:git-source-slice))
+  (let* ((commit (dreyeck/git:git-source-slice-commit-of slice))
+         (hash (dreyeck/git:git-commit-hash-of commit))
+         (selections (dreyeck/git:git-source-slice-selections-of slice))
+         (sparse-mode (dreyeck/git:git-source-slice-sparse-mode-of slice))
+         (slice-id
+          (format nil "git-source-slice:~A:~A:~S" hash sparse-mode selections))
+         (commit-id (format nil "git-commit:~A" hash))
+         (slice-topic
+          (make-instance 'dreyeck/topicmap:topicmap-topic :id slice-id :type
+                         :git-source-slice :label
+                         (format nil "source slice ~{~A~^, ~}" selections)
+                         :object slice :view-properties
+                         '(:x 120 :y 220 :visible t :pinned t)))
+         (commit-topic
+          (make-instance 'dreyeck/topicmap:topicmap-topic :id commit-id :type
+                         :git-commit :label hash :object commit
+                         :view-properties
+                         '(:x 700 :y 220 :visible t :pinned t)))
+         (association
+          (make-instance 'dreyeck/topicmap:topicmap-association :id
+                         (format nil
+                                 "association:git-source-slice-commit-of:~A"
+                                 slice-id)
+                         :type 'dreyeck/git:git-source-slice-commit-of :from
+                         slice-id :to commit-id :properties
+                         '(:from-role :source-slice :to-role :commit))))
+    (make-instance 'dreyeck/topicmap:topicmap-projection :source slice :topics
+                   (list slice-topic commit-topic) :associations
+                   (list association) :view-properties
+                   (list :point slice-id :scope :current-lisp-image :width 1050
+                         :height 520))))
