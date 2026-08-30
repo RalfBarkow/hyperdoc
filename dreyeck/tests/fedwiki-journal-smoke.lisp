@@ -101,6 +101,7 @@
                (= 1781148995000 (getf repair :to))
                (= 3990137795000 (gethash "date" raw-bad-data))
                (= 1781148995000 (gethash "date" (elt repaired-journal 1)))
+               (not (null (search "1 date-domain repair" (prin1-to-string candidate) :test #'char=)))
                (null (journal-check repaired-page :now 3996668473))))))))
 
 (defun run-fedwiki-journal-tests ()

@@ -92,3 +92,7 @@
                                                 :FUTURE-TOLERANCE-SECONDS
                                                 FUTURE-TOLERANCE-SECONDS)))))))
                  (HYPERBOOK/FEDWIKI::JOURNAL-OF PAGE)))))
+
+(defmethod print-object ((candidate fedwiki-journal-repair-candidate) stream)
+  (print-unreadable-object (candidate stream :type t :identity t)
+    (format stream "~D date-domain repair~:P" (length (repairs-of candidate)))))

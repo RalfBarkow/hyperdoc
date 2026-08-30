@@ -1235,3 +1235,36 @@
    (uiop:symbol-call
     :dreyeck/fedwiki-publication/tests
     :run-fedwiki-publication-smoke-tests)))
+
+
+(asdf:defsystem #:dreyeck/fedwiki-journal/topicmap
+  :pathname "dreyeck/src/"
+  :depends-on
+  ("dreyeck/fedwiki-journal"
+   "dreyeck/topicmap")
+  :components
+  ((:file "fedwiki-journal-topicmap"))
+  :in-order-to
+  ((asdf:test-op
+    (asdf:test-op
+     "dreyeck/fedwiki-journal/topicmap/tests"))))
+
+(asdf:defsystem #:dreyeck/fedwiki-journal/topicmap/tests
+  :pathname "dreyeck/tests/"
+  :serial t
+  :depends-on
+  ("dreyeck/fedwiki-journal/topicmap")
+  :components
+  ((:file "fedwiki-journal-topicmap-test-package")
+   (:file "fedwiki-journal-topicmap-smoke"))
+  :perform
+  (asdf:test-op
+   (operation component)
+   (declare
+    (ignore operation component))
+   (unless
+       (uiop:symbol-call
+        "DREYECK/FEDWIKI-JOURNAL/TOPICMAP/TESTS"
+        "RUN-FEDWIKI-JOURNAL-TOPICMAP-TESTS")
+     (error
+      "FedWiki journal Topicmap tests failed."))))
