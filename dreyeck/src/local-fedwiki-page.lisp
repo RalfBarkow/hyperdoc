@@ -105,6 +105,33 @@ a different HyperBook that already owns WIKI-ID."
      page)
     page))
 
+(defclass local-page-observed-copy nil
+          ((local-wiki-id :initarg :local-wiki-id :type string :reader
+            local-page-observed-copy-local-wiki-id-of)
+           (local-slug :initarg :local-slug :type string :reader
+            local-page-observed-copy-local-slug-of)
+           (observed-protocol :initarg :observed-protocol :type string :reader
+            local-page-observed-copy-observed-protocol-of)
+           (observed-domain :initarg :observed-domain :type string :reader
+            local-page-observed-copy-observed-domain-of)
+           (observed-slug :initarg :observed-slug :type string :reader
+            local-page-observed-copy-observed-slug-of))
+          (:documentation
+           "A local-first relation from a local FedWiki page coordinate to an observed FedWiki page coordinate."))
+
+(defun make-local-page-observed-copy
+       (local-wiki-id local-slug observed-protocol observed-domain
+        observed-slug)
+  "Represent an observed FedWiki page coordinate relative to a local page coordinate."
+  (check-type local-wiki-id string)
+  (check-type local-slug string)
+  (check-type observed-protocol string)
+  (check-type observed-domain string)
+  (check-type observed-slug string)
+  (make-instance 'local-page-observed-copy :local-wiki-id local-wiki-id
+                 :local-slug local-slug :observed-protocol observed-protocol
+                 :observed-domain observed-domain :observed-slug observed-slug))
+
 (defmethod hyperbook:find-page
     ((wiki local-fedwiki)
      slug

@@ -23,6 +23,34 @@
    #'asdf:registered-system
    *fixture-system-names*))
 
+(defun run-local-page-observed-copy-contract-test ()
+  (let ((copy
+         (dreyeck/local-fedwiki-page::make-local-page-observed-copy
+          "fedwiki:local-fixture.invalid" "example-hyperdoc-page" "http"
+          "remote-fixture.invalid" "example-hyperdoc-page")))
+    (assert (typep copy 'dreyeck/local-fedwiki-page::local-page-observed-copy))
+    (assert
+     (string= "fedwiki:local-fixture.invalid"
+              (dreyeck/local-fedwiki-page::local-page-observed-copy-local-wiki-id-of
+               copy)))
+    (assert
+     (string= "example-hyperdoc-page"
+              (dreyeck/local-fedwiki-page::local-page-observed-copy-local-slug-of
+               copy)))
+    (assert
+     (string= "http"
+              (dreyeck/local-fedwiki-page::local-page-observed-copy-observed-protocol-of
+               copy)))
+    (assert
+     (string= "remote-fixture.invalid"
+              (dreyeck/local-fedwiki-page::local-page-observed-copy-observed-domain-of
+               copy)))
+    (assert
+     (string= "example-hyperdoc-page"
+              (dreyeck/local-fedwiki-page::local-page-observed-copy-observed-slug-of
+               copy)))
+    t))
+
 (defun run-local-fedwiki-page-tests ()
   (clear-fixture-systems)
 
@@ -136,7 +164,10 @@
           (not
            (fixture-systems-registered-p)))
 
-         t)
+         (progn
+     (assert
+      (run-local-page-observed-copy-contract-test))
+     t))
 
     (clear-fixture-systems)))
 
