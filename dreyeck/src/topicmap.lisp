@@ -256,6 +256,40 @@
                    :associations associations :view-properties
                    (topicmap-projection-view-properties-of projection))))
 
+(defun project-page-attached-workspace
+       (common-lisp-user::projection common-lisp-user::primary-system-name)
+  (let* ((common-lisp-user::system-id
+          (format nil "asdf-system:~A" common-lisp-user::primary-system-name))
+         (common-lisp-user::workspace-id
+          (format nil "workspace:~A" common-lisp-user::primary-system-name))
+         (common-lisp-user::association-id
+          (format nil "association:~A:workspace" common-lisp-user::system-id))
+         (common-lisp-user::associations
+          (topicmap-projection-associations-of common-lisp-user::projection))
+         (common-lisp-user::projected-associations
+          (if (find common-lisp-user::association-id
+                    common-lisp-user::associations :key
+                    #'topicmap-association-id-of :test #'string=)
+              common-lisp-user::associations
+              (append common-lisp-user::associations
+                      (list
+                       (make-instance 'topicmap-association :id
+                                      common-lisp-user::association-id :type
+                                      :workspace :from
+                                      common-lisp-user::system-id :to
+                                      common-lisp-user::workspace-id))))))
+    (complete-topicmap-projection
+     (make-instance 'topicmap-projection :source
+                    (topicmap-projection-source-of
+                     common-lisp-user::projection)
+                    :topics
+                    (topicmap-projection-topics-of
+                     common-lisp-user::projection)
+                    :associations common-lisp-user::projected-associations
+                    :view-properties
+                    (topicmap-projection-view-properties-of
+                     common-lisp-user::projection)))))
+
 (defun make-topicmap-workspace-for-object (common-lisp-user::object)
   (block make-topicmap-workspace-for-object
     (if (typep common-lisp-user::object 'topicmap-workspace)

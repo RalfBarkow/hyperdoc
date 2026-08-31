@@ -229,6 +229,38 @@
          (dreyeck/topicmap:topicmap-projection-view-properties-of once)))
     t))
 
+(defun run-page-attached-workspace-projection-test ()
+  (let* ((system-id "asdf-system:example")
+         (workspace-id "workspace:example")
+         (projection
+          (make-instance 'dreyeck/topicmap:topicmap-projection :source :test
+                         :topics
+                         (list
+                          (make-instance 'dreyeck/topicmap:topicmap-topic :id
+                                         system-id :type :asdf-system :label
+                                         "example"))
+                         :associations nil))
+         (once
+          (dreyeck/topicmap::project-page-attached-workspace projection
+                                                             "example"))
+         (twice
+          (dreyeck/topicmap::project-page-attached-workspace once "example"))
+         (workspace
+          (find workspace-id
+                (dreyeck/topicmap:topicmap-projection-topics-of once) :key
+                #'dreyeck/topicmap:topicmap-topic-id-of :test #'string=))
+         (once-association-ids
+          (mapcar #'dreyeck/topicmap:topicmap-association-id-of
+                  (dreyeck/topicmap:topicmap-projection-associations-of once)))
+         (twice-association-ids
+          (mapcar #'dreyeck/topicmap:topicmap-association-id-of
+                  (dreyeck/topicmap:topicmap-projection-associations-of
+                   twice))))
+    (assert workspace)
+    (assert (null (dreyeck/topicmap:topicmap-topic-object-of workspace)))
+    (assert (equal once-association-ids twice-association-ids))
+    t))
+
 (defun run-topicmap-workspace-inspector-action-test ()
   (let* ((target (list :workspace-target))
          (fixture (make-instance 'topicmap-fixture :target target))
