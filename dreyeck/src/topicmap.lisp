@@ -256,6 +256,46 @@
                    :associations associations :view-properties
                    (topicmap-projection-view-properties-of projection))))
 
+(defun project-page-attached-asd
+       (common-lisp-user::asd common-lisp-user::system-observations)
+  (let* ((common-lisp-user::authority-id
+          (format nil "asd:~A" (namestring common-lisp-user::asd)))
+         (common-lisp-user::topics
+          (cons
+           (make-instance 'topicmap-topic :id common-lisp-user::authority-id
+                          :type :page-attached-authority :label
+                          (file-namestring common-lisp-user::asd))
+           (mapcar
+            (lambda (common-lisp-user::observation)
+              (let ((common-lisp-user::name
+                     (car common-lisp-user::observation))
+                    (common-lisp-user::object
+                     (cdr common-lisp-user::observation)))
+                (make-instance 'topicmap-topic :id
+                               (format nil "asdf-system:~A"
+                                       common-lisp-user::name)
+                               :type :asdf-system :label common-lisp-user::name
+                               :object common-lisp-user::object)))
+            common-lisp-user::system-observations)))
+         (common-lisp-user::associations
+          (mapcar
+           (lambda (common-lisp-user::observation)
+             (let* ((common-lisp-user::name
+                     (car common-lisp-user::observation))
+                    (common-lisp-user::system-id
+                     (format nil "asdf-system:~A" common-lisp-user::name)))
+               (make-instance 'topicmap-association :id
+                              (format nil "association:~A:defines:~A"
+                                      common-lisp-user::authority-id
+                                      common-lisp-user::system-id)
+                              :type :defines :from
+                              common-lisp-user::authority-id :to
+                              common-lisp-user::system-id)))
+           common-lisp-user::system-observations)))
+    (make-instance 'topicmap-projection :source common-lisp-user::asd :topics
+                   common-lisp-user::topics :associations
+                   common-lisp-user::associations)))
+
 (defun project-page-attached-workspace
        (common-lisp-user::projection common-lisp-user::primary-system-name)
   (let* ((common-lisp-user::system-id

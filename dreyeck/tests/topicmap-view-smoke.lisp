@@ -261,6 +261,40 @@
     (assert (equal once-association-ids twice-association-ids))
     t))
 
+(defun run-page-attached-asd-projection-test ()
+  (let* ((asd #P"/tmp/example.asd")
+         (primary-object (list :primary))
+         (tests-object (list :tests))
+         (projection
+          (dreyeck/topicmap::project-page-attached-asd asd
+                                                       (list
+                                                        (cons "example"
+                                                              primary-object)
+                                                        (cons "example/tests"
+                                                              tests-object))))
+         (topics (dreyeck/topicmap:topicmap-projection-topics-of projection))
+         (associations
+          (dreyeck/topicmap:topicmap-projection-associations-of projection))
+         (authority (first topics))
+         (primary
+          (find "asdf-system:example" topics :key
+                #'dreyeck/topicmap:topicmap-topic-id-of :test #'string=))
+         (tests
+          (find "asdf-system:example/tests" topics :key
+                #'dreyeck/topicmap:topicmap-topic-id-of :test #'string=)))
+    (assert
+     (eq asd (dreyeck/topicmap:topicmap-projection-source-of projection)))
+    (assert (= 3 (length topics)))
+    (assert (= 2 (length associations)))
+    (assert (null (dreyeck/topicmap:topicmap-topic-object-of authority)))
+    (assert primary)
+    (assert
+     (eq primary-object (dreyeck/topicmap:topicmap-topic-object-of primary)))
+    (assert tests)
+    (assert
+     (eq tests-object (dreyeck/topicmap:topicmap-topic-object-of tests)))
+    t))
+
 (defun run-topicmap-workspace-inspector-action-test ()
   (let* ((target (list :workspace-target))
          (fixture (make-instance 'topicmap-fixture :target target))
