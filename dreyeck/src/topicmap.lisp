@@ -230,6 +230,32 @@
       (:incoming
        (topicmap-association-from-of common-lisp-user::association)))))
 
+(defun complete-topicmap-projection (projection)
+  (let* ((topics (topicmap-projection-topics-of projection))
+         (associations (topicmap-projection-associations-of projection))
+         (topic-ids (mapcar #'topicmap-topic-id-of topics))
+         (endpoint-ids
+          (remove-duplicates
+           (mapcan
+            (lambda (association)
+              (list (topicmap-association-from-of association)
+                    (topicmap-association-to-of association)))
+            associations)
+           :test #'string=))
+         (missing-topic-ids
+          (remove-if (lambda (id) (member id topic-ids :test #'string=))
+                     endpoint-ids)))
+    (make-instance 'topicmap-projection :source
+                   (topicmap-projection-source-of projection) :topics
+                   (append topics
+                           (mapcar
+                            (lambda (id)
+                              (make-instance 'topicmap-topic :id id :type nil
+                                             :label id))
+                            missing-topic-ids))
+                   :associations associations :view-properties
+                   (topicmap-projection-view-properties-of projection))))
+
 (defun make-topicmap-workspace-for-object (common-lisp-user::object)
   (block make-topicmap-workspace-for-object
     (if (typep common-lisp-user::object 'topicmap-workspace)

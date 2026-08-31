@@ -186,6 +186,49 @@
      "Navigating to the current point changed workspace history.")
     t))
 
+(defun run-topicmap-projection-completion-test ()
+  (let* ((present-id "topic:present")
+         (missing-id "topic:missing")
+         (source :test-source)
+         (view-properties '(:width 100 :height 100))
+         (association
+          (make-instance 'dreyeck/topicmap:topicmap-association :id
+                         "association:test" :type :test :from present-id :to
+                         missing-id))
+         (associations (list association))
+         (projection
+          (make-instance 'dreyeck/topicmap:topicmap-projection :source source
+                         :topics
+                         (list
+                          (make-instance 'dreyeck/topicmap:topicmap-topic :id
+                                         present-id :type :test :label
+                                         present-id))
+                         :associations associations :view-properties
+                         view-properties))
+         (once (dreyeck/topicmap::complete-topicmap-projection projection))
+         (twice (dreyeck/topicmap::complete-topicmap-projection once))
+         (ghost
+          (find missing-id
+                (dreyeck/topicmap:topicmap-projection-topics-of once) :key
+                #'dreyeck/topicmap:topicmap-topic-id-of :test #'string=))
+         (once-ids
+          (mapcar #'dreyeck/topicmap:topicmap-topic-id-of
+                  (dreyeck/topicmap:topicmap-projection-topics-of once)))
+         (twice-ids
+          (mapcar #'dreyeck/topicmap:topicmap-topic-id-of
+                  (dreyeck/topicmap:topicmap-projection-topics-of twice))))
+    (assert ghost)
+    (assert (null (dreyeck/topicmap:topicmap-topic-object-of ghost)))
+    (assert (equal once-ids twice-ids))
+    (assert (eq source (dreyeck/topicmap:topicmap-projection-source-of once)))
+    (assert
+     (eq associations
+         (dreyeck/topicmap:topicmap-projection-associations-of once)))
+    (assert
+     (eq view-properties
+         (dreyeck/topicmap:topicmap-projection-view-properties-of once)))
+    t))
+
 (defun run-topicmap-workspace-inspector-action-test ()
   (let* ((target (list :workspace-target))
          (fixture (make-instance 'topicmap-fixture :target target))
