@@ -2,6 +2,16 @@
 
 (in-package #:dreyeck/page-attached-asdf)
 
+(defun asd-pathname-for-assets-reference
+       (common-lisp-user::assets-root common-lisp-user::assets-reference)
+  (let ((common-lisp-user::name
+         (pathname-name (pathname common-lisp-user::assets-reference))))
+    (truename
+     (merge-pathnames
+      (format nil "~A/~A.asd" common-lisp-user::assets-reference
+              common-lisp-user::name)
+      common-lisp-user::assets-root))))
+
 (defun systems-defined-by-asd (asd-pathname)
   "Return systems currently registered from ASD-PATHNAME.
 

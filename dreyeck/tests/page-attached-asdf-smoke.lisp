@@ -162,32 +162,43 @@
           t)
       (clear-fixture-systems))))
 
-(defun run-page-attached-asdf-tests
-    ()
-  (and
-   (run-basic-registration-test)
-   (run-source-authority-test)
-   (run-component-primary-asd-pathname-test)
-   (and
-        (let
-             ((root
-                    (asdf/system:system-source-directory
-                                                         "dreyeck/page-attached-asdf/tests")))
-             (dreyeck/page-attached-asdf:run-asd-test-system-in-fresh-process
-                                                                              (merge-pathnames
-                                                                                               "dreyeck/tests/fixtures/page-attached-asdf/page-attached-asdf-prerequisite-target.asd"
-                                                                                               root)
-                                                                              "page-attached-asdf-prerequisite-target"
-                                                                              "page-attached-asdf-prerequisite-target/tests"
-                                                                              :prerequisite-asd-pathnames
-                                                                              (list
-                                                                                    (merge-pathnames
-                                                                                                     "dreyeck/tests/fixtures/page-attached-asdf-prerequisite/explicit-prerequisite.lisp"
-                                                                                                     root))))
-        (dreyeck/page-attached-asdf:run-asd-test-system-in-fresh-process
-                                                                         (fixture-asd-pathname)
-                                                                         "page-attached-asdf-fixture"
-                                                                         "page-attached-asdf-fixture/tests"))))
+(defun run-assets-reference-asd-pathname-test ()
+  (let* ((assets-root
+          (asdf/system:system-relative-pathname
+           "dreyeck/page-attached-asdf/tests"
+           "dreyeck/tests/fixtures/fedwiki-assets-site/assets/"))
+         (expected
+          (truename
+           (merge-pathnames "pages/example-page/example-page.asd"
+                            assets-root)))
+         (actual
+          (dreyeck/page-attached-asdf::asd-pathname-for-assets-reference
+           assets-root "pages/example-page")))
+    (assert (equal expected actual))
+    t))
+
+(DEFUN RUN-PAGE-ATTACHED-ASDF-TESTS ()
+  (AND (RUN-BASIC-REGISTRATION-TEST) (RUN-SOURCE-AUTHORITY-TEST)
+       (RUN-COMPONENT-PRIMARY-ASD-PATHNAME-TEST)
+       (RUN-ASSETS-REFERENCE-ASD-PATHNAME-TEST)
+       (AND
+        (LET ((ROOT
+               (ASDF/SYSTEM:SYSTEM-SOURCE-DIRECTORY
+                "dreyeck/page-attached-asdf/tests")))
+          (DREYECK/PAGE-ATTACHED-ASDF:RUN-ASD-TEST-SYSTEM-IN-FRESH-PROCESS
+           (MERGE-PATHNAMES
+            "dreyeck/tests/fixtures/page-attached-asdf/page-attached-asdf-prerequisite-target.asd"
+            ROOT)
+           "page-attached-asdf-prerequisite-target"
+           "page-attached-asdf-prerequisite-target/tests"
+           :PREREQUISITE-ASD-PATHNAMES
+           (LIST
+            (MERGE-PATHNAMES
+             "dreyeck/tests/fixtures/page-attached-asdf-prerequisite/explicit-prerequisite.lisp"
+             ROOT))))
+        (DREYECK/PAGE-ATTACHED-ASDF:RUN-ASD-TEST-SYSTEM-IN-FRESH-PROCESS
+         (FIXTURE-ASD-PATHNAME) "page-attached-asdf-fixture"
+         "page-attached-asdf-fixture/tests"))))
 
 
 
