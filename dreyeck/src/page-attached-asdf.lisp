@@ -99,32 +99,7 @@ registration table and does not invoke FIND-SYSTEM."
             systems))
          systems)))))
 
-(defun asd-registration-observation
-    (asd-pathname &key name)
-  "Register ASD-PATHNAME and return before/after registry evidence."
-  (let* ((asd
-           (truename asd-pathname))
-         (before
-           (systems-defined-by-asd
-            asd))
-         (after
-           (register-asd-systems
-            asd
-            :name name))
-         (new
-           (remove-if
-            (lambda (system-name)
-              (member
-               system-name
-               before
-               :test #'string=))
-            after)))
-    (list
-     :asd asd
-     :requested-system-name name
-     :systems-before before
-     :systems-after after
-     :newly-registered-systems new)))
+
 
 (defun run-asd-test-system-in-fresh-process
     (asd-pathname primary-system-name test-system-name &key

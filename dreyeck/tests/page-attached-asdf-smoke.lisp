@@ -35,46 +35,44 @@
 (defun run-basic-registration-test ()
   (let ((asd
           (fixture-asd-pathname)))
-
     (clear-fixture-systems)
-
     (unwind-protect
-         (progn
-           (assert
-            (null
-             (dreyeck/page-attached-asdf:systems-defined-by-asd
-              asd)))
-
-           (let ((observation
-                   (dreyeck/page-attached-asdf:asd-registration-observation
+        (let ((before
+                (dreyeck/page-attached-asdf:systems-defined-by-asd
+                 asd)))
+          (assert
+           (null before))
+          (let* ((after
+                   (dreyeck/page-attached-asdf:register-asd-systems
                     asd
-                    :name "page-attached-asdf-fixture")))
-
-             (assert
-              (null
-               (getf observation :systems-before)))
-
-             (assert
-              (equal
-               *fixture-system-names*
-               (getf observation :systems-after)))
-
-             (assert
-              (equal
-               *fixture-system-names*
-               (getf observation :newly-registered-systems)))
-
-             (assert
-              (every
-               (lambda (name)
-                 (equal
-                  (truename asd)
-                  (truename
-                   (registered-system-source name))))
-               *fixture-system-names*)))
-
-           t)
-
+                    :name
+                    "page-attached-asdf-fixture"))
+                 (new
+                   (remove-if
+                    (lambda (system-name)
+                      (member
+                       system-name
+                       before
+                       :test #'string=))
+                    after)))
+            (assert
+             (equal
+              *fixture-system-names*
+              after))
+            (assert
+             (equal
+              *fixture-system-names*
+              new))
+            (assert
+             (every
+              (lambda (name)
+                (equal
+                 (truename asd)
+                 (truename
+                  (registered-system-source
+                   name))))
+              *fixture-system-names*))
+            t))
       (clear-fixture-systems))))
 
 (defun run-source-authority-test ()
@@ -85,68 +83,57 @@
            (truename
             (decoy-asd-pathname)))
          (decoy-directory
-           (uiop:pathname-directory-pathname
+           (uiop/pathname:pathname-directory-pathname
             decoy)))
-
     (clear-fixture-systems)
-
     (unwind-protect
-         (progn
-
-           ;; Establish the deliberately wrong source authority first.
-           (let ((asdf:*central-registry*
-                   (cons
-                    decoy-directory
-                    asdf:*central-registry*)))
-
-             (asdf:load-asd
-              decoy
-              :name "page-attached-asdf-fixture"))
-
-           (assert
-            (equal
+        (progn
+          (let ((asdf/system-registry:*central-registry*
+                  (cons
+                   decoy-directory
+                   asdf/system-registry:*central-registry*)))
+            (asdf/find-system:load-asd
              decoy
-             (truename
-              (registered-system-source
-               "page-attached-asdf-fixture"))))
-
-           ;; The explicitly selected target ASD must now take authority.
-           (let ((observation
-                   (dreyeck/page-attached-asdf:asd-registration-observation
-                    target
-                    :name "page-attached-asdf-fixture")))
-
-             (assert
-              (equal
-               *fixture-system-names*
-               (getf observation :systems-after)))
-
+             :name
+             "page-attached-asdf-fixture"))
+          (assert
+           (equal
+            decoy
+            (truename
+             (registered-system-source
+              "page-attached-asdf-fixture"))))
+          (let ((systems-after
+                  (dreyeck/page-attached-asdf:register-asd-systems
+                   target
+                   :name
+                   "page-attached-asdf-fixture")))
+            (assert
+             (equal
+              *fixture-system-names*
+              systems-after))
+            (assert
+             (every
+              (lambda (name)
+                (equal
+                 target
+                 (truename
+                  (registered-system-source
+                   name))))
+              *fixture-system-names*)))
+          (dreyeck/page-attached-asdf:call-with-asd-source-authority
+           target
+           (lambda ()
              (assert
               (every
                (lambda (name)
                  (equal
                   target
                   (truename
-                   (registered-system-source name))))
-               *fixture-system-names*)))
-
-           ;; FIND-SYSTEM must also resolve to the target while inside
-           ;; the explicit page-attached source-authority boundary.
-           (dreyeck/page-attached-asdf:call-with-asd-source-authority
-            target
-            (lambda ()
-              (assert
-               (every
-                (lambda (name)
-                  (equal
-                   target
-                   (truename
-                    (asdf:system-source-file
-                     (asdf:find-system name)))))
-                *fixture-system-names*))))
-
-           t)
-
+                   (asdf/system:system-source-file
+                    (asdf/system:find-system
+                     name)))))
+               *fixture-system-names*))))
+          t)
       (clear-fixture-systems))))
 
 (defun run-component-primary-asd-pathname-test ()
