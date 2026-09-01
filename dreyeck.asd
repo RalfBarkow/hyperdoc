@@ -272,20 +272,16 @@
   ((:file "upstream-intake-inspector-package")
    (:file "upstream-intake-views")))
 
-(asdf:defsystem #:dreyeck/catalog
-  :description "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
-  :license "BSD"
-  :version "0.0.1"
-  ;; The HyperDoc systems declare membership. Their inspector systems supply
-  ;; the executable views reached from the catalog pages.
-  :depends-on (#:dreyeck/wiki-link
-               #:dreyeck/upstream-intake
-               #:dreyeck/inspector/upstream-intake
-               #:dreyeck/inspector/fedwiki-source-relations
-	       #:dreyeck/lisp-image)
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/catalog/tests"))))
+(asdf:defsystem #:dreyeck/catalog :description
+                "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
+                :license "BSD" :version "0.0.1" :depends-on
+                (#:dreyeck/wiki-link #:dreyeck/upstream-intake
+                                     #:dreyeck/inspector/upstream-intake
+                                     #:dreyeck/inspector/fedwiki-source-relations
+                                     #:dreyeck/lisp-image)
+                :in-order-to
+                ((asdf:test-op (asdf:test-op "dreyeck/catalog/tests")))
+                :components ((:file "dreyeck/src/catalog")))
 
 (asdf/parse-defsystem:defsystem #:dreyeck/git/tests
   :description
