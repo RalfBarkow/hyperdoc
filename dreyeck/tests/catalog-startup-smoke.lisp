@@ -282,12 +282,73 @@
                shell-script))))
   t)
 
-(defun run-catalog-startup-smoke-tests ()
-  (check-normal-startup-contract)
-  (uiop:run-program
-   (fresh-catalog-command)
-   :directory (repository-directory)
-   :output *standard-output*
-   :error-output *error-output*)
-  (format t "Dreyeck Catalog startup smoke tests passed.~%")
-  t)
+(defun verify-fresh-catalog-reconstruction-sequence nil
+       (let*
+             ((controller-source-specification
+                                               (controller-source-coverage-specification))
+              (controller-source-cases
+                                       (getf controller-source-specification
+                                             :cases))
+              (controller-source-evaluations
+                                             (mapcar
+                                                     (lambda (entry)
+                                                             (getf entry
+                                                                   :evaluation))
+                                                     controller-source-cases))
+              (presentation-controller-cases
+                                             (presentation-controller-coverage-cases))
+              (presentation-controller-evaluations
+                                                   (mapcar
+                                                           (lambda (entry)
+                                                                   (getf entry
+                                                                         :evaluation))
+                                                           presentation-controller-cases))
+              (fresh-evaluations (fresh-catalog-evaluations))
+              (catalog-load-evaluation
+                                       "(asdf:load-system \"dreyeck/catalog\")")
+              (controller-source-start
+                                       (search controller-source-evaluations
+                                               fresh-evaluations :test
+                                               (function string=)))
+              (catalog-load-position
+                                     (position catalog-load-evaluation
+                                               fresh-evaluations :test
+                                               (function string=)))
+              (presentation-controller-start
+                                             (search
+                                                     presentation-controller-evaluations
+                                                     fresh-evaluations :test
+                                                     (function string=))))
+             (assert (= 2 (length controller-source-cases)))
+             (assert (= 5 (length presentation-controller-cases)))
+             (assert controller-source-start) (assert catalog-load-position)
+             (assert presentation-controller-start)
+             (assert (< controller-source-start catalog-load-position))
+             (assert
+                     (= presentation-controller-start
+                        (1+ catalog-load-position)))
+             (list :controller-source
+                   (list :case-count (length controller-source-cases)
+                         :evaluation-count
+                         (length controller-source-evaluations) :start
+                         controller-source-start :before-catalog-load-p
+                         (< controller-source-start catalog-load-position))
+                   :catalog-load
+                   (list :evaluation catalog-load-evaluation :position
+                         catalog-load-position)
+                   :presentation-controller
+                   (list :case-count (length presentation-controller-cases)
+                         :evaluation-count
+                         (length presentation-controller-evaluations) :start
+                         presentation-controller-start
+                         :immediately-after-catalog-load-p
+                         (= presentation-controller-start
+                            (1+ catalog-load-position)))
+                   :fresh-evaluation-count (length fresh-evaluations))))
+
+(defun run-catalog-startup-smoke-tests nil (check-normal-startup-contract)
+       (verify-fresh-catalog-reconstruction-sequence)
+       (uiop:run-program (fresh-catalog-command) :directory
+                         (repository-directory) :output *standard-output*
+                         :error-output *error-output*)
+       (format t "Dreyeck Catalog startup smoke tests passed.~%") t)
