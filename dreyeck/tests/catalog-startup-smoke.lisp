@@ -169,13 +169,32 @@
                                        :covered-by-id
                                        "association:failure:dreyeck/catalog:presentation-controller-misorders-hyperbooks:covered-by:fresh-presentation-controller-sorts-hyperbooks")))))
 
-(defun fresh-catalog-evaluations nil
-       (append
-               (list "(require :asdf)"
-                     (format nil "(asdf:load-asd #P~S)"
-                             (namestring (dreyeck-asd-pathname)))
-                     "(let* ((system (asdf/system-registry:registered-system \"dreyeck/catalog\")) (children (asdf:component-children system))) (assert (not (null children))))"
-                     "(LET* ((SYSTEM (ASDF/SYSTEM-REGISTRY:REGISTERED-SYSTEM \"dreyeck/catalog\"))
+(defun controller-source-coverage-specification ()
+  (copy-tree
+   '(:path-id "path:dreyeck/catalog:controller-source" :path-label
+     "Dreyeck catalog controller source path" :cases
+     ((:step 1 :traverses-id
+       "association:path:dreyeck/catalog:controller-source:step-1" :edge-id
+       "edge:association:asdf-system:dreyeck/catalog:component:asdf-component:dreyeck/catalog:catalog-presentation-state"
+       :failure-id "failure:dreyeck/catalog:component-missing" :failure-label
+       "dreyeck/catalog component missing" :condition :component-children-nil
+       :test-case-id "test-case:dreyeck/catalog:fresh-component-present"
+       :test-case-label "Fresh catalog component is present" :evaluation
+       "(let* ((system (asdf/system-registry:registered-system \"dreyeck/catalog\")) (children (asdf:component-children system))) (assert (not (null children))))"
+       :may-fail-as-id
+       "association:edge:dreyeck/catalog:component:may-fail-as:component-missing"
+       :covered-by-id
+       "association:failure:dreyeck/catalog:component-missing:covered-by:fresh-component-present"
+       :verification (:status :present :verification :fresh-process))
+      (:step 2 :traverses-id
+       "association:path:dreyeck/catalog:controller-source:step-2" :edge-id
+       "edge:association:asdf-component:dreyeck/catalog:catalog-presentation-state:source:function:dreyeck/catalog:catalog-presentation-state"
+       :failure-id "failure:dreyeck/catalog:component-source-wrong"
+       :failure-label "Catalog component source missing or wrong" :condition
+       :component-pathname-missing-or-wrong :test-case-id
+       "test-case:dreyeck/catalog:fresh-component-source" :test-case-label
+       "Fresh catalog component has expected source" :evaluation
+       "(LET* ((SYSTEM (ASDF/SYSTEM-REGISTRY:REGISTERED-SYSTEM \"dreyeck/catalog\"))
        (COMPONENT (FIRST (ASDF/COMPONENT:COMPONENT-CHILDREN SYSTEM)))
        (EXPECTED
         (MERGE-PATHNAMES #P\"dreyeck/src/catalog.lisp\"
@@ -183,7 +202,23 @@
   (ASSERT
    (EQUAL (TRUENAME EXPECTED)
           (TRUENAME (ASDF/COMPONENT:COMPONENT-PATHNAME COMPONENT)))))"
-                     "(asdf:load-system \"hyperdoc\")"
+       :may-fail-as-id
+       "association:edge:dreyeck/catalog:source:may-fail-as:source-wrong"
+       :covered-by-id
+       "association:failure:dreyeck/catalog:component-source-wrong:covered-by:fresh-component-source"
+       :verification (:status :present :verification :fresh-process))))))
+
+(defun fresh-catalog-evaluations nil
+       (append
+               (list "(require :asdf)"
+                     (format nil "(asdf:load-asd #P~S)"
+                             (namestring (dreyeck-asd-pathname))))
+               (mapcar
+                       (lambda (common-lisp-user::entry)
+                               (getf common-lisp-user::entry :evaluation))
+                       (getf (controller-source-coverage-specification)
+                             :cases))
+               (list "(asdf:load-system \"hyperdoc\")"
                      "(asdf:load-system \"hyperbook/server\")"
                      "(assert (null (find-package \"DREYECK/UPSTREAM-INTAKE\")))"
                      "(assert (null (find-package \"DREYECK/FEDWIKI-SOURCE-RELATIONS\")))"
