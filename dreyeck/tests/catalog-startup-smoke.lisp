@@ -31,40 +31,64 @@
 (defun repository-shell-script-pathnames ()
   (directory (merge-pathnames #P"scripts/*.sh" (repository-directory))))
 
-(defun presentation-controller-coverage-cases ()
-  (copy-tree
-   '((:failure-id
-      "failure:dreyeck/catalog:presentation-controller-not-materialized"
-      :failure-label "Catalog presentation controller not materialized"
-      :condition :function-not-fbound-after-system-load :test-case-id
-      "test-case:dreyeck/catalog:fresh-presentation-controller-present"
-      :test-case-label "Fresh catalog presentation controller is present"
-      :evaluation "(LET* ((PACKAGE (FIND-PACKAGE \"DREYECK/CATALOG\"))
+(defun presentation-controller-coverage-cases nil
+       (copy-tree
+                  (quote
+                         ((:failure-id
+                                       "failure:dreyeck/catalog:presentation-controller-not-materialized"
+                                       :failure-label
+                                       "Catalog presentation controller not materialized"
+                                       :condition
+                                       :function-not-fbound-after-system-load
+                                       :test-case-id
+                                       "test-case:dreyeck/catalog:fresh-presentation-controller-present"
+                                       :test-case-label
+                                       "Fresh catalog presentation controller is present"
+                                       :evaluation
+                                       "(LET* ((PACKAGE (FIND-PACKAGE \"DREYECK/CATALOG\"))
        (SYMBOL
         (AND PACKAGE (FIND-SYMBOL \"CATALOG-PRESENTATION-STATE\" PACKAGE))))
   (ASSERT (AND SYMBOL (FBOUNDP SYMBOL))))"
-      :verification (:status :present :verification :fresh-process))
-     (:failure-id
-      "failure:dreyeck/catalog:presentation-controller-mutates-catalog-sequence"
-      :failure-label "Catalog presentation controller mutates catalog sequence"
-      :condition :catalog-sequence-changed-by-presentation-controller
-      :test-case-id
-      "test-case:dreyeck/catalog:fresh-presentation-controller-preserves-catalog"
-      :test-case-label
-      "Fresh presentation controller preserves catalog sequence" :evaluation
-      "(LET* ((CATALOG HYPERBOOK:*CATALOG*)
+                                       :verification
+                                       (:status :present :verification
+                                                :fresh-process)
+                                       :may-fail-as-id
+                                       "association:edge:dreyeck/catalog:presentation-controller:may-fail-as:not-materialized"
+                                       :covered-by-id
+                                       "association:failure:dreyeck/catalog:presentation-controller-not-materialized:covered-by:fresh-presentation-controller-present")
+                          (:failure-id
+                                       "failure:dreyeck/catalog:presentation-controller-mutates-catalog-sequence"
+                                       :failure-label
+                                       "Catalog presentation controller mutates catalog sequence"
+                                       :condition
+                                       :catalog-sequence-changed-by-presentation-controller
+                                       :test-case-id
+                                       "test-case:dreyeck/catalog:fresh-presentation-controller-preserves-catalog"
+                                       :test-case-label
+                                       "Fresh presentation controller preserves catalog sequence"
+                                       :evaluation
+                                       "(LET* ((CATALOG HYPERBOOK:*CATALOG*)
        (BEFORE (COPY-LIST (HYPERBOOK:HYPERBOOKS-OF CATALOG))))
   (DREYECK/CATALOG:CATALOG-PRESENTATION-STATE CATALOG NIL)
   (ASSERT (EQUAL BEFORE (HYPERBOOK:HYPERBOOKS-OF CATALOG))))"
-      :verification (:status :present :verification :fresh-process))
-     (:failure-id
-      "failure:dreyeck/catalog:presentation-controller-misrepresents-workspace-topic"
-      :failure-label
-      "Catalog presentation controller misrepresents workspace topic"
-      :condition :workspace-topic-id-label-or-state-not-preserved :test-case-id
-      "test-case:dreyeck/catalog:fresh-presentation-controller-presents-workspace"
-      :test-case-label "Fresh presentation controller presents workspace topic"
-      :evaluation "(LET* ((TOPIC
+                                       :verification
+                                       (:status :present :verification
+                                                :fresh-process)
+                                       :may-fail-as-id
+                                       "association:edge:dreyeck/catalog:presentation-controller:may-fail-as:mutates-catalog-sequence"
+                                       :covered-by-id
+                                       "association:failure:dreyeck/catalog:presentation-controller-mutates-catalog-sequence:covered-by:fresh-presentation-controller-preserves-catalog")
+                          (:failure-id
+                                       "failure:dreyeck/catalog:presentation-controller-misrepresents-workspace-topic"
+                                       :failure-label
+                                       "Catalog presentation controller misrepresents workspace topic"
+                                       :condition
+                                       :workspace-topic-id-label-or-state-not-preserved
+                                       :test-case-id
+                                       "test-case:dreyeck/catalog:fresh-presentation-controller-presents-workspace"
+                                       :test-case-label
+                                       "Fresh presentation controller presents workspace topic"
+                                       :evaluation "(LET* ((TOPIC
         (MAKE-INSTANCE 'DREYECK/TOPICMAP:TOPICMAP-TOPIC :ID \"workspace:test\"
                        :TYPE :WORKSPACE :LABEL \"Workspace Test\"))
        (STATE
@@ -75,15 +99,24 @@
    (EQUAL ENTRY
           '(:ID \"workspace:test\" :LABEL \"Workspace Test\" :STATE :DISCOVERED)))
   T)"
-      :verification (:status :present :verification :fresh-process))
-     (:failure-id
-      "failure:dreyeck/catalog:presentation-controller-misrepresents-hyperbook"
-      :failure-label "Catalog presentation controller misrepresents HyperBook"
-      :condition :hyperbook-id-title-or-state-not-presented-correctly
-      :test-case-id
-      "test-case:dreyeck/catalog:fresh-presentation-controller-presents-hyperbook"
-      :test-case-label "Fresh presentation controller presents HyperBook"
-      :evaluation "(LET* ((SUBJECT
+                                       :verification
+                                       (:status :present :verification
+                                                :fresh-process)
+                                       :may-fail-as-id
+                                       "association:edge:dreyeck/catalog:presentation-controller:may-fail-as:misrepresents-workspace-topic"
+                                       :covered-by-id
+                                       "association:failure:dreyeck/catalog:presentation-controller-misrepresents-workspace-topic:covered-by:fresh-presentation-controller-presents-workspace")
+                          (:failure-id
+                                       "failure:dreyeck/catalog:presentation-controller-misrepresents-hyperbook"
+                                       :failure-label
+                                       "Catalog presentation controller misrepresents HyperBook"
+                                       :condition
+                                       :hyperbook-id-title-or-state-not-presented-correctly
+                                       :test-case-id
+                                       "test-case:dreyeck/catalog:fresh-presentation-controller-presents-hyperbook"
+                                       :test-case-label
+                                       "Fresh presentation controller presents HyperBook"
+                                       :evaluation "(LET* ((SUBJECT
         (FIND \"hyperdoc\" (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*) :KEY
               #'HYPERBOOK:ID-OF :TEST #'STRING=))
        (STATE
@@ -98,14 +131,24 @@
   (ASSERT (EQUAL (HYPERBOOK:TITLE-OF SUBJECT) (GETF ENTRY :LABEL)))
   (ASSERT (EQ :MATERIALIZED (GETF ENTRY :STATE)))
   T)"
-      :verification (:status :present :verification :fresh-process))
-     (:failure-id
-      "failure:dreyeck/catalog:presentation-controller-misorders-hyperbooks"
-      :failure-label "Catalog presentation controller misorders HyperBooks"
-      :condition :hyperbooks-not-sorted-by-title :test-case-id
-      "test-case:dreyeck/catalog:fresh-presentation-controller-sorts-hyperbooks"
-      :test-case-label "Fresh presentation controller sorts HyperBooks"
-      :evaluation "(LET* ((EXPECTED
+                                       :verification
+                                       (:status :present :verification
+                                                :fresh-process)
+                                       :may-fail-as-id
+                                       "association:edge:dreyeck/catalog:presentation-controller:may-fail-as:misrepresents-hyperbook"
+                                       :covered-by-id
+                                       "association:failure:dreyeck/catalog:presentation-controller-misrepresents-hyperbook:covered-by:fresh-presentation-controller-presents-hyperbook")
+                          (:failure-id
+                                       "failure:dreyeck/catalog:presentation-controller-misorders-hyperbooks"
+                                       :failure-label
+                                       "Catalog presentation controller misorders HyperBooks"
+                                       :condition
+                                       :hyperbooks-not-sorted-by-title
+                                       :test-case-id
+                                       "test-case:dreyeck/catalog:fresh-presentation-controller-sorts-hyperbooks"
+                                       :test-case-label
+                                       "Fresh presentation controller sorts HyperBooks"
+                                       :evaluation "(LET* ((EXPECTED
         (SORT
          (MAPCAR #'HYPERBOOK:TITLE-OF
                  (COPY-LIST (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*)))
@@ -118,7 +161,13 @@
                  :HYPERBOOKS))))
   (ASSERT (EQUAL EXPECTED PRESENTED))
   T)"
-      :verification (:status :present :verification :fresh-process)))))
+                                       :verification
+                                       (:status :present :verification
+                                                :fresh-process)
+                                       :may-fail-as-id
+                                       "association:edge:dreyeck/catalog:presentation-controller:may-fail-as:misorders-hyperbooks"
+                                       :covered-by-id
+                                       "association:failure:dreyeck/catalog:presentation-controller-misorders-hyperbooks:covered-by:fresh-presentation-controller-sorts-hyperbooks")))))
 
 (defun fresh-catalog-evaluations nil
        (append
