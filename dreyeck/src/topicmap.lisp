@@ -296,39 +296,79 @@
                    common-lisp-user::topics :associations
                    common-lisp-user::associations)))
 
-(defun project-page-attached-workspace
-       (common-lisp-user::projection common-lisp-user::primary-system-name)
-  (let* ((common-lisp-user::system-id
-          (format nil "asdf-system:~A" common-lisp-user::primary-system-name))
-         (common-lisp-user::workspace-id
-          (format nil "workspace:~A" common-lisp-user::primary-system-name))
-         (common-lisp-user::association-id
-          (format nil "association:~A:workspace" common-lisp-user::system-id))
-         (common-lisp-user::associations
-          (topicmap-projection-associations-of common-lisp-user::projection))
-         (common-lisp-user::projected-associations
-          (if (find common-lisp-user::association-id
-                    common-lisp-user::associations :key
-                    #'topicmap-association-id-of :test #'string=)
-              common-lisp-user::associations
-              (append common-lisp-user::associations
-                      (list
-                       (make-instance 'topicmap-association :id
-                                      common-lisp-user::association-id :type
-                                      :workspace :from
-                                      common-lisp-user::system-id :to
-                                      common-lisp-user::workspace-id))))))
-    (complete-topicmap-projection
-     (make-instance 'topicmap-projection :source
-                    (topicmap-projection-source-of
-                     common-lisp-user::projection)
-                    :topics
-                    (topicmap-projection-topics-of
-                     common-lisp-user::projection)
-                    :associations common-lisp-user::projected-associations
-                    :view-properties
-                    (topicmap-projection-view-properties-of
-                     common-lisp-user::projection)))))
+(defun page-attached-asdf-projection (asd defined-system-names)
+  (let* ((authority-id (format nil "asd:~A" (namestring asd)))
+         (authority-topic
+          (make-instance 'topicmap-topic :id authority-id :type
+                         :page-attached-authority :label (file-namestring asd)
+                         :object nil))
+         (system-topics
+          (mapcar
+           (lambda (defined-system-name)
+             (make-instance 'topicmap-topic :id
+                            (format nil "asdf-system:~A" defined-system-name)
+                            :type :asdf-system :label defined-system-name
+                            :object nil))
+           defined-system-names))
+         (associations
+          (mapcar
+           (lambda (defined-system-name)
+             (let ((system-id
+                    (format nil "asdf-system:~A" defined-system-name)))
+               (make-instance 'topicmap-association :id
+                              (format nil "association:~A:defines:~A"
+                                      authority-id system-id)
+                              :type :defines :from authority-id :to system-id
+                              :properties nil)))
+           defined-system-names)))
+    (make-instance 'topicmap-projection :source asd :topics
+                   (cons authority-topic system-topics) :associations
+                   associations)))
+
+(defun project-page-attached-workspace (projection primary-system-name)
+       (let*
+             ((system-id (format nil "asdf-system:~A" primary-system-name))
+              (workspace-id (format nil "workspace:~A" primary-system-name))
+              (association-id
+                              (format nil "association:~A:workspace"
+                                      system-id))
+              (associations (topicmap-projection-associations-of projection))
+              (projected-associations
+                                      (if
+                                          (find association-id associations
+                                                :key
+                                                (function
+                                                          topicmap-association-id-of)
+                                                :test (function string=))
+                                          associations
+                                          (append associations
+                                                  (list
+                                                        (make-instance
+                                                                       (quote
+                                                                              topicmap-association)
+                                                                       :id
+                                                                       association-id
+                                                                       :type
+                                                                       :workspace
+                                                                       :from
+                                                                       system-id
+                                                                       :to
+                                                                       workspace-id))))))
+             (complete-topicmap-projection
+                                           (make-instance
+                                                          (quote
+                                                                 topicmap-projection)
+                                                          :source
+                                                          (topicmap-projection-source-of
+                                                                                         projection)
+                                                          :topics
+                                                          (topicmap-projection-topics-of
+                                                                                         projection)
+                                                          :associations
+                                                          projected-associations
+                                                          :view-properties
+                                                          (topicmap-projection-view-properties-of
+                                                                                                  projection)))))
 
 (defun make-topicmap-workspace-for-object (common-lisp-user::object)
   (block make-topicmap-workspace-for-object
