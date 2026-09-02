@@ -9,56 +9,111 @@
   (or (uiop/image:argv0) (first sb-ext:*posix-argv*)
       (error "Cannot determine the current SBCL program.")))
 
-(defun run-fresh-asdf-test
-       (system-designator
-        &key additional-asds package-name (function-name "RUN-TESTS")
-        (marker "DREYECK-FRESH-ASDF-TEST-PASSED"))
-  (let ((system (asdf/system:find-system system-designator nil)))
-    (unless system (error "Unknown ASDF system ~S." system-designator))
-    (let* ((system-name (asdf/component:component-name system))
-           (system-asd (asdf/system:system-source-file system))
-           (effective-package-name
-            (or package-name (string-upcase system-name)))
-           (program (current-lisp-program))
-           (asds
-            (remove-duplicates (cons system-asd additional-asds) :test
-                               #'equal))
-           (child-form
-            `(progn
-              (require :asdf)
-              (dolist (asd ',asds) (asdf/find-system:load-asd asd))
-              (asdf/operate:load-system ,system-name)
-              (let* ((package (find-package ,effective-package-name))
-                     (runner-symbol
-                      (and package (find-symbol ,function-name package)))
-                     (runner
-                      (and runner-symbol (fboundp runner-symbol)
-                           (symbol-function runner-symbol))))
-                (unless runner
-                  (error "Fresh child cannot resolve ~A::~A."
-                         ,effective-package-name ,function-name))
-                (let ((result (funcall runner)))
-                  (unless (eq :passed (getf result :status))
-                    (error "Fresh test failed: ~S" result))
-                  (format t "~&~A~%" ,marker)
-                  (finish-output)))))
-           (command
-            (list program "--noinform" "--non-interactive" "--eval"
+
+(DEFUN DREYECK/FRESH-IMAGE-RUNNER:RUN-FRESH-ASDF-TEST
+       (DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-DESIGNATOR
+        &KEY DREYECK/FRESH-IMAGE-RUNNER::ADDITIONAL-ASDS PACKAGE-NAME
+        (DREYECK/FRESH-IMAGE-RUNNER::FUNCTION-NAME "RUN-TESTS")
+        (DREYECK/FRESH-IMAGE-RUNNER::MARKER "DREYECK-FRESH-ASDF-TEST-PASSED"))
+  (LET ((DREYECK/FRESH-IMAGE-RUNNER::SYSTEM
+         (ASDF/SYSTEM:FIND-SYSTEM DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-DESIGNATOR
+                                  NIL)))
+    (UNLESS DREYECK/FRESH-IMAGE-RUNNER::SYSTEM
+      (ERROR "Unknown ASDF system ~S."
+             DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-DESIGNATOR))
+    (LET* ((DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-NAME
+            (ASDF/COMPONENT:COMPONENT-NAME DREYECK/FRESH-IMAGE-RUNNER::SYSTEM))
+           (DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-ASD
+            (ASDF/SYSTEM:SYSTEM-SOURCE-FILE
+             DREYECK/FRESH-IMAGE-RUNNER::SYSTEM))
+           (DREYECK/FRESH-IMAGE-RUNNER::EFFECTIVE-PACKAGE-NAME
+            (OR PACKAGE-NAME
+                (STRING-UPCASE DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-NAME)))
+           (DREYECK/FRESH-IMAGE-RUNNER::PROGRAM
+            (DREYECK/FRESH-IMAGE-RUNNER::CURRENT-LISP-PROGRAM))
+           (DREYECK/FRESH-IMAGE-RUNNER::ASDS
+            (REMOVE-DUPLICATES
+             (CONS DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-ASD
+                   DREYECK/FRESH-IMAGE-RUNNER::ADDITIONAL-ASDS)
+             :TEST #'EQUAL))
+           (DREYECK/FRESH-IMAGE-RUNNER::CHILD-FORM
+            (ECLECTOR.READER:QUASIQUOTE
+             (PROGN
+              (REQUIRE :ASDF)
+              (DOLIST
+                  (DREYECK/FRESH-IMAGE-RUNNER::ASD
+                   '(ECLECTOR.READER:UNQUOTE DREYECK/FRESH-IMAGE-RUNNER::ASDS))
+                (ASDF/FIND-SYSTEM:LOAD-ASD DREYECK/FRESH-IMAGE-RUNNER::ASD))
+              (ASDF/OPERATE:LOAD-SYSTEM
+               (ECLECTOR.READER:UNQUOTE
+                DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-NAME))
+              (LET* ((PACKAGE
+                      (FIND-PACKAGE
+                       (ECLECTOR.READER:UNQUOTE
+                        DREYECK/FRESH-IMAGE-RUNNER::EFFECTIVE-PACKAGE-NAME)))
+                     (DREYECK/FRESH-IMAGE-RUNNER::RUNNER-SYMBOL
+                      (AND PACKAGE
+                           (FIND-SYMBOL
+                            (ECLECTOR.READER:UNQUOTE
+                             DREYECK/FRESH-IMAGE-RUNNER::FUNCTION-NAME)
+                            PACKAGE)))
+                     (DREYECK/FRESH-IMAGE-RUNNER::RUNNER
+                      (AND DREYECK/FRESH-IMAGE-RUNNER::RUNNER-SYMBOL
+                           (FBOUNDP DREYECK/FRESH-IMAGE-RUNNER::RUNNER-SYMBOL)
+                           (SYMBOL-FUNCTION
+                            DREYECK/FRESH-IMAGE-RUNNER::RUNNER-SYMBOL))))
+                (UNLESS DREYECK/FRESH-IMAGE-RUNNER::RUNNER
+                  (ERROR "Fresh child cannot resolve ~A::~A."
+                         (ECLECTOR.READER:UNQUOTE
+                          DREYECK/FRESH-IMAGE-RUNNER::EFFECTIVE-PACKAGE-NAME)
+                         (ECLECTOR.READER:UNQUOTE
+                          DREYECK/FRESH-IMAGE-RUNNER::FUNCTION-NAME)))
+                (LET ((DREYECK/FRESH-IMAGE-RUNNER::RESULT
+                       (FUNCALL DREYECK/FRESH-IMAGE-RUNNER::RUNNER)))
+                  (UNLESS
+                      (OR (EQ DREYECK/FRESH-IMAGE-RUNNER::RESULT T)
+                          (AND (LISTP DREYECK/FRESH-IMAGE-RUNNER::RESULT)
+                               (EQ :PASSED
+                                   (GETF DREYECK/FRESH-IMAGE-RUNNER::RESULT
+                                         :STATUS))))
+                    (ERROR "Fresh test failed: ~S"
+                           DREYECK/FRESH-IMAGE-RUNNER::RESULT))
+                  (FORMAT T "~&~A~%"
+                          (ECLECTOR.READER:UNQUOTE
+                           DREYECK/FRESH-IMAGE-RUNNER::MARKER))
+                  (FINISH-OUTPUT))))))
+           (DREYECK/FRESH-IMAGE-RUNNER::COMMAND
+            (LIST DREYECK/FRESH-IMAGE-RUNNER::PROGRAM "--noinform"
+                  "--non-interactive" "--eval"
                   "(progn (require :asdf) (unless (find-package \"DREYECK/FRESH-IMAGE-RUNNER\") (make-package \"DREYECK/FRESH-IMAGE-RUNNER\" :use '(\"CL\"))))"
-                  "--eval" (prin1-to-string child-form))))
-      (assert system-asd)
-      (assert (and (stringp program) (plusp (length program))))
-      (multiple-value-bind (output error-output status)
-          (uiop/run-program:run-program command :output :string :error-output
-                                        :output :ignore-error-status t)
-        (declare (ignore error-output))
-        (unless
-            (and (zerop status) (stringp output)
-                 (search marker output :test #'char=))
-          (error "Fresh ASDF test failed for ~S (status ~S).~%~A" system-name
-                 status output))
-        (list :status :passed :system system-name :system-asd system-asd
-              :additional-asds additional-asds :package-name
-              effective-package-name :function-name function-name :program
-              program :marker marker :child-status status :marker-observed-p
-              t)))))
+                  "--eval"
+                  (PRIN1-TO-STRING DREYECK/FRESH-IMAGE-RUNNER::CHILD-FORM))))
+      (ASSERT DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-ASD)
+      (ASSERT
+       (AND (STRINGP DREYECK/FRESH-IMAGE-RUNNER::PROGRAM)
+            (PLUSP (LENGTH DREYECK/FRESH-IMAGE-RUNNER::PROGRAM))))
+      (MULTIPLE-VALUE-BIND
+          (DREYECK/FRESH-IMAGE-RUNNER::OUTPUT
+           DREYECK/FRESH-IMAGE-RUNNER::ERROR-OUTPUT
+           DREYECK/FRESH-IMAGE-RUNNER::STATUS)
+          (UIOP/RUN-PROGRAM:RUN-PROGRAM DREYECK/FRESH-IMAGE-RUNNER::COMMAND
+                                        :OUTPUT :STRING :ERROR-OUTPUT :OUTPUT
+                                        :IGNORE-ERROR-STATUS T)
+        (DECLARE (IGNORE DREYECK/FRESH-IMAGE-RUNNER::ERROR-OUTPUT))
+        (UNLESS
+            (AND (ZEROP DREYECK/FRESH-IMAGE-RUNNER::STATUS)
+                 (STRINGP DREYECK/FRESH-IMAGE-RUNNER::OUTPUT)
+                 (SEARCH DREYECK/FRESH-IMAGE-RUNNER::MARKER
+                         DREYECK/FRESH-IMAGE-RUNNER::OUTPUT :TEST #'CHAR=))
+          (ERROR "Fresh ASDF test failed for ~S (status ~S).~%~A"
+                 DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-NAME
+                 DREYECK/FRESH-IMAGE-RUNNER::STATUS
+                 DREYECK/FRESH-IMAGE-RUNNER::OUTPUT))
+        (LIST :STATUS :PASSED :SYSTEM DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-NAME
+              :SYSTEM-ASD DREYECK/FRESH-IMAGE-RUNNER::SYSTEM-ASD
+              :ADDITIONAL-ASDS DREYECK/FRESH-IMAGE-RUNNER::ADDITIONAL-ASDS
+              :PACKAGE-NAME DREYECK/FRESH-IMAGE-RUNNER::EFFECTIVE-PACKAGE-NAME
+              :FUNCTION-NAME DREYECK/FRESH-IMAGE-RUNNER::FUNCTION-NAME :PROGRAM
+              DREYECK/FRESH-IMAGE-RUNNER::PROGRAM :MARKER
+              DREYECK/FRESH-IMAGE-RUNNER::MARKER :CHILD-STATUS
+              DREYECK/FRESH-IMAGE-RUNNER::STATUS :MARKER-OBSERVED-P T)))))
