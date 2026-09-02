@@ -523,6 +523,56 @@
       "Dreyeck page-attached ASDF tests failed."))))
 
 
+(asdf/parse-defsystem:defsystem "dreyeck/page-attached-system-projection"
+                                :pathname "dreyeck/src/" :serial t :depends-on
+                                ("asdf"
+                                 "dreyeck/page-attached-asdf"
+                                 "dreyeck/topicmap")
+                                :components
+                                ((:file
+                                        "page-attached-system-projection-package")
+                                 (:file "page-attached-system-projection"))
+                                :in-order-to
+                                ((asdf/lisp-action:test-op
+                                                           (asdf/lisp-action:test-op
+                                                                                     "dreyeck/page-attached-system-projection/tests"))))
+
+(asdf/parse-defsystem:defsystem "dreyeck/page-attached-system-projection/tests"
+  :pathname
+  "dreyeck/tests/"
+  :serial
+  t
+  :depends-on
+  ("asdf" "dreyeck/page-attached-system-projection" "dreyeck/topicmap")
+  :components
+  ((:file "page-attached-system-projection-package")
+   (:file "page-attached-system-projection"))
+  :perform
+  (asdf/lisp-action:test-op (operation component)
+   (declare (ignore operation component))
+   (uiop/package:symbol-call :dreyeck/page-attached-system-projection/tests
+                             :run-page-attached-system-projection-tests)))
+
+(asdf/parse-defsystem:defsystem "dreyeck/page-attached-workspace-reconstruction"
+  :pathname
+  "dreyeck/src/"
+  :serial
+  t
+  :depends-on
+  ("asdf" "dreyeck/page-attached-system-projection" "dreyeck/topicmap")
+  :components
+  ((:file "page-attached-workspace-reconstruction")))
+
+(asdf/parse-defsystem:defsystem "dreyeck/page-attached-workspace-reconstruction-runner"
+  :pathname
+  "dreyeck/src/"
+  :serial
+  t
+  :depends-on
+  ("asdf" "uiop" "dreyeck/page-attached-workspace-reconstruction")
+  :components
+  ((:file "page-attached-workspace-reconstruction-runner")))
+
 (asdf:defsystem #:dreyeck/page-attached-hyperdoc
   :description "Observe HyperDocs registered by explicitly loaded ASDF systems"
   :license "BSD"
@@ -1264,3 +1314,18 @@
         "RUN-FEDWIKI-JOURNAL-TOPICMAP-TESTS")
      (error
       "FedWiki journal Topicmap tests failed."))))
+
+
+(asdf:defsystem "dreyeck/page-attached-workspace-offer"
+  :depends-on ("hyperbook" "dreyeck/page-attached-workspace-reconstruction")
+  :components ((:file "dreyeck/src/page-attached-workspace-offer")))
+
+
+(asdf:defsystem "dreyeck/page-attached-workspace-offer/tests"
+  :depends-on ("dreyeck/page-attached-workspace-offer")
+  :components ((:file "dreyeck/src/page-attached-workspace-offer-tests")))
+
+
+(asdf:defsystem "dreyeck/fresh-image-runner"
+  :depends-on ("asdf")
+  :components ((:file "dreyeck/src/fresh-image-runner")))
