@@ -352,3 +352,15 @@
                          (repository-directory) :output *standard-output*
                          :error-output *error-output*)
        (format t "Dreyeck Catalog startup smoke tests passed.~%") t)
+
+
+
+(DEFUN DREYECK/CATALOG/TESTS::RUN-TESTS ()
+  (ASSERT (DREYECK/CATALOG/TESTS:RUN-CATALOG-STARTUP-SMOKE-TESTS))
+  (LET ((OFFER (DREYECK/CATALOG::ADMIT :CATALOG "related-topics-for-topic")))
+    (ASSERT
+     (MEMBER OFFER (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*) :TEST #'EQ))
+    (ASSERT
+     (NOT
+      (SLOT-BOUNDP OFFER 'DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER::WORKSPACE)))
+    (LIST :STATUS :PASSED :OFFER OFFER :WORKSPACE-MATERIALIZED-P NIL)))

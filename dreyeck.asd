@@ -272,16 +272,24 @@
   ((:file "upstream-intake-inspector-package")
    (:file "upstream-intake-views")))
 
-(asdf:defsystem #:dreyeck/catalog :description
-                "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
-                :license "BSD" :version "0.0.1" :depends-on
-                (#:dreyeck/wiki-link #:dreyeck/upstream-intake
-                                     #:dreyeck/inspector/upstream-intake
-                                     #:dreyeck/inspector/fedwiki-source-relations
-                                     #:dreyeck/lisp-image)
-                :in-order-to
-                ((asdf:test-op (asdf:test-op "dreyeck/catalog/tests")))
-                :components ((:file "dreyeck/src/catalog")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG
+  :DESCRIPTION
+  "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :DEPENDS-ON
+  (#:DREYECK/WIKI-LINK #:DREYECK/UPSTREAM-INTAKE
+   #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
+   #:DREYECK/INSPECTOR/FEDWIKI-SOURCE-RELATIONS #:DREYECK/LISP-IMAGE
+   #:DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER)
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/catalog/tests")))
+  :COMPONENTS
+  ((:FILE "dreyeck/src/catalog")))
 
 (asdf/parse-defsystem:defsystem #:dreyeck/git/tests
   :description
@@ -330,22 +338,27 @@
     :dreyeck/upstream-intake/tests
     :run-upstream-intake-tests)))
 
-(asdf:defsystem #:dreyeck/catalog/tests
-  :description "Fresh-image contract tests for the Dreyeck HyperBook catalog"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:uiop)
-  :components
-  ((:file "catalog-startup-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (uiop:symbol-call
-    :dreyeck/catalog/tests
-    :run-catalog-startup-smoke-tests)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG/TESTS
+  :DESCRIPTION
+  "Fresh-image contract tests for the Dreyeck HyperBook catalog"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:UIOP #:DREYECK/CATALOG)
+  :COMPONENTS
+  ((:FILE "catalog-startup-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/CATALOG/TESTS
+                             :RUN-CATALOG-STARTUP-SMOKE-TESTS)))
 
 (asdf/parse-defsystem:defsystem #:dreyeck/lisp-image
   :description
