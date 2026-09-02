@@ -1,4 +1,4 @@
-;;;; Dreyeck-owned renderer-independent Topicmap and Inspector tests.
+;;;; dreyeck.ch-owned renderer-independent Topicmap and Inspector tests.
 
 (defpackage #:dreyeck/topicmap/tests
   (:use #:cl)
@@ -227,6 +227,52 @@
     (assert
      (eq view-properties
          (dreyeck/topicmap:topicmap-projection-view-properties-of once)))
+    t))
+
+(defun run-page-attached-asdf-projection-test ()
+  (let* ((projection
+          (dreyeck/topicmap::page-attached-asdf-projection #P"example.asd"
+                                                           '("example"
+                                                             "example/tests")))
+         (topics (dreyeck/topicmap:topicmap-projection-topics-of projection))
+         (associations
+          (dreyeck/topicmap:topicmap-projection-associations-of projection))
+         (topic-ids
+          (sort (mapcar #'dreyeck/topicmap:topicmap-topic-id-of topics)
+                #'string<))
+         (association-ids
+          (sort
+           (mapcar #'dreyeck/topicmap:topicmap-association-id-of associations)
+           #'string<))
+         (authority
+          (find "asd:example.asd" topics :key
+                #'dreyeck/topicmap:topicmap-topic-id-of :test #'string=))
+         (primary
+          (find "asdf-system:example" topics :key
+                #'dreyeck/topicmap:topicmap-topic-id-of :test #'string=))
+         (tests
+          (find "asdf-system:example/tests" topics :key
+                #'dreyeck/topicmap:topicmap-topic-id-of :test #'string=)))
+    (assert
+     (equal topic-ids
+            '("asd:example.asd" "asdf-system:example"
+              "asdf-system:example/tests")))
+    (assert
+     (equal association-ids
+            '("association:asd:example.asd:defines:asdf-system:example"
+              "association:asd:example.asd:defines:asdf-system:example/tests")))
+    (assert authority)
+    (assert primary)
+    (assert tests)
+    (assert
+     (eq :page-attached-authority
+         (dreyeck/topicmap:topicmap-topic-type-of authority)))
+    (assert
+     (eq :asdf-system (dreyeck/topicmap:topicmap-topic-type-of primary)))
+    (assert (eq :asdf-system (dreyeck/topicmap:topicmap-topic-type-of tests)))
+    (assert (null (dreyeck/topicmap:topicmap-topic-object-of authority)))
+    (assert (null (dreyeck/topicmap:topicmap-topic-object-of primary)))
+    (assert (null (dreyeck/topicmap:topicmap-topic-object-of tests)))
     t))
 
 (defun run-page-attached-workspace-projection-test ()
@@ -918,18 +964,16 @@
        "Rendering changed workspace history.")
       t)))
 
-(defun run-topicmap-view-smoke-tests ()
-  (check-ownership-contract)
-  (run-generic-topicmap-view-test)
-  (run-topicmap-workspace-test)
-  (run-topicmap-workspace-inspector-action-test)
-  (run-topicmap-workspace-association-navigation-test)
-  (run-topicmap-workspace-point-relative-viewbox-test)
-  (run-topicmap-workspace-for-object-test)
-  (run-topicmap-workspace-snapshot-test)
-  (run-endpoint-validation-test)
-  (format t "Generic renderer-independent Topicmap view tests passed.~%")
-  (run-semantic-topicmap-presentation-smoke-test)
-  (run-semantic-topicmap-endpoint-role-smoke-test)
-  (run-topicmap-workspace-resource-get-test)
-  t)
+(defun run-topicmap-view-smoke-tests nil (check-ownership-contract)
+       (run-generic-topicmap-view-test) (run-topicmap-workspace-test)
+       (run-topicmap-workspace-inspector-action-test)
+       (run-topicmap-workspace-association-navigation-test)
+       (run-topicmap-workspace-point-relative-viewbox-test)
+       (run-topicmap-workspace-for-object-test)
+       (run-topicmap-workspace-snapshot-test) (run-endpoint-validation-test)
+       (run-page-attached-asdf-projection-test)
+       (run-page-attached-workspace-projection-test)
+       (format t "Generic renderer-independent Topicmap view tests passed.~%")
+       (run-semantic-topicmap-presentation-smoke-test)
+       (run-semantic-topicmap-endpoint-role-smoke-test)
+       (run-topicmap-workspace-resource-get-test) t)

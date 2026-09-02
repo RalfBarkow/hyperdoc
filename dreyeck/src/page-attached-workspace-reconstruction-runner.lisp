@@ -1,0 +1,63 @@
+(IN-PACKAGE #:DREYECK/PAGE-ATTACHED-SYSTEM-PROJECTION)
+
+(DEFUN RUN-FRESH-PAGE-ATTACHED-WORKSPACE-RECONSTRUCTION (SYSTEM-DESIGNATOR)
+  (LET* ((SYSTEM (ASDF/SYSTEM:FIND-SYSTEM SYSTEM-DESIGNATOR))
+         (PAGE-ASD (ASDF/SYSTEM:SYSTEM-SOURCE-FILE SYSTEM))
+         (DREYECK-SYSTEM (ASDF/SYSTEM:FIND-SYSTEM "dreyeck"))
+         (DREYECK-ASD (ASDF/SYSTEM:SYSTEM-SOURCE-FILE DREYECK-SYSTEM))
+         (RUNTIME
+          (PROGN
+           (ASSERT SB-EXT:*RUNTIME-PATHNAME*)
+           (NAMESTRING SB-EXT:*RUNTIME-PATHNAME*)))
+         (MARKER "DREYECK-FRESH-PAGE-ATTACHED-WORKSPACE-RECONSTRUCTION-PASSED")
+         (FINAL-FORM
+          `(LET* ((COMMON-LISP-USER::WITNESS
+                   (RECONSTRUCT-PAGE-ATTACHED-WORKSPACE ,SYSTEM-DESIGNATOR))
+                  (COMMON-LISP-USER::BASE-PROJECTION
+                   (GETF COMMON-LISP-USER::WITNESS :BASE-PROJECTION))
+                  (COMMON-LISP-USER::WORKSPACE-PROJECTION
+                   (GETF COMMON-LISP-USER::WITNESS :WORKSPACE-PROJECTION)))
+             (ASSERT
+              (EQ :FRESH-IMAGE-RUNNER
+                  (GETF COMMON-LISP-USER::WITNESS :READY-FOR)))
+             (ASSERT (GETF COMMON-LISP-USER::WITNESS :FRESH-PROJECTION-P))
+             (ASSERT
+              (= 3
+                 (LENGTH
+                  (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-TOPICS-OF
+                   COMMON-LISP-USER::BASE-PROJECTION))))
+             (ASSERT
+              (= 2
+                 (LENGTH
+                  (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
+                   COMMON-LISP-USER::BASE-PROJECTION))))
+             (ASSERT
+              (= 4
+                 (LENGTH
+                  (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-TOPICS-OF
+                   COMMON-LISP-USER::WORKSPACE-PROJECTION))))
+             (ASSERT
+              (= 3
+                 (LENGTH
+                  (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
+                   COMMON-LISP-USER::WORKSPACE-PROJECTION))))
+             (FORMAT T "~&~A~%" ,MARKER)
+             (FINISH-OUTPUT)))
+         (COMMAND
+          (LIST RUNTIME "--noinform" "--disable-debugger" "--non-interactive"
+                "--eval" "(require :asdf)" "--eval"
+                (FORMAT NIL "(asdf:load-asd ~S)" DREYECK-ASD) "--eval"
+                (FORMAT NIL "(asdf:load-system ~S)"
+                        "dreyeck/page-attached-workspace-reconstruction")
+                "--eval" (FORMAT NIL "(asdf:load-asd ~S)" PAGE-ASD) "--eval"
+                (WRITE-TO-STRING FINAL-FORM :READABLY T)))
+         (OUTPUT
+          (UIOP/RUN-PROGRAM:RUN-PROGRAM COMMAND :OUTPUT :STRING :ERROR-OUTPUT
+                                        :OUTPUT)))
+    (ASSERT (SEARCH MARKER OUTPUT))
+    (LIST :STATUS :PASSED :SYSTEM-DESIGNATOR SYSTEM-DESIGNATOR :PAGE-ASD
+          PAGE-ASD :DREYECK-ASD DREYECK-ASD :RUNTIME RUNTIME :MARKER MARKER
+          :OUTPUT OUTPUT :READY-FOR :PERSIST-FRESH-RUNNER)))
+
+(EXPORT 'RUN-FRESH-PAGE-ATTACHED-WORKSPACE-RECONSTRUCTION
+        (FIND-PACKAGE "DREYECK/PAGE-ATTACHED-SYSTEM-PROJECTION"))
