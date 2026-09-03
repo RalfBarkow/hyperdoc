@@ -816,6 +816,8 @@
       "Dreyeck Wiki-assets acceptance failed."))))
 
 
+
+
 (asdf:defsystem #:dreyeck/local-fedwiki-view
   :description "Serve locally persisted Federated Wiki JSON through /view/<slug>"
   :license "BSD"
@@ -823,7 +825,7 @@
   :pathname "dreyeck/src/"
   :serial t
   :depends-on (#:dreyeck/local-fedwiki-page
-               #:hyperbook/server)
+               #:hyperbook/server #:dreyeck/page-attached-asdf #:dreyeck/catalog)
   :components
   ((:file "local-fedwiki-view-package")
    (:file "local-fedwiki-view"))

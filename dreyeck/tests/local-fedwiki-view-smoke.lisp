@@ -103,126 +103,74 @@
                  "Network FedWiki fetch attempted while resolving a local page.")))
 
              (let* ((wiki
-                      (dreyeck/local-fedwiki-page:register-local-fedwiki
-                       (fixture-site-root)
-                       *fixture-wiki-id*))
-                    (page-from-semantic-link-contract
-                      (hyperbook:find-page
-                       *fixture-wiki-id*
-                       *fixture-slug*
-                       :signal-error? t))
-                    (page-from-view-route
-                      (dreyeck/local-fedwiki-view:make-local-fedwiki-view-page
-                       (fixture-site-root)
-                       *fixture-slug*
-                       :wiki-id *fixture-wiki-id*))
-                    (discovery
-                      (dreyeck/local-fedwiki-page:local-fedwiki-page-asdf-discovery
-                       page-from-semantic-link-contract))
-                    (html
-                      (story-view-html
-                       page-from-semantic-link-contract))
-                    (url-html
-                      (url-view-html
-                       page-from-semantic-link-contract)))
-
-               (assert
-                (typep
-                 wiki
-                 'dreyeck/local-fedwiki-page:local-fedwiki))
-
-               (assert
-                (equal
-                 (truename
-                  (fixture-site-root))
-                 (dreyeck/local-fedwiki-page:local-fedwiki-site-root-of
-                  wiki)))
-
-               (assert
-                (typep
-                 page-from-semantic-link-contract
-                 'dreyeck/local-fedwiki-page:local-fedwiki-page))
-
-               ;; Semantic HyperBook lookup and /view resolve to the same
-               ;; cached local page object.
-               (assert
-                (eq
-                 page-from-semantic-link-contract
-                 page-from-view-route))
-
-               (assert
-                (eq
-                 wiki
-                 (hyperbook:hyperbook-of
-                  page-from-semantic-link-contract)))
-
-               (assert
-                (string=
-                 "Reading Java Source as Data"
-                 (hyperbook:title-of
-                  page-from-semantic-link-contract)))
-
-               ;; Missing pages remain local misses. They do not fall through
-               ;; to the network-oriented FEDWIKI implementation.
-               (assert
-                (null
-                 (hyperbook:find-page
-                  *fixture-wiki-id*
-                  "does-not-exist")))
-
-               (assert
-                (not fetch-called-p))
-
-               (assert
-                (equal
-                 '("pages/reading-java-source-as-data")
-                 (getf discovery :assets-references)))
-
-               ;; The fixture contains the page JSON and one page-attached ASD.
-               ;; Discovery must resolve that relation without loading it.
-               (let* ((asdf-files
-                        (getf discovery :asdf-files))
-                      (expected-asd
-                        (asdf:system-relative-pathname
-                         "dreyeck/local-fedwiki-view/tests"
-                         "dreyeck/tests/fixtures/local-fedwiki-view-site/assets/pages/reading-java-source-as-data/reading-java-source-as-data.asd")))
-
-                 (assert
-                  (= 1
-                     (length asdf-files)))
-
-                 (assert
-                  (equal
-                   (truename expected-asd)
-                   (truename
-                    (first asdf-files)))))
-
-
-               (assert
-                (search
-                 "Reading Java Source as Data"
-                 html
-                 :test #'char-equal))
-
-               (assert
-                (search
-                 "This page treats Java source as inspectable"
-                 html
-                 :test #'char-equal))
-
-               (assert
-                (search
-                 (format nil "pages/~A" *fixture-slug*)
-                 html
-                 :test #'char-equal))
-
-               (assert
-                (search
-                 (string-left-trim
-                  "/"
-                  *fixture-view-path*)
-                 url-html
-                 :test #'char-equal))))
+        (dreyeck/local-fedwiki-page:register-local-fedwiki (fixture-site-root)
+                                                           *fixture-wiki-id*))
+       (page-from-semantic-link-contract
+        (hyperbook:find-page *fixture-wiki-id* *fixture-slug* :signal-error?
+                             t))
+       (page-from-view-route
+        (dreyeck/local-fedwiki-view:make-local-fedwiki-view-page
+         (fixture-site-root) *fixture-slug* :wiki-id *fixture-wiki-id*))
+       (discovery
+        (dreyeck/local-fedwiki-page:local-fedwiki-page-asdf-discovery
+         page-from-semantic-link-contract))
+       (html (story-view-html page-from-semantic-link-contract))
+       (url-html (url-view-html page-from-semantic-link-contract)))
+  (assert (typep wiki 'dreyeck/local-fedwiki-page:local-fedwiki))
+  (assert
+   (equal (truename (fixture-site-root))
+          (dreyeck/local-fedwiki-page:local-fedwiki-site-root-of wiki)))
+  (assert
+   (typep page-from-semantic-link-contract
+          'dreyeck/local-fedwiki-page:local-fedwiki-page))
+  (assert (eq page-from-semantic-link-contract page-from-view-route))
+  (assert (eq wiki (hyperbook:hyperbook-of page-from-semantic-link-contract)))
+  (assert
+   (string= "Reading Java Source as Data"
+            (hyperbook:title-of page-from-semantic-link-contract)))
+  (assert (null (hyperbook:find-page *fixture-wiki-id* "does-not-exist")))
+  (assert (not fetch-called-p))
+  (assert
+   (equal '("pages/reading-java-source-as-data")
+          (getf discovery :assets-references)))
+  (let* ((asdf-files (getf discovery :asdf-files))
+         (expected-asd
+          (asdf/system:system-relative-pathname
+           "dreyeck/local-fedwiki-view/tests"
+           "dreyeck/tests/fixtures/local-fedwiki-view-site/assets/pages/reading-java-source-as-data/reading-java-source-as-data.asd")))
+    (assert (= 1 (length asdf-files)))
+    (assert (equal (truename expected-asd) (truename (first asdf-files)))))
+  (let* ((workspace-id (format nil "workspace:~A" *fixture-slug*))
+         (offer-count-before
+          (count workspace-id (hyperbook:hyperbooks-of hyperbook:*catalog*)
+                 :key #'hyperbook:id-of :test #'string=))
+         (first-offer
+          (dreyeck/local-fedwiki-view::ensure-page-attached-workspace-offer
+           page-from-semantic-link-contract))
+         (offer-count-after-first
+          (count workspace-id (hyperbook:hyperbooks-of hyperbook:*catalog*)
+                 :key #'hyperbook:id-of :test #'string=))
+         (second-offer
+          (dreyeck/local-fedwiki-view::ensure-page-attached-workspace-offer
+           page-from-semantic-link-contract))
+         (offer-count-after-second
+          (count workspace-id (hyperbook:hyperbooks-of hyperbook:*catalog*)
+                 :key #'hyperbook:id-of :test #'string=)))
+    (assert (= 0 offer-count-before))
+    (assert first-offer)
+    (assert (string= workspace-id (hyperbook:id-of first-offer)))
+    (assert (= 1 offer-count-after-first))
+    (assert (eq first-offer second-offer))
+    (assert (= 1 offer-count-after-second)))
+  (assert (search "Reading Java Source as Data" html :test #'char-equal))
+  (assert
+   (search "This page treats Java source as inspectable" html :test
+           #'char-equal))
+  (assert
+   (search (format nil "pages/~A" *fixture-slug*) html :test #'char-equal))
+  (assert
+   (search (string-left-trim "/" *fixture-view-path*) url-html :test
+           #'char-equal))))
 
         (setf
          (symbol-function fetch-symbol)

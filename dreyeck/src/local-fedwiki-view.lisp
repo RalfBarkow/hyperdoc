@@ -55,42 +55,49 @@ HYPERDOC_FEDWIKI_SITE_ROOT overrides the default ~/.wiki/dreyeck.ch/ root."
      slug
      :signal-error? t)))
 
+(defun ensure-page-attached-workspace-offer (page)
+  "Ensure the Catalog offer for PAGE's uniquely matching page-attached ASDF system.
+
+Return NIL when PAGE has no matching attached system.  Repeated calls
+return the existing offer.  Ambiguous matches fail closed."
+  (let* ((discovery
+          (dreyeck/local-fedwiki-page:local-fedwiki-page-asdf-discovery page))
+         (page-slug (getf discovery :slug))
+         (system-names
+          (mapcan
+           (lambda (asd)
+             (dreyeck/page-attached-asdf:register-asd-systems asd))
+           (getf discovery :asdf-files)))
+         (matches
+          (remove-if-not (lambda (system-name) (string= page-slug system-name))
+                         system-names)))
+    (cond ((null matches) nil)
+          ((= 1 (length matches))
+           (dreyeck/catalog::admit :catalog (first matches)))
+          (t
+           (error "Page slug ~S matches ~D page-attached ASDF systems: ~S"
+                  page-slug (length matches) matches)))))
+
 (defun install-local-fedwiki-view-route
-    (site-root
-     &key
-       (path "/view")
-       (pane-width "700px")
-       (development nil)
-       (wiki-id *default-wiki-id*))
+       (site-root
+        &key (path "/view") (pane-width "700px") (development nil)
+        (wiki-id *default-wiki-id*))
   "Install PATH/<slug> as a local FedWiki JSON route in the running CLOG server."
-  (let ((site-root
-          (uiop:ensure-directory-pathname
-           site-root)))
+  (let ((site-root (uiop/pathname:ensure-directory-pathname site-root)))
     (clog:set-on-new-window
      (lambda (body)
-       (let* ((pathname
-                (clog:property
-                 (clog:location body)
-                 "pathname"))
-              (slug
-                (view-slug-from-pathname
-                 pathname)))
-         (unless slug
-           (error
-            "Expected /view/<slug>, got ~S."
-            pathname))
+       (let* ((pathname (clog:property (clog:location body) "pathname"))
+              (slug (view-slug-from-pathname pathname)))
+         (unless slug (error "Expected /view/<slug>, got ~S." pathname))
          (let ((page
-                 (make-local-fedwiki-view-page
-                  site-root
-                  slug
-                  :wiki-id wiki-id)))
-           (clog-moldable-inspector:on-new-inspector
-            body
-            :object page
-            :pane-width pane-width
-            :title
-            (hyperbook:title-of page)
-            :playground? development))))
+                (make-local-fedwiki-view-page site-root slug :wiki-id wiki-id)))
+           (ensure-page-attached-workspace-offer page)
+           (clog-moldable-inspector:on-new-inspector body :object page
+                                                     :pane-width pane-width
+                                                     :title
+                                                     (hyperbook:title-of page)
+                                                     :playground?
+                                                     development))))
      :path path)))
 
 (defun serve-catalog-with-local-fedwiki-view
