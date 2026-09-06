@@ -1,277 +1,315 @@
-;;;; Local dreyeck.ch integration and communication systems
 
-(asdf:defsystem #:dreyeck
-  :description "Local dreyeck.ch integration overlay"
-  :license "BSD"
-  :version "0.0.1"
-  :serial t
-  :components
-  ((:module "dreyeck/src"
-    :pathname "dreyeck/src/"
-    :serial t
-    :components
-    ((:file "dreyeck-hyperdoc-deployment-inventory")))))
-
-(asdf:defsystem #:dreyeck/wiki-link
-  :description "Dreyeck FedWiki lookup and story-item operation examples"
-  :license "BSD"
-  :version "0.0.1"
-  :serial t
-  :depends-on (#:hyperdoc/explorer
-               #:hyperbook/fedwiki)
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/wiki-link/tests")))
-  :components
-  ((:module "dreyeck/pages"
-    :pathname "dreyeck/pages/")
-
-   (:module "dreyeck/src"
-    :pathname "dreyeck/src/"
-    :serial t
-    :components
-    ((:file "wiki-link")
-     (:file "fedwiki-journal-context-debugger")
-     (:file "fedwiki-story-item-transfer")))))
-
-(asdf:defsystem #:dreyeck/wiki-link/tests
-  :description "Deterministic tests for Dreyeck FedWiki diagnostic operations"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/wiki-link)
-  :components
-  ((:file "wiki-link-slug-contract")
-   (:file "fedwiki-journal-context-debugger-smoke")
-   (:file "fedwiki-story-item-transfer-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (uiop:symbol-call
-    :dreyeck/wiki-link/contract-tests
-    :run-wiki-link-slug-contract-tests)
-   (uiop:symbol-call
-    :dreyeck/fedwiki-journal-context-debugger/tests
-    :run-fedwiki-journal-context-debugger-tests)
-   (uiop:symbol-call
-    :dreyeck/fedwiki-story-item-transfer/tests
-    :run-fedwiki-story-item-transfer-tests)))
-
-(asdf:defsystem #:dreyeck/fedwiki-navigation
-  :description "Replayable Federated Wiki navigation prototype"
-  :license "BSD"
-  :version "0.0.1"
-  :depends-on (#:asdf
-	       #:uiop
-	       #:hyperdoc)
-  :pathname "dreyeck/src/"
-  :serial t
-  :components
-  ((:file "fedwiki-navigation")
-   (:file "make-navigation-fixture")
-   (:file "navigation-trace"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/fedwiki-navigation/tests"))))
-
-(asdf:defsystem #:dreyeck/inspector/fedwiki-navigation
-  :description "Inspector views for source-backed FedWiki navigation traces"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/fedwiki-navigation
-               #:hyperdoc/inspector
-               #:html-inspector-views)
-  :components
-  ((:file "navigation-trace-views")))
-
-(asdf:defsystem #:dreyeck/fedwiki-navigation/tests
-  :description "Deterministic tests for source-backed FedWiki navigation traces"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/inspector/fedwiki-navigation)
-  :components
-  ((:file "fedwiki-navigation-trace-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (uiop:symbol-call
-    :dreyeck/fedwiki-navigation/tests
-    :run-fedwiki-navigation-trace-tests)))
-
-(asdf:defsystem #:dreyeck/topicmap
-  :description "Renderer-independent Topicmap projection protocol owned by Dreyeck"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :components
-  ((:file "topicmap-package")
-   (:file "topicmap"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/topicmap/tests"))))
-
-(asdf:defsystem #:dreyeck/inspector/topicmap
-  :description "Generic Dreyeck Topicmap view and native CLOG/SVG renderer"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/topicmap
-               #:hyperdoc/inspector
-               #:html-inspector-views
-               #:trivial-package-local-nicknames)
-  :components
-  ((:file "topicmap-inspector-package")
-   (:file "topicmap-inspector")))
-
-(asdf:defsystem #:dreyeck/topicmap/tests
-  :description "Behavior tests for the Dreyeck Topicmap extension"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/inspector/topicmap
-               #:asdf
-               #:uiop)
-  :components
-  ((:file "topicmap-view-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (uiop:symbol-call
-    :dreyeck/topicmap/tests
-    :run-topicmap-view-smoke-tests)))
-
-(asdf:defsystem #:dreyeck/fedwiki-source-relations
-  :description "Source-backed observation of FedWiki component relations"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/git
-               #:dreyeck/topicmap
-               #:hyperdoc)
-  :components
-  ((:module "dreyeck/pages/fedwiki-source-relations"
-    :pathname "../pages/fedwiki-source-relations/")
-   (:file "fedwiki-source-relations-package")
-   (:file "fedwiki-source-relations")
-   (:file "fedwiki-source-relations-hyperdoc"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/fedwiki-source-relations/tests"))))
-
-(asdf:defsystem #:dreyeck/inspector/fedwiki-source-relations
-  :description "Inspector views for Dreyeck FedWiki source relations"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/fedwiki-source-relations
-               #:dreyeck/inspector/git
-               #:dreyeck/inspector/topicmap
-               #:hyperdoc/inspector
-               #:html-inspector-views)
-  :components
-  ((:file "fedwiki-source-relations-inspector-package")
-   (:file "fedwiki-source-relations-views")))
-
-(asdf:defsystem #:dreyeck/fedwiki-source-relations/tests
-  :description "Source-backed tests for FedWiki source relations"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/inspector/fedwiki-source-relations
-               #:hyperdoc/explorer)
-  :components
-  ((:file "fedwiki-source-relations-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (uiop:symbol-call
-    :dreyeck/fedwiki-source-relations/tests
-    :run-fedwiki-source-relations-tests)))
-
-(asdf/parse-defsystem:defsystem #:dreyeck/git
-  :description
-  "Experimental Git-backed inspection objects incubated by Dreyeck"
-  :license
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK
+  :DESCRIPTION
+  "Local dreyeck.ch integration overlay"
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :SERIAL
+  T
+  :COMPONENTS
+  ((:MODULE "dreyeck/src" :PATHNAME "dreyeck/src/" :SERIAL T :COMPONENTS
+    ((:FILE "dreyeck-hyperdoc-deployment-inventory")))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/WIKI-LINK
+  :DESCRIPTION
+  "Dreyeck FedWiki lookup and story-item operation examples"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:HYPERDOC/EXPLORER #:HYPERBOOK/FEDWIKI)
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/wiki-link/tests")))
+  :COMPONENTS
+  ((:MODULE "dreyeck/pages" :PATHNAME "dreyeck/pages/")
+   (:MODULE "dreyeck/src" :PATHNAME "dreyeck/src/" :SERIAL T :COMPONENTS
+    ((:FILE "wiki-link") (:FILE "fedwiki-journal-context-debugger")
+     (:FILE "fedwiki-story-item-transfer")))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/WIKI-LINK/TESTS
+  :DESCRIPTION
+  "Deterministic tests for Dreyeck FedWiki diagnostic operations"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/WIKI-LINK)
+  :COMPONENTS
+  ((:FILE "wiki-link-slug-contract")
+   (:FILE "fedwiki-journal-context-debugger-smoke")
+   (:FILE "fedwiki-story-item-transfer-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/WIKI-LINK/CONTRACT-TESTS
+                             :RUN-WIKI-LINK-SLUG-CONTRACT-TESTS)
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-JOURNAL-CONTEXT-DEBUGGER/TESTS
+                             :RUN-FEDWIKI-JOURNAL-CONTEXT-DEBUGGER-TESTS)
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-STORY-ITEM-TRANSFER/TESTS
+                             :RUN-FEDWIKI-STORY-ITEM-TRANSFER-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-NAVIGATION
+  :DESCRIPTION
+  "Replayable Federated Wiki navigation prototype"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :DEPENDS-ON
+  (#:ASDF #:UIOP #:HYPERDOC)
+  :PATHNAME
   "dreyeck/src/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/topicmap #:asdf #:uiop)
-  :components
-  ((:file "git-package") (:file "git-repository-checkout")
-   (:file "git-commit-inspection") (:file "git-source-slice")
-   (:file "git-repository-topicmap") (:file "git-asdf-references")
-   (:file "git-asdf-reference-topicmap"))
-  :in-order-to
-  ((asdf/lisp-action:test-op (asdf/lisp-action:test-op "dreyeck/git/tests"))))
+  :SERIAL
+  T
+  :COMPONENTS
+  ((:FILE "fedwiki-navigation") (:FILE "make-navigation-fixture")
+   (:FILE "navigation-trace"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/fedwiki-navigation/tests"))))
 
-(asdf:defsystem #:dreyeck/inspector/git
-  :description "Dreyeck inspector views for experimental Git objects"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/git
-               #:dreyeck/inspector/topicmap
-               #:hyperdoc/inspector
-               #:html-inspector-views)
-  :components
-  ((:file "git-inspector-package")
-   (:file "git-commit-inspection-views")
-   (:file "git-asdf-reference-views")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/FEDWIKI-NAVIGATION
+  :DESCRIPTION
+  "Inspector views for source-backed FedWiki navigation traces"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/FEDWIKI-NAVIGATION #:HYPERDOC/INSPECTOR #:HTML-INSPECTOR-VIEWS)
+  :COMPONENTS
+  ((:FILE "navigation-trace-views")))
 
-(asdf:defsystem #:dreyeck/upstream-intake
-  :description "Read-only observations of upstream commits and components"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/git
-               #:hyperdoc
-               #:closer-mop)
-  :components
-  ((:module "dreyeck/pages/upstream-intake"
-    :pathname "../pages/upstream-intake/")
-   (:file "upstream-intake-package")
-   (:file "upstream-intake")
-   (:file "upstream-intake-hyperdoc"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/upstream-intake/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-NAVIGATION/TESTS
+  :DESCRIPTION
+  "Deterministic tests for source-backed FedWiki navigation traces"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/INSPECTOR/FEDWIKI-NAVIGATION)
+  :COMPONENTS
+  ((:FILE "fedwiki-navigation-trace-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-NAVIGATION/TESTS
+                             :RUN-FEDWIKI-NAVIGATION-TRACE-TESTS)))
 
-(asdf:defsystem #:dreyeck/inspector/upstream-intake
-  :description "Inspector views for read-only upstream intake observations"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/upstream-intake
-               #:dreyeck/inspector/git
-               #:hyperdoc/inspector
-               #:html-inspector-views)
-  :components
-  ((:file "upstream-intake-inspector-package")
-   (:file "upstream-intake-views")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/TOPICMAP
+  :DESCRIPTION
+  "Renderer-independent Topicmap projection protocol owned by Dreyeck"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :COMPONENTS
+  ((:FILE "topicmap-package") (:FILE "topicmap"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/topicmap/tests"))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/TOPICMAP
+  :DESCRIPTION
+  "Generic Dreyeck Topicmap view and native CLOG/SVG renderer"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/TOPICMAP #:HYPERDOC/INSPECTOR #:HTML-INSPECTOR-VIEWS
+   #:TRIVIAL-PACKAGE-LOCAL-NICKNAMES)
+  :COMPONENTS
+  ((:FILE "topicmap-inspector-package") (:FILE "topicmap-inspector")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/TOPICMAP/TESTS
+  :DESCRIPTION
+  "Behavior tests for the Dreyeck Topicmap extension"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/INSPECTOR/TOPICMAP #:ASDF #:UIOP)
+  :COMPONENTS
+  ((:FILE "topicmap-view-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/TOPICMAP/TESTS
+                             :RUN-TOPICMAP-VIEW-SMOKE-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-SOURCE-RELATIONS
+  :DESCRIPTION
+  "Source-backed observation of FedWiki component relations"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/GIT #:DREYECK/TOPICMAP #:HYPERDOC)
+  :COMPONENTS
+  ((:MODULE "dreyeck/pages/fedwiki-source-relations" :PATHNAME
+    "../pages/fedwiki-source-relations/")
+   (:FILE "fedwiki-source-relations-package")
+   (:FILE "fedwiki-source-relations")
+   (:FILE "fedwiki-source-relations-hyperdoc"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/fedwiki-source-relations/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/FEDWIKI-SOURCE-RELATIONS
+  :DESCRIPTION
+  "Inspector views for Dreyeck FedWiki source relations"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/FEDWIKI-SOURCE-RELATIONS #:DREYECK/INSPECTOR/GIT
+   #:DREYECK/INSPECTOR/TOPICMAP #:HYPERDOC/INSPECTOR #:HTML-INSPECTOR-VIEWS)
+  :COMPONENTS
+  ((:FILE "fedwiki-source-relations-inspector-package")
+   (:FILE "fedwiki-source-relations-views")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-SOURCE-RELATIONS/TESTS
+  :DESCRIPTION
+  "Source-backed tests for FedWiki source relations"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/INSPECTOR/FEDWIKI-SOURCE-RELATIONS #:HYPERDOC/EXPLORER)
+  :COMPONENTS
+  ((:FILE "fedwiki-source-relations-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-SOURCE-RELATIONS/TESTS
+                             :RUN-FEDWIKI-SOURCE-RELATIONS-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/GIT
+  :DESCRIPTION
+  "Experimental Git-backed inspection objects incubated by Dreyeck"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/TOPICMAP #:ASDF #:UIOP)
+  :COMPONENTS
+  ((:FILE "git-package") (:FILE "git-repository-checkout")
+   (:FILE "git-commit-inspection") (:FILE "git-source-slice")
+   (:FILE "git-repository-topicmap") (:FILE "git-asdf-references")
+   (:FILE "git-asdf-reference-topicmap"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP (ASDF/LISP-ACTION:TEST-OP "dreyeck/git/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/GIT
+  :DESCRIPTION
+  "Dreyeck inspector views for experimental Git objects"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/GIT #:DREYECK/INSPECTOR/TOPICMAP #:HYPERDOC/INSPECTOR
+   #:HTML-INSPECTOR-VIEWS)
+  :COMPONENTS
+  ((:FILE "git-inspector-package") (:FILE "git-commit-inspection-views")
+   (:FILE "git-asdf-reference-views")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/UPSTREAM-INTAKE
+  :DESCRIPTION
+  "Read-only observations of upstream commits and components"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/GIT #:HYPERDOC #:CLOSER-MOP)
+  :COMPONENTS
+  ((:MODULE "dreyeck/pages/upstream-intake" :PATHNAME
+    "../pages/upstream-intake/")
+   (:FILE "upstream-intake-package") (:FILE "upstream-intake")
+   (:FILE "upstream-intake-hyperdoc"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/upstream-intake/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
+  :DESCRIPTION
+  "Inspector views for read-only upstream intake observations"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/UPSTREAM-INTAKE #:DREYECK/INSPECTOR/GIT #:HYPERDOC/INSPECTOR
+   #:HTML-INSPECTOR-VIEWS)
+  :COMPONENTS
+  ((:FILE "upstream-intake-inspector-package") (:FILE "upstream-intake-views")))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG
   :DESCRIPTION
@@ -291,53 +329,54 @@
   :COMPONENTS
   ((:FILE "dreyeck/src/catalog")))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/git/tests
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/GIT/TESTS
+  :DESCRIPTION
   "Stable local-fixture tests for Dreyeck Git inspection"
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/tests/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/inspector/git #:closer-mop)
-  :components
-  ((:file "git-commit-inspection-smoke") (:file "git-source-slice-smoke")
-   (:file "git-repository-topicmap-smoke") (:file "git-asdf-reference-smoke"))
-  :perform
-  (asdf/lisp-action:test-op (operation component)
-   (declare (ignore operation component))
-   (uiop/package:symbol-call :dreyeck/git/tests
-                             :run-git-commit-inspection-smoke-tests)
-   (uiop/package:symbol-call :dreyeck/git/tests
-                             :run-git-source-slice-smoke-tests)
-   (uiop/package:symbol-call :dreyeck/git/tests
-                             :run-git-repository-topicmap-smoke-tests)
-   (uiop/package:symbol-call :dreyeck/git/asdf-reference-tests
-                             :run-git-asdf-reference-smoke-tests)))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/INSPECTOR/GIT #:CLOSER-MOP)
+  :COMPONENTS
+  ((:FILE "git-commit-inspection-smoke") (:FILE "git-source-slice-smoke")
+   (:FILE "git-repository-topicmap-smoke") (:FILE "git-asdf-reference-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GIT/TESTS
+                             :RUN-GIT-COMMIT-INSPECTION-SMOKE-TESTS)
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GIT/TESTS
+                             :RUN-GIT-SOURCE-SLICE-SMOKE-TESTS)
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GIT/TESTS
+                             :RUN-GIT-REPOSITORY-TOPICMAP-SMOKE-TESTS)
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GIT/ASDF-REFERENCE-TESTS
+                             :RUN-GIT-ASDF-REFERENCE-SMOKE-TESTS)))
 
-(asdf:defsystem #:dreyeck/upstream-intake/tests
-  :description "Deterministic read-only Upstream Intake contract tests"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/inspector/upstream-intake
-               #:hyperdoc/explorer
-               #:hyperbook/fedwiki)
-  :components
-  ((:file "upstream-intake-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (uiop:symbol-call
-    :dreyeck/upstream-intake/tests
-    :run-upstream-intake-tests)))
-
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/UPSTREAM-INTAKE/TESTS
+  :DESCRIPTION
+  "Deterministic read-only Upstream Intake contract tests"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/INSPECTOR/UPSTREAM-INTAKE #:HYPERDOC/EXPLORER #:HYPERBOOK/FEDWIKI)
+  :COMPONENTS
+  ((:FILE "upstream-intake-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/UPSTREAM-INTAKE/TESTS
+                             :RUN-UPSTREAM-INTAKE-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG/TESTS
   :DESCRIPTION
@@ -360,987 +399,1163 @@
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/CATALOG/TESTS
                              :RUN-CATALOG-STARTUP-SMOKE-TESTS)))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/lisp-image
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LISP-IMAGE
+  :DESCRIPTION
   "dreyeck.ch-owned Lisp image inventory and executable HyperDoc reading path."
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :serial
-  t
-  :depends-on
-  (#:hyperdoc/explorer)
-  :components
-  ((:module "dreyeck/src" :pathname "dreyeck/src/" :serial t :components
-    ((:file "lisp-image-package") (:file "lisp-image-inventory")
-     (:file "lisp-image-definition-sources") (:file "lisp-image-observations")
-     (:file "lisp-image-views") (:file "lisp-image-hyperdoc")))
-   (:module "dreyeck/pages/lisp-image" :pathname "dreyeck/pages/lisp-image/"
-    :components ((:static-file "Lisp image HyperBook refactor.html")))))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:HYPERDOC/EXPLORER)
+  :COMPONENTS
+  ((:MODULE "dreyeck/src" :PATHNAME "dreyeck/src/" :SERIAL T :COMPONENTS
+    ((:FILE "lisp-image-package") (:FILE "lisp-image-inventory")
+     (:FILE "lisp-image-definition-sources") (:FILE "lisp-image-observations")
+     (:FILE "lisp-image-views") (:FILE "lisp-image-hyperdoc")))
+   (:MODULE "dreyeck/pages/lisp-image" :PATHNAME "dreyeck/pages/lisp-image/"
+    :COMPONENTS ((:STATIC-FILE "Lisp image HyperBook refactor.html")))))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/lisp-image/topicmap
-  :depends-on
-  (#:dreyeck/lisp-image #:dreyeck/topicmap)
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LISP-IMAGE/TOPICMAP
+  :DEPENDS-ON
+  (#:DREYECK/LISP-IMAGE #:DREYECK/TOPICMAP)
+  :DESCRIPTION
   "Topicmap projection adapter for live Lisp image subjects."
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/src/"
-  :serial
-  t
-  :components
-  ((:file "lisp-image-topicmap"))
-  :in-order-to
-  ((asdf/lisp-action:test-op
-    (asdf/lisp-action:test-op "dreyeck/lisp-image/topicmap/tests"))))
+  :SERIAL
+  T
+  :COMPONENTS
+  ((:FILE "lisp-image-topicmap"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/lisp-image/topicmap/tests"))))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/lisp-image/topicmap/tests
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LISP-IMAGE/TOPICMAP/TESTS
+  :DESCRIPTION
   "Behavior tests for live Lisp image Topicmap projections."
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/tests/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/lisp-image/topicmap #:asdf #:uiop)
-  :components
-  ((:file "lisp-image-topicmap-smoke"))
-  :perform
-  (asdf/lisp-action:test-op (operation component)
-   (declare (ignore operation component))
-   (uiop/package:symbol-call :dreyeck/lisp-image/topicmap/tests
-                             :run-lisp-image-topicmap-smoke-tests)))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/LISP-IMAGE/TOPICMAP #:ASDF #:UIOP)
+  :COMPONENTS
+  ((:FILE "lisp-image-topicmap-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/LISP-IMAGE/TOPICMAP/TESTS
+                             :RUN-LISP-IMAGE-TOPICMAP-SMOKE-TESTS)))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-ASSETS
+  :DESCRIPTION
+  "Read-only discovery of local assets referenced by Federated Wiki pages"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:UIOP #:SHASHT)
+  :COMPONENTS
+  ((:FILE "fedwiki-assets-package") (:FILE "fedwiki-assets"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/fedwiki-assets/tests"))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-ASSETS/TESTS
+  :DESCRIPTION
+  "Deterministic tests for local FedWiki asset discovery"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/FEDWIKI-ASSETS)
+  :COMPONENTS
+  ((:FILE "fedwiki-assets-test-package") (:FILE "fedwiki-assets-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-ASSETS/TESTS
+                                 :RUN-FEDWIKI-ASSETS-TESTS)
+     (ERROR "Dreyeck FedWiki assets tests failed."))))
 
-(asdf:defsystem #:dreyeck/fedwiki-assets
-  :description "Read-only discovery of local assets referenced by Federated Wiki pages"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:uiop
-               #:shasht)
-  :components
-  ((:file "fedwiki-assets-package")
-   (:file "fedwiki-assets"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/fedwiki-assets/tests"))))
-
-(asdf:defsystem #:dreyeck/fedwiki-assets/tests
-  :description "Deterministic tests for local FedWiki asset discovery"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/fedwiki-assets)
-  :components
-  ((:file "fedwiki-assets-test-package")
-   (:file "fedwiki-assets-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/fedwiki-assets/tests
-        :run-fedwiki-assets-tests)
-     (error "Dreyeck FedWiki assets tests failed."))))
-
-
-(asdf/parse-defsystem:defsystem #:dreyeck/fedwiki-journal
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-JOURNAL
+  :DESCRIPTION
   "Generic invariant checks and inspectable findings for Federated Wiki journals"
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/src/"
-  :serial
-  t
-  :depends-on
-  (#:hyperbook/fedwiki #:local-time)
-  :components
-  ((:file "fedwiki-journal-package") (:file "fedwiki-journal"))
-  :in-order-to
-  ((asdf/lisp-action:test-op
-    (asdf/lisp-action:test-op "dreyeck/fedwiki-journal/tests"))))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:HYPERBOOK/FEDWIKI #:LOCAL-TIME)
+  :COMPONENTS
+  ((:FILE "fedwiki-journal-package") (:FILE "fedwiki-journal"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/fedwiki-journal/tests"))))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/fedwiki-journal/tests
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-JOURNAL/TESTS
+  :DESCRIPTION
   "Deterministic tests for generic Federated Wiki journal checks"
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/tests/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/fedwiki-journal)
-  :components
-  ((:file "fedwiki-journal-test-package") (:file "fedwiki-journal-smoke"))
-  :perform
-  (asdf/lisp-action:test-op (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop/package:symbol-call :dreyeck/fedwiki-journal/tests
-                                 :run-fedwiki-journal-tests)
-     (error "Dreyeck FedWiki journal tests failed."))))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/FEDWIKI-JOURNAL)
+  :COMPONENTS
+  ((:FILE "fedwiki-journal-test-package") (:FILE "fedwiki-journal-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-JOURNAL/TESTS
+                                 :RUN-FEDWIKI-JOURNAL-TESTS)
+     (ERROR "Dreyeck FedWiki journal tests failed."))))
 
-(asdf:defsystem #:dreyeck/page-attached-asdf
-  :description "Observable registration of trusted page-attached ASDF definitions"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:asdf
-               #:uiop)
-  :components
-  ((:file "page-attached-asdf-package")
-   (:file "page-attached-asdf"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/page-attached-asdf/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/PAGE-ATTACHED-ASDF
+  :DESCRIPTION
+  "Observable registration of trusted page-attached ASDF definitions"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:ASDF #:UIOP)
+  :COMPONENTS
+  ((:FILE "page-attached-asdf-package") (:FILE "page-attached-asdf"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/page-attached-asdf/tests"))))
 
-(asdf:defsystem #:dreyeck/page-attached-asdf/tests
-  :description "Deterministic tests for page-attached ASDF registration"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/page-attached-asdf)
-  :components
-  ((:file "page-attached-asdf-test-package")
-   (:file "page-attached-asdf-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/page-attached-asdf/tests
-        :run-page-attached-asdf-tests-in-fresh-process)
-     (error
-      "Dreyeck page-attached ASDF tests failed."))))
-
-
-(asdf/parse-defsystem:defsystem "dreyeck/page-attached-system-projection"
-                                :pathname "dreyeck/src/" :serial t :depends-on
-                                ("asdf"
-                                 "dreyeck/page-attached-asdf"
-                                 "dreyeck/topicmap")
-                                :components
-                                ((:file
-                                        "page-attached-system-projection-package")
-                                 (:file "page-attached-system-projection"))
-                                :in-order-to
-                                ((asdf/lisp-action:test-op
-                                                           (asdf/lisp-action:test-op
-                                                                                     "dreyeck/page-attached-system-projection/tests"))))
-
-(asdf/parse-defsystem:defsystem "dreyeck/page-attached-system-projection/tests"
-  :pathname
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/PAGE-ATTACHED-ASDF/TESTS
+  :DESCRIPTION
+  "Deterministic tests for page-attached ASDF registration"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
   "dreyeck/tests/"
-  :serial
-  t
-  :depends-on
-  ("asdf" "dreyeck/page-attached-system-projection" "dreyeck/topicmap")
-  :components
-  ((:file "page-attached-system-projection-package")
-   (:file "page-attached-system-projection"))
-  :perform
-  (asdf/lisp-action:test-op (operation component)
-   (declare (ignore operation component))
-   (uiop/package:symbol-call :dreyeck/page-attached-system-projection/tests
-                             :run-page-attached-system-projection-tests)))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/PAGE-ATTACHED-ASDF)
+  :COMPONENTS
+  ((:FILE "page-attached-asdf-test-package") (:FILE "page-attached-asdf-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/PAGE-ATTACHED-ASDF/TESTS
+                                 :RUN-PAGE-ATTACHED-ASDF-TESTS-IN-FRESH-PROCESS)
+     (ERROR "Dreyeck page-attached ASDF tests failed."))))
 
-(asdf/parse-defsystem:defsystem "dreyeck/page-attached-workspace-reconstruction"
-  :pathname
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/page-attached-system-projection"
+  :PATHNAME
   "dreyeck/src/"
-  :serial
-  t
-  :depends-on
-  ("asdf" "dreyeck/page-attached-system-projection" "dreyeck/topicmap")
-  :components
-  ((:file "page-attached-workspace-reconstruction")))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("asdf" "dreyeck/page-attached-asdf" "dreyeck/topicmap")
+  :COMPONENTS
+  ((:FILE "page-attached-system-projection-package")
+   (:FILE "page-attached-system-projection"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP
+     "dreyeck/page-attached-system-projection/tests"))))
 
-(asdf/parse-defsystem:defsystem "dreyeck/page-attached-workspace-reconstruction-runner"
-  :pathname
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/page-attached-system-projection/tests"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("asdf" "dreyeck/page-attached-system-projection" "dreyeck/topicmap")
+  :COMPONENTS
+  ((:FILE "page-attached-system-projection-package")
+   (:FILE "page-attached-system-projection"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/PAGE-ATTACHED-SYSTEM-PROJECTION/TESTS
+                             :RUN-PAGE-ATTACHED-SYSTEM-PROJECTION-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/page-attached-workspace-reconstruction"
+  :PATHNAME
   "dreyeck/src/"
-  :serial
-  t
-  :depends-on
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("asdf" "dreyeck/page-attached-system-projection" "dreyeck/topicmap")
+  :COMPONENTS
+  ((:FILE "page-attached-workspace-reconstruction")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/page-attached-workspace-reconstruction-runner"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
   ("asdf" "uiop" "dreyeck/page-attached-workspace-reconstruction")
-  :components
-  ((:file "page-attached-workspace-reconstruction-runner")))
+  :COMPONENTS
+  ((:FILE "page-attached-workspace-reconstruction-runner")))
 
-(asdf:defsystem #:dreyeck/page-attached-hyperdoc
-  :description "Observe HyperDocs registered by explicitly loaded ASDF systems"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:asdf
-               #:hyperbook
-               #:hyperdoc)
-  :components
-  ((:file "page-attached-hyperdoc-package")
-   (:file "page-attached-hyperdoc"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/page-attached-hyperdoc/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/PAGE-ATTACHED-HYPERDOC
+  :DESCRIPTION
+  "Observe HyperDocs registered by explicitly loaded ASDF systems"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:ASDF #:HYPERBOOK #:HYPERDOC)
+  :COMPONENTS
+  ((:FILE "page-attached-hyperdoc-package") (:FILE "page-attached-hyperdoc"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/page-attached-hyperdoc/tests"))))
 
-(asdf:defsystem #:dreyeck/page-attached-hyperdoc/tests
-  :description "Deterministic tests for page-attached HyperDoc activation"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/page-attached-hyperdoc)
-  :components
-  ((:file "page-attached-hyperdoc-test-package")
-   (:file "page-attached-hyperdoc-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/page-attached-hyperdoc/tests
-        :run-page-attached-hyperdoc-tests-in-fresh-process)
-     (error
-      "Dreyeck page-attached HyperDoc tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/PAGE-ATTACHED-HYPERDOC/TESTS
+  :DESCRIPTION
+  "Deterministic tests for page-attached HyperDoc activation"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/PAGE-ATTACHED-HYPERDOC)
+  :COMPONENTS
+  ((:FILE "page-attached-hyperdoc-test-package")
+   (:FILE "page-attached-hyperdoc-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/PAGE-ATTACHED-HYPERDOC/TESTS
+                                 :RUN-PAGE-ATTACHED-HYPERDOC-TESTS-IN-FRESH-PROCESS)
+     (ERROR "Dreyeck page-attached HyperDoc tests failed."))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-HYPERDOC
+  :DESCRIPTION
+  "Activate local page-attached HyperDocs from FedWiki assets"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:ASDF #:UIOP #:HYPERBOOK #:HYPERDOC #:DREYECK/FEDWIKI-ASSETS
+   #:DREYECK/PAGE-ATTACHED-ASDF #:DREYECK/PAGE-ATTACHED-HYPERDOC)
+  :COMPONENTS
+  ((:FILE "fedwiki-hyperdoc-package") (:FILE "fedwiki-hyperdoc"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/fedwiki-hyperdoc/tests"))))
 
-(asdf:defsystem #:dreyeck/fedwiki-hyperdoc
-  :description "Activate local page-attached HyperDocs from FedWiki assets"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:asdf
-               #:uiop
-               #:hyperbook
-               #:hyperdoc
-               #:dreyeck/fedwiki-assets
-               #:dreyeck/page-attached-asdf
-               #:dreyeck/page-attached-hyperdoc)
-  :components
-  ((:file "fedwiki-hyperdoc-package")
-   (:file "fedwiki-hyperdoc"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/fedwiki-hyperdoc/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-HYPERDOC-DEMO
+  :DESCRIPTION
+  "Executable demonstration of local FedWiki page-attached HyperDoc activation"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/FEDWIKI-HYPERDOC #:HYPERDOC/EXPLORER)
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/fedwiki-hyperdoc-demo/tests")))
+  :COMPONENTS
+  ((:MODULE "dreyeck/pages/fedwiki-hyperdoc-demo" :PATHNAME
+    "dreyeck/pages/fedwiki-hyperdoc-demo/")
+   (:MODULE "dreyeck/src" :PATHNAME "dreyeck/src/" :COMPONENTS
+    ((:FILE "fedwiki-hyperdoc-demo")))))
 
-(asdf:defsystem #:dreyeck/fedwiki-hyperdoc-demo
-  :description "Executable demonstration of local FedWiki page-attached HyperDoc activation"
-  :license "BSD"
-  :version "0.0.1"
-  :serial t
-  :depends-on (#:dreyeck/fedwiki-hyperdoc
-               #:hyperdoc/explorer)
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/fedwiki-hyperdoc-demo/tests")))
-  :components
-  ((:module "dreyeck/pages/fedwiki-hyperdoc-demo"
-    :pathname "dreyeck/pages/fedwiki-hyperdoc-demo/")
-   (:module "dreyeck/src"
-    :pathname "dreyeck/src/"
-    :components
-    ((:file "fedwiki-hyperdoc-demo")))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-HYPERDOC-DEMO/TESTS
+  :DESCRIPTION
+  "Smoke tests for the executable FedWiki HyperDoc demonstration"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/FEDWIKI-HYPERDOC-DEMO)
+  :COMPONENTS
+  ((:FILE "fedwiki-hyperdoc-demo-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-HYPERDOC-DEMO/TESTS
+                                 :RUN-FEDWIKI-HYPERDOC-DEMO-TESTS)
+     (ERROR "Dreyeck FedWiki HyperDoc demo tests failed."))))
 
-(asdf:defsystem #:dreyeck/fedwiki-hyperdoc-demo/tests
-  :description "Smoke tests for the executable FedWiki HyperDoc demonstration"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/fedwiki-hyperdoc-demo)
-  :components
-  ((:file "fedwiki-hyperdoc-demo-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/fedwiki-hyperdoc-demo/tests
-        :run-fedwiki-hyperdoc-demo-tests)
-     (error
-      "Dreyeck FedWiki HyperDoc demo tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-HYPERDOC/TESTS
+  :DESCRIPTION
+  "End-to-end tests for local FedWiki page-attached HyperDoc activation"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/FEDWIKI-HYPERDOC)
+  :COMPONENTS
+  ((:FILE "fedwiki-hyperdoc-test-package") (:FILE "fedwiki-hyperdoc-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-HYPERDOC/TESTS
+                                 :RUN-FEDWIKI-HYPERDOC-TESTS-IN-FRESH-PROCESS)
+     (ERROR "Dreyeck FedWiki HyperDoc tests failed."))))
 
-(asdf:defsystem #:dreyeck/fedwiki-hyperdoc/tests
-  :description "End-to-end tests for local FedWiki page-attached HyperDoc activation"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/fedwiki-hyperdoc)
-  :components
-  ((:file "fedwiki-hyperdoc-test-package")
-   (:file "fedwiki-hyperdoc-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/fedwiki-hyperdoc/tests
-        :run-fedwiki-hyperdoc-tests-in-fresh-process)
-     (error
-      "Dreyeck FedWiki HyperDoc tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LOCAL-FEDWIKI-PAGE
+  :DESCRIPTION
+  "Local Federated Wiki pages with explicit local provenance"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:UIOP #:HYPERBOOK/FEDWIKI #:DREYECK/FEDWIKI-ASSETS)
+  :COMPONENTS
+  ((:FILE "local-fedwiki-page-package") (:FILE "local-fedwiki-page"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/local-fedwiki-page/tests"))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LOCAL-FEDWIKI-PAGE/INSPECTOR
+  :DESCRIPTION
+  "Inspector integration for local Federated Wiki page provenance"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/LOCAL-FEDWIKI-PAGE #:HYPERBOOK/FEDWIKI #:HTML-INSPECTOR-VIEWS)
+  :COMPONENTS
+  ((:FILE "local-fedwiki-page-inspector-package")
+   (:FILE "local-fedwiki-page-inspector")))
 
-(asdf:defsystem #:dreyeck/local-fedwiki-page
-  :description "Local Federated Wiki pages with explicit local provenance"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:uiop
-               #:hyperbook/fedwiki
-               #:dreyeck/fedwiki-assets)
-  :components
-  ((:file "local-fedwiki-page-package")
-   (:file "local-fedwiki-page"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/local-fedwiki-page/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LOCAL-FEDWIKI-PAGE/TESTS
+  :DESCRIPTION
+  "Fresh-process tests for local FedWiki provenance and inspector discovery"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/LOCAL-FEDWIKI-PAGE/INSPECTOR)
+  :COMPONENTS
+  ((:FILE "local-fedwiki-page-test-package") (:FILE "local-fedwiki-page-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/LOCAL-FEDWIKI-PAGE/TESTS
+                                 :RUN-LOCAL-FEDWIKI-PAGE-TESTS-IN-FRESH-PROCESS)
+     (ERROR "Dreyeck local FedWiki page tests failed."))))
 
-
-(asdf:defsystem #:dreyeck/local-fedwiki-page/inspector
-  :description "Inspector integration for local Federated Wiki page provenance"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/local-fedwiki-page
-               #:hyperbook/fedwiki
-               #:html-inspector-views)
-  :components
-  ((:file "local-fedwiki-page-inspector-package")
-   (:file "local-fedwiki-page-inspector")))
-
-(asdf:defsystem #:dreyeck/local-fedwiki-page/tests
-  :description "Fresh-process tests for local FedWiki provenance and inspector discovery"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/local-fedwiki-page/inspector)
-  :components
-  ((:file "local-fedwiki-page-test-package")
-   (:file "local-fedwiki-page-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/local-fedwiki-page/tests
-        :run-local-fedwiki-page-tests-in-fresh-process)
-     (error
-      "Dreyeck local FedWiki page tests failed."))))
-
-
-(asdf:defsystem #:dreyeck/local-fedwiki-page/activation-inspector
-  :description "Explicit HyperDoc activation from local Federated Wiki page inspection"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/local-fedwiki-page/inspector
-               #:dreyeck/fedwiki-hyperdoc)
-  :components
-  ((:file "local-fedwiki-page-activation-inspector"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LOCAL-FEDWIKI-PAGE/ACTIVATION-INSPECTOR
+  :DESCRIPTION
+  "Explicit HyperDoc activation from local Federated Wiki page inspection"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/LOCAL-FEDWIKI-PAGE/INSPECTOR #:DREYECK/FEDWIKI-HYPERDOC)
+  :COMPONENTS
+  ((:FILE "local-fedwiki-page-activation-inspector"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP
      "dreyeck/local-fedwiki-page/activation-inspector/tests"))))
 
-(asdf:defsystem #:dreyeck/local-fedwiki-page/activation-inspector/tests
-  :description "Fresh-process tests for explicit local FedWiki HyperDoc activation"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/local-fedwiki-page/activation-inspector)
-  :components
-  ((:file "local-fedwiki-page-activation-inspector-test-package")
-   (:file "local-fedwiki-page-activation-inspector-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/local-fedwiki-page/activation-inspector/tests
-        :run-local-fedwiki-page-activation-inspector-tests-in-fresh-process)
-     (error
-      "Dreyeck local FedWiki page activation-inspector tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LOCAL-FEDWIKI-PAGE/ACTIVATION-INSPECTOR/TESTS
+  :DESCRIPTION
+  "Fresh-process tests for explicit local FedWiki HyperDoc activation"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/LOCAL-FEDWIKI-PAGE/ACTIVATION-INSPECTOR)
+  :COMPONENTS
+  ((:FILE "local-fedwiki-page-activation-inspector-test-package")
+   (:FILE "local-fedwiki-page-activation-inspector-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL
+        :DREYECK/LOCAL-FEDWIKI-PAGE/ACTIVATION-INSPECTOR/TESTS
+        :RUN-LOCAL-FEDWIKI-PAGE-ACTIVATION-INSPECTOR-TESTS-IN-FRESH-PROCESS)
+     (ERROR "Dreyeck local FedWiki page activation-inspector tests failed."))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/WIKI-ASSETS-ACCEPTANCE/TESTS
+  :DESCRIPTION
+  "Fresh-process acceptance of tracked page-attached Wiki asset ASDF systems"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:ASDF #:UIOP)
+  :COMPONENTS
+  ((:FILE "wiki-assets-acceptance-test-package")
+   (:FILE "wiki-assets-acceptance-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/WIKI-ASSETS-ACCEPTANCE/TESTS
+                                 :RUN-WIKI-ASSETS-ACCEPTANCE-TESTS-IN-FRESH-PROCESS)
+     (ERROR "Dreyeck Wiki-assets acceptance failed."))))
 
-(asdf:defsystem #:dreyeck/wiki-assets-acceptance/tests
-  :description "Fresh-process acceptance of tracked page-attached Wiki asset ASDF systems"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:asdf
-               #:uiop)
-  :components
-  ((:file "wiki-assets-acceptance-test-package")
-   (:file "wiki-assets-acceptance-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/wiki-assets-acceptance/tests
-        :run-wiki-assets-acceptance-tests-in-fresh-process)
-     (error
-      "Dreyeck Wiki-assets acceptance failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LOCAL-FEDWIKI-VIEW
+  :DESCRIPTION
+  "Serve locally persisted Federated Wiki JSON through /view/<slug>"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/LOCAL-FEDWIKI-PAGE #:HYPERBOOK/SERVER #:DREYECK/PAGE-ATTACHED-ASDF
+   #:DREYECK/CATALOG)
+  :COMPONENTS
+  ((:FILE "local-fedwiki-view-package") (:FILE "local-fedwiki-view"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/local-fedwiki-view/tests"))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LOCAL-FEDWIKI-VIEW/TESTS
+  :DESCRIPTION
+  "Server-independence tests for local FedWiki JSON rendering"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/LOCAL-FEDWIKI-VIEW)
+  :COMPONENTS
+  ((:FILE "local-fedwiki-view-test-package") (:FILE "local-fedwiki-view-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/LOCAL-FEDWIKI-VIEW/TESTS
+                                 :RUN-LOCAL-FEDWIKI-VIEW-TESTS)
+     (ERROR "Local FedWiki /view tests failed."))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-PAGE-MATERIALIZATION
+  :DESCRIPTION
+  "Persist raw Federated Wiki Page JSON; fork provenance is an explicit operation"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/FEDWIKI-ASSETS #:SHASHT #:UIOP)
+  :COMPONENTS
+  ((:FILE "fedwiki-page-materialization-package")
+   (:FILE "fedwiki-page-materialization"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/fedwiki-page-materialization/tests"))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-PAGE-MATERIALIZATION/TESTS
+  :DESCRIPTION
+  "Deterministic tests for local FedWiki page materialization"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/FEDWIKI-PAGE-MATERIALIZATION)
+  :COMPONENTS
+  ((:FILE "fedwiki-page-materialization-test-package")
+   (:FILE "fedwiki-page-materialization-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-PAGE-MATERIALIZATION/TESTS
+                                 :RUN-FEDWIKI-PAGE-MATERIALIZATION-TESTS)
+     (ERROR "FedWiki page materialization tests failed."))))
 
-(asdf:defsystem #:dreyeck/local-fedwiki-view
-  :description "Serve locally persisted Federated Wiki JSON through /view/<slug>"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/local-fedwiki-page
-               #:hyperbook/server #:dreyeck/page-attached-asdf #:dreyeck/catalog)
-  :components
-  ((:file "local-fedwiki-view-package")
-   (:file "local-fedwiki-view"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/local-fedwiki-view/tests"))))
-
-(asdf:defsystem #:dreyeck/local-fedwiki-view/tests
-  :description "Server-independence tests for local FedWiki JSON rendering"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/local-fedwiki-view)
-  :components
-  ((:file "local-fedwiki-view-test-package")
-   (:file "local-fedwiki-view-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare
-    (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/local-fedwiki-view/tests
-        :run-local-fedwiki-view-tests)
-     (error
-      "Local FedWiki /view tests failed."))))
-
-(asdf:defsystem #:dreyeck/fedwiki-page-materialization
-  :description "Persist raw Federated Wiki Page JSON; fork provenance is an explicit operation"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/src/"
-  :serial t
-  :depends-on (#:dreyeck/fedwiki-assets
-               #:shasht
-               #:uiop)
-  :components
-  ((:file "fedwiki-page-materialization-package")
-   (:file "fedwiki-page-materialization"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "dreyeck/fedwiki-page-materialization/tests"))))
-
-(asdf:defsystem #:dreyeck/fedwiki-page-materialization/tests
-  :description "Deterministic tests for local FedWiki page materialization"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on (#:dreyeck/fedwiki-page-materialization)
-  :components
-  ((:file "fedwiki-page-materialization-test-package")
-   (:file "fedwiki-page-materialization-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare
-    (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :dreyeck/fedwiki-page-materialization/tests
-        :run-fedwiki-page-materialization-tests)
-     (error
-      "FedWiki page materialization tests failed."))))
-
-(asdf:defsystem #:dreyeck/shop3
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SHOP3
+  :DESCRIPTION
   "SHOP3-backed HTN planning layer owned by Dreyeck"
-  :author
+  :AUTHOR
   "Ralf Barkow <ralf.barkow@me.com>"
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :serial
-  t
-  :depends-on
-  (#:hyperdoc #:shop3)
-  :components
-  ((:module "dreyeck/shop3" :serial t :components
-    ((:file "package") (:file "manual-topics") (:file "plan-objects")
-     (:file "examples") (:file "views")))))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:HYPERDOC #:SHOP3)
+  :COMPONENTS
+  ((:MODULE "dreyeck/shop3" :SERIAL T :COMPONENTS
+    ((:FILE "package") (:FILE "manual-topics") (:FILE "plan-objects")
+     (:FILE "examples") (:FILE "views")))))
 
-(asdf:defsystem #:DREYECK/STATE-MACHINE :description
-                "Generic evidence-bearing state-machine runtime" :license "BSD"
-                :version "0.0.1" :pathname "dreyeck/src/" :serial t :components
-                ((:file "state-machine-package") (:file "state-machine"))
-                :in-order-to
-                ((asdf:test-op (asdf:test-op "dreyeck/state-machine/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/STATE-MACHINE
+  :DESCRIPTION
+  "Generic evidence-bearing state-machine runtime"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :COMPONENTS
+  ((:FILE "state-machine-package") (:FILE "state-machine"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/state-machine/tests"))))
 
-(asdf:defsystem #:DREYECK/STATE-MACHINE/TESTS :description
-                "Deterministic tests for the generic state-machine runtime"
-                :license "BSD" :version "0.0.1" :pathname "dreyeck/tests/"
-                :serial t :depends-on (#:DREYECK/STATE-MACHINE) :components
-                ((:file "state-machine-test-package")
-                 (:file "state-machine-smoke"))
-                :perform
-                (asdf:test-op (operation component)
-                              (declare (ignore operation component))
-                              (unless
-                                      (uiop:symbol-call
-                                                        :DREYECK/STATE-MACHINE/TESTS
-                                                        :RUN-STATE-MACHINE-TESTS)
-                                      (error
-                                             "Dreyeck state-machine tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/STATE-MACHINE/TESTS
+  :DESCRIPTION
+  "Deterministic tests for the generic state-machine runtime"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/STATE-MACHINE)
+  :COMPONENTS
+  ((:FILE "state-machine-test-package") (:FILE "state-machine-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/STATE-MACHINE/TESTS
+                                 :RUN-STATE-MACHINE-TESTS)
+     (ERROR "Dreyeck state-machine tests failed."))))
 
-(asdf:defsystem #:DREYECK/LISP-CRITIC :description
-                "Generic LISP-CRITIC execution contracts and run records"
-                :license "BSD" :version "0.0.1" :pathname "dreyeck/src/"
-                :serial t :depends-on (#:ASDF #:UIOP) :components
-                ((:file "lisp-critic-package") (:file "lisp-critic"))
-                :in-order-to
-                ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LISP-CRITIC
+  :DESCRIPTION
+  "Generic LISP-CRITIC execution contracts and run records"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:ASDF #:UIOP)
+  :COMPONENTS
+  ((:FILE "lisp-critic-package") (:FILE "lisp-critic"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/lisp-critic/tests"))))
 
-(asdf:defsystem #:DREYECK/LISP-CRITIC/TESTS :description
-                "Deterministic tests for generic LISP-CRITIC execution contracts"
-                :license "BSD" :version "0.0.1" :pathname "dreyeck/tests/"
-                :serial t :depends-on (#:DREYECK/LISP-CRITIC) :components
-                ((:file "lisp-critic-test-package")
-                 (:file "lisp-critic-smoke"))
-                :perform
-                (asdf:test-op (operation component)
-                              (declare (ignore operation component))
-                              (unless
-                                      (uiop:symbol-call
-                                                        :DREYECK/LISP-CRITIC/TESTS
-                                                        :RUN-LISP-CRITIC-TESTS)
-                                      (error
-                                             "Dreyeck LISP-CRITIC tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LISP-CRITIC/TESTS
+  :DESCRIPTION
+  "Deterministic tests for generic LISP-CRITIC execution contracts"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/LISP-CRITIC)
+  :COMPONENTS
+  ((:FILE "lisp-critic-test-package") (:FILE "lisp-critic-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/LISP-CRITIC/TESTS
+                                 :RUN-LISP-CRITIC-TESTS)
+     (ERROR "Dreyeck LISP-CRITIC tests failed."))))
 
-(asdf:defsystem #:DREYECK/EVALUATION-RECORD :description
-                "Generic protocol for projecting execution objects as evaluation records"
-                :license "BSD" :version "0.0.1" :pathname "dreyeck/src/"
-                :serial t :components
-                ((:file "evaluation-record-package")
-                 (:file "evaluation-record"))
-                :in-order-to
-                ((asdf:test-op
-                               (asdf:test-op
-                                             "dreyeck/evaluation-record/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD
+  :DESCRIPTION
+  "Generic protocol for projecting execution objects as evaluation records"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :COMPONENTS
+  ((:FILE "evaluation-record-package") (:FILE "evaluation-record"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/evaluation-record/tests"))))
 
-(asdf:defsystem #:DREYECK/EVALUATION-RECORD/STATE-MACHINE :description
-                "Evaluation-record projection for state-machine runs" :license
-                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :depends-on
-                (#:DREYECK/EVALUATION-RECORD #:DREYECK/STATE-MACHINE)
-                :components ((:file "evaluation-record-state-machine")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD/STATE-MACHINE
+  :DESCRIPTION
+  "Evaluation-record projection for state-machine runs"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :DEPENDS-ON
+  (#:DREYECK/EVALUATION-RECORD #:DREYECK/STATE-MACHINE)
+  :COMPONENTS
+  ((:FILE "evaluation-record-state-machine")))
 
-(asdf:defsystem #:DREYECK/EVALUATION-RECORD/LISP-CRITIC :description
-                "Evaluation-record projection for LISP-CRITIC run records"
-                :license "BSD" :version "0.0.1" :pathname "dreyeck/src/"
-                :depends-on (#:DREYECK/EVALUATION-RECORD #:DREYECK/LISP-CRITIC)
-                :components ((:file "evaluation-record-lisp-critic")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD/LISP-CRITIC
+  :DESCRIPTION
+  "Evaluation-record projection for LISP-CRITIC run records"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :DEPENDS-ON
+  (#:DREYECK/EVALUATION-RECORD #:DREYECK/LISP-CRITIC)
+  :COMPONENTS
+  ((:FILE "evaluation-record-lisp-critic")))
 
-(asdf:defsystem #:DREYECK/EVALUATION-RECORD/TESTS :description
-                "Tests for generic evaluation-record projections" :license
-                "BSD" :version "0.0.1" :pathname "dreyeck/tests/" :serial t
-                :depends-on
-                (#:DREYECK/EVALUATION-RECORD/STATE-MACHINE
-                                                           #:DREYECK/EVALUATION-RECORD/LISP-CRITIC
-                                                           #:DREYECK/STATE-MACHINE/TESTS)
-                :components
-                ((:file "evaluation-record-test-package")
-                 (:file "evaluation-record-smoke"))
-                :perform
-                (asdf:test-op (operation component)
-                              (declare (ignore operation component))
-                              (unless
-                                      (uiop:symbol-call
-                                                        :DREYECK/EVALUATION-RECORD/TESTS
-                                                        :RUN-EVALUATION-RECORD-TESTS)
-                                      (error
-                                             "Dreyeck evaluation-record tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD/TESTS
+  :DESCRIPTION
+  "Tests for generic evaluation-record projections"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/EVALUATION-RECORD/STATE-MACHINE
+   #:DREYECK/EVALUATION-RECORD/LISP-CRITIC #:DREYECK/STATE-MACHINE/TESTS)
+  :COMPONENTS
+  ((:FILE "evaluation-record-test-package") (:FILE "evaluation-record-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/EVALUATION-RECORD/TESTS
+                                 :RUN-EVALUATION-RECORD-TESTS)
+     (ERROR "Dreyeck evaluation-record tests failed."))))
 
-(asdf:defsystem #:DREYECK/WORKSPACE-OPERATION :description
-                "Generic workspace operation and invocation records" :license
-                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :serial t
-                :components
-                ((:file "workspace-operation-package")
-                 (:file "workspace-operation"))
-                :in-order-to
-                ((asdf:test-op
-                               (asdf:test-op
-                                             "dreyeck/workspace-operation/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/WORKSPACE-OPERATION
+  :DESCRIPTION
+  "Generic workspace operation and invocation records"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :COMPONENTS
+  ((:FILE "workspace-operation-package") (:FILE "workspace-operation"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/workspace-operation/tests"))))
 
-(asdf:defsystem #:DREYECK/WORKSPACE-OPERATION/TESTS :description
-                "Deterministic tests for workspace operation invocation"
-                :license "BSD" :version "0.0.1" :pathname "dreyeck/tests/"
-                :serial t :depends-on (#:DREYECK/WORKSPACE-OPERATION)
-                :components
-                ((:file "workspace-operation-test-package")
-                 (:file "workspace-operation-smoke"))
-                :perform
-                (asdf:test-op (operation component)
-                              (declare (ignore operation component))
-                              (unless
-                                      (uiop:symbol-call
-                                                        :DREYECK/WORKSPACE-OPERATION/TESTS
-                                                        :RUN-WORKSPACE-OPERATION-TESTS)
-                                      (error
-                                             "Dreyeck workspace-operation tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/WORKSPACE-OPERATION/TESTS
+  :DESCRIPTION
+  "Deterministic tests for workspace operation invocation"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/WORKSPACE-OPERATION)
+  :COMPONENTS
+  ((:FILE "workspace-operation-test-package")
+   (:FILE "workspace-operation-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/WORKSPACE-OPERATION/TESTS
+                                 :RUN-WORKSPACE-OPERATION-TESTS)
+     (ERROR "Dreyeck workspace-operation tests failed."))))
 
-(asdf:defsystem #:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION :description
-                "Evaluation-record projection for workspace operation invocations"
-                :license "BSD" :version "0.0.1" :pathname "dreyeck/src/"
-                :serial t :depends-on
-                (#:DREYECK/EVALUATION-RECORD #:DREYECK/WORKSPACE-OPERATION)
-                :components ((:file "evaluation-record-workspace-operation"))
-                :in-order-to
-                ((asdf:test-op
-                               (asdf:test-op
-                                             "dreyeck/evaluation-record/workspace-operation/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION
+  :DESCRIPTION
+  "Evaluation-record projection for workspace operation invocations"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/EVALUATION-RECORD #:DREYECK/WORKSPACE-OPERATION)
+  :COMPONENTS
+  ((:FILE "evaluation-record-workspace-operation"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP
+     "dreyeck/evaluation-record/workspace-operation/tests"))))
 
-(asdf:defsystem #:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION/TESTS
-                :description
-                "Tests for workspace operation evaluation-record projection"
-                :license "BSD" :version "0.0.1" :pathname "dreyeck/tests/"
-                :serial t :depends-on
-                (#:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION) :components
-                ((:file "evaluation-record-workspace-operation-test-package")
-                 (:file "evaluation-record-workspace-operation-smoke"))
-                :perform
-                (asdf:test-op (operation component)
-                              (declare (ignore operation component))
-                              (unless
-                                      (uiop:symbol-call
-                                                        :DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION/TESTS
-                                                        :RUN-WORKSPACE-OPERATION-EVALUATION-RECORD-TESTS)
-                                      (error
-                                             "Workspace-operation evaluation-record tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION/TESTS
+  :DESCRIPTION
+  "Tests for workspace operation evaluation-record projection"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION)
+  :COMPONENTS
+  ((:FILE "evaluation-record-workspace-operation-test-package")
+   (:FILE "evaluation-record-workspace-operation-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL
+        :DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION/TESTS
+        :RUN-WORKSPACE-OPERATION-EVALUATION-RECORD-TESTS)
+     (ERROR "Workspace-operation evaluation-record tests failed."))))
 
-(asdf:defsystem #:DREYECK/SLICE-SUMMARY :description
-                "Summary projections over ordered evaluation records" :license
-                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :serial t
-                :depends-on (#:DREYECK/EVALUATION-RECORD) :components
-                ((:file "slice-summary-package") (:file "slice-summary"))
-                :in-order-to
-                ((asdf:test-op (asdf:test-op "dreyeck/slice-summary/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SLICE-SUMMARY
+  :DESCRIPTION
+  "Summary projections over ordered evaluation records"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/EVALUATION-RECORD)
+  :COMPONENTS
+  ((:FILE "slice-summary-package") (:FILE "slice-summary"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/slice-summary/tests"))))
 
-(asdf:defsystem #:DREYECK/SLICE-SUMMARY/TESTS :description
-                "Tests for heterogeneous evaluation-record summaries" :license
-                "BSD" :version "0.0.1" :pathname "dreyeck/tests/" :serial t
-                :depends-on
-                (#:DREYECK/SLICE-SUMMARY
-                                         #:DREYECK/EVALUATION-RECORD/STATE-MACHINE
-                                         #:DREYECK/EVALUATION-RECORD/LISP-CRITIC
-                                         #:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION
-                                         #:DREYECK/STATE-MACHINE/TESTS)
-                :components
-                ((:file "slice-summary-test-package")
-                 (:file "slice-summary-smoke"))
-                :perform
-                (asdf:test-op (operation component)
-                              (declare (ignore operation component))
-                              (unless
-                                      (uiop:symbol-call
-                                                        :DREYECK/SLICE-SUMMARY/TESTS
-                                                        :RUN-SLICE-SUMMARY-TESTS)
-                                      (error
-                                             "Dreyeck slice-summary tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SLICE-SUMMARY/TESTS
+  :DESCRIPTION
+  "Tests for heterogeneous evaluation-record summaries"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/SLICE-SUMMARY #:DREYECK/EVALUATION-RECORD/STATE-MACHINE
+   #:DREYECK/EVALUATION-RECORD/LISP-CRITIC
+   #:DREYECK/EVALUATION-RECORD/WORKSPACE-OPERATION
+   #:DREYECK/STATE-MACHINE/TESTS)
+  :COMPONENTS
+  ((:FILE "slice-summary-test-package") (:FILE "slice-summary-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/SLICE-SUMMARY/TESTS
+                                 :RUN-SLICE-SUMMARY-TESTS)
+     (ERROR "Dreyeck slice-summary tests failed."))))
 
-(asdf:defsystem #:DREYECK/SLY-MREPL :description
-                "Model observed SLY mREPL evaluation records" :license "BSD"
-                :version "0.0.1" :pathname "dreyeck/src/" :serial t :components
-                ((:file "sly-mrepl-package") (:file "sly-mrepl")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SLY-MREPL
+  :DESCRIPTION
+  "Model observed SLY mREPL evaluation records"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :COMPONENTS
+  ((:FILE "sly-mrepl-package") (:FILE "sly-mrepl")))
 
-(asdf:defsystem #:DREYECK/EVALUATION-RECORD/SLY-MREPL :description
-                "Evaluation-record adapter for SLY mREPL evaluations" :license
-                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :serial t
-                :depends-on (#:DREYECK/EVALUATION-RECORD #:DREYECK/SLY-MREPL)
-                :components ((:file "evaluation-record-sly-mrepl"))
-                :in-order-to
-                ((asdf:test-op
-                               (asdf:test-op
-                                             "dreyeck/evaluation-record/sly-mrepl/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD/SLY-MREPL
+  :DESCRIPTION
+  "Evaluation-record adapter for SLY mREPL evaluations"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/EVALUATION-RECORD #:DREYECK/SLY-MREPL)
+  :COMPONENTS
+  ((:FILE "evaluation-record-sly-mrepl"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/evaluation-record/sly-mrepl/tests"))))
 
-(asdf:defsystem #:DREYECK/EVALUATION-RECORD/SLY-MREPL/TESTS :description
-                "Tests for SLY mREPL evaluation-record integration" :license
-                "BSD" :version "0.0.1" :pathname "dreyeck/tests/" :serial t
-                :depends-on
-                (#:DREYECK/EVALUATION-RECORD/SLY-MREPL #:DREYECK/SLICE-SUMMARY)
-                :components
-                ((:file "evaluation-record-sly-mrepl-test-package")
-                 (:file "evaluation-record-sly-mrepl-smoke"))
-                :perform
-                (asdf:test-op (operation component)
-                              (declare (ignore operation component))
-                              (unless
-                                      (uiop:symbol-call
-                                                        :DREYECK/EVALUATION-RECORD/SLY-MREPL/TESTS
-                                                        :RUN-SLY-MREPL-EVALUATION-RECORD-TESTS)
-                                      (error
-                                             "Dreyeck SLY mREPL evaluation-record tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD/SLY-MREPL/TESTS
+  :DESCRIPTION
+  "Tests for SLY mREPL evaluation-record integration"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/EVALUATION-RECORD/SLY-MREPL #:DREYECK/SLICE-SUMMARY)
+  :COMPONENTS
+  ((:FILE "evaluation-record-sly-mrepl-test-package")
+   (:FILE "evaluation-record-sly-mrepl-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/EVALUATION-RECORD/SLY-MREPL/TESTS
+                                 :RUN-SLY-MREPL-EVALUATION-RECORD-TESTS)
+     (ERROR "Dreyeck SLY mREPL evaluation-record tests failed."))))
 
-(asdf:defsystem #:DREYECK/SLY-MREPL/RECORDING :description
-                "Capture SLY mREPL evaluations as Dreyeck records" :license
-                "BSD" :version "0.0.1" :pathname "dreyeck/src/" :serial t
-                :depends-on (#:SLYNK/MREPL #:DREYECK/SLY-MREPL) :components
-                ((:file "sly-mrepl-recording-package")
-                 (:file "sly-mrepl-recording"))
-                :in-order-to
-                ((asdf:test-op
-                               (asdf:test-op
-                                             "dreyeck/sly-mrepl/recording/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SLY-MREPL/RECORDING
+  :DESCRIPTION
+  "Capture SLY mREPL evaluations as Dreyeck records"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:SLYNK/MREPL #:DREYECK/SLY-MREPL)
+  :COMPONENTS
+  ((:FILE "sly-mrepl-recording-package") (:FILE "sly-mrepl-recording"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/sly-mrepl/recording/tests"))))
 
-(asdf:defsystem #:DREYECK/SLY-MREPL/RECORDING/TESTS :description
-                "Tests for SLY mREPL evaluation capture" :license "BSD"
-                :version "0.0.1" :pathname "dreyeck/tests/" :serial t
-                :depends-on
-                (#:DREYECK/SLY-MREPL/RECORDING
-                                               #:DREYECK/EVALUATION-RECORD/SLY-MREPL)
-                :components
-                ((:file "sly-mrepl-recording-test-package")
-                 (:file "sly-mrepl-recording-smoke"))
-                :perform
-                (asdf:test-op (operation component)
-                              (declare (ignore operation component))
-                              (unless
-                                      (uiop:symbol-call
-                                                        :DREYECK/SLY-MREPL/RECORDING/TESTS
-                                                        :RUN-SLY-MREPL-RECORDING-TESTS)
-                                      (error
-                                             "Dreyeck SLY mREPL recording tests failed."))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SLY-MREPL/RECORDING/TESTS
+  :DESCRIPTION
+  "Tests for SLY mREPL evaluation capture"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/SLY-MREPL/RECORDING #:DREYECK/EVALUATION-RECORD/SLY-MREPL)
+  :COMPONENTS
+  ((:FILE "sly-mrepl-recording-test-package")
+   (:FILE "sly-mrepl-recording-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/SLY-MREPL/RECORDING/TESTS
+                                 :RUN-SLY-MREPL-RECORDING-TESTS)
+     (ERROR "Dreyeck SLY mREPL recording tests failed."))))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/image-audit
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/IMAGE-AUDIT
+  :DESCRIPTION
   "Function reconstruction audits for Dreyeck"
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/src/"
-  :serial
-  t
-  :depends-on
-  nil
-  :components
-  ((:file "image-audit-package") (:file "image-function-audit"))
-  :in-order-to
-  ((asdf/lisp-action:test-op
-    (asdf/lisp-action:test-op "dreyeck/image-audit/tests"))))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  NIL
+  :COMPONENTS
+  ((:FILE "image-audit-package") (:FILE "image-function-audit"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/image-audit/tests"))))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/image-audit/tests
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/IMAGE-AUDIT/TESTS
+  :DESCRIPTION
   "Fresh-image smoke tests for Dreyeck image function audits"
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/tests/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/image-audit)
-  :components
-  ((:file "image-audit-test-package") (:file "image-function-audit-smoke"))
-  :perform
-  (asdf/lisp-action:test-op (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop/package:symbol-call :dreyeck/image-audit/tests
-                                 :run-image-function-audit-tests-in-fresh-process)
-     (error "Dreyeck image function audit tests failed."))))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/IMAGE-AUDIT)
+  :COMPONENTS
+  ((:FILE "image-audit-test-package") (:FILE "image-function-audit-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/IMAGE-AUDIT/TESTS
+                                 :RUN-IMAGE-FUNCTION-AUDIT-TESTS-IN-FRESH-PROCESS)
+     (ERROR "Dreyeck image function audit tests failed."))))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/inspector/image
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/IMAGE
+  :DESCRIPTION
   "Dreyeck Inspector views for Lisp image reconstruction audits"
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/src/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/image-audit #:hyperdoc/inspector #:html-inspector-views/standard)
-  :components
-  ((:file "image-inspector-package") (:file "image-only-functions-view")))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/IMAGE-AUDIT #:HYPERDOC/INSPECTOR #:HTML-INSPECTOR-VIEWS/STANDARD)
+  :COMPONENTS
+  ((:FILE "image-inspector-package") (:FILE "image-only-functions-view")))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/issue
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/ISSUE
+  :DESCRIPTION
   "Issue references and repository work contexts for Dreyeck"
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/src/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/git #:dreyeck/topicmap)
-  :components
-  ((:file "issue-package") (:file "issue-reference")
-   (:file "issue-work-context") (:file "issue-work-context-topicmap"))
-  :in-order-to
-  ((asdf/lisp-action:test-op (asdf/lisp-action:test-op "dreyeck/issue/tests"))))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/GIT #:DREYECK/TOPICMAP)
+  :COMPONENTS
+  ((:FILE "issue-package") (:FILE "issue-reference")
+   (:FILE "issue-work-context") (:FILE "issue-work-context-topicmap"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP (ASDF/LISP-ACTION:TEST-OP "dreyeck/issue/tests"))))
 
-(asdf/parse-defsystem:defsystem #:dreyeck/issue/tests
-  :description
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/ISSUE/TESTS
+  :DESCRIPTION
   "Smoke tests for Dreyeck issue work contexts and Topicmap projection"
-  :license
+  :LICENSE
   "BSD"
-  :version
+  :VERSION
   "0.0.1"
-  :pathname
+  :PATHNAME
   "dreyeck/tests/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/issue #:dreyeck/git/tests #:dreyeck/inspector/topicmap)
-  :components
-  ((:file "issue-work-context-topicmap-smoke"))
-  :perform
-  (asdf/lisp-action:test-op (operation component)
-   (declare (ignore operation component))
-   (uiop/package:symbol-call :dreyeck/issue/tests
-                             :run-issue-work-context-topicmap-smoke-tests)))
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/ISSUE #:DREYECK/GIT/TESTS #:DREYECK/INSPECTOR/TOPICMAP)
+  :COMPONENTS
+  ((:FILE "issue-work-context-topicmap-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/ISSUE/TESTS
+                             :RUN-ISSUE-WORK-CONTEXT-TOPICMAP-SMOKE-TESTS)))
 
+(DEFSYSTEM #:DREYECK/FEDWIKI-PUBLICATION :DESCRIPTION
+ "Reconstruct publication inputs for a local Federated Wiki context" :LICENSE
+ "BSD" :VERSION "0.0.1" :PATHNAME "dreyeck/src/" :SERIAL T :DEPENDS-ON
+ (#:DREYECK/GIT #:DREYECK/FEDWIKI-ASSETS #:DREYECK/LOCAL-FEDWIKI-PAGE)
+ :COMPONENTS
+ ((:FILE "fedwiki-publication-package") (:FILE "fedwiki-publication"))
+ :IN-ORDER-TO ((TEST-OP (TEST-OP "dreyeck/fedwiki-publication/tests"))))
 
-(defsystem #:dreyeck/fedwiki-publication
-  :description
-  "Reconstruct publication inputs for a local Federated Wiki context"
-  :license
-  "BSD"
-  :version
-  "0.0.1"
-  :pathname
+(DEFSYSTEM #:DREYECK/FEDWIKI-PUBLICATION/TESTS :DESCRIPTION
+ "Tests for FedWiki publication reconstruction" :LICENSE "BSD" :VERSION "0.0.1"
+ :PATHNAME "dreyeck/tests/" :SERIAL T :DEPENDS-ON
+ (#:DREYECK/FEDWIKI-PUBLICATION) :COMPONENTS
+ ((:FILE "fedwiki-publication-test-package")
+  (:FILE "fedwiki-publication-smoke"))
+ :PERFORM
+ (TEST-OP (OPERATION COMPONENT) (DECLARE (IGNORE OPERATION COMPONENT))
+  (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-PUBLICATION/TESTS
+                            :RUN-FEDWIKI-PUBLICATION-SMOKE-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-JOURNAL/TOPICMAP
+  :PATHNAME
   "dreyeck/src/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/git
-   #:dreyeck/fedwiki-assets
-   #:dreyeck/local-fedwiki-page)
-  :components
-  ((:file "fedwiki-publication-package")
-   (:file "fedwiki-publication"))
-  :in-order-to
-  ((test-op
-    (test-op "dreyeck/fedwiki-publication/tests"))))
+  :DEPENDS-ON
+  ("dreyeck/fedwiki-journal" "dreyeck/topicmap")
+  :COMPONENTS
+  ((:FILE "fedwiki-journal-topicmap"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/fedwiki-journal/topicmap/tests"))))
 
-(defsystem #:dreyeck/fedwiki-publication/tests
-  :description
-  "Tests for FedWiki publication reconstruction"
-  :license
-  "BSD"
-  :version
-  "0.0.1"
-  :pathname
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-JOURNAL/TOPICMAP/TESTS
+  :PATHNAME
   "dreyeck/tests/"
-  :serial
-  t
-  :depends-on
-  (#:dreyeck/fedwiki-publication)
-  :components
-  ((:file "fedwiki-publication-test-package")
-   (:file "fedwiki-publication-smoke"))
-  :perform
-  (test-op
-   (operation component)
-   (declare
-    (ignore operation component))
-   (uiop:symbol-call
-    :dreyeck/fedwiki-publication/tests
-    :run-fedwiki-publication-smoke-tests)))
-
-
-(asdf:defsystem #:dreyeck/fedwiki-journal/topicmap
-  :pathname "dreyeck/src/"
-  :depends-on
-  ("dreyeck/fedwiki-journal"
-   "dreyeck/topicmap")
-  :components
-  ((:file "fedwiki-journal-topicmap"))
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op
-     "dreyeck/fedwiki-journal/topicmap/tests"))))
-
-(asdf:defsystem #:dreyeck/fedwiki-journal/topicmap/tests
-  :pathname "dreyeck/tests/"
-  :serial t
-  :depends-on
+  :SERIAL
+  T
+  :DEPENDS-ON
   ("dreyeck/fedwiki-journal/topicmap")
-  :components
-  ((:file "fedwiki-journal-topicmap-test-package")
-   (:file "fedwiki-journal-topicmap-smoke"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare
-    (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        "DREYECK/FEDWIKI-JOURNAL/TOPICMAP/TESTS"
-        "RUN-FEDWIKI-JOURNAL-TOPICMAP-TESTS")
-     (error
-      "FedWiki journal Topicmap tests failed."))))
+  :COMPONENTS
+  ((:FILE "fedwiki-journal-topicmap-test-package")
+   (:FILE "fedwiki-journal-topicmap-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL "DREYECK/FEDWIKI-JOURNAL/TOPICMAP/TESTS"
+                                 "RUN-FEDWIKI-JOURNAL-TOPICMAP-TESTS")
+     (ERROR "FedWiki journal Topicmap tests failed."))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/page-attached-workspace-offer"
+  :DEPENDS-ON
+  ("hyperbook" "dreyeck/page-attached-workspace-reconstruction")
+  :COMPONENTS
+  ((:FILE "dreyeck/src/page-attached-workspace-offer")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/page-attached-workspace-offer/tests"
+  :DEPENDS-ON
+  ("dreyeck/page-attached-workspace-offer")
+  :COMPONENTS
+  ((:FILE "dreyeck/src/page-attached-workspace-offer-tests")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/fresh-image-runner"
+  :DEPENDS-ON
+  ("asdf")
+  :COMPONENTS
+  ((:FILE "dreyeck/src/fresh-image-runner")))
 
 
-(asdf:defsystem "dreyeck/page-attached-workspace-offer"
-  :depends-on ("hyperbook" "dreyeck/page-attached-workspace-reconstruction")
-  :components ((:file "dreyeck/src/page-attached-workspace-offer")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow"
+  :DEPENDS-ON
+  ("asdf" #:HYPERBOOK)
+  :COMPONENTS
+  ((:FILE "dreyeck/src/workflow")))
 
-
-(asdf:defsystem "dreyeck/page-attached-workspace-offer/tests"
-  :depends-on ("dreyeck/page-attached-workspace-offer")
-  :components ((:file "dreyeck/src/page-attached-workspace-offer-tests")))
-
-
-(asdf:defsystem "dreyeck/fresh-image-runner"
-  :depends-on ("asdf")
-  :components ((:file "dreyeck/src/fresh-image-runner")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/tests"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/workflow")
+  :COMPONENTS
+  ((:FILE "workflow")))
