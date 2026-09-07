@@ -190,6 +190,7 @@
 
               runtimeInputs = [
                 pkgs.git
+                pkgs.python3
                 sbcl
                 hyperdocEmacs
               ];
