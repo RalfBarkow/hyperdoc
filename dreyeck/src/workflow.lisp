@@ -7453,8 +7453,289 @@
                                                                                                                                                                                                                                                                  "SUBJECT")
                                                                                                                                                                                                                                                         (:NULL)))))
                                                                                                                                                                                                                             (:NULL)))))))))))
-                                                                                                                                                      (:NULL)))))))))))))))))))
+                                                                                                                                                      (:NULL)))))))))))))))))
 
+(SETF (GETHASH '(:OPERATION AUDIT :PART :GUARDED-EXTENSION)
+               *WORKFLOW-FRAGMENT-REGISTRY*)
+        '(:AUTHORITY-SYSTEM-NAME "dreyeck/workflow/catalog/tests" :FRAGMENT-KEY
+          (:OPERATION AUDIT :PART :GUARDED-EXTENSION) :OPERATION AUDIT
+          :CONSTRUCTION :GUARDED-OPERATION-EXTENSION :ROLE :GUARDED-EXTENSION
+          :RECORD
+          (:FRAGMENT-KEY
+           (:CONS (:KEYWORD "OPERATION")
+            (:CONS (:SYMBOL "DREYECK/WORKFLOW" "AUDIT")
+             (:CONS (:KEYWORD "PART")
+              (:CONS (:KEYWORD "GUARDED-EXTENSION") (:NULL)))))
+           :CONSTRUCTION :GUARDED-OPERATION-EXTENSION :ROLE :GUARDED-EXTENSION
+           :SEMANTIC-CARRIER
+           (:CONS (:KEYWORD "KIND")
+            (:CONS (:KEYWORD "FIELD-SET")
+             (:CONS (:KEYWORD "FIELDS")
+              (:CONS
+               (:CONS
+                (:CONS (:KEYWORD "FIELD")
+                 (:CONS (:KEYWORD "GUARD")
+                  (:CONS (:KEYWORD "VALUE")
+                   (:CONS
+                    (:CONS (:COMMON-LISP-SYMBOL "EQ")
+                     (:CONS (:SYMBOL "COMMON-LISP-USER" "SUBJECT")
+                      (:CONS (:KEYWORD "CATALOG-ADMISSION-SLICE") (:NULL))))
+                    (:NULL)))))
+                (:CONS
+                 (:CONS (:KEYWORD "FIELD")
+                  (:CONS (:KEYWORD "EXTENSION-BODY")
+                   (:CONS (:KEYWORD "VALUE")
+                    (:CONS
+                     (:CONS (:COMMON-LISP-SYMBOL "LET*")
+                      (:CONS
+                       (:CONS
+                        (:CONS (:SYMBOL "COMMON-LISP-USER" "ADMIT")
+                         (:CONS
+                          (:CONS (:COMMON-LISP-SYMBOL "SYMBOL-FUNCTION")
+                           (:CONS
+                            (:CONS (:COMMON-LISP-SYMBOL "QUOTE")
+                             (:CONS (:SYMBOL "DREYECK/CATALOG" "ADMIT")
+                              (:NULL)))
+                            (:NULL)))
+                          (:NULL)))
+                        (:CONS
+                         (:CONS (:SYMBOL "COMMON-LISP-USER" "TESTS")
+                          (:CONS
+                           (:CONS (:COMMON-LISP-SYMBOL "SYMBOL-FUNCTION")
+                            (:CONS
+                             (:CONS (:COMMON-LISP-SYMBOL "QUOTE")
+                              (:CONS
+                               (:SYMBOL "DREYECK/CATALOG/TESTS" "RUN-TESTS")
+                               (:NULL)))
+                             (:NULL)))
+                           (:NULL)))
+                         (:CONS
+                          (:CONS (:SYMBOL "COMMON-LISP-USER" "ADMIT-SOURCE")
+                           (:CONS
+                            (:CONS
+                             (:SYMBOL "SB-INTROSPECT"
+                              "DEFINITION-SOURCE-PATHNAME")
+                             (:CONS
+                              (:CONS
+                               (:SYMBOL "SB-INTROSPECT"
+                                "FIND-DEFINITION-SOURCE")
+                               (:CONS (:SYMBOL "COMMON-LISP-USER" "ADMIT")
+                                (:NULL)))
+                              (:NULL)))
+                            (:NULL)))
+                          (:CONS
+                           (:CONS (:SYMBOL "COMMON-LISP-USER" "TESTS-SOURCE")
+                            (:CONS
+                             (:CONS
+                              (:SYMBOL "SB-INTROSPECT"
+                               "DEFINITION-SOURCE-PATHNAME")
+                              (:CONS
+                               (:CONS
+                                (:SYMBOL "SB-INTROSPECT"
+                                 "FIND-DEFINITION-SOURCE")
+                                (:CONS (:SYMBOL "COMMON-LISP-USER" "TESTS")
+                                 (:NULL)))
+                               (:NULL)))
+                             (:NULL)))
+                           (:CONS
+                            (:CONS
+                             (:SYMBOL "COMMON-LISP-USER"
+                              "CATALOG-DEPENDENCIES")
+                             (:CONS
+                              (:CONS
+                               (:SYMBOL "ASDF/SYSTEM" "SYSTEM-DEPENDS-ON")
+                               (:CONS
+                                (:CONS (:SYMBOL "ASDF/SYSTEM" "FIND-SYSTEM")
+                                 (:CONS (:STRING "dreyeck/catalog") (:NULL)))
+                                (:NULL)))
+                              (:NULL)))
+                            (:CONS
+                             (:CONS
+                              (:SYMBOL "COMMON-LISP-USER" "TEST-DEPENDENCIES")
+                              (:CONS
+                               (:CONS
+                                (:SYMBOL "ASDF/SYSTEM" "SYSTEM-DEPENDS-ON")
+                                (:CONS
+                                 (:CONS (:SYMBOL "ASDF/SYSTEM" "FIND-SYSTEM")
+                                  (:CONS (:STRING "dreyeck/catalog/tests")
+                                   (:NULL)))
+                                 (:NULL)))
+                               (:NULL)))
+                             (:CONS
+                              (:CONS (:SYMBOL "COMMON-LISP-USER" "FRESH")
+                               (:CONS
+                                (:CONS
+                                 (:SYMBOL "DREYECK/WORKFLOW" "FRESH-TEST")
+                                 (:CONS (:STRING "dreyeck/catalog/tests")
+                                  (:NULL)))
+                                (:NULL)))
+                              (:NULL))))))))
+                       (:CONS
+                        (:CONS (:COMMON-LISP-SYMBOL "ASSERT")
+                         (:CONS
+                          (:CONS (:COMMON-LISP-SYMBOL "MEMBER")
+                           (:CONS
+                            (:STRING "dreyeck/page-attached-workspace-offer")
+                            (:CONS
+                             (:SYMBOL "COMMON-LISP-USER"
+                              "CATALOG-DEPENDENCIES")
+                             (:CONS (:KEYWORD "TEST")
+                              (:CONS
+                               (:CONS (:COMMON-LISP-SYMBOL "FUNCTION")
+                                (:CONS (:COMMON-LISP-SYMBOL "EQUAL") (:NULL)))
+                               (:NULL))))))
+                          (:NULL)))
+                        (:CONS
+                         (:CONS (:COMMON-LISP-SYMBOL "ASSERT")
+                          (:CONS
+                           (:CONS (:COMMON-LISP-SYMBOL "MEMBER")
+                            (:CONS (:STRING "dreyeck/catalog")
+                             (:CONS
+                              (:SYMBOL "COMMON-LISP-USER" "TEST-DEPENDENCIES")
+                              (:CONS (:KEYWORD "TEST")
+                               (:CONS
+                                (:CONS (:COMMON-LISP-SYMBOL "FUNCTION")
+                                 (:CONS (:COMMON-LISP-SYMBOL "EQUAL") (:NULL)))
+                                (:NULL))))))
+                           (:NULL)))
+                         (:CONS
+                          (:CONS (:COMMON-LISP-SYMBOL "ASSERT")
+                           (:CONS
+                            (:CONS (:COMMON-LISP-SYMBOL "EQ")
+                             (:CONS (:KEYWORD "PASSED")
+                              (:CONS
+                               (:CONS (:COMMON-LISP-SYMBOL "GETF")
+                                (:CONS (:SYMBOL "COMMON-LISP-USER" "FRESH")
+                                 (:CONS (:KEYWORD "STATUS") (:NULL))))
+                               (:NULL))))
+                            (:NULL)))
+                          (:CONS
+                           (:CONS (:COMMON-LISP-SYMBOL "LIST")
+                            (:CONS (:KEYWORD "SUBJECT")
+                             (:CONS (:SYMBOL "COMMON-LISP-USER" "SUBJECT")
+                              (:CONS (:KEYWORD "ADMIT-SOURCE")
+                               (:CONS
+                                (:SYMBOL "COMMON-LISP-USER" "ADMIT-SOURCE")
+                                (:CONS (:KEYWORD "TESTS-SOURCE")
+                                 (:CONS
+                                  (:SYMBOL "COMMON-LISP-USER" "TESTS-SOURCE")
+                                  (:CONS (:KEYWORD "CATALOG-DEPENDENCY-P")
+                                   (:CONS (:COMMON-LISP-SYMBOL "T")
+                                    (:CONS (:KEYWORD "TEST-DEPENDENCY-P")
+                                     (:CONS (:COMMON-LISP-SYMBOL "T")
+                                      (:CONS (:KEYWORD "FRESH-RESULT")
+                                       (:CONS
+                                        (:SYMBOL "COMMON-LISP-USER" "FRESH")
+                                        (:CONS (:KEYWORD "NEXT-FORM")
+                                         (:CONS
+                                          (:CONS (:COMMON-LISP-SYMBOL "LIST")
+                                           (:CONS
+                                            (:CONS
+                                             (:COMMON-LISP-SYMBOL "QUOTE")
+                                             (:CONS
+                                              (:SYMBOL "DREYECK/WORKFLOW"
+                                               "AUDIT-COMPLETE")
+                                              (:NULL)))
+                                            (:CONS
+                                             (:SYMBOL "COMMON-LISP-USER"
+                                              "SUBJECT")
+                                             (:NULL))))
+                                          (:NULL))))))))))))))))
+                           (:NULL)))))))
+                     (:NULL)))))
+                 (:CONS
+                  (:CONS (:KEYWORD "FIELD")
+                   (:CONS (:KEYWORD "FALLBACK-BODY")
+                    (:CONS (:KEYWORD "VALUE")
+                     (:CONS
+                      (:CONS (:COMMON-LISP-SYMBOL "FUNCALL")
+                       (:CONS (:SYMBOL "COMMON-LISP-USER" "PREVIOUS")
+                        (:CONS (:SYMBOL "COMMON-LISP-USER" "SUBJECT")
+                         (:NULL))))
+                      (:NULL)))))
+                  (:NULL))))
+               (:NULL))))))))
+
+(SETF (GETHASH '(:OPERATION FRESH-TEST :PART :CAPABILITY-RELATION)
+               *WORKFLOW-FRAGMENT-REGISTRY*)
+        '(:AUTHORITY-SYSTEM-NAME "dreyeck/workflow/fresh-image-runner"
+          :FRAGMENT-KEY (:OPERATION FRESH-TEST :PART :CAPABILITY-RELATION)
+          :OPERATION FRESH-TEST :CONSTRUCTION :FORWARDING-CLOSURE :ROLE
+          :CAPABILITY-RELATION :RECORD
+          (:FRAGMENT-KEY
+           (:CONS (:KEYWORD "OPERATION")
+            (:CONS (:SYMBOL "DREYECK/WORKFLOW" "FRESH-TEST")
+             (:CONS (:KEYWORD "PART")
+              (:CONS (:KEYWORD "CAPABILITY-RELATION") (:NULL)))))
+           :CONSTRUCTION :FORWARDING-CLOSURE :ROLE :CAPABILITY-RELATION
+           :SEMANTIC-CARRIER
+           (:CONS (:KEYWORD "KIND")
+            (:CONS (:KEYWORD "FIELD-SET")
+             (:CONS (:KEYWORD "FIELDS")
+              (:CONS
+               (:CONS
+                (:CONS (:KEYWORD "FIELD")
+                 (:CONS (:KEYWORD "AUTHORITY-TARGET")
+                  (:CONS (:KEYWORD "VALUE")
+                   (:CONS
+                    (:SYMBOL "DREYECK/FRESH-IMAGE-RUNNER"
+                     "RUN-FRESH-ASDF-TEST")
+                    (:NULL)))))
+                (:CONS
+                 (:CONS (:KEYWORD "FIELD")
+                  (:CONS (:KEYWORD "RELATION")
+                   (:CONS (:KEYWORD "VALUE")
+                    (:CONS
+                     (:CONS (:KEYWORD "FROM")
+                      (:CONS (:SYMBOL "DREYECK/WORKFLOW" "FRESH-TEST")
+                       (:CONS (:KEYWORD "RELATION")
+                        (:CONS (:KEYWORD "FORWARDS-TO")
+                         (:CONS (:KEYWORD "TO")
+                          (:CONS
+                           (:SYMBOL "DREYECK/FRESH-IMAGE-RUNNER"
+                            "RUN-FRESH-ASDF-TEST")
+                           (:NULL)))))))
+                     (:NULL)))))
+                 (:NULL)))
+               (:NULL))))))))))
+
+(SETF (GETHASH '(:OPERATION DREYECK/WORKFLOW:ADMIT :PART :CAPABILITY-RELATION)
+               DREYECK/WORKFLOW::*WORKFLOW-FRAGMENT-REGISTRY*)
+        '(:AUTHORITY-SYSTEM-NAME "dreyeck/workflow/catalog" :FRAGMENT-KEY
+          (:OPERATION DREYECK/WORKFLOW:ADMIT :PART :CAPABILITY-RELATION)
+          :OPERATION DREYECK/WORKFLOW:ADMIT :CONSTRUCTION :FORWARDING-CLOSURE
+          :ROLE :CAPABILITY-RELATION :RECORD
+          (:FRAGMENT-KEY
+           (:CONS (:KEYWORD "OPERATION")
+            (:CONS (:SYMBOL "DREYECK/WORKFLOW" "ADMIT")
+             (:CONS (:KEYWORD "PART")
+              (:CONS (:KEYWORD "CAPABILITY-RELATION") (:NULL)))))
+           :CONSTRUCTION :FORWARDING-CLOSURE :ROLE :CAPABILITY-RELATION
+           :SEMANTIC-CARRIER
+           (:CONS (:KEYWORD "KIND")
+            (:CONS (:KEYWORD "FIELD-SET")
+             (:CONS (:KEYWORD "FIELDS")
+              (:CONS
+               (:CONS
+                (:CONS (:KEYWORD "FIELD")
+                 (:CONS (:KEYWORD "AUTHORITY-TARGET")
+                  (:CONS (:KEYWORD "VALUE")
+                   (:CONS (:SYMBOL "DREYECK/CATALOG" "ADMIT") (:NULL)))))
+                (:CONS
+                 (:CONS (:KEYWORD "FIELD")
+                  (:CONS (:KEYWORD "RELATION")
+                   (:CONS (:KEYWORD "VALUE")
+                    (:CONS
+                     (:CONS (:KEYWORD "FROM")
+                      (:CONS (:SYMBOL "DREYECK/WORKFLOW" "ADMIT")
+                       (:CONS (:KEYWORD "RELATION")
+                        (:CONS (:KEYWORD "FORWARDS-TO")
+                         (:CONS (:KEYWORD "TO")
+                          (:CONS (:SYMBOL "DREYECK/CATALOG" "ADMIT")
+                           (:NULL)))))))
+                     (:NULL)))))
+                 (:NULL)))
+               (:NULL))))))))
 (PROGN
        (SETF
              (GETHASH :GUARDED-OPERATION-EXTENSION-CHAIN
@@ -7518,82 +7799,99 @@
                                                                                                         VALUE
                                                                                                         :FALLBACK-BODY)))))))))
        (SETF
-             (GETHASH :SUM-TYPE-DISPATCH
-                      DREYECK/WORKFLOW::*WORKFLOW-CONSTRUCTION-MATERIALIZERS*)
-             (FUNCTION
-                       (LAMBDA
-                               (DREYECK/WORKFLOW::OPERATION
-                                                            DREYECK/WORKFLOW::FRAGMENTS
-                                                            DREYECK/WORKFLOW::SPECIFICATION)
-                               (DECLARE
-                                        (IGNORE DREYECK/WORKFLOW::OPERATION
-                                                DREYECK/WORKFLOW::SPECIFICATION))
-                               (FLET
-                                     ((DREYECK/WORKFLOW::FIELD
-                                                               (DREYECK/WORKFLOW::ROLE
-                                                                                       DREYECK/WORKFLOW::NAME)
-                                                               (DREYECK/WORKFLOW::WORKFLOW-CARRIER-FIELD-VALUE
-                                                                                                               (DREYECK/WORKFLOW::WORKFLOW-FRAGMENT-CARRIER
-                                                                                                                                                            (FIND
-                                                                                                                                                                  DREYECK/WORKFLOW::ROLE
-                                                                                                                                                                  DREYECK/WORKFLOW::FRAGMENTS
-                                                                                                                                                                  :KEY
-                                                                                                                                                                  (LAMBDA
-                                                                                                                                                                          (DREYECK/WORKFLOW::FRAGMENT)
-                                                                                                                                                                          (GETF
-                                                                                                                                                                                DREYECK/WORKFLOW::FRAGMENT
-                                                                                                                                                                                :ROLE))))
-                                                                                                               DREYECK/WORKFLOW::NAME)))
-                                     (LET*
-                                           ((DREYECK/WORKFLOW::HANDLER
-                                                                       (DREYECK/WORKFLOW::FIELD
-                                                                                                :SYMBOL-HANDLER
-                                                                                                :SYMBOL-HANDLER))
-                                            (DREYECK/WORKFLOW::BINDING
-                                                                       (DREYECK/WORKFLOW::FIELD
-                                                                                                :SYMBOL-HANDLER
-                                                                                                :AUTHORITY-BINDING))
-                                            (DREYECK/WORKFLOW::TARGET
-                                                                      (DREYECK/WORKFLOW::FIELD
-                                                                                               :SYMBOL-HANDLER
-                                                                                               :AUTHORITY-TARGET))
-                                            (DREYECK/WORKFLOW::PERSIST-OPERATION
-                                                                                 (EVAL
-                                                                                       (ECLECTOR.READER:QUASIQUOTE
-                                                                                                                   (LET
-                                                                                                                        (((ECLECTOR.READER:UNQUOTE
-                                                                                                                                                   DREYECK/WORKFLOW::BINDING)
-                                                                                                                          (QUOTE
-                                                                                                                                 (ECLECTOR.READER:UNQUOTE
-                                                                                                                                                          DREYECK/WORKFLOW::TARGET))))
-                                                                                                                        (ECLECTOR.READER:UNQUOTE
-                                                                                                                                                 (GETF
-                                                                                                                                                       DREYECK/WORKFLOW::HANDLER
-                                                                                                                                                       :LAMBDA-EXPRESSION)))))))
-                                           (EVAL
-                                                 (ECLECTOR.READER:QUASIQUOTE
-                                                                             (LET
-                                                                                  ((DREYECK/WORKFLOW::PERSIST-OPERATION
-                                                                                                                        (ECLECTOR.READER:UNQUOTE
-                                                                                                                                                 DREYECK/WORKFLOW::PERSIST-OPERATION)))
-                                                                                  (LAMBDA
-                                                                                          (ECLECTOR.READER:UNQUOTE
-                                                                                                                   (DREYECK/WORKFLOW::FIELD
-                                                                                                                                            :SUBJECT-TYPE-DISPATCH
-                                                                                                                                            :LAMBDA-LIST))
-                                                                                          (ETYPECASE
-                                                                                                     (ECLECTOR.READER:UNQUOTE
-                                                                                                                              (DREYECK/WORKFLOW::FIELD
-                                                                                                                                                       :SUBJECT-TYPE-DISPATCH
-                                                                                                                                                       :DISPATCH-FORM))
-                                                                                                     (ECLECTOR.READER:UNQUOTE
-                                                                                                                              (DREYECK/WORKFLOW::FIELD
-                                                                                                                                                       :SYMBOL-HANDLER
-                                                                                                                                                       :SYMBOL-CLAUSE))
-                                                                                                     (ECLECTOR.READER:UNQUOTE
-                                                                                                                              (DREYECK/WORKFLOW::FIELD
-                                                                                                                                                       :CONS-KIND-DISPATCH
-                                                                                                                                                       :CONS-CLAUSE)))))))))))))
+   (GETHASH :SUM-TYPE-DISPATCH
+            DREYECK/WORKFLOW::*WORKFLOW-CONSTRUCTION-MATERIALIZERS*)
+   #'(LAMBDA
+         (DREYECK/WORKFLOW::OPERATION
+          DREYECK/WORKFLOW::FRAGMENTS
+          DREYECK/WORKFLOW::SPECIFICATION)
+       (DECLARE
+        (IGNORE
+         DREYECK/WORKFLOW::OPERATION
+         DREYECK/WORKFLOW::SPECIFICATION))
+       (FLET
+           ((DREYECK/WORKFLOW::FIELD
+                (DREYECK/WORKFLOW::ROLE
+                 DREYECK/WORKFLOW::NAME)
+              (DREYECK/WORKFLOW::WORKFLOW-CARRIER-FIELD-VALUE
+               (DREYECK/WORKFLOW::WORKFLOW-FRAGMENT-CARRIER
+                (FIND
+                 DREYECK/WORKFLOW::ROLE
+                 DREYECK/WORKFLOW::FRAGMENTS
+                 :KEY
+                 (LAMBDA (DREYECK/WORKFLOW::FRAGMENT)
+                   (GETF
+                    DREYECK/WORKFLOW::FRAGMENT
+                    :ROLE))))
+               DREYECK/WORKFLOW::NAME)))
+         (LET*
+             ((DREYECK/WORKFLOW::HANDLER
+                (DREYECK/WORKFLOW::FIELD
+                 :SYMBOL-HANDLER
+                 :SYMBOL-HANDLER))
+              (DREYECK/WORKFLOW::BINDING
+                (DREYECK/WORKFLOW::FIELD
+                 :SYMBOL-HANDLER
+                 :AUTHORITY-BINDING))
+              (DREYECK/WORKFLOW::TARGET
+                (DREYECK/WORKFLOW::FIELD
+                 :SYMBOL-HANDLER
+                 :AUTHORITY-TARGET))
+              (DREYECK/WORKFLOW::PERSIST-OPERATION
+                (EVAL
+                 `(LET
+                      ((,DREYECK/WORKFLOW::BINDING
+                         ',DREYECK/WORKFLOW::TARGET))
+                    ,(GETF
+                      DREYECK/WORKFLOW::HANDLER
+                      :LAMBDA-EXPRESSION)))))
+           (EVAL
+            `(LET
+                 ((DREYECK/WORKFLOW::PERSIST-OPERATION
+                    ,DREYECK/WORKFLOW::PERSIST-OPERATION))
+               (LAMBDA
+                   ,(DREYECK/WORKFLOW::FIELD
+                     :SUBJECT-TYPE-DISPATCH
+                     :LAMBDA-LIST)
+                 (ETYPECASE
+                     ,(DREYECK/WORKFLOW::FIELD
+                       :SUBJECT-TYPE-DISPATCH
+                       :DISPATCH-FORM)
+                   ,(DREYECK/WORKFLOW::FIELD
+                     :SYMBOL-HANDLER
+                     :SYMBOL-CLAUSE)
+                   ,(DREYECK/WORKFLOW::FIELD
+                     :CONS-KIND-DISPATCH
+                     :CONS-CLAUSE))))))))))
+
+(SETF (GETHASH :GUARDED-OPERATION-EXTENSION
+               *WORKFLOW-CONSTRUCTION-MATERIALIZERS*)
+        #'(LAMBDA (OPERATION FRAGMENTS SPECIFICATION)
+            (DECLARE (IGNORE OPERATION SPECIFICATION))
+            (LET* ((BASE
+                    (FIND :BASE-DEFINITION FRAGMENTS :KEY
+                          (LAMBDA (FRAGMENT) (GETF FRAGMENT :ROLE))))
+                   (EXTENSION
+                    (FIND :GUARDED-EXTENSION FRAGMENTS :KEY
+                          (LAMBDA (FRAGMENT) (GETF FRAGMENT :ROLE))))
+                   (BASE-CARRIER (WORKFLOW-FRAGMENT-CARRIER BASE))
+                   (EXTENSION-CARRIER (WORKFLOW-FRAGMENT-CARRIER EXTENSION))
+                   (LAMBDA-LIST
+                    (WORKFLOW-CARRIER-FIELD-VALUE BASE-CARRIER :LAMBDA-LIST))
+                   (PREVIOUS
+                    (WORKFLOW-COMPILE-LAMBDA-EXPRESSION
+                     (WORKFLOW-CARRIER-FIELD-VALUE BASE-CARRIER
+                                                   :BASE-LAMBDA-EXPRESSION))))
+              (WORKFLOW-MAKE-GUARDED-EXTENSION-FUNCTION PREVIOUS LAMBDA-LIST
+                                                        (WORKFLOW-CARRIER-FIELD-VALUE
+                                                         EXTENSION-CARRIER
+                                                         :GUARD)
+                                                        (WORKFLOW-CARRIER-FIELD-VALUE
+                                                         EXTENSION-CARRIER
+                                                         :EXTENSION-BODY)
+                                                        (WORKFLOW-CARRIER-FIELD-VALUE
+                                                         EXTENSION-CARRIER
+                                                         :FALLBACK-BODY)))))
 
 (SETF (GETHASH :DEFINITION-SUFFICIENT
                DREYECK/WORKFLOW::*WORKFLOW-CONSTRUCTION-MATERIALIZERS*)
@@ -7616,6 +7914,32 @@
               (DREYECK/WORKFLOW::WORKFLOW-COMPILE-LAMBDA-EXPRESSION
                DREYECK/WORKFLOW::LAMBDA-EXPRESSION))))
 
+(SETF (GETHASH :FORWARDING-CLOSURE
+               DREYECK/WORKFLOW::*WORKFLOW-CONSTRUCTION-MATERIALIZERS*)
+        (LAMBDA (OPERATION FRAGMENTS SPECIFICATION)
+          (DECLARE (IGNORE OPERATION SPECIFICATION))
+          (LET* ((RELATION
+                  (FIND :CAPABILITY-RELATION FRAGMENTS :KEY
+                        (LAMBDA (FRAGMENT) (GETF FRAGMENT :ROLE))))
+                 (FORWARDER
+                  (FIND :FORWARDER FRAGMENTS :KEY
+                        (LAMBDA (FRAGMENT) (GETF FRAGMENT :ROLE))))
+                 (RELATION-CARRIER
+                  (DREYECK/WORKFLOW::WORKFLOW-FRAGMENT-CARRIER RELATION))
+                 (FORWARDER-CARRIER
+                  (DREYECK/WORKFLOW::WORKFLOW-FRAGMENT-CARRIER FORWARDER))
+                 (TARGET
+                  (DREYECK/WORKFLOW::WORKFLOW-CARRIER-FIELD-VALUE
+                   RELATION-CARRIER :AUTHORITY-TARGET))
+                 (BINDING
+                  (DREYECK/WORKFLOW::WORKFLOW-CARRIER-FIELD-VALUE
+                   FORWARDER-CARRIER :AUTHORITY-BINDING))
+                 (LAMBDA-EXPRESSION
+                  (DREYECK/WORKFLOW::WORKFLOW-CARRIER-FIELD-VALUE
+                   FORWARDER-CARRIER :LAMBDA-EXPRESSION)))
+            (EVAL
+             `(LET ((,BINDING ',TARGET))
+                ,LAMBDA-EXPRESSION)))))
 (DREYECK/WORKFLOW::MATERIALIZE-OPERATION-DETERMINISTICALLY
  'DREYECK/WORKFLOW:AUDIT-COMPLETE)
 
