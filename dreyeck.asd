@@ -162,14 +162,15 @@
   :SERIAL
   T
   :DEPENDS-ON
-  (#:DREYECK/INSPECTOR/TOPICMAP #:ASDF #:UIOP)
+  (#:DREYECK/INSPECTOR/TOPICMAP #:ASDF #:UIOP "dreyeck/inspector/topicmap/tala")
   :COMPONENTS
-  ((:FILE "topicmap-view-smoke"))
+  ((:FILE "topicmap-view-smoke") (:FILE "topicmap-tala-smoke"))
   :PERFORM
   (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
    (DECLARE (IGNORE OPERATION COMPONENT))
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/TOPICMAP/TESTS
-                             :RUN-TOPICMAP-VIEW-SMOKE-TESTS)))
+                             :RUN-TOPICMAP-VIEW-SMOKE-TESTS)
+   (UIOP:SYMBOL-CALL :DREYECK/TOPICMAP/TESTS :RUN-TALA-INPUT-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-SOURCE-RELATIONS
   :DESCRIPTION
@@ -1559,3 +1560,55 @@
   ("dreyeck/workflow")
   :COMPONENTS
   ((:FILE "workflow")))
+
+
+(defsystem "dreyeck/topicmap/tala"
+  :description "Experimental deterministic Projection to D2/TALA rendering boundary"
+  :license "BSD" :serial t
+  :depends-on ("dreyeck/topicmap" "uiop" "plump" "cl-base64")
+  :components ((:file "dreyeck/src/topicmap-tala")))
+
+(defsystem "dreyeck/inspector/topicmap/tala"
+  :description "Explicit native/TALA comparison of an existing Topicmap Workspace"
+  :license "BSD" :serial t
+  :depends-on ("dreyeck/topicmap/tala" "dreyeck/inspector/topicmap" "dreyeck/git" "babel")
+  :components ((:file "dreyeck/src/topicmap-tala-inspector")))
+
+(asdf/parse-defsystem:defsystem "dreyeck/topicmap/tala/reading"
+  :description
+  "Executable reading companion for the experimental TALA layout boundary"
+  :license
+  "BSD"
+  :serial
+  t
+  :depends-on
+  ("dreyeck/inspector/topicmap/tala" "hyperdoc/explorer")
+  :components
+  ((:module "dreyeck/src" :components ((:file "topicmap-tala-reading")))
+   (:module "dreyeck/pages/topicmap-tala" :components
+    ((:static-file "Reading TALA as a Layout Layer.html")))))
+
+(asdf/parse-defsystem:defsystem "dreyeck/topicmap/tala/reading/tests"
+  :description
+  "Fresh reconstruction and executable reading-page tests"
+  :license
+  "BSD"
+  :serial
+  t
+  :depends-on
+  ("dreyeck/topicmap/tala/reading" "dreyeck/topicmap/tests")
+  :components
+  ((:file "dreyeck/tests/topicmap-tala-reading-smoke"))
+  :perform
+  (asdf/lisp-action:test-op (operation component)
+   (declare (ignore operation component))
+   (uiop/package:symbol-call :dreyeck/topicmap/tests
+                             :run-tala-integration-tests)
+   (uiop/package:symbol-call :dreyeck/topicmap/tests :run-tala-reading-tests)))
+
+(defsystem "dreyeck/topicmap/tala/tests"
+  :description "Fresh-process integration proof requiring pinned D2/TALA"
+  :depends-on ("dreyeck/topicmap/tests")
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/topicmap/tests :run-tala-integration-tests)))

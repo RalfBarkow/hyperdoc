@@ -1,0 +1,39 @@
+<html>
+<head><title>Reading TALA as a Layout Layer</title></head>
+<body>
+<in-package>dreyeck/inspector/topicmap/tala</in-package>
+<h1>Reading TALA as a Layout Layer</h1>
+<p>TALA is an experimental Layout-layer rendering backend. One existing HyperDoc Git repository/HEAD projection supplies both views: the same Topics, Associations and endpoints, Workspace point, and native Inspector navigation thunks. Only derived layout differs. The native renderer remains the default.</p>
+<p>Load <code>dreyeck/topicmap/tala/reading</code> in <code>nix develop .#tala</code>. Press the existing ► source buttons below to evaluate examples. Each starts from the real current repository, with no manually initialized globals. Separate clicks create separate observations; the comparison holds one shared Projection for both renderings.</p>
+<h2>Start with meaning</h2>
+<p>A Workspace retains point and history. Its Projection already decides what exists and how objects relate. Layout does not decide that. Open the Workspace's native Topicmap to navigate using the existing signs.</p>
+<source-of-function>reading-workspace</source-of-function>
+<source-of-function>reading-projection</source-of-function>
+<p>These stable identities and directed endpoints are semantic input, independent of labels and screen coordinates.</p>
+<source-of-function>reading-topic-identities</source-of-function>
+<source-of-function>reading-association-endpoints</source-of-function>
+<h2>Cross the adapter boundary</h2>
+<p>The <a href="https://d2lang.com/blog/tala-is-open-source/">TALA open-source announcement</a> introduces the engine bundled in D2 0.9.0. The source links on this page are fixed to D2 commit <code>d5a51743b6d5c00f1ec6f8340003f5d5a6ba4eda</code>.</p>
+<p>Read the <a href="https://github.com/d2lang/d2/blob/d5a51743b6d5c00f1ec6f8340003f5d5a6ba4eda/d2layouts/d2talalayout/README.md">README</a> for the layout entry point and explicit seeds, then <a href="https://github.com/d2lang/d2/blob/d5a51743b6d5c00f1ec6f8340003f5d5a6ba4eda/d2layouts/d2talalayout/ARCHITECTURE.md">ARCHITECTURE.md</a> for translation, candidate placement, routing and selection. Why a separate representation? The optimizer needs mutable geometric state. HyperDoc's semantic objects remain outside that state.</p>
+<p>HyperDoc's corresponding boundary is <code>projection-tala-input</code>. It sorts copies, uses seed 44, encodes Topic IDs reversibly, and keeps Association IDs and endpoints in an explicit map. Labels are presentation; they never become identity. Manual positions and Workspace point are excluded from D2 input.</p>
+<source-of-function>reading-layout-input</source-of-function>
+<source-of-function>reading-id-mapping</source-of-function>
+<p>In upstream <a href="https://github.com/d2lang/d2/blob/d5a51743b6d5c00f1ec6f8340003f5d5a6ba4eda/d2layouts/d2talalayout/adapter.go">adapter.go</a>, translation maps connect D2 entities to the layout graph. HyperDoc similarly retains an explicit mapping, but sends only derived D2 text to a subprocess. No TALA mutation reaches its Projection.</p>
+<h2>Observe derived geometry</h2>
+<p>Check availability first. Missing D2, an unsupported version, or invalid output is an explicit error; no hidden renderer fallback occurs. The optional Nix shell supplies checksum-pinned D2 0.9.0 with bundled TALA.</p>
+<source-of-function>reading-dependency</source-of-function>
+<source-of-function>reading-layout-result</source-of-function>
+<source-of-function>reading-geometry</source-of-function>
+<p>The CLI returns SVG. This slice is a static SVG rendering proof: inspect rectangles, viewboxes, route paths and their matched Topic/Association IDs. It does not claim a normalized numeric Topicmap layout API. Exact SVG group coverage is checked against encoded IDs, never inferred from label text or spatial proximity. A later machine-geometry adapter can feed native signs without changing this semantic boundary.</p>
+<p>Read <a href="https://github.com/d2lang/d2/blob/d5a51743b6d5c00f1ec6f8340003f5d5a6ba4eda/d2layouts/d2talalayout/internal/placement/candidate_movement.go">candidate_movement.go</a> for candidate movement and restoration, <a href="https://github.com/d2lang/d2/blob/d5a51743b6d5c00f1ec6f8340003f5d5a6ba4eda/d2layouts/d2talalayout/internal/placementcost/edge_length.go">edge_length.go</a> for geometric cost, and <a href="https://github.com/d2lang/d2/blob/d5a51743b6d5c00f1ec6f8340003f5d5a6ba4eda/d2layouts/d2talalayout/internal/routing/route.go">route.go</a> for ports and path segments. These change placement or routes; none defines a new HyperDoc relation.</p>
+<h2>Check preservation, then compare</h2>
+<p>Upstream <a href="https://github.com/d2lang/d2/blob/d5a51743b6d5c00f1ec6f8340003f5d5a6ba4eda/d2layouts/d2talalayout/result.go">result.go</a> validates and scores completed candidates before selection. HyperDoc checks its own boundary: unchanged Projection state, exact Topic/Association coverage and endpoints, and unchanged point/history during layout. Its report is preservation evidence, not TALA's quality score.</p>
+<source-of-function>reading-invariant-report</source-of-function>
+<source-of-function>reading-comparison</source-of-function>
+<p>Open “Native / TALA”. Native signs keep the existing Inspector actions. The TALA image is noninteractive. The comparison caches the layout and the point at observation time: clicking native signs updates the original Workspace without recomputing TALA. Follow the Workspace reference to inspect its live point and history. Tests invoke those actual native thunks and verify their return objects and navigation history.</p>
+<h2>Follow the executable source</h2>
+<p>The code page for these examples transcludes persisted definitions. This existing ASDF-source Workspace connects <code>dreyeck.asd</code> to the real adapter, Inspector, reading and test systems through existing <code>:defines</code> associations. Inspect the systems to follow their source components; no parallel navigation model is introduced.</p>
+<source-of-function>reading-source-workspace</source-of-function>
+<p>Run <code>(asdf:test-system "dreyeck/topicmap/tala/reading/tests")</code> in a fresh pinned Nix process. The development-time structural writer is not required to load this page or execute its examples. Structural containment and hidden Topics are outside the flat rendering proof and are rejected explicitly.</p>
+</body>
+</html>

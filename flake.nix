@@ -111,6 +111,7 @@
             inherit system;
           };
         in {
+          d2-tala = pkgs.callPackage ./nix/d2-tala.nix { };
           common-lisp-hyperspec =
             pkgs.callPackage ./nix/common-lisp-hyperspec.nix { };
         }
@@ -200,6 +201,10 @@
                   ./scripts/hyperdoc-sly.sh;
             };
         in {
+          tala = pkgs.mkShell {
+            inputsFrom = [ self.devShells.${system}.default ];
+            packages = [ self.packages.${system}.d2-tala ];
+          };
           default = pkgs.mkShell {
             packages = [
               commonLispHyperSpec
