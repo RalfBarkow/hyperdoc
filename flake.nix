@@ -9,6 +9,11 @@
       flake = false;
     };
 
+    workflow-source-editor = {
+      url = "https://codeberg.org/rgb/html-inspector-views/archive/4b0607d93b193e21bd2ca5dc0d7e47c062ac8112.tar.gz";
+      flake = false;
+    };
+
     plump-inspector-views = {
       url = "git+https://codeberg.org/khinsen/plump-inspector-views.git";
       flake = false;
@@ -80,6 +85,7 @@
     nixpkgs,
     html-inspector-views,
     plump-inspector-views,
+    workflow-source-editor,
     clog-moldable-inspector,
     lwcells,
     named-closure,
@@ -201,6 +207,15 @@
                   ./scripts/hyperdoc-sly.sh;
             };
         in {
+          workflow-authoring = pkgs.mkShell {
+            inputsFrom = [ self.devShells.${system}.default ];
+            shellHook = ''
+              export HYPERDOC_RUNTIME_SOURCE_REGISTRY="$CL_SOURCE_REGISTRY"
+              export HYPERDOC_WORKFLOW_EDITOR_SOURCE="${workflow-source-editor}"
+              export HYPERDOC_WORKFLOW_EDITOR_COMMIT="4b0607d93b193e21bd2ca5dc0d7e47c062ac8112"
+              export CL_SOURCE_REGISTRY="${workflow-source-editor}//:$CL_SOURCE_REGISTRY"
+            '';
+          };
           tala = pkgs.mkShell {
             inputsFrom = [ self.devShells.${system}.default ];
             packages = [ self.packages.${system}.d2-tala ];

@@ -312,24 +312,21 @@
   :COMPONENTS
   ((:FILE "upstream-intake-inspector-package") (:FILE "upstream-intake-views")))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG
-  :DESCRIPTION
-  "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
-  :LICENSE
-  "BSD"
-  :VERSION
-  "0.0.1"
-  :DEPENDS-ON
-  (#:DREYECK/WIKI-LINK #:DREYECK/UPSTREAM-INTAKE
-   #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
-   #:DREYECK/INSPECTOR/FEDWIKI-SOURCE-RELATIONS #:DREYECK/LISP-IMAGE
-   #:DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER
-   "dreyeck/topicmap/tala/reading")
-  :IN-ORDER-TO
-  ((ASDF/LISP-ACTION:TEST-OP
-    (ASDF/LISP-ACTION:TEST-OP "dreyeck/catalog/tests")))
-  :COMPONENTS
-  ((:FILE "dreyeck/src/catalog")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG :DESCRIPTION
+                                "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
+                                :LICENSE "BSD" :VERSION "0.0.1" :DEPENDS-ON
+                                (#:DREYECK/WIKI-LINK #:DREYECK/UPSTREAM-INTAKE
+                                                     #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
+                                                     #:DREYECK/INSPECTOR/FEDWIKI-SOURCE-RELATIONS
+                                                     #:DREYECK/LISP-IMAGE
+                                                     #:DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER
+                                                     "dreyeck/topicmap/tala/reading"
+                                                     "dreyeck/workflow/reading")
+                                :IN-ORDER-TO
+                                ((ASDF/LISP-ACTION:TEST-OP
+                                                           (ASDF/LISP-ACTION:TEST-OP
+                                                                                     "dreyeck/catalog/tests")))
+                                :COMPONENTS ((:FILE "dreyeck/src/catalog")))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/GIT/TESTS
   :DESCRIPTION
@@ -1546,21 +1543,66 @@
   ((:FILE "dreyeck/src/fresh-image-runner")))
 
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow"
-  :DEPENDS-ON
-  ("asdf" #:HYPERBOOK)
-  :COMPONENTS
-  ((:FILE "dreyeck/src/workflow")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow" :DEPENDS-ON
+                                ("asdf"
+                                 "uiop"
+                                 "sb-introspect"
+                                 "html-inspector-views/standard")
+                                :COMPONENTS
+                                ((:FILE "dreyeck/src/workflow-model")))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/tests"
-  :PATHNAME
-  "dreyeck/tests/"
-  :SERIAL
-  T
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/authoring"
+  :DESCRIPTION
+  "Explicit pinned authoring capability; excluded from ordinary Catalog"
   :DEPENDS-ON
   ("dreyeck/workflow")
   :COMPONENTS
-  ((:FILE "workflow")))
+  ((:FILE "dreyeck/src/workflow-authoring")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading"
+  :DESCRIPTION
+  "Executable ownership, persistence and reconstruction reading"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/workflow" "hyperdoc/explorer" "dreyeck/inspector/topicmap/tala")
+  :COMPONENTS
+  ((:MODULE "dreyeck/src" :SERIAL T :COMPONENTS ((:FILE "workflow-reading")))
+   (:MODULE "dreyeck/pages/workflow" :COMPONENTS
+    ((:STATIC-FILE "Reconstructing Workflow.html")))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/authoring/tests"
+  :DEPENDS-ON
+  ("dreyeck/workflow/authoring" "dreyeck/workflow/tests")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/workflow-authoring"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/WORKFLOW/TESTS :RUN-AUTHORING-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading/tests"
+  :DEPENDS-ON
+  ("dreyeck/workflow/reading" "dreyeck/workflow/tests")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/workflow-reading"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/WORKFLOW/TESTS :RUN-READING-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/tests" :PERFORM
+                                (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+                                                          (DECLARE
+                                                                   (IGNORE
+                                                                           OPERATION
+                                                                           COMPONENT))
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/WORKFLOW/TESTS
+                                                                                    :RUN-TESTS))
+                                :PATHNAME "dreyeck/tests/" :SERIAL T
+                                :DEPENDS-ON ("dreyeck/workflow") :COMPONENTS
+                                ((:FILE "workflow-model")))
 
 
 (defsystem "dreyeck/topicmap/tala"
