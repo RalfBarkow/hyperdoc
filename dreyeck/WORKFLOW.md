@@ -107,3 +107,41 @@ If a remote executable witness is desired, the operator may run the read-only de
 Fresh baseline archive of e2928cce: **12 Catalog items**. Fresh reconstructed Catalog: **13**. The ordinary unchanged launcher was run locally, with a temporary assertion inserted before serving; both reading pages were retrieved, all twelve TALA and ten Workflow source widgets each contained one callable thunk, and the authoring package was absent. The same assertion is persisted in `fresh-catalog-evaluations`, preserving the existing startup/controller checks. No reading system was manually loaded before the normal Catalog startup.
 
 The workflow runtime tests, explicit authoring tests (including writer absence in the fresh child), all ten reading play buttons in ordinary and authoring environments, existing TALA reading/integration tests, and the workflow Workspace's existing TALA navigation checker passed. The original TALA input/real-workspace tests reported D2 v0.9.0, seed 44, two Topics, one Association, exact SVG identity coverage and native Inspector thunks. Runtime startup uses the unchanged old dependency pin; D2 is optional for registration. Dependency libraries produce existing warnings; tests do not hide them.
+
+## Explicit live-image change tracking (follow-up slice)
+
+Direct pre-change observation: worktree `/Users/rgb/workspace/hyperdoc-workflow-reconstruction`, branch `dreyeck.ch`, HEAD `43bcb871a0df00e128a002808c86343d8b2c3520`. Tracked source was clean; the pre-existing untracked `dreyeck/pages/.DS_Store` was left untouched.
+
+The question “Was im Image ist noch nicht persistent?” now has a bounded executable answer: registered live-image changes whose reconstruction has not been verified. `REGISTER-CHANGE` records an ordinary function symbol, its EQ fdefinition and the existing `OBSERVE-OPERATION` result. `*CHANGE-LOG*` is the default image-local log; explicit `CHANGE-LOG` instances isolate examples/tests. `OUTSTANDING-CHANGES` returns a fresh oldest-first list. `OBSERVE-CHANGE` distinguishes the recorded observation from the current observation and says whether the captured function is still current. This is recording before observation/planning, not a second persistence implementation.
+
+Same symbol plus identical function object returns the identical record. A different fdefinition produces a distinct record; the old one remains outstanding. An unregistered redefinition is visible when observing an existing record, but does not silently create a new registration. `CHANGE-RECONSTRUCTION-STATUS` is explicitly `:UNVERIFIED`: no clearing transition is included. Source discovery, ASDF load and source writing cannot clear records. Future verification must establish the relevant change identity through the existing fresh-process acceptance seam; no unsupported success flag is provided here.
+
+The tests cover source-less compiled functions (`:SOURCE NIL`, `:UNOWNED-OR-UNAVAILABLE`), unregistered function exclusion, duplicate registration, subsequent redefinition, retained old records, fresh query list ownership, and source-located functions remaining unverified. Existing authoring semantics and pins are unchanged. All Lisp modifications use the same pinned structural writer and complete-file read-back checks.
+
+`READING-OUTSTANDING-CHANGES` is the eleventh real transcluded DEFEXAMPLE. It uses an isolated log and fresh symbol, mutates only example-owned live state, and returns records plus observations for Inspector navigation. It relates recording to Medley MARKASCHANGED and pending-work display to FILES?, without claiming FILEPKG compatibility. Ordinary Catalog still has 13 books; the startup test now reconstructs 12 TALA and 11 Workflow source/play thunks.
+
+SLY/mREPL:
+
+```lisp
+(dreyeck/workflow:outstanding-changes)
+```
+
+After an intentional mutation, explicitly register its name, for example `(dreyeck/workflow:register-change 'cl-user::workflow-live-only-increment)`. Use `CHANGE-OPERATION`, `CHANGE-OBSERVATION` and `OBSERVE-CHANGE` to continue into existing observation and ownership/planning facilities. The list and records are ordinary inspectable objects.
+
+Limits: no global scanner, interception, decompilation, remote access or persisted image log. Unregistered changes are invisible. Registration is sequential; synchronization of concurrent writers is outside this slice. DEFVAR preserves the log across ordinary source reload, not across process restarts. No transition to verified or discarded is implemented.
+
+Fresh validation commands for this follow-up:
+
+```sh
+nix develop path:. -c sbcl --noinform --no-userinit --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:test-system "dreyeck/workflow/tests")' \
+  --eval '(asdf:test-system "dreyeck/workflow/reading/tests")' \
+  --eval '(asdf:test-system "dreyeck/catalog/tests")'
+
+nix develop path:.#workflow-authoring -c sbcl --noinform --no-userinit --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:test-system "dreyeck/workflow/tests")' \
+  --eval '(asdf:test-system "dreyeck/workflow/authoring/tests")' \
+  --eval '(asdf:test-system "dreyeck/workflow/reading/tests")'
+```

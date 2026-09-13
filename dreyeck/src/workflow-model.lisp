@@ -5,7 +5,11 @@
                      :PLAN-DEPENDENCY :PLAN-SYSTEM :PLAN-PATH :PLAN-KEY
                      :PLAN-BEFORE :PLAN-PROPOSED :PLAN-SOURCE :PLAN-EXPECTATION
                      :PLAN-STATUS :OBSERVE-OPERATION :RECONSTRUCT :PERSIST-IN
-                     :SOURCE-FORMS :FORM-KEY :FORM-EQUAL))
+                     :SOURCE-FORMS :FORM-KEY :FORM-EQUAL :CHANGE-LOG
+                     :RECORDED-CHANGE :*CHANGE-LOG* :REGISTER-CHANGE
+                     :OUTSTANDING-CHANGES :CHANGE-OPERATION :CHANGE-FUNCTION
+                     :CHANGE-OBSERVATION :CHANGE-RECONSTRUCTION-STATUS
+                     :OBSERVE-CHANGE))
 
 (IN-PACKAGE :DREYECK/WORKFLOW)
 
@@ -161,6 +165,63 @@
        (ASDF/OPERATE:LOAD-SYSTEM SYSTEM :FORCE T)
        (LIST :STATUS :LOADED :SYSTEM SYSTEM :AUTHORITY
              (ASDF/SYSTEM:SYSTEM-SOURCE-FILE (ASDF/SYSTEM:FIND-SYSTEM SYSTEM))))
+
+(DEFCLASS CHANGE-LOG NIL ((CHANGES :INITFORM NIL :ACCESSOR RECORDED-CHANGES))
+          (:DOCUMENTATION
+           "Explicit registrations in this image, not discovered image contents. Use separate logs for isolated examples/tests."))
+
+(DEFCLASS RECORDED-CHANGE NIL
+          ((OPERATION :INITARG :OPERATION :READER CHANGE-OPERATION)
+           (FUNCTION :INITARG :FUNCTION :READER CHANGE-FUNCTION)
+           (OBSERVATION :INITARG :OBSERVATION :READER CHANGE-OBSERVATION))
+          (:DOCUMENTATION
+           "An explicitly registered operation/function identity. Captured source location is not verification."))
+
+(DEFVAR *CHANGE-LOG*
+  (MAKE-INSTANCE 'CHANGE-LOG)
+  "Default image-local registration log. Reloading source does not discard pending changes.")
+
+(DEFUN REGISTER-CHANGE (OPERATION &OPTIONAL (LOG *CHANGE-LOG*))
+  "Explicit sequential registration after mutation. Same symbol and EQ function returns the same record; a different function records a distinct change."
+  (UNLESS
+      (AND (SYMBOLP OPERATION) (FBOUNDP OPERATION)
+           (NOT (MACRO-FUNCTION OPERATION))
+           (NOT (SPECIAL-OPERATOR-P OPERATION)))
+    (ERROR "Expected a bound ordinary function symbol: ~S" OPERATION))
+  (LET ((FUNCTION (FDEFINITION OPERATION)))
+    (OR
+     (FIND-IF
+      (LAMBDA (CHANGE)
+        (AND (EQ OPERATION (CHANGE-OPERATION CHANGE))
+             (EQ FUNCTION (CHANGE-FUNCTION CHANGE))))
+      (RECORDED-CHANGES LOG))
+     (LET ((CHANGE
+            (MAKE-INSTANCE 'RECORDED-CHANGE :OPERATION OPERATION :FUNCTION
+                           FUNCTION :OBSERVATION
+                           (OBSERVE-OPERATION OPERATION))))
+       (PUSH CHANGE (RECORDED-CHANGES LOG))
+       CHANGE))))
+
+(DEFUN CHANGE-RECONSTRUCTION-STATUS (CHANGE)
+  "UNVERIFIED means no fresh reconstruction evidence has been attached. This slice has no clearing transition; source discovery and RECONSTRUCT do not clear records."
+  (CHECK-TYPE CHANGE RECORDED-CHANGE)
+  :UNVERIFIED)
+
+(DEFUN OUTSTANDING-CHANGES (&OPTIONAL (LOG *CHANGE-LOG*))
+  "Return a fresh list of registered unverified changes, oldest first. Unregistered mutations are invisible; source availability does not remove entries."
+  (REVERSE
+   (REMOVE-IF-NOT
+    (LAMBDA (CHANGE) (EQ :UNVERIFIED (CHANGE-RECONSTRUCTION-STATUS CHANGE)))
+    (RECORDED-CHANGES LOG))))
+
+(DEFUN OBSERVE-CHANGE (CHANGE)
+  "Keep registration, current observation and verification distinct. Later unregistered redefinitions can be observed but are not automatically registered."
+  (LET ((CURRENT (OBSERVE-OPERATION (CHANGE-OPERATION CHANGE))))
+    (LIST :CHANGE CHANGE :OPERATION (CHANGE-OPERATION CHANGE)
+          :RECORDED-OBSERVATION (CHANGE-OBSERVATION CHANGE)
+          :CURRENT-OBSERVATION CURRENT :RECORDED-DEFINITION-CURRENT-P
+          (EQ (CHANGE-FUNCTION CHANGE) (GETF CURRENT :FUNCTION))
+          :RECONSTRUCTION (CHANGE-RECONSTRUCTION-STATUS CHANGE))))
 
 (DEFGENERIC PERSIST-IN (PLAN AUTHORING-CAPABILITY)
             (:DOCUMENTATION

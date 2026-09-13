@@ -16,7 +16,7 @@
                         (LOOP FOR F IN FORMS WHEN
                               (EQ (CAR F) (QUOTE HYPERDOC:DEFEXAMPLE)) COLLECT
                               (SECOND F))))
-             (ASSERT (= 10 (LENGTH EXAMPLES)))
+             (ASSERT (= 11 (LENGTH EXAMPLES)))
              (HYPERDOC::ENSURE-PAGES-LOADED BOOK)
              (LET*
                    ((PAGE
@@ -33,7 +33,7 @@
                                           (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES
                                                                                 VIEW)))
                          (CLICKS 0))
-                        (ASSERT (= 10 (LENGTH WIDGETS)))
+                        (ASSERT (= 11 (LENGTH WIDGETS)))
                         (DOLIST (WIDGET WIDGETS)
                                 (HTML-INSPECTOR-VIEWS:VIEW-HTML WIDGET)
                                 (LET
@@ -53,7 +53,7 @@
                                                                               (CDAR
                                                                                     ACTIONS)))
                                      (INCF CLICKS)))
-                        (ASSERT (= CLICKS 10))))
+                        (ASSERT (= CLICKS 11))))
              (ASSERT (STRING= BEFORE (UIOP/STREAM:READ-FILE-STRING PATH)))
              (UNLESS (UIOP/OS:GETENV "HYPERDOC_WORKFLOW_EDITOR_SOURCE")
                      (ASSERT (NOT (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING))))
@@ -81,7 +81,7 @@
                              (EQUAL "46d6906bdb1f92c49e19b128459ca223289717ed"
                                     (GETF EVIDENCE :BLOB))))
              (FORMAT T
-                     "Workflow reading passed: 10 reconstructed source transclusions and executed thunks; explicit authoring boundary.~%")
+                     "Workflow reading passed: 11 reconstructed source transclusions and executed thunks; explicit authoring boundary.~%")
              (WHEN
                    (EQ :AVAILABLE
                        (GETF (DREYECK/TOPICMAP/TALA:TALA-DEPENDENCY-STATUS)
