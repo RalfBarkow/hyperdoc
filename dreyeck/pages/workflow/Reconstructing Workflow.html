@@ -1,67 +1,32 @@
 <html><head><title>Reconstructing Workflow</title></head><body>
 <in-package>dreyeck/workflow/reading</in-package>
 <h1>Reconstructing Workflow</h1>
-<p>A running definition is not proof that its source can recreate it. Workflow connects one owned source form, a proposed change, and an explicit reconstruction expectation. It neither replaces ASDF nor serializes the entire Lisp image.</p>
-<p>This book loads through ordinary <code>dreyeck/catalog</code>. Loading and inspecting it writes no source and changes no Git state. The ► buttons transclude real persisted DEFEXAMPLE definitions. Each example constructs its own observation.</p>
-<h2>What is the smallest authority?</h2>
-<p><code>persistence-plan</code> records an ASDF system, its owned source pathname, a unique top-level DEFUN or DEFSYSTEM key, the observed source and form, proposed Lisp data, and an expectation for a fresh process. The source owns the capability; the plan is a disposable observation/proposal. No persistent registry, fragment codec or construction-history chain is needed to recover this model.</p>
-<source-of-function>reading-plan</source-of-function>
-<p>Open “Persistence boundary” to inspect the source, before/after forms, status and expectation. The example proposes a documentation change to the real PLAN-STATUS definition; it does not execute it.</p>
-<source-of-function>reading-live-operation</source-of-function>
-<p>A source pathname found through SBCL introspection is evidence of location, not proof of equivalence. Observation covers only the supplied operation. Compiled closures may have no recoverable source. There is no claim to detect every unpersisted capability in the image, and no global scanner or hidden cleanup pass.</p>
-<h2>Ownership does not imply dependency</h2>
-<source-of-function>reading-dependency</source-of-function>
-<p>The dependency example observes the real workflow DEFSYSTEM. UIOP is already present, so its plan is unchanged. ASDF owns component membership, system dependencies and reconstruction order. Workflow changes that existing declaration structurally; it does not maintain a parallel dependency graph. Definition calls, ASDF load prerequisites, source provenance and verification expectations remain different relations.</p>
-<p>The falsification test writes a perfectly owned fixture DEFSYSTEM whose dependency does not exist. Ownership succeeds; fresh reconstruction fails. This is the concrete observation requiring dependency knowledge beyond ownership. It does not require fragment authorities or an extension chain.</p>
-<h2>PERSIST-IN crosses an explicit authoring boundary</h2>
-<source-of-function>reading-authoring-boundary</source-of-function>
-<p>Ordinary runtime creates plans and exposes the PERSIST-IN protocol. It has no authoring method. In <code>nix develop .#workflow-authoring</code>, load <code>dreyeck/workflow/authoring</code> and create its explicit authoring environment. That environment verifies the selected writer source and commit. Then <code>(dreyeck/workflow:persist-in plan environment)</code> is the actual operation.</p>
-<p>The separate shell pins html-inspector-views <code>4b0607d93b193e21bd2ca5dc0d7e47c062ac8112</code>. Ordinary HyperDoc keeps <code>386df8937a21457b3d91e1b61e070f836550ff71</code>. Neither path depends on a local editor checkout.</p>
-<p>The executor rejects stale source and ambiguous form identity, uses the existing CST writer, reparses the file, compares the intended form and unrelated forms, then starts a fresh ordinary-runtime SBCL process. That process loads the owning ASDF system and evaluates the expectation. Only success yields <code>:verified</code>. A failed reconstruction leaves a written, unaccepted edit for inspection; it is not silently rolled back or reported as persisted success. Expectations are explicit behavioral tests, not a general proof of equivalence.</p>
-<source-of-function>reading-persistence-roundtrip</source-of-function>
-<p>In ordinary runtime this button returns the required environment and an inspectable request. In the pinned authoring shell it runs the real PERSIST-IN seam against temporary authorities: 42 becomes 43 and is reconstructed in a fresh process. It also disproves acceptance of stale requests, wrong results and missing dependencies. Temporary test files are removed afterward. No production source or Git state is modified by this example.</p>
-<h2>Read the File Package as a countermodel</h2>
-<p>The <a href="https://interlisp.org/history/timeline/#1971">Interlisp primary project timeline</a> describes file ownership, change tracking and cleanup in 1971, and contrasts that system with dependency-aware make. The surviving implementation provides a more precise comparison than an analogy alone.</p>
-<source-of-function>reading-medley</source-of-function>
-<p>Evidence is fixed to <a href="https://github.com/Interlisp/medley/tree/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442">Medley commit 3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442</a>, <code>sources/FILEPKG</code>, blob <code>46d6906bdb1f92c49e19b128459ca223289717ed</code>. Each evidence object retains its definition, line, observation, immutable source link and MIT license attribution. Medley is neither copied into this repository nor required at runtime.</p>
-<p><a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L1060">FILECOMS</a> resolves the command-variable name for a file. The command list describes what belongs there. <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L1033">MARKASCHANGED</a> records names by type and invokes change hooks; <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L435">MAKEFILE</a> consults pending changes and file properties. <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L362">CLEANUP</a> coordinates dumping, listing and optional compilation; <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L1569">FILES?</a> exposes pending work.</p>
-<p>The analogy has limits. This workflow detects divergence between a scoped proposal and an observed authority; it does not implement Medley's change hooks. FILECREATED is source metadata, not a fresh-process behavioral test. FILECOMS is not an operation assembly registry. Further, modern <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L4708">CHECKIMPORTS</a> checks imported versions. The claim that all present-day Medley lacks dependency-related behavior is therefore rejected. ASDF remains the relevant dependency mechanism for this Common Lisp system.</p>
-<h2>What survived the historical workflow?</h2>
-<source-of-function>reading-historical</source-of-function>
-<p>Historical PERSIST-IN mixed a Catalog-specific append operation, a tests-specific append operation, and overlapping ASDF dependency guards. Newest-first closures preserved the history of those implementations. They did not establish distinct semantic authorities. Direct structural plans replace this dispatch history and reject duplicate target forms instead of appending competing definitions.</p>
-<table><tr><th>Historical mechanism</th><th>Decision and observation</th></tr>
-<tr><td>Authority</td><td>Retained as concrete ASDF source ownership; wrong ownership is rejected.</td></tr>
-<tr><td>Operation/specification</td><td>Ordinary persisted DEFUN/generic definitions and plan data; no second operation registry.</td></tr>
-<tr><td>Fragments, codec, assembly registry</td><td>Removed from the loaded system. No external persisted direct consumer was found; fresh plans and behavior reconstruct without them.</td></tr>
-<tr><td>Guarded extension chains</td><td>Replaced by explicit request identity and one authoring specialization. Repeated ASDF guards encoded editing history.</td></tr>
-<tr><td>Deterministic materialization</td><td>Retained as unique structural targeting and verified source writing, not dynamic closure assembly.</td></tr>
-<tr><td>ADMIT/COMMIT forwarding</td><td>Use existing Catalog and dreyeck/git facilities directly. Workflow adds no second Catalog or Git layer.</td></tr>
-<tr><td>Global reconstruction audit</td><td>Replaced by scoped evidence and explicit expectations; no unsupported claim of whole-image completeness.</td></tr>
-<tr><td>Conversation/portal rescue work</td><td>Left on the historical branch. It is unrelated to the minimal persistence boundary.</td></tr></table>
-<p>The original workflow source remains available as historical repository evidence, but is not an ASDF component of the reconstructed runtime. This is behavioral reconstruction, not a merge of every historical feature.</p>
-<h2>The map is not the territory</h2>
-<source-of-function>reading-workspace</source-of-function>
-<p>The existing Workspace exposes plans, ASDF ownership, historical evidence, Medley evidence and the authoring boundary. Every relation stores a warrant and epistemic status: source-observed fact, mechanically derived fact, design inference or working hypothesis. The comparison edge to Medley is explicitly a hypothesis; layout cannot promote it to a fact.</p>
-<source-of-function>reading-layout-comparison</source-of-function>
-<p>Native placement emphasizes a readable comparison row. Optional TALA derives orthogonal placement from the same Workspace. The existing comparison retains the same Projection, Topic IDs, Association IDs/endpoints, point and history. Native signs keep their existing navigation thunks; the TALA image is a noninteractive rendering proof. Without D2 the button returns an explicit capability requirement and a usable native Workspace. Proximity, routing and left-to-right placement have no workflow authority.</p>
-<h2>How this explanation reconstructs itself</h2>
-<source-of-function>reading-bootstrap</source-of-function>
-<p>The seed is Common Lisp and ASDF, the pinned runtime libraries, HyperDoc/HyperBook, DEFEXAMPLE/source transclusion, Inspector, Topicmap and Workspace. Persisted workflow source creates the plan protocol. Persisted reading definitions create observations and projections. The HTML page transcludes those definitions. Ordinary Catalog membership loads the reading system; it does not execute source writing. Fresh tests repeat this chain without a pre-populated workflow registry. This is an explainable bootstrap, not a claim of complete self-hosting.</p>
-<p>Run ordinary tests with <code>nix develop -c sbcl --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:test-system "dreyeck/workflow/reading/tests")'</code>. Run persistence falsification in <code>nix develop .#workflow-authoring</code> with <code>(asdf:test-system "dreyeck/workflow/authoring/tests")</code>. The optional TALA shell exercises the layout comparison. No routine Catalog startup runs these authoring tests or CLEANUP-like behavior.</p>
-<section>
-<h2>Deployment is a distinct authority</h2>
-<p>Local source reconstruction is executable repository evidence. It does not prove the state of a remote deployment. The bootstrap example retains explicitly operator-supplied evidence: <code>dreyeck.ch:/etc/nixos/hyperdoc-service.nix</code> starts <code>nix develop .#tala -c ./scripts/serve-catalog.sh 8080</code>, and the operator reports the TALA reading page available there. The workflow does not acquire remote evidence implicitly. Tests, examples, Inspector views and reconstruction require no SSH, SCP, rsync or server access. Deployment mutations remain operator-controlled.</p>
-<p>A server-side dependency witness, if needed, is run manually by the operator in <code>/home/rgb/workspace/hyperdoc</code>: <code>nix develop .#tala -c sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system "dreyeck/topicmap/tala")' --eval '(format t "SERVICE-TALA-STATUS=~S~%" (dreyeck/topicmap/tala:tala-dependency-status))'</code>. It tests executable availability, expects supported D2 v0.9.0 with TALA, and does not restart the service. A returned witness must be attributed to the operator; local tests cannot substitute for it.</p>
-</section>
-<h2>What in the Image Is Not Yet Persistent?</h2>
-<p>Show explicitly registered changes that are still current in the running image and whose reconstruction has not yet been verified. Registered history is not the same as current persistence risk. Unregistered mutations remain outside this answer.</p>
+<p>A running definition is not proof that its source can recreate it. Workflow distinguishes loaded image state, registered change history, current persistence risk, source authority and fresh-process verification. Process and deployment boundaries limit what that evidence establishes.</p>
+<table>
+<thead><tr><th scope="col">Question</th><th scope="col">Evidence / API</th></tr></thead>
+<tbody>
+<tr><td>Explicitly registered?</td><td><code>REGISTER-CHANGE</code> records a known operation/function pair.</td></tr>
+<tr><td>Recorded definition still current?</td><td><code>OBSERVE-CHANGE</code> reports <code>:RECORDED-DEFINITION-CURRENT-P</code>.</td></tr>
+<tr><td>Reconstruction verified?</td><td><code>CHANGE-RECONSTRUCTION-PROOF</code> retains accepted evidence; reconstruction status is <code>:VERIFIED</code> or <code>:UNVERIFIED</code>.</td></tr>
+<tr><td>Persisted source authority?</td><td><code>OBSERVE-OPERATION</code> locates possible source; <code>PERSISTENCE-PLAN</code> names an explicitly owned source form and expectation.</td></tr>
+</tbody></table>
+<p>These are distinct relations. A loaded definition need not be registered, a registered definition need not remain current, and locating source does not prove reconstruction. This book loads through ordinary <code>dreyeck/catalog</code>. The ► buttons transclude real persisted DEFEXAMPLE definitions.</p>
+<h2>Registered changes: history, current risk, and closure</h2>
+<p>What in the image is not yet persistent? The bounded answer is: explicitly registered changes that are still current and reconstruction-unverified. <code>OUTSTANDING-CHANGES</code> and <code>CURRENT-OUTSTANDING-CHANGES</code> are two projections over registered records: open reconstruction history and current persistence risk. Both preserve registration order.</p>
 <source-of-function>reading-outstanding-changes</source-of-function>
-<p>The example registers definition A, redefines the same operation as B, and observes A before registering B. A remains outstanding but is no longer current. After registering B, OUTSTANDING-CHANGES contains A and B in registration order; CURRENT-OUTSTANDING-CHANGES contains only B. Re-registering the same operation and EQ-identical function returns the same record.</p>
-<p>Each record retains its function identity, registration observation and optional reconstruction proof. OBSERVE-CHANGE reports currentness and reconstruction state separately. Source location does not verify reconstruction. RECONSTRUCT remains an in-image ASDF reload and closes no obligation.</p>
+<table>
+<thead><tr><th scope="col">Experiment</th><th scope="col">Outstanding</th><th scope="col">Current outstanding</th></tr></thead>
+<tbody>
+<tr><td>Register A</td><td>A</td><td>A</td></tr>
+<tr><td>B replaces A without registration</td><td>A</td><td>none</td></tr>
+<tr><td>Register B</td><td>A, B</td><td>B</td></tr>
+<tr><td>B fails fresh reconstruction</td><td>A, B</td><td>B</td></tr>
+<tr><td>B verifies successfully</td><td>A</td><td>none</td></tr>
+</tbody></table>
+<p>A record retains its operation, captured function identity, registration observation and optional reconstruction proof. Re-registering the same operation and EQ-identical function returns the same record. A later definition cannot close the older superseded record.</p>
 <source-of-function>reading-change-verification</source-of-function>
-<p>In ordinary runtime the closure button returns an explicit authoring requirement. In the pinned authoring shell it runs the durable A/B experiment through the real PERSIST-IN and VERIFY-CHANGE operations against temporary authorities. A deliberately wrong persisted definition fails fresh reconstruction, leaving B open. Correct persistence verifies B and removes it from both open queries; superseded A stays outstanding. The result contains records, before/after observations and proof. Temporary source is removed afterward; the proof describes that completed experiment.</p>
-<p>Use <code>(dreyeck/workflow:persist-in plan environment :change change)</code> to persist and verify a particular record. Use <code>(dreyeck/workflow:verify-change change plan environment)</code> to verify already-persisted source without rewriting it. The plan must own that operation, its proposed form and surrounding forms must match persisted source, and the recorded function must remain current before and after verification. The explicit behavioral expectation must hold both in the live image and a fresh ordinary-runtime process. Use observational expectations that do not mutate the operation. This proves the stated expectation, not general equivalence. A later definition cannot close an older superseded record.</p>
-<p>Failed verification leaves an unverified record open. A write followed by failed reconstruction stays on disk for inspection. PERSIST-IN without a record verifies the plan only and closes no registered change. Ordinary runtime has no writer or implicit authoring capability.</p>
+<p>In ordinary runtime the closure example returns an authoring requirement. In the pinned authoring shell it runs the durable A/B experiment through the real PERSIST-IN and VERIFY-CHANGE operations against temporary authorities. It returns records, before/after observations and accepted proof. Temporary source is removed afterward; the proof describes that completed experiment.</p>
+<p>Failed verification leaves the record open. Source discovery, in-image <code>RECONSTRUCT</code>, and <code>PERSIST-IN</code> without an associated change do not close a record. Only explicitly registered ordinary-function mutations are covered: unregistered mutations remain invisible, with no whole-image scanning, automatic hooks or generic-function method tracking.</p>
 <p>Copy these SLY/mREPL forms and inspect their ordinary Lisp results:</p>
 <pre>(dreyeck/workflow:outstanding-changes)
 (dreyeck/workflow:current-outstanding-changes)
@@ -76,42 +41,66 @@
 (dreyeck/workflow:outstanding-changes (getf *workflow-closure* :log))
 (dreyeck/workflow:current-outstanding-changes (getf *workflow-closure* :log))
 (dreyeck/workflow:change-reconstruction-proof (getf *workflow-closure* :b))</pre>
-<p>Medley MARKASCHANGED motivates recording mutations; FILES? motivates exposing pending work. This workflow's historical/current distinction is not FILEPKG equivalence. The image-local log survives source reload through DEFVAR but not process restart. Only explicitly registered ordinary function symbols are supported: no whole-image scanning, automatic hooks, generic-function method tracking or remote access is implied.</p>
-
-<section>
-<h2>From REPL History to a Reconstructible Change Model</h2>
-
-<p>
-The change-tracking extension was first read against an already running Lisp
-image. Before reloading <code>dreyeck/workflow</code>, the existing
-<code>RECORDED-CHANGE</code> class had only operation, function and observation
-state, while the source on disk already contained reconstruction-proof state,
-<code>CURRENT-OUTSTANDING-CHANGES</code>, <code>VERIFY-CHANGE</code>, and the
-extended <code>PERSIST-IN</code> protocol.
-</p>
-
-<p>
-Reloading the ordinary workflow system updated the running class definition.
-The previously existing change record remained the same object, but acquired
-a bound reconstruction-proof slot whose initial value was NIL. Its
-reconstruction status therefore remained <code>:UNVERIFIED</code>.
-</p>
-
-<p>
-Two registered definitions of the same operation remained historically
-outstanding. The earlier definition was no longer current; the later
-definition was current. Consequently,
-<code>OUTSTANDING-CHANGES</code> returned both records while
-<code>CURRENT-OUTSTANDING-CHANGES</code> returned only the later one.
-</p>
-
-<source-of-function>reading-outstanding-changes</source-of-function>
-
-<p>
-The executable example below reconstructs the semantic result independently
-of that particular REPL session. Object addresses and the previous image state
-are deliberately not part of the durable example.
-</p>
-</section>
-
+<h2>What is the smallest source authority?</h2>
+<p>After identifying a current outstanding change, the next question is: what persisted source owns the definition? The current workflow requires explicit ASDF ownership; it does not automatically assign an unowned image-only definition to a source file or insert a new top-level definition.</p>
+<p><code>persistence-plan</code> records an ASDF system, its owned source pathname, a unique top-level DEFUN or DEFSYSTEM key, the observed source and form, proposed Lisp data, and an expectation for a fresh process. The source owns the capability; the plan is a disposable observation/proposal. No persistent registry, fragment codec or construction-history chain is needed to recover this model.</p>
+<source-of-function>reading-plan</source-of-function>
+<p>Open “Persistence boundary” to inspect the source, before/after forms, status and expectation. The example proposes a documentation change to the real PLAN-STATUS definition; it does not execute it.</p>
+<source-of-function>reading-live-operation</source-of-function>
+<p>SBCL introspection supplies source-location evidence for the named operation. Compiled closures may have no recoverable source; the returned pathname does not establish ownership or reconstructive equivalence.</p>
+<h2>Ownership does not imply dependency</h2>
+<source-of-function>reading-dependency</source-of-function>
+<p>The dependency example observes the real workflow DEFSYSTEM. UIOP is already present, so its plan is unchanged. ASDF owns component membership, system dependencies and reconstruction order. Workflow changes that existing declaration structurally; it does not maintain a parallel dependency graph. Definition calls, ASDF load prerequisites, source provenance and verification expectations remain different relations.</p>
+<p>The falsification test writes a perfectly owned fixture DEFSYSTEM whose dependency does not exist. Ownership succeeds; fresh reconstruction fails. This is the concrete observation requiring dependency knowledge beyond ownership. It does not require fragment authorities or an extension chain.</p>
+<h2>PERSIST-IN crosses an explicit authoring boundary</h2>
+<source-of-function>reading-authoring-boundary</source-of-function>
+<p>Ordinary runtime constructs plans and defines the PERSIST-IN and VERIFY-CHANGE protocols, but has no authoring method. Loading the Catalog grants no writing capability. In an authoring-capable process, load <code>dreyeck/workflow/authoring</code> and create its explicit authoring environment. That environment verifies the selected writer source and commit.</p>
+<p>The <code>nix develop path:.#workflow-authoring</code> shell pins html-inspector-views <code>4b0607d93b193e21bd2ca5dc0d7e47c062ac8112</code>. Ordinary HyperDoc keeps <code>386df8937a21457b3d91e1b61e070f836550ff71</code>. Neither path depends on a local editor checkout.</p>
+<p>Use <code>(dreyeck/workflow:persist-in plan environment :change change)</code> to persist and verify a particular record. Use <code>(dreyeck/workflow:verify-change change plan environment)</code> to verify already-persisted source without rewriting it. The plan must own the operation, the proposed form and surrounding forms must match persisted source, and the captured function must remain current before and after verification.</p>
+<p>The executor rejects stale source and ambiguous form identity, uses the CST writer, and reparses the result. It then starts a fresh ordinary-runtime SBCL process to load the owning ASDF system and evaluate the expectation. For registered-change closure, the explicit behavioral expectation must hold in both the authoring image and the fresh process. Use observational expectations that do not mutate the operation. This proves the stated expectation, not general equivalence. A write followed by failed reconstruction remains on disk for inspection rather than being silently rolled back.</p>
+<source-of-function>reading-persistence-roundtrip</source-of-function>
+<p>In ordinary runtime this button returns the required environment and an inspectable request. In the pinned authoring shell it exercises the same PERSIST-IN seam against temporary authorities, including wrong results, stale requests and missing dependencies. No production source or Git state is modified by the example.</p>
+<h2>Countermodels and design history</h2>
+<h3>Medley File Package</h3>
+<p>The <a href="https://interlisp.org/history/timeline/#1971">Interlisp primary project timeline</a> describes file ownership, change tracking and cleanup in 1971, and contrasts that system with dependency-aware make. The surviving implementation provides a more precise comparison than an analogy alone.</p>
+<source-of-function>reading-medley</source-of-function>
+<p>Evidence is fixed to <a href="https://github.com/Interlisp/medley/tree/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442">Medley commit 3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442</a>, <code>sources/FILEPKG</code>, blob <code>46d6906bdb1f92c49e19b128459ca223289717ed</code>. Each evidence object retains its definition, line, observation, immutable source link and MIT license attribution. Medley is neither copied into this repository nor required at runtime.</p>
+<p><a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L1060">FILECOMS</a> resolves the command-variable name for a file. The command list describes what belongs there. <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L1033">MARKASCHANGED</a> records names by type and invokes change hooks; <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L435">MAKEFILE</a> consults pending changes and file properties. <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L362">CLEANUP</a> coordinates dumping, listing and optional compilation; <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L1569">FILES?</a> exposes pending work.</p>
+<p>The analogy has limits. This workflow detects divergence between a scoped proposal and an observed authority; it does not implement Medley's change hooks. FILECREATED is source metadata, not a fresh-process behavioral test. FILECOMS is not an operation assembly registry. Further, modern <a href="https://github.com/Interlisp/medley/blob/3a14c9aa040d6cd897e3d6c3c3fa664a3e2d1442/sources/FILEPKG#L4708">CHECKIMPORTS</a> checks imported versions. The claim that all present-day Medley lacks dependency-related behavior is therefore rejected. ASDF remains the relevant dependency mechanism for this Common Lisp system.</p>
+<h3>Historical HyperDoc workflow</h3>
+<source-of-function>reading-historical</source-of-function>
+<p>Historical PERSIST-IN mixed a Catalog-specific append operation, a tests-specific append operation, and overlapping ASDF dependency guards. Newest-first closures preserved the history of those implementations. They did not establish distinct semantic authorities. Direct structural plans replace this dispatch history and reject duplicate target forms instead of appending competing definitions.</p>
+<table>
+<thead><tr><th scope="col" style="text-align:left; padding-right:1.5em">Historical mechanism</th><th scope="col" style="text-align:left">Decision and observation</th></tr></thead>
+<tbody>
+<tr><td>Authority</td><td>Retained as concrete ASDF source ownership; wrong ownership is rejected.</td></tr>
+<tr><td>Operation/specification</td><td>Ordinary persisted DEFUN/generic definitions and plan data; no second operation registry.</td></tr>
+<tr><td>Fragments, codec, assembly registry</td><td>Removed from the loaded system. No external persisted direct consumer was found; fresh plans and behavior reconstruct without them.</td></tr>
+<tr><td>Guarded extension chains</td><td>Replaced by explicit request identity and one authoring specialization. Repeated ASDF guards encoded editing history.</td></tr>
+<tr><td>Deterministic materialization</td><td>Retained as unique structural targeting and verified source writing, not dynamic closure assembly.</td></tr>
+<tr><td>ADMIT/COMMIT forwarding</td><td>Use existing Catalog and dreyeck/git facilities directly. Workflow adds no second Catalog or Git layer.</td></tr>
+<tr><td>Global reconstruction audit</td><td>Replaced by scoped evidence and explicit expectations; no unsupported claim of whole-image completeness.</td></tr>
+<tr><td>Conversation/portal rescue work</td><td>Left on the historical branch. It is unrelated to the minimal persistence boundary.</td></tr></tbody></table>
+<p>The original workflow source remains available as historical repository evidence, but is not an ASDF component of the reconstructed runtime. This is behavioral reconstruction, not a merge of every historical feature.</p>
+<h2>The map is not the territory</h2>
+<p>The current Workspace does not yet project the image-local change log. OUTSTANDING-CHANGES, CURRENT-OUTSTANDING-CHANGES, captured function identity and reconstruction proof are not yet Topicmap objects. The current TALA comparison therefore lays out design evidence, not live reconstruction history.</p>
+<source-of-function>reading-workspace</source-of-function>
+<p>The existing Workspace exposes plans, ASDF ownership, historical evidence, Medley evidence and the authoring boundary. Every relation stores a warrant and epistemic status: source-observed fact, mechanically derived fact, design inference or working hypothesis. The comparison edge to Medley is explicitly a hypothesis; layout cannot promote it to a fact.</p>
+<source-of-function>reading-layout-comparison</source-of-function>
+<p>Native placement emphasizes a readable comparison row. Optional TALA derives orthogonal placement from the same Workspace. The existing comparison retains the same Projection, Topic IDs, Association IDs/endpoints, point and history. Native signs keep their existing navigation thunks; the TALA image is a noninteractive rendering proof. Without D2 the button returns an explicit capability requirement and a usable native Workspace. Proximity, routing and left-to-right placement have no workflow authority.</p>
+<h2>How this explanation reconstructs itself</h2>
+<source-of-function>reading-bootstrap</source-of-function>
+<p>The seed is Common Lisp and ASDF, the pinned runtime libraries, HyperDoc/HyperBook, DEFEXAMPLE/source transclusion, Inspector, Topicmap and Workspace. Persisted workflow source creates the plan protocol. Persisted reading definitions create observations and projections. The HTML page transcludes those definitions. Ordinary Catalog membership loads the reading system; it does not execute source writing. Fresh tests repeat this chain without a pre-populated workflow registry. This is an explainable bootstrap, not a claim of complete self-hosting.</p>
+<p>Run ordinary tests with <code>nix develop path:. -c sbcl --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:test-system "dreyeck/workflow/reading/tests")'</code>. Run persistence falsification in <code>nix develop path:.#workflow-authoring</code> with <code>(asdf:test-system "dreyeck/workflow/authoring/tests")</code>. The optional TALA shell exercises the layout comparison. No routine Catalog startup runs these authoring tests or CLEANUP-like behavior.</p>
+<h2>Operational boundaries</h2>
+<h3>Process boundary</h3>
+<p>Change records and change logs are currently image-local. The log survives ordinary source reload through DEFVAR, but is not persisted across process restarts. The authoring tests create and close their records within an authoring-capable Lisp process. A separate fresh ordinary-runtime process supplies reconstruction evidence; it does not receive or close the original RECORDED-CHANGE object.</p>
+<p>The current workflow has no demonstrated transport protocol for transferring a RECORDED-CHANGE from one Lisp process to another and later closing it there. This is a scope boundary, not a claim that such a mechanism is impossible. The tests do not prove cross-process record transfer.</p>
+<h3>Deployment authority</h3>
+<p>Local source reconstruction is executable repository evidence; it does not prove remote deployment state. The bootstrap example retains operator-supplied evidence that <code>dreyeck.ch:/etc/nixos/hyperdoc-service.nix</code> starts <code>nix develop .#tala -c ./scripts/serve-catalog.sh 8080</code>, and that the TALA reading page is available. This is the operator's observed command, quoted without changing its spelling.</p>
+<p>Remote evidence is supplied explicitly by the operator. Tests, examples, Inspector views and reconstruction require no SSH, SCP, rsync or server access; deployment mutations remain operator-controlled. If a service-equivalent D2/TALA witness is needed, the operator runs it manually and returns the output. Local test results cannot substitute for that evidence.</p>
+<p>Local instructions on this page use <code>path:.</code> to select this checkout explicitly, as in the fresh tests. Existing executable-example metadata may retain the shorter <code>.#workflow-authoring</code> spelling for the same local shell; the observed deployment command above remains historical evidence.</p>
+<h2>Development note: reloading the change model</h2>
+<p>In the reported development session, the running image initially held the older RECORDED-CHANGE class with operation, function and observation state, while persisted source already contained the reconstruction-proof model. Reloading <code>dreyeck/workflow</code> redefined the class. The pre-existing record remained the same object of that class and acquired a bound <code>RECONSTRUCTION-PROOF</code> slot initialized to NIL, so its status remained <code>:UNVERIFIED</code>.</p>
+<p>This was a development-session observation, not itself a fresh-process reconstruction proof. The durable distinction between historical obligations and current definitions is exercised by READING-OUTSTANDING-CHANGES earlier on this page; it is transcluded there once, without depending on object addresses or the previous image.</p>
 </body></html>
