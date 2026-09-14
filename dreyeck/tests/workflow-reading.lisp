@@ -3,6 +3,51 @@
 
 (DEFUN RUN-READING-TESTS NIL
        (LET*
+             ((DREYECK/WORKFLOW/TESTS::EXAMPLE
+                                               (DREYECK/WORKFLOW/READING::READING-OUTSTANDING-CHANGES))
+              (DREYECK/WORKFLOW/TESTS::A
+                                         (GETF DREYECK/WORKFLOW/TESTS::EXAMPLE
+                                               :A))
+              (DREYECK/WORKFLOW/TESTS::B
+                                         (GETF DREYECK/WORKFLOW/TESTS::EXAMPLE
+                                               :B))
+              (DREYECK/WORKFLOW/TESTS::PRIOR
+                                             (GETF
+                                                   DREYECK/WORKFLOW/TESTS::EXAMPLE
+                                                   :AFTER-REDEFINITION)))
+             (ASSERT
+                     (EQUAL (LIST DREYECK/WORKFLOW/TESTS::A)
+                            (GETF DREYECK/WORKFLOW/TESTS::PRIOR :OUTSTANDING)))
+             (ASSERT (NULL (GETF DREYECK/WORKFLOW/TESTS::PRIOR :CURRENT)))
+             (ASSERT
+                     (NOT
+                          (GETF
+                                (GETF DREYECK/WORKFLOW/TESTS::PRIOR
+                                      :OBSERVATION)
+                                :RECORDED-DEFINITION-CURRENT-P)))
+             (ASSERT
+                     (EQUAL
+                            (LIST DREYECK/WORKFLOW/TESTS::A
+                                  DREYECK/WORKFLOW/TESTS::B)
+                            (GETF DREYECK/WORKFLOW/TESTS::EXAMPLE
+                                  :OUTSTANDING)))
+             (ASSERT
+                     (EQUAL (LIST DREYECK/WORKFLOW/TESTS::B)
+                            (GETF DREYECK/WORKFLOW/TESTS::EXAMPLE :CURRENT)))
+             (ASSERT
+                     (NOT
+                          (GETF
+                                (FIRST
+                                       (GETF DREYECK/WORKFLOW/TESTS::EXAMPLE
+                                             :OBSERVATIONS))
+                                :RECORDED-DEFINITION-CURRENT-P)))
+             (ASSERT
+                     (GETF
+                           (SECOND
+                                   (GETF DREYECK/WORKFLOW/TESTS::EXAMPLE
+                                         :OBSERVATIONS))
+                           :RECORDED-DEFINITION-CURRENT-P)))
+       (LET*
              ((BOOK
                     (HYPERBOOK:FIND-HYPERBOOK "dreyeck/workflow/reading"
                                               :SIGNAL-ERROR? T))
@@ -16,7 +61,7 @@
                         (LOOP FOR F IN FORMS WHEN
                               (EQ (CAR F) (QUOTE HYPERDOC:DEFEXAMPLE)) COLLECT
                               (SECOND F))))
-             (ASSERT (= 11 (LENGTH EXAMPLES)))
+             (ASSERT (= 12 (LENGTH EXAMPLES)))
              (HYPERDOC::ENSURE-PAGES-LOADED BOOK)
              (LET*
                    ((PAGE
@@ -33,7 +78,7 @@
                                           (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES
                                                                                 VIEW)))
                          (CLICKS 0))
-                        (ASSERT (= 11 (LENGTH WIDGETS)))
+                        (ASSERT (= 12 (LENGTH WIDGETS)))
                         (DOLIST (WIDGET WIDGETS)
                                 (HTML-INSPECTOR-VIEWS:VIEW-HTML WIDGET)
                                 (LET
@@ -53,7 +98,7 @@
                                                                               (CDAR
                                                                                     ACTIONS)))
                                      (INCF CLICKS)))
-                        (ASSERT (= CLICKS 11))))
+                        (ASSERT (= CLICKS 12))))
              (ASSERT (STRING= BEFORE (UIOP/STREAM:READ-FILE-STRING PATH)))
              (UNLESS (UIOP/OS:GETENV "HYPERDOC_WORKFLOW_EDITOR_SOURCE")
                      (ASSERT (NOT (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING))))
@@ -81,7 +126,7 @@
                              (EQUAL "46d6906bdb1f92c49e19b128459ca223289717ed"
                                     (GETF EVIDENCE :BLOB))))
              (FORMAT T
-                     "Workflow reading passed: 11 reconstructed source transclusions and executed thunks; explicit authoring boundary.~%")
+                     "Workflow reading passed: 12 reconstructed source transclusions and executed thunks; explicit authoring boundary.~%")
              (WHEN
                    (EQ :AVAILABLE
                        (GETF (DREYECK/TOPICMAP/TALA:TALA-DEPENDENCY-STATUS)

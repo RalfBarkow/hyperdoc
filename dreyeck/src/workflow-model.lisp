@@ -9,7 +9,8 @@
                      :RECORDED-CHANGE :*CHANGE-LOG* :REGISTER-CHANGE
                      :OUTSTANDING-CHANGES :CHANGE-OPERATION :CHANGE-FUNCTION
                      :CHANGE-OBSERVATION :CHANGE-RECONSTRUCTION-STATUS
-                     :OBSERVE-CHANGE))
+                     :OBSERVE-CHANGE :CURRENT-OUTSTANDING-CHANGES
+                     :VERIFY-CHANGE :CHANGE-RECONSTRUCTION-PROOF))
 
 (IN-PACKAGE :DREYECK/WORKFLOW)
 
@@ -173,9 +174,11 @@
 (DEFCLASS RECORDED-CHANGE NIL
           ((OPERATION :INITARG :OPERATION :READER CHANGE-OPERATION)
            (FUNCTION :INITARG :FUNCTION :READER CHANGE-FUNCTION)
-           (OBSERVATION :INITARG :OBSERVATION :READER CHANGE-OBSERVATION))
+           (OBSERVATION :INITARG :OBSERVATION :READER CHANGE-OBSERVATION)
+           (RECONSTRUCTION-PROOF :INITFORM NIL :READER
+                                 CHANGE-RECONSTRUCTION-PROOF))
           (:DOCUMENTATION
-           "An explicitly registered operation/function identity. Captured source location is not verification."))
+                          "An explicitly registered operation/function identity. Captured source location is not verification."))
 
 (DEFVAR *CHANGE-LOG*
   (MAKE-INSTANCE 'CHANGE-LOG)
@@ -203,9 +206,9 @@
        CHANGE))))
 
 (DEFUN CHANGE-RECONSTRUCTION-STATUS (CHANGE)
-  "UNVERIFIED means no fresh reconstruction evidence has been attached. This slice has no clearing transition; source discovery and RECONSTRUCT do not clear records."
-  (CHECK-TYPE CHANGE RECORDED-CHANGE)
-  :UNVERIFIED)
+       "Only accepted fresh-process evidence closes this particular record."
+       (CHECK-TYPE CHANGE RECORDED-CHANGE)
+       (IF (CHANGE-RECONSTRUCTION-PROOF CHANGE) :VERIFIED :UNVERIFIED))
 
 (DEFUN OUTSTANDING-CHANGES (&OPTIONAL (LOG *CHANGE-LOG*))
   "Return a fresh list of registered unverified changes, oldest first. Unregistered mutations are invisible; source availability does not remove entries."
@@ -213,6 +216,13 @@
    (REMOVE-IF-NOT
     (LAMBDA (CHANGE) (EQ :UNVERIFIED (CHANGE-RECONSTRUCTION-STATUS CHANGE)))
     (RECORDED-CHANGES LOG))))
+
+(DEFUN CURRENT-OUTSTANDING-CHANGES (&OPTIONAL (LOG *CHANGE-LOG*))
+  "Registered, unverified definitions still EQ-current, in registration order. No whole-image discovery."
+  (REMOVE-IF-NOT
+   (LAMBDA (CHANGE)
+     (GETF (OBSERVE-CHANGE CHANGE) :RECORDED-DEFINITION-CURRENT-P))
+   (OUTSTANDING-CHANGES LOG)))
 
 (DEFUN OBSERVE-CHANGE (CHANGE)
   "Keep registration, current observation and verification distinct. Later unregistered redefinitions can be observed but are not automatically registered."
@@ -223,7 +233,12 @@
           (EQ (CHANGE-FUNCTION CHANGE) (GETF CURRENT :FUNCTION))
           :RECONSTRUCTION (CHANGE-RECONSTRUCTION-STATUS CHANGE))))
 
-(DEFGENERIC PERSIST-IN (PLAN AUTHORING-CAPABILITY)
+(DEFGENERIC VERIFY-CHANGE
+    (CHANGE PLAN AUTHORING-CAPABILITY)
+  (:DOCUMENTATION
+   "Close this registered ordinary-function obligation only after fresh ordinary-runtime reconstruction satisfies the explicit expectation. Requires a matching persisted plan and a still-current recorded function. Ordinary runtime supplies no verifier."))
+
+(DEFGENERIC PERSIST-IN (PLAN AUTHORING-CAPABILITY &KEY CHANGE)
             (:DOCUMENTATION
                             "Execute a plan through explicit pinned authoring capability.
 Ordinary runtime defines the request and protocol only. Acceptance requires

@@ -54,9 +54,64 @@
 <p>A server-side dependency witness, if needed, is run manually by the operator in <code>/home/rgb/workspace/hyperdoc</code>: <code>nix develop .#tala -c sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system "dreyeck/topicmap/tala")' --eval '(format t "SERVICE-TALA-STATUS=~S~%" (dreyeck/topicmap/tala:tala-dependency-status))'</code>. It tests executable availability, expects supported D2 v0.9.0 with TALA, and does not restart the service. A returned witness must be attributed to the operator; local tests cannot substitute for it.</p>
 </section>
 <h2>What in the Image Is Not Yet Persistent?</h2>
-<p>For this slice, the operational question is: show registered live-image changes whose reconstruction has not yet been verified. Recording a mutation, observing an operation, locating source, planning persistence and verifying fresh reconstruction remain separate responsibilities.</p>
+<p>Show explicitly registered changes that are still current in the running image and whose reconstruction has not yet been verified. Registered history is not the same as current persistence risk. Unregistered mutations remain outside this answer.</p>
 <source-of-function>reading-outstanding-changes</source-of-function>
-<p>The example compiles a live-only increment function under a fresh symbol, explicitly registers it in an isolated change log and returns outstanding records and their observations. No production source or Git state is modified. The function has no source pathname and remains unverified. Registering the same symbol and identical function object twice returns the same record; a redefinition is a distinct change. A later unregistered redefinition is visible when observing an existing record, but is not automatically registered.</p>
-<p>In SLY/mREPL, evaluate <code>(dreyeck/workflow:outstanding-changes)</code> and inspect the returned list. After a deliberate mutation, explicitly call <code>(dreyeck/workflow:register-change 'your-package:your-function)</code>. Each record exposes its operation, captured function, registration-time observation and reconstruction status; <code>(dreyeck/workflow:observe-change record)</code> adds the current observation. Source location alone is never a verification claim.</p>
-<p>This layer is motivated narrowly by Medley's MARKASCHANGED (record change) and FILES? (expose pending work). It does not reproduce FILEPKG or scan the image. Unregistered changes remain invisible. The log is image-local, uses sequential explicit registration and survives ordinary source reload through DEFVAR; it is not persisted across process restarts. This slice has no transition that clears a record: every registered change stays unverified. Neither RECONSTRUCT nor merely writing a source file clears it. A future verified transition must connect the recorded function/change identity to successful fresh-process evidence through the existing persistence boundary.</p>
+<p>The example registers definition A, redefines the same operation as B, and observes A before registering B. A remains outstanding but is no longer current. After registering B, OUTSTANDING-CHANGES contains A and B in registration order; CURRENT-OUTSTANDING-CHANGES contains only B. Re-registering the same operation and EQ-identical function returns the same record.</p>
+<p>Each record retains its function identity, registration observation and optional reconstruction proof. OBSERVE-CHANGE reports currentness and reconstruction state separately. Source location does not verify reconstruction. RECONSTRUCT remains an in-image ASDF reload and closes no obligation.</p>
+<source-of-function>reading-change-verification</source-of-function>
+<p>In ordinary runtime the closure button returns an explicit authoring requirement. In the pinned authoring shell it runs the durable A/B experiment through the real PERSIST-IN and VERIFY-CHANGE operations against temporary authorities. A deliberately wrong persisted definition fails fresh reconstruction, leaving B open. Correct persistence verifies B and removes it from both open queries; superseded A stays outstanding. The result contains records, before/after observations and proof. Temporary source is removed afterward; the proof describes that completed experiment.</p>
+<p>Use <code>(dreyeck/workflow:persist-in plan environment :change change)</code> to persist and verify a particular record. Use <code>(dreyeck/workflow:verify-change change plan environment)</code> to verify already-persisted source without rewriting it. The plan must own that operation, its proposed form and surrounding forms must match persisted source, and the recorded function must remain current before and after verification. The explicit behavioral expectation must hold both in the live image and a fresh ordinary-runtime process. Use observational expectations that do not mutate the operation. This proves the stated expectation, not general equivalence. A later definition cannot close an older superseded record.</p>
+<p>Failed verification leaves an unverified record open. A write followed by failed reconstruction stays on disk for inspection. PERSIST-IN without a record verifies the plan only and closes no registered change. Ordinary runtime has no writer or implicit authoring capability.</p>
+<p>Copy these SLY/mREPL forms and inspect their ordinary Lisp results:</p>
+<pre>(dreyeck/workflow:outstanding-changes)
+(dreyeck/workflow:current-outstanding-changes)
+(let ((change (first (dreyeck/workflow:outstanding-changes))))
+  (when change (dreyeck/workflow:observe-change change)))</pre>
+<p>For an isolated closure demonstration, start <code>nix develop path:.#workflow-authoring</code> and evaluate:</p>
+<pre>(asdf:load-system "dreyeck/workflow/authoring/tests")
+(defparameter *workflow-closure*
+  (dreyeck/workflow/tests:run-authoring-tests))
+(getf *workflow-closure* :before)
+(dreyeck/workflow:observe-change (getf *workflow-closure* :b))
+(dreyeck/workflow:outstanding-changes (getf *workflow-closure* :log))
+(dreyeck/workflow:current-outstanding-changes (getf *workflow-closure* :log))
+(dreyeck/workflow:change-reconstruction-proof (getf *workflow-closure* :b))</pre>
+<p>Medley MARKASCHANGED motivates recording mutations; FILES? motivates exposing pending work. This workflow's historical/current distinction is not FILEPKG equivalence. The image-local log survives source reload through DEFVAR but not process restart. Only explicitly registered ordinary function symbols are supported: no whole-image scanning, automatic hooks, generic-function method tracking or remote access is implied.</p>
+
+<section>
+<h2>From REPL History to a Reconstructible Change Model</h2>
+
+<p>
+The change-tracking extension was first read against an already running Lisp
+image. Before reloading <code>dreyeck/workflow</code>, the existing
+<code>RECORDED-CHANGE</code> class had only operation, function and observation
+state, while the source on disk already contained reconstruction-proof state,
+<code>CURRENT-OUTSTANDING-CHANGES</code>, <code>VERIFY-CHANGE</code>, and the
+extended <code>PERSIST-IN</code> protocol.
+</p>
+
+<p>
+Reloading the ordinary workflow system updated the running class definition.
+The previously existing change record remained the same object, but acquired
+a bound reconstruction-proof slot whose initial value was NIL. Its
+reconstruction status therefore remained <code>:UNVERIFIED</code>.
+</p>
+
+<p>
+Two registered definitions of the same operation remained historically
+outstanding. The earlier definition was no longer current; the later
+definition was current. Consequently,
+<code>OUTSTANDING-CHANGES</code> returned both records while
+<code>CURRENT-OUTSTANDING-CHANGES</code> returned only the later one.
+</p>
+
+<source-of-function>reading-outstanding-changes</source-of-function>
+
+<p>
+The executable example below reconstructs the semantic result independently
+of that particular REPL session. Object addresses and the previous image state
+are deliberately not part of the durable example.
+</p>
+</section>
+
 </body></html>

@@ -219,7 +219,7 @@
  (DOLIST
      (ENTRY
       '((\"dreyeck/topicmap/tala/reading\" \"Reading TALA as a Layout Layer\" 12)
-        (\"dreyeck/workflow/reading\" \"Reconstructing Workflow\" 11)))
+        (\"dreyeck/workflow/reading\" \"Reconstructing Workflow\" 12)))
    (LET* ((BOOK (HYPERBOOK:FIND-HYPERBOOK (FIRST ENTRY) :SIGNAL-ERROR? T)))
      (HYPERDOC::ENSURE-PAGES-LOADED BOOK)
      (LET* ((PAGE (HYPERBOOK:FIND-PAGE BOOK (SECOND ENTRY) :SIGNAL-ERROR? T))
@@ -237,7 +237,7 @@
               (LAMBDA (REF) (TYPEP (CDR REF) 'HTML-INSPECTOR-VIEWS:THUNK))
               (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES (CDR WIDGET)))))))))
  (FORMAT T
-         \"NORMAL-LAUNCHER-PROOF: 13 books; TALA 12 and workflow 11 source/play thunks; no authoring runtime.~%\"))")))
+         \"NORMAL-LAUNCHER-PROOF: 13 books; TALA 12 and workflow 12 source/play thunks; no authoring runtime.~%\"))")))
 
 (DEFUN FRESH-CATALOG-COMMAND ()
   (APPEND

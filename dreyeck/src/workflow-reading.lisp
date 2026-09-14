@@ -203,13 +203,59 @@
             "nix develop .#workflow-authoring" :REQUEST (READING-PLAN))))
 
 (HYPERDOC:DEFEXAMPLE READING-OUTSTANDING-CHANGES
-  (LET ((NAME (GENSYM "WORKFLOW-LIVE-ONLY-INCREMENT-"))
-        (LOG (MAKE-INSTANCE 'WF:CHANGE-LOG)))
-    (SETF (SYMBOL-FUNCTION NAME) (COMPILE NIL '(LAMBDA (X) (+ X 1))))
-    (WF:REGISTER-CHANGE NAME LOG)
-    (LIST :LOG LOG :OUTSTANDING (WF:OUTSTANDING-CHANGES LOG) :OBSERVATIONS
-          (MAPCAR #'WF:OBSERVE-CHANGE (WF:OUTSTANDING-CHANGES LOG)) :SCOPE
-          :EXPLICIT-REGISTRATIONS-IN-THIS-EXAMPLE)))
+                     (LET
+                          ((NAME (GENSYM "WORKFLOW-LIVE-ONLY-INCREMENT-"))
+                           (LOG (MAKE-INSTANCE (QUOTE WF:CHANGE-LOG))))
+                          (SETF (SYMBOL-FUNCTION NAME)
+                                (COMPILE NIL (QUOTE (LAMBDA (X) (+ X 1)))))
+                          (LET
+                               ((DREYECK/WORKFLOW/READING::A
+                                                             (WF:REGISTER-CHANGE
+                                                                                 NAME
+                                                                                 LOG)))
+                               (SETF (SYMBOL-FUNCTION NAME)
+                                     (COMPILE NIL
+                                              (QUOTE (LAMBDA (X) (+ X 2)))))
+                               (LET
+                                    ((DREYECK/WORKFLOW/READING::AFTER-REDEFINITION
+                                                                                   (LIST
+                                                                                         :OUTSTANDING
+                                                                                         (WF:OUTSTANDING-CHANGES
+                                                                                                                 LOG)
+                                                                                         :CURRENT
+                                                                                         (DREYECK/WORKFLOW:CURRENT-OUTSTANDING-CHANGES
+                                                                                                                                       LOG)
+                                                                                         :OBSERVATION
+                                                                                         (WF:OBSERVE-CHANGE
+                                                                                                            DREYECK/WORKFLOW/READING::A)))
+                                     (DREYECK/WORKFLOW/READING::B
+                                                                  (WF:REGISTER-CHANGE
+                                                                                      NAME
+                                                                                      LOG)))
+                                    (LIST :LOG LOG :A
+                                          DREYECK/WORKFLOW/READING::A :B
+                                          DREYECK/WORKFLOW/READING::B
+                                          :AFTER-REDEFINITION
+                                          DREYECK/WORKFLOW/READING::AFTER-REDEFINITION
+                                          :OUTSTANDING
+                                          (WF:OUTSTANDING-CHANGES LOG) :CURRENT
+                                          (DREYECK/WORKFLOW:CURRENT-OUTSTANDING-CHANGES
+                                                                                        LOG)
+                                          :OBSERVATIONS
+                                          (MAPCAR (FUNCTION WF:OBSERVE-CHANGE)
+                                                  (WF:OUTSTANDING-CHANGES LOG))
+                                          :SCOPE
+                                          :EXPLICIT-REGISTRATIONS-IN-THIS-EXAMPLE)))))
+
+(HYPERDOC:DEFEXAMPLE READING-CHANGE-VERIFICATION
+  (IF (UIOP/OS:GETENV "HYPERDOC_WORKFLOW_EDITOR_SOURCE")
+      (PROGN
+       (ASDF/OPERATE:LOAD-SYSTEM "dreyeck/workflow/authoring/tests")
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/WORKFLOW/TESTS :RUN-AUTHORING-TESTS))
+      (LIST :STATUS :REQUIRES-AUTHORING-ENVIRONMENT :COMMAND
+            "nix develop path:.#workflow-authoring" :EXECUTOR 'WF:VERIFY-CHANGE
+            :PERSIST-AND-VERIFY 'WF:PERSIST-IN :EXAMPLE
+            (READING-OUTSTANDING-CHANGES))))
 
 (HYPERDOC:DEFHYPERDOC *WORKFLOW-READING* :ID "dreyeck/workflow/reading" :TITLE
                       "Reconstructing Workflow" :ASDF-SYSTEM-NAME
