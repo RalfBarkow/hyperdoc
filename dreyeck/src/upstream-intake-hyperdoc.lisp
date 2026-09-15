@@ -13,6 +13,9 @@
              "dreyeck/tests/upstream-intake-smoke.lisp")))
          (test-path (third paths)))
     (values paths
+            (append
+            (list (list :role :literal-page-lookup :pathname (second paths)
+                        :name "UPSTREAM-INTAKE-REMOVAL-WORKSPACE-EXAMPLE"))
             (loop for (role
                        name) in '((:expected-page-set
                                    "+UPSTREAM-INTAKE-PAGE-SPECS+")
@@ -20,7 +23,7 @@
                                   (:page-executable "RUN-HYPERDOC-PAGE-TESTS")
                                   (:symbol-existence
                                    "RUN-UPSTREAM-INTAKE-TESTS"))
-                  collect (list :role role :pathname test-path :name name)))))
+                  collect (list :role role :pathname test-path :name name))))))
 
 (hyperdoc:defexample upstream-intake-removal-workspace-example
   "Inspect the warranted consequences of removing one page; authorize no change."

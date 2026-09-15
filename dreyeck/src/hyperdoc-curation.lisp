@@ -319,6 +319,48 @@ UNLESS and direct calls to inventoried functions. Unknown macros stay opaque."
                                                 DREYECK/HYPERDOC/CURATION::RECORD
                                                 :NODE)))))))
 
+(defun literal-page-lookups (record)
+  "Return literal HYPERBOOK:FIND-PAGE calls in bounded expression positions.
+Only DEFUN/DEFEXAMPLE bodies, LET/LET* initializers and bodies, MULTIPLE-VALUE-BIND
+values and bodies, simple control forms, and known global function arguments are
+visible. Local function/macro binders, quoted data, lambda lists, declarations,
+and unknown macros stay opaque. Neither source nor macro expansion is evaluated."
+  (labels ((operator-is (raw symbol)
+             (and (consp raw) (equal (token-key (car raw)) (token-key symbol))))
+           (global-function-p (operator)
+             (let* ((key (token-key operator))
+                    (package (and (first key) (find-package (first key))))
+                    (symbol (and package (find-symbol (second key) package))))
+               (and symbol (fboundp symbol)
+                    (not (macro-function symbol))
+                    (not (special-operator-p symbol)))))
+           (walk (node)
+             (let* ((raw (concrete-syntax-tree:raw node))
+                    (parts (and (consp raw) (children node))))
+               (cond
+                 ((or (operator-is raw 'let) (operator-is raw 'let*))
+                  (append
+                   (loop for binding in (children (second parts))
+                         when (consp (concrete-syntax-tree:raw binding))
+                           append (mapcan #'walk (rest (children binding))))
+                   (mapcan #'walk (cddr parts))))
+                 ((operator-is raw 'multiple-value-bind)
+                  (mapcan #'walk (cddr parts)))
+                 ((some (lambda (op) (operator-is raw op))
+                        '(progn if when unless))
+                  (mapcan #'walk (rest parts)))
+                 ((and parts (global-function-p (car raw)))
+                  (append
+                   (when (and (operator-is raw 'hyperbook:find-page)
+                              (stringp (third raw)))
+                     (list node))
+                   (mapcan #'walk (rest parts))))))))
+    (let ((raw (getf record :raw))
+          (parts (children (getf record :node))))
+      (cond ((operator-is raw 'defun) (mapcan #'walk (nthcdr 3 parts)))
+            ((operator-is raw 'hyperdoc:defexample)
+             (mapcan #'walk (cddr parts)))))))
+
 (DEFUN LEXICAL-PAGE-CONTRACT-USES (SCOPE VARIABLE-KEY)
   "Return structurally visible CHECK-PAGE-EXECUTABLE-CONTRACT uses of VARIABLE-KEY.
 LET and LET* shadowing are modeled. QUOTE and unmodeled lexical binders are
@@ -400,7 +442,7 @@ opaque, so this recognizer prefers false negatives over unsupported relations."
                                                     DREYECK/HYPERDOC/CURATION::CONTRACTS)
                    "Observe one book and explicit source files. CONTRACTS contains caller-declared
 (:role ROLE :pathname PATH :name TOPLEVEL-NAME) entries. Supported roles are
-:expected-page-set, :navigation, :page-executable and :symbol-existence.
+:expected-page-set, :navigation, :page-executable, :symbol-existence and :literal-page-lookup.
 Roles select interpretation; exact syntax supplies evidence. No HTML EXPR or
 source form is evaluated. Unsupported and unresolved references remain diagnostics."
                    (COMMON-LISP:LET*
@@ -1079,6 +1121,15 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
                                                                                                                                                                                                                                                                                                                                                                                     DREYECK/HYPERDOC/CURATION::ID
                                                                                                                                                                                                                                                                                                                                                                                     :EXECUTABLE-CONTRACT-LITERAL-ARGUMENT
                                                                                                                                                                                                                                                                                                                                                                                     DREYECK/HYPERDOC/CURATION::CONTRACT)))))))))))))
+                     (:literal-page-lookup
+                      (dolist (node (literal-page-lookups r))
+                        (let ((page (named-page
+                                     (third (concrete-syntax-tree:raw node)))))
+                          (when page
+                            (setf recognized t)
+                            (source-edge :looks-up-page r node (page-id page)
+                                         :literal-hyperbook-find-page-call
+                                         contract)))))
                                                                                                                  (:SYMBOL-EXISTENCE
                                                                                                                                     (COMMON-LISP:DOLIST
                                                                                                                                                         (DREYECK/HYPERDOC/CURATION::N
@@ -1222,6 +1273,10 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
              (DREYECK/HYPERDOC/CURATION::FINDING
               DREYECK/HYPERDOC/CURATION::EDGE :MUST-EDIT
               :INCOMING-PAGE-REFERENCE))
+            (:LOOKS-UP-PAGE
+             (DREYECK/HYPERDOC/CURATION::FINDING
+              DREYECK/HYPERDOC/CURATION::EDGE
+              :MUST-EDIT-OR-DELETE :EXECUTABLE-PAGE-DEPENDENCY))
             ((:ASSERTS-NAVIGATION :TESTS-PAGE)
              (DREYECK/HYPERDOC/CURATION::FINDING
               DREYECK/HYPERDOC/CURATION::EDGE :MUST-EDIT-OR-DELETE

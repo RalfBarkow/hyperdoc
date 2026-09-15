@@ -35,26 +35,8 @@
      "dreyeck/src/upstream-intake-hyperdoc.lisp"
      "dreyeck/tests/upstream-intake-smoke.lisp")))
 
-(COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION/TESTS::CONTRACTS ()
-  (COMMON-LISP:LET ((DREYECK/HYPERDOC/CURATION/TESTS::PATH
-                     (COMMON-LISP:THIRD
-                      (DREYECK/HYPERDOC/CURATION/TESTS::INVENTORY))))
-    (COMMON-LISP:LOOP DREYECK/HYPERDOC/CURATION/TESTS::FOR (DREYECK/HYPERDOC/CURATION/TESTS::ROLE
-                                                            DREYECK/HYPERDOC/CURATION/TESTS::NAME) DREYECK/HYPERDOC/CURATION/TESTS::IN '((:EXPECTED-PAGE-SET
-                                                                                                                                          "+UPSTREAM-INTAKE-PAGE-SPECS+")
-                                                                                                                                         (:NAVIGATION
-                                                                                                                                          "CHECK-PAGE-NAVIGATION")
-                                                                                                                                         (:PAGE-EXECUTABLE
-                                                                                                                                          "RUN-HYPERDOC-PAGE-TESTS")
-                                                                                                                                         (:SYMBOL-EXISTENCE
-                                                                                                                                          "RUN-UPSTREAM-INTAKE-TESTS"))
-                      DREYECK/HYPERDOC/CURATION/TESTS::COLLECT (COMMON-LISP:LIST
-                                                                :ROLE
-                                                                DREYECK/HYPERDOC/CURATION/TESTS::ROLE
-                                                                :PATHNAME
-                                                                DREYECK/HYPERDOC/CURATION/TESTS::PATH
-                                                                :NAME
-                                                                DREYECK/HYPERDOC/CURATION/TESTS::NAME))))
+(defun contracts ()
+  (nth-value 1 (dreyeck/upstream-intake::upstream-intake-curation-inputs)))
 
 (COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION/TESTS::CHECK-SOURCE-WARRANTS
                    (DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)
@@ -169,6 +151,18 @@
        COMMON-LISP:NIL "Missing impact ~S in ~S"
        DREYECK/HYPERDOC/CURATION/TESTS::ROW
        DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY))
+    (when (equal title "Observing an Upstream Commit")
+      (assert (member '(:must-edit-or-delete "UPSTREAM-INTAKE-REMOVAL-WORKSPACE-EXAMPLE")
+                      summary :test #'equal))
+      (check-literal-lookup-edge reference
+                                 "UPSTREAM-INTAKE-REMOVAL-WORKSPACE-EXAMPLE")
+      (multiple-value-bind (cut findings)
+          (dreyeck/hyperdoc/curation:hyperdoc-removal-impact projection point)
+        (declare (ignore cut))
+        (assert (find :executable-page-dependency findings
+                      :key (lambda (finding) (getf finding :rule))))))
+    (assert (null (getf (dreyeck/topicmap:topicmap-projection-source-of projection)
+                       :diagnostics)))
     (DREYECK/HYPERDOC/CURATION/TESTS::CHECK-SOURCE-WARRANTS
      DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)
     (COMMON-LISP:LET* ((DREYECK/HYPERDOC/CURATION/TESTS::RESULT
@@ -364,6 +358,7 @@
                                                                                     (DREYECK/HYPERDOC/CURATION::SOURCE-RECORDS
                                                                                                                                (COMMON-LISP:LIST
                                                                                                                                                  TEST-PATH))))
+                                     (check-literal-lookup-fixtures page test-path)
                                      (DREYECK/HYPERDOC/CURATION/TESTS::RUN-WITNESS
                                                                                    "Observing an Upstream Commit"
                                                                                    "HYPERDOC-HOST-NOT-FOUND-UPSTREAM-INTAKE-EXAMPLE")
@@ -492,3 +487,104 @@
                                      (COMMON-LISP:FORMAT COMMON-LISP:T
                                                          "~%CURATION-HYPERDOC-PASS: two witnesses, structural rejection, proxies, source unchanged.~%")
                                      COMMON-LISP:T))
+
+(defun literal-lookup-direct (book)
+  (hyperbook:find-page book "Observing an Upstream Commit"))
+
+(defun literal-lookup-value-bindings (book)
+  (multiple-value-bind (book) (values book)
+    (let* ((hyperbook:find-page nil)
+           (page (hyperbook:find-page book "Observing an Upstream Commit")))
+      (declare (ignore hyperbook:find-page))
+      page)))
+
+(defun literal-lookup-dynamic (book title)
+  (hyperbook:find-page book title))
+
+(defun literal-lookup-quoted ()
+  '(hyperbook:find-page book "Observing an Upstream Commit"))
+
+(defun literal-lookup-quasiquoted (book)
+  `(value ,(hyperbook:find-page book "Observing an Upstream Commit")))
+
+(defun literal-lookup-flet (book)
+  (flet ((hyperbook:find-page (&rest args) (declare (ignore args)) nil))
+    (hyperbook:find-page book "Observing an Upstream Commit")))
+
+(defun literal-lookup-labels (book)
+  (labels ((hyperbook:find-page (&rest args) (declare (ignore args)) nil))
+    (hyperbook:find-page book "Observing an Upstream Commit")))
+
+(defun literal-lookup-macrolet (book)
+  (declare (ignore book))
+  (macrolet ((hyperbook:find-page (&rest args) (declare (ignore args)) nil))
+    (hyperbook:find-page book "Observing an Upstream Commit")))
+
+(defun find-page (&rest args)
+  (declare (ignore args))
+  (never-evaluate))
+
+(defun literal-lookup-wrong-package (book)
+  (find-page book "Observing an Upstream Commit"))
+
+(defun literal-lookup-missing-page (book)
+  (hyperbook:find-page book "Not a current curation page"))
+
+(defun check-literal-lookup-edge (reference name)
+  (let* ((projection (dreyeck/topicmap:topicmap-workspace-projection-of reference))
+         (edges (remove-if-not
+                 (lambda (edge)
+                   (eq :looks-up-page
+                       (dreyeck/topicmap:topicmap-association-type-of edge)))
+                 (dreyeck/topicmap:topicmap-projection-associations-of projection))))
+    (assert (= 1 (length edges)))
+    (let* ((edge (first edges))
+           (warrant (getf (dreyeck/topicmap:topicmap-association-properties-of edge)
+                          :warrant)))
+      (assert (equal name
+                     (dreyeck/topicmap:topicmap-topic-label-of
+                      (dreyeck/topicmap:topicmap-projection-topic-by-id
+                       projection (dreyeck/topicmap:topicmap-association-from-of edge)))))
+      (assert (equal "Observing an Upstream Commit"
+                     (dreyeck/topicmap:topicmap-topic-label-of
+                      (dreyeck/topicmap:topicmap-projection-topic-by-id
+                       projection (dreyeck/topicmap:topicmap-association-to-of edge)))))
+      (assert (eq :lisp-cst (getf warrant :kind)))
+      (assert (equal name (getf warrant :top-level-name)))
+      (assert (equal (getf warrant :caller-contract)
+                     (list :role :literal-page-lookup
+                           :pathname (getf warrant :pathname) :name name)))
+      (check-source-warrants reference)
+      (format t "~%LITERAL-LOOKUP-WARRANT ~S~%" warrant))))
+
+(defun check-literal-lookup-fixtures (page test-path)
+  (let ((before (uiop:read-file-string test-path)))
+    (assert
+     (notany (lambda (edge)
+               (eq :looks-up-page (dreyeck/topicmap:topicmap-association-type-of edge)))
+             (dreyeck/topicmap:topicmap-projection-associations-of
+              (dreyeck/topicmap:topicmap-workspace-projection-of
+               (dreyeck/hyperdoc/curation:make-reference-workspace
+                page :source-files (list test-path))))))
+    (dolist (name '("LITERAL-LOOKUP-DIRECT" "LITERAL-LOOKUP-VALUE-BINDINGS"))
+      (check-literal-lookup-edge
+       (dreyeck/hyperdoc/curation:make-reference-workspace
+        page :source-files (list test-path)
+        :contracts (list (list :role :literal-page-lookup :pathname test-path :name name)))
+       name))
+    (dolist (name '("LITERAL-LOOKUP-DYNAMIC" "LITERAL-LOOKUP-QUOTED"
+                    "LITERAL-LOOKUP-QUASIQUOTED" "LITERAL-LOOKUP-FLET"
+                    "LITERAL-LOOKUP-LABELS" "LITERAL-LOOKUP-MACROLET"
+                    "LITERAL-LOOKUP-WRONG-PACKAGE" "LITERAL-LOOKUP-MISSING-PAGE"))
+      (assert
+       (handler-case
+           (progn
+             (dreyeck/hyperdoc/curation:make-reference-workspace
+              page :source-files (list test-path)
+              :contracts (list (list :role :literal-page-lookup :pathname test-path :name name)))
+             nil)
+         (error (condition)
+           (search "Declared contract has no supported structural evidence"
+                   (princ-to-string condition)))))
+      (format t "~%LITERAL-LOOKUP-REJECTED ~A~%" name))
+    (assert (equal before (uiop:read-file-string test-path)))))
