@@ -133,6 +133,59 @@
   ((ASDF/LISP-ACTION:TEST-OP
     (ASDF/LISP-ACTION:TEST-OP "dreyeck/topicmap/tests"))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/topicmap/curation"
+  :DESCRIPTION
+  "Policy-driven hypothetical impact projections without domain dependencies"
+  :DEPENDS-ON
+  ("dreyeck/topicmap")
+  :SERIAL
+  T
+  :PATHNAME
+  "dreyeck/src/"
+  :COMPONENTS
+  ((:FILE "topicmap-curation-package") (:FILE "topicmap-curation"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/topicmap/curation/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/topicmap/curation/tests"
+  :DEPENDS-ON
+  ("dreyeck/topicmap/curation")
+  :PATHNAME
+  "dreyeck/tests/"
+  :COMPONENTS
+  ((:FILE "topicmap-curation-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/TOPICMAP/CURATION/TESTS :RUN-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperdoc/curation"
+  :DESCRIPTION
+  "Bounded HyperDoc DOM/CST reference evidence and page removal policy"
+  :DEPENDS-ON
+  ("dreyeck/topicmap/curation" "hyperdoc/explorer" "html-inspector-views"
+   "concrete-syntax-tree" "plump" "uiop")
+  :SERIAL
+  T
+  :PATHNAME
+  "dreyeck/src/"
+  :COMPONENTS
+  ((:FILE "hyperdoc-curation-package") (:FILE "hyperdoc-curation"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/hyperdoc/curation/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperdoc/curation/tests"
+  :DEPENDS-ON
+  ("dreyeck/hyperdoc/curation" "dreyeck/upstream-intake")
+  :PATHNAME
+  "dreyeck/tests/"
+  :COMPONENTS
+  ((:FILE "hyperdoc-curation-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/CURATION/TESTS :RUN-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/TOPICMAP
   :DESCRIPTION
   "Generic Dreyeck Topicmap view and native CLOG/SVG renderer"
