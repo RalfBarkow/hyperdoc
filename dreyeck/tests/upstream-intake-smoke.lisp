@@ -328,7 +328,8 @@
     (check
      (equal
       '("(hyperdoc-host-not-found-upstream-intake-example)"
-        "(hyperspec-component-upstream-intake-example)")
+        "(hyperspec-component-upstream-intake-example)"
+        "(upstream-intake-removal-workspace-example)")
       (page-expressions overview))
      "Overview does not directly address both named examples: ~S."
      (page-expressions overview))
@@ -779,7 +780,8 @@
     (check-page-navigation overview commit-page component-page)
     (check-example-led-reading-order overview commit-page component-page)
     (check
-     (equal '("observe-upstream-change"
+     (equal '("upstream-intake-removal-workspace-example"
+              "observe-upstream-change"
               "make-upstream-commit-intake"
               "make-component-intake"
               "upstream-reference-summary")

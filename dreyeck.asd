@@ -338,7 +338,7 @@
   :SERIAL
   T
   :DEPENDS-ON
-  (#:DREYECK/GIT #:HYPERDOC #:CLOSER-MOP)
+  ("dreyeck/hyperdoc/curation" #:DREYECK/GIT #:HYPERDOC #:CLOSER-MOP)
   :COMPONENTS
   ((:MODULE "dreyeck/pages/upstream-intake" :PATHNAME
     "../pages/upstream-intake/")
