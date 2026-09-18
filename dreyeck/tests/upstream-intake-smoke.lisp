@@ -268,14 +268,17 @@
   t)
 
 (defparameter +upstream-intake-page-specs+
-  '(("Upstream Intake as a Read-Only Observation"
-     "Upstream Intake as a Read-Only Observation.html")
-    ("Observing an Upstream Commit"
-     "Observing an Upstream Commit.html")
-    ("An Upstream Supersession Hypothesis"
-     "An Upstream Supersession Hypothesis.html")
-    ("Historical ASDF Dependencies as a Topicmap"
-     "Historical ASDF Dependencies as a Topicmap.html")))
+              (quote
+                     (("Upstream Intake as a Read-Only Observation"
+                       "Upstream Intake as a Read-Only Observation.html")
+                      ("Observing an Upstream Commit"
+                       "Observing an Upstream Commit.html")
+                      ("An Upstream Supersession Hypothesis"
+                       "An Upstream Supersession Hypothesis.html")
+                      ("Historical ASDF Dependencies as a Topicmap"
+                       "Historical ASDF Dependencies as a Topicmap.html")
+                      ("HyperDoc Page Loading: Source Ahead of the Running Image"
+                       "HyperDoc Page Loading - Source Ahead of the Running Image.html"))))
 
 (defun page-elements (page tag-name)
   (plump:get-elements-by-tag-name (hyperdoc::dom-of page) tag-name))
@@ -415,64 +418,91 @@
     (and (<= (length directory) (length pathname))
          (string= directory pathname :end2 (length directory)))))
 
-(defun run-page-asdf-and-catalog-test ()
-  (let* ((system (asdf:find-system :dreyeck/upstream-intake))
-         (module
-           (asdf:find-component system "dreyeck/pages/upstream-intake"))
-         (module-directory (asdf:component-pathname module))
-         (book dreyeck/upstream-intake:*upstream-intake-hyperdoc*)
-         (catalog-book
-           (hyperbook:find-hyperbook
-            "dreyeck/upstream-intake" :signal-error? t)))
-    (check (typep module 'asdf:module)
-           "Upstream Intake pages have no owning ASDF module.")
-    (check (same-truename-p module-directory
-                            (hyperdoc:directory-of book))
-           "ASDF module ~A and HyperDoc directory ~A differ."
-           module-directory (hyperdoc:directory-of book))
-    (check (eq book catalog-book)
-           "The registered Catalog object is not the Intake HyperDoc.")
-    (check (string= "Upstream Intake as a Read-Only Observation"
+(defun run-page-asdf-and-catalog-test nil
+       (let*
+             ((system (asdf:find-system :dreyeck/upstream-intake))
+              (module
+                      (asdf:find-component system
+                                           "dreyeck/pages/upstream-intake"))
+              (module-directory (asdf:component-pathname module))
+              (book dreyeck/upstream-intake:*upstream-intake-hyperdoc*)
+              (catalog-book
+                            (hyperbook:find-hyperbook "dreyeck/upstream-intake"
+                                                      :signal-error? t)))
+             (check (typep module (quote asdf:module))
+                    "Upstream Intake pages have no owning ASDF module.")
+             (check
+                    (same-truename-p module-directory
+                                     (hyperdoc:directory-of book))
+                    "ASDF module ~A and HyperDoc directory ~A differ."
+                    module-directory (hyperdoc:directory-of book))
+             (check (eq book catalog-book)
+                    "The registered Catalog object is not the Intake HyperDoc.")
+             (check
+                    (string= "Upstream Intake as a Read-Only Observation"
+                             (hyperbook:main-page-id-of book))
+                    "Unexpected Upstream Intake main page ~S."
                     (hyperbook:main-page-id-of book))
-           "Unexpected Upstream Intake main page ~S."
-           (hyperbook:main-page-id-of book))
-    (hyperdoc::ensure-pages-loaded book)
-    (check (= 4 (hash-table-count (hyperdoc:pages-of book)))
-           "Upstream Intake HyperDoc contains ~D pages instead of four."
-           (hash-table-count (hyperdoc:pages-of book)))
-    (dolist (spec +upstream-intake-page-specs+)
-      (destructuring-bind (title filename) spec
-        (let* ((page
-                 (hyperbook:find-page book title :signal-error? t))
-               (expected-file (merge-pathnames filename module-directory)))
-          (check (probe-file expected-file)
-                 "Page file is absent from the ASDF module: ~A."
-                 expected-file)
-          (check (same-truename-p expected-file (hyperdoc:file-of page))
-                 "Page ~S loaded from ~A instead of ~A."
-                 title (hyperdoc:file-of page) expected-file)
-          (check (pathname-under-directory-p
-                  (hyperdoc:file-of page) module-directory)
-                 "Page ~S is outside its ASDF page module."
-                 title))))
-    book))
+             (hyperdoc::ensure-pages-loaded book)
+             (check
+                    (= (length +upstream-intake-page-specs+)
+                       (hash-table-count (hyperdoc:pages-of book)))
+                    "Upstream Intake HyperDoc contains ~D pages instead of ~D."
+                    (hash-table-count (hyperdoc:pages-of book))
+                    (length +upstream-intake-page-specs+))
+             (dolist (spec +upstream-intake-page-specs+)
+                     (destructuring-bind (title filename) spec
+                                         (let*
+                                               ((page
+                                                      (hyperbook:find-page book
+                                                                           title
+                                                                           :signal-error?
+                                                                           t))
+                                                (expected-file
+                                                               (merge-pathnames
+                                                                                filename
+                                                                                module-directory)))
+                                               (check
+                                                      (probe-file
+                                                                  expected-file)
+                                                      "Page file is absent from the ASDF module: ~A."
+                                                      expected-file)
+                                               (check
+                                                      (same-truename-p
+                                                                       expected-file
+                                                                       (hyperdoc:file-of
+                                                                                         page))
+                                                      "Page ~S loaded from ~A instead of ~A."
+                                                      title
+                                                      (hyperdoc:file-of page)
+                                                      expected-file)
+                                               (check
+                                                      (pathname-under-directory-p
+                                                                                  (hyperdoc:file-of
+                                                                                                    page)
+                                                                                  module-directory)
+                                                      "Page ~S is outside its ASDF page module."
+                                                      title))))
+             book))
 
 (defun check-page-navigation (overview commit-page component-page)
-  (check
-   (equal
-    '("Observing an Upstream Commit"
-      "An Upstream Supersession Hypothesis")
-    (page-links overview))
-   "Overview page navigation differs: ~S." (page-links overview))
-  (check
-   (member "Upstream Intake as a Read-Only Observation"
-           (page-links commit-page) :test #'string=)
-   "Commit page has no link back to the overview.")
-  (check
-   (member "Upstream Intake as a Read-Only Observation"
-           (page-links component-page) :test #'string=)
-   "Component page has no link back to the overview.")
-  t)
+       (check
+              (equal
+                     (quote
+                            ("Observing an Upstream Commit"
+                             "An Upstream Supersession Hypothesis"
+                             "HyperDoc Page Loading: Source Ahead of the Running Image"))
+                     (page-links overview))
+              "Overview page navigation differs: ~S." (page-links overview))
+       (check
+              (member "Upstream Intake as a Read-Only Observation"
+                      (page-links commit-page) :test (function string=))
+              "Commit page has no link back to the overview.")
+       (check
+              (member "Upstream Intake as a Read-Only Observation"
+                      (page-links component-page) :test (function string=))
+              "Component page has no link back to the overview.")
+       t)
 
 (defun check-page-executable-contract
     (page expected-expression expected-type expected-source)
@@ -755,84 +785,128 @@
            "Live-image observation changed Git state or FETCH_HEAD."))
   t)
 
-(defun run-hyperdoc-page-tests ()
-  (let* ((book (run-page-asdf-and-catalog-test))
-         (overview
-           (hyperbook:find-page
-            book "Upstream Intake as a Read-Only Observation"
-            :signal-error? t))
-         (commit-page
-           (hyperbook:find-page
-            book "Observing an Upstream Commit"
-            :signal-error? t))
-         (component-page
-           (hyperbook:find-page
-            book "An Upstream Supersession Hypothesis"
-            :signal-error? t))
-         (asdf-page
-           (hyperbook:find-page
-            book "Historical ASDF Dependencies as a Topicmap"
-            :signal-error? t))
-         (repository-root
-           (dreyeck/git:git-repository-root-of
-            (dreyeck/git:current-git-repository-checkout)))
-         (before (repository-state repository-root)))
-    (check-page-navigation overview commit-page component-page)
-    (check-example-led-reading-order overview commit-page component-page)
-    (check
-     (equal '("upstream-intake-removal-workspace-example"
-              "observe-upstream-change"
-              "make-upstream-commit-intake"
-              "make-component-intake"
-              "upstream-reference-summary")
-            (page-source-function-names overview))
-     "Overview source references differ: ~S."
-     (page-source-function-names overview))
-    (resolve-page-source-references overview)
-    (check
-     (equal '("git-file-asdf-reference-projection"
-              "historical-asdf-dependency-resolution"
-              "historical-asdf-reference-topicmap")
-            (page-source-function-names asdf-page))
-     "Historical ASDF page source references differ: ~S."
-     (page-source-function-names asdf-page))
-    (check (null (page-expressions asdf-page))
-           "Historical ASDF page unexpectedly evaluates expressions.")
-    (resolve-page-source-references asdf-page)
-    (multiple-value-bind (asdf-html asdf-view)
-        (render-page asdf-page)
-      (declare (ignore asdf-view))
-      (dolist (expected '("renderer-independent"
-                          "ASDF:REGISTERED-SYSTEM"
-                          "general Dreyeck Topicmap contract"
-                          "unchanged library"
-                          "native CLOG/SVG"
-                          "neither a core dependency"))
-        (check (search expected asdf-html :test #'char-equal)
-               "Historical ASDF page lacks ~S."
-               expected)))
-    (multiple-value-bind (overview-html overview-view)
-        (render-page overview)
-      (declare (ignore overview-view))
-      (check (search "OBSERVE" overview-html)
-             "Overview page did not render its observation process."))
-    (let ((commit-intake
-            (check-page-executable-contract
-             commit-page
-             "(hyperdoc-host-not-found-upstream-intake-example)"
-             'dreyeck/upstream-intake:git-commit-upstream-reference
-             "make-hyperdoc-host-not-found-intake"))
-          (component-intake
-            (check-page-executable-contract
-             component-page
-             "(hyperspec-component-upstream-intake-example)"
-             'dreyeck/upstream-intake:component-upstream-reference
-             "make-hyperspec-component-intake")))
-      (check-git-page-inspection commit-page commit-intake)
-      (check-component-page-inspection component-page component-intake))
-    (check (equal before (repository-state repository-root))
-           "Rendering Intake pages changed Git state or FETCH_HEAD."))
-  t)
+(defun run-hyperdoc-page-tests nil
+       (let*
+             ((book (run-page-asdf-and-catalog-test))
+              (overview
+                        (hyperbook:find-page book
+                                             "Upstream Intake as a Read-Only Observation"
+                                             :signal-error? t))
+              (commit-page
+                           (hyperbook:find-page book
+                                                "Observing an Upstream Commit"
+                                                :signal-error? t))
+              (component-page
+                              (hyperbook:find-page book
+                                                   "An Upstream Supersession Hypothesis"
+                                                   :signal-error? t))
+              (asdf-page
+                         (hyperbook:find-page book
+                                              "Historical ASDF Dependencies as a Topicmap"
+                                              :signal-error? t))
+              (page-loading-page
+                                 (hyperbook:find-page book
+                                                      "HyperDoc Page Loading: Source Ahead of the Running Image"
+                                                      :signal-error? t))
+              (repository-root
+                               (dreyeck/git:git-repository-root-of
+                                                                   (dreyeck/git:current-git-repository-checkout)))
+              (before (repository-state repository-root)))
+             (check
+                    (equal
+                           (quote
+                                  ("(hyperdoc-page-loading-comparison-example)"))
+                           (page-expressions page-loading-page))
+                    "Page Loading expressions differ: ~S."
+                    (page-expressions page-loading-page))
+             (check
+                    (equal
+                           (quote
+                                  ("hyperdoc-page-loading-image-state-example"
+                                   "hyperdoc-page-loading-source-state-example"
+                                   "hyperdoc-page-loading-checkpoint-example"))
+                           (page-source-function-names page-loading-page))
+                    "Page Loading source references differ: ~S."
+                    (page-source-function-names page-loading-page))
+             (check
+                    (equal
+                           (quote
+                                  ("Upstream Intake as a Read-Only Observation"))
+                           (page-links page-loading-page))
+                    "Page Loading backlink differs: ~S."
+                    (page-links page-loading-page))
+             (resolve-page-source-references page-loading-page)
+             (evaluate-page-expressions page-loading-page)
+             (render-page page-loading-page)
+             (check-page-navigation overview commit-page component-page)
+             (check-example-led-reading-order overview commit-page
+                                              component-page)
+             (check
+                    (equal
+                           (quote
+                                  ("upstream-intake-removal-workspace-example"
+                                   "observe-upstream-change"
+                                   "make-upstream-commit-intake"
+                                   "make-component-intake"
+                                   "upstream-reference-summary"))
+                           (page-source-function-names overview))
+                    "Overview source references differ: ~S."
+                    (page-source-function-names overview))
+             (resolve-page-source-references overview)
+             (check
+                    (equal
+                           (quote
+                                  ("git-file-asdf-reference-projection"
+                                   "historical-asdf-dependency-resolution"
+                                   "historical-asdf-reference-topicmap"))
+                           (page-source-function-names asdf-page))
+                    "Historical ASDF page source references differ: ~S."
+                    (page-source-function-names asdf-page))
+             (check (null (page-expressions asdf-page))
+                    "Historical ASDF page unexpectedly evaluates expressions.")
+             (resolve-page-source-references asdf-page)
+             (multiple-value-bind (asdf-html asdf-view) (render-page asdf-page)
+                                  (declare (ignore asdf-view))
+                                  (dolist
+                                          (expected
+                                                    (quote
+                                                           ("renderer-independent"
+                                                            "ASDF:REGISTERED-SYSTEM"
+                                                            "general Dreyeck Topicmap contract"
+                                                            "unchanged library"
+                                                            "native CLOG/SVG"
+                                                            "neither a core dependency")))
+                                          (check
+                                                 (search expected asdf-html
+                                                         :test
+                                                         (function char-equal))
+                                                 "Historical ASDF page lacks ~S."
+                                                 expected)))
+             (multiple-value-bind (overview-html overview-view)
+                                  (render-page overview)
+                                  (declare (ignore overview-view))
+                                  (check (search "OBSERVE" overview-html)
+                                         "Overview page did not render its observation process."))
+             (let
+                  ((commit-intake
+                                  (check-page-executable-contract commit-page
+                                                                  "(hyperdoc-host-not-found-upstream-intake-example)"
+                                                                  (quote
+                                                                         dreyeck/upstream-intake:git-commit-upstream-reference)
+                                                                  "make-hyperdoc-host-not-found-intake"))
+                   (component-intake
+                                     (check-page-executable-contract
+                                                                     component-page
+                                                                     "(hyperspec-component-upstream-intake-example)"
+                                                                     (quote
+                                                                            dreyeck/upstream-intake:component-upstream-reference)
+                                                                     "make-hyperspec-component-intake")))
+                  (check-git-page-inspection commit-page commit-intake)
+                  (check-component-page-inspection component-page
+                                                   component-intake))
+             (check (equal before (repository-state repository-root))
+                    "Rendering Intake pages changed Git state or FETCH_HEAD."))
+       t)
 
 (defun run-fixture-tests ()
   (let ((directory (make-fixture-directory)))
@@ -860,17 +934,94 @@
                                   :if-does-not-exist :ignore)))
   t)
 
-(defun run-upstream-intake-tests ()
-  (run-live-image-observation-tests)
-  (run-fixture-tests)
-  (run-hyperdoc-page-tests)
-  (check
-   (fboundp
-    'dreyeck/upstream-intake:hyperdoc-host-not-found-upstream-intake-example)
-   "Git-commit Intake example is missing.")
-  (check
-   (fboundp
-    'dreyeck/upstream-intake:hyperspec-component-upstream-intake-example)
-   "Component Intake example is missing.")
-  (format t "Read-only Upstream Intake tests passed.~%")
-  t)
+(defun check-page-loading-intake nil
+       (let*
+             ((dreyeck/upstream-intake/tests::records
+                                                      (dreyeck/workflow:outstanding-changes))
+              (root
+                    (dreyeck/git:git-repository-root-of
+                                                        (dreyeck/git:current-git-repository-checkout)))
+              (state (repository-state root))
+              (loaded (asdf/operate:already-loaded-systems))
+              (loader (function hyperdoc:load-page))
+              (selector (function hyperdoc:page-class))
+              (methods (copy-list (sb-mop:generic-function-methods loader)))
+              (historical
+                          (dreyeck/upstream-intake:hyperdoc-page-loading-before)))
+             (assert
+                     (eq :available-not-integrated
+                         (getf historical :classification)))
+             (assert
+                     (eq :internal
+                         (getf
+                               (first
+                                      (getf
+                                            (getf historical
+                                                  :current-lisp-image)
+                                            :definitions))
+                               :symbol-status)))
+             (dotimes (i 2)
+                      (let*
+                            ((now
+                                  (dreyeck/upstream-intake:make-hyperdoc-page-loading-intake))
+                             (definition
+                                         (definition-observation now "HYPERDOC"
+                                                                 "LOAD-PAGE")))
+                            (assert (not (eq historical now)))
+                            (assert
+                                    (dreyeck/upstream-intake:git-commit-upstream-object-present-p
+                                                                                                  now))
+                            (assert
+                                    (eq :external
+                                        (dreyeck/upstream-intake:live-definition-observation-symbol-status
+                                                                                                           definition)))
+                            (assert
+                                    (eq
+                                        (if
+                                            (dreyeck/upstream-intake:git-commit-upstream-ancestor-of-head-p
+                                                                                                            now)
+                                            :already-integrated
+                                            :available-not-integrated)
+                                        (dreyeck/upstream-intake:git-commit-upstream-classification-of
+                                                                                                       now)))
+                            (assert
+                                    (every
+                                           (lambda (c)
+                                                   (eq :potential
+                                                       (dreyeck/upstream-intake:potential-live-image-consequence-status
+                                                                                                                        c)))
+                                           (dreyeck/upstream-intake:upstream-reference-potential-consequences-of
+                                                                                                                 now)))
+                            (format t
+                                    "PAGE-LOADING-INTAKE: before internal; now external; Git ~S~%"
+                                    (dreyeck/upstream-intake:git-commit-upstream-classification-of
+                                                                                                   now))))
+             (assert
+                     (equal historical
+                            (dreyeck/upstream-intake:hyperdoc-page-loading-before)))
+             (assert (eq loader (function hyperdoc:load-page)))
+             (assert (eq selector (function hyperdoc:page-class)))
+             (assert (equal methods (sb-mop:generic-function-methods loader)))
+             (assert (equal loaded (asdf/operate:already-loaded-systems)))
+             (assert (equal state (repository-state root)))
+             (assert (not (loaded-system-p "dreyeck/workflow/authoring")))
+             (assert
+                     (equal dreyeck/upstream-intake/tests::records
+                            (dreyeck/workflow:outstanding-changes))))
+       t)
+
+(defun run-upstream-intake-tests nil
+       (dreyeck/upstream-intake/tests::check-page-loading-intake)
+       (run-live-image-observation-tests) (run-fixture-tests)
+       (run-hyperdoc-page-tests)
+       (check
+              (fboundp
+                       (quote
+                              dreyeck/upstream-intake:hyperdoc-host-not-found-upstream-intake-example))
+              "Git-commit Intake example is missing.")
+       (check
+              (fboundp
+                       (quote
+                              dreyeck/upstream-intake:hyperspec-component-upstream-intake-example))
+              "Component Intake example is missing.")
+       (format t "Read-only Upstream Intake tests passed.~%") t)

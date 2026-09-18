@@ -409,26 +409,24 @@
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GIT/ASDF-REFERENCE-TESTS
                              :RUN-GIT-ASDF-REFERENCE-SMOKE-TESTS)))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/UPSTREAM-INTAKE/TESTS
-  :DESCRIPTION
-  "Deterministic read-only Upstream Intake contract tests"
-  :LICENSE
-  "BSD"
-  :VERSION
-  "0.0.1"
-  :PATHNAME
-  "dreyeck/tests/"
-  :SERIAL
-  T
-  :DEPENDS-ON
-  (#:DREYECK/INSPECTOR/UPSTREAM-INTAKE #:HYPERDOC/EXPLORER #:HYPERBOOK/FEDWIKI)
-  :COMPONENTS
-  ((:FILE "upstream-intake-smoke"))
-  :PERFORM
-  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
-   (DECLARE (IGNORE OPERATION COMPONENT))
-   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/UPSTREAM-INTAKE/TESTS
-                             :RUN-UPSTREAM-INTAKE-TESTS)))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/UPSTREAM-INTAKE/TESTS :DESCRIPTION
+                                "Deterministic read-only Upstream Intake contract tests"
+                                :LICENSE "BSD" :VERSION "0.0.1" :PATHNAME
+                                "dreyeck/tests/" :SERIAL T :DEPENDS-ON
+                                ("dreyeck/workflow"
+                                 #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
+                                 #:HYPERDOC/EXPLORER
+                                 #:HYPERBOOK/FEDWIKI)
+                                :COMPONENTS ((:FILE "upstream-intake-smoke"))
+                                :PERFORM
+                                (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+                                                          (DECLARE
+                                                                   (IGNORE
+                                                                           OPERATION
+                                                                           COMPONENT))
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/UPSTREAM-INTAKE/TESTS
+                                                                                    :RUN-UPSTREAM-INTAKE-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG/TESTS
   :DESCRIPTION

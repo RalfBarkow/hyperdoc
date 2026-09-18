@@ -77,4 +77,7 @@
    #:upstream-reference-summary
    #:*upstream-intake-hyperdoc*
    #:hyperdoc-host-not-found-upstream-intake-example
-   #:hyperspec-component-upstream-intake-example))
+   #:hyperspec-component-upstream-intake-example
+   #:hyperdoc-page-loading-before
+   #:make-hyperdoc-page-loading-intake
+   #:hyperdoc-page-loading-comparison-example))

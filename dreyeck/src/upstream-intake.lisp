@@ -563,6 +563,67 @@ status; this routine never loads or changes the observed definitions."
                  (return checkout)))))
 
 (defun make-hyperdoc-host-not-found-intake ()
+(defun hyperdoc-page-loading-before ()
+  "Return a copy of the observation recorded before source integration; never refresh it implicitly."
+  (copy-tree
+   '(:kind :git-commit :origin
+     "khinsen/hyperdoc upstream/main (locally observed)" :reference
+     "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8" :local-context
+     (:repository "/Users/rgb/workspace/hyperdoc-workflow-reconstruction/"
+      :branch "dreyeck.ch" :head "401953522ec503cf78764bddc5534f7a9f16fd22")
+     :object-present-p t :current-head
+     "401953522ec503cf78764bddc5534f7a9f16fd22" :ancestor-of-head-p nil
+     :merge-base "44ed77e9b1d8c4707c86479826e9f0df5cd88684" :refs-containing
+     ("refs/remotes/khinsen/HEAD" "refs/remotes/khinsen/main"
+      "refs/remotes/upstream/HEAD" "refs/remotes/upstream/main")
+     :classification :available-not-integrated :current-lisp-image
+     (:relevant-systems (("hyperdoc" . t) ("hyperdoc/explorer" . t))
+      :candidate-system nil :candidate-system-loaded-p nil :definitions
+      ((:identity "HYPERDOC::LOAD-PAGE" :kind :generic-function :change-kind
+        :modified :package-present-p t :symbol-present-p t :symbol-status
+        :internal :fboundp t :boundp nil :class-present-p nil :function-kind
+        :generic-function :method-present-p nil))
+      :evidence-status :observed :potential-consequences
+      ((:kind :live-generic-function-redefinition :status :potential :basis
+        "Observed live definition plus evidenced MODIFIED upstream change.")))
+     :evidence
+     (:phase :before-integration :local-head
+      "401953522ec503cf78764bddc5534f7a9f16fd22" :decision :not-implied)
+     :evidence-status :observed)))
+
+(defun make-hyperdoc-page-loading-intake
+       (&optional (repository (dreyeck/git:current-git-repository-checkout)))
+  "Observe the verified reference against this repository and image without loading a candidate. Git ancestry does not assert protocol equivalence."
+  (make-upstream-commit-intake "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"
+                               :repository repository :origin
+                               "khinsen/hyperdoc upstream/main (locally observed)"
+                               :relevant-systems
+                               '("hyperdoc" "hyperdoc/explorer"
+                                 "dreyeck/hyperdoc")
+                               :definition-probes
+                               (list
+                                (make-live-definition-probe :package-name
+                                                            "HYPERDOC"
+                                                            :symbol-name
+                                                            "LOAD-PAGE" :kind
+                                                            :generic-function
+                                                            :change-kind
+                                                            :modified :evidence
+                                                            :upstream-export)
+                                (make-live-definition-probe :package-name
+                                                            "HYPERDOC"
+                                                            :symbol-name
+                                                            "PAGE-CLASS" :kind
+                                                            :generic-function
+                                                            :change-kind
+                                                            :modified :evidence
+                                                            :upstream-two-argument-dispatch))
+                               :evidence
+                               '(:phase :current-observation :comparison
+                                 :separate-from-application :protocol-proof
+                                 "dreyeck/hyperdoc/boundary-tests" :decision
+                                 :not-implied)))
+
   "Observe Konrad Hinsen's host-not-found HyperDoc commit locally."
   (make-upstream-commit-intake
    +hyperdoc-host-not-found-upstream-commit+

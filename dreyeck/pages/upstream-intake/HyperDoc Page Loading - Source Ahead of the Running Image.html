@@ -1,0 +1,65 @@
+<h1>HyperDoc Page Loading: Source Ahead of the Running Image</h1>
+
+<in-package>dreyeck/upstream-intake</in-package>
+
+<p>
+The source tree and the running Lisp image need not describe the same
+HyperDoc protocol state. This case compares a preserved earlier observation
+with the source and protocol visible now.
+</p>
+
+<p>
+  <a expr='(hyperdoc-page-loading-comparison-example)'>
+    Compare the preserved observation with current evidence
+  </a>
+</p>
+
+<h2>What changed?</h2>
+
+<p>
+For upstream 8a114919..., the preserved observation at local commit
+4019535... reports an internal LOAD-PAGE. The current observation sees
+the public PAGE-CLASS and LOAD-PAGE protocol now available in the source
+and running image.
+</p>
+
+<p>
+The separately authorized source refactor uses that upstream protocol:
+a Dreyeck book selects its HTML page subclass and its LOAD-PAGE :AFTER
+method supplies the local reader context.
+</p>
+
+<h2>Observe the running image</h2>
+<source-of-function>
+hyperdoc-page-loading-image-state-example
+</source-of-function>
+
+<h2>Observe the source tree</h2>
+<source-of-function>
+hyperdoc-page-loading-source-state-example
+</source-of-function>
+
+<h2>Keep the observations distinct</h2>
+<source-of-function>
+hyperdoc-page-loading-checkpoint-example
+</source-of-function>
+
+<pre>
+Git ancestry
+  != protocol adoption
+  != persisted source
+  != loaded-image state
+  != fresh-process reconstruction
+  != integration decision
+</pre>
+
+<p>
+Source adoption therefore does not by itself establish Git integration,
+fresh reconstruction, or a completed integration decision.
+</p>
+
+<p>
+  <a page='Upstream Intake as a Read-Only Observation'>
+    Back to Upstream Intake
+  </a>
+</p>

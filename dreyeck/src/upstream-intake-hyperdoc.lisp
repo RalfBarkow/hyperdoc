@@ -2,6 +2,108 @@
 
 (in-package #:dreyeck/upstream-intake)
 
+(hyperdoc:see
+  (hyperdoc:page "HyperDoc Page Loading: Source Ahead of the Running Image"))
+
+(hyperdoc:defexample hyperdoc-page-loading-image-state-example
+  (labels ((generic-state (name)
+             (let* ((package (find-package "HYPERDOC"))
+                    (symbol (and package (find-symbol name package)))
+                    (function
+                     (and symbol (fboundp symbol) (fdefinition symbol))))
+               (list :symbol symbol :visibility
+                     (and symbol (nth-value 1 (find-symbol name package)))
+                     :generic-function-p
+                     (and function (typep function 'generic-function)) :methods
+                     (and function (typep function 'generic-function)
+                          (mapcar
+                           (lambda (method)
+                             (list :qualifiers (method-qualifiers method)
+                                   :specializers
+                                   (mapcar #'princ-to-string
+                                           (sb-mop:method-specializers
+                                            method))))
+                           (sb-mop:generic-function-methods function)))))))
+    (list :evidence-kind :live-image-observation :cwd (uiop/os:getcwd)
+          :load-page (generic-state "LOAD-PAGE") :page-class
+          (generic-state "PAGE-CLASS") :dreyeck-hyperdoc-package
+          (find-package "DREYECK/HYPERDOC") :intake-evidence-api
+          (let ((package (find-package "DREYECK/UPSTREAM-INTAKE")))
+            (and package
+                 (mapcar
+                  (lambda (name)
+                    (multiple-value-list (find-symbol name package)))
+                  '("HYPERDOC-PAGE-LOADING-BEFORE"
+                    "MAKE-HYPERDOC-PAGE-LOADING-INTAKE"
+                    "HYPERDOC-PAGE-LOADING-EVIDENCE"
+                    "PAGE-LOADING-SOURCE-RELATIONS")))))))
+
+(hyperdoc:defexample hyperdoc-page-loading-source-state-example
+  (let* ((root (asdf/system:system-source-directory "dreyeck/upstream-intake"))
+         (policy-path (merge-pathnames "dreyeck/src/hyperdoc-pages.lisp" root))
+         (intake-path
+          (merge-pathnames "dreyeck/src/upstream-intake-hyperdoc.lisp" root))
+         (policy
+          (and (probe-file policy-path)
+               (uiop/stream:read-file-string policy-path)))
+         (intake
+          (and (probe-file intake-path)
+               (uiop/stream:read-file-string intake-path))))
+    (list :evidence-kind :source-text-observation :policy
+          (list :path policy-path :exists (not (null (probe-file policy-path)))
+                :page-class-present
+                (not
+                 (null
+                  (and policy
+                       (search "PAGE-CLASS" policy :test #'char-equal))))
+                :load-page-present
+                (not
+                 (null
+                  (and policy
+                       (search "LOAD-PAGE" policy :test #'char-equal)))))
+          :intake
+          (list :path intake-path :exists (not (null (probe-file intake-path)))
+                :source-relations-present
+                (not
+                 (null
+                  (and intake
+                       (search "PAGE-LOADING-SOURCE-RELATIONS" intake :test
+                               #'char-equal))))
+                :unfinished-git-rung-present
+                (not
+                 (null
+                  (and intake
+                       (search "GIT-RUNG" intake :test #'char-equal))))))))
+
+(hyperdoc:defexample hyperdoc-page-loading-checkpoint-example
+  (list :subject :hyperdoc-page-loading :live-image
+        (hyperdoc-page-loading-image-state-example) :source-now
+        (hyperdoc-page-loading-source-state-example) :upstream-reference
+        (list :commit "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"
+              :git-classification :available-not-integrated :evidence-kind
+              :reported-checkpoint)
+        :relations
+        (list :git-ancestry-is-not-protocol-adoption t
+              :source-state-is-not-loaded-image-state t
+              :source-observation-is-not-fresh-reconstruction t
+              :observation-is-not-integration-decision t)))
+
+
+
+
+
+
+
+
+
+
+(hyperdoc:defexample hyperdoc-page-loading-comparison-example
+  "Compare preserved pre-integration evidence with a new read-only observation."
+  (list :before (hyperdoc-page-loading-before) :now
+        (upstream-reference-summary (make-hyperdoc-page-loading-intake))
+        :application :separate-authorized-source-refactor :proof-system
+        "dreyeck/hyperdoc/boundary-tests"))
+
 (defun upstream-intake-curation-inputs ()
   "The bounded reading inventory shared by the executable demo and its tests."
   (let* ((paths
