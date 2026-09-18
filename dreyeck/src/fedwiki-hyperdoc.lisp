@@ -79,6 +79,27 @@ This is a structural candidate rule, not a naming convention."
          :test #'string-equal))))
    (dreyeck/page-attached-hyperdoc:registered-hyperdocs)))
 
+(defun asd-registration-observation (asd-pathname &key name)
+  "Register ASD-PATHNAME and retain before/after registration evidence."
+  (let* ((asd
+           (truename asd-pathname))
+         (before
+           (dreyeck/page-attached-asdf:systems-defined-by-asd
+            asd))
+         (after
+           (dreyeck/page-attached-asdf:register-asd-systems
+            asd
+            :name name)))
+    (list
+     :asd asd
+     :systems-before before
+     :systems-after after
+     :newly-registered-systems
+     (set-difference
+      after
+      before
+      :test #'string-equal))))
+
 (defun activate-local-fedwiki-page-hyperdoc (site-root slug)
   "Discover, register, select, and activate one local page-attached HyperDoc.
 
@@ -114,7 +135,7 @@ The returned plist retains the observations from each stage."
          "Refusing to evaluate page-attached ASD outside the local assets root: ~A"
          asd))
       (let* ((registration
-               (dreyeck/page-attached-asdf:asd-registration-observation
+               (asd-registration-observation
                 asd))
              (systems
                (getf registration :systems-after))
@@ -199,7 +220,7 @@ JSON is required."
      asd
      (lambda ()
        (let* ((registration
-                (dreyeck/page-attached-asdf:asd-registration-observation
+                (asd-registration-observation
                  asd
                  :name effective-system-name))
               (systems
