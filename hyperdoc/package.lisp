@@ -2,45 +2,24 @@
 ;;
 ;;;; Copyright (c) 2025 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(defpackage :hyperdoc
-  (:use :cl)
-  (:import-from :alexandria
-   :if-let :when-let :compose)
-  (:import-from :arrow-macros
-   :-> :-<> :->> :-<>> :<> :some-> :some->>)
-  (:import-from :hyperbook
-                #:id #:hyperbook
-                #:id-of #:hyperbook-of #:title-of #:main-page-id-of
-                #:links-of
-                ;; The catalog API
-                #:catalog #:*catalog*
-                #:register #:find-backlink-sources #:find-link-sources
-                ;; Accessing items
-                #:find-page #:find-hyperbook
-                ;; Conditions and their accessors
-                #:lookup-failure #:page-lookup-failure #:hyperbook-lookup-failure)
-  (:export ;; Creating and registering HyperDocs
-           #:defhyperdoc
-           #:make-hyperdoc
-           #:data-of
-           ;; Referencing HyperDocs and pages from code files
-           #:see #:page #:hyperdoc
-           ;; Defining examples and using assertions in them
-           #:defexample
-           #:assert-test #:assert-equalp #:assert-equal
-           #:assert-eql #:assert-within-tolerance
-           ;; Defining tools
-           #:deftool #:html #:markdown #:html-generator
-           #:defplayground
-           ;; Access to the global catalog of registered HyperDocs
-           #:*catalog* #:hyperdocs-of
-           ;; Access to HyperDoc data
-           #:title-of #:directory-of #:asdf-system-of #:pages-of
-           #:hyperdoc-of #:file-of
-           ;; HTML page assets
-           #:*hyperdoc-html-page-assets*
-           ;; HyperDoc's own HyperDoc
-           #:*hyperdoc*))
+(defpackage :hyperdoc (:use :cl)
+            (:import-from :alexandria :if-let :when-let :compose)
+            (:import-from :arrow-macros :-> :-<> :->> :-<>> :<> :some->
+                          :some->>)
+            (:import-from :hyperbook #:id #:hyperbook #:id-of #:hyperbook-of
+                          #:title-of #:main-page-id-of #:links-of #:catalog
+                          #:*catalog* #:register #:find-backlink-sources
+                          #:find-link-sources #:find-page #:find-hyperbook
+                          #:lookup-failure #:page-lookup-failure
+                          #:hyperbook-lookup-failure)
+            (:export #:defhyperdoc #:make-hyperdoc #:data-of #:load-page
+                     #:page-class #:see #:page #:hyperdoc #:defexample
+                     #:assert-test #:assert-equalp #:assert-equal #:assert-eql
+                     #:assert-within-tolerance #:deftool #:html #:markdown
+                     #:html-generator #:defplayground #:*catalog*
+                     #:hyperdocs-of #:title-of #:directory-of #:asdf-system-of
+                     #:pages-of #:hyperdoc-of #:file-of
+                     #:*hyperdoc-html-page-assets* #:*hyperdoc*))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :hb :hyperbook :hyperdoc)

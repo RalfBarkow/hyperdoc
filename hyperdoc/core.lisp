@@ -155,14 +155,14 @@ the macro DEFHYPERDOC."
 ;;
 
 (defun make-text-page (hdoc file)
-  "Create a page instance in HyperDoc HDOC for the page stored in FILE."
-  (let* ((type (pathname-type file))
-         (type-as-kw (alexandria:make-keyword (string-upcase type)))
-         (page (make-instance (page-class type-as-kw)
-                              :hyperbook hdoc
-                              :file file)))
-    (load-page page)
-    page))
+       "Create a page instance in HyperDoc HDOC for the page stored in FILE."
+       (let*
+             ((type (pathname-type file))
+              (type-as-kw (alexandria:make-keyword (string-upcase type)))
+              (page
+                    (make-instance (page-class hdoc type-as-kw) :hyperbook hdoc
+                                   :file file)))
+             (load-page page) page))
 
 (defun make-code-page (hdoc code-file)
   "Create a page instance in HyperDoc HDOC for CODE-FILE"
@@ -186,7 +186,7 @@ the macro DEFHYPERDOC."
 ;; are in hyperdoc/explorer.
 ;;
 
-(defgeneric page-class (filetype))
+(defgeneric page-class (hyperdoc::hdoc filetype))
 
 (defgeneric load-page (page))
 

@@ -284,15 +284,27 @@
   (plump:get-elements-by-tag-name (hyperdoc::dom-of page) tag-name))
 
 (defun page-package (page)
-  (let* ((tags (page-elements page "in-package"))
-         (name (and (= 1 (length tags))
-                    (string-trim '(#\Space #\Tab #\Newline #\Return)
-                                 (plump:text (first tags))))))
-    (check name "Page ~S does not declare exactly one IN-PACKAGE."
-           (hyperbook:id-of page))
-    (or (find-package (string-upcase name))
-        (error "Page ~S names missing package ~S."
-               (hyperbook:id-of page) name))))
+       (let*
+             ((tags
+                    (plump-dom:get-elements-by-tag-name
+                                                        (plump-parser:parse
+                                                                            (hyperdoc:file-of
+                                                                                              page))
+                                                        "in-package"))
+              (name
+                    (and (= 1 (length tags))
+                         (string-trim
+                                      (quote
+                                             (#\Space
+                                              #\Tab
+                                              #\Newline
+                                              #\Return))
+                                      (plump:text (first tags))))))
+             (check name "Page ~S does not declare exactly one IN-PACKAGE."
+                    (hyperbook:id-of page))
+             (or (find-package (string-upcase name))
+                 (error "Page ~S names missing package ~S."
+                        (hyperbook:id-of page) name))))
 
 (defun page-source-function-names (page)
   (mapcar
@@ -323,51 +335,54 @@
            (setf position (+ found (length substring))))
   t)
 
-(defun check-example-led-reading-order
-    (overview commit-page component-page)
-  (let ((overview-source (page-source-text overview))
-        (commit-source (page-source-text commit-page))
-        (component-source (page-source-text component-page)))
-    (check
-     (equal
-      '("(hyperdoc-host-not-found-upstream-intake-example)"
-        "(hyperspec-component-upstream-intake-example)"
-        "(upstream-intake-removal-workspace-example)")
-      (page-expressions overview))
-     "Overview does not directly address both named examples: ~S."
-     (page-expressions overview))
-    (check (null (search "Executable cases" overview-source
-                         :test #'char-equal))
-           "Overview still displaces its examples into an appendix.")
-    (check-substrings-in-order
-     overview-source
-     '("(hyperdoc-host-not-found-upstream-intake-example)"
-       "What happened in that observation?"
-       "Observing an upstream change is a routine"
-       "(hyperspec-component-upstream-intake-example)"
-       "Compare the two kinds of reference"
-       "Implementation and provenance on demand"
-       "<source-of-function>observe-upstream-change</source-of-function>")
-     "Overview example-led reading path")
-    (check-substrings-in-order
-     commit-source
-     '("(hyperdoc-host-not-found-upstream-intake-example)"
-       "What to notice"
-       "Interpretation"
-       "Historical evidence"
-       "Implementation and provenance on demand"
-       "<source-of-function>make-hyperdoc-host-not-found-intake</source-of-function>")
-     "Commit example-led reading path")
-    (check-substrings-in-order
-     component-source
-     '("(hyperspec-component-upstream-intake-example)"
-       "What to notice"
-       "Documentation evidence is not capability evidence"
-       "Contracts still to compare"
-       "Implementation and provenance on demand"
-       "<source-of-function>make-hyperspec-component-intake</source-of-function>")
-     "Component example-led reading path"))
-  t)
+(defun check-example-led-reading-order (overview commit-page component-page)
+       (let
+            ((overview-source (page-source-text overview))
+             (commit-source (page-source-text commit-page))
+             (component-source (page-source-text component-page)))
+            (check
+                   (equal
+                          (quote
+                                 ("(hyperdoc-host-not-found-upstream-intake-example)"
+                                  "(hyperspec-component-upstream-intake-example)"
+                                  "(upstream-intake-removal-workspace-example)"))
+                          (page-expressions overview))
+                   "Overview does not directly address both named examples: ~S."
+                   (page-expressions overview))
+            (check
+                   (null
+                         (search "Executable cases" overview-source :test
+                                 (function char-equal)))
+                   "Overview still displaces its examples into an appendix.")
+            (check-substrings-in-order overview-source
+                                       (quote
+                                              ("(hyperdoc-host-not-found-upstream-intake-example)"
+                                               "What happened in that observation?"
+                                               "Observing an upstream change is a routine"
+                                               "(hyperspec-component-upstream-intake-example)"
+                                               "Compare the two kinds of reference"
+                                               "Implementation and provenance on demand"
+                                               "<source-of-function>observe-upstream-change</source-of-function>"))
+                                       "Overview example-led reading path")
+            (check-substrings-in-order commit-source
+                                       (quote
+                                              ("(hyperdoc-host-not-found-upstream-intake-example)"
+                                               "What to notice"
+                                               "Interpretation"
+                                               "Historical evidence"
+                                               "Implementation and provenance on demand"
+                                               "<source-of-function>make-hyperdoc-host-not-found-intake</source-of-function>"))
+                                       "Commit example-led reading path")
+            (check-substrings-in-order component-source
+                                       (quote
+                                              ("(hyperspec-component-upstream-intake-example)"
+                                               "What to notice"
+                                               "Documentation evidence is not capability evidence"
+                                               "Contracts still to compare"
+                                               "Implementation and provenance on demand"
+                                               "<source-of-function>make-hyperspec-component-intake</source-of-function>"))
+                                       "Component example-led reading path"))
+       t)
 
 (defun resolve-page-source-references (page)
   (let ((*package* (page-package page)))
@@ -559,37 +574,44 @@
   t)
 
 (defun check-component-page-inspection (page intake)
-  (multiple-value-bind (html page-view)
-      (render-page page)
-    (declare (ignore html))
-    (check
-     (find-if
-      (lambda (value)
-        (typep value
-               'dreyeck/upstream-intake:component-upstream-reference))
-      (view-reference-values page-view))
-     "Component page did not render an inspectable Component Intake."))
-  (let* ((intake-view (view-named "Upstream Intake" intake))
-         (html (and intake-view
-                    (html-inspector-views:view-html intake-view))))
-    (check intake-view "Component Intake has no Upstream Intake view.")
-    (dolist (text '("SUPERSEDES" "UNVERIFIED"
-                    "Documentation evidence"
-                    "DOCUMENTATION-ONLY"
-                    "html-inspector-views-hyperspec"
-                    "Candidate system"
-                    "not loaded"
-                    "HYPERDOC/INSPECTOR::HYPERSPEC-ROOT-PATHNAME"
-                    "existing-symbol-lookup-preserved"
-                    "local-hyperspec-corpus"
-                    "reproducible-nix-source"
-                    "same-origin-http-serving"
-                    "no-external-runtime-fallback"
-                    "defmethod-resolution"
-                    "runtime-closure-availability"))
-      (check (search text html :test #'char-equal)
-             "Component Intake view lacks ~S." text)))
-  t)
+       (multiple-value-bind (html page-view) (render-page page)
+                            (declare (ignore html))
+                            (check
+                                   (find-if
+                                            (lambda (value)
+                                                    (typep value
+                                                           (quote
+                                                                  dreyeck/upstream-intake:component-upstream-reference)))
+                                            (view-reference-values page-view))
+                                   "Component page did not render an inspectable Component Intake."))
+       (let*
+             ((intake-view (view-named "Upstream Intake" intake))
+              (html
+                    (and intake-view
+                         (html-inspector-views:view-html intake-view))))
+             (check intake-view
+                    "Component Intake has no Upstream Intake view.")
+             (dolist
+                     (text
+                           (quote
+                                  ("SUPERSEDES"
+                                   "UNVERIFIED"
+                                   "Documentation evidence"
+                                   "DOCUMENTATION-ONLY"
+                                   "html-inspector-views-hyperspec"
+                                   "Candidate system"
+                                   "not loaded"
+                                   "DREYECK/HYPERSPEC::HYPERSPEC-ROOT-PATHNAME"
+                                   "existing-symbol-lookup-preserved"
+                                   "local-hyperspec-corpus"
+                                   "reproducible-nix-source"
+                                   "same-origin-http-serving"
+                                   "no-external-runtime-fallback"
+                                   "defmethod-resolution"
+                                   "runtime-closure-availability")))
+                     (check (search text html :test (function char-equal))
+                            "Component Intake view lacks ~S." text)))
+       t)
 
 (defun loaded-system-p (name)
   (member name (asdf:already-loaded-systems) :test #'string-equal))
@@ -616,177 +638,235 @@
    (dreyeck/upstream-intake:upstream-reference-potential-consequences-of
     reference)))
 
-(defun run-live-image-observation-tests ()
-  (let* ((repository-root
-           (dreyeck/git:git-repository-root-of
-            (dreyeck/git:current-git-repository-checkout)))
-         (repository-before (repository-state repository-root))
-         (candidate-system "html-inspector-views-hyperspec")
-         (candidate-loaded-before (not (null (loaded-system-p candidate-system))))
-         (candidate-package-before
-           (find-package "HTML-INSPECTOR-VIEWS-HYPERSPEC"))
-         (hyperspec-root-function
-           (symbol-function
-            'hyperdoc/inspector:hyperspec-root-pathname))
-         (hyperspec-page-class
-           (find-class 'html-inspector-views/standard::hyperspec-page))
-         (content-generic
-           (symbol-function 'html-inspector-views/standard:👀content))
-         (loaded-before-first-observation
-           (copy-list (asdf:already-loaded-systems))))
-    (when (boundp '*controlled-live-image-probe*)
-      (makunbound '*controlled-live-image-probe*))
-    (let* ((probe
-             (dreyeck/upstream-intake:make-live-definition-probe
-              :package-name "DREYECK/UPSTREAM-INTAKE/TESTS"
-              :symbol-name "*CONTROLLED-LIVE-IMAGE-PROBE*"
-              :kind :variable
-              :change-kind :local-capability
-              :evidence "Controlled re-observation fixture."))
-           (first
-             (dreyeck/upstream-intake:observe-current-lisp-image
-              :definition-probes (list probe)))
-           (first-definition
-             (first
-              (dreyeck/upstream-intake:lisp-image-observation-definitions
-               first))))
-      (check
-       (null
-        (dreyeck/upstream-intake:live-definition-observation-boundp
-         first-definition))
-       "Controlled definition was unexpectedly live before the first observation.")
-      (unwind-protect
-           (progn
-             (setf *controlled-live-image-probe* :live-now)
-             (let* ((second
-                      (dreyeck/upstream-intake:observe-current-lisp-image
-                       :definition-probes (list probe)))
-                    (second-definition
-                      (first
-                       (dreyeck/upstream-intake:lisp-image-observation-definitions
-                        second))))
-               (check
-                (dreyeck/upstream-intake:live-definition-observation-boundp
-                 second-definition)
-                "Re-running did not observe the controlled current binding.")))
-        (makunbound '*controlled-live-image-probe*)))
-    (check (equal loaded-before-first-observation
-                  (asdf:already-loaded-systems))
-           "Image observation loaded or unloaded an ASDF system.")
-
-    (let* ((host
-             (dreyeck/upstream-intake:make-hyperdoc-host-not-found-intake))
-           (host-definition
-             (definition-observation
-              host "HYPERBOOK/FEDWIKI" "MAKE-FEDWIKI"))
-           (component
-             (dreyeck/upstream-intake:make-hyperspec-component-intake))
-           (local-root
-             (definition-observation
-              component "HYPERDOC/INSPECTOR" "HYPERSPEC-ROOT-PATHNAME"))
-           (local-method
-             (definition-observation
-              component "HTML-INSPECTOR-VIEWS/STANDARD" "👀CONTENT"))
-           (documentation
-             (dreyeck/upstream-intake:component-upstream-documentation-observation-of
-              component)))
-      (check host-definition "Host observation lacks MAKE-FEDWIKI evidence.")
-      (check
-       (dreyeck/upstream-intake:live-definition-observation-fboundp
-        host-definition)
-       "Re-running did not observe the now-live MAKE-FEDWIKI definition.")
-      (check
-       (member :live-function-redefinition (consequence-kinds host))
-       "Live modified function produced no potential redefinition evidence.")
-      (check
-       (null (member :stale-live-definition (consequence-kinds host)))
-       "Patch without removed definitions produced stale-definition evidence.")
-      (check
-       (eq
-        (cond
-          ((not
-            (dreyeck/upstream-intake:git-commit-upstream-object-present-p
-             host))
-           :not-available-locally)
-          ((dreyeck/upstream-intake:git-commit-upstream-ancestor-of-head-p
-            host)
-           :already-integrated)
-          (t :available-not-integrated))
-        (dreyeck/upstream-intake:git-commit-upstream-classification-of host))
-       "Current host-not-found classification is inconsistent with the freshly observed object/ancestry facts: ~S."
-       (dreyeck/upstream-intake:git-commit-upstream-classification-of host))
-      (check
-       (equal (list (format nil "M~Chyperbook-fedwiki/fedwiki.lisp" #\Tab))
-              (dreyeck/git:git-commit-changed-files
-               (dreyeck/upstream-intake:git-commit-upstream-commit-of host)))
-       "Host-not-found changed-file evidence differs from the actual commit.")
-      (check local-root "Component observation lacks local root function.")
-      (check
-       (dreyeck/upstream-intake:live-definition-observation-fboundp local-root)
-       "Known local HyperSpec function was not observed live.")
-      (check local-method "Component observation lacks content-method evidence.")
-      (check
-       (dreyeck/upstream-intake:live-definition-observation-method-present-p
-        local-method)
-       "Known local HyperSpec content method was not observed live.")
-      (check
-       (eq :partial
-           (dreyeck/upstream-intake:upstream-reference-evidence-status-of
-            component))
-       "Uninspected candidate runtime evidence did not remain PARTIAL.")
-      (check
-       (every
-        (lambda (contract)
-          (eq :unknown
-              (dreyeck/upstream-intake:contract-observation-status-of
-               contract)))
-        (dreyeck/upstream-intake:component-upstream-contracts-of component))
-       "Component contracts changed without candidate verification.")
-      (check
-       (not
-        (dreyeck/upstream-intake:lisp-image-observation-candidate-system-loaded-p
-         (dreyeck/upstream-intake:upstream-reference-lisp-image-of component)))
-       "Component observation reports the forbidden candidate as loaded.")
-      (if documentation
-          (progn
-            (check
-             (eq :documentation-only
-                 (dreyeck/upstream-intake:component-upstream-documentation-scope-of
-                  component))
-             "Available documentation commit has the wrong scope.")
-            (check
-             (equal (list (format nil "M~CREADME.md" #\Tab))
-                    (dreyeck/git:git-commit-changed-files
-                     (dreyeck/upstream-intake:git-commit-upstream-commit-of
-                      documentation)))
-             "Documentation commit changes more than README.md."))
-          (check
-           (eq :not-available-locally
-               (dreyeck/upstream-intake:component-upstream-documentation-scope-of
-                component))
-           "Missing documentation commit was not retained as unavailable.")))
-
-    (check (eq hyperspec-root-function
-               (symbol-function
-                'hyperdoc/inspector:hyperspec-root-pathname))
-           "Observation redefined the local HyperSpec root function.")
-    (check (eq hyperspec-page-class
-               (find-class
-                'html-inspector-views/standard::hyperspec-page))
-           "Observation redefined the HyperSpec page class.")
-    (check (eq content-generic
-               (symbol-function
-                'html-inspector-views/standard:👀content))
-           "Observation replaced the content generic function.")
-    (check (eq candidate-package-before
-               (find-package "HTML-INSPECTOR-VIEWS-HYPERSPEC"))
-           "Observation created or replaced the candidate package.")
-    (check (eql candidate-loaded-before
-                (not (null (loaded-system-p candidate-system))))
-           "Observation loaded the candidate ASDF system.")
-    (check (equal repository-before (repository-state repository-root))
-           "Live-image observation changed Git state or FETCH_HEAD."))
-  t)
+(defun run-live-image-observation-tests nil
+       (let*
+             ((repository-root
+                               (dreyeck/git:git-repository-root-of
+                                                                   (dreyeck/git:current-git-repository-checkout)))
+              (repository-before (repository-state repository-root))
+              (candidate-system "html-inspector-views-hyperspec")
+              (candidate-loaded-before
+                                       (not
+                                            (null
+                                                  (loaded-system-p
+                                                                   candidate-system))))
+              (candidate-package-before
+                                        (find-package
+                                                      "HTML-INSPECTOR-VIEWS-HYPERSPEC"))
+              (hyperspec-root-function
+                                       (symbol-function
+                                                        (quote
+                                                               dreyeck/hyperspec:hyperspec-root-pathname)))
+              (hyperspec-page-class
+                                    (find-class
+                                                (quote
+                                                       html-inspector-views/standard::hyperspec-page)))
+              (content-generic
+                               (symbol-function
+                                                (quote
+                                                       html-inspector-views/standard:👀content)))
+              (loaded-before-first-observation
+                                               (copy-list
+                                                          (asdf:already-loaded-systems))))
+             (when (boundp (quote *controlled-live-image-probe*))
+                   (makunbound (quote *controlled-live-image-probe*)))
+             (let*
+                   ((probe
+                           (dreyeck/upstream-intake:make-live-definition-probe
+                                                                               :package-name
+                                                                               "DREYECK/UPSTREAM-INTAKE/TESTS"
+                                                                               :symbol-name
+                                                                               "*CONTROLLED-LIVE-IMAGE-PROBE*"
+                                                                               :kind
+                                                                               :variable
+                                                                               :change-kind
+                                                                               :local-capability
+                                                                               :evidence
+                                                                               "Controlled re-observation fixture."))
+                    (first
+                           (dreyeck/upstream-intake:observe-current-lisp-image
+                                                                               :definition-probes
+                                                                               (list
+                                                                                     probe)))
+                    (first-definition
+                                      (first
+                                             (dreyeck/upstream-intake:lisp-image-observation-definitions
+                                                                                                         first))))
+                   (check
+                          (null
+                                (dreyeck/upstream-intake:live-definition-observation-boundp
+                                                                                            first-definition))
+                          "Controlled definition was unexpectedly live before the first observation.")
+                   (unwind-protect
+                                   (progn
+                                          (setf *controlled-live-image-probe*
+                                                :live-now)
+                                          (let*
+                                                ((second
+                                                         (dreyeck/upstream-intake:observe-current-lisp-image
+                                                                                                             :definition-probes
+                                                                                                             (list
+                                                                                                                   probe)))
+                                                 (second-definition
+                                                                    (first
+                                                                           (dreyeck/upstream-intake:lisp-image-observation-definitions
+                                                                                                                                       second))))
+                                                (check
+                                                       (dreyeck/upstream-intake:live-definition-observation-boundp
+                                                                                                                   second-definition)
+                                                       "Re-running did not observe the controlled current binding.")))
+                                   (makunbound
+                                               (quote
+                                                      *controlled-live-image-probe*))))
+             (check
+                    (equal loaded-before-first-observation
+                           (asdf:already-loaded-systems))
+                    "Image observation loaded or unloaded an ASDF system.")
+             (let*
+                   ((host
+                          (dreyeck/upstream-intake:make-hyperdoc-host-not-found-intake))
+                    (host-definition
+                                     (definition-observation host
+                                                             "HYPERBOOK/FEDWIKI"
+                                                             "MAKE-FEDWIKI"))
+                    (component
+                               (dreyeck/upstream-intake:make-hyperspec-component-intake))
+                    (local-root
+                                (definition-observation component
+                                                        "DREYECK/HYPERSPEC"
+                                                        "HYPERSPEC-ROOT-PATHNAME"))
+                    (local-method
+                                  (definition-observation component
+                                                          "HTML-INSPECTOR-VIEWS/STANDARD"
+                                                          "👀CONTENT"))
+                    (documentation
+                                   (dreyeck/upstream-intake:component-upstream-documentation-observation-of
+                                                                                                            component)))
+                   (check host-definition
+                          "Host observation lacks MAKE-FEDWIKI evidence.")
+                   (check
+                          (dreyeck/upstream-intake:live-definition-observation-fboundp
+                                                                                       host-definition)
+                          "Re-running did not observe the now-live MAKE-FEDWIKI definition.")
+                   (check
+                          (member :live-function-redefinition
+                                  (consequence-kinds host))
+                          "Live modified function produced no potential redefinition evidence.")
+                   (check
+                          (null
+                                (member :stale-live-definition
+                                        (consequence-kinds host)))
+                          "Patch without removed definitions produced stale-definition evidence.")
+                   (check
+                          (eq
+                              (cond
+                                    ((not
+                                          (dreyeck/upstream-intake:git-commit-upstream-object-present-p
+                                                                                                        host))
+                                     :not-available-locally)
+                                    ((dreyeck/upstream-intake:git-commit-upstream-ancestor-of-head-p
+                                                                                                     host)
+                                     :already-integrated)
+                                    (t :available-not-integrated))
+                              (dreyeck/upstream-intake:git-commit-upstream-classification-of
+                                                                                             host))
+                          "Current host-not-found classification is inconsistent with the freshly observed object/ancestry facts: ~S."
+                          (dreyeck/upstream-intake:git-commit-upstream-classification-of
+                                                                                         host))
+                   (check
+                          (equal
+                                 (list
+                                       (format nil
+                                               "M~Chyperbook-fedwiki/fedwiki.lisp"
+                                               #\Tab))
+                                 (dreyeck/git:git-commit-changed-files
+                                                                       (dreyeck/upstream-intake:git-commit-upstream-commit-of
+                                                                                                                              host)))
+                          "Host-not-found changed-file evidence differs from the actual commit.")
+                   (check local-root
+                          "Component observation lacks local root function.")
+                   (check
+                          (dreyeck/upstream-intake:live-definition-observation-fboundp
+                                                                                       local-root)
+                          "Known local HyperSpec function was not observed live.")
+                   (check local-method
+                          "Component observation lacks content-method evidence.")
+                   (check
+                          (dreyeck/upstream-intake:live-definition-observation-method-present-p
+                                                                                                local-method)
+                          "Known local HyperSpec content method was not observed live.")
+                   (check
+                          (eq :partial
+                              (dreyeck/upstream-intake:upstream-reference-evidence-status-of
+                                                                                             component))
+                          "Uninspected candidate runtime evidence did not remain PARTIAL.")
+                   (check
+                          (every
+                                 (lambda (contract)
+                                         (eq :unknown
+                                             (dreyeck/upstream-intake:contract-observation-status-of
+                                                                                                     contract)))
+                                 (dreyeck/upstream-intake:component-upstream-contracts-of
+                                                                                          component))
+                          "Component contracts changed without candidate verification.")
+                   (check
+                          (not
+                               (dreyeck/upstream-intake:lisp-image-observation-candidate-system-loaded-p
+                                                                                                         (dreyeck/upstream-intake:upstream-reference-lisp-image-of
+                                                                                                                                                                   component)))
+                          "Component observation reports the forbidden candidate as loaded.")
+                   (if documentation
+                       (progn
+                              (check
+                                     (eq :documentation-only
+                                         (dreyeck/upstream-intake:component-upstream-documentation-scope-of
+                                                                                                            component))
+                                     "Available documentation commit has the wrong scope.")
+                              (check
+                                     (equal
+                                            (list
+                                                  (format nil "M~CREADME.md"
+                                                          #\Tab))
+                                            (dreyeck/git:git-commit-changed-files
+                                                                                  (dreyeck/upstream-intake:git-commit-upstream-commit-of
+                                                                                                                                         documentation)))
+                                     "Documentation commit changes more than README.md."))
+                       (check
+                              (eq :not-available-locally
+                                  (dreyeck/upstream-intake:component-upstream-documentation-scope-of
+                                                                                                     component))
+                              "Missing documentation commit was not retained as unavailable.")))
+             (check
+                    (eq hyperspec-root-function
+                        (symbol-function
+                                         (quote
+                                                dreyeck/hyperspec:hyperspec-root-pathname)))
+                    "Observation redefined the local HyperSpec root function.")
+             (check
+                    (eq hyperspec-page-class
+                        (find-class
+                                    (quote
+                                           html-inspector-views/standard::hyperspec-page)))
+                    "Observation redefined the HyperSpec page class.")
+             (check
+                    (eq content-generic
+                        (symbol-function
+                                         (quote
+                                                html-inspector-views/standard:👀content)))
+                    "Observation replaced the content generic function.")
+             (check
+                    (eq candidate-package-before
+                        (find-package "HTML-INSPECTOR-VIEWS-HYPERSPEC"))
+                    "Observation created or replaced the candidate package.")
+             (check
+                    (eql candidate-loaded-before
+                         (not (null (loaded-system-p candidate-system))))
+                    "Observation loaded the candidate ASDF system.")
+             (check
+                    (equal repository-before
+                           (repository-state repository-root))
+                    "Live-image observation changed Git state or FETCH_HEAD."))
+       t)
 
 (defun run-hyperdoc-page-tests nil
        (let*

@@ -97,6 +97,14 @@
 
 
 
+(hyperdoc:defexample hyperdoc-host-not-found-upstream-intake-example
+  "Observe the upstream host-not-found commit without integrating it."
+  (make-hyperdoc-host-not-found-intake))
+
+(hyperdoc:defexample hyperspec-component-upstream-intake-example
+  "Inspect the still-unverified HyperSpec supersession hypothesis."
+  (make-hyperspec-component-intake))
+
 (hyperdoc:defexample hyperdoc-page-loading-comparison-example
   "Compare preserved pre-integration evidence with a new read-only observation."
   (list :before (hyperdoc-page-loading-before) :now
@@ -127,6 +135,13 @@
                                    "RUN-UPSTREAM-INTAKE-TESTS"))
                   collect (list :role role :pathname test-path :name name))))))
 
+(dreyeck/hyperdoc:defhyperdoc *upstream-intake-hyperdoc*
+  :title "Upstream Intake"
+  :id "dreyeck/upstream-intake"
+  :asdf-system-name "dreyeck/upstream-intake"
+  :subdirectory "dreyeck/pages/upstream-intake"
+  :main-page-id "Upstream Intake as a Read-Only Observation")
+
 (hyperdoc:defexample upstream-intake-removal-workspace-example
   "Inspect the warranted consequences of removing one page; authorize no change."
   (multiple-value-bind (paths contracts)
@@ -139,10 +154,3 @@
             :source-files paths :contracts contracts)))
       (dreyeck/topicmap/curation:make-impact-workspace reference :policy
                                                        #'dreyeck/hyperdoc/curation:hyperdoc-removal-impact))))
-
-(hyperdoc:defhyperdoc *upstream-intake-hyperdoc*
-  :title "Upstream Intake"
-  :id "dreyeck/upstream-intake"
-  :asdf-system-name "dreyeck/upstream-intake"
-  :subdirectory "dreyeck/pages/upstream-intake"
-  :main-page-id "Upstream Intake as a Read-Only Observation")

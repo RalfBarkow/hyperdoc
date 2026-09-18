@@ -27,5 +27,7 @@
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperdoc)
 
+(export '(html-page markdown-page *current-package*))
+
 (trivial-package-local-nicknames:add-package-local-nickname
  :views/standard :html-inspector-views/standard :hyperdoc)

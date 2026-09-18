@@ -363,10 +363,8 @@ The result is :MATCHES-TITLE-PATH, :MATCHES-SLUG-PATH, :OTHER, or :RESOLVED."
         (lambda ()
           (html-inspector-views:eval-thunk installed-thunk)))))))
 
-(defhyperdoc *wiki-link-contract-demo*
-  :title "Wiki Links"
-  :id "dreyeck/wiki-link"
-  :asdf-system-name "dreyeck/wiki-link"
-  :subdirectory "dreyeck/pages"
-  ;; :code-subdirectory "dreyeck/src"
-  :main-page-id "Wiki-link title and slug lookup contracts")
+(dreyeck/hyperdoc:defhyperdoc *wiki-link-contract-demo* :title "Wiki Links" :id
+                              "dreyeck/wiki-link" :asdf-system-name
+                              "dreyeck/wiki-link" :subdirectory "dreyeck/pages"
+                              :main-page-id
+                              "Wiki-link title and slug lookup contracts")

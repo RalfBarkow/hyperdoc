@@ -257,8 +257,9 @@
             :PERSIST-AND-VERIFY 'WF:PERSIST-IN :EXAMPLE
             (READING-OUTSTANDING-CHANGES))))
 
-(HYPERDOC:DEFHYPERDOC *WORKFLOW-READING* :ID "dreyeck/workflow/reading" :TITLE
-                      "Reconstructing Workflow" :ASDF-SYSTEM-NAME
-                      "dreyeck/workflow/reading" :SUBDIRECTORY
-                      "dreyeck/pages/workflow" :CODE-SUBDIRECTORY "dreyeck/src"
-                      :MAIN-PAGE-ID "Reconstructing Workflow")
+(DREYECK/HYPERDOC:DEFHYPERDOC *WORKFLOW-READING* :ID "dreyeck/workflow/reading"
+                              :TITLE "Reconstructing Workflow"
+                              :ASDF-SYSTEM-NAME "dreyeck/workflow/reading"
+                              :SUBDIRECTORY "dreyeck/pages/workflow"
+                              :CODE-SUBDIRECTORY "dreyeck/src" :MAIN-PAGE-ID
+                              "Reconstructing Workflow")

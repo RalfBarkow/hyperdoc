@@ -6,26 +6,17 @@
 
 (in-package :hyperbook)
 
-(export '(link source-page-of target-hyperbook-of target-page-of key-of
-          object-link thunk-of view-of
-          page-link
-          hyperbook-link
-          web-link url-of
-          make-page-link
-          make-hyperbook-link
-          make-web-link
-          links web-links-of page-links-of hyperbook-links-of
-          no-links?
-          extract-links
-          replace-by-hyperbook-link
-          render-hyperbook-or-page-link
-          👀links
-          👀backlinks
-          dom-of
-          html-nodes
-          render-node
-          serialize-a-element
-          serialize-page-dom))
+(export
+        (quote
+               (link source-page-of target-hyperbook-of target-page-of key-of
+                     object-link thunk-of view-of page-link hyperbook-link
+                     web-link url-of make-page-link make-hyperbook-link
+                     make-web-link links web-links-of page-links-of
+                     hyperbook-links-of no-links? extract-links
+                     replace-by-hyperbook-link render-hyperbook-or-page-link
+                     👀links 👀backlinks dom-of html-nodes render-node
+                     serialize-a-element serialize-page-dom
+                     hyperbook::*current-page* hyperbook::*current-hyperbook*)))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :hyperbook)

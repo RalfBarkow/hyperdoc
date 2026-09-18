@@ -2,47 +2,20 @@
 ;;
 ;;;; Copyright (c) 2025-2026 Konrad Hinsen <konrad.hinsen@fastmail.net>
 
-(defsystem #:hyperbook
-  :description "Hyperbook interface"
-  :author "Konrad Hinsen <konrad.hinsen@fastmail.net>"
-  :license  "BSD"
-  :version "0.0.1"
-  :homepage "https://codeberg.org/khinsen/hyperdoc"
-  :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
-  :serial t
-  :in-order-to
-  ((asdf:test-op
-    (asdf:test-op "hyperdoc/tests")))
-  :depends-on (#:alexandria
-               #:arrow-macros
-               #:puri)
-  :components ((:module "hyperbook"
-                        :serial t
-                        :components ((:file "package")
-                                     (:file "hyperbooks")
-                                     (:file "catalog")
-                                     (:file "html-books")
-                                     (:file "html-rendering-support")))))
+(defsystem #:hyperbook :description "Hyperbook interface" :author
+           "Konrad Hinsen <konrad.hinsen@fastmail.net>" :license "BSD" :version
+           "0.0.1" :homepage "https://codeberg.org/khinsen/hyperdoc"
+           :source-control (:git "https://codeberg.org/khinsen/hyperdoc.git")
+           :serial t :depends-on (#:alexandria #:arrow-macros #:puri)
+           :components
+           ((:module "hyperbook" :serial t :components
+                     ((:file "package")
+                      (:file "hyperbooks")
+                      (:file "catalog")
+                      (:file "html-books")
+                      (:file "html-rendering-support")))))
 
-(defsystem #:hyperdoc/tests
-  :description "Tests for the HyperDoc core"
-  :author "Ralf Barkow"
-  :license "BSD"
-  :version "0.0.1"
-  :pathname "tests/hyperdoc/"
-  :serial t
-  :depends-on (#:hyperdoc)
-  :components ((:file "package")
-               (:file "code-subdirectory"))
-  :perform
-  (asdf:test-op
-   (operation component)
-   (declare (ignore operation component))
-   (unless
-       (uiop:symbol-call
-        :hyperdoc/tests
-        :run-tests)
-     (error "HyperDoc core tests failed."))))
+
 
 (defsystem #:hyperbook/explorer
   :description "Explorer for HyperBooks"

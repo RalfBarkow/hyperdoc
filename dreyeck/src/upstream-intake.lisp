@@ -491,46 +491,47 @@ status; this routine never loads or changes the observed definitions."
     :evidence
     "Commit 4a0a9d modifies the MAKE-FEDWIKI DEFUN in hyperbook-fedwiki/fedwiki.lisp.")))
 
-(defun hyperspec-local-definition-probes ()
-  (list
-   (make-live-definition-probe
-    :package-name "HYPERDOC/INSPECTOR"
-    :symbol-name "HYPERSPEC-HTTP-ROOT"
-    :kind :function
-    :change-kind :local-capability
-    :evidence "Local subject 47e29b3 provides the same-origin HTTP root.")
-   (make-live-definition-probe
-    :package-name "HYPERDOC/INSPECTOR"
-    :symbol-name "HYPERSPEC-ROOT-PATHNAME"
-    :kind :function
-    :change-kind :local-capability
-    :evidence "Local subject 47e29b3 validates the local HyperSpec corpus.")
-   (make-live-definition-probe
-    :package-name "HTML-INSPECTOR-VIEWS/STANDARD"
-    :symbol-name "HYPERSPEC-URL"
-    :kind :function
-    :change-kind :local-capability
-    :evidence "The existing symbol lookup and URL formatter are live dependencies.")
-   (make-live-definition-probe
-    :package-name "HTML-INSPECTOR-VIEWS/STANDARD"
-    :symbol-name "*HYPERSPEC-URL-TEMPLATE*"
-    :kind :variable
-    :change-kind :local-capability
-    :evidence "The local subject configures the existing URL template.")
-   (make-live-definition-probe
-    :package-name "HTML-INSPECTOR-VIEWS/STANDARD"
-    :symbol-name "HYPERSPEC-PAGE"
-    :kind :class
-    :change-kind :local-capability
-    :evidence "The local inspector method specializes the existing HyperSpec page class.")
-   (make-live-definition-probe
-    :package-name "HTML-INSPECTOR-VIEWS/STANDARD"
-    :symbol-name "👀CONTENT"
-    :kind :method
-    :change-kind :local-capability
-    :method-specializers
-    '(("HTML-INSPECTOR-VIEWS/STANDARD" "HYPERSPEC-PAGE"))
-    :evidence "Local subject 47e29b3 installs a content view for HyperSpec pages.")))
+(defun hyperspec-local-definition-probes nil
+       (list
+             (make-live-definition-probe :package-name "DREYECK/HYPERSPEC"
+                                         :symbol-name "HYPERSPEC-HTTP-ROOT"
+                                         :kind :function :change-kind
+                                         :local-capability :evidence
+                                         "Local subject 47e29b3 provides the same-origin HTTP root.")
+             (make-live-definition-probe :package-name "DREYECK/HYPERSPEC"
+                                         :symbol-name "HYPERSPEC-ROOT-PATHNAME"
+                                         :kind :function :change-kind
+                                         :local-capability :evidence
+                                         "Local subject 47e29b3 validates the local HyperSpec corpus.")
+             (make-live-definition-probe :package-name
+                                         "HTML-INSPECTOR-VIEWS/STANDARD"
+                                         :symbol-name "HYPERSPEC-URL" :kind
+                                         :function :change-kind
+                                         :local-capability :evidence
+                                         "The existing symbol lookup and URL formatter are live dependencies.")
+             (make-live-definition-probe :package-name
+                                         "HTML-INSPECTOR-VIEWS/STANDARD"
+                                         :symbol-name
+                                         "*HYPERSPEC-URL-TEMPLATE*" :kind
+                                         :variable :change-kind
+                                         :local-capability :evidence
+                                         "The local subject configures the existing URL template.")
+             (make-live-definition-probe :package-name
+                                         "HTML-INSPECTOR-VIEWS/STANDARD"
+                                         :symbol-name "HYPERSPEC-PAGE" :kind
+                                         :class :change-kind :local-capability
+                                         :evidence
+                                         "The local inspector method specializes the existing HyperSpec page class.")
+             (make-live-definition-probe :package-name
+                                         "HTML-INSPECTOR-VIEWS/STANDARD"
+                                         :symbol-name "👀CONTENT" :kind :method
+                                         :change-kind :local-capability
+                                         :method-specializers
+                                         (quote
+                                                (("HTML-INSPECTOR-VIEWS/STANDARD"
+                                                  "HYPERSPEC-PAGE")))
+                                         :evidence
+                                         "Local subject 47e29b3 installs a content view for HyperSpec pages.")))
 
 (defun candidate-documentation-repository-directories (repository)
   (let* ((root
@@ -562,7 +563,6 @@ status; this routine never loads or changes the observed definitions."
                         checkout commit-ish))
                  (return checkout)))))
 
-(defun make-hyperdoc-host-not-found-intake ()
 (defun hyperdoc-page-loading-before ()
   "Return a copy of the observation recorded before source integration; never refresh it implicitly."
   (copy-tree
@@ -624,6 +624,7 @@ status; this routine never loads or changes the observed definitions."
                                  "dreyeck/hyperdoc/boundary-tests" :decision
                                  :not-implied)))
 
+(defun make-hyperdoc-host-not-found-intake ()
   "Observe Konrad Hinsen's host-not-found HyperDoc commit locally."
   (make-upstream-commit-intake
    +hyperdoc-host-not-found-upstream-commit+
@@ -636,53 +637,73 @@ status; this routine never loads or changes the observed definitions."
      :definition-change
      (:modified-function "HYPERBOOK/FEDWIKI::MAKE-FEDWIKI"))))
 
-(defun make-hyperspec-component-intake ()
-  "Record the unverified HyperSpec supersession hypothesis."
-  (let* ((repository (dreyeck/git:current-git-repository-checkout))
-         (local-subject
-           (if (dreyeck/git:git-commit-object-present-p
-                repository +hyperspec-local-subject+)
-               (dreyeck/git:make-git-commit
-                :repository repository
-                :commit-ish +hyperspec-local-subject+)
-               +hyperspec-local-subject+))
-         (documentation-repository
-           (documentation-repository-containing
-            repository +html-inspector-views-documentation-commit+))
-         (documentation-observation
-           (and documentation-repository
-                (make-upstream-commit-intake
-                 +html-inspector-views-documentation-commit+
-                 :origin "khinsen/html-inspector-views"
-                 :repository documentation-repository
-                 :evidence
-                 '(:changed-files ("M" "README.md")
-                   :patch-scope :documentation-only))))
-         (documentation-scope
-           (if documentation-observation
-               :documentation-only
-               :not-available-locally)))
-    (make-component-intake
-     :repository repository
-     :origin "khinsen/html-inspector-views-hyperspec"
-     :component-name "html-inspector-views-hyperspec"
-     :reference "khinsen/html-inspector-views-hyperspec"
-     :local-subject local-subject
-     :proposed-relation :supersedes
-     :status :unverified
-     :contracts +hyperspec-contract-names+
-     :documentation-commit +html-inspector-views-documentation-commit+
-     :documentation-observation documentation-observation
-     :documentation-scope documentation-scope
-     :relevant-systems
-     '("hyperdoc/inspector" "html-inspector-views/standard")
-     :candidate-system "html-inspector-views-hyperspec"
-     :definition-probes (hyperspec-local-definition-probes)
-     :evidence
-     '(:candidate-runtime-source :not-inspected
-       :candidate-contract-equivalence :unknown
-       :documentation-commit-does-not-implement-capability)
-     :evidence-status :partial)))
+(defun make-hyperspec-component-intake nil
+       "Record the unverified HyperSpec supersession hypothesis."
+       (let*
+             ((repository (dreyeck/git:current-git-repository-checkout))
+              (local-subject
+                             (if
+                                 (dreyeck/git:git-commit-object-present-p
+                                                                          repository
+                                                                          +hyperspec-local-subject+)
+                                 (dreyeck/git:make-git-commit :repository
+                                                              repository
+                                                              :commit-ish
+                                                              +hyperspec-local-subject+)
+                                 +hyperspec-local-subject+))
+              (documentation-repository
+                                        (documentation-repository-containing
+                                                                             repository
+                                                                             +html-inspector-views-documentation-commit+))
+              (documentation-observation
+                                         (and documentation-repository
+                                              (make-upstream-commit-intake
+                                                                           +html-inspector-views-documentation-commit+
+                                                                           :origin
+                                                                           "khinsen/html-inspector-views"
+                                                                           :repository
+                                                                           documentation-repository
+                                                                           :evidence
+                                                                           (quote
+                                                                                  (:changed-files
+                                                                                                  ("M"
+                                                                                                   "README.md")
+                                                                                                  :patch-scope
+                                                                                                  :documentation-only)))))
+              (documentation-scope
+                                   (if documentation-observation
+                                       :documentation-only
+                                       :not-available-locally)))
+             (make-component-intake :repository repository :origin
+                                    "khinsen/html-inspector-views-hyperspec"
+                                    :component-name
+                                    "html-inspector-views-hyperspec" :reference
+                                    "khinsen/html-inspector-views-hyperspec"
+                                    :local-subject local-subject
+                                    :proposed-relation :supersedes :status
+                                    :unverified :contracts
+                                    +hyperspec-contract-names+
+                                    :documentation-commit
+                                    +html-inspector-views-documentation-commit+
+                                    :documentation-observation
+                                    documentation-observation
+                                    :documentation-scope documentation-scope
+                                    :relevant-systems
+                                    (quote
+                                           ("dreyeck/hyperspec"
+                                            "html-inspector-views/standard"))
+                                    :candidate-system
+                                    "html-inspector-views-hyperspec"
+                                    :definition-probes
+                                    (hyperspec-local-definition-probes)
+                                    :evidence
+                                    (quote
+                                           (:candidate-runtime-source
+                                                                      :not-inspected
+                                                                      :candidate-contract-equivalence
+                                                                      :unknown
+                                                                      :documentation-commit-does-not-implement-capability))
+                                    :evidence-status :partial)))
 
 (defgeneric upstream-reference-observations (reference)
   (:documentation "Return only observed facts or explicit review hypotheses."))
@@ -847,11 +868,3 @@ status; this routine never loads or changes the observed definitions."
    :evidence (copy-tree (upstream-reference-evidence-of reference))
    :evidence-status
    (upstream-reference-evidence-status-of reference)))
-
-(hyperdoc:defexample hyperdoc-host-not-found-upstream-intake-example
-  "Observe the upstream host-not-found commit without integrating it."
-  (make-hyperdoc-host-not-found-intake))
-
-(hyperdoc:defexample hyperspec-component-upstream-intake-example
-  "Inspect the still-unverified HyperSpec supersession hypothesis."
-  (make-hyperspec-component-intake))

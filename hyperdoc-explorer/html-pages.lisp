@@ -16,8 +16,8 @@
 ;; The page class for file type "html" is html-page.
 ;;
 
-(defmethod page-class ((filetype (eql :html)))
-  (find-class 'html-page))
+(defmethod page-class ((hyperdoc::hd hyperdoc:hyperdoc) (filetype (eql :html)))
+           (declare (ignore hyperdoc::hd)) (find-class (quote html-page)))
 
 ;;
 ;; Load an HTML page, parse it, set the title, and compile a
@@ -235,8 +235,7 @@
   *hyperdoc-html-page-assets*)
 
 (defmethod hb:serialize-page-dom ((page page))
-  (let ((*current-package* (find-package "CL-USER")))
-    (call-next-method)))
+           (let ((*current-package* (find-package "CL"))) (call-next-method)))
 
 ;;
 ;; Parse tree view

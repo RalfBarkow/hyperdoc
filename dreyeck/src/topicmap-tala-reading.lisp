@@ -89,9 +89,10 @@
                                                                                       (TM:TOPICMAP-PROJECTION-TOPICS-OF
                                                                                                                         PROJECTION))))))
 
-(HYPERDOC:DEFHYPERDOC *TALA-READING* :TITLE "Reading TALA as a Layout Layer"
-                      :ID "dreyeck/topicmap/tala/reading" :ASDF-SYSTEM-NAME
-                      "dreyeck/topicmap/tala/reading" :SUBDIRECTORY
-                      "dreyeck/pages/topicmap-tala" :CODE-SUBDIRECTORY
-                      "dreyeck/src" :MAIN-PAGE-ID
-                      "Reading TALA as a Layout Layer")
+(DREYECK/HYPERDOC:DEFHYPERDOC *TALA-READING* :TITLE
+                              "Reading TALA as a Layout Layer" :ID
+                              "dreyeck/topicmap/tala/reading" :ASDF-SYSTEM-NAME
+                              "dreyeck/topicmap/tala/reading" :SUBDIRECTORY
+                              "dreyeck/pages/topicmap-tala" :CODE-SUBDIRECTORY
+                              "dreyeck/src" :MAIN-PAGE-ID
+                              "Reading TALA as a Layout Layer")

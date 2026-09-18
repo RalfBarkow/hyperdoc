@@ -12,25 +12,86 @@
   ((:MODULE "dreyeck/src" :PATHNAME "dreyeck/src/" :SERIAL T :COMPONENTS
     ((:FILE "dreyeck-hyperdoc-deployment-inventory")))))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/WIKI-LINK
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperspec"
   :DESCRIPTION
-  "Dreyeck FedWiki lookup and story-item operation examples"
-  :LICENSE
-  "BSD"
-  :VERSION
-  "0.0.1"
-  :SERIAL
-  T
+  "Same-origin HyperSpec policy for the Dreyeck inspector"
   :DEPENDS-ON
-  (#:HYPERDOC/EXPLORER #:HYPERBOOK/FEDWIKI)
-  :IN-ORDER-TO
-  ((ASDF/LISP-ACTION:TEST-OP
-    (ASDF/LISP-ACTION:TEST-OP "dreyeck/wiki-link/tests")))
+  ("hyperdoc/inspector" "uiop")
   :COMPONENTS
-  ((:MODULE "dreyeck/pages" :PATHNAME "dreyeck/pages/")
-   (:MODULE "dreyeck/src" :PATHNAME "dreyeck/src/" :SERIAL T :COMPONENTS
-    ((:FILE "wiki-link") (:FILE "fedwiki-journal-context-debugger")
-     (:FILE "fedwiki-story-item-transfer")))))
+  ((:FILE "dreyeck/src/hyperspec")))
+
+(DEFSYSTEM "dreyeck/hyperspec/tests" :DESCRIPTION
+ "Tests for HyperDoc inspector adaptations" :AUTHOR
+ "Konrad Hinsen <konrad.hinsen@fastmail.net>" :LICENSE "BSD" :VERSION "0.0.1"
+ :PATHNAME "tests/" :SERIAL T :DEPENDS-ON
+ ("dreyeck/hyperspec" "hyperbook/server" "clack-handler-hunchentoot" "usocket")
+ :COMPONENTS ((:FILE "local-hyperspec")) :PERFORM
+ (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+  (DECLARE (IGNORE OPERATION COMPONENT))
+  (UIOP/PACKAGE:SYMBOL-CALL :HYPERDOC/INSPECTOR/TESTS
+                            :RUN-LOCAL-HYPERSPEC-TESTS)))
+
+(DEFSYSTEM "dreyeck/hyperdoc/compatibility-tests" :DESCRIPTION
+ "Tests for the HyperDoc core" :AUTHOR "Ralf Barkow" :LICENSE "BSD" :VERSION
+ "0.0.1" :PATHNAME "tests/hyperdoc/" :SERIAL T :DEPENDS-ON (#:HYPERDOC)
+ :COMPONENTS ((:FILE "package") (:FILE "code-subdirectory")) :PERFORM
+ (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+  (DECLARE (IGNORE OPERATION COMPONENT))
+  (UNLESS (UIOP/PACKAGE:SYMBOL-CALL :HYPERDOC/TESTS :RUN-TESTS)
+    (ERROR "HyperDoc core tests failed."))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperdoc/boundary-tests"
+  :DESCRIPTION
+  "Fresh upstream-first page policy boundary"
+  :DEPENDS-ON
+  ("hyperdoc/explorer" "uiop")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/hyperdoc-boundary"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/BOUNDARY-TESTS :RUN-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperdoc/library-tests"
+  :DESCRIPTION
+  "CST comparison against the verified upstream and retained compatibility inventory"
+  :DEPENDS-ON
+  ("hyperdoc/explorer" "hyperbook/fedwiki" "hyperbook/server"
+   "dreyeck/workflow" "dreyeck/git")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/hyperdoc-library-delta"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/LIBRARY-TESTS :RUN-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperdoc"
+  :DESCRIPTION
+  "Dreyeck page policy using the upstream LOAD-PAGE extension"
+  :DEPENDS-ON
+  ("hyperdoc/explorer" "plump")
+  :COMPONENTS
+  ((:FILE "dreyeck/src/hyperdoc-pages")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/WIKI-LINK :DESCRIPTION
+                                "Dreyeck FedWiki lookup and story-item operation examples"
+                                :LICENSE "BSD" :VERSION "0.0.1" :SERIAL T
+                                :DEPENDS-ON
+                                ("dreyeck/hyperdoc"
+                                 #:HYPERDOC/EXPLORER
+                                 #:HYPERBOOK/FEDWIKI)
+                                :IN-ORDER-TO
+                                ((ASDF/LISP-ACTION:TEST-OP
+                                                           (ASDF/LISP-ACTION:TEST-OP
+                                                                                     "dreyeck/wiki-link/tests")))
+                                :COMPONENTS
+                                ((:MODULE "dreyeck/pages" :PATHNAME
+                                          "dreyeck/pages/")
+                                 (:MODULE "dreyeck/src" :PATHNAME
+                                          "dreyeck/src/" :SERIAL T :COMPONENTS
+                                          ((:FILE "wiki-link")
+                                           (:FILE
+                                                  "fedwiki-journal-context-debugger")
+                                           (:FILE
+                                                  "fedwiki-story-item-transfer")))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/WIKI-LINK/TESTS
   :DESCRIPTION
@@ -326,55 +387,62 @@
   ((:FILE "git-inspector-package") (:FILE "git-commit-inspection-views")
    (:FILE "git-asdf-reference-views")))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/UPSTREAM-INTAKE
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/upstream-intake"
   :DESCRIPTION
-  "Read-only observations of upstream commits and components"
-  :LICENSE
-  "BSD"
-  :VERSION
-  "0.0.1"
-  :PATHNAME
-  "dreyeck/src/"
+  "Optional read-only workflow intake; observation grants no authoring capability"
+  :DEPENDS-ON
+  ("dreyeck/git" "closer-mop")
   :SERIAL
   T
-  :DEPENDS-ON
-  ("dreyeck/hyperdoc/curation" #:DREYECK/GIT #:HYPERDOC #:CLOSER-MOP)
+  :PATHNAME
+  "dreyeck/src/"
   :COMPONENTS
-  ((:MODULE "dreyeck/pages/upstream-intake" :PATHNAME
-    "../pages/upstream-intake/")
-   (:FILE "upstream-intake-package") (:FILE "upstream-intake")
-   (:FILE "upstream-intake-hyperdoc"))
-  :IN-ORDER-TO
-  ((ASDF/LISP-ACTION:TEST-OP
-    (ASDF/LISP-ACTION:TEST-OP "dreyeck/upstream-intake/tests"))))
+  ((:FILE "upstream-intake-package") (:FILE "upstream-intake")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/UPSTREAM-INTAKE :DESCRIPTION
+                                "Read-only observations of upstream commits and components"
+                                :LICENSE "BSD" :VERSION "0.0.1" :PATHNAME
+                                "dreyeck/src/" :SERIAL T :DEPENDS-ON
+                                ("dreyeck/hyperdoc/curation"
+                                 "dreyeck/workflow"
+                                 "dreyeck/workflow/upstream-intake"
+                                 "dreyeck/hyperdoc")
+                                :COMPONENTS
+                                ((:MODULE "dreyeck/pages/upstream-intake"
+                                          :PATHNAME
+                                          "../pages/upstream-intake/")
+                                 (:FILE "upstream-intake-hyperdoc"))
+                                :IN-ORDER-TO
+                                ((ASDF/LISP-ACTION:TEST-OP
+                                                           (ASDF/LISP-ACTION:TEST-OP
+                                                                                     "dreyeck/upstream-intake/tests"))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
-  :DESCRIPTION
-  "Inspector views for read-only upstream intake observations"
-  :LICENSE
-  "BSD"
-  :VERSION
-  "0.0.1"
-  :PATHNAME
-  "dreyeck/src/"
-  :SERIAL
-  T
-  :DEPENDS-ON
-  (#:DREYECK/UPSTREAM-INTAKE #:DREYECK/INSPECTOR/GIT #:HYPERDOC/INSPECTOR
-   #:HTML-INSPECTOR-VIEWS)
-  :COMPONENTS
-  ((:FILE "upstream-intake-inspector-package") (:FILE "upstream-intake-views")))
+                                :DESCRIPTION
+                                "Inspector views for read-only upstream intake observations"
+                                :LICENSE "BSD" :VERSION "0.0.1" :PATHNAME
+                                "dreyeck/src/" :SERIAL T :DEPENDS-ON
+                                ("dreyeck/hyperspec"
+                                 #:DREYECK/UPSTREAM-INTAKE
+                                 #:DREYECK/INSPECTOR/GIT
+                                 #:HYPERDOC/INSPECTOR
+                                 #:HTML-INSPECTOR-VIEWS)
+                                :COMPONENTS
+                                ((:FILE "upstream-intake-inspector-package")
+                                 (:FILE "upstream-intake-views")))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG :DESCRIPTION
                                 "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
                                 :LICENSE "BSD" :VERSION "0.0.1" :DEPENDS-ON
-                                (#:DREYECK/WIKI-LINK #:DREYECK/UPSTREAM-INTAKE
-                                                     #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
-                                                     #:DREYECK/INSPECTOR/FEDWIKI-SOURCE-RELATIONS
-                                                     #:DREYECK/LISP-IMAGE
-                                                     #:DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER
-                                                     "dreyeck/topicmap/tala/reading"
-                                                     "dreyeck/workflow/reading")
+                                ("dreyeck/hyperspec"
+                                 #:DREYECK/WIKI-LINK
+                                 #:DREYECK/UPSTREAM-INTAKE
+                                 #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
+                                 #:DREYECK/INSPECTOR/FEDWIKI-SOURCE-RELATIONS
+                                 #:DREYECK/LISP-IMAGE
+                                 #:DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER
+                                 "dreyeck/topicmap/tala/reading"
+                                 "dreyeck/workflow/reading")
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP
@@ -1610,17 +1678,19 @@
   :COMPONENTS
   ((:FILE "dreyeck/src/workflow-authoring")))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading"
-  :DESCRIPTION
-  "Executable ownership, persistence and reconstruction reading"
-  :SERIAL
-  T
-  :DEPENDS-ON
-  ("dreyeck/workflow" "hyperdoc/explorer" "dreyeck/inspector/topicmap/tala")
-  :COMPONENTS
-  ((:MODULE "dreyeck/src" :SERIAL T :COMPONENTS ((:FILE "workflow-reading")))
-   (:MODULE "dreyeck/pages/workflow" :COMPONENTS
-    ((:STATIC-FILE "Reconstructing Workflow.html")))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading" :DESCRIPTION
+                                "Executable ownership, persistence and reconstruction reading"
+                                :SERIAL T :DEPENDS-ON
+                                ("dreyeck/hyperdoc"
+                                 "dreyeck/workflow"
+                                 "hyperdoc/explorer"
+                                 "dreyeck/inspector/topicmap/tala")
+                                :COMPONENTS
+                                ((:MODULE "dreyeck/src" :SERIAL T :COMPONENTS
+                                          ((:FILE "workflow-reading")))
+                                 (:MODULE "dreyeck/pages/workflow" :COMPONENTS
+                                          ((:STATIC-FILE
+                                                         "Reconstructing Workflow.html")))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/authoring/tests"
   :DEPENDS-ON
@@ -1668,19 +1738,19 @@
   :depends-on ("dreyeck/topicmap/tala" "dreyeck/inspector/topicmap" "dreyeck/git" "babel")
   :components ((:file "dreyeck/src/topicmap-tala-inspector")))
 
-(asdf/parse-defsystem:defsystem "dreyeck/topicmap/tala/reading"
-  :description
-  "Executable reading companion for the experimental TALA layout boundary"
-  :license
-  "BSD"
-  :serial
-  t
-  :depends-on
-  ("dreyeck/inspector/topicmap/tala" "hyperdoc/explorer")
-  :components
-  ((:module "dreyeck/src" :components ((:file "topicmap-tala-reading")))
-   (:module "dreyeck/pages/topicmap-tala" :components
-    ((:static-file "Reading TALA as a Layout Layer.html")))))
+(asdf/parse-defsystem:defsystem "dreyeck/topicmap/tala/reading" :description
+                                "Executable reading companion for the experimental TALA layout boundary"
+                                :license "BSD" :serial t :depends-on
+                                ("dreyeck/hyperdoc"
+                                 "dreyeck/inspector/topicmap/tala"
+                                 "hyperdoc/explorer")
+                                :components
+                                ((:module "dreyeck/src" :components
+                                          ((:file "topicmap-tala-reading")))
+                                 (:module "dreyeck/pages/topicmap-tala"
+                                          :components
+                                          ((:static-file
+                                                         "Reading TALA as a Layout Layer.html")))))
 
 (asdf/parse-defsystem:defsystem "dreyeck/topicmap/tala/reading/tests"
   :description
