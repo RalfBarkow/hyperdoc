@@ -444,6 +444,9 @@
                     "Unexpected Upstream Intake main page ~S."
                     (hyperbook:main-page-id-of book))
              (hyperdoc::ensure-pages-loaded book)
+             (check (zerop (length (hyperdoc::code-pages-of book)))
+                    "Upstream Intake unexpectedly constructed ~D code pages; its complete inventory is currently the reader HTML inventory."
+                    (length (hyperdoc::code-pages-of book)))
              (check
                     (= (length +upstream-intake-page-specs+)
                        (hash-table-count (hyperdoc:pages-of book)))
