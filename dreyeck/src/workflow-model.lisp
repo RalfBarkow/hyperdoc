@@ -44,11 +44,13 @@
                                     CODE)))
 
 (DEFUN FORM-KEY (FORM)
-       "Only explicit top-level DEFUN and DEFSYSTEM ownership is supported."
+       "Only explicit top-level DEFUN, DEFPARAMETER, and DEFSYSTEM ownership is supported."
        (WHEN (AND (CONSP FORM) (SYMBOLP (FIRST FORM)))
              (COND
                    ((EQ (FIRST FORM) (QUOTE DEFUN))
                     (LIST :DEFINITION (SECOND FORM)))
+                   ((EQ (FIRST FORM) (QUOTE DEFPARAMETER))
+                    (LIST :PARAMETER (SECOND FORM)))
                    ((STRING= (SYMBOL-NAME (FIRST FORM)) "DEFSYSTEM")
                     (LIST :SYSTEM (STRING-DOWNCASE (STRING (SECOND FORM))))))))
 

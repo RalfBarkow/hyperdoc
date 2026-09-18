@@ -160,32 +160,32 @@
 
 (COMMON-LISP:DEFUN DREYECK/WORKFLOW/TESTS:RUN-AUTHORING-TESTS NIL
                    (COMMON-LISP:LET*
-                                     ((DREYECK/WORKFLOW/TESTS::ROOT
-                                                                    (COMMON-LISP:MERGE-PATHNAMES
-                                                                                                 (COMMON-LISP:FORMAT
-                                                                                                                     NIL
-                                                                                                                     "workflow-proof-~A/"
-                                                                                                                     (COMMON-LISP:GENSYM))
-                                                                                                 (UIOP/STREAM:TEMPORARY-DIRECTORY)))
-                                      (DREYECK/WORKFLOW/TESTS::ASD
-                                                                   (COMMON-LISP:MERGE-PATHNAMES
-                                                                                                "workflow-proof.asd"
-                                                                                                DREYECK/WORKFLOW/TESTS::ROOT))
+                                     ((ROOT
+                                            (COMMON-LISP:MERGE-PATHNAMES
+                                                                         (COMMON-LISP:FORMAT
+                                                                                             NIL
+                                                                                             "workflow-proof-~A/"
+                                                                                             (COMMON-LISP:GENSYM))
+                                                                         (UIOP/STREAM:TEMPORARY-DIRECTORY)))
+                                      (ASD
+                                           (COMMON-LISP:MERGE-PATHNAMES
+                                                                        "workflow-proof.asd"
+                                                                        ROOT))
                                       (DREYECK/WORKFLOW/TESTS::SOURCE
                                                                       (COMMON-LISP:MERGE-PATHNAMES
                                                                                                    "answer.lisp"
-                                                                                                   DREYECK/WORKFLOW/TESTS::ROOT))
+                                                                                                   ROOT))
                                       (DREYECK/WORKFLOW/TESTS::ENVIRONMENT
                                                                            (DREYECK/WORKFLOW/AUTHORING:MAKE-AUTHORING-ENVIRONMENT))
                                       (DREYECK/WORKFLOW/TESTS::SYSTEM
                                                                       "workflow-proof")
-                                      (DREYECK/WORKFLOW/TESTS::TRACKING NIL))
+                                      (TRACKING NIL))
                                      (COMMON-LISP:ENSURE-DIRECTORIES-EXIST
                                                                            DREYECK/WORKFLOW/TESTS::SOURCE)
                                      (COMMON-LISP:UNWIND-PROTECT
                                                                  (COMMON-LISP:PROGN
                                                                                     (HTML-INSPECTOR-VIEWS/STANDARD::MATERIALIZE-LISP-SOURCE
-                                                                                                                                            DREYECK/WORKFLOW/TESTS::ASD
+                                                                                                                                            ASD
                                                                                                                                             (QUOTE
                                                                                                                                                    ((ASDF/PARSE-DEFSYSTEM:DEFSYSTEM
                                                                                                                                                                                     "workflow-proof"
@@ -206,22 +206,25 @@
                                                                                                                                                     (COMMON-LISP:DEFUN
                                                                                                                                                                        COMMON-LISP-USER::WORKFLOW-PROOF-NEIGHBOR
                                                                                                                                                                        NIL
-                                                                                                                                                                       :UNCHANGED))))
+                                                                                                                                                                       :UNCHANGED)
+                                                                                                                                                    (DEFPARAMETER
+                                                                                                                                                                  COMMON-LISP-USER::WORKFLOW-PROOF-PARAMETER
+                                                                                                                                                                  42))))
                                                                                     (ASDF/FIND-SYSTEM:LOAD-ASD
-                                                                                                               DREYECK/WORKFLOW/TESTS::ASD)
+                                                                                                               ASD)
                                                                                     (COMMON-LISP:PROGN
                                                                                                        (ASDF/OPERATE:LOAD-SYSTEM
                                                                                                                                  DREYECK/WORKFLOW/TESTS::SYSTEM)
                                                                                                        (COMMON-LISP:SETF
-                                                                                                                         DREYECK/WORKFLOW/TESTS::TRACKING
+                                                                                                                         TRACKING
                                                                                                                          (DREYECK/WORKFLOW/TESTS::RUN-CHANGE-VERIFICATION-TESTS
                                                                                                                                                                                 DREYECK/WORKFLOW/TESTS::ENVIRONMENT
                                                                                                                                                                                 DREYECK/WORKFLOW/TESTS::SYSTEM
                                                                                                                                                                                 DREYECK/WORKFLOW/TESTS::SOURCE)))
                                                                                     (COMMON-LISP:FLET
                                                                                                       ((DREYECK/WORKFLOW/TESTS::PLAN
-                                                                                                                                     (DREYECK/WORKFLOW/TESTS::VALUE
-                                                                                                                                                                    DREYECK/WORKFLOW/TESTS::EXPECTED)
+                                                                                                                                     (VALUE
+                                                                                                                                            EXPECTED)
                                                                                                                                      (DREYECK/WORKFLOW:PLAN-DEFINITION
                                                                                                                                                                        DREYECK/WORKFLOW/TESTS::SYSTEM
                                                                                                                                                                        "answer"
@@ -233,7 +236,7 @@
                                                                                                                                                                                          (QUOTE
                                                                                                                                                                                                 COMMON-LISP-USER::WORKFLOW-PROOF-ANSWER)
                                                                                                                                                                                          NIL
-                                                                                                                                                                                         DREYECK/WORKFLOW/TESTS::VALUE)
+                                                                                                                                                                                         VALUE)
                                                                                                                                                                        (COMMON-LISP:LIST
                                                                                                                                                                                          (QUOTE
                                                                                                                                                                                                 COMMON-LISP:AND)
@@ -253,7 +256,7 @@
                                                                                                                                                                                                            (COMMON-LISP:LIST
                                                                                                                                                                                                                              (QUOTE
                                                                                                                                                                                                                                     COMMON-LISP-USER::WORKFLOW-PROOF-ANSWER))
-                                                                                                                                                                                                           DREYECK/WORKFLOW/TESTS::EXPECTED)))))
+                                                                                                                                                                                                           EXPECTED)))))
                                                                                                       (COMMON-LISP:LET*
                                                                                                                         ((DREYECK/WORKFLOW/TESTS::CHANGE
                                                                                                                                                          (DREYECK/WORKFLOW/TESTS::PLAN
@@ -285,12 +288,41 @@
                                                                                                                                                                          (COMMON-LISP:THIRD
                                                                                                                                                                                             (DREYECK/WORKFLOW:SOURCE-FORMS
                                                                                                                                                                                                                            DREYECK/WORKFLOW/TESTS::SOURCE))))
-                                                                                                                        (DREYECK/WORKFLOW/TESTS::MUST-FAIL
-                                                                                                                                                           (COMMON-LISP:LAMBDA
-                                                                                                                                                                               NIL
-                                                                                                                                                                               (DREYECK/WORKFLOW:PERSIST-IN
-                                                                                                                                                                                                            DREYECK/WORKFLOW/TESTS::CHANGE
-                                                                                                                                                                                                            DREYECK/WORKFLOW/TESTS::ENVIRONMENT))))
+                                                                                                                        (COMMON-LISP:PROGN
+                                                                                                                                           (DREYECK/WORKFLOW/TESTS::MUST-FAIL
+                                                                                                                                                                              (COMMON-LISP:LAMBDA
+                                                                                                                                                                                                  NIL
+                                                                                                                                                                                                  (DREYECK/WORKFLOW:PERSIST-IN
+                                                                                                                                                                                                                               DREYECK/WORKFLOW/TESTS::CHANGE
+                                                                                                                                                                                                                               DREYECK/WORKFLOW/TESTS::ENVIRONMENT)))
+                                                                                                                                           (COMMON-LISP:LET*
+                                                                                                                                                             ((PARAMETER-KEY
+                                                                                                                                                                             (QUOTE
+                                                                                                                                                                                    (:PARAMETER
+                                                                                                                                                                                                COMMON-LISP-USER::WORKFLOW-PROOF-PARAMETER)))
+                                                                                                                                                              (PARAMETER-PLAN
+                                                                                                                                                                              (WF:PLAN-CHANGE
+                                                                                                                                                                                              DREYECK/WORKFLOW/TESTS::SYSTEM
+                                                                                                                                                                                              DREYECK/WORKFLOW/TESTS::SOURCE
+                                                                                                                                                                                              PARAMETER-KEY
+                                                                                                                                                                                              (QUOTE
+                                                                                                                                                                                                     (DEFPARAMETER
+                                                                                                                                                                                                                   COMMON-LISP-USER::WORKFLOW-PROOF-PARAMETER
+                                                                                                                                                                                                                   43))
+                                                                                                                                                                                              (QUOTE
+                                                                                                                                                                                                     (COMMON-LISP:=
+                                                                                                                                                                                                                    COMMON-LISP-USER::WORKFLOW-PROOF-PARAMETER
+                                                                                                                                                                                                                    43))))
+                                                                                                                                                              (PARAMETER-RESULT
+                                                                                                                                                                                (DREYECK/WORKFLOW:PERSIST-IN
+                                                                                                                                                                                                             PARAMETER-PLAN
+                                                                                                                                                                                                             DREYECK/WORKFLOW/TESTS::ENVIRONMENT)))
+                                                                                                                                                             (COMMON-LISP:ASSERT
+                                                                                                                                                                                 (COMMON-LISP:EQ
+                                                                                                                                                                                                 :VERIFIED
+                                                                                                                                                                                                 (COMMON-LISP:GETF
+                                                                                                                                                                                                                   PARAMETER-RESULT
+                                                                                                                                                                                                                   :STATUS))))))
                                                                                                       (DREYECK/WORKFLOW/TESTS::MUST-FAIL
                                                                                                                                          (COMMON-LISP:LAMBDA
                                                                                                                                                              NIL
@@ -300,25 +332,25 @@
                                                                                                                                                                                                                         999)
                                                                                                                                                                                           DREYECK/WORKFLOW/TESTS::ENVIRONMENT)))
                                                                                                       (COMMON-LISP:LET
-                                                                                                                       ((DREYECK/WORKFLOW/TESTS::DEPENDENCY
-                                                                                                                                                            (DREYECK/WORKFLOW:PLAN-DEPENDENCY
-                                                                                                                                                                                              DREYECK/WORKFLOW/TESTS::SYSTEM
-                                                                                                                                                                                              "workflow-deliberately-missing-dependency"
-                                                                                                                                                                                              COMMON-LISP:T)))
+                                                                                                                       ((DEPENDENCY
+                                                                                                                                    (DREYECK/WORKFLOW:PLAN-DEPENDENCY
+                                                                                                                                                                      DREYECK/WORKFLOW/TESTS::SYSTEM
+                                                                                                                                                                      "workflow-deliberately-missing-dependency"
+                                                                                                                                                                      COMMON-LISP:T)))
                                                                                                                        (DREYECK/WORKFLOW/TESTS::MUST-FAIL
                                                                                                                                                           (COMMON-LISP:LAMBDA
                                                                                                                                                                               NIL
                                                                                                                                                                               (DREYECK/WORKFLOW:PERSIST-IN
-                                                                                                                                                                                                           DREYECK/WORKFLOW/TESTS::DEPENDENCY
+                                                                                                                                                                                                           DEPENDENCY
                                                                                                                                                                                                            DREYECK/WORKFLOW/TESTS::ENVIRONMENT)))))
                                                                                     (COMMON-LISP:FORMAT
                                                                                                         COMMON-LISP:T
                                                                                                         "Workflow authoring tests passed: actual writer, fresh ordinary reconstruction, stale source, wrong behavior, missing dependency.~%")
-                                                                                    DREYECK/WORKFLOW/TESTS::TRACKING)
+                                                                                    TRACKING)
                                                                  (ASDF/SYSTEM-REGISTRY:CLEAR-SYSTEM
                                                                                                     DREYECK/WORKFLOW/TESTS::SYSTEM)
                                                                  (UIOP/FILESYSTEM:DELETE-DIRECTORY-TREE
-                                                                                                        DREYECK/WORKFLOW/TESTS::ROOT
+                                                                                                        ROOT
                                                                                                         :VALIDATE
                                                                                                         COMMON-LISP:T
                                                                                                         :IF-DOES-NOT-EXIST
