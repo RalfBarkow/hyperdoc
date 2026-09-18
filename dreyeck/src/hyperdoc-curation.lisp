@@ -452,17 +452,14 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
                                       (DREYECK/HYPERDOC/CURATION::RECORDS
                                                                           (DREYECK/HYPERDOC/CURATION::SOURCE-RECORDS
                                                                                                                      DREYECK/HYPERDOC/CURATION::SOURCE-FILES))
-                                      (DREYECK/HYPERDOC/CURATION::TOPICS
-                                                                         COMMON-LISP:NIL)
-                                      (DREYECK/HYPERDOC/CURATION::EDGES
-                                                                        COMMON-LISP:NIL)
+                                      (DREYECK/HYPERDOC/CURATION::TOPICS NIL)
+                                      (DREYECK/HYPERDOC/CURATION::EDGES NIL)
                                       (DREYECK/HYPERDOC/CURATION::DIAGNOSTICS
-                                                                              COMMON-LISP:NIL)
-                                      (DREYECK/HYPERDOC/CURATION::PAGES
-                                                                        COMMON-LISP:NIL)
+                                                                              NIL)
+                                      (DREYECK/HYPERDOC/CURATION::PAGES NIL)
                                       (DREYECK/HYPERDOC/CURATION::BOOK-ID
                                                                           (COMMON-LISP:FORMAT
-                                                                                              COMMON-LISP:NIL
+                                                                                              NIL
                                                                                               "book:~A"
                                                                                               (HYPERBOOK:ID-OF
                                                                                                                DREYECK/HYPERDOC/CURATION::BOOK))))
@@ -506,7 +503,7 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
                                                                                                              (DREYECK/TOPICMAP:MAKE-TOPICMAP-ASSOCIATION
                                                                                                                                                          :ID
                                                                                                                                                          (COMMON-LISP:FORMAT
-                                                                                                                                                                             COMMON-LISP:NIL
+                                                                                                                                                                             NIL
                                                                                                                                                                              "reference:~D"
                                                                                                                                                                              (COMMON-LISP:LENGTH
                                                                                                                                                                                                  DREYECK/HYPERDOC/CURATION::EDGES))
@@ -754,9 +751,16 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
                                                                                                ((DREYECK/HYPERDOC/CURATION::PATH
                                                                                                                                  (HYPERDOC:FILE-OF
                                                                                                                                                    DREYECK/HYPERDOC/CURATION::P))
+                                                                                                (HTML-EVIDENCE
+                                                                                                               (MULTIPLE-VALUE-LIST
+                                                                                                                                    (PARSE-HTML-SOURCE-VIEWS
+                                                                                                                                                             DREYECK/HYPERDOC/CURATION::PATH)))
                                                                                                 (DREYECK/HYPERDOC/CURATION::DOM
-                                                                                                                                (PLUMP-PARSER:PARSE
-                                                                                                                                                    DREYECK/HYPERDOC/CURATION::PATH))
+                                                                                                                                (COMMON-LISP:FIRST
+                                                                                                                                                   HTML-EVIDENCE))
+                                                                                                (SOURCE-VIEWS
+                                                                                                              (COMMON-LISP:SECOND
+                                                                                                                                  HTML-EVIDENCE))
                                                                                                 (DREYECK/HYPERDOC/CURATION::DECLARATIONS
                                                                                                                                          (PLUMP-DOM:GET-ELEMENTS-BY-TAG-NAME
                                                                                                                                                                              DREYECK/HYPERDOC/CURATION::DOM
@@ -872,7 +876,55 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
                                                                                                                                                                                                         DREYECK/HYPERDOC/CURATION::PATH
                                                                                                                                                                                                         :ANCHOR-INDEX
                                                                                                                                                                                                         DREYECK/HYPERDOC/CURATION::INDEX)
-                                                                                                                                                                                      DREYECK/HYPERDOC/CURATION::DIAGNOSTICS)))))))
+                                                                                                                                                                                      DREYECK/HYPERDOC/CURATION::DIAGNOSTICS)))))
+                                                                                               (COMMON-LISP:DOLIST
+                                                                                                                   (DREYECK/HYPERDOC/CURATION::ENTRY
+                                                                                                                                                     SOURCE-VIEWS)
+                                                                                                                   (COMMON-LISP:LET*
+                                                                                                                                     ((ELEMENT
+                                                                                                                                               (COMMON-LISP:CAR
+                                                                                                                                                                DREYECK/HYPERDOC/CURATION::ENTRY))
+                                                                                                                                      (HTML-WARRANT
+                                                                                                                                                    (CDR
+                                                                                                                                                         DREYECK/HYPERDOC/CURATION::ENTRY))
+                                                                                                                                      (DREYECK/HYPERDOC/CURATION::RECORD
+                                                                                                                                                                         (SOURCE-VIEW-FUNCTION-RECORD
+                                                                                                                                                                                                      ELEMENT
+                                                                                                                                                                                                      COMMON-LISP:PACKAGE
+                                                                                                                                                                                                      DREYECK/HYPERDOC/CURATION::RECORDS)))
+                                                                                                                                     (COMMON-LISP:IF
+                                                                                                                                                     DREYECK/HYPERDOC/CURATION::RECORD
+                                                                                                                                                     (DREYECK/HYPERDOC/CURATION::EDGE
+                                                                                                                                                                                      :PRESENTS-SOURCE-OF
+                                                                                                                                                                                      (DREYECK/HYPERDOC/CURATION::PAGE-ID
+                                                                                                                                                                                                                          DREYECK/HYPERDOC/CURATION::P)
+                                                                                                                                                                                      (COMMON-LISP:GETF
+                                                                                                                                                                                                        DREYECK/HYPERDOC/CURATION::RECORD
+                                                                                                                                                                                                        :ID)
+                                                                                                                                                                                      :SOURCE-OBSERVED
+                                                                                                                                                                                      (COMMON-LISP:LIST
+                                                                                                                                                                                                        :ELEMENT
+                                                                                                                                                                                                        HTML-WARRANT
+                                                                                                                                                                                                        :DEFINITION
+                                                                                                                                                                                                        (DREYECK/HYPERDOC/CURATION::WARRANT
+                                                                                                                                                                                                                                            DREYECK/HYPERDOC/CURATION::RECORD
+                                                                                                                                                                                                                                            (COMMON-LISP:GETF
+                                                                                                                                                                                                                                                              DREYECK/HYPERDOC/CURATION::RECORD
+                                                                                                                                                                                                                                                              :NODE)
+                                                                                                                                                                                                                                            :NAMED-FUNCTION-SOURCE)
+                                                                                                                                                                                                        :PACKAGE
+                                                                                                                                                                                                        (COMMON-LISP:PACKAGE-NAME
+                                                                                                                                                                                                                                  COMMON-LISP:PACKAGE)
+                                                                                                                                                                                                        :INTERPRETATION
+                                                                                                                                                                                                        :SOURCE-PRESENTATION-NOT-EXECUTION))
+                                                                                                                                                     (COMMON-LISP:PUSH
+                                                                                                                                                                       (COMMON-LISP:LIST
+                                                                                                                                                                                         :UNRESOLVED-SOURCE-VIEW
+                                                                                                                                                                                         (PLUMP-DOM:TEXT
+                                                                                                                                                                                                         ELEMENT)
+                                                                                                                                                                                         :ELEMENT
+                                                                                                                                                                                         HTML-WARRANT)
+                                                                                                                                                                       DREYECK/HYPERDOC/CURATION::DIAGNOSTICS))))))
                                                          (COMMON-LISP:DOLIST
                                                                              (DREYECK/HYPERDOC/CURATION::CONTRACT
                                                                                                                   DREYECK/HYPERDOC/CURATION::CONTRACTS)
@@ -890,7 +942,7 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
                                                                                                                                                                                              DREYECK/HYPERDOC/CURATION::R
                                                                                                                                                                                              :NODE)))
                                                                                                 (DREYECK/HYPERDOC/CURATION::RECOGNIZED
-                                                                                                                                       COMMON-LISP:NIL))
+                                                                                                                                       NIL))
                                                                                                (COMMON-LISP:CASE
                                                                                                                  (COMMON-LISP:GETF
                                                                                                                                    DREYECK/HYPERDOC/CURATION::CONTRACT
@@ -1105,7 +1157,7 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
                                                                                                                                                                                                                                                                                                                                             ((DREYECK/HYPERDOC/CURATION::ID
                                                                                                                                                                                                                                                                                                                                                                             (DREYECK/HYPERDOC/CURATION::TOPIC
                                                                                                                                                                                                                                                                                                                                                                                                               (COMMON-LISP:FORMAT
-                                                                                                                                                                                                                                                                                                                                                                                                                                  COMMON-LISP:NIL
+                                                                                                                                                                                                                                                                                                                                                                                                                                  NIL
                                                                                                                                                                                                                                                                                                                                                                                                                                   "expression:~S"
                                                                                                                                                                                                                                                                                                                                                                                                                                   (COMMON-LISP:THIRD
                                                                                                                                                                                                                                                                                                                                                                                                                                                      DREYECK/HYPERDOC/CURATION::USE))
@@ -1214,81 +1266,153 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
 
 (COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION:HYPERDOC-REMOVAL-IMPACT
                    (DREYECK/HYPERDOC/CURATION::PROJECTION
-                    DREYECK/HYPERDOC/CURATION::TARGET)
-  "Interpret HyperDoc relations for the generic hypothetical-cut machinery."
-  (COMMON-LISP:LET ((DREYECK/HYPERDOC/CURATION::CUT
-                     (COMMON-LISP:LIST DREYECK/HYPERDOC/CURATION::TARGET))
-                    (DREYECK/HYPERDOC/CURATION::FINDINGS COMMON-LISP:NIL)
-                    (DREYECK/HYPERDOC/CURATION::EDGES
-                     (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
-                      DREYECK/HYPERDOC/CURATION::PROJECTION)))
-    (COMMON-LISP:LABELS ((DREYECK/HYPERDOC/CURATION::FINDING
-                             (DREYECK/HYPERDOC/CURATION::EDGE
-                              DREYECK/HYPERDOC/CURATION::CATEGORY
-                              DREYECK/HYPERDOC/CURATION::RULE)
-                           (COMMON-LISP:PUSH
-                            (COMMON-LISP:LIST :TARGET
-                                              (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
-                                               DREYECK/HYPERDOC/CURATION::EDGE)
-                                              :CATEGORY
-                                              DREYECK/HYPERDOC/CURATION::CATEGORY
-                                              :RULE
-                                              DREYECK/HYPERDOC/CURATION::RULE
-                                              :EDGES
-                                              (COMMON-LISP:LIST
-                                               DREYECK/HYPERDOC/CURATION::EDGE))
-                            DREYECK/HYPERDOC/CURATION::FINDINGS)))
-      (COMMON-LISP:DOLIST
-          (DREYECK/HYPERDOC/CURATION::EDGE DREYECK/HYPERDOC/CURATION::EDGES)
-        (COMMON-LISP:WHEN
-            (COMMON-LISP:AND
-             (COMMON-LISP:EQUAL DREYECK/HYPERDOC/CURATION::TARGET
-                                (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TO-OF
-                                 DREYECK/HYPERDOC/CURATION::EDGE))
-             (COMMON-LISP:EQ :SOURCE-OF-PAGE
-                             (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
-                              DREYECK/HYPERDOC/CURATION::EDGE)))
-          (COMMON-LISP:PUSHNEW
-           (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
-            DREYECK/HYPERDOC/CURATION::EDGE)
-           DREYECK/HYPERDOC/CURATION::CUT :TEST #'COMMON-LISP:EQUAL)
-          (DREYECK/HYPERDOC/CURATION::FINDING DREYECK/HYPERDOC/CURATION::EDGE
-           :REMOVE-WITH-PAGE :PAGE-SOURCE-CUT)))
-      (COMMON-LISP:DOLIST
-          (DREYECK/HYPERDOC/CURATION::EDGE DREYECK/HYPERDOC/CURATION::EDGES)
-        (COMMON-LISP:WHEN
-            (COMMON-LISP:AND
-             (COMMON-LISP:EQUAL DREYECK/HYPERDOC/CURATION::TARGET
-                                (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TO-OF
-                                 DREYECK/HYPERDOC/CURATION::EDGE))
-             (COMMON-LISP:NOT
-              (COMMON-LISP:MEMBER
-               (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
-                DREYECK/HYPERDOC/CURATION::EDGE)
-               DREYECK/HYPERDOC/CURATION::CUT :TEST #'COMMON-LISP:EQUAL)))
-          (COMMON-LISP:CASE
-              (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
-               DREYECK/HYPERDOC/CURATION::EDGE)
-            ((:LINKS-TO-PAGE :ASSERTS-PAGE-PRESENCE)
-             (DREYECK/HYPERDOC/CURATION::FINDING
-              DREYECK/HYPERDOC/CURATION::EDGE :MUST-EDIT
-              :INCOMING-PAGE-REFERENCE))
-            (:LOOKS-UP-PAGE
+                                                          DREYECK/HYPERDOC/CURATION::TARGET)
+                   "Interpret HyperDoc relations for the generic hypothetical-cut machinery."
+                   (COMMON-LISP:LET
+                                    ((DREYECK/HYPERDOC/CURATION::CUT
+                                                                     (COMMON-LISP:LIST
+                                                                                       DREYECK/HYPERDOC/CURATION::TARGET))
+                                     (DREYECK/HYPERDOC/CURATION::FINDINGS NIL)
+                                     (DREYECK/HYPERDOC/CURATION::EDGES
+                                                                       (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
+                                                                                                                             DREYECK/HYPERDOC/CURATION::PROJECTION)))
+                                    (COMMON-LISP:LABELS
+                                                        ((DREYECK/HYPERDOC/CURATION::FINDING
+                                                                                             (DREYECK/HYPERDOC/CURATION::EDGE
+                                                                                                                              DREYECK/HYPERDOC/CURATION::CATEGORY
+                                                                                                                              DREYECK/HYPERDOC/CURATION::RULE)
+                                                                                             (COMMON-LISP:PUSH
+                                                                                                               (COMMON-LISP:LIST
+                                                                                                                                 :TARGET
+                                                                                                                                 (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
+                                                                                                                                                                                DREYECK/HYPERDOC/CURATION::EDGE)
+                                                                                                                                 :CATEGORY
+                                                                                                                                 DREYECK/HYPERDOC/CURATION::CATEGORY
+                                                                                                                                 :RULE
+                                                                                                                                 DREYECK/HYPERDOC/CURATION::RULE
+                                                                                                                                 :EDGES
+                                                                                                                                 (COMMON-LISP:LIST
+                                                                                                                                                   DREYECK/HYPERDOC/CURATION::EDGE))
+                                                                                                               DREYECK/HYPERDOC/CURATION::FINDINGS)))
+                                                        (COMMON-LISP:DOLIST
+                                                                            (DREYECK/HYPERDOC/CURATION::EDGE
+                                                                                                             DREYECK/HYPERDOC/CURATION::EDGES)
+                                                                            (COMMON-LISP:WHEN
+                                                                                              (COMMON-LISP:AND
+                                                                                                               (COMMON-LISP:EQUAL
+                                                                                                                                  DREYECK/HYPERDOC/CURATION::TARGET
+                                                                                                                                  (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TO-OF
+                                                                                                                                                                               DREYECK/HYPERDOC/CURATION::EDGE))
+                                                                                                               (COMMON-LISP:EQ
+                                                                                                                               :SOURCE-OF-PAGE
+                                                                                                                               (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
+                                                                                                                                                                              DREYECK/HYPERDOC/CURATION::EDGE)))
+                                                                                              (COMMON-LISP:PUSHNEW
+                                                                                                                   (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
+                                                                                                                                                                  DREYECK/HYPERDOC/CURATION::EDGE)
+                                                                                                                   DREYECK/HYPERDOC/CURATION::CUT
+                                                                                                                   :TEST
+                                                                                                                   (FUNCTION
+                                                                                                                             COMMON-LISP:EQUAL))
+                                                                                              (DREYECK/HYPERDOC/CURATION::FINDING
+                                                                                                                                  DREYECK/HYPERDOC/CURATION::EDGE
+                                                                                                                                  :REMOVE-WITH-PAGE
+                                                                                                                                  :PAGE-SOURCE-CUT)))
+                                                        (COMMON-LISP:DOLIST
+                                                                            (DREYECK/HYPERDOC/CURATION::EDGE
+                                                                                                             DREYECK/HYPERDOC/CURATION::EDGES)
+                                                                            (COMMON-LISP:WHEN
+                                                                                              (COMMON-LISP:AND
+                                                                                                               (COMMON-LISP:EQUAL
+                                                                                                                                  DREYECK/HYPERDOC/CURATION::TARGET
+                                                                                                                                  (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TO-OF
+                                                                                                                                                                               DREYECK/HYPERDOC/CURATION::EDGE))
+                                                                                                               (COMMON-LISP:NOT
+                                                                                                                                (COMMON-LISP:MEMBER
+                                                                                                                                                    (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
+                                                                                                                                                                                                   DREYECK/HYPERDOC/CURATION::EDGE)
+                                                                                                                                                    DREYECK/HYPERDOC/CURATION::CUT
+                                                                                                                                                    :TEST
+                                                                                                                                                    (FUNCTION
+                                                                                                                                                              COMMON-LISP:EQUAL))))
+                                                                                              (COMMON-LISP:CASE
+                                                                                                                (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
+                                                                                                                                                               DREYECK/HYPERDOC/CURATION::EDGE)
+                                                                                                                ((:LINKS-TO-PAGE
+                                                                                                                                 :ASSERTS-PAGE-PRESENCE)
+                                                                                                                 (DREYECK/HYPERDOC/CURATION::FINDING
+                                                                                                                                                     DREYECK/HYPERDOC/CURATION::EDGE
+                                                                                                                                                     :MUST-EDIT
+                                                                                                                                                     :INCOMING-PAGE-REFERENCE))
+                                                                                                                (:LOOKS-UP-PAGE
              (DREYECK/HYPERDOC/CURATION::FINDING
               DREYECK/HYPERDOC/CURATION::EDGE
               :MUST-EDIT-OR-DELETE :EXECUTABLE-PAGE-DEPENDENCY))
-            ((:ASSERTS-NAVIGATION :TESTS-PAGE)
-             (DREYECK/HYPERDOC/CURATION::FINDING
-              DREYECK/HYPERDOC/CURATION::EDGE :MUST-EDIT-OR-DELETE
-              :PAGE-CONTRACT)))))
-      (COMMON-LISP:VALUES DREYECK/HYPERDOC/CURATION::CUT
-                          (COMMON-LISP:NREVERSE
-                           DREYECK/HYPERDOC/CURATION::FINDINGS)
-                          (COMMON-LISP:REMOVE-IF-NOT
-                           (COMMON-LISP:LAMBDA
-                               (DREYECK/HYPERDOC/CURATION::EDGE)
-                             (COMMON-LISP:MEMBER
-                              (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
-                               DREYECK/HYPERDOC/CURATION::EDGE)
-                              '(:EXPOSES-EXECUTABLE-LINK :INVOKES)))
-                           DREYECK/HYPERDOC/CURATION::EDGES)))))
+            ((:ASSERTS-NAVIGATION
+                                                                                                                                      :TESTS-PAGE)
+                                                                                                                 (DREYECK/HYPERDOC/CURATION::FINDING
+                                                                                                                                                     DREYECK/HYPERDOC/CURATION::EDGE
+                                                                                                                                                     :MUST-EDIT-OR-DELETE
+                                                                                                                                                     :PAGE-CONTRACT)))))
+                                                        (COMMON-LISP:VALUES
+                                                                            DREYECK/HYPERDOC/CURATION::CUT
+                                                                            (COMMON-LISP:NREVERSE
+                                                                                                  DREYECK/HYPERDOC/CURATION::FINDINGS)
+                                                                            (COMMON-LISP:REMOVE-IF-NOT
+                                                                                                       (COMMON-LISP:LAMBDA
+                                                                                                                           (DREYECK/HYPERDOC/CURATION::EDGE)
+                                                                                                                           (COMMON-LISP:MEMBER
+                                                                                                                                               (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
+                                                                                                                                                                                              DREYECK/HYPERDOC/CURATION::EDGE)
+                                                                                                                                               (QUOTE
+                                                                                                                                                      (:EXPOSES-EXECUTABLE-LINK
+                                                                                                                                                                                :INVOKES
+                                                                                                                                                                                :PRESENTS-SOURCE-OF))))
+                                                                                                       DREYECK/HYPERDOC/CURATION::EDGES)))))
+
+(defun parse-html-source-views (pathname)
+  "Parse with Plump, retaining exact source spans for source-view elements.
+The dispatcher is dynamically scoped; ordinary parser behavior is unchanged."
+  (let* ((source (uiop:read-file-string pathname))
+         (records nil)
+         (dispatcher
+           (plump-parser::make-tag-dispatcher
+            :name 'curation-source-view
+            :test (lambda (name) (string-equal name "source-of-function"))
+            :parser
+            (lambda (name)
+              (let* ((start (- plump-lexer:*index* (length name) 1))
+                     (element (plump-parser::read-standard-tag name))
+                     (end plump-lexer:*index*))
+                (when element
+                  (push (cons element
+                              (list :kind :html-source-element :pathname pathname
+                                    :region (cons start end)
+                                    :source (subseq source start end)
+                                    :tag "source-of-function"))
+                        records))
+                element))))
+         (plump-parser:*tag-dispatchers*
+           (cons dispatcher plump-parser:*tag-dispatchers*)))
+    (let ((dom (plump:parse source)))
+      (values dom (nreverse records)))))
+
+(defun source-view-function-record (element package records)
+  "Resolve one named function without evaluating source-view content."
+  (when (and package
+             (every (lambda (child) (typep child 'plump:text-node))
+                    (plump:children element)))
+    (multiple-value-bind (code recovered)
+        (html-inspector-views/standard:parse-lisp-code (plump:text element) package)
+      (unless recovered
+        (let ((tops (html-inspector-views/standard:top-level-forms-of code)))
+          (when (= 1 (length tops))
+            (let* ((raw (concrete-syntax-tree:raw
+                         (html-inspector-views/standard:cst-of (first tops))))
+                   (record (and (not (consp raw)) (resolve-record raw records))))
+              (when (and record
+                         (member (token-name (first (getf record :raw)))
+                                 '("DEFUN" "DEFEXAMPLE") :test #'equal))
+                record))))))))
+
+

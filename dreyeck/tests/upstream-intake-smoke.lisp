@@ -818,13 +818,6 @@
              (check
                     (equal
                            (quote
-                                  ("(hyperdoc-page-loading-comparison-example)"))
-                           (page-expressions page-loading-page))
-                    "Page Loading expressions differ: ~S."
-                    (page-expressions page-loading-page))
-             (check
-                    (equal
-                           (quote
                                   ("hyperdoc-page-loading-image-state-example"
                                    "hyperdoc-page-loading-source-state-example"
                                    "hyperdoc-page-loading-checkpoint-example"))
@@ -838,8 +831,10 @@
                            (page-links page-loading-page))
                     "Page Loading backlink differs: ~S."
                     (page-links page-loading-page))
-             (resolve-page-source-references page-loading-page)
-             (evaluate-page-expressions page-loading-page)
+             (check-page-executable-contract page-loading-page
+                                             "(hyperdoc-page-loading-comparison-example)"
+                                             (quote list)
+                                             "hyperdoc-page-loading-image-state-example")
              (render-page page-loading-page)
              (check-page-navigation overview commit-page component-page)
              (check-example-led-reading-order overview commit-page

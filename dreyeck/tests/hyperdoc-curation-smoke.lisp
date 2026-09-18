@@ -26,250 +26,305 @@
     COMMON-LISP:NIL)
    (COMMON-LISP:ERROR COMMON-LISP:NIL COMMON-LISP:T)))
 
-(COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION/TESTS::INVENTORY ()
-  (COMMON-LISP:MAPCAR
-   (COMMON-LISP:LAMBDA (DREYECK/HYPERDOC/CURATION/TESTS::PATH)
-     (ASDF/SYSTEM:SYSTEM-RELATIVE-PATHNAME "dreyeck"
-                                           DREYECK/HYPERDOC/CURATION/TESTS::PATH))
-   '("dreyeck/src/upstream-intake.lisp"
-     "dreyeck/src/upstream-intake-hyperdoc.lisp"
-     "dreyeck/tests/upstream-intake-smoke.lisp")))
+(COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION/TESTS::INVENTORY NIL
+                   (NTH-VALUE 0
+                              (DREYECK/UPSTREAM-INTAKE::UPSTREAM-INTAKE-CURATION-INPUTS)))
 
-(defun contracts ()
-  (nth-value 1 (dreyeck/upstream-intake::upstream-intake-curation-inputs)))
+(COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION/TESTS::CONTRACTS NIL
+                   (NTH-VALUE 1
+                              (DREYECK/UPSTREAM-INTAKE::UPSTREAM-INTAKE-CURATION-INPUTS)))
 
 (COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION/TESTS::CHECK-SOURCE-WARRANTS
                    (DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)
-  (COMMON-LISP:LABELS ((DREYECK/HYPERDOC/CURATION/TESTS::VERIFY
-                           (DREYECK/HYPERDOC/CURATION/TESTS::VALUE)
-                         (COMMON-LISP:WHEN
-                             (COMMON-LISP:CONSP
-                              DREYECK/HYPERDOC/CURATION/TESTS::VALUE)
-                           (COMMON-LISP:WHEN
-                               (COMMON-LISP:AND
-                                (COMMON-LISP:EQ
-                                 (COMMON-LISP:FIRST
-                                  DREYECK/HYPERDOC/CURATION/TESTS::VALUE)
-                                 :KIND)
-                                (COMMON-LISP:EQ
-                                 (COMMON-LISP:SECOND
-                                  DREYECK/HYPERDOC/CURATION/TESTS::VALUE)
-                                 :LISP-CST))
-                             (COMMON-LISP:LET ((DREYECK/HYPERDOC/CURATION/TESTS::SPAN
-                                                (COMMON-LISP:GETF
-                                                 DREYECK/HYPERDOC/CURATION/TESTS::VALUE
-                                                 :REGION)))
-                               (COMMON-LISP:ASSERT
-                                (COMMON-LISP:EQUAL
-                                 (COMMON-LISP:GETF
-                                  DREYECK/HYPERDOC/CURATION/TESTS::VALUE
-                                  :SOURCE)
-                                 (COMMON-LISP:SUBSEQ
-                                  (UIOP/STREAM:READ-FILE-STRING
-                                   (COMMON-LISP:GETF
-                                    DREYECK/HYPERDOC/CURATION/TESTS::VALUE
-                                    :PATHNAME))
-                                  (COMMON-LISP:CAR
-                                   DREYECK/HYPERDOC/CURATION/TESTS::SPAN)
-                                  (COMMON-LISP:CDR
-                                   DREYECK/HYPERDOC/CURATION/TESTS::SPAN))))))
-                           (DREYECK/HYPERDOC/CURATION/TESTS::VERIFY
-                            (COMMON-LISP:CAR
-                             DREYECK/HYPERDOC/CURATION/TESTS::VALUE))
-                           (DREYECK/HYPERDOC/CURATION/TESTS::VERIFY
-                            (COMMON-LISP:CDR
-                             DREYECK/HYPERDOC/CURATION/TESTS::VALUE)))))
-    (COMMON-LISP:DOLIST
-        (DREYECK/HYPERDOC/CURATION/TESTS::EDGE
-         (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
-          (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF
-           DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)))
-      (COMMON-LISP:LET ((DREYECK/HYPERDOC/CURATION/TESTS::PROPERTIES
-                         (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-PROPERTIES-OF
-                          DREYECK/HYPERDOC/CURATION/TESTS::EDGE)))
-        (COMMON-LISP:ASSERT
-         (COMMON-LISP:MEMBER
-          (COMMON-LISP:GETF DREYECK/HYPERDOC/CURATION/TESTS::PROPERTIES
-                            :EPISTEMIC-STATUS)
-          '(:SOURCE-OBSERVED :LIVE-OBSERVED)))
-        (COMMON-LISP:ASSERT
-         (COMMON-LISP:GETF DREYECK/HYPERDOC/CURATION/TESTS::PROPERTIES
-                           :WARRANT))
-        (DREYECK/HYPERDOC/CURATION/TESTS::VERIFY
-         (COMMON-LISP:GETF DREYECK/HYPERDOC/CURATION/TESTS::PROPERTIES
-                           :WARRANT))))))
+                   (COMMON-LISP:LABELS
+                                       ((DREYECK/HYPERDOC/CURATION/TESTS::VERIFY
+                                                                                 (DREYECK/HYPERDOC/CURATION/TESTS::VALUE)
+                                                                                 (COMMON-LISP:WHEN
+                                                                                                   (COMMON-LISP:CONSP
+                                                                                                                      DREYECK/HYPERDOC/CURATION/TESTS::VALUE)
+                                                                                                   (COMMON-LISP:WHEN
+                                                                                                                     (COMMON-LISP:AND
+                                                                                                                                      (COMMON-LISP:EQ
+                                                                                                                                                      (COMMON-LISP:FIRST
+                                                                                                                                                                         DREYECK/HYPERDOC/CURATION/TESTS::VALUE)
+                                                                                                                                                      :KIND)
+                                                                                                                                      (COMMON-LISP:MEMBER
+                                                                                                                                                          (COMMON-LISP:SECOND
+                                                                                                                                                                              DREYECK/HYPERDOC/CURATION/TESTS::VALUE)
+                                                                                                                                                          (QUOTE
+                                                                                                                                                                 (:LISP-CST
+                                                                                                                                                                            :HTML-SOURCE-ELEMENT))))
+                                                                                                                     (COMMON-LISP:LET
+                                                                                                                                      ((DREYECK/HYPERDOC/CURATION/TESTS::SPAN
+                                                                                                                                                                              (COMMON-LISP:GETF
+                                                                                                                                                                                                DREYECK/HYPERDOC/CURATION/TESTS::VALUE
+                                                                                                                                                                                                :REGION)))
+                                                                                                                                      (COMMON-LISP:ASSERT
+                                                                                                                                                          (COMMON-LISP:EQUAL
+                                                                                                                                                                             (COMMON-LISP:GETF
+                                                                                                                                                                                               DREYECK/HYPERDOC/CURATION/TESTS::VALUE
+                                                                                                                                                                                               :SOURCE)
+                                                                                                                                                                             (COMMON-LISP:SUBSEQ
+                                                                                                                                                                                                 (UIOP/STREAM:READ-FILE-STRING
+                                                                                                                                                                                                                               (COMMON-LISP:GETF
+                                                                                                                                                                                                                                                 DREYECK/HYPERDOC/CURATION/TESTS::VALUE
+                                                                                                                                                                                                                                                 :PATHNAME))
+                                                                                                                                                                                                 (COMMON-LISP:CAR
+                                                                                                                                                                                                                  DREYECK/HYPERDOC/CURATION/TESTS::SPAN)
+                                                                                                                                                                                                 (COMMON-LISP:CDR
+                                                                                                                                                                                                                  DREYECK/HYPERDOC/CURATION/TESTS::SPAN))))))
+                                                                                                   (DREYECK/HYPERDOC/CURATION/TESTS::VERIFY
+                                                                                                                                            (COMMON-LISP:CAR
+                                                                                                                                                             DREYECK/HYPERDOC/CURATION/TESTS::VALUE))
+                                                                                                   (DREYECK/HYPERDOC/CURATION/TESTS::VERIFY
+                                                                                                                                            (COMMON-LISP:CDR
+                                                                                                                                                             DREYECK/HYPERDOC/CURATION/TESTS::VALUE)))))
+                                       (COMMON-LISP:DOLIST
+                                                           (DREYECK/HYPERDOC/CURATION/TESTS::EDGE
+                                                                                                  (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
+                                                                                                                                                        (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF
+                                                                                                                                                                                                           DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)))
+                                                           (COMMON-LISP:LET
+                                                                            ((DREYECK/HYPERDOC/CURATION/TESTS::PROPERTIES
+                                                                                                                          (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-PROPERTIES-OF
+                                                                                                                                                                               DREYECK/HYPERDOC/CURATION/TESTS::EDGE)))
+                                                                            (COMMON-LISP:ASSERT
+                                                                                                (COMMON-LISP:MEMBER
+                                                                                                                    (COMMON-LISP:GETF
+                                                                                                                                      DREYECK/HYPERDOC/CURATION/TESTS::PROPERTIES
+                                                                                                                                      :EPISTEMIC-STATUS)
+                                                                                                                    (QUOTE
+                                                                                                                           (:SOURCE-OBSERVED
+                                                                                                                                             :LIVE-OBSERVED))))
+                                                                            (COMMON-LISP:ASSERT
+                                                                                                (COMMON-LISP:GETF
+                                                                                                                  DREYECK/HYPERDOC/CURATION/TESTS::PROPERTIES
+                                                                                                                  :WARRANT))
+                                                                            (DREYECK/HYPERDOC/CURATION/TESTS::VERIFY
+                                                                                                                     (COMMON-LISP:GETF
+                                                                                                                                       DREYECK/HYPERDOC/CURATION/TESTS::PROPERTIES
+                                                                                                                                       :WARRANT))))))
 
 (COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION/TESTS::RUN-WITNESS
                    (DREYECK/HYPERDOC/CURATION/TESTS::TITLE
-                    DREYECK/HYPERDOC/CURATION/TESTS::EXAMPLE)
-  (COMMON-LISP:LET* ((DREYECK/HYPERDOC/CURATION/TESTS::PAGE
-                      (HYPERBOOK:FIND-PAGE
-                       DREYECK/UPSTREAM-INTAKE:*UPSTREAM-INTAKE-HYPERDOC*
-                       DREYECK/HYPERDOC/CURATION/TESTS::TITLE :SIGNAL-ERROR?
-                       COMMON-LISP:T))
-                     (DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE
-                      (DREYECK/HYPERDOC/CURATION:MAKE-REFERENCE-WORKSPACE
-                       DREYECK/HYPERDOC/CURATION/TESTS::PAGE :SOURCE-FILES
-                       (DREYECK/HYPERDOC/CURATION/TESTS::INVENTORY) :CONTRACTS
-                       (DREYECK/HYPERDOC/CURATION/TESTS::CONTRACTS)))
-                     (DREYECK/HYPERDOC/CURATION/TESTS::PROJECTION
-                      (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF
-                       DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE))
-                     (DREYECK/HYPERDOC/CURATION/TESTS::POINT
-                      (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-POINT-OF
-                       DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE))
-                     (DREYECK/HYPERDOC/CURATION/TESTS::IMPACT
-                      (DREYECK/TOPICMAP/CURATION:MAKE-IMPACT-WORKSPACE
-                       DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE :POLICY
-                       #'DREYECK/HYPERDOC/CURATION:HYPERDOC-REMOVAL-IMPACT))
-                     (DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY
-                      (DREYECK/TOPICMAP/CURATION:IMPACT-SUMMARY
-                       DREYECK/HYPERDOC/CURATION/TESTS::IMPACT))
-                     (DREYECK/HYPERDOC/CURATION/TESTS::EXPECTED
-                      (COMMON-LISP:LIST
-                       (COMMON-LISP:LIST :REMOVE
-                                         DREYECK/HYPERDOC/CURATION/TESTS::TITLE)
-                       (COMMON-LISP:LIST :REMOVE-WITH-PAGE
-                                         (COMMON-LISP:CONCATENATE
-                                          'COMMON-LISP:STRING
-                                          DREYECK/HYPERDOC/CURATION/TESTS::TITLE
-                                          ".html"))
-                       '(:MUST-EDIT
-                         "Upstream Intake as a Read-Only Observation")
-                       '(:MUST-EDIT "+UPSTREAM-INTAKE-PAGE-SPECS+")
-                       '(:MUST-EDIT-OR-DELETE "CHECK-PAGE-NAVIGATION")
-                       '(:MUST-EDIT-OR-DELETE "RUN-HYPERDOC-PAGE-TESTS")
-                       (COMMON-LISP:LIST :KEEP
-                                         DREYECK/HYPERDOC/CURATION/TESTS::EXAMPLE))))
-    (COMMON-LISP:DOLIST
-        (DREYECK/HYPERDOC/CURATION/TESTS::ROW
-         DREYECK/HYPERDOC/CURATION/TESTS::EXPECTED)
-      (COMMON-LISP:ASSERT
-       (COMMON-LISP:MEMBER DREYECK/HYPERDOC/CURATION/TESTS::ROW
-                           DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY :TEST
-                           #'COMMON-LISP:EQUAL)
-       COMMON-LISP:NIL "Missing impact ~S in ~S"
-       DREYECK/HYPERDOC/CURATION/TESTS::ROW
-       DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY))
-    (when (equal title "Observing an Upstream Commit")
-      (assert (member '(:must-edit-or-delete "UPSTREAM-INTAKE-REMOVAL-WORKSPACE-EXAMPLE")
-                      summary :test #'equal))
-      (check-literal-lookup-edge reference
-                                 "UPSTREAM-INTAKE-REMOVAL-WORKSPACE-EXAMPLE")
-      (multiple-value-bind (cut findings)
-          (dreyeck/hyperdoc/curation:hyperdoc-removal-impact projection point)
-        (declare (ignore cut))
-        (assert (find :executable-page-dependency findings
-                      :key (lambda (finding) (getf finding :rule))))))
-    (assert (null (getf (dreyeck/topicmap:topicmap-projection-source-of projection)
-                       :diagnostics)))
-    (DREYECK/HYPERDOC/CURATION/TESTS::CHECK-SOURCE-WARRANTS
-     DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)
-    (COMMON-LISP:LET* ((DREYECK/HYPERDOC/CURATION/TESTS::RESULT
-                        (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF
-                         DREYECK/HYPERDOC/CURATION/TESTS::IMPACT))
-                       (DREYECK/HYPERDOC/CURATION/TESTS::CUT
-                        (COMMON-LISP:GETF
-                         (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-SOURCE-OF
-                          DREYECK/HYPERDOC/CURATION/TESTS::RESULT)
-                         :CUT-TOPIC-IDS))
-                       (DREYECK/HYPERDOC/CURATION/TESTS::REFERENCES
-                        (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
-                         DREYECK/HYPERDOC/CURATION/TESTS::PROJECTION)))
-      (COMMON-LISP:DOLIST
-          (DREYECK/HYPERDOC/CURATION/TESTS::EDGE
-           (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
-            DREYECK/HYPERDOC/CURATION/TESTS::RESULT))
-        (COMMON-LISP:LET* ((DREYECK/HYPERDOC/CURATION/TESTS::PROPS
-                            (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-PROPERTIES-OF
-                             DREYECK/HYPERDOC/CURATION/TESTS::EDGE))
-                           (DREYECK/HYPERDOC/CURATION/TESTS::W
-                            (COMMON-LISP:GETF
-                             DREYECK/HYPERDOC/CURATION/TESTS::PROPS :WARRANT)))
-          (COMMON-LISP:ASSERT
-           (COMMON-LISP:EQ :MECHANICALLY-DERIVED
-                           (COMMON-LISP:GETF
-                            DREYECK/HYPERDOC/CURATION/TESTS::PROPS
-                            :EPISTEMIC-STATUS)))
-          (COMMON-LISP:DOLIST
-              (DREYECK/HYPERDOC/CURATION/TESTS::ID
-               (COMMON-LISP:GETF DREYECK/HYPERDOC/CURATION/TESTS::W
-                                 :REFERENCE-EDGES))
-            (COMMON-LISP:ASSERT
-             (COMMON-LISP:FIND DREYECK/HYPERDOC/CURATION/TESTS::ID
-                               DREYECK/HYPERDOC/CURATION/TESTS::REFERENCES :KEY
-                               #'DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF
-                               :TEST #'COMMON-LISP:EQUAL)))
-          (COMMON-LISP:WHEN
-              (COMMON-LISP:EQ :KEEP
-                              (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
-                               DREYECK/HYPERDOC/CURATION/TESTS::EDGE))
-            (COMMON-LISP:ASSERT
-             (COMMON-LISP:GETF DREYECK/HYPERDOC/CURATION/TESTS::W
-                               :SURVIVING-RETENTION-EDGES))
-            (COMMON-LISP:ASSERT
-             (COMMON-LISP:SOME
-              (COMMON-LISP:LAMBDA (DREYECK/HYPERDOC/CURATION/TESTS::ID)
-                (COMMON-LISP:LET ((DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR
-                                   (COMMON-LISP:FIND
-                                    DREYECK/HYPERDOC/CURATION/TESTS::ID
-                                    DREYECK/HYPERDOC/CURATION/TESTS::REFERENCES
-                                    :KEY
-                                    #'DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF
-                                    :TEST #'COMMON-LISP:EQUAL)))
-                  (COMMON-LISP:AND DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR
-                                   (COMMON-LISP:EQ :EXPOSES-EXECUTABLE-LINK
-                                                   (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
-                                                    DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR))
-                                   (COMMON-LISP:NOT
-                                    (COMMON-LISP:MEMBER
-                                     (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
-                                      DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR)
-                                     DREYECK/HYPERDOC/CURATION/TESTS::CUT :TEST
-                                     #'COMMON-LISP:EQUAL))
-                                   (COMMON-LISP:EQUAL
-                                    "Upstream Intake as a Read-Only Observation"
-                                    (DREYECK/TOPICMAP:TOPICMAP-TOPIC-LABEL-OF
-                                     (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-TOPIC-BY-ID
-                                      DREYECK/HYPERDOC/CURATION/TESTS::PROJECTION
-                                      (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
-                                       DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR)))))))
-              (COMMON-LISP:GETF DREYECK/HYPERDOC/CURATION/TESTS::W
-                                :SURVIVING-RETENTION-EDGES)))))))
-    (COMMON-LISP:ASSERT
-     (COMMON-LISP:EQUAL DREYECK/HYPERDOC/CURATION/TESTS::POINT
-                        (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-POINT-OF
-                         DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)))
-    (COMMON-LISP:ASSERT
-     (COMMON-LISP:EQ DREYECK/HYPERDOC/CURATION/TESTS::PROJECTION
-                     (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF
-                      DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)))
-    (COMMON-LISP:FORMAT COMMON-LISP:T "~%REFERENCE ~A~%"
-                        DREYECK/HYPERDOC/CURATION/TESTS::TITLE)
-    (COMMON-LISP:DOLIST
-        (DREYECK/HYPERDOC/CURATION/TESTS::ROW
-         (DREYECK/TOPICMAP/CURATION:REFERENCE-SUMMARY
-          DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE))
-      (COMMON-LISP:WHEN
-          (COMMON-LISP:OR
-           (COMMON-LISP:EQUAL DREYECK/HYPERDOC/CURATION/TESTS::TITLE
-                              (COMMON-LISP:FIRST
-                               DREYECK/HYPERDOC/CURATION/TESTS::ROW))
-           (COMMON-LISP:EQUAL DREYECK/HYPERDOC/CURATION/TESTS::TITLE
-                              (COMMON-LISP:THIRD
-                               DREYECK/HYPERDOC/CURATION/TESTS::ROW)))
-        (COMMON-LISP:FORMAT COMMON-LISP:T "~S~%"
-                            DREYECK/HYPERDOC/CURATION/TESTS::ROW)))
-    (COMMON-LISP:FORMAT COMMON-LISP:T "~%IMPACT ~A~%~S~%"
-                        DREYECK/HYPERDOC/CURATION/TESTS::TITLE
-                        DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY)
-    (COMMON-LISP:FORMAT COMMON-LISP:T "~%UNRESOLVED ~D~%"
-                        (COMMON-LISP:LENGTH
-                         (COMMON-LISP:GETF
-                          (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-SOURCE-OF
-                           DREYECK/HYPERDOC/CURATION/TESTS::PROJECTION)
-                          :DIAGNOSTICS)))
-    DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE))
+                                                           DREYECK/HYPERDOC/CURATION/TESTS::EXAMPLE
+                                                           &OPTIONAL
+                                                           EXACT-EXPECTED)
+                   (COMMON-LISP:LET*
+                                     ((DREYECK/HYPERDOC/CURATION/TESTS::PAGE
+                                                                             (HYPERBOOK:FIND-PAGE
+                                                                                                  DREYECK/UPSTREAM-INTAKE:*UPSTREAM-INTAKE-HYPERDOC*
+                                                                                                  DREYECK/HYPERDOC/CURATION/TESTS::TITLE
+                                                                                                  :SIGNAL-ERROR?
+                                                                                                  COMMON-LISP:T))
+                                      (DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE
+                                                                                  (DREYECK/HYPERDOC/CURATION:MAKE-REFERENCE-WORKSPACE
+                                                                                                                                      DREYECK/HYPERDOC/CURATION/TESTS::PAGE
+                                                                                                                                      :SOURCE-FILES
+                                                                                                                                      (DREYECK/HYPERDOC/CURATION/TESTS::INVENTORY)
+                                                                                                                                      :CONTRACTS
+                                                                                                                                      (DREYECK/HYPERDOC/CURATION/TESTS::CONTRACTS)))
+                                      (DREYECK/HYPERDOC/CURATION/TESTS::PROJECTION
+                                                                                   (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF
+                                                                                                                                      DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE))
+                                      (DREYECK/HYPERDOC/CURATION/TESTS::POINT
+                                                                              (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-POINT-OF
+                                                                                                                            DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE))
+                                      (DREYECK/HYPERDOC/CURATION/TESTS::IMPACT
+                                                                               (DREYECK/TOPICMAP/CURATION:MAKE-IMPACT-WORKSPACE
+                                                                                                                                DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE
+                                                                                                                                :POLICY
+                                                                                                                                (FUNCTION
+                                                                                                                                          DREYECK/HYPERDOC/CURATION:HYPERDOC-REMOVAL-IMPACT)))
+                                      (DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY
+                                                                                (DREYECK/TOPICMAP/CURATION:IMPACT-SUMMARY
+                                                                                                                          DREYECK/HYPERDOC/CURATION/TESTS::IMPACT))
+                                      (DREYECK/HYPERDOC/CURATION/TESTS::EXPECTED
+                                                                                 (COMMON-LISP:OR
+                                                                                                 EXACT-EXPECTED
+                                                                                                 (COMMON-LISP:LIST
+                                                                                                                   (COMMON-LISP:LIST
+                                                                                                                                     :REMOVE
+                                                                                                                                     DREYECK/HYPERDOC/CURATION/TESTS::TITLE)
+                                                                                                                   (COMMON-LISP:LIST
+                                                                                                                                     :REMOVE-WITH-PAGE
+                                                                                                                                     (FILE-NAMESTRING
+                                                                                                                                                      (HYPERDOC:FILE-OF
+                                                                                                                                                                        DREYECK/HYPERDOC/CURATION/TESTS::PAGE)))
+                                                                                                                   (QUOTE
+                                                                                                                          (:MUST-EDIT
+                                                                                                                                      "Upstream Intake as a Read-Only Observation"))
+                                                                                                                   (QUOTE
+                                                                                                                          (:MUST-EDIT
+                                                                                                                                      "+UPSTREAM-INTAKE-PAGE-SPECS+"))
+                                                                                                                   (QUOTE
+                                                                                                                          (:MUST-EDIT-OR-DELETE
+                                                                                                                                                "CHECK-PAGE-NAVIGATION"))
+                                                                                                                   (QUOTE
+                                                                                                                          (:MUST-EDIT-OR-DELETE
+                                                                                                                                                "RUN-HYPERDOC-PAGE-TESTS"))
+                                                                                                                   (COMMON-LISP:LIST
+                                                                                                                                     :KEEP
+                                                                                                                                     DREYECK/HYPERDOC/CURATION/TESTS::EXAMPLE)))))
+                                     (COMMON-LISP:DOLIST
+                                                         (DREYECK/HYPERDOC/CURATION/TESTS::ROW
+                                                                                               DREYECK/HYPERDOC/CURATION/TESTS::EXPECTED)
+                                                         (COMMON-LISP:ASSERT
+                                                                             (COMMON-LISP:MEMBER
+                                                                                                 DREYECK/HYPERDOC/CURATION/TESTS::ROW
+                                                                                                 DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY
+                                                                                                 :TEST
+                                                                                                 (FUNCTION
+                                                                                                           COMMON-LISP:EQUAL))
+                                                                             NIL
+                                                                             "Missing impact ~S in ~S"
+                                                                             DREYECK/HYPERDOC/CURATION/TESTS::ROW
+                                                                             DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY))
+                                     (COMMON-LISP:WHEN EXACT-EXPECTED
+                                                       (COMMON-LISP:ASSERT
+                                                                           (NULL
+                                                                                 (SET-EXCLUSIVE-OR
+                                                                                                   DREYECK/HYPERDOC/CURATION/TESTS::EXPECTED
+                                                                                                   DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY
+                                                                                                   :TEST
+                                                                                                   (FUNCTION
+                                                                                                             COMMON-LISP:EQUAL))))
+                                                       (COMMON-LISP:ASSERT
+                                                                           (=
+                                                                              (COMMON-LISP:LENGTH
+                                                                                                  DREYECK/HYPERDOC/CURATION/TESTS::EXPECTED)
+                                                                              (COMMON-LISP:LENGTH
+                                                                                                  DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY))))
+                                     (when (equal title "Observing an Upstream Commit")
+  (assert
+   (member
+    '(:must-edit-or-delete "UPSTREAM-INTAKE-REMOVAL-WORKSPACE-EXAMPLE")
+    summary :test #'equal))
+  (check-literal-lookup-edge
+   reference "UPSTREAM-INTAKE-REMOVAL-WORKSPACE-EXAMPLE")
+  (multiple-value-bind (cut findings)
+      (dreyeck/hyperdoc/curation:hyperdoc-removal-impact projection point)
+    (declare (ignore cut))
+    (assert
+     (find :executable-page-dependency findings
+           :key (lambda (finding) (getf finding :rule))))))
+(DREYECK/HYPERDOC/CURATION/TESTS::CHECK-SOURCE-WARRANTS
+                                                                                             DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)
+                                     (COMMON-LISP:LET*
+                                                       ((DREYECK/HYPERDOC/CURATION/TESTS::RESULT
+                                                                                                 (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF
+                                                                                                                                                    DREYECK/HYPERDOC/CURATION/TESTS::IMPACT))
+                                                        (DREYECK/HYPERDOC/CURATION/TESTS::CUT
+                                                                                              (COMMON-LISP:GETF
+                                                                                                                (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-SOURCE-OF
+                                                                                                                                                                DREYECK/HYPERDOC/CURATION/TESTS::RESULT)
+                                                                                                                :CUT-TOPIC-IDS))
+                                                        (DREYECK/HYPERDOC/CURATION/TESTS::REFERENCES
+                                                                                                     (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
+                                                                                                                                                           DREYECK/HYPERDOC/CURATION/TESTS::PROJECTION)))
+                                                       (COMMON-LISP:DOLIST
+                                                                           (DREYECK/HYPERDOC/CURATION/TESTS::EDGE
+                                                                                                                  (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
+                                                                                                                                                                        DREYECK/HYPERDOC/CURATION/TESTS::RESULT))
+                                                                           (COMMON-LISP:LET*
+                                                                                             ((DREYECK/HYPERDOC/CURATION/TESTS::PROPS
+                                                                                                                                      (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-PROPERTIES-OF
+                                                                                                                                                                                           DREYECK/HYPERDOC/CURATION/TESTS::EDGE))
+                                                                                              (DREYECK/HYPERDOC/CURATION/TESTS::W
+                                                                                                                                  (COMMON-LISP:GETF
+                                                                                                                                                    DREYECK/HYPERDOC/CURATION/TESTS::PROPS
+                                                                                                                                                    :WARRANT)))
+                                                                                             (COMMON-LISP:ASSERT
+                                                                                                                 (COMMON-LISP:EQ
+                                                                                                                                 :MECHANICALLY-DERIVED
+                                                                                                                                 (COMMON-LISP:GETF
+                                                                                                                                                   DREYECK/HYPERDOC/CURATION/TESTS::PROPS
+                                                                                                                                                   :EPISTEMIC-STATUS)))
+                                                                                             (COMMON-LISP:ASSERT
+                                                                                                                 (COMMON-LISP:EQUAL
+                                                                                                                                    DREYECK/HYPERDOC/CURATION/TESTS::POINT
+                                                                                                                                    (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
+                                                                                                                                                                                   DREYECK/HYPERDOC/CURATION/TESTS::EDGE)))
+                                                                                             (COMMON-LISP:DOLIST
+                                                                                                                 (DREYECK/HYPERDOC/CURATION/TESTS::ID
+                                                                                                                                                      (COMMON-LISP:GETF
+                                                                                                                                                                        DREYECK/HYPERDOC/CURATION/TESTS::W
+                                                                                                                                                                        :REFERENCE-EDGES))
+                                                                                                                 (COMMON-LISP:ASSERT
+                                                                                                                                     (COMMON-LISP:FIND
+                                                                                                                                                       DREYECK/HYPERDOC/CURATION/TESTS::ID
+                                                                                                                                                       DREYECK/HYPERDOC/CURATION/TESTS::REFERENCES
+                                                                                                                                                       :KEY
+                                                                                                                                                       (FUNCTION
+                                                                                                                                                                 DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF)
+                                                                                                                                                       :TEST
+                                                                                                                                                       (FUNCTION
+                                                                                                                                                                 COMMON-LISP:EQUAL))))
+                                                                                             (COMMON-LISP:WHEN
+                                                                                                               (COMMON-LISP:EQ
+                                                                                                                               :KEEP
+                                                                                                                               (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
+                                                                                                                                                                              DREYECK/HYPERDOC/CURATION/TESTS::EDGE))
+                                                                                                               (COMMON-LISP:ASSERT
+                                                                                                                                   (COMMON-LISP:GETF
+                                                                                                                                                     DREYECK/HYPERDOC/CURATION/TESTS::W
+                                                                                                                                                     :SURVIVING-RETENTION-EDGES))
+                                                                                                               (COMMON-LISP:DOLIST
+                                                                                                                                   (DREYECK/HYPERDOC/CURATION/TESTS::ID
+                                                                                                                                                                        (COMMON-LISP:GETF
+                                                                                                                                                                                          DREYECK/HYPERDOC/CURATION/TESTS::W
+                                                                                                                                                                                          :SURVIVING-RETENTION-EDGES))
+                                                                                                                                   (COMMON-LISP:LET
+                                                                                                                                                    ((DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR
+                                                                                                                                                                                                (COMMON-LISP:FIND
+                                                                                                                                                                                                                  DREYECK/HYPERDOC/CURATION/TESTS::ID
+                                                                                                                                                                                                                  DREYECK/HYPERDOC/CURATION/TESTS::REFERENCES
+                                                                                                                                                                                                                  :KEY
+                                                                                                                                                                                                                  (FUNCTION
+                                                                                                                                                                                                                            DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF)
+                                                                                                                                                                                                                  :TEST
+                                                                                                                                                                                                                  (FUNCTION
+                                                                                                                                                                                                                            COMMON-LISP:EQUAL))))
+                                                                                                                                                    (COMMON-LISP:ASSERT
+                                                                                                                                                                        DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR)
+                                                                                                                                                    (COMMON-LISP:ASSERT
+                                                                                                                                                                        (COMMON-LISP:MEMBER
+                                                                                                                                                                                            (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
+                                                                                                                                                                                                                                           DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR)
+                                                                                                                                                                                            (QUOTE
+                                                                                                                                                                                                   (:EXPOSES-EXECUTABLE-LINK
+                                                                                                                                                                                                                             :INVOKES
+                                                                                                                                                                                                                             :PRESENTS-SOURCE-OF))))
+                                                                                                                                                    (COMMON-LISP:ASSERT
+                                                                                                                                                                        (COMMON-LISP:NOT
+                                                                                                                                                                                         (COMMON-LISP:MEMBER
+                                                                                                                                                                                                             (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-FROM-OF
+                                                                                                                                                                                                                                                            DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR)
+                                                                                                                                                                                                             DREYECK/HYPERDOC/CURATION/TESTS::CUT
+                                                                                                                                                                                                             :TEST
+                                                                                                                                                                                                             (FUNCTION
+                                                                                                                                                                                                                       COMMON-LISP:EQUAL))))
+                                                                                                                                                    (COMMON-LISP:ASSERT
+                                                                                                                                                                        (COMMON-LISP:EQUAL
+                                                                                                                                                                                           (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TO-OF
+                                                                                                                                                                                                                                        DREYECK/HYPERDOC/CURATION/TESTS::SURVIVOR)
+                                                                                                                                                                                           (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TO-OF
+                                                                                                                                                                                                                                        DREYECK/HYPERDOC/CURATION/TESTS::EDGE)))))))))
+                                     (COMMON-LISP:ASSERT
+                                                         (COMMON-LISP:EQUAL
+                                                                            DREYECK/HYPERDOC/CURATION/TESTS::POINT
+                                                                            (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-POINT-OF
+                                                                                                                          DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)))
+                                     (COMMON-LISP:ASSERT
+                                                         (COMMON-LISP:EQ
+                                                                         DREYECK/HYPERDOC/CURATION/TESTS::PROJECTION
+                                                                         (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF
+                                                                                                                            DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE)))
+                                     (COMMON-LISP:FORMAT COMMON-LISP:T
+                                                         "~%IMPACT ~A~%~S~%"
+                                                         DREYECK/HYPERDOC/CURATION/TESTS::TITLE
+                                                         DREYECK/HYPERDOC/CURATION/TESTS::SUMMARY)
+                                     DREYECK/HYPERDOC/CURATION/TESTS::REFERENCE))
 
 (DEFUN PAGE-CONTRACT-WITHOUT-USE (BOOK)
   (LET ((PAGE
@@ -313,7 +368,7 @@
                                                                    NAME)))))))
   T)
 
-(COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION/TESTS:RUN-TESTS COMMON-LISP:NIL
+(COMMON-LISP:DEFUN DREYECK/HYPERDOC/CURATION/TESTS:RUN-TESTS NIL
                    (COMMON-LISP:LET*
                                      ((DREYECK/HYPERDOC/CURATION/TESTS::BOOK
                                                                              DREYECK/UPSTREAM-INTAKE:*UPSTREAM-INTAKE-HYPERDOC*)
@@ -358,10 +413,17 @@
                                                                                     (DREYECK/HYPERDOC/CURATION::SOURCE-RECORDS
                                                                                                                                (COMMON-LISP:LIST
                                                                                                                                                  TEST-PATH))))
-                                     (check-literal-lookup-fixtures page test-path)
-                                     (DREYECK/HYPERDOC/CURATION/TESTS::RUN-WITNESS
-                                                                                   "Observing an Upstream Commit"
-                                                                                   "HYPERDOC-HOST-NOT-FOUND-UPSTREAM-INTAKE-EXAMPLE")
+(check-literal-lookup-fixtures page test-path)
+(PROGN (CHECK-FIVE-PAGE-EVIDENCE)
+       (CHECK-SOURCE-VIEW-PARSER)
+       (DREYECK/HYPERDOC/CURATION/TESTS::RUN-WITNESS
+        "Observing an Upstream Commit"
+        "HYPERDOC-HOST-NOT-FOUND-UPSTREAM-INTAKE-EXAMPLE"
+        (EXPECTED-INTAKE-IMPACT :COMMIT))
+       (DREYECK/HYPERDOC/CURATION/TESTS::RUN-WITNESS
+        "HyperDoc Page Loading: Source Ahead of the Running Image"
+        NIL
+        (EXPECTED-INTAKE-IMPACT :PAGE-LOADING)))
                                      (DREYECK/HYPERDOC/CURATION/TESTS::RUN-WITNESS
                                                                                    "An Upstream Supersession Hypothesis"
                                                                                    "HYPERSPEC-COMPONENT-UPSTREAM-INTAKE-EXAMPLE")
@@ -379,7 +441,7 @@
                                                          (COMMON-LISP:ASSERT
                                                                              (DREYECK/HYPERDOC/CURATION/TESTS::REJECTED-P
                                                                                                                           (COMMON-LISP:LAMBDA
-                                                                                                                                              COMMON-LISP:NIL
+                                                                                                                                              NIL
                                                                                                                                               (DREYECK/HYPERDOC/CURATION:MAKE-REFERENCE-WORKSPACE
                                                                                                                                                                                                   PAGE
                                                                                                                                                                                                   :SOURCE-FILES
@@ -456,12 +518,12 @@
                                                                                                 DREYECK/HYPERDOC/CURATION/TESTS::PROXY
                                                                                                 (COMMON-LISP:QUOTE
                                                                                                                    COMMON-LISP:PACKAGE-NAME))
-                                                                        COMMON-LISP:NIL)
+                                                                        NIL)
                                                       (COMMON-LISP:ASSERT
                                                                           (COMMON-LISP:EQUAL
                                                                                              (COMMON-LISP:QUOTE
-                                                                                                                (COMMON-LISP:NIL
-                                                                                                                                 "UNRESOLVED"))
+                                                                                                                (NIL
+                                                                                                                     "UNRESOLVED"))
                                                                                              (DREYECK/HYPERDOC/CURATION::TOKEN-KEY
                                                                                                                                    DREYECK/HYPERDOC/CURATION/TESTS::PROXY)))
                                                       (COMMON-LISP:ASSERT
@@ -485,7 +547,7 @@
                                                                           (COMMON-LISP:FIND-PACKAGE
                                                                                                     :DREYECK/WORKFLOW/AUTHORING)))
                                      (COMMON-LISP:FORMAT COMMON-LISP:T
-                                                         "~%CURATION-HYPERDOC-PASS: two witnesses, structural rejection, proxies, source unchanged.~%")
+                                                         "~%CURATION-HYPERDOC-PASS: five-page evidence, exact cuts, source spans, structural rejection, proxies, source unchanged.~%")
                                      COMMON-LISP:T))
 
 (defun literal-lookup-direct (book)
@@ -588,3 +650,103 @@
                    (princ-to-string condition)))))
       (format t "~%LITERAL-LOOKUP-REJECTED ~A~%" name))
     (assert (equal before (uiop:read-file-string test-path)))))
+(defun expected-intake-impact (point)
+  "Exact outcomes observed for the two supported reader witnesses."
+  (ecase point
+    (:commit
+     '((:remove "Observing an Upstream Commit")
+       (:remove-with-page "Observing an Upstream Commit.html")
+       (:must-edit "An Upstream Supersession Hypothesis")
+       (:must-edit "Upstream Intake as a Read-Only Observation")
+       (:must-edit "+UPSTREAM-INTAKE-PAGE-SPECS+")
+       (:must-edit-or-delete "CHECK-PAGE-NAVIGATION")
+       (:must-edit-or-delete "RUN-HYPERDOC-PAGE-TESTS")
+        (:must-edit-or-delete "UPSTREAM-INTAKE-REMOVAL-WORKSPACE-EXAMPLE")
+
+       (:keep "HYPERDOC-HOST-NOT-FOUND-UPSTREAM-INTAKE-EXAMPLE")
+       (:keep "MAKE-HYPERDOC-HOST-NOT-FOUND-INTAKE")))
+    (:page-loading
+     '((:remove "HyperDoc Page Loading: Source Ahead of the Running Image")
+       (:remove-with-page "HyperDoc Page Loading - Source Ahead of the Running Image.html")
+       (:must-edit "Upstream Intake as a Read-Only Observation")
+       (:must-edit "+UPSTREAM-INTAKE-PAGE-SPECS+")
+       (:must-edit-or-delete "CHECK-PAGE-NAVIGATION")
+       (:must-edit-or-delete "RUN-HYPERDOC-PAGE-TESTS")
+       (:review-for-orphaning "HYPERDOC-PAGE-LOADING-COMPARISON-EXAMPLE")
+       (:review-for-orphaning "HYPERDOC-PAGE-LOADING-IMAGE-STATE-EXAMPLE")
+       (:review-for-orphaning "HYPERDOC-PAGE-LOADING-SOURCE-STATE-EXAMPLE")
+       (:review-for-orphaning "HYPERDOC-PAGE-LOADING-CHECKPOINT-EXAMPLE")))))
+
+(defun check-five-page-evidence ()
+  (let* ((book dreyeck/upstream-intake:*upstream-intake-hyperdoc*)
+         (title "HyperDoc Page Loading: Source Ahead of the Running Image")
+         (page (hyperbook:find-page book title :signal-error? t))
+         (reference (dreyeck/hyperdoc/curation:make-reference-workspace
+                     page :source-files (inventory) :contracts (contracts)))
+         (projection (dreyeck/topicmap:topicmap-workspace-projection-of reference))
+         (topics (dreyeck/topicmap:topicmap-projection-topics-of projection))
+         (rows (dreyeck/topicmap/curation:reference-summary reference))
+         (spec-record (find "+UPSTREAM-INTAKE-PAGE-SPECS+"
+                            (dreyeck/hyperdoc/curation::source-records (inventory))
+                            :key (lambda (record) (getf record :name)) :test #'equal))
+         (specs (second (third (getf spec-record :raw)))))
+    (assert (= (length specs) (count :page topics :key #'dreyeck/topicmap:topicmap-topic-type-of)))
+    (assert (= (length specs) (count :html-source topics :key #'dreyeck/topicmap:topicmap-topic-type-of)))
+    (dolist (spec specs)
+      (destructuring-bind (id filename) spec
+        (let* ((reader-page (hyperbook:find-page book id :signal-error? t))
+               (page-topic (dreyeck/topicmap:topicmap-projection-topic-by-id
+                            projection (format nil "page:dreyeck/upstream-intake/~A" id)))
+               (file-topic (dreyeck/topicmap:topicmap-projection-topic-by-id
+                            projection (format nil "file:~A" (hyperdoc:file-of reader-page)))))
+          (assert (eq :page (dreyeck/topicmap:topicmap-topic-type-of page-topic)))
+          (assert (equal id (dreyeck/topicmap:topicmap-topic-label-of page-topic)))
+          (assert (eq :html-source (dreyeck/topicmap:topicmap-topic-type-of file-topic)))
+          (assert (equal filename (dreyeck/topicmap:topicmap-topic-label-of file-topic)))
+          (assert (member (list filename :source-of-page id) rows :test #'equal)))))
+    (let ((expected
+            (list (list "Upstream Intake" :contains-page title)
+                  (list "HyperDoc Page Loading - Source Ahead of the Running Image.html" :source-of-page title)
+                  (list "Upstream Intake as a Read-Only Observation" :links-to-page title)
+                  (list title :links-to-page "Upstream Intake as a Read-Only Observation")
+                  (list title :exposes-executable-link "HYPERDOC-PAGE-LOADING-COMPARISON-EXAMPLE")
+                  (list title :presents-source-of "HYPERDOC-PAGE-LOADING-IMAGE-STATE-EXAMPLE")
+                  (list title :presents-source-of "HYPERDOC-PAGE-LOADING-SOURCE-STATE-EXAMPLE")
+                  (list title :presents-source-of "HYPERDOC-PAGE-LOADING-CHECKPOINT-EXAMPLE")
+                  (list "+UPSTREAM-INTAKE-PAGE-SPECS+" :asserts-page-presence title)
+                  (list "CHECK-PAGE-NAVIGATION" :asserts-navigation title)
+                  (list "RUN-HYPERDOC-PAGE-TESTS" :tests-page title)))
+          (actual (remove-if-not (lambda (row) (or (equal title (first row))
+                                                   (equal title (third row)))) rows)))
+      (assert (null (set-exclusive-or expected actual :test #'equal)))
+      (assert (= (length expected) (length actual)))))
+  t)
+
+(defun check-source-view-parser ()
+  (let* ((records (dreyeck/hyperdoc/curation::source-records
+                   (list (asdf:system-relative-pathname "dreyeck" "dreyeck/tests/hyperdoc-curation-smoke.lisp"))))
+         (dispatchers plump-parser:*tag-dispatchers*)
+         (text (format nil "λ<!-- <source-of-function>never-evaluate</source-of-function> -->~%
+<script>\"<source-of-function>never-evaluate</source-of-function>\"</script>
+<SOURCE-OF-FUNCTION data-note='>'>never&#x2d;evaluate</SOURCE-OF-FUNCTION>
+<source-of-function>~%never-evaluate~%</source-of-function>
+<source-of-function>(never-evaluate)</source-of-function>
+<source-of-function>never-evaluate quoted-reference</source-of-function>
+<source-of-function>*not-a-page-table*</source-of-function>
+<source-of-function>not-in-the-inventory</source-of-function>")))
+    (uiop:with-temporary-file (:stream stream :pathname path :type "html")
+      (write-string text stream)
+      (finish-output stream)
+      (multiple-value-bind (dom entries) (dreyeck/hyperdoc/curation::parse-html-source-views path)
+        (declare (ignore dom))
+        (assert (= 6 (length entries)))
+        (loop for (element . evidence) in entries for index from 0
+              for span = (getf evidence :region)
+              for record = (dreyeck/hyperdoc/curation::source-view-function-record element (find-package :dreyeck/hyperdoc/curation/tests) records)
+              do (assert (equal (getf evidence :source) (subseq text (car span) (cdr span))))
+                 (if (< index 2)
+                     (assert (equal "NEVER-EVALUATE" (getf record :name)))
+                     (assert (null record))))
+        (assert (not (equal (getf (cdar entries) :region) (getf (cdr (second entries)) :region))))))
+    (assert (eq dispatchers plump-parser:*tag-dispatchers*)))
+  t)

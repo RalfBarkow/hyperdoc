@@ -21,11 +21,20 @@ observed objects. Associations represent structural evidence such as:
 - `:ASSERTS-NAVIGATION`
 - `:TESTS-PAGE`
 - `:EXPOSES-EXECUTABLE-LINK`
+- `:PRESENTS-SOURCE-OF`
 - `:INVOKES`
 
 These relations are observations, not editorial decisions. Source-derived
 relations carry warrants identifying the evidence from which they were
 obtained.
+
+A `source-of-function` element contributes `:PRESENTS-SOURCE-OF` from its
+page to one uniquely resolved inventoried `DEFUN` or `DEFEXAMPLE`. This is
+source presentation, not execution. Its warrant preserves the HTML pathname,
+exact character span and original element text, plus the resolved Lisp
+source record's CST warrant. Plump performs the parsing; comments and script
+text do not become source-view references. Unresolved or non-function names
+remain diagnostics, without guessed edges.
 
 Contract declarations select bounded source structures to inspect. They are
 not themselves evidence. A declared contract is rejected when the expected
@@ -116,7 +125,9 @@ operation inspectable before any source mutation occurs.
 
 A MUST-EDIT finding is an obligation only if the referring object survives the
 intended editorial cut. If that object is also removed, its edit is subsumed
-by removal. KEEP means a retention edge survives this particular cut; it does
+by removal. Source presentation, executable links and recognized direct calls
+are retention evidence; a source view inside a removed page is not itself a
+MUST-EDIT finding. KEEP means a retention edge survives this particular cut; it does
 not mean the retained object can never be removed.
 
 ## Executable Catalog example
@@ -130,12 +141,61 @@ MAKE-IMPACT-WORKSPACE with HYPERDOC-REMOVAL-IMPACT. The private reading helper
 UPSTREAM-INTAKE-CURATION-INPUTS supplies a bounded inventory and contract
 set matching the focused curation witness.
 
-The Workspace point is
-`page:dreyeck/upstream-intake/Observing an Upstream Commit`. Its eight impact
-associations describe removal of the page and its HTML, edits to the component
-page, overview and expected-page set, revision or deletion of two test
-contracts, and retention of the host-not-found example through the surviving
-Overview link.
+The Reference Workspace discovers the current five HTML pages from the book;
+there is no separate Curation page list. PAGE identity is `page:<book-id>/<page-id>`;
+HTML-SOURCE identity is `file:<pathname>`. Labels are presentation values. In
+particular, the Page Loading title contains a colon while its HTML filename
+uses ` - `; filenames must not be synthesized from page labels.
+
+The example's point remains
+`page:dreyeck/upstream-intake/Observing an Upstream Commit`. Fresh derivation
+now produces these nine associations:
+
+| Status | Affected topic |
+| --- | --- |
+| REMOVE | Observing an Upstream Commit |
+| REMOVE-WITH-PAGE | Observing an Upstream Commit.html |
+| MUST-EDIT | An Upstream Supersession Hypothesis |
+| MUST-EDIT | Upstream Intake as a Read-Only Observation |
+| MUST-EDIT | +UPSTREAM-INTAKE-PAGE-SPECS+ |
+| MUST-EDIT-OR-DELETE | CHECK-PAGE-NAVIGATION |
+| MUST-EDIT-OR-DELETE | RUN-HYPERDOC-PAGE-TESTS |
+| KEEP | HYPERDOC-HOST-NOT-FOUND-UPSTREAM-INTAKE-EXAMPLE |
+| KEEP | MAKE-HYPERDOC-HOST-NOT-FOUND-INTAKE |
+
+Adding the fifth page alone left the previous eight-finding cut unchanged.
+Recognizing source presentation adds the ninth finding: the Commit page
+presents `MAKE-HYPERDOC-HOST-NOT-FOUND-INTAKE`, which retains a warranted call
+from the host-not-found example after this cut. The example itself retains
+the Overview's executable link.
+
+The second durable witness uses point
+`page:dreyeck/upstream-intake/HyperDoc Page Loading: Source Ahead of the Running Image`
+and produces these ten associations:
+
+| Status | Affected topic |
+| --- | --- |
+| REMOVE | HyperDoc Page Loading: Source Ahead of the Running Image |
+| REMOVE-WITH-PAGE | HyperDoc Page Loading - Source Ahead of the Running Image.html |
+| MUST-EDIT | Upstream Intake as a Read-Only Observation |
+| MUST-EDIT | +UPSTREAM-INTAKE-PAGE-SPECS+ |
+| MUST-EDIT-OR-DELETE | CHECK-PAGE-NAVIGATION |
+| MUST-EDIT-OR-DELETE | RUN-HYPERDOC-PAGE-TESTS |
+| REVIEW-FOR-ORPHANING | HYPERDOC-PAGE-LOADING-COMPARISON-EXAMPLE |
+| REVIEW-FOR-ORPHANING | HYPERDOC-PAGE-LOADING-IMAGE-STATE-EXAMPLE |
+| REVIEW-FOR-ORPHANING | HYPERDOC-PAGE-LOADING-SOURCE-STATE-EXAMPLE |
+| REVIEW-FOR-ORPHANING | HYPERDOC-PAGE-LOADING-CHECKPOINT-EXAMPLE |
+
+The reader test reuses `CHECK-PAGE-EXECUTABLE-CONTRACT`, allowing the existing
+lexical recognizer to derive `:TESTS-PAGE` and `:ASSERTS-EXPRESSION-TEXT`.
+The exact three-source-reference list and backlink remain separately checked.
+The orphan-review findings mean no surviving retention edge was demonstrated
+by the bounded projection, not that the functions are globally unused. No
+stronger call-graph claim or deletion authorization follows.
+
+The Curation tests compare exact status/topic sets for both points and verify
+that source and impact warrants refer to the actual evidence. The runtime
+example and tests share `UPSTREAM-INTAKE-CURATION-INPUTS`.
 
 Ordinary Catalog loading registers the example without executing its
 hypothetical analysis. Clicking the action performs read-only observation.
