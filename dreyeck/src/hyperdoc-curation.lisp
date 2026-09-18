@@ -685,7 +685,11 @@ source form is evaluated. Unsupported and unresolved references remain diagnosti
                                                                                                                                 DREYECK/HYPERDOC/CURATION::P
                                                                                                                                 :PATHNAME
                                                                                                                                 (HYPERDOC:FILE-OF
-                                                                                                                                                  DREYECK/HYPERDOC/CURATION::P))))
+                                                                                                                                                  DREYECK/HYPERDOC/CURATION::P)
+                                                                                                                                :SOURCE
+                                                                                                                                (UIOP/STREAM:READ-FILE-STRING
+                                                                                                                                                              (HYPERDOC:FILE-OF
+                                                                                                                                                                                DREYECK/HYPERDOC/CURATION::P)))))
                                                          (COMMON-LISP:DOLIST
                                                                              (DREYECK/HYPERDOC/CURATION::R
                                                                                                            DREYECK/HYPERDOC/CURATION::RECORDS)
