@@ -184,7 +184,8 @@
                (APPEND
                        (LIST "(require :asdf)"
                              (FORMAT NIL "(asdf:load-asd #P~S)"
-                                     (NAMESTRING (DREYECK-ASD-PATHNAME))))
+                                     (NAMESTRING (DREYECK-ASD-PATHNAME)))
+                             "(asdf:load-system \"dreyeck\")")
                        (MAPCAR (LAMBDA (ENTRY) (GETF ENTRY :EVALUATION))
                                (GETF (CONTROLLER-SOURCE-COVERAGE-SPECIFICATION)
                                      :CASES))

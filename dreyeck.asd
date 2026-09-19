@@ -7,10 +7,7 @@
   :VERSION
   "0.0.1"
   :SERIAL
-  T
-  :COMPONENTS
-  ((:MODULE "dreyeck/src" :PATHNAME "dreyeck/src/" :SERIAL T :COMPONENTS
-    ((:FILE "dreyeck-hyperdoc-deployment-inventory")))))
+  T)
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/hyperspec"
   :DESCRIPTION
