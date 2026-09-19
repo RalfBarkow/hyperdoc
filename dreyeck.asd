@@ -411,7 +411,8 @@
                                 ((:MODULE "dreyeck/pages/upstream-intake"
                                           :PATHNAME
                                           "../pages/upstream-intake/")
-                                 (:FILE "upstream-intake-hyperdoc"))
+                                 (:FILE "upstream-intake-hyperdoc")
+                                 (:FILE "upstream-page-loading-history"))
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP

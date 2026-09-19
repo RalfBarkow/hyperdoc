@@ -1,0 +1,236 @@
+<h1>How Page Loading Became a Protocol</h1>
+
+<in-package>dreyeck/upstream-intake</in-package>
+
+<p>
+How did an internal, filetype-oriented mechanism become a public protocol a
+downstream book can specialize? The commits are already in this repository's
+object database, so every step below can be re-checked rather than believed.
+Press the play control on each example and inspect what it returns.
+</p>
+
+<h2>Before: one concrete loader</h2>
+
+<p>
+Early HyperDoc loaded one kind of page. <code>LOAD-PAGE</code> was an ordinary
+function that parsed Scriba into a document, and <code>MAKE-PAGE</code> always
+built the same class:
+</p>
+
+<pre>
+(defun load-page (page)
+  (with-slots (document) page
+    (let ((*current-page* page))
+      (setf document (parse-and-expand (file page)))))
+  page)
+
+(defun make-page (hdoc file)
+  (make-instance 'page :hyperdoc hdoc :file file))
+</pre>
+
+<p>
+There is nothing to specialize here. A second filetype cannot be added without
+editing this function.
+</p>
+
+<h2>The mechanism appears</h2>
+
+<p>
+<code>a8683fb</code> "Prepare for HTML pages" replaces both concrete
+definitions with generic operations and makes construction select a class by
+filetype. Run the example and read its warrants.
+</p>
+
+<p>
+  <a expr="(page-loading-mechanism-example)">
+    Observe the commit that introduces the two generics
+  </a>
+</p>
+
+<source-of-function>page-loading-mechanism-example</source-of-function>
+
+<h3>What to conclude, and what not to</h3>
+
+<p>
+A mechanism now exists: <code>PAGE-CLASS</code> dispatches on a filetype and
+<code>LOAD-PAGE</code> is a generic operation, so methods can be added. A
+public downstream contract does not exist. Neither name is exported, the
+dispatch cannot see which HyperDoc is asking, and the concrete page classes
+cannot be subclassed from another package. The observation records that
+directly as <code>:PUBLIC-CONTRACT-YET-P NIL</code>.
+</p>
+
+<h2>Eighteen months of relocation</h2>
+
+<p>
+Between February 2025 and August 2026 the code moves repeatedly: out of
+<code>hyperdoc/hyperdoc.lisp</code>, into the explorer, between the HyperDoc
+and HyperBook layers. Reading every relocation patch would not help. The
+question that matters is whether the protocol changed shape, and that can be
+answered by comparing the two ends of the range.
+</p>
+
+<p>
+  <a expr="(page-loading-relocation-example)">
+    Compare the protocol shape across the relocation range
+  </a>
+</p>
+
+<source-of-function>page-loading-relocation-example</source-of-function>
+
+<p>
+The file moves and both generics keep one argument. That is the whole claim,
+and it is checked rather than asserted.
+</p>
+
+<h2>The contract arrives in four commits</h2>
+
+<p>
+On 17 and 18 August 2026 four consecutive commits turn the mechanism into a
+protocol. The first two are twenty-five seconds apart: this is one design
+session, not accretion.
+</p>
+
+<p>
+  <a expr="(page-loading-contract-sequence-example)">
+    Verify the four-commit chain against the object database
+  </a>
+</p>
+
+<source-of-function>page-loading-contract-sequence-example</source-of-function>
+
+<h3>b3e7322: a general default, and a public knob</h3>
+
+<p>
+The ordinary renderer stops binding the reader package to
+<code>CL-USER</code> and binds <code>CL</code> instead, and
+<code>*CURRENT-PACKAGE*</code> is exported in the same commit. That pairing is
+the principle the rest of the transition follows: make the default
+unspecific, then publish the knob that lets someone else be specific.
+</p>
+
+<pre>
+- (let ((*current-package* (find-package "CL-USER")))
++ (let ((*current-package* (find-package "CL")))
++ (export '(*current-package*))
+</pre>
+
+<h3>a15bb54: publish the dynamic context</h3>
+
+<p>
+<code>*CURRENT-PAGE*</code> and <code>*CURRENT-HYPERBOOK*</code> join the
+export list, so a downstream method can tell which page and which book it is
+running inside.
+</p>
+
+<h2>beb1689 is the structural centre</h2>
+
+<p>
+This is the only commit in the transition that changes behavior. Everything
+else moves names onto an export list.
+</p>
+
+<pre>
+- (defgeneric page-class (filetype))
++ (defgeneric page-class (hdoc filetype))
+
+- (page-class type-as-kw)
++ (page-class hdoc type-as-kw)
+
+- (defmethod page-class ((filetype (eql :html)))
++ (defmethod page-class ((hd hyperdoc) (filetype (eql :html)))
++   (declare (ignore hd))
+</pre>
+
+<p>
+Three things had to land together. The dispatch must admit the book;
+<code>PAGE-CLASS</code> must be exported; and <code>HTML-PAGE</code> and
+<code>MARKDOWN-PAGE</code> must be exported, because otherwise a downstream
+book could select a class but would have nothing it was allowed to subclass.
+</p>
+
+<p>
+  <a expr="(page-loading-structural-center-example)">
+    Inspect the five warrants of the central commit
+  </a>
+</p>
+
+<source-of-function>page-loading-structural-center-example</source-of-function>
+
+<p>
+Notice the shape of the upstream method: it specializes on the base class
+<code>hyperdoc</code> and then ignores the argument. The default is
+deliberately as unspecific as it can be, so any subclass method wins by
+ordinary method specificity. No registry, no precedence rule, no override.
+</p>
+
+<h2>8a1149 publishes; it does not implement</h2>
+
+<p>
+The target commit adds two lines to one file:
+</p>
+
+<pre>
++           ;; Load a page
++           #:load-page
+</pre>
+
+<p>
+Nothing else changes. The generic and its primary methods are byte-identical
+to the parent, which the example checks by comparing the implementation file
+at both commits.
+</p>
+
+<p>
+  <a expr="(page-loading-publication-only-example)">
+    Verify that only the package definition changed
+  </a>
+</p>
+
+<source-of-function>page-loading-publication-only-example</source-of-function>
+
+<p>
+This is an ownership commit. An existing internal seam becomes a supported
+public extension point. Before it, a downstream <code>:AFTER</code> method had
+to reach for <code>hyperdoc::load-page</code>; after it, the same method rests
+on an export.
+</p>
+
+<h2>Derived: capabilities A to F</h2>
+
+<p>
+Everything above is observation. What follows is interpretation, and says so.
+Each row names the commit that first makes a statement true and resolves its
+basis back to warrants in the observation layer, so a row cannot cite evidence
+that is not there.
+</p>
+
+<p>
+  <a expr="(page-loading-capability-table-example)">
+    Derive the capability table from the observed warrants
+  </a>
+</p>
+
+<source-of-function>page-loading-capability-table-example</source-of-function>
+
+<p>
+Two rows are worth pausing on. <b>B</b> is established in February 2025, not in
+the 2026 transition: the generic operation long predates its publication.
+<b>C</b> and <b>E</b> arrive only with <code>8a1149</code>, because a seam that
+can only be reached through an internal symbol is not yet a supported
+extension point.
+</p>
+
+<h2>Next</h2>
+
+<p>
+  <a page="Specialization Without Integration">
+    How Dreyeck uses this protocol without the commits becoming ancestors
+  </a>
+</p>
+
+<p>
+  <a page="Upstream Intake as a Read-Only Observation">
+    Back to Upstream Intake
+  </a>
+</p>

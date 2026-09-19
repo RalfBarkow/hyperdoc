@@ -133,6 +133,17 @@ observed upstream capability
 <p>For upstream <code>8a1149197fabcb1ab5622316f09c5a60c2d3f1f8</code>, the retained observation at local commit <code>401953522ec503cf78764bddc5534f7a9f16fd22</code> reports <code>:AVAILABLE-NOT-INTEGRATED</code> and an internal <code>LOAD-PAGE</code>. The example returns a copy of that evidence beside a new current observation.</p>
 <p><a page="HyperDoc Page Loading: Source Ahead of the Running Image">Compare the preserved observation with current evidence</a></p>
 <p>The separately authorized source refactor adopted upstream's two-argument <code>PAGE-CLASS</code> and public one-argument <code>LOAD-PAGE</code>. A dreyeck book selects its HTML page subclass, whose <code>LOAD-PAGE :AFTER</code> method supplies the local reader context. The fresh <code>dreyeck/hyperdoc/boundary-tests</code> system verifies that behavior. Source adoption does not make the candidate a Git ancestor: the Git classification can still be <code>:AVAILABLE-NOT-INTEGRATED</code>.</p>
+
+<h2>How that protocol came to exist</h2>
+
+<p>
+  A three-page reading sequence reconstructs the upstream history behind that
+  protocol from observations rather than from prose: how the mechanism became
+  a public contract, how Dreyeck specializes it without Git integration, and
+  which local forms the history actually warrants.
+</p>
+
+<p><a page="How Page Loading Became a Protocol">Start the page-loading history reading sequence</a></p>
 <pre>observe -&gt; compare -&gt; inspect evidence -&gt; decide
   -&gt; separately apply -&gt; fresh reconstruction and tests</pre>
 <p>An intake object is not a <code>RECORDED-CHANGE</code>. A recorded change requires explicit registration of an ordinary-function mutation in the current image. Intake neither registers that mutation nor invokes <code>PERSIST-IN</code>. Image-local records, cross-process authoring and deployment evidence remain separate boundaries.</p>

@@ -691,6 +691,8 @@
      '((:remove "HyperDoc Page Loading: Source Ahead of the Running Image")
        (:remove-with-page "HyperDoc Page Loading - Source Ahead of the Running Image.html")
        (:must-edit "Upstream Intake as a Read-Only Observation")
+       ;; The page-loading history sequence cites this page as well.
+       (:must-edit "Specialization Without Integration")
        (:must-edit "+UPSTREAM-INTAKE-PAGE-SPECS+")
        (:must-edit-or-delete "CHECK-PAGE-NAVIGATION")
        (:must-edit-or-delete "RUN-HYPERDOC-PAGE-TESTS")
@@ -730,6 +732,9 @@
             (list (list "Upstream Intake" :contains-page title)
                   (list "HyperDoc Page Loading - Source Ahead of the Running Image.html" :source-of-page title)
                   (list "Upstream Intake as a Read-Only Observation" :links-to-page title)
+                  ;; The page-loading history reading sequence cites the
+                  ;; preserved observation from its "four relations" section.
+                  (list "Specialization Without Integration" :links-to-page title)
                   (list title :links-to-page "Upstream Intake as a Read-Only Observation")
                   (list title :exposes-executable-link "HYPERDOC-PAGE-LOADING-COMPARISON-EXAMPLE")
                   (list title :presents-source-of "HYPERDOC-PAGE-LOADING-IMAGE-STATE-EXAMPLE")

@@ -80,4 +80,30 @@
    #:hyperspec-component-upstream-intake-example
    #:hyperdoc-page-loading-before
    #:make-hyperdoc-page-loading-intake
-   #:hyperdoc-page-loading-comparison-example))
+   #:hyperdoc-page-loading-comparison-example
+   ;; How page loading became a protocol: observations and interpretations
+   #:page-loading-history-observations
+   #:page-loading-history-observation
+   #:verify-page-loading-observation
+   #:verify-page-loading-history
+   #:page-loading-protocol-shape-across-relocation
+   #:page-loading-capability-attributions
+   #:resolve-capability-basis
+   #:page-loading-capability-table
+   #:page-loading-ancestry-observation
+   #:page-loading-transition-references
+   #:page-loading-same-reading-p
+   ;; Named examples, in reading order
+   #:page-loading-mechanism-example
+   #:page-loading-relocation-example
+   #:page-loading-contract-sequence-example
+   #:page-loading-structural-center-example
+   #:page-loading-publication-only-example
+   #:page-loading-capability-table-example
+   #:page-loading-ancestry-example
+   #:page-loading-four-relations-example
+   #:page-loading-dreyeck-specialization-example
+   #:page-loading-reader-package-history-example
+   #:page-loading-ownership-example
+   #:page-loading-local-delta-example
+   #:page-loading-serialized-spelling-example))

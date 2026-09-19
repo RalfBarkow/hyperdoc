@@ -1,0 +1,162 @@
+<h1>Specialization Without Integration</h1>
+
+<in-package>dreyeck/upstream-intake</in-package>
+
+<p>
+Dreyeck uses Konrad's protocol. None of the four commits that created it is an
+ancestor of <code>dreyeck.ch</code>. Both statements are true at once, and the
+only way to hold them together is to stop using one word for several different
+relations.
+</p>
+
+<h2>Where the fork actually stands</h2>
+
+<p>
+  <a expr="(page-loading-ancestry-example)">
+    Observe ancestry for the mechanism, the fork point, and the four contract commits
+  </a>
+</p>
+
+<source-of-function>page-loading-ancestry-example</source-of-function>
+
+<p>
+The result separates cleanly. <code>a8683fb</code>, the 2025 mechanism commit,
+<em>is</em> an ancestor: it is shared history from before the fork. So is
+<code>44ed77e</code>, which is the fork point itself. The four contract commits
+are not ancestors, and each reports the same merge base,
+<code>44ed77e</code>. The protocol was adopted into the source tree after the
+branch had already diverged.
+</p>
+
+<pre>
+44ed77e  fork point, shared
+   |\
+   | \__ b3e7322 -&gt; a15bb54 -&gt; beb1689 -&gt; 8a1149   upstream/main
+   |
+   \____ dreyeck.ch                                 adopted the forms, not the commits
+</pre>
+
+<h2>Four relations, four answers</h2>
+
+<p>
+The temptation is to ask whether the work is "integrated". That word hides at
+least four separate questions, and in this case they do not agree with each
+other. Each gets its own observed value.
+</p>
+
+<p>
+  <a expr="(page-loading-four-relations-example)">
+    Ask all four questions about the same pair of forms
+  </a>
+</p>
+
+<source-of-function>page-loading-four-relations-example</source-of-function>
+
+<pre>
+Git ancestry          is the upstream commit an ancestor?        NIL
+source adoption       does the local tree carry the form?        T
+semantic equivalence  do the spellings read to the same form?    T
+text similarity       are the spellings the same text?           NIL
+</pre>
+
+<p>
+Two true, two false, about one pair of forms. Semantic equivalence is answered
+by the project's own structural reader rather than by comparing strings: in
+package <code>hyperdoc</code>, <code>hdoc</code> and
+<code>hyperdoc::hdoc</code> designate the same symbol. That is why text
+similarity can be false while semantic equivalence is true.
+</p>
+
+<p>
+The existing Upstream Intake observation reached the same Git conclusion
+earlier and recorded it as <code>:AVAILABLE-NOT-INTEGRATED</code>. Source
+adoption has since changed; the ancestry has not.
+</p>
+
+<p>
+  <a page="HyperDoc Page Loading: Source Ahead of the Running Image">
+    Compare the preserved observation with current evidence
+  </a>
+</p>
+
+<h2>What Dreyeck actually added</h2>
+
+<p>
+The specialization is small, and it is all ordinary CLOS resting on the
+published protocol: a book subclass, a page subclass, one
+<code>PAGE-CLASS</code> method, one <code>LOAD-PAGE</code>
+<code>:AFTER</code> method.
+</p>
+
+<p>
+  <a expr="(page-loading-dreyeck-specialization-example)">
+    Observe the specialization in the running image
+  </a>
+</p>
+
+<source-of-function>page-loading-dreyeck-specialization-example</source-of-function>
+
+<p>
+Read the <code>LOAD-PAGE</code> methods in the result. Upstream's primary
+methods on <code>HYPERDOC:HTML-PAGE</code> and
+<code>HYPERDOC:MARKDOWN-PAGE</code> are still there, untouched, and Dreyeck's
+method is an <code>:AFTER</code> on its own
+<code>DREYECK/HYPERDOC:HTML-PAGE</code>. Nothing was replaced. That is
+capability <b>E</b> from the previous page, visible in the metaobject
+protocol rather than asserted.
+</p>
+
+<h2>CL-USER and CL: the direction of the history</h2>
+
+<p>
+It is tempting to describe the local change in the ordinary renderer as
+returning to an older <code>CL</code> default. The history does not support
+that, and the phrase inverts the direction of events.
+</p>
+
+<p>
+  <a expr="(page-loading-reader-package-history-example)">
+    Sample the reader package at three points in upstream history
+  </a>
+</p>
+
+<source-of-function>page-loading-reader-package-history-example</source-of-function>
+
+<p>
+<code>CL-USER</code> is upstream's own long-standing default. It is there in
+February 2025, and it is still there in August 2026 after the renderer is
+restructured. Konrad changed the general default to <code>CL</code> in
+<code>b3e7322</code>, in the same commit that exported
+<code>*CURRENT-PACKAGE*</code>. There was no earlier <code>CL</code> default to
+return to, so the observation records
+<code>:EARLIER-CL-DEFAULT-P NIL</code>.
+</p>
+
+<p>
+The correct description is therefore: Dreyeck adopted a <em>new</em> upstream
+default, and re-established <code>CL-USER</code> only for Dreyeck pages,
+through its own <code>LOAD-PAGE</code> specialization. The effect the boundary
+documentation describes is right; the direction in time was not.
+</p>
+
+<p>
+One further nuance the history makes visible: upstream published two seams for
+reader context, and Dreyeck uses the other one. Upstream rebinds
+<code>*CURRENT-PACKAGE*</code> at serialization time; Dreyeck prepends reader
+context to the parse tree at load time. Both are supported, but they are not
+the same seam.
+</p>
+
+<h2>Next</h2>
+
+<p>
+  <a page="What Upstream History Warrants">
+    Which parts of Dreyeck this history warrants, and which it does not
+  </a>
+</p>
+
+<p>
+  <a page="Upstream Intake as a Read-Only Observation">
+    Back to Upstream Intake
+  </a>
+</p>

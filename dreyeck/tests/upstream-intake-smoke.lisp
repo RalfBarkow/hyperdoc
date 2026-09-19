@@ -278,7 +278,13 @@
                       ("Historical ASDF Dependencies as a Topicmap"
                        "Historical ASDF Dependencies as a Topicmap.html")
                       ("HyperDoc Page Loading: Source Ahead of the Running Image"
-                       "HyperDoc Page Loading - Source Ahead of the Running Image.html"))))
+                       "HyperDoc Page Loading - Source Ahead of the Running Image.html")
+                      ("How Page Loading Became a Protocol"
+                       "How Page Loading Became a Protocol.html")
+                      ("Specialization Without Integration"
+                       "Specialization Without Integration.html")
+                      ("What Upstream History Warrants"
+                       "What Upstream History Warrants.html"))))
 
 (defun page-elements (page tag-name)
   (plump:get-elements-by-tag-name (hyperdoc::dom-of page) tag-name))
@@ -509,7 +515,8 @@
                      (quote
                             ("Observing an Upstream Commit"
                              "An Upstream Supersession Hypothesis"
-                             "HyperDoc Page Loading: Source Ahead of the Running Image"))
+                             "HyperDoc Page Loading: Source Ahead of the Running Image"
+                             "How Page Loading Became a Protocol"))
                      (page-links overview))
               "Overview page navigation differs: ~S." (page-links overview))
        (check
@@ -1088,8 +1095,225 @@
                             (dreyeck/workflow:outstanding-changes))))
        t)
 
+;;
+;; The page-loading history reading sequence
+;;
+
+(defparameter +page-loading-history-reading-sequence+
+  '(("How Page Loading Became a Protocol"
+     ("page-loading-mechanism-example"
+      "page-loading-relocation-example"
+      "page-loading-contract-sequence-example"
+      "page-loading-structural-center-example"
+      "page-loading-publication-only-example"
+      "page-loading-capability-table-example")
+     ("Specialization Without Integration"
+      "Upstream Intake as a Read-Only Observation"))
+    ("Specialization Without Integration"
+     ("page-loading-ancestry-example"
+      "page-loading-four-relations-example"
+      "page-loading-dreyeck-specialization-example"
+      "page-loading-reader-package-history-example")
+     ("HyperDoc Page Loading: Source Ahead of the Running Image"
+      "What Upstream History Warrants"
+      "Upstream Intake as a Read-Only Observation"))
+    ("What Upstream History Warrants"
+     ("page-loading-ownership-example"
+      "page-loading-local-delta-example"
+      "page-loading-serialized-spelling-example")
+     ("How Page Loading Became a Protocol"
+      "Upstream Intake as a Read-Only Observation"))))
+
+(defparameter +page-loading-frozen-identities+
+  '(("a8683fb4b43d19e2eb85601e77431f682a80ad89"
+     "25c8ba374e5ecacfe3834b81791c48f41cae8dfe"
+     "Prepare for HTML pages")
+    ("b3e732232e51ccbcd0de479ae51b776955aa01e4"
+     "44ed77e9b1d8c4707c86479826e9f0df5cd88684"
+     "Make CL the default for *current-package*; export it")
+    ("a15bb5445e31a19c9b4e41a465f87b19764f0e00"
+     "b3e732232e51ccbcd0de479ae51b776955aa01e4"
+     "Export *current-hyperbook* and *current-page*")
+    ("beb1689a742f99f75b9255488bd4473ba67f3306"
+     "a15bb5445e31a19c9b4e41a465f87b19764f0e00"
+     "Allow hyperdoc subclasses to define page subclasses as well")
+    ("8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"
+     "beb1689a742f99f75b9255488bd4473ba67f3306"
+     "Allow hyperdoc subclasses to specialized load-page")))
+
+(defun check-frozen-history-identities ()
+  "The frozen records must name exactly these full hashes, parents and
+subjects. Abbreviated or drifting identities are a defect, not a detail."
+  (let ((records (dreyeck/upstream-intake:page-loading-history-observations)))
+    (check (= (length +page-loading-frozen-identities+) (length records))
+           "Expected ~D frozen observations, found ~D."
+           (length +page-loading-frozen-identities+) (length records))
+    (loop for (reference parent subject) in +page-loading-frozen-identities+
+          for record in records
+          do (check (string= reference (getf record :reference))
+                    "Frozen reference ~S differs from ~S."
+                    (getf record :reference) reference)
+             (check (= 40 (length (getf record :reference)))
+                    "Frozen reference ~S is not a full hash."
+                    (getf record :reference))
+             (check (string= parent (getf record :parent))
+                    "Frozen parent of ~S differs: ~S."
+                    reference (getf record :parent))
+             (check (= 40 (length (getf record :parent)))
+                    "Frozen parent ~S is not a full hash."
+                    (getf record :parent))
+             (check (string= subject (getf record :subject))
+                    "Frozen subject of ~S differs: ~S."
+                    reference (getf record :subject))
+             (check (eq :observed (getf record :evidence-status))
+                    "Frozen record ~S is not marked :OBSERVED." reference)
+             (check (getf record :warrants)
+                    "Frozen record ~S carries no warrant." reference)))
+  t)
+
+(defun check-live-history-verification ()
+  "Every frozen record must still agree with the object database."
+  (dolist (verification
+           (dreyeck/upstream-intake:verify-page-loading-history))
+    (let ((reference (getf verification :reference)))
+      (check (getf verification :object-present-p)
+             "Observed commit ~S is absent from this repository." reference)
+      (check (getf verification :parent-agrees-p)
+             "Parent of ~S disagrees with Git: ~S."
+             reference (getf verification :observed-parents))
+      (check (getf verification :subject-agrees-p)
+             "Subject of ~S disagrees with Git: ~S."
+             reference (getf verification :observed-subject))
+      (check (getf verification :changed-files-agree-p)
+             "Changed files of ~S disagree with Git: ~S."
+             reference (getf verification :observed-changed-files))
+      (check (getf verification :warrants-agree-p)
+             "A warrant of ~S is not confirmed by the blobs: ~S."
+             reference (getf verification :warrants))
+      (check (getf verification :agrees-p)
+             "Verification of ~S did not agree overall." reference)))
+  t)
+
+(defun check-history-ancestry-observation ()
+  "Adoption is not ancestry: the target is not an ancestor, the fork point is."
+  (let ((target (dreyeck/upstream-intake:page-loading-ancestry-observation
+                 "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"))
+        (fork (dreyeck/upstream-intake:page-loading-ancestry-observation
+               "44ed77e9b1d8c4707c86479826e9f0df5cd88684")))
+    (check (getf target :object-present-p)
+           "The upstream target object is not present locally.")
+    (check (null (getf target :ancestor-of-head-p))
+           "8a1149 is reported as an ancestor of this branch.")
+    (check (eq t (getf fork :ancestor-of-head-p))
+           "The fork point 44ed77e is not reported as an ancestor.")
+    (check (string= "44ed77e9b1d8c4707c86479826e9f0df5cd88684"
+                    (getf target :merge-base))
+           "Unexpected merge base ~S." (getf target :merge-base)))
+  t)
+
+(defun check-capability-attributions-are-derived ()
+  "An attribution must resolve to warrants that the observation layer holds,
+and must fail when it cites one that does not exist."
+  (dolist (attribution
+           (dreyeck/upstream-intake:page-loading-capability-attributions))
+    (check (eq :interpreted (getf attribution :evidence-status))
+           "Capability ~S is not marked :INTERPRETED."
+           (getf attribution :capability))
+    (let ((resolved
+            (dreyeck/upstream-intake:resolve-capability-basis attribution)))
+      (check resolved "Capability ~S resolved to no warrant at all."
+             (getf attribution :capability))
+      (dolist (entry resolved)
+        (let* ((record (dreyeck/upstream-intake:page-loading-history-observation
+                        (getf entry :commit)))
+               (warrant (find (getf entry :warrant) (getf record :warrants)
+                              :key (lambda (w) (getf w :id)))))
+          (check warrant
+                 "Capability ~S cites warrant ~S absent from observation ~S."
+                 (getf attribution :capability) (getf entry :warrant)
+                 (getf entry :commit))
+          (check (equal (getf warrant :after) (getf entry :after))
+                 "Resolved warrant ~S does not carry the observed form."
+                 (getf entry :warrant))))))
+  (check (nth-value 1
+                    (ignore-errors
+                     (dreyeck/upstream-intake:resolve-capability-basis
+                      (list :capability :fabricated-for-this-test
+                            :basis
+                            (list (list :commit
+                                        "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"
+                                        :warrant :no-such-warrant))))))
+         "A fabricated capability basis resolved instead of signalling.")
+  t)
+
+(defun check-page-loading-history-reading (book)
+  "Each reading page must exist, address its examples in order, transclude
+their persisted source, link onward as intended, and evaluate."
+  (dolist (spec +page-loading-history-reading-sequence+)
+    (destructuring-bind (title example-names links) spec
+      (let ((page (hyperbook:find-page book title :signal-error? t)))
+        (check (equal (mapcar (lambda (name) (format nil "(~A)" name))
+                              example-names)
+                      (page-expressions page))
+               "Page ~S does not address its examples in order: ~S."
+               title (page-expressions page))
+        (check (equal example-names (page-source-function-names page))
+               "Page ~S does not transclude its examples in order: ~S."
+               title (page-source-function-names page))
+        (check (equal links (page-links page))
+               "Page ~S navigation differs: ~S." title (page-links page))
+        (resolve-page-source-references page)
+        (dolist (name example-names)
+          (let ((symbol (find-symbol (string-upcase name)
+                                     :dreyeck/upstream-intake)))
+            (check (and symbol (fboundp symbol))
+                   "Page ~S names example ~S, which is not callable."
+                   title name)))
+        (let ((values (evaluate-page-expressions page)))
+          (check (= (length example-names) (length values))
+                 "Page ~S produced ~D values for ~D examples."
+                 title (length values) (length example-names))
+          (dolist (value values)
+            (check (getf value :evidence-status)
+                   "Page ~S produced a result without an evidence status."
+                   title)))
+        ;; The page must actually render, with each example's persisted
+        ;; source transcluded rather than copied into the HTML.
+        (let ((html (render-page page)))
+          (check (plusp (length html))
+                 "Page ~S rendered no content." title)
+          (dolist (name example-names)
+            (check (search name html :test #'char-equal)
+                   "Page ~S did not transclude the source of ~S."
+                   title name))))))
+  t)
+
+(defun run-page-loading-history-tests ()
+  "The reading sequence, its frozen identities, and its live agreement."
+  (let* ((book dreyeck/upstream-intake:*upstream-intake-hyperdoc*)
+         (root (dreyeck/git:git-repository-root-of
+                (dreyeck/git:current-git-repository-checkout)))
+         (before (repository-state root)))
+    (hyperdoc::ensure-pages-loaded book)
+    (check-frozen-history-identities)
+    (check-live-history-verification)
+    (check-history-ancestry-observation)
+    (check-capability-attributions-are-derived)
+    (check-page-loading-history-reading book)
+    (let ((shape
+            (dreyeck/upstream-intake:page-loading-protocol-shape-across-relocation)))
+      (check (getf shape :file-moved-p)
+             "The relocation comparison no longer shows a moved file.")
+      (check (getf shape :shape-unchanged-p)
+             "The relocation range changed the protocol shape: ~S." shape))
+    (check (equal before (repository-state root))
+           "Reading the page-loading history mutated the repository state."))
+  (format t "Page-loading history reading tests passed.~%")
+  t)
+
 (defun run-upstream-intake-tests nil
        (dreyeck/upstream-intake/tests::check-page-loading-intake)
+       (run-page-loading-history-tests)
        (run-live-image-observation-tests) (run-fixture-tests)
        (run-hyperdoc-page-tests)
        (check

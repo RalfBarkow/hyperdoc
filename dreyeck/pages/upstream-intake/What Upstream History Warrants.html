@@ -1,0 +1,140 @@
+<h1>What Upstream History Warrants</h1>
+
+<in-package>dreyeck/upstream-intake</in-package>
+
+<p>
+Once the upstream history is observable, it can be used as a warrant oracle. A
+local difference is justified when some upstream commit accounts for it, and
+unwarranted when none does. That turns an argument about taste into a
+question with an answer.
+</p>
+
+<h2>Three categories, not two</h2>
+
+<pre>
+:UPSTREAM-NOW-PROVIDES        protocol Konrad deliberately generalized
+:DREYECK-SPECIALIZATION       local policy expressed through that protocol
+:REMAINING-LOCAL-LIBRARY-DELTA  local library change with no upstream seam
+</pre>
+
+<p>
+  <a expr="(page-loading-ownership-example)">
+    Resolve each row to its upstream warrant and its local evidence
+  </a>
+</p>
+
+<source-of-function>page-loading-ownership-example</source-of-function>
+
+<p>
+Each row in the result carries an <code>:UPSTREAM-WARRANT</code> resolved out
+of the observation layer and an <code>:LOCAL-EVIDENCE</code> line read from
+the tracked file. A row cannot claim upstream provenance without naming the
+warrant that supplies it.
+</p>
+
+<p>
+The Dreyeck specialization is a separate entry rather than a fourth row,
+because it is not a thing upstream provides or fails to provide. It is local
+policy that happens to rest on two published names.
+</p>
+
+<h2>What this history does not warrant</h2>
+
+<p>
+  <a expr="(page-loading-local-delta-example)">
+    Observe the remaining local delta and the residual coupling
+  </a>
+</p>
+
+<source-of-function>page-loading-local-delta-example</source-of-function>
+
+<p>
+Two findings, of different kinds.
+</p>
+
+<p>
+<code>code-subdirectory</code> and
+<code>cl-source-file-components-under</code> are absent from upstream
+<code>hyperdoc/core.lisp</code> through <code>8a1149</code> and present
+locally. That is a genuine library delta: a local extension with no upstream
+counterpart in this range. It is intentional, and naming it as such is more
+useful than pretending the boundary is clean.
+</p>
+
+<p>
+The <code>LOAD-PAGE</code> <code>:AFTER</code> method is subtler. The method
+itself sits on a public seam, but its body reaches the DOM through the
+internal <code>hyperdoc::parse-tree</code> slot, because this history
+establishes no public parse-tree accessor. So a supported extension point
+still carries an unsupported coupling inside it. The protocol work did not
+retire that.
+</p>
+
+<h2>One spelling, and why history settles it</h2>
+
+<p>
+Upstream writes the lambda list with a bare parameter name. The local
+committed source carries a package prefix on that same parameter:
+</p>
+
+<pre>
+upstream   (defgeneric page-class (hdoc filetype))
+local      (defgeneric page-class (hyperdoc::hdoc filetype))
+</pre>
+
+<p>
+  <a expr="(page-loading-serialized-spelling-example)">
+    Compare the two spellings by text and by reading
+  </a>
+</p>
+
+<source-of-function>page-loading-serialized-spelling-example</source-of-function>
+
+<p>
+The example reports <code>:SAME-TEXT-P NIL</code> and
+<code>:SAME-READING-P T</code>. In package <code>hyperdoc</code> both
+spellings designate the identical symbol, so the binding is unaffected: this
+is not a bug, and the code is correct either way.
+</p>
+
+<p>
+What the history adds is provenance. The warranted change at
+<code>beb1689</code> was the <em>arity</em> — one argument became two. No
+upstream commit in this history produces a package prefix on a lambda-list
+parameter, because a printer produces that and a person does not. The
+semantic difference has a warrant; the representational difference has none.
+</p>
+
+<p>
+Upstream's own source carries the counter-evidence. The method added in
+<code>beb1689</code> reads <code>((hd hyperdoc )</code>, with a stray space
+before the closing paren, and the export clauses still carry their
+organizational comments. Hand-edited source keeps its typos and its comments;
+a read-and-print round trip normalizes the first and destroys the second.
+</p>
+
+<p>
+This is a provenance finding, not an instruction. Knowing that a spelling is
+unwarranted is a reason to record it, not a reason to rewrite source so that
+it resembles upstream. No source is changed by reading this page.
+</p>
+
+<h2>How to use this</h2>
+
+<pre>
+semantic difference + upstream warrant   -&gt; justified, keep
+semantic difference + no warrant         -&gt; a local decision, name it
+textual difference  + no warrant         -&gt; representation, record it
+</pre>
+
+<p>
+  <a page="How Page Loading Became a Protocol">
+    Back to the beginning of the reading sequence
+  </a>
+</p>
+
+<p>
+  <a page="Upstream Intake as a Read-Only Observation">
+    Back to Upstream Intake
+  </a>
+</p>
