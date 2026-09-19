@@ -1,0 +1,147 @@
+<h1>Reading the Lisp Critic Genealogy</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+Several different things have been called "Lisp Critic". This reading keeps
+them apart, because they are not versions of one another and only some of
+them can be shown running here.
+</p>
+
+<h2>Why this is not simply a linter</h2>
+
+<p>
+The oldest station is Gerhard Fischer's 1987 <i>A Critic for LISP</i>. As the
+local research note records it, that system was an intelligent support
+environment for incremental learning and "learning on demand", with
+rule-based advice, a user model, a knowledge browser and visualization
+support. Its stated purpose was to improve Lisp programs locally according to
+a style encoded by rules — explicitly <em>not</em> a whole-program
+correctness framework.
+</p>
+
+<p>
+A modern linter shares the surface behavior (look at code, say something about
+it) and almost none of the rest. Reading the two lines as one history loses
+exactly what was interesting about the first.
+</p>
+
+<h2>Two lines, not one lineage</h2>
+
+<pre>
+research line        Fischer 1987 LISP-CRITIC
+                         :documented
+
+                         (conceptual resemblance only)
+
+code line            Riesbeck  lisp-critic            CS 325
+                         -&gt; Beane 2004-05-06          ASDF adaptation
+                         -&gt; a-critic-for-lisp         local source station
+                         -&gt; dreyeck/lisp-critic       Evaluation Record + Critique
+</pre>
+
+<p>
+Nothing in this workspace demonstrates that Riesbeck's code descends from
+Fischer's system. The genealogy therefore has no <code>descends-from</code>
+relation at all. Between the two lines it records
+<code>:CONCEPTUAL-RESEMBLANCE</code>, and it says so in the data rather than
+in a footnote.
+</p>
+
+<p>
+  <a expr="(lisp-critic-genealogy-example)">
+    Inspect every station and the relation to its neighbours
+  </a>
+</p>
+
+<source-of-function>lisp-critic-genealogy-example</source-of-function>
+
+<h2>Three things "here is the Lisp Critic" can mean</h2>
+
+<p>
+The distinction that keeps this reading honest is what kind of access we have
+to each station. It is checked, not asserted: the example below looks at the
+filesystem and the running image.
+</p>
+
+<pre>
+:DOCUMENTED        a local document describes it; no source here
+:SOURCE-OBSERVED   source files are readable in this workspace
+:EXECUTABLE        the code runs in this image
+</pre>
+
+<p>
+  <a expr="(evidence-ladder-example)">
+    Check which rung each station actually reaches
+  </a>
+</p>
+
+<source-of-function>evidence-ladder-example</source-of-function>
+
+<p>
+Fischer's system reaches the first rung and no further. Riesbeck's engine
+reaches all three. Our slice reaches all three and adds objects of its own.
+Giving those the same visual weight on a page would be the easiest way to
+mislead a reader, so the status travels with every station.
+</p>
+
+<h2>Where today's slice sits</h2>
+
+<pre>
+Critic Rule
+    &darr;
+Evaluation Record
+    &darr;
+Critique
+    &darr;
+Explanation / Evidence
+</pre>
+
+<p>
+That structure is this repository's contribution. It does not exist in either
+predecessor: Riesbeck's engine prints findings, and our slice turns one rule
+application into an inspectable record and a first-class
+<code>Critique</code> object.
+</p>
+
+<h2>Read on</h2>
+
+<p>
+  <a page="The Fischer Critic as an Environment">
+    The Fischer Critic as an Environment — what the paper documents
+  </a>
+</p>
+
+<p>
+  <a page="Reading Riesbeck's Lisp Critic">
+    Reading Riesbeck's Lisp Critic — the engine source itself
+  </a>
+</p>
+
+<p>
+  <a page="From Riesbeck Run to HyperDoc Critique">
+    From Riesbeck Run to HyperDoc Critique — the three outcomes
+  </a>
+</p>
+
+<p>
+  <a page="Anatomy of a Critique">
+    Anatomy of a Critique — one object, read part by part
+  </a>
+</p>
+
+<h2>The same questions asked of each station</h2>
+
+<p>
+  <a expr="(critic-dimension-comparison-example)">
+    Compare rule representation, target, invocation, result, explanation
+  </a>
+</p>
+
+<source-of-function>critic-dimension-comparison-example</source-of-function>
+
+<p>
+This is a distinction aid, not a ranking. A <code>:DOCUMENTED</code> cell and
+a <code>:SOURCE</code> cell are answers to the same question from different
+kinds of evidence, and the table is only useful if that stays visible.
+</p>

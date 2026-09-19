@@ -1,0 +1,129 @@
+<h1>From Riesbeck Run to HyperDoc Critique</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+The previous page showed an engine that prints findings. This page shows what
+this repository adds: every rule application becomes a record, and a finding
+becomes an object.
+</p>
+
+<pre>
+Riesbeck rule
+     &darr;
+real critic invocation
+     &darr;
+Lisp-Critic Run Record
+     &darr;
+Evaluation Record
+     &darr;
+Critique
+</pre>
+
+<h2>One rule, applied for real</h2>
+
+<p>
+The target program is never evaluated. Only the rule is applied to its text,
+which is why a critic can safely look at code that would not run:
+</p>
+
+<source-of-function>run-one-rule</source-of-function>
+
+<h2>Three outcomes, not two</h2>
+
+<p>
+The distinction that matters is between "the critic had nothing to say" and
+"the critic did not get to speak". Collapsing them would make a broken run
+look like a clean program.
+</p>
+
+<pre>
+successful execution + match      &rarr; Evaluation Record + Critique
+successful execution + no match   &rarr; Evaluation Record only
+failed execution                  &rarr; Evaluation Record with condition
+</pre>
+
+<p>
+Each case below is a real run against the real engine.
+</p>
+
+<h3>Match</h3>
+
+<p>
+  <a expr="(critic-match-example)">
+    Apply CAR-CDR to <code>(car (cdr items))</code>
+  </a>
+</p>
+
+<source-of-function>critic-match-example</source-of-function>
+
+<h3>No match</h3>
+
+<p>
+The same rule applied to the form it recommends. Execution succeeds; there is
+simply nothing to report. An Evaluation Record still exists, which is how a
+reader can tell the critic actually ran:
+</p>
+
+<p>
+  <a expr="(critic-non-match-example)">
+    Apply CAR-CDR to <code>(second items)</code>
+  </a>
+</p>
+
+<source-of-function>critic-non-match-example</source-of-function>
+
+<h3>Failure</h3>
+
+<p>
+An unavailable rule name. The record is still produced, and it keeps the
+condition rather than discarding it:
+</p>
+
+<p>
+  <a expr="(critic-failure-example)">
+    Apply a rule that does not exist
+  </a>
+</p>
+
+<source-of-function>critic-failure-example</source-of-function>
+
+<h3>The three together</h3>
+
+<p>
+  <a expr="(critic-outcome-contrast-example)">
+    Contrast all three outcomes in one result
+  </a>
+</p>
+
+<source-of-function>critic-outcome-contrast-example</source-of-function>
+
+<p>
+Read the <code>:OUTCOME</code> key in each case. The invariant is that a rule
+application always yields an Evaluation Record; only the first case also
+yields a <code>Critique</code>.
+</p>
+
+<h2>How the outcome is derived</h2>
+
+<p>
+The summary is computed from the evaluation-record protocol rather than from
+critic-specific slots, which is why the same three terms would apply to any
+other evaluated thing in this repository:
+</p>
+
+<source-of-function>outcome-of</source-of-function>
+
+<h2>Next</h2>
+
+<p>
+  <a page="Anatomy of a Critique">
+    Anatomy of a Critique — the match case, read part by part
+  </a>
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>

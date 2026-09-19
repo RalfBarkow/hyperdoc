@@ -440,7 +440,8 @@
                                  #:DREYECK/LISP-IMAGE
                                  #:DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER
                                  "dreyeck/topicmap/tala/reading"
-                                 "dreyeck/workflow/reading")
+                                 "dreyeck/workflow/reading"
+                                 "dreyeck/lisp-critic/reading")
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP
@@ -1256,6 +1257,28 @@
   :perform (asdf:test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/lisp-critic/critique/tests :run-tests)))
+
+(asdf:defsystem "dreyeck/lisp-critic/reading"
+  :description "Source-backed reading of the Lisp Critic genealogy"
+  :depends-on ("dreyeck/hyperdoc" "dreyeck/inspector/lisp-critic"
+               "hyperdoc/explorer")
+  :components ((:module "dreyeck/src" :components
+                        ((:file "lisp-critic-reading")))
+               (:module "dreyeck/pages/lisp-critic" :components
+                        ((:static-file "Reading the Lisp Critic Genealogy.html")
+                         (:static-file "The Fischer Critic as an Environment.html")
+                         (:static-file "Reading Riesbeck's Lisp Critic.html")
+                         (:static-file "From Riesbeck Run to HyperDoc Critique.html")
+                         (:static-file "Anatomy of a Critique.html"))))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/reading/tests"))))
+
+(asdf:defsystem "dreyeck/lisp-critic/reading/tests"
+  :description "Contracts for the Lisp Critic genealogy reading"
+  :depends-on ("dreyeck/lisp-critic/reading")
+  :components ((:file "dreyeck/tests/lisp-critic-reading"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/reading/tests :run-tests)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD/TESTS
   :DESCRIPTION

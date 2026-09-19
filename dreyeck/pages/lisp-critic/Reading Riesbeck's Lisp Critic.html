@@ -1,0 +1,136 @@
+<h1>Reading Riesbeck's Lisp Critic</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+Everything below comes out of files on this disk. The engine is vendored in a
+local source station, and the definitions shown here are transcluded from it
+rather than copied into this page, so they cannot drift out of agreement with
+the code that runs.
+</p>
+
+<p><html-expr>(ensure-riesbeck-engine-loaded)</html-expr></p>
+
+<h2>Provenance of the source station</h2>
+
+<p>
+The station wraps Chris Riesbeck's Lisp Critic from Northwestern's CS 325 in
+the ASDF-loadable form Zach Beane published on 2004-05-06. Beane's README
+records exactly three changes: <code>require</code>/<code>provide</code>
+removed, course-package references replaced by
+<code>lisp-critic-user</code>, and an ASDF system file added. Nothing is
+fetched when this page is read; the station is read where it already is.
+</p>
+
+<p>
+  <a expr="(riesbeck-source-station-example)">
+    Inspect the station, its provenance and the vendored files
+  </a>
+</p>
+
+<source-of-function>riesbeck-source-station-example</source-of-function>
+
+<h2>The package and system boundary</h2>
+
+<p>
+Two packages matter. The engine lives in <code>LISP-CRITIC</code>; rule names
+are interned in <code>LISP-CRITIC-USER</code>, which is the package Beane
+introduced in place of the course package. The wrapper system
+<code>a-critic-for-lisp</code> exists only to make the preserved code
+discoverable and loadable — it deliberately does not define an analyzer
+protocol of its own.
+</p>
+
+<h2>How a rule is represented</h2>
+
+<p>
+A rule is a pattern plus a response template, registered under a name. This
+is the defining macro, transcluded from the engine:
+</p>
+
+<view-transclusion>(engine-source-view "DEFINE-LISP-PATTERN")</view-transclusion>
+
+<p>
+It expands into a registration call, which is where the pattern and the
+response actually get stored:
+</p>
+
+<view-transclusion>(engine-source-view "ADD-LISP-PATTERN")</view-transclusion>
+
+<h2>One real rule</h2>
+
+<p>
+<code>CAR-CDR</code> is the rule this reading follows all the way through. It
+is defined in the vendored <code>lisp-rules.lisp</code>, and rather than
+quoting its text here, the example below reads the pattern and the response
+back out of the loaded engine:
+</p>
+
+<p>
+  <a expr="(riesbeck-car-cdr-rule-example)">
+    Read the CAR-CDR pattern and response from the engine
+  </a>
+</p>
+
+<source-of-function>riesbeck-car-cdr-rule-example</source-of-function>
+
+<p>
+The recommendation the rule carries — use <code>CADR</code> or
+<code>SECOND</code> instead of <code>(CAR (CDR ...))</code> — is not written
+into this page. It is the response template stored by the engine, and it
+arrives here only by being read from the rule object.
+</p>
+
+<h2>How a rule is applied</h2>
+
+<p>
+This is the function our slice calls. It takes a rule name and a form, and
+returns findings:
+</p>
+
+<view-transclusion>(engine-source-view "APPLY-CRITIQUE-RULE")</view-transclusion>
+
+<p>
+And this is how a finding becomes the sentence a reader sees:
+</p>
+
+<view-transclusion>(engine-source-view "MAKE-RESPONSE-STRING")</view-transclusion>
+
+<h2>The engine's own entry points</h2>
+
+<p>
+The engine offers its own interface, which our slice does not replace. Note
+that <code>CRITIQUE</code> is a macro, not a function — it takes the
+definition itself rather than a quoted form, which is the first thing that
+surprises anyone loading this code into a modern image.
+</p>
+
+<view-transclusion>(engine-source-view "CRITIQUE")</view-transclusion>
+
+<view-transclusion>(engine-source-view "CRITIQUE-DEFINITION")</view-transclusion>
+
+<view-transclusion>(engine-source-view "CRITIQUE-FILE")</view-transclusion>
+
+<h2>What this page has shown</h2>
+
+<pre>
+:SOURCE-OBSERVED   the vendored files exist and are readable
+:EXECUTABLE        their definitions are loaded in this image
+</pre>
+
+<p>
+Both rungs, for the same station — which is exactly what the Fischer page
+could not offer. The next page applies this engine and keeps the result.
+</p>
+
+<p>
+  <a page="From Riesbeck Run to HyperDoc Critique">
+    From Riesbeck Run to HyperDoc Critique
+  </a>
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>

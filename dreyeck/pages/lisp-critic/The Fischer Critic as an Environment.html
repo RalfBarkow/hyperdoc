@@ -1,0 +1,109 @@
+<h1>The Fischer Critic as an Environment</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+This page is deliberately the thinnest in the reading. Fischer's system is
+documented here, not observed and not executed, and the page is built so that
+limit cannot be forgotten while reading it.
+</p>
+
+<h2>What the local evidence actually is</h2>
+
+<p>
+One artifact in this workspace carries the citation: a research note in the
+local wiki, which anchors the system to <i>A Critic for LISP</i>, Gerhard
+Fischer, IJCAI-87, and links the paper. That note is outside this repository;
+it is quoted as documentation, and its presence is checked rather than
+assumed.
+</p>
+
+<p>
+  <a expr="(fischer-critic-documentation-example)">
+    Inspect the documented station and its citation
+  </a>
+</p>
+
+<source-of-function>fischer-critic-documentation-example</source-of-function>
+
+<h2>What the paper is reported to describe</h2>
+
+<p>
+From that note: rule-based advice, a user model, a knowledge browser,
+visualization support, incremental learning, and "learning on demand". The
+stated scope is local improvement of Lisp programs according to a style
+encoded by rules, not whole-program correctness.
+</p>
+
+<p>
+Arranged as a shape, the documented environment looks roughly like this. It
+is a reading of the description, not a recovered design:
+</p>
+
+<pre>
+program
+  &darr;
+observation / pattern recognition
+  &darr;
+critic rule
+  &darr;
+critique / proposed transformation
+  &darr;
+explanation / conceptual knowledge
+  &darr;
+accept / reject / explain
+  &darr;
+user-model evidence
+</pre>
+
+<p>
+Two features at the bottom of that shape are worth naming, because they are
+the ones our own slice does not have: a response step in which the programmer
+accepts, rejects or asks for explanation, and a user model that accumulates
+evidence across such responses. Both are reported by the source; neither is
+implemented here, and this reading does not implement them.
+</p>
+
+<h2>What is claimed but not evidenced here</h2>
+
+<p>
+Earlier project conversation also described a co-author, two numbered
+versions, and a move to Symbolics Genera and CLOS. This workspace contains no
+artifact supporting any of them. Rather than quietly dropping those claims or
+quietly repeating them, the reading lists them as explicitly unevidenced —
+they are returned by the same example above, under
+<code>:CLAIMS-WITHOUT-LOCAL-EVIDENCE</code>.
+</p>
+
+<pre>
+documented        Fischer 1987, cited by a local research note
+asserted only     co-authorship, Version 1 / Version 2, Genera / CLOS
+not present       any Fischer-line source code
+</pre>
+
+<p>
+No pseudo-reconstruction of the historical implementation appears on this
+page. There is no Lisp here to transclude, because there is no Fischer source
+in this workspace, and inventing plausible code would destroy precisely the
+distinction this reading exists to preserve.
+</p>
+
+<h2>Why the distinction matters for the next page</h2>
+
+<p>
+Everything above is a report about a system. The next page shows a running
+engine: its actual definitions, loaded from files on this disk. The contrast
+between those two kinds of page is the argument.
+</p>
+
+<p>
+  <a page="Reading Riesbeck's Lisp Critic">
+    Reading Riesbeck's Lisp Critic
+  </a>
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>

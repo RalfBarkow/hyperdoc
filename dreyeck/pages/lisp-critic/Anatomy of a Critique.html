@@ -1,0 +1,118 @@
+<h1>Anatomy of a Critique</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+One <code>Critique</code>, read part by part. Every part below is a real
+object produced by a real run of the Riesbeck engine, not a description of
+one.
+</p>
+
+<pre>
+Target
+Evaluation Record
+Critic Rule
+Critique
+Match Evidence
+Explanation
+Source Provenance
+</pre>
+
+<h2>The whole object</h2>
+
+<p>
+  <a expr="(critique-anatomy-example)" view="Critic relations">
+    Open the anatomy of the CAR-CDR critique
+  </a>
+</p>
+
+<source-of-function>critique-anatomy-example</source-of-function>
+
+<h2>Reading the parts</h2>
+
+<p>
+<b>Target</b> holds the program form <code>(car (cdr items))</code>. It was
+never evaluated; it is the thing being read about, not run.
+</p>
+
+<p>
+<b>Evaluation Record</b> is the run itself. It carries the status, the
+invocation form, the engine's raw output and, when things go wrong, the
+condition. It exists whether or not anything was found.
+</p>
+
+<p>
+<b>Critic Rule</b> is the engine's <code>CAR-CDR</code> rule as an object:
+name, pattern, response template, and the pathname of the vendored file that
+defines it.
+</p>
+
+<p>
+<b>Critique</b> is the finding as a first-class object rather than a printed
+line. It is a separate class from the run record — a run is not a critique,
+and a run with no findings has none.
+</p>
+
+<p>
+<b>Match Evidence</b> is what the engine actually matched, kept as data so
+the claim can be rechecked instead of believed.
+</p>
+
+<p>
+<b>Explanation</b> is the response text the engine produced for this match.
+It is stored on the critique, so the recommendation travels with the finding.
+</p>
+
+<p>
+<b>Source Provenance</b> points back at the station and the file, closing the
+loop to the previous page.
+</p>
+
+<h2>The same relations, in the Inspector</h2>
+
+<p>
+The structure above is not a rendering convention of this page. The objects
+carry "Critic relations" views, and those views reference the very same
+objects. Following a relation in the Inspector and following it here reach
+the same place.
+</p>
+
+<source-of-function>dreyeck/lisp-critic::critique-view</source-of-function>
+
+<p>
+To open it in the moldable Inspector:
+</p>
+
+<pre>
+(asdf:load-system "dreyeck/inspector/lisp-critic")
+(asdf:load-system "clog-moldable-inspector")
+
+(clog-moldable-inspector:clog-inspect
+ :object
+ (dreyeck/lisp-critic:car-cdr-critique-example))
+</pre>
+
+<p>
+That entry point returns the <code>Target</code>, from which the record, the
+rule and the critique are all reachable as references. The reading pages and
+the Inspector are two views of one object graph, which is the reason this
+slice keeps the relations as object references rather than as display
+strings.
+</p>
+
+<h2>What is deliberately absent</h2>
+
+<p>
+Fischer's documented environment continued past the explanation into a
+response step — accept, reject, explain — and accumulated a user model from
+those responses. Neither exists here, and neither is simulated. The
+comparison table on the entry page records them as
+<code>:NOT-IMPLEMENTED</code> for this slice rather than leaving the
+impression that a critique is the end of the story.
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>
