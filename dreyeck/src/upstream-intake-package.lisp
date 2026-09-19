@@ -94,6 +94,7 @@
    #:page-loading-transition-references
    #:page-loading-same-reading-p
    ;; Named examples, in reading order
+   #:page-loading-repository-context-example
    #:page-loading-mechanism-example
    #:page-loading-relocation-example
    #:page-loading-contract-sequence-example

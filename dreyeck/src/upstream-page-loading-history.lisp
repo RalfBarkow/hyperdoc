@@ -23,20 +23,51 @@
 ;;
 ;; Reaching the upstream objects
 ;;
-;; The upstream commits are already present in this repository's object
-;; database, reachable through the khinsen/upstream remotes. No separate
-;; checkout, path or network access is required, and none is attempted.
-;;
+;; Resolve the loaded reading system's checkout before querying any objects.
+;; Object availability is observed, never assumed; no fetch is attempted.
 
 (defun page-loading-history-repository ()
-  "The repository whose object database holds the observed upstream commits."
-  (dreyeck/git:current-git-repository-checkout))
+  "Resolve the checkout of the actually loaded Intake system, without a cached default."
+  (multiple-value-bind (root source)
+      (dreyeck/git::system-repository-root-info "dreyeck/upstream-intake")
+    (make-instance 'dreyeck/git:git-repository-checkout
+                   :root root :root-source source)))
 
 (defun page-loading-history-commit (reference &optional repository)
-  "Resolve REFERENCE to an inspectable commit in the observing repository."
-  (dreyeck/git:make-git-commit
-   :repository (or repository (page-loading-history-repository))
-   :commit-ish reference))
+  "Resolve REFERENCE in the explicit history context; diagnose absent objects before SHOW."
+  (let ((repository (or repository (page-loading-history-repository))))
+    (unless (dreyeck/git:git-commit-object-present-p repository reference)
+      (error "History commit ~A is absent from the object database queried via ~A."
+             reference (dreyeck/git:git-repository-root-of repository)))
+    (dreyeck/git:make-git-commit :repository repository :commit-ish reference)))
+
+(defun page-loading-repository-context
+    (&optional (reference "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"))
+  "Observe checkout, shared object database and branch ancestry independently."
+  (let* ((repository (page-loading-history-repository))
+         (root (dreyeck/git:git-repository-root-of repository))
+         (present (dreyeck/git:git-commit-object-present-p repository reference))
+         (branch "refs/heads/dreyeck.ch")
+         (branch-present (dreyeck/git:git-commit-object-present-p repository branch)))
+    (flet ((git-path (option)
+             (uiop:ensure-directory-pathname
+              (dreyeck/git:trim-git-output
+               (dreyeck/git:git-run-string
+                root "rev-parse" "--path-format=absolute" option)))))
+      (list :kind :repository-context
+            :source-system "dreyeck/upstream-intake"
+            :repository-root root :worktree-root root
+            :git-directory (git-path "--git-dir")
+            :git-common-directory (git-path "--git-common-dir")
+            :reference reference :object-present-p present
+            :ancestry-reference branch :ancestry-reference-present-p branch-present
+            :ancestry-observed-p (and present branch-present)
+            :ancestor-of-dreyeck.ch-p
+            (and present branch-present
+                 (dreyeck/git:git-commit-ancestor-p
+                  (page-loading-history-commit reference repository)
+                  (page-loading-history-commit branch repository)))
+            :evidence-status :observed))))
 
 (defun page-loading-blob-text (commit pathname)
   "Return the text of PATHNAME at COMMIT, or NIL when the file is absent.
@@ -463,6 +494,10 @@ a string comparison's."
 ;;
 ;; Page 1: How Page Loading Became a Protocol
 ;;
+
+(hyperdoc:defexample page-loading-repository-context-example
+  "First establish which worktree and shared Git repository this reading can observe."
+  (page-loading-repository-context))
 
 (hyperdoc:defexample page-loading-mechanism-example
   "The commit that turns one concrete loader into two generic operations.

@@ -1101,7 +1101,8 @@
 
 (defparameter +page-loading-history-reading-sequence+
   '(("How Page Loading Became a Protocol"
-     ("page-loading-mechanism-example"
+     ("page-loading-repository-context-example"
+      "page-loading-mechanism-example"
       "page-loading-relocation-example"
       "page-loading-contract-sequence-example"
       "page-loading-structural-center-example"
@@ -1288,6 +1289,52 @@ their persisted source, link onward as intended, and evaluate."
                    title name))))))
   t)
 
+(defun check-page-loading-repository-context ()
+  "History ignores an unrelated cached checkout and records every Git query's root."
+  (let* ((directory (make-fixture-directory))
+         (dreyeck/git::*git-repository-checkout*
+           (make-instance 'dreyeck/git:git-repository-checkout
+                          :root directory :root-source :decoy))
+         (original (symbol-function 'dreyeck/git:git-run-values))
+         (calls nil))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'dreyeck/git:git-run-values)
+                 (lambda (root &rest arguments)
+                   (push (cons root arguments) calls)
+                   (apply original root arguments)))
+           (uiop:with-current-directory (directory)
+             (let* ((context (dreyeck/upstream-intake:page-loading-repository-context-example))
+                    (root (getf context :repository-root))
+                    (expected
+                      (dreyeck/git::system-repository-root-info "dreyeck/upstream-intake")))
+               (check (equal (truename expected) (truename root))
+                      "History did not derive its checkout from the loaded Intake system.")
+               (check (eq :repository-context (getf context :kind)) "Wrong context kind.")
+               (check (eq :observed (getf context :evidence-status)) "Context is not observed.")
+               (check (getf context :object-present-p) "Local upstream object is absent.")
+               (check (getf context :ancestry-observed-p) "Local branch ancestry was not observed.")
+               (check (probe-file (getf context :git-common-directory)) "Shared Git directory absent.")
+               (setf calls nil)
+               (let ((missing (dreyeck/upstream-intake::page-loading-repository-context
+                               "0000000000000000000000000000000000000000")))
+                 (check (null (getf missing :object-present-p)) "Missing object reported present.")
+                 (check (null (getf missing :ancestry-observed-p)) "Absent object ancestry queried.")
+                 (check (notany (lambda (call) (member "show" (cdr call) :test #'equal)) calls)
+                        "Absent object triggered git show."))
+               (setf calls nil)
+               (let ((publication (dreyeck/upstream-intake:page-loading-publication-only-example)))
+                 (check (eq :publication-commit (getf publication :kind)) "Publication example failed.")
+                 (check (getf publication :implementation-unchanged-p) "Historical implementation changed.")
+                 (check (some (lambda (call) (member "show" (cdr call) :test #'equal)) calls)
+                        "Publication did not query historical blobs.")
+                 (check (every (lambda (call) (equal (truename root) (truename (car call)))) calls)
+                        "Publication queried a different repository: ~S." calls))
+               (format t "~&PAGE-LOADING-REPOSITORY-CONTEXT=~S~%" context))))
+      (setf (symbol-function 'dreyeck/git:git-run-values) original)
+      (uiop:delete-directory-tree directory :validate t :if-does-not-exist :ignore)))
+  t)
+
 (defun run-page-loading-history-tests ()
   "The reading sequence, its frozen identities, and its live agreement."
   (let* ((book dreyeck/upstream-intake:*upstream-intake-hyperdoc*)
@@ -1295,6 +1342,7 @@ their persisted source, link onward as intended, and evaluate."
                 (dreyeck/git:current-git-repository-checkout)))
          (before (repository-state root)))
     (hyperdoc::ensure-pages-loaded book)
+    (check-page-loading-repository-context)
     (check-frozen-history-identities)
     (check-live-history-verification)
     (check-history-ancestry-observation)

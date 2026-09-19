@@ -3,11 +3,11 @@
 <in-package>dreyeck/upstream-intake</in-package>
 
 <p>
-How did an internal, filetype-oriented mechanism become a public protocol a
-downstream book can specialize? The commits are already in this repository's
-object database, so every step below can be re-checked rather than believed.
-Press the play control on each example and inspect what it returns.
+How did an internal, filetype-oriented mechanism become a public protocol that a downstream book can specialize? A worktree, its shared Git repository, object presence, and ancestry are distinct facts. Before reading the history, the first example establishes which repository this running HyperDoc can actually observe and whether the upstream commit used below is present there. The following examples then inspect commits, parents, changed paths, historical file contents, and ancestry in that repository. These are observations; the interpretations drawn from them are a separate step. Press the play control ► to inspect each observation.
 </p>
+
+<source-of-function>page-loading-repository-context-example</source-of-function>
+<a expr="(page-loading-repository-context-example)">Observe the repository context</a>
 
 <h2>Before: one concrete loader</h2>
 
