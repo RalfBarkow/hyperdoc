@@ -1240,6 +1240,23 @@
   :COMPONENTS
   ((:FILE "evaluation-record-lisp-critic")))
 
+(asdf:defsystem "dreyeck/lisp-critic/critique"
+  :description "One-rule Critic execution with explicit domain findings"
+  :depends-on ("dreyeck/evaluation-record/lisp-critic")
+  :components ((:file "dreyeck/src/lisp-critic-critique"))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/critique/tests"))))
+
+(asdf:defsystem "dreyeck/inspector/lisp-critic"
+  :depends-on ("dreyeck/lisp-critic/critique" "html-inspector-views")
+  :components ((:file "dreyeck/src/lisp-critic-critique-views")))
+
+(asdf:defsystem "dreyeck/lisp-critic/critique/tests"
+  :depends-on ("dreyeck/inspector/lisp-critic")
+  :components ((:file "dreyeck/tests/lisp-critic-critique"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/critique/tests :run-tests)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/EVALUATION-RECORD/TESTS
   :DESCRIPTION
   "Tests for generic evaluation-record projections"
