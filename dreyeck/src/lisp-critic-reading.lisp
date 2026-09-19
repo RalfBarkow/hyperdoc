@@ -21,6 +21,8 @@
                     (#:er #:dreyeck/evaluation-record))
   (:export #:*lisp-critic-reading*
            #:lisp-critic-genealogy
+           #:genealogy-in-this-runtime
+           #:engine-available-p
            #:lisp-critic-station
            #:evidence-ladder-example
            #:lisp-critic-genealogy-example
@@ -176,6 +178,25 @@ explicitly not a whole-program correctness framework."
       :executable-here t
       :evidence-status :executable))))
 
+(defparameter +engine-dependent-stations+
+  '(:riesbeck-lisp-critic :beane-asdf-adaptation :a-critic-for-lisp-station)
+  "Stations whose code can only run where the source station is mounted.")
+
+(defun genealogy-in-this-runtime ()
+  "The genealogy with EXECUTABLE-HERE answered for the runtime asking.
+
+The frozen records describe the stations. Whether their code can run is a
+property of the runtime, and a served HyperDoc without the source station
+must not inherit a yes that was true only on a development machine."
+  (let ((available (engine-available-p)))
+    (mapcar (lambda (station)
+              (if (member (getf station :station) +engine-dependent-stations+)
+                  (let ((copy (copy-list station)))
+                    (setf (getf copy :executable-here) available)
+                    copy)
+                  station))
+            (lisp-critic-genealogy))))
+
 (defun lisp-critic-station (key)
   (or (find key (lisp-critic-genealogy)
             :key (lambda (station) (getf station :station)))
@@ -248,11 +269,12 @@ reading cannot quietly promote a documented claim into a demonstrated one."
 Read the :RELATION-TO-PREDECESSOR values: between the two lines it is
 :CONCEPTUAL-RESEMBLANCE, never a descent claim."
   (list :kind :genealogy
-        :stations (lisp-critic-genealogy)
+        :engine-available-p (engine-available-p)
+        :stations (genealogy-in-this-runtime)
         :lines (flet ((line (key)
                         (remove-if-not (lambda (station)
                                          (eq key (getf station :line)))
-                                       (lisp-critic-genealogy))))
+                                       (genealogy-in-this-runtime))))
                  (list :research (line :research) :code (line :code)))
         :no-descent-claim-between-lines t
         :evidence-status :observed))
@@ -276,38 +298,83 @@ genealogy."
 ;; The Riesbeck/Beane source station
 ;;
 
+(defun engine-available-p ()
+  "Whether this runtime can reach the vendored engine at all.
+
+The engine is not an ordinary dependency of this repository. It is loaded
+out of a local source station that is deliberately not deployed, so whether
+it is reachable is a property of the runtime, not of the reading."
+  (and (critic:lisp-critic-source-station-present-p
+        (critic:make-critic-source-station))
+       t))
+
+(defun runtime-evidence-status ()
+  "The strongest status this runtime can honestly claim for the engine.
+
+Where the station is absent — a served HyperDoc, for instance — the engine
+is neither source-observed nor executable here, and the reading says so
+instead of showing an error where content belongs."
+  (if (engine-available-p) :executable :not-available-in-this-runtime))
+
 (defun ensure-riesbeck-engine-loaded ()
   "Load the vendored engine so its own definitions can be transcluded.
 
-Returns a short status line. Reading pages call this before transcluding
-LISP-CRITIC definitions, because a definition can only be shown once the
-file that defines it has been loaded."
+Returns a status line either way. Reading pages call this before
+transcluding LISP-CRITIC definitions, because a definition can only be
+shown once the file defining it has been loaded."
   (handler-case
       (progn
         (unless (find-package :lisp-critic)
-          (critic:car-cdr-critique-example))
+          (when (engine-available-p)
+            (critic:car-cdr-critique-example)))
         (if (find-package :lisp-critic)
             (format nil "Riesbeck/Beane engine loaded from ~A"
                     (namestring (vendored-engine-directory)))
-            "Riesbeck/Beane engine not available in this workspace."))
+            (format nil "Riesbeck/Beane engine is not reachable in this ~
+runtime. Its source station is a local resource and is not deployed, so the ~
+definitions below are shown as unavailable rather than as source.")))
     (error (condition)
-      (format nil "Riesbeck/Beane engine unavailable: ~A" condition))))
+      (format nil "Riesbeck/Beane engine is not reachable in this runtime: ~A"
+              condition))))
+
+(defun unavailable-definition-view (name)
+  "Stand in for a definition this runtime cannot reach.
+
+A served page must not present a failure where it promised source. It
+states which definition is missing and why, and keeps the claim it can
+still support: the definition exists in the station, wherever that is
+mounted."
+  (html-inspector-views:html-view :title (format nil "~A (not available here)"
+                                                 name)
+    (html-inspector-views:html
+      (:div
+       (:p (html-inspector-views:esc
+            (format nil "LISP-CRITIC:~A is defined in the vendored ~
+Riesbeck/Beane engine, which this runtime cannot reach." name)))
+       (:p (html-inspector-views:esc
+            "The engine lives in a local source station that is not part of ~
+this repository and is not deployed. Where the station is mounted this ~
+definition is source-observed and executable; here it is neither."))))))
 
 (defun engine-source-view (name)
   "Transclude one definition of the vendored engine, by name.
 
 The engine is loaded first, because a definition can only be shown once the
 file defining it has been loaded. Macros are resolved through
-MACRO-FUNCTION, since a macro name is not a function designator."
+MACRO-FUNCTION, since a macro name is not a function designator.
+
+When the engine is out of reach this returns an explicit unavailable view
+rather than signalling: on a served page the condition would otherwise be
+rendered as though it were the content."
   (ensure-riesbeck-engine-loaded)
-  (let* ((package (or (find-package :lisp-critic)
-                      (error "The Riesbeck engine is not loaded.")))
-         (symbol (or (find-symbol (string-upcase name) package)
-                     (error "The engine defines no ~A." name)))
-         (definition (or (macro-function symbol)
-                         (and (fboundp symbol) (fdefinition symbol))
-                         (error "~A is not defined." name))))
-    (html-inspector-views/standard:source-code-view definition)))
+  (let* ((package (find-package :lisp-critic))
+         (symbol (and package (find-symbol (string-upcase name) package)))
+         (definition (and symbol
+                          (or (macro-function symbol)
+                              (and (fboundp symbol) (fdefinition symbol))))))
+    (if definition
+        (html-inspector-views/standard:source-code-view definition)
+        (unavailable-definition-view name))))
 
 (hyperdoc:defexample riesbeck-source-station-example
   "What is actually on disk in the local source station, and its provenance.
@@ -332,7 +399,9 @@ Nothing is downloaded. The station is read where it already is."
                 for pathname = (vendored-engine-file name)
                 collect (list :name name :present-p (and pathname t)
                               :pathname (and pathname (namestring pathname))))
-          :evidence-status :source-observed)))
+          :evidence-status (if (engine-available-p)
+                               :source-observed
+                               :not-available-in-this-runtime))))
 
 (hyperdoc:defexample riesbeck-car-cdr-rule-example
   "The CAR-CDR rule as the engine holds it, not as prose repeats it.
@@ -342,13 +411,20 @@ drift from the rule it describes."
   (let* ((target (critic:car-cdr-critique-example))
          (run (first (critic:target-runs-of target)))
          (rule (critic:rule-of run)))
-    (list :kind :engine-rule
-          :rule-name (critic:rule-name-of rule)
-          :pattern (critic:rule-pattern-of rule)
-          :response (critic:rule-response-of rule)
-          :defined-in (getf (critic:rule-source-of rule) :pathname)
-          :defining-macro "LISP-CRITIC:DEFINE-LISP-PATTERN"
-          :evidence-status :source-observed)))
+    (if rule
+        (list :kind :engine-rule
+              :engine-available-p t
+              :rule-name (critic:rule-name-of rule)
+              :pattern (critic:rule-pattern-of rule)
+              :response (critic:rule-response-of rule)
+              :defined-in (getf (critic:rule-source-of rule) :pathname)
+              :defining-macro "LISP-CRITIC:DEFINE-LISP-PATTERN"
+              :evidence-status :source-observed)
+        (list :kind :engine-rule
+              :engine-available-p nil
+              :defining-macro "LISP-CRITIC:DEFINE-LISP-PATTERN"
+              :why (er:evaluation-failure-of run)
+              :evidence-status (runtime-evidence-status)))))
 
 ;;
 ;; Three outcomes of one rule application
@@ -389,7 +465,8 @@ The target program is never evaluated; only the rule is applied to its text."
           :form (critic:target-form-of (critic:target-of record))
           :summary (outcome-of record)
           :record record
-          :evidence-status :executable)))
+          :engine-available-p (engine-available-p)
+          :evidence-status (runtime-evidence-status))))
 
 (hyperdoc:defexample critic-non-match-example
   "The same rule against the form it recommends: execution succeeds, and
@@ -399,7 +476,8 @@ there is nothing to say. An Evaluation Record still exists."
           :form (critic:target-form-of (critic:target-of record))
           :summary (outcome-of record)
           :record record
-          :evidence-status :executable)))
+          :engine-available-p (engine-available-p)
+          :evidence-status (runtime-evidence-status))))
 
 (hyperdoc:defexample critic-failure-example
   "An unavailable rule: the run fails and the record keeps the condition."
@@ -408,7 +486,8 @@ there is nothing to say. An Evaluation Record still exists."
           :form (critic:target-form-of (critic:target-of record))
           :summary (outcome-of record)
           :record record
-          :evidence-status :executable)))
+          :engine-available-p (engine-available-p)
+          :evidence-status (runtime-evidence-status))))
 
 (hyperdoc:defexample critic-outcome-contrast-example
   "The three outcomes side by side.
@@ -420,7 +499,8 @@ only in the first. That separation is the point of the slice."
                      (critic-non-match-example)
                      (critic-failure-example))
         :invariant "every rule application yields an Evaluation Record"
-        :evidence-status :executable))
+        :engine-available-p (engine-available-p)
+        :evidence-status (runtime-evidence-status)))
 
 ;;
 ;; Anatomy of one critique
@@ -435,18 +515,29 @@ structure shown here is the structure you can navigate."
          (record (first (critic:target-runs-of target)))
          (rule (critic:rule-of record))
          (finding (first (critic:critiques-of record))))
-    (list :kind :critique-anatomy
-          :target target
-          :program-form (critic:target-form-of target)
-          :evaluation-record record
-          :evaluation-status (er:evaluation-status-of record)
-          :critic-rule rule
-          :critique finding
-          :match-evidence (critic:critique-evidence-of finding)
-          :explanation (critic:critique-explanation-of finding)
-          :source-provenance (critic:rule-source-of rule)
-          :inspector-entry-point '(dreyeck/lisp-critic:car-cdr-critique-example)
-          :evidence-status :executable)))
+    (append
+     (list :kind :critique-anatomy
+           :engine-available-p (and finding t)
+           :target target
+           :program-form (critic:target-form-of target)
+           :evaluation-record record
+           :evaluation-status (er:evaluation-status-of record)
+           :inspector-entry-point
+           '(dreyeck/lisp-critic:car-cdr-critique-example))
+     (if finding
+         (list :critic-rule rule
+               :critique finding
+               :match-evidence (critic:critique-evidence-of finding)
+               :explanation (critic:critique-explanation-of finding)
+               :source-provenance (critic:rule-source-of rule)
+               :evidence-status :executable)
+         ;; Without the engine there is a record and a condition, and
+         ;; honestly nothing else. The parts are named as absent rather
+         ;; than described from memory.
+         (list :critic-rule nil :critique nil
+               :match-evidence nil :explanation nil :source-provenance nil
+               :why (er:evaluation-failure-of record)
+               :evidence-status (runtime-evidence-status))))))
 
 ;;
 ;; Comparing the three models of criticism

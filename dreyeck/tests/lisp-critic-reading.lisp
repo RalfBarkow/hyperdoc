@@ -10,7 +10,8 @@
                     (#:critic #:dreyeck/lisp-critic)
                     (#:er #:dreyeck/evaluation-record)
                     (#:views #:html-inspector-views))
-  (:export #:run-tests #:run-current-tests))
+  (:export #:run-tests #:run-current-tests #:check-under-catalog-runtime
+           #:check-degraded-runtime))
 
 (in-package #:dreyeck/lisp-critic/reading/tests)
 
@@ -231,6 +232,121 @@
              "Vendored engine file ~A is absent." (getf file :name))))
   t)
 
+;;
+;; The gap the previous slice left open: the book was never exercised under
+;; the launcher that actually serves it. Rendering alone is not enough —
+;; absence of the error string would also be satisfied by a page that says
+;; nothing — so the critic must really run.
+;;
+
+(defun check-under-catalog-runtime ()
+  "Exercise this book the way the normal Catalog launcher reaches it.
+
+Called from the Catalog startup proof, in its fresh process, so the book
+cannot pass on a development image's leftover state."
+  (let ((book (hyperbook:find-hyperbook "dreyeck/lisp-critic/reading"
+                                        :signal-error? t)))
+    (hyperdoc::ensure-pages-loaded book)
+    (check (= (length +pages+) (hash-table-count (hyperdoc:pages-of book)))
+           "The Catalog sees ~D reading pages instead of ~D."
+           (hash-table-count (hyperdoc:pages-of book)) (length +pages+))
+    ;; Every page must render, and none may present a load failure as content.
+    (dolist (title +pages+)
+      (let* ((page (hyperbook:find-page book title :signal-error? t))
+             (view (find "Content" (views:all-views page)
+                         :key #'views:view-title :test #'string=))
+             (html (progn (check view "Page ~S has no Content view." title)
+                          (views:view-html view))))
+        (check (plusp (length html)) "Page ~S rendered nothing." title)
+        (check (not (search "is not loaded" html))
+               "Page ~S renders an engine load failure as content." title)
+        ;; Structural, not a fixed count: whatever the page addresses, the
+        ;; Catalog must be able to evaluate all of it.
+        (let ((*package* (page-package page)))
+          (dolist (expression (page-expressions page))
+            (let ((value (hyperdoc::parse-and-eval expression)))
+              (check (not (typep value 'condition))
+                     "Catalog runtime: ~S on ~S produced ~A."
+                     expression title value)
+              (check (getf value :evidence-status)
+                     "Catalog runtime: ~S on ~S has no evidence status."
+                     expression title))))))
+    ;; And the critic must genuinely run: a real CAR-CDR match.
+    (let* ((match (reading:critic-match-example))
+           (record (getf match :record)))
+      (check (getf match :engine-available-p)
+             "The Catalog runtime cannot reach the Riesbeck engine.")
+      (check (eq :completed (er:evaluation-status-of record))
+             "The Catalog runtime failed the CAR-CDR run: ~A"
+             (er:evaluation-failure-of record))
+      (check (= 1 (length (er:evaluation-result-of record)))
+             "The Catalog runtime produced ~D critiques instead of one."
+             (length (er:evaluation-result-of record)))
+      (check (search "CADR" (critic:critique-explanation-of
+                             (first (er:evaluation-result-of record))))
+             "The Catalog runtime lost the engine's recommendation.")))
+  (format t "~&CATALOG-LISP-CRITIC-READING-PASS: pages render, examples ~
+evaluate, real CAR-CDR match.~%")
+  t)
+
+;;
+;; The served runtime, where the source station is deliberately absent
+;;
+
+(defun report-degraded-runtime ()
+  "Render every page and report what this runtime can honestly claim.
+
+Run in the child process of CHECK-DEGRADED-RUNTIME, where the source
+station has been pointed at nothing."
+  (let ((book (hyperbook:find-hyperbook "dreyeck/lisp-critic/reading"
+                                        :signal-error? t)))
+    (hyperdoc::ensure-pages-loaded book)
+    (dolist (title +pages+)
+      (let* ((page (hyperbook:find-page book title :signal-error? t))
+             (view (find "Content" (views:all-views page)
+                         :key #'views:view-title :test #'string=))
+             (html (views:view-html view)))
+        (when (search "is not loaded" html)
+          (format t "~&DEGRADED-LEAK: ~A~%" title))))
+    (format t "~&DEGRADED-ENGINE-AVAILABLE: ~S~%" (reading:engine-available-p))
+    (format t "~&DEGRADED-STATUS: ~S~%"
+            (getf (reading:critic-match-example) :evidence-status))
+    (finish-output))
+  t)
+
+(defun check-degraded-runtime ()
+  "Prove the pages stay honest when the engine cannot be reached.
+
+Runs a fresh process with the source station pointed at nothing, which is
+the condition a served HyperDoc is in."
+  (let ((output
+          (with-output-to-string (stream)
+            (uiop:run-program
+             (list (namestring sb-ext:*runtime-pathname*)
+                   "--no-userinit" "--non-interactive"
+                   "--eval" "(require :asdf)"
+                   "--eval" (format nil "(asdf:load-asd ~S)"
+                                    (asdf:system-source-file "dreyeck"))
+                   "--eval" "(asdf:load-system \"dreyeck/lisp-critic/reading/tests\")"
+                   "--eval" "(dreyeck/lisp-critic/reading/tests::report-degraded-runtime)")
+             :environment
+             (cons "DREYECK_LISP_CRITIC_ROOT=/nonexistent/dreyeck-no-station/"
+                   (remove-if (lambda (entry)
+                                (uiop:string-prefix-p
+                                 "DREYECK_LISP_CRITIC_ROOT=" entry))
+                              (sb-ext:posix-environ)))
+             :output stream :error-output stream))))
+    (check (not (search "DEGRADED-LEAK" output))
+           "A page rendered an engine load failure as content:~%~A" output)
+    (check (search "DEGRADED-ENGINE-AVAILABLE: NIL" output)
+           "The degraded runtime still reported the engine as available:~%~A"
+           output)
+    (check (search "DEGRADED-STATUS: :NOT-AVAILABLE-IN-THIS-RUNTIME" output)
+           "The degraded runtime did not report an honest status:~%~A" output))
+  (format t "~&DEGRADED-RUNTIME-PASS: no failure rendered as content, status ~
+is honest.~%")
+  t)
+
 (defun run-current-tests ()
   (hyperdoc::ensure-pages-loaded reading:*lisp-critic-reading*)
   (check-pages-present)
@@ -245,6 +361,7 @@ three outcomes, source-backed transclusion.~%")
 
 (defun run-tests ()
   (run-current-tests)
+  (check-degraded-runtime)
   (format t "~&CURRENT-IMAGE-READING-PASS~%")
   (uiop:run-program
    (list (namestring sb-ext:*runtime-pathname*) "--no-userinit" "--non-interactive"

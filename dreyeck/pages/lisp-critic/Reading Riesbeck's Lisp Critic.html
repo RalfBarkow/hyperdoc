@@ -11,6 +11,17 @@ the code that runs.
 
 <p><html-expr>(ensure-riesbeck-engine-loaded)</html-expr></p>
 
+<p>
+That line is the page's own precondition, and it can fail honestly. The
+engine is not a dependency of this repository: it is loaded out of a local
+source station that is deliberately not deployed. Where that station is
+mounted, the definitions below are transcluded from it and the examples run.
+Where it is not — a served HyperDoc, for instance — each definition is
+replaced by an explicit "not available here" view, and the examples report
+<code>:NOT-AVAILABLE-IN-THIS-RUNTIME</code> instead of claiming to be
+executable.
+</p>
+
 <h2>Provenance of the source station</h2>
 
 <p>
