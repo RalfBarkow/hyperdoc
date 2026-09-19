@@ -166,6 +166,73 @@
   t)
 
 ;;
+;; Provenance of historical statements
+;;
+
+(defparameter +fischer-subjects+
+  '(:fischer-1987 :lisp-critic-version-1 :lisp-critic-version-2
+    :lisp-critic-later :lisp-critic-zmacs :critiquing-paradigm)
+  "Subjects on the research line. Nothing here is present in this workspace.")
+
+(defun check-historical-claims ()
+  "Every displayed claim must be traceable, and none may overstate access."
+  (let ((claims (reading:historical-claims)))
+    (check claims "The reading shows no historical claims at all.")
+    (dolist (claim claims)
+      (let ((subject (getf claim :subject)))
+        ;; Traceable: a witness and a locator, always.
+        (check (getf claim :witness)
+               "Claim about ~S carries no witness." subject)
+        (check (and (stringp (getf claim :locator))
+                    (plusp (length (getf claim :locator))))
+               "Claim about ~S carries no locator." subject)
+        (check (and (stringp (getf claim :assertion))
+                    (plusp (length (getf claim :assertion))))
+               "Claim about ~S carries no assertion." subject)
+        ;; Evidence must be able to carry this kind of claim at all.
+        (check (reading:evidence-adequate-for-p (getf claim :evidence-kind)
+                                                (getf claim :claim-type))
+               "Claim about ~S uses ~S, which cannot carry a ~S claim."
+               subject (getf claim :evidence-kind) (getf claim :claim-type))
+        ;; Nothing on the research line may claim local access.
+        (when (member subject +fischer-subjects+)
+          (check (null (getf claim :source-observed-p))
+                 "A Fischer-line claim about ~S claims observed source."
+                 subject)
+          (check (null (getf claim :locator-observed-p))
+                 "A Fischer-line claim about ~S claims a local document."
+                 subject)
+          (check (null (reading:resolve-executability claim))
+                 "A Fischer-line claim about ~S claims local executability."
+                 subject))))
+    ;; No descent claim may cross from the research line to the code line.
+    (dolist (claim claims)
+      (when (eq :descent (getf claim :claim-type))
+        (check (not (member (getf claim :subject) +fischer-subjects+))
+               "A descent claim is attached to research-line subject ~S."
+               (getf claim :subject))))
+    ;; The two access questions must stay independent: there is at least one
+    ;; claim whose source is observed while execution is not guaranteed.
+    (check (find-if (lambda (claim)
+                      (and (getf claim :source-observed-p)
+                           (eq :runtime-dependent
+                               (getf claim :executable-here-p))))
+                    claims)
+           "No claim distinguishes observed source from local executability; ~
+the two fields have collapsed into one.")
+    ;; And the unevidenced assertions stay listed as unevidenced.
+    (let ((absent (reading::fischer-claims-without-local-evidence)))
+      (check absent "The unevidenced claims disappeared.")
+      (check (find :code-lineage-to-riesbeck absent
+                   :key (lambda (entry) (getf entry :claim)))
+             "The descent claim is no longer listed as unevidenced.")
+      (dolist (entry absent)
+        (check (eq :none (getf entry :local-evidence))
+               "Claim ~S is no longer marked unevidenced."
+               (getf entry :claim)))))
+  t)
+
+;;
 ;; 5. 6. 7. The three outcomes, against the real engine
 ;;
 
@@ -352,6 +419,7 @@ is honest.~%")
   (check-pages-present)
   (check-navigation)
   (check-genealogy-separation)
+  (check-historical-claims)
   (check-outcomes)
   (check-source-backing)
   (check-transclusions-and-examples)

@@ -3,102 +3,135 @@
 <in-package>dreyeck/lisp-critic/reading</in-package>
 
 <p>
-This page is deliberately the thinnest in the reading. Fischer's system is
-documented here, not observed and not executed, and the page is built so that
-limit cannot be forgotten while reading it.
+Fischer's LISP-CRITIC is documented here, not observed and not executed.
+What has changed since the first version of this page is the quality of the
+documentation: the claims below now come from the primary papers, one
+sentence at a time, each with a locator you can re-check.
 </p>
 
-<h2>What the local evidence actually is</h2>
+<h2>Not a pipeline</h2>
 
 <p>
-One artifact in this workspace carries the citation: a research note in the
-local wiki, which anchors the system to <i>A Critic for LISP</i>, Gerhard
-Fischer, IJCAI-87, and links the paper. That note is outside this repository;
-it is quoted as documentation, and its presence is checked rather than
-assumed.
+It is tempting to read the system as a sequence — rules produce a critique,
+then an explanation, then eventually a user model. That ordering is wrong
+and it misrepresents what was interesting about the work. The 1987 paper
+describes an <em>integrated environment</em> in which these parts were
+present together:
 </p>
+
+<pre>
+Fischer 1987: integrated critic environment
+  rules
+  rule interpreter
+  user model
+  explanation / knowledge browser / visualization
+  learning on demand
+</pre>
+
+<p>
+The user model is not a later addition to a linter. It is part of what the
+system was for: supporting incremental learning while someone works, rather
+than checking a program once.
+</p>
+
+<h2>What came after</h2>
+
+<p>
+The later work is where the versioning, the empirical grounding and the
+generalisation happen:
+</p>
+
+<pre>
+later work
+  more systematic user-model framework
+  empirical validation
+  versioned Common-Lisp / Genera development
+  richer conceptual / domain model
+  editor interaction: Accept / Reject / Explain
+  generalization toward the Critiquing Paradigm
+</pre>
+
+<h2>Who built what</h2>
+
+<p>
+Boecker is documented as the developer of the original ideas, the rule set
+and the rule interpreter. That is a contribution credited in the
+acknowledgements — not co-authorship of the 1987 paper, and the reading
+keeps those apart. Morel implemented the explanation capabilities and Burns
+the statistical analysis. The 1991 paper additionally credits Morel, Burns
+and Cormack for Version 1, and Rieman, Johl and Lynn for Version 2.
+</p>
+
+<h2>Every claim, with its provenance</h2>
+
+<p>
+  <a expr="(historical-claims-example)">
+    Inspect each sentence, what carries it, and where to re-check it
+  </a>
+</p>
+
+<source-of-function>historical-claims-example</source-of-function>
+
+<p>
+Three columns are kept apart on purpose.
+<code>:LOCATOR-OBSERVED-P</code> says whether the cited document itself can
+be read in this workspace — for both Fischer papers it is false, so the
+citation is the thing to follow, not a local file.
+<code>:SOURCE-OBSERVED-P</code> says whether the artifact being described is
+here; for a 1987 research system it is false.
+<code>:EXECUTABLE-HERE-P</code> says whether it could run; also false. No
+Fischer claim on this page asserts otherwise.
+</p>
+
+<h2>Why evidence has no single ranking</h2>
+
+<p>
+It would be convenient to say that source code beats a paper. It does not,
+because the two answer different questions. Riesbeck's repository history
+can settle mechanically that two macros were merged in 2003; it is silent on
+whether a 1987 system had a user model. The 1987 paper is the opposite.
+Strength is therefore a relation between a piece of evidence and a
+particular claim, and this reading writes that relation down rather than
+implying a hierarchy.
+</p>
+
+<p>
+  <a expr="(evidence-adequacy-example)">
+    Check every claim against the evidence its kind can actually carry
+  </a>
+</p>
+
+<source-of-function>evidence-adequacy-example</source-of-function>
+
+<h2>What is still only claimed</h2>
 
 <p>
   <a expr="(fischer-critic-documentation-example)">
-    Inspect the documented station and its citation
+    Inspect the documented station and what remains unevidenced
   </a>
 </p>
 
 <source-of-function>fischer-critic-documentation-example</source-of-function>
 
-<h2>What the paper is reported to describe</h2>
-
 <p>
-From that note: rule-based advice, a user model, a knowledge browser,
-visualization support, incremental learning, and "learning on demand". The
-stated scope is local improvement of Lisp programs according to a style
-encoded by rules, not whole-program correctness.
+Two assertions stay outside the evidence. Boecker's <em>co-authorship of the
+paper</em> is not supported, although his contribution is documented and
+recorded above. And no source descent from this line to Riesbeck's engine is
+supported — the next page records the engine's own silence on the matter as
+evidence against it.
 </p>
 
 <p>
-Arranged as a shape, the documented environment looks roughly like this. It
-is a reading of the description, not a recovered design:
+No pseudo-reconstruction of the historical implementation appears here.
+There is no Fischer source in this workspace, and inventing plausible Lisp
+would destroy the distinction the whole reading exists to preserve.
 </p>
 
-<pre>
-program
-  &darr;
-observation / pattern recognition
-  &darr;
-critic rule
-  &darr;
-critique / proposed transformation
-  &darr;
-explanation / conceptual knowledge
-  &darr;
-accept / reject / explain
-  &darr;
-user-model evidence
-</pre>
-
-<p>
-Two features at the bottom of that shape are worth naming, because they are
-the ones our own slice does not have: a response step in which the programmer
-accepts, rejects or asks for explanation, and a user model that accumulates
-evidence across such responses. Both are reported by the source; neither is
-implemented here, and this reading does not implement them.
-</p>
-
-<h2>What is claimed but not evidenced here</h2>
-
-<p>
-Earlier project conversation also described a co-author, two numbered
-versions, and a move to Symbolics Genera and CLOS. This workspace contains no
-artifact supporting any of them. Rather than quietly dropping those claims or
-quietly repeating them, the reading lists them as explicitly unevidenced —
-they are returned by the same example above, under
-<code>:CLAIMS-WITHOUT-LOCAL-EVIDENCE</code>.
-</p>
-
-<pre>
-documented        Fischer 1987, cited by a local research note
-asserted only     co-authorship, Version 1 / Version 2, Genera / CLOS
-not present       any Fischer-line source code
-</pre>
-
-<p>
-No pseudo-reconstruction of the historical implementation appears on this
-page. There is no Lisp here to transclude, because there is no Fischer source
-in this workspace, and inventing plausible code would destroy precisely the
-distinction this reading exists to preserve.
-</p>
-
-<h2>Why the distinction matters for the next page</h2>
-
-<p>
-Everything above is a report about a system. The next page shows a running
-engine: its actual definitions, loaded from files on this disk. The contrast
-between those two kinds of page is the argument.
-</p>
+<h2>Read on</h2>
 
 <p>
   <a page="Reading Riesbeck's Lisp Critic">
-    Reading Riesbeck's Lisp Critic
+    Reading Riesbeck's Lisp Critic — a separate line, with its source present
   </a>
 </p>
 
