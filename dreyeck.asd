@@ -1263,7 +1263,9 @@
   :depends-on ("dreyeck/hyperdoc" "dreyeck/inspector/lisp-critic"
                "hyperdoc/explorer")
   :components ((:module "dreyeck/src" :components
-                        ((:file "lisp-critic-reading")))
+                        ((:file "lisp-critic-reading")
+                         (:file "historical-claims-views"
+                          :depends-on ("lisp-critic-reading"))))
                (:module "dreyeck/pages/lisp-critic" :components
                         ((:static-file "Reading the Lisp Critic Genealogy.html")
                          (:static-file "The Fischer Critic as an Environment.html")
