@@ -166,6 +166,29 @@ return :NOTHING-TO-COMMIT rather than signaling an error."
    "show" "--no-patch" "--format=fuller" "--no-color"
    (git-commit-hash-of commit)))
 
+(defun git-commit-parents (commit)
+  "Return the parent hashes of COMMIT in recorded order.
+
+A root commit has no parents and yields NIL. A merge commit yields more than
+one hash, so callers must not assume a single parent."
+  (remove ""
+          (uiop:split-string
+           (trim-git-output
+            (git-run-string
+             (git-repository-root-of (git-commit-repository-of commit))
+             "show" "--no-patch" "--format=%P" "--no-color"
+             (git-commit-hash-of commit)))
+           :separator '(#\Space))
+          :test #'string=))
+
+(defun git-commit-subject (commit)
+  "Return the subject line of COMMIT."
+  (trim-git-output
+   (git-run-string
+    (git-repository-root-of (git-commit-repository-of commit))
+    "show" "--no-patch" "--format=%s" "--no-color"
+    (git-commit-hash-of commit))))
+
 (defun git-commit-object-present-p (repository commit-ish)
   "Return true when COMMIT-ISH names a commit object in REPOSITORY.
 

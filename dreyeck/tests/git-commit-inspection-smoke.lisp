@@ -201,8 +201,44 @@
                                              :if-does-not-exist :ignore)))
   t)
 
+(defun run-commit-ancestry-accessor-tests ()
+  "Prove the parent and subject accessors against a fixture with known shape."
+  (let ((directory (make-fixture-directory)))
+    (unwind-protect
+         (progn
+           (initialize-git-fixture directory)
+           (let* ((repository
+                    (make-instance 'dreyeck/git:git-repository-checkout
+                                   :root directory
+                                   :root-source :test-fixture))
+                  (head (dreyeck/git:make-git-commit :repository repository
+                                                     :commit-ish "HEAD"))
+                  (parents (dreyeck/git:git-commit-parents head)))
+             (check (string= "Inspect fixture change"
+                             (dreyeck/git:git-commit-subject head))
+                    "Unexpected subject ~S."
+                    (dreyeck/git:git-commit-subject head))
+             (check (= 1 (length parents))
+                    "Expected exactly one parent, got ~S." parents)
+             (check (= 40 (length (first parents)))
+                    "Parent hash is not full length: ~S." (first parents))
+             (let ((base (dreyeck/git:make-git-commit
+                          :repository repository
+                          :commit-ish (first parents))))
+               (check (string= "Fixture base"
+                               (dreyeck/git:git-commit-subject base))
+                      "Unexpected parent subject ~S."
+                      (dreyeck/git:git-commit-subject base))
+               (check (null (dreyeck/git:git-commit-parents base))
+                      "A root commit reported parents ~S."
+                      (dreyeck/git:git-commit-parents base)))))
+      (uiop/filesystem:delete-directory-tree directory :validate t
+                                             :if-does-not-exist :ignore)))
+  t)
+
 (defun run-git-commit-inspection-smoke-tests ()
   (run-git-object-tests)
+  (run-commit-ancestry-accessor-tests)
   (run-repository-slice-commit-test)
   (run-repository-slice-index-guard-test)
   (format t "Dreyeck Git commit inspection smoke tests passed.~%")

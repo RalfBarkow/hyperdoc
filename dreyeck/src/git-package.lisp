@@ -13,7 +13,8 @@
            #:git-current-branch #:git-commit #:git-commit-repository-of
            #:git-commit-ish-of #:git-commit-hash-of #:make-git-commit
            #:current-head-git-commit #:git-commit-one-line
-           #:git-commit-metadata #:git-commit-object-present-p
+           #:git-commit-metadata #:git-commit-parents #:git-commit-subject
+           #:git-commit-object-present-p
            #:git-commit-ancestor-p #:git-commit-merge-base
            #:git-commit-refs-containing #:git-commit-stat #:git-commit-patch
            #:git-commit-changed-files #:git-file-at-commit
