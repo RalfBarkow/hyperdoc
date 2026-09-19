@@ -73,14 +73,33 @@ and Cormack for Version 1, and Rieman, Johl and Lynn for Version 2.
 <source-of-function>historical-claims-example</source-of-function>
 
 <p>
-Three columns are kept apart on purpose.
-<code>:LOCATOR-OBSERVED-P</code> says whether the cited document itself can
-be read in this workspace — for both Fischer papers it is false, so the
-citation is the thing to follow, not a local file.
-<code>:SOURCE-OBSERVED-P</code> says whether the artifact being described is
-here; for a 1987 research system it is false.
-<code>:EXECUTABLE-HERE-P</code> says whether it could run; also false. No
-Fischer claim on this page asserts otherwise.
+Citing a source is not the same as reading it, and the records keep those
+apart. <code>:CITED-SOURCE-KIND</code> names the source that <em>should</em>
+settle a claim; <code>:OBSERVED-EVIDENCE-KIND</code> names what actually
+carries it in this workspace right now.
+</p>
+
+<p>
+Neither Fischer paper has been read here. Only the first claim on this page
+is currently carried by something observed — a secondary research note in
+the local wiki, which mentions the rules, the user model, the knowledge
+browser, the visualization support and learning on demand. Every other
+Fischer claim cites a paper and reports
+<code>:OBSERVED-EVIDENCE-KIND :NONE-OBSERVED</code>: the sentence names
+where it should be checked, and nothing here has checked it yet.
+</p>
+
+<pre>
+cited        we know which source should carry the statement
+observed     we have actually read that source here
+executable   we can run the artifact it describes
+</pre>
+
+<p>
+For the research line the second and third are false throughout, and a test
+refuses any claim that names a primary paper as observed evidence while its
+locator was never read. Promoting these claims is the job of a later slice
+that reads the papers — not of a better sentence on this page.
 </p>
 
 <h2>Why evidence has no single ranking</h2>
@@ -117,8 +136,10 @@ implying a hierarchy.
 Two assertions stay outside the evidence. Boecker's <em>co-authorship of the
 paper</em> is not supported, although his contribution is documented and
 recorded above. And no source descent from this line to Riesbeck's engine is
-supported — the next page records the engine's own silence on the matter as
-evidence against it.
+supported: the next page records that a full-text search of the engine found
+no attribution to Fischer, which establishes a
+<code>:PROVENANCE-GAP</code> — no link has been observed — and not a proof
+that no link exists.
 </p>
 
 <p>

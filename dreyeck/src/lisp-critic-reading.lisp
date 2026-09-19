@@ -30,6 +30,7 @@
            #:claims-about
            #:resolve-executability
            #:evidence-adequate-for-p
+           #:claim-carried-p
            #:historical-claims-example
            #:evidence-adequacy-example
            #:fischer-critic-documentation-example
@@ -193,38 +194,62 @@ explicitly not a whole-program correctness framework."
 ;;
 ;; A claim carries:
 ;;
-;;   SUBJECT            what the claim is about
-;;   CLAIM-TYPE         what kind of thing is being claimed
-;;   ASSERTION          the sentence itself
-;;   EVIDENCE-KIND      what carries it
-;;   WITNESS            who stands behind that evidence
-;;   LOCATOR            where to re-check it
-;;   LOCATOR-OBSERVED-P whether the cited document is readable here
-;;   SOURCE-OBSERVED-P  whether we observe the artifact the claim is about
-;;   EXECUTABLE-HERE-P  whether that artifact can run in this runtime
+;;   SUBJECT               what the claim is about
+;;   CLAIM-TYPE            what kind of thing is being claimed
+;;   ASSERTION             the sentence itself
+;;   CITED-SOURCE-KIND     what source is supposed to carry it
+;;   LOCATOR               where that source is, to re-check it
+;;   LOCATOR-OBSERVED-P    whether that exact source was read here
+;;   OBSERVED-EVIDENCE-KIND what actually carries it in this workspace
+;;   OBSERVED-LOCATOR      where that observed evidence is
+;;   WITNESS               who stands behind the cited source
+;;   SOURCE-OBSERVED-P     whether the artifact described is present
+;;   EXECUTABLE-HERE-P     whether that artifact can run in this runtime
 ;;
-;; The last three are deliberately independent. Riesbeck's engine is source
-;; observed and still not executable on a server without the station, and a
-;; paper can carry a claim about an artifact nobody here possesses.
+;; Citing a source is not reading it. A claim may name a paper as the thing
+;; that should settle it while nothing in this workspace has yet settled
+;; anything: then OBSERVED-EVIDENCE-KIND is :NONE-OBSERVED and the claim is
+;; shown as uncarried rather than as proven. Promoting it is the job of a
+;; later slice that actually reads the paper.
+;;
+;; The three access questions stay independent. Riesbeck's engine is source
+;; observed and still not executable on a server without the station.
 ;;
 
 (defparameter +evidence-adequacy+
-  '((:capability    :primary-paper :source-file)
-    (:contribution  :primary-paper)
-    (:environment   :primary-paper)
-    (:identity      :primary-paper :source-file :readme)
-    (:descent       :source-file :readme :absence-of-reference))
-  "Which kind of evidence can carry which kind of claim.
+  '((:capability     :primary-paper :secondary-research-note :source-file)
+    (:contribution   :primary-paper)
+    (:environment    :primary-paper)
+    (:identity       :primary-paper :secondary-research-note :source-file
+                     :readme)
+    (:descent        :source-file :readme)
+    (:provenance-gap :absence-of-reference))
+  "Which kind of observed evidence can carry which kind of claim.
 
 Evidence has no standing on its own: a source file settles what a program
 does and says nothing about whether a 1987 system had a user model, and a
 paper about that system settles nothing about who edited a file in 2003.
 Strength is a relation between evidence and claim, so it is written down as
-one.")
+one.
+
+:ABSENCE-OF-REFERENCE deliberately carries only :PROVENANCE-GAP. Finding no
+attribution in a file is a fact about the search, not about descent: it
+neither establishes a lineage nor rules one out, and letting it settle
+:DESCENT either way would be an argument from silence.")
 
 (defun evidence-adequate-for-p (evidence-kind claim-type)
   (let ((row (assoc claim-type +evidence-adequacy+)))
     (and row (member evidence-kind (rest row)) t)))
+
+(defun claim-carried-p (claim)
+  "Whether something actually read here carries this claim right now.
+
+A claim whose OBSERVED-EVIDENCE-KIND is :NONE-OBSERVED is not carried. It
+still names the source that should carry it, so a later slice can read that
+source and promote it."
+  (let ((observed (getf claim :observed-evidence-kind)))
+    (and (not (eq :none-observed observed))
+         (evidence-adequate-for-p observed (getf claim :claim-type)))))
 
 (defun historical-claims ()
   "Every historical sentence this reading shows, with its provenance.
@@ -232,16 +257,19 @@ one.")
 Claims carried only by conversation are not listed here; they are listed
 as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
   (copy-tree
-   '(;; The Fischer line. The papers are the evidence; neither the papers
-     ;; nor the systems they describe are present in this workspace.
+   '(;; The Fischer line. The papers are the sources these claims cite.
+     ;; Neither paper has been read in this workspace, so only the first
+     ;; claim is currently carried by something actually observed here.
      (:subject :fischer-1987
       :claim-type :capability
       :assertion
       "LISP-CRITIC was an integrated environment: rules, a rule interpreter, a user model, explanation with a knowledge browser and visualization support, and learning on demand."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :peer-reviewed-publication)
+      :cited-source-kind :primary-paper
       :locator "Fischer 1987, A Critic for LISP, IJCAI-87, pp. 177-184"
       :locator-observed-p nil
+      :observed-evidence-kind :secondary-research-note
+      :observed-locator "~/.wiki/wiki.ralfbarkow.ch/pages/a-critic-for-lisp"
+      :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
 
@@ -249,10 +277,12 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :claim-type :contribution
       :assertion
       "Boecker developed the original ideas, the rule set and the rule interpreter. He is credited as a contributor, not as a co-author of the 1987 paper."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :acknowledgement)
+      :cited-source-kind :primary-paper
       :locator "Fischer 1987, A Critic for LISP, IJCAI-87, acknowledgements"
       :locator-observed-p nil
+      :observed-evidence-kind :none-observed
+      :observed-locator nil
+      :witness (:author-self-report :acknowledgement)
       :source-observed-p nil
       :executable-here-p nil)
 
@@ -260,32 +290,38 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :claim-type :contribution
       :assertion
       "Morel implemented the explanation capabilities; Burns implemented the statistical analysis."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :acknowledgement)
+      :cited-source-kind :primary-paper
       :locator "Fischer 1987, A Critic for LISP, IJCAI-87, acknowledgements"
       :locator-observed-p nil
+      :observed-evidence-kind :none-observed
+      :observed-locator nil
+      :witness (:author-self-report :acknowledgement)
       :source-observed-p nil
       :executable-here-p nil)
 
      (:subject :lisp-critic-version-1
       :claim-type :contribution
       :assertion "Version 1 is credited to Morel, Burns and Cormack."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :peer-reviewed-publication)
+      :cited-source-kind :primary-paper
       :locator
       "Fischer & Mastaglio 1991, A Conceptual Framework for Knowledge-Based Critic Systems, Decision Support Systems 7(4), 355-378"
       :locator-observed-p nil
+      :observed-evidence-kind :none-observed
+      :observed-locator nil
+      :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
 
      (:subject :lisp-critic-version-2
       :claim-type :contribution
       :assertion "Version 2 is credited to Rieman, Johl and Lynn."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :peer-reviewed-publication)
+      :cited-source-kind :primary-paper
       :locator
       "Fischer & Mastaglio 1991, Decision Support Systems 7(4), 355-378"
       :locator-observed-p nil
+      :observed-evidence-kind :none-observed
+      :observed-locator nil
+      :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
 
@@ -293,11 +329,13 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :claim-type :environment
       :assertion
       "Version 2 ran on a Symbolics 3600 under Genera, with the knowledge base updated to Common Lisp."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :peer-reviewed-publication)
+      :cited-source-kind :primary-paper
       :locator
       "Fischer & Mastaglio 1991, Decision Support Systems 7(4), 355-378"
       :locator-observed-p nil
+      :observed-evidence-kind :none-observed
+      :observed-locator nil
+      :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
 
@@ -305,11 +343,13 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :claim-type :environment
       :assertion
       "The conceptual knowledge structure was object-oriented, implemented with the Common Lisp Object System."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :peer-reviewed-publication)
+      :cited-source-kind :primary-paper
       :locator
       "Fischer & Mastaglio 1991, Decision Support Systems 7(4), 355-378"
       :locator-observed-p nil
+      :observed-evidence-kind :none-observed
+      :observed-locator nil
+      :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
 
@@ -317,11 +357,13 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :claim-type :capability
       :assertion
       "The refined user model drew on code analysis, explanation requests, and proposals the programmer had rejected."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :peer-reviewed-publication)
+      :cited-source-kind :primary-paper
       :locator
       "Fischer & Mastaglio 1991, Decision Support Systems 7(4), 355-378"
       :locator-observed-p nil
+      :observed-evidence-kind :none-observed
+      :observed-locator nil
+      :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
 
@@ -329,11 +371,13 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :claim-type :capability
       :assertion
       "The ZMACS-based version offered an interaction cycle of accept, reject, or request explanation."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :peer-reviewed-publication)
+      :cited-source-kind :primary-paper
       :locator
       "Fischer & Mastaglio 1991, Decision Support Systems 7(4), 355-378"
       :locator-observed-p nil
+      :observed-evidence-kind :none-observed
+      :observed-locator nil
+      :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
 
@@ -341,23 +385,28 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :claim-type :identity
       :assertion
       "The work was generalised from one Lisp critic into a conceptual framework for knowledge-based critic systems."
-      :evidence-kind :primary-paper
-      :witness (:author-self-report :peer-reviewed-publication)
+      :cited-source-kind :primary-paper
       :locator
       "Fischer & Mastaglio 1991, Decision Support Systems 7(4), 355-378, title and framing"
       :locator-observed-p nil
+      :observed-evidence-kind :none-observed
+      :observed-locator nil
+      :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
 
-     ;; The Riesbeck line. Here the artifact itself is in the workspace.
+     ;; The Riesbeck line. Here the cited source and the observed evidence
+     ;; are the same file, because the file is in the workspace.
      (:subject :riesbeck-engine
       :claim-type :identity
       :assertion
       "The engine carries a dated update history running from 1997 to 2003, each entry initialled CKR."
-      :evidence-kind :source-file
-      :witness (:author-self-report)
+      :cited-source-kind :source-file
       :locator "vendor/lisp-critic/lisp-critic.lisp, update-history header"
       :locator-observed-p t
+      :observed-evidence-kind :source-file
+      :observed-locator "vendor/lisp-critic/lisp-critic.lisp"
+      :witness (:author-self-report)
       :source-observed-p t
       :executable-here-p :runtime-dependent)
 
@@ -365,10 +414,12 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :claim-type :descent
       :assertion
       "DEFINE-LISP-PATTERN and DEFINE-RESPONSE were merged on 1/3/03."
-      :evidence-kind :source-file
-      :witness (:author-self-report)
+      :cited-source-kind :source-file
       :locator "vendor/lisp-critic/lisp-critic.lisp, update-history header"
       :locator-observed-p t
+      :observed-evidence-kind :source-file
+      :observed-locator "vendor/lisp-critic/lisp-critic.lisp"
+      :witness (:author-self-report)
       :source-observed-p t
       :executable-here-p :runtime-dependent)
 
@@ -376,22 +427,28 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :claim-type :descent
       :assertion
       "On 2004-05-06 require/provide statements were removed, cs235 package references were replaced by lisp-critic-user, and an ASDF defsystem file was added."
-      :evidence-kind :readme
-      :witness (:adapter-self-report)
+      :cited-source-kind :readme
       :locator "vendor/lisp-critic/README"
       :locator-observed-p t
+      :observed-evidence-kind :readme
+      :observed-locator "vendor/lisp-critic/README"
+      :witness (:adapter-self-report)
       :source-observed-p t
       :executable-here-p :runtime-dependent)
 
-     ;; The claim that keeps the two lines apart, carried by an absence.
-     (:subject :riesbeck-engine
-      :claim-type :descent
+     ;; A fact about a search, not a verdict on lineage. It records that no
+     ;; attribution was found; it neither establishes descent nor rules it
+     ;; out, which is why its claim-type is :PROVENANCE-GAP.
+     (:subject :fischer-to-riesbeck
+      :claim-type :provenance-gap
       :assertion
-      "The vendored engine contains no reference to Fischer, Boecker, Colorado or a critiquing paradigm. Nothing in the source connects it to the research line."
-      :evidence-kind :absence-of-reference
-      :witness (:local-observation)
+      "No attribution or reference to Fischer, Boecker, Colorado or a critiquing paradigm was found in the inspected vendor source. No source-provenance link has been observed in either direction."
+      :cited-source-kind :source-file
       :locator "vendor/lisp-critic/, full-text search"
       :locator-observed-p t
+      :observed-evidence-kind :absence-of-reference
+      :observed-locator "vendor/lisp-critic/"
+      :witness (:local-observation)
       :source-observed-p t
       :executable-here-p :runtime-dependent))))
 
@@ -536,11 +593,11 @@ which kind of claim, and every claim on these pages is checked against it."
         :checked (mapcar (lambda (claim)
                            (list :subject (getf claim :subject)
                                  :claim-type (getf claim :claim-type)
-                                 :evidence-kind (getf claim :evidence-kind)
-                                 :adequate-p
-                                 (evidence-adequate-for-p
-                                  (getf claim :evidence-kind)
-                                  (getf claim :claim-type))))
+                                 :cited-source-kind
+                                 (getf claim :cited-source-kind)
+                                 :observed-evidence-kind
+                                 (getf claim :observed-evidence-kind)
+                                 :carried-p (claim-carried-p claim)))
                          (historical-claims))
         :evidence-status :interpreted))
 

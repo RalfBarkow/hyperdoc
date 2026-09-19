@@ -174,6 +174,9 @@
     :lisp-critic-later :lisp-critic-zmacs :critiquing-paradigm)
   "Subjects on the research line. Nothing here is present in this workspace.")
 
+(defun claim-uncarried-p (claim)
+  (eq :none-observed (getf claim :observed-evidence-kind)))
+
 (defun check-historical-claims ()
   "Every displayed claim must be traceable, and none may overstate access."
   (let ((claims (reading:historical-claims)))
@@ -189,11 +192,19 @@
         (check (and (stringp (getf claim :assertion))
                     (plusp (length (getf claim :assertion))))
                "Claim about ~S carries no assertion." subject)
-        ;; Evidence must be able to carry this kind of claim at all.
-        (check (reading:evidence-adequate-for-p (getf claim :evidence-kind)
-                                                (getf claim :claim-type))
-               "Claim about ~S uses ~S, which cannot carry a ~S claim."
-               subject (getf claim :evidence-kind) (getf claim :claim-type))
+        ;; Either something observed here carries the claim, or the claim
+        ;; openly says nothing here carries it yet. What is forbidden is
+        ;; evidence that cannot settle this kind of claim at all.
+        (check (or (claim-uncarried-p claim) (reading:claim-carried-p claim))
+               "Claim about ~S is carried by ~S, which cannot settle a ~S claim."
+               subject (getf claim :observed-evidence-kind)
+               (getf claim :claim-type))
+        ;; Citing a source is not reading it.
+        (check (not (and (null (getf claim :locator-observed-p))
+                         (eq :primary-paper
+                             (getf claim :observed-evidence-kind))))
+               "Claim about ~S names a primary paper as observed evidence ~
+while its locator was never read here." subject)
         ;; Nothing on the research line may claim local access.
         (when (member subject +fischer-subjects+)
           (check (null (getf claim :source-observed-p))
@@ -205,6 +216,17 @@
           (check (null (reading:resolve-executability claim))
                  "A Fischer-line claim about ~S claims local executability."
                  subject))))
+    ;; An absence of attribution settles no lineage, in either direction.
+    (dolist (claim claims)
+      (when (eq :absence-of-reference (getf claim :observed-evidence-kind))
+        (check (not (member (getf claim :claim-type) '(:descent :non-descent)))
+               "An absence of reference is being used to settle a ~S claim ~
+about ~S. Finding no attribution is a fact about the search, not about ~
+lineage." (getf claim :claim-type) (getf claim :subject))))
+    (dolist (kind '(:descent :non-descent))
+      (check (not (reading:evidence-adequate-for-p :absence-of-reference kind))
+             "The adequacy relation still lets an absence of reference ~
+settle ~S." kind))
     ;; No descent claim may cross from the research line to the code line.
     (dolist (claim claims)
       (when (eq :descent (getf claim :claim-type))
