@@ -147,8 +147,6 @@
                      (format nil "~{~A~^, ~}" (getf station :authors)))
      (claim-view-row "Language" (or (getf station :language) "unspecified"))
      (claim-view-row "Runtime" (or (getf station :runtime) "unspecified"))
-     (claim-view-row "Source status"
-                     (claim-display-text (getf station :source-availability)))
      (claim-view-row "Executable here"
                      (if (getf station :executable-here) "yes" "no")))))
 
@@ -301,6 +299,21 @@ the view says which. Nothing is taken from the genealogy plist."
           (:p (html-inspector-views:esc
                "Page attachment is not itself a Workspace. It is what a Workspace reconstruction would start from.")))))))
 
+(defun source-representations-section (station)
+  "What is actually here of this node's source, in its own terms.
+
+Replaces a \"Source status\" row. That row asked one question of five
+objects that do not share it: for one the question is whether any source
+was ever observed, for another whether it has a tree of its own, for
+another what an adaptation changed."
+  (let ((sections (node-source-representations (getf station :station))))
+    (when sections
+      (html-inspector-views:html
+        (:h3 "Evidence and representations")
+        (:table :class "inspector-table"
+          (dolist (section sections)
+            (claim-view-row (car section) (cdr section))))))))
+
 (html-inspector-views:defview genealogy-station-overview (station cons)
   (when (and (eq :station (first station))
              ;; This node has a view of its own that answers better.
@@ -311,7 +324,9 @@ the view says which. Nothing is taken from the genealogy plist."
       (list
        (html-inspector-views:html-view
            :title (node-kind-label station) :priority 1
-         (station-field-rows station))
+         (html-inspector-views:html
+           (station-field-rows station)
+           (source-representations-section station)))
        (html-inspector-views:html-view :title "Relations" :priority 2
          (html-inspector-views:html
            (:p (html-inspector-views:esc

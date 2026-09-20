@@ -129,13 +129,13 @@ explicitly not a whole-program correctness framework."
       :period "Northwestern CS 325 course material; archived 2004"
       :authors ("Chris Riesbeck")
       :language "Common Lisp"
-      :runtime "runs under SBCL in this image"
+      :runtime "not executed as a separate artifact; what runs here is Beane's adapted distribution"
       :source-availability :vendored-in-source-station
       :provenance
       (:origin-url
        "http://www.cs.northwestern.edu/academics/courses/325/exercises/critic.html"
        :local-readme "vendor/lisp-critic/README")
-      :executable-here t
+      :executable-here nil
       :evidence-status :executable)
 
      (:station :beane-asdf-adaptation
@@ -531,6 +531,54 @@ The kind is the other half. A node used to be captioned STATION, which
 is this projection's word for \"a box in this diagram\" and says nothing
 about the thing in the box.")
 
+(defun page-asset-source-present-p ()
+  "Whether the adapted source tree is reachable from this runtime."
+  (and (probe-file (vendored-engine-directory)) t))
+
+(defun node-source-representations (key)
+  "Which representations of a node's source have actually been observed.
+
+There is no single question here, which is why there is no single field.
+What can be asked of Fischer's system is whether any implementation
+source was ever seen; what can be asked of Riesbeck's is whether a tree
+of his own exists separately from the one adaptation that carries it;
+what can be asked of Beane's is what the adaptation changed. A shared
+\"source status\" column had to answer all three with one word, and the
+word it chose — vendored — was true of at most one of them."
+  (let ((present (page-asset-source-present-p)))
+    (case key
+      (:fischer-lisp-critic
+       (list
+        (cons "Observed source artifact"
+              "None. No implementation source for this system has been observed in this workspace.")
+        (cons "Provenance"
+              "Papers. The 1987 IJCAI paper and the 1991 framework paper are cited, and two passages from them have been read here.")))
+      (:riesbeck-lisp-critic
+       (list
+        (cons "Observed source artifact"
+              "None of its own. No separate Riesbeck tree has been observed here.")
+        (cons "Local representation"
+              (if present
+                  "Present only through Beane's adapted distribution, which is the tree that is actually on disk."
+                  "Would be through Beane's adapted distribution, which is not reachable from this runtime."))
+        (cons "Provenance"
+              "Riesbeck's authorship and a dated update history initialled CKR, running 1997 to 2003, are preserved inside that distribution — in the header of lisp-critic.lisp and in its README.")))
+      (:beane-asdf-adaptation
+       (list
+        (cons "Observed source artifact"
+              (if present
+                  "The adapted source itself, in the page asset tree."
+                  "The adapted source, not reachable from this runtime."))
+        (cons "Adaptation"
+              "require/provide statements removed; cs235 package references replaced by lisp-critic-user; an ASDF system definition added.")
+        (cons "Provenance"
+              "Beane's README, dated 2004-05-06, which names Riesbeck's original and lists exactly those three changes.")))
+      (:dreyeck-lisp-critic
+       (list
+        (cons "Observed source artifact"
+              "Repository source, in this repository, under version control with the reading that describes it.")))
+      (t nil))))
+
 (defparameter +source-availability-phrases+
   '((:historical-source-not-observed
      . "historical implementation source not observed")
@@ -553,6 +601,22 @@ I am standing in\" spends that distinction for nothing, especially here,
 where the node already knows something sharper — whether the source came
 through a source station, the repository, or was never observed at all.")
 
+(defun node-caption-status (key)
+  "The one line a node gets under its name, said in its own terms.
+
+Not derived from a shared availability keyword: the five nodes do not
+have five values of one property, they have different properties."
+  (let ((present (page-asset-source-present-p)))
+    (case key
+      (:fischer-lisp-critic "no implementation source observed")
+      (:riesbeck-lisp-critic "no separate source tree observed")
+      (:beane-asdf-adaptation
+       (if present "adapted source observed" "adapted source not reachable here"))
+      (:a-critic-for-lisp-station
+       (if present "page assets available locally" "page assets not reachable here"))
+      (:dreyeck-lisp-critic "repository source")
+      (t nil))))
+
 (defun genealogy-station-topic (key x y)
   (let ((station (lisp-critic-station key))
         (presentation (rest (assoc key +genealogy-node-presentation+))))
@@ -564,8 +628,7 @@ through a source station, the repository, or was never observed at all.")
      :view-properties
      (list :x x :y y :visible t :pinned nil
            :kind (getf presentation :kind)
-           :status (cdr (assoc (getf station :source-availability)
-                               +source-availability-phrases+))))))
+           :status (node-caption-status key)))))
 
 (defun genealogy-stage-topic (id label subjects x y &key kind)
   "A documented stage of the research line, carrying the claims about it.
@@ -875,8 +938,14 @@ Returns (:outgoing ((type . topic) ...) :incoming ((type . topic) ...))."
                  (historical-claims)))
 
 (defparameter +engine-dependent-stations+
-  '(:riesbeck-lisp-critic :beane-asdf-adaptation :a-critic-for-lisp-station)
-  "Stations whose code can only run where the source station is mounted.")
+  '(:beane-asdf-adaptation :a-critic-for-lisp-station)
+  "Nodes whose own artifact runs where the page assets are reachable.
+
+Riesbeck's node is deliberately not here. It used to be, which let it
+answer \"executable here: yes\" whenever the engine loaded — but the
+artifact that loads is Beane's adapted distribution, reached through the
+wrapper. A historical authorship node must not inherit the runtime
+properties of the one adaptation that happens to carry it.")
 
 (defun genealogy-in-this-runtime ()
   "The genealogy with EXECUTABLE-HERE answered for the runtime asking.
@@ -913,7 +982,7 @@ genealogy rather than silently folded into it."
       :local-evidence :none)
      (:claim :code-lineage-to-riesbeck
       :statement "Riesbeck's lisp-critic derives from Fischer's LISP-CRITIC."
-      :note "The vendored engine's own silence about the research line is recorded as evidence against this, not for it."
+      :note "No source-provenance link has been observed. The engine says nothing about the research line, and that silence settles the question in neither direction."
       :local-evidence :none))))
 
 ;;

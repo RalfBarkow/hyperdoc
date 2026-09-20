@@ -389,6 +389,59 @@ shown."
              "No node names Riesbeck.")))
   t)
 
+(defun station-primary-html (key)
+  (let* ((station (reading:lisp-critic-station key))
+         (view (first (views:all-views station))))
+    (values (views:view-html view) station)))
+
+(defun check-source-representations ()
+  "No node may report another node's source or another node's runtime.
+
+\"Source status\" asked one question of five objects that do not share
+it. Its worst effect was on Riesbeck's node, which showed \"vendored in
+source station\" and \"executable here: yes\" — both true of Beane's
+adapted distribution, the one artifact actually on disk, and neither
+true of a historical authorship node with no tree of its own."
+  (let ((riesbeck (station-primary-html :riesbeck-lisp-critic))
+        (beane (station-primary-html :beane-asdf-adaptation)))
+    ;; The vocabulary this slice removes, wherever a reader could meet it.
+    (dolist (key '(:fischer-lisp-critic :riesbeck-lisp-critic
+                   :beane-asdf-adaptation :a-critic-for-lisp-station
+                   :dreyeck-lisp-critic))
+      (let ((html (station-primary-html key)))
+        (dolist (phrase '("Source status" "vendored in source station"
+                          "VENDORED-IN-SOURCE-STATION"
+                          "present in local checkout"))
+          (check (not (search phrase html :test #'char-equal))
+                 "The view of ~S still shows ~S." key phrase))))
+    ;; Riesbeck and Beane must not read the same.
+    (check (not (equal riesbeck beane))
+           "Riesbeck's node and Beane's node render identically.")
+    (check (search "no separate" riesbeck :test #'char-equal)
+           "Riesbeck's node does not say that no tree of its own was observed.")
+    (check (not (search "vendored" riesbeck :test #'char-equal))
+           "Riesbeck's node still calls something of its own vendored.")
+    ;; Only the node whose artifact is on disk may claim the adaptation.
+    (check (search "require/provide" beane)
+           "Beane's node no longer shows what the adaptation changed.")
+    (check (not (search "require/provide" riesbeck))
+           "Riesbeck's node claims Beane's documented changes."))
+  ;; Executability belongs to the artifact that runs, in every runtime.
+  (let ((live (reading:genealogy-in-this-runtime)))
+    (dolist (station live)
+      (when (eq :riesbeck-lisp-critic (getf station :station))
+        (check (null (getf station :executable-here))
+               "Riesbeck's node reports itself executable; the artifact that ~
+runs is Beane's adapted distribution.")))
+    ;; And the distinction must not be achieved by calling everything
+    ;; unexecutable: where the engine is here, Beane's node says so.
+    (when (reading:engine-available-p)
+      (let ((beane (find :beane-asdf-adaptation live
+                         :key (lambda (s) (getf s :station)))))
+        (check (getf beane :executable-here)
+               "The engine is reachable but Beane's node reports otherwise."))))
+  t)
+
 (defun check-page-attached-system-view ()
   "a-critic-for-lisp must be inspectable as what was observed about it.
 
@@ -908,6 +961,7 @@ is honest.~%")
   (check-source-passage-navigation)
   (check-node-view-shows-the-graph)
   (check-page-attached-system-view)
+  (check-source-representations)
   (check-genealogy-reads-as-domain-language)
   (check-station-claim-links)
   (check-historical-claim-views)
