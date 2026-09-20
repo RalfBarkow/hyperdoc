@@ -36,6 +36,9 @@
            #:source-passages
            #:source-passage-for
            #:source-passage-for-claim-id
+           #:genealogy-node-relations
+           #:station-node-id
+           #:station-claim-subjects
            #:claim-for-source-passage
            #:claims-for-source-passage
            #:passage-covers-p
@@ -116,8 +119,6 @@ Fischer's system; the evidence supports a resemblance of purpose, no more."
       :documented-scope
       "Improve Lisp programs locally according to a style encoded by rules;
 explicitly not a whole-program correctness framework."
-      :relation-to-predecessor nil
-      :relation-to-successor :conceptual-resemblance
       :executable-here nil
       :evidence-status :documented)
 
@@ -133,8 +134,6 @@ explicitly not a whole-program correctness framework."
       (:origin-url
        "http://www.cs.northwestern.edu/academics/courses/325/exercises/critic.html"
        :local-readme "vendor/lisp-critic/README")
-      :relation-to-predecessor :conceptual-resemblance
-      :relation-to-successor :port/adaptation
       :executable-here t
       :evidence-status :executable)
 
@@ -154,8 +153,6 @@ explicitly not a whole-program correctness framework."
       ("require/provide statements removed"
        "cs235 package references replaced by lisp-critic-user"
        "an ASDF defsystem file added")
-      :relation-to-predecessor :port/adaptation
-      :relation-to-successor :local-extraction
       :executable-here t
       :evidence-status :executable)
 
@@ -171,8 +168,6 @@ explicitly not a whole-program correctness framework."
                    :patch-notes "PATCH-NOTES.md")
       :documented-changes
       ("critic-available-p and critique-if-available use (find-package \"LISP-CRITIC-USER\")")
-      :relation-to-predecessor :local-extraction
-      :relation-to-successor :hyperdoc-projection
       :executable-here t
       :evidence-status :executable)
 
@@ -191,8 +186,6 @@ explicitly not a whole-program correctness framework."
       :adds ("run record as Evaluation Record"
              "first-class Critique object"
              "Inspector relations between them")
-      :relation-to-predecessor :hyperdoc-projection
-      :relation-to-successor nil
       :executable-here t
       :evidence-status :executable))))
 
@@ -488,6 +481,28 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
   (remove-if-not (lambda (claim) (member (getf claim :subject) subjects))
                  (historical-claims)))
 
+(defparameter +station-claim-subjects+
+  '((:fischer-lisp-critic :fischer-1987)
+    (:riesbeck-lisp-critic :riesbeck-engine :riesbeck-2003-change)
+    (:beane-asdf-adaptation :beane-2004-adaptation)
+    (:a-critic-for-lisp-station)
+    (:dreyeck-lisp-critic))
+  "Which claim subjects speak about which station.
+
+The two vocabularies are deliberately not the same. A station is a whole
+system or codebase; a claim subject is one stage or aspect of it, which is
+why :FISCHER-LISP-CRITIC and :FISCHER-1987 are different keys. Nothing
+derives one from the other by name — the correspondence is written down
+here, and a station with no claims about it has an empty list rather than
+a lucky miss.
+
+:FISCHER-TO-RIESBECK is absent on purpose: it is a claim about the
+relation between the two lines, not about either station, and hanging it
+on one of them would put it on the wrong side.")
+
+(defun station-claim-subjects (key)
+  (rest (assoc key +station-claim-subjects+)))
+
 (defun genealogy-station-topic (key x y)
   (let ((station (lisp-critic-station key)))
     (dreyeck/topicmap:make-topicmap-topic
@@ -759,6 +774,43 @@ A stored :RUNTIME-DEPENDENT is a contract, not an answer."
     (if (eq :runtime-dependent stored)
         (engine-available-p)
         stored)))
+
+(defun genealogy-node-relations (id)
+  "The associations of node ID in the genealogy, as the projection has them.
+
+Read from the projection rather than from the node's own plist. The
+plists used to carry RELATION-TO-PREDECESSOR and RELATION-TO-SUCCESSOR,
+which said one thing where the graph said another: Fischer's station
+named a single conceptual successor while the graph gave it both a
+documented successor and a cross-line comparison. Two models of the same
+edges is one too many, so the fields are gone and this function is the
+only way a view learns what a node is connected to.
+
+Returns (:outgoing ((type . topic) ...) :incoming ((type . topic) ...))."
+  (let* ((projection (lisp-critic-genealogy-projection))
+         (topics (dreyeck/topicmap:topicmap-projection-topics-of projection))
+         (associations
+           (dreyeck/topicmap:topicmap-projection-associations-of projection))
+         (by-id (lambda (other)
+                  (find other topics
+                        :key #'dreyeck/topicmap:topicmap-topic-id-of
+                        :test #'equal))))
+    (flet ((edges (near far)
+             (loop for association in associations
+                   when (equal id (funcall near association))
+                     collect (cons (dreyeck/topicmap:topicmap-association-type-of
+                                    association)
+                                   (funcall by-id
+                                            (funcall far association))))))
+      (list :outgoing (edges #'dreyeck/topicmap:topicmap-association-from-of
+                             #'dreyeck/topicmap:topicmap-association-to-of)
+            :incoming (edges #'dreyeck/topicmap:topicmap-association-to-of
+                             #'dreyeck/topicmap:topicmap-association-from-of)))))
+
+(defun station-node-id (station)
+  "The projection id of the node carrying STATION, or NIL."
+  (let ((key (getf station :station)))
+    (and key (string-downcase (symbol-name key)))))
 
 (defun claims-about (subject)
   (remove-if-not (lambda (claim) (eq subject (getf claim :subject)))

@@ -171,16 +171,31 @@ it was read here." where expression title)
     (check (eq :executable (getf riesbeck :evidence-status))
            "Riesbeck's station claims ~S rather than :EXECUTABLE."
            (getf riesbeck :evidence-status))
-    ;; The relation across the two lines must remain a resemblance.
-    (check (eq :conceptual-resemblance (getf riesbeck :relation-to-predecessor))
-           "Riesbeck's station claims ~S to its predecessor."
-           (getf riesbeck :relation-to-predecessor))
-    ;; No station anywhere may claim descent.
+    ;; Relations live in the projection and nowhere else. A station plist
+    ;; that carries its own predecessor or successor is a second model of
+    ;; the same edges, and the two drifted apart once already.
     (dolist (station stations)
       (dolist (key '(:relation-to-predecessor :relation-to-successor))
-        (check (not (eq :descends-from (getf station key)))
-               "Station ~S claims descent, which no local evidence supports."
-               (getf station :station))))
+        (check (not (nth-value 2 (get-properties station (list key))))
+               "Station ~S carries ~S; relations belong to the projection."
+               (getf station :station) key)))
+    ;; The relation across the two lines must remain a comparison, and no
+    ;; edge anywhere may claim descent. Asked of the graph itself.
+    (let* ((projection (reading:lisp-critic-genealogy-projection))
+           (associations (tm:topicmap-projection-associations-of projection))
+           (crossing (find "comparison" associations
+                           :key #'tm:topicmap-association-id-of
+                           :test #'equal)))
+      (check crossing "The cross-line association is gone.")
+      (check (eq :conceptual-comparison
+                 (tm:topicmap-association-type-of crossing))
+             "The cross-line association is typed ~S."
+             (tm:topicmap-association-type-of crossing))
+      (dolist (association associations)
+        (check (not (eq :descends-from
+                        (tm:topicmap-association-type-of association)))
+               "Association ~S claims descent, which no local evidence ~
+supports." (tm:topicmap-association-id-of association))))
     ;; The unevidenced claims must stay listed rather than quietly adopted.
     (let ((claims (reading::fischer-claims-without-local-evidence)))
       (check claims "The unevidenced Fischer claims disappeared.")
@@ -308,6 +323,71 @@ entry points, not a catalogue: ~S" (length expressions) expressions)
              "The entry page still exposes ~A." moved))
     (check (null (element-texts page "source-of-function"))
            "The entry page still transcludes implementation source."))
+  t)
+
+(defun check-node-view-shows-the-graph ()
+  "The node detail must show the projection's edges, not its own copy.
+
+Written because the detail view once reconstructed relations from fields
+in the station plist. It showed Fischer one conceptual successor where
+the graph gave two edges of different kinds, and it omitted the
+documented one entirely. So the contract is equality with the
+projection, checked edge for edge."
+  (let* ((projection (reading:lisp-critic-genealogy-projection))
+         (associations (tm:topicmap-projection-associations-of projection))
+         (topics (tm:topicmap-projection-topics-of projection)))
+    (dolist (topic topics)
+      (let* ((id (tm:topicmap-topic-id-of topic))
+             (relations (reading:genealogy-node-relations id))
+             (expected-out
+               (loop for a in associations
+                     when (equal id (tm:topicmap-association-from-of a))
+                       collect (cons (tm:topicmap-association-type-of a)
+                                     (tm:topicmap-association-to-of a))))
+             (actual-out
+               (loop for edge in (getf relations :outgoing)
+                     collect (cons (car edge)
+                                   (and (cdr edge)
+                                        (tm:topicmap-topic-id-of (cdr edge)))))))
+        (check (null (set-exclusive-or expected-out actual-out :test #'equal))
+               "Node ~S reports outgoing ~S but the graph has ~S."
+               id actual-out expected-out)
+        ;; Every neighbour must be resolvable, or the link is dead.
+        (dolist (edge (append (getf relations :outgoing)
+                              (getf relations :incoming)))
+          (check (cdr edge) "Node ~S has a ~S edge to a node that is not in ~
+the projection." id (car edge)))))
+    ;; Fischer is the case that exposed the defect: two edges, two kinds.
+    (let ((outgoing (getf (reading:genealogy-node-relations "fischer-lisp-critic")
+                          :outgoing)))
+      (check (= 2 (length outgoing))
+             "Fischer's node reports ~D outgoing edges instead of 2."
+             (length outgoing))
+      (dolist (type '(:documented-successor :conceptual-comparison))
+        (check (assoc type outgoing)
+               "Fischer's node does not report its ~S edge." type))))
+  t)
+
+(defun check-station-claim-links ()
+  "A station's claims must be declared, not guessed, and must exist.
+
+The station keys and the claim subjects are different vocabularies on
+purpose. While nothing joined them, every station rendered \"no claims\"
+and looked like a settled epistemic finding instead of a missing link."
+  (let ((subjects (mapcar (lambda (claim) (getf claim :subject))
+                          (reading:historical-claims))))
+    (dolist (station (reading:lisp-critic-genealogy))
+      (let ((key (getf station :station)))
+        (check (assoc key reading::+station-claim-subjects+)
+               "Station ~S declares no claim subjects, not even none." key)
+        (dolist (subject (reading:station-claim-subjects key))
+          (check (member subject subjects)
+                 "Station ~S points at subject ~S, about which there are no ~
+claims." key subject)))))
+  ;; The station that prompted this must actually reach its claims now.
+  (let ((claims (apply #'reading::claims-about-subjects
+                       (reading:station-claim-subjects :fischer-lisp-critic))))
+    (check claims "Fischer's station still reaches no claims."))
   t)
 
 (defun check-source-passage-navigation ()
@@ -695,6 +775,8 @@ is honest.~%")
   (check-reading-page-is-readable)
   (check-historical-claims)
   (check-source-passage-navigation)
+  (check-node-view-shows-the-graph)
+  (check-station-claim-links)
   (check-historical-claim-views)
   (check-outcomes)
   (check-source-backing)

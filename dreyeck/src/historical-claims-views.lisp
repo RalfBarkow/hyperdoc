@@ -150,32 +150,72 @@
      (claim-view-row "Source status"
                      (claim-display-text (getf station :source-availability)))
      (claim-view-row "Executable here"
-                     (if (getf station :executable-here) "yes" "no"))
-     (claim-view-row "Relation to predecessor"
-                     (claim-display-text
-                      (or (getf station :relation-to-predecessor) "none")))
-     (claim-view-row "Relation to successor"
-                     (claim-display-text
-                      (or (getf station :relation-to-successor) "none"))))))
+                     (if (getf station :executable-here) "yes" "no")))))
+
+(defun node-kind-label (station)
+  "What kind of thing this node is, rather than the projection's word for it.
+
+\"Station\" is how the topicmap types the node; it says where the thing
+sits in a diagram, not what it is. A reader arriving at LISP-CRITIC needs
+the second. Both answers below come from the node's own record."
+  (if (eq :research (getf station :line))
+      "System (documented, not present here)"
+      "Codebase"))
+
+(defun render-relation-list (edges empty)
+  (html-inspector-views:html
+    (if edges
+        (html-inspector-views:html
+          (:ul
+           (dolist (edge edges)
+             (let ((topic (cdr edge)))
+               (html-inspector-views:html
+                 (:li (html-inspector-views:esc
+                       (claim-display-text (car edge)))
+                      " → "
+                      (if topic
+                          (html-inspector-views:object-ref
+                           (dreyeck/topicmap:topicmap-topic-object-of topic)
+                           :display (dreyeck/topicmap:topicmap-topic-label-of
+                                     topic))
+                          (html-inspector-views:esc "(unknown node)"))))))))
+        (html-inspector-views:html
+          (:p (html-inspector-views:esc empty))))))
 
 (html-inspector-views:defview genealogy-station-overview (station cons)
   (when (eq :station (first station))
-    (list
-     (html-inspector-views:html-view :title "Station" :priority 1
-       (station-field-rows station))
-     (html-inspector-views:html-view :title "Related claims" :priority 2
-       (let ((claims (claims-about (getf station :station))))
+    (let* ((relations (genealogy-node-relations (station-node-id station)))
+           (subjects (station-claim-subjects (getf station :station)))
+           (claims (apply #'claims-about-subjects subjects)))
+      (list
+       (html-inspector-views:html-view
+           :title (node-kind-label station) :priority 1
+         (station-field-rows station))
+       (html-inspector-views:html-view :title "Relations" :priority 2
+         (html-inspector-views:html
+           (:p (html-inspector-views:esc
+                "As the genealogy has them. This node may have several, of different kinds, in either direction."))
+           (:h3 "Outgoing")
+           (render-relation-list (getf relations :outgoing)
+                                 "This node leads nowhere in the genealogy.")
+           (:h3 "Incoming")
+           (render-relation-list (getf relations :incoming)
+                                 "Nothing in the genealogy leads here.")))
+       (html-inspector-views:html-view :title "Related claims" :priority 3
          (html-inspector-views:html
            (if claims
                (html-inspector-views:html
                  (:ul (dolist (claim claims)
                         (html-inspector-views:html
                           (:li (html-inspector-views:object-ref claim))))))
+               ;; What is true here is that nothing is linked, which is not
+               ;; the same as nothing being argued. Claims speak about
+               ;; stages and aspects under their own keys; a node with no
+               ;; declared subjects simply has none pointed at it.
                (html-inspector-views:html
                  (:p (html-inspector-views:esc
-                      "No claim in this reading argues about this station."))))))
-       )
-     (historical-raw-view station))))
+                      "No claims are linked to this genealogy node."))))))
+       (historical-raw-view station)))))
 
 (html-inspector-views:defview documented-stage-overview (stage cons)
   (when (and (eq :kind (first stage))
