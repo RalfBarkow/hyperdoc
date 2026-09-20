@@ -3,8 +3,8 @@
 <in-package>dreyeck/lisp-critic/reading</in-package>
 
 <p>
-Everything below comes out of files on this disk. The engine is vendored in a
-local source station, and the definitions shown here are transcluded from it
+Everything below comes out of files on this disk. The engine sits in a
+page-attached wrapper, and the definitions shown here are transcluded from it
 rather than copied into this page, so they cannot drift out of agreement with
 the code that runs.
 </p>
@@ -13,19 +13,22 @@ the code that runs.
 
 <p>
 That line is the page's own precondition, and it can fail honestly. The
-engine is not a dependency of this repository: it is loaded out of a local
-source station that is deliberately not deployed. Where that station is
-mounted, the definitions below are transcluded from it and the examples run.
+engine is not a dependency of this repository. It is reached through a
+<em>source binding</em>: an object that holds where the source is, puts that
+location on ASDF's registry, loads the wrapper system and records the
+provenance — and which deliberately does not travel with a deployment. Where
+the binding resolves, the definitions below are transcluded and the examples
+run.
 Where it is not — a served HyperDoc, for instance — each definition is
 replaced by an explicit "not available here" view, and the examples report
 <code>:NOT-AVAILABLE-IN-THIS-RUNTIME</code> instead of claiming to be
 executable.
 </p>
 
-<h2>Provenance of the source station</h2>
+<h2>What the binding reaches</h2>
 
 <p>
-The station wraps Chris Riesbeck's Lisp Critic from Northwestern's CS 325 in
+The wrapper holds Chris Riesbeck's Lisp Critic from Northwestern's CS 325 in
 the ASDF-loadable form Zach Beane published on 2004-05-06. Beane's README
 records exactly three changes: <code>require</code>/<code>provide</code>
 removed, course-package references replaced by

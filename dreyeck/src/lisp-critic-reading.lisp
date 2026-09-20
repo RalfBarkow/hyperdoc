@@ -162,7 +162,7 @@ explicitly not a whole-program correctness framework."
       :period "2025"
       :authors ("HyperDoc project")
       :language "Common Lisp"
-      :runtime "local source station outside this repository"
+      :runtime "loaded on demand from a page-attached wrapper outside this repository"
       :source-availability :present-in-local-checkout
       :provenance (:wrapper-system "a-critic-for-lisp"
                    :patch-notes "PATCH-NOTES.md")
@@ -515,7 +515,7 @@ like a claim about that side.")
     (:beane-asdf-adaptation
      :label "Beane's ASDF adaptation" :kind "adaptation")
     (:a-critic-for-lisp-station
-     :label "a-critic-for-lisp" :kind "local source station")
+     :label "a-critic-for-lisp" :kind "page-attached wrapper system")
     (:dreyeck-lisp-critic
      :label "dreyeck/lisp-critic" :kind "HyperDoc projection"))
   "How each genealogy node names itself to a reader.
@@ -533,7 +533,8 @@ about the thing in the box.")
 (defparameter +source-availability-phrases+
   '((:historical-source-not-observed
      . "historical implementation source not observed")
-    (:vendored-in-source-station . "vendored through the local source station")
+    (:vendored-in-source-station
+     . "source copy inside the page-attached wrapper")
     (:present-in-local-checkout . "source available locally")
     (:in-this-repository . "repository source"))
   "Where a node's source is, in words.
@@ -1066,8 +1067,9 @@ shown once the file defining it has been loaded."
             (format nil "Riesbeck/Beane engine loaded from ~A"
                     (namestring (vendored-engine-directory)))
             (format nil "Riesbeck/Beane engine is not reachable in this ~
-runtime. Its source station is a local resource and is not deployed, so the ~
-definitions below are shown as unavailable rather than as source.")))
+runtime. The source binding that would reach it points outside this ~
+repository and is not deployed, so the definitions below are shown as ~
+unavailable rather than as source.")))
     (error (condition)
       (format nil "Riesbeck/Beane engine is not reachable in this runtime: ~A"
               condition))))
@@ -1087,9 +1089,10 @@ mounted."
             (format nil "LISP-CRITIC:~A is defined in the vendored ~
 Riesbeck/Beane engine, which this runtime cannot reach." name)))
        (:p (html-inspector-views:esc
-            "The engine lives in a local source station that is not part of ~
-this repository and is not deployed. Where the station is mounted this ~
-definition is source-observed and executable; here it is neither."))))))
+            "The engine lives in a page-attached wrapper outside this ~
+repository, which this reading reaches through a source binding rather than ~
+a dependency. The binding is deliberately not deployed. Where it resolves, ~
+this definition is source-observed and executable; here it is neither."))))))
 
 (defun engine-source-view (name)
   "Transclude one definition of the vendored engine, by name.

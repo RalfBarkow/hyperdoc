@@ -341,8 +341,8 @@ shown."
     (check html "The genealogy renders no Topicmap view.")
     ;; The caption is what a reader sees under the name. What is banned is
     ;; a segment that IS the internal vocabulary, not a segment that
-    ;; happens to contain one of those words: "source station" is the name
-    ;; of a real thing here, while "STATION" on its own explains nothing.
+    ;; happens to contain one of those words, while "STATION" on its own
+    ;; explains nothing.
     (dolist (topic topics)
       (let* ((caption (dreyeck/inspector/topicmap::topicmap-topic-caption topic))
              (segments (uiop:split-string caption :separator "·")))
