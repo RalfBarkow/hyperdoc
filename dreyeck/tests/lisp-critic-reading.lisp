@@ -9,7 +9,8 @@
   (:local-nicknames (#:reading #:dreyeck/lisp-critic/reading)
                     (#:critic #:dreyeck/lisp-critic)
                     (#:er #:dreyeck/evaluation-record)
-                    (#:views #:html-inspector-views))
+                    (#:views #:html-inspector-views)
+                    (#:tm #:dreyeck/topicmap))
   (:export #:run-tests #:run-current-tests #:check-under-catalog-runtime
            #:check-degraded-runtime))
 
@@ -120,14 +121,17 @@
           (check (plusp (length (views:view-html value)))
                  "Page ~S: transclusion ~S rendered nothing."
                  title expression)))
-      ;; Every addressed example must run and report its evidence status.
+      ;; Every addressed example must run. A plist-shaped result must still
+      ;; carry its evidence status; a projection or a domain object is a
+      ;; legitimate result too and is inspected rather than read as data.
       (dolist (expression (page-expressions page))
         (let ((value (hyperdoc::parse-and-eval expression)))
           (check (not (typep value 'condition))
                  "Page ~S: example ~S produced ~A." title expression value)
-          (check (getf value :evidence-status)
-                 "Page ~S: example ~S returned no evidence status."
-                 title expression)))))
+          (when (and (consp value) (keywordp (first value)))
+            (check (getf value :evidence-status)
+                   "Page ~S: example ~S returned a plist without an evidence ~
+status." title expression))))))
   t)
 
 ;;
@@ -176,6 +180,114 @@
 
 (defun claim-uncarried-p (claim)
   (eq :none-observed (getf claim :observed-evidence-kind)))
+
+(defun topic-ids (projection)
+  (mapcar #'tm:topicmap-topic-id-of (tm:topicmap-projection-topics-of projection)))
+
+(defun associations-of-type (projection type)
+  (remove-if-not (lambda (a) (eq type (tm:topicmap-association-type-of a)))
+                 (tm:topicmap-projection-associations-of projection)))
+
+(defparameter +research-topics+
+  '("fischer-lisp-critic" "documented-later-versions" "critiquing-paradigm"))
+(defparameter +code-topics+
+  '("riesbeck-lisp-critic" "beane-asdf-adaptation"
+    "a-critic-for-lisp-station" "dreyeck-lisp-critic"))
+
+(defun check-genealogy-projection ()
+  "Two lines, spatially separate, with no lineage edge between them."
+  (let* ((projection (reading:lisp-critic-genealogy-projection))
+         (topics (tm:topicmap-projection-topics-of projection))
+         (ids (topic-ids projection)))
+    (dolist (id (append +research-topics+ +code-topics+))
+      (check (member id ids :test #'string=)
+             "The genealogy is missing topic ~S." id))
+    ;; 3. The lines are shown separately: distinct x columns.
+    (flet ((column (id)
+             (getf (tm:topicmap-topic-view-properties-of
+                    (find id topics :key #'tm:topicmap-topic-id-of
+                                    :test #'string=))
+                   :x)))
+      (let ((research (remove-duplicates (mapcar #'column +research-topics+)))
+            (code (remove-duplicates (mapcar #'column +code-topics+))))
+        (check (= 1 (length research))
+               "The research line is not in one column: ~S." research)
+        (check (= 1 (length code))
+               "The code line is not in one column: ~S." code)
+        (check (/= (first research) (first code))
+               "Both lines share column ~S." (first research))))
+    ;; 4. No edge of any lineage type crosses between the two lines.
+    (dolist (association (tm:topicmap-projection-associations-of projection))
+      (let ((from (tm:topicmap-association-from-of association))
+            (to (tm:topicmap-association-to-of association))
+            (type (tm:topicmap-association-type-of association)))
+        (when (or (and (member from +research-topics+ :test #'string=)
+                       (member to +code-topics+ :test #'string=))
+                  (and (member from +code-topics+ :test #'string=)
+                       (member to +research-topics+ :test #'string=)))
+          (check (eq :conceptual-comparison type)
+                 "A ~S edge crosses between the two lines (~A -> ~A). Only a ~
+conceptual comparison may cross." type from to))))
+    ;; 5. Every visible station carries an object to inspect.
+    (dolist (topic topics)
+      (check (tm:topicmap-topic-object-of topic)
+             "Topic ~S carries no object, so it cannot be inspected."
+             (tm:topicmap-topic-id-of topic))))
+  t)
+
+(defun check-discourse-projection ()
+  "Only explicitly defined questions, claims and support relations."
+  (let* ((projection (reading:lisp-critic-genealogy-discourse))
+         (topics (tm:topicmap-projection-topics-of projection)))
+    (flet ((of-type (type)
+             (remove-if-not (lambda (topic)
+                              (eq type (tm:topicmap-topic-type-of topic)))
+                            topics)))
+      (check (= 3 (length (of-type :question)))
+             "Expected three questions, found ~D." (length (of-type :question)))
+      (check (= 3 (length (of-type :claim)))
+             "Expected three claims, found ~D." (length (of-type :claim)))
+      (check (= 3 (length (of-type :source)))
+             "Expected three sources, found ~D." (length (of-type :source))))
+    ;; Every association is one of the two declared discourse relations.
+    (dolist (association (tm:topicmap-projection-associations-of projection))
+      (check (member (tm:topicmap-association-type-of association)
+                     '(:answered-by :supported-by))
+             "The discourse holds an undeclared relation ~S."
+             (tm:topicmap-association-type-of association)))
+    (check (= 3 (length (associations-of-type projection :answered-by)))
+           "Every question must be answered exactly once.")
+    (check (= 3 (length (associations-of-type projection :supported-by)))
+           "Every claim must name its support.")
+    ;; Each claim reaches the provenance records behind it.
+    (dolist (topic topics)
+      (when (eq :claim (tm:topicmap-topic-type-of topic))
+        (check (getf (tm:topicmap-topic-object-of topic) :related-claims)
+               "Discourse claim ~S reaches no provenance record."
+               (tm:topicmap-topic-id-of topic)))))
+  t)
+
+(defun check-reading-page-is-readable ()
+  "The entry page argues; it does not expose the metamodel."
+  (let* ((page (page-of "Reading the Lisp Critic Genealogy"))
+         (expressions (page-expressions page))
+         (source (uiop:read-file-string (hyperdoc:file-of page))))
+    (check (<= (length expressions) 3)
+           "The entry page addresses ~D examples; it should offer a few ~
+entry points, not a catalogue: ~S" (length expressions) expressions)
+    (dolist (expression '("(lisp-critic-genealogy-example)"
+                          "(lisp-critic-discourse-example)"
+                          "(current-critique-example)"))
+      (check (member expression expressions :test #'string=)
+             "The entry page does not offer ~A." expression))
+    ;; The metamodel moved off this page but stays reachable elsewhere.
+    (dolist (moved '("historical-claims-example" "evidence-adequacy-example"
+                     "evidence-ladder-example"))
+      (check (not (search moved source))
+             "The entry page still exposes ~A." moved))
+    (check (null (element-texts page "source-of-function"))
+           "The entry page still transcludes implementation source."))
+  t)
 
 (defun check-historical-claims ()
   "Every displayed claim must be traceable, and none may overstate access."
@@ -357,9 +469,10 @@ cannot pass on a development image's leftover state."
               (check (not (typep value 'condition))
                      "Catalog runtime: ~S on ~S produced ~A."
                      expression title value)
-              (check (getf value :evidence-status)
-                     "Catalog runtime: ~S on ~S has no evidence status."
-                     expression title))))))
+              (when (and (consp value) (keywordp (first value)))
+                (check (getf value :evidence-status)
+                       "Catalog runtime: ~S on ~S returned a plist without ~
+an evidence status." expression title)))))))
     ;; And the critic must genuinely run: a real CAR-CDR match.
     (let* ((match (reading:critic-match-example))
            (record (getf match :record)))
@@ -498,6 +611,9 @@ is honest.~%")
   (check-pages-present)
   (check-navigation)
   (check-genealogy-separation)
+  (check-genealogy-projection)
+  (check-discourse-projection)
+  (check-reading-page-is-readable)
   (check-historical-claims)
   (check-historical-claim-views)
   (check-outcomes)

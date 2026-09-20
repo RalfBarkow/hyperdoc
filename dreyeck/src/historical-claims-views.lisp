@@ -118,3 +118,79 @@
     (let ((inspection (make-instance 'historical-claims-inspection :data data)))
       (list (historical-claims-overview inspection)
             (historical-claims-raw inspection)))))
+
+;;
+;; Station and discourse detail, for topics followed in a projection.
+;;
+;; Same approach as above: no domain classes, only presentation carriers
+;; over the plists that already exist. Each view discriminates on the
+;; plist's own leading key, so ordinary cons views stay available and
+;; unrelated lists are untouched.
+;;
+
+(defun station-field-rows (station)
+  (html-inspector-views:html
+    (:table
+     (claim-view-row "Name" (or (getf station :name) "unnamed"))
+     (claim-view-row "Period" (or (getf station :period) "unspecified"))
+     (claim-view-row "Authors"
+                     (format nil "~{~A~^, ~}" (getf station :authors)))
+     (claim-view-row "Language" (or (getf station :language) "unspecified"))
+     (claim-view-row "Runtime" (or (getf station :runtime) "unspecified"))
+     (claim-view-row "Source status"
+                     (claim-display-text (getf station :source-availability)))
+     (claim-view-row "Executable here"
+                     (if (getf station :executable-here) "yes" "no"))
+     (claim-view-row "Relation to predecessor"
+                     (claim-display-text
+                      (or (getf station :relation-to-predecessor) "none")))
+     (claim-view-row "Relation to successor"
+                     (claim-display-text
+                      (or (getf station :relation-to-successor) "none"))))))
+
+(html-inspector-views:defview genealogy-station-overview (station cons)
+  (when (eq :station (first station))
+    (list
+     (html-inspector-views:html-view :title "Station" :priority 1
+       (station-field-rows station))
+     (html-inspector-views:html-view :title "Related claims" :priority 2
+       (let ((claims (claims-about (getf station :station))))
+         (html-inspector-views:html
+           (if claims
+               (html-inspector-views:html
+                 (:ul (dolist (claim claims)
+                        (html-inspector-views:html
+                          (:li (html-inspector-views:object-ref claim))))))
+               (html-inspector-views:html
+                 (:p (html-inspector-views:esc
+                      "No claim in this reading argues about this station."))))))
+       )
+     (historical-raw-view station))))
+
+(html-inspector-views:defview documented-stage-overview (stage cons)
+  (when (and (eq :kind (first stage))
+             (eq :documented-stage (second stage)))
+    (list
+     (html-inspector-views:html-view :title "Documented stage" :priority 1
+       (html-inspector-views:html
+         (:p (html-inspector-views:esc (getf stage :label)))
+         (:p (html-inspector-views:esc
+              "No artifact for this stage is present in this workspace. It is documented by the claims below."))
+         (:ul (dolist (claim (getf stage :claims))
+                (html-inspector-views:html
+                  (:li (html-inspector-views:object-ref claim)))))))
+     (historical-raw-view stage))))
+
+(html-inspector-views:defview discourse-claim-overview (claim cons)
+  (when (and (eq :kind (first claim))
+             (eq :discourse-claim (second claim)))
+    (list
+     (html-inspector-views:html-view :title "Claim" :priority 1
+       (html-inspector-views:html
+         (:p (html-inspector-views:esc (getf claim :statement)))
+         (:table (claim-view-row "Support" (getf claim :support)))
+         (:p (html-inspector-views:esc "Provenance records behind this claim:"))
+         (:ul (dolist (record (getf claim :related-claims))
+                (html-inspector-views:html
+                  (:li (html-inspector-views:object-ref record)))))))
+     (historical-raw-view claim))))

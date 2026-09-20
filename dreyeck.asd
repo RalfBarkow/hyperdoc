@@ -1261,7 +1261,7 @@
 (asdf:defsystem "dreyeck/lisp-critic/reading"
   :description "Source-backed reading of the Lisp Critic genealogy"
   :depends-on ("dreyeck/hyperdoc" "dreyeck/inspector/lisp-critic"
-               "hyperdoc/explorer")
+               "dreyeck/inspector/topicmap" "hyperdoc/explorer")
   :components ((:module "dreyeck/src" :components
                         ((:file "lisp-critic-reading")
                          (:file "historical-claims-views"

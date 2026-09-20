@@ -21,6 +21,11 @@
                     (#:er #:dreyeck/evaluation-record))
   (:export #:*lisp-critic-reading*
            #:lisp-critic-genealogy
+           #:lisp-critic-genealogy-projection
+           #:lisp-critic-genealogy-discourse
+           #:lisp-critic-discourse-example
+           #:current-critique-example
+           #:genealogy-stations-example
            #:genealogy-in-this-runtime
            #:engine-available-p
            #:lisp-critic-station
@@ -452,6 +457,172 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :source-observed-p t
       :executable-here-p :runtime-dependent))))
 
+;;
+;; Two complementary projections of the same material.
+;;
+;; The genealogy shows objects and their lineage. The discourse shows the
+;; questions the comparison raises. Both are ordinary Topicmap projections,
+;; so they get the existing native view, navigation and legend, and neither
+;; needs a graph engine of its own.
+;;
+;; A topic carries the real plist as its OBJECT, so following a station in
+;; the Topicmap reaches the same data the claim views already render.
+;;
+
+(defun claims-about-subjects (&rest subjects)
+  (remove-if-not (lambda (claim) (member (getf claim :subject) subjects))
+                 (historical-claims)))
+
+(defun genealogy-station-topic (key x y)
+  (let ((station (lisp-critic-station key)))
+    (dreyeck/topicmap:make-topicmap-topic
+     :id (string-downcase (symbol-name key))
+     :type :station
+     :label (getf station :name)
+     :object station
+     :view-properties (list :x x :y y :visible t :pinned nil))))
+
+(defun genealogy-stage-topic (id label subjects x y)
+  "A documented stage of the research line, carrying the claims about it.
+
+These stages are not separate stations: nothing in this workspace holds an
+artifact for them. Their object is the set of claims that mention them, so
+following one reaches the evidence rather than an invented record."
+  (dreyeck/topicmap:make-topicmap-topic
+   :id id :type :documented-stage :label label
+   :object (list :kind :documented-stage :label label
+                 :subjects subjects
+                 :claims (apply #'claims-about-subjects subjects))
+   :view-properties (list :x x :y y :visible t :pinned nil)))
+
+(defun lisp-critic-genealogy-projection ()
+  "The two histories, side by side, with no edge between them.
+
+The left column is documented research; the right column is code that is
+present here. The only cross-column association is a conceptual comparison,
+and it is typed as such so it cannot be read as lineage."
+  (let ((topics
+          (list (genealogy-station-topic :fischer-lisp-critic 120 80)
+                (genealogy-stage-topic
+                 "documented-later-versions" "documented later versions"
+                 '(:lisp-critic-version-1 :lisp-critic-version-2
+                   :lisp-critic-later :lisp-critic-zmacs)
+                 120 240)
+                (genealogy-stage-topic
+                 "critiquing-paradigm" "broader critiquing paradigm"
+                 '(:critiquing-paradigm) 120 400)
+                (genealogy-station-topic :riesbeck-lisp-critic 620 80)
+                (genealogy-station-topic :beane-asdf-adaptation 620 220)
+                (genealogy-station-topic :a-critic-for-lisp-station 620 360)
+                (genealogy-station-topic :dreyeck-lisp-critic 620 500)))
+        (associations
+          (list
+           ;; Research line: documented succession only.
+           (dreyeck/topicmap:make-topicmap-association
+            :id "research-1" :type :documented-successor
+            :from "fischer-lisp-critic" :to "documented-later-versions")
+           (dreyeck/topicmap:make-topicmap-association
+            :id "research-2" :type :documented-successor
+            :from "documented-later-versions" :to "critiquing-paradigm")
+           ;; Code line: what the source itself records.
+           (dreyeck/topicmap:make-topicmap-association
+            :id "code-1" :type :port/adaptation
+            :from "riesbeck-lisp-critic" :to "beane-asdf-adaptation")
+           (dreyeck/topicmap:make-topicmap-association
+            :id "code-2" :type :local-extraction
+            :from "beane-asdf-adaptation" :to "a-critic-for-lisp-station")
+           (dreyeck/topicmap:make-topicmap-association
+            :id "code-3" :type :hyperdoc-projection
+            :from "a-critic-for-lisp-station" :to "dreyeck-lisp-critic")
+           ;; The one edge across the columns. Not a genealogy edge.
+           (dreyeck/topicmap:make-topicmap-association
+            :id "comparison" :type :conceptual-comparison
+            :from "fischer-lisp-critic" :to "riesbeck-lisp-critic"
+            :properties '(:note "compared, not descended; no source lineage established")))))
+    (dreyeck/topicmap:make-topicmap-projection
+     :source :lisp-critic-genealogy
+     :topics topics :associations associations
+     :view-properties '(:width 1000 :height 620))))
+
+;;
+;; The discourse: only the questions the comparison actually raises.
+;;
+
+(defun discourse-claim-object (statement support related)
+  (list :kind :discourse-claim :statement statement :support support
+        :related-claims (apply #'claims-about-subjects related)))
+
+(defun lisp-critic-genealogy-discourse ()
+  "The few questions this comparison raises, with their claims and support.
+
+Deliberately small. The full provenance record stays in the claim views;
+this projection carries only what a reader would actually ask."
+  (flet ((question (id label x y)
+           (dreyeck/topicmap:make-topicmap-topic
+            :id id :type :question :label label
+            :object (list :kind :discourse-question :question label)
+            :view-properties (list :x x :y y :visible t :pinned nil)))
+         (claim (id label object x y)
+           (dreyeck/topicmap:make-topicmap-topic
+            :id id :type :claim :label label :object object
+            :view-properties (list :x x :y y :visible t :pinned nil)))
+         (source (id label x y)
+           (dreyeck/topicmap:make-topicmap-topic
+            :id id :type :source :label label
+            :object (list :kind :discourse-source :source label)
+            :view-properties (list :x x :y y :visible t :pinned nil))))
+    (dreyeck/topicmap:make-topicmap-projection
+     :source :lisp-critic-discourse
+     :topics
+     (list
+      (question "q-linter" "Was Fischer's Lisp Critic essentially a linter?"
+                80 80)
+      (claim "c-linter" "No: an integrated environment"
+             (discourse-claim-object
+              "No. It was described as an integrated environment for criticism, explanation, learning and user modelling."
+              "Fischer 1987" '(:fischer-1987))
+             480 80)
+      (source "s-linter" "Fischer 1987" 880 80)
+
+      (question "q-descent" "Does Riesbeck's lisp-critic descend from Fischer's?"
+                80 240)
+      (claim "c-descent" "No source lineage has been established"
+             (discourse-claim-object
+              "No source lineage has been established, in either direction."
+              "No provenance statement observed in the inspected code line."
+              '(:fischer-to-riesbeck))
+             480 240)
+      (source "s-descent" "Inspected vendor source: no attribution found"
+              880 240)
+
+      (question "q-hyperdoc" "What does HyperDoc add?" 80 400)
+      (claim "c-hyperdoc" "It separates execution from critique"
+             (discourse-claim-object
+              "It separates a critic execution from the resulting Critique and makes both inspectable."
+              "Current repository implementation and tests."
+              '(:riesbeck-engine))
+             480 400)
+      (source "s-hyperdoc" "Repository implementation and tests" 880 400))
+     :associations
+     (list
+      (dreyeck/topicmap:make-topicmap-association
+       :id "a-linter" :type :answered-by :from "q-linter" :to "c-linter")
+      (dreyeck/topicmap:make-topicmap-association
+       :id "s-linter-edge" :type :supported-by
+       :from "c-linter" :to "s-linter")
+      (dreyeck/topicmap:make-topicmap-association
+       :id "a-descent" :type :answered-by :from "q-descent" :to "c-descent")
+      (dreyeck/topicmap:make-topicmap-association
+       :id "s-descent-edge" :type :supported-by
+       :from "c-descent" :to "s-descent")
+      (dreyeck/topicmap:make-topicmap-association
+       :id "a-hyperdoc" :type :answered-by
+       :from "q-hyperdoc" :to "c-hyperdoc")
+      (dreyeck/topicmap:make-topicmap-association
+       :id "s-hyperdoc-edge" :type :supported-by
+       :from "c-hyperdoc" :to "s-hyperdoc"))
+     :view-properties '(:width 1200 :height 520))))
+
 (defun resolve-executability (claim)
   "Answer EXECUTABLE-HERE-P for the runtime asking.
 
@@ -547,18 +718,24 @@ reading cannot quietly promote a documented claim into a demonstrated one."
      :evidence-status :observed)))
 
 (hyperdoc:defexample lisp-critic-genealogy-example
-  "Every station with its evidence status and its relation to its neighbours.
+  "Inspect the Lisp Critic genealogy."
+  (lisp-critic-genealogy-projection))
 
-Read the :RELATION-TO-PREDECESSOR values: between the two lines it is
-:CONCEPTUAL-RESEMBLANCE, never a descent claim."
+(hyperdoc:defexample lisp-critic-discourse-example
+  "Explore the questions and claims around the genealogy."
+  (lisp-critic-genealogy-discourse))
+
+(hyperdoc:defexample current-critique-example
+  "Inspect one current HyperDoc Critique."
+  (critic:car-cdr-critique-example))
+
+(hyperdoc:defexample genealogy-stations-example
+  "The station records behind the genealogy, with their evidence status.
+
+Secondary to the genealogy view: this is the data, not the reading."
   (list :kind :genealogy
         :engine-available-p (engine-available-p)
         :stations (genealogy-in-this-runtime)
-        :lines (flet ((line (key)
-                        (remove-if-not (lambda (station)
-                                         (eq key (getf station :line)))
-                                       (genealogy-in-this-runtime))))
-                 (list :research (line :research) :code (line :code)))
         :no-descent-claim-between-lines t
         :evidence-status :observed))
 
