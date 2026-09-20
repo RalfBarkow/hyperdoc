@@ -182,8 +182,129 @@ the second. Both answers below come from the node's own record."
         (html-inspector-views:html
           (:p (html-inspector-views:esc empty))))))
 
+(defun component-tree-list (tree)
+  (html-inspector-views:html
+    (:ul
+     (dolist (node tree)
+       (html-inspector-views:html
+         (:li (html-inspector-views:esc (car node))
+              (when (cdr node) (component-tree-list (cdr node)))))))))
+
+(defun runtime-row (label value)
+  "A row whose truth depends on the image this is rendered in."
+  (claim-view-row (format nil "~A (this runtime)" label)
+                  (if value "yes" "no")))
+
+(html-inspector-views:defview page-attached-system-overview (station cons)
+  "The wrapper system as it was observed, rather than as a genealogy node.
+
+Every value below is read at render time from one of three places that
+can disagree — the source binding, ASDF, and the page's own assets — and
+the view says which. Nothing is taken from the genealogy plist."
+  (when (eq :a-critic-for-lisp-station (getf station :station))
+    (let* ((observation (a-critic-for-lisp-observation))
+           (attachment (getf observation :page-attachment))
+           (discovery (getf attachment :discovery))
+           (system (getf observation :wrapper-system))
+           (wrapped (getf observation :wrapped-source))
+           (loading (getf observation :loading)))
+      (html-inspector-views:html-view
+          :title "Page-attached ASDF wrapper system" :priority 0
+        (html-inspector-views:html
+          (:h2 (html-inspector-views:esc (getf observation :name)))
+          (:p (html-inspector-views:esc
+               "An ASDF system that lives beside a wiki page rather than in this repository, and carries a copy of the engine it wraps."))
+
+          (:h3 "Page attachment")
+          (:table :class "inspector-table"
+            (claim-view-row "page" (or (getf discovery :page-title)
+                                       "not read in this runtime"))
+            (claim-view-row "slug" (getf attachment :slug))
+            (claim-view-row "page assets"
+                            (if (getf attachment :asset-root-present-p)
+                                "available locally"
+                                "not available in this runtime")))
+          (:p "Asset root: "
+              (html-inspector-views:object-ref (getf attachment :asset-root)))
+          (when (getf discovery :page-file)
+            (html-inspector-views:html
+              (:p "Page: "
+                  (html-inspector-views:object-ref
+                   (getf discovery :page-file)))))
+          (dolist (asd (getf discovery :asdf-files))
+            (html-inspector-views:html
+              (:p "System definition, found by page-attached discovery: "
+                  (html-inspector-views:object-ref asd))))
+          (:p (html-inspector-views:esc
+               "The site root above is derived from the asset root, not read from the binding: the binding's site and page slots exist on its class but are unbound on this instance."))
+
+          (:h3 "ASDF definition")
+          (if (getf system :read-p)
+              (html-inspector-views:html
+                (:table :class "inspector-table"
+                  (claim-view-row "system" (getf system :name))
+                  (claim-view-row "depends on"
+                                  (format nil "~{~A~^, ~}"
+                                          (getf system :depends-on))))
+                (:p "Components, as ASDF holds them:")
+                (component-tree-list (getf system :components))
+                (:p "Definition file: "
+                    (html-inspector-views:object-ref
+                     (getf system :source-file))))
+              (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     (format nil "The system definition could not be read here: ~A"
+                             (getf system :why))))))
+
+          (:h3 "Wrapped source")
+          (:table :class "inspector-table"
+            (claim-view-row "role" (getf wrapped :role))
+            (claim-view-row "present"
+                            (if (getf wrapped :present-p)
+                                "yes" "not in this runtime")))
+          (:p "Directory: "
+              (html-inspector-views:object-ref (getf wrapped :directory)))
+          (:p (html-inspector-views:esc
+               "Riesbeck's own tree has not been observed here. It is attested inside these files, by the README and the dated update history, and is not held as a separate artifact."))
+          (when (getf wrapped :files)
+            (html-inspector-views:html
+              (:ul (dolist (file (getf wrapped :files))
+                     (html-inspector-views:html
+                       (:li (html-inspector-views:esc file)))))))
+
+          (:h3 "Loading")
+          (:table :class "inspector-table"
+            (claim-view-row "wrapper system" (getf loading :wrapper-system))
+            (claim-view-row "wrapper loader"
+                            (format nil "~A::~A" (getf loading :wrapper-package)
+                                    (getf loading :wrapper-loader)))
+            (claim-view-row "wrapper entrypoint"
+                            (format nil "~A::~A" (getf loading :wrapper-package)
+                                    (getf loading :wrapper-entrypoint)))
+            (claim-view-row "upstream system" (getf loading :upstream-system))
+            (claim-view-row "upstream entrypoint"
+                            (format nil "~A::~A" (getf loading :upstream-package)
+                                    (getf loading :upstream-entrypoint)))
+            (runtime-row "assets reachable" (getf loading :assets-present-p))
+            (runtime-row "engine loaded" (getf loading :engine-loaded-here-p)))
+          (:p "Reached through the source binding "
+              (html-inspector-views:object-ref (getf observation :binding))
+              ", which holds the location, puts it on ASDF's registry, loads the wrapper system and records the provenance.")
+
+          (:h3 "Workspace")
+          (:table :class "inspector-table"
+            (claim-view-row "page attachment"
+                            (if (getf discovery :asdf-files)
+                                "discovered" "not discovered in this runtime"))
+            (claim-view-row "workspace reconstruction"
+                            "not attempted here; the recorded observation is that it does not resolve for this system"))
+          (:p (html-inspector-views:esc
+               "Page attachment is not itself a Workspace. It is what a Workspace reconstruction would start from.")))))))
+
 (html-inspector-views:defview genealogy-station-overview (station cons)
-  (when (eq :station (first station))
+  (when (and (eq :station (first station))
+             ;; This node has a view of its own that answers better.
+             (not (eq :a-critic-for-lisp-station (getf station :station))))
     (let* ((relations (genealogy-node-relations (station-node-id station)))
            (subjects (claim-subjects-relevant-to-node (getf station :station)))
            (claims (apply #'claims-about-subjects subjects)))
@@ -215,6 +336,23 @@ the second. Both answers below come from the node's own record."
                (html-inspector-views:html
                  (:p (html-inspector-views:esc
                       "No claims are linked to this genealogy node."))))))
+       (historical-raw-view station)))))
+
+(html-inspector-views:defview page-attached-system-context (station cons)
+  "Relations and raw data for the node that has its own primary view."
+  (when (eq :a-critic-for-lisp-station (getf station :station))
+    (let ((relations (genealogy-node-relations (station-node-id station))))
+      (list
+       (html-inspector-views:html-view :title "Relations" :priority 2
+         (html-inspector-views:html
+           (:h3 "Outgoing")
+           (render-relation-list (getf relations :outgoing)
+                                 "This node leads nowhere in the genealogy.")
+           (:h3 "Incoming")
+           (render-relation-list (getf relations :incoming)
+                                 "Nothing in the genealogy leads here.")))
+       (html-inspector-views:html-view :title "Genealogy record" :priority 3
+         (station-field-rows station))
        (historical-raw-view station)))))
 
 (html-inspector-views:defview documented-stage-overview (stage cons)

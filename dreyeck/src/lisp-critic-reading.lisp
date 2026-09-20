@@ -37,6 +37,7 @@
            #:source-passage-for
            #:source-passage-for-claim-id
            #:genealogy-node-relations
+           #:a-critic-for-lisp-observation
            #:station-node-id
            #:claim-subjects-relevant-to-node
            #:claim-for-source-passage
@@ -163,7 +164,7 @@ explicitly not a whole-program correctness framework."
       :authors ("HyperDoc project")
       :language "Common Lisp"
       :runtime "loaded on demand from a page-attached wrapper outside this repository"
-      :source-availability :present-in-local-checkout
+      :source-availability :present-in-page-assets
       :provenance (:wrapper-system "a-critic-for-lisp"
                    :patch-notes "PATCH-NOTES.md")
       :documented-changes
@@ -535,7 +536,7 @@ about the thing in the box.")
      . "historical implementation source not observed")
     (:vendored-in-source-station
      . "source copy inside the page-attached wrapper")
-    (:present-in-local-checkout . "source available locally")
+    (:present-in-page-assets . "page assets, outside this repository")
     (:in-this-repository . "repository source"))
   "Where a node's source is, in words.
 
@@ -1093,6 +1094,118 @@ Riesbeck/Beane engine, which this runtime cannot reach." name)))
 repository, which this reading reaches through a source binding rather than ~
 a dependency. The binding is deliberately not deployed. Where it resolves, ~
 this definition is source-observed and executable; here it is neither."))))))
+
+(defun %asdf-component-tree (component)
+  "COMPONENT and its children as (name . children), read from ASDF itself."
+  (cons (asdf:component-name component)
+        (when (typep component 'asdf:parent-component)
+          (mapcar #'%asdf-component-tree (asdf:component-children component)))))
+
+(defun %wrapper-system-observation (binding)
+  "Read the wrapper system from ASDF, or say why it could not be read.
+
+The system definition is page-attached, so it is not on the registry of
+an ordinary image. The asset root is bound around the lookup the same way
+the loader binds it, and nothing is loaded — a definition is read, not
+executed."
+  (let ((asset-root (%binding-asset-pathname binding))
+        (name (critic:lisp-critic-source-station-wrapper-system-of binding)))
+    (handler-case
+        (let* ((asdf/system-registry:*central-registry*
+                 (cons asset-root asdf/system-registry:*central-registry*))
+               (system (asdf:find-system name)))
+          (list :read-p t
+                :name (asdf:component-name system)
+                :source-file (asdf:system-source-file system)
+                :depends-on (asdf:system-depends-on system)
+                :components (mapcar #'%asdf-component-tree
+                                    (asdf:component-children system))))
+      (error (condition)
+        (list :read-p nil
+              :name name
+              :why (format nil "~A" condition))))))
+
+(defun %binding-asset-pathname (binding)
+  (uiop:ensure-directory-pathname
+   (%home-relative-pathname
+    (critic:lisp-critic-source-station-asset-root-of binding))))
+
+(defun %home-relative-pathname (path)
+  (let ((prefix "~/"))
+    (if (and (>= (length path) (length prefix))
+             (string= prefix path :end2 (length prefix)))
+        (merge-pathnames (subseq path (length prefix)) (user-homedir-pathname))
+        (parse-namestring path))))
+
+(defun %page-attachment-observation (binding)
+  "Where the assets sit, and what page discovery finds there.
+
+The binding's SITE and PAGE slots exist on the class but are unbound on
+this instance, so neither is read from it. The site root is derived from
+the asset root by inverting the layout LOCAL-FEDWIKI-ASSETS-ROOT builds —
+site/assets/pages/slug — and is marked as derived, not observed."
+  (let* ((asset-root (%binding-asset-pathname binding))
+         (slug (car (last (pathname-directory asset-root))))
+         (site-root (make-pathname
+                     :directory (butlast (pathname-directory asset-root) 3)
+                     :defaults asset-root)))
+    (list :asset-root asset-root
+          :asset-root-present-p (and (probe-file asset-root) t)
+          :slug slug
+          :site-root site-root
+          :site-root-derived-p t
+          :discovery
+          (handler-case
+              (uiop:symbol-call :dreyeck/fedwiki-assets
+                                :page-attached-asdf-discovery-observation
+                                site-root slug)
+            (error (condition) (list :failed (format nil "~A" condition)))))))
+
+(defun %wrapped-source-observation ()
+  "The source tree the wrapper carries, and what is actually in it."
+  (let* ((directory (vendored-engine-directory))
+         (present (and (probe-file directory) t)))
+    (list :directory directory
+          :present-p present
+          :files (when present
+                   (sort (mapcar #'file-namestring
+                                 (directory (merge-pathnames "*.*" directory)))
+                         #'string<))
+          ;; What is here is Beane's 2004 distribution. Riesbeck's own
+          ;; tree has not been observed anywhere in this workspace; it is
+          ;; attested inside these files, by the README and the dated
+          ;; [CKR] update history, not held as a separate artifact.
+          :role "Beane's 2004 ASDF-loadable distribution of Riesbeck's Lisp Critic"
+          :riesbeck-original-observed-p nil)))
+
+(defun a-critic-for-lisp-observation ()
+  "What is actually known about the page-attached wrapper system.
+
+Assembled from three separate sources, kept apart because they can
+disagree: the source binding, ASDF, and the page's own assets. Nothing
+here is copied from the genealogy plist."
+  (let ((binding (critic:make-critic-source-station)))
+    (list
+     :kind :page-attached-system
+     :name (critic:lisp-critic-source-station-wrapper-system-of binding)
+     :binding binding
+     :binding-site-bound-p (slot-boundp binding 'critic::site)
+     :binding-page-bound-p (slot-boundp binding 'critic::page)
+     :page-attachment (%page-attachment-observation binding)
+     :wrapper-system (%wrapper-system-observation binding)
+     :wrapped-source (%wrapped-source-observation)
+     :loading
+     (list :wrapper-system (critic:lisp-critic-source-station-wrapper-system-of binding)
+           :wrapper-package (critic:lisp-critic-source-station-wrapper-package-of binding)
+           :wrapper-loader (critic:lisp-critic-source-station-wrapper-loader-symbol-of binding)
+           :wrapper-entrypoint (critic:lisp-critic-source-station-wrapper-entrypoint-symbol-of binding)
+           :upstream-system (critic:lisp-critic-source-station-upstream-system-of binding)
+           :upstream-package (critic:lisp-critic-source-station-upstream-package-of binding)
+           :upstream-entrypoint (critic:lisp-critic-source-station-upstream-file-entrypoint-symbol-of binding)
+           :assets-present-p (critic:lisp-critic-source-station-present-p binding)
+           :engine-loaded-here-p (and (find-package :lisp-critic) t))
+     :provenance (critic:lisp-critic-source-station-provenance-of binding)
+     :evidence-status :observed)))
 
 (defun engine-source-view (name)
   "Transclude one definition of the vendored engine, by name.

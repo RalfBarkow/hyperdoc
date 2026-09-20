@@ -389,6 +389,73 @@ shown."
              "No node names Riesbeck.")))
   t)
 
+(defun check-page-attached-system-view ()
+  "a-critic-for-lisp must be inspectable as what was observed about it.
+
+The node used to answer with the generic genealogy profile, whose
+\"Source status\" said \"present in local checkout\" — wrong, because the
+asset tree is outside every worktree, and too coarse, because wrapper
+source, page assets and the vendored engine are three different things.
+
+The contract is that the visible values are read from the objects that
+hold them, not written into the view. Where the assets are reachable the
+test compares the view against ASDF and against page discovery; where
+they are not, it only requires the view to render and stay honest."
+  (let* ((station (reading:lisp-critic-station :a-critic-for-lisp-station))
+         (views (views:all-views station))
+         (titles (mapcar #'views:view-title views))
+         (primary (first views))
+         (observation (reading:a-critic-for-lisp-observation))
+         (attachment (getf observation :page-attachment))
+         (discovery (getf attachment :discovery))
+         (system (getf observation :wrapper-system))
+         (html (views:view-html primary)))
+    (check (equal "Page-attached ASDF wrapper system" (views:view-title primary))
+           "The primary view for a-critic-for-lisp is ~S." (views:view-title primary))
+    ;; Secondary views must survive; they are how the node stays a
+    ;; genealogy node as well as a system.
+    (dolist (title '("Relations" "Genealogy record" "Raw Lisp"))
+      (check (member title titles :test #'equal)
+             "The ~S view disappeared; titles are ~S." title titles))
+    ;; The vocabulary this slice exists to remove.
+    (dolist (phrase '("present in local checkout" "source station"
+                      "source in the workspace" "vendored through"))
+      (check (not (search phrase html :test #'char-equal))
+             "The system view still says ~S." phrase))
+    ;; Values must come from the observed objects.
+    (when (getf attachment :asset-root-present-p)
+      (check (search (getf discovery :page-title) html)
+             "The view does not show the page title discovery reports.")
+      (let ((asd (first (getf discovery :asdf-files))))
+        (check asd "Page discovery found no system definition.")
+        (check (search (file-namestring asd) html)
+               "The view does not show the .asd that discovery found.")
+        (check (getf system :read-p)
+               "The wrapper system could not be read although its assets ~
+are here: ~A" (getf system :why))
+        ;; The .asd ASDF used and the .asd discovery found must agree.
+        (check (equal (truename asd) (truename (getf system :source-file)))
+               "Discovery found ~A but ASDF read ~A."
+               asd (getf system :source-file))
+        ;; Components must be the loaded system's, not a copy.
+        (let ((names (mapcar #'car (getf system :components))))
+          (dolist (component names)
+            (check (search component html)
+                   "Component ~S is missing from the view." component))
+          (check (member "package" names :test #'equal)
+                 "The observed components ~S do not look like the wrapper's."
+                 names))))
+    ;; The binding's site/page are unbound, so the view may not claim to
+    ;; have read them from it.
+    (check (not (getf observation :binding-site-bound-p))
+           "The binding now carries a site; the view's note is stale.")
+    (check (not (getf observation :binding-page-bound-p))
+           "The binding now carries a page; the view's note is stale.")
+    ;; Page attachment is not a Workspace.
+    (check (search "not itself a Workspace" html)
+           "The view no longer separates page attachment from Workspace."))
+  t)
+
 (defun check-node-view-shows-the-graph ()
   "The node detail must show the projection's edges, not its own copy.
 
@@ -840,6 +907,7 @@ is honest.~%")
   (check-historical-claims)
   (check-source-passage-navigation)
   (check-node-view-shows-the-graph)
+  (check-page-attached-system-view)
   (check-genealogy-reads-as-domain-language)
   (check-station-claim-links)
   (check-historical-claim-views)
