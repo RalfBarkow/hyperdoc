@@ -107,7 +107,7 @@ Fischer's system; the evidence supports a resemblance of purpose, no more."
       :authors ("Gerhard Fischer")
       :language "LISP"
       :runtime "research environment; not identified in local evidence"
-      :source-availability :not-present-in-this-workspace
+      :source-availability :historical-source-not-observed
       :provenance
       (:primary "Gerhard Fischer, A Critic for LISP, IJCAI-87"
        :primary-url
@@ -163,7 +163,7 @@ explicitly not a whole-program correctness framework."
       :authors ("HyperDoc project")
       :language "Common Lisp"
       :runtime "local source station outside this repository"
-      :source-availability :present-in-workspace
+      :source-availability :present-in-local-checkout
       :provenance (:wrapper-system "a-critic-for-lisp"
                    :patch-notes "PATCH-NOTES.md")
       :documented-changes
@@ -531,16 +531,25 @@ is this projection's word for \"a box in this diagram\" and says nothing
 about the thing in the box.")
 
 (defparameter +source-availability-phrases+
-  '((:not-present-in-this-workspace . "not present here")
-    (:vendored-in-source-station . "vendored in the source station")
-    (:present-in-workspace . "source in the workspace")
-    (:in-this-repository . "in this repository"))
+  '((:historical-source-not-observed
+     . "historical implementation source not observed")
+    (:vendored-in-source-station . "vendored through the local source station")
+    (:present-in-local-checkout . "source available locally")
+    (:in-this-repository . "repository source"))
   "Where a node's source is, in words.
 
 Deliberately about the source and not about whether the thing runs. A
 station's :EXECUTABLE-HERE is true of a full runtime and false of the
 served site, so a caption promising executability would be wrong on the
-server — the failure this reading has already had once.")
+server — the failure this reading has already had once.
+
+\"Workspace\" is deliberately absent. It already names something specific
+in this system: a subject with a discovery, offer and materialization
+lifecycle, where catalog admission and workspace activation are distinct
+states. Using the same word for \"the files happen to be in the checkout
+I am standing in\" spends that distinction for nothing, especially here,
+where the node already knows something sharper — whether the source came
+through a source station, the repository, or was never observed at all.")
 
 (defun genealogy-station-topic (key x y)
   (let ((station (lisp-critic-station key))

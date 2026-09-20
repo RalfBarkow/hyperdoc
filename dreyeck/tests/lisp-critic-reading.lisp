@@ -357,6 +357,21 @@ shown."
             (check (not (search "UNSPECIFIED" segment :test #'char-equal))
                    "Node ~S is captioned ~S." (tm:topicmap-topic-id-of topic)
                    caption)))))
+    ;; "Workspace" is a reserved word here: it names a subject with a
+    ;; discovery/offer/materialization lifecycle elsewhere in this system.
+    ;; A node whose source status borrows it to mean "in the checkout I am
+    ;; standing in" spends that distinction. The node already knows
+    ;; something sharper, so it must say that instead.
+    (dolist (topic topics)
+      (let ((caption (dreyeck/inspector/topicmap::topicmap-topic-caption topic)))
+        (check (not (search "workspace" caption :test #'char-equal))
+               "Node ~S says ~S, but workspace means something else here."
+               (tm:topicmap-topic-id-of topic) caption)))
+    (dolist (station (reading:lisp-critic-genealogy))
+      (let ((status (symbol-name (getf station :source-availability))))
+        (check (not (search "WORKSPACE" status))
+               "Station ~S records its source as ~A."
+               (getf station :station) status)))
     ;; The scope column said the same nothing on every row, so it is not
     ;; shown. The internal values stay on the element's data- attributes,
     ;; which is why this looks at the reader's table and not at the markup
