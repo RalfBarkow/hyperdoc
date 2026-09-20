@@ -100,6 +100,33 @@
 ;; 3. + 4. Transclusions resolve, and every addressed example runs
 ;;
 
+(defun check-example-result (value expression title where)
+  "An addressed example must run, and a plist result must say what it rests on.
+
+This rule held in two places once — the page check and the Catalog
+runtime check — and a passage added to a page passed the first and failed
+the second. Writing it once is the fix; the WHERE argument is all the two
+callers actually differed by.
+
+Which field answers depends on the kind. A source passage is not evidence
+for anything by itself: what it has to declare is whether its wording was
+read here. What no plist may do is declare nothing."
+  (check (not (typep value 'condition))
+         "~A: ~S on ~S produced ~A." where expression title value)
+  (when (and (consp value) (keywordp (first value)))
+    (if (eq :source-passage (getf value :kind))
+        (progn
+          (check (nth-value 2 (get-properties value '(:passage-observed-p)))
+                 "~A: ~S on ~S returned a passage that does not say whether ~
+it was read here." where expression title)
+          (check (getf value :passage-origin)
+                 "~A: ~S on ~S returned a passage without an origin."
+                 where expression title))
+        (check (getf value :evidence-status)
+               "~A: ~S on ~S returned a plist without an evidence status."
+               where expression title)))
+  t)
+
 (defun check-transclusions-and-examples ()
   (dolist (title +pages+)
     (let* ((page (page-of title))
@@ -121,17 +148,11 @@
           (check (plusp (length (views:view-html value)))
                  "Page ~S: transclusion ~S rendered nothing."
                  title expression)))
-      ;; Every addressed example must run. A plist-shaped result must still
-      ;; carry its evidence status; a projection or a domain object is a
-      ;; legitimate result too and is inspected rather than read as data.
+      ;; Every addressed example must run and, if it is a plist, say what
+      ;; it rests on.
       (dolist (expression (page-expressions page))
-        (let ((value (hyperdoc::parse-and-eval expression)))
-          (check (not (typep value 'condition))
-                 "Page ~S: example ~S produced ~A." title expression value)
-          (when (and (consp value) (keywordp (first value)))
-            (check (getf value :evidence-status)
-                   "Page ~S: example ~S returned a plist without an evidence ~
-status." title expression))))))
+        (check-example-result (hyperdoc::parse-and-eval expression)
+                              expression title "Page"))))
   t)
 
 ;;
@@ -525,14 +546,8 @@ cannot pass on a development image's leftover state."
         ;; Catalog must be able to evaluate all of it.
         (let ((*package* (page-package page)))
           (dolist (expression (page-expressions page))
-            (let ((value (hyperdoc::parse-and-eval expression)))
-              (check (not (typep value 'condition))
-                     "Catalog runtime: ~S on ~S produced ~A."
-                     expression title value)
-              (when (and (consp value) (keywordp (first value)))
-                (check (getf value :evidence-status)
-                       "Catalog runtime: ~S on ~S returned a plist without ~
-an evidence status." expression title)))))))
+            (check-example-result (hyperdoc::parse-and-eval expression)
+                                  expression title "Catalog runtime")))))
     ;; And the critic must genuinely run: a real CAR-CDR match.
     (let* ((match (reading:critic-match-example))
            (record (getf match :record)))

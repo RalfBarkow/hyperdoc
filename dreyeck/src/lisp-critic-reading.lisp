@@ -35,6 +35,7 @@
            #:claims-about
            #:source-passages
            #:source-passage-for
+           #:source-passage-for-claim-id
            #:claim-for-source-passage
            #:claims-for-source-passage
            #:passage-covers-p
@@ -268,17 +269,20 @@ Claims carried only by conversation are not listed here; they are listed
 as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
   (copy-tree
    '(;; The Fischer line. The papers are the sources these claims cite.
-     ;; Neither paper has been read in this workspace, so only the first
-     ;; claim is currently carried by something actually observed here.
+     ;; Two of them are now in this workspace and have been read; the
+     ;; claims resting on a passage read here carry an OBSERVED-LOCATOR
+     ;; and are reachable from that passage. The rest still cite a source
+     ;; nobody here has opened, and say so.
      (:subject :fischer-1987
+      :id :critic-capability
       :claim-type :capability
       :assertion
-      "LISP-CRITIC was an integrated environment: rules, a rule interpreter, a user model, explanation with a knowledge browser and visualization support, and learning on demand."
+      "LISP-CRITIC improved LISP programs locally by rules, and based its advice on the system's model of the user. Explanation and illustration came from additional components around it, among them a knowledge browser and the KAESTLE visualization tool. It was aimed at incremental learning and learning on demand."
       :cited-source-kind :primary-paper
-      :locator "Fischer 1987, A Critic for LISP, IJCAI-87, pp. 177-184"
-      :locator-observed-p nil
-      :observed-evidence-kind :secondary-research-note
-      :observed-locator "~/.wiki/wiki.ralfbarkow.ch/pages/a-critic-for-lisp"
+      :locator "Fischer 1987, A Critic for LISP, IJCAI-87, pp. 177-184, abstract"
+      :locator-observed-p t
+      :observed-evidence-kind :primary-paper
+      :observed-locator "Fischer 1987, IJCAI-87, abstract"
       :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
@@ -299,14 +303,15 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :executable-here-p nil)
 
      (:subject :fischer-1987
+      :id :morel-burns-implementation
       :claim-type :contribution
       :assertion
-      "Morel implemented the explanation capabilities; Burns implemented the statistical analysis."
+      "Morel implemented the explanation capabilities; Burns implemented the statistical analysis package; Cormack analysed user programs with that package."
       :cited-source-kind :primary-paper
-      :locator "Fischer 1987, A Critic for LISP, IJCAI-87, acknowledgements"
-      :locator-observed-p nil
-      :observed-evidence-kind :none-observed
-      :observed-locator nil
+      :locator "Fischer 1987, A Critic for LISP, IJCAI-87, Acknowledgements"
+      :locator-observed-p t
+      :observed-evidence-kind :primary-paper
+      :observed-locator "Fischer 1987, IJCAI-87, Acknowledgements"
       :witness (:author-self-report :acknowledgement)
       :source-observed-p nil
       :executable-here-p nil)
@@ -587,10 +592,10 @@ this projection carries only what a reader would actually ask."
      (list
       (question "q-linter" "Was Fischer's Lisp Critic essentially a linter?"
                 80 80)
-      (claim "c-linter" "No: an integrated environment"
+      (claim "c-linter" "No: advice rests on a user model"
              (discourse-claim-object
-              "No. It was described as an integrated environment for criticism, explanation, learning and user modelling."
-              "Fischer 1987" '(:fischer-1987))
+              "No. Its advice already rested on a model of the user, and explanation and visualization stood beside it as additional components. The word environment is this reading's, not the paper's."
+              "Fischer 1987, abstract (read here)" '(:fischer-1987))
              480 80)
       (source "s-linter" "Fischer 1987" 880 80)
 
@@ -674,7 +679,43 @@ version 2; both had been recorded as \"credited to\"."
       :passage-origin :read-in-this-workspace
       :read-from "Zotero storage M9DJBUDF, PDF text layer"
       :transcription-note
-      "Transcribed from the PDF text layer. Obvious OCR damage repaired: the layer reads \"Bart Bums\" for Bart Burns and sets stray full stops after Boecker and Johl."))))
+      "Transcribed from the PDF text layer. Obvious OCR damage repaired: the layer reads \"Bart Bums\" for Bart Burns and sets stray full stops after Boecker and Johl.")
+
+     (:kind :source-passage
+      :id :fischer-1987-acknowledgements
+      :supports-claims (:morel-burns-implementation)
+      :source "Fischer 1987"
+      :title "A Critic for LISP"
+      :bibliographic
+      "Proceedings of the 10th International Joint Conference on Artificial Intelligence (IJCAI-87), Milan, pp. 177-184"
+      :location "Acknowledgements"
+      :supports
+      "Who implemented which part of the 1987 system."
+      :passage
+      "Many people have contributed to the development of the LISP-CRITIC over the last few years. The author would like to thank especially Heinz-Dieter Boecker, who developed many of the original ideas, the set of rules and the interpreter for it; Andreas Lemke, who contributed to the general framework for incremental learning; Helga Nieper, who developed KAESTLE; Christopher Morel, who implemented the explanation capabilities; Bart Burns, who implemented the statistical analysis package; Catherine Cormack, who analyzed user programs with the statistical package; and Janet Grassia who assisted in editing this paper."
+      :passage-observed-p t
+      :passage-origin :read-in-this-workspace
+      :read-from "Zotero storage VVA5RV4A, PDF text layer"
+      :transcription-note
+      "Transcribed from the PDF text layer. Obvious OCR damage repaired: the layer reads \"Bart Bums\" for Bart Burns and \"KAESne\" for KAESTLE. This paper attributes a specific implementation role to each person; the 1991 acknowledgments instead group Morel, Burns and Cormack as contributors to version 1. The two wordings are recorded separately rather than merged.")
+
+     (:kind :source-passage
+      :id :fischer-1987-abstract
+      :supports-claims (:critic-capability)
+      :source "Fischer 1987"
+      :title "A Critic for LISP"
+      :bibliographic
+      "Proceedings of the 10th International Joint Conference on Artificial Intelligence (IJCAI-87), Milan, pp. 177-184"
+      :location "Abstract"
+      :supports
+      "What the 1987 system did, and how its parts stood to one another."
+      :passage
+      "We have designed and implemented a critic for LISP as a prototype of an intelligent support system. Critics enhance incremental learning of a system and support learning strategies such as learning on demand. Our LISP-CRITIC has knowledge about how to improve LISP programs locally, following a style as defined by its rules. The advice given is based on the hypothesized knowledge of the user contained in the system's model of the user. Additional tools (e.g. a knowledge browser and visualization support) are available to explain and illustrate the advice."
+      :passage-observed-p t
+      :passage-origin :read-in-this-workspace
+      :read-from "Zotero storage VVA5RV4A, PDF text layer"
+      :transcription-note
+      "Transcribed from the cover-sheet abstract in the PDF text layer, which is cleaner than the OCR of the printed page. Obvious OCR damage repaired: the layer reads \"stich as\" for such as and \"llsing\" for using. Note what the passage does not say: the browser and the visualization are \"additional tools\" around the critic, and the body calls them \"additional system components\". Nothing in the paper calls the whole an integrated environment."))))
 
 (defun passage-covers-p (passage claim)
   "Whether PASSAGE is the recorded wording behind CLAIM.
@@ -687,6 +728,14 @@ of them is in this passage."
   (and (getf claim :id)
        (member (getf claim :id) (getf passage :supports-claims))
        t))
+
+(defun source-passage-for-claim-id (id)
+  "The passage recorded for the claim named ID.
+
+Pages cite a claim by id so that a link in prose reaches the same passage
+the claim detail reaches, rather than a second copy of the wording."
+  (find-if (lambda (passage) (member id (getf passage :supports-claims)))
+           (source-passages)))
 
 (defun source-passage-for (claim)
   "The passage recorded for CLAIM, if one exists."

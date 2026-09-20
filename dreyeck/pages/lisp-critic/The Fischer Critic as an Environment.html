@@ -13,20 +13,35 @@ sentence at a time, each with a locator you can re-check.
 
 <p>
 It is tempting to read the system as a sequence — rules produce a critique,
-then an explanation, then eventually a user model. That ordering is wrong
-and it misrepresents what was interesting about the work. The 1987 paper
-describes an <em>integrated environment</em> in which these parts were
-present together:
+then an explanation, then eventually a user model. That ordering is wrong,
+and it misrepresents what was interesting about the work. In the 1987
+abstract the advice is <em>already</em> based on the model of the user; the
+user model is not something the explanation eventually feeds. The paper
+then places the explanatory tools <em>around</em> that critic, as
+"additional tools" and "additional system components":
 </p>
 
 <pre>
-Fischer 1987: integrated critic environment
-  rules
-  rule interpreter
-  user model
-  explanation / knowledge browser / visualization
-  learning on demand
+Fischer 1987, as the paper lays it out
+  the critic
+    rules
+    rule interpreter
+    user model            <- the advice already rests on this
+  additional components, to explain and illustrate the advice
+    knowledge browser
+    KAESTLE (visualization)
+  purpose: incremental learning, learning on demand
 </pre>
+
+<p>
+"Environment" is this reading's word for that arrangement, and the page
+title keeps it. The paper itself does not use it: it says "additional",
+which puts those tools beside the critic rather than inside one integrated
+whole. The distinction is small but it is the kind this reading is for, so
+it is recorded rather than smoothed over. The
+<a expr="(source-passage-for-claim-id :critic-capability)">abstract</a> is
+here to be checked against.
+</p>
 
 <p>
 The user model is not a later addition to a linter. It is part of what the
@@ -57,9 +72,16 @@ later work
 Boecker is documented as the developer of the original ideas, the rule set
 and the rule interpreter. That is a contribution credited in the
 acknowledgements — not co-authorship of the 1987 paper, and the reading
-keeps those apart. Morel implemented the explanation capabilities and Burns
-the statistical analysis. The 1991 paper additionally credits Morel, Burns
-and Cormack for Version 1, and Rieman, Johl and Lynn for Version 2.
+keeps those apart. The
+<a expr="(source-passage-for-claim-id :morel-burns-implementation)">1987
+acknowledgements</a> give each person a specific job: Morel implemented the
+explanation capabilities, Burns the statistical analysis package, and
+Cormack analysed user programs with that package. The
+<a expr="(source-passage-for-claim-id :version-1-contribution)">1991
+acknowledgments</a> do not repeat those jobs; they group the same three as
+contributors to version 1, and name Rieman, Johl and Lynn for version 2.
+Both wordings are kept, because the difference between them is itself
+something a later reader may want.
 </p>
 
 <h2>Every claim, with its provenance</h2>
