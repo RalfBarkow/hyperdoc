@@ -8,16 +8,10 @@
 (defun configured-site-root ()
   "Return the local FedWiki page-store root used by the /view route.
 
-HYPERDOC_FEDWIKI_SITE_ROOT overrides the default ~/.wiki/dreyeck.ch/ root."
-  (uiop:ensure-directory-pathname
-   (let ((configured
-           (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT")))
-     (if (and configured
-              (> (length configured) 0))
-         (pathname configured)
-         (merge-pathnames
-          #P".wiki/dreyeck.ch/"
-          (user-homedir-pathname))))))
+The answer now comes from DREYECK/FEDWIKI-ASSETS, so that anything else
+needing this runtime's site root asks the same question rather than
+rebuilding the default. HYPERDOC_FEDWIKI_SITE_ROOT still overrides it."
+  (dreyeck/fedwiki-assets:configured-local-site-root))
 
 (defun view-slug-from-pathname (pathname)
   "Return the single page slug encoded by /view/<slug>, or NIL."

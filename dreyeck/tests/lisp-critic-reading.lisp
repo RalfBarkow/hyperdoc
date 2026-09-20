@@ -394,6 +394,97 @@ shown."
          (view (first (views:all-views station))))
     (values (views:view-html view) station)))
 
+(defun check-asset-root-resolution ()
+  "A page's identity must survive a change of machine; a path must not.
+
+The served runtime showed an asset root under a home directory that
+does not exist there, and then reported the page unread, the assets
+unavailable and the ASDF component missing. Those were symptoms: the
+resolution happened before ASDF, against a site name compiled in from
+the machine the engine was first read on.
+
+These cases are written against directories this test makes, so that
+none of them depends on this machine's home, host name or wiki."
+  (let* ((slug reading::+engine-page-slug+)
+         (relative (format nil "assets/pages/~A/" slug)))
+    (check (stringp slug) "The engine page has no stable slug.")
+    ;; 1. A runtime whose configured site holds the page resolves it,
+    ;;    and says that is how it resolved.
+    (let* ((site (uiop:ensure-directory-pathname
+                  (merge-pathnames "dreyeck-asset-resolution-site/"
+                                   (uiop:temporary-directory))))
+           (assets (merge-pathnames relative site)))
+      (unwind-protect
+           (progn
+             (ensure-directories-exist assets)
+             (uiop:with-current-directory ((uiop:getcwd))
+               (let ((original (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT")))
+                 (unwind-protect
+                      (progn
+                        (setf (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT")
+                              (namestring site))
+                        (multiple-value-bind (root source)
+                            (reading::resolve-engine-asset-root)
+                          (check (equal (truename assets) (truename root))
+                                 "A configured site holding the page resolved ~
+to ~A instead of ~A." root assets)
+                          (check (eq :configured-site-root source)
+                                 "It resolved by ~S rather than by the ~
+configured site." source)))
+                   (setf (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT")
+                         (or original ""))))))
+        (uiop:delete-directory-tree site :validate t :if-does-not-exist :ignore)))
+    ;; 2. The same identity under a different absolute root, with no
+    ;;    change to code or data.
+    (let* ((other (uiop:ensure-directory-pathname
+                   (merge-pathnames "dreyeck-asset-resolution-other/"
+                                    (uiop:temporary-directory))))
+           (assets (merge-pathnames relative other)))
+      (unwind-protect
+           (progn
+             (ensure-directories-exist assets)
+             (let ((original (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT")))
+               (unwind-protect
+                    (progn
+                      (setf (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT")
+                            (namestring other))
+                      (check (equal (truename assets)
+                                    (truename (reading::resolve-engine-asset-root)))
+                             "The same page did not resolve under a second root."))
+                 (setf (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT")
+                       (or original "")))))
+        (uiop:delete-directory-tree other :validate t :if-does-not-exist :ignore)))
+    ;; 3. An explicit root that does not exist must leave the runtime
+    ;;    unresolved rather than quietly using somewhere else, and the
+    ;;    view must say so without printing a path as though it held.
+    (let ((original (uiop:getenv "DREYECK_LISP_CRITIC_ROOT")))
+      (unwind-protect
+           (progn
+             (setf (uiop:getenv "DREYECK_LISP_CRITIC_ROOT")
+                   "/nonexistent/dreyeck-asset-resolution/")
+             (multiple-value-bind (root source candidates)
+                 (reading::resolve-engine-asset-root)
+               (check (null root) "An absent explicit root still resolved to ~A."
+                      root)
+               (check (null source) "An unresolved runtime named a source.")
+               (check (= 1 (length candidates))
+                      "An explicit root did not stop the search: ~S."
+                      (mapcar #'car candidates)))
+             (let* ((station (reading:lisp-critic-station
+                              :a-critic-for-lisp-station))
+                    (html (views:view-html (first (views:all-views station)))))
+               (check (search "Not resolved here" html)
+                      "An unresolved runtime does not say so.")
+               (check (not (search "Asset root:" html))
+                      "An unresolved runtime still prints an asset root.")))
+        (setf (uiop:getenv "DREYECK_LISP_CRITIC_ROOT") (or original ""))))
+    ;; The identity itself may not contain anyone's home directory.
+    (check (not (search "/Users/" relative))
+           "The relative asset location is not relative.")
+    (check (not (search "/home/" relative))
+           "The relative asset location is not relative."))
+  t)
+
 (defun check-source-representations ()
   "No node may report another node's source or another node's runtime.
 
@@ -962,6 +1053,7 @@ is honest.~%")
   (check-node-view-shows-the-graph)
   (check-page-attached-system-view)
   (check-source-representations)
+  (check-asset-root-resolution)
   (check-genealogy-reads-as-domain-language)
   (check-station-claim-links)
   (check-historical-claim-views)

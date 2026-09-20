@@ -79,13 +79,77 @@
   "The local research page that cites Fischer's paper. Not part of this
 repository: a workspace artifact, quoted here as documentation only.")
 
+(defparameter +engine-page-slug+ "a-critic-for-lisp"
+  "The page whose assets carry the engine.
+
+This, the relative location assets/pages/<slug>/ and the system name are
+the whole of the identity. Everything absolute is resolved per runtime.")
+
+(defun engine-asset-root-candidates ()
+  "Where this runtime could have the engine page's assets, in order.
+
+Each entry is (source . directory). The sources are named because an
+absolute path is worth little without knowing which question produced
+it: a developer machine and a server answer differently, and a view
+that shows the path alone invites the reader to believe a path that was
+true somewhere else."
+  (let ((explicit (uiop:getenv "DREYECK_LISP_CRITIC_ROOT")))
+    ;; An explicit root is the whole answer, not the first guess. Falling
+    ;; through from it to somewhere else would mean a runtime told to
+    ;; look in one place quietly used another — and would make a runtime
+    ;; pointed at nothing indistinguishable from one pointed nowhere in
+    ;; particular.
+    (when (and explicit (plusp (length explicit)))
+      (return-from engine-asset-root-candidates
+        (list (cons :explicit-asset-root
+                    (uiop:ensure-directory-pathname explicit)))))
+    (remove
+     nil
+     (list
+      (cons :configured-site-root
+            (dreyeck/fedwiki-assets:page-assets-directory
+             (dreyeck/fedwiki-assets:configured-local-site-root)
+             +engine-page-slug+))
+      ;; The site this engine was first read from. Kept last and named,
+      ;; because it is where the assets happen to be on one machine and
+      ;; nowhere else.
+      (cons :historical-site
+            (dreyeck/fedwiki-assets:page-assets-directory
+             (merge-pathnames ".wiki/wiki.ralfbarkow.ch/"
+                              (user-homedir-pathname))
+             +engine-page-slug+))))))
+
+(defun resolve-engine-asset-root ()
+  "Resolve the engine page's assets in this runtime.
+
+Returns (values directory source candidates). DIRECTORY is NIL when no
+candidate exists, which is a different answer from a directory that
+exists but holds nothing: the first says this runtime does not know
+where the page is, the second says the page is not deployed here."
+  (let ((candidates (engine-asset-root-candidates)))
+    (loop for (source . directory) in candidates
+          when (probe-file directory)
+            do (return (values directory source candidates))
+          finally (return (values nil nil candidates)))))
+
+(defun engine-source-binding ()
+  "The source binding for this runtime's resolved asset root.
+
+The binding holds an absolute path, so it must be built from what this
+runtime resolved rather than from a default compiled in elsewhere."
+  (let ((root (resolve-engine-asset-root)))
+    (if root
+        (critic:make-critic-source-station (namestring root))
+        (critic:make-critic-source-station
+         (namestring (cdr (first (last (engine-asset-root-candidates)))))))))
+
 (defun vendored-engine-directory ()
   "The vendored Riesbeck/Beane sources inside the local source station."
   (merge-pathnames
    "vendor/lisp-critic/"
    (uiop:ensure-directory-pathname
     (critic:lisp-critic-source-station-asset-root-of
-     (critic:make-critic-source-station)))))
+     (engine-source-binding)))))
 
 (defun vendored-engine-file (name)
   (let ((pathname (merge-pathnames name (vendored-engine-directory))))
@@ -994,7 +1058,7 @@ genealogy rather than silently folded into it."
 
 Each rung is checked against the filesystem and the running image, so the
 reading cannot quietly promote a documented claim into a demonstrated one."
-  (let* ((station (critic:make-critic-source-station))
+  (let* ((station (engine-source-binding))
          (engine (vendored-engine-file "lisp-critic.lisp"))
          (rules (vendored-engine-file "lisp-rules.lisp"))
          ;; Run first: the run is what loads the engine, so asking whether
@@ -1111,7 +1175,7 @@ The engine is not an ordinary dependency of this repository. It is loaded
 out of a local source station that is deliberately not deployed, so whether
 it is reachable is a property of the runtime, not of the reading."
   (and (critic:lisp-critic-source-station-present-p
-        (critic:make-critic-source-station))
+        (engine-source-binding))
        t))
 
 (defun runtime-evidence-status ()
@@ -1207,28 +1271,38 @@ executed."
         (parse-namestring path))))
 
 (defun %page-attachment-observation (binding)
-  "Where the assets sit, and what page discovery finds there.
+  "The page this system belongs to, and where this runtime found it.
 
-The binding's SITE and PAGE slots exist on the class but are unbound on
-this instance, so neither is read from it. The site root is derived from
-the asset root by inverting the layout LOCAL-FEDWIKI-ASSETS-ROOT builds —
-site/assets/pages/slug — and is marked as derived, not observed."
-  (let* ((asset-root (%binding-asset-pathname binding))
-         (slug (car (last (pathname-directory asset-root))))
-         (site-root (make-pathname
-                     :directory (butlast (pathname-directory asset-root) 3)
-                     :defaults asset-root)))
-    (list :asset-root asset-root
-          :asset-root-present-p (and (probe-file asset-root) t)
-          :slug slug
-          :site-root site-root
-          :site-root-derived-p t
-          :discovery
-          (handler-case
-              (uiop:symbol-call :dreyeck/fedwiki-assets
-                                :page-attached-asdf-discovery-observation
-                                site-root slug)
-            (error (condition) (list :failed (format nil "~A" condition)))))))
+Two levels, deliberately not mixed. The identity — the slug, the
+relative location assets/pages/<slug>/ and the system name — is the same
+everywhere. The absolute directory is this runtime's answer, and which
+question produced it is reported with it, because a path that was true
+on another machine looks exactly like one that is true here."
+  (declare (ignorable binding))
+  (multiple-value-bind (resolved source candidates) (resolve-engine-asset-root)
+    (let* ((slug +engine-page-slug+)
+           (site-root
+             (and resolved
+                  (make-pathname
+                   :directory (butlast (pathname-directory resolved) 3)
+                   :defaults resolved))))
+      (list :slug slug
+            :relative-location (format nil "assets/pages/~A/" slug)
+            :asset-root resolved
+            :resolution-source source
+            :resolved-p (and resolved t)
+            :candidates candidates
+            :asset-root-present-p (and resolved t)
+            :site-root site-root
+            :site-root-derived-p t
+            :discovery
+            (if resolved
+                (handler-case
+                    (uiop:symbol-call :dreyeck/fedwiki-assets
+                                      :page-attached-asdf-discovery-observation
+                                      site-root slug)
+                  (error (condition) (list :failed (format nil "~A" condition))))
+                (list :failed "no candidate asset root exists in this runtime"))))))
 
 (defun %wrapped-source-observation ()
   "The source tree the wrapper carries, and what is actually in it."
@@ -1253,7 +1327,7 @@ site/assets/pages/slug — and is marked as derived, not observed."
 Assembled from three separate sources, kept apart because they can
 disagree: the source binding, ASDF, and the page's own assets. Nothing
 here is copied from the genealogy plist."
-  (let ((binding (critic:make-critic-source-station)))
+  (let ((binding (engine-source-binding)))
     (list
      :kind :page-attached-system
      :name (critic:lisp-critic-source-station-wrapper-system-of binding)
@@ -1300,7 +1374,7 @@ rendered as though it were the content."
   "What is actually on disk in the local source station, and its provenance.
 
 Nothing is downloaded. The station is read where it already is."
-  (let ((station (critic:make-critic-source-station)))
+  (let ((station (engine-source-binding)))
     (list :kind :source-station
           :present-p (critic:lisp-critic-source-station-present-p station)
           :asset-root (critic:lisp-critic-source-station-asset-root-of station)
@@ -1354,7 +1428,7 @@ drift from the rule it describes."
   "Apply one engine rule to FORM and return the run record.
 
 The target program is never evaluated; only the rule is applied to its text."
-  (let* ((station (critic:make-critic-source-station))
+  (let* ((station (engine-source-binding))
          (contract (make-instance 'critic:lisp-critic-contract
                      :id "reading-one-rule" :title "Reading: one rule"
                      :source-station station

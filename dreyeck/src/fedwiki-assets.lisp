@@ -44,6 +44,30 @@ access and does not load HYPERBOOK/FEDWIKI."
     (check-type reference string)
     reference))
 
+(defparameter +default-local-site-name+ "dreyeck.ch"
+  "The site a runtime serves when nothing says otherwise.")
+
+(defun configured-local-site-root ()
+  "The local FedWiki page store this runtime is configured to use.
+
+One source, read here rather than guessed by each caller:
+HYPERDOC_FEDWIKI_SITE_ROOT, or ~/.wiki/<default site>/. Which absolute
+directory that is depends on the machine, so it is an observation about
+a runtime and not part of any page's identity."
+  (uiop:ensure-directory-pathname
+   (let ((configured (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT")))
+     (if (and configured (plusp (length configured)))
+         (pathname configured)
+         (merge-pathnames
+          (format nil ".wiki/~A/" +default-local-site-name+)
+          (user-homedir-pathname))))))
+
+(defun page-assets-directory (site-root slug)
+  "Where SLUG's assets sit under SITE-ROOT, by the layout, resolved or not."
+  (uiop:ensure-directory-pathname
+   (merge-pathnames (format nil "pages/~A/" slug)
+                    (local-fedwiki-assets-root site-root))))
+
 (defun local-fedwiki-assets-root (site-root)
   "Return the local assets root below SITE-ROOT."
   (uiop:ensure-directory-pathname

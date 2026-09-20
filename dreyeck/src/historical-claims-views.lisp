@@ -214,27 +214,47 @@ the view says which. Nothing is taken from the genealogy plist."
                "An ASDF system that lives beside a wiki page rather than in this repository, and carries a copy of the engine it wraps."))
 
           (:h3 "Page attachment")
-          (:table :class "inspector-table"
-            (claim-view-row "page" (or (getf discovery :page-title)
-                                       "not read in this runtime"))
-            (claim-view-row "slug" (getf attachment :slug))
-            (claim-view-row "page assets"
-                            (if (getf attachment :asset-root-present-p)
-                                "available locally"
-                                "not available in this runtime")))
-          (:p "Asset root: "
-              (html-inspector-views:object-ref (getf attachment :asset-root)))
-          (when (getf discovery :page-file)
-            (html-inspector-views:html
-              (:p "Page: "
-                  (html-inspector-views:object-ref
-                   (getf discovery :page-file)))))
-          (dolist (asd (getf discovery :asdf-files))
-            (html-inspector-views:html
-              (:p "System definition, found by page-attached discovery: "
-                  (html-inspector-views:object-ref asd))))
           (:p (html-inspector-views:esc
-               "The site root above is derived from the asset root, not read from the binding: the binding's site and page slots exist on its class but are unbound on this instance."))
+               "This much is the same in every runtime. It is what the system is attached to, not where a machine keeps it."))
+          (:table :class "inspector-table"
+            (claim-view-row "page slug" (getf attachment :slug))
+            (claim-view-row "assets, relative to the site"
+                            (getf attachment :relative-location))
+            (claim-view-row "system" (getf observation :name)))
+
+          (:h4 "Resolved in this runtime")
+          (if (getf attachment :resolved-p)
+              (html-inspector-views:html
+                (:table :class "inspector-table"
+                  (claim-view-row "resolved by"
+                                  (claim-display-text
+                                   (getf attachment :resolution-source)))
+                  (claim-view-row "page"
+                                  (or (getf discovery :page-title)
+                                      "the assets resolved, but the page itself was not read")))
+                (:p "Asset root: "
+                    (html-inspector-views:object-ref
+                     (getf attachment :asset-root)))
+                (when (getf discovery :page-file)
+                  (html-inspector-views:html
+                    (:p "Page: "
+                        (html-inspector-views:object-ref
+                         (getf discovery :page-file)))))
+                (dolist (asd (getf discovery :asdf-files))
+                  (html-inspector-views:html
+                    (:p "System definition, found by page-attached discovery: "
+                        (html-inspector-views:object-ref asd)))))
+              ;; Not the same as "the page is not deployed here". Nothing
+              ;; this runtime knows of points anywhere that exists, so it
+              ;; must not print a path as though it did.
+              (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "Not resolved here. None of the places this runtime would look exists, so there is no asset root to show — which is a different state from a root that exists and is empty."))
+                (:table :class "inspector-table"
+                  (dolist (candidate (getf attachment :candidates))
+                    (claim-view-row
+                     (claim-display-text (car candidate))
+                     (format nil "~A — absent" (namestring (cdr candidate))))))))
 
           (:h3 "ASDF definition")
           (if (getf system :read-p)

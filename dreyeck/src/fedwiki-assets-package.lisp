@@ -8,6 +8,8 @@
    #:assets-story-items
    #:assets-reference-of
    #:local-fedwiki-assets-root
+   #:configured-local-site-root
+   #:page-assets-directory
    #:resolve-local-assets
    #:discover-asdf-files
    #:discover-page-attached-asdf-files
