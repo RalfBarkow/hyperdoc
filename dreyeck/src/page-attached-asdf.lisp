@@ -12,6 +12,32 @@
               common-lisp-user::name)
       common-lisp-user::assets-root))))
 
+(defun page-attached-asd-p (asd-pathname)
+  "Whether ASD-PATHNAME is a page's own system definition.
+
+Page attachment is a fact about where the file sits: a page's assets
+live at <site>/assets/pages/<slug>/, and a definition attached to that
+page is in that directory. This mirrors the layout
+ASD-PATHNAME-FOR-ASSETS-REFERENCE builds and LOCAL-FEDWIKI-ASSETS-ROOT
+resolves, read in the other direction.
+
+It is deliberately about location and nothing else. A repository-wide
+.asd may define a page-attached system's dependencies, define many
+systems, or define exactly as many as a page's own definition happens
+to; none of that makes it a page's definition."
+  (let ((directory (pathname-directory
+                    (uiop:ensure-absolute-pathname
+                     (pathname asd-pathname)
+                     #'uiop:getcwd))))
+    (and (consp directory)
+         (>= (length directory) 3)
+         (let ((tail (last directory 3)))
+           (and (equal "assets" (first tail))
+                (equal "pages" (second tail))
+                (stringp (third tail))
+                (plusp (length (third tail)))))
+         t)))
+
 (defun systems-defined-by-asd (asd-pathname)
   "Return systems currently registered from ASD-PATHNAME.
 

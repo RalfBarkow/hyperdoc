@@ -21,23 +21,23 @@
               (EQ :FRESH-IMAGE-RUNNER
                   (GETF COMMON-LISP-USER::WITNESS :READY-FOR)))
              (ASSERT (GETF COMMON-LISP-USER::WITNESS :FRESH-PROJECTION-P))
+             ;; Shape, not size: the workspace projection adds exactly
+             ;; one topic and one association to the base, whatever the
+             ;; definition happens to define. Fixed counts here said
+             ;; only that the first definition tried had two systems.
              (ASSERT
-              (= 3
-                 (LENGTH
-                  (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-TOPICS-OF
-                   COMMON-LISP-USER::BASE-PROJECTION))))
-             (ASSERT
-              (= 2
-                 (LENGTH
-                  (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
-                   COMMON-LISP-USER::BASE-PROJECTION))))
-             (ASSERT
-              (= 4
+              (= (1+
+                  (LENGTH
+                   (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-TOPICS-OF
+                    COMMON-LISP-USER::BASE-PROJECTION)))
                  (LENGTH
                   (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-TOPICS-OF
                    COMMON-LISP-USER::WORKSPACE-PROJECTION))))
              (ASSERT
-              (= 3
+              (= (1+
+                  (LENGTH
+                   (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
+                    COMMON-LISP-USER::BASE-PROJECTION)))
                  (LENGTH
                   (DREYECK/TOPICMAP:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
                    COMMON-LISP-USER::WORKSPACE-PROJECTION))))

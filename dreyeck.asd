@@ -722,15 +722,20 @@
   :SERIAL
   T
   :DEPENDS-ON
-  ("asdf" "dreyeck/page-attached-system-projection" "dreyeck/topicmap")
+  ("asdf" "dreyeck/page-attached-asdf"
+   "dreyeck/page-attached-system-projection"
+   "dreyeck/page-attached-workspace-reconstruction" "dreyeck/topicmap")
   :COMPONENTS
   ((:FILE "page-attached-system-projection-package")
-   (:FILE "page-attached-system-projection"))
+   (:FILE "page-attached-system-projection")
+   (:FILE "page-attached-workspace-contract"))
   :PERFORM
   (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
    (DECLARE (IGNORE OPERATION COMPONENT))
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/PAGE-ATTACHED-SYSTEM-PROJECTION/TESTS
-                             :RUN-PAGE-ATTACHED-SYSTEM-PROJECTION-TESTS)))
+                             :RUN-PAGE-ATTACHED-SYSTEM-PROJECTION-TESTS)
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/PAGE-ATTACHED-SYSTEM-PROJECTION/TESTS
+                             :RUN-PAGE-ATTACHED-WORKSPACE-CONTRACT-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/page-attached-workspace-reconstruction"
   :PATHNAME
@@ -738,7 +743,8 @@
   :SERIAL
   T
   :DEPENDS-ON
-  ("asdf" "dreyeck/page-attached-system-projection" "dreyeck/topicmap")
+  ("asdf" "dreyeck/page-attached-asdf"
+   "dreyeck/page-attached-system-projection" "dreyeck/topicmap")
   :COMPONENTS
   ((:FILE "page-attached-workspace-reconstruction")))
 
