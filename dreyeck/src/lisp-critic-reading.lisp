@@ -507,16 +507,56 @@ like a claim about that side.")
 (defun claim-subjects-relevant-to-node (key)
   (rest (assoc key +claim-subjects-relevant-to-node+)))
 
+(defparameter +genealogy-node-presentation+
+  '((:fischer-lisp-critic
+     :label "Fischer's LISP-CRITIC" :kind "research system")
+    (:riesbeck-lisp-critic
+     :label "Riesbeck's lisp-critic" :kind "codebase")
+    (:beane-asdf-adaptation
+     :label "Beane's ASDF adaptation" :kind "adaptation")
+    (:a-critic-for-lisp-station
+     :label "a-critic-for-lisp" :kind "local source station")
+    (:dreyeck-lisp-critic
+     :label "dreyeck/lisp-critic" :kind "HyperDoc projection"))
+  "How each genealogy node names itself to a reader.
+
+Two nodes were previously called LISP-CRITIC and lisp-critic and
+differed only in case, which asks the reader to already know that one is
+Fischer's and one is Riesbeck's — the very thing the map is there to
+tell them. The names here carry the author; the stations' own :NAME
+stays as the systems were actually called.
+
+The kind is the other half. A node used to be captioned STATION, which
+is this projection's word for \"a box in this diagram\" and says nothing
+about the thing in the box.")
+
+(defparameter +source-availability-phrases+
+  '((:not-present-in-this-workspace . "not present here")
+    (:vendored-in-source-station . "vendored in the source station")
+    (:present-in-workspace . "source in the workspace")
+    (:in-this-repository . "in this repository"))
+  "Where a node's source is, in words.
+
+Deliberately about the source and not about whether the thing runs. A
+station's :EXECUTABLE-HERE is true of a full runtime and false of the
+served site, so a caption promising executability would be wrong on the
+server — the failure this reading has already had once.")
+
 (defun genealogy-station-topic (key x y)
-  (let ((station (lisp-critic-station key)))
+  (let ((station (lisp-critic-station key))
+        (presentation (rest (assoc key +genealogy-node-presentation+))))
     (dreyeck/topicmap:make-topicmap-topic
      :id (string-downcase (symbol-name key))
      :type :station
-     :label (getf station :name)
+     :label (or (getf presentation :label) (getf station :name))
      :object station
-     :view-properties (list :x x :y y :visible t :pinned nil))))
+     :view-properties
+     (list :x x :y y :visible t :pinned nil
+           :kind (getf presentation :kind)
+           :status (cdr (assoc (getf station :source-availability)
+                               +source-availability-phrases+))))))
 
-(defun genealogy-stage-topic (id label subjects x y)
+(defun genealogy-stage-topic (id label subjects x y &key kind)
   "A documented stage of the research line, carrying the claims about it.
 
 These stages are not separate stations: nothing in this workspace holds an
@@ -527,7 +567,9 @@ following one reaches the evidence rather than an invented record."
    :object (list :kind :documented-stage :label label
                  :subjects subjects
                  :claims (apply #'claims-about-subjects subjects))
-   :view-properties (list :x x :y y :visible t :pinned nil)))
+   :view-properties (list :x x :y y :visible t :pinned nil
+                          :kind kind
+                          :status "documented, no artifact here")))
 
 (defun lisp-critic-genealogy-projection ()
   "The two histories, side by side, with no edge between them.
@@ -541,10 +583,11 @@ and it is typed as such so it cannot be read as lineage."
                  "documented-later-versions" "documented later versions"
                  '(:lisp-critic-version-1 :lisp-critic-version-2
                    :lisp-critic-later :lisp-critic-zmacs)
-                 120 240)
+                 120 240 :kind "group of documented stages")
                 (genealogy-stage-topic
                  "critiquing-paradigm" "broader critiquing paradigm"
-                 '(:critiquing-paradigm) 120 400)
+                 '(:critiquing-paradigm) 120 400
+                 :kind "conceptual paradigm")
                 (genealogy-station-topic :riesbeck-lisp-critic 620 80)
                 (genealogy-station-topic :beane-asdf-adaptation 620 220)
                 (genealogy-station-topic :a-critic-for-lisp-station 620 360)

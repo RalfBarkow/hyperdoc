@@ -127,7 +127,7 @@
           (TOPICMAP-TOPIC-POSITION CONTAINED)
         (LET ((BOUNDARY-X (- X 30)) (BOUNDARY-Y (- Y 50)))
           (FORMAT STREAM
-                  "<g class='dreyeck-topicmap-structural-containment' data-association-id='~A' data-association-type='~A' data-topic-id='~A' data-presentation='STRUCTURAL-CONTAINMENT'><rect x='~D' y='~D' width='270' height='140' rx='8' fill='none' stroke='currentColor' stroke-width='2'></rect><text x='~D' y='~D'>~A</text><text class='dreyeck-topicmap-topic-kind' x='~D' y='~D'>~A · ~A</text></g>"
+                  "<g class='dreyeck-topicmap-structural-containment' data-association-id='~A' data-association-type='~A' data-topic-id='~A' data-presentation='STRUCTURAL-CONTAINMENT'><rect x='~D' y='~D' width='270' height='140' rx='8' fill='none' stroke='currentColor' stroke-width='2'></rect><text x='~D' y='~D'>~A</text><text class='dreyeck-topicmap-topic-kind' x='~D' y='~D'>~A</text></g>"
                   (TOPICMAP-HTML-ESCAPE (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-ID-OF ASSOCIATION))
                   (TOPICMAP-HTML-ESCAPE
                    (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF ASSOCIATION))
@@ -143,6 +143,27 @@
   (topicmap-property (dreyeck/topicmap:topicmap-topic-view-properties-of topic)
                      :path nil))
 
+(defun topicmap-topic-caption (topic)
+  "The line under a node's name: what kind of thing it is, and its status.
+
+Reads as prose rather than as keywords. A projection that has nothing to
+say in a slot leaves it out, because a node captioned UNSPECIFIED tells
+a reader less than a node captioned with nothing at all. The machine
+readable values stay on the element's data- attributes."
+  (let* ((properties (dreyeck/topicmap:topicmap-topic-view-properties-of topic))
+         (scope (dreyeck/topicmap:topicmap-topic-temporal-scope-of topic))
+         (parts
+           (remove nil
+                   (list (topicmap-property properties :kind nil)
+                         (topicmap-property properties :status nil)
+                         (unless (member scope '(nil :unspecified))
+                           (princ-to-string scope))))))
+    (if parts
+        (format nil "~{~A~^ · ~}" parts)
+        ;; Nothing domain-facing was supplied, so fall back to the internal
+        ;; type rather than showing an empty caption.
+        (princ-to-string (dreyeck/topicmap:topicmap-topic-type-of topic)))))
+
 (defun %render-native-topicmap-subject-sign (topic stream)
   (let ((path (topicmap-topic-path-of topic)))
     (when path
@@ -153,7 +174,7 @@
       (let ((properties
              (dreyeck/topicmap:topicmap-topic-view-properties-of topic)))
         (format stream
-                "<g class='dreyeck-topicmap-topic' data-topic-id='~A' data-topic-type='~A' data-temporal-scope='~A' data-pinned='~:[false~;true~]'><rect x='~D' y='~D' width='210' height='60' rx='8'></rect><text x='~D' y='~D'>~A</text><text class='dreyeck-topicmap-topic-kind' x='~D' y='~D'>~A · ~A</text></g>"
+                "<g class='dreyeck-topicmap-topic' data-topic-id='~A' data-topic-type='~A' data-temporal-scope='~A' data-pinned='~:[false~;true~]'><rect x='~D' y='~D' width='210' height='60' rx='8'></rect><text x='~D' y='~D'>~A</text><text class='dreyeck-topicmap-topic-kind' x='~D' y='~D'>~A</text></g>"
                 (topicmap-html-escape
                  (dreyeck/topicmap:topicmap-topic-id-of topic))
                 (topicmap-html-escape
@@ -165,10 +186,7 @@
                 (topicmap-html-escape
                  (dreyeck/topicmap:topicmap-topic-label-of topic))
                 (+ x 12) (+ y 46)
-                (topicmap-html-escape
-                 (dreyeck/topicmap:topicmap-topic-type-of topic))
-                (topicmap-html-escape
-                 (dreyeck/topicmap:topicmap-topic-temporal-scope-of topic)))))
+                (topicmap-html-escape (topicmap-topic-caption topic)))))
     (when path (write-string "</a>" stream))))
 
 (DEFUN %TOPICMAP-POINT-TOPIC-ID (PROJECTION)
@@ -301,21 +319,26 @@
           (:code
            (views:esc (dreyeck/topicmap:topicmap-topic-label-of topic)))))))
 
-(defun render-topicmap-topic-row (topic)
+(defun topicmap-scopes-say-anything-p (projection)
+  (some (lambda (topic)
+          (not (member (dreyeck/topicmap:topicmap-topic-temporal-scope-of topic)
+                       '(nil :unspecified))))
+        (dreyeck/topicmap:topicmap-projection-topics-of projection)))
+
+(defun render-topicmap-topic-row (topic &key (scope t))
   (views:html
     (:tr
      (:td
       (:code
        (views:esc (dreyeck/topicmap:topicmap-topic-id-of topic))))
-     (:td
-      (:code
-       (views:esc
-        (prin1-to-string (dreyeck/topicmap:topicmap-topic-type-of topic)))))
-     (:td
-      (:code
-       (views:esc
-        (prin1-to-string
-         (dreyeck/topicmap:topicmap-topic-temporal-scope-of topic)))))
+     (:td (views:esc (topicmap-topic-caption topic)))
+     (when scope
+       (views:html
+         (:td
+          (:code
+           (views:esc
+            (prin1-to-string
+             (dreyeck/topicmap:topicmap-topic-temporal-scope-of topic)))))))
      (:td (render-topicmap-topic-object topic)))))
 
 (defun render-topicmap-association-row (association)
@@ -336,18 +359,20 @@
         (dreyeck/topicmap:topicmap-association-to-of association)))))))
 
 (defun render-topicmap-legend (projection)
-  (views:html
+  ;; The temporal scope column is shown only where some topic fills it in.
+  (let ((scope (topicmap-scopes-say-anything-p projection)))
+   (views:html
     (:h3 (views:esc "Topics"))
     (:table :class "inspector-table"
             (:tr
              (:th (views:esc "ID"))
-             (:th (views:esc "Type"))
-             (:th (views:esc "Temporal scope"))
+             (:th (views:esc "Kind"))
+             (when scope (views:html (:th (views:esc "Temporal scope"))))
              (:th (views:esc "Inspectable object")))
             (dolist
                 (topic
                   (dreyeck/topicmap:topicmap-projection-topics-of projection))
-              (render-topicmap-topic-row topic)))
+              (render-topicmap-topic-row topic :scope scope)))
     (:h3 (views:esc "Typed associations"))
     (:table :class "inspector-table"
             (:tr
@@ -357,7 +382,7 @@
             (dolist
                 (association
                   (dreyeck/topicmap:topicmap-projection-associations-of projection))
-              (render-topicmap-association-row association)))))
+              (render-topicmap-association-row association))))))
 
 (views:defview 👀topicmap (object t)
   (let ((projection (dreyeck/topicmap:topicmap-projection-of object)))

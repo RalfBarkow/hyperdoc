@@ -325,6 +325,55 @@ entry points, not a catalogue: ~S" (length expressions) expressions)
            "The entry page still transcludes implementation source."))
   t)
 
+(defun check-genealogy-reads-as-domain-language ()
+  "No visible node may explain itself in the projection's own jargon.
+
+STATION is this projection's word for a box in a diagram; UNSPECIFIED is
+the absence of an answer. Both were on every node, where the kind of
+thing and its status belong. The internal type stays — it is still on
+the element's data- attribute — but it is no longer what the reader is
+shown."
+  (let* ((projection (reading:lisp-critic-genealogy-projection))
+         (topics (tm:topicmap-projection-topics-of projection))
+         (html (views:view-html
+                (find "Topicmap" (views:all-views projection)
+                      :key #'views:view-title :test #'equal))))
+    (check html "The genealogy renders no Topicmap view.")
+    ;; The caption is what a reader sees under the name. What is banned is
+    ;; a segment that IS the internal vocabulary, not a segment that
+    ;; happens to contain one of those words: "source station" is the name
+    ;; of a real thing here, while "STATION" on its own explains nothing.
+    (dolist (topic topics)
+      (let* ((caption (dreyeck/inspector/topicmap::topicmap-topic-caption topic))
+             (segments (uiop:split-string caption :separator "·")))
+        (check (plusp (length caption))
+               "Node ~S has no caption." (tm:topicmap-topic-id-of topic))
+        (dolist (segment segments)
+          (let ((segment (string-trim " " segment)))
+            (dolist (word '("STATION" "DOCUMENTED-STAGE" "UNSPECIFIED"))
+              (check (not (string-equal word segment))
+                     "Node ~S is captioned with the internal type ~S."
+                     (tm:topicmap-topic-id-of topic) segment))
+            (check (not (search "UNSPECIFIED" segment :test #'char-equal))
+                   "Node ~S is captioned ~S." (tm:topicmap-topic-id-of topic)
+                   caption)))))
+    ;; The scope column said the same nothing on every row, so it is not
+    ;; shown. The internal values stay on the element's data- attributes,
+    ;; which is why this looks at the reader's table and not at the markup
+    ;; as a whole.
+    (check (not (search "Temporal scope" html))
+           "The genealogy still shows an empty Temporal scope column.")
+    ;; Case alone may not be what tells the two systems apart.
+    (let ((labels (mapcar #'tm:topicmap-topic-label-of topics)))
+      (check (= (length labels)
+                (length (remove-duplicates labels :test #'string-equal)))
+             "Two nodes are distinguished only by case: ~S." labels)
+      (check (find-if (lambda (label) (search "Fischer" label)) labels)
+             "No node names Fischer.")
+      (check (find-if (lambda (label) (search "Riesbeck" label)) labels)
+             "No node names Riesbeck.")))
+  t)
+
 (defun check-node-view-shows-the-graph ()
   "The node detail must show the projection's edges, not its own copy.
 
@@ -776,6 +825,7 @@ is honest.~%")
   (check-historical-claims)
   (check-source-passage-navigation)
   (check-node-view-shows-the-graph)
+  (check-genealogy-reads-as-domain-language)
   (check-station-claim-links)
   (check-historical-claim-views)
   (check-outcomes)
