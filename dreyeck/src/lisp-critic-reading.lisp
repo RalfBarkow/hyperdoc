@@ -38,7 +38,7 @@
            #:source-passage-for-claim-id
            #:genealogy-node-relations
            #:station-node-id
-           #:station-claim-subjects
+           #:claim-subjects-relevant-to-node
            #:claim-for-source-passage
            #:claims-for-source-passage
            #:passage-covers-p
@@ -481,27 +481,31 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
   (remove-if-not (lambda (claim) (member (getf claim :subject) subjects))
                  (historical-claims)))
 
-(defparameter +station-claim-subjects+
+(defparameter +claim-subjects-relevant-to-node+
   '((:fischer-lisp-critic :fischer-1987)
     (:riesbeck-lisp-critic :riesbeck-engine :riesbeck-2003-change)
     (:beane-asdf-adaptation :beane-2004-adaptation)
     (:a-critic-for-lisp-station)
     (:dreyeck-lisp-critic))
-  "Which claim subjects speak about which station.
+  "Which claims are worth reading at which genealogy node.
 
-The two vocabularies are deliberately not the same. A station is a whole
-system or codebase; a claim subject is one stage or aspect of it, which is
-why :FISCHER-LISP-CRITIC and :FISCHER-1987 are different keys. Nothing
-derives one from the other by name — the correspondence is written down
-here, and a station with no claims about it has an empty list rather than
-a lucky miss.
+This is a relevance list for this projection, and no more than that. It
+says that someone standing at the LISP-CRITIC node will want the claims
+filed under :FISCHER-1987; it does not say what those two keys are to
+each other. They might turn out to name the same thing at different
+grain, or two things — that question belongs to the sources, and nothing
+here settles it. Reading this table as an identity or containment
+statement would smuggle in a historical finding that has not been made.
 
-:FISCHER-TO-RIESBECK is absent on purpose: it is a claim about the
-relation between the two lines, not about either station, and hanging it
-on one of them would put it on the wrong side.")
+What it does buy is that nothing is derived from names. A node with no
+relevant claims has an empty list, which is a decision, not a miss.
 
-(defun station-claim-subjects (key)
-  (rest (assoc key +station-claim-subjects+)))
+:FISCHER-TO-RIESBECK is on no node: it is a claim about the relation
+between the two lines, and putting it on either side would make it look
+like a claim about that side.")
+
+(defun claim-subjects-relevant-to-node (key)
+  (rest (assoc key +claim-subjects-relevant-to-node+)))
 
 (defun genealogy-station-topic (key x y)
   (let ((station (lisp-critic-station key)))

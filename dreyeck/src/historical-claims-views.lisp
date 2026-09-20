@@ -185,7 +185,7 @@ the second. Both answers below come from the node's own record."
 (html-inspector-views:defview genealogy-station-overview (station cons)
   (when (eq :station (first station))
     (let* ((relations (genealogy-node-relations (station-node-id station)))
-           (subjects (station-claim-subjects (getf station :station)))
+           (subjects (claim-subjects-relevant-to-node (getf station :station)))
            (claims (apply #'claims-about-subjects subjects)))
       (list
        (html-inspector-views:html-view

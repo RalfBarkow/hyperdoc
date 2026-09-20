@@ -378,15 +378,15 @@ and looked like a settled epistemic finding instead of a missing link."
                           (reading:historical-claims))))
     (dolist (station (reading:lisp-critic-genealogy))
       (let ((key (getf station :station)))
-        (check (assoc key reading::+station-claim-subjects+)
+        (check (assoc key reading::+claim-subjects-relevant-to-node+)
                "Station ~S declares no claim subjects, not even none." key)
-        (dolist (subject (reading:station-claim-subjects key))
+        (dolist (subject (reading:claim-subjects-relevant-to-node key))
           (check (member subject subjects)
                  "Station ~S points at subject ~S, about which there are no ~
 claims." key subject)))))
   ;; The station that prompted this must actually reach its claims now.
   (let ((claims (apply #'reading::claims-about-subjects
-                       (reading:station-claim-subjects :fischer-lisp-critic))))
+                       (reading:claim-subjects-relevant-to-node :fischer-lisp-critic))))
     (check claims "Fischer's station still reaches no claims."))
   t)
 
