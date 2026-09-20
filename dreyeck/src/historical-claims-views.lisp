@@ -82,6 +82,16 @@
           (claim-view-row "locator" (claim-display-text (getf claim :locator)))
           (claim-view-row "locator observed" (claim-observation-text (getf claim :locator-observed-p)))
           (claim-view-row "witness" (claim-display-text (getf claim :witness))))
+        ;; A locator that only names a source leaves the reader to go and
+        ;; find it. Where a passage has been recorded, offer it directly.
+        (let ((passage (source-passage-for claim)))
+          (if passage
+              (html-inspector-views:html
+                (:p "Supporting passage: "
+                    (html-inspector-views:object-ref passage)))
+              (html-inspector-views:html
+                (:p (html-inspector-views:esc
+                     "No supporting passage has been recorded for this claim yet.")))))
         (:h2 "Observed Evidence")
         (:table :class "inspector-table"
           (claim-view-row "observed-evidence-kind" (claim-display-text (getf claim :observed-evidence-kind)))
@@ -194,3 +204,47 @@
                 (html-inspector-views:html
                   (:li (html-inspector-views:object-ref record)))))))
      (historical-raw-view claim))))
+
+;;
+;; The passage a claim rests on.
+;;
+;; The point of this view is comparison: the reader sees the claim and the
+;; wording side by side and can tell whether the claim overstates it. That
+;; only works if the view is honest about whether the wording itself was
+;; read here.
+;;
+
+(html-inspector-views:defview source-passage-overview (passage cons)
+  (when (and (eq :kind (first passage))
+             (eq :source-passage (second passage)))
+    (list
+     (html-inspector-views:html-view :title "Source passage" :priority 1
+       (html-inspector-views:html
+         (:h2 (html-inspector-views:esc (getf passage :source)))
+         (:table :class "inspector-table"
+           (claim-view-row "title" (getf passage :title))
+           (claim-view-row "published in" (getf passage :bibliographic))
+           (claim-view-row "location" (getf passage :location)))
+         (:h2 "Supports")
+         (:p (html-inspector-views:esc (getf passage :supports)))
+         (:h2 "Passage")
+         (:blockquote (html-inspector-views:esc (getf passage :passage)))
+         (:h2 "Status of this passage")
+         (:table :class "inspector-table"
+           (claim-view-row "read in this workspace"
+                           (claim-observation-text
+                            (getf passage :passage-observed-p)))
+           (claim-view-row "how it got here"
+                           (claim-display-text
+                            (getf passage :passage-origin))))
+         (unless (getf passage :passage-observed-p)
+           (html-inspector-views:html
+             (:p (html-inspector-views:esc
+                  "This wording has not been read from the source in this workspace. It is shown so the claim can be compared against it, not as a verified quotation. Placing the paper in the workspace is what would change that."))))
+         (let ((claim (claim-for-source-passage passage)))
+           (when claim
+             (html-inspector-views:html
+               (:h2 "Claim")
+               (:p "Back to the claim this supports: "
+                   (html-inspector-views:object-ref claim)))))))
+     (historical-raw-view passage))))

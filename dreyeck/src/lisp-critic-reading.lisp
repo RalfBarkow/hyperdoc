@@ -33,6 +33,11 @@
            #:lisp-critic-genealogy-example
            #:historical-claims
            #:claims-about
+           #:source-passages
+           #:source-passage-for
+           #:claim-for-source-passage
+           #:claims-for-source-passage
+           #:passage-covers-p
            #:resolve-executability
            #:evidence-adequate-for-p
            #:claim-carried-p
@@ -279,14 +284,16 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :executable-here-p nil)
 
      (:subject :fischer-1987
+      :id :boecker-contribution
       :claim-type :contribution
       :assertion
-      "Boecker developed the original ideas, the rule set and the rule interpreter. He is credited as a contributor, not as a co-author of the 1987 paper."
+      "Boecker developed many of the original ideas, the original set of rules and the rule interpreter. He is credited as a contributor, not as a co-author."
       :cited-source-kind :primary-paper
-      :locator "Fischer 1987, A Critic for LISP, IJCAI-87, acknowledgements"
-      :locator-observed-p nil
-      :observed-evidence-kind :none-observed
-      :observed-locator nil
+      :locator
+      "Fischer & Mastaglio 1991, Decision Support Systems 7(4), 355-378, Acknowledgments"
+      :locator-observed-p t
+      :observed-evidence-kind :primary-paper
+      :observed-locator "Fischer & Mastaglio 1991, Acknowledgments"
       :witness (:author-self-report :acknowledgement)
       :source-observed-p nil
       :executable-here-p nil)
@@ -305,27 +312,30 @@ as absent by FISCHER-CLAIMS-WITHOUT-LOCAL-EVIDENCE."
       :executable-here-p nil)
 
      (:subject :lisp-critic-version-1
+      :id :version-1-contribution
       :claim-type :contribution
-      :assertion "Version 1 is credited to Morel, Burns and Cormack."
+      :assertion
+      "Morel, Burns, and Cormack contributed to version 1 of LISP-CRITIC."
       :cited-source-kind :primary-paper
       :locator
-      "Fischer & Mastaglio 1991, A Conceptual Framework for Knowledge-Based Critic Systems, Decision Support Systems 7(4), 355-378"
-      :locator-observed-p nil
-      :observed-evidence-kind :none-observed
-      :observed-locator nil
+      "Fischer & Mastaglio 1991, A conceptual framework for knowledge-based critic systems, Decision Support Systems 7(4), 355-378, Acknowledgments"
+      :locator-observed-p t
+      :observed-evidence-kind :primary-paper
+      :observed-locator "Fischer & Mastaglio 1991, Acknowledgments"
       :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
 
      (:subject :lisp-critic-version-2
+      :id :version-2-contribution
       :claim-type :contribution
-      :assertion "Version 2 is credited to Rieman, Johl and Lynn."
+      :assertion "Rieman, Johl, and Lynn worked on version 2 of LISP-CRITIC."
       :cited-source-kind :primary-paper
       :locator
-      "Fischer & Mastaglio 1991, Decision Support Systems 7(4), 355-378"
-      :locator-observed-p nil
-      :observed-evidence-kind :none-observed
-      :observed-locator nil
+      "Fischer & Mastaglio 1991, Decision Support Systems 7(4), 355-378, Acknowledgments"
+      :locator-observed-p t
+      :observed-evidence-kind :primary-paper
+      :observed-locator "Fischer & Mastaglio 1991, Acknowledgments"
       :witness (:author-self-report :peer-reviewed-publication)
       :source-observed-p nil
       :executable-here-p nil)
@@ -622,6 +632,75 @@ this projection carries only what a reader would actually ask."
        :id "s-hyperdoc-edge" :type :supported-by
        :from "c-hyperdoc" :to "s-hyperdoc"))
      :view-properties '(:width 1200 :height 520))))
+
+;;
+;; From a claim to the passage that is supposed to support it.
+;;
+;; A locator says where a statement should be checked. That is not yet
+;; useful: the reader still has to leave the reading to check it. A passage
+;; record carries the wording itself, so the claim can be compared against
+;; it — and, as the first one here shows, corrected against it.
+;;
+;; Deliberately not a citation model. One passage, for one claim, keyed by
+;; the claim it supports. The next one is added when a reader needs it.
+;;
+
+(defun source-passages ()
+  "Passages recorded for individual claims.
+
+PASSAGE-OBSERVED-P is the same question the claims already ask of their
+locators: was this text read in this workspace? For the entry below it now
+was — the paper was placed in the workspace and its acknowledgments read —
+so the claims this passage covers are promoted with it.
+
+Reading it immediately earned its keep: two claims were worded more
+strongly than the paper. The paper says Morel, Burns and Cormack
+\"contributed to\" version 1 and that Rieman, Johl and Lynn \"worked on\"
+version 2; both had been recorded as \"credited to\"."
+  (copy-tree
+   '((:kind :source-passage
+      :id :mastaglio-1991-acknowledgments
+      :supports-claims (:version-1-contribution :version-2-contribution
+                        :boecker-contribution)
+      :source "Fischer & Mastaglio 1991"
+      :title "A conceptual framework for knowledge-based critic systems"
+      :bibliographic "Decision Support Systems 7(4), 355-378"
+      :location "Acknowledgments"
+      :supports
+      "Morel, Burns, and Cormack contributed to version 1 of LISP-CRITIC."
+      :passage
+      "The authors would like to thank especially: Heinz-Dieter Boecker, who developed many of the original ideas, the original set of rules and the rule interpreter; Andreas Lemke developed FRAMER; Helga Nieper-Lemke developed KAESTLE; Christopher Morel, Bart Burns, and Catherine Cormack contributed to version 1 of LISP-CRITIC; Anders Morch developed JANUS; John Rieman, Paul Johl, and Patrick Lynn worked on version 2 of LISP-CRITIC; Hal Eden and Brent Reeves for recent work on LISP-CRITIC."
+      :passage-observed-p t
+      :passage-origin :read-in-this-workspace
+      :read-from "Zotero storage M9DJBUDF, PDF text layer"
+      :transcription-note
+      "Transcribed from the PDF text layer. Obvious OCR damage repaired: the layer reads \"Bart Bums\" for Bart Burns and sets stray full stops after Boecker and Johl."))))
+
+(defun passage-covers-p (passage claim)
+  "Whether PASSAGE is the recorded wording behind CLAIM.
+
+One passage can settle several claims — the acknowledgments below name
+three contributors in one sentence — so coverage is listed per claim id.
+Keying on subject and claim-type instead would be too coarse: two
+different claims about Fischer 1987 are both contributions, and only one
+of them is in this passage."
+  (and (getf claim :id)
+       (member (getf claim :id) (getf passage :supports-claims))
+       t))
+
+(defun source-passage-for (claim)
+  "The passage recorded for CLAIM, if one exists."
+  (find-if (lambda (passage) (passage-covers-p passage claim))
+           (source-passages)))
+
+(defun claims-for-source-passage (passage)
+  "Every claim this passage settles, for navigation back."
+  (remove-if-not (lambda (claim) (passage-covers-p passage claim))
+                 (historical-claims)))
+
+(defun claim-for-source-passage (passage)
+  "The claim a passage was primarily recorded for."
+  (first (claims-for-source-passage passage)))
 
 (defun resolve-executability (claim)
   "Answer EXECUTABLE-HERE-P for the runtime asking.

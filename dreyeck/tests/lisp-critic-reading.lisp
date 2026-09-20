@@ -289,6 +289,57 @@ entry points, not a catalogue: ~S" (length expressions) expressions)
            "The entry page still transcludes implementation source."))
   t)
 
+(defun check-source-passage-navigation ()
+  "A claim must reach the wording it rests on, and that wording must be
+honest about whether it was read here."
+  (let* ((claims (reading:historical-claims))
+         (passages (reading:source-passages)))
+    (check passages "No supporting passage is recorded at all.")
+    (dolist (passage passages)
+      ;; Every passage belongs to a claim, and leads back to it.
+      (let ((claim (reading:claim-for-source-passage passage)))
+        (check claim "Passage from ~S supports no known claim."
+               (getf passage :source))
+        (check (equal passage (reading:source-passage-for claim))
+               "The claim for ~S does not reach this passage."
+               (getf passage :source))
+        (check (reading:claims-for-source-passage passage)
+               "Passage from ~S leads back to no claim." (getf passage :source))
+        (dolist (covered (reading:claims-for-source-passage passage))
+          (check (equal passage (reading:source-passage-for covered))
+                 "Claim ~S/~S is covered by the passage but does not reach it."
+                 (getf covered :subject) (getf covered :claim-type)))
+        ;; The passage must carry the wording and where to find it.
+        (dolist (key '(:source :title :bibliographic :location :supports
+                       :passage))
+          (check (and (stringp (getf passage key))
+                      (plusp (length (getf passage key))))
+                 "Passage from ~S has no ~S." (getf passage :source) key))
+        ;; A passage not read here may not be presented as verified, and a
+        ;; claim whose locator was never read cannot hold a verified one.
+        (unless (getf passage :passage-observed-p)
+          (check (getf passage :passage-origin)
+                 "Passage from ~S is unobserved but does not say where it ~
+came from." (getf passage :source)))
+        (when (getf passage :passage-observed-p)
+          (check (getf claim :locator-observed-p)
+                 "Passage from ~S claims to be read here while its claim's ~
+locator was never read." (getf passage :source)))))
+    ;; The first recorded passage exists to correct its claim, so the claim
+    ;; must not have drifted back to the stronger wording.
+    (let ((claim (find-if (lambda (c)
+                            (and (eq :lisp-critic-version-1 (getf c :subject))
+                                 (eq :contribution (getf c :claim-type))))
+                          claims)))
+      (check claim "The version-1 contribution claim disappeared.")
+      (check (search "contributed to version 1" (getf claim :assertion))
+             "The version-1 claim no longer follows the source wording: ~S"
+             (getf claim :assertion))
+      (check (not (search "credited to" (getf claim :assertion)))
+             "The version-1 claim reverted to a stronger wording than the ~
+passage supports: ~S" (getf claim :assertion))))
+  t)
+
 (defun check-historical-claims ()
   "Every displayed claim must be traceable, and none may overstate access."
   (let ((claims (reading:historical-claims)))
@@ -317,17 +368,26 @@ entry points, not a catalogue: ~S" (length expressions) expressions)
                              (getf claim :observed-evidence-kind))))
                "Claim about ~S names a primary paper as observed evidence ~
 while its locator was never read here." subject)
-        ;; Nothing on the research line may claim local access.
+        ;; The research-line artifacts are still not here, whatever we may
+        ;; have read about them. A paper in the workspace settles what the
+        ;; paper says; it does not put the 1987 system on this machine.
         (when (member subject +fischer-subjects+)
           (check (null (getf claim :source-observed-p))
                  "A Fischer-line claim about ~S claims observed source."
                  subject)
-          (check (null (getf claim :locator-observed-p))
-                 "A Fischer-line claim about ~S claims a local document."
-                 subject)
           (check (null (reading:resolve-executability claim))
                  "A Fischer-line claim about ~S claims local executability."
-                 subject))))
+                 subject))
+        ;; Reading a locator is allowed, but for a source outside the
+        ;; workspace it must leave a trace: the passage that was read.
+        ;; Otherwise "observed" is an assertion with a nicer name. A
+        ;; workspace file needs no passage — the file is its own trace, and
+        ;; CHECK-SOURCE-BACKING already proves those files are there.
+        (when (and (getf claim :locator-observed-p)
+                   (eq :primary-paper (getf claim :cited-source-kind)))
+          (check (reading:source-passage-for claim)
+                 "Claim about ~S cites a paper, says it was read here, and ~
+records no passage from it." subject))))
     ;; An absence of attribution settles no lineage, in either direction.
     (dolist (claim claims)
       (when (eq :absence-of-reference (getf claim :observed-evidence-kind))
@@ -587,8 +647,12 @@ is honest.~%")
                  (check (equal "Historical claim" (views:view-title view)) "No primary detail view.")
                  (dolist (heading '("Claim" "Cited Source" "Observed Evidence" "Artifact Status"))
                    (check (search heading html) "Section ~A absent." heading))
+                 ;; The 1987 artifact is not in this workspace and cannot
+                 ;; run here, whatever we may have read about it. Whether a
+                 ;; cited paper has been read is a separate question and
+                 ;; may legitimately change, so it is not asserted here.
                  (when (eq :fischer-1987 (getf claim :subject))
-                   (dolist (row '("locator observed</th><td>no" "source observed</th><td>no"
+                   (dolist (row '("source observed</th><td>no"
                                   "executable</th><td>no"))
                      (check (search row html) "Incorrect Fischer status: ~A" row)))
                  (when (eq :riesbeck-engine (getf claim :subject))
@@ -615,6 +679,7 @@ is honest.~%")
   (check-discourse-projection)
   (check-reading-page-is-readable)
   (check-historical-claims)
+  (check-source-passage-navigation)
   (check-historical-claim-views)
   (check-outcomes)
   (check-source-backing)
