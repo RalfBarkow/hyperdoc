@@ -334,7 +334,12 @@ the view says which. Nothing is taken from the genealogy plist."
                                 "not run by this view"))
               (:p (html-inspector-views:esc
                    "Reconstruction is left to the button because it is not a reading: it registers the system with ASDF and returns a new workspace each time. A view that ran it would change the image every time it was drawn."))
-              (when (and attached (getf eligibility :eligible-p))
+              (unless (execution-permitted-p)
+                (html-inspector-views:html
+                  (:p (html-inspector-views:esc
+                       "Reconstruction is not offered here: this runtime does not run code that arrived with a page. The operation refuses as well, so the absent button is not the whole of it."))))
+              (when (and attached (getf eligibility :eligible-p)
+                         (execution-permitted-p))
                 (html-inspector-views:html
                   (:p (html-inspector-views:eval-button
                        "Reconstruct the workspace"

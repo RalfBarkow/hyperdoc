@@ -53,23 +53,33 @@ rebuilding the default. HYPERDOC_FEDWIKI_SITE_ROOT still overrides it."
   "Ensure the Catalog offer for PAGE's uniquely matching page-attached ASDF system.
 
 Return NIL when PAGE has no matching attached system.  Repeated calls
-return the existing offer.  Ambiguous matches fail closed."
+return the existing offer.  Ambiguous matches fail closed.
+
+Offered without being evaluated. This used to call REGISTER-ASD-SYSTEMS
+on every .asd the page carries, whose own docstring begins \"Evaluate
+trusted ASD-PATHNAME\": ASDF:LOAD-ASD runs the file as Lisp. Since this
+function runs on every /view/<slug> request, visiting a page ran the
+code attached to it, before anything was clicked and whatever the
+development flag said.
+
+Nothing is lost by not evaluating, because only a system whose name
+equals the page slug was ever admitted. That condition is decidable
+from the filename: the .asd a page offers is the one named after the
+page. The offer therefore says a page-attached ASDF artifact is here;
+whether a system can be built from it is a later question, asked in a
+runtime that is allowed to ask it."
   (let* ((discovery
           (dreyeck/local-fedwiki-page:local-fedwiki-page-asdf-discovery page))
          (page-slug (getf discovery :slug))
-         (system-names
-          (mapcan
-           (lambda (asd)
-             (dreyeck/page-attached-asdf:register-asd-systems asd))
-           (getf discovery :asdf-files)))
          (matches
-          (remove-if-not (lambda (system-name) (string= page-slug system-name))
-                         system-names)))
+          (remove-if-not
+           (lambda (asd) (equal page-slug (pathname-name asd)))
+           (getf discovery :asdf-files))))
     (cond ((null matches) nil)
           ((= 1 (length matches))
-           (dreyeck/catalog::admit :catalog (first matches)))
+           (dreyeck/catalog::admit :catalog page-slug))
           (t
-           (error "Page slug ~S matches ~D page-attached ASDF systems: ~S"
+           (error "Page slug ~S matches ~D page-attached ASDF artifacts: ~S"
                   page-slug (length matches) matches)))))
 
 (defun install-local-fedwiki-view-route

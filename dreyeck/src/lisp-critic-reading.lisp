@@ -39,6 +39,8 @@
            #:genealogy-node-relations
            #:a-critic-for-lisp-observation
            #:reconstruct-engine-workspace
+           #:execution-permitted-p
+           #:execution-not-permitted
            #:engine-workspace-eligibility
            #:station-node-id
            #:claim-subjects-relevant-to-node
@@ -1360,12 +1362,47 @@ costs, which this view already does; it builds nothing."
     (error (condition)
       (list :eligible-p nil :why (format nil "~A" condition)))))
 
+(defun execution-permitted-p ()
+  "Whether this runtime may run code that came with a page.
+
+Reuses the flag the playground already answers to rather than adding a
+second switch: HYPERBOOK-SERVER::*SERVER-PARAMETERS* is NIL until a
+server starts and then holds (pane-width development). So a served
+runtime started without development refuses, and an image with no
+server — a developer's, or a test's — allows.
+
+Read softly on purpose. The reading has no business depending on the
+HTTP server; the question is only whether one is running here."
+  (let* ((package (find-package :hyperbook-server))
+         (symbol (and package (find-symbol "*SERVER-PARAMETERS*" package)))
+         (parameters (and symbol (boundp symbol) (symbol-value symbol))))
+    (if (null parameters)
+        t
+        (and (second parameters) t))))
+
+(define-condition execution-not-permitted (error)
+  ((operation :initarg :operation :reader execution-not-permitted-operation))
+  (:report
+   (lambda (condition stream)
+     (format stream "~A is not permitted in this runtime: it would run code ~
+that arrived with a page, and this server was started without development ~
+mode."
+             (execution-not-permitted-operation condition))))
+  (:documentation
+   "Refusal of an operation that would execute page-attached code.
+
+Signalled by the operation itself, not by the view that offers it.
+Hiding a button only removes one way of asking; a caller reaching the
+function by any other route must meet the same answer."))
+
 (defun reconstruct-engine-workspace ()
   "Build the workspace for the wrapper system, and say so.
 
 Deliberately not called while rendering. It registers the system in
 ASDF and returns a fresh workspace on every call, so a view that ran it
 would mutate the image and mint a new workspace each time it is drawn."
+  (unless (execution-permitted-p)
+    (error 'execution-not-permitted :operation "Workspace reconstruction"))
   (incf *engine-workspace-reconstructions*)
   (with-engine-assets-registered
     (lambda ()

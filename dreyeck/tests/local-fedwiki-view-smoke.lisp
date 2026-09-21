@@ -162,6 +162,20 @@
     (assert (= 1 offer-count-after-first))
     (assert (eq first-offer second-offer))
     (assert (= 1 offer-count-after-second)))
+  ;; Offering must not evaluate what it offers. This used to call
+  ;; REGISTER-ASD-SYSTEMS, whose docstring begins "Evaluate trusted
+  ;; ASD-PATHNAME": ASDF:LOAD-ASD runs the file. Since the offer is made
+  ;; on every /view/<slug> request, visiting a page ran the code attached
+  ;; to it, before anything was clicked.
+  (let ((registered-before (length (asdf:registered-systems)))
+        (fixture-registered-before
+          (and (asdf:registered-system *fixture-slug*) t)))
+    (dreyeck/local-fedwiki-view::ensure-page-attached-workspace-offer
+     page-from-semantic-link-contract)
+    (assert (= registered-before (length (asdf:registered-systems))))
+    (assert (eq fixture-registered-before
+                (and (asdf:registered-system *fixture-slug*) t))))
+
   (assert (search "Reading Java Source as Data" html :test #'char-equal))
   (assert
    (search "This page treats Java source as inspectable" html :test

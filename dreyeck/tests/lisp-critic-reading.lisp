@@ -485,6 +485,58 @@ configured site." source)))
            "The relative asset location is not relative."))
   t)
 
+(defun with-server-parameters (parameters thunk)
+  "Run THUNK as though a server had been started with PARAMETERS.
+
+NIL stands for no server at all. The symbol is created when the HTTP
+server is not loaded, which is the usual case in these tests."
+  (let* ((package (or (find-package :hyperbook-server)
+                      (make-package :hyperbook-server :use '(:cl))))
+         (symbol (or (find-symbol "*SERVER-PARAMETERS*" package)
+                     (intern "*SERVER-PARAMETERS*" package)))
+         (had (boundp symbol))
+         (old (and had (symbol-value symbol))))
+    (unwind-protect
+         (progn (setf (symbol-value symbol) parameters) (funcall thunk))
+      (if had (setf (symbol-value symbol) old) (makunbound symbol)))))
+
+(defun check-execution-policy ()
+  "A runtime that does not run page-attached code must refuse, not just hide.
+
+The reconstruction button is wired by the inspector like any other eval
+reference, with no reference to the playground flag, so absence of the
+button would have been the only barrier. It is not enough: a caller
+reaching the operation another way must meet the same answer. The flag
+is the one the playground already answers to, not a second switch."
+  (let ((before reading::*engine-workspace-reconstructions*))
+    ;; Served, without development: both ways must be closed.
+    (with-server-parameters
+        (list "700px" nil)
+      (lambda ()
+        (check (not (reading:execution-permitted-p))
+               "A served runtime without development permits execution.")
+        (let* ((station (reading:lisp-critic-station :a-critic-for-lisp-station))
+               (html (views:view-html (first (views:all-views station)))))
+          (check (not (search "Reconstruct the workspace" html))
+                 "A runtime that refuses execution still offers the button.")
+          (check (search "not offered here" html)
+                 "The view does not say why reconstruction is absent."))
+        (check (handler-case (progn (reading:reconstruct-engine-workspace) nil)
+                 (reading:execution-not-permitted () t))
+               "Calling reconstruction directly was not refused.")))
+    (check (= before reading::*engine-workspace-reconstructions*)
+           "A refused reconstruction still counted as one.")
+    ;; Served with development, and no server at all, both allow.
+    (with-server-parameters
+        (list "700px" t)
+      (lambda () (check (reading:execution-permitted-p)
+                        "A development server refuses execution.")))
+    (with-server-parameters
+        nil
+      (lambda () (check (reading:execution-permitted-p)
+                        "An image with no server refuses execution."))))
+  t)
+
 (defun check-workspace-section ()
   "The Workspace section must report this runtime, and build nothing.
 
@@ -1104,6 +1156,7 @@ is honest.~%")
   (check-page-attached-system-view)
   (check-source-representations)
   (check-workspace-section)
+  (check-execution-policy)
   (check-asset-root-resolution)
   (check-genealogy-reads-as-domain-language)
   (check-station-claim-links)
