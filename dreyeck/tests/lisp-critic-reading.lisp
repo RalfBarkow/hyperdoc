@@ -518,6 +518,97 @@ testing against proves nothing."
                        (dreyeck/asdf-source:simple-asdf-designator-name
                         (second (dreyeck/asdf-source:asdf-source-node-children form))))))))
 
+(defun with-evaluation-snapshot (contents thunk)
+  "Run THUNK with a page-attached evaluation snapshot of CONTENTS.
+
+Builds its own site root under the temporary directory and points the
+runtime at it, so nothing is written into anyone's wiki. CONTENTS NIL
+means the file is absent."
+  (let* ((site (uiop:ensure-directory-pathname
+                (merge-pathnames "dreyeck-evaluation-snapshot-site/"
+                                 (uiop:temporary-directory))))
+         (assets (merge-pathnames
+                  (format nil "assets/pages/~A/" reading::+engine-page-slug+)
+                  site))
+         (file (merge-pathnames reading::+engine-evaluation-snapshot+ assets))
+         (original (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT")))
+    (unwind-protect
+         (progn
+           (ensure-directories-exist file)
+           (if contents
+               (with-open-file (out file :direction :output :if-exists :supersede)
+                 (write-string contents out))
+               (ignore-errors (delete-file file)))
+           (setf (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT") (namestring site))
+           (funcall thunk))
+      (setf (uiop:getenv "HYPERDOC_FEDWIKI_SITE_ROOT") (or original ""))
+      (uiop:delete-directory-tree site :validate t :if-does-not-exist :ignore))))
+
+(defun check-critique-from-snapshot ()
+  "The reading shows a recorded evaluation, and never produces one.
+
+This example used to run the critic while the page was being drawn,
+which loaded the engine out of the page's own assets. It now reads a
+record that a runtime allowed to run the critic wrote. There is no
+fallback on purpose: a fallback is how an absent result becomes an
+execution."
+  ;; A recorded evaluation is shown.
+  (let ((snapshot
+          (critic:critic-run-snapshot-string (critic:car-cdr-critique-example))))
+    (with-evaluation-snapshot
+        snapshot
+      (lambda ()
+        (let* ((registered (length (asdf:registered-systems)))
+               (result (reading:current-critique-example)))
+          (check (typep result 'critic:critic-target)
+                 "Reading a snapshot produced ~S rather than a target." result)
+          (let* ((record (first (critic:target-runs-of result)))
+                 (html (views:view-html
+                        (first (views:all-views result)))))
+            (check record "The reconstituted target carries no run.")
+            (check (critic:critiques-of record) "The run carries no critique.")
+            (check (search "CAR (CDR ITEMS)" html)
+                   "The rendered critique does not show the evaluated input.")
+            (dolist (object (list record (critic:rule-of record)
+                                  (first (critic:critiques-of record))))
+              (check (plusp (length (views:view-html
+                                     (first (views:all-views object)))))
+                     "A reconstituted object rendered nothing.")))
+          (check (= registered (length (asdf:registered-systems)))
+                 "Reading a snapshot registered an ASDF system.")))))
+  ;; An absent record stays absent.
+  (with-evaluation-snapshot
+      nil
+    (lambda ()
+      (let ((result (reading:current-critique-example)))
+        (check (eq :evaluation-snapshot-unavailable (getf result :kind))
+               "A missing record produced ~S instead of an absence." result)
+        (let ((html (views:view-html (first (views:all-views result)))))
+          (check (search "No trusted evaluation record is available here" html)
+                 "The absence is not stated in the view.")))))
+  ;; A record that cannot be read is reported, not worked around.
+  (with-evaluation-snapshot
+      "{ this is not valid json"
+    (lambda ()
+      (let ((result (reading:current-critique-example)))
+        (check (eq :evaluation-snapshot-unavailable (getf result :kind))
+               "A malformed record produced ~S." result)
+        (check (search "could not be read" (getf result :why))
+               "A malformed record was not reported as unreadable: ~A"
+               (getf result :why)))))
+  ;; A record from a contract this reading does not know is refused by
+  ;; version rather than half-read.
+  (with-evaluation-snapshot
+      "{\"snapshot-version\": 99, \"evaluation\": {}}"
+    (lambda ()
+      (let ((result (reading:current-critique-example)))
+        (check (eq :evaluation-snapshot-unavailable (getf result :kind))
+               "A future snapshot version was accepted.")
+        (check (search "version" (getf result :why))
+               "A version mismatch was not named as one: ~A"
+               (getf result :why)))))
+  t)
+
 (defun check-source-declaration ()
   "The definition file is read as text, and only as text.
 
@@ -1312,6 +1403,7 @@ is honest.~%")
   (check-source-representations)
   (check-workspace-section)
   (check-source-declaration)
+  (check-critique-from-snapshot)
   (check-execution-policy)
   (check-asset-root-resolution)
   (check-genealogy-reads-as-domain-language)

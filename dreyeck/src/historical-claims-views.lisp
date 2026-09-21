@@ -595,3 +595,29 @@ another what an adaptation changed."
                (:p "Back to the claim this supports: "
                    (html-inspector-views:object-ref claim)))))))
      (historical-raw-view passage))))
+
+;;
+;; A recorded evaluation that is not here.
+;;
+;; The absence needs a face of its own. Left as a bare plist it reads
+;; like a defect, and the temptation is then to make the page produce
+;; something by running the critic — which is the one thing this whole
+;; arrangement exists to prevent.
+;;
+
+(html-inspector-views:defview evaluation-snapshot-unavailable-overview
+    (data cons)
+  (when (and (eq :kind (first data))
+             (eq :evaluation-snapshot-unavailable (second data)))
+    (list
+     (html-inspector-views:html-view :title "No recorded evaluation" :priority 1
+       (html-inspector-views:html
+         (:h2 "No trusted evaluation record is available here")
+         (:p (html-inspector-views:esc (getf data :why)))
+         (when (getf data :looked-for)
+           (html-inspector-views:html
+             (:p "Looked for: "
+                 (html-inspector-views:object-ref (getf data :looked-for)))))
+         (:p (html-inspector-views:esc
+              "A runtime allowed to run the critic writes one of these; this one reads them. It will not run the critic to fill the gap, because a fallback is how an absent result becomes an execution."))))
+     (historical-raw-view data))))

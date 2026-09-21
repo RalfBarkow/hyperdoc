@@ -25,6 +25,7 @@
            #:lisp-critic-genealogy-discourse
            #:lisp-critic-discourse-example
            #:current-critique-example
+           #:engine-evaluation-snapshot-pathname
            #:genealogy-stations-example
            #:genealogy-in-this-runtime
            #:engine-available-p
@@ -1106,9 +1107,52 @@ reading cannot quietly promote a documented claim into a demonstrated one."
   "Explore the questions and claims around the genealogy."
   (lisp-critic-genealogy-discourse))
 
+(defparameter +engine-evaluation-snapshot+ "evaluations/car-cdr.json"
+  "The one evaluation this reading shows, relative to the page's assets.
+
+Named explicitly rather than chosen. A \"latest\" would have to answer
+which of several runs is current — by time, by input, by engine
+version, by publication — and there is one. The question can be asked
+when there is something to choose between.
+
+The file name is an address, not an identity: the evaluation identifies
+itself inside the snapshot, as a page identifies itself apart from the
+path a runtime happens to find it at.")
+
+(defun engine-evaluation-snapshot-pathname ()
+  "Where this runtime would find the evaluation, or NIL."
+  (let ((root (resolve-engine-asset-root)))
+    (and root (merge-pathnames +engine-evaluation-snapshot+ root))))
+
 (hyperdoc:defexample current-critique-example
-  "Inspect one current HyperDoc Critique."
-  (critic:car-cdr-critique-example))
+  "Inspect one Critique, read from a recorded evaluation.
+
+Reads a snapshot written by a runtime that was allowed to run the
+critic. It does not run the critic, and there is deliberately no
+fallback that would: a missing record must stay missing, because a
+fallback is how an absent result quietly becomes an execution."
+  (let ((pathname (engine-evaluation-snapshot-pathname)))
+    (cond
+      ((null pathname)
+       (list :kind :evaluation-snapshot-unavailable
+             :why "no page assets are resolved in this runtime"
+             :evidence-status :observed))
+      ((null (probe-file pathname))
+       (list :kind :evaluation-snapshot-unavailable
+             :why "no trusted evaluation record is available here"
+             :looked-for (namestring pathname)
+             :evidence-status :observed))
+      (t
+       (handler-case
+           (critic:reconstitute-critic-run
+            (with-open-file (stream pathname)
+              (critic:read-critic-run-snapshot stream)))
+         (error (condition)
+           (list :kind :evaluation-snapshot-unavailable
+                 :why (format nil "the evaluation record could not be read: ~A"
+                              condition)
+                 :looked-for (namestring pathname)
+                 :evidence-status :observed)))))))
 
 (hyperdoc:defexample genealogy-stations-example
   "The station records behind the genealogy, with their evidence status.
