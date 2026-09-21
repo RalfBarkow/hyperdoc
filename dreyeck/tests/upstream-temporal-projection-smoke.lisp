@@ -241,6 +241,60 @@ something else to load an engine on the way past."
            name))
   t)
 
+(defun check-identity-maps-are-inspectable ()
+  "The Topic and Association maps must survive being opened in the Inspector.
+
+This is where the readable-key contract meets a reader. Identity now
+lives in the mapping the projection carries, so the mapping is evidence
+and has to be reachable — and reaching it means the Inspector asking
+ALL-VIEWS of a plain list and then rendering what comes back.
+
+Written after a live witness: a synthetic DOM click on \"Topic ID map\"
+created an Inspector pane that stayed empty, because a view specialized
+on CONS read the list with GETF without checking that it was a property
+list. GETF signalled, the condition was raised while the pane was being
+built, and the pane appeared as a dead link. Nothing in the suite
+noticed, because every test asked the mapping for its data and none
+asked it for its views.
+
+So the test asks for views, and renders them. It also asks on behalf of
+the shapes that broke it: a list of plists, and a list whose length is
+odd. A test that only used a well-formed plist would pass against the
+defect."
+  (let* ((input (tala:projection-tala-input
+                 (tm:topicmap-projection-of (temporal:make-page-loading-history))))
+         (targets (list (cons "Topic ID map" (tala:tala-input-topics input))
+                        (cons "Association map" (tala:tala-input-associations input))
+                        (cons "odd list" (list :id "a" :d2-id))
+                        (cons "list of lists" (list (list 1 2) (list 3 4))))))
+    (dolist (target targets)
+      (let ((views (handler-case (html-inspector-views:all-views (cdr target))
+                     (error (condition)
+                       (error "Opening ~A in the Inspector signalled ~A: ~A~%~
+A view specialized on CONS is offered every list, so one that reads an ~
+unchecked GETF breaks panes for unrelated objects."
+                              (car target) (type-of condition) condition)))))
+        (check views "~A offers no Inspector view." (car target))
+        ;; A pane renders its selected view; an unrendered view is a
+        ;; pane that opens empty, which is what the reader saw.
+        (let ((html (handler-case
+                        (html-inspector-views:view-html (first views))
+                      (error (condition)
+                        (error "Rendering the first view of ~A signalled ~A: ~A"
+                               (car target) (type-of condition) condition)))))
+          (check (plusp (length html))
+                 "The first view of ~A renders as nothing." (car target)))))
+    ;; And the rendered map must actually show the identities it carries,
+    ;; not merely be non-empty.
+    (let ((html (html-inspector-views:view-html
+                 (first (html-inspector-views:all-views
+                         (tala:tala-input-topics input))))))
+      (check (search "git-commit:8a1149197fabcb1ab5622316f09c5a60c2d3f1f8" html)
+             "The rendered Topic ID map does not show the Topic it maps.")
+      (check (search "git_commit_8a1149197fabcb1ab5622316f09c5a60c2d3f1f8" html)
+             "The rendered Topic ID map does not show the D2 key it assigns.")))
+  t)
+
 (defun run-temporal-projection-tests ()
   (check-no-page-attached-engine-is-loaded)
   (check-projection-is-derived-from-the-history)
@@ -249,6 +303,7 @@ something else to load an engine on the way past."
   (check-publication-state-is-distinguishable)
   (check-intervals-come-from-the-observed-dates)
   (check-d2-carries-identity-and-not-labels)
+  (check-identity-maps-are-inspectable)
   (check-rendering-changes-nothing)
   (check-no-page-attached-engine-is-loaded)
   (format t "~&TEMPORAL-PROJECTION-PASS: derived from the history, ordered by ~

@@ -119,6 +119,24 @@
     (inspection historical-claim-inspection)
   (historical-raw-view (inspection-claim inspection)))
 
+(defun station-plist-p (object)
+  "Is OBJECT a property list this file may read with GETF?
+
+A view specialized on CONS is offered every list in the image, not only
+the ones it was written for — the Inspector asks ALL-VIEWS of whatever a
+reader clicks. GETF on a list that is not a property list signals, and a
+condition raised while a pane is being built leaves that pane empty, so
+one view's wrong assumption silently breaks the display of unrelated
+objects.
+
+Most views here already avoid that by testing (FIRST X) before reading
+anything, which is safe on any list. This predicate says the same thing
+for the ones whose marker is not in first position: proper, even, and
+keyed by keywords."
+  (and (listp object)
+       (ignore-errors (evenp (list-length object)))
+       (loop for (key nil) on object by #'cddr always (keywordp key))))
+
 ;; Adapt only the existing historical example envelope. Ordinary cons views
 ;; remain available, and the example's return value and data stay unchanged.
 (html-inspector-views:defview historical-claims-example-overview (data cons)
@@ -266,7 +284,8 @@ either way."
 Every value below is read at render time from one of three places that
 can disagree — the source binding, ASDF, and the page's own assets — and
 the view says which. Nothing is taken from the genealogy plist."
-  (when (eq :a-critic-for-lisp-station (getf station :station))
+  (when (and (station-plist-p station)
+             (eq :a-critic-for-lisp-station (getf station :station)))
     (let* ((observation (a-critic-for-lisp-observation))
            (attachment (getf observation :page-attachment))
            (discovery (getf attachment :discovery))
@@ -518,7 +537,8 @@ another what an adaptation changed."
 
 (html-inspector-views:defview page-attached-system-context (station cons)
   "Relations and raw data for the node that has its own primary view."
-  (when (eq :a-critic-for-lisp-station (getf station :station))
+  (when (and (station-plist-p station)
+             (eq :a-critic-for-lisp-station (getf station :station)))
     (let ((relations (genealogy-node-relations (station-node-id station))))
       (list
        (html-inspector-views:html-view :title "Relations" :priority 2

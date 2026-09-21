@@ -1885,7 +1885,13 @@
 (defsystem "dreyeck/upstream-intake/temporal/tests"
   :description "The temporal projection derives from the history and mutates nothing"
   :license "BSD" :serial t
-  :depends-on ("dreyeck/upstream-intake/temporal" "dreyeck/topicmap/tests")
+  ;; dreyeck/lisp-critic/reading is here for what it defines, not for what
+  ;; it does: views specialized on CONS. Those are offered every list in
+  ;; the image, so one of them reading an unchecked GETF broke Inspector
+  ;; panes for the identity maps. Without this system loaded the
+  ;; regression test cannot see the defect it exists to catch.
+  :depends-on ("dreyeck/upstream-intake/temporal" "dreyeck/topicmap/tests"
+               "dreyeck/lisp-critic/reading")
   :components ((:file "dreyeck/tests/upstream-temporal-projection-smoke"))
   :perform (test-op (operation component)
              (declare (ignore operation component))
