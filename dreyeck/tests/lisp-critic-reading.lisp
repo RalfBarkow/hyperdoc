@@ -523,7 +523,27 @@ is the one the playground already answers to, not a second switch."
                  "The view does not say why reconstruction is absent."))
         (check (handler-case (progn (reading:reconstruct-engine-workspace) nil)
                  (dreyeck/page-attached-system-projection:execution-not-permitted () t))
-               "Calling reconstruction directly was not refused.")))
+               "Calling reconstruction directly was not refused.")
+        ;; Refused means nothing changed, not merely nothing returned.
+        ;; Asked of a fresh offer: the shared one may already hold a
+        ;; workspace from an earlier check, and an offer that already
+        ;; has one is answered from the slot without executing anything.
+        (let ((fresh (make-instance
+                      'dreyeck/page-attached-workspace-offer:page-attached-workspace-offer
+                      :id "workspace:a-critic-for-lisp"
+                      :title "a-critic-for-lisp")))
+          (check (handler-case
+                     (progn
+                       (dreyeck/page-attached-workspace-offer:materialize-page-attached-workspace
+                        fresh)
+                       nil)
+                   (dreyeck/page-attached-system-projection:execution-not-permitted
+                       () t))
+                 "A refused runtime materialized a fresh offer.")
+          (check (not (slot-boundp
+                       fresh
+                       'dreyeck/page-attached-workspace-offer::workspace))
+                 "A refused materialization still bound the offer."))))
     (check (= before reading::*engine-workspace-reconstructions*)
            "A refused reconstruction still counted as one.")
     ;; Served with development, and no server at all, both allow.
@@ -573,14 +593,37 @@ live one, and eligibility and reconstruction answered as one question."
                    "An eligible system offers no way to reconstruct."))
           (check (search "not eligible" html)
                  "The system is ineligible but the view does not say why.")))
-    ;; And reconstruction, when actually run, must produce the workspace
-    ;; standing at this page's own definition.
+    ;; Materializing must be one transition on one object, whichever
+    ;; route asks for it. Two routes existed: this action, which built a
+    ;; workspace the offer never learned about, and LOOKUP-PATH, which
+    ;; stored one. A second press built a second workspace.
     (when (getf (reading:engine-workspace-eligibility) :eligible-p)
-      (let ((witness (reading:reconstruct-engine-workspace)))
-        (check (getf witness :workspace) "Reconstruction produced no workspace.")
-        (check (search "a-critic-for-lisp" (getf witness :current-topic-id))
-               "The reconstructed workspace stands at ~S."
-               (getf witness :current-topic-id)))))
+      (let* ((offer (reading:engine-workspace-offer))
+             (slot 'dreyeck/page-attached-workspace-offer::workspace)
+             (before reading::*engine-workspace-reconstructions*)
+             (first (reading:reconstruct-engine-workspace)))
+        (check first "Materialization produced no workspace.")
+        (check (slot-boundp offer slot)
+               "Materializing left the offer unmaterialized.")
+        (check (eq first
+                   (dreyeck/page-attached-workspace-offer:page-attached-workspace-of
+                    offer))
+               "The returned workspace is not the one the offer holds.")
+        (check (= (1+ before) reading::*engine-workspace-reconstructions*)
+               "The first materialization was not counted once.")
+        ;; A second ask returns the same one and builds nothing.
+        (let ((second (reading:reconstruct-engine-workspace)))
+          (check (eq first second)
+                 "A second materialization produced a different workspace.")
+          (check (= (1+ before) reading::*engine-workspace-reconstructions*)
+                 "A second materialization reconstructed again."))
+        ;; And the path route converges on it rather than making its own.
+        (check (eq first (hyperbook:lookup-path offer nil))
+               "LOOKUP-PATH and the inspector action disagree.")
+        (check (search "a-critic-for-lisp"
+                       (dreyeck/topicmap:topicmap-topic-id-of
+                        (dreyeck/topicmap:topicmap-workspace-current-topic first)))
+               "The workspace does not stand at this page's own definition."))))
   t)
 
 (defun check-source-representations ()

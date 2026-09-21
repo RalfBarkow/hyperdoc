@@ -1,6 +1,7 @@
 (DEFPACKAGE #:DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER
   (:USE #:CL)
-  (:EXPORT #:PAGE-ATTACHED-WORKSPACE-OFFER #:PAGE-ATTACHED-WORKSPACE-OF))
+  (:EXPORT #:PAGE-ATTACHED-WORKSPACE-OFFER #:PAGE-ATTACHED-WORKSPACE-OF
+   #:MATERIALIZE-PAGE-ATTACHED-WORKSPACE #:PAGE-SLUG-OF))
 
 (IN-PACKAGE #:DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER)
 
@@ -23,21 +24,41 @@
         (ERROR "Empty page slug in workspace subject ID: ~S" ID))
       SLUG)))
 
+(defun materialize-page-attached-workspace (offer)
+  "Take OFFER from offered to materialized, once.
+
+The one way an offer changes state. It used to be reachable only
+through LOOKUP-PATH, so a second route — an inspector action calling
+reconstruction directly — built a workspace without the offer noticing,
+and built another on the next press. Two ways into one state
+transition, with different results.
+
+Returns the offer's workspace, reconstructing it on the first call and
+returning the same object afterwards. Refusal lives in reconstruction
+itself, so a runtime that does not run page-attached code refuses here
+too, before anything is evaluated.
+
+An already materialized offer is answered from the slot without asking
+the policy, because handing back an object that exists executes
+nothing. That is not a way around the refusal: a runtime that refuses
+can never reach the state where the slot is bound."
+  (if (slot-boundp offer 'workspace)
+      (page-attached-workspace-of offer)
+      (let* ((slug (page-slug-of offer))
+             (witness
+               (dreyeck/page-attached-system-projection:reconstruct-page-attached-workspace
+                slug))
+             (workspace (getf witness :workspace)))
+        (unless workspace
+          (error "Workspace reconstruction returned no workspace for ~S." slug))
+        (setf (slot-value offer 'workspace) workspace)
+        workspace)))
+
 (DEFMETHOD HYPERBOOK:LOOKUP-PATH ((OFFER PAGE-ATTACHED-WORKSPACE-OFFER) PATH)
   (UNLESS (NULL PATH)
     (ERROR "Only root lookup is defined for ~S; got path ~S." OFFER PATH))
-  (IF (SLOT-BOUNDP OFFER 'WORKSPACE)
-      (PAGE-ATTACHED-WORKSPACE-OF OFFER)
-      (LET* ((SLUG (PAGE-SLUG-OF OFFER))
-             (WITNESS
-              (DREYECK/PAGE-ATTACHED-SYSTEM-PROJECTION::RECONSTRUCT-PAGE-ATTACHED-WORKSPACE
-               SLUG))
-             (WORKSPACE (GETF WITNESS :WORKSPACE)))
-        (UNLESS WORKSPACE
-          (ERROR "Workspace reconstruction returned no workspace for ~S."
-                 SLUG))
-        (SETF (SLOT-VALUE OFFER 'WORKSPACE) WORKSPACE)
-        WORKSPACE)))
+  ;; Delegates rather than repeating the transition.
+  (materialize-page-attached-workspace OFFER))
 
 ;;;; The offer as something to read
 ;;

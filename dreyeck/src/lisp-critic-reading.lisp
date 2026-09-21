@@ -39,6 +39,7 @@
            #:genealogy-node-relations
            #:a-critic-for-lisp-observation
            #:reconstruct-engine-workspace
+           #:engine-workspace-offer
            #:execution-permitted-p
            #:engine-workspace-eligibility
            #:station-node-id
@@ -1369,23 +1370,52 @@ reading. Kept as a name here only so the view can ask it."
   (uiop:symbol-call :dreyeck/page-attached-system-projection
                     :execution-permitted-p))
 
-(defun reconstruct-engine-workspace ()
-  "Build the workspace for the wrapper system, and say so.
+(defvar *engine-offer* nil
+  "The offer this reading materializes through, once one is known.")
 
-Deliberately not called while rendering. It registers the system in
-ASDF and returns a fresh workspace on every call, so a view that ran it
-would mutate the image and mint a new workspace each time it is drawn."
+(defun engine-workspace-offer ()
+  "The catalog's offer for the wrapper system, or a stand-in for it.
+
+Prefers the registered one so that materializing here and materializing
+from the catalog are the same transition on the same object. Where the
+catalog holds none — a bare image, a test — one is made and kept, so at
+least this reading does not mint a new offer per press."
+  (let* ((id (format nil "workspace:~A" +engine-wrapper-system+))
+         (registered
+           (find id (hyperbook:hyperbooks-of hyperbook:*catalog*)
+                 :key #'hyperbook:id-of :test #'equal)))
+    (or registered
+        *engine-offer*
+        (setf *engine-offer*
+              (make-instance
+               'dreyeck/page-attached-workspace-offer:page-attached-workspace-offer
+               :id id :title +engine-wrapper-system+)))))
+
+(defun reconstruct-engine-workspace ()
+  "Materialize the wrapper system's workspace, through its offer.
+
+Deliberately not called while rendering: materializing registers the
+system with ASDF, which runs the page's own definition file.
+
+Goes through MATERIALIZE-PAGE-ATTACHED-WORKSPACE rather than calling
+reconstruction directly. Calling directly built a workspace the offer
+never learned about, and a second press built another — two routes into
+one state transition, disagreeing."
   ;; The operation refuses on its own; this only keeps the counter
   ;; honest about attempts that were turned away.
   (unless (execution-permitted-p)
     (error 'dreyeck/page-attached-system-projection:execution-not-permitted
            :operation "Workspace reconstruction"))
-  (incf *engine-workspace-reconstructions*)
-  (with-engine-assets-registered
-    (lambda ()
-      (uiop:symbol-call :dreyeck/page-attached-system-projection
-                        :reconstruct-page-attached-workspace
-                        +engine-wrapper-system+))))
+  (let ((offer (engine-workspace-offer)))
+    ;; Count materializations, not presses: the second press returns the
+    ;; workspace the first one built.
+    (unless (slot-boundp offer
+                         'dreyeck/page-attached-workspace-offer::workspace)
+      (incf *engine-workspace-reconstructions*))
+    (with-engine-assets-registered
+      (lambda ()
+        (dreyeck/page-attached-workspace-offer:materialize-page-attached-workspace
+         offer)))))
 
 (defun a-critic-for-lisp-observation ()
   "What is actually known about the page-attached wrapper system.

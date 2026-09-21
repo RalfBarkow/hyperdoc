@@ -1269,6 +1269,7 @@
   :depends-on ("dreyeck/hyperdoc" "dreyeck/inspector/lisp-critic"
                "dreyeck/inspector/topicmap" "dreyeck/fedwiki-assets"
                "dreyeck/page-attached-workspace-reconstruction"
+               "dreyeck/page-attached-workspace-offer"
                "hyperdoc/explorer")
   :components ((:module "dreyeck/src" :components
                         ((:file "lisp-critic-reading")
