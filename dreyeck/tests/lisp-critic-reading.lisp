@@ -7,6 +7,7 @@
 (defpackage #:dreyeck/lisp-critic/reading/tests
   (:use #:cl)
   (:local-nicknames (#:reading #:dreyeck/lisp-critic/reading)
+                    (#:dreyeck/asdf-source #:dreyeck/asdf-source)
                     (#:critic #:dreyeck/lisp-critic)
                     (#:er #:dreyeck/evaluation-record)
                     (#:views #:html-inspector-views)
@@ -507,6 +508,78 @@ testing against proves nothing."
            (progn (setf (symbol-value symbol) parameters) (funcall thunk))
         (if had (setf (symbol-value symbol) old) (makunbound symbol))))))
 
+(defun scanned-declaration (source)
+  "Run the preview's own extraction over SOURCE, without touching disk."
+  (multiple-value-bind (nodes issues)
+      (dreyeck/asdf-source:scan-asdf-source source)
+    (let ((form (find-if #'dreyeck/asdf-source:asdf-defsystem-form-p nodes)))
+      (list :form form :issues issues
+            :name (and form
+                       (dreyeck/asdf-source:simple-asdf-designator-name
+                        (second (dreyeck/asdf-source:asdf-source-node-children form))))))))
+
+(defun check-source-declaration ()
+  "The definition file is read as text, and only as text.
+
+A file question — what does this .asd say — used to be answered by
+registering the system, because FIND-SYSTEM was the nearest thing to
+hand. It is now read, and where the source does not spell something
+out the preview says so rather than asking a runtime instead."
+  (let ((declaration (reading:engine-asdf-source-declaration)))
+    (check (getf declaration :read-p)
+           "The definition file was not read as text: ~A" (getf declaration :why))
+    (check (getf declaration :defsystem-p)
+           "No defsystem form was found in the definition file.")
+    (check (equal "a-critic-for-lisp" (getf declaration :name))
+           "The declared system name reads ~S." (getf declaration :name))
+    (check (equal '("uiop") (getf declaration :depends-on))
+           "The declared dependencies read ~S." (getf declaration :depends-on))
+    ;; The nesting survives: a module keeps its own components.
+    (let* ((components (getf declaration :components))
+           (module (find "module" components
+                         :key (lambda (c) (getf c :kind)) :test #'equal)))
+      (check (find "package" components
+                   :key (lambda (c) (getf c :name)) :test #'equal)
+             "The top-level file component is missing.")
+      (check module "The module component is missing.")
+      (check (= 2 (length (getf module :components)))
+             "The module lost its own components."))
+    (check (null (getf declaration :issues))
+           "This definition produced scanner issues: ~S"
+           (getf declaration :issues)))
+  ;; The two witnesses must be shown, and agreement must be a finding
+  ;; rather than an assumption.
+  (let* ((station (reading:lisp-critic-station :a-critic-for-lisp-station))
+         (html (views:view-html (first (views:all-views station)))))
+    (check (search "ASDF source declaration" html)
+           "The view does not show what the source declares.")
+    (check (search "source binding expects" html)
+           "The view does not show what the binding expects.")
+    (check (search "the two witnesses" html)
+           "The view does not compare the two witnesses."))
+  ;; What the source does not settle stays unsettled: no runtime fallback.
+  (let ((computed (scanned-declaration "(defsystem (compute-name))")))
+    (check (getf computed :form) "A computed-name definition was not found.")
+    (check (null (getf computed :name))
+           "A computed system name was resolved to ~S instead of left unknown."
+           (getf computed :name)))
+  (check (null (getf (scanned-declaration
+                      "(when (probe-file \"x\") (defsystem #:hidden))")
+                     :form))
+         "A nested definition was reported as top-level.")
+  (check (getf (scanned-declaration "(defsystem #:x :depends-on #.(list :uiop))")
+               :issues)
+         "Read-time evaluation was passed over without an issue.")
+  (check (getf (scanned-declaration "#| unterminated") :issues)
+         "Malformed source produced no issue.")
+  (check (equal "x" (getf (scanned-declaration
+                           "(defsystem #:x #+sbcl :depends-on #+sbcl (#:uiop))")
+                          :name))
+         "A feature conditional prevented reading the name.")
+  (check (equal "quoted" (getf (scanned-declaration "(defsystem \"quoted\")") :name))
+         "A string system name was not read.")
+  t)
+
 (defun check-execution-policy ()
   "A runtime that does not run page-attached code must refuse, not just hide.
 
@@ -542,8 +615,12 @@ systems became ~D." registered (length (asdf:registered-systems)))
           (check (search "would evaluate the page" html)
                  "The view does not say why eligibility is unasked.")
           ;; Declining to read is not the same as having nothing to say.
-          (check (search "If this were run" html)
+          (check (search "Expected from the source binding" html)
                  "A runtime that declines shows no preview of what it declined.")
+          ;; The inert reading of the file is shown whether or not the
+          ;; runtime will evaluate it: it is a fact about a file.
+          (check (search "ASDF source declaration" html)
+                 "A refusing runtime hides what the file itself declares.")
           (check (search "critic entrypoint" html)
                  "The preview does not name the entrypoint that would be called.")
           (check (search "Not knowable until it runs" html)
@@ -1234,6 +1311,7 @@ is honest.~%")
   (check-page-attached-system-view)
   (check-source-representations)
   (check-workspace-section)
+  (check-source-declaration)
   (check-execution-policy)
   (check-asset-root-resolution)
   (check-genealogy-reads-as-domain-language)

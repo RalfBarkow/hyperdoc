@@ -39,6 +39,7 @@
            #:genealogy-node-relations
            #:a-critic-for-lisp-observation
            #:engine-execution-preview
+           #:engine-asdf-source-declaration
            #:reconstruct-engine-workspace
            #:engine-workspace-offer
            #:execution-permitted-p
@@ -1460,6 +1461,83 @@ view says so."
             :strength :weak)
     (error () nil)))
 
+(defun %asd-component-tree (node)
+  "The component list as the source writes it, one level per module.
+
+Reads the tree the scanner produced; asks ASDF nothing. A module's own
+:components are followed, so the shape survives, but no name is
+invented where the source does not spell one out."
+  (when node
+    (loop for child in (dreyeck/asdf-source:asdf-source-node-children node)
+          collect
+          (let* ((children (dreyeck/asdf-source:asdf-source-node-children child))
+                 (kind (and children
+                            (dreyeck/asdf-source:simple-asdf-designator-name
+                             (first children))))
+                 (name (and (rest children)
+                            (dreyeck/asdf-source:simple-asdf-designator-name
+                             (second children))))
+                 (nested
+                   (loop for tail on (cddr children)
+                         for key = (first tail)
+                         when (and key
+                                   (eq :token
+                                       (dreyeck/asdf-source:asdf-source-node-kind key))
+                                   (string-equal
+                                    ":components"
+                                    (dreyeck/asdf-source:asdf-source-node-raw key)))
+                           return (second tail))))
+            (list :kind kind :name name
+                  :components (%asd-component-tree nested))))))
+
+(defun %asd-keyword-node (defsystem keyword)
+  (loop for tail on (cddr (dreyeck/asdf-source:asdf-source-node-children defsystem))
+        for key = (first tail)
+        when (and key
+                  (eq :token (dreyeck/asdf-source:asdf-source-node-kind key))
+                  (string-equal keyword
+                                (dreyeck/asdf-source:asdf-source-node-raw key)))
+          return (second tail)))
+
+(defun engine-asdf-source-declaration ()
+  "What the page's own definition file says, read as text.
+
+Never ASDF. This answers a question about a file — what is written in
+it — and a file question must not be answered by registering a system.
+Where the source does not spell something out, this says so rather than
+falling back on a runtime lookup: a computed name is unknown here, not
+resolved elsewhere."
+  (let* ((root (resolve-engine-asset-root))
+         (asd (and root (probe-file (merge-pathnames
+                                     (format nil "~A.asd" +engine-wrapper-system+)
+                                     root)))))
+    (if (null asd)
+        (list :read-p nil :why "no definition file is resolved in this runtime")
+        (handler-case
+            (multiple-value-bind (nodes issues)
+                (dreyeck/asdf-source:scan-asdf-source (uiop:read-file-string asd))
+              (let ((form (find-if #'dreyeck/asdf-source:asdf-defsystem-form-p nodes)))
+                (if (null form)
+                    (list :read-p t :artifact asd :defsystem-p nil :issues issues
+                          :why "no top-level defsystem form is written here")
+                    (list :read-p t
+                          :artifact asd
+                          :defsystem-p t
+                          :name (dreyeck/asdf-source:simple-asdf-designator-name
+                                 (second (dreyeck/asdf-source:asdf-source-node-children
+                                          form)))
+                          :depends-on
+                          (let ((node (dreyeck/asdf-source:depends-on-node form)))
+                            (and node
+                                 (mapcar #'dreyeck/asdf-source:simple-asdf-designator-name
+                                         (dreyeck/asdf-source:asdf-source-node-children
+                                          node))))
+                          :components (%asd-component-tree
+                                       (%asd-keyword-node form ":components"))
+                          :issues issues))))
+          (error (condition)
+            (list :read-p nil :why (format nil "~A" condition)))))))
+
 (defun engine-execution-preview ()
   "What a trusted runtime would be asked to run, and on what grounds.
 
@@ -1480,6 +1558,7 @@ no eligibility, no loading."
          (wrapped (%wrapped-source-observation)))
     (list
      :kind :execution-preview
+     :source-declaration (engine-asdf-source-declaration)
      :observed
      (list :page (getf discovery :page-title)
            :page-file (getf discovery :page-file)

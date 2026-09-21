@@ -1310,6 +1310,7 @@
   :description "Source-backed reading of the Lisp Critic genealogy"
   :depends-on ("dreyeck/hyperdoc" "dreyeck/inspector/lisp-critic"
                "dreyeck/inspector/topicmap" "dreyeck/fedwiki-assets"
+               "dreyeck/asdf-source"
                "dreyeck/page-attached-workspace-reconstruction"
                "dreyeck/page-attached-workspace-offer"
                "hyperdoc/explorer")

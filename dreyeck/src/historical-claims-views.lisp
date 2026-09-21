@@ -193,6 +193,73 @@ the second. Both answers below come from the node's own record."
   (claim-view-row (format nil "~A (this runtime)" label)
                   (if value "yes" "no")))
 
+(defun render-component-tree (components)
+  (html-inspector-views:html
+    (:ul
+     (dolist (component components)
+       (html-inspector-views:html
+         (:li (html-inspector-views:esc
+               (format nil "~A ~A"
+                       (or (getf component :kind) "?")
+                       (or (getf component :name) "(name not written literally)")))
+              (when (getf component :components)
+                (render-component-tree (getf component :components)))))))))
+
+(defun render-source-declaration (declaration expected-system)
+  "What the definition file says, and whether it agrees with the binding.
+
+Two independent witnesses. The file declares a system name; the source
+binding expects one. They have always been assumed equal. Showing both
+makes agreement a finding and disagreement visible, with nothing run
+either way."
+  (html-inspector-views:html
+    (:h3 "ASDF source declaration")
+    (:p (html-inspector-views:esc
+         "Read from the definition file as text. ASDF has not been asked anything; this is what is written, not what would be established."))
+    (if (getf declaration :read-p)
+        (if (getf declaration :defsystem-p)
+            (html-inspector-views:html
+              (:table :class "inspector-table"
+                (claim-view-row "declared system"
+                                (or (getf declaration :name)
+                                    "not written literally — not established from source"))
+                (claim-view-row "declared dependencies"
+                                (if (getf declaration :depends-on)
+                                    (format nil "~{~A~^, ~}"
+                                            (mapcar (lambda (d)
+                                                      (or d "(not literal)"))
+                                                    (getf declaration :depends-on)))
+                                    "none written"))
+                (claim-view-row "source binding expects" expected-system)
+                (claim-view-row
+                 "the two witnesses"
+                 (let ((declared (getf declaration :name)))
+                   (cond ((null declared)
+                          "cannot be compared: the source does not spell the name out")
+                         ((equal declared expected-system) "agree")
+                         (t (format nil "DISAGREE — the file declares ~S"
+                                    declared))))))
+              (when (getf declaration :components)
+                (html-inspector-views:html
+                  (:p "Components, as the source writes them:")
+                  (render-component-tree (getf declaration :components))))
+              (when (getf declaration :issues)
+                (html-inspector-views:html
+                  (:p (html-inspector-views:esc
+                       "The scanner recorded something it will not interpret; nothing was evaluated to resolve it:"))
+                  (:ul (dolist (issue (getf declaration :issues))
+                         (html-inspector-views:html
+                           (:li (html-inspector-views:esc
+                                 (format nil "~A" issue)))))))))
+            (html-inspector-views:html
+              (:p (html-inspector-views:esc
+                   (or (getf declaration :why)
+                       "no defsystem form is written here")))))
+        (html-inspector-views:html
+          (:p (html-inspector-views:esc
+               (format nil "The definition file was not read as text: ~A"
+                       (or (getf declaration :why) "no reason given"))))))))
+
 (html-inspector-views:defview page-attached-system-overview (station cons)
   "The wrapper system as it was observed, rather than as a genealogy node.
 
@@ -259,14 +326,20 @@ the view says which. Nothing is taken from the genealogy plist."
           ;; Where a runtime declines to read the definition, saying so
           ;; is not the same as saying nothing. What would be run, and on
           ;; what grounds, is knowable without running it.
+          ;; Always, because it is a fact about a file and costs nothing.
+          ;; Where the runtime also read the definition, the two sit
+          ;; side by side: what is written, and what ASDF made of it.
+          (let ((preview (engine-execution-preview)))
+            (render-source-declaration (getf preview :source-declaration)
+                                       (getf observation :name)))
           (unless (getf system :read-p)
             (let* ((preview (engine-execution-preview))
                    (expected (getf preview :expected))
                    (observed (getf preview :observed)))
               (html-inspector-views:html
-                (:h3 "If this were run")
+                (:h3 "Expected from the source binding")
                 (:p (html-inspector-views:esc
-                     "Expected from the source binding's own contract — it names what it will call. Not a prediction of what the definition does: an ASDF definition is Common Lisp."))
+                     "What the binding will call. Not a prediction of what the definition does: an ASDF definition is Common Lisp."))
                 (:table :class "inspector-table"
                   (claim-view-row "evaluate"
                                   (format nil "~A" (getf expected :evaluate)))
@@ -286,7 +359,7 @@ the view says which. Nothing is taken from the genealogy plist."
                 (:ul (dolist (unknown (getf preview :unknowable))
                        (html-inspector-views:html
                          (:li (html-inspector-views:esc unknown))))))))
-          (:h3 "ASDF definition")
+          (:h3 "Observed ASDF runtime definition")
           (if (getf system :read-p)
               (html-inspector-views:html
                 (:table :class "inspector-table"
@@ -294,7 +367,7 @@ the view says which. Nothing is taken from the genealogy plist."
                   (claim-view-row "depends on"
                                   (format nil "~{~A~^, ~}"
                                           (getf system :depends-on))))
-                (:p "Components, as ASDF holds them:")
+                (:p "Components, as ASDF holds them after evaluating the definition:")
                 (component-tree-list (getf system :components))
                 (:p "Definition file: "
                     (html-inspector-views:object-ref
