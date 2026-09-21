@@ -39,11 +39,10 @@ greyed-out debugging tabs. Giving it one must not cost an evaluation."
                           "not materialized"))
         (assert (search expected html)))))
   ;; A runtime that refuses execution says so, and the refusal is real.
-  (let* ((package (or (find-package :hyperbook-server)
-                      (make-package :hyperbook-server :use '(:cl))))
-         (symbol (or (find-symbol "*SERVER-PARAMETERS*" package)
-                     (intern "*SERVER-PARAMETERS*" package)))
-         (had (boundp symbol))
+  (asdf:load-system "hyperbook/server")
+  (let* ((package (find-package :hyperbook/server))
+         (symbol (and package (find-symbol "*SERVER-PARAMETERS*" package)))
+         (had (progn (assert package) (assert symbol) (boundp symbol)))
          (old (and had (symbol-value symbol))))
     (unwind-protect
          (progn

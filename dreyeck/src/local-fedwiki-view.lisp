@@ -109,6 +109,7 @@ runtime that is allowed to ask it."
        (site-root
          (configured-site-root))
        (port 8080)
+       (host "0.0.0.0")
        (pane-width "700px")
        (development nil)
        (wiki-id *default-wiki-id*))
@@ -122,6 +123,7 @@ runtime that is allowed to ask it."
 
   (hyperbook/server:serve-catalog
    :port port
+   :host host
    :pane-width pane-width
    :development development)
 

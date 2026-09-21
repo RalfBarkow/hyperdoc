@@ -40,14 +40,20 @@
   "Whether this runtime may run code that arrived with a page.
 
 Reuses the flag the playground already answers to rather than adding a
-second switch: HYPERBOOK-SERVER::*SERVER-PARAMETERS* is NIL until a
+second switch: HYPERBOOK/SERVER::*SERVER-PARAMETERS* is NIL until a
 server starts and then holds (pane-width development). A served runtime
 started without development refuses; an image with no server — a
 developer's, or a test's — allows.
 
 Read softly on purpose. Nothing down here should depend on the HTTP
-server; the question is only whether one is running."
-  (let* ((package (find-package :hyperbook-server))
+server; the question is only whether one is running.
+
+The package name is load-bearing and was wrong once: looked up as
+HYPERBOOK-SERVER, which does not exist, this returned NIL parameters
+and so permitted everything, including on a production server. A test
+that makes the package itself cannot catch that, so the tests bind the
+real variable in the real package."
+  (let* ((package (find-package :hyperbook/server))
          (symbol (and package (find-symbol "*SERVER-PARAMETERS*" package)))
          (parameters (and symbol (boundp symbol) (symbol-value symbol))))
     (if (null parameters)

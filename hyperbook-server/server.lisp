@@ -11,6 +11,7 @@
 (defvar *server-parameters* nil)
 
 (defun serve-hyperbooks (root-object &key (port 8080)
+                                       (host "0.0.0.0")
                                        (title "Inspector")
                                        (pane-width "700px")
                                        (development nil))
@@ -19,7 +20,14 @@ with the given TITLE and PANE-WIDTH. All registered HyperBooks are
 served at the URL defined by their slug. If DEVELOPMENT is non-nil,
 enable playgrounds and other development tools. This is not
 recommended on public servers because it allows the execution of
-arbitrary Lisp code."
+arbitrary Lisp code.
+
+HOST is the address to bind to, and defaults to what CLOG would have
+chosen on its own, every interface. Passing \"127.0.0.1\" is what makes
+a development server reachable only from the machine it runs on, which
+matters precisely because DEVELOPMENT enables evaluating arbitrary
+code: without it, the only thing keeping such a server private is that
+nobody happened to connect."
   (clog:initialize
    #'(lambda (body)
        (clog-moldable-inspector:on-new-inspector body
@@ -27,6 +35,7 @@ arbitrary Lisp code."
                                                  :pane-width pane-width
                                                  :title title
                                                  :playground? development))
+   :host host
    :port port
    :extended-routing t)
   (dolist (hb (hyperbook:hyperbooks-of hyperbook:*catalog*))
@@ -75,14 +84,17 @@ arbitrary Lisp code."
             (:h1 "Not found")
             (:p (views:esc (str:join "/" (path-of notfound))))))))
 
-(defun serve-catalog (&key (port 8080) (pane-width "700px") (development nil))
+(defun serve-catalog (&key (port 8080) (host "0.0.0.0") (pane-width "700px")
+                        (development nil))
   "Start a Web server on PORT that serves the HyperBook catalog at path \"/\"
 with the given PANE-WIDTH. All registered HyperBooks are served at the
 URL defined by their slug. If DEVELOPMENT is non-nil, enable
 playgrounds and other development tools. This is not recommended on
-public servers because it allows the execution of arbitrary Lisp code."
+public servers because it allows the execution of arbitrary Lisp code.
+HOST is passed through unchanged; see SERVE-HYPERBOOKS."
   (serve-hyperbooks hyperbook:*catalog*
                    :port port
+                   :host host
                    :title "HyperBook Catalog"
                    :development development
                    :pane-width pane-width))

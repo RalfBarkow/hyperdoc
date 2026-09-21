@@ -42,6 +42,72 @@
     (html-inspector-views:view-html
      view)))
 
+(defun call-recording-clog (thunk)
+  "Run THUNK with CLOG's server entry points replaced by recorders.
+
+No socket is opened. What is under test is which arguments reach
+CLOG:INITIALIZE, not whether a server comes up, and starting a real
+listener in a unit test would bind a port and change global state."
+  (let ((initialize (fdefinition 'clog:initialize))
+        (set-on-new-window (fdefinition 'clog:set-on-new-window))
+        (parameters (when (boundp 'hyperbook/server::*server-parameters*)
+                      hyperbook/server::*server-parameters*))
+        (recorded nil))
+    (unwind-protect
+         (progn
+           (setf (fdefinition 'clog:initialize)
+                 (lambda (handler &rest arguments)
+                   (declare (ignore handler))
+                   (setf recorded arguments)
+                   nil))
+           (setf (fdefinition 'clog:set-on-new-window)
+                 (lambda (handler &key path)
+                   (declare (ignore handler path))
+                   nil))
+           (funcall thunk)
+           ;; Both what reached CLOG and what the server recorded, read
+           ;; before the unwind restores the latter.
+           (list :clog recorded
+                 :server-parameters hyperbook/server::*server-parameters*))
+      (setf (fdefinition 'clog:initialize) initialize)
+      (setf (fdefinition 'clog:set-on-new-window) set-on-new-window)
+      (setf hyperbook/server::*server-parameters* parameters))))
+
+(defun run-bind-address-tests ()
+  "An explicitly given bind address must reach CLOG, and only then.
+
+DEVELOPMENT enables evaluating arbitrary code, so a development server
+that binds every interface is private only by luck. The address is now
+a parameter; it was not one, and CLOG's own default — every interface
+— was what every caller got."
+  ;; Explicit loopback reaches CLOG.
+  (let ((clog (getf (call-recording-clog
+                     (lambda ()
+                       (hyperbook/server:serve-catalog
+                        :port 8099 :host "127.0.0.1" :development t)))
+                    :clog)))
+    (assert (equal "127.0.0.1" (getf clog :host)))
+    (assert (= 8099 (getf clog :port))))
+  ;; Omitting it preserves what callers got before: every interface.
+  (let ((clog (getf (call-recording-clog
+                     (lambda () (hyperbook/server:serve-catalog :port 8080)))
+                    :clog)))
+    (assert (equal "0.0.0.0" (getf clog :host))))
+  ;; The two choices are independent: a bound address does not imply
+  ;; development, and development does not imply a public address.
+  (let ((observed (call-recording-clog
+                   (lambda ()
+                     (hyperbook/server:serve-catalog :host "127.0.0.1")))))
+    (assert (equal "127.0.0.1" (getf (getf observed :clog) :host)))
+    (assert (null (second (getf observed :server-parameters)))))
+  (let ((observed (call-recording-clog
+                   (lambda () (hyperbook/server:serve-catalog :development t)))))
+    (assert (equal "0.0.0.0" (getf (getf observed :clog) :host)))
+    (assert (second (getf observed :server-parameters))))
+  (format t "~&BIND-ADDRESS-PASS: an explicit host reaches CLOG, omitting it ~
+keeps every interface, and host and development stay independent.~%")
+  t)
+
 (defun run-local-fedwiki-view-tests ()
   (assert
    (string=

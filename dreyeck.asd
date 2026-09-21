@@ -1056,7 +1056,11 @@
    (UNLESS
        (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/LOCAL-FEDWIKI-VIEW/TESTS
                                  :RUN-LOCAL-FEDWIKI-VIEW-TESTS)
-     (ERROR "Local FedWiki /view tests failed."))))
+     (ERROR "Local FedWiki /view tests failed."))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/LOCAL-FEDWIKI-VIEW/TESTS
+                                 :RUN-BIND-ADDRESS-TESTS)
+     (ERROR "Bind address tests failed."))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-PAGE-MATERIALIZATION
   :DESCRIPTION

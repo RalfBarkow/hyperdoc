@@ -488,17 +488,24 @@ configured site." source)))
 (defun with-server-parameters (parameters thunk)
   "Run THUNK as though a server had been started with PARAMETERS.
 
-NIL stands for no server at all. The symbol is created when the HTTP
-server is not loaded, which is the usual case in these tests."
-  (let* ((package (or (find-package :hyperbook-server)
-                      (make-package :hyperbook-server :use '(:cl))))
-         (symbol (or (find-symbol "*SERVER-PARAMETERS*" package)
-                     (intern "*SERVER-PARAMETERS*" package)))
-         (had (boundp symbol))
-         (old (and had (symbol-value symbol))))
-    (unwind-protect
-         (progn (setf (symbol-value symbol) parameters) (funcall thunk))
-      (if had (setf (symbol-value symbol) old) (makunbound symbol)))))
+NIL stands for no server at all.
+
+Binds the variable the server itself writes, in the package the server
+itself defines, and loads that system to get at it. An earlier version
+made a package of its own when none was found — and so passed while
+the policy was reading a package name that does not exist, which meant
+it permitted everything everywhere. A test that can invent what it is
+testing against proves nothing."
+  (asdf:load-system "hyperbook/server")
+  (let* ((package (find-package :hyperbook/server))
+         (symbol (and package (find-symbol "*SERVER-PARAMETERS*" package))))
+    (check package "The server package is absent; the policy reads nothing.")
+    (check symbol "The server does not define *SERVER-PARAMETERS*.")
+    (let* ((had (boundp symbol))
+           (old (and had (symbol-value symbol))))
+      (unwind-protect
+           (progn (setf (symbol-value symbol) parameters) (funcall thunk))
+        (if had (setf (symbol-value symbol) old) (makunbound symbol))))))
 
 (defun check-execution-policy ()
   "A runtime that does not run page-attached code must refuse, not just hide.
