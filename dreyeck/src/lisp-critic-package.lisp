@@ -14,6 +14,12 @@
            #:lisp-critic-source-station-upstream-package-of
            #:lisp-critic-source-station-upstream-file-entrypoint-symbol-of
            #:lisp-critic-source-station-provenance-of
+           #:critic-run-snapshot
+           #:critic-run-snapshot-string
+           #:write-critic-run-snapshot
+           #:read-critic-run-snapshot
+           #:reconstitute-critic-run
+           #:+critic-snapshot-version+
            #:lisp-critic-contract-id-of
            #:lisp-critic-contract-title-of
            #:lisp-critic-contract-source-station-of

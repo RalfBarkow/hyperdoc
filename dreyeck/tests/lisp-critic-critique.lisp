@@ -3,7 +3,7 @@
   (:local-nicknames (#:critic #:dreyeck/lisp-critic)
                     (#:er #:dreyeck/evaluation-record)
                     (#:views #:html-inspector-views))
-  (:export #:run-tests #:run-current-tests))
+  (:export #:run-tests #:run-current-tests #:run-snapshot-roundtrip-tests))
 (in-package #:dreyeck/lisp-critic/critique/tests)
 
 (defun assert-link (object destination)
@@ -63,6 +63,82 @@
     (format t "~&REAL-CRITIC-PASS: CAR-CDR, completed record, one separate critique; negative/failure and Inspector links verified.~%")
     t))
 
+(defun run-snapshot-roundtrip-tests ()
+  "A run must survive as data into an image that cannot run it.
+
+Run here, write inert JSON, and read it back in a fresh process that
+has never loaded the engine. What is checked is not that the Lisp graph
+comes back identical — it does not, and need not — but that the same
+finding is visible: the same input, rule, recommendation, evidence and
+evaluation identity.
+
+The measurement matters as much as the rendering. The rule name and the
+match pattern are symbols from LISP-CRITIC-USER and EXTEND-MATCH, so a
+format that read them back as symbols would have to create those
+packages. JSON cannot, and the fresh process asserts that none
+appeared."
+  (let* ((target (critic:car-cdr-critique-example))
+         (json (critic:critic-run-snapshot-string target))
+         (file (uiop:tmpize-pathname
+                (merge-pathnames "critic-snapshot.json"
+                                 (uiop:temporary-directory)))))
+    (unwind-protect
+         (progn
+           (with-open-file (out file :direction :output :if-exists :supersede)
+             (write-string json out))
+           ;; Same image: the data carries the finding.
+           (let* ((snapshot (with-open-file (in file)
+                              (critic:read-critic-run-snapshot in)))
+                  (replayed (critic:reconstitute-critic-run snapshot))
+                  (record (first (critic:target-runs-of replayed))))
+             (assert (equal (princ-to-string (critic:target-form-of target))
+                            (critic:target-form-of replayed)))
+             (assert (equal (critic:lisp-critic-run-record-id-of
+                             (first (critic:target-runs-of target)))
+                            (critic:lisp-critic-run-record-id-of record)))
+             (assert (= 1 (length (critic:critiques-of record))))
+             (assert (equal (critic:critique-explanation-of
+                             (first (critic:critiques-of
+                                     (first (critic:target-runs-of target)))))
+                            (critic:critique-explanation-of
+                             (first (critic:critiques-of record))))))
+           ;; Fresh process: the engine was never here, and must not
+           ;; arrive because a snapshot was read.
+           (uiop:run-program
+            (list (namestring sb-ext:*runtime-pathname*)
+                  "--no-userinit" "--non-interactive"
+                  "--eval" "(require :asdf)"
+                  "--eval" (format nil "(asdf:load-asd ~S)"
+                                   (asdf:system-source-file "dreyeck"))
+                  "--eval" "(asdf:load-system \"dreyeck/inspector/lisp-critic\")"
+                  "--eval"
+                  (format nil
+                          "(let ((before (length (list-all-packages))) ~
+(systems (length (asdf:registered-systems)))) ~
+(assert (null (find-package :lisp-critic))) ~
+(assert (null (find-package :lisp-critic-user))) ~
+(assert (null (find-package :extend-match))) ~
+(let* ((target (with-open-file (in ~S) ~
+(dreyeck/lisp-critic:reconstitute-critic-run ~
+(dreyeck/lisp-critic:read-critic-run-snapshot in)))) ~
+(html (with-output-to-string (s) ~
+(dolist (v (html-inspector-views:all-views target)) ~
+(write-string (html-inspector-views:view-html v) s))))) ~
+(assert (search \"CAR (CDR ITEMS)\" html)) ~
+(assert (null (find-package :lisp-critic))) ~
+(assert (null (find-package :lisp-critic-user))) ~
+(assert (null (find-package :extend-match))) ~
+(assert (= before (length (list-all-packages)))) ~
+(assert (= systems (length (asdf:registered-systems)))) ~
+(format t \"~~&SNAPSHOT-FRESH-IMAGE-PASS: the finding rendered where ~
+the engine has never been.~~%\")))"
+                          (namestring file)))
+            :output *standard-output* :error-output *error-output*))
+      (ignore-errors (delete-file file))))
+  (format t "~&SNAPSHOT-ROUNDTRIP-PASS: a run survives as data into an image ~
+that cannot run it.~%")
+  t)
+
 (defun run-tests ()
   (run-current-tests)
   (format t "~&CURRENT-IMAGE-CRITIC-PASS~%")
@@ -74,4 +150,5 @@
          "--eval" "(dreyeck/lisp-critic/critique/tests:run-current-tests)")
    :output *standard-output* :error-output *error-output*)
   (format t "~&FRESH-PROCESS-CRITIC-PASS~%")
+  (run-snapshot-roundtrip-tests)
   t)

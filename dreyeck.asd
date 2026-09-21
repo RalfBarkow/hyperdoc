@@ -1291,8 +1291,10 @@
 
 (asdf:defsystem "dreyeck/lisp-critic/critique"
   :description "One-rule Critic execution with explicit domain findings"
-  :depends-on ("dreyeck/evaluation-record/lisp-critic")
-  :components ((:file "dreyeck/src/lisp-critic-critique"))
+  :depends-on ("dreyeck/evaluation-record/lisp-critic" "shasht")
+  :components ((:file "dreyeck/src/lisp-critic-critique")
+               (:file "dreyeck/src/lisp-critic-snapshot"
+                :depends-on ("dreyeck/src/lisp-critic-critique")))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/critique/tests"))))
 
 (asdf:defsystem "dreyeck/inspector/lisp-critic"
