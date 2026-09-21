@@ -70,7 +70,12 @@ Run here, write inert JSON, and read it back in a fresh process that
 has never loaded the engine. What is checked is not that the Lisp graph
 comes back identical — it does not, and need not — but that the same
 finding is visible: the same input, rule, recommendation, evidence and
-evaluation identity.
+run label.
+
+The label is checked for what it says about itself as much as for its
+value. It is a GENSYM name, unique only inside the image that made it,
+so the transported schema must not call it an identity and must carry
+its scope.
 
 The measurement matters as much as the rendering. The rule name and the
 match pattern are symbols from LISP-CRITIC-USER and EXTEND-MATCH, so a
@@ -90,7 +95,13 @@ appeared."
            (let* ((snapshot (with-open-file (in file)
                               (critic:read-critic-run-snapshot in)))
                   (replayed (critic:reconstitute-critic-run snapshot))
-                  (record (first (critic:target-runs-of replayed))))
+                  (record (first (critic:target-runs-of replayed)))
+                  (evaluation (gethash "evaluation" snapshot)))
+             ;; The schema must not promise more than a gensym can keep.
+             (assert (null (nth-value 1 (gethash "identity" evaluation))))
+             (assert (gethash "run-label" evaluation))
+             (assert (equal "the image that produced this snapshot"
+                            (gethash "label-scope" evaluation)))
              (assert (equal (princ-to-string (critic:target-form-of target))
                             (critic:target-form-of replayed)))
              (assert (equal (critic:lisp-critic-run-record-id-of

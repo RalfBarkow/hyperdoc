@@ -79,7 +79,17 @@ map. Nothing in it is a Lisp object that has to be read back as one."
     (list
      (cons "snapshot-version" +critic-snapshot-version+)
      (cons "evaluation"
-           (list (cons "identity" (lisp-critic-run-record-id-of record))
+           ;; A label, not an identity. The record's id is made by
+           ;; GENSYM, whose whole guarantee is uniqueness inside one
+           ;; image — and measurement showed the value is weaker still:
+           ;; the counter is shared by every gensym, so the number does
+           ;; not even count runs, and two freshly started images
+           ;; produce the same string. Calling that an identity in a
+           ;; file that leaves its image would claim what no reader
+           ;; could rely on, so the scope travels with the value the
+           ;; way RELATIVE-TO travels with the rule source path.
+           (list (cons "run-label" (lisp-critic-run-record-id-of record))
+                 (cons "label-scope" "the image that produced this snapshot")
                  (cons "status" (%snapshot-text
                                  (lisp-critic-run-record-status record)))
                  (cons "started-at" (lisp-critic-run-record-started-at-of record))
@@ -198,7 +208,10 @@ of a run that happened elsewhere, and says as much in its contract."
                        :failure-policy '(:record-condition)
                        :review-contract-role :critique))
            (record (make-instance 'critic-rule-run-record
-                     :id (%snapshot-value evaluation "identity")
+                     ;; Back into the slot it came from: inside this
+                     ;; image it is again a local label, which is all
+                     ;; the slot ever was.
+                     :id (%snapshot-value evaluation "run-label")
                      :contract contract
                      :target target
                      :target-paths nil
