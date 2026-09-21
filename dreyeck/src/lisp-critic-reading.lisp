@@ -38,6 +38,7 @@
            #:source-passage-for-claim-id
            #:genealogy-node-relations
            #:a-critic-for-lisp-observation
+           #:engine-execution-preview
            #:reconstruct-engine-workspace
            #:engine-workspace-offer
            #:execution-permitted-p
@@ -1444,6 +1445,71 @@ one state transition, disagreeing."
       (lambda ()
         (dreyeck/page-attached-workspace-offer:materialize-page-attached-workspace
          offer)))))
+
+(defun %artifact-identity (pathname)
+  "What can be said about a file without running it.
+
+Size and write date, not a digest: nothing in this repository hashes
+files, and pulling in a digest library to strengthen one line would be
+a larger change than the line is worth. It is a weak identity and the
+view says so."
+  (handler-case
+      (list :size (with-open-file (stream pathname :element-type '(unsigned-byte 8))
+                    (file-length stream))
+            :written (file-write-date pathname)
+            :strength :weak)
+    (error () nil)))
+
+(defun engine-execution-preview ()
+  "What a trusted runtime would be asked to run, and on what grounds.
+
+Three registers, kept apart because they are different kinds of claim.
+OBSERVED is read from the file system and from the source binding, with
+nothing evaluated. EXPECTED follows from the binding's own contract —
+it names the loader and entrypoints the binding will call — and is a
+reasoned expectation, not a prediction: an ASDF definition is Common
+Lisp, so what it will actually do cannot be known without running it.
+UNKNOWABLE says which questions only a run can answer.
+
+Deliberately asks nothing that evaluates: no FIND-SYSTEM, no LOAD-ASD,
+no eligibility, no loading."
+  (let* ((binding (engine-source-binding))
+         (attachment (%page-attachment-observation binding))
+         (discovery (getf attachment :discovery))
+         (asd (first (getf discovery :asdf-files)))
+         (wrapped (%wrapped-source-observation)))
+    (list
+     :kind :execution-preview
+     :observed
+     (list :page (getf discovery :page-title)
+           :page-file (getf discovery :page-file)
+           :asset-root (getf attachment :asset-root)
+           :artifact asd
+           :artifact-identity (and asd (%artifact-identity asd))
+           :wrapped-source (getf wrapped :directory)
+           :wrapped-source-present-p (getf wrapped :present-p)
+           :wrapped-files (getf wrapped :files)
+           :provenance (critic:lisp-critic-source-station-provenance-of binding))
+     :expected
+     (list :evaluate asd
+           :register (critic:lisp-critic-source-station-wrapper-system-of binding)
+           :load-wrapper
+           (format nil "~A::~A"
+                   (critic:lisp-critic-source-station-wrapper-package-of binding)
+                   (critic:lisp-critic-source-station-wrapper-loader-symbol-of binding))
+           :engine (critic:lisp-critic-source-station-upstream-system-of binding)
+           :entrypoint
+           (format nil "~A::~A"
+                   (critic:lisp-critic-source-station-upstream-package-of binding)
+                   (critic:lisp-critic-source-station-upstream-file-entrypoint-symbol-of
+                    binding))
+           :grounds "the source binding names these; they are what it will call")
+     :unknowable
+     (list "what the definition actually does, since it is Common Lisp"
+           "which systems it defines, which is read from ASDF after loading it"
+           "whether a workspace can be reconstructed from it"
+           "what the engine will report about any particular source")
+     :evidence-status :observed)))
 
 (defun a-critic-for-lisp-observation ()
   "What is actually known about the page-attached wrapper system.

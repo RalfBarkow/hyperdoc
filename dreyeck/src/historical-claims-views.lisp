@@ -256,6 +256,36 @@ the view says which. Nothing is taken from the genealogy plist."
                      (claim-display-text (car candidate))
                      (format nil "~A — absent" (namestring (cdr candidate))))))))
 
+          ;; Where a runtime declines to read the definition, saying so
+          ;; is not the same as saying nothing. What would be run, and on
+          ;; what grounds, is knowable without running it.
+          (unless (getf system :read-p)
+            (let* ((preview (engine-execution-preview))
+                   (expected (getf preview :expected))
+                   (observed (getf preview :observed)))
+              (html-inspector-views:html
+                (:h3 "If this were run")
+                (:p (html-inspector-views:esc
+                     "Expected from the source binding's own contract — it names what it will call. Not a prediction of what the definition does: an ASDF definition is Common Lisp."))
+                (:table :class "inspector-table"
+                  (claim-view-row "evaluate"
+                                  (format nil "~A" (getf expected :evaluate)))
+                  (claim-view-row "register" (getf expected :register))
+                  (claim-view-row "load wrapper" (getf expected :load-wrapper))
+                  (claim-view-row "engine becoming available"
+                                  (getf expected :engine))
+                  (claim-view-row "critic entrypoint" (getf expected :entrypoint))
+                  (claim-view-row "artifact identity"
+                                  (let ((identity (getf observed :artifact-identity)))
+                                    (if identity
+                                        (format nil "~D bytes, written ~D — weak: a size and a date, not a digest"
+                                                (getf identity :size)
+                                                (getf identity :written))
+                                        "not readable here"))))
+                (:p (html-inspector-views:esc "Not knowable until it runs:"))
+                (:ul (dolist (unknown (getf preview :unknowable))
+                       (html-inspector-views:html
+                         (:li (html-inspector-views:esc unknown))))))))
           (:h3 "ASDF definition")
           (if (getf system :read-p)
               (html-inspector-views:html
