@@ -522,7 +522,7 @@ is the one the playground already answers to, not a second switch."
           (check (search "not offered here" html)
                  "The view does not say why reconstruction is absent."))
         (check (handler-case (progn (reading:reconstruct-engine-workspace) nil)
-                 (reading:execution-not-permitted () t))
+                 (dreyeck/page-attached-system-projection:execution-not-permitted () t))
                "Calling reconstruction directly was not refused.")))
     (check (= before reading::*engine-workspace-reconstructions*)
            "A refused reconstruction still counted as one.")

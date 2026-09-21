@@ -1693,7 +1693,8 @@
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/page-attached-workspace-offer"
   :DEPENDS-ON
-  ("hyperbook" "dreyeck/page-attached-workspace-reconstruction")
+  ("hyperbook" "html-inspector-views"
+   "dreyeck/page-attached-workspace-reconstruction")
   :COMPONENTS
   ((:FILE "dreyeck/src/page-attached-workspace-offer")))
 

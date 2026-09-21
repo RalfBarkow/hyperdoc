@@ -36,6 +36,39 @@
   (find id (dreyeck/topicmap:topicmap-projection-topics-of projection)
         :key #'dreyeck/topicmap:topicmap-topic-id-of :test #'string=))
 
+(defun execution-permitted-p ()
+  "Whether this runtime may run code that arrived with a page.
+
+Reuses the flag the playground already answers to rather than adding a
+second switch: HYPERBOOK-SERVER::*SERVER-PARAMETERS* is NIL until a
+server starts and then holds (pane-width development). A served runtime
+started without development refuses; an image with no server — a
+developer's, or a test's — allows.
+
+Read softly on purpose. Nothing down here should depend on the HTTP
+server; the question is only whether one is running."
+  (let* ((package (find-package :hyperbook-server))
+         (symbol (and package (find-symbol "*SERVER-PARAMETERS*" package)))
+         (parameters (and symbol (boundp symbol) (symbol-value symbol))))
+    (if (null parameters)
+        t
+        (and (second parameters) t))))
+
+(define-condition execution-not-permitted (error)
+  ((operation :initarg :operation :reader execution-not-permitted-operation))
+  (:report
+   (lambda (condition stream)
+     (format stream "~A is not permitted in this runtime: it would run code ~
+that arrived with a page, and this server was started without development ~
+mode."
+             (execution-not-permitted-operation condition))))
+  (:documentation
+   "Refusal of an operation that would execute page-attached code.
+
+Signalled by the operation, not by a view that offers it. Removing a
+button removes one way of asking; anything reaching the function by
+another route must meet the same answer."))
+
 (defun page-attached-workspace-eligibility (system-designator)
   "Why SYSTEM-DESIGNATOR can or cannot become a Workspace, as a plist.
 
@@ -76,6 +109,10 @@ sit in a page's assets directory")
             :why (format nil "~A" condition)))))
 
 (defun reconstruct-page-attached-workspace (system-designator)
+  ;; Guarded here rather than at each caller: LOOKUP-PATH on an offer
+  ;; reaches this too, and so would anything else.
+  (unless (execution-permitted-p)
+    (error 'execution-not-permitted :operation "Workspace reconstruction"))
   (let* ((eligibility (page-attached-workspace-eligibility system-designator)))
     (assert (getf eligibility :eligible-p) ()
             "~A cannot be reconstructed as a page-attached workspace: ~A."
