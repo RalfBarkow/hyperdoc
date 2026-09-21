@@ -1251,6 +1251,19 @@ the loader binds it, and nothing is loaded — a definition is read, not
 executed."
   (let ((asset-root (%binding-asset-pathname binding))
         (name (critic:lisp-critic-source-station-wrapper-system-of binding)))
+    ;; Reading a system definition runs it: ASDF:FIND-SYSTEM evaluates
+    ;; the .asd. That is page-attached code, so a runtime that refuses
+    ;; to run page-attached code must refuse this too. It did not, and
+    ;; opening this node on the served site evaluated the file.
+    (unless (uiop:symbol-call :dreyeck/page-attached-system-projection
+                              :execution-permitted-p)
+      (return-from %wrapper-system-observation
+        (list :read-p nil
+              :name name
+              :why (concatenate
+                    'string
+                    "this runtime does not evaluate code that arrived with"
+                    " a page, and reading an ASDF definition evaluates it"))))
     (handler-case
         (let* ((asdf/system-registry:*central-registry*
                  (cons asset-root asdf/system-registry:*central-registry*))
@@ -1351,16 +1364,31 @@ not build one. Rendering a page must not materialize anything.")
   "Whether a workspace could be reconstructed for the wrapper system.
 
 Asked of the workspace contract itself rather than answered here, so
-the two cannot drift. Asking costs what reading the system definition
-costs, which this view already does; it builds nothing."
+the two cannot drift.
+
+Asking is not free: the contract calls ASDF:FIND-SYSTEM, which
+evaluates the page's own definition file. That is page-attached code,
+so a runtime that refuses to run it must not ask either. This is the
+same evaluation the definition read performs, and both were unguarded
+— opening this node on the served site ran the file."
+  (unless (uiop:symbol-call :dreyeck/page-attached-system-projection
+                            :execution-permitted-p)
+    (return-from engine-workspace-eligibility
+      (list :asked-p nil
+            :eligible-p nil
+            :why (concatenate
+                  'string
+                  "not asked: answering it would evaluate the page's own"
+                  " definition, which this runtime does not do"))))
   (handler-case
       (with-engine-assets-registered
         (lambda ()
-          (uiop:symbol-call :dreyeck/page-attached-system-projection
-                            :page-attached-workspace-eligibility
-                            +engine-wrapper-system+)))
+          (list* :asked-p t
+             (uiop:symbol-call :dreyeck/page-attached-system-projection
+                               :page-attached-workspace-eligibility
+                               +engine-wrapper-system+))))
     (error (condition)
-      (list :eligible-p nil :why (format nil "~A" condition)))))
+      (list :asked-p t :eligible-p nil :why (format nil "~A" condition)))))
 
 (defun execution-permitted-p ()
   "Whether this runtime may run page-attached code.

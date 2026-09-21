@@ -520,6 +520,27 @@ is the one the playground already answers to, not a second switch."
     (with-server-parameters
         (list "700px" nil)
       (lambda ()
+        ;; Drawing the node must not evaluate the page's definition.
+        ;; Two things did: reading the ASDF definition, and asking
+        ;; eligibility — both call FIND-SYSTEM, which runs the .asd.
+        ;; Neither was guarded, so opening this node on the served site
+        ;; ran the file.
+        (let* ((registered (length (asdf:registered-systems)))
+               (station (reading:lisp-critic-station :a-critic-for-lisp-station))
+               (html (views:view-html (first (views:all-views station)))))
+          ;; The delta, not the absolute count: an earlier check in this
+          ;; image may already have materialized, and what matters is
+          ;; that drawing adds nothing.
+          (check (= registered (length (asdf:registered-systems)))
+                 "Rendering the node evaluated the page's definition: ~D ~
+systems became ~D." registered (length (asdf:registered-systems)))
+          ;; And the view must say why it is not showing a definition,
+          ;; rather than quietly showing one it read anyway.
+          (check (search "does not evaluate code that arrived with a page"
+                         html)
+                 "The view does not say why the definition is unread.")
+          (check (search "would evaluate the page" html)
+                 "The view does not say why eligibility is unasked."))
         (check (not (reading:execution-permitted-p))
                "A served runtime without development permits execution.")
         (let* ((station (reading:lisp-critic-station :a-critic-for-lisp-station))

@@ -327,6 +327,8 @@ the view says which. Nothing is taken from the genealogy plist."
                  "workspace eligibility"
                  (cond ((not attached)
                         "not asked: nothing here to build one from")
+                       ((not (getf eligibility :asked-p))
+                        (or (getf eligibility :why) "not asked in this runtime"))
                        ((getf eligibility :eligible-p) "eligible")
                        (t (format nil "not eligible — ~A"
                                   (or (getf eligibility :why) "no reason given")))))
