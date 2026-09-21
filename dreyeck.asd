@@ -345,6 +345,44 @@
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/FEDWIKI-SOURCE-RELATIONS/TESTS
                              :RUN-FEDWIKI-SOURCE-RELATIONS-TESTS)))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/asdf-source"
+  :DESCRIPTION
+  "ASDF definition source read as syntax, without READ, ASDF or a repository"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("uiop")
+  :COMPONENTS
+  ((:FILE "asdf-source-package") (:FILE "asdf-source"))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP (ASDF/LISP-ACTION:TEST-OP "dreyeck/asdf-source/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/asdf-source/tests"
+  :DESCRIPTION
+  "Contracts for reading ASDF definition source as syntax"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/asdf-source")
+  :COMPONENTS
+  ((:FILE "asdf-source-tests"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+   (DECLARE (IGNORE OPERATION COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/ASDF-SOURCE/TESTS :RUN-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/GIT
   :DESCRIPTION
   "Experimental Git-backed inspection objects incubated by Dreyeck"
@@ -357,7 +395,7 @@
   :SERIAL
   T
   :DEPENDS-ON
-  (#:DREYECK/TOPICMAP #:ASDF #:UIOP)
+  (#:DREYECK/TOPICMAP #:ASDF #:UIOP "dreyeck/asdf-source")
   :COMPONENTS
   ((:FILE "git-package") (:FILE "git-repository-checkout")
    (:FILE "git-commit-inspection") (:FILE "git-source-slice")
