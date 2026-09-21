@@ -672,6 +672,62 @@ out the preview says so rather than asking a runtime instead."
          "A string system name was not read.")
   t)
 
+(defun check-reading-examples-honour-the-policy ()
+  "No reading example may load a page's code on a runtime that refuses to.
+
+The invariant is not that these particular examples happen to stay
+inert. It is that under a refusing policy no path through the reading
+examples crosses the one boundary where registering and loading the
+page-attached system happens — so the test drives the examples that
+used to cross it and measures what the attempt added.
+
+Differentially, because the suite around it has already loaded the
+engine on purpose. Asserting that the packages are absent would assert
+the order of this suite; asserting that the attempt added none of them
+is the contract. Under a refusing policy that difference must be empty
+even when the engine is already present, since what is forbidden is
+bringing it in, not having it.
+
+The recorded evaluation must stay readable throughout. A runtime that
+refuses to run the Critic is exactly the runtime the snapshot exists
+for, so a refusal that also silenced the recorded finding would have
+traded one failure for another."
+  (let ((engine-packages '(:lisp-critic :lisp-critic-user
+                           :extend-match :a-critic-for-lisp))
+        (crossing-examples '(reading:critique-anatomy-example
+                             reading:riesbeck-car-cdr-rule-example
+                             reading:evidence-ladder-example)))
+    (with-server-parameters
+        (list "700px" nil)
+      (lambda ()
+        (check (not (reading:execution-permitted-p))
+               "The served runtime without development still permits execution.")
+        (dolist (name crossing-examples)
+          (let ((systems-before (length (asdf:registered-systems)))
+                (packages-before (remove-if-not #'find-package engine-packages)))
+            ;; The example may fail; what it may not do is load anything.
+            (ignore-errors (funcall name))
+            (let ((added (set-difference
+                          (remove-if-not #'find-package engine-packages)
+                          packages-before)))
+              (check (null added)
+                     "~S brought in ~S on a runtime that refuses page-attached ~
+code." name added))
+            (check (= systems-before (length (asdf:registered-systems)))
+                   "~S registered ~D system(s) on a runtime that refuses ~
+page-attached code." name
+                   (- (length (asdf:registered-systems)) systems-before))))
+        ;; And the recorded finding is still there to be read.
+        (let ((target (reading:current-critique-example)))
+          (check (typep target 'critic:critic-target)
+                 "The recorded evaluation is unreadable under a refusing ~
+policy; it returned ~S." (and (listp target) (getf target :kind)))
+          (let ((record (first (critic:target-runs-of target))))
+            (check record "The recorded evaluation carries no run.")
+            (check (= 1 (length (critic:critiques-of record)))
+                   "The recorded evaluation lost its critique."))))))
+  t)
+
 (defun check-execution-policy ()
   "A runtime that does not run page-attached code must refuse, not just hide.
 
@@ -1567,6 +1623,7 @@ silently redefined." (getf observation :code-page-count)))
   (check-source-backing)
   (check-transclusions-and-examples)
   (check-source-structure-projection)
+  (check-reading-examples-honour-the-policy)
   (format t "~&LISP-CRITIC-READING-PASS: six pages, two lines kept apart, ~
 three outcomes, source-backed transclusion, source structure across three ~
 kinds of ownership.~%")
@@ -1584,4 +1641,64 @@ kinds of ownership.~%")
          "--eval" "(dreyeck/lisp-critic/reading/tests:run-current-tests)")
    :output *standard-output* :error-output *error-output*)
   (format t "~&FRESH-PROCESS-READING-PASS~%")
+  (check-policy-in-a-clean-image)
+  t)
+
+(defun check-policy-in-a-clean-image ()
+  "Measure the refusal where the difference can still be seen.
+
+CHECK-READING-EXAMPLES-HONOUR-THE-POLICY runs inside a suite that has
+already loaded the engine on purpose, so its difference is empty either
+way: nothing can be added that is not already there. That test was
+written first and passed with the guard removed, which is the whole
+reason this one exists. A differential measurement needs more than a
+before and an after — it needs a state in which the two could differ.
+
+So the same questions are asked again in a process that has loaded
+nothing, and in both directions. Under a refusing policy the examples
+must add no system and no package. Then, in the same image, the policy
+is opened and one example is run again: it must load the engine. Without
+that second half the first would prove only that the measurement is
+blind."
+  (uiop:run-program
+   (list (namestring sb-ext:*runtime-pathname*) "--no-userinit" "--non-interactive"
+         "--eval" "(require :asdf)"
+         "--eval" (format nil "(asdf:load-asd ~S)" (asdf:system-source-file "dreyeck"))
+         "--eval" "(asdf:load-system \"dreyeck/lisp-critic/reading\")"
+         "--eval" "(asdf:load-system \"hyperbook/server\")"
+         "--eval"
+         "(let* ((packages '(:lisp-critic :lisp-critic-user :extend-match :a-critic-for-lisp))
+                 (present (lambda () (remove-if-not #'find-package packages)))
+                 (parameters (find-symbol \"*SERVER-PARAMETERS*\" :hyperbook/server))
+                 (examples (list #'dreyeck/lisp-critic/reading:critique-anatomy-example
+                                 #'dreyeck/lisp-critic/reading:riesbeck-car-cdr-rule-example
+                                 #'dreyeck/lisp-critic/reading:evidence-ladder-example)))
+            (assert (null (funcall present)))
+            ;; Refusing: nothing may arrive.
+            (setf (symbol-value parameters) (list \"700px\" nil))
+            (assert (not (dreyeck/lisp-critic/reading:execution-permitted-p)))
+            (let ((systems (length (asdf:registered-systems))))
+              (dolist (example examples) (ignore-errors (funcall example)))
+              (assert (null (funcall present)))
+              (assert (= systems (length (asdf:registered-systems)))))
+            ;; The recorded finding stays readable exactly here.
+            (let ((target (dreyeck/lisp-critic/reading:current-critique-example)))
+              (assert (typep target 'dreyeck/lisp-critic:critic-target))
+              (assert (= 1 (length (dreyeck/lisp-critic:critiques-of
+                                    (first (dreyeck/lisp-critic:target-runs-of target)))))))
+            ;; Permitted: it must arrive, or the measurement above was blind.
+            (setf (symbol-value parameters) nil)
+            (assert (dreyeck/lisp-critic/reading:execution-permitted-p))
+            (let* ((result (funcall (first examples)))
+                   (record (getf result :evaluation-record))
+                   (missing (set-difference packages (funcall present))))
+              (unless (null missing)
+                (error \"Permitted policy did not load ~S; present ~S, run ~A, ~
+because: ~A. The refusal measured above would then prove nothing, since this ~
+shows the measurement cannot see loading at all.\"
+                       missing (funcall present)
+                       (and record (dreyeck/lisp-critic:lisp-critic-run-record-status record))
+                       (and record (dreyeck/lisp-critic:lisp-critic-run-record-condition-summary-of record)))))
+            (format t \"~&POLICY-BOUNDARY-PASS: refused adds nothing, permitted loads the engine, recorded finding readable in both.~%\"))")
+   :output *standard-output* :error-output *error-output*)
   t)

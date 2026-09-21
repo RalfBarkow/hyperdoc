@@ -151,7 +151,43 @@
                             package))))
     (and symbol (fboundp symbol) (symbol-function symbol))))
 
+(defun %page-attached-execution-permitted-p ()
+  "Whether this runtime may run code that arrived with a page.
+
+Read softly, the same way EXECUTION-PERMITTED-P reads the server it asks
+about, and for the same reason: nothing down here should depend on the
+layer that holds the policy. An image where that layer was never loaded
+has no page-attached code to refuse, so it permits — which is also what
+EXECUTION-PERMITTED-P answers when no server is running."
+  (let* ((package (find-package :dreyeck/page-attached-system-projection))
+         (symbol (and package (find-symbol "EXECUTION-PERMITTED-P" package))))
+    (if (and symbol (fboundp symbol))
+        (funcall symbol)
+        t)))
+
 (defun %load-lisp-critic-source-station (source-station)
+  "Register and load the page's wrapper system, and through it the engine.
+
+The one place where reading the Critic becomes running it. Three effects
+in a row — the asset root joins ASDF's central registry, the
+page-attached system is loaded, and the wrapper's loader runs — and
+every path that reaches the engine comes through here.
+
+Which is why the refusal belongs here and not at its callers. The
+Workspace side already learned this: RECONSTRUCT-PAGE-ATTACHED-WORKSPACE
+guards itself rather than its callers, because a second route would
+otherwise reach the same effect unguarded. That is exactly what had
+happened on this side. The policy was checked at the Workspace boundary,
+the Critic path never passed it, and three reading examples loaded a
+page's code on a runtime that refuses to.
+
+Callers need no change. RUN-CRITIC-RULE already turns a condition here
+into a failed record carrying its summary, so a refusal is reported as
+what it is instead of appearing as a diagram that quietly worked."
+  (unless (%page-attached-execution-permitted-p)
+    (error "This runtime does not run code that arrived with a page, so ~
+the page-attached system ~A was not registered or loaded."
+           (lisp-critic-source-station-wrapper-system-of source-station)))
   (let ((asset-root
          (%lisp-critic-source-station-asset-pathname source-station)))
     (let ((asdf/system-registry:*central-registry*

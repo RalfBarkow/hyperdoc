@@ -30,12 +30,30 @@
    (evidence :initarg :evidence :reader critique-evidence-of)
    (explanation :initarg :explanation :reader critique-explanation-of)))
 
+(defun %configured-critic-root ()
+  "The root DREYECK_LISP_CRITIC_ROOT names, or NIL when it names none.
+
+An environment variable that is set to the empty string is not a value,
+and reading it with OR made it one: \"\" is true in Lisp, so it beat the
+default, ENSURE-DIRECTORY-PATHNAME turned it into the current directory,
+and PROBE-FILE then reported the source station present because a
+current directory always exists. The station pointed nowhere in
+particular and said it was fine; the failure surfaced much later as a
+missing ASDF component.
+
+The reading layer already read this variable correctly, testing its
+length before believing it. Two places read one variable two ways, which
+is how a test that restored an unset variable to \"\" — the only thing
+UIOP can set it to — could make an unrelated child process fail."
+  (let ((configured (uiop:getenv "DREYECK_LISP_CRITIC_ROOT")))
+    (and configured (plusp (length configured)) configured)))
+
 (defun make-critic-source-station (&optional root)
   "Use an explicit source station or the historical local asset; never download it."
   (make-instance 'lisp-critic-source-station
     :id "riesbeck-beane-lisp-critic" :title "Riesbeck/Beane Lisp Critic"
     :asset-root (namestring (uiop:ensure-directory-pathname
-                 (or root (uiop:getenv "DREYECK_LISP_CRITIC_ROOT")
+                 (or root (%configured-critic-root)
                      (merge-pathnames ".wiki/wiki.ralfbarkow.ch/assets/pages/a-critic-for-lisp/"
                                       (user-homedir-pathname)))))
     :wrapper-system "a-critic-for-lisp" :wrapper-package "A-CRITIC-FOR-LISP"
