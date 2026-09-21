@@ -5,8 +5,6 @@
            #:lisp-critic-run-record
            #:lisp-critic-source-station-id-of
            #:lisp-critic-source-station-title-of
-           #:lisp-critic-source-station-site-of
-           #:lisp-critic-source-station-page-of
            #:lisp-critic-source-station-asset-root-of
            #:lisp-critic-source-station-wrapper-system-of
            #:lisp-critic-source-station-wrapper-package-of

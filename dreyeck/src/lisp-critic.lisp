@@ -1,10 +1,16 @@
 (in-package #:dreyeck/lisp-critic)
 
 (defclass lisp-critic-source-station nil
+          ;; SITE and PAGE slots were declared here from the class's first
+          ;; version and never bound by any instance, nor read anywhere, in
+          ;; either line of this repository. They presented themselves in
+          ;; the inspector as properties of the object and answered every
+          ;; question about themselves with an unbound-slot error. What
+          ;; they were reaching for is now held where it belongs: the page
+          ;; a system is attached to is stable identity, and the site root
+          ;; under which a runtime finds it is a runtime observation.
           ((id :initarg :id :reader lisp-critic-source-station-id-of)
            (title :initarg :title :reader lisp-critic-source-station-title-of)
-           (site :initarg :site :reader lisp-critic-source-station-site-of)
-           (page :initarg :page :reader lisp-critic-source-station-page-of)
            (asset-root :initarg :asset-root :reader
             lisp-critic-source-station-asset-root-of)
            (wrapper-system :initarg :wrapper-system :reader

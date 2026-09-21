@@ -1277,7 +1277,10 @@ Two levels, deliberately not mixed. The identity — the slug, the
 relative location assets/pages/<slug>/ and the system name — is the same
 everywhere. The absolute directory is this runtime's answer, and which
 question produced it is reported with it, because a path that was true
-on another machine looks exactly like one that is true here."
+on another machine looks exactly like one that is true here.
+
+Neither level is read from the binding. The binding holds one location
+and the loading it needs; it is not where a page's identity lives."
   (declare (ignorable binding))
   (multiple-value-bind (resolved source candidates) (resolve-engine-asset-root)
     (let* ((slug +engine-page-slug+)
@@ -1332,8 +1335,6 @@ here is copied from the genealogy plist."
      :kind :page-attached-system
      :name (critic:lisp-critic-source-station-wrapper-system-of binding)
      :binding binding
-     :binding-site-bound-p (slot-boundp binding 'critic::site)
-     :binding-page-bound-p (slot-boundp binding 'critic::page)
      :page-attachment (%page-attachment-observation binding)
      :wrapper-system (%wrapper-system-observation binding)
      :wrapped-source (%wrapped-source-observation)

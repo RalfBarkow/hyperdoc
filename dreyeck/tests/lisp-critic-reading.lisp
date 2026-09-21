@@ -589,12 +589,16 @@ are here: ~A" (getf system :why))
           (check (member "package" names :test #'equal)
                  "The observed components ~S do not look like the wrapper's."
                  names))))
-    ;; The binding's site/page are unbound, so the view may not claim to
-    ;; have read them from it.
-    (check (not (getf observation :binding-site-bound-p))
-           "The binding now carries a site; the view's note is stale.")
-    (check (not (getf observation :binding-page-bound-p))
-           "The binding now carries a page; the view's note is stale.")
+    ;; The binding must not present a slot it never binds. Two such slots
+    ;; sat on its class from its first version, were bound by no instance
+    ;; and read by nothing, and answered an inspector with an
+    ;; unbound-slot error while looking like properties of the object.
+    (let ((binding (getf observation :binding)))
+      (dolist (slot (sb-mop:class-slots (class-of binding)))
+        (let ((name (sb-mop:slot-definition-name slot)))
+          (check (slot-boundp binding name)
+                 "The source binding leaves ~S unbound, which an inspector ~
+shows as a property that errors when read." name))))
     ;; Page attachment is not a Workspace.
     (check (search "not itself a Workspace" html)
            "The view no longer separates page attachment from Workspace."))
