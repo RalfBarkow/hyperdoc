@@ -945,7 +945,40 @@ are here: ~A" (getf system :why))
 shows as a property that errors when read." name))))
     ;; Page attachment is not a Workspace.
     (check (search "not itself a Workspace" html)
-           "The view no longer separates page attachment from Workspace."))
+           "The view no longer separates page attachment from Workspace.")
+    ;; The runtime rows must report this image, not a written-in answer.
+    ;;
+    ;; A page that shows a recorded finding claims the engine was not
+    ;; needed to show it. That claim is only worth something if the
+    ;; runtime says so about itself where the page is served, so the
+    ;; test asks the image the same questions and requires the same
+    ;; answers. It deliberately does not require any particular answer:
+    ;; this image may well have loaded the engine, and a test that
+    ;; demanded "no" would be asserting its own circumstances rather
+    ;; than the view's honesty.
+    (let ((loading (getf observation :loading)))
+      (dolist (probe (list (cons :engine-loaded-here-p
+                                 (and (find-package :lisp-critic) t))
+                           (cons :engine-user-package-here-p
+                                 (and (find-package :lisp-critic-user) t))
+                           (cons :matcher-package-here-p
+                                 (and (find-package :extend-match) t))
+                           (cons :wrapper-package-here-p
+                                 (and (find-package
+                                       (getf loading :wrapper-package))
+                                      t))
+                           (cons :wrapper-system-registered-here-p
+                                 (and (member (getf loading :wrapper-system)
+                                              (asdf:registered-systems)
+                                              :test #'string-equal)
+                                      t))))
+        (check (eq (getf loading (car probe)) (cdr probe))
+               "The view reports ~S as ~S while this image says ~S."
+               (car probe) (getf loading (car probe)) (cdr probe))))
+    (dolist (label '("engine loaded" "engine user package" "matcher package"
+                     "wrapper loaded" "wrapper system registered with ASDF"))
+      (check (search label html)
+             "The runtime row ~S is missing from the view." label)))
   t)
 
 (defun check-node-view-shows-the-graph ()

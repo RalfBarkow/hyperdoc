@@ -407,7 +407,16 @@ the view says which. Nothing is taken from the genealogy plist."
                             (format nil "~A::~A" (getf loading :upstream-package)
                                     (getf loading :upstream-entrypoint)))
             (runtime-row "assets reachable" (getf loading :assets-present-p))
-            (runtime-row "engine loaded" (getf loading :engine-loaded-here-p)))
+            (runtime-row "engine loaded" (getf loading :engine-loaded-here-p))
+            (runtime-row "engine user package"
+                         (getf loading :engine-user-package-here-p))
+            (runtime-row "matcher package"
+                         (getf loading :matcher-package-here-p))
+            (runtime-row "wrapper loaded" (getf loading :wrapper-package-here-p))
+            (runtime-row "wrapper system registered with ASDF"
+                         (getf loading :wrapper-system-registered-here-p)))
+          (:p (html-inspector-views:esc
+               "Five rows read this image, not the page. A runtime that only shows a recorded finding answers no to all five, and that is the point: the finding is visible and the engine that produced it never arrived. A runtime that has materialized the workspace answers yes, and says so rather than looking the same."))
           (:p "Reached through the source binding "
               (html-inspector-views:object-ref (getf observation :binding))
               ", which holds the location, puts it on ASDF's registry, loads the wrapper system and records the provenance.")

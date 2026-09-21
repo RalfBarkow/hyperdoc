@@ -1657,7 +1657,31 @@ here is copied from the genealogy plist."
            :upstream-package (critic:lisp-critic-source-station-upstream-package-of binding)
            :upstream-entrypoint (critic:lisp-critic-source-station-upstream-file-entrypoint-symbol-of binding)
            :assets-present-p (critic:lisp-critic-source-station-present-p binding)
-           :engine-loaded-here-p (and (find-package :lisp-critic) t))
+           ;; What this image is, asked of this image. A page that shows
+           ;; a recorded finding says the engine was not needed to show
+           ;; it; these rows are how that stops being a claim and
+           ;; becomes an observation the reader can check where the page
+           ;; is served. Four packages, because the engine arrives as
+           ;; four and any one of them present would mean it came.
+           ;;
+           ;; The ASDF question is asked as membership and not as a
+           ;; count: a number only means something against a baseline
+           ;; taken before, which a rendered page does not have, whereas
+           ;; the name is either on the registry or it is not. Both
+           ;; FIND-PACKAGE and REGISTERED-SYSTEMS are lookups — neither
+           ;; searches for a definition, so asking cannot cause the
+           ;; thing it asks about.
+           :engine-loaded-here-p (and (find-package :lisp-critic) t)
+           :engine-user-package-here-p (and (find-package :lisp-critic-user) t)
+           :matcher-package-here-p (and (find-package :extend-match) t)
+           :wrapper-package-here-p
+           (and (find-package
+                 (critic:lisp-critic-source-station-wrapper-package-of binding))
+                t)
+           :wrapper-system-registered-here-p
+           (and (member (critic:lisp-critic-source-station-wrapper-system-of binding)
+                        (asdf:registered-systems) :test #'string-equal)
+                t))
      :provenance (critic:lisp-critic-source-station-provenance-of binding)
      :evidence-status :observed)))
 
