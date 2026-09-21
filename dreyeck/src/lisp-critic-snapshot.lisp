@@ -27,17 +27,35 @@
   "Render OBJECT as text, because it may name something not present here."
   (and object (princ-to-string object)))
 
-(defun %snapshot-artifact (pathname)
-  "What can be said about the engine's source file without running it.
+(defun %snapshot-rule-source (pathname root)
+  "Where the rule that produced this finding is written.
 
-A path and a byte size. Not a digest: nothing in this repository hashes
-content, and a snapshot should not be the reason to add a cryptography
-dependency. Not a write date either — a timestamp is not an identity,
-it is a coincidence that two files can share and one file can change
-without."
+The file the engine defines its rules in — lisp-rules.lisp — not the
+page's own definition. A run touches several artifacts and this names
+the one the finding actually came from; calling it the .asd would read
+better and say something false.
+
+The path is relative to the page's assets, because an absolute one is
+where a particular machine kept the file, and a snapshot that travels
+would carry a directory that does not exist where it is read. Byte size
+because it can be counted; digest null because nothing here hashes
+content, and a snapshot is not a reason to add a cryptography
+dependency. No write date: a timestamp is not an identity."
   (when pathname
-    (let ((truename (ignore-errors (probe-file pathname))))
-      (list (cons "path" (namestring pathname))
+    (let* ((truename (ignore-errors (probe-file pathname)))
+           (root-directory (and root
+                                (ignore-errors
+                                 (uiop:ensure-directory-pathname root))))
+           (relative (and root-directory
+                          (enough-namestring pathname root-directory))))
+      (list (cons "path"
+                  (if (and relative
+                           (not (uiop:absolute-pathname-p (pathname relative))))
+                      relative
+                      ;; Outside the page's assets: say so rather than
+                      ;; quietly emitting someone's home directory.
+                      :null))
+            (cons "relative-to" "the page's asset root")
             (cons "byte-size"
                   (or (and truename
                            (ignore-errors
@@ -91,7 +109,11 @@ map. Nothing in it is a Lisp object that has to be read back as one."
                                                   (rule-response-of rule))
                                           'vector))
                  (cons "system" (or (getf source :system) :null))))
-     (cons "artifact" (or (%snapshot-artifact (getf source :pathname)) :null))
+     (cons "rule-source"
+           (or (%snapshot-rule-source
+                (getf source :pathname)
+                (and station (lisp-critic-source-station-asset-root-of station)))
+               :null))
      (cons "provenance"
            (list (cons "engine"
                        (or (and station
@@ -159,7 +181,7 @@ of a run that happened elsewhere, and says as much in its contract."
          (evaluation (%snapshot-value snapshot "evaluation"))
          (rule-data (%snapshot-value snapshot "rule"))
          (provenance (%snapshot-value snapshot "provenance"))
-         (artifact (%snapshot-value snapshot "artifact")))
+         (rule-source (%snapshot-value snapshot "rule-source")))
     (unless (eql version +critic-snapshot-version+)
       (error "Unsupported Critic snapshot version ~S; this reads version ~S."
              version +critic-snapshot-version+))
@@ -195,8 +217,9 @@ of a run that happened elsewhere, and says as much in its contract."
                    :response (%snapshot-list
                               (%snapshot-value rule-data "response"))
                    :source (list :system (%snapshot-value rule-data "system")
-                                 :pathname (and artifact
-                                                (%snapshot-value artifact "path"))
+                                 :pathname (and rule-source
+                                                (%snapshot-value rule-source
+                                                                 "path"))
                                  :engine (and provenance
                                               (%snapshot-value provenance "engine"))
                                  :source-binding
