@@ -1,0 +1,79 @@
+<h1>Writing D2 by Hand</h1>
+
+<in-package>dreyeck/topicmap/tala/authored</in-package>
+
+<p>
+  The other page in this book shows a diagram derived from a Topicmap: every
+  node there names a Topic, and the rendering is checked against the
+  projection that produced it. This page shows the simpler thing. The diagram
+  below was written as D2, by hand, and stands for nothing but itself.
+</p>
+
+<p>
+  The text is the object. It is not a Lisp form that builds D2, and it is not
+  stored somewhere else and displayed here — it is the content of this page,
+  and the image is derived from it. Nothing behind it knows what
+  <code>network</code> or <code>user</code> mean.
+</p>
+
+<h2>The source</h2>
+
+<pre class="d2-source">network: {
+  cell tower: {
+    transmitter
+  }
+}
+
+user -&gt; network.cell tower: make call
+network.cell tower -&gt; user: ring
+</pre>
+
+<h2>Rendered</h2>
+
+<p>
+  Laid out by TALA, through the same pinned renderer the generated diagrams
+  use. The image is not interactive and carries no identity: there is no Topic
+  to return to, because no Topic was involved.
+</p>
+
+<p>
+  <a expr="(authored-d2-example)" view="Authored D2">
+    Render the D2 written above and inspect the result
+  </a>
+</p>
+
+<p>
+  <a expr="(authored-d2-source-example)">
+    The same source as plain text, before anything is done to it
+  </a>
+</p>
+
+<p>
+  <a expr="(authored-d2-renderer-status-example)">
+    Which renderer and layout engine this runtime would use
+  </a>
+</p>
+
+<h2>What this is not</h2>
+
+<p>
+  It is not editable here. The source is read from the page and rendered; to
+  change the diagram you change the page. An editable block would need a place
+  to put what a reader typed, and this slice deliberately does not decide
+  where that is.
+</p>
+
+<p>
+  It is also not bound to anything. A generated projection can answer the
+  question <em>which object is this node?</em>, because the projection holds a
+  checked mapping from each D2 key to a Topic. Authored text has no such
+  mapping, and giving it one is a separate capability rather than a missing
+  detail: someone would have to say which keys are meant to name existing
+  objects, and what it means when one does not.
+</p>
+
+<p>
+  What it does establish is that the authoritative payload can be ordinary D2.
+  Everything else — the layout engine, the SVG, this page — is derived from
+  that text and can be regenerated from it.
+</p>

@@ -5,7 +5,7 @@
   (:export #:tala-input #:projection-tala-input #:tala-input-projection
            #:tala-input-source #:tala-input-topics #:tala-input-associations
            #:tala-input-seed #:tala-rendering #:tala-rendering-input
-           #:tala-rendering-svg #:tala-rendering-version #:run-tala
+           #:tala-rendering-svg #:tala-rendering-version #:run-tala #:run-d2-tala
            #:validate-tala-svg #:assign-d2-keys #:tala-input-topic-id
            #:tala-input-d2-key
            #:projection-state #:tala-dependency-status #:tala-rendering-evidence))
@@ -203,25 +203,46 @@ No coordinates or labels are parsed; SVG remains derived presentation data."
       (error "TALA SVG identity coverage differs from the input projection."))
     t))
 
+(defun run-d2-tala (source &key (seed 44) (program "d2"))
+  "Lay out D2 SOURCE with TALA and return (values SVG VERSION).
+
+The boundary to the external tool, and nothing else. It knows about D2
+text and a layout engine; it knows nothing about projections, topics or
+identity, and it validates nothing, because there is nothing here to
+validate against — a caller who has expectations is the one who can
+check them.
+
+Separated out because two callers want it for different reasons. A
+projection renders what it can then hold the result to; an author
+renders what they wrote, which answers to nobody. Running the tool twice
+in two places would have been the way to let those two drift apart."
+  (check-type source string)
+  (check-type seed (signed-byte 64))
+  (let* ((dependency (tala-dependency-status :program program))
+         (version (getf dependency :version)))
+    (unless (eq :available (getf dependency :status))
+      (error "TALA dependency unavailable/unsupported: ~S. Use nix develop .#tala."
+             dependency))
+    (values
+     (with-input-from-string (s source)
+       (uiop:run-program
+        (list program "--layout=tala"
+              (format nil "--tala-seeds=~D" seed)
+              "--theme=0" "--sketch=false" "--animate-interval=0"
+              "--timeout=60" "--no-xml-tag" "--stdout-format=svg" "-" "-")
+        :input s :output :string :error-output :string
+        :external-format :utf-8))
+     version)))
+
 (defun run-tala (input &key (program "d2"))
   "Run the pinned external layout capability through streams, without temp files.
 An absent/unsupported D2 or invalid result is an error, never a native fallback."
   (check-type input tala-input)
-  (let* ((dependency (tala-dependency-status :program program))
-         (version (getf dependency :version)))
-    (unless (eq :available (getf dependency :status))
-      (error "TALA dependency unavailable/unsupported: ~S. Use nix develop .#tala." dependency))
-    (let ((svg
-            (with-input-from-string (s (tala-input-source input))
-              (uiop:run-program
-               (list program "--layout=tala"
-                     (format nil "--tala-seeds=~D" (tala-input-seed input))
-                     "--theme=0" "--sketch=false" "--animate-interval=0"
-                     "--timeout=60" "--no-xml-tag" "--stdout-format=svg" "-" "-")
-               :input s :output :string :error-output :string
-               :external-format :utf-8))))
-      (validate-tala-svg input svg)
-      (%make-tala-rendering :input input :version version :svg svg))))
+  (multiple-value-bind (svg version)
+      (run-d2-tala (tala-input-source input)
+                   :seed (tala-input-seed input) :program program)
+    (validate-tala-svg input svg)
+    (%make-tala-rendering :input input :version version :svg svg)))
 
 (defun projection-state (projection)
   (list (dreyeck/topicmap:topicmap-projection-source-of projection)

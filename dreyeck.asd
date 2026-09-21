@@ -1842,11 +1842,14 @@
                                  "hyperdoc/explorer")
                                 :components
                                 ((:module "dreyeck/src" :components
-                                          ((:file "topicmap-tala-reading")))
+                                          ((:file "topicmap-tala-reading")
+                                           (:file "topicmap-tala-authored")))
                                  (:module "dreyeck/pages/topicmap-tala"
                                           :components
                                           ((:static-file
-                                                         "Reading TALA as a Layout Layer.html")))))
+                                                         "Reading TALA as a Layout Layer.html")
+                                           (:static-file
+                                                         "Writing D2 by Hand.html")))))
 
 (asdf/parse-defsystem:defsystem "dreyeck/topicmap/tala/reading/tests"
   :description
@@ -1858,13 +1861,15 @@
   :depends-on
   ("dreyeck/topicmap/tala/reading" "dreyeck/topicmap/tests")
   :components
-  ((:file "dreyeck/tests/topicmap-tala-reading-smoke"))
+  ((:file "dreyeck/tests/topicmap-tala-reading-smoke")
+   (:file "dreyeck/tests/topicmap-tala-authored-smoke"))
   :perform
   (asdf/lisp-action:test-op (operation component)
    (declare (ignore operation component))
    (uiop/package:symbol-call :dreyeck/topicmap/tests
                              :run-tala-integration-tests)
-   (uiop/package:symbol-call :dreyeck/topicmap/tests :run-tala-reading-tests)))
+   (uiop/package:symbol-call :dreyeck/topicmap/tests :run-tala-reading-tests)
+   (uiop/package:symbol-call :dreyeck/topicmap/tests :run-authored-d2-tests)))
 
 (defsystem "dreyeck/upstream-intake/temporal"
   :description "The observed page-loading history as a Topicmap, D2 and TALA projection"
