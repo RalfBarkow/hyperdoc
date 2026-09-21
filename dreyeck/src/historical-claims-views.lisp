@@ -310,14 +310,38 @@ the view says which. Nothing is taken from the genealogy plist."
               ", which holds the location, puts it on ASDF's registry, loads the wrapper system and records the provenance.")
 
           (:h3 "Workspace")
-          (:table :class "inspector-table"
-            (claim-view-row "page attachment"
-                            (if (getf discovery :asdf-files)
-                                "discovered" "not discovered in this runtime"))
-            (claim-view-row "workspace reconstruction"
-                            "not attempted here; the recorded observation is that it does not resolve for this system"))
-          (:p (html-inspector-views:esc
-               "Page attachment is not itself a Workspace. It is what a Workspace reconstruction would start from.")))))))
+          ;; Three questions, not one. Whether the page carries a system
+          ;; definition, whether a workspace could be built from it, and
+          ;; whether one has been. An earlier version answered the third
+          ;; with a finding recorded months before, which had since
+          ;; stopped being true.
+          (let* ((attached (and (getf discovery :asdf-files) t))
+                 (eligibility (and attached (engine-workspace-eligibility))))
+            (html-inspector-views:html
+              (:table :class "inspector-table"
+                (claim-view-row "page attachment"
+                                (if attached
+                                    "discovered"
+                                    "not discovered in this runtime"))
+                (claim-view-row
+                 "workspace eligibility"
+                 (cond ((not attached)
+                        "not asked: nothing here to build one from")
+                       ((getf eligibility :eligible-p) "eligible")
+                       (t (format nil "not eligible — ~A"
+                                  (or (getf eligibility :why) "no reason given")))))
+                (claim-view-row "workspace reconstruction"
+                                "not run by this view"))
+              (:p (html-inspector-views:esc
+                   "Reconstruction is left to the button because it is not a reading: it registers the system with ASDF and returns a new workspace each time. A view that ran it would change the image every time it was drawn."))
+              (when (and attached (getf eligibility :eligible-p))
+                (html-inspector-views:html
+                  (:p (html-inspector-views:eval-button
+                       "Reconstruct the workspace"
+                       (html-inspector-views:thunk (reconstruct-engine-workspace))
+                       "Builds the workspace and shows the result, including a failure if it fails"))))
+              (:p (html-inspector-views:esc
+                   "Page attachment is not itself a Workspace, and neither is eligibility. Both say a workspace could be built; only reconstruction builds one.")))))))))
 
 (defun source-representations-section (station)
   "What is actually here of this node's source, in its own terms.

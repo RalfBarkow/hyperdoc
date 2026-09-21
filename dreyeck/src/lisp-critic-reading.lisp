@@ -38,6 +38,8 @@
            #:source-passage-for-claim-id
            #:genealogy-node-relations
            #:a-critic-for-lisp-observation
+           #:reconstruct-engine-workspace
+           #:engine-workspace-eligibility
            #:station-node-id
            #:claim-subjects-relevant-to-node
            #:claim-for-source-passage
@@ -78,6 +80,10 @@
                    (user-homedir-pathname))
   "The local research page that cites Fischer's paper. Not part of this
 repository: a workspace artifact, quoted here as documentation only.")
+
+(defparameter +engine-wrapper-system+ "a-critic-for-lisp"
+  "The ASDF system the page carries. Same spelling as the slug, and a
+different thing: one names a page, the other a system.")
 
 (defparameter +engine-page-slug+ "a-critic-for-lisp"
   "The page whose assets carry the engine.
@@ -1323,6 +1329,49 @@ and the loading it needs; it is not where a page's identity lives."
           ;; [CKR] update history, not held as a separate artifact.
           :role "Beane's 2004 ASDF-loadable distribution of Riesbeck's Lisp Critic"
           :riesbeck-original-observed-p nil)))
+
+(defvar *engine-workspace-reconstructions* 0
+  "How often a workspace has been built in this image.
+
+Only a counter, and only so a test can prove that drawing the view does
+not build one. Rendering a page must not materialize anything.")
+
+(defun with-engine-assets-registered (thunk)
+  "Run THUNK with the resolved asset root visible to ASDF, and no wider."
+  (let ((root (resolve-engine-asset-root)))
+    (if root
+        (let ((asdf/system-registry:*central-registry*
+                (cons root asdf/system-registry:*central-registry*)))
+          (funcall thunk))
+        (funcall thunk))))
+
+(defun engine-workspace-eligibility ()
+  "Whether a workspace could be reconstructed for the wrapper system.
+
+Asked of the workspace contract itself rather than answered here, so
+the two cannot drift. Asking costs what reading the system definition
+costs, which this view already does; it builds nothing."
+  (handler-case
+      (with-engine-assets-registered
+        (lambda ()
+          (uiop:symbol-call :dreyeck/page-attached-system-projection
+                            :page-attached-workspace-eligibility
+                            +engine-wrapper-system+)))
+    (error (condition)
+      (list :eligible-p nil :why (format nil "~A" condition)))))
+
+(defun reconstruct-engine-workspace ()
+  "Build the workspace for the wrapper system, and say so.
+
+Deliberately not called while rendering. It registers the system in
+ASDF and returns a fresh workspace on every call, so a view that ran it
+would mutate the image and mint a new workspace each time it is drawn."
+  (incf *engine-workspace-reconstructions*)
+  (with-engine-assets-registered
+    (lambda ()
+      (uiop:symbol-call :dreyeck/page-attached-system-projection
+                        :reconstruct-page-attached-workspace
+                        +engine-wrapper-system+))))
 
 (defun a-critic-for-lisp-observation ()
   "What is actually known about the page-attached wrapper system.

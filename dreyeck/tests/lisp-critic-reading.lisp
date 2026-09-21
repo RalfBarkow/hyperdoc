@@ -485,6 +485,52 @@ configured site." source)))
            "The relative asset location is not relative."))
   t)
 
+(defun check-workspace-section ()
+  "The Workspace section must report this runtime, and build nothing.
+
+It used to answer \"not attempted here; the recorded observation is
+that it does not resolve for this system\" — a finding from before the
+reconstruction contract was repaired, presented as though it were
+current. Two separate mistakes: a stored negative standing in for a
+live one, and eligibility and reconstruction answered as one question."
+  (let* ((station (reading:lisp-critic-station :a-critic-for-lisp-station))
+         (before reading::*engine-workspace-reconstructions*)
+         (html (views:view-html (first (views:all-views station))))
+         (after reading::*engine-workspace-reconstructions*))
+    ;; Drawing must not materialize. Reconstruction registers a system
+    ;; with ASDF and mints a new workspace per call.
+    (check (= before after)
+           "Rendering the view reconstructed ~D workspace(s)." (- after before))
+    (check (not (search "does not resolve for this system" html))
+           "The view still shows the stale workspace finding.")
+    ;; The three questions must be separately visible.
+    (dolist (row '("page attachment" "workspace eligibility"
+                   "workspace reconstruction"))
+      (check (search row html) "The Workspace section lost the ~S row." row))
+    (check (search "not run by this view" html)
+           "The view no longer says that it does not reconstruct.")
+    ;; Eligibility must come from the contract, not from a copy here.
+    (let ((eligibility (reading:engine-workspace-eligibility)))
+      (if (getf eligibility :eligible-p)
+          (progn
+            (check (search "eligible" html)
+                   "The system is eligible but the view does not say so.")
+            ;; An eligible system offers the action; an ineligible one
+            ;; must not, since there would be nothing to run.
+            (check (search "Reconstruct the workspace" html)
+                   "An eligible system offers no way to reconstruct."))
+          (check (search "not eligible" html)
+                 "The system is ineligible but the view does not say why.")))
+    ;; And reconstruction, when actually run, must produce the workspace
+    ;; standing at this page's own definition.
+    (when (getf (reading:engine-workspace-eligibility) :eligible-p)
+      (let ((witness (reading:reconstruct-engine-workspace)))
+        (check (getf witness :workspace) "Reconstruction produced no workspace.")
+        (check (search "a-critic-for-lisp" (getf witness :current-topic-id))
+               "The reconstructed workspace stands at ~S."
+               (getf witness :current-topic-id)))))
+  t)
+
 (defun check-source-representations ()
   "No node may report another node's source or another node's runtime.
 
@@ -1057,6 +1103,7 @@ is honest.~%")
   (check-node-view-shows-the-graph)
   (check-page-attached-system-view)
   (check-source-representations)
+  (check-workspace-section)
   (check-asset-root-resolution)
   (check-genealogy-reads-as-domain-language)
   (check-station-claim-links)
