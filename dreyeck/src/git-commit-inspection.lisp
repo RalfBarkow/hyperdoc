@@ -189,6 +189,23 @@ one hash, so callers must not assume a single parent."
     "show" "--no-patch" "--format=%s" "--no-color"
     (git-commit-hash-of commit))))
 
+(defun git-commit-authored-at (commit)
+  "Return the author date of COMMIT as ISO 8601 with its offset.
+
+The author date, not the committer date: when the change was made rather
+than when it last entered a history. They coincide in an unrebased
+history and diverge in a rewritten one, which is why the one that answers
+\"when did this happen\" is named here instead of whichever is handy.
+
+Kept as the string Git prints, offset included. Converting to universal
+time would discard the offset, and the offset is evidence: it says which
+clock the author was on."
+  (trim-git-output
+   (git-run-string
+    (git-repository-root-of (git-commit-repository-of commit))
+    "show" "--no-patch" "--format=%aI" "--no-color"
+    (git-commit-hash-of commit))))
+
 (defun git-commit-object-present-p (repository commit-ish)
   "Return true when COMMIT-ISH names a commit object in REPOSITORY.
 

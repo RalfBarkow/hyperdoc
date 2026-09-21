@@ -102,6 +102,7 @@ protocol, oldest first. Returns a fresh copy; nothing is refreshed here."
    '((:kind :git-commit
       :layer :mechanism
       :reference "a8683fb4b43d19e2eb85601e77431f682a80ad89"
+      :authored-at "2025-02-21T19:53:37+01:00"
       :parent "25c8ba374e5ecacfe3834b81791c48f41cae8dfe"
       :subject "Prepare for HTML pages"
       :changed-files ("hyperdoc.asd"
@@ -124,6 +125,7 @@ protocol, oldest first. Returns a fresh copy; nothing is refreshed here."
      (:kind :git-commit
       :layer :contract
       :reference "b3e732232e51ccbcd0de479ae51b776955aa01e4"
+      :authored-at "2026-08-17T14:40:00+02:00"
       :parent "44ed77e9b1d8c4707c86479826e9f0df5cd88684"
       :subject "Make CL the default for *current-package*; export it"
       :changed-files ("hyperdoc-explorer/html-pages.lisp"
@@ -140,6 +142,7 @@ protocol, oldest first. Returns a fresh copy; nothing is refreshed here."
      (:kind :git-commit
       :layer :contract
       :reference "a15bb5445e31a19c9b4e41a465f87b19764f0e00"
+      :authored-at "2026-08-17T14:40:25+02:00"
       :parent "b3e732232e51ccbcd0de479ae51b776955aa01e4"
       :subject "Export *current-hyperbook* and *current-page*"
       :changed-files ("hyperbook-explorer/package.lisp")
@@ -152,6 +155,7 @@ protocol, oldest first. Returns a fresh copy; nothing is refreshed here."
      (:kind :git-commit
       :layer :contract
       :reference "beb1689a742f99f75b9255488bd4473ba67f3306"
+      :authored-at "2026-08-17T14:57:39+02:00"
       :parent "a15bb5445e31a19c9b4e41a465f87b19764f0e00"
       :subject "Allow hyperdoc subclasses to define page subclasses as well"
       :changed-files ("hyperdoc-explorer/html-pages.lisp"
@@ -183,6 +187,7 @@ protocol, oldest first. Returns a fresh copy; nothing is refreshed here."
      (:kind :git-commit
       :layer :contract
       :reference "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8"
+      :authored-at "2026-08-18T11:22:11+02:00"
       :parent "beb1689a742f99f75b9255488bd4473ba67f3306"
       :subject "Allow hyperdoc subclasses to specialized load-page"
       :changed-files ("hyperdoc/package.lisp")
@@ -232,6 +237,7 @@ This reads only. It never rewrites the frozen record."
          (parents (dreyeck/git:git-commit-parents commit))
          (parent (page-loading-history-commit (getf record :parent)))
          (observed-subject (dreyeck/git:git-commit-subject commit))
+         (observed-date (dreyeck/git:git-commit-authored-at commit))
          (observed-paths (page-loading-changed-paths commit))
          (recorded-paths (sort (copy-list (getf record :changed-files))
                                #'string<))
@@ -245,6 +251,13 @@ This reads only. It never rewrites the frozen record."
                   :parent-agrees-p (equal (list (getf record :parent)) parents)
                   :subject-agrees-p (string= (getf record :subject)
                                              observed-subject)
+                  ;; A date is a Git fact and belongs with the others,
+                  ;; re-checkable rather than trusted. It earns its place
+                  ;; because sequence alone hides what the dates show:
+                  ;; eighteen months separate the mechanism from the
+                  ;; contract that publishes it.
+                  :authored-at-agrees-p (equal (getf record :authored-at)
+                                               observed-date)
                   :changed-files-agree-p (equal recorded-paths observed-paths)
                   :warrants-agree-p
                   (every (lambda (warrant)
@@ -256,6 +269,7 @@ This reads only. It never rewrites the frozen record."
                     :reference reference
                     :observed-parents parents
                     :observed-subject observed-subject
+                    :observed-authored-at observed-date
                     :observed-changed-files observed-paths
                     :warrants warrants)
               agreements
@@ -263,6 +277,7 @@ This reads only. It never rewrites the frozen record."
                     (and (getf agreements :object-present-p)
                          (getf agreements :parent-agrees-p)
                          (getf agreements :subject-agrees-p)
+                         (getf agreements :authored-at-agrees-p)
                          (getf agreements :changed-files-agree-p)
                          (getf agreements :warrants-agree-p))
                     :evidence-status :observed)))))
@@ -431,6 +446,111 @@ contain, so an interpretation cannot drift away from its evidence."
           (page-loading-capability-attributions)))
 
 ;;
+;; The same history read across states rather than commit by commit
+;;
+
+(defun page-loading-authored-universal-time (iso-8601)
+  "Parse an author date as Git prints it with %aI.
+
+Fixed width by construction — 2026-08-17T14:40:00+02:00 — so this reads
+positions rather than pattern-matching, and a string of another shape
+fails loudly instead of yielding a plausible wrong instant. Written here
+rather than pulled from a date library because one arithmetic question
+is not worth a dependency."
+  (unless (and (stringp iso-8601) (= 25 (length iso-8601)))
+    (error "Not an ISO 8601 author date of the expected shape: ~S" iso-8601))
+  (flet ((number-at (start end) (parse-integer iso-8601 :start start :end end)))
+    (let* ((offset-sign (if (char= #\- (char iso-8601 19)) -1 1))
+           (offset-hours (number-at 20 22))
+           (offset-minutes (number-at 23 25))
+           ;; ENCODE-UNIVERSAL-TIME wants hours *west* of GMT, so an
+           ;; eastern offset is negative and the sign flips here.
+           (zone (- (* offset-sign (+ offset-hours (/ offset-minutes 60))))))
+      (encode-universal-time (number-at 17 19) (number-at 14 16)
+                             (number-at 11 13) (number-at 8 10)
+                             (number-at 5 7) (number-at 0 4)
+                             zone))))
+
+(defun page-loading-history-states ()
+  "The observed commits as an ordered run of states, with the gaps between.
+
+Ordered by observed ancestry, not by position in the frozen list: the two
+layers are not one parent chain — the mechanism commit's parent is not in
+the set — so list order would be an assumption where ancestry is a fact.
+
+The elapsed time is carried because the states are not evenly spaced and
+the spacing is itself the finding. Between two of them lie twenty-five
+seconds; between two others, eighteen months."
+  (let* ((records (page-loading-history-observations))
+         (ordered
+           (sort (copy-list records)
+                 (lambda (earlier later)
+                   (and (not (string= (getf earlier :reference)
+                                      (getf later :reference)))
+                        (dreyeck/git:git-commit-ancestor-p
+                         (page-loading-history-commit (getf earlier :reference))
+                         (page-loading-history-commit
+                          (getf later :reference))))))))
+    (loop for (record next) on ordered
+          for at = (page-loading-authored-universal-time
+                    (getf record :authored-at))
+          collect (list :reference (getf record :reference)
+                        :layer (getf record :layer)
+                        :subject (getf record :subject)
+                        :authored-at (getf record :authored-at)
+                        :seconds-to-next
+                        (when next
+                          (- (page-loading-authored-universal-time
+                              (getf next :authored-at))
+                             at))))))
+
+(defun page-loading-states-in-date-order-p ()
+  "Does ancestry order agree with author-date order?
+
+Asked rather than assumed. They can disagree — a rebase or a cherry-pick
+rewrites one and not the other — and a disagreement would be a finding
+about this history, not a defect in the ordering."
+  (let ((seconds (mapcar (lambda (state) (getf state :seconds-to-next))
+                         (page-loading-history-states))))
+    (every (lambda (gap) (or (null gap) (plusp gap))) seconds)))
+
+(defun page-loading-capability-matrix ()
+  "Every attributed capability against every observed state.
+
+The transpose of the A-F table. That table answers \"which commit first
+made this true\"; this one answers \"what was true here\", which is the
+question a reader has when looking at one commit and wondering what it
+had to work with.
+
+A capability holds at a state when the commit that established it is an
+ancestor of that state, or is that state. So the row reads \"established
+at or before this point\". It does not observe removal: nothing here
+would notice a capability being taken away again, and claiming otherwise
+would be reading more out of ancestry than ancestry says."
+  (let ((states (page-loading-history-states)))
+    (list
+     :states states
+     :rows
+     (mapcar
+      (lambda (attribution)
+        (let ((established-by (getf attribution :established-by)))
+          (list :label (getf attribution :label)
+                :capability (getf attribution :capability)
+                :statement (getf attribution :statement)
+                :established-by established-by
+                :holds
+                (mapcar
+                 (lambda (state)
+                   (list :reference (getf state :reference)
+                         :holds-p
+                         (dreyeck/git:git-commit-ancestor-p
+                          (page-loading-history-commit established-by)
+                          (page-loading-history-commit
+                           (getf state :reference)))))
+                 states))))
+      (page-loading-capability-attributions)))))
+
+;;
 ;; Ancestry is not adoption
 ;;
 
@@ -583,6 +703,24 @@ the parent. The LOAD-PAGE methods are compared directly to make that concrete."
           (equal (page-loading-blob-text commit implementation)
                  (page-loading-blob-text before implementation))
           :evidence-status :observed)))
+
+(hyperdoc:defexample page-loading-capability-matrix-example
+  "What was already true at each step, and how far apart the steps are.
+
+Reading the transition commit by commit makes it look like five moves of
+similar weight. Read across states it is one mechanism, a long silence,
+three contract commits inside twenty minutes, and a publication the next
+morning. 8a11491 builds almost nothing because almost everything it
+publishes was already there.
+
+The ordering is observed ancestry; that it agrees with the author dates
+is checked rather than assumed."
+  (let ((matrix (page-loading-capability-matrix)))
+    (list :kind :capability-matrix
+          :states (getf matrix :states)
+          :rows (getf matrix :rows)
+          :ancestry-agrees-with-dates-p (page-loading-states-in-date-order-p)
+          :evidence-status :interpreted)))
 
 (hyperdoc:defexample page-loading-capability-table-example
   "Capabilities A to F, each resolved back to the warrants it rests on.

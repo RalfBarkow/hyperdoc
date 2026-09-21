@@ -14,6 +14,7 @@
            #:git-commit-ish-of #:git-commit-hash-of #:make-git-commit
            #:current-head-git-commit #:git-commit-one-line
            #:git-commit-metadata #:git-commit-parents #:git-commit-subject
+           #:git-commit-authored-at
            #:git-commit-object-present-p
            #:git-commit-ancestor-p #:git-commit-merge-base
            #:git-commit-refs-containing #:git-commit-stat #:git-commit-patch

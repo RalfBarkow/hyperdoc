@@ -1169,7 +1169,94 @@ subjects. Abbreviated or drifting identities are a defect, not a detail."
              (check (eq :observed (getf record :evidence-status))
                     "Frozen record ~S is not marked :OBSERVED." reference)
              (check (getf record :warrants)
-                    "Frozen record ~S carries no warrant." reference)))
+                    "Frozen record ~S carries no warrant." reference)
+             ;; A date is a Git fact, so it is frozen like the others and
+             ;; re-checked against the object database by
+             ;; CHECK-LIVE-HISTORY-VERIFICATION. Here only its presence
+             ;; and shape: an author date Git printed with %aI, offset
+             ;; included, because the offset says which clock the author
+             ;; was on and dropping it would lose evidence.
+             (let ((authored-at (getf record :authored-at)))
+               (check (stringp authored-at)
+                      "Frozen record ~S carries no author date." reference)
+               (check (= 25 (length authored-at))
+                      "Frozen author date ~S of ~S is not an ISO 8601 ~
+instant with offset." authored-at reference))))
+  t)
+
+(defun check-history-states-are-ordered-by-ancestry ()
+  "The state run must be ordered by observed ancestry, not by list position.
+
+The two layers are not one parent chain — the mechanism commit's parent
+is outside the set — so taking the frozen list's order as the history's
+order would be an assumption sitting where a fact can stand. The test
+therefore checks the order against Git twice: each state must be an
+ancestor of the next, and the author dates must rise with it. They can
+disagree, since a rebase rewrites one and not the other, and a
+disagreement here would be a finding rather than a defect — but it would
+be one nobody had noticed, which is why it is asked."
+  (let ((states (dreyeck/upstream-intake:page-loading-history-states)))
+    (check (= 5 (length states))
+           "Expected five observed states, found ~D." (length states))
+    (loop for (state next) on states
+          while next
+          do (check (dreyeck/git:git-commit-ancestor-p
+                     (dreyeck/upstream-intake:page-loading-history-commit
+                      (getf state :reference))
+                     (dreyeck/upstream-intake:page-loading-history-commit
+                      (getf next :reference)))
+                    "State ~S is not an ancestor of the state after it, ~S."
+                    (getf state :reference) (getf next :reference))
+             (check (plusp (getf state :seconds-to-next))
+                    "State ~S is not older than the state after it."
+                    (getf state :reference)))
+    (check (dreyeck/upstream-intake:page-loading-states-in-date-order-p)
+           "Ancestry order and author-date order disagree.")
+    ;; The finding the dates exist for. Sequence alone makes the five
+    ;; look like five comparable moves; the gaps say otherwise.
+    (let ((first-gap (getf (first states) :seconds-to-next)))
+      (check (> first-gap (* 300 24 60 60))
+             "The mechanism and the contract are now ~D seconds apart; the ~
+reading that a long latency separates them no longer holds." first-gap)))
+  t)
+
+(defun check-capability-matrix-reads-across-states ()
+  "A capability must be false before the commit that establishes it.
+
+Written around the case that prompted the matrix. Read commit by commit,
+8a11491 looks like one export among several; read across states it is
+the only point at which LOAD-PAGE becomes reachable as a supported
+export, and everything else it needs was already true one commit
+earlier. The test pins both halves, because a matrix that said yes
+everywhere would look just as plausible and mean nothing."
+  (let* ((matrix (dreyeck/upstream-intake:page-loading-capability-matrix))
+         (states (getf matrix :states))
+         (publication "8a1149197fabcb1ab5622316f09c5a60c2d3f1f8")
+         (centre "beb1689a742f99f75b9255488bd4473ba67f3306"))
+    (flet ((row (label)
+             (or (find label (getf matrix :rows)
+                       :key (lambda (r) (getf r :label)) :test #'equal)
+                 (error "The matrix carries no row ~S." label)))
+           (holds-p (row reference)
+             (getf (find reference (getf row :holds)
+                         :key (lambda (cell) (getf cell :reference))
+                         :test #'equal)
+                   :holds-p)))
+      (check (= (length states) (length (getf (row "A") :holds)))
+             "A matrix row does not cover every state.")
+      (let ((public-load-page (row "C")))
+        (check (not (holds-p public-load-page centre))
+               "LOAD-PAGE is reported public already at ~S, one commit ~
+before the export that makes it so." centre)
+        (check (holds-p public-load-page publication)
+               "LOAD-PAGE is not reported public at ~S, the commit that ~
+exports it." publication))
+      ;; What the publication commit did not have to build.
+      (dolist (label '("A" "B" "D" "F"))
+        (check (holds-p (row label) centre)
+               "Capability ~S is reported absent at ~S, so the reading ~
+that the publication commit found its ground already prepared no longer ~
+holds." label centre))))
   t)
 
 (defun check-live-history-verification ()
@@ -1346,7 +1433,9 @@ their persisted source, link onward as intended, and evaluate."
     (check-frozen-history-identities)
     (check-live-history-verification)
     (check-history-ancestry-observation)
+    (check-history-states-are-ordered-by-ancestry)
     (check-capability-attributions-are-derived)
+    (check-capability-matrix-reads-across-states)
     (check-page-loading-history-reading book)
     (let ((shape
             (dreyeck/upstream-intake:page-loading-protocol-shape-across-relocation)))

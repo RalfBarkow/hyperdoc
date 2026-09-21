@@ -90,6 +90,11 @@
    #:page-loading-capability-attributions
    #:resolve-capability-basis
    #:page-loading-capability-table
+   ;; The same history read across states rather than commit by commit
+   #:page-loading-history-commit
+   #:page-loading-history-states
+   #:page-loading-states-in-date-order-p
+   #:page-loading-capability-matrix
    #:page-loading-ancestry-observation
    #:page-loading-transition-references
    #:page-loading-same-reading-p
@@ -101,6 +106,7 @@
    #:page-loading-structural-center-example
    #:page-loading-publication-only-example
    #:page-loading-capability-table-example
+   #:page-loading-capability-matrix-example
    #:page-loading-ancestry-example
    #:page-loading-four-relations-example
    #:page-loading-dreyeck-specialization-example
