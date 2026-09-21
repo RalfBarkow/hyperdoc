@@ -39,6 +39,16 @@
            #:source-passage-for-claim-id
            #:genealogy-node-relations
            #:a-critic-for-lisp-observation
+           ;; Where the source lives, across three kinds of ownership
+           #:lisp-critic-source-structure
+           #:make-lisp-critic-source-structure
+           #:lisp-critic-source-layers
+           #:lisp-critic-source-structure-example
+           #:lisp-critic-source-layers-example
+           #:lisp-critic-source-workspace-example
+           #:lisp-critic-source-d2-example
+           #:lisp-critic-source-diagram-example
+           #:lisp-critic-code-pages-observation-example
            #:engine-execution-preview
            #:engine-asdf-source-declaration
            #:reconstruct-engine-workspace

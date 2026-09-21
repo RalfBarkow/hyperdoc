@@ -22,7 +22,8 @@
     "The Fischer Critic as an Environment"
     "Reading Riesbeck's Lisp Critic"
     "From Riesbeck Run to HyperDoc Critique"
-    "Anatomy of a Critique"))
+    "Anatomy of a Critique"
+    "Where the Source Lives"))
 
 (defun check (value control &rest arguments)
   (unless value
@@ -1421,6 +1422,126 @@ is honest.~%")
     (check (equal before data) "Rendering mutated the data."))
   t)
 
+(defun check-source-structure-projection ()
+  "Where the source lives must be observed, and observed layer by layer.
+
+Three layers with three different permissions. The repository systems
+are ours and loaded, so ASDF may be asked. The page-attached system and
+the vendored engine are neither, and asking ASDF about them would run a
+definition that arrived with a page — which is the distinction the
+projection exists to show, so a projection that discovered them by
+loading them would have destroyed it.
+
+The test therefore measures the abstention as well as the result: no
+system is registered by building the projection, and the engine's
+packages are exactly as present afterwards as they were before.
+
+Unchanged, not absent. Earlier checks in this suite run the engine on
+purpose, so by the time this one runs the packages are there — and a
+test demanding their absence would be asserting the order of its own
+suite rather than anything about the projection. What the projection
+owes is that it brings nothing in."
+  (let ((before-systems (length (asdf:registered-systems)))
+        (engine-packages '(:lisp-critic :lisp-critic-user
+                           :extend-match :a-critic-for-lisp))
+        (present-before nil))
+    (setf present-before
+          (remove-if-not (lambda (name) (find-package name)) engine-packages))
+    (let* ((layers (reading:lisp-critic-source-layers))
+           (by-layer (lambda (key)
+                       (find key layers :key (lambda (l) (getf l :layer))))))
+      (check (= 3 (length layers))
+             "Expected three source layers, found ~D." (length layers))
+      ;; Each layer must say how it was observed, because that is the
+      ;; difference between them.
+      (let ((repository (funcall by-layer :repository-owned))
+            (attached (funcall by-layer :page-attached))
+            (vendored (funcall by-layer :vendored-historical)))
+        (check repository "No repository-owned layer.")
+        (check attached "No page-attached layer.")
+        (check vendored "No vendored-historical layer.")
+        (check (eq :asdf-registry (getf repository :observed-by))
+               "The repository layer is no longer read from the registry.")
+        (dolist (layer (list attached vendored))
+          (check (eq :file-system-and-text (getf layer :observed-by))
+                 "Layer ~S is read by ~S; a definition that arrived with a ~
+page must be read as text." (getf layer :layer) (getf layer :observed-by)))
+        ;; The repository layer must report what ASDF reports, not a copy.
+        (dolist (system (getf repository :systems))
+          (check (getf system :present-p)
+                 "Repository system ~S is not registered." (getf system :name))
+          (let ((component (asdf:find-system (getf system :name) nil)))
+            (check component "~S vanished from the registry." (getf system :name))
+            (check (getf system :files)
+                   "~S is reported without source files." (getf system :name))))
+        ;; The other two must name the files that are actually there.
+        (let ((attached-files (getf (first (getf attached :systems)) :files)))
+          (dolist (expected '("a-critic-for-lisp.asd" "package.lisp"
+                              "src/loader.lisp" "src/hyperdoc-page.lisp"))
+            (check (member expected attached-files :test #'string=)
+                   "The page-attached layer does not report ~S; it reports ~S."
+                   expected attached-files)))
+        (let ((vendored-files (getf (first (getf vendored :systems)) :files)))
+          (dolist (expected '("lisp-critic.asd" "lisp-critic.lisp"
+                              "lisp-rules.lisp" "extend-match.lisp"
+                              "tables.lisp" "write-wrap.lisp"))
+            (check (member expected vendored-files :test #'string=)
+                   "The vendored layer does not report ~S; it reports ~S."
+                   expected vendored-files)))))
+    ;; The projection itself, and what it costs to build.
+    (let* ((structure (reading:make-lisp-critic-source-structure))
+           (projection (tm:topicmap-projection-of structure))
+           (topics (tm:topicmap-projection-topics-of projection))
+           (associations (tm:topicmap-projection-associations-of projection))
+           (input (dreyeck/topicmap/tala:projection-tala-input projection))
+           (source (dreyeck/topicmap/tala:tala-input-source input)))
+      (check (= 9 (length topics))
+             "Expected three layers and six systems, found ~D topics."
+             (length topics))
+      ;; Files are deliberately not topics; they travel on the system.
+      (dolist (topic topics)
+        (check (member (tm:topicmap-topic-type-of topic)
+                       '(:source-layer :asdf-system))
+               "The projection introduced a topic of type ~S."
+               (tm:topicmap-topic-type-of topic)))
+      ;; The two edges that cross layers come from the source binding.
+      (let ((crossings (remove-if-not
+                        (lambda (a) (member (tm:topicmap-association-type-of a)
+                                            '(:registers :loads)))
+                        associations)))
+        (check (= 2 (length crossings))
+               "Expected one REGISTERS and one LOADS edge, found ~D."
+               (length crossings)))
+      ;; Readable D2, not encoded identifiers.
+      (check (search "asdf_system_a_critic_for_lisp" source)
+             "The generated D2 carries no readable key for the wrapper system.")
+      (check (search "\"LOADS\"" source)
+             "The generated D2 does not show the wrapper loading the engine.")
+      ;; And the identity mapping remains walkable, which is what the
+      ;; Inspector repair restored.
+      (dolist (entry (dreyeck/topicmap/tala:tala-input-topics input))
+        (check (string= (getf entry :id)
+                        (dreyeck/topicmap/tala:tala-input-topic-id
+                         input (getf entry :d2-id)))
+               "A D2 key in the source projection does not lead back to its Topic."))
+      (check (html-inspector-views:all-views
+              (dreyeck/topicmap/tala:tala-input-topics input))
+             "The source projection's Topic ID map offers no Inspector view."))
+    ;; Code Pages keeps its narrow meaning: this book still carries none.
+    (let ((observation (reading:lisp-critic-code-pages-observation-example)))
+      (check (zerop (getf observation :code-page-count))
+             "This book now reports ~D code pages; Code Pages has been ~
+silently redefined." (getf observation :code-page-count)))
+    (check (= before-systems (length (asdf:registered-systems)))
+           "Reading where the source lives registered ~D system(s)."
+           (- (length (asdf:registered-systems)) before-systems))
+    (let ((present-after (remove-if-not (lambda (name) (find-package name))
+                                        engine-packages)))
+      (check (null (set-difference present-after present-before))
+             "Reading where the source lives brought in ~S."
+             (set-difference present-after present-before))))
+  t)
+
 (defun run-current-tests ()
   (hyperdoc::ensure-pages-loaded reading:*lisp-critic-reading*)
   (check-pages-present)
@@ -1445,8 +1566,10 @@ is honest.~%")
   (check-outcomes)
   (check-source-backing)
   (check-transclusions-and-examples)
-  (format t "~&LISP-CRITIC-READING-PASS: five pages, two lines kept apart, ~
-three outcomes, source-backed transclusion.~%")
+  (check-source-structure-projection)
+  (format t "~&LISP-CRITIC-READING-PASS: six pages, two lines kept apart, ~
+three outcomes, source-backed transclusion, source structure across three ~
+kinds of ownership.~%")
   t)
 
 (defun run-tests ()

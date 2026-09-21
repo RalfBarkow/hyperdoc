@@ -1316,17 +1316,23 @@
                "dreyeck/asdf-source"
                "dreyeck/page-attached-workspace-reconstruction"
                "dreyeck/page-attached-workspace-offer"
+               ;; The source structure is projected through the same
+               ;; readable-D2 boundary the other readings use.
+               "dreyeck/topicmap/tala"
                "hyperdoc/explorer")
   :components ((:module "dreyeck/src" :components
                         ((:file "lisp-critic-reading")
                          (:file "historical-claims-views"
+                          :depends-on ("lisp-critic-reading"))
+                         (:file "lisp-critic-source-projection"
                           :depends-on ("lisp-critic-reading"))))
                (:module "dreyeck/pages/lisp-critic" :components
                         ((:static-file "Reading the Lisp Critic Genealogy.html")
                          (:static-file "The Fischer Critic as an Environment.html")
                          (:static-file "Reading Riesbeck's Lisp Critic.html")
                          (:static-file "From Riesbeck Run to HyperDoc Critique.html")
-                         (:static-file "Anatomy of a Critique.html"))))
+                         (:static-file "Anatomy of a Critique.html")
+                         (:static-file "Where the Source Lives.html"))))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/reading/tests"))))
 
 (asdf:defsystem "dreyeck/lisp-critic/reading/tests"

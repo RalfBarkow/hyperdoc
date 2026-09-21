@@ -1,0 +1,125 @@
+<h1>Where the Source Lives</h1>
+
+<in-package>dreyeck/lisp-critic/reading</in-package>
+
+<p>
+  This book's <code>Code pages</code> tab shows nothing, and that is not an
+  oversight. Code Pages means the Lisp source components under one component
+  of one system — this book's own — and what it names is the directory holding
+  these pages, which contains no Lisp at all. The tab is answering a narrow
+  question correctly.
+</p>
+
+<p>
+  <a expr="(lisp-critic-code-pages-observation-example)">
+    The two facts that produce the empty tab, read from the book itself
+  </a>
+</p>
+
+<p>
+  The question it is not answering is where this subject's source lives. That
+  has a different shape, and no single ASDF system contains it.
+</p>
+
+<h2>Three kinds of ownership</h2>
+
+<p>
+  The source falls into three layers, and the difference between them is not
+  where the files sit but what may be done with them.
+</p>
+
+<ul>
+  <li><strong>repository-owned</strong> — four systems in this repository. They
+      are ours and already loaded, so ASDF can be asked about them without
+      evaluating anything new.</li>
+  <li><strong>page-attached</strong> — a system that lives beside a wiki page.
+      Asking ASDF about it would mean running a definition that arrived with
+      a page, so it is read as text and listed as files.</li>
+  <li><strong>vendored-historical</strong> — a copy of Zach Beane's 2004
+      distribution of Chris Riesbeck's engine, carrying a definition of its
+      own. Observed the same way, and for the same reason.</li>
+</ul>
+
+<p>
+  A projection that discovered the second and third layers by loading them
+  would have destroyed the distinction it exists to show. So each layer is
+  observed by the means that layer permits, and the projection records which
+  means it used.
+</p>
+
+<p>
+  <a expr="(lisp-critic-source-layers-example)">
+    The three layers, each with its systems, files, and how it was observed
+  </a>
+</p>
+
+<h2>As a structure</h2>
+
+<p>
+  <a expr="(lisp-critic-source-structure-example)">
+    The whole source structure as one inspectable subject
+  </a>
+</p>
+
+<p>
+  <a expr="(lisp-critic-source-workspace-example)">
+    The same structure as a Workspace, with native Topic signs to navigate by
+  </a>
+</p>
+
+<p>
+  Files are not nodes in the projection. Six systems and three layers are
+  something a reader can take in; twenty-four file nodes are a thicket. Each
+  system topic carries its own observation, files included, so nothing is
+  lost — it is one inspection away rather than drawn.
+</p>
+
+<p>
+  The two edges that cross between layers are read from the source binding,
+  which names the wrapper system it registers and the upstream system that
+  wrapper loads. They are not a guess about what probably calls what.
+</p>
+
+<h2>As D2, laid out by TALA</h2>
+
+<p>
+  <a expr="(lisp-critic-source-d2-example)" view="D2 input">
+    The generated D2 source and its Topic / Association identity maps
+  </a>
+</p>
+
+<p>
+  <a expr="(lisp-critic-source-diagram-example)">
+    Render the structure with TALA and inspect the result
+  </a>
+</p>
+
+<p>
+  The image is not interactive: no node carries a link or an action. Its
+  identity is preserved and checked, and each D2 key leads back to a Topic
+  through the projection's own mapping, so the rendering can be inspected as
+  evidence even though it is not an interface. Navigate by the native Topic
+  signs above.
+</p>
+
+<h2>What this does not do</h2>
+
+<p>
+  It evaluates nothing. The page-attached definition is read as text, no
+  system is registered from it, and the engine stays away — the tests check
+  that its four packages are absent both before and after. Reading where
+  source lives is a question about files, and a file question answered by
+  running code would be answering a different question.
+</p>
+
+<p>
+  It also leaves Code Pages alone. The narrow meaning is worth keeping: a book
+  that carries source should be able to say which source it carries, without
+  that answer expanding to include everything its subject touches.
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>
