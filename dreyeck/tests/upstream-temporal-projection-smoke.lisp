@@ -182,15 +182,19 @@ reports the same thing rather than a second opinion."
          (source (tala:tala-input-source input)))
     (dolist (entry (tala:tala-input-topics input))
       (check (string= (getf entry :id)
-                      (tala:topic-id-from-tala-id (getf entry :d2-id)))
-             "D2 identifier for ~S does not decode back to it." (getf entry :id))
+                      (tala:tala-input-topic-id input (getf entry :d2-id)))
+             "The D2 key for ~S does not lead back to it." (getf entry :id))
       (check (search (getf entry :d2-id) source)
              "D2 source does not mention ~S." (getf entry :id)))
     ;; Labels appear, but nothing is identified by them.
     (check (search "\"8a114919\"" source)
            "The D2 source carries no readable label for the publication state.")
-    (check (not (search "page-loading-capability:A" source))
-           "The D2 source carries a raw Topic id, so identity is not encoded."))
+    ;; And the source must now be readable: a reader should be able to
+    ;; see which commit a line is about without decoding anything.
+    (check (search "git_commit_8a1149197fabcb1ab5622316f09c5a60c2d3f1f8" source)
+           "The D2 source carries no readable key for the publication state.")
+    (check (not (search "n00006700006900007400002D" source))
+           "The D2 source still carries hex-encoded identifiers."))
   t)
 
 (defun check-rendering-changes-nothing ()

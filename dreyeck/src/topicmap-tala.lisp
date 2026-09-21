@@ -6,7 +6,8 @@
            #:tala-input-source #:tala-input-topics #:tala-input-associations
            #:tala-input-seed #:tala-rendering #:tala-rendering-input
            #:tala-rendering-svg #:tala-rendering-version #:run-tala
-           #:validate-tala-svg #:tala-id #:topic-id-from-tala-id
+           #:validate-tala-svg #:assign-d2-keys #:tala-input-topic-id
+           #:tala-input-d2-key
            #:projection-state #:tala-dependency-status #:tala-rendering-evidence))
 (in-package #:dreyeck/topicmap/tala)
 
@@ -19,22 +20,65 @@
 (defstruct (tala-rendering (:constructor %make-tala-rendering))
   input version svg)
 
-(defun tala-id (topic-id)
-  "Encode a stable Topic ID as a D2-safe identifier, independently of labels."
-  (check-type topic-id string)
-  (with-output-to-string (s)
-    (write-char #\n s)
-    (loop for c across topic-id do (format s "~6,'0X" (char-code c)))))
+;;;; Keys are not identities
+;;
+;; A D2 key used to be the Topic ID encoded six hex digits per
+;; character. That made the key reversible on its own, and it made the
+;; D2 unreadable: a commit topic produced an identifier of over three
+;; hundred characters, in a language chosen for being plain to read.
+;;
+;; The encoding was never needed. Nothing on the path from projection to
+;; validated SVG ever decoded a key: VALIDATE-TALA-SVG compares the keys
+;; D2 was given against the classes D2 emitted, and TALA-RENDERING-EVIDENCE
+;; reports geometry under the Topic ID it already holds in the map. Only
+;; the tests decoded, to prove an identity the map states outright.
+;;
+;; So identity moves from the spelling of the key to a bijection the
+;; projection carries and checks. A key is now projection-local: readable,
+;; deterministic, unique within one input, and meaningless outside it. The
+;; same Topic may appear under different keys in different diagrams and
+;; remain the same Topic, which is what it always was.
 
-(defun topic-id-from-tala-id (id)
-  (unless (and (plusp (length id)) (char= #\n (char id 0))
-               (zerop (mod (1- (length id)) 6)))
-    (error "Invalid TALA Topic ID: ~S" id))
-  (with-output-to-string (s)
-    (loop for i from 1 below (length id) by 6
-          do (write-char (or (code-char (parse-integer id :start i :end (+ i 6)
-                                                         :radix 16))
-                             (error "Invalid character in TALA ID: ~S" id)) s))))
+(defun %d2-key-candidate (topic-id)
+  "A readable D2 key for TOPIC-ID, before uniqueness is settled.
+
+Letters, digits and underscore only, because everything else is either
+D2 syntax — a dot nests, a dash starts an arrow — or an invitation to
+quote. A key must also start with a letter, since one beginning with a
+digit reads as a number."
+  (let ((sanitized
+          (with-output-to-string (s)
+            (loop for c across topic-id
+                  do (write-char (if (or (alphanumericp c) (char= c #\_)) c #\_)
+                                 s)))))
+    (cond ((zerop (length sanitized)) "t")
+          ((alpha-char-p (char sanitized 0)) sanitized)
+          (t (concatenate 'string "t_" sanitized)))))
+
+(defun assign-d2-keys (topic-ids)
+  "Map each Topic ID to a distinct readable D2 key, in the order given.
+
+Sanitizing is not injective — two Topic IDs differing only in
+punctuation reduce to one candidate — so collisions are possible and are
+settled here rather than discovered later as two Topics sharing a node.
+The first claimant in the given order keeps the plain key and the next
+takes a numbered one, which makes the assignment a function of the
+order, and the caller sorts before calling. Nothing is silently
+aliased: the result is checked to be as long as its input."
+  (let ((taken (make-hash-table :test #'equal))
+        (assignment nil))
+    (dolist (topic-id topic-ids)
+      (let ((candidate (%d2-key-candidate topic-id)))
+        (loop with base = candidate
+              for index from 2
+              while (gethash candidate taken)
+              do (setf candidate (format nil "~A__~D" base index)))
+        (setf (gethash candidate taken) topic-id)
+        (push (cons topic-id candidate) assignment)))
+    (setf assignment (nreverse assignment))
+    (unless (= (length assignment) (hash-table-count taken))
+      (error "Two Topics were assigned the same D2 key."))
+    assignment))
 
 (defun d2-quoted-label (label)
   (with-output-to-string (s)
@@ -58,7 +102,14 @@ Topic/Association IDs and endpoints; D2 labels never supply identity."
            (sort (copy-list (tm:topicmap-projection-associations-of projection))
                  #'string< :key #'tm:topicmap-association-id-of))
          (counts (make-hash-table :test #'equal))
+         ;; Assigned once, from the sorted order, so the same projection
+         ;; always yields the same keys and an association can name the
+         ;; same key its endpoint topic was given.
+         (keys (assign-d2-keys (mapcar #'tm:topicmap-topic-id-of topics)))
          (topic-map nil) (association-map nil))
+    (flet ((key-for (topic-id)
+             (or (cdr (assoc topic-id keys :test #'string=))
+                 (error "No D2 key was assigned to Topic ~S." topic-id))))
     (tm::validate-topicmap-projection topics associations)
     (unless (= (length associations)
                (length (remove-duplicates associations :test #'string=
@@ -68,7 +119,8 @@ Topic/Association IDs and endpoints; D2 labels never supply identity."
       (unless (getf (tm:topicmap-topic-view-properties-of topic) :visible t)
         (error "TALA proof requires all projected topics to be visible."))
       (push (list :id (copy-seq (tm:topicmap-topic-id-of topic))
-                  :d2-id (tala-id (tm:topicmap-topic-id-of topic))) topic-map))
+                  :d2-id (key-for (tm:topicmap-topic-id-of topic)))
+            topic-map))
     (dolist (association associations)
       (unless (eq :relation
                   (getf (tm:topicmap-association-properties-of association)
@@ -82,7 +134,7 @@ Topic/Association IDs and endpoints; D2 labels never supply identity."
         (push (list :id (copy-seq (tm:topicmap-association-id-of association))
                     :from (copy-seq from) :to (copy-seq to)
                     :d2-id (format nil "(~A -> ~A)[~D]"
-                                   (tala-id from) (tala-id to) index))
+                                   (key-for from) (key-for to) index))
               association-map)))
     (setf topic-map (nreverse topic-map) association-map (nreverse association-map))
     (%make-tala-input
@@ -91,14 +143,39 @@ Topic/Association IDs and endpoints; D2 labels never supply identity."
      :source
      (with-output-to-string (s)
        (dolist (topic topics)
-         (format s "~A: ~A~%" (tala-id (tm:topicmap-topic-id-of topic))
+         (format s "~A: ~A~%" (key-for (tm:topicmap-topic-id-of topic))
                  (d2-quoted-label (tm:topicmap-topic-label-of topic))))
        (dolist (association associations)
          (format s "~A -> ~A: ~A~%"
-                 (tala-id (tm:topicmap-association-from-of association))
-                 (tala-id (tm:topicmap-association-to-of association))
+                 (key-for (tm:topicmap-association-from-of association))
+                 (key-for (tm:topicmap-association-to-of association))
                  (d2-quoted-label
-                  (princ-to-string (tm:topicmap-association-type-of association)))))))))
+                  (princ-to-string (tm:topicmap-association-type-of association))))))))))
+
+(defun tala-input-d2-key (input topic-id)
+  "The key this INPUT gave TOPIC-ID, or an error.
+
+Half of the bijection. It is asked of the input and not computed from
+the Topic ID, because the key means nothing outside the projection that
+assigned it."
+  (let ((entry (find topic-id (tala-input-topics input)
+                     :key (lambda (e) (getf e :id)) :test #'string=)))
+    (unless entry
+      (error "Topic ~S is not in this layout input." topic-id))
+    (getf entry :d2-id)))
+
+(defun tala-input-topic-id (input d2-key)
+  "The Topic this INPUT gave D2-KEY to, or an error.
+
+The other half, and the one that replaces decoding. A key found in the
+rendered SVG leads back to a Topic by being looked up here, so the
+answer comes from the projection that made the claim rather than from
+the spelling of a string."
+  (let ((entry (find d2-key (tala-input-topics input)
+                     :key (lambda (e) (getf e :d2-id)) :test #'string=)))
+    (unless entry
+      (error "No Topic in this layout input carries the D2 key ~S." d2-key))
+    (getf entry :id)))
 
 (defun d2-svg-identity-class (id)
   ;; D2 v0.9.0: base64.URLEncoding(svg.EscapeText(ID)). Our generated IDs

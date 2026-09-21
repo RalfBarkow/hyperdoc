@@ -40,16 +40,13 @@
 </p>
 
 <p>
-  The identifiers are not ordinary, and it is worth knowing why before
-  looking. Each one is the Topic id encoded character by character, six hex
-  digits apiece, so that a node's identity survives any change of label and
-  can be decoded back to the object it stands for. A commit topic's id is
-  <code>git-commit:</code> followed by a full hash, which makes its encoded
-  form several hundred characters long. That is the price of an identity that
-  is shared with every other projection of the same commit rather than local
-  to this diagram, and it is paid in readability. A later slice could offer
-  short identifiers alongside the encoded ones; it would have to keep the SVG
-  identity check in step, which is why it is not done here.
+  A key is local to this projection. It is readable and it is not the Topic's
+  identity: <code>git_commit_8a1149…</code> names a node in this diagram,
+  while <code>git-commit:8a1149…</code> names the commit everywhere. The two
+  are joined by a bijection the projection carries and checks, so the same
+  Topic can appear under a different key in a different diagram and still be
+  the same Topic. Labels never identify anything, and the key is not derived
+  from them.
 </p>
 
 <p>
@@ -66,7 +63,8 @@
   <strong>not interactive</strong>: no node carries a link or an action, and
   clicking one does nothing. Its identity is nonetheless preserved and checked
   — every expected Topic and Association appears as an SVG group keyed by its
-  encoded id — so the rendering can be inspected as evidence even though it is
+  D2 key, and each key leads back to a Topic through the projection's own
+  mapping — so the rendering can be inspected as evidence even though it is
   not an interface.
 </p>
 

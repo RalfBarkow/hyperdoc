@@ -19,9 +19,22 @@
     (dolist (entry topics)
       (check (dreyeck/topicmap:topicmap-projection-topic-by-id projection (getf entry :id))
              "TALA introduced an unknown Topic.")
+      ;; The key leads back to its Topic through the input that assigned
+      ;; it. This used to decode the key, which proved a property of a
+      ;; string; it now proves the bijection the projection carries,
+      ;; which is what any reader of the SVG would actually follow.
       (check (string= (getf entry :id)
-                      (dreyeck/topicmap/tala:topic-id-from-tala-id (getf entry :d2-id)))
-             "Topic ID encoding is not reversible."))
+                      (dreyeck/topicmap/tala:tala-input-topic-id
+                       input (getf entry :d2-id)))
+             "A D2 key does not lead back to its Topic.")
+      (check (string= (getf entry :d2-id)
+                      (dreyeck/topicmap/tala:tala-input-d2-key
+                       input (getf entry :id)))
+             "A Topic does not lead to its D2 key."))
+    (check (= (length topics)
+              (length (remove-duplicates topics :test #'string=
+                                         :key (lambda (e) (getf e :d2-id)))))
+           "Two Topics share a D2 key.")
     (check (= (length associations)
               (length (dreyeck/topicmap:topicmap-projection-associations-of projection)))
            "TALA lost an Association.")
@@ -70,10 +83,33 @@
                       (dreyeck/topicmap:topicmap-projection-of workspace))))
            "Workspace navigation changed layout input topology.")
     (tala-must-fail (lambda () (dreyeck/topicmap/tala:validate-tala-svg input "<svg/>")))
-    (dolist (id '("" "same label" "A:a/b.c[1]" "ä λ 東京"))
-      (check (string= id (dreyeck/topicmap/tala:topic-id-from-tala-id
-                          (dreyeck/topicmap/tala:tala-id id)))
-             "Topic identity round-trip failed: ~S" id))
+    ;; Keys must stay distinct exactly where a readable scheme is most
+    ;; likely to lose them. Sanitizing is not injective — these four
+    ;; Topic IDs all reduce to the same candidate — so the assignment is
+    ;; asked to keep them apart rather than trusted to.
+    (let* ((colliding '("a:b" "a/b" "a b" "a.b"))
+           (assignment (dreyeck/topicmap/tala:assign-d2-keys colliding))
+           (keys (mapcar #'cdr assignment)))
+      (check (= (length colliding) (length assignment))
+             "The key assignment dropped a Topic.")
+      (check (= (length keys) (length (remove-duplicates keys :test #'string=)))
+             "Colliding Topic IDs were silently aliased to ~S." keys)
+      (loop for (topic-id . key) in assignment
+            do (check (string= topic-id
+                               (car (find key assignment :key #'cdr
+                                          :test #'string=)))
+                      "Key ~S does not lead back to ~S." key topic-id))
+      ;; Deterministic: the same input must give the same keys.
+      (check (equal assignment (dreyeck/topicmap/tala:assign-d2-keys colliding))
+             "The key assignment is not deterministic."))
+    ;; Awkward Topic IDs must still produce a usable key.
+    (dolist (id '("" "same label" "A:a/b.c[1]" "ä λ 東京" "9lives"))
+      (let ((key (cdr (first (dreyeck/topicmap/tala:assign-d2-keys (list id))))))
+        (check (plusp (length key)) "Topic ~S produced an empty key." id)
+        (check (alpha-char-p (char key 0))
+               "Key ~S for Topic ~S does not start with a letter." key id)
+        (check (every (lambda (c) (or (alphanumericp c) (char= c #\_))) key)
+               "Key ~S for Topic ~S is not D2-safe." key id)))
     (tala-must-fail
      (lambda () (dreyeck/topicmap/tala:projection-tala-input projection :seed "44"))))
   (format t "TALA input tests passed: real projection, deterministic IDs/endpoints, point independence, native availability, invalid output.~%")

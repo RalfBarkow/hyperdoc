@@ -40,13 +40,18 @@
                                 :ASSOCIATIONS
                                 (TALA:TALA-INPUT-ASSOCIATIONS INPUT)
                                 :ROUNDTRIPS
+                                ;; The key leads back to the Topic by being
+                                ;; looked up in the projection that assigned
+                                ;; it, not by being decoded. A key is local
+                                ;; to this diagram; the Topic is not.
                                 (MAPCAR
                                         (LAMBDA (ENTRY)
                                                 (LIST (GETF ENTRY :ID)
-                                                      (TALA:TOPIC-ID-FROM-TALA-ID
-                                                                                  (GETF
-                                                                                        ENTRY
-                                                                                        :D2-ID))))
+                                                      (TALA:TALA-INPUT-TOPIC-ID
+                                                                                INPUT
+                                                                                (GETF
+                                                                                      ENTRY
+                                                                                      :D2-ID))))
                                         (TALA:TALA-INPUT-TOPICS INPUT)))))
 
 (HYPERDOC:DEFEXAMPLE READING-DEPENDENCY (TALA:TALA-DEPENDENCY-STATUS))
