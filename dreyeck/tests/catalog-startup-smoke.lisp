@@ -220,7 +220,17 @@
                              "(format t \"Fresh Dreyeck catalog startup tests passed.~%\")"
                              "(PROGN
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
- (ASSERT (= 14 (LENGTH (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*))))
+ (ASSERT (= 15 (LENGTH (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*))))
+ ;; The fifteenth is the page-loading contract evolution reading. The
+ ;; count is pinned so that catalog membership stays a decision; naming
+ ;; the book here keeps the number attached to its reason.
+ (LET ((TEMPORAL
+        (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/upstream-intake/temporal\"
+                                  :SIGNAL-ERROR? T)))
+   (HYPERDOC::ENSURE-PAGES-LOADED TEMPORAL)
+   (ASSERT
+    (HYPERBOOK:FIND-PAGE TEMPORAL \"Page-Loading Contract Evolution\"
+                         :SIGNAL-ERROR? T)))
  (DOLIST
      (ENTRY
       '((\"dreyeck/topicmap/tala/reading\" \"Reading TALA as a Layout Layer\" 12)
@@ -242,7 +252,7 @@
               (LAMBDA (REF) (TYPEP (CDR REF) 'HTML-INSPECTOR-VIEWS:THUNK))
               (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES (CDR WIDGET)))))))))
  (FORMAT T
-         \"NORMAL-LAUNCHER-PROOF: 14 books; TALA 12 and workflow 12 source/play thunks; no authoring runtime.~%\"))"))
+         \"NORMAL-LAUNCHER-PROOF: 15 books; TALA 12 and workflow 12 source/play thunks; no authoring runtime.~%\"))"))
                (LIST
                      "(LET* ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/upstream-intake\" :SIGNAL-ERROR? T)) (PAGE (HYPERBOOK:FIND-PAGE BOOK \"Upstream Intake as a Read-Only Observation\" :SIGNAL-ERROR? T)) (DOM (PLUMP-PARSER:PARSE (HYPERDOC:FILE-OF PAGE))) (ACTION \"(upstream-intake-removal-workspace-example)\") (ANCHORS (REMOVE-IF-NOT (LAMBDA (A) (EQUAL ACTION (PLUMP-DOM:ATTRIBUTE A \"expr\"))) (PLUMP-DOM:GET-ELEMENTS-BY-TAG-NAME DOM \"a\"))) (VIEW (FIND \"Content\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE) :KEY (FUNCTION HTML-INSPECTOR-VIEWS:VIEW-TITLE) :TEST (FUNCTION EQUAL)))) (ASSERT (= 1 (LENGTH ANCHORS))) (ASSERT (EQUAL \"Topicmap\" (PLUMP-DOM:ATTRIBUTE (FIRST ANCHORS) \"view\"))) (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW) (LET* ((WIDGET (FIND-IF (LAMBDA (ENTRY) (SEARCH \"upstream-intake-removal-workspace-example\" (HTML-INSPECTOR-VIEWS:VIEW-HTML (CDR ENTRY)) :TEST (FUNCTION CHAR-EQUAL))) (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))) (THUNKS (AND WIDGET (REMOVE-IF-NOT (LAMBDA (ENTRY) (TYPEP (CDR ENTRY) (QUOTE HTML-INSPECTOR-VIEWS:THUNK))) (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES (CDR WIDGET)))))) (ASSERT WIDGET) (ASSERT (= 1 (LENGTH THUNKS))) (LET* ((WORKSPACE (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDAR THUNKS))) (PROJECTION (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-PROJECTION-OF WORKSPACE)) (WORKSPACE-VIEW (FIND \"Topicmap\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS WORKSPACE) :KEY (FUNCTION HTML-INSPECTOR-VIEWS:VIEW-TITLE) :TEST (FUNCTION EQUAL)))) (ASSERT (TYPEP WORKSPACE (QUOTE DREYECK/TOPICMAP:TOPICMAP-WORKSPACE))) (ASSERT (EQUAL \"page:dreyeck/upstream-intake/Observing an Upstream Commit\" (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE))) (PROGN (ASDF/OPERATE:LOAD-SYSTEM \"dreyeck/hyperdoc/curation/tests\") (LET ((EXPECTED (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/HYPERDOC/CURATION/TESTS :EXPECTED-INTAKE-IMPACT :COMMIT)) (ACTUAL (DREYECK/TOPICMAP/CURATION:IMPACT-SUMMARY PROJECTION))) (ASSERT (= (LENGTH EXPECTED) (LENGTH ACTUAL))) (ASSERT (NULL (SET-EXCLUSIVE-OR EXPECTED ACTUAL :TEST (FUNCTION EQUAL)))))) (ASSERT WORKSPACE-VIEW) (LET ((HTML (HTML-INSPECTOR-VIEWS:VIEW-HTML WORKSPACE-VIEW))) (ASSERT (SEARCH \"Point\" HTML)) (ASSERT (SEARCH \"Associations\" HTML))) (FORMAT T \"~%CATALOG-CURATION-DEMO-PASS: existing overview, one action/play thunk, Point and exact warranted impact.~%\"))))")))
 

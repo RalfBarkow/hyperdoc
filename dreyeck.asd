@@ -478,6 +478,7 @@
                                  #:DREYECK/LISP-IMAGE
                                  #:DREYECK/PAGE-ATTACHED-WORKSPACE-OFFER
                                  "dreyeck/topicmap/tala/reading"
+                                 "dreyeck/upstream-intake/temporal"
                                  "dreyeck/workflow/reading"
                                  "dreyeck/lisp-critic/reading")
                                 :IN-ORDER-TO
@@ -1864,6 +1865,27 @@
    (uiop/package:symbol-call :dreyeck/topicmap/tests
                              :run-tala-integration-tests)
    (uiop/package:symbol-call :dreyeck/topicmap/tests :run-tala-reading-tests)))
+
+(defsystem "dreyeck/upstream-intake/temporal"
+  :description "The observed page-loading history as a Topicmap, D2 and TALA projection"
+  :license "BSD" :serial t
+  :depends-on ("dreyeck/upstream-intake" "dreyeck/inspector/topicmap/tala"
+               "dreyeck/hyperdoc" "hyperdoc/explorer")
+  :components ((:module "dreyeck/src"
+                :components ((:file "upstream-temporal-projection")))
+               (:module "dreyeck/pages/upstream-temporal"
+                :components ((:static-file "Page-Loading Contract Evolution.html"))))
+  :in-order-to ((test-op (test-op "dreyeck/upstream-intake/temporal/tests"))))
+
+(defsystem "dreyeck/upstream-intake/temporal/tests"
+  :description "The temporal projection derives from the history and mutates nothing"
+  :license "BSD" :serial t
+  :depends-on ("dreyeck/upstream-intake/temporal" "dreyeck/topicmap/tests")
+  :components ((:file "dreyeck/tests/upstream-temporal-projection-smoke"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (uiop:symbol-call :dreyeck/upstream-intake/temporal/tests
+                               :run-temporal-projection-tests)))
 
 (defsystem "dreyeck/topicmap/tala/tests"
   :description "Fresh-process integration proof requiring pinned D2/TALA"

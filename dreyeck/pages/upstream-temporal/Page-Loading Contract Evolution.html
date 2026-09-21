@@ -1,0 +1,111 @@
+<h1>Page-Loading Contract Evolution</h1>
+
+<in-package>dreyeck/upstream-intake/temporal</in-package>
+
+<p>
+  Five upstream commits turned page loading into a protocol. Read one at a
+  time they look like five comparable moves, and the last one —
+  <code>8a11491</code> — looks like the one that fell short, since it changes
+  nothing but two lines of a package definition. Read as a run of states it is
+  the opposite: it is the only point at which <code>LOAD-PAGE</code> becomes
+  reachable as a supported export, and everything it needed was already there.
+</p>
+
+<p>
+  This page shows the same subject in several projections. None of them is the
+  subject. The observed history is, and each projection below is derived from
+  it rather than written out again.
+</p>
+
+<h2>The subject</h2>
+
+<p>
+  <a expr="(page-loading-history-example)">
+    The observed history as one inspectable object
+  </a>
+</p>
+
+<p>
+  <a expr="(page-loading-history-workspace-example)">
+    The same history as a Workspace, with native Topic signs to navigate by
+  </a>
+</p>
+
+<h2>As D2</h2>
+
+<p>
+  The Topicmap projection serialized to D2. The shape is ordinary — one line
+  per topic, one per association, nothing but <code>id: "label"</code> and
+  <code>from -&gt; to: "type"</code>.
+</p>
+
+<p>
+  The identifiers are not ordinary, and it is worth knowing why before
+  looking. Each one is the Topic id encoded character by character, six hex
+  digits apiece, so that a node's identity survives any change of label and
+  can be decoded back to the object it stands for. A commit topic's id is
+  <code>git-commit:</code> followed by a full hash, which makes its encoded
+  form several hundred characters long. That is the price of an identity that
+  is shared with every other projection of the same commit rather than local
+  to this diagram, and it is paid in readability. A later slice could offer
+  short identifiers alongside the encoded ones; it would have to keep the SVG
+  identity check in step, which is why it is not done here.
+</p>
+
+<p>
+  <a expr="(page-loading-d2-source-example)" view="D2 input">
+    The generated D2 source and its Topic / Association identity maps
+  </a>
+</p>
+
+<h2>Laid out by TALA</h2>
+
+<p>
+  D2 is the language; TALA is one layout choice within it, pinned here to
+  D2 v0.9.0 with the bundled engine. The image is
+  <strong>not interactive</strong>: no node carries a link or an action, and
+  clicking one does nothing. Its identity is nonetheless preserved and checked
+  — every expected Topic and Association appears as an SVG group keyed by its
+  encoded id — so the rendering can be inspected as evidence even though it is
+  not an interface.
+</p>
+
+<p>
+  <a expr="(page-loading-tala-rendering-example)">
+    Render the projection with TALA and inspect the result
+  </a>
+</p>
+
+<h2>How far apart the states are</h2>
+
+<p>
+  The intervals are not in the diagram. A graph layout would have to either
+  ignore them or imply a metric it does not have, and these particular numbers
+  are the reason the dates were recorded at all: the mechanism and the contract
+  that publishes it are five hundred and forty-two days apart, while two of the
+  contract commits are twenty-five seconds apart and are better read as one
+  editing move than as two steps.
+</p>
+
+<p>
+  <a expr="(page-loading-temporal-intervals-example)">
+    The observed dates and the intervals derived from them
+  </a>
+</p>
+
+<h2>What is observed and what is not</h2>
+
+<ul>
+  <li>commit dates and ancestry are <strong>observed</strong>, re-checked
+      against the object database on every reading;</li>
+  <li>the intervals are <strong>derived</strong> — a subtraction of two
+      observed instants, neither a new fact nor an interpretation;</li>
+  <li>the capabilities A to F are <strong>interpreted</strong>, and each
+      capability topic carries the attribution, so following one arrives at
+      its basis rather than at a label.</li>
+</ul>
+
+<p>
+  The capability matrix remains the authority on what was true when. The
+  diagram shows which state established what; it does not decide it.
+</p>
