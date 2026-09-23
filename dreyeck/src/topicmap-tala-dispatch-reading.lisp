@@ -7,7 +7,10 @@
   (fdefinition '👀tala-input))
 
 (defun dispatch-method-observations (generic-function)
-  "Keep the actual methods and specializers beside their observed sources."
+  "Keep the actual methods and specializers beside their observed sources.
+For a generic function the existing Lisp-image projection already keeps
+the live method, so this is only needed where there is no projection on
+the page to read it from."
   (mapcar (lambda (method)
             (list :method method
                   :qualifiers (method-qualifiers method)
@@ -16,9 +19,6 @@
                   (dreyeck/lisp-image::method-definition-source-of
                    generic-function method)))
           (sb-mop:generic-function-methods generic-function)))
-
-(hyperdoc:defexample reading-view-methods
-  (dispatch-method-observations (reading-view-generic-function)))
 
 (hyperdoc:defexample reading-view-workspace
   (tm::make-topicmap-workspace-for-object (reading-view-generic-function)))

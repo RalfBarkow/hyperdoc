@@ -42,12 +42,28 @@
         (assert (equal (truename (dreyeck/topicmap:topicmap-topic-object-of file))
                        (truename (asdf:system-relative-pathname
                                   "dreyeck" "dreyeck/src/topicmap-tala-inspector.lisp"))))))
-    (let ((observations (dreyeck/inspector/topicmap/tala::reading-view-methods)))
-      (assert (= (length observations) (length (sb-mop:generic-function-methods gf))))
-      (dolist (entry observations)
-        (assert (member (getf entry :method) (sb-mop:generic-function-methods gf)))
-        (assert (equal (getf entry :qualifiers) (method-qualifiers (getf entry :method))))
-        (assert (equal (getf entry :specializers) (sb-mop:method-specializers (getf entry :method))))))
+    ;; The page once carried a separate methods example, justified by the
+    ;; claim that the projection loses the live specializer object. It
+    ;; does not: the method Topic keeps the method itself, so qualifiers
+    ;; and specializers read the same objects from there. Measure that
+    ;; rather than assert the accessors agree with themselves.
+    (let* ((method-topics (remove :lisp-method topics
+                                  :key #'dreyeck/topicmap:topicmap-topic-type-of
+                                  :test-not #'eq))
+           (projected-methods (mapcar #'dreyeck/topicmap:topicmap-topic-object-of
+                                      method-topics))
+           (projected-specializers
+             (loop for projected in projected-methods
+                   append (sb-mop:method-specializers projected))))
+      (assert (null (set-exclusive-or projected-methods
+                                      (sb-mop:generic-function-methods gf)
+                                      :test #'eq)))
+      (assert (member (find-class 'dreyeck/topicmap/tala:tala-input)
+                      projected-specializers :test #'eq))
+      (assert (find '(:around) (mapcar #'method-qualifiers projected-methods)
+                    :test #'equal))
+      ;; Reintroducing the example means measuring this again first.
+      (assert (not (fboundp 'dreyeck/inspector/topicmap/tala::reading-view-methods))))
     (let* ((projected (dreyeck/inspector/topicmap/tala::reading-view-projection))
            (owner (dreyeck/topicmap:topicmap-projection-source-of projected)))
       (assert (typep owner 'dreyeck/topicmap:topicmap-workspace))
@@ -80,7 +96,7 @@
         (assert (find page (html-inspector-views:view-references content) :key #'cdr :test #'eq)))
       (assert (search "gigamonkeys.com/book/object-reorientation-generic-functions" html))
       (assert (search "gigamonkeys.com/book/object-reorientation-classes" html))
-      (assert (= 5 (length widgets)))
+      (assert (= 4 (length widgets)))
       (dolist (widget widgets)
         (html-inspector-views:view-html widget)
         (let ((actions (remove-if-not
@@ -88,5 +104,6 @@
                         (html-inspector-views:view-references widget))))
           (assert (= 1 (length actions)))
           (assert (html-inspector-views:eval-thunk (cdar actions)))))))
-  (format t "~&DISPATCH-READING-PASS: live function, methods, source chain and five page widgets.~%")
+  (format t "~&DISPATCH-READING-PASS: live function, methods reached through the ~
+projection, source chain and four page widgets.~%")
   t)

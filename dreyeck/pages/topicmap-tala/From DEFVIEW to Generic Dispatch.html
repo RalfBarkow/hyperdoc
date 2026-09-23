@@ -3,60 +3,77 @@
 <body>
 <in-package>dreyeck/inspector/topicmap/tala</in-package>
 <h1>From DEFVIEW to Generic Dispatch</h1>
-<p>Start at the existing  
+<p><code>DEFVIEW</code> looks like a definition form. What did it actually
+install? Start at the existing
 	<a expr="(fdefinition 'DREYECK/INSPECTOR/TOPICMAP/TALA::👀TALA-INPUT)"
    view="Source code"><code>👀tala-input</code></a>
  view. Its source says
 <code>(views:defview 👀tala-input (input tala:tala-input) ...)</code>.
-The definition installs a method on a generic function; the view returned
-when that function is called is a different object. These examples observe the
-loaded SBCL image, without scratch globals or running the TALA renderer.</p>
-<h2>Observe the operation and its methods</h2>
+These examples observe the loaded SBCL image, without scratch globals and
+without running the TALA renderer.</p>
+
+<h2>What is bound to the name?</h2>
 <source-of-function>reading-view-generic-function</source-of-function>
-<p>This returns the actual function bound to the symbol. On first registration,
-<code>DEFVIEW</code> creates a generic function with a primary method specialized
-on <code>T</code> returning nil and an <code>:around</code> method specialized
-on <code>T</code> that attaches object/method metadata to returned views. It
-registers the view function, then defines the primary method specialized on
-<code>TALA:TALA-INPUT</code>. The current method observations retain actual
-specializer objects, qualifiers, and available definition sources.</p>
-<source-of-function>reading-view-methods</source-of-function>
-<h2>Navigate the existing source relations</h2>
+<p>A <code>STANDARD-GENERIC-FUNCTION</code>, not the view. The view returned
+when that function is called is a different object. On first registration
+<code>DEFVIEW</code> creates the generic function with a primary method
+specialized on <code>T</code> returning nil and an <code>:around</code> method
+specialized on <code>T</code> that attaches object and method metadata to
+returned views. It registers the view function, then defines the primary
+method specialized on <code>TALA:TALA-INPUT</code>.</p>
+
+<h2>Where do its methods live?</h2>
 <source-of-function>reading-view-workspace</source-of-function>
 <source-of-function>reading-view-projection</source-of-function>
 <p>Open the Workspace's native Topicmap. Its point denotes the same generic
 function. Follow <code>:has-method</code> to a method, <code>:defined-by</code>
-to its definition source, and <code>:source-file</code> to the file. The existing
-Lisp-image projection owns these relations. Missing source metadata is not
-replaced by an invented location. Separate example clicks make fresh observations.</p>
-<p>TALA may visualize this same Projection through the existing layout adapter;
-it adds no dispatch or reading semantics. Native Topicmap navigation remains
-primary.</p>
+to its definition source, and <code>:source-file</code> to the file. The
+existing Lisp-image projection owns these relations; missing source metadata is
+not replaced by an invented location.</p>
+<p>The method Topics keep the live <code>STANDARD-METHOD</code> as their object,
+so <code>METHOD-QUALIFIERS</code> and <code>METHOD-SPECIALIZERS</code> read the
+same objects from there. The specializer reached through the projection is
+<code>EQ</code> to <code>(find-class 'tala:tala-input)</code>. This page once
+carried a separate example that returned methods with their specializers; it was
+removed when that <code>EQ</code> identity was measured, because the projection
+had never lost what the example claimed to preserve. The page's own reading test
+still makes that measurement, so the sentence stays falsifiable.</p>
+
+<h2>What is not asserted</h2>
+<p>One method is specialized on <code>TALA:TALA-INPUT</code>, and that is
+observable. It does not follow that a <code>SPECIALIZED-ON</code> association
+should be created in order to teach the fact. Inspect the specializer as the
+class of the argument the method is defined for; the method belongs to the
+generic function, not to the class. No new Topic type, association type or
+Workspace kind is introduced by this reading.</p>
+
 <h2>Which view operations are generic?</h2>
 <source-of-function>reading-view-operations</source-of-function>
 <p>In this image <code>OBJECT-REF</code> and <code>ALL-VIEWS</code> are ordinary
 functions; <code>VIEW-REFERENCES</code> and <code>VIEW-HTML</code> are generic
-accessors. Do not infer generic dispatch from an operation's name. The example
-returns their actual functions and definition sources, including method sources
-for generic functions. An accessor's generic-function source record can have no
-pathname even when its accessor and <code>:before</code> methods have file-backed
-sources. These are distinct observations.</p>
+accessors. Do not infer generic dispatch from an operation's name. These four
+have no projection on this page, so the example carries their methods itself. An
+accessor's generic-function source record can have no pathname even when its
+accessor and <code>:before</code> methods have file-backed sources; that absence
+is preserved rather than filled in.</p>
+
 <h2>Read alongside the observations</h2>
 <p>Peter Seibel, <cite>Practical Common Lisp</cite> (Apress, 2005),
 <a href="https://gigamonkeys.com/book/object-reorientation-generic-functions">chapter 16,
 “Object Reorientation: Generic Functions”</a>, explains how methods implement
 an operation and specialize its behavior for arguments. Use the three methods
 above as a concrete example of primary and qualified methods belonging to one
-operation.</p>
-<p><a href="https://gigamonkeys.com/book/object-reorientation-classes">Chapter 17,
+operation.
+<a href="https://gigamonkeys.com/book/object-reorientation-classes">Chapter 17,
 “Object Reorientation: Classes”</a>, explains class definitions, inheritance,
-and slots. Inspect the <code>TALA:TALA-INPUT</code> specializer as the class of
-the argument on which this view specializes; the method belongs to the generic
-function, not to the class.</p>
+and slots.</p>
 <p>These chapter connections are authored reading suggestions. The observed
 program graph does not assert that a method requires a chapter or that one
 chapter precedes another. A warranted learning relation would need its own
 explicit authorship and evidence contract; this page leaves that relation in
 prose rather than introducing a new Topicmap ontology.</p>
+
+<p>Back to <a page="Reading TALA as a Layout Layer">Reading TALA as a Layout
+Layer</a>.</p>
 </body>
 </html>
