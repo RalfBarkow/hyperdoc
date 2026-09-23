@@ -1203,6 +1203,46 @@
                                  :RUN-STATE-MACHINE-TESTS)
      (ERROR "Dreyeck state-machine tests failed."))))
 
+(DEFSYSTEM #:DREYECK/GESTURE-BINDING-WITNESS
+  :DESCRIPTION
+  "Transient Gesture/Binding recognizer stopping at operation identity"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/src/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/STATE-MACHINE #:DREYECK/TOPICMAP)
+  :COMPONENTS
+  ((:FILE "gesture-binding-witness"))
+  :IN-ORDER-TO
+  ((TEST-OP (TEST-OP "dreyeck/gesture-binding-witness/tests"))))
+
+(DEFSYSTEM #:DREYECK/GESTURE-BINDING-WITNESS/TESTS
+  :DESCRIPTION
+  "Counterexample traces that once falsified the Gesture/Binding witness"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :PATHNAME
+  "dreyeck/tests/"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  (#:DREYECK/GESTURE-BINDING-WITNESS)
+  :COMPONENTS
+  ((:FILE "gesture-binding-witness-smoke"))
+  :PERFORM
+  (TEST-OP (OPERATION COMPONENT) (DECLARE (IGNORE OPERATION COMPONENT))
+   (UNLESS
+       (SYMBOL-CALL :DREYECK/GESTURE-BINDING-WITNESS/TESTS
+                    :RUN-GESTURE-BINDING-WITNESS-TESTS)
+     (ERROR "Gesture/Binding witness tests failed."))))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LISP-CRITIC
   :DESCRIPTION
   "Generic LISP-CRITIC execution contracts and run records"
