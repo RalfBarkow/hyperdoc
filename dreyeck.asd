@@ -1812,13 +1812,11 @@
                                 :COMPONENTS
                                 ((:FILE "dreyeck/src/workflow-model")))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/authoring"
-  :DESCRIPTION
-  "Explicit pinned authoring capability; excluded from ordinary Catalog"
-  :DEPENDS-ON
-  ("dreyeck/workflow")
-  :COMPONENTS
-  ((:FILE "dreyeck/src/workflow-authoring")))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/authoring" :DESCRIPTION
+                                "Explicit pinned authoring capability; excluded from ordinary Catalog"
+                                :DEPENDS-ON ("dreyeck/workflow") :COMPONENTS
+                                ((:FILE "dreyeck/src/workflow-authoring")
+                                 (:FILE "dreyeck/src/workflow-insert")))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading" :DESCRIPTION
                                 "Executable ownership, persistence and reconstruction reading"
@@ -1834,15 +1832,24 @@
                                           ((:STATIC-FILE
                                                          "Reconstructing Workflow.html")))))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/authoring/tests"
-  :DEPENDS-ON
-  ("dreyeck/workflow/authoring" "dreyeck/workflow/tests")
-  :COMPONENTS
-  ((:FILE "dreyeck/tests/workflow-authoring"))
-  :PERFORM
-  (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
-   (DECLARE (IGNORE OPERATION COMPONENT))
-   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/WORKFLOW/TESTS :RUN-AUTHORING-TESTS)))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/authoring/tests" :DEPENDS-ON
+                                ("dreyeck/workflow/authoring"
+                                 "dreyeck/workflow/tests")
+                                :COMPONENTS
+                                ((:FILE "dreyeck/tests/workflow-authoring")
+                                 (:FILE "dreyeck/tests/workflow-insert"))
+                                :PERFORM
+                                (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
+                                                          (DECLARE
+                                                                   (IGNORE
+                                                                           OPERATION
+                                                                           COMPONENT))
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/WORKFLOW/TESTS
+                                                                                    :RUN-AUTHORING-TESTS)
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/WORKFLOW/INSERT/TESTS
+                                                                                    :RUN-INSERT-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading/tests"
   :DEPENDS-ON
