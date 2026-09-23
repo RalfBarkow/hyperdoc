@@ -242,15 +242,21 @@
              (FIND \"Content\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE) :KEY
                    #'HTML-INSPECTOR-VIEWS:VIEW-TITLE :TEST #'STRING=)))
        (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW)
-       (ASSERT
-        (= (THIRD ENTRY) (LENGTH (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))))
-       (DOLIST (WIDGET (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))
-         (HTML-INSPECTOR-VIEWS:VIEW-HTML (CDR WIDGET))
-         (ASSERT
-          (= 1
-             (COUNT-IF
-              (LAMBDA (REF) (TYPEP (CDR REF) 'HTML-INSPECTOR-VIEWS:THUNK))
-              (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES (CDR WIDGET)))))))))
+       ;; A page link retains the page object and an EXPR link retains
+       ;; the object it names, so not every reference of a Content view
+       ;; is an executable widget. The pinned number counts widgets.
+       (LET ((WIDGETS
+              (REMOVE-IF-NOT
+               (LAMBDA (REF) (TYPEP (CDR REF) 'HTML-INSPECTOR-VIEWS:VIEW))
+               (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))))
+         (ASSERT (= (THIRD ENTRY) (LENGTH WIDGETS)))
+         (DOLIST (WIDGET WIDGETS)
+           (HTML-INSPECTOR-VIEWS:VIEW-HTML (CDR WIDGET))
+           (ASSERT
+            (= 1
+               (COUNT-IF
+                (LAMBDA (REF) (TYPEP (CDR REF) 'HTML-INSPECTOR-VIEWS:THUNK))
+                (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES (CDR WIDGET))))))))))
  (FORMAT T
          \"NORMAL-LAUNCHER-PROOF: 15 books; TALA 12 and workflow 12 source/play thunks; no authoring runtime.~%\"))"))
                (LIST

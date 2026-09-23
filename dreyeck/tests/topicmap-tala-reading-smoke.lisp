@@ -1,6 +1,15 @@
 
 (IN-PACKAGE :DREYECK/TOPICMAP/TESTS)
 
+(defun tala-reading-widget-references (view)
+  "The references of VIEW that are executable page widgets.
+A page link retains the page object and an EXPR link retains the object
+it names, so VIEW-REFERENCES answers a wider question than \"which
+widgets does this page have\". Both kinds were observed on the TALA
+reading pages; only a view is a widget."
+  (remove-if-not (lambda (ref) (typep (cdr ref) 'html-inspector-views:view))
+                 (html-inspector-views:view-references view)))
+
 (DEFUN RUN-TALA-READING-TESTS NIL
        (LET*
              ((BOOK
@@ -55,8 +64,7 @@
                                                                (HTML-INSPECTOR-VIEWS:VIEW-HTML
                                                                                                (CDR
                                                                                                     REF)))
-                                                       (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES
-                                                                                             VIEW))))))
+                                                       (tala-reading-widget-references VIEW))))))
                    (ASSERT
                            (SEARCH "d5a51743b6d5c00f1ec6f8340003f5d5a6ba4eda"
                                    HTML))
@@ -68,8 +76,7 @@
                           (LET
                                ((WIDGETS
                                          (MAPCAR (FUNCTION CDR)
-                                                 (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES
-                                                                                       VIEW)))
+                                                 (tala-reading-widget-references VIEW)))
                                 (CLICKS 0))
                                (ASSERT (= 12 (LENGTH WIDGETS)))
                                (DOLIST (WIDGET WIDGETS)
