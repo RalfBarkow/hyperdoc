@@ -480,7 +480,8 @@
                                  "dreyeck/topicmap/tala/reading"
                                  "dreyeck/upstream-intake/temporal"
                                  "dreyeck/workflow/reading"
-                                 "dreyeck/lisp-critic/reading")
+                                 "dreyeck/lisp-critic/reading"
+                                 "dreyeck/gesture/reading")
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP
@@ -1242,6 +1243,43 @@
        (SYMBOL-CALL :DREYECK/GESTURE-BINDING-WITNESS/TESTS
                     :RUN-GESTURE-BINDING-WITNESS-TESTS)
      (ERROR "Gesture/Binding witness tests failed."))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/reading"
+  :DESCRIPTION
+  "Reading the corrected Gesture/Binding witness through its evidence"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/hyperdoc" "dreyeck/gesture-binding-witness" "dreyeck/state-machine"
+   "hyperdoc/explorer")
+  :COMPONENTS
+  ((:MODULE "dreyeck/src" :COMPONENTS ((:FILE "gesture-binding-reading")))
+   (:MODULE "dreyeck/pages/gesture" :COMPONENTS
+    ((:STATIC-FILE "Falsifying a Gesture-Binding Witness.html")))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/reading/tests" :DESCRIPTION
+                                "Falsifiers for the derived reading of a gesture session"
+                                :LICENSE "BSD" :VERSION "0.0.1" :SERIAL T
+                                :DEPENDS-ON
+                                ("dreyeck/gesture/reading" "dreyeck/catalog")
+                                :COMPONENTS
+                                ((:FILE
+                                        "dreyeck/tests/gesture-binding-reading-smoke"))
+                                :PERFORM
+                                (ASDF/LISP-ACTION:TEST-OP
+                                                          (ASDF/OPERATION:OPERATION
+                                                                                    ASDF/COMPONENT:COMPONENT)
+                                                          (DECLARE
+                                                                   (IGNORE
+                                                                           ASDF/OPERATION:OPERATION
+                                                                           ASDF/COMPONENT:COMPONENT))
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/GESTURE/READING/TESTS
+                                                                                    :RUN-GESTURE-READING-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/LISP-CRITIC
   :DESCRIPTION

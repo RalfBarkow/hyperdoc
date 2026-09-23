@@ -1,0 +1,91 @@
+<html>
+<head><title>Falsifying a Gesture/Binding Witness</title></head>
+<body>
+<in-package>dreyeck/gesture/reading</in-package>
+<h1>Falsifying a Gesture/Binding Witness</h1>
+<p>A first witness was written to show one thing about gestures, and a review
+took it apart. This page is not the repaired version's release notes. It is
+about how to read what the corrected recognizer keeps, and in particular how to
+read an input that changed nothing.</p>
+
+<h2>What survived?</h2>
+<p>Distinct Bindings reference the same opaque semantic Operation identity. A
+radial-menu sector, a learned mark and an Inspector action are three different
+Bindings; the thing they point at is one object, <code>EQ</code> in the sense of
+Lisp identity. The witness models transient recognition up to the selection of
+that identity. No execution mechanism is part of it: the identity is a structure
+with an id and a title, it is not <code>FUNCALL</code>able, and there is nothing
+here that could run it.</p>
+<p>That is a claim about what the objects are, not a measurement of something
+that failed to happen.</p>
+
+<h2>What was wrong with the first witness?</h2>
+<p>Four behaviours, each found by a trace rather than by reading. A release was
+recorded as <code>:RELEASED-IN-DEAD-ZONE</code> while the pointer was twenty
+units outside it, because the transition was named after a condition it never
+checked. Entering a disabled sector ended the whole session, although the
+evidence only ever established that a disabled sector cannot become active. A
+reveal timer arriving after marking had begun raised an error, although a real
+timer fires whatever the user is doing. Moving after a sector was selected
+raised an error too, although re-selecting before release is the ordinary way a
+marking menu is used.</p>
+<p>Those are recorded here as review findings, in prose. The executable objects
+on this page all come from the corrected implementation.</p>
+
+<h2>How is an input that causes no transition explained?</h2>
+<source-of-function>gesture-session-reading</source-of-function>
+<p>Run it. Each record is one delivered input sample with the state before it,
+the effects it had, and the state after. The effects are a list because one
+sample can have more than one: a pointer move that leaves the dead zone and
+lands in a sector produces <code>:PRESSED-&gt;MARKING</code> and
+<code>:MARKING-&gt;SECTOR-SELECTED</code> at the same timestamp. Joining effects
+to inputs by timestamp would merge them into one; the join here is the order of
+the evidence trace.</p>
+<source-of-function>expert-marking-reading</source-of-function>
+<p>An effect is either a <code>:TRANSITION</code> or an
+<code>:OBSERVATION</code>. An observation is a sample the recognizer consumed
+and deliberately did nothing with. It is in the record, with a reason, because
+an input that vanishes without trace is exactly what made the old witness able
+to misreport a release.</p>
+
+<h2>What does a disabled sector mean?</h2>
+<source-of-function>disabled-then-enabled-reading</source-of-function>
+<p>The pointer enters the disabled sector, then an enabled one, then releases.
+The disabled sector appears as an observation naming the Binding that was
+encountered, and the session stays live; the later move selects the enabled
+Binding, and the release completes. Not selectable is not the same as
+cancelled.</p>
+<p>The reading layer has to interpret the raw <code>DETAIL</code> of each
+entry, because the reducer stores whatever was most informative where it stood:
+a keyword for a guard, a Binding for a completion, a plist for a selection, a
+string for the disabled Binding's id. That case distinction lives in
+<code>%TRANSITION-DETAIL</code> and <code>%OBSERVATION-DETAIL</code> and is
+tested. It never invents a reason the trace did not record, and a shape it does
+not recognise is carried through rather than dropped.</p>
+
+<h2>Two things that look alike and are not</h2>
+<source-of-function>obsolete-deadline-session</source-of-function>
+<p>A reveal deadline delivered after marking has begun is consumed, recorded as
+<code>:OBSOLETE-REVEAL-DEADLINE</code>, and leaves the state where it was. That
+is an observation.</p>
+<p>Now compare it with what happens when the pointer leaves every enabled
+sector: the active selection is cleared and the session returns to its menu or
+marking state. That is a <em>transition</em>,
+<code>:SECTOR-SELECTED-&gt;MENU-VISIBLE</code> with reason
+<code>:NO-ENABLED-SECTOR-AT-ANGLE</code>, and it is visible as one in the
+derived record. Both look like “nothing was completed”; only one of them left
+the state alone. The reading layer does not add a third kind of effect to
+describe the second, because the state machine already describes it.</p>
+
+<h2>Where this witness stops</h2>
+<p>There is no browser input, no radial rendering, no persistence, and no
+execution protocol. The samples are synthetic and the operation identity is
+opaque by construction. The state machine's <code>:NOTES</code> carry three
+statements that read like invariants; nothing validates them, so they are filed
+as documentation, and the test that runs the generic validator is named for what
+that validator actually checks — known states, guards, events, and no outgoing
+transition from a terminal state.</p>
+<p>Input after a terminal state still signals a condition. That is a contract,
+not an outcome, and it was left alone on purpose.</p>
+</body>
+</html>
