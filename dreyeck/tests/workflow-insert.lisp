@@ -37,6 +37,12 @@ here needs one."
              (write-string "(in-package :cl-user)" stream))
            (asdf:load-asd asd)
            (funcall function asd "insert-proof"))
+      ;; Forget the fixture systems, or a second run in the same image
+      ;; would plan against the previous fixture's deleted pathnames.
+      (dolist (name '("insert-proof" "insert-proof/tests" "insert-proof/extra"
+                      "insert-proof/new" "insert-proof/local"
+                      "insert-proof/foreign" "insert-proof/fresh"))
+        (ignore-errors (asdf:clear-system name)))
       (uiop:delete-directory-tree root :validate t
                                        :if-does-not-exist :ignore))))
 
@@ -137,6 +143,75 @@ here needs one."
     (assert (= (length after) (length (wf:source-forms asd))))
     t))
 
+;;; Target readability, and that a refusal costs the authority nothing
+
+(defpackage #:insert-proof-absent-package
+  (:use #:cl)
+  (:documentation
+   "A package this image has and a plain SBCL does not.
+The falsifier is about a printed package prefix the consumer cannot
+resolve, not about any particular package of this repository."))
+
+(defun %authority-text (asd)
+  (uiop:read-file-string asd :external-format :utf-8))
+
+(defun %proposed-with-foreign-symbol (name)
+  "Structurally a fine DEFSYSTEM; one symbol belongs to a package the
+ordinary ASDF reader has never heard of."
+  (list (intern "DEFSYSTEM" :asdf-user) name
+        :depends-on '("insert-proof")
+        :perform (list (intern "TEST-OP" :asdf-user)
+                       (list (intern "OPERATION" :insert-proof-absent-package)
+                             (intern "COMPONENT" :insert-proof-absent-package))
+                       t)))
+
+(defun %proposed-with-local-symbol (name)
+  "The same shape, with symbols the consumer can read."
+  (list (intern "DEFSYSTEM" :asdf-user) name
+        :depends-on '("insert-proof")
+        :perform (list (intern "TEST-OP" :asdf-user)
+                       (list (intern "OPERATION" :asdf-user)
+                             (intern "COMPONENT" :asdf-user))
+                       t)))
+
+(defun test-refuses-a-candidate-the-consumer-cannot-read (asd system)
+  (let* ((before (%authority-text asd))
+         (proposed (%proposed-with-foreign-symbol "insert-proof/foreign"))
+         (plan (%plan asd system proposed "insert-proof/tests"))
+         (message (%signals (lambda ()
+                              (a::insert-into-candidate plan)))))
+    (assert message)
+    (assert (search "not readable by its ordinary consumer" message))
+    ;; The authority was never written to.
+    (assert (string= before (%authority-text asd)))
+    ;; Positive control: the same form with readable symbols is accepted,
+    ;; so the rejection is about the package prefix and not the shape.
+    (let* ((honest (%proposed-with-local-symbol "insert-proof/local"))
+           (honest-plan (%plan asd system honest "insert-proof/tests"))
+           (after (a::insert-into-candidate honest-plan)))
+      (assert (= 1 (count '(:system "insert-proof/local") after
+                          :key #'wf:form-key :test #'equal)))
+      (assert (= (length after) (a::read-in-target-reader-context asd))))
+    ;; No candidate file left behind beside the authority.
+    (assert (null (remove-if-not
+                   (lambda (file)
+                     (search "candidate" (or (pathname-type file) "")))
+                   (directory (make-pathname :name :wild :type :wild
+                                             :defaults asd)))))
+    t))
+
+(defun test-a-refusal-leaves-the-authority-untouched (asd system)
+  (dolist (attempt (list (lambda ()
+                           (%plan asd system (%proposed "insert-proof/tests")
+                                  "insert-proof/extra"))
+                         (lambda ()
+                           (%plan asd system (%proposed "insert-proof/fresh")
+                                  "insert-proof/absent"))))
+    (let ((before (%authority-text asd)))
+      (assert (%signals attempt))
+      (assert (string= before (%authority-text asd)))))
+  t)
+
 (defun run-insert-tests ()
   (let ((environment (a:make-authoring-environment)))
     (call-with-fixture
@@ -145,8 +220,12 @@ here needs one."
        (test-rejects-a-missing-anchor asd system)
        (test-rejects-an-ambiguous-anchor asd system)
        (test-rejects-a-disturbed-neighbour asd system)
+       (test-a-refusal-leaves-the-authority-untouched asd system)
+       (test-refuses-a-candidate-the-consumer-cannot-read asd system)
        (test-inserts-and-leaves-the-rest-alone asd system environment))))
   (format t "~&INSERT-OWNED-FORM-PASS: duplicate key, missing and ambiguous ~
-anchor refused; a changed, reordered or extra neighbour fails verification; ~
-one form inserted before its anchor and nothing else touched.~%")
+anchor refused with the authority byte-identical; a changed, reordered or ~
+extra neighbour fails verification; a candidate its consumer cannot read is ~
+refused while the same shape with readable symbols is accepted; one form ~
+inserted before its anchor and nothing else touched.~%")
   t)

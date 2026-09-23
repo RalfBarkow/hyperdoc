@@ -107,6 +107,36 @@ operation is not modelled yet — the name `MATERIALIZE-LISP-SOURCE` does not
 exist in this repository — and its inputs and identity guarantees would have to
 be designed and falsified before it could become a repository-wide requirement.
 
+`INSERT-OWNED-FORM` adds one new top-level form to an authority that already
+exists. It is neither of the other two: it has no predecessor form to bind
+itself to, and what it must protect is every form it does not touch, in the
+order they were in. Its contract separates three properties, because the first
+real use of the operation satisfied one of them and still broke the file.
+
+- **Structural insertion integrity.** The proposed key does not already occur,
+  the anchor occurs exactly once before and after, every pre-existing form is
+  structurally unchanged and in its original order, and the only difference in
+  the sequence is the one inserted form.
+- **Target-reader readability.** The *serialized* candidate must be readable
+  under the assumptions its ordinary consumer reads it with. For `dreyeck.asd`
+  that is what ASDF's `define-op` establishes: `WITH-STANDARD-IO-SYNTAX`,
+  `*PACKAGE*` bound to `ASDF-USER`, the outer readtable, and the file's own
+  directory as `*DEFAULT-PATHNAME-DEFAULTS*`. This cannot be checked in the
+  authoring image, where the authoring packages exist and a symbol qualified
+  with one of them would read; it is checked in a fresh process that has
+  nothing but ASDF.
+- **Persistence only after verification.** The insertion is written to a
+  candidate file beside the authority and installed by renaming it. A failure
+  of either check above removes the candidate and leaves the authority
+  byte-identical.
+
+The falsifier that produced the second and third properties: a structurally
+correct `DEFSYSTEM` was inserted whose lambda-list symbols had been interned in
+the authoring package, so they serialized as
+`DREYECK/WORKFLOW/AUTHORING::OPERATION`. Every structural postcondition held and
+`dreyeck.asd` became unreadable, which was only discovered after the authority
+had already been replaced.
+
 Known limitation of the acceptance check: the structural round-trip
 compares a form against itself re-read from its own printed
 representation, and SBCL's quasiquote objects are not conses, so an

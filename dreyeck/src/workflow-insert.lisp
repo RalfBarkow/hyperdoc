@@ -92,34 +92,115 @@ offered to it; a check that only ever sees correct input proves nothing."
       (error "The authority is no longer owned by its system."))
     after))
 
+;;; Target readability
+;;;
+;;; The first real use of this operation inserted a structurally correct
+;;; form and left dreyeck.asd unreadable. The proposed form had been built
+;;; in the authoring package, so one lambda-list symbol serialized as
+;;; DREYECK/WORKFLOW/AUTHORING::OPERATION, and ASDF's reader has no such
+;;; package. Every structural postcondition held; the authority was
+;;; broken anyway.
+;;;
+;;; Structural integrity and target readability are different properties.
+;;; The second one cannot be checked in this image, because the authoring
+;;; packages exist here and the symbol would read. It has to be checked
+;;; where the ordinary consumer reads: a fresh process with nothing but
+;;; ASDF, in the binding ASDF itself establishes for a system definition
+;;; (WITH-STANDARD-IO-SYNTAX, *PACKAGE* ASDF-USER, the file's directory as
+;;; *DEFAULT-PATHNAME-DEFAULTS*).
+
+(defun %target-reader-program (path)
+  "The whole form is read before REQUIRE runs, so it may not name a symbol
+from ASDF or UIOP; that is the same class of mistake this check exists to
+catch."
+  (format nil "(progn (require :asdf)
+ (with-standard-io-syntax
+  (let* ((file (pathname ~S))
+         (*package* (find-package :asdf-user))
+         (*default-pathname-defaults*
+          (make-pathname :name nil :type nil :version nil :defaults file)))
+    (with-open-file (stream file :external-format :utf-8)
+      (format t \"TARGET-READABLE ~~D~~%\"
+              (loop for form = (read stream nil :eof)
+                    until (eq form :eof) count t))))))"
+          (namestring path)))
+
+(defun read-in-target-reader-context (path)
+  "How many top-level forms PATH has when its ordinary consumer reads it.
+Signals if the consumer cannot read it at all."
+  (multiple-value-bind (output errors status)
+      (uiop:run-program (list "env" "-u" "HYPERDOC_WORKFLOW_EDITOR_SOURCE"
+                              "-u" "HYPERDOC_WORKFLOW_EDITOR_COMMIT"
+                              "-u" "HYPERDOC_RUNTIME_SOURCE_REGISTRY"
+                              "sbcl" "--noinform" "--no-userinit"
+                              "--non-interactive"
+                              "--eval" (%target-reader-program path))
+                        :output :string :error-output :string
+                        :ignore-error-status t)
+    (let ((marker (search "TARGET-READABLE " output)))
+      (unless (and (zerop status) marker)
+        (error "Candidate is not readable by its ordinary consumer:~%~A"
+               (if (plusp (length errors)) errors output)))
+      (values (parse-integer output :start (+ marker (length "TARGET-READABLE "))
+                                    :junk-allowed t)
+              output))))
+
+(defun %candidate-pathname (path)
+  "Beside the authority, so the install is a rename within one directory."
+  (make-pathname :type (format nil "~A-candidate-~D" (pathname-type path)
+                               (random 1000000))
+                 :defaults path))
+
+(defun insert-into-candidate (plan)
+  "Write, check and install: the authority is replaced only at the end.
+A candidate that fails any check is removed and the authority has never
+been written to."
+  (unless (eq :needs-insertion (insertion-plan-status plan))
+    (error "Authority changed since it was observed."))
+  (let* ((authority (insertion-plan-path plan))
+         (candidate (%candidate-pathname authority))
+         (installed nil))
+    (unwind-protect
+         (progn
+           (uiop:copy-file authority candidate)
+           (multiple-value-bind (before code) (wf:source-forms candidate)
+             (let* ((tlfs (hv:top-level-forms-of code))
+                    (anchors (remove-if-not
+                              (lambda (tlf)
+                                (equal (insertion-plan-anchor-key plan)
+                                       (wf:form-key (hv:s-exp tlf))))
+                              tlfs))
+                    (proposed (insertion-plan-proposed plan))
+                    (key (insertion-plan-key plan)))
+               (unless (= 1 (length anchors))
+                 (error "Anchor ~S is no longer unique."
+                        (insertion-plan-anchor-key plan)))
+               (unless (zerop (count key before :key #'wf:form-key :test #'equal))
+                 (error "~S appeared in the authority since it was observed."
+                        key))
+               (let ((index (position (first anchors) tlfs)))
+                 ;; The pinned editor does the writing, on the candidate.
+                 (hv::insert-toplevel-expression-before-in-file
+                  candidate code (first anchors) proposed)
+                 (let ((after (wf:source-forms candidate)))
+                   (verify-insertion plan index after)
+                   ;; And the consumer must be able to read what was written.
+                   (let ((counted (read-in-target-reader-context candidate)))
+                     (unless (eql counted (length after))
+                       (error "The consumer reads ~D forms where the authority ~
+has ~D." counted (length after))))
+                   (rename-file candidate authority)
+                   (setf installed t)
+                   after)))))
+      (unless installed
+        (ignore-errors (delete-file candidate))))))
+
 (defgeneric insert-owned-form (plan capability)
   (:documentation
-   "Insert one new top-level form before its anchor, and prove the rest
-of the authority survived unchanged."))
+   "Insert one new top-level form before its anchor, prove the rest of
+the authority survived unchanged, and prove the result is readable by the
+authority's ordinary consumer before it replaces the authority."))
 
 (defmethod insert-owned-form ((plan insertion-plan)
                               (capability authoring-environment))
-  (unless (eq :needs-insertion (insertion-plan-status plan))
-    (error "Authority changed since it was observed."))
-  (multiple-value-bind (before code)
-      (wf:source-forms (insertion-plan-path plan))
-    (let* ((tlfs (hv:top-level-forms-of code))
-           (anchors (remove-if-not
-                     (lambda (tlf)
-                       (equal (insertion-plan-anchor-key plan)
-                              (wf:form-key (hv:s-exp tlf))))
-                     tlfs))
-           (proposed (insertion-plan-proposed plan))
-           (key (insertion-plan-key plan)))
-      (unless (= 1 (length anchors))
-        (error "Anchor ~S is no longer unique." (insertion-plan-anchor-key plan)))
-      (unless (zerop (count key before :key #'wf:form-key :test #'equal))
-        (error "~S appeared in the authority since it was observed." key))
-      (let ((index (position (first anchors) tlfs)))
-        ;; The pinned editor does the writing and takes the anchor's own
-        ;; package; nothing here re-implements the insertion itself.
-        (hv::insert-toplevel-expression-before-in-file
-         (insertion-plan-path plan) code (first anchors) proposed)
-        ;; The postcondition is checked against what is on disk.
-        (verify-insertion plan index
-                          (wf:source-forms (insertion-plan-path plan)))))))
+  (insert-into-candidate plan))
