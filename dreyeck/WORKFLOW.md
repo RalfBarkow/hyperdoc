@@ -107,6 +107,15 @@ operation is not modelled yet — the name `MATERIALIZE-LISP-SOURCE` does not
 exist in this repository — and its inputs and identity guarantees would have to
 be designed and falsified before it could become a repository-wide requirement.
 
+Known limitation of the acceptance check: the structural round-trip
+compares a form against itself re-read from its own printed
+representation, and SBCL's quasiquote objects are not conses, so an
+otherwise valid top-level form containing a backquote is rejected. This
+is a conservative false negative in the check, not a property of the
+source. Reading or domain code must not be redesigned to avoid backquote
+in order to get past it; if the smallest natural implementation needs
+one, the check is what has to change first.
+
 The first executable form of the acceptance list above is
 `CHECK-CREATED-SOURCE-AUTHORITY` in
 `dreyeck/tests/gesture-binding-witness-smoke.lisp`, applied to the two files
