@@ -61,6 +61,58 @@ Fresh children restore the ordinary source registry, remove authoring variables 
 
 All new/changed repository Lisp and ASDF forms in this reconstruction were materialized, replaced or inserted through the committed writer, reparsed and compared structurally. Source formatting is its serialization output. Temporary authoring scripts construct Lisp data; no Lisp edit targets came from regex, line numbers or substring heuristics. Earlier textual TALA edits are historical baseline: they were already structurally readable and tested and were not rewritten. CST package-sensitive quoted fixture data was serialized with explicit package qualification and verified again.
 
+## Source authoring boundaries
+
+Creating a source authority and mutating one are two different authoring
+operations. The structural writer protects the identity and the neighbourhood
+of forms that are already persisted. A path that is not yet a source authority
+has no such neighbourhood to protect, so forcing it through the same mechanism
+would merge two different cases.
+
+The boundary is the existence of the file, not the convenience of the moment.
+
+```
+path absent   -> CREATE-LISP-SOURCE permitted
+path exists   -> whole-file rewrite prohibited; targeted structural change
+```
+
+`CREATE-LISP-SOURCE` may write one complete new Lisp source authority
+textually. Before the commit that persists it, it must satisfy all of:
+
+- the file parses with no reader recovery;
+- the intended package identity is preserved;
+- every top-level form round-trips structurally, compared package-aware and
+  by symbol identity rather than by `EQUAL`, which uninterned `#:` symbols
+  never satisfy;
+- every declared definition is individually identifiable and named exactly
+  once;
+- ASDF ownership and component membership are explicit where applicable;
+- a fresh load and the system's tests succeed.
+
+Afterwards the file is a persisted source authority, and a targeted change to
+one of its forms belongs to the structural mutation path wherever that contract
+applies. Whole-file creation is never a way to overwrite an authority that
+already exists.
+
+This is the contract as it stands, stated prospectively. It is not a claim that
+the writer was ever optional for mutation, and it does not retroactively bless
+the 110 hand-authored files in `dreyeck/src` as a model; they are baseline, on
+the same grounds as the earlier textual TALA edits recorded above.
+
+A stronger contract remains open and is deliberately not derived from this one:
+new Lisp and ASDF source could itself be produced from inspectable authored
+data through an explicit, deterministic creation operation, so that first
+creation is part of the reconstructible path rather than only its result. That
+operation is not modelled yet — the name `MATERIALIZE-LISP-SOURCE` does not
+exist in this repository — and its inputs and identity guarantees would have to
+be designed and falsified before it could become a repository-wide requirement.
+
+The first executable form of the acceptance list above is
+`CHECK-CREATED-SOURCE-AUTHORITY` in
+`dreyeck/tests/gesture-binding-witness-smoke.lisp`, applied to the two files
+that slice created. It lives beside them rather than in a shared place because
+it has one caller; a second caller is what would move it.
+
 ## Reading and layout
 
 Ten actual DEFEXAMPLEs are transcluded, not manually duplicated in HTML: plan, live operation, dependency, authoring boundary, Medley evidence, historical model, bootstrap, Workspace, layout comparison and persistence roundtrip. The plan Inspector view links to authority, prior/proposed forms, status and reconstruction expectation. The persistence button returns an explicit capability request in ordinary runtime; in authoring it exercises the same production PERSIST-IN seam against temporary fixture authorities, including failures.
