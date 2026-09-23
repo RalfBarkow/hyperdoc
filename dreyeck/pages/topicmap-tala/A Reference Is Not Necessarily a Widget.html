@@ -1,0 +1,56 @@
+<html>
+<head><title>A Reference Is Not Necessarily a Widget</title></head>
+<body>
+<in-package>dreyeck/inspector/topicmap/tala</in-package>
+<h1>A Reference Is Not Necessarily a Widget</h1>
+<p>A reading page renders into HTML and, while it renders, collects the objects
+it referred to. <code>VIEW-REFERENCES</code> returns those objects. It is
+tempting to read that list as “the widgets on this page”, because on a page made
+only of <code>&lt;source-of-function&gt;</code> transclusions the two coincide.
+They are not the same question.</p>
+
+<h2>What does a page actually keep?</h2>
+<source-of-function>reading-page-reference-classification</source-of-function>
+<p>Run it. Each entry names the reference, the runtime type of the object the
+page kept, and whether that object is a widget. Two kinds of non-widget appear
+on these very pages. A <code>&lt;a page=&gt;</code> link keeps the
+<code>HTML-PAGE</code> it points at, so a reader can open it. A
+<code>&lt;a expr=&gt;</code> link keeps the object its expression named — on
+<a page="From DEFVIEW to Generic Dispatch">From DEFVIEW to Generic Dispatch</a>
+that is a <code>STANDARD-GENERIC-FUNCTION</code>. Both are real references and
+neither can be rendered and run the way a transcluded source widget can.</p>
+<p>The list of non-widget kinds is open, which is the reason the predicate asks
+what an object <em>is</em> rather than listing what it might be. A fourth page in
+this book, <a page="Writing D2 by Hand">Writing D2 by Hand</a>, keeps a string
+and two conses and has no widgets at all.</p>
+
+<h2>The distinction, as code</h2>
+<source-of-function>page-widget-references</source-of-function>
+<source-of-function>classify-page-references</source-of-function>
+<p>One predicate: a reference is a widget when the object it kept is itself a
+view. Everything else on this page follows from that.</p>
+<p>The two widgets just above are worth one more look. Both render, neither
+offers a button, because a transcluded <code>DEFUN</code> is readable while only
+a <code>DEFEXAMPLE</code> is also runnable. “Widget” and “runnable” are a second
+pair of categories that happened to coincide on the earlier reading pages, where
+every transclusion was an example.</p>
+<p>The counts are not written
+down here on purpose — they change whenever a page gains a link, and a number
+copied into prose would then be wrong while still looking authoritative. Read
+them from the example.</p>
+
+<h2>What would show this is wrong</h2>
+<p>The reading test does not compare the widget count against a remembered
+integer. It counts the <code>&lt;source-of-function&gt;</code> elements in the
+page file itself and requires the widget count to equal it, and it requires every
+reference the predicate rejects to be something that is genuinely not a view.
+If the predicate ever admitted a page link or rejected a transclusion, the two
+independently obtained numbers would disagree and the test would fail.</p>
+<p>This is also why the distinction was worth a page rather than a fix. Three
+separate places had counted references as widgets, and each of them had pinned a
+number that happened to be right at the time. The number was never the claim.</p>
+
+<p>Back to <a page="Reading TALA as a Layout Layer">Reading TALA as a Layout
+Layer</a>.</p>
+</body>
+</html>

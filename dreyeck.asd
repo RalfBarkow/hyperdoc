@@ -1851,7 +1851,8 @@
                                 ((:module "dreyeck/src" :components
                                           ((:file "topicmap-tala-reading")
                                            (:file "topicmap-tala-authored")
-                                           (:file "topicmap-tala-dispatch-reading")))
+                                           (:file "topicmap-tala-dispatch-reading")
+                                           (:file "topicmap-tala-reference-reading")))
                                  (:module "dreyeck/pages/topicmap-tala"
                                           :components
                                           ((:static-file
@@ -1859,7 +1860,9 @@
                                            (:static-file
                                                          "Writing D2 by Hand.html")
                                            (:static-file
-                                                         "From DEFVIEW to Generic Dispatch.html")))))
+                                                         "From DEFVIEW to Generic Dispatch.html")
+                                           (:static-file
+                                                         "A Reference Is Not Necessarily a Widget.html")))))
 
 (asdf/parse-defsystem:defsystem "dreyeck/topicmap/tala/reading/tests"
   :description
@@ -1873,7 +1876,8 @@
   :components
   ((:file "dreyeck/tests/topicmap-tala-reading-smoke")
    (:file "dreyeck/tests/topicmap-tala-authored-smoke")
-   (:file "dreyeck/tests/topicmap-tala-dispatch-reading-smoke"))
+   (:file "dreyeck/tests/topicmap-tala-dispatch-reading-smoke")
+   (:file "dreyeck/tests/topicmap-tala-reference-reading-smoke"))
   :perform
   (asdf/lisp-action:test-op (operation component)
    (declare (ignore operation component))
@@ -1881,7 +1885,9 @@
                              :run-tala-integration-tests)
    (uiop/package:symbol-call :dreyeck/topicmap/tests :run-tala-reading-tests)
    (uiop/package:symbol-call :dreyeck/topicmap/tests :run-authored-d2-tests)
-   (uiop/package:symbol-call :dreyeck/topicmap/tests :run-dispatch-reading-tests)))
+   (uiop/package:symbol-call :dreyeck/topicmap/tests :run-dispatch-reading-tests)
+   (uiop/package:symbol-call :dreyeck/topicmap/tests
+                             :run-reference-reading-tests)))
 
 (defsystem "dreyeck/upstream-intake/temporal"
   :description "The observed page-loading history as a Topicmap, D2 and TALA projection"

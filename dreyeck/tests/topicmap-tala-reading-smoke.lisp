@@ -2,13 +2,9 @@
 (IN-PACKAGE :DREYECK/TOPICMAP/TESTS)
 
 (defun tala-reading-widget-references (view)
-  "The references of VIEW that are executable page widgets.
-A page link retains the page object and an EXPR link retains the object
-it names, so VIEW-REFERENCES answers a wider question than \"which
-widgets does this page have\". Both kinds were observed on the TALA
-reading pages; only a view is a widget."
-  (remove-if-not (lambda (ref) (typep (cdr ref) 'html-inspector-views:view))
-                 (html-inspector-views:view-references view)))
+  ;; The reading system owns this distinction and reads it on the page
+  ;; "A Reference Is Not Necessarily a Widget".
+  (dreyeck/inspector/topicmap/tala::page-widget-references view))
 
 (DEFUN RUN-TALA-READING-TESTS NIL
        (LET*
