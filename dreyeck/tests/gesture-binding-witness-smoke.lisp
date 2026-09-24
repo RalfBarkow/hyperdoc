@@ -43,6 +43,15 @@ and would report a difference the source does not have."
          (and (%structurally-equal (car a) (car b))
               (%structurally-equal (cdr a) (cdr b))))
         ((and (stringp a) (stringp b)) (string= a b))
+        ;; SBCL reads a backquote into comma objects, which are structures,
+        ;; and every read makes new ones. Slot by slot they are the same
+        ;; form; by EQL they never were, and every backquote was refused.
+        ((and (typep a 'structure-object) (typep b 'structure-object)
+              (eq (class-of a) (class-of b)))
+         (every (lambda (slot)
+                  (let ((name (sb-mop:slot-definition-name slot)))
+                    (%structurally-equal (slot-value a name) (slot-value b name))))
+                (sb-mop:class-slots (class-of a))))
         (t (eql a b))))
 
 (defun %round-trips-p (form package)
@@ -510,7 +519,22 @@ call was watched and did not happen."
       (assert (null (tm:topicmap-projection-associations-of cancelled))))
     t))
 
+(defun test-backquote-round-trips ()
+  "The documented false negative, closed where it arose: in the check.
+A backquoted form now survives its own round trip, and a difference inside
+a comma is still a difference."
+  (let ((form
+         (read-from-string
+          "(defun probe (path) `(open ,path :direction :output))"))
+        (other
+         (read-from-string
+          "(defun probe (path) `(open ,paths :direction :output))")))
+    (assert (%round-trips-p form (find-package :cl-user)))
+    (assert (not (%structurally-equal form other))))
+  t)
+
 (defun run-gesture-binding-witness-tests ()
+  (test-backquote-round-trips)
   (test-created-source-authority)
   (test-binding-identity)
   (test-operation-is-data)

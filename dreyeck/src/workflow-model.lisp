@@ -44,7 +44,7 @@
                                     CODE)))
 
 (DEFUN FORM-KEY (FORM)
-       "Only explicit top-level DEFUN, DEFPARAMETER, DEFINE-CONDITION, DEFPACKAGE and DEFSYSTEM ownership is supported. A package key carries the designator's string rather than the designator: #:FOO read twice yields two uninterned symbols that are never EQUAL, and EQUAL is what key comparison uses."
+       "Only explicit top-level DEFUN, DEFPARAMETER, DEFINE-CONDITION, DEFPACKAGE, DEFMETHOD and DEFSYSTEM ownership is supported. A package key carries the designator's string rather than the designator: #:FOO read twice yields two uninterned symbols that are never EQUAL, and EQUAL is what key comparison uses. A method is one function among several with its name, so its key carries its qualifiers and the specializers of its required parameters, which is what distinguishes it from its siblings."
        (WHEN (AND (CONSP FORM) (SYMBOLP (FIRST FORM)))
              (COND
                    ((EQ (FIRST FORM) (QUOTE DEFUN))
@@ -55,6 +55,17 @@
                     (LIST :CONDITION (SECOND FORM)))
                    ((EQ (FIRST FORM) (QUOTE DEFPACKAGE))
                     (LIST :PACKAGE (STRING (SECOND FORM))))
+                   ((EQ (FIRST FORM) (QUOTE DEFMETHOD))
+                    (LET* ((QUALIFIERS
+                            (LOOP FOR ITEM IN (CDDR FORM)
+                                  UNTIL (LISTP ITEM) COLLECT ITEM))
+                           (LAMBDA-LIST (NTH (LENGTH QUALIFIERS) (CDDR FORM))))
+                      (LIST :METHOD (SECOND FORM) QUALIFIERS
+                            (LOOP FOR PARAMETER IN LAMBDA-LIST
+                                  UNTIL (MEMBER PARAMETER LAMBDA-LIST-KEYWORDS)
+                                  COLLECT (IF (CONSP PARAMETER)
+                                              (SECOND PARAMETER)
+                                              T)))))
                    ((STRING= (SYMBOL-NAME (FIRST FORM)) "DEFSYSTEM")
                     (LIST :SYSTEM (STRING-DOWNCASE (STRING (SECOND FORM))))))))
 

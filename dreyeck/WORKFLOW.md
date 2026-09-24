@@ -91,7 +91,9 @@ the edit is made on a candidate file and installed by renaming.
 
 Which top-level forms can be addressed at all is `FORM-KEY`'s business, and
 it is deliberately a short list: `DEFUN`, `DEFPARAMETER`, `DEFINE-CONDITION`,
-`DEFPACKAGE`, `DEFSYSTEM`. A package key carries the designator's *string*, not
+`DEFPACKAGE`, `DEFMETHOD`, `DEFSYSTEM`. A method shares its name with its
+siblings, so its key carries its qualifiers and the specializers of its
+required parameters. A package key carries the designator's *string*, not
 the designator:
 
 ```
@@ -140,6 +142,44 @@ forms, compared in order with `FORM-EQUAL`, must be the same forms. Their
 offsets are not compared, because a replacement of a different length moves
 them legitimately. The candidate is written, verified as written, and only
 then installed, so a refusal leaves the authority byte-identical.
+
+A refused authoring operation leaves the authority as it found it. For the
+three targeted operations that is simple: the edit is made on a candidate
+beside the authority, the candidate is checked as written, and only then is it
+renamed into place. `PERSIST-IN` cannot be that simple, and was not safe
+until it was made so: it installed its write and then verified, and three
+measured failures -- a candidate that read back as a different program, a
+definition that failed its expectation, a system definition that stopped
+loading -- all signalled failure and left the changed file behind. Two of
+those were cases the test suite already ran, asserting only that they failed;
+a third test asserted that the failed write stayed on disk.
+
+Its order is now:
+
+```
+observe A
+edit a candidate, read it back, compare its forms with the intent
+    refused here -> PERSISTENCE-CANDIDATE-REJECTED, A untouched
+authority still A? then rename the candidate: B is installed
+fresh verification against the installed authority
+    passes -> B stays
+    fails, authority is still B -> A restored byte for byte
+                                   PERSISTENCE-RESTORED
+    fails, authority is not B   -> left as found
+                                   PERSISTENCE-NOT-RESTORED
+```
+
+Fresh verification stays after installation on purpose. What it checks is
+what an ordinary consumer loads, and ASDF resolves a component to its
+installed pathname; verifying a copied tree would verify a copy. Everything
+that depends only on the candidate's bytes is decided before installation.
+
+The claim is narrow. This restores after `PERSIST-IN`'s own failures under
+the repository's normal single-writer use. There is no lock, and comparing the
+authority with B before the restoring rename is not a compare-and-swap: a
+writer landing between the two could still be overwritten. What is guaranteed
+is weaker and checkable: a change observed before restoring is never
+overwritten, and is reported with both the installed and the current source.
 
 Creating a source authority and mutating one are two different authoring
 operations. The structural writer protects the identity and the neighbourhood
@@ -215,14 +255,16 @@ the authoring package, so they serialized as
 `dreyeck.asd` became unreadable, which was only discovered after the authority
 had already been replaced.
 
-Known limitation of the acceptance check: the structural round-trip
-compares a form against itself re-read from its own printed
-representation, and SBCL's quasiquote objects are not conses, so an
-otherwise valid top-level form containing a backquote is rejected. This
-is a conservative false negative in the check, not a property of the
-source. Reading or domain code must not be redesigned to avoid backquote
-in order to get past it; if the smallest natural implementation needs
-one, the check is what has to change first.
+The acceptance check's structural round-trip compares a form against itself
+re-read from its own printed representation. SBCL reads a backquote into comma
+objects, which are structures, and every read makes new ones, so the check
+once refused every form containing a backquote -- a false negative in the
+check, not a property of the source. It was recorded here with the rule that
+code must not be bent around it, and the first test whose natural shape needed
+a backquote (embedding a path into an expectation that a second process
+evaluates) is what closed it: instances of one structure type are now compared
+slot by slot. A difference inside a comma is still a difference, and a test
+says so.
 
 The first executable form of the acceptance list above is
 `CHECK-CREATED-SOURCE-AUTHORITY` in

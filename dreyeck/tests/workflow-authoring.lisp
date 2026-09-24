@@ -54,42 +54,16 @@
                                           (EQ :UNVERIFIED
                                               (WF:CHANGE-RECONSTRUCTION-STATUS
                                                                                B))))
-                             (PROGN
-                                    (ASSERT
-                                            (HANDLER-CASE
-                                                          (PROGN
-                                                                 (WF:PERSIST-IN
-                                                                                (PLAN
-                                                                                      45)
-                                                                                ENVIRONMENT
-                                                                                :CHANGE
-                                                                                B)
-                                                                 NIL)
-                                                          (ERROR (CONDITION)
-                                                                 (SEARCH
-                                                                         "Fresh reconstruction exited"
-                                                                         (PRINC-TO-STRING
-                                                                                          CONDITION)))))
-                                    (ASSERT
-                                            (DREYECK/WORKFLOW:FORM-EQUAL
-                                                                         (LIST
-                                                                               (QUOTE
-                                                                                      DEFUN)
-                                                                               NAME
-                                                                               NIL
-                                                                               45)
-                                                                         (FIND
-                                                                               (LIST
-                                                                                     :DEFINITION
-                                                                                     NAME)
-                                                                               (DREYECK/WORKFLOW:SOURCE-FORMS
-                                                                                                              SOURCE)
-                                                                               :KEY
-                                                                               (FUNCTION
-                                                                                         DREYECK/WORKFLOW:FORM-KEY)
-                                                                               :TEST
-                                                                               (FUNCTION
-                                                                                         EQUAL)))))
+                             (LET ((BEFORE-FAILED-PROOF (UIOP/STREAM:READ-FILE-STRING SOURCE)))
+                    (ASSERT
+                     (HANDLER-CASE
+                      (PROGN (WF:PERSIST-IN (PLAN 45) ENVIRONMENT :CHANGE B) NIL)
+                      (ERROR (CONDITION)
+                       (SEARCH "Fresh reconstruction exited"
+                               (PRINC-TO-STRING CONDITION)))))
+                    (ASSERT
+                     (STRING= BEFORE-FAILED-PROOF
+                              (UIOP/STREAM:READ-FILE-STRING SOURCE))))
                              (ASSERT
                                      (EQUAL (LIST A B)
                                             (WF:OUTSTANDING-CHANGES LOG)))
@@ -157,6 +131,16 @@
                                          :PROOF
                                          (WF:CHANGE-RECONSTRUCTION-PROOF
                                                                          B))))))))
+
+(DEFUN MUST-FAIL-LEAVING (FUNCTION PATH)
+  "Refused, and the authority is exactly as it was. The old tests stopped
+at the first half, and passed while PERSIST-IN left its write behind."
+  (LET ((BEFORE (UIOP/STREAM:READ-FILE-STRING PATH :EXTERNAL-FORMAT :UTF-8)))
+    (MUST-FAIL FUNCTION)
+    (ASSERT
+     (STRING= BEFORE
+              (UIOP/STREAM:READ-FILE-STRING PATH :EXTERNAL-FORMAT :UTF-8)))
+    T))
 
 (COMMON-LISP:DEFUN DREYECK/WORKFLOW/TESTS:RUN-AUTHORING-TESTS NIL
                    (COMMON-LISP:LET*
@@ -323,26 +307,28 @@
                                                                                                                                                                                                  (COMMON-LISP:GETF
                                                                                                                                                                                                                    PARAMETER-RESULT
                                                                                                                                                                                                                    :STATUS))))))
-                                                                                                      (DREYECK/WORKFLOW/TESTS::MUST-FAIL
-                                                                                                                                         (COMMON-LISP:LAMBDA
-                                                                                                                                                             NIL
-                                                                                                                                                             (DREYECK/WORKFLOW:PERSIST-IN
-                                                                                                                                                                                          (DREYECK/WORKFLOW/TESTS::PLAN
-                                                                                                                                                                                                                        44
-                                                                                                                                                                                                                        999)
-                                                                                                                                                                                          DREYECK/WORKFLOW/TESTS::ENVIRONMENT)))
+                                                                                                      (MUST-FAIL-LEAVING
+                                                                                          (LAMBDA
+                                                                                                  NIL
+                                                                                                  (DREYECK/WORKFLOW:PERSIST-IN
+                                                                                                                               (DREYECK/WORKFLOW/TESTS::PLAN
+                                                                                                                                                             44
+                                                                                                                                                             999)
+                                                                                                                               DREYECK/WORKFLOW/TESTS::ENVIRONMENT))
+                                                                                          DREYECK/WORKFLOW/TESTS::SOURCE)
                                                                                                       (COMMON-LISP:LET
                                                                                                                        ((DEPENDENCY
                                                                                                                                     (DREYECK/WORKFLOW:PLAN-DEPENDENCY
                                                                                                                                                                       DREYECK/WORKFLOW/TESTS::SYSTEM
                                                                                                                                                                       "workflow-deliberately-missing-dependency"
                                                                                                                                                                       COMMON-LISP:T)))
-                                                                                                                       (DREYECK/WORKFLOW/TESTS::MUST-FAIL
-                                                                                                                                                          (COMMON-LISP:LAMBDA
-                                                                                                                                                                              NIL
-                                                                                                                                                                              (DREYECK/WORKFLOW:PERSIST-IN
-                                                                                                                                                                                                           DEPENDENCY
-                                                                                                                                                                                                           DREYECK/WORKFLOW/TESTS::ENVIRONMENT)))))
+                                                                                                                       (MUST-FAIL-LEAVING
+                                                                                                (LAMBDA
+                                                                                                        NIL
+                                                                                                        (DREYECK/WORKFLOW:PERSIST-IN
+                                                                                                                                     DEPENDENCY
+                                                                                                                                     DREYECK/WORKFLOW/TESTS::ENVIRONMENT))
+                                                                                                ASD)))
                                                                                     (COMMON-LISP:FORMAT
                                                                                                         COMMON-LISP:T
                                                                                                         "Workflow authoring tests passed: actual writer, fresh ordinary reconstruction, stale source, wrong behavior, missing dependency.~%")

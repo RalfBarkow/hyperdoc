@@ -335,6 +335,34 @@ this operation's business."
 ")
   t)
 
+(defun test-a-method-key-names-one-method ()
+  "A method shares its name with its siblings, so the key carries what
+tells them apart: qualifiers, and the specializers of the required
+parameters, with T for an unspecialized one. &KEY and what follows do not
+take part in dispatch and do not take part in the key."
+  (let ((plain
+         (wf:form-key
+          (read-from-string "(defmethod cl-user::m ((x string) y &key z) x)")))
+        (sibling
+         (wf:form-key
+          (read-from-string "(defmethod cl-user::m ((x integer) y) x)")))
+        (around
+         (wf:form-key
+          (read-from-string
+           "(defmethod cl-user::m :around ((x string) y) x)")))
+        (again
+         (wf:form-key
+          (read-from-string "(defmethod cl-user::m ((x string) y &key z) x)"))))
+    (assert
+     (equal (list :method (intern "M" :cl-user) nil (list 'string t)) plain))
+    (assert (equal plain again))
+    (assert (not (equal plain sibling)))
+    (assert
+     (equal (list :method (intern "M" :cl-user) '(:around) (list 'string t))
+            around))
+    (assert (not (equal plain around))))
+  t)
+
 (defun run-cst-replace-tests ()
   (let ((environment (a:make-authoring-environment)))
     (test-targeted-replacement-preserves-everything-else environment)
@@ -346,11 +374,13 @@ this operation's business."
     (test-a-package-key-survives-reparsing)
     (test-a-package-key-does-not-fold-case)
     (test-edits-an-export-clause-without-reserializing environment)
-    (test-refuses-zero-and-ambiguous-package-keys))
+    (test-refuses-zero-and-ambiguous-package-keys)
+    (test-a-method-key-names-one-method))
   (format t "~&CST-SOURCE-REPLACEMENT-PASS: one token changed and every other ~
 byte kept; duplicate, missing and malformed targets refused with the ~
 authority untouched; comment, spelling, whitespace and neighbour damage all ~
-fail verification; and a package form is addressed by its designator's ~
+fail verification; a package form is addressed by its designator's ~
 string, so one export clause can be edited while the package's reason, ~
-:USE and nicknames are not.~%")
+:USE and nicknames are not; and a method is addressed by its qualifiers ~
+and specializers, apart from its siblings.~%")
   t)

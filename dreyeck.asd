@@ -1915,7 +1915,8 @@
                                 ((:FILE "dreyeck/tests/workflow-authoring")
                                  (:FILE "dreyeck/tests/workflow-insert")
                                  (:FILE "dreyeck/tests/workflow-cst-replace")
-                                 (:FILE "dreyeck/tests/workflow-source-range"))
+                                 (:FILE "dreyeck/tests/workflow-source-range")
+                                 (:FILE "dreyeck/tests/workflow-persist"))
                                 :PERFORM
                                 (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
                                                           (DECLARE
@@ -1933,7 +1934,10 @@
                                                                                     :RUN-CST-REPLACE-TESTS)
                                                           (UIOP/PACKAGE:SYMBOL-CALL
                                                                                     :DREYECK/WORKFLOW/SOURCE-RANGE/TESTS
-                                                                                    :RUN-SOURCE-RANGE-TESTS)))
+                                                                                    :RUN-SOURCE-RANGE-TESTS)
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/WORKFLOW/PERSIST/TESTS
+                                                                                    :RUN-PERSIST-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading/tests"
   :DEPENDS-ON

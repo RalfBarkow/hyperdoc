@@ -140,92 +140,181 @@
       (SETF (SLOT-VALUE CHANGE 'WF::RECONSTRUCTION-PROOF) PROOF)
       PROOF)))
 
+(DEFINE-CONDITION PERSISTENCE-FAILED
+    (ERROR)
+    ((PATH :INITARG :PATH :READER PERSISTENCE-FAILED-PATH)
+     (CAUSE :INITARG :CAUSE :READER PERSISTENCE-FAILED-CAUSE))
+  (:REPORT
+   (LAMBDA (CONDITION STREAM)
+     (FORMAT STREAM "Persisting ~A failed: ~A"
+             (PERSISTENCE-FAILED-PATH CONDITION)
+             (PERSISTENCE-FAILED-CAUSE CONDITION))))
+  (:DOCUMENTATION "A PERSIST-IN that did not persist. The subclass says
+what became of the authority, which is the part a caller has to know."))
+
+(DEFINE-CONDITION PERSISTENCE-CANDIDATE-REJECTED
+    (PERSISTENCE-FAILED)
+    NIL
+  (:REPORT
+   (LAMBDA (CONDITION STREAM)
+     (FORMAT STREAM "The candidate for ~A was rejected before ~
+installation; the authority was not changed: ~A"
+             (PERSISTENCE-FAILED-PATH CONDITION)
+             (PERSISTENCE-FAILED-CAUSE CONDITION))))
+  (:DOCUMENTATION "Refused while the authority still held what was observed."))
+
+(DEFINE-CONDITION PERSISTENCE-VERIFICATION-FAILED
+    (PERSISTENCE-FAILED)
+    ((OBSERVED :INITARG :OBSERVED :READER PERSISTENCE-OBSERVED-SOURCE)
+     (INSTALLED :INITARG :INSTALLED :READER PERSISTENCE-INSTALLED-SOURCE))
+  (:DOCUMENTATION "Installed, then refused by fresh verification. Both
+states are kept exactly, so what happened can be read rather than
+reconstructed."))
+
+(DEFINE-CONDITION PERSISTENCE-RESTORED
+    (PERSISTENCE-VERIFICATION-FAILED)
+    NIL
+  (:REPORT
+   (LAMBDA (CONDITION STREAM)
+     (FORMAT STREAM "The source installed at ~A failed fresh ~
+verification, and the observed source was restored byte for byte: ~A"
+             (PERSISTENCE-FAILED-PATH CONDITION)
+             (PERSISTENCE-FAILED-CAUSE CONDITION))))
+  (:DOCUMENTATION "Fresh verification failed and the authority is again
+exactly what was observed before PERSIST-IN began."))
+
+(DEFINE-CONDITION PERSISTENCE-NOT-RESTORED
+    (PERSISTENCE-VERIFICATION-FAILED)
+    ((CURRENT :INITARG :CURRENT :READER PERSISTENCE-CURRENT-SOURCE))
+  (:REPORT
+   (LAMBDA (CONDITION STREAM)
+     (FORMAT STREAM "The source installed at ~A failed fresh ~
+verification, but the authority no longer holds what was installed. It was ~
+deliberately not restored, so whatever changed it is not overwritten: ~A"
+             (PERSISTENCE-FAILED-PATH CONDITION)
+             (PERSISTENCE-FAILED-CAUSE CONDITION))))
+  (:DOCUMENTATION "Fresh verification failed and restoring was not safe:
+something other than PERSIST-IN changed the authority after installation.
+CURRENT is what was found; nothing was written over it."))
+
+(DEFUN %STAGE-STRUCTURAL-EDIT (PLAN)
+  "Apply PLAN to a sibling candidate and check the candidate as written.
+Returns the candidate pathname and its source. Everything that depends only
+on the candidate's bytes is decided here, while the authority is untouched;
+a refusal is PERSISTENCE-CANDIDATE-REJECTED and leaves no candidate behind."
+  (LET* ((AUTHORITY (WF:PLAN-PATH PLAN))
+         (CANDIDATE (%CANDIDATE-PATHNAME AUTHORITY))
+         (STAGED NIL))
+    (UNWIND-PROTECT
+        (HANDLER-CASE
+         (PROGN
+          (UIOP/STREAM:COPY-FILE AUTHORITY CANDIDATE)
+          (MULTIPLE-VALUE-BIND (BEFORE CODE)
+              (WF:SOURCE-FORMS CANDIDATE)
+            (LET* ((TLFS (HV:TOP-LEVEL-FORMS-OF CODE))
+                   (MATCHES
+                    (REMOVE-IF-NOT
+                     (LAMBDA (TLF)
+                       (EQUAL (WF:PLAN-KEY PLAN) (WF:FORM-KEY (HV:S-EXP TLF))))
+                     TLFS)))
+              (UNLESS (= 1 (LENGTH MATCHES))
+                (ERROR "Structural target is no longer unique."))
+              (LET ((INDEX (POSITION (FIRST MATCHES) TLFS)))
+                (UNLESS
+                    (WF:FORM-EQUAL (WF:PLAN-BEFORE PLAN) (NTH INDEX BEFORE))
+                  (ERROR "Structural authority changed."))
+                (HV::REPLACE-CST-EXPRESSION-IN-FILE CANDIDATE CODE
+                                                    (HV:CST-OF (FIRST MATCHES))
+                                                    (WF:PLAN-PROPOSED PLAN))
+                (LET ((AFTER (WF:SOURCE-FORMS CANDIDATE)))
+                  (SETF (NTH INDEX BEFORE) (WF:PLAN-PROPOSED PLAN))
+                  (UNLESS (= (LENGTH BEFORE) (LENGTH AFTER))
+                    (ERROR "Unexpected top-level forms."))
+                  (UNLESS (EVERY #'WF:FORM-EQUAL BEFORE AFTER)
+                    (ERROR "Structural read-back differs from intended file."))
+                  (SETF STAGED T)
+                  (VALUES CANDIDATE
+                          (UIOP/STREAM:READ-FILE-STRING CANDIDATE
+                                                        :EXTERNAL-FORMAT
+                                                        :UTF-8)))))))
+         (ERROR (CONDITION)
+                (ERROR 'PERSISTENCE-CANDIDATE-REJECTED :PATH AUTHORITY :CAUSE
+                       CONDITION)))
+      (UNLESS STAGED (IGNORE-ERRORS (DELETE-FILE CANDIDATE))))))
+
+(DEFUN %VERIFY-RESTORED (EXPECTED ACTUAL)
+  "Byte for byte. A restoration that merely reads the same has put back a
+different source, and would pass any structural comparison."
+  (UNLESS (STRING= EXPECTED ACTUAL)
+    (ERROR "The restored authority differs from the observed source."))
+  ACTUAL)
+
+(DEFUN %RESTORE-OBSERVED-SOURCE (AUTHORITY OBSERVED INSTALLED CAUSE)
+  "Put OBSERVED back, but only over exactly INSTALLED.
+If the authority holds anything else, somebody else wrote it, and it is
+left as found. The comparison and the rename are two steps, not one: with
+no lock this is safe against PERSIST-IN's own failure, not against a
+concurrent writer that lands between them."
+  (LET ((CURRENT
+         (UIOP/STREAM:READ-FILE-STRING AUTHORITY :EXTERNAL-FORMAT :UTF-8)))
+    (UNLESS (STRING= CURRENT INSTALLED)
+      (ERROR 'PERSISTENCE-NOT-RESTORED :PATH AUTHORITY :CAUSE CAUSE :OBSERVED
+             OBSERVED :INSTALLED INSTALLED :CURRENT CURRENT))
+    (LET ((CANDIDATE (%CANDIDATE-PATHNAME AUTHORITY)) (PLACED NIL))
+      (UNWIND-PROTECT
+          (PROGN
+           (UIOP/STREAM:WITH-OUTPUT-FILE (STREAM CANDIDATE :EXTERNAL-FORMAT
+                                          :UTF-8)
+             (WRITE-STRING OBSERVED STREAM))
+           (%VERIFY-RESTORED OBSERVED
+            (UIOP/STREAM:READ-FILE-STRING CANDIDATE :EXTERNAL-FORMAT :UTF-8))
+           (RENAME-FILE CANDIDATE AUTHORITY)
+           (SETF PLACED T)
+           (%VERIFY-RESTORED OBSERVED
+            (UIOP/STREAM:READ-FILE-STRING AUTHORITY :EXTERNAL-FORMAT :UTF-8)))
+        (UNLESS PLACED (IGNORE-ERRORS (DELETE-FILE CANDIDATE)))))
+    (ERROR 'PERSISTENCE-RESTORED :PATH AUTHORITY :CAUSE CAUSE :OBSERVED
+           OBSERVED :INSTALLED INSTALLED)))
+
 (DEFMETHOD WF:PERSIST-IN
-           ((PLAN WF:PERSISTENCE-PLAN)
-            (ENVIRONMENT AUTHORING-ENVIRONMENT)
-            &KEY
-            CHANGE)
-           "The one execution seam used by authoring tests and reading examples."
-           (WHEN CHANGE (CHECK-CHANGE-PLAN CHANGE PLAN))
-           (UNLESS (EQ :NEEDS-PERSISTENCE (WF:PLAN-STATUS PLAN))
-                   (ERROR "Plan must be current and changed, not ~S."
-                          (WF:PLAN-STATUS PLAN)))
-           (MULTIPLE-VALUE-BIND (BEFORE CODE)
-                                (WF:SOURCE-FORMS (WF:PLAN-PATH PLAN))
-                                (LET*
-                                      ((TLFS (HV:TOP-LEVEL-FORMS-OF CODE))
-                                       (MATCHES
-                                                (REMOVE-IF-NOT
-                                                               (LAMBDA (TLF)
-                                                                       (EQUAL
-                                                                              (WF:PLAN-KEY
-                                                                                           PLAN)
-                                                                              (WF:FORM-KEY
-                                                                                           (HV:S-EXP
-                                                                                                     TLF))))
-                                                               TLFS)))
-                                      (UNLESS (= 1 (LENGTH MATCHES))
-                                              (ERROR
-                                                     "Structural target is no longer unique."))
-                                      (LET*
-                                            ((TARGET (FIRST MATCHES))
-                                             (INDEX (POSITION TARGET TLFS)))
-                                            (UNLESS
-                                                    (WF:FORM-EQUAL
-                                                                   (WF:PLAN-BEFORE
-                                                                                   PLAN)
-                                                                   (NTH INDEX
-                                                                        BEFORE))
-                                                    (ERROR
-                                                           "Structural authority changed."))
-                                            (HV::REPLACE-CST-EXPRESSION-IN-FILE
-                                                                                (WF:PLAN-PATH
-                                                                                              PLAN)
-                                                                                CODE
-                                                                                (HV:CST-OF
-                                                                                           TARGET)
-                                                                                (WF:PLAN-PROPOSED
-                                                                                                  PLAN))
-                                            (LET
-                                                 ((AFTER
-                                                         (WF:SOURCE-FORMS
-                                                                          (WF:PLAN-PATH
-                                                                                        PLAN))))
-                                                 (SETF (NTH INDEX BEFORE)
-                                                       (WF:PLAN-PROPOSED PLAN))
-                                                 (UNLESS
-                                                         (EVERY
-                                                                (FUNCTION
-                                                                          WF:FORM-EQUAL)
-                                                                BEFORE AFTER)
-                                                         (ERROR
-                                                                "Structural read-back differs from intended file."))
-                                                 (UNLESS
-                                                         (= (LENGTH BEFORE)
-                                                            (LENGTH AFTER))
-                                                         (ERROR
-                                                                "Unexpected top-level forms.")))
-                                            (HANDLER-CASE
-                                                          (IF CHANGE
-                                                              (WF:VERIFY-CHANGE
-                                                                                CHANGE
-                                                                                PLAN
-                                                                                ENVIRONMENT)
-                                                              (LET
-                                                                   ((PROOF
-                                                                           (VERIFY-FRESH
-                                                                                         PLAN
-                                                                                         ENVIRONMENT)))
-                                                                   (LIST
-                                                                         :STATUS
-                                                                         :VERIFIED
-                                                                         :PLAN
-                                                                         PLAN
-                                                                         :FRESH-PROOF
-                                                                         PROOF
-                                                                         :WRITER-COMMIT
-                                                                         "4b0607d93b193e21bd2ca5dc0d7e47c062ac8112")))
-                                                          (ERROR (CONDITION)
-                                                                 (ERROR
-                                                                        "Source was written and reparsed, but fresh reconstruction failed: ~A"
-                                                                        CONDITION)))))))
+           ((PLAN WF:PERSISTENCE-PLAN) (ENVIRONMENT AUTHORING-ENVIRONMENT)
+            &KEY CHANGE)
+  "The one execution seam used by authoring tests and reading examples.
+The edit is made on a candidate beside the authority, and the candidate is
+installed only if it reads back as intended. Fresh verification then runs
+against the installed authority, because what it checks is what an
+ordinary consumer loads from there. If it fails, the observed source is put
+back byte for byte, unless the authority no longer holds what was
+installed; then it is left as found and the refusal says so. This restores
+after PERSIST-IN's own failures under single-writer use. There is no lock,
+and the comparison before the restoring rename is not a compare-and-swap."
+  (WHEN CHANGE (CHECK-CHANGE-PLAN CHANGE PLAN))
+  (UNLESS (EQ :NEEDS-PERSISTENCE (WF:PLAN-STATUS PLAN))
+    (ERROR "Plan must be current and changed, not ~S." (WF:PLAN-STATUS PLAN)))
+  (LET* ((AUTHORITY (WF:PLAN-PATH PLAN))
+         (OBSERVED
+          (UIOP/STREAM:READ-FILE-STRING AUTHORITY :EXTERNAL-FORMAT :UTF-8)))
+    (MULTIPLE-VALUE-BIND (CANDIDATE INSTALLED)
+        (%STAGE-STRUCTURAL-EDIT PLAN)
+      (LET ((PLACED NIL))
+        (UNWIND-PROTECT
+            (PROGN
+             (UNLESS
+                 (STRING= OBSERVED
+                          (UIOP/STREAM:READ-FILE-STRING AUTHORITY
+                                                        :EXTERNAL-FORMAT
+                                                        :UTF-8))
+               (ERROR 'PERSISTENCE-CANDIDATE-REJECTED :PATH AUTHORITY :CAUSE
+                      "The authority changed while its candidate was checked."))
+             (RENAME-FILE CANDIDATE AUTHORITY)
+             (SETF PLACED T))
+          (UNLESS PLACED (IGNORE-ERRORS (DELETE-FILE CANDIDATE)))))
+      (HANDLER-CASE
+       (IF CHANGE
+           (WF:VERIFY-CHANGE CHANGE PLAN ENVIRONMENT)
+           (LIST :STATUS :VERIFIED :PLAN PLAN :FRESH-PROOF
+                 (VERIFY-FRESH PLAN ENVIRONMENT) :WRITER-COMMIT
+                 "4b0607d93b193e21bd2ca5dc0d7e47c062ac8112"))
+       (ERROR (CONDITION)
+              (%RESTORE-OBSERVED-SOURCE AUTHORITY OBSERVED INSTALLED
+                                        CONDITION))))))
