@@ -63,6 +63,32 @@ All new/changed repository Lisp and ASDF forms in this reconstruction were mater
 
 ## Source authoring boundaries
 
+Persisted Lisp source has two structures, and an operation may protect one
+without protecting the other:
+
+```
+reader structure   the S-expressions a form denotes
+concrete syntax    tokens, whitespace, comments, spelling
+```
+
+`PLAN-CHANGE` binds itself to a whole top-level form and writes a serialization
+of the proposed data, so it preserves the first and destroys the second inside
+its target. Measured on a fixture, it turns a four-line `DEFUN` carrying two
+comments into `(defun probed nil (let ((x 8)) x))`. That is correct where
+reserializing the whole target form is the intent, and it is the wrong tool for
+a change inside a form whose comments record why the code is as it is. It is
+not deprecated; it is not general.
+
+`PLAN-CST-SOURCE-REPLACEMENT` / `REPLACE-OWNED-CST-SOURCE` add the missing
+case: one subexpression of one owned form, addressed by the value it currently
+has, with the requirement that it occur exactly once. The replacement is source
+text, because that is what the pinned editor's `REPLACE-CST-SOURCE-IN-FILE`
+accepts; it is not trusted, but read back and compared with the value the
+caller said it would have. The decisive postcondition is byte equality outside
+the targeted range, which is one comparison covering comments, whitespace and
+token spelling together. A failure leaves the authority byte-identical, because
+the edit is made on a candidate file and installed by renaming.
+
 Creating a source authority and mutating one are two different authoring
 operations. The structural writer protects the identity and the neighbourhood
 of forms that are already persisted. A path that is not yet a source authority
