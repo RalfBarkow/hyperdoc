@@ -1289,11 +1289,13 @@
   T
   :DEPENDS-ON
   ("dreyeck/hyperdoc" "dreyeck/gesture-binding-witness" "dreyeck/state-machine"
-   "hyperdoc/explorer")
+   "dreyeck/gesture/transport" "hyperdoc/explorer")
   :COMPONENTS
-  ((:MODULE "dreyeck/src" :COMPONENTS ((:FILE "gesture-binding-reading")))
+  ((:MODULE "dreyeck/src" :COMPONENTS ((:FILE "gesture-binding-reading")
+                                        (:FILE "gesture-ordering-reading")))
    (:MODULE "dreyeck/pages/gesture" :COMPONENTS
-    ((:STATIC-FILE "Falsifying a Gesture-Binding Witness.html")))))
+    ((:STATIC-FILE "Falsifying a Gesture-Binding Witness.html")
+     (:STATIC-FILE "When Does a Mark Become a Menu.html")))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/reading/tests" :DESCRIPTION
                                 "Falsifiers for the derived reading of a gesture session"

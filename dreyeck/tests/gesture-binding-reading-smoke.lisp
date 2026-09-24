@@ -237,13 +237,103 @@
             (length references) (length widgets) (length executable))
     t))
 
+(defun %executable-value (reference)
+  "The one thunk behind an executable widget, evaluated."
+  (let ((thunks
+         (remove-if-not (lambda (inner) (typep (cdr inner) 'views:thunk))
+                        (views:view-references (cdr reference)))))
+    (assert (= 1 (length thunks)))
+    (views:eval-thunk (cdar thunks))))
+
+(defun test-ordering-page ()
+  "The ordering page's argument, checked against what its widgets return.
+The page claims that one geometry yields two Bindings and one Operation,
+and that two sequencing authorities cannot be fused. Both claims are read
+back from the thunks the page actually runs, not from its prose."
+  (let* ((book
+          (hyperbook:find-hyperbook "dreyeck/gesture/reading" :signal-error?
+                                    t))
+         (page
+          (hyperbook:find-page book "When Does a Mark Become a Menu?"
+                               :signal-error? t))
+         (view
+          (find "Content" (views:all-views page) :key #'views:view-title :test
+                #'string=))
+         (html (views:view-html view))
+         (references (views:view-references view))
+         (widgets
+          (remove-if-not
+           (lambda (reference) (typep (cdr reference) 'views:view))
+           references))
+         (executable
+          (remove-if-not
+           (lambda (reference)
+             (views:view-html (cdr reference))
+             (find-if (lambda (inner) (typep (cdr inner) 'views:thunk))
+                      (views:view-references (cdr reference))))
+           widgets)))
+    (assert (= (length references) (length widgets)))
+    (assert (= 5 (length widgets)))
+    (assert (= 3 (length executable)))
+    (assert (search "approximately one third of a second" html))
+    (assert (search "500 ms" html))
+    (assert (search "does not describe a reveal-deadline event" html))
+    (let* ((results (mapcar #'%executable-value executable))
+           (races
+            (remove-if-not (lambda (result) (getf result :operation)) results))
+           (merged (find-if (lambda (result) (getf result :offered)) results)))
+      (assert (= 2 (length races)))
+      (assert merged)
+      (assert
+       (every
+        (lambda (result) (equal '(1 3 2) (getf result :callback-arrival)))
+        races))
+      (assert
+       (every
+        (lambda (result) (equal '(1 2 3) (getf result :consumer-delivery)))
+        races))
+      (assert
+       (every (lambda (result) (getf result :operation-is-the-shared-identity))
+              races))
+      (assert
+       (= 1
+          (length
+           (remove-duplicates
+            (mapcar (lambda (result) (getf result :operation)) races) :test
+            #'string=))))
+      (assert
+       (= 2
+          (length
+           (remove-duplicates
+            (mapcar (lambda (result) (getf result :binding)) races) :test
+            #'string=))))
+      (assert
+       (equal '(:marking :menu-visible)
+              (sort (mapcar (lambda (result) (getf result :mode)) races)
+                    #'string< :key #'symbol-name)))
+      (assert
+       (= 2
+          (count :refused (getf merged :offered) :key
+                 (lambda (entry) (getf entry :outcome)))))
+      (assert (equal '(1 2) (getf merged :consumer-delivery)))
+      (assert
+       (equal '(:pointer-down :pointer-move)
+              (getf merged :surviving-samples))))
+    (format t "~&GESTURE-ORDERING-PAGE: ~D references, ~D renderable widgets, ~
+~D executable.~%"
+            (length references) (length widgets) (length executable))
+    t))
+
 (defun run-gesture-reading-tests ()
   (test-ordered-grouping)
   (test-disabled-sector-is-read-as-an-observation)
   (test-observation-and-transition-are-not-confused)
   (test-controls-detect-a-damaged-reading)
   (test-page)
+  (test-ordering-page)
   (format t "~&GESTURE-READING-PASS: input-ordered grouping, two transitions ~
 from one sample, disabled sector observed not selected, obsolete timer ~
-without state change, four damaged readings refused.~%")
+without state change, four damaged readings refused, and one geometry ~
+read as two Bindings over one Operation while two sequencing authorities ~
+are kept apart.~%")
   t)
