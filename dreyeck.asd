@@ -1244,6 +1244,40 @@
                     :RUN-GESTURE-BINDING-WITNESS-TESTS)
      (ERROR "Gesture/Binding witness tests failed."))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/transport"
+  :DESCRIPTION
+  "Ordered pointer transport feeding the Gesture witness"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/gesture-binding-witness" "bordeaux-threads" "uiop")
+  :COMPONENTS
+  ((:FILE "dreyeck/src/gesture-clog-transport")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/transport/tests"
+  :DESCRIPTION
+  "Falsifiers for contiguous ordered pointer delivery"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/gesture/transport" "dreyeck/gesture/reading"
+   "dreyeck/gesture-binding-witness/tests")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/gesture-clog-transport-smoke"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT)
+   (DECLARE (IGNORE ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/TRANSPORT/TESTS
+                             :RUN-GESTURE-TRANSPORT-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/reading"
   :DESCRIPTION
   "Reading the corrected Gesture/Binding witness through its evidence"
