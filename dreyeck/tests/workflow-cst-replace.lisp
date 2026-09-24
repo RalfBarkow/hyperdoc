@@ -197,6 +197,144 @@
        (assert (search "reads as" message))
        (assert (string= before (%text path)))))))
 
+(defparameter +fixture-package+
+  "(defpackage #:cst-probe-package
+  ;; Why this package exists at all.
+  (:use #:cl)
+  (:local-nicknames (#:n #:cl))
+  (:export
+   ;; The first group, and the reason for it.
+   #:alpha
+   #:beta))
+
+(in-package #:cl-user)
+
+(defun probe-neighbour ()
+  ;; A neighbour whose text must survive byte for byte.
+  (list 1 2 3))
+"
+  "A package form carrying the kind of thing a reserializing write loses:
+a reason for the package, a nickname list, and a comment inside the export
+list explaining what the group is for.")
+
+(defun test-a-package-key-survives-reparsing ()
+  "Keys are compared with EQUAL, and #: designators never are.
+This is why the key carries the designator's string and not the
+designator, and it is the whole reason DEFPACKAGE could not simply be
+keyed like DEFUN."
+  (let* ((text "(defpackage #:cst-probe-package (:use #:cl))")
+         (one (read-from-string text))
+         (two (read-from-string text)))
+    ;; Stability under reparsing is the property; the literal below only
+    ;; pins which string it stabilises on.
+    (assert (equal (wf:form-key one) (wf:form-key two)))
+    (assert (equal '(:package "CST-PROBE-PACKAGE") (wf:form-key one)))
+    ;; The obvious analogy, and the measurement that rejected it.
+    (assert
+     (not (equal (list :package (second one)) (list :package (second two)))))
+    ;; FORM-EQUAL would have accepted it; key comparison does not use it.
+    (assert
+     (wf:form-equal (list :package (second one))
+                    (list :package (second two)))))
+  t)
+
+(defun test-a-package-key-does-not-fold-case ()
+  "#:probe and \"probe\" name different packages, and the key keeps them
+apart. The :SYSTEM key downcases, which is right for ASDF names and wrong
+for package names."
+  (let ((upper (wf:form-key (read-from-string "(defpackage #:probe)")))
+        (lower (wf:form-key (read-from-string "(defpackage \"probe\")"))))
+    (assert (equal '(:package "PROBE") upper))
+    (assert (equal '(:package "probe") lower))
+    (assert (not (equal upper lower)))
+    (assert
+     (string= (string-downcase (second upper))
+              (string-downcase (second lower)))))
+  t)
+
+(defun test-edits-an-export-clause-without-reserializing (environment)
+  "The real shape of the operation: one clause of one package form.
+Everything the package form says besides that clause -- its reason, its
+:USE, its nicknames -- is outside the targeted range and therefore not
+this operation's business."
+  (call-with-fixture
+   (lambda (path)
+     (let* ((before (%text path))
+            (plan
+             (a::plan-cst-source-replacement "cst-probe" path
+                                             '(:package "CST-PROBE-PACKAGE")
+                                             (read-from-string
+                                              "(:export #:alpha #:beta)")
+                                             "(:export
+   ;; The first group, and the reason for it.
+   #:alpha
+   #:beta
+   #:gamma)"
+                                             (read-from-string
+                                              "(:export #:alpha #:beta #:gamma)"))))
+       (a::replace-owned-cst-source plan environment)
+       (let ((after (%text path)))
+         (assert (not (string= before after)))
+         (assert (search ";; Why this package exists at all." after))
+         (assert (search "(:use #:cl)" after))
+         (assert (search "(:local-nicknames (#:n #:cl))" after))
+         (assert (search ";; A neighbour whose text must survive" after))
+         (assert (search "(list 1 2 3)" after))
+         (assert (search ";; The first group, and the reason for it." after))
+         (assert (search "#:gamma" after))
+         (let ((form (first (wf:source-forms path))))
+           (assert (equal '(:package "CST-PROBE-PACKAGE") (wf:form-key form)))
+           (assert
+            (= 3
+               (length
+                (rest
+                 (find-if
+                  (lambda (clause)
+                    (and (consp clause) (eq :export (first clause))))
+                  (cddr form))))))))))
+   :source +fixture-package+))
+
+(defun test-refuses-zero-and-ambiguous-package-keys ()
+  "An address that names no form, and one that names two."
+  (call-with-fixture
+   (lambda (path)
+     (let ((before (%text path)))
+       (let ((message
+              (%signals
+               (lambda ()
+                 (a::plan-cst-source-replacement "cst-probe" path
+                                                 '(:package "NOT-DEFINED-HERE")
+                                                 (read-from-string
+                                                  "(:export #:alpha #:beta)")
+                                                 "(:export #:alpha)"
+                                                 (read-from-string
+                                                  "(:export #:alpha)"))))))
+         (assert message)
+         (assert (search "found 0" message)))
+       (assert (string= before (%text path)))))
+   :source +fixture-package+)
+  (call-with-fixture
+   (lambda (path)
+     (let ((before (%text path)))
+       (let ((message
+              (%signals
+               (lambda ()
+                 (a::plan-cst-source-replacement "cst-probe" path
+                                                 '(:package "TWICE")
+                                                 (read-from-string
+                                                  "(:use #:cl)")
+                                                 "(:use)"
+                                                 (read-from-string
+                                                  "(:use)"))))))
+         (assert message)
+         (assert (search "found 2" message)))
+       (assert (string= before (%text path)))))
+   :source "(defpackage #:twice (:use #:cl))
+
+(defpackage #:twice (:use #:cl))
+")
+  t)
+
 (defun run-cst-replace-tests ()
   (let ((environment (a:make-authoring-environment)))
     (test-targeted-replacement-preserves-everything-else environment)
@@ -204,9 +342,15 @@
     (test-rejects-a-missing-target)
     (test-verification-catches-collateral-change environment)
     (test-rejects-malformed-replacement environment)
-    (test-rejects-a-replacement-that-reads-as-something-else environment))
+    (test-rejects-a-replacement-that-reads-as-something-else environment)
+    (test-a-package-key-survives-reparsing)
+    (test-a-package-key-does-not-fold-case)
+    (test-edits-an-export-clause-without-reserializing environment)
+    (test-refuses-zero-and-ambiguous-package-keys))
   (format t "~&CST-SOURCE-REPLACEMENT-PASS: one token changed and every other ~
 byte kept; duplicate, missing and malformed targets refused with the ~
 authority untouched; comment, spelling, whitespace and neighbour damage all ~
-fail verification.~%")
+fail verification; and a package form is addressed by its designator's ~
+string, so one export clause can be edited while the package's reason, ~
+:USE and nicknames are not.~%")
   t)

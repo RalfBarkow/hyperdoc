@@ -89,6 +89,30 @@ the targeted range, which is one comparison covering comments, whitespace and
 token spelling together. A failure leaves the authority byte-identical, because
 the edit is made on a candidate file and installed by renaming.
 
+Which top-level forms can be addressed at all is `FORM-KEY`'s business, and
+it is deliberately a short list: `DEFUN`, `DEFPARAMETER`, `DEFINE-CONDITION`,
+`DEFPACKAGE`, `DEFSYSTEM`. A package key carries the designator's *string*, not
+the designator:
+
+```
+(defpackage #:dreyeck/gesture/transport ...)  ->  (:PACKAGE "DREYECK/GESTURE/TRANSPORT")
+```
+
+The obvious analogy — the designator itself, as `DEFUN` keys its name symbol —
+was tried and rejected by measurement. `#:foo` read twice yields two uninterned
+symbols that are never `EQUAL`, and `EQUAL` is what key comparison uses.
+`FORM-EQUAL` would have accepted them, but that is used for targets, not for
+keys. The string is also not case-folded the way the `DEFSYSTEM` key is: `#:x`
+and `"x"` name different packages, and folding them together would make one
+address match two forms.
+
+With that key, editing a package's interface needs no new operation. The
+`:EXPORT` clause is a subexpression of an owned form like any other, so the
+targeted path applies to it, and the reason to prefer it is concrete: three
+package forms in this repository carry comments inside their export lists that
+say why a group of symbols is published. A whole-form write of one of them was
+measured to reduce four comment lines to one.
+
 Creating a source authority and mutating one are two different authoring
 operations. The structural writer protects the identity and the neighbourhood
 of forms that are already persisted. A path that is not yet a source authority

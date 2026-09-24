@@ -44,7 +44,7 @@
                                     CODE)))
 
 (DEFUN FORM-KEY (FORM)
-       "Only explicit top-level DEFUN, DEFPARAMETER, DEFINE-CONDITION and DEFSYSTEM ownership is supported."
+       "Only explicit top-level DEFUN, DEFPARAMETER, DEFINE-CONDITION, DEFPACKAGE and DEFSYSTEM ownership is supported. A package key carries the designator's string rather than the designator: #:FOO read twice yields two uninterned symbols that are never EQUAL, and EQUAL is what key comparison uses."
        (WHEN (AND (CONSP FORM) (SYMBOLP (FIRST FORM)))
              (COND
                    ((EQ (FIRST FORM) (QUOTE DEFUN))
@@ -53,6 +53,8 @@
                     (LIST :PARAMETER (SECOND FORM)))
                    ((EQ (FIRST FORM) (QUOTE DEFINE-CONDITION))
                     (LIST :CONDITION (SECOND FORM)))
+                   ((EQ (FIRST FORM) (QUOTE DEFPACKAGE))
+                    (LIST :PACKAGE (STRING (SECOND FORM))))
                    ((STRING= (SYMBOL-NAME (FIRST FORM)) "DEFSYSTEM")
                     (LIST :SYSTEM (STRING-DOWNCASE (STRING (SECOND FORM))))))))
 

@@ -249,7 +249,7 @@
     ;; in the sequence is a consumer that waits forever.
     (assert (null (assoc "contextmenu" kinds :test #'string=))))
   ;; The press-and-wait threshold has exactly one owner, and it is here.
-  (let ((timer (t*::reveal-timer-script "document.body")))
+  (let ((timer (t*:reveal-timer-script "document.body")))
     (assert (search "setTimeout" timer))
     (assert (search "clearTimeout" timer))
     (assert (search "gesturerevealdeadline" timer))
@@ -260,8 +260,8 @@
     (assert (search "pointercancel" timer))
     (assert (not (search "marking" timer)))
     ;; And the threshold is configuration, not a constant of the model.
-    (assert (search ", 333)" (t*::reveal-timer-script "document.body"
-                                                      :reveal-delay-ms 333))))
+    (assert (search ", 333)" (t*:reveal-timer-script "document.body"
+                                                     :reveal-delay-ms 333))))
   (multiple-value-bind (buttons sequence)
       (t*:trailing-transport-fields "12:34:56:2:41")
     (assert (= 2 buttons))

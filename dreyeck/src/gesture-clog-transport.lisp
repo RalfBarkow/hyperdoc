@@ -27,6 +27,7 @@
            #:transport-envelope-x #:transport-envelope-y
            #:transport-envelope-modifiers #:transport-envelope-target
            #:transport-event-kinds #:forwarding-script
+           #:reveal-timer-script
            #:trailing-transport-fields
            #:ordered-transport #:make-ordered-transport
            #:enqueue-envelope #:take-contiguous #:drain-transport
