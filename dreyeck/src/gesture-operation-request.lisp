@@ -139,7 +139,7 @@ that renders it has them."
                                                                       page
                                                                       :form-key
                                                                       form-key)
-                                                                :width "200px"
+                                                                :width "224px"
                                                                 :height "32px"
                                                                 :on-completed
                                                                 (lambda

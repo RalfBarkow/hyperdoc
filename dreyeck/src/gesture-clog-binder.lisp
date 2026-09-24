@@ -331,9 +331,17 @@ condition is shown on the surface instead of reaching CLOG."
     (clog:set-styles target
                      (list (list "position" "relative") (list "width" width)
                            (list "height" height) (list "background" "#dde")
-                           (list "touch-action" "none")
+                           (list "touch-action" "none") (list "cursor" "crosshair")
                            (list "user-select" "none")))
     (setf (clog:attribute target "data-gesture-target") "true")
+    ;; What the surface is for, not what state it is in: the reducer keeps
+    ;; the state labels. The physical input named here is this binder's.
+    (clog:set-styles (clog:create-div target
+                                      :content "Right-click: hold for menu &middot; move to mark")
+                     '(("position" "absolute") ("left" "8px") ("top" "50%")
+                       ("transform" "translateY(-50%)") ("color" "#556")
+                       ("font-family" "sans-serif") ("font-size" "11px")
+                       ("white-space" "nowrap") ("pointer-events" "none")))
     (dolist (element (cons mark (mapcar #'cdr labels)))
       (clog:set-styles element
                        '(("position" "absolute")
