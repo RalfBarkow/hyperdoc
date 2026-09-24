@@ -44,7 +44,7 @@
                                     CODE)))
 
 (DEFUN FORM-KEY (FORM)
-       "Only explicit top-level DEFUN, DEFPARAMETER, DEFINE-CONDITION, DEFPACKAGE, DEFMETHOD, DEFSYSTEM and HyperDoc DEFEXAMPLE ownership is supported. A package key carries the designator's string rather than the designator: #:FOO read twice yields two uninterned symbols that are never EQUAL, and EQUAL is what key comparison uses. A method is one function among several with its name, so its key carries its qualifiers and the specializers of its required parameters, which is what distinguishes it from its siblings. DEFEXAMPLE is recognised by name, like DEFSYSTEM, because this package does not depend on HyperDoc."
+       "Only explicit top-level DEFUN, DEFPARAMETER, DEFINE-CONDITION, DEFCLASS, DEFPACKAGE, DEFMETHOD, DEFSYSTEM and HyperDoc DEFEXAMPLE ownership is supported. A package key carries the designator's string rather than the designator: #:FOO read twice yields two uninterned symbols that are never EQUAL, and EQUAL is what key comparison uses. A method is one function among several with its name, so its key carries its qualifiers and the specializers of its required parameters, which is what distinguishes it from its siblings. DEFEXAMPLE is recognised by name, like DEFSYSTEM, because this package does not depend on HyperDoc."
        (WHEN (AND (CONSP FORM) (SYMBOLP (FIRST FORM)))
              (COND
                    ((EQ (FIRST FORM) (QUOTE DEFUN))
@@ -66,6 +66,8 @@
                                   COLLECT (IF (CONSP PARAMETER)
                                               (SECOND PARAMETER)
                                               T)))))
+                   ((EQ (FIRST FORM) (QUOTE DEFCLASS))
+                    (LIST :CLASS (SECOND FORM)))
                    ((STRING= (SYMBOL-NAME (FIRST FORM)) "DEFEXAMPLE")
                     (LIST :EXAMPLE (SECOND FORM)))
                    ((STRING= (SYMBOL-NAME (FIRST FORM)) "DEFSYSTEM")

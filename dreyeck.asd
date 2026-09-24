@@ -1278,6 +1278,40 @@
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/TRANSPORT/TESTS
                              :RUN-GESTURE-TRANSPORT-TESTS)))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/clog"
+  :DESCRIPTION
+  "A CLOG window that owns one marking-menu interaction"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("clog" "bordeaux-threads" "dreyeck/gesture/transport"
+   "dreyeck/gesture-binding-witness" "dreyeck/state-machine")
+  :COMPONENTS
+  ((:FILE "dreyeck/src/gesture-clog-binder")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/clog/tests"
+  :DESCRIPTION
+  "Per-window ownership and serialization of the CLOG gesture binder"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/gesture/clog")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/gesture-clog-binder"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT)
+   (DECLARE (IGNORE ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/CLOG/TESTS
+                             :RUN-GESTURE-CLOG-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/reading"
   :DESCRIPTION
   "Reading the corrected Gesture/Binding witness through its evidence"

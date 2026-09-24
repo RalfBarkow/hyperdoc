@@ -379,6 +379,19 @@ is, so the key needs no HyperDoc package to compute."
                "(cl-user::defexample cl-user::other (list 1))"))))))
   t)
 
+(defun test-a-class-key-names-one-class ()
+  "A class is addressed by its name, as a function is."
+  (let ((key
+         (wf:form-key
+          (read-from-string "(defclass cl-user::probe-class () ())"))))
+    (assert (equal (list :class (intern "PROBE-CLASS" :cl-user)) key))
+    (assert
+     (not
+      (equal key
+             (wf:form-key
+              (read-from-string "(defun cl-user::probe-class () 1)"))))))
+  t)
+
 (defun run-cst-replace-tests ()
   (let ((environment (a:make-authoring-environment)))
     (test-targeted-replacement-preserves-everything-else environment)
@@ -392,13 +405,14 @@ is, so the key needs no HyperDoc package to compute."
     (test-edits-an-export-clause-without-reserializing environment)
     (test-refuses-zero-and-ambiguous-package-keys)
     (test-a-method-key-names-one-method)
-    (test-an-example-key-names-one-example))
+    (test-an-example-key-names-one-example)
+    (test-a-class-key-names-one-class))
   (format t "~&CST-SOURCE-REPLACEMENT-PASS: one token changed and every other ~
 byte kept; duplicate, missing and malformed targets refused with the ~
 authority untouched; comment, spelling, whitespace and neighbour damage all ~
 fail verification; a package form is addressed by its designator's ~
 string, so one export clause can be edited while the package's reason, ~
 :USE and nicknames are not; a method is addressed by its qualifiers ~
-and specializers, apart from its siblings; and a HyperDoc example by its ~
-name.~%")
+and specializers, apart from its siblings; and a class and a HyperDoc ~
+example by their names.~%")
   t)

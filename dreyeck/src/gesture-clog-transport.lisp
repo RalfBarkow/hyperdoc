@@ -140,8 +140,10 @@ Read from the end, so the host's own field count stays its business."
    (delivery :initform nil :accessor transport-delivery))
   (:documentation
    "A queue that releases envelopes only in browser order.
-Callback threads may enqueue. They may not deliver, and they may not
-touch anything the gesture session owns."))
+Any thread may enqueue. Delivery, and everything the gesture session
+owns, belongs to one execution context at a time per sequencing
+authority -- a single consumer, or a lock held from enqueue through
+delivery. Having arrived is never a licence to deliver."))
 
 (defun make-ordered-transport ()
   "One transport, scoped to one sequencing authority.
@@ -180,7 +182,7 @@ envelopes, because the number alone does not say which event was about
 to be lost."))
 
 (defun enqueue-envelope (transport envelope)
-  "All a callback thread is allowed to do.
+  "Record one arriving envelope; delivery is a separate step.
 Signals DUPLICATE-TRANSPORT-SEQUENCE when the offered sequence number has
 already occurred in this ordered stream, whether it is still waiting to
 be delivered or is already behind NEXT-EXPECTED. The condition reports
@@ -249,7 +251,8 @@ error to paper over."
 
 ;;; Input session
 ;;;
-;;; The only place gesture state is mutated, and only from one thread.
+;;; The only place gesture state is mutated, and only by one execution
+;;; context at a time.
 
 (defclass gesture-input-session ()
   ((status :initform :idle :accessor input-session-status)

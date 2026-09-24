@@ -91,7 +91,7 @@ the edit is made on a candidate file and installed by renaming.
 
 Which top-level forms can be addressed at all is `FORM-KEY`'s business, and
 it is deliberately a short list: `DEFUN`, `DEFPARAMETER`, `DEFINE-CONDITION`,
-`DEFPACKAGE`, `DEFMETHOD`, `DEFSYSTEM`, and HyperDoc's `DEFEXAMPLE`. A method
+`DEFCLASS`, `DEFPACKAGE`, `DEFMETHOD`, `DEFSYSTEM`, and HyperDoc's `DEFEXAMPLE`. A method
 shares its name with its siblings, so its key carries its qualifiers and the
 specializers of its required parameters. `DEFEXAMPLE`, like `DEFSYSTEM`, is
 recognised by its operator's name, because the workflow package does not
