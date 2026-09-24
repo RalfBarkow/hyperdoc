@@ -46,13 +46,15 @@
   "Run THUNK with CLOG's server entry points replaced by recorders.
 
 No socket is opened. What is under test is which arguments reach
-CLOG:INITIALIZE, not whether a server comes up, and starting a real
-listener in a unit test would bind a port and change global state."
+CLOG:INITIALIZE and which routes reach CLOG:SET-ON-NEW-WINDOW, not
+whether a server comes up, and starting a real listener in a unit test
+would bind a port and change global state."
   (let ((initialize (fdefinition 'clog:initialize))
         (set-on-new-window (fdefinition 'clog:set-on-new-window))
         (parameters (when (boundp 'hyperbook/server::*server-parameters*)
                       hyperbook/server::*server-parameters*))
-        (recorded nil))
+        (recorded nil)
+        (routes nil))
     (unwind-protect
          (progn
            (setf (fdefinition 'clog:initialize)
@@ -62,13 +64,14 @@ listener in a unit test would bind a port and change global state."
                    nil))
            (setf (fdefinition 'clog:set-on-new-window)
                  (lambda (handler &key path)
-                   (declare (ignore handler path))
+                   (push (cons path handler) routes)
                    nil))
            (funcall thunk)
            ;; Both what reached CLOG and what the server recorded, read
            ;; before the unwind restores the latter.
            (list :clog recorded
-                 :server-parameters hyperbook/server::*server-parameters*))
+                 :server-parameters hyperbook/server::*server-parameters*
+                 :routes (reverse routes)))
       (setf (fdefinition 'clog:initialize) initialize)
       (setf (fdefinition 'clog:set-on-new-window) set-on-new-window)
       (setf hyperbook/server::*server-parameters* parameters))))
@@ -107,6 +110,48 @@ a parameter; it was not one, and CLOG's own default — every interface
   (format t "~&BIND-ADDRESS-PASS: an explicit host reaches CLOG, omitting it ~
 keeps every interface, and host and development stay independent.~%")
   t)
+
+(defun run-launcher-route-tests ()
+  "The ordinary launcher installs /gesture beside the routes it already had.
+
+SERVE-CATALOG-WITH-LOCAL-FEDWIKI-VIEW is what scripts/serve-catalog.sh
+calls. A route that is implemented but never installed by it answers
+Not Found on the running site, which is how its absence was noticed.
+
+The catalog is a copy of the loaded one, so every book route the launcher
+installs is checked and the fixture wiki it registers does not leak into
+the image. Each path must be installed once: a second handler for the
+same path would silently replace the first."
+  (let* ((loaded (hyperbook:hyperbooks-of hyperbook:*catalog*))
+         (hyperbook:*catalog* (make-instance 'hyperbook:catalog)))
+    (setf (hyperbook:hyperbooks-of hyperbook:*catalog*) (copy-list loaded))
+    (let* ((routes
+            (getf
+             (call-recording-clog
+              (lambda ()
+                (dreyeck/local-fedwiki-view:serve-catalog-with-local-fedwiki-view
+                 :site-root (fixture-site-root) :port 8099 :host "127.0.0.1"
+                 :wiki-id *fixture-wiki-id*)))
+             :routes))
+           (paths (mapcar #'car routes))
+           (books (hyperbook:hyperbooks-of hyperbook:*catalog*)))
+      (assert
+       (= (length paths) (length (remove-duplicates paths :test #'equal))))
+      (assert
+       (eq #'dreyeck/gesture/clog:on-gesture-window
+           (cdr (assoc "/gesture" routes :test #'equal))))
+      (assert (assoc "/view" routes :test #'equal))
+      (assert (hyperbook:find-hyperbook *fixture-wiki-id*))
+      (dolist (book books)
+        (assert
+         (assoc (format nil "/~A" (hyperbook/server::slug book)) routes :test
+                #'equal)))
+      (assert (= (+ 2 (length books)) (length routes)))
+      (format t
+              "~&LAUNCHER-ROUTES-PASS: the ordinary launcher installs /gesture ~
+with ON-GESTURE-WINDOW, beside /view and ~D book routes.~%"
+              (length books))
+      t)))
 
 (defun run-local-fedwiki-view-tests ()
   (assert

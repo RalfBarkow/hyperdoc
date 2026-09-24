@@ -1068,7 +1068,7 @@
   T
   :DEPENDS-ON
   (#:DREYECK/LOCAL-FEDWIKI-PAGE #:HYPERBOOK/SERVER #:DREYECK/PAGE-ATTACHED-ASDF
-   #:DREYECK/CATALOG)
+   #:DREYECK/CATALOG #:DREYECK/GESTURE/CLOG)
   :COMPONENTS
   ((:FILE "local-fedwiki-view-package") (:FILE "local-fedwiki-view"))
   :IN-ORDER-TO
@@ -1100,7 +1100,11 @@
    (UNLESS
        (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/LOCAL-FEDWIKI-VIEW/TESTS
                                  :RUN-BIND-ADDRESS-TESTS)
-     (ERROR "Bind address tests failed."))))
+     (ERROR "Bind address tests failed."))
+   (UNLESS
+       (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/LOCAL-FEDWIKI-VIEW/TESTS
+                                 :RUN-LAUNCHER-ROUTE-TESTS)
+     (ERROR "Launcher route tests failed."))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/FEDWIKI-PAGE-MATERIALIZATION
   :DESCRIPTION

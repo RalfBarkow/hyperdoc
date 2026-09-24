@@ -113,7 +113,8 @@ runtime that is allowed to ask it."
        (pane-width "700px")
        (development nil)
        (wiki-id *default-wiki-id*))
-  "Serve the HyperBook catalog plus server-independent /view/<slug> FedWiki pages."
+  "Serve the HyperBook catalog, server-independent /view/<slug> FedWiki pages
+and the /gesture marking-menu window."
 
   ;; Register the local FedWiki before SERVE-CATALOG installs the
   ;; routes for all currently registered HyperBooks.
@@ -131,7 +132,11 @@ runtime that is allowed to ask it."
    site-root
    :pane-width pane-width
    :development development
-   :wiki-id wiki-id))
+   :wiki-id wiki-id)
+
+  ;; Into the server SERVE-CATALOG started, as /view is. Implemented but
+  ;; not installed here, the route answered Not Found on the running site.
+  (dreyeck/gesture/clog:install-gesture-route))
 
 (html-inspector-views:defview
     hyperbook/server::👀url
