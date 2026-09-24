@@ -1282,6 +1282,41 @@
    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/TRANSPORT/TESTS
                              :RUN-GESTURE-TRANSPORT-TESTS)))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/operation-request"
+  :DESCRIPTION
+  "An operation and the Lisp source definition it is for, before anything runs"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("alexandria" "concrete-syntax-tree" "html-inspector-views"
+   "html-inspector-views/standard" "hyperdoc" "hyperdoc/explorer"
+   "dreyeck/workflow" "dreyeck/gesture-binding-witness")
+  :COMPONENTS
+  ((:FILE "dreyeck/src/gesture-operation-request")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/operation-request/tests"
+  :DESCRIPTION
+  "What makes two operation requests the same request"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/gesture/operation-request" "dreyeck/gesture/reading")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/gesture-operation-request"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT)
+   (DECLARE (IGNORE ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/OPERATION-REQUEST/TESTS
+                             :RUN-OPERATION-REQUEST-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/clog"
   :DESCRIPTION
   "A CLOG window that owns one marking-menu interaction"
