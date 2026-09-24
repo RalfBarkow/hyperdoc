@@ -257,6 +257,56 @@
                (COUNT-IF
                 (LAMBDA (REF) (TYPEP (CDR REF) 'HTML-INSPECTOR-VIEWS:THUNK))
                 (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES (CDR WIDGET))))))))))
+ ;; The normal Catalog offers an unexecuted operation request on a
+ ;; code-page definition. The view is checked first and the request API
+ ;; is called by name, so a Catalog without the system fails on the
+ ;; view, not on reading this form.
+ (LET* ((SOURCE-PATH
+         (ASDF:SYSTEM-RELATIVE-PATHNAME \"dreyeck\" \"dreyeck/src/gesture-ordering-reading.lisp\"))
+        (SOURCE-BEFORE (UIOP:READ-FILE-STRING SOURCE-PATH :EXTERNAL-FORMAT :UTF-8))
+        (BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/gesture/reading\" :SIGNAL-ERROR? T)))
+   (HYPERDOC::ENSURE-PAGES-LOADED BOOK)
+   (LET* ((PAGE
+           (HYPERBOOK:FIND-PAGE BOOK \"Reading the two continuations of one interaction.\"
+                                :SIGNAL-ERROR? T))
+          (VIEW
+           (FIND \"Operations\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE) :KEY
+                 #'HTML-INSPECTOR-VIEWS:VIEW-TITLE :TEST #'STRING=)))
+     (ASSERT VIEW)
+     (ASSERT
+      (ASDF:COMPONENT-LOADED-P (ASDF:FIND-SYSTEM \"dreyeck/gesture/operation-request\")))
+     (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW)
+     (FLET ((REQUEST-API (NAME &REST ARGUMENTS)
+              (APPLY #'UIOP:SYMBOL-CALL :DREYECK/GESTURE/OPERATION-REQUEST NAME ARGUMENTS)))
+       (LET* ((KEY (LIST :DEFINITION (FIND-SYMBOL \"RACE-READING\" \"DREYECK/GESTURE/ORDERING\")))
+              (BUTTONS
+               (REMOVE-IF-NOT (LAMBDA (REF) (TYPEP (CDR REF) 'HTML-INSPECTOR-VIEWS:THUNK))
+                              (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW)))
+              (BUTTON
+               (FIND KEY BUTTONS :KEY
+                     (LAMBDA (REF)
+                       (REQUEST-API :OPERATION-REQUEST-FORM-KEY
+                                    (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDR REF))))
+                     :TEST #'EQUAL))
+              (REQUEST (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDR BUTTON)))
+              (OPERATION
+               (UIOP:SYMBOL-CALL :DREYECK/GESTURE-BINDING-WITNESS
+                                 :INSERT-EXECUTABLE-DEFEXAMPLE-OPERATION))
+              (MARK
+               (FIND \"binding/mark-insert-defexample\"
+                     (UIOP:SYMBOL-CALL :DREYECK/GESTURE-BINDING-WITNESS
+                                       :MAKE-GESTURE-BINDING-CATALOG)
+                     :KEY (FIND-SYMBOL \"GESTURE-BINDING-ID\" \"DREYECK/GESTURE-BINDING-WITNESS\")
+                     :TEST #'STRING=)))
+         (ASSERT (EQ PAGE (REQUEST-API :OPERATION-REQUEST-PAGE REQUEST)))
+         (ASSERT (EQ OPERATION (REQUEST-API :OPERATION-REQUEST-OPERATION REQUEST)))
+         (ASSERT (EQ REQUEST (HTML-INSPECTOR-VIEWS:EVAL-THUNK (CDR BUTTON))))
+         (ASSERT (EQ REQUEST (REQUEST-API :REQUEST-THROUGH-BINDING MARK PAGE KEY))))))
+   (ASSERT
+    (STRING= SOURCE-BEFORE (UIOP:READ-FILE-STRING SOURCE-PATH :EXTERNAL-FORMAT :UTF-8))))
+ (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
+ (FORMAT T
+         \"OPERATION-REQUEST-CATALOG-PROOF: the gesture reading code page offers Operations; its button and the mark Binding reach one unexecuted request; source unchanged; no authoring runtime.~%\")
  (FORMAT T
          \"NORMAL-LAUNCHER-PROOF: 16 books; TALA 12 and workflow 12 source/play thunks; no authoring runtime.~%\"))"))
                (LIST

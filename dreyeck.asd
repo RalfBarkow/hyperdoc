@@ -1362,7 +1362,8 @@
   T
   :DEPENDS-ON
   ("dreyeck/hyperdoc" "dreyeck/gesture-binding-witness" "dreyeck/state-machine"
-   "dreyeck/gesture/transport" "hyperdoc/explorer")
+   "dreyeck/gesture/transport" "hyperdoc/explorer"
+   "dreyeck/gesture/operation-request")
   :COMPONENTS
   ((:MODULE "dreyeck/src" :COMPONENTS ((:FILE "gesture-binding-reading")
                                         (:FILE "gesture-ordering-reading")))
