@@ -410,6 +410,117 @@ still reveals the menu, because nothing compares it to anything."
       (assert (< (second stamps) 500))))
   t)
 
+(defun %violation (thunk)
+  "The condition object, not its text: the slots are the evidence."
+  (handler-case (progn (funcall thunk) nil)
+                (t*::duplicate-transport-sequence (condition) condition)))
+
+(defun test-two-authorities-cannot-share-one-transport ()
+  "The two-window collision, preserved as the failure it is.
+Source A numbers DOWN 1 and MOVE 2. Source B is a different page with its
+own counter and numbers DOWN 1 and DEADLINE 2. Fed into one transport
+this was measured to deliver A's press followed by B's deadline as one
+interaction, and to strand A's move for good. The numbers agree; the
+authorities do not."
+  (let* ((transport (t*:make-ordered-transport))
+         (input (t*:make-gesture-input-session))
+         (a-down (%envelope 1 :pointer-down :which 3 :buttons 2))
+         (a-move (%envelope 2 :pointer-move :x 20 :buttons 2))
+         (b-down (%envelope 1 :pointer-down :which 3 :buttons 2))
+         (b-deadline (%envelope 2 :reveal-deadline :buttons 2)))
+    (%feed input transport (list a-down))
+    (let ((violation
+           (%violation (lambda () (t*:enqueue-envelope transport b-down)))))
+      (assert violation)
+      (assert (eql 1 (t*::duplicate-sequence-number violation)))
+      (assert (eql 2 (t*::duplicate-sequence-next-expected violation)))
+      (assert
+       (eq :pointer-down (t*::duplicate-sequence-offered-kind violation))))
+    (%feed input transport (list a-move))
+    (assert
+     (%violation (lambda () (t*:enqueue-envelope transport b-deadline))))
+    (let ((session (t*:input-session-gesture-session input)))
+      (assert (eq :marking (w:gesture-session-mode-of session)))
+      (assert
+       (equal '(:pointer-down :pointer-move)
+              (mapcar #'w:gesture-input-sample-kind
+                      (reverse (t*:input-session-prefix input))))))
+    (assert (equal '(1 2) (t*:transport-arrival-order transport)))
+    (assert (equal '(1 2) (t*:transport-delivery-order transport)))
+    t))
+
+(defun test-a-repeated-sequence-is-refused-in-both-positions ()
+  "Delivered and still pending are both 'already seen by this transport'."
+  (let ((transport (t*:make-ordered-transport)))
+    (t*:enqueue-envelope transport
+                         (%envelope 1 :pointer-down :which 3 :buttons 2))
+    (t*:take-contiguous transport)
+    (let ((violation
+           (%violation
+            (lambda ()
+              (t*:enqueue-envelope transport
+                                   (%envelope 1 :pointer-move :buttons 2))))))
+      (assert violation)
+      (assert (null (t*::duplicate-sequence-present-kind violation))))
+    (t*:enqueue-envelope transport
+                         (%envelope 3 :pointer-move :x 30 :buttons 2))
+    (let ((violation
+           (%violation
+            (lambda ()
+              (t*:enqueue-envelope transport
+                                   (%envelope 3 :reveal-deadline :buttons
+                                              2))))))
+      (assert violation)
+      (assert
+       (eq :pointer-move (t*::duplicate-sequence-present-kind violation)))
+      (assert
+       (eq :reveal-deadline (t*::duplicate-sequence-offered-kind violation))))
+    t))
+
+(defun test-a-refused-envelope-changes-nothing ()
+  "Signalled before any mutation, so the refusal is not half-applied."
+  (let ((transport (t*:make-ordered-transport)))
+    (t*:enqueue-envelope transport
+                         (%envelope 1 :pointer-down :which 3 :buttons 2))
+    (t*:enqueue-envelope transport
+                         (%envelope 3 :pointer-move :x 30 :buttons 2))
+    (let ((arrival (t*:transport-arrival-order transport))
+          (pending (t*:transport-pending-sequences transport))
+          (next (t*:transport-next-expected transport)))
+      (assert
+       (%violation
+        (lambda ()
+          (t*:enqueue-envelope transport
+                               (%envelope 3 :reveal-deadline :buttons 2)))))
+      (assert (equal arrival (t*:transport-arrival-order transport)))
+      (assert (equal pending (t*:transport-pending-sequences transport)))
+      (assert (eql next (t*:transport-next-expected transport))))
+    t))
+
+(defun test-one-authority-may-number-across-interactions ()
+  "The invariant is uniqueness, not one interaction per transport.
+A page keeps counting across releases, and both interactions go through
+the same queue with no repetition anywhere."
+  (let* ((transport (t*:make-ordered-transport))
+         (input (t*:make-gesture-input-session)))
+    (%feed input transport
+           (list (%envelope 1 :pointer-down :which 3 :buttons 2)
+                 (%envelope 2 :pointer-move :x 20 :buttons 2)
+                 (%envelope 3 :pointer-up :x 20 :which 3 :buttons 0)
+                 (%envelope 4 :pointer-down :which 3 :buttons 2)
+                 (%envelope 5 :reveal-deadline :buttons 2)
+                 (%envelope 6 :pointer-move :x 20 :buttons 2)
+                 (%envelope 7 :pointer-up :x 20 :which 3 :buttons 0)))
+    (assert (equal '(1 2 3 4 5 6 7) (t*:transport-delivery-order transport)))
+    (let ((session (t*:input-session-gesture-session input)))
+      (assert (eq :completed (sm:state-machine-run-current-state-of session)))
+      (assert (eq :menu-visible (w:gesture-session-mode-of session)))
+      (assert
+       (string= "binding/radial-insert-defexample"
+                (w:gesture-binding-id
+                 (w:gesture-session-selected-binding-of session)))))
+    t))
+
 (defun run-gesture-transport-tests ()
   (test-unordered-arrival-is-delivered-in-order)
   (test-contiguous-blocking)
@@ -422,10 +533,16 @@ still reveals the menu, because nothing compares it to anything."
   (test-press-and-wait-is-ordered-by-the-browser)
   (test-a-closed-session-drops-a-late-deadline)
   (test-no-state-depends-on-a-timestamp)
+  (test-two-authorities-cannot-share-one-transport)
+  (test-a-repeated-sequence-is-refused-in-both-positions)
+  (test-a-refused-envelope-changes-nothing)
+  (test-one-authority-may-number-across-interactions)
   (test-witness)
   (test-created-source-authorities)
   (format t "~&GESTURE-TRANSPORT-PASS: out-of-order arrival delivered in ~
 browser order, a missing sequence blocks the ones behind it, only the ~
-consumer mutates, a real release completes, a vanished button cancels, and ~
-press-and-wait wins or loses the race by the browser's order alone.~%")
+consumer mutates, a real release completes, a vanished button cancels, ~
+press-and-wait wins or loses the race by the browser's order alone, and a ~
+sequence number offered twice is refused before anything is mutated, so ~
+two authorities can no longer be fused into one interaction.~%")
   t)

@@ -139,15 +139,68 @@ Read from the end, so the host's own field count stays its business."
 Callback threads may enqueue. They may not deliver, and they may not
 touch anything the gesture session owns."))
 
-(defun make-ordered-transport () (make-instance 'ordered-transport))
+(defun make-ordered-transport ()
+  "One transport, scoped to one sequencing authority.
+The authority is whatever assigns the sequence numbers. In the browser
+bridge that is one page -- one browsing context holding one monotonically
+increasing WINDOW.__GESTURESEQ -- and one CLOG connection corresponds to
+one such page.
+
+Browser sequence is not global time. It is evidence about the order one
+source observed, and it says nothing about how two sources relate. A
+transport may therefore reconstruct an order its authority observed; it
+may not invent one between independent authorities."
+  (make-instance 'ordered-transport))
+
+(define-condition duplicate-transport-sequence
+    (error)
+    ((sequence :initarg :sequence :reader duplicate-sequence-number)
+     (next-expected :initarg :next-expected :reader
+      duplicate-sequence-next-expected)
+     (present :initarg :present :reader duplicate-sequence-present-kind)
+     (offered :initarg :offered :reader duplicate-sequence-offered-kind))
+  (:report
+   (lambda (condition stream)
+     (format stream
+             "Sequence ~S offered twice to one transport (next expected ~S); present ~S, offered ~S."
+             (duplicate-sequence-number condition)
+             (duplicate-sequence-next-expected condition)
+             (duplicate-sequence-present-kind condition)
+             (duplicate-sequence-offered-kind condition))))
+  (:documentation "One sequence number offered twice to one ORDERED-TRANSPORT.
+A transport is scoped to one sequencing authority, and within that
+authority a number is used once. A repetition is therefore not a late
+retransmission to tolerate but evidence that two authorities are
+numbering into one stream. The slots keep what distinguishes the two
+envelopes, because the number alone does not say which event was about
+to be lost."))
 
 (defun enqueue-envelope (transport envelope)
-  "All a callback thread is allowed to do."
-  (bt:with-lock-held ((transport-lock transport))
-    (push (transport-envelope-sequence envelope) (transport-arrival transport))
-    (setf (gethash (transport-envelope-sequence envelope)
-                   (transport-pending transport))
-          envelope))
+  "All a callback thread is allowed to do.
+A sequence number this transport has already seen is refused. The
+transport is scoped to one sequencing authority, and inside that
+authority a number is used once; a repetition is evidence that two
+authorities are numbering into one stream. Accepting it was measured to
+replace one envelope with another, and to splice a press from one source
+in front of a deadline from another, so that the reducer reported an
+interaction that happened on neither."
+  (let ((sequence (transport-envelope-sequence envelope)))
+    (bt:with-lock-held ((transport-lock transport))
+      ;; Signalled before anything is mutated, so a refused envelope
+      ;; leaves the transport exactly as it was. A violation that had
+      ;; already pushed an arrival would be half-recorded and would make
+      ;; the evidence about it unreliable.
+      (let ((present (gethash sequence (transport-pending transport))))
+        (when (or present
+                  (and (integerp sequence)
+                       (< sequence (transport-next-expected transport))))
+          (error 'duplicate-transport-sequence
+                 :sequence sequence
+                 :next-expected (transport-next-expected transport)
+                 :present (and present (transport-envelope-kind present))
+                 :offered (transport-envelope-kind envelope))))
+      (push sequence (transport-arrival transport))
+      (setf (gethash sequence (transport-pending transport)) envelope)))
   envelope)
 
 (defun take-contiguous (transport)
@@ -301,6 +354,17 @@ is kept, and closing the input session is what keeps it kept."))
   (:documentation "One transport and the input session it feeds."))
 
 (defun make-gesture-transport-witness ()
+  "A transport and the input session that shares its lifetime.
+The session may hold successive interactions from the same source; it
+resets its prefix on each POINTER-DOWN. What it may not do is reach
+beyond the sequencing authority its transport is scoped to.
+
+For a CLOG binder that means ON-NEW-WINDOW constructs one of these and
+closes over it in that window's handlers. A binder keeping a single
+witness in a global variable gives every window the same queue, which is
+the violation ENQUEUE-ENVELOPE now refuses. This system has no CLOG
+dependency and does not write that binder; it only says what the binder
+owes it."
   (make-instance 'gesture-transport-witness
                  :transport (make-ordered-transport)
                  :input (make-gesture-input-session)))
