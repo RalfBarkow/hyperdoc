@@ -98,6 +98,44 @@
                        nil)
               (error () t)))))
 
+(defun test-button-and-strip-are-separate-cells ()
+  "The button and the gesture strip are separate cells of a two-column row.
+A click on one and a press on the other land on different elements, and
+the row fits a pane the width the Inspector gives it."
+  (let* ((page (%page))
+         (view
+          (find "Operations" (views:all-views page) :key #'views:view-title
+                :test #'string=))
+         (dom (plump-parser:parse (views:view-html view)))
+         (definitions (length (r:page-definitions page))))
+    (flet ((count-in (element tag prefix)
+             (count-if
+              (lambda (child)
+                (eql 0
+                     (search prefix (or (plump-dom:attribute child "id") ""))))
+              (plump-dom:get-elements-by-tag-name element tag))))
+      (let ((cells (plump-dom:get-elements-by-tag-name dom "td")))
+        (assert
+         (= definitions
+            (reduce #'+ cells :key
+                    (lambda (cell) (count-in cell "button" "eval-")))))
+        (assert
+         (= definitions
+            (reduce #'+ cells :key
+                    (lambda (cell) (count-in cell "div" "transclusion-")))))
+        (assert
+         (notany
+          (lambda (cell)
+            (and (plusp (count-in cell "button" "eval-"))
+                 (plusp (count-in cell "div" "transclusion-"))))
+          cells)))
+      (assert
+       (every
+        (lambda (row)
+          (<= (length (plump-dom:get-elements-by-tag-name row "td")) 2))
+        (plump-dom:get-elements-by-tag-name dom "tr")))))
+  t)
+
 (defun run-operation-request-tests ()
   (let* ((path (asdf:system-relative-pathname
                 "dreyeck" "dreyeck/src/gesture-ordering-reading.lisp"))
@@ -105,11 +143,13 @@
          (request (test-the-view-supplies-the-target)))
     (test-affordances-reach-one-request request)
     (test-what-distinguishes-requests request)
+    (test-button-and-strip-are-separate-cells)
     (assert (string= before (uiop:read-file-string path :external-format :utf-8)))
     (assert (null (find-package "DREYECK/WORKFLOW/AUTHORING")))
     (format t "~&OPERATION-REQUEST-PASS: the Operations view on a code page ~
 supplies the definition, the Binding only the Operation; the same button, a ~
 fresh rendering, a direct call and three Bindings reach one request; a ~
-different operation or definition is a different request; the source file is ~
+different operation or definition is a different request; the button and ~
+the gesture strip are separate cells of a two-column row; the source file is ~
 unchanged and no authoring runtime was loaded.~%")
     t))

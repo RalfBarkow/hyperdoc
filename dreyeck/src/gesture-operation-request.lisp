@@ -139,7 +139,7 @@ that renders it has them."
                                                                       page
                                                                       :form-key
                                                                       form-key)
-                                                                :width "360px"
+                                                                :width "200px"
                                                                 :height "32px"
                                                                 :on-completed
                                                                 (lambda
@@ -155,13 +155,20 @@ that renders it has them."
            (title (w:semantic-operation-identity-title
                    (w:gesture-binding-operation binding))))
       (views:html
+        ;; A button in a view body gets none of the title bar's styling
+        ;; and reads as a label; these rules make it look like the action
+        ;; it is.
+        (:style ".dreyeck-operation-requests button.inspector-action { border: 1px solid #777; border-radius: 3px; padding: 2px 8px; background: #fff; cursor: pointer; }
+.dreyeck-operation-requests button.inspector-action:hover { background: #eee; }")
         (:p (views:esc "Each button asks for an operation on one definition and opens the request. A secondary-button gesture on the strip beside it asks for the same request: press and wait for the menu, or move at once to mark. Nothing is executed and no source is changed."))
-        (:table :class "inspector-table"
+        (:table :class "inspector-table dreyeck-operation-requests"
           (dolist (entry (page-definitions page))
             (let ((key (car entry)))
               (views:html
-                (:tr (:td (:tt (views:esc (prin1-to-string (second key)))))
-                     (:td (views:eval-button
+                (:tr (:td :colspan "2" (:tt (views:esc (prin1-to-string (second key))))))
+                ;; Two cells, two pointer regions: a click on the button
+                ;; and a press on the strip never reach each other.
+                (:tr (:td (views:eval-button
                            title
                            (views:thunk (request-through-binding binding page key))))
                      (:td (views:transclusion (gesture-target-view page key))))))))))))
