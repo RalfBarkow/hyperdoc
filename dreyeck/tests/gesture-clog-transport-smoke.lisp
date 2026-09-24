@@ -413,7 +413,7 @@ still reveals the menu, because nothing compares it to anything."
 (defun %violation (thunk)
   "The condition object, not its text: the slots are the evidence."
   (handler-case (progn (funcall thunk) nil)
-                (t*::duplicate-transport-sequence (condition) condition)))
+                (t*:duplicate-transport-sequence (condition) condition)))
 
 (defun test-two-authorities-cannot-share-one-transport ()
   "The two-window collision, preserved as the failure it is.
@@ -432,10 +432,10 @@ authorities do not."
     (let ((violation
            (%violation (lambda () (t*:enqueue-envelope transport b-down)))))
       (assert violation)
-      (assert (eql 1 (t*::duplicate-sequence-number violation)))
-      (assert (eql 2 (t*::duplicate-sequence-next-expected violation)))
+      (assert (eql 1 (t*:duplicate-sequence-number violation)))
+      (assert (eql 2 (t*:duplicate-sequence-next-expected violation)))
       (assert
-       (eq :pointer-down (t*::duplicate-sequence-offered-kind violation))))
+       (eq :pointer-down (t*:duplicate-sequence-offered-kind violation))))
     (%feed input transport (list a-move))
     (assert
      (%violation (lambda () (t*:enqueue-envelope transport b-deadline))))
@@ -461,7 +461,7 @@ authorities do not."
               (t*:enqueue-envelope transport
                                    (%envelope 1 :pointer-move :buttons 2))))))
       (assert violation)
-      (assert (null (t*::duplicate-sequence-present-kind violation))))
+      (assert (null (t*:duplicate-sequence-present-kind violation))))
     (t*:enqueue-envelope transport
                          (%envelope 3 :pointer-move :x 30 :buttons 2))
     (let ((violation
@@ -471,10 +471,9 @@ authorities do not."
                                    (%envelope 3 :reveal-deadline :buttons
                                               2))))))
       (assert violation)
+      (assert (eq :pointer-move (t*:duplicate-sequence-present-kind violation)))
       (assert
-       (eq :pointer-move (t*::duplicate-sequence-present-kind violation)))
-      (assert
-       (eq :reveal-deadline (t*::duplicate-sequence-offered-kind violation))))
+       (eq :reveal-deadline (t*:duplicate-sequence-offered-kind violation))))
     t))
 
 (defun test-a-refused-envelope-changes-nothing ()
@@ -521,6 +520,41 @@ the same queue with no repetition anywhere."
                  (w:gesture-session-selected-binding-of session)))))
     t))
 
+(defun test-the-duplicate-failure-is-selectively-catchable ()
+  "The documented failure, answered by name through the package contract.
+Catching ERROR would also catch the reducer's terminal-input contract,
+which is a different fault with a different remedy. So the handler binds
+the specific type, reads the evidence through the exported readers, and a
+neighbouring error is shown passing straight through the same handler."
+  (let ((transport (t*:make-ordered-transport)))
+    (t*:enqueue-envelope transport
+                         (%envelope 1 :pointer-down :which 3 :buttons 2))
+    (let ((answered
+           (handler-case
+            (progn
+             (t*:enqueue-envelope transport
+                                  (%envelope 1 :pointer-move :x 20 :buttons 2))
+             :not-signalled)
+            (t*:duplicate-transport-sequence (condition)
+             (list (t*:duplicate-sequence-number condition)
+                   (t*:duplicate-sequence-next-expected condition)
+                   (t*:duplicate-sequence-present-kind condition)
+                   (t*:duplicate-sequence-offered-kind condition))))))
+      (assert (equal '(1 1 :pointer-down :pointer-move) answered)))
+    (assert (equal '(1) (t*:transport-arrival-order transport)))
+    (assert (equal '(1) (t*:transport-pending-sequences transport))))
+  (let ((leaked
+         (handler-case
+          (w:run-gesture-trace
+           (append (w:make-expert-marking-trace)
+                   (list
+                    (w:make-gesture-input-sample :kind :pointer-move :x 1.0d0
+                                                 :y 1.0d0 :timestamp 9999))))
+          (t*:duplicate-transport-sequence nil :wrongly-caught)
+          (error nil :passed-through))))
+    (assert (eq :passed-through leaked)))
+  t)
+
 (defun run-gesture-transport-tests ()
   (test-unordered-arrival-is-delivered-in-order)
   (test-contiguous-blocking)
@@ -537,12 +571,14 @@ the same queue with no repetition anywhere."
   (test-a-repeated-sequence-is-refused-in-both-positions)
   (test-a-refused-envelope-changes-nothing)
   (test-one-authority-may-number-across-interactions)
+  (test-the-duplicate-failure-is-selectively-catchable)
   (test-witness)
   (test-created-source-authorities)
   (format t "~&GESTURE-TRANSPORT-PASS: out-of-order arrival delivered in ~
 browser order, a missing sequence blocks the ones behind it, only the ~
 consumer mutates, a real release completes, a vanished button cancels, ~
 press-and-wait wins or loses the race by the browser's order alone, and a ~
-sequence number offered twice is refused before anything is mutated, so ~
-two authorities can no longer be fused into one interaction.~%")
+sequence number offered twice is refused before anything is mutated and ~
+can be answered by name through the package contract, so two authorities ~
+can no longer be fused into one interaction.~%")
   t)

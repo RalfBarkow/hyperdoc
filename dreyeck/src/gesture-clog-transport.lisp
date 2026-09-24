@@ -31,6 +31,9 @@
            #:trailing-transport-fields
            #:ordered-transport #:make-ordered-transport
            #:enqueue-envelope #:take-contiguous #:drain-transport
+           #:duplicate-transport-sequence
+           #:duplicate-sequence-number #:duplicate-sequence-next-expected
+           #:duplicate-sequence-present-kind #:duplicate-sequence-offered-kind
            #:transport-arrival-order #:transport-delivery-order
            #:transport-next-expected #:transport-pending-sequences
            #:gesture-input-session #:make-gesture-input-session
@@ -178,13 +181,20 @@ to be lost."))
 
 (defun enqueue-envelope (transport envelope)
   "All a callback thread is allowed to do.
-A sequence number this transport has already seen is refused. The
-transport is scoped to one sequencing authority, and inside that
+Signals DUPLICATE-TRANSPORT-SEQUENCE when the offered sequence number has
+already occurred in this ordered stream, whether it is still waiting to
+be delivered or is already behind NEXT-EXPECTED. The condition reports
+the repeated number, the number the transport was waiting for, the kind
+of event that already held the number where one is still held, and the
+kind of event that was offered.
+
+A transport is scoped to one sequencing authority, and inside that
 authority a number is used once; a repetition is evidence that two
 authorities are numbering into one stream. Accepting it was measured to
 replace one envelope with another, and to splice a press from one source
 in front of a deadline from another, so that the reducer reported an
-interaction that happened on neither."
+interaction that happened on neither. Nothing is mutated before the
+refusal, so a caller that answers it finds the transport as it was."
   (let ((sequence (transport-envelope-sequence envelope)))
     (bt:with-lock-held ((transport-lock transport))
       ;; Signalled before anything is mutated, so a refused envelope
