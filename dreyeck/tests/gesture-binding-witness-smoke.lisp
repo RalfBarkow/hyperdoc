@@ -374,11 +374,13 @@ call was watched and did not happen."
                          (%at :pointer-up 21 0 620)))))
     (assert (eq :completed (%state-of selected)))
     (assert (member :obsolete-reveal-deadline (%reasons selected))))
-  ;; A synthetic timer still may not claim to precede its own schedule.
-  (assert (search "precedes its deadline"
-                  (%signals-error
-                   (lambda () (w:run-gesture-trace
-                               (list (%down) (%deadline 499)))))))
+  ;; The clock falsifier. A deadline whose consumer-assigned timestamp is
+  ;; earlier than the old REVEAL-AT would have been is now accepted: the
+  ;; reducer no longer knows a threshold, so there is nothing for a second
+  ;; clock to disagree with. Restoring that guard makes this line fail.
+  (let ((early (w:run-gesture-trace (list (%down) (%deadline 499)))))
+    (assert (eq :menu-visible (w:gesture-session-mode-of early)))
+    (assert (member :pressed->menu-visible (%transition-ids early))))
   t)
 
 ;;; G. Target mismatch

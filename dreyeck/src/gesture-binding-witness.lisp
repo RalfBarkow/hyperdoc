@@ -300,7 +300,7 @@ transition, so that no input is dropped in silence."))
 ;;; The reducer
 
 (defun run-gesture-trace (samples &key (bindings (make-gesture-binding-catalog))
-                                       (dead-zone 5.0d0) (reveal-delay 500))
+                                       (dead-zone 5.0d0))
   "Reduce synthetic samples locally and stop at the selected identity.
 The selected operation is data and not FUNCALLable, so this reducer has
 no means of running it; no execution mechanism is part of this witness.
@@ -318,7 +318,6 @@ that was never delivered."
          (origin-x nil)
          (origin-y nil)
          (target nil)
-         (reveal-at nil)
          (mode nil)
          (selected-binding nil)
          (selected-operation nil)
@@ -381,11 +380,11 @@ that was never delivered."
                                 :binding binding))
                     t))))
          (handle-deadline (sample)
-           (when (and reveal-at
-                      (< (gesture-input-sample-timestamp sample) reveal-at))
-             ;; A trace-construction check: a synthetic timer may not claim
-             ;; to have fired before it was scheduled.
-             (error "Reveal sample precedes its deadline."))
+           ;; The deadline is an observed delivered fact. It used to be
+           ;; revalidated here against a Lisp clock, which asked the same
+           ;; question twice and gave the second asker the worse evidence:
+           ;; a consumer-assigned timestamp says when Lisp got round to
+           ;; the event, not when the browser fired it.
            (if (eq state :pressed)
                (progn (setf mode :menu-visible
                             menu-visible-p t)
@@ -437,10 +436,7 @@ that was never delivered."
                       (progn
                         (setf target (gesture-input-sample-target sample)
                               origin-x (gesture-input-sample-x sample)
-                              origin-y (gesture-input-sample-y sample)
-                              reveal-at
-                              (+ (gesture-input-sample-timestamp sample)
-                                 reveal-delay))
+                              origin-y (gesture-input-sample-y sample))
                         (take :idle->pressed sample target))
                       (cancel :idle->cancelled sample
                               :no-target-or-wrong-button)))
