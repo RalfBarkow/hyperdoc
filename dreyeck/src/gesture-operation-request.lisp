@@ -34,7 +34,9 @@
            #:page-definitions
            #:ensure-operation-request
            #:request-through-binding
-           #:inspector-binding))
+           #:inspector-binding
+           #:request-from-gesture
+           #:gesture-target-view))
 
 (in-package #:dreyeck/gesture/operation-request)
 
@@ -107,13 +109,53 @@ itself is PAGE's definition, supplied by whatever shows the page."
     (subseq (alexandria:read-file-into-string (hyperdoc::source-code-pathname page))
             start end)))
 
+(defun request-from-gesture (window)
+  "The request a completed gesture asks for: its Binding's Operation on
+the subject the gesture was pressed on. The Binding says which operation;
+the subject, which the surface was given by its view, says on what."
+  (multiple-value-bind (binding subject)
+      (dreyeck/gesture/clog:gesture-window-selection window)
+    (unless binding (error "The gesture has not completed with a Binding."))
+    (request-through-binding binding (getf subject :page)
+                             (getf subject :form-key))))
+
+(defun %open-request (pane request)
+  "Open REQUEST beside PANE, as an Inspector eval button would."
+  (let ((inspector (clog-moldable-inspector::inspector pane)))
+    (clog-moldable-inspector::close-panes-after inspector pane)
+    (clog-moldable-inspector::create-pane inspector request)))
+
+(defun gesture-target-view (page form-key)
+  "A gesture surface for FORM-KEY on PAGE, to be transcluded into a row.
+Each surface gets a subject of its own: the page and the key, as the view
+that renders it has them."
+  (make-instance 'clog-moldable-inspector:clog-view :title "Gesture" :priority
+                 1 :create-fn
+                 (lambda (pane parent)
+                   (dreyeck/gesture/clog:create-gesture-surface parent :subject
+                                                                (list :type
+                                                                      :lisp-source-definition
+                                                                      :page
+                                                                      page
+                                                                      :form-key
+                                                                      form-key)
+                                                                :width "360px"
+                                                                :height "32px"
+                                                                :on-completed
+                                                                (lambda
+                                                                    (window)
+                                                                  (%open-request
+                                                                   pane
+                                                                   (request-from-gesture
+                                                                    window)))))))
+
 (views:defview code-page-operations (page hyperdoc::code-page)
   (views:html-view :title "Operations" :priority 12
     (let* ((binding (inspector-binding))
            (title (w:semantic-operation-identity-title
                    (w:gesture-binding-operation binding))))
       (views:html
-        (:p (views:esc "Each button asks for an operation on one definition and opens the request. Nothing is executed and no source is changed."))
+        (:p (views:esc "Each button asks for an operation on one definition and opens the request. A secondary-button gesture on the strip beside it asks for the same request: press and wait for the menu, or move at once to mark. Nothing is executed and no source is changed."))
         (:table :class "inspector-table"
           (dolist (entry (page-definitions page))
             (let ((key (car entry)))
@@ -121,7 +163,8 @@ itself is PAGE's definition, supplied by whatever shows the page."
                 (:tr (:td (:tt (views:esc (prin1-to-string (second key)))))
                      (:td (views:eval-button
                            title
-                           (views:thunk (request-through-binding binding page key)))))))))))))
+                           (views:thunk (request-through-binding binding page key))))
+                     (:td (views:transclusion (gesture-target-view page key))))))))))))
 
 (views:defview operation-request-overview (request operation-request)
   (views:html-view :title "Request" :priority 1

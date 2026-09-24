@@ -91,9 +91,11 @@ the edit is made on a candidate file and installed by renaming.
 
 Which top-level forms can be addressed at all is `FORM-KEY`'s business, and
 it is deliberately a short list: `DEFUN`, `DEFPARAMETER`, `DEFINE-CONDITION`,
-`DEFCLASS`, `DEFPACKAGE`, `DEFMETHOD`, `DEFSYSTEM`, and HyperDoc's `DEFEXAMPLE`. A method
+`DEFCLASS`, `DEFPACKAGE`, `DEFMETHOD`, `DEFSYSTEM`, HyperDoc's `DEFEXAMPLE`, and
+html-inspector-views' `DEFVIEW`. A method
 shares its name with its siblings, so its key carries its qualifiers and the
-specializers of its required parameters. `DEFEXAMPLE`, like `DEFSYSTEM`, is
+specializers of its required parameters; a view, likewise, carries its name and
+the class it is for. `DEFEXAMPLE`, like `DEFSYSTEM`, is
 recognised by its operator's name, because the workflow package does not
 depend on HyperDoc. A package key carries the designator's *string*, not
 the designator:

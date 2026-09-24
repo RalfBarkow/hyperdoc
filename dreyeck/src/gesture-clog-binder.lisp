@@ -9,6 +9,9 @@
 ;;;; sequencing authority, its counter starts at one, and so does the
 ;;;; transport that belongs to it. Two windows sharing one transport was
 ;;;; measured to fuse a press from one with a deadline from the other.
+;;;; The converse holds as well: several surfaces on one page share its
+;;;; counter, so they share its window, and a press routes the interaction
+;;;; to the surface it began on.
 ;;;;
 ;;;;   one browser sequencing authority
 ;;;;       <-> one ORDERED-TRANSPORT
@@ -37,6 +40,8 @@
            #:gesture-window-witness #:gesture-window-lock
            #:gesture-window-log #:gesture-window-result
            #:receive-envelope
+           #:connection-gesture-window #:create-gesture-surface
+           #:gesture-window-selection #:newly-completed-p
            #:on-gesture-window #:install-gesture-route
            #:open-gesture-windows))
 
@@ -47,12 +52,15 @@
    (lock :initarg :lock :reader gesture-window-lock)
    (projection :initarg :projection :initform nil
                :accessor gesture-window-projection)
-   (log :initform nil :accessor gesture-window-log))
+   (log :initform nil :accessor gesture-window-log)
+   (surfaces :initform nil :accessor gesture-window-surfaces))
   (:documentation
    "One browser window's interaction: its own witness and its own lock.
 PROJECTION, if any, is called with the window and a snapshot after every
 delivered envelope, still under the lock. LOG holds the snapshots of the
-current interaction, newest first; a new press starts a new one."))
+current interaction, newest first; a new press starts a new one.
+SURFACES pairs each subject a surface presses with the function that draws
+on that surface; a page with several surfaces is still one window."))
 
 (defun make-gesture-window (&key projection)
   "A fresh window: a transport, an input session and a lock of its own."
@@ -195,7 +203,7 @@ CSS pixels with y growing downward, and so does this."
             (clog:attribute target "data-binding") (or binding ""))
       (setf (clog:text status) (%status-line window)))))
 
-(defun %envelope-from (kind data)
+(defun %envelope-from (kind data subject)
   (multiple-value-bind (buttons sequence) (tp:trailing-transport-fields data)
     (let ((parsed (clog::parse-pointer-event data)))
       (tp:make-transport-envelope
@@ -206,16 +214,16 @@ CSS pixels with y growing downward, and so does this."
                                     (when (getf parsed :ctrl-key) :ctrl)
                                     (when (getf parsed :shift-key) :shift)
                                     (when (getf parsed :meta-key) :meta)))
-       :target (list :type :lisp-source-definition :name 'gesture-window)))))
+       :target subject))))
 
-(defun %bind-transport-events (window target)
-  "The persisted bridge, installed on TARGET, feeding WINDOW."
+(defun %bind-transport-events (window target subject)
+  "The persisted bridge, installed on TARGET, feeding WINDOW about SUBJECT."
   (let ((script (tp:forwarding-script clog::pointer-event-script)))
     (dolist (entry (tp:transport-event-kinds))
       (destructuring-bind (name . kind) entry
         (clog::set-event target name
                          (lambda (data)
-                           (receive-envelope window (%envelope-from kind data)))
+                           (receive-envelope window (%envelope-from kind data subject)))
                          :call-back-script script
                          :post-eval
                          (if (string= name "pointerdown")
@@ -243,36 +251,119 @@ keep them alive."
     (setf *open-windows* (remove-if-not #'sb-ext:weak-pointer-value *open-windows*))
     (mapcar #'sb-ext:weak-pointer-value *open-windows*)))
 
-(defun on-gesture-window (body)
-  "The CLOG handler for the gesture route: one page, one interaction."
-  (setf (clog:title (clog:html-document body)) "Marking menu")
-  (let* ((target (clog:create-div body))
-         (status (clog:create-div body :content "idle"))
-         (labels (mapcar (lambda (binding)
-                           (cons binding (clog:create-div target :content (%label-text binding))))
-                         (%radial-bindings)))
-         (mark (clog:create-div target
-                                :content (format nil "mark: ~A" (%label-text (%mark-binding)))))
-         (window (make-gesture-window)))
-    (clog:set-styles target '(("position" "relative") ("width" "480px") ("height" "360px")
-                              ("background" "#dde") ("touch-action" "none")
-                              ("user-select" "none")))
+(defun %press-sample (window)
+  "The pointer-down that began the current interaction, if any."
+  (car
+   (last
+    (tp:input-session-prefix
+     (tp:witness-input (gesture-window-witness window))))))
+
+(defun gesture-window-selection (window)
+  "The Binding the current interaction completed with, and the subject it
+was pressed on, as two values; both NIL unless it completed with one.
+The subject is what the surface said it was about. Nothing here reads it."
+  (let ((gesture
+         (tp:input-session-gesture-session
+          (tp:witness-input (gesture-window-witness window))))
+        (press (%press-sample window)))
+    (if (and gesture
+             (eq :completed (sm:state-machine-run-current-state-of gesture))
+             (w:gesture-session-selected-binding-of gesture))
+        (values (w:gesture-session-selected-binding-of gesture)
+                (and press (w:gesture-input-sample-target press)))
+        (values nil nil))))
+
+(defun newly-completed-p (window snapshot)
+  "True for the one snapshot in which the current interaction completed
+with a Binding; the envelopes after it leave the state where it was."
+  (and (eq :completed (getf snapshot :state)) (getf snapshot :binding)
+       (not
+        (eq :completed (getf (second (gesture-window-log window)) :state)))))
+
+(defun %route-to-surface (window snapshot)
+  "Draw SNAPSHOT on the surface the current interaction was pressed on,
+found by the identity of the subject its press carried."
+  (let* ((press (%press-sample window))
+         (surface
+          (and press
+               (cdr
+                (assoc (w:gesture-input-sample-target press)
+                       (gesture-window-surfaces window) :test #'eq)))))
+    (when surface (funcall surface window snapshot))))
+
+(defun connection-gesture-window (clog-obj)
+  "The gesture window of CLOG-OBJ's browser page, made on first use.
+A page numbers its events with one counter, so it is one sequencing
+authority, and every surface on it forwards into this one window. It
+lives in the connection's data and goes when CLOG drops that."
+  (bt:with-lock-held (*open-windows-lock*)
+    (or (clog:connection-data-item clog-obj "dreyeck/gesture-window")
+        (let ((window (make-gesture-window :projection #'%route-to-surface)))
+          (push (sb-ext:make-weak-pointer window) *open-windows*)
+          (setf (clog:connection-data-item clog-obj "dreyeck/gesture-window")
+                  window)))))
+
+(defun create-gesture-surface
+       (parent
+        &key
+        (subject (list :type :lisp-source-definition :name 'gesture-window))
+        (width "480px") (height "360px") on-completed)
+  "A gesture target inside PARENT, feeding its page's gesture window.
+SUBJECT is what a press here is about: it travels with the pointer-down
+into the reducer and comes back as the subject of the selection. It is
+compared by identity, so each surface needs a subject of its own.
+ON-COMPLETED, if given, is called once with the window when an
+interaction pressed here completes with a Binding; if it signals, the
+condition is shown on the surface instead of reaching CLOG."
+  (let* ((target (clog:create-div parent))
+         (status (clog:create-div parent :content "idle"))
+         (labels
+          (mapcar
+           (lambda (binding)
+             (cons binding
+                   (clog:create-div target :content (%label-text binding))))
+           (%radial-bindings)))
+         (mark
+          (clog:create-div target :content
+                           (format nil "mark: ~A"
+                                   (%label-text (%mark-binding)))))
+         (window (connection-gesture-window parent)))
+    (clog:set-styles target
+                     (list (list "position" "relative") (list "width" width)
+                           (list "height" height) (list "background" "#dde")
+                           (list "touch-action" "none")
+                           (list "user-select" "none")))
     (setf (clog:attribute target "data-gesture-target") "true")
     (dolist (element (cons mark (mapcar #'cdr labels)))
-      (clog:set-styles element '(("position" "absolute") ("transform" "translate(-50%, -50%)")
-                                 ("padding" "4px 8px") ("border" "1px solid #555")
-                                 ("font-family" "sans-serif") ("font-size" "13px")
-                                 ("white-space" "nowrap") ("pointer-events" "none")))
+      (clog:set-styles element
+                       '(("position" "absolute")
+                         ("transform" "translate(-50%, -50%)")
+                         ("padding" "4px 8px") ("border" "1px solid #555")
+                         ("font-family" "sans-serif") ("font-size" "13px")
+                         ("white-space" "nowrap") ("pointer-events" "none")
+                         ("z-index" "10")))
       (setf (clog:visiblep element) nil))
     (dolist (entry labels)
       (unless (w:gesture-binding-enabled-p (car entry))
-        (clog:set-styles (cdr entry) '(("color" "#999") ("font-style" "italic")))))
-    (setf (gesture-window-projection window)
-          (lambda (window snapshot) (%project window snapshot target labels mark status)))
-    (%bind-transport-events window target)
-    (bt:with-lock-held (*open-windows-lock*)
-      (push (sb-ext:make-weak-pointer window) *open-windows*))
+        (clog:set-styles (cdr entry)
+                         '(("color" "#999") ("font-style" "italic")))))
+    (flet ((draw (window snapshot)
+             (%project window snapshot target labels mark status)
+             (when (and on-completed (newly-completed-p window snapshot))
+               (handler-case (funcall on-completed window)
+                             (error (condition)
+                                    (setf (clog:text status)
+                                            (format nil "nothing requested: ~A"
+                                                    condition)))))))
+      (bt:with-lock-held ((gesture-window-lock window))
+        (push (cons subject #'draw) (gesture-window-surfaces window))))
+    (%bind-transport-events window target subject)
     window))
+
+(defun on-gesture-window (body)
+  "The CLOG handler for the gesture route: one page, one surface."
+  (setf (clog:title (clog:html-document body)) "Marking menu")
+  (create-gesture-surface body))
 
 (defun install-gesture-route (&key (path "/gesture"))
   "Serve PATH from the CLOG server that is already running. Starts none."

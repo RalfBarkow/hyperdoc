@@ -1294,7 +1294,8 @@
   :DEPENDS-ON
   ("alexandria" "concrete-syntax-tree" "html-inspector-views"
    "html-inspector-views/standard" "hyperdoc" "hyperdoc/explorer"
-   "dreyeck/workflow" "dreyeck/gesture-binding-witness")
+   "dreyeck/workflow" "dreyeck/gesture-binding-witness"
+   "dreyeck/gesture/clog" "clog-moldable-inspector")
   :COMPONENTS
   ((:FILE "dreyeck/src/gesture-operation-request")))
 
@@ -1310,12 +1311,16 @@
   :DEPENDS-ON
   ("dreyeck/gesture/operation-request" "dreyeck/gesture/reading")
   :COMPONENTS
-  ((:FILE "dreyeck/tests/gesture-operation-request"))
+  ((:FILE "dreyeck/tests/gesture-operation-request")
+   (:FILE "dreyeck/tests/gesture-code-page"))
   :PERFORM
   (ASDF/LISP-ACTION:TEST-OP (ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT)
    (DECLARE (IGNORE ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT))
-   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/OPERATION-REQUEST/TESTS
-                             :RUN-OPERATION-REQUEST-TESTS)))
+   (PROGN
+    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/OPERATION-REQUEST/TESTS
+                              :RUN-OPERATION-REQUEST-TESTS)
+    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/CODE-PAGE/TESTS
+                              :RUN-CODE-PAGE-GESTURE-TESTS))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/clog"
   :DESCRIPTION

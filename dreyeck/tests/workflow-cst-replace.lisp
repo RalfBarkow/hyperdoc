@@ -392,6 +392,29 @@ is, so the key needs no HyperDoc package to compute."
               (read-from-string "(defun cl-user::probe-class () 1)"))))))
   t)
 
+(defun test-a-view-key-names-one-method ()
+  "A view is one method of its view function, addressed by name and class."
+  (let ((key
+         (wf:form-key
+          (read-from-string
+           "(html-inspector-views:defview cl-user::probe-view (object cl-user::probe-class) nil)")))
+        (sibling
+         (wf:form-key
+          (read-from-string
+           "(html-inspector-views:defview cl-user::probe-view (object cl-user::other-class) nil)"))))
+    (assert
+     (equal
+      (list :view (intern "PROBE-VIEW" :cl-user)
+            (intern "PROBE-CLASS" :cl-user))
+      key))
+    (assert (not (equal key sibling)))
+    (assert
+     (not
+      (equal key
+             (wf:form-key
+              (read-from-string "(defun cl-user::probe-view () 1)"))))))
+  t)
+
 (defun run-cst-replace-tests ()
   (let ((environment (a:make-authoring-environment)))
     (test-targeted-replacement-preserves-everything-else environment)
@@ -406,13 +429,14 @@ is, so the key needs no HyperDoc package to compute."
     (test-refuses-zero-and-ambiguous-package-keys)
     (test-a-method-key-names-one-method)
     (test-an-example-key-names-one-example)
-    (test-a-class-key-names-one-class))
+    (test-a-class-key-names-one-class)
+    (test-a-view-key-names-one-method))
   (format t "~&CST-SOURCE-REPLACEMENT-PASS: one token changed and every other ~
 byte kept; duplicate, missing and malformed targets refused with the ~
 authority untouched; comment, spelling, whitespace and neighbour damage all ~
 fail verification; a package form is addressed by its designator's ~
 string, so one export clause can be edited while the package's reason, ~
 :USE and nicknames are not; a method is addressed by its qualifiers ~
-and specializers, apart from its siblings; and a class and a HyperDoc ~
-example by their names.~%")
+and specializers, apart from its siblings; a class and a HyperDoc ~
+example by their names; and a view by its name and the class it is for.~%")
   t)
