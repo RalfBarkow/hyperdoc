@@ -1322,6 +1322,39 @@
     (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/CODE-PAGE/TESTS
                               :RUN-CODE-PAGE-GESTURE-TESTS))))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/operation-request/authoring"
+  :DESCRIPTION
+  "Plan a fully specified operation request as an exact insertion; authoring-side, never in the Catalog"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/gesture/operation-request" "dreyeck/workflow/authoring")
+  :COMPONENTS
+  ((:FILE "dreyeck/src/gesture-operation-plan")))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/operation-request/authoring/tests"
+  :DESCRIPTION
+  "What turns an operation request into a plan, and what refuses to"
+  :LICENSE
+  "BSD"
+  :VERSION
+  "0.0.1"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/gesture/operation-request/authoring" "dreyeck/gesture/reading")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/gesture-operation-plan"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT)
+   (DECLARE (IGNORE ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/OPERATION-PLAN/TESTS
+                             :RUN-OPERATION-PLAN-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/clog"
   :DESCRIPTION
   "A CLOG window that owns one marking-menu interaction"
