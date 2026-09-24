@@ -9,11 +9,6 @@
 ;;;; Nothing here recognises anything. Every value is read back from an
 ;;;; object the transport and the reducer already produced, so the page
 ;;;; that uses it shows evidence rather than a retelling.
-;;;;
-;;;; The persisted race witnesses are not exported from the transport
-;;;; package, so they are named here with a double colon. That is the
-;;;; seventh place this repository has wanted a DEFPACKAGE export it
-;;;; cannot author structurally; it is recorded, not worked around.
 
 (defpackage #:dreyeck/gesture/ordering
   (:use #:cl)

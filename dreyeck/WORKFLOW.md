@@ -113,6 +113,34 @@ package forms in this repository carry comments inside their export lists that
 say why a group of symbols is published. A whole-form write of one of them was
 measured to reduce four comment lines to one.
 
+Not every persisted byte belongs to a form. The parsed representation of an
+authority is its source string and its top-level forms; a comment before the
+first form, between two forms or after the last one is covered by no CST node.
+That text is still source and can still be wrong, so an existing authority
+now has three ways to change, chosen by what owns the text:
+
+```
+a whole top-level form        whole-form replacement (PLAN-CHANGE)
+a subexpression of one form   targeted CST-source replacement
+text no form owns             targeted source-range replacement
+```
+
+`PLAN-SOURCE-RANGE-REPLACEMENT` / `REPLACE-OWNED-SOURCE-RANGE` take an exact
+range and the exact bytes expected there. The range is the address; the bytes
+are the evidence that the author saw what is being replaced, and if they are
+not at the range nothing is relocated. The domain is disjoint from the CST
+path by construction: a range that shares a byte with any node is refused and
+sent to the targeted CST replacement, so the weaker operation cannot be used
+to reach text the stronger one protects. It is not generic text editing.
+
+One postcondition is specific to it. A comment is a comment only because of
+the bytes around it, and a replacement carrying a newline turns what follows
+into code. That result parses cleanly; what catches it is that the top-level
+forms, compared in order with `FORM-EQUAL`, must be the same forms. Their
+offsets are not compared, because a replacement of a different length moves
+them legitimately. The candidate is written, verified as written, and only
+then installed, so a refusal leaves the authority byte-identical.
+
 Creating a source authority and mutating one are two different authoring
 operations. The structural writer protects the identity and the neighbourhood
 of forms that are already persisted. A path that is not yet a source authority

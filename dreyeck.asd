@@ -1891,7 +1891,8 @@
                                 :DEPENDS-ON ("dreyeck/workflow") :COMPONENTS
                                 ((:FILE "dreyeck/src/workflow-authoring")
                                  (:FILE "dreyeck/src/workflow-insert")
-                                 (:FILE "dreyeck/src/workflow-cst-replace")))
+                                 (:FILE "dreyeck/src/workflow-cst-replace")
+                                 (:FILE "dreyeck/src/workflow-source-range")))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading" :DESCRIPTION
                                 "Executable ownership, persistence and reconstruction reading"
@@ -1913,7 +1914,8 @@
                                 :COMPONENTS
                                 ((:FILE "dreyeck/tests/workflow-authoring")
                                  (:FILE "dreyeck/tests/workflow-insert")
-                                 (:FILE "dreyeck/tests/workflow-cst-replace"))
+                                 (:FILE "dreyeck/tests/workflow-cst-replace")
+                                 (:FILE "dreyeck/tests/workflow-source-range"))
                                 :PERFORM
                                 (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
                                                           (DECLARE
@@ -1928,7 +1930,10 @@
                                                                                     :RUN-INSERT-TESTS)
                                                           (UIOP/PACKAGE:SYMBOL-CALL
                                                                                     :DREYECK/WORKFLOW/CST-REPLACE/TESTS
-                                                                                    :RUN-CST-REPLACE-TESTS)))
+                                                                                    :RUN-CST-REPLACE-TESTS)
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/WORKFLOW/SOURCE-RANGE/TESTS
+                                                                                    :RUN-SOURCE-RANGE-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading/tests"
   :DEPENDS-ON
