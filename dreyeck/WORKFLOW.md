@@ -55,7 +55,7 @@ Ownership and outstanding change are useful conceptual continuations of the File
 
 `RECONSTRUCT` loads the persisted ASDF system. Ordinary runtime contains the PERSIST-IN generic protocol but no implicit writer method. `workflow-authoring.lisp` supplies the sole executor only with an explicit authoring capability. It uses the existing stale-source and reader-recovery guards, reparses, compares intended and unrelated forms, then starts fresh pinned SBCL and checks the supplied expectation. A failed fresh check is an error; the written source is not reported as accepted and is not automatically rolled back. Child stdout/stderr are retained in the diagnostic.
 
-The authoring environment is `nix develop .#workflow-authoring`. Its independent lock input pins html-inspector-views `4b0607d93b193e21bd2ca5dc0d7e47c062ac8112`, NAR hash `sha256-zxGKX51RIHI9zPB3Aa9hPC3AOy+2h2FPqy30Uk00XQY=`. The ordinary runtime pin remains `386df8937a21457b3d91e1b61e070f836550ff71`. No local html-inspector-views checkout is a reconstruction dependency.
+The authoring environment is `nix develop .#workflow-authoring`. Its independent lock input pins html-inspector-views `38afb02d79838d4098589c2e203ba39799a44853`, NAR hash `sha256-Txz+XCWJZd99DLNVIBr/MSG1BXwPI7B4Xp3FuRkrwo4=`. The ordinary runtime pin remains `386df8937a21457b3d91e1b61e070f836550ff71`. No local html-inspector-views checkout is a reconstruction dependency.
 
 Fresh children restore the ordinary source registry, remove authoring variables and invoke Nix's `sbcl` wrapper. Direct invocation of the underlying binary was falsified by a missing CL-WHO dependency; bypassing the wrapper lost Nix library initialization. The strengthened fixture depends on the real workflow and checks that the child has no structural writer or authoring marker while reconstructing its changed answer.
 
@@ -91,9 +91,11 @@ the edit is made on a candidate file and installed by renaming.
 
 Which top-level forms can be addressed at all is `FORM-KEY`'s business, and
 it is deliberately a short list: `DEFUN`, `DEFPARAMETER`, `DEFINE-CONDITION`,
-`DEFPACKAGE`, `DEFMETHOD`, `DEFSYSTEM`. A method shares its name with its
-siblings, so its key carries its qualifiers and the specializers of its
-required parameters. A package key carries the designator's *string*, not
+`DEFPACKAGE`, `DEFMETHOD`, `DEFSYSTEM`, and HyperDoc's `DEFEXAMPLE`. A method
+shares its name with its siblings, so its key carries its qualifiers and the
+specializers of its required parameters. `DEFEXAMPLE`, like `DEFSYSTEM`, is
+recognised by its operator's name, because the workflow package does not
+depend on HyperDoc. A package key carries the designator's *string*, not
 the designator:
 
 ```

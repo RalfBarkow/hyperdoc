@@ -363,6 +363,22 @@ take part in dispatch and do not take part in the key."
     (assert (not (equal plain around))))
   t)
 
+(defun test-an-example-key-names-one-example ()
+  "A HyperDoc DEFEXAMPLE is recognised by its operator's name, as DEFSYSTEM
+is, so the key needs no HyperDoc package to compute."
+  (let ((key
+         (wf:form-key
+          (read-from-string
+           "(cl-user::defexample cl-user::probe-example (list 1))"))))
+    (assert (equal (list :example (intern "PROBE-EXAMPLE" :cl-user)) key))
+    (assert
+     (not
+      (equal key
+             (wf:form-key
+              (read-from-string
+               "(cl-user::defexample cl-user::other (list 1))"))))))
+  t)
+
 (defun run-cst-replace-tests ()
   (let ((environment (a:make-authoring-environment)))
     (test-targeted-replacement-preserves-everything-else environment)
@@ -375,12 +391,14 @@ take part in dispatch and do not take part in the key."
     (test-a-package-key-does-not-fold-case)
     (test-edits-an-export-clause-without-reserializing environment)
     (test-refuses-zero-and-ambiguous-package-keys)
-    (test-a-method-key-names-one-method))
+    (test-a-method-key-names-one-method)
+    (test-an-example-key-names-one-example))
   (format t "~&CST-SOURCE-REPLACEMENT-PASS: one token changed and every other ~
 byte kept; duplicate, missing and malformed targets refused with the ~
 authority untouched; comment, spelling, whitespace and neighbour damage all ~
 fail verification; a package form is addressed by its designator's ~
 string, so one export clause can be edited while the package's reason, ~
-:USE and nicknames are not; and a method is addressed by its qualifiers ~
-and specializers, apart from its siblings.~%")
+:USE and nicknames are not; a method is addressed by its qualifiers ~
+and specializers, apart from its siblings; and a HyperDoc example by its ~
+name.~%")
   t)

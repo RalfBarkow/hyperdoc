@@ -10,7 +10,7 @@
     };
 
     workflow-source-editor = {
-      url = "https://codeberg.org/rgb/html-inspector-views/archive/4b0607d93b193e21bd2ca5dc0d7e47c062ac8112.tar.gz";
+      url = "https://codeberg.org/rgb/html-inspector-views/archive/38afb02d79838d4098589c2e203ba39799a44853.tar.gz";
       flake = false;
     };
 
@@ -212,7 +212,7 @@
             shellHook = ''
               export HYPERDOC_RUNTIME_SOURCE_REGISTRY="$CL_SOURCE_REGISTRY"
               export HYPERDOC_WORKFLOW_EDITOR_SOURCE="${workflow-source-editor}"
-              export HYPERDOC_WORKFLOW_EDITOR_COMMIT="4b0607d93b193e21bd2ca5dc0d7e47c062ac8112"
+              export HYPERDOC_WORKFLOW_EDITOR_COMMIT="38afb02d79838d4098589c2e203ba39799a44853"
               export CL_SOURCE_REGISTRY="${workflow-source-editor}//:$CL_SOURCE_REGISTRY"
             '';
           };

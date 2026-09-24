@@ -20,7 +20,7 @@
                     (TRUENAME
                      (ASDF/SYSTEM:SYSTEM-SOURCE-DIRECTORY
                       "html-inspector-views/standard")))
-             (STRING= "4b0607d93b193e21bd2ca5dc0d7e47c062ac8112"
+             (STRING= "38afb02d79838d4098589c2e203ba39799a44853"
                       (UIOP/OS:GETENV "HYPERDOC_WORKFLOW_EDITOR_COMMIT"))
              (FBOUNDP 'HV::REPLACE-CST-EXPRESSION-IN-FILE))
       (ERROR
@@ -136,7 +136,7 @@
                  (WF:CHANGE-FUNCTION CHANGE) :PLAN PLAN :EXPECTATION
                  (COPY-TREE (WF:PLAN-EXPECTATION PLAN)) :FRESH-PROOF OUTPUT
                  :SCOPE :EXPLICIT-EXPECTATION :WRITER-COMMIT
-                 "4b0607d93b193e21bd2ca5dc0d7e47c062ac8112")))
+                 "38afb02d79838d4098589c2e203ba39799a44853")))
       (SETF (SLOT-VALUE CHANGE 'WF::RECONSTRUCTION-PROOF) PROOF)
       PROOF)))
 
@@ -314,7 +314,7 @@ and the comparison before the restoring rename is not a compare-and-swap."
            (WF:VERIFY-CHANGE CHANGE PLAN ENVIRONMENT)
            (LIST :STATUS :VERIFIED :PLAN PLAN :FRESH-PROOF
                  (VERIFY-FRESH PLAN ENVIRONMENT) :WRITER-COMMIT
-                 "4b0607d93b193e21bd2ca5dc0d7e47c062ac8112"))
+                 "38afb02d79838d4098589c2e203ba39799a44853"))
        (ERROR (CONDITION)
               (%RESTORE-OBSERVED-SOURCE AUTHORITY OBSERVED INSTALLED
                                         CONDITION))))))

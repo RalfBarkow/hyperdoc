@@ -263,15 +263,15 @@
     "workflow-source-editor": {
       "flake": false,
       "locked": {
-        "lastModified": 1788164787,
-        "narHash": "sha256-zxGKX51RIHI9zPB3Aa9hPC3AOy+2h2FPqy30Uk00XQY=",
-        "rev": "4b0607d93b193e21bd2ca5dc0d7e47c062ac8112",
+        "lastModified": 1790259902,
+        "narHash": "sha256-Txz+XCWJZd99DLNVIBr/MSG1BXwPI7B4Xp3FuRkrwo4=",
+        "rev": "38afb02d79838d4098589c2e203ba39799a44853",
         "type": "tarball",
-        "url": "https://codeberg.org/api/v1/repos/rgb/html-inspector-views/archive/4b0607d93b193e21bd2ca5dc0d7e47c062ac8112.tar.gz"
+        "url": "https://codeberg.org/api/v1/repos/rgb/html-inspector-views/archive/38afb02d79838d4098589c2e203ba39799a44853.tar.gz"
       },
       "original": {
         "type": "tarball",
-        "url": "https://codeberg.org/rgb/html-inspector-views/archive/4b0607d93b193e21bd2ca5dc0d7e47c062ac8112.tar.gz"
+        "url": "https://codeberg.org/rgb/html-inspector-views/archive/38afb02d79838d4098589c2e203ba39799a44853.tar.gz"
       }
     }
   },

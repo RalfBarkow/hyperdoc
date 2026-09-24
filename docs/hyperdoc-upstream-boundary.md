@@ -49,7 +49,7 @@ Observation/comparison produce evidence. Decisions and application remain separa
 
 ## Authoring and reconstruction
 
-Lisp/ASDF mutations use html-inspector-views structural authoring commit `4b0607d93b193e21bd2ca5dc0d7e47c062ac8112` in the isolated pinned authoring environment. Each targeted edit is reparsed and compared with its intended form and unchanged surrounding forms. The ordinary runtime pin remains `386df8937a21457b3d91e1b61e070f836550ff71`; no Nix pin changed. The editor checkout is not a runtime requirement.
+Lisp/ASDF mutations use html-inspector-views structural authoring commit `38afb02d79838d4098589c2e203ba39799a44853` in the isolated pinned authoring environment. Each targeted edit is reparsed and compared with its intended form and unchanged surrounding forms. The ordinary runtime pin remains `386df8937a21457b3d91e1b61e070f836550ff71`; no Nix pin changed. The editor checkout is not a runtime requirement.
 
 Run `sh scripts/check-upstream-boundary.sh` for the fresh ordinary and TALA matrices. Source-comparison tests require the locally retained upstream object and pre-refactor history; they never fetch it. Runtime reconstruction and Catalog startup do not load candidate source or structural authoring. The boundary test must start before any dreyeck page/HyperSpec policy is loaded.
 
