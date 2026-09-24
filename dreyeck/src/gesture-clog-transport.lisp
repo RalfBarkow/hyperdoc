@@ -58,7 +58,8 @@ number would put a hole in the queue."
     ("pointermove" . :pointer-move)
     ("pointerup" . :pointer-up)
     ("pointercancel" . :pointer-cancel)
-    ("lostpointercapture" . :lost-pointer-capture)))
+    ("lostpointercapture" . :lost-pointer-capture)
+    ("gesturerevealdeadline" . :reveal-deadline)))
 
 (defun forwarding-script (host-script)
   "HOST-SCRIPT with BUTTONS and a browser-assigned sequence appended.
@@ -68,6 +69,46 @@ nothing about what is still held."
   (concatenate 'string host-script
                " + ':' + e.buttons + ':' + (window.__gestureSeq="
                "(window.__gestureSeq||0)+1)"))
+
+(defun reveal-timer-script (target-expression &key (reveal-delay-ms 500))
+  "JavaScript turning press-and-wait into a forwarded transport event.
+This is where the threshold lives. The reducer knows no duration and the
+queue knows no duration; the browser schedules the wait and reports that
+it elapsed, and the report is ordered with the pointer events because it
+is dispatched as one of them.
+
+Kurtenbach and Buxton report approximately 1/3 second for press-and-wait.
+This witness uses 500 ms. That is our parameter choice, not a reading of
+the paper.
+
+The timeout is cleared on a browser-observed release, so an interaction
+that ends before the wait elapses produces no deadline at all. It is NOT
+cleared when movement begins marking: if the callback still runs, the
+event is forwarded and the reducer records it as obsolete, which is
+evidence that movement won the ordering race. A deadline that arrives
+after the input session closed for any other reason is dropped by the
+adapter, so nothing here needs to hear back from Lisp.
+
+The sequence number is not allocated when the timeout is scheduled. It is
+allocated by the forwarding script when the callback actually runs."
+  (format nil "(function () {
+  var target = ~A;
+  var timer = null;
+  function clear () { if (timer !== null) { clearTimeout(timer); timer = null; } }
+  target.addEventListener('pointerdown', function (event) {
+    clear();
+    timer = setTimeout(function () {
+      timer = null;
+      target.dispatchEvent(new PointerEvent('gesturerevealdeadline',
+        {bubbles: true, clientX: event.clientX, clientY: event.clientY,
+         buttons: event.buttons}));
+    }, ~D);
+  }, true);
+  ['pointerup', 'pointercancel'].forEach(function (kind) {
+    target.addEventListener(kind, clear, true);
+  });
+})();"
+          target-expression reveal-delay-ms))
 
 (defun trailing-transport-fields (data)
   "The BUTTONS and SEQUENCE this transport appended, as two values.
@@ -232,6 +273,15 @@ is kept, and closing the input session is what keeps it kept."))
              (%close session :pointer-cancel envelope
                      :initiating-button-no-longer-held)
              (%append session :pointer-move envelope))))
+      (:reveal-deadline
+       ;; Press-and-wait, as the browser observed it. Whether it reveals a
+       ;; menu or is merely obsolete is the reducer's business and depends
+       ;; only on where this envelope sits in the delivered order. A
+       ;; deadline arriving after the session closed is dropped here, which
+       ;; is why a cancelled timer needs no feedback from Lisp to the
+       ;; browser: the adapter already refuses it.
+       (when (eq (input-session-status session) :active)
+         (%append session :reveal-deadline envelope)))
       (:lost-pointer-capture
        ;; Never terminal by itself. A host that releases capture on every
        ;; pointerup produces this on an ordinary completion too.
@@ -271,6 +321,45 @@ is kept, and closing the input session is what keeps it kept."))
   (make-transport-envelope
    :sequence sequence :kind kind :x x :y y :which which :buttons buttons
    :target (list :type :lisp-source-definition :name 'gesture-transport)))
+
+(defun %race-witness (kinds arrival)
+  "Feed one ordered transport from a deliberately scrambled arrival.
+KINDS is the browser order; ARRIVAL is the order the callback threads
+happened to enqueue in. The two lists are kept apart in the witness so
+the difference is readable rather than asserted."
+  (let* ((witness (make-gesture-transport-witness))
+         (transport (witness-transport witness))
+         (input (witness-input witness))
+         (envelopes
+          (loop for (kind . arguments) in kinds
+                for sequence from 1
+                collect (apply #'%envelope sequence kind arguments))))
+    (dolist (sequence arrival witness)
+      (enqueue-envelope transport
+                        (find sequence envelopes :key
+                              #'transport-envelope-sequence))
+      (drain-transport transport
+                       (lambda (envelope) (consume-envelope input envelope))))))
+
+(defun movement-wins-witness ()
+  "The pointer left the dead zone before the browser reported the wait.
+The deadline callback's own envelope arrives at Lisp before the move's,
+which changes nothing: the queue releases them in browser order, so the
+move makes a mark and the deadline is merely obsolete."
+  (%race-witness
+   '((:pointer-down :which 3 :buttons 2) (:pointer-move :x 20 :buttons 2)
+     (:reveal-deadline :x 20 :buttons 2))
+   '(1 3 2)))
+
+(defun deadline-wins-witness ()
+  "The same movement, after the browser reported that the wait elapsed.
+Identical geometry to MOVEMENT-WINS-WITNESS; the only difference is where
+the deadline sits in the browser's own order, and that is enough to select
+a different Binding."
+  (%race-witness
+   '((:pointer-down :which 3 :buttons 2) (:reveal-deadline :x 0 :buttons 2)
+     (:pointer-move :x 20 :buttons 2))
+   '(1 3 2)))
 
 (defun scrambled-expert-marking-witness ()
   "The expert marking trace, enqueued out of order and delivered in order.

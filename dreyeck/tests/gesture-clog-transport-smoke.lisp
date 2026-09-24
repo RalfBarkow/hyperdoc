@@ -218,13 +218,50 @@
 ;;; The browser bridge, as data
 
 (defun test-browser-bridge-contract ()
-  (let ((script (t*:forwarding-script "HOST")))
+  (let ((script (t*:forwarding-script "HOST"))
+        (kinds (t*:transport-event-kinds)))
     (assert (search "e.buttons" script))
-    (assert (search "__gestureSeq" script))
-    ;; The counter runs over exactly the forwarded kinds.
-    (assert (= 5 (length (t*:transport-event-kinds))))
-    (assert (null (assoc "contextmenu" (t*:transport-event-kinds)
-                         :test #'string=))))
+    ;; One counter, for every forwarded kind. A second counter would
+    ;; number the deadline independently of the pointer events, and the
+    ;; contiguous queue would then wait forever for a sequence that the
+    ;; other counter had already used.
+    (let ((counters (loop with start = 0
+                          for position = (search "window.__" script
+                                                 :start2 start)
+                          while position
+                          collect (subseq script position
+                                          (position-if-not #'alphanumericp
+                                                           script
+                                                           :start (+ position 9)))
+                          do (setf start (1+ position)))))
+      (assert (= 2 (length counters)))
+      (assert (every (lambda (name) (string= "window.__gestureSeq" name))
+                     counters)))
+    (assert (not (search "e.type" script)))
+    ;; The counter runs over exactly the forwarded kinds, named here so
+    ;; the number stays attached to its reason.
+    (assert (equal '("pointerdown" "pointermove" "pointerup" "pointercancel"
+                     "lostpointercapture" "gesturerevealdeadline")
+                   (mapcar #'car kinds)))
+    (assert (equal :reveal-deadline (cdr (assoc "gesturerevealdeadline" kinds
+                                                :test #'string=))))
+    ;; CONTEXTMENU is suppressed in the browser and never numbered: a hole
+    ;; in the sequence is a consumer that waits forever.
+    (assert (null (assoc "contextmenu" kinds :test #'string=))))
+  ;; The press-and-wait threshold has exactly one owner, and it is here.
+  (let ((timer (t*::reveal-timer-script "document.body")))
+    (assert (search "setTimeout" timer))
+    (assert (search "clearTimeout" timer))
+    (assert (search "gesturerevealdeadline" timer))
+    (assert (search ", 500)" timer))
+    ;; Cleared on a browser-observed release, and on nothing else: if the
+    ;; callback runs after movement won, the reducer calls it obsolete.
+    (assert (search "pointerup" timer))
+    (assert (search "pointercancel" timer))
+    (assert (not (search "marking" timer)))
+    ;; And the threshold is configuration, not a constant of the model.
+    (assert (search ", 333)" (t*::reveal-timer-script "document.body"
+                                                      :reveal-delay-ms 333))))
   (multiple-value-bind (buttons sequence)
       (t*:trailing-transport-fields "12:34:56:2:41")
     (assert (= 2 buttons))
@@ -259,6 +296,120 @@
                                "dreyeck" (first entry))
                               (second entry) (third entry)))))
 
+(defun test-press-and-wait-is-ordered-by-the-browser ()
+  "Kurtenbach and Buxton describe one interaction with two continuations:
+press and wait, or move at once. Which one happened is decided by the
+browser's own order, and these two traces differ in nothing else."
+  (let* ((moving (t*::movement-wins-witness))
+         (waiting (t*::deadline-wins-witness))
+         (m (t*:witness-state moving))
+         (w* (t*:witness-state waiting)))
+    (assert (equal '(1 3 2) (getf m :callback-arrival)))
+    (assert (equal '(1 2 3) (getf m :consumer-delivery)))
+    (assert (eq :marking (w:gesture-session-mode-of (getf m :gesture))))
+    (assert
+     (equal '(:idle->pressed :pressed->marking :marking->sector-selected)
+            (mapcar (lambda (s) (getf s :transition-id))
+                    (sm:state-machine-run-transition-trace-of
+                     (getf m :gesture)))))
+    (assert
+     (member :obsolete-reveal-deadline
+             (mapcar (lambda (o) (getf o :reason))
+                     (w:gesture-session-observations-of (getf m :gesture)))))
+    (assert
+     (string= "binding/mark-insert-defexample"
+              (w:gesture-binding-id
+               (w:gesture-session-selected-binding-of (getf m :gesture)))))
+    (assert (equal '(1 2 3) (getf w* :consumer-delivery)))
+    (assert (eq :menu-visible (w:gesture-session-mode-of (getf w* :gesture))))
+    (assert
+     (equal
+      '(:idle->pressed :pressed->menu-visible :menu-visible->sector-selected)
+      (mapcar (lambda (s) (getf s :transition-id))
+              (sm:state-machine-run-transition-trace-of (getf w* :gesture)))))
+    (assert
+     (string= "binding/radial-insert-defexample"
+              (w:gesture-binding-id
+               (w:gesture-session-selected-binding-of (getf w* :gesture)))))
+    (assert
+     (eq (w:gesture-session-selected-operation-of (getf m :gesture))
+         (w:gesture-session-selected-operation-of (getf w* :gesture))))
+    (assert
+     (not
+      (eq (w:gesture-session-selected-binding-of (getf m :gesture))
+          (w:gesture-session-selected-binding-of (getf w* :gesture)))))
+    t))
+
+(defun test-a-closed-session-drops-a-late-deadline ()
+  "The cancelled-timer boundary, established rather than assumed.
+The bridge clears a timeout on a browser-observed release, so an ordinary
+interaction produces no late deadline at all. When the session closed for
+some other reason -- the initiating button vanishing, say -- the adapter
+is what refuses the deadline, and no feedback from Lisp to the browser is
+invented to prevent it. The reducer's own condition stays a contract and
+is exercised directly below."
+  (dolist (terminator '(:pointer-up :pointer-cancel))
+    (let* ((transport (t*:make-ordered-transport))
+           (input (t*:make-gesture-input-session)))
+      (%feed input transport
+             (list (%envelope 1 :pointer-down :which 3 :buttons 2)
+                   (%envelope 2 :pointer-move :x 20 :buttons 2)
+                   (%envelope 3 terminator :x 20 :which 3 :buttons 0)
+                   (%envelope 4 :reveal-deadline :x 20 :buttons 0)))
+      (assert (eq :closed (t*:input-session-status input)))
+      (assert
+       (notany
+        (lambda (s) (eq :reveal-deadline (w:gesture-input-sample-kind s)))
+        (sm:state-machine-run-input-of
+         (t*:input-session-gesture-session input))))))
+  (let* ((transport (t*:make-ordered-transport))
+         (input (t*:make-gesture-input-session)))
+    (%feed input transport
+           (list (%envelope 1 :pointer-down :which 3 :buttons 2)
+                 (%envelope 2 :pointer-move :x 20 :buttons 2)
+                 (%envelope 3 :pointer-move :x 30 :buttons 0)
+                 (%envelope 4 :reveal-deadline :x 30 :buttons 0)))
+    (assert (eq :closed (t*:input-session-status input)))
+    (assert
+     (eq :cancelled
+         (sm:state-machine-run-current-state-of
+          (t*:input-session-gesture-session input))))
+    (assert
+     (notany (lambda (s) (eq :reveal-deadline (w:gesture-input-sample-kind s)))
+             (sm:state-machine-run-input-of
+              (t*:input-session-gesture-session input))))
+    (let ((message
+           (%signals
+            (lambda ()
+              (w:run-gesture-trace
+               (append (reverse (t*:input-session-prefix input))
+                       (list
+                        (w:make-gesture-input-sample :kind :reveal-deadline :x
+                                                     30.0d0 :y 0.0d0 :timestamp
+                                                     9999))))))))
+      (assert message)
+      (assert (search "after terminal state" message))))
+  t)
+
+(defun test-no-state-depends-on-a-timestamp ()
+  "The clock regression for 6bf842bd, at transport level.
+The consumer stamps a sample when it gets round to it. Here the deadline
+is stamped earlier than the old REVEAL-AT would have allowed, and it
+still reveals the menu, because nothing compares it to anything."
+  (let* ((transport (t*:make-ordered-transport))
+         (input (t*:make-gesture-input-session)))
+    (%feed input transport
+           (list (%envelope 1 :pointer-down :which 3 :buttons 2)
+                 (%envelope 2 :reveal-deadline :x 0 :buttons 2)))
+    (let* ((session (t*:input-session-gesture-session input))
+           (stamps
+            (mapcar #'w:gesture-input-sample-timestamp
+                    (sm:state-machine-run-input-of session))))
+      (assert (eq :menu-visible (w:gesture-session-mode-of session)))
+      (assert (every #'integerp stamps))
+      (assert (< (second stamps) 500))))
+  t)
+
 (defun run-gesture-transport-tests ()
   (test-unordered-arrival-is-delivered-in-order)
   (test-contiguous-blocking)
@@ -268,9 +419,13 @@
   (test-capture-loss-alone-is-not-terminal)
   (test-concurrent-enqueue-has-no-terminal-race)
   (test-browser-bridge-contract)
+  (test-press-and-wait-is-ordered-by-the-browser)
+  (test-a-closed-session-drops-a-late-deadline)
+  (test-no-state-depends-on-a-timestamp)
   (test-witness)
   (test-created-source-authorities)
   (format t "~&GESTURE-TRANSPORT-PASS: out-of-order arrival delivered in ~
 browser order, a missing sequence blocks the ones behind it, only the ~
-consumer mutates, a real release completes and a vanished button cancels.~%")
+consumer mutates, a real release completes, a vanished button cancels, and ~
+press-and-wait wins or loses the race by the browser's order alone.~%")
   t)

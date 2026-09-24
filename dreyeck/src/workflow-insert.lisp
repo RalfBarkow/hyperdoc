@@ -185,10 +185,17 @@ been written to."
                  (let ((after (wf:source-forms candidate)))
                    (verify-insertion plan index after)
                    ;; And the consumer must be able to read what was written.
-                   (let ((counted (read-in-target-reader-context candidate)))
-                     (unless (eql counted (length after))
-                       (error "The consumer reads ~D forms where the authority ~
-has ~D." counted (length after))))
+                   (when (string-equal "asd" (pathname-type authority))
+                     ;; Only a system definition is read by ASDF, in
+                     ;; ASDF-USER with nothing else loaded. An ordinary
+                     ;; source file's consumer is the loader, after the
+                     ;; file's own DEFPACKAGE has run, so reading it that
+                     ;; way would reject perfectly good source for naming
+                     ;; a package the check never gave it.
+                     (let ((counted (read-in-target-reader-context candidate)))
+                       (unless (eql counted (length after))
+                         (error "The consumer reads ~D forms where the ~
+authority has ~D." counted (length after)))))
                    (rename-file candidate authority)
                    (setf installed t)
                    after)))))
