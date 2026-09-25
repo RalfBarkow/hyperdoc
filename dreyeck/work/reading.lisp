@@ -422,12 +422,13 @@ string is parsed, scanned for relationship occurrences and kept by each."
 ;;;; Relation change requests
 ;;
 ;; A request to change which Relation Contract one authored relationship
-;; uses. It names the authored <li> by its source occurrence, not by the
-;; semantic triple, so of two <li>s stating the same relationship it names
-;; one. Making it observes and writes nothing; it grants no permission and
-;; holds no executor. What the change would replace is fully determined --
-;; the occurrence's data-relation value range and the proposed contract's
-;; Topic ID -- so no separate plan is derived. Whether a changed relation
+;; statement uses. It names the authored relationship statement by its
+;; source occurrence, not by the semantic triple, so of two statements of
+;; the same relationship it names one. Making it observes and writes
+;; nothing; it grants no permission and holds no executor. The request
+;; records the proposed structural change and its exact authored source
+;; occurrence. Translating that request into a concrete source edit belongs
+;; to a later, representation-specific plan. Whether a changed relation
 ;; makes the same Association or another one is not decided here: the
 ;; request concerns the authored statement.
 
@@ -449,25 +450,25 @@ any, is the condition that showed why."))
    (observed-contract :initarg :observed-contract :reader relation-change-observed-contract)
    (proposed-contract :initarg :proposed-contract :reader relation-change-proposed-contract))
   (:documentation "Change relation for one exact authored Work relationship:
-the projected Association, its source occurrence -- which authored <li> --
+the projected Association, the source occurrence of its authored statement,
 the relation observed there and the Relation Contract Topic proposed in its
 place. Intent and evidence only; no executor, no permission."))
 
 (defun relation-change-proposed-relation (request)
-  "The relation reference the change would write: the contract's Topic ID."
+  "The proposed relation reference: the Relation Contract Topic ID."
   (tm:topicmap-topic-id-of (relation-change-proposed-contract request)))
 
 (defmethod print-object ((request relation-change-request) stream)
   (print-unreadable-object (request stream :type t)
-    (format stream "~A -> ~A at ~S" (relation-change-observed-relation request)
+    (format stream "~A -> ~A, occurrence ~D" (relation-change-observed-relation request)
             (relation-change-proposed-relation request)
-            (relationship-occurrence-element-range (relation-change-occurrence request)))))
+            (relationship-occurrence-ordinal (relation-change-occurrence request)))))
 
 (defun request-relation-change (association proposed &key (current nil current-p))
-  "A request to make the authored <li> behind ASSOCIATION use the Relation
-Contract whose Topic ID is PROPOSED. CURRENT is the page source now, read
-from the occurrence's page unless given. Observes, writes nothing, and
-signals RELATION-CHANGE-REFUSED unless every check holds."
+  "A request to make the authored relationship statement behind ASSOCIATION
+use the Relation Contract whose Topic ID is PROPOSED. CURRENT is the page
+source now, read from the occurrence's page unless given. Observes, writes
+nothing, and signals RELATION-CHANGE-REFUSED unless every check holds."
   (flet ((refuse (reason &optional cause)
            (error 'relation-change-refused :association association :reason reason :cause cause)))
     (unless (typep association 'tm:topicmap-association)
@@ -483,13 +484,13 @@ signals RELATION-CHANGE-REFUSED unless every check holds."
         (handler-case (resolve-work-relationship-occurrence occurrence :current current)
           (stale-work-relationship-occurrence (condition)
             (refuse "its source occurrence is stale" condition)))
-        (let ((observed (tm:topicmap-association-type-of association))
-              (range (relationship-occurrence-relation-range occurrence)))
-          (unless (and (equal observed (relationship-occurrence-relation occurrence))
-                       (string= observed current :start2 (car range) :end2 (cdr range)))
-            (refuse (format nil "the Association says ~S but its occurrence records ~S and the source has ~S"
-                            observed (relationship-occurrence-relation occurrence)
-                            (subseq current (car range) (cdr range)))))
+        ;; The occurrence's own source bytes were checked when it resolved.
+        ;; What remains is whether the projected Association agrees with the
+        ;; authored statement it was projected from.
+        (let ((observed (tm:topicmap-association-type-of association)))
+          (unless (equal observed (relationship-occurrence-relation occurrence))
+            (refuse (format nil "the Association says ~S but its source occurrence records ~S"
+                            observed (relationship-occurrence-relation occurrence))))
           (unless (stringp proposed)
             (refuse (format nil "~S is not a Relation Contract Topic ID" proposed)))
           (when (equal proposed observed)
@@ -517,7 +518,6 @@ signals RELATION-CHANGE-REFUSED unless every check holds."
     (let* ((occurrence (relation-change-occurrence request))
            (snapshot (relationship-occurrence-snapshot occurrence))
            (element (relationship-occurrence-element-range occurrence))
-           (relation (relationship-occurrence-relation-range occurrence))
            (page (relationship-occurrence-page occurrence))
            (observed (relation-change-observed-contract request))
            (proposed (relation-change-proposed-contract request)))
@@ -525,14 +525,12 @@ signals RELATION-CHANGE-REFUSED unless every check holds."
         (:table :class "inspector-table"
           (:tr (:td "Operation")
                (:td (:tt (views:esc (w:semantic-operation-identity-id (relation-change-operation request))))))
-          (:tr (:td "Association") (:td (views:object-ref (relation-change-association request))))
+          (:tr (:td "Projected Association") (:td (views:object-ref (relation-change-association request))))
           (:tr (:td "Source page")
                (:td (if (typep page 'hyperbook:page)
                         (views:object-ref page)
                         (views:html (:tt (views:esc (prin1-to-string page)))))))
           (:tr (:td "Source occurrence") (:td (views:object-ref occurrence)))
-          (:tr (:td "Element range") (:td (:tt (views:esc (prin1-to-string element)))))
-          (:tr (:td "Relation value range") (:td (:tt (views:esc (prin1-to-string relation)))))
           (:tr (:td "Observed relation") (:td (:tt (views:esc (relation-change-observed-relation request)))))
           (:tr (:td "Observed Relation Contract")
                (:td (if observed
@@ -541,11 +539,11 @@ signals RELATION-CHANGE-REFUSED unless every check holds."
           (:tr (:td "Proposed Relation Contract")
                (:td (views:object-ref proposed :display (tm:topicmap-topic-id-of proposed))))
           (:tr (:td "Executed") (:td "no -- a request holds no writer and grants no permission")))
-        (:p "Authored " (:tt (views:esc "<li>")) ", exactly as observed:")
-        (:pre (views:esc (subseq snapshot (car element) (cdr element))))
-        (:p "Would replace only the relation value at " (:tt (views:esc (prin1-to-string relation))) ": "
-            (:tt (views:esc (subseq snapshot (car relation) (cdr relation)))) " → "
-            (:tt (views:esc (relation-change-proposed-relation request))))))))
+        (:p "Proposed change: "
+            (:tt (views:esc (relation-change-observed-relation request))) " → "
+            (:tt (views:esc (relation-change-proposed-relation request))))
+        (:p "Authored statement, as observed in the page source:")
+        (:pre (views:esc (subseq snapshot (car element) (cdr element))))))))
 
 (hyperdoc:defexample work-workspace
   "Navigate the documented work and its concepts with native Workspace actions."

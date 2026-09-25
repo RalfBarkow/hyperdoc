@@ -844,8 +844,9 @@ after the move at DEADLINE-AFTER ms, if given, as the browser delivered it."
                              "<li data-from=\"interaction\" data-to=\"operations\" data-relation=\"work:relation/informs\">Stated a second time, in other words.</li>")))
 
 (defun replace-relation-value (occurrence value)
-  "Test-only evidence for later authoring: SNAPSHOT with just the recorded
-data-relation value replaced. Nothing is written."
+  "Test-only evidence for a future representation-specific plan: SNAPSHOT
+with just the recorded data-relation value replaced. Nothing is written,
+and no request contains this edit."
   (let ((snapshot (work:relationship-occurrence-snapshot occurrence))
         (range (work:relationship-occurrence-relation-range occurrence)))
     (concatenate 'string (subseq snapshot 0 (car range)) value (subseq snapshot (cdr range)))))
@@ -1008,7 +1009,8 @@ contract page, reused because the fixture needs some page object."
     (assert (equal "operation/change-relation" (w:semantic-operation-identity-id operation)))
     (assert (equal "Change relation" (w:semantic-operation-identity-title operation)))
     (assert (not (functionp operation)))
-    ;; A request names A1's authored <li>, not the triple A1 shares with A2.
+    ;; A request names A1's authored relationship statement by its source
+    ;; occurrence, not by the triple A1 shares with A2.
     (let ((request (work:request-relation-change a1 "work:relation/requires" :current fixture)))
       (assert (eq operation (work:relation-change-operation request)))
       (assert (eq a1 (work:relation-change-association request)))
@@ -1028,8 +1030,10 @@ contract page, reused because the fixture needs some page object."
       (assert (equal "relation" (getf (tm:topicmap-topic-view-properties-of
                                        (work:relation-change-proposed-contract request))
                                       :kind)))
-      ;; What a write would observe, computed in memory only: the relation
-      ;; value changes at A1's <li> and nowhere else.
+      ;; Test-only evidence for a future representation-specific plan,
+      ;; computed in memory: replacing the relation value in A1's source
+      ;; occurrence changes A1's statement and no other. The request itself
+      ;; describes no such edit.
       (let* ((expected (replace-relation-value o1 (work:relation-change-proposed-relation request)))
              (range (work:relationship-occurrence-relation-range o1))
              (delta (- (length (work:relation-change-proposed-relation request)) (- (cdr range) (car range))))
@@ -1054,12 +1058,32 @@ contract page, reused because the fixture needs some page object."
         (dolist (text '("operation/change-relation" "work:relation/informs" "work:relation/requires"
                         "&lt;li data-from=&quot;interaction&quot;" "Operations and change: informs."))
           (assert (search text html) () "The request view lacks ~S." text))
+        (dolist (text '("Proposed change" "Authored statement, as observed in the page source"))
+          (assert (search text html) () "The request view lacks ~S." text))
+        ;; No concrete source edit is described by the request.
+        (dolist (text '("Would replace" "Element range" "Relation value range"))
+          (assert (null (search text html)) () "The request view still shows ~S." text))
         (dolist (object (list a1 o1 (work:relation-change-proposed-contract request)
                               (work:relation-change-observed-contract request)))
           (assert (member object objects :test #'eq)))
         (assert (notany (lambda (entry) (or (eql 0 (search "action-" (car entry)))
                                             (eql 0 (search "eval-" (car entry)))))
                         (views:view-references view)))))
+    ;; Symmetric: A2's request retains O2. Neither request is addressed by
+    ;; the triple the two Associations share.
+    (let ((r1 (work:request-relation-change a1 "work:relation/requires" :current fixture))
+          (r2 (work:request-relation-change a2 "work:relation/requires" :current fixture)))
+      (assert (eq o1 (work:relation-change-occurrence r1)))
+      (assert (eq o2 (work:relation-change-occurrence r2)))
+      (assert (eq a2 (work:relation-change-association r2)))
+      (assert (not (eq (work:relation-change-occurrence r1)
+                       (work:relation-change-occurrence r2)))))
+    ;; The request holds the structural change and its occurrence, and no
+    ;; copied range or replacement text.
+    (assert (equal '("OPERATION" "ASSOCIATION" "OCCURRENCE" "OBSERVED-RELATION"
+                     "OBSERVED-CONTRACT" "PROPOSED-CONTRACT")
+                   (mapcar (lambda (slot) (symbol-name (sb-mop:slot-definition-name slot)))
+                           (sb-mop:class-slots (find-class 'work:relation-change-request)))))
     ;; Refusals: each names why, and nothing is requested.
     (flet ((refused (association proposed current fragment &optional cause-type)
              (let ((condition (change-refusal association proposed current)))
