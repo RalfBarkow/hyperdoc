@@ -260,11 +260,12 @@ Inspector. A refusal opens nothing."
 
 (defun %draw-association-menu (window snapshot element labels mark)
   "Show what the reducer says, beside ELEMENT, in menu elements that take no
-pointer input. Positions are the Binding angles around the press point."
+pointer input. Positions are the Binding angles around the press point.
+What is shown follows the binder's MENU-PRESENTATION, so a completed or
+cancelled interaction leaves nothing on the page."
   (destructuring-bind (x y) (dreyeck/gesture/clog::%press-point window)
-    (let ((binding (getf snapshot :binding))
-          (menu-visible (and (getf snapshot :menu-visible) t))
-          (marked (and (eq :marking (getf snapshot :mode)) (getf snapshot :binding) t)))
+    (multiple-value-bind (menu-visible marked binding)
+        (dreyeck/gesture/clog:menu-presentation snapshot)
       (flet ((place (sector label)
                (destructuring-bind (lx ly) (dreyeck/gesture/clog::%along sector x y)
                  (clog:js-execute
@@ -288,7 +289,8 @@ pointer input. Positions are the Binding angles around the press point."
             (string-downcase (princ-to-string (getf snapshot :mode)))
             (clog:attribute element "data-association-gesture-menu-visible")
             (if menu-visible "true" "false")
-            (clog:attribute element "data-association-gesture-binding") (or binding "")))))
+            (clog:attribute element "data-association-gesture-binding")
+            (or (getf snapshot :binding) "")))))
 
 (defun %association-menu-element (parent binding text)
   (let ((element (clog:create-div parent :content text)))

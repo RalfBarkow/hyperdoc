@@ -43,6 +43,7 @@
            #:connection-gesture-window #:create-gesture-surface
            #:gesture-window-selection #:newly-completed-p
            #:on-gesture-window #:install-gesture-route #:menu-bindings
+           #:menu-presentation
            #:open-gesture-windows))
 
 (in-package #:dreyeck/gesture/clog)
@@ -178,14 +179,24 @@ CSS pixels with y growing downward, and so does this."
             (or (getf result :binding) "-") (or (getf result :operation) "-")
             (getf result :shared-operation-p))))
 
+(defun menu-presentation (snapshot)
+  "What a surface shows for SNAPSHOT, as three values: whether the menu is
+shown, whether the mark is shown, and the ID of the Binding to highlight.
+The snapshot's :MENU-VISIBLE says the menu was revealed and stays true, as
+the mode stays :MARKING; those are the interaction's record. Once it is
+completed or cancelled the surface shows nothing of it."
+  (if (member (getf snapshot :state) '(:completed :cancelled))
+      (values nil nil nil)
+      (values (and (getf snapshot :menu-visible) t)
+              (and (eq :marking (getf snapshot :mode)) (getf snapshot :binding) t)
+              (getf snapshot :binding))))
+
 (defun %project (window snapshot target labels mark status)
   "Show what the reducer says, and nothing it does not. LABELS pairs each
 radial Binding with its element; MARK is the mark Binding and its element,
 or NIL when the window offers no mark for this subject."
   (destructuring-bind (x y) (%press-point window)
-    (let ((binding (getf snapshot :binding))
-          (menu-visible (and (getf snapshot :menu-visible) t))
-          (marked (and (eq :marking (getf snapshot :mode)) (getf snapshot :binding) t)))
+    (multiple-value-bind (menu-visible marked binding) (menu-presentation snapshot)
       (dolist (entry labels)
         (destructuring-bind (sector . element) entry
           (apply #'%place element (%along sector x y))
@@ -202,7 +213,7 @@ or NIL when the window offers no mark for this subject."
             (clog:attribute target "data-mode")
             (string-downcase (princ-to-string (getf snapshot :mode)))
             (clog:attribute target "data-menu-visible") (if menu-visible "true" "false")
-            (clog:attribute target "data-binding") (or binding ""))
+            (clog:attribute target "data-binding") (or (getf snapshot :binding) ""))
       (setf (clog:text status) (%status-line window)))))
 
 (defun %envelope-from (kind data subject)

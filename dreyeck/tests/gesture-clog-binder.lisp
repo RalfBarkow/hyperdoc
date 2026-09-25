@@ -148,15 +148,60 @@ Inspect relation contract and nothing from the code page."
                      catalog))))
   t)
 
+(defun test-terminal-interaction-shows-nothing ()
+  "Completed and cancelled interactions keep their record -- :MENU-VISIBLE
+stays true once revealed, the mode stays :MARKING -- but a surface shows
+no menu, no mark and no highlight for them. A deadline arriving after the
+end redraws the surface and shows nothing; the next press starts clean."
+  (let* ((shown nil)
+         (window (g:make-gesture-window
+                  :projection (lambda (window snapshot)
+                                (declare (ignore window))
+                                (push (list* (getf snapshot :state) (getf snapshot :menu-visible)
+                                             (multiple-value-list (g:menu-presentation snapshot)))
+                                      shown))))
+         (sequence 0))
+    (flet ((feed (kind &key (x 0) which (buttons 2))
+             (g:receive-envelope window (%envelope (incf sequence) kind :x x :which which
+                                                                        :buttons buttons))
+             (first shown)))
+      ;; Novice: the menu shows while open, highlights its sector, and goes on completion.
+      (feed :pointer-down :which 3)
+      (assert (equal '(:pressed nil nil nil nil) (first shown)))
+      (assert (equal '(:menu-visible t t nil nil) (feed :reveal-deadline)))
+      (assert (equal '(:sector-selected t t nil "binding/radial-insert-defexample")
+                     (feed :pointer-move :x 20)))
+      (assert (equal '(:completed t nil nil nil) (feed :pointer-up :x 20 :buttons 0)))
+      ;; Expert: the mark shows while selected and goes on completion.
+      (assert (equal '(:pressed nil nil nil nil) (feed :pointer-down :which 3)))
+      (assert (equal '(:sector-selected nil nil t "binding/mark-insert-defexample")
+                     (feed :pointer-move :x 20)))
+      (assert (equal '(:completed nil nil nil nil) (feed :pointer-up :x 20 :buttons 0)))
+      ;; A deadline after completion changes nothing in the closed session;
+      ;; the surface is drawn again and still shows nothing.
+      (assert (equal '(:completed nil nil nil nil) (feed :reveal-deadline)))
+      ;; Released with the menu open but no sector: cancelled, nothing shown.
+      (feed :pointer-down :which 3)
+      (feed :reveal-deadline)
+      (assert (equal '(:cancelled t nil nil nil) (feed :pointer-up :buttons 0)))
+      ;; Cancelled by the browser while marking a sector: nothing shown.
+      (feed :pointer-down :which 3)
+      (feed :pointer-move :x 20)
+      (assert (equal '(:cancelled nil nil nil nil) (feed :pointer-cancel :x 20 :buttons 0)))))
+  t)
+
 (defun run-gesture-clog-tests ()
   (test-arrival-order-is-reconstructed-across-threads)
   (test-one-mutator-at-a-time)
   (test-windows-own-their-state)
   (test-route-installs-into-a-running-server)
   (test-menu-follows-window-bindings)
+  (test-terminal-interaction-shows-nothing)
   (format t "~&GESTURE-CLOG-PASS: arrival 1 3 2 on three threads delivered ~
 1 2 3; a callback that arrives during another's delivery waits for it; two ~
 windows own two transports, two sessions and two locks, and both count from ~
 one; the route is added to a running server without starting one; each menu ~
-shows its own window's Bindings for the pressed subject.~%")
+shows its own window's Bindings for the pressed subject; a completed or ~
+cancelled interaction shows no menu, mark or highlight, and a late deadline ~
+cannot bring one back.~%")
   t)

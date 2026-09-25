@@ -183,6 +183,61 @@ turn. Explicitly synthetic: isTrusted is false for every one of them."
                :what what)
   (car (last (%live-panes))))
 
+(defun %live-strip (expression)
+  "Run EXPRESSION with S bound to the first code-page gesture strip on the page."
+  (%live-js (format nil "const s=document.querySelector('[data-gesture-target=\"true\"]');if(!s)return 'missing';~A" expression)))
+
+(defun %live-strip-pointers (steps)
+  (assert (equal "true"
+                 (%live-strip
+                  (format nil "const r=s.getBoundingClientRect();[~{~A~^,~}].forEach(([n,b,bs,dx])=>s.dispatchEvent(new PointerEvent(n,{bubbles:true,pointerId:79,pointerType:'mouse',button:b,buttons:bs,clientX:r.x+r.width/2+dx,clientY:r.y+r.height/2})));return 'true';"
+                          (mapcar (lambda (step)
+                                    (destructuring-bind (name button buttons dx) step
+                                      (format nil "['~A',~D,~D,~D]" name button buttons dx)))
+                                  steps))))))
+
+(defun %live-strip-visible ()
+  "Menu and mark elements of the strip that are shown, by text."
+  (%live-strip "return [...s.children].filter(e=>e.style.zIndex==='10'&&getComputedStyle(e).visibility==='visible').map(e=>e.textContent).join('|');"))
+
+(defun check-live-code-page-strip ()
+  "The shared binder surface on a code page: its menu and mark leave the page
+when an interaction ends, and completion still opens an Operation Request."
+  (let* ((page-pane (clog-moldable-inspector::create-pane
+                     *live-inspector* (work:work-page "Working on HyperDoc") :select "Operations"))
+         (request-type (find-symbol "OPERATION-REQUEST" "DREYECK/GESTURE/OPERATION-REQUEST")))
+    (%live-view page-pane "Operations")
+    (%live-await (lambda () (not (equal "missing" (%live-strip "return 'present';"))))
+                 :what "a code-page gesture strip")
+    (flet ((state () (%live-strip "return String(s.dataset.state);"))
+           (open-request (steps)
+             (let ((before (%live-panes)))
+               (%live-strip-pointers steps)
+               (typep (clog-moldable-inspector::pane-object
+                       (%live-await-pane before :what "the Operation Request pane"))
+                      request-type))))
+      ;; Novice: menu while open, gone on completion; the request opens.
+      (%live-strip-pointers '(("pointerdown" 2 2 0)))
+      (%live-await (lambda () (search "Insert executable DEFEXAMPLE" (%live-strip-visible)))
+                   :what "the code-page menu")
+      (assert (open-request '(("pointermove" -1 2 70) ("pointerup" 2 0 70))))
+      (%live-await (lambda () (equal "completed" (state))) :what "code-page completion")
+      (assert (equal "" (%live-strip-visible)))
+      ;; Expert: the mark is gone on completion and stays gone past the deadline.
+      (assert (open-request '(("pointerdown" 2 2 0) ("pointermove" -1 2 70) ("pointerup" 2 0 70))))
+      (%live-await (lambda () (equal "completed" (state))) :what "code-page completion")
+      (assert (equal "" (%live-strip-visible)))
+      (sleep 0.7)
+      (assert (equal "" (%live-strip-visible)))
+      ;; Cancelled in the dead zone: nothing opens, nothing remains.
+      (let ((before (%live-panes)))
+        (%live-strip-pointers '(("pointerdown" 2 2 0) ("pointerup" 2 0 0)))
+        (%live-await (lambda () (equal "cancelled" (state))) :what "code-page cancellation")
+        (sleep 0.7)
+        (assert (equal "" (%live-strip-visible)))
+        (assert (equal before (%live-panes)))))
+    (format t "~&CODE-PAGE-STRIP-PASS: novice and expert completions opened an Operation Request and left no menu or mark; a cancellation left nothing.~%")))
+
 (defun run-live-association-gesture-test (&key (port 18091) (open-browser t) (connect-timeout 120))
   (let* ((pages (work-page-sources))
          (rendering (start-interactive-tala-inspector :port port :open-browser open-browser
@@ -235,8 +290,10 @@ turn. Explicitly synthetic: isTrusted is false for every one of them."
           (assert (eq operation (w:gesture-binding-operation binding)))
           (assert (eq a1 (getf target :association))))
         (assert (equal "shown" (%live-sign-attribute id "data-association-gesture-outcome")))
+        ;; Completed: the menu and its highlight are gone without another input.
+        (assert (equal "" (%live-visible-menus)))
         (assert (equal clicks (%live-js "return String(window.__events.filter(e=>e.startsWith('click')).length);"))))
-      (format t "~&NOVICE-PASS: menu after the reveal delay, showing only Inspect relation contract; release opened the contract Topic, target A1, no click.~%")
+      (format t "~&NOVICE-PASS: menu after the reveal delay, showing only Inspect relation contract; release opened the contract Topic, target A1, no click; the menu then left the page.~%")
       ;; Expert on A1, then A2: marking before any menu, same Operation.
       (dolist (association (list a1 a2))
         (let* ((id (id-of association)) (window (window-of id)) (before (%live-panes)))
@@ -250,9 +307,13 @@ turn. Explicitly synthetic: isTrusted is false for every one of them."
           (multiple-value-bind (binding target) (dreyeck/gesture/clog:gesture-window-selection window)
             (assert (equal "binding/mark-inspect-relation-contract" (w:gesture-binding-id binding)))
             (assert (eq operation (w:gesture-binding-operation binding)))
-            (assert (eq association (getf target :association))))))
+            (assert (eq association (getf target :association))))
+          ;; The mark goes on completion, and nothing appears past the deadline.
+          (assert (equal "" (%live-visible-menus)))
+          (sleep 0.7)
+          (assert (equal "" (%live-visible-menus)))))
       (assert (not (eq a1 a2)))
-      (format t "~&EXPERT-PASS: A1 and A2 each marked without a menu, the same Operation, and each showed the same contract Topic.~%")
+      (format t "~&EXPERT-PASS: A1 and A2 each marked without a menu, the same Operation, and each showed the same contract Topic; no mark or menu remained, also past 500 ms.~%")
       ;; An Association without a contract: selected, refused, nothing opened.
       (let* ((id (id-of requires)) (before (%live-panes)))
         (%live-pointers id '(("pointerdown" 2 2 0) ("pointermove" -1 2 70) ("pointerup" 2 0 70)))
@@ -261,8 +322,27 @@ turn. Explicitly synthetic: isTrusted is false for every one of them."
         (assert (search "refers to no Relation Contract"
                         (%live-sign-attribute id "data-association-gesture-refusal")))
         (sleep 0.5)
+        (assert (equal before (%live-panes)))
+        (assert (equal "" (%live-visible-menus))))
+      ;; Cancelled: released with the menu open but no sector, and cancelled by
+      ;; the browser while a sector was marked. Nothing opens, nothing remains.
+      (let* ((id (id-of a1)) (before (%live-panes)))
+        (%live-pointers id '(("pointerdown" 2 2 0)))
+        (%live-await (lambda () (equal "Inspect relation contract" (%live-visible-menus)))
+                     :what "the menu")
+        (%live-pointers id '(("pointerup" 2 0 0)))
+        (%live-await (lambda () (equal "cancelled" (%live-sign-attribute id "data-association-gesture-state")))
+                     :what "the cancellation")
+        (assert (equal "" (%live-visible-menus)))
+        (%live-pointers id '(("pointerdown" 2 2 0) ("pointermove" -1 2 70) ("pointercancel" -1 0 70)))
+        (%live-await (lambda () (and (equal "cancelled" (%live-sign-attribute id "data-association-gesture-state"))
+                                     (equal "marking" (%live-sign-attribute id "data-association-gesture-mode"))))
+                     :what "the browser cancellation")
+        (assert (equal "" (%live-visible-menus)))
+        (sleep 0.7)
+        (assert (equal "" (%live-visible-menus)))
         (assert (equal before (%live-panes))))
-      (format t "~&NOT-APPLICABLE-PASS: operations -> state completes the selection, is refused, and opens no pane.~%")
+      (format t "~&NOT-APPLICABLE-PASS: operations -> state completes the selection, is refused, and opens no pane; released without a sector or cancelled by the browser, nothing opens and no menu or mark remains.~%")
       ;; Refresh: the old sign leaves; the new one has its own window.
       (let* ((old-id (id-of a1)) (old-window (window-of old-id))
              (old-log (copy-list (dreyeck/gesture/clog:gesture-window-log old-window))))
@@ -277,8 +357,10 @@ turn. Explicitly synthetic: isTrusted is false for every one of them."
                                 (%live-await-pane before :what "the contract pane"))))
           (assert (eq a1 (getf (nth-value 1 (dreyeck/gesture/clog:gesture-window-selection new-window))
                                :association)))
-          (assert (equal old-log (dreyeck/gesture/clog:gesture-window-log old-window)))))
+          (assert (equal old-log (dreyeck/gesture/clog:gesture-window-log old-window)))
+          (assert (equal "" (%live-visible-menus)))))
       (format t "~&REFRESH-PASS: the old sign left the page with its window idle; the new sign's own window selected A1.~%")
+      (check-live-code-page-strip)
       (assert (equal "synthetic"
                      (%live-js "return window.__events.length>0 && window.__events.every(e=>e.endsWith(':false')) ? 'synthetic' : 'trusted-or-none';")))
       (assert (equal pages (work-page-sources)))
