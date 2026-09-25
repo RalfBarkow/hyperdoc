@@ -51,8 +51,10 @@
                               (and last (not (member last before))))))
     (car (last (%live-panes)))))
 
-(defun start-interactive-tala-inspector (&key (port 18090) (open-browser t) (connect-timeout 120))
-  "Serve an Inspector whose first pane shows the Work layout's interactive view."
+(defun start-interactive-tala-inspector (&key (port 18090) (open-browser t) (connect-timeout 120)
+                                              on-connect)
+  "Serve an Inspector whose first pane shows the Work layout's interactive view.
+ON-CONNECT, if given, is called with the rendering on every new page, reload included."
   (let ((rendering (work:work-layout-example)))
     (setf *live-body* nil *live-inspector* nil)
     (clog:initialize
@@ -62,7 +64,8 @@
                          body :pane-width "900px" :playground? nil)))
          (clog-moldable-inspector::create-pane inspector rendering
                                                :select "TALA (interactive)")
-         (setf *live-inspector* inspector *live-body* body)))
+         (setf *live-inspector* inspector *live-body* body)
+         (when on-connect (funcall on-connect rendering))))
      :port port :host "127.0.0.1")
     (when open-browser (clog:open-browser :url (format nil "http://127.0.0.1:~D/" port)))
     (%live-await (lambda () *live-inspector*) :timeout connect-timeout :what "a browser")
@@ -282,3 +285,170 @@ turn. Explicitly synthetic: isTrusted is false for every one of them."
       (clog:close-connection (clog:window *live-body*))
       (format t "~&LIVE-ASSOCIATION-GESTURE-PASS (synthetic pointer and click events, isTrusted=false; no physical input claimed).~%")
       t)))
+
+;;;; Physical witness for an Association sign
+;;;;
+;;;; Observation only: production script, Bindings and reducer are untouched.
+;;;; A document-level capturing listener sees every pointer, capture, context
+;;;; menu and click event from a press on the sign until shortly after its
+;;;; release, wherever the browser delivered it, and reports each to Lisp.
+;;;; The sign's window projection is wrapped to keep every reducer snapshot.
+;;;; After each attempt the whole ordered trace is printed from Lisp.
+
+(defvar *witness-observations* nil "Raw browser events, newest first.")
+(defvar *witness-snapshots* nil "Reducer snapshots, newest first.")
+(defvar *witness-attempt* 0)
+(defvar *witness-print-pending* nil)
+(defvar *witness-lock* (sb-thread:make-mutex :name "association witness"))
+(defvar *witness-sign* nil "(:id :window :association :pane :contract) of the observed sign.")
+
+(defun %witness-observer-script (element-expression)
+  (format nil "(function(){
+ const g=~A;
+ if(g.__disposeWitness) g.__disposeWitness();
+ let down=null, recording=false, stop=null;
+ const kinds=['pointerdown','pointermove','pointerup','pointercancel','gotpointercapture','lostpointercapture','contextmenu','auxclick','click'];
+ function send(e){
+   let capture='n/a'; try{capture=String(g.hasPointerCapture(e.pointerId));}catch(_){}
+   const detail=[e.type,e.isTrusted,e.pointerId,e.pointerType,e.button,e.buttons,
+     Math.round(e.clientX),Math.round(e.clientY),e.timeStamp.toFixed(1),
+     down===null?'':(e.timeStamp-down).toFixed(1),capture,g.contains(e.target),
+     (e.target&&e.target.tagName)||''].join('|');
+   g.dispatchEvent(new CustomEvent('associationgesturewitness',{detail:detail}));
+ }
+ function on(e){
+   if(e.type==='pointerdown' && g.contains(e.target)){down=e.timeStamp;recording=true;if(stop!==null)clearTimeout(stop);stop=null;}
+   if(!recording)return;
+   send(e);
+   if(e.type==='pointerup'||e.type==='pointercancel'){if(stop!==null)clearTimeout(stop);stop=setTimeout(()=>{recording=false;stop=null;},400);}
+ }
+ kinds.forEach(k=>document.addEventListener(k,on,true));
+ g.__disposeWitness=()=>kinds.forEach(k=>document.removeEventListener(k,on,true));
+})();" element-expression))
+
+(defun %witness-observation (data)
+  (destructuring-bind (kind trusted id type button buttons x y at elapsed capture inside tag)
+      (uiop:split-string data :separator "|")
+    (list :kind kind :trusted trusted :pointer-id id :pointer-type type :button button
+          :buttons buttons :client-x x :client-y y :at at :elapsed elapsed
+          :capture capture :inside inside :tag tag)))
+
+(defun %witness-session (window)
+  (dreyeck/gesture/transport:input-session-gesture-session
+   (dreyeck/gesture/transport:witness-input (dreyeck/gesture/clog:gesture-window-witness window))))
+
+(defun print-association-gesture-trace (&optional (stream *standard-output*))
+  "Print the ordered trace of the attempt just made, and start the next one."
+  (let* ((sign *witness-sign*) (window (getf sign :window))
+         (observations (reverse *witness-observations*))
+         (snapshots (reverse *witness-snapshots*))
+         (session (%witness-session window))
+         (input (dreyeck/gesture/transport:witness-input
+                 (dreyeck/gesture/clog:gesture-window-witness window))))
+    (setf *witness-observations* nil *witness-snapshots* nil)
+    (format stream "~&~%===== ATTEMPT ~D =====~%-- browser events (document, capture phase)~%" (incf *witness-attempt*))
+    (format stream "   ~12A ~5A ~3A ~5A ~3A ~4A ~6A ~6A ~9A ~8A ~7A ~6A ~A~%"
+            "event" "trust" "id" "type" "btn" "btns" "x" "y" "t(ms)" "+down" "capture" "in-g" "target")
+    (dolist (o observations)
+      (format stream "   ~12A ~5A ~3A ~5A ~3A ~4A ~6A ~6A ~9A ~8A ~7A ~6A ~A~%"
+              (getf o :kind) (getf o :trusted) (getf o :pointer-id) (getf o :pointer-type)
+              (getf o :button) (getf o :buttons) (getf o :client-x) (getf o :client-y)
+              (getf o :at) (getf o :elapsed) (getf o :capture) (getf o :inside) (getf o :tag)))
+    (format stream "-- reducer snapshots, in delivered order~%")
+    (dolist (s snapshots)
+      (format stream "   seq ~3D ~18S +~5Dms state ~16S mode ~13S menu ~3A binding ~A~%"
+              (getf s :sequence) (getf s :kind) (getf s :lisp-ms) (getf s :state) (getf s :mode)
+              (if (getf s :menu-visible) "yes" "no") (or (getf s :binding) "-")))
+    (when session
+      (format stream "-- reducer transitions~%")
+      (dolist (tr (sm:state-machine-run-transition-trace-of session))
+        (format stream "   ~16S -> ~16S on ~16S (~A)~%" (getf tr :from-state) (getf tr :to-state)
+                (getf tr :trigger) (getf tr :transition-id)))
+      (format stream "-- samples consumed without transition~%")
+      (dolist (ob (w:gesture-session-observations-of session))
+        (format stream "   in ~16S ~S~@[ ~S~]~%" (getf ob :state-id) (getf ob :reason) (getf ob :detail)))
+      (format stream "-- visited ~S~%-- mode ~S; menu shown ~S~%-- binding ~A; operation ~A~%-- cancellation ~S~%"
+              (sm:state-machine-run-visited-states-of session)
+              (w:gesture-session-mode-of session) (w:gesture-session-menu-visible-p-of session)
+              (let ((b (w:gesture-session-selected-binding-of session))) (if b (w:gesture-binding-id b) "-"))
+              (let ((o (w:gesture-session-selected-operation-of session)))
+                (if o (w:semantic-operation-identity-id o) "-"))
+              (w:gesture-session-cancellation-reason-of session)))
+    (format stream "-- input session ~S; closures ~S~%"
+            (dreyeck/gesture/transport:input-session-status input)
+            (reverse (dreyeck/gesture/transport:input-session-closures input)))
+    (multiple-value-bind (binding target) (dreyeck/gesture/clog:gesture-window-selection window)
+      (declare (ignore binding))
+      (format stream "-- target is the exact Association A1: ~S~%"
+              (and target (eq (getf sign :association) (getf target :association)))))
+    (format stream "-- sign outcome ~A~%-- last pane shows the contract Topic: ~S~%"
+            (%live-sign-attribute (getf sign :id) "data-association-gesture-outcome")
+            (eq (getf sign :contract)
+                (clog-moldable-inspector::pane-object (car (last (%live-panes))))))
+    (finish-output stream)))
+
+(defun %witness-schedule-print ()
+  (sb-thread:with-mutex (*witness-lock*)
+    (unless *witness-print-pending*
+      (setf *witness-print-pending* t)
+      (sb-thread:make-thread
+       (lambda ()
+         (sleep 1.2)
+         (sb-thread:with-mutex (*witness-lock*) (setf *witness-print-pending* nil))
+         (handler-case (print-association-gesture-trace)
+           (error (c) (format t "~&witness print failed: ~A~%" c) (finish-output))))
+       :name "association witness print"))))
+
+(defun %attach-association-witness (rendering)
+  "Observe the sign of Interaction -> Operations and change on the current page."
+  (let* ((projection (tala:tala-input-projection (tala:tala-rendering-input rendering)))
+         (a1 (association-between projection "interaction" "operations"))
+         (pane (first (%live-panes)))
+         (id (%live-reference-id (%live-view pane "TALA (interactive)") a1))
+         (element (clog:attach-as-child *live-body* id))
+         (window (m:association-sign-gesture-window *live-body* id))
+         (original (dreyeck/gesture/clog::gesture-window-projection window))
+         (origin nil))
+    (setf *witness-observations* nil *witness-snapshots* nil
+          *witness-sign* (list :id id :window window :association a1 :pane pane
+                               :contract (getf (tm:topicmap-association-properties-of a1)
+                                               :relation-contract)))
+    (setf (dreyeck/gesture/clog::gesture-window-projection window)
+          (lambda (window snapshot)
+            (when (eq :pointer-down (getf snapshot :kind)) (setf origin (get-internal-real-time)))
+            (push (list* :lisp-ms (if origin
+                                      (round (* 1000 (- (get-internal-real-time) origin))
+                                             internal-time-units-per-second)
+                                      0)
+                         snapshot)
+                  *witness-snapshots*)
+            (funcall original window snapshot)
+            (when (member (getf snapshot :state) '(:completed :cancelled))
+              (%witness-schedule-print))))
+    (clog::set-event element "associationgesturewitness"
+                     (lambda (data)
+                       (let ((o (%witness-observation data)))
+                         (push o *witness-observations*)
+                         (when (member (getf o :kind) '("pointerup" "pointercancel") :test #'string=)
+                           (%witness-schedule-print))))
+                     :call-back-script "+ e.originalEvent.detail")
+    (clog:js-execute element (%witness-observer-script (clog:script-id element)))
+    (format t "~&WITNESS-READY sign ~A; user agent: ~A~%" id (%live-js "return navigator.userAgent;"))
+    (finish-output)
+    *witness-sign*))
+
+(defun start-association-gesture-witness (&key (port 18093) (open-browser nil) (connect-timeout 600))
+  "Serve the Work layout's interactive view and observe the sign of
+Interaction -> Operations and change, again after every reload."
+  (setf *witness-attempt* 0)
+  (start-interactive-tala-inspector :port port :open-browser open-browser
+                                    :connect-timeout connect-timeout
+                                    :on-connect
+                                    (lambda (rendering)
+                                      (handler-case (%attach-association-witness rendering)
+                                        (error (c) (format t "~&WITNESS-ATTACH-FAILED: ~A~%" c)
+                                          (finish-output)))))
+  (%live-await (lambda () *witness-sign*) :timeout connect-timeout :what "the witness")
+  (format t "~&WITNESS-SERVING http://127.0.0.1:~D/~%" port)
+  (finish-output)
+  *witness-sign*)

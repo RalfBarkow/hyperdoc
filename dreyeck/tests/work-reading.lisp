@@ -573,8 +573,8 @@ referenced group carries another reference."
 (defun association-target (association)
   (list :type :topicmap-association :association association))
 
-(defun gesture-sample (kind &key target (x 0.0d0) button timestamp)
-  (w:make-gesture-input-sample :kind kind :target target :x x :y 0.0d0
+(defun gesture-sample (kind &key target (x 0.0d0) (y 0.0d0) button timestamp)
+  (w:make-gesture-input-sample :kind kind :target target :x x :y y
                                :button button :modifiers nil :timestamp timestamp))
 
 (defun novice-trace (target &optional (bindings *inspect-bindings*))
@@ -710,6 +710,108 @@ referenced group carries another reference."
                          (system-dependency-names "dreyeck/inspector/topicmap")
                          :test #'equal)))))
 
+;;;; Traces shaped by a hand
+;;
+;; A mark is many moves, not one. The first three traces below replay, in the
+;; pure reducer, coordinates and times recorded from trusted physical mouse
+;; attempts on the Interaction -> Operations sign (relative to the press, in
+;; CSS pixels and milliseconds). A replay is not physical evidence; it keeps
+;; what the hand did.
+
+(defun hand-trace (target moves &key deadline-after (up-at 1000) up)
+  "Press at the origin, then MOVES (x y ms). A reveal deadline is delivered
+after the move at DEADLINE-AFTER ms, if given, as the browser delivered it."
+  (w:run-gesture-trace
+   (append
+    (list (gesture-sample :pointer-down :target target :button :secondary :timestamp 0))
+    (loop for (x y at) in moves
+          collect (gesture-sample :pointer-move :x (float x 1d0) :y (float y 1d0) :timestamp at)
+          when (and deadline-after (= at deadline-after))
+            collect (gesture-sample :reveal-deadline :timestamp 500))
+    (let ((last (or up (car (last moves)))))
+      (list (gesture-sample :pointer-up :x (float (first last) 1d0) :y (float (second last) 1d0)
+                            :timestamp up-at))))
+   :bindings *inspect-bindings*))
+
+(defun check-trace (session visited binding)
+  (assert (equal visited (sm:state-machine-run-visited-states-of session)) ()
+          "Visited ~S, expected ~S." (sm:state-machine-run-visited-states-of session) visited)
+  (if binding
+      (progn
+        (assert (equal binding (w:gesture-binding-id (w:gesture-session-selected-binding-of session))))
+        (assert (eq (w:inspect-relation-contract-operation)
+                    (w:gesture-session-selected-operation-of session))))
+      (assert (null (w:gesture-session-selected-binding-of session))))
+  session)
+
+(defparameter +expert-path+ '(:idle :pressed :marking :sector-selected :completed))
+(defparameter +novice-path+ '(:idle :pressed :menu-visible :sector-selected :completed))
+
+(defun check-hand-shaped-traces ()
+  (let* ((projection (work:work-projection))
+         (a1 (association-between projection "interaction" "operations"))
+         (target (association-target a1))
+         (mark "binding/mark-inspect-relation-contract")
+         (radial "binding/radial-inspect-relation-contract"))
+    ;; Recorded P1: fast, with a still start inside the dead zone.
+    (let ((s (hand-trace target '((0 0 45) (0 0 60) (0 1 75) (1 1 90) (2 1 105) (11 2 120)
+                                 (40 4 135) (106 6 150) (149 6 165) (162 6 180) (168 5 195)
+                                 (170 5 270) (172 5 285) (174 5 300))
+                         :up-at 330)))
+      (check-trace s +expert-path+ mark)
+      (assert (not (w:gesture-session-menu-visible-p-of s)))
+      (assert (eq a1 (getf (pressed-target s) :association))))
+    ;; Recorded P3: rightward with a downward drift.
+    (check-trace (hand-trace target '((1 0 105) (1 1 120) (6 2 135) (15 4 150) (30 7 165)
+                                      (50 10 180) (56 10 195) (58 10 210) (58 10 225))
+                             :up-at 315)
+                 +expert-path+ mark)
+    ;; Recorded P2: the hand stayed within 2 px for about a second, so the
+    ;; browser's reveal deadline came first and the menu opened; moving onto
+    ;; its sector then selected the same Operation by the radial Binding.
+    (check-trace (hand-trace target '((0 0 255) (1 0 480) (1 0 885) (1 0 930) (2 0 960)
+                                      (2 0 990) (2 0 1005) (2 0 1020) (3 0 1035) (7 0 1050)
+                                      (13 0 1065) (39 1 1095) (44 1 1110) (48 1 1125) (49 1 1140))
+                             :deadline-after 480 :up-at 1455)
+                 +novice-path+ radial)
+    ;; A gradual, human-like mark crossing the dead zone over several moves.
+    (let ((s (hand-trace target '((2 1 40) (4 0 80) (7 1 120) (11 2 160) (16 1 200)
+                                  (22 2 240) (30 1 280))
+                         :up-at 310)))
+      (check-trace s +expert-path+ mark)
+      (assert (not (w:gesture-session-menu-visible-p-of s))))
+    ;; Expert keeps its mode: leaving the sector returns to MARKING, never to
+    ;; MENU-VISIBLE; returning selects again; release completes.
+    (let ((s (hand-trace target '((20 0 60) (0 20 120) (25 2 180)) :up-at 220)))
+      (check-trace s '(:idle :pressed :marking :sector-selected :marking :sector-selected :completed)
+                   mark)
+      (assert (not (w:gesture-session-menu-visible-p-of s))))
+    ;; ... and release outside every sector cancels cleanly, still marking.
+    (let ((s (hand-trace target '((20 0 60) (0 20 120)) :up-at 180)))
+      (check-trace s '(:idle :pressed :marking :sector-selected :marking :cancelled) nil)
+      (assert (eq :marking (w:gesture-session-mode-of s)))
+      (assert (eq :no-active-enabled-sector (w:gesture-session-cancellation-reason-of s))))
+    ;; Novice keeps its mode the same way.
+    (let ((s (w:run-gesture-trace
+              (list (gesture-sample :pointer-down :target target :button :secondary :timestamp 0)
+                    (gesture-sample :reveal-deadline :timestamp 500)
+                    (gesture-sample :pointer-move :x 20d0 :timestamp 600)
+                    (gesture-sample :pointer-move :y 20d0 :timestamp 650)
+                    (gesture-sample :pointer-move :x 20d0 :y 1d0 :timestamp 700)
+                    (gesture-sample :pointer-up :x 20d0 :y 1d0 :timestamp 750))
+              :bindings *inspect-bindings*)))
+      (check-trace s '(:idle :pressed :menu-visible :sector-selected :menu-visible
+                       :sector-selected :completed)
+                   radial))
+    ;; Once movement has committed to marking, a later deadline is obsolete:
+    ;; after a selection, and while marking outside any sector.
+    (dolist (moves '(((20 0 60) (25 1 520)) ((0 20 60) (20 0 520))))
+      (let ((s (hand-trace target moves :deadline-after 60 :up-at 560)))
+        (check-trace s +expert-path+ mark)
+        (assert (not (w:gesture-session-menu-visible-p-of s)))
+        (assert (member :obsolete-reveal-deadline (w:gesture-session-observations-of s)
+                        :key (lambda (o) (getf o :reason))))))))
+
 (defun count-matches (needle haystack)
   (loop with start = 0 for position = (search needle haystack :start2 start)
         while position count t do (setf start (1+ position))))
@@ -725,5 +827,6 @@ referenced group carries another reference."
   (check-relation-contract-inspection)
   (check-interactive-tala)
   (check-inspect-relation-contract)
+  (check-hand-shaped-traces)
   (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect).~%")
   t)
