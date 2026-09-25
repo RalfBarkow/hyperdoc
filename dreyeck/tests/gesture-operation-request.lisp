@@ -5,7 +5,7 @@
   (:local-nicknames (#:r #:dreyeck/gesture/operation-request)
                     (#:w #:dreyeck/gesture-binding-witness)
                     (#:views #:html-inspector-views))
-  (:export #:run-operation-request-tests))
+  (:export #:run-operation-request-tests #:run-source-occurrence-tests))
 
 (in-package #:dreyeck/gesture/operation-request/tests)
 

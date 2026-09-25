@@ -1312,6 +1312,7 @@
   ("dreyeck/gesture/operation-request" "dreyeck/gesture/reading")
   :COMPONENTS
   ((:FILE "dreyeck/tests/gesture-operation-request")
+   (:FILE "dreyeck/tests/gesture-source-occurrence")
    (:FILE "dreyeck/tests/gesture-code-page"))
   :PERFORM
   (ASDF/LISP-ACTION:TEST-OP (ASDF/OPERATION:OPERATION ASDF/COMPONENT:COMPONENT)
@@ -1319,6 +1320,8 @@
    (PROGN
     (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/OPERATION-REQUEST/TESTS
                               :RUN-OPERATION-REQUEST-TESTS)
+    (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/OPERATION-REQUEST/TESTS
+                              :RUN-SOURCE-OCCURRENCE-TESTS)
     (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GESTURE/CODE-PAGE/TESTS
                               :RUN-CODE-PAGE-GESTURE-TESTS))))
 

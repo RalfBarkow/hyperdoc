@@ -79,12 +79,14 @@ REQUEST-FROM-GESTURE."
 (defun test-three-affordances-one-request ()
   (let* ((page (%page))
          (key (%key))
-         (subject (list :type :lisp-source-definition :page page :form-key key))
-         (button (%button-request page key)))
+         (button (%button-request page key))
+         (occurrence (r:operation-request-occurrence button))
+         (subject (list :type :lisp-source-definition :occurrence occurrence)))
     (assert button)
     (multiple-value-bind (marked window) (%gesture *mark* subject)
       (assert (= 1 (length marked)))
       (assert (eq button (first marked)))
+      (assert (eq occurrence (r:operation-request-occurrence (first marked))))
       (assert (equal "binding/mark-insert-defexample" (%selected-binding-id window)))
       (assert (not (%menu-shown-before-selection-p window)))
       ;; The subject comes back as the object the surface gave, not a copy.
@@ -92,6 +94,7 @@ REQUEST-FROM-GESTURE."
     (multiple-value-bind (chosen window) (%gesture *radial* subject)
       (assert (= 1 (length chosen)))
       (assert (eq button (first chosen)))
+      (assert (eq occurrence (r:operation-request-occurrence (first chosen))))
       (assert (equal "binding/radial-insert-defexample" (%selected-binding-id window)))
       (assert (%menu-shown-before-selection-p window)))
     (assert (eq button (r:request-through-binding (r:inspector-binding) page key)))
@@ -99,6 +102,12 @@ REQUEST-FROM-GESTURE."
                 (r:operation-request-operation button)))
     (assert (eq page (r:operation-request-page button)))
     (assert (equal key (r:operation-request-form-key button)))
+    (let ((html (views:view-html
+                 (find "Request" (views:all-views button)
+                       :key #'views:view-title :test #'string=))))
+      (assert (search "Executed" html))
+      (assert (search "no --" html))
+      (assert (search "CURRENT" html)))
     button))
 
 (defun test-the-route-subject-names-nothing ()
@@ -114,10 +123,10 @@ gesture made with it completes, and is refused a request."
 (defun run-code-page-gesture-tests ()
   (let* ((path (asdf:system-relative-pathname
                 "dreyeck" "dreyeck/src/gesture-ordering-reading.lisp"))
-         (before (uiop:read-file-string path :external-format :utf-8)))
+         (before (alexandria:read-file-into-byte-vector path)))
     (test-three-affordances-one-request)
     (test-the-route-subject-names-nothing)
-    (assert (string= before (uiop:read-file-string path :external-format :utf-8)))
+    (assert (equalp before (alexandria:read-file-into-byte-vector path)))
     (assert (null (find-package "DREYECK/WORKFLOW/AUTHORING")))
     (format t "~&CODE-PAGE-GESTURE-PASS: on RACE-READING the Inspector button, ~
 a mark and a radial selection reach one request, EQ, with the shared ~

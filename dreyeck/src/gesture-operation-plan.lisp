@@ -101,6 +101,9 @@ as DEFEXAMPLE takes them. Writes nothing."
     (%refuse request "this planner only plans ~A, not ~A"
              (w:semantic-operation-identity-id (w:insert-executable-defexample-operation))
              (w:semantic-operation-identity-id (r:operation-request-operation request))))
+  ;; The existing planner must not reinterpret an old selection by name.
+  (handler-case (r:resolve-occurrence (r:operation-request-occurrence request))
+    (error (condition) (%refuse request "~A" condition)))
   (let* ((system (r:operation-request-system request))
          (path (r:operation-request-path request))
          (target-key (r:operation-request-form-key request))
@@ -113,7 +116,7 @@ as DEFEXAMPLE takes them. Writes nothing."
     (unless (eq (symbol-package name) (symbol-package subject))
       (%refuse request "~S is not in ~A, the package ~S is read in"
                name (package-name (symbol-package subject)) subject))
-    (let* ((forms (wf:source-forms (uiop:read-file-string path :external-format :utf-8)))
+    (let* ((forms (wf:source-forms (r:occurrence-source (r:operation-request-occurrence request))))
            (keys (mapcar #'wf:form-key forms)))
       (unless (= 1 (count target-key keys :test #'equal))
         (%refuse request "~S is no longer a single definition in ~A"

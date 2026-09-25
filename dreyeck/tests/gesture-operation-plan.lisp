@@ -102,10 +102,14 @@
                (p:plan-operation-request
                 (make-instance 'r:operation-request
                                :operation (w:insert-executable-defexample-operation)
-                               :page page
-                               :form-key (list :definition
-                                               (intern "NO-LONGER-HERE"
-                                                       "DREYECK/GESTURE/ORDERING")))
+                               :occurrence
+                               (let ((observed (first (r:page-occurrences page))))
+                                 (make-instance 'r:source-occurrence :page page
+                                  :source (r:occurrence-source observed)
+                                  :range (r:occurrence-range observed)
+                                  :form-key (list :definition
+                                                 (intern "NO-LONGER-HERE"
+                                                         "DREYECK/GESTURE/ORDERING")))))
                 :name name :body (%body)))))
     ;; A definition with no keyed form after it: nothing to insert before.
     (assert (%refused-p
