@@ -2089,7 +2089,8 @@
 (defsystem "dreyeck/inspector/topicmap/tala"
   :description "Explicit native/TALA comparison of an existing Topicmap Workspace"
   :license "BSD" :serial t
-  :depends-on ("dreyeck/topicmap/tala" "dreyeck/inspector/topicmap" "dreyeck/git" "babel")
+  :depends-on ("dreyeck/topicmap/tala" "dreyeck/inspector/topicmap" "dreyeck/git" "babel"
+               "plump")
   :components ((:file "dreyeck/src/topicmap-tala-inspector")))
 
 (asdf/parse-defsystem:defsystem "dreyeck/topicmap/tala/reading" :description
@@ -2204,8 +2205,10 @@
                  (:static-file "Relation Contract informs.html")))))
 
 (defsystem "dreyeck/work/reading/tests"
-  :depends-on ("dreyeck/work/reading")
-  :components ((:file "dreyeck/tests/work-reading"))
+  :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset")
+  :serial t
+  :components ((:file "dreyeck/tests/work-reading")
+               (:file "dreyeck/tests/work-reading-live"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/tests :run-tests)))

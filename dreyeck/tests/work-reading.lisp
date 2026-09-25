@@ -399,6 +399,165 @@
       (assert (= 2 (count-matches "<tt>informs</tt>" html)))
       (assert (not (search "<tt>work:relation/" html))))))
 
+;;;; Interactive TALA: one Inspector reference per D2 group
+
+(defun work-page-sources ()
+  "Every authored Work page file with its contents, to show nothing wrote them."
+  (mapcar (lambda (file) (cons file (uiop:read-file-string file)))
+          (uiop:directory-files
+           (asdf:system-relative-pathname "dreyeck" "dreyeck/pages/work/"))))
+
+(defun interactive-tala-view (rendering)
+  "A new View, as a new Inspector pane or a refresh would make one."
+  (let ((view (find "TALA (interactive)" (views:all-views rendering)
+                    :key #'views:view-title :test #'equal)))
+    (assert view)
+    (views:view-html view)
+    view))
+
+(defun view-svg-dom (view)
+  (let ((plump:*tag-dispatchers* plump:*xml-tags*))
+    (plump:parse (views:view-html view))))
+
+(defun svg-elements-with-attribute (dom name)
+  (let (found)
+    (plump:traverse dom (lambda (node) (when (plump:attribute node name) (push node found)))
+                    :test #'plump:element-p)
+    (nreverse found)))
+
+(defun reference-group (view dom object)
+  "The one element whose Inspector reference in VIEW is OBJECT."
+  (let ((ids (mapcar #'car (remove object (views:view-references view)
+                                   :key #'cdr :test-not #'eq))))
+    (assert (= 1 (length ids)))
+    (let ((elements (remove (first ids) (svg-elements-with-attribute dom "id")
+                            :key (lambda (e) (plump:attribute e "id"))
+                            :test-not #'equal)))
+      (assert (= 1 (length elements)))
+      (first elements))))
+
+(defun group-text (group)
+  (let ((texts (plump:get-elements-by-tag-name group "text")))
+    (assert (= 1 (length texts)))
+    (plump:text (first texts))))
+
+(defun check-reference-groups (view rendering)
+  "Each reference sits on the top-level group whose D2 identity class is the
+one this rendering's input gave its object, and nothing nested in a
+referenced group carries another reference."
+  (let* ((input (tala:tala-rendering-input rendering))
+         (entries (append (tala:tala-input-topics input) (tala:tala-input-associations input)))
+         (dom (view-svg-dom view)))
+    (assert (= (length entries) (length (views:view-references view))))
+    (dolist (reference (views:view-references view))
+      (let* ((object (cdr reference))
+             (id (if (typep object 'tm:topicmap-association)
+                     (tm:topicmap-association-id-of object)
+                     (tm:topicmap-topic-id-of object)))
+             (entry (find id entries :key (lambda (e) (getf e :id)) :test #'equal))
+             (group (reference-group view dom object)))
+        (assert (equal "g" (plump:tag-name group)))
+        (assert (equal "svg" (plump:tag-name (plump:parent group))))
+        (assert (equal (tala:d2-svg-identity-class (getf entry :d2-id))
+                       (plump:attribute group "class")))
+        ;; D2 may define a marker inside an edge group; only a second
+        ;; reference inside the group could take a click from this one.
+        (plump:traverse group (lambda (node)
+                                (assert (or (eq node group)
+                                            (not (assoc (plump:attribute node "id")
+                                                        (views:view-references view)
+                                                        :test #'equal)))))
+                        :test #'plump:element-p)))
+    dom))
+
+(defun rendering-with-svg (rendering svg)
+  (tala::%make-tala-rendering :input (tala:tala-rendering-input rendering)
+                              :version (tala:tala-rendering-version rendering)
+                              :svg svg))
+
+(defun check-interactive-tala ()
+  (let* ((before (work-page-sources))
+         (rendering (work:work-layout-example))
+         (projection (tala:tala-input-projection (tala:tala-rendering-input rendering)))
+         (a1 (association-between projection "interaction" "operations"))
+         (a2 (association-between projection "operations" "connect"))
+         (view (interactive-tala-view rendering))
+         (dom (check-reference-groups view rendering))
+         (g1 (reference-group view dom a1))
+         (g2 (reference-group view dom a2)))
+    ;; The image view stays, and says what it is.
+    (assert (search "non-interactive"
+                    (views:view-html (find "TALA rendering proof" (views:all-views rendering)
+                                           :key #'views:view-title :test #'equal))))
+    ;; Two equal visible labels, two distinct Associations, one contract.
+    (assert (equal "informs" (group-text g1)))
+    (assert (equal "informs" (group-text g2)))
+    (assert (not (eq g1 g2)))
+    (assert (not (eq a1 a2)))
+    (let ((contract (getf (tm:topicmap-association-properties-of a1) :relation-contract)))
+      (assert contract)
+      (assert (eq contract (getf (tm:topicmap-association-properties-of a2) :relation-contract)))
+      (assert (eq (work:work-page "Relation Contract: informs")
+                  (tm:topicmap-topic-object-of contract))))
+    ;; Path and label of one edge are inside the one referenced group.
+    (dolist (group (list g1 g2))
+      (assert (plump:get-elements-by-tag-name group "path"))
+      (assert (= 1 (length (plump:get-elements-by-tag-name group "text")))))
+    ;; Topic shapes are sibling groups with Topic references of their own.
+    (let ((interaction (reference-group view dom (tm:topicmap-projection-topic-by-id
+                                                  projection "interaction"))))
+      (assert (eq (plump:parent interaction) (plump:parent g1)))
+      (assert (null (plump:get-elements-by-tag-name interaction "path"))))
+    ;; No label identifies anything: with every text emptied, and with the
+    ;; two informs labels swapped for other words, the groups map as before.
+    (dolist (relabel (list (constantly "")
+                           (lambda (text) (if (equal text "informs") "requires" text))))
+      (let ((blank (let ((plump:*tag-dispatchers* plump:*xml-tags*))
+                     (plump:parse (tala:tala-rendering-svg rendering)))))
+        (dolist (text (plump:get-elements-by-tag-name blank "text"))
+          (loop for child across (plump:children text)
+                when (typep child 'plump:textual-node)
+                  do (setf (plump:text child) (funcall relabel (plump:text child)))))
+        (let* ((relabelled (rendering-with-svg rendering (plump:serialize blank nil)))
+               (other (interactive-tala-view relabelled))
+               (other-dom (check-reference-groups other relabelled)))
+          (assert (equal (plump:attribute g1 "class")
+                         (plump:attribute (reference-group other other-dom a1) "class")))
+          (assert (equal (plump:attribute g2 "class")
+                         (plump:attribute (reference-group other other-dom a2) "class"))))))
+    ;; A new View of the same rendering: new element IDs and a new D2 scope,
+    ;; the same Associations. IDs of two Views in one page never coincide,
+    ;; and each View's url(#...) references resolve inside that View.
+    (let* ((again (interactive-tala-view rendering))
+           (again-dom (check-reference-groups again rendering))
+           (ids (mapcar (lambda (e) (plump:attribute e "id"))
+                        (svg-elements-with-attribute dom "id")))
+           (again-ids (mapcar (lambda (e) (plump:attribute e "id"))
+                              (svg-elements-with-attribute again-dom "id"))))
+      (assert (null (intersection ids again-ids :test #'equal)))
+      (assert (= (length ids) (length (remove-duplicates ids :test #'equal))))
+      (dolist (entry (list (cons dom ids) (cons again-dom again-ids)))
+        (dolist (element (append (svg-elements-with-attribute (car entry) "mask")
+                                 (svg-elements-with-attribute (car entry) "marker-end")))
+          (let* ((value (or (plump:attribute element "marker-end")
+                            (plump:attribute element "mask")))
+                 (target (subseq value 5 (position #\) value))))
+            (assert (member target (cdr entry) :test #'equal)))))
+      (assert (eq a1 (cdr (find (plump:attribute (reference-group again again-dom a1) "id")
+                                (views:view-references again) :key #'car :test #'equal))))
+      (assert (not (equal (plump:attribute g1 "id")
+                          (plump:attribute (reference-group again again-dom a1) "id")))))
+    ;; A new rendering has a new Projection; its groups map to its own Associations.
+    (let* ((next (work:work-layout-example))
+           (next-projection (tala:tala-input-projection (tala:tala-rendering-input next)))
+           (next-a1 (association-between next-projection "interaction" "operations"))
+           (next-view (interactive-tala-view next)))
+      (check-reference-groups next-view next)
+      (assert (not (eq a1 next-a1)))
+      (assert (equal (tm:topicmap-association-id-of a1) (tm:topicmap-association-id-of next-a1)))
+      (reference-group next-view (view-svg-dom next-view) next-a1))
+    (assert (equal before (work-page-sources)))))
+
 (defun count-matches (needle haystack)
   (loop with start = 0 for position = (search needle haystack :start2 start)
         while position count t do (setf start (1+ position))))
@@ -412,5 +571,6 @@
   (check-relation-reference-integrity)
   (check-relation-contract-changes)
   (check-relation-contract-inspection)
-  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection).~%")
+  (check-interactive-tala)
+  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references.~%")
   t)

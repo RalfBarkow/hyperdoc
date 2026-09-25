@@ -106,9 +106,124 @@ Viewing the result or invoking existing navigation actions does not run TALA."
       (:p (views:object-ref (tala:tala-input-topics input) :display "Topic ID map")
           " · " (views:object-ref (tala:tala-input-associations input) :display "Association ID / endpoint map")))) )
 
+;;;; Inline, with Inspector references
+;;
+;; The same SVG, placed in the page instead of an image, so that each D2
+;; group can carry an ordinary Inspector reference. A group is found by the
+;; class D2 derives from the key this rendering's input gave it, the class
+;; VALIDATE-TALA-SVG already checks; labels, geometry and DOM nodes identify
+;; nothing. An edge's path and label sit in one group and so reach one
+;; Association. Shape and edge groups are siblings, so neither contains the
+;; other's reference.
+;;
+;; D2 names its marker, mask, style scope and fonts after a hash of the
+;; diagram. Two copies of one diagram in a page would share those IDs, and
+;; hidden Inspector views stay in the page, so each rendering of this view
+;; gets its own suffix on that hash.
+
+(defun %d2-scope (dom)
+  "The diagram hash D2 scoped this SVG with, e.g. \"d2-37195573\"."
+  (let ((svg (find-if (lambda (node)
+                        (member "d2-svg" (uiop:split-string (or (plump:attribute node "class") "") :separator " ")
+                                :test #'string=))
+                      (plump:get-elements-by-tag-name dom "svg"))))
+    (or (and svg
+             (find-if (lambda (class)
+                        (and (> (length class) 3) (string= "d2-" class :end2 3)
+                             (every #'digit-char-p (subseq class 3))))
+                      (uiop:split-string (plump:attribute svg "class") :separator " ")))
+        (error "TALA SVG has no D2 scope class."))))
+
+(defun %rescope (string scope new-scope)
+  "STRING with each SCOPE that is not followed by another digit renamed."
+  (with-output-to-string (out)
+    (loop with start = 0
+          for position = (search scope string :start2 start)
+          do (write-string string out :start start :end (or position (length string)))
+          while position
+          do (let ((end (+ position (length scope))))
+               (write-string (if (and (< end (length string))
+                                      (digit-char-p (char string end)))
+                                 scope new-scope)
+                             out)
+               (setf start end)))))
+
+(defun %rescope-dom (dom scope new-scope)
+  "Rename SCOPE in IDs, references and the style sheet. A class token is
+renamed only when it is SCOPE, so D2's identity classes are never touched."
+  (plump:traverse
+   dom
+   (lambda (node)
+     (let ((attributes (plump:attributes node)))
+       (loop for name being the hash-keys of attributes using (hash-value value)
+             do (setf (gethash name attributes)
+                      (if (string-equal name "class")
+                          (format nil "~{~A~^ ~}"
+                                  (mapcar (lambda (class)
+                                            (if (string= class scope) new-scope class))
+                                          (uiop:split-string value :separator " ")))
+                          (%rescope value scope new-scope))))
+       (when (string-equal "style" (plump:tag-name node))
+         (loop for child across (plump:children node)
+               when (typep child 'plump:textual-node)
+                 do (setf (plump:text child)
+                          (%rescope (plump:text child) scope new-scope))))))
+   :test #'plump:element-p)
+  dom)
+
+(defun %identity-group (groups entry)
+  "The one top-level group D2 made for ENTRY's key."
+  (let* ((class (tala:d2-svg-identity-class (getf entry :d2-id)))
+         (matches (remove class groups :key (lambda (g) (plump:attribute g "class"))
+                                       :test-not #'equal)))
+    (unless (= 1 (length matches))
+      (error "~D SVG groups carry the D2 identity of ~S." (length matches)
+             (getf entry :id)))
+    (first matches)))
+
+(defun interactive-tala-svg (rendering)
+  "RENDERING's SVG with an Inspector reference on each Topic and Association
+group. Call it while a view is being built: the references belong to it."
+  (let* ((input (tala:tala-rendering-input rendering))
+         (projection (tala:tala-input-projection input))
+         (dom (let ((plump:*tag-dispatchers* plump:*xml-tags*))
+                (plump:parse (tala:tala-rendering-svg rendering))))
+         (groups (remove-if-not
+                  (lambda (g) (let ((parent (plump:parent g)))
+                                (and (plump:element-p parent)
+                                     (string= "svg" (plump:tag-name parent)))))
+                  (plump:get-elements-by-tag-name dom "g")))
+         (scope (%d2-scope dom)))
+    (%rescope-dom dom scope
+                  (format nil "~A-~(~A~)" scope (symbol-name (gensym "V"))))
+    (dolist (entry (tala:tala-input-topics input))
+      (let ((group (%identity-group groups entry))
+            (topic (tm:topicmap-projection-topic-by-id projection (getf entry :id))))
+        (setf (plump:attribute group "id") (views:inspect-id topic)
+              (plump:attribute group "data-topic-id") (getf entry :id)
+              (plump:attribute group "style") "cursor:pointer")))
+    (dolist (entry (tala:tala-input-associations input))
+      (let ((group (%identity-group groups entry))
+            (association (find (getf entry :id)
+                               (tm:topicmap-projection-associations-of projection)
+                               :key #'tm:topicmap-association-id-of :test #'equal)))
+        (setf (plump:attribute group "id") (views:inspect-id association)
+              (plump:attribute group "data-association-id") (getf entry :id)
+              (plump:attribute group "style") "cursor:pointer")))
+    (let ((outer (first (plump:get-elements-by-tag-name dom "svg"))))
+      (setf (plump:attribute outer "style") "max-width:100%;height:auto"))
+    (plump:serialize dom nil)))
+
+(views:defview 👀tala-interactive (rendering tala:tala-rendering)
+  (views:html-view :title "TALA (interactive)" :priority 2
+    (views:html
+      (:p "The same TALA layout, inline. Click an edge or its label to inspect that Association; click a shape to inspect its Topic. Inspecting changes nothing.")
+      (views:str (interactive-tala-svg rendering)))))
+
 (views:defview 👀tala-result (rendering tala:tala-rendering)
   (views:html-view :title "TALA rendering proof" :priority 1
     (views:html
-      (:p "D2 " (views:esc (tala:tala-rendering-version rendering)) " · non-interactive")
+      (:p "D2 " (views:esc (tala:tala-rendering-version rendering))
+          " · image, non-interactive; the TALA (interactive) view inlines it")
       (:p (views:object-ref (tala:tala-rendering-evidence rendering) :display "SVG geometry by original ID"))
       (views:str (rendering-image-html rendering)))))

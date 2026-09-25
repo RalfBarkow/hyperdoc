@@ -7,7 +7,7 @@
            #:tala-input-seed #:tala-rendering #:tala-rendering-input
            #:tala-rendering-svg #:tala-rendering-version #:run-tala #:run-d2-tala
            #:validate-tala-svg #:assign-d2-keys #:tala-input-topic-id
-           #:tala-input-d2-key
+           #:tala-input-d2-key #:d2-svg-identity-class
            #:projection-state #:tala-dependency-status #:tala-rendering-evidence))
 (in-package #:dreyeck/topicmap/tala)
 
