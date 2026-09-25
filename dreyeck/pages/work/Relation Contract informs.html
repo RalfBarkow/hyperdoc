@@ -1,0 +1,19 @@
+<h1>Relation Contract: informs</h1>
+<in-package>dreyeck/work/reading</in-package>
+<p>Status: draft. This page states the meaning of the Work relation whose identity is the Topic ID <code>work:relation/informs</code>. Its label is <em>informs</em>. The title above names this page, not the relation: a new page title or a new label leaves the relation, and every Association that refers to it, unchanged.</p>
+<h2>What "A informs B" asserts</h2>
+<p>Results or questions from A provide input relevant to B. Each Association that uses this contract remains its own statement between two Work Topics.</p>
+<ul><li>Interaction → Operations and change: Interaction records a selected Operation separately from carrying it out; what that Operation may change is a question for Operations and change.</li>
+<li>Operations and change → Connect / Associations: the Operations and Change page asks which authority each kind of change affects, and names Connect among the work that depends on that distinction.</li></ul>
+<h2>What it does not assert</h2>
+<p>Authorization. Work Breakdown says of its arrows that they "do not authorize execution". An informs relation grants no change authority to A, to B or to anyone acting on them.</p>
+<h2>Open contract questions</h2>
+<p>The current Work material does not settle these. Until it does, informs asserts none of them.</p>
+<dl><dt>Execution order</dt><dd>Must work on A come before work on B? No Work page states an order.</dd>
+<dt>Ownership</dt><dd>Does informs say who owns A or B? No Work page connects the relation with ownership.</dd>
+<dt>Strict prerequisite</dt><dd>Work Breakdown records Operations and change → State and persistence separately as <em>requires</em>. The Operations and Change page also says Connect depends on its distinction, while Work Breakdown records that edge as <em>informs</em>. Whether informs ever carries a prerequisite is open.</dd>
+<dt>Causal determination</dt><dd>Does a result of A determine B? No Work page claims so.</dd></dl>
+<h2>Uses</h2>
+<p><a expr='(relation-uses (work-projection) "work:relation/informs")'>Associations using this contract</a>, read from Work Breakdown. Each is a separate Association with its own ID.</p>
+<p>Whether changing an Association's relation replaces it with another Association or changes one stable Association is not decided here. Today an Association's ID spells its relation, so a retyped Association gets a new ID.</p>
+<p><a page="Work Breakdown">Work Breakdown</a> · <a expr="(work-workspace)" view="Topicmap">Open the work Topicmap</a></p>

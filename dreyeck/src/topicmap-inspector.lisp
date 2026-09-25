@@ -108,8 +108,10 @@
                     X1 Y1 X2 Y2 (ROUND (/ (+ X1 X2) 2))
                     (- (ROUND (/ (+ Y1 Y2) 2)) 6)
                     (TOPICMAP-HTML-ESCAPE
-                     (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
-                      ASSOCIATION)))))))))
+                     (OR (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-RELATION-LABEL
+                          ASSOCIATION)
+                         (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF
+                          ASSOCIATION))))))))))
 
 (DEFUN %RENDER-NATIVE-TOPICMAP-STRUCTURAL-CONTAINMENT-SIGN
        (PROJECTION ASSOCIATION STREAM)
@@ -350,8 +352,9 @@ readable values stay on the element's data- attributes."
      (:td
       (:code
        (views:esc
-        (prin1-to-string
-         (dreyeck/topicmap:topicmap-association-type-of association)))))
+        (or (dreyeck/topicmap:topicmap-association-relation-label association)
+            (prin1-to-string
+             (dreyeck/topicmap:topicmap-association-type-of association))))))
      (:td
       (:code
        (views:esc
@@ -436,9 +439,11 @@ readable values stay on the element's data- attributes."
                             (:td
                              (:tt
                               (cl-who:esc
-                               (princ-to-string
-                                (dreyeck/topicmap:topicmap-association-type-of
-                                 association)))))
+                               (or (dreyeck/topicmap:topicmap-association-relation-label
+                                    association)
+                                   (princ-to-string
+                                    (dreyeck/topicmap:topicmap-association-type-of
+                                     association))))))
                             (:td
                              (cl-who:esc
                               (if (eq direction :outgoing)

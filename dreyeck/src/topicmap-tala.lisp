@@ -150,7 +150,8 @@ Topic/Association IDs and endpoints; D2 labels never supply identity."
                  (key-for (tm:topicmap-association-from-of association))
                  (key-for (tm:topicmap-association-to-of association))
                  (d2-quoted-label
-                  (princ-to-string (tm:topicmap-association-type-of association))))))))))
+                  (or (tm:topicmap-association-relation-label association)
+                      (princ-to-string (tm:topicmap-association-type-of association)))))))))))
 
 (defun tala-input-d2-key (input topic-id)
   "The key this INPUT gave TOPIC-ID, or an error.

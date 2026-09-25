@@ -15,10 +15,13 @@
 <li><a page="D2 Connections" data-topic="connection" data-kind="concept" data-status="demonstrated">Connection</a> — demonstrated.</li>
 <li><a page="Connect and Associations" data-topic="association" data-kind="concept" data-status="question">Association</a> — question.</li>
 <li><a page="Reading TALA as a Layout Layer" hyperbook="dreyeck/topicmap/tala/reading" data-topic="topicmap" data-kind="concept" data-status="existing">Topicmap</a> — existing.</li></ul>
+<h2>Relation contracts</h2>
+<p>A relation written <code>work:relation/…</code> refers to the one Topic below with that ID. The Topic ID is the contract's identity; the link text is its label; the linked page states what the relation asserts. Other relations are still plain words.</p>
+<ul><li><a page="Relation Contract: informs" data-topic="work:relation/informs" data-kind="relation" data-status="draft">informs</a> — draft.</li></ul>
 <h2>Dependencies and relationships</h2>
 <p>The arrows below express documented dependencies or questions. They do not authorize execution. Planning observes Operations/change and models the documentation work.</p>
-<ul><li data-from="interaction" data-to="operations" data-relation="informs">Interaction → Operations and change: informs.</li>
-<li data-from="operations" data-to="connect" data-relation="informs">Operations and change → Connect / Associations: informs.</li>
+<ul><li data-from="interaction" data-to="operations" data-relation="work:relation/informs">Interaction → Operations and change: informs.</li>
+<li data-from="operations" data-to="connect" data-relation="work:relation/informs">Operations and change → Connect / Associations: informs.</li>
 <li data-from="operations" data-to="state" data-relation="requires">Operations and change → State and persistence: requires.</li>
 <li data-from="dogfooding" data-to="corpus" data-relation="develops">HyperDoc dogfooding → D2 example corpus: develops.</li>
 <li data-from="planning" data-to="dogfooding" data-relation="models">Planning / SHOP3 → HyperDoc dogfooding: models.</li>

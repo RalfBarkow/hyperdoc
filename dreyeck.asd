@@ -2200,7 +2200,8 @@
                  (:static-file "HyperDoc Dogfooding.html")
                  (:static-file "D2 Corpus.html")
                  (:static-file "Planning with SHOP3.html")
-                 (:static-file "D2 Connections.html")))))
+                 (:static-file "D2 Connections.html")
+                 (:static-file "Relation Contract informs.html")))))
 
 (defsystem "dreyeck/work/reading/tests"
   :depends-on ("dreyeck/work/reading")

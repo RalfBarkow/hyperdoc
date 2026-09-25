@@ -23,6 +23,7 @@
            #:topicmap-association-from-of
            #:topicmap-association-to-of
            #:topicmap-association-properties-of
+           #:topicmap-association-relation-label
            #:topicmap-projection-of
            #:topicmap-workspace
            #:make-topicmap-workspace

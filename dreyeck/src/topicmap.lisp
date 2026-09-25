@@ -100,6 +100,15 @@
                  :to to
                  :properties (copy-list properties)))
 
+(defun topicmap-association-relation-label (association)
+  "The label of ASSOCIATION's Relation Contract Topic, or NIL if it has none.
+A producer that resolves a relation reference puts the contract Topic under
+:RELATION-CONTRACT; that is derived presentation data. The label is read from
+the Topic each time, so the Topic stays its only authority."
+  (let ((contract (getf (topicmap-association-properties-of association)
+                        :relation-contract)))
+    (and contract (topicmap-topic-label-of contract))))
+
 (defun validate-topicmap-projection (topics associations)
   (let ((ids (mapcar #'topicmap-topic-id-of topics)))
     (unless (= (length ids)
