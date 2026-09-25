@@ -255,7 +255,7 @@ when an interaction ends, and completion still opens an Operation Request."
              (%live-await (lambda () (m:association-sign-gesture-window *live-body* id))
                           :what "the Association sign's gesture window")
              (m:association-sign-gesture-window *live-body* id)))
-      (%live-js "window.__events=[];['pointerdown','pointermove','pointerup','click'].forEach(k=>document.addEventListener(k,e=>window.__events.push(k+':'+e.isTrusted),true));return true;")
+      (%live-js "window.__events=[];['pointerdown','pointermove','pointerup','pointercancel','click'].forEach(k=>document.addEventListener(k,e=>window.__events.push(k+':'+e.isTrusted),true));return true;")
       ;; PRIMARY: never Gesture, always the exact Association.
       (dolist (association (list a1 a2))
         (let* ((id (id-of association)) (window (window-of id)))
@@ -361,11 +361,14 @@ when an interaction ends, and completion still opens an Operation Request."
           (assert (equal "" (%live-visible-menus)))))
       (format t "~&REFRESH-PASS: the old sign left the page with its window idle; the new sign's own window selected A1.~%")
       (check-live-code-page-strip)
+      ;; Every press, release, cancel and click was dispatched by the test.
+      ;; A real mouse passing over the page adds trusted hover moves; those
+      ;; take part in no gesture here and are allowed.
       (assert (equal "synthetic"
-                     (%live-js "return window.__events.length>0 && window.__events.every(e=>e.endsWith(':false')) ? 'synthetic' : 'trusted-or-none';")))
+                     (%live-js "const input=window.__events.filter(e=>!e.startsWith('pointermove:'));return input.some(e=>e.startsWith('pointerdown:')) && input.every(e=>e.endsWith(':false')) ? 'synthetic' : 'trusted-input:'+input.filter(e=>e.endsWith(':true')).join(' ');")))
       (assert (equal pages (work-page-sources)))
       (clog:close-connection (clog:window *live-body*))
-      (format t "~&LIVE-ASSOCIATION-GESTURE-PASS (synthetic pointer and click events, isTrusted=false; no physical input claimed).~%")
+      (format t "~&LIVE-ASSOCIATION-GESTURE-PASS (synthetic presses, releases, cancels and clicks, isTrusted=false; trusted hover moves ignored; no physical input claimed).~%")
       t)))
 
 ;;;; Physical witness for an Association sign

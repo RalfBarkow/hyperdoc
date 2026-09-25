@@ -3,7 +3,9 @@
   (:use #:cl)
   (:local-nicknames (#:tm #:dreyeck/topicmap)
                     (#:tala #:dreyeck/topicmap/tala)
-                    (#:authored #:dreyeck/topicmap/tala/authored))
+                    (#:authored #:dreyeck/topicmap/tala/authored)
+                    (#:w #:dreyeck/gesture-binding-witness)
+                    (#:views #:html-inspector-views))
   (:export #:work-page #:work-projection #:work-workspace
            #:connections-source #:connections-example #:work-layout-example
            #:project-work-breakdown #:relation-uses
@@ -16,7 +18,14 @@
            #:relationship-occurrence-to
            #:work-relationship-source-error #:source-error-position #:source-error-reason
            #:resolve-work-relationship-occurrence
-           #:stale-work-relationship-occurrence #:stale-relationship-occurrence))
+           #:stale-work-relationship-occurrence #:stale-relationship-occurrence
+           #:relation-change-request #:request-relation-change
+           #:relation-change-operation #:relation-change-association
+           #:relation-change-occurrence #:relation-change-observed-relation
+           #:relation-change-observed-contract #:relation-change-proposed-contract
+           #:relation-change-proposed-relation
+           #:relation-change-refused #:relation-change-refused-reason
+           #:relation-change-refused-cause))
 (in-package #:dreyeck/work/reading)
 
 (hyperdoc:see (hyperdoc:page "D2 Connections"))
@@ -409,6 +418,134 @@ string is parsed, scanned for relationship occurrences and kept by each."
   (let ((page (work-page "Work Breakdown")))
     (project-work-breakdown (uiop:read-file-string (hyperdoc:file-of page))
                             :source page :areas-only areas-only)))
+
+;;;; Relation change requests
+;;
+;; A request to change which Relation Contract one authored relationship
+;; uses. It names the authored <li> by its source occurrence, not by the
+;; semantic triple, so of two <li>s stating the same relationship it names
+;; one. Making it observes and writes nothing; it grants no permission and
+;; holds no executor. What the change would replace is fully determined --
+;; the occurrence's data-relation value range and the proposed contract's
+;; Topic ID -- so no separate plan is derived. Whether a changed relation
+;; makes the same Association or another one is not decided here: the
+;; request concerns the authored statement.
+
+(define-condition relation-change-refused (error)
+  ((association :initarg :association :reader refused-relation-change-association)
+   (reason :initarg :reason :reader relation-change-refused-reason)
+   (cause :initarg :cause :initform nil :reader relation-change-refused-cause))
+  (:report (lambda (condition stream)
+             (format stream "No relation change request: ~A"
+                     (relation-change-refused-reason condition))))
+  (:documentation "Nothing was requested and nothing was written. CAUSE, if
+any, is the condition that showed why."))
+
+(defclass relation-change-request ()
+  ((operation :initarg :operation :reader relation-change-operation)
+   (association :initarg :association :reader relation-change-association)
+   (occurrence :initarg :occurrence :reader relation-change-occurrence)
+   (observed-relation :initarg :observed-relation :reader relation-change-observed-relation)
+   (observed-contract :initarg :observed-contract :reader relation-change-observed-contract)
+   (proposed-contract :initarg :proposed-contract :reader relation-change-proposed-contract))
+  (:documentation "Change relation for one exact authored Work relationship:
+the projected Association, its source occurrence -- which authored <li> --
+the relation observed there and the Relation Contract Topic proposed in its
+place. Intent and evidence only; no executor, no permission."))
+
+(defun relation-change-proposed-relation (request)
+  "The relation reference the change would write: the contract's Topic ID."
+  (tm:topicmap-topic-id-of (relation-change-proposed-contract request)))
+
+(defmethod print-object ((request relation-change-request) stream)
+  (print-unreadable-object (request stream :type t)
+    (format stream "~A -> ~A at ~S" (relation-change-observed-relation request)
+            (relation-change-proposed-relation request)
+            (relationship-occurrence-element-range (relation-change-occurrence request)))))
+
+(defun request-relation-change (association proposed &key (current nil current-p))
+  "A request to make the authored <li> behind ASSOCIATION use the Relation
+Contract whose Topic ID is PROPOSED. CURRENT is the page source now, read
+from the occurrence's page unless given. Observes, writes nothing, and
+signals RELATION-CHANGE-REFUSED unless every check holds."
+  (flet ((refuse (reason &optional cause)
+           (error 'relation-change-refused :association association :reason reason :cause cause)))
+    (unless (typep association 'tm:topicmap-association)
+      (refuse (format nil "~S is not a Topicmap Association" association)))
+    (let ((occurrence (getf (tm:topicmap-association-properties-of association) :source-occurrence)))
+      (unless (typep occurrence 'work-relationship-source-occurrence)
+        (refuse (format nil "Association ~A has no Work source occurrence"
+                        (tm:topicmap-association-id-of association))))
+      (let ((current (if current-p
+                         current
+                         (uiop:read-file-string
+                          (hyperdoc:file-of (relationship-occurrence-page occurrence))))))
+        (handler-case (resolve-work-relationship-occurrence occurrence :current current)
+          (stale-work-relationship-occurrence (condition)
+            (refuse "its source occurrence is stale" condition)))
+        (let ((observed (tm:topicmap-association-type-of association))
+              (range (relationship-occurrence-relation-range occurrence)))
+          (unless (and (equal observed (relationship-occurrence-relation occurrence))
+                       (string= observed current :start2 (car range) :end2 (cdr range)))
+            (refuse (format nil "the Association says ~S but its occurrence records ~S and the source has ~S"
+                            observed (relationship-occurrence-relation occurrence)
+                            (subseq current (car range) (cdr range)))))
+          (unless (stringp proposed)
+            (refuse (format nil "~S is not a Relation Contract Topic ID" proposed)))
+          (when (equal proposed observed)
+            (refuse (format nil "it already uses ~A" observed)))
+          (let ((contract
+                  (handler-case
+                      (resolve-relation-contract
+                       proposed
+                       (tm:topicmap-projection-topics-of
+                        (project-work-breakdown current :source (relationship-occurrence-page occurrence)))
+                       (tm:topicmap-association-id-of association))
+                    (relation-contract-reference-error (condition)
+                      (refuse (format nil "~A is not a Relation Contract in this page" proposed)
+                              condition)))))
+            (make-instance 'relation-change-request
+                           :operation (w:change-relation-operation)
+                           :association association :occurrence occurrence
+                           :observed-relation observed
+                           :observed-contract (getf (tm:topicmap-association-properties-of association)
+                                                    :relation-contract)
+                           :proposed-contract contract)))))))
+
+(views:defview relation-change-request-overview (request relation-change-request)
+  (views:html-view :title "Relation change request" :priority 1
+    (let* ((occurrence (relation-change-occurrence request))
+           (snapshot (relationship-occurrence-snapshot occurrence))
+           (element (relationship-occurrence-element-range occurrence))
+           (relation (relationship-occurrence-relation-range occurrence))
+           (page (relationship-occurrence-page occurrence))
+           (observed (relation-change-observed-contract request))
+           (proposed (relation-change-proposed-contract request)))
+      (views:html
+        (:table :class "inspector-table"
+          (:tr (:td "Operation")
+               (:td (:tt (views:esc (w:semantic-operation-identity-id (relation-change-operation request))))))
+          (:tr (:td "Association") (:td (views:object-ref (relation-change-association request))))
+          (:tr (:td "Source page")
+               (:td (if (typep page 'hyperbook:page)
+                        (views:object-ref page)
+                        (views:html (:tt (views:esc (prin1-to-string page)))))))
+          (:tr (:td "Source occurrence") (:td (views:object-ref occurrence)))
+          (:tr (:td "Element range") (:td (:tt (views:esc (prin1-to-string element)))))
+          (:tr (:td "Relation value range") (:td (:tt (views:esc (prin1-to-string relation)))))
+          (:tr (:td "Observed relation") (:td (:tt (views:esc (relation-change-observed-relation request)))))
+          (:tr (:td "Observed Relation Contract")
+               (:td (if observed
+                        (views:object-ref observed :display (tm:topicmap-topic-id-of observed))
+                        (views:html "none: a plain relation"))))
+          (:tr (:td "Proposed Relation Contract")
+               (:td (views:object-ref proposed :display (tm:topicmap-topic-id-of proposed))))
+          (:tr (:td "Executed") (:td "no -- a request holds no writer and grants no permission")))
+        (:p "Authored " (:tt (views:esc "<li>")) ", exactly as observed:")
+        (:pre (views:esc (subseq snapshot (car element) (cdr element))))
+        (:p "Would replace only the relation value at " (:tt (views:esc (prin1-to-string relation))) ": "
+            (:tt (views:esc (subseq snapshot (car relation) (cdr relation)))) " → "
+            (:tt (views:esc (relation-change-proposed-relation request))))))))
 
 (hyperdoc:defexample work-workspace
   "Navigate the documented work and its concepts with native Workspace actions."

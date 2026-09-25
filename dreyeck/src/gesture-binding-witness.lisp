@@ -7,6 +7,7 @@
            #:semantic-operation-identity-title
            #:insert-executable-defexample-operation
            #:inspect-relation-contract-operation
+           #:change-relation-operation
            #:gesture-input-sample
            #:make-gesture-input-sample
            #:gesture-input-sample-kind
@@ -72,6 +73,14 @@ Like every identity here it is data; what it shows is computed elsewhere.")
 
 (defun inspect-relation-contract-operation ()
   *inspect-relation-contract-operation*)
+
+(defvar *change-relation-operation*
+  (%make-operation-identity "operation/change-relation" "Change relation")
+  "The EQ identity of changing which Relation Contract one authored Work
+relationship uses. Data only: it names what is asked, not who may do it.")
+
+(defun change-relation-operation ()
+  *change-relation-operation*)
 
 ;;; Transient input
 

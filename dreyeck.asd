@@ -2189,7 +2189,7 @@
 
 (defsystem "dreyeck/work/reading"
   :description "HyperDoc work pages and one complete D2 Connections example"
-  :depends-on ("dreyeck/topicmap/tala/reading")
+  :depends-on ("dreyeck/topicmap/tala/reading" "dreyeck/gesture-binding-witness")
   :serial t
   :components ((:module "dreyeck/work" :components ((:file "reading")))
                (:module "dreyeck/pages/work" :components

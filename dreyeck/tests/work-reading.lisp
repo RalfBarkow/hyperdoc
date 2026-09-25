@@ -976,6 +976,129 @@ data-relation value replaced. Nothing is written."
                                (source-refusal (concatenate 'string "<script>var s;</script>" source)))))
     (assert (equal pages (work-page-sources)))))
 
+;;;; Change relation: a request, nothing more
+
+(defun with-fixture-requires-contract (source)
+  "SOURCE plus a second Relation Contract, work:relation/requires. A fixture:
+production Work Breakdown defines only informs. Its page is the informs
+contract page, reused because the fixture needs some page object."
+  (replace-once source "data-status=\"draft\">informs</a> — draft.</li>"
+                (concatenate 'string "data-status=\"draft\">informs</a> — draft.</li>"
+                             "<li><a page=\"Relation Contract: informs\" data-topic=\"work:relation/requires\" data-kind=\"relation\">requires</a> — test fixture.</li>")))
+
+(defun change-refusal (association proposed current)
+  (handler-case (progn (work:request-relation-change association proposed :current current)
+                       (error "Expected a refusal."))
+    (work:relation-change-refused (condition) condition)))
+
+(defun check-relation-change-request ()
+  (let* ((pages (work-page-sources))
+         (source (work-breakdown-source))
+         (fixture (with-fixture-requires-contract (duplicated-a1 source)))
+         (twins (associations-between (fixture-projection fixture) "interaction" "operations"))
+         (a1 (first twins)) (a2 (second twins))
+         (o1 (occurrence-of a1)) (o2 (occurrence-of a2))
+         (workspace (work:work-workspace))
+         (point (copy-seq (tm:topicmap-workspace-point-of workspace)))
+         (history (copy-list (tm:topicmap-workspace-history-of workspace)))
+         (requests (symbol-value (find-symbol "*REQUESTS*" "DREYECK/GESTURE/OPERATION-REQUEST")))
+         (request-count (hash-table-count requests))
+         (operation (w:change-relation-operation)))
+    ;; The Operation is data.
+    (assert (equal "operation/change-relation" (w:semantic-operation-identity-id operation)))
+    (assert (equal "Change relation" (w:semantic-operation-identity-title operation)))
+    (assert (not (functionp operation)))
+    ;; A request names A1's authored <li>, not the triple A1 shares with A2.
+    (let ((request (work:request-relation-change a1 "work:relation/requires" :current fixture)))
+      (assert (eq operation (work:relation-change-operation request)))
+      (assert (eq a1 (work:relation-change-association request)))
+      (assert (not (eq a2 (work:relation-change-association request))))
+      (assert (equal (tm:topicmap-association-id-of a1) (tm:topicmap-association-id-of a2)))
+      (assert (eq o1 (work:relation-change-occurrence request)))
+      (assert (not (eq o1 o2)))
+      (let ((value (work:relationship-occurrence-relation-range o1))
+            (other (work:relationship-occurrence-element-range o2))
+            (own (work:relationship-occurrence-element-range o1)))
+        (assert (<= (car own) (car value) (cdr value) (cdr own)))
+        (assert (or (<= (cdr value) (car other)) (>= (car value) (cdr other)))))
+      (assert (equal "work:relation/informs" (work:relation-change-observed-relation request)))
+      (assert (eq (getf (tm:topicmap-association-properties-of a1) :relation-contract)
+                  (work:relation-change-observed-contract request)))
+      (assert (equal "work:relation/requires" (work:relation-change-proposed-relation request)))
+      (assert (equal "relation" (getf (tm:topicmap-topic-view-properties-of
+                                       (work:relation-change-proposed-contract request))
+                                      :kind)))
+      ;; What a write would observe, computed in memory only: the relation
+      ;; value changes at A1's <li> and nowhere else.
+      (let* ((expected (replace-relation-value o1 (work:relation-change-proposed-relation request)))
+             (range (work:relationship-occurrence-relation-range o1))
+             (delta (- (length (work:relation-change-proposed-relation request)) (- (cdr range) (car range))))
+             (after (fixture-projection expected))
+             (at (lambda (occurrence)
+                   (find (work:relationship-occurrence-ordinal occurrence)
+                         (tm:topicmap-projection-associations-of after)
+                         :key (lambda (a) (work:relationship-occurrence-ordinal (occurrence-of a)))))))
+        (assert (string= fixture expected :end1 (car range) :end2 (car range)))
+        (assert (string= fixture expected :start1 (cdr range) :start2 (+ (cdr range) delta)))
+        (assert (equal "work:relation/requires" (tm:topicmap-association-type-of (funcall at o1))))
+        (assert (equal "work:relation/informs" (tm:topicmap-association-type-of (funcall at o2))))
+        ;; An observation, not an identity decision: the derived ID there differs.
+        (assert (not (equal (tm:topicmap-association-id-of a1)
+                            (tm:topicmap-association-id-of (funcall at o1))))))
+      ;; The Inspector shows what is asked, with nothing to press.
+      (let* ((view (find "Relation change request" (views:all-views request)
+                         :key #'views:view-title :test #'equal))
+             (html (views:view-html view))
+             (objects (mapcar #'cdr (views:view-references view))))
+        (assert view)
+        (dolist (text '("operation/change-relation" "work:relation/informs" "work:relation/requires"
+                        "&lt;li data-from=&quot;interaction&quot;" "Operations and change: informs."))
+          (assert (search text html) () "The request view lacks ~S." text))
+        (dolist (object (list a1 o1 (work:relation-change-proposed-contract request)
+                              (work:relation-change-observed-contract request)))
+          (assert (member object objects :test #'eq)))
+        (assert (notany (lambda (entry) (or (eql 0 (search "action-" (car entry)))
+                                            (eql 0 (search "eval-" (car entry)))))
+                        (views:view-references view)))))
+    ;; Refusals: each names why, and nothing is requested.
+    (flet ((refused (association proposed current fragment &optional cause-type)
+             (let ((condition (change-refusal association proposed current)))
+               (assert (search fragment (work:relation-change-refused-reason condition)) ()
+                       "Refusal ~S lacks ~S." (princ-to-string condition) fragment)
+               (when cause-type
+                 (assert (typep (work:relation-change-refused-cause condition) cause-type))))))
+      (refused 42 "work:relation/requires" fixture "not a Topicmap Association")
+      (refused (tm:make-topicmap-association :id "work:x:y:z" :type "work:relation/informs"
+                                             :from "interaction" :to "operations")
+               "work:relation/requires" fixture "no Work source occurrence")
+      (refused (tm:make-topicmap-association :id "work:tampered" :type "work:relation/requires"
+                                             :from "interaction" :to "operations"
+                                             :properties (list :source-occurrence o1))
+               "work:relation/informs" fixture "the Association says")
+      (refused a1 "work:relation/absent" fixture "not a Relation Contract"
+               'work:relation-contract-reference-error)
+      (refused a1 "interaction" fixture "not a Relation Contract" 'work:relation-contract-reference-error)
+      (refused a1 "work:relation/informs" fixture "already uses")
+      ;; Stale: any difference from the snapshot, however it came about.
+      (dolist (current (list (replace-once fixture "This is the current work" "This is the present work")
+                             (replace-once fixture "<h2>Navigate and inspect</h2>"
+                                           (concatenate 'string "<ul>" +a1-item+ "</ul><h2>Navigate and inspect</h2>"))
+                             (replace-once (replace-once fixture +a1-item+ "")
+                                           "<h2>Navigate and inspect</h2>"
+                                           (concatenate 'string "<ul>" +a1-item+ "</ul><h2>Navigate and inspect</h2>"))
+                             (replace-relation-value o1 "work:relation/requires")))
+        (refused a1 "work:relation/requires" current "stale" 'work:stale-work-relationship-occurrence)))
+    ;; Production defines no requires contract, so the real page refuses it.
+    (let ((real-a1 (association-between (work:work-projection) "interaction" "operations")))
+      (assert (search "not a Relation Contract"
+                      (work:relation-change-refused-reason
+                       (change-refusal real-a1 "work:relation/requires" source)))))
+    ;; Nothing happened elsewhere.
+    (assert (equal pages (work-page-sources)))
+    (assert (equal point (tm:topicmap-workspace-point-of workspace)))
+    (assert (equal history (tm:topicmap-workspace-history-of workspace)))
+    (assert (= request-count (hash-table-count requests)))))
+
 (defun remove-substring (string part)
   (replace-once string part ""))
 
@@ -996,5 +1119,6 @@ data-relation value replaced. Nothing is written."
   (check-inspect-relation-contract)
   (check-hand-shaped-traces)
   (check-work-relationship-occurrences)
+  (check-relation-change-request)
   (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect).~%")
   t)
