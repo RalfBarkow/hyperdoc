@@ -255,7 +255,8 @@ error to paper over."
 ;;; context at a time.
 
 (defclass gesture-input-session ()
-  ((status :initform :idle :accessor input-session-status)
+  ((bindings :initarg :bindings :reader input-session-bindings)
+   (status :initform :idle :accessor input-session-status)
    (prefix :initform nil :accessor input-session-prefix)
    (held-mask :initform nil :accessor input-session-held-mask)
    (origin :initform nil :accessor input-session-origin)
@@ -266,7 +267,8 @@ error to paper over."
 RUN-GESTURE-TRACE signals on input after a terminal state; that contract
 is kept, and closing the input session is what keeps it kept."))
 
-(defun make-gesture-input-session () (make-instance 'gesture-input-session))
+(defun make-gesture-input-session (&key (bindings (w:make-gesture-binding-catalog)))
+  (make-instance 'gesture-input-session :bindings bindings))
 
 (defun %mask-of (which)
   "BUTTONS is a bitmask; WHICH names one button. 1 primary, 3 secondary."
@@ -298,7 +300,8 @@ is kept, and closing the input session is what keeps it kept."))
 
 (defun %reduce (session)
   (setf (input-session-gesture-session session)
-        (w:run-gesture-trace (reverse (input-session-prefix session))))
+        (w:run-gesture-trace (reverse (input-session-prefix session))
+                             :bindings (input-session-bindings session)))
   (when (member (sm:state-machine-run-current-state-of
                  (input-session-gesture-session session))
                 '(:completed :cancelled))
@@ -367,7 +370,7 @@ is kept, and closing the input session is what keeps it kept."))
    (input :initarg :input :reader witness-input))
   (:documentation "One transport and the input session it feeds."))
 
-(defun make-gesture-transport-witness ()
+(defun make-gesture-transport-witness (&key (bindings (w:make-gesture-binding-catalog)))
   "A transport and the input session that shares its lifetime.
 The session may hold successive interactions from the same source; it
 resets its prefix on each POINTER-DOWN. What it may not do is reach
@@ -381,7 +384,7 @@ dependency and does not write that binder; it only says what the binder
 owes it."
   (make-instance 'gesture-transport-witness
                  :transport (make-ordered-transport)
-                 :input (make-gesture-input-session)))
+                 :input (make-gesture-input-session :bindings bindings)))
 
 (defun witness-state (witness)
   (let ((transport (witness-transport witness))

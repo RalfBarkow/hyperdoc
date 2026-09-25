@@ -257,9 +257,10 @@
   T
   :DEPENDS-ON
   (#:DREYECK/TOPICMAP #:HYPERDOC/INSPECTOR #:HTML-INSPECTOR-VIEWS
-   #:TRIVIAL-PACKAGE-LOCAL-NICKNAMES)
+   #:TRIVIAL-PACKAGE-LOCAL-NICKNAMES "clog-moldable-inspector" "dreyeck/gesture/clog")
   :COMPONENTS
-  ((:FILE "topicmap-inspector-package") (:FILE "topicmap-inspector")))
+  ((:FILE "topicmap-inspector-package") (:FILE "topicmap-gesture")
+   (:FILE "topicmap-inspector")))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/TOPICMAP/TESTS
   :DESCRIPTION
@@ -2172,3 +2173,14 @@
   :perform (test-op (operation component)
              (declare (ignore operation component))
              (uiop:symbol-call :dreyeck/topicmap/tests :run-tala-integration-tests)))
+
+(defsystem "dreyeck/topicmap/gesture/tests"
+  :description "Workspace action sign occurrences and contextual input"
+  :depends-on ("dreyeck/topicmap/tala/reading")
+  :serial t
+  :components ((:file "dreyeck/tests/topicmap-gesture")
+               (:file "dreyeck/tests/topicmap-gesture-browser"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/topicmap/gesture/tests
+                               :run-workspace-action-sign-tests)))

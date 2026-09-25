@@ -62,10 +62,10 @@ current interaction, newest first; a new press starts a new one.
 SURFACES pairs each subject a surface presses with the function that draws
 on that surface; a page with several surfaces is still one window."))
 
-(defun make-gesture-window (&key projection)
+(defun make-gesture-window (&key projection (bindings (w:make-gesture-binding-catalog)))
   "A fresh window: a transport, an input session and a lock of its own."
   (make-instance 'gesture-window
-                 :witness (tp:make-gesture-transport-witness)
+                 :witness (tp:make-gesture-transport-witness :bindings bindings)
                  :lock (bt:make-lock "gesture window")
                  :projection projection))
 

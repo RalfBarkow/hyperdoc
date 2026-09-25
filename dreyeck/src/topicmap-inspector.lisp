@@ -213,8 +213,11 @@ readable values stay on the element's data- attributes."
     (WHEN (TYPEP SOURCE 'DREYECK/TOPICMAP:TOPICMAP-WORKSPACE)
       (LET ((TOPIC-ID (DREYECK/TOPICMAP:TOPICMAP-TOPIC-ID-OF TOPIC)))
         (VIEWS:ACTION-ID
-         (VIEWS:THUNK
-           (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-GO-TO SOURCE TOPIC-ID)))))))
+         (make-instance 'topic-action-reference
+                        :topic topic :projection projection :workspace source
+                        :fn (lambda ()
+                              (DREYECK/TOPICMAP:TOPICMAP-WORKSPACE-GO-TO
+                               SOURCE TOPIC-ID))))))))
 
 (defun %render-native-topicmap-workspace-action-sign (projection topic stream)
   (unless (topicmap-topic-path-of topic)
