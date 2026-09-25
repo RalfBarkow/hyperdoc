@@ -25,6 +25,7 @@
            #:gesture-binding-enabled-p
            #:gesture-binding-operation
            #:make-gesture-binding-catalog
+           #:make-association-binding-catalog
            #:gesture-session
            #:gesture-session-binding-catalog-of
            #:gesture-session-mode-of
@@ -125,6 +126,23 @@ observation asks for one."
                             :sector-half-width 30.0d0
                             :target-type :lisp-source-definition
                             :enabled-p nil :operation operation))))
+
+(defun make-association-binding-catalog ()
+  "What a Topicmap Association offers: Inspect relation contract, by the
+visible menu or by a mark, in one sector. PRIMARY inspection of the
+Association itself is the Inspector's, not a Binding."
+  (let ((operation (inspect-relation-contract-operation)))
+    (list
+     (%make-gesture-binding :id "binding/radial-inspect-relation-contract"
+                            :kind :radial-menu :sector-center 0.0d0
+                            :sector-half-width 30.0d0
+                            :target-type :topicmap-association
+                            :enabled-p t :operation operation)
+     (%make-gesture-binding :id "binding/mark-inspect-relation-contract"
+                            :kind :learned-mark :sector-center 0.0d0
+                            :sector-half-width 30.0d0
+                            :target-type :topicmap-association
+                            :enabled-p t :operation operation))))
 
 ;;; The run
 

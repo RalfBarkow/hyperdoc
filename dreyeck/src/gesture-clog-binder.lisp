@@ -42,7 +42,7 @@
            #:receive-envelope
            #:connection-gesture-window #:create-gesture-surface
            #:gesture-window-selection #:newly-completed-p
-           #:on-gesture-window #:install-gesture-route
+           #:on-gesture-window #:install-gesture-route #:menu-bindings
            #:open-gesture-windows))
 
 (in-package #:dreyeck/gesture/clog)
@@ -136,18 +136,17 @@ named, compared with the shared identity, and not executed."
 (defparameter +menu-radius+ 72
   "How far from the press point a sector's label is drawn.")
 
-(defun %catalog () (w:make-gesture-binding-catalog))
-
-(defun %radial-bindings ()
-  "The sectors a visible menu shows: every radial Binding with an angle,
-enabled or not, from the same catalog the reducer selects from."
-  (remove-if-not (lambda (binding)
-                   (and (eq :radial-menu (w:gesture-binding-kind binding))
-                        (numberp (w:gesture-binding-sector-center binding))))
-                 (%catalog)))
-
-(defun %mark-binding ()
-  (find :learned-mark (%catalog) :key #'w:gesture-binding-kind))
+(defun menu-bindings (window subject kind)
+  "The Bindings of KIND a menu shows for SUBJECT: every one with an angle,
+enabled or not, that applies to SUBJECT's type, taken from WINDOW's own
+catalog -- the catalog its reducer selects from, so the menu can show
+nothing the reducer would not select and miss nothing it would."
+  (remove-if-not
+   (lambda (binding)
+     (and (eq kind (w:gesture-binding-kind binding))
+          (eq (getf subject :type) (w:gesture-binding-target-type binding))
+          (numberp (w:gesture-binding-sector-center binding))))
+   (tp:input-session-bindings (tp:witness-input (gesture-window-witness window)))))
 
 (defun %label-text (binding)
   (format nil "~A~:[ (disabled)~;~]"
@@ -180,7 +179,9 @@ CSS pixels with y growing downward, and so does this."
             (getf result :shared-operation-p))))
 
 (defun %project (window snapshot target labels mark status)
-  "Show what the reducer says, and nothing it does not."
+  "Show what the reducer says, and nothing it does not. LABELS pairs each
+radial Binding with its element; MARK is the mark Binding and its element,
+or NIL when the window offers no mark for this subject."
   (destructuring-bind (x y) (%press-point window)
     (let ((binding (getf snapshot :binding))
           (menu-visible (and (getf snapshot :menu-visible) t))
@@ -193,8 +194,9 @@ CSS pixels with y growing downward, and so does this."
                                        (if (equal binding (w:gesture-binding-id sector))
                                            "#ffd54f" "#ffffff"))))
           (setf (clog:visiblep element) menu-visible)))
-      (apply #'%place mark (%along (%mark-binding) x y))
-      (setf (clog:visiblep mark) marked)
+      (when mark
+        (apply #'%place (cdr mark) (%along (car mark) x y))
+        (setf (clog:visiblep (cdr mark)) marked))
       (setf (clog:attribute target "data-state")
             (string-downcase (princ-to-string (getf snapshot :state)))
             (clog:attribute target "data-mode")
@@ -315,19 +317,21 @@ compared by identity, so each surface needs a subject of its own.
 ON-COMPLETED, if given, is called once with the window when an
 interaction pressed here completes with a Binding; if it signals, the
 condition is shown on the surface instead of reaching CLOG."
-  (let* ((target (clog:create-div parent))
+  (let* ((window (connection-gesture-window parent))
+         (target (clog:create-div parent))
          (status (clog:create-div parent :content "idle"))
          (labels
           (mapcar
            (lambda (binding)
              (cons binding
                    (clog:create-div target :content (%label-text binding))))
-           (%radial-bindings)))
+           (menu-bindings window subject :radial-menu)))
          (mark
-          (clog:create-div target :content
-                           (format nil "mark: ~A"
-                                   (%label-text (%mark-binding)))))
-         (window (connection-gesture-window parent)))
+          (let ((binding (first (menu-bindings window subject :learned-mark))))
+            (when binding
+              (cons binding
+                    (clog:create-div target :content
+                                     (format nil "mark: ~A" (%label-text binding))))))))
     (clog:set-styles target
                      (list (list "position" "relative") (list "width" width)
                            (list "height" height) (list "background" "#dde")
@@ -342,7 +346,7 @@ condition is shown on the surface instead of reaching CLOG."
                        ("transform" "translateY(-50%)") ("color" "#556")
                        ("font-family" "sans-serif") ("font-size" "11px")
                        ("white-space" "nowrap") ("pointer-events" "none")))
-    (dolist (element (cons mark (mapcar #'cdr labels)))
+    (dolist (element (mapcar #'cdr (if mark (cons mark labels) labels)))
       (clog:set-styles element
                        '(("position" "absolute")
                          ("transform" "translate(-50%, -50%)")

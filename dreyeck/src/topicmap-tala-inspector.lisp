@@ -207,7 +207,10 @@ group. Call it while a view is being built: the references belong to it."
             (association (find (getf entry :id)
                                (tm:topicmap-projection-associations-of projection)
                                :key #'tm:topicmap-association-id-of :test #'equal)))
-        (setf (plump:attribute group "id") (views:inspect-id association)
+        ;; The same reference is the Association's sign: PRIMARY inspects it,
+        ;; SECONDARY offers what an Association offers.
+        (setf (plump:attribute group "id")
+              (native:register-association-sign (views:inspect-id association))
               (plump:attribute group "data-association-id") (getf entry :id)
               (plump:attribute group "style") "cursor:pointer")))
     (let ((outer (first (plump:get-elements-by-tag-name dom "svg"))))
@@ -217,7 +220,7 @@ group. Call it while a view is being built: the references belong to it."
 (views:defview 👀tala-interactive (rendering tala:tala-rendering)
   (views:html-view :title "TALA (interactive)" :priority 2
     (views:html
-      (:p "The same TALA layout, inline. Click an edge or its label to inspect that Association; click a shape to inspect its Topic. Inspecting changes nothing.")
+      (:p "The same TALA layout, inline. Click an edge or its label to inspect that Association; click a shape to inspect its Topic. Right-click an edge to inspect its relation contract: hold for the menu, or move right at once to mark. Inspecting changes nothing.")
       (views:str (interactive-tala-svg rendering)))))
 
 (views:defview 👀tala-result (rendering tala:tala-rendering)

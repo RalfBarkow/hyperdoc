@@ -107,13 +107,56 @@ would have seen the two out of order or overlapping."
     (assert (eq (fdefinition 'g:on-gesture-window) (first (first recorded)))))
   t)
 
+(defun test-menu-follows-window-bindings ()
+  "A menu shows the window's own Bindings for the pressed subject's type:
+the code page keeps exactly its sectors, and an Association window offers
+Inspect relation contract and nothing from the code page."
+  (let* ((code-page (g:make-gesture-window))
+         (association (g:make-gesture-window
+                       :bindings (w:make-association-binding-catalog)))
+         (code-subject (list :type :lisp-source-definition :name 'gesture-clog-tests))
+         (association-subject (list :type :topicmap-association))
+         (ids (lambda (window subject kind)
+                (mapcar #'w:gesture-binding-id (g:menu-bindings window subject kind)))))
+    (assert (equal '("binding/radial-insert-defexample" "binding/radial-disabled-sector")
+                   (funcall ids code-page code-subject :radial-menu)))
+    (assert (equal '("binding/mark-insert-defexample")
+                   (funcall ids code-page code-subject :learned-mark)))
+    (assert (equal '("binding/radial-inspect-relation-contract")
+                   (funcall ids association association-subject :radial-menu)))
+    (assert (equal '("binding/mark-inspect-relation-contract")
+                   (funcall ids association association-subject :learned-mark)))
+    (assert (equal '("Inspect relation contract")
+                   (mapcar #'g::%label-text
+                           (g:menu-bindings association association-subject :radial-menu))))
+    ;; Neither window offers the other's sectors.
+    (assert (null (g:menu-bindings association code-subject :radial-menu)))
+    (assert (null (g:menu-bindings code-page association-subject :radial-menu)))
+    ;; The menu reads the very Bindings the window's reducer selects from.
+    (assert (every (lambda (binding)
+                     (member binding (tp:input-session-bindings
+                                      (tp:witness-input (g:gesture-window-witness association)))
+                             :test #'eq))
+                   (g:menu-bindings association association-subject :radial-menu)))
+    ;; Production: two Bindings, one EQ Operation, for Topicmap Associations.
+    (let ((catalog (w:make-association-binding-catalog)))
+      (assert (equal '(:radial-menu :learned-mark) (mapcar #'w:gesture-binding-kind catalog)))
+      (assert (every (lambda (b) (eq (w:inspect-relation-contract-operation)
+                                     (w:gesture-binding-operation b)))
+                     catalog))
+      (assert (every (lambda (b) (eq :topicmap-association (w:gesture-binding-target-type b)))
+                     catalog))))
+  t)
+
 (defun run-gesture-clog-tests ()
   (test-arrival-order-is-reconstructed-across-threads)
   (test-one-mutator-at-a-time)
   (test-windows-own-their-state)
   (test-route-installs-into-a-running-server)
+  (test-menu-follows-window-bindings)
   (format t "~&GESTURE-CLOG-PASS: arrival 1 3 2 on three threads delivered ~
 1 2 3; a callback that arrives during another's delivery waits for it; two ~
 windows own two transports, two sessions and two locks, and both count from ~
-one; the route is added to a running server without starting one.~%")
+one; the route is added to a running server without starting one; each menu ~
+shows its own window's Bindings for the pressed subject.~%")
   t)

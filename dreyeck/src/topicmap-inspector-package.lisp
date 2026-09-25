@@ -17,7 +17,8 @@
    #:occurrence-workspace #:occurrence-gesture-window
    #:occurrence-inspectable-object
    #:operation-inspectable-object
-   #:operation-not-applicable #:operation-not-applicable-reason))
+   #:operation-not-applicable #:operation-not-applicable-reason
+   #:register-association-sign #:association-sign-gesture-window))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :dreyeck/inspector/topicmap)

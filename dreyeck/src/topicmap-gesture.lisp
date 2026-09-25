@@ -141,30 +141,37 @@ captures, starts a timer, emits an event or prevents its ordinary click."
  target.__disposeTopicGesture=dispose;
 })();" element-expression))
 
+(defun %forward-topic-gesture (window target data &optional record)
+  "Deliver one forwarded event, KIND|TRUSTED|PAYLOAD, to WINDOW about TARGET.
+RECORD, if given, is called with the input's kind, sequence and trust flag.
+The caller decides first whether its element is still current."
+  (let* ((first (position #\| data))
+         (second (and first (position #\| data :start (1+ first))))
+         (kind (and second
+                    (cdr (assoc (subseq data 0 first)
+                                (dreyeck/gesture/transport:transport-event-kinds)
+                                :test #'string=)))))
+    (when kind
+      (let ((envelope (dreyeck/gesture/clog::%envelope-from
+                       kind (subseq data (1+ second)) target)))
+        ;; The browser filters before assigning a sequence number. This is
+        ;; a defensive check at the same adapter boundary, not reducer policy.
+        (when (and (eq kind :pointer-down)
+                   (/= 3 (or (dreyeck/gesture/transport:transport-envelope-which envelope) 0)))
+          (return-from %forward-topic-gesture nil))
+        (when record
+          (funcall record
+                   (list :kind kind
+                         :sequence (dreyeck/gesture/transport:transport-envelope-sequence envelope)
+                         :trusted (string= "trusted" (subseq data (1+ first) second)))))
+        (dreyeck/gesture/clog:receive-envelope window envelope)))))
+
 (defun %receive-topic-gesture (occurrence target data)
   "One forwarded event: KIND|TRUSTED|PAYLOAD. Refuse queued input for an
 ended occurrence, including removal outside the Inspector refresh path."
   (when (workspace-action-sign-occurrence-current-p occurrence)
-    (let* ((first (position #\| data))
-           (second (and first (position #\| data :start (1+ first))))
-           (kind (and second
-                      (cdr (assoc (subseq data 0 first)
-                                  (dreyeck/gesture/transport:transport-event-kinds)
-                                  :test #'string=)))))
-      (when kind
-        (let ((envelope (dreyeck/gesture/clog::%envelope-from
-                         kind (subseq data (1+ second)) target)))
-          ;; The browser filters before assigning a sequence number. This is
-          ;; a defensive check at the same adapter boundary, not reducer policy.
-          (when (and (eq kind :pointer-down)
-                     (/= 3 (or (dreyeck/gesture/transport:transport-envelope-which envelope) 0)))
-            (return-from %receive-topic-gesture nil))
-          (push (list :kind kind
-                      :sequence (dreyeck/gesture/transport:transport-envelope-sequence envelope)
-                      :trusted (string= "trusted" (subseq data (1+ first) second)))
-                (occurrence-inputs occurrence))
-          (dreyeck/gesture/clog:receive-envelope
-           (occurrence-gesture-window occurrence) envelope))))))
+    (%forward-topic-gesture (occurrence-gesture-window occurrence) target data
+                            (lambda (input) (push input (occurrence-inputs occurrence))))))
 
 (defun bind-workspace-action-sign-occurrence (occurrence)
   (let* ((element (occurrence-element occurrence))
@@ -191,18 +198,163 @@ ended occurrence, including removal outside the Inspector refresh path."
     (clog:js-execute element (secondary-topic-script (clog:script-id element)))
     occurrence))
 
+;;;; Association signs
+;;;;
+;;;; A renderer that gives an Association's sign an ordinary Inspector
+;;;; reference -- PRIMARY opens the Association -- may register that
+;;;; reference's ID here. The sign then also takes SECONDARY: the same
+;;;; element, script and reveal deadline as a workspace action sign, with
+;;;; the Bindings a Topicmap Association offers, and the exact Association
+;;;; as the target. No object stands for the sign. Its element, window and
+;;;; target live in one closure; the script disposes itself when the element
+;;;; leaves the page, and each event is refused unless the element is still
+;;;; in the page with this binding's token.
+
+(defvar *association-sign-ids* (make-hash-table :test 'eq :weakness :key)
+  "Reference IDs rendered as Association signs, held while their View is.")
+
+(defun register-association-sign (html-id)
+  "Declare that the Inspector reference HTML-ID is an Association's sign."
+  (setf (gethash html-id *association-sign-ids*) t)
+  html-id)
+
+(defun %association-sign-key (html-id)
+  (format nil "dreyeck/association-sign/~A" html-id))
+
+(defun association-sign-gesture-window (clog-obj html-id)
+  "The gesture window bound to the Association sign HTML-ID on CLOG-OBJ's page."
+  (clog:connection-data-item clog-obj (%association-sign-key html-id)))
+
+(defun %association-sign-current-p (element token)
+  (and (clog:validp element)
+       (equal "true"
+              (clog:js-query
+               element
+               (format nil "(function(){var e=~A;return !!(e && e.isConnected && e.dataset.associationSign === '~A');})()"
+                       (clog:script-id element) token)
+               :default-answer "false"))))
+
+(defun %open-beside (pane object)
+  "Show OBJECT in a new pane after PANE, as an Inspector reference does."
+  (let ((inspector (clog-moldable-inspector::inspector pane)))
+    (clog-moldable-inspector::close-panes-after inspector pane)
+    (clog-moldable-inspector::create-pane inspector object)))
+
+(defun %show-selected-object (pane element window)
+  "The steps after a completed gesture: the Operation its Binding selected,
+the object that Operation shows for the exact target, and only then the
+Inspector. A refusal opens nothing."
+  (multiple-value-bind (binding target)
+      (dreyeck/gesture/clog:gesture-window-selection window)
+    (let* ((operation (dreyeck/gesture-binding-witness:gesture-binding-operation binding))
+           (object (handler-case (operation-inspectable-object operation target)
+                     (operation-not-applicable (condition)
+                       (setf (clog:attribute element "data-association-gesture-outcome")
+                             "not-applicable"
+                             (clog:attribute element "data-association-gesture-refusal")
+                             (operation-not-applicable-reason condition))
+                       nil))))
+      (when object
+        (setf (clog:attribute element "data-association-gesture-outcome") "shown")
+        (%open-beside pane object)))))
+
+(defun %draw-association-menu (window snapshot element labels mark)
+  "Show what the reducer says, beside ELEMENT, in menu elements that take no
+pointer input. Positions are the Binding angles around the press point."
+  (destructuring-bind (x y) (dreyeck/gesture/clog::%press-point window)
+    (let ((binding (getf snapshot :binding))
+          (menu-visible (and (getf snapshot :menu-visible) t))
+          (marked (and (eq :marking (getf snapshot :mode)) (getf snapshot :binding) t)))
+      (flet ((place (sector label)
+               (destructuring-bind (lx ly) (dreyeck/gesture/clog::%along sector x y)
+                 (clog:js-execute
+                  label
+                  (format nil "(function(){var r=~A.getBoundingClientRect(),l=~A;l.style.left=(r.left+~,1F)+'px';l.style.top=(r.top+~,1F)+'px';})()"
+                          (clog:script-id element) (clog:script-id label) lx ly)))))
+        (dolist (entry labels)
+          (place (car entry) (cdr entry))
+          (clog:set-styles (cdr entry)
+                           (list (list "background"
+                                       (if (equal binding (dreyeck/gesture-binding-witness:gesture-binding-id
+                                                           (car entry)))
+                                           "#ffd54f" "#ffffff"))))
+          (setf (clog:visiblep (cdr entry)) menu-visible))
+        (when mark
+          (place (car mark) (cdr mark))
+          (setf (clog:visiblep (cdr mark)) marked)))
+      (setf (clog:attribute element "data-association-gesture-state")
+            (string-downcase (princ-to-string (getf snapshot :state)))
+            (clog:attribute element "data-association-gesture-mode")
+            (string-downcase (princ-to-string (getf snapshot :mode)))
+            (clog:attribute element "data-association-gesture-menu-visible")
+            (if menu-visible "true" "false")
+            (clog:attribute element "data-association-gesture-binding") (or binding "")))))
+
+(defun %association-menu-element (parent binding text)
+  (let ((element (clog:create-div parent :content text)))
+    (clog:set-styles element
+                     '(("position" "fixed") ("transform" "translate(-50%, -50%)")
+                       ("padding" "4px 8px") ("border" "1px solid #555")
+                       ("background" "#ffffff") ("font-family" "sans-serif")
+                       ("font-size" "13px") ("white-space" "nowrap")
+                       ("pointer-events" "none") ("z-index" "10")))
+    (setf (clog:attribute element "class") "dreyeck-association-gesture-menu"
+          (clog:attribute element "data-binding-id")
+          (dreyeck/gesture-binding-witness:gesture-binding-id binding)
+          (clog:visiblep element) nil)
+    element))
+
+(defun bind-association-sign (pane parent element association)
+  (let* ((token (symbol-name (gensym "association-sign-")))
+         ;; The exact Association is the target; IDs and labels are not.
+         (target (list :type :topicmap-association :association association))
+         (window (dreyeck/gesture/clog:make-gesture-window
+                  :bindings (dreyeck/gesture-binding-witness:make-association-binding-catalog)))
+         (labels (mapcar (lambda (binding)
+                           (cons binding
+                                 (%association-menu-element
+                                  parent binding (dreyeck/gesture/clog::%label-text binding))))
+                         (dreyeck/gesture/clog:menu-bindings window target :radial-menu)))
+         (mark (let ((binding (first (dreyeck/gesture/clog:menu-bindings
+                                      window target :learned-mark))))
+                 (when binding
+                   (cons binding
+                         (%association-menu-element
+                          parent binding
+                          (format nil "mark: ~A" (dreyeck/gesture/clog::%label-text binding))))))))
+    (setf (dreyeck/gesture/clog::gesture-window-projection window)
+          (lambda (window snapshot)
+            (%draw-association-menu window snapshot element labels mark)
+            (when (dreyeck/gesture/clog:newly-completed-p window snapshot)
+              (%show-selected-object pane element window)))
+          (clog:attribute element "data-association-sign") token
+          (clog:connection-data-item element (%association-sign-key (clog:html-id element)))
+          window)
+    (clog::set-event element "topicgesture"
+                     (lambda (data)
+                       (when (%association-sign-current-p element token)
+                         (%forward-topic-gesture window target data)))
+                     :call-back-script "+ e.originalEvent.detail")
+    (clog:js-execute element (secondary-topic-script (clog:script-id element)))
+    window))
+
 (defmethod clog-moldable-inspector::create-view-element :after
     (pane parent (view views:html-view))
-  ;; The Inspector has just wired its ordinary click to these action ids.
-  ;; Gesture input goes on the same element, never on a sibling or overlay.
+  ;; The Inspector has just wired its ordinary click to these ids. Gesture
+  ;; input goes on the same element, never on a sibling or overlay.
   (dolist (entry (views:view-references view))
-    (when (typep (cdr entry) 'topic-action-reference)
-      (let ((occurrence (make-instance 'workspace-action-sign-occurrence
-                                       :reference (cdr entry)
-                                       :element (clog:attach-as-child parent (car entry))
-                                       :pane pane :view view)))
-        (bind-workspace-action-sign-occurrence occurrence)
-        (push (sb-ext:make-weak-pointer occurrence) *workspace-action-sign-occurrences*)))))
+    (cond
+      ((typep (cdr entry) 'topic-action-reference)
+       (let ((occurrence (make-instance 'workspace-action-sign-occurrence
+                                        :reference (cdr entry)
+                                        :element (clog:attach-as-child parent (car entry))
+                                        :pane pane :view view)))
+         (bind-workspace-action-sign-occurrence occurrence)
+         (push (sb-ext:make-weak-pointer occurrence) *workspace-action-sign-occurrences*)))
+      ((and (typep (cdr entry) 'dreyeck/topicmap:topicmap-association)
+            (gethash (car entry) *association-sign-ids*))
+       (bind-association-sign pane parent (clog:attach-as-child parent (car entry))
+                              (cdr entry))))))
 
 (views:defview workspace-action-sign-occurrence-overview
     (occurrence workspace-action-sign-occurrence)

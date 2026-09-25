@@ -39,7 +39,7 @@
            #:gesture-input-session #:make-gesture-input-session
            #:consume-envelope #:input-session-status #:input-session-prefix
            #:input-session-gesture-session #:input-session-closures
-           #:input-session-held-mask
+           #:input-session-held-mask #:input-session-bindings
            #:gesture-transport-witness #:make-gesture-transport-witness
            #:witness-transport #:witness-input #:witness-state
            #:scrambled-expert-marking-witness))

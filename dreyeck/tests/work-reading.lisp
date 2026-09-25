@@ -488,6 +488,10 @@ referenced group carries another reference."
          (dom (check-reference-groups view rendering))
          (g1 (reference-group view dom a1))
          (g2 (reference-group view dom a2)))
+    ;; Association references, and only they, are Association signs.
+    (dolist (reference (views:view-references view))
+      (assert (eq (typep (cdr reference) 'tm:topicmap-association)
+                  (and (gethash (car reference) m::*association-sign-ids*) t))))
     ;; The image view stays, and says what it is.
     (assert (search "non-interactive"
                     (views:view-html (find "TALA rendering proof" (views:all-views rendering)
@@ -563,18 +567,8 @@ referenced group carries another reference."
 
 ;;;; Inspect relation contract: selected Operation + exact target -> object
 
-(defparameter *inspect-bindings*
-  ;; Test-only. Production offers no Binding for this Operation yet.
-  (list (w::%make-gesture-binding :id "fixture/radial-inspect-relation-contract"
-                                  :kind :radial-menu :sector-center 0.0d0
-                                  :sector-half-width 30.0d0
-                                  :target-type :topicmap-association :enabled-p t
-                                  :operation (w:inspect-relation-contract-operation))
-        (w::%make-gesture-binding :id "fixture/mark-inspect-relation-contract"
-                                  :kind :learned-mark :sector-center 0.0d0
-                                  :sector-half-width 30.0d0
-                                  :target-type :topicmap-association :enabled-p t
-                                  :operation (w:inspect-relation-contract-operation))))
+(defparameter *inspect-bindings* (w:make-association-binding-catalog)
+  "The production Bindings a Topicmap Association offers.")
 
 (defun association-target (association)
   (list :type :topicmap-association :association association))
@@ -663,8 +657,10 @@ referenced group carries another reference."
                (assert (eq operation (w:gesture-session-selected-operation-of session)))
                (assert (eq target (pressed-target session)))
                (assert (eq a1 (getf (pressed-target session) :association))))
-             (assert (not (eq (w:gesture-session-selected-binding-of novice)
-                              (w:gesture-session-selected-binding-of expert))))
+             (assert (equal "binding/radial-inspect-relation-contract"
+                            (w:gesture-binding-id (w:gesture-session-selected-binding-of novice))))
+             (assert (equal "binding/mark-inspect-relation-contract"
+                            (w:gesture-binding-id (w:gesture-session-selected-binding-of expert))))
              ;; One object shown for both edges and for both routes.
              (let ((shown (m:operation-inspectable-object operation target)))
                (assert (eq contract shown))
