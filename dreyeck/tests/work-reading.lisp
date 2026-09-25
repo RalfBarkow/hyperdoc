@@ -15,6 +15,58 @@
     (views:view-html view)
     view))
 
+;; Keep the complete authored graph in this regression: a missing edge must not
+;; make an endpoint-resolution check pass vacuously.
+(defparameter *expected-work-associations*
+  '("work:interaction:informs:operations"
+    "work:operations:informs:connect"
+    "work:operations:requires:state"
+    "work:dogfooding:develops:corpus"
+    "work:planning:models:dogfooding"
+    "work:planning:models:corpus"
+    "work:planning:observes:operations"
+    "work:dogfooding:current-work:connections-example"
+    "work:corpus:contains:connections-example"
+    "work:connections-example:uses:d2"
+    "work:connections-example:demonstrates:connection"
+    "work:connections-example:compares-with:association"
+    "work:connections-example:raises-question-for:connect"
+    "work:connections-example:is-related-in:topicmap"))
+
+(defun check-projection-integrity (projection)
+  (let* ((topics (tm:topicmap-projection-topics-of projection))
+         (associations (tm:topicmap-projection-associations-of projection))
+         (ids (mapcar #'tm:topicmap-association-id-of associations)))
+    (assert (= 12 (length topics)))
+    (assert (= (length *expected-work-associations*) (length ids)))
+    (dolist (id *expected-work-associations*)
+      (assert (= 1 (count id ids :test #'equal))))
+    (dolist (association associations)
+      (dolist (endpoint (list (tm:topicmap-association-from-of association)
+                             (tm:topicmap-association-to-of association)))
+        (assert (= 1 (count endpoint topics :key #'tm:topicmap-topic-id-of
+                                           :test #'equal))
+                () "Association ~S endpoint ~S must resolve to exactly one Topic."
+                (tm:topicmap-association-id-of association) endpoint)))))
+
+(defun workspace-from-operations-page ()
+  ;; EXPR links run inside Content rendering's dynamic tag-dispatcher context.
+  ;; HyperDoc stores an evaluation error as a reference, so rendering HTML alone
+  ;; is insufficient evidence that the link produced a Workspace.
+  (let* ((view (content-view (work:work-page "Operations and Change")))
+         (references (mapcar #'cdr (views:view-references view)))
+         (workspaces (remove-if-not
+                      (lambda (object) (typep object 'tm:topicmap-workspace))
+                      references)))
+    (assert (notany (lambda (object) (typep object 'condition)) references))
+    (assert (= 1 (length workspaces)))
+    (first workspaces)))
+
+(defun check-work-projection ()
+  (check-projection-integrity (work:work-projection))
+  (check-projection-integrity
+   (tm:topicmap-projection-of (workspace-from-operations-page))))
+
 (defun check-pages-and-example ()
   (let ((book (hyperbook:find-hyperbook "dreyeck/work/reading" :signal-error? t)))
     (dolist (title '("Work Breakdown" "Interaction" "Operations and Change"
@@ -48,11 +100,24 @@
                   :key #'views:view-title :test #'equal))))
 
 (defun check-native-work-navigation ()
-  (let* ((workspace (work:work-workspace))
+  (let* ((workspace (workspace-from-operations-page))
          (projection (tm:topicmap-projection-of workspace))
          (view (find "Topicmap" (views:all-views workspace)
                      :key #'views:view-title :test #'equal)))
-    (views:view-html view)
+    (assert view)
+    (assert (search "dreyeck-topicmap-workspace-action" (views:view-html view)))
+    (dolist (entry '(("interaction" "Interaction")
+                     ("operations" "Operations and Change")
+                     ("connect" "Connect and Associations")
+                     ("state" "State and Persistence")
+                     ("dogfooding" "HyperDoc Dogfooding")
+                     ("corpus" "D2 Corpus")
+                     ("planning" "Planning with SHOP3")))
+      (let ((topics (remove (first entry) (tm:topicmap-projection-topics-of projection)
+                            :key #'tm:topicmap-topic-id-of :test-not #'equal)))
+        (assert (= 1 (length topics)))
+        (assert (eq (work:work-page (second entry))
+                    (tm:topicmap-topic-object-of (first topics))))))
     (dolist (id '("d2" "connection" "association" "connect" "topicmap"))
       (assert (find-if (lambda (a)
                         (and (equal "connections-example" (tm:topicmap-association-from-of a))
@@ -88,8 +153,9 @@
     (assert (search "<svg" (tala:tala-rendering-svg render)))))
 
 (defun run-tests ()
+  (check-work-projection)
   (check-pages-and-example)
   (check-native-work-navigation)
   (check-work-layout)
-  (format t "~&WORK-READING-PASS: pages, executable widget, D2 SVG, native page navigation, seven-area derived layout.~%")
+  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout.~%")
   t)

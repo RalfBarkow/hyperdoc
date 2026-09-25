@@ -35,7 +35,10 @@
 ;; Reading this one page avoids a second authoritative WBS list in Lisp or D2.
 (defun work-projection (&key areas-only)
   (let* ((page (work-page "Work Breakdown"))
-         (dom (plump:parse (hyperdoc:file-of page)))
+         ;; EXPR evaluation can inherit printer-only page tag dispatchers.
+         ;; Read the authored anchors with the HTML parser, independently of that context.
+         (dom (let ((plump:*tag-dispatchers* plump:*html-tags*))
+                (plump:parse (hyperdoc:file-of page))))
          (links (remove-if-not
                  (lambda (node)
                    (and (plump:attribute node "data-topic")
