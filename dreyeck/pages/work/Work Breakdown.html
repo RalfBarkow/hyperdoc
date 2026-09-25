@@ -1,0 +1,41 @@
+<h1>Work Breakdown</h1>
+<in-package>dreyeck/work/reading</in-package>
+<p>This is the current work on HyperDoc, organized inside HyperDoc. The seven areas are questions and work boundaries, not seven implemented features. The first completed learning slice is the <a page="D2 Connections">Connections example</a>: Text Page, executable source, TALA render, Inspector and native Topicmap navigation.</p>
+<p>Why: use the system itself to connect a question to its explanation, executable evidence and next unresolved decision. Completion of this example does not implement CONNECT or grant change authority.</p>
+<h2>Areas, current work and concepts</h2>
+<ul><li><a page="Interaction" data-topic="interaction" data-kind="area" data-status="prototype">Interaction</a> — prototype.</li>
+<li><a page="Operations and Change" data-topic="operations" data-kind="area" data-status="open">Operations and change</a> — open.</li>
+<li><a page="Connect and Associations" data-topic="connect" data-kind="area" data-status="open">Connect / Associations</a> — open.</li>
+<li><a page="State and Persistence" data-topic="state" data-kind="area" data-status="open">State and persistence</a> — open.</li>
+<li><a page="HyperDoc Dogfooding" data-topic="dogfooding" data-kind="area" data-status="in use">HyperDoc dogfooding</a> — in use.</li>
+<li><a page="D2 Corpus" data-topic="corpus" data-kind="area" data-status="one new example">D2 example corpus</a> — one new example.</li>
+<li><a page="Planning with SHOP3" data-topic="planning" data-kind="area" data-status="experiment">Planning / SHOP3</a> — experiment.</li>
+<li><a page="D2 Connections" data-topic="connections-example" data-kind="work item" data-status="complete">Connections example</a> — complete.</li>
+<li><a page="D2 Corpus" data-topic="d2" data-kind="concept" data-status="inventory">D2</a> — inventory.</li>
+<li><a page="D2 Connections" data-topic="connection" data-kind="concept" data-status="demonstrated">Connection</a> — demonstrated.</li>
+<li><a page="Connect and Associations" data-topic="association" data-kind="concept" data-status="question">Association</a> — question.</li>
+<li><a page="Reading TALA as a Layout Layer" hyperbook="dreyeck/topicmap/tala/reading" data-topic="topicmap" data-kind="concept" data-status="existing">Topicmap</a> — existing.</li></ul>
+<h2>Dependencies and relationships</h2>
+<p>The arrows below express documented dependencies or questions. They do not authorize execution. Planning observes Operations/change and models the documentation work.</p>
+<ul><li data-from="interaction" data-to="operations" data-relation="informs">Interaction → Operations and change: informs.</li>
+<li data-from="operations" data-to="connect" data-relation="informs">Operations and change → Connect / Associations: informs.</li>
+<li data-from="operations" data-to="state" data-relation="requires">Operations and change → State and persistence: requires.</li>
+<li data-from="dogfooding" data-to="corpus" data-relation="develops">HyperDoc dogfooding → D2 example corpus: develops.</li>
+<li data-from="planning" data-to="dogfooding" data-relation="models">Planning / SHOP3 → HyperDoc dogfooding: models.</li>
+<li data-from="planning" data-to="corpus" data-relation="models">Planning / SHOP3 → D2 example corpus: models.</li>
+<li data-from="planning" data-to="operations" data-relation="observes">Planning / SHOP3 → Operations and change: observes.</li>
+<li data-from="dogfooding" data-to="connections-example" data-relation="current-work">HyperDoc dogfooding → Connections example: current-work.</li>
+<li data-from="corpus" data-to="connections-example" data-relation="contains">D2 example corpus → Connections example: contains.</li>
+<li data-from="connections-example" data-to="d2" data-relation="uses">Connections example → D2: uses.</li>
+<li data-from="connections-example" data-to="connection" data-relation="demonstrates">Connections example → Connection: demonstrates.</li>
+<li data-from="connections-example" data-to="association" data-relation="compares-with">Connections example → Association: compares-with.</li>
+<li data-from="connections-example" data-to="connect" data-relation="raises-question-for">Connections example → Connect / Associations: raises-question-for.</li>
+<li data-from="connections-example" data-to="topicmap" data-relation="is-related-in">Connections example → Topicmap: is-related-in.</li></ul>
+<h2>Navigate and inspect</h2>
+<p><a page="Working on HyperDoc">Lisp Code Page and executable examples</a>.</p>
+<p>The Topicmap is read from these page links and relationships. Clicking a native action sign changes Workspace Point. Follow the Point reference to open its existing page object; History remains the Workspace's history.</p>
+<source-of-function>work-workspace</source-of-function>
+<h2>A derived seven-area diagram</h2>
+<p>This small D2 projection selects the seven areas and their relationships from the same page. There is no separately maintained D2 work database. Its rendering is a static picture; use the native Topicmap above for navigation.</p>
+<source-of-function>work-layout-example</source-of-function>
+<p>Open questions: what authority permits each operation; which endpoint observations CONNECT needs; what survives a restart; and whether a planner adds anything beyond a fixed documentation checklist.</p>

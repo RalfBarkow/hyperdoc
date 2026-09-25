@@ -482,7 +482,8 @@
                                  "dreyeck/upstream-intake/temporal"
                                  "dreyeck/workflow/reading"
                                  "dreyeck/lisp-critic/reading"
-                                 "dreyeck/gesture/reading")
+                                 "dreyeck/gesture/reading"
+                                 "dreyeck/work/reading")
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP
@@ -2184,3 +2185,38 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/topicmap/gesture/tests
                                :run-workspace-action-sign-tests)))
+
+(defsystem "dreyeck/work/reading"
+  :description "HyperDoc work pages and one complete D2 Connections example"
+  :depends-on ("dreyeck/topicmap/tala/reading")
+  :serial t
+  :components ((:module "dreyeck/work" :components ((:file "reading")))
+               (:module "dreyeck/pages/work" :components
+                ((:static-file "Work Breakdown.html")
+                 (:static-file "Interaction.html")
+                 (:static-file "Operations and Change.html")
+                 (:static-file "Connect and Associations.html")
+                 (:static-file "State and Persistence.html")
+                 (:static-file "HyperDoc Dogfooding.html")
+                 (:static-file "D2 Corpus.html")
+                 (:static-file "Planning with SHOP3.html")
+                 (:static-file "D2 Connections.html")))))
+
+(defsystem "dreyeck/work/reading/tests"
+  :depends-on ("dreyeck/work/reading")
+  :components ((:file "dreyeck/tests/work-reading"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/tests :run-tests)))
+
+(defsystem "dreyeck/work/planning"
+  :description "Optional in-memory SHOP3 documentation experiment; no executor"
+  :depends-on ("dreyeck/work/reading" "dreyeck/shop3")
+  :components ((:file "dreyeck/work/planning")))
+
+(defsystem "dreyeck/work/planning/tests"
+  :depends-on ("dreyeck/work/planning")
+  :components ((:file "dreyeck/tests/work-planning"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/planning :check-plan)))

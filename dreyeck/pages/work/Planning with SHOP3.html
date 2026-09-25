@@ -1,0 +1,13 @@
+<h1>Planning with SHOP3</h1>
+<in-package>dreyeck/work/reading</in-package>
+<p>Status: optional in-memory experiment. Question: can SHOP3 usefully plan <code>document-one-D2-concept</code>?</p>
+<p>The current <code>dreyeck/shop3</code> system supplies a plan-result object, plan normalization and manual-topic examples. Historical extraction-planning examples demonstrate <code>shop3:find-plans</code>, shorter plans, plan trees and final states. Those historical worktrees were read only.</p>
+<ol><li>Identify concept/source</li><li>Formulate Text Page</li><li>Create executable example</li><li>Render</li><li>Verify</li><li>Expose in Inspector</li><li>Relate in Topicmap</li><li>Review</li></ol>
+<p>The optional experiment uses one ordered method and modeled stage facts. Its primitive operators only update SHOP3's simulated state; they do not write pages, render D2, verify real output, invoke an editor or apply changes. In particular a modeled “verified” fact is not verification evidence.</p>
+<p>Verdict <strong>B</strong>: this experiment restates the hand-written sequence. It can return the eight stages and refuse a problem with no known source, but offers no alternative decomposition, resource decision or repair strategy. That is evidence for this small domain only, not a general assessment of SHOP3.</p>
+<p>The existing generic step normalizer labels unknown operators as source edits. This experiment therefore exposes the raw/shorter plan through the existing result object's Inspector slots, without presenting that classifier as a documentation-specific checklist. A useful next investigation would need actual alternate methods and observed preconditions; neither is invented here.</p>
+<pre>(asdf:load-system "dreyeck/work/planning")
+(defparameter *documentation-plan*
+  (dreyeck/work/planning:documentation-plan-example))
+(clog-moldable-inspector:clog-inspect :object *documentation-plan*)</pre>
+<p>This optional system is absent from normal Catalog startup. Run <code>(asdf:test-system "dreyeck/work/planning/tests")</code> to check the actual plan and missing-source control. It grants no execution authority and is not connected to source mutation.</p><p><a page="Work Breakdown">Work Breakdown</a> · <a expr="(work-workspace)" view="Topicmap">Open the work Topicmap</a></p>

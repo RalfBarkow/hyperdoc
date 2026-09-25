@@ -1,0 +1,27 @@
+<h1>D2 Connections</h1>
+<in-package>dreyeck/work/reading</in-package>
+<p>Status: the one completed new learning example in this slice. It separates D2 language notation, TALA geometry and HyperDoc's own relation model.</p>
+<h2>Two endpoints, two readings</h2>
+<p>A D2 connection relates shape keys. In <code>source -&gt; target</code>, source is the starting endpoint and target carries the arrowhead. <code>source -- target</code> draws an undirected connection. Arrow direction expresses a diagram relation; it is not a command to change either endpoint. The keys identify shapes in this diagram, not global HyperDoc Topics.</p>
+<p>Our original minimal example uses the same two shapes for a directed dependency and an undirected comparison. D2 keeps these as two connections. Source: <a href="https://d2lang.com/tour/connections/">official D2 Tour: Connections</a>. This is a locally authored example, not a gallery copy.</p>
+<pre class="d2-source">source: Text Page
+target: Executable example
+source -&gt; target: explains
+source -- target: compare evidence
+</pre>
+<h2>Run and inspect</h2>
+<p>The block above is the authoritative D2 source. The <a page="Working on HyperDoc">Lisp Code Page</a> reads those characters and calls the existing authored-D2/TALA boundary. The returned object retains source, SVG and renderer version. The Authored D2 view shows both source and image; the SVG itself has no HyperDoc navigation.</p>
+<source-of-function>connections-example</source-of-function>
+<p><a expr="(connections-source)">Inspect the exact D2 source</a>. The function above is runnable through the existing DEFEXAMPLE action. Missing D2 is reported with the required environment rather than breaking normal Catalog.</p>
+<h2>Compare with HyperDoc</h2>
+<p>A HyperDoc Topicmap Association has an ID, type and Topic-ID endpoints. A D2 connection has diagram-local endpoints and graphical direction. An Association can be projected as D2, but the authored edge above is not itself an Association. TALA chooses placement and routing; it does not choose HyperDoc semantics.</p>
+<p>Related concepts in <a expr="(work-workspace)" view="Topicmap">the native work Topicmap</a>: D2, Connection, Association, Connect and Topicmap. The example's Topic refers to this page; the runtime render remains inspectable through the executable example.</p>
+<h2>Questions for HyperDoc</h2>
+<ul><li>Which source and target observations must CONNECT retain?</li><li>When can observed endpoints become Topic-ID endpoints?</li><li>Does an undirected relation need a different Association type?</li><li>How are cancellation, change authority and persistence determined separately from selection?</li></ul>
+<h2>mREPL</h2>
+<p>Start the mREPL from <code>nix develop .#tala</code>. This uses the repository's pinned D2 v0.9.0 with TALA, seed 44; no second renderer or layout comparison is added.</p>
+<pre>(asdf:load-system "dreyeck/work/reading")
+(defparameter *connections-render*
+  (dreyeck/work/reading:connections-example))
+(clog-moldable-inspector:clog-inspect :object *connections-render*)</pre>
+<p>The same path with <code>(dreyeck/work/reading:work-workspace)</code> opens the navigable Workspace. Run <code>(asdf:test-system "dreyeck/work/reading/tests")</code> in this environment to check pages, executable widget, SVG and native navigation.</p><p><a page="Work Breakdown">Work Breakdown</a> · <a expr="(work-workspace)" view="Topicmap">Open the work Topicmap</a></p>
