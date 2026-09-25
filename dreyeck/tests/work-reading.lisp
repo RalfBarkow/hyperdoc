@@ -812,6 +812,173 @@ after the move at DEADLINE-AFTER ms, if given, as the browser delivered it."
         (assert (member :obsolete-reveal-deadline (w:gesture-session-observations-of s)
                         :key (lambda (o) (getf o :reason))))))))
 
+;;;; Work relationship source occurrences
+
+(defparameter +a1-item+
+  "<li data-from=\"interaction\" data-to=\"operations\" data-relation=\"work:relation/informs\">Interaction → Operations and change: informs.</li>")
+
+(defun occurrence-of (association)
+  (getf (tm:topicmap-association-properties-of association) :source-occurrence))
+
+(defun associations-between (projection from to)
+  (remove-if-not (lambda (a) (and (equal from (tm:topicmap-association-from-of a))
+                                  (equal to (tm:topicmap-association-to-of a))))
+                 (tm:topicmap-projection-associations-of projection)))
+
+(defun occurrence-text (occurrence range-reader)
+  (let ((range (funcall range-reader occurrence)))
+    (subseq (work:relationship-occurrence-snapshot occurrence) (car range) (cdr range))))
+
+(defun source-refusal (html)
+  "The WORK-RELATIONSHIP-SOURCE-ERROR projecting HTML signals, or an error."
+  (handler-case (progn (fixture-projection html) (error "Expected a source refusal."))
+    (work:work-relationship-source-error (condition) condition)))
+
+(defun stale-p (occurrence current)
+  (handler-case (progn (work:resolve-work-relationship-occurrence occurrence :current current) nil)
+    (work:stale-work-relationship-occurrence () t)))
+
+(defun duplicated-a1 (source)
+  (replace-once source +a1-item+
+                (concatenate 'string +a1-item+ (string #\Newline)
+                             "<li data-from=\"interaction\" data-to=\"operations\" data-relation=\"work:relation/informs\">Stated a second time, in other words.</li>")))
+
+(defun replace-relation-value (occurrence value)
+  "Test-only evidence for later authoring: SNAPSHOT with just the recorded
+data-relation value replaced. Nothing is written."
+  (let ((snapshot (work:relationship-occurrence-snapshot occurrence))
+        (range (work:relationship-occurrence-relation-range occurrence)))
+    (concatenate 'string (subseq snapshot 0 (car range)) value (subseq snapshot (cdr range)))))
+
+(defun check-work-relationship-occurrences ()
+  (let* ((pages (work-page-sources))
+         (source (work-breakdown-source))
+         (projection (work:work-projection))
+         (associations (tm:topicmap-projection-associations-of projection))
+         (a1 (association-between projection "interaction" "operations"))
+         (o1 (occurrence-of a1)))
+    ;; One snapshot: the page as read, kept by every occurrence of the projection.
+    (assert (every #'occurrence-of associations))
+    (let ((snapshot (work:relationship-occurrence-snapshot o1)))
+      (assert (string= source snapshot))
+      (assert (every (lambda (a) (eq snapshot (work:relationship-occurrence-snapshot (occurrence-of a))))
+                     associations)))
+    (assert (eq (work:work-page "Work Breakdown") (work:relationship-occurrence-page o1)))
+    ;; Each occurrence is its own <li>: ordinal, triple and ranges agree.
+    (loop for a in associations for k from 1
+          for o = (occurrence-of a)
+          do (assert (= k (work:relationship-occurrence-ordinal o)))
+             (assert (equal (list (tm:topicmap-association-from-of a) (tm:topicmap-association-type-of a)
+                                  (tm:topicmap-association-to-of a))
+                            (list (work:relationship-occurrence-from o) (work:relationship-occurrence-relation o)
+                                  (work:relationship-occurrence-to o))))
+             (let ((element (occurrence-text o #'work:relationship-occurrence-element-range)))
+               (assert (eql 0 (search "<li" element)))
+               (assert (eql (- (length element) 5) (search "</li>" element :from-end t))))
+             (assert (equal (tm:topicmap-association-type-of a)
+                            (occurrence-text o #'work:relationship-occurrence-relation-range))))
+    (assert (equal +a1-item+ (occurrence-text o1 #'work:relationship-occurrence-element-range)))
+    ;; The occurrence is derived, not identity: IDs are as before.
+    (assert (equal "work:interaction:work:relation/informs:operations" (tm:topicmap-association-id-of a1)))
+    ;; The page as it is on disk resolves; the resolver reads it itself.
+    (assert (eq o1 (work:resolve-work-relationship-occurrence o1)))
+    ;; The seven-area projection keeps the same kind of occurrence.
+    (assert (occurrence-of (association-between (work:work-projection :areas-only t)
+                                                "interaction" "operations")))
+    ;; Two <li>s with one triple: two Associations, equal IDs, two occurrences.
+    (let* ((duplicated (duplicated-a1 source))
+           (twins (associations-between (fixture-projection duplicated) "interaction" "operations"))
+           (first (first twins)) (second (second twins))
+           (o-first (occurrence-of first)) (o-second (occurrence-of second)))
+      (assert (= 2 (length twins)))
+      (assert (not (eq first second)))
+      (assert (equal (tm:topicmap-association-id-of first) (tm:topicmap-association-id-of second)))
+      (assert (not (eq o-first o-second)))
+      (assert (not (equal (work:relationship-occurrence-element-range o-first)
+                          (work:relationship-occurrence-element-range o-second))))
+      (assert (not (equal (work:relationship-occurrence-relation-range o-first)
+                          (work:relationship-occurrence-relation-range o-second))))
+      (assert (search "Interaction → Operations" (occurrence-text o-first #'work:relationship-occurrence-element-range)))
+      (assert (search "in other words" (occurrence-text o-second #'work:relationship-occurrence-element-range)))
+      (assert (eq o-first (work:resolve-work-relationship-occurrence o-first :current duplicated)))
+      (assert (eq o-second (work:resolve-work-relationship-occurrence o-second :current duplicated)))
+      ;; Stale unless the source is exactly the snapshot. Nothing relocates.
+      (assert (stale-p o-first (replace-once duplicated "This is the current work" "This is the present work")))
+      (assert (stale-p o-first (replace-once duplicated "Open questions:" "Questions still open:")))
+      (assert (stale-p o-first (replace-once duplicated +a1-item+
+                                             (concatenate 'string "<li data-from=\"state\" data-to=\"connect\" data-relation=\"requires\">new</li>" +a1-item+))))
+      (assert (stale-p o-second (replace-once (remove-substring duplicated +a1-item+)
+                                              "<h2>Navigate and inspect</h2>"
+                                              (concatenate 'string "<ul>" +a1-item+ "</ul><h2>Navigate and inspect</h2>"))))
+      ;; Test-only: replacing just one recorded value range changes just that <li>.
+      (let* ((changed (replace-relation-value o-first "requires"))
+             (range (work:relationship-occurrence-relation-range o-first))
+             (delta (- (length "requires") (- (cdr range) (car range))))
+             (after (fixture-projection changed))
+             (pair (associations-between after "interaction" "operations")))
+        (assert (string= duplicated changed :end1 (car range) :end2 (car range)))
+        (assert (string= duplicated changed :start1 (cdr range) :start2 (+ (cdr range) delta)))
+        (assert (equal '("requires" "work:relation/informs")
+                       (mapcar #'tm:topicmap-association-type-of pair)))
+        (assert (= (work:relationship-occurrence-ordinal o-second)
+                   (work:relationship-occurrence-ordinal (occurrence-of (second pair)))))
+        (assert (= 2 (length (work:relation-uses after "work:relation/informs"))))
+        (assert (= 3 (length (work:relation-uses (fixture-projection duplicated) "work:relation/informs"))))))
+    ;; The accepted forms.
+    (flet ((same-relationships-p (html)
+             (equal (mapcar (lambda (a) (let ((o (occurrence-of a)))
+                                          (list (work:relationship-occurrence-from o)
+                                                (work:relationship-occurrence-relation o)
+                                                (work:relationship-occurrence-to o))))
+                            (tm:topicmap-projection-associations-of (fixture-projection html)))
+                    (mapcar (lambda (a) (let ((o (occurrence-of a)))
+                                          (list (work:relationship-occurrence-from o)
+                                                (work:relationship-occurrence-relation o)
+                                                (work:relationship-occurrence-to o))))
+                            associations))))
+      (assert (same-relationships-p
+               (replace-once source +a1-item+ "<li data-relation=\"work:relation/informs\" data-to=\"operations\" data-from=\"interaction\">reordered</li>")))
+      (assert (same-relationships-p
+               (replace-once source +a1-item+ (format nil "<li~%  data-from=\"interaction\"~%~Cdata-to=\"operations\"   data-relation=\"work:relation/informs\"~%>multi-line</li>" #\Tab))))
+      (assert (same-relationships-p
+               (replace-once source +a1-item+ (concatenate 'string "<li>plain</li><li class=\"data-from\" title=\"data-relation\">decoy</li>"
+                                                           +a1-item+ "<li>after</li>"))))
+      (assert (same-relationships-p
+               (replace-once source +a1-item+ "<li title=\"a > b < c\" data-from=\"interaction\" data-to=\"operations\" data-relation=\"work:relation/informs\">quoted</li>")))
+      (assert (same-relationships-p
+               (replace-once source +a1-item+ (concatenate 'string "<!-- <li data-from=\"x\" data-to=\"y\" data-relation=\"z\">c</li> -->"
+                                                           "<a title='<li data-from=\"x\" data-to=\"y\" data-relation=\"z\">'>t</a>"
+                                                           +a1-item+)))))
+    ;; Everything else in or near the relationship form is refused, not guessed.
+    (dolist (case '(("<li data-from=\"interaction data-to=\"operations\" data-relation=\"work:relation/informs\">x</li>"
+                     "unexpected")
+                    ("<li data-from=\"interaction\" data-to=\"operations\">x</li>"
+                     "needs data-from, data-to and data-relation")
+                    ("<li data-to=\"operations\" data-relation=\"requires\">x</li>"
+                     "needs data-from, data-to and data-relation")
+                    ("<li data-from=\"interaction\" data-from=\"state\" data-to=\"operations\" data-relation=\"work:relation/informs\">x</li>"
+                     "more than once")
+                    ("<li DATA-FROM=\"interaction\" data-to=\"operations\" data-relation=\"work:relation/informs\">x</li>"
+                     "not in lower case")
+                    ("<li data-from='interaction' data-to=\"operations\" data-relation=\"work:relation/informs\">x</li>"
+                     "not in double quotes")
+                    ("<li data-from=interaction data-to=\"operations\" data-relation=\"work:relation/informs\">x</li>"
+                     "not in double quotes")
+                    ("<li data-from=\"interaction\" data-to=\"operations\" data-relation=\"work:relation/informs&amp;\">x</li>"
+                     "entity reference")
+                    ("<li data-from=\"interaction\" data-to=\"operations\" data-relation=\"work:relation/informs\">not closed"
+                     "not closed")))
+      (destructuring-bind (item reason) case
+        (let ((condition (source-refusal (replace-once source +a1-item+ item))))
+          (assert (search reason (work:source-error-reason condition)) ()
+                  "Refusal ~S lacks ~S." (princ-to-string condition) reason))))
+    (assert (search "outside" (work:source-error-reason
+                               (source-refusal (concatenate 'string "<script>var s;</script>" source)))))
+    (assert (equal pages (work-page-sources)))))
+
+(defun remove-substring (string part)
+  (replace-once string part ""))
+
 (defun count-matches (needle haystack)
   (loop with start = 0 for position = (search needle haystack :start2 start)
         while position count t do (setf start (1+ position))))
@@ -828,5 +995,6 @@ after the move at DEADLINE-AFTER ms, if given, as the browser delivered it."
   (check-interactive-tala)
   (check-inspect-relation-contract)
   (check-hand-shaped-traces)
+  (check-work-relationship-occurrences)
   (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect).~%")
   t)
