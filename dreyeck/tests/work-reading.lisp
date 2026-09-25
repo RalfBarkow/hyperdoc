@@ -4,7 +4,10 @@
                     (#:tm #:dreyeck/topicmap)
                     (#:views #:html-inspector-views)
                     (#:authored #:dreyeck/topicmap/tala/authored)
-                    (#:tala #:dreyeck/topicmap/tala))
+                    (#:tala #:dreyeck/topicmap/tala)
+                    (#:w #:dreyeck/gesture-binding-witness)
+                    (#:sm #:dreyeck/state-machine)
+                    (#:m #:dreyeck/inspector/topicmap))
   (:export #:run-tests))
 (in-package #:dreyeck/work/tests)
 
@@ -558,6 +561,159 @@ referenced group carries another reference."
       (reference-group next-view (view-svg-dom next-view) next-a1))
     (assert (equal before (work-page-sources)))))
 
+;;;; Inspect relation contract: selected Operation + exact target -> object
+
+(defparameter *inspect-bindings*
+  ;; Test-only. Production offers no Binding for this Operation yet.
+  (list (w::%make-gesture-binding :id "fixture/radial-inspect-relation-contract"
+                                  :kind :radial-menu :sector-center 0.0d0
+                                  :sector-half-width 30.0d0
+                                  :target-type :topicmap-association :enabled-p t
+                                  :operation (w:inspect-relation-contract-operation))
+        (w::%make-gesture-binding :id "fixture/mark-inspect-relation-contract"
+                                  :kind :learned-mark :sector-center 0.0d0
+                                  :sector-half-width 30.0d0
+                                  :target-type :topicmap-association :enabled-p t
+                                  :operation (w:inspect-relation-contract-operation))))
+
+(defun association-target (association)
+  (list :type :topicmap-association :association association))
+
+(defun gesture-sample (kind &key target (x 0.0d0) button timestamp)
+  (w:make-gesture-input-sample :kind kind :target target :x x :y 0.0d0
+                               :button button :modifiers nil :timestamp timestamp))
+
+(defun novice-trace (target &optional (bindings *inspect-bindings*))
+  (w:run-gesture-trace
+   (list (gesture-sample :pointer-down :target target :button :secondary :timestamp 0)
+         (gesture-sample :reveal-deadline :timestamp 500)
+         (gesture-sample :pointer-move :x 20.0d0 :timestamp 600)
+         (gesture-sample :pointer-up :x 20.0d0 :timestamp 620))
+   :bindings bindings))
+
+(defun expert-trace (target &optional (bindings *inspect-bindings*))
+  (w:run-gesture-trace
+   (list (gesture-sample :pointer-down :target target :button :secondary :timestamp 0)
+         (gesture-sample :pointer-move :x 20.0d0 :timestamp 100)
+         (gesture-sample :pointer-up :x 20.0d0 :timestamp 120))
+   :bindings bindings))
+
+(defun pressed-target (session)
+  "The target the reducer kept: the one its pointer-down carried."
+  (w:gesture-input-sample-target (first (sm:state-machine-run-input-of session))))
+
+(defun selected-object (session)
+  (m:operation-inspectable-object (w:gesture-session-selected-operation-of session)
+                                  (pressed-target session)))
+
+(defun refusal (operation target)
+  "The condition OPERATION-INSPECTABLE-OBJECT signals, or an error if it returns."
+  (handler-case
+      (let ((value (m:operation-inspectable-object operation target)))
+        (error "Expected a refusal, got ~S." value))
+    (m:operation-not-applicable (condition) condition)))
+
+(defun system-dependency-names (name &optional seen)
+  (let ((system (asdf:find-system name nil)))
+    (if (or (null system) (member (asdf:component-name system) seen :test #'equal))
+        seen
+        (let ((seen (cons (asdf:component-name system) seen)))
+          (dolist (dependency (asdf:system-depends-on system) seen)
+            (when (or (stringp dependency) (symbolp dependency))
+              (setf seen (system-dependency-names (asdf:coerce-name dependency) seen))))))))
+
+(defun check-inspect-relation-contract ()
+  (let* ((operation (w:inspect-relation-contract-operation))
+         (projection (work:work-projection))
+         (a1 (association-between projection "interaction" "operations"))
+         (a2 (association-between projection "operations" "connect"))
+         (requires (association-between projection "operations" "state"))
+         (contract (tm:topicmap-projection-topic-by-id projection "work:relation/informs"))
+         (workspace (work:work-workspace))
+         (point (copy-seq (tm:topicmap-workspace-point-of workspace)))
+         (history (copy-list (tm:topicmap-workspace-history-of workspace)))
+         (state (tala:projection-state projection))
+         (pages (work-page-sources))
+         ;; Loaded by this test system only, so that "no request" is observed.
+         (requests (find-symbol "*REQUESTS*" (find-package "DREYECK/GESTURE/OPERATION-REQUEST")))
+         (request-count (and requests (hash-table-count (symbol-value requests))))
+         (create-pane (find-symbol "CREATE-PANE" "CLOG-MOLDABLE-INSPECTOR"))
+         (panes 0))
+    ;; The identity is data, with a title and nothing to call.
+    (assert (equal "operation/inspect-relation-contract"
+                   (w:semantic-operation-identity-id operation)))
+    (assert (equal "Inspect relation contract" (w:semantic-operation-identity-title operation)))
+    (assert (not (functionp operation)))
+    (assert (eq operation (w:inspect-relation-contract-operation)))
+    ;; Test-local watch on the Inspector's pane creation; removed afterwards.
+    (sb-int:encapsulate create-pane 'inspect-relation-contract-test
+                        (lambda (function &rest arguments)
+                          (incf panes) (apply function arguments)))
+    (unwind-protect
+         (let ((target (association-target a1)))
+           ;; Novice and expert: different routes and Bindings, one EQ Operation,
+           ;; the exact target kept.
+           (let ((novice (novice-trace target))
+                 (expert (expert-trace target)))
+             (assert (equal '(:idle :pressed :menu-visible :sector-selected :completed)
+                            (sm:state-machine-run-visited-states-of novice)))
+             (assert (equal '(:idle :pressed :marking :sector-selected :completed)
+                            (sm:state-machine-run-visited-states-of expert)))
+             (dolist (session (list novice expert))
+               (assert (eq operation (w:gesture-session-selected-operation-of session)))
+               (assert (eq target (pressed-target session)))
+               (assert (eq a1 (getf (pressed-target session) :association))))
+             (assert (not (eq (w:gesture-session-selected-binding-of novice)
+                              (w:gesture-session-selected-binding-of expert))))
+             ;; One object shown for both edges and for both routes.
+             (let ((shown (m:operation-inspectable-object operation target)))
+               (assert (eq contract shown))
+               (assert (eq shown (m:operation-inspectable-object operation (association-target a2))))
+               (assert (eq shown (selected-object novice)))
+               (assert (eq shown (selected-object expert)))
+               (assert (eq shown (selected-object (novice-trace (association-target a2)))))
+               (assert (eq (work:work-page "Relation Contract: informs")
+                           (tm:topicmap-topic-object-of shown)))))
+           ;; Refusals, each a condition, never NIL.
+           (flet ((refused (operation target fragment)
+                    (let ((condition (refusal operation target)))
+                      (assert (search fragment (m:operation-not-applicable-reason condition))
+                              () "Refusal ~S lacks ~S." (princ-to-string condition) fragment))))
+             (refused (w:insert-executable-defexample-operation) target
+                      "only Inspect relation contract")
+             (refused operation (list :type :lisp-source-definition :name 'work:work-projection)
+                      ":LISP-SOURCE-DEFINITION")
+             (refused operation (association-target requires) "refers to no Relation Contract")
+             (refused operation (list :type :topicmap-association) "carries NIL")
+             (refused operation (association-target (tm:topicmap-association-id-of a1))
+                      "carries \"work:interaction:work:relation/informs:operations\""))
+           ;; The four events are distinct:
+           ;; recognized without a Binding (none applies to this target type),
+           (let ((recognized (expert-trace (association-target a1) nil)))
+             (assert (member :marking (sm:state-machine-run-visited-states-of recognized)))
+             (assert (eq :cancelled (sm:state-machine-run-current-state-of recognized)))
+             (assert (null (w:gesture-session-selected-binding-of recognized))))
+           ;; two Bindings select one Operation (above), and an Operation
+           ;; selected on a target still need not show anything.
+           (let ((selected (novice-trace (association-target requires))))
+             (assert (eq :completed (sm:state-machine-run-current-state-of selected)))
+             (assert (eq operation (w:gesture-session-selected-operation-of selected)))
+             (refusal operation (pressed-target selected))))
+      (sb-int:unencapsulate create-pane 'inspect-relation-contract-test))
+    ;; Nothing happened besides computing the object.
+    (assert (zerop panes))
+    (assert (equal state (tala:projection-state projection)))
+    (assert (equal point (tm:topicmap-workspace-point-of workspace)))
+    (assert (equal history (tm:topicmap-workspace-history-of workspace)))
+    (assert (equal pages (work-page-sources)))
+    (assert requests)
+    (assert (= request-count (hash-table-count (symbol-value requests))))
+    ;; The code that computes it cannot make a request: its system does not
+    ;; depend on the one that defines OPERATION-REQUEST.
+    (assert (not (member "dreyeck/gesture/operation-request"
+                         (system-dependency-names "dreyeck/inspector/topicmap")
+                         :test #'equal)))))
+
 (defun count-matches (needle haystack)
   (loop with start = 0 for position = (search needle haystack :start2 start)
         while position count t do (setf start (1+ position))))
@@ -572,5 +728,6 @@ referenced group carries another reference."
   (check-relation-contract-changes)
   (check-relation-contract-inspection)
   (check-interactive-tala)
-  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references.~%")
+  (check-inspect-relation-contract)
+  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect).~%")
   t)

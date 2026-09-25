@@ -225,3 +225,44 @@ ended occurrence, including removal outside the Inspector refresh path."
         (:tr (:td "Gesture Window")
              (:td (views:object-ref (occurrence-gesture-window occurrence)))))
       (:p "No Topic Operation is installed or executed."))))
+
+;;;; What a selected read-only Operation shows
+;;;;
+;;;; A gesture is recognized, then completes with a Binding, whose Operation
+;;;; is thereby selected; nothing is computed. OPERATION-INSPECTABLE-OBJECT is
+;;;; the next step and only that one: the object a read-only Operation shows
+;;;; for its exact target. Showing it in a pane is a further step not taken
+;;;; here, and nothing is written, requested or remembered. One case is
+;;;; recognized: Inspect relation contract on a Topicmap Association.
+
+(define-condition operation-not-applicable (error)
+  ((operation :initarg :operation :reader operation-not-applicable-operation)
+   (target :initarg :target :reader operation-not-applicable-target)
+   (reason :initarg :reason :reader operation-not-applicable-reason))
+  (:report (lambda (condition stream)
+             (format stream "~A does not apply: ~A"
+                     (dreyeck/gesture-binding-witness:semantic-operation-identity-id
+                      (operation-not-applicable-operation condition))
+                     (operation-not-applicable-reason condition))))
+  (:documentation "OPERATION shows nothing for TARGET. Distinct from a result."))
+
+(defun operation-inspectable-object (operation target)
+  "The inspectable object OPERATION shows for TARGET, a Gesture target plist.
+TARGET must carry the exact Topicmap Association under :ASSOCIATION; an ID
+names no Association. Signals OPERATION-NOT-APPLICABLE otherwise."
+  (flet ((refuse (format-control &rest arguments)
+           (error 'operation-not-applicable
+                  :operation operation :target target
+                  :reason (apply #'format nil format-control arguments))))
+    (unless (eq operation
+                (dreyeck/gesture-binding-witness:inspect-relation-contract-operation))
+      (refuse "only Inspect relation contract shows an inspectable object"))
+    (unless (eq :topicmap-association (getf target :type))
+      (refuse "target type ~S is not :TOPICMAP-ASSOCIATION" (getf target :type)))
+    (let ((association (getf target :association)))
+      (unless (typep association 'dreyeck/topicmap:topicmap-association)
+        (refuse "the target carries ~S, not a Topicmap Association" association))
+      (or (getf (dreyeck/topicmap:topicmap-association-properties-of association)
+                :relation-contract)
+          (refuse "Association ~A refers to no Relation Contract"
+                  (dreyeck/topicmap:topicmap-association-id-of association))))))

@@ -15,7 +15,9 @@
    #:occurrence-view #:occurrence-token #:occurrence-inputs
    #:occurrence-topic #:occurrence-topic-id #:occurrence-projection
    #:occurrence-workspace #:occurrence-gesture-window
-   #:occurrence-inspectable-object))
+   #:occurrence-inspectable-object
+   #:operation-inspectable-object
+   #:operation-not-applicable #:operation-not-applicable-reason))
 
 (trivial-package-local-nicknames:add-package-local-nickname
  :views :html-inspector-views :dreyeck/inspector/topicmap)

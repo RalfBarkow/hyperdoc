@@ -6,6 +6,7 @@
            #:semantic-operation-identity-id
            #:semantic-operation-identity-title
            #:insert-executable-defexample-operation
+           #:inspect-relation-contract-operation
            #:gesture-input-sample
            #:make-gesture-input-sample
            #:gesture-input-sample-kind
@@ -61,6 +62,15 @@
 
 (defun insert-executable-defexample-operation ()
   *insert-executable-defexample-operation*)
+
+(defvar *inspect-relation-contract-operation*
+  (%make-operation-identity "operation/inspect-relation-contract"
+                            "Inspect relation contract")
+  "The EQ identity of a read-only Operation on one Topicmap Association.
+Like every identity here it is data; what it shows is computed elsewhere.")
+
+(defun inspect-relation-contract-operation ()
+  *inspect-relation-contract-operation*)
 
 ;;; Transient input
 
