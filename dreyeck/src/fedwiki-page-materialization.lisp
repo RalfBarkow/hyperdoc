@@ -66,16 +66,25 @@ appended Federated Wiki fork relation."
     copy))
 
 (defun %temporary-page-pathname (target)
-  (make-pathname
-   :name
-   (format nil
-           ".~A.~A"
-           (or (pathname-name target)
-               "page")
-           (symbol-name
-            (gensym "TMP-")))
-   :type nil
-   :defaults target))
+  "Create a new, empty file beside TARGET and return its pathname.
+
+The file is created exclusively: a name another writer already holds, in
+this process or another, is passed over and never opened, so concurrent
+materializations never share a temporary file. Names are numbered from a
+process-wide counter that is incremented atomically; the exclusive creation,
+not the number, is what guarantees a file of one's own."
+  (loop repeat 1000
+        for number = (sb-ext:atomic-incf (car (load-time-value (list 0))))
+        for candidate = (make-pathname
+                         :name (format nil ".~A.~D.tmp" (or (pathname-name target) "page") number)
+                         :type nil
+                         :defaults target)
+        when (with-open-file (stream candidate :direction :output
+                                               :if-exists nil
+                                               :if-does-not-exist :create)
+               (and stream t))
+          return candidate
+        finally (error "No free temporary file name beside ~A." target)))
 
 (defun materialize-fedwiki-page-json
     (page-json
@@ -123,7 +132,7 @@ files are rejected by default. IF-EXISTS may be :ERROR or :SUPERSEDE."
              (with-open-file
                  (output temporary
                          :direction :output
-                         :if-exists :error
+                         :if-exists :supersede
                          :if-does-not-exist :create
                          :external-format :utf-8)
                (let ((*print-pretty* t)

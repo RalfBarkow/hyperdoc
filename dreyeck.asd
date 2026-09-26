@@ -1152,6 +1152,30 @@
                                  :RUN-FEDWIKI-PAGE-MATERIALIZATION-TESTS)
      (ERROR "FedWiki page materialization tests failed."))))
 
+(defsystem "dreyeck/fedwiki-page-authoring"
+  :description "Capability-scoped, page-serialized edits of one local FedWiki page; no HTTP route, no authentication"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on ("dreyeck/fedwiki-assets" "dreyeck/fedwiki-page-materialization"
+               "shasht" "bordeaux-threads" "html-inspector-views")
+  :components ((:file "fedwiki-page-authoring-package") (:file "fedwiki-page-authoring"))
+  :in-order-to ((test-op (test-op "dreyeck/fedwiki-page-authoring/tests"))))
+
+(defsystem "dreyeck/fedwiki-page-authoring/tests"
+  :description "FedWiki page authoring: refusals, page serialization, temporary files"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :depends-on ("dreyeck/fedwiki-page-authoring" "alexandria")
+  :components ((:file "fedwiki-page-authoring"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (unless (uiop:symbol-call :dreyeck/fedwiki-page-authoring/tests
+                                       :run-fedwiki-page-authoring-tests)
+               (error "FedWiki page authoring tests failed."))))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SHOP3
   :DESCRIPTION
   "SHOP3-backed HTN planning layer owned by Dreyeck"
