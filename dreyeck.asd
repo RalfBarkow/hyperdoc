@@ -631,7 +631,7 @@
   :DEPENDS-ON
   (#:UIOP #:SHASHT)
   :COMPONENTS
-  ((:FILE "fedwiki-assets-package") (:FILE "fedwiki-assets"))
+  ((:FILE "fedwiki-assets-package") (:FILE "fedwiki-page-slug") (:FILE "fedwiki-assets"))
   :IN-ORDER-TO
   ((ASDF/LISP-ACTION:TEST-OP
     (ASDF/LISP-ACTION:TEST-OP "dreyeck/fedwiki-assets/tests"))))

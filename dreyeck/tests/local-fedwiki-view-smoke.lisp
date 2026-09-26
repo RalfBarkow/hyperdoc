@@ -153,6 +153,34 @@ with ON-GESTURE-WINDOW, beside /view and ~D book routes.~%"
               (length books))
       t)))
 
+(defun check-view-slug-boundary ()
+  "The /view segment is decoded exactly once, and the decoded string must be a
+page slug. The local site's page lookup refuses a decoded escape before any
+file is opened."
+  (flet ((slug (path) (dreyeck/local-fedwiki-view:view-slug-from-pathname path)))
+    ;; Decoded once: %2D becomes -, and %252D only becomes %2D.
+    (assert (equal "work-breakdown" (slug "/view/work%2Dbreakdown")))
+    (assert (null (slug "/view/work%252Dbreakdown")))
+    ;; The observed escape and its relatives are refused after decoding.
+    (dolist (path '("/view/..%2Fstatus%2Fowner.json" "/view/..%2F..%2Fx" "/view/%2E%2E"
+                    "/view/.." "/view/a%2Fb" "/view/a/b" "/view/a%5Cb" "/view/%2Fa"
+                    "/view/a%2F" "/view/" "/view/Example-Page" "/view/x.json" "/view/a%20b"))
+      (assert (null (slug path)) () "~S was accepted as ~S." path (slug path))))
+  (let ((root (uiop:ensure-directory-pathname
+               (merge-pathnames (format nil "dreyeck-view-slug-~A/" (symbol-name (gensym "RUN-")))
+                                (uiop:temporary-directory)))))
+    (ensure-directories-exist (merge-pathnames "pages/" root))
+    (let ((outside (merge-pathnames "status/outside.json" root)))
+      (ensure-directories-exist outside)
+      (with-open-file (out outside :direction :output :if-exists :error :external-format :utf-8)
+        (write-string "{\"title\":\"Outside pages/\",\"story\":[],\"journal\":[]}" out)))
+    (unwind-protect
+         (let ((wiki (dreyeck/local-fedwiki-page:make-local-fedwiki root "fedwiki:view-slug-boundary")))
+           (assert (handler-case (progn (hyperbook:find-page wiki "../status/outside.json") nil)
+                     (dreyeck/fedwiki-assets:invalid-fedwiki-page-slug () t)))
+           (assert (null (hyperbook:find-page wiki "absent-page"))))
+      (uiop:delete-directory-tree root :validate t))))
+
 (defun run-local-fedwiki-view-tests ()
   (assert
    (string=
@@ -164,6 +192,8 @@ with ON-GESTURE-WINDOW, beside /view and ~D book routes.~%"
    (null
     (dreyeck/local-fedwiki-view:view-slug-from-pathname
      (format nil "/not-view/~A" *fixture-slug*))))
+
+  (check-view-slug-boundary)
 
   ;; The authored HyperDoc page names the same executable contracts that
   ;; this smoke test exercises below.

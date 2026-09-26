@@ -13,6 +13,10 @@
    #:resolve-local-assets
    #:discover-asdf-files
    #:discover-page-attached-asdf-files
-   #:page-attached-asdf-discovery-observation))
+   #:page-attached-asdf-discovery-observation
+   #:fedwiki-page-slug-p
+   #:check-fedwiki-page-slug
+   #:invalid-fedwiki-page-slug
+   #:invalid-fedwiki-page-slug-slug))
 
 (in-package #:dreyeck/fedwiki-assets)

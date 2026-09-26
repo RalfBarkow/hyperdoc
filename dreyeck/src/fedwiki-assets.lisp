@@ -3,11 +3,21 @@
 (in-package #:dreyeck/fedwiki-assets)
 
 (defun local-fedwiki-page-pathname (site-root slug)
-  "Return the local page pathname for SLUG below SITE-ROOT."
-  (check-type slug string)
-  (merge-pathnames
-   (format nil "pages/~A" slug)
-   (uiop:ensure-directory-pathname site-root)))
+  "Return the local page pathname for SLUG below SITE-ROOT: a direct child of
+its pages/ directory. SLUG must be a FedWiki page slug; anything else is
+refused before a pathname exists."
+  (check-fedwiki-page-slug slug)
+  (let* ((root (uiop:ensure-directory-pathname site-root))
+         (pages (merge-pathnames "pages/" root))
+         (pathname (merge-pathnames (format nil "pages/~A" slug) root))
+         ;; What is opened is the namestring; read back, it must still name
+         ;; SLUG directly in pages/.
+         (named (pathname (namestring pathname))))
+    (unless (and (equal (pathname-directory named) (pathname-directory pages))
+                 (equal slug (pathname-name named))
+                 (null (pathname-type named)))
+      (error 'invalid-fedwiki-page-slug :slug slug))
+    pathname))
 
 (defun read-local-fedwiki-page (site-root slug)
   "Read the local Federated Wiki page identified by SLUG as JSON data.
@@ -63,10 +73,17 @@ a runtime and not part of any page's identity."
           (user-homedir-pathname))))))
 
 (defun page-assets-directory (site-root slug)
-  "Where SLUG's assets sit under SITE-ROOT, by the layout, resolved or not."
-  (uiop:ensure-directory-pathname
-   (merge-pathnames (format nil "pages/~A/" slug)
-                    (local-fedwiki-assets-root site-root))))
+  "Where SLUG's assets sit under SITE-ROOT, by the layout, resolved or not:
+assets/pages/SLUG/. SLUG must be a FedWiki page slug."
+  (check-fedwiki-page-slug slug)
+  (let* ((assets (local-fedwiki-assets-root site-root))
+         (directory (uiop:ensure-directory-pathname
+                     (merge-pathnames (format nil "pages/~A/" slug) assets))))
+    (unless (and (equal (pathname-directory directory)
+                        (append (pathname-directory assets) (list "pages" slug)))
+                 (null (pathname-name directory)))
+      (error 'invalid-fedwiki-page-slug :slug slug))
+    directory))
 
 (defun local-fedwiki-assets-root (site-root)
   "Return the local assets root below SITE-ROOT."

@@ -14,7 +14,11 @@ rebuilding the default. HYPERDOC_FEDWIKI_SITE_ROOT still overrides it."
   (dreyeck/fedwiki-assets:configured-local-site-root))
 
 (defun view-slug-from-pathname (pathname)
-  "Return the single page slug encoded by /view/<slug>, or NIL."
+  "Return the single page slug encoded by /view/<slug>, or NIL.
+
+The segment after /view/ is URL-decoded exactly once, and it is the decoded
+string that must be a FedWiki page slug. Nothing is judged before decoding:
+an encoded / or . would pass any such check and appear only after it."
   (let ((prefix "/view/"))
     (when
         (and
@@ -26,13 +30,12 @@ rebuilding the default. HYPERDOC_FEDWIKI_SITE_ROOT still overrides it."
           pathname
           :end2
           (length prefix)))
-      (let ((encoded
-              (subseq pathname
-                      (length prefix))))
-        (when
-            (not
-             (find #\/ encoded))
-          (tbnl:url-decode encoded))))))
+      (let ((slug
+              (tbnl:url-decode
+               (subseq pathname
+                       (length prefix)))))
+        (when (dreyeck/fedwiki-assets:fedwiki-page-slug-p slug)
+          slug)))))
 
 (defun make-local-fedwiki-view-page
     (site-root
