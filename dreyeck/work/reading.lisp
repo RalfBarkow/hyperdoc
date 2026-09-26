@@ -25,7 +25,11 @@
            #:relation-change-observed-contract #:relation-change-proposed-contract
            #:relation-change-proposed-relation
            #:relation-change-refused #:relation-change-refused-reason
-           #:relation-change-refused-cause))
+           #:relation-change-refused-cause
+           #:work-fedwiki-item-observation #:observe-work-fedwiki-item
+           #:fedwiki-item-observation-site #:fedwiki-item-observation-slug
+           #:fedwiki-item-observation-item-id #:fedwiki-item-observation-item
+           #:resolve-work-fedwiki-item-observation #:project-fedwiki-work))
 (in-package #:dreyeck/work/reading)
 
 (hyperdoc:see (hyperdoc:page "D2 Connections"))
@@ -347,6 +351,185 @@ STALE-WORK-RELATIONSHIP-OCCURRENCE. Nothing is relocated."
         (stale "its ranges no longer denote the recorded relationship"))
       occurrence)))
 
+;;;; FedWiki Work item observations
+;;
+;; Work can also be authored as structured Federated Wiki Items on one page:
+;; a work-topic Item for each Topic, Relation Contracts included, and a
+;; work-relationship Item for each relationship statement. FedWiki keeps an
+;; Item as opaque JSON and edits it by item id, so an Item keeps its id when
+;; it is edited, moved or reordered, where an HTML range goes stale at any
+;; changed byte. This section only reads such pages. Work Breakdown.html
+;; remains the source WORK-PROJECTION reads; nothing here fetches or writes.
+;;
+;; A FedWiki item observation names one authored Item as a source occurrence
+;; names one <li>. Its address is (site, slug, item-id): item ids are random
+;; and unique only within a page, and a fork or copy carries them to another
+;; site or page. The observed Item is evidence, compared whole; a page whose
+;; Item differs at all makes the observation stale.
+;;
+;; Pages are taken parsed: a JSON object is an EQUAL hash table, an array a
+;; vector or list, as HyperBook's FedWiki reader returns them.
+
+(defclass work-fedwiki-item-observation ()
+  ((site :initarg :site :reader fedwiki-item-observation-site)
+   (slug :initarg :slug :reader fedwiki-item-observation-slug)
+   (item-id :initarg :item-id :reader fedwiki-item-observation-item-id)
+   (item :initarg :item :reader fedwiki-item-observation-item))
+  (:documentation "One authored Work Item on one Federated Wiki page, as observed.
+SITE, SLUG and ITEM-ID are the address. An item id alone identifies nothing:
+it is unique only within one page, and a fork or copy carries it to another
+site or page. ITEM is a copy of the whole Item as read; it is evidence,
+compared whole, never used to find the Item again."))
+
+(defmethod print-object ((observation work-fedwiki-item-observation) stream)
+  (print-unreadable-object (observation stream :type t)
+    (format stream "~A ~A item ~A" (fedwiki-item-observation-site observation)
+            (fedwiki-item-observation-slug observation)
+            (fedwiki-item-observation-item-id observation))))
+
+(defun %json-field (object name)
+  "The value of NAME in the parsed JSON OBJECT, or NIL if it is absent or null."
+  (multiple-value-bind (value present) (gethash name object)
+    (and present (not (eq value :null)) value)))
+
+(defun %json-array-p (value)
+  (or (consp value) (and (vectorp value) (not (stringp value)))))
+
+(defun %copy-json (value)
+  "A copy of the parsed JSON VALUE sharing no object or array with it."
+  (cond ((hash-table-p value)
+         (let ((copy (make-hash-table :test (hash-table-test value))))
+           (maphash (lambda (key item) (setf (gethash key copy) (%copy-json item))) value)
+           copy))
+        ((%json-array-p value) (map (if (listp value) 'list 'vector) #'%copy-json value))
+        (t value)))
+
+(defun %json-equal (a b)
+  "Whether the parsed JSON values A and B are equal: objects key by key, in
+any order, arrays element by element, anything else by EQUAL."
+  (cond ((and (hash-table-p a) (hash-table-p b))
+         (and (= (hash-table-count a) (hash-table-count b))
+              (loop for key being the hash-keys of a using (hash-value value)
+                    always (multiple-value-bind (other present) (gethash key b)
+                             (and present (%json-equal value other))))))
+        ((and (%json-array-p a) (%json-array-p b))
+         (and (= (length a) (length b)) (every #'%json-equal a b)))
+        (t (equal a b))))
+
+(defun %fedwiki-story (page)
+  "The Items of the parsed FedWiki PAGE, in story order."
+  (coerce (or (%json-field page "story") '()) 'list))
+
+(defun %fedwiki-item-string (item name)
+  "The string NAME of ITEM, or an error naming the Item."
+  (let ((value (%json-field item name)))
+    (unless (stringp value)
+      (error "FedWiki ~A Item ~S has no string ~S." (%json-field item "type")
+             (%json-field item "id") name))
+    value))
+
+(defun observe-work-fedwiki-item (site slug item)
+  "An observation of ITEM, as read from the page SLUG at SITE."
+  (check-type site string)
+  (check-type slug string)
+  (make-instance 'work-fedwiki-item-observation
+                 :site site :slug slug :item-id (%fedwiki-item-string item "id")
+                 :item (%copy-json item)))
+
+(defun resolve-work-fedwiki-item-observation (observation page)
+  "OBSERVATION, if PAGE -- the page now at its site and slug, parsed; the JSON
+names neither -- holds its item id exactly once and that Item equals the
+observed Item. Otherwise STALE-WORK-RELATIONSHIP-OCCURRENCE. Nothing is
+relocated."
+  (let ((matches (remove (fedwiki-item-observation-item-id observation) (%fedwiki-story page)
+                         :key (lambda (item) (%json-field item "id")) :test-not #'equal)))
+    (flet ((stale (reason) (error 'stale-work-relationship-occurrence
+                                  :occurrence observation :reason reason)))
+      (unless (= 1 (length matches))
+        (stale (format nil "its item id occurs ~D times on the page" (length matches))))
+      (unless (%json-equal (first matches) (fedwiki-item-observation-item observation))
+        (stale "the Item on the page is not the observed Item"))
+      observation)))
+
+;;;; Work projections
+;;
+;; One set of rules for every authored representation of Work: Topics in
+;; authored order, with positions from that order; relationship statements
+;; as Associations whose ID spells from, relation and to; a contract
+;; reference resolved against every Topic of the page. Only the occurrence
+;; each Association keeps differs between representations.
+;;
+;; Open: two authored statements of one relationship are two occurrences,
+;; distinct by range or by item id, yet their Associations get one derived
+;; ID, and TALA refuses such a projection. That is a question of Association
+;; identity, not of either representation, and it is not decided here.
+
+(defun %work-topic (index id label kind status object)
+  "The Work Topic authored INDEXth among a page's Topics."
+  (tm:make-topicmap-topic
+   :id id :type :work-page :label label :object object
+   :view-properties (list :x (* 285 (mod index 4)) :y (* 120 (floor index 4))
+                          :visible t :kind kind :status status)))
+
+(defun %work-projection (all-topics statements &key source areas-only)
+  "The Work projection of ALL-TOPICS and STATEMENTS, each (FROM RELATION TO
+OCCURRENCE), both in authored order. AREAS-ONLY keeps the area Topics and
+the Associations between them; a contract reference is resolved against
+ALL-TOPICS either way."
+  (let* ((topics (if areas-only
+                     (remove "area" all-topics
+                             :key (lambda (topic)
+                                    (getf (tm:topicmap-topic-view-properties-of topic) :kind))
+                             :test-not #'equal)
+                     all-topics))
+         (ids (mapcar #'tm:topicmap-topic-id-of topics))
+         (associations
+           (loop for (from relation to occurrence) in statements
+                 for id = (format nil "work:~A:~A:~A" from relation to)
+                 when (or (not areas-only)
+                          (and (member from ids :test #'equal)
+                               (member to ids :test #'equal)))
+                   collect (tm:make-topicmap-association
+                            :id id :type relation :from from :to to
+                            ;; Derived while projecting, and part of no identity.
+                            ;; The reference in TYPE is the authored statement and
+                            ;; the contract Topic owns the label; the occurrence
+                            ;; says which authored statement this Association came from.
+                            :properties
+                            (list* :source-occurrence occurrence
+                                   (when (relation-contract-reference-p relation)
+                                     (list :relation-contract
+                                           (resolve-relation-contract relation all-topics id))))))))
+    (tm:make-topicmap-projection :source source :topics topics
+                                 :associations associations)))
+
+(defun project-fedwiki-work (page &key site slug source areas-only
+                                       (find-page #'work-page))
+  "Project the work-topic and work-relationship Items of PAGE, the parsed
+FedWiki page SLUG at SITE, by the rules PROJECT-WORK-BREAKDOWN uses. Each
+Association's source occurrence observes its Item. Reads nothing: PAGE is
+given."
+  (check-type site string)
+  (check-type slug string)
+  (flet ((items (type)
+           (remove type (%fedwiki-story page)
+                   :key (lambda (item) (%json-field item "type")) :test-not #'equal)))
+    (%work-projection
+     (loop for item in (items "work-topic")
+           for index from 0
+           collect (%work-topic index (%fedwiki-item-string item "topic")
+                                (%fedwiki-item-string item "label")
+                                (%json-field item "kind") (%json-field item "status")
+                                (funcall find-page (%fedwiki-item-string item "page")
+                                         (or (%json-field item "hyperbook")
+                                             "dreyeck/work/reading"))))
+     (loop for item in (items "work-relationship")
+           collect (list (%fedwiki-item-string item "from")
+                         (%fedwiki-item-string item "relation")
+                         (%fedwiki-item-string item "to")
+                         (observe-work-fedwiki-item site slug item)))
+     :source source :areas-only areas-only)))
+
 (defun project-work-breakdown (html &key source areas-only
                                          (find-page #'work-page))
   "Project Work Breakdown HTML (a pathname, read once, or a string). FIND-PAGE
@@ -361,56 +544,28 @@ string is parsed, scanned for relationship occurrences and kept by each."
                                             (plump:get-elements-by-tag-name dom "li")))
          (occurrences (let ((occurrences (scan-work-relationships snapshot source)))
                         (%align-relationships occurrences relationship-nodes snapshot)
-                        occurrences))
-         ;; Every authored Topic, including those AREAS-ONLY leaves out, so a
-         ;; contract reference is checked against the whole page either way.
-         (all-topics
-           (loop for node in (remove-if-not
-                              (lambda (node) (plump:attribute node "data-topic"))
-                              (plump:get-elements-by-tag-name dom "a"))
-                 for index from 0
-                 collect
-                 (tm:make-topicmap-topic
-                  :id (plump:attribute node "data-topic") :type :work-page
-                  :label (plump:decode-entities (plump:text node))
-                  :object (funcall find-page (plump:attribute node "page")
-                                   (or (plump:attribute node "hyperbook")
-                                       "dreyeck/work/reading"))
-                  :view-properties
-                  (list :x (* 285 (mod index 4)) :y (* 120 (floor index 4))
-                        :visible t :kind (plump:attribute node "data-kind")
-                        :status (plump:attribute node "data-status")))))
-         (topics (if areas-only
-                     (remove "area" all-topics
-                             :key (lambda (topic)
-                                    (getf (tm:topicmap-topic-view-properties-of topic)
-                                          :kind))
-                             :test-not #'equal)
-                     all-topics))
-         (ids (mapcar #'tm:topicmap-topic-id-of topics))
-         (associations
-           (loop for node in relationship-nodes
-                 for occurrence in occurrences
-                 for from = (plump:attribute node "data-from")
-                 for to = (plump:attribute node "data-to")
-                 for relation = (plump:attribute node "data-relation")
-                 for id = (format nil "work:~A:~A:~A" from relation to)
-                 when (and from (or (not areas-only)
-                                    (and (member from ids :test #'equal)
-                                         (member to ids :test #'equal))))
-                 collect (tm:make-topicmap-association
-                          :id id :type relation :from from :to to
-                          ;; Derived while projecting, and part of no identity.
-                          ;; The reference in TYPE is the authored statement and
-                          ;; the contract Topic owns the label; the occurrence
-                          ;; says which authored <li> this Association came from.
-                          :properties
-                          (list* :source-occurrence occurrence
-                                 (when (relation-contract-reference-p relation)
-                                   (list :relation-contract
-                                         (resolve-relation-contract relation all-topics id))))))))
-    (tm:make-topicmap-projection :source source :topics topics
-                                 :associations associations)))
+                        occurrences)))
+    (%work-projection
+     ;; Every authored Topic, including those AREAS-ONLY leaves out, so a
+     ;; contract reference is checked against the whole page either way.
+     (loop for node in (remove-if-not
+                        (lambda (node) (plump:attribute node "data-topic"))
+                        (plump:get-elements-by-tag-name dom "a"))
+           for index from 0
+           collect (%work-topic index (plump:attribute node "data-topic")
+                                (plump:decode-entities (plump:text node))
+                                (plump:attribute node "data-kind")
+                                (plump:attribute node "data-status")
+                                (funcall find-page (plump:attribute node "page")
+                                         (or (plump:attribute node "hyperbook")
+                                             "dreyeck/work/reading"))))
+     (loop for node in relationship-nodes
+           for occurrence in occurrences
+           collect (list (plump:attribute node "data-from")
+                         (plump:attribute node "data-relation")
+                         (plump:attribute node "data-to")
+                         occurrence))
+     :source source :areas-only areas-only)))
 
 ;; These are ordinary page links and relationship entries in Work Breakdown.
 ;; Reading this one page avoids a second authoritative WBS list in Lisp or D2.
@@ -424,13 +579,13 @@ string is parsed, scanned for relationship occurrences and kept by each."
 ;; A request to change which Relation Contract one authored relationship
 ;; statement uses. It names the authored relationship statement by its
 ;; source occurrence, not by the semantic triple, so of two statements of
-;; the same relationship it names one. Making it observes and writes
-;; nothing; it grants no permission and holds no executor. The request
-;; records the proposed structural change and its exact authored source
-;; occurrence. Translating that request into a concrete source edit belongs
-;; to a later, representation-specific plan. Whether a changed relation
-;; makes the same Association or another one is not decided here: the
-;; request concerns the authored statement.
+;; the same relationship it names one. The occurrence is an HTML source
+;; occurrence or a FedWiki item observation; the request holds it and
+;; copies nothing out of it. Making a request observes and writes nothing;
+;; it grants no permission and holds no executor. Translating it into a
+;; change to one representation belongs to a later writer. Whether a
+;; changed relation makes the same Association or another one is not
+;; decided here: the request concerns the authored statement.
 
 (define-condition relation-change-refused (error)
   ((association :initarg :association :reader refused-relation-change-association)
@@ -458,39 +613,122 @@ place. Intent and evidence only; no executor, no permission."))
   "The proposed relation reference: the Relation Contract Topic ID."
   (tm:topicmap-topic-id-of (relation-change-proposed-contract request)))
 
+;; What a request needs from its occurrence, for each of the two forms an
+;; authored relationship statement is observed in: a short name, the
+;; relation it records, the authored source now, whether that source still
+;; holds it, the Topics that source authors, and its evidence for the view.
+;; Each is one function over the two concrete classes; there is no common
+;; occurrence class.
+
+(defun %occurrence-label (occurrence)
+  "A short name for OCCURRENCE among its page's statements."
+  (etypecase occurrence
+    (work-relationship-source-occurrence
+     (format nil "occurrence ~D" (relationship-occurrence-ordinal occurrence)))
+    (work-fedwiki-item-observation
+     (format nil "item ~A" (fedwiki-item-observation-item-id occurrence)))))
+
+(defun %occurrence-relation (occurrence)
+  "The relation the authored statement at OCCURRENCE records."
+  (etypecase occurrence
+    (work-relationship-source-occurrence (relationship-occurrence-relation occurrence))
+    (work-fedwiki-item-observation
+     (%json-field (fedwiki-item-observation-item occurrence) "relation"))))
+
+(defun %current-authored-source (occurrence)
+  "OCCURRENCE's authored source as it is now, or NIL for a FedWiki page, which
+is not fetched here: its reader supplies it."
+  (etypecase occurrence
+    (work-relationship-source-occurrence
+     (uiop:read-file-string (hyperdoc:file-of (relationship-occurrence-page occurrence))))
+    (work-fedwiki-item-observation nil)))
+
+(defun %resolve-occurrence (occurrence current)
+  "OCCURRENCE, if CURRENT, its authored source now, still holds it; otherwise
+STALE-WORK-RELATIONSHIP-OCCURRENCE."
+  (etypecase occurrence
+    (work-relationship-source-occurrence
+     (resolve-work-relationship-occurrence occurrence :current current))
+    (work-fedwiki-item-observation
+     (resolve-work-fedwiki-item-observation occurrence current))))
+
+(defun %current-work-topics (occurrence current)
+  "Every Work Topic that CURRENT, OCCURRENCE's authored source now, authors."
+  (tm:topicmap-projection-topics-of
+   (etypecase occurrence
+     (work-relationship-source-occurrence
+      (project-work-breakdown current :source (relationship-occurrence-page occurrence)))
+     (work-fedwiki-item-observation
+      (project-fedwiki-work current :site (fedwiki-item-observation-site occurrence)
+                                    :slug (fedwiki-item-observation-slug occurrence))))))
+
+(defun %render-occurrence-evidence (occurrence)
+  "The authored evidence OCCURRENCE holds, in a request's view."
+  (etypecase occurrence
+    (work-relationship-source-occurrence
+     (let ((page (relationship-occurrence-page occurrence))
+           (element (relationship-occurrence-element-range occurrence)))
+       (views:html
+         (:table :class "inspector-table"
+           (:tr (:td "Source occurrence") (:td (views:object-ref occurrence)))
+           (:tr (:td "Source page")
+                (:td (if (typep page 'hyperbook:page)
+                         (views:object-ref page)
+                         (views:html (:tt (views:esc (prin1-to-string page))))))))
+         (:p "Authored statement, as observed in the page source:")
+         (:pre (views:esc (subseq (relationship-occurrence-snapshot occurrence)
+                                  (car element) (cdr element)))))))
+    (work-fedwiki-item-observation
+     (views:html
+       (:table :class "inspector-table"
+         (:tr (:td "Source occurrence") (:td (views:object-ref occurrence)))
+         (:tr (:td "Site") (:td (:tt (views:esc (fedwiki-item-observation-site occurrence)))))
+         (:tr (:td "Page slug") (:td (:tt (views:esc (fedwiki-item-observation-slug occurrence)))))
+         (:tr (:td "Item id") (:td (:tt (views:esc (fedwiki-item-observation-item-id occurrence))))))
+       (:p "Authored Item, as observed on the page:")
+       (:table :class "inspector-table"
+         (maphash (lambda (field value)
+                    (views:html
+                      (:tr (:td (:tt (views:esc field)))
+                           (:td (:tt (views:esc (princ-to-string value)))))))
+                  (fedwiki-item-observation-item occurrence)))))))
+
 (defmethod print-object ((request relation-change-request) stream)
   (print-unreadable-object (request stream :type t)
-    (format stream "~A -> ~A, occurrence ~D" (relation-change-observed-relation request)
+    (format stream "~A -> ~A, ~A" (relation-change-observed-relation request)
             (relation-change-proposed-relation request)
-            (relationship-occurrence-ordinal (relation-change-occurrence request)))))
+            (%occurrence-label (relation-change-occurrence request)))))
 
 (defun request-relation-change (association proposed &key (current nil current-p))
   "A request to make the authored relationship statement behind ASSOCIATION
-use the Relation Contract whose Topic ID is PROPOSED. CURRENT is the page
-source now, read from the occurrence's page unless given. Observes, writes
-nothing, and signals RELATION-CHANGE-REFUSED unless every check holds."
+use the Relation Contract whose Topic ID is PROPOSED. CURRENT is the
+authored source now: for an HTML source occurrence the page source, read
+from its page unless given; for a FedWiki item observation the parsed page,
+which must be given. Observes, writes nothing, and signals
+RELATION-CHANGE-REFUSED unless every check holds."
   (flet ((refuse (reason &optional cause)
            (error 'relation-change-refused :association association :reason reason :cause cause)))
     (unless (typep association 'tm:topicmap-association)
       (refuse (format nil "~S is not a Topicmap Association" association)))
     (let ((occurrence (getf (tm:topicmap-association-properties-of association) :source-occurrence)))
-      (unless (typep occurrence 'work-relationship-source-occurrence)
+      (unless (typep occurrence '(or work-relationship-source-occurrence
+                                     work-fedwiki-item-observation))
         (refuse (format nil "Association ~A has no Work source occurrence"
                         (tm:topicmap-association-id-of association))))
-      (let ((current (if current-p
-                         current
-                         (uiop:read-file-string
-                          (hyperdoc:file-of (relationship-occurrence-page occurrence))))))
-        (handler-case (resolve-work-relationship-occurrence occurrence :current current)
+      (let ((current (if current-p current (%current-authored-source occurrence))))
+        (unless current
+          (refuse (format nil "the current page of ~A was not given; no page is fetched here"
+                          occurrence)))
+        (handler-case (%resolve-occurrence occurrence current)
           (stale-work-relationship-occurrence (condition)
             (refuse "its source occurrence is stale" condition)))
-        ;; The occurrence's own source bytes were checked when it resolved.
-        ;; What remains is whether the projected Association agrees with the
-        ;; authored statement it was projected from.
+        ;; The occurrence resolved in the current source. What remains is
+        ;; whether the projected Association agrees with the authored
+        ;; statement it was projected from.
         (let ((observed (tm:topicmap-association-type-of association)))
-          (unless (equal observed (relationship-occurrence-relation occurrence))
+          (unless (equal observed (%occurrence-relation occurrence))
             (refuse (format nil "the Association says ~S but its source occurrence records ~S"
-                            observed (relationship-occurrence-relation occurrence))))
+                            observed (%occurrence-relation occurrence))))
           (unless (stringp proposed)
             (refuse (format nil "~S is not a Relation Contract Topic ID" proposed)))
           (when (equal proposed observed)
@@ -498,9 +736,7 @@ nothing, and signals RELATION-CHANGE-REFUSED unless every check holds."
           (let ((contract
                   (handler-case
                       (resolve-relation-contract
-                       proposed
-                       (tm:topicmap-projection-topics-of
-                        (project-work-breakdown current :source (relationship-occurrence-page occurrence)))
+                       proposed (%current-work-topics occurrence current)
                        (tm:topicmap-association-id-of association))
                     (relation-contract-reference-error (condition)
                       (refuse (format nil "~A is not a Relation Contract in this page" proposed)
@@ -515,22 +751,13 @@ nothing, and signals RELATION-CHANGE-REFUSED unless every check holds."
 
 (views:defview relation-change-request-overview (request relation-change-request)
   (views:html-view :title "Relation change request" :priority 1
-    (let* ((occurrence (relation-change-occurrence request))
-           (snapshot (relationship-occurrence-snapshot occurrence))
-           (element (relationship-occurrence-element-range occurrence))
-           (page (relationship-occurrence-page occurrence))
-           (observed (relation-change-observed-contract request))
-           (proposed (relation-change-proposed-contract request)))
+    (let ((observed (relation-change-observed-contract request))
+          (proposed (relation-change-proposed-contract request)))
       (views:html
         (:table :class "inspector-table"
           (:tr (:td "Operation")
                (:td (:tt (views:esc (w:semantic-operation-identity-id (relation-change-operation request))))))
           (:tr (:td "Projected Association") (:td (views:object-ref (relation-change-association request))))
-          (:tr (:td "Source page")
-               (:td (if (typep page 'hyperbook:page)
-                        (views:object-ref page)
-                        (views:html (:tt (views:esc (prin1-to-string page)))))))
-          (:tr (:td "Source occurrence") (:td (views:object-ref occurrence)))
           (:tr (:td "Observed relation") (:td (:tt (views:esc (relation-change-observed-relation request)))))
           (:tr (:td "Observed Relation Contract")
                (:td (if observed
@@ -542,8 +769,8 @@ nothing, and signals RELATION-CHANGE-REFUSED unless every check holds."
         (:p "Proposed change: "
             (:tt (views:esc (relation-change-observed-relation request))) " → "
             (:tt (views:esc (relation-change-proposed-relation request))))
-        (:p "Authored statement, as observed in the page source:")
-        (:pre (views:esc (subseq snapshot (car element) (cdr element))))))))
+        (:h4 "Authored source occurrence")
+        (%render-occurrence-evidence (relation-change-occurrence request))))))
 
 (hyperdoc:defexample work-workspace
   "Navigate the documented work and its concepts with native Workspace actions."

@@ -1130,6 +1130,358 @@ contract page, reused because the fixture needs some page object."
   (loop with start = 0 for position = (search needle haystack :start2 start)
         while position count t do (setf start (1+ position))))
 
+;;;; FedWiki-authored Work
+;;
+;; The fixture pages were written by wiki-server 0.26.2 (Federated Wiki
+;; 0.39.2) through its ordinary create action on an isolated scratch site,
+;; 127.0.0.1:3998, and copied from its page store unchanged. work-breakdown
+;; authors the Work of Work Breakdown.html as work-topic and
+;; work-relationship Items; work-duplicates states one relationship twice.
+;; No check here runs a server, fetches, writes or requests anything.
+
+(defparameter *fedwiki-site* "127.0.0.1:3998"
+  "The site the fixture pages were written on, as their observations name it.")
+
+(defun fedwiki-fixture-path (slug)
+  (asdf:system-relative-pathname
+   "dreyeck" (format nil "dreyeck/tests/fixtures/work-fedwiki-site/pages/~A" slug)))
+
+(defun fedwiki-fixture (slug)
+  "The fixture page SLUG, parsed as HyperBook's FedWiki reader parses a page."
+  (with-open-file (in (fedwiki-fixture-path slug) :external-format :utf-8)
+    (shasht:read-json in)))
+
+(defun fedwiki-projection (page slug &rest keys)
+  (apply #'work:project-fedwiki-work page :site *fedwiki-site* :slug slug keys))
+
+(defun fedwiki-items (page type)
+  (remove type (coerce (gethash "story" page) 'list)
+          :key (lambda (item) (gethash "type" item)) :test-not #'equal))
+
+(defun fedwiki-topic-item (page topic-id)
+  (find topic-id (fedwiki-items page "work-topic")
+        :key (lambda (item) (gethash "topic" item)) :test #'equal))
+
+(defun add-fedwiki-item (page item)
+  (setf (gethash "story" page) (concatenate 'vector (gethash "story" page) (vector item)))
+  page)
+
+(defun with-fedwiki-requires-contract (page)
+  "PAGE plus a second Relation Contract Item, work:relation/requires, as
+WITH-FIXTURE-REQUIRES-CONTRACT adds one to the HTML fixture, reusing the
+informs contract page."
+  (let ((contract (alexandria:copy-hash-table (fedwiki-topic-item page *informs*))))
+    (setf (gethash "id" contract) "0f1e2d3c4b5a6978"
+          (gethash "topic" contract) "work:relation/requires"
+          (gethash "label" contract) "requires"
+          (gethash "status" contract) "test fixture")
+    (add-fedwiki-item page contract)))
+
+(defun topic-row (topic)
+  "What a Topic says, its object compared by identity."
+  (let ((properties (tm:topicmap-topic-view-properties-of topic)))
+    (list (tm:topicmap-topic-id-of topic) (tm:topicmap-topic-label-of topic)
+          (tm:topicmap-topic-type-of topic) (getf properties :kind) (getf properties :status)
+          (getf properties :x) (getf properties :y) (tm:topicmap-topic-object-of topic))))
+
+(defun association-row (association)
+  "What an Association says, its contract as the contract Topic says it."
+  (let ((contract (getf (tm:topicmap-association-properties-of association) :relation-contract)))
+    (list (tm:topicmap-association-id-of association) (tm:topicmap-association-from-of association)
+          (tm:topicmap-association-type-of association) (tm:topicmap-association-to-of association)
+          (and contract (list (tm:topicmap-topic-id-of contract) (tm:topicmap-topic-label-of contract)
+                              (tm:topicmap-topic-object-of contract)))
+          (tm:topicmap-association-relation-label association))))
+
+(defun check-fedwiki-work-projection ()
+  "The Work of Work Breakdown.html, authored as FedWiki Items, projects to the
+same Topics, Associations, contracts and uses. Only the occurrences differ."
+  (let ((source (work-breakdown-source))
+        (page (fedwiki-fixture "work-breakdown")))
+    (dolist (areas-only '(nil t))
+      (let* ((html (fixture-projection source :areas-only areas-only))
+             (fedwiki (fedwiki-projection page "work-breakdown" :areas-only areas-only))
+             (html-associations (tm:topicmap-projection-associations-of html))
+             (associations (tm:topicmap-projection-associations-of fedwiki)))
+        (assert (= (if areas-only 7 13) (length (tm:topicmap-projection-topics-of fedwiki))))
+        (assert (= (if areas-only 7 14) (length associations)))
+        (assert (equal (mapcar #'topic-row (tm:topicmap-projection-topics-of html))
+                       (mapcar #'topic-row (tm:topicmap-projection-topics-of fedwiki))))
+        (assert (equal (mapcar #'association-row html-associations)
+                       (mapcar #'association-row associations)))
+        (assert (equal (mapcar #'tm:topicmap-association-id-of (work:relation-uses html *informs*))
+                       (mapcar #'tm:topicmap-association-id-of (work:relation-uses fedwiki *informs*))))
+        ;; Each projection resolves a reference to its own contract Topic.
+        (unless areas-only
+          (dolist (projection (list html fedwiki))
+            (let ((contract (tm:topicmap-projection-topic-by-id projection *informs*)))
+              (dolist (association (work:relation-uses projection *informs*))
+                (assert (eq contract (getf (tm:topicmap-association-properties-of association)
+                                           :relation-contract)))))))
+        (assert (every (lambda (association)
+                         (typep (occurrence-of association) 'work:work-relationship-source-occurrence))
+                       html-associations))
+        (assert (every (lambda (association)
+                         (typep (occurrence-of association) 'work:work-fedwiki-item-observation))
+                       associations))))
+    ;; Each Association observes its own Item: the address, and the whole
+    ;; Item as a copy.
+    (let ((observations (mapcar #'occurrence-of
+                                (tm:topicmap-projection-associations-of
+                                 (fedwiki-projection page "work-breakdown")))))
+      (loop for observation in observations
+            for item in (fedwiki-items page "work-relationship")
+            do (assert (equal *fedwiki-site* (work:fedwiki-item-observation-site observation)))
+               (assert (equal "work-breakdown" (work:fedwiki-item-observation-slug observation)))
+               (assert (equal (gethash "id" item) (work:fedwiki-item-observation-item-id observation)))
+               (assert (work::%json-equal item (work:fedwiki-item-observation-item observation)))
+               (assert (not (eq item (work:fedwiki-item-observation-item observation)))))
+      (assert (= 14 (length (remove-duplicates (mapcar #'work:fedwiki-item-observation-item-id observations)
+                                               :test #'equal)))))
+    ;; The comparison sees one changed label.
+    (let ((renamed (fedwiki-fixture "work-breakdown")))
+      (setf (gethash "label" (fedwiki-topic-item renamed "interaction")) "Interaction, renamed")
+      (assert (not (equal (mapcar #'topic-row (tm:topicmap-projection-topics-of (fixture-projection source)))
+                          (mapcar #'topic-row (tm:topicmap-projection-topics-of
+                                               (fedwiki-projection renamed "work-breakdown")))))))))
+
+(defun check-fedwiki-relation-contract-integrity ()
+  "The contract rules hold for Items as for anchors: a missing, duplicate or
+non-relation contract Topic is refused, and a new label keeps every ID."
+  (flet ((variant (edit)
+           (let ((page (fedwiki-fixture "work-breakdown")))
+             (funcall edit page)
+             page))
+         (refused (page &rest keys)
+           (handler-case (progn (apply #'fedwiki-projection page "work-breakdown" keys) nil)
+             (work:relation-contract-reference-error (condition) condition))))
+    (assert (null (refused (fedwiki-fixture "work-breakdown"))))
+    (dolist (areas-only '(nil t))
+      (let ((condition (refused (variant (lambda (page)
+                                           (setf (gethash "topic" (fedwiki-topic-item page *informs*))
+                                                 "work:relation/absent")))
+                                :areas-only areas-only)))
+        (assert condition)
+        (assert (null (work::matches-of condition)))))
+    (let ((condition (refused (variant (lambda (page)
+                                         (let ((copy (alexandria:copy-hash-table
+                                                      (fedwiki-topic-item page *informs*))))
+                                           (setf (gethash "id" copy) "0f1e2d3c4b5a6978")
+                                           (add-fedwiki-item page copy)))))))
+      (assert condition)
+      (assert (= 2 (length (work::matches-of condition)))))
+    (let ((condition (refused (variant (lambda (page)
+                                         (setf (gethash "kind" (fedwiki-topic-item page *informs*))
+                                               "concept"))))))
+      (assert condition)
+      (assert (search "\"concept\"" (princ-to-string condition))))
+    (let ((baseline (fedwiki-projection (fedwiki-fixture "work-breakdown") "work-breakdown"))
+          (renamed (fedwiki-projection
+                    (variant (lambda (page)
+                               (setf (gethash "label" (fedwiki-topic-item page *informs*))
+                                     "provides input to")))
+                    "work-breakdown")))
+      (assert (equal (association-ids baseline) (association-ids renamed)))
+      (dolist (association (informs-associations renamed))
+        (assert (equal "provides input to" (tm:topicmap-association-relation-label association)))))))
+
+(defun check-fedwiki-work-consumers ()
+  "Existing read-only consumers take the FedWiki-derived projection as they
+take the HTML one: uses, contract resolution and inspection, the native
+Topicmap, TALA input and its interactive references."
+  (let* ((page (fedwiki-fixture "work-breakdown"))
+         (projection (fedwiki-projection page "work-breakdown"))
+         (contract (tm:topicmap-projection-topic-by-id projection *informs*))
+         (informs (informs-associations projection)))
+    (assert (equal informs (work:relation-uses projection *informs*)))
+    (assert (eq (work:work-page "Relation Contract: informs") (tm:topicmap-topic-object-of contract)))
+    (dolist (association informs)
+      (assert (eq contract (getf (tm:topicmap-association-properties-of association) :relation-contract)))
+      (assert (eq contract (m:operation-inspectable-object (w:inspect-relation-contract-operation)
+                                                           (association-target association)))))
+    (let* ((workspace (tm:make-topicmap-workspace projection "operations"))
+           (html (views:view-html (find "Topicmap" (views:all-views workspace)
+                                        :key #'views:view-title :test #'equal))))
+      (dolist (association informs)
+        (let ((start (search (format nil "data-association-id='~A'"
+                                     (tm:topicmap-association-id-of association))
+                             html)))
+          (assert start)
+          (assert (search ">informs</text>" (subseq html start (search "</g>" html :start2 start))))))
+      (assert (not (search "work:relation/informs</text>" html)))
+      (assert (= 2 (count-matches "<tt>informs</tt>" html))))
+    (let* ((input (tala:projection-tala-input (fedwiki-projection page "work-breakdown" :areas-only t)))
+           (rendering (tala:run-tala input))
+           (areas (tala:tala-input-projection input))
+           (view (interactive-tala-view rendering))
+           (dom (check-reference-groups view rendering)))
+      (assert (string= (tala:tala-input-source
+                        (tala:projection-tala-input (fixture-projection (work-breakdown-source) :areas-only t)))
+                       (tala:tala-input-source input)))
+      (dolist (association (informs-associations areas))
+        (assert (equal "informs" (group-text (reference-group view dom association))))))))
+
+(defun check-fedwiki-relation-change-request ()
+  "One semantic request from either occurrence form: the same operation,
+observed relation and contracts, each request keeping its own occurrence.
+The refusals that do not depend on the representation are the same."
+  (let* ((source (with-fixture-requires-contract (work-breakdown-source)))
+         (page (with-fedwiki-requires-contract (fedwiki-fixture "work-breakdown")))
+         (html-a1 (association-between (fixture-projection source) "interaction" "operations"))
+         (a1 (association-between (fedwiki-projection page "work-breakdown") "interaction" "operations"))
+         (observation (occurrence-of a1))
+         (html-request (work:request-relation-change html-a1 "work:relation/requires" :current source))
+         (request (work:request-relation-change a1 "work:relation/requires" :current page)))
+    ;; The same request, semantically.
+    (assert (eq (work:relation-change-operation html-request) (work:relation-change-operation request)))
+    (assert (equal "work:relation/informs" (work:relation-change-observed-relation request)))
+    (assert (equal (work:relation-change-observed-relation html-request)
+                   (work:relation-change-observed-relation request)))
+    (dolist (reader (list #'work:relation-change-observed-contract #'work:relation-change-proposed-contract))
+      (flet ((says (topic)
+               (list (tm:topicmap-topic-id-of topic) (tm:topicmap-topic-label-of topic)
+                     (getf (tm:topicmap-topic-view-properties-of topic) :kind)
+                     (tm:topicmap-topic-object-of topic))))
+        (assert (equal (says (funcall reader html-request)) (says (funcall reader request))))
+        (assert (not (eq (funcall reader html-request) (funcall reader request))))))
+    (assert (equal "work:relation/requires" (work:relation-change-proposed-relation request)))
+    ;; Distinct evidence, held rather than copied.
+    (assert (eq a1 (work:relation-change-association request)))
+    (assert (eq observation (work:relation-change-occurrence request)))
+    (assert (typep (work:relation-change-occurrence html-request) 'work:work-relationship-source-occurrence))
+    (assert (typep observation 'work:work-fedwiki-item-observation))
+    ;; Printed and shown for both.
+    (assert (search "occurrence 1" (prin1-to-string html-request)))
+    (assert (search (format nil "item ~A" (work:fedwiki-item-observation-item-id observation))
+                    (prin1-to-string request)))
+    (flet ((view-of (request)
+             (let ((view (find "Relation change request" (views:all-views request)
+                               :key #'views:view-title :test #'equal)))
+               (values (views:view-html view) (mapcar #'cdr (views:view-references view))))))
+      ;; The request in the same words for both, before any evidence.
+      (dolist (each (list html-request request))
+        (let* ((html (view-of each))
+               (evidence (search "Authored source occurrence" html)))
+          (assert evidence)
+          (dolist (text '("Operation" "Projected Association" "Observed Relation Contract"
+                          "Proposed Relation Contract" "Executed" "Proposed change"))
+            (assert (< (search text html) evidence) () "~S is not above the evidence." text))))
+      (multiple-value-bind (html objects) (view-of request)
+        (dolist (text (list "Site" "Page slug" "Item id" *fedwiki-site* "work-breakdown"
+                            (work:fedwiki-item-observation-item-id observation) "work-relationship"
+                            "Authored Item, as observed on the page"))
+          (assert (search text html) () "The FedWiki request view lacks ~S." text))
+        (assert (null (search "&lt;li" html)))
+        (dolist (object (list a1 observation (work:relation-change-proposed-contract request)
+                              (work:relation-change-observed-contract request)))
+          (assert (member object objects :test #'eq))))
+      (let ((html (view-of html-request)))
+        (assert (search "&lt;li data-from=&quot;interaction&quot;" html))
+        (assert (null (search "Item id" html)))))
+    ;; Refusals.
+    (flet ((refused (association proposed current fragment &optional cause-type)
+             (let ((condition (change-refusal association proposed current)))
+               (assert (search fragment (work:relation-change-refused-reason condition)) ()
+                       "Refusal ~S lacks ~S." (princ-to-string condition) fragment)
+               (when cause-type
+                 (assert (typep (work:relation-change-refused-cause condition) cause-type))))))
+      (refused a1 "work:relation/informs" page "already uses")
+      (refused a1 "work:relation/absent" page "not a Relation Contract" 'work:relation-contract-reference-error)
+      (refused (tm:make-topicmap-association :id "work:tampered" :type "work:relation/requires"
+                                             :from "interaction" :to "operations"
+                                             :properties (list :source-occurrence observation))
+               "work:relation/informs" page "the Association says")
+      ;; Stale: the Item changed, is gone, or occurs twice.
+      (dolist (edit (list (lambda (story item) (setf (gethash "text" item) "Edited.") story)
+                          (lambda (story item) (remove item story))
+                          (lambda (story item)
+                            (concatenate 'vector story (vector (alexandria:copy-hash-table item))))))
+        (let* ((changed (with-fedwiki-requires-contract (fedwiki-fixture "work-breakdown")))
+               (item (find (work:fedwiki-item-observation-item-id observation) (gethash "story" changed)
+                           :key (lambda (item) (gethash "id" item)) :test #'equal)))
+          (setf (gethash "story" changed) (funcall edit (gethash "story" changed) item))
+          (refused a1 "work:relation/requires" changed "stale" 'work:stale-work-relationship-occurrence)))
+      ;; A FedWiki page is given, never fetched.
+      (assert (search "not given"
+                      (work:relation-change-refused-reason
+                       (handler-case (progn (work:request-relation-change a1 "work:relation/requires")
+                                            (error "Expected a refusal."))
+                         (work:relation-change-refused (condition) condition))))))))
+
+(defun check-fedwiki-duplicate-statements ()
+  "Two Items stating one relationship are two observations, and a request
+from each keeps its own. Their Associations share one derived ID, which TALA
+refuses: an open question of Association identity, recorded, not answered."
+  (let* ((page (fedwiki-fixture "work-duplicates"))
+         (items (fedwiki-items page "work-relationship"))
+         (twins (associations-between (fedwiki-projection page "work-duplicates")
+                                      "interaction" "operations")))
+    (assert (= 2 (length items) (length twins)))
+    (destructuring-bind (a1 a2) twins
+      (let ((o1 (occurrence-of a1)) (o2 (occurrence-of a2)))
+        ;; Two authored statements...
+        (assert (not (eq o1 o2)))
+        (assert (equal (mapcar (lambda (item) (gethash "id" item)) items)
+                       (mapcar #'work:fedwiki-item-observation-item-id (list o1 o2))))
+        (assert (not (equal (work:fedwiki-item-observation-item-id o1)
+                            (work:fedwiki-item-observation-item-id o2))))
+        (assert (eql 0 (search "A1:" (gethash "text" (work:fedwiki-item-observation-item o1)))))
+        (assert (eql 0 (search "A2:" (gethash "text" (work:fedwiki-item-observation-item o2)))))
+        ;; ...of one relationship, with one derived ID.
+        (assert (equal (association-row a1) (association-row a2)))
+        (assert (equal (tm:topicmap-association-id-of a1) (tm:topicmap-association-id-of a2)))
+        ;; Each request keeps its own observation.
+        (let ((r1 (work:request-relation-change a1 "work:relation/requires" :current page))
+              (r2 (work:request-relation-change a2 "work:relation/requires" :current page)))
+          (assert (eq o1 (work:relation-change-occurrence r1)))
+          (assert (eq o2 (work:relation-change-occurrence r2)))
+          (assert (eq a2 (work:relation-change-association r2))))
+        ;; A1 is found by its item id: an edit to A2 leaves it current, an
+        ;; edit to A1 does not.
+        (flet ((edited (observation)
+                 (let ((changed (fedwiki-fixture "work-duplicates")))
+                   (setf (gethash "text" (find (work:fedwiki-item-observation-item-id observation)
+                                               (fedwiki-items changed "work-relationship")
+                                               :key (lambda (item) (gethash "id" item)) :test #'equal))
+                         "Edited.")
+                   changed)))
+          (assert (eq o1 (work:relation-change-occurrence
+                          (work:request-relation-change a1 "work:relation/requires" :current (edited o2)))))
+          (assert (search "stale" (work:relation-change-refused-reason
+                                   (change-refusal a1 "work:relation/requires" (edited o1))))))
+        ;; The known limitation: TALA takes Associations by derived ID.
+        (assert (search "unique Association IDs"
+                        (handler-case (progn (tala:projection-tala-input
+                                              (fedwiki-projection page "work-duplicates"))
+                                             "accepted")
+                          (error (condition) (princ-to-string condition)))))))))
+
+(defun check-fedwiki-work ()
+  "FedWiki-authored Work, read side only. Every check reads fixture pages;
+none writes, fetches or makes an Operation request, and Work reading does
+not depend on the authoring runtime."
+  (let ((fixtures (mapcar (lambda (slug) (alexandria:read-file-into-byte-vector (fedwiki-fixture-path slug)))
+                          '("work-breakdown" "work-duplicates")))
+        (pages (work-page-sources))
+        (requests (hash-table-count
+                   (symbol-value (find-symbol "*REQUESTS*" "DREYECK/GESTURE/OPERATION-REQUEST")))))
+    (check-fedwiki-work-projection)
+    (check-fedwiki-relation-contract-integrity)
+    (check-fedwiki-work-consumers)
+    (check-fedwiki-relation-change-request)
+    (check-fedwiki-duplicate-statements)
+    (assert (equalp fixtures (mapcar (lambda (slug)
+                                       (alexandria:read-file-into-byte-vector (fedwiki-fixture-path slug)))
+                                     '("work-breakdown" "work-duplicates"))))
+    (assert (equal pages (work-page-sources)))
+    (assert (= requests (hash-table-count
+                         (symbol-value (find-symbol "*REQUESTS*" "DREYECK/GESTURE/OPERATION-REQUEST")))))
+    ;; The closure check can see the authoring runtime where it is a dependency.
+    (assert (member "dreyeck/workflow/authoring"
+                    (system-dependency-names "dreyeck/gesture/operation-request/authoring") :test #'equal))
+    (assert (not (member "dreyeck/workflow/authoring" (system-dependency-names "dreyeck/work/reading")
+                         :test #'equal)))))
+
 (defun run-tests ()
   (check-work-projection)
   (check-pages-and-example)
@@ -1144,5 +1496,6 @@ contract page, reused because the fixture needs some page object."
   (check-hand-shaped-traces)
   (check-work-relationship-occurrences)
   (check-relation-change-request)
-  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect).~%")
+  (check-fedwiki-work)
+  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only).~%")
   t)

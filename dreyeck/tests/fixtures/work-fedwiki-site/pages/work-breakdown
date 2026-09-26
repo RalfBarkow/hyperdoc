@@ -1,0 +1,537 @@
+{
+  "title": "Work Breakdown",
+  "story": [
+    {
+      "id": "a2ab1166d7edf4ca",
+      "type": "paragraph",
+      "text": "This is the current work on HyperDoc, organized inside HyperDoc. The seven areas are questions and work boundaries, not seven implemented features."
+    },
+    {
+      "id": "bd5b24afa1f9a152",
+      "type": "html",
+      "text": "<h2>Areas, current work and concepts</h2>"
+    },
+    {
+      "id": "ee58f3a3ad92db7e",
+      "type": "work-topic",
+      "topic": "interaction",
+      "label": "Interaction",
+      "kind": "area",
+      "status": "prototype",
+      "page": "Interaction"
+    },
+    {
+      "id": "7e16f375cb09330c",
+      "type": "work-topic",
+      "topic": "operations",
+      "label": "Operations and change",
+      "kind": "area",
+      "status": "open",
+      "page": "Operations and Change"
+    },
+    {
+      "id": "8c4e1b0839b2e090",
+      "type": "work-topic",
+      "topic": "connect",
+      "label": "Connect / Associations",
+      "kind": "area",
+      "status": "open",
+      "page": "Connect and Associations"
+    },
+    {
+      "id": "85a95da6f2930aa3",
+      "type": "work-topic",
+      "topic": "state",
+      "label": "State and persistence",
+      "kind": "area",
+      "status": "open",
+      "page": "State and Persistence"
+    },
+    {
+      "id": "971e8a0c6b8b7cb6",
+      "type": "work-topic",
+      "topic": "dogfooding",
+      "label": "HyperDoc dogfooding",
+      "kind": "area",
+      "status": "in use",
+      "page": "HyperDoc Dogfooding"
+    },
+    {
+      "id": "ad38ea9bf2f7c959",
+      "type": "work-topic",
+      "topic": "corpus",
+      "label": "D2 example corpus",
+      "kind": "area",
+      "status": "one new example",
+      "page": "D2 Corpus"
+    },
+    {
+      "id": "7478d62aaf720fd0",
+      "type": "work-topic",
+      "topic": "planning",
+      "label": "Planning / SHOP3",
+      "kind": "area",
+      "status": "experiment",
+      "page": "Planning with SHOP3"
+    },
+    {
+      "id": "390a40b3b9325a37",
+      "type": "work-topic",
+      "topic": "connections-example",
+      "label": "Connections example",
+      "kind": "work item",
+      "status": "complete",
+      "page": "D2 Connections"
+    },
+    {
+      "id": "162107d86fbbd509",
+      "type": "work-topic",
+      "topic": "d2",
+      "label": "D2",
+      "kind": "concept",
+      "status": "inventory",
+      "page": "D2 Corpus"
+    },
+    {
+      "id": "64109c88971fe0e0",
+      "type": "work-topic",
+      "topic": "connection",
+      "label": "Connection",
+      "kind": "concept",
+      "status": "demonstrated",
+      "page": "D2 Connections"
+    },
+    {
+      "id": "f90e88232194dcf9",
+      "type": "work-topic",
+      "topic": "association",
+      "label": "Association",
+      "kind": "concept",
+      "status": "question",
+      "page": "Connect and Associations"
+    },
+    {
+      "id": "22a6f2fa61b7bbb8",
+      "type": "work-topic",
+      "topic": "topicmap",
+      "label": "Topicmap",
+      "kind": "concept",
+      "status": "existing",
+      "page": "Reading TALA as a Layout Layer",
+      "hyperbook": "dreyeck/topicmap/tala/reading"
+    },
+    {
+      "id": "95e5a3fcb09ca1c3",
+      "type": "html",
+      "text": "<h2>Relation contracts</h2>"
+    },
+    {
+      "id": "8f8f7889107f1307",
+      "type": "paragraph",
+      "text": "A relation written work:relation/… refers to the one Topic below with that ID. The Topic ID is the contract's identity; the label is what readers see; the linked page states what the relation asserts."
+    },
+    {
+      "id": "9510e215a696c184",
+      "type": "work-topic",
+      "topic": "work:relation/informs",
+      "label": "informs",
+      "kind": "relation",
+      "status": "draft",
+      "page": "Relation Contract: informs"
+    },
+    {
+      "id": "1019958432cb160b",
+      "type": "html",
+      "text": "<h2>Dependencies and relationships</h2>"
+    },
+    {
+      "id": "f0d1d4dd5c4fa17d",
+      "type": "paragraph",
+      "text": "The arrows below express documented dependencies or questions. They do not authorize execution."
+    },
+    {
+      "id": "a1442a4a124e0460",
+      "type": "work-relationship",
+      "from": "interaction",
+      "relation": "work:relation/informs",
+      "to": "operations",
+      "text": "Interaction → Operations and change: informs."
+    },
+    {
+      "id": "af8b85c1c8e07d3e",
+      "type": "work-relationship",
+      "from": "operations",
+      "relation": "work:relation/informs",
+      "to": "connect",
+      "text": "Operations and change → Connect / Associations: informs."
+    },
+    {
+      "id": "63ea23bb9940adb8",
+      "type": "work-relationship",
+      "from": "operations",
+      "relation": "requires",
+      "to": "state",
+      "text": "Operations and change → State and persistence: requires."
+    },
+    {
+      "id": "54af8cced0b496df",
+      "type": "work-relationship",
+      "from": "dogfooding",
+      "relation": "develops",
+      "to": "corpus",
+      "text": "HyperDoc dogfooding → D2 example corpus: develops."
+    },
+    {
+      "id": "5a7ae853a1c1bcc8",
+      "type": "work-relationship",
+      "from": "planning",
+      "relation": "models",
+      "to": "dogfooding",
+      "text": "Planning / SHOP3 → HyperDoc dogfooding: models."
+    },
+    {
+      "id": "a3f3505ef7ef3ac1",
+      "type": "work-relationship",
+      "from": "planning",
+      "relation": "models",
+      "to": "corpus",
+      "text": "Planning / SHOP3 → D2 example corpus: models."
+    },
+    {
+      "id": "75994682677e5fa5",
+      "type": "work-relationship",
+      "from": "planning",
+      "relation": "observes",
+      "to": "operations",
+      "text": "Planning / SHOP3 → Operations and change: observes."
+    },
+    {
+      "id": "f0d422c2e007383a",
+      "type": "work-relationship",
+      "from": "dogfooding",
+      "relation": "current-work",
+      "to": "connections-example",
+      "text": "HyperDoc dogfooding → Connections example: current-work."
+    },
+    {
+      "id": "b7c6a415451dbb96",
+      "type": "work-relationship",
+      "from": "corpus",
+      "relation": "contains",
+      "to": "connections-example",
+      "text": "D2 example corpus → Connections example: contains."
+    },
+    {
+      "id": "2bbbd2ce3043cf97",
+      "type": "work-relationship",
+      "from": "connections-example",
+      "relation": "uses",
+      "to": "d2",
+      "text": "Connections example → D2: uses."
+    },
+    {
+      "id": "a5777e91fd7949ed",
+      "type": "work-relationship",
+      "from": "connections-example",
+      "relation": "demonstrates",
+      "to": "connection",
+      "text": "Connections example → Connection: demonstrates."
+    },
+    {
+      "id": "512ae81034f3fd7b",
+      "type": "work-relationship",
+      "from": "connections-example",
+      "relation": "compares-with",
+      "to": "association",
+      "text": "Connections example → Association: compares-with."
+    },
+    {
+      "id": "7d87e4ea8fafc741",
+      "type": "work-relationship",
+      "from": "connections-example",
+      "relation": "raises-question-for",
+      "to": "connect",
+      "text": "Connections example → Connect / Associations: raises-question-for."
+    },
+    {
+      "id": "17861051afc391c0",
+      "type": "work-relationship",
+      "from": "connections-example",
+      "relation": "is-related-in",
+      "to": "topicmap",
+      "text": "Connections example → Topicmap: is-related-in."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "id": "b1d8fa7a7261bd88",
+      "item": {
+        "title": "Work Breakdown",
+        "story": [
+          {
+            "id": "a2ab1166d7edf4ca",
+            "type": "paragraph",
+            "text": "This is the current work on HyperDoc, organized inside HyperDoc. The seven areas are questions and work boundaries, not seven implemented features."
+          },
+          {
+            "id": "bd5b24afa1f9a152",
+            "type": "html",
+            "text": "<h2>Areas, current work and concepts</h2>"
+          },
+          {
+            "id": "ee58f3a3ad92db7e",
+            "type": "work-topic",
+            "topic": "interaction",
+            "label": "Interaction",
+            "kind": "area",
+            "status": "prototype",
+            "page": "Interaction"
+          },
+          {
+            "id": "7e16f375cb09330c",
+            "type": "work-topic",
+            "topic": "operations",
+            "label": "Operations and change",
+            "kind": "area",
+            "status": "open",
+            "page": "Operations and Change"
+          },
+          {
+            "id": "8c4e1b0839b2e090",
+            "type": "work-topic",
+            "topic": "connect",
+            "label": "Connect / Associations",
+            "kind": "area",
+            "status": "open",
+            "page": "Connect and Associations"
+          },
+          {
+            "id": "85a95da6f2930aa3",
+            "type": "work-topic",
+            "topic": "state",
+            "label": "State and persistence",
+            "kind": "area",
+            "status": "open",
+            "page": "State and Persistence"
+          },
+          {
+            "id": "971e8a0c6b8b7cb6",
+            "type": "work-topic",
+            "topic": "dogfooding",
+            "label": "HyperDoc dogfooding",
+            "kind": "area",
+            "status": "in use",
+            "page": "HyperDoc Dogfooding"
+          },
+          {
+            "id": "ad38ea9bf2f7c959",
+            "type": "work-topic",
+            "topic": "corpus",
+            "label": "D2 example corpus",
+            "kind": "area",
+            "status": "one new example",
+            "page": "D2 Corpus"
+          },
+          {
+            "id": "7478d62aaf720fd0",
+            "type": "work-topic",
+            "topic": "planning",
+            "label": "Planning / SHOP3",
+            "kind": "area",
+            "status": "experiment",
+            "page": "Planning with SHOP3"
+          },
+          {
+            "id": "390a40b3b9325a37",
+            "type": "work-topic",
+            "topic": "connections-example",
+            "label": "Connections example",
+            "kind": "work item",
+            "status": "complete",
+            "page": "D2 Connections"
+          },
+          {
+            "id": "162107d86fbbd509",
+            "type": "work-topic",
+            "topic": "d2",
+            "label": "D2",
+            "kind": "concept",
+            "status": "inventory",
+            "page": "D2 Corpus"
+          },
+          {
+            "id": "64109c88971fe0e0",
+            "type": "work-topic",
+            "topic": "connection",
+            "label": "Connection",
+            "kind": "concept",
+            "status": "demonstrated",
+            "page": "D2 Connections"
+          },
+          {
+            "id": "f90e88232194dcf9",
+            "type": "work-topic",
+            "topic": "association",
+            "label": "Association",
+            "kind": "concept",
+            "status": "question",
+            "page": "Connect and Associations"
+          },
+          {
+            "id": "22a6f2fa61b7bbb8",
+            "type": "work-topic",
+            "topic": "topicmap",
+            "label": "Topicmap",
+            "kind": "concept",
+            "status": "existing",
+            "page": "Reading TALA as a Layout Layer",
+            "hyperbook": "dreyeck/topicmap/tala/reading"
+          },
+          {
+            "id": "95e5a3fcb09ca1c3",
+            "type": "html",
+            "text": "<h2>Relation contracts</h2>"
+          },
+          {
+            "id": "8f8f7889107f1307",
+            "type": "paragraph",
+            "text": "A relation written work:relation/… refers to the one Topic below with that ID. The Topic ID is the contract's identity; the label is what readers see; the linked page states what the relation asserts."
+          },
+          {
+            "id": "9510e215a696c184",
+            "type": "work-topic",
+            "topic": "work:relation/informs",
+            "label": "informs",
+            "kind": "relation",
+            "status": "draft",
+            "page": "Relation Contract: informs"
+          },
+          {
+            "id": "1019958432cb160b",
+            "type": "html",
+            "text": "<h2>Dependencies and relationships</h2>"
+          },
+          {
+            "id": "f0d1d4dd5c4fa17d",
+            "type": "paragraph",
+            "text": "The arrows below express documented dependencies or questions. They do not authorize execution."
+          },
+          {
+            "id": "a1442a4a124e0460",
+            "type": "work-relationship",
+            "from": "interaction",
+            "relation": "work:relation/informs",
+            "to": "operations",
+            "text": "Interaction → Operations and change: informs."
+          },
+          {
+            "id": "af8b85c1c8e07d3e",
+            "type": "work-relationship",
+            "from": "operations",
+            "relation": "work:relation/informs",
+            "to": "connect",
+            "text": "Operations and change → Connect / Associations: informs."
+          },
+          {
+            "id": "63ea23bb9940adb8",
+            "type": "work-relationship",
+            "from": "operations",
+            "relation": "requires",
+            "to": "state",
+            "text": "Operations and change → State and persistence: requires."
+          },
+          {
+            "id": "54af8cced0b496df",
+            "type": "work-relationship",
+            "from": "dogfooding",
+            "relation": "develops",
+            "to": "corpus",
+            "text": "HyperDoc dogfooding → D2 example corpus: develops."
+          },
+          {
+            "id": "5a7ae853a1c1bcc8",
+            "type": "work-relationship",
+            "from": "planning",
+            "relation": "models",
+            "to": "dogfooding",
+            "text": "Planning / SHOP3 → HyperDoc dogfooding: models."
+          },
+          {
+            "id": "a3f3505ef7ef3ac1",
+            "type": "work-relationship",
+            "from": "planning",
+            "relation": "models",
+            "to": "corpus",
+            "text": "Planning / SHOP3 → D2 example corpus: models."
+          },
+          {
+            "id": "75994682677e5fa5",
+            "type": "work-relationship",
+            "from": "planning",
+            "relation": "observes",
+            "to": "operations",
+            "text": "Planning / SHOP3 → Operations and change: observes."
+          },
+          {
+            "id": "f0d422c2e007383a",
+            "type": "work-relationship",
+            "from": "dogfooding",
+            "relation": "current-work",
+            "to": "connections-example",
+            "text": "HyperDoc dogfooding → Connections example: current-work."
+          },
+          {
+            "id": "b7c6a415451dbb96",
+            "type": "work-relationship",
+            "from": "corpus",
+            "relation": "contains",
+            "to": "connections-example",
+            "text": "D2 example corpus → Connections example: contains."
+          },
+          {
+            "id": "2bbbd2ce3043cf97",
+            "type": "work-relationship",
+            "from": "connections-example",
+            "relation": "uses",
+            "to": "d2",
+            "text": "Connections example → D2: uses."
+          },
+          {
+            "id": "a5777e91fd7949ed",
+            "type": "work-relationship",
+            "from": "connections-example",
+            "relation": "demonstrates",
+            "to": "connection",
+            "text": "Connections example → Connection: demonstrates."
+          },
+          {
+            "id": "512ae81034f3fd7b",
+            "type": "work-relationship",
+            "from": "connections-example",
+            "relation": "compares-with",
+            "to": "association",
+            "text": "Connections example → Association: compares-with."
+          },
+          {
+            "id": "7d87e4ea8fafc741",
+            "type": "work-relationship",
+            "from": "connections-example",
+            "relation": "raises-question-for",
+            "to": "connect",
+            "text": "Connections example → Connect / Associations: raises-question-for."
+          },
+          {
+            "id": "17861051afc391c0",
+            "type": "work-relationship",
+            "from": "connections-example",
+            "relation": "is-related-in",
+            "to": "topicmap",
+            "text": "Connections example → Topicmap: is-related-in."
+          }
+        ]
+      },
+      "date": 1790403873311
+    }
+  ]
+}

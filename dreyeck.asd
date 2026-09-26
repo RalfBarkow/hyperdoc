@@ -2206,7 +2206,7 @@
 
 (defsystem "dreyeck/work/reading/tests"
   :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset"
-               "dreyeck/gesture/operation-request")
+               "dreyeck/gesture/operation-request" "shasht")
   :serial t
   :components ((:file "dreyeck/tests/work-reading")
                (:file "dreyeck/tests/work-reading-live"))

@@ -1,0 +1,131 @@
+{
+  "title": "Work Duplicates",
+  "story": [
+    {
+      "id": "7d8b857ab66aca49",
+      "type": "paragraph",
+      "text": "Two authored statements of one Work relationship, and two Relation Contracts. The requires contract links the informs contract page because no requires page exists."
+    },
+    {
+      "id": "a471f03c1640959b",
+      "type": "work-topic",
+      "topic": "interaction",
+      "label": "Interaction",
+      "kind": "area",
+      "status": "prototype",
+      "page": "Interaction"
+    },
+    {
+      "id": "041f120fe8e5c8b5",
+      "type": "work-topic",
+      "topic": "operations",
+      "label": "Operations and change",
+      "kind": "area",
+      "status": "open",
+      "page": "Operations and Change"
+    },
+    {
+      "id": "d15f78d7abc2f688",
+      "type": "work-topic",
+      "topic": "work:relation/informs",
+      "label": "informs",
+      "kind": "relation",
+      "status": "draft",
+      "page": "Relation Contract: informs"
+    },
+    {
+      "id": "6fe5629122d2d20c",
+      "type": "work-topic",
+      "topic": "work:relation/requires",
+      "label": "requires",
+      "kind": "relation",
+      "status": "test fixture",
+      "page": "Relation Contract: informs"
+    },
+    {
+      "id": "5a64cc839f4dbbb8",
+      "type": "work-relationship",
+      "from": "interaction",
+      "relation": "work:relation/informs",
+      "to": "operations",
+      "text": "A1: Interaction → Operations and change: informs."
+    },
+    {
+      "id": "841681c22bf5129c",
+      "type": "work-relationship",
+      "from": "interaction",
+      "relation": "work:relation/informs",
+      "to": "operations",
+      "text": "A2: the same relationship, stated a second time."
+    }
+  ],
+  "journal": [
+    {
+      "type": "create",
+      "id": "74bea334d20d9e6a",
+      "item": {
+        "title": "Work Duplicates",
+        "story": [
+          {
+            "id": "7d8b857ab66aca49",
+            "type": "paragraph",
+            "text": "Two authored statements of one Work relationship, and two Relation Contracts. The requires contract links the informs contract page because no requires page exists."
+          },
+          {
+            "id": "a471f03c1640959b",
+            "type": "work-topic",
+            "topic": "interaction",
+            "label": "Interaction",
+            "kind": "area",
+            "status": "prototype",
+            "page": "Interaction"
+          },
+          {
+            "id": "041f120fe8e5c8b5",
+            "type": "work-topic",
+            "topic": "operations",
+            "label": "Operations and change",
+            "kind": "area",
+            "status": "open",
+            "page": "Operations and Change"
+          },
+          {
+            "id": "d15f78d7abc2f688",
+            "type": "work-topic",
+            "topic": "work:relation/informs",
+            "label": "informs",
+            "kind": "relation",
+            "status": "draft",
+            "page": "Relation Contract: informs"
+          },
+          {
+            "id": "6fe5629122d2d20c",
+            "type": "work-topic",
+            "topic": "work:relation/requires",
+            "label": "requires",
+            "kind": "relation",
+            "status": "test fixture",
+            "page": "Relation Contract: informs"
+          },
+          {
+            "id": "5a64cc839f4dbbb8",
+            "type": "work-relationship",
+            "from": "interaction",
+            "relation": "work:relation/informs",
+            "to": "operations",
+            "text": "A1: Interaction → Operations and change: informs."
+          },
+          {
+            "id": "841681c22bf5129c",
+            "type": "work-relationship",
+            "from": "interaction",
+            "relation": "work:relation/informs",
+            "to": "operations",
+            "text": "A2: the same relationship, stated a second time."
+          }
+        ]
+      },
+      "date": 1790414393393
+    }
+  ]
+}
