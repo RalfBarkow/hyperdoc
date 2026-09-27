@@ -2260,9 +2260,11 @@
 
 (defsystem "dreyeck/work/reading"
   :description "HyperDoc work pages and one complete D2 Connections example"
-  :depends-on ("dreyeck/topicmap/tala/reading" "dreyeck/gesture-binding-witness")
+  :depends-on ("dreyeck/topicmap/tala/reading" "dreyeck/gesture-binding-witness"
+               "dreyeck/inspector/git")
   :serial t
-  :components ((:module "dreyeck/work" :components ((:file "reading")))
+  :components ((:module "dreyeck/work" :components ((:file "reading")
+                                                    (:file "authoring-architecture")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
                  (:static-file "Interaction.html")
@@ -2273,17 +2275,21 @@
                  (:static-file "D2 Corpus.html")
                  (:static-file "Planning with SHOP3.html")
                  (:static-file "D2 Connections.html")
-                 (:static-file "Relation Contract informs.html")))))
+                 (:static-file "Relation Contract informs.html")
+                 (:static-file "Deriving HyperDoc Authoring Constraints.html")))))
 
 (defsystem "dreyeck/work/reading/tests"
   :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset"
-               "dreyeck/gesture/operation-request" "shasht")
+               "dreyeck/gesture/operation-request" "shasht" "hyperbook/server")
   :serial t
   :components ((:file "dreyeck/tests/work-reading")
-               (:file "dreyeck/tests/work-reading-live"))
+               (:file "dreyeck/tests/work-reading-live")
+               (:file "dreyeck/tests/work-authoring-architecture"))
   :perform (test-op (op component)
              (declare (ignore op component))
-             (uiop:symbol-call :dreyeck/work/tests :run-tests)))
+             (uiop:symbol-call :dreyeck/work/tests :run-tests)
+             (uiop:symbol-call :dreyeck/work/authoring-architecture/tests
+                               :run-authoring-architecture-tests)))
 
 (defsystem "dreyeck/work/planning"
   :description "Optional in-memory SHOP3 documentation experiment; no executor"

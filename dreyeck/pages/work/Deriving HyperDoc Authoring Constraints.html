@@ -1,0 +1,175 @@
+<h1>Deriving HyperDoc Authoring Constraints</h1>
+<in-package>dreyeck/work/authoring-architecture</in-package>
+<p><strong>This page uses Fielding's constraint/property method. It does not claim that HyperDoc Authoring currently conforms to REST.</strong></p>
+<p>HyperDoc Authoring is the path by which a signed request may change one Item on one local FedWiki page. This page reads its development as a derivation: each step adds one constraint for a stated requirement, and each constraint is judged by the properties it induces and what it costs. Where a property has been shown by a test, the page says so and names the commit; where it is only intended or inferred, the page says that instead.</p>
+
+<h2>1. Why constraints rather than "a REST API"</h2>
+<p>Using HTTP, JSON or signed requests does not make an architecture RESTful, and having no login session does not make it stateless. HyperDoc Authoring keeps server-held state on purpose: one-time challenges, a principal registry and page locks. Calling it a REST API would be a claim that is not established; naming its constraints and their effects can be checked against evidence.</p>
+
+<h2>2. Fielding's architectural method</h2>
+<p>Reference: FIELDING, Roy Thomas, 2000. <a href="https://ics.uci.edu/~fielding/pubs/dissertation/top.htm">Architectural Styles and the Design of Network-based Software Architectures</a>. Doctoral dissertation, University of California, Irvine. The ideas used here, each with where it is stated:</p>
+<ul><li><strong>Run-time abstraction.</strong> A software architecture abstracts the run-time elements and behavior of a system; the structure of its source code is a different thing (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/software_arch.htm">§1.1</a>). So the run-time view below shows no source files, although source files implement it.</li>
+<li><strong>Elements.</strong> An architecture is a configuration of components, connectors and data (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/software_arch.htm">§1.2, §1.2.1–1.2.3</a>). The run-time view uses those three kinds.</li>
+<li><strong>Constraints induce properties.</strong> Properties are induced by the constraints of an architecture, and a style is a coordinated set of constraints (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/software_arch.htm">§1.4, §1.5</a>); a style is evaluated by the properties it induces, and improving one property can cost another (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/net_arch_styles.htm">§3.1.2</a>).</li>
+<li><strong>Incremental derivation.</strong> Fielding starts from the null style and adds one constraint at a time, examining the effect of each (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm">§5.1, §5.1.1–5.1.8</a>). The derivation below borrows that method, not REST's constraints.</li>
+<li><strong>Anarchic scalability.</strong> At Internet scale, elements must keep working under unanticipated load and when given malformed or maliciously constructed data, and information from outside a trust boundary is untrusted unless authenticated (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/web_arch_domain.htm">§4.1.4.1</a>).</li>
+<li><strong>Intermediaries at boundaries.</strong> Layers let security policies be enforced on data crossing an organizational boundary (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm">§5.1.6</a>); a gateway is an intermediary component imposed by the network or the origin server (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm">§5.2.3</a>). Visibility is the ability of a component to monitor or mediate an interaction between two others (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/net_app_arch.htm">§2.3.5</a>).</li></ul>
+<p>Fielding does not describe HyperDoc or its protocol. Nothing here says that he would endorse these constraints.</p>
+
+<h2>3. Constraint derivation</h2>
+<p><strong>Model, don't draw.</strong> The authored facts on this page are Topics, Associations, labels, kinds, statuses and evidence references: the links and list entries below. There are no coordinates, no SVG and no layout directives. Layout is presentation, and TALA derives it each time from the same Topics and Associations. The <a page="Working on HyperDoc">Work projection</a> reads this page by the rules it uses for <a page="Work Breakdown">Work Breakdown</a>; the views below are selections of that one projection by Topic kind.</p>
+<p>The starting requirement, and seven constraints added in order. For each: the problem it answers, the constraint itself, and what it costs. Its properties and evidence are Associations further down, not prose here.</p>
+<ul><li><a page="Deriving HyperDoc Authoring Constraints" data-topic="public-network-authoring" data-kind="requirement" data-status="planned">Public network authoring</a> — requirement: authoring requests arrive over the public Internet, from clients and through networks the server does not control. Planned; not deployed.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="signed-intent" data-kind="constraint" data-status="production">Signed intent</a>. Requirement: <span data-facet="requirement">a request's authority cannot rest on the channel or on a login session, because whatever relays it may be untrusted.</span> Constraint: <span data-facet="constraint">every authoring request carries one signed envelope naming service, principal, operation, site, page, nonce, validity window and the Keccak-256 digest of the exact body, and the server verifies its secp256k1 signature before acting on any of it.</span> Trade-off: <span data-facet="trade-off">clients must hold and use a private key; one fixed envelope format and signature scheme; how a browser keeps the key is unresolved.</span></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="authenticated-principal" data-kind="constraint" data-status="production">Authenticated principal</a>. Requirement: <span data-facet="requirement">a valid signature says only that some key signed; the server must know who may act.</span> Constraint: <span data-facet="constraint">the envelope's principal must be in a server-held registry, and the signature must verify under one of that principal's registered public keys.</span> Trade-off: <span data-facet="trade-off">enrollment, rotation and recovery of keys become the server's obligations; the registry is not yet durable.</span></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="single-use-freshness" data-kind="constraint" data-status="production">Single-use freshness</a>. Requirement: <span data-facet="requirement">a captured signed request must not be replayable.</span> Constraint: <span data-facet="constraint">each request names a server-issued challenge bound to its principal, and the challenge is consumed atomically, exactly once, before any effect.</span> Trade-off: <span data-facet="trade-off">server-held challenge state and an extra round trip; the interaction is not stateless, and a restart invalidates outstanding challenges.</span></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="bounded-freshness-state" data-kind="constraint" data-status="production">Bounded freshness state</a>. Requirement: <span data-facet="requirement">challenge issuance is reachable by anyone, so allocation that grows with requests lets any requester exhaust server memory.</span> Constraint: <span data-facet="constraint">challenges are allocated only for registered principals, with a fixed limit on outstanding challenges per principal checked under one lock, expired challenges pruned and consumed ones kept only up to a second limit.</span> Trade-off: <span data-facet="trade-off">a principal holds only finitely many simultaneous challenges; anyone who knows a principal's id can occupy them until they expire; old replay diagnostics disappear.</span></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="explicit-authoring-rule" data-kind="constraint" data-status="production">Explicit authoring rule</a>. Requirement: <span data-facet="requirement">knowing who signed does not decide what they may change.</span> Constraint: <span data-facet="constraint">an explicit rule names principal, operation, site and page; a request no rule permits is refused before its challenge is consumed.</span> Trade-off: <span data-facet="trade-off">rules are enumerated and static; there is no delegation and no policy language.</span></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="scoped-capability" data-kind="constraint" data-status="production">Scoped capability</a>. Requirement: <span data-facet="requirement">even a permitted request must not reach beyond the page it names.</span> Constraint: <span data-facet="constraint">from the matched rule the server derives a capability for one configured site root, one validated page slug and the edit action, and the effect layer accepts nothing outside it.</span> Trade-off: <span data-facet="trade-off">only the edit of one Item on an existing page; other FedWiki actions and page creation are outside.</span></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="serialized-verified-effect" data-kind="constraint" data-status="production">Serialized verified effect</a>. Requirement: <span data-facet="requirement">FedWiki's own server can lose concurrent updates, and an effect must not silently overwrite another.</span> Constraint: <span data-facet="constraint">edits of one page are serialized under a page lock, conditioned on the Item the client observed, written through an exclusive temporary file, journalled only when the Item changed and verified by reading the page back.</span> Trade-off: <span data-facet="trade-off">one writer per page at a time within one process; another process or a direct file write is not serialized; nothing is synced to disk, so crash durability is not established.</span></li></ul>
+<p>Status <code>production</code> means committed production source with in-process tests. It says nothing about deployment.</p>
+<p>Each step adds one constraint to what came before:</p>
+<ul><li data-from="public-network-authoring" data-to="signed-intent" data-relation="work:relation/adds-constraint">Public network authoring → Signed intent.</li>
+<li data-from="signed-intent" data-to="authenticated-principal" data-relation="work:relation/adds-constraint">Signed intent → Authenticated principal.</li>
+<li data-from="authenticated-principal" data-to="single-use-freshness" data-relation="work:relation/adds-constraint">Authenticated principal → Single-use freshness.</li>
+<li data-from="single-use-freshness" data-to="bounded-freshness-state" data-relation="work:relation/adds-constraint">Single-use freshness → Bounded freshness state.</li>
+<li data-from="bounded-freshness-state" data-to="explicit-authoring-rule" data-relation="work:relation/adds-constraint">Bounded freshness state → Explicit authoring rule.</li>
+<li data-from="explicit-authoring-rule" data-to="scoped-capability" data-relation="work:relation/adds-constraint">Explicit authoring rule → Scoped capability.</li>
+<li data-from="scoped-capability" data-to="serialized-verified-effect" data-relation="work:relation/adds-constraint">Scoped capability → Serialized verified effect.</li></ul>
+<p>Properties. A property's status is the strength of the claim made for it: <code>demonstrated</code> means a committed test shows it in-process; <code>intended</code> means it is the architectural aim or an inference and has not been measured.</p>
+<ul><li><a page="Deriving HyperDoc Authoring Constraints" data-topic="integrity" data-kind="property" data-status="demonstrated">Integrity of intent</a> — demonstrated: an altered envelope or body is refused.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="interaction-visibility" data-kind="property" data-status="intended">Interaction visibility</a> — intended: the whole intent is in the request, so an intermediary could see what is asked; no intermediary inspects it yet.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="principal-bound-requests" data-kind="property" data-status="demonstrated">Only registered principals act</a> — demonstrated: unknown principals and unregistered keys are refused.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="replay-resistance" data-kind="property" data-status="demonstrated">Replay resistance</a> — demonstrated: replay and concurrent duplicates are refused; exactly one effect.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="bounded-resource-consumption" data-kind="property" data-status="demonstrated">Bounded resource consumption</a> — demonstrated for challenge state.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="anarchic-scalability" data-kind="property" data-status="intended">Anarchic scalability</a> — intended, not directly measured.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="bounded-authorization" data-kind="property" data-status="demonstrated">Bounded authorization</a> — demonstrated: requests outside every rule are refused.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="least-authority" data-kind="property" data-status="demonstrated">Least authority, confined effect</a> — demonstrated: other pages, actions and slugs outside pages/ are refused.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="consistency" data-kind="property" data-status="demonstrated">Consistency: no lost update</a> — demonstrated within one process.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="reliability" data-kind="property" data-status="intended">Reliability of the effect</a> — intended; crash durability is not established.</li></ul>
+<ul><li data-from="signed-intent" data-to="integrity" data-relation="work:relation/induces-demonstrated">Signed intent → Integrity of intent.</li>
+<li data-from="signed-intent" data-to="interaction-visibility" data-relation="work:relation/induces-intended">Signed intent → Interaction visibility.</li>
+<li data-from="authenticated-principal" data-to="principal-bound-requests" data-relation="work:relation/induces-demonstrated">Authenticated principal → Only registered principals act.</li>
+<li data-from="single-use-freshness" data-to="replay-resistance" data-relation="work:relation/induces-demonstrated">Single-use freshness → Replay resistance.</li>
+<li data-from="bounded-freshness-state" data-to="bounded-resource-consumption" data-relation="work:relation/induces-demonstrated">Bounded freshness state → Bounded resource consumption.</li>
+<li data-from="bounded-freshness-state" data-to="anarchic-scalability" data-relation="work:relation/induces-intended">Bounded freshness state → Anarchic scalability.</li>
+<li data-from="explicit-authoring-rule" data-to="bounded-authorization" data-relation="work:relation/induces-demonstrated">Explicit authoring rule → Bounded authorization.</li>
+<li data-from="scoped-capability" data-to="least-authority" data-relation="work:relation/induces-demonstrated">Scoped capability → Least authority, confined effect.</li>
+<li data-from="serialized-verified-effect" data-to="consistency" data-relation="work:relation/induces-demonstrated">Serialized verified effect → Consistency.</li>
+<li data-from="serialized-verified-effect" data-to="reliability" data-relation="work:relation/induces-intended">Serialized verified effect → Reliability.</li></ul>
+<p>The relations are Relation Contracts; each Topic ID is the contract's identity:</p>
+<ul><li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/adds-constraint" data-kind="relation" data-status="draft">adds constraint</a> — the target adds one constraint to the style reached so far.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/induces-demonstrated" data-kind="relation" data-status="draft">induces (demonstrated)</a> — the constraint induces the property, and a committed test shows it.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/induces-intended" data-kind="relation" data-status="draft">induces (intended)</a> — the constraint is meant to induce the property; nothing has measured it.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/evidenced-by" data-kind="relation" data-status="draft">evidenced by</a> — the milestone holds the evidence for the constraint. A commit is provenance, never the constraint's identity.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/realized-by" data-kind="relation" data-status="draft">realized by</a> — the run-time element that enforces the constraint.</li></ul>
+<p>Run the derivation layout. The result's “TALA (interactive)” view makes every shape and edge an Inspector reference to its Topic or Association:</p>
+<source-of-function>derivation-layout</source-of-function>
+<p>The claims those Associations make, joined per constraint. Every entry is a reference to the object itself:</p>
+<html-generator>(render-constraint-claims)</html-generator>
+
+<h2>4. Runtime architecture</h2>
+<p>The run-time elements, with Fielding's element kinds. The HTTP connector exists only in a scratch experiment; nginx's authoring role is planned. nginx may terminate TLS and forward; it does not authenticate the principal, and nothing depends on it doing so.</p>
+<ul><li><a page="Deriving HyperDoc Authoring Constraints" data-topic="signing-client" data-kind="component" data-status="scratch-proven">Signing authoring client</a> — user agent; so far a test signer in a scratch experiment.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="nginx-gateway" data-kind="component" data-status="planned">nginx gateway</a> — intermediary at the network boundary.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="http-connector" data-kind="connector" data-status="scratch-proven">HyperDoc HTTP connector</a> — the server connector that would hand the exact envelope and body to the authority; scratch-proven, not production.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="envelope-verification" data-kind="component" data-status="production">Envelope verification</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="principal-registry" data-kind="component" data-status="production">Principal registry</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="challenge-store" data-kind="component" data-status="production">Challenge store</a> — freshness.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="authoring-rules" data-kind="component" data-status="production">Authoring authorization</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="capability-derivation" data-kind="component" data-status="production">Capability derivation</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="fedwiki-m0" data-kind="component" data-status="production">FedWiki M0 authority</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="signed-envelope" data-kind="data" data-status="production">Signed envelope</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="exact-body" data-kind="data" data-status="production">Exact body</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="expected-item" data-kind="data" data-status="production">Expected Item</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="authenticated-principal-value" data-kind="data" data-status="production">Authenticated principal (value)</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="page-capability" data-kind="data" data-status="production">Page authoring capability</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="fedwiki-action" data-kind="data" data-status="production">Ordinary FedWiki Action</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="fedwiki-page-state" data-kind="data" data-status="production">FedWiki Page / Item / Journal</a></li></ul>
+<ul><li data-from="signing-client" data-to="signed-envelope" data-relation="signs">Signing authoring client → Signed envelope: signs.</li>
+<li data-from="signed-envelope" data-to="exact-body" data-relation="binds digest of">Signed envelope → Exact body: binds digest of.</li>
+<li data-from="exact-body" data-to="expected-item" data-relation="carries">Exact body → Expected Item: carries.</li>
+<li data-from="signing-client" data-to="nginx-gateway" data-relation="HTTPS request">Signing authoring client → nginx gateway: HTTPS request.</li>
+<li data-from="nginx-gateway" data-to="http-connector" data-relation="forwards, does not authenticate">nginx gateway → HyperDoc HTTP connector: forwards, does not authenticate.</li>
+<li data-from="http-connector" data-to="challenge-store" data-relation="issues challenges from">HyperDoc HTTP connector → Challenge store: issues challenges from.</li>
+<li data-from="http-connector" data-to="envelope-verification" data-relation="passes envelope and exact body">HyperDoc HTTP connector → Envelope verification: passes envelope and exact body.</li>
+<li data-from="envelope-verification" data-to="signed-envelope" data-relation="verifies">Envelope verification → Signed envelope: verifies.</li>
+<li data-from="envelope-verification" data-to="principal-registry" data-relation="looks up keys in">Envelope verification → Principal registry: looks up keys in.</li>
+<li data-from="envelope-verification" data-to="authenticated-principal-value" data-relation="yields">Envelope verification → Authenticated principal: yields.</li>
+<li data-from="authenticated-principal-value" data-to="challenge-store" data-relation="holds an unused challenge in">Authenticated principal → Challenge store: holds an unused challenge in.</li>
+<li data-from="authenticated-principal-value" data-to="authoring-rules" data-relation="is checked by">Authenticated principal → Authoring authorization: is checked by.</li>
+<li data-from="authoring-rules" data-to="capability-derivation" data-relation="matched rule">Authoring authorization → Capability derivation: matched rule.</li>
+<li data-from="capability-derivation" data-to="page-capability" data-relation="derives">Capability derivation → Page authoring capability: derives.</li>
+<li data-from="page-capability" data-to="fedwiki-m0" data-relation="authorizes">Page authoring capability → FedWiki M0 authority: authorizes.</li>
+<li data-from="expected-item" data-to="fedwiki-m0" data-relation="conditions">Expected Item → FedWiki M0 authority: conditions.</li>
+<li data-from="fedwiki-m0" data-to="fedwiki-action" data-relation="journals">FedWiki M0 authority → Ordinary FedWiki Action: journals.</li>
+<li data-from="fedwiki-m0" data-to="fedwiki-page-state" data-relation="writes, rereads">FedWiki M0 authority → FedWiki Page / Item / Journal: writes, rereads.</li>
+<li data-from="fedwiki-action" data-to="fedwiki-page-state" data-relation="is appended to">Ordinary FedWiki Action → FedWiki Page / Item / Journal: is appended to.</li></ul>
+<p>Where each constraint is enforced at run time:</p>
+<ul><li data-from="public-network-authoring" data-to="http-connector" data-relation="work:relation/realized-by">Public network authoring → HyperDoc HTTP connector.</li>
+<li data-from="signed-intent" data-to="envelope-verification" data-relation="work:relation/realized-by">Signed intent → Envelope verification.</li>
+<li data-from="authenticated-principal" data-to="principal-registry" data-relation="work:relation/realized-by">Authenticated principal → Principal registry.</li>
+<li data-from="single-use-freshness" data-to="challenge-store" data-relation="work:relation/realized-by">Single-use freshness → Challenge store.</li>
+<li data-from="bounded-freshness-state" data-to="challenge-store" data-relation="work:relation/realized-by">Bounded freshness state → Challenge store.</li>
+<li data-from="explicit-authoring-rule" data-to="authoring-rules" data-relation="work:relation/realized-by">Explicit authoring rule → Authoring authorization.</li>
+<li data-from="scoped-capability" data-to="capability-derivation" data-relation="work:relation/realized-by">Scoped capability → Capability derivation.</li>
+<li data-from="serialized-verified-effect" data-to="fedwiki-m0" data-relation="work:relation/realized-by">Serialized verified effect → FedWiki M0 authority.</li></ul>
+<source-of-function>runtime-layout</source-of-function>
+
+<h2>5. Evidence and implementation status</h2>
+<p>Milestones and their status. A committed milestone stands for its Git commit: inspect it for the changed source and test files. A commit's existence says nothing about deployment.</p>
+<ul><li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/work-read-side" data-kind="milestone" data-status="production" data-commit="c23e36f9dc5e0eb9b98272203a68f1e2f78f951a">c23e36f9 FedWiki-authored Work, read side</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/page-slug-confinement" data-kind="milestone" data-status="production" data-commit="632ae72d70f30715fd5539688a478b46104fce74">632ae72d page slug confined to pages/</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/m0-page-edit" data-kind="milestone" data-status="production" data-commit="bb8bf21f4a1a0cd998b12feafbe19ec5819fe037">bb8bf21f M0 page capability and effect</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/envelope-verification" data-kind="milestone" data-status="production" data-commit="ab57e9c13e33fb2f4a10ef42ac9a527abaf8c80a">ab57e9c1 signed envelope verification</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/principal-challenge-rule" data-kind="milestone" data-status="production" data-commit="d12d0ed75cbb20d189332afe2900c81549c2aed1">d12d0ed7 principal, challenge, rule, capability</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/bounded-challenges" data-kind="milestone" data-status="production" data-commit="9a041fdd2a7b14d3fc7ad57672460c1f87827005">9a041fdd bounded challenge lifecycle</a></li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/signed-http-transport" data-kind="milestone" data-status="scratch-proven">Signed HTTP transport</a> — scratch-proven: signed requests reached the authority chain over a loopback HTTP connector, without a session or proxy authentication. Not a production commit.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/production-http-adapter" data-kind="milestone" data-status="planned">Production HTTP adapter</a> — planned.</li></ul>
+<ul><li data-from="milestone/work-read-side" data-to="milestone/page-slug-confinement" data-relation="precedes">c23e36f9 → 632ae72d: precedes.</li>
+<li data-from="milestone/page-slug-confinement" data-to="milestone/m0-page-edit" data-relation="precedes">632ae72d → bb8bf21f: precedes.</li>
+<li data-from="milestone/m0-page-edit" data-to="milestone/envelope-verification" data-relation="precedes">bb8bf21f → ab57e9c1: precedes.</li>
+<li data-from="milestone/envelope-verification" data-to="milestone/principal-challenge-rule" data-relation="precedes">ab57e9c1 → d12d0ed7: precedes.</li>
+<li data-from="milestone/principal-challenge-rule" data-to="milestone/bounded-challenges" data-relation="precedes">d12d0ed7 → 9a041fdd: precedes.</li>
+<li data-from="milestone/signed-http-transport" data-to="milestone/principal-challenge-rule" data-relation="exercised over HTTP">Signed HTTP transport → d12d0ed7: exercised over HTTP.</li>
+<li data-from="milestone/signed-http-transport" data-to="milestone/bounded-challenges" data-relation="exposed the failure fixed by">Signed HTTP transport → 9a041fdd: exposed the failure fixed by.</li>
+<li data-from="milestone/signed-http-transport" data-to="milestone/production-http-adapter" data-relation="prototypes">Signed HTTP transport → Production HTTP adapter: prototypes.</li>
+<li data-from="milestone/bounded-challenges" data-to="milestone/production-http-adapter" data-relation="unblocks">9a041fdd → Production HTTP adapter: unblocks.</li></ul>
+<ul><li data-from="public-network-authoring" data-to="milestone/signed-http-transport" data-relation="work:relation/evidenced-by">Public network authoring → Signed HTTP transport.</li>
+<li data-from="signed-intent" data-to="milestone/envelope-verification" data-relation="work:relation/evidenced-by">Signed intent → ab57e9c1.</li>
+<li data-from="authenticated-principal" data-to="milestone/principal-challenge-rule" data-relation="work:relation/evidenced-by">Authenticated principal → d12d0ed7.</li>
+<li data-from="single-use-freshness" data-to="milestone/principal-challenge-rule" data-relation="work:relation/evidenced-by">Single-use freshness → d12d0ed7.</li>
+<li data-from="bounded-freshness-state" data-to="milestone/bounded-challenges" data-relation="work:relation/evidenced-by">Bounded freshness state → 9a041fdd.</li>
+<li data-from="explicit-authoring-rule" data-to="milestone/principal-challenge-rule" data-relation="work:relation/evidenced-by">Explicit authoring rule → d12d0ed7.</li>
+<li data-from="scoped-capability" data-to="milestone/m0-page-edit" data-relation="work:relation/evidenced-by">Scoped capability → bb8bf21f.</li>
+<li data-from="scoped-capability" data-to="milestone/page-slug-confinement" data-relation="work:relation/evidenced-by">Scoped capability → 632ae72d.</li>
+<li data-from="scoped-capability" data-to="milestone/principal-challenge-rule" data-relation="work:relation/evidenced-by">Scoped capability → d12d0ed7.</li>
+<li data-from="serialized-verified-effect" data-to="milestone/m0-page-edit" data-relation="work:relation/evidenced-by">Serialized verified effect → bb8bf21f.</li></ul>
+<source-of-function>evidence-layout</source-of-function>
+<p>All of these Topics and Associations together, including where each constraint is realized, in the native Topicmap: <a expr="(architecture-workspace)" view="Topicmap">open the authoring architecture Topicmap</a>. Clicking an action sign moves the Workspace Point; the Point's object is this page, or the commit for a committed milestone.</p>
+<source-of-function>architecture-workspace</source-of-function>
+
+<h2>6. Bounded challenges as a worked derivation</h2>
+<p>This step, commit <a expr="(topic-commit &quot;milestone/bounded-challenges&quot;)">9a041fdd</a>, followed Fielding's order: a requirement, one added constraint, and its induced properties weighed against its cost.</p>
+<ul><li><strong>Observed failure.</strong> In the scratch HTTP experiment, 2000 anonymous requests for unregistered principal ids grew the challenge store by exactly 2000 entries; nothing removed used or expired challenges. That was unbounded allocation, observed in scratch, not in repository history.</li>
+<li><strong>Requirement.</strong> Public authoring must remain operable under untrusted, potentially adversarial request load (§4.1.4.1).</li>
+<li><strong>Constraint.</strong> Allocate challenge state only for registered principals, and bound its lifecycle through issuance, expiry and consumption.</li>
+<li><strong>Mechanism.</strong> An outstanding limit per principal (default 4); a consumed limit (default 8), kept only to name a replay; expired challenges pruned; the limit check and the insertion made atomically under the store's one lock.</li>
+<li><strong>Demonstrated in the committed tests.</strong> 5000 issuance requests for unknown principals caused zero store growth. With 16 concurrent issuers, exactly the configured 4 challenges were issued in each round. Capacity returned after consumption and after expiry. These are in-process results.</li>
+<li><strong>Intended, not measured.</strong> Better scalability and reliability under adversarial interaction. No load test and no public deployment support this yet.</li>
+<li><strong>Trade-off.</strong> Finitely many simultaneous challenges per principal; old replay diagnostics disappear, so a pruned replay is refused as unknown rather than as used; issuance is not authenticated, so anyone knowing a principal's id can occupy its challenges until they expire.</li></ul>
+
+<h2>7. What has NOT been established</h2>
+<ul><li>No production HTTP adapter exists; the signed HTTP transport is scratch-proven only.</li>
+<li>Nothing is deployed, and no nginx or TLS configuration for authoring has been checked.</li>
+<li>Scalability and reliability under adversarial load are intended properties; neither has been measured.</li>
+<li>The principal registry and the challenges live in memory: no durability, no key enrollment, rotation or recovery.</li>
+<li>No fsync: crash durability of an effect is not established. Another process writing the same page is not serialized.</li>
+<li>Challenge issuance is not authenticated; there is no rate limiting.</li>
+<li>HyperDoc Authoring is not shown to be RESTful, and it is not stateless: challenges, the registry and page locks are server-held state.</li></ul>
+
+<h2>8. Next architectural boundary</h2>
+<p>After 9a041fdd, the next boundary this derivation justifies is a <strong>production HTTP adapter</strong>: the connector that carries the exact envelope and body to the authority, with bounded request bodies and no session. It is identified here, not implemented.</p>
+<p>Browser key storage, nginx deployment and Lisp source or image authoring remain separate questions.</p>
+<p><strong>Remote evaluation is not the model.</strong> Fielding's Remote Evaluation style sends code from client to server for execution; its main limitation is lost visibility, since the server receives code instead of standardized requests, which is a deployment problem when the server cannot trust its clients (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/net_arch_styles.htm">§3.5.2</a>). Prospective Lisp authoring is therefore not represented as a client sending Lisp for the server to EVAL. A signed request carries semantic data and server-known identifiers; the server constructs a bounded operation from them, derives a scoped capability, and only then causes an effect. This avoids a Remote Evaluation interaction style for public authoring.</p>
+<p><a page="Work Breakdown">Work Breakdown</a> · <a page="HyperDoc Authoring as a Constraint Derivation">Lisp code for this page</a> · <a expr="(architecture-workspace)" view="Topicmap">Open the authoring architecture Topicmap</a></p>
