@@ -1199,6 +1199,30 @@
                                        :run-authoring-envelope-tests)
                (error "Authoring envelope tests failed."))))
 
+(defsystem "dreyeck/authenticated-page-authoring"
+  :description "Principals, principal-bound single-use challenges and authoring rules that derive the FedWiki page-authoring capability; trusted Lisp only, no HTTP"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on ("dreyeck/authoring-envelope" "dreyeck/fedwiki-page-authoring"
+               "ironclad" "shasht" "bordeaux-threads" "html-inspector-views")
+  :components ((:file "authenticated-page-authoring-package") (:file "authenticated-page-authoring"))
+  :in-order-to ((test-op (test-op "dreyeck/authenticated-page-authoring/tests"))))
+
+(defsystem "dreyeck/authenticated-page-authoring/tests"
+  :description "Authenticated FedWiki page authoring: identity, freshness, authorization, replay"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :depends-on ("dreyeck/authenticated-page-authoring" "alexandria")
+  :components ((:file "authenticated-page-authoring"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (unless (uiop:symbol-call :dreyeck/authenticated-page-authoring/tests
+                                       :run-authenticated-page-authoring-tests)
+               (error "Authenticated page authoring tests failed."))))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SHOP3
   :DESCRIPTION
   "SHOP3-backed HTN planning layer owned by Dreyeck"
