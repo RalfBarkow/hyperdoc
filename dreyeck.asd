@@ -1229,8 +1229,7 @@
   :version "0.0.1"
   :pathname "dreyeck/src/"
   :serial t
-  :depends-on ("dreyeck/authenticated-page-authoring" "clack" "clack-handler-hunchentoot"
-               "usocket" "shasht" "bordeaux-threads")
+  :depends-on ("dreyeck/authenticated-page-authoring" "hunchentoot" "shasht")
   :components ((:file "authoring-http-package") (:file "authoring-http"))
   :in-order-to ((test-op (test-op "dreyeck/authoring-http/tests"))))
 
@@ -1239,7 +1238,8 @@
   :license "BSD"
   :version "0.0.1"
   :pathname "dreyeck/tests/"
-  :depends-on ("dreyeck/authoring-http" "dreyeck/work/reading" "drakma" "alexandria" "ironclad")
+  :depends-on ("dreyeck/authoring-http" "dreyeck/work/reading" "drakma" "alexandria" "ironclad"
+               "usocket" "bordeaux-threads")
   :components ((:file "authoring-http"))
   :perform (test-op (operation component)
              (declare (ignore operation component))

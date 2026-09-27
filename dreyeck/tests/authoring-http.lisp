@@ -2,7 +2,7 @@
 ;;;;
 ;;;; A real listener on 127.0.0.1 and a real HTTP client. Keys are generated
 ;;;; in memory for each run and dropped with it; none is stored or printed.
-;;;; Every refusal is checked for its status, its logged reason, an unchanged
+;;;; Every refusal is checked for its status, the reason its observer is told, an unchanged
 ;;;; page and journal, and, where the authority has not reached the
 ;;;; challenge, a challenge that still works afterwards.
 
@@ -93,13 +93,19 @@
          root slug)))
     root))
 
-(defun free-port ()
-  (let ((socket (usocket:socket-listen "127.0.0.1" 0 :reuse-address t)))
-    (prog1 (usocket:get-local-port socket) (usocket:socket-close socket))))
+(defun make-recorder ()
+  "A test-owned observer, and a function returning what it was told, newest
+first. The adapter tells it from Hunchentoot's worker threads."
+  (let ((told nil) (lock (bt:make-lock "authoring http test observer")))
+    (values (lambda (method path status reason)
+              (bt:with-lock-held (lock)
+                (push (list :method method :path path :status status :reason reason) told)))
+            (lambda () (bt:with-lock-held (lock) (copy-list told))))))
 
 (defparameter *root* nil)
 (defparameter *authority* nil)
 (defparameter *adapter* nil)
+(defparameter *told* nil "What the adapter under test told its observer.")
 (defparameter *port* nil)
 (defparameter *p* nil "The authorized principal's id.")
 (defparameter *q* nil "Another registered principal's id, with no rule.")
@@ -107,6 +113,12 @@
 (defparameter *p-key* nil)
 (defparameter *q-key* nil)
 (defparameter *keys* nil "Each principal's id and public key.")
+
+(defun fresh-observer ()
+  "A new recorder for the adapter under test; *TOLD* reads what it was told."
+  (multiple-value-bind (observer told) (make-recorder)
+    (setf *told* told)
+    observer))
 
 (defun make-authority (keys root)
   (aa:make-authoring-authority
@@ -124,9 +136,10 @@
                      (*p-key* p-key) (*q-key* q-key)
                      (*keys* (list (list *p* p-public) (list *q* q-public) (list *r* q-public)))
                      (*authority* (make-authority *keys* *root*))
-                     (*adapter* (http:make-authoring-http-adapter *authority*))
-                     (*port* (free-port)))
-                (setf listener (http:start-authoring-http-listener *adapter* :port *port*))
+                     (*adapter* (http:make-authoring-http-adapter *authority* :observer (fresh-observer)))
+                     (*port* nil))
+                (setf listener (http:start-authoring-http-listener *adapter*)
+                      *port* (http:authoring-http-listener-port listener))
                 ,@body)))
        (when listener (http:stop-authoring-http-listener listener))
        (uiop:delete-directory-tree *root* :validate t))))
@@ -171,14 +184,14 @@
     (utf8 (json (obj "expected" item "action" (obj "type" "edit" "id" (gethash "id" item)
                                                    "item" new "date" 1790486348600))))))
 
-(defun last-reason () (getf (first (http:authoring-http-adapter-log *adapter*)) :reason))
+(defun last-reason () (getf (first (funcall *told*)) :reason))
 
 (defmacro refused ((status reason) &body request)
-  "REQUEST answers STATUS, the adapter logs REASON, and the page is byte-identical."
+  "REQUEST answers STATUS, the observer is told REASON, and the page is byte-identical."
   `(let ((before (page-bytes)))
      (let ((status (progn ,@request)))
        (assert (eql ,status status) () "~S answered ~S, not ~S" ',request status ,status)
-       (assert (eq ,reason (last-reason)) () "~S logged ~S, not ~S" ',request (last-reason) ,reason)
+       (assert (eq ,reason (last-reason)) () "~S told ~S, not ~S" ',request (last-reason) ,reason)
        (assert (string= before (page-bytes)) () "~S changed the page" ',request))))
 
 (defun other-relation ()
@@ -227,8 +240,7 @@
     (dolist (address '("0.0.0.0" "::" "192.0.2.1" "localhost"))
       ;; Refused as an address, before any attempt to bind: a failed bind
       ;; would also be an error, and would not show the address was refused.
-      (assert (handler-case (progn (http:start-authoring-http-listener adapter :port (free-port)
-                                                                               :address address)
+      (assert (handler-case (progn (http:start-authoring-http-listener adapter :address address)
                                    nil)
                 (error (condition) (search "only a loopback address" (princ-to-string condition))))
               () "~A was not refused as a listening address." address))
@@ -359,18 +371,18 @@
   ;; Authority is the adapter's, not the process's: another adapter with its
   ;; own authority -- the same principals, keys, rule and site -- knows nothing
   ;; of this one's challenge.
-  (let* ((other (http:make-authoring-http-adapter (make-authority *keys* *root*)))
-         (port (free-port))
-         (listener (http:start-authoring-http-listener other :port port)))
-    (unwind-protect
-         (let ((request (good-request)) (before (page-bytes)))
-           (let ((*port* port))
-             (assert (= 401 (put request))))
-           (assert (eq :unknown-challenge (getf (first (http:authoring-http-adapter-log other)) :reason)))
-           (assert (string= before (page-bytes)))
-           ;; The request is still good where its challenge was issued.
-           (assert (= 200 (put request))))
-      (http:stop-authoring-http-listener listener))))
+  (multiple-value-bind (observer told) (make-recorder)
+    (let* ((other (http:make-authoring-http-adapter (make-authority *keys* *root*) :observer observer))
+           (listener (http:start-authoring-http-listener other)))
+      (unwind-protect
+           (let ((request (good-request)) (before (page-bytes)))
+             (let ((*port* (http:authoring-http-listener-port listener)))
+               (assert (= 401 (put request))))
+             (assert (eq :unknown-challenge (getf (first (funcall told)) :reason)))
+             (assert (string= before (page-bytes)))
+             ;; The request is still good where its challenge was issued.
+             (assert (= 200 (put request))))
+        (http:stop-authoring-http-listener listener)))))
 
 (defun test-application-refusals ()
   (let* ((stale (alexandria:copy-hash-table (a1 (page)))))
@@ -398,12 +410,71 @@
       (refused (413 :too-large) (put (list* :body too-large good)))
       (multiple-value-bind (status text) (put good) (assert (= 200 status) () "~A" text)))))
 
-(defun test-bounded-log ()
-  (let ((adapter (http:make-authoring-http-adapter *authority*)))
-    (dotimes (i 1000)
-      (http:authoring-http-response adapter (list :request-method :get :path-info "/nowhere"
-                                                  :headers (make-hash-table :test #'equal))))
-    (assert (= 256 (length (http:authoring-http-adapter-log adapter))))))
+(defun test-adapter-keeps-no-history ()
+  "The adapter holds its authority and its observer, and nothing a request
+could add to; an observer that fails changes no answer."
+  (let ((class (find-class 'http:authoring-http-adapter)))
+    (sb-mop:finalize-inheritance class)
+    (assert (equal '("AUTHORITY" "OBSERVER")
+                   (mapcar (lambda (slot) (symbol-name (sb-mop:slot-definition-name slot)))
+                           (sb-mop:class-slots class)))))
+  (let ((quiet (http:make-authoring-http-adapter *authority*))
+        (failing (http:make-authoring-http-adapter
+                  *authority* :observer (lambda (&rest told)
+                                          (declare (ignore told))
+                                          (error "The observer failed.")))))
+    (dolist (env (list (list :request-method :get :path-info "/nowhere")
+                       (list :request-method :get :path-info "/authoring/v1/challenge")
+                       (list :request-method :post :path-info (edit-path))
+                       (list :request-method :post :path-info "/authoring/v1/challenge")))
+      (setf (getf env :headers) (make-hash-table :test #'equal))
+      (assert (equal (http:authoring-http-response quiet env)
+                     (http:authoring-http-response failing env))))))
+
+(defun listening-thread-p (port)
+  (find-if (lambda (thread)
+             (search (format nil "hunchentoot-listener-127.0.0.1:~D" port)
+                     (or (bt:thread-name thread) "")))
+           (bt:all-threads)))
+
+(defun test-listener-owns-its-bind ()
+  "START returns exactly when this adapter's own socket is bound."
+  ;; A port another socket already holds: START signals, and no server of
+  ;; ours listens there.
+  (let* ((foreign (usocket:socket-listen "127.0.0.1" 0 :reuse-address nil))
+         (port (usocket:get-local-port foreign)))
+    (unwind-protect
+         (let ((message (handler-case
+                            (progn (http:start-authoring-http-listener
+                                    (http:make-authoring-http-adapter *authority*) :port port)
+                                   nil)
+                          (error (condition) (princ-to-string condition)))))
+           (assert (and message (search "could not bind" message)) ()
+                   "Port ~D was held by another socket, and START returned." port)
+           (assert (not (listening-thread-p port))))
+      (usocket:socket-close foreign)))
+  ;; Port 0: the listener reports the port it bound, and what answers there
+  ;; is this adapter, because its observer is told.
+  (multiple-value-bind (observer told) (make-recorder)
+    (let* ((own (http:make-authoring-http-adapter *authority* :observer observer))
+           (listener (http:start-authoring-http-listener own))
+           (port (http:authoring-http-listener-port listener)))
+      (unwind-protect
+           (let ((*port* port))
+             (assert (plusp port))
+             (assert (= 404 (http :get "/answered-by-this-adapter")))
+             (assert (equal "/answered-by-this-adapter" (getf (first (funcall told)) :path)))
+             ;; The same port again is refused, and the first listener keeps it.
+             (assert (handler-case (progn (http:start-authoring-http-listener own :port port) nil)
+                       (error (condition) (search "could not bind" (princ-to-string condition)))))
+             (assert (= 404 (http :get "/still-this-adapter")))
+             (assert (equal "/still-this-adapter" (getf (first (funcall told)) :path))))
+        (http:stop-authoring-http-listener listener))
+      ;; Stopped: nothing accepts there.
+      (assert (handler-case (progn (usocket:socket-close
+                                    (usocket:socket-connect "127.0.0.1" port :timeout 1))
+                                   nil)
+                (error () t))))))
 
 (defun run-authoring-http-tests ()
   (test-transport-encoding)
@@ -416,7 +487,8 @@
     (test-no-ambient-authority)
     (test-application-refusals)
     (test-bodies-are-bounded-and-drained)
-    (test-bounded-log))
+    (test-adapter-keeps-no-history)
+    (test-listener-owns-its-bind))
   ;; Connection threads end with their connections.
   (loop repeat 100 while (hunchentoot-threads) do (sleep 0.05))
   (assert (null (hunchentoot-threads)))
@@ -427,5 +499,7 @@ ordinary journal entry, no identity stored, and the Work projection sees it; ~
 replay and A->B->A replay refused; route mismatch and every tampering refused ~
 with the challenge left usable; cookies and proxy headers carry no authority, ~
 and another adapter's authority is not this one's; M0 and rule refusals mapped; ~
-bodies bounded and drained; the log bounded; the listener stopped.~%")
+bodies bounded and drained; the adapter keeps no history, and a failing ~
+observer changes no answer; START returns only on its own bind, refusing a ~
+port another socket holds; the listener stopped.~%")
   t)

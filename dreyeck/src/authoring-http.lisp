@@ -20,13 +20,15 @@
 ;;;;
 ;;;; Every body is read, within a bound, before routing, so that no answer
 ;;;; resets a connection the client is still writing. Refusals answer with a
-;;;; coarse status; the adapter's log keeps the precise reason, and the log
-;;;; is bounded like everything else an anonymous caller can cause.
+;;;; coarse status. The adapter keeps no record of what it answered; a caller
+;;;; that wants the precise reason passes an observer, which is told and
+;;;; never asked.
 ;;;;
 ;;;; Loading this system opens no socket. START-AUTHORING-HTTP-LISTENER is the
-;;;; only thing that listens, and only on a loopback address; reaching it
-;;;; from elsewhere is the operator's business. Production here means
-;;;; committed and tested, not deployed.
+;;;; only thing that listens, and only on a loopback address. It returns
+;;;; exactly when this adapter's own socket is bound, and signals when it is
+;;;; not; reaching it from elsewhere is the operator's business. Production
+;;;; here means committed and tested, not deployed.
 
 (in-package #:dreyeck/authoring-http)
 
@@ -66,32 +68,29 @@ no padding, no character outside the alphabet, no unused bits set."
   "How much of a too-large body is read and discarded before answering.")
 (defparameter +challenge-request-limit+ 1024)
 (defparameter +envelope-header-limit+ 2800)
-(defparameter +log-limit+ 256)
 (defparameter +edit-prefix+ "/authoring/v1/fedwiki/")
 (defparameter +challenge-path+ "/authoring/v1/challenge")
 
 (defclass authoring-http-adapter ()
   ((authority :initarg :authority :reader authoring-http-adapter-authority)
-   (log :initform nil :accessor %adapter-log)
-   (lock :initform (bt:make-lock "authoring http log") :reader %adapter-lock))
-  (:documentation "HTTP transport for one authoring authority."))
+   (observer :initarg :observer :initform nil :reader %adapter-observer))
+  (:documentation "HTTP transport for one authoring authority. It keeps no
+record of the requests it answers."))
 
-(defun make-authoring-http-adapter (authority)
+(defun make-authoring-http-adapter (authority &key observer)
+  "An adapter for AUTHORITY. OBSERVER, if given, is a function called with
+the method, path, status and internal reason of each answer. It is told and
+never asked: what it returns or signals changes no answer."
   (check-type authority aa:authoring-authority)
-  (make-instance 'authoring-http-adapter :authority authority))
+  (check-type observer (or null function))
+  (make-instance 'authoring-http-adapter :authority authority :observer observer))
 
-(defun authoring-http-adapter-log (adapter)
-  "The newest requests first, each (:METHOD :PATH :STATUS :REASON)."
-  (bt:with-lock-held ((%adapter-lock adapter))
-    (copy-list (%adapter-log adapter))))
+(defun %observe (adapter method path status reason)
+  (let ((observer (%adapter-observer adapter)))
+    (when observer
+      (ignore-errors (funcall observer method path status reason)))))
 
-(defun %record (adapter method path status reason)
-  (bt:with-lock-held ((%adapter-lock adapter))
-    (let ((log (cons (list :method method :path path :status status :reason reason)
-                     (%adapter-log adapter))))
-      (setf (%adapter-log adapter) (subseq log 0 (min +log-limit+ (length log)))))))
-
-;;; Answers: coarse outside, precise in the log
+;;; Answers: coarse outside; the precise reason only to an observer
 
 (defparameter +statuses+
   '((400 "malformed request" :malformed-transport :malformed-envelope :unsupported-version
@@ -120,7 +119,7 @@ no padding, no character outside the alphabet, no unused bits set."
 
 (defun %refuse (adapter method path reason &key close)
   (multiple-value-bind (status text) (%status reason)
-    (%record adapter method path status reason)
+    (%observe adapter method path status reason)
     (%respond status text :close close)))
 
 (defun %json (plist)
@@ -177,7 +176,7 @@ A body with neither a length nor chunked encoding is empty, as HTTP says."
     (handler-case
         (let ((challenge (aa:issue-authoring-challenge (authoring-http-adapter-authority adapter)
                                                        principal)))
-          (%record adapter :post +challenge-path+ 200 :issued)
+          (%observe adapter :post +challenge-path+ 200 :issued)
           (%respond 200 (%json (list "principal" principal
                                      "nonce" (aa:authoring-challenge-nonce challenge)
                                      "issuedAt" (aa:authoring-challenge-issued-at challenge)
@@ -208,7 +207,7 @@ A body with neither a length nor chunked encoding is empty, as HTTP says."
           (let ((edit (aa:authenticate-authorize-fedwiki-page-edit
                        (authoring-http-adapter-authority adapter)
                        (list :envelope envelope :body body :signature signature))))
-            (%record adapter :put path 200 :applied)
+            (%observe adapter :put path 200 :applied)
             (%respond 200 (%json (list "applied" "edit" "id" (pa:page-edit-item-id edit)))
                       :type "application/json"))
         (ae:authoring-envelope-refused (condition)
@@ -244,57 +243,70 @@ A body with neither a length nor chunked encoding is empty, as HTTP says."
   (lambda (env) (authoring-http-response adapter env)))
 
 ;;; The listener
+;;
+;; HUNCHENTOOT:START binds the socket in the calling thread and signals if
+;; it cannot; only after that bind does it start accepting, in threads of
+;; its own. That bind is the one fact of ownership, so the listener is
+;; returned exactly when it succeeded. Nothing probes the port before or
+;; after: another listener answering there would say nothing about ours.
+
+(defclass %acceptor (hunchentoot:acceptor)
+  ((adapter :initarg :adapter :reader %acceptor-adapter)))
+
+(defun %request-env (request)
+  "REQUEST in the form AUTHORING-HTTP-RESPONSE reads."
+  (list :request-method (hunchentoot:request-method* request)
+        :path-info (hunchentoot:script-name* request)
+        :content-length (let ((length (hunchentoot:header-in* :content-length request)))
+                          (and length (parse-integer length :junk-allowed t)))
+        :raw-body (hunchentoot:raw-post-data :request request :want-stream t)
+        :headers (let ((headers (make-hash-table :test #'equal)))
+                   (loop for (name . value) in (hunchentoot:headers-in* request)
+                         do (setf (gethash (string-downcase name) headers) value))
+                   headers)))
+
+(defmethod hunchentoot:acceptor-dispatch-request ((acceptor %acceptor) request)
+  (destructuring-bind (status headers (text))
+      (authoring-http-response (%acceptor-adapter acceptor) (%request-env request))
+    (let ((octets (sb-ext:string-to-octets text :external-format :utf-8)))
+      (setf (hunchentoot:return-code*) status
+            (hunchentoot:content-type*) (getf headers :content-type)
+            (hunchentoot:content-length*) (length octets))
+      (when (getf headers :connection)
+        (setf (hunchentoot:header-out :connection) (getf headers :connection)))
+      octets)))
 
 (defclass authoring-http-listener ()
-  ((thread :initarg :thread :reader %listener-thread)
-   (address :initarg :address :reader authoring-http-listener-address)
-   (port :initarg :port :reader authoring-http-listener-port)))
+  ((acceptor :initarg :acceptor :reader %listener-acceptor)
+   (address :initarg :address :reader authoring-http-listener-address)))
+
+(defun authoring-http-listener-port (listener)
+  "The port LISTENER's own socket is bound to."
+  (hunchentoot:acceptor-port (%listener-acceptor listener)))
 
 (defparameter +loopback-addresses+ '("127.0.0.1" "::1"))
 
-(defun %accepting-p (address port)
-  (handler-case (progn (usocket:socket-close (usocket:socket-connect address port :timeout 1)) t)
-    (error () nil)))
-
-(defun start-authoring-http-listener (adapter &key port (address "127.0.0.1"))
-  "Listen for ADAPTER on the loopback ADDRESS and PORT, and return the
-listener once it accepts connections. Any other address is refused, and so is
-a port something else already accepts on."
+(defun start-authoring-http-listener (adapter &key (port 0) (address "127.0.0.1"))
+  "Bind ADAPTER's own socket on the loopback ADDRESS and PORT, 0 for any free
+port, and return the listener. Returns only if that bind succeeded, and
+signals if it did not, whatever else listens there. Any other address is
+refused before anything is made."
   (check-type adapter authoring-http-adapter)
-  (check-type port (integer 1 65535))
+  (check-type port (integer 0 65535))
   (unless (member address +loopback-addresses+ :test #'equal)
     (error "The authoring listener binds only a loopback address, not ~S." address))
-  (when (%accepting-p address port)
-    (error "Something already accepts connections on ~A:~D." address port))
-  ;; The server runs, blocking, in a thread of our own; Hunchentoot stops
-  ;; when that thread unwinds. It binds in that thread, so wait until the
-  ;; port accepts while the thread lives: a thread that died did not bind.
-  (let* ((app (authoring-http-app adapter))
-         (thread (bt:make-thread
-                  (lambda ()
-                    (clack:clackup app :server :hunchentoot :address address :port port
-                                       :use-thread nil :use-default-middlewares nil
-                                       :silent t :debug nil))
-                  :name (format nil "authoring-http ~A:~D" address port))))
-    (loop repeat 100
-          until (or (not (bt:thread-alive-p thread)) (%accepting-p address port))
-          do (sleep 0.05))
-    (unless (and (bt:thread-alive-p thread) (%accepting-p address port))
-      (when (bt:thread-alive-p thread) (bt:destroy-thread thread))
-      (error "The authoring listener did not bind ~A:~D." address port))
-    (make-instance 'authoring-http-listener :thread thread :address address :port port)))
+  (let ((acceptor (make-instance '%acceptor :adapter adapter :address address :port port
+                                            :access-log-destination nil
+                                            :message-log-destination nil)))
+    (handler-case (hunchentoot:start acceptor)
+      (error (condition)
+        (error "The authoring listener could not bind ~A:~D: ~A" address port condition)))
+    (make-instance 'authoring-http-listener :acceptor acceptor :address address)))
 
 (defun stop-authoring-http-listener (listener)
-  "Stop LISTENER and return once its port no longer accepts."
-  (let ((thread (%listener-thread listener)))
-    (when (bt:thread-alive-p thread)
-      (bt:destroy-thread thread)
-      (ignore-errors (bt:join-thread thread)))
-    (loop repeat 100
-          while (%accepting-p (authoring-http-listener-address listener)
-                              (authoring-http-listener-port listener))
-          do (sleep 0.05))
-    t))
+  "Close LISTENER's socket and stop accepting."
+  (hunchentoot:stop (%listener-acceptor listener))
+  t)
 
 (defmethod print-object ((listener authoring-http-listener) stream)
   (print-unreadable-object (listener stream :type t)
