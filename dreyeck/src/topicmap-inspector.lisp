@@ -137,9 +137,7 @@
                   BOUNDARY-X BOUNDARY-Y (+ BOUNDARY-X 12) (+ BOUNDARY-Y 22)
                   (TOPICMAP-HTML-ESCAPE (DREYECK/TOPICMAP:TOPICMAP-TOPIC-LABEL-OF CONTAINER))
                   (+ BOUNDARY-X 12) (+ BOUNDARY-Y 40)
-                  (TOPICMAP-HTML-ESCAPE (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TYPE-OF CONTAINER))
-                  (TOPICMAP-HTML-ESCAPE
-                   (DREYECK/TOPICMAP:TOPICMAP-ASSOCIATION-TYPE-OF ASSOCIATION))))))))
+                  (TOPICMAP-HTML-ESCAPE (DREYECK/TOPICMAP:TOPICMAP-TOPIC-TYPE-OF CONTAINER))))))))
 
 (defun topicmap-topic-path-of (topic)
   (topicmap-property (dreyeck/topicmap:topicmap-topic-view-properties-of topic)

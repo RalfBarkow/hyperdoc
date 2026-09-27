@@ -964,6 +964,75 @@
        "Rendering changed workspace history.")
       t)))
 
+(defun run-structural-containment-sign-mapping-test ()
+  "Behavior: each value of a structural-containment sign lands in its own
+attribute or text. The values are all distinct, so a shifted argument
+cannot look right."
+  (let* ((contained (dreyeck/topicmap:make-topicmap-topic
+                     :id "contained-id-9" :type :contained-type-z :label "contained label"
+                     :view-properties '(:x 1234 :y 5678 :visible t)))
+         (container (dreyeck/topicmap:make-topicmap-topic
+                     :id "container-id-3" :type :container-type-k :label "container label w"
+                     :view-properties '(:x 40 :y 50 :visible t)))
+         (association (dreyeck/topicmap:make-topicmap-association
+                       :id "association-id-7" :type :association-type-q
+                       :from "contained-id-9" :to "container-id-3"
+                       :properties '(:presentation :structural-containment)))
+         (html (dreyeck/inspector/topicmap:render-topicmap-html
+                :native-svg (dreyeck/topicmap:make-topicmap-projection
+                             :source :containment-mapping-test
+                             :topics (list contained container)
+                             :associations (list association))))
+         (dom (let ((plump:*tag-dispatchers* plump:*xml-tags*)) (plump:parse html)))
+         (signs (remove "dreyeck-topicmap-structural-containment"
+                        (plump:get-elements-by-tag-name dom "g")
+                        :key (lambda (g) (plump:attribute g "class")) :test-not #'equal)))
+    (assert (= 1 (length signs)))
+    (let* ((sign (first signs))
+           (rect (first (plump:get-elements-by-tag-name sign "rect")))
+           (texts (plump:get-elements-by-tag-name sign "text")))
+      (assert (equal "association-id-7" (plump:attribute sign "data-association-id")))
+      (assert (equal "ASSOCIATION-TYPE-Q" (plump:attribute sign "data-association-type")))
+      (assert (equal "container-id-3" (plump:attribute sign "data-topic-id")))
+      (assert (equal '("1204" "5628") (list (plump:attribute rect "x") (plump:attribute rect "y"))))
+      (assert (= 2 (length texts)))
+      (destructuring-bind (label kind) texts
+        (assert (equal '("1216" "5650" "container label w")
+                       (list (plump:attribute label "x") (plump:attribute label "y")
+                             (plump:text label))))
+        (assert (equal "dreyeck-topicmap-topic-kind" (plump:attribute kind "class")))
+        (assert (equal '("1216" "5668" "CONTAINER-TYPE-K")
+                       (list (plump:attribute kind "x") (plump:attribute kind "y")
+                             (plump:text kind)))))))
+  t)
+
+(defun topicmap-inspector-format-argument-warnings
+    (&optional (source (asdf:system-relative-pathname
+                        "dreyeck" "dreyeck/src/topicmap-inspector.lisp")))
+  "Each warning SBCL gives, compiling SOURCE, that a FORMAT call is passed
+more or fewer arguments than its control string uses. SBCL checks this
+only at compile time and the call still runs, so a cached FASL hides it.
+Compiles into a temporary file; loads nothing."
+  (let ((found nil))
+    (uiop:with-temporary-file (:pathname fasl :type "fasl")
+      (handler-bind ((warning
+                       (lambda (condition)
+                         (let ((text (princ-to-string condition)))
+                           (when (and (search "arguments (" text) (search "to FORMAT" text))
+                             (push text found)
+                             (muffle-warning condition))))))
+        (let ((*compile-verbose* nil) (*compile-print* nil))
+          (compile-file source :output-file fasl))))
+    (nreverse found)))
+
+(defun run-topicmap-inspector-format-arguments-test ()
+  "Compiler diagnostic: every native sign's FORMAT call gets as many
+arguments as its control string uses."
+  (let ((warnings (topicmap-inspector-format-argument-warnings)))
+    (assert (null warnings) () "FORMAT argument mismatch in the Topicmap inspector: ~{~A~^; ~}"
+            warnings))
+  t)
+
 (defun run-topicmap-view-smoke-tests nil (check-ownership-contract)
        (run-generic-topicmap-view-test) (run-topicmap-workspace-test)
        (run-topicmap-workspace-inspector-action-test)
@@ -976,4 +1045,6 @@
        (format t "Generic renderer-independent Topicmap view tests passed.~%")
        (run-semantic-topicmap-presentation-smoke-test)
        (run-semantic-topicmap-endpoint-role-smoke-test)
-       (run-topicmap-workspace-resource-get-test) t)
+       (run-topicmap-workspace-resource-get-test)
+       (run-structural-containment-sign-mapping-test)
+       (run-topicmap-inspector-format-arguments-test) t)
