@@ -130,7 +130,7 @@
     (utf8 (json (obj "expected" item "action" (obj "type" "edit" "id" (gethash "id" item) "item" new "date" 1790486348600))))))
 
 (defun challenge (&optional (principal *p*) (now 1000000))
-  (aa:issue-authoring-challenge (aa:authoring-authority-challenges *authority*) principal :now now :lifetime-ms 60000))
+  (aa:issue-authoring-challenge *authority* principal :now now :lifetime-ms 60000))
 
 (defun submit (request &key (now 1000100))
   (aa:authenticate-authorize-fedwiki-page-edit *authority* request :now now))
@@ -347,6 +347,97 @@
   ;; M0 is reached only through its exported entry point.
   (assert (fboundp 'pa:edit-fedwiki-page-item)))
 
+(defun store-count (&optional principal)
+  "How many challenges the store holds, in all or for PRINCIPAL."
+  (let ((store (aa:authoring-authority-challenges *authority*)))
+    (if principal
+        (length (gethash principal (aa::%store-by-principal store)))
+        (hash-table-count (aa::%store-challenges store)))))
+
+(defun issuance-refusal (principal &key (now 1000000))
+  (refusal (lambda () (challenge principal now))))
+
+(defun test-issuance-only-for-registered-principals ()
+  "Thousands of requests for principals the registry does not know allocate nothing."
+  (with-authority ()
+    (let ((before (store-count)))
+      (dotimes (i 5000)
+        (assert (eq :unknown-principal (issuance-refusal (aa:new-principal-id)))))
+      (assert (eq :unknown-principal (issuance-refusal "not a principal id")))
+      (assert (= before (store-count)))
+      ;; Control: a registered principal does allocate.
+      (challenge *p*)
+      (assert (= (1+ before) (store-count))))))
+
+(defun test-outstanding-bound ()
+  "A principal holds at most the store's limit of unused challenges; another is unaffected."
+  (with-authority ()
+    (let ((limit (aa:challenge-store-outstanding-limit (aa:authoring-authority-challenges *authority*))))
+      (assert (= 4 limit))
+      (dotimes (i limit) (challenge *p*))
+      (assert (eq :challenge-limit-reached (issuance-refusal *p*)))
+      (assert (= limit (store-count *p*)))
+      (assert (typep (challenge *q*) 'aa:authoring-challenge)))))
+
+(defun test-concurrent-issuance ()
+  "Sixteen workers released together ask for one principal's challenges: four
+are issued, twelve refused, in every round."
+  (dotimes (round 5)
+    (with-authority ()
+      (let* ((authority *authority*) (principal *p*)          ; threads do not see this thread's bindings
+             (workers 16) (lock (bt:make-lock)) (ready 0)
+             (results
+               (mapcar #'bt:join-thread
+                       (loop repeat workers
+                             collect (bt:make-thread
+                                      (lambda ()
+                                        (bt:with-lock-held (lock) (incf ready))
+                                        (loop until (>= ready workers) do (sleep 0.0001))
+                                        (handler-case (aa:issue-authoring-challenge authority principal :now 1000000)
+                                          (aa:authoring-request-refused (c) (aa:authoring-request-refusal-reason c)))))))))
+        (assert (= 4 (count-if (lambda (result) (typep result 'aa:authoring-challenge)) results)))
+        (assert (= 12 (count :challenge-limit-reached results)))
+        (assert (= 4 (store-count *p*) (store-count)))))))
+
+(defun test-capacity-recovery ()
+  "Consumption frees a place at once; expiry frees them all and removes the state."
+  (with-authority ()
+    (let ((store (aa:authoring-authority-challenges *authority*))
+          (challenges (loop repeat 4 collect (challenge *p* 1000000))))
+      (assert (eq :challenge-limit-reached (issuance-refusal *p* :now 1000000)))
+      (submit (signed-request *p-key* :principal *p* :challenge (first challenges)
+                                       :body (edit-body (a1 (page)) "work:relation/requires")))
+      (assert (typep (challenge *p* 1000200) 'aa:authoring-challenge))
+      (assert (eq :challenge-limit-reached (issuance-refusal *p* :now 1000300)))
+      (let ((fresh (challenge *p* 1070000)))
+        (assert (equal (list fresh) (gethash *p* (aa::%store-by-principal store))))
+        (assert (= 1 (store-count)))
+        (dolist (old challenges)
+          (assert (null (aa:find-authoring-challenge store (aa:authoring-challenge-nonce old)))))))))
+
+(defun test-consumed-bound ()
+  "Consumed challenges are kept only up to the store's limit. A replay of a kept
+one is refused as used, of a pruned one as unknown: refused either way."
+  (with-authority ()
+    (let* ((*authority* (aa:make-authoring-authority
+                         :service-id "hyperdoc-authoring-test"
+                         :registry (aa:authoring-authority-registry *authority*)
+                         :challenges (aa:make-challenge-store :outstanding-limit 2 :consumed-limit 3)
+                         :rules (list (aa:make-authoring-rule *p* "fedwiki-page-edit" "dreyeck.ch" "work-breakdown"))
+                         :sites (list (cons "dreyeck.ch" *root*))))
+           (requests
+             (loop for i below 6
+                   for relation = (if (evenp i) "work:relation/requires" "work:relation/informs")
+                   collect (let ((request (signed-request *p-key* :principal *p* :challenge (challenge *p* (+ 1000000 i))
+                                                                   :body (edit-body (a1 (page)) relation))))
+                             (submit request :now (+ 1000100 i))
+                             request))))
+      (assert (= 3 (store-count *p*) (store-count)))
+      (assert (every #'aa:authoring-challenge-used-p
+                     (gethash *p* (aa::%store-by-principal (aa:authoring-authority-challenges *authority*)))))
+      (refused-without-effect (:used-challenge) (submit (car (last requests)) :now 1000200))
+      (refused-without-effect (:unknown-challenge) (submit (first requests) :now 1000200)))))
+
 (defun run-authenticated-page-authoring-tests ()
   (test-principals)
   (test-an-authenticated-edit)
@@ -355,6 +446,11 @@
   (test-challenge-belongs-to-its-principal)
   (test-authorization-refusals)
   (test-time)
+  (test-issuance-only-for-registered-principals)
+  (test-outstanding-bound)
+  (test-concurrent-issuance)
+  (test-capacity-recovery)
+  (test-consumed-bound)
   (test-authentication-refusals)
   (test-inspection)
   (test-boundaries)
@@ -363,5 +459,8 @@ current challenge of the same principal and an authoring rule derive the page ~
 capability and M0 applies the edit; replay after A->B->A and a concurrent ~
 duplicate are refused as a used challenge; another principal's challenge, ~
 a wrong site, page or operation, a bad time, key, signature, body or service ~
-leave the challenge unused and the page unchanged; nothing of it is stored.~%")
+leave the challenge unused and the page unchanged; nothing of it is stored; ~
+challenge state is bounded -- none for unknown principals, at most the limit of ~
+unused ones per principal even under concurrent issuance, consumed ones pruned ~
+to their limit, expired ones removed.~%")
   t)

@@ -12,7 +12,8 @@
            #:authenticated-principal #:authenticated-principal-id #:authenticated-principal-envelope
            #:authoring-challenge #:authoring-challenge-nonce #:authoring-challenge-principal-id
            #:authoring-challenge-issued-at #:authoring-challenge-expires-at #:authoring-challenge-used-p
-           #:challenge-store #:make-challenge-store #:issue-authoring-challenge #:find-authoring-challenge
+           #:challenge-store #:make-challenge-store
+           #:challenge-store-outstanding-limit #:challenge-store-consumed-limit #:issue-authoring-challenge #:find-authoring-challenge
            #:authoring-rule #:make-authoring-rule #:authoring-rule-principal-id #:authoring-rule-operation
            #:authoring-rule-site #:authoring-rule-page
            #:authoring-authority #:make-authoring-authority

@@ -35,6 +35,33 @@
 ;;;; outstanding at a restart is refused afterwards; replay protection does not
 ;;;; extend to requests signed before a restart. Time is the server's clock,
 ;;;; passed as :NOW so that tests need not wait.
+;;;;
+;;;; Architectural rationale for bounded challenge state, stated as Fielding
+;;;; (2000) derives an architecture: a requirement, the constraint added for
+;;;; it, the properties the constraint is meant to induce, and what it costs.
+;;;;
+;;;;   Requirement  public authoring stays operable under untrusted, possibly
+;;;;                adversarial request load. A component reachable from the
+;;;;                network cannot assume that its callers cooperate -- the
+;;;;                anarchic scalability of an Internet-scale system. Issuing a
+;;;;                challenge to anyone for any principal id, and never
+;;;;                discarding one, was an observed failure of it.
+;;;;   Constraint   challenge state is allocated only for registered
+;;;;                principals, and for each it stays bounded through issuance,
+;;;;                expiry and consumption: at most OUTSTANDING-LIMIT unused
+;;;;                challenges, at most CONSUMED-LIMIT consumed ones kept to
+;;;;                name a replay, and expired ones pruned.
+;;;;   Properties   bounded resource consumption -- at most the number of
+;;;;                registered principals times the two limits -- and so
+;;;;                reliability and scalability under untrusted interaction.
+;;;;   Trade-off    a principal holds finitely many challenges at once, and
+;;;;                since issuance is not authenticated, anyone who knows its id
+;;;;                can occupy them until they expire; a replay of a consumed
+;;;;                challenge that has been pruned is refused as unknown rather
+;;;;                than as used.
+;;;;
+;;;; None of this makes authoring RESTful or stateless: the challenges are
+;;;; server-held state, by design.
 
 (in-package #:dreyeck/authenticated-page-authoring)
 
@@ -129,19 +156,57 @@ usable once until EXPIRES-AT, both in server milliseconds."))
 
 (defclass challenge-store ()
   ((challenges :initform (make-hash-table :test #'equal) :reader %store-challenges)
-   (lock :initform (bt:make-lock "authoring challenges") :reader %store-lock)))
+   (by-principal :initform (make-hash-table :test #'equal) :reader %store-by-principal)
+   (outstanding-limit :initarg :outstanding-limit :reader challenge-store-outstanding-limit)
+   (consumed-limit :initarg :consumed-limit :reader challenge-store-consumed-limit)
+   (lock :initform (bt:make-lock "authoring challenges") :reader %store-lock))
+  (:documentation "Every challenge by nonce, and each principal's challenges
+newest first. A principal holds at most OUTSTANDING-LIMIT unused challenges
+and at most CONSUMED-LIMIT consumed ones; expired ones are pruned."))
 
-(defun make-challenge-store () (make-instance 'challenge-store))
+(defun make-challenge-store (&key (outstanding-limit 4) (consumed-limit 8))
+  (check-type outstanding-limit (integer 1))
+  (check-type consumed-limit (integer 0))
+  (make-instance 'challenge-store :outstanding-limit outstanding-limit :consumed-limit consumed-limit))
 
-(defun issue-authoring-challenge (store principal-id &key (now (%now-ms)) (lifetime-ms 60000))
-  "A new challenge for PRINCIPAL-ID, valid until NOW plus LIFETIME-MS."
-  (check-type lifetime-ms (integer 1))
+(defun %prune-challenges (store principal-id now)
+  "Drop PRINCIPAL-ID's expired challenges and all but its newest CONSUMED-LIMIT
+consumed ones. Called with the store's lock held."
+  (let ((kept nil) (consumed 0))
+    (dolist (challenge (gethash principal-id (%store-by-principal store)))
+      (if (or (> now (authoring-challenge-expires-at challenge))
+              (and (authoring-challenge-used-p challenge)
+                   (> (incf consumed) (challenge-store-consumed-limit store))))
+          (remhash (authoring-challenge-nonce challenge) (%store-challenges store))
+          (push challenge kept)))
+    (if kept
+        (setf (gethash principal-id (%store-by-principal store)) (nreverse kept))
+        (remhash principal-id (%store-by-principal store)))))
+
+(defun %issue-challenge (store principal-id now lifetime-ms)
+  "Add a challenge for PRINCIPAL-ID, unless it already holds its limit of
+unused ones. The limit is checked and the challenge added under one lock."
   (let ((challenge (make-instance 'authoring-challenge
                                   :nonce (ironclad:byte-array-to-hex-string (ironclad:random-data 32))
                                   :principal-id principal-id
                                   :issued-at now :expires-at (+ now lifetime-ms))))
     (bt:with-lock-held ((%store-lock store))
+      (%prune-challenges store principal-id now)
+      (when (>= (count-if-not #'authoring-challenge-used-p (gethash principal-id (%store-by-principal store)))
+                (challenge-store-outstanding-limit store))
+        (%refuse :challenge-limit-reached "~A holds ~D unused challenges"
+                 principal-id (challenge-store-outstanding-limit store)))
+      (push challenge (gethash principal-id (%store-by-principal store)))
       (setf (gethash (authoring-challenge-nonce challenge) (%store-challenges store)) challenge))))
+
+(defun issue-authoring-challenge (authority principal-id &key (now (%now-ms)) (lifetime-ms 60000))
+  "A new challenge for PRINCIPAL-ID, valid until NOW plus LIFETIME-MS. Nothing
+is allocated for a principal AUTHORITY does not register, or for one that
+already holds its limit of unused challenges; both are refused."
+  (check-type lifetime-ms (integer 1))
+  (unless (find-authoring-principal (authoring-authority-registry authority) principal-id)
+    (%refuse :unknown-principal "~A" principal-id))
+  (%issue-challenge (authoring-authority-challenges authority) principal-id now lifetime-ms))
 
 (defun find-authoring-challenge (store nonce)
   (bt:with-lock-held ((%store-lock store))
@@ -166,11 +231,14 @@ usable once until EXPIRES-AT, both in server milliseconds."))
 
 (defun %consume-challenge (store challenge envelope principal-id now)
   "Mark CHALLENGE used, after checking it again under the store's lock; of two
-callers with the same challenge exactly one succeeds."
+callers with the same challenge exactly one succeeds. The principal's consumed
+challenges beyond the store's limit are pruned in the same step."
   (bt:with-lock-held ((%store-lock store))
     (let ((problem (%challenge-problem challenge envelope principal-id now)))
       (when problem (%refuse problem "challenge ~A" (authoring-challenge-nonce challenge)))
-      (setf (slot-value challenge 'used-p) t))))
+      (setf (slot-value challenge 'used-p) t)
+      (%prune-challenges store principal-id now)
+      t)))
 
 ;;; Authorization
 
