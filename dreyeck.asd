@@ -2103,7 +2103,8 @@
                                 ((:FILE "dreyeck/src/workflow-authoring")
                                  (:FILE "dreyeck/src/workflow-insert")
                                  (:FILE "dreyeck/src/workflow-cst-replace")
-                                 (:FILE "dreyeck/src/workflow-source-range")))
+                                 (:FILE "dreyeck/src/workflow-source-range")
+                                 (:FILE "dreyeck/src/workflow-remove")))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/workflow/reading" :DESCRIPTION
                                 "Executable ownership, persistence and reconstruction reading"
@@ -2127,6 +2128,7 @@
                                  (:FILE "dreyeck/tests/workflow-insert")
                                  (:FILE "dreyeck/tests/workflow-cst-replace")
                                  (:FILE "dreyeck/tests/workflow-source-range")
+                                 (:FILE "dreyeck/tests/workflow-remove")
                                  (:FILE "dreyeck/tests/workflow-persist"))
                                 :PERFORM
                                 (ASDF/LISP-ACTION:TEST-OP (OPERATION COMPONENT)
@@ -2146,6 +2148,9 @@
                                                           (UIOP/PACKAGE:SYMBOL-CALL
                                                                                     :DREYECK/WORKFLOW/SOURCE-RANGE/TESTS
                                                                                     :RUN-SOURCE-RANGE-TESTS)
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/WORKFLOW/REMOVE/TESTS
+                                                                                    :RUN-REMOVE-TESTS)
                                                           (UIOP/PACKAGE:SYMBOL-CALL
                                                                                     :DREYECK/WORKFLOW/PERSIST/TESTS
                                                                                     :RUN-PERSIST-TESTS)))
