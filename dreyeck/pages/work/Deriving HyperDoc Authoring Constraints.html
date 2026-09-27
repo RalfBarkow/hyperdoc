@@ -69,10 +69,10 @@
 <html-generator>(render-constraint-claims)</html-generator>
 
 <h2>4. Runtime architecture</h2>
-<p>The run-time elements, with Fielding's element kinds. The HTTP connector exists only in a scratch experiment; nginx's authoring role is planned. nginx may terminate TLS and forward; it does not authenticate the principal, and nothing depends on it doing so.</p>
+<p>The run-time elements, with Fielding's element kinds. The HTTP connector is production since 8a019b2f: committed, tested end to end on a loopback socket, and not deployed. nginx's authoring role is planned. nginx may terminate TLS and forward; it does not authenticate the principal, and nothing depends on it doing so.</p>
 <ul><li><a page="Deriving HyperDoc Authoring Constraints" data-topic="signing-client" data-kind="component" data-status="scratch-proven">Signing authoring client</a> — user agent; so far a test signer in a scratch experiment.</li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="nginx-gateway" data-kind="component" data-status="planned">nginx gateway</a> — intermediary at the network boundary.</li>
-<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="http-connector" data-kind="connector" data-status="scratch-proven">HyperDoc HTTP connector</a> — the server connector that would hand the exact envelope and body to the authority; scratch-proven, not production.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="http-connector" data-kind="connector" data-status="production">HyperDoc HTTP connector</a> — the server connector that hands the exact envelope and body to the authority; it listens only on a loopback address, and only when started. Production, not deployed.</li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="envelope-verification" data-kind="component" data-status="production">Envelope verification</a></li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="principal-registry" data-kind="component" data-status="production">Principal registry</a></li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="challenge-store" data-kind="component" data-status="production">Challenge store</a> — freshness.</li>
@@ -124,18 +124,19 @@
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/envelope-verification" data-kind="milestone" data-status="production" data-commit="ab57e9c13e33fb2f4a10ef42ac9a527abaf8c80a">ab57e9c1 signed envelope verification</a></li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/principal-challenge-rule" data-kind="milestone" data-status="production" data-commit="d12d0ed75cbb20d189332afe2900c81549c2aed1">d12d0ed7 principal, challenge, rule, capability</a></li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/bounded-challenges" data-kind="milestone" data-status="production" data-commit="9a041fdd2a7b14d3fc7ad57672460c1f87827005">9a041fdd bounded challenge lifecycle</a></li>
-<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/signed-http-transport" data-kind="milestone" data-status="scratch-proven">Signed HTTP transport</a> — scratch-proven: signed requests reached the authority chain over a loopback HTTP connector, without a session or proxy authentication. Not a production commit.</li>
-<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/production-http-adapter" data-kind="milestone" data-status="planned">Production HTTP adapter</a> — planned.</li></ul>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/http-transport-experiment" data-kind="milestone" data-status="scratch-proven">HTTP transport experiment</a> — scratch-proven: signed requests reached the authority chain over a loopback HTTP connector, without a session or proxy authentication. Not in repository history.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/signed-http-transport" data-kind="milestone" data-status="production" data-commit="8a019b2f67c32a1bb9f678b7b3e4af90c81c2970">8a019b2f signed HTTP transport</a> — production: the adapter the experiment prototyped, with its end-to-end tests. Not deployed.</li></ul>
 <ul><li data-from="milestone/work-read-side" data-to="milestone/page-slug-confinement" data-relation="precedes">c23e36f9 → 632ae72d: precedes.</li>
 <li data-from="milestone/page-slug-confinement" data-to="milestone/m0-page-edit" data-relation="precedes">632ae72d → bb8bf21f: precedes.</li>
 <li data-from="milestone/m0-page-edit" data-to="milestone/envelope-verification" data-relation="precedes">bb8bf21f → ab57e9c1: precedes.</li>
 <li data-from="milestone/envelope-verification" data-to="milestone/principal-challenge-rule" data-relation="precedes">ab57e9c1 → d12d0ed7: precedes.</li>
 <li data-from="milestone/principal-challenge-rule" data-to="milestone/bounded-challenges" data-relation="precedes">d12d0ed7 → 9a041fdd: precedes.</li>
-<li data-from="milestone/signed-http-transport" data-to="milestone/principal-challenge-rule" data-relation="exercised over HTTP">Signed HTTP transport → d12d0ed7: exercised over HTTP.</li>
-<li data-from="milestone/signed-http-transport" data-to="milestone/bounded-challenges" data-relation="exposed the failure fixed by">Signed HTTP transport → 9a041fdd: exposed the failure fixed by.</li>
-<li data-from="milestone/signed-http-transport" data-to="milestone/production-http-adapter" data-relation="prototypes">Signed HTTP transport → Production HTTP adapter: prototypes.</li>
-<li data-from="milestone/bounded-challenges" data-to="milestone/production-http-adapter" data-relation="unblocks">9a041fdd → Production HTTP adapter: unblocks.</li></ul>
-<ul><li data-from="public-network-authoring" data-to="milestone/signed-http-transport" data-relation="work:relation/evidenced-by">Public network authoring → Signed HTTP transport.</li>
+<li data-from="milestone/bounded-challenges" data-to="milestone/signed-http-transport" data-relation="precedes">9a041fdd → 8a019b2f: precedes.</li>
+<li data-from="milestone/http-transport-experiment" data-to="milestone/principal-challenge-rule" data-relation="exercised over HTTP">HTTP transport experiment → d12d0ed7: exercised over HTTP.</li>
+<li data-from="milestone/http-transport-experiment" data-to="milestone/bounded-challenges" data-relation="exposed the failure fixed by">HTTP transport experiment → 9a041fdd: exposed the failure fixed by.</li>
+<li data-from="milestone/http-transport-experiment" data-to="milestone/signed-http-transport" data-relation="prototypes">HTTP transport experiment → 8a019b2f: prototypes.</li></ul>
+<ul><li data-from="public-network-authoring" data-to="milestone/signed-http-transport" data-relation="work:relation/evidenced-by">Public network authoring → 8a019b2f.</li>
+<li data-from="public-network-authoring" data-to="milestone/http-transport-experiment" data-relation="work:relation/evidenced-by">Public network authoring → HTTP transport experiment.</li>
 <li data-from="signed-intent" data-to="milestone/envelope-verification" data-relation="work:relation/evidenced-by">Signed intent → ab57e9c1.</li>
 <li data-from="authenticated-principal" data-to="milestone/principal-challenge-rule" data-relation="work:relation/evidenced-by">Authenticated principal → d12d0ed7.</li>
 <li data-from="single-use-freshness" data-to="milestone/principal-challenge-rule" data-relation="work:relation/evidenced-by">Single-use freshness → d12d0ed7.</li>
@@ -160,16 +161,16 @@
 <li><strong>Trade-off.</strong> Finitely many simultaneous challenges per principal; old replay diagnostics disappear, so a pruned replay is refused as unknown rather than as used; issuance is not authenticated, so anyone knowing a principal's id can occupy its challenges until they expire.</li></ul>
 
 <h2>7. What has NOT been established</h2>
-<ul><li>No production HTTP adapter exists; the signed HTTP transport is scratch-proven only.</li>
+<ul><li>The production HTTP adapter (8a019b2f) has been exercised only on a loopback socket in tests. It is not deployed: no nginx route, no TLS and no public listener exist for authoring.</li>
 <li>Nothing is deployed, and no nginx or TLS configuration for authoring has been checked.</li>
 <li>Scalability and reliability under adversarial load are intended properties; neither has been measured.</li>
 <li>The principal registry and the challenges live in memory: no durability, no key enrollment, rotation or recovery.</li>
 <li>No fsync: crash durability of an effect is not established. Another process writing the same page is not serialized.</li>
-<li>Challenge issuance is not authenticated; there is no rate limiting.</li>
+<li>Challenge issuance is not authenticated; there is no rate limiting. Because issuance answers only registered principals, a caller can tell a registered principal id from an unknown one.</li>
 <li>HyperDoc Authoring is not shown to be RESTful, and it is not stateless: challenges, the registry and page locks are server-held state.</li></ul>
 
 <h2>8. Next architectural boundary</h2>
-<p>After 9a041fdd, the next boundary this derivation justifies is a <strong>production HTTP adapter</strong>: the connector that carries the exact envelope and body to the authority, with bounded request bodies and no session. It is identified here, not implemented.</p>
+<p>After 9a041fdd, the next boundary this derivation justified was a <strong>production HTTP adapter</strong>: the connector that carries the exact envelope and body to the authority, with bounded request bodies and no session. Since 8a019b2f it exists, tested on a loopback socket. What reaches it from outside, and under which operator policy, is the next question; this page does not decide it.</p>
 <p>Browser key storage, nginx deployment and Lisp source or image authoring remain separate questions.</p>
 <p><strong>Remote evaluation is not the model.</strong> Fielding's Remote Evaluation style sends code from client to server for execution; its main limitation is lost visibility, since the server receives code instead of standardized requests, which is a deployment problem when the server cannot trust its clients (<a href="https://ics.uci.edu/~fielding/pubs/dissertation/net_arch_styles.htm">§3.5.2</a>). Prospective Lisp authoring is therefore not represented as a client sending Lisp for the server to EVAL. A signed request carries semantic data and server-known identifiers; the server constructs a bounded operation from them, derives a scoped capability, and only then causes an effect. This avoids a Remote Evaluation interaction style for public authoring.</p>
 <p><a page="Work Breakdown">Work Breakdown</a> · <a page="HyperDoc Authoring as a Constraint Derivation">Lisp code for this page</a> · <a expr="(architecture-workspace)" view="Topicmap">Open the authoring architecture Topicmap</a></p>

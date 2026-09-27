@@ -207,7 +207,7 @@
                          for object = (tm:topicmap-topic-object-of topic)
                          when (typep object 'git:git-commit)
                            collect (cons (tm:topicmap-topic-id-of topic) object))))
-      (assert (= 6 (length commits)))
+      (assert (= 7 (length commits)))
       (dolist (entry commits)
         (assert (git:git-commit-object-present-p repository (git:git-commit-hash-of (cdr entry))))
         ;; A hash is provenance, never part of a Topic's identity.
@@ -231,12 +231,29 @@
       (when (equal "milestone" (%property topic :kind))
         (assert (eq (equal "production" (%property topic :status))
                     (typep (tm:topicmap-topic-object-of topic) 'git:git-commit)))))
-    (let ((transport (%topic projection "milestone/signed-http-transport")))
-      (assert (equal "scratch-proven" (%property transport :status)))
-      (assert (eq (arch:architecture-page) (tm:topicmap-topic-object-of transport))))
-    (assert (equal "planned" (%property (%topic projection "milestone/production-http-adapter") :status)))
-    (assert (equal "scratch-proven" (%property (%topic projection "http-connector") :status)))
-    (assert (equal "planned" (%property (%topic projection "nginx-gateway") :status)))))
+    ;; The signed HTTP transport is production: it stands for the commit that
+    ;; added the adapter and its tests, after 9a041fdd.
+    (let* ((transport (%topic projection "milestone/signed-http-transport"))
+           (commit (tm:topicmap-topic-object-of transport)))
+      (assert (equal "production" (%property transport :status)))
+      (assert (typep commit 'git:git-commit))
+      (let ((changed (git:git-commit-changed-files commit)))
+        (dolist (path '("dreyeck/src/authoring-http.lisp" "dreyeck/tests/authoring-http.lisp"))
+          (assert (find path changed :test (lambda (p line) (search p line))))))
+      (assert (member '("milestone/bounded-challenges" "milestone/signed-http-transport")
+                      (%edges projection "precedes") :test #'equal)))
+    ;; The experiment that prototyped it stays what it was.
+    (let ((experiment (%topic projection "milestone/http-transport-experiment")))
+      (assert (equal "scratch-proven" (%property experiment :status)))
+      (assert (eq (arch:architecture-page) (tm:topicmap-topic-object-of experiment)))
+      (assert (member '("milestone/http-transport-experiment" "milestone/signed-http-transport")
+                      (%edges projection "prototypes") :test #'equal)))
+    ;; The planned adapter is resolved into the production one, not kept beside it.
+    (assert (null (tm:topicmap-projection-topic-by-id projection "milestone/production-http-adapter")))
+    (assert (equal "production" (%property (%topic projection "http-connector") :status)))
+    ;; Production is not deployed: the gateway is still planned, and the page says so.
+    (assert (equal "planned" (%property (%topic projection "nginx-gateway") :status)))
+    (assert (search "It says nothing about deployment." (arch:architecture-source)))))
 
 ;;;; The run-time view: components, connectors, data
 
@@ -453,7 +470,7 @@ negating it."
 rendered; the derivation is the seven-constraint chain with requirement, constraint ~
 and trade-off each; ten property claims, intended kept apart from demonstrated; ~
 9a041fdd is the commit behind bounded challenges, with its source and tests; ~
-the HTTP transport is scratch-proven; the run-time view has its components, ~
+the HTTP transport is production, prototyped in scratch, not deployed; the run-time view has its components, ~
 connectors and data, and nginx does not authenticate; no geometry is authored; ~
 TALA lays out all three views and a changed graph, every shape and edge an ~
 Inspector reference; native navigation reaches the commit; no REST or stateless ~
