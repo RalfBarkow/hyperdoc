@@ -1223,6 +1223,29 @@
                                        :run-authenticated-page-authoring-tests)
                (error "Authenticated page authoring tests failed."))))
 
+(defsystem "dreyeck/authoring-http"
+  :description "Signed HyperDoc authoring over HTTP: transport to the authenticated authoring chain; a loopback listener, opened only on request"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on ("dreyeck/authenticated-page-authoring" "clack" "clack-handler-hunchentoot"
+               "usocket" "shasht" "bordeaux-threads")
+  :components ((:file "authoring-http-package") (:file "authoring-http"))
+  :in-order-to ((test-op (test-op "dreyeck/authoring-http/tests"))))
+
+(defsystem "dreyeck/authoring-http/tests"
+  :description "Signed authoring on a loopback socket: end to end, replay, route binding, tampering, no ambient authority, bounded bodies"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :depends-on ("dreyeck/authoring-http" "dreyeck/work/reading" "drakma" "alexandria" "ironclad")
+  :components ((:file "authoring-http"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (unless (uiop:symbol-call :dreyeck/authoring-http/tests :run-authoring-http-tests)
+               (error "Authoring HTTP tests failed."))))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SHOP3
   :DESCRIPTION
   "SHOP3-backed HTN planning layer owned by Dreyeck"
