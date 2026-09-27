@@ -1176,6 +1176,29 @@
                                        :run-fedwiki-page-authoring-tests)
                (error "FedWiki page authoring tests failed."))))
 
+(defsystem "dreyeck/authoring-envelope"
+  :description "Parse and verify signed hyperdoc-authoring-v1 envelopes (secp256k1 over Keccak-256); no principal, nonce, authorization or HTTP"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/src/"
+  :serial t
+  :depends-on ("ironclad" "html-inspector-views")
+  :components ((:file "authoring-envelope-package") (:file "authoring-envelope"))
+  :in-order-to ((test-op (test-op "dreyeck/authoring-envelope/tests"))))
+
+(defsystem "dreyeck/authoring-envelope/tests"
+  :description "Public cross-language vectors and refusals for authoring envelopes"
+  :license "BSD"
+  :version "0.0.1"
+  :pathname "dreyeck/tests/"
+  :depends-on ("dreyeck/authoring-envelope" "shasht")
+  :components ((:file "authoring-envelope"))
+  :perform (test-op (operation component)
+             (declare (ignore operation component))
+             (unless (uiop:symbol-call :dreyeck/authoring-envelope/tests
+                                       :run-authoring-envelope-tests)
+               (error "Authoring envelope tests failed."))))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/SHOP3
   :DESCRIPTION
   "SHOP3-backed HTN planning layer owned by Dreyeck"

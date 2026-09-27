@@ -1,0 +1,31 @@
+{
+  "about": "Public test vectors for HyperDoc authoring-envelope verification. Signatures were made with sessionless-node 0.11.0 (secp256k1 ECDSA over Ethereum Keccak-256 of the UTF-8 message bytes) using ephemeral keys that were never stored. Only public material is here.",
+  "contract": {
+    "curve": "secp256k1",
+    "digest": "Keccak-256 as used by Ethereum (original Keccak padding), not SHA3-256",
+    "message": "the exact UTF-8 bytes",
+    "publicKey": "compressed SEC1 point, 33 bytes, 66 lowercase hex characters, 02 or 03 prefix",
+    "signature": "compact r||s, 64 bytes, 128 lowercase hex characters, 1 <= r < n, 1 <= s <= n/2"
+  },
+  "digestKnownAnswers": {
+    "emptyKeccak256": "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470",
+    "emptySha3_256": "a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a"
+  },
+  "message": {
+    "text": "hyperdoc interop vector: é ✓",
+    "utf8Hex": "6879706572646f6320696e7465726f7020766563746f723a20c3a920e29c93",
+    "keccak256": "8fce705d9b15faeb65ebba5a84c6650d9e96ced1be1d156d42f05ce9fac8b51f",
+    "publicKey": "0391e90093231841f2ebea81dc0cef35d1680413ced05eb8e3ca183da76b03a4b2",
+    "signature": "e5f14ef440b69fc9bcbd1e87121a115123de149584511f4ee6558928bb772b4552569455d99c30a13cbbcd06e695b65806d29a4a0b513f979e2ca866746ff944"
+  },
+  "envelope": {
+    "text": "hyperdoc-authoring-v1\nservice=hyperdoc-authoring-test\nprincipal=principal-5f1c0a9e3b7d4c2a8e6f1b0d9c7a5e3f\noperation=fedwiki-page-edit\nsite=dreyeck.ch\npage=work-breakdown\nnonce=3c9e1f7a5b2d8e4c6a0f1b3d5e7a9c2e4f6b8d0a1c3e5f7b9d2a4c6e8f0b1d3a\nissued-at=1790486348545\nexpires-at=1790486408545\nbody-keccak256=7744ddf50e4ec9b56b65a8db367e9ff64432e6c8d9a899ad27d7361ca819ffcd",
+    "keccak256": "b36856131be39ebb6d0071e57e3a262f30740806c40477c1e14036c8a20cc4ae",
+    "body": "{\"expected\":{\"id\":\"a1b2c3d4e5f60718\",\"type\":\"work-relationship\",\"from\":\"interaction\",\"relation\":\"work:relation/informs\",\"to\":\"operations\",\"text\":\"Interaction → Operations and change: informs.\"},\"action\":{\"type\":\"edit\",\"id\":\"a1b2c3d4e5f60718\",\"item\":{\"id\":\"a1b2c3d4e5f60718\",\"type\":\"work-relationship\",\"from\":\"interaction\",\"relation\":\"work:relation/requires\",\"to\":\"operations\",\"text\":\"Interaction → Operations and change: informs.\"},\"date\":1790486348600}}",
+    "bodyUtf8Hex": "7b226578706563746564223a7b226964223a2261316232633364346535663630373138222c2274797065223a22776f726b2d72656c6174696f6e73686970222c2266726f6d223a22696e746572616374696f6e222c2272656c6174696f6e223a22776f726b3a72656c6174696f6e2f696e666f726d73222c22746f223a226f7065726174696f6e73222c2274657874223a22496e746572616374696f6e20e28692204f7065726174696f6e7320616e64206368616e67653a20696e666f726d732e227d2c22616374696f6e223a7b2274797065223a2265646974222c226964223a2261316232633364346535663630373138222c226974656d223a7b226964223a2261316232633364346535663630373138222c2274797065223a22776f726b2d72656c6174696f6e73686970222c2266726f6d223a22696e746572616374696f6e222c2272656c6174696f6e223a22776f726b3a72656c6174696f6e2f7265717569726573222c22746f223a226f7065726174696f6e73222c2274657874223a22496e746572616374696f6e20e28692204f7065726174696f6e7320616e64206368616e67653a20696e666f726d732e227d2c2264617465223a313739303438363334383630307d7d",
+    "bodyKeccak256": "7744ddf50e4ec9b56b65a8db367e9ff64432e6c8d9a899ad27d7361ca819ffcd",
+    "publicKey": "02a1a1c75262e636e51d5dec3dcb405bda0e0d2b223aa0ae701ed60792eb82cbbf",
+    "signature": "c083cd86bf875023c88a14cf257ae8c1f13da512846cb99c23c5bfaa81174c5364264938284429f64a4eefae58032feceb861a6a74b53c27e78ecef1e793182a"
+  },
+  "offCurvePublicKey": "020000000000000000000000000000000000000000000000000000000000000005"
+}
