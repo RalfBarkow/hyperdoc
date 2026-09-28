@@ -221,6 +221,22 @@
                              "(PROGN
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
  (ASSERT (= 17 (LENGTH (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*))))
+ (LET ((BOOK (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/work/reading\" :SIGNAL-ERROR? T)))
+   (ASSERT (= 1 (COUNT \"dreyeck/work/reading\"
+                      (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*)
+                      :KEY #'HYPERBOOK:ID-OF :TEST #'STRING=)))
+   (ASSERT (STRING= \"Working on HyperDoc\" (HYPERBOOK:TITLE-OF BOOK)))
+   (ASSERT (STRING= \"Work Breakdown\" (HYPERBOOK:MAIN-PAGE-ID-OF BOOK)))
+   (ASSERT (NULL (HYPERBOOK:FIND-HYPERBOOK \"dreyeck/working-on-hyperdoc\")))
+   (DOLIST (TITLE '(\"Federated Wiki deployment state\" \"wiki.ralfbarkow.ch deployment\"
+                    \"dreyeck.ch deployment\" \"Cookie Secret\"))
+     (LET* ((PAGE (HYPERBOOK:FIND-PAGE BOOK TITLE :SIGNAL-ERROR? T))
+            (VIEW (FIND \"Content\" (HTML-INSPECTOR-VIEWS:ALL-VIEWS PAGE)
+                        :KEY #'HTML-INSPECTOR-VIEWS:VIEW-TITLE :TEST #'STRING=)))
+       (ASSERT VIEW)
+       (HTML-INSPECTOR-VIEWS:VIEW-HTML VIEW)
+       (ASSERT (NOTANY (LAMBDA (REF) (TYPEP (CDR REF) 'CONDITION))
+                       (HTML-INSPECTOR-VIEWS:VIEW-REFERENCES VIEW))))))
  ;; The seventeenth is Working on HyperDoc. The
  ;; count is pinned so that catalog membership stays a decision; naming
  ;; the book here keeps the number attached to its reason.

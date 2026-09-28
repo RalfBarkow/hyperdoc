@@ -1,0 +1,11 @@
+<h1>dreyeck.ch deployment</h1>
+<in-package>dreyeck/work/deployment-reading</in-package>
+<p>Two separate operator-supplied observations. Observation time not supplied; no host query is performed here.</p>
+<h2>Checkout observation</h2>
+<p>Path: <code>/home/rgb/workspace/hyperdoc</code>. Checkout HEAD: <code>84ee991aa4591a873a63753b89b37737ba5f2efc</code>.</p>
+<h2>Service observation</h2>
+<p>Service: <code>hyperdoc.service</code>. Reported state: <code>ActiveState=active</code>, <code>SubState=running</code>.</p>
+<pre>nix develop .#tala -c ./scripts/serve-catalog.sh 8080</pre>
+<p>This is the supplied ExecStart command. Its relative paths do not establish which directory the service uses. The service WorkingDirectory and its relationship to the observed checkout HEAD are <strong>not established</strong>.</p>
+<p>HyperDoc's Federated Wiki integration does not prove that this host runs a Node Federated Wiki service. No such service claim is made.</p>
+<p><a expr="(deployment-evidence)">Inspect the separate observations</a> · <a page="Federated Wiki deployment state">Deployment reading</a> · <a page="Work Breakdown">Work Breakdown</a></p>

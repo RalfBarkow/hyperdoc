@@ -2292,7 +2292,8 @@
                "dreyeck/inspector/git")
   :serial t
   :components ((:module "dreyeck/work" :components ((:file "reading")
-                                                    (:file "authoring-architecture")))
+                                                    (:file "authoring-architecture")
+                                                    (:file "deployment-reading")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
                  (:static-file "Interaction.html")
@@ -2304,7 +2305,11 @@
                  (:static-file "Planning with SHOP3.html")
                  (:static-file "D2 Connections.html")
                  (:static-file "Relation Contract informs.html")
-                 (:static-file "Deriving HyperDoc Authoring Constraints.html")))))
+                 (:static-file "Deriving HyperDoc Authoring Constraints.html")
+                 (:static-file "Federated Wiki deployment state.html")
+                 (:static-file "wiki.ralfbarkow.ch deployment.html")
+                 (:static-file "dreyeck.ch deployment.html")
+                 (:static-file "Cookie Secret.html")))))
 
 (defsystem "dreyeck/work/reading/tests"
   :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset"
@@ -2312,12 +2317,14 @@
   :serial t
   :components ((:file "dreyeck/tests/work-reading")
                (:file "dreyeck/tests/work-reading-live")
-               (:file "dreyeck/tests/work-authoring-architecture"))
+               (:file "dreyeck/tests/work-authoring-architecture")
+               (:file "dreyeck/tests/work-deployment-reading"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/tests :run-tests)
              (uiop:symbol-call :dreyeck/work/authoring-architecture/tests
-                               :run-authoring-architecture-tests)))
+                               :run-authoring-architecture-tests)
+             (uiop:symbol-call :dreyeck/work/deployment-reading/tests :run-tests)))
 
 (defsystem "dreyeck/work/planning"
   :description "Optional in-memory SHOP3 documentation experiment; no executor"

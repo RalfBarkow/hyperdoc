@@ -1,0 +1,11 @@
+<h1>Federated Wiki deployment state</h1>
+<in-package>dreyeck/work/deployment-reading</in-package>
+<p>This reading connects HyperDoc, its Federated Wiki integration and two separately observed hosts. It records operator-supplied snapshots, not live monitoring or eternal configuration. The observation time was not supplied; no capture date is invented.</p>
+<p>The supplied wiki.ralfbarkow.ch witness names source <code>b42eb888d6e5d59803667c6320e0779523fc265c</code>, artifact <code>/nix/store/q8ppar443gy3ahm33hbbp3b5kwf4j930-wiki-p41-0.41.0-rc.3</code>, and <code>wiki.service</code> active/running with ExecStart pointing to that artifact's <code>bin/wiki</code>.</p>
+<p><a page="wiki.ralfbarkow.ch deployment">wiki.ralfbarkow.ch deployment</a> supplies the P41 reading anchor. <a page="dreyeck.ch deployment">dreyeck.ch deployment</a> keeps its checkout observation separate from its service observation. Federated Wiki integration does not establish that dreyeck.ch runs a Node Federated Wiki service.</p>
+<h2>Inspect the supplied evidence</h2>
+<source-of-function>deployment-evidence</source-of-function>
+<p><a expr="(deployment-evidence)">Inspect the evidence record</a>. This returns fresh ordinary Lisp data; it does not query a host, inspect a checkout or execute a service command.</p>
+<dl><dt>Observed</dt><dd>Facts reported by the operator, with that provenance retained. They were not independently observed by this reading.</dd><dt>Derived</dt><dd>A mechanical consequence with its inputs identified; none added here.</dd><dt>Inferred</dt><dd>An interpretation with its basis stated; none added here.</dd><dt>Hypothesized</dt><dd>An unverified proposition; none added here.</dd></dl>
+<p>Missing relations remain unresolved. In particular, a checkout and an active service on the same host do not establish the service's WorkingDirectory or source commit.</p>
+<p>Continue with <a page="Cookie Secret">Cookie Secret</a>, or return to <a page="Work Breakdown">Work Breakdown</a>.</p>
