@@ -35,13 +35,21 @@
     "work:connections-example:demonstrates:connection"
     "work:connections-example:compares-with:association"
     "work:connections-example:raises-question-for:connect"
-    "work:connections-example:is-related-in:topicmap"))
+    "work:connections-example:is-related-in:topicmap"
+    "work:operations:work:relation/informs:fedwiki-item-authoring"
+    "work:dogfooding:develops:hyperdoc-authoring-interaction"
+    "work:authoring-listener-startup:requires:production-authoring-authority"
+    "work:authoring-nginx-route:requires:authoring-listener-startup"
+    "work:fedwiki-item-authoring:develops:hyperdoc-authoring"
+    "work:hyperdoc-page-authoring:develops:hyperdoc-authoring"
+    "work:lisp-source-authoring:develops:hyperdoc-authoring"
+    "work:running-image-authoring:develops:hyperdoc-authoring"))
 
 (defun check-projection-integrity (projection)
   (let* ((topics (tm:topicmap-projection-topics-of projection))
          (associations (tm:topicmap-projection-associations-of projection))
          (ids (mapcar #'tm:topicmap-association-id-of associations)))
-    (assert (= 13 (length topics)))
+    (assert (= 22 (length topics)))
     (assert (= (length *expected-work-associations*) (length ids)))
     (dolist (id *expected-work-associations*)
       (assert (= 1 (count id ids :test #'equal))))
@@ -113,14 +121,15 @@
     ;; Each informs edge shows the contract label; no sign shows the reference.
     (let ((html (views:view-html view)))
       (dolist (id '("work:interaction:work:relation/informs:operations"
-                    "work:operations:work:relation/informs:connect"))
+                    "work:operations:work:relation/informs:connect"
+                    "work:operations:work:relation/informs:fedwiki-item-authoring"))
         (let* ((start (search (format nil "data-association-id='~A'" id) html))
                (sign (subseq html start (search "</g>" html :start2 start))))
           (assert (search ">informs</text>" sign))))
       (assert (not (search "work:relation/informs</text>" html)))
       ;; Typed-associations legend rows too. The Topics legend still lists the
       ;; contract Topic under its ID, which is what that column shows.
-      (assert (= 2 (count-matches "<tr><td><code>informs</code></td>" html)))
+      (assert (= 3 (count-matches "<tr><td><code>informs</code></td>" html)))
       (assert (not (search "&quot;work:relation/informs&quot;" html))))
     (dolist (entry '(("interaction" "Interaction")
                      ("operations" "Operations and Change")
@@ -246,9 +255,10 @@
     (let ((requires (association-between projection "operations" "state")))
       (assert (equal "requires" (tm:topicmap-association-type-of requires)))
       (assert (null (tm:topicmap-association-relation-label requires))))
-    ;; Uses: exactly the two informs Associations, by EQUAL.
+    ;; Uses: exactly the three informs Associations, by EQUAL.
     (let ((uses (work:relation-uses projection *informs*)))
-      (assert (= 2 (length uses)))
+      (assert (= 3 (length uses)))
+      (assert (member (association-between projection "operations" "fedwiki-item-authoring") uses :test #'eq))
       (assert (every (lambda (a) (member a uses :test #'eq)) informs)))
     (assert (null (work:relation-uses projection (copy-seq "informs"))))
     ;; The seven-area projection leaves the contract Topic out and still resolves.
@@ -362,12 +372,13 @@
                      (tm:topicmap-association-id-of before)))
       (assert (equal "work:interaction:requires:operations"
                      (tm:topicmap-association-id-of after)))
-      (assert (equal (list other) (work:relation-uses retyped *informs*))))
-    ;; D. Uses returns both distinct informs Associations.
+      (assert (equal (list other (association-between retyped "operations" "fedwiki-item-authoring"))
+                     (work:relation-uses retyped *informs*))))
+    ;; D. Uses returns every distinct informs Association, in page order.
     (let ((uses (work:relation-uses baseline *informs*)))
-      (assert (= 2 (length uses)))
+      (assert (= 3 (length uses)))
       (assert (not (eq (first uses) (second uses))))
-      (assert (equal '("interaction" "operations")
+      (assert (equal '("interaction" "operations" "operations")
                      (mapcar #'tm:topicmap-association-from-of uses))))))
 
 (defun check-relation-contract-inspection ()
@@ -391,7 +402,8 @@
         (assert (eq page (work:work-page "Relation Contract: informs")))
         (let ((uses (find-if #'consp (references page "Content"))))
           (assert (equal '("work:interaction:work:relation/informs:operations"
-                           "work:operations:work:relation/informs:connect")
+                           "work:operations:work:relation/informs:connect"
+                           "work:operations:work:relation/informs:fedwiki-item-authoring")
                          (mapcar #'tm:topicmap-association-id-of uses))))))
     ;; The Workspace lists the label at a Point that an informs edge touches.
     (let* ((workspace (work:work-workspace))
@@ -399,7 +411,7 @@
                         (find "Topicmap" (views:all-views workspace)
                               :key #'views:view-title :test #'equal)))
            (html (views:view-html view)))
-      (assert (= 2 (count-matches "<tt>informs</tt>" html)))
+      (assert (= 3 (count-matches "<tt>informs</tt>" html)))
       (assert (not (search "<tt>work:relation/" html))))))
 
 ;;;; Interactive TALA: one Inspector reference per D2 group
@@ -904,7 +916,7 @@ and no request contains this edit."
       (assert (eq o-first (work:resolve-work-relationship-occurrence o-first :current duplicated)))
       (assert (eq o-second (work:resolve-work-relationship-occurrence o-second :current duplicated)))
       ;; Stale unless the source is exactly the snapshot. Nothing relocates.
-      (assert (stale-p o-first (replace-once duplicated "This is the current work" "This is the present work")))
+      (assert (stale-p o-first (replace-once duplicated "This page is the current work map" "This page is the present work map")))
       (assert (stale-p o-first (replace-once duplicated "Open questions:" "Questions still open:")))
       (assert (stale-p o-first (replace-once duplicated +a1-item+
                                              (concatenate 'string "<li data-from=\"state\" data-to=\"connect\" data-relation=\"requires\">new</li>" +a1-item+))))
@@ -923,8 +935,8 @@ and no request contains this edit."
                        (mapcar #'tm:topicmap-association-type-of pair)))
         (assert (= (work:relationship-occurrence-ordinal o-second)
                    (work:relationship-occurrence-ordinal (occurrence-of (second pair)))))
-        (assert (= 2 (length (work:relation-uses after "work:relation/informs"))))
-        (assert (= 3 (length (work:relation-uses (fixture-projection duplicated) "work:relation/informs"))))))
+        (assert (= 3 (length (work:relation-uses after "work:relation/informs"))))
+        (assert (= 4 (length (work:relation-uses (fixture-projection duplicated) "work:relation/informs"))))))
     ;; The accepted forms.
     (flet ((same-relationships-p (html)
              (equal (mapcar (lambda (a) (let ((o (occurrence-of a)))
@@ -1104,7 +1116,7 @@ contract page, reused because the fixture needs some page object."
       (refused a1 "interaction" fixture "not a Relation Contract" 'work:relation-contract-reference-error)
       (refused a1 "work:relation/informs" fixture "already uses")
       ;; Stale: any difference from the snapshot, however it came about.
-      (dolist (current (list (replace-once fixture "This is the current work" "This is the present work")
+      (dolist (current (list (replace-once fixture "This page is the current work map" "This page is the present work map")
                              (replace-once fixture "<h2>Navigate and inspect</h2>"
                                            (concatenate 'string "<ul>" +a1-item+ "</ul><h2>Navigate and inspect</h2>"))
                              (replace-once (replace-once fixture +a1-item+ "")
@@ -1193,10 +1205,18 @@ informs contract page."
                               (tm:topicmap-topic-object-of contract)))
           (tm:topicmap-association-relation-label association))))
 
+(defun fedwiki-fixture-html ()
+  "Work Breakdown.html as it was when the FedWiki fixture was written from
+it, at c23e36f9. The live page has grown since; the fixture has not."
+  (uiop:read-file-string
+   (asdf:system-relative-pathname "dreyeck" "dreyeck/tests/fixtures/work-fedwiki-site/work-breakdown.html")
+   :external-format :utf-8))
+
 (defun check-fedwiki-work-projection ()
   "The Work of Work Breakdown.html, authored as FedWiki Items, projects to the
-same Topics, Associations, contracts and uses. Only the occurrences differ."
-  (let ((source (work-breakdown-source))
+same Topics, Associations, contracts and uses. Only the occurrences differ.
+Both are the Work of c23e36f9, from which the FedWiki fixture was written."
+  (let ((source (fedwiki-fixture-html))
         (page (fedwiki-fixture "work-breakdown")))
     (dolist (areas-only '(nil t))
       (let* ((html (fixture-projection source :areas-only areas-only))
@@ -1482,6 +1502,89 @@ not depend on the authoring runtime."
     (assert (not (member "dreyeck/workflow/authoring" (system-dependency-names "dreyeck/work/reading")
                          :test #'equal)))))
 
+(defparameter *seven-areas*
+  '(("interaction" "Interaction" "prototype") ("operations" "Operations and change" "open")
+    ("connect" "Connect / Associations" "open") ("state" "State and persistence" "open")
+    ("dogfooding" "HyperDoc dogfooding" "in use") ("corpus" "D2 example corpus" "one new example")
+    ("planning" "Planning / SHOP3" "experiment"))
+  "The seven areas, with their labels and work statuses, unchanged.")
+
+(defparameter *authoring-work-items*
+  '(("fedwiki-item-authoring" "in progress") ("production-authoring-authority" "open")
+    ("authoring-listener-startup" "blocked") ("authoring-nginx-route" "blocked")
+    ("hyperdoc-authoring-interaction" "open") ("hyperdoc-page-authoring" "open")
+    ("lisp-source-authoring" "open") ("running-image-authoring" "future"))
+  "The HyperDoc Authoring work items, with their work statuses.")
+
+(defparameter *authoring-effect-items*
+  '("fedwiki-item-authoring" "hyperdoc-page-authoring" "lisp-source-authoring" "running-image-authoring")
+  "Different effect and authority classes; not a sequence.")
+
+(defun check-authoring-work ()
+  "Work Breakdown is the current work map: the seven areas unchanged, the
+Connections example still complete, HyperDoc Authoring one concept with its
+work items, only warranted relationships, and no architecture copied in."
+  (let* ((projection (work:work-projection))
+         (topics (tm:topicmap-projection-topics-of projection)))
+    (flet ((topic (id)
+             (let ((matches (remove id topics :key #'tm:topicmap-topic-id-of :test-not #'equal)))
+               (assert (= 1 (length matches)) () "~A occurs ~D times." id (length matches))
+               (first matches)))
+           (property (topic name) (getf (tm:topicmap-topic-view-properties-of topic) name))
+           (edge-p (from relation to)
+             (find-if (lambda (a) (and (equal from (tm:topicmap-association-from-of a))
+                                       (equal relation (tm:topicmap-association-type-of a))
+                                       (equal to (tm:topicmap-association-to-of a))))
+                      (tm:topicmap-projection-associations-of projection))))
+      (loop for (id label status) in *seven-areas*
+            for area = (topic id)
+            do (assert (equal label (tm:topicmap-topic-label-of area)))
+               (assert (equal "area" (property area :kind)))
+               (assert (equal status (property area :status))))
+      (assert (= 7 (count "area" topics :key (lambda (topic) (property topic :kind)) :test #'equal)))
+      (let ((example (topic "connections-example")))
+        (assert (equal "work item" (property example :kind)))
+        (assert (equal "complete" (property example :status))))
+      (let ((concept (topic "hyperdoc-authoring")))
+        (assert (equal "concept" (property concept :kind)))
+        (assert (eq (work:work-page "Deriving HyperDoc Authoring Constraints")
+                    (tm:topicmap-topic-object-of concept))))
+      (loop for (id status) in *authoring-work-items*
+            for item = (topic id)
+            do (assert (equal "work item" (property item :kind)))
+               (assert (equal status (property item :status)))
+               (assert (typep (tm:topicmap-topic-object-of item) 'hyperdoc:page)))
+      ;; The architecture stays on its own page: none of its requirements,
+      ;; constraints or properties is a Work Topic.
+      (let ((copied 0))
+        (dolist (topic (tm:topicmap-projection-topics-of
+                        (dreyeck/work/authoring-architecture:architecture-projection)))
+          (when (member (property topic :kind) '("requirement" "constraint" "property") :test #'equal)
+            (incf copied)
+            (assert (null (tm:topicmap-projection-topic-by-id projection (tm:topicmap-topic-id-of topic)))
+                    () "~A is copied into Work Breakdown." (tm:topicmap-topic-id-of topic))))
+        ;; The check has something to check.
+        (assert (plusp copied)))
+      ;; The warranted relationships resolve, and the dependencies point the
+      ;; right way.
+      (assert (edge-p "operations" "work:relation/informs" "fedwiki-item-authoring"))
+      (assert (edge-p "dogfooding" "develops" "hyperdoc-authoring-interaction"))
+      (assert (edge-p "authoring-listener-startup" "requires" "production-authoring-authority"))
+      (assert (edge-p "authoring-nginx-route" "requires" "authoring-listener-startup"))
+      (assert (not (edge-p "production-authoring-authority" "requires" "authoring-listener-startup")))
+      (assert (not (edge-p "authoring-listener-startup" "requires" "authoring-nginx-route")))
+      (dolist (id *authoring-effect-items*)
+        (assert (edge-p id "develops" "hyperdoc-authoring")))
+      ;; No chain among the effect classes, in either direction.
+      (dolist (association (tm:topicmap-projection-associations-of projection))
+        (assert (not (and (member (tm:topicmap-association-from-of association) *authoring-effect-items* :test #'equal)
+                          (member (tm:topicmap-association-to-of association) *authoring-effect-items* :test #'equal))))))
+    ;; The seven-area projection is still exactly the seven areas.
+    (let ((areas (mapcar #'tm:topicmap-topic-id-of
+                         (tm:topicmap-projection-topics-of (work:work-projection :areas-only t)))))
+      (assert (= 7 (length areas)))
+      (assert (null (set-exclusive-or areas (mapcar #'first *seven-areas*) :test #'equal))))))
+
 (defun run-tests ()
   (check-work-projection)
   (check-pages-and-example)
@@ -1497,5 +1600,6 @@ not depend on the authoring runtime."
   (check-work-relationship-occurrences)
   (check-relation-change-request)
   (check-fedwiki-work)
-  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only).~%")
+  (check-authoring-work)
+  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in).~%")
   t)

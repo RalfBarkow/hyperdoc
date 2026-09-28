@@ -1,7 +1,7 @@
 <h1>Work Breakdown</h1>
 <in-package>dreyeck/work/reading</in-package>
-<p>This is the current work on HyperDoc, organized inside HyperDoc. The seven areas are questions and work boundaries, not seven implemented features. The first completed learning slice is the <a page="D2 Connections">Connections example</a>: Text Page, executable source, TALA render, Inspector and native Topicmap navigation.</p>
-<p>Why: use the system itself to connect a question to its explanation, executable evidence and next unresolved decision. Completion of this example does not implement CONNECT or grant change authority.</p>
+<p>This page is the current work map for HyperDoc. Areas name enduring problem fields; work items name bounded investigations or changes that may cross several areas; concepts name subjects that recur across the work. A work status on this page is not an implementation-maturity or deployment claim. The <a page="D2 Connections">Connections example</a> remains the first completed learning slice; HyperDoc Authoring is now an active line of work, from signed intent through bounded effects and deployment to authoring inside HyperDoc itself.</p>
+<p>Why: use HyperDoc itself to keep questions, work, explanations, executable or observed evidence, dependencies and next decisions connected and inspectable, while distinguishing what is implemented, what is deployed, what is only intended and what remains unresolved. A relationship on this page describes the work; it grants no authority to perform a change.</p>
 <h2>Areas, current work and concepts</h2>
 <ul><li><a page="Interaction" data-topic="interaction" data-kind="area" data-status="prototype">Interaction</a> — prototype.</li>
 <li><a page="Operations and Change" data-topic="operations" data-kind="area" data-status="open">Operations and change</a> — open.</li>
@@ -15,6 +15,17 @@
 <li><a page="D2 Connections" data-topic="connection" data-kind="concept" data-status="demonstrated">Connection</a> — demonstrated.</li>
 <li><a page="Connect and Associations" data-topic="association" data-kind="concept" data-status="question">Association</a> — question.</li>
 <li><a page="Reading TALA as a Layout Layer" hyperbook="dreyeck/topicmap/tala/reading" data-topic="topicmap" data-kind="concept" data-status="existing">Topicmap</a> — existing.</li></ul>
+<h2>HyperDoc Authoring</h2>
+<p>How authoring is constrained, and what is implemented or deployed, is on <a page="Deriving HyperDoc Authoring Constraints">Deriving HyperDoc Authoring Constraints</a>. The work items here are the work, not its architecture.</p>
+<ul><li><a page="Deriving HyperDoc Authoring Constraints" data-topic="hyperdoc-authoring" data-kind="concept" data-status="active">HyperDoc Authoring</a> — active.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="fedwiki-item-authoring" data-kind="work item" data-status="in progress">FedWiki Item Authoring</a> — in progress: the inner chain from signed intent to the M0 effect exists; its production deployment is not complete.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="production-authoring-authority" data-kind="work item" data-status="open">Production Authoring Authority</a> — open: operator-held configuration of principals and public keys, authoring rules, and site id to site root.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="authoring-listener-startup" data-kind="work item" data-status="blocked">Start loopback Authoring listener</a> — blocked.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="authoring-nginx-route" data-kind="work item" data-status="blocked">Expose /authoring/v1/ through nginx</a> — blocked.</li>
+<li><a page="Interaction" data-topic="hyperdoc-authoring-interaction" data-kind="work item" data-status="open">HyperDoc Authoring Interaction</a> — open: make the selected target, the proposed effect, the authority it needs and the verified result visible and operable in HyperDoc itself.</li>
+<li><a page="Operations and Change" data-topic="hyperdoc-page-authoring" data-kind="work item" data-status="open">Structural HyperDoc Page Authoring</a> — open: a second bounded effect type, editing HyperDoc pages structurally rather than FedWiki Items.</li>
+<li><a page="Operations and Change" data-topic="lisp-source-authoring" data-kind="work item" data-status="open">Structural Lisp Source Authoring</a> — open.</li>
+<li><a page="Operations and Change" data-topic="running-image-authoring" data-kind="work item" data-status="future">Running Lisp Image Authoring</a> — future.</li></ul>
 <h2>Relation contracts</h2>
 <p>A relation written <code>work:relation/…</code> refers to the one Topic below with that ID. The Topic ID is the contract's identity; the link text is its label; the linked page states what the relation asserts. Other relations are still plain words.</p>
 <ul><li><a page="Relation Contract: informs" data-topic="work:relation/informs" data-kind="relation" data-status="draft">informs</a> — draft.</li></ul>
@@ -33,15 +44,24 @@
 <li data-from="connections-example" data-to="connection" data-relation="demonstrates">Connections example → Connection: demonstrates.</li>
 <li data-from="connections-example" data-to="association" data-relation="compares-with">Connections example → Association: compares-with.</li>
 <li data-from="connections-example" data-to="connect" data-relation="raises-question-for">Connections example → Connect / Associations: raises-question-for.</li>
-<li data-from="connections-example" data-to="topicmap" data-relation="is-related-in">Connections example → Topicmap: is-related-in.</li></ul>
+<li data-from="connections-example" data-to="topicmap" data-relation="is-related-in">Connections example → Topicmap: is-related-in.</li>
+<li data-from="operations" data-to="fedwiki-item-authoring" data-relation="work:relation/informs">Operations and change → FedWiki Item Authoring: informs.</li>
+<li data-from="dogfooding" data-to="hyperdoc-authoring-interaction" data-relation="develops">HyperDoc dogfooding → HyperDoc Authoring Interaction: develops.</li>
+<li data-from="authoring-listener-startup" data-to="production-authoring-authority" data-relation="requires">Start loopback Authoring listener → Production Authoring Authority: requires.</li>
+<li data-from="authoring-nginx-route" data-to="authoring-listener-startup" data-relation="requires">Expose /authoring/v1/ through nginx → Start loopback Authoring listener: requires.</li>
+<li data-from="fedwiki-item-authoring" data-to="hyperdoc-authoring" data-relation="develops">FedWiki Item Authoring → HyperDoc Authoring: develops.</li>
+<li data-from="hyperdoc-page-authoring" data-to="hyperdoc-authoring" data-relation="develops">Structural HyperDoc Page Authoring → HyperDoc Authoring: develops.</li>
+<li data-from="lisp-source-authoring" data-to="hyperdoc-authoring" data-relation="develops">Structural Lisp Source Authoring → HyperDoc Authoring: develops.</li>
+<li data-from="running-image-authoring" data-to="hyperdoc-authoring" data-relation="develops">Running Lisp Image Authoring → HyperDoc Authoring: develops.</li></ul>
+<p>The four effect-oriented work items each develop HyperDoc Authoring as a different effect and authority class. They are not a sequence, and no dependency among them is asserted.</p>
 <h2>Navigate and inspect</h2>
 <p><a page="Working on HyperDoc">Lisp Code Page and executable examples</a>.</p>
 <p>The Topicmap is read from these page links and relationships. Clicking a native action sign changes Workspace Point. Follow the Point reference to open its existing page object; History remains the Workspace's history.</p>
 <source-of-function>work-workspace</source-of-function>
 <h2>A derived seven-area diagram</h2>
-<p>This small D2 projection selects the seven areas and their relationships from the same page. There is no separately maintained D2 work database. Its rendering is a static picture; use the native Topicmap above for navigation.</p>
+<p>This small D2 projection selects the seven areas and their relationships from the same page. The areas are problem fields, not the whole of the current work: work items such as those of HyperDoc Authoring appear in the native Topicmap above. There is no separately maintained D2 work database. Its rendering is a static picture; use the native Topicmap above for navigation.</p>
 <source-of-function>work-layout-example</source-of-function>
-<p>Open questions: what authority permits each operation; which endpoint observations CONNECT needs; what survives a restart; and whether a planner adds anything beyond a fixed documentation checklist.</p>
+<p>Open questions: what authority permits each operation; which endpoint observations CONNECT needs; what survives a restart; and whether a planner adds anything beyond a fixed documentation checklist. HyperDoc Authoring now takes up the first of these.</p>
 
 <h2>Operational reading</h2>
 <p>Read the supplied observations through <a page="Federated Wiki deployment state">Federated Wiki deployment state</a>, <a page="wiki.ralfbarkow.ch deployment">wiki.ralfbarkow.ch deployment</a> and <a page="dreyeck.ch deployment">dreyeck.ch deployment</a>. <a page="Cookie Secret">Cookie Secret</a> opens the next P41 source-reading question. These are ordinary reading links, not new Work Topics or claims of current host verification.</p>
