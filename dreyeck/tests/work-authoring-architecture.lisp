@@ -207,7 +207,7 @@
                          for object = (tm:topicmap-topic-object-of topic)
                          when (typep object 'git:git-commit)
                            collect (cons (tm:topicmap-topic-id-of topic) object))))
-      (assert (= 7 (length commits)))
+      (assert (= 8 (length commits)))
       (dolist (entry commits)
         (assert (git:git-commit-object-present-p repository (git:git-commit-hash-of (cdr entry))))
         ;; A hash is provenance, never part of a Topic's identity.
@@ -452,6 +452,54 @@ negating it."
                       "dreyeck/fedwiki-page-authoring" "dreyeck/workflow/authoring"))
       (assert (not (member system closure :test #'string=))))))
 
+(defun check-connector-evidence ()
+  "The HTTP connector is one run-time element with two evidence events: the
+commit that made it production and the one that corrected it. A commit that
+changed only the authoring tools is evidence for nothing here."
+  (let* ((projection (arch:architecture-projection))
+         (evidence (sort (loop for (from to) in (%edges projection "work:relation/evidenced-by")
+                               when (equal from "http-connector") collect to)
+                         #'string<)))
+    (assert (equal '("milestone/http-listener-correction" "milestone/signed-http-transport")
+                   evidence))
+    ;; Each evidence milestone stands for exactly the commit it names: the
+    ;; production adapter and its correction, and no tooling commit.
+    (assert (equal '("8a019b2f67c32a1bb9f678b7b3e4af90c81c2970" "afb8f0647c56655eccefb04f42d6e7e345beee27")
+                   (sort (mapcar (lambda (id) (git:git-commit-hash-of
+                                               (tm:topicmap-topic-object-of (%topic projection id))))
+                                 evidence)
+                         #'string<)))
+    (assert (= 1 (count "connector" (tm:topicmap-projection-topics-of projection)
+                        :key (lambda (topic) (%property topic :kind)) :test #'equal)))
+    (let* ((correction (%topic projection "milestone/http-listener-correction"))
+           (commit (tm:topicmap-topic-object-of correction)))
+      (assert (equal "production" (%property correction :status)))
+      (assert (typep commit 'git:git-commit))
+      (let ((changed (git:git-commit-changed-files commit)))
+        (dolist (path '("dreyeck/src/authoring-http.lisp" "dreyeck/tests/authoring-http.lisp"))
+          (assert (find path changed :test (lambda (p line) (search p line))))))
+      (assert (member '("milestone/signed-http-transport" "milestone/http-listener-correction")
+                      (%edges projection "precedes") :test #'equal)))
+    (dolist (topic (tm:topicmap-projection-topics-of projection))
+      (let ((object (tm:topicmap-topic-object-of topic)))
+        (when (typep object 'git:git-commit)
+          (assert (notevery (lambda (line) (search "/workflow-" line))
+                            (git:git-commit-changed-files object))
+                  () "~A stands for a commit that changed only the authoring tools."
+                  (tm:topicmap-topic-id-of topic)))))
+    ;; The evidence view shows the connector with its evidence, and selecting
+    ;; the connector kind adds that one Topic and no other.
+    (let ((view (arch:architecture-projection :view :evidence)))
+      (assert (equal '("http-connector")
+                     (loop for topic in (tm:topicmap-projection-topics-of view)
+                           unless (member (%property topic :kind) '("requirement" "constraint" "milestone")
+                                          :test #'equal)
+                             collect (tm:topicmap-topic-id-of topic))))
+      (dolist (milestone '("milestone/signed-http-transport" "milestone/http-listener-correction"))
+        (assert (member (list "http-connector" milestone)
+                        (%edges view "work:relation/evidenced-by") :test #'equal)))))
+  t)
+
 (defun run-authoring-architecture-tests ()
   (let ((before (%page-sources)))
     (let ((route (check-catalog-registration)))
@@ -459,6 +507,7 @@ negating it."
       (check-properties)
       (check-bounded-challenge-evidence)
       (check-statuses)
+      (check-connector-evidence)
       (check-runtime)
       (check-no-authored-geometry)
       (check-layouts)
@@ -470,7 +519,8 @@ negating it."
 rendered; the derivation is the seven-constraint chain with requirement, constraint ~
 and trade-off each; ten property claims, intended kept apart from demonstrated; ~
 9a041fdd is the commit behind bounded challenges, with its source and tests; ~
-the HTTP transport is production, prototyped in scratch, not deployed; the run-time view has its components, ~
+the HTTP transport is production, prototyped in scratch, not deployed, ~
+and the connector's two production commits are its evidence, no tooling commit; the run-time view has its components, ~
 connectors and data, and nginx does not authenticate; no geometry is authored; ~
 TALA lays out all three views and a changed graph, every shape and edge an ~
 Inspector reference; native navigation reaches the commit; no REST or stateless ~

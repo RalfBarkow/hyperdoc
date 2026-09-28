@@ -36,7 +36,7 @@
 (defparameter *views*
   '((:derivation "requirement" "constraint" "property")
     (:runtime "component" "connector" "data")
-    (:evidence "requirement" "constraint" "milestone"))
+    (:evidence "requirement" "constraint" "connector" "milestone"))
   "Each view, with the Topic kinds it selects.")
 
 (defparameter *facets*
@@ -143,7 +143,7 @@ a plist. A facet name outside *FACETS* is refused."
   (%layout :runtime))
 
 (hyperdoc:defexample evidence-layout
-  "The requirement, constraints, milestones and their evidential status, laid out by TALA."
+  "The requirement, constraints, the connector, milestones and their evidential status, laid out by TALA."
   (%layout :evidence))
 
 (hyperdoc:defexample architecture-workspace

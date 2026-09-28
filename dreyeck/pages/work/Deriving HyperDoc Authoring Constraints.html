@@ -61,7 +61,7 @@
 <ul><li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/adds-constraint" data-kind="relation" data-status="draft">adds constraint</a> — the target adds one constraint to the style reached so far.</li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/induces-demonstrated" data-kind="relation" data-status="draft">induces (demonstrated)</a> — the constraint induces the property, and a committed test shows it.</li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/induces-intended" data-kind="relation" data-status="draft">induces (intended)</a> — the constraint is meant to induce the property; nothing has measured it.</li>
-<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/evidenced-by" data-kind="relation" data-status="draft">evidenced by</a> — the milestone holds the evidence for the constraint. A commit is provenance, never the constraint's identity.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/evidenced-by" data-kind="relation" data-status="draft">evidenced by</a> — the milestone holds evidence for the constraint or run-time element. A commit is provenance, never the identity of what it evidences.</li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="work:relation/realized-by" data-kind="relation" data-status="draft">realized by</a> — the run-time element that enforces the constraint.</li></ul>
 <p>Run the derivation layout. The result's “TALA (interactive)” view makes every shape and edge an Inspector reference to its Topic or Association:</p>
 <source-of-function>derivation-layout</source-of-function>
@@ -69,7 +69,7 @@
 <html-generator>(render-constraint-claims)</html-generator>
 
 <h2>4. Runtime architecture</h2>
-<p>The run-time elements, with Fielding's element kinds. The HTTP connector is production since 8a019b2f: committed, tested end to end on a loopback socket, and not deployed. nginx's authoring role is planned. nginx may terminate TLS and forward; it does not authenticate the principal, and nothing depends on it doing so.</p>
+<p>The run-time elements, with Fielding's element kinds. The HTTP connector is production since 8a019b2f, which introduced it: committed, tested end to end on a loopback socket, and not deployed. afb8f064 corrected the same connector: its listener is returned only once its own socket is bound, and it keeps no record of the requests it answers. nginx's authoring role is planned. nginx may terminate TLS and forward; it does not authenticate the principal, and nothing depends on it doing so.</p>
 <ul><li><a page="Deriving HyperDoc Authoring Constraints" data-topic="signing-client" data-kind="component" data-status="scratch-proven">Signing authoring client</a> — user agent; so far a test signer in a scratch experiment.</li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="nginx-gateway" data-kind="component" data-status="planned">nginx gateway</a> — intermediary at the network boundary.</li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="http-connector" data-kind="connector" data-status="production">HyperDoc HTTP connector</a> — the server connector that hands the exact envelope and body to the authority; it listens only on a loopback address, and only when started. Production, not deployed.</li>
@@ -125,13 +125,15 @@
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/principal-challenge-rule" data-kind="milestone" data-status="production" data-commit="d12d0ed75cbb20d189332afe2900c81549c2aed1">d12d0ed7 principal, challenge, rule, capability</a></li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/bounded-challenges" data-kind="milestone" data-status="production" data-commit="9a041fdd2a7b14d3fc7ad57672460c1f87827005">9a041fdd bounded challenge lifecycle</a></li>
 <li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/http-transport-experiment" data-kind="milestone" data-status="scratch-proven">HTTP transport experiment</a> — scratch-proven: signed requests reached the authority chain over a loopback HTTP connector, without a session or proxy authentication. Not in repository history.</li>
-<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/signed-http-transport" data-kind="milestone" data-status="production" data-commit="8a019b2f67c32a1bb9f678b7b3e4af90c81c2970">8a019b2f signed HTTP transport</a> — production: the adapter the experiment prototyped, with its end-to-end tests. Not deployed.</li></ul>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/signed-http-transport" data-kind="milestone" data-status="production" data-commit="8a019b2f67c32a1bb9f678b7b3e4af90c81c2970">8a019b2f signed HTTP transport</a> — production: the initial production HTTP boundary, the adapter the experiment prototyped, with its end-to-end tests. Not deployed.</li>
+<li><a page="Deriving HyperDoc Authoring Constraints" data-topic="milestone/http-listener-correction" data-kind="milestone" data-status="production" data-commit="afb8f0647c56655eccefb04f42d6e7e345beee27">afb8f064 listener owns its bind, no request history</a> — production: makes listener ownership authoritative and removes request-history state the adapter had kept by accident. A correction of the same connector, not a new element. Not deployed.</li></ul>
 <ul><li data-from="milestone/work-read-side" data-to="milestone/page-slug-confinement" data-relation="precedes">c23e36f9 → 632ae72d: precedes.</li>
 <li data-from="milestone/page-slug-confinement" data-to="milestone/m0-page-edit" data-relation="precedes">632ae72d → bb8bf21f: precedes.</li>
 <li data-from="milestone/m0-page-edit" data-to="milestone/envelope-verification" data-relation="precedes">bb8bf21f → ab57e9c1: precedes.</li>
 <li data-from="milestone/envelope-verification" data-to="milestone/principal-challenge-rule" data-relation="precedes">ab57e9c1 → d12d0ed7: precedes.</li>
 <li data-from="milestone/principal-challenge-rule" data-to="milestone/bounded-challenges" data-relation="precedes">d12d0ed7 → 9a041fdd: precedes.</li>
 <li data-from="milestone/bounded-challenges" data-to="milestone/signed-http-transport" data-relation="precedes">9a041fdd → 8a019b2f: precedes.</li>
+<li data-from="milestone/signed-http-transport" data-to="milestone/http-listener-correction" data-relation="precedes">8a019b2f → afb8f064: precedes.</li>
 <li data-from="milestone/http-transport-experiment" data-to="milestone/principal-challenge-rule" data-relation="exercised over HTTP">HTTP transport experiment → d12d0ed7: exercised over HTTP.</li>
 <li data-from="milestone/http-transport-experiment" data-to="milestone/bounded-challenges" data-relation="exposed the failure fixed by">HTTP transport experiment → 9a041fdd: exposed the failure fixed by.</li>
 <li data-from="milestone/http-transport-experiment" data-to="milestone/signed-http-transport" data-relation="prototypes">HTTP transport experiment → 8a019b2f: prototypes.</li></ul>
@@ -145,7 +147,9 @@
 <li data-from="scoped-capability" data-to="milestone/m0-page-edit" data-relation="work:relation/evidenced-by">Scoped capability → bb8bf21f.</li>
 <li data-from="scoped-capability" data-to="milestone/page-slug-confinement" data-relation="work:relation/evidenced-by">Scoped capability → 632ae72d.</li>
 <li data-from="scoped-capability" data-to="milestone/principal-challenge-rule" data-relation="work:relation/evidenced-by">Scoped capability → d12d0ed7.</li>
-<li data-from="serialized-verified-effect" data-to="milestone/m0-page-edit" data-relation="work:relation/evidenced-by">Serialized verified effect → bb8bf21f.</li></ul>
+<li data-from="serialized-verified-effect" data-to="milestone/m0-page-edit" data-relation="work:relation/evidenced-by">Serialized verified effect → bb8bf21f.</li>
+<li data-from="http-connector" data-to="milestone/signed-http-transport" data-relation="work:relation/evidenced-by">HyperDoc HTTP connector → 8a019b2f.</li>
+<li data-from="http-connector" data-to="milestone/http-listener-correction" data-relation="work:relation/evidenced-by">HyperDoc HTTP connector → afb8f064.</li></ul>
 <source-of-function>evidence-layout</source-of-function>
 <p>All of these Topics and Associations together, including where each constraint is realized, in the native Topicmap: <a expr="(architecture-workspace)" view="Topicmap">open the authoring architecture Topicmap</a>. Clicking an action sign moves the Workspace Point; the Point's object is this page, or the commit for a committed milestone.</p>
 <source-of-function>architecture-workspace</source-of-function>
@@ -161,7 +165,7 @@
 <li><strong>Trade-off.</strong> Finitely many simultaneous challenges per principal; old replay diagnostics disappear, so a pruned replay is refused as unknown rather than as used; issuance is not authenticated, so anyone knowing a principal's id can occupy its challenges until they expire.</li></ul>
 
 <h2>7. What has NOT been established</h2>
-<ul><li>The production HTTP adapter (8a019b2f) has been exercised only on a loopback socket in tests. It is not deployed: no nginx route, no TLS and no public listener exist for authoring.</li>
+<ul><li>The production HTTP adapter (8a019b2f, corrected in afb8f064) has been exercised only on a loopback socket in tests. It is not deployed: no nginx route, no TLS and no public listener exist for authoring.</li>
 <li>Nothing is deployed, and no nginx or TLS configuration for authoring has been checked.</li>
 <li>Scalability and reliability under adversarial load are intended properties; neither has been measured.</li>
 <li>The principal registry and the challenges live in memory: no durability, no key enrollment, rotation or recovery.</li>
