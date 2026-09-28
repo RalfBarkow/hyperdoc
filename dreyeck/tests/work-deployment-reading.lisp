@@ -15,41 +15,130 @@
                     (views:view-references view)))
     (values page view)))
 
-(defun run-tests ()
-  (let* ((evidence (reading:deployment-evidence))
-         (facts (getf evidence :observed))
-         (wiki (first facts)) (checkout (second facts)) (service (third facts)))
+(defun record-by-id (evidence category id)
+  (let ((matches (remove-if-not (lambda (record) (equal id (getf record :id)))
+                                 (getf evidence category))))
+    (assert (= 1 (length matches)))
+    (first matches)))
+
+(defun check-evidence (evidence)
+  (let* ((facts (getf evidence :observed))
+         (wiki (first facts))
+         (checkout (record-by-id evidence :observed "dreyeck-checkout"))
+         (service (record-by-id evidence :observed "hyperdoc-service"))
+         (inference (record-by-id evidence :inferred "hyperdoc-started-from-checkout")))
     (assert (equal (getf evidence :provenance)
                    '(:kind :operator-supplied :observation-time :not-supplied
                      :scope :reported-snapshot :host-probe :not-performed)))
-    ;; Exact records guard the minimal witness and keep incidental host data out.
     (assert (equal wiki
                    '(:subject "wiki.ralfbarkow.ch" :kind :deployment-witness
                      :source-commit "b42eb888d6e5d59803667c6320e0779523fc265c"
                      :artifact "/nix/store/q8ppar443gy3ahm33hbbp3b5kwf4j930-wiki-p41-0.41.0-rc.3"
                      :service "wiki.service" :active-state "active" :sub-state "running"
                      :exec-start-program "/nix/store/q8ppar443gy3ahm33hbbp3b5kwf4j930-wiki-p41-0.41.0-rc.3/bin/wiki")))
-    (assert (equal checkout
-                   '(:subject "dreyeck.ch" :kind :checkout
-                     :path "/home/rgb/workspace/hyperdoc"
-                     :head "84ee991aa4591a873a63753b89b37737ba5f2efc")))
-    (assert (equal service
-                   '(:subject "dreyeck.ch" :kind :service
-                     :service "hyperdoc.service" :active-state "active" :sub-state "running"
-                     :exec-start "nix develop .#tala -c ./scripts/serve-catalog.sh 8080")))
-    (assert (= 3 (length facts)))
-    (dolist (kind '(:derived :inferred :hypothesized))
-      (assert (member kind evidence))
-      (assert (null (getf evidence kind))))
+    (assert (equal (getf checkout :path) "/home/rgb/workspace/hyperdoc"))
+    (assert (equal (getf checkout :head) "84ee991aa4591a873a63753b89b37737ba5f2efc"))
+    (assert (eq :checkout (getf checkout :kind)))
+    (assert (eq :service (getf service :kind)))
+    (assert (equal (getf service :working-directory) (getf checkout :path)))
+    (assert (equal (getf service :exec-start) "nix develop .#tala -c ./scripts/serve-catalog.sh 8080"))
+    (assert (equal (getf service :active-state) "active"))
+    (assert (equal (getf service :sub-state) "running"))
+    (assert (not (eq checkout service)))
+    (assert (notany (lambda (r) (eq :service-working-directory (getf r :relation)))
+                    (getf evidence :unresolved)))
+    ;; Check this before cardinality: promotion to observed must fail semantically.
+    (dolist (record facts)
+      (when (equal "dreyeck.ch" (getf record :subject))
+        (assert (not (eq :service-source-commit (getf record :relation))))
+        (when (getf record :service)
+          (assert (not (getf record :source-commit)))
+          (assert (not (getf record :head))))))
+    (assert (eq :service-source-commit (getf inference :relation)))
+    (assert (equal (getf inference :source-commit) (getf checkout :head)))
+    (assert (eq :not-directly-observed (getf inference :verification)))
+    (assert (equal (getf inference :basis)
+                   '("dreyeck-checkout" "hyperdoc-service" "checkout-fast-forward"
+                     "sbcl-process-start" "hyperdoc-service-start")))
+    (dolist (id (getf inference :basis)) (record-by-id evidence :observed id))
+    (dolist (spec
+             '(("checkout-fast-forward" :kind :checkout-transition :transition :fast-forward
+                :checkout "dreyeck-checkout" :to "84ee991aa4591a873a63753b89b37737ba5f2efc"
+                :at "2026-09-28 06:25:03 +0200")
+               ("sbcl-process-start" :kind :process-start :runtime "SBCL"
+                :time "06:25:13" :precision :approximate)
+               ("hyperdoc-service-start" :kind :service-start :service "hyperdoc.service"
+                :at "2026-09-28 06:25:14 CEST")
+               ("nginx-exact-host" :host "dreyeck.ch" :match :exact
+                :upstream "127.0.0.1:8080" :observed-paths ("/" "/clog"))
+               ("nginx-wildcard-host" :host "*.dreyeck.ch" :match :wildcard :upstream "127.0.0.1:3000")
+               ("nginx-mcp-host" :host "mcp.dreyeck.ch" :match :exact :upstream "127.0.0.1:8787")
+               ("nginx-tls" :kind :tls-termination :host "dreyeck.ch" :terminator "nginx")
+               ("hyperdoc-listener" :kind :listener :runtime "HyperDoc" :address "0.0.0.0:8080")
+               ("fedwiki-listener" :kind :listener :runtime "Node/FedWiki" :address "*:3000")
+               ("mcp-listener" :kind :listener :runtime "MCP/SBCL" :address "127.0.0.1:8787")
+               ("nginx-listeners" :kind :listener :runtime "nginx" :addresses (":80" ":443"))
+               ("nixos-firewall" :allowed-tcp-ports (80 443))
+               ("external-8080" :origin :external :destination "dreyeck.ch:8080" :result :timed-out)
+               ("fedwiki-config" :service "wiki.service" :user "rgb"
+                :config "/home/rgb/.wiki/config.json" :farm t :security-type "friends"
+                :not-explicitly-configured (:data :root :wiki-domains))
+               ("fedwiki-pages" :path "/home/rgb/.wiki/dreyeck.ch/pages" :exists t)))
+      (let ((record (record-by-id evidence :observed (first spec))))
+        (loop for (key value) on (rest spec) by #'cddr
+              do (assert (equal value (getf record key))))))
+    (let ((route (record-by-id evidence :derived "public-apex-route")))
+      (assert (eq :observed-public-nginx-routing (getf route :scope)))
+      (assert (equal "127.0.0.1:8080" (getf route :reaches)))
+      (assert (equal "Node/FedWiki :3000" (getf route :does-not-reach)))
+      (assert (search "Local/operator-side requests remain possible" (getf route :limit)))
+      (dolist (id (getf route :basis)) (record-by-id evidence :observed id)))
+    (dolist (category '(:observed :derived :inferred :hypothesized :unresolved))
+      (assert (member category evidence)))
+    (assert (null (getf evidence :hypothesized)))
+    (assert (= 18 (length facts)))
+    (assert (= 1 (length (getf evidence :derived)) (length (getf evidence :inferred))))
     (assert (equal (getf evidence :unresolved)
-                   '((:subject "dreyeck.ch" :relation :service-working-directory
-                      :status :not-established)
-                     (:subject "dreyeck.ch" :relation :service-source-commit
-                      :status :not-established))))
-    ;; Inspecting or altering a returned snapshot must not change later readings.
-    (setf (getf service :active-state) "changed by reader")
-    (assert (equal "active" (getf (third (getf (reading:deployment-evidence) :observed))
-                                 :active-state))))
+                   '((:subject "dreyeck.ch" :relation :service-source-commit
+                      :status :not-directly-observed :inference "hyperdoc-started-from-checkout")
+                     (:subject "dreyeck.ch" :relation :external-8080-filtering-cause
+                      :status :not-established :basis ("nixos-firewall" "external-8080")
+                      :limit "Other network filtering was not excluded; the timeout does not prove that the firewall alone protects port 8080."))))
+    (let ((text (string-downcase (prin1-to-string evidence))))
+      (dolist (forbidden '("/authoring/v1/" "signed-authoring" "authoring-authority"))
+        (assert (not (search forbidden text)))))
+    (dolist (record facts)
+      (when (and (eq :nginx-route (getf record :kind))
+                 (equal "dreyeck.ch" (getf record :host)))
+        (assert (equal "127.0.0.1:8080" (getf record :upstream))))))
+  t)
+
+(defun check-positive-controls ()
+  (dolist (tamper
+           (list
+            (lambda (e) (push (first (getf e :inferred)) (getf e :observed)))
+            (lambda (e)
+              (push '(:subject "dreyeck.ch" :relation :service-working-directory
+                      :status :not-established) (getf e :unresolved)))
+            (lambda (e)
+              (let ((record (record-by-id e :observed "nginx-exact-host")))
+                (setf (getf record :upstream) "127.0.0.1:3000")))
+            (lambda (e)
+              (let ((record (record-by-id e :observed "hyperdoc-service")))
+                (setf (getf record :exec-start) "signed-authoring /authoring/v1/")))))
+    (let ((changed (reading:deployment-evidence)))
+      (funcall tamper changed)
+      (assert (handler-case (progn (check-evidence changed) nil)
+                (error () t)))))
+  (format t "~&DEPLOYMENT-EVIDENCE-CONTROLS-PASS: observed-commit promotion, stale unresolved WorkingDirectory, public Node route and target authoring rejected.~%"))
+
+(defun run-tests ()
+  (check-evidence (reading:deployment-evidence))
+  (check-positive-controls)
+  (let ((changed (reading:deployment-evidence)))
+    (let ((record (record-by-id changed :observed "hyperdoc-service")))
+      (setf (getf record :active-state) "changed"))
+    (check-evidence (reading:deployment-evidence)))
   (let* ((book (hyperbook:find-hyperbook "dreyeck/work/reading" :signal-error? t))
          (titles '("Federated Wiki deployment state" "wiki.ralfbarkow.ch deployment"
                    "dreyeck.ch deployment" "Cookie Secret")))
