@@ -2292,8 +2292,8 @@
                "dreyeck/inspector/git")
   :serial t
   :components ((:module "dreyeck/work" :components ((:file "reading")
-                                                    (:file "authoring-architecture")
-                                                    (:file "deployment-reading")))
+                                                    (:file "deployment-reading")
+                                                    (:file "authoring-architecture")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
                  (:static-file "Interaction.html")

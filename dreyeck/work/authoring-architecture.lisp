@@ -5,10 +5,15 @@
                     (#:tm #:dreyeck/topicmap)
                     (#:tala #:dreyeck/topicmap/tala)
                     (#:git #:dreyeck/git)
+                    (#:evidence #:dreyeck/work/deployment-reading)
                     (#:views #:html-inspector-views))
   (:export #:architecture-page #:architecture-source #:architecture-projection
            #:architecture-view-kinds #:constraint-facets #:topic-commit
            #:derivation-layout #:runtime-layout #:evidence-layout
+           #:deployment-observation #:deployment-observation-record
+           #:deployment-observation-category #:deployment-observation-related
+           #:deployment-observation-provenance #:deployment-projection
+           #:observed-deployment-layout #:target-deployment-layout
            #:architecture-workspace #:render-constraint-claims))
 (in-package #:dreyeck/work/authoring-architecture)
 
@@ -127,7 +132,10 @@ a plist. A facet name outside *FACETS* is refused."
 ;;;; Layout, by TALA only
 
 (defun %layout (view)
-  (let ((input (tala:projection-tala-input (architecture-projection :view view)))
+  (%layout-projection (architecture-projection :view view)))
+
+(defun %layout-projection (projection)
+  (let ((input (tala:projection-tala-input projection))
         (dependency (tala:tala-dependency-status)))
     (if (eq :available (getf dependency :status))
         (tala:run-tala input)
@@ -145,6 +153,149 @@ a plist. A facet name outside *FACETS* is refused."
 (hyperdoc:defexample evidence-layout
   "The requirement, constraints, the connector, milestones and their evidential status, laid out by TALA."
   (%layout :evidence))
+
+;;;; Deployment on dreyeck.ch, projected from supplied evidence
+;;
+;; The observed deployment is not written here. DEPLOYMENT-EVIDENCE, in the
+;; deployment reading, is the one record of what was observed on dreyeck.ch,
+;; with each fact's epistemic category. This builder draws a selection of it:
+;; the records that make up the dreyeck.ch authoring topology, chosen for
+;; relevance, not for being observed. The wiki.ralfbarkow.ch witness and the
+;; MCP service are observed but are not part of that topology.
+;;
+;; A node stands for one observed record and keeps, for inspection, the
+;; records that describe it, each with its category. An edge is drawn only
+;; for an observed nginx route. Derived, inferred and unresolved records are
+;; never edges; the inferred source commit of the service in particular
+;; stays with the HyperDoc listener as an inference.
+;;
+;; The target adds what the page authors as intent: the three missing
+;; deployment relations, each a Topic of kind deployment with status
+;; target, and the existing run-time Topics they would deploy. A deployment
+;; Topic's status is its deployment state, current or target; the evidence
+;; object carries how it is known; a run-time Topic's status stays its
+;; implementation maturity.
+
+(defclass deployment-observation ()
+  ((record :initarg :record :reader deployment-observation-record)
+   (category :initarg :category :reader deployment-observation-category)
+   (related :initarg :related :reader deployment-observation-related)
+   (provenance :initarg :provenance :reader deployment-observation-provenance))
+  (:documentation "One record of DEPLOYMENT-EVIDENCE as a node stands for it:
+the record, its epistemic category, the related records with theirs, and
+the evidence's provenance."))
+
+(defmethod print-object ((observation deployment-observation) stream)
+  (print-unreadable-object (observation stream :type t)
+    (format stream "~(~A~) ~A" (deployment-observation-category observation)
+            (getf (deployment-observation-record observation) :id))))
+
+(defparameter *deployment-nodes*
+  '(("nginx-listeners" "nginx :80 :443" ("nginx-tls"))
+    ("hyperdoc-listener" "HyperDoc 0.0.0.0:8080"
+     ("hyperdoc-service" "dreyeck-checkout" "checkout-fast-forward" "hyperdoc-service-start"
+      "hyperdoc-started-from-checkout" "nixos-firewall" "external-8080"))
+    ("fedwiki-listener" "Node/FedWiki *:3000" ("fedwiki-config" "public-apex-route"))
+    ("fedwiki-pages" "/home/rgb/.wiki/dreyeck.ch/pages" ("fedwiki-config" "public-apex-route")))
+  "Each evidence record a node may stand for: its id, its label, and the ids
+of the records kept with it.")
+
+(defparameter *deployment-routes*
+  '(("nginx-exact-host" "nginx-listeners" "hyperdoc-listener")
+    ("nginx-wildcard-host" "nginx-listeners" "fedwiki-listener"))
+  "Each nginx route record, from the nginx listener to the listener its
+upstream port names.")
+
+(defparameter *deployment-views*
+  '((:observed :nodes ("nginx-listeners" "hyperdoc-listener" "fedwiki-listener")
+               :routes ("nginx-exact-host" "nginx-wildcard-host")
+               :page-topics () :attachments ())
+    (:target :nodes ("nginx-listeners" "hyperdoc-listener" "fedwiki-listener" "fedwiki-pages")
+             :routes ("nginx-exact-host" "nginx-wildcard-host")
+             :page-topics ("deployment/authoring-route" "deployment/listener-startup"
+                           "deployment/authority-configuration" "http-connector" "fedwiki-m0")
+             :attachments (("nginx-listeners" "deployment/authoring-route" "would carry /authoring/v1/")
+                           ("fedwiki-m0" "fedwiki-pages" "would edit"))))
+  "The two deployment views: which evidence records become nodes, which
+route records edges, which of the page's Topics the view adds, and the
+edges joining those to the evidence nodes.")
+
+(defun %deployment-record (evidence id)
+  "The record ID names in EVIDENCE, and its category."
+  (loop for category in '(:observed :derived :inferred :unresolved)
+        for record = (find id (getf evidence category)
+                           :key (lambda (record) (getf record :id)) :test #'equal)
+        when record return (values record category)
+        finally (error "No evidence record ~S." id)))
+
+(defun %deployment-topic-id (record-id) (format nil "deployment/~A" record-id))
+
+(defun %deployment-node (evidence id)
+  (destructuring-bind (label related) (rest (assoc id *deployment-nodes* :test #'equal))
+    (multiple-value-bind (record category) (%deployment-record evidence id)
+      (tm:make-topicmap-topic
+       :id (%deployment-topic-id id) :type :deployment :label label
+       :object (make-instance 'deployment-observation
+                              :record record :category category
+                              :related (loop for other in related
+                                             collect (multiple-value-bind (r c)
+                                                         (%deployment-record evidence other)
+                                                       (cons c r)))
+                              :provenance (getf evidence :provenance))
+       :view-properties (list :visible t :kind "deployment" :status "current")))))
+
+(defun %route-label (record)
+  (format nil "Host ~A~@[: ~{~A~^ and ~}~]" (getf record :host) (getf record :observed-paths)))
+
+(defun %view-topic-id (spec id)
+  "ID as a Topic ID of the view SPEC: one of its page Topics, or the node
+standing for that evidence record."
+  (if (member id (getf spec :page-topics) :test #'equal) id (%deployment-topic-id id)))
+
+(defun deployment-projection (role &key (evidence (evidence:deployment-evidence)))
+  "The deployment view ROLE names, :OBSERVED or :TARGET: nodes standing for
+selected observed records of EVIDENCE, edges for its nginx routes, and for
+the target the page's authored intent joined to them."
+  (let* ((spec (or (rest (assoc role *deployment-views*))
+                   (error "No deployment view ~S." role)))
+         (page (architecture-projection))
+         (page-topics (loop for id in (getf spec :page-topics)
+                            collect (or (tm:topicmap-projection-topic-by-id page id)
+                                        (error "The page has no Topic ~S." id))))
+         (topics (append (loop for id in (getf spec :nodes) collect (%deployment-node evidence id))
+                         page-topics))
+         (ids (mapcar #'tm:topicmap-topic-id-of topics)))
+    (tm:make-topicmap-projection
+     :source (architecture-page) :topics topics
+     :associations
+     (append
+      (loop for route in (getf spec :routes)
+            for (nil from to) = (assoc route *deployment-routes* :test #'equal)
+            for record = (%deployment-record evidence route)
+            collect (tm:make-topicmap-association
+                     :id (format nil "deployment:~A" route) :type (%route-label record)
+                     :from (%deployment-topic-id from) :to (%deployment-topic-id to)
+                     :properties (list :evidence record)))
+      (loop for association in (tm:topicmap-projection-associations-of page)
+            when (and (member (tm:topicmap-association-from-of association) ids :test #'string=)
+                      (member (tm:topicmap-association-to-of association) ids :test #'string=))
+              collect association)
+      (loop for (from to relation) in (getf spec :attachments)
+            for from-id = (%view-topic-id spec from)
+            for to-id = (%view-topic-id spec to)
+            do (dolist (id (list from-id to-id))
+                 (unless (member id ids :test #'string=) (error "~S is not in the view." id)))
+            collect (tm:make-topicmap-association
+                     :id (format nil "deployment:~A:~A" from-id to-id) :type relation
+                     :from from-id :to to-id))))))
+
+(hyperdoc:defexample observed-deployment-layout
+  "The observed dreyeck.ch deployment, projected from the supplied evidence and laid out by TALA."
+  (%layout-projection (deployment-projection :observed)))
+
+(hyperdoc:defexample target-deployment-layout
+  "The observed deployment with the authoring relations still missing, laid out by TALA."
+  (%layout-projection (deployment-projection :target)))
 
 (hyperdoc:defexample architecture-workspace
   "Every Topic and Association of the page, navigable with native action signs."

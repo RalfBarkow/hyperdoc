@@ -50,7 +50,7 @@
 (defparameter *bounded-challenges* "9a041fdd2a7b14d3fc7ad57672460c1f87827005")
 
 (defparameter *statuses*
-  '("production" "scratch-proven" "planned" "demonstrated" "intended" "draft"))
+  '("production" "scratch-proven" "planned" "demonstrated" "intended" "draft" "target"))
 
 ;;;; Helpers
 
@@ -112,7 +112,7 @@
       (let* ((view (%content-view page))
              (objects (mapcar #'cdr (views:view-references view))))
         (assert (notany (lambda (object) (typep object 'condition)) objects))
-        (assert (= 4 (count-if (lambda (object) (typep object 'views:view)) objects)))
+        (assert (= 6 (count-if (lambda (object) (typep object 'views:view)) objects)))
         ;; The worked example links its evidence: the commit itself.
         (assert (find-if (lambda (object)
                            (and (typep object 'git:git-commit)
@@ -500,6 +500,137 @@ changed only the authoring tools is evidence for nothing here."
                         (%edges view "work:relation/evidenced-by") :test #'equal)))))
   t)
 
+(defparameter *current-deployment-nodes*
+  '("deployment/nginx-listeners" "deployment/hyperdoc-listener" "deployment/fedwiki-listener")
+  "The evidence records the current deployment view draws, as its Topics.")
+
+(defparameter *target-deployment-topics*
+  '("deployment/authoring-route" "deployment/listener-startup" "deployment/authority-configuration")
+  "The page's authored target: the three missing deployment relations.")
+
+(defun %evidence-record (evidence category id)
+  (find id (getf evidence category) :key (lambda (record) (getf record :id)) :test #'equal))
+
+(defun %pairs-of (projection)
+  (mapcar (lambda (association)
+            (list (tm:topicmap-association-from-of association)
+                  (tm:topicmap-association-to-of association)))
+          (tm:topicmap-projection-associations-of projection)))
+
+(defun check-deployment-projection ()
+  "The current deployment is a projection of the supplied evidence, selected
+for relevance; the target adds only authored intent; neither claims more
+than the evidence, and the three axes stay apart."
+  (let* ((evidence (uiop:symbol-call :dreyeck/work/deployment-reading :deployment-evidence))
+         (current (arch:deployment-projection :observed))
+         (target (arch:deployment-projection :target))
+         (page (arch:architecture-projection)))
+    ;; Exactly the relevant records, each standing for its evidence record.
+    (assert (%same-set-p *current-deployment-nodes* (%ids current)))
+    (dolist (topic (tm:topicmap-projection-topics-of current))
+      (let* ((observation (tm:topicmap-topic-object-of topic))
+             (id (subseq (tm:topicmap-topic-id-of topic) (length "deployment/"))))
+        (assert (typep observation 'arch:deployment-observation))
+        (assert (eq :observed (arch:deployment-observation-category observation)))
+        (assert (equal (%evidence-record evidence :observed id)
+                       (arch:deployment-observation-record observation)))
+        (assert (equal (getf evidence :provenance) (arch:deployment-observation-provenance observation)))
+        (assert (equal "current" (%property topic :status)))))
+    ;; No unrelated evidence: not the wiki.ralfbarkow.ch witness, not MCP.
+    (dolist (projection (list current target))
+      (dolist (topic (tm:topicmap-projection-topics-of projection))
+        (let ((object (tm:topicmap-topic-object-of topic)))
+          (when (typep object 'arch:deployment-observation)
+            (let ((record (arch:deployment-observation-record object)))
+              (assert (equal "dreyeck.ch" (getf record :subject)))
+              (assert (not (search "mcp" (string-downcase (princ-to-string (getf record :id)))))))))))
+    ;; Edges are the two observed routes, each carrying its route record,
+    ;; and each reaching the listener its upstream port names.
+    (assert (%same-set-p '(("deployment/nginx-listeners" "deployment/hyperdoc-listener")
+                           ("deployment/nginx-listeners" "deployment/fedwiki-listener"))
+                         (%pairs-of current)))
+    (dolist (association (tm:topicmap-projection-associations-of current))
+      (let ((route (getf (tm:topicmap-association-properties-of association) :evidence)))
+        (assert (eq :nginx-route (getf route :kind)))
+        (assert (%evidence-record evidence :observed (getf route :id)))
+        (let* ((listener (arch:deployment-observation-record
+                          (tm:topicmap-topic-object-of
+                           (%topic current (tm:topicmap-association-to-of association)))))
+               (port (lambda (address) (subseq address (1+ (position #\: address :from-end t))))))
+          (assert (equal (funcall port (getf route :upstream)) (funcall port (getf listener :address)))))))
+    ;; The inferred source commit is kept as an inference, never an edge.
+    (let* ((listener (tm:topicmap-topic-object-of (%topic current "deployment/hyperdoc-listener")))
+           (inferred (find "hyperdoc-started-from-checkout" (arch:deployment-observation-related listener)
+                           :key (lambda (pair) (getf (cdr pair) :id)) :test #'equal)))
+      (assert (eq :inferred (car inferred)))
+      (dolist (projection (list current target))
+        (dolist (association (tm:topicmap-projection-associations-of projection))
+          (let ((record (getf (tm:topicmap-association-properties-of association) :evidence)))
+            (when record
+              (assert (%evidence-record evidence :observed (getf record :id))))))))
+    ;; Target-only elements are authored intent, absent from the current view.
+    (assert (null (intersection *target-deployment-topics* (%ids current) :test #'equal)))
+    (dolist (id *target-deployment-topics*)
+      (let ((topic (%topic target id)))
+        (assert (equal "deployment" (%property topic :kind)))
+        (assert (equal "target" (%property topic :status)))
+        (assert (eq (arch:architecture-page) (tm:topicmap-topic-object-of topic)))))
+    ;; Exactly: the current nodes, the pages directory, the three target
+    ;; relations and the two existing run-time Topics they deploy.
+    (assert (%same-set-p (append *current-deployment-nodes* '("deployment/fedwiki-pages")
+                                 *target-deployment-topics* '("http-connector" "fedwiki-m0"))
+                         (%ids target)))
+    ;; The run-time Topics are the page's own subjects, not copies: the same
+    ;; Topic IDs standing for the same objects, their maturity unchanged.
+    (dolist (id '("http-connector" "fedwiki-m0"))
+      (assert (eq (tm:topicmap-topic-object-of (%topic page id))
+                  (tm:topicmap-topic-object-of (%topic target id))))
+      (assert (equal (tm:topicmap-topic-label-of (%topic page id))
+                     (tm:topicmap-topic-label-of (%topic target id)))))
+    (assert (equal "production" (%property (%topic target "http-connector") :status)))
+    (assert (equal "production" (%property (%topic target "fedwiki-m0") :status)))
+    ;; No deployment Topic claims a maturity or an epistemic status.
+    (dolist (projection (list current target))
+      (dolist (topic (tm:topicmap-projection-topics-of projection))
+        (when (equal "deployment" (%property topic :kind))
+          (assert (member (%property topic :status) '("current" "target") :test #'equal)))))
+    (dolist (topic (tm:topicmap-projection-topics-of page))
+      (assert (not (member (%property topic :status) '("current" "deployed" "observed") :test #'equal))))
+    ;; The target keeps the ordinary path and adds the authoring chain.
+    (dolist (edge '(("deployment/nginx-listeners" "deployment/hyperdoc-listener")
+                    ("deployment/nginx-listeners" "deployment/authoring-route")
+                    ("deployment/authoring-route" "http-connector")
+                    ("deployment/listener-startup" "http-connector")
+                    ("http-connector" "deployment/authority-configuration")
+                    ("deployment/authority-configuration" "fedwiki-m0")
+                    ("fedwiki-m0" "deployment/fedwiki-pages")))
+      (assert (member edge (%pairs-of target) :test #'equal) () "The target lacks ~S." edge))
+    ;; No invented FedWiki writer.
+    (dolist (projection (list current target))
+      (assert (notany (lambda (edge) (equal (first edge) "deployment/fedwiki-listener"))
+                      (remove '("deployment/nginx-listeners" "deployment/fedwiki-listener")
+                              (%pairs-of projection) :test #'equal))))
+    ;; TALA lays out both; no geometry is authored; every shape and edge
+    ;; is an Inspector reference.
+    (dolist (entry (list (cons current #'arch:observed-deployment-layout)
+                         (cons target #'arch:target-deployment-layout)))
+      (let* ((input (tala:projection-tala-input (car entry)))
+             (keys (mapcar (lambda (e) (getf e :d2-id)) (tala:tala-input-topics input)))
+             (lines (remove "" (uiop:split-string (tala:tala-input-source input) :separator '(#\Newline))
+                            :test #'string=)))
+        (assert (= (length lines) (+ (length keys) (length (tala:tala-input-associations input)))))
+        (let* ((rendering (funcall (cdr entry)))
+               (projection (progn (assert (typep rendering 'tala:tala-rendering) () "No TALA layout: ~S" rendering)
+                                  (tala:tala-input-projection (tala:tala-rendering-input rendering))))
+               (view (find "TALA (interactive)" (views:all-views rendering)
+                           :key #'views:view-title :test #'equal)))
+          (assert (%same-set-p (%ids (car entry)) (%ids projection)))
+          (views:view-html view)
+          (assert (%same-set-p (append (tm:topicmap-projection-topics-of projection)
+                                       (tm:topicmap-projection-associations-of projection))
+                               (mapcar #'cdr (views:view-references view))))))))
+  t)
+
 (defun run-authoring-architecture-tests ()
   (let ((before (%page-sources)))
     (let ((route (check-catalog-registration)))
@@ -508,6 +639,7 @@ changed only the authoring tools is evidence for nothing here."
       (check-bounded-challenge-evidence)
       (check-statuses)
       (check-connector-evidence)
+      (check-deployment-projection)
       (check-runtime)
       (check-no-authored-geometry)
       (check-layouts)
@@ -520,7 +652,9 @@ rendered; the derivation is the seven-constraint chain with requirement, constra
 and trade-off each; ten property claims, intended kept apart from demonstrated; ~
 9a041fdd is the commit behind bounded challenges, with its source and tests; ~
 the HTTP transport is production, prototyped in scratch, not deployed, ~
-and the connector's two production commits are its evidence, no tooling commit; the run-time view has its components, ~
+and the connector's two production commits are its evidence, no tooling commit; ~
+the current deployment is drawn from selected supplied evidence, the target adds ~
+the three missing relations, and neither claims more than the evidence; the run-time view has its components, ~
 connectors and data, and nginx does not authenticate; no geometry is authored; ~
 TALA lays out all three views and a changed graph, every shape and edge an ~
 Inspector reference; native navigation reaches the commit; no REST or stateless ~
