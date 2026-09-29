@@ -389,6 +389,102 @@ one way on."
       (assert (typep (a:complete-work-status-change inspector "open") 'work:work-status-change-refused))
       (assert (equal "in progress" (%status (%project page path) "hyperdoc-page-authoring"))))))
 
+(defun relationship-plan-refusal (thunk)
+  (handler-case (progn (funcall thunk) (error "Expected a plan refusal."))
+    (a:work-relationship-creation-plan-refused (condition) condition)))
+
+(defun check-relationship-creation-plan (page path)
+  "A relationship creation request gets a verified HTML plan: one statement
+after the last authored one, reading and projecting as exactly the requested
+relationship. Nothing is written, and no relationship occurrence is made."
+  (let* ((pages (work-page-sources))
+         (source (%read path))
+         (projection (%project page path))
+         (from (tm:topicmap-projection-topic-by-id projection "lisp-source-authoring"))
+         (to (tm:topicmap-projection-topic-by-id projection "running-image-authoring"))
+         (operation (w:create-relationship-operation))
+         (selection (ops:work-topic-operation-request operation from))
+         (request (work:request-work-relationship-creation selection to "work:relation/informs"))
+         (statements (work:scan-work-relationships source page))
+         (plan (a:plan-work-relationship-creation request))
+         (position (a:work-relationship-creation-plan-position plan))
+         (representation (a:work-relationship-creation-plan-representation plan)))
+    ;; What the plan adds to the request: where, and what.
+    (assert (eq request (a:work-relationship-creation-plan-request plan)))
+    (assert (eq (work:work-relationship-creation-authority-snapshot request)
+                (a:work-relationship-creation-plan-snapshot plan)))
+    (assert (= position (cdr (work:relationship-occurrence-element-range (car (last statements))))))
+    (assert (string= (format nil "~%<li data-from=\"lisp-source-authoring\" data-to=\"running-image-authoring\" data-relation=\"work:relation/informs\">Structural Lisp Source Authoring → Running Lisp Image Authoring: informs.</li>")
+                     representation))
+    (let ((slots (sb-mop:class-slots (find-class 'a:work-relationship-creation-plan))))
+      (assert (equal '("REQUEST" "SNAPSHOT" "POSITION" "REPRESENTATION")
+                     (mapcar (lambda (slot) (symbol-name (sb-mop:slot-definition-name slot))) slots)))
+      (assert (notany (lambda (slot) (typep (slot-value plan (sb-mop:slot-definition-name slot))
+                                            'work:work-relationship-source-occurrence))
+                      slots)))
+    ;; Nothing was written; the page states what it stated.
+    (assert (string= source (%read path)))
+    (assert (= (length statements) (length (work:scan-work-relationships (%read path) page))))
+    ;; Read independently, the candidate is the page and one statement more.
+    (let* ((candidate (concatenate 'string (subseq source 0 position) representation (subseq source position)))
+           (read (work:scan-work-relationships candidate page))
+           (after (work:project-work-breakdown candidate :source page))
+           (added (car (last (tm:topicmap-projection-associations-of after)))))
+      (assert (= (1+ (length statements)) (length read)))
+      (assert (equal '("lisp-source-authoring" "work:relation/informs" "running-image-authoring")
+                     (list (work:relationship-occurrence-from (car (last read)))
+                           (work:relationship-occurrence-relation (car (last read)))
+                           (work:relationship-occurrence-to (car (last read))))))
+      (assert (equal "informs" (tm:topicmap-association-relation-label added)))
+      (assert (= (1+ (length (tm:topicmap-projection-associations-of projection)))
+                 (length (tm:topicmap-projection-associations-of after)))))
+    ;; A plain relation word is its own label.
+    (assert (search "Running Lisp Image Authoring: requires.</li>"
+                    (a:work-relationship-creation-plan-representation
+                     (a:plan-work-relationship-creation
+                      (work:request-work-relationship-creation selection to "requires")))))
+    ;; The Inspector shows where and what, and that nothing was applied.
+    (let* ((view (%view plan "Relationship creation plan"))
+           (html (views:view-html view)))
+      (dolist (text '("Request" "Authority" "after the last authored relationship statement"
+                      "a representation policy, not a relationship collection"
+                      "data-relation=&quot;work:relation/informs&quot;"
+                      "none -- only reading the written source would observe one" "no -- there is no writer"))
+        (assert (search text html) () "The plan view lacks ~S." text))
+      (assert (%no-actions-p view))
+      (assert (member request (mapcar #'cdr (views:view-references view)) :test #'eq)))
+    ;; Refusals.
+    (flet ((refused (fragment thunk)
+             (let ((condition (relationship-plan-refusal thunk)))
+               (assert (search fragment (a:work-relationship-creation-plan-refused-reason condition)) ()
+                       "Refusal ~S lacks ~S." (princ-to-string condition) fragment)
+               condition)))
+      ;; A relation the plain data-relation representation does not admit.
+      (dolist (relation '("in\"forms" "informs & more" "a<b"))
+        (let ((admitted (work:request-work-relationship-creation selection to relation)))
+          (refused "is not admitted in the plain, unescaped data-relation representation"
+                   (lambda () (a:plan-work-relationship-creation admitted)))))
+      ;; The page changed after the request.
+      (%write path (replace-once source "This page is the current work map" "This page is the present work map"))
+      (assert (typep (a:work-relationship-creation-plan-refused-cause
+                      (refused "the request no longer holds" (lambda () (a:plan-work-relationship-creation request))))
+                     'work:work-relationship-creation-refused))
+      ;; A page that states no relationship gives the policy no place.
+      (let ((bare source))
+        (dolist (statement (reverse statements))
+          (let ((range (work:relationship-occurrence-element-range statement)))
+            (setf bare (concatenate 'string (subseq bare 0 (car range)) (subseq bare (cdr range))))))
+        (%write path bare)
+        (let* ((bare-projection (%project page path))
+               (bare-request (work:request-work-relationship-creation
+                              (ops:work-topic-operation-request
+                               operation (tm:topicmap-projection-topic-by-id bare-projection "lisp-source-authoring"))
+                              (tm:topicmap-projection-topic-by-id bare-projection "running-image-authoring")
+                              "develops")))
+          (refused "states no relationship" (lambda () (a:plan-work-relationship-creation bare-request)))))
+      (%write path source))
+    (assert (equal pages (work-page-sources)))))
+
 (defun %closure (name &optional seen)
   "Every system NAME depends on, by name, found without loading any."
   (let ((system (asdf:find-system name nil)))
@@ -427,6 +523,7 @@ planner and writer."
        (check-applying page path)))
     (call-with-work-breakdown-fixture #'check-authoring-circle)
     (call-with-work-breakdown-fixture #'check-shared-selection)
+    (call-with-work-breakdown-fixture #'check-relationship-creation-plan)
     (check-authoring-boundary)
     (assert (equal pages (work-page-sources))))
   (format t "~&WORK-AUTHORING-PASS: a valid request plans without writing; a stale ~
@@ -443,6 +540,10 @@ the page's observed statuses carries request, plan and authorised apply to ~
 the written page, the reloaded page object and the projected Topic, all ~
 connected in the outcome, while without that environment nothing is planned ~
 or written; a Topic sign gesture, by menu or by mark, and the Inspector select ~
-the same registry-backed operation request, whose own view completes it; the ~
+the same registry-backed operation request, whose own view completes it; a ~
+relationship creation request gets a plan that inserts one statement after the ~
+last authored one, verified to read and project as exactly the requested ~
+relationship, writing nothing and making no occurrence, refused for an ~
+unadmitted relation, a changed page and a page stating no relationship; the ~
 repository's pages are untouched.~%")
   t)

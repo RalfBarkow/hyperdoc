@@ -67,6 +67,11 @@
            #:work-status-change-outcome-status #:work-status-change-outcome-cause
            #:work-status-change-outcome-topic #:work-status-change-outcome-selection
            #:complete-work-status-change
+           #:work-relationship-creation-plan #:plan-work-relationship-creation
+           #:work-relationship-creation-plan-request #:work-relationship-creation-plan-snapshot
+           #:work-relationship-creation-plan-position #:work-relationship-creation-plan-representation
+           #:work-relationship-creation-plan-refused #:work-relationship-creation-plan-refused-reason
+           #:work-relationship-creation-plan-refused-cause
            #:work-status-change-execution-refused #:work-status-change-execution-refused-reason))
 
 (in-package #:dreyeck/work/authoring)
@@ -525,6 +530,173 @@ selects on that Topic's exact declaration, from the shared registry."
                         (views:html (views:object-ref topic :display (tm:topicmap-topic-id-of topic))
                                     " " (:tt (views:esc (getf (tm:topicmap-topic-view-properties-of topic) :status))))
                         (views:html "unchanged")))))))))
+
+;;;; Planning a relationship creation
+;;;;
+;;;; A WORK-RELATIONSHIP-CREATION-REQUEST binds what is to be created to the
+;;;; observed page snapshot; the plan adds how it would be written there. It
+;;;; inserts one relationship statement, in the form the page's statements
+;;;; have, directly after the last authored statement. That place is a
+;;;; representation policy: the page declares no relationship collection,
+;;;; and a statement anywhere on it would read the same. A page that states
+;;;; no relationship gives the policy no place, and is refused. Before it is
+;;;; returned, the plan's candidate is read and projected: exactly one new
+;;;; statement, read as the requested one, and exactly one new Association,
+;;;; everything else as before. No relationship occurrence is made here;
+;;;; only reading written source would observe one. Nothing writes.
+
+(define-condition work-relationship-creation-plan-refused (error)
+  ((request :initarg :request :reader refused-relationship-plan-request)
+   (reason :initarg :reason :reader work-relationship-creation-plan-refused-reason)
+   (cause :initarg :cause :initform nil :reader work-relationship-creation-plan-refused-cause))
+  (:report (lambda (condition stream)
+             (format stream "No relationship creation plan: ~A"
+                     (work-relationship-creation-plan-refused-reason condition))))
+  (:documentation "Nothing was planned and nothing was written. CAUSE, if
+any, is the condition that showed why."))
+
+(defclass work-relationship-creation-plan ()
+  ((request :initarg :request :reader work-relationship-creation-plan-request)
+   (snapshot :initarg :snapshot :reader work-relationship-creation-plan-snapshot)
+   (position :initarg :position :reader work-relationship-creation-plan-position)
+   (representation :initarg :representation :reader work-relationship-creation-plan-representation))
+  (:documentation "How one relationship creation request would be written:
+the exact page source it was derived from, the character position the
+statement goes at, and the statement's text. A plan writes nothing and holds
+no relationship occurrence."))
+
+(defmethod print-object ((plan work-relationship-creation-plan) stream)
+  (print-unreadable-object (plan stream :type t)
+    (format stream "~A at ~D" (work-relationship-creation-plan-request plan)
+            (work-relationship-creation-plan-position plan))))
+
+(defun %escape-text (text)
+  "TEXT as HTML text content: & < and > written as entities."
+  (with-output-to-string (stream)
+    (loop for character across text
+          do (case character
+               (#\& (write-string "&amp;" stream))
+               (#\< (write-string "&lt;" stream))
+               (#\> (write-string "&gt;" stream))
+               (t (write-char character stream))))))
+
+(defun %relationship-representation (from to relation from-label to-label relation-label)
+  "One relationship statement, on its own line, in the form the page's
+statements have."
+  (format nil "~%<li data-from=\"~A\" data-to=\"~A\" data-relation=\"~A\">~A → ~A: ~A.</li>"
+          from to relation (%escape-text from-label) (%escape-text to-label) (%escape-text relation-label)))
+
+(defun %relationship-candidate (plan)
+  (let ((snapshot (work-relationship-creation-plan-snapshot plan))
+        (position (work-relationship-creation-plan-position plan)))
+    (concatenate 'string (subseq snapshot 0 position)
+                 (work-relationship-creation-plan-representation plan) (subseq snapshot position))))
+
+(defun %statement-triple (occurrence)
+  (list (work:relationship-occurrence-from occurrence) (work:relationship-occurrence-relation occurrence)
+        (work:relationship-occurrence-to occurrence)))
+
+(defun %verify-relationship-candidate (plan refuse)
+  "Call REFUSE unless PLAN's candidate, read and projected, differs from its
+snapshot by exactly the requested statement and Association."
+  (let* ((request (work-relationship-creation-plan-request plan))
+         (page (work:work-relationship-creation-authority-page request))
+         (snapshot (work-relationship-creation-plan-snapshot plan))
+         (position (work-relationship-creation-plan-position plan))
+         (representation (work-relationship-creation-plan-representation plan))
+         (candidate (%relationship-candidate plan))
+         (triple (list (work:topic-occurrence-topic (work:work-relationship-creation-from-occurrence request))
+                       (work:work-relationship-creation-relation request)
+                       (work:topic-occurrence-topic (work:work-relationship-creation-to-occurrence request)))))
+    (flet ((read-source (text what)
+             (handler-case (values (work:scan-work-relationships text page)
+                                   (work:project-work-breakdown text :source page))
+               (error (condition)
+                 (funcall refuse (format nil "the ~A does not read as Work source: ~A" what condition))))))
+      (multiple-value-bind (old before) (read-source snapshot "snapshot")
+        (multiple-value-bind (new after) (read-source candidate "candidate")
+          ;; The source: one new statement, read as the requested one, just
+          ;; where the plan put it; every earlier statement as it was.
+          (unless (and (= (length new) (1+ (length old)))
+                       (equal (mapcar #'%statement-triple old) (mapcar #'%statement-triple (butlast new)))
+                       (equal triple (%statement-triple (car (last new))))
+                       (equal (cons (1+ position) (+ position (length representation)))
+                              (work:relationship-occurrence-element-range (car (last new)))))
+            (funcall refuse "the candidate does not add exactly the requested statement after the last one"))
+          ;; The projection: every Topic as it was, and the Associations
+          ;; as they were, followed by exactly the requested one.
+          (let ((old-associations (tm:topicmap-projection-associations-of before))
+                (new-associations (tm:topicmap-projection-associations-of after)))
+            (unless (equal (mapcar #'%topic-row (tm:topicmap-projection-topics-of before))
+                           (mapcar #'%topic-row (tm:topicmap-projection-topics-of after)))
+              (funcall refuse "the candidate changes the Topics"))
+            (unless (and (= (length new-associations) (1+ (length old-associations)))
+                         (equal (mapcar #'%association-row old-associations)
+                                (mapcar #'%association-row (butlast new-associations)))
+                         (let ((added (car (last new-associations))))
+                           (equal triple (list (tm:topicmap-association-from-of added)
+                                               (tm:topicmap-association-type-of added)
+                                               (tm:topicmap-association-to-of added)))))
+              (funcall refuse "the candidate does not project to exactly the requested new Association"))))))))
+
+(defun plan-work-relationship-creation (request &key (current nil current-p))
+  "The HTML statement that would carry out REQUEST, verified before it is
+returned. CURRENT is the page's source now, read from its page unless given;
+the request is validated again against it exactly as when it was made.
+Writes nothing, and signals WORK-RELATIONSHIP-CREATION-PLAN-REFUSED unless
+every check holds."
+  (flet ((refuse (reason &optional cause)
+           (error 'work-relationship-creation-plan-refused :request request :reason reason :cause cause)))
+    (unless (typep request 'work:work-relationship-creation-request)
+      (refuse (format nil "~S is not a relationship creation request" request)))
+    (let* ((page (work:work-relationship-creation-authority-page request))
+           (snapshot (work:work-relationship-creation-authority-snapshot request))
+           (from (work:work-relationship-creation-from-occurrence request))
+           (to (work:work-relationship-creation-to-occurrence request))
+           (relation (work:work-relationship-creation-relation request)))
+      (unless (typep page 'hyperdoc:html-page)
+        (refuse (format nil "its authority page ~S is not a HyperDoc HTML page" page)))
+      (let ((current (if current-p current (%read-source (hyperdoc:file-of page)))))
+        (handler-case (work:request-work-relationship-creation
+                       (work:work-relationship-creation-selection request) (ops:declared-work-topic to)
+                       relation :current current)
+          (work:work-relationship-creation-refused (condition)
+            (refuse "the request no longer holds" condition))))
+      (let ((unwritable (%unwritable-character relation)))
+        (when unwritable
+          (refuse (format nil "~S is not admitted in the plain, unescaped data-relation representation used by this plan: it contains ~S"
+                          relation unwritable))))
+      (let ((statements (work:scan-work-relationships snapshot page)))
+        (unless statements
+          (refuse "the observed page states no relationship, so this plan's policy has no statement to insert after"))
+        (let* ((projection (work:project-work-breakdown snapshot :source page))
+               (contract (and (work::relation-contract-reference-p relation)
+                              (tm:topicmap-projection-topic-by-id projection relation)))
+               (plan (make-instance
+                      'work-relationship-creation-plan
+                      :request request :snapshot snapshot
+                      :position (cdr (work:relationship-occurrence-element-range (car (last statements))))
+                      :representation (%relationship-representation
+                                       (work:topic-occurrence-topic from) (work:topic-occurrence-topic to) relation
+                                       (tm:topicmap-topic-label-of (ops:declared-work-topic from))
+                                       (tm:topicmap-topic-label-of (ops:declared-work-topic to))
+                                       (if contract (tm:topicmap-topic-label-of contract) relation)))))
+          (%verify-relationship-candidate plan #'refuse)
+          plan)))))
+
+(views:defview work-relationship-creation-plan-overview (plan work-relationship-creation-plan)
+  (views:html-view :title "Relationship creation plan" :priority 1
+    (let ((page (work:work-relationship-creation-authority-page (work-relationship-creation-plan-request plan))))
+      (views:html
+        (:table :class "inspector-table"
+          (:tr (:td "Request") (:td (views:object-ref (work-relationship-creation-plan-request plan))))
+          (:tr (:td "Authority") (:td (views:object-ref page)))
+          (:tr (:td "Insertion")
+               (:td (views:esc (format nil "at character ~D of the observed source: after the last authored relationship statement -- a representation policy, not a relationship collection"
+                                       (work-relationship-creation-plan-position plan)))))
+          (:tr (:td "Statement") (:td (:pre (views:esc (string-left-trim '(#\Newline) (work-relationship-creation-plan-representation plan))))))
+          (:tr (:td "Relationship occurrence") (:td "none -- only reading the written source would observe one"))
+          (:tr (:td "Applied") (:td "no -- there is no writer for this plan")))))))
 
 (views:defview work-status-change-plan-overview (plan work-status-change-plan)
   (views:html-view :title "Work status change plan" :priority 1
