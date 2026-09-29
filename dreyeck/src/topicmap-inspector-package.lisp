@@ -10,7 +10,8 @@
    #:open-workspace-action-sign-occurrences
    #:workspace-action-sign-occurrence-current-p
    #:invalidate-workspace-action-sign-occurrence
-   #:*workspace-action-sign-bindings*
+   #:*workspace-action-sign-bindings* #:workspace-action-sign-bindings
+   #:workspace-action-sign-selected-object
    #:occurrence-reference #:occurrence-element #:occurrence-pane
    #:occurrence-view #:occurrence-token #:occurrence-inputs
    #:occurrence-topic #:occurrence-topic-id #:occurrence-projection

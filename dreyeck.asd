@@ -1380,7 +1380,7 @@
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/operation-request"
   :DESCRIPTION
-  "An operation and the Lisp source definition it is for, before anything runs"
+  "An operation and the exact occurrence it is for, before anything runs"
   :LICENSE
   "BSD"
   :VERSION
@@ -2289,9 +2289,10 @@
 (defsystem "dreyeck/work/reading"
   :description "HyperDoc work pages and one complete D2 Connections example"
   :depends-on ("dreyeck/topicmap/tala/reading" "dreyeck/gesture-binding-witness"
-               "dreyeck/inspector/git")
+               "dreyeck/inspector/git" "dreyeck/gesture/operation-request")
   :serial t
   :components ((:module "dreyeck/work" :components ((:file "reading")
+                                                    (:file "operation-requests")
                                                     (:file "deployment-reading")
                                                     (:file "authoring-architecture")))
                (:module "dreyeck/pages/work" :components
@@ -2332,7 +2333,7 @@
   :components ((:file "dreyeck/src/work-authoring")))
 
 (defsystem "dreyeck/work/authoring/tests"
-  :depends-on ("dreyeck/work/authoring")
+  :depends-on ("dreyeck/work/authoring" "dreyeck/topicmap/gesture/tests")
   :components ((:file "dreyeck/tests/work-authoring"))
   :perform (test-op (op component)
              (declare (ignore op component))

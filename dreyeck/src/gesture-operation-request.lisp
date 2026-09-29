@@ -1,4 +1,4 @@
-;;;; An operation and the Lisp source definition it is for, before anything runs.
+;;;; An operation and the exact occurrence it is for, before anything runs.
 ;;;;
 ;;;; A Binding answers which operation. It does not answer on what: its
 ;;;; TARGET-TYPE is a criterion, never an instance. The instance belongs to
@@ -11,6 +11,13 @@
 ;;;; with the same FORM-KEY. Keep the page, parser source snapshot and CST
 ;;;; character range together. A range addresses only that observed snapshot;
 ;;;; changing the source invalidates it rather than moving it to a namesake.
+;;;;
+;;;; The occurrence is a Lisp source definition here. Another system may
+;;;; make another kind of exact occurrence a target by giving it methods for
+;;;; what a request itself needs: its page and snapshot, whether it is
+;;;; current, resolving it, a short label and its registry key. What only a
+;;;; Lisp definition has -- FORM-KEY, system, path, the CST check and
+;;;; DEFEXAMPLE planning -- stays Lisp-only.
 
 (defpackage #:dreyeck/gesture/operation-request
   (:use #:cl)
@@ -83,18 +90,16 @@ observations as immutable. FORM-KEY is consistency evidence, not a locator."))
   (alexandria:read-file-into-string
    (hyperdoc::source-code-pathname (occurrence-page occurrence))))
 
-(defun occurrence-status (occurrence)
+(defmethod occurrence-status ((occurrence source-occurrence))
   "Read-only freshness check. An unavailable authority is also stale."
-  (check-type occurrence source-occurrence)
   (if (handler-case (string= (%current-source occurrence)
                              (occurrence-source occurrence))
         (file-error () nil))
       :current :stale-authority))
 
-(defun resolve-occurrence (occurrence)
+(defmethod resolve-occurrence ((occurrence source-occurrence))
   "Resolve the exact recorded range only while the entire snapshot is current.
 No name search, relocation or replacement observation is permitted."
-  (check-type occurrence source-occurrence)
   (unless (eq :current (occurrence-status occurrence))
     (error 'stale-source-occurrence :occurrence occurrence))
   (let ((source (occurrence-source occurrence))
@@ -120,7 +125,7 @@ No name search, relocation or replacement observation is permitted."
 (defclass operation-request ()
   ((operation :initarg :operation :reader operation-request-operation)
    (occurrence :initarg :occurrence :reader operation-request-occurrence))
-  (:documentation "One operation on one observed source occurrence; no executor."))
+  (:documentation "One operation on one exact observed occurrence; no executor."))
 
 (defun operation-request-page (request)
   (occurrence-page (operation-request-occurrence request)))
@@ -128,31 +133,39 @@ No name search, relocation or replacement observation is permitted."
 (defun operation-request-form-key (request)
   (occurrence-form-key (operation-request-occurrence request)))
 
+(defmethod %write-occurrence-label ((occurrence source-occurrence) stream)
+  "Write a short name for OCCURRENCE to STREAM: its FORM-KEY and character range."
+  (format stream "~S at ~S" (occurrence-form-key occurrence) (occurrence-range occurrence)))
+
+(defun %occurrence-label (occurrence)
+  (with-output-to-string (stream) (%write-occurrence-label occurrence stream)))
+
 (defmethod print-object ((request operation-request) stream)
   (print-unreadable-object (request stream :type t)
-    (format stream "~A on ~S at ~S"
-            (w:semantic-operation-identity-id (operation-request-operation request))
-            (operation-request-form-key request)
-            (occurrence-range (operation-request-occurrence request)))))
+    (format stream "~A on "
+            (w:semantic-operation-identity-id (operation-request-operation request)))
+    (%write-occurrence-label (operation-request-occurrence request) stream)))
 
 (defvar *requests* (make-hash-table :test #'equal)
-  "EQUAL over operation, page, FORM-KEY, snapshot string and character range.
+  "EQUAL over the operation and what makes its occurrence exact -- for a Lisp
+source occurrence its page, FORM-KEY, snapshot string and character range.
 Operation and page compare by EQ; reparsed CST identity never participates.")
 
-(defun %request-key (operation occurrence)
+(defmethod %request-key (operation (occurrence source-occurrence))
   (list operation (occurrence-page occurrence) (occurrence-form-key occurrence)
         (occurrence-source occurrence) (occurrence-range occurrence)))
 
 (defun %as-occurrence (target form-key)
-  "Legacy page/key callers may observe only an unambiguous definition.
-Rendered affordances always pass their already captured occurrence instead."
-  (if (typep target 'source-occurrence)
-      target
+  "Legacy page/key callers may observe only an unambiguous definition. Any
+other TARGET is itself the occurrence: rendered affordances pass the one they
+already captured."
+  (if (typep target 'hyperdoc::code-page)
       (let ((matches (remove form-key (page-occurrences target)
                              :key #'occurrence-form-key :test-not #'equal)))
         (unless (= 1 (length matches))
           (error "A page/key request requires exactly one definition: ~S." form-key))
-        (first matches))))
+        (first matches))
+      target))
 
 (defun ensure-operation-request (operation target &optional form-key)
   (check-type operation w:semantic-operation-identity)
@@ -233,8 +246,21 @@ the subject, which the surface was given by its view, says on what."
                            (views:thunk (request-through-binding binding occurrence))))
                      (:td (views:transclusion (gesture-target-view occurrence))))))))))))
 
-(views:defview operation-request-overview (request operation-request)
-  (views:html-view :title "Request" :priority 1
+(defun %render-occurrence-request (request)
+  "What a request says about an occurrence other than a Lisp definition."
+  (let ((occurrence (operation-request-occurrence request)))
+    (views:html
+      (:table :class "inspector-table"
+        (:tr (:td "Operation")
+             (:td (:tt (views:esc (w:semantic-operation-identity-id
+                                   (operation-request-operation request))))))
+        (:tr (:td "Target") (:td (views:object-ref occurrence :display (%occurrence-label occurrence))))
+        (:tr (:td "Page") (:td (views:object-ref (occurrence-page occurrence))))
+        (:tr (:td "Status") (:td (views:esc (symbol-name (occurrence-status occurrence)))))
+        (:tr (:td "Executed") (:td "no -- a request holds no executor"))))))
+
+(defun %render-source-occurrence-request (request)
+  "What a request says about a Lisp source definition."
     (let* ((operation (operation-request-operation request))
            (page (operation-request-page request))
            (occurrence (operation-request-occurrence request))
@@ -255,4 +281,10 @@ the subject, which the surface was given by its view, says on what."
           (resolve-occurrence occurrence)
           (views:html
             (:pre (views:esc (subseq (occurrence-source occurrence)
-                                    (car range) (cdr range))))))))))
+                                    (car range) (cdr range)))))))))
+
+(views:defview operation-request-overview (request operation-request)
+  (views:html-view :title "Request" :priority 1
+    (if (typep (operation-request-occurrence request) 'source-occurrence)
+        (%render-source-occurrence-request request)
+        (%render-occurrence-request request))))

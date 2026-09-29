@@ -6,6 +6,11 @@
   (:local-nicknames (#:a #:dreyeck/work/authoring)
                     (#:work #:dreyeck/work/reading)
                     (#:tm #:dreyeck/topicmap)
+                    (#:r #:dreyeck/gesture/operation-request)
+                    (#:ops #:dreyeck/work/operation-requests)
+                    (#:m #:dreyeck/inspector/topicmap)
+                    (#:w #:dreyeck/gesture-binding-witness)
+                    (#:gt #:dreyeck/topicmap/gesture/tests)
                     (#:views #:html-inspector-views))
   (:export #:run-tests))
 
@@ -282,16 +287,25 @@ plan, source, reloaded page and projected Topic stay inspectably connected."
       (assert (null (a:work-status-change-outcome-plan outcome)))
       (assert (typep (a:work-status-change-outcome-cause outcome) 'a:work-status-change-execution-refused))
       (assert (string= source (%read path))))
-    ;; The action: request, plan, authorised apply, and the outcome to open.
-    (let* ((outcome (views:eval-thunk (cdr (assoc "Change work status to \"in progress\"" buttons :test #'equal))))
+    ;; The action: selection, request, plan, authorised apply, and the
+    ;; outcome to open.
+    (let* ((selection (ops:work-topic-operation-request (w:change-work-status-operation) topic))
+           (outcome (views:eval-thunk (cdr (assoc "Change work status to \"in progress\"" buttons :test #'equal))))
            (request (a:work-status-change-outcome-request outcome))
            (plan (a:work-status-change-outcome-plan outcome))
            (now (a:work-status-change-outcome-topic outcome)))
       (assert (typep outcome 'a:work-status-change-outcome))
       (assert (eq :applied (a:work-status-change-outcome-status outcome)))
       (assert (null (a:work-status-change-outcome-cause outcome)))
-      (assert (eq topic (work:work-status-change-topic request)))
-      (assert (eq (work:topic-source-occurrence topic) (work:work-status-change-occurrence request)))
+      ;; The request completed the shared selection, for the Topic its
+      ;; declaration declares.
+      (assert (eq selection (a:work-status-change-outcome-selection outcome)))
+      (assert (equal (tm:topicmap-topic-id-of topic)
+                     (tm:topicmap-topic-id-of (work:work-status-change-topic request))))
+      (assert (string= (work:topic-occurrence-snapshot (work:topic-source-occurrence topic))
+                       (work:topic-occurrence-snapshot (work:work-status-change-occurrence request))))
+      (assert (equal (work:topic-occurrence-element-range (work:topic-source-occurrence topic))
+                     (work:topic-occurrence-element-range (work:work-status-change-occurrence request))))
       (assert (equal "open" (work:work-status-change-observed-status request)))
       (assert (equal "in progress" (work:work-status-change-proposed-status request)))
       (assert (eq request (a:work-status-change-plan-request plan)))
@@ -315,7 +329,7 @@ plan, source, reloaded page and projected Topic stay inspectably connected."
         (dolist (text '("operation/change-work-status" "Request" "Plan" "applied" "Source authority"
                         "Work Topic now" "<tt>in progress</tt>"))
           (assert (search text outcome-html) () "The outcome view lacks ~S." text))
-        (dolist (object (list topic request plan page now))
+        (dolist (object (list (work:work-status-change-topic request) selection request plan page now))
           (assert (member object objects :test #'eq)))))
     ;; The Workspace it started from is as it was.
     (assert (equal point (tm:topicmap-workspace-point-of workspace)))
@@ -330,6 +344,50 @@ plan, source, reloaded page and projected Topic stay inspectably connected."
       (assert (null (find "Change work status" (views:all-views plain)
                           :key #'views:view-title :test #'equal))))
     (assert (equal pages (work-page-sources)))))
+
+(defun check-shared-selection (page path)
+  "Inspector and gesture select Change work status on the same exact Work Topic
+declaration as the same operation request, and completing that request is the
+one way on."
+  (let* ((source (%read path))
+         (projection (%project page path))
+         (topic (tm:topicmap-projection-topic-by-id projection "hyperdoc-page-authoring"))
+         (workspace (tm:make-topicmap-workspace projection "hyperdoc-page-authoring"))
+         (operation (w:change-work-status-operation))
+         (inspector (ops:work-topic-operation-request operation topic))
+         (bindings (m:workspace-action-sign-bindings (gt::%occurrence workspace topic :bindings nil))))
+    ;; This image offers Change work status on the sign of a declared Work
+    ;; Topic, and nothing on a Topic no HTML declaration backs.
+    (assert (equal '("binding/radial-menu-change-work-status" "binding/learned-mark-change-work-status")
+                   (mapcar #'w:gesture-binding-id bindings)))
+    (assert (every (lambda (binding) (eq operation (w:gesture-binding-operation binding))) bindings))
+    (let* ((plain (tm:make-topicmap-topic :id "plain" :label "Plain"))
+           (elsewhere (tm:make-topicmap-workspace (tm:make-topicmap-projection :topics (list plain)) "plain")))
+      (assert (null (m:workspace-action-sign-bindings (gt::%occurrence elsewhere plain :bindings nil)))))
+    ;; A radial gesture and a mark on the sign select the Inspector's own
+    ;; operation request: the same object, operation and declaration.
+    (dolist (steps (list gt::*radial* gt::*mark*))
+      (let ((sign (gt::%occurrence workspace topic :bindings bindings)))
+        (gt::%feed sign steps)
+        (let ((gesture (m:workspace-action-sign-selected-object sign)))
+          (assert (eq inspector gesture))
+          (assert (eq operation (r:operation-request-operation gesture)))
+          (assert (eq (work:topic-source-occurrence topic) (r:operation-request-occurrence gesture))))))
+    (assert (string= source (%read path)))
+    ;; The selection's own view completes it; request, plan and effect follow.
+    (let* ((view (%view inspector "Change work status"))
+           (outcome (views:eval-thunk (cdr (assoc "Change work status to \"in progress\"" (%buttons view)
+                                                  :test #'equal)))))
+      (assert (eq :applied (a:work-status-change-outcome-status outcome)))
+      (assert (eq inspector (a:work-status-change-outcome-selection outcome)))
+      (assert (member inspector (mapcar #'cdr (views:view-references
+                                                 (%view outcome "Work status change outcome")))
+                      :test #'eq))
+      (assert (equal "in progress" (%status (%project page path) "hyperdoc-page-authoring")))
+      ;; The selection was of the page as it was: completing it again is
+      ;; refused, and nothing relocates.
+      (assert (typep (a:complete-work-status-change inspector "open") 'work:work-status-change-refused))
+      (assert (equal "in progress" (%status (%project page path) "hyperdoc-page-authoring"))))))
 
 (defun %closure (name &optional seen)
   "Every system NAME depends on, by name, found without loading any."
@@ -368,6 +426,7 @@ planner and writer."
        (check-hand-built-plans page path)
        (check-applying page path)))
     (call-with-work-breakdown-fixture #'check-authoring-circle)
+    (call-with-work-breakdown-fixture #'check-shared-selection)
     (check-authoring-boundary)
     (assert (equal pages (work-page-sources))))
   (format t "~&WORK-AUTHORING-PASS: a valid request plans without writing; a stale ~
@@ -383,5 +442,7 @@ an image holding the pinned authoring environment, one action offered from ~
 the page's observed statuses carries request, plan and authorised apply to ~
 the written page, the reloaded page object and the projected Topic, all ~
 connected in the outcome, while without that environment nothing is planned ~
-or written; the repository's pages are untouched.~%")
+or written; a Topic sign gesture, by menu or by mark, and the Inspector select ~
+the same registry-backed operation request, whose own view completes it; the ~
+repository's pages are untouched.~%")
   t)

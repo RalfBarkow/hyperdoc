@@ -7,7 +7,9 @@
                     (#:tala #:dreyeck/topicmap/tala)
                     (#:w #:dreyeck/gesture-binding-witness)
                     (#:sm #:dreyeck/state-machine)
-                    (#:m #:dreyeck/inspector/topicmap))
+                    (#:m #:dreyeck/inspector/topicmap)
+                    (#:r #:dreyeck/gesture/operation-request)
+                    (#:ops #:dreyeck/work/operation-requests))
   (:export #:run-tests))
 (in-package #:dreyeck/work/tests)
 
@@ -1296,6 +1298,72 @@ stated there and the status proposed. A request, nothing more."
     (assert (equal history (tm:topicmap-workspace-history-of workspace)))
     (assert (= request-count (hash-table-count requests)))))
 
+;;;; An operation selected on a Work Topic declaration: representable, not offered
+
+(defun check-work-operation-request ()
+  "Reading side: Change work status selected on a Work Topic's exact
+declaration is an ordinary operation request from the shared registry.
+Nothing here offers it: no Topic sign Binding, no action, no authoring."
+  (let* ((pages (work-page-sources))
+         (projection (work:work-projection))
+         (topic (tm:topicmap-projection-topic-by-id projection "hyperdoc-page-authoring"))
+         (occurrence (work:topic-source-occurrence topic))
+         (operation (w:change-work-status-operation))
+         (selection (ops:work-topic-operation-request operation topic)))
+    (assert (typep selection 'r:operation-request))
+    (assert (eq operation (r:operation-request-operation selection)))
+    ;; The registry keeps the first observation of a declaration; any later
+    ;; one of the same snapshot and ranges selects the same request.
+    (let ((kept (r:operation-request-occurrence selection)))
+      (assert (string= (work:topic-occurrence-snapshot occurrence) (work:topic-occurrence-snapshot kept)))
+      (assert (equal (work:topic-occurrence-element-range occurrence) (work:topic-occurrence-element-range kept)))
+      (assert (eq (work:topic-occurrence-page occurrence) (work:topic-occurrence-page kept))))
+    ;; One registry: the same declaration selects the same request, even from
+    ;; a projection read anew; another declaration selects another.
+    (assert (eq selection (ops:work-topic-operation-request operation topic)))
+    (assert (eq selection (ops:work-topic-operation-request
+                           operation (tm:topicmap-projection-topic-by-id (work:work-projection)
+                                                                         "hyperdoc-page-authoring"))))
+    (assert (not (eq selection (ops:work-topic-operation-request
+                                operation (tm:topicmap-projection-topic-by-id projection
+                                                                              "lisp-source-authoring")))))
+    ;; What a request needs of its target, and the Topic declared there.
+    (assert (eq (work:work-page "Work Breakdown") (r:operation-request-page selection)))
+    (assert (eq :current (r:occurrence-status occurrence)))
+    (assert (eq occurrence (r:resolve-occurrence occurrence)))
+    (assert (eq :current (r:occurrence-status (r:operation-request-occurrence selection))))
+    (assert (search "operation/change-work-status on Work Topic hyperdoc-page-authoring"
+                    (prin1-to-string selection)))
+    (assert (equal "hyperdoc-page-authoring"
+                   (tm:topicmap-topic-id-of (ops:declared-work-topic occurrence))))
+    ;; Its view says what was selected and offers nothing.
+    (let* ((views (views:all-views selection))
+           (view (find "Request" views :key #'views:view-title :test #'equal))
+           (html (views:view-html view)))
+      (dolist (text '("operation/change-work-status" "Target" "Work Topic hyperdoc-page-authoring"
+                      "Page" "CURRENT" "no -- a request holds no executor"))
+        (assert (search text html) () "The request view lacks ~S." text))
+      (assert (notany (lambda (entry) (or (eql 0 (search "action-" (car entry)))
+                                          (eql 0 (search "eval-" (car entry)))))
+                      (views:view-references view)))
+      (assert (null (find "Change work status" views :key #'views:view-title :test #'equal))))
+    ;; Not offered in this image: nothing authoring is loaded, the Topic sign
+    ;; offers no Binding, and the Operation shows nothing for it.
+    (assert (null (find-package "DREYECK/WORK/AUTHORING")))
+    (assert (not (asdf:component-loaded-p "dreyeck/workflow/authoring")))
+    (let* ((sign (make-instance 'm:workspace-action-sign-occurrence
+                                :reference (make-instance 'm::topic-action-reference
+                                                          :topic topic :projection projection
+                                                          :workspace (tm:make-topicmap-workspace
+                                                                      projection "hyperdoc-page-authoring")
+                                                          :fn (lambda () nil))
+                                :element nil :pane nil :view nil))
+           (target (list :type :workspace-action-sign-occurrence :occurrence sign)))
+      (assert (null (m:workspace-action-sign-bindings sign)))
+      (assert (handler-case (progn (m:operation-inspectable-object operation target) nil)
+                (m:operation-not-applicable () t))))
+    (assert (equal pages (work-page-sources)))))
+
 ;;;; Change relation: a request, nothing more
 
 (defun with-fixture-requires-contract (source)
@@ -1907,8 +1975,9 @@ work items, only warranted relationships, and no architecture copied in."
   (check-work-relationship-occurrences)
   (check-work-topic-occurrences)
   (check-work-status-change-request)
+  (check-work-operation-request)
   (check-relation-change-request)
   (check-fedwiki-work)
   (check-authoring-work)
-  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in), Work Topic declarations (one snapshot, the declaring page not the carrier, stale not relocated, a duplicate refused naming both declarations, the declaration form or a refusal), Change work status (one exact declaration on its declaring page, observed and proposed status, no copied range or edit, stale, moved, mismatched, unchanged and unstated refused, only the status value differs in memory, no effect).~%")
+  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in), Work Topic declarations (one snapshot, the declaring page not the carrier, stale not relocated, a duplicate refused naming both declarations, the declaration form or a refusal), Change work status (one exact declaration on its declaring page, observed and proposed status, no copied range or edit, stale, moved, mismatched, unchanged and unstated refused, only the status value differs in memory, no effect), Change work status selected on a declaration (one registry-backed operation request, not offered here: no Topic sign Binding, no action, no authoring loaded).~%")
   t)

@@ -14,7 +14,10 @@
 ;;;; again is a new occurrence.
 ;;;;
 ;;;; No Topic Operation is installed here. Production Bindings are empty,
-;;;; so a secondary gesture is recognized and completes with nothing.
+;;;; so a secondary gesture is recognized and completes with nothing. A
+;;;; system that establishes a Topic Operation may offer Bindings for the
+;;;; occurrences it applies to, by a method on WORKSPACE-ACTION-SIGN-BINDINGS;
+;;;; a gesture completed with one opens what its Operation shows.
 
 (in-package #:dreyeck/inspector/topicmap)
 
@@ -57,8 +60,14 @@ that occurrence. A refresh or disconnected browser ends the occurrence."))
   (dreyeck/topicmap:topicmap-topic-object-of (occurrence-topic occurrence)))
 
 (defvar *workspace-action-sign-bindings* nil
-  "The Gesture Bindings a workspace action sign offers. None in production:
-no Topic Operation is established. Read when an occurrence is created.")
+  "The Gesture Bindings every workspace action sign offers. None in
+production: no Topic Operation is established here. Read, through
+WORKSPACE-ACTION-SIGN-BINDINGS, when an occurrence is created.")
+
+(defmethod workspace-action-sign-bindings ((occurrence workspace-action-sign-occurrence))
+  "The Bindings OCCURRENCE offers: by default *WORKSPACE-ACTION-SIGN-BINDINGS*,
+the same for every occurrence."
+  *workspace-action-sign-bindings*)
 
 (defvar *workspace-action-sign-occurrences* nil
   "Weak references for inspection; never a store.")
@@ -180,15 +189,16 @@ ended occurrence, including removal outside the Inspector refresh path."
          (target (list :type :workspace-action-sign-occurrence :occurrence occurrence))
          (window
            (dreyeck/gesture/clog:make-gesture-window
-            :bindings *workspace-action-sign-bindings*
+            :bindings (workspace-action-sign-bindings occurrence)
             :projection
             (lambda (window snapshot)
-              (declare (ignore window))
               (when (%occurrence-current occurrence)
                 (setf (clog:attribute element "data-topic-gesture-state")
                       (string-downcase (princ-to-string (getf snapshot :state)))
                       (clog:attribute element "data-topic-gesture-mode")
-                      (string-downcase (princ-to-string (getf snapshot :mode)))))))))
+                      (string-downcase (princ-to-string (getf snapshot :mode))))
+                (when (dreyeck/gesture/clog:newly-completed-p window snapshot)
+                  (%show-topic-selection occurrence)))))))
     (setf (occurrence-gesture-window occurrence) window
           (clog:attribute element "data-workspace-action-sign-occurrence")
           (occurrence-token occurrence))
@@ -197,6 +207,30 @@ ended occurrence, including removal outside the Inspector refresh path."
                      :call-back-script "+ e.originalEvent.detail")
     (clog:js-execute element (secondary-topic-script (clog:script-id element)))
     occurrence))
+
+(defun workspace-action-sign-selected-object (occurrence)
+  "What the Operation OCCURRENCE's completed gesture selected shows for its
+exact target, or NIL unless the gesture completed with a Binding. Signals
+OPERATION-NOT-APPLICABLE when that Operation shows nothing there."
+  (multiple-value-bind (binding target)
+      (dreyeck/gesture/clog:gesture-window-selection (occurrence-gesture-window occurrence))
+    (when binding
+      (operation-inspectable-object (dreyeck/gesture-binding-witness:gesture-binding-operation binding)
+                                    target))))
+
+(defun %show-topic-selection (occurrence)
+  "After a completed gesture on OCCURRENCE: what its Operation shows, in a pane
+beside the occurrence's. A refusal opens nothing."
+  (let* ((element (occurrence-element occurrence))
+         (object (handler-case (workspace-action-sign-selected-object occurrence)
+                   (operation-not-applicable (condition)
+                     (setf (clog:attribute element "data-topic-gesture-outcome") "not-applicable"
+                           (clog:attribute element "data-topic-gesture-refusal")
+                           (operation-not-applicable-reason condition))
+                     nil))))
+    (when (and object (occurrence-pane occurrence))
+      (setf (clog:attribute element "data-topic-gesture-outcome") "shown")
+      (%open-beside (occurrence-pane occurrence) object))))
 
 ;;;; Association signs
 ;;;;
@@ -378,7 +412,7 @@ cancelled interaction leaves nothing on the page."
         (:tr (:td "View") (:td (views:object-ref (occurrence-view occurrence))))
         (:tr (:td "Gesture Window")
              (:td (views:object-ref (occurrence-gesture-window occurrence)))))
-      (:p "No Topic Operation is installed or executed."))))
+      (:p "Nothing is executed from this occurrence."))))
 
 ;;;; What a selected read-only Operation shows
 ;;;;
@@ -387,20 +421,10 @@ cancelled interaction leaves nothing on the page."
 ;;;; the next step and only that one: the object a read-only Operation shows
 ;;;; for its exact target. Showing it in a pane is a further step not taken
 ;;;; here, and nothing is written, requested or remembered. One case is
-;;;; recognized: Inspect relation contract on a Topicmap Association.
+;;;; recognized here: Inspect relation contract on a Topicmap Association.
+;;;; Another system may add a case by a method for its Operation.
 
-(define-condition operation-not-applicable (error)
-  ((operation :initarg :operation :reader operation-not-applicable-operation)
-   (target :initarg :target :reader operation-not-applicable-target)
-   (reason :initarg :reason :reader operation-not-applicable-reason))
-  (:report (lambda (condition stream)
-             (format stream "~A does not apply: ~A"
-                     (dreyeck/gesture-binding-witness:semantic-operation-identity-id
-                      (operation-not-applicable-operation condition))
-                     (operation-not-applicable-reason condition))))
-  (:documentation "OPERATION shows nothing for TARGET. Distinct from a result."))
-
-(defun operation-inspectable-object (operation target)
+(defmethod operation-inspectable-object (operation target)
   "The inspectable object OPERATION shows for TARGET, a Gesture target plist.
 TARGET must carry the exact Topicmap Association under :ASSOCIATION; an ID
 names no Association. Signals OPERATION-NOT-APPLICABLE otherwise."
@@ -420,3 +444,14 @@ names no Association. Signals OPERATION-NOT-APPLICABLE otherwise."
                 :relation-contract)
           (refuse "Association ~A refers to no Relation Contract"
                   (dreyeck/topicmap:topicmap-association-id-of association))))))
+
+(define-condition operation-not-applicable (error)
+  ((operation :initarg :operation :reader operation-not-applicable-operation)
+   (target :initarg :target :reader operation-not-applicable-target)
+   (reason :initarg :reason :reader operation-not-applicable-reason))
+  (:report (lambda (condition stream)
+             (format stream "~A does not apply: ~A"
+                     (dreyeck/gesture-binding-witness:semantic-operation-identity-id
+                      (operation-not-applicable-operation condition))
+                     (operation-not-applicable-reason condition))))
+  (:documentation "OPERATION shows nothing for TARGET. Distinct from a result."))

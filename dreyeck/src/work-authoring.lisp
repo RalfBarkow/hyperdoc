@@ -30,10 +30,13 @@
 ;;;; EXECUTE-WORK-STATUS-CHANGE carries one request through these steps, and
 ;;;; only in an image holding the pinned authoring environment, the same
 ;;;; capability the Lisp source writers require. It adds no editing of its
-;;;; own. In such an image, a Work Topic declared in HTML, and a Workspace
-;;;; whose Point is one, show a Change work status view whose actions start
-;;;; that path and open its outcome. Neither the view nor the executor exists
-;;;; in an image that has not loaded this system.
+;;;; own. Only such an image offers Change work status: on a Work Topic
+;;;; declared in HTML, on a Workspace whose Point is one, and on the Topic
+;;;; sign of one, by menu or by mark. Every offer first selects the operation
+;;;; on the exact declaration as the one shared OPERATION-REQUEST; choosing a
+;;;; status completes it into the request, which is executed. Neither the
+;;;; offers nor the executor exist in an image that has not loaded this
+;;;; system, though the selection is representable there.
 ;;;;
 ;;;; Staleness is the whole snapshot's, as for every Work source occurrence:
 ;;;; any difference refuses, and nothing is relocated by Topic ID. A plan
@@ -45,6 +48,10 @@
   (:use #:cl)
   (:local-nicknames (#:work #:dreyeck/work/reading)
                     (#:tm #:dreyeck/topicmap)
+                    (#:r #:dreyeck/gesture/operation-request)
+                    (#:ops #:dreyeck/work/operation-requests)
+                    (#:m #:dreyeck/inspector/topicmap)
+                    (#:w #:dreyeck/gesture-binding-witness)
                     (#:views #:html-inspector-views))
   (:export #:work-status-change-plan #:plan-work-status-change
            #:work-status-change-plan-request #:work-status-change-plan-snapshot
@@ -58,7 +65,8 @@
            #:execute-work-status-change #:work-status-change-outcome
            #:work-status-change-outcome-request #:work-status-change-outcome-plan
            #:work-status-change-outcome-status #:work-status-change-outcome-cause
-           #:work-status-change-outcome-topic
+           #:work-status-change-outcome-topic #:work-status-change-outcome-selection
+           #:complete-work-status-change
            #:work-status-change-execution-refused #:work-status-change-execution-refused-reason))
 
 (in-package #:dreyeck/work/authoring)
@@ -329,11 +337,13 @@ WORK-STATUS-CHANGE-UNVERIFIED having installed the verified candidate."
    (plan :initarg :plan :initform nil :reader work-status-change-outcome-plan)
    (status :initarg :status :reader work-status-change-outcome-status)
    (cause :initarg :cause :initform nil :reader work-status-change-outcome-cause)
-   (topic :initarg :topic :initform nil :reader work-status-change-outcome-topic))
+   (topic :initarg :topic :initform nil :reader work-status-change-outcome-topic)
+   (selection :initarg :selection :initform nil :reader work-status-change-outcome-selection))
   (:documentation "What executing one work status change request came to:
 STATUS is :APPLIED, :REFUSED or :UNVERIFIED. PLAN is NIL if execution stopped
 before planning. CAUSE is the refusal or the unverified condition. TOPIC, once
-applied, is the Work Topic as the written page now declares it."))
+applied, is the Work Topic as the written page now declares it. SELECTION, if
+any, is the operation request the request completed."))
 
 (defmethod print-object ((outcome work-status-change-outcome) stream)
   (print-unreadable-object (outcome stream :type t)
@@ -341,13 +351,15 @@ applied, is the Work Topic as the written page now declares it."))
                             (work:work-status-change-topic (work-status-change-outcome-request outcome)))
             (work-status-change-outcome-status outcome))))
 
-(defun execute-work-status-change (request environment)
+(defun execute-work-status-change (request environment &key selection)
   "Carry REQUEST through the authoring contract: plan it, then apply the plan,
 if ENVIRONMENT is the pinned authoring environment this image was given.
-Returns a WORK-STATUS-CHANGE-OUTCOME in every case. Adds no editing of its
-own: planning, applying and verifying are the existing steps."
+Returns a WORK-STATUS-CHANGE-OUTCOME in every case, recording SELECTION, the
+operation request REQUEST completed, if given. Adds no editing of its own:
+planning, applying and verifying are the existing steps."
   (flet ((outcome (&rest initargs)
-           (apply #'make-instance 'work-status-change-outcome :request request initargs)))
+           (apply #'make-instance 'work-status-change-outcome
+                  :request request :selection selection initargs)))
     (unless (typep environment 'dreyeck/workflow/authoring::authoring-environment)
       (return-from execute-work-status-change
         (outcome :status :refused
@@ -380,20 +392,60 @@ recommended, or part of any lifecycle."
                  :test #'equal :from-end t)
             :test #'equal)))
 
-(defun %initiate (topic proposed)
-  "What pressing a status action does: make the request, execute it with this
-image's authoring environment, and return the outcome -- or the refusal, if
-no request can be made."
-  (handler-case
-      (execute-work-status-change (work:request-work-status-change topic proposed)
-                                  (handler-case (dreyeck/workflow/authoring:make-authoring-environment)
-                                    (error () nil)))
-    (work:work-status-change-refused (condition) condition)))
+(defun complete-work-status-change (selection proposed)
+  "Complete SELECTION -- Change work status selected on a Work Topic's exact
+declaration -- with the status PROPOSED: make the request for the Topic that
+declaration declares, execute it with this image's authoring environment, and
+return the outcome, or the condition that refused a request."
+  (let* ((occurrence (and (typep selection 'r:operation-request)
+                          (eq (w:change-work-status-operation) (r:operation-request-operation selection))
+                          (r:operation-request-occurrence selection)))
+         (topic (and (typep occurrence 'work:work-topic-source-occurrence)
+                     (ops:declared-work-topic occurrence))))
+    (if (null topic)
+        (make-condition 'work-status-change-execution-refused
+                        :request nil
+                        :reason (format nil "~S is not Change work status selected on a Work Topic declaration"
+                                        selection))
+        (handler-case
+            (execute-work-status-change (work:request-work-status-change topic proposed)
+                                        (handler-case (dreyeck/workflow/authoring:make-authoring-environment)
+                                          (error () nil))
+                                        :selection selection)
+          (work:work-status-change-refused (condition) condition)))))
 
 (defun %declared-work-topic-p (topic)
   (and (typep topic 'work:work-topic) (work:topic-source-occurrence topic) t))
 
-(defun %render-status-actions (topic)
+(defparameter *topic-sign-bindings*
+  (loop for kind in '(:radial-menu :learned-mark)
+        collect (w::%make-gesture-binding
+                 :id (format nil "binding/~(~A~)-change-work-status" kind) :kind kind
+                 :sector-center 0.0d0 :sector-half-width 30.0d0
+                 :target-type :workspace-action-sign-occurrence
+                 :enabled-p t :operation (w:change-work-status-operation)))
+  "What the Topic sign of a Work Topic declared in HTML offers in an image that
+has loaded this system: Change work status, by the visible menu or by a mark.")
+
+(defmethod m:workspace-action-sign-bindings :around ((occurrence m:workspace-action-sign-occurrence))
+  "Add Change work status to the Topic signs it applies to."
+  (if (%declared-work-topic-p (m:occurrence-topic occurrence))
+      (append (call-next-method) *topic-sign-bindings*)
+      (call-next-method)))
+
+(defmethod m:operation-inspectable-object ((operation (eql (w:change-work-status-operation))) target)
+  "What Change work status shows for a Topic sign: the operation request it
+selects on that Topic's exact declaration, from the shared registry."
+  (let ((occurrence (getf target :occurrence)))
+    (unless (and (eq :workspace-action-sign-occurrence (getf target :type))
+                 (typep occurrence 'm:workspace-action-sign-occurrence)
+                 (%declared-work-topic-p (m:occurrence-topic occurrence)))
+      (error 'm:operation-not-applicable
+             :operation operation :target target
+             :reason "the target is no Topic sign of a Work Topic declared in HTML"))
+    (ops:work-topic-operation-request operation (m:occurrence-topic occurrence))))
+
+(defun %render-status-actions (topic &optional selection)
   (let* ((occurrence (work:topic-source-occurrence topic))
          (page (work:topic-occurrence-page occurrence))
          (status (getf (tm:topicmap-topic-view-properties-of topic) :status))
@@ -412,10 +464,15 @@ no request can be made."
             (:ul
              (dolist (choice choices)
                (views:html
-                 (:li (views:eval-button (views:esc (format nil "Change work status to ~S" choice))
-                                         (views:thunk (%initiate topic choice))))))))
+                 (:li (views:eval-button
+                       (views:esc (format nil "Change work status to ~S" choice))
+                       (views:thunk
+                         (complete-work-status-change
+                          (or selection
+                              (ops:work-topic-operation-request (w:change-work-status-operation) topic))
+                          choice))))))))
           (views:html (:p "No other status occurs on the declaring page.")))
-      (:p "An action makes a request and a plan, applies the plan only in an image holding the pinned authoring environment, and opens the outcome."))))
+      (:p "An action selects Change work status on this declaration, completes the selection into a request, applies its plan only in an image holding the pinned authoring environment, and opens the outcome."))))
 
 (views:defview work-topic-status-actions (topic work:work-topic)
   (when (%declared-work-topic-p topic)
@@ -427,6 +484,15 @@ no request can be made."
     (when (%declared-work-topic-p topic)
       (views:html-view :title "Change work status" :priority 5
         (%render-status-actions topic)))))
+
+(views:defview operation-request-status-actions (selection r:operation-request)
+  (let ((occurrence (r:operation-request-occurrence selection)))
+    (when (and (eq (w:change-work-status-operation) (r:operation-request-operation selection))
+               (typep occurrence 'work:work-topic-source-occurrence))
+      (let ((topic (ops:declared-work-topic occurrence)))
+        (when topic
+          (views:html-view :title "Change work status" :priority 2
+            (%render-status-actions topic selection)))))))
 
 (views:defview work-status-change-outcome-overview (outcome work-status-change-outcome)
   (views:html-view :title "Work status change outcome" :priority 1
@@ -443,6 +509,9 @@ no request can be made."
           (:tr (:td "Work Topic")
                (:td (views:object-ref (work:work-status-change-topic request)
                                       :display (tm:topicmap-topic-id-of (work:work-status-change-topic request)))))
+          (:tr (:td "Selection")
+               (:td (let ((selection (work-status-change-outcome-selection outcome)))
+                      (if selection (views:object-ref selection) (views:html "none")))))
           (:tr (:td "Request") (:td (views:object-ref request)))
           (:tr (:td "Plan") (:td (if plan (views:object-ref plan) (views:html "none: execution stopped before planning"))))
           (:tr (:td "Outcome") (:td (:tt (views:esc (string-downcase (symbol-name (work-status-change-outcome-status outcome)))))))
