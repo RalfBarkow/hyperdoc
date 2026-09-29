@@ -83,6 +83,73 @@
     (assert (not (equal (a::insertion-plan-proposed (p:operation-plan-insertion plan))
                         (a::insertion-plan-proposed (p:operation-plan-insertion other)))))))
 
+(defparameter +last-keyed-definition-source+
+  ";;;; Operation plan probe
+(in-package :cl-user)
+
+(defun plan-probe-earlier () 1)
+
+(defun plan-probe-last () 2)
+
+(pushnew :plan-probe-unkeyed *features*)
+"
+  "A code page whose last keyed top-level form is PLAN-PROBE-LAST. A form
+follows it, but one without a structural key, so there is no insertion
+anchor after it. PLAN-PROBE-EARLIER has one: PLAN-PROBE-LAST.")
+
+(defun call-with-code-page-fixture (source function)
+  "FUNCTION called with the one code page of a temporary system whose only
+file holds SOURCE, and that file's path. The page is made by HyperDoc's own
+constructor, so a request on it takes the production path. The system and
+its directory are removed afterwards."
+  (let* ((root (merge-pathnames (format nil "operation-plan-probe-~D-~D/"
+                                        (get-universal-time) (random 100000))
+                                (uiop:temporary-directory)))
+         (asd (merge-pathnames "operation-plan-probe.asd" root))
+         (path (merge-pathnames "code/probe.lisp" root)))
+    (ensure-directories-exist path)
+    (unwind-protect
+         (progn
+           (uiop:with-output-file (stream asd :external-format :utf-8)
+             (write-string "(defsystem \"operation-plan-probe\"
+  :components ((:module \"code\" :components ((:file \"probe\")))))
+" stream))
+           (uiop:with-output-file (stream path :external-format :utf-8)
+             (write-string source stream))
+           (asdf:load-asd asd)
+           (let ((book (hyperdoc:make-hyperdoc :id "operation-plan-probe"
+                                               :title "Operation plan probe"
+                                               :asdf-system-name "operation-plan-probe"
+                                               :subdirectory "code")))
+             (funcall function (elt (hyperdoc::code-pages-of book) 0) path)))
+      (ignore-errors (asdf:clear-system "operation-plan-probe"))
+      (uiop:delete-directory-tree root :validate t :if-does-not-exist :ignore))))
+
+(defun test-no-keyed-form-after-the-definition ()
+  "A definition with no keyed form after it: nothing to insert before. A
+fixture owns that situation, so no evolving production file has to keep
+it; the definition before it plans on the same page, so the refusal is
+about the missing anchor and nothing else."
+  (call-with-code-page-fixture
+   +last-keyed-definition-source+
+   (lambda (page path)
+     (let ((before (uiop:read-file-string path :external-format :utf-8)))
+       (flet ((plan (name)
+                (p:plan-operation-request
+                 (r:ensure-operation-request (w:insert-executable-defexample-operation) page
+                                             (list :definition (intern name :cl-user)))
+                 :name (intern (concatenate 'string name "-EXAMPLE") :cl-user)
+                 :body (list 't))))
+         (assert (equal (list :definition (intern "PLAN-PROBE-LAST" :cl-user))
+                        (a::insertion-plan-anchor-key
+                         (p:operation-plan-insertion (plan "PLAN-PROBE-EARLIER")))))
+         (assert (%refused-p (lambda () (plan "PLAN-PROBE-LAST"))))
+         (assert (search "no keyed top-level form follows"
+                         (handler-case (progn (plan "PLAN-PROBE-LAST") "")
+                           (p:operation-plan-refused (condition)
+                             (p:operation-plan-refused-reason condition))))))
+       (assert (string= before (uiop:read-file-string path :external-format :utf-8)))))))
+
 (defun test-refusals ()
   (let* ((page (%ordering-page))
          (race (list :definition (%ordering "RACE-READING")))
@@ -112,15 +179,7 @@
                                                          "DREYECK/GESTURE/ORDERING")))))
                 :name name :body (%body)))))
     ;; A definition with no keyed form after it: nothing to insert before.
-    (assert (%refused-p
-             (lambda ()
-               (p:plan-operation-request
-                (r:ensure-operation-request
-                 (w:insert-executable-defexample-operation)
-                 (%page "hyperdoc" "Support for tools")
-                 (list :definition (find-symbol "MAKE-PLAYGROUND" "HYPERDOC")))
-                :name (intern "PLAN-PROBE-EXAMPLE" "HYPERDOC")
-                :body (list 't)))))
+    (test-no-keyed-form-after-the-definition)
     ;; A name outside the definition's package is not how DEFEXAMPLE is used.
     (assert (%refused-p
              (lambda ()
@@ -165,8 +224,7 @@
 
 (defun run-operation-plan-tests ()
   (let* ((authorities (list (asdf:system-relative-pathname
-                             "dreyeck" "dreyeck/src/gesture-ordering-reading.lisp")
-                            (hyperdoc::source-code-pathname (%page "hyperdoc" "Support for tools"))))
+                             "dreyeck" "dreyeck/src/gesture-ordering-reading.lisp")))
          (before (mapcar (lambda (path) (uiop:read-file-string path :external-format :utf-8))
                          authorities)))
     (let ((plan (test-the-running-example)))
@@ -180,7 +238,8 @@
 body plans one DEFEXAMPLE before %ENVELOPE, needs insertion, and reports ~
 MOVEMENT-WINS-READING and DEADLINE-WINS-READING already calling it; other ~
 arguments plan another form; another operation, a vanished definition, no ~
-following keyed form and a stray name are refused by the planner, an ~
-existing example by the insertion machinery; the Catalog's dependencies do ~
-not reach the planner; both authorities are byte-identical.~%")
+following keyed form (a fixture code page, whose earlier definition does ~
+plan) and a stray name are refused by the planner, an existing example by ~
+the insertion machinery; the Catalog's dependencies do not reach the ~
+planner; the authority and the fixture are byte-identical.~%")
     t))
