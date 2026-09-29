@@ -1140,6 +1140,12 @@ WORK-STATUS-CHANGE-REFUSED unless every check holds."
 ;; which both endpoint declarations must belong to. The request holds no
 ;; relationship occurrence, writes nothing, grants no permission and holds
 ;; no executor; where a new statement would go is a later plan's concern.
+;;
+;; Create relationship does not author a second statement of a relationship
+;; the snapshot already states: an authored statement read as the same
+;; from, relation and to refuses the request. That is this operation's
+;; contract. It does not decide whether two statements of one relationship
+;; are one Association, which the reading model leaves open.
 
 (define-condition work-relationship-creation-refused (error)
   ((reason :initarg :reason :reader work-relationship-creation-refused-reason)
@@ -1209,6 +1215,17 @@ and signals WORK-RELATIONSHIP-CREATION-REFUSED unless every check holds."
                  (format nil "work:~A:~A:~A" (topic-occurrence-topic from) relation (topic-occurrence-topic to)))
               (relation-contract-reference-error (condition)
                 (refuse (format nil "~A is not a Relation Contract in this page" relation) condition))))
+          (let ((stated (find (list (topic-occurrence-topic from) relation (topic-occurrence-topic to))
+                              (scan-work-relationships current page)
+                              :key (lambda (occurrence)
+                                     (list (relationship-occurrence-from occurrence)
+                                           (relationship-occurrence-relation occurrence)
+                                           (relationship-occurrence-to occurrence)))
+                              :test #'equal)))
+            (when stated
+              (refuse (format nil "the observed page already states ~A -~A-> ~A, as its relationship statement ~D"
+                              (topic-occurrence-topic from) relation (topic-occurrence-topic to)
+                              (relationship-occurrence-ordinal stated)))))
           (make-instance 'work-relationship-creation-request
                          :operation operation :selection selection
                          :from-occurrence from :to-occurrence to :relation relation
