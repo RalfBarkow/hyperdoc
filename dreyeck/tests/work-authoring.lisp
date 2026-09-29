@@ -90,7 +90,7 @@ with that page's file. The system and its directory are removed afterwards."
 
 (defun check-planning (page path)
   "A valid request plans and writes nothing; a stale request, or a status the
-source cannot hold as written, plans nothing."
+plain data-status representation does not admit, plans nothing."
   (let* ((source (%read path))
          (request (%request page path))
          (occurrence (work:work-status-change-occurrence request))
@@ -110,12 +110,13 @@ source cannot hold as written, plans nothing."
       (dolist (text '("Declaring page" "Status value" "Applied" "no -- a plan writes nothing"))
         (assert (search text html) () "The plan view lacks ~S." text))
       (assert (member request (mapcar #'cdr (views:view-references view)) :test #'eq)))
-    ;; A request may propose any other status; this source cannot hold every one.
+    ;; A request may propose any other status; this representation does not
+    ;; admit every one.
     (dolist (proposed '("in \"progress\"" "in progress & review" "in <progress>"))
       (let* ((request (%request page path proposed))
              (condition (plan-refusal (lambda () (a:plan-work-status-change request)))))
         (assert (equal proposed (work:work-status-change-proposed-status request)))
-        (assert (search "cannot be written as a data-status value"
+        (assert (search "is not admitted in the plain, unescaped data-status representation"
                         (a:work-status-change-plan-refused-reason condition)))))
     (assert (string= source (%read path)))
     ;; A stale request plans nothing: the page changed elsewhere, or its
@@ -153,8 +154,8 @@ and applying refuses, and nothing is written."
 
 (defun check-hand-built-plans (page path)
   "APPLY does not trust that a plan came from the planner: a plan built by hand
-for a status the source cannot hold as written is refused before anything is
-installed, and the page is left byte for byte as it was."
+for a status the plain data-status representation does not admit is refused
+before anything is installed, and the page is left byte for byte as it was."
   (let* ((source (%read path))
          (valid (a:plan-work-status-change (%request page path))))
     (dolist (proposed '("in \"progress\"" "in progress & review" "in <progress>"))
@@ -165,7 +166,7 @@ installed, and the page is left byte for byte as it was."
                                              (work:work-status-change-occurrence request))
                                   :status-range (a:work-status-change-plan-status-range valid)))
              (condition (apply-refusal (lambda () (a:apply-work-status-change plan)))))
-        (assert (search "cannot be written as a data-status value"
+        (assert (search "is not admitted in the plain, unescaped data-status representation"
                         (a:work-status-change-apply-refused-reason condition)))
         (assert (string= source (%read path)))
         (assert (null (%candidates path)))))
@@ -266,7 +267,7 @@ planner and writer."
     (check-authoring-boundary)
     (assert (equal pages (work-page-sources))))
   (format t "~&WORK-AUTHORING-PASS: a valid request plans without writing; a stale ~
-request, a moved declaration and a status the HTML cannot hold as written plan ~
+request, a moved declaration and a status the plain data-status representation does not admit plan ~
 nothing; a change anywhere between plan and apply, the declaration still at its ~
 offset, refuses without writing; a plan built by hand for such a status is ~
 refused before installation, the page byte-identical; applied once, the ~

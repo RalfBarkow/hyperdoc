@@ -6,21 +6,23 @@
 ;;;;
 ;;;;   PLAN-WORK-STATUS-CHANGE   validate the request again against the page
 ;;;;                             source now, refuse a proposed status the
-;;;;                             source cannot hold as written, and record
-;;;;                             where the declaration's data-status value
-;;;;                             is. Writes nothing.
+;;;;                             plain, unescaped data-status representation
+;;;;                             does not admit, and record where the
+;;;;                             declaration's data-status value is. Writes
+;;;;                             nothing.
 ;;;;   APPLY-WORK-STATUS-CHANGE  only while the page source is still exactly
 ;;;;                             the plan's snapshot: derive the candidate,
 ;;;;                             verify it, install it atomically, reload the
 ;;;;                             page object, verify what was installed.
 ;;;;   before installation       everything the plan, its snapshot and the
-;;;;                             candidate decide: the status is writable as
-;;;;                             is, the candidate differs from the snapshot
-;;;;                             in the status value alone, and it projects
-;;;;                             to exactly the intended change -- the
-;;;;                             target's status, every other Topic and every
-;;;;                             Association as before. A candidate known to
-;;;;                             be wrong never becomes the page.
+;;;;                             candidate decide: the status is admitted in
+;;;;                             that representation, the candidate differs
+;;;;                             from the snapshot in the status value alone,
+;;;;                             and it projects to exactly the intended
+;;;;                             change -- the target's status, every other
+;;;;                             Topic and every Association as before. A
+;;;;                             candidate not admitted, or not exactly the
+;;;;                             intended change, never becomes the page.
 ;;;;   after installation        only what installing can reveal: the page
 ;;;;                             file is the verified candidate, and the page
 ;;;;                             object reloads to show the new status.
@@ -105,12 +107,14 @@ SNAPSHOT."))
   (work:topic-occurrence-page (work:work-status-change-occurrence request)))
 
 (defparameter +unwritable-status-characters+ '(#\" #\& #\<)
-  "Characters a data-status value cannot hold as written. This plan does not
-escape them; it refuses.")
+  "Characters not admitted in the plain, unescaped data-status representation
+used by this plan. A policy of this representation, not a limit of HTML: the
+plan neither escapes them nor claims that every value containing one would
+break the page; it refuses.")
 
 (defun %unwritable-character (status)
-  "The first character of STATUS a data-status value cannot hold as written,
-or NIL."
+  "The first character of STATUS not admitted in the plain, unescaped
+data-status representation used by this plan, or NIL."
   (find-if (lambda (character) (member character +unwritable-status-characters+))
            status))
 
@@ -153,7 +157,7 @@ WORK-STATUS-CHANGE-PLAN-REFUSED unless every check holds."
             (refuse "the request no longer holds" condition)))
         (let ((unwritable (%unwritable-character proposed)))
           (when unwritable
-            (refuse (format nil "~S cannot be written as a data-status value without escaping ~S"
+            (refuse (format nil "~S is not admitted in the plain, unescaped data-status representation used by this plan: it contains ~S"
                             proposed unwritable))))
         (let ((snapshot (work:topic-occurrence-snapshot (work:work-status-change-occurrence request))))
           (make-instance 'work-status-change-plan
@@ -216,7 +220,7 @@ from the plan and the candidate alone, before anything is installed."
          (unwritable (%unwritable-character proposed)))
     ;; A plan need not have come from the planner.
     (when unwritable
-      (funcall refuse (format nil "~S cannot be written as a data-status value without escaping ~S"
+      (funcall refuse (format nil "~S is not admitted in the plain, unescaped data-status representation used by this plan: it contains ~S"
                               proposed unwritable)))
     ;; The source delta: the status value and nothing else.
     (unless (and (= (length candidate) (+ (length snapshot) (- end (cdr range))))
