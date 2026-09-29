@@ -2334,7 +2334,8 @@
 
 (defsystem "dreyeck/work/authoring/tests"
   :depends-on ("dreyeck/work/authoring" "dreyeck/topicmap/gesture/tests")
-  :components ((:file "dreyeck/tests/work-authoring"))
+  :components ((:file "dreyeck/tests/work-authoring")
+               (:file "dreyeck/tests/work-authoring-browser"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/authoring/tests :run-tests)))
