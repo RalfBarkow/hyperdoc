@@ -1364,6 +1364,97 @@ Nothing here offers it: no Topic sign Binding, no action, no authoring."
                 (m:operation-not-applicable () t))))
     (assert (equal pages (work-page-sources)))))
 
+;;;; Create relationship: a request for what does not exist yet
+
+(defun creation-refusal (thunk)
+  (handler-case (progn (funcall thunk) (error "Expected a refusal."))
+    (work:work-relationship-creation-refused (condition) condition)))
+
+(defun check-relationship-creation-request ()
+  "Create relationship: selected on the source Topic's declaration, completed
+by a destination Topic and a relation, bound to the observed page snapshot
+both declarations belong to -- while no relationship occurrence exists."
+  (let* ((pages (work-page-sources))
+         (source (work-breakdown-source))
+         (projection (work:work-projection))
+         (from (tm:topicmap-projection-topic-by-id projection "lisp-source-authoring"))
+         (to (tm:topicmap-projection-topic-by-id projection "running-image-authoring"))
+         (operation (w:create-relationship-operation))
+         (selection (ops:work-topic-operation-request operation from))
+         (request (work:request-work-relationship-creation selection to "work:relation/informs")))
+    ;; The Operation is data, a sibling of the others.
+    (assert (equal "operation/create-relationship" (w:semantic-operation-identity-id operation)))
+    (assert (not (eq operation (w:change-work-status-operation))))
+    ;; Interaction target, arguments and authority, each what it is.
+    (assert (eq operation (work:work-relationship-creation-operation request)))
+    (assert (eq selection (work:work-relationship-creation-selection request)))
+    (assert (eq (r:operation-request-occurrence selection) (work:work-relationship-creation-from-occurrence request)))
+    (assert (eq (work:topic-source-occurrence to) (work:work-relationship-creation-to-occurrence request)))
+    (assert (equal "work:relation/informs" (work:work-relationship-creation-relation request)))
+    (assert (eq (work:work-page "Work Breakdown") (work:work-relationship-creation-authority-page request)))
+    (assert (string= source (work:work-relationship-creation-authority-snapshot request)))
+    ;; No relationship occurrence exists, in the request or on the page.
+    (let ((slots (sb-mop:class-slots (find-class 'work:work-relationship-creation-request))))
+      (assert (equal '("OPERATION" "SELECTION" "FROM-OCCURRENCE" "TO-OCCURRENCE" "RELATION"
+                       "AUTHORITY-PAGE" "AUTHORITY-SNAPSHOT")
+                     (mapcar (lambda (slot) (symbol-name (sb-mop:slot-definition-name slot))) slots)))
+      (assert (notany (lambda (slot) (typep (slot-value request (sb-mop:slot-definition-name slot))
+                                            'work:work-relationship-source-occurrence))
+                      slots)))
+    (assert (null (find "work:lisp-source-authoring:work:relation/informs:running-image-authoring"
+                        (tm:topicmap-projection-associations-of projection)
+                        :key #'tm:topicmap-association-id-of :test #'equal)))
+    ;; The Inspector shows what is asked, with nothing to press.
+    (let* ((view (find "Relationship creation request" (views:all-views request)
+                       :key #'views:view-title :test #'equal))
+           (html (views:view-html view)))
+      (dolist (text '("operation/create-relationship" "Selection" "lisp-source-authoring"
+                      "work:relation/informs" "running-image-authoring" "Authority" "as observed"
+                      "none yet -- it exists only after an effect creates it" "Executed"))
+        (assert (search text html) () "The creation view lacks ~S." text))
+      (assert (notany (lambda (entry) (or (eql 0 (search "action-" (car entry)))
+                                          (eql 0 (search "eval-" (car entry)))))
+                      (views:view-references view)))
+      (dolist (object (list selection (work:topic-source-occurrence to) (work:work-page "Work Breakdown")))
+        (assert (member object (mapcar #'cdr (views:view-references view)) :test #'eq))))
+    ;; A plain relation word is a relation too; the page states many.
+    (assert (equal "develops" (work:work-relationship-creation-relation
+                               (work:request-work-relationship-creation selection to "develops"))))
+    ;; Refusals: each names why, and nothing is requested.
+    (flet ((refused (fragment thunk)
+             (let ((condition (creation-refusal thunk)))
+               (assert (search fragment (work:work-relationship-creation-refused-reason condition)) ()
+                       "Refusal ~S lacks ~S." (princ-to-string condition) fragment)
+               condition)))
+      (refused "is not Create relationship selected"
+               (lambda () (work:request-work-relationship-creation
+                           (ops:work-topic-operation-request (w:change-work-status-operation) from) to "develops")))
+      (refused "is not Create relationship selected"
+               (lambda () (work:request-work-relationship-creation 42 to "develops")))
+      (refused "is no Work Topic declared in HTML"
+               (lambda () (work:request-work-relationship-creation
+                           selection (tm:make-topicmap-topic :id "plain" :label "Plain") "develops")))
+      ;; Both endpoints must belong to one observed snapshot.
+      (let ((elsewhere (tm:topicmap-projection-topic-by-id
+                        (work:project-work-breakdown (replace-once source "This page is the current work map"
+                                                                   "This page is the present work map")
+                                                     :source (work:work-page "Work Breakdown"))
+                        "running-image-authoring")))
+        (refused "do not belong to the same observed page snapshot"
+                 (lambda () (work:request-work-relationship-creation selection elsewhere "develops"))))
+      ;; The observation is stale once the page is other than observed.
+      (let ((condition (refused "stale"
+                                (lambda () (work:request-work-relationship-creation
+                                            selection to "develops"
+                                            :current (replace-once source "This page is the current work map"
+                                                                   "This page is the present work map"))))))
+        (assert (typep (work:work-relationship-creation-refused-cause condition) 'work:stale-work-topic-occurrence)))
+      (refused "is not a relation" (lambda () (work:request-work-relationship-creation selection to "")))
+      (refused "is not a relation" (lambda () (work:request-work-relationship-creation selection to :informs)))
+      (refused "is not a Relation Contract"
+               (lambda () (work:request-work-relationship-creation selection to "work:relation/absent"))))
+    (assert (equal pages (work-page-sources)))))
+
 ;;;; Change relation: a request, nothing more
 
 (defun with-fixture-requires-contract (source)
@@ -1976,8 +2067,9 @@ work items, only warranted relationships, and no architecture copied in."
   (check-work-topic-occurrences)
   (check-work-status-change-request)
   (check-work-operation-request)
+  (check-relationship-creation-request)
   (check-relation-change-request)
   (check-fedwiki-work)
   (check-authoring-work)
-  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in), Work Topic declarations (one snapshot, the declaring page not the carrier, stale not relocated, a duplicate refused naming both declarations, the declaration form or a refusal), Change work status (one exact declaration on its declaring page, observed and proposed status, no copied range or edit, stale, moved, mismatched, unchanged and unstated refused, only the status value differs in memory, no effect), Change work status selected on a declaration (one registry-backed operation request, not offered here: no Topic sign Binding, no action, no authoring loaded).~%")
+  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in), Work Topic declarations (one snapshot, the declaring page not the carrier, stale not relocated, a duplicate refused naming both declarations, the declaration form or a refusal), Change work status (one exact declaration on its declaring page, observed and proposed status, no copied range or edit, stale, moved, mismatched, unchanged and unstated refused, only the status value differs in memory, no effect), Change work status selected on a declaration (one registry-backed operation request, not offered here: no Topic sign Binding, no action, no authoring loaded), Create relationship (selected on the source declaration, destination and relation as arguments, the observed page snapshot as authority, no relationship occurrence yet; foreign selection, undeclared or foreign-snapshot endpoint, stale page, empty relation and absent contract refused).~%")
   t)

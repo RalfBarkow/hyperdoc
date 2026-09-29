@@ -5,6 +5,7 @@
                     (#:tala #:dreyeck/topicmap/tala)
                     (#:authored #:dreyeck/topicmap/tala/authored)
                     (#:w #:dreyeck/gesture-binding-witness)
+                    (#:r #:dreyeck/gesture/operation-request)
                     (#:views #:html-inspector-views))
   (:export #:work-page #:work-projection #:work-workspace
            #:connections-source #:connections-example #:work-layout-example
@@ -41,6 +42,13 @@
            #:work-status-change-proposed-status
            #:work-status-change-refused #:refused-work-status-change-topic
            #:work-status-change-refused-reason #:work-status-change-refused-cause
+           #:work-relationship-creation-request #:request-work-relationship-creation
+           #:work-relationship-creation-operation #:work-relationship-creation-selection
+           #:work-relationship-creation-from-occurrence #:work-relationship-creation-to-occurrence
+           #:work-relationship-creation-relation #:work-relationship-creation-authority-page
+           #:work-relationship-creation-authority-snapshot
+           #:work-relationship-creation-refused #:work-relationship-creation-refused-reason
+           #:work-relationship-creation-refused-cause
            #:work-fedwiki-item-observation #:observe-work-fedwiki-item
            #:fedwiki-item-observation-site #:fedwiki-item-observation-slug
            #:fedwiki-item-observation-item-id #:fedwiki-item-observation-item
@@ -1119,6 +1127,115 @@ WORK-STATUS-CHANGE-REFUSED unless every check holds."
         (:p "The request concerns the declaration on the declaring page. The Topic's carrier page, "
             (if carrier (views:object-ref carrier) (views:html "none"))
             ", is not its target.")))))
+
+;;;; Work relationship creation requests
+;;
+;; A request to create one authored Work relationship statement. Changing
+;; an existing declaration can take its source occurrence as both target
+;; and authority. Creating one cannot: the statement's occurrence exists
+;; only after an effect. So three things stay apart. The selection is the
+;; operation request on the source endpoint's Topic declaration, where the
+;; interaction began. The destination Topic and the relation are arguments.
+;; The authority is the observed declaring page and its exact snapshot,
+;; which both endpoint declarations must belong to. The request holds no
+;; relationship occurrence, writes nothing, grants no permission and holds
+;; no executor; where a new statement would go is a later plan's concern.
+
+(define-condition work-relationship-creation-refused (error)
+  ((reason :initarg :reason :reader work-relationship-creation-refused-reason)
+   (cause :initarg :cause :initform nil :reader work-relationship-creation-refused-cause))
+  (:report (lambda (condition stream)
+             (format stream "No relationship creation request: ~A"
+                     (work-relationship-creation-refused-reason condition))))
+  (:documentation "Nothing was requested and nothing was written. CAUSE, if
+any, is the condition that showed why."))
+
+(defclass work-relationship-creation-request ()
+  ((operation :initarg :operation :reader work-relationship-creation-operation)
+   (selection :initarg :selection :reader work-relationship-creation-selection)
+   (from-occurrence :initarg :from-occurrence :reader work-relationship-creation-from-occurrence)
+   (to-occurrence :initarg :to-occurrence :reader work-relationship-creation-to-occurrence)
+   (relation :initarg :relation :reader work-relationship-creation-relation)
+   (authority-page :initarg :authority-page :reader work-relationship-creation-authority-page)
+   (authority-snapshot :initarg :authority-snapshot :reader work-relationship-creation-authority-snapshot))
+  (:documentation "Create relationship: the operation request selected on the
+source Topic's declaration, both endpoint declarations, the relation, and the
+observed page and exact snapshot it is to be created in. Intent and evidence
+only; the relationship has no occurrence until an effect creates one."))
+
+(defmethod print-object ((request work-relationship-creation-request) stream)
+  (print-unreadable-object (request stream :type t)
+    (format stream "~A -~A-> ~A"
+            (topic-occurrence-topic (work-relationship-creation-from-occurrence request))
+            (work-relationship-creation-relation request)
+            (topic-occurrence-topic (work-relationship-creation-to-occurrence request)))))
+
+(defun request-work-relationship-creation (selection to-topic relation &key (current nil current-p))
+  "A request to create the relationship RELATION from the Work Topic whose
+declaration SELECTION was selected on, to the Work Topic TO-TOPIC. CURRENT is
+the declaring page's source now, read from its page unless given; both
+declarations must belong to it, exactly as observed. Observes, writes nothing,
+and signals WORK-RELATIONSHIP-CREATION-REFUSED unless every check holds."
+  (flet ((refuse (reason &optional cause)
+           (error 'work-relationship-creation-refused :reason reason :cause cause)))
+    (let ((operation (w:create-relationship-operation))
+          (from (and (typep selection 'r:operation-request)
+                     (r:operation-request-occurrence selection))))
+      (unless (and from
+                   (eq operation (r:operation-request-operation selection))
+                   (typep from 'work-topic-source-occurrence))
+        (refuse (format nil "~S is not Create relationship selected on a Work Topic declaration" selection)))
+      (let ((to (and (typep to-topic 'work-topic) (topic-source-occurrence to-topic)))
+            (page (topic-occurrence-page from))
+            (snapshot (topic-occurrence-snapshot from)))
+        (unless to
+          (refuse (format nil "~S is no Work Topic declared in HTML" to-topic)))
+        ;; One authority: the page both declarations were observed on, as it was.
+        (unless (and (eq page (topic-occurrence-page to))
+                     (string= snapshot (topic-occurrence-snapshot to)))
+          (refuse "the two declarations do not belong to the same observed page snapshot"))
+        (let ((current (if current-p current (uiop:read-file-string (hyperdoc:file-of page)))))
+          (handler-case (progn (resolve-work-topic-occurrence from :current current)
+                               (resolve-work-topic-occurrence to :current current))
+            (stale-work-topic-occurrence (condition)
+              (refuse "the observed page snapshot is stale" condition)))
+          (unless (and (stringp relation)
+                       (string/= "" (string-trim '(#\Space #\Tab #\Newline) relation)))
+            (refuse (format nil "~S is not a relation" relation)))
+          (when (relation-contract-reference-p relation)
+            (handler-case
+                (resolve-relation-contract
+                 relation (tm:topicmap-projection-topics-of (project-work-breakdown current :source page))
+                 (format nil "work:~A:~A:~A" (topic-occurrence-topic from) relation (topic-occurrence-topic to)))
+              (relation-contract-reference-error (condition)
+                (refuse (format nil "~A is not a Relation Contract in this page" relation) condition))))
+          (make-instance 'work-relationship-creation-request
+                         :operation operation :selection selection
+                         :from-occurrence from :to-occurrence to :relation relation
+                         :authority-page page :authority-snapshot snapshot))))))
+
+(views:defview work-relationship-creation-request-overview (request work-relationship-creation-request)
+  (views:html-view :title "Relationship creation request" :priority 1
+    (let ((page (work-relationship-creation-authority-page request))
+          (from (work-relationship-creation-from-occurrence request))
+          (to (work-relationship-creation-to-occurrence request)))
+      (views:html
+        (:table :class "inspector-table"
+          (:tr (:td "Operation")
+               (:td (:tt (views:esc (w:semantic-operation-identity-id
+                                     (work-relationship-creation-operation request))))))
+          (:tr (:td "Selection") (:td (views:object-ref (work-relationship-creation-selection request))))
+          (:tr (:td "From") (:td (views:object-ref from :display (topic-occurrence-topic from))))
+          (:tr (:td "Relation") (:td (:tt (views:esc (work-relationship-creation-relation request)))))
+          (:tr (:td "To") (:td (views:object-ref to :display (topic-occurrence-topic to))))
+          (:tr (:td "Authority")
+               (:td (if (typep page 'hyperbook:page)
+                        (views:object-ref page)
+                        (views:html (:tt (views:esc (prin1-to-string page)))))
+                    (views:esc (format nil ", as observed: ~D characters"
+                                       (length (work-relationship-creation-authority-snapshot request))))))
+          (:tr (:td "Relationship occurrence") (:td "none yet -- it exists only after an effect creates it"))
+          (:tr (:td "Executed") (:td "no -- a request holds no writer and grants no permission")))))))
 
 (hyperdoc:defexample work-workspace
   "Navigate the documented work and its concepts with native Workspace actions."

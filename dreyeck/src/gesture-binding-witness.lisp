@@ -9,6 +9,7 @@
            #:inspect-relation-contract-operation
            #:change-relation-operation
            #:change-work-status-operation
+           #:create-relationship-operation
            #:gesture-input-sample
            #:make-gesture-input-sample
            #:gesture-input-sample-kind
@@ -82,6 +83,14 @@ declaration states. Data only: it names what is asked, not who may do it.")
 
 (defun change-work-status-operation ()
   *change-work-status-operation*)
+
+(defvar *create-relationship-operation*
+  (%make-operation-identity "operation/create-relationship" "Create relationship")
+  "The EQ identity of creating one authored Work relationship statement.
+Data only: it names what is asked, not who may do it.")
+
+(defun create-relationship-operation ()
+  *create-relationship-operation*)
 
 (defvar *change-relation-operation*
   (%make-operation-identity "operation/change-relation" "Change relation")
