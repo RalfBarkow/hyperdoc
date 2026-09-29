@@ -6,6 +6,9 @@
                     (#:r #:dreyeck/gesture/operation-request)
                     (#:w #:dreyeck/gesture-binding-witness)
                     (#:a #:dreyeck/workflow/authoring)
+                    (#:ex #:dreyeck/lisp-critic/examples)
+                    (#:critic #:dreyeck/lisp-critic)
+                    (#:er #:dreyeck/evaluation-record)
                     (#:views #:html-inspector-views))
   (:export #:run-operation-plan-tests))
 
@@ -200,6 +203,68 @@ about the missing anchor and nothing else."
                                               :name (%ordering "MOVEMENT-WINS-READING")
                                               :body (%body))))))))
 
+(defun %read (path) (uiop:read-file-string path :external-format :utf-8))
+
+(defun test-execution-to-critique ()
+  "RACE-READING's request, planned and executed on a copy of its code page.
+Reading the installed page finds the new example; the Critic then judges that
+occurrence. The inserted example, the critic evaluation, the critique and its
+recommendation are four results, and none stands in for another."
+  (call-with-code-page-fixture
+   (%read (asdf:system-relative-pathname "dreyeck" "dreyeck/src/gesture-ordering-reading.lisp"))
+   (lambda (page path)
+     (let* ((before (%read path))
+            (name (intern "MOVEMENT-WINS-MARKING-EXAMPLE" "DREYECK/GESTURE/ORDERING"))
+            (body (let ((*package* (find-package "DREYECK/GESTURE/ORDERING")))
+                    (list (read-from-string
+                           "(equal :marking (getf (race-reading (t*::movement-wins-witness)) :mode))"))))
+            (plan (p:plan-operation-request
+                   (r:ensure-operation-request (w:insert-executable-defexample-operation) page
+                                               (list :definition (%ordering "RACE-READING")))
+                   :name name :body body))
+            (environment (a:make-authoring-environment)))
+       ;; Without the pinned authoring environment: refused, nothing written.
+       (assert (%refused-p (lambda () (p:execute-operation-plan plan nil)) 'p:operation-execution-refused))
+       (assert (string= before (%read path)))
+       (let ((occurrence (p:execute-operation-plan plan environment))
+             (after (%read path)))
+         ;; The inserted example: what reading the installed page finds.
+         (assert (typep occurrence 'r:source-occurrence))
+         (assert (eq page (r:occurrence-page occurrence)))
+         (assert (equal (list :example name) (r:occurrence-form-key occurrence)))
+         (assert (not (string= before after)))
+         (assert (string= after (r:occurrence-source occurrence)))
+         (assert (eq :current (r:occurrence-status occurrence)))
+         (assert (equal (list (list :example name) (r:occurrence-range occurrence))
+                        (find (list :example name)
+                              (mapcar (lambda (found) (list (r:occurrence-form-key found) (r:occurrence-range found)))
+                                      (r:page-example-occurrences page))
+                              :key #'first :test #'equal)))
+         ;; Executed again, the plan no longer holds: nothing more is written.
+         (assert (%refused-p (lambda () (p:execute-operation-plan plan environment))
+                             'p:operation-execution-refused))
+         (assert (string= after (%read path)))
+         ;; A critic evaluation of that occurrence, by one real rule.
+         (let* ((target (ex:critic-target-for-example occurrence))
+                (contract (critic:lisp-critic-run-record-contract-of
+                           (first (critic:target-runs-of (critic:car-cdr-critique-example)))))
+                (record (critic:run-critic-rule contract "USE-EQL" target))
+                (finding (first (critic:critiques-of record))))
+           (assert (eq :completed (er:evaluation-status-of record)) ()
+                   "Real Critic run failed: ~A" (er:evaluation-failure-of record))
+           (assert (eq target (er:evaluation-input-of record)))
+           ;; Its critique leads back to the inserted occurrence.
+           (assert (equal (list finding) (er:evaluation-result-of record)))
+           (assert (eq occurrence (ex:example-occurrence-of (critic:target-of finding))))
+           (assert (eq 'equal (first (uiop:symbol-call :lisp-critic :critique-code
+                                                       (critic:critique-evidence-of finding)))))
+           ;; Its recommendation is text; nothing applies it.
+           (assert (search "EQL" (critic:critique-explanation-of finding)))
+           (assert (string= after (%read path)))
+           ;; The example was never loaded, so it was never run.
+           (assert (not (fboundp name)))
+           record))))))
+
 (defun %closure (name &optional seen)
   "Every system NAME depends on, by name, found without loading any."
   (let ((system (asdf:find-system name nil)))
@@ -230,6 +295,7 @@ about the missing anchor and nothing else."
     (let ((plan (test-the-running-example)))
       (test-arguments-specify-the-plan plan))
     (test-refusals)
+    (test-execution-to-critique)
     (test-the-catalog-cannot-reach-the-planner)
     (assert (every #'string= before
                    (mapcar (lambda (path) (uiop:read-file-string path :external-format :utf-8))
@@ -241,5 +307,8 @@ arguments plan another form; another operation, a vanished definition, no ~
 following keyed form (a fixture code page, whose earlier definition does ~
 plan) and a stray name are refused by the planner, an existing example by ~
 the insertion machinery; the Catalog's dependencies do not reach the ~
-planner; the authority and the fixture are byte-identical.~%")
+planner; the authority and the fixture are byte-identical. Executed on a ~
+copy of the code page, the plan installs one example that reading the page ~
+again finds, and USE-EQL judges that occurrence without the example being ~
+run or its recommendation applied.~%")
     t))

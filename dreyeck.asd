@@ -1423,7 +1423,7 @@
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/gesture/operation-request/authoring"
   :DESCRIPTION
-  "Plan a fully specified operation request as an exact insertion; authoring-side, never in the Catalog"
+  "Plan a fully specified operation request as an exact insertion, and execute it; authoring-side, never in the Catalog"
   :LICENSE
   "BSD"
   :VERSION
@@ -1445,7 +1445,8 @@
   :SERIAL
   T
   :DEPENDS-ON
-  ("dreyeck/gesture/operation-request/authoring" "dreyeck/gesture/reading")
+  ("dreyeck/gesture/operation-request/authoring" "dreyeck/gesture/reading"
+   "dreyeck/lisp-critic/examples")
   :COMPONENTS
   ((:FILE "dreyeck/tests/gesture-operation-plan"))
   :PERFORM

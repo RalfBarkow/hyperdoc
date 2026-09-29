@@ -9,9 +9,13 @@
 ;;;;
 ;;;; An OPERATION-PLAN keeps the four together -- the request, the
 ;;;; arguments, the insertion plan and what was observed while planning --
-;;;; and is still only a proposal. Nothing here authorises, attempts,
-;;;; installs or verifies anything, and nothing here holds the capability
-;;;; that could. PLAN-INSERTION writes nothing and evaluates nothing.
+;;;; and is still only a proposal. PLAN-INSERTION writes nothing and
+;;;; evaluates nothing, and a plan records no execution.
+;;;;
+;;;; EXECUTE-OPERATION-PLAN carries one out, with the existing structural
+;;;; writer and only in an image holding the pinned authoring environment,
+;;;; and then reads the code page again. Its result is what that reading
+;;;; finds, not what the plan proposed.
 ;;;;
 ;;;; This system is authoring-side. The Catalog never loads it.
 
@@ -21,6 +25,7 @@
                     (#:w #:dreyeck/gesture-binding-witness)
                     (#:wf #:dreyeck/workflow)
                     (#:a #:dreyeck/workflow/authoring)
+                    (#:hv #:html-inspector-views/standard)
                     (#:views #:html-inspector-views))
   (:export #:operation-plan
            #:operation-plan-request
@@ -30,7 +35,13 @@
            #:operation-plan-refused
            #:operation-plan-refused-request
            #:operation-plan-refused-reason
-           #:plan-operation-request))
+           #:plan-operation-request
+           #:execute-operation-plan
+           #:operation-execution-refused
+           #:operation-execution-refused-reason
+           #:operation-execution-refused-cause
+           #:operation-result-unobserved
+           #:operation-result-unobserved-reason))
 
 (in-package #:dreyeck/gesture/operation-plan)
 
@@ -135,6 +146,68 @@ as DEFEXAMPLE takes them. Writes nothing."
                              (%examples-calling subject forms)
                              :authority-status (a::insertion-plan-status insertion)))))))
 
+;;;; Executing a plan, and what reading then finds
+;;;;
+;;;; The effect is the existing structural writer's, INSERT-OWNED-FORM, which
+;;;; verifies its candidate before installing it. What was created is then
+;;;; observed, not asserted: the request's code page is read again, and the
+;;;; result is the DEFEXAMPLE occurrence that reading finds there. The plan's
+;;;; proposed form is a representation before the effect; the occurrence is
+;;;; an observation after it. Judging that example is a later, separate
+;;;; reading of the occurrence, and no part of the effect.
+
+(define-condition operation-execution-refused (error)
+  ((plan :initarg :plan :reader operation-execution-refused-plan)
+   (reason :initarg :reason :reader operation-execution-refused-reason)
+   (cause :initarg :cause :initform nil :reader operation-execution-refused-cause))
+  (:report (lambda (condition stream)
+             (format stream "Operation plan not executed: ~A"
+                     (operation-execution-refused-reason condition))))
+  (:documentation "Nothing was installed: the authority is as it was."))
+
+(define-condition operation-result-unobserved (error)
+  ((plan :initarg :plan :reader operation-result-unobserved-plan)
+   (reason :initarg :reason :reader operation-result-unobserved-reason))
+  (:report (lambda (condition stream)
+             (format stream "Operation plan installed but its result not observed: ~A"
+                     (operation-result-unobserved-reason condition))))
+  (:documentation "The writer installed its verified candidate, but reading
+the code page again does not find exactly the proposed example. The effect is
+not accepted; nothing is rolled back."))
+
+(defun execute-operation-plan (plan environment)
+  "Carry out PLAN with the existing structural writer, if ENVIRONMENT is the
+pinned authoring environment this image was given; then read the request's
+code page again. Returns the SOURCE-OCCURRENCE of the inserted DEFEXAMPLE that
+reading finds. Signals OPERATION-EXECUTION-REFUSED having installed nothing,
+or OPERATION-RESULT-UNOBSERVED having installed the writer's verified
+candidate. Neither loads nor runs the example."
+  (flet ((refuse (reason &optional cause)
+           (error 'operation-execution-refused :plan plan :reason reason :cause cause)))
+    (unless (typep plan 'operation-plan)
+      (refuse (format nil "~S is not an operation plan" plan)))
+    (unless (typep environment 'a::authoring-environment)
+      (refuse "there is no authoring environment: the pinned authoring capability is absent"))
+    (let ((insertion (operation-plan-insertion plan)))
+      ;; The writer refuses only before it installs: every check it makes is
+      ;; on the candidate beside the authority.
+      (handler-case (a::insert-owned-form insertion environment)
+        (error (condition)
+          (refuse "the structural writer did not install its candidate" condition)))
+      (flet ((unobserved (reason)
+               (error 'operation-result-unobserved :plan plan :reason reason)))
+        (let* ((key (a::insertion-plan-key insertion))
+               (found (remove key (r:page-example-occurrences
+                                   (r:operation-request-page (operation-plan-request plan)))
+                              :key #'r:occurrence-form-key :test-not #'equal)))
+          (unless (= 1 (length found))
+            (unobserved (format nil "reading the code page again finds ~D examples ~S"
+                                (length found) (second key))))
+          (unless (wf:form-equal (a::insertion-plan-proposed insertion)
+                                 (hv:s-exp (r:resolve-occurrence (first found))))
+            (unobserved "the example reading finds is not the proposed form"))
+          (first found))))))
+
 (defun %stage (label answer)
   (views:html (:tr (:td (views:esc label)) (:td (views:esc answer)))))
 
@@ -166,7 +239,8 @@ as DEFEXAMPLE takes them. Writes nothing."
                                                  stream)))))))
           (:tr (:td "Before")
                (:td (:tt (views:esc (prin1-to-string (a::insertion-plan-anchor-key insertion))))))
-          (:tr (:td "Executed") (:td "no")))
+          (:tr (:td "Executed")
+               (:td "not recorded here: a plan is a proposal, and executing it returns what reading then finds")))
         (:h3 "Stages")
         (:table :class "inspector-table"
           (%stage "requested" "yes")
@@ -174,7 +248,7 @@ as DEFEXAMPLE takes them. Writes nothing."
           (%stage "planned" (if (eq :needs-insertion status)
                                 "yes"
                                 (format nil "no longer current: ~(~A~)" status)))
-          (%stage "authorised" "no")
-          (%stage "attempted" "no")
-          (%stage "installed" "no")
-          (%stage "verified" "no"))))))
+          (%stage "authorised" "not recorded by the plan")
+          (%stage "attempted" "not recorded by the plan")
+          (%stage "installed" "not recorded by the plan")
+          (%stage "verified" "not recorded by the plan"))))))
