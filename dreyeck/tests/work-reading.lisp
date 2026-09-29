@@ -1140,8 +1140,20 @@ Topic keeps the exact <a> that declared it, on the page projected."
 
 ;;;; Change work status: a request, nothing more
 
-(defun status-change-refusal (topic proposed &rest keys)
-  (handler-case (progn (apply #'work:request-work-status-change topic proposed keys)
+(defun %status-selection (topic)
+  "The Change work status selection a request for TOPIC completes: the
+registry's for TOPIC's declaration, or, where TOPIC has none, the one for
+hyperdoc-page-authoring's, so that the Topic itself is what is refused."
+  (ops:work-topic-operation-request
+   (w:change-work-status-operation)
+   (if (and (typep topic 'work:work-topic) (work:topic-source-occurrence topic))
+       topic
+       (tm:topicmap-projection-topic-by-id (work:work-projection) "hyperdoc-page-authoring"))))
+
+(defun status-change-refusal (topic proposed &key (current nil current-p) (selection (%status-selection topic)))
+  (handler-case (progn (if current-p
+                           (work:request-work-status-change selection topic proposed :current current)
+                           (work:request-work-status-change selection topic proposed))
                        (error "Expected a refusal."))
     (work:work-status-change-refused (condition) condition)))
 
@@ -1174,10 +1186,15 @@ stated there and the status proposed. A request, nothing more."
          (workspace (work:work-workspace))
          (point (copy-seq (tm:topicmap-workspace-point-of workspace)))
          (history (copy-list (tm:topicmap-workspace-history-of workspace)))
+         (operation (w:change-work-status-operation))
+         ;; Every selection this check completes or offers, made first: a
+         ;; request completes one and creates none.
+         (selection (%status-selection topic))
+         (other-operation (ops:work-topic-operation-request (w:create-relationship-operation) topic))
+         (other-declaration (%status-selection (tm:topicmap-projection-topic-by-id projection "lisp-source-authoring")))
          (requests (symbol-value (find-symbol "*REQUESTS*" "DREYECK/GESTURE/OPERATION-REQUEST")))
          (request-count (hash-table-count requests))
-         (operation (w:change-work-status-operation))
-         (request (work:request-work-status-change topic "in progress"))
+         (request (work:request-work-status-change selection topic "in progress"))
          (changed (replace-once source "data-topic=\"hyperdoc-page-authoring\" data-kind=\"work item\" data-status=\"open\""
                                 "data-topic=\"hyperdoc-page-authoring\" data-kind=\"work item\" data-status=\"in progress\"")))
     ;; The Operation is data, a sibling of Change relation.
@@ -1188,6 +1205,7 @@ stated there and the status proposed. A request, nothing more."
     ;; The request names the declaration on Work Breakdown, not the carrier
     ;; page and not a passage on it.
     (assert (eq operation (work:work-status-change-operation request)))
+    (assert (eq selection (work:work-status-change-selection request)))
     (assert (eq topic (work:work-status-change-topic request)))
     (assert (eq occurrence (work:work-status-change-occurrence request)))
     (assert (eq (work:work-page "Work Breakdown") (work:topic-occurrence-page occurrence)))
@@ -1197,11 +1215,11 @@ stated there and the status proposed. A request, nothing more."
     ;; It holds the change and the objects it concerns: no copied range,
     ;; replacement text, parsed node or edit plan.
     (let ((slots (sb-mop:class-slots (find-class 'work:work-status-change-request))))
-      (assert (equal '("OPERATION" "TOPIC" "OCCURRENCE" "OBSERVED-STATUS" "PROPOSED-STATUS")
+      (assert (equal '("OPERATION" "SELECTION" "TOPIC" "OCCURRENCE" "OBSERVED-STATUS" "PROPOSED-STATUS")
                      (mapcar (lambda (slot) (symbol-name (sb-mop:slot-definition-name slot))) slots)))
       (assert (every (lambda (slot)
                        (typep (slot-value request (sb-mop:slot-definition-name slot))
-                              '(or w:semantic-operation-identity work:work-topic
+                              '(or w:semantic-operation-identity r:operation-request work:work-topic
                                    work:work-topic-source-occurrence string)))
                      slots)))
     ;; Test-only evidence for a later representation-specific effect,
@@ -1261,6 +1279,16 @@ stated there and the status proposed. A request, nothing more."
                                                     (copy-list (tm:topicmap-topic-view-properties-of topic)))
                             :source-occurrence occurrence)))
       (refused 42 "in progress" "not a Topicmap Topic")
+      ;; The selection it completes: Change work status, on this declaration.
+      (assert (search "is not Change work status selected on the declaration of hyperdoc-page-authoring"
+                      (work:work-status-change-refused-reason
+                       (status-change-refusal topic "in progress" :selection other-operation))))
+      (assert (search "is not Change work status selected on the declaration of hyperdoc-page-authoring"
+                      (work:work-status-change-refused-reason
+                       (status-change-refusal topic "in progress" :selection other-declaration))))
+      (assert (search "is not Change work status selected"
+                      (work:work-status-change-refused-reason
+                       (status-change-refusal topic "in progress" :selection 42))))
       ;; No declaration kept: a plain Topic, and a FedWiki-projected Work Topic.
       (refused (tm:make-topicmap-topic :id "hyperdoc-page-authoring" :label "plain") "in progress"
                "no Work Topic source occurrence")
@@ -1291,7 +1319,12 @@ stated there and the status proposed. A request, nothing more."
                                      "data-topic=\"hyperdoc-page-authoring\" data-kind=\"work item\""))
              (bare (tm:topicmap-projection-topic-by-id (fixture-projection unstated) "hyperdoc-page-authoring")))
         (assert (null (getf (tm:topicmap-topic-view-properties-of bare) :status)))
-        (refused bare "in progress" "states no work status" :current unstated)))
+        (assert (search "states no work status"
+                        (work:work-status-change-refused-reason
+                         (status-change-refusal bare "in progress" :current unstated
+                                                :selection (make-instance 'r:operation-request
+                                                                          :operation operation
+                                                                          :occurrence (work:topic-source-occurrence bare))))))))
     ;; Nothing happened elsewhere.
     (assert (equal pages (work-page-sources)))
     (assert (equal point (tm:topicmap-workspace-point-of workspace)))

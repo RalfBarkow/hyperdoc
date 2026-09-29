@@ -68,9 +68,9 @@ with that page's file. The system and its directory are removed afterwards."
         :status))
 
 (defun %request (page path &optional (proposed "in progress"))
-  (work:request-work-status-change
-   (tm:topicmap-projection-topic-by-id (%project page path) "hyperdoc-page-authoring")
-   proposed))
+  (let ((topic (tm:topicmap-projection-topic-by-id (%project page path) "hyperdoc-page-authoring")))
+    (work:request-work-status-change
+     (ops:work-topic-operation-request (w:change-work-status-operation) topic) topic proposed)))
 
 (defun plan-refusal (thunk)
   (handler-case (progn (funcall thunk) (error "Expected a plan refusal."))
@@ -282,7 +282,10 @@ plan, source, reloaded page and projected Topic stay inspectably connected."
     (assert (search "does not mean the change is permitted, recommended, or part of a lifecycle" html))
     (assert (member topic (mapcar #'cdr (views:view-references view)) :test #'eq))
     ;; Without the pinned authoring environment: refused, no plan, no write.
-    (let ((outcome (a:execute-work-status-change (work:request-work-status-change topic "in progress") nil)))
+    (let ((outcome (a:execute-work-status-change
+                    (work:request-work-status-change
+                     (ops:work-topic-operation-request (w:change-work-status-operation) topic) topic "in progress")
+                    nil)))
       (assert (eq :refused (a:work-status-change-outcome-status outcome)))
       (assert (null (a:work-status-change-outcome-plan outcome)))
       (assert (typep (a:work-status-change-outcome-cause outcome) 'a:work-status-change-execution-refused))

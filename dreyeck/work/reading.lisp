@@ -36,7 +36,7 @@
            #:relation-change-proposed-relation
            #:relation-change-refused #:relation-change-refused-reason
            #:relation-change-refused-cause
-           #:work-status-change-request #:request-work-status-change
+           #:work-status-change-request #:request-work-status-change #:work-status-change-selection
            #:work-status-change-operation #:work-status-change-topic
            #:work-status-change-occurrence #:work-status-change-observed-status
            #:work-status-change-proposed-status
@@ -1003,9 +1003,10 @@ RELATION-CHANGE-REFUSED unless every check holds."
 ;;;; Work status change requests
 ;;
 ;; A request to change the work status one authored Work Topic declaration
-;; states. It names the declaration by its Work Topic source occurrence: the
-;; <a data-topic> on the page projected, not the carrier page the
-;; declaration names and not any passage there. The request holds the Topic
+;; states. It completes the operation request selected on that declaration,
+;; and refers to it. It names the declaration by its Work Topic source
+;; occurrence: the <a data-topic> on the page projected, not the carrier page
+;; the declaration names and not any passage there. The request holds the Topic
 ;; and the occurrence and copies nothing out of them; their ranges stay the
 ;; occurrence's evidence. Making a request observes and writes nothing; it
 ;; grants no permission and holds no executor. Work statuses are
@@ -1026,14 +1027,16 @@ any, is the condition that showed why."))
 
 (defclass work-status-change-request ()
   ((operation :initarg :operation :reader work-status-change-operation)
+   (selection :initarg :selection :reader work-status-change-selection)
    (topic :initarg :topic :reader work-status-change-topic)
    (occurrence :initarg :occurrence :reader work-status-change-occurrence)
    (observed-status :initarg :observed-status :reader work-status-change-observed-status)
    (proposed-status :initarg :proposed-status :reader work-status-change-proposed-status))
   (:documentation "Change work status for one exact authored Work Topic
-declaration: the projected Work Topic, the source occurrence of its
-declaration, the status observed there and the status proposed in its
-place. Intent and evidence only; no executor, no permission, no edit."))
+declaration: the operation request it completes, the projected Work Topic,
+the source occurrence of its declaration, the status observed there and the
+status proposed in its place. Intent and evidence only; no executor, no
+permission, no edit."))
 
 (defmethod print-object ((request work-status-change-request) stream)
   (print-unreadable-object (request stream :type t)
@@ -1043,11 +1046,19 @@ place. Intent and evidence only; no executor, no permission, no edit."))
             (work-status-change-proposed-status request)
             (topic-occurrence-ordinal (work-status-change-occurrence request)))))
 
-(defun request-work-status-change (topic proposed &key (current nil current-p))
-  "A request to make the authored declaration behind the Work TOPIC state the
-work status PROPOSED. CURRENT is the declaring page's source now, read from
-its page unless given. Observes, writes nothing, and signals
-WORK-STATUS-CHANGE-REFUSED unless every check holds."
+(defun %same-declaration-p (a b)
+  "Whether the Work Topic source occurrences A and B observe one declaration:
+the same page, snapshot and element."
+  (and (eq (topic-occurrence-page a) (topic-occurrence-page b))
+       (string= (topic-occurrence-snapshot a) (topic-occurrence-snapshot b))
+       (equal (topic-occurrence-element-range a) (topic-occurrence-element-range b))))
+
+(defun request-work-status-change (selection topic proposed &key (current nil current-p))
+  "A request completing SELECTION -- Change work status selected on the
+declaration of the Work TOPIC -- with the work status PROPOSED. CURRENT is
+the declaring page's source now, read from its page unless given. Observes,
+writes nothing, and signals WORK-STATUS-CHANGE-REFUSED unless every check
+holds."
   (flet ((refuse (reason &optional cause)
            (error 'work-status-change-refused :topic topic :reason reason :cause cause)))
     (unless (typep topic 'tm:topicmap-topic)
@@ -1056,6 +1067,14 @@ WORK-STATUS-CHANGE-REFUSED unless every check holds."
           (occurrence (and (typep topic 'work-topic) (topic-source-occurrence topic))))
       (unless (typep occurrence 'work-topic-source-occurrence)
         (refuse (format nil "Topic ~A has no Work Topic source occurrence" id)))
+      (let ((selected (and (typep selection 'r:operation-request)
+                           (r:operation-request-occurrence selection))))
+        (unless (and selected
+                     (eq (w:change-work-status-operation) (r:operation-request-operation selection))
+                     (typep selected 'work-topic-source-occurrence)
+                     (%same-declaration-p selected occurrence))
+          (refuse (format nil "~S is not Change work status selected on the declaration of ~A"
+                          selection id))))
       (let ((current (if current-p
                          current
                          (uiop:read-file-string (hyperdoc:file-of (topic-occurrence-page occurrence))))))
@@ -1094,7 +1113,7 @@ WORK-STATUS-CHANGE-REFUSED unless every check holds."
           (when (equal proposed observed)
             (refuse (format nil "it already states ~S" observed)))
           (make-instance 'work-status-change-request
-                         :operation (w:change-work-status-operation)
+                         :operation (w:change-work-status-operation) :selection selection
                          :topic topic :occurrence occurrence
                          :observed-status observed :proposed-status proposed))))))
 
@@ -1108,6 +1127,7 @@ WORK-STATUS-CHANGE-REFUSED unless every check holds."
         (:table :class "inspector-table"
           (:tr (:td "Operation")
                (:td (:tt (views:esc (w:semantic-operation-identity-id (work-status-change-operation request))))))
+          (:tr (:td "Selection") (:td (views:object-ref (work-status-change-selection request))))
           (:tr (:td "Work Topic")
                (:td (views:object-ref topic :display (tm:topicmap-topic-id-of topic))))
           (:tr (:td "Declaring page")

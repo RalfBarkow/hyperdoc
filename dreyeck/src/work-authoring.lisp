@@ -25,7 +25,11 @@
 ;;;;                             intended change, never becomes the page.
 ;;;;   after installation        only what installing can reveal: the page
 ;;;;                             file is the verified candidate, and the page
-;;;;                             object reloads to show the new status.
+;;;;                             object reloads to show the new status. The
+;;;;                             result is then observed: the Work Topic as
+;;;;                             reading the installed page declares it, not
+;;;;                             the candidate's projection, which proved the
+;;;;                             candidate correct and nothing more.
 ;;;;
 ;;;; EXECUTE-WORK-STATUS-CHANGE carries one request through these steps, and
 ;;;; only in an image holding the pinned authoring environment, the same
@@ -187,7 +191,8 @@ WORK-STATUS-CHANGE-PLAN-REFUSED unless every check holds."
       (unless (typep page 'hyperdoc:html-page)
         (refuse (format nil "its declaring page ~S is not a HyperDoc HTML page" page)))
       (let ((current (if current-p current (%read-source (hyperdoc:file-of page)))))
-        (handler-case (work:request-work-status-change (work:work-status-change-topic request) proposed
+        (handler-case (work:request-work-status-change (work:work-status-change-selection request)
+                                                       (work:work-status-change-topic request) proposed
                                                        :current current)
           (work:work-status-change-refused (condition)
             (refuse "the request no longer holds" condition)))
@@ -243,9 +248,9 @@ sibling removed."
         (tm:topicmap-association-relation-label association)))
 
 (defun %verify-candidate (plan candidate refuse)
-  "The Work Topic as CANDIDATE declares it, if CANDIDATE is exactly the
-intended change of the plan's snapshot; otherwise a call to REFUSE. Decided
-from the plan and the candidate alone, before anything is installed."
+  "Call REFUSE unless CANDIDATE is exactly the intended change of the plan's
+snapshot. Decided from the plan and the candidate alone, before anything is
+installed; what the change produced is observed only after installation."
   (let* ((request (work-status-change-plan-request plan))
          (id (tm:topicmap-topic-id-of (work:work-status-change-topic request)))
          (proposed (work:work-status-change-proposed-status request))
@@ -285,8 +290,7 @@ from the plan and the candidate alone, before anything is installed."
                                              (tm:topicmap-topic-id-of was))))))
       (unless (equal (mapcar #'%association-row (tm:topicmap-projection-associations-of before))
                      (mapcar #'%association-row (tm:topicmap-projection-associations-of after)))
-        (funcall refuse "the candidate changes the Associations"))
-      (tm:topicmap-projection-topic-by-id after id))))
+        (funcall refuse "the candidate changes the Associations")))))
 
 (defun %verify-installed (plan candidate)
   "Reload the declaring page, and signal WORK-STATUS-CHANGE-UNVERIFIED unless
@@ -309,12 +313,23 @@ proposed status. Only installation can reveal these."
         (unless (and anchor (equal proposed (plump:attribute anchor "data-status")))
           (unverified "the reloaded page does not show the proposed status"))))))
 
+(defun %observe-status-topic (plan)
+  "The Work Topic the installed page declares for PLAN's request, as reading it
+now finds it; otherwise WORK-STATUS-CHANGE-UNVERIFIED."
+  (let* ((request (work-status-change-plan-request plan))
+         (page (%declaring-page request))
+         (id (tm:topicmap-topic-id-of (work:work-status-change-topic request))))
+    (or (tm:topicmap-projection-topic-by-id
+         (work:project-work-breakdown (%read-source (hyperdoc:file-of page)) :source page) id)
+        (error 'work-status-change-unverified :plan plan
+               :reason (format nil "reading the installed page finds no Topic ~A" id)))))
+
 (defun apply-work-status-change (plan)
   "Carry out PLAN: only while the declaring page's source is still exactly the
 plan's snapshot, derive the candidate and verify that it is exactly the
 intended change, install it atomically, reload the page object, and accept
 the effect only if the file and the reloaded page are that candidate.
-Returns the Work Topic as the page now declares it. Signals
+Returns the Work Topic as reading the installed page declares it. Signals
 WORK-STATUS-CHANGE-APPLY-REFUSED having written nothing, or
 WORK-STATUS-CHANGE-UNVERIFIED having installed the verified candidate."
   (flet ((refuse (reason &optional cause)
@@ -331,11 +346,11 @@ WORK-STATUS-CHANGE-UNVERIFIED having installed the verified candidate."
       (unless (equal (work-status-change-plan-status-range plan)
                      (%status-range request snapshot #'refuse))
         (refuse "the status value is not where the plan found it"))
-      (let* ((candidate (%candidate plan))
-             (topic (%verify-candidate plan candidate #'refuse)))
+      (let ((candidate (%candidate plan)))
+        (%verify-candidate plan candidate #'refuse)
         (%replace-source path snapshot candidate #'refuse)
         (%verify-installed plan candidate)
-        topic))))
+        (%observe-status-topic plan)))))
 
 ;;;; Executing a request, and where an Inspector starts it
 
@@ -352,13 +367,16 @@ WORK-STATUS-CHANGE-UNVERIFIED having installed the verified candidate."
    (plan :initarg :plan :initform nil :reader work-status-change-outcome-plan)
    (status :initarg :status :reader work-status-change-outcome-status)
    (cause :initarg :cause :initform nil :reader work-status-change-outcome-cause)
-   (topic :initarg :topic :initform nil :reader work-status-change-outcome-topic)
-   (selection :initarg :selection :initform nil :reader work-status-change-outcome-selection))
+   (topic :initarg :topic :initform nil :reader work-status-change-outcome-topic))
   (:documentation "What executing one work status change request came to:
 STATUS is :APPLIED, :REFUSED or :UNVERIFIED. PLAN is NIL if execution stopped
 before planning. CAUSE is the refusal or the unverified condition. TOPIC, once
-applied, is the Work Topic as the written page now declares it. SELECTION, if
-any, is the operation request the request completed."))
+applied, is the Work Topic as the written page now declares it. The selection
+is the request's."))
+
+(defun work-status-change-outcome-selection (outcome)
+  "The operation request OUTCOME's request completed."
+  (work:work-status-change-selection (work-status-change-outcome-request outcome)))
 
 (defmethod print-object ((outcome work-status-change-outcome) stream)
   (print-unreadable-object (outcome stream :type t)
@@ -366,15 +384,13 @@ any, is the operation request the request completed."))
                             (work:work-status-change-topic (work-status-change-outcome-request outcome)))
             (work-status-change-outcome-status outcome))))
 
-(defun execute-work-status-change (request environment &key selection)
+(defun execute-work-status-change (request environment)
   "Carry REQUEST through the authoring contract: plan it, then apply the plan,
 if ENVIRONMENT is the pinned authoring environment this image was given.
-Returns a WORK-STATUS-CHANGE-OUTCOME in every case, recording SELECTION, the
-operation request REQUEST completed, if given. Adds no editing of its own:
-planning, applying and verifying are the existing steps."
+Returns a WORK-STATUS-CHANGE-OUTCOME in every case. Adds no editing of its
+own: planning, applying and verifying are the existing steps."
   (flet ((outcome (&rest initargs)
-           (apply #'make-instance 'work-status-change-outcome
-                  :request request :selection selection initargs)))
+           (apply #'make-instance 'work-status-change-outcome :request request initargs)))
     (unless (typep environment 'dreyeck/workflow/authoring::authoring-environment)
       (return-from execute-work-status-change
         (outcome :status :refused
@@ -423,10 +439,9 @@ return the outcome, or the condition that refused a request."
                         :reason (format nil "~S is not Change work status selected on a Work Topic declaration"
                                         selection))
         (handler-case
-            (execute-work-status-change (work:request-work-status-change topic proposed)
+            (execute-work-status-change (work:request-work-status-change selection topic proposed)
                                         (handler-case (dreyeck/workflow/authoring:make-authoring-environment)
-                                          (error () nil))
-                                        :selection selection)
+                                          (error () nil)))
           (work:work-status-change-refused (condition) condition)))))
 
 (defun %declared-work-topic-p (topic)
