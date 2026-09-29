@@ -468,10 +468,24 @@
                                 ((:FILE "upstream-intake-inspector-package")
                                  (:FILE "upstream-intake-views")))
 
+(asdf:defsystem "dreyeck/authority-policy"
+  :description "Operation contracts and disclosure gates over HyperDoc's Inspector: containment, with upstream untouched"
+  :depends-on ("html-inspector-views/standard" "closer-mop" "hyperbook" "hyperbook/fedwiki" "hyperdoc" "ironclad")
+  :components ((:file "dreyeck/src/authority-policy"))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/authority-policy/tests"))))
+
+(asdf:defsystem "dreyeck/authority-policy/tests"
+  :depends-on ("dreyeck/authority-policy" "dreyeck/catalog" "dreyeck/local-fedwiki-view" "hyperbook/server")
+  :components ((:file "dreyeck/tests/authority-policy"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/authority-policy/tests :run-tests)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG :DESCRIPTION
                                 "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
                                 :LICENSE "BSD" :VERSION "0.0.1" :DEPENDS-ON
                                 ("dreyeck/hyperspec"
+                                 "dreyeck/authority-policy"
                                  #:DREYECK/WIKI-LINK
                                  #:DREYECK/UPSTREAM-INTAKE
                                  #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
@@ -523,6 +537,7 @@
                                 :LICENSE "BSD" :VERSION "0.0.1" :PATHNAME
                                 "dreyeck/tests/" :SERIAL T :DEPENDS-ON
                                 ("dreyeck/workflow"
+                                 "dreyeck/authority-policy"
                                  #:DREYECK/INSPECTOR/UPSTREAM-INTAKE
                                  #:HYPERDOC/EXPLORER
                                  #:HYPERBOOK/FEDWIKI)

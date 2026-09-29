@@ -1448,11 +1448,20 @@ their persisted source, link onward as intended, and evaluate."
   (format t "Page-loading history reading tests passed.~%")
   t)
 
+(defun check-authority-containment-as-reviewed ()
+  "The upstream points the dreyeck authority policy replaces or relies on are
+still as reviewed, and upstream offers no pathname view or title-bar action
+the policy has not seen. An Intake that finds otherwise fails here."
+  (let ((drift (dreyeck/authority-policy:containment-adapter-drift)))
+    (check (null drift) "Upstream Intake: authority containment points drifted: ~S" drift))
+  t)
+
 (defun run-upstream-intake-tests nil
        (dreyeck/upstream-intake/tests::check-page-loading-intake)
        (run-page-loading-history-tests)
        (run-live-image-observation-tests) (run-fixture-tests)
        (run-hyperdoc-page-tests)
+       (check-authority-containment-as-reviewed)
        (check
               (fboundp
                        (quote
