@@ -35,6 +35,12 @@
            #:relation-change-proposed-relation
            #:relation-change-refused #:relation-change-refused-reason
            #:relation-change-refused-cause
+           #:work-status-change-request #:request-work-status-change
+           #:work-status-change-operation #:work-status-change-topic
+           #:work-status-change-occurrence #:work-status-change-observed-status
+           #:work-status-change-proposed-status
+           #:work-status-change-refused #:refused-work-status-change-topic
+           #:work-status-change-refused-reason #:work-status-change-refused-cause
            #:work-fedwiki-item-observation #:observe-work-fedwiki-item
            #:fedwiki-item-observation-site #:fedwiki-item-observation-slug
            #:fedwiki-item-observation-item-id #:fedwiki-item-observation-item
@@ -985,6 +991,134 @@ RELATION-CHANGE-REFUSED unless every check holds."
             (:tt (views:esc (relation-change-proposed-relation request))))
         (:h4 "Authored source occurrence")
         (%render-occurrence-evidence (relation-change-occurrence request))))))
+
+;;;; Work status change requests
+;;
+;; A request to change the work status one authored Work Topic declaration
+;; states. It names the declaration by its Work Topic source occurrence: the
+;; <a data-topic> on the page projected, not the carrier page the
+;; declaration names and not any passage there. The request holds the Topic
+;; and the occurrence and copies nothing out of them; their ranges stay the
+;; occurrence's evidence. Making a request observes and writes nothing; it
+;; grants no permission and holds no executor. Work statuses are
+;; descriptive: any stated status may be proposed for another, and no
+;; lifecycle is checked. The projection reads a declaration without
+;; data-status as stating no status, so there is none to change, and such a
+;; request is refused rather than given a default.
+
+(define-condition work-status-change-refused (error)
+  ((topic :initarg :topic :reader refused-work-status-change-topic)
+   (reason :initarg :reason :reader work-status-change-refused-reason)
+   (cause :initarg :cause :initform nil :reader work-status-change-refused-cause))
+  (:report (lambda (condition stream)
+             (format stream "No work status change request: ~A"
+                     (work-status-change-refused-reason condition))))
+  (:documentation "Nothing was requested and nothing was written. CAUSE, if
+any, is the condition that showed why."))
+
+(defclass work-status-change-request ()
+  ((operation :initarg :operation :reader work-status-change-operation)
+   (topic :initarg :topic :reader work-status-change-topic)
+   (occurrence :initarg :occurrence :reader work-status-change-occurrence)
+   (observed-status :initarg :observed-status :reader work-status-change-observed-status)
+   (proposed-status :initarg :proposed-status :reader work-status-change-proposed-status))
+  (:documentation "Change work status for one exact authored Work Topic
+declaration: the projected Work Topic, the source occurrence of its
+declaration, the status observed there and the status proposed in its
+place. Intent and evidence only; no executor, no permission, no edit."))
+
+(defmethod print-object ((request work-status-change-request) stream)
+  (print-unreadable-object (request stream :type t)
+    (format stream "~A: ~S -> ~S, declaration ~D"
+            (tm:topicmap-topic-id-of (work-status-change-topic request))
+            (work-status-change-observed-status request)
+            (work-status-change-proposed-status request)
+            (topic-occurrence-ordinal (work-status-change-occurrence request)))))
+
+(defun request-work-status-change (topic proposed &key (current nil current-p))
+  "A request to make the authored declaration behind the Work TOPIC state the
+work status PROPOSED. CURRENT is the declaring page's source now, read from
+its page unless given. Observes, writes nothing, and signals
+WORK-STATUS-CHANGE-REFUSED unless every check holds."
+  (flet ((refuse (reason &optional cause)
+           (error 'work-status-change-refused :topic topic :reason reason :cause cause)))
+    (unless (typep topic 'tm:topicmap-topic)
+      (refuse (format nil "~S is not a Topicmap Topic" topic)))
+    (let ((id (tm:topicmap-topic-id-of topic))
+          (occurrence (and (typep topic 'work-topic) (topic-source-occurrence topic))))
+      (unless (typep occurrence 'work-topic-source-occurrence)
+        (refuse (format nil "Topic ~A has no Work Topic source occurrence" id)))
+      (let ((current (if current-p
+                         current
+                         (uiop:read-file-string (hyperdoc:file-of (topic-occurrence-page occurrence))))))
+        (handler-case (resolve-work-topic-occurrence occurrence :current current)
+          (stale-work-topic-occurrence (condition)
+            (refuse "its source occurrence is stale" condition)))
+        (unless (equal id (topic-occurrence-topic occurrence))
+          (refuse (format nil "Topic ~A holds the source occurrence of ~A"
+                          id (topic-occurrence-topic occurrence))))
+        ;; The occurrence resolved. What remains is whether the projected
+        ;; Topic agrees with its declaration as the current page projects it,
+        ;; under every rule a projection checks.
+        (let* ((start (car (topic-occurrence-element-range occurrence)))
+               (declared
+                 (find start
+                       (tm:topicmap-projection-topics-of
+                        (handler-case
+                            (project-work-breakdown current :source (topic-occurrence-page occurrence))
+                          (error (condition)
+                            (refuse "the declaring page does not project" condition))))
+                       :key (lambda (other)
+                              (car (topic-occurrence-element-range (topic-source-occurrence other))))))
+               (observed (and declared
+                              (getf (tm:topicmap-topic-view-properties-of declared) :status)))
+               (projected (getf (tm:topicmap-topic-view-properties-of topic) :status)))
+          (unless (and declared (equal id (tm:topicmap-topic-id-of declared)))
+            (refuse (format nil "the declaring page does not declare ~A at its occurrence" id)))
+          (unless observed
+            (refuse (format nil "the declaration of ~A states no work status, so there is none to change"
+                            id)))
+          (unless (equal projected observed)
+            (refuse (format nil "Topic ~A says ~S but its declaration states ~S" id projected observed)))
+          (unless (and (stringp proposed)
+                       (string/= "" (string-trim '(#\Space #\Tab #\Newline) proposed)))
+            (refuse (format nil "~S is not a work status" proposed)))
+          (when (equal proposed observed)
+            (refuse (format nil "it already states ~S" observed)))
+          (make-instance 'work-status-change-request
+                         :operation (w:change-work-status-operation)
+                         :topic topic :occurrence occurrence
+                         :observed-status observed :proposed-status proposed))))))
+
+(views:defview work-status-change-request-overview (request work-status-change-request)
+  (views:html-view :title "Work status change request" :priority 1
+    (let* ((topic (work-status-change-topic request))
+           (occurrence (work-status-change-occurrence request))
+           (page (topic-occurrence-page occurrence))
+           (carrier (tm:topicmap-topic-object-of topic)))
+      (views:html
+        (:table :class "inspector-table"
+          (:tr (:td "Operation")
+               (:td (:tt (views:esc (w:semantic-operation-identity-id (work-status-change-operation request))))))
+          (:tr (:td "Work Topic")
+               (:td (views:object-ref topic :display (tm:topicmap-topic-id-of topic))))
+          (:tr (:td "Declaring page")
+               (:td (if (typep page 'hyperbook:page)
+                        (views:object-ref page)
+                        (views:html (:tt (views:esc (prin1-to-string page)))))))
+          (:tr (:td "Source occurrence")
+               (:td (views:object-ref occurrence
+                                      :display (format nil "declaration ~D of ~A"
+                                                       (topic-occurrence-ordinal occurrence)
+                                                       (topic-occurrence-topic occurrence)))))
+          (:tr (:td "Observed work status")
+               (:td (:tt (views:esc (work-status-change-observed-status request)))))
+          (:tr (:td "Proposed work status")
+               (:td (:tt (views:esc (work-status-change-proposed-status request)))))
+          (:tr (:td "Executed") (:td "no -- a request holds no writer and grants no permission")))
+        (:p "The request concerns the declaration on the declaring page. The Topic's carrier page, "
+            (if carrier (views:object-ref carrier) (views:html "none"))
+            ", is not its target.")))))
 
 (hyperdoc:defexample work-workspace
   "Navigate the documented work and its concepts with native Workspace actions."

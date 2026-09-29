@@ -8,6 +8,7 @@
            #:insert-executable-defexample-operation
            #:inspect-relation-contract-operation
            #:change-relation-operation
+           #:change-work-status-operation
            #:gesture-input-sample
            #:make-gesture-input-sample
            #:gesture-input-sample-kind
@@ -73,6 +74,14 @@ Like every identity here it is data; what it shows is computed elsewhere.")
 
 (defun inspect-relation-contract-operation ()
   *inspect-relation-contract-operation*)
+
+(defvar *change-work-status-operation*
+  (%make-operation-identity "operation/change-work-status" "Change work status")
+  "The EQ identity of changing the work status one authored Work Topic
+declaration states. Data only: it names what is asked, not who may do it.")
+
+(defun change-work-status-operation ()
+  *change-work-status-operation*)
 
 (defvar *change-relation-operation*
   (%make-operation-identity "operation/change-relation" "Change relation")

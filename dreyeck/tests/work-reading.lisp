@@ -1136,6 +1136,166 @@ Topic keeps the exact <a> that declared it, on the page projected."
                      (fedwiki-projection (fedwiki-fixture "work-breakdown") "work-breakdown"))))
     (assert (equal pages (work-page-sources)))))
 
+;;;; Change work status: a request, nothing more
+
+(defun status-change-refusal (topic proposed &rest keys)
+  (handler-case (progn (apply #'work:request-work-status-change topic proposed keys)
+                       (error "Expected a refusal."))
+    (work:work-status-change-refused (condition) condition)))
+
+(defun status-value-range (occurrence)
+  "Test-only evidence for a later representation-specific effect, derived
+here and held by no request: the range of the data-status value inside
+OCCURRENCE's start tag."
+  (let ((snapshot (work:topic-occurrence-snapshot occurrence))
+        (tag (work:topic-occurrence-start-tag-range occurrence)))
+    (multiple-value-bind (name attributes end) (work::%start-tag snapshot (car tag))
+      (assert (equal "a" name))
+      (assert (= end (cdr tag)))
+      (let ((entry (find "data-status" attributes :key #'first :test #'string=)))
+        (assert entry)
+        (assert (eql #\" (fifth entry)))
+        (cons (third entry) (fourth entry))))))
+
+(defun status-of (projection id)
+  (getf (tm:topicmap-topic-view-properties-of (tm:topicmap-projection-topic-by-id projection id))
+        :status))
+
+(defun check-work-status-change-request ()
+  "Change work status: one exact authored Work Topic declaration, the status
+stated there and the status proposed. A request, nothing more."
+  (let* ((pages (work-page-sources))
+         (source (work-breakdown-source))
+         (projection (work:work-projection))
+         (topic (tm:topicmap-projection-topic-by-id projection "hyperdoc-page-authoring"))
+         (occurrence (work:topic-source-occurrence topic))
+         (workspace (work:work-workspace))
+         (point (copy-seq (tm:topicmap-workspace-point-of workspace)))
+         (history (copy-list (tm:topicmap-workspace-history-of workspace)))
+         (requests (symbol-value (find-symbol "*REQUESTS*" "DREYECK/GESTURE/OPERATION-REQUEST")))
+         (request-count (hash-table-count requests))
+         (operation (w:change-work-status-operation))
+         (request (work:request-work-status-change topic "in progress"))
+         (changed (replace-once source "data-topic=\"hyperdoc-page-authoring\" data-kind=\"work item\" data-status=\"open\""
+                                "data-topic=\"hyperdoc-page-authoring\" data-kind=\"work item\" data-status=\"in progress\"")))
+    ;; The Operation is data, a sibling of Change relation.
+    (assert (equal "operation/change-work-status" (w:semantic-operation-identity-id operation)))
+    (assert (equal "Change work status" (w:semantic-operation-identity-title operation)))
+    (assert (not (functionp operation)))
+    (assert (not (eq operation (w:change-relation-operation))))
+    ;; The request names the declaration on Work Breakdown, not the carrier
+    ;; page and not a passage on it.
+    (assert (eq operation (work:work-status-change-operation request)))
+    (assert (eq topic (work:work-status-change-topic request)))
+    (assert (eq occurrence (work:work-status-change-occurrence request)))
+    (assert (eq (work:work-page "Work Breakdown") (work:topic-occurrence-page occurrence)))
+    (assert (eq (work:work-page "Operations and Change") (tm:topicmap-topic-object-of topic)))
+    (assert (equal "open" (work:work-status-change-observed-status request)))
+    (assert (equal "in progress" (work:work-status-change-proposed-status request)))
+    ;; It holds the change and the objects it concerns: no copied range,
+    ;; replacement text, parsed node or edit plan.
+    (let ((slots (sb-mop:class-slots (find-class 'work:work-status-change-request))))
+      (assert (equal '("OPERATION" "TOPIC" "OCCURRENCE" "OBSERVED-STATUS" "PROPOSED-STATUS")
+                     (mapcar (lambda (slot) (symbol-name (sb-mop:slot-definition-name slot))) slots)))
+      (assert (every (lambda (slot)
+                       (typep (slot-value request (sb-mop:slot-definition-name slot))
+                              '(or w:semantic-operation-identity work:work-topic
+                                   work:work-topic-source-occurrence string)))
+                     slots)))
+    ;; Test-only evidence for a later representation-specific effect,
+    ;; computed in memory: the data-status value inside the occurrence's
+    ;; start tag is the only range that must change. The request describes
+    ;; no such edit, and nothing here writes.
+    (let* ((range (status-value-range occurrence))
+           (proposed (work:work-status-change-proposed-status request))
+           (candidate (concatenate 'string (subseq source 0 (car range)) proposed
+                                   (subseq source (cdr range))))
+           (delta (- (length proposed) (- (cdr range) (car range))))
+           (before (fixture-projection source))
+           (after (fixture-projection candidate)))
+      (assert (equal "open" (subseq source (car range) (cdr range))))
+      (assert (string= source candidate :end1 (car range) :end2 (car range)))
+      (assert (string= source candidate :start1 (cdr range) :start2 (+ (cdr range) delta)))
+      (assert (string= changed candidate))
+      (assert (equal "in progress" (status-of after "hyperdoc-page-authoring")))
+      (assert (equal "open" (status-of after "lisp-source-authoring")))
+      (loop for old in (tm:topicmap-projection-topics-of before)
+            for new in (tm:topicmap-projection-topics-of after)
+            unless (equal "hyperdoc-page-authoring" (tm:topicmap-topic-id-of old))
+              do (assert (equal (topic-row old) (topic-row new))))
+      (assert (equal (mapcar #'association-row (tm:topicmap-projection-associations-of before))
+                     (mapcar #'association-row (tm:topicmap-projection-associations-of after)))))
+    ;; The Inspector shows what is asked, with nothing to press.
+    (let* ((view (find "Work status change request" (views:all-views request)
+                       :key #'views:view-title :test #'equal))
+           (html (views:view-html view))
+           (objects (mapcar #'cdr (views:view-references view))))
+      (assert view)
+      (dolist (text '("operation/change-work-status" "Work Topic" "Declaring page" "Source occurrence"
+                      "Observed work status" "<tt>open</tt>" "Proposed work status"
+                      "<tt>in progress</tt>" "Executed" "no -- " "is not its target"))
+        (assert (search text html) () "The request view lacks ~S." text))
+      (dolist (text (list "Would replace" "eplacement" "data-status" "&lt;a" "target HTML"
+                          (prin1-to-string (work:topic-occurrence-element-range occurrence))))
+        (assert (null (search text html)) () "The request view shows ~S." text))
+      (dolist (object (list topic occurrence (work:topic-occurrence-page occurrence)
+                            (tm:topicmap-topic-object-of topic)))
+        (assert (member object objects :test #'eq)))
+      (assert (notany (lambda (entry) (or (eql 0 (search "action-" (car entry)))
+                                          (eql 0 (search "eval-" (car entry)))))
+                      (views:view-references view))))
+    ;; Refusals: each names why, and nothing is requested.
+    (flet ((refused (topic proposed fragment &key (current source) cause-type)
+             (let ((condition (status-change-refusal topic proposed :current current)))
+               (assert (search fragment (work:work-status-change-refused-reason condition)) ()
+                       "Refusal ~S lacks ~S." (princ-to-string condition) fragment)
+               (when cause-type
+                 (assert (typep (work:work-status-change-refused-cause condition) cause-type)))))
+           (variant (id status)
+             (make-instance 'work:work-topic
+                            :id id :type :work-page :label (tm:topicmap-topic-label-of topic)
+                            :object (tm:topicmap-topic-object-of topic)
+                            :view-properties (list* :status status
+                                                    (copy-list (tm:topicmap-topic-view-properties-of topic)))
+                            :source-occurrence occurrence)))
+      (refused 42 "in progress" "not a Topicmap Topic")
+      ;; No declaration kept: a plain Topic, and a FedWiki-projected Work Topic.
+      (refused (tm:make-topicmap-topic :id "hyperdoc-page-authoring" :label "plain") "in progress"
+               "no Work Topic source occurrence")
+      (refused (tm:topicmap-projection-topic-by-id
+                (fedwiki-projection (fedwiki-fixture "work-breakdown") "work-breakdown") "interaction")
+               "in progress" "no Work Topic source occurrence")
+      ;; Stale: any difference from the snapshot, the status itself or the
+      ;; same declaration moved. Nothing relocates by Topic ID.
+      (let ((element (declaration-text occurrence #'work:topic-occurrence-element-range)))
+        (dolist (current (list (replace-once source "This page is the current work map"
+                                             "This page is the present work map")
+                               (replace-once (replace-once source element "Structural HyperDoc Page Authoring")
+                                             "<h2>Relation contracts</h2>"
+                                             (concatenate 'string "<p>" element "</p><h2>Relation contracts</h2>"))
+                               changed))
+          (refused topic "in progress" "stale" :current current :cause-type 'work:stale-work-topic-occurrence)))
+      ;; The occurrence declares another Topic.
+      (refused (variant "lisp-source-authoring" "open") "in progress" "holds the source occurrence of")
+      ;; The projected Topic disagrees with its declaration.
+      (refused (variant "hyperdoc-page-authoring" "blocked") "in progress"
+               "says \"blocked\" but its declaration states \"open\"")
+      ;; Nothing to change, or no status proposed.
+      (refused topic "open" "already states")
+      (refused topic "" "not a work status")
+      (refused topic :open "not a work status")
+      ;; A declaration stating no status has none to change.
+      (let* ((unstated (replace-once source "data-topic=\"hyperdoc-page-authoring\" data-kind=\"work item\" data-status=\"open\""
+                                     "data-topic=\"hyperdoc-page-authoring\" data-kind=\"work item\""))
+             (bare (tm:topicmap-projection-topic-by-id (fixture-projection unstated) "hyperdoc-page-authoring")))
+        (assert (null (getf (tm:topicmap-topic-view-properties-of bare) :status)))
+        (refused bare "in progress" "states no work status" :current unstated)))
+    ;; Nothing happened elsewhere.
+    (assert (equal pages (work-page-sources)))
+    (assert (equal point (tm:topicmap-workspace-point-of workspace)))
+    (assert (equal history (tm:topicmap-workspace-history-of workspace)))
+    (assert (= request-count (hash-table-count requests)))))
+
 ;;;; Change relation: a request, nothing more
 
 (defun with-fixture-requires-contract (source)
@@ -1746,8 +1906,9 @@ work items, only warranted relationships, and no architecture copied in."
   (check-hand-shaped-traces)
   (check-work-relationship-occurrences)
   (check-work-topic-occurrences)
+  (check-work-status-change-request)
   (check-relation-change-request)
   (check-fedwiki-work)
   (check-authoring-work)
-  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in), Work Topic declarations (one snapshot, the declaring page not the carrier, stale not relocated, a duplicate refused naming both declarations, the declaration form or a refusal).~%")
+  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in), Work Topic declarations (one snapshot, the declaring page not the carrier, stale not relocated, a duplicate refused naming both declarations, the declaration form or a refusal), Change work status (one exact declaration on its declaring page, observed and proposed status, no copied range or edit, stale, moved, mismatched, unchanged and unstated refused, only the status value differs in memory, no effect).~%")
   t)
