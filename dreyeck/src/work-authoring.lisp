@@ -205,14 +205,17 @@ WORK-STATUS-CHANGE-PLAN-REFUSED unless every check holds."
                          :request request :snapshot snapshot
                          :status-range (%status-range request snapshot #'refuse)))))))
 
+(defun %splice-source (snapshot range text)
+  "SNAPSHOT with the characters in RANGE, (start . end), replaced by TEXT, and
+nothing else. An empty RANGE inserts TEXT at its start."
+  (concatenate 'string (subseq snapshot 0 (car range)) text (subseq snapshot (cdr range))))
+
 (defun %candidate (plan)
   "The source PLAN would leave: its snapshot with the status value replaced
 by the proposed status, and nothing else."
-  (let ((snapshot (work-status-change-plan-snapshot plan))
-        (range (work-status-change-plan-status-range plan)))
-    (concatenate 'string (subseq snapshot 0 (car range))
-                 (work:work-status-change-proposed-status (work-status-change-plan-request plan))
-                 (subseq snapshot (cdr range)))))
+  (%splice-source (work-status-change-plan-snapshot plan)
+                  (work-status-change-plan-status-range plan)
+                  (work:work-status-change-proposed-status (work-status-change-plan-request plan))))
 
 (defun %replace-source (path expected candidate refuse)
   "Make PATH hold CANDIDATE, if it still holds exactly EXPECTED: through a
@@ -612,10 +615,9 @@ statements have."
           from to relation (%escape-text from-label) (%escape-text to-label) (%escape-text relation-label)))
 
 (defun %relationship-candidate (plan)
-  (let ((snapshot (work-relationship-creation-plan-snapshot plan))
-        (position (work-relationship-creation-plan-position plan)))
-    (concatenate 'string (subseq snapshot 0 position)
-                 (work-relationship-creation-plan-representation plan) (subseq snapshot position))))
+  (let ((position (work-relationship-creation-plan-position plan)))
+    (%splice-source (work-relationship-creation-plan-snapshot plan) (cons position position)
+                    (work-relationship-creation-plan-representation plan))))
 
 (defun %statement-triple (occurrence)
   (list (work:relationship-occurrence-from occurrence) (work:relationship-occurrence-relation occurrence)
