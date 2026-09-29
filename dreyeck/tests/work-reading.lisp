@@ -989,6 +989,153 @@ and no request contains this edit."
                                (source-refusal (concatenate 'string "<script>var s;</script>" source)))))
     (assert (equal pages (work-page-sources)))))
 
+;;;; Work Topic source occurrences: the declaration, not the carrier
+
+(defparameter *authoring-carried*
+  '("hyperdoc-authoring" "fedwiki-item-authoring" "production-authoring-authority"
+    "authoring-listener-startup" "authoring-nginx-route")
+  "Five Topics declared on Work Breakdown and carried by one page.")
+
+(defun declaration-of (projection id)
+  (work:topic-source-occurrence (tm:topicmap-projection-topic-by-id projection id)))
+
+(defun declaration-text (occurrence range-reader)
+  (let ((range (funcall range-reader occurrence)))
+    (subseq (work:topic-occurrence-snapshot occurrence) (car range) (cdr range))))
+
+(defun declaration-stale-p (occurrence current)
+  (handler-case (progn (work:resolve-work-topic-occurrence occurrence :current current) nil)
+    (work:stale-work-topic-occurrence () t)))
+
+(defun topic-source-refusal (html)
+  "The WORK-TOPIC-SOURCE-ERROR projecting HTML signals, or an error."
+  (handler-case (progn (fixture-projection html) (error "Expected a Topic source refusal."))
+    (work:work-topic-source-error (condition) condition)))
+
+(defun duplicate-declaration-refusal (html &rest keys)
+  (handler-case (progn (apply #'fixture-projection html keys) (error "Expected a duplicate refusal."))
+    (work:duplicate-work-topic-declaration (condition) condition)))
+
+(defun parsed-anchor (element)
+  (first (plump:get-elements-by-tag-name
+          (let ((plump:*tag-dispatchers* plump:*html-tags*)) (plump:parse element)) "a")))
+
+(defun check-work-topic-occurrences ()
+  "Topic ID, declaring occurrence and carrier page are three things: each
+Topic keeps the exact <a> that declared it, on the page projected."
+  (let* ((pages (work-page-sources))
+         (source (work-breakdown-source))
+         (projection (work:work-projection))
+         (topics (tm:topicmap-projection-topics-of projection))
+         (declaring-page (work:work-page "Work Breakdown"))
+         (carrier (work:work-page "Deriving HyperDoc Authoring Constraints"))
+         (listener (declaration-of projection "authoring-listener-startup"))
+         (element (declaration-text listener #'work:topic-occurrence-element-range)))
+    ;; One snapshot: the page as read, kept by every Topic and every
+    ;; relationship occurrence of the projection.
+    (let ((snapshot (work:topic-occurrence-snapshot listener)))
+      (assert (string= source snapshot))
+      (assert (every (lambda (topic)
+                       (eq snapshot (work:topic-occurrence-snapshot (work:topic-source-occurrence topic))))
+                     topics))
+      (assert (every (lambda (a) (eq snapshot (work:relationship-occurrence-snapshot (occurrence-of a))))
+                     (tm:topicmap-projection-associations-of projection))))
+    ;; Each declaration is its own <a>: ordinal, Topic ID and ranges agree,
+    ;; and the Topic's label and carrier are read from those bytes.
+    (loop for topic in topics for k from 1
+          for o = (work:topic-source-occurrence topic)
+          for text = (declaration-text o #'work:topic-occurrence-element-range)
+          for node = (parsed-anchor text)
+          do (assert (= k (work:topic-occurrence-ordinal o)))
+             (assert (equal (tm:topicmap-topic-id-of topic) (work:topic-occurrence-topic o)))
+             (assert (equal (tm:topicmap-topic-id-of topic)
+                            (declaration-text o #'work:topic-occurrence-topic-range)))
+             (assert (eql 0 (search "<a " text)))
+             (assert (eql (- (length text) 4) (search "</a>" text :from-end t)))
+             (assert (equal (tm:topicmap-topic-label-of topic) (plump:decode-entities (plump:text node))))
+             (assert (eq (tm:topicmap-topic-object-of topic)
+                         (work:work-page (plump:attribute node "page")
+                                         (or (plump:attribute node "hyperbook") "dreyeck/work/reading")))))
+    ;; Five Topics, one carrier, five declarations on the declaring page.
+    (dolist (id *authoring-carried*)
+      (let ((topic (tm:topicmap-projection-topic-by-id projection id)))
+        (assert (eq carrier (tm:topicmap-topic-object-of topic)))
+        (assert (eq declaring-page (work:topic-occurrence-page (work:topic-source-occurrence topic))))))
+    (assert (= 5 (length (remove-duplicates
+                          (mapcar (lambda (id) (work:topic-occurrence-element-range (declaration-of projection id)))
+                                  *authoring-carried*)
+                          :test #'equal))))
+    (assert (search "data-status=\"blocked\">Start loopback Authoring listener</a>" element))
+    ;; The Topic's Slots lead to its declaration.
+    (let* ((topic (tm:topicmap-projection-topic-by-id projection "authoring-listener-startup"))
+           (view (find "Slots" (views:all-views topic) :key #'views:view-title :test #'search)))
+      (views:view-html view)
+      (assert (member listener (mapcar #'cdr (views:view-references view)) :test #'eq)))
+    ;; The page as it is on disk resolves; the resolver reads it itself.
+    (assert (eq listener (work:resolve-work-topic-occurrence listener)))
+    ;; The seven-area projection keeps the same kind of declaration.
+    (assert (declaration-of (work:work-projection :areas-only t) "operations"))
+    ;; Stale unless the source is exactly the snapshot. Nothing relocates,
+    ;; not even to the one declaration of the same Topic ID.
+    (let ((moved (replace-once (replace-once source element "Start loopback Authoring listener")
+                               "<h2>Relation contracts</h2>"
+                               (concatenate 'string "<p>" element "</p><h2>Relation contracts</h2>"))))
+      (assert (not (equal (work:topic-occurrence-element-range listener)
+                          (work:topic-occurrence-element-range
+                           (declaration-of (fixture-projection moved) "authoring-listener-startup")))))
+      (dolist (current (list (replace-once source "This page is the current work map"
+                                           "This page is the present work map")
+                             (replace-once source "data-topic=\"authoring-listener-startup\" data-kind=\"work item\" data-status=\"blocked\""
+                                           "data-topic=\"authoring-listener-startup\" data-kind=\"work item\" data-status=\"open\"")
+                             (replace-once source "<h2>Areas, current work and concepts</h2>"
+                                           "<p><a page=\"Interaction\" data-topic=\"new-topic\">New</a></p><h2>Areas, current work and concepts</h2>")
+                             moved))
+        (assert (declaration-stale-p listener current))))
+    ;; The falsifier: one Topic ID declared twice. Both declarations are
+    ;; refused together, each still its own occurrence, in both projections.
+    (let* ((again (replace-once element "Start loopback Authoring listener" "Start the listener, declared again"))
+           (duplicated (replace-once source "<h2>Relation contracts</h2>"
+                                     (concatenate 'string "<p>" again "</p><h2>Relation contracts</h2>"))))
+      (dolist (areas-only '(nil t))
+        (let* ((condition (duplicate-declaration-refusal duplicated :areas-only areas-only))
+               (twins (work:duplicate-declaration-occurrences condition))
+               (first (first twins)) (second (second twins)))
+          (assert (equal "authoring-listener-startup" (work:duplicate-declaration-topic condition)))
+          (assert (= 2 (length twins)))
+          (assert (not (eq first second)))
+          (assert (every (lambda (o) (equal "authoring-listener-startup" (work:topic-occurrence-topic o))) twins))
+          (assert (eq (work:topic-occurrence-snapshot first) (work:topic-occurrence-snapshot second)))
+          (assert (string= duplicated (work:topic-occurrence-snapshot first)))
+          (assert (< (work:topic-occurrence-ordinal first) (work:topic-occurrence-ordinal second)))
+          (assert (not (equal (work:topic-occurrence-element-range first)
+                              (work:topic-occurrence-element-range second))))
+          (assert (search "Start loopback" (declaration-text first #'work:topic-occurrence-element-range)))
+          (assert (search "declared again" (declaration-text second #'work:topic-occurrence-element-range)))
+          (dolist (o twins)
+            (assert (eq o (work:resolve-work-topic-occurrence o :current duplicated))))
+          (assert (search "declared 2 times" (princ-to-string condition))))))
+    ;; Departures from the declaration form are refused, not guessed.
+    (let ((anchor "data-topic=\"authoring-listener-startup\""))
+      (dolist (case (list (list (replace-once source anchor "DATA-TOPIC=\"authoring-listener-startup\"") "not in lower case")
+                          (list (replace-once source anchor "data-topic='authoring-listener-startup'") "not in double quotes")
+                          (list (replace-once source anchor "data-topic=authoring-listener-startup") "not in double quotes")
+                          (list (replace-once source anchor "data-topic=\"authoring-listener-startup&amp;\"") "entity reference")
+                          (list (replace-once source anchor (concatenate 'string anchor " data-topic=\"other\"")) "more than once")
+                          (list (replace-once source element (remove-substring element "</a>")) "not closed by </a> before <a>")
+                          (list (replace-once source element
+                                              (concatenate 'string "<A" (subseq element 2 (- (length element) 4)) "</A>"))
+                                "in the source")))
+        (destructuring-bind (html reason) case
+          (let ((condition (topic-source-refusal html)))
+            (assert (search reason (work:source-error-reason condition)) ()
+                    "Refusal ~S lacks ~S." (princ-to-string condition) reason)))))
+    ;; Recorded, not endorsed: FedWiki work-topic Items have item ids, but
+    ;; their Topics keep no declaration yet.
+    (assert (notany #'work:topic-source-occurrence
+                    (tm:topicmap-projection-topics-of
+                     (fedwiki-projection (fedwiki-fixture "work-breakdown") "work-breakdown"))))
+    (assert (equal pages (work-page-sources)))))
+
 ;;;; Change relation: a request, nothing more
 
 (defun with-fixture-requires-contract (source)
@@ -1598,8 +1745,9 @@ work items, only warranted relationships, and no architecture copied in."
   (check-inspect-relation-contract)
   (check-hand-shaped-traces)
   (check-work-relationship-occurrences)
+  (check-work-topic-occurrences)
   (check-relation-change-request)
   (check-fedwiki-work)
   (check-authoring-work)
-  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in).~%")
+  (format t "~&WORK-READING-PASS: complete projection integrity, Operations page link, pages, executable widget, D2 SVG, native page navigation, seven-area derived layout, informs relation contract (label, integrity, rename, contract text, retype one, uses, inspection), interactive TALA references, Inspect relation contract (novice/expert selection, one object, refusals, no effect), FedWiki-authored Work (the same projection as the HTML it was written from, contract integrity, consumers, requests from either occurrence form, duplicate statements told apart by item id; read side only), the current work map (seven areas unchanged, HyperDoc Authoring and its work items, warranted dependencies only, no architecture copied in), Work Topic declarations (one snapshot, the declaring page not the carrier, stale not relocated, a duplicate refused naming both declarations, the declaration form or a refusal).~%")
   t)

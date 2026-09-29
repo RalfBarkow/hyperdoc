@@ -19,6 +19,15 @@
            #:work-relationship-source-error #:source-error-position #:source-error-reason
            #:resolve-work-relationship-occurrence
            #:stale-work-relationship-occurrence #:stale-relationship-occurrence
+           #:work-topic #:topic-source-occurrence
+           #:work-topic-source-occurrence #:scan-work-topics
+           #:topic-occurrence-page #:topic-occurrence-snapshot
+           #:topic-occurrence-element-range #:topic-occurrence-start-tag-range
+           #:topic-occurrence-topic-range #:topic-occurrence-ordinal #:topic-occurrence-topic
+           #:work-topic-source-error #:resolve-work-topic-occurrence
+           #:stale-work-topic-occurrence #:stale-topic-occurrence
+           #:duplicate-work-topic-declaration #:duplicate-declaration-topic
+           #:duplicate-declaration-occurrences
            #:relation-change-request #:request-relation-change
            #:relation-change-operation #:relation-change-association
            #:relation-change-occurrence #:relation-change-observed-relation
@@ -144,8 +153,12 @@ which names ~D Topic~:P~@[ of kind~{ ~S~^,~}~]; exactly one Topic of kind ~
              (format stream "Work relationship source at character ~D: ~A"
                      (source-error-position condition) (source-error-reason condition)))))
 
+(defparameter *source-error* 'work-relationship-source-error
+  "The condition a Work source refusal signals, named for the authored form
+being read.")
+
 (defun %refuse-source (position format-control &rest arguments)
-  (error 'work-relationship-source-error
+  (error *source-error*
          :position position :reason (apply #'format nil format-control arguments)))
 
 (defclass work-relationship-source-occurrence ()
@@ -240,12 +253,44 @@ relationship <li>, NIL for any other <li>, or a refusal."
             (%refuse-source position "~A contains an entity reference" (first a))))
         entries))))
 
-(defun scan-work-relationships (snapshot page)
-  "Every authored Work relationship <li> in SNAPSHOT, in source order."
+(defun %scan-tags (snapshot start-tag end-tag)
+  "Read SNAPSHOT's markup in source order, calling START-TAG with the position,
+name, attributes and end of each start tag, and END-TAG with the positions of
+the < and > of each end tag. Comments and declarations are passed over; what
+no Work source accepts is refused."
   (dolist (tag '("<script" "<style" "<textarea" "<title" "<![CDATA["))
     (let ((position (search tag snapshot :test #'char-equal)))
-      (when position (%refuse-source position "~A is outside the Work relationship syntax" tag))))
-  (let ((length (length snapshot)) (i 0) (ordinal 0) (occurrences nil) (open nil))
+      (when position (%refuse-source position "~A is outside the Work source syntax" tag))))
+  (let ((length (length snapshot)) (i 0))
+    (loop
+      (let ((position (position #\< snapshot :start i)))
+        (unless position (return))
+        (cond
+          ((and (<= (+ position 4) length)
+                (string= "<!--" snapshot :start2 position :end2 (+ position 4)))
+           (let ((end (search "-->" snapshot :start2 (+ position 4))))
+             (unless end (%refuse-source position "unterminated comment"))
+             (setf i (+ end 3))))
+          ((and (< (1+ position) length) (member (char snapshot (1+ position)) '(#\/ #\! #\?)))
+           (let ((end (position #\> snapshot :start position)))
+             (unless end (%refuse-source position "unterminated tag"))
+             (when (char= #\/ (char snapshot (1+ position)))
+               (funcall end-tag position end))
+             (setf i (1+ end))))
+          ((and (< (1+ position) length) (alpha-char-p (char snapshot (1+ position))))
+           (multiple-value-bind (name attributes end) (%start-tag snapshot position)
+             (funcall start-tag position name attributes end)
+             (setf i end)))
+          (t (setf i (1+ position))))))))
+
+(defun %end-tag-p (snapshot position end name)
+  "Whether the end tag from POSITION to END closes NAME."
+  (string= (format nil "</~A" name)
+           (string-right-trim '(#\Space #\Tab #\Newline #\Return) (subseq snapshot position end))))
+
+(defun scan-work-relationships (snapshot page)
+  "Every authored Work relationship <li> in SNAPSHOT, in source order."
+  (let ((ordinal 0) (occurrences nil) (open nil))
     (flet ((close-open (end)
              (destructuring-bind (start tag-end relation-range entries) open
                (push (make-instance 'work-relationship-source-occurrence
@@ -259,37 +304,21 @@ relationship <li>, NIL for any other <li>, or a refusal."
                                     :relation (second (third entries)))
                      occurrences)
                (setf open nil))))
-      (loop
-        (let ((position (position #\< snapshot :start i)))
-          (unless position (return))
-          (cond
-            ((and (<= (+ position 4) length)
-                  (string= "<!--" snapshot :start2 position :end2 (+ position 4)))
-             (let ((end (search "-->" snapshot :start2 (+ position 4))))
-               (unless end (%refuse-source position "unterminated comment"))
-               (setf i (+ end 3))))
-            ((and (< (1+ position) length) (member (char snapshot (1+ position)) '(#\/ #\! #\?)))
-             (let ((end (position #\> snapshot :start position)))
-               (unless end (%refuse-source position "unterminated tag"))
-               (when (and open (string= "</li" (string-right-trim
-                                                 '(#\Space #\Tab #\Newline #\Return)
-                                                 (subseq snapshot position end))))
-                 (close-open (1+ end)))
-               (setf i (1+ end))))
-            ((and (< (1+ position) length) (alpha-char-p (char snapshot (1+ position))))
-             (multiple-value-bind (name attributes end) (%start-tag snapshot position)
-               (when (member name '("li" "ul" "ol") :test #'string-equal)
-                 (when open
-                   (%refuse-source (first open) "relationship <li> is not closed by </li> before ~A"
-                                   (format nil "<~A>" name)))
-                 (when (string= name "li")
-                   (let ((entries (%relationship-attributes position attributes)))
-                     (when entries
-                       (setf open (list position end
-                                        (cons (third (third entries)) (fourth (third entries)))
-                                        entries))))))
-               (setf i end)))
-            (t (setf i (1+ position))))))
+      (%scan-tags snapshot
+                  (lambda (position name attributes end)
+                    (when (member name '("li" "ul" "ol") :test #'string-equal)
+                      (when open
+                        (%refuse-source (first open) "relationship <li> is not closed by </li> before ~A"
+                                        (format nil "<~A>" name)))
+                      (when (string= name "li")
+                        (let ((entries (%relationship-attributes position attributes)))
+                          (when entries
+                            (setf open (list position end
+                                             (cons (third (third entries)) (fourth (third entries)))
+                                             entries)))))))
+                  (lambda (position end)
+                    (when (and open (%end-tag-p snapshot position end "li"))
+                      (close-open (1+ end)))))
       (when open (%refuse-source (first open) "relationship <li> is not closed by </li>")))
     (nreverse occurrences)))
 
@@ -349,6 +378,152 @@ STALE-WORK-RELATIONSHIP-OCCURRENCE. Nothing is relocated."
                                 (relationship-occurrence-relation occurrence)
                                 (relationship-occurrence-to occurrence))))
         (stale "its ranges no longer denote the recorded relationship"))
+      occurrence)))
+
+;;;; Work Topic source occurrences
+;;
+;; A projected Work Topic says what a Topic is; it does not say which
+;; authored <a data-topic> declared it. Four things stay apart: the Topic ID;
+;; the declaration, on the page being projected; the carrier page the
+;; declaration names in page=, which is the Topic's object; and any passage
+;; on the carrier that explains the Topic, which nothing here models. A Work
+;; Topic source occurrence names one declaration: the exact page source a
+;; projection read, the ranges of the <a> in it, and the range of its
+;; data-topic value. Those are the address. The ordinal and the recorded
+;; Topic ID are evidence, checked and never used to find a declaration
+;; again; label and carrier are read from the same bytes. A source that
+;; differs at all makes the occurrence stale.
+;;
+;; One Topic ID names one Topic in a projection, since Associations name
+;; their endpoints by it. Two declarations of one ID are therefore refused,
+;; naming both occurrences, rather than projected as two Topics.
+;;
+;; Accepted Work Topic declaration syntax, within the Work source syntax
+;; above:
+;;   - a declaration is an <a> start tag, tag name in lower case, carrying
+;;     data-topic exactly once, in lower case, its value in double quotes
+;;     with no & in it;
+;;   - it is closed by </a> before the next <a>; content between may
+;;     contain other tags.
+
+(define-condition work-topic-source-error (error)
+  ((position :initarg :position :reader source-error-position)
+   (reason :initarg :reason :reader source-error-reason))
+  (:report (lambda (condition stream)
+             (format stream "Work Topic declaration source at character ~D: ~A"
+                     (source-error-position condition) (source-error-reason condition)))))
+
+(defclass work-topic-source-occurrence ()
+  ((page :initarg :page :reader topic-occurrence-page)
+   (snapshot :initarg :snapshot :reader topic-occurrence-snapshot)
+   (element-range :initarg :element-range :reader topic-occurrence-element-range)
+   (start-tag-range :initarg :start-tag-range :reader topic-occurrence-start-tag-range)
+   (topic-range :initarg :topic-range :reader topic-occurrence-topic-range)
+   (ordinal :initarg :ordinal :reader topic-occurrence-ordinal)
+   (topic :initarg :topic :reader topic-occurrence-topic))
+  (:documentation "One authored Work Topic declaration <a> in one observed page
+source. PAGE is the page the declaration is on, not the carrier page it
+names. Ranges are half-open (START . END) character offsets into SNAPSHOT:
+the element, its start tag, and the data-topic value between its quotes.
+The ordinal and the recorded Topic ID are evidence, not an address."))
+
+(defmethod print-object ((occurrence work-topic-source-occurrence) stream)
+  (print-unreadable-object (occurrence stream :type t)
+    (format stream "~D ~A at ~S" (topic-occurrence-ordinal occurrence)
+            (topic-occurrence-topic occurrence) (topic-occurrence-element-range occurrence))))
+
+(defun %topic-attribute (position attributes)
+  "The data-topic attribute entry of a declaring <a>, NIL for any other <a>,
+or a refusal."
+  (let ((present (remove "data-topic" attributes :key #'first :test-not #'string-equal)))
+    (when present
+      (dolist (a present)
+        (unless (string= "data-topic" (first a))
+          (%refuse-source position "Topic attribute ~S is not in lower case" (first a))))
+      (when (rest present)
+        (%refuse-source position "data-topic appears more than once"))
+      (let ((entry (first present)))
+        (unless (eql #\" (fifth entry))
+          (%refuse-source position "data-topic is not in double quotes"))
+        (when (find #\& (second entry))
+          (%refuse-source position "data-topic contains an entity reference"))
+        entry))))
+
+(defun scan-work-topics (snapshot page)
+  "Every authored Work Topic declaration <a> in SNAPSHOT, in source order."
+  (let ((*source-error* 'work-topic-source-error) (ordinal 0) (occurrences nil) (open nil))
+    (%scan-tags snapshot
+                (lambda (position name attributes end)
+                  (when (string-equal name "a")
+                    (when open
+                      (%refuse-source (first open) "Topic declaration <a> is not closed by </a> before <a>"))
+                    (when (string= name "a")
+                      (let ((entry (%topic-attribute position attributes)))
+                        (when entry
+                          (setf open (list position end (cons (third entry) (fourth entry))
+                                           (second entry))))))))
+                (lambda (position end)
+                  (when (and open (%end-tag-p snapshot position end "a"))
+                    (destructuring-bind (start tag-end topic-range topic) open
+                      (push (make-instance 'work-topic-source-occurrence
+                                           :page page :snapshot snapshot
+                                           :element-range (cons start (1+ end))
+                                           :start-tag-range (cons start tag-end)
+                                           :topic-range topic-range
+                                           :ordinal (incf ordinal) :topic topic)
+                            occurrences))
+                    (setf open nil))))
+    (when open (%refuse-source (first open) "Topic declaration <a> is not closed by </a>"))
+    (nreverse occurrences)))
+
+(defun %align-topics (occurrences nodes snapshot)
+  "Refuse unless the scanned OCCURRENCES and plump's declaring NODES agree,
+ordinal by ordinal. Nothing is skipped, searched for or reordered."
+  (let ((*source-error* 'work-topic-source-error))
+    (unless (= (length occurrences) (length nodes))
+      (%refuse-source (length snapshot) "~D Topic declarations in the source, ~D in the parsed page"
+                      (length occurrences) (length nodes)))
+    (loop for occurrence in occurrences for node in nodes
+          for parsed = (plump:attribute node "data-topic")
+          unless (equal parsed (topic-occurrence-topic occurrence))
+            do (%refuse-source (car (topic-occurrence-element-range occurrence))
+                               "Topic declaration ~D reads ~S in the source but ~S when parsed"
+                               (topic-occurrence-ordinal occurrence)
+                               (topic-occurrence-topic occurrence) parsed))))
+
+(define-condition stale-work-topic-occurrence (error)
+  ((occurrence :initarg :occurrence :reader stale-topic-occurrence)
+   (reason :initarg :reason :reader stale-topic-reason))
+  (:report (lambda (condition stream)
+             (format stream "Stale Work Topic occurrence ~A: ~A. Observe its page again."
+                     (stale-topic-occurrence condition)
+                     (stale-topic-reason condition)))))
+
+(defun resolve-work-topic-occurrence
+    (occurrence &key (current (uiop:read-file-string
+                               (hyperdoc:file-of (topic-occurrence-page occurrence)))))
+  "OCCURRENCE, if CURRENT -- by default the declaring page's source now -- is
+exactly its snapshot and its ranges still denote the recorded declaration.
+Otherwise STALE-WORK-TOPIC-OCCURRENCE. Nothing is relocated, by Topic ID or
+otherwise."
+  (flet ((stale (reason) (error 'stale-work-topic-occurrence
+                                :occurrence occurrence :reason reason)))
+    (unless (string= current (topic-occurrence-snapshot occurrence))
+      (stale "the page source is not the recorded snapshot"))
+    (let* ((element (topic-occurrence-element-range occurrence))
+           (tag (topic-occurrence-start-tag-range occurrence))
+           (topic (topic-occurrence-topic-range occurrence))
+           (here (find (car element) (scan-work-topics current (topic-occurrence-page occurrence))
+                       :key (lambda (o) (car (topic-occurrence-element-range o))))))
+      (unless (and here
+                   (equal element (topic-occurrence-element-range here))
+                   (equal tag (topic-occurrence-start-tag-range here))
+                   (equal topic (topic-occurrence-topic-range here))
+                   (<= (car tag) (car topic) (cdr topic) (cdr tag) (cdr element))
+                   (string= (topic-occurrence-topic occurrence) current
+                            :start2 (car topic) :end2 (cdr topic))
+                   (equal (topic-occurrence-topic here) (topic-occurrence-topic occurrence)))
+        (stale "its ranges no longer denote the recorded declaration"))
       occurrence)))
 
 ;;;; FedWiki Work item observations
@@ -464,12 +639,43 @@ relocated."
 ;; ID, and TALA refuses such a projection. That is a question of Association
 ;; identity, not of either representation, and it is not decided here.
 
-(defun %work-topic (index id label kind status object)
+(defclass work-topic (tm:topicmap-topic)
+  ((source-occurrence :initarg :source-occurrence :initform nil
+                      :reader topic-source-occurrence))
+  (:documentation "A Work Topic and the authored declaration it was projected
+from, where its representation keeps one. The declaration is on the page
+projected; the Topic's object is the carrier page the declaration names."))
+
+(defun %work-topic (index id label kind status object &optional source-occurrence)
   "The Work Topic authored INDEXth among a page's Topics."
-  (tm:make-topicmap-topic
-   :id id :type :work-page :label label :object object
-   :view-properties (list :x (* 285 (mod index 4)) :y (* 120 (floor index 4))
-                          :visible t :kind kind :status status)))
+  (check-type id string)
+  (check-type label string)
+  (make-instance 'work-topic
+                 :id id :type :work-page :label label :object object
+                 :source-occurrence source-occurrence
+                 :view-properties (list :x (* 285 (mod index 4)) :y (* 120 (floor index 4))
+                                        :visible t :kind kind :status status)))
+
+(define-condition duplicate-work-topic-declaration (error)
+  ((topic :initarg :topic :reader duplicate-declaration-topic)
+   (occurrences :initarg :occurrences :reader duplicate-declaration-occurrences))
+  (:report (lambda (condition stream)
+             (format stream "Topic ID ~S is declared ~D times: ~{~A~^, ~}. One Topic ID names one Topic."
+                     (duplicate-declaration-topic condition)
+                     (length (duplicate-declaration-occurrences condition))
+                     (duplicate-declaration-occurrences condition)))))
+
+(defun %refuse-duplicate-declarations (topics)
+  "Refuse a Topic ID that two declared TOPICS share, naming every declaration of it."
+  (loop for (topic . rest) on topics
+        for id = (tm:topicmap-topic-id-of topic)
+        when (and (topic-source-occurrence topic)
+                  (find id rest :key #'tm:topicmap-topic-id-of :test #'string=))
+          do (error 'duplicate-work-topic-declaration
+                    :topic id
+                    :occurrences (loop for other in topics
+                                       when (string= id (tm:topicmap-topic-id-of other))
+                                         collect (topic-source-occurrence other)))))
 
 (defun %work-projection (all-topics statements &key source areas-only)
   "The Work projection of ALL-TOPICS and STATEMENTS, each (FROM RELATION TO
@@ -500,6 +706,8 @@ ALL-TOPICS either way."
                                    (when (relation-contract-reference-p relation)
                                      (list :relation-contract
                                            (resolve-relation-contract relation all-topics id))))))))
+    ;; Checked against every declaration, as contract references are.
+    (%refuse-duplicate-declarations all-topics)
     (tm:make-topicmap-projection :source source :topics topics
                                  :associations associations)))
 
@@ -534,7 +742,8 @@ given."
                                          (find-page #'work-page))
   "Project Work Breakdown HTML (a pathname, read once, or a string). FIND-PAGE
 maps a page title and HyperBook ID to the Topic's object. The one source
-string is parsed, scanned for relationship occurrences and kept by each."
+string is parsed, scanned for Topic declarations and relationship
+occurrences, and kept by each."
   (let* ((snapshot (if (stringp html) html (uiop:read-file-string html)))
          ;; EXPR evaluation can inherit printer-only page tag dispatchers.
          ;; Read the authored anchors with the HTML parser, independently of that context.
@@ -544,13 +753,17 @@ string is parsed, scanned for relationship occurrences and kept by each."
                                             (plump:get-elements-by-tag-name dom "li")))
          (occurrences (let ((occurrences (scan-work-relationships snapshot source)))
                         (%align-relationships occurrences relationship-nodes snapshot)
-                        occurrences)))
+                        occurrences))
+         (topic-nodes (remove-if-not (lambda (node) (plump:attribute node "data-topic"))
+                                     (plump:get-elements-by-tag-name dom "a")))
+         (declarations (let ((declarations (scan-work-topics snapshot source)))
+                         (%align-topics declarations topic-nodes snapshot)
+                         declarations)))
     (%work-projection
      ;; Every authored Topic, including those AREAS-ONLY leaves out, so a
      ;; contract reference is checked against the whole page either way.
-     (loop for node in (remove-if-not
-                        (lambda (node) (plump:attribute node "data-topic"))
-                        (plump:get-elements-by-tag-name dom "a"))
+     (loop for node in topic-nodes
+           for declaration in declarations
            for index from 0
            collect (%work-topic index (plump:attribute node "data-topic")
                                 (plump:decode-entities (plump:text node))
@@ -558,7 +771,8 @@ string is parsed, scanned for relationship occurrences and kept by each."
                                 (plump:attribute node "data-status")
                                 (funcall find-page (plump:attribute node "page")
                                          (or (plump:attribute node "hyperbook")
-                                             "dreyeck/work/reading"))))
+                                             "dreyeck/work/reading"))
+                                declaration))
      (loop for node in relationship-nodes
            for occurrence in occurrences
            collect (list (plump:attribute node "data-from")
