@@ -23,7 +23,8 @@
     "Reading Riesbeck's Lisp Critic"
     "From Riesbeck Run to HyperDoc Critique"
     "Anatomy of a Critique"
-    "Where the Source Lives"))
+    "Where the Source Lives"
+    "Reading a Recorded Critique"))
 
 (defun check (value control &rest arguments)
   (unless value

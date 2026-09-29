@@ -1,0 +1,109 @@
+{
+  "example-evaluation-version": 1,
+  "occurrence": {
+    "hyperdoc": "dreyeck/workflow/reading",
+    "code-file": "workflow-reading.lisp",
+    "form-key": "(:EXAMPLE READING-PLAN)",
+    "range": [
+      326,
+      1049
+    ],
+    "text": "(HYPERDOC:DEFEXAMPLE READING-PLAN\n  (LET* ((COMPONENT\n          (ASDF/COMPONENT:FIND-COMPONENT\n           (ASDF/SYSTEM:FIND-SYSTEM \"dreyeck/workflow\")\n           \"dreyeck/src/workflow-model\"))\n         (FORM\n          (COPY-TREE\n           (FIND '(:DEFINITION WF:PLAN-STATUS)\n                 (WF:SOURCE-FORMS\n                  (ASDF/COMPONENT:COMPONENT-PATHNAME COMPONENT))\n                 :KEY #'WF:FORM-KEY :TEST #'EQUAL))))\n    (ASSERT FORM)\n    (SETF (CDDDR FORM)\n            (CONS \"Read-only example of a proposed documentation change.\"\n                  (CDDDR FORM)))\n    (WF:PLAN-DEFINITION \"dreyeck/workflow\" \"dreyeck/src/workflow-model\"\n                        'WF:PLAN-STATUS FORM '(FBOUNDP 'WF:PLAN-STATUS))))",
+    "source-sha256": "ae53416ad8851aab608894ecd089640c0da99cbdb380af9c7da5362184217544"
+  },
+  "run": {
+    "snapshot-version": 1,
+    "evaluation": {
+      "run-label": "critic-rule-run-366",
+      "label-scope": "the image that produced this snapshot",
+      "status": "COMPLETED",
+      "started-at": 3999669775,
+      "finished-at": 3999669776,
+      "input": "(DEFEXAMPLE READING-PLAN\n  (LET* ((COMPONENT\n          (FIND-COMPONENT (FIND-SYSTEM dreyeck/workflow)\n                          dreyeck/src/workflow-model))\n         (FORM\n          (COPY-TREE\n           (FIND '(DEFINITION PLAN-STATUS)\n                 (SOURCE-FORMS (COMPONENT-PATHNAME COMPONENT)) KEY #'FORM-KEY\n                 TEST #'EQUAL))))\n    (ASSERT FORM)\n    (SETF (CDDDR FORM)\n            (CONS Read-only example of a proposed documentation change.\n                  (CDDDR FORM)))\n    (PLAN-DEFINITION dreyeck/workflow dreyeck/src/workflow-model 'PLAN-STATUS\n                     FORM '(FBOUNDP 'PLAN-STATUS))))",
+      "invocation": "(FUNCTION lisp-critic:apply-critique-rule RULE SETF-PUSH FORM\n (DEFEXAMPLE READING-PLAN\n   (LET* ((COMPONENT\n           (FIND-COMPONENT (FIND-SYSTEM dreyeck/workflow)\n                           dreyeck/src/workflow-model))\n          (FORM\n           (COPY-TREE\n            (FIND '(DEFINITION PLAN-STATUS)\n                  (SOURCE-FORMS (COMPONENT-PATHNAME COMPONENT)) KEY #'FORM-KEY\n                  TEST #'EQUAL))))\n     (ASSERT FORM)\n     (SETF (CDDDR FORM)\n             (CONS Read-only example of a proposed documentation change.\n                   (CDDDR FORM)))\n     (PLAN-DEFINITION dreyeck/workflow dreyeck/src/workflow-model 'PLAN-STATUS\n                      FORM '(FBOUNDP 'PLAN-STATUS)))))",
+      "notes": [
+        "STRUCTURED-ENGINE-FINDINGS",
+        "TARGET-NOT-EVALUATED"
+      ],
+      "raw-output": "----------------------------------------------------------------------\nInstead of (SETF (CDDDR DREYECK/WORKFLOW/READING::FORM) (CONS ...)),\nuse PUSH.\n----------------------------------------------------------------------\n",
+      "error-output": "",
+      "condition": null
+    },
+    "rule": {
+      "name": "SETF-PUSH",
+      "pattern": "(SETF (? X) (CONS (? Y) (? X)))",
+      "response": [
+        "Instead of (SETF ~S (CONS ...)), use PUSH.",
+        "((? X))"
+      ],
+      "system": "lisp-critic"
+    },
+    "rule-source": {
+      "path": "vendor/lisp-critic/lisp-rules.lisp",
+      "relative-to": "the page's asset root",
+      "byte-size": 20474,
+      "digest": null
+    },
+    "provenance": {
+      "engine": "Riesbeck/Beane",
+      "source-binding": "riesbeck-beane-lisp-critic"
+    },
+    "runtime": {
+      "implementation": "SBCL",
+      "version": "2.4.10",
+      "written-at": 3999669776
+    },
+    "critiques": [
+      {
+        "explanation": "Instead of (SETF (CDDDR DREYECK/WORKFLOW/READING::FORM) (CONS ...)), use PUSH.",
+        "evidence": "(SETF-PUSH\n ((Y . Read-only example of a proposed documentation change.) (X CDDDR FORM))\n (SETF (CDDDR FORM)\n         (CONS Read-only example of a proposed documentation change.\n               (CDDDR FORM))))"
+      }
+    ]
+  },
+  "matches": [
+    {
+      "matched": "(SETF (CDDDR FORM)\n        (CONS \"Read-only example of a proposed documentation change.\"\n              (CDDDR FORM)))",
+      "path": [
+        2,
+        3
+      ]
+    }
+  ],
+  "engine": {
+    "edition": "Zach Beane's ASDF-loadable archive of Chris Riesbeck's Lisp Critic, dated 2004-05-06 (https://xach.com/lisp/lisp-critic.tar.gz), with the one local change its source station's PATCH-NOTES.md records: VAR-PREFIX in extend-match.lisp is a DEFPARAMETER.",
+    "files": [
+      {
+        "file": "README",
+        "sha256": "7961ca3383ecafa5206f1d92fa12a7fb5fba0b3068e31d48875f8047635633f0"
+      },
+      {
+        "file": "lisp-critic.asd",
+        "sha256": "fef5d126603ce1fdc992941dbd8fd103e1dd0b2a21f79bef7dcb24fbc5a5768a"
+      },
+      {
+        "file": "tables.lisp",
+        "sha256": "7b153d761a7ac5dd6004cbe4bec681a185a797d39d6ea814d65efc9cd51c4035"
+      },
+      {
+        "file": "write-wrap.lisp",
+        "sha256": "ef6bdbd4d0d536897663777598b43f37eca37d9283846fc79b3a93778202b388"
+      },
+      {
+        "file": "extend-match.lisp",
+        "sha256": "5072e90450602c53e648cd87c8f2c6578998c7f35dbc93c08909e2ec4b1722e1"
+      },
+      {
+        "file": "lisp-critic.lisp",
+        "sha256": "2fe59ca5a1a223940d3e875439e17b1e962ad5ad6cc9a049c52378d0afbbed1c"
+      },
+      {
+        "file": "lisp-rules.lisp",
+        "sha256": "ca19b5129743c2f9fc10ab99d7f17a542ff10ae8896fb653f34c626fa8310411"
+      }
+    ]
+  },
+  "recording": {
+    "context": "A trusted development runtime, in which the 2004 engine's source station was reachable and running page-attached code was permitted.",
+    "recorded-at": 3999669776
+  }
+}

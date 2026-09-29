@@ -1,0 +1,101 @@
+<h1>Reading a Recorded Critique</h1>
+
+<in-package>dreyeck/lisp-critic/recorded</in-package>
+
+<p>
+Two critiques of real examples in this repository, both from the page
+<i>Executable workflow reading</i>. Each starts at an exact
+<code>DEFEXAMPLE</code> in its source and leads to the Evaluation Record the
+Riesbeck/Beane engine produced for it, the Critique, the rule, what the rule
+matched, its recommendation, and the engine it came from.
+</p>
+
+<pre>
+DEFEXAMPLE source occurrence
+Evaluation Record
+Critique
+Rule, match, recommendation
+Engine and recording provenance
+</pre>
+
+<h2>Recorded, not live</h2>
+
+<p>
+These evaluations were produced with the 2004 Riesbeck/Beane Lisp Critic in a
+trusted development runtime. This server does not run that engine. It is
+loaded as code that arrived with a page, which a served runtime does not run,
+and its licence for redistribution has not been established. What the server
+reads is the record of a run.
+</p>
+
+<p>
+Recorded is not written by hand. Every recommendation below is the text the
+engine produced. The record names the example by page, form, character range
+and a digest of the source it was read from, and the engine by the digests of
+its files. When a page is opened, the example is observed again in this
+server's own source. That says whether the record is still about the example
+as it reads now, and where in it the rule matched.
+</p>
+
+<h2>A recommendation worth taking</h2>
+
+<p>
+<code>READING-PLAN</code> adds a documentation string to a copied definition
+with <code>(setf (cdddr form) (cons "…" (cdddr form)))</code>. The rule
+<code>SETF-PUSH</code> matches it.
+</p>
+
+<p>
+  <a expr="(setf-push-recorded-example)" view="Recorded evaluation">
+    Open the recorded SETF-PUSH evaluation
+  </a>
+</p>
+
+<source-of-function>setf-push-recorded-example</source-of-function>
+
+<h2>A match to read critically</h2>
+
+<p>
+<code>READING-OUTSTANDING-CHANGES</code> compiles
+<code>(lambda (x) (+ x 1))</code> from quoted data, then redefines the same
+function as <code>(lambda (x) (+ x 2))</code>, to show a change that exists
+only in the running image. The rule <code>X-PLUS-1</code> matches
+<code>(+ x 1)</code>.
+</p>
+
+<p>
+  <a expr="(x-plus-1-recorded-example)" view="Recorded evaluation">
+    Open the recorded X-PLUS-1 evaluation
+  </a>
+</p>
+
+<source-of-function>x-plus-1-recorded-example</source-of-function>
+
+<p>
+The match is inside a <code>QUOTE</code>. The rule reads the example's source
+as code throughout; it cannot ask what the quoted list is for, or why its
+<code>1</code> sits beside a later <code>2</code>. Should the example follow
+the recommendation? That is a judgement for its reader, not a fact the rule
+has established.
+</p>
+
+<h2>What a Critique is</h2>
+
+<p>
+A Critique is a rule's finding, with the evidence it rests on. It is not a
+defect report. A match is not a mistake, and a recommendation is not a change
+anyone has made. Keeping the rule, the match and the engine inspectable is
+what lets a reader decide what to do with it.
+</p>
+
+<p>
+  <a page="Anatomy of a Critique">
+    Anatomy of a Critique — one object, read part by part
+  </a>
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>

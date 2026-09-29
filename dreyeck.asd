@@ -1648,9 +1648,23 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/lisp-critic/examples/tests :run-tests)))
 
+(asdf:defsystem "dreyeck/lisp-critic/recorded"
+  :description "Critic evaluations of DEFEXAMPLEs, recorded where the engine may run and read where it may not"
+  :depends-on ("dreyeck/lisp-critic/examples" "dreyeck/workflow/reading" "hyperdoc" "ironclad" "shasht")
+  :components ((:file "dreyeck/src/lisp-critic-recorded"))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/recorded/tests"))))
+
+(asdf:defsystem "dreyeck/lisp-critic/recorded/tests"
+  :depends-on ("dreyeck/lisp-critic/recorded")
+  :components ((:file "dreyeck/tests/lisp-critic-recorded"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/recorded/tests :run-tests)))
+
 (asdf:defsystem "dreyeck/lisp-critic/reading"
   :description "Source-backed reading of the Lisp Critic genealogy"
   :depends-on ("dreyeck/hyperdoc" "dreyeck/inspector/lisp-critic"
+               "dreyeck/lisp-critic/recorded"
                "dreyeck/inspector/topicmap" "dreyeck/fedwiki-assets"
                "dreyeck/asdf-source"
                "dreyeck/page-attached-workspace-reconstruction"
