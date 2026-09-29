@@ -27,6 +27,14 @@
 ;;;;                             file is the verified candidate, and the page
 ;;;;                             object reloads to show the new status.
 ;;;;
+;;;; EXECUTE-WORK-STATUS-CHANGE carries one request through these steps, and
+;;;; only in an image holding the pinned authoring environment, the same
+;;;; capability the Lisp source writers require. It adds no editing of its
+;;;; own. In such an image, a Work Topic declared in HTML, and a Workspace
+;;;; whose Point is one, show a Change work status view whose actions start
+;;;; that path and open its outcome. Neither the view nor the executor exists
+;;;; in an image that has not loaded this system.
+;;;;
 ;;;; Staleness is the whole snapshot's, as for every Work source occurrence:
 ;;;; any difference refuses, and nothing is relocated by Topic ID. A plan
 ;;;; applied once has changed its own snapshot, so it cannot be applied
@@ -46,7 +54,12 @@
            #:work-status-change-plan-refused-cause
            #:work-status-change-apply-refused #:work-status-change-apply-refused-reason
            #:work-status-change-apply-refused-cause
-           #:work-status-change-unverified #:work-status-change-unverified-reason))
+           #:work-status-change-unverified #:work-status-change-unverified-reason
+           #:execute-work-status-change #:work-status-change-outcome
+           #:work-status-change-outcome-request #:work-status-change-outcome-plan
+           #:work-status-change-outcome-status #:work-status-change-outcome-cause
+           #:work-status-change-outcome-topic
+           #:work-status-change-execution-refused #:work-status-change-execution-refused-reason))
 
 (in-package #:dreyeck/work/authoring)
 
@@ -300,6 +313,149 @@ WORK-STATUS-CHANGE-UNVERIFIED having installed the verified candidate."
         (%replace-source path snapshot candidate #'refuse)
         (%verify-installed plan candidate)
         topic))))
+
+;;;; Executing a request, and where an Inspector starts it
+
+(define-condition work-status-change-execution-refused (error)
+  ((request :initarg :request :reader refused-execution-request)
+   (reason :initarg :reason :reader work-status-change-execution-refused-reason))
+  (:report (lambda (condition stream)
+             (format stream "Work status change not executed: ~A"
+                     (work-status-change-execution-refused-reason condition))))
+  (:documentation "Nothing was planned and nothing was written."))
+
+(defclass work-status-change-outcome ()
+  ((request :initarg :request :reader work-status-change-outcome-request)
+   (plan :initarg :plan :initform nil :reader work-status-change-outcome-plan)
+   (status :initarg :status :reader work-status-change-outcome-status)
+   (cause :initarg :cause :initform nil :reader work-status-change-outcome-cause)
+   (topic :initarg :topic :initform nil :reader work-status-change-outcome-topic))
+  (:documentation "What executing one work status change request came to:
+STATUS is :APPLIED, :REFUSED or :UNVERIFIED. PLAN is NIL if execution stopped
+before planning. CAUSE is the refusal or the unverified condition. TOPIC, once
+applied, is the Work Topic as the written page now declares it."))
+
+(defmethod print-object ((outcome work-status-change-outcome) stream)
+  (print-unreadable-object (outcome stream :type t)
+    (format stream "~A ~A" (tm:topicmap-topic-id-of
+                            (work:work-status-change-topic (work-status-change-outcome-request outcome)))
+            (work-status-change-outcome-status outcome))))
+
+(defun execute-work-status-change (request environment)
+  "Carry REQUEST through the authoring contract: plan it, then apply the plan,
+if ENVIRONMENT is the pinned authoring environment this image was given.
+Returns a WORK-STATUS-CHANGE-OUTCOME in every case. Adds no editing of its
+own: planning, applying and verifying are the existing steps."
+  (flet ((outcome (&rest initargs)
+           (apply #'make-instance 'work-status-change-outcome :request request initargs)))
+    (unless (typep environment 'dreyeck/workflow/authoring::authoring-environment)
+      (return-from execute-work-status-change
+        (outcome :status :refused
+                 :cause (make-condition 'work-status-change-execution-refused
+                                        :request request
+                                        :reason "there is no authoring environment: the pinned authoring capability is absent"))))
+    (let ((plan (handler-case (plan-work-status-change request)
+                  (work-status-change-plan-refused (condition)
+                    (return-from execute-work-status-change
+                      (outcome :status :refused :cause condition))))))
+      (handler-case (outcome :status :applied :plan plan :topic (apply-work-status-change plan))
+        (work-status-change-apply-refused (condition)
+          (outcome :status :refused :plan plan :cause condition))
+        (work-status-change-unverified (condition)
+          (outcome :status :unverified :plan plan :cause condition))))))
+
+(defun %status-choices (topic)
+  "The statuses declared elsewhere on TOPIC's declaring page, in page order,
+other than its own. An affordance of the view only: a value observed on the
+page is merely a value to propose. It does not make a change permitted or
+recommended, or part of any lifecycle."
+  (let* ((occurrence (work:topic-source-occurrence topic))
+         (own (getf (tm:topicmap-topic-view-properties-of topic) :status))
+         (projection (work:project-work-breakdown (work:topic-occurrence-snapshot occurrence)
+                                                  :source (work:topic-occurrence-page occurrence))))
+    (remove own (remove-duplicates
+                 (remove nil (mapcar (lambda (other)
+                                       (getf (tm:topicmap-topic-view-properties-of other) :status))
+                                     (tm:topicmap-projection-topics-of projection)))
+                 :test #'equal :from-end t)
+            :test #'equal)))
+
+(defun %initiate (topic proposed)
+  "What pressing a status action does: make the request, execute it with this
+image's authoring environment, and return the outcome -- or the refusal, if
+no request can be made."
+  (handler-case
+      (execute-work-status-change (work:request-work-status-change topic proposed)
+                                  (handler-case (dreyeck/workflow/authoring:make-authoring-environment)
+                                    (error () nil)))
+    (work:work-status-change-refused (condition) condition)))
+
+(defun %declared-work-topic-p (topic)
+  (and (typep topic 'work:work-topic) (work:topic-source-occurrence topic) t))
+
+(defun %render-status-actions (topic)
+  (let* ((occurrence (work:topic-source-occurrence topic))
+         (page (work:topic-occurrence-page occurrence))
+         (status (getf (tm:topicmap-topic-view-properties-of topic) :status))
+         (choices (%status-choices topic)))
+    (views:html
+      (:table :class "inspector-table"
+        (:tr (:td "Work Topic") (:td (views:object-ref topic :display (tm:topicmap-topic-id-of topic))))
+        (:tr (:td "Declaring page")
+             (:td (if (typep page 'hyperbook:page)
+                      (views:object-ref page)
+                      (views:html (:tt (views:esc (prin1-to-string page)))))))
+        (:tr (:td "Work status now") (:td (:tt (views:esc (or status "none stated"))))))
+      (:p "Each value below occurs elsewhere on the declaring page. Offering one does not mean the change is permitted, recommended, or part of a lifecycle.")
+      (if choices
+          (views:html
+            (:ul
+             (dolist (choice choices)
+               (views:html
+                 (:li (views:eval-button (views:esc (format nil "Change work status to ~S" choice))
+                                         (views:thunk (%initiate topic choice))))))))
+          (views:html (:p "No other status occurs on the declaring page.")))
+      (:p "An action makes a request and a plan, applies the plan only in an image holding the pinned authoring environment, and opens the outcome."))))
+
+(views:defview work-topic-status-actions (topic work:work-topic)
+  (when (%declared-work-topic-p topic)
+    (views:html-view :title "Change work status" :priority 2
+      (%render-status-actions topic))))
+
+(views:defview workspace-status-actions (workspace tm:topicmap-workspace)
+  (let ((topic (tm:topicmap-workspace-current-topic workspace)))
+    (when (%declared-work-topic-p topic)
+      (views:html-view :title "Change work status" :priority 5
+        (%render-status-actions topic)))))
+
+(views:defview work-status-change-outcome-overview (outcome work-status-change-outcome)
+  (views:html-view :title "Work status change outcome" :priority 1
+    (let* ((request (work-status-change-outcome-request outcome))
+           (plan (work-status-change-outcome-plan outcome))
+           (cause (work-status-change-outcome-cause outcome))
+           (topic (work-status-change-outcome-topic outcome))
+           (page (%declaring-page request)))
+      (views:html
+        (:table :class "inspector-table"
+          (:tr (:td "Operation")
+               (:td (:tt (views:esc (dreyeck/gesture-binding-witness:semantic-operation-identity-id
+                                     (work:work-status-change-operation request))))))
+          (:tr (:td "Work Topic")
+               (:td (views:object-ref (work:work-status-change-topic request)
+                                      :display (tm:topicmap-topic-id-of (work:work-status-change-topic request)))))
+          (:tr (:td "Request") (:td (views:object-ref request)))
+          (:tr (:td "Plan") (:td (if plan (views:object-ref plan) (views:html "none: execution stopped before planning"))))
+          (:tr (:td "Outcome") (:td (:tt (views:esc (string-downcase (symbol-name (work-status-change-outcome-status outcome)))))))
+          (:tr (:td "Cause") (:td (if cause (views:object-ref cause) (views:html "none"))))
+          (:tr (:td "Source authority")
+               (:td (if (typep page 'hyperbook:page)
+                        (views:html (views:object-ref page) " " (:tt (views:esc (namestring (hyperdoc:file-of page)))))
+                        (views:html (:tt (views:esc (prin1-to-string page)))))))
+          (:tr (:td "Work Topic now")
+               (:td (if topic
+                        (views:html (views:object-ref topic :display (tm:topicmap-topic-id-of topic))
+                                    " " (:tt (views:esc (getf (tm:topicmap-topic-view-properties-of topic) :status))))
+                        (views:html "unchanged")))))))))
 
 (views:defview work-status-change-plan-overview (plan work-status-change-plan)
   (views:html-view :title "Work status change plan" :priority 1

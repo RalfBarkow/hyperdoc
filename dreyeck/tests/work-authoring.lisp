@@ -232,6 +232,105 @@ projection show exactly the intended change, and it cannot be applied again."
     ;; The repository's own pages were never written.
     (assert (equal pages (work-page-sources)))))
 
+(defun %view (object title)
+  (let ((view (find title (views:all-views object) :key #'views:view-title :test #'equal)))
+    (when view (views:view-html view))
+    view))
+
+(defun %buttons (view)
+  "Each eval button of VIEW as (LABEL . THUNK), read from its rendered HTML."
+  (let ((html (views:view-html view)))
+    (loop for (id . thunk) in (views:view-references view)
+          when (eql 0 (search "eval-" id))
+            collect (let* ((start (+ (search (format nil "id='~A'" id) html) (length id) 6))
+                           (open (1+ (position #\> html :start start)))
+                           (close (search "</button>" html :start2 open)))
+                      (cons (plump:decode-entities (subseq html open close)) thunk)))))
+
+(defun %no-actions-p (view)
+  (notany (lambda (entry) (or (eql 0 (search "action-" (car entry))) (eql 0 (search "eval-" (car entry)))))
+          (views:view-references view)))
+
+(defun check-authoring-circle (page path)
+  "From a Work Topic at a Workspace Point, in an image holding the pinned
+authoring environment: the Change work status view offers values observed on
+the page, one action carries the request through plan and apply, and request,
+plan, source, reloaded page and projected Topic stay inspectably connected."
+  (let* ((pages (work-page-sources))
+         (source (%read path))
+         (projection (%project page path))
+         (topic (tm:topicmap-projection-topic-by-id projection "hyperdoc-page-authoring"))
+         (workspace (tm:make-topicmap-workspace projection "hyperdoc-page-authoring"))
+         (point (copy-seq (tm:topicmap-workspace-point-of workspace)))
+         (view (%view workspace "Change work status"))
+         (html (views:view-html view))
+         (buttons (%buttons view)))
+    ;; The Workspace and the Topic itself offer the same actions.
+    (assert view)
+    (assert (equal (mapcar #'car buttons) (mapcar #'car (%buttons (%view topic "Change work status")))))
+    ;; Offered values are values observed on the page, not a lifecycle.
+    (assert (member "Change work status to \"in progress\"" (mapcar #'car buttons) :test #'equal))
+    (assert (notany (lambda (label) (search "\"open\"" label)) (mapcar #'car buttons)))
+    (assert (= (length buttons) (length (remove-duplicates (mapcar #'car buttons) :test #'equal))))
+    (dolist (text '("allowed" "valid transition" "Allowed" "Valid transition"))
+      (assert (null (search text html)) () "The action view says ~S." text))
+    (assert (search "does not mean the change is permitted, recommended, or part of a lifecycle" html))
+    (assert (member topic (mapcar #'cdr (views:view-references view)) :test #'eq))
+    ;; Without the pinned authoring environment: refused, no plan, no write.
+    (let ((outcome (a:execute-work-status-change (work:request-work-status-change topic "in progress") nil)))
+      (assert (eq :refused (a:work-status-change-outcome-status outcome)))
+      (assert (null (a:work-status-change-outcome-plan outcome)))
+      (assert (typep (a:work-status-change-outcome-cause outcome) 'a:work-status-change-execution-refused))
+      (assert (string= source (%read path))))
+    ;; The action: request, plan, authorised apply, and the outcome to open.
+    (let* ((outcome (views:eval-thunk (cdr (assoc "Change work status to \"in progress\"" buttons :test #'equal))))
+           (request (a:work-status-change-outcome-request outcome))
+           (plan (a:work-status-change-outcome-plan outcome))
+           (now (a:work-status-change-outcome-topic outcome)))
+      (assert (typep outcome 'a:work-status-change-outcome))
+      (assert (eq :applied (a:work-status-change-outcome-status outcome)))
+      (assert (null (a:work-status-change-outcome-cause outcome)))
+      (assert (eq topic (work:work-status-change-topic request)))
+      (assert (eq (work:topic-source-occurrence topic) (work:work-status-change-occurrence request)))
+      (assert (equal "open" (work:work-status-change-observed-status request)))
+      (assert (equal "in progress" (work:work-status-change-proposed-status request)))
+      (assert (eq request (a:work-status-change-plan-request plan)))
+      ;; The source changed, the same page object shows it, and the Topic
+      ;; read from the written page has the new status.
+      (assert (not (string= source (%read path))))
+      (assert (equal "in progress" (%status (%project page path) "hyperdoc-page-authoring")))
+      (assert (equal "hyperdoc-page-authoring" (tm:topicmap-topic-id-of now)))
+      (assert (equal "in progress" (getf (tm:topicmap-topic-view-properties-of now) :status)))
+      (assert (eq page (work:topic-occurrence-page (work:topic-source-occurrence now))))
+      (let ((anchor (find "hyperdoc-page-authoring" (plump:get-elements-by-tag-name (hyperbook:dom-of page) "a")
+                          :key (lambda (node) (plump:attribute node "data-topic")) :test #'equal)))
+        (assert (equal "in progress" (plump:attribute anchor "data-status"))))
+      ;; Request and plan are only inspected; the outcome connects them all.
+      (assert (%no-actions-p (%view request "Work status change request")))
+      (assert (%no-actions-p (%view plan "Work status change plan")))
+      (let* ((outcome-view (%view outcome "Work status change outcome"))
+             (outcome-html (views:view-html outcome-view))
+             (objects (mapcar #'cdr (views:view-references outcome-view))))
+        (assert (%no-actions-p outcome-view))
+        (dolist (text '("operation/change-work-status" "Request" "Plan" "applied" "Source authority"
+                        "Work Topic now" "<tt>in progress</tt>"))
+          (assert (search text outcome-html) () "The outcome view lacks ~S." text))
+        (dolist (object (list topic request plan page now))
+          (assert (member object objects :test #'eq)))))
+    ;; The Workspace it started from is as it was.
+    (assert (equal point (tm:topicmap-workspace-point-of workspace)))
+    ;; A Workspace over the written page offers the way back.
+    (let ((again (%view (tm:make-topicmap-workspace (%project page path) "hyperdoc-page-authoring")
+                        "Change work status")))
+      (assert (member "Change work status to \"open\"" (mapcar #'car (%buttons again)) :test #'equal)))
+    ;; A Point whose Topic no HTML declaration backs offers nothing.
+    (let ((plain (tm:make-topicmap-workspace
+                  (tm:make-topicmap-projection :topics (list (tm:make-topicmap-topic :id "plain" :label "Plain")))
+                  "plain")))
+      (assert (null (find "Change work status" (views:all-views plain)
+                          :key #'views:view-title :test #'equal))))
+    (assert (equal pages (work-page-sources)))))
+
 (defun %closure (name &optional seen)
   "Every system NAME depends on, by name, found without loading any."
   (let ((system (asdf:find-system name nil)))
@@ -254,7 +353,11 @@ planner and writer."
     (let ((closure (%closure reader)))
       (assert (member reader closure :test #'string=))
       (assert (not (member "dreyeck/work/authoring" closure :test #'string=)))))
-  (assert (member "dreyeck/work/reading" (%closure "dreyeck/work/authoring") :test #'string=)))
+  (assert (member "dreyeck/work/reading" (%closure "dreyeck/work/authoring") :test #'string=))
+  ;; Authorisation is the pinned authoring environment, which the Catalog
+  ;; cannot reach either.
+  (assert (member "dreyeck/workflow/authoring" (%closure "dreyeck/work/authoring") :test #'string=))
+  (assert (not (member "dreyeck/workflow/authoring" (%closure "dreyeck/catalog") :test #'string=))))
 
 (defun run-tests ()
   (let ((pages (work-page-sources)))
@@ -264,6 +367,7 @@ planner and writer."
        (check-stale-plans page path)
        (check-hand-built-plans page path)
        (check-applying page path)))
+    (call-with-work-breakdown-fixture #'check-authoring-circle)
     (check-authoring-boundary)
     (assert (equal pages (work-page-sources))))
   (format t "~&WORK-AUTHORING-PASS: a valid request plans without writing; a stale ~
@@ -274,5 +378,10 @@ refused before installation, the page byte-identical; applied once, the ~
 candidate verified before its atomic installation, only the status value's bytes ~
 change, the reprojection changes only the target's status, the loaded page ~
 shows it, and the plan and request are stale; neither the Catalog nor the ~
-reading system reaches the writer; the repository's pages are untouched.~%")
+reading system reaches the writer; from a Work Topic at a Workspace Point, in ~
+an image holding the pinned authoring environment, one action offered from ~
+the page's observed statuses carries request, plan and authorised apply to ~
+the written page, the reloaded page object and the projected Topic, all ~
+connected in the outcome, while without that environment nothing is planned ~
+or written; the repository's pages are untouched.~%")
   t)

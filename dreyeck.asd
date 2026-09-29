@@ -2328,7 +2328,7 @@
 
 (defsystem "dreyeck/work/authoring"
   :description "Plan and apply a Work status change as a checked HTML edit; authoring-side, never in the Catalog"
-  :depends-on ("dreyeck/work/reading" "plump")
+  :depends-on ("dreyeck/work/reading" "dreyeck/workflow/authoring" "plump")
   :components ((:file "dreyeck/src/work-authoring")))
 
 (defsystem "dreyeck/work/authoring/tests"
