@@ -33,7 +33,8 @@
            #:operation-request-path
            #:source-occurrence
            #:occurrence-page #:occurrence-form-key #:occurrence-source
-           #:occurrence-range #:page-occurrences #:occurrence-status
+           #:occurrence-range #:page-occurrences #:page-example-occurrences
+           #:occurrence-status
            #:resolve-occurrence #:stale-source-occurrence
            #:operation-request-occurrence
            #:page-definitions
@@ -75,6 +76,21 @@ observations as immutable. FORM-KEY is consistency evidence, not a locator."))
     (loop for form in (hv:top-level-forms-of code)
           for key = (wf:form-key (hv:s-exp form))
           when (and key (eq :definition (first key)))
+            collect (make-instance 'source-occurrence :page page :form-key key
+                                   :source source
+                                   :range (copy-tree (concrete-syntax-tree:source
+                                                      (hv:cst-of form)))))))
+
+(defun page-example-occurrences (page)
+  "Every DEFEXAMPLE on PAGE, observed once, as a SOURCE-OCCURRENCE keyed
+(:EXAMPLE name). A reading of the page, not a list of operation targets:
+PAGE-OCCURRENCES stays the definitions Insert executable DEFEXAMPLE is
+offered on, and an example is not one of them."
+  (let* ((code (%parse-page page))
+         (source (hv::source-of code)))
+    (loop for form in (hv:top-level-forms-of code)
+          for key = (wf:form-key (hv:s-exp form))
+          when (and key (eq :example (first key)))
             collect (make-instance 'source-occurrence :page page :form-key key
                                    :source source
                                    :range (copy-tree (concrete-syntax-tree:source

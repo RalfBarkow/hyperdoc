@@ -1634,6 +1634,19 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/lisp-critic/critique/tests :run-tests)))
 
+(asdf:defsystem "dreyeck/lisp-critic/examples"
+  :description "A DEFEXAMPLE read back from its code page, as a Lisp Critic target"
+  :depends-on ("dreyeck/inspector/lisp-critic" "dreyeck/gesture/operation-request")
+  :components ((:file "dreyeck/src/lisp-critic-examples"))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/examples/tests"))))
+
+(asdf:defsystem "dreyeck/lisp-critic/examples/tests"
+  :depends-on ("dreyeck/lisp-critic/examples" "dreyeck/work/reading")
+  :components ((:file "dreyeck/tests/lisp-critic-examples"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/examples/tests :run-tests)))
+
 (asdf:defsystem "dreyeck/lisp-critic/reading"
   :description "Source-backed reading of the Lisp Critic genealogy"
   :depends-on ("dreyeck/hyperdoc" "dreyeck/inspector/lisp-critic"
