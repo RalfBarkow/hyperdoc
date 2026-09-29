@@ -485,6 +485,104 @@ relationship. Nothing is written, and no relationship occurrence is made."
       (%write path source))
     (assert (equal pages (work-page-sources)))))
 
+(defun relationship-apply-refusal (thunk)
+  (handler-case (progn (funcall thunk) (error "Expected an apply refusal."))
+    (a:work-relationship-creation-apply-refused (condition) condition)))
+
+(defun check-relationship-creation-effect (page path)
+  "Applied, a verified plan installs its statement; what was created is what
+reading the written page observes: one new relationship occurrence and its
+Association, which did not exist before and which no plan contained."
+  (let* ((pages (work-page-sources))
+         (source (%read path))
+         (projection (%project page path))
+         (from (tm:topicmap-projection-topic-by-id projection "lisp-source-authoring"))
+         (to (tm:topicmap-projection-topic-by-id projection "running-image-authoring"))
+         (selection (ops:work-topic-operation-request (w:create-relationship-operation) from))
+         (triple '("lisp-source-authoring" "work:relation/informs" "running-image-authoring"))
+         (statements (work:scan-work-relationships source page)))
+    (flet ((stated (text) (count triple (work:scan-work-relationships text page)
+                                 :key (lambda (occurrence)
+                                        (list (work:relationship-occurrence-from occurrence)
+                                              (work:relationship-occurrence-relation occurrence)
+                                              (work:relationship-occurrence-to occurrence)))
+                                 :test #'equal)))
+      (assert (zerop (stated source)))
+      ;; APPLY does not trust a plan: one built by hand with a wrong
+      ;; statement is refused before anything is installed.
+      (let* ((request (work:request-work-relationship-creation selection to "work:relation/informs"))
+             (plan (a:plan-work-relationship-creation request))
+             (forged (make-instance 'a:work-relationship-creation-plan
+                                    :request request :snapshot (a:work-relationship-creation-plan-snapshot plan)
+                                    :position (a:work-relationship-creation-plan-position plan)
+                                    :representation (replace-once (a:work-relationship-creation-plan-representation plan)
+                                                                  "data-to=\"running-image-authoring\""
+                                                                  "data-to=\"hyperdoc-authoring\""))))
+        (assert (search "does not add exactly the requested statement"
+                        (a:work-relationship-creation-apply-refused-reason
+                         (relationship-apply-refusal (lambda () (a:apply-work-relationship-creation forged))))))
+        (assert (string= source (%read path)))
+        ;; A page changed after planning: refused, the change preserved.
+        (let ((changed (replace-once source "This page is the current work map" "This page is the present work map")))
+          (%write path changed)
+          (assert (search "not the plan's snapshot"
+                          (a:work-relationship-creation-apply-refused-reason
+                           (relationship-apply-refusal (lambda () (a:apply-work-relationship-creation plan))))))
+          (assert (string= changed (%read path)))
+          (%write path source))
+        ;; Applied.
+        (multiple-value-bind (association occurrence) (a:apply-work-relationship-creation plan)
+          (let* ((written (%read path))
+                 (position (a:work-relationship-creation-plan-position plan))
+                 (read (work:scan-work-relationships written page)))
+            ;; The source: the planned statement, where it was planned.
+            (assert (string= written (concatenate 'string (subseq source 0 position)
+                                                  (a:work-relationship-creation-plan-representation plan)
+                                                  (subseq source position))))
+            (assert (= 1 (stated written)))
+            (assert (= (1+ (length statements)) (length read)))
+            ;; The occurrence was observed by reading, not made from the plan.
+            (assert (typep occurrence 'work:work-relationship-source-occurrence))
+            (assert (eq occurrence (getf (tm:topicmap-association-properties-of association) :source-occurrence)))
+            (assert (string= written (work:relationship-occurrence-snapshot occurrence)))
+            (assert (not (string= (a:work-relationship-creation-plan-snapshot plan)
+                                  (work:relationship-occurrence-snapshot occurrence))))
+            (assert (eq page (work:relationship-occurrence-page occurrence)))
+            (assert (= (1+ (length statements)) (work:relationship-occurrence-ordinal occurrence)))
+            (assert (equal (work:relationship-occurrence-element-range (car (last read)))
+                           (work:relationship-occurrence-element-range occurrence)))
+            (assert (eq occurrence (work:resolve-work-relationship-occurrence occurrence)))
+            ;; Its Association, as the ordinary projection reads it.
+            (assert (equal "work:lisp-source-authoring:work:relation/informs:running-image-authoring"
+                           (tm:topicmap-association-id-of association)))
+            (assert (equal "informs" (tm:topicmap-association-relation-label association)))
+            (assert (= (1+ (length (tm:topicmap-projection-associations-of projection)))
+                       (length (tm:topicmap-projection-associations-of (%project page path)))))
+            ;; The page object shows it; the plan never held it.
+            (assert (find "running-image-authoring"
+                          (plump:get-elements-by-tag-name (hyperbook:dom-of page) "li")
+                          :key (lambda (node) (and (equal "lisp-source-authoring" (plump:attribute node "data-from"))
+                                                   (plump:attribute node "data-to")))
+                          :test #'equal))
+            (assert (notany (lambda (slot)
+                              (typep (slot-value plan (sb-mop:slot-definition-name slot))
+                                     'work:work-relationship-source-occurrence))
+                            (sb-mop:class-slots (class-of plan))))
+            ;; No replay; and the request is now for a stated relationship.
+            (assert (search "not the plan's snapshot"
+                            (a:work-relationship-creation-apply-refused-reason
+                             (relationship-apply-refusal (lambda () (a:apply-work-relationship-creation plan))))))
+            (assert (string= written (%read path)))
+            (assert (handler-case (progn (work:request-work-relationship-creation
+                                          (ops:work-topic-operation-request
+                                           (w:create-relationship-operation)
+                                           (tm:topicmap-projection-topic-by-id (%project page path) "lisp-source-authoring"))
+                                          (tm:topicmap-projection-topic-by-id (%project page path) "running-image-authoring")
+                                          "work:relation/informs")
+                                         nil)
+                      (work:work-relationship-creation-refused () t)))))))
+    (assert (equal pages (work-page-sources)))))
+
 (defun %closure (name &optional seen)
   "Every system NAME depends on, by name, found without loading any."
   (let ((system (asdf:find-system name nil)))
@@ -524,6 +622,7 @@ planner and writer."
     (call-with-work-breakdown-fixture #'check-authoring-circle)
     (call-with-work-breakdown-fixture #'check-shared-selection)
     (call-with-work-breakdown-fixture #'check-relationship-creation-plan)
+    (call-with-work-breakdown-fixture #'check-relationship-creation-effect)
     (check-authoring-boundary)
     (assert (equal pages (work-page-sources))))
   (format t "~&WORK-AUTHORING-PASS: a valid request plans without writing; a stale ~
@@ -544,6 +643,9 @@ the same registry-backed operation request, whose own view completes it; a ~
 relationship creation request gets a plan that inserts one statement after the ~
 last authored one, verified to read and project as exactly the requested ~
 relationship, writing nothing and making no occurrence, refused for an ~
-unadmitted relation, a changed page and a page stating no relationship; the ~
+unadmitted relation, a changed page and a page stating no relationship; ~
+applied, the plan installs its statement and reading the written page observes ~
+the new relationship occurrence and its Association, a forged plan and a ~
+changed page refused without writing, no replay; the ~
 repository's pages are untouched.~%")
   t)

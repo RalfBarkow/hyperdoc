@@ -72,6 +72,10 @@
            #:work-relationship-creation-plan-position #:work-relationship-creation-plan-representation
            #:work-relationship-creation-plan-refused #:work-relationship-creation-plan-refused-reason
            #:work-relationship-creation-plan-refused-cause
+           #:apply-work-relationship-creation
+           #:work-relationship-creation-apply-refused #:work-relationship-creation-apply-refused-reason
+           #:work-relationship-creation-apply-refused-cause
+           #:work-relationship-creation-unverified #:work-relationship-creation-unverified-reason
            #:work-status-change-execution-refused #:work-status-change-execution-refused-reason))
 
 (in-package #:dreyeck/work/authoring)
@@ -683,6 +687,92 @@ every check holds."
                                        (if contract (tm:topicmap-topic-label-of contract) relation)))))
           (%verify-relationship-candidate plan #'refuse)
           plan)))))
+
+;;;; Applying a relationship creation plan
+;;;;
+;;;; The effect follows the status writer's discipline: only while the page is
+;;;; still exactly the plan's snapshot, the candidate is derived and verified
+;;;; again -- a plan verified once is not trusted to stay sufficient -- then
+;;;; installed atomically, and the page object reloaded. What was created is
+;;;; then observed, not asserted: the written page is read by the ordinary
+;;;; relationship scanner and projection, and the result is the Association and
+;;;; the source occurrence that reading finds. The planned statement is a
+;;;; representation before the effect; the occurrence is an observation after.
+
+(define-condition work-relationship-creation-apply-refused (error)
+  ((plan :initarg :plan :reader refused-relationship-apply-plan)
+   (reason :initarg :reason :reader work-relationship-creation-apply-refused-reason)
+   (cause :initarg :cause :initform nil :reader work-relationship-creation-apply-refused-cause))
+  (:report (lambda (condition stream)
+             (format stream "Relationship creation not applied: ~A"
+                     (work-relationship-creation-apply-refused-reason condition))))
+  (:documentation "The page source was not changed."))
+
+(define-condition work-relationship-creation-unverified (error)
+  ((plan :initarg :plan :reader unverified-relationship-plan)
+   (reason :initarg :reason :reader work-relationship-creation-unverified-reason))
+  (:report (lambda (condition stream)
+             (format stream "Relationship creation installed but not accepted: ~A"
+                     (work-relationship-creation-unverified-reason condition))))
+  (:documentation "The verified candidate was installed atomically, but
+afterwards the page file, or the reloaded page object, or reading the written
+page does not show it. The effect is not accepted; nothing is rolled back."))
+
+(defun %statement-count (dom triple)
+  "How many relationship statements in DOM read as TRIPLE."
+  (count triple (remove-if-not (lambda (node) (plump:attribute node "data-from"))
+                               (plump:get-elements-by-tag-name dom "li"))
+         :key (lambda (node) (list (plump:attribute node "data-from") (plump:attribute node "data-relation")
+                                   (plump:attribute node "data-to")))
+         :test #'equal))
+
+(defun apply-work-relationship-creation (plan)
+  "Carry out PLAN: only while the page is still exactly the plan's snapshot,
+verify its candidate again, install it atomically and reload the page object;
+then read the written page. Returns the Association that reading projects for
+the requested relationship, and the source occurrence it was read from, as two
+values. Signals WORK-RELATIONSHIP-CREATION-APPLY-REFUSED having written
+nothing, or WORK-RELATIONSHIP-CREATION-UNVERIFIED having installed the
+verified candidate."
+  (flet ((refuse (reason &optional cause)
+           (error 'work-relationship-creation-apply-refused :plan plan :reason reason :cause cause)))
+    (unless (typep plan 'work-relationship-creation-plan)
+      (refuse (format nil "~S is not a relationship creation plan" plan)))
+    (let* ((request (work-relationship-creation-plan-request plan))
+           (page (work:work-relationship-creation-authority-page request))
+           (path (hyperdoc:file-of page))
+           (snapshot (work-relationship-creation-plan-snapshot plan))
+           (triple (list (work:topic-occurrence-topic (work:work-relationship-creation-from-occurrence request))
+                         (work:work-relationship-creation-relation request)
+                         (work:topic-occurrence-topic (work:work-relationship-creation-to-occurrence request)))))
+      (unless (string= snapshot (%read-source path))
+        (refuse "the page source is not the plan's snapshot"))
+      (let ((candidate (%relationship-candidate plan)))
+        (%verify-relationship-candidate plan #'refuse)
+        (%replace-source path snapshot candidate #'refuse)
+        (flet ((unverified (reason)
+                 (error 'work-relationship-creation-unverified :plan plan :reason reason)))
+          (let ((written (%read-source path)))
+            (unless (string= candidate written)
+              (unverified "the page file is not the verified candidate"))
+            (handler-case (hyperdoc:load-page page)
+              (error (condition)
+                (unverified (format nil "the page object could not be reloaded: ~A" condition))))
+            (unless (= 1 (%statement-count (hyperbook:dom-of page) triple))
+              (unverified "the reloaded page does not show exactly one such statement"))
+            ;; What exists now is what reading the written page observes.
+            (let ((created (remove triple
+                                   (tm:topicmap-projection-associations-of
+                                    (work:project-work-breakdown written :source page))
+                                   :key (lambda (association)
+                                          (%statement-triple
+                                           (getf (tm:topicmap-association-properties-of association)
+                                                 :source-occurrence)))
+                                   :test-not #'equal)))
+              (unless (= 1 (length created))
+                (unverified (format nil "reading the written page finds ~D such statements" (length created))))
+              (values (first created)
+                      (getf (tm:topicmap-association-properties-of (first created)) :source-occurrence)))))))))
 
 (views:defview work-relationship-creation-plan-overview (plan work-relationship-creation-plan)
   (views:html-view :title "Relationship creation plan" :priority 1
