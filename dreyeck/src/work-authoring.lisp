@@ -76,6 +76,12 @@
            #:work-relationship-creation-apply-refused #:work-relationship-creation-apply-refused-reason
            #:work-relationship-creation-apply-refused-cause
            #:work-relationship-creation-unverified #:work-relationship-creation-unverified-reason
+           #:execute-work-relationship-creation #:work-relationship-creation-outcome
+           #:work-relationship-creation-outcome-request #:work-relationship-creation-outcome-plan
+           #:work-relationship-creation-outcome-status #:work-relationship-creation-outcome-cause
+           #:work-relationship-creation-outcome-association #:work-relationship-creation-outcome-occurrence
+           #:work-relationship-creation-execution-refused
+           #:work-relationship-creation-execution-refused-reason
            #:work-status-change-execution-refused #:work-status-change-execution-refused-reason))
 
 (in-package #:dreyeck/work/authoring)
@@ -773,6 +779,94 @@ verified candidate."
                 (unverified (format nil "reading the written page finds ~D such statements" (length created))))
               (values (first created)
                       (getf (tm:topicmap-association-properties-of (first created)) :source-occurrence)))))))))
+
+;;;; Executing a relationship creation request
+;;;;
+;;;; The same boundary as EXECUTE-WORK-STATUS-CHANGE: only with the pinned
+;;;; authoring environment this image was given does a request go on to its
+;;;; plan and effect. The executor adds no editing of its own.
+
+(define-condition work-relationship-creation-execution-refused (error)
+  ((request :initarg :request :reader refused-relationship-execution-request)
+   (reason :initarg :reason :reader work-relationship-creation-execution-refused-reason))
+  (:report (lambda (condition stream)
+             (format stream "Relationship creation not executed: ~A"
+                     (work-relationship-creation-execution-refused-reason condition))))
+  (:documentation "Nothing was planned and nothing was written."))
+
+(defclass work-relationship-creation-outcome ()
+  ((request :initarg :request :reader work-relationship-creation-outcome-request)
+   (plan :initarg :plan :initform nil :reader work-relationship-creation-outcome-plan)
+   (status :initarg :status :reader work-relationship-creation-outcome-status)
+   (cause :initarg :cause :initform nil :reader work-relationship-creation-outcome-cause)
+   (association :initarg :association :initform nil :reader work-relationship-creation-outcome-association)
+   (occurrence :initarg :occurrence :initform nil :reader work-relationship-creation-outcome-occurrence))
+  (:documentation "What executing one relationship creation request came to:
+STATUS is :APPLIED, :REFUSED or :UNVERIFIED. PLAN is NIL if execution stopped
+before planning. CAUSE is the refusal or the unverified condition. Once
+applied, ASSOCIATION and OCCURRENCE are what reading the written page
+observed: the relationship and the statement it was read from."))
+
+(defmethod print-object ((outcome work-relationship-creation-outcome) stream)
+  (print-unreadable-object (outcome stream :type t)
+    (format stream "~A ~A" (work-relationship-creation-outcome-request outcome)
+            (work-relationship-creation-outcome-status outcome))))
+
+(defun execute-work-relationship-creation (request environment)
+  "Carry REQUEST through the authoring contract -- plan it, then apply the plan
+-- if ENVIRONMENT is the pinned authoring environment this image was given.
+Returns a WORK-RELATIONSHIP-CREATION-OUTCOME in every case. Adds no editing
+of its own: planning, applying and observing are the existing steps."
+  (flet ((outcome (&rest initargs)
+           (apply #'make-instance 'work-relationship-creation-outcome :request request initargs)))
+    (unless (typep environment 'dreyeck/workflow/authoring::authoring-environment)
+      (return-from execute-work-relationship-creation
+        (outcome :status :refused
+                 :cause (make-condition 'work-relationship-creation-execution-refused
+                                        :request request
+                                        :reason "there is no authoring environment: the pinned authoring capability is absent"))))
+    (let ((plan (handler-case (plan-work-relationship-creation request)
+                  (work-relationship-creation-plan-refused (condition)
+                    (return-from execute-work-relationship-creation
+                      (outcome :status :refused :cause condition))))))
+      (handler-case (multiple-value-bind (association occurrence) (apply-work-relationship-creation plan)
+                      (outcome :status :applied :plan plan :association association :occurrence occurrence))
+        (work-relationship-creation-apply-refused (condition)
+          (outcome :status :refused :plan plan :cause condition))
+        (work-relationship-creation-unverified (condition)
+          (outcome :status :unverified :plan plan :cause condition))))))
+
+(views:defview work-relationship-creation-outcome-overview (outcome work-relationship-creation-outcome)
+  (views:html-view :title "Relationship creation outcome" :priority 1
+    (let* ((request (work-relationship-creation-outcome-request outcome))
+           (plan (work-relationship-creation-outcome-plan outcome))
+           (cause (work-relationship-creation-outcome-cause outcome))
+           (association (work-relationship-creation-outcome-association outcome))
+           (occurrence (work-relationship-creation-outcome-occurrence outcome))
+           (page (work:work-relationship-creation-authority-page request)))
+      (views:html
+        (:table :class "inspector-table"
+          (:tr (:td "Operation")
+               (:td (:tt (views:esc (w:semantic-operation-identity-id
+                                     (work:work-relationship-creation-operation request))))))
+          (:tr (:td "Request") (:td (views:object-ref request)))
+          (:tr (:td "Plan") (:td (if plan (views:object-ref plan) (views:html "none: execution stopped before planning"))))
+          (:tr (:td "Outcome") (:td (:tt (views:esc (string-downcase (symbol-name (work-relationship-creation-outcome-status outcome)))))))
+          (:tr (:td "Cause") (:td (if cause (views:object-ref cause) (views:html "none"))))
+          (:tr (:td "Source authority")
+               (:td (if (typep page 'hyperbook:page)
+                        (views:html (views:object-ref page) " " (:tt (views:esc (namestring (hyperdoc:file-of page)))))
+                        (views:html (:tt (views:esc (prin1-to-string page)))))))
+          (:tr (:td "Relationship statement")
+               (:td (if occurrence
+                        (views:html (views:object-ref occurrence
+                                                      :display (format nil "statement ~D, as reading the written page observed it"
+                                                                       (work:relationship-occurrence-ordinal occurrence))))
+                        (views:html "none"))))
+          (:tr (:td "Association")
+               (:td (if association
+                        (views:object-ref association :display (tm:topicmap-association-id-of association))
+                        (views:html "none")))))))))
 
 (views:defview work-relationship-creation-plan-overview (plan work-relationship-creation-plan)
   (views:html-view :title "Relationship creation plan" :priority 1

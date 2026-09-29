@@ -583,6 +583,66 @@ Association, which did not exist before and which no plan contained."
                       (work:work-relationship-creation-refused () t)))))))
     (assert (equal pages (work-page-sources)))))
 
+(defun check-relationship-creation-execution (page path)
+  "Relationship creation behind the same boundary as Change work status: without
+the pinned authoring environment nothing is planned or written; with it, the
+existing request, plan and writer, and an outcome connecting what reading the
+written page observed."
+  (let* ((pages (work-page-sources))
+         (source (%read path))
+         (projection (%project page path))
+         (selection (ops:work-topic-operation-request
+                     (w:create-relationship-operation)
+                     (tm:topicmap-projection-topic-by-id projection "lisp-source-authoring")))
+         (request (work:request-work-relationship-creation
+                   selection (tm:topicmap-projection-topic-by-id projection "running-image-authoring")
+                   "work:relation/informs")))
+    ;; No authoring environment: refused, no plan, no write.
+    (let ((outcome (a:execute-work-relationship-creation request nil)))
+      (assert (eq :refused (a:work-relationship-creation-outcome-status outcome)))
+      (assert (null (a:work-relationship-creation-outcome-plan outcome)))
+      (assert (null (a:work-relationship-creation-outcome-occurrence outcome)))
+      (assert (typep (a:work-relationship-creation-outcome-cause outcome)
+                     'a:work-relationship-creation-execution-refused))
+      (assert (string= source (%read path))))
+    ;; With it: the existing plan and writer, and the observed result.
+    (let* ((outcome (a:execute-work-relationship-creation
+                     request (dreyeck/workflow/authoring:make-authoring-environment)))
+           (plan (a:work-relationship-creation-outcome-plan outcome))
+           (association (a:work-relationship-creation-outcome-association outcome))
+           (occurrence (a:work-relationship-creation-outcome-occurrence outcome))
+           (written (%read path)))
+      (assert (eq :applied (a:work-relationship-creation-outcome-status outcome)))
+      (assert (null (a:work-relationship-creation-outcome-cause outcome)))
+      (assert (eq request (a:work-relationship-creation-plan-request plan)))
+      (assert (string= written (concatenate 'string
+                                            (subseq source 0 (a:work-relationship-creation-plan-position plan))
+                                            (a:work-relationship-creation-plan-representation plan)
+                                            (subseq source (a:work-relationship-creation-plan-position plan)))))
+      (assert (typep occurrence 'work:work-relationship-source-occurrence))
+      (assert (string= written (work:relationship-occurrence-snapshot occurrence)))
+      (assert (eq occurrence (getf (tm:topicmap-association-properties-of association) :source-occurrence)))
+      (assert (equal "work:lisp-source-authoring:work:relation/informs:running-image-authoring"
+                     (tm:topicmap-association-id-of association)))
+      ;; The outcome connects them, with nothing to press.
+      (let* ((view (%view outcome "Relationship creation outcome"))
+             (html (views:view-html view)))
+        (dolist (text '("operation/create-relationship" "Request" "Plan" "applied" "Source authority"
+                        "as reading the written page observed it"
+                        "work:lisp-source-authoring:work:relation/informs:running-image-authoring"))
+          (assert (search text html) () "The outcome view lacks ~S." text))
+        (assert (%no-actions-p view))
+        (dolist (object (list request plan page occurrence association))
+          (assert (member object (mapcar #'cdr (views:view-references view)) :test #'eq))))
+      ;; Executed again, the request no longer holds: nothing planned or written.
+      (let ((again (a:execute-work-relationship-creation
+                    request (dreyeck/workflow/authoring:make-authoring-environment))))
+        (assert (eq :refused (a:work-relationship-creation-outcome-status again)))
+        (assert (null (a:work-relationship-creation-outcome-plan again)))
+        (assert (typep (a:work-relationship-creation-outcome-cause again) 'a:work-relationship-creation-plan-refused))
+        (assert (string= written (%read path)))))
+    (assert (equal pages (work-page-sources)))))
+
 (defun %closure (name &optional seen)
   "Every system NAME depends on, by name, found without loading any."
   (let ((system (asdf:find-system name nil)))
@@ -623,6 +683,7 @@ planner and writer."
     (call-with-work-breakdown-fixture #'check-shared-selection)
     (call-with-work-breakdown-fixture #'check-relationship-creation-plan)
     (call-with-work-breakdown-fixture #'check-relationship-creation-effect)
+    (call-with-work-breakdown-fixture #'check-relationship-creation-execution)
     (check-authoring-boundary)
     (assert (equal pages (work-page-sources))))
   (format t "~&WORK-AUTHORING-PASS: a valid request plans without writing; a stale ~
@@ -646,6 +707,8 @@ relationship, writing nothing and making no occurrence, refused for an ~
 unadmitted relation, a changed page and a page stating no relationship; ~
 applied, the plan installs its statement and reading the written page observes ~
 the new relationship occurrence and its Association, a forged plan and a ~
-changed page refused without writing, no replay; the ~
+changed page refused without writing, no replay; executed only with the pinned ~
+authoring environment, its outcome connecting request, plan and the observed ~
+statement and Association, and nothing planned or written without it; the ~
 repository's pages are untouched.~%")
   t)
