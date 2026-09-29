@@ -10,15 +10,20 @@
 ;;;;                             where the declaration's data-status value
 ;;;;                             is. Writes nothing.
 ;;;;   APPLY-WORK-STATUS-CHANGE  only while the page source is still exactly
-;;;;                             the plan's snapshot, write the source with
-;;;;                             that value replaced and nothing else;
-;;;;                             reload the page object; verify.
-;;;;   verification              the written bytes are exactly the planned
-;;;;                             ones, and the page read afresh declares
-;;;;                             exactly the intended change: the target's
-;;;;                             status, every other Topic and every
-;;;;                             Association as before, and the reloaded
-;;;;                             page showing the new status.
+;;;;                             the plan's snapshot: derive the candidate,
+;;;;                             verify it, install it atomically, reload the
+;;;;                             page object, verify what was installed.
+;;;;   before installation       everything the plan, its snapshot and the
+;;;;                             candidate decide: the status is writable as
+;;;;                             is, the candidate differs from the snapshot
+;;;;                             in the status value alone, and it projects
+;;;;                             to exactly the intended change -- the
+;;;;                             target's status, every other Topic and every
+;;;;                             Association as before. A candidate known to
+;;;;                             be wrong never becomes the page.
+;;;;   after installation        only what installing can reveal: the page
+;;;;                             file is the verified candidate, and the page
+;;;;                             object reloads to show the new status.
 ;;;;
 ;;;; Staleness is the whole snapshot's, as for every Work source occurrence:
 ;;;; any difference refuses, and nothing is relocated by Topic ID. A plan
@@ -68,9 +73,10 @@ any, is the condition that showed why."))
   (:report (lambda (condition stream)
              (format stream "Work status change written but not accepted: ~A"
                      (work-status-change-unverified-reason condition))))
-  (:documentation "The page source was written, but what it now holds is not
-exactly the intended change. The effect is not accepted; nothing is rolled
-back, so the page shows what happened."))
+  (:documentation "The verified candidate was installed atomically, but
+afterwards the page file or the reloaded page object does not coincide with
+it. The effect is not accepted; nothing is rolled back, so the page shows
+what happened."))
 
 (defclass work-status-change-plan ()
   ((request :initarg :request :reader work-status-change-plan-request)
@@ -101,6 +107,12 @@ SNAPSHOT."))
 (defparameter +unwritable-status-characters+ '(#\" #\& #\<)
   "Characters a data-status value cannot hold as written. This plan does not
 escape them; it refuses.")
+
+(defun %unwritable-character (status)
+  "The first character of STATUS a data-status value cannot hold as written,
+or NIL."
+  (find-if (lambda (character) (member character +unwritable-status-characters+))
+           status))
 
 (defun %status-range (request snapshot refuse)
   "The range of the data-status value in the start tag of REQUEST's
@@ -139,9 +151,7 @@ WORK-STATUS-CHANGE-PLAN-REFUSED unless every check holds."
                                                        :current current)
           (work:work-status-change-refused (condition)
             (refuse "the request no longer holds" condition)))
-        (let ((unwritable (find-if (lambda (character)
-                                     (member character +unwritable-status-characters+))
-                                   proposed)))
+        (let ((unwritable (%unwritable-character proposed)))
           (when unwritable
             (refuse (format nil "~S cannot be written as a data-status value without escaping ~S"
                             proposed unwritable))))
@@ -192,63 +202,81 @@ sibling removed."
         (tm:topicmap-association-from-of association) (tm:topicmap-association-to-of association)
         (tm:topicmap-association-relation-label association)))
 
-(defun %verify (plan candidate)
-  "The Work Topic as the written page declares it, if the page source is
-exactly CANDIDATE and declares exactly the intended change; otherwise
-WORK-STATUS-CHANGE-UNVERIFIED."
+(defun %verify-candidate (plan candidate refuse)
+  "The Work Topic as CANDIDATE declares it, if CANDIDATE is exactly the
+intended change of the plan's snapshot; otherwise a call to REFUSE. Decided
+from the plan and the candidate alone, before anything is installed."
   (let* ((request (work-status-change-plan-request plan))
          (id (tm:topicmap-topic-id-of (work:work-status-change-topic request)))
          (proposed (work:work-status-change-proposed-status request))
          (page (%declaring-page request))
          (snapshot (work-status-change-plan-snapshot plan))
          (range (work-status-change-plan-status-range plan))
-         (end (+ (car range) (length proposed))))
+         (end (+ (car range) (length proposed)))
+         (unwritable (%unwritable-character proposed)))
+    ;; A plan need not have come from the planner.
+    (when unwritable
+      (funcall refuse (format nil "~S cannot be written as a data-status value without escaping ~S"
+                              proposed unwritable)))
+    ;; The source delta: the status value and nothing else.
+    (unless (and (= (length candidate) (+ (length snapshot) (- end (cdr range))))
+                 (string= snapshot candidate :end1 (car range) :end2 (car range))
+                 (string= proposed candidate :start2 (car range) :end2 end)
+                 (string= snapshot candidate :start1 (cdr range) :start2 end))
+      (funcall refuse "the candidate changes bytes outside the status value"))
+    ;; The reconstructed delta: the target's status and nothing else.
+    (let* ((before (work:project-work-breakdown snapshot :source page))
+           (after (handler-case (work:project-work-breakdown candidate :source page)
+                    (error (condition)
+                      (funcall refuse (format nil "the candidate does not project: ~A" condition)))))
+           (old (tm:topicmap-projection-topics-of before))
+           (new (tm:topicmap-projection-topics-of after)))
+      (unless (= (length old) (length new))
+        (funcall refuse "the candidate declares another number of Topics"))
+      (loop for was in old
+            for is in new
+            do (if (equal id (tm:topicmap-topic-id-of was))
+                   (unless (and (equal (%topic-row was :status nil) (%topic-row is :status nil))
+                                (equal proposed (getf (tm:topicmap-topic-view-properties-of is) :status)))
+                     (funcall refuse (format nil "the candidate's Topic ~A is not ~A with the proposed status"
+                                             id id)))
+                   (unless (equal (%topic-row was) (%topic-row is))
+                     (funcall refuse (format nil "the candidate changes Topic ~A"
+                                             (tm:topicmap-topic-id-of was))))))
+      (unless (equal (mapcar #'%association-row (tm:topicmap-projection-associations-of before))
+                     (mapcar #'%association-row (tm:topicmap-projection-associations-of after)))
+        (funcall refuse "the candidate changes the Associations"))
+      (tm:topicmap-projection-topic-by-id after id))))
+
+(defun %verify-installed (plan candidate)
+  "Reload the declaring page, and signal WORK-STATUS-CHANGE-UNVERIFIED unless
+its file is the verified CANDIDATE and the reloaded page object shows the
+proposed status. Only installation can reveal these."
+  (let* ((request (work-status-change-plan-request plan))
+         (id (tm:topicmap-topic-id-of (work:work-status-change-topic request)))
+         (proposed (work:work-status-change-proposed-status request))
+         (page (%declaring-page request)))
     (flet ((unverified (reason)
              (error 'work-status-change-unverified :plan plan :reason reason)))
-      (let ((written (%read-source (hyperdoc:file-of page))))
-        ;; The source delta: the status value and nothing else.
-        (unless (string= candidate written)
-          (unverified "the page source is not the planned candidate"))
-        (unless (and (= (length written) (+ (length snapshot) (- end (cdr range))))
-                     (string= snapshot written :end1 (car range) :end2 (car range))
-                     (string= proposed written :start2 (car range) :end2 end)
-                     (string= snapshot written :start1 (cdr range) :start2 end))
-          (unverified "bytes outside the status value changed"))
-        ;; The reconstructed delta: the target's status and nothing else.
-        (let* ((before (work:project-work-breakdown snapshot :source page))
-               (after (handler-case (work:project-work-breakdown written :source page)
-                        (error (condition)
-                          (unverified (format nil "the written page does not project: ~A" condition)))))
-               (old (tm:topicmap-projection-topics-of before))
-               (new (tm:topicmap-projection-topics-of after)))
-          (unless (= (length old) (length new))
-            (unverified "the written page declares another number of Topics"))
-          (loop for was in old
-                for is in new
-                do (if (equal id (tm:topicmap-topic-id-of was))
-                       (unless (and (equal (%topic-row was :status nil) (%topic-row is :status nil))
-                                    (equal proposed (getf (tm:topicmap-topic-view-properties-of is) :status)))
-                         (unverified (format nil "Topic ~A is not ~A with the proposed status" id id)))
-                       (unless (equal (%topic-row was) (%topic-row is))
-                         (unverified (format nil "Topic ~A changed" (tm:topicmap-topic-id-of was))))))
-          (unless (equal (mapcar #'%association-row (tm:topicmap-projection-associations-of before))
-                         (mapcar #'%association-row (tm:topicmap-projection-associations-of after)))
-            (unverified "the Associations changed"))
-          ;; The page object an Inspector holds was reloaded from what was written.
-          (let ((anchor (find id (plump:get-elements-by-tag-name (hyperbook:dom-of page) "a")
-                              :key (lambda (node) (plump:attribute node "data-topic"))
-                              :test #'equal)))
-            (unless (and anchor (equal proposed (plump:attribute anchor "data-status")))
-              (unverified "the loaded page does not show the proposed status")))
-          (tm:topicmap-projection-topic-by-id after id))))))
+      (unless (string= candidate (%read-source (hyperdoc:file-of page)))
+        (unverified "the page file is not the verified candidate"))
+      (handler-case (hyperdoc:load-page page)
+        (error (condition)
+          (unverified (format nil "the page object could not be reloaded: ~A" condition))))
+      (let ((anchor (find id (plump:get-elements-by-tag-name (hyperbook:dom-of page) "a")
+                          :key (lambda (node) (plump:attribute node "data-topic"))
+                          :test #'equal)))
+        (unless (and anchor (equal proposed (plump:attribute anchor "data-status")))
+          (unverified "the reloaded page does not show the proposed status"))))))
 
 (defun apply-work-status-change (plan)
   "Carry out PLAN: only while the declaring page's source is still exactly the
-plan's snapshot, replace the status value and nothing else, reload the page
-object, and accept the effect only if the page read afresh shows exactly the
-intended change. Returns the Work Topic as the page now declares it. Signals
+plan's snapshot, derive the candidate and verify that it is exactly the
+intended change, install it atomically, reload the page object, and accept
+the effect only if the file and the reloaded page are that candidate.
+Returns the Work Topic as the page now declares it. Signals
 WORK-STATUS-CHANGE-APPLY-REFUSED having written nothing, or
-WORK-STATUS-CHANGE-UNVERIFIED having written."
+WORK-STATUS-CHANGE-UNVERIFIED having installed the verified candidate."
   (flet ((refuse (reason &optional cause)
            (error 'work-status-change-apply-refused :plan plan :reason reason :cause cause)))
     (unless (typep plan 'work-status-change-plan)
@@ -263,10 +291,11 @@ WORK-STATUS-CHANGE-UNVERIFIED having written."
       (unless (equal (work-status-change-plan-status-range plan)
                      (%status-range request snapshot #'refuse))
         (refuse "the status value is not where the plan found it"))
-      (let ((candidate (%candidate plan)))
+      (let* ((candidate (%candidate plan))
+             (topic (%verify-candidate plan candidate #'refuse)))
         (%replace-source path snapshot candidate #'refuse)
-        (hyperdoc:load-page page)
-        (%verify plan candidate)))))
+        (%verify-installed plan candidate)
+        topic))))
 
 (views:defview work-status-change-plan-overview (plan work-status-change-plan)
   (views:html-view :title "Work status change plan" :priority 1

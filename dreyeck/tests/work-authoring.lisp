@@ -151,6 +151,30 @@ and applying refuses, and nothing is written."
       (assert (null (%candidates path))))
     (%write path source)))
 
+(defun check-hand-built-plans (page path)
+  "APPLY does not trust that a plan came from the planner: a plan built by hand
+for a status the source cannot hold as written is refused before anything is
+installed, and the page is left byte for byte as it was."
+  (let* ((source (%read path))
+         (valid (a:plan-work-status-change (%request page path))))
+    (dolist (proposed '("in \"progress\"" "in progress & review" "in <progress>"))
+      (let* ((request (%request page path proposed))
+             (plan (make-instance 'a:work-status-change-plan
+                                  :request request
+                                  :snapshot (work:topic-occurrence-snapshot
+                                             (work:work-status-change-occurrence request))
+                                  :status-range (a:work-status-change-plan-status-range valid)))
+             (condition (apply-refusal (lambda () (a:apply-work-status-change plan)))))
+        (assert (search "cannot be written as a data-status value"
+                        (a:work-status-change-apply-refused-reason condition)))
+        (assert (string= source (%read path)))
+        (assert (null (%candidates path)))))
+    ;; The loaded page was not reloaded from anything new.
+    (let ((anchor (find "hyperdoc-page-authoring"
+                        (plump:get-elements-by-tag-name (hyperbook:dom-of page) "a")
+                        :key (lambda (node) (plump:attribute node "data-topic")) :test #'equal)))
+      (assert (equal "open" (plump:attribute anchor "data-status"))))))
+
 (defun check-applying (page path)
   "Applied once, the plan changes exactly the status value, the page and its
 projection show exactly the intended change, and it cannot be applied again."
@@ -237,13 +261,16 @@ planner and writer."
      (lambda (page path)
        (check-planning page path)
        (check-stale-plans page path)
+       (check-hand-built-plans page path)
        (check-applying page path)))
     (check-authoring-boundary)
     (assert (equal pages (work-page-sources))))
   (format t "~&WORK-AUTHORING-PASS: a valid request plans without writing; a stale ~
 request, a moved declaration and a status the HTML cannot hold as written plan ~
 nothing; a change anywhere between plan and apply, the declaration still at its ~
-offset, refuses without writing; applied once, only the status value's bytes ~
+offset, refuses without writing; a plan built by hand for such a status is ~
+refused before installation, the page byte-identical; applied once, the ~
+candidate verified before its atomic installation, only the status value's bytes ~
 change, the reprojection changes only the target's status, the loaded page ~
 shows it, and the plan and request are stale; neither the Catalog nor the ~
 reading system reaches the writer; the repository's pages are untouched.~%")
