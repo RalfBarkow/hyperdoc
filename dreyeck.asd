@@ -2326,6 +2326,18 @@
                                :run-authoring-architecture-tests)
              (uiop:symbol-call :dreyeck/work/deployment-reading/tests :run-tests)))
 
+(defsystem "dreyeck/work/authoring"
+  :description "Plan and apply a Work status change as a checked HTML edit; authoring-side, never in the Catalog"
+  :depends-on ("dreyeck/work/reading" "plump")
+  :components ((:file "dreyeck/src/work-authoring")))
+
+(defsystem "dreyeck/work/authoring/tests"
+  :depends-on ("dreyeck/work/authoring")
+  :components ((:file "dreyeck/tests/work-authoring"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/work/authoring/tests :run-tests)))
+
 (defsystem "dreyeck/work/planning"
   :description "Optional in-memory SHOP3 documentation experiment; no executor"
   :depends-on ("dreyeck/work/reading" "dreyeck/shop3")
