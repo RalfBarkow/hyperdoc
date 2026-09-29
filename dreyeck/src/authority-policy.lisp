@@ -16,15 +16,20 @@
 ;;;; Disclosure is a separate question. A pathname view reveals the file
 ;;;; system, so pathname views stay inside the allowed roots. Title-bar actions
 ;;;; that start a process on the server or fetch over the network are withheld:
-;;;; copying a pathname or a string to the server's clipboard, and FedWiki's
-;;;; Reload and Open.
+;;;; copying a pathname or a string to the server's clipboard, FedWiki's
+;;;; Reload and Open, the HyperDoc and text-page Reload that re-reads page files
+;;;; into the running image, and forcing a lazy cell.
+;;;;
+;;;; An example's run button (►) is an operation too: it runs whatever the
+;;;; example does. It runs only for an example with a contract.
 ;;;;
 ;;;; All of this is enforced where the served Catalog runs: a server is up,
 ;;;; not in development mode. An image without a server, or a developer's
 ;;;; server, shows the same statuses and refuses nothing.
 ;;;;
-;;;; This is containment, not the architecture. The Operations view is a
-;;;; replaced upstream method, and the gates rest on upstream internals;
+;;;; This is containment, not the architecture. The Operations view and the
+;;;; example button are replaced upstream methods, and the gates rest on
+;;;; upstream internals;
 ;;;; +CONTAINMENT-ADAPTERS+ records each point with the source it relies on,
 ;;;; and CONTAINMENT-ADAPTER-DRIFT reports any that has moved.
 
@@ -42,6 +47,7 @@
            #:register-operation-contract #:find-operation-contract #:method-contract
            #:invocation-decision #:method-invocation-decision #:policy-enforced-p
            #:operation-thunk #:invocation-refused #:invocation-refused-reason
+           #:example-thunk #:example-invocation-decision #:find-example-contract
            #:allowed-disclosure-roots #:pathname-disclosure-permitted-p
            #:+containment-adapters+ #:containment-adapter-drift))
 
@@ -365,6 +371,93 @@ decision is taken again when it is evaluated, not only when it was shown."))
  :replay-semantics "refused once applied: the page already states the relationship"
  :audit-provenance "dreyeck 73cc52dd")
 
+;;;; Title-bar actions that re-read files or force computation
+
+(defmethod hv:title-bar-action-buttons :around ((object hyperdoc::hyperdoc))
+  (%withhold-actions (call-next-method)))
+
+(defmethod hv:title-bar-action-buttons :around ((object hyperdoc::text-page))
+  (%withhold-actions (call-next-method)))
+
+(defmethod hv:title-bar-action-buttons :around ((object lwcells::lazy-cell))
+  (%withhold-actions (call-next-method)))
+
+;;;; Running an example
+;;
+;; Replaces upstream's RENDER-TOPLEVEL-CST :AROUND for DEFEXAMPLE (see
+;; +CONTAINMENT-ADAPTERS+). Upstream puts a run button before every example's
+;; source; here the button is shown only for an example whose contract permits
+;; it, and is an EXAMPLE-THUNK, decided again when clicked. Elsewhere a marker
+;; says why it is not offered.
+
+(defun %qualified-name (symbol)
+  (format nil "~A::~A" (package-name (symbol-package symbol)) (symbol-name symbol)))
+
+(defun find-example-contract (name)
+  "The contract registered for running the example NAME, or NIL."
+  (loop for contract being the hash-values of *contracts*
+        when (and (eq :example (contract-applicability contract))
+                  (equal (%qualified-name name) (contract-operation contract)))
+          return contract))
+
+(defun example-invocation-decision (name)
+  (if (policy-enforced-p)
+      (invocation-decision (find-example-contract name))
+      (values t "not enforced: no served runtime, or a development server")))
+
+(defclass example-thunk (hv:thunk)
+  ((example :initarg :example :reader example-thunk-example))
+  (:documentation "Running one example. Decided again when it is evaluated."))
+
+(defmethod hv:eval-thunk ((thunk example-thunk))
+  (multiple-value-bind (allowed reason) (example-invocation-decision (example-thunk-example thunk))
+    (if allowed
+        (call-next-method)
+        (make-condition 'invocation-refused :method nil :target (example-thunk-example thunk) :reason reason))))
+
+(defmethod hvs:render-toplevel-cst :around ((head (eql 'hyperdoc:defexample)) cst source position)
+  (let ((name (concrete-syntax-tree:raw (concrete-syntax-tree:second cst))))
+    (multiple-value-bind (allowed reason) (example-invocation-decision name)
+      (if allowed
+          (hv:eval-button "►" (make-instance 'example-thunk :fn (lambda () (funcall (symbol-function name)))
+                                                            :example name)
+                          "Run example")
+          (hv:html (:span :title (cl-who:escape-string (format nil "Not run here: ~A" reason)) "▷")))))
+  (call-next-method))
+
+(defparameter +served-catalog-contracts+
+  (list
+   (register-operation-contract
+    :identity "hyperdoc/reload" :status :unresolved :effect-classes '(:image-local)
+    :effect-extent "re-reads a HyperDoc's text pages, or one page, from disk into the running image"
+    :execution "the Reload title-bar action of a writable HyperDoc or text page"
+    :audit-provenance "upstream 8a114919 hyperdoc-explorer/explorer.lisp")
+   (register-operation-contract
+    :identity "cell/evaluate" :status :unresolved :effect-classes '(:image-local)
+    :effect-extent "forces a lazy cell's computation, whatever it computes"
+    :execution "the Evaluate title-bar action of a lazy cell"
+    :audit-provenance "html-inspector-views 386df893 cell-views.lisp")
+   (register-operation-contract
+    :identity "example/setf-push-recorded-example"
+    :operation "DREYECK/LISP-CRITIC/RECORDED::SETF-PUSH-RECORDED-EXAMPLE" :applicability :example
+    :status :contracted :effect-classes '(:observational)
+    :effect-extent "nothing changes: reads a committed JSON record and the example's current source, and builds objects from them"
+    :authority "the repository's own record file and code page"
+    :postconditions "no file, registry or running engine changes"
+    :verification-evidence "reviewed source: dreyeck/src/lisp-critic-recorded.lisp READ-EXAMPLE-EVALUATION; the recorded-evaluation tests assert the engine never loads"
+    :replay-semantics "repeatable" :audit-provenance "dreyeck b915ab08")
+   (register-operation-contract
+    :identity "example/x-plus-1-recorded-example"
+    :operation "DREYECK/LISP-CRITIC/RECORDED::X-PLUS-1-RECORDED-EXAMPLE" :applicability :example
+    :status :contracted :effect-classes '(:observational)
+    :effect-extent "nothing changes: reads a committed JSON record and the example's current source, and builds objects from them"
+    :authority "the repository's own record file and code page"
+    :postconditions "no file, registry or running engine changes"
+    :verification-evidence "reviewed source: dreyeck/src/lisp-critic-recorded.lisp READ-EXAMPLE-EVALUATION; the recorded-evaluation tests assert the engine never loads"
+    :replay-semantics "repeatable" :audit-provenance "dreyeck b915ab08"))
+  "The contracts for the remaining served-Catalog paths: two unresolved title-bar
+actions, and the two examples reviewed to run.")
+
 ;;;; Containment adapters and their drift
 
 (defparameter +containment-adapters+
@@ -379,10 +472,26 @@ decision is taken again when it is evaluated, not only when it was shown."))
      :sha256 "38a9d2a07ca7abf8d9a4753b75debe5f3f761dff9ec6aec9a1fb419fc6b5df45")
     (:point "a view's HTML is computed only while its HTML slot is empty"
      :system "html-inspector-views" :file "views.lisp" :form "(defmethod view-html :before ((view html-view))"
-     :sha256 "ead88cd43d332099705b8d98ddee322f735bfb52b9c12e3d0a6633987c02289e"))
+     :sha256 "ead88cd43d332099705b8d98ddee322f735bfb52b9c12e3d0a6633987c02289e")
+    (:point "HTML-INSPECTOR-VIEWS/STANDARD:RENDER-TOPLEVEL-CST :AROUND for DEFEXAMPLE, replaced"
+     :system "hyperdoc/explorer" :file "hyperdoc-explorer/examples.lisp"
+     :form "(defmethod html-inspector-views/standard:render-toplevel-cst :around"
+     :sha256 "741549c2b7ecf0637fbc6325bb8a274b2e00bce2efd73590a2660988a9048a43"))
   "Each upstream point this layer replaces or relies on, with the digest of the
 source form as reviewed: html-inspector-views 386df893, clog-moldable-inspector
 b369f0a4, the revisions dreyeck's flake pins.")
+
+(defparameter +replacement-methods+
+  (flet ((entry (label generic qualifiers specializers)
+           (list label generic qualifiers specializers (find-method generic qualifiers specializers))))
+    (list (entry "👀OPERATIONS on T" #'hvs::👀operations '() (list (find-class t)))
+          (entry "RENDER-TOPLEVEL-CST :AROUND for DEFEXAMPLE" #'hvs:render-toplevel-cst '(:around)
+                 (list (c2mop:intern-eql-specializer 'hyperdoc:defexample)
+                       (find-class t) (find-class t) (find-class t)))))
+  "The methods this layer put in place of upstream's, with where they live. If
+upstream code is loaded again after this layer, a method found there is no
+longer this layer's, and a replaced method no longer knows its generic
+function, so both are recorded here.")
 
 (defparameter +known-pathname-views+
   '("👀COMPONENTS" "👀PATH" "👀ITEMS" "👀CONTENT")
@@ -433,4 +542,7 @@ everything is as reviewed."
          for class = (first (c2mop:method-specializers method))
          when (and (null (method-qualifiers method)) (typep class 'class) (not (eq class (find-class t)))
                    (not (member (symbol-name (class-name class)) +known-title-bar-classes+ :test #'string=)))
-           collect (list :point (format nil "new title-bar actions on ~S" (class-name class))))))
+           collect (list :point (format nil "new title-bar actions on ~S" (class-name class))))
+   (loop for (label generic qualifiers specializers method) in +replacement-methods+
+         unless (eq method (find-method generic qualifiers specializers nil))
+           collect (list :point (format nil "~A is no longer this layer's method" label)))))

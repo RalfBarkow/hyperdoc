@@ -135,6 +135,55 @@ on the server; without the served policy it does."
   (assert (%references (hv:title-bar-action-buttons "a string")))
   t)
 
+(defun check-reload-withheld ()
+  "Served, a HyperDoc and its text pages offer no Reload, which re-reads page
+files into the running image; without the served policy the HyperDoc does."
+  (let* ((book (hyperbook:find-hyperbook "dreyeck/lisp-critic/reading" :signal-error? t))
+         (page (hyperbook:find-page book "Anatomy of a Critique" :signal-error? t)))
+    (served (lambda ()
+              (assert (null (%references (hv:title-bar-action-buttons book))))
+              (assert (null (%references (hv:title-bar-action-buttons page))))))
+    (assert (%references (hv:title-bar-action-buttons book))))
+  t)
+
+(defun check-lazy-cell-withheld ()
+  "Served, a lazy cell offers no Evaluate; without the served policy it does."
+  (let ((cell (lwcells::cell 1)))
+    (served (lambda () (assert (null (%references (hv:title-bar-action-buttons cell))))))
+    (assert (%references (hv:title-bar-action-buttons cell))))
+  t)
+
+(defun %all-references (view)
+  "VIEW's references, and those of the views it transcludes."
+  (loop for reference in (%references view)
+        append (cons reference (and (typep reference 'hv:view) (%all-references reference)))))
+
+(defun %example-thunks (object title)
+  (remove-if-not (lambda (x) (typep x 'ap:example-thunk)) (%all-references (%view object title))))
+
+(defun check-examples-gated ()
+  "Served, an example's run button appears only for an example with a contract,
+and a run obtained otherwise is refused; without the served policy it runs."
+  (let* ((recorded (hyperbook:find-page (hyperbook:find-hyperbook "dreyeck/lisp-critic/reading" :signal-error? t)
+                                        "Reading a Recorded Critique" :signal-error? t))
+         (code (%code-page))
+         (uncontracted (find-symbol "THE-ANSWER" "HYPERDOC"))
+         (run (make-instance 'ap:example-thunk :fn (lambda () (funcall (symbol-function uncontracted)))
+                                               :example uncontracted)))
+    (served
+     (lambda ()
+       (assert (equal '("SETF-PUSH-RECORDED-EXAMPLE" "X-PLUS-1-RECORDED-EXAMPLE")
+                      (sort (mapcar (lambda (thunk) (symbol-name (ap::example-thunk-example thunk)))
+                                    (%example-thunks recorded "Content"))
+                            #'string<)))
+       (assert (null (%example-thunks code "Source")))
+       (assert (some (lambda (view) (and (typep view 'hv:view) (search "<span title='Not run here" (hv:view-html view))))
+                     (cons (%view code "Source") (%all-references (%view code "Source")))))
+       (assert (typep (hv:eval-thunk run) 'ap:invocation-refused))))
+    (assert (%example-thunks code "Source"))
+    (assert (eql 42 (hv:eval-thunk run))))
+  t)
+
 (defun check-contracts ()
   "The Work operations are fully contracted and still not invocable in a Catalog:
 the authoring capability is absent. The audited upstream candidates are
@@ -148,7 +197,10 @@ registered as unresolved or unsafe."
         (assert (search "authoring-environment" reason)))))
   (loop for (identity status) in '(("hyperdoc:load-page" :unresolved) ("hyperbook:register" :unresolved)
                                    ("fedwiki/reload" :unsafe) ("fedwiki/open-external" :unsafe)
-                                   ("copy-to-clipboard" :unsafe) ("page-attached/activation" :unsafe))
+                                   ("copy-to-clipboard" :unsafe) ("page-attached/activation" :unsafe)
+                                   ("hyperdoc/reload" :unresolved) ("cell/evaluate" :unresolved)
+                                   ("example/setf-push-recorded-example" :contracted)
+                                   ("example/x-plus-1-recorded-example" :contracted))
         do (assert (eq status (ap:contract-status (ap:find-operation-contract identity))) () "~A" identity))
   t)
 
@@ -182,12 +234,16 @@ registered as unresolved or unsafe."
   (check-pathnames-stay-inside-the-root)
   (check-fedwiki-actions-withheld)
   (check-clipboard-withheld)
+  (check-reload-withheld)
+  (check-lazy-cell-withheld)
+  (check-examples-gated)
   (check-contracts)
   (check-served-catalog-boundary)
   (check-adapters-as-reviewed)
   (format t "~&AUTHORITY-POLICY-PASS: served, Operations stays and shows contract status; an unreviewed ~
 new method is listed, gets no Evaluate and is refused if invoked anyway; a contracted reader-like ~
 method runs; pathnames outside the repository show nothing; FedWiki's inherited actions and the ~
-server-side clipboard are withheld; ~
+server-side clipboard, Reload and a lazy cell's Evaluate are withheld; an example runs only with ~
+a contract; ~
 the Work operations are contracted but need the authoring capability; adapted upstream points are as reviewed.~%")
   t)
