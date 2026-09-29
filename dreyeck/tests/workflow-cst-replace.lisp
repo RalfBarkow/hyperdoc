@@ -434,6 +434,125 @@ own: a macro and a function are different definitions of a name."
               (read-from-string "(defmacro cl-user::other-macro (x) x)"))))))
   t)
 
+(defun test-a-variable-key-names-one-variable ()
+  "A DEFVAR is addressed by the variable it defines, under the key a
+DEFPARAMETER of that variable has: they are one definition, made two ways."
+  (let ((key
+         (wf:form-key (read-from-string "(defvar cl-user::*probe-variable* 1)"))))
+    (assert (equal (list :parameter (intern "*PROBE-VARIABLE*" :cl-user)) key))
+    (assert
+     (equal key
+            (wf:form-key (read-from-string "(defvar cl-user::*probe-variable* 1)"))))
+    (assert
+     (equal key (wf:form-key (read-from-string "(defvar cl-user::*probe-variable*)"))))
+    (assert
+     (equal key
+            (wf:form-key
+             (read-from-string "(defparameter cl-user::*probe-variable* 2)"))))
+    (assert
+     (not
+      (equal key
+             (wf:form-key (read-from-string "(defvar cl-user::*other-variable* 1)")))))
+    ;; The key holds the symbol, so the package stays part of it.
+    (assert
+     (not
+      (equal key
+             (wf:form-key
+              (read-from-string
+               "(defvar dreyeck/workflow/cst-replace/tests::*probe-variable* 1)")))))
+    (assert
+     (not
+      (equal key
+             (wf:form-key
+              (read-from-string "(defun cl-user::*probe-variable* () 1)"))))))
+  t)
+
+(defparameter +fixture-variable-source+
+  "(in-package :cl-user)
+
+(defvar *probe-variable*
+  ;; Why the variable starts at seven.
+  7)
+
+(defun untouched ()
+  ;; A neighbour whose text must survive byte for byte.
+  (list 1 2 3))
+")
+
+(defun test-edits-a-defvar-without-reserializing (environment)
+  "The positive control: one token of a DEFVAR changed through the
+repository-level operation, and every other byte kept."
+  (call-with-fixture
+   (lambda (path)
+     (let ((plan (a::plan-cst-source-replacement
+                  "cst-probe" path (list :parameter (intern "*PROBE-VARIABLE*" :cl-user))
+                  7 "8" 8)))
+       (a::replace-owned-cst-source plan environment)
+       (assert (string= (replace-once +fixture-variable-source+ "  7)" "  8)")
+                        (%text path)))))
+   :source +fixture-variable-source+))
+
+(defun test-refuses-ambiguous-variable-keys ()
+  "One variable defined twice, both ways or the same way, is an address no
+structural operation picks from: replacement and removal refuse it, and so
+does inserting a DEFVAR of a variable a DEFPARAMETER already defines."
+  (let ((key (list :parameter (intern "*PROBE-VARIABLE*" :cl-user))))
+    (dolist (source (list "(in-package :cl-user)
+
+(defvar *probe-variable* 7)
+
+(defparameter *probe-variable* 7)
+"
+                          "(in-package :cl-user)
+
+(defvar *probe-variable* 7)
+
+(defvar *probe-variable* 7)
+"))
+      (call-with-fixture
+       (lambda (path)
+         (let ((before (%text path)))
+           (dolist (thunk
+                    (list (lambda ()
+                            (a::plan-cst-source-replacement "cst-probe" path key 7 "8" 8))
+                          (lambda () (a::plan-removal "cst-probe" path key))))
+             (let ((message (%signals thunk)))
+               (assert message)
+               (assert (search "found 2" message))))
+           (assert (string= before (%text path)))))
+       :source source))
+    (call-with-fixture
+     (lambda (path)
+       (let* ((before (%text path))
+              (message
+               (%signals
+                (lambda ()
+                  (a::plan-insertion "cst-probe" path key
+                                     (read-from-string "(defvar cl-user::*probe-variable* 7)")
+                                     (list :definition (intern "UNTOUCHED" :cl-user)))))))
+         (assert message)
+         (assert (search "already occurs" message))
+         (assert (string= before (%text path)))))
+     :source (replace-once +fixture-variable-source+ "(defvar" "(defparameter")))
+  t)
+
+(defun test-defvar-keeps-its-binding-across-reload ()
+  "A semantic control, not a property of FORM-KEY: why an identity whose
+EQ-ness matters, such as a semantic operation, is a DEFVAR. Evaluating its
+DEFVAR again leaves the object already bound; a DEFPARAMETER replaces it."
+  (let ((variable (make-symbol "*RELOADED*"))
+        (parameter (make-symbol "*REPLACED*")))
+    (eval (list 'defvar variable '(list :identity)))
+    (eval (list 'defparameter parameter '(list :identity)))
+    (let ((kept (symbol-value variable))
+          (replaced (symbol-value parameter)))
+      (eval (list 'defvar variable '(list :identity)))
+      (eval (list 'defparameter parameter '(list :identity)))
+      (assert (eq kept (symbol-value variable)))
+      (assert (not (eq replaced (symbol-value parameter))))
+      (assert (equal replaced (symbol-value parameter)))))
+  t)
+
 (defun run-cst-replace-tests ()
   (let ((environment (a:make-authoring-environment)))
     (test-targeted-replacement-preserves-everything-else environment)
@@ -450,7 +569,11 @@ own: a macro and a function are different definitions of a name."
     (test-an-example-key-names-one-example)
     (test-a-class-key-names-one-class)
     (test-a-view-key-names-one-method)
-    (test-a-macro-key-names-one-macro))
+    (test-a-macro-key-names-one-macro)
+    (test-a-variable-key-names-one-variable)
+    (test-edits-a-defvar-without-reserializing environment)
+    (test-refuses-ambiguous-variable-keys)
+    (test-defvar-keeps-its-binding-across-reload))
   (format t "~&CST-SOURCE-REPLACEMENT-PASS: one token changed and every other ~
 byte kept; duplicate, missing and malformed targets refused with the ~
 authority untouched; comment, spelling, whitespace and neighbour damage all ~
@@ -459,5 +582,9 @@ string, so one export clause can be edited while the package's reason, ~
 :USE and nicknames are not; a method is addressed by its qualifiers ~
 and specializers, apart from its siblings; a class and a HyperDoc ~
 example by their names; a view by its name and the class it is for; ~
-and a macro by its name, apart from a function of that name.~%")
+and a macro by its name, apart from a function of that name; a DEFVAR by ~
+its variable, under the key a DEFPARAMETER of it has, so one variable ~
+defined twice is refused by replacement, removal and insertion alike. ~
+Semantic control: a DEFVAR evaluated again keeps its bound object, a ~
+DEFPARAMETER replaces it.~%")
   t)
