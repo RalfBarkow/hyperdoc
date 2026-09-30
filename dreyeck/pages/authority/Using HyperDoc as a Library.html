@@ -2,43 +2,54 @@
 <in-package>dreyeck/authority/reading</in-package>
 <h1>Using HyperDoc as a Library</h1>
 <p>We want to use Konrad Hinsen's <code>upstream/main</code> HyperDoc as a library
-and develop the dreyeck systems separately. This lets us build on HyperDoc's
-objects and Inspector while giving our own extensions their own source and
-responsibility. The <a expr="(library-boundary)" view="Source">current source-adoption boundary</a>
-records what was adopted and which local differences remain; this checkout is
-not a claim that all those differences have disappeared.</p>
-<p>For a downstream developer, extension includes new classes, generic functions,
-methods, views and operations. We want those extensions to participate in the
-library without each definition silently becoming permission for a browser
-visitor to execute it.</p>
-<h2>The composition that raised the question</h2>
-<p>The <a expr="(upstream-operations-source)" view="Source">installed upstream Inspector source</a>
-constructs an Evaluate thunk for each method selected by its one-argument
-<a expr="(discovery-sources)">discovery rule</a>. The thunk calls the method's
-generic function on the inspected object. The
-<a expr="(invocation-path)">Evaluate reference and browser handler</a> carry that
-call into the server's Lisp image. Together these sources expose this route:</p>
+and develop the dreyeck systems separately. Downstream development includes new
+classes, generic functions, methods, views and operations. We want those
+extensions to remain discoverable and inspectable without their applicability
+alone granting a browser visitor permission to execute them.</p>
+<h2>Upstream source inspection</h2>
+<p>The <a expr="(discovery-sources)">upstream Inspector discovery functions</a>
+select methods for an object and filter for one required argument. The
+<a expr="(upstream-operations-source)" view="Source">upstream Operations definition</a>
+then constructs an Evaluate thunk for each selected method; its body calls that
+method's generic function on the object. The
+<a expr="(invocation-path)">reference construction, browser handler and thunk dispatch source</a>
+show how an Evaluate reference leads to server-side Lisp evaluation.</p>
 <pre>downstream adds a method selected for this object
-    → Inspector lists the method in Operations
-    → Operations offers Evaluate
-    → a browser invocation evaluates its Lisp thunk</pre>
-<p>The policy suite's <a expr="(policy-test-source)">composition test</a> uses a
-downstream Page method with a visible effect as a probe. Under the served
-policy the method stays visible, is offered no Evaluate and is refused with
-zero probe calls; outside that policy the same invocation runs once. That test
-runs in <code>dreyeck/authority-policy/tests</code>; this page shows its current
-source and does not run it.</p>
-<p>The issue is the composition rule, even when the added method is harmless:
-does adding behavior also grant remote invocation authority? We want to keep
-<code>👀operations</code> useful for discovering and inspecting real methods.
-Approval to invoke them is a further decision. The
-<a page="Authority Surface Witnesses" view="Source">current effect-free experiment</a>
-shows one dreyeck attempt to separate the two. It covers the guarded method-thunk
-route; render-time page expressions remain under investigation.</p>
-<p>This reading continues through
-<a page="Reading the HyperDoc Authority Surface">the distinctions</a>,
-<a page="Authority Surface Witnesses" view="Source">the Lisp witnesses</a>,
-<a page="Extending HyperDoc Without Granting Authority">the desired library contract</a>,
+    → Inspector discovers it
+    → upstream Operations constructs Evaluate
+    → the eval-reference handler evaluates its thunk</pre>
+<p>These links provide upstream source inspection. This reading does not execute
+a pristine upstream instance.</p>
+<h2>Observed upstream+dreyeck composition</h2>
+<p>The existing policy tests compose upstream discovery and thunk dispatch with
+<a expr="(policy-sources)">dreyeck's replacement Operations view and method-thunk gate</a>.
+Their <a expr="(source-form &quot;dreyeck&quot; &quot;dreyeck/tests/authority-policy.lisp&quot; &quot;(defmethod probe-effect&quot;)" view="Source">downstream probe method</a>
+increments an image-local counter. Here “served policy” means the
+<a expr="(source-form &quot;dreyeck&quot; &quot;dreyeck/tests/authority-policy.lisp&quot; &quot;(defun served&quot;)" view="Source">test's dynamic non-development server parameters</a>;
+it does not mean that a browser click has been exercised.</p>
+<p>Under those parameters the probe remains listed without Evaluate, as asserted
+by <a expr="(source-form &quot;dreyeck&quot; &quot;dreyeck/tests/authority-policy.lisp&quot; &quot;(defun check-operations-stay-inspectable&quot;)" view="Source">the actual visibility/no-Evaluate test</a>.
+Its guarded invocation is refused with zero probe calls; outside those
+parameters the same invocation runs once, as asserted by
+<a expr="(source-form &quot;dreyeck&quot; &quot;dreyeck/tests/authority-policy.lisp&quot; &quot;(defun check-uncontracted-invocation-refused&quot;)" view="Source">the invocation test</a>.
+The <a expr="(policy-test-source)">complete selected test definitions and helpers</a>
+make both assertions readable. These links expose current test source; they do
+not execute it or display a recorded result. The policy-off comparison still
+uses dreyeck's replacement, not pristine upstream.</p>
+<h2>Current dreyeck containment witness</h2>
+<p>The <a page="Authority Surface Witnesses" view="Library definitions">current effect-free witness</a>
+asserts that a pure uncontracted method stays visible, has no Evaluate offer,
+and is refused at dreyeck's typed method-thunk gate. It contrasts that refusal
+with a permitted observational Page reader. It tests this guarded route under
+dynamic served parameters, not every remote evaluation path. The
+<a expr="(render-expression-source)">render-time page-expression route</a>
+remains unresolved and under investigation.</p>
+<p>The library question is therefore about composition: should adding behavior
+also grant browser invocation authority? We want to preserve
+<code>👀operations</code> as a way to discover and inspect real methods while
+making invocation a separate decision.</p>
+<p>Next: <a page="Reading the HyperDoc Authority Surface">the distinctions exposed by this problem</a>.
+Then follow <a page="Authority Surface Witnesses" view="Library definitions">the Lisp evidence</a>,
+<a page="Extending HyperDoc Without Granting Authority">the upstream question</a>,
 and <a page="Using Upstream Safely">future upstream changes</a>.</p>
-<p>Next: <a page="Reading the HyperDoc Authority Surface">Reading the HyperDoc Authority Surface</a>.</p>
 </body></html>

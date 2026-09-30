@@ -1,9 +1,8 @@
 <html><head><title>Reading the HyperDoc Authority Surface</title></head><body>
 <in-package>dreyeck/authority/reading</in-package>
 <h1>Reading the HyperDoc Authority Surface</h1>
-<p>The <a page="Using HyperDoc as a Library">library composition problem</a>
-asks us to distinguish several relations. The examples below give them concrete
-meaning before we discuss extension points.</p>
+<p>The <a page="Using HyperDoc as a Library">composition problem</a> concerns
+several different relations. We can name them before choosing an implementation.</p>
 <h2>From a method to an invocation</h2>
 <p><strong>Method applicability</strong> concerns dispatch: a method specialized
 on Page can participate when its generic function receives a Page. Our
@@ -11,51 +10,59 @@ on Page can participate when its generic function receives a Page. Our
 is such a definition. Inspector discovery has its own selection rules,
 including superclass traversal and a one-argument filter; inspect the
 <a expr="(discovery-sources)">actual discovery functions</a> rather than treating
-this list as a complete account of CLOS dispatch.</p>
-<p><strong>Inspectability</strong> means being able to see that method and read
-its definition. <strong>Invocation affordance</strong> means being offered a
-way to run it. The <a expr="(upstream-operations-source)" view="Source">upstream
-Operations definition</a> supplies both a method reference and an Evaluate
-button. Those are distinct offers.</p>
+the list as a complete account of CLOS dispatch.</p>
+<p><strong>Inspectability</strong> means seeing a method and examining its
+definition. <strong>Invocation affordance</strong> means being offered a way to
+run it. The <a expr="(upstream-operations-source)" view="Source">upstream Operations source</a>
+supplies both a method reference and an Evaluate button. These are distinct offers.</p>
 <p><strong>Invocation authority</strong> asks whether this visitor may request
 that execution in this context. The <a expr="(decision-objects)">current dreyeck
-contracts and decisions</a> give the marker no contract and give
-<code>PATH-ITEM-OF</code> an observational contract. Under served policy the
-<a expr="(policy-sources)">containment source</a> keeps the method reference but
-withholds its Evaluate offer and checks again at thunk invocation. This is a
-local experiment, not an upstream library contract.</p>
+evidence objects</a> expose the marker's absent contract and the Page reader's
+observational contract. The <a expr="(policy-sources)">dreyeck containment definitions</a>
+withhold an unpermitted Evaluate offer and check again at typed thunk invocation.
+This is downstream containment, not an upstream library contract.</p>
 <h2>Capability, effect and verification</h2>
-<p><strong>Runtime capability</strong> asks whether the image has the means to
-carry out an operation; permission asks whether it may. The
-<a expr="(ap:find-operation-contract &quot;hyperbook:path-item-of on page&quot;)" view="Contract">Page reader contract</a>
-requires no additional capability (<code>:none</code>) and allows anonymous
-invocation. In contrast, the
-<a expr="(ap:find-operation-contract &quot;operation/change-work-status&quot;)" view="Contract">Work status contract</a>
-requires an authoring environment and owner permission. The
-<a expr="(policy-sources)">decision source</a> treats capability and permission
-as separate checks; its present permission model only grants anonymous access.</p>
+<p><strong>Runtime capability</strong> asks whether the runtime has the means to
+perform an operation; permission asks whether it may. Having a writer available,
+for example, would not establish permission to change a particular document.</p>
 <p>For a changing operation, <strong>effect authority</strong> identifies what
-it may act on, and <strong>effect extent</strong> bounds what may change. The
-<a expr="(ap:find-operation-contract &quot;operation/change-work-status&quot;)" view="Contract">same Work contract</a>
-names an exact observed source declaration and bounds the intended change to
-one status character range in one HTML file. Its <strong>post-effect verification</strong>
-record calls for checking installed source and rereading the Topic. These are
-contract statements, not evidence that this reading has performed a write.
-No changing operation is used in our executable witness.</p>
+it may act on. <strong>Effect extent</strong> bounds which changes are permitted.
+<strong>Post-effect verification</strong> asks what observation would establish
+that the intended change, within those bounds, actually occurred.</p>
+<p>Consider a hypothetical edit of one field in one document. Its authority might
+be that particular document in the state we inspected; its extent might be only
+that field; verification might reread the document and compare it with the
+expected result, including the unchanged remainder. This explains the concepts;
+it is not an operation implemented or executed by this reading.</p>
+<p>The <a expr="(ap:find-operation-contract &quot;hyperbook:path-item-of on page&quot;)" view="Contract">existing Page reader contract</a>
+is the simpler observational case: it describes returning the Page ID with no
+change and requires no additional capability (<code>:none</code>). The
+<a page="Authority Surface Witnesses" view="Library definitions">behavioral witness</a>
+checks its returned ID and that the Page ID remains unchanged. That check is
+not a general verification of all Page state.</p>
 <h2>Two other authority questions</h2>
 <p><strong>Disclosure</strong> asks what an inspection may reveal. The
-<a expr="(disclosure-sources)">pathname Items and Content views</a> can expose
+<a expr="(disclosure-sources)">pathname Items and Content definitions</a> expose
 directory entries or file contents without changing those files. The same
-source group shows dreyeck's current root check. A description of write effects
-alone would not answer who may read those resources.</p>
+source group shows dreyeck's current root predicate. Describing permitted
+changes alone would not answer who may read those resources.</p>
 <p><strong>Authored evaluation</strong> asks why code supplied by a Page may run.
-The <a expr="(render-expression-source)">HTML generator and expression-link
-serialization source</a> call <code>PARSE-AND-EVAL</code> while rendering, before
-an invocation button is clicked. This is a separate authority class. Its source
-and permitted effects remain under investigation; the guarded method witness
-does not establish containment for it.</p>
-<p>Applicability, inspectability and invocation authority are different relations.
-Next: <a page="Authority Surface Witnesses" view="Source">inspect the Lisp and run the witnesses</a>.
-The <a page="Authority Surface Witnesses" view="Library definitions">Library definitions view</a>
-transcludes the external definitions beside the downstream source.</p>
+The <a expr="(render-expression-source)">HTML generator and expression-link serialization source</a>
+call <code>PARSE-AND-EVAL</code> during rendering, before an invocation button is
+clicked. This source-exposing example does not exercise or contain that route.
+Render-time evaluation remains unresolved and under investigation.</p>
+<h2>A later concrete example of the effect concepts</h2>
+<p>The existing dreyeck <a expr="(ap:find-operation-contract &quot;operation/change-work-status&quot;)" view="Contract">Work status contract</a>
+applies these concepts to a status field in an HTML document. “Topic” here means
+the item described by a declaration in that document. The record identifies the
+observed declaration, bounds the intended change to its status character range,
+and calls for rereading the installed source and the item reconstructed from it.
+Its “authoring environment” names the runtime's supported source-writing means;
+owner permission is a separate requirement. These are contract statements, not
+evidence of a write performed here. The <a expr="(policy-sources)">decision source</a>
+checks capability separately from permission and presently grants only anonymous
+permission, so it does not implement owner authorization.</p>
+<p>Next: <a page="Authority Surface Witnesses" view="Library definitions">read discovery → affordance construction → invocation → downstream decision → refusal / permitted contrast</a>.
+The Code Page distinguishes its behavioral witness from examples that expose
+source and evidence objects.</p>
 </body></html>

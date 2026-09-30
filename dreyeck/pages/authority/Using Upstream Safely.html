@@ -4,10 +4,11 @@
 <p>A library composition contract must survive changes to the library. Before
 adopting a future <code>upstream/main</code> revision we would therefore ask:
 has its remote authority surface changed when composed with dreyeck?</p>
-<p>Our existing <a hyperbook="dreyeck/upstream-intake" page="Upstream Intake as a Read-Only Observation">Upstream Intake reading</a>
-separates observing a candidate from integrating it. The
-<a expr="(intake-sources)">page-loading comparison and current containment drift
-check</a> provide concrete starting points. The drift check is bounded to known
+<p>“Upstream Intake” is our name for observing a candidate revision before deciding
+to integrate it. The existing <a hyperbook="dreyeck/upstream-intake" page="Upstream Intake as a Read-Only Observation">general Intake reading</a> is optional background;
+its other examples concern commit observation and curation, not a demonstration
+of authority compatibility. The
+<a expr="(intake-sources)">page-loading observation constructor, current containment drift check and its test</a> provide concrete starting points. The drift check is bounded to known
 adapters and several enumerated surface changes; it is not a complete authority
 review. Its existing test can detect those recorded dependencies moving.</p>
 <p>A future intake review could compare the candidate and retained source, then
@@ -25,13 +26,17 @@ supplies their expressions?</li>
 </ul>
 <p>The <a page="Authority Surface Witnesses" view="Library definitions">actual
 source definitions</a> identify today's comparison points. The
-<a page="Authority Surface Witnesses" view="Source">live witness</a> supplies a
-repeatable negative case and a permitted observational contrast. New cases
+<a page="Authority Surface Witnesses" view="Library definitions">current dreyeck containment witness</a> supplies a
+repeatable negative case and a permitted observational contrast for typed
+method thunks under dynamic served parameters. It does not execute pristine upstream. New cases
 would be needed for surfaces that these examples do not cover.</p>
 <p>An intake result should distinguish source differences, observed composed
 behavior, proposed consequences and unknowns. In particular, a passing
 method-thunk test must not close the render-time authority question. That topic
 remains under investigation.</p>
+<p>For provenance, the <a expr="(library-boundary)" view="Source">repository-relative source-adoption record</a>
+identifies the adopted HyperDoc reference and remaining local differences. This
+checkout and its containment witness should not be read as pristine upstream.</p>
 <p>No upstream update is performed by this reading. Return to
 <a page="Extending HyperDoc Without Granting Authority">the proposed library contract</a>
 or <a page="Using HyperDoc as a Library">the beginning of the five-stop reading</a>.</p>

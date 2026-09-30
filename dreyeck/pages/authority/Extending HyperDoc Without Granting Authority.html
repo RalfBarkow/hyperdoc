@@ -1,12 +1,12 @@
 <html><head><title>Extending HyperDoc Without Granting Authority</title></head><body>
 <in-package>dreyeck/authority/reading</in-package>
 <h1>Extending HyperDoc Without Granting Authority</h1>
-<p>The <a page="Authority Surface Witnesses" view="Source">witnesses</a> motivate
+<p>The <a page="Authority Surface Witnesses" view="Library definitions">source and bounded containment witness</a> motivate
 an acceptance criterion for using HyperDoc as a library:</p>
-<blockquote>adding an applicable downstream method must not by itself grant remote invocation authority</blockquote>
+<blockquote>Downstream applicability should not itself grant browser invocation authority.</blockquote>
 <p>This is a desired composition contract, offered for upstream discussion.
-The following purposes explain what we would need; they do not prescribe a
-particular set of APIs.</p>
+The concrete upstream question is:</p>
+<blockquote>Can HyperDoc provide a supported way for downstream code to make the invocation decision inspectable, use it to determine the affordance, and enforce it again at invocation time?</blockquote>
 <h2>Keep discovery open; decide invocation separately</h2>
 <p>Automatically discovering downstream methods is useful. We want
 <code>👀operations</code> to keep exposing real behavior and its source.
@@ -24,30 +24,28 @@ arguments. The <a expr="(ap:find-operation-contract &quot;hyperdoc:load-page&quo
 LOAD-PAGE record</a> marks invocation authority unresolved. A useful Inspector
 can show that uncertainty alongside the definition.</p>
 <p>The decision should explain why an operation is offered or refused here.
-The <a expr="(decision-objects)">present decision objects</a> demonstrate one
-representation. Could upstream expose a way for a downstream library user to
-supply and inspect such a decision? A decision protocol is a possible implementation;
-the requirement is an understandable, separate decision.</p>
+The <a expr="(decision-objects)">present evidence objects</a> expose contracts
+and decision functions; the example does not itself exercise an invocation decision. The purpose is to let a downstream library user supply a decision that a reader
+can inspect and understand.</p>
 <h2>Enforce the decision when invoking</h2>
 <p>Hiding a button does not enforce authority. At server-side invocation the
 operation must still be permitted, its required capability present, and its
 target and authority current. The
 <a expr="(policy-sources)">present method-thunk gate</a> rechecks its limited
-contract decision, and the <a page="Authority Surface Witnesses" view="Source">effect-free witness</a>
+contract decision, and the <a page="Authority Surface Witnesses" view="Library definitions">effect-free witness</a>
 challenges that gate. It does not verify every target snapshot, effective method
-combination or evaluation path. Could the library provide an invocation boundary
-at which a downstream policy can enforce its decision?</p>
+combination or evaluation path. The supported library capability we are asking
+about must connect the decision with the actual invocation, as well as the affordance.</p>
 <h2>Control disclosure independently</h2>
 <p>The <a expr="(disclosure-sources)">pathname source</a> illustrates why a
 non-writing view may still need authority. A library user needs to describe
-which resources a view may disclose and to whom. A view policy or source-root
-protocol might implement that purpose; neither a write-effect contract nor a
+which resources a view may disclose and to whom. Neither a write-effect contract nor a
 hidden Evaluate button settles it.</p>
 <h2>Give authored evaluation its own account</h2>
 <p>The <a expr="(render-expression-source)">render-time source</a> requires further
 questions: which source authority supplied this expression, why should rendering
-evaluate it, and what may it do? An evaluation context might be an extension
-seam, but we have not established its required contract. This class remains open.</p>
+evaluate it, and what may it do? We have not established the required contract for that route. Render-time
+evaluation remains unresolved; the method-thunk witness does not settle it.</p>
 <p>The dreyeck containment replaces upstream methods and relies on internal
 seams, recorded by its <a expr="ap:+containment-adapters+">adapter inventory</a>.
 It is evidence for discussion, not a completed HyperDoc security architecture.</p>
