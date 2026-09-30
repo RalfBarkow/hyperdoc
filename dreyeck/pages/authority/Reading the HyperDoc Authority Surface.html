@@ -1,0 +1,61 @@
+<html><head><title>Reading the HyperDoc Authority Surface</title></head><body>
+<in-package>dreyeck/authority/reading</in-package>
+<h1>Reading the HyperDoc Authority Surface</h1>
+<p>The <a page="Using HyperDoc as a Library">library composition problem</a>
+asks us to distinguish several relations. The examples below give them concrete
+meaning before we discuss extension points.</p>
+<h2>From a method to an invocation</h2>
+<p><strong>Method applicability</strong> concerns dispatch: a method specialized
+on Page can participate when its generic function receives a Page. Our
+<a expr="(page-method #'uncontracted-marker)" view="Source code">marker method</a>
+is such a definition. Inspector discovery has its own selection rules,
+including superclass traversal and a one-argument filter; inspect the
+<a expr="(discovery-sources)">actual discovery functions</a> rather than treating
+this list as a complete account of CLOS dispatch.</p>
+<p><strong>Inspectability</strong> means being able to see that method and read
+its definition. <strong>Invocation affordance</strong> means being offered a
+way to run it. The <a expr="(upstream-operations-source)" view="Source">upstream
+Operations definition</a> supplies both a method reference and an Evaluate
+button. Those are distinct offers.</p>
+<p><strong>Invocation authority</strong> asks whether this visitor may request
+that execution in this context. The <a expr="(decision-objects)">current dreyeck
+contracts and decisions</a> give the marker no contract and give
+<code>PATH-ITEM-OF</code> an observational contract. Under served policy the
+<a expr="(policy-sources)">containment source</a> keeps the method reference but
+withholds its Evaluate offer and checks again at thunk invocation. This is a
+local experiment, not an upstream library contract.</p>
+<h2>Capability, effect and verification</h2>
+<p><strong>Runtime capability</strong> asks whether the image has the means to
+carry out an operation; permission asks whether it may. The
+<a expr="(ap:find-operation-contract &quot;hyperbook:path-item-of on page&quot;)" view="Contract">Page reader contract</a>
+requires no additional capability (<code>:none</code>) and allows anonymous
+invocation. In contrast, the
+<a expr="(ap:find-operation-contract &quot;operation/change-work-status&quot;)" view="Contract">Work status contract</a>
+requires an authoring environment and owner permission. The
+<a expr="(policy-sources)">decision source</a> treats capability and permission
+as separate checks; its present permission model only grants anonymous access.</p>
+<p>For a changing operation, <strong>effect authority</strong> identifies what
+it may act on, and <strong>effect extent</strong> bounds what may change. The
+<a expr="(ap:find-operation-contract &quot;operation/change-work-status&quot;)" view="Contract">same Work contract</a>
+names an exact observed source declaration and bounds the intended change to
+one status character range in one HTML file. Its <strong>post-effect verification</strong>
+record calls for checking installed source and rereading the Topic. These are
+contract statements, not evidence that this reading has performed a write.
+No changing operation is used in our executable witness.</p>
+<h2>Two other authority questions</h2>
+<p><strong>Disclosure</strong> asks what an inspection may reveal. The
+<a expr="(disclosure-sources)">pathname Items and Content views</a> can expose
+directory entries or file contents without changing those files. The same
+source group shows dreyeck's current root check. A description of write effects
+alone would not answer who may read those resources.</p>
+<p><strong>Authored evaluation</strong> asks why code supplied by a Page may run.
+The <a expr="(render-expression-source)">HTML generator and expression-link
+serialization source</a> call <code>PARSE-AND-EVAL</code> while rendering, before
+an invocation button is clicked. This is a separate authority class. Its source
+and permitted effects remain under investigation; the guarded method witness
+does not establish containment for it.</p>
+<p>Applicability, inspectability and invocation authority are different relations.
+Next: <a page="Authority Surface Witnesses" view="Source">inspect the Lisp and run the witnesses</a>.
+The <a page="Authority Surface Witnesses" view="Library definitions">Library definitions view</a>
+transcludes the external definitions beside the downstream source.</p>
+</body></html>

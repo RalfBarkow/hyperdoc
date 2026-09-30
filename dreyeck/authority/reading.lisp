@@ -1,0 +1,282 @@
+;;;; Authority Surface Witnesses
+(defpackage #:dreyeck/authority/reading
+  (:use #:cl)
+  (:local-nicknames (#:ap #:dreyeck/authority-policy)
+                    (#:hv #:html-inspector-views)
+                    (#:hvs #:html-inspector-views/standard))
+  (:export #:authority-demonstration #:uncontracted-marker #:reading-target
+           #:upstream-operations-source #:invocation-path #:decision-objects
+           #:policy-test-source #:render-expression-source))
+(in-package #:dreyeck/authority/reading)
+
+
+(dreyeck/hyperdoc:defhyperdoc *authority-reading*
+  :id "dreyeck/authority/reading" :title "HyperDoc Authority: A Reading Path"
+  :asdf-system-name "dreyeck/authority/reading"
+  :subdirectory "dreyeck/pages/authority" :code-subdirectory "dreyeck/authority"
+  :main-page-id "Using HyperDoc as a Library")
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Using HyperDoc as a Library" :HYPERBOOK
+                 "dreyeck/authority/reading"))
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Reading the HyperDoc Authority Surface" :HYPERBOOK
+                 "dreyeck/authority/reading"))
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Extending HyperDoc Without Granting Authority" :HYPERBOOK
+                 "dreyeck/authority/reading"))
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Using Upstream Safely" :HYPERBOOK
+                 "dreyeck/authority/reading"))
+
+;;; Source evidence is read from the actual installed source, not reconstructed
+;;; from the currently installed generic function (which dreyeck replaces).
+(defstruct source-evidence origin text)
+(hv:defview evidence-source (evidence source-evidence)
+  (hv:html-view :title "Source" :priority 0
+    (hv:html (:p (hv:esc (source-evidence-origin evidence)))
+             (:pre (hv:esc (source-evidence-text evidence))))))
+(defun source-form (system file marker)
+  (let* ((path (asdf:system-relative-pathname system file))
+         (text (uiop:read-file-string path :external-format :utf-8))
+         (start (search marker text)))
+    (assert start () "Source marker absent: ~A in ~A" marker path)
+    (make-source-evidence :origin (format nil "~A: ~A" path marker)
+                         :text (ap::%form-text text start))))
+
+(hyperdoc:defexample upstream-operations-source
+  (source-form "html-inspector-views" "basic.lisp" "(defview 👀operations (object t)"))
+
+;;; Browser click -> the reference's thunk -> EVAL-THUNK -> Lisp FUNCALL.
+;;; These are actual function objects and exact source forms; no click is sent.
+(hyperdoc:defexample invocation-path
+  (list :evaluate-button
+        (source-form "html-inspector-views" "html.lisp" "(defun eval-button")
+        :eval-reference (source-form "html-inspector-views" "html.lisp" "(defun eval-id")
+        :reference-map (source-form "html-inspector-views" "html.lisp" "(defun html-id")
+        :browser-handler
+        (source-form "clog-moldable-inspector" "inspector.lisp" "(defun set-event-handlers")
+        :active-button
+        (source-form "clog-moldable-inspector" "inspector.lisp" "(defun eval-thunk-with-active-button")
+        :thunk-dispatch (source-form "html-inspector-views" "thunks.lisp" "(defgeneric eval-thunk")
+        :live-thunk-generic #'hv:eval-thunk))
+
+(defun reading-target ()
+  (hyperbook:find-page *authority-reading* "Authority Surface Witnesses" :signal-error? t))
+(defun page-method (generic)
+  (find-method generic '() (list (find-class 'hyperbook:page))))
+
+;;; Deliberately no operation contract. Applicability is its only offer.
+;;; The method has no file, network, process, registry or object mutation.
+(defgeneric uncontracted-marker (page))
+(defmethod uncontracted-marker ((page hyperbook:page))
+  (declare (ignore page))
+  :applicable-only)
+
+(HYPERDOC:DEFEXAMPLE DECISION-OBJECTS
+  (LET ((METHOD (PAGE-METHOD #'UNCONTRACTED-MARKER)))
+    (LIST :TARGET (READING-TARGET) :UNCONTRACTED-METHOD METHOD
+          :UNCONTRACTED-GENERIC #'UNCONTRACTED-MARKER :CONTRACT
+          (AP:METHOD-CONTRACT METHOD) :DECISION #'AP:INVOCATION-DECISION
+          :METHOD-DECISION #'AP:METHOD-INVOCATION-DECISION :GATE-METHOD
+          (FIND-METHOD #'HV:EVAL-THUNK 'NIL
+                       (LIST (FIND-CLASS 'AP:OPERATION-THUNK)))
+          :OPERATIONS-NOW #'HVS::👀OPERATIONS :CONTRACTED-METHOD
+          (PAGE-METHOD #'HYPERBOOK:PATH-ITEM-OF) :OBSERVATIONAL-CONTRACT
+          (AP:FIND-OPERATION-CONTRACT "hyperbook:path-item-of on page")
+          :LOAD-PAGE-CONTRACT (AP:FIND-OPERATION-CONTRACT "hyperdoc:load-page")
+          :UPSTREAM-LOAD-PAGE-METHOD
+          (FIND-METHOD #'HYPERDOC:LOAD-PAGE 'NIL
+                       (LIST (FIND-CLASS 'HYPERDOC::CODE-PAGE))))))
+
+(defun operations-view (page)
+  (hvs::👀operations page))
+(defun rendered-references (view)
+  (hv:view-html view)
+  (mapcar #'cdr (hv:view-references view)))
+(defun thunk-for-method-p (reference method)
+  (and (typep reference 'ap:operation-thunk)
+       (eq method (ap::operation-thunk-method reference))))
+(defun under-served-policy (fn)
+  "Exercise the real policy with served, non-development parameters.
+This dynamic binding starts no server and never disables a running policy."
+  (progv (list (find-symbol "*SERVER-PARAMETERS*" :hyperbook/server))
+         (list (list "700px" nil))
+    (funcall fn)))
+
+;;; Runnable now: no historical output is embedded in this result.
+;;; The lexical counter observes whether the thunk's FN was entered. A removed
+;;; gate makes the counter 1 and the refusal assertion fail, even though the
+;;; marker itself is pure. Direct trusted Lisp calls are outside this contract.
+(hyperdoc:defexample authority-demonstration
+  (under-served-policy
+   (lambda ()
+     (let* ((target (reading-target))
+            (method (page-method #'uncontracted-marker))
+            (reader (page-method #'hyperbook:path-item-of))
+            (contract (ap:method-contract reader))
+            (id-before (hyperbook:id-of target))
+            (view (operations-view target))
+            (references (rendered-references view))
+            (calls 0)
+            (thunk (make-instance 'ap:operation-thunk :method method :target target
+                     :fn (lambda () (incf calls) (uncontracted-marker target))))
+            (refusal (hv:eval-thunk thunk))
+            (reader-thunk (find-if (lambda (ref) (thunk-for-method-p ref reader)) references)))
+       (assert (member method (hvs::find-applicable-methods target)))
+       (assert (member method references))
+       (assert (null (ap:method-contract method)))
+       (assert (notany (lambda (ref) (thunk-for-method-p ref method)) references))
+       (assert (typep refusal 'ap:invocation-refused))
+       (assert (zerop calls))
+       (assert (member reader (hvs::find-applicable-methods target)))
+       (assert (member reader references))
+       (assert (eq contract (ap:find-operation-contract "hyperbook:path-item-of on page")))
+       (assert (equal '(:observational) (ap:contract-effect-classes contract)))
+       (assert (ap::%capability-present-p (ap:contract-required-capability contract)))
+       (assert (ap:method-invocation-decision reader))
+       (assert reader-thunk)
+       (let ((reader-result (hv:eval-thunk reader-thunk)))
+         (assert (equal reader-result id-before))
+         (assert (equal (hyperbook:id-of target) id-before))
+         (list :policy-enforced (ap:policy-enforced-p)
+               :target target :operations-view view
+               :uncontracted
+               (list :method method :exists t :applicable t :inspector-visible t
+                     :contract nil :evaluate-offered nil :guarded-attempt thunk
+                     :invocation :refused :result refusal :thunk-body-calls calls)
+               :contracted
+               (list :method reader :exists t :applicable t :inspector-visible t
+                     :contract contract :effect-classes (ap:contract-effect-classes contract)
+                     :required-capability (ap:contract-required-capability contract)
+                     :capability-present t :invocation-permitted t :evaluate-thunk reader-thunk
+                     :result reader-result :page-id-unchanged t)))))))
+
+
+;;; Source groups for the Library definitions view and the Text Pages.
+(defun library-boundary ()
+  (let ((path
+         (asdf/system:system-relative-pathname "dreyeck"
+                                               "docs/hyperdoc-upstream-boundary.md")))
+    (make-source-evidence :origin (namestring path) :text
+                          (uiop/stream:read-file-string path :external-format
+                                                        :utf-8))))
+
+(defun discovery-sources ()
+  (list
+   (source-form "html-inspector-views" "swank.lisp"
+                "(defun find-applicable-methods")
+   (source-form "html-inspector-views" "swank.lisp"
+                "(defun find-specializers-with-superclasses")
+   (source-form "html-inspector-views" "basic.lisp"
+                "(defun callable-with-one-arg?")))
+
+(defun upstream-page-methods ()
+  (list
+   (source-form "hyperdoc/explorer" "hyperdoc-explorer/html-pages.lisp"
+                "(defmethod load-page ((page html-page))")
+   (source-form "hyperdoc/explorer" "hyperdoc-explorer/code-pages.lisp"
+                "(defmethod load-page ((page code-page))")
+   (source-form "hyperbook" "hyperbook/hyperbooks.lisp"
+                "(defgeneric path-item-of")))
+
+(defun policy-sources ()
+  (list
+   (source-form "dreyeck/authority-policy" "dreyeck/src/authority-policy.lisp"
+                "(defclass operation-contract")
+   (source-form "dreyeck/authority-policy" "dreyeck/src/authority-policy.lisp"
+                "(defun method-contract")
+   (source-form "dreyeck/authority-policy" "dreyeck/src/authority-policy.lisp"
+                "(defun %capability-present-p")
+   (source-form "dreyeck/authority-policy" "dreyeck/src/authority-policy.lisp"
+                "(defun invocation-decision")
+   (source-form "dreyeck/authority-policy" "dreyeck/src/authority-policy.lisp"
+                "(defun method-invocation-decision")
+   (source-form "dreyeck/authority-policy" "dreyeck/src/authority-policy.lisp"
+                "(defmethod hv:eval-thunk ((thunk operation-thunk))")
+   (source-form "dreyeck/authority-policy" "dreyeck/src/authority-policy.lisp"
+                "(defmethod hvs::👀operations ((object t))")))
+
+(defun disclosure-sources ()
+  (list (source-form "html-inspector-views" "pathnames.lisp" "(defview 👀items")
+        (source-form "html-inspector-views" "pathnames.lisp"
+                     "(defview 👀content")
+        (source-form "dreyeck/authority-policy"
+                     "dreyeck/src/authority-policy.lisp"
+                     "(defun allowed-disclosure-roots")
+        (source-form "dreyeck/authority-policy"
+                     "dreyeck/src/authority-policy.lisp"
+                     "(defun pathname-disclosure-permitted-p")))
+
+(defun intake-sources ()
+  (list
+   (source-form "dreyeck" "dreyeck/src/upstream-intake.lisp"
+                "(defun make-hyperdoc-page-loading-intake")
+   (source-form "dreyeck/authority-policy" "dreyeck/src/authority-policy.lisp"
+                "(defun containment-adapter-drift")
+   (source-form "dreyeck"
+                "dreyeck/tests/upstream-intake-smoke.lisp"
+                "(defun check-authority-containment-as-reviewed")))
+
+(defun library-definition-sections ()
+  (list
+   (cons "Installed Inspector: discovery"
+         (append (discovery-sources) (list (upstream-operations-source))))
+   (cons "Installed Inspector: Evaluate reference and invocation"
+         (remove-if-not (lambda (x) (typep x 'source-evidence))
+                        (invocation-path)))
+   (cons "Adopted HyperDoc: Page methods" (upstream-page-methods))
+   (cons "dreyeck: contract, decision and enforcement" (policy-sources))))
+
+(hv:defview authority-library-definitions (page hyperdoc::code-page)
+            (when
+                (and (eq (hyperbook:hyperbook-of page) *authority-reading*)
+                     (equal (hyperbook:id-of page)
+                            "Authority Surface Witnesses"))
+              (hv:html-view :title "Library definitions" :priority 2
+                            (hv:html
+                              (dolist (section (library-definition-sections))
+                                (hv:html
+                                  (:h2 (cl-who:esc (car section)))
+                                  (dolist (evidence (cdr section))
+                                    (hv:html
+                                      (:p
+                                       (hv:object-ref evidence :display
+                                                      (source-evidence-origin
+                                                       evidence)
+                                                      :select "Source"))
+                                      (:pre
+                                       (cl-who:esc
+                                        (source-evidence-text
+                                         evidence)))))))))))
+
+;;; Current test source, not a recorded result: dreyeck/authority-policy/tests
+;;; runs these forms; reading them here does not.
+(hyperdoc:defexample policy-test-source
+  (list (source-form "dreyeck" "dreyeck/tests/authority-policy.lisp" "(defmethod probe-effect")
+        (source-form "dreyeck" "dreyeck/tests/authority-policy.lisp"
+                     "(defun check-uncontracted-invocation-refused")))
+(hyperdoc:defexample render-expression-source
+  (list :html-generator
+        (source-form "hyperdoc/explorer" "hyperdoc-explorer/html-pages.lisp"
+                     "(plump:define-tag-printer html-generator")
+        :expression-link
+        (source-form "hyperdoc/explorer" "hyperdoc-explorer/html-pages.lisp"
+                     "(defun serialize-a-expr-element")
+        :parse-and-eval (fdefinition 'hyperdoc::parse-and-eval)))
+
+;;; Only the named reading examples are reviewed here. The marker METHOD above
+;;; remains uncontracted. These example contracts permit observation, including
+;;; an explicitly refused attempt; they do not authorize arbitrary page code.
+(dolist (name '(upstream-operations-source invocation-path decision-objects
+                authority-demonstration policy-test-source render-expression-source))
+  (ap:register-operation-contract
+   :identity (format nil "authority-reading/~A" (string-downcase name))
+   :operation (format nil "DREYECK/AUTHORITY/READING::~A" name)
+   :applicability :example :status :contracted :effect-classes '(:observational)
+   :effect-extent "Reads repository/dependency source and image metadata; allocates ephemeral evidence; the demonstration changes only a lexical counter and dynamic server parameters"
+   :authority "the named reading example and its explicit source files/objects"
+   :preconditions "reading system loaded; demonstration enforces non-development served policy dynamically"
+   :postconditions "no file, registry, server, network or inspected target is changed by running the example"
+   :verification-evidence "dreyeck/authority/reading/tests: method visible, no Evaluate, thunk refused before its body, contracted PATH-ITEM-OF runs; gate-removal control fails"
+   :replay-semantics "repeatable observation"
+   :audit-provenance "dreyeck/authority/reading, source reviewed 2026-09-30"))

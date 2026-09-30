@@ -1,0 +1,38 @@
+<html><head><title>Using Upstream Safely</title></head><body>
+<in-package>dreyeck/authority/reading</in-package>
+<h1>Using Upstream Safely</h1>
+<p>A library composition contract must survive changes to the library. Before
+adopting a future <code>upstream/main</code> revision we would therefore ask:
+has its remote authority surface changed when composed with dreyeck?</p>
+<p>Our existing <a hyperbook="dreyeck/upstream-intake" page="Upstream Intake as a Read-Only Observation">Upstream Intake reading</a>
+separates observing a candidate from integrating it. The
+<a expr="(intake-sources)">page-loading comparison and current containment drift
+check</a> provide concrete starting points. The drift check is bounded to known
+adapters and several enumerated surface changes; it is not a complete authority
+review. Its existing test can detect those recorded dependencies moving.</p>
+<p>A future intake review could compare the candidate and retained source, then
+exercise their composition with downstream classes and methods. Beyond API
+compatibility and passing tests, it should ask:</p>
+<ul>
+<li>Do new or inherited methods enter the Inspector's discovery list? Does a
+harmless uncontracted downstream method acquire an invocation offer?</li>
+<li>Have generic Evaluate affordances, reference construction, browser handlers
+or server-side evaluation routes changed?</li>
+<li>Do new views disclose files or other resources, or bypass the expected
+source-root decision?</li>
+<li>Have authored or render-time evaluation paths changed? Which source authority
+supplies their expressions?</li>
+</ul>
+<p>The <a page="Authority Surface Witnesses" view="Library definitions">actual
+source definitions</a> identify today's comparison points. The
+<a page="Authority Surface Witnesses" view="Source">live witness</a> supplies a
+repeatable negative case and a permitted observational contrast. New cases
+would be needed for surfaces that these examples do not cover.</p>
+<p>An intake result should distinguish source differences, observed composed
+behavior, proposed consequences and unknowns. In particular, a passing
+method-thunk test must not close the render-time authority question. That topic
+remains under investigation.</p>
+<p>No upstream update is performed by this reading. Return to
+<a page="Extending HyperDoc Without Granting Authority">the proposed library contract</a>
+or <a page="Using HyperDoc as a Library">the beginning of the five-stop reading</a>.</p>
+</body></html>

@@ -1,0 +1,44 @@
+<html><head><title>Using HyperDoc as a Library</title></head><body>
+<in-package>dreyeck/authority/reading</in-package>
+<h1>Using HyperDoc as a Library</h1>
+<p>We want to use Konrad Hinsen's <code>upstream/main</code> HyperDoc as a library
+and develop the dreyeck systems separately. This lets us build on HyperDoc's
+objects and Inspector while giving our own extensions their own source and
+responsibility. The <a expr="(library-boundary)" view="Source">current source-adoption boundary</a>
+records what was adopted and which local differences remain; this checkout is
+not a claim that all those differences have disappeared.</p>
+<p>For a downstream developer, extension includes new classes, generic functions,
+methods, views and operations. We want those extensions to participate in the
+library without each definition silently becoming permission for a browser
+visitor to execute it.</p>
+<h2>The composition that raised the question</h2>
+<p>The <a expr="(upstream-operations-source)" view="Source">installed upstream Inspector source</a>
+constructs an Evaluate thunk for each method selected by its one-argument
+<a expr="(discovery-sources)">discovery rule</a>. The thunk calls the method's
+generic function on the inspected object. The
+<a expr="(invocation-path)">Evaluate reference and browser handler</a> carry that
+call into the server's Lisp image. Together these sources expose this route:</p>
+<pre>downstream adds a method selected for this object
+    → Inspector lists the method in Operations
+    → Operations offers Evaluate
+    → a browser invocation evaluates its Lisp thunk</pre>
+<p>The policy suite's <a expr="(policy-test-source)">composition test</a> uses a
+downstream Page method with a visible effect as a probe. Under the served
+policy the method stays visible, is offered no Evaluate and is refused with
+zero probe calls; outside that policy the same invocation runs once. That test
+runs in <code>dreyeck/authority-policy/tests</code>; this page shows its current
+source and does not run it.</p>
+<p>The issue is the composition rule, even when the added method is harmless:
+does adding behavior also grant remote invocation authority? We want to keep
+<code>👀operations</code> useful for discovering and inspecting real methods.
+Approval to invoke them is a further decision. The
+<a page="Authority Surface Witnesses" view="Source">current effect-free experiment</a>
+shows one dreyeck attempt to separate the two. It covers the guarded method-thunk
+route; render-time page expressions remain under investigation.</p>
+<p>This reading continues through
+<a page="Reading the HyperDoc Authority Surface">the distinctions</a>,
+<a page="Authority Surface Witnesses" view="Source">the Lisp witnesses</a>,
+<a page="Extending HyperDoc Without Granting Authority">the desired library contract</a>,
+and <a page="Using Upstream Safely">future upstream changes</a>.</p>
+<p>Next: <a page="Reading the HyperDoc Authority Surface">Reading the HyperDoc Authority Surface</a>.</p>
+</body></html>

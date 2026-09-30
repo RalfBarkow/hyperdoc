@@ -475,6 +475,34 @@
   :components ((:file "dreyeck/src/authority-policy"))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/authority-policy/tests"))))
 
+(asdf/parse-defsystem:defsystem "dreyeck/authority/reading"
+  :description
+  "Five reading stops: library composition, distinctions, Lisp witnesses, extension purposes and upstream intake"
+  :depends-on
+  ("dreyeck/hyperdoc" "dreyeck/authority-policy" "clog-moldable-inspector"
+   "hyperbook/server" "dreyeck/upstream-intake")
+  :serial
+  t
+  :components
+  ((:module "dreyeck/authority" :components ((:file "reading")))
+   (:module "dreyeck/pages/authority" :components
+    ((:static-file "Using HyperDoc as a Library.html")
+     (:static-file "Reading the HyperDoc Authority Surface.html")
+     (:static-file "Extending HyperDoc Without Granting Authority.html")
+     (:static-file "Using Upstream Safely.html"))))
+  :in-order-to
+  ((asdf/lisp-action:test-op
+    (asdf/lisp-action:test-op "dreyeck/authority/reading/tests"))))
+
+(asdf/parse-defsystem:defsystem "dreyeck/authority/reading/tests"
+  :depends-on
+  ("dreyeck/authority/reading")
+  :components
+  ((:file "dreyeck/authority/tests"))
+  :perform
+  (asdf/lisp-action:test-op (op component) (declare (ignore op component))
+   (uiop/package:symbol-call :dreyeck/authority/reading/tests :run-tests)))
+
 (asdf:defsystem "dreyeck/authority-policy/tests"
   :depends-on ("dreyeck/authority-policy" "dreyeck/catalog" "dreyeck/local-fedwiki-view" "hyperbook/server")
   :components ((:file "dreyeck/tests/authority-policy"))
@@ -498,7 +526,8 @@
                                  "dreyeck/workflow/reading"
                                  "dreyeck/lisp-critic/reading"
                                  "dreyeck/gesture/reading"
-                                 "dreyeck/work/reading")
+                                 "dreyeck/work/reading"
+                                 "dreyeck/authority/reading")
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP

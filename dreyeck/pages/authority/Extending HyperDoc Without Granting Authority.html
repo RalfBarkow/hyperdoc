@@ -1,0 +1,55 @@
+<html><head><title>Extending HyperDoc Without Granting Authority</title></head><body>
+<in-package>dreyeck/authority/reading</in-package>
+<h1>Extending HyperDoc Without Granting Authority</h1>
+<p>The <a page="Authority Surface Witnesses" view="Source">witnesses</a> motivate
+an acceptance criterion for using HyperDoc as a library:</p>
+<blockquote>adding an applicable downstream method must not by itself grant remote invocation authority</blockquote>
+<p>This is a desired composition contract, offered for upstream discussion.
+The following purposes explain what we would need; they do not prescribe a
+particular set of APIs.</p>
+<h2>Keep discovery open; decide invocation separately</h2>
+<p>Automatically discovering downstream methods is useful. We want
+<code>👀operations</code> to keep exposing real behavior and its source.
+Discovery should establish that a method is a candidate for this object.
+Whether a browser visitor may execute it is a separate decision. The
+<a expr="(upstream-operations-source)" view="Source">upstream definition</a> currently
+constructs Evaluate along with discovery; the
+<a expr="(policy-sources)">dreyeck replacement</a> is one experiment in separating them.</p>
+<h2>Make the description and decision inspectable</h2>
+<p>A reader should be able to inspect the operation, its target, possible effects,
+required authority, expected result and unresolved questions. For example,
+<a expr="(upstream-page-methods)">the adopted LOAD-PAGE definitions</a> read source
+and update Page state; the Code Page method also evaluates <code>SEE</code>
+arguments. The <a expr="(ap:find-operation-contract &quot;hyperdoc:load-page&quot;)" view="Contract">current
+LOAD-PAGE record</a> marks invocation authority unresolved. A useful Inspector
+can show that uncertainty alongside the definition.</p>
+<p>The decision should explain why an operation is offered or refused here.
+The <a expr="(decision-objects)">present decision objects</a> demonstrate one
+representation. Could upstream expose a way for a downstream library user to
+supply and inspect such a decision? A decision protocol is a possible implementation;
+the requirement is an understandable, separate decision.</p>
+<h2>Enforce the decision when invoking</h2>
+<p>Hiding a button does not enforce authority. At server-side invocation the
+operation must still be permitted, its required capability present, and its
+target and authority current. The
+<a expr="(policy-sources)">present method-thunk gate</a> rechecks its limited
+contract decision, and the <a page="Authority Surface Witnesses" view="Source">effect-free witness</a>
+challenges that gate. It does not verify every target snapshot, effective method
+combination or evaluation path. Could the library provide an invocation boundary
+at which a downstream policy can enforce its decision?</p>
+<h2>Control disclosure independently</h2>
+<p>The <a expr="(disclosure-sources)">pathname source</a> illustrates why a
+non-writing view may still need authority. A library user needs to describe
+which resources a view may disclose and to whom. A view policy or source-root
+protocol might implement that purpose; neither a write-effect contract nor a
+hidden Evaluate button settles it.</p>
+<h2>Give authored evaluation its own account</h2>
+<p>The <a expr="(render-expression-source)">render-time source</a> requires further
+questions: which source authority supplied this expression, why should rendering
+evaluate it, and what may it do? An evaluation context might be an extension
+seam, but we have not established its required contract. This class remains open.</p>
+<p>The dreyeck containment replaces upstream methods and relies on internal
+seams, recorded by its <a expr="ap:+containment-adapters+">adapter inventory</a>.
+It is evidence for discussion, not a completed HyperDoc security architecture.</p>
+<p>Next: <a page="Using Upstream Safely">Using Upstream Safely</a>.</p>
+</body></html>
