@@ -22,7 +22,8 @@ flake.nix: devShells.default / .tala
 
 Die Quellen für diese Rekonstruktion sind die genannten Dateien am beobachteten
 HEAD, insbesondere [flake.nix](../flake.nix),
-[Script](../scripts/serve-catalog.sh), [ASDF-Definitionen](../dreyeck.asd),
+historisches Script (`git show 91785f7711dfcac609ef5de084b2fd0172d46117:scripts/serve-catalog.sh`),
+[ASDF-Definitionen](../dreyeck.asd),
 [Local-FedWiki-Start](src/local-fedwiki-view.lisp) und
 [HyperBook-Server](../hyperbook-server/server.lisp). Die Backend-Auswahl wurde
 zusätzlich in der tatsächlich aufgelösten, von nixpkgs gelieferten CLOG-Quelle
@@ -55,7 +56,7 @@ Anwendungs-Konfiguration und Lebensdauer als eingebetteten Lisp-Text. Der
 Serverstart selbst war bereits sinnvoll in Lisp gekapselt. Das Script meldete
 `127.0.0.1`, obwohl der tatsächliche Default-Bind `0.0.0.0` war.
 
-### Bestehende Einstiege
+### Einstiege am Ausgangs-HEAD
 
 - `hyperdoc-sly`: nur in der Entwicklungsshell angeboten. Shell → Python →
   frisches SBCL/Slynk + Emacs/SLY. Keine Anwendungssysteme werden vorgeladen;
@@ -107,8 +108,9 @@ Das Executable setzt seine Quellen unabhängig von `shellHook`, CWD und
 persönlichen SBCL-Initdateien. Der ASDF-Adapter schließt persönliche
 Source-Registry-Vererbung ausdrücklich aus: Der nixpkgs-SBCL-Wrapper erzeugt
 leere Registry-Einträge, die sonst persönliche ASDF-Konfiguration einbeziehen.
-Das Kompatibilitätsscript delegiert nur noch an `hyperdoc-catalog`. Es benötigt
-dessen Installation im PATH; es bootstrapt keine Entwicklungsshell.
+Benutzer starten lokal mit `nix run .#catalog -- 8080` oder mit dem
+installierten `hyperdoc-catalog`. Services verwenden dasselbe Executable
+aus dem gebauten Nix-Paket.
 
 ### Verwendung und Service-Anschluss
 
@@ -130,9 +132,13 @@ Arbeit an den **aktuellen Checkout-Quellen** in einer weißen `hyperdoc-sly`-Ima
 (clog:shutdown)
 ```
 
-Der konkrete nächste **Deployment-Schritt**, außerhalb dieses lokalen Slices,
-ist die Änderung des vorhandenen serverlokalen NixOS-Moduls auf dasselbe Paket.
-Beispiel für den Anschluss an einen dort gepinnten Flake-Input `hyperdoc`:
+Für den Removal-Slice hat der Betreiber am 2026-10-01 bestätigt, dass der
+NixOS-Service bereits das gebaute `hyperdoc-catalog` verwendet. Das ist neue
+Operator-Evidenz; dieser Task führt keine Remote-Prüfung durch. Die oben
+zitierten früheren Service-Snapshots bleiben historische Evidenz. Der bisherige
+Kompatibilitätswrapper wird deshalb entfernt.
+
+Beispiel für den Service-Anschluss an einen gepinnten Flake-Input `hyperdoc`:
 
 ```nix
 let
@@ -147,9 +153,8 @@ in {
 }
 ```
 
-Diese Felder werden in den vorhandenen Service integriert; Benutzer,
-Dateizugriff und Proxy-Konfiguration bleiben Verantwortung des serverlokalen
-Moduls. Der Service-Benutzer braucht einen schreibbaren Lisp-Kompilationscache
+Benutzer, Dateizugriff und Proxy-Konfiguration bleiben Verantwortung des
+serverlokalen Moduls. Der Service-Benutzer braucht einen schreibbaren Lisp-Kompilationscache
 und Zugriff auf seinen Wiki-Store. `ExecStart` benötigt weder Nix noch einen
 Checkout zum **Starten** des Catalog. NixOS-Aktivierung, Linux-Laufzeittest und
 Proxy/Websocket-Akzeptanz auf dem Server wurden lokal nicht behauptet.

@@ -17,9 +17,6 @@
 (DEFUN REPOSITORY-DIRECTORY ()
   (UIOP/PATHNAME:PATHNAME-DIRECTORY-PATHNAME (DREYECK-ASD-PATHNAME)))
 
-(DEFUN STARTUP-SCRIPT-PATHNAME ()
-  (MERGE-PATHNAMES #P"scripts/serve-catalog.sh" (REPOSITORY-DIRECTORY)))
-
 (DEFUN HISTORICAL-STARTUP-SCRIPT-PATHNAME ()
   (MERGE-PATHNAMES #P"scripts/serve-wiki-link-contract-demo.sh"
                    (REPOSITORY-DIRECTORY)))
@@ -341,30 +338,19 @@
    (LOOP FOR FORM IN (FRESH-CATALOG-EVALUATIONS)
          APPEND (LIST "--eval" FORM))))
 
-(DEFUN CHECK-NORMAL-STARTUP-CONTRACT ()
-  (LET ((SCRIPT (STARTUP-SCRIPT-PATHNAME)))
-    (CHECK (UIOP/FILESYSTEM:FILE-EXISTS-P SCRIPT)
-     "The canonical Catalog launcher does not exist: ~A." SCRIPT)
-    (UIOP/RUN-PROGRAM:RUN-PROGRAM (LIST "test" "-x" (NAMESTRING SCRIPT)))
-    (LET ((SOURCE (UIOP/STREAM:READ-FILE-STRING SCRIPT)))
-      (CHECK (SEARCH "exec hyperdoc-catalog \"$@\"" SOURCE)
-       "Compatibility launcher does not delegate to the Catalog executable.")
-      (CHECK (NULL (SEARCH "asdf:load-system" SOURCE))
-       "Compatibility launcher duplicates ASDF application loading.")
-      (CHECK (NULL (SEARCH "nix develop" SOURCE))
-       "Compatibility launcher bootstraps a development environment."))
-    (CHECK (NOT (PROBE-FILE (HISTORICAL-STARTUP-SCRIPT-PATHNAME)))
-     "The historical root-level launcher still exists.")
-    (CHECK (NOT (PROBE-FILE (DELETED-DEMO-STARTUP-SCRIPT-PATHNAME)))
-     "The deleted nested Dreyeck demo launcher still exists.")
-    (DOLIST (SHELL-SCRIPT (REPOSITORY-SHELL-SCRIPT-PATHNAMES))
-      (LET ((SHELL-SOURCE (UIOP/STREAM:READ-FILE-STRING SHELL-SCRIPT)))
-        (CHECK
-         (NULL
-          (SEARCH "dreyeck/scripts/serve-wiki-link-contract-demo.sh"
-                  SHELL-SOURCE))
-         "Active launcher ~A still refers to the deleted nested launcher."
-         SHELL-SCRIPT))))
+(DEFUN CHECK-RETIRED-DEMO-LAUNCHERS ()
+  (CHECK (NOT (PROBE-FILE (HISTORICAL-STARTUP-SCRIPT-PATHNAME)))
+   "The historical root-level launcher still exists.")
+  (CHECK (NOT (PROBE-FILE (DELETED-DEMO-STARTUP-SCRIPT-PATHNAME)))
+   "The deleted nested Dreyeck demo launcher still exists.")
+  (DOLIST (SHELL-SCRIPT (REPOSITORY-SHELL-SCRIPT-PATHNAMES))
+    (LET ((SHELL-SOURCE (UIOP/STREAM:READ-FILE-STRING SHELL-SCRIPT)))
+      (CHECK
+       (NULL
+        (SEARCH "dreyeck/scripts/serve-wiki-link-contract-demo.sh"
+                SHELL-SOURCE))
+       "Active launcher ~A still refers to the deleted nested launcher."
+       SHELL-SCRIPT)))
   T)
 
 (DEFUN VERIFY-FRESH-CATALOG-RECONSTRUCTION-SEQUENCE ()
@@ -414,7 +400,7 @@
           :FRESH-EVALUATION-COUNT (LENGTH FRESH-EVALUATIONS))))
 
 (DEFUN RUN-CATALOG-STARTUP-SMOKE-TESTS ()
-  (CHECK-NORMAL-STARTUP-CONTRACT)
+  (CHECK-RETIRED-DEMO-LAUNCHERS)
   (VERIFY-FRESH-CATALOG-RECONSTRUCTION-SEQUENCE)
   (UIOP/RUN-PROGRAM:RUN-PROGRAM (FRESH-CATALOG-COMMAND) :DIRECTORY
                                 (REPOSITORY-DIRECTORY) :OUTPUT

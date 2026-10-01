@@ -29,8 +29,8 @@ HyperSpec and D2/TALA. It serves the Dreyeck Catalog, local FedWiki `/view`
 and `/gesture`. Set `HYPERDOC_FEDWIKI_SITE_ROOT` for the local Wiki store;
 the default is `~/.wiki/dreyeck.ch/`. The default bind address is `0.0.0.0`.
 
-The same executable is available in `nix develop`; `scripts/serve-catalog.sh`
-is a compatibility delegate. For interactive work on live checkout sources,
+The same `hyperdoc-catalog` executable is available in `nix develop`.
+For interactive work on live checkout sources,
 load `dreyeck/catalog-application` and call
 `dreyeck/catalog-application:start-catalog`. See the
 [reconstructed startup contract](dreyeck/CATALOG-STARTUP.md) for source evidence,
