@@ -11,6 +11,12 @@
 (COMMON-LISP:DEFPARAMETER DREYECK/HYPERDOC/LIBRARY-TESTS::+PREVIOUS+
   "401953522ec503cf78764bddc5534f7a9f16fd22")
 
+(defparameter +host-forwarding+ "53732270d42177eb01a46dad7940e60244ec52a2"
+  "Existing reusable HOST forwarding; compare its two forms exactly, not just their names.")
+
+(defun compatibility-revision (path)
+  (if (string= path "hyperbook-server/server.lisp") +host-forwarding+ +previous+))
+
 (COMMON-LISP:DEFPARAMETER DREYECK/HYPERDOC/LIBRARY-TESTS::+PATHS+
   '("hyperdoc" "hyperbook" "hyperdoc-explorer" "hyperbook-explorer"
     "inspector-hyperdoc" "hyperbook-fedwiki" "hyperbook-wikipedia"
@@ -54,7 +60,9 @@
       '("MAKE-HYPERDOC" "CL-SOURCE-FILE-COMPONENTS-UNDER"))
      ((COMMON-LISP:STRING= DREYECK/HYPERDOC/LIBRARY-TESTS::PATH
                            "hyperdoc/defining.lisp")
-      '("DEFHYPERDOC")))
+      '("DEFHYPERDOC"))
+     ((string= path "hyperbook-server/server.lisp")
+      '("SERVE-HYPERBOOKS" "SERVE-CATALOG")))
     :TEST #'COMMON-LISP:EQUAL)))
 
 (COMMON-LISP:DEFUN DREYECK/HYPERDOC/LIBRARY-TESTS::NORMALIZE-DEPENDENCIES
@@ -252,7 +260,7 @@
                                                                                                                                                                                                                             DREYECK/HYPERDOC/LIBRARY-TESTS::ALLOWED
                                                                                                                                                                                                                             (DREYECK/HYPERDOC/LIBRARY-TESTS::FORMS-AT
                                                                                                                                                                                                                                                                       DREYECK/HYPERDOC/LIBRARY-TESTS::ROOT
-                                                                                                                                                                                                                                                                      DREYECK/HYPERDOC/LIBRARY-TESTS::+PREVIOUS+
+                                                                                                                                                                                                                                                                      (compatibility-revision path)
                                                                                                                                                                                                                                                                       DREYECK/HYPERDOC/LIBRARY-TESTS::PATH)))))
                                                                                                              (COMMON-LISP:ASSERT
                                                                                                                                  (COMMON-LISP:=
