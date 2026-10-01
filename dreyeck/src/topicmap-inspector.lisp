@@ -412,10 +412,17 @@ readable values stay on the element's data- attributes."
         (views:html
           (:h3 "Point")
           (:p
-           (views:object-ref
-            (dreyeck/topicmap:topicmap-topic-object-of point-topic) :display
-            (dreyeck/topicmap:topicmap-topic-label-of point-topic)))
+           (views:object-ref point-topic :display
+                             (dreyeck/topicmap:topicmap-topic-label-of point-topic)))
           (render-workspace-point-editor workspace point-topic)
+          ;; The Topic and the object it represents are distinct Inspector
+          ;; targets. Name the latter by its own role and title.
+          (let ((object (dreyeck/topicmap:topicmap-topic-object-of point-topic)))
+            (unless (eq object point-topic)
+              (if (typep object 'hyperbook:page)
+                  (views:html (:p "Carrier page: "
+                                  (views:object-ref object :display (hyperbook:title-of object))))
+                  (views:html (:p "Represented object: " (views:object-ref object))))))
           (:h3 "Associations")
           (if associations
               (views:html

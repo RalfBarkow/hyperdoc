@@ -37,28 +37,81 @@
           (uiop:directory-files (asdf:system-relative-pathname "dreyeck" "dreyeck/pages/work/"))))
 
 (defun call-with-work-breakdown-fixture (function)
-  "FUNCTION called with the Work Breakdown page of a temporary HyperDoc, made
-by HyperDoc's own constructor, whose one page is a copy of the real one, and
-with that page's file. The system and its directory are removed afterwards."
+  "FUNCTION receives Work Breakdown and its file in an isolated temporary
+HyperDoc. Copy its text and code pages so ordinary relative links resolve
+inside the fixture. Register only for its lifetime; never load copied code."
+  (assert (null (hyperbook:find-hyperbook "work-authoring-probe")))
   (let* ((root (merge-pathnames (format nil "work-authoring-probe-~D-~D/"
                                         (get-universal-time) (random 100000))
                                 (uiop:temporary-directory)))
          (asd (merge-pathnames "work-authoring-probe.asd" root))
-         (path (merge-pathnames "pages/Work Breakdown.html" root)))
+         (path (merge-pathnames "pages/Work Breakdown.html" root))
+         (original-book (hyperbook:find-hyperbook "dreyeck/work/reading" :signal-error? t))
+         (code-files (map 'list (lambda (page)
+                                 (asdf:component-pathname (hyperdoc:file-of page)))
+                          (hyperdoc::code-pages-of original-book)))
+         (book nil))
     (ensure-directories-exist path)
     (unwind-protect
          (progn
-           (%write asd "(defsystem \"work-authoring-probe\")
-")
-           (%write path (%read (hyperdoc:file-of (work:work-page "Work Breakdown"))))
+           (dolist (file (append (mapcar #'car (work-page-sources)) code-files))
+             (let ((copy (merge-pathnames
+                          (format nil "~A/~A" (if (member file code-files :test #'equal)
+                                                   "code" "pages")
+                                  (file-namestring file)) root)))
+               (ensure-directories-exist copy)
+               (uiop:copy-file file copy)))
+           (%write asd
+                   (format nil "(defsystem ~S :components ((:module ~S :components ~S)))~%"
+                           "work-authoring-probe" "code"
+                           (mapcar (lambda (file) (list :file (pathname-name file))) code-files)))
            (asdf:load-asd asd)
-           (let ((book (hyperdoc:make-hyperdoc :id "work-authoring-probe"
-                                               :title "Work authoring probe"
-                                               :asdf-system-name "work-authoring-probe"
-                                               :subdirectory "pages")))
-             (funcall function (hyperbook:find-page book "Work Breakdown" :signal-error? t) path)))
+           (setf book (hyperdoc:make-hyperdoc :id "work-authoring-probe"
+                                             :title "Work authoring probe"
+                                             :asdf-system-name "work-authoring-probe"
+                                             :subdirectory "pages" :code-subdirectory "code"
+                                             :main-page-id "Work Breakdown"))
+           (hyperbook:register book)
+           (funcall function (hyperbook:find-page book "Work Breakdown" :signal-error? t) path))
+      (when book
+        (setf (hyperbook:hyperbooks-of hyperbook:*catalog*)
+              (remove book (hyperbook:hyperbooks-of hyperbook:*catalog*) :test #'eq)))
       (ignore-errors (asdf:clear-system "work-authoring-probe"))
       (uiop:delete-directory-tree root :validate t :if-does-not-exist :ignore))))
+
+(defun check-fixture-navigation ()
+  "The same Content links used by the browser resolve to fixture pages;
+normal and nonlocal exits remove registration, ASDF system and source files."
+  (let ((catalog (copy-list (hyperbook:hyperbooks-of hyperbook:*catalog*)))
+        (fixture-path nil))
+    (labels ((check (page path)
+               (setf fixture-path path)
+               (let* ((book (hyperbook:hyperbook-of page))
+                      (view (%view page "Content"))
+                      (targets (mapcar #'cdr (views:view-references view))))
+                 (assert (eq book (hyperbook:find-hyperbook "work-authoring-probe" :signal-error? t)))
+                 (assert (not (search "hyperbook-error" (views:view-html view))))
+                 (assert (notany (lambda (target) (typep target 'hyperbook:lookup-failure)) targets))
+                 (dolist (title '("Operations and Change" "Working on HyperDoc"))
+                   (let ((target (hyperbook:find-page "work-authoring-probe" title :signal-error? t)))
+                     (assert (member target targets :test #'eq))
+                     (assert (eq book (hyperbook:hyperbook-of target)))
+                     (assert (not (eq target (work:work-page title))))
+                     (let ((file (hyperdoc:file-of target)))
+                       (assert (uiop:subpathp (truename (if (pathnamep file) file (asdf:component-pathname file)))
+                                              (truename (uiop:pathname-parent-directory-pathname
+                                                         (uiop:pathname-directory-pathname path)))))))))))
+      (call-with-work-breakdown-fixture #'check)
+      (assert (not (probe-file fixture-path)))
+      (assert (equal catalog (hyperbook:hyperbooks-of hyperbook:*catalog*)))
+      (assert (null (asdf:find-system "work-authoring-probe" nil)))
+      (assert (eq :exited
+                  (catch 'fixture-exit
+                    (call-with-work-breakdown-fixture
+                     (lambda (page path) (check page path) (throw 'fixture-exit :exited))))))
+      (assert (not (probe-file fixture-path)))
+      (assert (equal catalog (hyperbook:hyperbooks-of hyperbook:*catalog*)))
+      (assert (null (asdf:find-system "work-authoring-probe" nil))))))
 
 (defun %project (page path)
   (work:project-work-breakdown (%read path) :source page))
@@ -686,6 +739,7 @@ planner and writer."
 
 (defun run-tests ()
   (let ((pages (work-page-sources)))
+    (check-fixture-navigation)
     (call-with-work-breakdown-fixture
      (lambda (page path)
        (check-planning page path)

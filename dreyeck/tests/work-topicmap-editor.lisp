@@ -10,7 +10,7 @@
                     (#:r #:dreyeck/gesture/operation-request)
                     (#:w #:dreyeck/gesture-binding-witness)
                     (#:views #:html-inspector-views))
-  (:export #:run-tests #:run-live-editor-witness))
+  (:export #:run-tests #:run-live-editor-witness #:run-human-editor-demo))
 (in-package #:dreyeck/work/editor/tests)
 
 (defun button (object title label)
@@ -34,6 +34,60 @@
   (or (find-if (lambda (object) (typep object 'a::work-editor-context))
                (mapcar #'cdr (views:view-references (tst::%view ws "Topicmap"))))
       (error "No concrete Work editor context.")))
+
+(defun check-point-rendering (page path)
+  "The Point section names three distinct Inspector targets by their roles."
+  (let* ((source (tst::%read path))
+         (ws (workspace page))
+         (projection (tm:topicmap-workspace-projection-of ws))
+         (topic (tm:topicmap-workspace-current-topic ws))
+         (occurrence (work:topic-source-occurrence topic))
+         (carrier (tm:topicmap-topic-object-of topic))
+         (point (tm:topicmap-workspace-point-of ws))
+         (history (copy-list (tm:topicmap-workspace-history-of ws)))
+         (view (tst::%view ws "Topicmap"))
+         (html (views:view-html view))
+         ;; Restrict assertions to Point, excluding graph labels/association rows.
+         (section (plump:parse (subseq html (search "<h3>Point</h3>" html)
+                                      (search "<h3>Associations</h3>" html))))
+         (entries (loop for node across (plump:children section)
+                        when (and (typep node 'plump:element)
+                                  (not (string= "h3" (plump:tag-name node))))
+                          collect node))
+         (labels (mapcar (lambda (node) (string-trim '(#\Space #\Tab #\Newline)
+                                                    (plump:decode-entities (plump:text node)))) entries))
+         (targets (mapcar
+                   (lambda (entry)
+                     (let ((refs (loop for node in (plump:get-elements-by-tag-name entry "span")
+                                       for id = (plump:attribute node "id")
+                                       when id collect (assoc id (views:view-references view) :test #'equal))))
+                       (assert (= 1 (length refs)))
+                       (assert (first refs))
+                       (cdr (first refs)))) entries)))
+    (assert (eq carrier (work:work-page "Operations and Change")))
+    (assert (equal (list (tm:topicmap-topic-label-of topic) "Open Work Topic"
+                        (format nil "Carrier page: ~A" (hyperbook:title-of carrier))) labels))
+    (assert (= 1 (count (tm:topicmap-topic-label-of topic) labels :test #'equal)))
+    (assert (= 1 (count "Open Work Topic" labels :test #'equal)))
+    (assert (= 1 (count topic targets :test #'eq)))
+    (assert (= 1 (count carrier targets :test #'eq)))
+    (let ((context (second targets)))
+      (assert (typep context 'a::work-editor-context))
+      (assert (eq topic (first targets)))
+      (assert (eq topic (a::editor-topic context)))
+      (assert (eq carrier (third targets)))
+      (assert (eq ws (a::editor-workspace context)))
+      (assert (eq projection (a::editor-projection context)))
+      (assert (null (a::editor-selection context)))
+      (assert (eq occurrence (work:topic-source-occurrence (a::editor-topic context)))))
+    (loop for (label next-label) on labels
+          for (target next-target) on targets
+          while next-label
+          do (assert (or (not (equal label next-label)) (eq target next-target))))
+    (assert (equal point (tm:topicmap-workspace-point-of ws)))
+    (assert (equal history (tm:topicmap-workspace-history-of ws)))
+    (assert (eq projection (tm:topicmap-workspace-projection-of ws)))
+    (assert (string= source (tst::%read path)))))
 
 (defun check-connections (page path)
   (let* ((source (tst::%read path))
@@ -294,10 +348,10 @@ Returning to A must use A's targets, relation choices and post-effect Point."
 
 (defun run-tests ()
   (let ((pages (tst::work-page-sources)))
-    (dolist (test (list #'check-connections #'check-status-loop #'check-relationship-loop
+    (dolist (test (list #'check-point-rendering #'check-connections #'check-status-loop #'check-relationship-loop
                        #'check-stale-arguments #'check-unverified-and-point #'check-two-workspaces))
       (tst::call-with-work-breakdown-fixture test))
     (check-source-ownership)
     (tst::check-authoring-boundary)
     (assert (equal pages (tst::work-page-sources))))
-  (format t "~&WORK-TOPICMAP-EDITOR-PASS: exact Topic/occurrence, two-Workspace callback isolation, two operations, staged requests/plans, executor replanning, fresh objects, stale refusal, unverified reread, Point fallback, ASDF ownership and Catalog boundary.~%"))
+  (format t "~&WORK-TOPICMAP-EDITOR-PASS: distinct Point/Topic/carrier rendering, exact Topic/occurrence, two-Workspace callback isolation, two operations, staged requests/plans, executor replanning, fresh objects, stale refusal, unverified reread, Point fallback, ASDF ownership and Catalog boundary.~%"))

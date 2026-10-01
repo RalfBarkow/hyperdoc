@@ -8,8 +8,12 @@
     (tst::%witness-await label
       (lambda () (equal "clicked" (tst::%witness-click pane selector label))))
     (tst::%witness-await label
-      (lambda () (and (not (member (%browser-last-pane) before :test #'eq))
-                      (typep (tst::%witness-last-object) type))))
+      (lambda ()
+        (assert (notany (lambda (pane)
+                          (typep (clog-moldable-inspector::pane-object pane)
+                                 'hyperbook:lookup-failure)) (tst::%witness-panes)))
+        (and (not (member (%browser-last-pane) before :test #'eq))
+             (typep (tst::%witness-last-object) type))))
     (%browser-last-pane)))
 (defun %browser-tab (pane title needle)
   (assert (equal "clicked" (tst::%witness-click pane ".inspector-tabs button" title)))
@@ -26,9 +30,34 @@
     (lambda ()
       (equal "true"
              (tst::%witness-js
-              (format nil "(function(){const p=document.getElementById('~A');const h=[...p.querySelectorAll('h3')].find(x=>x.textContent==='Point');return !!h&&h.nextElementSibling.textContent.trim()===~S&&!!h.nextElementSibling.nextElementSibling.querySelector('[id]');})()"
+              (format nil "(function(){const p=document.getElementById('~A');const h=[...p.querySelectorAll('h3')].find(x=>x.textContent==='Point');if(!h)return false;const entries=[];for(let e=h.nextElementSibling;e&&e.tagName!=='H3';e=e.nextElementSibling)entries.push(e);const labels=entries.map(e=>e.textContent.trim());return labels.length===3&&labels[0]===~S&&labels[1]==='Open Work Topic'&&labels[2]===~S&&entries.every(e=>e.querySelectorAll('.inspector-inspect [id]').length===1);})()"
                       (clog:html-id (clog-moldable-inspector::clog-obj pane))
-                      (tm:topicmap-topic-label-of (tm:topicmap-workspace-current-topic ws))))))))
+                      (tm:topicmap-topic-label-of (tm:topicmap-workspace-current-topic ws))
+                      (format nil "Carrier page: ~A"
+                              (hyperbook:title-of
+                               (tm:topicmap-topic-object-of (tm:topicmap-workspace-current-topic ws))))))))))
+
+(defun run-human-editor-demo (&key (port 18091))
+  "The browser witness's authoring-capable fixture, without synthetic clicks.
+Enter on the terminal stops the loopback listener and removes the fixture."
+  (assert (typep (dreyeck/workflow/authoring:make-authoring-environment)
+                 'dreyeck/workflow/authoring::authoring-environment))
+  (tst::call-with-work-breakdown-fixture
+   (lambda (page path)
+     (let ((ws (workspace page)))
+       (unwind-protect
+            (progn
+              (clog:initialize
+               (lambda (body)
+                 (setf (clog:text (clog:create-style-block body)) clog-moldable-inspector::*css*)
+                 (let ((inspector (clog-moldable-inspector::create-inspector
+                                   body :pane-width "900px" :playground? nil)))
+                   (clog-moldable-inspector::create-pane inspector ws :select "Topicmap")))
+               :host "127.0.0.1" :port port)
+              (format t "~&Demo: http://127.0.0.1:~D/~%Temporary source: ~A~%Press Enter to stop and remove the fixture.~%" port path)
+              (finish-output)
+              (read-line *query-io*))
+         (clog:shutdown))))))
 
 (defun run-live-editor-witness (&key (port 18091) done-file (linger 300))
   "Serve a fresh authoring image's Inspector only on loopback. A connected
@@ -59,6 +88,16 @@ is on the temporary Work Breakdown copy; TEST-OP never starts this server."
                 (finish-output)
                 (tst::%witness-await "browser" (lambda () tst::*witness-pane*) :seconds 600)
                 (%browser-primary tst::*witness-pane* ws "hyperdoc-page-authoring")
+                ;; All Point references retain their distinct exact targets.
+                (let* ((topic (tm:topicmap-workspace-current-topic ws))
+                       (raw-pane (%browser-open tst::*witness-pane* ".inspector-inspect [id]"
+                                                "Structural HyperDoc Page Authoring" 'work:work-topic)))
+                  (assert (eq topic (clog-moldable-inspector::pane-object raw-pane)))
+                  (let ((carrier-pane (%browser-open tst::*witness-pane* ".inspector-inspect [id]"
+                                                      "Operations and Change" 'hyperbook:page)))
+                    (assert (eq (tm:topicmap-topic-object-of topic)
+                                (clog-moldable-inspector::pane-object carrier-pane)))
+                    (%browser-tab carrier-pane "Content" "Operations")))
                 (let* ((topic-pane (%browser-open tst::*witness-pane* ".inspector-inspect [id]" "Open Work Topic" 'a::work-editor-context))
                        (topic (a::editor-topic (clog-moldable-inspector::pane-object topic-pane))))
                   (assert (eq topic (tm:topicmap-workspace-current-topic ws)))
@@ -68,6 +107,26 @@ is on the temporary Work Breakdown copy; TEST-OP never starts this server."
                          (selection (clog-moldable-inspector::pane-object selection-pane)))
                     (assert (eq (work:topic-source-occurrence topic) (r:operation-request-occurrence (a::editor-selection selection))))
                     (%browser-tab selection-pane "Change work status" "in progress")
+                    ;; The human failure path: declaring page -> authored link.
+                    ;; Page Content resolves relative links against the fixture,
+                    ;; not against dreyeck/work/reading or an error condition.
+                    (let ((page-pane (%browser-open selection-pane ".inspector-inspect [id]"
+                                                    "Work Breakdown" 'hyperbook:page)))
+                      (assert (eq page (clog-moldable-inspector::pane-object page-pane)))
+                      (%browser-tab page-pane "Content" "Structural HyperDoc Page Authoring")
+                      (assert (equal "0" (tst::%witness-js
+                                           (format nil "document.getElementById('~A').querySelectorAll('.hyperbook-error').length"
+                                                   (clog:html-id (clog-moldable-inspector::clog-obj page-pane))))))
+                      (dolist (navigation '(("Structural HyperDoc Page Authoring" "Operations and Change")
+                                            ("Lisp Code Page and executable examples" "Working on HyperDoc")))
+                        (let* ((target-pane (%browser-open page-pane ".inspector-inspect [id]"
+                                                           (first navigation) 'hyperbook:page))
+                               (target (clog-moldable-inspector::pane-object target-pane)))
+                          (assert (eq target (hyperbook:find-page "work-authoring-probe" (second navigation)
+                                                                 :signal-error? t)))
+                          (assert (eq (hyperbook:hyperbook-of page) (hyperbook:hyperbook-of target)))
+                          (assert (not (eq target (work:work-page (second navigation))))))))
+                    (format t "~&EDITOR-BROWSER-NAVIGATION-PASS: Point Topic, editor context and original carrier retained; declaring-page Content links open fixture text/code pages, no lookup-failure pane.~%")
                     (let* ((request-pane (%browser-open selection-pane "button.inspector-action" "Change work status to \"in progress\"" 'work:work-status-change-request))
                            (request (clog-moldable-inspector::pane-object request-pane)))
                       (%browser-tab request-pane "Work request" "Preview plan")

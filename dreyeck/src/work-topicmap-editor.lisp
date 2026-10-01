@@ -35,7 +35,6 @@
                                             (topic work:work-topic))
   (when (work:topic-source-occurrence topic)
     (views:html
-      (views:object-ref topic :display (tm:topicmap-topic-label-of topic))
       (:p (views:object-ref
            (make-instance 'work-editor-context :topic topic :workspace workspace
                           :projection (tm:topicmap-workspace-projection-of workspace))
