@@ -1,5 +1,5 @@
 {
-  description = "HyperDoc development shell";
+  description = "HyperDoc development environments and Catalog application";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
@@ -99,7 +99,7 @@
     shop3-trivial-garbage,
     shop3-iterate,
     ...
-  }:
+  }@inputs:
     let
       systems = [
         "aarch64-darwin"
@@ -109,6 +109,11 @@
       ];
 
       forAllSystems = nixpkgs.lib.genAttrs systems;
+      runtimeFor = system: import ./nix/lisp-runtime.nix {
+        pkgs = import nixpkgs { inherit system; };
+        sources = inputs;
+        commonLispHyperSpec = self.packages.${system}.common-lisp-hyperspec;
+      };
     in {
       packages = forAllSystems (
         system:
@@ -117,15 +122,34 @@
             inherit system;
           };
         in {
+          hyperdoc-catalog = pkgs.callPackage ./nix/catalog.nix {
+            runtime = runtimeFor system;
+            source = pkgs.lib.cleanSource self.outPath;
+            d2-tala = self.packages.${system}.d2-tala;
+          };
           d2-tala = pkgs.callPackage ./nix/d2-tala.nix { };
           common-lisp-hyperspec =
             pkgs.callPackage ./nix/common-lisp-hyperspec.nix { };
         }
       );
 
+      apps = forAllSystems (system: {
+        catalog = {
+          type = "app";
+          inherit (self.packages.${system}.hyperdoc-catalog) meta;
+          program = "${self.packages.${system}.hyperdoc-catalog}/bin/hyperdoc-catalog";
+        };
+      });
+
       checks = forAllSystems (system: {
         common-lisp-hyperspec =
           self.packages.${system}.common-lisp-hyperspec;
+        catalog = let pkgs = import nixpkgs { inherit system; }; in
+          pkgs.callPackage ./nix/catalog-check.nix {
+            catalog = self.packages.${system}.hyperdoc-catalog;
+            runtime = runtimeFor system;
+            source = pkgs.lib.cleanSource self.outPath;
+          };
       });
 
       devShells = forAllSystems (
@@ -135,51 +159,8 @@
             inherit system;
           };
 
-          commonLispHyperSpec =
-            self.packages.${system}.common-lisp-hyperspec;
-
-          sbcl = pkgs.sbcl.withPackages (
-            ps:
-            with ps; [
-              alexandria
-              ps.arrow-macros
-              babel
-              bordeaux-threads
-              cffi
-              ps."cl-base32"
-              ps."cl-base64"
-              ps."cl-slug"
-              ps."clack-handler-hunchentoot"
-              ps."clog-ace"
-              cl-who
-              clog
-              ps."closer-mop"
-              dissect
-              ps."damn-fast-stable-priority-queue"
-              drakma
-              ps."eclector-concrete-syntax-tree"
-              flexi-streams
-              fset
-              ps."local-time"
-              lquery
-              iterate
-              jzon
-              plump
-              puri
-              ps."s-graphviz"
-              serapeum
-              sha1
-              shasht
-              str
-              swank
-              ps."trivial-clipboard"
-              ps."trivial-cltl2"
-              ps."trivial-package-local-nicknames"
-              usocket
-              ps._3bmd
-              ps._3bmd-ext-code-blocks
-            ]
-          );
+          runtime = runtimeFor system;
+          inherit (runtime) sbcl;
 
           emacsPackages =
             pkgs.emacsPackagesFor pkgs.emacs;
@@ -222,16 +203,17 @@
           };
           default = pkgs.mkShell {
             packages = [
-              commonLispHyperSpec
+              self.packages.${system}.common-lisp-hyperspec
               pkgs.git
               sbcl
               hyperdocEmacs
               hyperdocSly
+              self.packages.${system}.hyperdoc-catalog
             ];
 
             shellHook = ''
-              export CL_SOURCE_REGISTRY="${clog-moldable-inspector}//:${html-inspector-views}//:${plump-inspector-views}//:${lwcells}//:${named-closure}//:${njson}//:${shop3}/shop3//:${shop3-pddl-tools}//:${shop3-fiveam-asdf}//:${shop3-random-state}//:${shop3-documentation-utils}//:${shop3-trivial-indent}//:${shop3-trivial-garbage}//:${shop3-iterate}//:$PWD//"
-              export HYPERDOC_HYPERSPEC_ROOT="${commonLispHyperSpec}/share/common-lisp-hyperspec/HyperSpec"
+              export CL_SOURCE_REGISTRY="${runtime.sourceRegistry}:$PWD//"
+              export HYPERDOC_HYPERSPEC_ROOT="${runtime.hyperspecRoot}"
             '';
           };
         }

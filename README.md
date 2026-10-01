@@ -15,6 +15,27 @@ sbcl --no-userinit \
 
 This will serve a catalog containing a single HyperDoc, the one for HyperDoc itself. In practice, you will load additional systems providing HyperDocs, before the last `--eval` line.
 
+## Dreyeck Catalog application
+
+Run the packaged Catalog without a development shell:
+
+```sh
+HYPERDOC_CATALOG_HOST=127.0.0.1 nix run .#catalog -- 8080
+```
+
+`nix build .#hyperdoc-catalog` provides `result/bin/hyperdoc-catalog` for users
+and service `ExecStart`. The executable supplies its own pinned Lisp runtime,
+HyperSpec and D2/TALA. It serves the Dreyeck Catalog, local FedWiki `/view`
+and `/gesture`. Set `HYPERDOC_FEDWIKI_SITE_ROOT` for the local Wiki store;
+the default is `~/.wiki/dreyeck.ch/`. The default bind address is `0.0.0.0`.
+
+The same executable is available in `nix develop`; `scripts/serve-catalog.sh`
+is a compatibility delegate. For interactive work on live checkout sources,
+load `dreyeck/catalog-application` and call
+`dreyeck/catalog-application:start-catalog`. See the
+[reconstructed startup contract](dreyeck/CATALOG-STARTUP.md) for source evidence,
+SLY usage, package limits, service integration and tests.
+
 ## Fresh interactive Lisp image
 
 Run `nix develop`, then `hyperdoc-sly` from this repository (or a subdirectory).

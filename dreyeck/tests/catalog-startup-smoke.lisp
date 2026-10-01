@@ -347,15 +347,12 @@
      "The canonical Catalog launcher does not exist: ~A." SCRIPT)
     (UIOP/RUN-PROGRAM:RUN-PROGRAM (LIST "test" "-x" (NAMESTRING SCRIPT)))
     (LET ((SOURCE (UIOP/STREAM:READ-FILE-STRING SCRIPT)))
-      (CHECK
-       (SEARCH
-        "HYPERDOC_CATALOG_SYSTEM=${HYPERDOC_CATALOG_SYSTEM:-dreyeck/catalog}"
-        SOURCE)
-       "Normal Catalog startup has no explicit dreyeck/catalog default.")
-      (CHECK (SEARCH "asdf:load-system system" SOURCE)
-       "Normal Catalog startup does not load its configured Catalog system.")
-      (CHECK (NULL (SEARCH "HYPERDOC_DEMO_SYSTEM" SOURCE))
-       "The canonical Catalog launcher still exposes the demo-system contract."))
+      (CHECK (SEARCH "exec hyperdoc-catalog \"$@\"" SOURCE)
+       "Compatibility launcher does not delegate to the Catalog executable.")
+      (CHECK (NULL (SEARCH "asdf:load-system" SOURCE))
+       "Compatibility launcher duplicates ASDF application loading.")
+      (CHECK (NULL (SEARCH "nix develop" SOURCE))
+       "Compatibility launcher bootstraps a development environment."))
     (CHECK (NOT (PROBE-FILE (HISTORICAL-STARTUP-SCRIPT-PATHNAME)))
      "The historical root-level launcher still exists.")
     (CHECK (NOT (PROBE-FILE (DELETED-DEMO-STARTUP-SCRIPT-PATHNAME)))

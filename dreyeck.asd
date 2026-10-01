@@ -2424,3 +2424,16 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/planning :check-plan)))
+
+(defsystem "dreyeck/catalog-application"
+  :description "Catalog application startup and executable lifecycle"
+  :depends-on ("dreyeck/local-fedwiki-view" "clack-handler-hunchentoot" "uiop")
+  :components ((:file "dreyeck/src/catalog-application"))
+  :in-order-to ((test-op (test-op "dreyeck/catalog-application/tests"))))
+
+(defsystem "dreyeck/catalog-application/tests"
+  :depends-on ("dreyeck/catalog-application" "dreyeck/local-fedwiki-view/tests")
+  :components ((:file "dreyeck/tests/catalog-application"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/catalog-application/tests :run-tests)))
