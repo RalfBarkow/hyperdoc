@@ -286,7 +286,7 @@ Bootstrap seed: Common Lisp, ASDF, pinned dependencies, HyperDoc/HyperBook, DEFE
 
 ## Catalog and local checks
 
-`scripts/serve-catalog.sh` loads its configured system, default `dreyeck/catalog`; its ASDF dependencies load books whose DEFHYPERDOC forms register them. The persisted Catalog change adds `dreyeck/workflow/reading` to that same dependency list. TALA registration from e2928cce remains intact. Registration does not require D2, invoke persistence or mutate Git.
+`hyperdoc-catalog` loads `dreyeck/catalog-application`; its ASDF graph includes `dreyeck/local-fedwiki-view` and `dreyeck/catalog`, whose dependencies load books whose DEFHYPERDOC forms register them. `HYPERDOC_CATALOG_SYSTEM` can add a trusted system from the packaged registry; it does not replace the default Catalog membership. The persisted Catalog change adds `dreyeck/workflow/reading` to that same dependency list. TALA registration from e2928cce remains intact. Registration does not require D2, invoke persistence or mutate Git. See [CATALOG-STARTUP.md](CATALOG-STARTUP.md) for the application entry point and service migration boundary.
 
 Reproducible local commands (from the repository):
 

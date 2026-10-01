@@ -114,8 +114,9 @@ keeps every interface, and host and development stay independent.~%")
 (defun run-launcher-route-tests ()
   "The ordinary launcher installs /gesture beside the routes it already had.
 
-SERVE-CATALOG-WITH-LOCAL-FEDWIKI-VIEW is what scripts/serve-catalog.sh
-calls. A route that is implemented but never installed by it answers
+SERVE-CATALOG-WITH-LOCAL-FEDWIKI-VIEW is called by the shared application
+core DREYECK/CATALOG-APPLICATION:START-CATALOG. A route that is implemented
+but never installed by it answers
 Not Found on the running site, which is how its absence was noticed.
 
 The catalog is a copy of the loaded one, so every book route the launcher
