@@ -797,10 +797,10 @@ occurrences, and kept by each."
 
 ;; These are ordinary page links and relationship entries in Work Breakdown.
 ;; Reading this one page avoids a second authoritative WBS list in Lisp or D2.
-(defun work-projection (&key areas-only)
-  (let ((page (work-page "Work Breakdown")))
-    (project-work-breakdown (uiop:read-file-string (hyperdoc:file-of page))
-                            :source page :areas-only areas-only)))
+(defun work-projection (&key areas-only (page (work-page "Work Breakdown")))
+  "Read PAGE's current file, independently of its cached DOM."
+  (project-work-breakdown (uiop:read-file-string (hyperdoc:file-of page))
+                          :source page :areas-only areas-only))
 
 ;;;; Relation change requests
 ;;

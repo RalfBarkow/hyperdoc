@@ -217,6 +217,7 @@
                              "(format t \"Fresh Dreyeck catalog startup tests passed.~%\")"
                              "(PROGN
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
+ (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORK/AUTHORING)))
  (ASSERT (= 18 (LENGTH (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*))))
  (ASSERT (= 1 (COUNT \"dreyeck/authority/reading\" (HYPERBOOK:HYPERBOOKS-OF HYPERBOOK:*CATALOG*) :KEY #'HYPERBOOK:ID-OF :TEST #'STRING=)))
  (ASDF:TEST-SYSTEM \"dreyeck/authority/reading\")
@@ -324,6 +325,7 @@
    (ASSERT
     (STRING= SOURCE-BEFORE (UIOP:READ-FILE-STRING SOURCE-PATH :EXTERNAL-FORMAT :UTF-8))))
  (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORKFLOW/AUTHORING)))
+ (ASSERT (NULL (FIND-PACKAGE :DREYECK/WORK/AUTHORING)))
  (FORMAT T
          \"OPERATION-REQUEST-CATALOG-PROOF: the gesture reading code page offers Operations; its button and the mark Binding reach one unexecuted request; source unchanged; no authoring runtime.~%\")
  (FORMAT T

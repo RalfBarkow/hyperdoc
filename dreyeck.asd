@@ -2401,17 +2401,23 @@
              (uiop:symbol-call :dreyeck/work/deployment-reading/tests :run-tests)))
 
 (defsystem "dreyeck/work/authoring"
-  :description "Plan and apply a Work status change as a checked HTML edit; authoring-side, never in the Catalog"
+  :description "Inspect and execute Work status/relationship requests from the Topicmap; authoring-side, never in the Catalog"
   :depends-on ("dreyeck/work/reading" "dreyeck/workflow/authoring" "plump")
-  :components ((:file "dreyeck/src/work-authoring")))
+  :serial t
+  :components ((:file "dreyeck/src/work-authoring")
+               (:file "dreyeck/src/work-topicmap-editor")))
 
 (defsystem "dreyeck/work/authoring/tests"
   :depends-on ("dreyeck/work/authoring" "dreyeck/topicmap/gesture/tests")
+  :serial t
   :components ((:file "dreyeck/tests/work-authoring")
-               (:file "dreyeck/tests/work-authoring-browser"))
+               (:file "dreyeck/tests/work-authoring-browser")
+               (:file "dreyeck/tests/work-topicmap-editor")
+               (:file "dreyeck/tests/work-topicmap-editor-browser"))
   :perform (test-op (op component)
              (declare (ignore op component))
-             (uiop:symbol-call :dreyeck/work/authoring/tests :run-tests)))
+             (uiop:symbol-call :dreyeck/work/authoring/tests :run-tests)
+             (uiop:symbol-call :dreyeck/work/editor/tests :run-tests)))
 
 (defsystem "dreyeck/work/planning"
   :description "Optional in-memory SHOP3 documentation experiment; no executor"

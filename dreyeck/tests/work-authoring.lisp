@@ -259,8 +259,8 @@ projection show exactly the intended change, and it cannot be applied again."
 (defun check-authoring-circle (page path)
   "From a Work Topic at a Workspace Point, in an image holding the pinned
 authoring environment: the Change work status view offers values observed on
-the page, one action carries the request through plan and apply, and request,
-plan, source, reloaded page and projected Topic stay inspectably connected."
+the page. Choosing one completes an inspectable request; explicit execution
+connects request, plan, source, reloaded page and projected Topic."
   (let* ((pages (work-page-sources))
          (source (%read path))
          (projection (%project page path))
@@ -293,8 +293,11 @@ plan, source, reloaded page and projected Topic stay inspectably connected."
     ;; The action: selection, request, plan, authorised apply, and the
     ;; outcome to open.
     (let* ((selection (ops:work-topic-operation-request (w:change-work-status-operation) topic))
-           (outcome (views:eval-thunk (cdr (assoc "Change work status to \"in progress\"" buttons :test #'equal))))
-           (request (a:work-status-change-outcome-request outcome))
+           (request (views:eval-thunk (cdr (assoc "Change work status to \"in progress\"" buttons :test #'equal))))
+           (outcome (progn (assert (typep request 'work:work-status-change-request))
+                           (assert (string= source (%read path)))
+                           (a:execute-work-status-change request
+                            (dreyeck/workflow/authoring:make-authoring-environment))))
            (plan (a:work-status-change-outcome-plan outcome))
            (now (a:work-status-change-outcome-topic outcome)))
       (assert (typep outcome 'a:work-status-change-outcome))
@@ -372,15 +375,22 @@ one way on."
     (dolist (steps (list gt::*radial* gt::*mark*))
       (let ((sign (gt::%occurrence workspace topic :bindings bindings)))
         (gt::%feed sign steps)
-        (let ((gesture (m:workspace-action-sign-selected-object sign)))
+        (let* ((context (m:workspace-action-sign-selected-object sign))
+               (gesture (a::editor-selection context)))
+          (assert (eq workspace (a::editor-workspace context)))
+          (assert (eq projection (a::editor-projection context)))
           (assert (eq inspector gesture))
           (assert (eq operation (r:operation-request-operation gesture)))
           (assert (eq (work:topic-source-occurrence topic) (r:operation-request-occurrence gesture))))))
     (assert (string= source (%read path)))
     ;; The selection's own view completes it; request, plan and effect follow.
     (let* ((view (%view inspector "Change work status"))
-           (outcome (views:eval-thunk (cdr (assoc "Change work status to \"in progress\"" (%buttons view)
-                                                  :test #'equal)))))
+           (request (views:eval-thunk (cdr (assoc "Change work status to \"in progress\"" (%buttons view)
+                                                  :test #'equal))))
+           (outcome (progn (assert (typep request 'work:work-status-change-request))
+                           (assert (string= source (%read path)))
+                           (a:execute-work-status-change request
+                            (dreyeck/workflow/authoring:make-authoring-environment)))))
       (assert (eq :applied (a:work-status-change-outcome-status outcome)))
       (assert (eq inspector (a:work-status-change-outcome-selection outcome)))
       (assert (member inspector (mapcar #'cdr (views:view-references
@@ -698,8 +708,8 @@ candidate verified before its atomic installation, only the status value's bytes
 change, the reprojection changes only the target's status, the loaded page ~
 shows it, and the plan and request are stale; neither the Catalog nor the ~
 reading system reaches the writer; from a Work Topic at a Workspace Point, in ~
-an image holding the pinned authoring environment, one action offered from ~
-the page's observed statuses carries request, plan and authorised apply to ~
+an image holding the pinned authoring environment, choosing an observed ~
+status completes a request; explicit execution connects plan and effect to ~
 the written page, the reloaded page object and the projected Topic, all ~
 connected in the outcome, while without that environment nothing is planned ~
 or written; a Topic sign gesture, by menu or by mark, and the Inspector select ~

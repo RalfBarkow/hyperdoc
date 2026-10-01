@@ -476,9 +476,9 @@ selects on that Topic's exact declaration, from the shared registry."
       (error 'm:operation-not-applicable
              :operation operation :target target
              :reason "the target is no Topic sign of a Work Topic declared in HTML"))
-    (ops:work-topic-operation-request operation (m:occurrence-topic occurrence))))
+    (select-work-operation operation (m:occurrence-topic occurrence) (m:occurrence-workspace occurrence))))
 
-(defun %render-status-actions (topic &optional selection)
+(defun %render-status-actions (topic &optional selection workspace)
   (let* ((occurrence (work:topic-source-occurrence topic))
          (page (work:topic-occurrence-page occurrence))
          (status (getf (tm:topicmap-topic-view-properties-of topic) :status))
@@ -500,12 +500,13 @@ selects on that Topic's exact declaration, from the shared registry."
                  (:li (views:eval-button
                        (views:esc (format nil "Change work status to ~S" choice))
                        (views:thunk
-                         (complete-work-status-change
+                         (complete-editor-status
                           (or selection
-                              (ops:work-topic-operation-request (w:change-work-status-operation) topic))
+                              (select-work-operation (w:change-work-status-operation) topic
+                                                     (or workspace (%topic-workspace topic))))
                           choice))))))))
           (views:html (:p "No other status occurs on the declaring page.")))
-      (:p "An action selects Change work status on this declaration, completes the selection into a request, applies its plan only in an image holding the pinned authoring environment, and opens the outcome."))))
+      (:p "Choose a status to inspect the request. Preview its plan separately, then explicitly execute the request after revalidation."))))
 
 (views:defview work-topic-status-actions (topic work:work-topic)
   (when (%declared-work-topic-p topic)
@@ -516,7 +517,7 @@ selects on that Topic's exact declaration, from the shared registry."
   (let ((topic (tm:topicmap-workspace-current-topic workspace)))
     (when (%declared-work-topic-p topic)
       (views:html-view :title "Change work status" :priority 5
-        (%render-status-actions topic)))))
+        (%render-status-actions topic nil workspace)))))
 
 (views:defview operation-request-status-actions (selection r:operation-request)
   (let ((occurrence (r:operation-request-occurrence selection)))

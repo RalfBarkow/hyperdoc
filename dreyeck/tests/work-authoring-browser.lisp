@@ -55,7 +55,8 @@ page would receive it; the Inspector's own handler does the rest."
 copy, then, once a browser has connected: a radial gesture on the Topic sign
 of hyperdoc-page-authoring selects Change work status and opens the shared
 operation request; its Change work status tab offers the statuses; choosing
-\"in progress\" opens the outcome of the existing executor. Waits up to LINGER
+\"in progress\" opens a complete request; previewing its plan and explicitly executing
+that request opens a fresh Workspace, from which its outcome is inspected. Waits up to LINGER
 seconds, or until DONE-FILE exists, before closing."
   (call-with-work-breakdown-fixture
    (lambda (page path)
@@ -97,10 +98,10 @@ seconds, or until DONE-FILE exists, before closing."
                          (lambda () (eq :completed (getf (dreyeck/gesture/clog:gesture-window-result window) :state))))
          ;; The selection opens beside the Workspace pane.
          (%witness-await "the selection pane"
-                         (lambda () (typep (%witness-last-object) 'r:operation-request)))
+                         (lambda () (typep (%witness-last-object) 'a::work-editor-context)))
          (let ((selection (%witness-last-object))
                (selection-pane (car (last (%witness-panes)))))
-           (assert (eq selection (ops:work-topic-operation-request operation topic)))
+           (assert (eq (a::editor-selection selection) (ops:work-topic-operation-request operation topic)))
            (assert (equal "shown" (clog:attribute (m:occurrence-element sign) "data-topic-gesture-outcome")))
            (format t "~&WITNESS-SELECTION-PASS: the gesture opened ~A, the Inspector's own selection.~%"
                    (prin1-to-string selection))
@@ -111,6 +112,22 @@ seconds, or until DONE-FILE exists, before closing."
                                               (%witness-pane-text selection-pane))))
            (assert (equal "clicked" (%witness-click selection-pane "button.inspector-action"
                                                     "Change work status to \"in progress\"")))
+           ;; The status button now completes a request. Preview and execution
+           ;; are separate Inspector actions; the executor replans the request.
+           (%witness-await "the complete request"
+                           (lambda () (typep (%witness-last-object) 'work:work-status-change-request)))
+           (let ((request-pane (car (last (%witness-panes)))))
+             (uiop:symbol-call :dreyeck/work/editor/tests :%browser-tab request-pane "Work request" "Preview plan")
+             (uiop:symbol-call :dreyeck/work/editor/tests :%browser-open request-pane "button.inspector-action"
+                               "Preview plan" 'a:work-status-change-plan))
+           (let ((plan-pane (car (last (%witness-panes)))))
+             (uiop:symbol-call :dreyeck/work/editor/tests :%browser-tab plan-pane "Work plan" "Execute request after revalidation")
+             (uiop:symbol-call :dreyeck/work/editor/tests :%browser-open plan-pane "button.inspector-action"
+                               "Execute request after revalidation" 'tm:topicmap-workspace))
+           (let ((fresh-pane (car (last (%witness-panes)))))
+             (uiop:symbol-call :dreyeck/work/editor/tests :%browser-tab fresh-pane "Work Breakdown" "Inspect execution outcome")
+             (uiop:symbol-call :dreyeck/work/editor/tests :%browser-open fresh-pane ".inspector-inspect [id]"
+                               "Inspect execution outcome" 'a:work-status-change-outcome))
            (%witness-await "the outcome pane"
                            (lambda () (typep (%witness-last-object) 'a:work-status-change-outcome))
                            :seconds 120)
@@ -118,7 +135,7 @@ seconds, or until DONE-FILE exists, before closing."
                   (outcome-pane (car (last (%witness-panes))))
                   (text (%witness-pane-text outcome-pane)))
              (assert (eq :applied (a:work-status-change-outcome-status outcome)))
-             (assert (eq selection (a:work-status-change-outcome-selection outcome)))
+             (assert (eq (a::editor-selection selection) (a:work-status-change-outcome-selection outcome)))
              (assert (equal "in progress" (%status (%project page path) "hyperdoc-page-authoring")))
              (let ((anchor (find "hyperdoc-page-authoring"
                                  (plump:get-elements-by-tag-name (hyperbook:dom-of page) "a")

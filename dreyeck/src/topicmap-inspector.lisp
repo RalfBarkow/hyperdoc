@@ -396,6 +396,10 @@ readable values stay on the element's data- attributes."
           (views:str (render-topicmap-html *topicmap-renderer* projection))
           (render-topicmap-legend projection))))))
 
+(defgeneric render-workspace-point-editor (workspace topic)
+  (:documentation "Optional domain editor access at Point; navigation remains unchanged.")
+  (:method (workspace topic) (declare (ignore workspace topic)) nil))
+
 (defun render-topicmap-workspace-associations (projection)
   (let ((workspace (dreyeck/topicmap:topicmap-projection-source-of projection)))
     (when (typep workspace 'dreyeck/topicmap:topicmap-workspace)
@@ -411,6 +415,7 @@ readable values stay on the element's data- attributes."
            (views:object-ref
             (dreyeck/topicmap:topicmap-topic-object-of point-topic) :display
             (dreyeck/topicmap:topicmap-topic-label-of point-topic)))
+          (render-workspace-point-editor workspace point-topic)
           (:h3 "Associations")
           (if associations
               (views:html
