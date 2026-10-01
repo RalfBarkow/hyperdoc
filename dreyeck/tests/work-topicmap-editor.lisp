@@ -334,6 +334,71 @@ Returning to A must use A's targets, relation choices and post-effect Point."
             (assert (equal "corpus" (tm:topicmap-workspace-point-of wb)))
             (assert (not (eq pa (tm:topicmap-workspace-projection-of fresh))))))))))
 
+(defun call-with-tala-probe (probe function)
+  "Test-only scoped replacement of the one existing runtime probe."
+  (let ((original (symbol-function 'dreyeck/topicmap/tala:tala-dependency-status)))
+    (unwind-protect
+         (progn (setf (symbol-function 'dreyeck/topicmap/tala:tala-dependency-status) probe)
+                (funcall function))
+      (setf (symbol-function 'dreyeck/topicmap/tala:tala-dependency-status) original))))
+
+(defun check-optional-tala (page path)
+  "Loaded TALA Inspector code is safe without its optional executable;
+play-button availability and click-time revalidation use the existing probe."
+  (let* ((probe (symbol-function 'dreyeck/topicmap/tala:tala-dependency-status))
+         (missing (namestring (merge-pathnames "absent-d2" (uiop:pathname-directory-pathname path))))
+         (status (funcall probe :program missing))
+         (examples '(dreyeck/inspector/topicmap/tala::reading-layout-result
+                     dreyeck/inspector/topicmap/tala::reading-geometry
+                     dreyeck/inspector/topicmap/tala::reading-invariant-report
+                     dreyeck/inspector/topicmap/tala::reading-comparison)))
+    (assert (eq :unavailable (getf status :status)))
+    (call-with-tala-probe
+     (lambda (&key program) (declare (ignore program)) status)
+     (lambda ()
+       (let* ((ws (workspace page))
+              (projection (tm:topicmap-workspace-projection-of ws))
+              (before (dreyeck/topicmap/tala:projection-state projection)))
+         (assert (eq status (dreyeck/inspector/topicmap/tala:compare-workspace-layouts ws)))
+         (assert (eq status (dreyeck/inspector/topicmap/tala:repository-layout-comparison)))
+         (assert (equal before (dreyeck/topicmap/tala:projection-state projection)))
+         (assert (equal "hyperdoc-page-authoring" (tm:topicmap-workspace-point-of ws)))
+         (assert (null (tm:topicmap-workspace-history-of ws)))
+         (assert (search "Open Work Topic" (views:view-html (tst::%view ws "Topicmap")))))
+       (dolist (name examples)
+         (assert (eq status (funcall name)))
+         (let ((view (html-inspector-views/standard:source-code-view (symbol-function name))))
+           (assert (search "TALA unavailable (inspect capability)" (views:view-html view)))
+           (assert (null (plump:get-elements-by-tag-name (plump:parse (views:view-html view)) "button")))
+           (assert (member status (mapcar #'cdr (views:view-references view)) :test #'eq))))
+       ;; Real status request/plan/executor/fresh Workspace still work.
+       (check-status-loop page path)))
+    ;; An action rendered while available must recheck when clicked, and
+    ;; an actual runtime error must remain inspectable at the UI boundary.
+    (let ((view nil))
+      (call-with-tala-probe
+       (lambda (&key program) (declare (ignore program)) '(:status :available))
+       (lambda ()
+         (setf view (html-inspector-views/standard:source-code-view
+                     #'dreyeck/inspector/topicmap/tala::reading-comparison))
+         (views:view-html view)))
+      (let* ((button (first (plump:get-elements-by-tag-name (plump:parse (views:view-html view)) "button")))
+             (thunk (cdr (assoc (plump:attribute button "id") (views:view-references view) :test #'equal))))
+        (assert thunk)
+        (call-with-tala-probe
+         (lambda (&key program) (declare (ignore program)) status)
+         (lambda () (assert (eq status (views:eval-thunk thunk)))))
+        (let ((original (symbol-function 'dreyeck/inspector/topicmap/tala::reading-comparison)))
+          (unwind-protect
+               (progn
+                 (setf (symbol-function 'dreyeck/inspector/topicmap/tala::reading-comparison)
+                       (lambda () (error "Test: tool failed after the capability probe.")))
+                 (call-with-tala-probe
+                  (lambda (&key program) (declare (ignore program)) '(:status :available))
+                  (lambda () (assert (typep (views:eval-thunk thunk) 'error)))))
+            (setf (symbol-function 'dreyeck/inspector/topicmap/tala::reading-comparison) original))))))
+  (format t "~&OPTIONAL-TALA-PASS: unavailable actions inspect existing evidence, available actions revalidate/capture runtime failure, Work execution unaffected.~%"))
+
 (defun check-source-ownership ()
   (dolist (entry '(("dreyeck/work/authoring" "dreyeck/src/work-topicmap-editor")
                    ("dreyeck/work/authoring/tests" "dreyeck/tests/work-topicmap-editor")
@@ -348,7 +413,7 @@ Returning to A must use A's targets, relation choices and post-effect Point."
 
 (defun run-tests ()
   (let ((pages (tst::work-page-sources)))
-    (dolist (test (list #'check-point-rendering #'check-connections #'check-status-loop #'check-relationship-loop
+    (dolist (test (list #'check-optional-tala #'check-point-rendering #'check-connections #'check-status-loop #'check-relationship-loop
                        #'check-stale-arguments #'check-unverified-and-point #'check-two-workspaces))
       (tst::call-with-work-breakdown-fixture test))
     (check-source-ownership)

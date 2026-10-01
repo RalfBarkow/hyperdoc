@@ -57,15 +57,18 @@
 (HYPERDOC:DEFEXAMPLE READING-DEPENDENCY (TALA:TALA-DEPENDENCY-STATUS))
 
 (HYPERDOC:DEFEXAMPLE READING-LAYOUT-RESULT
-                     (TALA:RUN-TALA (READING-LAYOUT-INPUT)))
+  (let ((dependency (tala:tala-dependency-status)))
+    (if (eq :available (getf dependency :status))
+        (tala:run-tala (reading-layout-input)) dependency)))
 
 (HYPERDOC:DEFEXAMPLE READING-GEOMETRY
-                     (TALA:TALA-RENDERING-EVIDENCE (READING-LAYOUT-RESULT)))
+  (let ((result (reading-layout-result)))
+    (if (typep result 'tala:tala-rendering)
+        (tala:tala-rendering-evidence result) result)))
 
 (HYPERDOC:DEFEXAMPLE READING-INVARIANT-REPORT
-                     (COMPARISON-INVARIANTS
-                                            (REPOSITORY-LAYOUT-COMPARISON :SEED
-                                                                          44)))
+  (let ((result (repository-layout-comparison :seed 44)))
+    (if (typep result 'tala-comparison) (comparison-invariants result) result)))
 
 (HYPERDOC:DEFEXAMPLE READING-COMPARISON (REPOSITORY-LAYOUT-COMPARISON :SEED 44))
 
@@ -101,3 +104,40 @@
                               "dreyeck/pages/topicmap-tala" :CODE-SUBDIRECTORY
                               "dreyeck/src" :MAIN-PAGE-ID
                               "Reading TALA as a Layout Layer")
+
+;; The existing source renderer supplies the play thunk. This more-specific
+;; presentation adapter leaves other examples and any authority-policy thunk
+;; untouched, and binds only these layout examples to the existing TALA probe.
+(defmethod html-inspector-views/standard:render-toplevel-cst :around
+    ((head (eql 'hyperdoc:defexample)) (cst concrete-syntax-tree:cons-cst) source position)
+  (let ((name (concrete-syntax-tree:raw (concrete-syntax-tree:second cst))))
+    (if (not (member name '(reading-layout-result reading-geometry
+                           reading-invariant-report reading-comparison authored-d2-example)))
+        (call-next-method)
+        (let ((dependency (tala:tala-dependency-status)))
+          (if (not (eq :available (getf dependency :status)))
+              (progn
+                (views:object-ref dependency :display
+                                  (format nil "TALA ~A (inspect capability)"
+                                          (string-downcase (symbol-name (getf dependency :status)))))
+                ;; DEFEXAMPLE's normal primary rendering is RENDER-CST. Keep
+                ;; its persisted source and object references, without play.
+                (html-inspector-views/standard::render-cst cst source position))
+              (let* ((before (copy-list (views::accumulator-references views::*view-accumulator*)))
+                     (end (call-next-method)))
+                ;; Preserve the upstream/authority-policy action itself; wrap
+                ;; only its evaluation so disappearing/failed tools remain
+                ;; inspectable instead of escaping the CLOG event thread.
+                (dolist (reference (set-difference
+                                    (views::accumulator-references views::*view-accumulator*)
+                                    before :test #'eq))
+                  (when (typep (cdr reference) 'views:thunk)
+                    (let ((original (cdr reference)))
+                      (setf (cdr reference)
+                            (views:thunk
+                              (handler-case
+                                  (let ((current (tala:tala-dependency-status)))
+                                    (if (eq :available (getf current :status))
+                                        (views:eval-thunk original) current))
+                                (error (condition) condition)))))))
+                end))))))

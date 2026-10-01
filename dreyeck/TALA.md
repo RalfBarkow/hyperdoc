@@ -105,3 +105,19 @@ Work was isolated on `feature/topicmap-tala-layout`, based exactly on
 `0aae85da29d085e0c41d53243fcff97c460b2c39`, in
 `/Users/rgb/workspace/hyperdoc-topicmap-tala`. The three pre-existing HyperDoc
 worktrees and the separate html-inspector-views checkout were left untouched.
+
+## Optional capability in other Inspector images
+
+The Work-editor demo's `workflow-authoring` shell does not require D2. When
+this reading extension is loaded without the pinned CLI, its five layout play
+affordances expose the existing `tala-dependency-status` evidence instead of
+advertising an available execution. Persisted source and examples without a
+layout requirement remain inspectable/executable. A direct Workspace comparison
+returns that same dependency evidence when unavailable. Low-level `run-tala`
+and `run-d2-tala` remain strict; they do not substitute a renderer.
+
+A rendered layout action rechecks availability when clicked and retains a
+runtime error as an inspectable condition at the Inspector boundary. Its
+original thunk, including any served-runtime authority decision, is preserved.
+See [the human demo](WORK-EDITOR-DEMO.md) for the complete authoring environment
+and acceptance paths.

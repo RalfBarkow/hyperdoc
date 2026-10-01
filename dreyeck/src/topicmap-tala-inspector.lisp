@@ -18,8 +18,12 @@
 
 (defun compare-workspace-layouts (workspace &key (program "d2") (seed 44))
   "Lay out one existing workspace projection once, explicitly on request.
-Viewing the result or invoking existing navigation actions does not run TALA."
+Viewing the result or invoking existing navigation actions does not run TALA.
+An absent/unsupported optional renderer returns its existing dependency evidence."
   (check-type workspace tm:topicmap-workspace)
+  (let ((dependency (tala:tala-dependency-status :program program)))
+    (unless (eq :available (getf dependency :status))
+      (return-from compare-workspace-layouts dependency)))
   (let* ((base (tm:topicmap-workspace-projection-of workspace))
          (base-before (tala:projection-state base))
          (point-before (copy-seq (tm:topicmap-workspace-point-of workspace)))

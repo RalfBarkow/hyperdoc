@@ -37,6 +37,43 @@
                               (hyperbook:title-of
                                (tm:topicmap-topic-object-of (tm:topicmap-workspace-current-topic ws))))))))))
 
+(defun %browser-optional-tala (pane ws)
+  "Follow the human Work concept -> TALA reading page -> layout example path
+in the documented authoring shell, then prove the same connection still works."
+  (let* ((dependency (dreyeck/topicmap/tala:tala-dependency-status))
+         (projection (tm:topicmap-workspace-projection-of ws)))
+    (assert (eq :unavailable (getf dependency :status)))
+    (%browser-primary pane ws "topicmap")
+    (let ((page-pane (%browser-open pane ".inspector-inspect [id]"
+                                    "Reading TALA as a Layout Layer" 'hyperbook:page)))
+      (%browser-tab page-pane "Content" "READING-INVARIANT-REPORT")
+      (dolist (name '("READING-LAYOUT-RESULT" "READING-GEOMETRY"
+                      "READING-INVARIANT-REPORT" "READING-COMPARISON"))
+        (tst::%witness-await name
+          (lambda ()
+            (equal "true"
+                   (tst::%witness-js
+                    (format nil "(function(){const p=document.getElementById('~A');const form=[...p.querySelectorAll('lisp-toplevel')].find(e=>e.querySelector('lisp-symbol[name=\"~A\"]'));return !!form&&!form.querySelector('button.inspector-action')&&form.textContent.includes('TALA unavailable (inspect capability)');})()"
+                            (clog:html-id (clog-moldable-inspector::clog-obj page-pane)) name))))))
+      (let* ((status-pane (%browser-open page-pane
+                                        "lisp-toplevel:has(lisp-symbol[name=READING-INVARIANT-REPORT]) .inspector-inspect [id]"
+                                        "TALA unavailable (inspect capability)" 'list))
+             (status (clog-moldable-inspector::pane-object status-pane)))
+        (assert (eq :unavailable (getf status :status)))
+        (assert (equal "d2" (getf status :program)))
+        (assert (typep (getf status :condition) 'error))
+        (assert (search "nix develop .#tala" (getf status :remedy))))
+      ;; Source examples without the layout requirement remain executable.
+      (let* ((git-pane (%browser-open page-pane "button.inspector-action" "►" 'tm:topicmap-workspace))
+             (git-ws (clog-moldable-inspector::pane-object git-pane))
+             (ids (mapcar #'tm:topicmap-topic-id-of
+                          (tm:topicmap-projection-topics-of (tm:topicmap-workspace-projection-of git-ws)))))
+        (assert (every (lambda (id) (eql 0 (search "git-" id))) ids))
+        (%browser-tab git-pane "Topicmap" "Point"))
+      (assert (eq projection (tm:topicmap-workspace-projection-of ws))))
+    (%browser-primary pane ws "hyperdoc-page-authoring")
+    (format t "~&EDITOR-BROWSER-OPTIONAL-TALA-PASS: human failure path now inspects existing unavailable evidence; non-layout Git Workspace and Work Point remain usable on the same live CLOG connection, no D2.~%")))
+
 (defun run-human-editor-demo (&key (port 18091))
   "The browser witness's authoring-capable fixture, without synthetic clicks.
 Enter on the terminal stops the loopback listener and removes the fixture."
@@ -88,6 +125,7 @@ is on the temporary Work Breakdown copy; TEST-OP never starts this server."
                 (finish-output)
                 (tst::%witness-await "browser" (lambda () tst::*witness-pane*) :seconds 600)
                 (%browser-primary tst::*witness-pane* ws "hyperdoc-page-authoring")
+                (%browser-optional-tala tst::*witness-pane* ws)
                 ;; All Point references retain their distinct exact targets.
                 (let* ((topic (tm:topicmap-workspace-current-topic ws))
                        (raw-pane (%browser-open tst::*witness-pane* ".inspector-inspect [id]"
