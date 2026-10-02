@@ -471,7 +471,8 @@
 (asdf:defsystem "dreyeck/authority-policy"
   :description "Operation contracts and disclosure gates over HyperDoc's Inspector: containment, with upstream untouched"
   :depends-on ("html-inspector-views/standard" "cl-who" "closer-mop" "concrete-syntax-tree" "lwcells"
-               "hyperbook" "hyperbook/fedwiki" "hyperdoc" "hyperdoc/explorer" "ironclad")
+               "hyperbook" "hyperbook/fedwiki" "hyperbook/wikipedia" "hyperdoc" "hyperdoc/explorer"
+               "ironclad")
   :components ((:file "dreyeck/src/authority-policy"))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/authority-policy/tests"))))
 
