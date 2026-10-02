@@ -4,38 +4,91 @@
 (HYPERDOC:SEE
   (HYPERDOC:PAGE "Reading TALA as a Layout Layer"))
 
+;; This reading's subject is the real current repository and its
+;; CURRENT-HEAD. A runtime loaded from sources that are not a Git checkout,
+;; such as a Nix store copy, has no current repository, and the reading
+;; says so instead of failing inside Git. Nothing here stands in for the
+;; repository: no commit, no repository and no CURRENT-HEAD is claimed,
+;; and build provenance is a different statement that this reading does
+;; not make.
+
+(defun reading-source-directory ()
+  "The directory whose checkout this reading is about: where DREYECK/GIT is
+defined, the directory MAKE-CURRENT-GIT-REPOSITORY-CHECKOUT asks Git about."
+  (uiop:pathname-directory-pathname
+   (asdf:system-source-file (asdf:find-system :dreyeck/git))))
+
+(defun live-git-checkout-absence (directory)
+  "NIL when DIRECTORY lies in a live Git checkout, otherwise an observation
+that it does not.
+
+Git is asked once, through GIT-RUN-VALUES, where a non-zero exit status is
+data rather than an error. Once Git has answered that there is no checkout,
+nothing further is asked of it. The observation keeps what Git said, so a
+refusal for another reason, such as an unsafe directory, stays visible.
+It is not a missing renderer: D2 is reported by TALA-DEPENDENCY-STATUS."
+  (let ((arguments '("rev-parse" "--show-toplevel")))
+    (multiple-value-bind (stdout stderr exit-code)
+        (apply #'dreyeck/git:git-run-values directory arguments)
+      (declare (ignore stdout))
+      (unless (zerop exit-code)
+        (list :kind :no-live-git-checkout
+              :examined (namestring directory)
+              :git (list :command (cons "git" arguments)
+                         :directory (namestring directory)
+                         :exit-code exit-code
+                         :stderr (dreyeck/git:trim-git-output stderr))
+              :requires "A live Git checkout, because this reading's subject is the current repository and its CURRENT-HEAD. This is not the TALA renderer: D2 is reported separately."
+              :remedy "Load the reading from a Git checkout, for example with nix develop .#tala in the repository."
+              :evidence-status :observed)))))
+
+(defun no-live-git-checkout-p (value)
+  (and (consp value) (eq :no-live-git-checkout (getf value :kind))))
+
+(defun reading-live-checkout ()
+  "The live checkout this reading is about, or the observation that there is none."
+  (or (live-git-checkout-absence (reading-source-directory))
+      (dreyeck/git:make-current-git-repository-checkout)))
+
 (HYPERDOC:DEFEXAMPLE READING-WORKSPACE
-                     (TM::MAKE-TOPICMAP-WORKSPACE-FOR-OBJECT
-                                                             (DREYECK/GIT:MAKE-CURRENT-GIT-REPOSITORY-CHECKOUT)))
+  (let ((checkout (reading-live-checkout)))
+    (if (no-live-git-checkout-p checkout)
+        checkout
+        (tm::make-topicmap-workspace-for-object checkout))))
 
 (HYPERDOC:DEFEXAMPLE READING-PROJECTION
-                     (TM:TOPICMAP-PROJECTION-OF (READING-WORKSPACE)))
+  (let ((workspace (reading-workspace)))
+    (if (no-live-git-checkout-p workspace)
+        workspace
+        (tm:topicmap-projection-of workspace))))
 
 (HYPERDOC:DEFEXAMPLE READING-TOPIC-IDENTITIES
-                     (MAPCAR (FUNCTION TM:TOPICMAP-TOPIC-ID-OF)
-                             (TM:TOPICMAP-PROJECTION-TOPICS-OF
-                                                               (READING-PROJECTION))))
+  (let ((projection (reading-projection)))
+    (if (no-live-git-checkout-p projection)
+        projection
+        (mapcar #'tm:topicmap-topic-id-of
+                (tm:topicmap-projection-topics-of projection)))))
 
 (HYPERDOC:DEFEXAMPLE READING-ASSOCIATION-ENDPOINTS
-                     (MAPCAR
-                             (LAMBDA (ASSOCIATION)
-                                     (LIST :ID
-                                           (TM:TOPICMAP-ASSOCIATION-ID-OF
-                                                                          ASSOCIATION)
-                                           :FROM
-                                           (TM:TOPICMAP-ASSOCIATION-FROM-OF
-                                                                            ASSOCIATION)
-                                           :TO
-                                           (TM:TOPICMAP-ASSOCIATION-TO-OF
-                                                                          ASSOCIATION)))
-                             (TM:TOPICMAP-PROJECTION-ASSOCIATIONS-OF
-                                                                     (READING-PROJECTION))))
+  (let ((projection (reading-projection)))
+    (if (no-live-git-checkout-p projection)
+        projection
+        (mapcar (lambda (association)
+                  (list :id (tm:topicmap-association-id-of association)
+                        :from (tm:topicmap-association-from-of association)
+                        :to (tm:topicmap-association-to-of association)))
+                (tm:topicmap-projection-associations-of projection)))))
 
 (HYPERDOC:DEFEXAMPLE READING-LAYOUT-INPUT
-                     (TALA:PROJECTION-TALA-INPUT (READING-PROJECTION) :SEED 44))
+  (let ((projection (reading-projection)))
+    (if (no-live-git-checkout-p projection)
+        projection
+        (tala:projection-tala-input projection :seed 44))))
 
 (HYPERDOC:DEFEXAMPLE READING-ID-MAPPING
                      (LET ((INPUT (READING-LAYOUT-INPUT)))
+                       (IF (NO-LIVE-GIT-CHECKOUT-P INPUT)
+                           INPUT
                           (LIST :TOPICS (TALA:TALA-INPUT-TOPICS INPUT)
                                 :ASSOCIATIONS
                                 (TALA:TALA-INPUT-ASSOCIATIONS INPUT)
@@ -52,14 +105,19 @@
                                                                                 (GETF
                                                                                       ENTRY
                                                                                       :D2-ID))))
-                                        (TALA:TALA-INPUT-TOPICS INPUT)))))
+                                        (TALA:TALA-INPUT-TOPICS INPUT))))))
 
 (HYPERDOC:DEFEXAMPLE READING-DEPENDENCY (TALA:TALA-DEPENDENCY-STATUS))
 
+;; The subject comes first: without a current repository there is nothing
+;; to lay out, so the renderer is not consulted.
 (HYPERDOC:DEFEXAMPLE READING-LAYOUT-RESULT
-  (let ((dependency (tala:tala-dependency-status)))
-    (if (eq :available (getf dependency :status))
-        (tala:run-tala (reading-layout-input)) dependency)))
+  (let ((input (reading-layout-input)))
+    (if (no-live-git-checkout-p input)
+        input
+        (let ((dependency (tala:tala-dependency-status)))
+          (if (eq :available (getf dependency :status))
+              (tala:run-tala input) dependency)))))
 
 (HYPERDOC:DEFEXAMPLE READING-GEOMETRY
   (let ((result (reading-layout-result)))
@@ -67,10 +125,14 @@
         (tala:tala-rendering-evidence result) result)))
 
 (HYPERDOC:DEFEXAMPLE READING-INVARIANT-REPORT
-  (let ((result (repository-layout-comparison :seed 44)))
+  (let ((result (reading-comparison)))
     (if (typep result 'tala-comparison) (comparison-invariants result) result)))
 
-(HYPERDOC:DEFEXAMPLE READING-COMPARISON (REPOSITORY-LAYOUT-COMPARISON :SEED 44))
+(HYPERDOC:DEFEXAMPLE READING-COMPARISON
+  (let ((workspace (reading-workspace)))
+    (if (no-live-git-checkout-p workspace)
+        workspace
+        (compare-workspace-layouts workspace :seed 44))))
 
 (HYPERDOC:DEFEXAMPLE READING-SOURCE-WORKSPACE
                      (LET

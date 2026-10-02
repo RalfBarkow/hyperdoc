@@ -2300,6 +2300,7 @@
   ("dreyeck/topicmap/tala/reading" "dreyeck/topicmap/tests")
   :components
   ((:file "dreyeck/tests/topicmap-tala-reading-smoke")
+   (:file "dreyeck/tests/topicmap-tala-reading-checkout-smoke")
    (:file "dreyeck/tests/topicmap-tala-authored-smoke")
    (:file "dreyeck/tests/topicmap-tala-dispatch-reading-smoke")
    (:file "dreyeck/tests/topicmap-tala-reference-reading-smoke"))
@@ -2309,6 +2310,8 @@
    (uiop/package:symbol-call :dreyeck/topicmap/tests
                              :run-tala-integration-tests)
    (uiop/package:symbol-call :dreyeck/topicmap/tests :run-tala-reading-tests)
+   (uiop/package:symbol-call :dreyeck/topicmap/tests
+                             :run-reading-live-checkout-tests)
    (uiop/package:symbol-call :dreyeck/topicmap/tests :run-authored-d2-tests)
    (uiop/package:symbol-call :dreyeck/topicmap/tests :run-dispatch-reading-tests)
    (uiop/package:symbol-call :dreyeck/topicmap/tests
