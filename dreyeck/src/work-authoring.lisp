@@ -217,7 +217,7 @@ by the proposed status, and nothing else."
                   (work-status-change-plan-status-range plan)
                   (work:work-status-change-proposed-status (work-status-change-plan-request plan))))
 
-(defun %replace-source (path expected candidate refuse)
+(defun %replace-source (path expected candidate refuse &key before-install)
   "Make PATH hold CANDIDATE, if it still holds exactly EXPECTED: through a
 sibling file, read back before it is renamed over PATH. Otherwise, or if the
 sibling does not read back, call REFUSE; PATH is then unchanged and the
@@ -233,6 +233,7 @@ sibling removed."
              (funcall refuse "the written candidate does not read back as planned"))
            (unless (string= expected (%read-source path))
              (funcall refuse "the page source changed while the candidate was written"))
+           (when before-install (funcall before-install))
            (rename-file sibling path))
       (when (probe-file sibling)
         (delete-file sibling)))))
@@ -675,6 +676,8 @@ Writes nothing, and signals WORK-RELATIONSHIP-CREATION-PLAN-REFUSED unless
 every check holds."
   (flet ((refuse (reason &optional cause)
            (error 'work-relationship-creation-plan-refused :request request :reason reason :cause cause)))
+    (when (typep request 'work:addresses-creation-request)
+      (return-from plan-work-relationship-creation (plan-addresses-creation request)))
     (unless (typep request 'work:work-relationship-creation-request)
       (refuse (format nil "~S is not a relationship creation request" request)))
     (let* ((page (work:work-relationship-creation-authority-page request))
@@ -703,7 +706,7 @@ every check holds."
                (plan (make-instance
                       'work-relationship-creation-plan
                       :request request :snapshot snapshot
-                      :position (cdr (work:relationship-occurrence-element-range (car (last statements))))
+                      :position (work:relationship-insertion-position snapshot page)
                       :representation (%relationship-representation
                                        (work:topic-occurrence-topic from) (work:topic-occurrence-topic to) relation
                                        (tm:topicmap-topic-label-of (ops:declared-work-topic from))
@@ -760,6 +763,8 @@ nothing, or WORK-RELATIONSHIP-CREATION-UNVERIFIED having installed the
 verified candidate."
   (flet ((refuse (reason &optional cause)
            (error 'work-relationship-creation-apply-refused :plan plan :reason reason :cause cause)))
+    (when (typep plan 'addresses-creation-plan)
+      (return-from apply-work-relationship-creation (apply-addresses-creation plan)))
     (unless (typep plan 'work-relationship-creation-plan)
       (refuse (format nil "~S is not a relationship creation plan" plan)))
     (let* ((request (work-relationship-creation-plan-request plan))

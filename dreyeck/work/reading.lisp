@@ -706,6 +706,8 @@ ALL-TOPICS either way."
          (associations
            (loop for (from relation to occurrence) in statements
                  for id = (format nil "work:~A:~A:~A" from relation to)
+                 do (when (equal relation "work:relation/addresses")
+                      (validate-local-addresses-roles all-topics from to))
                  when (or (not areas-only)
                           (and (member from ids :test #'equal)
                                (member to ids :test #'equal)))
@@ -773,7 +775,12 @@ occurrences, and kept by each."
          (declarations (let ((declarations (scan-work-topics snapshot source)))
                          (%align-topics declarations topic-nodes snapshot)
                          declarations)))
-    (%work-projection
+    (let* ((bridges (ingest-addresses-bridges snapshot source relationship-nodes occurrences))
+           (qualified (mapcar #'bridge-occurrence bridges))
+           (local-nodes (loop for node in relationship-nodes for occurrence in occurrences
+                              unless (member occurrence qualified :test #'eq) collect node))
+           (local-occurrences (remove-if (lambda (o) (member o qualified :test #'eq)) occurrences))
+           (projection (%work-projection
      ;; Every authored Topic, including those AREAS-ONLY leaves out, so a
      ;; contract reference is checked against the whole page either way.
      (loop for node in topic-nodes
@@ -787,13 +794,16 @@ occurrences, and kept by each."
                                          (or (plump:attribute node "hyperbook")
                                              "dreyeck/work/reading"))
                                 declaration))
-     (loop for node in relationship-nodes
-           for occurrence in occurrences
+     (loop for node in local-nodes
+           for occurrence in local-occurrences
            collect (list (plump:attribute node "data-from")
                          (plump:attribute node "data-relation")
                          (plump:attribute node "data-to")
                          occurrence))
      :source source :areas-only areas-only)))
+      (setf (slot-value projection 'tm::view-properties)
+            (list* :qualified-bridges bridges (tm:topicmap-projection-view-properties-of projection)))
+      projection)))
 
 ;; These are ordinary page links and relationship entries in Work Breakdown.
 ;; Reading this one page avoids a second authoritative WBS list in Lisp or D2.
@@ -1199,8 +1209,8 @@ only; the relationship has no occurrence until an effect creates one."))
 (defun request-work-relationship-creation (selection to-topic relation &key (current nil current-p))
   "A request to create the relationship RELATION from the Work Topic whose
 declaration SELECTION was selected on, to the Work Topic TO-TOPIC. CURRENT is
-the declaring page's source now, read from its page unless given; both
-declarations must belong to it, exactly as observed. Observes, writes nothing,
+the declaring page's source now, read from its page unless given; local declarations must belong to it, exactly as observed. Only the bounded
+addresses mode admits a separately observed foreign Constraint. Writes nothing,
 and signals WORK-RELATIONSHIP-CREATION-REFUSED unless every check holds."
   (flet ((refuse (reason &optional cause)
            (error 'work-relationship-creation-refused :reason reason :cause cause)))
@@ -1216,6 +1226,9 @@ and signals WORK-RELATIONSHIP-CREATION-REFUSED unless every check holds."
             (snapshot (topic-occurrence-snapshot from)))
         (unless to
           (refuse (format nil "~S is no Work Topic declared in HTML" to-topic)))
+        (when (and to (equal relation "work:relation/addresses"))
+          (return-from request-work-relationship-creation
+            (request-addresses-bridge selection to-topic)))
         ;; One authority: the page both declarations were observed on, as it was.
         (unless (and (eq page (topic-occurrence-page to))
                      (string= snapshot (topic-occurrence-snapshot to)))

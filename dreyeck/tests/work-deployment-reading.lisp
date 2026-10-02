@@ -166,7 +166,7 @@
       (assert (search "b42eb888d6e5d59803667c6320e0779523fc265c" source)))
     ;; Navigation additions must preserve the existing semantic Work graph.
     (let ((projection (dreyeck/work/reading:work-projection)))
-      (assert (= 22 (length (dreyeck/topicmap:topicmap-projection-topics-of projection))))
+      (assert (= 23 (length (dreyeck/topicmap:topicmap-projection-topics-of projection))))
       (assert (= 22 (length (dreyeck/topicmap:topicmap-projection-associations-of projection))))))
   (format t "~&WORK-DEPLOYMENT-READING-PASS: supplied evidence, separate checkout/service, page navigation and unchanged Work graph.~%")
   t)

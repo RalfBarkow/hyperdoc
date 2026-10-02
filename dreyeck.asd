@@ -2362,12 +2362,13 @@
 (defsystem "dreyeck/work/reading"
   :description "HyperDoc work pages and one complete D2 Connections example"
   :depends-on ("dreyeck/topicmap/tala/reading" "dreyeck/gesture-binding-witness"
-               "dreyeck/inspector/git" "dreyeck/gesture/operation-request")
+               "dreyeck/inspector/git" "dreyeck/gesture/operation-request" "shasht" "cl-base64")
   :serial t
   :components ((:module "dreyeck/work" :components ((:file "reading")
                                                     (:file "operation-requests")
                                                     (:file "deployment-reading")
-                                                    (:file "authoring-architecture")))
+                                                    (:file "authoring-architecture")
+                                                    (:file "addresses")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
                  (:static-file "Interaction.html")
@@ -2405,6 +2406,7 @@
   :depends-on ("dreyeck/work/reading" "dreyeck/workflow/authoring" "plump")
   :serial t
   :components ((:file "dreyeck/src/work-authoring")
+               (:file "dreyeck/src/work-addresses-authoring")
                (:file "dreyeck/src/work-topicmap-editor")))
 
 (defsystem "dreyeck/work/authoring/tests"
@@ -2413,11 +2415,14 @@
   :components ((:file "dreyeck/tests/work-authoring")
                (:file "dreyeck/tests/work-authoring-browser")
                (:file "dreyeck/tests/work-topicmap-editor")
-               (:file "dreyeck/tests/work-topicmap-editor-browser"))
+               (:file "dreyeck/tests/work-topicmap-editor-browser")
+               (:file "dreyeck/tests/work-addresses")
+               (:file "dreyeck/tests/work-addresses-browser"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/authoring/tests :run-tests)
-             (uiop:symbol-call :dreyeck/work/editor/tests :run-tests)))
+             (uiop:symbol-call :dreyeck/work/editor/tests :run-tests)
+             (uiop:symbol-call :dreyeck/work/addresses/tests :run-tests)))
 
 (defsystem "dreyeck/work/planning"
   :description "Optional in-memory SHOP3 documentation experiment; no executor"

@@ -41,8 +41,8 @@
 HyperDoc. Copy its text and code pages so ordinary relative links resolve
 inside the fixture. Register only for its lifetime; never load copied code."
   (assert (null (hyperbook:find-hyperbook "work-authoring-probe")))
-  (let* ((root (merge-pathnames (format nil "work-authoring-probe-~D-~D/"
-                                        (get-universal-time) (random 100000))
+  (let* ((root (merge-pathnames (format nil "work-authoring-probe-~D-~D-~D/"
+                                        (sb-unix:unix-getpid) (get-universal-time) (random 100000))
                                 (uiop:temporary-directory)))
          (asd (merge-pathnames "work-authoring-probe.asd" root))
          (path (merge-pathnames "pages/Work Breakdown.html" root))
