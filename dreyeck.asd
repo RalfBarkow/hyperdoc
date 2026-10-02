@@ -471,10 +471,25 @@
 (asdf:defsystem "dreyeck/authority-policy"
   :description "Operation contracts and disclosure gates over HyperDoc's Inspector: containment, with upstream untouched"
   :depends-on ("html-inspector-views/standard" "cl-who" "closer-mop" "concrete-syntax-tree" "lwcells"
-               "hyperbook" "hyperbook/fedwiki" "hyperbook/wikipedia" "hyperdoc" "hyperdoc/explorer"
-               "ironclad")
+               "hyperbook" "hyperbook/fedwiki" "hyperdoc" "hyperdoc/explorer" "ironclad")
   :components ((:file "dreyeck/src/authority-policy"))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/authority-policy/tests"))))
+
+;; Temporary, pending upstream HyperDoc: delete both systems, with
+;; dreyeck/catalog's dependency, once the pinned upstream Wikipedia title bar
+;; navigates in the client.
+(asdf:defsystem "dreyeck/wikipedia-title-bar"
+  :description "Wikipedia's Open in browser as an ordinary link, replacing upstream's server-side action"
+  :depends-on ("hyperbook/wikipedia" "html-inspector-views" "cl-who")
+  :components ((:file "dreyeck/src/wikipedia-title-bar"))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/wikipedia-title-bar/tests"))))
+
+(asdf:defsystem "dreyeck/wikipedia-title-bar/tests"
+  :depends-on ("dreyeck/wikipedia-title-bar" "dreyeck/workflow" "clog" "plump" "uiop")
+  :components ((:file "dreyeck/tests/wikipedia-title-bar"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/wikipedia-title-bar/tests :run-tests)))
 
 (asdf/parse-defsystem:defsystem "dreyeck/authority/reading"
   :description
@@ -505,7 +520,8 @@
    (uiop/package:symbol-call :dreyeck/authority/reading/tests :run-tests)))
 
 (asdf:defsystem "dreyeck/authority-policy/tests"
-  :depends-on ("dreyeck/authority-policy" "dreyeck/catalog" "dreyeck/local-fedwiki-view" "hyperbook/server")
+  :depends-on ("dreyeck/authority-policy" "dreyeck/catalog" "dreyeck/local-fedwiki-view" "hyperbook/server"
+               "hyperbook/wikipedia" "clog" "plump")
   :components ((:file "dreyeck/tests/authority-policy"))
   :perform (asdf:test-op (op component)
              (declare (ignore op component))
@@ -516,6 +532,7 @@
                                 :LICENSE "BSD" :VERSION "0.0.1" :DEPENDS-ON
                                 ("dreyeck/hyperspec"
                                  "dreyeck/authority-policy"
+                                 "dreyeck/wikipedia-title-bar"
                                  #:DREYECK/WIKI-LINK
                                  #:DREYECK/UPSTREAM-INTAKE
                                  #:DREYECK/INSPECTOR/UPSTREAM-INTAKE

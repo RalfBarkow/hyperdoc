@@ -133,30 +133,37 @@ network or process actions; without the served policy the book does."
     (assert (%references (hv:title-bar-action-buttons wiki)))
     t))
 
-(defun check-wikipedia-open-withheld ()
-  "Served, a Wikipedia page offers no Open in browser, so no click reaches
-CLOG:OPEN-BROWSER and no process starts on the server; a development server
-still offers it, and clicking it opens the page's URL."
+(defun check-wikipedia-open-is-navigation ()
+  "A Wikipedia page's Open in browser is an ordinary link, the same served and on
+a development server: shown, to the page's URL, in a new tab, with nothing for
+the Inspector to invoke, so no click reaches CLOG:OPEN-BROWSER and no process
+starts on the server."
   (let* ((wikipedia (hyperbook/wikipedia::make-wikipedia "en" "Wikipedia" "Main Page"))
          (page (make-instance 'hyperbook/wikipedia::wikipedia-page
                               :hyperbook wikipedia :id "Blog" :title "Blog"))
          (original (symbol-function 'clog:open-browser))
          (opened nil))
-    (flet ((click-every-action ()
-             ;; What the Inspector does with each reference the title bar offers.
-             (dolist (target (%references (hv:title-bar-action-buttons page)))
-               (hv:eval-thunk target))))
+    (flet ((check-title-bar ()
+             (let* ((view (hv:title-bar-action-buttons page))
+                    (html (hv:view-html view))
+                    (links (plump:get-elements-by-tag-name (plump:parse html) "a")))
+               ;; What the Inspector does with each reference the title bar offers.
+               (dolist (target (%references view))
+                 (hv:eval-thunk target))
+               (assert (= 1 (length links)) () "The title bar shows ~S." html)
+               (assert (string= "Open in browser" (plump:text (first links))))
+               (assert (string= "https://en.wikipedia.org/wiki/Blog" (plump:attribute (first links) "href")))
+               (assert (string= "_blank" (plump:attribute (first links) "target")))
+               (assert (null (hv:view-references view)) () "The title bar offers ~S." (hv:view-references view))
+               (assert (notany (lambda (prefix) (search prefix html)) '("action-" "eval-")) ()
+                       "The title bar names a reference: ~S." html))))
       (unwind-protect
            (progn
              (setf (symbol-function 'clog:open-browser)
                    (lambda (&rest arguments) (push arguments opened) nil))
-             (served (lambda ()
-                       (assert (null (%references (hv:title-bar-action-buttons page))))
-                       (click-every-action)))
-             (assert (null opened) () "Served, a Wikipedia page opened ~S." opened)
-             (developing #'click-every-action)
-             (assert (equal '((:url "https://en.wikipedia.org/wiki/Blog")) opened) ()
-                     "A development server opened ~S." opened))
+             (served #'check-title-bar)
+             (developing #'check-title-bar)
+             (assert (null opened) () "A Wikipedia page opened ~S on the server." opened))
         (setf (symbol-function 'clog:open-browser) original))))
   t)
 
@@ -229,7 +236,6 @@ registered as unresolved or unsafe."
         (assert (search "authoring-environment" reason)))))
   (loop for (identity status) in '(("hyperdoc:load-page" :unresolved) ("hyperbook:register" :unresolved)
                                    ("fedwiki/reload" :unsafe) ("fedwiki/open-external" :unsafe)
-                                   ("wikipedia/open-in-browser" :unsafe)
                                    ("copy-to-clipboard" :unsafe) ("page-attached/activation" :unsafe)
                                    ("hyperdoc/reload" :unresolved) ("cell/evaluate" :unresolved)
                                    ("example/setf-push-recorded-example" :contracted)
@@ -266,7 +272,7 @@ registered as unresolved or unsafe."
   (check-uncontracted-invocation-refused)
   (check-pathnames-stay-inside-the-root)
   (check-fedwiki-actions-withheld)
-  (check-wikipedia-open-withheld)
+  (check-wikipedia-open-is-navigation)
   (check-clipboard-withheld)
   (check-reload-withheld)
   (check-lazy-cell-withheld)
@@ -276,8 +282,8 @@ registered as unresolved or unsafe."
   (check-adapters-as-reviewed)
   (format t "~&AUTHORITY-POLICY-PASS: served, Operations stays and shows contract status; an unreviewed ~
 new method is listed, gets no Evaluate and is refused if invoked anyway; a contracted reader-like ~
-method runs; pathnames outside the repository show nothing; FedWiki's inherited actions, Wikipedia's ~
-Open in browser and the server-side clipboard, Reload and a lazy cell's Evaluate are withheld; an example runs only with ~
-a contract; ~
+method runs; pathnames outside the repository show nothing; FedWiki's inherited actions, the server-side ~
+clipboard, Reload and a lazy cell's Evaluate are withheld; Wikipedia's Open in browser is the same link served and ~
+developing, and nothing opens on the server; an example runs only with a contract; ~
 the Work operations are contracted but need the authoring capability; adapted upstream points are as reviewed.~%")
   t)

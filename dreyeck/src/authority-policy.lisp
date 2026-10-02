@@ -17,9 +17,8 @@
 ;;;; system, so pathname views stay inside the allowed roots. Title-bar actions
 ;;;; that start a process on the server or fetch over the network are withheld:
 ;;;; copying a pathname or a string to the server's clipboard, FedWiki's
-;;;; Reload and Open, Wikipedia's Open in browser, the HyperDoc and text-page
-;;;; Reload that re-reads page files into the running image, and forcing a
-;;;; lazy cell.
+;;;; Reload and Open, the HyperDoc and text-page Reload that re-reads page files
+;;;; into the running image, and forcing a lazy cell.
 ;;;;
 ;;;; An example's run button (►) is an operation too: it runs whatever the
 ;;;; example does. It runs only for an example with a contract.
@@ -290,12 +289,6 @@ decision is taken again when it is evaluated, not only when it was shown."))
 (%define-action-withholding hyperbook/fedwiki::fedwiki)
 (%define-action-withholding hyperbook/fedwiki::fedwiki-page)
 
-;; Temporary, until html-inspector-views and its clients have an invocation
-;; boundary: a Wikipedia page's Open in browser runs CLOG:OPEN-BROWSER, a
-;; process on the server. +KNOWN-TITLE-BAR-CLASSES+ named the class, but
-;; nothing withheld its action, so a served Catalog offered it.
-(%define-action-withholding hyperbook/wikipedia::wikipedia-page)
-
 ;;;; The registered contracts
 
 (register-operation-contract
@@ -338,12 +331,6 @@ decision is taken again when it is evaluated, not only when it was shown."))
  :effect-extent "CLOG:OPEN-BROWSER: starts xdg-open on the server"
  :execution "the title bar of a FedWiki book or page"
  :audit-provenance "upstream 8a114919 hyperbook-fedwiki/views.lisp and pages.lisp; inherited by dreyeck's local FedWiki")
-
-(register-operation-contract
- :identity "wikipedia/open-in-browser" :status :unsafe :effect-classes '(:external)
- :effect-extent "CLOG:OPEN-BROWSER: starts a browser process on the server"
- :execution "the title bar of a Wikipedia page"
- :audit-provenance "upstream 8a114919 hyperbook-wikipedia/wikipedia.lisp")
 
 (register-operation-contract
  :identity "copy-to-clipboard" :status :unsafe :effect-classes '(:external)
