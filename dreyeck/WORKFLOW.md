@@ -311,7 +311,7 @@ nix develop .#tala -c sbcl --noinform --no-userinit --non-interactive \
 
 ## External deployment boundary
 
-Local repository reconstruction is not remote deployment verification. Deployment authority is server-local `/etc/nixos/hyperdoc-service.nix`. Operator-supplied evidence says ExecStart uses `nix develop .#tala -c ./scripts/serve-catalog.sh 8080` in `/home/rgb/workspace/hyperdoc`, and the TALA reading page is available. This already selects the existing pinned `nix/d2-tala.nix` package. No NixOS migration, service modification, deployment or restart is part of this reconstruction.
+Local repository reconstruction is not remote deployment verification. Deployment authority is server-local `/etc/nixos/hyperdoc-service.nix`. Operator-supplied evidence says ExecStart uses `nix develop .#tala -c ./scripts/serve-catalog.sh 8080` in `/home/rgb/workspace/hyperdoc`, and the TALA reading page is available. (Recorded on 2026-09-13 in 43bcb871. Superseded for current service startup: on 2026-10-01 the operator confirmed that the service runs the built `hyperdoc-catalog`; see `SERVICE-START-CONFIRMATION` in the dreyeck.ch deployment reading.) This already selects the existing pinned `nix/d2-tala.nix` package. No NixOS migration, service modification, deployment or restart is part of this reconstruction.
 
 An initial read of the service file occurred before the operator prohibited direct access. A subsequent dependency probe was rejected and did not execute. No further SSH/SCP/rsync/remote-shell access is authorized. The durable workflow performs none; remote evidence is explicitly operator-supplied and mutations are operator-controlled. This boundary is inspectable in READING-BOOTSTRAP and explained in the page.
 

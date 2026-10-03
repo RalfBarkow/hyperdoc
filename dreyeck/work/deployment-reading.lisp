@@ -1,7 +1,7 @@
 ;;;; Reading supplied deployment observations
 (defpackage #:dreyeck/work/deployment-reading
   (:use #:cl)
-  (:export #:deployment-evidence))
+  (:export #:deployment-evidence #:service-start-confirmation))
 (in-package #:dreyeck/work/deployment-reading)
 
 (hyperdoc:see (hyperdoc:page "Federated Wiki deployment state"))
@@ -83,3 +83,35 @@ unresolved. Event times do not supply a capture time for the whole snapshot."
       (:subject "dreyeck.ch" :relation :external-8080-filtering-cause
        :status :not-established :basis ("nixos-firewall" "external-8080")
        :limit "Other network filtering was not excluded; the timeout does not prove that the firewall alone protects port 8080.")))))
+
+;;; A second, later observation, kept apart: DEPLOYMENT-EVIDENCE stays as it
+;;; was reported. This one answers a single question that snapshot also
+;;; answered, which command starts hyperdoc.service now, and no other.
+(hyperdoc:defexample service-start-confirmation
+  "Inspect the operator's confirmation of 2026-10-01 that the NixOS service
+runs the built hyperdoc-catalog executable. It supersedes DEPLOYMENT-EVIDENCE
+only as the answer to which command currently starts the service; that
+snapshot's other observations are neither confirmed nor withdrawn. Each call
+returns fresh data."
+  (copy-tree
+   '(:provenance (:kind :operator-supplied :observation-time "2026-10-01"
+                  :scope :operator-confirmation :host-probe :not-performed)
+     :observed
+     ((:id "hyperdoc-service-program" :subject "dreyeck.ch" :kind :service
+       :service "hyperdoc.service" :exec-start-program "hyperdoc-catalog"
+       :artifact :not-supplied :exec-start :not-supplied))
+     :derived
+     ((:id "current-service-start" :subject "dreyeck.ch"
+       :relation :current-service-start-command :service "hyperdoc.service"
+       :starts "hyperdoc-catalog"
+       :no-longer-starts "nix develop .#tala -c ./scripts/serve-catalog.sh 8080"
+       :basis ("hyperdoc-service-program"
+               (deployment-evidence :observed "hyperdoc-service"))
+       :reason "This confirmation is dated 2026-10-01; DEPLOYMENT-EVIDENCE was recorded on 2026-09-28 (bee9d0a1). The later answer to the same question is the current one."
+       :limit "Answers only which command currently starts hyperdoc.service. DEPLOYMENT-EVIDENCE keeps the ExecStart it reported."))
+     :inferred ()
+     :hypothesized ()
+     :unresolved
+     ((:subject "dreyeck.ch" :relation :current-exec-start-arguments
+       :status :not-established
+       :limit "The confirmation names the program, not its store path, arguments, port or working directory.")))))

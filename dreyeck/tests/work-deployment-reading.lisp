@@ -132,9 +132,70 @@
                 (error () t)))))
   (format t "~&DEPLOYMENT-EVIDENCE-CONTROLS-PASS: observed-commit promotion, stale unresolved WorkingDirectory, public Node route and target authoring rejected.~%"))
 
+;;; The confirmation of 2026-10-01 is a separate observation. It is checked
+;;; on its own and against the snapshot, which CHECK-EVIDENCE keeps as reported.
+
+(defun check-confirmation (confirmation evidence)
+  (let ((program (record-by-id confirmation :observed "hyperdoc-service-program"))
+        (current (record-by-id confirmation :derived "current-service-start")))
+    (assert (equal (getf confirmation :provenance)
+                   '(:kind :operator-supplied :observation-time "2026-10-01"
+                     :scope :operator-confirmation :host-probe :not-performed)))
+    (assert (= 1 (length (getf confirmation :observed))))
+    (assert (eq :service (getf program :kind)))
+    (assert (equal "hyperdoc.service" (getf program :service)))
+    (assert (equal "hyperdoc-catalog" (getf program :exec-start-program)))
+    ;; The confirmation names the program; it does not supply a command line.
+    (assert (eq :not-supplied (getf program :exec-start)))
+    (assert (eq :current-service-start-command (getf current :relation)))
+    (assert (equal (getf program :exec-start-program) (getf current :starts)))
+    ;; Its basis is its own observation and the snapshot's service record,
+    ;; resolved in the snapshot; what it no longer starts is what that
+    ;; record reported.
+    (destructuring-bind (own earlier) (getf current :basis)
+      (assert (eq program (record-by-id confirmation :observed own)))
+      (destructuring-bind (example category id) earlier
+        (assert (eq 'reading:deployment-evidence example))
+        (assert (equal (getf current :no-longer-starts)
+                       (getf (record-by-id evidence category id) :exec-start)))))
+    (assert (search "only which command currently starts" (getf current :limit)))
+    (assert (equal (getf confirmation :unresolved)
+                   '((:subject "dreyeck.ch" :relation :current-exec-start-arguments
+                      :status :not-established
+                      :limit "The confirmation names the program, not its store path, arguments, port or working directory."))))
+    ;; Not merged into the snapshot.
+    (assert (notany (lambda (record) (equal "hyperdoc-service-program" (getf record :id)))
+                    (getf evidence :observed))))
+  t)
+
+(defun check-confirmation-controls ()
+  (dolist (tamper
+           (list
+            (lambda (c e) (declare (ignore e))
+              (let ((provenance (getf c :provenance)))
+                (setf (getf provenance :observation-time) :not-supplied)))
+            (lambda (c e) (declare (ignore e))
+              (let ((record (record-by-id c :derived "current-service-start")))
+                (setf (getf record :no-longer-starts) "nix run .#catalog")))
+            (lambda (c e) (declare (ignore e))
+              (let ((record (record-by-id c :derived "current-service-start")))
+                (setf (getf record :limit) "Supersedes the snapshot.")))
+            (lambda (c e)
+              (push (first (getf c :observed)) (getf e :observed)))))
+    (let ((confirmation (reading:service-start-confirmation))
+          (evidence (reading:deployment-evidence)))
+      (funcall tamper confirmation evidence)
+      (assert (handler-case (progn (check-confirmation confirmation evidence) nil)
+                (error () t)))))
+  (format t "~&SERVICE-START-CONFIRMATION-CONTROLS-PASS: undated confirmation, a superseded command the snapshot never reported, an unlimited supersession and a merge into the snapshot rejected.~%"))
+
 (defun run-tests ()
   (check-evidence (reading:deployment-evidence))
   (check-positive-controls)
+  (check-confirmation (reading:service-start-confirmation) (reading:deployment-evidence))
+  (check-confirmation-controls)
+  ;; The snapshot is still exactly what it was, after the confirmation was read.
+  (check-evidence (reading:deployment-evidence))
   (let ((changed (reading:deployment-evidence)))
     (let ((record (record-by-id changed :observed "hyperdoc-service")))
       (setf (getf record :active-state) "changed"))
@@ -160,6 +221,13 @@
       (declare (ignore page))
       (assert (member (reading:deployment-evidence)
                       (mapcar #'cdr (views:view-references view)) :test #'equal)))
+    ;; The dreyeck.ch page reaches both observations, the snapshot and the
+    ;; later confirmation.
+    (multiple-value-bind (page view) (render-page book "dreyeck.ch deployment")
+      (declare (ignore page))
+      (let ((references (mapcar #'cdr (views:view-references view))))
+        (assert (member (reading:deployment-evidence) references :test #'equal))
+        (assert (member (reading:service-start-confirmation) references :test #'equal))))
     (let ((source (uiop:read-file-string
                    (hyperdoc:file-of (hyperbook:find-page book "Cookie Secret" :signal-error? t)))))
       (assert (search "Cookie Secret → Session → Session Cookie → wiki-security-friends" source))

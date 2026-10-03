@@ -102,6 +102,9 @@
                                  :EVIDENCE-KIND :OPERATOR-SUPPLIED
                                  :OBSERVED-COMMAND
                                  "nix develop .#tala -c ./scripts/serve-catalog.sh 8080"
+                                 :RECORDED "2026-09-13"
+                                 :CURRENT-SERVICE-START
+                                 "superseded by the operator confirmation of 2026-10-01: SERVICE-START-CONFIRMATION in the dreyeck.ch deployment reading"
                                  :OPERATOR-REPORT
                                  "TALA reading page is available" :LOCAL-PROOF
                                  :NOT-A-DEPLOYMENT-PROOF :REMOTE-PROBE

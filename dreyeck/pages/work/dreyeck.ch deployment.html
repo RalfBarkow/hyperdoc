@@ -6,6 +6,7 @@
 <h2>Service observation</h2>
 <p>Service: <code>hyperdoc.service</code>. Reported state: <code>ActiveState=active</code>, <code>SubState=running</code>.</p>
 <pre>nix develop .#tala -c ./scripts/serve-catalog.sh 8080</pre>
-<p>This is the supplied ExecStart command. Its relative paths do not establish which directory the service uses. The service WorkingDirectory and its relationship to the observed checkout HEAD are <strong>not established</strong>.</p>
+<p>This is the supplied ExecStart command. Its relative paths do not establish which directory the service uses; the snapshot records that separately as the service's WorkingDirectory, <code>/home/rgb/workspace/hyperdoc</code>, the path of the observed checkout. Which commit the service was started from is only inferred from the start times: <strong>not directly observed</strong>.</p>
+<p>This command comes from the snapshot that reports the service started on 2026-09-28 at 06:25:14 CEST, recorded that day; its capture time was not supplied. On 2026-10-01 the operator confirmed that the service runs the built <code>hyperdoc-catalog</code> executable: <a expr="(service-start-confirmation)">a separate, later observation</a>. It supersedes the command above only as the answer to which command starts the service now. It supplies no WorkingDirectory, so the directory above is known only for the snapshot. The snapshot itself is unchanged.</p>
 <p>HyperDoc's Federated Wiki integration does not prove that this host runs a Node Federated Wiki service. No such service claim is made.</p>
 <p><a expr="(deployment-evidence)">Inspect the separate observations</a> · <a page="Federated Wiki deployment state">Deployment reading</a> · <a page="Work Breakdown">Work Breakdown</a></p>
