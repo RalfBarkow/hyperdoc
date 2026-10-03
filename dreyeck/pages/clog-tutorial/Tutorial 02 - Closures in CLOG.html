@@ -1,0 +1,61 @@
+<html><head><title>Tutorial 02 — Closures in CLOG</title></head><body>
+<in-package>dreyeck/clog-tutorial/reading</in-package>
+<h1>Tutorial 02 — Closures in CLOG</h1>
+<p>CLOG's second tutorial keeps the heading of the first and changes what a
+click does. It titles the page "Tutorial 02" and adds "Hello World! (click
+me!)"; the k-th click then adds k paragraphs that each say "Clicked k
+times.". It runs here the way Tutorial 01 does, as one more route on the CLOG
+server this HyperDoc image serves from:</p>
+<view-transclusion>(route-relation (tutorial-2-route))</view-transclusion>
+<p>The four lines are read as for Tutorial 01: the handler CLOG's table holds
+at the route, the file the image says it was defined in, and a live link
+completed by your browser, offered only while the route is mounted.</p>
+
+<h2>One route, many windows</h2>
+<p>This is <a expr="(fdefinition (route-handler (tutorial-2-route)))" view="Source code">ON-NEW-WINDOW</a>
+as the installed CLOG ships it:</p>
+<source-of-function>clog-tut-2::on-new-window</source-of-function>
+<p>The counter <code>x</code> is bound inside ON-NEW-WINDOW, and CLOG calls
+that function once for every browser window that opens the route. Each window
+therefore gets a click handler closing over a counter of its own: open the
+live page twice and the two count separately, and reloading a window starts
+it from zero. A route is where the tutorial is mounted; each window is one run
+of it.</p>
+<p>That was already true of
+<a page="Tutorial 01 — Hello World">Tutorial 01</a>, whose heading turns green
+only in the window clicked, but nothing there accumulates, so it could not be
+seen. The counter itself is not shown on this page: it exists only in a
+closure held by one window's click handler, and nothing here reads it.</p>
+
+<h2>What is new relative to Tutorial 01</h2>
+<ul>
+<li>The heading is made with <code>CREATE-SECTION</code>, a Lisp call for
+an HTML section element, where Tutorial 01 wrote the HTML text for
+<code>CREATE-CHILD</code>.</li>
+<li>State lives in a closure per window, as above.</li>
+<li>Each click scrolls the window to the end with <code>SCROLL-TO</code> and
+<code>HEIGHT</code>.</li>
+<li>START-TUTORIAL hands <code>CLOG:INITIALIZE</code> the symbol
+ON-NEW-WINDOW, where Tutorial 01 handed it the function, as Tutorial 01's
+comments announce. This book registers the symbol for both, so a
+redefinition reaches new windows.</li>
+</ul>
+
+<h2>How it is mounted</h2>
+<p>As for Tutorial 01, START-TUTORIAL would call <code>CLOG:INITIALIZE</code>
+and open a browser on the machine running Lisp, so it is not called.
+<a expr="#'dreyeck/clog-tutorial:install-tutorial-2-route" view="Source code">INSTALL-TUTORIAL-2-ROUTE</a>
+loads the definitions and adds this one path to the server that is running,
+and refuses without one. It repeats Tutorial 01's three steps rather than
+sharing them: two tutorials show what these two have in common, not what the
+rest of the collection has.</p>
+
+<h2>What is checked, and what only a browser shows</h2>
+<p>The tests read CLOG's own tables: the route holds this tutorial's handler
+and not Tutorial 01's, mounting twice changes nothing, and nothing calls
+<code>CLOG:INITIALIZE</code>. That each window counts on its own is a fact
+about browsers connected to a running server, and the live page is where it
+can be seen.</p>
+
+<p>Back to the <a page="Overview">overview of the CLOG Tutorial</a>.</p>
+</body></html>

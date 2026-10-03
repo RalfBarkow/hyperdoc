@@ -1,0 +1,23 @@
+;;;; Tutorial 02 where it runs
+;;;;
+;;;; The page "Tutorial 02 — Closures in CLOG" shows the same relation as
+;;;; Tutorial 01's:
+;;;;
+;;;;   tutorial source -> CLOG-TUT-2::ON-NEW-WINDOW -> /clog-tutorial/02 -> live page
+;;;;
+;;;; and adds what this tutorial is about: its handler binds a counter, so
+;;;; every browser window that opens the route counts its own clicks. The
+;;;; counter lives in a closure inside the window's click handler; nothing
+;;;; here reads it, and the page says so.
+
+(in-package #:dreyeck/clog-tutorial/reading)
+
+(hyperdoc:see (hyperdoc:page "Tutorial 02 — Closures in CLOG" :hyperbook "dreyeck/clog-tutorial/reading"))
+
+;;; As for Tutorial 01: defining only, no server state, no START-TUTORIAL.
+(tut:tutorial-2-handler)
+
+(defun tutorial-2-route ()
+  (make-instance 'clog-route :path "/clog-tutorial/02"
+                             :handler (tut:tutorial-2-handler)
+                             :mounted-by 'tut:install-tutorial-2-route))

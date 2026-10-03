@@ -1,0 +1,41 @@
+<html><head><title>Tutorial 01 — Hello World</title></head><body>
+<in-package>dreyeck/clog-tutorial/reading</in-package>
+<h1>Tutorial 01 — Hello World</h1>
+<p>CLOG's first tutorial is one window handler. It titles the page "Tutorial 01",
+adds the heading "Hello World! (click me!)" and turns it green when it is
+clicked. Here it runs on the CLOG server this HyperDoc image already serves
+from, as one more route:</p>
+<view-transclusion>(route-relation (tutorial-1-route))</view-transclusion>
+<p>Each line is read when this page is shown. The handler is the one CLOG's
+table holds at the route, and its source is the file the image says it was
+defined from. The live page's address is completed by your browser from the
+address of this page, so it always points at the server you are reading from.
+It opens in a tab of its own, as every URL view in this Catalog does: the
+tutorial is a separate CLOG window with its own connection, not a view of an
+object.</p>
+
+<h2>The handler</h2>
+<p>This is <a expr="(fdefinition (route-handler (tutorial-1-route)))" view="Source code">ON-NEW-WINDOW</a>
+as the installed CLOG ships it, read from its installation rather than copied:</p>
+<source-of-function>clog-tut-1::on-new-window</source-of-function>
+
+<h2>Why the tutorial does not start itself</h2>
+<p>Upstream, the tutorial owns its server: START-TUTORIAL calls
+<code>CLOG:INITIALIZE</code> and then opens a browser on the machine running
+Lisp. CLOG has one server per image, and initializing it again would make the
+tutorial the handler of <code>/</code> and switch off the extended routing that
+HyperBook page addresses depend on.
+<a expr="#'dreyeck/clog-tutorial:install-tutorial-1-route" view="Source code">INSTALL-TUTORIAL-1-ROUTE</a>
+therefore loads only the definitions and adds this one path to the server that
+is running, the way CLOG's Tutorial 12 adds pages. Without a running server it
+refuses.</p>
+
+<h2>What is checked, and what only a browser shows</h2>
+<p>The tests read CLOG's own tables: the route above holds this handler, its
+boot page is CLOG's default one, mounting twice changes nothing, and nothing
+calls <code>CLOG:INITIALIZE</code>. Whether the heading turns green is a fact
+about a browser connected to a running server, and the live page is where it
+can be seen.</p>
+
+<p>Back to the <a page="Overview">overview of the CLOG Tutorial</a>.</p>
+</body></html>

@@ -2473,3 +2473,34 @@
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/catalog-application/tests :run-tests)))
+
+(defsystem "dreyeck/clog-tutorial"
+  :description "CLOG Tutorial 1 as a route on the CLOG server HyperDoc already runs"
+  :depends-on ("clog")
+  :components ((:file "dreyeck/src/clog-tutorial"))
+  :in-order-to ((test-op (test-op "dreyeck/clog-tutorial/tests"))))
+
+(defsystem "dreyeck/clog-tutorial/tests"
+  :depends-on ("dreyeck/clog-tutorial" "sb-introspect")
+  :components ((:file "dreyeck/tests/clog-tutorial"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/clog-tutorial/tests :run-tests)))
+
+(defsystem "dreyeck/clog-tutorial/reading"
+  :description "The CLOG tutorial collection, read where it runs; so far Tutorials 01 and 02"
+  :depends-on ("dreyeck/clog-tutorial" "dreyeck/hyperdoc" "hyperbook/server" "sb-introspect")
+  :components ((:module "dreyeck/clog-tutorial" :serial t
+                :components ((:file "reading") (:file "tutorial-01") (:file "tutorial-02")))
+               (:module "dreyeck/pages/clog-tutorial"
+                :components ((:static-file "Overview.html")
+                             (:static-file "Tutorial 01 - Hello World.html")
+                             (:static-file "Tutorial 02 - Closures in CLOG.html"))))
+  :in-order-to ((test-op (test-op "dreyeck/clog-tutorial/reading/tests"))))
+
+(defsystem "dreyeck/clog-tutorial/reading/tests"
+  :depends-on ("dreyeck/clog-tutorial/reading" "dreyeck/clog-tutorial/tests")
+  :components ((:file "dreyeck/tests/clog-tutorial-reading"))
+  :perform (test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/clog-tutorial/reading/tests :run-tests)))
