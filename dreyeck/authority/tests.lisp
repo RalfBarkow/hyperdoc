@@ -33,6 +33,25 @@
     (assert (equal (hyperbook:main-page-id-of book)
                 (first titles)))))
 
+(defun %example-runs (view)
+  "The run widgets of the examples in VIEW and the views it transcludes."
+  (html-inspector-views:view-html view)
+  (loop for ref in (mapcar #'cdr (html-inspector-views:view-references view)) append
+    (cond ((typep ref 'dreyeck/authority-policy:example-thunk) (list ref))
+          ((typep ref 'html-inspector-views:view) (%example-runs ref)))))
+
+(defun %squeeze (text)
+  "TEXT with every run of whitespace read as one space."
+  (format nil "~{~A~^ ~}" (remove "" (uiop:split-string text :separator '(#\Space #\Newline #\Tab))
+                                  :test #'string=)))
+
+(defun %content (page)
+  "PAGE's Content view: its HTML and the objects it refers to."
+  (let ((view (find "Content" (html-inspector-views:all-views page)
+                    :key #'html-inspector-views:view-title :test #'equal)))
+    (values (html-inspector-views:view-html view)
+            (mapcar #'cdr (html-inspector-views:view-references view)))))
+
 (defun check-source-views (code)
   (let* ((views (html-inspector-views:all-views code))
          (source (find "Source" views :key #'html-inspector-views:view-title :test #'equal))
@@ -51,19 +70,136 @@
                       (mapcar #'cdr (html-inspector-views:view-references external)))))
     (dreyeck/authority/reading::under-served-policy
      (lambda ()
-       (labels ((thunks (refs)
-                  (loop for ref in refs append
-                    (cond ((typep ref 'dreyeck/authority-policy:example-thunk) (list ref))
-                          ((typep ref 'html-inspector-views:view)
-                           (html-inspector-views:view-html ref)
-                           (thunks (mapcar #'cdr (html-inspector-views:view-references ref))))))))
-         (html-inspector-views:view-html source)
-         (let ((runs (thunks (mapcar #'cdr (html-inspector-views:view-references source)))))
-           (assert (= 6 (length runs)))
-           ;; Execute the actual served Source widgets, not just their functions.
-           (dolist (run runs)
-             (assert (not (typep (html-inspector-views:eval-thunk run)
-                                'dreyeck/authority-policy:invocation-refused))))))))))
+       (let ((runs (%example-runs source)))
+         (assert (= 6 (length runs)))
+         ;; Execute the actual served Source widgets, not just their functions.
+         (dolist (run runs)
+           (assert (not (typep (html-inspector-views:eval-thunk run)
+                              'dreyeck/authority-policy:invocation-refused)))))))))
+
+(defun check-navigation-page (book)
+  "Open in Browser Is Navigation follows the five stops as a related case. It
+starts from upstream and says that its resolution removes an invocation rather
+than authorizing one; its browser witness is local, not dreyeck.ch; it names the
+public commit and how the page changes when the adapter goes. Every source it
+links or transcludes resolves."
+  (let ((page (hyperbook:find-page book "Open in Browser Is Navigation" :signal-error? t))
+        (before (hyperbook:find-page book "Using Upstream Safely" :signal-error? t)))
+    (assert (typep page 'hyperdoc::html-page))
+    (assert (member page (nth-value 1 (%content before))))
+    (multiple-value-bind (html refs) (%content page)
+      (assert (notany (lambda (ref) (typep ref 'condition)) refs))
+      (assert (member before refs))
+      (dolist (phrase '("removes the invocation rather than authorizing it"
+                        "https://codeberg.org/rgb/hyperdoc/commit/ea31d6c3ce219d5df20bda2291c51e5e49e21ec0"
+                        "not against dreyeck.ch"
+                        "this reading does not reproduce it"
+                        "revise this page to point at upstream"))
+        (assert (search phrase (%squeeze html)) () "The page does not say ~S." phrase))
+      ;; Upstream objects come first; dreyeck's commits only after them.
+      (let ((commit (search "ea31d6c3" html)))
+        (dolist (upstream '("WIKIPEDIA-PAGE" "PAGE-URL" "ACTION-BUTTON" "THUNK" "CLOG:OPEN-BROWSER"))
+          (assert (< (search upstream html) commit) () "~A appears after the commit." upstream))
+        (assert (< commit (search "35a83fdf" html)))))
+    (loop for (key) in dreyeck/authority/reading::+navigation-sources+
+          do (assert (dreyeck/authority/reading::navigation-source key)))
+    (assert (dreyeck/authority/reading::title-bar-action-css)))
+  t)
+
+(defun check-navigation-topicmap ()
+  "The topicmap's subjects are the upstream and downstream objects themselves,
+each relation has a status and a warrant, only CLOG:OPEN-BROWSER reaches the
+server host, and nothing in it is about RUNNABLE?."
+  (let* ((workspace (dreyeck/authority/reading::open-in-browser-topicmap))
+         (projection (dreyeck/topicmap:topicmap-workspace-projection-of workspace))
+         (topics (dreyeck/topicmap:topicmap-projection-topics-of projection))
+         (associations (dreyeck/topicmap:topicmap-projection-associations-of projection))
+         (page-class (find-class 'hyperbook/wikipedia::wikipedia-page)))
+    (flet ((object (id)
+             (dreyeck/topicmap:topicmap-topic-object-of
+              (dreyeck/topicmap:topicmap-projection-topic-by-id projection id)))
+           (status (id)
+             (getf (dreyeck/topicmap:topicmap-association-properties-of
+                    (find id associations :key #'dreyeck/topicmap:topicmap-association-id-of :test #'string=))
+                   :epistemic-status)))
+      (assert (eq page-class (object "wikipedia-page")))
+      (assert (eq #'hyperbook/wikipedia::page-url (object "page-url")))
+      (assert (eq #'html-inspector-views:action-button (object "action-button")))
+      (assert (eq (find-class 'html-inspector-views:thunk) (object "thunk")))
+      (assert (eq #'clog:open-browser (object "open-browser")))
+      (assert (eq (find-method #'html-inspector-views:title-bar-action-buttons '() (list page-class))
+                  (object "adapter")))
+      ;; ... and that method is the adapter's, not upstream's.
+      (assert (equal "wikipedia-title-bar"
+                     (pathname-name (sb-introspect:definition-source-pathname
+                                     (sb-introspect:find-definition-source (object "adapter"))))))
+      ;; The image runs the adapter's method; upstream's is read from its source.
+      (assert (search "(clog:open-browser :url (page-url page))"
+                      (dreyeck/authority/reading::source-evidence-text (object "upstream-method"))))
+      (assert (search ":target \"_blank\""
+                      (dreyeck/authority/reading::source-evidence-text (object "external-link"))))
+      (assert (equal "ea31d6c3ce219d5df20bda2291c51e5e49e21ec0" (getf (object "commit") :commit)))
+      (assert (equal "dreyeck.ch" (getf (object "browser-witness") :not-run-against)))
+      (assert (eq (asdf:find-system "dreyeck/wikipedia-title-bar") (object "adapter-system")))
+      (dolist (association associations)
+        (let ((properties (dreyeck/topicmap:topicmap-association-properties-of association)))
+          (assert (member (getf properties :epistemic-status) '(:observed :derived :proposed)))
+          (assert (stringp (getf properties :warrant)))))
+      ;; The page links the map with view="Topicmap"; that view renders.
+      (let ((view (find "Topicmap" (html-inspector-views:all-views workspace)
+                        :key #'html-inspector-views:view-title :test #'equal)))
+        (assert view)
+        (assert (plusp (length (html-inspector-views:view-html view)))))
+      (assert (eq :observed (status "thunk-calls")))
+      (assert (eq :observed (status "link-navigates")))
+      (assert (eq :derived (status "url-is-data")))
+      (assert (eq :proposed (status "proposed-for")))
+      (assert (equal '("open-browser")
+                     (loop for association in associations
+                           when (string= "server-host" (dreyeck/topicmap:topicmap-association-to-of association))
+                             collect (dreyeck/topicmap:topicmap-association-from-of association))))
+      (dolist (topic topics)
+        (assert (not (search "RUNNABLE" (string-upcase
+                                         (format nil "~A ~A" (dreyeck/topicmap:topicmap-topic-id-of topic)
+                                                 (dreyeck/topicmap:topicmap-topic-label-of topic))))))
+        (let ((object (dreyeck/topicmap:topicmap-topic-object-of topic)))
+          (assert (not (and (functionp object)
+                            (search "RUNNABLE" (string-upcase (princ-to-string object))))))))
+      (dolist (association associations)
+        (assert (not (search "RUNNABLE"
+                             (string-upcase
+                              (format nil "~A ~A ~A" (dreyeck/topicmap:topicmap-association-id-of association)
+                                      (dreyeck/topicmap:topicmap-association-type-of association)
+                                      (getf (dreyeck/topicmap:topicmap-association-properties-of association)
+                                            :warrant)))))))))
+  t)
+
+(defun check-title-bar-now (book)
+  "The one executable example: served and developing, the same ordinary link to
+PAGE-URL in a new tab and no reference. It is the only run widget of its code
+page and runs on a served Catalog."
+  (let* ((result (dreyeck/authority/reading::title-bar-now))
+         (url (getf result :page-url)))
+    (assert (string= "https://en.wikipedia.org/wiki/Blog" url))
+    (dolist (mode '(:served :development))
+      (let* ((bar (getf result mode))
+             (links (plump:get-elements-by-tag-name (plump:parse (getf bar :html)) "a")))
+        (assert (null (getf bar :references)) () "~A: the title bar offers ~S." mode (getf bar :references))
+        (assert (= 1 (length links)))
+        (assert (string= url (plump:attribute (first links) "href")))
+        (assert (string= "_blank" (plump:attribute (first links) "target")))))
+    (assert (equal (getf (getf result :served) :html) (getf (getf result :development) :html))))
+  (let* ((code (hyperbook:find-page book "Open in Browser Evidence" :signal-error? t))
+         (source (find "Source" (html-inspector-views:all-views code)
+                       :key #'html-inspector-views:view-title :test #'equal)))
+    (assert (typep code 'hyperdoc::code-page))
+    (dreyeck/authority/reading::under-served-policy
+     (lambda ()
+       (let ((runs (%example-runs source)))
+         (assert (= 1 (length runs)))
+         (assert (not (typep (html-inspector-views:eval-thunk (first runs))
+                             'dreyeck/authority-policy:invocation-refused)))))))
+  t)
 
 (defun check-live-witness ()
   (let* ((result (dreyeck/authority/reading:authority-demonstration))
@@ -92,8 +228,12 @@
   (let* ((book (hyperbook:find-hyperbook "dreyeck/authority/reading" :signal-error? t))
          (code (dreyeck/authority/reading:reading-target)))
     (dreyeck/authority/reading::under-served-policy
-     (lambda () (check-reading-sequence book) (check-source-views code)))
-    (assert (= 5 (hash-table-count (hyperdoc::pages-of book))))
+     (lambda () (check-reading-sequence book) (check-source-views code)
+       (check-navigation-page book)))
+    (check-navigation-topicmap)
+    (check-title-bar-now book)
+    ;; Five stops, the related navigation page and two code pages.
+    (assert (= 7 (hash-table-count (hyperdoc::pages-of book))))
     (dolist (fn '(dreyeck/authority/reading::library-boundary
                  dreyeck/authority/reading::discovery-sources
                  dreyeck/authority/reading::upstream-page-methods
@@ -115,5 +255,6 @@
                             (error () t))))
         (add-method gf gate)))
     (check-live-witness)
-    (format t "~&AUTHORITY-READING-PASS: five linked Pages; conceptual Library definitions first; actual source transcluded; six served Source examples run; visible uncontracted method refused before body; contracted observation permitted; gate-removal control fails.~%")
+    (format t "~&AUTHORITY-READING-PASS: five linked Pages; conceptual Library definitions first; actual source transcluded; six served Source examples run; visible uncontracted method refused before body; contracted observation permitted; gate-removal control fails. ~
+Open in Browser Is Navigation follows as a related case: upstream first, its sources resolve, its topicmap names the actual objects with a status per relation and no RUNNABLE?, and its one example renders the same link served and developing.~%")
     t))

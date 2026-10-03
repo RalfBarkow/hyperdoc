@@ -1,0 +1,145 @@
+<html><head><title>Open in Browser Is Navigation</title></head><body>
+<in-package>dreyeck/authority/reading</in-package>
+<h1>Open in Browser Is Navigation</h1>
+<p>This case was found while auditing executable affordances, but its resolution
+is not an authority-policy rule. The upstream representation made client
+navigation look like a server-side action. Replacing that representation removes
+the invocation rather than authorizing it: nothing on this page decides that an
+operation may run, because the affordance stops being an operation.</p>
+<pre>upstream:  PAGE-URL → ACTION-BUTTON → THUNK → CLOG:OPEN-BROWSER → server host
+link:      PAGE-URL → ordinary link → visitor's browser</pre>
+<p>The <a expr="(open-in-browser-topicmap)" view="Topicmap">topicmap of both paths</a>
+gives each relation its status: observed in source, tests or the browser witness;
+derived from those observations; or proposed.</p>
+
+<h2>Upstream: a Wikipedia page and its URL</h2>
+<p>In HyperDoc's
+<a href="https://codeberg.org/khinsen/hyperdoc/src/commit/8a1149197fabcb1ab5622316f09c5a60c2d3f1f8/hyperbook-wikipedia/wikipedia.lisp">hyperbook-wikipedia/wikipedia.lisp</a>
+(8a114919), a <a expr="(navigation-source :wikipedia-page)" view="Source">WIKIPEDIA-PAGE</a>
+belongs to the book of one Wikipedia edition and carries its title.
+<a expr="(navigation-source :page-url)" view="Source">PAGE-URL</a> derives the
+page's address from these two:</p>
+<view-transclusion>(navigation-source-view :page-url)</view-transclusion>
+
+<h2>Upstream: Open in browser as a title-bar action</h2>
+<p>The title bar of a Wikipedia page comes from this method:</p>
+<view-transclusion>(navigation-source-view :upstream-title-bar)</view-transclusion>
+<p><a expr="(navigation-source :action-button)" view="Source">ACTION-BUTTON</a>
+renders a button whose id names an action reference to the
+<a expr="(navigation-source :thunk)" view="Source">THUNK</a>, a closure over the
+body. When the button is clicked,
+<a expr="(navigation-source :click-handler)" view="Source">the Inspector's click handler</a>
+evaluates the thunk on the server. Its body calls CLOG:OPEN-BROWSER, which by
+its own documentation launches a web browser on the local machine:</p>
+<view-transclusion>(navigation-source-view :open-browser)</view-transclusion>
+<p>The local machine is the one running the server. A visitor's click therefore
+starts a process on the server host. On a Catalog run on one's own machine,
+that host is the visitor's machine too, which is why the action looks right
+there.</p>
+
+<h2>PAGE-URL is already data</h2>
+<p>The thunk's only input is <code>(page-url page)</code>, which exists before
+anything is clicked. Following a URL needs no Lisp evaluation: an href can carry
+it, and the visitor's browser follows it. The
+<a expr="(navigation-source :title-bar-generic)" view="Source">title-bar generic</a>
+asks for "HTML inline elements", and a link is one. HyperDoc already writes such
+links: <a expr="(navigation-source :content-links)" view="Source">ADAPT-DOM</a>
+gives the external links in Wikipedia page content <code>target="_blank"</code>
+and no <code>rel</code>.</p>
+
+<h2>A downstream experiment</h2>
+<p>The dreyeck commit
+<a href="https://codeberg.org/rgb/hyperdoc/commit/ea31d6c3ce219d5df20bda2291c51e5e49e21ec0">ea31d6c3</a>
+replaces only that method, without changing HyperDoc's source:</p>
+<view-transclusion>(navigation-source-view :adapter)</view-transclusion>
+<p>The link's href is upstream's PAGE-URL, HTML-escaped and nothing else; it
+opens in a new tab, like the links in page content. There is no thunk and no
+<code>action-</code> or <code>eval-</code> reference, so nothing can reach
+CLOG:OPEN-BROWSER. Before this commit, dreyeck withheld the upstream action from
+its public Catalog (35a83fdf); ea31d6c3 removed that withholding, since there is
+no invocation left to withhold. The public Catalog and a development server now
+offer the same link.</p>
+<h3>Styling is a separate, open choice</h3>
+<p>The link has the class <code>inspector-action</code>. Observed: in the
+current clog-moldable-inspector this class gives a title-bar element
+<a expr="(title-bar-action-css)" view="Source">the look of an action</a>, so
+the link looks close to an action button. Observed: the only behaviour tied to
+the class, <a expr="(navigation-source :active-button)" view="Source">the highlight
+while an action runs</a>, comes through a reference, and this link has none.
+Open: whether upstream should make a title-bar link look like an action button
+at all. The semantic proposal is the link, not this class.</p>
+
+<h2>What the current image renders</h2>
+<p>The one executable example of this page,
+<a expr="(symbol-function 'title-bar-now)" view="Source code">TITLE-BAR-NOW</a>,
+renders a Wikipedia page's title bar under served parameters and under
+development parameters; run it from
+<a page="Open in Browser Evidence" view="Source">its code page</a>. It is
+executable because which method renders the title bar depends on what the image
+has loaded: only running it shows that this image gives an ordinary link with no
+reference, the same served and developing. It allocates an unregistered page,
+fetches nothing and clicks nothing.</p>
+
+<h2>Tests and a manual browser witness</h2>
+<p><a expr="(navigation-source :adapter-test)" view="Source">The adapter's test</a>
+reads back <a expr="(navigation-source :adapter-titles)" view="Source">four titles</a>
+— Blog, Schrödinger's cat, a"b&lt;c&gt;&amp;d and Schr%C3%B6dinger%27s cat — as
+one anchor with only class, href and target, an href equal to PAGE-URL, no
+second percent-encoding, and CLOG:OPEN-BROWSER stubbed and never called.
+<a expr="(navigation-source :navigation-test)" view="Source">The navigation regression</a>
+asserts the same visible link served and developing, no reference and zero
+CLOG:OPEN-BROWSER calls; it does not name the adapter.</p>
+<p>A manual browser witness is associated with ea31d6c3; this reading does not
+reproduce it. It ran the packaged sources locally on 127.0.0.1, once as a
+public-mode Catalog and once as a development server, not against dreyeck.ch.
+A trusted click on the link reached the window's bubble phase with
+<code>defaultPrevented=false</code>: the Inspector did not cancel it. A control
+handler that cancels the click was detected as cancelled. The witness then
+cancelled the external navigation itself, so the click did not contact
+wikipedia.org. CLOG:OPEN-BROWSER, stubbed on the server, was called zero
+times.</p>
+<p>Separately, in each run the server made one request to the Wikipedia API
+while the page rendered, intercepted by the witness: upstream's
+<a expr="(navigation-source :render-fetch)" view="Source">Source and Parse tree views</a>
+fetch when they are computed. That is a render-time fetch, not part of the
+title-bar navigation path.</p>
+
+<h2>The minimal upstream change</h2>
+<p>Proposed for khinsen/hyperdoc, in hyperbook-wikipedia/wikipedia.lisp:</p>
+<pre> (defmethod views:title-bar-action-buttons ((page wikipedia-page))
+-  (views:action-button "Open in browser"
+-                       (views:thunk (clog:open-browser :url (page-url page))
+-                         nil)))
++  (views:html
++    (:a :href (cl-who:escape-string (page-url page))
++        :target "_blank"
++        :class "inspector-action"
++        "Open in browser")))</pre>
+<p>with <code>#:cl-who</code> added to the depends-on of hyperbook/wikipedia,
+which would then call it directly. The class may be whatever upstream prefers.
+A test needs no dreyeck machinery: render the title bar of an unregistered page,
+expect no reference, and parse the HTML for exactly one anchor whose decoded
+href equals PAGE-URL and whose target is <code>_blank</code>.</p>
+
+<h2>When the downstream adapter goes</h2>
+<p><a expr="(navigation-source :staleness-test)" view="Source">The adapter's test</a>
+compares the pinned upstream method as one form and fails when it changes, with
+<a expr="(navigation-source :proposed-method)" view="Source">the proposed method</a>
+as its positive control. When pinned upstream navigates in the client: delete
+the adapter, its focused test and its systems; keep the navigation regression if
+it still applies; and revise this page to point at upstream's implementation
+rather than delete it.</p>
+
+<h2>A related observation: FedWiki</h2>
+<p>The title-bar Open actions of a
+<a expr="(navigation-source :fedwiki-open)" view="Source">FedWiki book</a>, a
+<a expr="(navigation-source :fedwiki-page-open)" view="Source">FedWiki page</a> and a
+<a expr="(navigation-source :remote-fedwiki-page-open)" view="Source">remote FedWiki page</a>
+have the same shape: an ACTION-BUTTON whose THUNK calls CLOG:OPEN-BROWSER.
+They are not examined here; whether the same change fits them is a separate
+question.</p>
+
+<p>The five stops before this page concern invocation authority; this page is a
+related case outside it. Back to <a page="Using Upstream Safely">Using Upstream Safely</a>
+or <a page="Using HyperDoc as a Library">the beginning of the reading</a>.</p>
+</body></html>

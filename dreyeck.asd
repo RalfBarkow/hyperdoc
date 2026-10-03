@@ -475,9 +475,10 @@
   :components ((:file "dreyeck/src/authority-policy"))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/authority-policy/tests"))))
 
-;; Temporary, pending upstream HyperDoc: delete both systems, with
-;; dreyeck/catalog's dependency, once the pinned upstream Wikipedia title bar
-;; navigates in the client.
+;; Temporary, pending upstream HyperDoc: delete both systems, with the
+;; dependencies of dreyeck/catalog and dreyeck/authority/reading, once the
+;; pinned upstream Wikipedia title bar navigates in the client; then revise that
+;; reading's "Open in Browser Is Navigation" rather than delete it.
 (asdf:defsystem "dreyeck/wikipedia-title-bar"
   :description "Wikipedia's Open in browser as an ordinary link, replacing upstream's server-side action"
   :depends-on ("hyperbook/wikipedia" "html-inspector-views" "cl-who")
@@ -493,26 +494,29 @@
 
 (asdf/parse-defsystem:defsystem "dreyeck/authority/reading"
   :description
-  "Five reading stops: library composition, distinctions, Lisp witnesses, extension purposes and upstream intake"
+  "Five reading stops: library composition, distinctions, Lisp witnesses, extension purposes and upstream intake; then a related case that is navigation, not authority"
   :depends-on
   ("dreyeck/hyperdoc" "dreyeck/authority-policy" "clog-moldable-inspector"
-   "hyperbook/server" "dreyeck/upstream-intake")
+   "hyperbook/server" "dreyeck/upstream-intake" "dreyeck/inspector/topicmap" "clog"
+   "hyperbook/wikipedia" "dreyeck/wikipedia-title-bar")
   :serial
   t
   :components
-  ((:module "dreyeck/authority" :components ((:file "reading")))
+  ((:module "dreyeck/authority" :components
+    ((:file "reading") (:file "navigation" :depends-on ("reading"))))
    (:module "dreyeck/pages/authority" :components
     ((:static-file "Using HyperDoc as a Library.html")
      (:static-file "Reading the HyperDoc Authority Surface.html")
      (:static-file "Extending HyperDoc Without Granting Authority.html")
-     (:static-file "Using Upstream Safely.html"))))
+     (:static-file "Using Upstream Safely.html")
+     (:static-file "Open in Browser Is Navigation.html"))))
   :in-order-to
   ((asdf/lisp-action:test-op
     (asdf/lisp-action:test-op "dreyeck/authority/reading/tests"))))
 
 (asdf/parse-defsystem:defsystem "dreyeck/authority/reading/tests"
   :depends-on
-  ("dreyeck/authority/reading")
+  ("dreyeck/authority/reading" "plump" "sb-introspect")
   :components
   ((:file "dreyeck/authority/tests"))
   :perform

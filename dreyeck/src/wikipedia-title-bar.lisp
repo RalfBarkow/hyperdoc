@@ -11,9 +11,15 @@
 ;;;; browser follows, the same served and on a development server. Upstream's
 ;;;; source stays as it is, so the library-boundary test still holds.
 ;;;;
-;;;; Temporary: delete this file, its test, its two systems in dreyeck.asd and
-;;;; dreyeck/catalog's dependency on it once the pinned upstream method navigates
-;;;; in the client. The test fails when the pinned upstream method changes.
+;;;; Temporary. Once the pinned upstream method navigates in the client:
+;;;;  - delete this file, its test, its two systems in dreyeck.asd, and the
+;;;;    dependencies on it of dreyeck/catalog and dreyeck/authority/reading;
+;;;;  - keep CHECK-WIKIPEDIA-OPEN-IS-NAVIGATION in dreyeck/tests/authority-policy.lisp
+;;;;    while it still applies;
+;;;;  - revise the reading page "Open in Browser Is Navigation" and
+;;;;    dreyeck/authority/navigation.lisp to read upstream's implementation,
+;;;;    rather than delete them.
+;;;; The test fails when the pinned upstream method changes.
 ;;;;
 ;;;; Technical debt meanwhile: HYPERBOOK/WIKIPEDIA::PAGE-URL is not exported. It
 ;;;; is called rather than copied, so there is one URL model, upstream's.
