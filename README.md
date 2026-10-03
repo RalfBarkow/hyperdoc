@@ -33,8 +33,8 @@ The same `hyperdoc-catalog` executable is available in `nix develop`.
 For interactive work on live checkout sources,
 load `dreyeck/catalog-application` and call
 `dreyeck/catalog-application:start-catalog`. See the
-[reconstructed startup contract](dreyeck/CATALOG-STARTUP.md) for source evidence,
-SLY usage, package limits, service integration and tests.
+[Catalog operations note](dreyeck/CATALOG-OPERATIONS.md) for the startup flow,
+service integration, the limits of the packaged runtime and the checks.
 
 ## Fresh interactive Lisp image
 
