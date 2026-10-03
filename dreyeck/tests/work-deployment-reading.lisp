@@ -189,11 +189,120 @@
                 (error () t)))))
   (format t "~&SERVICE-START-CONFIRMATION-CONTROLS-PASS: undated confirmation, a superseded command the snapshot never reported, an unlimited supersession and a merge into the snapshot rejected.~%"))
 
+(defun check-preserved-observation-sources ()
+  ;; Pin the exact DEFEXAMPLE forms at 548f73d0, including their evidence and
+  ;; docstrings. This catches even changes the semantic checks do not cover.
+  (let ((source (uiop:read-file-string
+                 (asdf:system-relative-pathname "dreyeck/work/reading"
+                                                "dreyeck/work/deployment-reading.lisp")))
+        (*package* (find-package :dreyeck/work/deployment-reading)))
+    (dolist (spec '((reading:deployment-evidence
+                    "d1fc93f5008be13d60f03cbf236306e42f0bf3a744f4016811ddb3d99eb794dc")
+                   (reading:service-start-confirmation
+                    "b210379b8d3c766b3413b6c38f518138472321e29be6cc548af570b6618ff2b7")))
+      (let ((start (search (format nil "(hyperdoc:defexample ~A~%"
+                                  (string-downcase (symbol-name (first spec))))
+                           source)))
+        (assert start)
+        (let ((tail (subseq source start)))
+          (with-input-from-string (stream tail)
+            (read-preserving-whitespace stream)
+            (assert (equal (second spec)
+                           (ironclad:byte-array-to-hex-string
+                            (ironclad:digest-sequence
+                             :sha256 (babel:string-to-octets
+                                      (subseq tail 0 (file-position stream))
+                                      :encoding :utf-8))))))))))
+  (format t "~&DEPLOYMENT-SOURCES-PRESERVED-PASS: both earlier DEFEXAMPLE forms are byte-for-byte unchanged from 548f73d0.~%"))
+
+(defun check-update-observation (observation)
+  (assert (equal (getf observation :provenance)
+                 '(:kind :operator-supplied :observation-time "2026-10-03"
+                   :recorded-at "2026-10-03" :scope :command-output
+                   :host-probe :not-performed)))
+  (assert (= 1 (length (getf observation :observed))))
+  (let* ((operation (record-by-id observation :observed "dreyeck-update-2026-10-03"))
+         (steps (getf operation :steps)))
+    (assert (equal "dreyeck.ch" (getf operation :subject)))
+    (assert (eq :deployment-operation (getf operation :kind)))
+    (assert (eq :update-and-activate (getf operation :operation)))
+    (assert (equal "/etc/nixos" (getf operation :directory)))
+    ;; Ordered steps retain the input revision transition separately from
+    ;; the activation result. Successful activation supplies no ExecStart.
+    (assert (= 2 (length steps)))
+    (destructuring-bind (update activation) steps
+      (assert (eq :flake-input-update (getf update :kind)))
+      (assert (equal "nix flake update hyperdoc" (getf update :command)))
+      (assert (equal "hyperdoc" (getf update :input)))
+      (assert (equal "/etc/nixos/flake.lock" (getf update :lock-file)))
+      (assert (equal "384fab636fd2695109aea626b12963cd58bbdcac"
+                     (getf update :revision-before)))
+      (assert (equal "548f73d09826795cbeaea1eae38da9a4b6e8a9e7"
+                     (getf update :revision-after)))
+      (assert (eq :nixos-activation (getf activation :kind)))
+      (assert (equal "nixos-rebuild switch --flake /etc/nixos#dreyeck"
+                     (getf activation :command)))
+      (assert (equal "/etc/nixos#dreyeck" (getf activation :flake)))
+      (assert (equal '("hyperdoc-catalog") (getf activation :built)))
+      (assert (equal '("hyperdoc.service") (getf activation :rebuilt-units)))
+      (let* ((result (getf activation :result))
+             (transition (getf result :transition)))
+        (assert (eq :completed-successfully (getf result :status)))
+        (assert (equal '((:kind :service-stop :service "hyperdoc.service")
+                         (:kind :configuration-activation :flake "/etc/nixos#dreyeck")
+                         (:kind :service-start :service "hyperdoc.service"))
+                       transition))
+        (dolist (record (append (list operation update activation result) transition))
+          (loop for key in '(:exec-start :exec-start-program :working-directory)
+                do (assert (not (member key record))))))))
+  ;; No inference or current-service-start derivation is added, so this
+  ;; observation cannot supersede the confirmation or rewrite the snapshot.
+  (dolist (category '(:derived :inferred :hypothesized))
+    (assert (member category observation))
+    (assert (null (getf observation category))))
+  (assert (equal (getf observation :unresolved)
+                 '((:subject "dreyeck.ch" :relation :post-activation-verification
+                    :status :not-established :basis ("dreyeck-update-2026-10-03")
+                    :outside-observation (:exec-start :working-directory :proxy-state
+                                          :browser-reachability :application-health)
+                    :limit "This update output does not establish the service's ExecStart, WorkingDirectory, proxy state, browser reachability or application-level health after restart; each needs a separate observation."))))
+  t)
+
+(defun check-update-controls ()
+  (dolist (tamper
+           (list
+            (lambda (observation)
+              (let ((update (first (getf (first (getf observation :observed)) :steps))))
+                (rotatef (getf update :revision-before) (getf update :revision-after))))
+            (lambda (observation)
+              (let ((steps (getf (first (getf observation :observed)) :steps)))
+                (setf (getf (second steps) :exec-start) "invented hyperdoc-catalog 8080")))
+            (lambda (observation)
+              (let* ((operation (first (getf observation :observed)))
+                     (result (getf (second (getf operation :steps)) :result)))
+                (setf (getf (first (getf observation :observed)) :transition)
+                      (getf result :transition))
+                (remf result :transition)))))
+    (let ((changed (reading:deployment-update-observation)))
+      (funcall tamper changed)
+      (assert (not (equal changed (reading:deployment-update-observation))))
+      (assert (handler-case (progn (check-update-observation changed) nil)
+                (error () t)))))
+  ;; Controls modify their own copies, not the recorded observation or either
+  ;; earlier evidence object.
+  (check-update-observation (reading:deployment-update-observation))
+  (check-evidence (reading:deployment-evidence))
+  (check-confirmation (reading:service-start-confirmation) (reading:deployment-evidence))
+  (format t "~&DEPLOYMENT-UPDATE-CONTROLS-PASS: reversed revisions, invented ExecStart and a transition detached from the activation result rejected.~%"))
+
 (defun run-tests ()
+  (check-preserved-observation-sources)
   (check-evidence (reading:deployment-evidence))
   (check-positive-controls)
   (check-confirmation (reading:service-start-confirmation) (reading:deployment-evidence))
   (check-confirmation-controls)
+  (check-update-observation (reading:deployment-update-observation))
+  (check-update-controls)
   ;; The snapshot is still exactly what it was, after the confirmation was read.
   (check-evidence (reading:deployment-evidence))
   (let ((changed (reading:deployment-evidence)))
@@ -221,13 +330,24 @@
       (declare (ignore page))
       (assert (member (reading:deployment-evidence)
                       (mapcar #'cdr (views:view-references view)) :test #'equal)))
-    ;; The dreyeck.ch page reaches both observations, the snapshot and the
-    ;; later confirmation.
+    ;; The page reaches all three evidence objects and visibly distinguishes
+    ;; the service-start question from the revision-deployment question.
     (multiple-value-bind (page view) (render-page book "dreyeck.ch deployment")
       (declare (ignore page))
       (let ((references (mapcar #'cdr (views:view-references view))))
         (assert (member (reading:deployment-evidence) references :test #'equal))
-        (assert (member (reading:service-start-confirmation) references :test #'equal))))
+        (assert (member (reading:service-start-confirmation) references :test #'equal))
+        (assert (member (reading:deployment-update-observation) references :test #'equal)))
+      (let ((html (views:view-html view)))
+        (dolist (text '("How is the service started?" "2026-10-01"
+                        "How was this HyperDoc revision deployed?" "2026-10-03"
+                        "operator supplied command output"
+                        "384fab636fd2695109aea626b12963cd58bbdcac"
+                        "548f73d09826795cbeaea1eae38da9a4b6e8a9e7"
+                        "nix flake update hyperdoc"
+                        "nixos-rebuild switch --flake /etc/nixos#dreyeck"
+                        "does not establish ExecStart, WorkingDirectory"))
+          (assert (search text html)))))
     (let ((source (uiop:read-file-string
                    (hyperdoc:file-of (hyperbook:find-page book "Cookie Secret" :signal-error? t)))))
       (assert (search "Cookie Secret → Session → Session Cookie → wiki-security-friends" source))
@@ -236,5 +356,5 @@
     (let ((projection (dreyeck/work/reading:work-projection)))
       (assert (= 23 (length (dreyeck/topicmap:topicmap-projection-topics-of projection))))
       (assert (= 22 (length (dreyeck/topicmap:topicmap-projection-associations-of projection))))))
-  (format t "~&WORK-DEPLOYMENT-READING-PASS: supplied evidence, separate checkout/service, page navigation and unchanged Work graph.~%")
+  (format t "~&WORK-DEPLOYMENT-READING-PASS: preserved snapshot/confirmation, dated update with activation result, page navigation and unchanged Work graph.~%")
   t)

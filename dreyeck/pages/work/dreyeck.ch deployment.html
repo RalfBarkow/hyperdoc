@@ -1,12 +1,22 @@
 <h1>dreyeck.ch deployment</h1>
 <in-package>dreyeck/work/deployment-reading</in-package>
-<p>Two separate operator-supplied observations. Observation time not supplied; no host query is performed here.</p>
-<h2>Checkout observation</h2>
+<p>Three separate evidence objects answer different questions: the historical service snapshot recorded on 2026-09-28, the service-start confirmation of 2026-10-01, and the deployment/update observation of 2026-10-03. No host query is performed here; the historical snapshot's capture time was not supplied.</p>
+<h2>Historical checkout observation</h2>
 <p>Path: <code>/home/rgb/workspace/hyperdoc</code>. Checkout HEAD: <code>84ee991aa4591a873a63753b89b37737ba5f2efc</code>.</p>
-<h2>Service observation</h2>
+<h2>Historical service observation</h2>
 <p>Service: <code>hyperdoc.service</code>. Reported state: <code>ActiveState=active</code>, <code>SubState=running</code>.</p>
 <pre>nix develop .#tala -c ./scripts/serve-catalog.sh 8080</pre>
 <p>This is the supplied ExecStart command. Its relative paths do not establish which directory the service uses; the snapshot records that separately as the service's WorkingDirectory, <code>/home/rgb/workspace/hyperdoc</code>, the path of the observed checkout. Which commit the service was started from is only inferred from the start times: <strong>not directly observed</strong>.</p>
 <p>This command comes from the snapshot that reports the service started on 2026-09-28 at 06:25:14 CEST, recorded that day; its capture time was not supplied. On 2026-10-01 the operator confirmed that the service runs the built <code>hyperdoc-catalog</code> executable: <a expr="(service-start-confirmation)">a separate, later observation</a>. It supersedes the command above only as the answer to which command starts the service now. It supplies no WorkingDirectory, so the directory above is known only for the snapshot. The snapshot itself is unchanged.</p>
+<h2>How is the service started? — 2026-10-01</h2>
+<p><a expr="(service-start-confirmation)">Inspect SERVICE-START-CONFIRMATION</a>: the operator confirmed that the NixOS service runs the built <code>hyperdoc-catalog</code> executable. Its exact ExecStart, arguments, store path and current WorkingDirectory were not supplied.</p>
+<h2>How was this HyperDoc revision deployed? — 2026-10-03</h2>
+<p>The operator supplied command output from a successful update, recorded on 2026-10-03:</p>
+<pre>cd /etc/nixos
+nix flake update hyperdoc
+nixos-rebuild switch --flake /etc/nixos#dreyeck</pre>
+<p>The <code>hyperdoc</code> input in <code>/etc/nixos/flake.lock</code> changed from <code>384fab636fd2695109aea626b12963cd58bbdcac</code> to <code>548f73d09826795cbeaea1eae38da9a4b6e8a9e7</code>. Nix built <code>hyperdoc-catalog</code> and rebuilt the <code>hyperdoc.service</code> unit. Activation stopped the service, activated the new configuration and started the service; <code>nixos-rebuild switch</code> completed successfully.</p>
+<p><a expr="(deployment-update-observation)">Inspect the dated deployment/update observation and its evidence basis</a>. The flake input update and NixOS activation are two distinct steps. The stop/start transition belongs to the activation result; systemd ExecStart starts the application within the activated generation.</p>
+<p>This observation does not establish ExecStart, WorkingDirectory, proxy state, browser reachability or application-level health after restart. Those require separate observations. It supersedes neither SERVICE-START-CONFIRMATION nor the historical snapshot.</p>
 <p>HyperDoc's Federated Wiki integration does not prove that this host runs a Node Federated Wiki service. No such service claim is made.</p>
-<p><a expr="(deployment-evidence)">Inspect the separate observations</a> · <a page="Federated Wiki deployment state">Deployment reading</a> · <a page="Work Breakdown">Work Breakdown</a></p>
+<p><a expr="(deployment-evidence)">Inspect the historical snapshot</a> · <a page="Federated Wiki deployment state">Deployment reading</a> · <a page="Work Breakdown">Work Breakdown</a></p>
