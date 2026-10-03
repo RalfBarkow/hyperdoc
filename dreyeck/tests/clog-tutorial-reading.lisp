@@ -233,13 +233,15 @@ Route view of /clog-tutorial/02 carrying the URL view once mounted."
            (assert (%view-titled "URL" (nth-value 1 (%rendered route-view)))))))))
   t)
 
-(defun check-not-in-production-catalog ()
-  "The book is reachable by loading its system, not by belonging to the
-production Catalog. Control: a known member is seen as one."
+(defun check-in-production-catalog ()
+  "The book is a member of the production Catalog: dreyeck/catalog depends
+on its system. Control: another known member is seen as one, and a system
+that is not a member is not."
   (let ((members (mapcar #'asdf:coerce-name
                          (asdf:system-depends-on (asdf:find-system "dreyeck/catalog")))))
     (assert (member "dreyeck/authority/reading" members :test #'string-equal))
-    (assert (not (member "dreyeck/clog-tutorial/reading" members :test #'string-equal))))
+    (assert (not (member "dreyeck/clog-tutorial/reading/tests" members :test #'string-equal)))
+    (assert (member "dreyeck/clog-tutorial/reading" members :test #'string-equal)))
   t)
 
 (defun %served (thunk)
@@ -338,8 +340,8 @@ linked, and the page offers nothing to run, not even in development."
   (check-page-reaches-both-ends)
   (check-tutorial-2-route)
   (check-tutorial-2-page-reaches-both-ends)
-  (check-not-in-production-catalog)
+  (check-in-production-catalog)
   (check-mount-examples-run-only-in-development)
   (check-workflow-page)
-  (format t "~&CLOG tutorial reading tests passed: route state, source, collection, page reaches both ends; Tutorial 02 route and page; not in the production Catalog; mount examples only in development; workflow page.~%")
+  (format t "~&CLOG tutorial reading tests passed: route state, source, collection, page reaches both ends; Tutorial 02 route and page; in the production Catalog; mount examples only in development; workflow page.~%")
   t)

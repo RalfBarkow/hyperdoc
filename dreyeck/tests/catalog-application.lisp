@@ -37,7 +37,8 @@
                     "dreyeck/local-fedwiki-view" "clack-handler-hunchentoot"))
     (assert (asdf:component-loaded-p (asdf:find-system system))))
   (assert (hyperbook:find-hyperbook "dreyeck/authority/reading"))
-  (assert (= 18 (length (hyperbook:hyperbooks-of hyperbook:*catalog*))))
+  (assert (hyperbook:find-hyperbook "dreyeck/clog-tutorial/reading"))
+  (assert (= 19 (length (hyperbook:hyperbooks-of hyperbook:*catalog*))))
   (assert (null (find-package :dreyeck/workflow/authoring)))
   (let* ((hyperbook:*catalog* (make-instance 'hyperbook:catalog))
          (observed

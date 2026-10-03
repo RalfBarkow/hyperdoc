@@ -549,7 +549,8 @@
                                  "dreyeck/lisp-critic/reading"
                                  "dreyeck/gesture/reading"
                                  "dreyeck/work/reading"
-                                 "dreyeck/authority/reading")
+                                 "dreyeck/authority/reading"
+                                 "dreyeck/clog-tutorial/reading")
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP
