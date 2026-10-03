@@ -20,7 +20,8 @@
 (defun tutorial-1-route ()
   (make-instance 'clog-route :path "/clog-tutorial/01"
                              :handler (tut:tutorial-1-handler)
-                             :mounted-by 'tut:install-tutorial-1-route))
+                             :mounted-by 'tut:install-tutorial-1-route
+                             :example 'mount-tutorial-01))
 
 ;;; The part of (CLOG:RUN-TUTORIAL 1) that applies in HyperDoc. It changes
 ;;; the running server, so it has no operation contract: a served Catalog

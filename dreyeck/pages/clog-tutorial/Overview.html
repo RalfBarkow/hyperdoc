@@ -1,10 +1,22 @@
 <html><head><title>Overview</title></head><body>
 <in-package>dreyeck/clog-tutorial/reading</in-package>
 <h1>CLOG Tutorial</h1>
-<p>CLOG ships a numbered collection of tutorials with its source, in the
-<a expr="(merge-pathnames &quot;tutorial/&quot; (clog:clog-install-dir))">tutorial directory</a>
-of the CLOG this image has loaded. This book reads them where they run: on the
-CLOG server this HyperDoc image already serves from.</p>
+<p>CLOG ships a numbered collection of tutorials with its source. Where they
+come from:</p>
+<ul>
+<li>the upstream collection, developed in the
+<a href="https://github.com/rabbibotton/clog/tree/main/tutorial">tutorial directory
+of the CLOG repository</a>, whose README lists the tutorials' subjects. It may
+have moved on since the copy installed here;</li>
+<li>the installed source this server runs: CLOG
+<value-of>(asdf:component-version (asdf:find-system &quot;clog&quot;))</value-of>,
+installed at <code><value-of>(namestring (clog:clog-install-dir))</value-of></code>.
+Each tutorial page names its file there and links its handler's source, as this
+runtime has it;</li>
+<li>this book, which reads the tutorials where they run, on the CLOG server this
+HyperDoc image already serves from, and says how each is mounted and what can be
+run where.</li>
+</ul>
 <p>Four things are kept apart:</p>
 <ul>
 <li>the collection, which is this book;</li>

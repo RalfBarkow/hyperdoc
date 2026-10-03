@@ -29,28 +29,42 @@ not in your browser. The tests observe the first two effects on CLOG's own
 tables, without a listener. RUN-TUTORIAL must therefore not be evaluated in a
 HyperDoc server.</p>
 
-<h2>Each upstream step and its counterpart here</h2>
+<h2>Three situations</h2>
+<p>The same tutorial is met in three situations, and what a reader can do
+differs between them:</p>
+<ul>
+<li>upstream, standalone: CLOG in a REPL of your own, as its README describes;</li>
+<li>a HyperDoc development server: a HyperDoc image run on your own machine with
+development enabled, as the person who owns it;</li>
+<li>a public HyperDoc reading, such as the Catalog on dreyeck.ch: a server you
+read as an anonymous visitor.</li>
+</ul>
 <table>
-<tr><th style="text-align:left">Upstream</th><th style="text-align:left">In HyperDoc</th></tr>
-<tr><td>Load CLOG</td>
-<td>Already loaded: CLOG is an ASDF dependency of this book.</td></tr>
-<tr><td><code>(clog:run-tutorial N)</code></td>
-<td>Load the tutorial's definitions and mount its handler at
-<code>/clog-tutorial/NN</code>, for a tutorial classified for that: so far
-Tutorials 01 and 02.</td></tr>
-<tr><td>Start the server</td>
-<td>Already done by HyperDoc, and never repeated.</td></tr>
-<tr><td>Open a browser</td>
-<td>Follow the Live page link on the tutorial's page, in your own browser.</td></tr>
-<tr><td>Evaluate a form at the REPL</td>
-<td>Run the tutorial page's example with ►; its result opens in the
+<tr><th style="text-align:left">Step</th><th style="text-align:left">Upstream, standalone</th>
+<th style="text-align:left">HyperDoc development server</th><th style="text-align:left">Public HyperDoc reading</th></tr>
+<tr><td>Load CLOG</td><td><code>(ql:quickload :clog)</code></td>
+<td colspan="2">Already loaded: CLOG is an ASDF dependency of this book.</td></tr>
+<tr><td>Run a tutorial</td><td><code>(clog:run-tutorial N)</code></td>
+<td>Run the tutorial page's mount example with ►: it loads the definitions and
+mounts the handler at <code>/clog-tutorial/NN</code>, for a tutorial classified
+for that (so far 01 and 02).</td>
+<td>Not available: mounting changes the server for every visitor. A tutorial is
+live only if the server's operator has mounted it.</td></tr>
+<tr><td>Start the server</td><td>Done by <code>CLOG:INITIALIZE</code></td>
+<td colspan="2">Already done by HyperDoc, and never repeated.</td></tr>
+<tr><td>Open a browser</td><td>Usually done by the tutorial</td>
+<td colspan="2">Follow the Live page link on the tutorial's page, in your own
+browser, once the route is mounted.</td></tr>
+<tr><td>Evaluate code</td><td>At the REPL</td>
+<td>► on examples, and the Playground; results open in the Inspector.</td>
+<td>Not available. Only examples with an operation contract run, and these
+tutorials have none; the Playground is disabled.</td></tr>
+<tr><td>Read and inspect</td><td>The source files</td>
+<td colspan="2">The handler's Source code, the tutorial's route, and the
 Inspector.</td></tr>
-<tr><td>Inspect, change, evaluate again</td>
-<td>The handler's Source code, the Playground in a development server, and the
-Live page and the Inspector to see the result.</td></tr>
 </table>
 
-<h2>Where the examples run</h2>
+<h2>Why the examples run only in development</h2>
 <p>Each tutorial page has one example,
 <a expr="#'mount-tutorial-01" view="Source code">MOUNT-TUTORIAL-01</a> and
 <a expr="#'mount-tutorial-02" view="Source code">MOUNT-TUTORIAL-02</a>: the

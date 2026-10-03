@@ -50,10 +50,11 @@
 (defclass clog-route ()
   ((path :initarg :path :reader route-path)
    (handler :initarg :handler :reader route-handler)
-   (mounted-by :initarg :mounted-by :reader route-mounted-by))
+   (mounted-by :initarg :mounted-by :reader route-mounted-by)
+   (example :initarg :example :reader route-example))
   (:documentation "A path on the CLOG server of this image, the handler meant
-for it, and the function that mounts it there. Whether it is mounted is
-not stored: see ROUTE-STATE."))
+for it, the function that mounts it there, and the example that runs that
+function from a page. Whether it is mounted is not stored: see ROUTE-STATE."))
 
 (defmethod print-object ((route clog-route) stream)
   (print-unreadable-object (route stream :type t)
@@ -80,6 +81,24 @@ something else there, :NOT-MOUNTED when it holds nothing."
   "The form a reader evaluates to mount ROUTE, as text."
   (let ((mount (route-mounted-by route)))
     (format nil "(~(~A:~A~))" (package-name (symbol-package mount)) (symbol-name mount))))
+
+(defun %unmounted-live-page (route)
+  "What the Live page row says while ROUTE is not mounted. Whether this
+reader may mount it is the decision that gates the example's run button,
+asked here as well, so the text and the button cannot disagree."
+  (let ((example (route-example route)))
+    (if (dreyeck/authority-policy:example-invocation-decision example)
+        (hv:html
+          (hv:esc "Not mounted yet. Run ")
+          (hv:object-ref (fdefinition example)
+                         :display (symbol-name example)
+                         :select "Source code")
+          (hv:esc " with ► to mount it, or evaluate ")
+          (:code (hv:esc (%mount-form route)))
+          (hv:esc " in this image; the Live page then appears here."))
+        (hv:html
+          (hv:esc "None: the tutorial is not mounted on this server. Mounting
+changes the server for every visitor, so it is not offered to readers here.")))))
 
 (hv:defview hyperbook/server::👀url (route clog-route)
   (when (eq :mounted (route-state route))
@@ -115,7 +134,4 @@ something else there, :NOT-MOUNTED when it holds nothing."
           (:tr (:th :style "text-align:left" "Live page")
                (:td (if (eq state :mounted)
                         (hv:transclusion (hyperbook/server::👀url route))
-                        (hv:html
-                          (hv:esc "None until mounted: evaluate ")
-                          (:code (hv:esc (%mount-form route)))
-                          (hv:esc " in this image."))))))))))
+                        (%unmounted-live-page route)))))))))

@@ -333,6 +333,122 @@ linked, and the page offers nothing to run, not even in development."
       (assert (find "Source code" (hv:all-views function) :key #'hv:view-title :test #'equal))))
   t)
 
+;;; Public reading against development: the same pages, told apart by the
+;;; decision that gates the run buttons.
+
+(defun %tutorials ()
+  (list (list *tutorial-01* #'r:tutorial-1-route 'r:mount-tutorial-01
+              "(dreyeck/clog-tutorial:install-tutorial-1-route)")
+        (list *tutorial-02* #'r:tutorial-2-route 'r:mount-tutorial-02
+              "(dreyeck/clog-tutorial:install-tutorial-2-route)")))
+
+(defun check-unmounted-wording-by-mode ()
+  "Unmounted, a development server points to the runnable mount example and
+the REPL form; a served Catalog says the route is not mounted and why, and
+tells the reader to evaluate nothing."
+  (dolist (tutorial (%tutorials))
+    (destructuring-bind (title route-function example form) tutorial
+      (declare (ignore title))
+      (call-with-clog
+       (lambda ()
+         (let ((route (funcall route-function)))
+           (%developing
+            (lambda ()
+              (multiple-value-bind (html references) (%rendered (r:route-relation route))
+                (assert (search "to mount it" html))
+                (assert (search form html))
+                (assert (find-if (lambda (reference)
+                                   (%source-code-link-p reference (fdefinition example)))
+                                 references)))))
+           (%served
+            (lambda ()
+              (multiple-value-bind (html references) (%rendered (r:route-relation route))
+                (assert (search "not offered to readers" html))
+                (assert (not (search form html)))
+                (assert (not (search "evaluate" html :test #'char-equal)))
+                (assert (notany (lambda (reference) (eq (cdr reference) (fdefinition example)))
+                                references))
+                (assert (notany (lambda (reference) (typep (cdr reference) 'hv:thunk))
+                                references))))))))))
+  t)
+
+(defun check-public-reading-mounts-nothing ()
+  "Showing every page of the book to a served reader leaves CLOG's routes as
+they were: both tutorials stay unmounted."
+  (let ((observed
+          (dreyeck/clog-tutorial/tests::call-with-clog
+           t (lambda ()
+               (%served
+                (lambda ()
+                  (dolist (title (list "Overview" *workflow* *tutorial-01* *tutorial-02*))
+                    (%all-references
+                     (%content-view (hyperbook:find-page (%book) title :signal-error? t))))
+                  (list (r:route-state (r:tutorial-1-route))
+                        (r:route-state (r:tutorial-2-route)))))))))
+    (assert (equal '(:not-mounted :not-mounted) (getf observed :value)))
+    (assert (equal (getf observed :before) (getf observed :after)))
+    (assert (null (getf observed :calls))))
+  t)
+
+(defun %inspector-options (development)
+  "The options this book's HyperBook route gives the Inspector for its
+Overview, served with DEVELOPMENT. CLOG is replaced by recorders: no socket
+is opened and no browser connects."
+  (let* ((names '(clog:initialize clog:set-on-new-window clog:location clog:property
+                  clog-moldable-inspector:on-new-inspector))
+         (saved (mapcar #'fdefinition names))
+         (parameters hyperbook/server::*server-parameters*)
+         (path (concatenate 'string "/" (hyperbook/server::slug (%book))))
+         (routes nil)
+         (options nil))
+    (unwind-protect
+         (progn
+           (setf (fdefinition 'clog:initialize) (lambda (&rest arguments) (declare (ignore arguments)))
+                 (fdefinition 'clog:set-on-new-window)
+                 (lambda (handler &key path) (push (cons path handler) routes))
+                 (fdefinition 'clog:location) #'identity
+                 (fdefinition 'clog:property) (lambda (object name) (declare (ignore name)) object)
+                 (fdefinition 'clog-moldable-inspector:on-new-inspector)
+                 (lambda (body &rest arguments) (declare (ignore body)) (setf options arguments)))
+           (hyperbook/server:serve-hyperbooks hyperbook:*catalog* :port 0 :development development)
+           (funcall (cdr (assoc path routes :test #'equal))
+                    (concatenate 'string path "/Overview"))
+           options)
+      (loop for name in names for definition in saved
+            do (setf (fdefinition name) definition))
+      (setf hyperbook/server::*server-parameters* parameters))))
+
+(defun check-playground-disabled-when-served ()
+  "Served, the book's pages open in an Inspector whose Playground does not
+evaluate. Control: a development server's does."
+  (let ((served (%inspector-options nil))
+        (developing (%inspector-options t)))
+    (assert (typep (getf served :object) 'hyperbook:page))
+    (assert (equal "Overview" (hyperbook:title-of (getf served :object))))
+    (assert (member :playground? served))
+    (assert (null (getf served :playground?)))
+    (assert (eq t (getf developing :playground?))))
+  t)
+
+(defun check-public-source-reference ()
+  "Served, the Overview points to the upstream collection with an ordinary
+link and names the installed CLOG as text; it refers to no pathname object.
+Pathname authority is unchanged: CLOG's directory is still refused to a
+served reader, the repository still shown."
+  (let ((overview (hyperbook:find-page (%book) "Overview" :signal-error? t)))
+    (%served
+     (lambda ()
+       (let ((html (hv:view-html (%content-view overview))))
+         (assert (search "href='https://github.com/rabbibotton/clog/tree/main/tutorial' target='_blank'"
+                         html))
+         (assert (search (asdf:component-version (asdf:find-system "clog")) html))
+         (assert (search (namestring (clog:clog-install-dir)) html)))
+       (assert (notany #'pathnamep (%all-references (%content-view overview))))
+       (assert (not (ap:pathname-disclosure-permitted-p
+                     (merge-pathnames "tutorial/" (clog:clog-install-dir)))))
+       (assert (ap:pathname-disclosure-permitted-p (asdf:system-source-directory "dreyeck"))))))
+  t)
+
 (defun run-tests ()
   (check-route-reads-clog)
   (check-source-is-the-installed-tutorial)
@@ -343,5 +459,9 @@ linked, and the page offers nothing to run, not even in development."
   (check-in-production-catalog)
   (check-mount-examples-run-only-in-development)
   (check-workflow-page)
-  (format t "~&CLOG tutorial reading tests passed: route state, source, collection, page reaches both ends; Tutorial 02 route and page; in the production Catalog; mount examples only in development; workflow page.~%")
+  (check-unmounted-wording-by-mode)
+  (check-public-reading-mounts-nothing)
+  (check-playground-disabled-when-served)
+  (check-public-source-reference)
+  (format t "~&CLOG tutorial reading tests passed: route state, source, collection, page reaches both ends; Tutorial 02 route and page; in the production Catalog; mount examples only in development; workflow page; wording by mode; public reading mounts nothing; Playground disabled when served; public source reference.~%")
   t)
