@@ -121,7 +121,11 @@ server host, and nothing in it is about RUNNABLE?."
            (status (id)
              (getf (dreyeck/topicmap:topicmap-association-properties-of
                     (find id associations :key #'dreyeck/topicmap:topicmap-association-id-of :test #'string=))
-                   :epistemic-status)))
+                   :epistemic-status))
+           (warrant (id)
+             (getf (dreyeck/topicmap:topicmap-association-properties-of
+                    (find id associations :key #'dreyeck/topicmap:topicmap-association-id-of :test #'string=))
+                   :warrant)))
       (assert (eq page-class (object "wikipedia-page")))
       (assert (eq #'hyperbook/wikipedia::page-url (object "page-url")))
       (assert (eq #'html-inspector-views:action-button (object "action-button")))
@@ -143,17 +147,24 @@ server host, and nothing in it is about RUNNABLE?."
       (assert (eq (asdf:find-system "dreyeck/wikipedia-title-bar") (object "adapter-system")))
       (dolist (association associations)
         (let ((properties (dreyeck/topicmap:topicmap-association-properties-of association)))
-          (assert (member (getf properties :epistemic-status) '(:observed :derived :proposed)))
+          ;; The statuses other dreyeck topicmaps already use; none invented here.
+          (assert (member (getf properties :epistemic-status)
+                          '(:source-observed :directly-observed :mechanically-derived
+                            :design-inference :working-hypothesis)))
           (assert (stringp (getf properties :warrant)))))
       ;; The page links the map with view="Topicmap"; that view renders.
       (let ((view (find "Topicmap" (html-inspector-views:all-views workspace)
                         :key #'html-inspector-views:view-title :test #'equal)))
         (assert view)
         (assert (plusp (length (html-inspector-views:view-html view)))))
-      (assert (eq :observed (status "thunk-calls")))
-      (assert (eq :observed (status "link-navigates")))
-      (assert (eq :derived (status "url-is-data")))
-      (assert (eq :proposed (status "proposed-for")))
+      (assert (eq :source-observed (status "thunk-calls")))
+      (assert (eq :directly-observed (status "adapter-emits")))
+      (assert (eq :directly-observed (status "link-navigates")))
+      (assert (eq :mechanically-derived (status "system-contains")))
+      (assert (eq :design-inference (status "url-is-data")))
+      (assert (eq :design-inference (status "proposed-for")))
+      (assert (search "Proposed upstream change" (warrant "proposed-for")))
+      (assert (search "Adapter deletion condition" (warrant "deleted-when")))
       (assert (equal '("open-browser")
                      (loop for association in associations
                            when (string= "server-host" (dreyeck/topicmap:topicmap-association-to-of association))

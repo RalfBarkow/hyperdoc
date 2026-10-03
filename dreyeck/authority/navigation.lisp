@@ -156,44 +156,48 @@
                    (topic "browser-witness" "manual browser witness" +manual-browser-witness+ 1000 440)
                    (topic "adapter-system" "adapter system, temporary"
                           (asdf:find-system "dreyeck/wikipedia-title-bar") 1000 660)))
+           ;; Statuses are those the other dreyeck topicmaps use: SOURCE-OBSERVED
+           ;; read in source, DIRECTLY-OBSERVED in a running image or run,
+           ;; MECHANICALLY-DERIVED by a fixed rule, DESIGN-INFERENCE a judgment
+           ;; about a representation or decision.
            (associations
              (loop for (id from to type status warrant)
-                     in '(("url-of" "page-url" "wikipedia-page" :reads :observed
+                     in '(("url-of" "page-url" "wikipedia-page" :reads :source-observed
                            "PAGE-URL builds the address from the page's edition and title.")
-                          ("upstream-for" "upstream-method" "wikipedia-page" :specializes-on :observed
+                          ("upstream-for" "upstream-method" "wikipedia-page" :specializes-on :source-observed
                            "The upstream method's only parameter is a WIKIPEDIA-PAGE.")
-                          ("upstream-uses-url" "upstream-method" "page-url" :reads :observed
+                          ("upstream-uses-url" "upstream-method" "page-url" :reads :source-observed
                            "The thunk body passes (page-url page) to CLOG:OPEN-BROWSER.")
-                          ("upstream-button" "upstream-method" "action-button" :constructs :observed
+                          ("upstream-button" "upstream-method" "action-button" :constructs :source-observed
                            "Upstream source: the method returns an ACTION-BUTTON.")
-                          ("button-thunk" "action-button" "thunk" :refers-to :observed
-                           "ACTION-BUTTON gives the button an action- id for the THUNK; the Inspector evaluates it on click.")
-                          ("thunk-calls" "thunk" "open-browser" :calls :observed
+                          ("button-thunk" "action-button" "thunk" :refers-to :source-observed
+                           "ACTION-BUTTON gives the button an action- id for the THUNK; the Inspector's click handler evaluates it.")
+                          ("thunk-calls" "thunk" "open-browser" :calls :source-observed
                            "Upstream source: the thunk's body is (clog:open-browser :url (page-url page)).")
-                          ("opens-on-host" "open-browser" "server-host" :launches :observed
+                          ("opens-on-host" "open-browser" "server-host" :launches :source-observed
                            "CLOG source: UIOP:LAUNCH-PROGRAM of open or xdg-open, a web browser on the local machine, which is the machine running the server.")
-                          ("url-is-data" "page-url" "external-link" :can-be-carried-by :derived
-                           "PAGE-URL exists before any thunk; following a URL needs no Lisp, so an href can carry it.")
-                          ("adapter-replaces" "adapter" "upstream-method" :replaces :observed
-                           "Same generic, no qualifiers, same specializer: the adapter's method takes the upstream method's place.")
-                          ("adapter-uses-url" "adapter" "page-url" :reads :observed
+                          ("url-is-data" "page-url" "external-link" :can-be-carried-by :design-inference
+                           "PAGE-URL exists before any thunk and following a URL needs no Lisp, so an href can carry it in place of the action.")
+                          ("adapter-replaces" "adapter" "upstream-method" :replaces :directly-observed
+                           "FIND-METHOD for WIKIPEDIA-PAGE in this image returns the method defined in dreyeck/src/wikipedia-title-bar.lisp.")
+                          ("adapter-uses-url" "adapter" "page-url" :reads :source-observed
                            "The adapter's href is (cl-who:escape-string (page-url page)).")
-                          ("adapter-emits" "adapter" "external-link" :emits :observed
+                          ("adapter-emits" "adapter" "external-link" :emits :directly-observed
                            "Tests: one anchor, class href target only, href reads back as PAGE-URL, no reference.")
-                          ("link-navigates" "external-link" "visitor-browser" :navigates :observed
+                          ("link-navigates" "external-link" "visitor-browser" :navigates :directly-observed
                            "Manual browser witness: the click reached window bubble phase with defaultPrevented=false; the witness then cancelled navigation itself.")
-                          ("commit-introduces" "commit" "adapter" :introduces :observed
+                          ("commit-introduces" "commit" "adapter" :introduces :source-observed
                            "ea31d6c3 adds dreyeck/src/wikipedia-title-bar.lisp.")
-                          ("regression-asserts" "regression" "external-link" :asserts :observed
-                           "Served and developing: the same visible link, no reference, zero CLOG:OPEN-BROWSER calls.")
-                          ("witness-observes" "browser-witness" "external-link" :observes :observed
+                          ("regression-asserts" "regression" "external-link" :asserts :directly-observed
+                           "Run served and developing: the same visible link, no reference, zero CLOG:OPEN-BROWSER calls.")
+                          ("witness-observes" "browser-witness" "external-link" :observes :directly-observed
                            "Packaged sources on 127.0.0.1, a public-mode Catalog and a development server, not dreyeck.ch.")
-                          ("system-contains" "adapter-system" "adapter" :contains :observed
-                           "The adapter is the only method in dreyeck/wikipedia-title-bar.")
-                          ("proposed-for" "proposed-change" "upstream-method" :would-replace :proposed
-                           "Proposed for khinsen/hyperdoc: the same link, rendered by upstream's own method.")
-                          ("deleted-when" "adapter-system" "proposed-change" :deleted-when-pinned :proposed
-                           "Delete the adapter, its test and systems once pinned upstream navigates in the client; keep the regression; revise the reading."))
+                          ("system-contains" "adapter-system" "adapter" :contains :mechanically-derived
+                           "The ASDF system's only component is the file that defines the method.")
+                          ("proposed-for" "proposed-change" "upstream-method" :would-replace :design-inference
+                           "Proposed upstream change for khinsen/hyperdoc: the same link, rendered by upstream's own method.")
+                          ("deleted-when" "adapter-system" "proposed-change" :deleted-when-pinned :design-inference
+                           "Adapter deletion condition: once pinned upstream navigates in the client, delete the adapter, its test and systems; keep the regression; revise the reading."))
                    collect (dreyeck/topicmap:make-topicmap-association
                             :id id :type type :from from :to to
                             :properties (list :presentation :relation
