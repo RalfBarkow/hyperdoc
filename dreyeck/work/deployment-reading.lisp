@@ -1,7 +1,8 @@
 ;;;; Reading supplied deployment observations
 (defpackage #:dreyeck/work/deployment-reading
   (:use #:cl)
-  (:export #:deployment-evidence #:service-start-confirmation))
+  (:export #:deployment-evidence #:service-start-confirmation
+           #:deployment-update-observation))
 (in-package #:dreyeck/work/deployment-reading)
 
 (hyperdoc:see (hyperdoc:page "Federated Wiki deployment state"))
@@ -115,3 +116,43 @@ returns fresh data."
      ((:subject "dreyeck.ch" :relation :current-exec-start-arguments
        :status :not-established
        :limit "The confirmation names the program, not its store path, arguments, port or working directory.")))))
+
+;;; A deployment operation answers how a revision was activated, not which
+;;; program systemd starts. Neither earlier observation is superseded here.
+(hyperdoc:defexample deployment-update-observation
+  "Inspect operator-supplied command output from the successful update of
+2026-10-03. The flake input update precedes NixOS activation; service stop and
+start belong to the activation result. This is separate from both the older
+snapshot and SERVICE-START-CONFIRMATION. Each call returns fresh data without
+executing a command or querying a host."
+  (copy-tree
+   '(:provenance (:kind :operator-supplied :observation-time "2026-10-03"
+                  :recorded-at "2026-10-03" :scope :command-output
+                  :host-probe :not-performed)
+     :observed
+     ((:id "dreyeck-update-2026-10-03" :subject "dreyeck.ch"
+       :kind :deployment-operation :operation :update-and-activate
+       :directory "/etc/nixos"
+       :steps
+       ((:kind :flake-input-update :command "nix flake update hyperdoc"
+         :input "hyperdoc" :lock-file "/etc/nixos/flake.lock"
+         :revision-before "384fab636fd2695109aea626b12963cd58bbdcac"
+         :revision-after "548f73d09826795cbeaea1eae38da9a4b6e8a9e7")
+        (:kind :nixos-activation
+         :command "nixos-rebuild switch --flake /etc/nixos#dreyeck"
+         :flake "/etc/nixos#dreyeck"
+         :built ("hyperdoc-catalog") :rebuilt-units ("hyperdoc.service")
+         :result
+         (:status :completed-successfully
+          :transition ((:kind :service-stop :service "hyperdoc.service")
+                       (:kind :configuration-activation :flake "/etc/nixos#dreyeck")
+                       (:kind :service-start :service "hyperdoc.service")))))))
+     :derived ()
+     :inferred ()
+     :hypothesized ()
+     :unresolved
+     ((:subject "dreyeck.ch" :relation :post-activation-verification
+       :status :not-established :basis ("dreyeck-update-2026-10-03")
+       :outside-observation (:exec-start :working-directory :proxy-state
+                             :browser-reachability :application-health)
+       :limit "This update output does not establish the service's ExecStart, WorkingDirectory, proxy state, browser reachability or application-level health after restart; each needs a separate observation.")))))

@@ -53,6 +53,45 @@ service user needs a writable Lisp compilation cache and access to its Wiki
 store. `ExecStart` needs neither Nix nor a repository checkout to start the
 Catalog.
 
+## Operator update procedure for dreyeck.ch
+
+The operator uses the following commands on dreyeck.ch to update the
+server-local NixOS configuration:
+
+```sh
+cd /etc/nixos
+nix flake update hyperdoc
+nixos-rebuild switch --flake /etc/nixos#dreyeck
+```
+
+The operator supplied output from a successful execution on **2026-10-03**.
+It reports the `hyperdoc` input revision changing, `hyperdoc-catalog` being
+built, the `hyperdoc.service` unit being rebuilt, and activation stopping the
+service, activating the new configuration and starting the service. The
+switch completed successfully.
+
+```text
+operator deploy/update operation
+  → Nix flake input revision changes
+  → new NixOS generation is built
+  → activation restarts hyperdoc.service
+
+systemd ExecStart
+  → starts hyperdoc-catalog inside an already activated generation
+```
+
+Updating and activating the configuration is an operator procedure;
+`ExecStart` is the service's startup command within that configuration. The
+successful switch does not establish the service's ExecStart or
+WorkingDirectory, proxy state, browser reachability or application health
+after restart. The separate operator confirmation of **2026-10-01** identifies
+the program the service starts.
+
+This records the procedure actually used, without requiring every future
+deployment to use exactly these commands. HyperDoc adds no SSH automation.
+The dated deployment observations are kept in the
+[dreyeck.ch deployment reading](pages/work/dreyeck.ch%20deployment.html).
+
 ## Limits of the packaged runtime
 
 - The package is not a saved SBCL core. It starts a fresh image from the
@@ -69,8 +108,9 @@ Catalog.
 
 ## Not verified
 
-NixOS activation of the template, a Linux runtime test, and proxy and
-WebSocket acceptance on the server have not been verified. The executable test
+The successful operator update above does not verify NixOS activation of the
+template shown here, a Linux runtime test, or proxy and WebSocket acceptance
+on the server. The executable test
 makes real HTTP requests, but no test drives a browser or the WebSocket UI.
 
 ## Checks
