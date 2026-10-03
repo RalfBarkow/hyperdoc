@@ -21,3 +21,13 @@
   (make-instance 'clog-route :path "/clog-tutorial/02"
                              :handler (tut:tutorial-2-handler)
                              :mounted-by 'tut:install-tutorial-2-route))
+
+;;; The part of (CLOG:RUN-TUTORIAL 2) that applies in HyperDoc. It changes
+;;; the running server, so it has no operation contract: a served Catalog
+;;; shows why it is not run, and a development server runs it.
+(hyperdoc:defexample mount-tutorial-02
+  "Mount Tutorial 02 on the CLOG server this image already runs, and return
+its route. No server is started and no browser is opened; the route's
+Live page is then a link, followed in the reader's own browser."
+  (tut:install-tutorial-2-route)
+  (tutorial-2-route))

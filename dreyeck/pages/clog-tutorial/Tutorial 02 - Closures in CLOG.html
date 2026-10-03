@@ -41,6 +41,15 @@ comments announce. This book registers the symbol for both, so a
 redefinition reaches new windows.</li>
 </ul>
 
+<h2>Mounting it from here</h2>
+<p>This is the part of <code>(clog:run-tutorial 2)</code> that applies in
+HyperDoc; <a page="Running the CLOG Tutorials in HyperDoc">Running the CLOG
+Tutorials in HyperDoc</a> says which parts do not. In a development server, ►
+mounts the route and opens it in the Inspector, where its Live page is then a
+link. A served Catalog does not run it, and the marker in place of ► says
+why.</p>
+<source-of-function>mount-tutorial-02</source-of-function>
+
 <h2>How it is mounted</h2>
 <p>As for Tutorial 01, START-TUTORIAL would call <code>CLOG:INITIALIZE</code>
 and open a browser on the machine running Lisp, so it is not called.

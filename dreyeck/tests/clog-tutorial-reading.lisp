@@ -9,6 +9,7 @@
   (:use #:cl)
   (:local-nicknames (#:r #:dreyeck/clog-tutorial/reading)
                     (#:tut #:dreyeck/clog-tutorial)
+                    (#:ap #:dreyeck/authority-policy)
                     (#:hv #:html-inspector-views))
   (:export #:run-tests))
 
@@ -94,15 +95,17 @@ of one table, and the live link exists only in the second."
 
 (defparameter *tutorial-02* "Tutorial 02 — Closures in CLOG")
 
+(defparameter *workflow* "Running the CLOG Tutorials in HyperDoc")
+
 (defun %count (needle text)
   (loop for start = (search needle text) then (search needle text :start2 (1+ start))
         while start count t))
 
 (defun check-book-is-the-collection ()
   "The Catalog entry is the collection: titled CLOG Tutorial, opening on an
-Overview that lists Tutorials 01 and 02 and links exactly those. No other
-tutorial is in the book, and each route state on the Overview is read from
-its own route."
+Overview that lists Tutorials 01 and 02 and links exactly those and the
+workflow page. No other tutorial is in the book, and each route state on
+the Overview is read from its own route."
   (let* ((book (%book))
          (overview (hyperbook:find-page book "Overview" :signal-error? t))
          (tutorials (list (hyperbook:find-page book *tutorial-01* :signal-error? t)
@@ -110,7 +113,7 @@ its own route."
     (assert (member book (hyperbook:hyperbooks-of hyperbook:*catalog*)))
     (assert (equal "CLOG Tutorial" (hyperbook:title-of book)))
     (assert (equal "Overview" (hyperbook:main-page-id-of book)))
-    (assert (equal (list "Overview" *tutorial-01* *tutorial-02*)
+    (assert (equal (list "Overview" *workflow* *tutorial-01* *tutorial-02*)
                    (sort (loop for page being the hash-values of (hyperdoc::text-pages-of book)
                                collect (hyperbook:title-of page))
                          #'string<)))
@@ -123,8 +126,10 @@ its own route."
                                               (eq book (hyperbook:hyperbook-of object))
                                               (not (eq object overview)))
                                       collect object))))
-                 (assert (and (= 2 (length linked))
-                              (every (lambda (page) (member page linked)) tutorials))))
+                 (assert (and (= 3 (length linked))
+                              (every (lambda (page) (member page linked))
+                                     (cons (hyperbook:find-page book *workflow* :signal-error? t)
+                                           tutorials)))))
                html)))
       (let ((neither (call-with-clog #'overview))
             (first-only (call-with-clog (lambda ()
@@ -237,6 +242,95 @@ production Catalog. Control: a known member is seen as one."
     (assert (not (member "dreyeck/clog-tutorial/reading" members :test #'string-equal))))
   t)
 
+(defun %served (thunk)
+  "THUNK run as the served Catalog runs: a server up, not in development mode."
+  (progv (list (find-symbol "*SERVER-PARAMETERS*" :hyperbook/server)) (list (list "700px" nil))
+    (funcall thunk)))
+
+(defun %developing (thunk)
+  "THUNK run as a development server runs."
+  (progv (list (find-symbol "*SERVER-PARAMETERS*" :hyperbook/server)) (list (list "700px" t))
+    (funcall thunk)))
+
+(defun %content-view (page)
+  (find "Content" (hv:all-views page) :key #'hv:view-title :test #'equal))
+
+(defun %all-references (view)
+  "The objects VIEW refers to, and those of the views it transcludes."
+  (hv:view-html view)
+  (loop for (nil . object) in (hv:view-references view)
+        append (cons object (and (typep object 'hv:view) (%all-references object)))))
+
+(defun %example-thunks (page)
+  (remove-if-not (lambda (object) (typep object 'ap:example-thunk))
+                 (%all-references (%content-view page))))
+
+(defun check-mount-examples-run-only-in-development ()
+  "Each tutorial page offers its mount example in a development server, and
+running it mounts the route and nothing else: no INITIALIZE, no browser.
+Served, there is no run button, the marker says why, and a run obtained
+anyway is refused and mounts nothing. Neither example has a contract, and
+the book loads the gate with them."
+  (loop for (title example route) in (list (list *tutorial-01* 'r:mount-tutorial-01 #'r:tutorial-1-route)
+                                            (list *tutorial-02* 'r:mount-tutorial-02 #'r:tutorial-2-route))
+        for page = (hyperbook:find-page (%book) title :signal-error? t)
+        do (assert (null (ap:find-example-contract example)))
+           (let ((thunks (%developing (lambda () (%example-thunks page)))))
+             (assert (equal (list example) (mapcar #'ap::example-thunk-example thunks)))
+             (let ((observed (dreyeck/clog-tutorial/tests::call-with-clog
+                              t (lambda ()
+                                  (%developing
+                                   (lambda ()
+                                     (let ((result (hv:eval-thunk (first thunks))))
+                                       (list (typep result 'r:clog-route)
+                                             (r:route-state (funcall route))))))))))
+               (assert (equal '(t :mounted) (getf observed :value)))
+               (assert (null (getf observed :calls)))))
+           (%served
+            (lambda ()
+              ;; Nothing runnable at all, not only no gated run: upstream's
+              ;; own button is a plain thunk.
+              (assert (notany (lambda (object) (typep object 'hv:thunk))
+                              (%all-references (%content-view page))))
+              (assert (some (lambda (object)
+                              (and (typep object 'hv:view)
+                                   (search "Not run here: no operation contract" (hv:view-html object))))
+                            (%all-references (%content-view page))))
+              (let ((observed (dreyeck/clog-tutorial/tests::call-with-clog
+                               t (lambda ()
+                                   (let ((result (hv:eval-thunk
+                                                  (make-instance 'ap:example-thunk
+                                                                 :fn (lambda () (funcall (symbol-function example)))
+                                                                 :example example))))
+                                     (list (typep result 'ap:invocation-refused)
+                                           (r:route-state (funcall route))))))))
+                (assert (equal '(t :not-mounted) (getf observed :value)))))))
+  (assert (member "dreyeck/authority-policy"
+                  (mapcar #'asdf:coerce-name
+                          (asdf:system-depends-on (asdf:find-system "dreyeck/clog-tutorial/reading")))
+                  :test #'string-equal))
+  t)
+
+(defun check-workflow-page ()
+  "The README's workflow, translated. RUN-TUTORIAL, INITIALIZE and
+OPEN-BROWSER are linked as source to read, the two mount examples are
+linked, and the page offers nothing to run, not even in development."
+  (let ((page (hyperbook:find-page (%book) *workflow* :signal-error? t)))
+    (%developing
+     (lambda ()
+       (multiple-value-bind (html references) (%content page)
+         (assert (notany (lambda (reference) (typep (cdr reference) 'condition)) references))
+         (assert (search "(clog:run-tutorial 1)" html))
+         (dolist (function (list #'clog:run-tutorial #'clog:initialize #'clog:open-browser
+                                 #'r:mount-tutorial-01 #'r:mount-tutorial-02))
+           (assert (find-if (lambda (reference) (%source-code-link-p reference function))
+                            references))))
+       (assert (notany (lambda (object) (typep object 'hv:thunk))
+                       (%all-references (%content-view page))))))
+    (dolist (function (list #'clog:run-tutorial #'clog:initialize #'clog:open-browser))
+      (assert (find "Source code" (hv:all-views function) :key #'hv:view-title :test #'equal))))
+  t)
+
 (defun run-tests ()
   (check-route-reads-clog)
   (check-source-is-the-installed-tutorial)
@@ -245,5 +339,7 @@ production Catalog. Control: a known member is seen as one."
   (check-tutorial-2-route)
   (check-tutorial-2-page-reaches-both-ends)
   (check-not-in-production-catalog)
-  (format t "~&CLOG tutorial reading tests passed: route state, source, collection, page reaches both ends; Tutorial 02 route and page; not in the production Catalog.~%")
+  (check-mount-examples-run-only-in-development)
+  (check-workflow-page)
+  (format t "~&CLOG tutorial reading tests passed: route state, source, collection, page reaches both ends; Tutorial 02 route and page; not in the production Catalog; mount examples only in development; workflow page.~%")
   t)

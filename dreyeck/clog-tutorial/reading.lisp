@@ -23,7 +23,8 @@
                     (#:tut #:dreyeck/clog-tutorial))
   (:export #:clog-route #:route-path #:route-handler #:route-mounted-by
            #:route-state #:route-source #:route-relation
-           #:tutorial-1-route #:tutorial-2-route))
+           #:tutorial-1-route #:tutorial-2-route
+           #:mount-tutorial-01 #:mount-tutorial-02))
 
 (in-package #:dreyeck/clog-tutorial/reading)
 
@@ -34,6 +35,7 @@
   :main-page-id "Overview")
 
 (hyperdoc:see (hyperdoc:page "Overview" :hyperbook "dreyeck/clog-tutorial/reading"))
+(hyperdoc:see (hyperdoc:page "Running the CLOG Tutorials in HyperDoc" :hyperbook "dreyeck/clog-tutorial/reading"))
 
 ;;; A CLOG-ROUTE is a path, the handler meant for it and the function
 ;;; that mounts it. Nothing about it is restated: whether CLOG dispatches

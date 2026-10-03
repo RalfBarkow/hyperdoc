@@ -1,0 +1,71 @@
+<html><head><title>Running the CLOG Tutorials in HyperDoc</title></head><body>
+<in-package>dreyeck/clog-tutorial/reading</in-package>
+<h1>Running the CLOG Tutorials in HyperDoc</h1>
+<p>CLOG's tutorial README describes one way of working: load CLOG in a REPL,
+then evaluate one form per tutorial. Shown here as text, not evaluated:</p>
+<pre>(ql:quickload :clog)
+(clog:run-tutorial 1)</pre>
+<p>The README's transcript continues with CLOG starting its own web server,
+listening on <code>0.0.0.0:8080</code>, and says that most tutorials then open
+a browser. This page says which of those steps happen in HyperDoc, and in what
+form.</p>
+
+<h2>Why RUN-TUTORIAL is not run here</h2>
+<p><a expr="#'clog:run-tutorial" view="Source code">RUN-TUTORIAL</a> loads the
+tutorial's file and calls its START-TUTORIAL, which calls
+<a expr="#'clog:initialize" view="Source code">CLOG:INITIALIZE</a> and then
+<a expr="#'clog:open-browser" view="Source code">CLOG:OPEN-BROWSER</a>. In a
+fresh REPL, INITIALIZE starts CLOG's server, on <code>0.0.0.0:8080</code> by
+default.</p>
+<p>In this image a CLOG server is already running: it is serving this page.
+CLOG keeps one server per image, and INITIALIZE called on a running server
+starts nothing new. It makes the tutorial's handler the handler of
+<code>/</code>, and it sets extended routing to whatever it is given, which,
+called as START-TUTORIAL calls it, is off. The Catalog at <code>/</code> would
+become the tutorial, and page addresses such as
+<code>/&lt;book&gt;/&lt;page&gt;</code> would no longer reach their pages.
+OPEN-BROWSER would start a browser process on the machine running this server,
+not in your browser. The tests observe the first two effects on CLOG's own
+tables, without a listener. RUN-TUTORIAL must therefore not be evaluated in a
+HyperDoc server.</p>
+
+<h2>Each upstream step and its counterpart here</h2>
+<table>
+<tr><th style="text-align:left">Upstream</th><th style="text-align:left">In HyperDoc</th></tr>
+<tr><td>Load CLOG</td>
+<td>Already loaded: CLOG is an ASDF dependency of this book.</td></tr>
+<tr><td><code>(clog:run-tutorial N)</code></td>
+<td>Load the tutorial's definitions and mount its handler at
+<code>/clog-tutorial/NN</code>, for a tutorial classified for that: so far
+Tutorials 01 and 02.</td></tr>
+<tr><td>Start the server</td>
+<td>Already done by HyperDoc, and never repeated.</td></tr>
+<tr><td>Open a browser</td>
+<td>Follow the Live page link on the tutorial's page, in your own browser.</td></tr>
+<tr><td>Evaluate a form at the REPL</td>
+<td>Run the tutorial page's example with ►; its result opens in the
+Inspector.</td></tr>
+<tr><td>Inspect, change, evaluate again</td>
+<td>The handler's Source code, the Playground in a development server, and the
+Live page and the Inspector to see the result.</td></tr>
+</table>
+
+<h2>Where the examples run</h2>
+<p>Each tutorial page has one example,
+<a expr="#'mount-tutorial-01" view="Source code">MOUNT-TUTORIAL-01</a> and
+<a expr="#'mount-tutorial-02" view="Source code">MOUNT-TUTORIAL-02</a>: the
+part of RUN-TUTORIAL that applies here. An example changes the running
+server: it adds a route for every visitor. It therefore has no operation
+contract, and a served Catalog shows a marker in place of ►, saying why. In a
+development server, ► runs it. The Playground follows the same line: it
+evaluates code only in a development server.</p>
+<p>A contract would not be the right way to offer it publicly. The only
+permission the authority layer knows is that of an anonymous visitor, so a
+contracted example would let anyone change the server. Whether a public
+Catalog should have these routes mounted when it starts is a separate
+question, decided outside this book.</p>
+<p>Everything else on these pages is read when the page is shown: route
+state, handler and source. Showing a page changes nothing.</p>
+
+<p>Back to the <a page="Overview">overview of the CLOG Tutorial</a>.</p>
+</body></html>

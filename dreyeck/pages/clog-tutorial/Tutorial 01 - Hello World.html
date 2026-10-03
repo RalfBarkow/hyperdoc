@@ -19,6 +19,15 @@ object.</p>
 as the installed CLOG ships it, read from its installation rather than copied:</p>
 <source-of-function>clog-tut-1::on-new-window</source-of-function>
 
+<h2>Mounting it from here</h2>
+<p>This is the part of <code>(clog:run-tutorial 1)</code> that applies in
+HyperDoc; <a page="Running the CLOG Tutorials in HyperDoc">Running the CLOG
+Tutorials in HyperDoc</a> says which parts do not. In a development server, ►
+mounts the route and opens it in the Inspector, where its Live page is then a
+link. A served Catalog does not run it, and the marker in place of ► says
+why.</p>
+<source-of-function>mount-tutorial-01</source-of-function>
+
 <h2>Why the tutorial does not start itself</h2>
 <p>Upstream, the tutorial owns its server: START-TUTORIAL calls
 <code>CLOG:INITIALIZE</code> and then opens a browser on the machine running

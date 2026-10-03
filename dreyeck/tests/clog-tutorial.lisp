@@ -217,15 +217,50 @@ reload it; mounting both tutorials leaves each route with its own handler."
     (assert (eq definition (fdefinition (%tutorial-2-handler-symbol)))))
   t)
 
+;;; Why START-TUTORIAL, and so CLOG:RUN-TUTORIAL, must not run in HyperDoc,
+;;; observed rather than read: INITIALIZE on a running server, called as
+;;; START-TUTORIAL calls it. The running flag is bound and no listener
+;;; exists, so CLOG takes its running branch and opens nothing.
+
+(defun test-initialize-takes-over-a-running-server ()
+  "With CLOG running and HyperDoc's routing in place -- a root handler and
+extended routing on -- INITIALIZE with a tutorial's handler starts nothing,
+makes that handler the handler of / and switches extended routing off."
+  (let* ((tables (list clog::*url-to-on-new-window* clog-connection::*url-to-boot-file*))
+         (saved-root (mapcar (lambda (table) (multiple-value-list (gethash "/" table))) tables))
+         (saved-extended clog::*extended-routing*)
+         (saved-static-root clog-connection:*static-root*)
+         (catalog-root (lambda (body) (declare (ignore body))))
+         (tutorial (lambda (body) (declare (ignore body)))))
+    (unwind-protect
+         (let ((clog-connection:*clog-running* t))
+           (clog:set-on-new-window catalog-root :path "/")
+           (setf clog::*extended-routing* t)
+           (assert (eq catalog-root (gethash "/" clog::*url-to-on-new-window*)))
+           (clog:initialize tutorial)
+           (assert (eq tutorial (gethash "/" clog::*url-to-on-new-window*)))
+           (assert (null clog::*extended-routing*))
+           (assert (null clog-connection::*client-handler*)))
+      (setf clog::*extended-routing* saved-extended
+            clog-connection:*static-root* saved-static-root)
+      (loop for table in tables
+            for (value present) in saved-root
+            do (if present (setf (gethash "/" table) value) (remhash "/" table)))))
+  t)
+
 (defun run-tests ()
   (assert (and (null (find-package "CLOG-TUT-1")) (null (find-package "CLOG-TUT-2"))) ()
           "A tutorial is already loaded in this image, so its first load ~
 cannot be observed. Run these tests in a fresh image.")
+  (assert (null clog-connection::*client-handler*) ()
+          "A CLOG listener is running in this image; these tests change CLOG's ~
+routing while they run. Run them in a fresh image.")
   (test-mounts-only-on-a-running-server)
   (test-route-is-the-tutorial-handler)
   (test-reinstall-changes-nothing)
   (test-tutorial-2-mounts-only-on-a-running-server)
   (test-tutorial-2-source-is-installed)
   (test-tutorial-2-reinstall-changes-nothing)
-  (format t "~&CLOG tutorial tests passed: refusal, no initialize, route, reinstall; the same for Tutorial 2.~%")
+  (test-initialize-takes-over-a-running-server)
+  (format t "~&CLOG tutorial tests passed: refusal, no initialize, route, reinstall; the same for Tutorial 2; INITIALIZE would take over a running server.~%")
   t)

@@ -2489,11 +2489,15 @@
 
 (defsystem "dreyeck/clog-tutorial/reading"
   :description "The CLOG tutorial collection, read where it runs; so far Tutorials 01 and 02"
-  :depends-on ("dreyeck/clog-tutorial" "dreyeck/hyperdoc" "hyperbook/server" "sb-introspect")
+  ;; The examples mount routes, so the gate that keeps a served Catalog from
+  ;; running uncontracted examples must be loaded with them.
+  :depends-on ("dreyeck/clog-tutorial" "dreyeck/hyperdoc" "dreyeck/authority-policy"
+               "hyperbook/server" "sb-introspect")
   :components ((:module "dreyeck/clog-tutorial" :serial t
                 :components ((:file "reading") (:file "tutorial-01") (:file "tutorial-02")))
                (:module "dreyeck/pages/clog-tutorial"
                 :components ((:static-file "Overview.html")
+                             (:static-file "Running the CLOG Tutorials in HyperDoc.html")
                              (:static-file "Tutorial 01 - Hello World.html")
                              (:static-file "Tutorial 02 - Closures in CLOG.html"))))
   :in-order-to ((test-op (test-op "dreyeck/clog-tutorial/reading/tests"))))
