@@ -2,7 +2,8 @@
 (defpackage #:dreyeck/work/trails-rendered-reading
   (:use #:cl)
   (:export #:provenance-evidence #:initial-state #:integration-decision
-           #:runtime-verification #:provenance-chain #:operations-record))
+           #:runtime-verification #:provenance-chain #:operations-record
+           #:commit-record))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
@@ -429,8 +430,12 @@ stage is described, not reconstructed. Each call returns fresh data."
               :entry "client/dialog/index.html composite and dotify")
        :external-module (:url "https://wardcunningham.github.io/graph/graph.js"
                          :pinned nil :fetched-at-runtime t)
+       :wiki-build-source (:repository "/Users/rgb/Projects/RalfBarkow/wiki"
+                           :commit "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c"
+                           :override "WIKI_MECH_SRC=/Users/rgb/workspace/wiki-plugin-mech-upstream")
        :evidence ((runtime-verification :derived "runtime-serves-local-mech")
-                  (runtime-verification :observed "served-assets")))
+                  (runtime-verification :observed "served-assets")
+                  (commit-record :derived "running-artifact-matches-committed-source")))
       (:stage 3 :name :intermediate-representation :status :reproduced
        :what "this.aspect from trails(), handed to Solo as a batch"
        :aspect (:source "Trails Rendered"
@@ -478,7 +483,9 @@ alone. Each call returns fresh data."
      :files-modified
      ((:repository "/Users/rgb/Projects/RalfBarkow/wiki" :file "flake.nix"
        :change "WIKI_MECH_SRC impure override of mechSrc; default pin unchanged"
-       :committed nil
+       :branch "localhost" :commit "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c"
+       :parent "47a9ca6b97597eedebe602bd80b8657978b813e3"
+       :subject "dev(nix): allow opt-in local mech source" :pushed nil
        :patch "/Users/rgb/workspace/wiki-trails-rendered-local/flake-mech-override.patch"
        :patch-sha256 "e3710b63098c23c31c539b91604db63baeb8a2ca0ff2bbcc723919223e782d8f")
       (:repository "/Users/rgb/workspace/hyperdoc-trails-rendered"
@@ -486,8 +493,14 @@ alone. Each call returns fresh data."
                "dreyeck/pages/work/Trails Rendered public reproduction.html"
                "dreyeck/tests/work-trails-rendered-reading.lisp"
                "dreyeck.asd" "dreyeck/pages/work/Work Breakdown.html")
-       :committed nil :authoring :text-edit
+       :branch "claude/trails-rendered-public-slice"
+       :commit "89c6d582cdb51dec275bf6c9dedcbbf76d0f9519"
+       :parent "4b56913e88c67e1434bc83665a2d623b73268c56"
+       :subject "feat(work): document public Trails Rendered reproduction" :pushed nil
+       :authoring :text-edit
        :note "Not authored through the dreyeck/workflow structural writer."))
+     :record-history
+     "Commit 89c6d582 recorded both changes as uncommitted, which they were when it was written. The commit ids above were added by the following commit on the same branch; see COMMIT-RECORD."
      :files-created-outside-repositories
      ((:directory "/Users/rgb/workspace/wiki-trails-rendered-local"
        :contents ("source/" "data/" "home/" "chrome-profile/" "result-wiki"
@@ -536,3 +549,70 @@ alone. Each call returns fresh data."
      :not-added
      ("Trace relation suppression" "missing-node top-row layout" "getBBox lookup"
       "swoopy-arrow overlay"))))
+
+;;; Added after both commits existed. It answers which committed source the
+;;; running artifact corresponds to; the readings above are not re-observed.
+(hyperdoc:defexample commit-record
+  "Which commits hold this slice, and does the running wiki correspond to
+committed source? Observed on 2026-10-04 after both commits, by evaluating
+the clean committed flake with and without the override. Evaluation, not a
+rebuild. Each call returns fresh data."
+  (copy-tree
+   '(:provenance (:kind :agent-observed :observer "Claude Code"
+                  :observation-date "2026-10-04" :scope :committed-source
+                  :method :nix-eval :rebuild-performed nil)
+     :observed
+     ((:id "hyperdoc-commit" :kind :git-commit
+       :repository "/Users/rgb/workspace/hyperdoc"
+       :worktree "/Users/rgb/workspace/hyperdoc-trails-rendered"
+       :branch "claude/trails-rendered-public-slice"
+       :commit "89c6d582cdb51dec275bf6c9dedcbbf76d0f9519"
+       :parent "4b56913e88c67e1434bc83665a2d623b73268c56"
+       :files 5 :insertions 746 :deletions 4
+       :tests-before-commit (:system "dreyeck/work/reading/tests"
+                             :shell "nix develop .#tala" :result :pass))
+      (:id "wiki-commit" :kind :git-commit
+       :repository "/Users/rgb/Projects/RalfBarkow/wiki" :branch "localhost"
+       :commit "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c"
+       :parent "47a9ca6b97597eedebe602bd80b8657978b813e3"
+       :files ("flake.nix") :flake-lock-changed nil :pushed nil)
+      (:id "default-eval" :kind :nix-eval :tree "clean 8e6c2e53"
+       :mode :pure :wiki-mech-src :unset
+       :out-path "/nix/store/ygy5f63q5m587ly4z0hr81s97bvq399l-wiki-0.39.1"
+       :mech-source "/nix/store/nip9afqnjckbdl08h72dd0s85y58x4j5-source")
+      (:id "original-commit-eval" :kind :nix-eval
+       :tree "git+file rev 47a9ca6b97597eedebe602bd80b8657978b813e3" :mode :pure
+       :mech-source "/nix/store/nip9afqnjckbdl08h72dd0s85y58x4j5-source")
+      (:id "pure-eval-with-env" :kind :nix-eval :mode :pure :wiki-mech-src :set
+       :out-path "/nix/store/ygy5f63q5m587ly4z0hr81s97bvq399l-wiki-0.39.1"
+       :mech-source "/nix/store/nip9afqnjckbdl08h72dd0s85y58x4j5-source"
+       :note "A first attempt with the eval cache enabled failed with a dynamic-derivations error on the cached postInstall string; repeated with eval-cache false.")
+      (:id "impure-eval-without-env" :kind :nix-eval :mode :impure :wiki-mech-src :unset
+       :mech-source "/nix/store/nip9afqnjckbdl08h72dd0s85y58x4j5-source")
+      (:id "override-eval" :kind :nix-eval :tree "clean 8e6c2e53"
+       :mode :impure :wiki-mech-src "/Users/rgb/workspace/wiki-plugin-mech-upstream"
+       :out-path "/nix/store/155fjjd6pv29d8lwpzljmqpv4ifa44bg-wiki-0.39.1"
+       :mech-source "/nix/store/c8734mbf8g7xxr9j8yypmxws8732fgj0-wiki-plugin-mech-local")
+      (:id "result-link" :kind :out-link
+       :path "/Users/rgb/Projects/RalfBarkow/wiki/result"
+       :target "/nix/store/ib56gml232vfswinxwqw65cin4z98xsc-wiki-0.39.2"))
+     :derived
+     ((:id "default-pin-unchanged" :relation :same-mech-source
+       :subject "default evaluation of 8e6c2e53" :same-as "47a9ca6b97597eedebe602bd80b8657978b813e3"
+       :basis ("default-eval" "original-commit-eval"))
+      (:id "override-is-opt-in" :relation :requires
+       :subject "WIKI_MECH_SRC override" :requires (:impure-evaluation :environment-variable)
+       :basis ("default-eval" "pure-eval-with-env" "impure-eval-without-env" "override-eval"))
+      (:id "running-artifact-matches-committed-source" :relation :derivation-output-identity
+       :subject "/nix/store/155fjjd6pv29d8lwpzljmqpv4ifa44bg-wiki-0.39.1"
+       :committed-source "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c"
+       :mech-input "/nix/store/c8734mbf8g7xxr9j8yypmxws8732fgj0-wiki-plugin-mech-local"
+       :basis ("override-eval" (runtime-verification :observed "artifact"))
+       :reason "The artifact was built before the commit, from a working tree with the same flake.nix; evaluating the clean commit with the same override yields the same output path."
+       :limit "Output-path identity follows from identical derivations; the artifact was not rebuilt from the commit."))
+     :inferred ()
+     :hypothesized ()
+     :unresolved
+     ((:subject "mech-local input" :relation :commit-of-checkout-content
+       :status :not-a-git-object
+       :limit "builtins.path copies the working directory of a028b4b plus its built client/; the input is identified by store path and bundle SHA-256, not by a commit.")))))
