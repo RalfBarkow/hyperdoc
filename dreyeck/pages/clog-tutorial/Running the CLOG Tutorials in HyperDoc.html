@@ -84,6 +84,13 @@ They mount nothing and dispatch no click. Their forwarding observer preserves
 the original CLOG dispatcher and tutorial callback; Tutorial 02 retains
 paragraphs at creation time. These examples also have no public operation
 contract and require explicit development mode.</p>
+<p>Tutorial 01 opens the existing Web Page view as its embedded execution
+surface after observation is armed and its route is mounted. Keep that Live
+pane open; refresh the reading and Shift-click a Dispatch execution link
+to inspect the click alongside it. The record keeps registration context
+separate from dispatcher entry, COLOR writes, completion and observed CSS.
+Reloading the iframe or refreshing its Live pane starts a new connection;
+refreshing a separate reading or execution pane preserves it.</p>
 <p>Opt-in uses CLOG's existing debug hook to establish observation only while
 the selected original Tutorial 01/02 ON-NEW-WINDOW runs. An existing debug
 hook is forwarded unchanged; other handlers and later Inspector callbacks
@@ -97,7 +104,9 @@ It unmounts nothing and changes no tutorial state.</p>
 <p>CLOG first allows its reconnect grace period, then removes the connection's
 data. The next observed-window lookup or new tutorial-window registration
 prunes that disconnected observation and clears its captured objects and
-paragraphs without waiting for GC. Observation stays enabled for new windows.</p>
+paragraphs without waiting for GC. Tutorial 01's execution records also clear
+their retained context and steps, even if a record is open in the Inspector.
+Observation stays enabled for new windows.</p>
 <p>A contract would not be the right way to offer it publicly. The only
 permission the authority layer knows is that of an anonymous visitor, so a
 contracted example would let anyone change the server. Whether a public

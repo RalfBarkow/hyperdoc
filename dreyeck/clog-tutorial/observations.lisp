@@ -23,11 +23,11 @@
 (defvar *tutorial-02-windows* nil)
 (defvar *registering-click* nil)
 (defvar *observing-output* nil)
+(defvar *executing-tutorial-01* nil)
 (defvar *initializing-tutorial* nil)
 (defvar *observation-hook* nil)
 (defvar *previous-clog-debug* nil)
 (defvar *window-number* 0)
-(defvar *observation-lock* (bordeaux-threads:make-lock "Tutorial 01/02 observations"))
 
 (defun %object (observation key)
   (gethash key (observation-objects observation)))
@@ -193,12 +193,15 @@ is observed. After opening the existing live transport, refresh this reading."
                         ;; Preallocate fields: GETF updates must preserve the
                         ;; frame's EQ identity in PENDING and output capture.
                         :completed nil :color-before nil :color-after nil
+                        :execution nil
                         :counter-after nil :total-after nil
                         :paragraphs nil
                         :total-before (when (typep observation 'tutorial-02-counter-output)
                                         (length (observed-paragraphs observation)))
                         :counter-before (when (typep observation 'tutorial-02-counter-output)
                                           (observed-counter observation)))))
+      (when (and (typep observation 'tutorial-01-click-color) (%object observation "CLOG dispatcher"))
+        (setf (getf frame :execution) (%make-01-execution (observation-objects observation) frame)))
       ;; Protect evidence bookkeeping, not tutorial execution. CLOG's event
       ;; threads retain their original scheduling; overlapping calls are marked.
       (dolist (other pending) (setf (getf other :overlapping) t))
@@ -227,7 +230,32 @@ is observed. After opening the existing live transport, refresh this reading."
               (observed-counter observation) (getf frame :counter-after))))
     (setf (observed-dispatches observation)
           (sort (cons frame (observed-dispatches observation)) #'<
-                :key (lambda (entry) (getf entry :number))))))
+                :key (lambda (entry) (getf entry :number))))
+    (when (getf frame :execution)
+      (%append-01-step (getf frame :execution)
+                       (list :kind :css-observed :target (getf frame :heading)
+                             :before (getf frame :color-before) :after (getf frame :color-after))))))
+
+(defun %append-01-step (execution step)
+  ;; Caller holds the metadata lock. No lock serializes tutorial execution.
+  (unless (eq :released (execution-completion execution))
+    (setf (execution-steps execution) (append (execution-steps execution) (list step)))
+    (case (getf step :kind)
+      (:dispatcher-entered (setf (execution-completion execution) :running))
+      (:dispatcher-returned (setf (execution-completion execution) :returned-normally))
+      (:dispatcher-unwound (setf (execution-completion execution) :did-not-return-normally)))))
+
+(defun %record-01-step (execution step)
+  (when execution
+    (bordeaux-threads:with-lock-held (*observation-lock*) (%append-01-step execution step))))
+
+(defmethod (setf clog:color) :around (value (heading clog:clog-element))
+  (let ((execution *executing-tutorial-01*))
+    (when (and execution *observe-tutorial-01* (second hyperbook/server::*server-parameters*)
+               (not (eq :released (execution-completion execution)))
+               (eq heading (%execution-object execution "Heading")))
+      (%record-01-step execution (list :kind :color-write :target heading :value value))))
+  (call-next-method))
 
 (defun %observe-dispatch (observation dispatcher data)
   (unless (and (observation-active-p observation)
@@ -237,6 +265,8 @@ is observed. After opening the existing live transport, refresh this reading."
                  (tutorial-02-counter-output *observe-tutorial-02*)))
     (return-from %observe-dispatch (funcall dispatcher data)))
   (let* ((frame (%begin-dispatch observation))
+         (execution (when (and frame (eq dispatcher (%object observation "CLOG dispatcher")))
+                      (getf frame :execution)))
          (completed nil)
          (*observing-output* (when (typep observation 'tutorial-02-counter-output)
                               (cons observation frame))))
@@ -244,8 +274,12 @@ is observed. After opening the existing live transport, refresh this reading."
     (when (typep observation 'tutorial-01-click-color)
       (setf (getf frame :color-before) (ignore-errors (clog:color (%object observation "Heading")))))
     (unwind-protect
-         (multiple-value-prog1 (funcall dispatcher data)
-           (setf completed t))
+         (let ((*executing-tutorial-01* execution))
+           (%record-01-step execution (list :kind :dispatcher-entered :dispatcher dispatcher))
+           (multiple-value-prog1 (funcall dispatcher data)
+             (setf completed t)
+             (%record-01-step execution (list :kind :dispatcher-returned))))
+      (unless completed (%record-01-step execution (list :kind :dispatcher-unwound)))
       (when (and (observation-active-p observation) (typep observation 'tutorial-01-click-color))
         (setf (getf frame :color-after) (ignore-errors (clog:color (%object observation "Heading")))))
       (%finish-dispatch observation frame completed))))
@@ -301,6 +335,8 @@ is observed. After opening the existing live transport, refresh this reading."
          (number (%object observation "Window number")))
     (when (and table (eq (gethash key table) (%object observation "Registered observer")))
       (setf (gethash key table) (%object observation "CLOG dispatcher")))
+    (dolist (frame (append (observed-dispatches observation) (slot-value observation 'pending)))
+      (when (getf frame :execution) (%release-01-execution (getf frame :execution))))
     (setf (observation-active-p observation) nil
           (observed-dispatches observation) nil
           (slot-value observation 'pending) nil)
@@ -361,11 +397,6 @@ registry once CLOG releases their connection table."
         ((getf frame :overlapping) "overlapping")
         (t "completed")))
 
-(defun %color-label (color)
-  (cond ((equal color "rgb(0, 0, 0)") "black")
-        ((equal color "rgb(0, 128, 0)") "green")
-        (color color) (t "unavailable")))
-
 (hv:defview click-color (observation tutorial-01-click-color)
   (hv:html-view :title "Click → color" :priority 0
     (if (not (observation-active-p observation))
@@ -380,7 +411,9 @@ registry once CLOG releases their connection table."
                         (:td (hv:object-ref (getf frame :heading) :select "Tree"))
                         (:td (hv:esc (%color-label (getf frame :color-before))))
                         (:td (hv:esc (%color-label (getf frame :color-after))))
-                        (:td (hv:esc (%dispatch-status frame)))))))
+                        (:td (hv:esc (%dispatch-status frame))
+                             (when (getf frame :execution)
+                               (hv:html " · " (hv:object-ref (getf frame :execution) :select "Dispatch execution"))))))))
       (unless (observed-dispatches observation)
         (hv:html (:p (hv:esc (if (slot-value observation 'pending)
                         "A click observation is in progress; refresh after completion."
@@ -424,5 +457,29 @@ registry once CLOG releases their connection table."
             (hv:html (:p "Click the heading in its live window, then refresh this Inspector view to read the new observation.")))
           (hv:html (:p "No observed development window in this image. The installed source remains available below. Rendering this reading enables no observer and runs no tutorial."))))))
 
-(defun tutorial-01-reading () (%observed-reading (%live-windows 1) #'click-color))
+(defun tutorial-01-live-page ()
+  ;; Construct only the existing Web Page value. Its separate Inspector pane
+  ;; loads the iframe; rendering/refreshing this reading never loads it.
+  (when (and (second hyperbook/server::*server-parameters*) *observe-tutorial-01*
+             (eq :mounted (route-state (tutorial-1-route))))
+    (html-inspector-views/standard:make-web-page "/clog-tutorial/01" "Tutorial 01 – Live")))
+
+(defun tutorial-01-reading ()
+  (let* ((windows (%live-windows 1))
+         (live (tutorial-01-live-page))
+         (latest (when windows (car (last (observed-dispatches (first windows)))))))
+    (hv:html-view :title "Observed windows" :priority 0
+      (hv:html
+        (:h3 "Live Tutorial")
+        (if live
+            (hv:html (:p (hv:object-ref live :select "Content" :display "Open embedded live Tutorial 01"))
+                     (:p "The existing Web Page view opens the actual tutorial in a separate iframe pane with its own CLOG connection. Keep it open while refreshing this reading. Refreshing the Live pane or reloading its iframe restarts the tutorial."))
+            (hv:html (:p "The embedded live surface becomes available after Observe is armed and the existing route is mounted in development mode.")))
+        (:h3 "Dispatch execution")
+        (if (getf latest :execution)
+            (hv:html (:p (hv:object-ref (getf latest :execution) :select "Dispatch execution"))
+                     (:p "Shift-click the execution link to keep the Live pane open. Its target, source and registration links open existing Inspector views."))
+            (hv:html (:p "No dispatch execution yet. Click the heading in the embedded Live pane, then refresh this reading.")))
+        (:h3 "Click → color — mechanism overview")
+        (hv:transclusion (%observed-reading windows #'click-color))))))
 (defun tutorial-02-reading () (%observed-reading (%live-windows 2) #'counter-output))

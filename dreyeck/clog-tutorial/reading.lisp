@@ -24,6 +24,9 @@
            #:tutorial-01-click-color #:tutorial-02-counter-output
            #:observation-objects #:observed-dispatches #:observed-paragraphs
            #:observed-counter #:click-color #:counter-output
+           #:tutorial-01-dispatch-execution #:dispatch-execution
+           #:execution-number #:execution-context #:execution-steps #:execution-completion
+           #:execution-color-before #:execution-color-after #:tutorial-01-live-page
            #:observe-tutorial-01 #:observe-tutorial-02 #:release-tutorial-observations
            #:tutorial-01-reading #:tutorial-02-reading))
 

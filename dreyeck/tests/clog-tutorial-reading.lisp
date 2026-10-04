@@ -468,5 +468,6 @@ served reader, the repository still shown."
   (check-instrumentation-audit)
   (check-observe-play-result)
   (check-observation-lifecycle)
+  (check-dispatch-execution)
   (format t "~&CLOG tutorial reading tests passed: route state, source, collection, page reaches both ends; Tutorial 02 route and page; in the production Catalog; mount examples only in development; workflow page; wording by mode; public reading mounts nothing; Playground disabled when served; public source reference.~%")
   t)

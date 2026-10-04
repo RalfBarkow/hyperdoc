@@ -2496,7 +2496,7 @@
                "hyperbook/server" "sb-introspect" "bordeaux-threads" "trivial-garbage")
   :components ((:module "dreyeck/clog-tutorial" :serial t
                 :components ((:file "reading") (:file "tutorial-01") (:file "tutorial-02")
-                             (:file "observations")))
+                             (:file "tutorial-01-execution") (:file "observations")))
                (:module "dreyeck/pages/clog-tutorial"
                 :components ((:static-file "Overview.html")
                              (:static-file "Running the CLOG Tutorials in HyperDoc.html")
@@ -2508,7 +2508,8 @@
   :depends-on ("dreyeck/clog-tutorial/reading" "dreyeck/clog-tutorial/tests")
   :serial t
   :components ((:file "dreyeck/tests/clog-tutorial-reading")
-               (:file "dreyeck/tests/clog-tutorial-observations"))
+               (:file "dreyeck/tests/clog-tutorial-observations")
+               (:file "dreyeck/tests/clog-tutorial-execution"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/clog-tutorial/reading/tests :run-tests)))

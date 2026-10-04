@@ -478,6 +478,7 @@
           (loop for (name classes) in
                 '((clog:set-on-click (clog:clog-element t))
                   (clog::set-event (clog:clog-obj t t))
+                  ((setf clog:color) (t clog:clog-element))
                   (clog:create-child (clog:clog-obj t)))
                 for gf = (fdefinition name)
                 collect (cons gf (find-method gf '(:around) (mapcar #'find-class classes))))))
