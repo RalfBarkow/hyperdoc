@@ -2394,7 +2394,8 @@
                                                     (:file "operation-requests")
                                                     (:file "deployment-reading")
                                                     (:file "authoring-architecture")
-                                                    (:file "addresses")))
+                                                    (:file "addresses")
+                                                    (:file "trails-rendered-reading")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
                  (:static-file "Interaction.html")
@@ -2410,7 +2411,8 @@
                  (:static-file "Federated Wiki deployment state.html")
                  (:static-file "wiki.ralfbarkow.ch deployment.html")
                  (:static-file "dreyeck.ch deployment.html")
-                 (:static-file "Cookie Secret.html")))))
+                 (:static-file "Cookie Secret.html")
+                 (:static-file "Trails Rendered public reproduction.html")))))
 
 (defsystem "dreyeck/work/reading/tests"
   :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset"
@@ -2419,13 +2421,15 @@
   :components ((:file "dreyeck/tests/work-reading")
                (:file "dreyeck/tests/work-reading-live")
                (:file "dreyeck/tests/work-authoring-architecture")
-               (:file "dreyeck/tests/work-deployment-reading"))
+               (:file "dreyeck/tests/work-deployment-reading")
+               (:file "dreyeck/tests/work-trails-rendered-reading"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/tests :run-tests)
              (uiop:symbol-call :dreyeck/work/authoring-architecture/tests
                                :run-authoring-architecture-tests)
-             (uiop:symbol-call :dreyeck/work/deployment-reading/tests :run-tests)))
+             (uiop:symbol-call :dreyeck/work/deployment-reading/tests :run-tests)
+             (uiop:symbol-call :dreyeck/work/trails-rendered-reading/tests :run-tests)))
 
 (defsystem "dreyeck/work/authoring"
   :description "Inspect and execute Work status/relationship requests from the Topicmap; authoring-side, never in the Catalog"
