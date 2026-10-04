@@ -60,12 +60,15 @@ browser, once the route is mounted.</td></tr>
 <td>Not available. Only examples with an operation contract run, and these
 tutorials have none; the Playground is disabled.</td></tr>
 <tr><td>Read and inspect</td><td>The source files</td>
-<td colspan="2">The handler's Source code, the tutorial's route, and the
-Inspector.</td></tr>
+<td>Enable the tutorial's observation example, then open a new live window.
+Refresh the reading to follow its mechanism, original CLOG objects and
+recorded changes in the Inspector.</td>
+<td>The installed source and any already retained observations. Showing a
+page runs neither a tutorial nor an observer.</td></tr>
 </table>
 
 <h2>Why the examples run only in development</h2>
-<p>Each tutorial page has one example,
+<p>Each tutorial page retains its existing transport example,
 <a expr="#'mount-tutorial-01" view="Source code">MOUNT-TUTORIAL-01</a> and
 <a expr="#'mount-tutorial-02" view="Source code">MOUNT-TUTORIAL-02</a>: the
 part of RUN-TUTORIAL that applies here. An example changes the running
@@ -73,6 +76,28 @@ server: it adds a route for every visitor. It therefore has no operation
 contract, and a served Catalog shows a marker in place of ►, saying why. In a
 development server, ► runs it. The Playground follows the same line: it
 evaluates code only in a development server.</p>
+<p>The additional
+<a expr="#'observe-tutorial-01" view="Source code">OBSERVE-TUTORIAL-01</a> and
+<a expr="#'observe-tutorial-02" view="Source code">OBSERVE-TUTORIAL-02</a>
+examples enable object retention in subsequently opened development windows.
+They mount nothing and dispatch no click. Their forwarding observer preserves
+the original CLOG dispatcher and tutorial callback; Tutorial 02 retains
+paragraphs at creation time. These examples also have no public operation
+contract and require explicit development mode.</p>
+<p>Opt-in uses CLOG's existing debug hook to establish observation only while
+the selected original Tutorial 01/02 ON-NEW-WINDOW runs. An existing debug
+hook is forwarded unchanged; other handlers and later Inspector callbacks
+establish no tutorial initialization scope.</p>
+<p>The window registry holds weak references: after CLOG drops a closed
+connection, the reading does not keep that window alive. In development,
+run <a expr="#'release-tutorial-observations" view="Source code">RELEASE-TUTORIAL-OBSERVATIONS</a>
+to stop observation, restore original dispatcher entries and clear captured
+bindings, even if an observation itself remains open in the Inspector.
+It unmounts nothing and changes no tutorial state.</p>
+<p>CLOG first allows its reconnect grace period, then removes the connection's
+data. The next observed-window lookup or new tutorial-window registration
+prunes that disconnected observation and clears its captured objects and
+paragraphs without waiting for GC. Observation stays enabled for new windows.</p>
 <p>A contract would not be the right way to offer it publicly. The only
 permission the authority layer knows is that of an anonymous visitor, so a
 contracted example would let anyone change the server. Whether a public

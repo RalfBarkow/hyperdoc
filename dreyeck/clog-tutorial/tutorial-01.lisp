@@ -1,12 +1,5 @@
-;;;; Tutorial 01 where it runs
-;;;;
-;;;; The page "Tutorial 01 — Hello World" shows one runtime relation:
-;;;;
-;;;;   tutorial source -> CLOG-TUT-1::ON-NEW-WINDOW -> /clog-tutorial/01 -> live page
-;;;;
-;;;; Each step is read through the collection's CLOG-ROUTE, defined in
-;;;; the collection file because Tutorial 02 showed the same four
-;;;; relations.
+;;;; Tutorial 01's existing execution transport. Its Inspector mechanism
+;;;; retains the original heading and click closures in OBSERVATIONS.
 
 (in-package #:dreyeck/clog-tutorial/reading)
 

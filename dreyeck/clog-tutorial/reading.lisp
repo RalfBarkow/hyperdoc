@@ -9,13 +9,9 @@
 ;;;; of its own next to this one. Adding a tutorial adds those and an
 ;;;; entry on the Overview; it does not change the book.
 ;;;;
-;;;; What two tutorials were shown to share is here: a CLOG-ROUTE, read
-;;;; from CLOG's table, with its source, handler, state and live page.
-;;;; Tutorials 01 and 02 each have exactly these four relations. That a
-;;;; route is not an instance holds for both as well: CLOG runs the
-;;;; handler once per browser window that opens it, so each window has
-;;;; its own elements and state. Nothing further is assumed of the rest
-;;;; of CLOG's collection.
+;;;; The route is execution transport. The two concrete mechanism views in
+;;;; OBSERVATIONS retain the objects created by these installed handlers,
+;;;; and connect their source to observed dispatches and DOM effects.
 
 (defpackage #:dreyeck/clog-tutorial/reading
   (:use #:cl)
@@ -24,7 +20,12 @@
   (:export #:clog-route #:route-path #:route-handler #:route-mounted-by
            #:route-state #:route-source #:route-relation
            #:tutorial-1-route #:tutorial-2-route
-           #:mount-tutorial-01 #:mount-tutorial-02))
+           #:mount-tutorial-01 #:mount-tutorial-02
+           #:tutorial-01-click-color #:tutorial-02-counter-output
+           #:observation-objects #:observed-dispatches #:observed-paragraphs
+           #:observed-counter #:click-color #:counter-output
+           #:observe-tutorial-01 #:observe-tutorial-02 #:release-tutorial-observations
+           #:tutorial-01-reading #:tutorial-02-reading))
 
 (in-package #:dreyeck/clog-tutorial/reading)
 

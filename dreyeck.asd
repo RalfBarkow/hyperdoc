@@ -2493,9 +2493,10 @@
   ;; The examples mount routes, so the gate that keeps a served Catalog from
   ;; running uncontracted examples must be loaded with them.
   :depends-on ("dreyeck/clog-tutorial" "dreyeck/hyperdoc" "dreyeck/authority-policy"
-               "hyperbook/server" "sb-introspect")
+               "hyperbook/server" "sb-introspect" "bordeaux-threads" "trivial-garbage")
   :components ((:module "dreyeck/clog-tutorial" :serial t
-                :components ((:file "reading") (:file "tutorial-01") (:file "tutorial-02")))
+                :components ((:file "reading") (:file "tutorial-01") (:file "tutorial-02")
+                             (:file "observations")))
                (:module "dreyeck/pages/clog-tutorial"
                 :components ((:static-file "Overview.html")
                              (:static-file "Running the CLOG Tutorials in HyperDoc.html")
@@ -2505,7 +2506,9 @@
 
 (defsystem "dreyeck/clog-tutorial/reading/tests"
   :depends-on ("dreyeck/clog-tutorial/reading" "dreyeck/clog-tutorial/tests")
-  :components ((:file "dreyeck/tests/clog-tutorial-reading"))
+  :serial t
+  :components ((:file "dreyeck/tests/clog-tutorial-reading")
+               (:file "dreyeck/tests/clog-tutorial-observations"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/clog-tutorial/reading/tests :run-tests)))

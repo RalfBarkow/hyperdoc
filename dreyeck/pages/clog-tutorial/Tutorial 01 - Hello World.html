@@ -1,50 +1,50 @@
 <html><head><title>Tutorial 01 — Hello World</title></head><body>
 <in-package>dreyeck/clog-tutorial/reading</in-package>
 <h1>Tutorial 01 — Hello World</h1>
-<p>CLOG's first tutorial is one window handler. It titles the page "Tutorial 01",
-adds the heading "Hello World! (click me!)" and turns it green when it is
-clicked. Here it runs on the CLOG server this HyperDoc image already serves
-from, as one more route:</p>
-<view-transclusion>(route-relation (tutorial-1-route))</view-transclusion>
-<p>Each line is read when this page is shown. The handler is the one CLOG's
-table holds at the route, and its source is the file the image says it was
-defined from. The live page's address is completed by your browser from the
-address of this page, so it always points at the server you are reading from.
-It opens in a tab of its own, as every URL view in this Catalog does: the
-tutorial is a separate CLOG window with its own connection, not a view of an
-object.</p>
+<p>One window handler creates a heading and registers a callback that closes
+over that same object. Clicking the heading calls the callback and changes
+its browser color to green. A second click changes no object identity and
+leaves the heading green.</p>
 
-<h2>The handler</h2>
-<p>This is <a expr="(fdefinition (route-handler (tutorial-1-route)))" view="Source code">ON-NEW-WINDOW</a>
-as the installed CLOG ships it, read from its installation rather than copied:</p>
+<h2>Click → color</h2>
+<p>Read the mechanism through the retained original objects and the observed
+dispatch. Their links open the existing Inspector views: the heading's Tree
+and HTML, the callback and dispatcher's Source code, and the event table's
+Items. The observation shows what the click changed.</p>
+<view-transclusion>(tutorial-01-reading)</view-transclusion>
+
+<h2>The installed source</h2>
+<p><a expr="(fdefinition (tut:tutorial-1-handler))" view="Source code">ON-NEW-WINDOW</a>
+creates HELLO-ELEMENT with CREATE-CHILD, passes the callback to SET-ON-CLICK,
+and changes COLOR inside that callback. Read the installed forms here:</p>
 <source-of-function>clog-tut-1::on-new-window</source-of-function>
 
-<h2>Mounting it in a development server</h2>
-<p>This is the part of <code>(clog:run-tutorial 1)</code> that applies in
-HyperDoc; <a page="Running the CLOG Tutorials in HyperDoc">Running the CLOG
-Tutorials in HyperDoc</a> says which parts do not. In a development server, ►
-mounts the route and opens it in the Inspector, where its Live page is then a
-link. A served Catalog does not run it, and the marker in place of ► says
-why.</p>
+<h2>Observe a development window</h2>
+<p>In a development server, run the observation example below before opening
+a new live window. It retains the original callback at SET-ON-CLICK and the
+original CLOG dispatcher at SET-EVENT. A forwarding observer becomes the
+registered event-table entry; it calls the original dispatcher once, with
+the original data, and records color before and after. Neither original
+closure is rewritten. Showing this page performs none of these steps.</p>
+<p>Retention is scoped to this original handler's execution through CLOG's
+existing debug hook. Registrations elsewhere, even on the same connection,
+are not captured. The development workflow describes releasing observations.</p>
+<source-of-function>observe-tutorial-01</source-of-function>
+<p>Then open a new Live page using the existing transport below. Refresh
+this reading to reach its observed window. Click the heading there and
+refresh the mechanism view to read the transition here. The Live page is
+the browser effect surface; the explanation continues through Inspector
+objects.</p>
+
+<h2>Existing execution transport</h2>
+<view-transclusion>(route-relation (tutorial-1-route))</view-transclusion>
+<p>If the transport is unmounted in a development server, this existing
+example mounts it. A public Catalog offers neither observation nor mounting.
+<a page="Running the CLOG Tutorials in HyperDoc">Running the CLOG Tutorials
+in HyperDoc</a> explains why START-TUTORIAL is not called here.</p>
 <source-of-function>mount-tutorial-01</source-of-function>
 
-<h2>Why the tutorial does not start itself</h2>
-<p>Upstream, the tutorial owns its server: START-TUTORIAL calls
-<code>CLOG:INITIALIZE</code> and then opens a browser on the machine running
-Lisp. CLOG has one server per image, and initializing it again would make the
-tutorial the handler of <code>/</code> and switch off the extended routing that
-HyperBook page addresses depend on.
-<a expr="#'dreyeck/clog-tutorial:install-tutorial-1-route" view="Source code">INSTALL-TUTORIAL-1-ROUTE</a>
-therefore loads only the definitions and adds this one path to the server that
-is running, the way CLOG's Tutorial 12 adds pages. Without a running server it
-refuses.</p>
-
-<h2>What is checked, and what only a browser shows</h2>
-<p>The tests read CLOG's own tables: the route above holds this handler, its
-boot page is CLOG's default one, mounting twice changes nothing, and nothing
-calls <code>CLOG:INITIALIZE</code>. Whether the heading turns green is a fact
-about a browser connected to a running server, and the live page is where it
-can be seen.</p>
-
-<p>Back to the <a page="Overview">overview of the CLOG Tutorial</a>.</p>
+<p>Compare <a page="Tutorial 02 — Closures in CLOG">Tutorial 02</a>, where
+the callback accumulates window-local output. Back to the
+<a page="Overview">CLOG Tutorial overview</a>.</p>
 </body></html>

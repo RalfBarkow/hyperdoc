@@ -278,12 +278,13 @@ the book loads the gate with them."
         for page = (hyperbook:find-page (%book) title :signal-error? t)
         do (assert (null (ap:find-example-contract example)))
            (let ((thunks (%developing (lambda () (%example-thunks page)))))
-             (assert (equal (list example) (mapcar #'ap::example-thunk-example thunks)))
+             (assert (find example thunks :key #'ap::example-thunk-example))
              (let ((observed (dreyeck/clog-tutorial/tests::call-with-clog
                               t (lambda ()
                                   (%developing
                                    (lambda ()
-                                     (let ((result (hv:eval-thunk (first thunks))))
+                                     (let ((result (hv:eval-thunk
+                                                    (find example thunks :key #'ap::example-thunk-example))))
                                        (list (typep result 'r:clog-route)
                                              (r:route-state (funcall route))))))))))
                (assert (equal '(t :mounted) (getf observed :value)))
@@ -463,5 +464,8 @@ served reader, the repository still shown."
   (check-public-reading-mounts-nothing)
   (check-playground-disabled-when-served)
   (check-public-source-reference)
+  (check-runtime-observations)
+  (check-instrumentation-audit)
+  (check-observation-lifecycle)
   (format t "~&CLOG tutorial reading tests passed: route state, source, collection, page reaches both ends; Tutorial 02 route and page; in the production Catalog; mount examples only in development; workflow page; wording by mode; public reading mounts nothing; Playground disabled when served; public source reference.~%")
   t)

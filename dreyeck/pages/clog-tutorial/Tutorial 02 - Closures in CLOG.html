@@ -1,70 +1,57 @@
 <html><head><title>Tutorial 02 — Closures in CLOG</title></head><body>
 <in-package>dreyeck/clog-tutorial/reading</in-package>
 <h1>Tutorial 02 — Closures in CLOG</h1>
-<p>CLOG's second tutorial keeps the heading of the first and changes what a
-click does. It titles the page "Tutorial 02" and adds "Hello World! (click
-me!)"; the k-th click then adds k paragraphs that each say "Clicked k
-times.". It runs here the way Tutorial 01 does, as one more route on the CLOG
-server this HyperDoc image serves from:</p>
-<view-transclusion>(route-relation (tutorial-2-route))</view-transclusion>
-<p>The four lines are read as for Tutorial 01: the handler CLOG's table holds
-at the route, the file the image says it was defined in, and a live link
-completed by your browser, offered only while the route is mounted.</p>
+<p>Each ON-NEW-WINDOW call binds X to zero and creates a callback that
+captures that binding and the original body. The k-th click increments X
+and creates k paragraphs under that body. Three sequential clicks therefore
+leave 1, 3, and 6 paragraphs. Another window begins independently at zero.</p>
 
-<h2>One route, many windows</h2>
-<p>This is <a expr="(fdefinition (route-handler (tutorial-2-route)))" view="Source code">ON-NEW-WINDOW</a>
-as the installed CLOG ships it:</p>
+<h2>Counter → output</h2>
+<p>Follow the retained body, window, callback and click registration through
+their Inspector references. Each dispatch row connects the observed X
+transition to the original paragraph objects created by that call and their
+creation parent. Open a paragraph's HTML or Tree view to inspect its effect.</p>
+<view-transclusion>(tutorial-02-reading)</view-transclusion>
+
+<h2>The installed source</h2>
+<p><a expr="(fdefinition (tut:tutorial-2-handler))" view="Source code">ON-NEW-WINDOW</a>
+uses CREATE-SECTION for the heading, LET for X, INCF for its transition and
+DOTIMES to create the output. Each paragraph addition also calls SCROLL-TO
+on this body's window.</p>
 <source-of-function>clog-tut-2::on-new-window</source-of-function>
-<p>The counter <code>x</code> is bound inside ON-NEW-WINDOW, and CLOG calls
-that function once for every browser window that opens the route. Each window
-therefore gets a click handler closing over a counter of its own: open the
-live page twice and the two count separately, and reloading a window starts
-it from zero. A route is where the tutorial is mounted; each window is one run
-of it.</p>
-<p>That was already true of
-<a page="Tutorial 01 — Hello World">Tutorial 01</a>, whose heading turns green
-only in the window clicked, but nothing there accumulates, so it could not be
-seen. The counter itself is not shown on this page: it exists only in a
-closure held by one window's click handler, and nothing here reads it.</p>
+<p>X is shown as an observed lexical-state value: a completed sequential
+dispatch's paragraph count, together with INCF and DOTIMES, establishes its
+value. The lexical cell itself is not generally exposed by the Inspector.
+This reading uses no SBCL closure-environment introspection. Incomplete or
+overlapping dispatches are marked instead of supplying a reliable X
+transition.</p>
 
-<h2>What is new relative to Tutorial 01</h2>
-<ul>
-<li>The heading is made with <code>CREATE-SECTION</code>, a Lisp call for
-an HTML section element, where Tutorial 01 wrote the HTML text for
-<code>CREATE-CHILD</code>.</li>
-<li>State lives in a closure per window, as above.</li>
-<li>Each click scrolls the window to the end with <code>SCROLL-TO</code> and
-<code>HEIGHT</code>.</li>
-<li>START-TUTORIAL hands <code>CLOG:INITIALIZE</code> the symbol
-ON-NEW-WINDOW, where Tutorial 01 handed it the function, as Tutorial 01's
-comments announce. This book registers the symbol for both, so a
-redefinition reaches new windows.</li>
-</ul>
+<h2>Observe development windows</h2>
+<p>Run this observation example before opening new live windows. It retains
+the original callback and dispatcher without rewriting either closure.
+During each dispatch it retains CREATE-CHILD's original return objects, so
+their identity and creation parent remain available. It does not reconstruct
+them later through DOM traversal.</p>
+<p>Only the original handler's initialization and its retained dispatcher
+establish observation scopes. Other Inspector/Catalog creation activity is
+excluded. The development workflow describes releasing observations.</p>
+<source-of-function>observe-tutorial-02</source-of-function>
+<p>Open the Live page twice, then refresh this reading. Each observed window
+has its own mechanism link; click one heading three times, allowing each
+effect to complete, and compare it with the untouched second window.
+Refresh the mechanism view after clicking to read the new observation.
+Rendering or inspecting these observations creates no paragraph and
+advances no counter.</p>
 
-<h2>Mounting it in a development server</h2>
-<p>This is the part of <code>(clog:run-tutorial 2)</code> that applies in
-HyperDoc; <a page="Running the CLOG Tutorials in HyperDoc">Running the CLOG
-Tutorials in HyperDoc</a> says which parts do not. In a development server, ►
-mounts the route and opens it in the Inspector, where its Live page is then a
-link. A served Catalog does not run it, and the marker in place of ► says
-why.</p>
+<h2>Existing execution transport</h2>
+<view-transclusion>(route-relation (tutorial-2-route))</view-transclusion>
+<p>If needed, this existing example mounts the transport in a development
+server. A public Catalog offers neither observation nor mounting.
+<a page="Running the CLOG Tutorials in HyperDoc">Running the CLOG Tutorials
+in HyperDoc</a> explains the development workflow.</p>
 <source-of-function>mount-tutorial-02</source-of-function>
 
-<h2>How it is mounted</h2>
-<p>As for Tutorial 01, START-TUTORIAL would call <code>CLOG:INITIALIZE</code>
-and open a browser on the machine running Lisp, so it is not called.
-<a expr="#'dreyeck/clog-tutorial:install-tutorial-2-route" view="Source code">INSTALL-TUTORIAL-2-ROUTE</a>
-loads the definitions and adds this one path to the server that is running,
-and refuses without one. It repeats Tutorial 01's three steps rather than
-sharing them: two tutorials show what these two have in common, not what the
-rest of the collection has.</p>
-
-<h2>What is checked, and what only a browser shows</h2>
-<p>The tests read CLOG's own tables: the route holds this tutorial's handler
-and not Tutorial 01's, mounting twice changes nothing, and nothing calls
-<code>CLOG:INITIALIZE</code>. That each window counts on its own is a fact
-about browsers connected to a running server, and the live page is where it
-can be seen.</p>
-
-<p>Back to the <a page="Overview">overview of the CLOG Tutorial</a>.</p>
+<p>Compare <a page="Tutorial 01 — Hello World">Tutorial 01</a>, which
+captures a heading and changes its color. Back to the
+<a page="Overview">CLOG Tutorial overview</a>.</p>
 </body></html>

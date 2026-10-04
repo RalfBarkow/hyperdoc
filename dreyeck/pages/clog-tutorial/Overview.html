@@ -13,9 +13,9 @@ have moved on since the copy installed here;</li>
 installed at <code><value-of>(namestring (clog:clog-install-dir))</value-of></code>.
 Each tutorial page names its file there and links its handler's source, as this
 runtime has it;</li>
-<li>this book, which reads the tutorials where they run, on the CLOG server this
-HyperDoc image already serves from, and says how each is mounted and what can be
-run where.</li>
+<li>this book, which connects explanation and installed source to retained
+runtime objects and their observed changes in the Inspector. Existing live
+routes provide the browser effect surface in a development server.</li>
 </ul>
 <p>Four things are kept apart:</p>
 <ul>
@@ -37,11 +37,13 @@ must not be evaluated in this server.</p>
 <h2>Tutorials in this book</h2>
 <ul>
 <li><a page="Tutorial 01 — Hello World">Tutorial 01 — Hello World</a>: one
-window handler, ON-NEW-WINDOW, mounted at <code>/clog-tutorial/01</code>.
+window handler, its captured heading and the <em>Click → color</em> mechanism.
+Its existing execution transport is <code>/clog-tutorial/01</code>.
 On this server the route is now <value-of>(route-state (tutorial-1-route))</value-of>.</li>
 <li><a page="Tutorial 02 — Closures in CLOG">Tutorial 02 — Closures in CLOG</a>:
-one window handler, ON-NEW-WINDOW, whose clicks are counted per window,
-mounted at <code>/clog-tutorial/02</code>. On this server the route is now
+the <em>Counter → output</em> mechanism, whose clicks accumulate output
+independently per window. Its existing transport is
+<code>/clog-tutorial/02</code>. On this server the route is now
 <value-of>(route-state (tutorial-2-route))</value-of>.</li>
 </ul>
 <p>The other tutorials in CLOG's directory are not in this book. Each is to be

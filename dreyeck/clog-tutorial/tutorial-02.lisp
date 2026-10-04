@@ -1,14 +1,6 @@
-;;;; Tutorial 02 where it runs
-;;;;
-;;;; The page "Tutorial 02 — Closures in CLOG" shows the same relation as
-;;;; Tutorial 01's:
-;;;;
-;;;;   tutorial source -> CLOG-TUT-2::ON-NEW-WINDOW -> /clog-tutorial/02 -> live page
-;;;;
-;;;; and adds what this tutorial is about: its handler binds a counter, so
-;;;; every browser window that opens the route counts its own clicks. The
-;;;; counter lives in a closure inside the window's click handler; nothing
-;;;; here reads it, and the page says so.
+;;;; Tutorial 02's existing execution transport. OBSERVATIONS retains its
+;;;; original body and paragraphs and records X transitions from output;
+;;;; it does not access the lexical cell inside the original closure.
 
 (in-package #:dreyeck/clog-tutorial/reading)
 
