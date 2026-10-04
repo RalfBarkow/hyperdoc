@@ -4,10 +4,76 @@
   (:export #:provenance-evidence #:initial-state #:integration-decision
            #:runtime-verification #:provenance-chain #:operations-record
            #:commit-record #:integration-record #:evidence-refs
-           #:codeberg-follow-up))
+           #:codeberg-follow-up #:solo-batch #:solo-batch-provenance))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
+
+;;; The JSON is the observed MessageEvent.data, saved before Solo mutates it.
+;;; Keep the payload apart from its provenance: do not add fields to the batch.
+(hyperdoc:defexample solo-batch
+  "The actual MECH -> SOLO batch observed on 2026-10-04.
+Read the captured JSON into fresh hash tables and vectors, preserving keys,
+array order, empty arrays/objects and embedded newlines. No source code is
+executed to reconstruct it. See SOLO-BATCH-PROVENANCE for the capture evidence."
+  (with-open-file (stream (asdf:system-relative-pathname
+                          "dreyeck/work/reading"
+                          "dreyeck/work/trails-rendered-solo-batch.json")
+                         :external-format :utf-8)
+    (shasht:read-json* :stream stream :single-value t
+                      :object-format :hash-table :hash-table-test 'equal
+                      :array-format :vector
+                      :true-value :true :false-value :false :null-value :null)))
+
+(hyperdoc:defexample solo-batch-provenance
+  "Where the captured SOLO batch came from, and how to observe it again.
+The payload is a runtime observation, not a source-derived expectation.
+The pageKey identifies this browser load; another load can allocate a new key."
+  (copy-tree
+   '(:kind :observed-runtime-value :observer "Codex"
+     :observed-at "2026-10-04T08:41:15.950Z"
+     :source-page
+     (:url "https://ward.voices.ustawi.wiki/trails-rendered.json"
+      :title "Trails Rendered"
+      :snapshot-sha256 "5fdba40fd3a68eddee00497af4dadb3847500356a2f131dbc0745afb86de9810"
+      :local-url "http://localhost:3477/view/trails-rendered"
+      :local-title-and-story :identical-to-source-snapshot
+      :mech-item-id "6405b752d1739af0"
+      :action "CLICK -> CODE trails -> CLICK -> SOLO")
+     :environment
+     (:wiki-artifact "/nix/store/155fjjd6pv29d8lwpzljmqpv4ifa44bg-wiki-0.39.1"
+      :mech-version "0.1.48-3"
+      :mech-revision "a028b4bba04e539dcaa090423d38a00a0050489d"
+      :mech-evidence :served-bundle-identical-to-clean-public-checkout
+      :mech-bundle-sha256 "c72ed0a572469d29c3287dafe8c8770c636d2537dbcfbededdd60a244d1e2384"
+      :solo-version "0.1.30-1"
+      :solo-dialog-revision "17915844349bada64c901bd5ea73472702c446f9"
+      :solo-evidence :served-dialog-identical-to-public-revision
+      :solo-dialog-sha256 "5a513f70546ced3e2af7f83c4f14fb73d30e27f22a295558cbff4b078871aed8")
+     :capture
+     (:boundary "MECH popup.postMessage -> Solo MessageEvent.data"
+      :dialog-url "http://localhost:3477/plugins/solo/dialog/" :line 47
+      :method :debugger-breakpoint-before-first-mutation
+      :origin "http://localhost:3477" :event-source-is-opener t
+      :opener "http://localhost:3477/view/trails-rendered"
+      :page-key "b845228c"
+      :serialization "JSON.stringify(event.data) while paused"
+      :json-values :plain-objects-arrays-strings-and-finite-numbers
+      :payload-file "dreyeck/work/trails-rendered-solo-batch.json"
+      :payload-sha256 "ad24ef4944011180134858902e9f8041f501c3896a5cd0d48c33be3f757b5293"
+      :plugin-source-changes nil :breakpoint-removed t
+      :repeat "Load the isolated source page; click CODE trails. Pre-open the named solo dialog with the page as opener, set a debugger breakpoint at dialog/index.html:47, then click the MECH SOLO action. Serialize event.data while paused, remove the breakpoint and resume.")
+     :verification
+     (:code-status "2 aspects" :solo-status "1 sources, 2 aspects"
+      :aspect-names ("trail 1" "trail 2") :nodes-per-aspect 3
+      :trail-relations-per-aspect 2 :resumed-render-nodes 5
+      :resumed-render-trail-edges 4
+      :hyperdoc-test-system "dreyeck/work/reading/tests"
+      :hyperdoc-test-environment "nix develop .#tala"
+      :inspector-check :browser-navigation-through-both-aspects-nodes-and-trail-relations)
+     :representation
+     (:objects :hash-tables :arrays :vectors :fresh-per-call t
+      :meaning "A snapshot of the received batch before Solo adds aspect.label, not a live connection to Wiki."))))
 
 ;;; Each reading answers one question and keeps its own provenance. Facts
 ;;; observed by the agent are kept apart from what is derived from them,

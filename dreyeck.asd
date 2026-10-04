@@ -2395,7 +2395,8 @@
                                                     (:file "deployment-reading")
                                                     (:file "authoring-architecture")
                                                     (:file "addresses")
-                                                    (:file "trails-rendered-reading")))
+                                                    (:file "trails-rendered-reading")
+                                                    (:static-file "trails-rendered-solo-batch.json")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
                  (:static-file "Interaction.html")

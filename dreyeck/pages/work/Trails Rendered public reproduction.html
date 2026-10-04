@@ -2,6 +2,9 @@
 <in-package>dreyeck/work/trails-rendered-reading</in-package>
 <p>Ward Cunningham reported incremental work on a project he now calls "layers of interpretation", with a snippet that finds a Graphviz node by its <code>&lt;title&gt;</code> and asks for its <code>getBBox()</code>. This reading records where that work can be traced in public, and a local Federated Wiki that reproduces his public <em>Trails Rendered</em> page up to the point where the public sources end.</p>
 <p>The snippet was not found in any public source. Ward states that the change was made in an experimental Solo popup deployed only to his own localhost. The reproduction therefore stops before that change, and says so.</p>
+<p><code>trails()</code> stores the two trail aspects in <code>this.aspect</code>. The MECH <code>SOLO</code> action wraps them in a batch with <code>sources</code> and the current <code>pageKey</code>, then sends it to the Solo dialog with <code>postMessage</code>.</p>
+<p><a expr="(solo-batch)">Inspect the SOLO batch</a>: the actual message captured at the dialog's receive boundary before Solo changes it. Follow <code>sources</code> → source → <code>aspects</code> → <em>trail 1</em> or <em>trail 2</em> → <code>graph</code> → <code>nodes</code> and <code>rels</code>. JSON objects remain objects and arrays retain their order, including empty arrays and properties.</p>
+<p><a expr="(solo-batch-provenance)">Inspect the batch provenance</a> for the source page, MECH/SOLO versions, asset and payload hashes, capture point and repeat procedure. This is a captured runtime value; its <code>pageKey</code> belongs to that browser load.</p>
 <h2>1. Where the code lives</h2>
 <source-of-function>provenance-evidence</source-of-function>
 <p><a expr="(provenance-evidence)">Inspect the provenance search</a>. It separates what was observed in repositories, npm releases, served plugin assets and wiki journals from what is inferred about the snippet's location.</p>
