@@ -143,7 +143,7 @@
 (defun collect-assets (assets)
   (let ((inherit (inherit-of (first assets))))
     (if inherit
-        (cons inherit assets)
+        (append (collect-assets (list inherit)) assets)
         assets)))
 
 (defun collect-tag-dispatchers (all-assets)
