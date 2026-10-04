@@ -3,7 +3,7 @@
   (:use #:cl)
   (:export #:provenance-evidence #:initial-state #:integration-decision
            #:runtime-verification #:provenance-chain #:operations-record
-           #:commit-record))
+           #:commit-record #:integration-record))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
@@ -616,3 +616,158 @@ rebuild. Each call returns fresh data."
      ((:subject "mech-local input" :relation :commit-of-checkout-content
        :status :not-a-git-object
        :limit "builtins.path copies the working directory of a028b4b plus its built client/; the input is identified by store path and bundle SHA-256, not by a commit.")))))
+
+;;; Added on dreyeck.ch after the authoritative merge existed and was
+;;; published. A tested integration is not the authoritative integration:
+;;; the reconnaissance rehearsal was never executed, because dreyeck.ch
+;;; moved before the real merge.
+(hyperdoc:defexample integration-record
+  "How did the Trails Rendered commits reach the authoritative dreyeck.ch
+branch? Distinguishes the reconnaissance and its merge rehearsal, the
+movement of dreyeck.ch in between, the rehearsal on the moved tip, the
+authoritative merge, its tests and its publication. Observed on
+2026-10-04. Each call returns fresh data."
+  (copy-tree
+   '(:provenance (:kind :agent-observed :observer "Claude Code"
+                  :observation-date "2026-10-04" :scope :integration
+                  :method (:git :ls-remote :nix-eval :test-system))
+     :observed
+     (;; Reconnaissance
+      (:id "recon-authoritative-tip" :phase :reconnaissance :kind :branch-tip
+       :branch "dreyeck.ch" :commit "a7c73c1698335cfafe16fd240530b130c3e2cacb"
+       :github "a7c73c1698335cfafe16fd240530b130c3e2cacb"
+       :codeberg "4b56913e88c67e1434bc83665a2d623b73268c56")
+      (:id "trails-branch" :phase :reconnaissance :kind :branch-tip
+       :branch "claude/trails-rendered-public-slice"
+       :commit "3b9d053ad25b19a7566eab87ade29f2cbb935d70"
+       :commits ("89c6d582cdb51dec275bf6c9dedcbbf76d0f9519"
+                 "3b9d053ad25b19a7566eab87ade29f2cbb935d70")
+       :base "4b56913e88c67e1434bc83665a2d623b73268c56")
+      (:id "recon-range" :phase :reconnaissance :kind :commit-range
+       :from "4b56913e88c67e1434bc83665a2d623b73268c56"
+       :to "a7c73c1698335cfafe16fd240530b130c3e2cacb"
+       :commits ("a7c73c1698335cfafe16fd240530b130c3e2cacb")
+       :files ("dreyeck/clog-tutorial/observations.lisp"
+               "dreyeck/tests/clog-tutorial-observations.lisp"
+               "dreyeck/tests/clog-tutorial-reading.lisp")
+       :files-shared-with-trails ())
+      (:id "recon-blocker" :phase :reconnaissance :kind :worktree-state
+       :worktree "/Users/rgb/workspace/hyperdoc-dreyeck-ch" :head "a7c73c1698335cfafe16fd240530b130c3e2cacb"
+       :modified 7 :untracked 2 :includes "dreyeck.asd"
+       :diff-sha256 "4c77373eb777f6007abbaaff27c25a75848a6361b8d1570009a6b229dd8bacf9"
+       :dry-apply-onto-rehearsal :clean
+       :consequence "A merge in that worktree would have been refused; the work was left untouched.")
+      (:id "rehearsal-1" :phase :reconnaissance :kind :merge-rehearsal
+       :branch "claude/integrate-trails-merge"
+       :commit "1036c7d7638f11e32c03f98ae3ef941442982ad8"
+       :parents ("a7c73c1698335cfafe16fd240530b130c3e2cacb"
+                 "3b9d053ad25b19a7566eab87ade29f2cbb935d70")
+       :tree "13f588eb" :conflicts nil)
+      (:id "rehearsal-1-tests" :phase :reconnaissance :kind :test-run
+       :commit "1036c7d7638f11e32c03f98ae3ef941442982ad8" :shell "nix develop .#tala"
+       :results (("dreyeck/work/reading/tests" :pass)
+                 ("dreyeck/clog-tutorial/reading/tests" :pass)
+                 ("dreyeck/clog-tutorial/tests" :pass))
+       :harness-note "dreyeck/clog-tutorial/tests refused to run in an image that had already loaded a tutorial; it passed in a fresh image.")
+      (:id "rebase-alternative" :phase :reconnaissance :kind :rejected-alternative
+       :branch "claude/integrate-trails-rebase"
+       :commits ("59df1ce11102467b1aee08f2c0dbc19e16ee97ca"
+                 "1e87114e0e78c838859aa75bb07685fb48f9552b")
+       :tree "13f588eb" :conflicts nil
+       :rejected-because "It rewrites the provenance-bearing commits 89c6d582 and 3b9d053a. 89c6d582 is named five times in the record and twice in the second commit message, and its recorded parent 4b56913e would no longer hold."
+       :removed (:worktree t :branch t))
+      ;; Movement of dreyeck.ch
+      (:id "authoritative-movement" :phase :movement :kind :commit-range
+       :from "a7c73c1698335cfafe16fd240530b130c3e2cacb"
+       :to "e8456f6b1986156076e24f721df20aed2b0642f6"
+       :commits ("e8456f6b1986156076e24f721df20aed2b0642f6")
+       :subject "feat(clog-tutorial): expose live dispatch execution" :files 9
+       :files-shared-with-trails ("dreyeck.asd")
+       :shared-file-hunks (:theirs (2499 2511) :trails (2393 2432)))
+      (:id "blocker-resolution" :phase :movement :kind :content-comparison
+       :compared "the recon-blocker diff replayed onto a7c73c16 against e8456f6b"
+       :tracked-files 7 :byte-identical t
+       :untracked-files-now-committed ("dreyeck/clog-tutorial/tutorial-01-execution.lisp"
+                                       "dreyeck/tests/clog-tutorial-execution.lisp")
+       :untracked-content-compared nil)
+      ;; Rehearsal on the moved tip
+      (:id "rehearsal-2" :phase :final-rehearsal :kind :merge-rehearsal
+       :branch "claude/integrate-trails-merge-e8456f6b"
+       :commit "ef055d50f0a44f19fb8a3008649b8b526b41df42"
+       :parents ("e8456f6b1986156076e24f721df20aed2b0642f6"
+                 "3b9d053ad25b19a7566eab87ade29f2cbb935d70")
+       :tree "7b7a386c" :conflicts nil :auto-merged ("dreyeck.asd"))
+      (:id "rehearsal-2-tests" :phase :final-rehearsal :kind :test-run
+       :commit "ef055d50f0a44f19fb8a3008649b8b526b41df42" :shell "nix develop .#tala"
+       :fresh-image-per-system t
+       :results (("dreyeck/work/reading/tests" :pass)
+                 ("dreyeck/clog-tutorial/reading/tests" :pass)
+                 ("dreyeck/clog-tutorial/tests" :pass))
+       :trails-run-tests t)
+      ;; Authoritative integration
+      (:id "pre-merge-check" :phase :final-integration :kind :precondition
+       :branch "dreyeck.ch" :head "e8456f6b1986156076e24f721df20aed2b0642f6"
+       :worktree-clean t :github "e8456f6b1986156076e24f721df20aed2b0642f6")
+      (:id "authoritative-merge" :phase :final-integration :kind :merge-commit
+       :branch "dreyeck.ch" :worktree "/Users/rgb/workspace/hyperdoc-dreyeck-ch"
+       :commit "4892ff0a29a97f0a2a3df1f5efe3dcbf80ed8fdc"
+       :parents ("e8456f6b1986156076e24f721df20aed2b0642f6"
+                 "3b9d053ad25b19a7566eab87ade29f2cbb935d70")
+       :tree "7b7a386c" :merge "--no-ff, ort" :conflicts nil
+       :subject "Merge branch 'claude/trails-rendered-public-slice' into dreyeck.ch")
+      (:id "final-merge-tests" :phase :final-integration :kind :test-run
+       :commit "4892ff0a29a97f0a2a3df1f5efe3dcbf80ed8fdc" :shell "nix develop .#tala"
+       :fresh-image-per-system t
+       :results (("dreyeck/work/reading/tests" :pass)
+                 ("dreyeck/clog-tutorial/reading/tests" :pass)
+                 ("dreyeck/clog-tutorial/tests" :pass))
+       :trails-run-tests t)
+      (:id "merge-publication" :phase :final-integration :kind :push
+       :remote "github" :url "git@github.com:RalfBarkow/hyperdoc.git" :ref "dreyeck.ch"
+       :before "e8456f6b1986156076e24f721df20aed2b0642f6"
+       :after "4892ff0a29a97f0a2a3df1f5efe3dcbf80ed8fdc"
+       :fast-forward t :at "2026-10-04T08:02:27Z" :verified-by :ls-remote)
+      (:id "codeberg-state" :phase :final-integration :kind :remote-tip
+       :remote "codeberg" :ref "dreyeck.ch"
+       :commit "4b56913e88c67e1434bc83665a2d623b73268c56" :pushed-by-this-work nil)
+      (:id "wiki-publication" :phase :final-integration :kind :push
+       :repository "/Users/rgb/Projects/RalfBarkow/wiki" :remote "origin"
+       :url "git@github.com:RalfBarkow/wiki.git" :ref "localhost"
+       :before "47a9ca6b97597eedebe602bd80b8657978b813e3"
+       :after "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c"
+       :fast-forward t :verified-by :ls-remote)
+      (:id "override-witness-recheck" :phase :final-integration :kind :nix-eval
+       :commit "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c" :mode :impure
+       :wiki-mech-src "/Users/rgb/workspace/wiki-plugin-mech-upstream"
+       :out-path "/nix/store/155fjjd6pv29d8lwpzljmqpv4ifa44bg-wiki-0.39.1"))
+     :derived
+     ((:id "rehearsal-1-not-executed" :relation :superseded-candidate
+       :subject "1036c7d7638f11e32c03f98ae3ef941442982ad8"
+       :status :historical-evidence-only
+       :basis ("rehearsal-1" "authoritative-movement")
+       :reason "dreyeck.ch moved from a7c73c16 to e8456f6b before the real merge; the merge was recreated from the new tip and retested.")
+      (:id "authoritative-tree-was-tested" :relation :tree-identity
+       :subject "4892ff0a29a97f0a2a3df1f5efe3dcbf80ed8fdc" :same-tree-as "ef055d50f0a44f19fb8a3008649b8b526b41df42"
+       :basis ("rehearsal-2" "rehearsal-2-tests" "authoritative-merge" "final-merge-tests"))
+      (:id "provenance-references-valid" :relation :reachability
+       :subject "published dreyeck.ch 4892ff0a29a97f0a2a3df1f5efe3dcbf80ed8fdc"
+       :contains ("89c6d582cdb51dec275bf6c9dedcbbf76d0f9519"
+                  "3b9d053ad25b19a7566eab87ade29f2cbb935d70")
+       :basis ("authoritative-merge" "merge-publication" "wiki-publication"
+               "override-witness-recheck"
+               (commit-record :observed "hyperdoc-commit")
+               (commit-record :derived "running-artifact-matches-committed-source"))
+       :reason "The merge keeps both Trails commits with their ids; the cited wiki commit is published; the override still evaluates to the artifact that ran.")
+      (:id "earlier-push-states-superseded" :relation :supersedes
+       :subject "pushed nil in commit-record and operations-record"
+       :basis ("merge-publication" "wiki-publication" (commit-record :observed "wiki-commit"))
+       :reason "Those records said the commits were not pushed, which was true when they were written. The wiki commit and, through the merge, both Trails commits are now published on GitHub."))
+     :inferred ()
+     :hypothesized ()
+     :unresolved
+     ((:subject "this integration-record commit" :relation :own-id-and-publication
+       :status :not-recordable-in-itself
+       :limit "Its commit id, its test run and its push are reported outside this reading.")
+      (:subject "codeberg dreyeck.ch" :relation :publication
+       :status :not-updated :basis ("codeberg-state")
+       :limit "Codeberg still has 4b56913e; this work published only to the configured upstream, github.")))))

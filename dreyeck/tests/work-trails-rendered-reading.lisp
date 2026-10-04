@@ -174,6 +174,47 @@
     (assert (equal "/nix/store/ib56gml232vfswinxwqw65cin4z98xsc-wiki-0.39.2"
                    (getf (record-by-id evidence :observed "result-link") :target)))))
 
+(defun check-integration (evidence)
+  (check-structure evidence)
+  (assert (eq :integration (getf (getf evidence :provenance) :scope)))
+  (flet ((field (id key) (getf (record-by-id evidence :observed id) key)))
+    (let ((trails "3b9d053ad25b19a7566eab87ade29f2cbb935d70")
+          (merge (field "authoritative-merge" :commit)))
+      ;; Tested integration is not authoritative integration.
+      (assert (commit-id-p merge))
+      (assert (not (equal merge (field "rehearsal-1" :commit))))
+      (assert (not (equal merge (field "rehearsal-2" :commit))))
+      (dolist (id '("rehearsal-1" "rehearsal-2" "authoritative-merge"))
+        (assert (equal trails (second (field id :parents)))))
+      ;; Rehearsal 1 sat on the tip that later moved; rehearsal 2 and the merge on the new tip.
+      (assert (equal (first (field "rehearsal-1" :parents)) (field "recon-authoritative-tip" :commit)))
+      (assert (equal (field "authoritative-movement" :from) (field "recon-authoritative-tip" :commit)))
+      (assert (equal (first (field "rehearsal-2" :parents)) (field "authoritative-movement" :to)))
+      (assert (equal (first (field "authoritative-merge" :parents)) (field "pre-merge-check" :head)))
+      (assert (equal (field "authoritative-merge" :tree) (field "rehearsal-2" :tree)))
+      (assert (not (equal (field "authoritative-merge" :tree) (field "rehearsal-1" :tree))))
+      (assert (eq :historical-evidence-only
+                  (getf (record-by-id evidence :derived "rehearsal-1-not-executed") :status)))
+      ;; The rejected alternative stays rejected and removed.
+      (assert (equal '(:worktree t :branch t) (field "rebase-alternative" :removed)))
+      ;; Publication is a verified fast-forward from the pre-merge tip to the merge.
+      (assert (equal (field "merge-publication" :before) (field "pre-merge-check" :github)))
+      (assert (equal (field "merge-publication" :after) merge))
+      (assert (eq t (field "merge-publication" :fast-forward)))
+      ;; Every suite passed after the final merge.
+      (assert (every (lambda (r) (eq :pass (second r))) (field "final-merge-tests" :results)))
+      (assert (= 3 (length (field "final-merge-tests" :results))))
+      ;; The witnesses the record cites still agree with the earlier readings.
+      (assert (member trails (getf (record-by-id evidence :derived "provenance-references-valid") :contains)
+                      :test #'equal))
+      (assert (equal (field "override-witness-recheck" :out-path)
+                     (getf (record-by-id (reading:runtime-verification) :observed "artifact") :path)))
+      (assert (equal (field "wiki-publication" :after)
+                     (getf (record-by-id (reading:commit-record) :observed "wiki-commit") :commit)))))
+  ;; The reproduction boundary is unchanged by integration.
+  (assert (equal "PUBLIC REPRODUCTION ENDS HERE"
+                 (getf (getf (reading:provenance-chain) :boundary) :label))))
+
 (defun check-fresh (function)
   "Each call returns fresh data: mutating one result leaves the next intact."
   (let ((a (funcall function)) (b (funcall function)))
@@ -191,6 +232,8 @@
   (check-commit-record (reading:commit-record) (reading:operations-record)
                        (reading:runtime-verification))
   (check-fresh #'reading:commit-record)
+  (check-integration (reading:integration-record))
+  (check-fresh #'reading:integration-record)
   (check-fresh #'reading:provenance-evidence)
   (check-fresh #'reading:initial-state)
   (check-fresh #'reading:runtime-verification)
@@ -208,6 +251,7 @@
                                 (reading:runtime-verification)
                                 (reading:provenance-chain)
                                 (reading:operations-record)
-                                (reading:commit-record)))
+                                (reading:commit-record)
+                                (reading:integration-record)))
           (assert (member evidence references :test #'equal))))))
   t)
