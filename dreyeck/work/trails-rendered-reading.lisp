@@ -4,7 +4,8 @@
   (:export #:provenance-evidence #:initial-state #:integration-decision
            #:runtime-verification #:provenance-chain #:operations-record
            #:commit-record #:integration-record #:evidence-refs
-           #:codeberg-follow-up #:solo-batch #:solo-batch-provenance))
+           #:codeberg-follow-up #:solo-batch #:solo-batch-provenance
+           #:solo-beam #:solo-beam-provenance))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
@@ -74,6 +75,74 @@ The pageKey identifies this browser load; another load can allocate a new key."
      :representation
      (:objects :hash-tables :arrays :vectors :fresh-per-call t
       :meaning "A snapshot of the received batch before Solo adds aspect.label, not a live connection to Wiki."))))
+
+;;; BEAM is captured from the lexical Solo variable, not computed from SOLO-BATCH.
+(hyperdoc:defexample solo-beam
+  "The actual Solo beam captured after the public batch-to-beam loop.
+Each call reads the observed JSON array into a fresh vector of nested objects.
+The added label is preserved. These snapshots do not retain JavaScript aliases;
+SOLO-BEAM-PROVENANCE records the runtime identity checks."
+  (with-open-file (stream (asdf:system-relative-pathname
+                          "dreyeck/work/reading"
+                          "dreyeck/work/trails-rendered-solo-beam.json")
+                         :external-format :utf-8)
+    (shasht:read-json* :stream stream :single-value t
+                      :object-format :hash-table :hash-table-test 'equal
+                      :array-format :vector
+                      :true-value :true :false-value :false :null-value :null)))
+
+(hyperdoc:defexample solo-beam-provenance
+  "One observed public Solo transformation: batch.sources[*].aspects[*] -> beam[*].
+Before/after debugger observations establish identity separately from JSON value
+comparison. The earlier SOLO-BATCH snapshot remains unchanged."
+  (list
+   :kind :observed-runtime-value :observer "Codex"
+   :observed-at "2026-10-04T09:07:07.794Z"
+   :environment (getf (solo-batch-provenance) :environment)
+   :public-code
+   (copy-tree
+    '(:url "https://github.com/WardCunningham/wiki-plugin-solo/blob/17915844349bada64c901bd5ea73472702c446f9/client/dialog/index.html#L48"
+      :path "client/dialog/index.html" :lines (48 52 53 54)
+      :served-dialog-sha256 "5a513f70546ced3e2af7f83c4f14fb73d30e27f22a295558cbff4b078871aed8"
+      :verified :served-dialog-identical-to-public-revision
+      :reset "beam.splice(0)"
+      :loop "for (const source of data.sources)"
+      :label-write "source.aspects.forEach(aspect => aspect.label = source.source)"
+      :append "beam.push(...source.aspects)"))
+   :capture
+   (copy-tree
+    '(:dialog-url "http://localhost:3477/plugins/solo/dialog/"
+      :before-line 47 :after-line 55 :before-refresh-beam t
+      :method :paired-debugger-breakpoints-with-retained-object-references
+      :serialization "JSON.stringify(beam) while paused after the loop"
+      :origin "http://localhost:3477" :event-source-is-opener t
+      :opener "http://localhost:3477/view/trails-rendered"
+      :mech-item-id "6405b752d1739af0" :page-key "2cd273c5"
+      :input-sha256 "93933158d2a547093644fa5eb078ffd597aa2ec3378f28e34c43cf0d5165e08a"
+      :input-comparison-with-solo-batch :identical-except-page-key
+      :earlier-page-key "b845228c"
+      :payload-file "dreyeck/work/trails-rendered-solo-beam.json"
+      :payload-sha256 "1225c651ef70d2271bbeecc72d41a1b2294846a2e19b3b2b1c06ab31ae33a6b1"
+      :plugin-source-changes nil :breakpoints-removed t :debugger-handles-released t
+      :repeat "Run CODE trails and the MECH SOLO action. Pause the dialog at lines 47 and 55; retain incoming aspect/nested-object references through the debugger, serialize beam at line 55, compare references, then remove both breakpoints and release the handles. Do not select beam entries."))
+   :transformation
+   (copy-tree
+    '(:input-path "batch.sources[*].aspects[*]" :output-path "beam[*]"
+      :added-field "label" :label-value-from "source.source" :source-field-added nil
+      :removed-aspect-fields nil :entry-names ("trail 1" "trail 2")
+      :labels ("Trails Rendered" "Trails Rendered")
+      :public-loop-order :source-order-then-aspect-order
+      :observed-order :same-as-incoming-aspects
+      :beam-length-before 0 :beam-length-after 2
+      :same-beam-array t :same-aspect-objects (t t)
+      :same-nested-objects (t t) :checked-object-references-per-aspect (20 20)
+      :graph-values-unchanged (t t) :source-wrappers-and-aspect-arrays-retained t
+      :batch-metadata "type, pageKey and source wrappers stay outside beam; the incoming batch itself remains present with its aspects now labelled."))
+   :representation
+   (copy-tree
+    '(:kind :independent-json-snapshots :fresh-per-call t
+      :identity-evidence :runtime-reference-comparisons-before-serialization
+      :test-system "dreyeck/work/reading/tests" :test-environment "nix develop .#tala"))))
 
 ;;; Each reading answers one question and keeps its own provenance. Facts
 ;;; observed by the agent are kept apart from what is derived from them,
