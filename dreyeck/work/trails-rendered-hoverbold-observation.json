@@ -1,0 +1,723 @@
+{
+  "source-function": {
+    "name": "hoverbold",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-solo",
+    "revision": "17915844349bada64c901bd5ea73472702c446f9",
+    "version": "0.1.30-1",
+    "path": "client/dialog/index.html",
+    "range": [
+      450,
+      485
+    ],
+    "callRange": [
+      197,
+      201
+    ],
+    "servedDialogSha256": "5a513f70546ced3e2af7f83c4f14fb73d30e27f22a295558cbff4b078871aed8",
+    "source": "function hoverbold(div,select='both') {\n  let rels = [] // [[edge, from, to], ...]\n  const title = target => target.querySelector('title').textContent.replace(/\\\\n/g,' ')\n  div.querySelectorAll('.edge').forEach(edge => rels.push([edge, ...title(edge).split('->')]))\n  const trace = (node,doit) => {\n    const related = io => rels.filter(row => row[io]==node)\n    switch (select) {\n      case 'output':\n        related(1).map(row => doit(row[0]))\n        break\n      case 'input':\n        related(2).map(row => doit(row[0]))\n        break\n      case 'both':\n        related(1).map(row => doit(row[0]))\n        related(2).map(row => doit(row[0]))\n        break\n      case 'most':\n        let o = related(1).length\n        let i = related(2).length\n        related(o>i?1:2).map(row => doit(row[0]))\n        break\n    }\n  }\n  const feature = (event,width) => {\n    if(width==3) console.log([...event.target.querySelectorAll('text')].map(e => e.innerHTML).join(\" \"))\n  }\n  const stroke = width => {\n    const adjust = edge => edge.setAttribute('stroke-width',width)\n    return event => {feature(event,width); return trace(title(event.target), adjust)}\n  }\n  div.querySelectorAll('.node').forEach(node => {\n    node.addEventListener('mouseenter',stroke(3))\n    node.addEventListener('mouseleave',stroke(1))\n  })\n}",
+    "installation": {
+      "line": 451,
+      "callerLine": 200,
+      "div": "target",
+      "select": "both",
+      "nodeCount": 5,
+      "edgeCount": 4
+    }
+  },
+  "example": {
+    "page": "Trails Rendered",
+    "selectedAspects": [
+      "trail 1",
+      "trail 2"
+    ],
+    "hoveredLabel": "John Dewey",
+    "nodeCount": 5,
+    "edgeCount": 4
+  },
+  "hovered-node": {
+    "tag": "g",
+    "id": "node3",
+    "title": "1",
+    "label": "John Dewey",
+    "attributes": {
+      "id": "node3",
+      "class": "node"
+    },
+    "outerHTML": "<g id=\"node3\" class=\"node\">\n<title>1</title>\n<g id=\"a_node3\"><a xlink:title=\"name: John Dewey\">\n<polygon fill=\"palegreen\" stroke=\"black\" points=\"55.47,-135.8 0.17,-135.8 0.17,-94.6 55.47,-94.6 55.47,-135.8\"></polygon>\n<text text-anchor=\"middle\" x=\"27.82\" y=\"-119.4\" font-family=\"Times,serif\" font-size=\"14.00\">John</text>\n<text text-anchor=\"middle\" x=\"27.82\" y=\"-102.6\" font-family=\"Times,serif\" font-size=\"14.00\">Dewey</text>\n</a>\n</g>\n</g>",
+    "selector": "g.node#node3"
+  },
+  "node-title": "1",
+  "incoming-edges": [
+    {
+      "tag": "g",
+      "id": "edge1",
+      "title": "0->1",
+      "label": "Trail",
+      "attributes": {
+        "id": "edge1",
+        "class": "edge"
+      },
+      "outerHTML": "<g id=\"edge1\" class=\"edge\">\n<title>0-&gt;1</title>\n<path fill=\"none\" stroke=\"black\" d=\"M27.82,-188.55C27.82,-176.56 27.82,-161.07 27.82,-147.5\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"31.32,-147.72 27.82,-137.72 24.32,-147.72 31.32,-147.72\"></polygon>\n<g id=\"a_edge1-label\"><a xlink:title=\"source: trail 1\">\n<text text-anchor=\"middle\" x=\"41.43\" y=\"-158.2\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+      "selector": "g.edge#edge1",
+      "strokeWidthAttribute": null,
+      "computedStrokeWidth": "1px",
+      "descendants": [
+        {
+          "tag": "path",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        },
+        {
+          "tag": "polygon",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        },
+        {
+          "tag": "text",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        }
+      ]
+    }
+  ],
+  "outgoing-edges": [
+    {
+      "tag": "g",
+      "id": "edge2",
+      "title": "1->2",
+      "label": "Trail",
+      "attributes": {
+        "id": "edge2",
+        "class": "edge"
+      },
+      "outerHTML": "<g id=\"edge2\" class=\"edge\">\n<title>1-&gt;2</title>\n<path fill=\"none\" stroke=\"black\" d=\"M35.13,-94.11C38.98,-83.74 43.89,-70.93 48.62,-59.6 49.59,-57.28 50.61,-54.88 51.66,-52.48\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"54.8,-54.04 55.68,-43.48 48.41,-51.18 54.8,-54.04\"></polygon>\n<g id=\"a_edge2-label\"><a xlink:title=\"source: trail 1\">\n<text text-anchor=\"middle\" x=\"62.43\" y=\"-63.8\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+      "selector": "g.edge#edge2",
+      "strokeWidthAttribute": null,
+      "computedStrokeWidth": "1px",
+      "descendants": [
+        {
+          "tag": "path",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        },
+        {
+          "tag": "polygon",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        },
+        {
+          "tag": "text",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        }
+      ]
+    }
+  ],
+  "unrelated-edges": [
+    {
+      "tag": "g",
+      "id": "edge3",
+      "title": "3->4",
+      "label": "Trail",
+      "attributes": {
+        "id": "edge3",
+        "class": "edge"
+      },
+      "outerHTML": "<g id=\"edge3\" class=\"edge\">\n<title>3-&gt;4</title>\n<path fill=\"none\" stroke=\"black\" d=\"M104.82,-188.55C104.82,-176.56 104.82,-161.07 104.82,-147.5\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"108.32,-147.72 104.82,-137.72 101.32,-147.72 108.32,-147.72\"></polygon>\n<g id=\"a_edge3-label\"><a xlink:title=\"source: trail 2\">\n<text text-anchor=\"middle\" x=\"118.43\" y=\"-158.2\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+      "selector": "g.edge#edge3",
+      "strokeWidthAttribute": null,
+      "computedStrokeWidth": "1px",
+      "descendants": [
+        {
+          "tag": "path",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        },
+        {
+          "tag": "polygon",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        },
+        {
+          "tag": "text",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        }
+      ]
+    },
+    {
+      "tag": "g",
+      "id": "edge4",
+      "title": "4->2",
+      "label": "Trail",
+      "attributes": {
+        "id": "edge4",
+        "class": "edge"
+      },
+      "outerHTML": "<g id=\"edge4\" class=\"edge\">\n<title>4-&gt;2</title>\n<path fill=\"none\" stroke=\"black\" d=\"M96.36,-94.15C91.24,-82 84.59,-66.26 78.81,-52.57\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"82.11,-51.38 74.99,-43.52 75.66,-54.1 82.11,-51.38\"></polygon>\n<g id=\"a_edge4-label\"><a xlink:title=\"source: trail 2\">\n<text text-anchor=\"middle\" x=\"101.43\" y=\"-63.8\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+      "selector": "g.edge#edge4",
+      "strokeWidthAttribute": null,
+      "computedStrokeWidth": "1px",
+      "descendants": [
+        {
+          "tag": "path",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        },
+        {
+          "tag": "polygon",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        },
+        {
+          "tag": "text",
+          "strokeWidthAttribute": null,
+          "computedStrokeWidth": "1px"
+        }
+      ]
+    }
+  ],
+  "before-state": {
+    "observedAt": "2026-10-04T19:21:59.137Z",
+    "pointerOnNode": false,
+    "hoveredNode": {
+      "tag": "g",
+      "id": "node3",
+      "title": "1",
+      "label": "John Dewey",
+      "attributes": {
+        "id": "node3",
+        "class": "node"
+      },
+      "outerHTML": "<g id=\"node3\" class=\"node\">\n<title>1</title>\n<g id=\"a_node3\"><a xlink:title=\"name: John Dewey\">\n<polygon fill=\"palegreen\" stroke=\"black\" points=\"55.47,-135.8 0.17,-135.8 0.17,-94.6 55.47,-94.6 55.47,-135.8\"></polygon>\n<text text-anchor=\"middle\" x=\"27.82\" y=\"-119.4\" font-family=\"Times,serif\" font-size=\"14.00\">John</text>\n<text text-anchor=\"middle\" x=\"27.82\" y=\"-102.6\" font-family=\"Times,serif\" font-size=\"14.00\">Dewey</text>\n</a>\n</g>\n</g>",
+      "selector": "g.node#node3"
+    },
+    "edges": [
+      {
+        "tag": "g",
+        "id": "edge1",
+        "title": "0->1",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge1",
+          "class": "edge"
+        },
+        "outerHTML": "<g id=\"edge1\" class=\"edge\">\n<title>0-&gt;1</title>\n<path fill=\"none\" stroke=\"black\" d=\"M27.82,-188.55C27.82,-176.56 27.82,-161.07 27.82,-147.5\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"31.32,-147.72 27.82,-137.72 24.32,-147.72 31.32,-147.72\"></polygon>\n<g id=\"a_edge1-label\"><a xlink:title=\"source: trail 1\">\n<text text-anchor=\"middle\" x=\"41.43\" y=\"-158.2\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge1",
+        "strokeWidthAttribute": null,
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      },
+      {
+        "tag": "g",
+        "id": "edge2",
+        "title": "1->2",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge2",
+          "class": "edge"
+        },
+        "outerHTML": "<g id=\"edge2\" class=\"edge\">\n<title>1-&gt;2</title>\n<path fill=\"none\" stroke=\"black\" d=\"M35.13,-94.11C38.98,-83.74 43.89,-70.93 48.62,-59.6 49.59,-57.28 50.61,-54.88 51.66,-52.48\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"54.8,-54.04 55.68,-43.48 48.41,-51.18 54.8,-54.04\"></polygon>\n<g id=\"a_edge2-label\"><a xlink:title=\"source: trail 1\">\n<text text-anchor=\"middle\" x=\"62.43\" y=\"-63.8\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge2",
+        "strokeWidthAttribute": null,
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      },
+      {
+        "tag": "g",
+        "id": "edge3",
+        "title": "3->4",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge3",
+          "class": "edge"
+        },
+        "outerHTML": "<g id=\"edge3\" class=\"edge\">\n<title>3-&gt;4</title>\n<path fill=\"none\" stroke=\"black\" d=\"M104.82,-188.55C104.82,-176.56 104.82,-161.07 104.82,-147.5\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"108.32,-147.72 104.82,-137.72 101.32,-147.72 108.32,-147.72\"></polygon>\n<g id=\"a_edge3-label\"><a xlink:title=\"source: trail 2\">\n<text text-anchor=\"middle\" x=\"118.43\" y=\"-158.2\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge3",
+        "strokeWidthAttribute": null,
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      },
+      {
+        "tag": "g",
+        "id": "edge4",
+        "title": "4->2",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge4",
+          "class": "edge"
+        },
+        "outerHTML": "<g id=\"edge4\" class=\"edge\">\n<title>4-&gt;2</title>\n<path fill=\"none\" stroke=\"black\" d=\"M96.36,-94.15C91.24,-82 84.59,-66.26 78.81,-52.57\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"82.11,-51.38 74.99,-43.52 75.66,-54.1 82.11,-51.38\"></polygon>\n<g id=\"a_edge4-label\"><a xlink:title=\"source: trail 2\">\n<text text-anchor=\"middle\" x=\"101.43\" y=\"-63.8\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge4",
+        "strokeWidthAttribute": null,
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      }
+    ]
+  },
+  "hover-state": {
+    "observedAt": "2026-10-04T19:21:59.948Z",
+    "pointerOnNode": true,
+    "hoveredNode": {
+      "tag": "g",
+      "id": "node3",
+      "title": "1",
+      "label": "John Dewey",
+      "attributes": {
+        "id": "node3",
+        "class": "node"
+      },
+      "outerHTML": "<g id=\"node3\" class=\"node\">\n<title>1</title>\n<g id=\"a_node3\"><a xlink:title=\"name: John Dewey\">\n<polygon fill=\"palegreen\" stroke=\"black\" points=\"55.47,-135.8 0.17,-135.8 0.17,-94.6 55.47,-94.6 55.47,-135.8\"></polygon>\n<text text-anchor=\"middle\" x=\"27.82\" y=\"-119.4\" font-family=\"Times,serif\" font-size=\"14.00\">John</text>\n<text text-anchor=\"middle\" x=\"27.82\" y=\"-102.6\" font-family=\"Times,serif\" font-size=\"14.00\">Dewey</text>\n</a>\n</g>\n</g>",
+      "selector": "g.node#node3"
+    },
+    "edges": [
+      {
+        "tag": "g",
+        "id": "edge1",
+        "title": "0->1",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge1",
+          "class": "edge",
+          "stroke-width": "3"
+        },
+        "outerHTML": "<g id=\"edge1\" class=\"edge\" stroke-width=\"3\">\n<title>0-&gt;1</title>\n<path fill=\"none\" stroke=\"black\" d=\"M27.82,-188.55C27.82,-176.56 27.82,-161.07 27.82,-147.5\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"31.32,-147.72 27.82,-137.72 24.32,-147.72 31.32,-147.72\"></polygon>\n<g id=\"a_edge1-label\"><a xlink:title=\"source: trail 1\">\n<text text-anchor=\"middle\" x=\"41.43\" y=\"-158.2\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge1",
+        "strokeWidthAttribute": "3",
+        "computedStrokeWidth": "3px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "3px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "3px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "3px"
+          }
+        ]
+      },
+      {
+        "tag": "g",
+        "id": "edge2",
+        "title": "1->2",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge2",
+          "class": "edge",
+          "stroke-width": "3"
+        },
+        "outerHTML": "<g id=\"edge2\" class=\"edge\" stroke-width=\"3\">\n<title>1-&gt;2</title>\n<path fill=\"none\" stroke=\"black\" d=\"M35.13,-94.11C38.98,-83.74 43.89,-70.93 48.62,-59.6 49.59,-57.28 50.61,-54.88 51.66,-52.48\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"54.8,-54.04 55.68,-43.48 48.41,-51.18 54.8,-54.04\"></polygon>\n<g id=\"a_edge2-label\"><a xlink:title=\"source: trail 1\">\n<text text-anchor=\"middle\" x=\"62.43\" y=\"-63.8\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge2",
+        "strokeWidthAttribute": "3",
+        "computedStrokeWidth": "3px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "3px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "3px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "3px"
+          }
+        ]
+      },
+      {
+        "tag": "g",
+        "id": "edge3",
+        "title": "3->4",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge3",
+          "class": "edge"
+        },
+        "outerHTML": "<g id=\"edge3\" class=\"edge\">\n<title>3-&gt;4</title>\n<path fill=\"none\" stroke=\"black\" d=\"M104.82,-188.55C104.82,-176.56 104.82,-161.07 104.82,-147.5\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"108.32,-147.72 104.82,-137.72 101.32,-147.72 108.32,-147.72\"></polygon>\n<g id=\"a_edge3-label\"><a xlink:title=\"source: trail 2\">\n<text text-anchor=\"middle\" x=\"118.43\" y=\"-158.2\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge3",
+        "strokeWidthAttribute": null,
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      },
+      {
+        "tag": "g",
+        "id": "edge4",
+        "title": "4->2",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge4",
+          "class": "edge"
+        },
+        "outerHTML": "<g id=\"edge4\" class=\"edge\">\n<title>4-&gt;2</title>\n<path fill=\"none\" stroke=\"black\" d=\"M96.36,-94.15C91.24,-82 84.59,-66.26 78.81,-52.57\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"82.11,-51.38 74.99,-43.52 75.66,-54.1 82.11,-51.38\"></polygon>\n<g id=\"a_edge4-label\"><a xlink:title=\"source: trail 2\">\n<text text-anchor=\"middle\" x=\"101.43\" y=\"-63.8\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge4",
+        "strokeWidthAttribute": null,
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      }
+    ]
+  },
+  "after-state": {
+    "observedAt": "2026-10-04T19:22:00.726Z",
+    "pointerOnNode": false,
+    "hoveredNode": {
+      "tag": "g",
+      "id": "node3",
+      "title": "1",
+      "label": "John Dewey",
+      "attributes": {
+        "id": "node3",
+        "class": "node"
+      },
+      "outerHTML": "<g id=\"node3\" class=\"node\">\n<title>1</title>\n<g id=\"a_node3\"><a xlink:title=\"name: John Dewey\">\n<polygon fill=\"palegreen\" stroke=\"black\" points=\"55.47,-135.8 0.17,-135.8 0.17,-94.6 55.47,-94.6 55.47,-135.8\"></polygon>\n<text text-anchor=\"middle\" x=\"27.82\" y=\"-119.4\" font-family=\"Times,serif\" font-size=\"14.00\">John</text>\n<text text-anchor=\"middle\" x=\"27.82\" y=\"-102.6\" font-family=\"Times,serif\" font-size=\"14.00\">Dewey</text>\n</a>\n</g>\n</g>",
+      "selector": "g.node#node3"
+    },
+    "edges": [
+      {
+        "tag": "g",
+        "id": "edge1",
+        "title": "0->1",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge1",
+          "class": "edge",
+          "stroke-width": "1"
+        },
+        "outerHTML": "<g id=\"edge1\" class=\"edge\" stroke-width=\"1\">\n<title>0-&gt;1</title>\n<path fill=\"none\" stroke=\"black\" d=\"M27.82,-188.55C27.82,-176.56 27.82,-161.07 27.82,-147.5\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"31.32,-147.72 27.82,-137.72 24.32,-147.72 31.32,-147.72\"></polygon>\n<g id=\"a_edge1-label\"><a xlink:title=\"source: trail 1\">\n<text text-anchor=\"middle\" x=\"41.43\" y=\"-158.2\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge1",
+        "strokeWidthAttribute": "1",
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      },
+      {
+        "tag": "g",
+        "id": "edge2",
+        "title": "1->2",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge2",
+          "class": "edge",
+          "stroke-width": "1"
+        },
+        "outerHTML": "<g id=\"edge2\" class=\"edge\" stroke-width=\"1\">\n<title>1-&gt;2</title>\n<path fill=\"none\" stroke=\"black\" d=\"M35.13,-94.11C38.98,-83.74 43.89,-70.93 48.62,-59.6 49.59,-57.28 50.61,-54.88 51.66,-52.48\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"54.8,-54.04 55.68,-43.48 48.41,-51.18 54.8,-54.04\"></polygon>\n<g id=\"a_edge2-label\"><a xlink:title=\"source: trail 1\">\n<text text-anchor=\"middle\" x=\"62.43\" y=\"-63.8\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge2",
+        "strokeWidthAttribute": "1",
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      },
+      {
+        "tag": "g",
+        "id": "edge3",
+        "title": "3->4",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge3",
+          "class": "edge"
+        },
+        "outerHTML": "<g id=\"edge3\" class=\"edge\">\n<title>3-&gt;4</title>\n<path fill=\"none\" stroke=\"black\" d=\"M104.82,-188.55C104.82,-176.56 104.82,-161.07 104.82,-147.5\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"108.32,-147.72 104.82,-137.72 101.32,-147.72 108.32,-147.72\"></polygon>\n<g id=\"a_edge3-label\"><a xlink:title=\"source: trail 2\">\n<text text-anchor=\"middle\" x=\"118.43\" y=\"-158.2\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge3",
+        "strokeWidthAttribute": null,
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      },
+      {
+        "tag": "g",
+        "id": "edge4",
+        "title": "4->2",
+        "label": "Trail",
+        "attributes": {
+          "id": "edge4",
+          "class": "edge"
+        },
+        "outerHTML": "<g id=\"edge4\" class=\"edge\">\n<title>4-&gt;2</title>\n<path fill=\"none\" stroke=\"black\" d=\"M96.36,-94.15C91.24,-82 84.59,-66.26 78.81,-52.57\"></path>\n<polygon fill=\"black\" stroke=\"black\" points=\"82.11,-51.38 74.99,-43.52 75.66,-54.1 82.11,-51.38\"></polygon>\n<g id=\"a_edge4-label\"><a xlink:title=\"source: trail 2\">\n<text text-anchor=\"middle\" x=\"101.43\" y=\"-63.8\" font-family=\"Times,serif\" font-size=\"14.00\">Trail</text>\n</a>\n</g>\n</g>",
+        "selector": "g.edge#edge4",
+        "strokeWidthAttribute": null,
+        "computedStrokeWidth": "1px",
+        "descendants": [
+          {
+            "tag": "path",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "polygon",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          },
+          {
+            "tag": "text",
+            "strokeWidthAttribute": null,
+            "computedStrokeWidth": "1px"
+          }
+        ]
+      }
+    ]
+  },
+  "captured-calls": [
+    {
+      "line": 479,
+      "type": "mouseenter",
+      "trusted": true,
+      "target": "node3",
+      "nodeTitle": "1",
+      "width": 3,
+      "select": "both",
+      "rels": [
+        {
+          "id": "edge1",
+          "title": "0->1",
+          "from": "0",
+          "to": "1"
+        },
+        {
+          "id": "edge2",
+          "title": "1->2",
+          "from": "1",
+          "to": "2"
+        },
+        {
+          "id": "edge3",
+          "title": "3->4",
+          "from": "3",
+          "to": "4"
+        },
+        {
+          "id": "edge4",
+          "title": "4->2",
+          "from": "4",
+          "to": "2"
+        }
+      ],
+      "writes": [
+        {
+          "line": 478,
+          "id": "edge2",
+          "title": "1->2",
+          "width": 3,
+          "before": null
+        },
+        {
+          "line": 478,
+          "id": "edge1",
+          "title": "0->1",
+          "width": 3,
+          "before": null
+        }
+      ]
+    },
+    {
+      "line": 479,
+      "type": "mouseleave",
+      "trusted": true,
+      "target": "node3",
+      "nodeTitle": "1",
+      "width": 1,
+      "select": "both",
+      "rels": [
+        {
+          "id": "edge1",
+          "title": "0->1",
+          "from": "0",
+          "to": "1"
+        },
+        {
+          "id": "edge2",
+          "title": "1->2",
+          "from": "1",
+          "to": "2"
+        },
+        {
+          "id": "edge3",
+          "title": "3->4",
+          "from": "3",
+          "to": "4"
+        },
+        {
+          "id": "edge4",
+          "title": "4->2",
+          "from": "4",
+          "to": "2"
+        }
+      ],
+      "writes": [
+        {
+          "line": 478,
+          "id": "edge2",
+          "title": "1->2",
+          "width": 1,
+          "before": "3"
+        },
+        {
+          "line": 478,
+          "id": "edge1",
+          "title": "0->1",
+          "width": 1,
+          "before": "3"
+        }
+      ]
+    }
+  ],
+  "capture": {
+    "method": "Debugger breakpoints plus actual CDP mouse movement; DOM snapshots from the live Solo popup",
+    "dialog": "http://localhost:3477/plugins/solo/dialog/",
+    "pluginSourceChanges": false,
+    "breakpointsRemoved": true,
+    "pointerEventsTrusted": true,
+    "classification": "Incoming/outgoing/unrelated grouping is derived from the observed rels title table and hovered title; entries retain the actual before-state DOM snapshots.",
+    "repeat": "Run CODE trails and MECH SOLO on the saved source page with the verified public assets. Select both trails. Move into John Dewey, then away; inspect stroke-width on g.edge groups and computed widths on their children. Debug at hoverbold installation line 451, event handler line 479 and attribute write line 478."
+  }
+}

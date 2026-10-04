@@ -2397,7 +2397,8 @@
                                                     (:file "addresses")
                                                     (:file "trails-rendered-reading")
                                                     (:static-file "trails-rendered-solo-batch.json")
-                                                    (:static-file "trails-rendered-solo-beam.json")))
+                                                    (:static-file "trails-rendered-solo-beam.json")
+                                                    (:static-file "trails-rendered-hoverbold-observation.json")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
                  (:static-file "Interaction.html")
@@ -2414,7 +2415,8 @@
                  (:static-file "wiki.ralfbarkow.ch deployment.html")
                  (:static-file "dreyeck.ch deployment.html")
                  (:static-file "Cookie Secret.html")
-                 (:static-file "Trails Rendered public reproduction.html")))))
+                 (:static-file "Trails Rendered public reproduction.html")
+                 (:static-file "Solo hoverbold.html")))))
 
 (defsystem "dreyeck/work/reading/tests"
   :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset"

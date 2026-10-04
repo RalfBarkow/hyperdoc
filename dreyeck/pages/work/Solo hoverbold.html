@@ -1,0 +1,24 @@
+<h1>Solo hoverbold</h1>
+<in-package>dreyeck/work/trails-rendered-reading</in-package>
+<h2>Question</h2>
+<p>How does <code>hoverbold</code> turn a rendered Graphviz SVG into an interactive graph?</p>
+<h2>Source → node → edges</h2>
+<p><a href="https://github.com/WardCunningham/wiki-plugin-solo/blob/17915844349bada64c901bd5ea73472702c446f9/client/dialog/index.html#L450-L485">Public Solo: lines 450–485</a>. <code>display()</code> calls <code>hoverbold(target)</code> at line 200, just after inserting the rendered SVG. <a expr="(gethash &quot;source-function&quot; (hoverbold-observation))">Inspect the executed source function</a>, its arguments and installation witness.</p>
+<p>The arguments are a containing DOM element and optional <code>select='both'</code>. The function indexes <code>.edge</code> elements by splitting their <code>&lt;title&gt;</code> on <code>-&gt;</code>, normalizing newlines to spaces. It attaches <code>mouseenter</code> and <code>mouseleave</code> listeners to each <code>.node</code>. The event target's title supplies the node identity.</p>
+<p><code>output</code> matches the first edge endpoint; <code>input</code> matches the second; <code>both</code> processes outgoing then incoming edges. <code>most</code> chooses the larger set, choosing incoming on a tie.</p>
+<p>We selected both existing trails, then moved the pointer into John Dewey: Susan Kare → <strong>John Dewey</strong> → Reflective Practice. <a expr="(gethash &quot;hovered-node&quot; (hoverbold-observation))">Inspect the concrete SVG node</a>: <code>g.node#node3</code>, title <code>1</code>. <a expr="(gethash &quot;incoming-edges&quot; (hoverbold-observation))">Inspect incoming edges</a> (<code>0-&gt;1</code>); <a expr="(gethash &quot;outgoing-edges&quot; (hoverbold-observation))">inspect outgoing edges</a> (<code>1-&gt;2</code>). <a expr="(gethash &quot;unrelated-edges&quot; (hoverbold-observation))">Inspect the control edges</a> (<code>3-&gt;4</code>, <code>4-&gt;2</code>).</p>
+<h2>Observed effect</h2>
+<p><a expr="(hoverbold-observation)">Inspect the hover observation</a>, including trusted pointer events and debugger-observed writes at line 478. Open <a expr="(gethash &quot;before-state&quot; (hoverbold-observation))">before-state</a>, <a expr="(gethash &quot;hover-state&quot; (hoverbold-observation))">hover-state</a> and <a expr="(gethash &quot;after-state&quot; (hoverbold-observation))">after-state</a> to compare actual DOM attributes, outer HTML and computed widths.</p>
+<table>
+<thead><tr><th>Edge group</th><th>Before</th><th>Hover</th><th>After</th></tr></thead>
+<tbody>
+<tr><td>Incoming 0-&gt;1</td><td>absent</td><td>3</td><td>1</td></tr>
+<tr><td>Outgoing 1-&gt;2</td><td>absent</td><td>3</td><td>1</td></tr>
+<tr><td>Controls 3-&gt;4, 4-&gt;2</td><td>absent</td><td>absent</td><td>absent</td></tr>
+</tbody>
+</table>
+<p>These are <code>stroke-width</code> attributes on the <code>g.edge</code> groups. Their children inherit the width: computed <code>1px → 3px → 1px</code> on the incident edges. The captured node and edge child DOM remain unchanged; the code writes no classes, geometry or new elements. Entering also logs the node text. Leaving sets a fixed width of <code>1</code>: it restores the visible baseline here, while retaining an attribute that was initially absent.</p>
+<h2>Falsification</h2>
+<p><strong>Claim:</strong> In this graph with <code>select='both'</code>, hovering John Dewey sets exactly the incident edge groups to width <code>3</code>, then <code>1</code> on leaving; the control edges remain unchanged.</p>
+<p><strong>Counter-observation:</strong> A repeat with the identified public dialog changes a control edge, fails to set an incident edge to either stated width, or changes the node or edge child DOM.</p>
+<p>Return to <a page="Trails Rendered public reproduction">Trails Rendered public reproduction</a> or <a page="Work Breakdown">Work Breakdown</a>.</p>

@@ -2,7 +2,7 @@
 (defpackage #:dreyeck/work/trails-rendered-reading
   (:use #:cl)
   (:export #:public-source-boundary #:solo-batch #:solo-batch-provenance
-           #:solo-beam #:public-result #:interpretation-path))
+           #:solo-beam #:public-result #:interpretation-path #:hoverbold-observation))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
@@ -66,6 +66,9 @@
      :plugin-source-changes nil
      :limit "graph.js and svg-pan-zoom were fetched unpinned at runtime; plugin revision alone does not freeze those dependencies. pageKey varies by browser load."
      :tests "nix develop .#tala --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:test-system \"dreyeck/work/reading/tests\")'")
+    :hoverbold-capture
+    (:file "dreyeck/work/trails-rendered-hoverbold-observation.json"
+     :sha256 "888df20c4f6407623fcef06b6b5a7f61ecef4ee62358e12f85fbe52b0b3006e3")
     :boundary-evidence
     (:report (:url "https://ward.voices.ustawi.wiki/increment-of-progress.json"
               :paragraph-date "2026-10-02T18:49:24Z"
@@ -153,3 +156,13 @@ is an inference. Its implementation was not observed or reconstructed."
           :inference "Ward's reported later experiment appears to be a local Solo change; its precise source and behaviour remain unobserved."
           :falsified-by "A public revision in the identified lineage containing that operation."
           :provenance (solo-batch-provenance))))
+
+(hyperdoc:see (hyperdoc:page "Solo hoverbold"))
+
+(hyperdoc:defexample hoverbold-observation
+  "Observed public Solo installation and trusted mouseenter/mouseleave execution.
+The JSON contains actual node/edge DOM snapshots before, during and after hover,
+computed stroke widths, source-function text and debugger-observed writes.
+Edge grouping is derived from the observed title table. No SVG or hover effect
+is reconstructed; each call reads fresh objects and arrays."
+  (read-capture :hoverbold-capture))
