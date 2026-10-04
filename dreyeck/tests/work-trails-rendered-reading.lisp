@@ -234,6 +234,36 @@
     (assert (equal (getf (record-by-id integration :observed "trails-branch") :commits)
                    (getf home :commits)))))
 
+(defun check-codeberg-follow-up (evidence integration)
+  (check-structure evidence)
+  (let ((earlier (record-by-id evidence :observed "earlier-codeberg-observation"))
+        (now (record-by-id evidence :observed "codeberg-tip"))
+        (github (record-by-id evidence :observed "github-tip"))
+        (parent (record-by-id evidence :observed "github-tip-parent"))
+        (behind (record-by-id evidence :derived "codeberg-one-commit-behind"))
+        (publication (record-by-id evidence :observed "b75b2560-publication")))
+    ;; The earlier observation is cited, not rewritten.
+    (assert (equal (getf earlier :commit)
+                   (getf (record-by-id integration :observed "codeberg-state") :commit)))
+    (assert (equal (getf earlier :recorded-as)
+                   (list 'reading:integration-record :observed "codeberg-state")))
+    (assert (not (equal (getf earlier :commit) (getf now :commit))))
+    ;; One commit behind: the GitHub tip's parent is the Codeberg tip.
+    (assert (equal (getf parent :commit) (getf github :commit)))
+    (assert (equal (getf parent :parent) (getf now :commit)))
+    (assert (equal (getf behind :missing) (list (getf github :commit))))
+    (assert (eql 0 (getf (record-by-id evidence :observed "session-codeberg-pushes") :codeberg-pushes)))
+    ;; The actor is inferred at most, and left unresolved.
+    (assert (eq :not-directly-observed
+                (getf (record-by-id evidence :inferred "external-codeberg-publication") :verification)))
+    (assert (find :actor-and-mechanism (getf evidence :unresolved)
+                  :key (lambda (r) (getf r :relation))))
+    ;; The failed first push keeps an unestablished cause; no guessed cause is recorded.
+    (let ((attempt-1 (first (getf publication :attempts))))
+      (assert (eq :failed (getf attempt-1 :result)))
+      (assert (eq :not-established (getf attempt-1 :cause))))
+    (assert (not (search "transient" (string-downcase (prin1-to-string evidence)))))))
+
 (defun check-fresh (function)
   "Each call returns fresh data: mutating one result leaves the next intact."
   (let ((a (funcall function)) (b (funcall function)))
@@ -255,6 +285,8 @@
   (check-fresh #'reading:integration-record)
   (check-evidence-refs (reading:evidence-refs) (reading:integration-record))
   (check-fresh #'reading:evidence-refs)
+  (check-codeberg-follow-up (reading:codeberg-follow-up) (reading:integration-record))
+  (check-fresh #'reading:codeberg-follow-up)
   (check-fresh #'reading:provenance-evidence)
   (check-fresh #'reading:initial-state)
   (check-fresh #'reading:runtime-verification)
@@ -274,6 +306,7 @@
                                 (reading:operations-record)
                                 (reading:commit-record)
                                 (reading:integration-record)
-                                (reading:evidence-refs)))
+                                (reading:evidence-refs)
+                                (reading:codeberg-follow-up)))
           (assert (member evidence references :test #'equal))))))
   t)

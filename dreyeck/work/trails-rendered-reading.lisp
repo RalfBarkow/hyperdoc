@@ -3,7 +3,8 @@
   (:use #:cl)
   (:export #:provenance-evidence #:initial-state #:integration-decision
            #:runtime-verification #:provenance-chain #:operations-record
-           #:commit-record #:integration-record #:evidence-refs))
+           #:commit-record #:integration-record #:evidence-refs
+           #:codeberg-follow-up))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
@@ -833,3 +834,69 @@ authoritative integration commits. Each call returns fresh data."
        :limit "They were deleted with their branch as rejected; INTEGRATION-RECORD keeps their ids, not their content.")
       (:subject "evidence tags on codeberg" :relation :publication
        :status :not-published :limit "Published to github only.")))))
+
+;;; A dated follow-up observation, not a correction. INTEGRATION-RECORD's
+;;; codeberg-state (4b56913e) was observed at its point in the workflow and
+;;; stays as it was recorded.
+(hyperdoc:defexample codeberg-follow-up
+  "What did Codeberg's dreyeck.ch hold after the evidence refs were
+published, and how was b75b2560 published? Observed at
+2026-10-04T08:17:57Z with git ls-remote. Records a later state next to the
+earlier one; it does not rewrite the earlier one. Each call returns fresh
+data."
+  (copy-tree
+   '(:provenance (:kind :agent-observed :observer "Claude Code"
+                  :observed-at "2026-10-04T08:17:57Z" :method :git-ls-remote
+                  :observed-after "evidence-ref cleanup and publication of b75b25605c0ae3c24094d44e11b65edc4c284c7e"
+                  :scope :publication-follow-up)
+     :observed
+     ((:id "earlier-codeberg-observation" :kind :remote-tip
+       :remote "codeberg" :ref "dreyeck.ch"
+       :commit "4b56913e88c67e1434bc83665a2d623b73268c56"
+       :recorded-as (integration-record :observed "codeberg-state")
+       :last-seen "right after 5bbb73bf was published to github (push started 2026-10-04T08:08:21Z)")
+      (:id "codeberg-tip" :kind :remote-tip
+       :remote "codeberg" :url "ssh://git@codeberg.org/rgb/hyperdoc.git" :ref "dreyeck.ch"
+       :commit "5bbb73bf69c5bcc19cad28bbdee32553227c47fc"
+       :at "2026-10-04T08:17:57Z"
+       :first-seen "after the first attempt to publish b75b2560 to github")
+      (:id "github-tip" :kind :remote-tip
+       :remote "github" :url "git@github.com:RalfBarkow/hyperdoc.git" :ref "dreyeck.ch"
+       :commit "b75b25605c0ae3c24094d44e11b65edc4c284c7e"
+       :at "2026-10-04T08:17:57Z")
+      (:id "github-tip-parent" :kind :git-commit
+       :commit "b75b25605c0ae3c24094d44e11b65edc4c284c7e"
+       :parent "5bbb73bf69c5bcc19cad28bbdee32553227c47fc"
+       :subject "feat(work): name durable refs for Trails Rendered rehearsal commits")
+      (:id "session-codeberg-pushes" :kind :session-operations
+       :session "this Claude Code session" :codeberg-pushes 0)
+      (:id "b75b2560-publication" :kind :push
+       :remote "github" :ref "dreyeck.ch"
+       :attempts ((:attempt 1 :result :failed :cause :not-established
+                   :why-unknown "the output filter kept only the final error line")
+                  (:between :remote-tip-rechecked
+                   :remote-tip "5bbb73bf69c5bcc19cad28bbdee32553227c47fc" :unchanged t)
+                  (:attempt 2 :result :succeeded
+                   :before "5bbb73bf69c5bcc19cad28bbdee32553227c47fc"
+                   :after "b75b25605c0ae3c24094d44e11b65edc4c284c7e"
+                   :fast-forward t :verified-by :ls-remote))))
+     :derived
+     ((:id "codeberg-one-commit-behind" :relation :behind
+       :subject "codeberg dreyeck.ch" :behind "github dreyeck.ch"
+       :missing ("b75b25605c0ae3c24094d44e11b65edc4c284c7e")
+       :missing-is "one authoritative-record commit"
+       :basis ("codeberg-tip" "github-tip" "github-tip-parent")))
+     :inferred
+     ((:id "external-codeberg-publication" :relation :publication-event
+       :subject "codeberg dreyeck.ch 4b56913e -> 5bbb73bf"
+       :conclusion "An external or concurrent publication to Codeberg occurred between the two observations."
+       :basis ("earlier-codeberg-observation" "codeberg-tip" "session-codeberg-pushes")
+       :verification :not-directly-observed))
+     :hypothesized ()
+     :unresolved
+     ((:subject "codeberg publication" :relation :actor-and-mechanism
+       :status :not-established
+       :limit "Which person, agent or mirror moved Codeberg is not observable from ls-remote.")
+      (:subject "first b75b2560 push attempt" :relation :cause-of-failure
+       :status :not-established
+       :limit "The error text was not retained.")))))
