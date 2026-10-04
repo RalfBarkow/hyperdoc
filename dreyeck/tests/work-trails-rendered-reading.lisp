@@ -215,6 +215,25 @@
   (assert (equal "PUBLIC REPRODUCTION ENDS HERE"
                  (getf (getf (reading:provenance-chain) :boundary) :label))))
 
+(defun check-evidence-refs (evidence integration)
+  (check-structure evidence)
+  (dolist (pair '(("rehearsal-1-tag" "rehearsal-1") ("rehearsal-2-tag" "rehearsal-2")))
+    (destructuring-bind (tag-id rehearsal-id) pair
+      (let ((tag (record-by-id evidence :observed tag-id))
+            (rehearsal (record-by-id integration :observed rehearsal-id)))
+        ;; Each tag points at exactly the rehearsal commit the integration record names.
+        (assert (equal (getf tag :commit) (getf rehearsal :commit)))
+        (assert (equal (getf tag :cites)
+                       (list 'reading:integration-record :observed rehearsal-id)))
+        (assert (search "NOT an authoritative" (getf tag :message-says)))
+        (assert (search "evidence/trails-rendered-merge-rehearsal-" (getf tag :tag)))
+        ;; A rehearsal tag never names the authoritative merge.
+        (assert (not (equal (getf tag :commit)
+                            (getf (record-by-id integration :observed "authoritative-merge") :commit)))))))
+  (let ((home (record-by-id evidence :observed "trails-commits-home")))
+    (assert (equal (getf (record-by-id integration :observed "trails-branch") :commits)
+                   (getf home :commits)))))
+
 (defun check-fresh (function)
   "Each call returns fresh data: mutating one result leaves the next intact."
   (let ((a (funcall function)) (b (funcall function)))
@@ -234,6 +253,8 @@
   (check-fresh #'reading:commit-record)
   (check-integration (reading:integration-record))
   (check-fresh #'reading:integration-record)
+  (check-evidence-refs (reading:evidence-refs) (reading:integration-record))
+  (check-fresh #'reading:evidence-refs)
   (check-fresh #'reading:provenance-evidence)
   (check-fresh #'reading:initial-state)
   (check-fresh #'reading:runtime-verification)
@@ -252,6 +273,7 @@
                                 (reading:provenance-chain)
                                 (reading:operations-record)
                                 (reading:commit-record)
-                                (reading:integration-record)))
+                                (reading:integration-record)
+                                (reading:evidence-refs)))
           (assert (member evidence references :test #'equal))))))
   t)

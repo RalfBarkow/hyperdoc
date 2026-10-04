@@ -3,7 +3,7 @@
   (:use #:cl)
   (:export #:provenance-evidence #:initial-state #:integration-decision
            #:runtime-verification #:provenance-chain #:operations-record
-           #:commit-record #:integration-record))
+           #:commit-record #:integration-record #:evidence-refs))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
@@ -771,3 +771,65 @@ authoritative merge, its tests and its publication. Observed on
       (:subject "codeberg dreyeck.ch" :relation :publication
        :status :not-updated :basis ("codeberg-state")
        :limit "Codeberg still has 4b56913e; this work published only to the configured upstream, github.")))))
+
+;;; Added after cleanup. INTEGRATION-RECORD names the rehearsals by commit and
+;;; by branches that no longer exist; this reading gives the refs that keep
+;;; those commits reachable, and says where the other cited commits now live.
+(hyperdoc:defexample evidence-refs
+  "Which durable refs keep the commits cited by this reading reachable,
+now that the temporary branches and worktrees are gone? Observed on
+2026-10-04 after cleanup. The rehearsal tags mark tested rehearsals, not
+authoritative integration commits. Each call returns fresh data."
+  (copy-tree
+   '(:provenance (:kind :agent-observed :observer "Claude Code"
+                  :observation-date "2026-10-04" :scope :durable-refs
+                  :method (:git :ls-remote))
+     :observed
+     ((:id "rehearsal-1-tag" :kind :annotated-tag
+       :tag "evidence/trails-rendered-merge-rehearsal-a7c73c16"
+       :tag-object "ab29815b96b4225f47c2bda25173ac7a3e70a924"
+       :commit "1036c7d7638f11e32c03f98ae3ef941442982ad8"
+       :cites (integration-record :observed "rehearsal-1")
+       :message-says "tested merge rehearsal, NOT an authoritative integration commit"
+       :published (:remote "github" :verified-by :ls-remote) :codeberg nil)
+      (:id "rehearsal-2-tag" :kind :annotated-tag
+       :tag "evidence/trails-rendered-merge-rehearsal-e8456f6b"
+       :tag-object "3a6ab3cd1e7f4b633ad8e75229b737ea3645180d"
+       :commit "ef055d50f0a44f19fb8a3008649b8b526b41df42"
+       :cites (integration-record :observed "rehearsal-2")
+       :message-says "tested merge rehearsal, NOT an authoritative integration commit"
+       :published (:remote "github" :verified-by :ls-remote) :codeberg nil)
+      (:id "removed-rehearsal-refs" :kind :cleanup
+       :branches-deleted ("claude/integrate-trails-merge"
+                          "claude/integrate-trails-merge-e8456f6b")
+       :worktrees-removed ("/Users/rgb/workspace/hyperdoc-integrate-trails-merge"
+                           "/Users/rgb/workspace/hyperdoc-integrate-trails-merge-e8456f6b")
+       :were-clean t)
+      (:id "removed-trails-branch" :kind :cleanup
+       :branch-deleted "claude/trails-rendered-public-slice" :was "3b9d053ad25b19a7566eab87ade29f2cbb935d70"
+       :delete-mode "git branch -d with dreyeck.ch as HEAD"
+       :worktree-removed "/Users/rgb/workspace/hyperdoc-trails-rendered" :was-clean t
+       :commits-outside-dreyeck.ch 0 :on-any-remote nil)
+      (:id "trails-commits-home" :kind :reachability
+       :commits ("89c6d582cdb51dec275bf6c9dedcbbf76d0f9519"
+                 "3b9d053ad25b19a7566eab87ade29f2cbb935d70")
+       :ancestors-of (:branch "dreyeck.ch" :commit "5bbb73bf69c5bcc19cad28bbdee32553227c47fc"
+                      :github "5bbb73bf69c5bcc19cad28bbdee32553227c47fc")))
+     :derived
+     ((:id "cited-commits-stay-reachable" :relation :reachability
+       :subject "commits cited by the Trails Rendered reading"
+       :via (("1036c7d7638f11e32c03f98ae3ef941442982ad8" "evidence/trails-rendered-merge-rehearsal-a7c73c16")
+             ("ef055d50f0a44f19fb8a3008649b8b526b41df42" "evidence/trails-rendered-merge-rehearsal-e8456f6b")
+             ("89c6d582cdb51dec275bf6c9dedcbbf76d0f9519" "dreyeck.ch")
+             ("3b9d053ad25b19a7566eab87ade29f2cbb935d70" "dreyeck.ch")
+             ("4892ff0a29a97f0a2a3df1f5efe3dcbf80ed8fdc" "dreyeck.ch"))
+       :basis ("rehearsal-1-tag" "rehearsal-2-tag" "trails-commits-home"
+               (integration-record :observed "authoritative-merge"))))
+     :inferred ()
+     :hypothesized ()
+     :unresolved
+     ((:subject "rejected rebase commits 59df1ce1 and 1e87114e" :relation :reachability
+       :status :intentionally-unreferenced
+       :limit "They were deleted with their branch as rejected; INTEGRATION-RECORD keeps their ids, not their content.")
+      (:subject "evidence tags on codeberg" :relation :publication
+       :status :not-published :limit "Published to github only.")))))
