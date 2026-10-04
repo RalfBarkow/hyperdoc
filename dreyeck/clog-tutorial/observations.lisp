@@ -65,6 +65,20 @@
                     (2 (setf *tutorial-02-windows* pointers)))
       (remove nil (mapcar #'trivial-garbage:weak-pointer-value pointers)))))
 
+(defun %armed-observation-result (number)
+  ;; A scalar snapshot for Play's Inspector result, not an observed window.
+  ;; Reuse the existing hash-table Items view without retaining runtime objects.
+  (let ((result (make-hash-table :test #'equal))
+        (count (length (%live-windows number))))
+    (setf (gethash "Tutorial" result) (format nil "Tutorial ~2,'0D" number)
+          (gethash "Observation" result) "Observation armed"
+          (gethash "Observed windows" result) count
+          (gethash "Window state" result)
+          (if (zerop count) "No observed window yet" "Observed windows available in the reading")
+          (gethash "Next step" result)
+          "Open a NEW live tutorial window, interact, then reload the reading to inspect its retained mechanism.")
+    result))
+
 (defun %install-observation-hook ()
   ;; CLOG already calls this hook with the selected ON-NEW-WINDOW and BODY.
   ;; Install it only on explicit opt-in, without replacing any route/handler.
@@ -95,20 +109,22 @@
 (hyperdoc:defexample observe-tutorial-01
   "Retain Tutorial 01's objects in subsequently opened development windows.
 This enables observation only: it mounts nothing and dispatches no click.
+Play returns an armed-status snapshot, even before any window is observed.
 After opening the existing live transport, refresh this reading."
   (%require-development)
   (setf *observe-tutorial-01* t)
   (%install-observation-hook)
-  (%live-windows 1))
+  (%armed-observation-result 1))
 
 (hyperdoc:defexample observe-tutorial-02
   "Retain Tutorial 02's objects and output in subsequently opened development
 windows. This mounts nothing, dispatches no click and inspects no closure
-environment. After opening the existing live transport, refresh this reading."
+environment. Play returns an armed-status snapshot, even before any window
+is observed. After opening the existing live transport, refresh this reading."
   (%require-development)
   (setf *observe-tutorial-02* t)
   (%install-observation-hook)
-  (%live-windows 2))
+  (%armed-observation-result 2))
 
 (defun %observed-tutorial (heading)
   ;; A path alone is insufficient: only the original handler's dynamic extent
