@@ -1,38 +1,29 @@
 <h1>Trails Rendered public reproduction</h1>
 <in-package>dreyeck/work/trails-rendered-reading</in-package>
-<p>Ward Cunningham reported incremental work on a project he now calls "layers of interpretation", with a snippet that finds a Graphviz node by its <code>&lt;title&gt;</code> and asks for its <code>getBBox()</code>. This reading records where that work can be traced in public, and a local Federated Wiki that reproduces his public <em>Trails Rendered</em> page up to the point where the public sources end.</p>
-<p>The snippet was not found in any public source. Ward states that the change was made in an experimental Solo popup deployed only to his own localhost. The reproduction therefore stops before that change, and says so.</p>
-<p><code>trails()</code> stores the two trail aspects in <code>this.aspect</code>. The MECH <code>SOLO</code> action wraps them in a batch with <code>sources</code> and the current <code>pageKey</code>, then sends it to the Solo dialog with <code>postMessage</code>.</p>
-<p><a expr="(solo-batch)">Inspect the SOLO batch</a>: the actual message captured at the dialog's receive boundary before Solo changes it. Follow <code>sources</code> → source → <code>aspects</code> → <em>trail 1</em> or <em>trail 2</em> → <code>graph</code> → <code>nodes</code> and <code>rels</code>. JSON objects remain objects and arrays retain their order, including empty arrays and properties.</p>
-<p>SOLO batch → <code>aspect.label = source.source</code> → flatten aspects → beam. <a expr="(solo-beam)">Inspect the SOLO beam</a>. Solo reuses the incoming aspect objects; the two HyperDoc objects are independent snapshots. <a expr="(solo-beam-provenance)">Inspect the transformation observation</a>.</p>
-<p><a expr="(solo-batch-provenance)">Inspect the batch provenance</a> for the source page, MECH/SOLO versions, asset and payload hashes, capture point and repeat procedure. This is a captured runtime value; its <code>pageKey</code> belongs to that browser load.</p>
-<h2>1. Where the code lives</h2>
-<source-of-function>provenance-evidence</source-of-function>
-<p><a expr="(provenance-evidence)">Inspect the provenance search</a>. It separates what was observed in repositories, npm releases, served plugin assets and wiki journals from what is inferred about the snippet's location.</p>
-<h2>2. The wiki checkout before any change</h2>
-<source-of-function>initial-state</source-of-function>
-<p><a expr="(initial-state)">Inspect the initial source state</a>. The pinned mech revision predates the CODE block, so the checkout as found cannot run the page. The existing <code>result</code> link is not a build of the checked-out commit.</p>
-<h2>3. How mech enters the build</h2>
-<source-of-function>integration-decision</source-of-function>
-<p><a expr="(integration-decision)">Inspect the integration decision</a>: the alternatives considered, the narrow override chosen, and what was deliberately left unchanged.</p>
-<h2>4. What the running wiki did</h2>
-<source-of-function>runtime-verification</source-of-function>
-<p><a expr="(runtime-verification)">Inspect the runtime observations</a>: the Nix artifact, the process on <code>127.0.0.1:3477</code>, what it served, and what a separate Chrome window did with the page. The served <code>mech.js</code> has the same SHA-256 as the bundle built from <code>a028b4b</code>. The failed attempts are kept: the built-in browser pane cannot host Solo's popup, and the driving script needed four corrections.</p>
-<h2>5. From Ward's page to the rendered graph</h2>
-<source-of-function>provenance-chain</source-of-function>
-<p><a expr="(provenance-chain)">Inspect the provenance chain</a>, one stage at a time: page item, plugin and version, intermediate representation, runtime transformation, rendered result. Stages 1 to 5 ran here. In the result, both trails are drawn by public Solo as ordinary edges labelled <code>Trail</code>, joined at <em>Reflective Practice</em>.</p>
-<p><strong>PUBLIC REPRODUCTION ENDS HERE.</strong> Stage 6, Ward's interpretation layer, is described from his own account and not reconstructed. Its first operation, a <code>dotify</code> that draws no edge for trace relations, exists only in the Solo popup on his localhost.</p>
-<h2>6. What was changed, and how to repeat it</h2>
-<source-of-function>operations-record</source-of-function>
-<p><a expr="(operations-record)">Inspect the operations record</a>: every file changed, every repository operation, the build, run and verification commands, and what was deliberately left alone. The wiki change is commit <code>8e6c2e53</code> on <code>localhost</code>; this record was first committed as <code>89c6d582</code> on <code>claude/trails-rendered-public-slice</code>.</p>
-<h2>7. Which committed source the running wiki corresponds to</h2>
-<source-of-function>commit-record</source-of-function>
-<p><a expr="(commit-record)">Inspect the commit record</a>. Evaluating the clean commit <code>8e6c2e53</code> with the override yields the output path of the artifact that ran; without the override, or in pure evaluation, it yields the unchanged default mech pin. This is identity of derivation outputs, established by evaluation; the artifact was not rebuilt.</p>
-<h2>8. How the record reached dreyeck.ch</h2>
-<source-of-function>integration-record</source-of-function>
-<p><a expr="(integration-record)">Inspect the integration record</a>. A tested integration is not the authoritative one. The first merge rehearsal, <code>1036c7d7</code> on <code>a7c73c16</code>, passed but was never executed: <code>dreyeck.ch</code> moved to <code>e8456f6b</code>, the commit of the concurrent CLOG-tutorial work, before the real merge. The merge was recreated and retested on that tip. The authoritative merge is <code>4892ff0a</code>, with parents <code>e8456f6b</code> and <code>3b9d053a</code>, published to GitHub as a fast-forward. A rebase was tested and rejected, because it would rewrite the two commits this record cites.</p>
-<p>The two rehearsal commits are not part of <code>dreyeck.ch</code>. <a expr="(evidence-refs)">Inspect the evidence refs</a> that keep them reachable: the annotated tags <code>evidence/trails-rendered-merge-rehearsal-a7c73c16</code> and <code>evidence/trails-rendered-merge-rehearsal-e8456f6b</code>, published to GitHub. The temporary branches and worktrees have been removed.</p>
-<p>A later, dated observation: after the evidence refs were published, Codeberg's <code>dreyeck.ch</code> had moved from <code>4b56913e</code> to <code>5bbb73bf</code>, one record commit behind GitHub, although no Codeberg push was made in this work. <a expr="(codeberg-follow-up)">Inspect the Codeberg follow-up</a>. The integration record above keeps the state it observed.</p>
-<dl><dt>Observed</dt><dd>Seen by the agent in a named source, at a named revision or URL.</dd><dt>Derived</dt><dd>A mechanical consequence of observed records, with its basis.</dd><dt>Inferred</dt><dd>An interpretation with its basis and the reason; not directly observed.</dd><dt>Hypothesized</dt><dd>An unverified proposition.</dd></dl>
-<p>Source state and runtime state are kept in separate readings. A source revision does not establish what a running process loaded.</p>
-<p>Return to <a page="Work Breakdown">Work Breakdown</a>, or see <a page="Federated Wiki deployment state">Federated Wiki deployment state</a>.</p>
+<h2>Question</h2>
+<p>What happens to the two trails as Ward's page passes through MECH and public Solo?</p>
+<h2>Observed path</h2>
+<p>Ward's <em>Trails Rendered</em> → <code>trails()</code> → two aspects → MECH <code>SOLO</code> → observed batch → label and flatten → observed beam → public Solo selection and composition → Graphviz SVG.</p>
+<p>The arrows follow public code. The source page, batch, beam and rendered result were observed. Solo writes <code>aspect.label = source.source</code>, then appends the aspects to <code>beam</code> in source/aspect order. Debugger reference checks found the same aspect objects; HyperDoc opens independent snapshots.</p>
+<h2>Inspect</h2>
+<p><a expr="(solo-batch)">Inspect the SOLO batch</a>. Follow <code>sources</code> → source → <code>aspects</code> → trail → <code>graph</code> → <code>nodes</code> / <code>rels</code>.</p>
+<p><a expr="(solo-beam)">Inspect the SOLO beam</a>. Compare the added <code>label</code> and the two entries.</p>
+<p><a expr="(solo-batch-provenance)">Inspect its minimal provenance</a> for source/asset hashes, revisions, capture points, repeat procedure and search scope.</p>
+<h2>Result</h2>
+<p>trail 1: Susan Kare → John Dewey → Reflective Practice<br>trail 2: Jean Lave → Dorothy Smith → Reflective Practice</p>
+<p>The observed public result has <strong>5 nodes and 4 relations labelled Trail</strong>, with one shared Reflective Practice node. <a expr="(public-result)">Inspect the observed result</a>; <a expr="(interpretation-path)">inspect the derived counts and trail names</a>. The summary is computed from the saved observations.</p>
+<h2>Boundary</h2>
+<p><strong>PUBLIC REPRODUCTION ENDS HERE.</strong></p>
+<p>Ward reports a later local Solo experiment. Trace/getBBox behaviour was <em>not found in the searched public sources</em>. A local unpublished change is inferred; its precise implementation was not observed. <a expr="(public-source-boundary)">Inspect the public source boundary</a>.</p>
+<h2>Falsification</h2>
+<table>
+<thead><tr><th>Claim</th><th>Counter-observation</th></tr></thead>
+<tbody>
+<tr><td>The public path produces trail graphs and sends them through MECH to Solo.</td><td>The identified source items or plugin entries use a different handoff path.</td></tr>
+<tr><td>The captured batch contains the two trails shown above, with consecutive Trail relations.</td><td>The saved payload has different aspect names, nodes, or relations, or the derived summary disagrees with it.</td></tr>
+<tr><td>Solo adds label, flattens in source/aspect order and reuses aspect objects.</td><td>A paired debugger observation shows different fields/order or copied aspect references; changing one HyperDoc snapshot changes another.</td></tr>
+<tr><td>Both selected trails render as 5 nodes, 4 Trail edges and a shared Reflective Practice node.</td><td>A repeat with the specified public runtime produces a different graph. Recheck the unpinned dependencies noted in provenance.</td></tr>
+<tr><td>The Trace/getBBox interpretation layer is beyond the reproduced public source.</td><td>A public revision within the identified, searched lineage contains that operation.</td></tr>
+</tbody>
+</table>
+<p>Return to <a page="Work Breakdown">Work Breakdown</a>.</p>
