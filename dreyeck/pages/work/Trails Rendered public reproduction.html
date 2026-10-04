@@ -1,0 +1,26 @@
+<h1>Trails Rendered public reproduction</h1>
+<in-package>dreyeck/work/trails-rendered-reading</in-package>
+<p>Ward Cunningham reported incremental work on a project he now calls "layers of interpretation", with a snippet that finds a Graphviz node by its <code>&lt;title&gt;</code> and asks for its <code>getBBox()</code>. This reading records where that work can be traced in public, and a local Federated Wiki that reproduces his public <em>Trails Rendered</em> page up to the point where the public sources end.</p>
+<p>The snippet was not found in any public source. Ward states that the change was made in an experimental Solo popup deployed only to his own localhost. The reproduction therefore stops before that change, and says so.</p>
+<h2>1. Where the code lives</h2>
+<source-of-function>provenance-evidence</source-of-function>
+<p><a expr="(provenance-evidence)">Inspect the provenance search</a>. It separates what was observed in repositories, npm releases, served plugin assets and wiki journals from what is inferred about the snippet's location.</p>
+<h2>2. The wiki checkout before any change</h2>
+<source-of-function>initial-state</source-of-function>
+<p><a expr="(initial-state)">Inspect the initial source state</a>. The pinned mech revision predates the CODE block, so the checkout as found cannot run the page. The existing <code>result</code> link is not a build of the checked-out commit.</p>
+<h2>3. How mech enters the build</h2>
+<source-of-function>integration-decision</source-of-function>
+<p><a expr="(integration-decision)">Inspect the integration decision</a>: the alternatives considered, the narrow override chosen, and what was deliberately left unchanged.</p>
+<h2>4. What the running wiki did</h2>
+<source-of-function>runtime-verification</source-of-function>
+<p><a expr="(runtime-verification)">Inspect the runtime observations</a>: the Nix artifact, the process on <code>127.0.0.1:3477</code>, what it served, and what a separate Chrome window did with the page. The served <code>mech.js</code> has the same SHA-256 as the bundle built from <code>a028b4b</code>. The failed attempts are kept: the built-in browser pane cannot host Solo's popup, and the driving script needed four corrections.</p>
+<h2>5. From Ward's page to the rendered graph</h2>
+<source-of-function>provenance-chain</source-of-function>
+<p><a expr="(provenance-chain)">Inspect the provenance chain</a>, one stage at a time: page item, plugin and version, intermediate representation, runtime transformation, rendered result. Stages 1 to 5 ran here. In the result, both trails are drawn by public Solo as ordinary edges labelled <code>Trail</code>, joined at <em>Reflective Practice</em>.</p>
+<p><strong>PUBLIC REPRODUCTION ENDS HERE.</strong> Stage 6, Ward's interpretation layer, is described from his own account and not reconstructed. Its first operation, a <code>dotify</code> that draws no edge for trace relations, exists only in the Solo popup on his localhost.</p>
+<h2>6. What was changed, and how to repeat it</h2>
+<source-of-function>operations-record</source-of-function>
+<p><a expr="(operations-record)">Inspect the operations record</a>: every file changed, every repository operation, the build, run and verification commands, and what was deliberately left alone.</p>
+<dl><dt>Observed</dt><dd>Seen by the agent in a named source, at a named revision or URL.</dd><dt>Derived</dt><dd>A mechanical consequence of observed records, with its basis.</dd><dt>Inferred</dt><dd>An interpretation with its basis and the reason; not directly observed.</dd><dt>Hypothesized</dt><dd>An unverified proposition.</dd></dl>
+<p>Source state and runtime state are kept in separate readings. A source revision does not establish what a running process loaded.</p>
+<p>Return to <a page="Work Breakdown">Work Breakdown</a>, or see <a page="Federated Wiki deployment state">Federated Wiki deployment state</a>.</p>
