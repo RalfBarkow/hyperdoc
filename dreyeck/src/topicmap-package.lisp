@@ -28,7 +28,9 @@
            #:topicmap-workspace
            #:make-topicmap-workspace
            #:topicmap-workspace-projection-of
+           #:topicmap-workspace-reproject
            #:topicmap-workspace-point-of
+           #:topicmap-workspace-point-projected-p
            #:topicmap-workspace-history-of
            #:topicmap-workspace-current-topic
            #:topicmap-workspace-current-object

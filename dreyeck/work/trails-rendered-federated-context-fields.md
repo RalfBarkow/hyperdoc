@@ -167,9 +167,16 @@ The external browser QA script remains outside the application. Its recorded
 walkthrough is `wiki-trails-rendered-local/federated-context-workspace-evidence.json`;
 it is not a semantic fixture or part of the running model.
 
-When temporal selection or State/Delta changes produces a different projection
-object, the context creates a new Workspace. It retains the prior Point ID if
-present, otherwise the selected event's page ID if present, otherwise the first
-topic (or NIL for an empty projection). Navigation history is not copied, even
-when Point survives. This is an observation of the existing rule; this slice
-does not repair it.
+The context retains one Workspace editing session. Temporal selection and
+State/Delta changes call `topicmap-workspace-reproject` on that same object,
+preserving Point and its history. Initial creation uses the selected event's page
+as Point only when present in the initial Projection; there is no first-topic
+fallback. The real example starts at event 10/State, with Jan / John Dewey present.
+
+`topicmap-workspace-point-projected-p` determines whether Point has a current Topic.
+If absent, including in an empty Delta, the panel shows Point's stable ID and
+`Not present in current projection`, with no Follow, object/sign inspection, or
+relations fabricated from an old Topic. No Cursor mark is drawn. When a later
+Projection contains Point, its mark and operations return automatically using
+that Projection's Topic/object. Only explicit GO-TO movement changes history.
+There is no new session, Point/Topic cache, Cursor state, or reactive cell.

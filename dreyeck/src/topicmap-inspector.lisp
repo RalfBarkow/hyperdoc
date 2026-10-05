@@ -403,6 +403,12 @@ readable values stay on the element's data- attributes."
 (defun render-topicmap-workspace-associations (projection)
   (let ((workspace (dreyeck/topicmap:topicmap-projection-source-of projection)))
     (when (typep workspace 'dreyeck/topicmap:topicmap-workspace)
+      (unless (dreyeck/topicmap:topicmap-workspace-point-projected-p workspace)
+        (return-from render-topicmap-workspace-associations
+          (views:html
+            (:h3 "Point")
+            (:p (views:esc (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
+            (:p "Not present in current projection"))))
       (let* ((point-topic
               (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
              (associations

@@ -167,6 +167,21 @@ the Topic each time, so the Topic stays its only authority."
     (ERROR "Topic ~S is absent from projection." POINT))
   (MAKE-INSTANCE 'TOPICMAP-WORKSPACE :PROJECTION PROJECTION :POINT POINT))
 
+(defun topicmap-workspace-reproject (workspace projection)
+  "Change this editing session's Projection, retaining Point and history.
+Point may be absent from the new Projection; GO-TO still requires a present Topic."
+  (check-type workspace topicmap-workspace)
+  (check-type projection topicmap-projection)
+  (setf (slot-value workspace 'projection) projection)
+  workspace)
+
+(defun topicmap-workspace-point-projected-p (workspace)
+  "Whether this session's semantic Point has a Topic in its current Projection."
+  (check-type workspace topicmap-workspace)
+  (not (null (topicmap-projection-topic-by-id
+              (topicmap-workspace-projection-of workspace)
+              (topicmap-workspace-point-of workspace)))))
+
 (defun topicmap-workspace-snapshot-at (workspace topic-id)
   (check-type workspace topicmap-workspace)
   (make-topicmap-workspace

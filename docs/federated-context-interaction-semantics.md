@@ -70,10 +70,10 @@ object` and `Inspect Topicmap sign` links; and relations with direction, associa
 inspection, and go-to buttons for the other endpoints. Endpoint identity and
 direction come from the generic Workspace helpers.
 
-The explicit `Set Workspace Point` button is removed because primary clicks and
+At `bab61506`, the explicit `Set Workspace Point` button was removed because primary clicks and
 relation endpoints now use that exact Point operation. `select-context-topic` is
 removed: it only wrapped go-to and returned T, which would request the unwanted
-full refresh. No additional `projection-kind` branch disappears in this slice;
+full refresh. No additional `projection-kind` branch disappeared in that slice;
 the necessary temporal/context construction and primary-dispatch distinctions
 remain. The per-sign highlight branch was already removed in `92025a7d`.
 
@@ -82,15 +82,53 @@ can now also be reached through Point, making it structurally redundant for
 inspection of the current Topic. It still supports inspecting another sign without
 moving Point, and remains useful for comparison.
 
-## Point survival and history observation
+## Persistent Workspace: Model C
 
-When temporal selection or State/Delta changes yields a different context
-projection object, `context-current-workspace` creates a new Workspace. It keeps
-the prior Point ID if present. If absent, it chooses the selected event's page ID
-when present, otherwise the projection's first Topic; an empty projection yields
-NIL. History is not copied, even when Point survives. Returning to a cached
-projection does not recover its old Workspace history. These existing rules are
-observed, not repaired in this slice.
+One `TOPICMAP-WORKSPACE` owns the federated editing session. Its Point ID and
+history survive temporal and State/Delta changes, while its Projection changes.
+Point is the semantic position; the map's Cursor is its visible mark in the
+current Projection. Point can remain established while that mark is absent.
+
+The generic `topicmap-workspace-reproject` operation changes only the existing
+Workspace's Projection and returns that same Workspace. It exposes no public
+Projection SETF writer. `topicmap-workspace-point-projected-p` is the authoritative
+presence predicate. GO-TO remains strict about target presence, and CURRENT-TOPIC
+and CURRENT-OBJECT retain their strict/error contracts.
+
+`context-current-workspace` now re-projects its existing Workspace. The following
+projection-change structures disappeared: Point migration, event-page replacement,
+first-topic fallback, NIL Workspace fallback, and Workspace recreation. There is
+no second session object, Point mirror, retained stale Topic, or Cursor state.
+
+Initial creation remains separate and strict: the selected event's page must be
+present in the initial Projection. The real example starts at event 10 in State
+mode, with Jan / John Dewey present. The data audit confirms every event's State
+contains its event page. A first-time initialization in a Delta that omits its
+event page is rejected rather than inventing a Point; empty/absent Deltas reached
+after session creation are ordinary supported re-projections.
+
+When Point is unprojected, both the federated and native Workspace Point panels
+show its stable ID and **Not present in current projection**. They test the
+predicate before calling CURRENT-TOPIC. The Point panel has no Follow, object/sign
+inspection, or relation operations in that state. The separate per-sign inspection
+table remains unchanged and can still inspect Topics that are projected.
+
+An empty Delta retains the Workspace, Point, and identical history list. Returning
+to a Projection containing Point restores its Cursor and resolves its current
+Topic/object from that Projection. Only GO-TO records a previous Point in history;
+re-projection neither pushes nor clears history. Back/history traversal is absent.
+
+Work editing, native fixed-projection navigation, TALA comparisons, and
+`make-topicmap-workspace-for-object` continue using their existing fixed-projection
+behavior. Native Point-panel rendering additionally handles an unprojected Point
+when explicitly re-projected. No caller is forced to change its Workspace lifetime.
+
+Persistent Workspace identity makes an observable Point cell more compelling:
+observers could share one stable session owner across coordinate changes. A Point
+cell alone would not redraw the panel or Cursor when only Projection changes;
+that dependency would also need observation. This slice keeps Point as an ordinary
+slot and retains the local update path from `bab61506`, with no hvr:subview/lwcells
+refactor or browser domain state.
 
 ## Verification
 
@@ -105,13 +143,48 @@ changes Point and its presentation callback once, and makes no Follow call.
 Follow at B returns its exact represented page and leaves Point/time unchanged.
 Both Point inspections reference the exact page/Topic. Relation navigation to C
 uses the same Point action and preserves time and Follow count. A temporal click
-changes cursor 10 → 8, retains C by ID, and observes the existing history reset.
+changes cursor 10 → 8 and retains the same Workspace, Point C and history.
 The per-sign inspection tests and unique/ambiguous/incomplete subject controls
 remain in place, now exercising Follow from Point. Repeated render/rebuild at all
 11 events leaves empty catalog/neighborhood registries empty and raw evidence
 unchanged.
 
-Browser verification on 2026-10-05 used synthetic DOM clicks through the real
+Model C verification on 2026-10-05 used the actual temporal example in a fresh
+localhost CLOG Inspector image. Synthetic DOM clicks went through its real sign,
+relation, temporal, and mode handlers. The witness checked Lisp `EQ` identity,
+the exact history cons list, actual GO-TO/Follow counts, and rendered DOM:
+
+| Interaction | Observed result |
+| --- | --- |
+| Initial A → primary B → relation C at event 10/State | One Workspace; Point C; history `[B, A]`; exactly one C mark. Two GO-TO calls, zero Follow calls, zero source refreshes. |
+| Temporal sign → event 8/State | Same Workspace, Point C, and identical history list; one C mark and current operations. |
+| Event 8/Delta | Five projected Topics, C absent; zero marks. Panel shows `concept:How We Think` and **Not present in current projection**, with no buttons, object/sign inspection links, or relation rows. |
+| Temporal signs → events 6 and 2/Delta | Both actual empty Projections preserve the same Workspace, Point C, and identical history list; no marks or Point operations. |
+| Event 2/State, then Delta → State | One C mark and current operations return in State; disappear in Delta. Workspace, Point and history never change; GO-TO count remains two. |
+| Event 10/State → Delta → State | Delta contains A, the selected event's page, but retains absent Point C and its history. Returning to State restores C's mark without GO-TO. |
+| Explicit primary D: Reflective Practice | Same Workspace; Point D; history `[C, B, A]`, with the previous history list as its exact tail. One D mark, Follow/both inspections and five relations. Third GO-TO, zero Follow, cursor still 10. |
+| Local D update after re-projections | Same source pane, outer body and Point container; one pane and zero additional source refreshes. Outer scrollTop remains 708; context offsets remain `(123, 234)`, with no application scroll compensation. |
+
+Temporal/mode actions retained their existing full render behavior (ten refreshes
+in this walkthrough); graph navigation retained the local update path. No browser
+domain state or new interaction transport was introduced. The witness lived
+outside the application.
+
+The generic re-projection regression additionally checks strict CURRENT-TOPIC,
+CURRENT-OBJECT and GO-TO failure while absent; unchanged history on refusal; native
+absence/return rendering; fresh Topic/object identity on return; and navigation
+from an unprojected Point to a present Topic. The federated regression covers both
+empty Deltas and the event-page-present/Point-absent negative control.
+
+The complete Work reading and generic/native/TALA suites passed, including D2
+v0.9.0/seed 44 integration and `make-topicmap-workspace-for-object`. The complete
+Work editor suite passed in the pinned workflow-authoring runtime, including
+Point rendering, native navigation, two-Workspace isolation, both authoring
+operations, stale refusal and optional-TALA behavior. The first Work editor attempt
+used the reading runtime and lacked the explicit authoring capability; rerunning
+with the repository's configured authoring source/environment passed.
+
+Editor interaction verification at `bab61506` on 2026-10-05 used synthetic DOM clicks through the real
 CLOG Inspector handlers in an isolated localhost image. Lisp assertions checked
 the actual pane objects, operation counts, and DOM values:
 
@@ -123,27 +196,34 @@ the actual pane objects, operation counts, and DOM values:
 | Relation B → C | Point C, with its own three relations and selected mark; cursor 10, Follow count one, source refresh count zero. |
 | Replaced-panel relations and repetition | C → B → C relation buttons remained live after replacement. Two more primary A → B → C cycles passed. Ten local updates total; no additional Follow or source refresh. |
 | Pane/scroll identity across all Point operations | Same source pane, outer body `CLOG111`, context map `context-map-685`, temporal map `temporal-map-658`, and Point container `workspace-point-729`. Outer scrollTop stayed 708; context offsets stayed (123, 234); temporal offsets stayed (0, 2496.5). Point panel height stayed 256px. |
-| Temporal event | Cursor 10 → 8 and four Delta relation changes; Point C survived by ID. Follow count stayed one, pane count stayed two, and the existing open Inspector object stayed `EQ`. The existing temporal path performed one source refresh and created a new Workspace with empty history. |
+| Temporal event at `bab61506` | Cursor 10 → 8 and four Delta relation changes, without another Follow. That commit's Workspace recreation/history loss is superseded by Model C above. |
 
 The Work reading and TALA suites passed, including the native renderer tests and
-D2 v0.9.0/seed 44 integration. Follow, subject resolution, and Workspace rebuilding
+D2 v0.9.0/seed 44 integration. Follow and subject resolution
 were also compared byte-for-byte with `40bdaadc` and remain unchanged. The browser
 proof introduced no application state or transport; the witness ran outside the
 application.
 
-Run the automated suites in the pinned TALA environment:
+Run the reading/generic/TALA suites in the pinned TALA environment and the Work
+editor suite in its pinned authoring environment:
 
 ```sh
 nix develop .#tala --command sbcl --noinform --non-interactive \
   --eval '(require :asdf)' \
   --eval '(asdf:test-system "dreyeck/work/reading/tests")' \
   --eval '(asdf:test-system "dreyeck/topicmap/tala/tests")'
+
+nix develop .#workflow-authoring --command sbcl --noinform --non-interactive \
+  --eval '(require :asdf)' \
+  --eval '(asdf:load-system "dreyeck/work/authoring/tests")' \
+  --eval '(dreyeck/work/editor/tests:run-tests)'
 ```
 
 For manual verification, open the `federated-context` Topicmap at cursor 10, click
 Thompson / How We Think, then use Follow and both inspection links in the Point
 panel. Use a relation endpoint to move Point to another Topic, then click a
-temporal event. Point survives if its ID is in the resulting projection. The
+temporal event. Point and history survive even if its ID is absent; only its map
+Cursor and operations disappear until Point is projected again. The
 separate inspection table remains under **Inspect context signs and represented
 objects**. Candidate fixtures replace only the HTTP boundary; their resolution
 results do not assert what a different live neighborhood will resolve today.

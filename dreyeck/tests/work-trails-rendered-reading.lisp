@@ -453,6 +453,7 @@
   (check-context-represented-objects)
   (check-context-interaction-semantics)
   (check-context-orthogonal-operations)
+  (check-context-persistent-workspace)
   (check-attribution-negative-control)
   (check-attribution-mutation-control)
   (check-page-contract)

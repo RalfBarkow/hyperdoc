@@ -684,18 +684,18 @@ It labels the edge; it does not introduce another node into the domain graph."
         (context-projection context))))
 
 (defun context-current-workspace (context)
-  "Reuse Workspace Point selection. It owns no time or State/Delta cursor."
+  "One editing session; changing time/mode re-projects it without moving Point."
   (let* ((projection (context-rendered-projection context :context))
-         (old (context-workspace context)))
-    (unless (and old (eq projection (dreyeck/topicmap:topicmap-workspace-projection-of old)))
-      (let* ((ids (mapcar #'dreyeck/topicmap:topicmap-topic-id-of
-                         (dreyeck/topicmap:topicmap-projection-topics-of projection)))
-             (prior (and old (dreyeck/topicmap:topicmap-workspace-point-of old)))
-             (page (context-page-id (context-page context
-                     (gethash "page" (aref (context-events context) (context-cursor context))))))
-             (point (or (find prior ids :test #'equal) (find page ids :test #'equal) (first ids))))
+         (workspace (context-workspace context)))
+    (if workspace
+        (unless (eq projection (dreyeck/topicmap:topicmap-workspace-projection-of workspace))
+          (dreyeck/topicmap:topicmap-workspace-reproject workspace projection))
+        ;; Initial creation is explicit and strict. An absent event page is
+        ;; not permission to invent a first-Topic Point or an empty session.
         (setf (context-workspace context)
-              (when point (dreyeck/topicmap:make-topicmap-workspace projection point)))))
+              (dreyeck/topicmap:make-topicmap-workspace
+               projection (context-page-id (context-page context
+                            (gethash "page" (aref (context-events context) (context-cursor context))))))))
     (context-workspace context)))
 
 (defclass context-point-action (dreyeck/inspector/topicmap::topic-action-reference)
@@ -729,7 +729,8 @@ presentation. The existing Workspace owns Point; this reference owns no Point st
          (projection (context-rendered-projection context projection-kind))
          (workspace (when (eq projection-kind :context) (context-current-workspace context)))
          (delta (context-current-delta context))
-         (selected (if workspace (dreyeck/topicmap:topicmap-workspace-point-of workspace)
+         (selected (if workspace (and (dreyeck/topicmap:topicmap-workspace-point-projected-p workspace)
+                                     (dreyeck/topicmap:topicmap-workspace-point-of workspace))
                        (gethash "id" (aref (context-events context) (context-cursor context)))))
          (dom (let ((plump:*tag-dispatchers* plump:*xml-tags*))
                 (plump:parse
@@ -765,6 +766,11 @@ presentation. The existing Workspace owns Point; this reference owns no Point st
 (defun render-context-point (context)
   (let ((workspace (context-current-workspace context)))
     (when workspace
+      (unless (dreyeck/topicmap:topicmap-workspace-point-projected-p workspace)
+        (return-from render-context-point
+          (html-inspector-views:html
+            (:p "Workspace Point: " (html-inspector-views:esc (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
+            (:p "Not present in current projection"))))
       (let* ((topic (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
              (object (dreyeck/topicmap:topicmap-workspace-current-object workspace))
              (projection (dreyeck/topicmap:topicmap-workspace-projection-of workspace)))
