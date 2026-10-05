@@ -9,12 +9,29 @@
    ;; These are cached results, not another temporal engine. Only CURSOR selects
    ;; time; every result comes from CONTEXT-DELTA / CONTEXT-STATE-AT.
    (deltas :initform (make-hash-table) :reader context-deltas)
+   (page-objects :initform (make-hash-table) :reader context-page-objects)
+   (subjects :initform (make-hash-table :test 'equal) :reader context-subjects)
    (workspace :initform nil :accessor context-workspace)
    (layouts :initform (make-hash-table :test 'equal) :reader context-layouts)))
 
 (defclass federated-event ()
   ((record :initarg :record :reader event-record)
    (context :initarg :context :reader event-context)))
+
+;; Native pages retain their native Story/Links behavior. This specialization
+;; distinguishes a saved historical reading from a live, reloadable page.
+(defclass context-fedwiki-page (hyperbook/fedwiki::fedwiki-page)
+  ((evidence :initarg :evidence :reader page-evidence)
+   (event :initarg :event :reader page-event)
+   (json :initarg :json :reader page-json)))
+
+;; A collaborative wiki-link has one source and selects its first match. A
+;; shared subject has several source contexts and must retain all candidates.
+(defclass federated-subject ()
+  ((title :initarg :title :reader subject-title)
+   (context :initarg :context :reader subject-context)
+   (event :initarg :event :reader subject-event)
+   (links :initarg :links :reader subject-links)))
 
 (defun context-events (context)
   (gethash "events" (gethash "temporal" (context-data context))))
@@ -44,8 +61,9 @@
 
 (defun native-context-page (page)
   "Use the existing FedWiki HyperBook resolver, preserving site and slug."
-  (hyperbook:find-page (hyperbook:find-hyperbook (gethash "hyperbook" page) :signal-error? t)
-                      (gethash "slug" page) :signal-error? t))
+  (if (typep page 'hyperbook/fedwiki::fedwiki-page) page
+      (hyperbook:find-page (hyperbook:find-hyperbook (gethash "hyperbook" page) :signal-error? t)
+                          (gethash "slug" page) :signal-error? t)))
 
 (defun render-context-page-link (page)
   (hyperbook:render-hyperbook-or-page-link (gethash "hyperbook" page) (gethash "slug" page)
@@ -97,6 +115,142 @@ Never execute page code. Return the selected page's actual item values by ID."
                         (setf (gethash (gethash "id" action) story) item))
                        ((equal type "remove") (remhash (gethash "id" action) story)))))
     story))
+
+(defun context-page-json-at (page milliseconds)
+  "Adapt the existing historical item values to a native page, retaining order.
+Only presentation order is replayed here; STATE-AT remains authoritative."
+  (let ((items (context-page-story-at page milliseconds)) (order nil)
+        (journal (remove-if (lambda (a) (and (gethash "date" a)
+                                            (> (gethash "date" a) milliseconds)))
+                            (gethash "journal" (gethash "raw" page)))))
+    (labels ((insert-after (id after)
+               (let ((position (position after order :test #'equal)))
+                 (setf order (append (subseq order 0 (if position (1+ position) 0))
+                                     (list id) (subseq order (if position (1+ position) 0)))))))
+      (loop for action across journal
+            when (gethash "date" action)
+              do (let ((kind (gethash "type" action)) (id (gethash "id" action)))
+                   (cond ((equal kind "create")
+                          (setf order (map 'list (lambda (item) (gethash "id" item))
+                                           (gethash "story" (gethash "item" action) #()))))
+                         ((equal kind "add") (insert-after id (gethash "after" action)))
+                         ((equal kind "edit")
+                          (unless (member id order :test #'equal) (setf order (append order (list id)))))
+                         ((equal kind "remove") (setf order (remove id order :test #'equal)))
+                         ((equal kind "move")
+                          (let* ((absolute (coerce (gethash "order" action) 'list))
+                                 (position (position id absolute :test #'equal)))
+                            (setf order (remove id order :test #'equal))
+                            (insert-after id (and position (plusp position) (nth (1- position) absolute)))))))))
+    ;; Native constructors consume their JSON fields, so never hand them the
+    ;; saved evidence or the actual item values used by temporal derivation.
+    (dreyeck/work/reading::%copy-json
+     (context-table "title" (gethash "title" page)
+                    "story" (coerce (loop for id in order for item = (gethash id items)
+                                           when item collect item) 'vector)
+                    "journal" journal))))
+
+(defun context-native-pages-at (context event)
+  "Memoize native historical page objects without I/O or global registration.
+The per-time native site catalogs contain only this reading's saved evidence."
+  (let ((time (gethash "date" (event-record event))))
+    (or (gethash time (context-page-objects context))
+        (let ((sites (make-hash-table :test 'equal)) (pages nil))
+          (labels ((site (name)
+                     (or (gethash name sites)
+                         (setf (gethash name sites)
+                               (let ((wiki (make-instance 'hyperbook/fedwiki::fedwiki
+                                                          :id (format nil "fedwiki:~A" name))))
+                                 (setf (hyperbook/fedwiki::status-of wiki) t)
+                                 wiki)))))
+            (loop for evidence across (context-pages context)
+                  when (context-page-present-p evidence time)
+                    do (let* ((wiki (site (gethash "site" evidence)))
+                              (json (context-page-json-at evidence time))
+                              (page (make-instance 'context-fedwiki-page
+                                                   :hyperbook wiki :id (gethash "slug" evidence)
+                                                   :title (gethash "title" evidence)
+                                                   :evidence evidence :event event :json json)))
+                         (setf (gethash (hyperbook:id-of page) (hyperbook/fedwiki::pages-of wiki)) page)
+                         (push page pages)))
+            (dolist (page pages)
+              (let* ((json (dreyeck/work/reading::%copy-json (page-json page)))
+                     (journal (hyperbook/fedwiki::make-journal (gethash "journal" json))))
+                (setf (slot-value page 'hyperbook/fedwiki::story)
+                      (hyperbook/fedwiki::make-story (gethash "story" json))
+                      (slot-value page 'hyperbook/fedwiki::journal) journal
+                      (slot-value page 'hyperbook/fedwiki::context)
+                      (hyperbook/fedwiki::resolve-context-site-references
+                       (hyperbook/fedwiki::context-site-references journal) #'site)
+                      (slot-value page 'hyperbook/fedwiki::links) (hyperbook/fedwiki::extract-links page))))
+            (setf (gethash time (context-page-objects context)) (nreverse pages)))))))
+
+(defun context-page-object (context evidence &optional (event (context-event-object context (context-cursor context))))
+  (or (find evidence (context-native-pages-at context event) :key #'page-evidence :test #'eq)
+      (error "Page ~A is absent at ~A" (gethash "id" evidence) (gethash "at" (event-record event)))))
+
+(defun context-subject-object (context title &optional (event (context-event-object context (context-cursor context))))
+  (let ((key (list (gethash "date" (event-record event)) title)))
+    (or (gethash key (context-subjects context))
+        (setf (gethash key (context-subjects context))
+              (make-instance 'federated-subject :title title :context context :event event
+                             :links (loop for page in (context-native-pages-at context event)
+                                          append (remove-if-not
+                                                  (lambda (link) (equal title (hyperbook/fedwiki::target-title-of link)))
+                                                  (hyperbook/fedwiki::wiki-links-of (hyperbook:links-of page)))))))))
+
+(defun subject-context-pages (subject)
+  "All recorded page identities for this title at the subject's source event."
+  (remove-if-not (lambda (page) (equal (subject-title subject) (hyperbook:title-of page)))
+                 (context-native-pages-at (subject-context subject) (subject-event subject))))
+
+(defun historical-wiki-link-target (page title)
+  "Use native local/context catalogs, preserving an unresolved subject on a miss.
+A historical reading must not fall through to a live plugin/page fetch."
+  (let ((slug (hyperbook/fedwiki::slug title)))
+    (or (gethash slug (hyperbook/fedwiki::pages-of (hyperbook:hyperbook-of page)))
+        (loop for wiki in (hyperbook/fedwiki::context-of page)
+              thereis (gethash slug (hyperbook/fedwiki::pages-of wiki)))
+        (context-subject-object (event-context (page-event page)) title (page-event page)))))
+
+(defun historical-wiki-link (page title)
+  (make-instance 'hyperbook/fedwiki::wiki-link
+                 :source-hyperbook (hyperbook:id-of (hyperbook:hyperbook-of page))
+                 :source-page (hyperbook:id-of page)
+                 :target-title title :target-slug (hyperbook/fedwiki::slug title)
+                 :thunk (html-inspector-views:thunk (historical-wiki-link-target page title))))
+
+(defmethod hyperbook/fedwiki::extract-links-from-wiki-text (text (page context-fedwiki-page))
+  (hyperbook/fedwiki::process-text-and-links
+   text page (lambda (chunk source) (declare (ignore chunk source)) nil)
+   (lambda (chunk source)
+     (if (uiop:string-prefix-p "[[" chunk)
+         (historical-wiki-link source (subseq chunk 2 (- (length chunk) 2)))
+         (hyperbook/fedwiki::collect-link chunk source)))))
+
+(defmethod hyperbook/fedwiki::render-wiki-text (text (page context-fedwiki-page))
+  (hyperbook/fedwiki::process-text-and-links
+   text page
+   (lambda (chunk source) (declare (ignore source))
+     (html-inspector-views:html (html-inspector-views:esc chunk)))
+   (lambda (chunk source)
+     (if (uiop:string-prefix-p "[[" chunk)
+         (let ((title (subseq chunk 2 (- (length chunk) 2))))
+           (html-inspector-views:html
+             (:span :class "hyperbook-reference"
+                    (html-inspector-views:object-ref (historical-wiki-link-target source title) :display title))))
+         (hyperbook/fedwiki::render-link chunk source)))))
+
+(defun subject-neighborhood-pages (subject)
+  "Existing cached neighborhood candidates. No fetch, fork, or preferred site.
+These references are not a claim about their uncaptured historical contents."
+  (let ((slug (hyperbook/fedwiki::slug (subject-title subject))) (pages nil))
+    (maphash (lambda (site wiki)
+               (declare (ignore site))
+               (let ((page (gethash slug (hyperbook/fedwiki::pages-of wiki))))
+                 (when page (push page pages))))
+             hyperbook/fedwiki::*neighborhood*)
+    (sort pages #'string< :key (lambda (page) (hyperbook:id-of (hyperbook:hyperbook-of page))))))
 
 (defun context-wiki-targets (text)
   "Reuse the FedWiki text/link scanner, including its treatment of incomplete links."
@@ -367,6 +521,19 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
           (gethash "links" (gethash "observed" (context-data context)))
           :key (lambda (link) (gethash "item" link)) :test #'equal)))
 
+(defun context-relation-topic (context relation delta)
+  "An existing Relation Contract Topic represents the actual state/change value.
+It labels the edge; it does not introduce another node into the domain graph."
+  (dreyeck/topicmap:make-topicmap-topic
+   :id (format nil "relation:~A" (gethash "id" relation)) :type :relation
+   :label (if (equal "" (gethash "kind" relation)) "unnamed" (gethash "kind" relation))
+   :object (if (eq :delta (context-mode context))
+               (or (find (gethash "id" relation) (getf delta :relation-changes)
+                         :key (lambda (change) (getf change :id)) :test #'equal)
+                   relation)
+               relation)
+   :temporal-scope (context-event-object context (context-cursor context))))
+
 (defun context-projection (context)
   (let* ((delta (context-current-delta context))
          (state (context-current-state context))
@@ -385,9 +552,11 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
      (loop for id in ids
            for page = (find id (context-pages context) :key #'context-page-id :test #'equal)
            collect (dreyeck/topicmap:make-topicmap-topic
-                    :id id :type (if page :page :concept)
+                    :id id :type (if page :page :subject)
                     :label (if page (context-page-label page) (subseq id (length "concept:")))
-                    :object (or page id)))
+                    :object (if page (context-page-object context page)
+                                (context-subject-object context (subseq id (length "concept:"))))
+                    :temporal-scope (context-event-object context (context-cursor context))))
      :associations
      (loop for relation in relations
            for item = (context-relation-item context relation)
@@ -397,6 +566,7 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
                     :from (gethash "from" relation) :to (gethash "to" relation)
                     :properties
                     (list :context context :evidence relation :item item
+                          :relation-contract (context-relation-topic context relation delta)
                           :attribution (context-relation-attribution context relation item)
                           :change (find (gethash "id" relation) (getf delta :relation-changes)
                                         :key (lambda (change) (getf change :id)) :test #'equal)
@@ -522,8 +692,8 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
           (:p "Selected topic: " (html-inspector-views:object-ref topic :display
                                   (dreyeck/topicmap:topicmap-topic-label-of topic))
               " · " (html-inspector-views:object-ref object :display "Inspect represented object"))
-          (when (and (hash-table-p object) (gethash "hyperbook" object))
-            (html-inspector-views:html (:p "Open wiki page: " (render-context-page-link object))))
+          (when (typep object 'context-fedwiki-page)
+            (html-inspector-views:html (:p "Open wiki page: " (render-context-page-link (page-evidence object)))))
           (:p "Relations at this topic: "
               (dolist (association (dreyeck/topicmap::topicmap-associations-of-point workspace))
                 (html-inspector-views:object-ref association :display
@@ -633,6 +803,9 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
           (html-inspector-views:html
             (:p (html-inspector-views:esc (gethash "kind" relation)) " · "
                 (html-inspector-views:object-ref relation :display "Inspect selected relation"))
+            (:p (html-inspector-views:object-ref
+                 (dreyeck/topicmap:topicmap-topic-object-of (getf properties :relation-contract))
+                 :display "Inspect represented object"))
             (:p (html-inspector-views:esc (gethash "id" relation)))
             (:p (html-inspector-views:esc (gethash "from" relation)) " → "
                 (html-inspector-views:esc (gethash "to" relation)))
@@ -679,6 +852,58 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
       (:p (html-inspector-views:object-ref (gethash "derived" (context-data context)) :display "Derived ordering and shared concepts"))
       (:p (html-inspector-views:esc (gethash "falsifiable-claim" (context-data context))))
       (:p "Falsified by: " (html-inspector-views:esc (gethash "falsified-by" (context-data context)))))))
+
+(defmethod html-inspector-views:title-bar-action-buttons ((page context-fedwiki-page))
+  ;; Reloading would silently replace the historical object with a live page.
+  nil)
+
+(defmethod hyperbook/fedwiki::👀context ((page context-fedwiki-page))
+  ;; Retain the native Context view without fetching live site-owner metadata.
+  (html-inspector-views:list-view (hyperbook/fedwiki::context-of page)
+                                :title "Context" :priority 4 :display #'hyperbook:id-of))
+
+(html-inspector-views:defview historical-page-evidence (page context-fedwiki-page)
+  (html-inspector-views:html-view :title "Source / Time" :priority 0
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc (context-page-label (page-evidence page))))
+      (:p "Source site: " (html-inspector-views:object-ref (hyperbook:hyperbook-of page)))
+      (:p "Source slug: " (html-inspector-views:esc (hyperbook:id-of page)))
+      (:p "State at: " (html-inspector-views:esc (gethash "at" (event-record (page-event page))))
+          " · " (html-inspector-views:object-ref (page-event page) :display "Inspect source event"))
+      (:p (html-inspector-views:object-ref (page-json page) :display "Inspect historical page JSON"))
+      (:p (html-inspector-views:object-ref (gethash "raw" (page-evidence page)) :display "Inspect saved source evidence"))
+      (:p "Native page: " (render-context-page-link (page-evidence page))))))
+
+(defmethod html-inspector-views:text-representation ((subject federated-subject))
+  (subject-title subject))
+
+(html-inspector-views:defview federated-subject-resolution (subject federated-subject)
+  (html-inspector-views:html-view :title "Subject" :priority 0
+    (html-inspector-views:html
+      (:h2 (html-inspector-views:esc (subject-title subject)))
+      (:p "Context: " (html-inspector-views:object-ref (subject-context subject)))
+      (:p "State at: " (html-inspector-views:esc (gethash "at" (event-record (subject-event subject))))
+          " · " (html-inspector-views:object-ref (subject-event subject)))
+      (:p "Unresolved collaborative links: "
+          (dolist (link (subject-links subject))
+            (html-inspector-views:object-ref link :display
+              (format nil "~A / ~A" (hyperbook::source-hyperbook-of link) (hyperbook::source-page-of link)))
+            (html-inspector-views:str " ")))
+      (:p "Recorded page candidates at this event:")
+      (let ((pages (subject-context-pages subject)))
+        (if pages
+            (dolist (page pages)
+              (html-inspector-views:html (:p (html-inspector-views:object-ref page :display
+                                               (context-page-label (page-evidence page)))
+                                            " · " (render-context-page-link (page-evidence page)))))
+            (html-inspector-views:html (:p "No concrete page with this title in the saved context evidence."))))
+      (:p "Cached neighborhood candidates (historical content not captured):")
+      (dolist (page (subject-neighborhood-pages subject))
+        (html-inspector-views:html
+          (:p (html-inspector-views:object-ref page :display
+                (format nil "~A / ~A" (hyperbook:id-of (hyperbook:hyperbook-of page)) (hyperbook:title-of page)))
+              " · " (hyperbook:render-hyperbook-or-page-link
+                      (hyperbook:id-of (hyperbook:hyperbook-of page)) (hyperbook:id-of page) (hyperbook:title-of page))))))))
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
 (hyperdoc:defexample federated-context
