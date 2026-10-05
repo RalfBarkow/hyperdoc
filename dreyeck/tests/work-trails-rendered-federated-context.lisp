@@ -38,7 +38,7 @@
     (loop for event across events
           do (assert (find (gethash "journal" event)
                            (gethash "journal" (gethash "raw" (reading::context-page context (gethash "page" event)))) :test #'eq))
-             (dolist (key '("topics-added" "topics-removed" "relations-set" "relations-remove" "relations-removed"))
+             (dolist (key '("topics-added" "topics-removed" "relations-set" "relations-remove" "relations-removed" "summary"))
                (assert (not (nth-value 1 (gethash key event))))))
     (assert (not (gethash "baseline" (gethash "temporal" (reading::context-data context)))))
     (assert (= 4 (length (getf delta :relation-changes))))
@@ -493,3 +493,72 @@
       (assert (equal catalog-pages (hyperbook::hyperbooks-of hyperbook::*catalog*)))
       (assert (dreyeck/work/reading::%json-equal raw (reading::context-data context))))))))
   (format t "~&REPRESENTED-OBJECTS-PASS: EQ page/subject/event/state/change objects, historical native pages, distinct same-title sites, unresolved native links, separate context/neighborhood and unchanged raw evidence/catalog.~%"))
+
+(defun check-attribution-negative-control ()
+  (let ((context (reading:federated-context)))
+    (context-native-fixture
+     context
+     (lambda ()
+       (loop for cursor from 0 to 9
+             do (reading::select-context-event context cursor)
+                (dolist (mode '(:state :delta))
+                  (setf (reading::context-mode context) mode)
+                  (let ((projection (reading::context-projection context)))
+                    (dolist (association (dreyeck/topicmap:topicmap-projection-associations-of projection))
+                      (assert (null (getf (dreyeck/topicmap:topicmap-association-properties-of association) :attribution)))
+                      (assert (not (search "Textual attribution"
+                                           (views:view-html (context-view association "Evidence")))))))
+                  (assert (not (search "Textual attribution"
+                                       (views:view-html (context-view context "Topicmap"))))))))))
+  (format t "~&ATTRIBUTION-NEGATIVE-CONTROL-PASS: cursors 0–9, State/Delta associations and Topicmap/Evidence views have no attribution.~%"))
+
+(defun check-attribution-mutation-control ()
+  ;; Trace the one interpreter as well as checking the result. A duplicated
+  ;; textual test could also hide the mutated attribution, but must fail this
+  ;; control because it bypasses the shared operation.
+  (let* ((name 'reading::context-item-attribution)
+         (interpreter (symbol-function name)) (calls nil))
+    (unwind-protect
+         (progn
+           (setf (symbol-function name)
+                 (lambda (item) (push item calls) (funcall interpreter item)))
+           (let* ((context (reading:federated-context))
+                  (page (reading::context-page context "jan-dewey"))
+                  (action (find 1790877831968 (gethash "journal" (gethash "raw" page))
+                                :key (lambda (entry) (gethash "date" entry))))
+                  (item (gethash "item" action)))
+             ;; DERIVE-FEDERATED-DATA must use the same interpreter. Its saved
+             ;; observed link deliberately remains attributed after the mutation.
+             (assert (member item calls :test #'eq))
+             (assert (some (lambda (link) (gethash "attribution" link))
+                           (gethash "links" (gethash "observed" (reading::context-data context)))))
+             (assert (search " via Thompson" (gethash "text" item)))
+             (setf (gethash "text" item)
+                   (cl-ppcre:regex-replace " via Thompson" (gethash "text" item) ""))
+             (assert (null (funcall interpreter item)))
+             (context-native-fixture
+              context
+              (lambda ()
+                (dolist (mode '(:state :delta))
+                  (setf (reading::context-mode context) mode calls nil)
+                  (let ((projection (reading::context-projection context)))
+                    ;; Use the actual, already page-scoped item, not its bare ID.
+                    (assert (find item (dreyeck/topicmap:topicmap-projection-associations-of projection)
+                                  :key (lambda (association)
+                                         (getf (dreyeck/topicmap:topicmap-association-properties-of association) :item))
+                                  :test #'eq))
+                    (assert (member item calls :test #'eq))
+                    (dolist (association (dreyeck/topicmap:topicmap-projection-associations-of projection))
+                      (assert (null (getf (dreyeck/topicmap:topicmap-association-properties-of association) :attribution)))
+                      (assert (not (search "Textual attribution"
+                                           (views:view-html (context-view association "Evidence")))))))
+                  ;; Warm the map caches so calls from association construction
+                  ;; cannot conceal an independent interpreter in the view.
+                  (reading::context-rendering context :context)
+                  (reading::context-rendering context :temporal)
+                  (setf calls nil)
+                  (assert (not (search "Textual attribution"
+                                       (views:view-html (context-view context "Topicmap")))))
+                  (assert (member item calls :test #'eq)))))))
+      (setf (symbol-function name) interpreter)))
+  (format t "~&ATTRIBUTION-MUTATION-CONTROL-PASS: removing the raw attribution suppresses association/Topicmap/Evidence attribution despite stale observed metadata; derivation, association and view decisions use the single interpreter.~%"))

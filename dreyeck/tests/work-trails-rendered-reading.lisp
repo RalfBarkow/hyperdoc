@@ -451,6 +451,8 @@
   (check-temporal-federation)
   (check-coordinated-context-workspace)
   (check-context-represented-objects)
+  (check-attribution-negative-control)
+  (check-attribution-mutation-control)
   (check-page-contract)
   (check-hoverbold)
   (format t "~&TRAILS-RENDERED-EXPERIMENT-PASS: exact inspectable batch/beam, expected trails and relations, observed 5/4 result, derived summary, shared provenance, scoped boundary, falsification and working page links.~%")

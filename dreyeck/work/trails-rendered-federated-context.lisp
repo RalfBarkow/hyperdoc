@@ -90,6 +90,11 @@
 (defun context-table (&rest pairs)
   (alexandria:plist-hash-table pairs :test 'equal))
 
+(defun context-item-attribution (item)
+  "Interpret attribution from this page-scoped item, never from an item-ID index."
+  (when (and (hash-table-p item) (search "via Thompson" (gethash "text" item "")))
+    (context-table "attribution" "via Thompson" "credited-page" "thompson-think")))
+
 (defun context-last-fork (page)
   "The last named fork separates inherited history from this site's actions."
   (position-if (lambda (action) (and (equal "fork" (gethash "type" action))
@@ -369,8 +374,7 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
                                                      "page" (gethash "id" page) "date" date "at" (context-time-string date)
                                                      "site" (gethash "site" page) "page-title" (gethash "title" page)
                                                      "hyperbook" (gethash "hyperbook" page) "operation" type "journal" action
-                                                     "before" (or before :null) "after" (or item :null)
-                                                     "summary" (format nil "~A selected evidence on ~A" type (gethash "title" page)))))
+                                                     "before" (or before :null) "after" (or item :null))))
                           (when (equal type "fork")
                             (let ((source (find-if (lambda (p) (and (equal (gethash "site" action) (gethash "site" p))
                                                                   (equal (gethash "title" page) (gethash "title" p))))
@@ -436,6 +440,7 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
                (when (eq :true (gethash "observed-links" page))
                  (loop for id across (gethash "link-items" page)
                        for item = (gethash id story)
+                       for attribution = (context-item-attribution item)
                        for action = (find-if (lambda (a) (equal id (gethash "id" a))) (gethash "journal" page) :from-end t)
                        do (loop for name in (context-wiki-targets (gethash "text" item))
                                 for link = (context-table "from" (gethash "id" page) "kind" "wiki-link" "target" name "item" id)
@@ -444,8 +449,8 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
                                    (let* ((target (context-link-target context page name end))
                                           (target-page (find target pages :key #'context-page-id :test #'equal)))
                                      (when target-page (setf (gethash "to" link) (gethash "id" target-page))))
-                                   (when (search "via Thompson" (gethash "text" item))
-                                     (setf (gethash "attribution" link) "via Thompson" (gethash "credited-page" link) "thompson-think"))
+                                   (when attribution
+                                     (maphash (lambda (key value) (setf (gethash key link) value)) attribution))
                                    (push link links))))
                (loop for id across (gethash "trail-items" page #())
                      do (push (context-table "page" (gethash "id" page) "item" id
@@ -513,14 +518,6 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
                (context-page-story-at page
                  (gethash "date" (aref (context-events context) (context-cursor context))))))))
 
-(defun context-relation-attribution (context relation item)
-  ;; Attribution is existing observed text metadata, not a fork or another link.
-  ;; Do not expose the final reading's attribution before its item says it.
-  (when (and item (search "via Thompson" (gethash "text" item "")))
-    (find (gethash "item" relation)
-          (gethash "links" (gethash "observed" (context-data context)))
-          :key (lambda (link) (gethash "item" link)) :test #'equal)))
-
 (defun context-relation-topic (context relation delta)
   "An existing Relation Contract Topic represents the actual state/change value.
 It labels the edge; it does not introduce another node into the domain graph."
@@ -567,7 +564,7 @@ It labels the edge; it does not introduce another node into the domain graph."
                     :properties
                     (list :context context :evidence relation :item item
                           :relation-contract (context-relation-topic context relation delta)
-                          :attribution (context-relation-attribution context relation item)
+                          :attribution (context-item-attribution item)
                           :change (find (gethash "id" relation) (getf delta :relation-changes)
                                         :key (lambda (change) (getf change :id)) :test #'equal)
                           :delta (cond ((member relation (getf delta :removed-relations) :test #'eq) :removed)
@@ -755,11 +752,13 @@ It labels the edge; it does not introduce another node into the domain graph."
               (html-inspector-views:str (context-map-html context)))
         (render-context-point context)
         (when (eq :delta (context-mode context)) (render-context-changes context))
-        (when (and (hash-table-p item) (search "via Thompson" (gethash "text" item "")))
-          (html-inspector-views:html
-            (:p "Textual attribution: " (html-inspector-views:esc (gethash "text" item)) " · "
-                (html-inspector-views:object-ref item :display "Inspect attribution item")
-                " · credited page: " (render-context-page-link (context-page context "thompson-think")))))
+        (let ((attribution (context-item-attribution item)))
+          (when attribution
+            (html-inspector-views:html
+              (:p "Textual attribution: " (html-inspector-views:esc (gethash "text" item)) " · "
+                  (html-inspector-views:object-ref item :display "Inspect attribution item")
+                  " · credited page: " (render-context-page-link
+                                        (context-page context (gethash "credited-page" attribution)))))))
         (:p "Observed: page contents, links, forks, journal times and Ward's trail nodes. Derived: temporal ordering and shared concepts.")
         (:p "Not established: " (html-inspector-views:esc (gethash "not-established" (context-data context))))))))
 
