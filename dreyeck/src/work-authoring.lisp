@@ -515,10 +515,11 @@ selects on that Topic's exact declaration, from the shared registry."
       (%render-status-actions topic))))
 
 (views:defview workspace-status-actions (workspace tm:topicmap-workspace)
-  (let ((topic (tm:topicmap-workspace-current-topic workspace)))
-    (when (%declared-work-topic-p topic)
-      (views:html-view :title "Change work status" :priority 5
-        (%render-status-actions topic nil workspace)))))
+  (when (tm:topicmap-workspace-point-projected-p workspace)
+    (let ((topic (tm:topicmap-workspace-current-topic workspace)))
+      (when (%declared-work-topic-p topic)
+        (views:html-view :title "Change work status" :priority 5
+          (%render-status-actions topic nil workspace))))))
 
 (views:defview operation-request-status-actions (selection r:operation-request)
   (let ((occurrence (r:operation-request-occurrence selection)))

@@ -765,36 +765,35 @@ presentation. The existing Workspace owns Point; this reference owns no Point st
 
 (defun render-context-point (context)
   (let ((workspace (context-current-workspace context)))
-    (when workspace
-      (unless (dreyeck/topicmap:topicmap-workspace-point-projected-p workspace)
-        (return-from render-context-point
-          (html-inspector-views:html
-            (:p "Workspace Point: " (html-inspector-views:esc (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
-            (:p "Not present in current projection"))))
-      (let* ((topic (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
-             (object (dreyeck/topicmap:topicmap-workspace-current-object workspace))
-             (projection (dreyeck/topicmap:topicmap-workspace-projection-of workspace)))
+    (unless (dreyeck/topicmap:topicmap-workspace-point-projected-p workspace)
+      (return-from render-context-point
         (html-inspector-views:html
-          (:p "Workspace Point: " (html-inspector-views:esc (dreyeck/topicmap:topicmap-topic-label-of topic)))
-          (:p (html-inspector-views:eval-button "Follow"
-                (html-inspector-views:thunk
-                  (follow-context-object (dreyeck/topicmap:topicmap-workspace-current-object workspace))))
-              " · " (html-inspector-views:object-ref object :display "Inspect represented object")
-              " · " (html-inspector-views:object-ref topic :display "Inspect Topicmap sign"))
-          (:p "Relations at Point:")
-          (:table :class "inspector-table"
-              (dolist (association (dreyeck/topicmap::topicmap-associations-of-point workspace))
-                (let* ((direction (dreyeck/topicmap::topicmap-association-direction-at-point workspace association))
-                       (other-id (dreyeck/topicmap::topicmap-association-other-topic-id workspace association))
-                       (other (dreyeck/topicmap::topicmap-projection-topic-by-id projection other-id)))
-                  (html-inspector-views:html
-                    (:tr :data-point-relation (dreyeck/topicmap:topicmap-association-id-of association)
-                     (:td (html-inspector-views:object-ref association :display
-                            (or (dreyeck/topicmap:topicmap-association-relation-label association)
-                                (dreyeck/topicmap:topicmap-association-type-of association))))
-                     (:td (html-inspector-views:esc (if (eq direction :outgoing) "→" "←")))
-                     (:td (html-inspector-views:action-button (dreyeck/topicmap:topicmap-topic-label-of other)
-                            (context-point-reference workspace other)))))))))))))
+          (:p "Workspace Point: " (html-inspector-views:esc (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
+          (:p "Not present in current projection"))))
+    (let* ((topic (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
+           (object (dreyeck/topicmap:topicmap-workspace-current-object workspace))
+           (projection (dreyeck/topicmap:topicmap-workspace-projection-of workspace)))
+      (html-inspector-views:html
+        (:p "Workspace Point: " (html-inspector-views:esc (dreyeck/topicmap:topicmap-topic-label-of topic)))
+        (:p (html-inspector-views:eval-button "Follow"
+              (html-inspector-views:thunk
+                (follow-context-object (dreyeck/topicmap:topicmap-workspace-current-object workspace))))
+            " · " (html-inspector-views:object-ref object :display "Inspect represented object")
+            " · " (html-inspector-views:object-ref topic :display "Inspect Topicmap sign"))
+        (:p "Relations at Point:")
+        (:table :class "inspector-table"
+            (dolist (association (dreyeck/topicmap::topicmap-associations-of-point workspace))
+              (let* ((direction (dreyeck/topicmap::topicmap-association-direction-at-point workspace association))
+                     (other-id (dreyeck/topicmap::topicmap-association-other-topic-id workspace association))
+                     (other (dreyeck/topicmap::topicmap-projection-topic-by-id projection other-id)))
+                (html-inspector-views:html
+                  (:tr :data-point-relation (dreyeck/topicmap:topicmap-association-id-of association)
+                   (:td (html-inspector-views:object-ref association :display
+                          (or (dreyeck/topicmap:topicmap-association-relation-label association)
+                              (dreyeck/topicmap:topicmap-association-type-of association))))
+                   (:td (html-inspector-views:esc (if (eq direction :outgoing) "→" "←")))
+                   (:td (html-inspector-views:action-button (dreyeck/topicmap:topicmap-topic-label-of other)
+                          (context-point-reference workspace other))))))))))))
 
 (defun context-point-view (context)
   (html-inspector-views:html-view (render-context-point context)))
