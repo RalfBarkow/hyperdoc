@@ -4,6 +4,17 @@
   (or (find title (views:all-views object) :key #'views:view-title :test #'equal)
       (error "Missing ~A view" title)))
 
+(defun check-native-follow-reference (view evidence)
+  "Resolve the actual lazy navigation reference, not an eager rendering lookup."
+  (let* ((dom (plump:parse (views:view-html view)))
+         (element (find (reading::context-page-label evidence)
+                        (plump:get-elements-by-tag-name dom "span")
+                        :key #'plump:text :test #'equal))
+         (id (and element (plump:attribute element "id"))))
+    (assert (and id (uiop:string-prefix-p "eval-" id)))
+    (assert (eq (reading::native-context-page evidence)
+                (views:eval-thunk (cdr (assoc id (views:view-references view) :test #'equal)))))))
+
 (defun temporal-proof-values (context)
   "Seven actual Lisp values, independent of Topicmap rendering and its controls."
   (let* ((events (reading:context-events context))
@@ -169,16 +180,14 @@
          (assert (equal (hyperbook:title-of jan) (hyperbook:title-of thompson)))
          (assert (equal "fedwiki:jan.voices.ustawi.wiki" (hyperbook:id-of (hyperbook:hyperbook-of jan))))
          (assert (equal "fedwiki:thompson.voices.ustawi.wiki" (hyperbook:id-of (hyperbook:hyperbook-of thompson)))))
-       ;; Evidence views resolve native source pages for every selected event.
+       ;; Evidence views resolve native source pages only when followed.
        (loop for record across events
              for event = (make-instance 'reading::federated-event :record record :context context)
              for view = (context-view event "Evidence")
              do (views:view-html view)
-                (assert (member (reading::native-context-page (reading::context-page context (gethash "page" record)))
-                                (mapcar #'cdr (views:view-references view)) :test #'eq))
+                (check-native-follow-reference view (reading::context-page context (gethash "page" record)))
                 (when (gethash "source-page" record)
-                  (assert (member (reading::native-context-page (reading::context-page context (gethash "source-page" record)))
-                                  (mapcar #'cdr (views:view-references view)) :test #'eq))))
+                  (check-native-follow-reference view (reading::context-page context (gethash "source-page" record)))))
        ;; TALA retains native page signs and event evidence while State/Delta
        ;; action buttons keep one context object and refresh its existing pane.
        (reading::select-context-event context 9)
@@ -196,9 +205,8 @@
          (assert (search "Delta" html))
          (assert (find-if (lambda (reference) (typep (cdr reference) 'reading::federated-event)) references))
          (let ((sign-thunk (cdr (assoc (plump:attribute jan-sign "id") references :test #'equal))))
-           (assert (views:eval-thunk sign-thunk))
-           (assert (equal jan-id (dreyeck/topicmap:topicmap-workspace-point-of
-                                 (reading::context-current-workspace context))))
+           (assert (eq (reading::context-page-object context (reading::context-page context "jan-think"))
+                       (views:eval-thunk sign-thunk)))
            (assert (= 9 (reading::context-cursor context))))
          (let* ((button (find "Previous event" (plump:get-elements-by-tag-name dom "button") :key #'plump:text :test #'equal))
                 (action (cdr (assoc (plump:attribute button "id") references :test #'equal))))
@@ -346,19 +354,27 @@
          (multiple-value-bind (view dom) (render) (action view (button dom "Next event")))
          (assert (= 9 (reading::context-cursor context)))
          (multiple-value-bind (view dom) (render) (action view (button dom "State")))
-         ;; Same title, distinct Topics and native pages. Point selection stays local.
+         ;; Same title, distinct Topics and native pages. Primary follows the object;
+         ;; explicit Workspace Point movement remains a separate operation.
          (dolist (id (list jan-id thompson-id))
            (multiple-value-bind (view dom) (render)
-             (action view (sign (map-dom dom "context") id)))
+             (let* ((element (sign (map-dom dom "context") id))
+                    (reference (cdr (assoc (plump:attribute element "id")
+                                           (views:view-references view) :test #'equal))))
+               (assert (uiop:string-prefix-p "eval-" (plump:attribute element "id")))
+               (assert (eq (dreyeck/topicmap:topicmap-topic-object-of
+                            (dreyeck/topicmap::topicmap-projection-topic-by-id
+                             (reading::context-rendered-projection context :context) id))
+                           (views:eval-thunk reference)))))
            (assert (= 9 (reading::context-cursor context)))
+           (reading::select-context-topic context id)
            (let* ((workspace (reading::context-current-workspace context))
                   (topic (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
                   (page (dreyeck/topicmap:topicmap-topic-object-of topic)))
              (assert (equal id (dreyeck/topicmap:topicmap-topic-id-of topic)))
              (multiple-value-bind (view dom) (render)
                (declare (ignore dom))
-               (has-reference view topic) (has-reference view page)
-               (has-reference view (reading::native-context-page page)))))
+               (has-reference view topic) (has-reference view page))))
          (multiple-value-bind (view dom) (render) (action view (button dom "Next event")))
          (assert (= 10 (reading::context-cursor context)))
          (multiple-value-bind (view dom) (render) (action view (button dom "Delta")))
@@ -374,8 +390,8 @@
            (views:view-html view)
            (has-reference view attribution)
            (has-reference view (gethash "after" (aref events 10)))
-           (has-reference view (reading::native-context-page (reading::context-page context "thompson-think"))))))))
-  (format t "~&COORDINATED-WORKSPACE-PASS: one cursor, two TALA maps, ordered event selection, deterministic Previous/Next, actual State/Delta/topic/relation Inspector references and separate native page navigation.~%"))
+           (check-native-follow-reference view (reading::context-page context "thompson-think")))))))
+  (format t "~&COORDINATED-WORKSPACE-PASS: one cursor, two TALA maps, ordered event selection, deterministic Previous/Next, actual State/Delta/topic/relation Inspector references and native object following.~%"))
 
 (defun check-context-represented-objects ()
   (let* ((context (reading:federated-context))
@@ -493,6 +509,165 @@
       (assert (equal catalog-pages (hyperbook::hyperbooks-of hyperbook::*catalog*)))
       (assert (dreyeck/work/reading::%json-equal raw (reading::context-data context))))))))
   (format t "~&REPRESENTED-OBJECTS-PASS: EQ page/subject/event/state/change objects, historical native pages, distinct same-title sites, unresolved native links, separate context/neighborhood and unchanged raw evidence/catalog.~%"))
+
+(defun context-native-follow-fixture (context function)
+  "Only the HTTP boundary is replaced: absent plugin pages return the native
+server's non-JSON miss response. Collaborative/context resolution stays real."
+  (let ((fetch (symbol-function 'hyperbook/fedwiki::fetch-page-json)))
+    (unwind-protect
+         (progn
+           (setf (symbol-function 'hyperbook/fedwiki::fetch-page-json)
+                 (lambda (&rest arguments)
+                   (declare (ignore arguments))
+                   (shasht:read-json "Page not found")))
+           (context-native-fixture context function))
+      (setf (symbol-function 'hyperbook/fedwiki::fetch-page-json) fetch))))
+
+(defun check-context-interaction-semantics ()
+  (let* ((context (reading:federated-context))
+         (raw (dreyeck/work/reading::%copy-json (reading::context-data context)))
+         (hyperbook/fedwiki::*neighborhood* (make-hash-table :test 'equal)))
+    (context-native-follow-fixture
+     context
+     (lambda ()
+       ;; Native page resolution must be exercised offline, with loaded source
+       ;; pages, rather than replaced by another title/context resolver.
+       (dolist (wiki (hyperbook::hyperbooks-of hyperbook::*catalog*))
+         (maphash (lambda (id page) (declare (ignore id))
+                    (setf (slot-value page 'hyperbook/fedwiki::story) #()))
+                  (hyperbook/fedwiki::pages-of wiki)))
+       (let* ((projection (reading::context-rendered-projection context :context))
+              (jan-id "fedwiki:jan.voices.ustawi.wiki/john-dewey")
+              (subject-id "concept:Reflective Practice")
+              (jan-topic (dreyeck/topicmap::topicmap-projection-topic-by-id projection jan-id))
+              (subject-topic (dreyeck/topicmap::topicmap-projection-topic-by-id projection subject-id))
+              (jan (dreyeck/topicmap:topicmap-topic-object-of jan-topic))
+              (subject (dreyeck/topicmap:topicmap-topic-object-of subject-topic))
+              (workspace (reading::context-current-workspace context))
+              (point (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
+         (labels ((reference (view element)
+                    (cdr (assoc (plump:attribute element "id") (views:view-references view) :test #'equal)))
+                  (primary (id &optional (kind "context"))
+                    (let* ((view (context-view context "Topicmap"))
+                           (dom (plump:parse (views:view-html view)))
+                           (map (find kind (plump:get-elements-by-tag-name dom "div")
+                                      :key (lambda (e) (plump:attribute e "data-projection")) :test #'equal))
+                           (sign (find id (plump:get-elements-by-tag-name map "g")
+                                       :key (lambda (e) (plump:attribute e "data-topic-id")) :test #'equal)))
+                      (assert (uiop:string-prefix-p (if (equal kind "temporal") "action-" "eval-")
+                                                   (plump:attribute sign "id")))
+                      (views:eval-thunk (reference view sign))))
+                  (inspection (id expected)
+                    (let* ((view (context-view context "Topicmap"))
+                           (dom (plump:parse (views:view-html view)))
+                           (row (find id (plump:get-elements-by-tag-name dom "tr")
+                                      :key (lambda (e) (plump:attribute e "data-inspection-topic")) :test #'equal)))
+                      (dolist (label '("Inspect represented object" "Inspect Topicmap sign"))
+                        (let ((element (find label (remove-if-not
+                                                   (lambda (e) (plump:attribute e "id"))
+                                                   (plump:get-elements-by-tag-name row "span"))
+                                             :key #'plump:text :test #'equal)))
+                          (assert (uiop:string-prefix-p "inspect-" (plump:attribute element "id")))
+                          (assert (eq (if (equal label "Inspect represented object") expected
+                                          (dreyeck/topicmap::topicmap-projection-topic-by-id projection id))
+                                      (reference view element)))))))
+                  (add-candidate (site)
+                    (let* ((wiki (hyperbook:find-hyperbook (format nil "fedwiki:~A" site) :signal-error? t))
+                           (page (hyperbook/fedwiki::make-fedwiki-page wiki "reflective-practice" "Reflective Practice")))
+                      (setf (slot-value page 'hyperbook/fedwiki::story) #()
+                            (gethash "reflective-practice" (hyperbook/fedwiki::pages-of wiki)) page
+                            (gethash site hyperbook/fedwiki::*neighborhood*) wiki)
+                      page)))
+           ;; Rendering has no follow or subject resolution effect.
+           (let ((lookup (symbol-function 'hyperbook/fedwiki::lookup-slug-in-page-context)) (calls 0))
+             (unwind-protect
+                  (progn
+                    (setf (symbol-function 'hyperbook/fedwiki::lookup-slug-in-page-context)
+                          (lambda (&rest args) (incf calls) (apply lookup args)))
+                    (views:view-html (context-view context "Topicmap"))
+                    (views:view-html (context-view subject "Subject"))
+                    (assert (zerop calls))
+                    (assert (null (reading::subject-resolution subject)))
+                    (assert (eq jan (primary jan-id)))
+                    (assert (= 10 (reading::context-cursor context)))
+                    (assert (equal point (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
+                    (assert (eq subject (primary subject-id)))
+                    (assert (plusp calls))
+                    (assert (null (getf (reading::subject-resolution subject) :pages)))
+                    (assert (null (getf (reading::subject-resolution subject) :failures))))
+               (setf (symbol-function 'hyperbook/fedwiki::lookup-slug-in-page-context) lookup)))
+           (assert (typep subject 'reading::federated-subject))
+           (assert (typep jan 'reading::context-fedwiki-page))
+           (inspection subject-id subject)
+           (inspection jan-id jan)
+           ;; A unique candidate is followed. Two sites require an explicit
+           ;; choice; source ordering and site spelling never decide for us.
+           (let* ((tp (add-candidate "thompson.voices.ustawi.wiki"))
+                  (jp nil))
+             (assert (eq tp (primary subject-id)))
+             (assert (equal (list tp) (getf (reading::subject-resolution subject) :pages)))
+             (let ((lookup (symbol-function 'hyperbook/fedwiki::lookup-slug-in-page-context)))
+               (unwind-protect
+                    (progn
+                      (setf (symbol-function 'hyperbook/fedwiki::lookup-slug-in-page-context)
+                            (lambda (slug source &rest arguments)
+                              (if (equal "fedwiki:jan.voices.ustawi.wiki"
+                                         (hyperbook:id-of (hyperbook:hyperbook-of source)))
+                                  (error "Fixture transport unavailable")
+                                  (apply lookup slug source arguments))))
+                      (assert (eq subject (primary subject-id)))
+                      (assert (equal (list tp) (getf (reading::subject-resolution subject) :pages)))
+                      (assert (getf (reading::subject-resolution subject) :failures)))
+                 (setf (symbol-function 'hyperbook/fedwiki::lookup-slug-in-page-context) lookup)))
+             (setf jp (add-candidate "jan.voices.ustawi.wiki"))
+             (assert (eq subject (primary subject-id)))
+             (let* ((pages (getf (reading::subject-resolution subject) :pages))
+                    (view (context-view subject "Subject"))
+                    (html (views:view-html view)))
+               (assert (= 2 (length pages)))
+               (assert (member tp pages :test #'eq)) (assert (member jp pages :test #'eq))
+               (assert (search "Choose wiki working material" html))
+               (dolist (page pages)
+                 (assert (member page (mapcar #'cdr (views:view-references view)) :test #'eq))))
+             ;; The native context resolver may return a remote reference. It
+             ;; is deduplicated by origin, and never called a persistent fork.
+             (let* ((source (hyperbook:find-page (hyperbook:find-hyperbook "fedwiki:ward.voices.ustawi.wiki")
+                                               "trails-rendered"))
+                    (wiki (hyperbook:hyperbook-of tp)))
+               (setf (slot-value source 'hyperbook/fedwiki::context) (list wiki))
+               (assert (eq subject (primary subject-id)))
+               (assert (= 2 (length (getf (reading::subject-resolution subject) :pages)))))
+             (format t "~&SUBJECT-FOLLOW-PASS: unique Thompson / Reflective Practice follows; Jan + Thompson require explicit choice; native collaborative/context resolution and origin deduplication.~%"))
+           (assert (= 10 (reading::context-cursor context)))
+           (assert (equal point (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
+           ;; A temporal click uses its represented event, recomputes the
+           ;; existing State/Delta, and cannot call the wiki follow operation.
+           (let ((follow (symbol-function 'reading::follow-context-object))
+                 (before (reading::context-current-state context)))
+             (unwind-protect
+                  (progn
+                    (setf (symbol-function 'reading::follow-context-object)
+                          (lambda (object) (error "Temporal click followed ~S" object)))
+                    (primary (gethash "id" (aref (reading::context-events context) 8)) "temporal")
+                    (assert (= 8 (reading::context-cursor context)))
+                    (assert (not (equalp before (reading::context-current-state context))))
+                    (assert (= 4 (length (getf (reading::context-current-delta context) :relation-changes)))))
+               (setf (symbol-function 'reading::follow-context-object) follow)))
+           (assert (dreyeck/work/reading::%json-equal raw (reading::context-data context))))))))
+  ;; With empty global registries, even repeated render/rebuild at every event
+  ;; must leave them empty. Live page references are lazy until navigation.
+  (let* ((context (reading:federated-context))
+         (hyperbook/fedwiki::*neighborhood* (make-hash-table :test 'equal))
+         (hyperbook::*catalog* (make-instance 'hyperbook::catalog)))
+    (loop for index below (length (reading::context-events context))
+          do (reading::select-context-event context index)
+             (dolist (mode '(:state :delta))
+               (setf (reading::context-mode context) mode)
+               (reading::context-projection context)
+               (views:view-html (context-view context "Topicmap"))))
+    (assert (zerop (hash-table-count hyperbook/fedwiki::*neighborhood*)))
+    (assert (null (hyperbook::hyperbooks-of hyperbook::*catalog*))))
+  (format t "~&INTERACTION-SEMANTICS-PASS: temporal-only event selection, exact Jan historical working page, subject resolution/choice, exact Inspector ID targets, unchanged context cursor/Point, no refresh transport and side-effect-free projection/rendering.~%"))
 
 (defun check-attribution-negative-control ()
   (let ((context (reading:federated-context)))

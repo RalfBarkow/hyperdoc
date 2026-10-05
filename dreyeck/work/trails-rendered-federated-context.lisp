@@ -31,7 +31,10 @@
   ((title :initarg :title :reader subject-title)
    (context :initarg :context :reader subject-context)
    (event :initarg :event :reader subject-event)
-   (links :initarg :links :reader subject-links)))
+   (links :initarg :links :reader subject-links)
+   ;; Only an explicit follow fills this result. The Subject view can present
+   ;; candidates and lookup failures without resolving links during rendering.
+   (resolution :initform nil :accessor subject-resolution)))
 
 (defun context-events (context)
   (gethash "events" (gethash "temporal" (context-data context))))
@@ -66,8 +69,12 @@
                           (gethash "slug" page) :signal-error? t)))
 
 (defun render-context-page-link (page)
-  (hyperbook:render-hyperbook-or-page-link (gethash "hyperbook" page) (gethash "slug" page)
-                                         (context-page-label page)))
+  ;; Resolving a live site/page is navigation, not presentation. Keep it behind
+  ;; the same native EVAL transport that follows a context sign.
+  (html-inspector-views:html
+    (:span :class "hyperbook-reference inspector-inspect"
+           :id (html-inspector-views:eval-id (html-inspector-views:thunk (native-context-page page)))
+           (html-inspector-views:esc (context-page-label page)))))
 
 (defun select-context-event (context index)
   (check-type index integer)
@@ -256,6 +263,69 @@ These references are not a claim about their uncaptured historical contents."
                  (when page (push page pages))))
              hyperbook/fedwiki::*neighborhood*)
     (sort pages #'string< :key (lambda (page) (hyperbook:id-of (hyperbook:hyperbook-of page))))))
+
+(defun subject-page-identity (page)
+  "A remote reference and its origin page are the same concrete candidate."
+  (list (hyperbook:id-of (hyperbook/fedwiki::origin-of page))
+        (hyperbook/fedwiki::origin-id-of page)))
+
+(defun resolve-federated-subject (subject)
+  "Follow each existing collaborative link, retaining distinct site candidates.
+Historical links retain their saved targets. On a historical miss, ask the
+native link resolver in that source page's live context. This is an explicit
+navigation operation; projection and Subject rendering never call it."
+  (let ((pages (copy-list (subject-context-pages subject))) (failures nil))
+    (dolist (link (subject-links subject))
+      (let ((target
+              (handler-case
+                  (let ((historical (html-inspector-views:eval-thunk (hyperbook::thunk-of link))))
+                    (if (typep historical 'hyperbook/fedwiki::fedwiki-page) historical
+                        (let ((source (hyperbook:find-page
+                                       (hyperbook:find-hyperbook (hyperbook::source-hyperbook-of link)
+                                                                :signal-error? t)
+                                       (hyperbook::source-page-of link) :signal-error? t)))
+                          (hyperbook/fedwiki::load-page source)
+                          (html-inspector-views:eval-thunk
+                           (hyperbook::thunk-of
+                            (hyperbook/fedwiki::make-wiki-link
+                             source :target-title (subject-title subject)
+                                    :target-slug (hyperbook/fedwiki::target-slug-of link)))))))
+                (error (condition) condition))))
+        (cond ((typep target 'hyperbook/fedwiki::fedwiki-page)
+               (setf pages (append pages (list target))))
+              ((typep target 'hyperbook/fedwiki::wiki-lookup-failure))
+              (t (push (cons link target) failures)))))
+    (setf (subject-resolution subject)
+          (list :pages (remove-duplicates (append pages (subject-neighborhood-pages subject))
+                                         :key #'subject-page-identity :test #'equal :from-end t)
+                :failures (nreverse failures)))))
+
+(defun follow-context-object (object)
+  "Return wiki working material through the Inspector's native follow transport."
+  (etypecase object
+    (hyperbook/fedwiki::fedwiki-page object)
+    (federated-subject
+     (let* ((resolution (resolve-federated-subject object))
+            (pages (getf resolution :pages)))
+       ;; Operational failures leave the candidate set incomplete. Present the
+       ;; Subject chooser in that case, even if one page was found elsewhere.
+       (if (and (= 1 (length pages)) (null (getf resolution :failures)))
+           (first pages) object)))))
+
+(defun context-topic-primary-reference (context projection-kind topic)
+  (let ((object (dreyeck/topicmap:topicmap-topic-object-of topic)))
+    (ecase projection-kind
+      (:temporal
+       (html-inspector-views:action-id
+        (html-inspector-views:thunk
+          (select-context-event (event-context object)
+                                (position (event-record object) (context-events context) :test #'eq)))))
+      (:context
+       ;; EVAL opens the result beside this pane. Unlike ACTION it never
+       ;; refreshes the Topicmap pane or destroys its outer/inner scroll state.
+       (html-inspector-views:eval-id
+        (html-inspector-views:thunk
+          (follow-context-object object)))))))
 
 (defun context-wiki-targets (text)
   "Reuse the FedWiki text/link scanner, including its treatment of incomplete links."
@@ -645,18 +715,14 @@ It labels the edge; it does not introduce another node into the domain graph."
          (delta (context-current-delta context))
          (selected (gethash "id" (aref (context-events context) (context-cursor context))))
          (dom (let ((plump:*tag-dispatchers* plump:*xml-tags*))
-                (plump:parse (dreyeck/inspector/topicmap/tala::interactive-tala-svg rendering)))))
+                (plump:parse
+                 (dreyeck/inspector/topicmap/tala::interactive-tala-svg
+                  rendering :topic-reference
+                  (lambda (topic) (context-topic-primary-reference context projection-kind topic)))))))
     (dolist (group (plump:get-elements-by-tag-name dom "g"))
       (let* ((id (plump:attribute group "data-topic-id"))
              (association-id (plump:attribute group "data-association-id")))
         (when id
-          (setf (plump:attribute group "id")
-                (html-inspector-views:action-id
-                 (if (eq projection-kind :temporal)
-                     (let ((index (position id (context-events context)
-                                            :key (lambda (e) (gethash "id" e)) :test #'equal)))
-                       (html-inspector-views:thunk (select-context-event context index)))
-                     (html-inspector-views:thunk (select-context-topic context id)))))
           (when (if (eq projection-kind :temporal) (equal id selected)
                     (and workspace (equal id (dreyeck/topicmap:topicmap-workspace-point-of workspace))))
             (setf (plump:attribute group "data-selected") "true")))
@@ -686,16 +752,33 @@ It labels the edge; it does not introduce another node into the domain graph."
       (let* ((topic (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
              (object (dreyeck/topicmap:topicmap-topic-object-of topic)))
         (html-inspector-views:html
-          (:p "Selected topic: " (html-inspector-views:object-ref topic :display
-                                  (dreyeck/topicmap:topicmap-topic-label-of topic))
+          (:p "Workspace Point: " (html-inspector-views:esc (dreyeck/topicmap:topicmap-topic-label-of topic))
+              " · " (html-inspector-views:object-ref topic :display "Inspect Topicmap sign")
               " · " (html-inspector-views:object-ref object :display "Inspect represented object"))
           (when (typep object 'context-fedwiki-page)
-            (html-inspector-views:html (:p "Open wiki page: " (render-context-page-link (page-evidence object)))))
+            (html-inspector-views:html
+              (:p "Open wiki page: " (html-inspector-views:object-ref object :select "Story"
+                                                                     :display (hyperbook:title-of object)))))
           (:p "Relations at this topic: "
               (dolist (association (dreyeck/topicmap::topicmap-associations-of-point workspace))
                 (html-inspector-views:object-ref association :display
                   (dreyeck/topicmap:topicmap-association-type-of association))
                 (html-inspector-views:str " "))))))))
+
+(defun render-context-inspection (context)
+  "Explicit inspection is independent of primary follow and Workspace Point."
+  (html-inspector-views:html
+    (:details
+     (:summary "Inspect context signs and represented objects")
+     (:table :class "inspector-table"
+      (dolist (topic (dreyeck/topicmap:topicmap-projection-topics-of
+                     (context-rendered-projection context :context)))
+        (html-inspector-views:html
+          (:tr :data-inspection-topic (dreyeck/topicmap:topicmap-topic-id-of topic)
+           (:td (html-inspector-views:esc (dreyeck/topicmap:topicmap-topic-label-of topic)))
+           (:td (html-inspector-views:object-ref
+                 (dreyeck/topicmap:topicmap-topic-object-of topic) :display "Inspect represented object"))
+           (:td (html-inspector-views:object-ref topic :display "Inspect Topicmap sign")))))))))
 
 (defun render-context-changes (context)
   (let ((delta (context-current-delta context)))
@@ -747,10 +830,11 @@ It labels the edge; it does not introduce another node into the domain graph."
             " · " (html-inspector-views:esc (symbol-name (context-mode context)))
             " · " (html-inspector-views:object-ref (context-current-state context) :display "Inspect current State")
             " · " (html-inspector-views:object-ref (context-current-delta context) :display "Inspect current Delta"))
-        (:p "Select an event to move the cursor. Select a context topic to inspect it; its separate wiki link opens the page. Orange relations mark the selected event's changes; faded topics are removed.")
+        (:p "Select an event to move the cursor. Click a context sign to follow its wiki material; a subject with several candidates offers a choice. Use the inspection links below to inspect represented objects or Topicmap signs. Orange relations mark the selected event's changes; faded topics are removed.")
         (:div :id (symbol-name (gensym "context-map-")) :data-projection "context"
               (html-inspector-views:str (context-map-html context)))
         (render-context-point context)
+        (render-context-inspection context)
         (when (eq :delta (context-mode context)) (render-context-changes context))
         (let ((attribution (context-item-attribution item)))
           (when attribution
@@ -862,7 +946,7 @@ It labels the edge; it does not introduce another node into the domain graph."
                                 :title "Context" :priority 4 :display #'hyperbook:id-of))
 
 (html-inspector-views:defview historical-page-evidence (page context-fedwiki-page)
-  (html-inspector-views:html-view :title "Source / Time" :priority 0
+  (html-inspector-views:html-view :title "Source / Time" :priority 3
     (html-inspector-views:html
       (:p (html-inspector-views:esc (context-page-label (page-evidence page))))
       (:p "Source site: " (html-inspector-views:object-ref (hyperbook:hyperbook-of page)))
@@ -883,6 +967,23 @@ It labels the edge; it does not introduce another node into the domain graph."
       (:p "Context: " (html-inspector-views:object-ref (subject-context subject)))
       (:p "State at: " (html-inspector-views:esc (gethash "at" (event-record (subject-event subject))))
           " · " (html-inspector-views:object-ref (subject-event subject)))
+      (when (subject-resolution subject)
+        (html-inspector-views:html
+          (:h3 "Choose wiki working material")
+          (:p "Candidates retain their source sites. Following a candidate leaves the temporal cursor unchanged.")
+          (dolist (page (getf (subject-resolution subject) :pages))
+            (html-inspector-views:html
+              (:p (html-inspector-views:object-ref
+                   page :display (format nil "~A / ~A"
+                                         (hyperbook:id-of (hyperbook/fedwiki::origin-of page))
+                                         (hyperbook:title-of page))))))
+          (unless (getf (subject-resolution subject) :pages)
+            (html-inspector-views:html (:p "No concrete page candidate was resolved.")))
+          (dolist (failure (getf (subject-resolution subject) :failures))
+            (html-inspector-views:html
+              (:p "Resolution incomplete for "
+                  (html-inspector-views:object-ref (car failure)) " · "
+                  (html-inspector-views:object-ref (cdr failure)))))))
       (:p "Unresolved collaborative links: "
           (dolist (link (subject-links subject))
             (html-inspector-views:object-ref link :display
@@ -900,15 +1001,13 @@ It labels the edge; it does not introduce another node into the domain graph."
       (dolist (page (subject-neighborhood-pages subject))
         (html-inspector-views:html
           (:p (html-inspector-views:object-ref page :display
-                (format nil "~A / ~A" (hyperbook:id-of (hyperbook:hyperbook-of page)) (hyperbook:title-of page)))
-              " · " (hyperbook:render-hyperbook-or-page-link
-                      (hyperbook:id-of (hyperbook:hyperbook-of page)) (hyperbook:id-of page) (hyperbook:title-of page))))))))
+                (format nil "~A / ~A" (hyperbook:id-of (hyperbook:hyperbook-of page)) (hyperbook:title-of page)))))))))
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
 (hyperdoc:defexample federated-context
   "One Lisp cursor coordinates ordered events and the State/Delta context Topicmap.
-Forks import inherited content at their own time. Topic selection and native
-fedwiki page navigation are separate; causal influence is not established."
+Forks import inherited content at their own time. Temporal selection, wiki
+following and explicit sign/object inspection are separate operations."
   (let ((data (read-federated-context)))
     (make-instance 'federated-context :data data
                    :cursor (1- (length (gethash "events" (gethash "temporal" data)))))))

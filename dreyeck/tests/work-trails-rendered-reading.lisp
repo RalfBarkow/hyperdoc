@@ -451,6 +451,7 @@
   (check-temporal-federation)
   (check-coordinated-context-workspace)
   (check-context-represented-objects)
+  (check-context-interaction-semantics)
   (check-attribution-negative-control)
   (check-attribution-mutation-control)
   (check-page-contract)

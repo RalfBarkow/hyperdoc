@@ -185,9 +185,10 @@ renamed only when it is SCOPE, so D2's identity classes are never touched."
              (getf entry :id)))
     (first matches)))
 
-(defun interactive-tala-svg (rendering)
+(defun interactive-tala-svg (rendering &key (topic-reference #'views:inspect-id))
   "RENDERING's SVG with an Inspector reference on each Topic and Association
-group. Call it while a view is being built: the references belong to it."
+group. TOPIC-REFERENCE supplies the primary operation's reference for a Topic.
+Call it while a view is being built: the references belong to it."
   (let* ((input (tala:tala-rendering-input rendering))
          (projection (tala:tala-input-projection input))
          (dom (let ((plump:*tag-dispatchers* plump:*xml-tags*))
@@ -203,7 +204,7 @@ group. Call it while a view is being built: the references belong to it."
     (dolist (entry (tala:tala-input-topics input))
       (let ((group (%identity-group groups entry))
             (topic (tm:topicmap-projection-topic-by-id projection (getf entry :id))))
-        (setf (plump:attribute group "id") (views:inspect-id topic)
+        (setf (plump:attribute group "id") (funcall topic-reference topic)
               (plump:attribute group "data-topic-id") (getf entry :id)
               (plump:attribute group "style") "cursor:pointer")))
     (dolist (entry (tala:tala-input-associations input))
