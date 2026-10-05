@@ -2388,7 +2388,8 @@
 (defsystem "dreyeck/work/reading"
   :description "HyperDoc work pages and one complete D2 Connections example"
   :depends-on ("dreyeck/topicmap/tala/reading" "dreyeck/gesture-binding-witness"
-               "dreyeck/inspector/git" "dreyeck/gesture/operation-request" "shasht" "cl-base64")
+               "dreyeck/inspector/git" "dreyeck/gesture/operation-request" "hyperbook/fedwiki"
+               "shasht" "cl-base64" "local-time")
   :serial t
   :components ((:module "dreyeck/work" :components ((:file "reading")
                                                     (:file "operation-requests")
@@ -2396,8 +2397,19 @@
                                                     (:file "authoring-architecture")
                                                     (:file "addresses")
                                                     (:file "trails-rendered-reading")
+                                                    (:file "trails-rendered-federated-context")
                                                     (:static-file "trails-rendered-solo-batch.json")
                                                     (:static-file "trails-rendered-solo-beam.json")
+                                                    (:static-file "trails-rendered-federated-context.json")
+                                                    (:module "trails-rendered-evidence" :components
+                                                     ((:static-file "ward.voices.ustawi.wiki--trails-rendered.json")
+                                                      (:static-file "thompson.voices.ustawi.wiki--how-we-think.json")
+                                                      (:static-file "thompson.voices.ustawi.wiki--as-we-may-think.json")
+                                                      (:static-file "jan.voices.ustawi.wiki--alan-cooper.json")
+                                                      (:static-file "jan.voices.ustawi.wiki--ethnomethodology.json")
+                                                      (:static-file "jan.voices.ustawi.wiki--john-dewey.json")
+                                                      (:static-file "jan.voices.ustawi.wiki--how-we-think.json")
+                                                      (:static-file "thompson.fed.wiki--how-we-think.json")))
                                                     (:static-file "trails-rendered-hoverbold-observation.json")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
@@ -2426,7 +2438,8 @@
                (:file "dreyeck/tests/work-reading-live")
                (:file "dreyeck/tests/work-authoring-architecture")
                (:file "dreyeck/tests/work-deployment-reading")
-               (:file "dreyeck/tests/work-trails-rendered-reading"))
+               (:file "dreyeck/tests/work-trails-rendered-reading")
+               (:file "dreyeck/tests/work-trails-rendered-federated-context"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/tests :run-tests)

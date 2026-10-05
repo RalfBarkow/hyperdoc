@@ -1,0 +1,174 @@
+{
+  "not-established": "That Jan or Thompson caused Ward's change to relation type \"Trail\".",
+  "falsifiable-claim": "Ward's trail traverses concepts that were concurrently connected and exchanged across Jan's and Thompson's wiki pages.",
+  "falsified-by": "Contemporaneous page contents or journals contradict the listed connections or exchange, or Ward's recorded trail nodes do not traverse those concepts.",
+  "scope": "Selected saved evidence; page/item selection and same-title subject matching are project rules, not causal claims.",
+  "window": {
+    "start": "2026-10-01T00:00:00.000Z",
+    "end": "2026-10-02T00:00:00.000Z"
+  },
+  "question": "How did this federated context change during October 1?",
+  "pages": [
+    {
+      "id": "ward-trails",
+      "site": "ward.voices.ustawi.wiki",
+      "title": "Trails Rendered",
+      "slug": "trails-rendered",
+      "hyperbook": "fedwiki:ward.voices.ustawi.wiki",
+      "url": "http://ward.voices.ustawi.wiki/trails-rendered",
+      "json-url": "http://ward.voices.ustawi.wiki/trails-rendered.json",
+      "selected-items": [
+        "93cd119d6286888a",
+        "fc6c7d06e5bce7d3"
+      ],
+      "link-items": [],
+      "observed-links": false,
+      "raw-file": "dreyeck/work/trails-rendered-evidence/ward.voices.ustawi.wiki--trails-rendered.json",
+      "trail-items": [
+        "93cd119d6286888a",
+        "fc6c7d06e5bce7d3"
+      ],
+      "trail-code-item": "84da00fa76850971"
+    },
+    {
+      "id": "thompson-think",
+      "site": "thompson.voices.ustawi.wiki",
+      "title": "How We Think",
+      "slug": "how-we-think",
+      "hyperbook": "fedwiki:thompson.voices.ustawi.wiki",
+      "url": "http://thompson.voices.ustawi.wiki/how-we-think",
+      "json-url": "http://thompson.voices.ustawi.wiki/how-we-think.json",
+      "selected-items": [
+        "dd58398f2e473674",
+        "217b0067e707e17c",
+        "cb5cae90d5a1f19d"
+      ],
+      "link-items": [
+        "dd58398f2e473674",
+        "217b0067e707e17c",
+        "cb5cae90d5a1f19d"
+      ],
+      "observed-links": true,
+      "raw-file": "dreyeck/work/trails-rendered-evidence/thompson.voices.ustawi.wiki--how-we-think.json"
+    },
+    {
+      "id": "thompson-memex",
+      "site": "thompson.voices.ustawi.wiki",
+      "title": "As We May Think",
+      "slug": "as-we-may-think",
+      "hyperbook": "fedwiki:thompson.voices.ustawi.wiki",
+      "url": "http://thompson.voices.ustawi.wiki/as-we-may-think",
+      "json-url": "http://thompson.voices.ustawi.wiki/as-we-may-think.json",
+      "selected-items": [
+        "38a6eb8423fa6f7c",
+        "39cb57e1b0fb35fe"
+      ],
+      "link-items": [],
+      "observed-links": false,
+      "raw-file": "dreyeck/work/trails-rendered-evidence/thompson.voices.ustawi.wiki--as-we-may-think.json",
+      "content-summary": "Bush describes constructing a trail, adding commentary and side trails, preserving it, and sharing a reproduced trail for insertion in a friend's memex."
+    },
+    {
+      "id": "jan-cooper",
+      "site": "jan.voices.ustawi.wiki",
+      "title": "Alan Cooper",
+      "slug": "alan-cooper",
+      "hyperbook": "fedwiki:jan.voices.ustawi.wiki",
+      "url": "http://jan.voices.ustawi.wiki/alan-cooper",
+      "json-url": "http://jan.voices.ustawi.wiki/alan-cooper.json",
+      "selected-items": [
+        "37d9faf7b0366769"
+      ],
+      "link-items": [
+        "37d9faf7b0366769"
+      ],
+      "observed-links": true,
+      "raw-file": "dreyeck/work/trails-rendered-evidence/jan.voices.ustawi.wiki--alan-cooper.json"
+    },
+    {
+      "id": "jan-ethnomethodology",
+      "site": "jan.voices.ustawi.wiki",
+      "title": "Ethnomethodology",
+      "slug": "ethnomethodology",
+      "hyperbook": "fedwiki:jan.voices.ustawi.wiki",
+      "url": "http://jan.voices.ustawi.wiki/ethnomethodology",
+      "json-url": "http://jan.voices.ustawi.wiki/ethnomethodology.json",
+      "selected-items": [
+        "61fa1dfcd5dd9de1"
+      ],
+      "link-items": [
+        "61fa1dfcd5dd9de1"
+      ],
+      "observed-links": true,
+      "raw-file": "dreyeck/work/trails-rendered-evidence/jan.voices.ustawi.wiki--ethnomethodology.json"
+    },
+    {
+      "id": "jan-dewey",
+      "site": "jan.voices.ustawi.wiki",
+      "title": "John Dewey",
+      "slug": "john-dewey",
+      "hyperbook": "fedwiki:jan.voices.ustawi.wiki",
+      "url": "http://jan.voices.ustawi.wiki/john-dewey",
+      "json-url": "http://jan.voices.ustawi.wiki/john-dewey.json",
+      "selected-items": [
+        "246e853a1bba5717"
+      ],
+      "link-items": [
+        "246e853a1bba5717"
+      ],
+      "observed-links": true,
+      "raw-file": "dreyeck/work/trails-rendered-evidence/jan.voices.ustawi.wiki--john-dewey.json"
+    },
+    {
+      "id": "jan-think",
+      "site": "jan.voices.ustawi.wiki",
+      "title": "How We Think",
+      "slug": "how-we-think",
+      "hyperbook": "fedwiki:jan.voices.ustawi.wiki",
+      "url": "http://jan.voices.ustawi.wiki/how-we-think",
+      "json-url": "http://jan.voices.ustawi.wiki/how-we-think.json",
+      "selected-items": [
+        "dd58398f2e473674",
+        "217b0067e707e17c",
+        "cb5cae90d5a1f19d"
+      ],
+      "link-items": [
+        "dd58398f2e473674",
+        "217b0067e707e17c",
+        "cb5cae90d5a1f19d"
+      ],
+      "observed-links": false,
+      "raw-file": "dreyeck/work/trails-rendered-evidence/jan.voices.ustawi.wiki--how-we-think.json"
+    },
+    {
+      "id": "source-think",
+      "site": "thompson.fed.wiki",
+      "title": "How We Think",
+      "slug": "how-we-think",
+      "hyperbook": "fedwiki:thompson.fed.wiki",
+      "url": "http://thompson.fed.wiki/how-we-think",
+      "json-url": "http://thompson.fed.wiki/how-we-think.json",
+      "selected-items": [],
+      "link-items": [
+        "dd58398f2e473674",
+        "217b0067e707e17c",
+        "cb5cae90d5a1f19d"
+      ],
+      "observed-links": false,
+      "raw-file": "dreyeck/work/trails-rendered-evidence/thompson.fed.wiki--how-we-think.json"
+    },
+    {
+      "id": "source-memex",
+      "site": "thompson.forage.ustawi.wiki",
+      "title": "As We May Think",
+      "slug": "as-we-may-think",
+      "hyperbook": "fedwiki:thompson.forage.ustawi.wiki",
+      "url": "http://thompson.forage.ustawi.wiki/as-we-may-think",
+      "json-url": "http://thompson.forage.ustawi.wiki/as-we-may-think.json",
+      "selected-items": [],
+      "link-items": [],
+      "observed-links": false,
+      "inherited-from": "thompson-memex"
+    }
+  ]
+}

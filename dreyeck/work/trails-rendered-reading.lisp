@@ -2,7 +2,8 @@
 (defpackage #:dreyeck/work/trails-rendered-reading
   (:use #:cl)
   (:export #:public-source-boundary #:solo-batch #:solo-batch-provenance
-           #:solo-beam #:public-result #:interpretation-path #:hoverbold-observation))
+           #:solo-beam #:public-result #:interpretation-path #:federated-context
+           #:hoverbold-observation #:context-events #:context-state-at #:context-delta))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
@@ -80,14 +81,17 @@
                      :terms ("getBBox" "g.node" "Trace" "layer" "interpret") :hits 0)
               :served-dialog "next.ward.dojo.fed.wiki matched the public Solo dialog; no Trace/getBBox match.")))))
 
-(defun read-capture (key)
+(defun read-observation (file)
   (with-open-file (stream (asdf:system-relative-pathname
-                          "dreyeck/work/reading" (getf (gethash key *provenance*) :file))
+                          "dreyeck/work/reading" file)
                          :external-format :utf-8)
     (shasht:read-json* :stream stream :single-value t
                       :object-format :hash-table :hash-table-test 'equal
                       :array-format :vector
                       :true-value :true :false-value :false :null-value :null)))
+
+(defun read-capture (key)
+  (read-observation (getf (gethash key *provenance*) :file)))
 
 (hyperdoc:defexample solo-batch
   "Observed MessageEvent.data before Solo mutates it. Read the saved JSON,
@@ -156,6 +160,44 @@ is an inference. Its implementation was not observed or reconstructed."
           :inference "Ward's reported later experiment appears to be a local Solo change; its precise source and behaviour remain unobserved."
           :falsified-by "A public revision in the identified lineage containing that operation."
           :provenance (solo-batch-provenance))))
+
+(defun read-federated-context ()
+  "Selected page contents and journal actions from the recovered Jan/Thompson JSON.
+The page/link/fork/trail graph records observations; ordering and shared concept
+names are derived below. Each inspection opens fresh objects. Causal influence
+on Ward's Trail relation change is not established."
+  (let* ((context (derive-federated-data
+                   (read-observation "dreyeck/work/trails-rendered-federated-context.json")))
+         (observed (gethash "observed" context))
+         (links (gethash "links" observed))
+         (forks (gethash "forks" observed))
+         (change (gethash "relation-type-change" observed))
+         (attribution (find "jan-dewey" links :key (lambda (link) (gethash "from" link))
+                            :test #'equal))
+         (names (loop for trail across (gethash "trails" observed)
+                      append (coerce (gethash "nodes" trail) 'list)))
+         (events (append (remove-if-not (lambda (link) (gethash "date" link))
+                                       (coerce links 'list))
+                         (coerce forks 'list) (list change))))
+    (setf (gethash "derived" context)
+          (alexandria:plist-hash-table
+           (list "scope" "Temporal ordering and shared concepts."
+                 "temporal-order" (coerce (sort events #'< :key (lambda (event) (gethash "date" event)))
+                                          'vector)
+                 "shared-concepts"
+                 (coerce (remove-duplicates
+                          (remove-if-not (lambda (name)
+                                           (find name links :key (lambda (link) (gethash "target" link))
+                                                            :test #'equal))
+                                         names)
+                          :test #'equal :from-end t)
+                         'vector)
+                 "jan-fork-after-ward-trail-change"
+                 (if (> (gethash "date" (aref forks 0)) (gethash "date" change)) :true :false)
+                 "jan-attribution-after-ward-trail-change"
+                 (if (> (gethash "date" attribution) (gethash "date" change)) :true :false))
+           :test 'equal))
+    context))
 
 (hyperdoc:see (hyperdoc:page "Solo hoverbold"))
 
