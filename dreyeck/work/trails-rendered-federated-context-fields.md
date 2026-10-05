@@ -95,3 +95,50 @@ followed the Before and After relation lists to all four Trail relation objects.
 Their IDs, endpoints and item identities were unchanged; the observed `kind` fields
 were four empty strings before and four `Trail` strings after. This happened before
 the existing Workspace controls were checked against the new model.
+
+## Coordinated Workspace
+
+The existing `federated-context` example's Topicmap view now contains two TALA
+projections. Both have the same context as their source. Its one `context-cursor`
+selects an existing `federated-event`; selecting a temporal sign and Previous/Next
+all use `select-context-event`. The temporal graph contains the ordered eleven
+events and ten adjacency relations labelled `next observed event`. Those arrows
+express chronology, not influence.
+
+The context map selects State or Delta. State is the selected event's inclusive
+`context-state-at` result, retained as `:after` in the actual `context-delta` value.
+Delta projects only changed/removed relations and their endpoints, plus changed
+or removed topics. An edit with no projected graph changes has an empty Delta.
+The context retains these raw-derived results for Inspector references and caches
+TALA renderings; neither projection advances or derives its own temporal state.
+State/Delta changes reuse the same temporal rendering.
+
+Context topic clicks reuse `topicmap-workspace-go-to`. The selected Topic and its
+represented object can both be inspected. The separate `Open wiki page` reference
+uses `render-hyperbook-or-page-link` with the original `fedwiki:` site and slug.
+Association signs retain their existing Inspector/gesture binding. Their Evidence
+view exposes actual relation, Delta change, before/after, and source item values.
+The existing observed `via Thompson` metadata is shown as textual attribution,
+with its own credited page link; the relation remains `wiki-link`, and fork
+provenance remains a separate `fork` relation. No new domain classes or evidence
+fixtures were introduced.
+
+The maps keep TALA's natural geometry in bounded, scrollable viewports. CLOG
+scrolls those viewports to the selected signs using the rendered SVG coordinates.
+This is presentation only: there is no browser event list, cursor or graph model.
+The additional CLOG after method specializes the existing Inspector Pane so it
+coexists with the generic Association gesture-binding after method.
+
+Local browser verification selected Thompson's 17:13:54.907 correction, then
+advanced through Jan's 17:14:16.195 Ethnomethodology edit and 17:14:46.108 Alan
+Cooper/Susan Kare edit to Ward's 17:18:24.009 event. Its Delta exposed four stable
+relation changes `"" → "Trail"`, with no topic additions/removals. The walkthrough
+continued through Jan's 18:03:05.302 fork, selected and inspected both same-title
+page Topics, then reached the 18:03:51.968 attribution. Actual event, State, Delta,
+Topic, association and change values were opened in CLOG Inspector, and a native
+link opened Thompson / How We Think. Cursor and topic actions refreshed the same
+context pane, and State/Delta left the temporal geometry unchanged.
+
+The external browser QA script remains outside the application. Its recorded
+walkthrough is `wiki-trails-rendered-local/federated-context-workspace-evidence.json`;
+it is not a semantic fixture or part of the running model.

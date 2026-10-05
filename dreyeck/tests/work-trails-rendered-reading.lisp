@@ -449,6 +449,7 @@
   (check-result-and-boundary)
   (check-federated-context)
   (check-temporal-federation)
+  (check-coordinated-context-workspace)
   (check-page-contract)
   (check-hoverbold)
   (format t "~&TRAILS-RENDERED-EXPERIMENT-PASS: exact inspectable batch/beam, expected trails and relations, observed 5/4 result, derived summary, shared provenance, scoped boundary, falsification and working page links.~%")

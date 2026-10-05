@@ -5,8 +5,11 @@
   ((data :initarg :data :reader context-data)
    (cursor :initarg :cursor :accessor context-cursor)
    (mode :initform :state :accessor context-mode)
-   (phase :initform :at :accessor context-phase)
    (event-objects :initform (make-hash-table) :reader context-event-objects)
+   ;; These are cached results, not another temporal engine. Only CURSOR selects
+   ;; time; every result comes from CONTEXT-DELTA / CONTEXT-STATE-AT.
+   (deltas :initform (make-hash-table) :reader context-deltas)
+   (workspace :initform nil :accessor context-workspace)
    (layouts :initform (make-hash-table :test 'equal) :reader context-layouts)))
 
 (defclass federated-event ()
@@ -339,125 +342,317 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
           :before before :after after
           :event record)))
 
+(defun context-current-delta (context)
+  "Retain the actual Lisp result used by both the map and Inspector links."
+  (or (gethash (context-cursor context) (context-deltas context))
+      (setf (gethash (context-cursor context) (context-deltas context))
+            (context-delta context (context-event-object context (context-cursor context))))))
+
+(defun context-current-state (context)
+  (getf (context-current-delta context) :after))
+
+(defun context-relation-item (context relation)
+  (let ((page (find (gethash "from" relation) (context-pages context)
+                    :key #'context-page-id :test #'equal)))
+    (when (and page (gethash "item" relation))
+      (gethash (gethash "item" relation)
+               (context-page-story-at page
+                 (gethash "date" (aref (context-events context) (context-cursor context))))))))
+
+(defun context-relation-attribution (context relation item)
+  ;; Attribution is existing observed text metadata, not a fork or another link.
+  ;; Do not expose the final reading's attribution before its item says it.
+  (when (and item (search "via Thompson" (gethash "text" item "")))
+    (find (gethash "item" relation)
+          (gethash "links" (gethash "observed" (context-data context)))
+          :key (lambda (link) (gethash "item" link)) :test #'equal)))
+
 (defun context-projection (context)
-  (let* ((event (aref (context-events context) (context-cursor context)))
-         (delta (context-delta context))
-         (state (if (eq :before (context-phase context)) (getf delta :before) (getf delta :after)))
+  (let* ((delta (context-current-delta context))
+         (state (context-current-state context))
          (relations (if (eq :delta (context-mode context))
                         (append (getf delta :changed-relations) (getf delta :removed-relations))
                         (getf state :relations)))
          (ids (if (eq :delta (context-mode context))
                   (remove-duplicates
-                   (append (list (context-page-id (context-page context (gethash "page" event))))
-                           (getf delta :added-topics) (getf delta :removed-topics)
+                   (append (getf delta :added-topics) (getf delta :removed-topics)
                            (mapcan (lambda (r) (list (gethash "from" r) (gethash "to" r))) relations))
                    :test #'equal)
-                  (getf state :topics)))
-         (event-object (context-event-object context (context-cursor context)))
-         (topics
-           (loop for id in ids
-                 for page = (find id (context-pages context) :key #'context-page-id :test #'equal)
-                 collect (dreyeck/topicmap:make-topicmap-topic
-                          :id id :type (if page :page :concept)
-                          :label (if page (context-page-label page)
-                                     (subseq id (length "concept:")))
-                          :object (or page id)))))
+                  (getf state :topics))))
     (dreyeck/topicmap:make-topicmap-projection
      :source context
-     :topics (append topics (list (dreyeck/topicmap:make-topicmap-topic
-                                   :id (gethash "id" event) :type :event
-                                   :label (format nil "Selected event: ~A" (gethash "operation" event))
-                                   :object event-object)))
+     :topics
+     (loop for id in ids
+           for page = (find id (context-pages context) :key #'context-page-id :test #'equal)
+           collect (dreyeck/topicmap:make-topicmap-topic
+                    :id id :type (if page :page :concept)
+                    :label (if page (context-page-label page) (subseq id (length "concept:")))
+                    :object (or page id)))
      :associations
      (loop for relation in relations
+           for item = (context-relation-item context relation)
            collect (dreyeck/topicmap:make-topicmap-association
-                    :id (gethash "id" relation) :type (if (equal "" (gethash "kind" relation)) "unnamed"
-                                                         (gethash "kind" relation))
+                    :id (gethash "id" relation)
+                    :type (if (equal "" (gethash "kind" relation)) "unnamed" (gethash "kind" relation))
                     :from (gethash "from" relation) :to (gethash "to" relation)
-                    :properties (list :evidence relation
-                                      :delta (cond ((member relation (getf delta :removed-relations) :test #'eq) :removed)
-                                                   ((member relation (getf delta :changed-relations) :test #'eq) :changed))))))))
+                    :properties
+                    (list :context context :evidence relation :item item
+                          :attribution (context-relation-attribution context relation item)
+                          :change (find (gethash "id" relation) (getf delta :relation-changes)
+                                        :key (lambda (change) (getf change :id)) :test #'equal)
+                          :delta (cond ((member relation (getf delta :removed-relations) :test #'eq) :removed)
+                                       ((member relation (getf delta :changed-relations) :test #'eq) :changed))))))))
+
+(defun context-temporal-projection (context)
+  "Ordered observed event objects. NEXT means order, never causal influence."
+  (let ((events (context-events context)))
+    (dreyeck/topicmap:make-topicmap-projection
+     :source context
+     :topics
+     (loop for record across events for index from 0
+           collect (dreyeck/topicmap:make-topicmap-topic
+                    :id (gethash "id" record) :type :event
+                    :label (format nil "~A~%~A~%~A"
+                                   (subseq (gethash "at" record) 11)
+                                   (context-page-label (context-page context (gethash "page" record)))
+                                   (gethash "operation" record))
+                    :object (context-event-object context index)))
+     :associations
+     (loop for index from 1 below (length events)
+           for from = (gethash "id" (aref events (1- index)))
+           for to = (gethash "id" (aref events index))
+           collect (dreyeck/topicmap:make-topicmap-association
+                    :id (format nil "order:~A" to) :type "next observed event"
+                    :from from :to to)))))
 
 (defmethod dreyeck/topicmap:topicmap-projection-of ((context federated-context))
   (context-projection context))
 
-(defun context-map-html (context)
-  "Existing TALA layout and Inspector signs, with page signs resolving natively."
-  (let* ((key (list (context-cursor context) (context-mode context) (context-phase context)))
-         (rendering (or (gethash key (context-layouts context))
-                        (setf (gethash key (context-layouts context))
-                              (dreyeck/topicmap/tala:run-tala
-                               (dreyeck/topicmap/tala:projection-tala-input (context-projection context))))))
-         (projection (dreyeck/topicmap/tala:tala-input-projection
-                      (dreyeck/topicmap/tala:tala-rendering-input rendering)))
+(defun context-rendering (context projection-kind)
+  (let ((key (ecase projection-kind
+               (:temporal :temporal)
+               (:context (list (context-cursor context) (context-mode context))))))
+    (or (gethash key (context-layouts context))
+        (let ((projection (ecase projection-kind
+                            (:temporal (context-temporal-projection context))
+                            (:context (context-projection context)))))
+          ;; An edit can change words without changing this projected graph.
+          ;; TALA emits no SVG for empty input; do not invent a topic for it.
+          (when (dreyeck/topicmap:topicmap-projection-topics-of projection)
+            (setf (gethash key (context-layouts context))
+                  (dreyeck/topicmap/tala:run-tala
+                   (dreyeck/topicmap/tala:projection-tala-input projection))))))))
+
+(defun context-rendered-projection (context projection-kind)
+  (let ((rendering (context-rendering context projection-kind)))
+    (if rendering
+        (dreyeck/topicmap/tala:tala-input-projection (dreyeck/topicmap/tala:tala-rendering-input rendering))
+        (context-projection context))))
+
+(defun context-current-workspace (context)
+  "Reuse Workspace Point selection. It owns no time or State/Delta cursor."
+  (let* ((projection (context-rendered-projection context :context))
+         (old (context-workspace context)))
+    (unless (and old (eq projection (dreyeck/topicmap:topicmap-workspace-projection-of old)))
+      (let* ((ids (mapcar #'dreyeck/topicmap:topicmap-topic-id-of
+                         (dreyeck/topicmap:topicmap-projection-topics-of projection)))
+             (prior (and old (dreyeck/topicmap:topicmap-workspace-point-of old)))
+             (page (context-page-id (context-page context
+                     (gethash "page" (aref (context-events context) (context-cursor context))))))
+             (point (or (find prior ids :test #'equal) (find page ids :test #'equal) (first ids))))
+        (setf (context-workspace context)
+              (when point (dreyeck/topicmap:make-topicmap-workspace projection point)))))
+    (context-workspace context)))
+
+(defun select-context-topic (context id)
+  (dreyeck/topicmap:topicmap-workspace-go-to (context-current-workspace context) id)
+  t)
+
+(defun context-map-html (context &optional (projection-kind :context))
+  "Two TALA projections, coordinated by the context's one Lisp cursor."
+  (unless (context-rendering context projection-kind)
+    (return-from context-map-html "<p>No topic or relation changes at this event.</p>"))
+  (let* ((rendering (context-rendering context projection-kind))
+         (projection (context-rendered-projection context projection-kind))
+         (workspace (when (eq projection-kind :context) (context-current-workspace context)))
+         (delta (context-current-delta context))
+         (selected (gethash "id" (aref (context-events context) (context-cursor context))))
          (dom (let ((plump:*tag-dispatchers* plump:*xml-tags*))
                 (plump:parse (dreyeck/inspector/topicmap/tala::interactive-tala-svg rendering)))))
     (dolist (group (plump:get-elements-by-tag-name dom "g"))
       (let* ((id (plump:attribute group "data-topic-id"))
-             (topic (and id (dreyeck/topicmap:topicmap-projection-topic-by-id projection id)))
-             (object (and topic (dreyeck/topicmap:topicmap-topic-object-of topic)))
              (association-id (plump:attribute group "data-association-id")))
-        (cond ((typep object 'federated-event)
-               (setf (plump:attribute group "id") (html-inspector-views:inspect-id object)))
-              ((and (hash-table-p object) (gethash "hyperbook" object))
-               (setf (plump:attribute group "id")
-                     (html-inspector-views:eval-id (html-inspector-views:thunk (native-context-page object))))))
-        (when (or (eq :delta (context-mode context)) (eq :at (context-phase context)))
+        (when id
+          (setf (plump:attribute group "id")
+                (html-inspector-views:action-id
+                 (if (eq projection-kind :temporal)
+                     (let ((index (position id (context-events context)
+                                            :key (lambda (e) (gethash "id" e)) :test #'equal)))
+                       (html-inspector-views:thunk (select-context-event context index)))
+                     (html-inspector-views:thunk (select-context-topic context id)))))
+          (when (if (eq projection-kind :temporal) (equal id selected)
+                    (and workspace (equal id (dreyeck/topicmap:topicmap-workspace-point-of workspace))))
+            (setf (plump:attribute group "data-selected") "true")))
+        (when (eq projection-kind :context)
           (when association-id
             (let* ((association (find association-id (dreyeck/topicmap:topicmap-projection-associations-of projection)
                                      :key #'dreyeck/topicmap:topicmap-association-id-of :test #'equal))
                    (status (getf (dreyeck/topicmap:topicmap-association-properties-of association) :delta)))
               (when status (setf (plump:attribute group "data-delta") (string-downcase (symbol-name status))))))
-          (when (or (typep object 'federated-event)
-                    (equal id (context-page-id (context-page context
-                                 (gethash "page" (aref (context-events context) (context-cursor context))))))
-                    (member id (getf (context-delta context) :added-topics) :test #'equal))
+          (when (member id (getf delta :added-topics) :test #'equal)
             (setf (plump:attribute group "data-delta") "changed"))
-          (when (member id (getf (context-delta context) :removed-topics) :test #'equal)
+          (when (member id (getf delta :removed-topics) :test #'equal)
             (setf (plump:attribute group "data-delta") "removed")))))
-    (concatenate 'string
-                 "<style>[data-delta='changed'] path,[data-delta='changed'] rect{stroke:#b45309!important;stroke-width:3px!important}[data-delta='removed']{opacity:.45}</style>"
-                 (plump:serialize dom nil))))
+    ;; Keep TALA's natural dimensions inside a scrollable viewport. Stretching
+    ;; the event chain to pane width makes it several screens tall; shrinking
+    ;; the context graph to that width makes its page labels unreadable.
+    (let* ((outer (first (plump:get-elements-by-tag-name dom "svg")))
+           (inner (second (plump:get-elements-by-tag-name dom "svg"))))
+      (setf (plump:attribute outer "style")
+            (format nil "width:~Apx;height:~Apx;max-width:none"
+                    (plump:attribute inner "width") (plump:attribute inner "height"))))
+    (plump:serialize dom nil)))
+
+(defun render-context-point (context)
+  (let ((workspace (context-current-workspace context)))
+    (when workspace
+      (let* ((topic (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
+             (object (dreyeck/topicmap:topicmap-topic-object-of topic)))
+        (html-inspector-views:html
+          (:p "Selected topic: " (html-inspector-views:object-ref topic :display
+                                  (dreyeck/topicmap:topicmap-topic-label-of topic))
+              " · " (html-inspector-views:object-ref object :display "Inspect represented object"))
+          (when (and (hash-table-p object) (gethash "hyperbook" object))
+            (html-inspector-views:html (:p "Open wiki page: " (render-context-page-link object))))
+          (:p "Relations at this topic: "
+              (dolist (association (dreyeck/topicmap::topicmap-associations-of-point workspace))
+                (html-inspector-views:object-ref association :display
+                  (dreyeck/topicmap:topicmap-association-type-of association))
+                (html-inspector-views:str " "))))))))
+
+(defun render-context-changes (context)
+  (let ((delta (context-current-delta context)))
+    (html-inspector-views:html
+      (:p (html-inspector-views:esc
+           (format nil "~D topic additions · ~D topic removals · ~D changed relations · ~D removed relations"
+                   (length (getf delta :added-topics)) (length (getf delta :removed-topics))
+                   (length (getf delta :changed-relations)) (length (getf delta :removed-relations)))))
+      (:table :class "inspector-table"
+       (dolist (change (getf delta :relation-changes))
+         (let ((before (getf change :before)) (after (getf change :after)))
+           (html-inspector-views:html
+             (:tr :data-relation-change (getf change :id)
+              (:td (html-inspector-views:object-ref change :display (getf change :id)))
+              (:td (html-inspector-views:esc (gethash "from" after)))
+              (:td (html-inspector-views:esc (gethash "to" after)))
+              (:td (html-inspector-views:esc
+                    (if before (format nil "~S → ~S" (gethash "kind" before) (gethash "kind" after))
+                        (format nil "added ~S" (gethash "kind" after)))))))))))))
 
 (html-inspector-views:defview dreyeck/inspector/topicmap::👀topicmap (context federated-context)
   (html-inspector-views:html-view :title "Topicmap" :priority 0
     (let* ((event (aref (context-events context) (context-cursor context)))
-           (page (context-page context (gethash "page" event))))
+           (page (context-page context (gethash "page" event)))
+           (item (gethash "after" event)))
       (html-inspector-views:html
+        (:style "[data-projection]{overflow:auto;max-height:26rem;border:1px solid #ddd}[data-projection='temporal']{max-height:18rem}[data-projection='context'] [data-delta='changed'] path,[data-projection='context'] [data-delta='changed'] rect{stroke:#b45309!important;stroke-width:3px!important}[data-projection='context'] [data-delta='removed']{opacity:.45}[data-projection] [data-selected='true'] rect{stroke:#2563eb!important;stroke-width:4px!important}")
         (:p "How did this federated context change during October 1?")
         (:p (html-inspector-views:action-button "Previous event" (html-inspector-views:thunk
                                                                  (select-context-event context (1- (context-cursor context)))))
             " " (html-inspector-views:esc (gethash "at" event)) " "
             (html-inspector-views:action-button "Next event" (html-inspector-views:thunk
-                                                             (select-context-event context (1+ (context-cursor context))))))
-        (:p (html-inspector-views:esc (format nil "~A / ~A — ~A" (gethash "site" page)
-                                             (gethash "title" page) (gethash "summary" event))))
+                                                             (select-context-event context (1+ (context-cursor context)))))
+            " · " (html-inspector-views:esc (format nil "Event ~D of ~D" (1+ (context-cursor context))
+                                                    (length (context-events context)))))
+        (:p (html-inspector-views:esc (format nil "~A / ~A · ~A" (gethash "site" page)
+                                             (gethash "title" page) (gethash "operation" event)))
+            " · " (html-inspector-views:object-ref (context-event-object context (context-cursor context))
+                                                  :display "Inspect selected event evidence"))
+        (:h3 "Temporal · 2026-10-01 UTC")
+        (:div :id (symbol-name (gensym "temporal-map-")) :data-projection "temporal"
+              (html-inspector-views:str (context-map-html context :temporal)))
+        (:h3 "Federated context")
         (:p (dolist (mode '(:state :delta))
               (let ((choice mode))
                 (html-inspector-views:action-button (string-capitalize (symbol-name choice))
                   (html-inspector-views:thunk (setf (context-mode context) choice) t))
                 (html-inspector-views:str " ")))
             " · " (html-inspector-views:esc (symbol-name (context-mode context)))
-            (when (eq :state (context-mode context))
-              (dolist (phase '(:before :at :after))
-                (let ((choice phase))
-                  (html-inspector-views:action-button (if (eq choice :at) "At event" (string-capitalize (symbol-name choice)))
-                    (html-inspector-views:thunk (setf (context-phase context) choice) t))
-                  (html-inspector-views:str " ")))
-              " · " (html-inspector-views:esc (symbol-name (context-phase context)))))
-        (:p "Orange marks this event's change; faded topics are removed. Before excludes the event; At event applies and highlights it; After shows the resulting state. Delta shows only its changes, with unchanged endpoints for context.")
-        (:p (html-inspector-views:object-ref (context-event-object context (context-cursor context))
-                                            :display "Inspect selected event evidence"))
-        (html-inspector-views:str (context-map-html context))
+            " · " (html-inspector-views:object-ref (context-current-state context) :display "Inspect current State")
+            " · " (html-inspector-views:object-ref (context-current-delta context) :display "Inspect current Delta"))
+        (:p "Select an event to move the cursor. Select a context topic to inspect it; its separate wiki link opens the page. Orange relations mark the selected event's changes; faded topics are removed.")
+        (:div :id (symbol-name (gensym "context-map-")) :data-projection "context"
+              (html-inspector-views:str (context-map-html context)))
+        (render-context-point context)
+        (when (eq :delta (context-mode context)) (render-context-changes context))
+        (when (and (hash-table-p item) (search "via Thompson" (gethash "text" item "")))
+          (html-inspector-views:html
+            (:p "Textual attribution: " (html-inspector-views:esc (gethash "text" item)) " · "
+                (html-inspector-views:object-ref item :display "Inspect attribution item")
+                " · credited page: " (render-context-page-link (context-page context "thompson-think")))))
         (:p "Observed: page contents, links, forks, journal times and Ward's trail nodes. Derived: temporal ordering and shared concepts.")
-        (:p "Not established: " (html-inspector-views:esc (gethash "not-established" (context-data context))))
-        (:details (:summary "Select an observed event")
-                  (loop for record across (context-events context) for index from 0
-                        do (let ((choice index))
-                             (html-inspector-views:html
-                               (:p (html-inspector-views:action-button
-                                    (cl-who:escape-string (format nil "~A · ~A" (gethash "at" record) (gethash "summary" record)))
-                                    (html-inspector-views:thunk (select-context-event context choice))))))))))))
+        (:p "Not established: " (html-inspector-views:esc (gethash "not-established" (context-data context))))))))
+
+(defun context-map-scroll-offsets (viewport)
+  "Presentation coordinates from TALA's SVG, never event/time semantics."
+  (let* ((selected (find "true" (plump:get-elements-by-tag-name viewport "g")
+                         :key (lambda (g) (plump:attribute g "data-selected")) :test #'equal))
+         (rect (and selected (first (plump:get-elements-by-tag-name selected "rect"))))
+         (inner (second (plump:get-elements-by-tag-name viewport "svg"))))
+    (when (and rect inner)
+      (let ((origin (uiop:split-string (plump:attribute inner "viewBox"))))
+        (flet ((coordinate (text) (shasht:read-json text)))
+          (values (max 0 (round (- (coordinate (plump:attribute rect "x"))
+                                  (coordinate (first origin)) 72)))
+                  (max 0 (round (- (coordinate (plump:attribute rect "y"))
+                                  (coordinate (second origin)) 72)))))))))
+
+(defmethod clog-moldable-inspector::create-view-element :after
+    ((pane clog-moldable-inspector::pane) parent (view html-inspector-views:html-view))
+  (declare (ignore pane))
+  ;; CLOG retains the two bounded viewports around their selected signs after
+  ;; a refresh. No browser cursor, event ordering or graph state is introduced.
+  (when (find-if (lambda (ref) (typep (cdr ref) 'federated-event))
+                (html-inspector-views:view-references view))
+    (let* ((plump:*tag-dispatchers* plump:*xml-tags*)
+           (dom (plump:parse (html-inspector-views:view-html view))))
+      (dolist (viewport (plump:get-elements-by-tag-name dom "div"))
+        (when (plump:attribute viewport "data-projection")
+          (multiple-value-bind (x y) (context-map-scroll-offsets viewport)
+            (when x
+              (let ((element (clog:attach-as-child parent (plump:attribute viewport "id"))))
+                (setf (clog:scroll-left element) x (clog:scroll-top element) y)))))))))
+
+(html-inspector-views:defview federated-relation-evidence (association dreyeck/topicmap:topicmap-association)
+  (let* ((properties (dreyeck/topicmap:topicmap-association-properties-of association))
+         (context (getf properties :context)))
+    (when (typep context 'federated-context)
+      (html-inspector-views:html-view :title "Evidence" :priority 0
+        (let ((relation (getf properties :evidence)) (change (getf properties :change))
+              (item (getf properties :item)) (attribution (getf properties :attribution)))
+          (html-inspector-views:html
+            (:p (html-inspector-views:esc (gethash "kind" relation)) " · "
+                (html-inspector-views:object-ref relation :display "Inspect selected relation"))
+            (:p (html-inspector-views:esc (gethash "id" relation)))
+            (:p (html-inspector-views:esc (gethash "from" relation)) " → "
+                (html-inspector-views:esc (gethash "to" relation)))
+            (when change
+              (html-inspector-views:html
+                (:p (html-inspector-views:object-ref change :display "Inspect relation change"))
+                (:p "Before: " (html-inspector-views:object-ref (getf change :before)))
+                (:p "After: " (html-inspector-views:object-ref (getf change :after)))))
+            (when item
+              (html-inspector-views:html
+                (:p (html-inspector-views:object-ref item :display "Inspect source item"))
+                (:p (html-inspector-views:esc (gethash "text" item "")))))
+            (when attribution
+              (html-inspector-views:html
+                (:p "Textual attribution: " (html-inspector-views:esc (gethash "attribution" attribution))
+                    " · " (html-inspector-views:object-ref attribution :display "Inspect observed attribution")
+                    " · " (render-context-page-link (context-page context (gethash "credited-page" attribution))))))
+            (dolist (id (list (gethash "from" relation) (gethash "to" relation)))
+              (let ((page (find id (context-pages context) :key #'context-page-id :test #'equal)))
+                (when page (html-inspector-views:html (:p "Wiki page: " (render-context-page-link page))))))))))))
 
 (html-inspector-views:defview federated-event-evidence (event federated-event)
   (html-inspector-views:html-view :title "Evidence" :priority 0
@@ -487,9 +682,9 @@ TIMESTAMP is an ISO UTC string or Unix milliseconds. No prepared effect is read.
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))
 (hyperdoc:defexample federated-context
-  "Inspect selected observed page contents and journal events as successive states
-of one Topicmap. Forks import inherited content at their own time. Native page
-signs resolve through fedwiki HyperBooks; causal influence is not established."
+  "One Lisp cursor coordinates ordered events and the State/Delta context Topicmap.
+Forks import inherited content at their own time. Topic selection and native
+fedwiki page navigation are separate; causal influence is not established."
   (let ((data (read-federated-context)))
     (make-instance 'federated-context :data data
                    :cursor (1- (length (gethash "events" (gethash "temporal" data)))))))
