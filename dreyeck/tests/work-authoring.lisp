@@ -416,13 +416,21 @@ one way on."
          (inspector (ops:work-topic-operation-request operation topic))
          (bindings (m:workspace-action-sign-bindings (gt::%occurrence workspace topic :bindings nil))))
     ;; This image offers Change work status on the sign of a declared Work
-    ;; Topic, and nothing on a Topic no HTML declaration backs.
+    ;; Topic, alongside ordinary inspections; a plain Topic has no Work operation.
     (assert (equal '("binding/radial-menu-change-work-status" "binding/learned-mark-change-work-status")
-                   (mapcar #'w:gesture-binding-id bindings)))
-    (assert (every (lambda (binding) (eq operation (w:gesture-binding-operation binding))) bindings))
+                   (mapcar #'w:gesture-binding-id
+                           (remove operation bindings :key #'w:gesture-binding-operation :test-not #'eq))))
+    (let ((sign (gt::%production-occurrence workspace topic)))
+      (gt::check-topic-binding-sectors sign)
+      (gt::check-topic-binding-pair sign operation 0)
+      (gt::check-topic-binding-pair sign (w:inspect-represented-object-operation) 180)
+      (gt::check-topic-binding-pair sign (w:inspect-topicmap-sign-operation) 270)
+      (assert (notany (lambda (binding) (eq (w:follow-operation) (w:gesture-binding-operation binding))) bindings)))
     (let* ((plain (tm:make-topicmap-topic :id "plain" :label "Plain"))
            (elsewhere (tm:make-topicmap-workspace (tm:make-topicmap-projection :topics (list plain)) "plain")))
-      (assert (null (m:workspace-action-sign-bindings (gt::%occurrence elsewhere plain :bindings nil)))))
+      (let ((sign (gt::%production-occurrence elsewhere plain)))
+        (assert (= 2 (length (m:workspace-action-sign-bindings sign))))
+        (gt::check-topic-binding-pair sign (w:inspect-topicmap-sign-operation) 270)))
     ;; A radial gesture and a mark on the sign select the Inspector's own
     ;; operation request: the same object, operation and declaration.
     (dolist (steps (list gt::*radial* gt::*mark*))
@@ -433,6 +441,8 @@ one way on."
           (assert (eq workspace (a::editor-workspace context)))
           (assert (eq projection (a::editor-projection context)))
           (assert (eq inspector gesture))
+          (assert (equal "hyperdoc-page-authoring" (tm:topicmap-workspace-point-of workspace)))
+          (assert (null (tm:topicmap-workspace-history-of workspace)))
           (assert (eq operation (r:operation-request-operation gesture)))
           (assert (eq (work:topic-source-occurrence topic) (r:operation-request-occurrence gesture))))))
     (assert (string= source (%read path)))

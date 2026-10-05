@@ -79,8 +79,10 @@ remain. The per-sign highlight branch was already removed in `92025a7d`.
 
 The explicit per-sign inspection table is retained and tested. Its two targets
 can now also be reached through Point, making it structurally redundant for
-inspection of the current Topic. It still supports inspecting another sign without
-moving Point, and remains useful for comparison.
+inspection of the current Topic. The [Topic marking menu](topic-marking-menu.md)
+now also inspects an arbitrary projected Topic or its represented object without
+moving Point, duplicating that table's inspection capability. The table and Point
+panel remain unchanged in this slice.
 
 ## Persistent Workspace: Model C
 

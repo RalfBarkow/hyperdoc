@@ -63,14 +63,15 @@ occurrence type. Nothing in production supplies these."
     occurrence))
 
 (defun %feed (occurrence steps &key (trust "untrusted"))
-  "STEPS as (EVENT-NAME X BUTTONS), in browser order."
-  (loop for (name x buttons) in steps
+  "STEPS as (EVENT-NAME X BUTTONS [Y]), in browser order."
+  (loop for (name x buttons y) in steps
+        for py = (or y 10)
         for sequence from 1
         for which = (if (member name '("pointerdown" "pointerup") :test #'string=) 3 0)
         do (m::%receive-topic-gesture
             occurrence (list :type :workspace-action-sign-occurrence :occurrence occurrence)
-            (format nil "~A|~A|~D:10:0:0:~D:false:false:false:false:~D:10:~D:10:~D:~D"
-                    name trust x which x x buttons sequence))))
+            (format nil "~A|~A|~D:~D:0:0:~D:false:false:false:false:~D:~D:~D:~D:~D:~D"
+                    name trust x py which x py x py buttons sequence))))
 
 (defparameter *radial*
   '(("pointerdown" 100 2) ("gesturerevealdeadline" 100 2)
@@ -87,13 +88,74 @@ occurrence type. Nothing in production supplies these."
       (g:gesture-window-selection (m:occurrence-gesture-window occurrence))
     (values (and binding (w:gesture-binding-id binding)) (getf subject :occurrence))))
 
-(defun test-production-offers-no-operation (workspace topic)
-  (assert (null m:*workspace-action-sign-bindings*))
-  (let ((occurrence (%occurrence workspace topic :bindings m:*workspace-action-sign-bindings*)))
-    (%feed occurrence *radial*)
-    ;; Recognized, and completed with nothing: there is no sector to select.
-    (assert (eq :cancelled (getf (%result occurrence) :state)))
-    (assert (null (%selected occurrence)))))
+(defun %production-occurrence (workspace topic)
+  (let ((occurrence (%occurrence workspace topic :bindings nil)))
+    (setf (m:occurrence-gesture-window occurrence)
+          (g:make-gesture-window :bindings (m:workspace-action-sign-bindings occurrence)))
+    occurrence))
+
+(defun check-topic-binding-sectors (occurrence)
+  "Inclusive sectors for different operations must not overlap within either path."
+  (dolist (kind '(:radial-menu :learned-mark))
+    (let ((bindings (g:menu-bindings (m:occurrence-gesture-window occurrence)
+                                   (list :type :workspace-action-sign-occurrence :occurrence occurrence) kind)))
+      (loop for (binding . others) on bindings do
+        (dolist (other others)
+          (assert (> (w::%angular-distance (w:gesture-binding-sector-center binding)
+                                          (w:gesture-binding-sector-center other))
+                     (+ (w:gesture-binding-sector-half-width binding)
+                        (w:gesture-binding-sector-half-width other)))
+                  () "Overlapping Topic sectors: ~A / ~A"
+                  (w:gesture-binding-id binding) (w:gesture-binding-id other)))))))
+
+(defun check-topic-binding-pair (occurrence operation angle)
+  (let* ((bindings (m:workspace-action-sign-bindings occurrence))
+         (pair (remove operation bindings :key #'w:gesture-binding-operation :test-not #'eq))
+         (radial (find :radial-menu pair :key #'w:gesture-binding-kind))
+         (mark (find :learned-mark pair :key #'w:gesture-binding-kind)))
+    (assert (= 2 (length pair)))
+    (assert (and radial mark))
+    (assert (eq (w:gesture-binding-operation radial) (w:gesture-binding-operation mark)))
+    (assert (= angle (w:gesture-binding-sector-center radial) (w:gesture-binding-sector-center mark)))
+    (assert (= (w:gesture-binding-sector-half-width radial) (w:gesture-binding-sector-half-width mark)))))
+
+(defun %sector-trace (angle kind)
+  (let* ((radians (* pi (/ angle 180)))
+         (x (round (+ 100 (* 80 (cos radians)))))
+         (y (round (+ 100 (* 80 (sin radians))))))
+    (append (list '("pointerdown" 100 2 100))
+            (when (eq kind :radial-menu) (list '("gesturerevealdeadline" 100 2 100)))
+            (list (list "pointermove" x 2 y) (list "pointerup" x 0 y)))))
+
+(defun test-production-topic-inspections (workspace topic)
+  (let ((point (tm:topicmap-workspace-point-of workspace))
+        (history (tm:topicmap-workspace-history-of workspace)))
+    (dolist (case (list (list (w:inspect-represented-object-operation) 180 (tm:topicmap-topic-object-of topic))
+                        (list (w:inspect-topicmap-sign-operation) 270 topic)))
+      (destructuring-bind (operation angle object) case
+        (dolist (kind '(:radial-menu :learned-mark))
+          (let ((occurrence (%production-occurrence workspace topic)))
+            (check-topic-binding-sectors occurrence)
+            (check-topic-binding-pair occurrence operation angle)
+            (%feed occurrence (%sector-trace angle kind))
+            (assert (eq :completed (getf (%result occurrence) :state)))
+            (assert (eq operation (w:gesture-binding-operation
+                                  (g:gesture-window-selection (m:occurrence-gesture-window occurrence)))))
+            (assert (eq object (m:workspace-action-sign-selected-object occurrence)))))))
+    (assert (equal point (tm:topicmap-workspace-point-of workspace)))
+    (assert (eq history (tm:topicmap-workspace-history-of workspace))))
+  ;; No object: only the sign's original sector remains, rather than shifting.
+  (let* ((plain (tm:make-topicmap-topic :id "plain" :label "Plain"))
+         (ws (tm:make-topicmap-workspace (tm:make-topicmap-projection :topics (list plain)) "plain"))
+         (occurrence (%production-occurrence ws plain))
+         (target (list :type :workspace-action-sign-occurrence :occurrence occurrence)))
+    (assert (= 2 (length (m:workspace-action-sign-bindings occurrence))))
+    (check-topic-binding-pair occurrence (w:inspect-topicmap-sign-operation) 270)
+    (assert (handler-case (progn (m:operation-inspectable-object (w:inspect-represented-object-operation) target) nil)
+              (m:operation-not-applicable () t))))
+  (dolist (operation (list (w:inspect-represented-object-operation) (w:inspect-topicmap-sign-operation)))
+    (assert (handler-case (progn (m:operation-inspectable-object operation '(:type :topicmap-association)) nil)
+              (m:operation-not-applicable () t)))))
 
 (defun test-the-exact-occurrence-is-the-target (workspace topic)
   (dolist (case (list (list *radial* "test-only/radial-menu" :menu-visible)
@@ -170,7 +232,7 @@ tokens and Gesture Windows; input to one does not reach the other."
   (let* ((workspace (reading-workspace))
          (topic (%topic workspace *reachable-topic-id*)))
     (assert topic)
-    (test-production-offers-no-operation workspace topic)
+    (test-production-topic-inspections workspace topic)
     (test-the-exact-occurrence-is-the-target workspace topic)
     (test-occurrence-is-not-the-topic-id workspace topic)
     (test-topic-and-inspectable-object-differ workspace topic)
@@ -178,8 +240,7 @@ tokens and Gesture Windows; input to one does not reach the other."
     (test-primary-refused workspace topic)
     (test-an-ended-occurrence-takes-no-input workspace topic)
     (test-occurrence-overview workspace topic)
-    (format t "~&WORKSPACE-ACTION-SIGN-OCCURRENCE-PASS: production offers no ~
-Topic Operation; with test-only Bindings a radial and a mark complete on ~
+    (format t "~&WORKSPACE-ACTION-SIGN-OCCURRENCE-PASS: production inspections share identities/angles, exact targets and disjoint sectors; with test-only Bindings a radial and a mark complete on ~
 the exact occurrence; two occurrences of one Topic are distinct; the ~
 inspectable object is not the Topic; inputs record isTrusted; an ended ~
 occurrence takes no input.~%")

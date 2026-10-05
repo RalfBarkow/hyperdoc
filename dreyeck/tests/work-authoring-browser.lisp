@@ -85,7 +85,9 @@ seconds, or until DONE-FILE exists, before closing."
        (let* ((sign (%witness-sign "hyperdoc-page-authoring"))
               (window (m:occurrence-gesture-window sign)))
          (assert (equal '("binding/radial-menu-change-work-status" "binding/learned-mark-change-work-status")
-                        (mapcar #'w:gesture-binding-id (m:workspace-action-sign-bindings sign))))
+                        (mapcar #'w:gesture-binding-id
+                                (remove operation (m:workspace-action-sign-bindings sign)
+                                        :key #'w:gesture-binding-operation :test-not #'eq))))
          (format t "~&WITNESS-SIGN: ~A offers ~{~A~^, ~}~%" (m:occurrence-topic-id sign)
                  (mapcar #'w:gesture-binding-id (m:workspace-action-sign-bindings sign)))
          ;; A radial gesture: press, wait for the menu, move right, release.

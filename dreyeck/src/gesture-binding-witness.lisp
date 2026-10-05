@@ -7,6 +7,9 @@
            #:semantic-operation-identity-title
            #:insert-executable-defexample-operation
            #:inspect-relation-contract-operation
+           #:follow-operation
+           #:inspect-represented-object-operation
+           #:inspect-topicmap-sign-operation
            #:change-relation-operation
            #:change-work-status-operation
            #:create-relationship-operation
@@ -75,6 +78,18 @@ Like every identity here it is data; what it shows is computed elsewhere.")
 
 (defun inspect-relation-contract-operation ()
   *inspect-relation-contract-operation*)
+
+(defvar *follow-operation*
+  (%make-operation-identity "operation/follow" "Follow"))
+(defun follow-operation () *follow-operation*)
+
+(defvar *inspect-represented-object-operation*
+  (%make-operation-identity "operation/inspect-represented-object" "Inspect represented object"))
+(defun inspect-represented-object-operation () *inspect-represented-object-operation*)
+
+(defvar *inspect-topicmap-sign-operation*
+  (%make-operation-identity "operation/inspect-topicmap-sign" "Inspect Topicmap sign"))
+(defun inspect-topicmap-sign-operation () *inspect-topicmap-sign-operation*)
 
 (defvar *change-work-status-operation*
   (%make-operation-identity "operation/change-work-status" "Change work status")

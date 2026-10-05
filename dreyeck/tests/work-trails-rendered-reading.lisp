@@ -1,7 +1,11 @@
 (defpackage #:dreyeck/work/trails-rendered-reading/tests
   (:use #:cl)
   (:local-nicknames (#:reading #:dreyeck/work/trails-rendered-reading)
-                    (#:views #:html-inspector-views))
+                    (#:views #:html-inspector-views)
+                    (#:gt #:dreyeck/topicmap/gesture/tests)
+                    (#:m #:dreyeck/inspector/topicmap)
+                    (#:tm #:dreyeck/topicmap)
+                    (#:w #:dreyeck/gesture-binding-witness))
   (:export #:run-tests))
 (in-package #:dreyeck/work/trails-rendered-reading/tests)
 
@@ -454,6 +458,7 @@
   (check-context-interaction-semantics)
   (check-context-orthogonal-operations)
   (check-context-persistent-workspace)
+  (check-context-topic-operations)
   (check-attribution-negative-control)
   (check-attribution-mutation-control)
   (check-page-contract)

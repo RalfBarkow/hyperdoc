@@ -1381,7 +1381,7 @@ Nothing here offers it: no Topic sign Binding, no action, no authoring."
                       (views:view-references view)))
       (assert (null (find "Change work status" views :key #'views:view-title :test #'equal))))
     ;; Not offered in this image: nothing authoring is loaded, the Topic sign
-    ;; offers no Binding, and the Operation shows nothing for it.
+    ;; offers no Work status Binding, and that Operation shows nothing for it.
     (assert (null (find-package "DREYECK/WORK/AUTHORING")))
     (assert (not (asdf:component-loaded-p "dreyeck/workflow/authoring")))
     (let* ((sign (make-instance 'm:workspace-action-sign-occurrence
@@ -1392,7 +1392,8 @@ Nothing here offers it: no Topic sign Binding, no action, no authoring."
                                                           :fn (lambda () nil))
                                 :element nil :pane nil :view nil))
            (target (list :type :workspace-action-sign-occurrence :occurrence sign)))
-      (assert (null (m:workspace-action-sign-bindings sign)))
+      (assert (notany (lambda (binding) (eq operation (w:gesture-binding-operation binding)))
+                      (m:workspace-action-sign-bindings sign)))
       (assert (handler-case (progn (m:operation-inspectable-object operation target) nil)
                 (m:operation-not-applicable () t))))
     (assert (equal pages (work-page-sources)))))

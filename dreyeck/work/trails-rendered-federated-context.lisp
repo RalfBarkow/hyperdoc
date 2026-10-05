@@ -312,6 +312,33 @@ navigation operation; projection and Subject rendering never call it."
        (if (and (= 1 (length pages)) (null (getf resolution :failures)))
            (first pages) object)))))
 
+(defparameter *context-topic-follow-bindings*
+  (loop for kind in '(:radial-menu :learned-mark)
+        collect (dreyeck/gesture-binding-witness::%make-gesture-binding
+                 :id (format nil "binding/~(~A~)-follow" kind) :kind kind
+                 :sector-center 90.0d0 :sector-half-width 30.0d0
+                 :target-type :workspace-action-sign-occurrence :enabled-p t
+                 :operation (dreyeck/gesture-binding-witness:follow-operation))))
+
+(defmethod dreyeck/inspector/topicmap:workspace-action-sign-bindings :around ((occurrence t))
+  ;; Less specific than Work's existing around method, so both providers compose.
+  (let ((bindings (call-next-method)))
+    (if (and (typep occurrence 'dreyeck/inspector/topicmap:workspace-action-sign-occurrence)
+             (typep (dreyeck/inspector/topicmap:occurrence-inspectable-object occurrence)
+                    '(or hyperbook/fedwiki::fedwiki-page federated-subject)))
+        (append bindings *context-topic-follow-bindings*)
+        bindings)))
+
+(defmethod dreyeck/inspector/topicmap:operation-inspectable-object
+    ((operation (eql (dreyeck/gesture-binding-witness:follow-operation))) target)
+  (let* ((topic (dreyeck/inspector/topicmap::%topic-operation-topic operation target))
+         (object (dreyeck/topicmap:topicmap-topic-object-of topic)))
+    (unless (typep object '(or hyperbook/fedwiki::fedwiki-page federated-subject))
+      (error 'dreyeck/inspector/topicmap:operation-not-applicable
+             :operation operation :target target
+             :reason "the represented object is not supported by federated Follow"))
+    (follow-context-object object)))
+
 (defun context-topic-primary-reference (context projection-kind topic)
   (let ((object (dreyeck/topicmap:topicmap-topic-object-of topic)))
     (ecase projection-kind

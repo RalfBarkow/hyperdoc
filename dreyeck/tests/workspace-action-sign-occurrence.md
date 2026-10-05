@@ -17,12 +17,14 @@ Neither Topic ID nor the element token replaces it.
 retains the one used for rendering, not a later reconstruction. Its projection
 source is the Workspace, and its Topic is the exact member of that projection.
 
-PRIMARY returns before capture, sequencing, timer or Gesture forwarding. The
-existing click invokes `TOPICMAP-WORKSPACE-GO-TO`, then the Inspector refreshes.
+PRIMARY returns before capture, sequencing, timer or Gesture forwarding. Native
+Workspace clicks invoke `TOPICMAP-WORKSPACE-GO-TO`, then the Inspector refreshes;
+federated context clicks use the existing local Point presentation callback.
 SECONDARY uses the existing transport/reducer through a per-occurrence Gesture
-Window. Production bindings are NIL: no Topic Operation is offered or executed.
-The test system alone supplies inert radial/mark bindings. This slice exposes
-reducer state and selection; it does not draw a new radial-menu widget.
+Window. Production bindings now offer exact Topic and represented-object
+inspection, plus applicable domain operations. Topic and Association signs share
+menu rendering from those bindings. See [Topic marking-menu integration](../../docs/topic-marking-menu.md)
+for the current operation catalogue and browser proof.
 
 Refresh invalidates the old occurrences before replacing the Pane's content.
 Currentness also checks the live connection, DOM attachment and element token;
@@ -30,7 +32,10 @@ once false it stays false. Detached elements dispose their browser listeners,
 capture and reveal timer. Queued input for an ended occurrence is refused.
 The registry is weak and is an inspection aid, not persistent storage.
 
-## Evidence obtained
+## Original transport evidence
+
+The following witness predates production Topic operations and uses explicitly
+supplied inert bindings to isolate transport and occurrence lifetime.
 
 The live witness uses `READING-SOURCE-WORKSPACE` with the production Inspector
 stylesheet and unchanged default positions. `elementFromPoint` freshly found
@@ -92,8 +97,9 @@ The assertions supply these falsifiers (not a claim of mutation testing):
 | D: Topic equals inspectable object | Actual Topic type and exact ASDF object are checked separately. |
 | E: adapter attached to painted sibling | Live elementFromPoint must equal the occurrence's action rect, whose ID resolves to the exact action reference in its View. |
 
-Pure tests also check empty production bindings, radial/mark selection, trust
-recording and both statuses in the human-readable occurrence overview.
+Pure tests check production inspection applicability, radial/mark identity and
+sector separation, inert transport selection, trust recording and both statuses
+in the human-readable occurrence overview.
 
 ## Manual physical witness: pending
 
@@ -136,8 +142,8 @@ PRIMARY. Then evaluate:
 ```
 
 On the same sign, physically hold SECONDARY for more than 500 ms, move at least
-70 browser pixels right, then release. There is no new visible radial widget;
-inspect the reducer result in Lisp. Then evaluate:
+70 browser pixels right, then release. The explicitly supplied inert binding
+appears in the shared menu; inspect the reducer result in Lisp. Then evaluate:
 
 ```lisp
 (assert (equal "test-only/radial-menu"

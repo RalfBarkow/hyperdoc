@@ -13,9 +13,8 @@
 ;;;; rendered for, and it ends with the element. The same Topic rendered
 ;;;; again is a new occurrence.
 ;;;;
-;;;; No Topic Operation is installed here. Production Bindings are empty,
-;;;; so a secondary gesture is recognized and completes with nothing. A
-;;;; system that establishes a Topic Operation may offer Bindings for the
+;;;; Topic signs offer inspection of their exact Topic and represented object.
+;;;; A system that establishes another Topic Operation may offer Bindings for the
 ;;;; occurrences it applies to, by a method on WORKSPACE-ACTION-SIGN-BINDINGS;
 ;;;; a gesture completed with one opens what its Operation shows.
 
@@ -59,15 +58,28 @@ that occurrence. A refresh or disconnected browser ends the occurrence."))
   "The inspectable object the Topic stands for, not the Topic itself."
   (dreyeck/topicmap:topicmap-topic-object-of (occurrence-topic occurrence)))
 
-(defvar *workspace-action-sign-bindings* nil
-  "The Gesture Bindings every workspace action sign offers. None in
-production: no Topic Operation is established here. Read, through
-WORKSPACE-ACTION-SIGN-BINDINGS, when an occurrence is created.")
+(defparameter *workspace-action-sign-bindings*
+  (loop for (operation angle) in
+        (list (list (dreyeck/gesture-binding-witness:inspect-represented-object-operation) 180.0d0)
+              (list (dreyeck/gesture-binding-witness:inspect-topicmap-sign-operation) 270.0d0))
+        append (loop for kind in '(:radial-menu :learned-mark)
+                     collect (dreyeck/gesture-binding-witness::%make-gesture-binding
+                              :id (format nil "binding/~(~A~)-~A" kind
+                                          (subseq (dreyeck/gesture-binding-witness:semantic-operation-identity-id operation)
+                                                  (length "operation/")))
+                              :kind kind :sector-center angle :sector-half-width 30.0d0
+                              :target-type :workspace-action-sign-occurrence
+                              :enabled-p t :operation operation)))
+  "Ordinary Topic inspections, with fixed sectors. Domain providers add their
+own Bindings through WORKSPACE-ACTION-SIGN-BINDINGS.")
 
 (defmethod workspace-action-sign-bindings ((occurrence workspace-action-sign-occurrence))
-  "The Bindings OCCURRENCE offers: by default *WORKSPACE-ACTION-SIGN-BINDINGS*,
-the same for every occurrence."
-  *workspace-action-sign-bindings*)
+  "The base catalogue, omitting object inspection if there is no represented object."
+  (remove-if (lambda (binding)
+               (and (eq (dreyeck/gesture-binding-witness:gesture-binding-operation binding)
+                        (dreyeck/gesture-binding-witness:inspect-represented-object-operation))
+                    (null (occurrence-inspectable-object occurrence))))
+             *workspace-action-sign-bindings*))
 
 (defvar *workspace-action-sign-occurrences* nil
   "Weak references for inspection; never a store.")
@@ -182,23 +194,21 @@ ended occurrence, including removal outside the Inspector refresh path."
     (%forward-topic-gesture (occurrence-gesture-window occurrence) target data
                             (lambda (input) (push input (occurrence-inputs occurrence))))))
 
-(defun bind-workspace-action-sign-occurrence (occurrence)
+(defun bind-workspace-action-sign-occurrence (occurrence parent)
   (let* ((element (occurrence-element occurrence))
          ;; The reducer matches Bindings against the target's :TYPE; the
          ;; occurrence itself travels in the target, as the exact object.
          (target (list :type :workspace-action-sign-occurrence :occurrence occurrence))
-         (window
-           (dreyeck/gesture/clog:make-gesture-window
-            :bindings (workspace-action-sign-bindings occurrence)
-            :projection
+         (window (dreyeck/gesture/clog:make-gesture-window
+                  :bindings (workspace-action-sign-bindings occurrence))))
+    (multiple-value-bind (labels marks)
+        (%make-sign-menu window target parent "dreyeck-topic-gesture-menu")
+      (setf (dreyeck/gesture/clog::gesture-window-projection window)
             (lambda (window snapshot)
               (when (%occurrence-current occurrence)
-                (setf (clog:attribute element "data-topic-gesture-state")
-                      (string-downcase (princ-to-string (getf snapshot :state)))
-                      (clog:attribute element "data-topic-gesture-mode")
-                      (string-downcase (princ-to-string (getf snapshot :mode))))
+                (%draw-sign-menu window snapshot element labels marks "topic")
                 (when (dreyeck/gesture/clog:newly-completed-p window snapshot)
-                  (%show-topic-selection occurrence)))))))
+                  (%show-topic-selection occurrence))))))
     (setf (occurrence-gesture-window occurrence) window
           (clog:attribute element "data-workspace-action-sign-occurrence")
           (occurrence-token occurrence))
@@ -292,7 +302,7 @@ Inspector. A refusal opens nothing."
         (setf (clog:attribute element "data-association-gesture-outcome") "shown")
         (%open-beside pane object)))))
 
-(defun %draw-association-menu (window snapshot element labels mark)
+(defun %draw-sign-menu (window snapshot element labels marks role)
   "Show what the reducer says, beside ELEMENT, in menu elements that take no
 pointer input. Positions are the Binding angles around the press point.
 What is shown follows the binder's MENU-PRESENTATION, so a completed or
@@ -314,56 +324,61 @@ cancelled interaction leaves nothing on the page."
                                                            (car entry)))
                                            "#ffd54f" "#ffffff"))))
           (setf (clog:visiblep (cdr entry)) menu-visible))
-        (when mark
+        (dolist (mark marks)
           (place (car mark) (cdr mark))
-          (setf (clog:visiblep (cdr mark)) marked)))
-      (setf (clog:attribute element "data-association-gesture-state")
+          (setf (clog:visiblep (cdr mark))
+                (and marked (equal binding (dreyeck/gesture-binding-witness:gesture-binding-id (car mark)))))))
+      (setf (clog:attribute element (format nil "data-~A-gesture-state" role))
             (string-downcase (princ-to-string (getf snapshot :state)))
-            (clog:attribute element "data-association-gesture-mode")
+            (clog:attribute element (format nil "data-~A-gesture-mode" role))
             (string-downcase (princ-to-string (getf snapshot :mode)))
-            (clog:attribute element "data-association-gesture-menu-visible")
+            (clog:attribute element (format nil "data-~A-gesture-menu-visible" role))
             (if menu-visible "true" "false")
-            (clog:attribute element "data-association-gesture-binding")
+            (clog:attribute element (format nil "data-~A-gesture-binding" role))
             (or (getf snapshot :binding) "")))))
 
-(defun %association-menu-element (parent binding text)
+(defun %sign-menu-element (parent binding text class)
   (let ((element (clog:create-div parent :content text)))
     (clog:set-styles element
                      '(("position" "fixed") ("transform" "translate(-50%, -50%)")
                        ("padding" "4px 8px") ("border" "1px solid #555")
                        ("background" "#ffffff") ("font-family" "sans-serif")
-                       ("font-size" "13px") ("white-space" "nowrap")
+                       ("font-size" "13px") ("white-space" "normal")
+                       ("max-width" "140px") ("box-sizing" "border-box")
+                       ("text-align" "center")
                        ("pointer-events" "none") ("z-index" "10")))
-    (setf (clog:attribute element "class") "dreyeck-association-gesture-menu"
+    (setf (clog:attribute element "class") class
           (clog:attribute element "data-binding-id")
           (dreyeck/gesture-binding-witness:gesture-binding-id binding)
           (clog:visiblep element) nil)
     element))
+
+(defun %make-sign-menu (window target parent class)
+  "Draw from the same catalogue as the reducer, retaining every Binding's angle."
+  (flet ((elements (kind)
+           (mapcar (lambda (binding)
+                     (cons binding
+                           (%sign-menu-element
+                            parent binding
+                            (format nil "~A~A" (if (eq kind :learned-mark) "mark: " "")
+                                    (dreyeck/gesture/clog::%label-text binding)) class)))
+                   (dreyeck/gesture/clog:menu-bindings window target kind))))
+    (values (elements :radial-menu) (elements :learned-mark))))
 
 (defun bind-association-sign (pane parent element association)
   (let* ((token (symbol-name (gensym "association-sign-")))
          ;; The exact Association is the target; IDs and labels are not.
          (target (list :type :topicmap-association :association association))
          (window (dreyeck/gesture/clog:make-gesture-window
-                  :bindings (dreyeck/gesture-binding-witness:make-association-binding-catalog)))
-         (labels (mapcar (lambda (binding)
-                           (cons binding
-                                 (%association-menu-element
-                                  parent binding (dreyeck/gesture/clog::%label-text binding))))
-                         (dreyeck/gesture/clog:menu-bindings window target :radial-menu)))
-         (mark (let ((binding (first (dreyeck/gesture/clog:menu-bindings
-                                      window target :learned-mark))))
-                 (when binding
-                   (cons binding
-                         (%association-menu-element
-                          parent binding
-                          (format nil "mark: ~A" (dreyeck/gesture/clog::%label-text binding))))))))
-    (setf (dreyeck/gesture/clog::gesture-window-projection window)
+                  :bindings (dreyeck/gesture-binding-witness:make-association-binding-catalog))))
+    (multiple-value-bind (labels marks)
+        (%make-sign-menu window target parent "dreyeck-association-gesture-menu")
+      (setf (dreyeck/gesture/clog::gesture-window-projection window)
           (lambda (window snapshot)
-            (%draw-association-menu window snapshot element labels mark)
+            (%draw-sign-menu window snapshot element labels marks "association")
             (when (dreyeck/gesture/clog:newly-completed-p window snapshot)
-              (%show-selected-object pane element window)))
-          (clog:attribute element "data-association-sign") token
+              (%show-selected-object pane element window)))))
+    (setf (clog:attribute element "data-association-sign") token
           (clog:connection-data-item element (%association-sign-key (clog:html-id element)))
           window)
     (clog::set-event element "topicgesture"
@@ -385,7 +400,7 @@ cancelled interaction leaves nothing on the page."
                                         :reference (cdr entry)
                                         :element (clog:attach-as-child parent (car entry))
                                         :pane pane :view view)))
-         (bind-workspace-action-sign-occurrence occurrence)
+         (bind-workspace-action-sign-occurrence occurrence parent)
          (push (sb-ext:make-weak-pointer occurrence) *workspace-action-sign-occurrences*)))
       ((and (typep (cdr entry) 'dreyeck/topicmap:topicmap-association)
             (gethash (car entry) *association-sign-ids*))
@@ -423,6 +438,26 @@ cancelled interaction leaves nothing on the page."
 ;;;; here, and nothing is written, requested or remembered. One case is
 ;;;; recognized here: Inspect relation contract on a Topicmap Association.
 ;;;; Another system may add a case by a method for its Operation.
+
+(defun %topic-operation-topic (operation target)
+  "Validate the existing occurrence target, shared by the three Topic Operations."
+  (let ((occurrence (getf target :occurrence)))
+    (unless (and (eq :workspace-action-sign-occurrence (getf target :type))
+                 (typep occurrence 'workspace-action-sign-occurrence)
+                 (typep (occurrence-topic occurrence) 'dreyeck/topicmap:topicmap-topic))
+      (error 'operation-not-applicable :operation operation :target target
+             :reason "the target carries no Topic sign occurrence"))
+    (occurrence-topic occurrence)))
+
+(defmethod operation-inspectable-object
+    ((operation (eql (dreyeck/gesture-binding-witness:inspect-topicmap-sign-operation))) target)
+  (%topic-operation-topic operation target))
+
+(defmethod operation-inspectable-object
+    ((operation (eql (dreyeck/gesture-binding-witness:inspect-represented-object-operation))) target)
+  (or (dreyeck/topicmap:topicmap-topic-object-of (%topic-operation-topic operation target))
+      (error 'operation-not-applicable :operation operation :target target
+             :reason "the Topic has no represented object")))
 
 (defmethod operation-inspectable-object (operation target)
   "The inspectable object OPERATION shows for TARGET, a Gesture target plist.
