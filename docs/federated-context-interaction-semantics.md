@@ -2,13 +2,17 @@
 
 Context Topicmap navigation follows the generic Workspace editor model:
 
-- Primary context-sign click moves Workspace Point to that Topic.
+- Primary context-sign click moves Workspace Point to that Topic, then invokes
+  the existing Follow operation where applicable.
 - A relation endpoint at Point moves Point along the graph.
 - Follow at Point operates on `topicmap-workspace-current-object`.
 - Explicit inspection at Point targets either that exact object or its Topic sign.
 - Temporal sign clicks and Previous/Next select events and rebuild State/Delta.
 
-Point movement, Follow, inspection, and temporal selection are independent.
+Primary sign activation composes Point movement and applicable Follow. Explicit
+secondary operations preserve Point; relation endpoints perform movement only.
+Inspection and temporal selection remain separate operations. See the
+[PRIMARY activation report](topic-primary-activation.md).
 
 ## Existing machinery
 
@@ -42,13 +46,19 @@ as a request to `refresh` the source pane. `refresh` destroys the pane's childre
 including `.inspector-body`, then loads views and recreates the DOM. Native Point
 marks and the Point/relations panel are refreshed through that complete rerender.
 
-The federated renderer keeps the non-destructive transport proven in `92025a7d`:
-the ordinary Point action calls `topicmap-workspace-go-to` and returns NIL. Its
-existing evaluation callback updates only the Point panel and existing map mark.
+The federated renderer keeps the non-destructive Point update proven in `92025a7d`:
+the movement thunk calls `topicmap-workspace-go-to` and returns NIL. Its existing
+evaluation callback updates only the Point panel and existing map mark.
 New relation-endpoint actions receive that same callback whenever the panel is
 replaced. Repeating the current Point does not redraw. The pane, outer body,
 context viewport, temporal viewport, map geometry, and per-sign inspection table
-remain present. Point movement never calls Follow or temporal selection.
+remain present. Movement-only references never call Follow or temporal selection.
+Applicable Topic signs now use the Inspector's existing `eval` reference: after
+movement and the local update, the action returns the result of the existing
+Follow identity on its exact occurrence. That handler opens the result beside
+the source without refreshing it. Relation endpoints retain `action` references
+and return NIL. A repeated sign activation can Follow again without redrawing
+Point or adding history.
 
 Inspector already supports this child-view replacement. Its reactive `subview`
 references use the same `create-view-element` operation on a child div when a

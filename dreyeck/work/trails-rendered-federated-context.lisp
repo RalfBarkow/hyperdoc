@@ -312,6 +312,10 @@ navigation operation; projection and Subject rendering never call it."
        (if (and (= 1 (length pages)) (null (getf resolution :failures)))
            (first pages) object)))))
 
+(defun context-followable-object-p (object)
+  "The domain already offered by Follow; actual dispatch remains in FOLLOW-CONTEXT-OBJECT."
+  (typep object '(or hyperbook/fedwiki::fedwiki-page federated-subject)))
+
 (defparameter *context-topic-follow-bindings*
   (loop for kind in '(:radial-menu :learned-mark)
         collect (dreyeck/gesture-binding-witness::%make-gesture-binding
@@ -324,8 +328,8 @@ navigation operation; projection and Subject rendering never call it."
   ;; Less specific than Work's existing around method, so both providers compose.
   (let ((bindings (call-next-method)))
     (if (and (typep occurrence 'dreyeck/inspector/topicmap:workspace-action-sign-occurrence)
-             (typep (dreyeck/inspector/topicmap:occurrence-inspectable-object occurrence)
-                    '(or hyperbook/fedwiki::fedwiki-page federated-subject)))
+             (context-followable-object-p
+              (dreyeck/inspector/topicmap:occurrence-inspectable-object occurrence)))
         (append bindings *context-topic-follow-bindings*)
         bindings)))
 
@@ -333,7 +337,7 @@ navigation operation; projection and Subject rendering never call it."
     ((operation (eql (dreyeck/gesture-binding-witness:follow-operation))) target)
   (let* ((topic (dreyeck/inspector/topicmap::%topic-operation-topic operation target))
          (object (dreyeck/topicmap:topicmap-topic-object-of topic)))
-    (unless (typep object '(or hyperbook/fedwiki::fedwiki-page federated-subject))
+    (unless (context-followable-object-p object)
       (error 'dreyeck/inspector/topicmap:operation-not-applicable
              :operation operation :target target
              :reason "the represented object is not supported by federated Follow"))
@@ -348,8 +352,11 @@ navigation operation; projection and Subject rendering never call it."
           (select-context-event (event-context object)
                                 (position (event-record object) (context-events context) :test #'eq)))))
       (:context
-       (html-inspector-views:action-id
-        (context-point-reference (context-current-workspace context) topic))))))
+       ;; EVAL opens the operation's result beside the source, without refreshing it.
+       ;; Relation endpoints retain ACTION and the movement-only reference.
+       (funcall (if (context-followable-object-p object)
+                    #'html-inspector-views:eval-id #'html-inspector-views:action-id)
+                (context-point-reference (context-current-workspace context) topic))))))
 
 (defun context-wiki-targets (text)
   "Reuse the FedWiki text/link scanner, including its treatment of incomplete links."
@@ -726,17 +733,23 @@ It labels the edge; it does not introduce another node into the domain graph."
     (context-workspace context)))
 
 (defclass context-point-action (dreyeck/inspector/topicmap::topic-action-reference)
-  ((update-view :initform nil :accessor point-action-update-view))
+  ((update-view :initform nil :accessor point-action-update-view)
+   (operation-target :initform nil :accessor point-action-operation-target))
   (:documentation "An ordinary Workspace action with a callback for its Point
-presentation. The existing Workspace owns Point; this reference owns no Point state."))
+presentation and an optional rendered occurrence target for activation. The
+existing Workspace owns Point; this reference owns no Point state."))
 
 (defmethod html-inspector-views:eval-thunk :around ((action context-point-action))
   (let* ((workspace (dreyeck/inspector/topicmap::action-workspace action))
          (before (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
-    (multiple-value-prog1 (call-next-method)
-      (when (and (not (equal before (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
-                 (point-action-update-view action))
-        (funcall (point-action-update-view action))))))
+    (call-next-method)
+    (when (and (not (equal before (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
+               (point-action-update-view action))
+      (funcall (point-action-update-view action)))
+    (when (point-action-operation-target action)
+      (dreyeck/inspector/topicmap:operation-inspectable-object
+       (dreyeck/gesture-binding-witness:follow-operation)
+       (point-action-operation-target action)))))
 
 (defun context-point-reference (workspace topic)
   "The same non-refreshing Point operation for a sign or a relation endpoint."
@@ -825,11 +838,18 @@ presentation. The existing Workspace owns Point; this reference owns no Point st
 (defun context-point-view (context)
   (html-inspector-views:html-view (render-context-point context)))
 
-(defun bind-context-point-actions (view update-view)
+(defun bind-context-point-actions (view update-view &optional occurrences)
+  "Bind local Point updates; EVAL sign activations reuse their existing occurrence target."
   (html-inspector-views:view-html view)
   (dolist (reference (html-inspector-views:view-references view))
     (when (typep (cdr reference) 'context-point-action)
-      (setf (point-action-update-view (cdr reference)) update-view)))
+      (setf (point-action-update-view (cdr reference)) update-view)
+      (when (uiop:string-prefix-p "eval-" (car reference))
+        (let ((occurrence (find (cdr reference) occurrences
+                                :key #'dreyeck/inspector/topicmap:occurrence-reference :test #'eq)))
+          (when occurrence
+            (setf (point-action-operation-target (cdr reference))
+                  (list :type :workspace-action-sign-occurrence :occurrence occurrence)))))))
   view)
 
 (defun render-context-inspection (context)
@@ -897,7 +917,7 @@ presentation. The existing Workspace owns Point; this reference owns no Point st
             " · " (html-inspector-views:esc (symbol-name (context-mode context)))
             " · " (html-inspector-views:object-ref (context-current-state context) :display "Inspect current State")
             " · " (html-inspector-views:object-ref (context-current-delta context) :display "Inspect current Delta"))
-        (:p "Select an event to move the cursor. Click a context sign or a relation endpoint to move Workspace Point. Follow at Point opens its wiki material; a subject with several candidates offers a choice. Point and the table below provide separate object and sign inspection. Orange relations mark the selected event's changes; faded topics are removed.")
+        (:p "Select an event to move the cursor. Click a context sign to move Workspace Point and follow its wiki material; a subject with several candidates offers a choice. Relation endpoints move Point along the graph. Secondary Topic gestures invoke operations without moving Point. Point and the table below provide separate object and sign inspection. Orange relations mark the selected event's changes; faded topics are removed.")
         (:div :id (symbol-name (gensym "context-map-")) :data-projection "context"
               (html-inspector-views:str (context-map-html context)))
         ;; Keep the surrounding layout stable as Point's relation count changes.
@@ -968,7 +988,8 @@ presentation. The existing Workspace owns Point; this reference owns no Point st
             (bind-context-point-actions
              view (lambda ()
                     (update-context-point-view pane parent point viewport context
-                                               (context-current-workspace context))))))))))
+                                               (context-current-workspace context)))
+             (dreyeck/inspector/topicmap:open-workspace-action-sign-occurrences))))))))
 
 (html-inspector-views:defview federated-relation-evidence (association dreyeck/topicmap:topicmap-association)
   (let* ((properties (dreyeck/topicmap:topicmap-association-properties-of association))

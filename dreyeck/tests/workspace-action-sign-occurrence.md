@@ -20,6 +20,8 @@ source is the Workspace, and its Topic is the exact member of that projection.
 PRIMARY returns before capture, sequencing, timer or Gesture forwarding. Native
 Workspace clicks invoke `TOPICMAP-WORKSPACE-GO-TO`, then the Inspector refreshes;
 federated context clicks use the existing local Point presentation callback.
+Followable context signs then activate the existing Follow identity through the
+Inspector's EVAL transport; see [PRIMARY activation](../../docs/topic-primary-activation.md).
 SECONDARY uses the existing transport/reducer through a per-occurrence Gesture
 Window. Production bindings now offer exact Topic and represented-object
 inspection, plus applicable domain operations. Topic and Association signs share

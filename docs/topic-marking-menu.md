@@ -5,6 +5,11 @@ Implemented from clean `090656dbc7ec1ab2e39ecadaabac5f09dab609c6` on
 status-action fix remain unchanged. The Point panel and explicit sign inspection
 table are retained.
 
+The browser evidence below records this slice at `6ab7e62b`. PRIMARY was
+subsequently corrected to compose Point movement and applicable Follow; see the
+[PRIMARY activation report](topic-primary-activation.md). SECONDARY remains as
+described here.
+
 ## Operations and fixed directions
 
 The existing Gesture → Binding → semantic-operation-identity →
