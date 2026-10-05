@@ -705,6 +705,19 @@ It labels the edge; it does not introduce another node into the domain graph."
   (dreyeck/topicmap:topicmap-workspace-go-to (context-current-workspace context) id)
   t)
 
+(defclass context-point-action (dreyeck/inspector/topicmap::topic-action-reference)
+  ((update-view :initform nil :accessor point-action-update-view))
+  (:documentation "An ordinary Workspace action with a callback for its Point
+presentation. The existing Workspace owns Point; this reference owns no Point state."))
+
+(defmethod html-inspector-views:eval-thunk :around ((action context-point-action))
+  (let* ((workspace (dreyeck/inspector/topicmap::action-workspace action))
+         (before (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
+    (multiple-value-prog1 (call-next-method)
+      (when (and (not (equal before (dreyeck/topicmap:topicmap-workspace-point-of workspace)))
+                 (point-action-update-view action))
+        (funcall (point-action-update-view action))))))
+
 (defun context-map-html (context &optional (projection-kind :context))
   "Two TALA projections, coordinated by the context's one Lisp cursor."
   (unless (context-rendering context projection-kind)
@@ -713,7 +726,8 @@ It labels the edge; it does not introduce another node into the domain graph."
          (projection (context-rendered-projection context projection-kind))
          (workspace (when (eq projection-kind :context) (context-current-workspace context)))
          (delta (context-current-delta context))
-         (selected (gethash "id" (aref (context-events context) (context-cursor context))))
+         (selected (if workspace (dreyeck/topicmap:topicmap-workspace-point-of workspace)
+                       (gethash "id" (aref (context-events context) (context-cursor context)))))
          (dom (let ((plump:*tag-dispatchers* plump:*xml-tags*))
                 (plump:parse
                  (dreyeck/inspector/topicmap/tala::interactive-tala-svg
@@ -723,8 +737,7 @@ It labels the edge; it does not introduce another node into the domain graph."
       (let* ((id (plump:attribute group "data-topic-id"))
              (association-id (plump:attribute group "data-association-id")))
         (when id
-          (when (if (eq projection-kind :temporal) (equal id selected)
-                    (and workspace (equal id (dreyeck/topicmap:topicmap-workspace-point-of workspace))))
+          (when (equal id selected)
             (setf (plump:attribute group "data-selected") "true")))
         (when (eq projection-kind :context)
           (when association-id
@@ -749,36 +762,40 @@ It labels the edge; it does not introduce another node into the domain graph."
 (defun render-context-point (context)
   (let ((workspace (context-current-workspace context)))
     (when workspace
-      (let* ((topic (dreyeck/topicmap:topicmap-workspace-current-topic workspace))
-             (object (dreyeck/topicmap:topicmap-topic-object-of topic)))
+      (let ((topic (dreyeck/topicmap:topicmap-workspace-current-topic workspace)))
         (html-inspector-views:html
-          (:p "Workspace Point: " (html-inspector-views:esc (dreyeck/topicmap:topicmap-topic-label-of topic))
-              " · " (html-inspector-views:object-ref topic :display "Inspect Topicmap sign")
-              " · " (html-inspector-views:object-ref object :display "Inspect represented object"))
-          (when (typep object 'context-fedwiki-page)
-            (html-inspector-views:html
-              (:p "Open wiki page: " (html-inspector-views:object-ref object :select "Story"
-                                                                     :display (hyperbook:title-of object)))))
+          (:p "Workspace Point: " (html-inspector-views:esc (dreyeck/topicmap:topicmap-topic-label-of topic)))
           (:p "Relations at this topic: "
               (dolist (association (dreyeck/topicmap::topicmap-associations-of-point workspace))
                 (html-inspector-views:object-ref association :display
                   (dreyeck/topicmap:topicmap-association-type-of association))
                 (html-inspector-views:str " "))))))))
 
+(defun context-point-view (context)
+  (html-inspector-views:html-view (render-context-point context)))
+
 (defun render-context-inspection (context)
   "Explicit inspection is independent of primary follow and Workspace Point."
-  (html-inspector-views:html
-    (:details
-     (:summary "Inspect context signs and represented objects")
-     (:table :class "inspector-table"
-      (dolist (topic (dreyeck/topicmap:topicmap-projection-topics-of
-                     (context-rendered-projection context :context)))
-        (html-inspector-views:html
-          (:tr :data-inspection-topic (dreyeck/topicmap:topicmap-topic-id-of topic)
-           (:td (html-inspector-views:esc (dreyeck/topicmap:topicmap-topic-label-of topic)))
-           (:td (html-inspector-views:object-ref
-                 (dreyeck/topicmap:topicmap-topic-object-of topic) :display "Inspect represented object"))
-           (:td (html-inspector-views:object-ref topic :display "Inspect Topicmap sign")))))))))
+  (let* ((workspace (context-current-workspace context))
+         (projection (context-rendered-projection context :context)))
+    (html-inspector-views:html
+      (:details
+       (:summary "Inspect context signs and represented objects")
+       (:table :class "inspector-table"
+        (dolist (topic (dreyeck/topicmap:topicmap-projection-topics-of projection))
+          (html-inspector-views:html
+            (:tr :data-inspection-topic (dreyeck/topicmap:topicmap-topic-id-of topic)
+             (:td (html-inspector-views:esc (dreyeck/topicmap:topicmap-topic-label-of topic)))
+             (:td (html-inspector-views:object-ref
+                   (dreyeck/topicmap:topicmap-topic-object-of topic) :display "Inspect represented object"))
+             (:td (html-inspector-views:object-ref topic :display "Inspect Topicmap sign"))
+             (:td (html-inspector-views:action-button "Set Workspace Point"
+                    (make-instance 'context-point-action :topic topic :projection projection :workspace workspace
+                      :fn (lambda ()
+                            (select-context-topic context (dreyeck/topicmap:topicmap-topic-id-of topic))
+                            ;; Point presentation is updated locally after evaluation.
+                            ;; NIL prevents the ordinary action handler refreshing the pane.
+                            nil))))))))))))
 
 (defun render-context-changes (context)
   (let ((delta (context-current-delta context)))
@@ -830,10 +847,11 @@ It labels the edge; it does not introduce another node into the domain graph."
             " · " (html-inspector-views:esc (symbol-name (context-mode context)))
             " · " (html-inspector-views:object-ref (context-current-state context) :display "Inspect current State")
             " · " (html-inspector-views:object-ref (context-current-delta context) :display "Inspect current Delta"))
-        (:p "Select an event to move the cursor. Click a context sign to follow its wiki material; a subject with several candidates offers a choice. Use the inspection links below to inspect represented objects or Topicmap signs. Orange relations mark the selected event's changes; faded topics are removed.")
+        (:p "Select an event to move the cursor. Click a context sign to follow its wiki material; a subject with several candidates offers a choice. Use the table below to inspect represented objects or Topicmap signs, or to Set Workspace Point. Orange relations mark the selected event's changes; faded topics are removed.")
         (:div :id (symbol-name (gensym "context-map-")) :data-projection "context"
               (html-inspector-views:str (context-map-html context)))
-        (render-context-point context)
+        (:div :id (symbol-name (gensym "workspace-point-")) :data-workspace-point "true"
+              (render-context-point context))
         (render-context-inspection context)
         (when (eq :delta (context-mode context)) (render-context-changes context))
         (let ((attribution (context-item-attribution item)))
@@ -860,9 +878,25 @@ It labels the edge; it does not introduce another node into the domain graph."
                   (max 0 (round (- (coordinate (plump:attribute rect "y"))
                                   (coordinate (second origin)) 72)))))))))
 
+(defun update-context-point-view (pane parent point viewport context workspace)
+  "Update Point presentation without rebuilding the pane or either map."
+  (let* ((outer (clog:parent-element parent))
+         (scroll-top (clog:scroll-top outer)))
+    (clog-moldable-inspector::create-view-element
+     pane (clog:attach-as-child parent (plump:attribute point "id"))
+     (context-point-view context))
+    (dolist (sign (plump:get-elements-by-tag-name viewport "g"))
+      (when (plump:attribute sign "data-topic-id")
+        (setf (clog:attribute (clog:attach-as-child parent (plump:attribute sign "id")) "data-selected")
+              (if (equal (plump:attribute sign "data-topic-id")
+                         (dreyeck/topicmap:topicmap-workspace-point-of workspace))
+                  "true" "false"))))
+    ;; Changing the relation paragraph's height can trigger browser scroll
+    ;; anchoring above the clicked table row. Retain the existing Lisp view offset.
+    (setf (clog:scroll-top outer) scroll-top)))
+
 (defmethod clog-moldable-inspector::create-view-element :after
     ((pane clog-moldable-inspector::pane) parent (view html-inspector-views:html-view))
-  (declare (ignore pane))
   ;; CLOG retains the two bounded viewports around their selected signs after
   ;; a refresh. No browser cursor, event ordering or graph state is introduced.
   (when (find-if (lambda (ref) (typep (cdr ref) 'federated-event))
@@ -874,7 +908,20 @@ It labels the edge; it does not introduce another node into the domain graph."
           (multiple-value-bind (x y) (context-map-scroll-offsets viewport)
             (when x
               (let ((element (clog:attach-as-child parent (plump:attribute viewport "id"))))
-                (setf (clog:scroll-left element) x (clog:scroll-top element) y)))))))))
+                (setf (clog:scroll-left element) x (clog:scroll-top element) y))))))
+      (let* ((point (find "true" (plump:get-elements-by-tag-name dom "div")
+                          :key (lambda (e) (plump:attribute e "data-workspace-point")) :test #'equal))
+             (viewport (find "context" (plump:get-elements-by-tag-name dom "div")
+                             :key (lambda (e) (plump:attribute e "data-projection")) :test #'equal)))
+        (when point
+          (dolist (reference (html-inspector-views:view-references view))
+            (let ((action (cdr reference)))
+              (when (typep action 'context-point-action)
+                (setf (point-action-update-view action)
+                      (lambda ()
+                        (update-context-point-view
+                         pane parent point viewport (html-inspector-views:view-object view)
+                         (dreyeck/inspector/topicmap::action-workspace action))))))))))))
 
 (html-inspector-views:defview federated-relation-evidence (association dreyeck/topicmap:topicmap-association)
   (let* ((properties (dreyeck/topicmap:topicmap-association-properties-of association))

@@ -113,15 +113,31 @@ The context retains these raw-derived results for Inspector references and cache
 TALA renderings; neither projection advances or derives its own temporal state.
 State/Delta changes reuse the same temporal rendering.
 
-Context topic clicks reuse `topicmap-workspace-go-to`. The selected Topic and its
-represented object can both be inspected. The separate `Open wiki page` reference
-uses `render-hyperbook-or-page-link` with the original `fedwiki:` site and slug.
+Primary context-sign clicks Follow the actual represented object into wiki
+working material. They leave Workspace Point and the temporal cursor unchanged.
+Subjects use the existing collaborative/context/neighborhood resolution and
+present genuine ambiguity in the Subject chooser; page signs open their exact
+represented native historical page in Story.
+
+The explicit inspection table retains separate `Inspect represented object` and
+`Inspect Topicmap sign` links. Its `Set Workspace Point` button calls
+`select-context-topic` → `topicmap-workspace-go-to`, without following wiki material
+or moving time. It updates only the Point summary, its relation references and the
+context-map highlight; the maps, inspection table and source pane are not rebuilt.
+The operation returns NIL to the existing Inspector action handler, suppressing
+a pane refresh. A repeated choice of the current Point performs no presentation
+update. Point is still owned by the existing `topicmap-workspace`, retained in
+the context's `workspace` slot. The action's callback contains only view context.
+
+`render-context-point` presents the Workspace Point's label and relations at that
+point. It has no duplicate page-follow or sign/object inspection links. Native
+source-page links resolve lazily on explicit navigation rather than on rendering.
 Association signs retain their existing Inspector/gesture binding. Their Evidence
 view exposes actual relation, Delta change, before/after, and source item values.
 The existing observed `via Thompson` metadata is shown as textual attribution,
 with its own credited page link; the relation remains `wiki-link`, and fork
-provenance remains a separate `fork` relation. No new domain classes or evidence
-fixtures were introduced.
+provenance remains a separate `fork` relation. The saved temporal evidence and
+State/Delta derivation remain unchanged.
 
 The maps keep TALA's natural geometry in bounded, scrollable viewports. CLOG
 scrolls those viewports to the selected signs using the rendered SVG coordinates.
@@ -129,15 +145,19 @@ This is presentation only: there is no browser event list, cursor or graph model
 The additional CLOG after method specializes the existing Inspector Pane so it
 coexists with the generic Association gesture-binding after method.
 
-Local browser verification selected Thompson's 17:13:54.907 correction, then
+An earlier browser walkthrough, before the explicit Follow/Point separation,
+selected Thompson's 17:13:54.907 correction, then
 advanced through Jan's 17:14:16.195 Ethnomethodology edit and 17:14:46.108 Alan
 Cooper/Susan Kare edit to Ward's 17:18:24.009 event. Its Delta exposed four stable
 relation changes `"" → "Trail"`, with no topic additions/removals. The walkthrough
 continued through Jan's 18:03:05.302 fork, selected and inspected both same-title
 page Topics, then reached the 18:03:51.968 attribution. Actual event, State, Delta,
 Topic, association and change values were opened in CLOG Inspector, and a native
-link opened Thompson / How We Think. Cursor and topic actions refreshed the same
-context pane, and State/Delta left the temporal geometry unchanged.
+link opened Thompson / How We Think. In that earlier implementation, cursor and
+topic actions refreshed the same context pane. Current context Follow and explicit
+Point movement preserve the source pane; only temporal/State/Delta actions retain
+the existing refresh behavior. The operation and scroll proofs are recorded in
+`../../docs/federated-context-interaction-semantics.md`.
 
 The external browser QA script remains outside the application. Its recorded
 walkthrough is `wiki-trails-rendered-local/federated-context-workspace-evidence.json`;
