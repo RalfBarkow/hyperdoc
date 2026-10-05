@@ -35,6 +35,7 @@
            #:recorded-engine-of
            #:recorded-context-of
            #:read-example-evaluation
+           #:page-forms
            #:record-example-evaluation
            #:record-demonstration-evaluations
            #:+recorded-cases+
@@ -76,8 +77,9 @@ example on the Executable workflow reading code page, and rule.")
   (ironclad:byte-array-to-hex-string (ironclad:digest-file :sha256 pathname)))
 
 (defun %key-text (key)
-  "KEY as text, printed in the package its name is read in."
-  (let ((*package* (symbol-package (second key))))
+  "KEY as text, printed in the package its name is read in. A package or
+system key names its subject by a string, which prints the same anywhere."
+  (let ((*package* (if (symbolp (second key)) (symbol-package (second key)) (find-package :keyword))))
     (prin1-to-string key)))
 
 (defun %occurrence-identity (occurrence)
@@ -230,16 +232,36 @@ whether that is quoted data. ENGINE and CONTEXT say what ran, and where."))
                :key (lambda (page) (file-namestring (hyperdoc::source-code-pathname page)))
                :test #'string=))))
 
+(defun page-forms (page &optional source)
+  "Every top-level form of PAGE, from one parse, as a plist: its structural
+form key, NIL for a form the structural operations do not own; the form; its
+range; and, for a keyed form, the SOURCE-OCCURRENCE that names it. SOURCE,
+when given, is read in place of the page's file: the same page, other text.
+A second value is the text that was read."
+  (multiple-value-bind (code recovered)
+      (hv:parse-lisp-code (or source (hyperdoc::source-code-pathname page)))
+    (when recovered (error "Source required reader recovery."))
+    (let ((text (hv::source-of code)))
+      (values (loop for form in (hv:top-level-forms-of code)
+                    for key = (dreyeck/workflow:form-key (hv:s-exp form))
+                    for range = (copy-tree (concrete-syntax-tree:source (hv:cst-of form)))
+                    collect (list :form-key key :form (hv:s-exp form) :range range
+                                  :occurrence (and key (make-instance 'r:source-occurrence
+                                                                      :page page :form-key key
+                                                                      :source text :range range))))
+              text))))
+
 (defun %observe-now (identity)
-  "The example IDENTITY names, as this runtime's source declares it now, and
-how it relates to the recorded one."
+  "The top-level form IDENTITY names, as this runtime's source declares it
+now, and how it relates to the recorded one."
   (let ((page (%code-page (gethash "hyperdoc" identity) (gethash "code-file" identity))))
     (if (null page)
         (values nil :page-absent)
-        (let ((found (find (gethash "form-key" identity) (r:page-example-occurrences page)
+        (let ((found (find (gethash "form-key" identity)
+                           (remove nil (mapcar (lambda (form) (getf form :occurrence)) (page-forms page)))
                            :key (lambda (occurrence) (%key-text (r:occurrence-form-key occurrence)))
                            :test #'string=)))
-          (cond ((null found) (values nil :example-absent))
+          (cond ((null found) (values nil :form-absent))
                 ((and (string= (gethash "source-sha256" identity) (%text-digest (r:occurrence-source found)))
                       (equal (coerce (gethash "range" identity) 'list)
                              (let ((range (r:occurrence-range found))) (list (car range) (cdr range)))))
@@ -247,12 +269,12 @@ how it relates to the recorded one."
                 ((string= (gethash "text" identity)
                           (let ((range (r:occurrence-range found)))
                             (subseq (r:occurrence-source found) (car range) (cdr range))))
-                 (values found :example-unchanged))
-                (t (values found :example-changed)))))))
+                 (values found :form-unchanged))
+                (t (values found :form-changed)))))))
 
 (defun %read-match (critique match occurrence status)
   (let* ((path (let ((value (gethash "path" match))) (if (vectorp value) (coerce value 'list) :absent)))
-         (form (and (member status '(:recorded-snapshot :example-unchanged)) (listp path)
+         (form (and (member status '(:recorded-snapshot :form-unchanged)) (listp path)
                     (hv:s-exp (r:resolve-occurrence occurrence)))))
     (list :critique critique
           :matched (gethash "matched" match)
@@ -286,9 +308,9 @@ runs no rule, interns no symbol from the record."
 (defun %status-text (status)
   (ecase status
     (:recorded-snapshot "the page's source is the snapshot the record was made on")
-    (:example-unchanged "the page's source has changed since, but this example reads exactly as recorded")
-    (:example-changed "this example has changed since: the record is about an earlier text")
-    (:example-absent "the page no longer declares this example")
+    (:form-unchanged "the page's source has changed since, but this form reads exactly as recorded")
+    (:form-changed "this form has changed since: the record is about an earlier text")
+    (:form-absent "the page no longer declares this form")
     (:page-absent "this runtime has no such code page")))
 
 (defun %where-text (quoted-p)

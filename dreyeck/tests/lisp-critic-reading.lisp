@@ -24,7 +24,8 @@
     "From Riesbeck Run to HyperDoc Critique"
     "Anatomy of a Critique"
     "Where the Source Lives"
-    "Reading a Recorded Critique"))
+    "Reading a Recorded Critique"
+    "Lisp Critic on the Federated Context"))
 
 (defun check (value control &rest arguments)
   (unless value
@@ -117,17 +118,27 @@ read here. What no plist may do is declare nothing."
   (check (not (typep value 'condition))
          "~A: ~S on ~S produced ~A." where expression title value)
   (when (and (consp value) (keywordp (first value)))
-    (if (eq :source-passage (getf value :kind))
-        (progn
-          (check (nth-value 2 (get-properties value '(:passage-observed-p)))
-                 "~A: ~S on ~S returned a passage that does not say whether ~
+    (case (getf value :kind)
+      (:source-passage
+       (check (nth-value 2 (get-properties value '(:passage-observed-p)))
+              "~A: ~S on ~S returned a passage that does not say whether ~
 it was read here." where expression title)
-          (check (getf value :passage-origin)
-                 "~A: ~S on ~S returned a passage without an origin."
-                 where expression title))
-        (check (getf value :evidence-status)
-               "~A: ~S on ~S returned a plist without an evidence status."
-               where expression title)))
+       (check (getf value :passage-origin)
+              "~A: ~S on ~S returned a passage without an origin."
+              where expression title))
+      ;; A recommendation is not evidence and must not claim to be: what it
+      ;; declares is what it addresses and what it predicts.
+      (:reduction-proposal
+       (check (not (nth-value 2 (get-properties value '(:evidence-status))))
+              "~A: ~S on ~S returned a recommendation with an evidence status."
+              where expression title)
+       (check (and (getf value :addresses) (getf value :predictions))
+              "~A: ~S on ~S returned a recommendation without what it addresses and predicts."
+              where expression title))
+      (t
+       (check (getf value :evidence-status)
+              "~A: ~S on ~S returned a plist without an evidence status."
+              where expression title))))
   t)
 
 (defun check-transclusions-and-examples ()

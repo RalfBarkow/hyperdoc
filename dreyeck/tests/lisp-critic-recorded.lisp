@@ -25,7 +25,7 @@
   (let ((record (rec:recorded-record-of evaluation))
         (match (%only-match evaluation)))
     ;; The example the record names is the one this runtime's source declares.
-    (assert (member (rec:occurrence-status-of evaluation) '(:recorded-snapshot :example-unchanged)))
+    (assert (member (rec:occurrence-status-of evaluation) '(:recorded-snapshot :form-unchanged)))
     (assert (typep (rec:current-occurrence-of evaluation) 'r:source-occurrence))
     ;; The recorded Evaluation Record: completed, and its result is the Critiques.
     (assert (equal "COMPLETED" (er:evaluation-status-of record)))

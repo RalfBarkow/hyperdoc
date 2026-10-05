@@ -1729,10 +1729,24 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/lisp-critic/recorded/tests :run-tests)))
 
+(asdf:defsystem "dreyeck/lisp-critic/federated-context"
+  :description "Observations of the federated context, Claude's judgements about them and a recommendation, kept as three kinds of record"
+  :depends-on ("dreyeck/lisp-critic/recorded" "dreyeck/work/reading" "alexandria" "shasht")
+  :components ((:file "dreyeck/src/lisp-critic-federated-context"))
+  :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/federated-context/tests"))))
+
+(asdf:defsystem "dreyeck/lisp-critic/federated-context/tests"
+  :depends-on ("dreyeck/lisp-critic/federated-context" "dreyeck/lisp-critic/reading")
+  :components ((:file "dreyeck/tests/lisp-critic-federated-context"))
+  :perform (asdf:test-op (op component)
+             (declare (ignore op component))
+             (uiop:symbol-call :dreyeck/lisp-critic/federated-context/tests :run-tests)))
+
 (asdf:defsystem "dreyeck/lisp-critic/reading"
   :description "Source-backed reading of the Lisp Critic genealogy"
   :depends-on ("dreyeck/hyperdoc" "dreyeck/inspector/lisp-critic"
                "dreyeck/lisp-critic/recorded"
+               "dreyeck/lisp-critic/federated-context"
                "dreyeck/inspector/topicmap" "dreyeck/fedwiki-assets"
                "dreyeck/asdf-source"
                "dreyeck/page-attached-workspace-reconstruction"
@@ -1753,7 +1767,8 @@
                          (:static-file "Reading Riesbeck's Lisp Critic.html")
                          (:static-file "From Riesbeck Run to HyperDoc Critique.html")
                          (:static-file "Anatomy of a Critique.html")
-                         (:static-file "Where the Source Lives.html"))))
+                         (:static-file "Where the Source Lives.html")
+                         (:static-file "Lisp Critic on the Federated Context.html"))))
   :in-order-to ((asdf:test-op (asdf:test-op "dreyeck/lisp-critic/reading/tests"))))
 
 (asdf:defsystem "dreyeck/lisp-critic/reading/tests"

@@ -1,0 +1,97 @@
+<h1>Lisp Critic on the Federated Context</h1>
+
+<in-package>dreyeck/lisp-critic/federated-context</in-package>
+
+<p>
+Three kinds of record about one code page of <i>Working on HyperDoc</i>,
+<code>trails-rendered-federated-context.lisp</code>: what was observed, what
+Claude judged about it, and what Claude recommended. Only observations are
+evidence. No critic rule ran for any of this; none of it is an Evaluation
+Record or a Critique.
+</p>
+
+<pre>
+source form            identified structurally, re-observed now
+observation            executed against a stated program state
+judgement              an interpretation, resting on observations by its basis
+recommendation         a proposed change and its predictions, not evidence
+</pre>
+
+<h2>Observed at 3e84471c, before the reduction</h2>
+
+<p>
+On 5 October 2026, at commit 3e84471c, a Claude Code session observed four
+conditions, by Git search, by reading the source and with a test script. The
+reduction they led to was committed afterwards as d1849327. These records keep
+what was observed then and how; the probes below did not exist yet and made
+none of them.
+</p>
+
+<p>
+<a expr="(prior-observation :c1a)">Tests for "via Thompson"</a> ·
+<a expr="(prior-observation :c1b)">a search through stored links by bare item id</a> ·
+<a expr="(prior-observation :c4)">the event summary field</a> ·
+<a expr="(prior-observation :f1)">Trail associations and their source items</a>.
+</p>
+
+<p>
+The forms they name are kept in a
+<a expr="(source-snapshot)">source snapshot of 3e84471c</a>: file, structural
+form key, range, text and source digest, read from Git once, when it was
+recorded. Nothing here reads Git now.
+</p>
+
+<h2>Observed now</h2>
+
+<p>
+The same four conditions, observed by read-only probes against this runtime's
+source and reading:
+<a expr="(observe-attribution-tests)">tests for "via Thompson"</a> ·
+<a expr="(observe-links-by-bare-item)">searches through stored links by bare item id</a> ·
+<a expr="(observe-event-summary-field)">the summary field</a> ·
+<a expr="(f1-discrimination)">Trail source items, with the control that shows the witness can tell</a>.
+</p>
+
+<p>
+<a expr="(observed-transition)">Both observations, side by side</a>. Each row
+pairs what was observed at 3e84471c with what its probe observes now. Nothing is
+marked resolved: whether a condition is still observed is read off the two
+observations.
+</p>
+
+<h2>Judged by Claude</h2>
+
+<p>
+These are Claude's judgements, an LLM's interpretations, recorded with critic,
+model and date. Each rests on the observations at 3e84471c that its basis names,
+and resolving the basis fails if one of them is missing. Their evidence status
+<code>:interpreted</code> is only a label.
+<a expr="(judgement &quot;C1a&quot;)">C1a</a>, repeated interpretation ·
+<a expr="(judgement &quot;C1b&quot;)">C1b</a>, identity scope ·
+<a expr="(judgement &quot;C4&quot;)">C4</a>, an orphaned derived field ·
+<a expr="(judgement &quot;F1&quot;)">F1</a>, a falsified Evidence contract.
+</p>
+
+<h2>Recommended by Claude</h2>
+
+<p>
+<a expr="(reduction-proposal)">Reduce C1 and C4</a>: a recommendation and
+what it predicts the probes will observe, not evidence. F1 and F2 are left out
+of it. Whether a prediction held is the probe's next observation.
+</p>
+
+<h2>One chain, C1b</h2>
+
+<p>
+<a expr="(recorded-target 'context-relation-attribution)">CONTEXT-RELATION-ATTRIBUTION at 3e84471c</a>
+→ <a expr="(target-now 'context-relation-attribution)">the same form, looked for now</a>
+→ <a expr="(prior-observation :c1b)">the observation that names it</a>
+→ <a expr="(judgement &quot;C1b&quot;)">the judgement resting on that observation</a>,
+whose provenance says who judged it.
+</p>
+
+<p>
+  <a page="Reading the Lisp Critic Genealogy">
+    Back to the genealogy
+  </a>
+</p>
