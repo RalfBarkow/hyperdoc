@@ -113,25 +113,29 @@ The context retains these raw-derived results for Inspector references and cache
 TALA renderings; neither projection advances or derives its own temporal state.
 State/Delta changes reuse the same temporal rendering.
 
-Primary context-sign clicks Follow the actual represented object into wiki
-working material. They leave Workspace Point and the temporal cursor unchanged.
-Subjects use the existing collaborative/context/neighborhood resolution and
-present genuine ambiguity in the Subject chooser; page signs open their exact
-represented native historical page in Story.
+Primary context-sign clicks move the existing Workspace Point through
+`topicmap-workspace-go-to`. Relations at Point provide go-to operations for their
+other endpoints using the same Point action. Neither operation follows wiki
+material or moves the temporal cursor.
 
-The explicit inspection table retains separate `Inspect represented object` and
-`Inspect Topicmap sign` links. Its `Set Workspace Point` button calls
-`select-context-topic` → `topicmap-workspace-go-to`, without following wiki material
-or moving time. It updates only the Point summary, its relation references and the
-context-map highlight; the maps, inspection table and source pane are not rebuilt.
-The operation returns NIL to the existing Inspector action handler, suppressing
-a pane refresh. A repeated choice of the current Point performs no presentation
-update. Point is still owned by the existing `topicmap-workspace`, retained in
-the context's `workspace` slot. The action's callback contains only view context.
+Point movement updates only the Point panel, its operation/relation references
+and the existing context-map highlight; the maps, inspection table and source pane
+are not rebuilt. The operation returns NIL to the existing Inspector action
+handler, suppressing a pane refresh. A repeated choice of the current Point
+performs no presentation update. The bounded Point panel keeps the surrounding
+layout stable as its relation count changes, without saving/restoring scroll
+offsets. Point is still owned by `topicmap-workspace`, retained in the context's
+`workspace` slot. The action's callback contains only view context. The redundant
+`Set Workspace Point` button and `select-context-topic` wrapper are gone.
 
-`render-context-point` presents the Workspace Point's label and relations at that
-point. It has no duplicate page-follow or sign/object inspection links. Native
-source-page links resolve lazily on explicit navigation rather than on rendering.
+`render-context-point` presents what is at Point and operations at Point: Follow,
+`Inspect represented object`, `Inspect Topicmap sign`, and relation navigation.
+Follow obtains `topicmap-workspace-current-object` and calls the unchanged
+`follow-context-object`. Subjects use the existing collaborative/context/neighborhood
+resolution and present genuine ambiguity in the Subject chooser; pages open the
+exact represented historical/native page in Story. The separate per-sign inspection
+table remains available for comparison. Native source-page links resolve lazily
+on explicit navigation rather than on rendering.
 Association signs retain their existing Inspector/gesture binding. Their Evidence
 view exposes actual relation, Delta change, before/after, and source item values.
 The existing observed `via Thompson` metadata is shown as textual attribution,
@@ -154,11 +158,18 @@ continued through Jan's 18:03:05.302 fork, selected and inspected both same-titl
 page Topics, then reached the 18:03:51.968 attribution. Actual event, State, Delta,
 Topic, association and change values were opened in CLOG Inspector, and a native
 link opened Thompson / How We Think. In that earlier implementation, cursor and
-topic actions refreshed the same context pane. Current context Follow and explicit
-Point movement preserve the source pane; only temporal/State/Delta actions retain
+topic actions refreshed the same context pane. Current Follow at Point and context
+Point navigation preserve the source pane; only temporal/State/Delta actions retain
 the existing refresh behavior. The operation and scroll proofs are recorded in
 `../../docs/federated-context-interaction-semantics.md`.
 
 The external browser QA script remains outside the application. Its recorded
 walkthrough is `wiki-trails-rendered-local/federated-context-workspace-evidence.json`;
 it is not a semantic fixture or part of the running model.
+
+When temporal selection or State/Delta changes produces a different projection
+object, the context creates a new Workspace. It retains the prior Point ID if
+present, otherwise the selected event's page ID if present, otherwise the first
+topic (or NIL for an empty projection). Navigation history is not copied, even
+when Point survives. This is an observation of the existing rule; this slice
+does not repair it.
