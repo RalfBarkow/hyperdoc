@@ -2413,6 +2413,7 @@
                                                     (:file "addresses")
                                                     (:file "trails-rendered-reading")
                                                     (:file "trails-rendered-federated-context")
+                                                    (:file "shift-click" :depends-on ("trails-rendered-federated-context"))
                                                     (:static-file "trails-rendered-solo-batch.json")
                                                     (:static-file "trails-rendered-solo-beam.json")
                                                     (:static-file "trails-rendered-federated-context.json")
@@ -2443,26 +2444,29 @@
                  (:static-file "dreyeck.ch deployment.html")
                  (:static-file "Cookie Secret.html")
                  (:static-file "Trails Rendered public reproduction.html")
-                 (:static-file "Solo hoverbold.html")))))
+                 (:static-file "Solo hoverbold.html")
+                 (:static-file "Shift-click Is Pane Policy.html")))))
 
 (defsystem "dreyeck/work/reading/tests"
   :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset"
                "dreyeck/gesture/operation-request" "shasht" "hyperbook/server"
-               "dreyeck/topicmap/gesture/tests")
+               "dreyeck/topicmap/gesture/tests" "ironclad")
   :serial t
   :components ((:file "dreyeck/tests/work-reading")
                (:file "dreyeck/tests/work-reading-live")
                (:file "dreyeck/tests/work-authoring-architecture")
                (:file "dreyeck/tests/work-deployment-reading")
                (:file "dreyeck/tests/work-trails-rendered-reading")
-               (:file "dreyeck/tests/work-trails-rendered-federated-context"))
+               (:file "dreyeck/tests/work-trails-rendered-federated-context")
+               (:file "dreyeck/tests/work-shift-click"))
   :perform (test-op (op component)
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/work/tests :run-tests)
              (uiop:symbol-call :dreyeck/work/authoring-architecture/tests
                                :run-authoring-architecture-tests)
              (uiop:symbol-call :dreyeck/work/deployment-reading/tests :run-tests)
-             (uiop:symbol-call :dreyeck/work/trails-rendered-reading/tests :run-tests)))
+             (uiop:symbol-call :dreyeck/work/trails-rendered-reading/tests :run-tests)
+             (uiop:symbol-call :dreyeck/work/shift-click/tests :run-tests)))
 
 (defsystem "dreyeck/work/authoring"
   :description "Inspect and execute Work status/relationship requests from the Topicmap; authoring-side, never in the Catalog"

@@ -1,0 +1,150 @@
+<h1>Shift-click Is Pane Policy</h1>
+<in-package>dreyeck/work/shift-click</in-package>
+<p>What does Shift-click mean in HyperDoc? In this image and its pinned
+dependencies, it decides whether the Inspector keeps the panes to the right of
+the one that was clicked. It does not select an operation. The
+<a expr="(shift-click-topicmap)" view="Topicmap">Topicmap of this reading</a>
+starts at Shift-click. Its associations show what reads it and what merely
+carries it. The reader, the Inspector's click handler, is in turn compared with
+Mech's CLICK, and only compared. Each association records a warrant and a status
+in its properties: source-observed, directly observed, or design inference.</p>
+
+<h2>One handler reads Shift</h2>
+<p>Clicks on references reach the
+<a expr="(function clog-moldable-inspector::set-event-handlers)" view="Source code">Inspector's click handler</a>,
+in clog-moldable-inspector as pinned for this repository. Its <code>inspect-</code>
+and <code>eval-</code> branches guard one call with
+<code>(unless (getf event :shift-key) (close-panes-after inspector pane))</code>.
+Everything else they do is the same with or without Shift:</p>
+<table>
+<thead><tr><th>Click</th><th>Panes to the right</th><th>Then</th></tr></thead>
+<tbody>
+<tr><td>ordinary</td><td>closed</td><td>the reference; its pane follows the clicked one</td></tr>
+<tr><td>Shift</td><td>kept</td><td>the same reference; its pane goes last</td></tr>
+</tbody>
+</table>
+<p><a expr="(function clog-moldable-inspector::close-panes-after)" view="Source code">CLOSE-PANES-AFTER</a>
+is the whole difference. An <code>action-</code> reference opens no pane, and the
+handler reads Shift there only together with Alt. Alt is not pane policy. On an
+<code>eval-</code> or <code>action-</code> reference it opens the reference's own
+thunk instead of running it, so it yields a different result.</p>
+
+<h2>Same operation, different pane policy</h2>
+<p>A followable federated-context Topic sign is an <code>eval-</code> reference.
+Its PRIMARY activation is
+<a expr="(primary-composition)" view="Source code">one method</a>: Workspace
+Point moves to the Topic, the local Point presentation is updated, and the existing
+<code>operation/follow</code> runs on that Topic's sign occurrence. Its result
+opens in the next pane. Run it on a fresh context:</p>
+<source-of-function>topic-primary-activation</source-of-function>
+<p>Point moves from Jan / John Dewey to Thompson / How We Think, and history
+records Jan / John Dewey. The Point presentation is updated with Point already at
+How We Think. The result is the Topic's represented page itself. The handler reads
+Shift before this thunk runs, and nothing reaches the thunk from the click event.
+Shift-PRIMARY therefore makes the same Point, the same Follow and the same result.
+Only the panes to the right differ.</p>
+<table>
+<thead><tr><th>On B</th><th>Point</th><th>Follow</th><th>Result</th><th>Panes to the right</th></tr></thead>
+<tbody>
+<tr><td>PRIMARY</td><td>A → B</td><td>operation/follow</td><td>B's page</td><td>closed</td></tr>
+<tr><td>Shift-PRIMARY</td><td>A → B</td><td>the same, EQ</td><td>the same page</td><td>kept; B's page opens last</td></tr>
+</tbody>
+</table>
+<p>The Shift regression in <code>dreyeck/work/reading/tests</code> checks the table.
+It captures the click handlers that the pinned code installs on this
+context's own references and calls them with CLOG's parse of a plain and of a
+shifted click, without a browser. Without Shift the real CLOSE-PANES-AFTER removes the trailing
+pane; with Shift it is not called. Point, history, the Follow identity and the
+opened object agree in both cases. With Alt, the handler opens the sign's own
+reference instead, and Point stays where it was. That control shows the harness
+can see a modifier that does change the result.</p>
+
+<h2>Operation is not invocation</h2>
+<p><a expr="(dreyeck/gesture-binding-witness:follow-operation)">Follow</a> is a
+semantic operation identity, a SEMANTIC-OPERATION-IDENTITY. What reaches it
+differs:</p>
+<ul>
+<li>PRIMARY, through the Inspector's eval transport and the composition above;</li>
+<li>SECONDARY, through two GESTURE-BINDINGs, the radial-menu and the learned-mark
+Binding at 90°;</li>
+<li>Shift and Alt, which do neither. They are the Inspector's presentation
+policy, read in its handler.</li>
+</ul>
+<source-of-function>follow-identity</source-of-function>
+<p>Both Bindings reference the identity EQ. The composition names it in its source,
+and the federated-context Topic-operations test records the same EQ identity for
+PRIMARY, radial and learned-mark Follow. That identity is the claim; the result
+cannot carry it, because for a page Topic, Inspect represented object returns the
+same page. There is no common invocation protocol either. The Point panel's
+Follow button calls
+<a expr="(function dreyeck/work/trails-rendered-reading::follow-context-object)" view="Source code">FOLLOW-CONTEXT-OBJECT</a>
+directly, without the identity.</p>
+
+<h2>PRIMARY and SECONDARY</h2>
+<dl>
+<dt>PRIMARY on a Topic</dt><dd>Point := Topic, then default Follow where applicable.</dd>
+<dt>SECONDARY on a Topic</dt><dd>An explicit operation on the transient gesture target. Point is unchanged.</dd>
+</dl>
+<p><a expr="(function dreyeck/work/trails-rendered-reading::context-topic-primary-reference)" view="Source code">CONTEXT-TOPIC-PRIMARY-REFERENCE</a>
+gives a followable context sign an <code>eval-</code> reference. Other context
+signs get an <code>action-</code> reference that only moves Point, and temporal
+signs keep selecting an event. A completed gesture reaches
+<a expr="(function dreyeck/inspector/topicmap::%show-topic-selection)" view="Source code">%SHOW-TOPIC-SELECTION</a>,
+which runs the selected Operation on the exact occurrence and opens the result
+with
+<a expr="(function dreyeck/inspector/topicmap::%open-beside)" view="Source code">%OPEN-BESIDE</a>.</p>
+<p>Shift differs between the two. PRIMARY gets pane policy from the Inspector
+without any Topic code. SECONDARY carries Shift but never interprets it:</p>
+<source-of-function>secondary-modifier-transport</source-of-function>
+<p>The transport puts <code>:SHIFT</code> into the
+<a expr="(find-class 'dreyeck/gesture-binding-witness:gesture-input-sample)">GESTURE-INPUT-SAMPLE</a>
+of every event. A
+<a expr="(find-class 'dreyeck/gesture-binding-witness:gesture-binding)">GESTURE-BINDING</a>
+has no modifier slot, and the reducer selects the same Binding and Operation either
+way. %OPEN-BESIDE then closes the panes to the right, Shift or not. This is an
+observation of the current code. Nothing in this reading changes it.</p>
+
+<h2>Mech's Shift-click is another mechanism</h2>
+<p>Ward Cunningham reports a Mech Shift-click that reports the properties used in
+each block. His screenshot shows <code>aspect ⇒</code> above a line
+<code>SOLO ⇒ 1 sources, 3 aspects</code>, and <code>status ⇒</code> above
+<code>REPORT status</code>. His current, unpublished implementation was not
+inspected. What can be inspected is the Mech revision that the Trails Rendered
+reading already pins:</p>
+<view-transclusion>(mech-excerpt-view :click)</view-transclusion>
+<view-transclusion>(mech-excerpt-view :inspect)</view-transclusion>
+<p>A CLICK sets <code>state.debug</code> from <code>event.shiftKey</code> and then
+runs the same blocks. While <code>state.debug</code> is set, <code>inspect</code>
+writes a <code>key ⇒</code> label for each key it is called with. So Shift turns
+on reporting over an unchanged execution. The screenshot is consistent with this
+pinned output form: <a expr="(mech-excerpt :solo)">SOLO</a> inspects
+<code>aspect</code> and writes <code>⇒ N sources, M aspects</code>, and
+<a expr="(mech-excerpt :report)">REPORT</a> inspects the key it reports. Where Ward's
+<code>status</code> comes from was not established. These are excerpts with
+provenance, not HyperDoc runtime objects.</p>
+<p>Interpretation, not observation: both are modifiers read when an invocation
+starts, and both leave what runs unchanged. That is the whole analogy. HyperDoc's
+Shift keeps panes and Mech's turns on reports, and the two share no implementation.
+Mech's Shift-click is neither Inspect represented object nor Inspect Topicmap sign.
+Both of those are explicit SECONDARY operations that return a different object,
+with no run and no report.</p>
+
+<h2>Boundary: properties used</h2>
+<p>Ward's example reports block properties such as <code>aspect</code> and
+<code>status</code>. In the pinned Mech, those keys are not inferred: each block
+names them in explicit <code>inspect</code> calls. HyperDoc has no runtime
+representation of the properties that a View or an Operation actually reads, and
+this reading does not add one.</p>
+
+<h2>Falsification</h2>
+<table>
+<thead><tr><th>Claim</th><th>Counter-observation</th><th>Checked by</th></tr></thead>
+<tbody>
+<tr><td>Shift changes only whether CLOSE-PANES-AFTER runs, for <code>inspect-</code> and <code>eval-</code> references.</td><td>With Shift, the pinned handler opens a different object, evaluates a different reference, or still closes the panes to the right.</td><td>The Shift regression on this context's references.</td></tr>
+<tr><td>Shift-PRIMARY moves Point and follows exactly like PRIMARY.</td><td>Point, history, the Follow identity or the opened object differ between a plain and a shifted click.</td><td>The Shift regression; <code>topic-primary-activation</code>.</td></tr>
+<tr><td>PRIMARY, radial and learned-mark Follow reach one identity.</td><td>A Binding or the composition reaches an identity that is not EQ to operation/follow.</td><td><code>follow-identity</code>; the federated-context Topic-operations test.</td></tr>
+<tr><td>SECONDARY carries Shift and does not interpret it.</td><td>A shifted mark selects another Binding or Operation, or a sample loses <code>:SHIFT</code>.</td><td><code>secondary-modifier-transport</code>.</td></tr>
+<tr><td>Mech's Shift turns on reporting over the same run.</td><td>The pinned CLICK runs other blocks when Shift is held, or <code>inspect</code> reports without <code>state.debug</code>.</td><td>The pinned excerpts and their SHA-256.</td></tr>
+</tbody>
+</table>
+<p>Back to <a page="Interaction">Interaction</a> · <a page="Work Breakdown">Work Breakdown</a></p>
