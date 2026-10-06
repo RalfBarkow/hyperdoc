@@ -66,10 +66,12 @@ differs:</p>
 <ul>
 <li>PRIMARY, through the Inspector's eval transport and the composition above;</li>
 <li>SECONDARY, through two GESTURE-BINDINGs, the radial-menu and the learned-mark
-Binding at 90°;</li>
-<li>Shift and Alt, which do neither. They are the Inspector's presentation
-policy, read in its handler.</li>
+Binding at 90°.</li>
 </ul>
+<p>Neither modifier becomes part of the Follow invocation. Shift is consumed by
+the Inspector as pane policy while the underlying PRIMARY activation still
+reaches Follow; Alt is consumed as meta-inspection and does not run that eval
+path.</p>
 <source-of-function>follow-identity</source-of-function>
 <p>Both Bindings reference the identity EQ. The composition names it in its source,
 and the federated-context Topic-operations test records the same EQ identity for
@@ -131,8 +133,8 @@ with no run and no report.</p>
 
 <h2>Boundary: properties used</h2>
 <p>Ward's example reports block properties such as <code>aspect</code> and
-<code>status</code>. In the pinned Mech, those keys are not inferred: each block
-names them in explicit <code>inspect</code> calls. HyperDoc has no runtime
+<code>status</code>. In the pinned Mech, those keys are not inferred: the SOLO and
+REPORT blocks shown above name them in explicit <code>inspect</code> calls. HyperDoc has no runtime
 representation of the properties that a View or an Operation actually reads, and
 this reading does not add one.</p>
 

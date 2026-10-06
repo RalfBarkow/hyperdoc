@@ -282,7 +282,7 @@ modifier slot."
                           ("radial-follows" "binding/radial-menu-follow" "operation/follow" :references :directly-observed
                            "GESTURE-BINDING-OPERATION is EQ to it; see FOLLOW-IDENTITY.")
                           ("reducer-reads-samples" "run-gesture-trace" "gesture-input-sample" :reads :source-observed
-                           "It reads each sample's kind, button and coordinates. No code reads a sample's MODIFIERS.")
+                           "It reads each sample's kind, button and coordinates. No selection or execution code reads a sample's MODIFIERS.")
                           ("reducer-selects-mark" "run-gesture-trace" "binding/learned-mark-follow" :selects :directly-observed
                            "This is the learned-mark path. SECONDARY-MODIFIER-TRANSPORT shows it selecting this Binding with and without :SHIFT.")
                           ("reducer-selects-radial" "run-gesture-trace" "binding/radial-menu-follow" :selects :source-observed
