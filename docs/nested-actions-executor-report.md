@@ -1,4 +1,6 @@
-# Nested Actions in Solo — slice report
+# Nested Actions in Solo — original slice report
+
+This records the original slice at commit 073c72f3. The current revision separates subordinate execution from event propagation; see [the follow-up report](nested-actions-event-propagation.md). Counts and interpretation statuses below describe the original slice.
 
 Date: 2026-10-07. Operator: Codex, acting as the plan-maintaining programmer.
 All paths below are relative to the observed checkout unless explicitly absolute.

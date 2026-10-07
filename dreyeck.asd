@@ -531,25 +531,49 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/authority-policy/tests :run-tests)))
 
-(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/nested-actions/reading"
-  :DESCRIPTION
-  "Observed SOLO/LISTEN/REPORT syntax, open semantic probes and warranted learning Workspace"
-  :LICENSE
-  "BSD"
-  :SERIAL
-  T
-  :DEPENDS-ON
-  ("dreyeck/hyperdoc" "dreyeck/authority-policy"
-   "dreyeck/inspector/topicmap/tala")
-  :COMPONENTS
-  ((:MODULE "dreyeck/nested-actions" :COMPONENTS
-    ((:FILE "action-tree") (:FILE "probes") (:FILE "reading")))
-   (:MODULE "dreyeck/pages/nested-actions" :COMPONENTS
-    ((:STATIC-FILE "Nested Actions in Solo.html")
-     (:STATIC-FILE "What Does a Nested Action Inherit?.html"))))
-  :IN-ORDER-TO
-  ((ASDF/LISP-ACTION:TEST-OP
-    (ASDF/LISP-ACTION:TEST-OP "dreyeck/nested-actions/reading/tests"))))
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/nested-actions/reading" :DESCRIPTION
+                                "Subordinate execution and broadcast event propagation: source-backed message witness with explicit nested-input gap"
+                                :LICENSE "BSD" :SERIAL T :DEPENDS-ON
+                                ("dreyeck/hyperdoc"
+                                 "dreyeck/authority-policy"
+                                 "dreyeck/inspector/topicmap/tala"
+                                 "shasht"
+                                 "ironclad")
+                                :COMPONENTS
+                                ((:MODULE "dreyeck/nested-actions" :COMPONENTS
+                                          ((:FILE "action-tree")
+                                           (:FILE "probes")
+                                           (:FILE "message-path")
+                                           (:FILE "reading")
+                                           (:STATIC-FILE
+                                                         "message-witness.json")
+                                           (:STATIC-FILE
+                                                         "message-witness.html")
+                                           (:MODULE "sources" :COMPONENTS
+                                                    ((:STATIC-FILE
+                                                                   "ward-node-message.js")
+                                                     (:STATIC-FILE "listen.js")
+                                                     (:STATIC-FILE "report.js")
+                                                     (:STATIC-FILE
+                                                                   "message.js")
+                                                     (:STATIC-FILE "run.js")
+                                                     (:STATIC-FILE "render.js")
+                                                     (:STATIC-FILE
+                                                                   "provenance.json")
+                                                     (:STATIC-FILE
+                                                                   "LICENSE-Mech")))))
+                                 (:MODULE "dreyeck/pages/nested-actions"
+                                          :COMPONENTS
+                                          ((:STATIC-FILE
+                                                         "Nested Actions in Solo.html")
+                                           (:STATIC-FILE
+                                                         "What Does a Nested Action Inherit?.html")
+                                           (:STATIC-FILE
+                                                         "Two Relations Hidden in One Nest.html"))))
+                                :IN-ORDER-TO
+                                ((ASDF/LISP-ACTION:TEST-OP
+                                                           (ASDF/LISP-ACTION:TEST-OP
+                                                                                     "dreyeck/nested-actions/reading/tests"))))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/nested-actions/reading/tests"
                                 :DEPENDS-ON

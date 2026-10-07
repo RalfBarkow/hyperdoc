@@ -1,0 +1,185 @@
+<html><head><title>Native message witness</title></head><body><h1>Native window/opener message witness</h1><p>Supplied producer fragment and retained LISTEN; nested input remains unestablished.</p><div id='controls'><p id='left'>Left receiver</p><button id='launch'>Open producer popup</button><p id='right'>Right receiver</p></div><div id='producer-controls' hidden='hidden'><button id='with-title'>Send props.title</button><button id='with-name'>Send props.name fallback</button></div><pre id='capture'>No message received yet.</pre><script>const manifest = [
+  {
+    "role": "producer",
+    "status": "source-observed",
+    "origin": "Ward-supplied fragment in the follow-up task",
+    "revision": null,
+    "path": null,
+    "file": "dreyeck/nested-actions/sources/ward-node-message.js",
+    "sha256": "920f15162bf07e719f7815855e47724add942ef9669d2ce8c8df17c3197c74c8",
+    "limitation": "Supplied source; current runtime revision and complete click-handler installation not provided."
+  },
+  {
+    "role": "listen",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/blocks.js",
+    "startLine": 878,
+    "endLine": 915,
+    "file": "dreyeck/nested-actions/sources/listen.js",
+    "sha256": "e5af66ba1c03319911bca8c29aceef91bc4977b08d03b00f0a03ced6a29fc02c",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  },
+  {
+    "role": "report",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/blocks.js",
+    "startLine": 305,
+    "endLine": 314,
+    "file": "dreyeck/nested-actions/sources/report.js",
+    "sha256": "040c08a8e823b1abe2daba15ee15c721e5f6672482e6c8637b392405b9f058ed",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  },
+  {
+    "role": "message",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/blocks.js",
+    "startLine": 917,
+    "endLine": 928,
+    "file": "dreyeck/nested-actions/sources/message.js",
+    "sha256": "b6df37ee075c5989f9923d87de882b9d49772d645c3e0c6621f686ed6fc17fe0",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  },
+  {
+    "role": "run",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/blocks.js",
+    "startLine": 224,
+    "endLine": 241,
+    "file": "dreyeck/nested-actions/sources/run.js",
+    "sha256": "b7ce24565e00b41cd7af8516004717812f31d3e35ba85114b4becb2f58a79dc9",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  },
+  {
+    "role": "render",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/mech.js",
+    "startLine": 18,
+    "endLine": 42,
+    "file": "dreyeck/nested-actions/sources/render.js",
+    "sha256": "79dc0a9521d8bb04acacb3d26620e97dff0db8f4c1ab09c30dca68eb87f844b8",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  }
+]
+;
+const capture = {
+  mode: "native-window-opener-to-retained-listen",
+  limitations: [
+    "Synthetic popup props; supplied producer fragment only, not the complete Solo click handler.",
+    "Retained Mech LISTEN revision, not proven to be Ward's new nested implementation.",
+    "DOM status instrumentation and an inert jQuery thumb-hook shim; native window message delivery is used.",
+    "No nested-input mapping, REPORT invocation or alternative scoped emitter is implemented.",
+    "Fixture left/right receivers are not the FedWiki lineup."
+  ],
+  sources: manifest,
+  emitter: {sender: "popup window", target: "window.opener", receiver: "opener window",
+            channel: "message", native: true, alternativeEmitter: false},
+  browser: navigator.userAgent,
+  events: []
+};
+const statuses = {};
+const handlers = [];
+const nativeAdd = window.addEventListener.bind(window);
+window.addEventListener = function(type, callback, ...rest) {
+  if (type === "message" && callback.name === "listen") handlers.push(callback);
+  return nativeAdd(type, callback, ...rest);
+};
+window.$ = () => ({on: () => {}});
+const state = {api: {
+  status(elem, command, value) {
+    (statuses[elem.id] ||= []).push({command, value});
+    document.getElementById(elem.id).textContent = command + value;
+  },
+  trouble(elem, message) {throw new Error(message)}
+}};
+function listen_emit({ elem, command, args, state }) {
+  if (args.length < 1) return state.api.trouble(elem, `LISTEN expects argument, an action.`)
+  const topic = args[0]
+  let recent = Date.now()
+  let count = 0
+  const handler = listen
+  handler.action = 'publishSourceData'
+  handler.id = elem.id
+  window.addEventListener('message', listen)
+  $('.main').on('thumb', (evt, thumb) => console.log('jquery', { evt, thumb }))
+  // elem.innerHTML = command + ` ⇒ ready`
+  state.api.status(elem, command, ` ⇒ ready`)
+  // window.listeners = (action=null) => {
+  //   return getEventListeners(window).message
+  //     .map(t => t.listener)
+  //     .filter(f => f.name == 'listen')
+  //     .map(f => ({action:f.action,elem:document.getElementById(f.id),count:f.count}))
+  // }
+
+  function listen(event) {
+    console.log({ event })
+    const { data } = event
+    if (data.action == 'publishSourceData' && (data.name == topic || data.topic == topic)) {
+      count++
+      handler.count = count
+      if (state.debug) console.log({ count, data })
+      if (count <= 100) {
+        const now = Date.now()
+        const elapsed = now - recent
+        recent = now
+        // elem.innerHTML = command + ` ⇒ ${count} events, ${elapsed} ms`
+        state.api.status(elem, command, ` ⇒ ${count} events, ${elapsed} ms`)
+      } else {
+        window.removeEventListener('message', listen)
+      }
+    }
+  }
+}
+
+listen_emit({elem: document.getElementById("left"), command:"LISTEN node", args:["node"], state});
+listen_emit({elem: document.getElementById("right"), command:"LISTEN node", args:["node"], state});
+window.addEventListener = nativeAdd;
+capture.initialListeners = handlers.map(h => ({id:h.id, action:h.action, count:h.count || 0}));
+let popup;
+document.getElementById("launch").onclick = () => {
+  popup = window.open("message-witness.html?producer=1", "nested-message-producer", "popup,width=620,height=460");
+};
+window.addEventListener("message", event => {
+  if (event.data?.action !== "publishSourceData" || event.source !== popup) return;
+  capture.events.push({
+    producer: {props: JSON.parse(JSON.stringify(event.source.fixtureProps)), kind:"synthetic sample props"},
+    emittedMessage: JSON.parse(JSON.stringify(event.source.fixtureEmitted)),
+    receivedMessage: event.data,
+    reception: {type:event.type, isTrusted:event.isTrusted, origin:event.origin,
+                sourceIsPopup:event.source === popup, distinctFromSenderObject:event.data !== event.source.fixtureEmitted},
+    listeners: handlers.map(h => ({id:h.id, action:h.action, count:h.count || 0, statuses:JSON.parse(JSON.stringify(statuses[h.id]))})),
+    listenerOutput: {status:"not-produced-by-retained-listen", value:null},
+    nestedInput: {status:"unestablished-for-current-experiment", value:null},
+    reportLookupTarget: {status:"unestablished-for-current-experiment", value:null, retainedRevisionKey:"state.title"}
+  });
+  capture.capturedAt = new Date().toISOString();
+  document.getElementById("capture").textContent = JSON.stringify(capture, null, 2);
+});
+function sendSample(props) {
+  window.fixtureProps = props;
+  const message = {
+  action: 'publishSourceData',
+  topic: 'node',
+  title: props.title || props.name.replaceAll(/\n/g,' ')
+}
+window.opener.postMessage(message)
+
+  window.fixtureEmitted = message;
+}
+if (location.search === "?producer=1") {
+  document.getElementById("controls").hidden = true;
+  document.getElementById("producer-controls").hidden = false;
+  document.getElementById("with-title").onclick = () => sendSample({title:"Payload Title", name:"Unused Name"});
+  document.getElementById("with-name").onclick = () => sendSample({title:"", name:"Fallback\nNode"});
+}
+
+</script></body></html>

@@ -16,7 +16,19 @@
            #:READING-PROJECTION
            #:READING-WORKSPACE
            #:TOPIC-WORKSPACE
-           #:LAYOUT-COMPARISON))
+           #:LAYOUT-COMPARISON
+           "MESSAGE-SOURCE"
+           "SOURCE-METADATA"
+           "SOURCE-TEXT"
+           "SOURCE-FILE"
+           "MESSAGE-SOURCE-OBSERVATIONS"
+           "PRODUCER-SOURCE"
+           "MESSAGE-WITNESS"
+           "WITNESS-CAPTURE"
+           "WITNESS-SOURCES"
+           "WITNESS-STAGE"
+           "EMITTED-MESSAGE-WITNESS"
+           "WARD-PROPAGATION-EVIDENCE"))
 
 (IN-PACKAGE #:DREYECK/NESTED-ACTIONS)
 
@@ -26,6 +38,10 @@
 
 (HYPERDOC:SEE
   (HYPERDOC:PAGE "What Does a Nested Action Inherit?" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Two Relations Hidden in One Nest" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
 (DEFCLASS NESTED-ACTION NIL
@@ -50,7 +66,10 @@ The representation is HyperDoc code, not Ward's implementation."
 
 (HYPERDOC:DEFEXAMPLE EXPERIMENT-EVIDENCE
   "Inspect the supplied testimony and screenshot transcription, not a runtime capture."
-  (LIST :ORIGIN :USER-SUPPLIED-TASK :WARD-STATEMENT
+  (LIST :EXPLICIT-CORRECTION
+        "Earlier LISTEN rebinding language is retained in Ralf's historical quote only. Ward's follow-up distinguishes subordinate execution from event broadcast; scope here is event-emitter reach. The message-to-current-nested-input transformation remains unestablished."
+        :CURRENT-FRAMING :SEPARATE-SUBORDINATE-AND-EVENT-RELATIONS :ORIGIN
+        :USER-SUPPLIED-TASK :WARD-STATEMENT
         "With Paul's help we now have a few more lines of just right code. With this the SOLO block will run any nested statements. Here we use existing blocks to LISTEN for clicked nodes and then REPORT their titles."
         :COMPOSITION
         '((:CLICK) (:NEIGHBORS :PAGES 1845 :SITES 4)
@@ -65,7 +84,7 @@ The representation is HyperDoc code, not Ward's implementation."
         "A block is beginning to behave less like a command in a pipeline and more like a form that establishes an execution context for nested forms.
 
 This looks like more than nested syntax. SOLO now seems able to establish an execution context in which another statement can wait for future events and continue evaluation. LISTEN node → REPORT title makes the interesting question concrete: what exactly does a nested statement inherit from its enclosing statement, and what does LISTEN rebind when an event arrives? That seems like the place where the semantics of nested actions will become visible."
-        :INTERPRETATION-STATUS :HYPOTHESIZED :IMPLEMENTATION-STATUS
+        :INTERPRETATION-STATUS :HISTORICAL-HYPOTHESIS :IMPLEMENTATION-STATUS
         :NOT-LOCALLY-ESTABLISHED :HYPERDOC-WITNESS :SYNTAX-CONSTRUCTION-ONLY))
 
 (V:DEFVIEW ACTION-TREE-VIEW (ACTION NESTED-ACTION)

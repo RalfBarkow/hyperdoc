@@ -10,52 +10,55 @@
   (HYPERDOC:PAGE "Nested Actions in Solo" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "Two Relations Hidden in One Nest" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
 (HYPERDOC:DEFEXAMPLE SEMANTIC-QUESTIONS
-  "Fresh open question records. Later answers can carry evidence without rewriting the observation."
+  "Questions left open after distinguishing subordinate execution and window event reach."
   (LOOP FOR (ID
              QUESTION) IN '((:ENVIRONMENT
-                             "What environment is visible to LISTEN; which values, aspects and sources are inherited?")
-                            (:NODE "What object does node denote?")
+                             "What input object does the current LISTEN pass to its subordinate REPORT?")
+                            (:NODE
+                             "Retained LISTEN matches topic or name node. Does Ward's current implementation retain that filter?")
                             (:TITLE
-                             "What object supplies title, outside and inside LISTEN?")
+                             "The producer supplies message.title. What current nested REPORT target receives it? Retained REPORT reads state.title.")
                             (:EVENT-CONTEXT
-                             "Does an event replace, extend, or leave untouched the enclosing context? Is rebind an accurate description?")
+                             "What transformation connects received event.data to current nested action input? Rebinding is not established.")
                             (:LIFETIME
-                             "How long does the nested computation live?")
+                             "How long does the current nested listener computation live? The retained listener's count limit does not prove its lifecycle.")
                             (:TERMINATION
-                             "What ends it; how are cancellation and unsubscription handled?")
+                             "What ends the current listener and nested actions; how are cancellation and unsubscription handled?")
                             (:SCOPE
-                             "What evidence distinguishes lexical from dynamic scope, or establishes closure semantics?"))
+                             "Ward's proposed scope concerns event-emitter reach through replacing window. No lexical or dynamic variable scope is established."))
         COLLECT (LIST :ID ID :QUESTION QUESTION :STATUS :OPEN :ANSWER NIL
                       :EVIDENCE NIL)))
 
 (HYPERDOC:DEFEXAMPLE PROPOSED-PROBES
-  "Construct plans for future semantic experiments. None executes Solo.
-Even validity of the proposed action notation requires the matching implementation."
+  "Future experiments after inspecting the emitted-message witness. No current Solo semantics execute here."
   (LIST
-   (LIST :ID :OUTER-INNER-TITLE :STATUS :PROPOSED :EXECUTABLE-P NIL
-         :NOTATION-VALIDITY :UNVERIFIED :FORM
-         '("SOLO" ("REPORT" "title") ("LISTEN" "node" ("REPORT" "title")))
-         :QUESTION :TITLE :PROCEDURE
-         "Give the enclosing input a distinguishable title A and click a node with title B. Record both REPORT values and object identities, including missing-title errors."
+   (LIST :ID :MESSAGE-HANDOFF :STATUS :PROPOSED :EXECUTABLE-P NIL
+         :NOTATION-VALIDITY :UNVERIFIED :QUESTION :EVENT-CONTEXT :PRIORITY
+         :PRIMARY :PROCEDURE
+         "In the matching current Mech revision, capture the same node message at window reception, at LISTEN's nested dispatch and at REPORT's state[key] or actual lookup operation. Preserve identities and revision coordinates."
          :DISCRIMINATES
-         "A then B is consistent with different suppliers; A then A is consistent with retained lookup; neither result alone establishes scope or rebinding."
+         "Whether event.data is passed, copied, merged, wrapped or transformed; do not infer the handoff from equal title strings."
          :REQUIRED-EVIDENCE
-         "Exact plugin revision, accepted notation, input and event objects, before/after state and output trace."
-         :RESULT NIL)
-   (LIST :ID :EVENT-STATE :STATUS :PROPOSED :EXECUTABLE-P NIL
-         :NOTATION-VALIDITY :UNVERIFIED :QUESTION :EVENT-CONTEXT :PROCEDURE
-         "Observe the enclosing state identity and keys before LISTEN and on two distinct clicks. Compare retained keys and new event fields."
-         :DISCRIMINATES
-         "Replacement, extension and unchanged state require paired object/key evidence; reported titles alone do not discriminate."
-         :REQUIRED-EVIDENCE
-         "Matching source and debugger observations at dispatch and nested evaluation."
+         "Current LISTEN nested-dispatch and REPORT implementation, plus paired runtime objects."
          :RESULT NIL)
    (LIST :ID :LIFETIME :STATUS :PROPOSED :EXECUTABLE-P NIL :NOTATION-VALIDITY
          :UNVERIFIED :QUESTION :TERMINATION :PROCEDURE
-         "Record callbacks after two clicks, rerun the enclosing action, close its UI and click again. Inspect disposal and subscription counts."
+         "Measure callbacks and cleanup after rerunning the enclosing action and closing its UI, in the matching revision."
          :DISCRIMINATES
-         "Repeated, duplicate or absent callbacks delimit lifetime only for the tested run; source must explain cancellation."
+         "Registration/disposal timing, without importing the retained revision's event-count limit."
          :REQUIRED-EVIDENCE
-         "Timestamped events, callback identities and actual cleanup path."
+         "Current registration/cleanup source and timestamped handler identities."
+         :RESULT NIL)
+   (LIST :ID :OUTER-INNER-TITLE :STATUS :SUPERSEDED :PRIORITY :HISTORICAL
+         :EXECUTABLE-P NIL :NOTATION-VALIDITY :UNVERIFIED :FORM
+         '("SOLO" ("REPORT" "title") ("LISTEN" "node" ("REPORT" "title")))
+         :QUESTION :TITLE :REASON
+         "Earlier outer/inner-title proposal is no longer the primary witness. Trace the emitted message and missing handoff first."
+         :REQUIRED-EVIDENCE
+         "Actual current input and lookup targets, before comparing outer and inner values."
          :RESULT NIL)))
