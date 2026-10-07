@@ -531,10 +531,58 @@
              (declare (ignore op component))
              (uiop:symbol-call :dreyeck/authority-policy/tests :run-tests)))
 
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/nested-actions/reading"
+  :DESCRIPTION
+  "Observed SOLO/LISTEN/REPORT syntax, open semantic probes and warranted learning Workspace"
+  :LICENSE
+  "BSD"
+  :SERIAL
+  T
+  :DEPENDS-ON
+  ("dreyeck/hyperdoc" "dreyeck/authority-policy"
+   "dreyeck/inspector/topicmap/tala")
+  :COMPONENTS
+  ((:MODULE "dreyeck/nested-actions" :COMPONENTS
+    ((:FILE "action-tree") (:FILE "probes") (:FILE "reading")))
+   (:MODULE "dreyeck/pages/nested-actions" :COMPONENTS
+    ((:STATIC-FILE "Nested Actions in Solo.html")
+     (:STATIC-FILE "What Does a Nested Action Inherit?.html"))))
+  :IN-ORDER-TO
+  ((ASDF/LISP-ACTION:TEST-OP
+    (ASDF/LISP-ACTION:TEST-OP "dreyeck/nested-actions/reading/tests"))))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/nested-actions/reading/tests"
+                                :DEPENDS-ON
+                                ("dreyeck/nested-actions/reading"
+                                 "dreyeck/topicmap/tests")
+                                :COMPONENTS
+                                ((:FILE
+                                        "dreyeck/tests/nested-actions-reading"))
+                                :PERFORM
+                                (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT)
+                                                          (DECLARE
+                                                                   (IGNORE OP
+                                                                           COMPONENT))
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/NESTED-ACTIONS/TESTS
+                                                                                    :RUN-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/nested-actions/tala/tests" :DEPENDS-ON
+                                ("dreyeck/nested-actions/reading/tests")
+                                :PERFORM
+                                (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT)
+                                                          (DECLARE
+                                                                   (IGNORE OP
+                                                                           COMPONENT))
+                                                          (UIOP/PACKAGE:SYMBOL-CALL
+                                                                                    :DREYECK/NESTED-ACTIONS/TESTS
+                                                                                    :RUN-TALA-TESTS)))
+
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM #:DREYECK/CATALOG :DESCRIPTION
                                 "Explicit membership and runtime support for the dreyeck.ch HyperBook catalog"
                                 :LICENSE "BSD" :VERSION "0.0.1" :DEPENDS-ON
-                                ("dreyeck/hyperspec"
+                                ("dreyeck/nested-actions/reading"
+                                 "dreyeck/hyperspec"
                                  "dreyeck/authority-policy"
                                  "dreyeck/wikipedia-title-bar"
                                  #:DREYECK/WIKI-LINK
