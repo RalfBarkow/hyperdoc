@@ -178,12 +178,13 @@
         (ID
          '("experiment" "tree" "syntax" "solo" "nested-statement" "listen"
            "event" "report" "title" "enclosing-context" "inherited-context"
-           "event-context" "lifetime" "probes" "popup-handler" "message"
-           "node-topic" "title-payload" "window-emitter" "broadcast"
-           "subordinate-execution" "scoped-emitter" "nested-input"
-           "report-target" "witness"))
+           "event-context" "lifetime" "probes" "solo-popup-click"
+           "publish-source-data-message" "node-topic" "title-payload"
+           "window-event-emitter" "broadcast-event-reach"
+           "subordinate-execution" "scoped-event-emitter-proposal"
+           "nested-input" "report-target" "witness"))
       (ASSERT (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION ID)))
-    (ASSERT (= 29 (LENGTH RELATIONS)))
+    (ASSERT (= 31 (LENGTH RELATIONS)))
     (DOLIST (A RELATIONS)
       (ASSERT
        (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
@@ -350,7 +351,7 @@
       (ASSERT (MEMBER :EVENT-PROPAGATION KINDS))
       (DOLIST (A RELATIONS)
         (WHEN
-            (MEMBER "scoped-emitter"
+            (MEMBER "scoped-event-emitter-proposal"
                     (LIST (TM:TOPICMAP-ASSOCIATION-FROM-OF A)
                           (TM:TOPICMAP-ASSOCIATION-TO-OF A))
                     :TEST #'EQUAL)
@@ -368,7 +369,8 @@
              (FIND-IF
               (LAMBDA (A)
                 (AND
-                 (EQUAL "window-emitter" (TM:TOPICMAP-ASSOCIATION-FROM-OF A))
+                 (EQUAL "window-event-emitter"
+                        (TM:TOPICMAP-ASSOCIATION-FROM-OF A))
                  (EQUAL "listen" (TM:TOPICMAP-ASSOCIATION-TO-OF A))))
               RELATIONS)))
         (ASSERT
@@ -381,12 +383,127 @@
                    :RELATION-KIND)))
         (ASSERT (NOT (EQ SUBORDINATE EVENT)))))))
 
+(DEFUN CHECK-WARD-FOLLOW-UP-CONTRACT ()
+  (LET* ((EVIDENCE (R:WARD-PROPAGATION-EVIDENCE))
+         (QUOTES (GETF EVIDENCE :QUOTATIONS))
+         (PROJECTION (R:READING-PROJECTION))
+         (RELATIONS (TM:TOPICMAP-PROJECTION-ASSOCIATIONS-OF PROJECTION)))
+    (ASSERT
+     (EQUAL
+      '("The LISTEN in this example is operational as soon as it is rendered.
+The subsequent CLICK MESSAGE will be heard to the left, counter to our habit
+of communicating to the right or, in the case of Mech, to subordinate blocks."
+        "The broadcast nature of events forward and backwards across the lineup was
+a feature I pitched to my original sponsor."
+        "Scope could be applied to the LISTEN block by offering an alternative event
+emitter to be used in place of window.")
+      (MAPCAR (LAMBDA (Q) (GETF Q :TEXT)) QUOTES)))
+    (ASSERT
+     (EQUAL '(:AUTHOR-REPORTED :AUTHOR-REPORTED :DESIGN-PROPOSAL)
+            (MAPCAR (LAMBDA (Q) (GETF Q :STATUS)) QUOTES)))
+    (DOLIST
+        (ID
+         '("solo-popup-click" "publish-source-data-message" "node-topic"
+           "title-payload" "window-event-emitter" "broadcast-event-reach"
+           "subordinate-execution" "scoped-event-emitter-proposal"))
+      (ASSERT (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION ID)))
+    (DOLIST
+        (REQUIRED
+         '(("solo-popup-click" "publish-source-data-message" :EVENT-PROPAGATION
+            :SOURCE-OBSERVED "constructs")
+           ("publish-source-data-message" "node-topic" :EVENT-PROPAGATION
+            :SOURCE-OBSERVED "carries")
+           ("publish-source-data-message" "title-payload" :EVENT-PROPAGATION
+            :SOURCE-OBSERVED "carries")
+           ("solo-popup-click" "window-event-emitter" :EVENT-PROPAGATION
+            :SOURCE-OBSERVED "posts-via")
+           ("window-event-emitter" "listen" :EVENT-PROPAGATION :AUTHOR-REPORTED
+            "provides broadcast reach")
+           ("solo" "listen" :SUBORDINATE-EXECUTION :OBSERVED "subordinates")
+           ("listen" "scoped-event-emitter-proposal" :EVENT-PROPAGATION
+            :DESIGN-PROPOSAL "could-use")))
+      (ASSERT
+       (FIND-IF
+        (LAMBDA (A)
+          (LET ((PROPS (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A)))
+            (AND (EQUAL (FIRST REQUIRED) (TM:TOPICMAP-ASSOCIATION-FROM-OF A))
+                 (EQUAL (SECOND REQUIRED) (TM:TOPICMAP-ASSOCIATION-TO-OF A))
+                 (EQ (THIRD REQUIRED) (GETF PROPS :RELATION-KIND))
+                 (EQ (FOURTH REQUIRED) (GETF PROPS :EVIDENCE-STATUS))
+                 (EQ (FOURTH REQUIRED) (GETF (GETF PROPS :WARRANT) :STATUS))
+                 (SEARCH (FIFTH REQUIRED)
+                         (TM:TOPICMAP-ASSOCIATION-TYPE-OF A)))))
+        RELATIONS)))
+    (DOLIST (ID '("enclosing-context" "inherited-context" "event-context"))
+      (LET* ((TOPIC (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION ID))
+             (HISTORY (TM:TOPICMAP-TOPIC-OBJECT-OF TOPIC)))
+        (ASSERT (EQUAL ID (GETF HISTORY :ID)))
+        (ASSERT (EQ :HISTORICAL-HYPOTHESIS (GETF HISTORY :STATUS)))
+        (ASSERT (GETF HISTORY :ORIGINAL-QUOTATION))
+        (ASSERT (GETF HISTORY :NEW-EVIDENCE))
+        (ASSERT
+         (EQ :HISTORICAL-HYPOTHESIS
+             (GETF (TM:TOPICMAP-TOPIC-VIEW-PROPERTIES-OF TOPIC)
+                   :EVIDENCE-STATUS)))))
+    (ASSERT
+     (NOTANY
+      (LAMBDA (A)
+        (AND (EQUAL "solo" (TM:TOPICMAP-ASSOCIATION-FROM-OF A))
+             (EQUAL "listen" (TM:TOPICMAP-ASSOCIATION-TO-OF A))
+             (EQ :EVENT-PROPAGATION
+                 (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A)
+                       :RELATION-KIND))))
+      RELATIONS))
+    (DOLIST
+        (PAIR
+         '(("popup-handler" "solo-popup-click")
+           ("message" "publish-source-data-message")
+           ("window-emitter" "window-event-emitter")
+           ("broadcast" "broadcast-event-reach")
+           ("scoped-emitter" "scoped-event-emitter-proposal")))
+      (ASSERT
+       (EQUAL (SECOND PAIR)
+              (TM:TOPICMAP-WORKSPACE-POINT-OF
+               (R:TOPIC-WORKSPACE (FIRST PAIR)))))))
+  (LET* ((READING (RENDER (PAGE "Two Relations Hidden in One Nest") "Content"))
+         (PRODUCER
+          (FIND-IF (LAMBDA (O) (TYPEP O 'R:MESSAGE-SOURCE))
+                   (MAPCAR #'CDR (V:VIEW-REFERENCES READING))))
+         (SOURCE (RENDER PRODUCER "Source evidence"))
+         (WITNESS
+          (FIND-IF (LAMBDA (O) (TYPEP O 'R:MESSAGE-WITNESS))
+                   (MAPCAR #'CDR (V:VIEW-REFERENCES SOURCE))))
+         (PATH (RENDER WITNESS "Message path"))
+         (WORKSPACE
+          (FIND-IF (LAMBDA (O) (TYPEP O 'TM:TOPICMAP-WORKSPACE))
+                   (MAPCAR #'CDR (V:VIEW-REFERENCES PATH)))))
+    (ASSERT PRODUCER)
+    (ASSERT WITNESS)
+    (ASSERT WORKSPACE)
+    (ASSERT
+     (EQ :SOURCE-OBSERVED
+         (GETF
+          (TM:TOPICMAP-TOPIC-VIEW-PROPERTIES-OF
+           (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID
+            (TM:TOPICMAP-PROJECTION-OF WORKSPACE) "solo-popup-click"))
+          :EVIDENCE-STATUS)))
+    (ASSERT (EQUAL "witness" (TM:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE)))
+    (ASSERT
+     (TYPEP (TM:TOPICMAP-WORKSPACE-CURRENT-OBJECT WORKSPACE)
+            'R:MESSAGE-WITNESS))
+    (ASSERT
+     (EQUAL "unestablished-for-current-experiment"
+            (GETHASH "status" (R:WITNESS-STAGE WITNESS "nestedInput")))))
+  (FORMAT T
+          "~&WARD-FOLLOW-UP-CONTRACT-PASS: exact quotations, canonical Topics, directed/warranted mechanism relations, retained historical hypotheses, no SOLO event scoping, and native reading/source/witness/Topicmap route.~%"))
+
 (DEFUN RUN-TESTS ()
   (CHECK-PAGES)
   (CHECK-TREE)
   (CHECK-STATUS)
   (CHECK-WORKSPACE)
   (CHECK-MESSAGE-PATH)
+  (CHECK-WARD-FOLLOW-UP-CONTRACT)
   (DOLIST
       (NAME
        '(R:EXPERIMENT-EVIDENCE R:OBSERVED-ACTION-TREE R:SEMANTIC-QUESTIONS
@@ -394,10 +511,11 @@
                                R:READING-WORKSPACE R:LAYOUT-COMPARISON
                                R:MESSAGE-SOURCE-OBSERVATIONS R:PRODUCER-SOURCE
                                R:EMITTED-MESSAGE-WITNESS
-                               R:WARD-PROPAGATION-EVIDENCE))
+                               R:WARD-PROPAGATION-EVIDENCE
+                               R:HISTORICAL-CONTEXT-HYPOTHESES))
     (ASSERT (DREYECK/AUTHORITY-POLICY:FIND-EXAMPLE-CONTRACT NAME)))
   (FORMAT T
-          "~&NESTED-ACTIONS-READING-PASS: 3 text/4 code pages; source -> recorded native witness -> Topicmap; 25 Topics/29 relations with independent subordinate/event kinds; scoped emitter remains proposal; current input/lookup gap explicit; native Point/history.~%")
+          "~&NESTED-ACTIONS-READING-PASS: 3 text/4 code pages; canonical source/event Topics and exact Ward quotations; 25 Topics/31 warranted relations; independent subordination/reach, retained historical hypotheses, proposal-only scoped emitter, specific handoff/lookup gap, native Point/history.~%")
   T)
 
 (DEFUN RUN-TALA-TESTS ()

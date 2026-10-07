@@ -21,7 +21,8 @@
 
 (HYPERDOC:DEFEXAMPLE READING-PROJECTION
   "Two independent mechanism relation kinds, with revision-specific warrants and explicit handoff gaps."
-  (LET* ((TREE (OBSERVED-ACTION-TREE))
+  (LET* ((HISTORY (HISTORICAL-CONTEXT-HYPOTHESES))
+         (TREE (OBSERVED-ACTION-TREE))
          (LISTEN (FIRST (ACTION-CHILDREN TREE)))
          (REPORT (FIRST (ACTION-CHILDREN LISTEN)))
          (QUESTIONS (SEMANTIC-QUESTIONS))
@@ -42,20 +43,29 @@
            (LIST "report" "REPORT" REPORT :AUTHOR-REPORTED)
            (LIST "title" "title lookup (question)"
                  (FIND :TITLE QUESTIONS :KEY (LAMBDA (Q) (GETF Q :ID))) :OPEN)
-           (LIST "enclosing-context" "Enclosing input (question)"
-                 (READING-PAGE "What Does a Nested Action Inherit?") :OPEN)
-           (LIST "inherited-context" "Nested input handoff (question)"
-                 QUESTIONS :OPEN)
-           (LIST "event-context" "Event data transformation (question)"
-                 (FIND :EVENT-CONTEXT QUESTIONS :KEY (LAMBDA (Q) (GETF Q :ID)))
-                 :OPEN)
+           (LIST "enclosing-context"
+                 "enclosing-context (earlier hypothesis; challenged)"
+                 (FIND "enclosing-context" HISTORY :KEY
+                       (LAMBDA (H) (GETF H :ID)) :TEST #'EQUAL)
+                 :HISTORICAL-HYPOTHESIS)
+           (LIST "inherited-context"
+                 "inherited-context (earlier hypothesis; challenged)"
+                 (FIND "inherited-context" HISTORY :KEY
+                       (LAMBDA (H) (GETF H :ID)) :TEST #'EQUAL)
+                 :HISTORICAL-HYPOTHESIS)
+           (LIST "event-context"
+                 "event-context (earlier hypothesis; challenged)"
+                 (FIND "event-context" HISTORY :KEY (LAMBDA (H) (GETF H :ID))
+                       :TEST #'EQUAL)
+                 :HISTORICAL-HYPOTHESIS)
            (LIST "lifetime" "Lifetime (question)"
                  (FIND :LIFETIME QUESTIONS :KEY (LAMBDA (Q) (GETF Q :ID)))
                  :OPEN)
            (LIST "probes" "Message handoff probes" (PROPOSED-PROBES) :PROPOSED)
-           (LIST "popup-handler" "Solo popup click handler (supplied fragment)"
+           (LIST "solo-popup-click"
+                 "Solo popup click handler (supplied fragment)"
                  (FIRST (WITNESS-SOURCES WITNESS)) :SOURCE-OBSERVED)
-           (LIST "message" "publishSourceData message"
+           (LIST "publish-source-data-message" "publishSourceData message"
                  (WITNESS-STAGE WITNESS "emittedMessage") :SOURCE-OBSERVED)
            (LIST "node-topic" "node topic"
                  (GETHASH "topic" (WITNESS-STAGE WITNESS "receivedMessage"))
@@ -63,15 +73,17 @@
            (LIST "title-payload" "title payload"
                  (GETHASH "title" (WITNESS-STAGE WITNESS "receivedMessage"))
                  :SOURCE-OBSERVED)
-           (LIST "window-emitter" "window event emitter (opener realm)"
+           (LIST "window-event-emitter" "window event emitter (opener realm)"
                  (WITNESS-STAGE WITNESS "emitter") :SOURCE-OBSERVED)
-           (LIST "broadcast" "Broadcast across lineup (Ward reports)" WARD
+           (LIST "broadcast-event-reach"
+                 "Broadcast across lineup (Ward reports)" WARD
                  :AUTHOR-REPORTED)
            (LIST "subordinate-execution" "Subordinate execution"
                  (READING-PAGE "Two Relations Hidden in One Nest")
                  :AUTHOR-REPORTED)
-           (LIST "scoped-emitter" "Scoped event emitter (proposal)"
-                 (GETF WARD :SCOPED-EMITTER) :DESIGN-PROPOSAL)
+           (LIST "scoped-event-emitter-proposal"
+                 "Scoped event emitter (proposal)" (GETF WARD :SCOPED-EMITTER)
+                 :DESIGN-PROPOSAL)
            (LIST "nested-input" "Current nested input: gap"
                  (WITNESS-STAGE WITNESS "nestedInput") :OPEN)
            (LIST "report-target" "Current REPORT lookup target: gap"
@@ -93,8 +105,9 @@
                                                       :EVIDENCE-STATUS
                                                       STATUS))))
          (RELATIONS
-          '(("solo" "listen" "contains (subordinate)" :SUBORDINATE-EXECUTION
-             :OBSERVED :SUPPLIED-SCREENSHOT-TRANSCRIPTION)
+          '(("solo" "listen" "contains / subordinates (observed composition)"
+             :SUBORDINATE-EXECUTION :OBSERVED
+             :SUPPLIED-SCREENSHOT-TRANSCRIPTION)
             ("listen" "report" "contains (subordinate)" :SUBORDINATE-EXECUTION
              :OBSERVED :SUPPLIED-SCREENSHOT-TRANSCRIPTION)
             ("solo" "nested-statement" "runs nested statements (Ward reports)"
@@ -107,29 +120,36 @@
             ("syntax" "subordinate-execution"
              "enclosing actions run nested statements (Ward reports)"
              :SUBORDINATE-EXECUTION :AUTHOR-REPORTED :WARD-ORIGINAL-STATEMENT)
-            ("popup-handler" "message" "constructs message (event)"
-             :EVENT-PROPAGATION :SOURCE-OBSERVED :WARD-SUPPLIED-PRODUCER)
-            ("popup-handler" "title-payload"
+            ("solo-popup-click" "publish-source-data-message"
+             "constructs message (event)" :EVENT-PROPAGATION :SOURCE-OBSERVED
+             :WARD-SUPPLIED-PRODUCER)
+            ("solo-popup-click" "title-payload"
              "props.title or normalized props.name (event)" :EVENT-PROPAGATION
              :SOURCE-OBSERVED :WARD-SUPPLIED-PRODUCER)
-            ("message" "title-payload" "carries title (event)"
-             :EVENT-PROPAGATION :SOURCE-OBSERVED :WARD-SUPPLIED-PRODUCER)
-            ("message" "node-topic" "carries topic=node (event)"
-             :EVENT-PROPAGATION :SOURCE-OBSERVED :WARD-SUPPLIED-PRODUCER)
-            ("message" "window-emitter" "postMessage to opener (event)"
-             :EVENT-PROPAGATION :SOURCE-OBSERVED :WARD-SUPPLIED-PRODUCER)
-            ("window-emitter" "listen" "registers on window (retained LISTEN)"
-             :EVENT-PROPAGATION :SOURCE-OBSERVED :MECH-A028-LISTEN)
+            ("publish-source-data-message" "title-payload"
+             "carries title (event)" :EVENT-PROPAGATION :SOURCE-OBSERVED
+             :WARD-SUPPLIED-PRODUCER)
+            ("publish-source-data-message" "node-topic"
+             "carries topic=node (event)" :EVENT-PROPAGATION :SOURCE-OBSERVED
+             :WARD-SUPPLIED-PRODUCER)
+            ("publish-source-data-message" "window-event-emitter"
+             "postMessage to opener (event)" :EVENT-PROPAGATION
+             :SOURCE-OBSERVED :WARD-SUPPLIED-PRODUCER)
+            ("window-event-emitter" "listen"
+             "registers on window (retained LISTEN)" :EVENT-PROPAGATION
+             :SOURCE-OBSERVED :MECH-A028-LISTEN)
             ("node-topic" "listen"
              "matches data.topic or data.name (retained LISTEN)"
              :EVENT-PROPAGATION :SOURCE-OBSERVED :MECH-A028-LISTEN)
-            ("window-emitter" "broadcast"
+            ("window-event-emitter" "broadcast-event-reach"
              "left/right lineup reach (Ward reports)" :EVENT-PROPAGATION
              :AUTHOR-REPORTED :WARD-FOLLOW-UP)
-            ("broadcast" "listen" "can reach an earlier LISTEN (Ward reports)"
-             :EVENT-PROPAGATION :AUTHOR-REPORTED :WARD-FOLLOW-UP)
-            ("window-emitter" "event" "native message reception (fixture)"
-             :EVENT-PROPAGATION :OBSERVED :RECORDED-NATIVE-BROWSER-WITNESS)
+            ("broadcast-event-reach" "listen"
+             "can reach an earlier LISTEN (Ward reports)" :EVENT-PROPAGATION
+             :AUTHOR-REPORTED :WARD-FOLLOW-UP)
+            ("window-event-emitter" "event"
+             "native message reception (fixture)" :EVENT-PROPAGATION :OBSERVED
+             :RECORDED-NATIVE-BROWSER-WITNESS)
             ("listen" "event" "counts matching messages (retained LISTEN)"
              :EVENT-PROPAGATION :SOURCE-OBSERVED :MECH-A028-LISTEN)
             ("listen" "nested-input" "current handoff unestablished"
@@ -143,25 +163,34 @@
             ("report" "title" "names title argument (subordinate)"
              :SUBORDINATE-EXECUTION :OBSERVED
              :SUPPLIED-SCREENSHOT-TRANSCRIPTION)
-            ("scoped-emitter" "listen" "could replace window (proposal)"
-             :EVENT-PROPAGATION :DESIGN-PROPOSAL :WARD-SCOPED-EMITTER-PROPOSAL)
-            ("witness" "message" "records native emitted payload"
-             :EVENT-PROPAGATION :OBSERVED :RECORDED-NATIVE-BROWSER-WITNESS)
-            ("event" "event-context" "requires current transformation evidence"
+            ("listen" "scoped-event-emitter-proposal"
+             "could-use alternative to window (proposal)" :EVENT-PROPAGATION
+             :DESIGN-PROPOSAL :WARD-SCOPED-EMITTER-PROPOSAL)
+            ("witness" "publish-source-data-message"
+             "records native emitted payload" :EVENT-PROPAGATION :OBSERVED
+             :RECORDED-NATIVE-BROWSER-WITNESS)
+            ("event" "event-context"
+             "payload reception does not establish rebinding"
              :EVENT-PROPAGATION :DERIVED :CURRENT-SOURCE-GAP)
-            ("event-context" "inherited-context"
-             "asks what becomes nested input" :EVENT-PROPAGATION :DERIVED
-             :READING-QUESTION)
-            ("inherited-context" "enclosing-context"
-             "asks how nested input is supplied" :SUBORDINATE-EXECUTION
-             :DERIVED :READING-QUESTION)
+            ("nested-input" "inherited-context"
+             "current handoff unverified; earlier inheritance hypothesis retained"
+             :SUBORDINATE-EXECUTION :OPEN :CURRENT-SOURCE-GAP)
+            ("broadcast-event-reach" "enclosing-context"
+             "challenges nesting-only context explanation" :EVENT-PROPAGATION
+             :DERIVED :WARD-FOLLOW-UP)
             ("listen" "lifetime" "current disposal remains open"
              :EVENT-PROPAGATION :DERIVED :READING-QUESTION)
             ("nested-input" "probes" "trace this handoff next"
              :EVENT-PROPAGATION :DERIVED :READING-QUESTION)
             ("experiment" "tree" "transcribed nested structure"
              :SUBORDINATE-EXECUTION :OBSERVED
-             :SUPPLIED-SCREENSHOT-TRANSCRIPTION))))
+             :SUPPLIED-SCREENSHOT-TRANSCRIPTION)
+            ("solo-popup-click" "window-event-emitter"
+             "posts-via window.opener.postMessage (supplied source)"
+             :EVENT-PROPAGATION :SOURCE-OBSERVED :WARD-SUPPLIED-PRODUCER)
+            ("window-event-emitter" "listen"
+             "provides broadcast reach (Ward reports)" :EVENT-PROPAGATION
+             :AUTHOR-REPORTED :WARD-FOLLOW-UP))))
     (TM:MAKE-TOPICMAP-PROJECTION :SOURCE WARD :TOPICS TOPICS :ASSOCIATIONS
                                  (LOOP FOR (FROM TO LABEL KIND STATUS
                                             SOURCE) IN RELATIONS
@@ -189,9 +218,16 @@
   (TM:MAKE-TOPICMAP-WORKSPACE (READING-PROJECTION) "tree"))
 
 (DEFUN TOPIC-WORKSPACE (TOPIC-ID)
-  "Native point navigation using the same reading projection."
-  (LET ((WORKSPACE (READING-WORKSPACE)))
-    (TM:TOPICMAP-WORKSPACE-GO-TO WORKSPACE TOPIC-ID)
+  "Navigate to a canonical concept ID; preserve the previous follow-up's native links."
+  (LET* ((ALIASES
+          '(("popup-handler" . "solo-popup-click")
+            ("message" . "publish-source-data-message")
+            ("window-emitter" . "window-event-emitter")
+            ("broadcast" . "broadcast-event-reach")
+            ("scoped-emitter" . "scoped-event-emitter-proposal")))
+         (CANONICAL (OR (CDR (ASSOC TOPIC-ID ALIASES :TEST #'EQUAL)) TOPIC-ID))
+         (WORKSPACE (READING-WORKSPACE)))
+    (TM:TOPICMAP-WORKSPACE-GO-TO WORKSPACE CANONICAL)
     WORKSPACE))
 
 (HYPERDOC:DEFEXAMPLE LAYOUT-COMPARISON
@@ -212,7 +248,8 @@
                            PROPOSED-PROBES READING-PROJECTION READING-WORKSPACE
                            LAYOUT-COMPARISON MESSAGE-SOURCE-OBSERVATIONS
                            PRODUCER-SOURCE EMITTED-MESSAGE-WITNESS
-                           WARD-PROPAGATION-EVIDENCE))
+                           WARD-PROPAGATION-EVIDENCE
+                           HISTORICAL-CONTEXT-HYPOTHESES))
   (DREYECK/AUTHORITY-POLICY:REGISTER-OPERATION-CONTRACT :IDENTITY
                                                         (FORMAT NIL
                                                                 "nested-actions/~A"

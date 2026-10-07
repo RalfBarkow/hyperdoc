@@ -1,5 +1,7 @@
 # Separating subordinate execution from event propagation
 
+This is the report for commit 54463604. The current follow-up from that committed state is recorded in [Ward follow-up: subordination and event reach](nested-actions-ward-follow-up-report.md); it preserves historical hypothesis objects and uses the exact requested concept IDs, quotations and directed warrants.
+
 Extension of the existing Nested Actions in Solo slice, 2026-10-07.
 
 ## Starting coordinates and preserved state

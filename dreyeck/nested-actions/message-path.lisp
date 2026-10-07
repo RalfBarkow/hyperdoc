@@ -64,6 +64,22 @@ This reads a capture; it does not install listeners in the Catalog or run Ward's
                   "dreyeck/nested-actions/message-witness.json")
                  :SOURCES (MESSAGE-SOURCE-OBSERVATIONS)))
 
+(HYPERDOC:DEFEXAMPLE HISTORICAL-CONTEXT-HYPOTHESES
+  "Retain the three earlier hypotheses as history; their role is challenged/refined by the separate event path."
+  (LOOP FOR (ID
+             CLAIM) IN '(("enclosing-context"
+                          "SOLO may establish an enclosing execution context.")
+                         ("inherited-context"
+                          "Nested statements may inherit state from an enclosing action.")
+                         ("event-context"
+                          "LISTEN may alter or rebind a context for its nested REPORT."))
+        COLLECT (LIST :ID ID :STATUS :HISTORICAL-HYPOTHESIS :CLAIM CLAIM
+                      :ORIGIN :RALF-ORIGINAL-INTERPRETATION :ORIGINAL-QUOTATION
+                      (GETF (EXPERIMENT-EVIDENCE) :RALF-INTERPRETATION)
+                      :REFINEMENT
+                      "Ward separates subordinate execution from window event reach. The current message-to-nested-input transformation is unverified; event-emitter scope is not variable scope."
+                      :NEW-EVIDENCE (WARD-PROPAGATION-EVIDENCE))))
+
 (DEFUN WITNESS-STAGE (WITNESS KEY &OPTIONAL (EVENT-INDEX 0))
   "The exact structured stage in one received event, or the shared emitter descriptor."
   (LET ((CAPTURE (WITNESS-CAPTURE WITNESS)))
@@ -72,7 +88,19 @@ This reads a capture; it does not install listeners in the Catalog or run Ward's
         (GETHASH KEY (AREF (GETHASH "events" CAPTURE) EVENT-INDEX)))))
 
 (HYPERDOC:DEFEXAMPLE WARD-PROPAGATION-EVIDENCE
-  (LIST :ORIGIN :WARD-FOLLOW-UP-TASK :REPORTS
+  (LIST :QUOTATIONS
+        (LIST
+         (LIST :STATUS :AUTHOR-REPORTED :TEXT
+               "The LISTEN in this example is operational as soon as it is rendered.
+The subsequent CLICK MESSAGE will be heard to the left, counter to our habit
+of communicating to the right or, in the case of Mech, to subordinate blocks.")
+         (LIST :STATUS :AUTHOR-REPORTED :TEXT
+               "The broadcast nature of events forward and backwards across the lineup was
+a feature I pitched to my original sponsor.")
+         (LIST :STATUS :DESIGN-PROPOSAL :TEXT
+               "Scope could be applied to the LISTEN block by offering an alternative event
+emitter to be used in place of window."))
+        :ORIGIN :WARD-FOLLOW-UP-TASK :REPORTS
         (LIST
          (LIST :STATUS :AUTHOR-REPORTED :CLAIM
                "LISTEN becomes operational as soon as it is rendered.")
