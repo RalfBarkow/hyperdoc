@@ -34,12 +34,7 @@ This is the status-aware reader underneath GIT-RUN-STRING. It deliberately
 does not turn a non-zero exit status into a condition, because some Git
 queries use exit statuses as data. It never retries, fetches, or otherwise
 changes the requested operation."
-  (uiop/run-program:run-program
-   (cons "git" arguments)
-   :directory repository-root
-   :output :string
-   :error-output :string
-   :ignore-error-status t))
+  (apply #'git-run-values-with-input repository-root nil arguments))
 
 (defun signal-git-command-failed
     (repository-root arguments stdout stderr exit-code)

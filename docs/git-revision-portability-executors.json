@@ -1,0 +1,80 @@
+[
+  {
+    "operator": "Codex",
+    "executor": "Read-only local reconnaissance",
+    "entry": "Observe root, Git directories, branch, HEAD and index; inspect revision constructor, checkout class, inherited views and Git runners",
+    "expected": "Locate the runtime path boundary without inspecting or inferring server-loaded definitions",
+    "observed": "HEAD 2d9847301406da900fd392ae3a94538633d4c4c8, branch dreyeck.ch; only Trails Rendered staged. Recorded macOS root promoted unconditionally into a checkout; inherited Git views bypass local-status check.",
+    "assimilation": "Identity is authority/full OID; checkout is optional runtime resource",
+    "replan": "Add a shared availability check and preserve retained evidence paths"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Pinned guarded structural writer",
+    "entry": "nix develop .#workflow-authoring --command sbcl --noinform --no-userinit --non-interactive --load /private/tmp/git-portability-*-author.lisp (individual scripts recorded in local logs)",
+    "expected": "Make only guarded, reparsed Lisp/ASDF changes in disposable runtimes",
+    "observed": "Final structural authoring passes; temporary draft errors refused/corrected, including list operations/traversal and an Eclector-rejected SBCL character name. No live image was reloaded.",
+    "assimilation": "Reuse existing Git classes and Inspector HTML/code/native-reference mechanisms",
+    "replan": "Fresh positive and absence acceptance"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Fresh available-checkout SBCL acceptance",
+    "entry": "nix develop --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/git\" :force t)' --eval '(asdf:load-system \"dreyeck/inspector/git\" :force t)' --eval '(asdf:load-system \"dreyeck/nested-actions/portability/tests\" :force t)' --eval '(dreyeck/git/portability/tests:run-available-tests)' > /private/tmp/git-portability-available-final.log 2>&1",
+    "expected": "Original exact commit and blob inspection plus honest missing-object/error results",
+    "observed": "Exit 0; GIT-PORTABILITY-AVAILABLE-PASS and GIT-PORTABILITY-NO-FETCH-PASS. Real temporary Git checkout plus actual Mech revision; all five commit views and code blob variants work; absent promised blob returns missing with empty stderr.",
+    "evidence": "/private/tmp/git-portability-available-final.log",
+    "assimilation": "Available resource works; missing objects and unrelated Git failures stay distinct; no implicit fetching",
+    "replan": "Retain these results; no production changes after this acceptance"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Fresh unavailable-checkout SBCL acceptance",
+    "entry": "nix develop --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/nested-actions/portability/tests\" :force t)' --eval '(dreyeck/git/portability/tests:run-unavailable-tests)' > /private/tmp/git-portability-unavailable-final.log 2>&1",
+    "expected": "Retained native claim/revision/file/definition path with zero Git calls against absent recorded roots",
+    "observed": "Exit 0; GIT-PORTABILITY-UNAVAILABLE-PASS, Git calls=0. New NIL checkout references and legacy macOS-path objects return graceful dependent views; retained LISTEN/REPORT excerpts, metadata and external URL remain navigable.",
+    "evidence": "/private/tmp/git-portability-unavailable-final.log",
+    "assimilation": "Absence simulated only in the disposable runtime; developer checkouts untouched. A physically removed fixture is independently covered by the available-case lazy views.",
+    "replan": "Preserve exact evidence fixtures and staged Trails patch"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Fresh Nested Actions/Git ASDF TEST-OP",
+    "entry": "nix develop --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading\" :force t)' --eval '(asdf:test-system \"dreyeck/nested-actions/reading/tests\" :force t)' --eval '(asdf:test-system \"dreyeck/git/tests\")' > /private/tmp/git-portability-reading-git-final.log 2>&1",
+    "expected": "Existing Reading and reusable Git suites stay green",
+    "observed": "Exit 0; all Nested Actions/Ward/input/provenance contracts and Git commit/source-slice/repository/ASDF reference suites pass. Reading remains 5 text/7 code pages, 39 Topics/52 Associations.",
+    "evidence": "/private/tmp/git-portability-reading-git-final.log",
+    "assimilation": "Source identity/provenance semantics unchanged",
+    "replan": "Complete TALA and Catalog regression"
+  },
+  {
+    "operator": "Codex",
+    "executor": "First TALA/Topicmap/Catalog matrix",
+    "entry": "nix develop .#tala --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading\" :force t)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading/tests\" :force t)' --eval '(asdf:test-system \"dreyeck/nested-actions/tala/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/reading/tests\")' --eval '(asdf:test-system \"dreyeck/catalog/tests\")' > /private/tmp/git-portability-regressions-final.log 2>&1",
+    "expected": "Existing TALA and Catalog suites pass",
+    "observed": "Exit 1 at the exact one-query TALA Reading argument assertion: the shared runner now prefixes --no-lazy-fetch. Catalog not reached in that attempt.",
+    "evidence": "/private/tmp/git-portability-regressions-attempt1.log",
+    "assimilation": "Query cardinality and behavior are unchanged; update only the exact expected global option",
+    "replan": "One-line guarded test expectation change; rerun the identical matrix"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Fresh corrected TALA/Topicmap/Catalog ASDF TEST-OP",
+    "entry": "nix develop .#tala --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading\" :force t)' --eval '(asdf:load-system \"dreyeck/nested-actions/reading/tests\" :force t)' --eval '(asdf:test-system \"dreyeck/nested-actions/tala/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/reading/tests\")' --eval '(asdf:test-system \"dreyeck/catalog/tests\")' > /private/tmp/git-portability-regressions-final.log 2>&1",
+    "expected": "Same matrix, same semantic assertions",
+    "observed": "Exit 0; Nested Actions TALA, Topicmap, TALA integration, TALA Reading/checkout/widgets/dispatch/reference, and fresh Catalog startup pass.",
+    "evidence": "/private/tmp/git-portability-regressions-final.log",
+    "assimilation": "No-checkout assertion still permits exactly one discovery query, no other Git, and no invented repository/revision",
+    "replan": "Document and selectively commit"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Selective local Git commit and preservation assertions",
+    "entry": "nix develop --command sbcl --noinform --no-userinit --non-interactive --load /private/tmp/git-portability-commit.lisp",
+    "expected": "Commit only portability/report paths, preserve Trails exactly, keep the live image and public runtime untouched",
+    "observed": "The commit executor records its measured hash, state, and byte-identical patch/index/file assertions; the final response returns its measured result.",
+    "evidence": "/private/tmp/git-portability-commit.log",
+    "assimilation": "Explicit commit --only paths preserve the unrelated index item; no SSH/deploy/reload",
+    "replan": "Public release/activation remains a separate requirement"
+  }
+]

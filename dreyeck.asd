@@ -394,6 +394,7 @@
                                 ((:FILE "git-package")
                                  (:FILE "git-repository-checkout")
                                  (:FILE "git-commit-inspection")
+                                 (:FILE "git-local-availability")
                                  (:FILE "git-revision-reference")
                                  (:FILE "git-source-slice")
                                  (:FILE "git-repository-topicmap")
@@ -617,6 +618,17 @@
                                                           (UIOP/PACKAGE:SYMBOL-CALL
                                                                                     :DREYECK/NESTED-ACTIONS/TESTS
                                                                                     :RUN-TESTS)))
+
+(ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/nested-actions/portability/tests"
+  :DESCRIPTION
+  "Git revision inspection with optional runtime checkouts"
+  :DEPENDS-ON
+  ("dreyeck/nested-actions/reading" "dreyeck/git/tests")
+  :COMPONENTS
+  ((:FILE "dreyeck/tests/git-revision-portability"))
+  :PERFORM
+  (ASDF/LISP-ACTION:TEST-OP (OP COMPONENT) (DECLARE (IGNORE OP COMPONENT))
+   (UIOP/PACKAGE:SYMBOL-CALL :DREYECK/GIT/PORTABILITY/TESTS :RUN-TESTS)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/nested-actions/tala/tests" :DEPENDS-ON
                                 ("dreyeck/nested-actions/reading/tests")

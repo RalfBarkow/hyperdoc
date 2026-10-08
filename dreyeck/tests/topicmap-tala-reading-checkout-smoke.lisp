@@ -153,7 +153,7 @@ every repository example, each asking Git once and nothing further."
            (call-recording-git (symbol-function example))
          (check (dreyeck/inspector/topicmap/tala::no-live-git-checkout-p value)
                 "~S without a checkout gave ~S." example value)
-         (check (equal '(("rev-parse" "--show-toplevel")) git)
+         (check (equal '(("--no-lazy-fetch" "rev-parse" "--show-toplevel")) git)
                 "~S without a checkout ran Git ~S." example git)
          (check-claims-no-repository value))))))
 

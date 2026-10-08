@@ -1,4 +1,4 @@
-;;;; Inspecting Revision Provenance and Source Locations
+;;;; Portable Revision Provenance and Retained Source Locations
 
 (IN-PACKAGE #:DREYECK/INSPECTOR/GIT)
 
@@ -35,20 +35,32 @@
                                                                           "~A"
                                                                           (DREYECK/GIT:GIT-REVISION-ROLE-OF
                                                                            REVISION))))
+                                                                (WHEN
+                                                                    (DREYECK/GIT:GIT-REVISION-RECORDED-CHECKOUT-PATH-OF
+                                                                     REVISION)
+                                                                  (HTML-INSPECTOR-VIEWS:HTML
+                                                                    (:P
+                                                                     "Recorded development checkout (provenance only): "
+                                                                     (:CODE
+                                                                      (CL-WHO:ESC
+                                                                       (DREYECK/GIT:GIT-REVISION-RECORDED-CHECKOUT-PATH-OF
+                                                                        REVISION))))))
                                                                 (:P
-                                                                 "Local checkout: "
-                                                                 (HTML-INSPECTOR-VIEWS:OBJECT-REF
-                                                                  (DREYECK/GIT:GIT-COMMIT-REPOSITORY-OF
-                                                                   REVISION)))
+                                                                 "Optional runtime checkout: "
+                                                                 (LET ((REPOSITORY
+                                                                        (DREYECK/GIT:GIT-COMMIT-REPOSITORY-OF
+                                                                         REVISION)))
+                                                                   (IF REPOSITORY
+                                                                       (HTML-INSPECTOR-VIEWS:OBJECT-REF
+                                                                        REPOSITORY)
+                                                                       (CL-WHO:ESC
+                                                                        "No checkout attached in this runtime."))))
                                                                 (:P
-                                                                 "Local object status: "
-                                                                 (CL-WHO:ESC
-                                                                  (FORMAT NIL
-                                                                          "~A"
-                                                                          (DREYECK/GIT:GIT-REVISION-LOCAL-STATUS
-                                                                           REVISION))))
+                                                                 "Local object availability: "
+                                                                 (RENDER-GIT-LOCAL-STATUS
+                                                                  REVISION))
                                                                 (:P
-                                                                 "Recorded retention identifies a local commit object and verified source excerpts. Current local availability is shown separately. This evidence does not identify the current implementation.")
+                                                                 "Repository authority and full OID identify this evidence revision. The recorded development path is not identity or proof of current runtime availability. Retained source excerpts remain navigable without a checkout; they do not identify the current implementation.")
                                                                 (:UL
                                                                  (DOLIST
                                                                      (FILE
@@ -97,11 +109,11 @@
                                                                 (:P
                                                                  (HTML-INSPECTOR-VIEWS:OBJECT-REF
                                                                   FILE :DISPLAY
-                                                                  "Read the complete Git blob in the local checkout"
+                                                                  "Inspect local Git blob availability and contents"
                                                                   :SELECT
                                                                   "Contents"))
                                                                 (:P
-                                                                 "Relevant definitions and exact retained source ranges:")
+                                                                 "Relevant definitions and exact retained source ranges. These excerpts are retained evidence, separate from current local Git blob availability:")
                                                                 (:UL
                                                                  (DOLIST
                                                                      (LOCATION

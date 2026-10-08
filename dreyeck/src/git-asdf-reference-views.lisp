@@ -168,68 +168,94 @@
            (otherwise "Current-image resolution"))))))
 
 (html-inspector-views:defview 👀asdf-references
-    (file dreyeck/git:git-file-at-commit)
-  (let ((projection
-          (dreyeck/git:git-file-asdf-reference-projection file)))
-    (when projection
-      (html-inspector-views:html-view :title "ASDF references" :priority 3
-        (html-inspector-views:html
-          (:p
-           (html-inspector-views:esc
-            "Historical declarations are extracted from this Git blob. Current-image targets are resolved separately from ASDF's already registered systems."))
-          (:table :class "inspector-table"
-                  (:tr
-                   (:th (html-inspector-views:esc "Historical system"))
-                   (:th (html-inspector-views:esc "Relation"))
-                   (:th (html-inspector-views:esc "Source designator"))
-                   (:th (html-inspector-views:esc "Canonical ASDF name"))
-                   (:th (html-inspector-views:esc "Current image")))
-                  (dolist
-                      (declaration
-                        (dreyeck/git:historical-asdf-file-projection-declarations-of
-                         projection))
-                    (dolist
-                        (reference
-                          (dreyeck/git:historical-asdf-system-declaration-dependencies-of
-                           declaration))
-                      (html-inspector-views:html
-                        (:tr
-                         (:td
-                          (html-inspector-views:object-ref
-                           declaration
-                           :display
-                           (dreyeck/git:historical-asdf-system-declaration-canonical-name-of
-                            declaration)))
-                         (:td (:code
-                               (html-inspector-views:esc
-                                (prin1-to-string
-                                 (dreyeck/git:historical-asdf-dependency-reference-relation-of
-                                  reference)))))
-                         (:td
-                          (html-inspector-views:object-ref
-                           reference
-                           :display
-                           (dreyeck/git:historical-asdf-dependency-reference-source-designator-of
-                            reference)))
-                         (:td (:code
-                               (html-inspector-views:esc
-                                (let ((canonical-name
-                                        (dreyeck/git:historical-asdf-dependency-reference-canonical-name-of
-                                         reference)))
-                                  (if canonical-name
-                                      (prin1-to-string canonical-name)
-                                      "unsupported")))))
-                         (:td (render-current-image-resolution reference))))))
-          (when
-              (dreyeck/git:historical-asdf-file-projection-issues-of
-               projection)
-            (html-inspector-views:html
-              (:h3 (html-inspector-views:esc "Parse issues"))
-              (:ul
-               (dolist
-                   (issue
-                     (dreyeck/git:historical-asdf-file-projection-issues-of
-                      projection))
-                 (html-inspector-views:html
-                   (:li
-                    (html-inspector-views:object-ref issue)))))))))))))
+                              (file dreyeck/git:git-file-at-commit)
+                              (when (dreyeck/git::git-asdf-file-p file)
+                                (html-inspector-views:html-view :title
+                                                                "ASDF references"
+                                                                :priority 3
+                                                                (with-available-git-object (file)
+                                                                 (let
+                                                                  ((projection
+                                                                    (dreyeck/git:git-file-asdf-reference-projection
+                                                                     file)))
+                                                                  (html-inspector-views:html
+                                                                   (:p
+                                                                    (cl-who:esc
+                                                                     "Historical declarations are extracted from this Git blob. Current-image targets are resolved separately from ASDF's already registered systems."))
+                                                                   (:table
+                                                                    :class
+                                                                    "inspector-table"
+                                                                    (:tr
+                                                                     (:th
+                                                                      (cl-who:esc
+                                                                       "Historical system"))
+                                                                     (:th
+                                                                      (cl-who:esc
+                                                                       "Relation"))
+                                                                     (:th
+                                                                      (cl-who:esc
+                                                                       "Source designator"))
+                                                                     (:th
+                                                                      (cl-who:esc
+                                                                       "Canonical ASDF name"))
+                                                                     (:th
+                                                                      (cl-who:esc
+                                                                       "Current image")))
+                                                                    (dolist
+                                                                     (declaration
+                                                                      (dreyeck/git:historical-asdf-file-projection-declarations-of
+                                                                       projection))
+                                                                     (dolist
+                                                                      (reference
+                                                                       (dreyeck/git:historical-asdf-system-declaration-dependencies-of
+                                                                        declaration))
+                                                                      (html-inspector-views:html
+                                                                       (:tr
+                                                                        (:td
+                                                                         (html-inspector-views:object-ref
+                                                                          declaration
+                                                                          :display
+                                                                          (dreyeck/git:historical-asdf-system-declaration-canonical-name-of
+                                                                           declaration)))
+                                                                        (:td
+                                                                         (:code
+                                                                          (cl-who:esc
+                                                                           (prin1-to-string
+                                                                            (dreyeck/git:historical-asdf-dependency-reference-relation-of
+                                                                             reference)))))
+                                                                        (:td
+                                                                         (html-inspector-views:object-ref
+                                                                          reference
+                                                                          :display
+                                                                          (dreyeck/git:historical-asdf-dependency-reference-source-designator-of
+                                                                           reference)))
+                                                                        (:td
+                                                                         (:code
+                                                                          (cl-who:esc
+                                                                           (let
+                                                                            ((canonical-name
+                                                                              (dreyeck/git:historical-asdf-dependency-reference-canonical-name-of
+                                                                               reference)))
+                                                                            (if canonical-name
+                                                                             (prin1-to-string
+                                                                              canonical-name)
+                                                                             "unsupported")))))
+                                                                        (:td
+                                                                         (render-current-image-resolution
+                                                                          reference))))))
+                                                                    (when
+                                                                     (dreyeck/git:historical-asdf-file-projection-issues-of
+                                                                      projection)
+                                                                     (html-inspector-views:html
+                                                                      (:h3
+                                                                       (cl-who:esc
+                                                                        "Parse issues"))
+                                                                      (:ul
+                                                                       (dolist
+                                                                        (issue
+                                                                         (dreyeck/git:historical-asdf-file-projection-issues-of
+                                                                          projection))
+                                                                        (html-inspector-views:html
+                                                                         (:li
+                                                                          (html-inspector-views:object-ref
+                                                                           issue))))))))))))))

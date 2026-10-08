@@ -28,30 +28,42 @@
                              "dreyeck/nested-actions/sources/revision-provenance.json")
         COLLECT (CONS (GETHASH "key" METADATA)
                       (DREYECK/GIT:MAKE-GIT-REVISION-REFERENCE :REPOSITORY
-                                                               (MAKE-INSTANCE
-                                                                'DREYECK/GIT:GIT-REPOSITORY-CHECKOUT
-                                                                :ROOT
-                                                                (UIOP/PATHNAME:ENSURE-DIRECTORY-PATHNAME
-                                                                 (PATHNAME
-                                                                  (GETHASH
-                                                                   "root"
-                                                                   METADATA)))
-                                                                :ROOT-SOURCE
+                                                               (LET
+                                                                ((ROOT
+                                                                  (UIOP/PATHNAME:ENSURE-DIRECTORY-PATHNAME
+                                                                   (PATHNAME
+                                                                    (GETHASH
+                                                                     "root"
+                                                                     METADATA)))))
+                                                                (WHEN
+                                                                 (UIOP/FILESYSTEM:DIRECTORY-EXISTS-P
+                                                                  ROOT)
+                                                                 (MAKE-INSTANCE
+                                                                  'DREYECK/GIT:GIT-REPOSITORY-CHECKOUT
+                                                                  :ROOT
+                                                                  ROOT
+                                                                  :ROOT-SOURCE
+                                                                  METADATA)))
+                                                               :RECORDED-CHECKOUT-PATH
+                                                               (GETHASH
+                                                                "root"
                                                                 METADATA)
                                                                :AUTHORITY
                                                                (GETHASH
                                                                 "authority"
                                                                 METADATA)
                                                                :OID
-                                                               (GETHASH "oid"
-                                                                        METADATA)
+                                                               (GETHASH
+                                                                "oid"
+                                                                METADATA)
                                                                :DISPLAY-ID
                                                                (GETHASH
                                                                 "display"
                                                                 METADATA)
                                                                :ROLE
-                                                               (GETHASH "role"
-                                                                        METADATA)
+                                                               (GETHASH
+                                                                "role"
+                                                                METADATA)
                                                                :WEB-URL
                                                                (GETHASH
                                                                 "webUrl"

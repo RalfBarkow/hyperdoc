@@ -1,6 +1,9 @@
 (in-package #:dreyeck/git)
 
 (defun git-repository-topicmap-projection (common-lisp-user::repository)
+  (unless
+      (eq :available (git-local-object-status common-lisp-user::repository))
+    (return-from git-repository-topicmap-projection nil))
   (let* ((common-lisp-user::root
           (git-repository-root-of common-lisp-user::repository))
          (common-lisp-user::directory-components

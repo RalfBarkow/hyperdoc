@@ -208,23 +208,21 @@
   (check-type file git-file-at-commit)
   (unless (git-asdf-file-p file)
     (return-from git-file-asdf-reference-projection nil))
-  (when (or refresh
-            (null (git-file-asdf-reference-projection-cache file)))
+  (unless (eq :available (git-local-object-status file))
+    (return-from git-file-asdf-reference-projection nil))
+  (when (or refresh (null (git-file-asdf-reference-projection-cache file)))
     (setf (git-file-asdf-reference-projection-cache file)
-          (handler-case
-              (extract-historical-asdf-reference-projection
-               file (git-file-contents file))
-            (condition (condition)
-              (make-instance
-               'historical-asdf-file-projection
-               :file file
-               :issues
-               (list
-                (make-instance
-                 'historical-asdf-parse-issue
-                 :file file
-                 :position 0
-                 :message (format nil "~A" condition))))))))
+            (handler-case
+             (extract-historical-asdf-reference-projection file
+                                                           (git-file-contents
+                                                            file))
+             (condition (condition)
+              (make-instance 'historical-asdf-file-projection :file file
+                             :issues
+                             (list
+                              (make-instance 'historical-asdf-parse-issue :file
+                                             file :position 0 :message
+                                             (format nil "~A" condition))))))))
   (git-file-asdf-reference-projection-cache file))
 
 (defun historical-asdf-dependency-resolution (reference)
