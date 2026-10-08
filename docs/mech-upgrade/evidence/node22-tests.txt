@@ -1,0 +1,924 @@
+TAP version 13
+# [mech] version: dev build: unknown commit: nogit
+# {
+#   event: {
+#     data: { action: 'publishSourceData', topic: 'other', title: 'Other' }
+#   }
+# }
+# {
+#   event: {
+#     data: {
+#       action: 'publishSourceData',
+#       topic: 'node',
+#       title: 'Reflective Practice'
+#     }
+#   }
+# }
+# {
+#   event: {
+#     data: { action: 'publishSourceData', name: 'node', title: 'John Dewey' }
+#   }
+# }
+# {
+#   pageKey: 'page-key',
+#   doing: { type: 'batch', sources: [ [Object] ], pageKey: 'page-key' }
+# }
+# **** Adding solo listener
+# Subtest: CODE backport preserves existing event and Solo protocol
+    # Subtest: LISTEN retains publishSourceData topic/name counting without new nested-input semantics
+    ok 1 - LISTEN retains publishSourceData topic/name counting without new nested-input semantics
+      ---
+      duration_ms: 7.831025
+      type: 'test'
+      ...
+# reusing existing dialog
+    # Subtest: SOLO retains batch/source/aspect/pageKey and opener-origin delivery
+    ok 2 - SOLO retains batch/source/aspect/pageKey and opener-origin delivery
+      ---
+      duration_ms: 754.784664
+      type: 'test'
+      ...
+    1..2
+ok 1 - CODE backport preserves existing event and Solo protocol
+  ---
+  duration_ms: 765.620833
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# {
+#   command: 'TICK 1',
+#   args: [ '1' ],
+#   body: [ { command: 'CODE trails', key: 'code' } ],
+#   state: {
+#     context: { value: 2 },
+#     api: {
+#       thisLineupKey: [Function: thisLineupKey],
+#       lineupAtKey: [Function: lineupAtKey],
+#       inspect: [Function: inspect],
+#       element: [Function: element],
+#       trouble: [Function: trouble],
+#       status: [Function: status],
+#       button: [Function: button],
+#       ticker: [Function: ticker]
+#     }
+#   }
+# }
+# Subtest: CODE backport invocation and state contract
+    # Subtest: recognizes CODE, joins multiple Code items and invokes named export with state/arguments
+    ok 1 - recognizes CODE, joins multiple Code items and invokes named export with state/arguments
+      ---
+      duration_ms: 39.414597
+      type: 'test'
+      ...
+    # Subtest: CLICK propagates initiation to its CODE child
+    ok 2 - CLICK propagates initiation to its CODE child
+      ---
+      duration_ms: 1.052931
+      type: 'test'
+      ...
+    # Subtest: TICK propagates initiation to its CODE child
+    ok 3 - TICK propagates initiation to its CODE child
+      ---
+      duration_ms: 3.52692
+      type: 'test'
+      ...
+    # Subtest: rejects non-initiated execution for anonymous and owner/remote pages before evaluating source
+    ok 4 - rejects non-initiated execution for anonymous and owner/remote pages before evaluating source
+      ---
+      duration_ms: 0.820886
+      type: 'test'
+      ...
+    # Subtest: allows non-initiated execution only for an owned local page
+    ok 5 - allows non-initiated execution only for an owned local page
+      ---
+      duration_ms: 0.905416
+      type: 'test'
+      ...
+    # Subtest: CLICK permits explicit execution of a remote page like the upstream contract
+    ok 6 - CLICK permits explicit execution of a remote page like the upstream contract
+      ---
+      duration_ms: 0.685067
+      type: 'test'
+      ...
+    # Subtest: reports missing Code items, missing/non-function exports and syntax errors through the caller API
+    ok 7 - reports missing Code items, missing/non-function exports and syntax errors through the caller API
+      ---
+      duration_ms: 2.594682
+      type: 'test'
+      ...
+    # Subtest: supports default export and hides the raw execution API in the narrow backport
+    ok 8 - supports default export and hides the raw execution API in the narrow backport
+      ---
+      duration_ms: 1.11561
+      type: 'test'
+      ...
+    # Subtest: reports unsupported server execution before importing a page module
+    ok 9 - reports unsupported server execution before importing a page module
+      ---
+      duration_ms: 0.455028
+      type: 'test'
+      ...
+    # Subtest: locates the current page by its actual lineup key
+    ok 10 - locates the current page by its actual lineup key
+      ---
+      duration_ms: 0.597043
+      type: 'test'
+      ...
+    1..10
+ok 2 - CODE backport invocation and state contract
+  ---
+  duration_ms: 53.227507
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# Subtest: EDGES renderer
+    # Subtest: renders claim group when claim edges exist
+    ok 1 - renders claim group when claim edges exist
+      ---
+      duration_ms: 2.273148
+      type: 'test'
+      ...
+    # Subtest: keeps summary counts consistent with groups
+    ok 2 - keeps summary counts consistent with groups
+      ---
+      duration_ms: 1.581482
+      type: 'test'
+      ...
+    # Subtest: renders links with site-aware /view URLs
+    ok 3 - renders links with site-aware /view URLs
+      ---
+      duration_ms: 0.502384
+      type: 'test'
+      ...
+    # Subtest: prefers title over slug in link labels
+    ok 4 - prefers title over slug in link labels
+      ---
+      duration_ms: 0.292712
+      type: 'test'
+      ...
+    # Subtest: shows all edges by default without a limit label
+    ok 5 - shows all edges by default without a limit label
+      ---
+      duration_ms: 0.276562
+      type: 'test'
+      ...
+    # Subtest: shows slug when title is unknown
+    ok 6 - shows slug when title is unknown
+      ---
+      duration_ms: 3.122513
+      type: 'test'
+      ...
+    # Subtest: applies limit when provided and includes limit label
+    ok 7 - applies limit when provided and includes limit label
+      ---
+      duration_ms: 0.53785
+      type: 'test'
+      ...
+    # Subtest: summary counts reflect filtered edges beyond the visible limit
+    ok 8 - summary counts reflect filtered edges beyond the visible limit
+      ---
+      duration_ms: 0.765642
+      type: 'test'
+      ...
+    1..8
+ok 3 - EDGES renderer
+  ---
+  duration_ms: 24.411349
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# Subtest: parse_extract_args
+    # Subtest: defaults to unbounded when no args provided
+    ok 1 - defaults to unbounded when no args provided
+      ---
+      duration_ms: 1.534194
+      type: 'test'
+      ...
+    # Subtest: accepts a positive integer limit
+    ok 2 - accepts a positive integer limit
+      ---
+      duration_ms: 0.301356
+      type: 'test'
+      ...
+    1..2
+ok 4 - parse_extract_args
+  ---
+  duration_ms: 3.611806
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# Subtest: extract_edges_from_story
+    # Subtest: claim fold produces a claim edge from paragraph link
+    ok 1 - claim fold produces a claim edge from paragraph link
+      ---
+      duration_ms: 2.012396
+      type: 'test'
+      ...
+    # Subtest: unknown fold produces no edges and increments foldsUnknown
+    ok 2 - unknown fold produces no edges and increments foldsUnknown
+      ---
+      duration_ms: 0.317942
+      type: 'test'
+      ...
+    # Subtest: support fold with two links produces two support edges
+    ok 3 - support fold with two links produces two support edges
+      ---
+      duration_ms: 34.075264
+      type: 'test'
+      ...
+    # Subtest: slugifies paragraph links derived from titles
+    ok 4 - slugifies paragraph links derived from titles
+      ---
+      duration_ms: 0.481333
+      type: 'test'
+      ...
+    # Subtest: recognized fold but no link yields no edges
+    ok 5 - recognized fold but no link yields no edges
+      ---
+      duration_ms: 0.263085
+      type: 'test'
+      ...
+    1..5
+ok 5 - extract_edges_from_story
+  ---
+  duration_ms: 38.979821
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# Subtest: fold canonicalization
+    # Subtest: treats "Claims" as claim
+    ok 1 - treats "Claims" as claim
+      ---
+      duration_ms: 1.337716
+      type: 'test'
+      ...
+    # Subtest: treats "Claim:" as claim
+    ok 2 - treats "Claim:" as claim
+      ---
+      duration_ms: 0.300169
+      type: 'test'
+      ...
+    # Subtest: tracks unknown folds and returns null role
+    ok 3 - tracks unknown folds and returns null role
+      ---
+      duration_ms: 0.346558
+      type: 'test'
+      ...
+    1..3
+ok 6 - fold canonicalization
+  ---
+  duration_ms: 3.922098
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# Subtest: renderNeighborsDetails
+    # Subtest: renders done/inflight/error labels
+    ok 1 - renders done/inflight/error labels
+      ---
+      duration_ms: 48.626666
+      type: 'test'
+      ...
+    1..1
+ok 7 - renderNeighborsDetails
+  ---
+  duration_ms: 50.163126
+  type: 'suite'
+  ...
+# Subtest: no bare imports in client modules
+    # Subtest: avoids bare module specifiers under src/client
+    ok 1 - avoids bare module specifiers under src/client
+      ---
+      duration_ms: 14.524773
+      type: 'test'
+      ...
+    1..1
+ok 8 - no bare imports in client modules
+  ---
+  duration_ms: 18.445988
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# { key: 'data', value: 'your data here' }
+# Subtest: api for inline reporting
+    # Subtest: trouble notice shown
+    ok 1 - trouble notice shown
+      ---
+      duration_ms: 3.307703
+      type: 'test'
+      ...
+    # Subtest: trouble notice clicked
+    ok 2 - trouble notice clicked
+      ---
+      duration_ms: 0.897053
+      type: 'test'
+      ...
+    # Subtest: inspect notice omitted
+    ok 3 - inspect notice omitted
+      ---
+      duration_ms: 0.625615
+      type: 'test'
+      ...
+    # Subtest: inspect notice shown
+    ok 4 - inspect notice shown
+      ---
+      duration_ms: 0.621593
+      type: 'test'
+      ...
+    # Subtest: inspect notice clicked
+    ok 5 - inspect notice clicked
+      ---
+      duration_ms: 2.329771
+      type: 'test'
+      ...
+    # Subtest: response shown
+    ok 6 - response shown
+      ---
+      duration_ms: 0.516795
+      type: 'test'
+      ...
+    # Subtest: button clicked
+    ok 7 - button clicked
+      ---
+      duration_ms: 1.36472
+      type: 'test'
+      ...
+    # Subtest: button has single handler
+    ok 8 - button has single handler
+      ---
+      duration_ms: 1.241998
+      type: 'test'
+      ...
+    # Subtest: status shown
+    ok 9 - status shown
+      ---
+      duration_ms: 0.912339
+      type: 'test'
+      ...
+    1..9
+ok 9 - api for inline reporting
+  ---
+  duration_ms: 14.156316
+  type: 'suite'
+  ...
+# Subtest: api for acquisiton and generation
+    # Subtest: element by id
+    ok 1 - element by id
+      ---
+      duration_ms: 0.828587
+      type: 'test'
+      ...
+    # Subtest: json from url
+    ok 2 - json from url
+      ---
+      duration_ms: 1.410736
+      type: 'test'
+      ...
+    # Subtest: source data from lineup
+    ok 3 - source data from lineup
+      ---
+      duration_ms: 0.912827
+      type: 'test'
+      ...
+    # Subtest: trouble source data from lineup
+    ok 4 - trouble source data from lineup
+      ---
+      duration_ms: 0.621186
+      type: 'test'
+      ...
+    # Subtest: publish source aspect data
+    ok 5 - publish source aspect data
+      ---
+      duration_ms: 3.084956
+      type: 'test'
+      ...
+    # Subtest: publish source markers data
+    ok 6 - publish source markers data
+      ---
+      duration_ms: 0.826703
+      type: 'test'
+      ...
+    # Subtest: show result as ghost page
+    ok 7 - show result as ghost page
+      ---
+      duration_ms: 0.897771
+      type: 'test'
+      ...
+    # Subtest: all sitemaps from neighborhod
+    ok 8 - all sitemaps from neighborhod
+      ---
+      duration_ms: 1.599715
+      type: 'test'
+      ...
+    # Subtest: some sitemaps from neighborhod
+    ok 9 - some sitemaps from neighborhod
+      ---
+      duration_ms: 0.722765
+      type: 'test'
+      ...
+    1..9
+ok 10 - api for acquisiton and generation
+  ---
+  duration_ms: 11.668125
+  type: 'suite'
+  ...
+# Subtest: api for svg graphics
+    # Subtest: create inline svg
+    ok 1 - create inline svg
+      ---
+      duration_ms: 3.034743
+      type: 'test'
+      ...
+    # Subtest: add line to svg
+    ok 2 - add line to svg
+      ---
+      duration_ms: 1.257541
+      type: 'test'
+      ...
+    1..2
+ok 11 - api for svg graphics
+  ---
+  duration_ms: 4.461441
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# Subtest: mech plugin basics
+    # Subtest: expand
+        # Subtest: can use math notations
+        ok 1 - can use math notations
+          ---
+          duration_ms: 25.030174
+          type: 'test'
+          ...
+        1..1
+    ok 1 - expand
+      ---
+      duration_ms: 31.00172
+      type: 'suite'
+      ...
+    # Subtest: tree
+        # Subtest: simple HELLO
+        ok 1 - simple HELLO
+          ---
+          duration_ms: 0.978237
+          type: 'test'
+          ...
+        # Subtest: indented HELLO
+        ok 2 - indented HELLO
+          ---
+          duration_ms: 0.521797
+          type: 'test'
+          ...
+        # Subtest: nested CLICK HELLO
+        ok 3 - nested CLICK HELLO
+          ---
+          duration_ms: 3.258477
+          type: 'test'
+          ...
+        1..3
+    ok 2 - tree
+      ---
+      duration_ms: 5.096885
+      type: 'suite'
+      ...
+    # Subtest: format
+        # Subtest: simple HELLO
+        ok 1 - simple HELLO
+          ---
+          duration_ms: 2.171168
+          type: 'test'
+          ...
+        # Subtest: nested CLICK HELLO
+        ok 2 - nested CLICK HELLO
+          ---
+          duration_ms: 0.571289
+          type: 'test'
+          ...
+        # Subtest: nested NEIGHBORS
+        ok 3 - nested NEIGHBORS
+          ---
+          duration_ms: 0.995781
+          type: 'test'
+          ...
+        1..3
+    ok 3 - format
+      ---
+      duration_ms: 4.18361
+      type: 'suite'
+      ...
+    1..3
+ok 12 - mech plugin basics
+  ---
+  duration_ms: 41.464449
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# {
+#   command: 'HELLO',
+#   op: 'HELLO',
+#   args: [],
+#   body: undefined,
+#   elem: 'element 732954.1.0',
+#   state: {
+#     api: {
+#       trouble: [Function: trouble],
+#       response: [Function: response],
+#       button: [Function: button],
+#       inspect: [Function: inspect],
+#       click: [Function: click],
+#       element: [Function: element],
+#       jfetch: [Function: jfetch],
+#       status: [Function: status],
+#       sourceData: [Function: sourceData],
+#       showResult: [Function: showResult],
+#       neighborhood: [Function: neighborhood],
+#       publishSourceData: [Function: publishSourceData],
+#       newSVG: [Function: newSVG],
+#       SVGline: [Function: SVGline],
+#       ticker: [Function: ticker],
+#       log: [Array],
+#       files: [],
+#       handler: [Function (anonymous)]
+#     },
+#     debug: true
+#   },
+#   initiator: 'click'
+# }
+# {
+#   url: '//fed.wiki/test-survey.json',
+#   page: { story: [ [Object] ] },
+#   survey: [],
+#   todo: [
+#     {
+#       domain: 'fed.wiki',
+#       title: 'Hello World',
+#       slug: 'hello-world',
+#       date: 1517758360043,
+#       synopsis: 'All about Hello World.'
+#     },
+#     {
+#       domain: 'fed.wiki',
+#       title: 'Test Survey',
+#       slug: 'test-survey',
+#       date: 1517758360043,
+#       synopsis: 'All about Test Survey.'
+#     }
+#   ]
+# }
+# { hits: { yang: 2, ying: 1 }, hubs: [ [ 'yang', 2 ] ] }
+# {
+#   command: 'TICK 2',
+#   args: [ '2' ],
+#   body: [ { command: 'HELLO', key: '210350.1.0' }, key: '210350.1' ],
+#   state: {
+#     api: {
+#       trouble: [Function: trouble],
+#       response: [Function: response],
+#       button: [Function: button],
+#       inspect: [Function: inspect],
+#       click: [Function: click],
+#       element: [Function: element],
+#       jfetch: [Function: jfetch],
+#       status: [Function: status],
+#       sourceData: [Function: sourceData],
+#       showResult: [Function: showResult],
+#       neighborhood: [Function: neighborhood],
+#       publishSourceData: [Function: publishSourceData],
+#       newSVG: [Function: newSVG],
+#       SVGline: [Function: SVGline],
+#       ticker: [Function: ticker],
+#       log: [],
+#       files: [],
+#       handler: [Function (anonymous)]
+#     }
+#   }
+# }
+# {
+#   command: 'TICK 2',
+#   args: [ '2' ],
+#   body: [ { command: 'HELLO', key: '945398.1.0' }, key: '945398.1' ],
+#   state: {
+#     api: {
+#       trouble: [Function: trouble],
+#       response: [Function: response],
+#       button: [Function: button],
+#       inspect: [Function: inspect],
+#       click: [Function: click],
+#       element: [Function: element],
+#       jfetch: [Function: jfetch],
+#       status: [Function: status],
+#       sourceData: [Function: sourceData],
+#       showResult: [Function: showResult],
+#       neighborhood: [Function: neighborhood],
+#       publishSourceData: [Function: publishSourceData],
+#       newSVG: [Function: newSVG],
+#       SVGline: [Function: SVGline],
+#       ticker: [Function: ticker],
+#       log: [],
+#       files: [],
+#       handler: [Function: start]
+#     }
+#   }
+# }
+# Subtest: Early Blocks
+    # Subtest: simple HELLO
+    ok 1 - simple HELLO
+      ---
+      duration_ms: 3.088749
+      type: 'test'
+      ...
+    # Subtest: trouble GOODBYE
+    ok 2 - trouble GOODBYE
+      ---
+      duration_ms: 19.289828
+      type: 'test'
+      ...
+    # Subtest: trouble BadLuck
+    ok 3 - trouble BadLuck
+      ---
+      duration_ms: 2.286417
+      type: 'test'
+      ...
+    # Subtest: CLICK HELLO
+    ok 4 - CLICK HELLO
+      ---
+      duration_ms: 1.243352
+      type: 'test'
+      ...
+    # Subtest: shift CLICK HELLO
+    ok 5 - shift CLICK HELLO
+      ---
+      duration_ms: 8.196986
+      type: 'test'
+      ...
+    # Subtest: trouble CLICK
+    ok 6 - trouble CLICK
+      ---
+      duration_ms: 0.644275
+      type: 'test'
+      ...
+    1..6
+ok 13 - Early Blocks
+  ---
+  duration_ms: 36.500633
+  type: 'suite'
+  ...
+# Subtest: Sensor and Report Blocks
+    # Subtest: simple REPORT
+    ok 1 - simple REPORT
+      ---
+      duration_ms: 1.095431
+      type: 'test'
+      ...
+    # Subtest: trouble REPORT
+    ok 2 - trouble REPORT
+      ---
+      duration_ms: 0.850432
+      type: 'test'
+      ...
+    # Subtest: trouble FROM
+    ok 3 - trouble FROM
+      ---
+      duration_ms: 1.420265
+      type: 'test'
+      ...
+    # Subtest: simple FROM
+    ok 4 - simple FROM
+      ---
+      duration_ms: 1.294418
+      type: 'test'
+      ...
+    # Subtest: see Testing Sensor Mech
+    ok 5 - see Testing Sensor Mech
+      ---
+      duration_ms: 1.588958
+      type: 'test'
+      ...
+    1..5
+ok 14 - Sensor and Report Blocks
+  ---
+  duration_ms: 9.801943
+  type: 'suite'
+  ...
+# Subtest: Source and Preview Blocks
+    # Subtest: simple SOURCE
+    ok 1 - simple SOURCE
+      ---
+      duration_ms: 1.064495
+      type: 'test'
+      ...
+    # Subtest: see Testing Marker Mech
+    ok 2 - see Testing Marker Mech
+      ---
+      duration_ms: 14.644693
+      type: 'test'
+      ...
+    # Subtest: simple PREVIEW graph
+    ok 3 - simple PREVIEW graph
+      ---
+      duration_ms: 0.870484
+      type: 'test'
+      ...
+    # Subtest: simple PREVIEW items
+    ok 4 - simple PREVIEW items
+      ---
+      duration_ms: 6.2937
+      type: 'test'
+      ...
+    # Subtest: simple PREVIEW page
+    ok 5 - simple PREVIEW page
+      ---
+      duration_ms: 0.705942
+      type: 'test'
+      ...
+    # Subtest: trouble PREVIEW foobar
+    ok 6 - trouble PREVIEW foobar
+      ---
+      duration_ms: 0.514633
+      type: 'test'
+      ...
+    1..6
+ok 15 - Source and Preview Blocks
+  ---
+  duration_ms: 24.489894
+  type: 'suite'
+  ...
+# Subtest: Neighborhood Blocks
+    # Subtest: simple NEIGHBORS
+    ok 1 - simple NEIGHBORS
+      ---
+      duration_ms: 1.321124
+      type: 'test'
+      ...
+    # Subtest: augmented NEIGHBORS
+    ok 2 - augmented NEIGHBORS
+      ---
+      duration_ms: 1.159617
+      type: 'test'
+      ...
+    # Subtest: troubles NEIGHBORS
+    ok 3 - troubles NEIGHBORS
+      ---
+      duration_ms: 0.640115
+      type: 'test'
+      ...
+    # Subtest: simple WALK
+    ok 4 - simple WALK
+      ---
+      duration_ms: 1.356426
+      type: 'test'
+      ...
+    # Subtest: trouble WALK
+    ok 5 - trouble WALK
+      ---
+      duration_ms: 1.357538
+      type: 'test'
+      ...
+    # Subtest: test WALK 2 steps
+    ok 6 - test WALK 2 steps
+      ---
+      duration_ms: 2.735355
+      type: 'test'
+      ...
+    # Subtest: test WALK 1 hubs
+    ok 7 - test WALK 1 hubs
+      ---
+      duration_ms: 1.673439
+      type: 'test'
+      ...
+    # Subtest: test WALK 1 days
+    ok 8 - test WALK 1 days
+      ---
+      duration_ms: 48.996365
+      type: 'test'
+      ...
+    # Subtest: test WALK 1 weeks
+    ok 9 - test WALK 1 weeks
+      ---
+      duration_ms: 0.767378
+      type: 'test'
+      ...
+    # Subtest: test WALK 1 months
+    ok 10 - test WALK 1 months
+      ---
+      duration_ms: 0.804877
+      type: 'test'
+      ...
+    1..10
+ok 16 - Neighborhood Blocks
+  ---
+  duration_ms: 61.422458
+  type: 'suite'
+  ...
+# Subtest: Turtle Blocks
+    # Subtest: simple FORWARD
+    ok 1 - simple FORWARD
+      ---
+      duration_ms: 0.819846
+      type: 'test'
+      ...
+    # Subtest: simple TURN
+    ok 2 - simple TURN
+      ---
+      duration_ms: 0.46231
+      type: 'test'
+      ...
+    # Subtest: test FORWARD and TURN
+    ok 3 - test FORWARD and TURN
+      ---
+      duration_ms: 0.741863
+      type: 'test'
+      ...
+    1..3
+ok 17 - Turtle Blocks
+  ---
+  duration_ms: 2.257656
+  type: 'suite'
+  ...
+# Subtest: Sequencing Blocks
+    # Subtest: simple TICK
+    ok 1 - simple TICK
+      ---
+      duration_ms: 1.184681
+      type: 'test'
+      ...
+    # Subtest: click TICK
+    ok 2 - click TICK
+      ---
+      duration_ms: 3.070192
+      type: 'test'
+      ...
+    1..2
+ok 18 - Sequencing Blocks
+  ---
+  duration_ms: 4.443821
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# Subtest: mech as plugin
+    # Subtest: emits and runs the blocks
+    ok 1 - emits and runs the blocks
+      ---
+      duration_ms: 14.946251
+      type: 'test'
+      ...
+    # Subtest: binds double-click to edit
+    ok 2 - binds double-click to edit
+      ---
+      duration_ms: 0.598031
+      type: 'test'
+      ...
+    1..2
+ok 19 - mech as plugin
+  ---
+  duration_ms: 17.286417
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# Subtest: parse_walk_command
+    # Subtest: parses questions to singular
+    ok 1 - parses questions to singular
+      ---
+      duration_ms: 2.195749
+      type: 'test'
+      ...
+    # Subtest: parses claims to singular
+    ok 2 - parses claims to singular
+      ---
+      duration_ms: 1.03302
+      type: 'test'
+      ...
+    1..2
+ok 20 - parse_walk_command
+  ---
+  duration_ms: 5.011808
+  type: 'suite'
+  ...
+# [mech] version: dev build: unknown commit: nogit
+# Subtest: walk scope helpers
+    # Subtest: lineup returns prefix of pages before current page
+    ok 1 - lineup returns prefix of pages before current page
+      ---
+      duration_ms: 2.122076
+      type: 'test'
+      ...
+    # Subtest: references returns reference items from current page story
+    ok 2 - references returns reference items from current page story
+      ---
+      duration_ms: 0.485088
+      type: 'test'
+      ...
+    1..2
+ok 21 - walk scope helpers
+  ---
+  duration_ms: 4.373924
+  type: 'suite'
+  ...
+1..21
+# tests 97
+# suites 24
+# pass 97
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1058.132752

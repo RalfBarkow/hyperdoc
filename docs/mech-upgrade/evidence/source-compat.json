@@ -1,0 +1,116 @@
+{
+  "base": "abd88d2da6c89029515f2a456356832dffe038ab",
+  "candidateSourceSha256": "c3bc41f896ee965e067d9dc618450eed9c90cf81710d92bbd05b66ea4e59bd70",
+  "existingFunctions": 56,
+  "changedFunctions": [
+    "click_emit",
+    "run",
+    "tick_emit"
+  ],
+  "addedFunctions": [
+    "lineupAtKey",
+    "thisLineupKey",
+    "code_emit"
+  ],
+  "unchangedFunctions": [
+    "trouble",
+    "inspect",
+    "response",
+    "button",
+    "element",
+    "jfetch",
+    "status",
+    "sourceData",
+    "publishSourceData",
+    "showResult",
+    "expand",
+    "neighborhood",
+    "normalize_fold",
+    "canonicalize_fold",
+    "update_fold_stats",
+    "parse_extract_args",
+    "parse_links",
+    "extract_edges_from_story",
+    "renderNeighborsDetails",
+    "newSVG",
+    "SVGline",
+    "ticker",
+    "hello_emit",
+    "from_emit",
+    "sensor_emit",
+    "report_emit",
+    "extract_emit",
+    "renderEdgesHtml",
+    "edges_emit",
+    "source_emit",
+    "preview_emit",
+    "neighbors_emit",
+    "scope_lineup",
+    "scope_references",
+    "parse_walk_command",
+    "walk_emit",
+    "debug_emit",
+    "until_emit",
+    "forward_emit",
+    "turn_emit",
+    "file_emit",
+    "kwic_emit",
+    "show_emit",
+    "random_emit",
+    "sleep_emit",
+    "together_emit",
+    "get_emit",
+    "delta_emit",
+    "roster_emit",
+    "lineup_emit",
+    "listen_emit",
+    "message_emit",
+    "solo_emit"
+  ],
+  "candidateAddedBlocks": [
+    "CODE"
+  ],
+  "candidateRemovedBlocks": [],
+  "candidateAddedApi": [
+    "lineupAtKey",
+    "thisLineupKey"
+  ],
+  "unchangedSourceFiles": [
+    "src/client/mech.js",
+    "src/client/interpreter.js",
+    "src/client/library.js",
+    "server/server.js",
+    "scripts/build-client.js",
+    "scripts/write-build-info.cjs"
+  ],
+  "staticImports": {
+    "base": [
+      "./library.js",
+      "./mech.js"
+    ],
+    "candidate": [
+      "./library.js",
+      "./mech.js"
+    ],
+    "upstreamGuarded": [
+      "./library.js",
+      "./mech.js",
+      "./graph/graph.js",
+      "universal-ticker"
+    ]
+  },
+  "wholesaleUpgrade": {
+    "removedForkBlocks": [
+      "EXTRACT",
+      "EDGES",
+      "DEBUG"
+    ],
+    "addedBlocks": [
+      "PLUGIN",
+      "POPUP",
+      "PRINT",
+      "CODE",
+      "DOWNLOAD"
+    ]
+  }
+}

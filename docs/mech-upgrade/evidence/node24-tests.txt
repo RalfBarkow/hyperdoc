@@ -1,0 +1,317 @@
+[mech] version: dev build: unknown commit: nogit
+{
+  event: {
+    data: { action: 'publishSourceData', topic: 'other', title: 'Other' }
+  }
+}
+{
+  event: {
+    data: {
+      action: 'publishSourceData',
+      topic: 'node',
+      title: 'Reflective Practice'
+    }
+  }
+}
+{
+  event: {
+    data: { action: 'publishSourceData', name: 'node', title: 'John Dewey' }
+  }
+}
+{
+  pageKey: 'page-key',
+  doing: { type: 'batch', sources: [ [Object] ], pageKey: 'page-key' }
+}
+**** Adding solo listener
+▶ CODE backport preserves existing event and Solo protocol
+  ✔ LISTEN retains publishSourceData topic/name counting without new nested-input semantics (3.043984ms)
+reusing existing dialog
+  ✔ SOLO retains batch/source/aspect/pageKey and opener-origin delivery (754.411601ms)
+✔ CODE backport preserves existing event and Solo protocol (759.3373ms)
+[mech] version: dev build: unknown commit: nogit
+{
+  command: 'TICK 1',
+  args: [ '1' ],
+  body: [ { command: 'CODE trails', key: 'code' } ],
+  state: {
+    context: { value: 2 },
+    api: {
+      thisLineupKey: [Function: thisLineupKey],
+      lineupAtKey: [Function: lineupAtKey],
+      inspect: [Function: inspect],
+      element: [Function: element],
+      trouble: [Function: trouble],
+      status: [Function: status],
+      button: [Function: button],
+      ticker: [Function: ticker]
+    }
+  }
+}
+▶ CODE backport invocation and state contract
+  ✔ recognizes CODE, joins multiple Code items and invokes named export with state/arguments (4.836386ms)
+  ✔ CLICK propagates initiation to its CODE child (25.101903ms)
+  ✔ TICK propagates initiation to its CODE child (25.078432ms)
+  ✔ rejects non-initiated execution for anonymous and owner/remote pages before evaluating source (1.112667ms)
+  ✔ allows non-initiated execution only for an owned local page (1.335543ms)
+  ✔ CLICK permits explicit execution of a remote page like the upstream contract (1.773407ms)
+  ✔ reports missing Code items, missing/non-function exports and syntax errors through the caller API (2.927313ms)
+  ✔ supports default export and hides the raw execution API in the narrow backport (1.070136ms)
+  ✔ reports unsupported server execution before importing a page module (0.284524ms)
+  ✔ locates the current page by its actual lineup key (0.592324ms)
+✔ CODE backport invocation and state contract (67.151023ms)
+[mech] version: dev build: unknown commit: nogit
+▶ EDGES renderer
+  ✔ renders claim group when claim edges exist (20.275422ms)
+  ✔ keeps summary counts consistent with groups (1.525565ms)
+  ✔ renders links with site-aware /view URLs (1.054888ms)
+  ✔ prefers title over slug in link labels (0.345415ms)
+  ✔ shows all edges by default without a limit label (0.488925ms)
+  ✔ shows slug when title is unknown (15.247507ms)
+  ✔ applies limit when provided and includes limit label (0.404289ms)
+  ✔ summary counts reflect filtered edges beyond the visible limit (0.617927ms)
+✔ EDGES renderer (42.869461ms)
+[mech] version: dev build: unknown commit: nogit
+▶ parse_extract_args
+  ✔ defaults to unbounded when no args provided (1.300666ms)
+  ✔ accepts a positive integer limit (0.310174ms)
+✔ parse_extract_args (3.211291ms)
+[mech] version: dev build: unknown commit: nogit
+▶ extract_edges_from_story
+  ✔ claim fold produces a claim edge from paragraph link (2.45372ms)
+  ✔ unknown fold produces no edges and increments foldsUnknown (0.360054ms)
+  ✔ support fold with two links produces two support edges (0.318888ms)
+  ✔ slugifies paragraph links derived from titles (0.381902ms)
+  ✔ recognized fold but no link yields no edges (32.124784ms)
+✔ extract_edges_from_story (39.617963ms)
+[mech] version: dev build: unknown commit: nogit
+▶ fold canonicalization
+  ✔ treats "Claims" as claim (2.02277ms)
+  ✔ treats "Claim:" as claim (0.331296ms)
+  ✔ tracks unknown folds and returns null role (0.287565ms)
+✔ fold canonicalization (7.434198ms)
+[mech] version: dev build: unknown commit: nogit
+▶ renderNeighborsDetails
+  ✔ renders done/inflight/error labels (99.204238ms)
+✔ renderNeighborsDetails (100.672726ms)
+▶ no bare imports in client modules
+  ✔ avoids bare module specifiers under src/client (12.021523ms)
+✔ no bare imports in client modules (13.713598ms)
+[mech] version: dev build: unknown commit: nogit
+{ key: 'data', value: 'your data here' }
+▶ api for inline reporting
+  ✔ trouble notice shown (15.198614ms)
+  ✔ trouble notice clicked (0.97109ms)
+  ✔ inspect notice omitted (0.612531ms)
+  ✔ inspect notice shown (1.72166ms)
+  ✔ inspect notice clicked (2.850032ms)
+  ✔ response shown (0.576622ms)
+  ✔ button clicked (0.705881ms)
+  ✔ button has single handler (1.05098ms)
+  ✔ status shown (11.272387ms)
+✔ api for inline reporting (37.235266ms)
+▶ api for acquisiton and generation
+  ✔ element by id (1.354528ms)
+  ✔ json from url (3.912065ms)
+  ✔ source data from lineup (0.952548ms)
+  ✔ trouble source data from lineup (0.680194ms)
+  ✔ publish source aspect data (0.8556ms)
+  ✔ publish source markers data (5.628251ms)
+  ✔ show result as ghost page (0.702298ms)
+  ✔ all sitemaps from neighborhod (0.820287ms)
+  ✔ some sitemaps from neighborhod (0.635842ms)
+✔ api for acquisiton and generation (16.203243ms)
+▶ api for svg graphics
+  ✔ create inline svg (0.725933ms)
+  ✔ add line to svg (0.663708ms)
+✔ api for svg graphics (20.966874ms)
+[mech] version: dev build: unknown commit: nogit
+▶ mech plugin basics
+  ▶ expand
+    ✔ can use math notations (3.420483ms)
+  ✔ expand (4.575966ms)
+  ▶ tree
+    ✔ simple HELLO (0.661165ms)
+    ✔ indented HELLO (0.510861ms)
+    ✔ nested CLICK HELLO (1.218397ms)
+  ✔ tree (2.744592ms)
+  ▶ format
+    ✔ simple HELLO (1.309495ms)
+    ✔ nested CLICK HELLO (0.606817ms)
+    ✔ nested NEIGHBORS (0.629063ms)
+  ✔ format (2.928777ms)
+✔ mech plugin basics (11.233402ms)
+[mech] version: dev build: unknown commit: nogit
+{
+  command: 'HELLO',
+  op: 'HELLO',
+  args: [],
+  body: undefined,
+  elem: 'element 966171.1.0',
+  state: {
+    api: {
+      trouble: [Function: trouble],
+      response: [Function: response],
+      button: [Function: button],
+      inspect: [Function: inspect],
+      click: [Function: click],
+      element: [Function: element],
+      jfetch: [Function: jfetch],
+      status: [Function: status],
+      sourceData: [Function: sourceData],
+      showResult: [Function: showResult],
+      neighborhood: [Function: neighborhood],
+      publishSourceData: [Function: publishSourceData],
+      newSVG: [Function: newSVG],
+      SVGline: [Function: SVGline],
+      ticker: [Function: ticker],
+      log: [Array],
+      files: [],
+      handler: [Function (anonymous)]
+    },
+    debug: true
+  },
+  initiator: 'click'
+}
+{
+  url: '//fed.wiki/test-survey.json',
+  page: { story: [ [Object] ] },
+  survey: [],
+  todo: [
+    {
+      domain: 'fed.wiki',
+      title: 'Hello World',
+      slug: 'hello-world',
+      date: 1517758360043,
+      synopsis: 'All about Hello World.'
+    },
+    {
+      domain: 'fed.wiki',
+      title: 'Test Survey',
+      slug: 'test-survey',
+      date: 1517758360043,
+      synopsis: 'All about Test Survey.'
+    }
+  ]
+}
+{ hits: { yang: 2, ying: 1 }, hubs: [ [ 'yang', 2 ] ] }
+{
+  command: 'TICK 2',
+  args: [ '2' ],
+  body: [ { command: 'HELLO', key: '5436.1.0' }, key: '5436.1' ],
+  state: {
+    api: {
+      trouble: [Function: trouble],
+      response: [Function: response],
+      button: [Function: button],
+      inspect: [Function: inspect],
+      click: [Function: click],
+      element: [Function: element],
+      jfetch: [Function: jfetch],
+      status: [Function: status],
+      sourceData: [Function: sourceData],
+      showResult: [Function: showResult],
+      neighborhood: [Function: neighborhood],
+      publishSourceData: [Function: publishSourceData],
+      newSVG: [Function: newSVG],
+      SVGline: [Function: SVGline],
+      ticker: [Function: ticker],
+      log: [],
+      files: [],
+      handler: [Function (anonymous)]
+    }
+  }
+}
+{
+  command: 'TICK 2',
+  args: [ '2' ],
+  body: [ { command: 'HELLO', key: '88882.1.0' }, key: '88882.1' ],
+  state: {
+    api: {
+      trouble: [Function: trouble],
+      response: [Function: response],
+      button: [Function: button],
+      inspect: [Function: inspect],
+      click: [Function: click],
+      element: [Function: element],
+      jfetch: [Function: jfetch],
+      status: [Function: status],
+      sourceData: [Function: sourceData],
+      showResult: [Function: showResult],
+      neighborhood: [Function: neighborhood],
+      publishSourceData: [Function: publishSourceData],
+      newSVG: [Function: newSVG],
+      SVGline: [Function: SVGline],
+      ticker: [Function: ticker],
+      log: [],
+      files: [],
+      handler: [Function: start]
+    }
+  }
+}
+▶ Early Blocks
+  ✔ simple HELLO (2.980517ms)
+  ✔ trouble GOODBYE (8.653482ms)
+  ✔ trouble BadLuck (0.795363ms)
+  ✔ CLICK HELLO (1.128191ms)
+  ✔ shift CLICK HELLO (1.670239ms)
+  ✔ trouble CLICK (0.65163ms)
+✔ Early Blocks (17.721207ms)
+▶ Sensor and Report Blocks
+  ✔ simple REPORT (0.827197ms)
+  ✔ trouble REPORT (0.862548ms)
+  ✔ trouble FROM (1.172836ms)
+  ✔ simple FROM (0.994082ms)
+  ✔ see Testing Sensor Mech (25.419339ms)
+✔ Sensor and Report Blocks (33.771512ms)
+▶ Source and Preview Blocks
+  ✔ simple SOURCE (1.164716ms)
+  ✔ see Testing Marker Mech (1.313706ms)
+  ✔ simple PREVIEW graph (0.859219ms)
+  ✔ simple PREVIEW items (0.587933ms)
+  ✔ simple PREVIEW page (1.022215ms)
+  ✔ trouble PREVIEW foobar (0.514097ms)
+✔ Source and Preview Blocks (9.97895ms)
+▶ Neighborhood Blocks
+  ✔ simple NEIGHBORS (5.895704ms)
+  ✔ augmented NEIGHBORS (1.203623ms)
+  ✔ troubles NEIGHBORS (15.640524ms)
+  ✔ simple WALK (1.468772ms)
+  ✔ trouble WALK (1.20968ms)
+  ✔ test WALK 2 steps (2.508117ms)
+  ✔ test WALK 1 hubs (2.254234ms)
+  ✔ test WALK 1 days (40.808872ms)
+  ✔ test WALK 1 weeks (0.787284ms)
+  ✔ test WALK 1 months (0.68747ms)
+✔ Neighborhood Blocks (73.039461ms)
+▶ Turtle Blocks
+  ✔ simple FORWARD (0.820702ms)
+  ✔ simple TURN (0.559519ms)
+  ✔ test FORWARD and TURN (0.564947ms)
+✔ Turtle Blocks (2.158159ms)
+▶ Sequencing Blocks
+  ✔ simple TICK (1.125271ms)
+  ✔ click TICK (2.948394ms)
+✔ Sequencing Blocks (4.42235ms)
+[mech] version: dev build: unknown commit: nogit
+▶ mech as plugin
+  ✔ emits and runs the blocks (35.802821ms)
+  ✔ binds double-click to edit (0.647656ms)
+✔ mech as plugin (38.058202ms)
+[mech] version: dev build: unknown commit: nogit
+▶ parse_walk_command
+  ✔ parses questions to singular (1.824911ms)
+  ✔ parses claims to singular (0.424495ms)
+✔ parse_walk_command (3.991791ms)
+[mech] version: dev build: unknown commit: nogit
+▶ walk scope helpers
+  ✔ lineup returns prefix of pages before current page (2.271872ms)
+  ✔ references returns reference items from current page story (0.504707ms)
+✔ walk scope helpers (4.455087ms)
+ℹ tests 97
+ℹ suites 24
+ℹ pass 97
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1046.223577

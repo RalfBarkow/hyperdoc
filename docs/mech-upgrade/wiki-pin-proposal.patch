@@ -1,0 +1,17 @@
+--- a/flake.nix
++++ b/flake.nix
+@@ -11,12 +11,12 @@
+       let
+         pkgs = import nixpkgs { inherit system; };
+         lib  = pkgs.lib;
+-        mechRev = "abd88d2da6c89029515f2a456356832dffe038ab";
++        mechRev = "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44";
+         mechSrc = pkgs.fetchFromGitHub {
+           owner = "RalfBarkow";
+           repo = "wiki-plugin-mech";
+           rev = mechRev;
+-          hash = "sha256-KJrG7bgqiY7rPYqU8Cg9FLcetgpOXtnIevKLgAnezWs=";
++          hash = "sha256-K+lfLQIbmPmz/kzlzCW6QiOasAtbTrrpkcR3CGyTvpI=";
+         };
+         soloVersion = "0.1.30-1";
+         soloSrc = pkgs.fetchurl {

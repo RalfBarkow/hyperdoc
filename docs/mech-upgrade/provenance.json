@@ -1,0 +1,161 @@
+{
+  "starting-repository": {
+    "root": "/Users/rgb/workspace/hyperdoc-dreyeck-ch",
+    "branch": "dreyeck.ch",
+    "oid": "9a3db587db7c57190e681a739e1ce55f5b29788d",
+    "index": "clean",
+    "untracked-preserved": [
+      ".DS_Store"
+    ]
+  },
+  "candidate": {
+    "authority": "https://github.com/RalfBarkow/wiki-plugin-mech",
+    "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+    "display": "0fc36fc",
+    "version": "0.1.32-dev.2",
+    "base": "abd88d2da6c89029515f2a456356832dffe038ab",
+    "branch": "codex/code-trails-candidate",
+    "published": false,
+    "narHash": "sha256-K+lfLQIbmPmz/kzlzCW6QiOasAtbTrrpkcR3CGyTvpI=",
+    "bundle": "docs/mech-upgrade/candidate.bundle",
+    "patch": "docs/mech-upgrade/candidate.patch"
+  },
+  "upstream-history": [
+    {
+      "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+      "oid": "215d9cd0c4d6345917479b67ae2d6743ed20a188",
+      "version": "0.1.37",
+      "status": "CODE exists, original Trails contract fails: calls doit from first Code item"
+    },
+    {
+      "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+      "oid": "70b23b9fa4dc065c51643988d80c2f45fa8e5901",
+      "version": "0.1.37",
+      "status": "First available history revision joining Code items and invoking trails with state; browser succeeds; invocation policy absent"
+    },
+    {
+      "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+      "oid": "6782e4d5202888ff8ae42d1fc10343ee3cf457ae",
+      "version": "0.1.48-2",
+      "status": "Policy complete; compiled original-page success; raw copy cannot resolve universal-ticker; EXTRACT/EDGES/DEBUG removed"
+    }
+  ],
+  "local-Wiki-authorities": [
+    {
+      "authority": "https://github.com/RalfBarkow/wiki",
+      "branch": "localhost",
+      "oid": "8e6c2e53a47f038f4b0c6d2ef35576cc1d4f456c",
+      "mech": "4b8051417dec6b0eff40878290a703b1fa60fb52",
+      "role": "current local checkout, not inferred as production"
+    },
+    {
+      "authority": "https://github.com/RalfBarkow/wiki",
+      "branch": "dreyeck.ch",
+      "oid": "548ee4c31ec7824bf19954b745f12b3b5212fc2b",
+      "mech": "abd88d2da6c89029515f2a456356832dffe038ab",
+      "mechHash": "sha256-KJrG7bgqiY7rPYqU8Cg9FLcetgpOXtnIevKLgAnezWs=",
+      "role": "matches observed source-copy/stamp pipeline and asset source; exact active host Wiki source revision not inferred"
+    },
+    {
+      "authority": "https://github.com/RalfBarkow/wiki",
+      "branch": "wiki.ralfbarkow.ch",
+      "oid": "b42eb888d6e5d59803667c6320e0779523fc265c",
+      "role": "different P41 packaging; not selected as target"
+    }
+  ],
+  "acceptance": {
+    "baseline": "CODE rejected",
+    "Ward-original": "2 aspects",
+    "candidate-browser-overlay": "2 aspects; 1 batch source/2 trail graphs; 5 SVG nodes/4 Trail edges",
+    "candidate-node22.18.0": "97 pass, 0 fail, 0 skipped",
+    "candidate-node24.10.0": "97 pass, 0 fail, 0 skipped",
+    "deployed-source-baseline": "85 pass",
+    "HyperDoc-Work-and-Nested-Actions": "fresh TEST-OP exit 0",
+    "production-updated": false,
+    "full-active-Wiki-Linux-build": "not performed; publication/host-source selector required"
+  },
+  "files": [
+    {
+      "file": "docs/mech-upgrade/evidence/assets.json",
+      "sha256": "4f9f0109f8348fab142be2abc60368896aec1308b03f98f090e8ca6668187cc9"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/baseline-tests.txt",
+      "sha256": "73eb3dc2bb9629fe227f46ad048fe4a6d654189f2fc0396d29542f775e88cbc5"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/baseline.json",
+      "sha256": "c24833eb9e9b7d46399a8f00ef8ba505135047eae6f1471931d130ea6783772e"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/candidate.json",
+      "sha256": "1a5034c203d6eddeabcf17dd3befaf8a3080d5393c4c4501b81b2c01b8182626"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/first-code.json",
+      "sha256": "9aa4cd01044e08a10360a13d5fafe5597b3ed40fad4a98fe5daf872f52519736"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/first-functional.json",
+      "sha256": "a7881bb60951588da623256814d780c41f1ca85f4e107c0a3b538e80640376fe"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/host-observation.json",
+      "sha256": "862bf03db713e4570138586d3060dcbf68b884eb39d27e80536a6106b7fdb819"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/node22-tests.txt",
+      "sha256": "ea6c99e1a1af8ef2042bcc7404d962e57a4c0a3ea988f784a2a87538d090643c"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/node24-tests.txt",
+      "sha256": "e4e7af7e2c189267727f5dd6244f911b2d50dfe5e2511ff2eaca7a39a06253f7"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/source-compat.json",
+      "sha256": "d725bd9e9db4b13529376952c105b50cd7646a5c11e4aa2a7162ac509fbbc0c7"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/upstream-guarded-built.json",
+      "sha256": "2a336e428ddfc037a8ef3b914a3594ecb8789c34a7e918cbeb266a4294fe84f7"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/upstream-guarded-raw.json",
+      "sha256": "4608ea528a98bb22a32ca013a8b7140ff585328625dbf82fb6becac7dd32f986"
+    },
+    {
+      "file": "docs/mech-upgrade/evidence/ward.json",
+      "sha256": "2ef02dde82a61fe447775d2ed82082d87f424afaf1397d66d5bdafa3f0eae214"
+    }
+  ],
+  "proposalArtifacts": [
+    {
+      "file": "docs/mech-upgrade/candidate.bundle",
+      "sha256": "f4806f5f1396b952e4e46396d5823d579766fe4343a5af197eef933e52c91f72"
+    },
+    {
+      "file": "docs/mech-upgrade/candidate.patch",
+      "sha256": "4dbb3c01c3384d988fb0349d114b89c7b432623f43074fb679536415e9be41c4"
+    },
+    {
+      "file": "docs/mech-upgrade/plan.md",
+      "sha256": "88f629bba6c77d618862b3cc4c30ecf25fde04e731a43acf225601f64682a5ae"
+    },
+    {
+      "file": "docs/mech-upgrade/prepare-assets.py",
+      "sha256": "7669d18b06e03d4c8f174fe3674d051afc608e0400bc385cf0ab2086d91ee25f"
+    },
+    {
+      "file": "docs/mech-upgrade/rehearse.mjs",
+      "sha256": "f2181caa627305555c655ca3ae6e8fd83d3af337dd5861f335104ee299f85a67"
+    },
+    {
+      "file": "docs/mech-upgrade/source-compat.mjs",
+      "sha256": "08daf1ed3a0cb00d92595b5d15c62d5d93bfbd83c5977fcf667d06bd8374f44e"
+    },
+    {
+      "file": "docs/mech-upgrade/wiki-pin-proposal.patch",
+      "sha256": "693186828d4619617dca603ccdacb123788efb334d9be63bf6c97f6ba547c5de"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "provenance": {
+    "kind": "operator-supplied read-only host output",
+    "initial-observed-at": [
+      "2026-10-08T13:47:16+02:00",
+      "2026-10-08T13:47:56+02:00"
+    ],
+    "later-output-time": "not separately supplied",
+    "agent-SSH": false
+  },
+  "host": "dreyeck",
+  "current-system": "/nix/store/xnsnhc5d9pcqsgmr8vs2x0d02dv1by11-nixos-system-dreyeck-25.11.20260429.755f5aa",
+  "active-unit": {
+    "id": "wiki.service",
+    "active": "active",
+    "MainPID": 801,
+    "FragmentPath": "/etc/systemd/system/wiki.service",
+    "WorkingDirectory": "",
+    "ExecStart": "/nix/store/idhgz3kwwj5z24s6kdazsggdgjqngri3-wiki-0.39.2/bin/wiki --config /home/rgb/.wiki/config.json"
+  },
+  "inactive-unit": {
+    "id": "fedwiki.service",
+    "active": "inactive",
+    "MainPID": 0,
+    "FragmentPath": ""
+  },
+  "configured-execstart-offline-evaluation": "/nix/store/idhgz3kwwj5z24s6kdazsggdgjqngri3-wiki-0.39.2/bin/wiki --config /home/rgb/.wiki/config.json",
+  "running-process": {
+    "pid": 801,
+    "user": "rgb",
+    "exe": "/nix/store/vrqcpwq576gar2i430lj91v37b7k8jw2-nodejs-22.18.0/bin/node",
+    "argv": [
+      "/nix/store/vrqcpwq576gar2i430lj91v37b7k8jw2-nodejs-22.18.0/bin/node",
+      "/nix/store/idhgz3kwwj5z24s6kdazsggdgjqngri3-wiki-0.39.2/lib/node_modules/wiki/index.js",
+      "--config",
+      "/home/rgb/.wiki/config.json"
+    ]
+  },
+  "served-package": "/nix/store/idhgz3kwwj5z24s6kdazsggdgjqngri3-wiki-0.39.2",
+  "Mech-store-target": "/nix/store/idhgz3kwwj5z24s6kdazsggdgjqngri3-wiki-0.39.2/lib/node_modules/wiki/node_modules/wiki-plugin-mech",
+  "build-stamp": {
+    "MECH_VERSION": "0.1.32-dev.1",
+    "MECH_BUILD_TIME": "2026-03-03T15:12:15Z",
+    "MECH_GIT_COMMIT": "abd88d2da6c89029515f2a456356832dffe038ab"
+  },
+  "asset-sha256": {
+    "mech.js": "5a2005522b6bb8d7ae0c4c30e2c8b6b049044315728a0c49846b0a417a5da1b7",
+    "blocks.js": "1b69037fda8c89a0c06f333e3b8a3bb11925b1371daf8c1dfda32835d757652b",
+    "interpreter.js": "f0a0b360496ee520072421e1b4cc9584b6e46b47df455fcd5c8406e9baa5e90f",
+    "library.js": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319"
+  },
+  "authority-boundary": {
+    "services.fedwiki.package": "option absent; not the active selector",
+    "wiki-lock-github-repo-filter": [],
+    "limit": "No locked.repo=wiki entry; this does not establish that no Git/path/direct package source is used. Exact host source expression remains to be located."
+  }
+}

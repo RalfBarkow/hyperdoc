@@ -1,0 +1,39 @@
+{
+  "kind": "local mirror of observed Wiki source-copy-and-stamp assembly; not deployed",
+  "source": {
+    "authority": "https://github.com/RalfBarkow/wiki-plugin-mech",
+    "oid": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44",
+    "role": "unpublished local candidate"
+  },
+  "stamp": {
+    "MECH_VERSION": "0.1.32-dev.2",
+    "MECH_BUILD_TIME": "2026-10-08T12:39:51Z",
+    "MECH_GIT_COMMIT": "0fc36fcd58a8d7c399d3e86d2ee2e9328cafba44"
+  },
+  "assets": [
+    {
+      "source": "src/client/blocks.js",
+      "name": "blocks.js",
+      "sourceSha256": "c3bc41f896ee965e067d9dc618450eed9c90cf81710d92bbd05b66ea4e59bd70",
+      "sha256": "c3bc41f896ee965e067d9dc618450eed9c90cf81710d92bbd05b66ea4e59bd70"
+    },
+    {
+      "source": "src/client/interpreter.js",
+      "name": "interpreter.js",
+      "sourceSha256": "f0a0b360496ee520072421e1b4cc9584b6e46b47df455fcd5c8406e9baa5e90f",
+      "sha256": "f0a0b360496ee520072421e1b4cc9584b6e46b47df455fcd5c8406e9baa5e90f"
+    },
+    {
+      "source": "src/client/library.js",
+      "name": "library.js",
+      "sourceSha256": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319",
+      "sha256": "bf1e1a2f3438d7cba322c90d4410ba4be353552256459ad32bc338050bb5e319"
+    },
+    {
+      "source": "src/client/mech.js",
+      "name": "mech.js",
+      "sourceSha256": "d25151ef5170779de50e13e819b950277b99aa7a6591ef097eaef5c0043d71c7",
+      "sha256": "86513ade458db54001d77c4d88338b4f963ef70f617725564db7d09fcc2ff871"
+    }
+  ]
+}
