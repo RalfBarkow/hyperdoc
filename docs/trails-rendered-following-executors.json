@@ -1,0 +1,101 @@
+[
+  {
+    "operator": "Codex",
+    "executor": "Read-only repository/index and reading reconstruction",
+    "entry": "Git root/worktree/branch/HEAD/status/cached diff; inspect Work reading, raw source, context/native page/Workspace and tests",
+    "expected": "Reuse completed artifacts and preserve the existing user patch",
+    "observed": "HEAD 92773c8acf1b20e0660503aa3241fe0477e4846a, dreyeck.ch linked worktree; only staged native Ward link, blob 00febd71cd6b266c9dd574a6fcea23b0a78dee60",
+    "assimilation": "The staged change belongs to this Trails Rendered slice",
+    "replan": "Preserve its anchor and incorporate it explicitly"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Primary Wiki source and retained capture inspection",
+    "entry": "Read retained Ward JSON; HTTP GET trails-rendered.json; inspect verified Solo dialog and pinned MECH solo_emit blob",
+    "expected": "Identify actual paragraphs, source rules, payloads and renderer evidence",
+    "observed": "HTTP SHA256 matches retained 5fdba40f...; paragraph IDs 93cd119d6286888a/fc6c7d06e5bce7d3; actual retained source ranges; two distinct input node-2 records; full original SVG not retained",
+    "assimilation": "Use actual records; retain current HTTP verification separately from historical captures",
+    "replan": "Derived correspondence and explicit retention boundaries"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Isolated Node VM source witness",
+    "entry": "node dreyeck/work/trails-rendered-witness.mjs <repository-root>; nix develop .#tala --command node ...",
+    "expected": "Execute retained functions with disclosed Graph substitution and counter-controls",
+    "observed": "5 nodes/4 relations; mapping 0,1,2,3,4,2; all node identity checks false; name/type controls yield 6 nodes/4 relations; exact captured fields match",
+    "assimilation": "Executable structural evidence, not original graph.js or Graphviz replay",
+    "replan": "Retain structured fixture and explicit Inspector rerun"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Pinned structural writer and HTML DSL",
+    "entry": "nix develop .#workflow-authoring --command sbcl --noinform --no-userinit --non-interactive --load /private/tmp/trails-follow-*-author.lisp (individual local logs)",
+    "expected": "Guard all new/changed Lisp and ASDF forms; preserve source surrounding changes",
+    "observed": "Reparse guards pass. Local vector-aware comparator was needed for unchanged vector literals; an extra temporary-script close parenthesis was diagnosed after its guarded writes. Existing source formatting restored with semantic equality guards.",
+    "assimilation": "No workflow implementation or unrelated source modified",
+    "replan": "Fresh source/identity/navigation acceptance"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Initial fresh acceptance and corrections",
+    "entry": "nix develop .#tala --command sbcl ... --eval (check-trail-following)",
+    "expected": "Native source/graph/witness/backlink route resolves",
+    "observed": "First failure: Node dyld/OpenSSL mismatch. Next failure: filename used as code page ID, then default SEE directory context produced no reading backlink. Fixed child-only library environment and distinct title/explicit HyperBook links.",
+    "evidence": [
+      "/private/tmp/trails-follow-acceptance-attempt1.log",
+      "/private/tmp/trails-follow-acceptance-attempt2.log",
+      "/private/tmp/trails-follow-acceptance-navigation-failure.log"
+    ],
+    "assimilation": "Report real subprocess errors; retain strict native navigation assertions",
+    "replan": "Run identical acceptance and full regressions"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Final Work Reading ASDF TEST-OP",
+    "entry": "nix develop .#tala --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:load-system \"dreyeck/work/reading\" :force t)' --eval '(asdf:test-system \"dreyeck/work/reading/tests\" :force t)' > /private/tmp/trails-follow-work-final.log 2>&1",
+    "expected": "New source identity/warrant/frozen-frame/pure-rendering tests and old contracts pass",
+    "observed": "Exit 0; TRAIL-FOLLOWING-PASS, all existing Work/context/Workspace/native navigation/hoverbold/Shift-click tests; 46 Topics/69 Associations",
+    "evidence": "/private/tmp/trails-follow-work-final.log",
+    "assimilation": "Actual object refs, both input nodes and SVG table entry, cross-capture derived warrants, mutable mismatch detector, isolated controls and frozen temporal objects verified",
+    "replan": "Complete focused local commit"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Fresh Topicmap/native navigation/TALA regressions",
+    "entry": "nix develop .#tala --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:test-system \"dreyeck/topicmap/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/gesture/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/tests\")' --eval '(asdf:test-system \"dreyeck/topicmap/tala/reading/tests\")' --eval '(asdf:test-system \"dreyeck/wiki-link/tests\")' > /private/tmp/trails-follow-topicmap-navigation-final.log 2>&1",
+    "expected": "Existing framework navigation and layout remain green",
+    "observed": "Exit 0; Topicmap, gesture/Workspace, TALA integration/Reading, Wiki-link, journal debugger and story transfer pass",
+    "evidence": "/private/tmp/trails-follow-topicmap-navigation-final.log",
+    "assimilation": "No new client, interaction engine or rendering protocol",
+    "replan": "Keep framework source unchanged"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Fresh final Catalog startup",
+    "entry": "nix develop .#tala --command sbcl --noinform --no-userinit --non-interactive --eval '(require :asdf)' --eval '(asdf:test-system \"dreyeck/catalog/tests\")' > /private/tmp/trails-follow-catalog-final.log 2>&1",
+    "expected": "New source/text page registration works with the existing Catalog",
+    "observed": "Exit 0; fresh Catalog startup and existing contract suites pass",
+    "evidence": "/private/tmp/trails-follow-catalog-final.log",
+    "assimilation": "No additional HyperBook or public runtime claim",
+    "replan": "Selective commit"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Selective commit whitespace guard",
+    "entry": "git diff --cached --check",
+    "expected": "All staged slice files pass whitespace checks",
+    "observed": "Two checks stopped on EOF blank lines: the authored separator, then the original blank line following the function. Removed the separator and narrowed the source range to its closing brace at line 378; no function code or capture byte changed. Updated range/SHA; witness output remains byte-identical.",
+    "assimilation": "Do not alter actual retained source or waive unrelated checks",
+    "replan": "Retry the same explicit related slice after exact-stage validation"
+  },
+  {
+    "operator": "Codex",
+    "executor": "Selective local commit",
+    "entry": "nix develop --command sbcl --noinform --no-userinit --non-interactive --load /private/tmp/trails-follow-commit.lisp",
+    "expected": "Incorporate the original related staged link, commit only explicit slice paths, final clean index/tree",
+    "observed": "Measured commit hash, anchor-preservation and final clean-state assertions emitted to the commit log and final response",
+    "evidence": "/private/tmp/trails-follow-commit.log",
+    "assimilation": "User-authored link retained in this related slice; no SSH/deploy/live-image reload",
+    "replan": "Return measured identity and report"
+  }
+]

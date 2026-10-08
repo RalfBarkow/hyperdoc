@@ -1,0 +1,716 @@
+{
+  "status": "executed-controlled-witness",
+  "graphDependency": "Retained Solo embedded Graph; the original unpinned graph.js import is not replayed.",
+  "originAssignments": "Positional/value derivation only; original paragraph IDs are not preserved in the emitted graphs or batch.",
+  "sourceParagraphs": [
+    {
+      "type": "paragraph",
+      "id": "93cd119d6286888a",
+      "text": "[[Susan Kare]] ⇒ [[John Dewey]] ⇒ [[Reflective Practice]]"
+    },
+    {
+      "type": "paragraph",
+      "id": "fc6c7d06e5bce7d3",
+      "text": "[[Jean Lave]] ⇒ [[Dorothy Smith]] ⇒ [[Reflective Practice]]"
+    }
+  ],
+  "trailsStatus": "2 aspects",
+  "aspects": [
+    {
+      "name": "trail 1",
+      "graph": {
+        "nodes": [
+          {
+            "type": "",
+            "in": [],
+            "out": [
+              0
+            ],
+            "props": {
+              "name": "Susan\nKare"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              0
+            ],
+            "out": [
+              1
+            ],
+            "props": {
+              "name": "John\nDewey"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              1
+            ],
+            "out": [],
+            "props": {
+              "name": "Reflective\nPractice"
+            }
+          }
+        ],
+        "rels": [
+          {
+            "type": "Trail",
+            "from": 0,
+            "to": 1,
+            "props": {}
+          },
+          {
+            "type": "Trail",
+            "from": 1,
+            "to": 2,
+            "props": {}
+          }
+        ]
+      }
+    },
+    {
+      "name": "trail 2",
+      "graph": {
+        "nodes": [
+          {
+            "type": "",
+            "in": [],
+            "out": [
+              0
+            ],
+            "props": {
+              "name": "Jean\nLave"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              0
+            ],
+            "out": [
+              1
+            ],
+            "props": {
+              "name": "Dorothy\nSmith"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              1
+            ],
+            "out": [],
+            "props": {
+              "name": "Reflective\nPractice"
+            }
+          }
+        ],
+        "rels": [
+          {
+            "type": "Trail",
+            "from": 0,
+            "to": 1,
+            "props": {}
+          },
+          {
+            "type": "Trail",
+            "from": 1,
+            "to": 2,
+            "props": {}
+          }
+        ]
+      }
+    }
+  ],
+  "sourceAspect": [
+    {
+      "id": "controlled-witness-item",
+      "source": "Trails Rendered",
+      "result": [
+        {
+          "name": "trail 1",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Susan\nKare"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "John\nDewey"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "Reflective\nPractice"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        },
+        {
+          "name": "trail 2",
+          "graph": {
+            "nodes": [
+              {
+                "type": "",
+                "in": [],
+                "out": [
+                  0
+                ],
+                "props": {
+                  "name": "Jean\nLave"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  0
+                ],
+                "out": [
+                  1
+                ],
+                "props": {
+                  "name": "Dorothy\nSmith"
+                }
+              },
+              {
+                "type": "",
+                "in": [
+                  1
+                ],
+                "out": [],
+                "props": {
+                  "name": "Reflective\nPractice"
+                }
+              }
+            ],
+            "rels": [
+              {
+                "type": "Trail",
+                "from": 0,
+                "to": 1,
+                "props": {}
+              },
+              {
+                "type": "Trail",
+                "from": 1,
+                "to": 2,
+                "props": {}
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "sourceItemsShareResult": true,
+  "matchesCapturedBatch": true,
+  "input": [
+    {
+      "name": "trail 1",
+      "graph": {
+        "nodes": [
+          {
+            "type": "",
+            "in": [],
+            "out": [
+              0
+            ],
+            "props": {
+              "name": "Susan\nKare"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              0
+            ],
+            "out": [
+              1
+            ],
+            "props": {
+              "name": "John\nDewey"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              1
+            ],
+            "out": [],
+            "props": {
+              "name": "Reflective\nPractice"
+            }
+          }
+        ],
+        "rels": [
+          {
+            "type": "Trail",
+            "from": 0,
+            "to": 1,
+            "props": {}
+          },
+          {
+            "type": "Trail",
+            "from": 1,
+            "to": 2,
+            "props": {}
+          }
+        ]
+      },
+      "label": "Trails Rendered"
+    },
+    {
+      "name": "trail 2",
+      "graph": {
+        "nodes": [
+          {
+            "type": "",
+            "in": [],
+            "out": [
+              0
+            ],
+            "props": {
+              "name": "Jean\nLave"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              0
+            ],
+            "out": [
+              1
+            ],
+            "props": {
+              "name": "Dorothy\nSmith"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              1
+            ],
+            "out": [],
+            "props": {
+              "name": "Reflective\nPractice"
+            }
+          }
+        ],
+        "rels": [
+          {
+            "type": "Trail",
+            "from": 0,
+            "to": 1,
+            "props": {}
+          },
+          {
+            "type": "Trail",
+            "from": 1,
+            "to": 2,
+            "props": {}
+          }
+        ]
+      },
+      "label": "Trails Rendered"
+    }
+  ],
+  "output": {
+    "nodes": [
+      {
+        "type": "",
+        "in": [],
+        "out": [
+          0
+        ],
+        "props": {
+          "name": "Susan\nKare"
+        }
+      },
+      {
+        "type": "",
+        "in": [
+          0
+        ],
+        "out": [
+          1
+        ],
+        "props": {
+          "name": "John\nDewey"
+        }
+      },
+      {
+        "type": "",
+        "in": [
+          1,
+          3
+        ],
+        "out": [],
+        "props": {
+          "name": "Reflective\nPractice"
+        }
+      },
+      {
+        "type": "",
+        "in": [],
+        "out": [
+          2
+        ],
+        "props": {
+          "name": "Jean\nLave"
+        }
+      },
+      {
+        "type": "",
+        "in": [
+          2
+        ],
+        "out": [
+          3
+        ],
+        "props": {
+          "name": "Dorothy\nSmith"
+        }
+      }
+    ],
+    "rels": [
+      {
+        "type": "Trail",
+        "from": 0,
+        "to": 1,
+        "props": {
+          "source": "trail 1"
+        }
+      },
+      {
+        "type": "Trail",
+        "from": 1,
+        "to": 2,
+        "props": {
+          "source": "trail 1"
+        }
+      },
+      {
+        "type": "Trail",
+        "from": 3,
+        "to": 4,
+        "props": {
+          "source": "trail 2"
+        }
+      },
+      {
+        "type": "Trail",
+        "from": 4,
+        "to": 2,
+        "props": {
+          "source": "trail 2"
+        }
+      }
+    ]
+  },
+  "nodeMap": [
+    {
+      "aspectIndex": 0,
+      "nodeIndex": 0,
+      "outputIndex": 0,
+      "sameNodeObject": false,
+      "samePropsObject": true
+    },
+    {
+      "aspectIndex": 0,
+      "nodeIndex": 1,
+      "outputIndex": 1,
+      "sameNodeObject": false,
+      "samePropsObject": true
+    },
+    {
+      "aspectIndex": 0,
+      "nodeIndex": 2,
+      "outputIndex": 2,
+      "sameNodeObject": false,
+      "samePropsObject": true
+    },
+    {
+      "aspectIndex": 1,
+      "nodeIndex": 0,
+      "outputIndex": 3,
+      "sameNodeObject": false,
+      "samePropsObject": true
+    },
+    {
+      "aspectIndex": 1,
+      "nodeIndex": 1,
+      "outputIndex": 4,
+      "sameNodeObject": false,
+      "samePropsObject": true
+    },
+    {
+      "aspectIndex": 1,
+      "nodeIndex": 2,
+      "outputIndex": 2,
+      "sameNodeObject": false,
+      "samePropsObject": false
+    }
+  ],
+  "inputReflectiveNodesIdentical": false,
+  "outputReflectiveTargetShared": true,
+  "matchesRecordedRenderFields": true,
+  "controls": [
+    {
+      "field": "name",
+      "value": "Reflective\nPractice (control)",
+      "nodeCount": 6,
+      "relationCount": 4,
+      "output": {
+        "nodes": [
+          {
+            "type": "",
+            "in": [],
+            "out": [
+              0
+            ],
+            "props": {
+              "name": "Susan\nKare"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              0
+            ],
+            "out": [
+              1
+            ],
+            "props": {
+              "name": "John\nDewey"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              1
+            ],
+            "out": [],
+            "props": {
+              "name": "Reflective\nPractice"
+            }
+          },
+          {
+            "type": "",
+            "in": [],
+            "out": [
+              2
+            ],
+            "props": {
+              "name": "Jean\nLave"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              2
+            ],
+            "out": [
+              3
+            ],
+            "props": {
+              "name": "Dorothy\nSmith"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              3
+            ],
+            "out": [],
+            "props": {
+              "name": "Reflective\nPractice (control)"
+            }
+          }
+        ],
+        "rels": [
+          {
+            "type": "Trail",
+            "from": 0,
+            "to": 1,
+            "props": {
+              "source": "trail 1"
+            }
+          },
+          {
+            "type": "Trail",
+            "from": 1,
+            "to": 2,
+            "props": {
+              "source": "trail 1"
+            }
+          },
+          {
+            "type": "Trail",
+            "from": 3,
+            "to": 4,
+            "props": {
+              "source": "trail 2"
+            }
+          },
+          {
+            "type": "Trail",
+            "from": 4,
+            "to": 5,
+            "props": {
+              "source": "trail 2"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "field": "type",
+      "value": "control-type",
+      "nodeCount": 6,
+      "relationCount": 4,
+      "output": {
+        "nodes": [
+          {
+            "type": "",
+            "in": [],
+            "out": [
+              0
+            ],
+            "props": {
+              "name": "Susan\nKare"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              0
+            ],
+            "out": [
+              1
+            ],
+            "props": {
+              "name": "John\nDewey"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              1
+            ],
+            "out": [],
+            "props": {
+              "name": "Reflective\nPractice"
+            }
+          },
+          {
+            "type": "",
+            "in": [],
+            "out": [
+              2
+            ],
+            "props": {
+              "name": "Jean\nLave"
+            }
+          },
+          {
+            "type": "",
+            "in": [
+              2
+            ],
+            "out": [
+              3
+            ],
+            "props": {
+              "name": "Dorothy\nSmith"
+            }
+          },
+          {
+            "type": "control-type",
+            "in": [
+              3
+            ],
+            "out": [],
+            "props": {
+              "name": "Reflective\nPractice"
+            }
+          }
+        ],
+        "rels": [
+          {
+            "type": "Trail",
+            "from": 0,
+            "to": 1,
+            "props": {
+              "source": "trail 1"
+            }
+          },
+          {
+            "type": "Trail",
+            "from": 1,
+            "to": 2,
+            "props": {
+              "source": "trail 1"
+            }
+          },
+          {
+            "type": "Trail",
+            "from": 3,
+            "to": 4,
+            "props": {
+              "source": "trail 2"
+            }
+          },
+          {
+            "type": "Trail",
+            "from": 4,
+            "to": 5,
+            "props": {
+              "source": "trail 2"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "limitations": [
+    "Original graph.js fetched unpinned in historical runtime; the controlled trails witness substitutes the retained Solo Graph implementation.",
+    "No original paragraph IDs are forwarded into graph nodes or MECH batch aspects; correspondences are derived by order and values.",
+    "Complete original SVG outerHTML was not retained; DOT, title/label tables, screenshot and existing hoverbold DOM fragments are historical captures.",
+    "No re-layout, resize, reload, Wiki renaming, Trace, getBBox, Swoopy Arrow or Polyline claim is established."
+  ]
+}

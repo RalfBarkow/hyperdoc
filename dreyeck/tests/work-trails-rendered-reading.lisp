@@ -323,7 +323,7 @@
         (assert (search "PUBLIC REPRODUCTION ENDS HERE." html))
         (assert (equal '("Question" "Observed path" "Inspect" "Result" "Boundary" "Falsification")
                        (mapcar #'plump:text (plump:get-elements-by-tag-name dom "h2"))))
-        (assert (= 7 (length expressions)))
+        (assert (= 8 (length expressions)))
         (assert (null (plump:get-elements-by-tag-name dom "source-of-function")))
         (let ((rows (rest (plump:get-elements-by-tag-name dom "tr"))))
           (assert (= 5 (length rows)))
@@ -448,6 +448,7 @@
   (format t "~&SOLO-HOVERBOLD-PASS: observed source and installation, trusted enter/leave writes, incident edge widths, unchanged controls/child DOM/node, fresh snapshots, native inspector references and linked page.~%"))
 
 (defun run-tests ()
+  (check-trail-following)
   (check-solo-batch)
   (check-solo-beam)
   (check-result-and-boundary)

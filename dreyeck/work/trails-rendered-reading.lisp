@@ -1,9 +1,12 @@
 ;;;; The public Trails Rendered experiment: observations and their limits.
-(defpackage #:dreyeck/work/trails-rendered-reading
-  (:use #:cl)
-  (:export #:public-source-boundary #:solo-batch #:solo-batch-provenance
-           #:solo-beam #:public-result #:interpretation-path #:federated-context
-           #:hoverbold-observation #:context-events #:context-state-at #:context-delta))
+(defpackage #:dreyeck/work/trails-rendered-reading (:use #:cl)
+            (:export #:public-source-boundary #:solo-batch
+                     #:solo-batch-provenance #:solo-beam #:public-result
+                     #:interpretation-path #:federated-context
+                     #:hoverbold-observation #:context-events
+                     #:context-state-at #:context-delta "TRAIL-FOLLOWING"
+                     "TRAIL-COMPOSITION-WITNESS" "EXECUTE-TRAIL-WITNESS"
+                     "TRAIL-WORKSPACE"))
 (in-package #:dreyeck/work/trails-rendered-reading)
 
 (hyperdoc:see (hyperdoc:page "Trails Rendered public reproduction"))

@@ -2515,7 +2515,7 @@
   :description "HyperDoc work pages and one complete D2 Connections example"
   :depends-on ("dreyeck/topicmap/tala/reading" "dreyeck/gesture-binding-witness"
                "dreyeck/inspector/git" "dreyeck/gesture/operation-request" "hyperbook/fedwiki"
-               "shasht" "cl-base64" "local-time")
+               "shasht" "cl-base64" "local-time" "ironclad")
   :serial t
   :components ((:module "dreyeck/work" :components ((:file "reading")
                                                     (:file "operation-requests")
@@ -2524,6 +2524,7 @@
                                                     (:file "addresses")
                                                     (:file "trails-rendered-reading")
                                                     (:file "trails-rendered-federated-context")
+                                                    (:file "trails-rendered-following")
                                                     (:file "shift-click" :depends-on ("trails-rendered-federated-context"))
                                                     (:static-file "trails-rendered-solo-batch.json")
                                                     (:static-file "trails-rendered-solo-beam.json")
@@ -2537,7 +2538,14 @@
                                                       (:static-file "jan.voices.ustawi.wiki--john-dewey.json")
                                                       (:static-file "jan.voices.ustawi.wiki--how-we-think.json")
                                                       (:static-file "thompson.fed.wiki--how-we-think.json")))
-                                                    (:static-file "trails-rendered-hoverbold-observation.json")))
+                                                    (:static-file "trails-rendered-hoverbold-observation.json")
+                                                    (:static-file "trails-rendered-following-provenance.json")
+                                                    (:static-file "trails-rendered-solo-composite.js")
+                                                    (:static-file "trails-rendered-mech-solo.js")
+                                                    (:static-file "trails-rendered-runtime-evidence.json")
+                                                    (:static-file "trails-rendered-result.png")
+                                                    (:static-file "trails-rendered-witness.mjs")
+                                                    (:static-file "trails-rendered-witness.json")))
                (:module "dreyeck/pages/work" :components
                 ((:static-file "Work Breakdown.html")
                  (:static-file "Interaction.html")
@@ -2556,7 +2564,8 @@
                  (:static-file "Cookie Secret.html")
                  (:static-file "Trails Rendered public reproduction.html")
                  (:static-file "Solo hoverbold.html")
-                 (:static-file "Shift-click Is Pane Policy.html")))))
+                 (:static-file "Shift-click Is Pane Policy.html")
+                 (:static-file "Following One Recorded Trail.html")))))
 
 (defsystem "dreyeck/work/reading/tests"
   :depends-on ("dreyeck/work/reading" "clog-moldable-inspector" "fset"
@@ -2569,6 +2578,7 @@
                (:file "dreyeck/tests/work-deployment-reading")
                (:file "dreyeck/tests/work-trails-rendered-reading")
                (:file "dreyeck/tests/work-trails-rendered-federated-context")
+               (:file "dreyeck/tests/work-trails-rendered-following")
                (:file "dreyeck/tests/work-shift-click"))
   :perform (test-op (op component)
              (declare (ignore op component))

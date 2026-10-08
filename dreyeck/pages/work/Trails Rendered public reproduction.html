@@ -3,12 +3,13 @@
 <h2>Question</h2>
 <p>What happens to the two trails as Ward's page passes through MECH and public Solo?</p>
 <h2>Observed path</h2>
-<p>Ward's <em>Trails Rendered</em> → <code>trails()</code> → two aspects → MECH <code>SOLO</code> → observed batch → label and flatten → observed beam → public Solo selection and composition → Graphviz SVG.</p>
+<p>Ward's <a hyperbook="fedwiki:ward.voices.ustawi.wiki" page="trails-rendered">Trails Rendered</a> → <code>trails()</code> → two aspects → MECH <code>SOLO</code> → observed batch → label and flatten → observed beam → public Solo selection and composition → Graphviz SVG.</p>
 <p>The arrows follow public code. The source page, batch, beam and rendered result were observed. Solo writes <code>aspect.label = source.source</code>, then appends the aspects to <code>beam</code> in source/aspect order. Debugger reference checks found the same aspect objects; HyperDoc opens independent snapshots.</p>
 <h2>Inspect</h2>
 <p><a expr="(solo-batch)">Inspect the SOLO batch</a>. Follow <code>sources</code> → source → <code>aspects</code> → trail → <code>graph</code> → <code>nodes</code> / <code>rels</code>.</p>
 <p><a expr="(solo-beam)">Inspect the SOLO beam</a>. Compare the added <code>label</code> and the two entries.</p>
 <p><a expr="(solo-batch-provenance)">Inspect its minimal provenance</a> for source/asset hashes, revisions, capture points, repeat procedure and search scope.</p>
+<p><a page='Following One Recorded Trail'>Follow one recorded trail from its source paragraph</a>. <a expr='(trail-following)'>Inspect the learning path and existing Workspace bridge</a>. The two input Reflective Practice nodes are distinct; sharing is established in the composed result, not by identical source titles.</p>
 <h2>Result</h2>
 <p>trail 1: Susan Kare → John Dewey → Reflective Practice<br>trail 2: Jean Lave → Dorothy Smith → Reflective Practice</p>
 <p>The observed public result has <strong>5 nodes and 4 relations labelled Trail</strong>, with one shared Reflective Practice node. <a expr="(public-result)">Inspect the observed result</a>; <a expr="(interpretation-path)">inspect the derived counts and trail names</a>. The summary is computed from the saved observations. Continue with <a page="Solo hoverbold">the public hover interaction</a> on this rendered graph.</p>

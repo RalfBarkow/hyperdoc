@@ -1,0 +1,95 @@
+{
+  "files": {
+    "solo-source": {
+      "file": "dreyeck/work/trails-rendered-solo-composite.js",
+      "sha256": "af27344fb257d311a551380d9c8eec874a55e30a701fe86e01fc8ed0d134029e",
+      "authority": "https://github.com/WardCunningham/wiki-plugin-solo",
+      "revision": "17915844349bada64c901bd5ea73472702c446f9",
+      "path": "client/dialog/index.html",
+      "ranges": [
+        [
+          229,
+          229
+        ],
+        [
+          231,
+          281
+        ],
+        [
+          318,
+          378
+        ]
+      ],
+      "wholeSourceSha256": "5a513f70546ced3e2af7f83c4f14fb73d30e27f22a295558cbff4b078871aed8",
+      "role": "retained-public-source-excerpts",
+      "receiver": {
+        "range": [
+          45,
+          55
+        ],
+        "text": "    const data = event.data\n    console.log({data})\n    pageKey = data.pageKey\n    beam.splice(0)\n    window.beamlist.querySelectorAll('input[type=checkbox]:checked')\n      .forEach(elem => elem.checked = false)\n    window.target.innerHTML = ''\n    for (const source of data.sources){\n      source.aspects.forEach(aspect => aspect.label = source.source)\n      beam.push(...source.aspects)}\n    console.log({data,beam})\n"
+      },
+      "display": {
+        "range": [
+          185,
+          201
+        ],
+        "text": "      const complex = composite(chosen)\n      try {\n        if (document.querySelector('#target svg')) {\n          panZoom.pan = panSVG.getPan()\n          panZoom.zoom = panSVG.getZoom()\n          panZoom.size = {\n              width: document.querySelector('#target svg').width.baseVal.valueInSpecifiedUnits,\n              height: document.querySelector('#target svg').height.baseVal.valueInSpecifiedUnits\n            }\n        }\n        const dot = dotify(complex)\n        window.dot = dot\n        hpccWasm.graphviz.layout(window.dot, \"svg\", \"dot\").then(svg => {\n          target.innerHTML = svg;\n          drawing = false\n          hoverbold(target)\n          clickready(target,complex.graph)\n"
+      }
+    },
+    "mech-source": {
+      "file": "dreyeck/work/trails-rendered-mech-solo.js",
+      "sha256": "5ee6cbdf39484636411f8fec152d764bd4f5ca822925a12f6e47098b879e5ae8",
+      "authority": "https://github.com/WardCunningham/wiki-plugin-mech",
+      "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+      "path": "src/client/blocks.js",
+      "ranges": [
+        [
+          930,
+          966
+        ]
+      ],
+      "role": "retained-public-source-excerpt",
+      "wholeSourceSha256": "388ee024299ce3674c607b83ec671f8d3df0cb9ba9e584960768fd359fff6d9d"
+    },
+    "render": {
+      "file": "dreyeck/work/trails-rendered-runtime-evidence.json",
+      "sha256": "950916a54e83dafa841fd3d65714df30c4a45f03049da376f30436af79c9d489",
+      "observedAt": "2026-10-04T06:43:21.755Z",
+      "role": "historical-runtime-capture"
+    },
+    "image": {
+      "file": "dreyeck/work/trails-rendered-result.png",
+      "sha256": "711f62cc7df954d5a708a0b6545ee47c120af7fc3d40e6934c6a117b28f7312b",
+      "observedAt": "2026-10-04T06:43:21.755Z",
+      "role": "historical-runtime-capture"
+    },
+    "witness": {
+      "file": "dreyeck/work/trails-rendered-witness.json",
+      "sha256": "04fbfbd01105ca02f5388de6edbbbea705bf7a40ae66476c0b091412f4809a66",
+      "role": "controlled-executable-witness"
+    }
+  },
+  "source": {
+    "url": "http://ward.voices.ustawi.wiki/trails-rendered.json",
+    "file": "dreyeck/work/trails-rendered-evidence/ward.voices.ustawi.wiki--trails-rendered.json",
+    "sha256": "5fdba40fd3a68eddee00497af4dadb3847500356a2f131dbc0745afb86de9810",
+    "paragraphs": [
+      "93cd119d6286888a",
+      "fc6c7d06e5bce7d3"
+    ],
+    "trailsCode": "cc6a77771de7edbd",
+    "builderCode": "84da00fa76850971"
+  },
+  "verification": {
+    "currentHttpSha256": "5fdba40fd3a68eddee00497af4dadb3847500356a2f131dbc0745afb86de9810",
+    "date": "2026-10-08",
+    "https": "connection failed; HTTP native authority resolved"
+  },
+  "limits": [
+    "Original graph.js fetched unpinned in historical runtime; the controlled trails witness substitutes the retained Solo Graph implementation.",
+    "No original paragraph IDs are forwarded into graph nodes or MECH batch aspects; correspondences are derived by order and values.",
+    "Complete original SVG outerHTML was not retained; DOT, title/label tables, screenshot and existing hoverbold DOM fragments are historical captures.",
+    "No re-layout, resize, reload, Wiki renaming, Trace, getBBox, Swoopy Arrow or Polyline claim is established."
+  ]
+}

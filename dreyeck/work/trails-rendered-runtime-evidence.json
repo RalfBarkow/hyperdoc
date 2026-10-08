@@ -1,0 +1,379 @@
+{
+  "started": "2026-10-04T06:43:16.234Z",
+  "browser": {
+    "Browser": "Chrome/148.0.7778.179",
+    "Protocol-Version": "1.3",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36",
+    "V8-Version": "14.8.178.22",
+    "WebKit-Version": "537.36 (@4687a88676f95bfbce9ec62314791faae363fea6)",
+    "webSocketDebuggerUrl": "ws://127.0.0.1:9333/devtools/browser/2fdad592-716b-4f13-80cc-44ae1b66f2eb"
+  },
+  "mainPage": {
+    "url": "http://localhost:3477/view/trails-rendered",
+    "mechBanner": "/* wiki-plugin-mech - 0.1.48-3 - Sun, 04 Oct 2026 06:32:59 GMT */\n",
+    "mechSha256": "c72ed0a572469d29c3287dafe8c8770c636d2537dbcfbededdd60a244d1e2384",
+    "soloLoaded": true,
+    "isOwner": false,
+    "pluginScripts": [
+      "http://localhost:3477/plugins/solo/solo.js",
+      "http://localhost:3477/plugins/mech/mech.js",
+      "http://localhost:3477/plugins/mech/mech.css",
+      "http://localhost:3477/plugins/mech/mech.js"
+    ]
+  },
+  "code": {
+    "block": "CODE trails",
+    "status": "⇒ 2 aspects",
+    "imports": [
+      {
+        "name": "https://wardcunningham.github.io/graph/graph.js",
+        "status": 200
+      },
+      {
+        "name": "https://wardcunningham.github.io/graph/cypher.js",
+        "status": 200
+      }
+    ]
+  },
+  "solo": {
+    "popupUrl": "http://localhost:3477/plugins/solo/dialog/#",
+    "reusedExistingDialog": true,
+    "opener": "http://localhost:3477/view/trails-rendered",
+    "batchReceivedLog": "[log] refreshBeam Array(0)",
+    "beam": {
+      "text": "Trails Rendered\n0  trail 13\n1  trail 23",
+      "entries": [
+        {
+          "value": "0",
+          "name": "trail 1",
+          "nodeCount": "3"
+        },
+        {
+          "value": "1",
+          "name": "trail 2",
+          "nodeCount": "3"
+        }
+      ]
+    },
+    "mechBlocks": [
+      "CLICK▶",
+      "CODE trails ⇒ 2 aspects",
+      "CLICK▶",
+      "SOLO ⇒ 1 sources, 2 aspects",
+      "CLICK▶",
+      "PREVIEW synopsis items"
+    ]
+  },
+  "renders": [
+    {
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"Susan\nKare\"   tooltip=\"name: Susan Kare\"]\n1 [label=\"John\nDewey\"   tooltip=\"name: John Dewey\"]\n2 [label=\"Reflective\nPractice\"   tooltip=\"name: Reflective Practice\"]\n0->1 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n1->2 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n}",
+      "graph": {
+        "nodes": [
+          {
+            "type": "",
+            "name": "Susan\nKare"
+          },
+          {
+            "type": "",
+            "name": "John\nDewey"
+          },
+          {
+            "type": "",
+            "name": "Reflective\nPractice"
+          }
+        ],
+        "rels": [
+          {
+            "type": "Trail",
+            "from": 0,
+            "to": 1
+          },
+          {
+            "type": "Trail",
+            "from": 1,
+            "to": 2
+          }
+        ]
+      },
+      "svgNodes": [
+        {
+          "title": "0",
+          "label": "Susan Kare"
+        },
+        {
+          "title": "1",
+          "label": "John Dewey"
+        },
+        {
+          "title": "2",
+          "label": "Reflective Practice"
+        }
+      ],
+      "svgEdges": [
+        {
+          "title": "0->1",
+          "label": "Trail"
+        },
+        {
+          "title": "1->2",
+          "label": "Trail"
+        }
+      ],
+      "checked": [
+        "0"
+      ]
+    },
+    {
+      "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n2\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"Susan\nKare\"   tooltip=\"name: Susan Kare\"]\n1 [label=\"John\nDewey\"   tooltip=\"name: John Dewey\"]\n2 [label=\"Reflective\nPractice\"   tooltip=\"name: Reflective Practice\"]\n3 [label=\"Jean\nLave\"   tooltip=\"name: Jean Lave\"]\n4 [label=\"Dorothy\nSmith\"   tooltip=\"name: Dorothy Smith\"]\n0->1 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n1->2 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n3->4 [label=\"Trail\"  labeltooltip=\"source: trail 2\"]\n4->2 [label=\"Trail\"  labeltooltip=\"source: trail 2\"]\n}",
+      "graph": {
+        "nodes": [
+          {
+            "type": "",
+            "name": "Susan\nKare"
+          },
+          {
+            "type": "",
+            "name": "John\nDewey"
+          },
+          {
+            "type": "",
+            "name": "Reflective\nPractice"
+          },
+          {
+            "type": "",
+            "name": "Jean\nLave"
+          },
+          {
+            "type": "",
+            "name": "Dorothy\nSmith"
+          }
+        ],
+        "rels": [
+          {
+            "type": "Trail",
+            "from": 0,
+            "to": 1
+          },
+          {
+            "type": "Trail",
+            "from": 1,
+            "to": 2
+          },
+          {
+            "type": "Trail",
+            "from": 3,
+            "to": 4
+          },
+          {
+            "type": "Trail",
+            "from": 4,
+            "to": 2
+          }
+        ]
+      },
+      "svgNodes": [
+        {
+          "title": "2",
+          "label": "Reflective Practice"
+        },
+        {
+          "title": "0",
+          "label": "Susan Kare"
+        },
+        {
+          "title": "1",
+          "label": "John Dewey"
+        },
+        {
+          "title": "3",
+          "label": "Jean Lave"
+        },
+        {
+          "title": "4",
+          "label": "Dorothy Smith"
+        }
+      ],
+      "svgEdges": [
+        {
+          "title": "0->1",
+          "label": "Trail"
+        },
+        {
+          "title": "1->2",
+          "label": "Trail"
+        },
+        {
+          "title": "3->4",
+          "label": "Trail"
+        },
+        {
+          "title": "4->2",
+          "label": "Trail"
+        }
+      ],
+      "checked": [
+        "0",
+        "1"
+      ]
+    }
+  ],
+  "render": {
+    "dot": "strict digraph {\noverlap = false; splines=true\nlayout = dot\nnode [shape=box style=filled fillcolor=gold penwidth=2]\n2\nnode [fillcolor=palegreen penwidth=1]\n0 [label=\"Susan\nKare\"   tooltip=\"name: Susan Kare\"]\n1 [label=\"John\nDewey\"   tooltip=\"name: John Dewey\"]\n2 [label=\"Reflective\nPractice\"   tooltip=\"name: Reflective Practice\"]\n3 [label=\"Jean\nLave\"   tooltip=\"name: Jean Lave\"]\n4 [label=\"Dorothy\nSmith\"   tooltip=\"name: Dorothy Smith\"]\n0->1 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n1->2 [label=\"Trail\"  labeltooltip=\"source: trail 1\"]\n3->4 [label=\"Trail\"  labeltooltip=\"source: trail 2\"]\n4->2 [label=\"Trail\"  labeltooltip=\"source: trail 2\"]\n}",
+    "graph": {
+      "nodes": [
+        {
+          "type": "",
+          "name": "Susan\nKare"
+        },
+        {
+          "type": "",
+          "name": "John\nDewey"
+        },
+        {
+          "type": "",
+          "name": "Reflective\nPractice"
+        },
+        {
+          "type": "",
+          "name": "Jean\nLave"
+        },
+        {
+          "type": "",
+          "name": "Dorothy\nSmith"
+        }
+      ],
+      "rels": [
+        {
+          "type": "Trail",
+          "from": 0,
+          "to": 1
+        },
+        {
+          "type": "Trail",
+          "from": 1,
+          "to": 2
+        },
+        {
+          "type": "Trail",
+          "from": 3,
+          "to": 4
+        },
+        {
+          "type": "Trail",
+          "from": 4,
+          "to": 2
+        }
+      ]
+    },
+    "svgNodes": [
+      {
+        "title": "2",
+        "label": "Reflective Practice"
+      },
+      {
+        "title": "0",
+        "label": "Susan Kare"
+      },
+      {
+        "title": "1",
+        "label": "John Dewey"
+      },
+      {
+        "title": "3",
+        "label": "Jean Lave"
+      },
+      {
+        "title": "4",
+        "label": "Dorothy Smith"
+      }
+    ],
+    "svgEdges": [
+      {
+        "title": "0->1",
+        "label": "Trail"
+      },
+      {
+        "title": "1->2",
+        "label": "Trail"
+      },
+      {
+        "title": "3->4",
+        "label": "Trail"
+      },
+      {
+        "title": "4->2",
+        "label": "Trail"
+      }
+    ],
+    "checked": [
+      "0",
+      "1"
+    ]
+  },
+  "screenshots": [
+    "screenshot-main.png",
+    "screenshot-solo-popup.png"
+  ],
+  "console": {
+    "main": [
+      "[log] JQMIGRATE: Migrate is installed, version 3.5.0",
+      "[log] siteAdapter: loading data",
+      "[log] loading url: /security/security.js",
+      "[log] siteAdapter: withCredentials data loaded",
+      "[log] siteAdapter: data loaded",
+      "[log] Image Plugin declares an editor, so pre-loading the plugin",
+      "[log] loading url: /plugins/image/image.js",
+      "[log] getScript: Failed to load: /security/security.js TypeError: Failed to fetch dynamically imported module: http://localhost:3477/security/security.js",
+      "[exception] TypeError: Cannot read properties of undefined (reading 'setup')\n    at http://localhost:3477/client.js:81:3653\n    at le.getScript (http://localhost:3477/client.js:17:3060)",
+      "[log] loading url: /plugins/graphviz/graphviz.js",
+      "[log] **** Adding graphviz listener",
+      "[log] adding style",
+      "[log] loading url: /plugins/solo/solo.js",
+      "[log] **** Adding solo listener",
+      "[log] Object",
+      "[log] Object",
+      "[log] loading url: /plugins/mech/mech.js",
+      "[log] loading url: /plugins/code/code.js",
+      "[log] delay for  localhost:3477 1.5909833333333334",
+      "[log] localhost:3477 index loaded",
+      "[log] delay for  ward.voices.ustawi.wiki 211.5255",
+      "[log] ward.voices.ustawi.wiki index loaded",
+      "[log] reusing existing dialog",
+      "[log] JQMIGRATE: Migrate is installed, version 3.5.0",
+      "[log] siteAdapter: loading data",
+      "[log] loading url: /security/security.js",
+      "[log] siteAdapter: withCredentials data loaded",
+      "[log] siteAdapter: data loaded",
+      "[log] Image Plugin declares an editor, so pre-loading the plugin",
+      "[log] loading url: /plugins/image/image.js",
+      "[log] getScript: Failed to load: /security/security.js TypeError: Failed to fetch dynamically imported module: http://localhost:3477/security/security.js",
+      "[exception] TypeError: Cannot read properties of undefined (reading 'setup')\n    at http://localhost:3477/client.js:81:3653\n    at le.getScript (http://localhost:3477/client.js:17:3060)",
+      "[log] loading url: /plugins/graphviz/graphviz.js",
+      "[log] **** Adding graphviz listener",
+      "[log] adding style",
+      "[log] loading url: /plugins/solo/solo.js",
+      "[log] **** Adding solo listener",
+      "[log] Object",
+      "[log] Object",
+      "[log] loading url: /plugins/mech/mech.js",
+      "[log] loading url: /plugins/code/code.js",
+      "[log] delay for  localhost:3477 1.6990166666666666",
+      "[log] localhost:3477 index loaded",
+      "[log] delay for  ward.voices.ustawi.wiki 211.63368333333332",
+      "[log] ward.voices.ustawi.wiki index loaded",
+      "[log] reusing existing dialog"
+    ],
+    "popup": [
+      "[log] Object",
+      "[log] Object",
+      "[log] refreshBeam Array(0)",
+      "[log] Object",
+      "[log] dotify Object",
+      "[warning] Deprecation Warning:  'graphviz' will be replaced with 'Graphviz' in 2.0.0",
+      "[log] Object",
+      "[log] dotify Object",
+      "[warning] Deprecation Warning:  'graphviz' will be replaced with 'Graphviz' in 2.0.0"
+    ]
+  },
+  "finished": "2026-10-04T06:43:21.755Z"
+}
