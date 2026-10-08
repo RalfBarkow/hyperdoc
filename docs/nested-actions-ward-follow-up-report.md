@@ -1,5 +1,7 @@
 # Ward follow-up: subordination and event reach
 
+This is the completed subordination/event-reach slice. The subsequent received-message input-boundary slice is reported in [nested-actions-input-boundary-report.md](nested-actions-input-boundary-report.md).
+
 This report records the follow-up revision starting from committed HEAD 5446360490e8949e476e84ad21c4173abced3442, not the original Nested Actions slice.
 
 ## Starting state and scope

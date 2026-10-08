@@ -14,6 +14,10 @@
   (HYPERDOC:PAGE "What Does a Nested Action Inherit?" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "From Message to Nested Input" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
 (DEFUN READ-MESSAGE-JSON (FILE)
   (WITH-OPEN-FILE
       (IN

@@ -532,7 +532,7 @@
              (uiop:symbol-call :dreyeck/authority-policy/tests :run-tests)))
 
 (ASDF/PARSE-DEFSYSTEM:DEFSYSTEM "dreyeck/nested-actions/reading" :DESCRIPTION
-                                "Subordinate execution and broadcast event propagation: source-backed message witness with explicit nested-input gap"
+                                "Subordination, broadcast reach and received-payload input trace with explicit current-source boundary"
                                 :LICENSE "BSD" :SERIAL T :DEPENDS-ON
                                 ("dreyeck/hyperdoc"
                                  "dreyeck/authority-policy"
@@ -544,6 +544,7 @@
                                           ((:FILE "action-tree")
                                            (:FILE "probes")
                                            (:FILE "message-path")
+                                           (:FILE "input-path")
                                            (:FILE "reading")
                                            (:STATIC-FILE
                                                          "message-witness.json")
@@ -561,7 +562,12 @@
                                                      (:STATIC-FILE
                                                                    "provenance.json")
                                                      (:STATIC-FILE
-                                                                   "LICENSE-Mech")))))
+                                                                   "LICENSE-Mech")
+                                                     (:STATIC-FILE
+                                                                   "local-input-source-inventory.json")))
+                                           (:STATIC-FILE "input-witness.html")
+                                           (:STATIC-FILE "input-witness.json")
+                                           (:STATIC-FILE "input-witness.cjs")))
                                  (:MODULE "dreyeck/pages/nested-actions"
                                           :COMPONENTS
                                           ((:STATIC-FILE
@@ -569,7 +575,9 @@
                                            (:STATIC-FILE
                                                          "What Does a Nested Action Inherit?.html")
                                            (:STATIC-FILE
-                                                         "Two Relations Hidden in One Nest.html"))))
+                                                         "Two Relations Hidden in One Nest.html")
+                                           (:STATIC-FILE
+                                                         "From Message to Nested Input.html"))))
                                 :IN-ORDER-TO
                                 ((ASDF/LISP-ACTION:TEST-OP
                                                            (ASDF/LISP-ACTION:TEST-OP

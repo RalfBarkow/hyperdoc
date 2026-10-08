@@ -41,7 +41,7 @@
     (DOLIST
         (TITLE
          '("Nested Actions in Solo" "What Does a Nested Action Inherit?"
-           "Two Relations Hidden in One Nest"))
+           "Two Relations Hidden in One Nest" "From Message to Nested Input"))
       (LET* ((P (PAGE TITLE))
              (VIEW (RENDER P "Content"))
              (OBJECTS (MAPCAR #'CDR (V:VIEW-REFERENCES VIEW)))
@@ -70,7 +70,8 @@
         (DOLIST
             (CODE-TITLE
              '("Inspecting the Observed Nested Action Tree"
-               "Proposed Nested Action Probes" "Following One Node Message"))
+               "Proposed Nested Action Probes" "Following One Node Message"
+               "Tracing the Received Message Boundary"))
           (ASSERT (MEMBER (PAGE CODE-TITLE) OBJECTS :TEST #'EQ)))
         (ASSERT (FIND-IF (LAMBDA (O) (TYPEP O 'R:NESTED-ACTION)) OBJECTS))
         (ASSERT
@@ -81,14 +82,16 @@
          '("Inspecting the Observed Nested Action Tree"
            "Proposed Nested Action Probes"
            "Navigating the Nested Actions Investigation"
-           "Following One Node Message"))
+           "Following One Node Message"
+           "Tracing the Received Message Boundary"))
       (LET ((P (PAGE TITLE)))
         (HYPERDOC:LOAD-PAGE P)
         (LET ((LINKS (HYPERBOOK:PAGE-LINKS-OF (HYPERBOOK:LINKS-OF P))))
           (DOLIST
               (TARGET
                '("Nested Actions in Solo" "What Does a Nested Action Inherit?"
-                 "Two Relations Hidden in One Nest"))
+                 "Two Relations Hidden in One Nest"
+                 "From Message to Nested Input"))
             (LET ((LINK
                    (FIND TARGET LINKS :KEY #'HYPERBOOK:TARGET-PAGE-OF :TEST
                          #'EQUAL)))
@@ -167,92 +170,163 @@
       (ASSERT (NULL (GETF PROBE :RESULT)))
       (ASSERT (GETF PROBE :REQUIRED-EVIDENCE)))))
 
-(DEFUN CHECK-WORKSPACE ()
-  (LET* ((WORKSPACE (R:READING-WORKSPACE))
-         (PROJECTION (TM:TOPICMAP-PROJECTION-OF WORKSPACE))
-         (TOPICS (TM:TOPICMAP-PROJECTION-TOPICS-OF PROJECTION))
-         (RELATIONS (TM:TOPICMAP-PROJECTION-ASSOCIATIONS-OF PROJECTION)))
-    (ASSERT (EQUAL "tree" (TM:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE)))
-    (ASSERT (= 25 (LENGTH TOPICS)))
-    (DOLIST
-        (ID
-         '("experiment" "tree" "syntax" "solo" "nested-statement" "listen"
-           "event" "report" "title" "enclosing-context" "inherited-context"
-           "event-context" "lifetime" "probes" "solo-popup-click"
-           "publish-source-data-message" "node-topic" "title-payload"
-           "window-event-emitter" "broadcast-event-reach"
-           "subordinate-execution" "scoped-event-emitter-proposal"
-           "nested-input" "report-target" "witness"))
-      (ASSERT (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION ID)))
-    (ASSERT (= 31 (LENGTH RELATIONS)))
-    (DOLIST (A RELATIONS)
-      (ASSERT
-       (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
-                                           (TM:TOPICMAP-ASSOCIATION-FROM-OF
-                                            A)))
-      (ASSERT
-       (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
-                                           (TM:TOPICMAP-ASSOCIATION-TO-OF A)))
-      (LET* ((PROPS (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A))
-             (STATUS (GETF PROPS :EVIDENCE-STATUS)))
-        (ASSERT
-         (MEMBER STATUS
-                 '(:OBSERVED :DERIVED :SOURCE-OBSERVED :AUTHOR-REPORTED
-                   :DESIGN-PROPOSAL :OPEN)))
-        (ASSERT (EQ STATUS (GETF (GETF PROPS :WARRANT) :STATUS)))
-        (ASSERT (GETF (GETF PROPS :WARRANT) :SOURCE))))
-    (DOLIST (PAIR '(("solo" "listen") ("listen" "report")))
-      (LET ((A
-             (FIND-IF
-              (LAMBDA (A)
-                (AND (EQUAL (FIRST PAIR) (TM:TOPICMAP-ASSOCIATION-FROM-OF A))
-                     (EQUAL (SECOND PAIR) (TM:TOPICMAP-ASSOCIATION-TO-OF A))))
-              RELATIONS)))
-        (ASSERT
-         (EQ :SUBORDINATE-EXECUTION
-             (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A) :RELATION-KIND)))
-        (ASSERT
-         (EQ :OBSERVED
-             (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A)
-                   :EVIDENCE-STATUS)))))
-    (LET ((A
-           (FIND "enclosing-context" RELATIONS :KEY
-                 #'TM:TOPICMAP-ASSOCIATION-TO-OF :TEST #'EQUAL)))
-      (ASSERT
-       (EQ :DERIVED
-           (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A) :EVIDENCE-STATUS))))
-    (LET* ((VIEW (RENDER WORKSPACE "Topicmap"))
-           (HTML (V:VIEW-HTML VIEW))
-           (ACTIONS
-            (REMOVE-IF-NOT
-             (LAMBDA (REF)
-               (AND (TYPEP (CDR REF) 'V:THUNK)
-                    (SEARCH
-                     (FORMAT NIL
-                             "id='~A' class='dreyeck-topicmap-workspace-action "
-                             (CAR REF))
-                     HTML)))
-             (V:VIEW-REFERENCES VIEW))))
-      (ASSERT (= 25 (LENGTH ACTIONS)))
-      (DOLIST (REF ACTIONS)
-        (LET* ((OLD (TM:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE))
-               (HISTORY
-                (COPY-LIST (TM:TOPICMAP-WORKSPACE-HISTORY-OF WORKSPACE)))
-               (TOPIC (V:EVAL-THUNK (CDR REF)))
-               (ID (TM:TOPICMAP-TOPIC-ID-OF TOPIC)))
-          (ASSERT (EQ TOPIC (TM:TOPICMAP-WORKSPACE-CURRENT-TOPIC WORKSPACE)))
-          (ASSERT
-           (EQ (TM:TOPICMAP-TOPIC-OBJECT-OF TOPIC)
-               (TM:TOPICMAP-WORKSPACE-CURRENT-OBJECT WORKSPACE)))
-          (ASSERT
-           (EQUAL
-            (IF (EQUAL OLD ID)
-                HISTORY
-                (CONS OLD HISTORY))
-            (TM:TOPICMAP-WORKSPACE-HISTORY-OF WORKSPACE))))))
-    (LET ((AT (R:TOPIC-WORKSPACE "title")))
-      (ASSERT (EQUAL "title" (TM:TOPICMAP-WORKSPACE-POINT-OF AT)))
-      (ASSERT (EQUAL '("tree") (TM:TOPICMAP-WORKSPACE-HISTORY-OF AT))))))
+(DEFUN CHECK-WORKSPACE NIL
+       (LET*
+             ((WORKSPACE (R:READING-WORKSPACE))
+              (PROJECTION (TM:TOPICMAP-PROJECTION-OF WORKSPACE))
+              (TOPICS (TM:TOPICMAP-PROJECTION-TOPICS-OF PROJECTION))
+              (RELATIONS (TM:TOPICMAP-PROJECTION-ASSOCIATIONS-OF PROJECTION)))
+             (ASSERT (EQUAL "tree" (TM:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE)))
+             (ASSERT (= 32 (LENGTH TOPICS)))
+             (DOLIST
+                     (ID
+                         (QUOTE
+                                ("experiment"
+                                 "tree"
+                                 "syntax"
+                                 "solo"
+                                 "nested-statement"
+                                 "listen"
+                                 "event"
+                                 "report"
+                                 "title"
+                                 "enclosing-context"
+                                 "inherited-context"
+                                 "event-context"
+                                 "lifetime"
+                                 "probes"
+                                 "solo-popup-click"
+                                 "publish-source-data-message"
+                                 "node-topic"
+                                 "title-payload"
+                                 "window-event-emitter"
+                                 "broadcast-event-reach"
+                                 "subordinate-execution"
+                                 "scoped-event-emitter-proposal"
+                                 "nested-action-input"
+                                 "report-lookup-target"
+                                 "witness"
+                                 "received-message"
+                                 "message-data"
+                                 "listen-match"
+                                 "title-value"
+                                 "retained-report-state"
+                                 "retained-title-value"
+                                 "input-path")))
+                     (ASSERT
+                             (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
+                                                                 ID)))
+             (ASSERT (= 44 (LENGTH RELATIONS)))
+             (DOLIST (A RELATIONS)
+                     (ASSERT
+                             (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
+                                                                 (TM:TOPICMAP-ASSOCIATION-FROM-OF
+                                                                                                  A)))
+                     (ASSERT
+                             (TM:TOPICMAP-PROJECTION-TOPIC-BY-ID PROJECTION
+                                                                 (TM:TOPICMAP-ASSOCIATION-TO-OF
+                                                                                                A)))
+                     (LET*
+                           ((PROPS (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A))
+                            (STATUS (GETF PROPS :EVIDENCE-STATUS)))
+                           (ASSERT
+                                   (MEMBER STATUS
+                                           (QUOTE
+                                                  (:OBSERVED :DERIVED
+                                                             :SOURCE-OBSERVED
+                                                             :AUTHOR-REPORTED
+                                                             :DESIGN-PROPOSAL
+                                                             :OPEN
+                                                             :RUNTIME-OBSERVED
+                                                             :HYPOTHESIZED))))
+                           (ASSERT
+                                   (EQ STATUS
+                                       (GETF (GETF PROPS :WARRANT) :STATUS)))
+                           (ASSERT (GETF (GETF PROPS :WARRANT) :SOURCE))))
+             (DOLIST (PAIR (QUOTE (("solo" "listen") ("listen" "report"))))
+                     (LET
+                          ((A
+                              (FIND-IF
+                                       (LAMBDA (A)
+                                               (AND
+                                                    (EQUAL (FIRST PAIR)
+                                                           (TM:TOPICMAP-ASSOCIATION-FROM-OF
+                                                                                            A))
+                                                    (EQUAL (SECOND PAIR)
+                                                           (TM:TOPICMAP-ASSOCIATION-TO-OF
+                                                                                          A))))
+                                       RELATIONS)))
+                          (ASSERT
+                                  (EQ :SUBORDINATE-EXECUTION
+                                      (GETF
+                                            (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF
+                                                                                   A)
+                                            :RELATION-KIND)))
+                          (ASSERT
+                                  (EQ :OBSERVED
+                                      (GETF
+                                            (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF
+                                                                                   A)
+                                            :EVIDENCE-STATUS)))))
+             (LET
+                  ((A
+                      (FIND "enclosing-context" RELATIONS :KEY
+                            (FUNCTION TM:TOPICMAP-ASSOCIATION-TO-OF) :TEST
+                            (FUNCTION EQUAL))))
+                  (ASSERT
+                          (EQ :DERIVED
+                              (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A)
+                                    :EVIDENCE-STATUS))))
+             (LET*
+                   ((VIEW (RENDER WORKSPACE "Topicmap"))
+                    (HTML (V:VIEW-HTML VIEW))
+                    (ACTIONS
+                             (REMOVE-IF-NOT
+                                            (LAMBDA (REF)
+                                                    (AND
+                                                         (TYPEP (CDR REF)
+                                                                (QUOTE
+                                                                       V:THUNK))
+                                                         (SEARCH
+                                                                 (FORMAT NIL
+                                                                         "id='~A' class='dreyeck-topicmap-workspace-action "
+                                                                         (CAR
+                                                                              REF))
+                                                                 HTML)))
+                                            (V:VIEW-REFERENCES VIEW))))
+                   (ASSERT (= 32 (LENGTH ACTIONS)))
+                   (DOLIST (REF ACTIONS)
+                           (LET*
+                                 ((OLD
+                                       (TM:TOPICMAP-WORKSPACE-POINT-OF
+                                                                       WORKSPACE))
+                                  (HISTORY
+                                           (COPY-LIST
+                                                      (TM:TOPICMAP-WORKSPACE-HISTORY-OF
+                                                                                        WORKSPACE)))
+                                  (TOPIC (V:EVAL-THUNK (CDR REF)))
+                                  (ID (TM:TOPICMAP-TOPIC-ID-OF TOPIC)))
+                                 (ASSERT
+                                         (EQ TOPIC
+                                             (TM:TOPICMAP-WORKSPACE-CURRENT-TOPIC
+                                                                                  WORKSPACE)))
+                                 (ASSERT
+                                         (EQ
+                                             (TM:TOPICMAP-TOPIC-OBJECT-OF
+                                                                          TOPIC)
+                                             (TM:TOPICMAP-WORKSPACE-CURRENT-OBJECT
+                                                                                   WORKSPACE)))
+                                 (ASSERT
+                                         (EQUAL
+                                                (IF (EQUAL OLD ID) HISTORY
+                                                    (CONS OLD HISTORY))
+                                                (TM:TOPICMAP-WORKSPACE-HISTORY-OF
+                                                                                  WORKSPACE))))))
+             (LET ((AT (R:TOPIC-WORKSPACE "title")))
+                  (ASSERT (EQUAL "title" (TM:TOPICMAP-WORKSPACE-POINT-OF AT)))
+                  (ASSERT
+                          (EQUAL (QUOTE ("tree"))
+                                 (TM:TOPICMAP-WORKSPACE-HISTORY-OF AT))))))
 
 (DEFUN CHECK-MESSAGE-PATH ()
   (LET* ((WITNESS (R:EMITTED-MESSAGE-WITNESS))
@@ -346,7 +420,7 @@
                 (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A)
                       :RELATION-KIND))
               RELATIONS))))
-      (ASSERT (= 2 (LENGTH KINDS)))
+      (ASSERT (= 3 (LENGTH KINDS)))
       (ASSERT (MEMBER :SUBORDINATE-EXECUTION KINDS))
       (ASSERT (MEMBER :EVENT-PROPAGATION KINDS))
       (DOLIST (A RELATIONS)
@@ -497,6 +571,217 @@ emitter to be used in place of window.")
   (FORMAT T
           "~&WARD-FOLLOW-UP-CONTRACT-PASS: exact quotations, canonical Topics, directed/warranted mechanism relations, retained historical hypotheses, no SOLO event scoping, and native reading/source/witness/Topicmap route.~%"))
 
+(DEFUN CHECK-INPUT-TRACE ()
+  (LET* ((TRACE (R:RECEIVED-INPUT-TRACE))
+         (CAPTURE (R:INPUT-CAPTURE TRACE))
+         (EVENTS (GETHASH "events" CAPTURE))
+         (INVOCATION (GETHASH "invocation" CAPTURE))
+         (PROJECTION (R:READING-PROJECTION))
+         (RELATIONS (TM:TOPICMAP-PROJECTION-ASSOCIATIONS-OF PROJECTION)))
+    (ASSERT
+     (EQUAL "0ed82813cb272f09a85ccf1c9dce89794e739544b55f6f590f124e9de8d55a7a"
+            (IRONCLAD:BYTE-ARRAY-TO-HEX-STRING
+             (IRONCLAD:DIGEST-FILE :SHA256
+                                   (ASDF/SYSTEM:SYSTEM-RELATIVE-PATHNAME
+                                    "dreyeck/nested-actions/reading"
+                                    "dreyeck/nested-actions/input-witness.json")))))
+    (ASSERT
+     (EQUAL (GETHASH "fixtureSha256" CAPTURE)
+            (IRONCLAD:BYTE-ARRAY-TO-HEX-STRING
+             (IRONCLAD:DIGEST-FILE :SHA256
+                                   (ASDF/SYSTEM:SYSTEM-RELATIVE-PATHNAME
+                                    "dreyeck/nested-actions/reading"
+                                    "dreyeck/nested-actions/input-witness.html")))))
+    (LET ((FIXTURE
+           (UIOP/STREAM:READ-FILE-STRING
+            (ASDF/SYSTEM:SYSTEM-RELATIVE-PATHNAME
+             "dreyeck/nested-actions/reading"
+             "dreyeck/nested-actions/input-witness.html"))))
+      (DOLIST (ROLE '("producer" "listen" "report" "run"))
+        (LET ((SOURCE
+               (FIND ROLE (R:INPUT-SOURCES TRACE) :KEY
+                     (LAMBDA (S) (GETHASH "role" (R:SOURCE-METADATA S))) :TEST
+                     #'EQUAL)))
+          (ASSERT SOURCE)
+          (ASSERT (SEARCH (R:SOURCE-TEXT SOURCE) FIXTURE)))))
+    (ASSERT (= 24 (LENGTH (GETHASH "records" (R:INPUT-INVENTORY TRACE)))))
+    (ASSERT (NOT (GETHASH "networkFetch" (R:INPUT-INVENTORY TRACE))))
+    (ASSERT
+     (EQUAL "derived"
+            (GETHASH "classificationStatus" (R:INPUT-INVENTORY TRACE))))
+    (ASSERT
+     (EQUAL "native-message-to-retained-listen-with-independent-report"
+            (GETHASH "mode" CAPTURE)))
+    (ASSERT (GETHASH "stateIsPriorObject" INVOCATION))
+    (ASSERT (GETHASH "bodyPassedByRun" INVOCATION))
+    (ASSERT (NOT (GETHASH "bodyAcceptedByRetainedListen" INVOCATION)))
+    (ASSERT
+     (EQUAL "REPORT title"
+            (GETHASH "command" (AREF (GETHASH "body" INVOCATION) 0))))
+    (ASSERT (= 2 (LENGTH EVENTS)))
+    (LOOP FOR EVENT ACROSS EVENTS
+          FOR
+          COUNT FROM 1
+          FOR TITLE IN '("Payload Title" "Fallback Node")
+          DO (LET* ((RECEPTION (GETHASH "reception" EVENT))
+                    (SELECTION (GETHASH "listenSelection" EVENT))
+                    (STATE (GETHASH "priorState" EVENT))
+                    (EFFECT (GETHASH "listenerEffect" EVENT))
+                    (PROBE (GETHASH "independentReportProbe" EVENT)))
+               (ASSERT (GETHASH "actualObjectChecksPassed" EVENT))
+               (ASSERT
+                (EQUAL "[object MessageEvent]"
+                       (GETHASH "eventType" RECEPTION)))
+               (ASSERT (GETHASH "isTrusted" RECEPTION))
+               (ASSERT (GETHASH "sourceIsPopup" RECEPTION))
+               (ASSERT (GETHASH "dataIsDistinctFromSender" RECEPTION))
+               (ASSERT (GETHASH "eventIsReceiverEvent" SELECTION))
+               (ASSERT (GETHASH "dataIsEventData" SELECTION))
+               (ASSERT
+                (EQUAL "[object Object]" (GETHASH "dataType" SELECTION)))
+               (ASSERT (= COUNT (GETHASH "count" SELECTION)))
+               (ASSERT
+                (EQUAL TITLE
+                       (GETHASH "title" (GETHASH "receivedPayload" EVENT))))
+               (ASSERT
+                (EQUALP (GETHASH "receivedPayload" EVENT)
+                        (GETHASH "selectedPayload" SELECTION)))
+               (ASSERT
+                (EQUAL "publishSourceData"
+                       (GETHASH "action" (GETHASH "receivedPayload" EVENT))))
+               (ASSERT
+                (EQUAL "node"
+                       (GETHASH "topic" (GETHASH "receivedPayload" EVENT))))
+               (ASSERT (NOT (GETHASH "stateIsSelectedData" STATE)))
+               (ASSERT (GETHASH "contextIdentityPreserved" STATE))
+               (ASSERT (EQUAL "Prior Title" (GETHASH "titleBefore" STATE)))
+               (ASSERT (EQUAL "Prior Title" (GETHASH "titleAfter" STATE)))
+               (ASSERT (= 0 (GETHASH "automaticReportDispatches" EFFECT)))
+               (ASSERT
+                (= (1- COUNT)
+                   (GETHASH "reportCallsBeforeIndependentProbe" EFFECT)))
+               (ASSERT (GETHASH "inspectedTargetIsPriorState" PROBE))
+               (ASSERT (NOT (GETHASH "inspectedTargetIsEventData" PROBE)))
+               (ASSERT
+                (EQUAL "explicit fixture call, not nested LISTEN"
+                       (GETHASH "caller" PROBE)))
+               (ASSERT (EQUAL "title" (GETHASH "key" PROBE)))
+               (ASSERT (EQUAL "Prior Title" (GETHASH "value" PROBE)))
+               (ASSERT
+                (EQUAL "<div class=report>Prior Title</div>"
+                       (GETHASH "output" PROBE)))
+               (DOLIST (KEY '("nestedInput" "reportLookupTarget"))
+                 (ASSERT
+                  (EQUAL "unavailable-current-implementation"
+                         (GETHASH "status" (GETHASH KEY EVENT))))
+                 (ASSERT (NULL (GETHASH "value" (GETHASH KEY EVENT)))))))
+    (ASSERT (= 8 (LENGTH (R:INPUT-STAGES TRACE))))
+    (DOLIST (ID '("nested-action-input" "report-lookup-target" "title-value"))
+      (LET ((STAGE (R:INPUT-STAGE TRACE ID)))
+        (ASSERT (EQ :OPEN (GETF STAGE :STATUS)))
+        (ASSERT (EQ :UNKNOWN (GETF STAGE :TYPE)))
+        (ASSERT (NULL (GETF STAGE :OBJECT)))
+        (ASSERT (GETF STAGE :SOURCE))))
+    (DOLIST (H (R:INPUT-HYPOTHESES))
+      (ASSERT (MEMBER (GETF H :ID) '(:A :B :C :D :E)))
+      (ASSERT (EQ :HYPOTHESIZED (GETF H :STATUS)))
+      (ASSERT (EQ :UNRESOLVED (GETF H :CURRENT-VERDICT))))
+    (ASSERT (= 5 (LENGTH (R:INPUT-HYPOTHESES))))
+    (DOLIST
+        (REQUIRED
+         '(("window-event-emitter" "received-message" :EVENT-PROPAGATION
+            :RUNTIME-OBSERVED :NATIVE-INPUT-OBJECT-FLOW)
+           ("received-message" "message-data" :PAYLOAD-TO-INPUT
+            :SOURCE-OBSERVED :MECH-A028-LISTEN)
+           ("received-message" "message-data" :PAYLOAD-TO-INPUT
+            :RUNTIME-OBSERVED :NATIVE-INPUT-OBJECT-FLOW)
+           ("message-data" "listen-match" :PAYLOAD-TO-INPUT :SOURCE-OBSERVED
+            :MECH-A028-LISTEN)
+           ("message-data" "listen-match" :PAYLOAD-TO-INPUT :RUNTIME-OBSERVED
+            :NATIVE-INPUT-OBJECT-FLOW)
+           ("listen-match" "listen" :PAYLOAD-TO-INPUT :RUNTIME-OBSERVED
+            :NATIVE-INPUT-OBJECT-FLOW)
+           ("listen-match" "nested-action-input" :PAYLOAD-TO-INPUT :OPEN
+            :CURRENT-SOURCE-GAP)
+           ("nested-action-input" "report-lookup-target" :PAYLOAD-TO-INPUT
+            :OPEN :CURRENT-SOURCE-GAP)
+           ("report-lookup-target" "report" :PAYLOAD-TO-INPUT :OPEN
+            :CURRENT-SOURCE-GAP)
+           ("report" "title-value" :PAYLOAD-TO-INPUT :OPEN :CURRENT-SOURCE-GAP)
+           ("retained-report-state" "report" :PAYLOAD-TO-INPUT :SOURCE-OBSERVED
+            :MECH-A028-REPORT)
+           ("retained-report-state" "retained-title-value" :PAYLOAD-TO-INPUT
+            :RUNTIME-OBSERVED :NATIVE-INPUT-OBJECT-FLOW)
+           ("report" "title" :PAYLOAD-TO-INPUT :SOURCE-OBSERVED
+            :MECH-A028-REPORT)
+           ("title" "input-path" :PAYLOAD-TO-INPUT :DERIVED
+            :READING-NAVIGATION)
+           ("input-path" "received-message" :PAYLOAD-TO-INPUT :DERIVED
+            :REVISION-BOUNDED-TRACE)))
+      (ASSERT
+       (FIND-IF
+        (LAMBDA (A)
+          (LET* ((P (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A))
+                 (W (GETF P :WARRANT)))
+            (AND (EQUAL (FIRST REQUIRED) (TM:TOPICMAP-ASSOCIATION-FROM-OF A))
+                 (EQUAL (SECOND REQUIRED) (TM:TOPICMAP-ASSOCIATION-TO-OF A))
+                 (EQ (THIRD REQUIRED) (GETF P :RELATION-KIND))
+                 (EQ (FOURTH REQUIRED) (GETF P :EVIDENCE-STATUS))
+                 (EQ (FOURTH REQUIRED) (GETF W :STATUS))
+                 (EQ (FIFTH REQUIRED) (GETF W :SOURCE)))))
+        RELATIONS)))
+    (DOLIST (A RELATIONS)
+      (WHEN
+          (MEMBER (TM:TOPICMAP-ASSOCIATION-TO-OF A)
+                  '("nested-action-input" "report-lookup-target" "title-value")
+                  :TEST #'EQUAL)
+        (ASSERT
+         (EQ :OPEN
+             (GETF (TM:TOPICMAP-ASSOCIATION-PROPERTIES-OF A)
+                   :EVIDENCE-STATUS)))))
+    (DOLIST
+        (PAIR
+         '(("nested-input" "nested-action-input")
+           ("report-target" "report-lookup-target")))
+      (ASSERT
+       (EQUAL (SECOND PAIR)
+              (TM:TOPICMAP-WORKSPACE-POINT-OF
+               (R:TOPIC-WORKSPACE (FIRST PAIR)))))))
+  (LET* ((TREE (R:OBSERVED-ACTION-TREE))
+         (REPORT (FIRST (R:ACTION-CHILDREN (FIRST (R:ACTION-CHILDREN TREE)))))
+         (VIEW (RENDER REPORT "Action tree"))
+         (TRACE
+          (FIND-IF (LAMBDA (O) (TYPEP O 'R:MESSAGE-INPUT-TRACE))
+                   (MAPCAR #'CDR (V:VIEW-REFERENCES VIEW))))
+         (PATH (RENDER TRACE "Input path"))
+         (OBJECTS (MAPCAR #'CDR (V:VIEW-REFERENCES PATH)))
+         (WORKSPACE
+          (FIND-IF (LAMBDA (O) (TYPEP O 'TM:TOPICMAP-WORKSPACE)) OBJECTS)))
+    (ASSERT TRACE)
+    (ASSERT WORKSPACE)
+    (ASSERT (MEMBER (R:INPUT-STAGE TRACE "message-data") OBJECTS :TEST #'EQ))
+    (ASSERT
+     (MEMBER (R:INPUT-STAGE TRACE "report-lookup-target") OBJECTS :TEST #'EQ))
+    (ASSERT (MEMBER (R:INPUT-CAPTURE TRACE) OBJECTS :TEST #'EQ))
+    (ASSERT (EQUAL "input-path" (TM:TOPICMAP-WORKSPACE-POINT-OF WORKSPACE)))
+    (ASSERT
+     (TYPEP (TM:TOPICMAP-WORKSPACE-CURRENT-OBJECT (R:TOPIC-WORKSPACE "title"))
+            'R:MESSAGE-INPUT-TRACE)))
+  (LET ((OBJECTS
+         (MAPCAR #'CDR
+                 (V:VIEW-REFERENCES
+                  (RENDER (PAGE "From Message to Nested Input") "Content")))))
+    (ASSERT (FIND-IF (LAMBDA (O) (TYPEP O 'R:MESSAGE-INPUT-TRACE)) OBJECTS)))
+  (LET* ((SOURCE
+          (RENDER (PAGE "Tracing the Received Message Boundary") "Source"))
+         (VALUES
+          (LOOP FOR REF IN (V:VIEW-REFERENCES SOURCE)
+                WHEN (TYPEP (CDR REF) 'V:THUNK)
+                COLLECT (V:EVAL-THUNK (CDR REF)))))
+    (ASSERT (FIND-IF (LAMBDA (O) (TYPEP O 'R:MESSAGE-INPUT-TRACE)) VALUES)))
+  (FORMAT T
+          "~&MESSAGE-INPUT-TRACE-PASS: live identity capture, counter-only retained listener, independent REPORT lookup, three relation kinds, precise open boundary and native REPORT/title navigation.~%"))
+
 (DEFUN RUN-TESTS ()
   (CHECK-PAGES)
   (CHECK-TREE)
@@ -504,6 +789,7 @@ emitter to be used in place of window.")
   (CHECK-WORKSPACE)
   (CHECK-MESSAGE-PATH)
   (CHECK-WARD-FOLLOW-UP-CONTRACT)
+  (CHECK-INPUT-TRACE)
   (DOLIST
       (NAME
        '(R:EXPERIMENT-EVIDENCE R:OBSERVED-ACTION-TREE R:SEMANTIC-QUESTIONS
@@ -512,10 +798,11 @@ emitter to be used in place of window.")
                                R:MESSAGE-SOURCE-OBSERVATIONS R:PRODUCER-SOURCE
                                R:EMITTED-MESSAGE-WITNESS
                                R:WARD-PROPAGATION-EVIDENCE
-                               R:HISTORICAL-CONTEXT-HYPOTHESES))
+                               R:HISTORICAL-CONTEXT-HYPOTHESES
+                               R:RECEIVED-INPUT-TRACE R:INPUT-HYPOTHESES))
     (ASSERT (DREYECK/AUTHORITY-POLICY:FIND-EXAMPLE-CONTRACT NAME)))
   (FORMAT T
-          "~&NESTED-ACTIONS-READING-PASS: 3 text/4 code pages; canonical source/event Topics and exact Ward quotations; 25 Topics/31 warranted relations; independent subordination/reach, retained historical hypotheses, proposal-only scoped emitter, specific handoff/lookup gap, native Point/history.~%")
+          "~&NESTED-ACTIONS-READING-PASS: 4 text/5 code pages; 32 Topics/44 warranted relations; three independent concerns; native input identity capture, independent retained REPORT lookup, exact current dispatch gap; proposal-only scoped emitter and native Point/history.~%")
   T)
 
 (DEFUN RUN-TALA-TESTS ()

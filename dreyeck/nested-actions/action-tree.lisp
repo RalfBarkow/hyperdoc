@@ -29,7 +29,15 @@
            "WITNESS-STAGE"
            "EMITTED-MESSAGE-WITNESS"
            "WARD-PROPAGATION-EVIDENCE"
-           "HISTORICAL-CONTEXT-HYPOTHESES"))
+           "HISTORICAL-CONTEXT-HYPOTHESES"
+           "MESSAGE-INPUT-TRACE"
+           "INPUT-STAGES"
+           "INPUT-STAGE"
+           "INPUT-CAPTURE"
+           "INPUT-SOURCES"
+           "INPUT-INVENTORY"
+           "INPUT-HYPOTHESES"
+           "RECEIVED-INPUT-TRACE"))
 
 (IN-PACKAGE #:DREYECK/NESTED-ACTIONS)
 
@@ -43,6 +51,10 @@
 
 (HYPERDOC:SEE
   (HYPERDOC:PAGE "Two Relations Hidden in One Nest" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "From Message to Nested Input" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
 (DEFCLASS NESTED-ACTION NIL
@@ -114,4 +126,10 @@ This looks like more than nested syntax. SOLO now seems able to establish an exe
                              "Inspecting the Observed Nested Action Tree"
                              :HYPERBOOK "dreyeck/nested-actions/reading")
                             :DISPLAY "Inspect the constructing code" :SELECT
-                            "Source")))))
+                            "Source"))
+                          (WHEN (EQUAL (ACTION-NAME ACTION) "REPORT")
+                            (V:HTML
+                              (:P
+                               (V:OBJECT-REF (RECEIVED-INPUT-TRACE) :DISPLAY
+                                             "Follow REPORT title to its supplying path and exact gap"
+                                             :SELECT "Input path")))))))

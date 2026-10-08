@@ -14,6 +14,10 @@
   (HYPERDOC:PAGE "Two Relations Hidden in One Nest" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "From Message to Nested Input" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
 (HYPERDOC:DEFEXAMPLE SEMANTIC-QUESTIONS
   "Questions left open after distinguishing subordinate execution and window event reach."
   (LOOP FOR (ID
@@ -22,7 +26,7 @@
                             (:NODE
                              "Retained LISTEN matches topic or name node. Does Ward's current implementation retain that filter?")
                             (:TITLE
-                             "The producer supplies message.title. What current nested REPORT target receives it? Retained REPORT reads state.title.")
+                             "Retained LISTEN aliases event.data, filters and counts; it does not dispatch nested REPORT. Which matching current caller supplies REPORT's lookup target? Retained REPORT separately reads its supplied state.title.")
                             (:EVENT-CONTEXT
                              "What transformation connects received event.data to current nested action input? Rebinding is not established.")
                             (:LIFETIME

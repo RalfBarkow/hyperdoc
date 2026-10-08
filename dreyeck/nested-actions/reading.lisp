@@ -14,13 +14,17 @@
   (HYPERDOC:PAGE "Two Relations Hidden in One Nest" :HYPERBOOK
                  "dreyeck/nested-actions/reading"))
 
+(HYPERDOC:SEE
+  (HYPERDOC:PAGE "From Message to Nested Input" :HYPERBOOK
+                 "dreyeck/nested-actions/reading"))
+
 (DEFUN READING-PAGE (TITLE)
   (HYPERBOOK:FIND-PAGE
    (HYPERBOOK:FIND-HYPERBOOK "dreyeck/nested-actions/reading" :SIGNAL-ERROR? T)
    TITLE :SIGNAL-ERROR? T))
 
 (HYPERDOC:DEFEXAMPLE READING-PROJECTION
-  "Two independent mechanism relation kinds, with revision-specific warrants and explicit handoff gaps."
+  "Three independent concerns: subordination, event reach, and payload-to-input; exact revision and runtime warrants."
   (LET* ((HISTORY (HISTORICAL-CONTEXT-HYPOTHESES))
          (TREE (OBSERVED-ACTION-TREE))
          (LISTEN (FIRST (ACTION-CHILDREN TREE)))
@@ -28,6 +32,7 @@
          (QUESTIONS (SEMANTIC-QUESTIONS))
          (WITNESS (EMITTED-MESSAGE-WITNESS))
          (WARD (WARD-PROPAGATION-EVIDENCE))
+         (INPUT (RECEIVED-INPUT-TRACE))
          (SPECS
           (LIST
            (LIST "experiment" "Ward's nested-action experiment"
@@ -41,8 +46,8 @@
            (LIST "event" "Received MessageEvent (fixture)"
                  (WITNESS-STAGE WITNESS "reception") :OBSERVED)
            (LIST "report" "REPORT" REPORT :AUTHOR-REPORTED)
-           (LIST "title" "title lookup (question)"
-                 (FIND :TITLE QUESTIONS :KEY (LAMBDA (Q) (GETF Q :ID))) :OPEN)
+           (LIST "title" "REPORT title: supplying path / exact gap" INPUT
+                 :OPEN)
            (LIST "enclosing-context"
                  "enclosing-context (earlier hypothesis; challenged)"
                  (FIND "enclosing-context" HISTORY :KEY
@@ -84,12 +89,27 @@
            (LIST "scoped-event-emitter-proposal"
                  "Scoped event emitter (proposal)" (GETF WARD :SCOPED-EMITTER)
                  :DESIGN-PROPOSAL)
-           (LIST "nested-input" "Current nested input: gap"
-                 (WITNESS-STAGE WITNESS "nestedInput") :OPEN)
-           (LIST "report-target" "Current REPORT lookup target: gap"
-                 (WITNESS-STAGE WITNESS "reportLookupTarget") :OPEN)
+           (LIST "nested-action-input" "Current nested input: gap"
+                 (INPUT-STAGE INPUT "nested-action-input") :OPEN)
+           (LIST "report-lookup-target" "Current REPORT lookup target: gap"
+                 (INPUT-STAGE INPUT "report-lookup-target") :OPEN)
            (LIST "witness" "One emitted message: recorded witness" WITNESS
-                 :OBSERVED)))
+                 :OBSERVED)
+           (LIST "received-message" "Received MessageEvent (input witness)"
+                 (INPUT-STAGE INPUT "received-message") :RUNTIME-OBSERVED)
+           (LIST "message-data" "event.data / local data: same object"
+                 (INPUT-STAGE INPUT "message-data") :SOURCE-OBSERVED)
+           (LIST "listen-match" "publishSourceData + node match"
+                 (INPUT-STAGE INPUT "listen-match") :SOURCE-OBSERVED)
+           (LIST "title-value" "Current nested title result: unavailable"
+                 (INPUT-STAGE INPUT "title-value") :OPEN)
+           (LIST "retained-report-state" "Independent retained REPORT state"
+                 (INPUT-STAGE INPUT "retained-report-state") :RUNTIME-OBSERVED)
+           (LIST "retained-title-value"
+                 "Independent retained value: Prior Title"
+                 (INPUT-STAGE INPUT "retained-title-value") :RUNTIME-OBSERVED)
+           (LIST "input-path" "Message → nested input: exact boundary" INPUT
+                 :DERIVED)))
          (TOPICS
           (LOOP FOR (ID LABEL OBJECT STATUS) IN SPECS
                 FOR I FROM 0
@@ -152,14 +172,14 @@
              :RECORDED-NATIVE-BROWSER-WITNESS)
             ("listen" "event" "counts matching messages (retained LISTEN)"
              :EVENT-PROPAGATION :SOURCE-OBSERVED :MECH-A028-LISTEN)
-            ("listen" "nested-input" "current handoff unestablished"
-             :EVENT-PROPAGATION :OPEN :CURRENT-SOURCE-GAP)
-            ("nested-input" "report-target"
-             "current lookup target unestablished" :EVENT-PROPAGATION :OPEN
+            ("listen" "nested-action-input" "current handoff unestablished"
+             :PAYLOAD-TO-INPUT :OPEN :CURRENT-SOURCE-GAP)
+            ("nested-action-input" "report-lookup-target"
+             "current lookup target unestablished" :PAYLOAD-TO-INPUT :OPEN
              :CURRENT-SOURCE-GAP)
-            ("report-target" "report"
-             "retained REPORT reads state[key]; current target unknown"
-             :SUBORDINATE-EXECUTION :SOURCE-OBSERVED :MECH-A028-REPORT)
+            ("report-lookup-target" "report"
+             "current nested invocation/lookup target unavailable"
+             :PAYLOAD-TO-INPUT :OPEN :CURRENT-SOURCE-GAP)
             ("report" "title" "names title argument (subordinate)"
              :SUBORDINATE-EXECUTION :OBSERVED
              :SUPPLIED-SCREENSHOT-TRANSCRIPTION)
@@ -172,7 +192,7 @@
             ("event" "event-context"
              "payload reception does not establish rebinding"
              :EVENT-PROPAGATION :DERIVED :CURRENT-SOURCE-GAP)
-            ("nested-input" "inherited-context"
+            ("nested-action-input" "inherited-context"
              "current handoff unverified; earlier inheritance hypothesis retained"
              :SUBORDINATE-EXECUTION :OPEN :CURRENT-SOURCE-GAP)
             ("broadcast-event-reach" "enclosing-context"
@@ -180,8 +200,8 @@
              :DERIVED :WARD-FOLLOW-UP)
             ("listen" "lifetime" "current disposal remains open"
              :EVENT-PROPAGATION :DERIVED :READING-QUESTION)
-            ("nested-input" "probes" "trace this handoff next"
-             :EVENT-PROPAGATION :DERIVED :READING-QUESTION)
+            ("nested-action-input" "probes" "trace this handoff next"
+             :PAYLOAD-TO-INPUT :DERIVED :READING-QUESTION)
             ("experiment" "tree" "transcribed nested structure"
              :SUBORDINATE-EXECUTION :OBSERVED
              :SUPPLIED-SCREENSHOT-TRANSCRIPTION)
@@ -190,7 +210,45 @@
              :EVENT-PROPAGATION :SOURCE-OBSERVED :WARD-SUPPLIED-PRODUCER)
             ("window-event-emitter" "listen"
              "provides broadcast reach (Ward reports)" :EVENT-PROPAGATION
-             :AUTHOR-REPORTED :WARD-FOLLOW-UP))))
+             :AUTHOR-REPORTED :WARD-FOLLOW-UP)
+            ("window-event-emitter" "received-message"
+             "native opener reception (bounded input witness)"
+             :EVENT-PROPAGATION :RUNTIME-OBSERVED :NATIVE-INPUT-OBJECT-FLOW)
+            ("received-message" "message-data"
+             "const { data } = event; direct alias (retained source)"
+             :PAYLOAD-TO-INPUT :SOURCE-OBSERVED :MECH-A028-LISTEN)
+            ("received-message" "message-data"
+             "local data === receiver event.data (live identity measured)"
+             :PAYLOAD-TO-INPUT :RUNTIME-OBSERVED :NATIVE-INPUT-OBJECT-FLOW)
+            ("message-data" "listen-match"
+             "tests action and topic/name inline (no separate dispatcher)"
+             :PAYLOAD-TO-INPUT :SOURCE-OBSERVED :MECH-A028-LISTEN)
+            ("message-data" "listen-match"
+             "selected data preserves receiver object identity"
+             :PAYLOAD-TO-INPUT :RUNTIME-OBSERVED :NATIVE-INPUT-OBJECT-FLOW)
+            ("listen-match" "listen"
+             "matching callback counts/statuses; zero nested dispatches"
+             :PAYLOAD-TO-INPUT :RUNTIME-OBSERVED :NATIVE-INPUT-OBJECT-FLOW)
+            ("listen-match" "nested-action-input"
+             "matched payload → current input unavailable" :PAYLOAD-TO-INPUT
+             :OPEN :CURRENT-SOURCE-GAP)
+            ("report" "title-value" "current nested title result unavailable"
+             :PAYLOAD-TO-INPUT :OPEN :CURRENT-SOURCE-GAP)
+            ("retained-report-state" "report"
+             "report_emit accepts state; independent caller only"
+             :PAYLOAD-TO-INPUT :SOURCE-OBSERVED :MECH-A028-REPORT)
+            ("retained-report-state" "retained-title-value"
+             "independent REPORT reads Prior Title from same state object"
+             :PAYLOAD-TO-INPUT :RUNTIME-OBSERVED :NATIVE-INPUT-OBJECT-FLOW)
+            ("report" "title"
+             "args[0] selects title; retained state[key] lookup"
+             :PAYLOAD-TO-INPUT :SOURCE-OBSERVED :MECH-A028-REPORT)
+            ("title" "input-path"
+             "navigate title supplying path and exact missing boundary"
+             :PAYLOAD-TO-INPUT :DERIVED :READING-NAVIGATION)
+            ("input-path" "received-message"
+             "trace begins at native reception; current handoff gap explicit"
+             :PAYLOAD-TO-INPUT :DERIVED :REVISION-BOUNDED-TRACE))))
     (TM:MAKE-TOPICMAP-PROJECTION :SOURCE WARD :TOPICS TOPICS :ASSOCIATIONS
                                  (LOOP FOR (FROM TO LABEL KIND STATUS
                                             SOURCE) IN RELATIONS
@@ -212,7 +270,7 @@
                                                                   '(:MECH-A028-LISTEN
                                                                     :MECH-A028-REPORT))
                                                         "Retained a028b4b; current nested implementation not established."))))
-                                 :VIEW-PROPERTIES '(:WIDTH 1300 :HEIGHT 830))))
+                                 :VIEW-PROPERTIES '(:WIDTH 1300 :HEIGHT 1110))))
 
 (HYPERDOC:DEFEXAMPLE READING-WORKSPACE
   (TM:MAKE-TOPICMAP-WORKSPACE (READING-PROJECTION) "tree"))
@@ -224,7 +282,9 @@
             ("message" . "publish-source-data-message")
             ("window-emitter" . "window-event-emitter")
             ("broadcast" . "broadcast-event-reach")
-            ("scoped-emitter" . "scoped-event-emitter-proposal")))
+            ("scoped-emitter" . "scoped-event-emitter-proposal")
+            ("nested-input" . "nested-action-input")
+            ("report-target" . "report-lookup-target")))
          (CANONICAL (OR (CDR (ASSOC TOPIC-ID ALIASES :TEST #'EQUAL)) TOPIC-ID))
          (WORKSPACE (READING-WORKSPACE)))
     (TM:TOPICMAP-WORKSPACE-GO-TO WORKSPACE CANONICAL)
@@ -249,7 +309,8 @@
                            LAYOUT-COMPARISON MESSAGE-SOURCE-OBSERVATIONS
                            PRODUCER-SOURCE EMITTED-MESSAGE-WITNESS
                            WARD-PROPAGATION-EVIDENCE
-                           HISTORICAL-CONTEXT-HYPOTHESES))
+                           HISTORICAL-CONTEXT-HYPOTHESES RECEIVED-INPUT-TRACE
+                           INPUT-HYPOTHESES))
   (DREYECK/AUTHORITY-POLICY:REGISTER-OPERATION-CONTRACT :IDENTITY
                                                         (FORMAT NIL
                                                                 "nested-actions/~A"

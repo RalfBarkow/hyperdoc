@@ -1,0 +1,248 @@
+<html><head><title>Native input witness</title></head><body><h1>Native message input boundary witness</h1><p>Supplied producer fragment and retained LISTEN; nested input remains unavailable; REPORT is probed independently.</p><div id='controls'><p id='listen'>Retained LISTEN</p><button id='launch'>Open producer popup</button><p id='report'>Independent retained REPORT</p></div><div id='producer-controls' hidden='hidden'><button id='with-title'>Send props.title</button><button id='with-name'>Send props.name fallback</button></div><pre id='capture'>No message received yet.</pre><script type='module'>const capture = {
+  mode: "native-message-to-retained-listen-with-independent-report",
+  sources: [
+  {
+    "role": "producer",
+    "status": "source-observed",
+    "origin": "Ward-supplied fragment in the follow-up task",
+    "revision": null,
+    "path": null,
+    "file": "dreyeck/nested-actions/sources/ward-node-message.js",
+    "sha256": "920f15162bf07e719f7815855e47724add942ef9669d2ce8c8df17c3197c74c8",
+    "limitation": "Supplied source; current runtime revision and complete click-handler installation not provided."
+  },
+  {
+    "role": "listen",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/blocks.js",
+    "startLine": 878,
+    "endLine": 915,
+    "file": "dreyeck/nested-actions/sources/listen.js",
+    "sha256": "e5af66ba1c03319911bca8c29aceef91bc4977b08d03b00f0a03ced6a29fc02c",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  },
+  {
+    "role": "report",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/blocks.js",
+    "startLine": 305,
+    "endLine": 314,
+    "file": "dreyeck/nested-actions/sources/report.js",
+    "sha256": "040c08a8e823b1abe2daba15ee15c721e5f6672482e6c8637b392405b9f058ed",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  },
+  {
+    "role": "message",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/blocks.js",
+    "startLine": 917,
+    "endLine": 928,
+    "file": "dreyeck/nested-actions/sources/message.js",
+    "sha256": "b6df37ee075c5989f9923d87de882b9d49772d645c3e0c6621f686ed6fc17fe0",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  },
+  {
+    "role": "run",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/blocks.js",
+    "startLine": 224,
+    "endLine": 241,
+    "file": "dreyeck/nested-actions/sources/run.js",
+    "sha256": "b7ce24565e00b41cd7af8516004717812f31d3e35ba85114b4becb2f58a79dc9",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  },
+  {
+    "role": "render",
+    "status": "source-observed",
+    "repository": "https://github.com/WardCunningham/wiki-plugin-mech",
+    "revision": "a028b4bba04e539dcaa090423d38a00a0050489d",
+    "path": "src/client/mech.js",
+    "startLine": 18,
+    "endLine": 42,
+    "file": "dreyeck/nested-actions/sources/render.js",
+    "sha256": "79dc0a9521d8bb04acacb3d26620e97dff0db8f4c1ab09c30dca68eb87f844b8",
+    "limitation": "Retained public revision; not established as the newer nested Solo implementation."
+  }
+]
+,
+  limitations: [
+    "Retained Mech a028b4b, not Ward's unavailable newer nested implementation.",
+    "Synthetic producer props and prior state; native popup/opener MessageEvent delivery.",
+    "Exact retained run, LISTEN and REPORT functions; pass-through emit instrumentation, debug console interception, inert thumb hook and instrumented API.",
+    "REPORT probe is invoked independently after reception; no payload-to-REPORT handoff is implemented."
+  ],
+  browser: navigator.userAgent,
+  invocation: null,
+  events: []
+};
+const nativeLog = console.log.bind(console);
+const selected = [];
+let lastEvent;
+console.log = function(value, ...rest) {
+  if (value?.event instanceof MessageEvent) lastEvent = value.event;
+  if (value && 'count' in value && value.data) selected.push({event:lastEvent, data:value.data, count:value.count});
+  nativeLog(value, ...rest);
+};
+window.$ = () => ({on: () => {}});
+const statuses = [];
+const reportCalls = [];
+let inspectedTarget;
+const priorContext = {marker:"prior-context"};
+const state = {title:"Prior Title", context:priorContext, debug:true, api:{
+  element(key) {return document.getElementById(key)},
+  status(elem, command, value) {statuses.push({command,value});elem.textContent=command+value},
+  trouble(elem, message) {throw Error(message)},
+  inspect(elem, key, target) {inspectedTarget=target},
+  report(elem, command, html) {reportCalls.push({command,html});elem.innerHTML=html}
+}};
+function listen_emit({ elem, command, args, state }) {
+  if (args.length < 1) return state.api.trouble(elem, `LISTEN expects argument, an action.`)
+  const topic = args[0]
+  let recent = Date.now()
+  let count = 0
+  const handler = listen
+  handler.action = 'publishSourceData'
+  handler.id = elem.id
+  window.addEventListener('message', listen)
+  $('.main').on('thumb', (evt, thumb) => console.log('jquery', { evt, thumb }))
+  // elem.innerHTML = command + ` ⇒ ready`
+  state.api.status(elem, command, ` ⇒ ready`)
+  // window.listeners = (action=null) => {
+  //   return getEventListeners(window).message
+  //     .map(t => t.listener)
+  //     .filter(f => f.name == 'listen')
+  //     .map(f => ({action:f.action,elem:document.getElementById(f.id),count:f.count}))
+  // }
+
+  function listen(event) {
+    console.log({ event })
+    const { data } = event
+    if (data.action == 'publishSourceData' && (data.name == topic || data.topic == topic)) {
+      count++
+      handler.count = count
+      if (state.debug) console.log({ count, data })
+      if (count <= 100) {
+        const now = Date.now()
+        const elapsed = now - recent
+        recent = now
+        // elem.innerHTML = command + ` ⇒ ${count} events, ${elapsed} ms`
+        state.api.status(elem, command, ` ⇒ ${count} events, ${elapsed} ms`)
+      } else {
+        window.removeEventListener('message', listen)
+      }
+    }
+  }
+}
+
+function report_emit({ elem, command, args, state }) {
+  const key = args[0] || 'temperature'
+  if (!(key in state)) return state.api.trouble(elem, `Expect "${key}" in state`)
+  const value = state[key]
+  const type = typeof value
+  if (!['string', 'number'].includes(type))
+    return state.api.trouble(elem, `Expect state.${key} to be a string or number`)
+  state.api.inspect(elem, key, state)
+  state.api.report(elem, command, `<div class=report>${value}</div>`)
+}
+
+export async function run(nest, state, initiator) {
+  const scope = nest.slice()
+  while (scope.length) {
+    const code = scope.shift()
+    if ('command' in code) {
+      const command = code.command
+      const elem = state.api ? state.api.element(code.key) : document.getElementById(code.key)
+      const [op, ...args] = code.command.split(/ +/)
+      const next = scope[0]
+      const body = next && 'command' in next ? null : scope.shift()
+      const stuff = { command, op, args, body, elem, state, initiator }
+      if (state.debug) console.log(stuff)
+      if (blocks[op]) await blocks[op].emit.apply(null, [stuff])
+      else if (op.match(/^[A-Z]+$/)) state.api.trouble(elem, `${op} doesn't name a block we know.`)
+      else if (code.command.match(/\S/)) state.api.trouble(elem, `Expected line to begin with all-caps keyword.`)
+    }
+  }
+}
+
+let reportDispatches = 0;
+const blocks = {
+  LISTEN:{emit(stuff) {
+    capture.invocation = {command:stuff.command,args:stuff.args,body:stuff.body,
+      stateType:Object.prototype.toString.call(stuff.state),stateIsPriorObject:stuff.state===state,
+      bodyPassedByRun:true,bodyAcceptedByRetainedListen:false};
+    return listen_emit(stuff);
+  }},
+  REPORT:{emit(stuff) {reportDispatches++;return report_emit(stuff)}}
+};
+const nest = [{command:"LISTEN node",key:"listen"},[{command:"REPORT title",key:"report"}]];
+await run(nest,state,"fixture");
+let popup;
+document.getElementById("launch").onclick = () => {
+  popup=window.open("input-witness.html?producer=1","nested-input-producer","popup,width=620,height=460");
+};
+window.addEventListener("message",event => {
+  if(event.source!==popup || event.data?.action!=="publishSourceData") return;
+  const selection=selected.at(-1);
+  const beforeReport=reportCalls.length;
+  const automaticDispatches=reportDispatches;
+  const priorTitle=state.title;
+  const priorContextPreserved=state.context===priorContext;
+  // Separate, explicit caller of retained REPORT. This is not LISTEN dispatch.
+  inspectedTarget=null;
+  report_emit({elem:document.getElementById("report"),command:"REPORT title",args:["title"],state});
+  const record={
+    emittedPayload:JSON.parse(JSON.stringify(popup.fixtureEmitted)),receivedPayload:event.data,
+    reception:{eventType:Object.prototype.toString.call(event),dataType:Object.prototype.toString.call(event.data),
+      isTrusted:event.isTrusted,sourceIsPopup:event.source===popup,
+      dataIsDistinctFromSender:event.data!==popup.fixtureEmitted},
+    listenSelection:{count:selection.count,eventIsReceiverEvent:selection.event===event,
+      dataIsEventData:selection.data===event.data,dataType:Object.prototype.toString.call(selection.data),
+      selectedPayload:selection.data,filter:"data.action == publishSourceData && (data.name == node || data.topic == node)"},
+    priorState:{titleBefore:priorTitle,titleAfter:state.title,contextMarker:state.context.marker,
+      contextIdentityPreserved:priorContextPreserved,stateIsSelectedData:state===selection.data,
+      selectedDataHasApi:'api' in selection.data},
+    listenerEffect:{statuses:JSON.parse(JSON.stringify(statuses)),automaticReportDispatches:automaticDispatches,
+      reportCallsBeforeIndependentProbe:beforeReport,output:"count/status only; no retained nested dispatch"},
+    nestedInput:{status:"unavailable-current-implementation",value:null},
+    reportLookupTarget:{status:"unavailable-current-implementation",value:null},
+    independentReportProbe:{caller:"explicit fixture call, not nested LISTEN",key:"title",
+      inspectedTargetIsPriorState:inspectedTarget===state,
+      inspectedTargetIsEventData:inspectedTarget===event.data,
+      targetType:Object.prototype.toString.call(inspectedTarget),value:state.title,
+      output:reportCalls.at(-1).html}
+  };
+  const checks=[record.reception.isTrusted,record.reception.sourceIsPopup,record.reception.dataIsDistinctFromSender,
+    selection.event===event,selection.data===event.data,state!==selection.data,
+    priorTitle==="Prior Title",state.title==="Prior Title",priorContextPreserved,
+    automaticDispatches===0,inspectedTarget===state,inspectedTarget!==event.data];
+  if(checks.some(c=>!c)) throw Error("actual object-flow assertion failed");
+  record.actualObjectChecksPassed=true;
+  capture.events.push(record);
+  capture.capturedAt=new Date().toISOString();
+  document.getElementById("capture").textContent=JSON.stringify(capture,null,2);
+});
+function sendSample(props) {
+  const message = {
+  action: 'publishSourceData',
+  topic: 'node',
+  title: props.title || props.name.replaceAll(/\n/g,' ')
+}
+window.opener.postMessage(message)
+
+  window.fixtureEmitted=message;
+}
+if(location.search==="?producer=1") {
+  document.getElementById("controls").hidden=true;
+  document.getElementById("producer-controls").hidden=false;
+  document.getElementById("with-title").onclick=()=>sendSample({title:"Payload Title",name:"Unused Name"});
+  document.getElementById("with-name").onclick=()=>sendSample({title:"",name:"Fallback\nNode"});
+}
+</script></body></html>

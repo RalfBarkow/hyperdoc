@@ -1,0 +1,550 @@
+{
+  "status": "source-observed",
+  "classificationStatus": "derived",
+  "networkFetch": false,
+  "records": [
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/heads/0.1.32-dev.1",
+      "commit": "4b8051417dec6b0eff40878290a703b1fa60fb52",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 1062,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 326,
+          "sha256": "0705836da8364e43703ead0474aec18aad022a94b70b0bcbdad924fe4fc02da5"
+        },
+        {
+          "name": "run",
+          "line": 254,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/heads/main",
+      "commit": "47cba6d57bef6db43e237abcbad60829d78b691c",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 810,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 279,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 202,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/heads/no-extract",
+      "commit": "65d4359b3f22b8e9dbc82fa53ab86d87b027263b",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 870,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 238,
+          "sha256": "e3752001b9899c8857cdc14c9f723781ff724dac0f0b37003d4b3559315ef1cd"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/heads/ward/module",
+      "commit": "0836b5b8449c0d42c640da73514fb16fe11797f5",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 700,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 212,
+          "sha256": "8f6195f40dd1aea6c05284fff7bbc8e0dba85b46138e7b0c0ced17e01329ddf1"
+        },
+        {
+          "name": "run",
+          "line": 140,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/origin/0.1.32-dev.1",
+      "commit": "4b8051417dec6b0eff40878290a703b1fa60fb52",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 1062,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 326,
+          "sha256": "0705836da8364e43703ead0474aec18aad022a94b70b0bcbdad924fe4fc02da5"
+        },
+        {
+          "name": "run",
+          "line": 254,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/origin/HEAD",
+      "commit": "47cba6d57bef6db43e237abcbad60829d78b691c",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 810,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 279,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 202,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/origin/main",
+      "commit": "47cba6d57bef6db43e237abcbad60829d78b691c",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 810,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 279,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 202,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/upstream/HEAD",
+      "commit": "89f43bfdb3a5b8819f2c08cc3a791e95f7ecb054",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 878,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 305,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 224,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/upstream/main",
+      "commit": "89f43bfdb3a5b8819f2c08cc3a791e95f7ecb054",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 878,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 305,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 224,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/upstream/testing",
+      "commit": "20c337ac7c245b1d1078a06cd0e0d30f2e839a5f",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 702,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 212,
+          "sha256": "8f6195f40dd1aea6c05284fff7bbc8e0dba85b46138e7b0c0ced17e01329ddf1"
+        },
+        {
+          "name": "run",
+          "line": 140,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/upstream/ward/module",
+      "commit": "b49909b45c2d45408f62dc06f48bffec1b63f0dd",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 700,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 212,
+          "sha256": "8f6195f40dd1aea6c05284fff7bbc8e0dba85b46138e7b0c0ced17e01329ddf1"
+        },
+        {
+          "name": "run",
+          "line": 140,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/ward/HEAD",
+      "commit": "89f43bfdb3a5b8819f2c08cc3a791e95f7ecb054",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 878,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 305,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 224,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/ward/main",
+      "commit": "89f43bfdb3a5b8819f2c08cc3a791e95f7ecb054",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 878,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 305,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 224,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/ward/testing",
+      "commit": "20c337ac7c245b1d1078a06cd0e0d30f2e839a5f",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 702,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 212,
+          "sha256": "8f6195f40dd1aea6c05284fff7bbc8e0dba85b46138e7b0c0ced17e01329ddf1"
+        },
+        {
+          "name": "run",
+          "line": 140,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/remotes/ward/ward/module",
+      "commit": "b49909b45c2d45408f62dc06f48bffec1b63f0dd",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 700,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 212,
+          "sha256": "8f6195f40dd1aea6c05284fff7bbc8e0dba85b46138e7b0c0ced17e01329ddf1"
+        },
+        {
+          "name": "run",
+          "line": 140,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech",
+      "ref": "refs/stash",
+      "commit": "da6a00ef706fc110b27c7570e1e569b752cb7d3b",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 1062,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 326,
+          "sha256": "0705836da8364e43703ead0474aec18aad022a94b70b0bcbdad924fe4fc02da5"
+        },
+        {
+          "name": "run",
+          "line": 254,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech-upstream",
+      "ref": "refs/heads/main",
+      "commit": "a028b4bba04e539dcaa090423d38a00a0050489d",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 878,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 305,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 224,
+          "sha256": "346bc68e722f581136009da2f00b8a8a321cf566f84dfe3ee101b72dfc32aea1"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech-upstream",
+      "ref": "refs/remotes/origin/HEAD",
+      "commit": "a028b4bba04e539dcaa090423d38a00a0050489d",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 878,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 305,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 224,
+          "sha256": "346bc68e722f581136009da2f00b8a8a321cf566f84dfe3ee101b72dfc32aea1"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech-upstream",
+      "ref": "refs/remotes/origin/main",
+      "commit": "a028b4bba04e539dcaa090423d38a00a0050489d",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 878,
+          "sha256": "1e2c8c9747ce42dacf702dbd40cf0a52d44d7fc5630d0521c1f4ec1507e87dda",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 305,
+          "sha256": "1cfc3cf465eb510c894e7437359f6f13e0cc6fa8a5ace6d4bb9c94d90bbcb6db"
+        },
+        {
+          "name": "run",
+          "line": 224,
+          "sha256": "346bc68e722f581136009da2f00b8a8a321cf566f84dfe3ee101b72dfc32aea1"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech-upstream",
+      "ref": "refs/remotes/origin/pr/2",
+      "commit": "1322a4ae46088b66724604aa5a3b9a132bb65fd4",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 700,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 212,
+          "sha256": "8f6195f40dd1aea6c05284fff7bbc8e0dba85b46138e7b0c0ced17e01329ddf1"
+        },
+        {
+          "name": "run",
+          "line": 140,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech-upstream",
+      "ref": "refs/remotes/origin/pr/3",
+      "commit": "36e10b155b79a614bbafdea8a70038f121d956d2",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 591,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 98,
+          "sha256": "d89e371cbcbfa6835915b2f43b25af01f288fcfeab3defc425c8ef3a34faed55"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech-upstream",
+      "ref": "refs/remotes/origin/pr/4",
+      "commit": "0f498aaadc625c1b18cd9357ce73e990f30557fb",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 610,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 117,
+          "sha256": "d89e371cbcbfa6835915b2f43b25af01f288fcfeab3defc425c8ef3a34faed55"
+        },
+        {
+          "name": "run",
+          "line": 37,
+          "sha256": "d3d148cdf17f8fde37a2728a9604dea0cfc3bea55299321a01ea7d076b128dfc"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech-upstream",
+      "ref": "refs/remotes/origin/pr/5",
+      "commit": "b49909b45c2d45408f62dc06f48bffec1b63f0dd",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 700,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 212,
+          "sha256": "8f6195f40dd1aea6c05284fff7bbc8e0dba85b46138e7b0c0ced17e01329ddf1"
+        },
+        {
+          "name": "run",
+          "line": 140,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    },
+    {
+      "repo": "/Users/rgb/workspace/wiki-plugin-mech-upstream",
+      "ref": "refs/remotes/origin/pr/6",
+      "commit": "910a817a56e91f3d7aaaa2711a420cd7b57e0d22",
+      "definitions": [
+        {
+          "name": "listen_emit",
+          "line": 723,
+          "sha256": "a9682225c52ddb836f1ecfcfec6b5a38e24c558d97e9abe0f5299f0d0bde1f0e",
+          "derivedClassification": "counter/status only; no body parameter, nested dispatch or payload-to-state transformation"
+        },
+        {
+          "name": "report_emit",
+          "line": 235,
+          "sha256": "8f6195f40dd1aea6c05284fff7bbc8e0dba85b46138e7b0c0ced17e01329ddf1"
+        },
+        {
+          "name": "run",
+          "line": 163,
+          "sha256": "f795a3526ab7d20c3de85366077e05052a1ea801cb3b224d6730ea236d20ff3d"
+        }
+      ]
+    }
+  ],
+  "workingTreePatchInspected": "/Users/rgb/workspace/wiki-plugin-mech/mech.patch; contains no LISTEN change"
+}
