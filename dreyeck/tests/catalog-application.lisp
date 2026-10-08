@@ -38,7 +38,8 @@
     (assert (asdf:component-loaded-p (asdf:find-system system))))
   (assert (hyperbook:find-hyperbook "dreyeck/authority/reading"))
   (assert (hyperbook:find-hyperbook "dreyeck/clog-tutorial/reading"))
-  (assert (= 19 (length (hyperbook:hyperbooks-of hyperbook:*catalog*))))
+  (assert (hyperbook:find-hyperbook "dreyeck/nested-actions/reading"))
+  (assert (= 20 (length (hyperbook:hyperbooks-of hyperbook:*catalog*))))
   (assert (null (find-package :dreyeck/workflow/authoring)))
   (let* ((hyperbook:*catalog* (make-instance 'hyperbook:catalog))
          (observed
