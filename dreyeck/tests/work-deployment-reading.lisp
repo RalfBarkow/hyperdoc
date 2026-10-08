@@ -295,14 +295,167 @@
   (check-confirmation (reading:service-start-confirmation) (reading:deployment-evidence))
   (format t "~&DEPLOYMENT-UPDATE-CONTROLS-PASS: reversed revisions, invented ExecStart and a transition detached from the activation result rejected.~%"))
 
+(defun check-preserved-update-observation-source ()
+  ;; Pin the 2026-10-03 DEFEXAMPLE form as it is at fab21433, the commit the
+  ;; 2026-10-08 observation was added to, in the same way as the two above.
+  (let* ((source (uiop:read-file-string
+                  (asdf:system-relative-pathname "dreyeck/work/reading"
+                                                 "dreyeck/work/deployment-reading.lisp")))
+         (*package* (find-package :dreyeck/work/deployment-reading))
+         (start (search (format nil "(hyperdoc:defexample deployment-update-observation~%")
+                        source)))
+    (assert start)
+    (let ((tail (subseq source start)))
+      (with-input-from-string (stream tail)
+        (read-preserving-whitespace stream)
+        (assert (equal "a4e3e853e1c5e8b97b8331f35ad98642d408bdf258b6916d075436e43131de55"
+                       (ironclad:byte-array-to-hex-string
+                        (ironclad:digest-sequence
+                         :sha256 (babel:string-to-octets
+                                  (subseq tail 0 (file-position stream))
+                                  :encoding :utf-8))))))))
+  (format t "~&DEPLOYMENT-UPDATE-SOURCE-PRESERVED-PASS: the 2026-10-03 DEFEXAMPLE form is byte-for-byte unchanged from fab21433.~%"))
+
+;;; The served-state observation of 2026-10-08 is a fourth object. It keeps
+;;; the process, the service, the locked source, the store source, the assets
+;;; copy, the routes and the listeners apart, and leaves the earlier objects
+;;; exactly as they were reported.
+
+(defparameter +served-state-kinds+
+  '(:process :service :nixos-generation :flake-input-lock :store-source
+    :source-text :assets-copy :fedwiki-page :nginx-route :listener
+    :host-boot :checkout :served-catalog :served-route-response))
+
+(defun record-ids (evidence &rest categories)
+  (loop for category in categories
+        append (remove nil (mapcar (lambda (record) (getf record :id))
+                                   (getf evidence category)))))
+
+(defun records-of-kind (evidence kind)
+  (remove-if-not (lambda (record) (eq kind (getf record :kind)))
+                 (getf evidence :observed)))
+
+(defun check-served-state (observation evidence)
+  (let ((facts (getf observation :observed))
+        (lock (record-by-id observation :observed "hyperdoc-input-lock"))
+        (store (record-by-id observation :observed "hyperdoc-store-source"))
+        (service (record-by-id observation :observed "served-service"))
+        (assets (record-by-id observation :observed "served-assets-copy"))
+        (inference (record-by-id observation :inferred "generation-698-started-service")))
+    (assert (equal (getf observation :provenance)
+                   '(:kind :operator-supplied :observation-time "2026-10-08T03:29:16Z"
+                     :recorded-at "2026-10-08" :scope :read-only-command-output
+                     :host-probe :operator-run-read-only
+                     :supplements
+                     ((:kind :browser-observation :observer "Claude"
+                       :observation-time :not-recorded :after "2026-10-08T03:29:16Z"
+                       :records ("served-catalog" "view-route-response"))
+                      (:kind :content-comparison :where :away-from-host
+                       :records ("store-source-is-commit" "assets-copy-content-is-commit"))))))
+    (dolist (category '(:observed :derived :inferred :hypothesized :unresolved))
+      (assert (member category observation)))
+    (assert (null (getf observation :hypothesized)))
+    ;; Every record has a declared kind, and each required subject is present
+    ;; as its own record.
+    (dolist (record facts)
+      (assert (member (getf record :kind) +served-state-kinds+)))
+    (dolist (kind '(:process :service :flake-input-lock :store-source
+                    :assets-copy :nginx-route :listener))
+      (assert (records-of-kind observation kind)))
+    ;; Observed records state no relation; relations are derived or inferred.
+    (dolist (record facts)
+      (assert (not (member :relation record))))
+    ;; A running process carries no source revision; a service carries none either.
+    (dolist (kind '(:process :service))
+      (dolist (record (records-of-kind observation kind))
+        (dolist (key '(:rev :source-commit :commit :head :nar-hash))
+          (assert (not (member key record))))))
+    ;; A locked or stored source carries no process identity.
+    (dolist (kind '(:flake-input-lock :store-source))
+      (dolist (record (records-of-kind observation kind))
+        (dolist (key '(:pid :main-pid :ppid :pids))
+          (assert (not (member key record))))))
+    ;; The assets copy is explicitly unversioned and mutable.
+    (assert (member :versioned assets))
+    (assert (null (getf assets :versioned)))
+    (assert (member :git-checkout assets))
+    (assert (null (getf assets :git-checkout)))
+    (assert (eq :mutable-copy (getf assets :mutability)))
+    (assert (= 12 (length (getf assets :files))))
+    ;; The answers this object gives.
+    (assert (equal "127.0.0.1:8080"
+                   (getf (record-by-id observation :observed "hyperdoc-loopback-listener")
+                         :address)))
+    (assert (equal "fab214334279bc5d3df0f2f624d34e6a1bdc1897" (getf lock :rev)))
+    (assert (equal (getf lock :nar-hash) (getf store :nar-hash)))
+    (assert (eq :not-set (getf service :working-directory)))
+    (assert (equal "127.0.0.1:8080"
+                   (getf (record-by-id observation :observed "apex-route") :upstream)))
+    ;; Derived, inferred and unresolved records rest on records of this object.
+    (let ((ids (record-ids observation :observed :derived)))
+      (dolist (category '(:derived :inferred :unresolved))
+        (dolist (record (getf observation category))
+          (dolist (id (getf record :basis))
+            (assert (member id ids :test #'equal))))))
+    ;; Comparisons made away from the host say so.
+    (dolist (id '("store-source-is-commit" "assets-copy-content-is-commit"))
+      (assert (eq :away-from-host
+                  (getf (getf (record-by-id observation :derived id) :computation) :where))))
+    (assert (search "not provenance"
+                    (getf (record-by-id observation :derived "assets-copy-content-is-commit")
+                          :limit)))
+    ;; The one inference stays an inference.
+    (assert (= 1 (length (getf observation :inferred))))
+    (assert (eq :not-directly-observed (getf inference :verification)))
+    (assert (not (member (getf inference :id) (record-ids observation :observed :derived)
+                         :test #'equal)))
+    ;; The earlier snapshot keeps its own answers, and nothing is merged into it.
+    (assert (equal "0.0.0.0:8080"
+                   (getf (record-by-id evidence :observed "hyperdoc-listener") :address)))
+    (record-by-id evidence :inferred "hyperdoc-started-from-checkout")
+    (let ((new-ids (record-ids observation :observed :derived :inferred)))
+      (dolist (id (record-ids evidence :observed :derived :inferred))
+        (assert (not (member id new-ids :test #'equal))))))
+  t)
+
+(defun check-served-state-controls ()
+  (dolist (tamper
+           (list
+            (lambda (o)
+              (nconc (record-by-id o :observed "served-process")
+                     (list :rev "fab214334279bc5d3df0f2f624d34e6a1bdc1897")))
+            (lambda (o)
+              (nconc (record-by-id o :observed "hyperdoc-store-source")
+                     (list :pid 1062025)))
+            (lambda (o)
+              (let ((record (record-by-id o :observed "served-assets-copy")))
+                (setf (getf record :versioned) t)))
+            (lambda (o) (push (first (getf o :inferred)) (getf o :observed)))
+            (lambda (o)
+              (let ((provenance (getf o :provenance)))
+                (setf (getf provenance :observation-time) :not-supplied)))))
+    (let ((changed (reading:served-state-observation-2026-10-08)))
+      (funcall tamper changed)
+      (assert (not (equal changed (reading:served-state-observation-2026-10-08))))
+      (assert (handler-case
+                  (progn (check-served-state changed (reading:deployment-evidence)) nil)
+                (error () t)))))
+  (check-served-state (reading:served-state-observation-2026-10-08)
+                      (reading:deployment-evidence))
+  (format t "~&SERVED-STATE-CONTROLS-PASS: a revision on the process, a PID on the store source, a versioned assets copy, a promoted inference and an undated observation rejected.~%"))
+
 (defun run-tests ()
   (check-preserved-observation-sources)
+  (check-preserved-update-observation-source)
   (check-evidence (reading:deployment-evidence))
   (check-positive-controls)
   (check-confirmation (reading:service-start-confirmation) (reading:deployment-evidence))
   (check-confirmation-controls)
   (check-update-observation (reading:deployment-update-observation))
   (check-update-controls)
+  (check-served-state (reading:served-state-observation-2026-10-08)
+                      (reading:deployment-evidence))
+  (check-served-state-controls)
   ;; The snapshot is still exactly what it was, after the confirmation was read.
   (check-evidence (reading:deployment-evidence))
   (let ((changed (reading:deployment-evidence)))
@@ -337,7 +490,9 @@
       (let ((references (mapcar #'cdr (views:view-references view))))
         (assert (member (reading:deployment-evidence) references :test #'equal))
         (assert (member (reading:service-start-confirmation) references :test #'equal))
-        (assert (member (reading:deployment-update-observation) references :test #'equal)))
+        (assert (member (reading:deployment-update-observation) references :test #'equal))
+        (assert (member (reading:served-state-observation-2026-10-08) references
+                        :test #'equal)))
       (let ((html (views:view-html view)))
         (dolist (text '("How is the service started?" "2026-10-01"
                         "How was this HyperDoc revision deployed?" "2026-10-03"
@@ -346,7 +501,14 @@
                         "548f73d09826795cbeaea1eae38da9a4b6e8a9e7"
                         "nix flake update hyperdoc"
                         "nixos-rebuild switch --flake /etc/nixos#dreyeck"
-                        "does not establish ExecStart, WorkingDirectory"))
+                        "does not establish ExecStart, WorkingDirectory"
+                        ;; The 2026-10-08 section, beside the sections above.
+                        "What served dreyeck.ch?" "2026-10-08T03:29:16Z"
+                        "127.0.0.1:8080" "0.0.0.0:8080"
+                        "fab214334279bc5d3df0f2f624d34e6a1bdc1897"
+                        "bdb09ff431b1750ade5be5ea15ae9d2467194f71"
+                        "content identity, not provenance" "wiki.service"
+                        "No such service claim is made."))
           (assert (search text html)))))
     (let ((source (uiop:read-file-string
                    (hyperdoc:file-of (hyperbook:find-page book "Cookie Secret" :signal-error? t)))))
